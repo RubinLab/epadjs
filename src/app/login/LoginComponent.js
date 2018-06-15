@@ -2,7 +2,8 @@ import React from 'react';
 import styles from './login.css';
 
 
-const LoginComponent = () => {
+const LoginComponent = ({createSession}) => {
+  console.log(createSession);
 
   return (
     <div className="card">
@@ -18,7 +19,7 @@ const LoginComponent = () => {
         <input type="checkbox" value="remember-me" /> I agree to <a color="primary" href="#">Terms and Conditions</a>
       </label>
     </div>
-    <button className="btn btn-primary" type="submit" onClick={ () => {console.log('test')}}>Sign in</button>
+    <button className="btn btn-primary" type="submit" onClick={ () => {createSession('sherylj', '3p4dt3st')}}>Sign in</button>
     <p />
     <a href="#">Forgot Password?</a>
   </form>
