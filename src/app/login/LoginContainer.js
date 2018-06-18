@@ -10,16 +10,24 @@ class LoginContainer extends Component {
     super(props);
     console.log(props);
   }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.props.token !== nextProps.token) {
+      console.log(this.props.token);
+      return true;
+    }
+    return true;
+  }
   render() {
-    console.log(this.props);
+    console.log(this.props.token);
     return(<LoginComponent {...this.props}/>);
   }
 }
 
 const mapStateToProps = state => {
   return { 
-    token: state.token,
-    loading: state.loading,
+    token: state.login.token,
+    loading: state.login.loading,
     error: state.login.error
   }
 }

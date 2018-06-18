@@ -8,14 +8,19 @@ export function createSession(username, password) {
     dispatch(createSessionBegin());
     console.log( Base64.encode(username + ':' + password));
     var request = new Request(`${config.qifphost}/qifp/session/`, {
-      method: 'POST'
+      method: 'POST',
+      headers: new Headers({
+        'Authorization': 'Basic ' + Base64.encode(username + ':' + password)
+      })
     });
     console.log(request);
     return fetch(request)
     .then(handleErrors)
     .then(res => {
-      dispatch(createSessionSuccess(res));
-      return res;
+      return res.text();
+    })
+    .then(text => {
+      dispatch(createSessionSuccess(text));
     })
     .catch(error => dispatch(createSessionFailure(error)));
   };

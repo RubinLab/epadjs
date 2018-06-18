@@ -3,10 +3,13 @@ import { render } from "react-dom";
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware} from 'redux';
 import rootReducer from './reducers';
-import thunk from 'redux-thunk';
+import thunkMiddleware from 'redux-thunk';
+import { createLogger } from 'redux-logger';
 import App from './app/app';
 
-const store = createStore(rootReducer, applyMiddleware(thunk));
+const loggerMiddleware = createLogger();
+
+const store = createStore(rootReducer, applyMiddleware(thunkMiddleware, loggerMiddleware));
 
 render(
 	<Provider store={store}>
