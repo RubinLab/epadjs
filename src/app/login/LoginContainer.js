@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import styles from './login.css';
-import { createSession } from './duck/actions';
+import { createSession, recoverPassword } from './duck/actions';
 import { connect } from 'react-redux';
 import LoginComponent from './LoginComponent';
 
@@ -35,8 +35,12 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return { createSession: (username, password) => {
     dispatch(createSession(username, password))
-  } }
+  },
+  recoverPassword: (username) => {
+    dispatch(recoverPassword(username))
+   }
+  }
   }
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(LoginContainer);;
+export default connect(mapStateToProps, mapDispatchToProps)(LoginContainer);

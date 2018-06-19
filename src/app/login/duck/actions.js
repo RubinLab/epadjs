@@ -1,19 +1,18 @@
 const config = require('../../config');
 import { Base64 } from 'js-base64';
-import { CREATE_SESSION_BEGIN, CREATE_SESSION_SUCCESS, CREATE_SESSION_FAILURE} from './types.js';
+import { CREATE_SESSION_BEGIN, CREATE_SESSION_SUCCESS, CREATE_SESSION_FAILURE,
+RECOVER_PASSWORD_BEGIN, RECOVER_PASSWORD_SUCCESS, RECOVER_PASSWORD_FAILURE} from './types.js';
 import { connect } from 'react-redux';
 
 export function createSession(username, password) {
   return dispatch => {
     dispatch(createSessionBegin());
-    console.log( Base64.encode(username + ':' + password));
-    var request = new Request(`${config.qifphost}/qifp/session/`, {
+    var request = new Request(`${config.host}/epad/session/`, {
       method: 'POST',
       headers: new Headers({
         'Authorization': 'Basic ' + Base64.encode(username + ':' + password)
       })
     });
-    console.log(request);
     return fetch(request)
     .then(handleErrors)
     .then(res => {
@@ -23,6 +22,26 @@ export function createSession(username, password) {
       dispatch(createSessionSuccess(text));
     })
     .catch(error => dispatch(createSessionFailure(error)));
+  };
+}
+
+export function recoverPassword(username) {
+  return dispatch => {
+    dispatch(recoverPasswordBegin());
+    const encodeUser = encodeURI(username);
+    var request = new Request(`${config.host}/epad/v2/users/${encodeUser}/sendnewpassword/`, {
+      method: 'PUT'
+    });
+    return fetch(request)
+    .then(handleErrors)
+    .then(res => {
+      return res.text();
+    })
+    .then(text => {
+      window.confirm('Please check email for changing password');
+      dispatch(recoverPasswordSuccess(text));
+    })
+    .catch(error => dispatch(recoverPasswordFailure(error)));
   };
 }
 
@@ -45,5 +64,19 @@ export const createSessionSuccess = token => ({
 
 export const createSessionFailure = error => ({
   type: CREATE_SESSION_FAILURE,
+  payload: { error }
+});
+
+export const recoverPasswordBegin = () => ({
+  type: RECOVER_PASSWORD_BEGIN
+});
+
+export const recoverPasswordSuccess = text => ({
+  type: RECOVER_PASSWORD_SUCCESS,
+  payload: { text }
+});
+
+export const recoverPasswordFailure = error => ({
+  type: RECOVER_PASSWORD_FAILURE,
   payload: { error }
 });

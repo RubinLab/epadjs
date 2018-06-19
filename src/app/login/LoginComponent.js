@@ -4,14 +4,33 @@ import serializeForm from 'form-serialize';
 
 
 class LoginComponent extends Component {
-
+  state = {
+    agreeTerms: false
+  }
   handleSubmit = event => {
     event.preventDefault();
-    console.log('hi');
-    console.log(this.form);
+    if (!this.state.agreeTerms) {
+      window.confirm('Please agree Terms and Conditions');
+    }
     const values = serializeForm(this.form, { hash: true});
     this.props.createSession(values.user, values.password);
   }
+
+  handleAgree = () => {
+    const agreeTerms = !this.state.agreeTerms;
+    this.setState({agreeTerms});
+  }
+
+  handlePasswordRecover = () => {
+    const values = serializeForm(this.form, { hash: true});
+    if (values.user !== '') {
+      this.props.recoverPassword(values.user);
+    } else {
+      window.confirm('Please enter username');
+    }
+    
+  }
+  
   render() {
     return (
       <div className="card">
@@ -23,15 +42,15 @@ class LoginComponent extends Component {
       <label htmlFor="inputEmail" className="sr-only">Email address</label>
       <input name="user" type="text" id="inputUser" className="form-control" placeholder="Username" required autoFocus />
       <label htmlFor="inputPassword" className="sr-only">Password</label>
-      <input name="password" type="password" id="inputPassword" className="form-control" placeholder="Password" required />
+      <input name="password" type="password" id="inputPassword" className="form-control" placeholder="Password" />
       <div className="checkbox mb-3">
         <label>
-          <input type="checkbox" value="remember-me" /> I agree to <a color="primary" href="#">Terms and Conditions</a>
+          <input type="checkbox" value="remember-me" onClick={this.handleAgree}/> I agree to <a color="primary" href="https://epad.stanford.edu/license#" target="_blank">Terms and Conditions</a>
         </label>
       </div>
       <button className="btn btn-primary" type="submit">Sign in</button>
       <p />
-      <a href="#">Forgot Password?</a>
+      <a href="#" onClick={this.handlePasswordRecover}>Forgot Password?</a>
     </form>
     </div>
     </div>
