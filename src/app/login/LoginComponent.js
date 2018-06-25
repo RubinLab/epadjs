@@ -1,11 +1,13 @@
 import React, { Component }from 'react';
 import styles from './login.css';
 import serializeForm from 'form-serialize';
+import TermsModal from './TermsModal';
 
 
 class LoginComponent extends Component {
   state = {
-    agreeTerms: false
+    agreeTerms: false,
+    openTermsModal: false
   }
   handleSubmit = event => {
     event.preventDefault();
@@ -30,6 +32,10 @@ class LoginComponent extends Component {
     }
     
   }
+
+  toggleTermsModal = () => {
+    this.setState({ openTermsModal: !this.state.openTermsModal });
+  }
   
   render() {
     return (
@@ -45,13 +51,14 @@ class LoginComponent extends Component {
       <input name="password" type="password" id="inputPassword" className="form-control" placeholder="Password" />
       <div className="checkbox mb-3">
         <label>
-          <input type="checkbox" value="remember-me" onClick={this.handleAgree}/> I agree to <a color="primary" href="https://epad.stanford.edu/license#" target="_blank">Terms and Conditions</a>
+          <input type="checkbox" value="remember-me" onClick={this.handleAgree}/> I agree to <a color="primary" href="#" onClick={this.toggleTermsModal}>Terms and Conditions</a>
         </label>
       </div>
       <button className="btn btn-primary" type="submit">Sign in</button>
       <p />
       <a href="#" onClick={this.handlePasswordRecover}>Forgot Password?</a>
     </form>
+    <TermsModal show={this.state.openTermsModal} toggle={this.toggleTermsModal} />
     </div>
     </div>
     );
