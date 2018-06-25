@@ -1,7 +1,10 @@
 import {
   CREATE_SESSION_BEGIN,
   CREATE_SESSION_SUCCESS,
-  CREATE_SESSION_FAILURE
+  CREATE_SESSION_FAILURE,
+  RECOVER_PASSWORD_BEGIN,
+  RECOVER_PASSWORD_SUCCESS,
+  RECOVER_PASSWORD_FAILURE
 } from './types';
 
 const initialState = {
@@ -39,8 +42,27 @@ export default function productReducer(state = initialState, action) {
       return {
         ...state,
         loading: false,
-        error: action.payload.error,
-        items: []
+        error: action.payload.error
+      };
+      case RECOVER_PASSWORD_BEGIN:
+      return {
+        ...state,
+        recovering: true,
+        recoverError: null
+      };
+
+    case RECOVER_PASSWORD_SUCCESS:
+      return {
+        ...state,
+        recovering: false,
+        text: action.payload.text
+      };
+
+    case RECOVER_PASSWORD_FAILURE:
+      return {
+        ...state,
+        recovering: false,
+        error: action.payload.error
       };
 
     default:

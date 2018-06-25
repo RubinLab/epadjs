@@ -1,30 +1,46 @@
 import React, { Component } from 'react';
 import styles from './login.css';
-import { createSession } from './duck/actions';
+import { createSession, recoverPassword } from './duck/actions';
 import { connect } from 'react-redux';
 import LoginComponent from './LoginComponent';
 
 
-export class LoginContainer extends Component {
+class LoginContainer extends Component {
   constructor(props) {
     super(props);
+    console.log(props);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.props.token !== nextProps.token) {
+      console.log(this.props.token);
+      return true;
+    }
+    return true;
   }
   render() {
-    return(<LoginComponent />);
+    console.log(this.props.token);
+    return(<LoginComponent {...this.props}/>);
   }
 }
 
-const mapStateToProps = state => ({
-  token: state.token,
-  loading: state.loading,
-  error: state.login.error
-});
-
-const mapDispatchToProps = dispatch => ({
-  createSession: (username, password) => {
-    dispatch(createSession(username, password))
+const mapStateToProps = state => {
+  return { 
+    token: state.login.token,
+    loading: state.login.loading,
+    error: state.login.error
   }
-})
+}
+
+const mapDispatchToProps = dispatch => {
+  return { createSession: (username, password) => {
+    dispatch(createSession(username, password))
+  },
+  recoverPassword: (username) => {
+    dispatch(recoverPassword(username))
+   }
+  }
+  }
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(LoginContainer);;
+export default connect(mapStateToProps, mapDispatchToProps)(LoginContainer);

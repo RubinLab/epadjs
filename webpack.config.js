@@ -22,7 +22,10 @@ const config = {
 		    }
 		]
 	},
-	plugins: [htmlWebpackPlugin]
+	plugins: [htmlWebpackPlugin],
+	devServer: {
+  		historyApiFallback: true
+  	}
 };
 
 module.exports = config;
