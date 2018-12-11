@@ -1,0 +1,28 @@
+.toolbar {
+  position: absolute;
+  top: 5px;
+  right: 250px;
+}
+.toolbarSectionButton {
+  cursor: pointer;
+  display: inline-block;
+  min-width: 30px;
+  outline: none;
+  position: relative;
+  text-align: center;
+  margin-left: 5px;
+}
+.toolbarSectionButton {
+  color: white;
+  transition: all 0.2s ease-in-out;
+}
+.toolbarSectionButton:hover {
+  color: #aaa;
+  transform: scale(1.1);
+}
+.toolContainer {
+  font-size: 16px;
+}
+.buttonLabel {
+  font-size: 11px;
+}
