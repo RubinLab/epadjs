@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { getImageIds } from "../../services/seriesService";
+import { getImageIds } from "../../services/seriesServices";
+import { wadoUrl } from "../../config.json";
 
 import "./viewport.css";
 
@@ -166,9 +167,7 @@ class Viewport extends Component {
     } = await getImageIds({ ...this.state.series }); //get the Wado image ids for this series
     urls.map(url =>
       this.state.imageIds.push(
-        "wadouri:http://epad-dev6.stanford.edu:8080/epad/wado/" +
-          url.lossyImage +
-          "&contentType=application%2Fdicom"
+        wadoUrl + url.lossyImage + "&contentType=application%2Fdicom/frames/4"
       )
     );
   }

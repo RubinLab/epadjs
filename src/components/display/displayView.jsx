@@ -5,8 +5,10 @@ import ViewportSeg from "./viewportSeg.jsx";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import "./flex.css";
-import viewport from "./viewport.jsx";
+//import viewport from "./viewport.jsx";
 import { FiZoomIn } from "react-icons/fi";
+
+import * as aim from "../../utils/AimEditorClassV2/parseClass.js";
 
 const mapStateToProps = state => {
   return {
@@ -20,6 +22,7 @@ const mapStateToProps = state => {
 class DisplayView extends Component {
   constructor(props) {
     super(props);
+    this.csTools = this.props.cornerstoneTools;
     this.child = React.createRef();
     this.state = {
       series: props.series,
@@ -35,13 +38,38 @@ class DisplayView extends Component {
   componentDidMount() {
     this.getViewports();
     const vpList = document.getElementsByClassName("cs");
-    for (var i = 0; i < vpList.length; i++) {
+    const ZoomTool = this.props.cornerstoneTools.ZoomTool;
+    //check the logic here
+    /*for (var i = 0; i < vpList.length; i++) {
       this.props.cornerstoneTools.zoom.activate(vpList[i], 5);
-    }
+    }*/
+    this.props.cornerstoneTools.setToolActive(ZoomTool.name, {
+      mouseButtonMask: 5
+    });
+
+    //make the last element in series as selected viewport since the last open will be added to end
+    this.props.dispatch(
+      this.defaultSelectVP("viewport" + (this.state.series.length - 1))
+    );
     //console.log(viewports);
     //viewports.map(vp => this.props.cornerstoneTools.wwwc.activate(vp, 1));
     //this.props.cornerstoneTools.wwwc.activate(this.state.refs[0], 1);
+    this.testAimEditor();
   }
+
+  testAimEditor = () => {
+    console.log(document.getElementById("cont"));
+    var instanceAimEditor = new aim.AimEditor(document.getElementById("cont"));
+    var myA = [
+      { key: "BeaulieuBoneTemplate_rev18", value: aim.myjson },
+      { key: "asdf", value: aim.myjson1 }
+    ];
+    instanceAimEditor.loadTemplates(myA);
+
+    instanceAimEditor.addButtonsDiv();
+
+    instanceAimEditor.createViewerWindow();
+  };
 
   getViewports = () => {
     let numSeries = this.state.series.length;
@@ -67,6 +95,13 @@ class DisplayView extends Component {
     return {
       type: "CREATE_VIEWPORT",
       payload: viewportRef
+    };
+  }
+
+  defaultSelectVP(id) {
+    return {
+      type: "SELECT_VIEWPORT",
+      payload: id
     };
   }
 
@@ -119,6 +154,7 @@ class DisplayView extends Component {
             />
           </div>
         ))}
+        <div id="cont" />
       </React.Fragment>
     );
   }

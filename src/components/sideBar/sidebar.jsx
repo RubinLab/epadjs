@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import { Tabs, Nav, Content } from "react-tiny-tabs";
-import { getProjects } from "../../services/projectsService";
+import { getProjects } from "../../services/projectServices";
+import { getWorklists } from "../../services/worklistServices";
+import { getPacs } from "../../services/pacsServices";
 import { FiZoomIn } from "react-icons/fi";
 import "./w2.css";
 
@@ -13,6 +15,8 @@ class Sidebar extends Component {
 
     this.state = {
       projects: [],
+      worklists: [],
+      pacs: [],
       width: "200px",
       marginLeft: "200px",
       buttonDisplay: "none",
@@ -21,12 +25,26 @@ class Sidebar extends Component {
   }
 
   async componentDidMount() {
+    //get the porjects
     const {
       data: {
         ResultSet: { Result: projects }
       }
     } = await getProjects();
     this.setState({ projects, pId: projects[0].id });
+    //get the worklists
+    const {
+      data: {
+        ResultSet: { Result: worklists }
+      }
+    } = await getWorklists(sessionStorage.getItem("username"));
+    this.setState({ worklists });
+    const {
+      data: {
+        ResultSet: { Result: pacs }
+      }
+    } = await getPacs();
+    this.setState({ pacs });
   }
 
   handleClose() {
@@ -99,7 +117,66 @@ class Sidebar extends Component {
                   </tbody>
                 </table>
               </div>
-              <div>Connections</div>
+              <div>
+                <table>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <button
+                          to="#"
+                          className="closebtn"
+                          onClick={this.handleClose}
+                        >
+                          Close &times;
+                        </button>
+                      </td>
+                    </tr>
+                    {this.state.worklists.map(worklist => (
+                      <tr key={worklist.workListID}>
+                        <td>
+                          <p
+                            onClick={() => {
+                              alert("clicked");
+                            }}
+                          >
+                            {worklist.name}
+                          </p>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <table>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <button
+                          to="#"
+                          className="closebtn"
+                          onClick={this.handleClose}
+                        >
+                          Close &times;
+                        </button>
+                      </td>
+                    </tr>
+                    {this.state.pacs.map(pac => (
+                      <tr key={pac.pacID}>
+                        <td>
+                          <p
+                            onClick={() => {
+                              alert("clicked");
+                            }}
+                          >
+                            {pac.aeTitle}
+                          </p>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               <div>Users</div>
             </Content>
           </Tabs>

@@ -5,7 +5,7 @@ import "react-table/react-table.css";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import Studies from "./studies";
-import { getSubjects } from "../../services/subjectsService";
+import { getSubjects } from "../../services/subjectServices";
 
 const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
 const chance = new Chance();

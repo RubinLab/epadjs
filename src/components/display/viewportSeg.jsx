@@ -1,12 +1,50 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { getImageIds } from "../../services/seriesService";
+import { getImageIds } from "../../services/seriesServices";
+import { wadoUrl } from "../../config.json";
+//import ImageScrollbar from "./imageScrollbar";
 
 import "./viewport.css";
+
+const tools = [
+  { name: "Wwwc" },
+  { name: "Pan" },
+  {
+    name: "Zoom",
+    configuration: {
+      minScale: 0.3,
+      maxScale: 25,
+      preventZoomOutsideImage: true
+    }
+  },
+  { name: "Probe" },
+  { name: "Length" },
+  {
+    name: "EllipticalRoi",
+    configuration: {
+      showMinMax: true
+    }
+  },
+  {
+    name: "RectangleRoi",
+    configuration: {
+      showMinMax: true
+    }
+  },
+  { name: "Angle" },
+  { name: "Rotate" },
+  { name: "WwwcRegion" },
+  { name: "Probe" },
+  { name: "FreehandMouse" },
+  { name: "Eraser" },
+  { name: "Bidirectional" },
+  { name: "Brush" }
+];
 
 class ViewportSeg extends Component {
   constructor(props) {
     super(props);
+    this.tools = tools;
     this.cornerstone = this.props.cs;
     this.cornerstoneTools = this.props.csT;
     this.onNewImage = this.onNewImage.bind(this);
@@ -14,6 +52,8 @@ class ViewportSeg extends Component {
     this.onImageLoaded = this.onImageLoaded.bind(this);
     this.onImageRendered = this.onImageRendered.bind(this);
     this.updateViewport = this.updateViewport.bind(this);
+
+    const scrollToIndex = this.cornerstoneTools.import("util/scrollToIndex");
 
     this.state = {
       series: { ...this.props },
@@ -96,6 +136,7 @@ class ViewportSeg extends Component {
     this.setImageOverlayData(image);
   }
 
+  //remove these functions to a helper file
   formatDate(dateString) {
     if (dateString && dateString.length >= 8)
       return (
@@ -119,6 +160,23 @@ class ViewportSeg extends Component {
       );
     return "";
   }
+
+  initializeTools = () => {
+    console.log(this.cornerstoneTools);
+    Array.from(this.tools).forEach(tool => {
+      const apiTool = this.cornerstoneTools[`${tool.name}Tool`];
+      if (apiTool) {
+        this.cornerstoneTools.addToolForElement(
+          this.state.viewport,
+          apiTool,
+          tool
+        );
+      } else {
+        throw new Error(`Tool not found: ${tool.name}Tool`);
+      }
+    });
+    console.log(this.cornerstoneTools);
+  };
 
   selectImage(event) {
     var targetElement = this.state.viewport;
@@ -164,17 +222,24 @@ class ViewportSeg extends Component {
         ResultSet: { Result: urls }
       }
     } = await getImageIds({ ...this.state.series }); //get the Wado image ids for this series
-    urls.map(url =>
-      this.state.imageIds.push(
-        "wadouri:http://epad-dev6.stanford.edu:8080/epad/wado/" +
-          url.lossyImage +
-          "&contentType=application%2Fdicom"
-      )
-    );
+    urls.map(url => {
+      if (url.multiFrameImage === true) {
+        for (var i = 0; i < url.numberOfFrames; i++) {
+          this.state.imageIds.push(
+            wadoUrl +
+              url.lossyImage +
+              "&contentType=application%2Fdicom?frame=" +
+              i
+          );
+        }
+      } else
+        this.state.imageIds.push(
+          wadoUrl + url.lossyImage + "&contentType=application%2Fdicom"
+        );
+    });
   }
 
   async componentDidMount() {
-    console.log(this.state.viewport);
     await this.getImages();
     this.loadDisplayImage();
     this.state.viewport.addEventListener(
@@ -189,6 +254,7 @@ class ViewportSeg extends Component {
     this.loadProgress.remaining = this.loadProgress.total = this.state.imageIds.length;
     this.props.setClick(this.updateViewport);
     window.addEventListener("resize", this.updateViewport);
+    this.initializeTools();
   }
 
   viewportRef = el => {
@@ -218,12 +284,12 @@ class ViewportSeg extends Component {
     this.cornerstone.loadImage(this.state.imageIds[0]).then(image => {
       // first image
       this.cornerstone.displayImage(element, image);
-      this.cornerstoneTools.orientationMarkers.enable(element);
+      //this.cornerstoneTools.orientationMarkers.enable(element);
       // Enable mouse, mouseWheel, touch, and keyboard input on the element
-      this.cornerstoneTools.mouseInput.enable(element);
+      //this.cornerstoneTools.mouseInput.enable(element);
       //this.cornerstoneTools.touchInput.enable(element);
-      this.cornerstoneTools.mouseWheelInput.enable(element);
-      this.cornerstoneTools.keyboardInput.enable(element);
+      //this.cornerstoneTools.mouseWheelInput.enable(element);
+      //this.cornerstoneTools.keyboardInput.enable(element);
 
       // add the stack tool state to the ekement
       this.cornerstoneTools.addStackStateManager(element, [
@@ -237,10 +303,10 @@ class ViewportSeg extends Component {
       element.tabIndex = 0;
       element.focus();
       // Enable all tools we want to use with this element
-      this.cornerstoneTools.stackScrollKeyboard.activate(element);
-      this.cornerstoneTools.wwwc.activate(element, 1);
-      this.cornerstoneTools.pan.activate(element, 3);
-      this.cornerstoneTools.stackScrollWheel.activate(element);
+      //this.cornerstoneTools.stackScrollKeyboard.activate(element);
+      //this.cornerstoneTools.wwwc.activate(element, 1);
+      //this.cornerstoneTools.pan.activate(element, 3);
+      //this.cornerstoneTools.stackScrollWheel.activate(element);
       //this.cornerstoneTools.scrollIndicator.enable(element);
       this.cornerstoneTools.stackPrefetch.enable(element);
 
@@ -303,6 +369,24 @@ class ViewportSeg extends Component {
   updateViewport() {
     this.cornerstone.resize(this.state.viewport);
   }
+
+  imageSliderOnInputCallback = value => {
+    this.setViewportActive();
+    /*
+    Temporarily removed because it didn't seem to be performing well
+    if (this.props.setViewportSpecificData) {
+      this.props.setViewportSpecificData({ stack });
+    }*/
+
+    this.scrollToIndex(this.element, value);
+
+    const stack = this.stack;
+    stack.currentImageIdIndex = value;
+
+    /*this.setState({
+      stack
+    });*/
+  };
 
   render() {
     return (
@@ -398,6 +482,12 @@ class ViewportSeg extends Component {
               step="1"
             />
           </div>
+          {/*<ImageScrollbar
+            onInputCallback={this.imageSliderOnInputCallback}
+            max={this.stack.imageIds.length - 1}
+            value={this.stack.currentImageIdIndex}
+            height="100%"
+          />*/}
         </div>
       </React.Fragment>
     );

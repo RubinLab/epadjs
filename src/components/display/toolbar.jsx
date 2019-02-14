@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import MetaData from "./metaData";
+import Draggable from "react-draggable";
 
 import { FaLocationArrow } from "react-icons/fa";
 import { FiSun } from "react-icons/fi";
@@ -12,10 +13,13 @@ import { MdPanTool } from "react-icons/md";
 import { FaListAlt } from "react-icons/fa";
 import { FiRotateCw } from "react-icons/fi";
 import { TiPipette } from "react-icons/ti";
+import { TiDeleteOutline } from "react-icons/ti";
+import { TiPencil } from "react-icons/ti";
 import { MdWbIridescent } from "react-icons/md";
 //import { FaDraftingCompass } from "react-icons/fa";
 
 import "./toolbar.css";
+import "../../font-icons/styles.css";
 
 const mapStateToProps = state => {
   return {
@@ -25,41 +29,86 @@ const mapStateToProps = state => {
   };
 };
 
+const tools = [
+  { name: "Wwwc" },
+  { name: "Pan" },
+  {
+    name: "Zoom",
+    configuration: {
+      minScale: 0.3,
+      maxScale: 25,
+      preventZoomOutsideImage: true
+    }
+  },
+  { name: "Probe" },
+  { name: "Length" },
+  { name: "EllipticalRoi" },
+  {
+    name: "RectangleRoi",
+    configuration: {
+      showMinMax: true
+      // showHounsfieldUnits: true
+    }
+  },
+  { name: "Angle" },
+  { name: "Rotate" },
+  { name: "WwwcRegion" },
+  { name: "Probe" },
+  { name: "FreehandMouse" },
+  { name: "Eraser" },
+  { name: "Bidirectional" },
+  { name: "Brush" }
+];
+
 class Toolbar extends Component {
-  //state = { activeTool: "" };
+  state = { activeTool: "", showDrawing: false };
+
+  constructor(props) {
+    super(props);
+    this.tools = tools;
+    this.csTools = this.props.cornerstoneTools;
+    //this.initializeTools();
+  }
+
+  initializeTools = () => {
+    Array.from(this.tools).forEach(tool => {
+      const apiTool = this.csTools[`${tool.name}Tool`];
+      if (apiTool) {
+        this.csTools.addTool(apiTool, tool);
+      } else {
+        throw new Error(`Tool not found: ${tool.name}Tool`);
+      }
+    });
+    const WwwcTool = this.csTools.WwwcTool;
+  };
+
   disableAllTools = () => {
-    const elements = document.getElementsByClassName("cs");
-    for (var i = 0; i < elements.length; i++) {
-      this.props.cornerstoneTools.wwwc.disable(elements[i]);
-      this.props.cornerstoneTools.pan.activate(elements[i], 2); // 2 is middle mouse button
-      this.props.cornerstoneTools.zoom.activate(elements[i], 4); // 4 is right mouse button
-      this.props.cornerstoneTools.probe.deactivate(elements[i], 1);
-      this.props.cornerstoneTools.length.deactivate(elements[i], 1);
-      this.props.cornerstoneTools.ellipticalRoi.deactivate(elements[i], 1);
-      this.props.cornerstoneTools.rectangleRoi.deactivate(elements[i], 1);
-      this.props.cornerstoneTools.simpleAngle.deactivate(elements[i], 1);
-      this.props.cornerstoneTools.highlight.deactivate(elements[i], 1);
-      this.props.cornerstoneTools.freehand.deactivate(elements[i], 1);
-      this.props.cornerstoneTools.eraser.deactivate(elements[i], 1);
-      this.props.cornerstoneTools.rotate.deactivate(elements[i], 1);
-      this.props.cornerstoneTools.wwwcRegion.deactivate(elements[i], 1);
-    }
+    Array.from(this.tools).forEach(tool => {
+      const apiTool = this.csTools[`${tool.name}Tool`];
+      if (apiTool) {
+        this.csTools.setToolPassive(tool.name);
+      } else {
+        throw new Error(`Tool not found: ${tool.name}Tool`);
+      }
+    });
   };
 
-  levels = () => {
+  //sets the selected tool active for all of the enabled elements
+  setToolActive = (toolName, mouseMask = 1) => {
     this.disableAllTools();
-    const elements = document.getElementsByClassName("cs");
-    for (var i = 0; i < elements.length; i++) {
-      this.props.cornerstoneTools.wwwc.activate(elements[i], 1);
-    }
+    this.csTools.setToolActive(toolName, {
+      mouseButtonMask: mouseMask
+    });
+    console.log(this.csTools);
   };
 
-  zoom = () => {
+  //sets the selected tool active for an enabled elements
+  setToolActiveForElement = (toolName, mouseMask = 1) => {
+    const elem = document.getElementById(this.props.activeVP);
     this.disableAllTools();
-    const elements = document.getElementsByClassName("cs");
-    for (var i = 0; i < elements.length; i++) {
-      this.props.cornerstoneTools.zoom.activate(elements[i], 5);
-    }
+    this.csTools.setToolActiveForElement(elem, toolName, {
+      mouseButtonMask: mouseMask
+    });
   };
 
   invert = () => {
@@ -77,50 +126,10 @@ class Toolbar extends Component {
     this.props.cornerstone.reset(element);
   };
 
-  pan = () => {
-    this.disableAllTools();
-    const elements = document.getElementsByClassName("cs");
-    for (var i = 0; i < elements.length; i++) {
-      this.props.cornerstoneTools.pan.activate(elements[i], 3);
-    }
-  };
-
   toggleMetaData = () => {
     this.disableAllTools();
     const element = document.getElementById("myForm");
     element.style.display = "block";
-  };
-
-  angle = () => {
-    this.disableAllTools();
-    const elements = document.getElementsByClassName("cs");
-    for (var i = 0; i < elements.length; i++) {
-      this.props.cornerstoneTools.simpleAngle.activate(elements[i], 1);
-    }
-  };
-
-  rotate = () => {
-    this.disableAllTools();
-    const elements = document.getElementsByClassName("cs");
-    for (var i = 0; i < elements.length; i++) {
-      this.props.cornerstoneTools.rotate.activate(elements[i], 1);
-    }
-  };
-
-  region = () => {
-    this.disableAllTools();
-    const elements = document.getElementsByClassName("cs");
-    for (var i = 0; i < elements.length; i++) {
-      this.props.cornerstoneTools.wwwcRegion.activate(elements[i], 1);
-    }
-  };
-
-  highlight = () => {
-    this.disableAllTools();
-    const elements = document.getElementsByClassName("cs");
-    for (var i = 0; i < elements.length; i++) {
-      this.props.cornerstoneTools.highlight.activate(elements[i], 1);
-    }
   };
 
   probe = () => {
@@ -131,10 +140,40 @@ class Toolbar extends Component {
     }
   };
 
+  anotate = () => {
+    this.disableAllTools();
+    this.setState({ showDrawing: !this.state.showDrawing });
+  };
+
+  point = () => {
+    /*console.log(this.props.cornerstoneTools);
+    const element = document.getElementById(this.props.activeVP);
+    console.log(
+      this.props.cornerstoneTools.getElementToolStateManager(element)
+    );*/
+    console.log("Saving state");
+    const element = [document.getElementById(this.props.activeVP)];
+    //var appState = this.props.cornerstoneTools.getToolState(element);
+    //var serializedState = JSON.stringify(appState);
+    //var parsed = JSON.parse(appState);
+    console.log(this.props.cornerstoneTools.state);
+  };
+
+  line = () => {
+    this.disableAllTools();
+    const element = document.getElementById(this.props.activeVP);
+    this.props.cornerstoneTools.length.activate(element, 1);
+  };
+
   render() {
     return (
       <div className="toolbar">
-        <div id="noop" tabIndex="1" className="toolbarSectionButton active">
+        <div
+          id="noop"
+          tabIndex="0"
+          className="toolbarSectionButton active"
+          onClick={this.disableAllTools}
+        >
           <div className="toolContainer">
             <FaLocationArrow />
           </div>
@@ -142,14 +181,11 @@ class Toolbar extends Component {
             <span>No Op</span>
           </div>
         </div>
-
-        {/*<a href="#" onClick={()=>alert('mete')}><FaSun /></a>
-      <a href="#" onClick={()=>alert('mete')}><TiStarburstOutline /></a>*/}
         <div
           id="wwwc"
           tabIndex="1"
           className="toolbarSectionButton"
-          onClick={this.levels}
+          onClick={() => this.setToolActive("Wwwc")}
         >
           <div className="toolContainer">
             <FiSun />
@@ -158,7 +194,6 @@ class Toolbar extends Component {
             <span>Levels</span>
           </div>
         </div>
-
         <div id="preset" tabIndex="1" className="toolbarSectionButton">
           <div className="toolContainer">
             <FiSunset />
@@ -169,9 +204,9 @@ class Toolbar extends Component {
         </div>
         <div
           id="zoom"
-          tabIndex="1"
+          tabIndex="2"
           className="toolbarSectionButton"
-          onClick={this.zoom}
+          onClick={() => this.setToolActive("Zoom")}
         >
           <div className="toolContainer">
             <FiZoomIn />
@@ -182,7 +217,7 @@ class Toolbar extends Component {
         </div>
         <div
           id="invert"
-          tabIndex="1"
+          tabIndex="3"
           className="toolbarSectionButton"
           onClick={this.invert}
         >
@@ -195,7 +230,7 @@ class Toolbar extends Component {
         </div>
         <div
           id="reset"
-          tabIndex="1"
+          tabIndex="4"
           className="toolbarSectionButton"
           onClick={this.reset}
         >
@@ -208,9 +243,9 @@ class Toolbar extends Component {
         </div>
         <div
           id="pan"
-          tabIndex="1"
+          tabIndex="5"
           className="toolbarSectionButton"
-          onClick={this.pan}
+          onClick={() => this.setToolActive("Pan", [1])}
         >
           <div className="toolContainer">
             <MdPanTool />
@@ -220,8 +255,8 @@ class Toolbar extends Component {
           </div>
         </div>
         <div
-          id="pan"
-          tabIndex="1"
+          id="data"
+          tabIndex="6"
           className="toolbarSectionButton"
           onClick={this.toggleMetaData}
         >
@@ -233,22 +268,22 @@ class Toolbar extends Component {
           </div>
         </div>
         <MetaData />
-        <div
+        {/*<div
           id="angle"
-          tabIndex="1"
+          tabIndex="7"
           className="toolbarSectionButton"
-          onClick={this.angle}
+          onClick={() => this.setToolActive("Angle")}
         >
           <div className="toolContainer" />
           <div className="buttonLabel">
             <span>Angle</span>
           </div>
-        </div>
+        </div>*/}
         <div
-          id="angle"
-          tabIndex="1"
+          id="rotate"
+          tabIndex="8"
           className="toolbarSectionButton"
-          onClick={this.rotate}
+          onClick={() => this.setToolActive("Rotate")}
         >
           <div className="toolContainer">
             <FiRotateCw />
@@ -258,10 +293,10 @@ class Toolbar extends Component {
           </div>
         </div>
         <div
-          id="angle"
-          tabIndex="1"
+          id="wwwcRegion"
+          tabIndex="9"
           className="toolbarSectionButton"
-          onClick={this.region}
+          onClick={() => this.setToolActive("WwwcRegion")}
         >
           <div className="toolContainer">
             <FaListAlt />
@@ -271,23 +306,10 @@ class Toolbar extends Component {
           </div>
         </div>
         <div
-          id="angle"
-          tabIndex="1"
+          id="probe"
+          tabIndex="10"
           className="toolbarSectionButton"
-          onClick={this.highlight}
-        >
-          <div className="toolContainer">
-            <MdWbIridescent />
-          </div>
-          <div className="buttonLabel">
-            <span>Highlight</span>
-          </div>
-        </div>
-        <div
-          id="angle"
-          tabIndex="1"
-          className="toolbarSectionButton"
-          onClick={this.probe}
+          onClick={() => this.setToolActive("Probe")}
         >
           <div className="toolContainer">
             <TiPipette />
@@ -296,6 +318,150 @@ class Toolbar extends Component {
             <span>Probe</span>
           </div>
         </div>
+        <div
+          id="drawing"
+          tabIndex="12"
+          className="toolbarSectionButton"
+          onClick={this.anotate}
+        >
+          <div className="toolContainer">
+            <TiPencil />
+          </div>
+          <div className="buttonLabel">
+            <span>Anotate</span>
+          </div>
+        </div>
+        <div
+          id="eraser"
+          tabIndex="13"
+          className="toolbarSectionButton"
+          onClick={() => this.setToolActive("Eraser")}
+        >
+          <div className="toolContainer">
+            <TiPencil />
+          </div>
+          <div className="buttonLabel">
+            <span>Eraser</span>
+          </div>
+        </div>
+        {/* Drawing Bar Starts here. Extract it to another component later  */}
+        {this.state.showDrawing && (
+          <Draggable
+            handle=".handle"
+            defaultPosition={{ x: 0, y: 5 }}
+            position={null}
+            grid={[10, 10]}
+            scale={1}
+            onStart={this.handleStart}
+            onDrag={this.handleDrag}
+            onStop={this.handleStop}
+          >
+            <div className="drawBar">
+              <TiDeleteOutline />
+
+              <div
+                id="point"
+                tabIndex="1"
+                className="toolbarSectionButton"
+                onClick={this.point}
+              >
+                <div className="toolContainer">
+                  <FiSun />
+                </div>
+                <div className="buttonLabel">
+                  <span>Point</span>
+                </div>
+              </div>
+              <div
+                id="line"
+                tabIndex="2"
+                className="toolbarSectionButton"
+                onClick={() => this.setToolActiveForElement("Length")}
+              >
+                <div className="toolContainer">
+                  <FiSun />
+                </div>
+                <div className="buttonLabel">
+                  <span>Line</span>
+                </div>
+              </div>
+              <div
+                id="ellipse"
+                tabIndex="3"
+                className="toolbarSectionButton"
+                onClick={() => this.setToolActiveForElement("EllipticalRoi")}
+              >
+                <div className="toolContainer">
+                  <FiSun />
+                </div>
+                <div className="buttonLabel">
+                  <span>Ellipse</span>
+                </div>
+              </div>
+              <div
+                id="rectangle"
+                tabIndex="4"
+                className="toolbarSectionButton"
+                onClick={() => this.setToolActiveForElement("RectangleRoi")}
+              >
+                <div className="toolContainer">
+                  <FiSun />
+                </div>
+                <div className="buttonLabel">
+                  <span>Rectangle</span>
+                </div>
+              </div>
+              <div
+                id="polygon"
+                tabIndex="5"
+                className="toolbarSectionButton"
+                onClick={() => this.setToolActiveForElement("FreehandMouse")}
+              >
+                <div className="toolContainer">
+                  <FiSun />
+                </div>
+                <div className="buttonLabel">
+                  <span>Polygon</span>
+                </div>
+              </div>
+              <div
+                id="spline"
+                tabIndex="6"
+                className="toolbarSectionButton"
+                onClick={this.spline}
+              >
+                <div className="toolContainer">
+                  <FiSun />
+                </div>
+                <div className="buttonLabel">
+                  <span>Spline</span>
+                </div>
+              </div>
+              <div
+                id="perpendicular"
+                tabIndex="7"
+                className="toolbarSectionButton"
+                onClick={() => this.setToolActiveForElement("Bidirectional")}
+              >
+                <div className="icon-perpendicular" />
+                <div className="buttonLabel">
+                  <span>Perpendicular</span>
+                </div>
+              </div>
+              <div
+                id="brush"
+                tabIndex="8"
+                className="toolbarSectionButton"
+                onClick={() => this.setToolActiveForElement("Brush")}
+              >
+                <div className="icon-brush" />
+                <div className="buttonLabel">
+                  <span>Brush</span>
+                </div>
+              </div>
+            </div>
+          </Draggable>
+        )}
       </div>
     );
   }

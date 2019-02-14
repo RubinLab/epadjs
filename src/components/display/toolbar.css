@@ -26,3 +26,13 @@
 .buttonLabel {
   font-size: 11px;
 }
+.drawBar {
+  outline: solid;
+  outline-width: 1px;
+  background-color: #333;
+  outline-color: black;
+  width: 40px;
+  cursor: pointer;
+  z-index: 1;
+  position: absolute;
+}

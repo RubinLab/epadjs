@@ -5,7 +5,7 @@ import * as cornerstoneMath from "cornerstone-math";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import * as dicomParser from "dicom-parser";
 
-import { getImageIds } from "../../services/seriesService";
+import { getImageIds } from "../../services/seriesServices";
 
 import "./viewport.css";
 

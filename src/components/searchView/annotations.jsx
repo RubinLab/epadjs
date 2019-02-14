@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { getAnnotations } from "../../services/annotationsService";
+import { getAnnotations } from "../../services/annotationServices";
 import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";

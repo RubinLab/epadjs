@@ -7,9 +7,7 @@ const apiEndpoint = apiUrlV1 + "/session/";
 export async function login(username, password) {
   const basicAuth = "Basic " + btoa(username + ":" + password);
   const header = {
-    Authorization: basicAuth,
-    //"content-type": "application/json"
-    "Accept-Encoding": "gzip, deflate"
+    Authorization: basicAuth
   };
   const { data: token } = await http.post(apiEndpoint, {}, { headers: header });
   sessionStorage.setItem("token", token);

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { toast } from  "react-toastify";
-import { getProjects } from "../services/projectsService";
+import { getProjects } from "../services/projectServices";
 
 class Projects extends Component {
     state = { projects: [] }

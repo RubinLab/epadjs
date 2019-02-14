@@ -2,9 +2,9 @@ import React, { Component } from "react";
 import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
-import { getStudies } from "../../services/studiesService";
+import { getStudies } from "../../services/studyServices";
 import Series from "./series";
-import "react-table/react-table.css";
+//import "react-table/react-table.css";
 
 function getNodes(data, node = []) {
   data.forEach(item => {
@@ -45,12 +45,12 @@ class Studies extends Component {
   setColumns() {
     const columns = [
       {
-        Header: (
+        /*Header: (
           <div>
             Study Description{" "}
             <span className="badge badge-secondary"> # of Annotations </span>
           </div>
-        ),
+        ),*/
         Cell: row => (
           <div>
             {row.original.studyDescription} &nbsp;
@@ -66,13 +66,13 @@ class Studies extends Component {
         )
       },
       {
-        Header: (
+        /*Header: (
           <div>
             <span className="badge badge-secondary"> # of Series </span>
             &nbsp;&nbsp;
             <span className="badge badge-secondary"> # of Images </span>
           </div>
-        ),
+        ),*/
         Cell: row => (
           <div>
             {row.original.numberOfSeries === "" ? (
@@ -96,27 +96,27 @@ class Studies extends Component {
         )
       },
       {
-        Header: "Type",
+        //Header: "Type",
         Cell: row => row.original.examTypes.join("/")
       },
       {
-        Header: "Ready",
+        //Header: "Ready",
         Cell: row => row.original.studyProcessingStatus
       },
       {
-        Header: "Study/Created Date",
+        //Header: "Study/Created Date",
         Cell: row => row.original.insertDate
       },
       {
-        Header: "Uploaded",
+        //Header: "Uploaded",
         Cell: row => row.original.createdTime
       },
       {
-        Header: "Accession",
+        //Header: "Accession",
         Cell: row => row.original.studyAccessionNumber
       },
       {
-        Header: "Identifier",
+        //Header: "Identifier",
         Cell: row => row.original.studyUID
       }
     ];
@@ -202,7 +202,7 @@ class Studies extends Component {
     this.setState({
       selectType: this.state.selectType === "radio" ? "checkbox" : "radio",
       selection: [],
-      selectAll: false
+      selectAll: true
     });
   };
   toggleTree = () => {
