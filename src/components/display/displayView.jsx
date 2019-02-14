@@ -8,7 +8,7 @@ import "./flex.css";
 //import viewport from "./viewport.jsx";
 import { FiZoomIn } from "react-icons/fi";
 
-import * as aim from "../../utils/AimEditorClassV2/parseClass.js";
+//import * as aim from "../../utils/AimEditorClassV2/parseClass.js";
 
 const mapStateToProps = state => {
   return {
@@ -54,10 +54,10 @@ class DisplayView extends Component {
     //console.log(viewports);
     //viewports.map(vp => this.props.cornerstoneTools.wwwc.activate(vp, 1));
     //this.props.cornerstoneTools.wwwc.activate(this.state.refs[0], 1);
-    this.testAimEditor();
+    //this.testAimEditor();
   }
 
-  testAimEditor = () => {
+  /*testAimEditor = () => {
     console.log(document.getElementById("cont"));
     var instanceAimEditor = new aim.AimEditor(document.getElementById("cont"));
     var myA = [
@@ -69,7 +69,7 @@ class DisplayView extends Component {
     instanceAimEditor.addButtonsDiv();
 
     instanceAimEditor.createViewerWindow();
-  };
+  };*/
 
   getViewports = () => {
     let numSeries = this.state.series.length;
