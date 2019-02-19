@@ -36,6 +36,7 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
+    //document.body.classList.add("fixed-page");
     this.getViewports();
     const vpList = document.getElementsByClassName("cs");
     const ZoomTool = this.props.cornerstoneTools.ZoomTool;
