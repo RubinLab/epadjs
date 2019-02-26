@@ -1,6 +1,7 @@
-import { combineReducers } from 'redux';
-import login from './app/login/duck/reducers';
+import { combineReducers } from "redux";
+import searchViewReducer from "./components/searchView/reducer";
 
 export default combineReducers({
-	login
+  searchViewReducer
 });
+
