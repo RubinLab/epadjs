@@ -1,0 +1,1157 @@
+
+{
+   "uid": "2.25.75761204952962875896072870850622745228",
+   "name": "adsdf",
+   "authors": "AIM Team",
+   "version": "asdfadsf",
+   "creationDate": "2012-12-28",
+   "description": "asdfsadfasd",
+   "schemaLocation": "gme://caCORE.caCORE/3.2/edu.northwestern.radiology.AIMTemplate AIMTemplate_v2rv13.xsd",
+   "Template": {
+      "uid": "2.25.246328047169208880141674055331849154527",
+      "name": "TEST 3",
+      "authors": "AIM Team",
+      "version": "1.0",
+      "creationDate": "2012-12-28",
+      "description": "test three",
+      "modality": "CT",
+      "precedingAnnotation": "RequireToSelect",
+      "codeMeaning": "Non-Target Lesion Incomplete Response or Stable Disease",
+      "codeValue": "112046",
+      "codingSchemeDesignator": "DCM",
+      "codingSchemeVersion": "1.0",
+      "Component": [
+         {
+            "label": "free text",
+            "itemNumber": "0",
+            "authors": "AIM Team",
+            "explanatoryText": "ae ONE",
+            "minCardinality": "1",
+            "maxCardinality": "2",
+            "shouldDisplay": "true",
+            "id": "2.25.249736992084416545275140963623879078777",
+            "requireComment": "true",
+            "textFreeInput": {
+               "codeValue": "112042",
+               "codeMeaning": "Target Lesion Partial Response",
+               "codingSchemeDesignator": "DCM",
+               "codingSchemeVersion": "1.0"
+               
+            }
+         },
+         {
+            "label": "AE - 1",
+            "itemNumber": "0",
+            "authors": "AIM Team",
+            "explanatoryText": "ae ONE",
+            "minCardinality": "1",
+            "maxCardinality": "2",
+            "shouldDisplay": "true",
+            "groupLabel": "AE",
+            "id": "2.25.249736992084416545275140963623879078175",
+            "requireComment": "true",
+            "QuestionType": {
+               "codeValue": "112042",
+               "codeMeaning": "Target Lesion Partial Response",
+               "codingSchemeDesignator": "DCM",
+               "codingSchemeVersion": "1.0"
+            },
+            "AnatomicEntity": {
+               "annotatorConfidence": "true",
+               "AnatomicEntityCharacteristic": [
+                  {
+                     "label": "AEC - 1 - 1",
+                     "itemNumber": "0",
+                     "authors": "AIM Team",
+                     "explanatoryText": "AEC one - one",
+                     "minCardinality": "1",
+                     "maxCardinality": "1",
+                     "shouldDisplay": "true",
+                     "groupLabel": "AEC - 1 - 1",
+                     "id": "2.25.96983863729747964833684373111073058156",
+                     "requireComment": "true",
+                     "annotatorConfidence": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeValue": "RID34993",
+                           "codeMeaning": "absent gastric air bubble sign",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0",
+                           "ValidTerm": {
+                              "codeValue": "10055397",
+                              "codeMeaning": "bone marrow edema",
+                              "codingSchemeDesignator": "MedDRA",
+                              "codingSchemeVersion": "1.0"
+                           }
+                        },
+                        {
+                           "codeValue": "RID34998",
+                           "codeMeaning": "acute kyphosis sign",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeValue": "RID34997",
+                           "codeMeaning": "acorn deformity",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0",
+                           "nextId": "2.25.144384273350738068267645406522525823311"
+                        },
+                        {
+                           "codeValue": "RID34995",
+                           "codeMeaning": "absent liver sign",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeValue": "RID34404",
+                           "codeMeaning": "Mickey Mouse sign of liver",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0",
+                           "ValidTerm": {
+                              "codeValue": "MTHU002077",
+                              "codeMeaning": "Bone",
+                              "codingSchemeDesignator": "LOINC",
+                              "codingSchemeVersion": ""
+                           }
+                        },
+                        {
+                           "codeValue": "RID34409",
+                           "codeMeaning": "swan neck deformity",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0",
+                           "nextId": "2.25.264945780284452461227299362245725897438"
+                        },
+                        {
+                           "codeValue": "RID34412",
+                           "codeMeaning": "Erlenmeyer flask deformity",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        }
+                     ],
+                     "QuestionType": {
+                        "codeValue": "RID34999",
+                        "codeMeaning": "air bronchogram sign",
+                        "codingSchemeDesignator": "RadLex",
+                        "codingSchemeVersion": "1.0"
+                     }
+                  },
+                  {
+                     "label": "AEC - 1 - 2",
+                     "itemNumber": "1",
+                     "authors": "AIM Team",
+                     "explanatoryText": "AEC one two",
+                     "minCardinality": "1",
+                     "maxCardinality": "3",
+                     "shouldDisplay": "true",
+                     "groupLabel": "",
+                     "id": "2.25.282321381780351407137178608344539789057",
+                     "requireComment": "true",
+                     "annotatorConfidence": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeValue": "RID34995",
+                           "codeMeaning": "absent liver sign",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0",
+                           "CharacteristicQuantification": {
+                              "name": "Scale-1",
+                              "annotatorConfidence": "false",
+                              "characteristicQuantificationIndex": "0",
+                              "Scale": {
+                                 "scaleType": "Ordinal",
+                                 "ScaleLevel": [
+                                    {
+                                       "value": "1",
+                                       "valueLabel": "1",
+                                       "valueDescription": "1"
+                                    },
+                                    {
+                                       "value": "2",
+                                       "valueLabel": "two",
+                                       "valueDescription": "2"
+                                    },
+                                    {
+                                       "value": "3",
+                                       "valueLabel": "three",
+                                       "valueDescription": "3"
+                                    }
+                                 ]
+                              },
+                              "NonQuantifiable": [
+                                 {
+                                    "codeValue": "R-0038D",
+                                    "codeMeaning": "Yes",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 },
+                                 {
+                                    "codeValue": "G-A540",
+                                    "codeMeaning": "Complex",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 },
+                                 {
+                                    "codeValue": "R-00339",
+                                    "codeMeaning": "No",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 }
+                              ]
+                           }
+                        },
+                        {
+                           "codeValue": "RID34400",
+                           "codeMeaning": "butterfly shadow",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0",
+                           "defaultAnswer": "true",
+                           "nextId": "2.25.316621944217354986956136852674485484897",
+                           "CharacteristicQuantification": {
+                              "name": "scale",
+                              "annotatorConfidence": "true",
+                              "characteristicQuantificationIndex": "0",
+                              "Scale": {
+                                 "scaleType": "Nominal",
+                                 "ScaleLevel": [
+                                    {
+                                       "value": "1",
+                                       "valueLabel": "1-1",
+                                       "valueDescription": "1-1-1"
+                                    },
+                                    {
+                                       "value": "2",
+                                       "valueLabel": "2-1-1",
+                                       "valueDescription": "2-1-1"
+                                    },
+                                    {
+                                       "value": "3",
+                                       "valueLabel": "3-1-1",
+                                       "valueDescription": "3-1-1"
+                                    }
+                                 ]
+                              },
+                              "NonQuantifiable": [
+                                 {
+                                    "codeValue": "R-4207A",
+                                    "codeMeaning": "Extrusion",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0",
+                                    "defaultAnswer": "true"
+                                 },
+                                 {
+                                    "codeValue": "G-A429",
+                                    "codeMeaning": "marked",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 }
+                              ]
+                           }
+                        },
+                        {
+                           "codeValue": "RID34405",
+                           "codeMeaning": "cobblestone pattern",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0",
+                           "defaultAnswer": "true",
+                           "ValidTerm": [
+                              {
+                                 "codeValue": "C0229962",
+                                 "codeMeaning": "Body Part",
+                                 "codingSchemeDesignator": "NCIm",
+                                 "codingSchemeVersion": "1.0"
+                              },
+                              {
+                                 "codeValue": "C1204543",
+                                 "codeMeaning": "Plica",
+                                 "codingSchemeDesignator": "NCIm",
+                                 "codingSchemeVersion": "1.0"
+                              }
+                           ],
+                           "CharacteristicQuantification": {
+                              "name": "scale-3",
+                              "annotatorConfidence": "false",
+                              "characteristicQuantificationIndex": "0",
+                              "Scale": {
+                                 "scaleType": "Ratio",
+                                 "ScaleLevel": [
+                                    {
+                                       "value": "1",
+                                       "valueLabel": "1",
+                                       "valueDescription": "1"
+                                    },
+                                    {
+                                       "value": "2",
+                                       "valueLabel": "2",
+                                       "valueDescription": "2"
+                                    },
+                                    {
+                                       "value": "3",
+                                       "valueLabel": "3",
+                                       "valueDescription": "3",
+                                       "defaultAnswer": "true"
+                                    }
+                                 ]
+                              },
+                              "NonQuantifiable": [
+                                 {
+                                    "codeValue": "G-A102",
+                                    "codeMeaning": "Center/Bilateral",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 },
+                                 {
+                                    "codeValue": "R-404FA",
+                                    "codeMeaning": "Mild",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 },
+                                 {
+                                    "codeValue": "G-A460",
+                                    "codeMeaning": "Normal",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 }
+                              ]
+                           }
+                        },
+                        {
+                           "codeValue": "RID34409",
+                           "codeMeaning": "swan neck deformity",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0",
+                           "CharacteristicQuantification": {
+                              "name": "numerical",
+                              "annotatorConfidence": "false",
+                              "characteristicQuantificationIndex": "0",
+                              "Numerical": [
+                                 {
+                                    "value": "0.0",
+                                    "ucumString": "cm",
+                                    "operator": "Equal",
+                                    "valueLabel": "0",
+                                    "valueDescription": "zero",
+                                    "askForInput": "false"
+                                 },
+                                 {
+                                    "value": "10.0",
+                                    "ucumString": "cm",
+                                    "operator": "NotEqual",
+                                    "valueLabel": "10",
+                                    "valueDescription": "10",
+                                    "askForInput": "false"
+                                 },
+                                 {
+                                    "value": "20.0",
+                                    "ucumString": "cm",
+                                    "operator": "LessThan",
+                                    "valueLabel": "20",
+                                    "valueDescription": "20",
+                                    "askForInput": "false"
+                                 },
+                                 {
+                                    "value": "30.0",
+                                    "ucumString": "cm",
+                                    "operator": "GreaterThan",
+                                    "valueLabel": "30",
+                                    "valueDescription": "30",
+                                    "askForInput": "false"
+                                 },
+                                 {
+                                    "value": "40.0",
+                                    "ucumString": "cm",
+                                    "operator": "LessThanEqual",
+                                    "valueLabel": "40",
+                                    "valueDescription": "40",
+                                    "askForInput": "false"
+                                 },
+                                 {
+                                    "value": "50.0",
+                                    "ucumString": "cm",
+                                    "operator": "GreaterThanEqual",
+                                    "valueLabel": "50",
+                                    "valueDescription": "50",
+                                    "askForInput": "false"
+                                 }
+                              ],
+                              "NonQuantifiable": [
+                                 {
+                                    "codeValue": "R-0038D",
+                                    "codeMeaning": "Yes",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 },
+                                 {
+                                    "codeValue": "G-A142",
+                                    "codeMeaning": "Horizontal",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 },
+                                 {
+                                    "codeValue": "G-A429",
+                                    "codeMeaning": "marked",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 }
+                              ]
+                           }
+                        },
+                        {
+                           "codeValue": "RID34412",
+                           "codeMeaning": "Erlenmeyer flask deformity",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0",
+                           "defaultAnswer": "true",
+                           "CharacteristicQuantification": {
+                              "name": "Quantile",
+                              "annotatorConfidence": "false",
+                              "characteristicQuantificationIndex": "0",
+                              "Quantile": {
+                                 "minValue": "0.0",
+                                 "maxValue": "500.0",
+                                 "bins": "16",
+                                 "valueLabel": "quantile",
+                                 "valueDescription": "500",
+                                 "defaultBin": "2"
+                              },
+                              "NonQuantifiable": [
+                                 {
+                                    "codeValue": "R-00339",
+                                    "codeMeaning": "no",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 },
+                                 {
+                                    "codeValue": "R-0038D",
+                                    "codeMeaning": "Yes",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 },
+                                 {
+                                    "codeValue": "R-00339",
+                                    "codeMeaning": "No",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 }
+                              ]
+                           }
+                        },
+                        {
+                           "codeValue": "RID34399",
+                           "codeMeaning": "bowler hat sign",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0",
+                           "ValidTerm": {
+                              "codeValue": "C66832",
+                              "codeMeaning": "one",
+                              "codingSchemeDesignator": "NCIt",
+                              "codingSchemeVersion": "1.0"
+                           },
+                           "CharacteristicQuantification": {
+                              "name": "Interval",
+                              "annotatorConfidence": "false",
+                              "characteristicQuantificationIndex": "0",
+                              "Interval": [
+                                 {
+                                    "minValue": "0.0",
+                                    "maxValue": "10.0",
+                                    "minOperator": "GreaterThan",
+                                    "maxOperator": "LessThanEqual",
+                                    "ucumString": "cm",
+                                    "valueLabel": "0-10",
+                                    "valueDescription": "0-10",
+                                    "askForInput": "false"
+                                 },
+                                 {
+                                    "minValue": "10.0",
+                                    "maxValue": "20.0",
+                                    "minOperator": "NotEqual",
+                                    "maxOperator": "LessThanEqual",
+                                    "ucumString": "cm",
+                                    "valueLabel": "10-20",
+                                    "valueDescription": "10-20",
+                                    "askForInput": "false"
+                                 },
+                                 {
+                                    "minValue": "20.0",
+                                    "maxValue": "30.0",
+                                    "minOperator": "GreaterThan",
+                                    "maxOperator": "LessThanEqual",
+                                    "ucumString": "cm",
+                                    "valueLabel": "20-30",
+                                    "valueDescription": "20-30",
+                                    "askForInput": "false"
+                                 },
+                                 {
+                                    "minValue": "30.0",
+                                    "maxValue": "40.0",
+                                    "minOperator": "GreaterThanEqual",
+                                    "maxOperator": "LessThanEqual",
+                                    "ucumString": "cm",
+                                    "valueLabel": "cm",
+                                    "valueDescription": "cm",
+                                    "askForInput": "false"
+                                 }
+                              ],
+                              "NonQuantifiable": [
+                                 {
+                                    "codeValue": "G-A472",
+                                    "codeMeaning": "Oblique",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 },
+                                 {
+                                    "codeValue": "R-00339",
+                                    "codeMeaning": "No",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 },
+                                 {
+                                    "codeValue": "G-A104",
+                                    "codeMeaning": "Lateral",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 },
+                                 {
+                                    "codeValue": "G-A540",
+                                    "codeMeaning": "Complex",
+                                    "codingSchemeDesignator": "SRT",
+                                    "codingSchemeVersion": "1.0"
+                                 }
+                              ]
+                           }
+                        }
+                     ],
+                     "QuestionType": {
+                        "codeValue": "G-A460",
+                        "codeMeaning": "Normal",
+                        "codingSchemeDesignator": "SRT",
+                        "codingSchemeVersion": "1.0"
+                     }
+                  },
+                  {
+                     "label": "AEC - 1- 3",
+                     "itemNumber": "2",
+                     "authors": "Default User",
+                     "explanatoryText": "AEC 1-3",
+                     "minCardinality": "0",
+                     "maxCardinality": "1",
+                     "shouldDisplay": "true",
+                     "groupLabel": "AEC - 1 - 1",
+                     "id": "2.25.314136553354390144751865176243128910653",
+                     "annotatorConfidence": "false",
+                     "AllowedTerm": [
+                        {
+                           "codeValue": "2181666",
+                           "codeMeaning": "Image Nodule Lobar Location Type",
+                           "codingSchemeDesignator": "CTEP",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeValue": "62",
+                           "codeMeaning": "Patient Gender Category",
+                           "codingSchemeDesignator": "CTEP",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeValue": "2182326",
+                           "codeMeaning": "Nodule Histology Histologic Type WHO Code",
+                           "codingSchemeDesignator": "CTEP",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeValue": "57819",
+                           "codeMeaning": "NonNodule Finding X Position Number",
+                           "codingSchemeDesignator": "CTEP",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeValue": "2182326",
+                           "codeMeaning": "Nodule Histology Histologic Type WHO Code",
+                           "codingSchemeDesignator": "CTEP",
+                           "codingSchemeVersion": "1.0"
+                        }
+                     ]
+                  }
+               ]
+            },
+            "AllowedTerm": [
+               {
+                  "codeValue": "RID34991",
+                  "codeMeaning": "abdominal fat necrosis sign",
+                  "codingSchemeDesignator": "RadLex",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "RID34408",
+                  "codeMeaning": "scotty dog sign",
+                  "codingSchemeDesignator": "RadLex",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "RID34412",
+                  "codeMeaning": "Erlenmeyer flask deformity",
+                  "codingSchemeDesignator": "RadLex",
+                  "codingSchemeVersion": "1.0",
+                  "nextId": "2.25.264945780284452461227299362245725897438"
+               },
+               {
+                  "codeValue": "RID35333",
+                  "codeMeaning": "lacunar skull",
+                  "codingSchemeDesignator": "RadLex",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "RID35330",
+                  "codeMeaning": "knuckle sign",
+                  "codingSchemeDesignator": "RadLex",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "RID35337",
+                  "codeMeaning": "lateral femoral notch sign",
+                  "codingSchemeDesignator": "RadLex",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "RID35335",
+                  "codeMeaning": "lambda sign of chest",
+                  "codingSchemeDesignator": "RadLex",
+                  "codingSchemeVersion": "1.0",
+                  "nextId": "2.25.316621944217354986956136852674485484897",
+                  "ValidTerm": {
+                     "codeValue": "C25228",
+                     "codeMeaning": "Right",
+                     "codingSchemeDesignator": "NCIt",
+                     "codingSchemeVersion": "1.0"
+                  }
+               },
+               {
+                  "codeValue": "RID35340",
+                  "codeMeaning": "leafless tree sign",
+                  "codingSchemeDesignator": "RadLex",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "RID35346",
+                  "codeMeaning": "linguine sign",
+                  "codingSchemeDesignator": "RadLex",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "RID35349",
+                  "codeMeaning": "lollipop sign",
+                  "codingSchemeDesignator": "RadLex",
+                  "codingSchemeVersion": "1.0"
+               }
+            ]
+         },
+         {
+            "label": "IO",
+            "itemNumber": "1",
+            "authors": "AIM Team",
+            "explanatoryText": "IO",
+            "minCardinality": "1",
+            "maxCardinality": "1",
+            "shouldDisplay": "true",
+            "groupLabel": "IO",
+            "id": "2.25.221240251915004149123867287125995545695",
+            "QuestionType": {
+               "codeValue": "R-4206F",
+               "codeMeaning": "Displaced",
+               "codingSchemeDesignator": "SRT",
+               "codingSchemeVersion": "1.0"
+            },
+            "ImagingObservation": {
+               "annotatorConfidence": "false",
+               "ImagingObservationCharacteristic": {
+                  "label": "IOC",
+                  "itemNumber": "0",
+                  "authors": "AIM Team",
+                  "explanatoryText": "IOC",
+                  "minCardinality": "1",
+                  "maxCardinality": "3",
+                  "shouldDisplay": "true",
+                  "groupLabel": "",
+                  "id": "2.25.262609545894946533504172503990783678900",
+                  "requireComment": "true",
+                  "annotatorConfidence": "true",
+                  "AllowedTerm": [
+                     {
+                        "codeValue": "RID34996",
+                        "codeMeaning": "accordian sign",
+                        "codingSchemeDesignator": "RadLex",
+                        "codingSchemeVersion": "1.0"
+                     },
+                     {
+                        "codeValue": "RID34995",
+                        "codeMeaning": "absent liver sign",
+                        "codingSchemeDesignator": "RadLex",
+                        "codingSchemeVersion": "1.0",
+                        "defaultAnswer": "true"
+                     },
+                     {
+                        "codeValue": "RID34407",
+                        "codeMeaning": "comet tail sign",
+                        "codingSchemeDesignator": "RadLex",
+                        "codingSchemeVersion": "1.0"
+                     },
+                     {
+                        "codeValue": "RID34411",
+                        "codeMeaning": "absent bow tie sign",
+                        "codingSchemeDesignator": "RadLex",
+                        "codingSchemeVersion": "1.0",
+                        "ValidTerm": {
+                           "codeValue": "C70764",
+                           "codeMeaning": "Free text format",
+                           "codingSchemeDesignator": "NCIt",
+                           "codingSchemeVersion": "1.0"
+                        }
+                     },
+                     {
+                        "codeValue": "RID34399",
+                        "codeMeaning": "bowler hat sign",
+                        "codingSchemeDesignator": "RadLex",
+                        "codingSchemeVersion": "1.0"
+                     },
+                     {
+                        "codeValue": "RID35341",
+                        "codeMeaning": "left atrial notch sign",
+                        "codingSchemeDesignator": "RadLex",
+                        "codingSchemeVersion": "1.0"
+                     }
+                  ],
+                  "QuestionType": {
+                     "codeValue": "R-409D1",
+                     "codeMeaning": "Radial",
+                     "codingSchemeDesignator": "SRT",
+                     "codingSchemeVersion": "1.0"
+                  }
+               }
+            },
+            "AllowedTerm": [
+               {
+                  "codeValue": "R-00339",
+                  "codeMeaning": "No",
+                  "codingSchemeDesignator": "SRT",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "G-A002",
+                  "codeMeaning": "moderate",
+                  "codingSchemeDesignator": "SRT",
+                  "codingSchemeVersion": "1.0",
+                  "defaultAnswer": "true"
+               },
+               {
+                  "codeValue": "R-4076E",
+                  "codeMeaning": "trace",
+                  "codingSchemeDesignator": "SRT",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "G-A176",
+                  "codeMeaning": "previous",
+                  "codingSchemeDesignator": "SRT",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "F-32100",
+                  "codeMeaning": "cardiac output",
+                  "codingSchemeDesignator": "SRT",
+                  "codingSchemeVersion": "1.0"
+               }
+            ]
+         },
+         {
+            "label": "AE-2",
+            "itemNumber": "2",
+            "authors": "AIM Team",
+            "explanatoryText": "AE-2",
+            "minCardinality": "1",
+            "maxCardinality": "1",
+            "shouldDisplay": "true",
+            "groupLabel": "",
+            "id": "2.25.200462337283989723836761134995730139613",
+            "QuestionType": {
+               "codeValue": "RID34406",
+               "codeMeaning": "coffee bean sign",
+               "codingSchemeDesignator": "RadLex",
+               "codingSchemeVersion": "1.0"
+            },
+            "AnatomicEntity": {
+               "annotatorConfidence": "false",
+               "AnatomicEntityCharacteristic": {
+                  "label": "AE-AEC",
+                  "itemNumber": "1",
+                  "authors": "AIM Team",
+                  "explanatoryText": "AE-AEC",
+                  "minCardinality": "1",
+                  "maxCardinality": "1",
+                  "shouldDisplay": "true",
+                  "groupLabel": "",
+                  "id": "2.25.4904697685331920492789743978108629689",
+                  "annotatorConfidence": "false",
+                  "AllowedTerm": [
+                     {
+                        "codeValue": "3227238",
+                        "codeMeaning": "Minimal",
+                        "codingSchemeDesignator": "caDSR",
+                        "codingSchemeVersion": "1.0"
+                     },
+                     {
+                        "codeValue": "3262715",
+                        "codeMeaning": "Center/Bilateral",
+                        "codingSchemeDesignator": "caDSR",
+                        "codingSchemeVersion": "1.0",
+                        "defaultAnswer": "true"
+                     },
+                     {
+                        "codeValue": "2574088",
+                        "codeMeaning": "Right",
+                        "codingSchemeDesignator": "caDSR",
+                        "codingSchemeVersion": "1.0"
+                     },
+                     {
+                        "codeValue": "C0042789",
+                        "codeMeaning": "Vision",
+                        "codingSchemeDesignator": "caDSR",
+                        "codingSchemeVersion": "1.0",
+                        "ValidTerm": {
+                           "codeValue": "C25517",
+                           "codeMeaning": "full",
+                           "codingSchemeDesignator": "NCIt",
+                           "codingSchemeVersion": "1.0"
+                        }
+                     },
+                     {
+                        "codeValue": "3262720",
+                        "codeMeaning": "No Contrast Injected",
+                        "codingSchemeDesignator": "caDSR",
+                        "codingSchemeVersion": "1.0"
+                     }
+                  ],
+                  "QuestionType": {
+                     "codeValue": "2903542",
+                     "codeMeaning": "Lesion Substance Morphology Region Type",
+                     "codingSchemeDesignator": "caDSR",
+                     "codingSchemeVersion": "1.0"
+                  }
+               },
+               "ImagingObservationCharacteristic": [
+                  {
+                     "label": "AE-IOC",
+                     "itemNumber": "0",
+                     "authors": "AIM Team",
+                     "explanatoryText": "AE-IOC",
+                     "minCardinality": "1",
+                     "maxCardinality": "2",
+                     "shouldDisplay": "true",
+                     "groupLabel": "",
+                     "id": "2.25.108530634510740764767878159000975400939",
+                     "requireComment": "true",
+                     "annotatorConfidence": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeValue": "RID34997",
+                           "codeMeaning": "acorn deformity",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeValue": "RID34404",
+                           "codeMeaning": "Mickey Mouse sign of liver",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0",
+                           "ValidTerm": {
+                              "codeValue": "C48660",
+                              "codeMeaning": "Not Applicable",
+                              "codingSchemeDesignator": "NCIt",
+                              "codingSchemeVersion": "1.0"
+                           }
+                        },
+                        {
+                           "codeValue": "RID34409",
+                           "codeMeaning": "swan neck deformity",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeValue": "RID34396",
+                           "codeMeaning": "beaded ureter",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0",
+                           "nextId": "2.25.316621944217354986956136852674485484897"
+                        },
+                        {
+                           "codeValue": "RID35339",
+                           "codeMeaning": "lead pipe sign",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0",
+                           "defaultAnswer": "true"
+                        },
+                        {
+                           "codeValue": "RID35335",
+                           "codeMeaning": "lambda sign of chest",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeValue": "RID35340",
+                           "codeMeaning": "leafless tree sign",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        }
+                     ],
+                     "QuestionType": {
+                        "codeValue": "G-A472",
+                        "codeMeaning": "Oblique",
+                        "codingSchemeDesignator": "SRT",
+                        "codingSchemeVersion": "1.0"
+                     }
+                  },
+                  {
+                     "label": "AE-IOC2",
+                     "itemNumber": "2",
+                     "authors": "AIM Team",
+                     "explanatoryText": "AE-IOC2",
+                     "minCardinality": "1",
+                     "maxCardinality": "1",
+                     "shouldDisplay": "true",
+                     "groupLabel": "",
+                     "id": "2.25.144384273350738068267645406522525823311",
+                     "requireComment": "true",
+                     "annotatorConfidence": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeValue": "2891769",
+                           "codeMeaning": "Lesion Substance Morphology Contrast-enhanced MRI Quality Type",
+                           "codingSchemeDesignator": "caDSR",
+                           "codingSchemeVersion": "1.0",
+                           "defaultAnswer": "true"
+                        },
+                        {
+                           "codeValue": "2904270",
+                           "codeMeaning": "Lesion Substance Morphology Noncontrast-enhancing Tissue (nCET) Proportion Category",
+                           "codingSchemeDesignator": "caDSR",
+                           "codingSchemeVersion": "1.0",
+                           "ValidTerm": {
+                              "codeValue": "C16847",
+                              "codeMeaning": "Technique",
+                              "codingSchemeDesignator": "NCIt",
+                              "codingSchemeVersion": "1.0"
+                           }
+                        },
+                        {
+                           "codeValue": "2904265",
+                           "codeMeaning": "Lesion Substance Morphology Enhancing Proportion Category",
+                           "codingSchemeDesignator": "caDSR",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeValue": "2903556",
+                           "codeMeaning": "Lesion Morphology Margin Thickness Category",
+                           "codingSchemeDesignator": "caDSR",
+                           "codingSchemeVersion": "1.0"
+                        }
+                     ],
+                     "QuestionType": {
+                        "codeValue": "2904305",
+                        "codeMeaning": "Lesion Alteration Calvarial Bone Remodeling Yes No Indicator",
+                        "codingSchemeDesignator": "caDSR",
+                        "codingSchemeVersion": "1.0"
+                     }
+                  }
+               ]
+            },
+            "AllowedTerm": [
+               {
+                  "codeValue": "RID34402",
+                  "codeMeaning": "C sign",
+                  "codingSchemeDesignator": "RadLex",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "RID34410",
+                  "codeMeaning": "inverted Napoleon hat sign",
+                  "codingSchemeDesignator": "RadLex",
+                  "codingSchemeVersion": "1.0",
+                  "defaultAnswer": "true"
+               },
+               {
+                  "codeValue": "RID34992",
+                  "codeMeaning": "absent collecting duct system",
+                  "codingSchemeDesignator": "RadLex",
+                  "codingSchemeVersion": "1.0",
+                  "ValidTerm": {
+                     "codeValue": "C96205",
+                     "codeMeaning": "meniscal cyst",
+                     "codingSchemeDesignator": "NCIt",
+                     "codingSchemeVersion": "1.0"
+                  }
+               }
+            ]
+         },
+         {
+            "label": "Inference",
+            "itemNumber": "3",
+            "authors": "AIM Team",
+            "explanatoryText": "Inference",
+            "minCardinality": "1",
+            "maxCardinality": "1",
+            "shouldDisplay": "true",
+            "groupLabel": "",
+            "id": "2.25.264945780284452461227299362245725897438",
+            "QuestionType": {
+               "codeValue": "2574088",
+               "codeMeaning": "Right",
+               "codingSchemeDesignator": "caDSR",
+               "codingSchemeVersion": "1.0"
+            },
+            "Inference": {
+               "annotatorConfidence": "false"
+            },
+            "AllowedTerm": [
+               {
+                  "codeValue": "2574089",
+                  "codeMeaning": "Left",
+                  "codingSchemeDesignator": "caDSR",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "3262719",
+                  "codeMeaning": "No Contrast Enhancement",
+                  "codingSchemeDesignator": "caDSR",
+                  "codingSchemeVersion": "1.0",
+                  "defaultAnswer": "true"
+               },
+               {
+                  "codeValue": "3262722",
+                  "codeMeaning": "Between Two Thirds and One Third",
+                  "codingSchemeDesignator": "caDSR",
+                  "codingSchemeVersion": "1.0"
+               }
+            ]
+         },
+         {
+            "label": "Calculation",
+            "itemNumber": "4",
+            "authors": "AIM Team",
+            "explanatoryText": "Calculation",
+            "minCardinality": "1",
+            "maxCardinality": "1",
+            "shouldDisplay": "true",
+            "groupLabel": "",
+            "id": "2.25.316621944217354986956136852674485484897",
+            "QuestionType": {
+               "codeValue": "QT-K09373",
+               "codeMeaning": "What is the anatomical position?",
+               "codingSchemeDesignator": "99PRIVATEQA",
+               "codingSchemeVersion": "1.0"
+            },
+            "Calculation": {
+               "CalculationType": {
+                  "codeValue": "122405",
+                  "codeMeaning": "Algorithm Manufacturer",
+                  "codingSchemeDesignator": "DCM",
+                  "codingSchemeVersion": "1.0",
+                  "AlgorithmType": [
+                     {
+                        "codeValue": "111002",
+                        "codeMeaning": "Algorithm Parameters",
+                        "codingSchemeDesignator": "DCM",
+                        "codingSchemeVersion": "1.0",
+                        "description": "Algorithm",
+                        "uniqueIdentifier": "",
+                        "algorithmName": "na",
+                        "algorithmVersion": "na",
+                        "mathML": "na"
+                     },
+                     {
+                        "codeValue": "112046",
+                        "codeMeaning": "Non-Target Lesion Incomplete Response or Stable Disease",
+                        "codingSchemeDesignator": "DCM",
+                        "codingSchemeVersion": "1.0",
+                        "description": "AL-2",
+                        "uniqueIdentifier": "2.25.159918858042017011226795796657810478482",
+                        "algorithmName": "NA",
+                        "algorithmVersion": "NA",
+                        "mathML": "NA"
+                     }
+                  ]
+               }
+            }
+         },
+         {
+            "label": "Line",
+            "itemNumber": "5",
+            "authors": "AIM Team",
+            "explanatoryText": "Draw a line",
+            "minCardinality": "1",
+            "maxCardinality": "1",
+            "shouldDisplay": "true",
+            "groupLabel": "",
+            "id": "2.25.96258620923756115961136393481188603332",
+            "QuestionType": {
+               "codeValue": "QT-839565",
+               "codeMeaning": "What have you seen on the image?",
+               "codingSchemeDesignator": "99PRIVATEQA",
+               "codingSchemeVersion": "1.0"
+            },
+            "GeometricShape": "MultiPoint"
+         },
+         {
+            "label": "IO-2",
+            "itemNumber": "6",
+            "authors": "Default User",
+            "explanatoryText": "Imaging Observation II",
+            "minCardinality": "1",
+            "maxCardinality": "1",
+            "shouldDisplay": "true",
+            "groupLabel": "",
+            "id": "2.25.331558201624197906250695550755625883257",
+            "QuestionType": {
+               "codeValue": "QT-839565",
+               "codeMeaning": "What have you seen on the image?",
+               "codingSchemeDesignator": "99PRIVATEQA",
+               "codingSchemeVersion": "1.0"
+            },
+            "ImagingObservation": {
+               "annotatorConfidence": "false"
+            },
+            "AllowedTerm": [
+               {
+                  "codeValue": "C0577559",
+                  "codeMeaning": "Mass",
+                  "codingSchemeDesignator": "NCIm",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "C0012634",
+                  "codeMeaning": "Disease",
+                  "codingSchemeDesignator": "NCIm",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "C0205258",
+                  "codeMeaning": "Indeterminate",
+                  "codingSchemeDesignator": "NCIm",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "99PI-349877",
+                  "codeMeaning": "Anteroseptal",
+                  "codingSchemeDesignator": "99Privt",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeValue": "99PI-084624",
+                  "codeMeaning": "mid ascending aorta",
+                  "codingSchemeDesignator": "99Privt",
+                  "codingSchemeVersion": "1.0"
+               }
+            ]
+         }
+      ]
+   }
+}

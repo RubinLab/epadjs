@@ -1,0 +1,18 @@
+
+
+{
+   "label": "template holder",
+   "Template": {
+      "label": "template",
+      "Component": 
+         {
+            "label": "C1",
+            "AnatomicEntity": {
+               "label": "C1 - AE1"
+            }
+         }
+
+      
+   }
+}
+

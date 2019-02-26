@@ -1,0 +1,165 @@
+
+
+{
+   "authors": "Default User",
+   "creationDate": "2013-08-15",
+   "description": "Current liver template",
+   "name": "Active Liver Template",
+   "uid": "2.25.262327926267685184074584276827607514851",
+   "version": "Active Liver 16",
+   "schemaLocation": "gme://caCORE.caCORE/3.2/edu.northwestern.radiology.AIMTemplate AIMTemplate_v2rv13.xsd",
+   "Template": {
+      "authors": "cfbeaulieu",
+      "codeMeaning": "liver15",
+      "codeValue": "RID58-2",
+      "codingSchemeDesignator": "RadLex",
+      "codingSchemeVersion": "1.0",
+      "creationDate": "2013-02-10",
+      "description": "Liver template.v18",
+      "name": "Active Liver Template Beaulieu",
+      "uid": "2.25.143518070104148940884779125624652210206",
+      "version": "18",
+      "Component": [
+         {
+            "authors": "cfbeaulieu",
+            "explanatoryText": "Mass, normal, or geographic alteration? Almost all annotations will be for a mass.",
+            "groupLabel": "",
+            "id": "2.25.1800391920560.536979723139.204033480097",
+            "itemNumber": "3",
+            "label": "Lesion Type",
+            "maxCardinality": "1",
+            "minCardinality": "1",
+            "shouldDisplay": "true",
+            "ImagingObservation": {
+               "annotatorConfidence": "false",
+               "ImagingObservationCharacteristic": [
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "cfbeaulieu",
+                     "explanatoryText": "What is the etiology of the lesion or its presumed etiology?",
+                     "groupLabel": "",
+                     "id": "2.25.1800391920798.536979723377.204033480142",
+                     "itemNumber": "0",
+                     "label": "Diagnosis",
+                     "maxCardinality": "1",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "abscess",
+                           "codeValue": "RID3711",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeMeaning": "angiosarcoma",
+                           "codeValue": "RID3989",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        }
+
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "cfbeaulieu",
+                     "explanatoryText": "What is the phase of intravenous contrast enhancement, or is it a noncontrast scan?",
+                     "groupLabel": "",
+                     "id": "2.25.1800391921038.536979723617.204033480187",
+                     "itemNumber": "1",
+                     "label": "Imaging Phase",
+                     "maxCardinality": "1",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "early arterial phase",
+                           "codeValue": "RID11082",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeMeaning": "late arterial phase",
+                           "codeValue": "RID39127",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "cfbeaulieu",
+                     "explanatoryText": "How many lesions with a given diagnosis? Are there also more complex distribution patterns?  Up to 2 responses.",
+                     "groupLabel": "",
+                     "id": "2.25.1800391921279.536979723858.204033480232",
+                     "itemNumber": "2",
+                     "label": "Focality of Lesion",
+                     "maxCardinality": "2",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "solitary lesion",
+                           "codeValue": "RID43312",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeMeaning": "multiple lesions 1-5",
+                           "codeValue": "RID43314",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "cfbeaulieu",
+                     "explanatoryText": "What is the overall shape or shapes associated with the lesion?  Up to 3 responses.",
+                     "groupLabel": "",
+                     "id": "2.25.1800391921521.536979724100.204033480277",
+                     "itemNumber": "3",
+                     "label": "Shape Descriptors",
+                     "maxCardinality": "3",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "round",
+                           "codeValue": "RID5799",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeMeaning": "oval",
+                           "codeValue": "RID5800",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        }
+                     ]
+                  }
+               ]
+            },
+            "AllowedTerm": {
+               "codeMeaning": "liver mass",
+               "codeValue": "RID39466",
+               "codingSchemeDesignator": "RadLex",
+               "codingSchemeVersion": "1.0"
+            }
+         },
+         {
+            "authors": "Default User",
+            "explanatoryText": "",
+            "groupLabel": "",
+            "id": "2.25.260407454693500192885566124937158854189",
+            "itemNumber": "3",
+            "label": "Spline ROI",
+            "maxCardinality": "1",
+            "minCardinality": "1",
+            "shouldDisplay": "true",
+            "GeometricShape": "Point"
+         }
+      ]
+   }
+}
+
