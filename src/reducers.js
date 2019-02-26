@@ -4,3 +4,4 @@ import searchViewReducer from "./components/searchView/reducer";
 export default combineReducers({
   searchViewReducer
 });
+
