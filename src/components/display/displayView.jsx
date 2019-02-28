@@ -47,6 +47,7 @@ class DisplayView extends Component {
     this.props.cornerstoneTools.setToolActive(ZoomTool.name, {
       mouseButtonMask: 5
     });
+    console.log(this.props.cornerstoneTools);
 
     //make the last element in series as selected viewport since the last open will be added to end
     this.props.dispatch(
