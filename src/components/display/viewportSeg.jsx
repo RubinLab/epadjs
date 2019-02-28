@@ -38,7 +38,9 @@ const tools = [
   { name: "FreehandMouse" },
   { name: "Eraser" },
   { name: "Bidirectional" },
-  { name: "Brush" }
+  { name: "Brush" },
+  { name: "StackScroll" },
+  { name: "StackScrollMouseWheel" }
 ];
 
 class ViewportSeg extends Component {
@@ -162,20 +164,18 @@ class ViewportSeg extends Component {
   }
 
   initializeTools = () => {
-    console.log(this.cornerstoneTools);
     Array.from(this.tools).forEach(tool => {
       const apiTool = this.cornerstoneTools[`${tool.name}Tool`];
       if (apiTool) {
         this.cornerstoneTools.addToolForElement(
           this.state.viewport,
           apiTool,
-          tool
+          tool.configuration
         );
       } else {
         throw new Error(`Tool not found: ${tool.name}Tool`);
       }
     });
-    console.log(this.cornerstoneTools);
   };
 
   selectImage(event) {
@@ -303,10 +303,17 @@ class ViewportSeg extends Component {
       element.tabIndex = 0;
       element.focus();
       // Enable all tools we want to use with this element
-      //this.cornerstoneTools.stackScrollKeyboard.activate(element);
+      //this.cornerstoneTools.setToolActive("StackScroll");
       //this.cornerstoneTools.wwwc.activate(element, 1);
       //this.cornerstoneTools.pan.activate(element, 3);
-      //this.cornerstoneTools.stackScrollWheel.activate(element);
+      const zoomOptions = {
+        mouseButtonMask: [1, 2]
+      };
+      this.cornerstoneTools.setToolActive("Zoom", zoomOptions);
+      this.cornerstoneTools.setToolActive("StackScrollMouseWheel", {
+        mouseButtonMask: 0,
+        isTouchActive: true
+      });
       //this.cornerstoneTools.scrollIndicator.enable(element);
       this.cornerstoneTools.stackPrefetch.enable(element);
 
