@@ -1,6 +1,7 @@
 import React from "react";
-import logo from "../images/logo.png";
 import { Link, NavLink } from "react-router-dom";
+import { FaCogs, FaAngleDown } from 'react-icons/fa';
+import logo from "../images/logo.png";
 
 const NavBar = ({ user }) => {
   return (
@@ -65,6 +66,12 @@ const NavBar = ({ user }) => {
             )}
             {user && (
               <React.Fragment>
+                <li className="nav-item pull-right">
+                    <div className="nav-link" style={{cursor: "pointer"}}>
+                      <FaCogs style={{height: "200%"}}/>
+                      <FaAngleDown style={{height: "50%"}}/>
+                    </div>
+                </li>
                 <li className="nav-item pull-right">
                   <NavLink className="nav-link" to="/profile">
                     {user.displayname}
