@@ -12,14 +12,21 @@ import NotFound from "./components/notFound";
 import LoginForm from "./components/loginForm";
 import Logout from "./components/logout";
 import ProtectedRoute from "./components/common/protectedRoute";
-
 import Cornerstone from "./components/cornerstone/cornerstone";
+import ManagementMenu from './components/managementMenu/mainMenu';
+import ManagementModal from './components/common/customModal';
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
 class App extends Component {
-  state = {};
+  state = {
+    isMngMenuOpen:false
+  };
+
+  handleClickManagementMenu = () => {
+    this.setState((state) => ({isMngMenuOpen: !state.isMngMenuOpen}));
+  }
 
   async componentDidMount() {
     //when comp mount check if the user is set already. If is set then set state
@@ -37,7 +44,8 @@ class App extends Component {
       <React.Fragment>
         <Cornerstone />
         <ToastContainer />
-        <NavBar user={this.state.user} />
+        <NavBar user={this.state.user} openGearMenu={this.handleClickManagementMenu}/>
+        {this.state.isMngMenuOpen && <ManagementMenu />}
         {!this.state.user && <Route path="/login" component={LoginForm} />}
         {this.state.user && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>

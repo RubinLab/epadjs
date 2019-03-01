@@ -1,5 +1,5 @@
 import React from 'react';
-import { RND}  from 'react-rnd';
+import { Rnd }  from 'react-rnd';
 
 const style = {
     display: "flex",
