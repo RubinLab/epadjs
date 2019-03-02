@@ -42,8 +42,9 @@
     max-width: auto;
     cursor: default;
     border-radius: 4px;
-    background: blue;
     resize: both;
+    background: white;
+    color: rgb(85, 85, 85)
   }
 
   .react-draggable {

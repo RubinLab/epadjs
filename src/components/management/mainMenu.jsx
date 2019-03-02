@@ -2,13 +2,15 @@ import React from 'react';
 import Modal from '../common/customModal';
 import Users from './users';
 import Projects from './projects';
+import  './menuStyle.css';
+
 
 const selectDisplay = (selected) => {
   switch(selected) {
     case 'Users':
-      return <Users />
+      return <Users selection={selected}/>
     case 'Projects':
-      return <Projects />
+      return <Projects selection={selected}/>
     default:
       return <div />
   }

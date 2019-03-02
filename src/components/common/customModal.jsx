@@ -1,10 +1,8 @@
 import React from 'react';
-import  '../managementMenu/menuStyle.css';
 import ResizeAndDrag from './resizeAndDrag';
 
 
 class CustomModal extends React.Component {
-
   listenKeyboard = (event) => {
     if (event.key === 'Escape' || event.keyCode === 27) {
       this.props.onClose();
