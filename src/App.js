@@ -13,7 +13,7 @@ import LoginForm from "./components/loginForm";
 import Logout from "./components/logout";
 import ProtectedRoute from "./components/common/protectedRoute";
 import Cornerstone from "./components/cornerstone/cornerstone";
-import ManagementMenu from './components/managementMenu/mainMenu';
+import Management from "./components/management/mainMenu"
 import ManagementModal from './components/common/customModal';
 
 import "react-toastify/dist/ReactToastify.css";
@@ -45,7 +45,7 @@ class App extends Component {
         <Cornerstone />
         <ToastContainer />
         <NavBar user={this.state.user} openGearMenu={this.handleClickManagementMenu}/>
-        {this.state.isMngMenuOpen && <ManagementMenu />}
+        {this.state.isMngMenuOpen && <Management />}
         {!this.state.user && <Route path="/login" component={LoginForm} />}
         {this.state.user && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>

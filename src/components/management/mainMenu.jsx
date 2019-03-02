@@ -1,5 +1,18 @@
 import React from 'react';
 import Modal from '../common/customModal';
+import Users from './users';
+import Projects from './projects';
+
+const selectDisplay = (selected) => {
+  switch(selected) {
+    case 'Users':
+      return <Users />
+    case 'Projects':
+      return <Projects />
+    default:
+      return <div />
+  }
+}
 
 class MainMenu extends React.Component {
     state = {
@@ -33,6 +46,8 @@ class MainMenu extends React.Component {
             <div onClick={this.handleSelection}>Queries</div>
             {this.state.isModalOpen && 
             <Modal onClose={this.handleCloseModal}>
+              {/* {this.selectDisplay()} */}
+              {selectDisplay(this.state.selection)}
               <button onClick={this.handleCloseModal}>Close</button>
             </Modal>}
           </div>
