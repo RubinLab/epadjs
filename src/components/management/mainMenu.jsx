@@ -3,18 +3,9 @@ import Modal from '../common/customModal';
 import Users from './users';
 import Projects from './projects';
 import  './menuStyle.css';
+import Header from '../common/managementHeader'
 
 
-const selectDisplay = (selected) => {
-  switch(selected) {
-    case 'Users':
-      return <Users selection={selected}/>
-    case 'Projects':
-      return <Projects selection={selected}/>
-    default:
-      return <div />
-  }
-}
 
 class MainMenu extends React.Component {
     state = {
@@ -32,6 +23,18 @@ class MainMenu extends React.Component {
       handleCloseModal = (e) => {
         this.setState((state) => {return {isModalOpen: !state.isModalOpen}});
       }
+
+      
+      selectDisplay = () => {
+        switch(this.state.selection) {
+          case 'Users':
+            return <Users selection={this.state.selection}/>
+          case 'Projects':
+            return <Projects selection={this.state.selection}/>
+          default:
+            return <div />
+        }
+      }
     
       render() {
         console.log(this.state)
@@ -48,8 +51,8 @@ class MainMenu extends React.Component {
             <div onClick={this.handleSelection}>Queries</div>
             {this.state.isModalOpen && 
             <Modal onClose={this.handleCloseModal}>
-              {/* {this.selectDisplay()} */}
-              {selectDisplay(this.state.selection)}
+              <Header selection={this.state.selection} onClose={this.handleCloseModal}/>
+              {this.selectDisplay()}
               <button onClick={this.handleCloseModal}>Close</button>
             </Modal>}
           </div>

@@ -50,3 +50,7 @@
   .react-draggable {
     position: relative;
   }
+
+  .user-display {
+    display: inline-block;
+  }

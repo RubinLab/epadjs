@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, NavLink } from "react-router-dom";
-import { FaCogs, FaAngleDown } from 'react-icons/fa';
+import { FaCogs, FaCaretDown } from 'react-icons/fa';
 import logo from "../images/logo.png";
 
 const NavBar = ({ user, openGearMenu }) => {
@@ -69,7 +69,7 @@ const NavBar = ({ user, openGearMenu }) => {
                 <li className="nav-item pull-right">
                     <div className="nav-link" style={{cursor: "pointer"}} onClick={openGearMenu}>
                       <FaCogs style={{fontSize: "1.25rem"}}/>
-                      <FaAngleDown style={{fontSize: "1rem"}}/>
+                      <FaCaretDown style={{fontSize: "1rem"}}/>
                     </div>
                 </li>
                 <li className="nav-item pull-right">

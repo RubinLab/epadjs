@@ -1,5 +1,6 @@
 import React from 'react';
 import Table from 'react-table';
+import './menuStyle.css';
 import { getUsers } from '../../services/userServices';
 
 class Users extends React.Component {
@@ -19,6 +20,37 @@ class Users extends React.Component {
 
   defineColumns = () => {
     return [
+      {
+        id: "checkbox",
+          accessor: "",
+          Cell: ({ original }) => {
+            return (
+              <input
+                type="checkbox"
+                className="checkbox"
+                // checked={this.state.selected[original.firstName] === true}
+                // onChange={() => this.toggleRow(original.firstName)}
+              />
+            );
+        },
+        Header: x => {
+          return (
+            <input
+              type="checkbox"
+              className="checkbox"
+              // checked={this.state.selectAll === 1}
+            //   ref={input => {
+            //     if (input) {
+            //       input.indeterminate = this.state.selectAll === 2;
+            //     }
+            //   }}
+            //   onChange={() => this.toggleSelectAll()}
+            />
+          );
+        },
+        sortable: false,
+        width: 45
+      },
       {
         Header: 'First',
         accessor: 'firstname'
@@ -54,8 +86,7 @@ class Users extends React.Component {
     console.log('user data', this.state.data);
     // const col = 
     return (
-      <div> 
-        <p>{this.props.selection}</p>
+      <div className="users-display"> 
         <Table data={this.state.data} columns={this.defineColumns()}/>
       </div>
     );
