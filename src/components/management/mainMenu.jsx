@@ -22,6 +22,7 @@ class MainMenu extends React.Component {
     
       handleCloseModal = (e) => {
         this.setState((state) => {return {isModalOpen: !state.isModalOpen}});
+        this.props.closeMenu();
       }
 
       

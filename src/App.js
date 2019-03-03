@@ -24,7 +24,17 @@ class App extends Component {
     isMngMenuOpen:false
   };
 
-  handleClickManagementMenu = () => {
+  closeMenu = (event) => {
+    console.log(event);
+    if (event && event.type === "keydown") {
+      if (event.key === 'Escape' || event.keyCode === 27) {
+        this.setState({ isMngMenuOpen: false });
+      }
+    }
+    this.setState({ isMngMenuOpen: false });
+  }
+
+  openMenu = () => {
     this.setState((state) => ({isMngMenuOpen: !state.isMngMenuOpen}));
   }
 
@@ -37,6 +47,13 @@ class App extends Component {
         this.setState({ user });
       }
     } catch (ex) {}
+    
+    window.addEventListener('keydown', this.closeMenu, true); 
+  }
+
+  componentWillUnmount = () => {
+    window.removeEventListener('keydown', this.closeMenu, true);
+    
   }
 
   render() {
@@ -44,8 +61,8 @@ class App extends Component {
       <React.Fragment>
         <Cornerstone />
         <ToastContainer />
-        <NavBar user={this.state.user} openGearMenu={this.handleClickManagementMenu}/>
-        {this.state.isMngMenuOpen && <Management />}
+        <NavBar user={this.state.user} openGearMenu={this.openMenu}/>
+        {this.state.isMngMenuOpen && <Management closeMenu={this.closeMenu} />}
         {!this.state.user && <Route path="/login" component={LoginForm} />}
         {this.state.user && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
