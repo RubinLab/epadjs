@@ -39,7 +39,7 @@ class MainMenu extends React.Component {
       render() {
         console.log(this.state)
         return (
-          <div className="gear-menu">
+          <div className="mng-menu">
             <div onClick={this.handleSelection}>Users</div>
             <div onClick={this.handleSelection}>Projects</div>
             <div onClick={this.handleSelection}>Worklists</div>
@@ -53,7 +53,6 @@ class MainMenu extends React.Component {
             <Modal onClose={this.handleCloseModal}>
               <Header selection={this.state.selection} onClose={this.handleCloseModal}/>
               {this.selectDisplay()}
-              <button onClick={this.handleCloseModal}>Close</button>
             </Modal>}
           </div>
         );

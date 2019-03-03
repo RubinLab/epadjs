@@ -4,8 +4,10 @@ import { FaWindowClose } from 'react-icons/fa'
 const managementHeader = ({selection, onClose}) => {
   return (
     <div className="mng-header">
-      <h3 class="mang-header__title">{selection}</h3>
-      <FaWindowClose class="mng-header__close" onClick={onClose}/>     
+      <div class="mang-header__title">{selection}</div>
+      <div  class="mng-header__close"> 
+        <FaWindowClose onClick={onClose}/>    
+      </div> 
     </div>
   );
 } 

@@ -43,8 +43,6 @@
     cursor: default;
     border-radius: 4px;
     resize: both;
-    background: white;
-    color: rgb(85, 85, 85)
   }
 
   .react-draggable {
@@ -53,4 +51,38 @@
 
   .user-display {
     display: inline-block;
+  }
+
+  .mng-menu {
+    z-index: 5;
+    float: "right"
+  }
+
+  .mng-header {
+    display: flex;
+    /* justify-content: center; */
+    /* flex-flow: row wrap; */
+  }
+
+  .mng-header__title {
+    order: 1; 
+    flex:1 100%;
+    /* width: 90% */
+  }
+
+  .mng-header__close {
+    /* float: right; */
+    /* grid-column: 10;
+    grid-row: 1;
+    text-align: center */
+    /* width: 5% */
+    order: 2; 
+    width: 10%; 
+  }
+
+  .react-draggable {
+    width: auto;
+    overflow: scroll;
+    background: white;
+    color: rgb(85, 85, 85)
   }
