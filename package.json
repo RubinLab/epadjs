@@ -26,7 +26,8 @@
     "react-table": "^6.8.6",
     "react-tiny-tabs": "^0.1.2",
     "react-toastify": "^4.3.0",
-    "redux": "^4.0.1"
+    "redux": "^4.0.1",
+    "semantic-ui": "^2.4.2"
   },
   "scripts": {
     "start": "react-scripts start",
