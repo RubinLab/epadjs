@@ -106,7 +106,7 @@ class Projects extends React.Component {
   render = () => {
     console.log('projects data', this.state.data);
     return (
-      <div className="projects-display"> 
+      <div className="projects menu-display"> 
         <Table data={this.state.data} columns={this.defineColumns()}/>
       </div>
     );

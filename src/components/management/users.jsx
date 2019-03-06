@@ -133,7 +133,7 @@ class Users extends React.Component {
     console.log('user data', this.state.data);
     // const col = 
     return (
-      <div className="users-display"> 
+      <div className="users menu-display"> 
         <Table data={this.state.data} columns={this.defineColumns()}/>
       </div>
     );
