@@ -22,16 +22,16 @@ class Users extends React.Component {
     return [
       {
         id: "checkbox",
-          accessor: "",
-          Cell: ({ original }) => {
-            return (
-              <input
-                type="checkbox"
-                className="checkbox"
-                // checked={this.state.selected[original.firstName] === true}
-                // onChange={() => this.toggleRow(original.firstName)}
-              />
-            );
+        accessor: "",
+        Cell: ({ original }) => {
+          return (
+            <input
+              type="checkbox"
+              className="checkbox"
+              // checked={this.state.selected[original.firstName] === true}
+              // onChange={() => this.toggleRow(original.firstName)}
+            />
+          );
         },
         Header: x => {
           return (
@@ -53,31 +53,62 @@ class Users extends React.Component {
       },
       {
         Header: 'First',
-        accessor: 'firstname'
+        accessor: 'firstname',
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 50
       }, {
         Header: 'Last',
-        accessor: 'lastname'
+        accessor: 'lastname',
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 50
       }, {
         Header: 'Email',
-        accessor: 'email'
+        accessor: 'email',
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 50
       }, {
         Header: 'Color',
-        accessor: 'colorpreference'
+        accessor: 'colorpreference',
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 50
       }, {
         Header: 'Projects',
-        accessor: 'projects'
+        accessor: 'projects',
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 50
       }, {
         Header: 'Admin',
-        accessor: 'admin'
+        accessor: 'admin',
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 50
       }, {
         Header: 'Permissions',
-        accessor: 'permissions'
+        accessor: 'permissions',
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 50
 
       }, {
         Header: 'Enable',
-        accessor: 'enabled'
+        accessor: 'enabled',
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 50
       }, {
         Header: 'Password',
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 50
       },
     ];
   }
