@@ -2,6 +2,7 @@ import React from 'react';
 import Table from 'react-table';
 import './menuStyle.css';
 import { getProjects } from '../../services/projectServices';
+import ToolBar from './baseToolBar';
 
 class Projects extends React.Component {
 
@@ -107,6 +108,7 @@ class Projects extends React.Component {
     console.log('projects data', this.state.data);
     return (
       <div className="projects menu-display"> 
+        <ToolBar />
         <Table data={this.state.data} columns={this.defineColumns()}/>
       </div>
     );

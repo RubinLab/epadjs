@@ -74,7 +74,7 @@
 
   .mng-header {
     display: flex;
-    height: 10%;
+    height: 5%;
     /* justify-content: center; */
     /* flex-flow: row wrap; */
   }
@@ -84,7 +84,7 @@
     flex:1 100%;
     /* width: 90% */
   }
-
+  
   .mng-header__close {
     /* float: right; */
     /* grid-column: 10;
@@ -94,19 +94,28 @@
     order: 2; 
     width: 10%; 
   }
-
+  
   .react-draggable {
     width: auto;
     overflow: scroll;
     background: white;
     color: rgb(85, 85, 85)
   }
-
+  
   .wrapped {
     white-space: normal
   }
-
+  
   .ReactTable {
     height: 100%
   }
-
+  
+  .base-toolbar {
+    display: flex;
+    height: 5%;
+    justify-content: flex-start;
+  }
+  
+  .tool-icon {
+    margin-left: 1.2rem
+  }
