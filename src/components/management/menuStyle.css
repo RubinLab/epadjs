@@ -96,3 +96,7 @@
     background: white;
     color: rgb(85, 85, 85)
   }
+
+  .wrapped {
+    white-space: normal
+  }

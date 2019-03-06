@@ -18,6 +18,15 @@ class Users extends React.Component {
     this.setState({ data: result.data.ResultSet.Result });
   }
 
+  convertArrToStr = (arr) => {
+    return arr.reduce((all, item, index) => {
+      if (item.length > 0) {
+        all.length > 0 ? all += ', ' + item : all += item;
+      }
+      return all;
+    }, '');
+  }
+
   defineColumns = () => {
     return [
       {
@@ -84,7 +93,10 @@ class Users extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
+        minWidth: 50,
+        Cell: original => (
+          <p className="clickable wrapped">{original.row.projects.join(', ')}</p>
+        )
       }, {
         Header: 'Admin',
         accessor: 'admin',
@@ -96,7 +108,11 @@ class Users extends React.Component {
         accessor: 'permissions',
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
+        minWidth: 50,
+        Cell: original => (
+          <p className="clickable wrapped">{this.convertArrToStr(original.row.permissions)}</p>
+
+          )
 
       }, {
         Header: 'Enable',

@@ -88,31 +88,11 @@ class Projects extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
-      }, {
-        Header: '',
         minWidth: 50,
-        minResizeWidth: 20,
-        resizable: true,
-
-      }, {
-        Header: '',
-        minWidth: 50,
-        minResizeWidth: 20,
-        resizable: true,
-
-      } , {
-        Header: '',
-        minWidth: 50,
-        minResizeWidth: 20,
-        resizable: true,
-
-      }, {
-        Header: '',
-        minWidth: 50,
-        minResizeWidth: 20,
-        resizable: true,
-
+        Cell: original => (
+          <p className="clickable wrapped">{original.row.loginNames.join(', ')}</p>
+        ) 
+        
       }, {
         Header: '',
         minWidth: 50,
