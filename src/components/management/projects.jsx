@@ -2,12 +2,14 @@ import React from 'react';
 import Table from 'react-table';
 import './menuStyle.css';
 import { getProjects } from '../../services/projectServices';
-import ToolBar from './baseToolBar';
+import ToolBar from './basicToolBar';
 
 class Projects extends React.Component {
 
   state = {
-    data: []
+    data: [], 
+    selected: {},
+    selectAll: 0
   }
 
   componentDidMount = () => {
@@ -17,6 +19,38 @@ class Projects extends React.Component {
   getProjectData = async () => {
     const result = await getProjects();
     this.setState({ data: result.data.ResultSet.Result });
+  }
+
+  toggleRow = async (id) => {
+    let newSelected = Object.assign({}, this.state.selected);
+    newSelected[id] = !this.state.selected[id];
+    await this.setState({
+      selected: newSelected,
+      selectAll: 2
+    });
+
+    let values = Object.values(this.state.selected);
+    if (!values.includes(true)) {
+      this.setState({
+        selectAll: 0
+      });
+    }
+
+  }
+  
+  toggleSelectAll() {
+		let newSelected = {};
+
+		if (this.state.selectAll === 0) {
+			this.state.data.forEach(project => {
+				newSelected[project.id] = true;
+			});
+		}
+
+		this.setState({
+			selected: newSelected,
+			selectAll: this.state.selectAll === 0 ? 1 : 0
+		});
   }
   
   defineColumns = () => {
@@ -29,8 +63,8 @@ class Projects extends React.Component {
             <input
               type="checkbox"
               className="checkbox"
-              // checked={this.state.selected[original.firstName] === true}
-              // onChange={() => this.toggleRow(original.firstName)}
+              checked={this.state.selected[original.id] === true}
+              onChange={() => this.toggleRow(original.id)}
             />
           );
         },
@@ -39,13 +73,13 @@ class Projects extends React.Component {
             <input
               type="checkbox"
               className="checkbox"
-              // checked={this.state.selectAll === 1}
-            //   ref={input => {
-            //     if (input) {
-            //       input.indeterminate = this.state.selectAll === 2;
-            //     }
-            //   }}
-            //   onChange={() => this.toggleSelectAll()}
+              checked={this.state.selectAll === 1}
+              ref={input => {
+                if (input) {
+                  input.indeterminate = this.state.selectAll === 2;
+                }
+              }}
+              onChange={() => this.toggleSelectAll()}
             />
           );
         },
@@ -90,9 +124,11 @@ class Projects extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
-        Cell: original => (
-          <p className="clickable wrapped">{original.row.loginNames.join(', ')}</p>
-        ) 
+        Cell: original => {
+          // console.log(original.row.checkbox.id);
+          // console.log(this.state);
+          return (<p className="clickable wrapped">{original.row.loginNames.join(', ')}</p>)
+        } 
         
       }, {
         Header: '',
@@ -105,7 +141,7 @@ class Projects extends React.Component {
   }
 
   render = () => {
-    console.log('projects data', this.state.data);
+    // console.log('projects data', this.state.data);
     return (
       <div className="projects menu-display"> 
         <ToolBar />
