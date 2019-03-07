@@ -94,8 +94,10 @@ class Projects extends React.Component {
     this.getProjectData();
   };
 
-  deleteSingleProject = ({ original }) => {
-    console.log(original);
+  deleteSingleProject = async project => {
+    await deleteProject(this.state.singleDeleteId);
+    this.setState({ singleDeleteId: '', hasDeleteSingleClicked: false });
+    this.getProjectData();
   };
 
   handleDeleteAll = () => {
@@ -104,6 +106,10 @@ class Projects extends React.Component {
     !values.includes(true)
       ? this.setState({ noSelection: true })
       : this.setState({ hasDeleteAllClicked: true });
+  };
+
+  handleSingleDelete = id => {
+    this.setState({ hasDeleteSingleClicked: true, singleDeleteId: id });
   };
 
   defineColumns = () => {
@@ -192,13 +198,18 @@ class Projects extends React.Component {
         minWidth: 50,
         minResizeWidth: 20,
         resizable: true,
-        Cell: () => <FaRegTrashAlt className="menu-clickable" />
+        Cell: original => (
+          <FaRegTrashAlt
+            className="menu-clickable"
+            onClick={() => this.handleSingleDelete(original.row.checkbox.id)}
+          />
+        )
       }
     ];
   };
 
   render = () => {
-    console.log('projects data', this.state.data);
+    // console.log('projects data', this.state.data);
     return (
       <div className="projects menu-display">
         <ToolBar onDelete={this.handleDeleteAll} />

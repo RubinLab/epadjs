@@ -3,7 +3,7 @@ import { Modal } from 'react-bootstrap';
 
 const alertDeletionModal = ({ message, onCancel, onDelete }) => {
   return (
-    <Modal.Dialog centered={true}>
+    <Modal.Dialog centered="true">
       <Modal.Body>
         <p>{message}</p>
       </Modal.Body>
