@@ -4,7 +4,7 @@ import './menuStyle.css';
 
 const baseToolBar = ({ onAdd, onDelete }) => {
   return (
-    <div className="base-toolbar">
+    <div className="basic-toolbar">
       <FaPlusCircle className="tool-icon" onClick={onAdd} />
       <FaRegTrashAlt className="tool-icon" onClick={onDelete} />
     </div> 

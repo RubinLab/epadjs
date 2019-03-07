@@ -1,27 +1,49 @@
 import React from 'react';
 import Table from 'react-table';
+import { FaRegTrashAlt } from 'react-icons/fa';
+import { Modal } from 'react-bootstrap';
 import './menuStyle.css';
-import { getProjects } from '../../services/projectServices';
+import { getProjects, deleteProject } from '../../services/projectServices';
 import ToolBar from './basicToolBar';
+import AlertDelete from './alertDeletionModal';
+import AlertNoSelection from './alertNoSelectionModal';
+
+const messages = {
+  deleteSingle: 'Delete the project? This cannot be undone.',
+  deleteSelected: 'Delete selected projects? This cannot be undone.',
+  noSelection: 'Please select a project'
+};
 
 class Projects extends React.Component {
-
   state = {
-    data: [], 
+    data: [],
     selected: {},
-    selectAll: 0
-  }
+    selectAll: 0,
+    error: false,
+    singleDeleteId: '',
+    hasDeleteSingleClicked: false,
+    hasDeleteAllClicked: false,
+    noSelection: false
+  };
 
   componentDidMount = () => {
     this.getProjectData();
-  } 
+  };
 
   getProjectData = async () => {
-    const result = await getProjects();
-    this.setState({ data: result.data.ResultSet.Result });
-  }
+    try {
+      const {
+        data: {
+          ResultSet: { Result: data }
+        }
+      } = await getProjects();
+      this.setState({ data });
+    } catch (err) {
+      this.setState({ error: true });
+    }
+  };
 
-  toggleRow = async (id) => {
+  toggleRow = async id => {
     let newSelected = Object.assign({}, this.state.selected);
     newSelected[id] = !this.state.selected[id];
     await this.setState({
@@ -35,29 +57,60 @@ class Projects extends React.Component {
         selectAll: 0
       });
     }
+  };
 
-  }
-  
   toggleSelectAll() {
-		let newSelected = {};
+    let newSelected = {};
+    if (this.state.selectAll === 0) {
+      this.state.data.forEach(project => {
+        newSelected[project.id] = true;
+      });
+    }
 
-		if (this.state.selectAll === 0) {
-			this.state.data.forEach(project => {
-				newSelected[project.id] = true;
-			});
-		}
-
-		this.setState({
-			selected: newSelected,
-			selectAll: this.state.selectAll === 0 ? 1 : 0
-		});
+    this.setState({
+      selected: newSelected,
+      selectAll: this.state.selectAll === 0 ? 1 : 0
+    });
   }
-  
+
+  cancelDelete = () => {
+    this.setState({
+      hasDeleteSingleClicked: false,
+      hasDeleteAllClicked: false,
+      singleDeleteId: '',
+      noSelection: false
+    });
+  };
+
+  deleteAllSelected = async () => {
+    let newSelected = Object.assign({}, this.state.selected);
+    for (let project in newSelected) {
+      if (newSelected[project]) {
+        await deleteProject(project);
+        delete newSelected[project];
+      }
+    }
+    this.setState({ selected: {}, hasDeleteAllClicked: false });
+    this.getProjectData();
+  };
+
+  deleteSingleProject = ({ original }) => {
+    console.log(original);
+  };
+
+  handleDeleteAll = () => {
+    let values = Object.values(this.state.selected);
+    let isSelected;
+    !values.includes(true)
+      ? this.setState({ noSelection: true })
+      : this.setState({ hasDeleteAllClicked: true });
+  };
+
   defineColumns = () => {
     return [
       {
-        id: "checkbox",
-        accessor: "",
+        id: 'checkbox',
+        accessor: '',
         Cell: ({ original }) => {
           return (
             <input
@@ -100,7 +153,7 @@ class Projects extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50
-      }, 
+      },
       {
         Header: 'Description',
         accessor: 'description',
@@ -127,28 +180,56 @@ class Projects extends React.Component {
         Cell: original => {
           // console.log(original.row.checkbox.id);
           // console.log(this.state);
-          return (<p className="clickable wrapped">{original.row.loginNames.join(', ')}</p>)
-        } 
-        
-      }, {
+          return (
+            <p className="menu-clickable wrapped">
+              {original.row.loginNames.join(', ')}
+            </p>
+          );
+        }
+      },
+      {
         Header: '',
         minWidth: 50,
         minResizeWidth: 20,
         resizable: true,
-
+        Cell: () => <FaRegTrashAlt className="menu-clickable" />
       }
     ];
-  }
+  };
 
   render = () => {
-    // console.log('projects data', this.state.data);
+    console.log('projects data', this.state.data);
     return (
-      <div className="projects menu-display"> 
-        <ToolBar />
-        <Table data={this.state.data} columns={this.defineColumns()}/>
+      <div className="projects menu-display">
+        <ToolBar onDelete={this.handleDeleteAll} />
+        {this.state.error ? (
+          <div>Something went wrong!</div>
+        ) : (
+          <Table data={this.state.data} columns={this.defineColumns()} />
+        )}
+        {this.state.hasDeleteAllClicked && (
+          <AlertDelete
+            message={messages.deleteSelected}
+            onCancel={this.cancelDelete}
+            onDelete={this.deleteAllSelected}
+          />
+        )}
+        {this.state.hasDeleteSingleClicked && (
+          <AlertDelete
+            message={messages.deleteSingle}
+            onCancel={this.cancelDelete}
+            onDelete={this.deleteSingleProject}
+          />
+        )}
+        {this.state.noSelection && (
+          <AlertNoSelection
+            message={messages.noSelection}
+            onOK={this.cancelDelete}
+          />
+        )}
       </div>
     );
-  }
+  };
 }
 
 export default Projects;

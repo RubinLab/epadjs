@@ -110,12 +110,17 @@
     height: 100%
   }
   
-  .base-toolbar {
+  .basic-toolbar {
     display: flex;
     height: 5%;
     justify-content: flex-start;
   }
   
   .tool-icon {
-    margin-left: 1.2rem
+    margin-left: 1.2rem;
+    cursor: pointer
+  }
+
+  .menu-clickable  {
+    cursor: pointer
   }

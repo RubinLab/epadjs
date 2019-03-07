@@ -6,7 +6,7 @@ const managementHeader = ({selection, onClose}) => {
     <div className="mng-header">
       <div className="mng-header__title">{selection}</div>
       <div  className="mng-header__close"> 
-        <FaWindowClose onClick={onClose}/>    
+        <FaWindowClose className="menu-clickable" onClick={onClose}/>    
       </div> 
     </div>
   );

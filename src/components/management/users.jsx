@@ -2,6 +2,7 @@ import React from 'react';
 import Table from 'react-table';
 import './menuStyle.css';
 import { getUsers } from '../../services/userServices';
+import ToolBar from './basicToolBar'
 
 class Users extends React.Component {
 
@@ -95,7 +96,7 @@ class Users extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => (
-          <p className="clickable wrapped">{original.row.projects.join(', ')}</p>
+          <p className="menu-clickable wrapped">{original.row.projects.join(', ')}</p>
         )
       }, {
         Header: 'Admin',
@@ -110,7 +111,7 @@ class Users extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => (
-          <p className="clickable wrapped">{this.convertArrToStr(original.row.permissions)}</p>
+          <p className="menu-clickable wrapped">{this.convertArrToStr(original.row.permissions)}</p>
 
           )
 
@@ -134,6 +135,7 @@ class Users extends React.Component {
     // const col = 
     return (
       <div className="users menu-display"> 
+        <ToolBar />
         <Table data={this.state.data} columns={this.defineColumns()}/>
       </div>
     );
