@@ -1,12 +1,12 @@
 import React from 'react';
 import Table from 'react-table';
 import { FaRegTrashAlt } from 'react-icons/fa';
-import { Modal } from 'react-bootstrap';
 import './menuStyle.css';
 import { getProjects, deleteProject } from '../../services/projectServices';
 import ToolBar from './basicToolBar';
-import AlertDelete from './alertDeletionModal';
-import AlertNoSelection from './alertNoSelectionModal';
+import DeleteAlert from './alertDeletionModal';
+import NoSelectionAlert from './alertNoSelectionModal';
+import ProjectCreationForm from './projectCreationForm';
 
 const messages = {
   deleteSingle: 'Delete the project? This cannot be undone.',
@@ -23,7 +23,12 @@ class Projects extends React.Component {
     singleDeleteId: '',
     hasDeleteSingleClicked: false,
     hasDeleteAllClicked: false,
-    noSelection: false
+    noSelection: false,
+    hasAddClicked: false,
+    id: '',
+    name: '',
+    description: '',
+    type: ''
   };
 
   componentDidMount = () => {
@@ -110,6 +115,10 @@ class Projects extends React.Component {
 
   handleSingleDelete = id => {
     this.setState({ hasDeleteSingleClicked: true, singleDeleteId: id });
+  };
+
+  handleAddProject = () => {
+    this.setState({ hasAddClicked: true });
   };
 
   defineColumns = () => {
@@ -212,32 +221,36 @@ class Projects extends React.Component {
     // console.log('projects data', this.state.data);
     return (
       <div className="projects menu-display">
-        <ToolBar onDelete={this.handleDeleteAll} />
+        <ToolBar
+          onDelete={this.handleDeleteAll}
+          onAdd={this.handleAddProject}
+        />
         {this.state.error ? (
           <div>Something went wrong!</div>
         ) : (
           <Table data={this.state.data} columns={this.defineColumns()} />
         )}
         {this.state.hasDeleteAllClicked && (
-          <AlertDelete
+          <DeleteAlert
             message={messages.deleteSelected}
             onCancel={this.cancelDelete}
             onDelete={this.deleteAllSelected}
           />
         )}
         {this.state.hasDeleteSingleClicked && (
-          <AlertDelete
+          <DeleteAlert
             message={messages.deleteSingle}
             onCancel={this.cancelDelete}
             onDelete={this.deleteSingleProject}
           />
         )}
         {this.state.noSelection && (
-          <AlertNoSelection
+          <NoSelectionAlert
             message={messages.noSelection}
             onOK={this.cancelDelete}
           />
         )}
+        {this.state.hasAddClicked && <ProjectCreationForm />}
       </div>
     );
   };
