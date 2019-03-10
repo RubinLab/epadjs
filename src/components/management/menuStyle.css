@@ -129,7 +129,7 @@
   display: inline-block;
 }
 
-.add-project__modal-form {
+.add-project__modal--form {
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -141,18 +141,24 @@
   height: 70%;
 }
 
-.form-input {
+.add-project__modal--input {
   width: 100%;
-}
-
-label {
-  float: left;
 }
 
 select {
   margin-left: 3rem;
 }
 
-.form-label {
-  text-align: left;
+.add-project__modal--label {
+  margin-top: 1rem;
+  color: gray;
+}
+
+.form-exp,
+.modal-title {
+  color: gray;
+}
+
+.required {
+  margin-top: 1rem;
 }

@@ -1,14 +1,14 @@
-import React from "react";
-import { Link, NavLink } from "react-router-dom";
+import React from 'react';
+import { Link, NavLink } from 'react-router-dom';
 import { FaCogs, FaCaretDown } from 'react-icons/fa';
-import logo from "../images/logo.png";
+import logo from '../images/logo.png';
 
 const NavBar = ({ user, openGearMenu }) => {
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
         <Link className="navbar-brand-right nounderline pr-3 " to="#">
-          <img src={logo} alt={"logo"} width="25px" />
+          <img src={logo} alt={'logo'} width="25px" />
           ePAD
         </Link>
         <button
@@ -54,7 +54,7 @@ const NavBar = ({ user, openGearMenu }) => {
               <NavLink className="nav-link" to="/edit">
                 Edit
               </NavLink>
-            </li>{" "}
+            </li>{' '}
           </ul>
           <ul className="navbar-nav ml-auto">
             {!user && (
@@ -67,10 +67,14 @@ const NavBar = ({ user, openGearMenu }) => {
             {user && (
               <React.Fragment>
                 <li className="nav-item pull-right">
-                    <div className="nav-link" style={{cursor: "pointer"}} onClick={openGearMenu}>
-                      <FaCogs style={{fontSize: "1.25rem"}}/>
-                      <FaCaretDown style={{fontSize: "1rem"}}/>
-                    </div>
+                  <div
+                    className="nav-link"
+                    style={{ cursor: 'pointer' }}
+                    onClick={openGearMenu}
+                  >
+                    <FaCogs style={{ fontSize: '1.25rem' }} />
+                    <FaCaretDown style={{ fontSize: '1rem' }} />
+                  </div>
                 </li>
                 <li className="nav-item pull-right">
                   <NavLink className="nav-link" to="/profile">

@@ -14,6 +14,8 @@ const messages = {
   noSelection: 'Please select a project'
 };
 
+//TODO only owner can delete the project
+
 class Projects extends React.Component {
   state = {
     data: [],
@@ -28,7 +30,7 @@ class Projects extends React.Component {
     id: '',
     name: '',
     description: '',
-    type: ''
+    type: 'Private'
   };
 
   componentDidMount = () => {
@@ -78,12 +80,13 @@ class Projects extends React.Component {
     });
   }
 
-  cancelDelete = () => {
+  handleCancel = () => {
     this.setState({
       hasDeleteSingleClicked: false,
       hasDeleteAllClicked: false,
       singleDeleteId: '',
-      noSelection: false
+      noSelection: false,
+      hasAddClicked: false
     });
   };
 
@@ -119,6 +122,11 @@ class Projects extends React.Component {
 
   handleAddProject = () => {
     this.setState({ hasAddClicked: true });
+  };
+
+  handleFormInput = e => {
+    const { name, value } = e.target;
+    this.setState({ [name]: value });
   };
 
   defineColumns = () => {
@@ -219,8 +227,9 @@ class Projects extends React.Component {
 
   render = () => {
     // console.log('projects data', this.state.data);
+    console.log(this.state);
     return (
-      <div className="projects menu-display">
+      <div className="projects menu-display" id="projects">
         <ToolBar
           onDelete={this.handleDeleteAll}
           onAdd={this.handleAddProject}
@@ -233,24 +242,31 @@ class Projects extends React.Component {
         {this.state.hasDeleteAllClicked && (
           <DeleteAlert
             message={messages.deleteSelected}
-            onCancel={this.cancelDelete}
+            onCancel={this.handleCancel}
             onDelete={this.deleteAllSelected}
           />
         )}
         {this.state.hasDeleteSingleClicked && (
           <DeleteAlert
             message={messages.deleteSingle}
-            onCancel={this.cancelDelete}
+            onCancel={this.handleCancel}
             onDelete={this.deleteSingleProject}
           />
         )}
         {this.state.noSelection && (
           <NoSelectionAlert
             message={messages.noSelection}
-            onOK={this.cancelDelete}
+            onOK={this.handleCancel}
           />
         )}
-        {this.state.hasAddClicked && <ProjectCreationForm />}
+        {this.state.hasAddClicked && (
+          <ProjectCreationForm onType={this.handleFormInput} />
+        )}
+        {/* <Modal
+          modalIsOpen={this.state.hasAddClicked}
+          closeModal={this.handleCancel}
+          parent=".menu-display"
+        /> */}
       </div>
     );
   };

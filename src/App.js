@@ -14,7 +14,8 @@ import Logout from './components/logout';
 import ProtectedRoute from './components/common/protectedRoute';
 import Cornerstone from './components/cornerstone/cornerstone';
 import Management from './components/management/mainMenu';
-import ManagementModal from './components/common/customModal';
+// import Modal from './components/management/projectCreationForm';
+// import Modal from './components/common/rndBootModal';
 
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
@@ -84,6 +85,7 @@ class App extends Component {
                 <Redirect to="/not-found" />
               </Switch>
             </Sidebar>
+            {/* <Modal /> */}
           </div>
         )}
       </React.Fragment>
