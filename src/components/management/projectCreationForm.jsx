@@ -4,8 +4,6 @@ import './menuStyle.css';
 
 const projectCreationForm = ({ onCancel, onSubmit, onType }) => {
   return (
-    //TODO fix label tags to cover the form fields
-    //TODO style the form
     <Modal.Dialog dialogClassName="add-project__modal">
       <Modal.Header>
         <Modal.Title>New Project</Modal.Title>
@@ -15,7 +13,7 @@ const projectCreationForm = ({ onCancel, onSubmit, onType }) => {
           <h5 className="add-project__modal--label">Name*</h5>
           <input
             onMouseDown={e => e.stopPropagation()}
-            className="add-project__modal--input form-first-element"
+            className="add-project__modal--input"
             name="name"
             type="text"
             onChange={onType}

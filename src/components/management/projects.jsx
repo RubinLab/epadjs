@@ -2,7 +2,11 @@ import React from 'react';
 import Table from 'react-table';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import './menuStyle.css';
-import { getProjects, deleteProject } from '../../services/projectServices';
+import {
+  getProjects,
+  deleteProject,
+  saveProject
+} from '../../services/projectServices';
 import ToolBar from './basicToolBar';
 import DeleteAlert from './alertDeletionModal';
 import NoSelectionAlert from './alertNoSelectionModal';
@@ -18,6 +22,7 @@ const messages = {
 
 class Projects extends React.Component {
   state = {
+    user: '',
     data: [],
     selected: {},
     selectAll: 0,
@@ -30,11 +35,13 @@ class Projects extends React.Component {
     id: '',
     name: '',
     description: '',
-    type: 'Private'
+    type: 'Private',
+    defaultTemplate: ''
   };
 
   componentDidMount = () => {
     this.getProjectData();
+    this.setState({ user: sessionStorage.getItem('username') });
   };
 
   getProjectData = async () => {
@@ -48,6 +55,13 @@ class Projects extends React.Component {
     } catch (err) {
       this.setState({ error: true });
     }
+  };
+
+  saveNewProject = async () => {
+    // http://171.65.102.26:8080/epad/v2/projects/test2/users/ozgetest?role=Owner
+    const { name, description, defaultTemplate, id, user, type } = this.state;
+    await saveProject(name, description, defaultTemplate, id, user, type);
+    this.getProjectData();
   };
 
   toggleRow = async id => {
@@ -260,7 +274,10 @@ class Projects extends React.Component {
           />
         )}
         {this.state.hasAddClicked && (
-          <ProjectCreationForm onType={this.handleFormInput} />
+          <ProjectCreationForm
+            onType={this.handleFormInput}
+            onSubmit={this.saveNewProject}
+          />
         )}
         {/* <Modal
           modalIsOpen={this.state.hasAddClicked}
