@@ -20,13 +20,16 @@ const messages = {
 
 //TODO only owner can delete the project
 //TODO projects - post default template nedir
+//TODO http response code should be more specific for post
+//request in case of duplicate id
+
 class Projects extends React.Component {
   state = {
     user: '',
     data: [],
     selected: {},
     selectAll: 0,
-    error: false,
+    errorMessage: null,
     singleDeleteId: '',
     hasDeleteSingleClicked: false,
     hasDeleteAllClicked: false,
@@ -53,14 +56,18 @@ class Projects extends React.Component {
       } = await getProjects();
       this.setState({ data });
     } catch (err) {
-      this.setState({ error: true });
+      // this.setState({ error: true });
     }
   };
 
   saveNewProject = async () => {
-    // http://171.65.102.26:8080/epad/v2/projects/test2/users/ozgetest?role=Owner
     const { name, description, defaultTemplate, id, user, type } = this.state;
-    await saveProject(name, description, defaultTemplate, id, user, type);
+    try {
+      await saveProject(name, description, defaultTemplate, id, user, type);
+    } catch (error) {
+      console.log('error', error.response);
+      this.setState({ errorMessage: error.response.data.message });
+    }
     this.getProjectData();
   };
 
@@ -241,7 +248,7 @@ class Projects extends React.Component {
 
   render = () => {
     // console.log('projects data', this.state.data);
-    console.log(this.state);
+    // console.log(this.state);
     return (
       <div className="projects menu-display" id="projects">
         <ToolBar
@@ -277,6 +284,7 @@ class Projects extends React.Component {
           <ProjectCreationForm
             onType={this.handleFormInput}
             onSubmit={this.saveNewProject}
+            error={this.state.errorMessage}
           />
         )}
         {/* <Modal

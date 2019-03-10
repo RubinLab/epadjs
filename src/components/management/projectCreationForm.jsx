@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal } from 'react-bootstrap';
 import './menuStyle.css';
 
-const projectCreationForm = ({ onCancel, onSubmit, onType }) => {
+const projectCreationForm = ({ onCancel, onSubmit, onType, error }) => {
   return (
     <Modal.Dialog dialogClassName="add-project__modal">
       <Modal.Header>
@@ -48,6 +48,7 @@ const projectCreationForm = ({ onCancel, onSubmit, onType }) => {
             <option value="Public">Public</option>
           </select>
           <h5 className="form-exp required">*Required</h5>
+          {error && <div className="err-message">{error}</div>}
         </form>
       </Modal.Body>
       <Modal.Footer>

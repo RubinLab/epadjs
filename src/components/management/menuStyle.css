@@ -162,3 +162,10 @@ select {
 .required {
   margin-top: 1rem;
 }
+
+.err-message {
+  background: rgb(199, 3, 3);
+  color: white;
+  /* font-weight: bold; */
+  padding: 0.5rem;
+}
