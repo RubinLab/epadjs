@@ -17,8 +17,7 @@ export function saveProject(
   user,
   type
 ) {
-  //171.65.102.26:8080/epad/v2/projects/test4?username=ozgetest&projectName=test4&type=private
-  http: return http.post(
+  return http.post(
     apiUrl +
       '/projects/' +
       id +

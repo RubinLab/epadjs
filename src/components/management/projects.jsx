@@ -19,7 +19,7 @@ const messages = {
 };
 
 //TODO only owner can delete the project
-
+//TODO projects - post default template nedir
 class Projects extends React.Component {
   state = {
     user: '',
