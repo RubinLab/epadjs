@@ -1,6 +1,6 @@
 import React from 'react';
 import Table from 'react-table';
-import { FaRegTrashAlt } from 'react-icons/fa';
+import { FaRegTrashAlt, FaEdit } from 'react-icons/fa';
 import './menuStyle.css';
 import {
   getProjects,
@@ -62,13 +62,37 @@ class Projects extends React.Component {
 
   saveNewProject = async () => {
     const { name, description, defaultTemplate, id, user, type } = this.state;
-    try {
-      await saveProject(name, description, defaultTemplate, id, user, type);
-    } catch (error) {
-      console.log('error', error.response);
-      this.setState({ errorMessage: error.response.data.message });
-    }
-    this.getProjectData();
+    const postData = saveProject(
+      name,
+      description,
+      defaultTemplate,
+      id,
+      user,
+      type
+    );
+    postData
+      .then(res => {
+        if (res.status === 200) {
+          this.setState({
+            hasAddClicked: false,
+            name: '',
+            description: '',
+            id: '',
+            type: 'Private'
+          });
+          this.getProjectData();
+        }
+      })
+      .catch(error => {
+        this.setState({ errorMessage: error.response.data.message });
+      });
+    // try {
+    //   await saveProject(name, description, defaultTemplate, id, user, type);
+    // } catch (error) {
+    //   console.log('error', error.response);
+    //   this.setState({ errorMessage: error.response.data.message });
+    // }
+    // this.getProjectData();
   };
 
   toggleRow = async id => {
@@ -181,6 +205,7 @@ class Projects extends React.Component {
           );
         },
         sortable: false,
+        minResizeWidth: 20,
         width: 45
       },
       {
@@ -196,7 +221,7 @@ class Projects extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
+        width: 45
       },
       {
         Header: 'Description',
@@ -233,7 +258,19 @@ class Projects extends React.Component {
       },
       {
         Header: '',
-        minWidth: 50,
+        width: 45,
+        minResizeWidth: 20,
+        resizable: true,
+        Cell: original => (
+          <FaEdit
+            className="menu-clickable"
+            // onClick={() => this.handleSingleDelete(original.row.checkbox.id)}
+          />
+        )
+      },
+      {
+        Header: '',
+        width: 45,
         minResizeWidth: 20,
         resizable: true,
         Cell: original => (
@@ -285,13 +322,9 @@ class Projects extends React.Component {
             onType={this.handleFormInput}
             onSubmit={this.saveNewProject}
             error={this.state.errorMessage}
+            onCancel={this.handleCancel}
           />
         )}
-        {/* <Modal
-          modalIsOpen={this.state.hasAddClicked}
-          closeModal={this.handleCancel}
-          parent=".menu-display"
-        /> */}
       </div>
     );
   };
