@@ -25,8 +25,24 @@ export function saveProject(
       user +
       '&projectName=' +
       projectName +
+      '&projectDescription=' +
+      projectDescription +
       '&type=' +
       type,
-    { projectName, projectDescription, defaultTemplate }
+    { projectDescription, defaultTemplate }
+  );
+}
+
+export function updateProject(id, projectName, projectDescription, type) {
+  return http.put(
+    apiUrl +
+      '/projects/' +
+      id +
+      '?projectName=' +
+      projectName +
+      '&description=' +
+      projectDescription +
+      '&type=' +
+      type
   );
 }

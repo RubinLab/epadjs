@@ -166,6 +166,9 @@ select {
 .err-message {
   background: rgb(199, 3, 3);
   color: white;
-  /* font-weight: bold; */
   padding: 0.5rem;
+}
+
+.project-edit__error {
+  margin-top: 1rem;
 }

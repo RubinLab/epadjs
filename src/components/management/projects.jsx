@@ -5,12 +5,14 @@ import './menuStyle.css';
 import {
   getProjects,
   deleteProject,
-  saveProject
+  saveProject,
+  updateProject
 } from '../../services/projectServices';
 import ToolBar from './basicToolBar';
 import DeleteAlert from './alertDeletionModal';
 import NoSelectionAlert from './alertNoSelectionModal';
 import ProjectCreationForm from './projectCreationForm';
+import ProjectEditingForm from './projectEditingForm';
 
 const messages = {
   deleteSingle: 'Delete the project? This cannot be undone.',
@@ -18,10 +20,14 @@ const messages = {
   noSelection: 'Please select a project'
 };
 
-//TODO only owner can delete the project
 //TODO projects - post default template nedir
 //TODO http response code should be more specific for post
 //request in case of duplicate id
+//TODO check required fields
+//TODO better error message for duplicate project name
+//TODO update only if owner
+//TODO query string gec post ve put icin / emelle konus
+//TODO add a max width for edit/create project popups for the error messages
 
 class Projects extends React.Component {
   state = {
@@ -35,6 +41,7 @@ class Projects extends React.Component {
     hasDeleteAllClicked: false,
     noSelection: false,
     hasAddClicked: false,
+    hasEditClicked: false,
     id: '',
     name: '',
     description: '',
@@ -78,7 +85,8 @@ class Projects extends React.Component {
             name: '',
             description: '',
             id: '',
-            type: 'Private'
+            type: 'Private',
+            errorMessage: null
           });
           this.getProjectData();
         }
@@ -86,13 +94,30 @@ class Projects extends React.Component {
       .catch(error => {
         this.setState({ errorMessage: error.response.data.message });
       });
-    // try {
-    //   await saveProject(name, description, defaultTemplate, id, user, type);
-    // } catch (error) {
-    //   console.log('error', error.response);
-    //   this.setState({ errorMessage: error.response.data.message });
-    // }
-    // this.getProjectData();
+  };
+
+  editProject = async () => {
+    const { name, description, defaultTemplate, id, type } = this.state;
+    console.log('name', name, 'desc', description, type);
+    const editData = updateProject(id, name, description, type);
+
+    editData
+      .then(res => {
+        if (res.status === 200) {
+          this.setState({
+            hasEditClicked: false,
+            name: '',
+            description: '',
+            id: '',
+            type: 'Private',
+            errorMessage: null
+          });
+          this.getProjectData();
+        }
+      })
+      .catch(error => {
+        this.setState({ errorMessage: error.response.data.message });
+      });
   };
 
   toggleRow = async id => {
@@ -131,16 +156,20 @@ class Projects extends React.Component {
       hasDeleteAllClicked: false,
       singleDeleteId: '',
       noSelection: false,
-      hasAddClicked: false
+      hasAddClicked: false,
+      hasEditClicked: false,
+      errorMessage: null
     });
   };
 
   deleteAllSelected = async () => {
     let newSelected = Object.assign({}, this.state.selected);
     for (let project in newSelected) {
+      //TODO catch error set errorMessage and getproject data -- use promise here
       if (newSelected[project]) {
         await deleteProject(project);
         delete newSelected[project];
+        this.getProjectData();
       }
     }
     this.setState({ selected: {}, hasDeleteAllClicked: false });
@@ -247,8 +276,6 @@ class Projects extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
-          // console.log(original.row.checkbox.id);
-          // console.log(this.state);
           return (
             <p className="menu-clickable wrapped">
               {original.row.loginNames.join(', ')}
@@ -264,7 +291,16 @@ class Projects extends React.Component {
         Cell: original => (
           <FaEdit
             className="menu-clickable"
-            // onClick={() => this.handleSingleDelete(original.row.checkbox.id)}
+            onClick={() => {
+              // console.log(original);
+              this.setState({
+                hasEditClicked: true,
+                id: original.row.checkbox.id,
+                name: original.row.checkbox.name,
+                description: original.row.checkbox.description,
+                type: original.row.checkbox.type
+              });
+            }}
           />
         )
       },
@@ -285,7 +321,7 @@ class Projects extends React.Component {
 
   render = () => {
     // console.log('projects data', this.state.data);
-    // console.log(this.state);
+    console.log(this.state);
     return (
       <div className="projects menu-display" id="projects">
         <ToolBar
@@ -321,6 +357,14 @@ class Projects extends React.Component {
           <ProjectCreationForm
             onType={this.handleFormInput}
             onSubmit={this.saveNewProject}
+            error={this.state.errorMessage}
+            onCancel={this.handleCancel}
+          />
+        )}
+        {this.state.hasEditClicked && (
+          <ProjectEditingForm
+            onType={this.handleFormInput}
+            onSubmit={this.editProject}
             error={this.state.errorMessage}
             onCancel={this.handleCancel}
           />
