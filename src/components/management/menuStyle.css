@@ -81,7 +81,8 @@
 .mng-header__title {
   order: 1;
   flex: 1 100%;
-  /* width: 90% */
+  font-size: 1.1rem;
+  width: 98%;
 }
 
 .mng-header__close {
@@ -91,7 +92,9 @@
     text-align: center */
   /* width: 5% */
   order: 2;
-  width: 10%;
+  width: 2%;
+  font-size: 1.1rem;
+  align-self: right;
 }
 
 .react-draggable {
@@ -127,6 +130,8 @@
 .add-project__modal {
   height: 100%;
   display: inline-block;
+  max-width: 30%;
+  min-width: 20%;
 }
 
 .add-project__modal--form {
@@ -159,6 +164,10 @@ select {
   color: gray;
 }
 
+.alert-delete__message {
+  color: gray;
+  font-size: 1.2rem;
+}
 .required {
   margin-top: 1rem;
 }
@@ -171,4 +180,20 @@ select {
 
 .project-edit__error {
   margin-top: 1rem;
+}
+
+::-webkit-input-placeholder {
+  color: rgb(213, 216, 220);
+}
+
+.alert-delete__modal {
+  top: 30%;
+}
+
+.add-project__modal.modal-dialog {
+  min-width: 40%;
+  max-width: 40%;
+  position: relative;
+  margin: auto;
+  /* background: red; */
 }

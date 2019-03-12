@@ -29,7 +29,6 @@ class CustomModal extends React.Component {
       <div>
         <div className="modal-overlay-div" />
         <div className="modal-content-div">
-          <input type="text" />
           <ResizeAndDrag>
             <div className="modal-dialog-div" onClick={this.onDialogClick}>
               {this.props.children}

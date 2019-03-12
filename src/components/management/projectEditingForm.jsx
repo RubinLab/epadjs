@@ -2,7 +2,20 @@ import React from 'react';
 import { Modal } from 'react-bootstrap';
 import './menuStyle.css';
 
-const projectEditingForm = ({ onCancel, onSubmit, onType, error }) => {
+// const style = {
+//   maxWidth: '40%',
+//   position: 'relative',
+//   margin: 'auto'
+// };
+
+const projectEditingForm = ({
+  onCancel,
+  onSubmit,
+  onType,
+  error,
+  name,
+  desc
+}) => {
   return (
     <Modal.Dialog dialogClassName="add-project__modal">
       <Modal.Header>
@@ -18,6 +31,7 @@ const projectEditingForm = ({ onCancel, onSubmit, onType, error }) => {
             type="text"
             onChange={onType}
             id="form-first-element"
+            placeholder={name}
           />
           <h5 className="add-project__modal--label">Description</h5>
           <textarea
@@ -25,6 +39,7 @@ const projectEditingForm = ({ onCancel, onSubmit, onType, error }) => {
             className="add-project__modal--input"
             name="description"
             onChange={onType}
+            placeholder={desc}
           />
           <h5 className="add-project__modal--label">Type</h5>
           <select

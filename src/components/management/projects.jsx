@@ -6,8 +6,10 @@ import {
   getProjects,
   deleteProject,
   saveProject,
-  updateProject
+  updateProject,
+  getProjectUsers
 } from '../../services/projectServices';
+import { getUsers } from '../../services/userServices';
 import ToolBar from './basicToolBar';
 import DeleteAlert from './alertDeletionModal';
 import NoSelectionAlert from './alertNoSelectionModal';
@@ -21,13 +23,8 @@ const messages = {
 };
 
 //TODO projects - post default template nedir
-//TODO http response code should be more specific for post
-//request in case of duplicate id
-//TODO check required fields
-//TODO better error message for duplicate project name
-//TODO update only if owner
-//TODO query string gec post ve put icin / emelle konus
 //TODO add a max width for edit/create project popups for the error messages
+//TODO no selection stateten cikarip renderda calculate et
 
 class Projects extends React.Component {
   state = {
@@ -46,12 +43,49 @@ class Projects extends React.Component {
     name: '',
     description: '',
     type: 'Private',
-    defaultTemplate: ''
+    defaultTemplate: '',
+    // users: [],
+    userRoles: []
   };
 
   componentDidMount = () => {
     this.getProjectData();
     this.setState({ user: sessionStorage.getItem('username') });
+  };
+
+  handleClickUSerRoles = async id => {
+    const userRoles = [];
+    try {
+      const {
+        data: {
+          ResultSet: { Result: users }
+        }
+      } = await getUsers();
+
+      const {
+        data: {
+          ResultSet: { Result: roles }
+        }
+      } = await getProjectUsers(id);
+      // console.log('roles here', roles);
+      // console.log('users here', users);
+      for (let i = 0; i < users.length; i++) {
+        for (let k = 0; k < roles.length; k++) {
+          if (users[i].username === roles[k].username) {
+            userRoles.push({ name: users[i].username, role: roles[k].role });
+            break;
+          }
+        }
+        if (userRoles.length !== i + 1) {
+          userRoles.push({ name: users[i].username, role: 'None' });
+        }
+      }
+      this.setState({ userRoles });
+
+      // this.setState({ users, roles });
+    } catch (err) {
+      // this.setState({ error: true });
+    }
   };
 
   getProjectData = async () => {
@@ -67,33 +101,43 @@ class Projects extends React.Component {
     }
   };
 
+  clearProjectInfo = () => {
+    this.setState({
+      name: '',
+      description: '',
+      id: '',
+      type: 'Private'
+    });
+  };
+
   saveNewProject = async () => {
     const { name, description, defaultTemplate, id, user, type } = this.state;
-    const postData = saveProject(
-      name,
-      description,
-      defaultTemplate,
-      id,
-      user,
-      type
-    );
-    postData
-      .then(res => {
-        if (res.status === 200) {
-          this.setState({
-            hasAddClicked: false,
-            name: '',
-            description: '',
-            id: '',
-            type: 'Private',
-            errorMessage: null
-          });
-          this.getProjectData();
-        }
-      })
-      .catch(error => {
-        this.setState({ errorMessage: error.response.data.message });
-      });
+    if (!name || !id) {
+      this.setState({ errorMessage: 'Please fill the required fields' });
+    } else {
+      const postData = saveProject(
+        name,
+        description,
+        defaultTemplate,
+        id,
+        user,
+        type
+      );
+      postData
+        .then(res => {
+          if (res.status === 200) {
+            this.setState({
+              hasAddClicked: false,
+              errorMessage: null
+            });
+            this.clearProjectInfo();
+            this.getProjectData();
+          }
+        })
+        .catch(error => {
+          this.setState({ errorMessage: error.response.data.message });
+        });
+    }
   };
 
   editProject = async () => {
@@ -106,17 +150,17 @@ class Projects extends React.Component {
         if (res.status === 200) {
           this.setState({
             hasEditClicked: false,
-            name: '',
-            description: '',
-            id: '',
-            type: 'Private',
             errorMessage: null
           });
+          this.clearProjectInfo();
           this.getProjectData();
         }
       })
       .catch(error => {
-        this.setState({ errorMessage: error.response.data.message });
+        this.setState({
+          errorMessage: error.response.data.message
+        });
+        this.clearProjectInfo();
       });
   };
 
@@ -165,21 +209,29 @@ class Projects extends React.Component {
   deleteAllSelected = async () => {
     let newSelected = Object.assign({}, this.state.selected);
     for (let project in newSelected) {
-      //TODO catch error set errorMessage and getproject data -- use promise here
       if (newSelected[project]) {
-        await deleteProject(project);
-        delete newSelected[project];
-        this.getProjectData();
+        deleteProject(project)
+          .then(() => {
+            delete newSelected[project];
+            this.setState({ selected: {}, hasDeleteAllClicked: false });
+            this.getProjectData();
+          })
+          .catch(err => {
+            this.setState({ errorMessage: err.response.data.message });
+          });
       }
     }
-    this.setState({ selected: {}, hasDeleteAllClicked: false });
-    this.getProjectData();
   };
 
-  deleteSingleProject = async project => {
-    await deleteProject(this.state.singleDeleteId);
-    this.setState({ singleDeleteId: '', hasDeleteSingleClicked: false });
-    this.getProjectData();
+  deleteSingleProject = async () => {
+    deleteProject(this.state.singleDeleteId)
+      .then(() => {
+        this.setState({ singleDeleteId: '', hasDeleteSingleClicked: false });
+        this.getProjectData();
+      })
+      .catch(err => {
+        this.setState({ errorMessage: err.response.data.message });
+      });
   };
 
   handleDeleteAll = () => {
@@ -277,7 +329,12 @@ class Projects extends React.Component {
         minWidth: 50,
         Cell: original => {
           return (
-            <p className="menu-clickable wrapped">
+            <p
+              className="menu-clickable wrapped"
+              onClick={() => {
+                this.handleClickUSerRoles(original.row.checkbox.id);
+              }}
+            >
               {original.row.loginNames.join(', ')}
             </p>
           );
@@ -320,8 +377,7 @@ class Projects extends React.Component {
   };
 
   render = () => {
-    // console.log('projects data', this.state.data);
-    console.log(this.state);
+    // console.log(this.state);
     return (
       <div className="projects menu-display" id="projects">
         <ToolBar
@@ -338,6 +394,7 @@ class Projects extends React.Component {
             message={messages.deleteSelected}
             onCancel={this.handleCancel}
             onDelete={this.deleteAllSelected}
+            error={this.state.errorMessage}
           />
         )}
         {this.state.hasDeleteSingleClicked && (
@@ -345,6 +402,7 @@ class Projects extends React.Component {
             message={messages.deleteSingle}
             onCancel={this.handleCancel}
             onDelete={this.deleteSingleProject}
+            error={this.state.errorMessage}
           />
         )}
         {this.state.noSelection && (
@@ -367,6 +425,8 @@ class Projects extends React.Component {
             onSubmit={this.editProject}
             error={this.state.errorMessage}
             onCancel={this.handleCancel}
+            name={this.state.name}
+            desc={this.state.description}
           />
         )}
       </div>

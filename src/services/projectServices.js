@@ -46,3 +46,7 @@ export function updateProject(id, projectName, projectDescription, type) {
       type
   );
 }
+
+export function getProjectUsers(id) {
+  return http.get(apiUrl + '/projects/' + id + '/users/');
+}
