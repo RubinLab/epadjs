@@ -1,6 +1,7 @@
 import React from 'react';
 import Table from 'react-table';
 import { FaRegTrashAlt, FaEdit, FaRegEye } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 import './menuStyle.css';
 import {
   getProjects,
@@ -17,6 +18,8 @@ import NoSelectionAlert from './alertNoSelectionModal';
 import ProjectCreationForm from './projectCreationForm';
 import ProjectEditingForm from './projectEditingForm';
 import UserRoleEditingForm from './userRoleEditingForm';
+import ProtectedRoute from '../common/protectedRoute';
+import SearchView from '../searchView/searchView';
 
 const messages = {
   deleteSingle: 'Delete the project? This cannot be undone.',
@@ -262,7 +265,6 @@ class Projects extends React.Component {
     const newObj = { [name]: value };
     const oldState = Object.assign({}, this.state.newRoles);
     const newRoles = Object.assign(oldState, newObj);
-    console.log('new roles', newRoles);
     this.setState({ newRoles });
   };
 
@@ -333,7 +335,9 @@ class Projects extends React.Component {
         minResizeWidth: 20,
         width: 45,
         Cell: original => (
-          <FaRegEye className="menu-clickable" onClick={() => console.log()} />
+          <Link to={'/search/' + original.row.checkbox.id}>
+            <FaRegEye className="menu-clickable" onClick={this.props.onClose} />
+          </Link>
         )
       },
       {
@@ -414,6 +418,7 @@ class Projects extends React.Component {
 
   render = () => {
     // console.log(this.state);
+    console.log('props here', this.props);
     return (
       <div className="projects menu-display" id="projects">
         <ToolBar
@@ -473,6 +478,9 @@ class Projects extends React.Component {
             onType={this.handleRoleEditing}
             onSubmit={this.editRoles}
           />
+        )}
+        {this.state.hasOpenClicked && (
+          <ProtectedRoute from="/" exact to="/search" component={SearchView} />
         )}
       </div>
     );

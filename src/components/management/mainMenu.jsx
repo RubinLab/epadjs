@@ -5,6 +5,7 @@ import Users from './users';
 import Projects from './projects';
 import './menuStyle.css';
 import Header from '../common/managementHeader';
+import { runInThisContext } from 'vm';
 
 class MainMenu extends React.Component {
   state = {
@@ -31,9 +32,19 @@ class MainMenu extends React.Component {
   selectDisplay = () => {
     switch (this.state.selection) {
       case 'Users':
-        return <Users selection={this.state.selection} />;
+        return (
+          <Users
+            selection={this.state.selection}
+            onClose={this.handleCloseModal}
+          />
+        );
       case 'Projects':
-        return <Projects selection={this.state.selection} />;
+        return (
+          <Projects
+            selection={this.state.selection}
+            onClose={this.handleCloseModal}
+          />
+        );
       default:
         return <div />;
     }
