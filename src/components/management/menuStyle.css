@@ -198,6 +198,14 @@ select {
   /* background: red; */
 }
 
+.edit-userRole__modal.modal-dialog {
+  max-width: 90%;
+  max-height: 90%;
+  display: inline-block;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 .edit-userRole.modal-body {
   /* height: 80%;
   overflow-y: auto;
@@ -207,4 +215,42 @@ select {
 }
 .user-table__header {
   padding: 0.5rem;
+}
+
+.edit-userRole__modal--footer.modal-footer {
+  display: flex;
+  /* justify-content: right; */
+  flex-direction: column;
+}
+
+.edit-userRole__table--row {
+  padding: 1rem;
+  /* background: red; */
+}
+
+/* .edit-userRole__table--col {
+  text-align: left;
+} */
+.edit-userRole__modal--button {
+  margin-left: 0.5rem;
+}
+
+.modal {
+  max-width: 90%;
+  max-height: 90%;
+  margin: auto;
+}
+
+.userRole-edit__error {
+  margin-bottom: 0.5rem;
+  /* width: 100%; */
+  align-self: flex-start;
+}
+
+.edit-userRole__modal--buttons {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  /* flex-flow: row wrap; */
+  /* background: red; */
 }

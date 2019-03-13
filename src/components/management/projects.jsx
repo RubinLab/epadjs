@@ -268,18 +268,20 @@ class Projects extends React.Component {
 
   editRoles = async () => {
     const { id } = this.state;
+    const editList = [];
     const roles = Object.assign({}, this.state.newRoles);
-    try {
-      for (let prop in roles) {
-        console.log('in try', prop, roles, roles[prop]);
-        await editUserRole(id, prop, roles[prop]);
-        delete roles[prop];
-      }
-      this.setState({ newRoles: roles, hasUserRolesClicked: false });
-      this.getProjectData();
-    } catch (error) {
-      this.setState({ errorMessage: error.response.data.message });
+    for (let prop in roles) {
+      editList.push(editUserRole(id, prop, roles[prop]));
+      delete roles[prop];
     }
+    Promise.all(editList)
+      .then(() => {
+        this.setState({ newRoles: roles, hasUserRolesClicked: false });
+        this.getProjectData();
+      })
+      .catch(error => {
+        this.setState({ errorMessage: error.response.data.message });
+      });
   };
 
   defineColumns = () => {

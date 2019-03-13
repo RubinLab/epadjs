@@ -3,8 +3,8 @@ import React from 'react';
 const tableRow = ({ name, role, onSelect }) => {
   // console.log(typeofrole);
   return (
-    <tr>
-      <th>{name}</th>
+    <tr className="edit-userRole__table--row">
+      <th className="edit-userRole__table--col">{name}</th>
       <td>
         <input
           type="radio"

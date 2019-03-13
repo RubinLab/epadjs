@@ -12,16 +12,26 @@ const userRoleEditingForm = ({ onCancel, onSubmit, onType, error, users }) => {
       <Modal.Body className="edit-userRole">
         <UserTable onSelect={onType} users={users} />
       </Modal.Body>
-      <Modal.Footer>
+      <Modal.Footer className="edit-userRole__modal--footer">
         {error && (
-          <div className="err-message project-edit__error">{error}</div>
+          <div className="err-message userRole-edit__error">{error}</div>
         )}
-        <button variant="primary" onClick={onSubmit}>
-          Submit
-        </button>
-        <button variant="secondary" onClick={onCancel}>
-          Cancel
-        </button>
+        <div className="edit-userRole__modal--buttons">
+          <button
+            className="edit-userRole__modal--button"
+            variant="primary"
+            onClick={onSubmit}
+          >
+            Submit
+          </button>
+          <button
+            className="edit-userRole__modal--button"
+            variant="secondary"
+            onClick={onCancel}
+          >
+            Cancel
+          </button>
+        </div>
       </Modal.Footer>
     </Modal.Dialog>
   );

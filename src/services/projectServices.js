@@ -52,7 +52,7 @@ export function getProjectUsers(id) {
 }
 
 export function editUserRole(id, user, role) {
-  role
+  return role
     ? http.put(apiUrl + '/projects/' + id + '/users/' + user + '?role=' + role)
     : http.delete(apiUrl + '/projects/' + id + '/users/' + user);
 }
