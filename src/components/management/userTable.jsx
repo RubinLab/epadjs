@@ -1,0 +1,27 @@
+import React from 'react';
+import Row from './tableRow';
+
+const userTable = ({ onSelect, users }) => {
+  const rows = [];
+  users.forEach(el => {
+    rows.push(
+      <Row name={el.name} key={el.name} role={el.role} onSelect={onSelect} />
+    );
+  });
+  return (
+    <table>
+      <thead>
+        <tr>
+          <th className="user-table__header">User</th>
+          <th className="user-table__header">Owner</th>
+          <th className="user-table__header">Member</th>
+          <th className="user-table__header">Collaborator</th>
+          <th className="user-table__header">None</th>
+        </tr>
+      </thead>
+      <tbody>{rows}</tbody>
+    </table>
+  );
+};
+
+export default userTable;

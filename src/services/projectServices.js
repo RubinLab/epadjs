@@ -50,3 +50,9 @@ export function updateProject(id, projectName, projectDescription, type) {
 export function getProjectUsers(id) {
   return http.get(apiUrl + '/projects/' + id + '/users/');
 }
+
+export function editUserRole(id, user, role) {
+  role
+    ? http.put(apiUrl + '/projects/' + id + '/users/' + user + '?role=' + role)
+    : http.delete(apiUrl + '/projects/' + id + '/users/' + user);
+}

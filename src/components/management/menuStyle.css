@@ -197,3 +197,14 @@ select {
   margin: auto;
   /* background: red; */
 }
+
+.edit-userRole.modal-body {
+  /* height: 80%;
+  overflow-y: auto;
+  width: 600px; */
+  color: gray;
+  width: 100%;
+}
+.user-table__header {
+  padding: 0.5rem;
+}

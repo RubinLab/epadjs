@@ -1,13 +1,14 @@
 import React from 'react';
 import Table from 'react-table';
-import { FaRegTrashAlt, FaEdit } from 'react-icons/fa';
+import { FaRegTrashAlt, FaEdit, FaRegEye } from 'react-icons/fa';
 import './menuStyle.css';
 import {
   getProjects,
   deleteProject,
   saveProject,
   updateProject,
-  getProjectUsers
+  getProjectUsers,
+  editUserRole
 } from '../../services/projectServices';
 import { getUsers } from '../../services/userServices';
 import ToolBar from './basicToolBar';
@@ -15,6 +16,7 @@ import DeleteAlert from './alertDeletionModal';
 import NoSelectionAlert from './alertNoSelectionModal';
 import ProjectCreationForm from './projectCreationForm';
 import ProjectEditingForm from './projectEditingForm';
+import UserRoleEditingForm from './userRoleEditingForm';
 
 const messages = {
   deleteSingle: 'Delete the project? This cannot be undone.',
@@ -22,8 +24,9 @@ const messages = {
   noSelection: 'Please select a project'
 };
 
+//NICE TO HAVE
 //TODO projects - post default template nedir
-//TODO add a max width for edit/create project popups for the error messages
+//TODO show one error message only
 //TODO no selection stateten cikarip renderda calculate et
 
 class Projects extends React.Component {
@@ -39,13 +42,14 @@ class Projects extends React.Component {
     noSelection: false,
     hasAddClicked: false,
     hasEditClicked: false,
+    hasUserRolesClicked: false,
     id: '',
     name: '',
     description: '',
     type: 'Private',
     defaultTemplate: '',
-    // users: [],
-    userRoles: []
+    userRoles: [],
+    newRoles: {}
   };
 
   componentDidMount = () => {
@@ -67,8 +71,6 @@ class Projects extends React.Component {
           ResultSet: { Result: roles }
         }
       } = await getProjectUsers(id);
-      // console.log('roles here', roles);
-      // console.log('users here', users);
       for (let i = 0; i < users.length; i++) {
         for (let k = 0; k < roles.length; k++) {
           if (users[i].username === roles[k].username) {
@@ -81,8 +83,6 @@ class Projects extends React.Component {
         }
       }
       this.setState({ userRoles });
-
-      // this.setState({ users, roles });
     } catch (err) {
       // this.setState({ error: true });
     }
@@ -197,11 +197,13 @@ class Projects extends React.Component {
   handleCancel = () => {
     this.setState({
       hasDeleteSingleClicked: false,
+      id: '',
       hasDeleteAllClicked: false,
       singleDeleteId: '',
       noSelection: false,
       hasAddClicked: false,
       hasEditClicked: false,
+      hasUserRolesClicked: false,
       errorMessage: null
     });
   };
@@ -255,6 +257,31 @@ class Projects extends React.Component {
     this.setState({ [name]: value });
   };
 
+  handleRoleEditing = e => {
+    const { name, value } = e.target;
+    const newObj = { [name]: value };
+    const oldState = Object.assign({}, this.state.newRoles);
+    const newRoles = Object.assign(oldState, newObj);
+    console.log('new roles', newRoles);
+    this.setState({ newRoles });
+  };
+
+  editRoles = async () => {
+    const { id } = this.state;
+    const roles = Object.assign({}, this.state.newRoles);
+    try {
+      for (let prop in roles) {
+        console.log('in try', prop, roles, roles[prop]);
+        await editUserRole(id, prop, roles[prop]);
+        delete roles[prop];
+      }
+      this.setState({ newRoles: roles, hasUserRolesClicked: false });
+      this.getProjectData();
+    } catch (error) {
+      this.setState({ errorMessage: error.response.data.message });
+    }
+  };
+
   defineColumns = () => {
     return [
       {
@@ -302,7 +329,10 @@ class Projects extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        width: 45
+        width: 45,
+        Cell: original => (
+          <FaRegEye className="menu-clickable" onClick={() => console.log()} />
+        )
       },
       {
         Header: 'Description',
@@ -331,8 +361,12 @@ class Projects extends React.Component {
           return (
             <p
               className="menu-clickable wrapped"
-              onClick={() => {
-                this.handleClickUSerRoles(original.row.checkbox.id);
+              onClick={async () => {
+                await this.handleClickUSerRoles(original.row.checkbox.id);
+                this.setState({
+                  hasUserRolesClicked: true,
+                  id: original.row.checkbox.id
+                });
               }}
             >
               {original.row.loginNames.join(', ')}
@@ -427,6 +461,15 @@ class Projects extends React.Component {
             onCancel={this.handleCancel}
             name={this.state.name}
             desc={this.state.description}
+          />
+        )}
+        {this.state.hasUserRolesClicked && (
+          <UserRoleEditingForm
+            users={this.state.userRoles}
+            onCancel={this.handleCancel}
+            error={this.state.errorMessage}
+            onType={this.handleRoleEditing}
+            onSubmit={this.editRoles}
           />
         )}
       </div>
