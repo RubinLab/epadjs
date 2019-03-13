@@ -46,6 +46,8 @@
   resize: both;
   display: inline-flex;
   flex-direction: column;
+  background: rgb(58, 63, 68);
+  color: white;
 }
 
 .react-draggable {
@@ -61,21 +63,17 @@
 .mng-menu {
   z-index: 5;
   width: 15%;
-  /* display: none; */
   position: absolute;
   background-color: rgb(0, 0, 0);
   color: white;
   left: 85%;
-  /* min-width: 160px; */
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  /* padding: 12px 16px; */
 }
 
 .mng-header {
   display: flex;
   height: 5%;
-  /* justify-content: center; */
-  /* flex-flow: row wrap; */
+  background: rgb(85, 85, 85);
 }
 
 .mng-header__title {
@@ -83,14 +81,11 @@
   flex: 1 100%;
   font-size: 1.1rem;
   width: 98%;
+  text-align: center;
+  margin: auto;
 }
 
 .mng-header__close {
-  /* float: right; */
-  /* grid-column: 10;
-    grid-row: 1;
-    text-align: center */
-  /* width: 5% */
   order: 2;
   width: 2%;
   font-size: 1.1rem;
@@ -116,6 +111,7 @@
   display: flex;
   height: 5%;
   justify-content: flex-start;
+  align-content: center;
 }
 
 .tool-icon {
@@ -127,14 +123,8 @@
   cursor: pointer;
 }
 
-.add-project__modal {
-  height: 100%;
-  display: inline-block;
-  max-width: 30%;
-  min-width: 20%;
-}
-
-.add-project__modal--form {
+.add-project__modal--form,
+.edit-project__modal--form {
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -146,7 +136,8 @@
   height: 70%;
 }
 
-.add-project__modal--input {
+.add-project__modal--input,
+.edit-project__modal--input {
   width: 100%;
 }
 
@@ -154,7 +145,8 @@ select {
   margin-left: 3rem;
 }
 
-.add-project__modal--label {
+.add-project__modal--label,
+.edit-project__modal--label {
   margin-top: 1rem;
   color: gray;
 }
@@ -191,25 +183,28 @@ select {
 }
 
 .add-project__modal.modal-dialog {
-  min-width: 40%;
-  max-width: 40%;
-  position: relative;
-  margin: auto;
-  /* background: red; */
-}
-
-.edit-userRole__modal.modal-dialog {
   max-width: 90%;
   max-height: 90%;
   display: inline-block;
   overflow-x: hidden;
   overflow-y: auto;
+  border: 2px solid gray;
+  box-shadow: 1rem 1rem 1rem grey;
+}
+
+.edit-userRole__modal.modal-dialog,
+.edit-project__modal.modal-dialog {
+  width: 40%;
+  max-width: 90%;
+  max-height: 90%;
+  display: inline-block;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 2px solid gray;
+  box-shadow: 1rem 1rem 1rem grey;
 }
 
 .edit-userRole.modal-body {
-  /* height: 80%;
-  overflow-y: auto;
-  width: 600px; */
   color: gray;
   width: 100%;
 }
@@ -217,20 +212,19 @@ select {
   padding: 0.5rem;
 }
 
+.modal-footer {
+  color: black;
+}
+
 .edit-userRole__modal--footer.modal-footer {
   display: flex;
-  /* justify-content: right; */
   flex-direction: column;
 }
 
 .edit-userRole__table--row {
   padding: 1rem;
-  /* background: red; */
 }
 
-/* .edit-userRole__table--col {
-  text-align: left;
-} */
 .edit-userRole__modal--button {
   margin-left: 0.5rem;
 }
@@ -243,7 +237,6 @@ select {
 
 .userRole-edit__error {
   margin-bottom: 0.5rem;
-  /* width: 100%; */
   align-self: flex-start;
 }
 
@@ -251,6 +244,45 @@ select {
   display: flex;
   justify-content: flex-end;
   width: 100%;
-  /* flex-flow: row wrap; */
-  /* background: red; */
+  color: black;
+}
+
+.open-link {
+  color: white;
+  cursor: pointer;
+}
+
+.-pageJump,
+select {
+  color: rgb(85, 85, 85);
+}
+
+.-next,
+.-previous {
+  background: rgb(236, 236, 236);
+  color: black;
+}
+
+button {
+  font-weight: bold;
+}
+
+.rt-tr-group:hover {
+  background: rgb(85, 85, 85);
+}
+
+.rt-thead.-header {
+  border-bottom: 1px solid white;
+  font-size: 1.2rem;
+}
+
+.modal-content {
+  border: 1px solid gray;
+  max-width: 100%;
+  max-height: 100%;
+  border: 2px solid gray;
+}
+
+input {
+  color: black;
 }

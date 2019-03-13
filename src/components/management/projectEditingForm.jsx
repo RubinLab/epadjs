@@ -17,34 +17,34 @@ const projectEditingForm = ({
   desc
 }) => {
   return (
-    <Modal.Dialog dialogClassName="add-project__modal">
+    <Modal.Dialog dialogClassName="edit-project__modal">
       <Modal.Header>
         <Modal.Title>Edit Project</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <form className="add-project__modal--form">
-          <h5 className="add-project__modal--label">Name</h5>
+        <form className="edit-project__modal--form">
+          <h5 className="edit-project__modal--label">Name</h5>
           <input
             onMouseDown={e => e.stopPropagation()}
-            className="add-project__modal--input"
+            className="edit-project__modal--input"
             name="name"
             type="text"
             onChange={onType}
             id="form-first-element"
             placeholder={name}
           />
-          <h5 className="add-project__modal--label">Description</h5>
+          <h5 className="edit-project__modal--label">Description</h5>
           <textarea
             onMouseDown={e => e.stopPropagation()}
-            className="add-project__modal--input"
+            className="edit-project__modal--input"
             name="description"
             onChange={onType}
             placeholder={desc}
           />
-          <h5 className="add-project__modal--label">Type</h5>
+          <h5 className="edit-project__modal--label">Type</h5>
           <select
             name="type"
-            className="add-project__modal--select"
+            className="edit-project__modal--select"
             onChange={onType}
             defaultValue="Private"
           >

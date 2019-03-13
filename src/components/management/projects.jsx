@@ -28,9 +28,10 @@ const messages = {
 };
 
 //NICE TO HAVE
-//TODO projects - post default template nedir
+//TODO projects - add default template feature
 //TODO show one error message only
-//TODO no selection stateten cikarip renderda calculate et
+//TODO change the no selection behavior
+//change the color of the row if the check box is selected
 
 class Projects extends React.Component {
   state = {
@@ -145,9 +146,7 @@ class Projects extends React.Component {
 
   editProject = async () => {
     const { name, description, defaultTemplate, id, type } = this.state;
-    console.log('name', name, 'desc', description, type);
     const editData = updateProject(id, name, description, type);
-
     editData
       .then(res => {
         if (res.status === 200) {
@@ -169,18 +168,21 @@ class Projects extends React.Component {
 
   toggleRow = async id => {
     let newSelected = Object.assign({}, this.state.selected);
-    newSelected[id] = !this.state.selected[id];
-    await this.setState({
-      selected: newSelected,
-      selectAll: 2
-    });
-
-    let values = Object.values(this.state.selected);
-    if (!values.includes(true)) {
-      this.setState({
-        selectAll: 0
+    if (newSelected[id]) {
+      delete newSelected[id];
+      let values = Object.values(newSelected);
+      if (values.length === 0) {
+        this.setState({
+          selectAll: 0
+        });
+      }
+    } else {
+      newSelected[id] = true;
+      await this.setState({
+        selectAll: 2
       });
     }
+    this.setState({ selected: newSelected });
   };
 
   toggleSelectAll() {
@@ -213,17 +215,18 @@ class Projects extends React.Component {
 
   deleteAllSelected = async () => {
     let newSelected = Object.assign({}, this.state.selected);
+    const toBeDeleted = [];
     for (let project in newSelected) {
       if (newSelected[project]) {
-        deleteProject(project)
-          .then(() => {
-            delete newSelected[project];
-            this.setState({ selected: {}, hasDeleteAllClicked: false });
-            this.getProjectData();
-          })
-          .catch(err => {
-            this.setState({ errorMessage: err.response.data.message });
-          });
+        toBeDeleted.push(deleteProject(project));
+        // .then(() => {
+        //   delete newSelected[project];
+        //   this.setState({ selected: {}, hasDeleteAllClicked: false });
+        //   this.getProjectData();
+        // })
+        // .catch(err => {
+        //   this.setState({ errorMessage: err.response.data.message });
+        // });
       }
     }
   };
@@ -333,9 +336,12 @@ class Projects extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        width: 45,
+        width: 50,
         Cell: original => (
-          <Link to={'/search/' + original.row.checkbox.id}>
+          <Link
+            className="open-link"
+            to={'/search/' + original.row.checkbox.id}
+          >
             <FaRegEye className="menu-clickable" onClick={this.props.onClose} />
           </Link>
         )
@@ -389,7 +395,6 @@ class Projects extends React.Component {
           <FaEdit
             className="menu-clickable"
             onClick={() => {
-              // console.log(original);
               this.setState({
                 hasEditClicked: true,
                 id: original.row.checkbox.id,
@@ -418,7 +423,6 @@ class Projects extends React.Component {
 
   render = () => {
     // console.log(this.state);
-    console.log('props here', this.props);
     return (
       <div className="projects menu-display" id="projects">
         <ToolBar
