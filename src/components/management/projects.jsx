@@ -23,8 +23,7 @@ import SearchView from '../searchView/searchView';
 
 const messages = {
   deleteSingle: 'Delete the project? This cannot be undone.',
-  deleteSelected: 'Delete selected projects? This cannot be undone.',
-  noSelection: 'Please select a project'
+  deleteSelected: 'Delete selected projects? This cannot be undone.'
 };
 
 //NICE TO HAVE
@@ -298,7 +297,7 @@ class Projects extends React.Component {
           return (
             <input
               type="checkbox"
-              className="checkbox"
+              className="checkbox-cell"
               checked={this.state.selected[original.id] === true}
               onChange={() => this.toggleRow(original.id)}
             />
@@ -308,7 +307,7 @@ class Projects extends React.Component {
           return (
             <input
               type="checkbox"
-              className="checkbox"
+              className="checkbox-cell"
               checked={this.state.selectAll === 1}
               ref={input => {
                 if (input) {
@@ -423,11 +422,14 @@ class Projects extends React.Component {
 
   render = () => {
     // console.log(this.state);
+    const checkboxSelected = Object.values(this.state.selected).length > 0;
+    console.log(checkboxSelected);
     return (
       <div className="projects menu-display" id="projects">
         <ToolBar
           onDelete={this.handleDeleteAll}
           onAdd={this.handleAddProject}
+          selected={checkboxSelected}
         />
         {this.state.error ? (
           <div>Something went wrong!</div>
@@ -448,12 +450,6 @@ class Projects extends React.Component {
             onCancel={this.handleCancel}
             onDelete={this.deleteSingleProject}
             error={this.state.errorMessage}
-          />
-        )}
-        {this.state.noSelection && (
-          <NoSelectionAlert
-            message={messages.noSelection}
-            onOK={this.handleCancel}
           />
         )}
         {this.state.hasAddClicked && (

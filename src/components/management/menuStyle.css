@@ -79,16 +79,16 @@
 .mng-header__title {
   order: 1;
   flex: 1 100%;
-  font-size: 1.1rem;
-  width: 98%;
+  font-size: 1.2rem;
+  width: 96%;
   text-align: center;
   margin: auto;
 }
 
 .mng-header__close {
   order: 2;
-  width: 2%;
-  font-size: 1.1rem;
+  width: 4%;
+  font-size: 1.3rem;
   align-self: right;
 }
 
@@ -112,6 +112,8 @@
   height: 5%;
   justify-content: flex-start;
   align-content: center;
+  align-items: center;
+  font-size: 1.2rem;
 }
 
 .tool-icon {
@@ -267,6 +269,10 @@ button {
   font-weight: bold;
 }
 
+.rt-tr-group {
+  border: 0.005rem solid gray;
+}
+
 .rt-tr-group:hover {
   background: rgb(85, 85, 85);
 }
@@ -276,7 +282,7 @@ button {
   font-size: 1.2rem;
 }
 
-.modal-content {
+.rt-rd .modal-content {
   border: 1px solid gray;
   max-width: 100%;
   max-height: 100%;
@@ -285,4 +291,12 @@ button {
 
 input {
   color: black;
+}
+
+.pagination-bottom {
+  background: rgb(85, 85, 85);
+}
+
+.checkbox-cell {
+  margin: auto;
 }
