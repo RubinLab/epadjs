@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FaPlusCircle, FaRegTrashAlt } from 'react-icons/fa';
 import '../menuStyle.css';
 
@@ -10,5 +11,9 @@ const baseToolBar = ({ onAdd, onDelete, selected }) => {
     </div>
   );
 };
-
+baseToolBar.propTypes = {
+  onAdd: PropTypes.func,
+  onDelete: PropTypes.func,
+  selected: PropTypes.bool
+};
 export default baseToolBar;

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Table from 'react-table';
 import { FaRegTrashAlt, FaEdit, FaRegEye } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
@@ -425,6 +426,7 @@ class Projects extends React.Component {
   };
 
   render = () => {
+    console.log('project', this.props);
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     return (
       <div className="projects menu-display" id="projects">
@@ -489,4 +491,8 @@ class Projects extends React.Component {
   };
 }
 
+Projects.propTypes = {
+  selection: PropTypes.string,
+  onClose: PropTypes.func
+};
 export default Projects;

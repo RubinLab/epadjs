@@ -63,7 +63,7 @@ class MainMenu extends React.Component {
         <div onClick={this.handleSelection}>Connections</div>
         <div onClick={this.handleSelection}>Queries</div>
         {this.state.isModalOpen && (
-          <Modal onClose={this.handleCloseModal}>
+          <Modal>
             <Header
               selection={this.state.selection}
               onClose={this.handleCloseModal}

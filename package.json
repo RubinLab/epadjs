@@ -14,6 +14,7 @@
     "google-closure-library": "^20190121.0.0",
     "hammerjs": "^2.0.8",
     "joi-browser": "^13.4.0",
+    "prop-types": "^15.7.2",
     "react": "^16.4.2",
     "react-bootstrap": "^0.32.4",
     "react-bootstrap-sweetalert": "^4.4.1",

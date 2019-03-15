@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Row from './tableRow';
 
 const userTable = ({ onSelect, users }) => {
@@ -22,6 +23,11 @@ const userTable = ({ onSelect, users }) => {
       <tbody>{rows}</tbody>
     </table>
   );
+};
+
+PropTypes.userTable = {
+  onSelect: PropTypes.func,
+  users: PropTypes.string
 };
 
 export default userTable;

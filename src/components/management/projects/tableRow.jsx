@@ -1,7 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const tableRow = ({ name, role, onSelect }) => {
-  // console.log(typeofrole);
   return (
     <tr className="edit-userRole__table--row">
       <th className="edit-userRole__table--col">{name}</th>
@@ -43,6 +43,12 @@ const tableRow = ({ name, role, onSelect }) => {
       </td>
     </tr>
   );
+};
+
+tableRow.propTypes = {
+  name: PropTypes.string,
+  role: PropTypes.string,
+  onSelect: PropTypes.func
 };
 
 export default tableRow;

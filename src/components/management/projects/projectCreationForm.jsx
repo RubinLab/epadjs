@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Modal } from 'react-bootstrap';
 import '../menuStyle.css';
 
@@ -61,6 +62,13 @@ const projectCreationForm = ({ onCancel, onSubmit, onType, error }) => {
       </Modal.Footer>
     </Modal.Dialog>
   );
+};
+
+projectCreationForm.propTypes = {
+  onCancel: PropTypes.func,
+  onSubmit: PropTypes.func,
+  onType: PropTypes.func,
+  error: PropTypes.string
 };
 
 export default projectCreationForm;

@@ -19,6 +19,7 @@ class ResizeAndDrag extends React.Component {
   render() {
     return (
       <Rnd
+        className="rnd-window"
         style={style}
         size={{ width: this.state.width, height: this.state.height }}
         position={{ x: this.state.x, y: this.state.y }}

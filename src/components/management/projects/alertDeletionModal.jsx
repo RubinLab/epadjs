@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Modal } from 'react-bootstrap';
 
 const alertDeletionModal = ({ message, onCancel, onDelete, error }) => {
@@ -20,6 +21,13 @@ const alertDeletionModal = ({ message, onCancel, onDelete, error }) => {
       </Modal.Footer>
     </Modal.Dialog>
   );
+};
+
+alertDeletionModal.propTypes = {
+  message: PropTypes.string,
+  onCancel: PropTypes.func,
+  onDelete: PropTypes.func,
+  error: PropTypes.string
 };
 
 export default alertDeletionModal;

@@ -1,12 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Modal } from 'react-bootstrap';
 import '../menuStyle.css';
-
-// const style = {
-//   maxWidth: '40%',
-//   position: 'relative',
-//   margin: 'auto'
-// };
 
 const projectEditingForm = ({
   onCancel,
@@ -66,6 +61,15 @@ const projectEditingForm = ({
       </Modal.Footer>
     </Modal.Dialog>
   );
+};
+
+projectEditingForm.propTypes = {
+  onCancel: PropTypes.func,
+  onSubmit: PropTypes.func,
+  onType: PropTypes.func,
+  error: PropTypes.string,
+  name: PropTypes.string,
+  desc: PropTypes.string
 };
 
 export default projectEditingForm;

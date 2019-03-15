@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FaTimes } from 'react-icons/fa';
 
 const managementHeader = ({ selection, onClose }) => {
@@ -12,4 +13,8 @@ const managementHeader = ({ selection, onClose }) => {
   );
 };
 
+managementHeader.propTypes = {
+  selection: PropTypes.string,
+  onClose: PropTypes.func
+};
 export default managementHeader;

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Modal } from 'react-bootstrap';
 import '../menuStyle.css';
 import UserTable from './userTable';
@@ -35,6 +36,14 @@ const userRoleEditingForm = ({ onCancel, onSubmit, onType, error, users }) => {
       </Modal.Footer>
     </Modal.Dialog>
   );
+};
+
+userRoleEditingForm.propTypes = {
+  onCancel: PropTypes.func,
+  onSubmit: PropTypes.func,
+  onType: PropTypes.func,
+  error: PropTypes.string,
+  users: PropTypes.string
 };
 
 export default userRoleEditingForm;
