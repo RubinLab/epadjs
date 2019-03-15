@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaPlusCircle, FaRegTrashAlt } from 'react-icons/fa';
-import './menuStyle.css';
+import '../menuStyle.css';
 
 const baseToolBar = ({ onAdd, onDelete, selected }) => {
   return (

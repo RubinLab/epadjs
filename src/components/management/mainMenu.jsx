@@ -1,11 +1,10 @@
 import React from 'react';
-import Modal from '../common/customModal';
+import Modal from './common/customModal';
 // import Modal from '../common/rndBootModal';
 import Users from './users';
-import Projects from './projects';
+import Projects from './projects/projects';
 import './menuStyle.css';
-import Header from '../common/managementHeader';
-import { runInThisContext } from 'vm';
+import Header from './common/managementHeader';
 
 class MainMenu extends React.Component {
   state = {

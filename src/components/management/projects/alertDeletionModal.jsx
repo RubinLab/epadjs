@@ -12,9 +12,11 @@ const alertDeletionModal = ({ message, onCancel, onDelete, error }) => {
         <button variant="secondary" onClick={onCancel}>
           Cancel
         </button>
-        <button variant="primary" onClick={onDelete}>
-          Delete
-        </button>
+        {!error && (
+          <button variant="primary" onClick={onDelete}>
+            Delete
+          </button>
+        )}
       </Modal.Footer>
     </Modal.Dialog>
   );

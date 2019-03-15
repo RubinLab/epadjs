@@ -2,7 +2,7 @@ import React from 'react';
 import Table from 'react-table';
 import { FaRegTrashAlt, FaEdit, FaRegEye } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import './menuStyle.css';
+import '../menuStyle.css';
 import {
   getProjects,
   deleteProject,
@@ -10,27 +10,31 @@ import {
   updateProject,
   getProjectUsers,
   editUserRole
-} from '../../services/projectServices';
-import { getUsers } from '../../services/userServices';
-import ToolBar from './basicToolBar';
+} from '../../../services/projectServices';
+import { getUsers } from '../../../services/userServices';
+import ToolBar from '../common/basicToolBar';
 import DeleteAlert from './alertDeletionModal';
-import NoSelectionAlert from './alertNoSelectionModal';
 import ProjectCreationForm from './projectCreationForm';
 import ProjectEditingForm from './projectEditingForm';
 import UserRoleEditingForm from './userRoleEditingForm';
-import ProtectedRoute from '../common/protectedRoute';
-import SearchView from '../searchView/searchView';
+import ProtectedRoute from '../../common/protectedRoute';
+import SearchView from '../../searchView/searchView';
 
 const messages = {
   deleteSingle: 'Delete the project? This cannot be undone.',
   deleteSelected: 'Delete selected projects? This cannot be undone.'
 };
 
-//NICE TO HAVE
+//NICE TO HAVES
 //TODO projects - add default template feature
 //TODO show one error message only
 //TODO change the no selection behavior
-//change the color of the row if the check box is selected
+//TODO change the color of the row if the check box is selected
+/*TODO api will be updated to return permission info 
+  in response. UI will be updated accordingly with conditional rendering 
+  to disable the checkbox if user doesn't have any permission to edit that project */
+//TODO add project names to delete project and user roles editing pop ups
+//TODO Add tool tip for icons/button
 
 class Projects extends React.Component {
   state = {
@@ -165,7 +169,7 @@ class Projects extends React.Component {
       });
   };
 
-  toggleRow = async id => {
+  toggleRow = async (id, name) => {
     let newSelected = Object.assign({}, this.state.selected);
     if (newSelected[id]) {
       delete newSelected[id];
@@ -176,7 +180,7 @@ class Projects extends React.Component {
         });
       }
     } else {
-      newSelected[id] = true;
+      newSelected[id] = name;
       await this.setState({
         selectAll: 2
       });
@@ -214,19 +218,23 @@ class Projects extends React.Component {
 
   deleteAllSelected = async () => {
     let newSelected = Object.assign({}, this.state.selected);
-    const toBeDeleted = [];
+    const notDeleted = [];
     for (let project in newSelected) {
-      if (newSelected[project]) {
-        toBeDeleted.push(deleteProject(project));
-        // .then(() => {
-        //   delete newSelected[project];
-        //   this.setState({ selected: {}, hasDeleteAllClicked: false });
-        //   this.getProjectData();
-        // })
-        // .catch(err => {
-        //   this.setState({ errorMessage: err.response.data.message });
-        // });
-      }
+      await deleteProject(project)
+        .then(() => {
+          delete newSelected[project];
+          this.setState({ selected: newSelected });
+        })
+        .catch(err => {
+          notDeleted.push(newSelected[project]);
+          let names = notDeleted.join(', ');
+          this.setState({
+            errorMessage: err.response.data.message + ': ' + names
+          });
+        })
+        .finally(() => {
+          this.getProjectData();
+        });
     }
   };
 
@@ -242,11 +250,7 @@ class Projects extends React.Component {
   };
 
   handleDeleteAll = () => {
-    let values = Object.values(this.state.selected);
-    let isSelected;
-    !values.includes(true)
-      ? this.setState({ noSelection: true })
-      : this.setState({ hasDeleteAllClicked: true });
+    this.setState({ hasDeleteAllClicked: true });
   };
 
   handleSingleDelete = id => {
@@ -298,8 +302,8 @@ class Projects extends React.Component {
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={this.state.selected[original.id] === true}
-              onChange={() => this.toggleRow(original.id)}
+              checked={this.state.selected[original.id]}
+              onChange={() => this.toggleRow(original.id, original.name)}
             />
           );
         },
@@ -421,9 +425,7 @@ class Projects extends React.Component {
   };
 
   render = () => {
-    // console.log(this.state);
     const checkboxSelected = Object.values(this.state.selected).length > 0;
-    console.log(checkboxSelected);
     return (
       <div className="projects menu-display" id="projects">
         <ToolBar
@@ -431,11 +433,11 @@ class Projects extends React.Component {
           onAdd={this.handleAddProject}
           selected={checkboxSelected}
         />
-        {this.state.error ? (
-          <div>Something went wrong!</div>
-        ) : (
-          <Table data={this.state.data} columns={this.defineColumns()} />
-        )}
+        <Table
+          className="pro-table"
+          data={this.state.data}
+          columns={this.defineColumns()}
+        />
         {this.state.hasDeleteAllClicked && (
           <DeleteAlert
             message={messages.deleteSelected}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal } from 'react-bootstrap';
-import './menuStyle.css';
+import '../menuStyle.css';
 import UserTable from './userTable';
 
 const userRoleEditingForm = ({ onCancel, onSubmit, onType, error, users }) => {

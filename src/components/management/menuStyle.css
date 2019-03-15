@@ -180,8 +180,11 @@ select {
   color: rgb(213, 216, 220);
 }
 
-.alert-delete__modal {
-  top: 30%;
+.alert-delete__modal .modal-content {
+  /* top: 30%; */
+  border: 2px solid gray;
+  box-shadow: 1rem 1rem 1rem grey;
+  color: white;
 }
 
 .add-project__modal.modal-dialog {
@@ -269,27 +272,28 @@ button {
   font-weight: bold;
 }
 
-.rt-tr-group {
+.pro-table .rt-table .rt-tbody .rt-tr-group {
   border: 0.005rem solid gray;
 }
 
-.rt-tr-group:hover {
+.pro-table .rt-table .rt-tbody .rt-tr-group:hover {
   background: rgb(85, 85, 85);
 }
 
-.rt-thead.-header {
+.pro-table .rt-table .rt-thead.-header {
   border-bottom: 1px solid white;
   font-size: 1.2rem;
 }
 
-.rt-rd .modal-content {
+/* .rt-rd .modal-content {
   border: 1px solid gray;
   max-width: 100%;
   max-height: 100%;
   border: 2px solid gray;
-}
+} */
 
-input {
+input,
+textarea {
   color: black;
 }
 

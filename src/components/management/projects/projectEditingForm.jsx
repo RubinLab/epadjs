@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal } from 'react-bootstrap';
-import './menuStyle.css';
+import '../menuStyle.css';
 
 // const style = {
 //   maxWidth: '40%',
