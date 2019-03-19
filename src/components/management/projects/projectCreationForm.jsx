@@ -52,7 +52,7 @@ const projectCreationForm = ({ onCancel, onSubmit, onType, error }) => {
           {error && <div className="err-message">{error}</div>}
         </form>
       </Modal.Body>
-      <Modal.Footer>
+      <Modal.Footer className="modal-footer__buttons">
         <button variant="primary" onClick={onSubmit}>
           Submit
         </button>

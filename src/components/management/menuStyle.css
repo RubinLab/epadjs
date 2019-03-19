@@ -283,3 +283,11 @@
 .checkbox-cell {
   margin: auto;
 }
+
+#plus-icon,
+#trash-icon,
+#close-icon {
+  font-size: 0.9rem;
+  display: inline-block;
+  padding: 0.3rem;
+}
