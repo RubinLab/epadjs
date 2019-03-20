@@ -8,7 +8,6 @@
   width: 100%;
   z-index: 1000;
   overflow: hidden;
-  /* background-color: rgba(0, 0, 0, 0.65); */
 }
 
 .modal-content-div {
@@ -50,10 +49,6 @@
   color: white;
 }
 
-.react-draggable {
-  position: relative;
-}
-
 .menu-display {
   display: inline-block;
   height: 90%;
@@ -92,15 +87,12 @@
   align-self: right;
 }
 
-.react-draggable {
+.rnd-window {
   width: auto;
   overflow: scroll;
-  background: white;
+  background: #333;
   color: rgb(85, 85, 85);
-  /* border: 2px solid #702632; */
-}
-
-.rnd-window {
+  position: relative;
   border: 2px solid #702632;
 }
 
@@ -108,7 +100,7 @@
   white-space: normal;
 }
 
-.ReactTable {
+.pro-table {
   height: 100%;
 }
 
@@ -137,19 +129,9 @@
   flex-direction: column;
   align-items: left;
 }
-
-.modal-body {
-  display: inline-block;
-  height: 70%;
-}
-
 .add-project__modal--input,
 .edit-project__modal--input {
   width: 100%;
-}
-
-select {
-  margin-left: 3rem;
 }
 
 .add-project__modal--label,
@@ -186,7 +168,6 @@ select {
 }
 
 .alert-delete__modal .modal-content {
-  /* top: 30%; */
   border: 2px solid gray;
   box-shadow: 1rem 1rem 1rem grey;
   color: white;
@@ -223,7 +204,7 @@ select {
 }
 
 .modal-footer {
-  color: black;
+  color: #333;
 }
 
 .edit-userRole__modal--footer.modal-footer {
@@ -237,12 +218,6 @@ select {
 
 .edit-userRole__modal--button {
   margin-left: 0.5rem;
-}
-
-.modal {
-  max-width: 90%;
-  max-height: 90%;
-  margin: auto;
 }
 
 .userRole-edit__error {
@@ -263,7 +238,7 @@ select {
 }
 
 .-pageJump,
-select {
+.add-project__modal--select {
   color: rgb(85, 85, 85);
 }
 
@@ -273,12 +248,15 @@ select {
   color: black;
 }
 
-button {
-  font-weight: bold;
+.select-wrap {
+  color: rgb(85, 85, 85);
 }
-
 .pro-table .rt-table .rt-tbody .rt-tr-group {
   border: 0.005rem solid gray;
+}
+
+.pro-table .rt-table .rt-tbody .rt-tr-group .rt-tr {
+  align-items: center;
 }
 
 .pro-table .rt-table .rt-tbody .rt-tr-group:hover {
@@ -290,15 +268,11 @@ button {
   font-size: 1.2rem;
 }
 
-/* .rt-rd .modal-content {
-  border: 1px solid gray;
-  max-width: 100%;
-  max-height: 100%;
-  border: 2px solid gray;
-} */
-
-input,
-textarea {
+.add-project__modal--form input,
+.add-project__modal--form textarea,
+.edit-project__modal--form input,
+.edit-project__modal--form textarea,
+.edit-project__modal--form select {
   color: black;
 }
 
@@ -308,4 +282,12 @@ textarea {
 
 .checkbox-cell {
   margin: auto;
+}
+
+#plus-icon,
+#trash-icon,
+#close-icon {
+  font-size: 0.9rem;
+  display: inline-block;
+  padding: 0.3rem;
 }

@@ -51,7 +51,7 @@ const projectEditingForm = ({
           )}
         </form>
       </Modal.Body>
-      <Modal.Footer>
+      <Modal.Footer className="modal-footer__buttons">
         <button variant="primary" onClick={onSubmit}>
           Submit
         </button>

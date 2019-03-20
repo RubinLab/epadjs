@@ -9,7 +9,7 @@ const projectCreationForm = ({ onCancel, onSubmit, onType, error }) => {
       <Modal.Header>
         <Modal.Title>New Project</Modal.Title>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body className="add-project__mbody">
         <form className="add-project__modal--form">
           <h5 className="add-project__modal--label">Name*</h5>
           <input
@@ -52,7 +52,7 @@ const projectCreationForm = ({ onCancel, onSubmit, onType, error }) => {
           {error && <div className="err-message">{error}</div>}
         </form>
       </Modal.Body>
-      <Modal.Footer>
+      <Modal.Footer className="modal-footer__buttons">
         <button variant="primary" onClick={onSubmit}>
           Submit
         </button>

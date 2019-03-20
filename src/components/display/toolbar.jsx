@@ -1,25 +1,25 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
-import MetaData from "./metaData";
-import Draggable from "react-draggable";
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import MetaData from './metaData';
+import Draggable from 'react-draggable';
 
-import { FaLocationArrow } from "react-icons/fa";
-import { FiSun } from "react-icons/fi";
-import { FiSunset } from "react-icons/fi";
-import { FiZoomIn } from "react-icons/fi";
-import { FaAdjust } from "react-icons/fa";
-import { MdLoop } from "react-icons/md";
-import { MdPanTool } from "react-icons/md";
-import { FaListAlt } from "react-icons/fa";
-import { FiRotateCw } from "react-icons/fi";
-import { TiPipette } from "react-icons/ti";
-import { TiDeleteOutline } from "react-icons/ti";
-import { TiPencil } from "react-icons/ti";
-import { MdWbIridescent } from "react-icons/md";
+import { FaLocationArrow } from 'react-icons/fa';
+import { FiSun } from 'react-icons/fi';
+import { FiSunset } from 'react-icons/fi';
+import { FiZoomIn } from 'react-icons/fi';
+import { FaAdjust } from 'react-icons/fa';
+import { MdLoop } from 'react-icons/md';
+import { MdPanTool } from 'react-icons/md';
+import { FaListAlt } from 'react-icons/fa';
+import { FiRotateCw } from 'react-icons/fi';
+import { TiPipette } from 'react-icons/ti';
+import { TiDeleteOutline } from 'react-icons/ti';
+import { TiPencil } from 'react-icons/ti';
+import { MdWbIridescent } from 'react-icons/md';
 //import { FaDraftingCompass } from "react-icons/fa";
 
-import "./toolbar.css";
-import "../../font-icons/styles.css";
+import './toolbar.css';
+import '../../font-icons/styles.css';
 
 const mapStateToProps = state => {
   return {
@@ -30,38 +30,38 @@ const mapStateToProps = state => {
 };
 
 const tools = [
-  { name: "Wwwc" },
-  { name: "Pan" },
+  { name: 'Wwwc' },
+  { name: 'Pan' },
   {
-    name: "Zoom",
+    name: 'Zoom',
     configuration: {
       minScale: 0.3,
       maxScale: 25,
       preventZoomOutsideImage: true
     }
   },
-  { name: "Probe" },
-  { name: "Length" },
-  { name: "EllipticalRoi" },
+  { name: 'Probe' },
+  { name: 'Length' },
+  { name: 'EllipticalRoi' },
   {
-    name: "RectangleRoi",
+    name: 'RectangleRoi',
     configuration: {
       showMinMax: true
       // showHounsfieldUnits: true
     }
   },
-  { name: "Angle" },
-  { name: "Rotate" },
-  { name: "WwwcRegion" },
-  { name: "Probe" },
-  { name: "FreehandMouse" },
-  { name: "Eraser" },
-  { name: "Bidirectional" },
-  { name: "Brush" }
+  { name: 'Angle' },
+  { name: 'Rotate' },
+  { name: 'WwwcRegion' },
+  { name: 'Probe' },
+  { name: 'FreehandMouse' },
+  { name: 'Eraser' },
+  { name: 'Bidirectional' },
+  { name: 'Brush' }
 ];
 
 class Toolbar extends Component {
-  state = { activeTool: "", showDrawing: false };
+  state = { activeTool: '', showDrawing: false };
 
   //Tools are initialized in viewport.jsx since they are activated on elements. I don't really like this logic, we shall think of a better way.
 
@@ -119,19 +119,20 @@ class Toolbar extends Component {
 
   toggleMetaData = () => {
     this.disableAllTools();
-    const element = document.getElementById("myForm");
-    element.style.display = "block";
+    const element = document.getElementById('myForm');
+    element.style.display = 'block';
   };
 
   probe = () => {
     this.disableAllTools();
-    const elements = document.getElementsByClassName("cs");
+    const elements = document.getElementsByClassName('cs');
     for (var i = 0; i < elements.length; i++) {
       this.props.cornerstoneTools.probe.activate(elements[i], 1);
     }
   };
 
   anotate = () => {
+    console.log(this.props.cornerstoneTools);
     this.disableAllTools();
     this.setState({ showDrawing: !this.state.showDrawing });
   };
@@ -142,7 +143,7 @@ class Toolbar extends Component {
     console.log(
       this.props.cornerstoneTools.getElementToolStateManager(element)
     );*/
-    console.log("Saving state");
+    console.log('Saving state');
     const element = [document.getElementById(this.props.activeVP)];
     //var appState = this.props.cornerstoneTools.getToolState(element);
     //var serializedState = JSON.stringify(appState);
@@ -152,12 +153,12 @@ class Toolbar extends Component {
 
   line = () => {
     this.setState({ showDrawing: false });
-    console.log("state of drawing:" + this.state.showDrawing);
+    console.log('state of drawing:' + this.state.showDrawing);
     this.disableAllTools();
     const element = document.getElementById(this.props.activeVP);
     this.props.cornerstoneTools.length.activate(element, 1);
 
-    element.style.cursor = "crosshair";
+    element.style.cursor = 'crosshair';
   };
 
   render() {
@@ -180,7 +181,7 @@ class Toolbar extends Component {
           id="wwwc"
           tabIndex="1"
           className="toolbarSectionButton"
-          onClick={() => this.setToolActive("Wwwc")}
+          onClick={() => this.setToolActive('Wwwc')}
         >
           <div className="toolContainer">
             <FiSun />
@@ -201,7 +202,7 @@ class Toolbar extends Component {
           id="zoom"
           tabIndex="2"
           className="toolbarSectionButton"
-          onClick={() => this.setToolActive("Zoom")}
+          onClick={() => this.setToolActive('Zoom')}
         >
           <div className="toolContainer">
             <FiZoomIn />
@@ -240,7 +241,7 @@ class Toolbar extends Component {
           id="pan"
           tabIndex="5"
           className="toolbarSectionButton"
-          onClick={() => this.setToolActive("Pan", [1])}
+          onClick={() => this.setToolActive('Pan', [1])}
         >
           <div className="toolContainer">
             <MdPanTool />
@@ -278,7 +279,7 @@ class Toolbar extends Component {
           id="rotate"
           tabIndex="8"
           className="toolbarSectionButton"
-          onClick={() => this.setToolActive("Rotate")}
+          onClick={() => this.setToolActive('Rotate')}
         >
           <div className="toolContainer">
             <FiRotateCw />
@@ -291,7 +292,7 @@ class Toolbar extends Component {
           id="wwwcRegion"
           tabIndex="9"
           className="toolbarSectionButton"
-          onClick={() => this.setToolActive("WwwcRegion")}
+          onClick={() => this.setToolActive('WwwcRegion')}
         >
           <div className="toolContainer">
             <FaListAlt />
@@ -330,7 +331,7 @@ class Toolbar extends Component {
           id="eraser"
           tabIndex="13"
           className="toolbarSectionButton"
-          onClick={() => this.setToolActiveForElement("Eraser")}
+          onClick={() => this.setToolActiveForElement('Eraser')}
         >
           <div className="toolContainer">
             <TiPencil />
@@ -358,7 +359,7 @@ class Toolbar extends Component {
                 id="point"
                 tabIndex="1"
                 className="toolbarSectionButton"
-                onClick={() => this.setToolActiveForElement("Probe")}
+                onClick={() => this.setToolActiveForElement('Probe')}
               >
                 <div className="toolContainer">
                   <FiSun />
@@ -371,7 +372,7 @@ class Toolbar extends Component {
                 id="line"
                 tabIndex="2"
                 className="toolbarSectionButton"
-                onClick={() => this.setToolActiveForElement("Length")}
+                onClick={() => this.setToolActiveForElement('Length')}
               >
                 <div className="toolContainer">
                   <FiSun />
@@ -384,7 +385,7 @@ class Toolbar extends Component {
                 id="ellipse"
                 tabIndex="3"
                 className="toolbarSectionButton"
-                onClick={() => this.setToolActiveForElement("EllipticalRoi")}
+                onClick={() => this.setToolActiveForElement('EllipticalRoi')}
               >
                 <div className="toolContainer">
                   <FiSun />
@@ -397,7 +398,7 @@ class Toolbar extends Component {
                 id="rectangle"
                 tabIndex="4"
                 className="toolbarSectionButton"
-                onClick={() => this.setToolActiveForElement("RectangleRoi")}
+                onClick={() => this.setToolActiveForElement('RectangleRoi')}
               >
                 <div className="toolContainer">
                   <FiSun />
@@ -410,7 +411,7 @@ class Toolbar extends Component {
                 id="polygon"
                 tabIndex="5"
                 className="toolbarSectionButton"
-                onClick={() => this.setToolActiveForElement("FreehandMouse")}
+                onClick={() => this.setToolActiveForElement('FreehandMouse')}
               >
                 <div className="toolContainer">
                   <FiSun />
@@ -436,7 +437,7 @@ class Toolbar extends Component {
                 id="perpendicular"
                 tabIndex="7"
                 className="toolbarSectionButton"
-                onClick={() => this.setToolActiveForElement("Bidirectional")}
+                onClick={() => this.setToolActiveForElement('Bidirectional')}
               >
                 <div className="icon-perpendicular" />
                 <div className="buttonLabel">
@@ -447,7 +448,7 @@ class Toolbar extends Component {
                 id="brush"
                 tabIndex="8"
                 className="toolbarSectionButton"
-                onClick={() => this.setToolActiveForElement("Brush")}
+                onClick={() => this.setToolActiveForElement('Brush')}
               >
                 <div className="icon-brush" />
                 <div className="buttonLabel">
