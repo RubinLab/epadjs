@@ -29,7 +29,9 @@
     "react-table": "^6.9.2",
     "react-tiny-tabs": "^0.1.2",
     "react-toastify": "^4.3.0",
-    "redux": "^4.0.1"
+    "redux": "^4.0.1",
+    "redux-devtools-extension": "^2.13.8",
+    "redux-thunk": "^2.3.0"
   },
   "scripts": {
     "start": "react-scripts start",

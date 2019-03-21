@@ -10,7 +10,7 @@ import { FiZoomIn } from "react-icons/fi";
 import { FaAdjust } from "react-icons/fa";
 import { MdLoop } from "react-icons/md";
 import { MdPanTool } from "react-icons/md";
-import { FaListAlt } from "react-icons/fa";
+import { FaListAlt, FaRegFolderOpen } from "react-icons/fa";
 import { FiRotateCw } from "react-icons/fi";
 import { TiPipette } from "react-icons/ti";
 import { TiDeleteOutline } from "react-icons/ti";
@@ -337,6 +337,14 @@ class Toolbar extends Component {
           </div>
           <div className="buttonLabel">
             <span>Eraser</span>
+          </div>
+        </div>
+        <div tabIndex="14" className="toolbarSectionButton">
+          <div className="toolContainer">
+            <FaRegFolderOpen />
+          </div>
+          <div className="buttonLabel">
+            <span>Annotations</span>
           </div>
         </div>
         {/* Drawing Bar Starts here. Extract it to another component later  */}

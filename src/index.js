@@ -1,19 +1,30 @@
 import React from "react";
 import { render } from "react-dom";
 import { BrowserRouter } from "react-router-dom";
+import ReduxThunk from "redux-thunk";
+import { composeWithDevTools } from "redux-devtools-extension/developmentOnly";
+import { createStore, applyMiddleware } from "redux";
+import { Provider } from "react-redux";
 import "./index.css";
 import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";
 import "font-awesome/css/font-awesome.css";
-import { createStore } from "redux";
-import { Provider } from "react-redux";
 import rootReducer from "./reducers";
 
-/* eslint-disable no-underscore-dangle */
 const store = createStore(
-  rootReducer /* preloadedState, */,
+  rootReducer,
+  composeWithDevTools(applyMiddleware(ReduxThunk))
+);
+
+/* eslint-disable no-underscore-dangle */
+/*
+const store = createStore(
+  rootReducer,
+  // applyMiddleware(ReduxThunk)
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 );
+*/
+
 /* eslint-enable */
 render(
   <BrowserRouter>

@@ -27,3 +27,18 @@ export function getImageIds(series) {
       "/images/"
   );
 }
+
+export function getSeriesByID(projectId, subjectId, studyId, seriesId) {
+  return http.get(
+    apiUrl +
+      "/projects/" +
+      projectId +
+      "/subjects/" +
+      subjectId +
+      "/studies/" +
+      studyId +
+      "/series/" +
+      seriesId +
+      "/aims/?format=json"
+  );
+}

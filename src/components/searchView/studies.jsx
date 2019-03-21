@@ -248,6 +248,9 @@ class Studies extends Component {
             freezWhenExpanded={false}
             showPagination={false}
             {...extraProps}
+            getTdProps={(state, rowInfo, column) => ({
+              onDoubleClick: e => console.log("A row was clicked!", rowInfo)
+            })}
             SubComponent={row => {
               return (
                 <div style={{ paddingLeft: "20px" }}>

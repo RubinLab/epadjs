@@ -1,9 +1,9 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import Table from 'react-table';
-import { FaRegTrashAlt, FaEdit, FaRegEye } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
-import '../menuStyle.css';
+import React from "react";
+import PropTypes from "prop-types";
+import Table from "react-table";
+import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import "../menuStyle.css";
 import {
   getProjects,
   deleteProject,
@@ -11,19 +11,19 @@ import {
   updateProject,
   getProjectUsers,
   editUserRole
-} from '../../../services/projectServices';
-import { getUsers } from '../../../services/userServices';
-import ToolBar from '../common/basicToolBar';
-import DeleteAlert from './alertDeletionModal';
-import ProjectCreationForm from './projectCreationForm';
-import ProjectEditingForm from './projectEditingForm';
-import UserRoleEditingForm from './userRoleEditingForm';
-import ProtectedRoute from '../../common/protectedRoute';
-import SearchView from '../../searchView/searchView';
+} from "../../../services/projectServices";
+import { getUsers } from "../../../services/userServices";
+import ToolBar from "../common/basicToolBar";
+import DeleteAlert from "./alertDeletionModal";
+import ProjectCreationForm from "./projectCreationForm";
+import ProjectEditingForm from "./projectEditingForm";
+import UserRoleEditingForm from "./userRoleEditingForm";
+import ProtectedRoute from "../../common/protectedRoute";
+import SearchView from "../../searchView/searchView";
 
 const messages = {
-  deleteSingle: 'Delete the project? This cannot be undone.',
-  deleteSelected: 'Delete selected projects? This cannot be undone.'
+  deleteSingle: "Delete the project? This cannot be undone.",
+  deleteSelected: "Delete selected projects? This cannot be undone."
 };
 
 //NICE TO HAVES
@@ -39,30 +39,30 @@ const messages = {
 
 class Projects extends React.Component {
   state = {
-    user: '',
+    user: "",
     data: [],
     selected: {},
     selectAll: 0,
     errorMessage: null,
-    singleDeleteId: '',
+    singleDeleteId: "",
     hasDeleteSingleClicked: false,
     hasDeleteAllClicked: false,
     noSelection: false,
     hasAddClicked: false,
     hasEditClicked: false,
     hasUserRolesClicked: false,
-    id: '',
-    name: '',
-    description: '',
-    type: 'Private',
-    defaultTemplate: '',
+    id: "",
+    name: "",
+    description: "",
+    type: "Private",
+    defaultTemplate: "",
     userRoles: [],
     newRoles: {}
   };
 
   componentDidMount = () => {
     this.getProjectData();
-    this.setState({ user: sessionStorage.getItem('username') });
+    this.setState({ user: sessionStorage.getItem("username") });
   };
 
   handleClickUSerRoles = async id => {
@@ -87,7 +87,7 @@ class Projects extends React.Component {
           }
         }
         if (userRoles.length !== i + 1) {
-          userRoles.push({ name: users[i].username, role: 'None' });
+          userRoles.push({ name: users[i].username, role: "None" });
         }
       }
       this.setState({ userRoles });
@@ -111,17 +111,17 @@ class Projects extends React.Component {
 
   clearProjectInfo = () => {
     this.setState({
-      name: '',
-      description: '',
-      id: '',
-      type: 'Private'
+      name: "",
+      description: "",
+      id: "",
+      type: "Private"
     });
   };
 
   saveNewProject = async () => {
     const { name, description, defaultTemplate, id, user, type } = this.state;
     if (!name || !id) {
-      this.setState({ errorMessage: 'Please fill the required fields' });
+      this.setState({ errorMessage: "Please fill the required fields" });
     } else {
       const postData = saveProject(
         name,
@@ -206,9 +206,9 @@ class Projects extends React.Component {
   handleCancel = () => {
     this.setState({
       hasDeleteSingleClicked: false,
-      id: '',
+      id: "",
       hasDeleteAllClicked: false,
-      singleDeleteId: '',
+      singleDeleteId: "",
       noSelection: false,
       hasAddClicked: false,
       hasEditClicked: false,
@@ -228,9 +228,9 @@ class Projects extends React.Component {
         })
         .catch(err => {
           notDeleted.push(newSelected[project]);
-          let names = notDeleted.join(', ');
+          let names = notDeleted.join(", ");
           this.setState({
-            errorMessage: err.response.data.message + ': ' + names
+            errorMessage: err.response.data.message + ": " + names
           });
         })
         .finally(() => {
@@ -242,7 +242,7 @@ class Projects extends React.Component {
   deleteSingleProject = async () => {
     deleteProject(this.state.singleDeleteId)
       .then(() => {
-        this.setState({ singleDeleteId: '', hasDeleteSingleClicked: false });
+        this.setState({ singleDeleteId: "", hasDeleteSingleClicked: false });
         this.getProjectData();
       })
       .catch(err => {
@@ -296,8 +296,8 @@ class Projects extends React.Component {
   defineColumns = () => {
     return [
       {
-        id: 'checkbox',
-        accessor: '',
+        id: "checkbox",
+        accessor: "",
         Cell: ({ original }) => {
           return (
             <input
@@ -328,15 +328,15 @@ class Projects extends React.Component {
         width: 45
       },
       {
-        Header: 'Name',
-        accessor: 'name',
+        Header: "Name",
+        accessor: "name",
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50
       },
       {
-        Header: 'Open',
+        Header: "Open",
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
@@ -344,31 +344,31 @@ class Projects extends React.Component {
         Cell: original => (
           <Link
             className="open-link"
-            to={'/search/' + original.row.checkbox.id}
+            to={"/search/" + original.row.checkbox.id}
           >
             <FaRegEye className="menu-clickable" onClick={this.props.onClose} />
           </Link>
         )
       },
       {
-        Header: 'Description',
-        accessor: 'description',
+        Header: "Description",
+        accessor: "description",
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50
       },
       {
-        Header: 'Type',
-        accessor: 'type',
+        Header: "Type",
+        accessor: "type",
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50
       },
       {
-        Header: 'Users',
-        accessor: 'loginNames',
+        Header: "Users",
+        accessor: "loginNames",
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
@@ -385,13 +385,13 @@ class Projects extends React.Component {
                 });
               }}
             >
-              {original.row.loginNames.join(', ')}
+              {original.row.loginNames.join(", ")}
             </p>
           );
         }
       },
       {
-        Header: '',
+        Header: "",
         width: 45,
         minResizeWidth: 20,
         resizable: true,
@@ -411,7 +411,7 @@ class Projects extends React.Component {
         )
       },
       {
-        Header: '',
+        Header: "",
         width: 45,
         minResizeWidth: 20,
         resizable: true,
@@ -426,7 +426,7 @@ class Projects extends React.Component {
   };
 
   render = () => {
-    console.log('project', this.props);
+    console.log("project", this.props);
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     return (
       <div className="projects menu-display" id="projects">

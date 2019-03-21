@@ -6,6 +6,7 @@ import treeTableHOC from "react-table/lib/hoc/treeTable";
 import Annotations from "./annotations";
 import { getSeries } from "../../services/seriesServices";
 import { connect } from "react-redux";
+import { getAnnotations } from "../annotationList/action";
 import "react-table/react-table.css";
 
 const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -271,6 +272,17 @@ class Series extends Component {
                   if (handleOriginal) {
                     handleOriginal();
                   }
+                  const {
+                    projectID,
+                    patientID,
+                    studyUID,
+                    seriesUID
+                  } = rowInfo.original;
+                  console.log(
+                    this.props.dispatch(
+                      getAnnotations(projectID, patientID, studyUID, seriesUID)
+                    )
+                  );
                 }
               };
             }}
