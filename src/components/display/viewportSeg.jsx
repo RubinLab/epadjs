@@ -237,9 +237,11 @@ class ViewportSeg extends Component {
           wadoUrl + url.lossyImage + "&contentType=application%2Fdicom"
         );
     });
+    console.log(this.state.imageIds);
   }
 
   async componentDidMount() {
+    console.log("state", this.state);
     await this.getImages();
     this.loadDisplayImage();
     this.state.viewport.addEventListener(
