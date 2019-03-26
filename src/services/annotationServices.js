@@ -15,3 +15,18 @@ export function getAnnotations(projectId, subjectId, studyId, seriesId) {
       "/aims/?count=0&format=summary"
   );
 }
+
+export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
+  return http.get(
+    apiUrl +
+      "/projects/" +
+      projectId +
+      "/subjects/" +
+      subjectId +
+      "/studies/" +
+      studyId +
+      "/series/" +
+      seriesId +
+      "/aims/?format=json"
+  );
+}
