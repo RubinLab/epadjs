@@ -236,11 +236,15 @@ class Series extends Component {
 
   checkSerieExists = selected => {
     const openSeries = Object.values(this.props.newSeries);
+    console.log(openSeries);
     let isSerieOpen = false;
-    for (let serie of openSeries) {
-      if (serie.seriesUID === selected) {
-        isSerieOpen = true;
-        break;
+    if (openSeries.length > 0) {
+      for (let serie of openSeries) {
+        console.log(serie);
+        if (serie.seriesUID === selected) {
+          isSerieOpen = true;
+          break;
+        }
       }
     }
     return isSerieOpen;

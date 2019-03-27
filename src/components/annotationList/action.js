@@ -6,7 +6,10 @@ import {
 } from "./types";
 import { getSeries } from "../../services/seriesServices";
 import { getStudies } from "../../services/studyServices";
-import { getAnnotations } from "../../services/annotationServices";
+import {
+  getAnnotations,
+  getAnnotationsJSON
+} from "../../services/annotationServices";
 // TODO
 // study selection logic will be changed according to remaining available viewport
 // test cases 1- select a project check if all series are selected
@@ -19,10 +22,10 @@ export const loadAnnotations = () => {
   };
 };
 
-export const annotationsLoaded = data => {
+export const annotationsLoaded = (summaryData, aimsData, id) => {
   return {
     type: LOAD_ANNOTATIONS_SUCCESS,
-    data
+    payload: { summaryData, aimsData, id }
   };
 };
 
@@ -41,21 +44,16 @@ export const viewPortFullError = error => {
 };
 
 const getAimListFields = aims => {
-  // const seriesUID =
-  //   element.imageAnnotations.ImageAnnotation.imageReferenceEntityCollection
-  //     .ImageReferenceEntity.imageStudy.imageSeries.instanceUid.root;
-  // obj = {
-  //   seriesUID: seriesUID,
-  //   annotationID:
-  //     element.imageAnnotations.ImageAnnotation.uniqueIdentifier.root,
-  //   isDisplayed: seriesUID === selectedID,
-  //   name: element.imageAnnotations.ImageAnnotation.name.value,
-  //   comment: element.imageAnnotations.ImageAnnotation.comment.value,
-  //   markupEntityCollection:
-  //     element.imageAnnotations.ImageAnnotation.markupEntityCollection,
-  //   segmentationEntityCollection:
-  //     element.imageAnnotations.ImageAnnotation.segmentationEntityCollection
-  // };
+  const result = {};
+  aims.forEach((aim, index) => {
+    // console.log(index);
+    result[aim.uniqueIdentifier.root] = {
+      json: aim,
+      isDisplayed: true,
+      cornerStoneTools: []
+    };
+  });
+  return result;
 };
 
 const getRequiredFields = (arr, type, selectedID) => {
@@ -168,17 +166,20 @@ export const getAnnotationListData = (viewport, serie, study) => {
   return async (dispatch, getState) => {
     // create an object with patient details
     dispatch(loadAnnotations());
-    const { projectID, patientID, patientName, seriesUID } = serie || study;
+    // console.log("serie data", serie);
+    const { projectID, patientID, patientName, seriesUID, studyUID } =
+      serie || study;
     const selectedID = serie.seriesUID;
-    let displayData = { seriesUID, projectID, patientID, patientName };
+    let summaryData = { seriesUID, projectID, patientID, patientName };
+    let aimsData = {};
     // make call to get study and populate the studies data
     try {
-      await getStudiesData(displayData, projectID, patientID);
+      await getStudiesData(summaryData, projectID, patientID);
     } catch (error) {
       dispatch(annotationsLoadingError(error));
     }
     // make call to get series and populate studies with series data
-    const studies = displayData["studies"];
+    const studies = summaryData["studies"];
     studies.forEach(async study => {
       let series;
       try {
@@ -208,6 +209,20 @@ export const getAnnotationListData = (viewport, serie, study) => {
         dispatch(annotationsLoadingError(error));
       }
     });
-    dispatch(annotationsLoaded(displayData));
+
+    try {
+      const {
+        data: {
+          imageAnnotations: { ImageAnnotationCollection: aims }
+        }
+      } = await getAnnotationsJSON(projectID, patientID, studyUID, seriesUID);
+      // console.log("aims", aims);
+      aimsData = getAimListFields(aims);
+      console.log("aimsData", aimsData);
+    } catch (err) {
+      dispatch(annotationsLoadingError(err));
+    }
+    console.log("big data", aimsData);
+    dispatch(annotationsLoaded(summaryData, aimsData, seriesUID));
   };
 };

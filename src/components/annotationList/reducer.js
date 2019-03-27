@@ -6,6 +6,7 @@ import {
 
 const initialState = {
   openSeries: {},
+  aimsList: {},
   activePort: null,
   loading: false,
   error: false
@@ -20,11 +21,17 @@ const asyncReducer = (state = initialState, action) => {
       });
     case LOAD_ANNOTATIONS_SUCCESS:
       const indexKey = Object.keys(state.openSeries).length;
+      const { id } = action.payload;
+      console.log(action.payload);
       return Object.assign({}, state, {
-        openSeries: { ...state.openSeries, [indexKey]: action.data },
+        openSeries: {
+          ...state.openSeries,
+          [indexKey]: action.payload.summaryData
+        },
         loading: false,
         error: false,
-        activePort: indexKey
+        activePort: indexKey,
+        aimsList: { ...state.aimsList, [id]: action.payload.aimsData }
       });
     case LOAD_ANNOTATIONS_ERROR:
       return Object.assign({}, state, {
