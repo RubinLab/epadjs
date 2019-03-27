@@ -6,10 +6,7 @@ import treeTableHOC from "react-table/lib/hoc/treeTable";
 import Annotations from "./annotations";
 import { getSeries } from "../../services/seriesServices";
 import { connect } from "react-redux";
-import {
-  getAnnotations,
-  getAnnotationListData
-} from "../annotationList/action";
+import { getAnnotationListData } from "../annotationList/action";
 import "react-table/react-table.css";
 
 const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -236,6 +233,19 @@ class Series extends Component {
     }
     this.props.history.push("/display");
   };
+
+  checkSerieExists = selected => {
+    const openSeries = Object.values(this.props.newSeries);
+    let isSerieOpen = false;
+    for (let serie of openSeries) {
+      if (serie.seriesUID === selected) {
+        isSerieOpen = true;
+        break;
+      }
+    }
+    return isSerieOpen;
+  };
+
   render() {
     const {
       toggleSelection,
@@ -275,9 +285,11 @@ class Series extends Component {
                   if (handleOriginal) {
                     handleOriginal();
                   }
-                  this.props.dispatch(
-                    getAnnotationListData(2, rowInfo.original)
-                  );
+                  if (!this.checkSerieExists(rowInfo.original.seriesUID)) {
+                    this.props.dispatch(
+                      getAnnotationListData(2, rowInfo.original)
+                    );
+                  }
                 }
               };
             }}
@@ -301,7 +313,10 @@ class Series extends Component {
 }
 
 const mapStateToProps = state => {
-  return { series: state.searchViewReducer.series };
+  return {
+    series: state.searchViewReducer.series,
+    newSeries: state.annotationsListReducer.openSeries
+  };
 };
 
 export default withRouter(connect(mapStateToProps)(Series));

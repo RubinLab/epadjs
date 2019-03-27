@@ -6,7 +6,7 @@ import {
 } from "./types";
 import { getSeries } from "../../services/seriesServices";
 import { getStudies } from "../../services/studyServices";
-import { getAnnotationsJSON } from "../../services/annotationServices";
+import { getAnnotations } from "../../services/annotationServices";
 // TODO
 // study selection logic will be changed according to remaining available viewport
 // test cases 1- select a project check if all series are selected
@@ -40,33 +40,40 @@ export const viewPortFullError = error => {
   };
 };
 
-const getRequiredFields = (arr, type) => {
+const getAimListFields = aims => {
+  // const seriesUID =
+  //   element.imageAnnotations.ImageAnnotation.imageReferenceEntityCollection
+  //     .ImageReferenceEntity.imageStudy.imageSeries.instanceUid.root;
+  // obj = {
+  //   seriesUID: seriesUID,
+  //   annotationID:
+  //     element.imageAnnotations.ImageAnnotation.uniqueIdentifier.root,
+  //   isDisplayed: seriesUID === selectedID,
+  //   name: element.imageAnnotations.ImageAnnotation.name.value,
+  //   comment: element.imageAnnotations.ImageAnnotation.comment.value,
+  //   markupEntityCollection:
+  //     element.imageAnnotations.ImageAnnotation.markupEntityCollection,
+  //   segmentationEntityCollection:
+  //     element.imageAnnotations.ImageAnnotation.segmentationEntityCollection
+  // };
+};
+
+const getRequiredFields = (arr, type, selectedID) => {
   let result = [];
   if (arr) {
     arr.forEach(element => {
       let obj;
       if (type === "study") {
-        obj = {
-          studyUID: element.studyUID,
-          studyDescription: element.studyDescription,
-          isDisplayed: true
-        };
+        const { studyUID, studyDescription } = element;
+        obj = { studyUID, studyDescription };
       } else if (type === "serie") {
-        obj = {
-          seriesUID: element.seriesUID,
-          seriesDescription: element.seriesDescription,
-          isDisplayed: true
-        };
+        const { seriesUID, seriesDescription } = element;
+        const isDisplayed = seriesUID === selectedID;
+        obj = { seriesUID, seriesDescription, isDisplayed };
       } else {
-        obj = {
-          annotationID:
-            element.imageAnnotations.ImageAnnotation.uniqueIdentifier.root,
-          isDisplayed: true,
-          name: element.imageAnnotations.ImageAnnotation.name.value,
-          comment: element.imageAnnotations.ImageAnnotation.comment.value,
-          markupEntityCollection:
-            element.imageAnnotations.ImageAnnotation.markupEntityCollection
-        };
+        const { seriesUID, name, aimID, comment } = element;
+        const isDisplayed = seriesUID === selectedID;
+        obj = { seriesUID, name, aimID, comment, isDisplayed };
       }
       result.push(obj);
     });
@@ -81,91 +88,116 @@ const getStudiesData = async (dataObj, projectID, patientID) => {
         ResultSet: { Result: studies }
       }
     } = await getStudies(projectID, patientID);
-    dataObj[patientID]["studies"] = getRequiredFields(studies, "study");
+    dataObj["studies"] = getRequiredFields(studies, "study");
     return new Promise((resolve, reject) => {
       resolve(dataObj);
     });
   } catch (err) {
     return new Promise((resolve, reject) => {
-      reject(new Error("Error while getting study data ", err.response));
+      reject(
+        new Error(
+          `Error while getting study data ${err.response}`,
+          "src/components/annotationList/action.js"
+        )
+      );
     });
   }
 };
 
-const getSeriesData = async (projectID, patientID, studyID) => {
+const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
   try {
     const {
       data: {
         ResultSet: { Result: series }
       }
     } = await getSeries(projectID, patientID, studyID);
-    const formattedSeries = getRequiredFields(series, "serie");
+    const formattedSeries = getRequiredFields(series, "serie", selectedID);
     return new Promise((resolve, reject) => {
       resolve(formattedSeries);
     });
   } catch (err) {
     return new Promise((resolve, reject) => {
-      reject(new Error("Error while getting series data ", err.response));
+      reject(
+        new Error(
+          `Error while getting series data ${err.response}`,
+          "src/components/annotationList/action.js"
+        )
+      );
     });
   }
 };
 
-const getAnnotationData = async (projectID, patientID, studyID, seriesID) => {
+const getAnnotationData = async (
+  projectID,
+  patientID,
+  studyID,
+  seriesID,
+  selectedID
+) => {
   try {
     const {
       data: {
-        imageAnnotations: { ImageAnnotationCollection: annotations }
+        ResultSet: { Result: annotations }
       }
-    } = await getAnnotationsJSON(projectID, patientID, studyID, seriesID);
+    } = await getAnnotations(projectID, patientID, studyID, seriesID);
     let formattedAnnotation = [];
     if (annotations) {
-      formattedAnnotation.push(getRequiredFields(annotations, "annotation"));
+      formattedAnnotation = getRequiredFields(
+        annotations,
+        "annotation",
+        selectedID
+      );
     }
     return new Promise((resolve, reject) => {
       resolve(formattedAnnotation);
     });
   } catch (err) {
     return new Promise((resolve, reject) => {
-      reject(new Error("Error while getting annotations data ", err.response));
+      reject(
+        new Error(
+          `Error while getting annotations data ${err.response}`,
+          "src/components/annotationList/action.js"
+        )
+      );
     });
   }
 };
 
-//gets one patient and all the studys under it
-// getAnnotationListDataFromSeries(seri, viewPortArray.length, study) - on serie level
+// gets one patient and all the studys->series->annotations under it
 export const getAnnotationListData = (viewport, serie, study) => {
   return async (dispatch, getState) => {
-    // create and object with patient details
+    // create an object with patient details
     dispatch(loadAnnotations());
-    const { projectID, patientID, patientName } = serie || study;
-    let displayData = {};
-    displayData[patientID] = {
-      projectID: projectID,
-      patientID: patientID,
-      patientName: patientName,
-      studies: []
-    };
+    const { projectID, patientID, patientName, seriesUID } = serie || study;
+    const selectedID = serie.seriesUID;
+    let displayData = { seriesUID, projectID, patientID, patientName };
     // make call to get study and populate the studies data
     try {
       await getStudiesData(displayData, projectID, patientID);
     } catch (error) {
       dispatch(annotationsLoadingError(error));
     }
-    // make the call to get series and populate studies with series data
-    const studies = displayData[patientID]["studies"];
+    // make call to get series and populate studies with series data
+    const studies = displayData["studies"];
     studies.forEach(async study => {
       let series;
       try {
-        series = await getSeriesData(projectID, patientID, study.studyUID);
+        series = await getSeriesData(
+          projectID,
+          patientID,
+          study.studyUID,
+          selectedID
+        );
         study.series = series;
-        //make the call to get annotations and populate series annotations data
+        //make call to get annotations and populate series annotations data
         study.series.forEach(async serie => {
           try {
             const annotations = await getAnnotationData(
               projectID,
               patientID,
               study.studyUID,
-              serie.seriesUID
+              serie.seriesUID,
+              selectedID
             );
             serie.annotations = annotations;
           } catch (error) {

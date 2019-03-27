@@ -5,7 +5,8 @@ import {
 } from "./types";
 
 const initialState = {
-  annotations: [],
+  openSeries: {},
+  activePort: null,
   loading: false,
   error: false
 };
@@ -14,17 +15,17 @@ const asyncReducer = (state = initialState, action) => {
   switch (action.type) {
     case LOAD_ANNOTATIONS:
       return Object.assign({}, state, {
-        annotations: [],
         loading: true,
         error: false
       });
     case LOAD_ANNOTATIONS_SUCCESS:
+      const indexKey = Object.keys(state.openSeries).length;
       return Object.assign({}, state, {
-        annotations: action.data,
+        openSeries: { ...state.openSeries, [indexKey]: action.data },
         loading: false,
-        error: false
+        error: false,
+        activePort: indexKey
       });
-
     case LOAD_ANNOTATIONS_ERROR:
       return Object.assign({}, state, {
         loading: false,
