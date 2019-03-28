@@ -15,6 +15,7 @@ import {
 // test cases 1- select a project check if all series are selected
 // test cases 2- select a serie
 // in the client check the length of the viewports
+// change the active port if user clicks another port
 
 export const loadAnnotations = () => {
   return {
@@ -94,7 +95,7 @@ const getStudiesData = async (dataObj, projectID, patientID) => {
     return new Promise((resolve, reject) => {
       reject(
         new Error(
-          `Error while getting study data ${err.response}`,
+          `Error while getting study data ${err}`,
           "src/components/annotationList/action.js"
         )
       );
@@ -117,7 +118,7 @@ const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
     return new Promise((resolve, reject) => {
       reject(
         new Error(
-          `Error while getting series data ${err.response}`,
+          `Error while getting series data ${err}`,
           "src/components/annotationList/action.js"
         )
       );
@@ -153,7 +154,7 @@ const getAnnotationData = async (
     return new Promise((resolve, reject) => {
       reject(
         new Error(
-          `Error while getting annotations data ${err.response}`,
+          `Error while getting annotations data ${err}`,
           "src/components/annotationList/action.js"
         )
       );
@@ -218,11 +219,9 @@ export const getAnnotationListData = (viewport, serie, study) => {
       } = await getAnnotationsJSON(projectID, patientID, studyUID, seriesUID);
       // console.log("aims", aims);
       aimsData = getAimListFields(aims);
-      console.log("aimsData", aimsData);
     } catch (err) {
       dispatch(annotationsLoadingError(err));
     }
-    console.log("big data", aimsData);
     dispatch(annotationsLoaded(summaryData, aimsData, seriesUID));
   };
 };

@@ -17,7 +17,6 @@ export function getAnnotations(projectId, subjectId, studyId, seriesId) {
 }
 
 export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
-  console.log("this is called");
   return http.get(
     apiUrl +
       "/projects/" +

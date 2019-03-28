@@ -22,7 +22,6 @@ const asyncReducer = (state = initialState, action) => {
     case LOAD_ANNOTATIONS_SUCCESS:
       const indexKey = Object.keys(state.openSeries).length;
       const { id } = action.payload;
-      console.log(action.payload);
       return Object.assign({}, state, {
         openSeries: {
           ...state.openSeries,

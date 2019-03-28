@@ -1,0 +1,29 @@
+.annList {
+  background-color: #3a3f44;
+  padding: 0.5rem;
+  z-index: 1;
+  display: inline-flex;
+  flex-direction: column;
+  position: relative;
+  /* vertical-align: baseline; */
+  max-width: 30%;
+  overflow: scroll;
+  border: 0.2rem solid gray;
+  border-radius: 10px;
+}
+
+.annList-dropdown__container {
+  display: inline-flex;
+  /* flex-direction: row; */
+}
+
+.annList-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.annList-close {
+  /* align-self: right; */
+  cursor: pointer;
+  font: 3rem;
+}

@@ -16,6 +16,7 @@ import { TiPipette } from "react-icons/ti";
 import { TiDeleteOutline } from "react-icons/ti";
 import { TiPencil } from "react-icons/ti";
 import { MdWbIridescent } from "react-icons/md";
+import AnnotationList from "../annotationsList";
 //import { FaDraftingCompass } from "react-icons/fa";
 
 import "./toolbar.css";
@@ -61,7 +62,7 @@ const tools = [
 ];
 
 class Toolbar extends Component {
-  state = { activeTool: "", showDrawing: false };
+  state = { activeTool: "", showDrawing: false, showAnnotationList: false };
 
   //Tools are initialized in viewport.jsx since they are activated on elements. I don't really like this logic, we shall think of a better way.
 
@@ -101,6 +102,11 @@ class Toolbar extends Component {
       mouseButtonMask: mouseMask
     });
     this.setState({ showDrawing: false });
+  };
+
+  handleAnnotationListClick = () => {
+    const showStatus = this.state.showAnnotationList;
+    this.setState({ showAnnotationList: !showStatus });
   };
 
   invert = () => {
@@ -339,7 +345,11 @@ class Toolbar extends Component {
             <span>Eraser</span>
           </div>
         </div>
-        <div tabIndex="14" className="toolbarSectionButton">
+        <div
+          tabIndex="14"
+          className="toolbarSectionButton"
+          onClick={this.handleAnnotationListClick}
+        >
           <div className="toolContainer">
             <FaRegFolderOpen />
           </div>
@@ -464,6 +474,9 @@ class Toolbar extends Component {
               </div>
             </div>
           </Draggable>
+        )}
+        {this.state.showAnnotationList && (
+          <AnnotationList onClick={this.handleAnnotationListClick} />
         )}
       </div>
     );

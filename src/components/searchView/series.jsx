@@ -6,7 +6,7 @@ import treeTableHOC from "react-table/lib/hoc/treeTable";
 import Annotations from "./annotations";
 import { getSeries } from "../../services/seriesServices";
 import { connect } from "react-redux";
-import { getAnnotationListData } from "../annotationList/action";
+import { getAnnotationListData } from "../annotationsList/action";
 import "react-table/react-table.css";
 
 const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -236,11 +236,9 @@ class Series extends Component {
 
   checkSerieExists = selected => {
     const openSeries = Object.values(this.props.newSeries);
-    console.log(openSeries);
     let isSerieOpen = false;
     if (openSeries.length > 0) {
       for (let serie of openSeries) {
-        console.log(serie);
         if (serie.seriesUID === selected) {
           isSerieOpen = true;
           break;
