@@ -21,8 +21,7 @@ class ListItem extends React.Component {
   handleCheckboxClick = e => {
     const { seriesUID } = this.props.serie;
     const { value, checked } = e.target;
-    console.log(value, checked);
-    updateAnnotation(seriesUID);
+    this.props.dispatch(updateAnnotation(seriesUID, value, checked));
   };
 
   render = () => {

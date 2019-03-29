@@ -1,7 +1,8 @@
 import {
   LOAD_ANNOTATIONS,
   LOAD_ANNOTATIONS_SUCCESS,
-  LOAD_ANNOTATIONS_ERROR
+  LOAD_ANNOTATIONS_ERROR,
+  UPDATE_ANNOTATION
 } from "./types";
 
 const initialState = {
@@ -36,6 +37,18 @@ const asyncReducer = (state = initialState, action) => {
       return Object.assign({}, state, {
         loading: false,
         error: action.error
+      });
+    case UPDATE_ANNOTATION:
+      const { serie, annotation, isDisplayed } = action.payload;
+      const newAnn = { annotation };
+      return Object.assign({}, state, {
+        aimsList: {
+          ...state.aimsList,
+          [serie]: {
+            ...state.aimsList[serie],
+            [annotation]: { ...state.aimsList[serie][annotation], isDisplayed }
+          }
+        }
       });
     default:
       return state;

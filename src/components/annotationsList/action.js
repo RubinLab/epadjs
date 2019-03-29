@@ -45,10 +45,10 @@ export const viewPortFullError = error => {
   };
 };
 
-export const updateAnnotation = (serie, annotation, isDisplayed, showFlag) => {
+export const updateAnnotation = (serie, annotation, isDisplayed) => {
   return {
     type: UPDATE_ANNOTATION,
-    payload: { serie, annotation, isDisplayed, showFlag }
+    payload: { serie, annotation, isDisplayed }
   };
 };
 
