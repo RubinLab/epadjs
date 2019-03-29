@@ -14,16 +14,66 @@
 
 .annList-dropdown__container {
   display: inline-flex;
+  margin-bottom: 1rem;
+
   /* flex-direction: row; */
 }
 
 .annList-header {
   display: flex;
   justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
 .annList-close {
   /* align-self: right; */
   cursor: pointer;
   font: 3rem;
+}
+.-serieButton__container {
+  display: flex;
+  justify-content: space-evenly;
+  margin: 0.2rem;
+}
+
+.annList-serieButton {
+  background-color: #333;
+  width: 90%;
+  max-width: 100%;
+  border: none;
+  height: 2.5rem;
+  display: inline-flex;
+  margin: 0 auto;
+}
+
+.annList-serieButton:hover {
+  transform: scale(1.05);
+}
+.-serieButton__icon {
+  margin-right: 0.5rem;
+}
+
+.-serieButton__container {
+  display: flex;
+  flex-direction: column;
+}
+
+.-annotation__checkbox {
+  margin-right: 0.5rem;
+}
+
+.-annotation__checkbox input {
+  margin: 0px;
+}
+
+.-annotation__container {
+  display: flex;
+  margin-bottom: 0.2rem;
+  height: 1.3rem;
+  /* margin-left: 0.5rem 1rem; */
+  /* flex-direction: column; */
+}
+
+.annList-annotations {
+  margin: 0.2rem 0.5rem 0.5rem 2rem;
 }

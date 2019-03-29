@@ -2,7 +2,8 @@ import {
   LOAD_ANNOTATIONS,
   LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
-  VIEWPORT_FULL_ERROR
+  VIEWPORT_FULL_ERROR,
+  UPDATE_ANNOTATION
 } from "./types";
 import { getSeries } from "../../services/seriesServices";
 import { getStudies } from "../../services/studyServices";
@@ -44,6 +45,13 @@ export const viewPortFullError = error => {
   };
 };
 
+export const updateAnnotation = (serie, annotation, isDisplayed, showFlag) => {
+  return {
+    type: UPDATE_ANNOTATION,
+    payload: { serie, annotation, isDisplayed, showFlag }
+  };
+};
+
 const getAimListFields = aims => {
   const result = {};
   aims.forEach((aim, index) => {
@@ -51,6 +59,7 @@ const getAimListFields = aims => {
     result[aim.uniqueIdentifier.root] = {
       json: aim,
       isDisplayed: true,
+      showLabel: true,
       cornerStoneTools: []
     };
   });
@@ -66,9 +75,9 @@ const getRequiredFields = (arr, type, selectedID) => {
         const { studyUID, studyDescription } = element;
         obj = { studyUID, studyDescription };
       } else if (type === "serie") {
-        const { seriesUID, seriesDescription } = element;
+        const { seriesUID, seriesDescription, studyUID } = element;
         const isDisplayed = seriesUID === selectedID;
-        obj = { seriesUID, seriesDescription, isDisplayed };
+        obj = { seriesUID, seriesDescription, studyUID, isDisplayed };
       } else {
         const { seriesUID, name, aimID, comment } = element;
         const isDisplayed = seriesUID === selectedID;
@@ -171,7 +180,13 @@ export const getAnnotationListData = (viewport, serie, study) => {
     const { projectID, patientID, patientName, seriesUID, studyUID } =
       serie || study;
     const selectedID = serie.seriesUID;
-    let summaryData = { seriesUID, projectID, patientID, patientName };
+    let summaryData = {
+      seriesUID,
+      projectID,
+      patientID,
+      patientName,
+      studyUID
+    };
     let aimsData = {};
     // make call to get study and populate the studies data
     try {
