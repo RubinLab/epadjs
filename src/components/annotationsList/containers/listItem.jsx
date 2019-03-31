@@ -10,7 +10,6 @@ class ListItem extends React.Component {
   state = { isOpen: false };
 
   componentDidMount = () => {
-    console.log("serie?", this.props.serie);
     this.setState({ isOpen: this.props.serie.isDisplayed });
   };
 
@@ -19,13 +18,14 @@ class ListItem extends React.Component {
   };
 
   handleCheckboxClick = e => {
-    const { seriesUID } = this.props.serie;
+    const { seriesUID, studyUID } = this.props.serie;
     const { value, checked } = e.target;
-    this.props.dispatch(updateAnnotation(seriesUID, value, checked));
+    this.props.dispatch(updateAnnotation(seriesUID, studyUID, value, checked));
   };
 
   render = () => {
-    const { seriesDescription } = this.props.serie;
+    const { seriesDescription, seriesUID, studyUID } = this.props.serie;
+    console.log();
     return (
       <div className="-serieButton__container">
         <button className="annList-serieButton">
@@ -43,10 +43,7 @@ class ListItem extends React.Component {
           <span className="-serieButton__value">{seriesDescription}</span>
         </button>
         {this.state.isOpen && (
-          <Annotations
-            annotations={this.props.serie.annotations}
-            handleCheck={this.handleCheckboxClick}
-          />
+          <Annotations handleCheck={this.handleCheckboxClick} />
         )}
       </div>
     );

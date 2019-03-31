@@ -39,16 +39,37 @@ const asyncReducer = (state = initialState, action) => {
         error: action.error
       });
     case UPDATE_ANNOTATION:
-      const { serie, annotation, isDisplayed } = action.payload;
-      const newAnn = { annotation };
+      const { serie, study, annotation, isDisplayed } = action.payload;
+      const openSeriesArr = Object.values(state.openSeries);
+      let index;
+      for (let i = 0; i < openSeriesArr.length; i++) {
+        if (openSeriesArr[i].seriesUID === serie) {
+          index = i;
+          openSeriesArr[i]["studies"][study]["series"][serie]["annotations"][
+            annotation
+          ].isDisplayed = isDisplayed;
+        }
+      }
+      console.log("openSeries[index]", openSeriesArr[index]);
+      const newOpenSeries = {
+        ...state.openSeries,
+        [index]: openSeriesArr[index]
+      };
+      console.log("newOne", newOpenSeries);
+
+      console.log("checking ann", annotation);
       return Object.assign({}, state, {
         aimsList: {
           ...state.aimsList,
           [serie]: {
             ...state.aimsList[serie],
-            [annotation]: { ...state.aimsList[serie][annotation], isDisplayed }
+            [annotation]: {
+              ...state.aimsList[serie][annotation],
+              isDisplayed
+            }
           }
-        }
+        },
+        openSeries: newOpenSeries
       });
     default:
       return state;

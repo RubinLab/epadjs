@@ -1,13 +1,27 @@
 import React from "react";
+import { connect } from "react-redux";
 import ListItem from "./listItem";
 
-//series array will be passed
-const list = ({ series }) => {
+const list = ({ series, activePort }) => {
   const seriesMenu = [];
-  series.forEach(serie => {
+  let displayedSeries;
+  const studiesArr = Object.values(series[activePort].studies);
+  studiesArr.forEach(element => {
+    if (element.studyUID === series[activePort].studyUID) {
+      displayedSeries = Object.values(element["series"]);
+    }
+  });
+  displayedSeries.forEach(serie => {
     seriesMenu.push(<ListItem serie={serie} key={serie.seriesUID} />);
   });
   return <div>{seriesMenu}</div>;
 };
 
-export default list;
+const mapStateToProps = state => {
+  return {
+    series: state.annotationsListReducer.openSeries,
+    activePort: state.annotationsListReducer.activePort
+  };
+};
+
+export default connect(mapStateToProps)(list);

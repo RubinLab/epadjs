@@ -45,10 +45,10 @@ export const viewPortFullError = error => {
   };
 };
 
-export const updateAnnotation = (serie, annotation, isDisplayed) => {
+export const updateAnnotation = (serie, study, annotation, isDisplayed) => {
   return {
     type: UPDATE_ANNOTATION,
-    payload: { serie, annotation, isDisplayed }
+    payload: { serie, study, annotation, isDisplayed }
   };
 };
 
@@ -67,23 +67,25 @@ const getAimListFields = aims => {
 };
 
 const getRequiredFields = (arr, type, selectedID) => {
-  let result = [];
+  let result = {};
   if (arr) {
     arr.forEach(element => {
       let obj;
       if (type === "study") {
         const { studyUID, studyDescription } = element;
         obj = { studyUID, studyDescription };
+        result[studyUID] = obj;
       } else if (type === "serie") {
         const { seriesUID, seriesDescription, studyUID } = element;
         const isDisplayed = seriesUID === selectedID;
         obj = { seriesUID, seriesDescription, studyUID, isDisplayed };
+        result[seriesUID] = obj;
       } else {
         const { seriesUID, name, aimID, comment } = element;
         const isDisplayed = seriesUID === selectedID;
         obj = { seriesUID, name, aimID, comment, isDisplayed };
+        result[aimID] = obj;
       }
-      result.push(obj);
     });
   }
   return result;
@@ -96,6 +98,9 @@ const getStudiesData = async (dataObj, projectID, patientID) => {
         ResultSet: { Result: studies }
       }
     } = await getStudies(projectID, patientID);
+    //create an empty object to be "studies" property in the data
+    //iterate over the studies array create key/value pairs
+    console.log("mine", studies);
     dataObj["studies"] = getRequiredFields(studies, "study");
     return new Promise((resolve, reject) => {
       resolve(dataObj);
@@ -195,7 +200,8 @@ export const getAnnotationListData = (viewport, serie, study) => {
       dispatch(annotationsLoadingError(error));
     }
     // make call to get series and populate studies with series data
-    const studies = summaryData["studies"];
+    const studies = Object.values(summaryData["studies"]);
+    console.log("mine studies after object.values", studies);
     studies.forEach(async study => {
       let series;
       try {
@@ -207,7 +213,8 @@ export const getAnnotationListData = (viewport, serie, study) => {
         );
         study.series = series;
         //make call to get annotations and populate series annotations data
-        study.series.forEach(async serie => {
+        const seriesArr = Object.values(study.series);
+        seriesArr.forEach(async serie => {
           try {
             const annotations = await getAnnotationData(
               projectID,

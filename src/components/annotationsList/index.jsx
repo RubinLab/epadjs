@@ -11,7 +11,8 @@ class AnnotationsList extends React.Component {
   componentDidMount = () => {
     let displayedSeries = [];
     const { series, activePort } = this.props;
-    series[activePort].studies.forEach(element => {
+    const studiesArr = Object.values(series[activePort].studies);
+    studiesArr.forEach(element => {
       if (element.studyUID === series[activePort].studyUID) {
         displayedSeries = element["series"];
       }
@@ -33,7 +34,7 @@ class AnnotationsList extends React.Component {
           display={series[activePort]}
           changeStudy={this.handleStudyChange}
         />
-        <List series={this.state.displayedSeries} />
+        <List />
       </div>
     );
   };

@@ -4,7 +4,8 @@ import "../annotationsList.css";
 const dropDownMenu = ({ display, changeStudy }) => {
   const optionsArr = [];
   let selectedStudy = "";
-  display.studies.forEach(study => {
+  const studiesArr = Object.values(display.studies);
+  studiesArr.forEach(study => {
     let value = study.studyDescription.trim().replace(/\^/g, " ");
     value = value.length === 0 ? "Unnamed study" : value;
     if (study.studyUID === display.studyUID) {
