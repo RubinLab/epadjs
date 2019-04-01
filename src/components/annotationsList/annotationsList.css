@@ -43,11 +43,14 @@
   border: none;
   height: 2.5rem;
   display: inline-flex;
+  flex-direction: row;
   margin: 0 auto;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .annList-serieButton:hover {
-  transform: scale(1.05);
+  transform: scale(1.1);
 }
 .-serieButton__icon {
   margin-right: 0.5rem;
@@ -77,3 +80,15 @@
 .annList-annotations {
   margin: 0.2rem 0.5rem 0.5rem 2rem;
 }
+
+.-serieButton__checkbox-container {
+  width: 10%;
+  margin: 0.5rem;
+}
+
+.-serieButton__value {
+  cursor: pointer;
+}
+/* .-serieButton__checkbox {
+  margin: 0.5rem;
+} */

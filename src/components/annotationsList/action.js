@@ -3,7 +3,8 @@ import {
   LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
   VIEWPORT_FULL_ERROR,
-  UPDATE_ANNOTATION
+  UPDATE_ANNOTATION,
+  TOGGLE_ALL_ANNOTATIONS
 } from "./types";
 import { getSeries } from "../../services/seriesServices";
 import { getStudies } from "../../services/studyServices";
@@ -52,10 +53,16 @@ export const updateAnnotation = (serie, study, annotation, isDisplayed) => {
   };
 };
 
+export const toggleAllAnnotations = (serieID, studyID, displayStatus) => {
+  return {
+    type: TOGGLE_ALL_ANNOTATIONS,
+    payload: { serieID, studyID, displayStatus }
+  };
+};
+
 const getAimListFields = aims => {
   const result = {};
   aims.forEach((aim, index) => {
-    // console.log(index);
     result[aim.uniqueIdentifier.root] = {
       json: aim,
       isDisplayed: true,
@@ -100,7 +107,6 @@ const getStudiesData = async (dataObj, projectID, patientID) => {
     } = await getStudies(projectID, patientID);
     //create an empty object to be "studies" property in the data
     //iterate over the studies array create key/value pairs
-    console.log("mine", studies);
     dataObj["studies"] = getRequiredFields(studies, "study");
     return new Promise((resolve, reject) => {
       resolve(dataObj);
@@ -181,7 +187,6 @@ export const getAnnotationListData = (viewport, serie, study) => {
   return async (dispatch, getState) => {
     // create an object with patient details
     dispatch(loadAnnotations());
-    // console.log("serie data", serie);
     const { projectID, patientID, patientName, seriesUID, studyUID } =
       serie || study;
     const selectedID = serie.seriesUID;
@@ -201,7 +206,6 @@ export const getAnnotationListData = (viewport, serie, study) => {
     }
     // make call to get series and populate studies with series data
     const studies = Object.values(summaryData["studies"]);
-    console.log("mine studies after object.values", studies);
     studies.forEach(async study => {
       let series;
       try {

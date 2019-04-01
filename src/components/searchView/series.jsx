@@ -239,9 +239,11 @@ class Series extends Component {
     let isSerieOpen = false;
     if (openSeries.length > 0) {
       for (let serie of openSeries) {
-        if (serie.seriesUID === selected) {
-          isSerieOpen = true;
-          break;
+        if (serie) {
+          if (serie.seriesUID === selected) {
+            isSerieOpen = true;
+            break;
+          }
         }
       }
     }

@@ -11,7 +11,6 @@ const dropDownMenu = ({ display, changeStudy }) => {
     if (study.studyUID === display.studyUID) {
       selectedStudy = study.studyUID;
     }
-    console.log("selected", selectedStudy);
     optionsArr.push(
       <option key={study.studyUID} value={study.studyUID}>
         {value}

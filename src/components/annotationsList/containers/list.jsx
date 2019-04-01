@@ -12,7 +12,13 @@ const list = ({ series, activePort }) => {
     }
   });
   displayedSeries.forEach(serie => {
-    seriesMenu.push(<ListItem serie={serie} key={serie.seriesUID} />);
+    seriesMenu.push(
+      <ListItem
+        serie={serie}
+        activeSerie={series[activePort]}
+        key={serie.seriesUID}
+      />
+    );
   });
   return <div>{seriesMenu}</div>;
 };
