@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { getImageIds } from "../../services/seriesServices";
+import { getAnnotations } from "../../services/annotationServices";
 import { wadoUrl } from "../../config.json";
+import Aim from "../../utils/Aim";
 //import ImageScrollbar from "./imageScrollbar";
 
 import "./viewport.css";
@@ -53,10 +55,8 @@ class ViewportSeg extends Component {
     this.onImageRendered = this.onImageRendered.bind(this);
     this.updateViewport = this.updateViewport.bind(this);
 
-    const scrollToIndex = this.cornerstoneTools.import("util/scrollToIndex");
-
     this.state = {
-      series: { ...this.props },
+      series: { ...this.props.serie },
       images: {},
       imageIds: [],
       viewport: "",
@@ -116,6 +116,12 @@ class ViewportSeg extends Component {
     const patientName = image.data.string("x00100010");
     const modality = image.data.string("x00080060");
     const seriesDescription = image.data.string("x0008103e");
+    console.log(
+      this.cornerstone.metaData.get(
+        "generalSeriesModule",
+        this.stack.imageIds[this.stack.currentImageIdIndex]
+      )
+    );
     const studyTime = this.formatTime(image.data.string("x00080030"));
     var rotation = "";
     if (Math.round(viewport.rotation) > 0)
@@ -217,11 +223,12 @@ class ViewportSeg extends Component {
   }
 
   async getImages() {
+    console.log(this.state.series);
     const {
       data: {
         ResultSet: { Result: urls }
       }
-    } = await getImageIds({ ...this.state.series }); //get the Wado image ids for this series
+    } = await getImageIds(this.state.series); //get the Wado image ids for this series
     urls.map(url => {
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
@@ -241,6 +248,12 @@ class ViewportSeg extends Component {
 
   async componentDidMount() {
     await this.getImages();
+    const { data: imageAnnotations } = await getAnnotations(
+      { ...this.state.series },
+      { json: true }
+    );
+    const aim = Aim.parse(imageAnnotations);
+    console.log(aim);
     this.loadDisplayImage();
     this.state.viewport.addEventListener(
       "cornerstoneimagerendered",
@@ -281,7 +294,7 @@ class ViewportSeg extends Component {
     );
     this.cornerstone.enable(element);
 
-    this.cornerstone.loadImage(this.state.imageIds[0]).then(image => {
+    this.cornerstone.loadAndCacheImage(this.state.imageIds[0]).then(image => {
       // first image
       this.cornerstone.displayImage(element, image);
       //this.cornerstoneTools.orientationMarkers.enable(element);

@@ -133,16 +133,45 @@ class Toolbar extends Component {
   };
 
   probe = () => {
-    this.disableAllTools();
+    /*console.log(this.props.cornerstoneTools);
+    const element = document.getElementById(this.props.activeVP);
+    console.log(
+      this.props.cornerstoneTools.getElementToolStateManager(element)
+    );*/
+    console.log("Saving state");
+    const element = [document.getElementById(this.props.activeVP)];
+    //var appState = this.props.cornerstoneTools.getToolState(element);
+    //var serializedState = JSON.stringify(appState);
+    //var parsed = JSON.parse(appState);
+    console.log(this.props.cornerstoneTools.state);
+    console.log(this.dxm);
+    this.dxm[
+      "wadouri:http://epad-dev6.stanford.edu:8080/epad/wado/?requestType=WADO&studyUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.949&seriesUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.950&objectUID=1.3.12.2.1107.5.8.2.484849.837749.68675556.2004110916031631&contentType=application%2Fdicom"
+    ].Length.data[0].handles.textBox = "";
+    console.log(this.dxm);
+    this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+      this.dxm
+    );
+    /*this.disableAllTools();
     const elements = document.getElementsByClassName("cs");
     for (var i = 0; i < elements.length; i++) {
       this.props.cornerstoneTools.probe.activate(elements[i], 1);
-    }
+    }*/
   };
 
   anotate = () => {
     this.disableAllTools();
     this.setState({ showDrawing: !this.state.showDrawing });
+    console.log(
+      this.props.cornerstoneTools.globalImageIdSpecificToolStateManager
+        .toolState[
+        "wadouri:http://epad-dev6.stanford.edu:8080/epad/wado/?requestType=WADO&studyUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.949&seriesUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.950&objectUID=1.3.12.2.1107.5.8.2.484849.837749.68675556.2004110916031631&contentType=application%2Fdicom"
+      ]
+    );
+    this.dxm = {
+      ...this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState()
+    };
+    console.log(this.dxm);
   };
 
   point = () => {
@@ -157,12 +186,24 @@ class Toolbar extends Component {
     //var serializedState = JSON.stringify(appState);
     //var parsed = JSON.parse(appState);
     console.log(this.props.cornerstoneTools.state);
+    console.log(this.dxm);
+    this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+      this.dxm
+    );
   };
 
   line = () => {
     this.disableAllTools();
     const element = document.getElementById(this.props.activeVP);
     this.props.cornerstoneTools.length.activate(element, 1);
+  };
+
+  erase = () => {
+    const elem = document.getElementById(this.props.activeVP);
+    this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.clear(
+      elem
+    );
+    console.log(this.props.cornerstoneTools);
   };
 
   render() {
@@ -309,7 +350,8 @@ class Toolbar extends Component {
           id="probe"
           tabIndex="10"
           className="toolbarSectionButton"
-          onClick={() => this.setToolActive("Probe")}
+          onClick={this.probe}
+          //onClick={() => this.setToolActive("Probe")}
         >
           <div className="toolContainer">
             <TiPipette />
@@ -335,7 +377,8 @@ class Toolbar extends Component {
           id="eraser"
           tabIndex="13"
           className="toolbarSectionButton"
-          onClick={() => this.setToolActive("Eraser")}
+          onClick={this.erase}
+          //onClick={() => this.setToolActive("Eraser")}
         >
           <div className="toolContainer">
             <TiPencil />

@@ -58,7 +58,7 @@ class DisplayView extends Component {
   }
 
   testAimEditor = () => {
-    console.log(document.getElementById("cont"));
+    //console.log(document.getElementById("cont"));
     var instanceAimEditor = new aim.AimEditor(document.getElementById("cont"));
     var myA = [
       { key: "BeaulieuBoneTemplate_rev18", value: aim.myjson },
@@ -150,7 +150,7 @@ class DisplayView extends Component {
               cs={this.props.cornerstone}
               csT={this.props.cornerstoneTools}
               setClick={click => (this.updateViewport = click)}
-              {...serie}
+              serie={serie}
             />
           </div>
         ))}
