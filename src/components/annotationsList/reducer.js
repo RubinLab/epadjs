@@ -3,15 +3,19 @@ import {
   LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
   UPDATE_ANNOTATION,
-  TOGGLE_ALL_ANNOTATIONS
+  VIEWPORT_FULL_PROJECTS,
+  TOGGLE_ALL_ANNOTATIONS,
+  CHANGE_ACTIVE_PORT,
+  LOAD_SERIE_SUCCESS
 } from "./types";
 
 const initialState = {
-  openSeries: {},
+  openSeries: [],
   aimsList: {},
   activePort: null,
   loading: false,
-  error: false
+  error: false,
+  patients: {}
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -22,17 +26,30 @@ const asyncReducer = (state = initialState, action) => {
         error: false
       });
     case LOAD_ANNOTATIONS_SUCCESS:
-      const indexKey = Object.keys(state.openSeries).length;
-      const { id } = action.payload;
+      let indexKey = state.openSeries.length;
+      let { summaryData, aimsData, serID, patID, ref } = action.payload;
       return Object.assign({}, state, {
-        openSeries: {
-          ...state.openSeries,
-          [indexKey]: action.payload.summaryData
+        patients: {
+          ...state.patients,
+          [patID]: summaryData
         },
         loading: false,
         error: false,
         activePort: indexKey,
-        aimsList: { ...state.aimsList, [id]: action.payload.aimsData }
+        aimsList: { ...state.aimsList, [serID]: aimsData },
+        openSeries: state.openSeries.concat([ref])
+      });
+    case LOAD_SERIE_SUCCESS:
+      let indexNum = state.openSeries.length;
+      return Object.assign({}, state, {
+        loading: false,
+        error: false,
+        activePort: indexNum,
+        aimsList: {
+          ...state.aimsList,
+          [action.payload.serID]: action.payload.aimsData
+        },
+        openSeries: state.openSeries.concat([action.payload.ref])
       });
     case LOAD_ANNOTATIONS_ERROR:
       return Object.assign({}, state, {
@@ -40,9 +57,9 @@ const asyncReducer = (state = initialState, action) => {
         error: action.error
       });
     case UPDATE_ANNOTATION:
-      const { serie, study, annotation, isDisplayed } = action.payload;
+      let { serie, study, annotation, isDisplayed } = action.payload;
       let newOpenSeries = Object.assign({}, state.openSeries);
-      const openSeriesArr = Object.values(newOpenSeries);
+      let openSeriesArr = Object.values(newOpenSeries);
       let index;
       for (let i = 0; i < openSeriesArr.length; i++) {
         if (openSeriesArr[i].seriesUID === serie) {
@@ -69,15 +86,17 @@ const asyncReducer = (state = initialState, action) => {
         },
         openSeries: newOpenSeries
       });
+    case CHANGE_ACTIVE_PORT:
+      return Object.assign({}, state, { activePort: action.portIndex });
     case TOGGLE_ALL_ANNOTATIONS:
       //update openSeries
-      const { serieID, studyID, displayStatus } = action.payload;
+      let { serieID, studyID, displayStatus } = action.payload;
       let changedOpenSeries = { ...state.openSeries };
-      const openSeriesArray = Object.values(changedOpenSeries);
+      let openSeriesArray = Object.values(changedOpenSeries);
 
       for (let i = 0; i < openSeriesArray.length; i++) {
         if (openSeriesArray[i].seriesUID === serieID) {
-          const annotations =
+          let annotations =
             openSeriesArray[i]["studies"][studyID]["series"][serieID][
               "annotations"
             ];
@@ -91,7 +110,7 @@ const asyncReducer = (state = initialState, action) => {
       }
 
       //update aimlist
-      const newAimList = Object.assign({}, state.aimsList);
+      let newAimList = Object.assign({}, state.aimsList);
       for (let aim in newAimList[serieID]) {
         newAimList[serieID][aim].isDisplayed = displayStatus;
       }

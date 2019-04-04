@@ -1,29 +1,27 @@
 import React from "react";
 import "../annotationsList.css";
 
-const dropDownMenu = ({ display, changeStudy }) => {
+const dropDownMenu = ({ display, selectedStudy, changeStudy }) => {
   const optionsArr = [];
-  let selectedStudy = "";
-  const studiesArr = Object.values(display.studies);
+  const studiesArr = Object.values(display);
   studiesArr.forEach(study => {
-    let value = study.studyDescription.trim().replace(/\^/g, " ");
-    value = value.length === 0 ? "Unnamed study" : value;
-    if (study.studyUID === display.studyUID) {
-      selectedStudy = study.studyUID;
-    }
+    let desc = study.studyDescription.trim().replace(/\^/g, " ");
+    desc = desc.length === 0 ? "Unnamed study" : desc;
+    console.log(selectedStudy, study.studyUID, desc);
     optionsArr.push(
       <option key={study.studyUID} value={study.studyUID}>
-        {value}
+        {desc}
       </option>
     );
   });
+
   return (
     <div className="annList-dropdown__container">
       <label>
         {optionsArr.length === 1 ? "Study: " : "Studies: "}
         <select
           className="annList-dropdown"
-          defaultValue={selectedStudy}
+          value={selectedStudy}
           onChange={changeStudy}
         >
           {optionsArr}

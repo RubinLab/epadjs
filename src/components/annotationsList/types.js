@@ -3,7 +3,10 @@ export const LOAD_ANNOTATIONS_SUCCESS =
   "epadjs/annotationList/LOAD_ANNOTATIONS_SUCCESS";
 export const LOAD_ANNOTATIONS_ERROR =
   "epadjs/annotationList/LOAD_ANNOTATIONS_ERROR";
-export const VIEWPORT_FULL_ERROR = "epadjs/annotationList/VIEWPORT_FULL_ERROR";
+export const VIEWPORT_FULL_PROJECTS =
+  "epadjs/annotationList/VIEWPORT_FULL_PROJECTS";
 export const UPDATE_ANNOTATION = "epadjs/annotationList/UPDATE_ANNOTATION";
 export const TOGGLE_ALL_ANNOTATIONS =
   "epadjs/annotationList/TOGGLE_ALL_ANNOTATIONS";
+export const CHANGE_ACTIVE_PORT = "epadjs/annotationList/CHANGE_ACTIVE_PORT";
+export const LOAD_SERIE_SUCCESS = "epadjs/annotationList/CHANGE_ACTIVE_PORT";

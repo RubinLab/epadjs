@@ -6,44 +6,44 @@ import Header from "./containers/header";
 import List from "./containers/list";
 
 class AnnotationsList extends React.Component {
-  state = { displayedSeries: [] };
+  state = { selectedStudy: "" };
 
   componentDidMount = () => {
-    let displayedSeries = [];
-    const { series, activePort } = this.props;
-    const studiesArr = Object.values(series[activePort].studies);
-    studiesArr.forEach(element => {
-      if (element.studyUID === series[activePort].studyUID) {
-        displayedSeries = element["series"];
-      }
-    });
-    this.setState({ displayedSeries });
+    const { openSeries, activePort, patients } = this.props;
+    const patient = openSeries[activePort].patientID;
+    const studiesArr = patients[patient].studies;
+    this.setState({ selectedStudy: openSeries[activePort].studyUID });
   };
 
-  handleStudyChange = () => {
-    console.log("study changed");
+  handleStudyChange = e => {
+    console.log("study changed", e.target.value);
+    this.setState({ selectedStudy: e.target.value });
   };
 
   render = () => {
-    const { series, activePort, onClick } = this.props;
+    const { openSeries, activePort, onClick, patients } = this.props;
+    const patient = patients[openSeries[activePort].patientID];
     //find the study in the studies array
     return (
       <div className="annList">
-        <Header name={series[activePort].patientName} onClick={onClick} />
+        <Header name={patient.patientName} onClick={onClick} />
         <Dropdown
-          display={series[activePort]}
+          display={patient.studies}
+          selectedStudy={this.state.selectedStudy}
           changeStudy={this.handleStudyChange}
         />
-        <List />
+        {/* <List /> */}
       </div>
     );
   };
 }
 
 const mapStateToProps = state => {
+  const { openSeries, activePort, patients } = state.annotationsListReducer;
   return {
-    series: state.annotationsListReducer.openSeries,
-    activePort: state.annotationsListReducer.activePort
+    openSeries,
+    activePort,
+    patients
   };
 };
 export default connect(mapStateToProps)(AnnotationsList);

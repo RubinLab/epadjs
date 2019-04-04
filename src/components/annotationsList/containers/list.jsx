@@ -6,16 +6,21 @@ const list = ({ series, activePort }) => {
   const seriesMenu = [];
   let displayedSeries;
   const studiesArr = Object.values(series[activePort].studies);
+
+  // console.log("series actieveport", series[activePort]);
   studiesArr.forEach(element => {
+    // console.log(element.studyUID, series[activePort].studyUID);
     if (element.studyUID === series[activePort].studyUID) {
       displayedSeries = Object.values(element["series"]);
     }
   });
+  // console.log(displayedSeries);
+
   displayedSeries.forEach(serie => {
     seriesMenu.push(
       <ListItem
         serie={serie}
-        activeSerie={series[activePort]}
+        // activeSerie={series[activePort]}
         key={serie.seriesUID}
       />
     );

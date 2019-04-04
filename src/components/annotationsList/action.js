@@ -2,9 +2,11 @@ import {
   LOAD_ANNOTATIONS,
   LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
-  VIEWPORT_FULL_ERROR,
+  VIEWPORT_FULL_PROJECTS,
   UPDATE_ANNOTATION,
-  TOGGLE_ALL_ANNOTATIONS
+  TOGGLE_ALL_ANNOTATIONS,
+  CHANGE_ACTIVE_PORT,
+  LOAD_SERIE_SUCCESS
 } from "./types";
 import { getSeries } from "../../services/seriesServices";
 import { getStudies } from "../../services/studyServices";
@@ -19,30 +21,28 @@ import {
 // in the client check the length of the viewports
 // change the active port if user clicks another port
 
-export const loadAnnotations = () => {
+const loadAnnotations = () => {
   return {
     type: LOAD_ANNOTATIONS
   };
 };
 
-export const annotationsLoaded = (summaryData, aimsData, id) => {
+const annotationsLoaded = (summaryData, aimsData, serID, patID, ref) => {
   return {
     type: LOAD_ANNOTATIONS_SUCCESS,
-    payload: { summaryData, aimsData, id }
+    payload: { summaryData, aimsData, serID, patID, ref }
   };
 };
 
-export const annotationsLoadingError = error => {
+const annotationsLoadingError = error => {
   return {
-    type: LOAD_ANNOTATIONS_ERROR,
-    error
+    type: LOAD_ANNOTATIONS_ERROR
   };
 };
 
-export const viewPortFullError = error => {
+export const viewPortFull = () => {
   return {
-    type: VIEWPORT_FULL_ERROR,
-    error
+    type: VIEWPORT_FULL_PROJECTS
   };
 };
 
@@ -57,6 +57,20 @@ export const toggleAllAnnotations = (serieID, studyID, displayStatus) => {
   return {
     type: TOGGLE_ALL_ANNOTATIONS,
     payload: { serieID, studyID, displayStatus }
+  };
+};
+
+export const changeActivePort = portIndex => {
+  return {
+    type: CHANGE_ACTIVE_PORT,
+    portIndex
+  };
+};
+
+export const singleSerieLoaded = (ref, aimsData, serID) => {
+  return {
+    type: LOAD_SERIE_SUCCESS,
+    payload: { ref, aimsData, serID }
   };
 };
 
@@ -84,13 +98,13 @@ const getRequiredFields = (arr, type, selectedID) => {
         result[studyUID] = obj;
       } else if (type === "serie") {
         const { seriesUID, seriesDescription, studyUID } = element;
-        const isDisplayed = seriesUID === selectedID;
-        obj = { seriesUID, seriesDescription, studyUID, isDisplayed };
+        // const isDisplayed = seriesUID === selectedID;
+        obj = { seriesUID, seriesDescription, studyUID };
         result[seriesUID] = obj;
       } else {
-        const { seriesUID, name, aimID, comment } = element;
-        const isDisplayed = seriesUID === selectedID;
-        obj = { seriesUID, name, aimID, comment, isDisplayed };
+        const { seriesUID, studyUID, name, aimID, comment } = element;
+        // const isDisplayed = seriesUID === selectedID;
+        obj = { seriesUID, studyUID, name, aimID, comment };
         result[aimID] = obj;
       }
     });
@@ -182,14 +196,38 @@ const getAnnotationData = async (
   }
 };
 
+export const getSingleSerie = (serie, annotation) => {
+  return async (dispatch, getState) => {
+    dispatch(loadAnnotations());
+    let aimsData = {};
+    let { patientID, studyUID, seriesUID, projectID } = serie;
+    let reference = {
+      patientID,
+      studyUID,
+      seriesUID,
+      aimID: annotation
+    };
+    try {
+      const {
+        data: {
+          imageAnnotations: { ImageAnnotationCollection: aims }
+        }
+      } = await getAnnotationsJSON(projectID, patientID, studyUID, seriesUID);
+      // console.log("aims", aims);
+      aimsData = getAimListFields(aims);
+    } catch (err) {
+      dispatch(annotationsLoadingError(err));
+    }
+    dispatch(singleSerieLoaded(reference, aimsData, seriesUID));
+  };
+};
 // gets one patient and all the studys->series->annotations under it
-export const getAnnotationListData = (viewport, serie, study) => {
+export const getAnnotationListData = (serie, annotation) => {
   return async (dispatch, getState) => {
     // create an object with patient details
     dispatch(loadAnnotations());
-    const { projectID, patientID, patientName, seriesUID, studyUID } =
-      serie || study;
-    const selectedID = serie.seriesUID;
+    let { projectID, patientID, patientName, seriesUID, studyUID } = serie;
+    let selectedID = serie.seriesUID;
     let summaryData = {
       seriesUID,
       projectID,
@@ -237,6 +275,13 @@ export const getAnnotationListData = (viewport, serie, study) => {
       }
     });
 
+    const reference = {
+      patientID,
+      studyUID,
+      seriesUID,
+      aimID: annotation
+    };
+
     try {
       const {
         data: {
@@ -248,6 +293,8 @@ export const getAnnotationListData = (viewport, serie, study) => {
     } catch (err) {
       dispatch(annotationsLoadingError(err));
     }
-    dispatch(annotationsLoaded(summaryData, aimsData, seriesUID));
+    dispatch(
+      annotationsLoaded(summaryData, aimsData, seriesUID, patientID, reference)
+    );
   };
 };

@@ -6,7 +6,11 @@ import treeTableHOC from "react-table/lib/hoc/treeTable";
 import Annotations from "./annotations";
 import { getSeries } from "../../services/seriesServices";
 import { connect } from "react-redux";
-import { getAnnotationListData } from "../annotationsList/action";
+import {
+  getAnnotationListData,
+  getSingleSerie
+} from "../annotationsList/action";
+import AlertGridFull from "./alertGridFull";
 import "react-table/react-table.css";
 
 const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -44,7 +48,8 @@ class Series extends Component {
       selection: [],
       selectAll: false,
       selectType: "checkbox",
-      expanded: {}
+      expanded: {},
+      showGridFullWarning: false
     };
   }
 
@@ -234,23 +239,48 @@ class Series extends Component {
     this.props.history.push("/display");
   };
 
-  checkSerieExists = selected => {
-    const openSeries = Object.values(this.props.newSeries);
+  handleCloseModal = () => {
+    this.setState({ showGridFullWarning: false });
+  };
+
+  dispatchSerieDisplay = selected => {
+    console.log("selected row info", selected);
+    // console.log(this.props);
+    const openSeries = Object.values(this.props.openSeries);
     let isSerieOpen = false;
+    //check if there is enough space in the grid
+    let isGridFull = openSeries.length === 6;
+    //check if the serie is already open
     if (openSeries.length > 0) {
       for (let serie of openSeries) {
         if (serie) {
-          if (serie.seriesUID === selected) {
+          if (serie.seriesUID === selected.seriesUID) {
             isSerieOpen = true;
             break;
           }
         }
       }
     }
-    return isSerieOpen;
+    if (!isSerieOpen) {
+      console.log("serie is not open");
+      if (isGridFull) {
+        this.setState({ showGridFullWarning: true });
+      } else {
+        console.log("grid is NOT full");
+        if (this.props.patients[selected.patientID]) {
+          console.log("patient exists make a reference object to the patient");
+          this.props.dispatch(getSingleSerie(selected));
+        } else {
+          console.log("patient doesn't exist dispatch get big data");
+          this.props.dispatch(getAnnotationListData(selected));
+          console.log("make a reference to the newly received patient");
+        }
+      }
+    }
   };
 
   render() {
+    console.log(this.state);
     const {
       toggleSelection,
       toggleAll,
@@ -271,55 +301,59 @@ class Series extends Component {
       onExpandedChange
     };
     return (
-      <div>
-        {this.state.data ? (
-          <SelectTreeTable
-            data={this.state.data}
-            columns={this.state.columns}
-            defaultPageSize={this.state.data.length}
-            ref={r => (this.selectTable = r)}
-            className="-striped -highlight"
-            freezWhenExpanded={false}
-            showPagination={false}
-            {...extraProps}
-            getTdProps={(state, rowInfo, column, instance) => {
-              return {
-                onDoubleClick: (e, handleOriginal) => {
-                  this.handleSelectSeries(rowInfo.original);
-                  if (handleOriginal) {
-                    handleOriginal();
+      <>
+        <div>
+          {this.state.data ? (
+            <SelectTreeTable
+              data={this.state.data}
+              columns={this.state.columns}
+              defaultPageSize={this.state.data.length}
+              ref={r => (this.selectTable = r)}
+              className="-striped -highlight"
+              freezWhenExpanded={false}
+              showPagination={false}
+              {...extraProps}
+              getTdProps={(state, rowInfo, column, instance) => {
+                return {
+                  onDoubleClick: (e, handleOriginal) => {
+                    this.handleSelectSeries(rowInfo.original);
+                    if (handleOriginal) {
+                      handleOriginal();
+                    }
+                    this.dispatchSerieDisplay(rowInfo.original);
                   }
-                  if (!this.checkSerieExists(rowInfo.original.seriesUID)) {
-                    this.props.dispatch(
-                      getAnnotationListData(2, rowInfo.original)
-                    );
-                  }
-                }
-              };
-            }}
-            SubComponent={row => {
-              return (
-                <div style={{ paddingLeft: "20px" }}>
-                  <Annotations
-                    projectId={this.props.projectId}
-                    subjectId={this.props.subjectId}
-                    studyId={row.original.studyUID}
-                    seriesId={row.original.seriesUID}
-                  />
-                </div>
-              );
-            }}
-          />
-        ) : null}
-      </div>
+                };
+              }}
+              SubComponent={row => {
+                return (
+                  <div style={{ paddingLeft: "20px" }}>
+                    <Annotations
+                      projectId={this.props.projectId}
+                      subjectId={this.props.subjectId}
+                      studyId={row.original.studyUID}
+                      seriesId={row.original.seriesUID}
+                    />
+                  </div>
+                );
+              }}
+            />
+          ) : null}
+        </div>
+        {this.state.showGridFullWarning && (
+          <AlertGridFull onOK={this.handleCloseModal} />
+        )}
+      </>
     );
   }
 }
 
 const mapStateToProps = state => {
+  const { openSeries, patients, activePort } = state.annotationsListReducer;
   return {
     series: state.searchViewReducer.series,
-    newSeries: state.annotationsListReducer.openSeries
+    openSeries,
+    patients,
+    activePort
   };
 };
 
