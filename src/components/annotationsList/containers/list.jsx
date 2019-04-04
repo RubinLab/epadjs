@@ -2,10 +2,27 @@ import React from "react";
 import { connect } from "react-redux";
 import ListItem from "./listItem";
 
-const list = ({ series, activePort }) => {
+const list = ({ series, selectedSerie }) => {
   const seriesMenu = [];
-  let displayedSeries;
-  const studiesArr = Object.values(series[activePort].studies);
+  series.forEach(serie => {
+    seriesMenu.push(
+      <ListItem
+        serie={serie}
+        selected={selectedSerie === serie.seriesUID}
+        key={serie.seriesUID}
+      />
+    );
+  });
+  return <div>{seriesMenu}</div>;
+};
+
+export default list;
+
+/*
+const list = ({ series, selectedSerie }) => {
+  // const seriesMenu = [];
+  // let displayedSeries;
+  // const studiesArr = Object.values(series[activePort].studies);
 
   // console.log("series actieveport", series[activePort]);
   studiesArr.forEach(element => {
@@ -27,12 +44,12 @@ const list = ({ series, activePort }) => {
   });
   return <div>{seriesMenu}</div>;
 };
+*/
+// const mapStateToProps = state => {
+//   return {
+//     series: state.annotationsListReducer.openSeries,
+//     activePort: state.annotationsListReducer.activePort
+//   };
+// };
 
-const mapStateToProps = state => {
-  return {
-    series: state.annotationsListReducer.openSeries,
-    activePort: state.annotationsListReducer.activePort
-  };
-};
-
-export default connect(mapStateToProps)(list);
+// export default connect(mapStateToProps)(list);

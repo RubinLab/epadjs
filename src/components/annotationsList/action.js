@@ -46,10 +46,16 @@ export const viewPortFull = () => {
   };
 };
 
-export const updateAnnotation = (serie, study, annotation, isDisplayed) => {
+export const updateAnnotation = (
+  serie,
+  study,
+  patient,
+  annotation,
+  isDisplayed
+) => {
   return {
     type: UPDATE_ANNOTATION,
-    payload: { serie, study, annotation, isDisplayed }
+    payload: { serie, study, patient, annotation, isDisplayed }
   };
 };
 
@@ -97,14 +103,14 @@ const getRequiredFields = (arr, type, selectedID) => {
         obj = { studyUID, studyDescription };
         result[studyUID] = obj;
       } else if (type === "serie") {
-        const { seriesUID, seriesDescription, studyUID } = element;
+        const { seriesUID, seriesDescription, studyUID, patientID } = element;
         // const isDisplayed = seriesUID === selectedID;
-        obj = { seriesUID, seriesDescription, studyUID };
+        obj = { seriesUID, seriesDescription, studyUID, patientID };
         result[seriesUID] = obj;
       } else {
         const { seriesUID, studyUID, name, aimID, comment } = element;
-        // const isDisplayed = seriesUID === selectedID;
-        obj = { seriesUID, studyUID, name, aimID, comment };
+        const isDisplayed = seriesUID === selectedID;
+        obj = { seriesUID, studyUID, name, aimID, comment, isDisplayed };
         result[aimID] = obj;
       }
     });
@@ -229,11 +235,11 @@ export const getAnnotationListData = (serie, annotation) => {
     let { projectID, patientID, patientName, seriesUID, studyUID } = serie;
     let selectedID = serie.seriesUID;
     let summaryData = {
-      seriesUID,
+      // seriesUID,
       projectID,
       patientID,
-      patientName,
-      studyUID
+      patientName
+      // studyUID
     };
     let aimsData = {};
     // make call to get study and populate the studies data

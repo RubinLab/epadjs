@@ -244,7 +244,6 @@ class Series extends Component {
   };
 
   dispatchSerieDisplay = selected => {
-    console.log("selected row info", selected);
     // console.log(this.props);
     const openSeries = Object.values(this.props.openSeries);
     let isSerieOpen = false;
@@ -261,26 +260,24 @@ class Series extends Component {
         }
       }
     }
+    //serie is not already open;
     if (!isSerieOpen) {
-      console.log("serie is not open");
+      //if the grid is full show warning
       if (isGridFull) {
         this.setState({ showGridFullWarning: true });
       } else {
-        console.log("grid is NOT full");
+        //if grid is NOT full check if patient data exists
         if (this.props.patients[selected.patientID]) {
-          console.log("patient exists make a reference object to the patient");
           this.props.dispatch(getSingleSerie(selected));
+          //if patient doesn't exist dispatch to get data
         } else {
-          console.log("patient doesn't exist dispatch get big data");
           this.props.dispatch(getAnnotationListData(selected));
-          console.log("make a reference to the newly received patient");
         }
       }
     }
   };
 
   render() {
-    console.log(this.state);
     const {
       toggleSelection,
       toggleAll,

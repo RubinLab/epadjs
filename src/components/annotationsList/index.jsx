@@ -6,33 +6,41 @@ import Header from "./containers/header";
 import List from "./containers/list";
 
 class AnnotationsList extends React.Component {
-  state = { selectedStudy: "" };
-
+  constructor(props) {
+    super(props);
+    this.state = { selectedStudy: "", serieList: [] };
+    this.openSeries = this.props.openSeries;
+    this.activePort = this.props.activePort;
+    this.patients = this.props.patients;
+    this.patient = this.patients[this.openSeries[this.activePort].patientID];
+  }
   componentDidMount = () => {
-    const { openSeries, activePort, patients } = this.props;
-    const patient = openSeries[activePort].patientID;
-    const studiesArr = patients[patient].studies;
-    this.setState({ selectedStudy: openSeries[activePort].studyUID });
+    const selectedStudy = this.openSeries[this.activePort].studyUID;
+    this.setState({ selectedStudy });
+
+    const serieList = Object.values(this.patient.studies[selectedStudy].series);
+    this.setState({ serieList });
   };
 
   handleStudyChange = e => {
-    console.log("study changed", e.target.value);
-    this.setState({ selectedStudy: e.target.value });
+    const newSerieList = Object.values(
+      this.patient.studies[e.target.value].series
+    );
+    this.setState({ selectedStudy: e.target.value, serieList: newSerieList });
   };
 
   render = () => {
-    const { openSeries, activePort, onClick, patients } = this.props;
-    const patient = patients[openSeries[activePort].patientID];
+    const selectedSerie = this.openSeries[this.activePort].seriesUID;
     //find the study in the studies array
     return (
       <div className="annList">
-        <Header name={patient.patientName} onClick={onClick} />
+        <Header name={this.patient.patientName} onClick={this.props.onClick} />
         <Dropdown
-          display={patient.studies}
+          display={this.patient.studies}
           selectedStudy={this.state.selectedStudy}
           changeStudy={this.handleStudyChange}
         />
-        {/* <List /> */}
+        <List series={this.state.serieList} selectedSerie={selectedSerie} />
       </div>
     );
   };

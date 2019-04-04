@@ -13,13 +13,12 @@ import {
 
 //single serie will be passed
 class ListItem extends React.Component {
-  state = { isOpen: false, collapseAnnList: false, showAnnotations: true };
+  state = { isSerieOpen: false, collapseAnnList: false };
 
   componentDidMount = () => {
-    console.log("props", this.props);
     this.setState({
-      isOpen: this.props.serie.isDisplayed,
-      collapseAnnList: this.props.serie.isDisplayed
+      isSerieOpen: this.props.selected,
+      collapseAnnList: this.props.selected
     });
   };
 
@@ -28,17 +27,18 @@ class ListItem extends React.Component {
   };
 
   handleAnnotationClick = e => {
-    const { seriesUID, studyUID } = this.props.serie;
+    const { seriesUID, studyUID, patientID } = this.props.serie;
     const { value, checked } = e.target;
-    console.log(e.target.dataset);
-    this.props.dispatch(updateAnnotation(seriesUID, studyUID, value, checked));
-    console.log("it worked");
+    this.props.dispatch(
+      updateAnnotation(seriesUID, studyUID, patientID, value, checked)
+    );
   };
 
   handleToggleSerie = e => {
+    //select de select all anotations
     const { seriesUID, studyUID } = this.props.serie;
-    //if isOpen
-    if (this.state.isOpen) {
+    //if isSerieOpen
+    if (this.state.isSerieOpen) {
       this.props.dispatch(
         toggleAllAnnotations(seriesUID, studyUID, e.target.checked)
       );
@@ -49,66 +49,37 @@ class ListItem extends React.Component {
   };
 
   render = () => {
-    const { seriesDescription, seriesUID, studyUID } = this.props.serie;
-    console.log();
+    const {
+      seriesDescription,
+      seriesUID,
+      studyUID,
+      patientID
+    } = this.props.serie;
+    let desc =
+      seriesDescription.length === 0 ? "unnamed serie" : seriesDescription;
     return (
-      <div className="-serieButton__container">
-        <button className="annList-serieButton" onClick={this.handleCollapse}>
-          {this.state.collapseAnnList ? (
-            <FaMinus
-              className="-serieButton__icon"
-              onClick={this.handleCollapse}
-            />
-          ) : (
-            <FaPlus
-              className="-serieButton__icon"
-              onClick={this.handleCollapse}
-            />
-          )}
-          <span className="-serieButton__value">{seriesDescription}</span>
-        </button>
+      <>
+        <div className="-serieButton__container" onClick={this.handleCollapse}>
+          <button className="annList-serieButton">
+            {this.state.collapseAnnList ? (
+              <FaMinus className="-serieButton__icon" />
+            ) : (
+              <FaPlus className="-serieButton__icon" />
+            )}
+            <span className="-serieButton__value">{desc}</span>
+          </button>
+        </div>
         {this.state.collapseAnnList && (
           <Annotations
             handleCheck={this.handleAnnotationClick}
-            annotations={this.props.serie.annotations}
-            seriesUID={this.props.serie.seriesUID}
+            seriesUID={seriesUID}
+            studyUID={studyUID}
+            patient={patientID}
           />
         )}
-      </div>
+      </>
     );
   };
 }
 
-const mapStateToProps = state => {
-  return {
-    aimsList: state.annotationsListReducer.aimsList,
-    series: state.annotationsListReducer.openSeries,
-    activePort: state.annotationsListReducer.activePort
-  };
-};
-export default connect(mapStateToProps)(ListItem);
-
-// <div className="-serieButton__container">
-//   <div className="annList-serieButton">
-//     <div className="-serieButton__checkbox-container">
-//       <input
-//         className="-serieButton__checkbox"
-//         type="checkbox"
-//         name="serieButton"
-//         value={seriesUID}
-//         onChange={this.handleToggleSerie}
-//         checked={this.state.showAnnotations}
-//       />
-//     </div>
-//     <div className="-serieButton__value" onClick={this.handleCollapse}>
-//       {seriesDescription}
-//     </div>
-//   </div>
-//   {this.state.collapseAnnList && (
-//     <Annotations
-//       handleCheck={this.handleAnnotationClick}
-//       annotations={this.props.serie.annotations}
-//       seriesUID={this.props.serie.seriesUID}
-//     />
-//   )}
-// </div>
+export default connect()(ListItem);

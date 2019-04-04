@@ -7,7 +7,6 @@ const dropDownMenu = ({ display, selectedStudy, changeStudy }) => {
   studiesArr.forEach(study => {
     let desc = study.studyDescription.trim().replace(/\^/g, " ");
     desc = desc.length === 0 ? "Unnamed study" : desc;
-    console.log(selectedStudy, study.studyUID, desc);
     optionsArr.push(
       <option key={study.studyUID} value={study.studyUID}>
         {desc}

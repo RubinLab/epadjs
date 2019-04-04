@@ -57,34 +57,34 @@ const asyncReducer = (state = initialState, action) => {
         error: action.error
       });
     case UPDATE_ANNOTATION:
-      let { serie, study, annotation, isDisplayed } = action.payload;
-      let newOpenSeries = Object.assign({}, state.openSeries);
-      let openSeriesArr = Object.values(newOpenSeries);
-      let index;
-      for (let i = 0; i < openSeriesArr.length; i++) {
-        if (openSeriesArr[i].seriesUID === serie) {
-          index = i;
-          openSeriesArr[i]["studies"][study]["series"][serie]["annotations"][
-            annotation
-          ].isDisplayed = isDisplayed;
+      let { serie, study, patient, annotation, isDisplayed } = action.payload;
+      let updatedPatient = Object.assign({}, state.patients[patient]);
+
+      let updatedSerieAimArr = Object.values(
+        updatedPatient.studies[study].series[serie].annotations
+      );
+      updatedSerieAimArr.forEach(ann => {
+        if (ann.aimID === annotation) {
+          ann.isDisplayed = isDisplayed;
         }
-      }
-      newOpenSeries = {
-        ...state.openSeries,
-        [index]: openSeriesArr[index]
+      });
+
+      const newPatients = {
+        ...state.patients,
+        [patient]: updatedPatient
       };
       return Object.assign({}, state, {
-        aimsList: {
-          ...state.aimsList,
-          [serie]: {
-            ...state.aimsList[serie],
-            [annotation]: {
-              ...state.aimsList[serie][annotation],
-              isDisplayed
-            }
-          }
-        },
-        openSeries: newOpenSeries
+        //   aimsList: {
+        //     ...state.aimsList,
+        //     [serie]: {
+        //       ...state.aimsList[serie],
+        //       [annotation]: {
+        //         ...state.aimsList[serie][annotation],
+        //         isDisplayed
+        //       }
+        //     }
+        //   },
+        patients: newPatients
       });
     case CHANGE_ACTIVE_PORT:
       return Object.assign({}, state, { activePort: action.portIndex });
