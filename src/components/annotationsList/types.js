@@ -9,4 +9,4 @@ export const UPDATE_ANNOTATION = "epadjs/annotationList/UPDATE_ANNOTATION";
 export const TOGGLE_ALL_ANNOTATIONS =
   "epadjs/annotationList/TOGGLE_ALL_ANNOTATIONS";
 export const CHANGE_ACTIVE_PORT = "epadjs/annotationList/CHANGE_ACTIVE_PORT";
-export const LOAD_SERIE_SUCCESS = "epadjs/annotationList/CHANGE_ACTIVE_PORT";
+export const LOAD_SERIE_SUCCESS = "epadjs/annotationList/LOAD_SERIE_SUCCESS";

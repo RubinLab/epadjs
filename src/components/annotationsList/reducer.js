@@ -41,6 +41,24 @@ const asyncReducer = (state = initialState, action) => {
       });
     case LOAD_SERIE_SUCCESS:
       let indexNum = state.openSeries.length;
+      const ptID = action.payload.ref.patientID;
+      const stID = action.payload.ref.studyUID;
+      const srID = action.payload.ref.seriesUID;
+      const { ann } = action.payload;
+      const updatedPatient = Object.assign(
+        {},
+        state.patients[ptID].studies[stID].series[srID]
+      );
+      console.log("updatedPatient", updatedPatient);
+      // let displayStatus = ann ? ann === aim.uniqueIdentifier.root : !ann;
+
+      if (ann) {
+        updatedPatient.annotations[ann].isDisplayed = true;
+      } else {
+        for (let annotation in updatedPatient.annotations) {
+          updatedPatient.annotations[annotation].isDisplayed = true;
+        }
+      }
       return Object.assign({}, state, {
         loading: false,
         error: false,
@@ -58,7 +76,7 @@ const asyncReducer = (state = initialState, action) => {
       });
     case UPDATE_ANNOTATION:
       let { serie, study, patient, annotation, isDisplayed } = action.payload;
-      let updatedPatient = Object.assign({}, state.patients[patient]);
+      updatedPatient = Object.assign({}, state.patients[patient]);
 
       let updatedSerieAimArr = Object.values(
         updatedPatient.studies[study].series[serie].annotations
@@ -74,50 +92,50 @@ const asyncReducer = (state = initialState, action) => {
         [patient]: updatedPatient
       };
       return Object.assign({}, state, {
-        //   aimsList: {
-        //     ...state.aimsList,
-        //     [serie]: {
-        //       ...state.aimsList[serie],
-        //       [annotation]: {
-        //         ...state.aimsList[serie][annotation],
-        //         isDisplayed
-        //       }
-        //     }
-        //   },
+        aimsList: {
+          ...state.aimsList,
+          [serie]: {
+            ...state.aimsList[serie],
+            [annotation]: {
+              ...state.aimsList[serie][annotation],
+              isDisplayed
+            }
+          }
+        },
         patients: newPatients
       });
     case CHANGE_ACTIVE_PORT:
       return Object.assign({}, state, { activePort: action.portIndex });
-    case TOGGLE_ALL_ANNOTATIONS:
-      //update openSeries
-      let { serieID, studyID, displayStatus } = action.payload;
-      let changedOpenSeries = { ...state.openSeries };
-      let openSeriesArray = Object.values(changedOpenSeries);
+    // case TOGGLE_ALL_ANNOTATIONS:
+    //   //update openSeries
+    //   let { serieID, studyID, displayStatus } = action.payload;
+    //   let changedOpenSeries = { ...state.openSeries };
+    //   let openSeriesArray = Object.values(changedOpenSeries);
 
-      for (let i = 0; i < openSeriesArray.length; i++) {
-        if (openSeriesArray[i].seriesUID === serieID) {
-          let annotations =
-            openSeriesArray[i]["studies"][studyID]["series"][serieID][
-              "annotations"
-            ];
-          for (let annotation in annotations) {
-            annotations[annotation].isDisplayed = displayStatus;
-          }
-          changedOpenSeries[i] = openSeriesArray[i];
-        } else {
-          changedOpenSeries[i] = openSeriesArray[i];
-        }
-      }
+    //   for (let i = 0; i < openSeriesArray.length; i++) {
+    //     if (openSeriesArray[i].seriesUID === serieID) {
+    //       let annotations =
+    //         openSeriesArray[i]["studies"][studyID]["series"][serieID][
+    //           "annotations"
+    //         ];
+    //       for (let annotation in annotations) {
+    //         annotations[annotation].isDisplayed = displayStatus;
+    //       }
+    //       changedOpenSeries[i] = openSeriesArray[i];
+    //     } else {
+    //       changedOpenSeries[i] = openSeriesArray[i];
+    //     }
+    //   }
 
-      //update aimlist
-      let newAimList = Object.assign({}, state.aimsList);
-      for (let aim in newAimList[serieID]) {
-        newAimList[serieID][aim].isDisplayed = displayStatus;
-      }
-      return Object.assign({}, state, {
-        aimsList: newAimList,
-        openSeries: changedOpenSeries
-      });
+    //   //update aimlist
+    //   let newAimList = Object.assign({}, state.aimsList);
+    //   for (let aim in newAimList[serieID]) {
+    //     newAimList[serieID][aim].isDisplayed = displayStatus;
+    //   }
+    //   return Object.assign({}, state, {
+    //     aimsList: newAimList,
+    //     openSeries: changedOpenSeries
+    //   });
     default:
       return state;
   }

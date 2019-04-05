@@ -73,20 +73,22 @@ export const changeActivePort = portIndex => {
   };
 };
 
-export const singleSerieLoaded = (ref, aimsData, serID) => {
+export const singleSerieLoaded = (ref, aimsData, serID, ann) => {
   return {
     type: LOAD_SERIE_SUCCESS,
-    payload: { ref, aimsData, serID }
+    payload: { ref, aimsData, serID, ann }
   };
 };
 
-const getAimListFields = aims => {
+const getAimListFields = (aims, ann) => {
+  if (!Array.isArray(aims)) aims = [aims];
   const result = {};
   aims.forEach((aim, index) => {
+    let displayStatus = ann ? ann === aim.uniqueIdentifier.root : !ann;
     result[aim.uniqueIdentifier.root] = {
       json: aim,
-      isDisplayed: true,
-      showLabel: true,
+      isDisplayed: displayStatus,
+      showLabel: displayStatus,
       cornerStoneTools: []
     };
   });
@@ -103,9 +105,16 @@ const getRequiredFields = (arr, type, selectedID) => {
         obj = { studyUID, studyDescription };
         result[studyUID] = obj;
       } else if (type === "serie") {
-        const { seriesUID, seriesDescription, studyUID, patientID } = element;
+        // console.log("checking fields for projectid", element);
+        const {
+          seriesUID,
+          seriesDescription,
+          studyUID,
+          patientID,
+          projectID
+        } = element;
         // const isDisplayed = seriesUID === selectedID;
-        obj = { seriesUID, seriesDescription, studyUID, patientID };
+        obj = { seriesUID, seriesDescription, studyUID, patientID, projectID };
         result[seriesUID] = obj;
       } else {
         const { seriesUID, studyUID, name, aimID, comment } = element;
@@ -203,7 +212,9 @@ const getAnnotationData = async (
 };
 
 export const getSingleSerie = (serie, annotation) => {
+  console.log(serie, annotation);
   return async (dispatch, getState) => {
+    console.log("here");
     dispatch(loadAnnotations());
     let aimsData = {};
     let { patientID, studyUID, seriesUID, projectID } = serie;
@@ -219,12 +230,13 @@ export const getSingleSerie = (serie, annotation) => {
           imageAnnotations: { ImageAnnotationCollection: aims }
         }
       } = await getAnnotationsJSON(projectID, patientID, studyUID, seriesUID);
-      // console.log("aims", aims);
+      console.log("aims", aims);
       aimsData = getAimListFields(aims);
+      console.log("single serie data", aimsData);
     } catch (err) {
       dispatch(annotationsLoadingError(err));
     }
-    dispatch(singleSerieLoaded(reference, aimsData, seriesUID));
+    dispatch(singleSerieLoaded(reference, aimsData, seriesUID, annotation));
   };
 };
 // gets one patient and all the studys->series->annotations under it
@@ -294,7 +306,6 @@ export const getAnnotationListData = (serie, annotation) => {
           imageAnnotations: { ImageAnnotationCollection: aims }
         }
       } = await getAnnotationsJSON(projectID, patientID, studyUID, seriesUID);
-      // console.log("aims", aims);
       aimsData = getAimListFields(aims);
     } catch (err) {
       dispatch(annotationsLoadingError(err));
