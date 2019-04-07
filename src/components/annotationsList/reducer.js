@@ -6,7 +6,8 @@ import {
   VIEWPORT_FULL_PROJECTS,
   TOGGLE_ALL_ANNOTATIONS,
   CHANGE_ACTIVE_PORT,
-  LOAD_SERIE_SUCCESS
+  LOAD_SERIE_SUCCESS,
+  SHOW_ANNOTATION_WINDOW
 } from "./types";
 
 const initialState = {
@@ -15,7 +16,8 @@ const initialState = {
   activePort: null,
   loading: false,
   error: false,
-  patients: {}
+  patients: {},
+  listOpen: false
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -45,20 +47,22 @@ const asyncReducer = (state = initialState, action) => {
       const stID = action.payload.ref.studyUID;
       const srID = action.payload.ref.seriesUID;
       const { ann } = action.payload;
-      const updatedPatient = Object.assign(
-        {},
-        state.patients[ptID].studies[stID].series[srID]
-      );
-      console.log("updatedPatient", updatedPatient);
+      let changedPatient = Object.assign({}, state.patients[ptID]);
       // let displayStatus = ann ? ann === aim.uniqueIdentifier.root : !ann;
 
       if (ann) {
-        updatedPatient.annotations[ann].isDisplayed = true;
+        changedPatient.studies[stID].series[srID].annotations[
+          ann
+        ].isDisplayed = true;
       } else {
-        for (let annotation in updatedPatient.annotations) {
-          updatedPatient.annotations[annotation].isDisplayed = true;
+        for (let annotation in changedPatient.studies[stID].series[srID]
+          .annotations) {
+          changedPatient.studies[stID].series[srID].annotations[
+            annotation
+          ].isDisplayed = true;
         }
       }
+      const changedPatients = { ...state.patients, [ptID]: changedPatient };
       return Object.assign({}, state, {
         loading: false,
         error: false,
@@ -67,7 +71,8 @@ const asyncReducer = (state = initialState, action) => {
           ...state.aimsList,
           [action.payload.serID]: action.payload.aimsData
         },
-        openSeries: state.openSeries.concat([action.payload.ref])
+        openSeries: state.openSeries.concat([action.payload.ref]),
+        patients: changedPatients
       });
     case LOAD_ANNOTATIONS_ERROR:
       return Object.assign({}, state, {
@@ -76,7 +81,7 @@ const asyncReducer = (state = initialState, action) => {
       });
     case UPDATE_ANNOTATION:
       let { serie, study, patient, annotation, isDisplayed } = action.payload;
-      updatedPatient = Object.assign({}, state.patients[patient]);
+      let updatedPatient = Object.assign({}, state.patients[patient]);
 
       let updatedSerieAimArr = Object.values(
         updatedPatient.studies[study].series[serie].annotations
@@ -106,6 +111,8 @@ const asyncReducer = (state = initialState, action) => {
       });
     case CHANGE_ACTIVE_PORT:
       return Object.assign({}, state, { activePort: action.portIndex });
+    case SHOW_ANNOTATION_WINDOW:
+      return Object.assign({}, state, { listOpen: action.show });
     // case TOGGLE_ALL_ANNOTATIONS:
     //   //update openSeries
     //   let { serieID, studyID, displayStatus } = action.payload;

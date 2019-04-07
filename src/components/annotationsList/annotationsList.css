@@ -1,3 +1,13 @@
+#annList-modal {
+  display: inline-flex;
+  background: #3a3f44;
+  border: 0.2rem solid gray;
+  border-radius: 10px;
+  color: #d3d3d3;
+  /* min-width: 10rem; */
+  max-width: 5rem;
+}
+
 .annList {
   background-color: #3a3f44;
   padding: 0.5rem;
@@ -6,10 +16,9 @@
   flex-direction: column;
   position: relative;
   /* vertical-align: baseline; */
-  max-width: 30%;
+  max-width: 100%;
   overflow: scroll;
-  border: 0.2rem solid gray;
-  border-radius: 10px;
+  margin: auto;
 }
 
 .annList-dropdown__container {
@@ -77,10 +86,17 @@
   /* flex-direction: column; */
 }
 
-.annList-annotations {
+.annList-annotations,
+.-collapse-toogle {
   margin: 0.2rem 0.5rem 0.5rem 2rem;
 }
 
+.annotations-collapse {
+  max-width: 100%;
+  display: inline-flex;
+  justify-content: flex-start;
+  flex-direction: column;
+}
 .-serieButton__checkbox-container {
   width: 10%;
   margin: 0.5rem;
@@ -95,8 +111,8 @@
 
 .switch {
   border: 1px solid #ccc;
-  width: 50px;
-  height: 26px;
+  width: 3rem;
+  height: 1.5rem;
   border-radius: 13px;
   cursor: pointer;
   display: inline-block;
@@ -104,8 +120,8 @@
 .switch-toggle {
   border: 1px solid #999;
   box-shadow: 1px 1px 1px #ccc;
-  width: 25px;
-  height: 24px;
+  width: 1.5rem;
+  height: 1.3rem;
   left: 0;
   border-radius: 12px;
   background: #fff;
@@ -113,11 +129,26 @@
   transition: left 0.2s ease-in-out;
 }
 .switch.on {
-  background: blue;
+  background: #4a83f4;
 }
 .switch.on .switch-toggle {
-  left: 23px;
+  left: 1.3rem;
 }
 .switch.disabled {
   cursor: not-allowed;
+}
+
+/* .-collapse-toogleAnn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+} */
+
+.-collapse-toogle {
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  width: 100%;
 }

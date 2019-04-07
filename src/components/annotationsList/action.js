@@ -5,8 +5,10 @@ import {
   VIEWPORT_FULL_PROJECTS,
   UPDATE_ANNOTATION,
   TOGGLE_ALL_ANNOTATIONS,
+  TOGGLE_ALL_LABELS,
   CHANGE_ACTIVE_PORT,
-  LOAD_SERIE_SUCCESS
+  LOAD_SERIE_SUCCESS,
+  SHOW_ANNOTATION_WINDOW
 } from "./types";
 import { getSeries } from "../../services/seriesServices";
 import { getStudies } from "../../services/studyServices";
@@ -20,6 +22,10 @@ import {
 // test cases 2- select a serie
 // in the client check the length of the viewports
 // change the active port if user clicks another port
+
+export const showAnnotationWindow = show => {
+  return { type: SHOW_ANNOTATION_WINDOW, show };
+};
 
 const loadAnnotations = () => {
   return {
@@ -62,6 +68,13 @@ export const updateAnnotation = (
 export const toggleAllAnnotations = (serieID, studyID, displayStatus) => {
   return {
     type: TOGGLE_ALL_ANNOTATIONS,
+    payload: { serieID, studyID, displayStatus }
+  };
+};
+
+export const toggleAllLabels = (serieID, studyID, displayStatus) => {
+  return {
+    type: TOGGLE_ALL_LABELS,
     payload: { serieID, studyID, displayStatus }
   };
 };
@@ -212,9 +225,7 @@ const getAnnotationData = async (
 };
 
 export const getSingleSerie = (serie, annotation) => {
-  console.log(serie, annotation);
   return async (dispatch, getState) => {
-    console.log("here");
     dispatch(loadAnnotations());
     let aimsData = {};
     let { patientID, studyUID, seriesUID, projectID } = serie;
@@ -230,9 +241,7 @@ export const getSingleSerie = (serie, annotation) => {
           imageAnnotations: { ImageAnnotationCollection: aims }
         }
       } = await getAnnotationsJSON(projectID, patientID, studyUID, seriesUID);
-      console.log("aims", aims);
       aimsData = getAimListFields(aims);
-      console.log("single serie data", aimsData);
     } catch (err) {
       dispatch(annotationsLoadingError(err));
     }

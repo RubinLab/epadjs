@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import MetaData from "./metaData";
 import Draggable from "react-draggable";
-
+// import { Rnd } from "react-rnd";
 import { FaLocationArrow } from "react-icons/fa";
 import { FiSun } from "react-icons/fi";
 import { FiSunset } from "react-icons/fi";
@@ -18,7 +18,9 @@ import { TiPencil } from "react-icons/ti";
 import { MdWbIridescent } from "react-icons/md";
 import AnnotationList from "../annotationsList";
 //import { FaDraftingCompass } from "react-icons/fa";
-
+import ResizeAndDrag from "../management/common/resizeAndDrag";
+import CustomModal from "../management/common/resizeAndDrag";
+import { showAnnotationWindow } from "../annotationsList/action";
 import "./toolbar.css";
 import "../../font-icons/styles.css";
 
@@ -104,9 +106,12 @@ class Toolbar extends Component {
     this.setState({ showDrawing: false });
   };
 
-  handleAnnotationListClick = () => {
-    const showStatus = this.state.showAnnotationList;
-    this.setState({ showAnnotationList: !showStatus });
+  handleAnnotationListClick = async () => {
+    // const showStatus = this.state.showAnnotationList;
+    await this.setState(state => ({
+      showAnnotationList: !state.showAnnotationList
+    }));
+    this.props.dispatch(showAnnotationWindow(this.state.showAnnotationList));
   };
 
   invert = () => {
@@ -475,9 +480,11 @@ class Toolbar extends Component {
             </div>
           </Draggable>
         )}
-        {this.state.showAnnotationList && (
-          <AnnotationList onClick={this.handleAnnotationListClick} />
-        )}
+        {/* {this.state.showAnnotationList && (
+          <CustomModal className="annList-popup">
+            <AnnotationList onClick={this.handleAnnotationListClick} />
+          </CustomModal>
+        )} */}
       </div>
     );
   }

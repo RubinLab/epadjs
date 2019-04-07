@@ -8,6 +8,7 @@ import Annotations from "./annotations";
 import {
   updateAnnotation,
   toggleAllAnnotations,
+  toggleAllLabels,
   changeActivePort,
   getAnnotationListData,
   getSingleSerie
@@ -18,14 +19,16 @@ class ListItem extends React.Component {
   state = {
     isSerieOpen: false,
     collapseAnnList: false,
-    displayAnnotations: false
+    displayAnnotations: false,
+    displayLabels: false
   };
 
   componentDidMount = () => {
     this.setState({
       isSerieOpen: this.props.selected,
       collapseAnnList: this.props.selected,
-      displayAnnotations: this.props.selected
+      displayAnnotations: this.props.selected,
+      displayLabels: this.props.selected
     });
   };
 
@@ -87,6 +90,22 @@ class ListItem extends React.Component {
     //dispatch yap ve o serie icin viewport ac openSeriese ekle
   };
 
+  handleToggleLabels = e => {
+    //select de select all anotations
+    const { seriesUID, studyUID } = this.props.serie;
+    //if isSerieOpen
+    if (this.state.isSerieOpen) {
+      this.props.dispatch(
+        toggleAllLabels(seriesUID, studyUID, e.target.checked)
+      );
+      this.setState(state => ({
+        displayLabels: !state.displayLabels
+      }));
+    } else {
+    }
+    //dispatch yap ve o serie icin viewport ac openSeriese ekle
+  };
+
   render = () => {
     const {
       seriesDescription,
@@ -96,7 +115,11 @@ class ListItem extends React.Component {
     } = this.props.serie;
     let desc =
       seriesDescription.length === 0 ? "unnamed serie" : seriesDescription;
-    const numOfAnn = Object.values(this.props.serie.annotations).length;
+
+    const numOfAnn = this.props.serie.annotations
+      ? Object.values(this.props.serie.annotations).length
+      : 0;
+    console.log(this.state.displayAnnotations);
     return (
       <>
         <div className="-serieButton__container" onClick={this.handleCollapse}>
@@ -112,18 +135,16 @@ class ListItem extends React.Component {
           </button>
         </div>
         {this.state.collapseAnnList && (
-          <div>
-            <Switch
-              on={this.state.displayAnnotations}
-              onClick={this.handleToggleSerie}
-            />
-            <Annotations
-              handleCheck={this.handleAnnotationClick}
-              seriesUID={seriesUID}
-              studyUID={studyUID}
-              patient={patientID}
-            />
-          </div>
+          <Annotations
+            handleCheck={this.handleAnnotationClick}
+            seriesUID={seriesUID}
+            studyUID={studyUID}
+            patient={patientID}
+            showAnns={this.state.displayAnnotations}
+            onToggleSerie={this.handleToggleSerie}
+            showLabels={this.state.displayLabels}
+            onToggleLabels={this.handleToggleLabels}
+          />
         )}
       </>
     );
@@ -136,3 +157,10 @@ const mapStateToProps = state => {
   };
 };
 export default connect(mapStateToProps)(ListItem);
+
+{
+  /* <label>
+  <span>Switch with default style</span>
+  <Switch onChange={this.handleChange} checked={this.state.checked} />
+</label>; */
+}

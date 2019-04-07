@@ -1,9 +1,11 @@
 import React from "react";
 import { connect } from "react-redux";
 import { BrowserRouter, withRouter } from "react-router-dom";
+import { Rnd } from "react-rnd";
 import Dropdown from "./containers/dropdown";
 import Header from "./containers/header";
 import List from "./containers/list";
+import CustomModal from "../management/common/resizeAndDrag";
 
 class AnnotationsList extends React.Component {
   constructor(props) {
@@ -12,6 +14,9 @@ class AnnotationsList extends React.Component {
     this.openSeries = this.props.openSeries;
     this.activePort = this.props.activePort;
     this.patients = this.props.patients;
+    console.log(this.patients);
+    console.log(this.props.openSeries[this.props.activePort]);
+    console.log(this.props.openSeries[this.props.activePort].patientID);
     this.patient = this.patients[this.openSeries[this.activePort].patientID];
   }
   componentDidMount = () => {
@@ -33,15 +38,20 @@ class AnnotationsList extends React.Component {
     const selectedSerie = this.openSeries[this.activePort].seriesUID;
     //find the study in the studies array
     return (
-      <div className="annList">
-        <Header name={this.patient.patientName} onClick={this.props.onClick} />
-        <Dropdown
-          display={this.patient.studies}
-          selectedStudy={this.state.selectedStudy}
-          changeStudy={this.handleStudyChange}
-        />
-        <List series={this.state.serieList} selectedSerie={selectedSerie} />
-      </div>
+      <Rnd id="annList-modal">
+        <div className="annList">
+          <Header
+            name={this.patient.patientName}
+            onClick={this.props.onClick}
+          />
+          <Dropdown
+            display={this.patient.studies}
+            selectedStudy={this.state.selectedStudy}
+            changeStudy={this.handleStudyChange}
+          />
+          <List series={this.state.serieList} selectedSerie={selectedSerie} />
+        </div>
+      </Rnd>
     );
   };
 }

@@ -1,14 +1,15 @@
-import React from 'react';
-import { Link, NavLink } from 'react-router-dom';
-import { FaCogs, FaCaretDown } from 'react-icons/fa';
-import logo from '../images/logo.png';
+import React from "react";
+import { Link, NavLink } from "react-router-dom";
+import { FaCogs, FaCaretDown } from "react-icons/fa";
+import logo from "../images/logo.png";
+import { connect } from "react-redux";
 
-const NavBar = ({ user, openGearMenu }) => {
+const NavBar = ({ user, openGearMenu, loading }) => {
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
         <Link className="navbar-brand-right nounderline pr-3 " to="#">
-          <img src={logo} alt={'logo'} width="25px" />
+          <img src={logo} alt={"logo"} width="25px" />
           ePAD
         </Link>
         <button
@@ -54,7 +55,7 @@ const NavBar = ({ user, openGearMenu }) => {
               <NavLink className="nav-link" to="/edit">
                 Edit
               </NavLink>
-            </li>{' '}
+            </li>{" "}
           </ul>
           <ul className="navbar-nav ml-auto">
             {!user && (
@@ -69,11 +70,11 @@ const NavBar = ({ user, openGearMenu }) => {
                 <li className="nav-item pull-right">
                   <div
                     className="nav-link"
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: "pointer" }}
                     onClick={openGearMenu}
                   >
-                    <FaCogs style={{ fontSize: '1.25rem' }} />
-                    <FaCaretDown style={{ fontSize: '1rem' }} />
+                    <FaCogs style={{ fontSize: "1.25rem" }} />
+                    <FaCaretDown style={{ fontSize: "1rem" }} />
                   </div>
                 </li>
                 <li className="nav-item pull-right">
@@ -86,6 +87,11 @@ const NavBar = ({ user, openGearMenu }) => {
                     Logout
                   </NavLink>
                 </li>
+                <li className="nav-item-right pull-right">
+                  <NavLink className="nav-link" to="/logout">
+                    {loading ? "loading" : "not loading"}
+                  </NavLink>
+                </li>
               </React.Fragment>
             )}
           </ul>
@@ -95,4 +101,9 @@ const NavBar = ({ user, openGearMenu }) => {
   );
 };
 
-export default NavBar;
+const mapStateToProps = state => {
+  return {
+    loading: state.annotationsListReducer.loading
+  };
+};
+export default connect(mapStateToProps)(NavBar);
