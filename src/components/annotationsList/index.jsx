@@ -6,18 +6,18 @@ import Dropdown from "./containers/dropdown";
 import Header from "./containers/header";
 import List from "./containers/list";
 import CustomModal from "../management/common/resizeAndDrag";
+import { showAnnotationWindow } from "../annotationsList/action";
 
 const style = {
   left: "70%",
-  "max-width": "30%",
-  "max-height": "100%"
+  maxWidth: "30%",
+  maxHeight: "100%"
   // color: "red"
 };
 
 class AnnotationsList extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { selectedStudy: "", serieList: [] };
     this.openSeries = this.props.openSeries;
     this.activePort = this.props.activePort;
     this.patients = this.props.patients;
@@ -27,7 +27,7 @@ class AnnotationsList extends React.Component {
     this.patient = this.patients[this.openSeries[this.activePort].patientID];
     this.state = {
       width: "20%",
-      x: 1100,
+      x: 1000,
       y: 50,
       selectedStudy: "",
       serieList: []
@@ -48,6 +48,10 @@ class AnnotationsList extends React.Component {
     this.setState({ selectedStudy: e.target.value, serieList: newSerieList });
   };
 
+  handleAnnotationListClick = async () => {
+    this.props.dispatch(showAnnotationWindow());
+  };
+
   render = () => {
     const selectedSerie = this.openSeries[this.activePort].seriesUID;
     //find the study in the studies array
@@ -64,7 +68,7 @@ class AnnotationsList extends React.Component {
         <div className="annList">
           <Header
             name={this.patient.patientName}
-            onClick={this.props.onClick}
+            onClick={this.handleAnnotationListClick}
           />
           <Dropdown
             display={this.patient.studies}

@@ -112,7 +112,8 @@ const asyncReducer = (state = initialState, action) => {
     case CHANGE_ACTIVE_PORT:
       return Object.assign({}, state, { activePort: action.portIndex });
     case SHOW_ANNOTATION_WINDOW:
-      return Object.assign({}, state, { listOpen: action.show });
+      const showStatus = state.listOpen;
+      return Object.assign({}, state, { listOpen: !showStatus });
     // case TOGGLE_ALL_ANNOTATIONS:
     //   //update openSeries
     //   let { serieID, studyID, displayStatus } = action.payload;

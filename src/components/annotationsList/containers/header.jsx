@@ -1,6 +1,6 @@
 import React from "react";
 import { FaTimes } from "react-icons/fa";
-import { IoMdCloseCircleOutline } from "react-icons/io";
+// import { IoMdCloseCircleOutline } from "react-icons/io";
 import "../annotationsList.css";
 
 const header = ({ name, onClick }) => {
@@ -9,7 +9,7 @@ const header = ({ name, onClick }) => {
       <h5 className="annList-title">Patient: {name}</h5>
       <div className="annList-close" onClick={onClick}>
         <div>
-          <IoMdCloseCircleOutline />
+          <FaTimes />
         </div>
       </div>
     </div>

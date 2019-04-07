@@ -23,7 +23,8 @@
 
 .annList-dropdown__container {
   display: inline-flex;
-  margin-bottom: 1rem;
+  margin-right: 1rem;
+  margin-left: 1rem;
 
   /* flex-direction: row; */
 }
@@ -32,12 +33,14 @@
   display: flex;
   justify-content: space-between;
   margin-bottom: 1rem;
+  margin-right: 1rem;
+  margin-left: 1rem;
 }
 
 .annList-close {
   /* align-self: right; */
   cursor: pointer;
-  font: 3rem;
+  font: 5rem;
 }
 .-serieButton__container {
   display: flex;

@@ -48,11 +48,11 @@ const annotations = ({
       <div className="annotations-collapse">
         <div className="-collapse-toggles">
           <label className="-collapse-toggle">
-            <span>{showAnns ? "Hide" : "Show"} Annotations</span>
+            <span>Show Annotations</span>
             <Switch on={showAnns} onClick={onToggleSerie} />
           </label>
           <label className="-collapse-toggle">
-            <span>{showLabels ? "Hide" : "Show"} Labels</span>
+            <span>Show Labels</span>
             <Switch on={showLabels} onClick={onToggleLabels} />
           </label>
         </div>

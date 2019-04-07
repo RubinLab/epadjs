@@ -64,7 +64,7 @@ const tools = [
 ];
 
 class Toolbar extends Component {
-  state = { activeTool: "", showDrawing: false, showAnnotationList: false };
+  state = { activeTool: "", showDrawing: false };
 
   //Tools are initialized in viewport.jsx since they are activated on elements. I don't really like this logic, we shall think of a better way.
 
@@ -111,7 +111,7 @@ class Toolbar extends Component {
     await this.setState(state => ({
       showAnnotationList: !state.showAnnotationList
     }));
-    this.props.dispatch(showAnnotationWindow(this.state.showAnnotationList));
+    this.props.dispatch(showAnnotationWindow());
   };
 
   invert = () => {
