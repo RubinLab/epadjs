@@ -7,6 +7,13 @@ import Header from "./containers/header";
 import List from "./containers/list";
 import CustomModal from "../management/common/resizeAndDrag";
 
+const style = {
+  left: "70%",
+  "max-width": "30%",
+  "max-height": "100%"
+  // color: "red"
+};
+
 class AnnotationsList extends React.Component {
   constructor(props) {
     super(props);
@@ -18,6 +25,13 @@ class AnnotationsList extends React.Component {
     console.log(this.props.openSeries[this.props.activePort]);
     console.log(this.props.openSeries[this.props.activePort].patientID);
     this.patient = this.patients[this.openSeries[this.activePort].patientID];
+    this.state = {
+      width: "20%",
+      x: 1100,
+      y: 50,
+      selectedStudy: "",
+      serieList: []
+    };
   }
   componentDidMount = () => {
     const selectedStudy = this.openSeries[this.activePort].studyUID;
@@ -38,7 +52,15 @@ class AnnotationsList extends React.Component {
     const selectedSerie = this.openSeries[this.activePort].seriesUID;
     //find the study in the studies array
     return (
-      <Rnd id="annList-modal">
+      <Rnd
+        id="annList-modal"
+        style={style}
+        size={{ width: this.state.width, height: this.state.height }}
+        position={{ x: this.state.x, y: this.state.y }}
+        onDragStop={(e, d) => {
+          this.setState({ x: d.x, y: d.y });
+        }}
+      >
         <div className="annList">
           <Header
             name={this.patient.patientName}

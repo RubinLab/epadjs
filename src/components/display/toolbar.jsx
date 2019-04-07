@@ -480,11 +480,6 @@ class Toolbar extends Component {
             </div>
           </Draggable>
         )}
-        {/* {this.state.showAnnotationList && (
-          <CustomModal className="annList-popup">
-            <AnnotationList onClick={this.handleAnnotationListClick} />
-          </CustomModal>
-        )} */}
       </div>
     );
   }

@@ -4,8 +4,8 @@
   border: 0.2rem solid gray;
   border-radius: 10px;
   color: #d3d3d3;
+  left: 80%;
   /* min-width: 10rem; */
-  max-width: 5rem;
 }
 
 .annList {
@@ -16,7 +16,7 @@
   flex-direction: column;
   position: relative;
   /* vertical-align: baseline; */
-  max-width: 100%;
+  width: 100%;
   overflow: scroll;
   margin: auto;
 }
@@ -87,8 +87,9 @@
 }
 
 .annList-annotations,
-.-collapse-toogle {
+.-collapse-toggles {
   margin: 0.2rem 0.5rem 0.5rem 2rem;
+  width: 90%;
 }
 
 .annotations-collapse {
@@ -145,8 +146,8 @@
   position: relative;
 } */
 
-.-collapse-toogle {
-  display: inline-flex;
+.-collapse-toggle {
+  display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;

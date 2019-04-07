@@ -46,14 +46,16 @@ const annotations = ({
   ) : (
     <div>
       <div className="annotations-collapse">
-        <label className="-collapse-toogle">
-          <span>{showAnns ? "Hide" : "Show"} Annotations</span>
-          <Switch on={showAnns} onClick={onToggleSerie} />
-        </label>
-        <label className="-collapse-toogle">
-          <span>{showLabels ? "Hide" : "Show"} Labels</span>
-          <Switch on={showLabels} onClick={onToggleLabels} />
-        </label>
+        <div className="-collapse-toggles">
+          <label className="-collapse-toggle">
+            <span>{showAnns ? "Hide" : "Show"} Annotations</span>
+            <Switch on={showAnns} onClick={onToggleSerie} />
+          </label>
+          <label className="-collapse-toggle">
+            <span>{showLabels ? "Hide" : "Show"} Labels</span>
+            <Switch on={showLabels} onClick={onToggleLabels} />
+          </label>
+        </div>
         <div className="annList-annotations">{annotationsList}</div>
       </div>
     </div>

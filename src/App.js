@@ -90,7 +90,11 @@ class App extends Component {
             {/* <Modal /> */}
           </div>
         )}
-        {this.props.listOpen && <AnnotationList />}
+        {this.props.listOpen && (
+          // <aside>
+          <AnnotationList />
+          // </aside>
+        )}
       </React.Fragment>
     );
   }
