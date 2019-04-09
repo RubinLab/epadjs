@@ -11,6 +11,7 @@ import {
   SHOW_ANNOTATION_WINDOW,
   SHOW_ANNOTATION_DOCK
 } from "./types";
+
 import { getSeries } from "../../services/seriesServices";
 import { getStudies } from "../../services/studyServices";
 import {
@@ -23,6 +24,25 @@ import {
 // test cases 2- select a serie
 // in the client check the length of the viewports
 // change the active port if user clicks another port
+const colors = [
+  { background: "#e6194B", color: "black" },
+  { background: "#f58231", color: "black" },
+  { background: "#ffe119", color: "black" },
+  { background: "#3cb44b", color: "black" },
+  { background: "#42d4f4", color: "black" },
+  { background: "#4363d8", color: "white" },
+  { background: "#911eb4", color: "white" },
+  { background: "#f032e6", color: "white" },
+  { background: "#800000", color: "white" },
+  { background: "#9A6324", color: "white" },
+  { background: "#808000", color: "white" },
+  { background: "#469990", color: "white" },
+  { background: "#fabebe", color: "black" },
+  { background: "#ffd8b1", color: "black" },
+  { background: "#fffac8", color: "black" },
+  { background: "#aaffc3", color: "black" },
+  { background: "#e6beff", color: "black" }
+];
 
 export const showAnnotationWindow = () => {
   return { type: SHOW_ANNOTATION_WINDOW };
@@ -110,13 +130,18 @@ export const singleSerieLoaded = (ref, aimsData, serID, ann) => {
 const getAimListFields = (aims, ann) => {
   if (!Array.isArray(aims)) aims = [aims];
   const result = {};
+
   aims.forEach((aim, index) => {
+    if (index >= colors.length) {
+      index = index % colors.length;
+    }
     let displayStatus = ann ? ann === aim.uniqueIdentifier.root : !ann;
     result[aim.uniqueIdentifier.root] = {
       json: aim,
       isDisplayed: displayStatus,
       showLabel: displayStatus,
-      cornerStoneTools: []
+      cornerStoneTools: [],
+      color: { ...colors[index] }
     };
   });
   return result;

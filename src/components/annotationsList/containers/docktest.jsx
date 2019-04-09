@@ -3,10 +3,12 @@ import { connect } from "react-redux";
 import Dock from "react-dock";
 import { FaTimes } from "react-icons/fa";
 import { showAnnotationDock } from "../action";
+import Annotations from "./annotationList";
 
 const styles = {
   border: "0.2rem solid #333",
-  background: "#3A3F44"
+  background: "#3A3F44",
+  minWidth: "5%"
 };
 
 const positions = ["left", "top", "right", "bottom"];
@@ -16,11 +18,7 @@ class DockTest extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      //   isVisible: true,
-      //   fluid: true,
-      //   customAnimation: false,
-      //   slow: false,
-      size: 0.15
+      size: 0.1
     };
   }
 
@@ -40,13 +38,14 @@ class DockTest extends Component {
           onSizeChange={this.handleSizeChange}
           //   duration={duration}
         >
-          <div>
+          <div className="-dock__close">
             <FaTimes
               onClick={() => {
                 this.props.dispatch(showAnnotationDock());
               }}
             />
           </div>
+          <Annotations />
         </Dock>
       </div>
     );

@@ -273,3 +273,43 @@
 .annotation-dock {
   width: 10%;
 }
+
+.-dock__close {
+  margin-bottom: 2rem;
+}
+
+.annotation-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 80%;
+  max-width: 20rem;
+  min-width: 8rem;
+  margin: 0 auto;
+  height: 2rem;
+  margin-bottom: 1rem;
+  border-radius: 1rem 1rem;
+  flex-wrap: wrap;
+}
+
+.annotation-container__name {
+  display: flex;
+  justify-content: center;
+  width: 70%;
+  font-size: 1rem;
+}
+
+.annotation-container-icons {
+  width: 30%;
+  display: flex;
+  justify-content: space-evenly;
+  font-size: 1.2rem;
+  justify-content: center;
+}
+
+.-container-icon {
+  /* border-left: 1px solid grey; */
+  display: flex;
+  margin: 0 auto;
+  /* margin-right: 0.5rem; */
+}
