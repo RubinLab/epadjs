@@ -7,7 +7,7 @@ import { FaLocationArrow } from "react-icons/fa";
 import { FiSun } from "react-icons/fi";
 import { FiSunset } from "react-icons/fi";
 import { FiZoomIn } from "react-icons/fi";
-import { FaAdjust } from "react-icons/fa";
+import { FaAdjust, FaList } from "react-icons/fa";
 import { MdLoop } from "react-icons/md";
 import { MdPanTool } from "react-icons/md";
 import { FaListAlt, FaRegFolderOpen } from "react-icons/fa";
@@ -20,7 +20,10 @@ import AnnotationList from "../annotationsList";
 //import { FaDraftingCompass } from "react-icons/fa";
 import ResizeAndDrag from "../management/common/resizeAndDrag";
 import CustomModal from "../management/common/resizeAndDrag";
-import { showAnnotationWindow } from "../annotationsList/action";
+import {
+  showAnnotationWindow,
+  showAnnotationDock
+} from "../annotationsList/action";
 import "./toolbar.css";
 import "../../font-icons/styles.css";
 
@@ -106,12 +109,20 @@ class Toolbar extends Component {
     this.setState({ showDrawing: false });
   };
 
-  handleAnnotationListClick = async () => {
+  handlePatientClick = async () => {
     // const showStatus = this.state.showAnnotationList;
     await this.setState(state => ({
       showAnnotationList: !state.showAnnotationList
     }));
     this.props.dispatch(showAnnotationWindow());
+  };
+
+  handleAnnotationsDockClick = async () => {
+    // const showStatus = this.state.showAnnotationList;
+    await this.setState(state => ({
+      dockOpen: !state.dockOpen
+    }));
+    this.props.dispatch(showAnnotationDock());
   };
 
   invert = () => {
@@ -353,15 +364,28 @@ class Toolbar extends Component {
         <div
           tabIndex="14"
           className="toolbarSectionButton"
-          onClick={this.handleAnnotationListClick}
+          onClick={this.handlePatientClick}
         >
           <div className="toolContainer">
             <FaRegFolderOpen />
           </div>
           <div className="buttonLabel">
+            <span>Patient</span>
+          </div>
+        </div>
+        <div
+          tabIndex="15"
+          className="toolbarSectionButton"
+          onClick={this.handleAnnotationsDockClick}
+        >
+          <div className="toolContainer">
+            <FaList />
+          </div>
+          <div className="buttonLabel">
             <span>Annotations</span>
           </div>
         </div>
+
         {/* Drawing Bar Starts here. Extract it to another component later  */}
         {this.state.showDrawing && (
           <Draggable

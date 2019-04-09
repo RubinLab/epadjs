@@ -24,16 +24,30 @@ class ListItem extends React.Component {
   };
 
   componentDidMount = () => {
+    console.log("list item props", this.props);
     this.setState({
       isSerieOpen: this.props.selected,
-      collapseAnnList: this.props.selected,
-      displayAnnotations: this.props.selected,
-      displayLabels: this.props.selected
+      collapseAnnList: this.checkIfSerieOpen(this.props.serie.seriesUID).isOpen,
+      displayAnnotations: this.checkIfSerieOpen(this.props.serie.seriesUID)
+        .isOpen,
+      displayLabels: this.checkIfSerieOpen(this.props.serie.seriesUID).isOpen
     });
   };
 
   handleCollapse = () => {
     this.setState(state => ({ collapseAnnList: !state.collapseAnnList }));
+  };
+
+  checkIfSerieOpen = selectedSerie => {
+    let isOpen = false;
+    let index;
+    this.props.openSeries.forEach((serie, i) => {
+      if (serie.seriesUID === selectedSerie) {
+        isOpen = true;
+        index = i;
+      }
+    });
+    return { isOpen, index };
   };
 
   handleAnnotationClick = async e => {
@@ -49,14 +63,8 @@ class ListItem extends React.Component {
       );
     } else {
       //if doesn't match check if the serie exists in the open series
-      let isOpen = false;
-      let index;
-      this.props.openSeries.forEach((serie, i) => {
-        if (serie.seriesUID === seriesid) {
-          isOpen = true;
-          index = i;
-        }
-      });
+      const isOpen = this.checkIfSerieOpen(seriesid).isOpen;
+      const index = this.checkIfSerieOpen(seriesid).index;
       if (isOpen) {
         // if it exists in the openSeries update activeport
         this.props.dispatch(changeActivePort(index));
@@ -74,33 +82,63 @@ class ListItem extends React.Component {
     }
   };
 
-  handleToggleSerie = e => {
+  handleToggleSerie = async e => {
     //select de select all anotations
-    const { seriesUID, studyUID } = this.props.serie;
+    const { patientID, seriesUID, studyUID } = this.props.serie;
+    const { seriesid } = e.target.dataset;
+    const openSeriesUID = this.props.openSeries[this.props.activePort]
+      .seriesUID;
     //if isSerieOpen
-    if (this.state.isSerieOpen) {
-      this.props.dispatch(
-        toggleAllAnnotations(seriesUID, studyUID, e.target.checked)
-      );
-      this.setState(state => ({
+    if (openSeriesUID === seriesid) {
+      // if (this.state.isSerieOpen) {
+      await this.setState(state => ({
         displayAnnotations: !state.displayAnnotations
       }));
+      this.props.dispatch(
+        toggleAllAnnotations(
+          patientID,
+          studyUID,
+          seriesUID,
+          this.state.displayAnnotations
+        )
+      );
     } else {
+      //if doesn't match check if the serie exists in the open series
+      const isOpen = this.checkIfSerieOpen(seriesid).isOpen;
+      const index = this.checkIfSerieOpen(seriesid).index;
+      console.log("default checked", e.target.defaultChecked);
+      if (isOpen) {
+        //if in the open series change the active port
+        console.log("serie open yes");
+        this.props.dispatch(changeActivePort(index));
+      }
+      //check if user toggle on or off and change the state accordingly
     }
+    //if it doesn't exist in the open series dispatch the action to add
     //dispatch yap ve o serie icin viewport ac openSeriese ekle
   };
 
-  handleToggleLabels = e => {
+  handleToggleLabels = async e => {
     //select de select all anotations
-    const { seriesUID, studyUID } = this.props.serie;
+    const { patientID, seriesUID, studyUID } = this.props.serie;
+    const { seriesid } = e.target.dataset;
+    const openSeriesUID = this.props.openSeries[this.props.activePort]
+      .seriesUID;
     //if isSerieOpen
-    if (this.state.isSerieOpen) {
-      this.props.dispatch(
-        toggleAllLabels(seriesUID, studyUID, e.target.checked)
-      );
-      this.setState(state => ({
+    // if (this.state.isSerieOpen) {
+    if (openSeriesUID === seriesid) {
+      console.log("got here with labels");
+      await this.setState(state => ({
         displayLabels: !state.displayLabels
       }));
+      this.props.dispatch(
+        toggleAllLabels(
+          patientID,
+          studyUID,
+          seriesUID,
+          this.state.displayLabels
+        )
+      );
     } else {
     }
     //dispatch yap ve o serie icin viewport ac openSeriese ekle
@@ -119,7 +157,6 @@ class ListItem extends React.Component {
     const numOfAnn = this.props.serie.annotations
       ? Object.values(this.props.serie.annotations).length
       : 0;
-    console.log(this.state.displayAnnotations);
     return (
       <>
         <div className="-serieButton__container" onClick={this.handleCollapse}>

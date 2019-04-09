@@ -5,9 +5,11 @@ import {
   UPDATE_ANNOTATION,
   VIEWPORT_FULL_PROJECTS,
   TOGGLE_ALL_ANNOTATIONS,
+  TOGGLE_ALL_LABELS,
   CHANGE_ACTIVE_PORT,
   LOAD_SERIE_SUCCESS,
-  SHOW_ANNOTATION_WINDOW
+  SHOW_ANNOTATION_WINDOW,
+  SHOW_ANNOTATION_DOCK
 } from "./types";
 
 const initialState = {
@@ -17,7 +19,8 @@ const initialState = {
   loading: false,
   error: false,
   patients: {},
-  listOpen: false
+  listOpen: false,
+  dockOpen: false
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -114,36 +117,31 @@ const asyncReducer = (state = initialState, action) => {
     case SHOW_ANNOTATION_WINDOW:
       const showStatus = state.listOpen;
       return Object.assign({}, state, { listOpen: !showStatus });
-    // case TOGGLE_ALL_ANNOTATIONS:
-    //   //update openSeries
-    //   let { serieID, studyID, displayStatus } = action.payload;
-    //   let changedOpenSeries = { ...state.openSeries };
-    //   let openSeriesArray = Object.values(changedOpenSeries);
-
-    //   for (let i = 0; i < openSeriesArray.length; i++) {
-    //     if (openSeriesArray[i].seriesUID === serieID) {
-    //       let annotations =
-    //         openSeriesArray[i]["studies"][studyID]["series"][serieID][
-    //           "annotations"
-    //         ];
-    //       for (let annotation in annotations) {
-    //         annotations[annotation].isDisplayed = displayStatus;
-    //       }
-    //       changedOpenSeries[i] = openSeriesArray[i];
-    //     } else {
-    //       changedOpenSeries[i] = openSeriesArray[i];
-    //     }
-    //   }
-
-    //   //update aimlist
-    //   let newAimList = Object.assign({}, state.aimsList);
-    //   for (let aim in newAimList[serieID]) {
-    //     newAimList[serieID][aim].isDisplayed = displayStatus;
-    //   }
-    //   return Object.assign({}, state, {
-    //     aimsList: newAimList,
-    //     openSeries: changedOpenSeries
-    //   });
+    case SHOW_ANNOTATION_DOCK:
+      const displayAnnDock = state.dockOpen;
+      return Object.assign({}, state, { dockOpen: !displayAnnDock });
+    case TOGGLE_ALL_ANNOTATIONS:
+      //update openSeries
+      let { patientID, studyID, serieID, displayStatus } = action.payload;
+      let toggleAnnPatients = Object.assign({}, state.patients);
+      let annotationsInSerie =
+        toggleAnnPatients[patientID].studies[studyID].series[serieID]
+          .annotations;
+      for (let ann in annotationsInSerie) {
+        annotationsInSerie[ann].isDisplayed = displayStatus;
+      }
+      return Object.assign({}, state, { patients: toggleAnnPatients });
+    case TOGGLE_ALL_LABELS:
+      //update openSeries
+      let { ptLabelID, stLabelID, srLabelID, labelDisplay } = action.payload;
+      let toggleLabelPatients = Object.assign({}, state.patients);
+      let annsInSerie =
+        toggleLabelPatients[ptLabelID].studies[stLabelID].series[srLabelID]
+          .annotations;
+      for (let ann in annotationsInSerie) {
+        annsInSerie[ann].showLabel = labelDisplay;
+      }
+      return Object.assign({}, state, { patients: toggleLabelPatients });
     default:
       return state;
   }

@@ -8,7 +8,8 @@ import {
   TOGGLE_ALL_LABELS,
   CHANGE_ACTIVE_PORT,
   LOAD_SERIE_SUCCESS,
-  SHOW_ANNOTATION_WINDOW
+  SHOW_ANNOTATION_WINDOW,
+  SHOW_ANNOTATION_DOCK
 } from "./types";
 import { getSeries } from "../../services/seriesServices";
 import { getStudies } from "../../services/studyServices";
@@ -23,10 +24,13 @@ import {
 // in the client check the length of the viewports
 // change the active port if user clicks another port
 
-export const showAnnotationWindow = show => {
-  return { type: SHOW_ANNOTATION_WINDOW, show };
+export const showAnnotationWindow = () => {
+  return { type: SHOW_ANNOTATION_WINDOW };
 };
 
+export const showAnnotationDock = () => {
+  return { type: SHOW_ANNOTATION_DOCK };
+};
 const loadAnnotations = () => {
   return {
     type: LOAD_ANNOTATIONS
@@ -65,17 +69,27 @@ export const updateAnnotation = (
   };
 };
 
-export const toggleAllAnnotations = (serieID, studyID, displayStatus) => {
+export const toggleAllAnnotations = (
+  patientID,
+  studyID,
+  serieID,
+  displayStatus
+) => {
   return {
     type: TOGGLE_ALL_ANNOTATIONS,
-    payload: { serieID, studyID, displayStatus }
+    payload: { patientID, studyID, serieID, displayStatus }
   };
 };
 
-export const toggleAllLabels = (serieID, studyID, displayStatus) => {
+export const toggleAllLabels = (
+  ptLabelID,
+  stLabelID,
+  srLabelID,
+  labelDisplay
+) => {
   return {
     type: TOGGLE_ALL_LABELS,
-    payload: { serieID, studyID, displayStatus }
+    payload: { ptLabelID, stLabelID, srLabelID, labelDisplay }
   };
 };
 
@@ -132,7 +146,15 @@ const getRequiredFields = (arr, type, selectedID) => {
       } else {
         const { seriesUID, studyUID, name, aimID, comment } = element;
         const isDisplayed = seriesUID === selectedID;
-        obj = { seriesUID, studyUID, name, aimID, comment, isDisplayed };
+        obj = {
+          seriesUID,
+          studyUID,
+          name,
+          aimID,
+          comment,
+          isDisplayed,
+          showLabel: true
+        };
         result[aimID] = obj;
       }
     });

@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import Switch from "react-toggle-switch";
+import Toggle from "react-toggle";
 
 const annotations = ({
   seriesUID,
@@ -41,6 +41,7 @@ const annotations = ({
     );
     annotationsList.push(item);
   });
+  console.log(seriesUID);
   return annotationsArr.length === 0 ? (
     <div className="annList-annotations">There is no annotation</div>
   ) : (
@@ -49,11 +50,23 @@ const annotations = ({
         <div className="-collapse-toggles">
           <label className="-collapse-toggle">
             <span>Show Annotations</span>
-            <Switch on={showAnns} onClick={onToggleSerie} />
+            <div>
+              <Toggle
+                defaultChecked={showAnns}
+                onClick={onToggleSerie}
+                data-seriesid={seriesUID}
+              />
+            </div>
           </label>
           <label className="-collapse-toggle">
             <span>Show Labels</span>
-            <Switch on={showLabels} onClick={onToggleLabels} />
+            <div>
+              <Toggle
+                defaultChecked={showLabels}
+                onClick={onToggleLabels}
+                data-seriesid={seriesUID}
+              />
+            </div>
           </label>
         </div>
         <div className="annList-annotations">{annotationsList}</div>

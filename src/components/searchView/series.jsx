@@ -7,6 +7,7 @@ import Annotations from "./annotations";
 import { getSeries } from "../../services/seriesServices";
 import { connect } from "react-redux";
 import {
+  showAnnotationDock,
   getAnnotationListData,
   getSingleSerie
 } from "../annotationsList/action";

@@ -1,6 +1,5 @@
 import React from "react";
 import { FaTimes } from "react-icons/fa";
-// import { IoMdCloseCircleOutline } from "react-icons/io";
 import "../annotationsList.css";
 
 const header = ({ name, onClick }) => {

@@ -16,6 +16,9 @@ import ProtectedRoute from "./components/common/protectedRoute";
 import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
 import AnnotationList from "./components/annotationsList";
+import AnnotationsDock from "./components/annotationsList/containers/annotationsDock";
+import DockTest from "./components/annotationsList/containers/docktest";
+
 // import Modal from './components/management/projectCreationForm';
 // import Modal from './components/common/rndBootModal';
 
@@ -87,12 +90,16 @@ class App extends Component {
                 <Redirect to="/not-found" />
               </Switch>
             </Sidebar>
-            {/* <Modal /> */}
           </div>
         )}
         {this.props.listOpen && (
           // <aside>
           <AnnotationList />
+          // </aside>
+        )}
+        {this.props.dockOpen && (
+          // <aside>
+          <DockTest />
           // </aside>
         )}
       </React.Fragment>
@@ -102,7 +109,8 @@ class App extends Component {
 
 const mapStateToProps = state => {
   return {
-    listOpen: state.annotationsListReducer.listOpen
+    listOpen: state.annotationsListReducer.listOpen,
+    dockOpen: state.annotationsListReducer.dockOpen
   };
 };
 export default withRouter(connect(mapStateToProps)(App));
