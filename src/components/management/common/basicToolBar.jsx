@@ -7,12 +7,36 @@ const baseToolBar = ({ onAdd, onDelete, selected }) => {
   return (
     <div className="basic-toolbar">
       <div onClick={onAdd}>
-        <FaPlusCircle className="tool-icon" />
+        <FaPlusCircle
+          data-tip="New Project"
+          className="tool-icon"
+          data-tip
+          data-for="plus-icon"
+          onClick={onAdd}
+        />
       </div>
+      <ReactTooltip id="plus-icon" place="right" type="info" delayShow={1500}>
+        <span>New Project</span>
+      </ReactTooltip>
       {selected && (
-        <div onClick={onDelete}>
-          <FaRegTrashAlt className="tool-icon" />
-        </div>
+        <>
+       <div onClick={onDelete}>
+          <FaRegTrashAlt
+            className="tool-icon"
+            onClick={onDelete}
+            data-tip
+            data-for="trash-icon"
+          />
+       </div>
+        <ReactTooltip
+          id="trash-icon"
+          place="right"
+          type="info"
+          delayShow={1500}
+         >
+          <span>Delete selections</span>
+        </ReactTooltip>
+        </>
       )}
     </div>
   );
