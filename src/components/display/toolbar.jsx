@@ -1,25 +1,31 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import MetaData from './metaData';
-import Draggable from 'react-draggable';
-
-import { FaLocationArrow } from 'react-icons/fa';
-import { FiSun } from 'react-icons/fi';
-import { FiSunset } from 'react-icons/fi';
-import { FiZoomIn } from 'react-icons/fi';
-import { FaAdjust } from 'react-icons/fa';
-import { MdLoop } from 'react-icons/md';
-import { MdPanTool } from 'react-icons/md';
-import { FaListAlt } from 'react-icons/fa';
-import { FiRotateCw } from 'react-icons/fi';
-import { TiPipette } from 'react-icons/ti';
-import { TiDeleteOutline } from 'react-icons/ti';
-import { TiPencil } from 'react-icons/ti';
-import { MdWbIridescent } from 'react-icons/md';
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import MetaData from "./metaData";
+import Draggable from "react-draggable";
+// import { Rnd } from "react-rnd";
+import { FaLocationArrow } from "react-icons/fa";
+import { FiSun } from "react-icons/fi";
+import { FiSunset } from "react-icons/fi";
+import { FiZoomIn } from "react-icons/fi";
+import { FaAdjust, FaList } from "react-icons/fa";
+import { MdLoop } from "react-icons/md";
+import { MdPanTool } from "react-icons/md";
+import { FaListAlt, FaRegFolderOpen } from "react-icons/fa";
+import { FiRotateCw } from "react-icons/fi";
+import { TiPipette } from "react-icons/ti";
+import { TiDeleteOutline } from "react-icons/ti";
+import { TiPencil } from "react-icons/ti";
+import { MdWbIridescent } from "react-icons/md";
+import AnnotationList from "../annotationsList";
 //import { FaDraftingCompass } from "react-icons/fa";
-
-import './toolbar.css';
-import '../../font-icons/styles.css';
+import ResizeAndDrag from "../management/common/resizeAndDrag";
+import CustomModal from "../management/common/resizeAndDrag";
+import {
+  showAnnotationWindow,
+  showAnnotationDock
+} from "../annotationsList/action";
+import "./toolbar.css";
+import "../../font-icons/styles.css";
 
 const mapStateToProps = state => {
   return {
@@ -101,6 +107,22 @@ class Toolbar extends Component {
       mouseButtonMask: mouseMask
     });
     this.setState({ showDrawing: false });
+  };
+
+  handlePatientClick = async () => {
+    // const showStatus = this.state.showAnnotationList;
+    await this.setState(state => ({
+      showAnnotationList: !state.showAnnotationList
+    }));
+    this.props.dispatch(showAnnotationWindow());
+  };
+
+  handleAnnotationsDockClick = async () => {
+    // const showStatus = this.state.showAnnotationList;
+    await this.setState(state => ({
+      dockOpen: !state.dockOpen
+    }));
+    this.props.dispatch(showAnnotationDock());
   };
 
   invert = () => {
@@ -340,6 +362,31 @@ class Toolbar extends Component {
             <span>Eraser</span>
           </div>
         </div>
+        <div
+          tabIndex="14"
+          className="toolbarSectionButton"
+          onClick={this.handlePatientClick}
+        >
+          <div className="toolContainer">
+            <FaRegFolderOpen />
+          </div>
+          <div className="buttonLabel">
+            <span>Patient</span>
+          </div>
+        </div>
+        <div
+          tabIndex="15"
+          className="toolbarSectionButton"
+          onClick={this.handleAnnotationsDockClick}
+        >
+          <div className="toolContainer">
+            <FaList />
+          </div>
+          <div className="buttonLabel">
+            <span>Annotations</span>
+          </div>
+        </div>
+
         {/* Drawing Bar Starts here. Extract it to another component later  */}
         {this.state.showDrawing && (
           <Draggable

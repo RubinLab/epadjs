@@ -1,24 +1,28 @@
-import React, { Component } from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import { getUser } from './services/userServices';
-import NavBar from './components/navbar';
-import Sidebar from './components/sideBar/sidebar';
-import SearchView from './components/searchView/searchView';
-import DisplayView from './components/display/displayView';
-import AnotateView from './components/anotateView';
-import ProgressView from './components/progressView';
-import NotFound from './components/notFound';
-import LoginForm from './components/loginForm';
-import Logout from './components/logout';
-import ProtectedRoute from './components/common/protectedRoute';
-import Cornerstone from './components/cornerstone/cornerstone';
-import Management from './components/management/mainMenu';
+import React, { Component } from "react";
+import { Route, Switch, Redirect, withRouter } from "react-router-dom";
+import { connect } from "react-redux";
+import { ToastContainer } from "react-toastify";
+import { getUser } from "./services/userServices";
+import NavBar from "./components/navbar";
+import Sidebar from "./components/sideBar/sidebar";
+import SearchView from "./components/searchView/searchView";
+import DisplayView from "./components/display/displayView";
+import AnotateView from "./components/anotateView";
+import ProgressView from "./components/progressView";
+import NotFound from "./components/notFound";
+import LoginForm from "./components/loginForm";
+import Logout from "./components/logout";
+import ProtectedRoute from "./components/common/protectedRoute";
+import Cornerstone from "./components/cornerstone/cornerstone";
+import Management from "./components/management/mainMenu";
+import AnnotationList from "./components/annotationsList";
+import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
+
 // import Modal from './components/management/projectCreationForm';
 // import Modal from './components/common/rndBootModal';
 
-import 'react-toastify/dist/ReactToastify.css';
-import './App.css';
+import "react-toastify/dist/ReactToastify.css";
+import "./App.css";
 
 class App extends Component {
   state = {
@@ -42,7 +46,7 @@ class App extends Component {
   async componentDidMount() {
     //when comp mount check if the user is set already. If is set then set state
     try {
-      const username = sessionStorage.getItem('username');
+      const username = sessionStorage.getItem("username");
       if (username) {
         const { data: user } = await getUser(username);
         this.setState({ user });
@@ -65,7 +69,7 @@ class App extends Component {
         {this.state.isMngMenuOpen && <Management closeMenu={this.closeMenu} />}
         {!this.state.user && <Route path="/login" component={LoginForm} />}
         {this.state.user && (
-          <div style={{ display: 'inline', width: '100%', height: '100%' }}>
+          <div style={{ display: "inline", width: "100%", height: "100%" }}>
             <Sidebar>
               <Switch>
                 <Route path="/logout" component={Logout} />
@@ -85,12 +89,19 @@ class App extends Component {
                 <Redirect to="/not-found" />
               </Switch>
             </Sidebar>
-            {/* <Modal /> */}
           </div>
         )}
+        {this.props.listOpen && <AnnotationList />}
+        {this.props.dockOpen && <AnnotationsDock />}
       </React.Fragment>
     );
   }
 }
 
-export default App;
+const mapStateToProps = state => {
+  return {
+    listOpen: state.annotationsListReducer.listOpen,
+    dockOpen: state.annotationsListReducer.dockOpen
+  };
+};
+export default withRouter(connect(mapStateToProps)(App));
