@@ -2,7 +2,6 @@ import React from "react";
 import { connect } from "react-redux";
 // import Collapse from "react-bootstrap/Collapse";
 import { FaMinus, FaPlus } from "react-icons/fa";
-import Switch from "react-toggle-switch";
 
 import Annotations from "./annotations";
 import {

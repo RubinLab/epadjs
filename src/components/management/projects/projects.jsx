@@ -346,7 +346,9 @@ class Projects extends React.Component {
             className="open-link"
             to={"/search/" + original.row.checkbox.id}
           >
-            <FaRegEye className="menu-clickable" onClick={this.props.onClose} />
+            <div onClick={this.props.onClose}>
+              <FaRegEye className="menu-clickable" />
+            </div>
           </Link>
         )
       },
@@ -396,8 +398,7 @@ class Projects extends React.Component {
         minResizeWidth: 20,
         resizable: true,
         Cell: original => (
-          <FaEdit
-            className="menu-clickable"
+          <div
             onClick={() => {
               this.setState({
                 hasEditClicked: true,
@@ -407,7 +408,9 @@ class Projects extends React.Component {
                 type: original.row.checkbox.type
               });
             }}
-          />
+          >
+            <FaEdit className="menu-clickable" />
+          </div>
         )
       },
       {
@@ -416,10 +419,11 @@ class Projects extends React.Component {
         minResizeWidth: 20,
         resizable: true,
         Cell: original => (
-          <FaRegTrashAlt
-            className="menu-clickable"
+          <div
             onClick={() => this.handleSingleDelete(original.row.checkbox.id)}
-          />
+          >
+            <FaRegTrashAlt className="menu-clickable" />
+          </div>
         )
       }
     ];

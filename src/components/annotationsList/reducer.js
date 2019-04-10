@@ -9,7 +9,8 @@ import {
   CHANGE_ACTIVE_PORT,
   LOAD_SERIE_SUCCESS,
   SHOW_ANNOTATION_WINDOW,
-  SHOW_ANNOTATION_DOCK
+  SHOW_ANNOTATION_DOCK,
+  colors
 } from "./types";
 
 const initialState = {
@@ -21,26 +22,7 @@ const initialState = {
   patients: {},
   listOpen: false,
   dockOpen: false,
-  colors: [
-    { background: "#e6194B", color: "white" },
-    { background: "#f58231", color: "white" },
-    { background: "#ffe119", color: "black" },
-    { background: "#bfef45", color: "black" },
-    { background: "#3cb44b", color: "black" },
-    { background: "#42d4f4", color: "black" },
-    { background: "#4363d8", color: "white" },
-    { background: "#911eb4", color: "white" },
-    { background: "#f032e6", color: "white" },
-    { background: "#800000", color: "white" },
-    { background: "#9A6324", color: "white" },
-    { background: "#808000", color: "white" },
-    { background: "#469990", color: "white" },
-    { background: "#fabebe", color: "black" },
-    { background: "#ffd8b1", color: "black" },
-    { background: "#fffac8", color: "black" },
-    { background: "#aaffc3", color: "black" },
-    { background: "#e6beff", color: "black" }
-  ]
+  colors
 };
 
 const asyncReducer = (state = initialState, action) => {

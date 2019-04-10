@@ -9,7 +9,8 @@ import {
   CHANGE_ACTIVE_PORT,
   LOAD_SERIE_SUCCESS,
   SHOW_ANNOTATION_WINDOW,
-  SHOW_ANNOTATION_DOCK
+  SHOW_ANNOTATION_DOCK,
+  colors
 } from "./types";
 
 import { getSeries } from "../../services/seriesServices";
@@ -24,25 +25,6 @@ import {
 // test cases 2- select a serie
 // in the client check the length of the viewports
 // change the active port if user clicks another port
-const colors = [
-  { background: "#e6194B", color: "black" },
-  { background: "#f58231", color: "black" },
-  { background: "#ffe119", color: "black" },
-  { background: "#3cb44b", color: "black" },
-  { background: "#42d4f4", color: "black" },
-  { background: "#4363d8", color: "white" },
-  { background: "#911eb4", color: "white" },
-  { background: "#f032e6", color: "white" },
-  { background: "#800000", color: "white" },
-  { background: "#9A6324", color: "white" },
-  { background: "#808000", color: "white" },
-  { background: "#469990", color: "white" },
-  { background: "#fabebe", color: "black" },
-  { background: "#ffd8b1", color: "black" },
-  { background: "#fffac8", color: "black" },
-  { background: "#aaffc3", color: "black" },
-  { background: "#e6beff", color: "black" }
-];
 
 export const showAnnotationWindow = () => {
   return { type: SHOW_ANNOTATION_WINDOW };
@@ -132,6 +114,7 @@ const getAimListFields = (aims, ann) => {
   const result = {};
 
   aims.forEach((aim, index) => {
+    console.log(aim);
     if (index >= colors.length) {
       index = index % colors.length;
     }

@@ -1,13 +1,19 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { FaPlusCircle, FaRegTrashAlt } from 'react-icons/fa';
-import '../menuStyle.css';
+import React from "react";
+import PropTypes from "prop-types";
+import { FaPlusCircle, FaRegTrashAlt } from "react-icons/fa";
+import "../menuStyle.css";
 
 const baseToolBar = ({ onAdd, onDelete, selected }) => {
   return (
     <div className="basic-toolbar">
-      <FaPlusCircle className="tool-icon" onClick={onAdd} />
-      {selected && <FaRegTrashAlt className="tool-icon" onClick={onDelete} />}
+      <div onClick={onAdd}>
+        <FaPlusCircle className="tool-icon" />
+      </div>
+      {selected && (
+        <div onClick={onDelete}>
+          <FaRegTrashAlt className="tool-icon" />
+        </div>
+      )}
     </div>
   );
 };

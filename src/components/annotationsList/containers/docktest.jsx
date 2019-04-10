@@ -39,11 +39,14 @@ class DockTest extends Component {
           //   duration={duration}
         >
           <div className="-dock__close">
-            <FaTimes
+            <div
               onClick={() => {
+                console.log("fired");
                 this.props.dispatch(showAnnotationDock());
               }}
-            />
+            >
+              <FaTimes />
+            </div>
           </div>
           <Annotations />
         </Dock>
