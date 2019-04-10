@@ -1,5 +1,5 @@
 import React from "react";
-import "../annotationsList.scss";
+import "../annotationsList.css";
 
 const dropDownMenu = ({ display, selectedStudy, changeStudy }) => {
   const optionsArr = [];

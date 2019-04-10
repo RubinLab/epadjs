@@ -87,11 +87,6 @@ const NavBar = ({ user, openGearMenu, loading }) => {
                     Logout
                   </NavLink>
                 </li>
-                <li className="nav-item-right pull-right">
-                  <NavLink className="nav-link" to="/logout">
-                    {loading ? "loading" : "not loading"}
-                  </NavLink>
-                </li>
               </React.Fragment>
             )}
           </ul>

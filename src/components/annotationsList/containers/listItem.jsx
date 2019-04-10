@@ -23,7 +23,6 @@ class ListItem extends React.Component {
   };
 
   componentDidMount = () => {
-    console.log("list item props", this.props);
     this.setState({
       isSerieOpen: this.props.selected,
       collapseAnnList: this.checkIfSerieOpen(this.props.serie.seriesUID).isOpen,
@@ -105,10 +104,8 @@ class ListItem extends React.Component {
       //if doesn't match check if the serie exists in the open series
       const isOpen = this.checkIfSerieOpen(seriesid).isOpen;
       const index = this.checkIfSerieOpen(seriesid).index;
-      console.log("default checked", e.target.defaultChecked);
       if (isOpen) {
         //if in the open series change the active port
-        console.log("serie open yes");
         this.props.dispatch(changeActivePort(index));
       }
       //check if user toggle on or off and change the state accordingly
@@ -126,7 +123,6 @@ class ListItem extends React.Component {
     //if isSerieOpen
     // if (this.state.isSerieOpen) {
     if (openSeriesUID === seriesid) {
-      console.log("got here with labels");
       await this.setState(state => ({
         displayLabels: !state.displayLabels
       }));
@@ -193,10 +189,3 @@ const mapStateToProps = state => {
   };
 };
 export default connect(mapStateToProps)(ListItem);
-
-{
-  /* <label>
-  <span>Switch with default style</span>
-  <Switch onChange={this.handleChange} checked={this.state.checked} />
-</label>; */
-}

@@ -21,9 +21,6 @@ class AnnotationsList extends React.Component {
     this.openSeries = this.props.openSeries;
     this.activePort = this.props.activePort;
     this.patients = this.props.patients;
-    console.log(this.patients);
-    console.log(this.props.openSeries[this.props.activePort]);
-    console.log(this.props.openSeries[this.props.activePort].patientID);
     this.patient = this.patients[this.openSeries[this.activePort].patientID];
     this.state = {
       width: "20%",

@@ -19,12 +19,6 @@ import {
   getAnnotations,
   getAnnotationsJSON
 } from "../../services/annotationServices";
-// TODO
-// study selection logic will be changed according to remaining available viewport
-// test cases 1- select a project check if all series are selected
-// test cases 2- select a serie
-// in the client check the length of the viewports
-// change the active port if user clicks another port
 
 export const showAnnotationWindow = () => {
   return { type: SHOW_ANNOTATION_WINDOW };
@@ -114,7 +108,6 @@ const getAimListFields = (aims, ann) => {
   const result = {};
 
   aims.forEach((aim, index) => {
-    console.log(aim);
     if (index >= colors.length) {
       index = index % colors.length;
     }
@@ -140,7 +133,6 @@ const getRequiredFields = (arr, type, selectedID) => {
         obj = { studyUID, studyDescription };
         result[studyUID] = obj;
       } else if (type === "serie") {
-        // console.log("checking fields for projectid", element);
         const {
           seriesUID,
           seriesDescription,
@@ -203,6 +195,7 @@ const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
       }
     } = await getSeries(projectID, patientID, studyID);
     const formattedSeries = getRequiredFields(series, "serie", selectedID);
+
     return new Promise((resolve, reject) => {
       resolve(formattedSeries);
     });

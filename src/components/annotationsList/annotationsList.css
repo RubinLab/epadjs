@@ -5,7 +5,6 @@
   border-radius: 10px;
   color: #d3d3d3;
   left: 80%;
-  /* min-width: 10rem; */
 }
 
 .annList {
@@ -15,7 +14,6 @@
   display: inline-flex;
   flex-direction: column;
   position: relative;
-  /* vertical-align: baseline; */
   width: 100%;
   overflow: scroll;
   margin: auto;
@@ -25,8 +23,6 @@
   display: inline-flex;
   margin-right: 1rem;
   margin-left: 1rem;
-
-  /* flex-direction: row; */
 }
 
 .annList-header {
@@ -38,7 +34,6 @@
 }
 
 .annList-close {
-  /* align-self: right; */
   cursor: pointer;
   font: 5rem;
 }
@@ -85,8 +80,6 @@
   display: flex;
   margin-bottom: 0.2rem;
   height: 1.3rem;
-  /* margin-left: 0.5rem 1rem; */
-  /* flex-direction: column; */
 }
 
 .annList-annotations,
@@ -109,16 +102,6 @@
 .-serieButton__value {
   cursor: pointer;
 }
-/* .-serieButton__checkbox {
-  margin: 0.5rem;
-} */
-
-/* .-collapse-toogleAnn {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
-} */
 
 .-collapse-toggle {
   display: flex;
@@ -285,7 +268,7 @@
   width: 80%;
   height: auto;
   max-width: 20rem;
-  min-width: 8rem;
+  min-width: 10rem;
   margin: 0 auto;
   margin-bottom: 1rem;
   border-radius: 1rem 1rem;
@@ -297,16 +280,18 @@
 .annotation-name__container {
   display: flex;
   justify-content: center;
-  width: 80%;
+  width: 70%;
   font-size: 1rem;
 }
 
 .annotation-icons__container {
-  width: 20%;
+  width: 30%;
   display: flex;
   justify-content: space-evenly;
   font-size: 1.2rem;
   justify-content: center;
+  padding-right: 0.2rem;
+  margin-right: 0.2rem;
 }
 
 .annotation-icon {
@@ -317,53 +302,4 @@
 
 svg {
   pointer-events: none;
-}
-
-$tooltip-color: rgba(0, 0, 0, 0.7);
-$tooltip-text-color: #fff;
-
-.tooltip {
-  position: relative;
-}
-
-.tooltip-trigger {
-  display: inline-block;
-  text-decoration: underline;
-}
-
-.tooltip-bubble {
-  min-width: 120px;
-  max-width: 210px;
-  position: absolute;
-  z-index: 10;
-  &::after {
-    content: "";
-    position: absolute;
-  }
-}
-
-.tooltip-right {
-  top: 50%;
-  left: 100%;
-  padding-left: 9px;
-  transform: translateY(-50%);
-
-  &::after {
-    border-right: 9px solid $tooltip-color;
-    border-top: 9px solid transparent;
-    border-bottom: 9px solid transparent;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-  }
-}
-
-.tooltip-message {
-  background: $tooltip-color;
-  border-radius: 3px;
-  color: $tooltip-text-color;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  padding: 0.75em;
-  text-align: center;
 }

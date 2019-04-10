@@ -13,11 +13,6 @@ const annotations = ({
   showLabels,
   onToggleLabels
 }) => {
-  // pass serie number from the parent
-  // get whole  state
-  // find the viewport where series numbers match
-  // navigate down to annotation of the series
-  // iterate over the annotations
   let annotationsList = [];
   const annotationsArr = Object.values(
     patients[patient].studies[studyUID].series[seriesUID].annotations
@@ -41,7 +36,6 @@ const annotations = ({
     );
     annotationsList.push(item);
   });
-  console.log(seriesUID);
   return annotationsArr.length === 0 ? (
     <div className="annList-annotations">There is no annotation</div>
   ) : (

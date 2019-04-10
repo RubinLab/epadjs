@@ -11,9 +11,6 @@ const styles = {
   minWidth: "5%"
 };
 
-const positions = ["left", "top", "right", "bottom"];
-const dimModes = ["transparent", "none", "opaque"];
-
 class DockTest extends Component {
   constructor(props) {
     super(props);
@@ -25,8 +22,6 @@ class DockTest extends Component {
   componentDidMount() {}
 
   render() {
-    // const duration = this.state.slow ? 2000 : 200;
-
     return (
       <div>
         <Dock
@@ -36,7 +31,6 @@ class DockTest extends Component {
           dimMode="none"
           isVisible={this.props.dockOpen}
           onSizeChange={this.handleSizeChange}
-          //   duration={duration}
         >
           <div className="-dock__close">
             <div

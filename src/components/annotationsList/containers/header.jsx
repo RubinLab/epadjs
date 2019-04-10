@@ -1,6 +1,6 @@
 import React from "react";
 import { FaTimes } from "react-icons/fa";
-import "../annotationsList.scss";
+import "../annotationsList.css";
 
 const header = ({ name, onClick }) => {
   return (

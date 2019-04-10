@@ -21,8 +21,7 @@ const initialState = {
   error: false,
   patients: {},
   listOpen: false,
-  dockOpen: false,
-  colors
+  dockOpen: false
 };
 
 const asyncReducer = (state = initialState, action) => {

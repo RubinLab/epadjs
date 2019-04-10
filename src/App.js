@@ -16,8 +16,7 @@ import ProtectedRoute from "./components/common/protectedRoute";
 import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
 import AnnotationList from "./components/annotationsList";
-import AnnotationsDock from "./components/annotationsList/containers/annotationsDock";
-import DockTest from "./components/annotationsList/containers/docktest";
+import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 
 // import Modal from './components/management/projectCreationForm';
 // import Modal from './components/common/rndBootModal';
@@ -92,16 +91,8 @@ class App extends Component {
             </Sidebar>
           </div>
         )}
-        {this.props.listOpen && (
-          // <aside>
-          <AnnotationList />
-          // </aside>
-        )}
-        {this.props.dockOpen && (
-          // <aside>
-          <DockTest />
-          // </aside>
-        )}
+        {this.props.listOpen && <AnnotationList />}
+        {this.props.dockOpen && <AnnotationsDock />}
       </React.Fragment>
     );
   }

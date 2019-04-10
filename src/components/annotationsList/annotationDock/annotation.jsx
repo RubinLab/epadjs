@@ -1,5 +1,4 @@
 import React from "react";
-import { connect } from "react-redux";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 const annotation = props => {
