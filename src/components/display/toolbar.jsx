@@ -2,21 +2,19 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import MetaData from "./metaData";
 import Draggable from "react-draggable";
-// import { Rnd } from "react-rnd";
-import { FaLocationArrow } from "react-icons/fa";
-import { FiSun } from "react-icons/fi";
-import { FiSunset } from "react-icons/fi";
-import { FiZoomIn } from "react-icons/fi";
-import { FaAdjust, FaList } from "react-icons/fa";
-import { MdLoop } from "react-icons/md";
-import { MdPanTool } from "react-icons/md";
-import { FaListAlt, FaRegFolderOpen } from "react-icons/fa";
-import { FiRotateCw } from "react-icons/fi";
-import { TiPipette } from "react-icons/ti";
-import { TiDeleteOutline } from "react-icons/ti";
-import { TiPencil } from "react-icons/ti";
-import { FaRulerHorizontal } from "react-icons/fa";
-import { FaScrewdriver } from "react-icons/fa";
+import {
+  FaLocationArrow,
+  FaEraser,
+  FaAdjust,
+  FaList,
+  FaListAlt,
+  FaRegFolderOpen,
+  FaRulerHorizontal,
+  FaScrewdriver
+} from "react-icons/fa";
+import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
+import { MdLoop, MdPanTool } from "react-icons/md";
+import { TiDeleteOutline, TiPencil } from "react-icons/ti";
 import { MdWbIridescent } from "react-icons/md";
 import AnnotationList from "../annotationsList";
 //import { FaDraftingCompass } from "react-icons/fa";
@@ -393,20 +391,7 @@ class Toolbar extends Component {
           </div>
         </div>
         <div
-          id="eraser"
           tabIndex="13"
-          className="toolbarSectionButton"
-          onClick={() => this.setToolActiveForElement("Eraser")}
-        >
-          <div className="toolContainer">
-            <TiPencil />
-          </div>
-          <div className="buttonLabel">
-            <span>Eraser</span>
-          </div>
-        </div>
-        <div
-          tabIndex="14"
           className="toolbarSectionButton"
           onClick={this.handlePatientClick}
         >
@@ -418,7 +403,7 @@ class Toolbar extends Component {
           </div>
         </div>
         <div
-          tabIndex="15"
+          tabIndex="14"
           className="toolbarSectionButton"
           onClick={this.handleAnnotationsDockClick}
         >
@@ -528,6 +513,19 @@ class Toolbar extends Component {
                 <div className="icon-brush" />
                 <div className="buttonLabel">
                   <span>Brush</span>
+                </div>
+              </div>
+              <div
+                id="line"
+                tabIndex="9"
+                className="drawingSectionButton"
+                onClick={() => this.setToolActiveForElement("Eraser")}
+              >
+                <div className="toolContainer">
+                  <FaEraser />
+                </div>
+                <div className="buttonLabel">
+                  <span>Eraser</span>
                 </div>
               </div>
             </div>
