@@ -1,3 +1,5 @@
+import aimConf from "./aimConf";
+
 class Aim {
   constructor(aim = {}) {
     Object.assign(this, aim);
@@ -278,5 +280,158 @@ function createImageCollection(sopClass, sopInstance) {
   var sopClass = { root: sopClass };
   var sopInstance = { root: sopInstance };
   obj["Image"] = { sopClassUid: sopClass, sopInstanceUid: sopInstance };
+  return obj;
+}
+
+function createImageSeries() {
+  var obj = {};
+  obj["modality"] = createModality();
+  obj["imageColletion"] = createImageCollection();
+  return obj;
+}
+
+function createImageStudy(startTime, instanceUid, startDate, accessionNumber) {
+  var obj = {};
+  obj["imageSeries"] = createImageSeries();
+  obj["startTime"] = { value: startTime };
+  obj["instanceUid"] = { root: instanceUid };
+  obj["startDate"] = { value: startDate };
+  obj["accessionNumber"] = { value: accessionNumber };
+  return obj;
+}
+
+function createImageReferenceEntity(id) {
+  var obj = {};
+  obj["imageStudy"] = createImageStudy();
+  obj["xsi:type"] = "DicomImageReferenceEntity";
+  obj["uniqueIdentifier"] = { root: id };
+  return obj;
+}
+
+function createImageReferanceEntityCollection() {
+  var obj = {};
+  obj["imageReferenceEntityCollection"] = createImageReferenceEntity();
+  return obj;
+}
+
+/*                                                */
+/*    Segmentation Entitiy Realted Functions      */
+/*                                                */
+
+function createSegmentationEntity(
+  refrencedSopUid,
+  segmentNumber,
+  seriesUid,
+  studyUid,
+  sopClassUid,
+  sopInstanceUid,
+  uniqueId
+) {
+  var obj = {};
+  obj["referencedSopInstanceUid"] = { root: refrencedSopUid };
+  obj["segmentNumber"] = { value: segmentNumber };
+  obj["seriesInstanceUid"] = { root: seriesUid };
+  obj["studyInstanceUid"] = { root: studyUid };
+  obj["xsi:type"] = "DicomSegmentationEntity";
+  obj["sopClassUid"] = { root: sopClassUid };
+  obj["sopInstanceUid"] = { root: sopInstanceUid };
+  obj["uniqueIdentifier"] = { root: uniqueId };
+  return obj;
+}
+
+function creatSegmentationEntityCollection(segEntities) {
+  var obj = {};
+  obj["SegmentationEntity"] = segEntities;
+  return obj;
+}
+
+//
+//
+//
+
+function createImageAnnotationStatement(referenceType, objectId, subjectId) {
+  var obj = {};
+  var references;
+  if (
+    referenceType === 1
+      ? (references = "CalculationEntityReferencesMarkupEntityStatement")
+      : (references = "CalculationEntityReferencesSegmentationEntityStatement")
+  )
+    obj["xsi:type"] = referenceType;
+  obj["objectUniqueIdentifier"] = { root: objectId };
+  obj["subjectUniqueIdentifier"] = { root: subjectId };
+  return obj;
+}
+
+function createImageAnnotationStatementCollection(imageAnnotationStatemnents) {
+  var obj = {};
+  obj["ImageAnnotationStatement"] = imageAnnotationStatemnents;
+  return obj;
+}
+
+//
+//
+// Image Annotations
+function createImageAnnotation(dateTime, annotationStatementCollection) {
+  var obj = {};
+  obj["dateTime"] = { value: dateTime };
+  obj["imageAnnotationStatementCollection"] = annotationStatementCollection;
+  return obj;
+}
+
+function createImageAnnotations(imageAnnotation) {
+  var obj = {};
+  obj["imageAnnotations"] = imageAnnotation;
+  return obj;
+}
+
+//
+//
+// Person
+function createPerson(sex, name, id, birthDate) {
+  var obj = {};
+  obj["sex"] = { value: sex };
+  obj["name"] = { name: name };
+  obj["id"] = { value: id };
+  obj["birthDate"] = { value: birthDate };
+  return obj;
+}
+
+//
+//
+// User
+function createUser(loginName, name) {
+  var obj = {};
+  obj["loginName"] = { value: loginName };
+  obj["name"] = { value: name };
+  return obj;
+}
+
+//
+//
+// aim
+function createAim(
+  dateTime,
+  seriesUid,
+  studyUid,
+  imageAnnotations,
+  accessionNumber,
+  person,
+  user
+) {
+  var obj = {};
+  obj["aimVersion"] = aimConf["aimVersion"];
+  obj["dateTime"] = { value: dateTime };
+  obj["seriesInstanceUid"] = { root: seriesUid };
+  obj["studyInstanceUid"] = { root: studyUid };
+  obj["imageAnnotations"] = imageAnnotations;
+  obj["xsi:schemaLocation"] = aimConf["xsi:schemaLocation"];
+  obj["xmlns:xsi"] = aimConf["xmlns:xsi"];
+  obj["xmlns:rdf"] = aimConf["xmlns:rdf"];
+  obj["accessionNumber"] = { value: accessionNumber };
+  obj["xmlns"] = aimConf["xmlns"];
+  obj["person"] = person;
+  obj["user"] = user;
+  // obj["uniqueIdentifier"] = { root: uniqueId };
   return obj;
 }
