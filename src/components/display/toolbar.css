@@ -11,8 +11,6 @@
   position: relative;
   text-align: center;
   margin-left: 5px;
-}
-.toolbarSectionButton {
   color: white;
   transition: all 0.2s ease-in-out;
 }
@@ -20,8 +18,25 @@
   color: #aaa;
   transform: scale(1.1);
 }
+.drawingSectionButton {
+  cursor: pointer;
+  min-width: 30px;
+  outline: none;
+  position: relative;
+  text-align: center;
+  color: white;
+  transition: all 0.2s ease-in-out;
+  margin-bottom: 5px;
+}
+.drawingSectionButton:hover {
+  color: #aaa;
+  transform: scale(1.1);
+}
 .toolContainer {
   font-size: 16px;
+}
+.fontastic-icons {
+  font-size: 22px;
 }
 .buttonLabel {
   font-size: 11px;
@@ -29,9 +44,9 @@
 .drawBar {
   outline: solid;
   outline-width: 1px;
-  background-color: #333;
+  background-color: #3a3f44;
   outline-color: black;
-  width: 40px;
+  width: 80px;
   cursor: pointer;
   z-index: 1;
   position: absolute;

@@ -3,13 +3,14 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import auth from "./authService";
 
-//axios.defaults.withCredentials = true;
+// axios.defaults.withCredentials = false;
 axios.defaults.headers.common["Authorization"] = auth.getAuthHeader1();
+// axios.defaults.headers.common["Transfer-Encoding"] = "chunked";
 axios.defaults.headers.common["Content-Type"] =
-  "application/x-www-form-urlencoded, multipart/form-data, application/octet-stream, charset=UTF-8";
+  "application/json, multipart/form-data";
 
 axios.interceptors.response.use(null, error => {
-  console.log(error);
+  console.log("ERROR::", error.response.data);
   if (error.response.status === 401) {
     //possibly session expired so logout the user and redirect to login
     auth.logout();

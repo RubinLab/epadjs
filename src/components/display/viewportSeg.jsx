@@ -4,6 +4,7 @@ import { getImageIds } from "../../services/seriesServices";
 import { getAnnotations } from "../../services/annotationServices";
 import { wadoUrl } from "../../config.json";
 import Aim from "../../utils/Aim";
+import AimEditor from "../aimEditor/aimEditor";
 //import ImageScrollbar from "./imageScrollbar";
 
 import "./viewport.css";
@@ -41,8 +42,7 @@ const tools = [
   { name: "Eraser" },
   { name: "Bidirectional" },
   { name: "Brush" },
-  { name: "StackScroll" },
-  { name: "StackScrollMouseWheel" }
+  { name: "FreehandSculpterMouse" }
 ];
 
 class ViewportSeg extends Component {
@@ -65,7 +65,8 @@ class ViewportSeg extends Component {
       coordinates: { x: 0, y: 0, xm: 0, ym: 0 },
       pixelSpacing: { column: 0, row: 0 },
       imageX: 0,
-      imageY: 0
+      imageY: 0,
+      showAimEditor: false
     };
 
     this.stack = {
@@ -118,12 +119,12 @@ class ViewportSeg extends Component {
     const patientName = image.data.string("x00100010");
     const modality = image.data.string("x00080060");
     const seriesDescription = image.data.string("x0008103e");
-    console.log(
-      this.cornerstone.metaData.get(
-        "generalSeriesModule",
-        this.stack.imageIds[this.stack.currentImageIdIndex]
-      )
-    );
+    // console.log(
+    //   this.cornerstone.metaData.get(
+    //     "generalSeriesModule",
+    //     this.stack.imageIds[this.stack.currentImageIdIndex]
+    //   )
+    // );
     const studyTime = this.formatTime(image.data.string("x00080030"));
     var rotation = "";
     if (Math.round(viewport.rotation) > 0)
@@ -158,7 +159,7 @@ class ViewportSeg extends Component {
   }
 
   formatTime(timeString) {
-    if (timeString.length > 5)
+    if (timeString && timeString.length > 5)
       return (
         timeString.substring(0, 2) +
         ":" +
@@ -222,13 +223,17 @@ class ViewportSeg extends Component {
     this.setState({ currentImageNum: newImageIdIndex + 1 });
   }
 
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   async getImages() {
-    console.log(this.state.series);
     const {
       data: {
         ResultSet: { Result: urls }
       }
-    } = await getImageIds(this.state.series); //get the Wado image ids for this series
+    } = await getImageIds(this.state.series);
+
     urls.map(url => {
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
@@ -264,6 +269,14 @@ class ViewportSeg extends Component {
     this.state.viewport.addEventListener(
       "cornerstonenewimage",
       this.onNewImage
+    );
+    this.state.viewport.addEventListener(
+      this.cornerstoneTools.EVENTS.MEASUREMENT_ADDED,
+      this.annotationCreated
+    );
+    this.state.viewport.addEventListener(
+      this.cornerstoneTools.EVENTS.MEASUREMENT_REMOVED,
+      this.annotationCreated
     );
     this.loadProgress.imageIds = this.state.imageIds.slice(0);
     this.loadProgress.remaining = this.loadProgress.total = this.state.imageIds.length;
@@ -410,9 +423,27 @@ class ViewportSeg extends Component {
     });*/
   };
 
+  annotationCreated = event => {
+    const { toolType } = event.detail;
+
+    const toolsOfInterest = [
+      "Length",
+      "EllipticalRoi",
+      "RectangleRoi",
+      "FreehandMouse",
+      "Bidirectional"
+    ];
+    if (toolsOfInterest.includes(toolType)) {
+      this.setState({ showAimEditor: true });
+    }
+  };
+
   render() {
     return (
       <React.Fragment>
+        {this.state.showAimEditor && (
+          <AimEditor csTools={this.cornerstoneTools} />
+        )}
         <div
           ref={this.viewportRef}
           className="cs"
