@@ -19,6 +19,7 @@
     "react": "^16.8.6",
     "react-bootstrap": "^0.32.4",
     "react-bootstrap-sweetalert": "^4.4.1",
+    "react-cornerstone-viewport": "^0.1.25",
     "react-dock": "^0.2.4",
     "react-dom": "^16.8.6",
     "react-draggable": "^3.1.1",
@@ -33,10 +34,10 @@
     "react-tiny-tabs": "^0.1.2",
     "react-toastify": "^4.3.0",
     "react-toggle": "^4.0.2",
+    "react-tooltip": "^3.10.0",
     "redux": "^4.0.1",
     "redux-devtools-extension": "^2.13.8",
     "redux-thunk": "^2.3.0",
-    "react-tooltip": "^3.10.0",
     "semantic-ui": "^2.4.2"
   },
   "scripts": {
