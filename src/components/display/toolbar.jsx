@@ -175,16 +175,16 @@ class Toolbar extends Component {
 
   anotate = () => {
     this.setState({ showDrawing: !this.state.showDrawing });
-    console.log(
-      this.props.cornerstoneTools.globalImageIdSpecificToolStateManager
-        .toolState[
-        "wadouri:http://epad-dev6.stanford.edu:8080/epad/wado/?requestType=WADO&studyUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.949&seriesUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.950&objectUID=1.3.12.2.1107.5.8.2.484849.837749.68675556.2004110916031631&contentType=application%2Fdicom"
-      ]
-    );
+    // console.log(
+    //   this.props.cornerstoneTools.globalImageIdSpecificToolStateManager
+    //     .toolState[
+    //     "wadouri:http://epad-dev6.stanford.edu:8080/epad/wado/?requestType=WADO&studyUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.949&seriesUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.950&objectUID=1.3.12.2.1107.5.8.2.484849.837749.68675556.2004110916031631&contentType=application%2Fdicom"
+    //   ]
+    // );
     this.dxm = {
       ...this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState()
     };
-    console.log(this.dxm);
+    // console.log(this.dxm);
   };
 
   point = () => {

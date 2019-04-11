@@ -4,6 +4,7 @@ import Toolbar from "./toolbar";
 import ViewportSeg from "./viewportSeg.jsx";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
+import CornerstoneViewport from 'react-cornerstone-viewport'
 import "./flex.css";
 //import viewport from "./viewport.jsx";
 import { FiZoomIn } from "react-icons/fi";
@@ -129,15 +130,17 @@ class DisplayView extends Component {
             }}
             onDoubleClick={() => this.hideShow(i)}
           >
-            <ViewportSeg
+            {/* <ViewportSeg
               key={serie.seriesId}
               id={"viewport" + i}
               cs={this.props.cornerstone}
               csT={this.props.cornerstoneTools}
               setClick={click => (this.updateViewport = click)}
               serie={serie}
-            />
-          </div>
+            />*/}
+            <CornerstoneViewport/>
+          </div> 
+          
         ))}
         <div id="cont" />
       </React.Fragment>
