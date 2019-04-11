@@ -1,7 +1,7 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import ReactTooltip from 'react-tooltip';
-import { FaTimes } from 'react-icons/fa';
+import React from "react";
+import PropTypes from "prop-types";
+import ReactTooltip from "react-tooltip";
+import { FaTimes } from "react-icons/fa";
 
 const managementHeader = ({ selection, onClose }) => {
   return (
@@ -14,11 +14,10 @@ const managementHeader = ({ selection, onClose }) => {
           data-tip
           data-for="close-icon"
         />
-        </div>
-        <ReactTooltip id="close-icon" place="left" type="info" delayShow={1500}>
-          <span>Close Window</span>
-        </ReactTooltip>
       </div>
+      <ReactTooltip id="close-icon" place="left" type="info" delayShow={1500}>
+        <span>Close Window</span>
+      </ReactTooltip>
     </div>
   );
 };

@@ -14,6 +14,8 @@ const annotations = ({
   onToggleLabels
 }) => {
   let annotationsList = [];
+  console.log(patients[patient].studies[studyUID].series[seriesUID]);
+
   const annotationsArr = Object.values(
     patients[patient].studies[studyUID].series[seriesUID].annotations
   );

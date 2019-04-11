@@ -218,6 +218,18 @@ const getAnnotationData = async (
   seriesID,
   selectedID
 ) => {
+  console.log(
+    "in annotation http call",
+    projectID,
+    "=",
+    patientID,
+    "=",
+    studyID,
+    "=",
+    seriesID,
+    "=",
+    selectedID
+  );
   try {
     const {
       data: {
@@ -315,8 +327,10 @@ export const getAnnotationListData = (serie, annotation) => {
               serie.seriesUID,
               selectedID
             );
+            console.log("annotations in big fuction", annotations);
             serie.annotations = annotations;
           } catch (error) {
+            console.log("-------- error ------------");
             dispatch(annotationsLoadingError(error));
           }
         });
