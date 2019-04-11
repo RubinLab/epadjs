@@ -1,6 +1,7 @@
 import http from "./httpService";
-import { apiUrl } from "../config.json";
+import { lightweightApi } from "../config.json";
 
 export function getSubjects(projectId) {
-  return http.get(apiUrl + "/projects/" + projectId + "/subjects/");
+  projectId = "lite";
+  return http.get(lightweightApi + "/projects/" + projectId + "/subjects");
 }
