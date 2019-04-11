@@ -1,0 +1,3 @@
+[submodule "src/utils/AimEditorReactV1"]
+	path = src/utils/AimEditorReactV1
+	url = https://github.com/acavit/AimEditorReactV1.git

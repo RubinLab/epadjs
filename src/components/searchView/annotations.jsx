@@ -22,6 +22,7 @@ class Annotations extends Component {
   constructor(props) {
     super(props);
 
+    this.series = Object.assign({}, this.props);
     this.state = {
       columns: [],
       selection: [],
@@ -36,12 +37,7 @@ class Annotations extends Component {
       data: {
         ResultSet: { Result: data }
       }
-    } = await getAnnotations(
-      this.props.projectId,
-      this.props.subjectId,
-      this.props.studyId,
-      this.props.seriesId
-    );
+    } = await getAnnotations(this.series);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
   }

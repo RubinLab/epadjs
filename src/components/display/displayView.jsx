@@ -152,7 +152,7 @@ class DisplayView extends Component {
               cs={this.props.cornerstone}
               csT={this.props.cornerstoneTools}
               setClick={click => (this.updateViewport = click)}
-              {...serie}
+              serie={serie}
             />
           </div>
         ))}
