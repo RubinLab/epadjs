@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { FaPlusCircle, FaRegTrashAlt } from "react-icons/fa";
+import ReactTooltip from "react-tooltip";
 import "../menuStyle.css";
 
 const baseToolBar = ({ onAdd, onDelete, selected }) => {
@@ -20,22 +21,22 @@ const baseToolBar = ({ onAdd, onDelete, selected }) => {
       </ReactTooltip>
       {selected && (
         <>
-       <div onClick={onDelete}>
-          <FaRegTrashAlt
-            className="tool-icon"
-            onClick={onDelete}
-            data-tip
-            data-for="trash-icon"
-          />
-       </div>
-        <ReactTooltip
-          id="trash-icon"
-          place="right"
-          type="info"
-          delayShow={1500}
-         >
-          <span>Delete selections</span>
-        </ReactTooltip>
+          <div onClick={onDelete}>
+            <FaRegTrashAlt
+              className="tool-icon"
+              onClick={onDelete}
+              data-tip
+              data-for="trash-icon"
+            />
+          </div>
+          <ReactTooltip
+            id="trash-icon"
+            place="right"
+            type="info"
+            delayShow={1500}
+          >
+            <span>Delete selections</span>
+          </ReactTooltip>
         </>
       )}
     </div>
