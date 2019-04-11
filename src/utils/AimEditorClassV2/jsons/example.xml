@@ -1,0 +1,369 @@
+<uniqueIdentifier root="2.25.315158392848160637748108868094921498589"/>
+<studyInstanceUid root="1.2.826.0.1.3680043.8.420.12307316984239077022721560039253479548"/>
+<seriesInstanceUid root="2.25.276318872129538412910538591647326685134"/>
+<accessionNumber value="5287533"/>
+<dateTime value="20181102022712"/>
+<user>
+<name value="admin"/>
+<loginName value="admin"/>
+</user>
+<equipment>
+<manufacturerName value=""/>
+<manufacturerModelName value=""/>
+<softwareVersion value="syngo CT 2008G"/>
+</equipment>
+<person>
+<name value="AM-1-251-129771"/>
+<id value="129771061547608292133092105219228867067"/>
+<birthDate value="19570214000000"/>
+<sex value="F"/>
+</person>
+<imageAnnotations>
+<ImageAnnotation>
+<uniqueIdentifier root="2.25.205035654363658945528449709472022300042"/>
+<typeCode code="RID58-2" codeSystemName="RadLex">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="liver15"/>
+</typeCode>
+<dateTime value="20181102022808"/>
+<name value="rev_18~sp1~-~sp1~-1~sp1~#FFFFFF"/>
+<comment value="CT / ARTERIAL PHASE  2.0  B25F / 0 / 4"/>
+<imagingPhysicalEntityCollection>
+<ImagingPhysicalEntity>
+<uniqueIdentifier root="2.25.252610726732504134576747466742004255886"/>
+<typeCode code="RID58" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="liver"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Lobar Location"/>
+</ImagingPhysicalEntity>
+<ImagingPhysicalEntity>
+<uniqueIdentifier root="2.25.319098259893188982957419575568011073682"/>
+<typeCode code="RID62" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="hepatovenous segment II"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Segmental Location"/>
+</ImagingPhysicalEntity>
+</imagingPhysicalEntityCollection>
+<calculationEntityCollection>
+<CalculationEntity>
+<uniqueIdentifier root="2.25.139966971363069929048599894823256468905"/>
+<typeCode code="G-D7FE" codeSystemName="SRT">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="Length"/>
+</typeCode>
+<description value="Length"/>
+<calculationResultCollection>
+<CalculationResult type="Scalar" xsi:type="CompactCalculationResult">
+<unitOfMeasure value="cm"/>
+<dataType code="C48870" codeSystemName="NCI">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="Double"/>
+</dataType>
+<dimensionCollection>
+<Dimension>
+<index value="0"/>
+<size value="1"/>
+<label value="LineLength"/>
+</Dimension>
+</dimensionCollection>
+<value value="6.1396812200546265"/>
+</CalculationResult>
+</calculationResultCollection>
+</CalculationEntity>
+<CalculationEntity>
+<uniqueIdentifier root="2.25.98233874665002735164435464823758320746"/>
+<typeCode code="112031" codeSystemName="DCM">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="Attenuation Coefficient"/>
+</typeCode>
+<typeCode code="R-00317" codeSystemName="SRT">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="Mean"/>
+</typeCode>
+<description value="Mean"/>
+<calculationResultCollection>
+<CalculationResult type="Scalar" xsi:type="CompactCalculationResult">
+<unitOfMeasure value="[hnsf\'U]"/>
+<dataType code="C48870" codeSystemName="NCI">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="Double"/>
+</dataType>
+<dimensionCollection>
+<Dimension>
+<index value="0"/>
+<size value="1"/>
+<label value="Mean"/>
+</Dimension>
+</dimensionCollection>
+<value value="105.30434782608695"/>
+</CalculationResult>
+</calculationResultCollection>
+</CalculationEntity>
+<CalculationEntity>
+<uniqueIdentifier root="2.25.160783227489918149482523203070132715378"/>
+<typeCode code="112031" codeSystemName="DCM">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="Attenuation Coefficient"/>
+</typeCode>
+<typeCode code="R-10047" codeSystemName="SRT">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="Standard Deviation"/>
+</typeCode>
+<description value="Standard Deviation"/>
+<calculationResultCollection>
+<CalculationResult type="Scalar" xsi:type="CompactCalculationResult">
+<unitOfMeasure value="[hnsf\'U]"/>
+<dataType code="C48870" codeSystemName="NCI">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="Double"/>
+</dataType>
+<dimensionCollection>
+<Dimension>
+<index value="0"/>
+<size value="1"/>
+<label value="Standard Deviation"/>
+</Dimension>
+</dimensionCollection>
+<value value="16.744719563800444"/>
+</CalculationResult>
+</calculationResultCollection>
+</CalculationEntity>
+<CalculationEntity>
+<uniqueIdentifier root="2.25.268998517181098610140898258606586565120"/>
+<typeCode code="112031" codeSystemName="DCM">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="Attenuation Coefficient"/>
+</typeCode>
+<typeCode code="R-404FB" codeSystemName="SRT">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="Minimum"/>
+</typeCode>
+<description value="Minimum"/>
+<calculationResultCollection>
+<CalculationResult type="Scalar" xsi:type="CompactCalculationResult">
+<unitOfMeasure value="[hnsf\'U]"/>
+<dataType code="C48870" codeSystemName="NCI">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="Double"/>
+</dataType>
+<dimensionCollection>
+<Dimension>
+<index value="0"/>
+<size value="1"/>
+<label value="Minimum"/>
+</Dimension>
+</dimensionCollection>
+<value value="57"/>
+</CalculationResult>
+</calculationResultCollection>
+</CalculationEntity>
+<CalculationEntity>
+<uniqueIdentifier root="2.25.234089010419326141142289307624966597723"/>
+<typeCode code="112031" codeSystemName="DCM">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="Attenuation Coefficient"/>
+</typeCode>
+<typeCode code="G-A437" codeSystemName="SRT">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="Maximum"/>
+</typeCode>
+<description value="Maximum"/>
+<calculationResultCollection>
+<CalculationResult type="Scalar" xsi:type="CompactCalculationResult">
+<unitOfMeasure value="[hnsf\'U]"/>
+<dataType code="C48870" codeSystemName="NCI">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="Double"/>
+</dataType>
+<dimensionCollection>
+<Dimension>
+<index value="0"/>
+<size value="1"/>
+<label value="Maximum"/>
+</Dimension>
+</dimensionCollection>
+<value value="149"/>
+</CalculationResult>
+</calculationResultCollection>
+</CalculationEntity>
+</calculationEntityCollection>
+<imagingObservationEntityCollection>
+<ImagingObservationEntity>
+<uniqueIdentifier root="2.25.224037540631763904743113714148100365563"/>
+<typeCode code="RID39466" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="liver mass"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Lesion Type"/>
+<imagingObservationCharacteristicCollection>
+<ImagingObservationCharacteristic>
+<typeCode code="RID3711" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="abscess"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Diagnosis"/>
+</ImagingObservationCharacteristic>
+<ImagingObservationCharacteristic>
+<typeCode code="RID11082" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="early arterial phase"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Imaging Phase"/>
+</ImagingObservationCharacteristic>
+<ImagingObservationCharacteristic>
+<typeCode code="RID43312" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="solitary lesion"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Focality of Lesion"/>
+</ImagingObservationCharacteristic>
+<ImagingObservationCharacteristic>
+<typeCode code="RID5799" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="round"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Shape Descriptors"/>
+</ImagingObservationCharacteristic>
+<ImagingObservationCharacteristic>
+<typeCode code="RID5714" codeSystemName="ISIS_LIVER" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="smooth margin"/>
+</typeCode>
+<annotatorConfidence value="0.05"/>
+<label value="Margin Contours: Smooth to Irregular"/>
+</ImagingObservationCharacteristic>
+<ImagingObservationCharacteristic>
+<typeCode code="RID6042" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="hypodense"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Average Lesion Density: Hypo to Hyperdense"/>
+</ImagingObservationCharacteristic>
+<ImagingObservationCharacteristic>
+<typeCode code="RID6059" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="homogeneous"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Density - Homogeneous or Heterogeneous"/>
+</ImagingObservationCharacteristic>
+<ImagingObservationCharacteristic>
+<typeCode code="RID6056" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="nonenhancing"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Enhancement"/>
+</ImagingObservationCharacteristic>
+<ImagingObservationCharacteristic>
+<typeCode code="RID39563" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="homogeneous enhancement"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Enhancement Uniformity"/>
+</ImagingObservationCharacteristic>
+<ImagingObservationCharacteristic>
+<typeCode code="RID34421" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="homogeneous internal enhancement"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Specific Enhancement Pattern(s)"/>
+</ImagingObservationCharacteristic>
+<ImagingObservationCharacteristic>
+<typeCode code="RID43338" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="homogeneous retention"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Temporal Enhancement (if known)"/>
+</ImagingObservationCharacteristic>
+<ImagingObservationCharacteristic>
+<typeCode code="RID45676" codeSystemName="ISIS_LIVER" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="thick septae"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Septation Thickness"/>
+</ImagingObservationCharacteristic>
+<ImagingObservationCharacteristic>
+<typeCode code="RID43300" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="perilesional perfusion alteration"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Perilesional Tissue"/>
+</ImagingObservationCharacteristic>
+<ImagingObservationCharacteristic>
+<typeCode code="RID43346" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="blood products (lesion)"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Special Features"/>
+</ImagingObservationCharacteristic>
+<ImagingObservationCharacteristic>
+<typeCode code="RID43327" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="abuts capsule of liver"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Lesion Effects on Liver"/>
+</ImagingObservationCharacteristic>
+<ImagingObservationCharacteristic>
+<typeCode code="RID28454" codeSystemName="RadLex" codeSystemVersion="1.0">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="none"/>
+</typeCode>
+<annotatorConfidence value="0.0"/>
+<label value="Primary Malignancy if Metastatic Disease"/>
+</ImagingObservationCharacteristic>
+</imagingObservationCharacteristicCollection>
+</ImagingObservationEntity>
+</imagingObservationEntityCollection>
+<markupEntityCollection>
+<MarkupEntity xsi:type="TwoDimensionMultiPoint">
+<uniqueIdentifier root="2.25.171279248602543582770806938873370239560"/>
+<shapeIdentifier value="1"/>
+<includeFlag value="true"/>
+<imageReferenceUid root="1.2.826.0.1.3680043.8.420.31093973183104747672136176388142683243"/>
+<referencedFrameNumber value="1"/>
+<twoDimensionSpatialCoordinateCollection>
+<TwoDimensionSpatialCoordinate>
+<coordinateIndex value="0"/>
+<x value="130.67546754675467"/>
+<y value="268.6732673267327"/>
+</TwoDimensionSpatialCoordinate>
+<TwoDimensionSpatialCoordinate>
+<coordinateIndex value="1"/>
+<x value="221.35973597359734"/>
+<y value="257.4081408140814"/>
+</TwoDimensionSpatialCoordinate>
+</twoDimensionSpatialCoordinateCollection>
+</MarkupEntity>
+</markupEntityCollection>
+<imageAnnotationStatementCollection>
+<ImageAnnotationStatement xsi:type="CalculationEntityReferencesMarkupEntityStatement">
+<subjectUniqueIdentifier root="2.25.139966971363069929048599894823256468905"/>
+<objectUniqueIdentifier root="2.25.171279248602543582770806938873370239560"/>
+</ImageAnnotationStatement>
+<ImageAnnotationStatement xsi:type="CalculationEntityReferencesMarkupEntityStatement">
+<subjectUniqueIdentifier root="2.25.98233874665002735164435464823758320746"/>
+<objectUniqueIdentifier root="2.25.171279248602543582770806938873370239560"/>
+</ImageAnnotationStatement>
+<ImageAnnotationStatement xsi:type="CalculationEntityReferencesMarkupEntityStatement">
+<subjectUniqueIdentifier root="2.25.160783227489918149482523203070132715378"/>
+<objectUniqueIdentifier root="2.25.171279248602543582770806938873370239560"/>
+</ImageAnnotationStatement>
+<ImageAnnotationStatement xsi:type="CalculationEntityReferencesMarkupEntityStatement">
+<subjectUniqueIdentifier root="2.25.268998517181098610140898258606586565120"/>
+<objectUniqueIdentifier root="2.25.171279248602543582770806938873370239560"/>
+</ImageAnnotationStatement>
+<ImageAnnotationStatement xsi:type="CalculationEntityReferencesMarkupEntityStatement">
+<subjectUniqueIdentifier root="2.25.234089010419326141142289307624966597723"/>
+<objectUniqueIdentifier root="2.25.171279248602543582770806938873370239560"/>
+</ImageAnnotationStatement>
+</imageAnnotationStatementCollection>
+<imageReferenceEntityCollection>
+<ImageReferenceEntity xsi:type="DicomImageReferenceEntity">
+<uniqueIdentifier root="2.25.294891800358651262491806518464955515943"/>
+<imageStudy>
+<instanceUid root="1.2.826.0.1.3680043.8.420.12307316984239077022721560039253479548"/>
+<startDate value="20090129"/>
+<startTime value="081924"/>
+<accessionNumber value="5287533"/>
+<imageSeries>
+<instanceUid root="1.2.826.0.1.3680043.8.420.19308572646164920912587366848473840270"/>
+<modality code="CT" codeSystemName="DCM" codeSystemVersion="20121129">
+<iso:displayName xmlns:iso="uri:iso.org:21090" value="Computed Tomography"/>
+</modality>
+<imageCollection>
+<Image>
+<sopClassUid root="1.2.840.10008.5.1.4.1.1.2"/>
+<sopInstanceUid root="1.2.826.0.1.3680043.8.420.31093973183104747672136176388142683243"/>
+</Image>
+</imageCollection>
+</imageSeries>
+</imageStudy>
+</ImageReferenceEntity>
+</imageReferenceEntityCollection>
+</ImageAnnotation>
+</imageAnnotations>
+</ImageAnnotationCollection>

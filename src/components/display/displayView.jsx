@@ -8,7 +8,7 @@ import "./flex.css";
 //import viewport from "./viewport.jsx";
 import { FiZoomIn } from "react-icons/fi";
 
-import * as aim from "../../utils/AimEditorClassV2/parseClass.js";
+//import * as aim from "../../utils/AimEditorClassV2/parseClass.js";
 
 const mapStateToProps = state => {
   return {
@@ -36,6 +36,7 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
+    //document.body.classList.add("fixed-page");
     this.getViewports();
     const vpList = document.getElementsByClassName("cs");
     const ZoomTool = this.props.cornerstoneTools.ZoomTool;
@@ -46,6 +47,7 @@ class DisplayView extends Component {
     this.props.cornerstoneTools.setToolActive(ZoomTool.name, {
       mouseButtonMask: 5
     });
+    console.log(this.props.cornerstoneTools);
 
     //make the last element in series as selected viewport since the last open will be added to end
     this.props.dispatch(
@@ -54,11 +56,11 @@ class DisplayView extends Component {
     //console.log(viewports);
     //viewports.map(vp => this.props.cornerstoneTools.wwwc.activate(vp, 1));
     //this.props.cornerstoneTools.wwwc.activate(this.state.refs[0], 1);
-    this.testAimEditor();
+    //this.testAimEditor();
   }
 
-  testAimEditor = () => {
-    //console.log(document.getElementById("cont"));
+  /*testAimEditor = () => {
+    console.log(document.getElementById("cont"));
     var instanceAimEditor = new aim.AimEditor(document.getElementById("cont"));
     var myA = [
       { key: "BeaulieuBoneTemplate_rev18", value: aim.myjson },
@@ -69,7 +71,7 @@ class DisplayView extends Component {
     instanceAimEditor.addButtonsDiv();
 
     instanceAimEditor.createViewerWindow();
-  };
+  };*/
 
   getViewports = () => {
     let numSeries = this.state.series.length;

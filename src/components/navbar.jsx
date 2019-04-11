@@ -1,8 +1,10 @@
 import React from "react";
-import logo from "../images/logo.png";
 import { Link, NavLink } from "react-router-dom";
+import { FaCogs, FaCaretDown } from "react-icons/fa";
+import logo from "../images/logo.png";
+import { connect } from "react-redux";
 
-const NavBar = ({ user }) => {
+const NavBar = ({ user, openGearMenu, loading }) => {
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -66,6 +68,16 @@ const NavBar = ({ user }) => {
             {user && (
               <React.Fragment>
                 <li className="nav-item pull-right">
+                  <div
+                    className="nav-link"
+                    style={{ cursor: "pointer" }}
+                    onClick={openGearMenu}
+                  >
+                    <FaCogs style={{ fontSize: "1.25rem" }} />
+                    <FaCaretDown style={{ fontSize: "1rem" }} />
+                  </div>
+                </li>
+                <li className="nav-item pull-right">
                   <NavLink className="nav-link" to="/profile">
                     {user.displayname}
                   </NavLink>
@@ -84,4 +96,9 @@ const NavBar = ({ user }) => {
   );
 };
 
-export default NavBar;
+const mapStateToProps = state => {
+  return {
+    loading: state.annotationsListReducer.loading
+  };
+};
+export default connect(mapStateToProps)(NavBar);

@@ -1,0 +1,173 @@
+
+
+{
+   "uid": "2.25.226786059025611331467166333882529892626777",
+   "name": "Coordination Test",
+   "authors": "willrett",
+   "version": "1.0",
+   "creationDate": "2013-11-01",
+   "description": "Testing Coordiantions",
+   "schemaLocation": "gme://caCORE.caCORE/3.2/edu.northwestern.radiology.AIMTemplate AIMTemplate_v2rv13.xsd",
+   "Template": {
+      "templateType": "Image",
+      "uid": "2.25.3117718860672205766530793354048693651257777",
+      "name": "Coordiantion Test",
+      "authors": "willrett",
+      "version": "1.0",
+      "creationDate": "2013-10-31",
+      "description": "Coordination Test",
+      "modality": "CT",
+      "precedingAnnotation": "DoNotOffer",
+      "codeMeaning": "Coordination Template",
+      "codeValue": "LTC",
+      "codingSchemeDesignator": "CoordinationTemplate",
+      "codingSchemeVersion": "",
+      "Component": {
+         "label": "Lung Nodule",
+         "itemNumber": "1",
+         "authors": "Default User",
+         "explanatoryText": "",
+         "minCardinality": "1",
+         "maxCardinality": "1",
+         "shouldDisplay": "true",
+         "groupLabel": "",
+         "id": "2.25.87157590103780976172344716887617624858",
+         "ImagingObservation": {
+            "annotatorConfidence": "false",
+            "ImagingObservationCharacteristic": {
+               "label": "Nodule Attenuation",
+               "itemNumber": "1",
+               "authors": "Default User",
+               "explanatoryText": "",
+               "minCardinality": "1",
+               "maxCardinality": "1",
+               "shouldDisplay": "true",
+               "groupLabel": "",
+               "id": "2.25.14296178658435596975218217235280517220",
+               "annotatorConfidence": "false",
+               "AllowedTerm": [
+                  {
+                     "codeValue": "RID5741",
+                     "codeMeaning": "solid",
+                     "codingSchemeDesignator": "RadLex.3.10"
+                  },
+                  {
+                     "codeValue": "RID45726",
+                     "codeMeaning": "ground glass",
+                     "codingSchemeDesignator": "RadLex.3.10"
+                  },
+                  {
+                     "codeValue": "RID46009",
+                     "codeMeaning": "semi-consolidation",
+                     "codingSchemeDesignator": "RadLex.3.10"
+                  },
+                  {
+                     "codeValue": "RID46011",
+                     "codeMeaning": "partially solid",
+                     "codingSchemeDesignator": "RadLex.3.10",
+                     "ValidTerm": {
+                        "codeValue": "LT2",
+                        "codeMeaning": "greaterThan 5mm",
+                        "codingSchemeDesignator": "LungTemplate"
+                     }
+                  },
+                  {
+                     "codeValue": "RID46011",
+                     "codeMeaning": "partially solid",
+                     "codingSchemeDesignator": "RadLex.3.10",
+                     "ValidTerm": [
+                        {
+                           "codeValue": "LT3",
+                           "codeMeaning": "greaterThan 10mm",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeValue": "LT5",
+                           "codeMeaning": "square",
+                           "codingSchemeDesignator": "LungTemplate"
+                        }
+                     ]
+                  },
+                  {
+                     "codeValue": "RID46011",
+                     "codeMeaning": "partially solid",
+                     "codingSchemeDesignator": "RadLex.3.10",
+                     "codingSchemeVersion": "",
+                     "ValidTerm": [
+                        {
+                           "codeValue": "LT4",
+                           "codeMeaning": "greaterThan 5mm",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeValue": "LT6",
+                           "codeMeaning": "round",
+                           "codingSchemeDesignator": "LungTemplate"
+                        }
+                     ]
+                  },
+                  {
+                     "codeValue": "RID46011",
+                     "codeMeaning": "partially solid",
+                     "codingSchemeDesignator": "RadLex.3.10",
+                     "codingSchemeVersion": "",
+                     "ValidTerm": [
+                        {
+                           "codeValue": "LT7",
+                           "codeMeaning": "green",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeValue": "LT3",
+                           "codeMeaning": "greaterThan 10mm",
+                           "codingSchemeDesignator": "LungTemplate"
+                        }
+                     ]
+                  }
+               ]
+            }
+         },
+         "AllowedTerm": [
+            {
+               "codeValue": "RID39056",
+               "codeMeaning": "lung mass",
+               "codingSchemeDesignator": "RadLex3.8",
+               "codingSchemeVersion": "",
+               "defaultAnswer": "true",
+               "ValidTerm": [
+                  {
+                     "codeValue": "LT4",
+                     "codeMeaning": "greaterThan 5mm",
+                     "codingSchemeDesignator": "LungTemplate"
+                  },
+                  {
+                     "codeValue": "LT6",
+                     "codeMeaning": "round",
+                     "codingSchemeDesignator": "LungTemplate"
+                  }
+               ]
+            },
+            {
+               "codeValue": "RID39057",
+               "codeMeaning": "other",
+               "codingSchemeDesignator": "debra",
+               "codingSchemeVersion": "",
+               "defaultAnswer": "false",
+               "ValidTerm": [
+                  {
+                     "codeValue": "LT4",
+                     "codeMeaning": "greaterThan 5mm",
+                     "codingSchemeDesignator": "LungTemplate"
+                  },
+                  {
+                     "codeValue": "LT6",
+                     "codeMeaning": "round",
+                     "codingSchemeDesignator": "LungTemplate"
+                  }
+               ]
+            }
+         ]
+      }
+   }
+}
+

@@ -1,0 +1,305 @@
+#annList-modal {
+  display: inline-flex;
+  background: #3a3f44;
+  border: 0.2rem solid gray;
+  border-radius: 10px;
+  color: #d3d3d3;
+  left: 80%;
+}
+
+.annList {
+  background-color: #3a3f44;
+  padding: 0.5rem;
+  z-index: 1;
+  display: inline-flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  overflow: scroll;
+  margin: auto;
+}
+
+.annList-dropdown__container {
+  display: inline-flex;
+  margin-right: 1rem;
+  margin-left: 1rem;
+}
+
+.annList-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  margin-right: 1rem;
+  margin-left: 1rem;
+}
+
+.annList-close {
+  cursor: pointer;
+  font: 5rem;
+}
+.-serieButton__container {
+  display: flex;
+  justify-content: space-evenly;
+  margin: 0.2rem;
+}
+
+.annList-serieButton {
+  background-color: #333;
+  width: 90%;
+  max-width: 100%;
+  border: none;
+  height: 2.5rem;
+  display: inline-flex;
+  flex-direction: row;
+  margin: 0 auto;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.annList-serieButton:hover {
+  transform: scale(1.1);
+}
+.-serieButton__icon {
+  margin-right: 0.5rem;
+}
+
+.-serieButton__container {
+  display: flex;
+  flex-direction: column;
+}
+
+.-annotation__checkbox {
+  margin-right: 0.5rem;
+}
+
+.-annotation__checkbox input {
+  margin: 0px;
+}
+
+.-annotation__container {
+  display: flex;
+  margin-bottom: 0.2rem;
+  height: 1.3rem;
+}
+
+.annList-annotations,
+.-collapse-toggles {
+  margin: 0.2rem 0.5rem 0.5rem 2rem;
+  width: 90%;
+}
+
+.annotations-collapse {
+  max-width: 100%;
+  display: inline-flex;
+  justify-content: flex-start;
+  flex-direction: column;
+}
+.-serieButton__checkbox-container {
+  width: 10%;
+  margin: 0.5rem;
+}
+
+.-serieButton__value {
+  cursor: pointer;
+}
+
+.-collapse-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
+.react-toggle {
+  touch-action: pan-x;
+
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  background-color: transparent;
+  border: 0;
+  padding: 0;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.react-toggle-screenreader-only {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.react-toggle--disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  -webkit-transition: opacity 0.25s;
+  transition: opacity 0.25s;
+}
+
+.react-toggle-track {
+  width: 40px;
+  height: 15px;
+  padding: 0;
+  border-radius: 30px;
+  background-color: #333;
+  -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  transition: all 0.2s ease;
+}
+
+.react-toggle:hover:not(.react-toggle--disabled) .react-toggle-track {
+  background-color: #000000;
+}
+
+.react-toggle--checked .react-toggle-track {
+  background-color: #4a83f4;
+}
+
+.react-toggle--checked:hover:not(.react-toggle--disabled) .react-toggle-track {
+  background-color: #4a83f4;
+}
+
+.react-toggle-track-check {
+  position: absolute;
+  width: 14px;
+  height: 10px;
+  top: 0px;
+  bottom: 0px;
+  margin-top: auto;
+  margin-bottom: auto;
+  line-height: 0;
+  left: 8px;
+  opacity: 0;
+  -webkit-transition: opacity 0.25s ease;
+  -moz-transition: opacity 0.25s ease;
+  transition: opacity 0.25s ease;
+}
+
+.react-toggle--checked .react-toggle-track-check {
+  opacity: 1;
+  -webkit-transition: opacity 0.25s ease;
+  -moz-transition: opacity 0.25s ease;
+  transition: opacity 0.25s ease;
+}
+
+.react-toggle-track-x {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 0px;
+  bottom: 0px;
+  margin-top: auto;
+  margin-bottom: auto;
+  line-height: 0;
+  right: 10px;
+  opacity: 1;
+  -webkit-transition: opacity 0.25s ease;
+  -moz-transition: opacity 0.25s ease;
+  transition: opacity 0.25s ease;
+}
+
+.react-toggle--checked .react-toggle-track-x {
+  opacity: 0;
+}
+
+.react-toggle-thumb {
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+  position: absolute;
+  top: 0.5px;
+  left: 0.5px;
+  width: 15px;
+  height: 15px;
+  border: 1px solid #333;
+  border-radius: 50%;
+  background-color: #fafafa;
+
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+
+  -webkit-transition: all 0.25s ease;
+  -moz-transition: all 0.25s ease;
+  transition: all 0.25s ease;
+}
+
+.react-toggle--checked .react-toggle-thumb {
+  left: 27px;
+  border-color: #4a83f4;
+}
+
+.react-toggle--focus .react-toggle-thumb {
+  -webkit-box-shadow: 0px 0px 3px 2px #4a83f4;
+  -moz-box-shadow: 0px 0px 3px 2px #4a83f4;
+  box-shadow: 0px 0px 2px 3px #4a83f4;
+}
+
+.react-toggle:active:not(.react-toggle--disabled) .react-toggle-thumb {
+  -webkit-box-shadow: 0px 0px 5px 5px #4a83f4;
+  -moz-box-shadow: 0px 0px 5px 5px #4a83f4;
+  box-shadow: 0px 0px 5px 5px #4a83f4;
+}
+
+.annotation-dock {
+  width: 10%;
+}
+
+.-dock__close {
+  margin-bottom: 2rem;
+}
+
+.annotation-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 80%;
+  height: auto;
+  max-width: 20rem;
+  min-width: 10rem;
+  margin: 0 auto;
+  margin-bottom: 1rem;
+  border-radius: 1rem 1rem;
+}
+
+.annotation__name--text {
+  padding: 0.3rem;
+}
+.annotation-name__container {
+  display: flex;
+  justify-content: center;
+  width: 70%;
+  font-size: 1rem;
+}
+
+.annotation-icons__container {
+  width: 30%;
+  display: flex;
+  justify-content: space-evenly;
+  font-size: 1.2rem;
+  justify-content: center;
+  padding-right: 0.2rem;
+  margin-right: 0.2rem;
+}
+
+.annotation-icon {
+  display: inline-block;
+  margin: 0 auto;
+  cursor: pointer;
+}
+
+svg {
+  pointer-events: none;
+}

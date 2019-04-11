@@ -1,0 +1,1143 @@
+
+
+{
+   "authors": "Ann Leung and Deni Aberle",
+   "creationDate": "2013-11-01",
+   "description": "Template describing features of lung nodules",
+   "name": "Lung Nodule V2",
+   "uid": "2.25.226786059025611331467166333882529892626",
+   "version": "1.0",
+   "schemaLocation": "gme://caCORE.caCORE/3.2/edu.northwestern.radiology.AIMTemplate AIMTemplate_v2rv13.xsd",
+   "Template": {
+      "authors": "Ann Leung, Deni Aberle, Daniel Rubin",
+      "codeMeaning": "Lung Template",
+      "codeValue": "LT1",
+      "codingSchemeDesignator": "LungTemplate",
+      "codingSchemeVersion": "",
+      "creationDate": "2013-10-31",
+      "description": "Lung cancer tameplate for descibing lung cancers",
+      "modality": "CT",
+      "name": "Lung Nodule Features V2",
+      "precedingAnnotation": "DoNotOffer",
+      "uid": "2.25.311771886067220576653079335404869365125",
+      "version": "1.0",
+      "Component": [
+         {
+            "authors": "Default User",
+            "explanatoryText": "",
+            "groupLabel": "",
+            "id": "2.25.140176464195137397956100227930935538072",
+            "itemNumber": "0",
+            "label": "Anatomic Location",
+            "maxCardinality": "1",
+            "minCardinality": "1",
+            "shouldDisplay": "true",
+            "AnatomicEntity": {
+               "annotatorConfidence": "false"
+            },
+            "AllowedTerm": [
+               {
+                  "codeMeaning": "upper lobe of right lung",
+                  "codeValue": "RID1303",
+                  "codingSchemeDesignator": "RadLex",
+                  "codingSchemeVersion": "1.0"
+               },
+               {
+                  "codeMeaning": "middle lobe of right lung",
+                  "codeValue": "RID1310",
+                  "codingSchemeDesignator": "RadLex_3.9.1"
+               },
+               {
+                  "codeMeaning": "lower lobe of right lung",
+                  "codeValue": "RID1315",
+                  "codingSchemeDesignator": "RadLex_3.9.1"
+               },
+               {
+                  "codeMeaning": "upper lobe of left lung",
+                  "codeValue": "RID1327",
+                  "codingSchemeDesignator": "RadLex_3.9.1"
+               },
+               {
+                  "codeMeaning": "lingula",
+                  "codeValue": "RID1333",
+                  "codingSchemeDesignator": "RadLex_3.9.1"
+               },
+               {
+                  "codeMeaning": "lower lobe of left lung",
+                  "codeValue": "RID1338",
+                  "codingSchemeDesignator": "RadLex_3.9.1"
+               },
+               {
+                  "codeMeaning": "right bronchial tree",
+                  "codeValue": "RID46006",
+                  "codingSchemeDesignator": "RadLex3.9.1"
+               },
+               {
+                  "codeMeaning": "left bronchial tree",
+                  "codeValue": "RID46005",
+                  "codingSchemeDesignator": "RadLex3.9.1"
+               },
+               {
+                  "codeMeaning": "right side",
+                  "codeValue": "RID46055",
+                  "codingSchemeDesignator": "RadLex_3.9.1"
+               },
+               {
+                  "codeMeaning": "left side",
+                  "codeValue": "RID46054",
+                  "codingSchemeDesignator": "RadLex_3.9.1"
+               },
+               {
+                  "codeMeaning": "unable to determine",
+                  "codeValue": "RID39110",
+                  "codingSchemeDesignator": "RadLex_3.9.1"
+               }
+            ]
+         },
+         {
+            "authors": "Default User",
+            "explanatoryText": "",
+            "groupLabel": "",
+            "id": "2.25.87157590103780976172344716887617624858",
+            "itemNumber": "1",
+            "label": "Lung Nodule",
+            "maxCardinality": "1",
+            "minCardinality": "1",
+            "shouldDisplay": "true",
+            "ImagingObservation": {
+               "annotatorConfidence": "false",
+               "ImagingObservationCharacteristic": [
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.237962337540884656877012377106352564200",
+                     "itemNumber": "0",
+                     "label": "Axial Location",
+                     "maxCardinality": "1",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "central",
+                           "codeValue": "RID5827",
+                           "codingSchemeDesignator": "RadLex_3.9.1"
+                        },
+                        {
+                           "codeMeaning": "peripheral",
+                           "codeValue": "RID5828",
+                           "codingSchemeDesignator": "RadLex_3.9.1"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.14296178658435596975218217235280517220",
+                     "itemNumber": "1",
+                     "label": "Nodule Attenuation",
+                     "maxCardinality": "1",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "solid",
+                           "codeValue": "RID5741",
+                           "codingSchemeDesignator": "RadLex.3.10"
+                        },
+                        {
+                           "codeMeaning": "ground glass",
+                           "codeValue": "RID45726",
+                           "codingSchemeDesignator": "RadLex.3.10"
+                        },
+                        {
+                           "codeMeaning": "semi-consolidation",
+                           "codeValue": "RID46009",
+                           "codingSchemeDesignator": "RadLex.3.10"
+                        },
+                        {
+                           "codeMeaning": "partially solid",
+                           "codeValue": "RID46011",
+                           "codingSchemeDesignator": "RadLex.3.10",
+                           "ValidTerm": {
+                              "codeMeaning": "Solid lessOrEqual 5mm",
+                              "codeValue": "LT2",
+                              "codingSchemeDesignator": "LungTemplate"
+                           }
+                        },
+                        {
+                           "codeMeaning": "partially solid",
+                           "codeValue": "RID46011",
+                           "codingSchemeDesignator": "RadLex.3.10",
+                           "codingSchemeVersion": "",
+                           "ValidTerm": {
+                              "codeMeaning": "Solid greaterThan 5mm",
+                              "codeValue": "LT3",
+                              "codingSchemeDesignator": "LungTemplate"
+                           }
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.35741647376747435228941990394228816488",
+                     "itemNumber": "2",
+                     "label": "Nodule Internal Features",
+                     "maxCardinality": "5",
+                     "minCardinality": "0",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "reticulation",
+                           "codeValue": "RID38794",
+                           "codingSchemeDesignator": "RadLex3.9.1"
+                        },
+                        {
+                           "codeMeaning": "internal air bronchogram sign",
+                           "codeValue": "RID46015",
+                           "codingSchemeDesignator": "RadLex3.9.1"
+                        },
+                        {
+                           "codeMeaning": "necrosis",
+                           "codeValue": "RID5171",
+                           "codingSchemeDesignator": "RadLex3.9.1"
+                        },
+                        {
+                           "codeMeaning": "cavitated",
+                           "codeValue": "RID46014",
+                           "codingSchemeDesignator": "RadLex3.9.1"
+                        },
+                        {
+                           "codeMeaning": "nodule cysts",
+                           "codeValue": "LT4",
+                           "codingSchemeDesignator": "LungTemplate"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.183099523845672751539777412085619223302",
+                     "itemNumber": "3",
+                     "label": "Nodule Margins-Primary Pattern",
+                     "maxCardinality": "1",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "smooth",
+                           "codeValue": "RID5912",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeMeaning": "irregular",
+                           "codeValue": "RID5809",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeMeaning": "lobulated",
+                           "codeValue": "RID5801",
+                           "codingSchemeDesignator": "RadLex.3.10"
+                        },
+                        {
+                           "codeMeaning": "spiculated",
+                           "codeValue": "RID34284",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeMeaning": "poorly defined",
+                           "codeValue": "RID34283",
+                           "codingSchemeDesignator": "RadLex.3.10"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.274004174861007766345536611609722648729",
+                     "itemNumber": "4",
+                     "label": "Nodule Margins-Secondary Pattern",
+                     "maxCardinality": "1",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "smooth",
+                           "codeValue": "RID5912",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeMeaning": "irregular",
+                           "codeValue": "RID5809",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeMeaning": "lobulated",
+                           "codeValue": "RID5801",
+                           "codingSchemeDesignator": "RadLex.3.10"
+                        },
+                        {
+                           "codeMeaning": "spiculated",
+                           "codeValue": "RID34284",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeMeaning": "poorly defined",
+                           "codeValue": "RID34283",
+                           "codingSchemeDesignator": "RadLex.3.10"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.210192685152885213289122028983951587405",
+                     "itemNumber": "5",
+                     "label": "Nodule Shape",
+                     "maxCardinality": "1",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "round",
+                           "codeValue": "RID5799",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeMeaning": "oval",
+                           "codeValue": "RID5800",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeMeaning": "complex",
+                           "codeValue": "RID5757",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeMeaning": "polygonal",
+                           "codeValue": "RID34291",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.91578940853568465168607658611838451559",
+                     "itemNumber": "6",
+                     "label": "Nodule Calcification",
+                     "maxCardinality": "1",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "none",
+                           "codeValue": "RID28454",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeMeaning": "central",
+                           "codeValue": "RID5827",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        },
+                        {
+                           "codeMeaning": "peripheral",
+                           "codeValue": "RID5828",
+                           "codingSchemeDesignator": "RadLex",
+                           "codingSchemeVersion": "1.0"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.86591728618943540706650681612583222798",
+                     "itemNumber": "7",
+                     "label": "Nodule Associated Findings",
+                     "maxCardinality": "8",
+                     "minCardinality": "0",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "attachment to pleura",
+                           "codeValue": "RID46018",
+                           "codingSchemeDesignator": "RadLex.3.10"
+                        },
+                        {
+                           "codeMeaning": "attachment to vessel",
+                           "codeValue": "RID46052",
+                           "codingSchemeDesignator": "RadLex.3.10"
+                        },
+                        {
+                           "codeMeaning": "attachment to bronchus",
+                           "codeValue": "RID46019",
+                           "codingSchemeDesignator": "RadLex.3.10"
+                        },
+                        {
+                           "codeMeaning": "pleural retraction",
+                           "codeValue": "RID46034",
+                           "codingSchemeDesignator": "RadLex.3.10"
+                        },
+                        {
+                           "codeMeaning": "entering airway",
+                           "codeValue": "RID46035",
+                           "codingSchemeDesignator": "RadLex.3.10"
+                        },
+                        {
+                           "codeMeaning": "bronchovascular bundle",
+                           "codeValue": "RID46020",
+                           "codingSchemeDesignator": "RadLex.3.10",
+                           "codingSchemeVersion": "",
+                           "ValidTerm": {
+                              "codeMeaning": "thickened",
+                              "codeValue": "RID5914",
+                              "codingSchemeDesignator": "RadLex3.10_NS"
+                           }
+                        },
+                        {
+                           "codeMeaning": "vascular convergence",
+                           "codeValue": "RID46036",
+                           "codingSchemeDesignator": "RadLex.3.10"
+                        },
+                        {
+                           "codeMeaning": "septal thickening",
+                           "codeValue": "RID46021",
+                           "codingSchemeDesignator": "RadLex.3.10"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.337873076505794771639407232761357500198",
+                     "itemNumber": "8",
+                     "label": "Nodule Periphery",
+                     "maxCardinality": "1",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "emphysema",
+                           "codeValue": "RID4799",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "fibrosis",
+                           "codeValue": "RID3820",
+                           "codingSchemeDesignator": "RadLex3.10_NS",
+                           "ValidTerm": {
+                              "codeMeaning": "diffuse",
+                              "codeValue": "RID5701",
+                              "codingSchemeDesignator": "RadLex3.10_NS"
+                           }
+                        },
+                        {
+                           "codeMeaning": "normal",
+                           "codeValue": "RID13173",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "scar",
+                           "codeValue": "RID3829",
+                           "codingSchemeDesignator": "RadLex3.10_NS",
+                           "ValidTerm": {
+                              "codeMeaning": "focal",
+                              "codeValue": "RID5702",
+                              "codingSchemeDesignator": "RadLex3.10_NS"
+                           }
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.56874292711129473332146919471556731934",
+                     "itemNumber": "9",
+                     "label": "Satellite Nodules in Primary Lesion Lobe (greater than 4mm noncalcified)",
+                     "maxCardinality": "1",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "absent",
+                           "codeValue": "RID28473",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "solid",
+                           "codeValue": "RID5741",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "non-solid",
+                           "codeValue": "RID46016",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "semi-consolidation",
+                           "codeValue": "RID46009",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "partially solid",
+                           "codeValue": "RID46011",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.164648481688704170072251256968019225088",
+                     "itemNumber": "10",
+                     "label": "Nodules in Non-Lesion Lobe Same Lung (greater than 4mm noncalcified)",
+                     "maxCardinality": "1",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "absent",
+                           "codeValue": "RID28473",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "solid",
+                           "codeValue": "RID5741",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "non-solid",
+                           "codeValue": "RID46016",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "semi-consolidation",
+                           "codeValue": "RID46009",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "partially solid",
+                           "codeValue": "RID46011",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.33923803346582189330047535303230692411",
+                     "itemNumber": "11",
+                     "label": "Nodules in Contralateral Lung (gretater than 4mm noncalcified)",
+                     "maxCardinality": "1",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "absent",
+                           "codeValue": "RID28473",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "solid",
+                           "codeValue": "RID5741",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "non-solid",
+                           "codeValue": "RID46016",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "semi-consolidation",
+                           "codeValue": "RID46009",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "partially solid",
+                           "codeValue": "RID46011",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.180475864236240257350664551875509074349",
+                     "itemNumber": "12",
+                     "label": "Centrilobular Nodules - Diffuse (RB type nodules)",
+                     "maxCardinality": "1",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "absent",
+                           "codeValue": "RID28473",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "present",
+                           "codeValue": "RID28472",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.85167896134846854745150364271756901116",
+                     "itemNumber": "13",
+                     "label": "Emphysema",
+                     "maxCardinality": "1",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "absent",
+                           "codeValue": "RID28473",
+                           "codingSchemeDesignator": "RadLex3.10_NS",
+                           "codingSchemeVersion": "",
+                           "nextId": "2.25.196629001251905554888034863981784506133"
+                        },
+                        {
+                           "codeMeaning": "present",
+                           "codeValue": "RID28472",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.48209778667419927995403117943578362888",
+                     "itemNumber": "14",
+                     "label": "Primary Emphysema Pattern",
+                     "maxCardinality": "1",
+                     "minCardinality": "0",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "centrilobular",
+                           "codeValue": "RID28505",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "panacinar",
+                           "codeValue": "RID46023",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "paraseptal",
+                           "codeValue": "RID46024",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "paracicatricial",
+                           "codeValue": "RID46025",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "not applicable",
+                           "codeValue": "RID46056",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.87497229868117253568605741682731038702",
+                     "itemNumber": "15",
+                     "label": "Primary Distribution",
+                     "maxCardinality": "1",
+                     "minCardinality": "0",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "upper predominant",
+                           "codeValue": "T28",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "middle predominant",
+                           "codeValue": "T29",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "lower predominant",
+                           "codeValue": "T30",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "diffuse, no predominance",
+                           "codeValue": "T31",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "patchy, no predominance",
+                           "codeValue": "T32",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "unable to determin predominance or NA",
+                           "codeValue": "T33",
+                           "codingSchemeDesignator": "LungTemplate"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.22412018022639277396146875668346172866",
+                     "itemNumber": "16",
+                     "label": "Primary Emphysema Laterality",
+                     "maxCardinality": "1",
+                     "minCardinality": "0",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "right",
+                           "codeValue": "RID5825",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "left",
+                           "codeValue": "RID5824",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "both",
+                           "codeValue": "RID5770",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.302457310194949316717802766802040777742",
+                     "itemNumber": "17",
+                     "label": "Secondary Emmphysema Pattern",
+                     "maxCardinality": "1",
+                     "minCardinality": "0",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "centrilobular",
+                           "codeValue": "RID28505",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "panacinar",
+                           "codeValue": "RID46023",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "paraseptal",
+                           "codeValue": "RID46024",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "paracicatricial",
+                           "codeValue": "RID46025",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "not applicable",
+                           "codeValue": "RID46056",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.126554497157909901085611395913043926817",
+                     "itemNumber": "18",
+                     "label": "Secondary Emhysema Distribution",
+                     "maxCardinality": "1",
+                     "minCardinality": "0",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "upper predominant",
+                           "codeValue": "T28",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "middle predominant",
+                           "codeValue": "T29",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "lower predominant",
+                           "codeValue": "T30",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "diffuse, no predominance",
+                           "codeValue": "T31",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "patchy, no predominance",
+                           "codeValue": "T32",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "unable to determin predominance or NA",
+                           "codeValue": "T33",
+                           "codingSchemeDesignator": "LungTemplate"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.79576331108465773610712356090472423453",
+                     "itemNumber": "19",
+                     "label": "Secondary Emphysema Laterality",
+                     "maxCardinality": "1",
+                     "minCardinality": "0",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "right",
+                           "codeValue": "RID5825",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "left",
+                           "codeValue": "RID5824",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "both",
+                           "codeValue": "RID5770",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.289810694927622330644816270675737408632",
+                     "itemNumber": "20",
+                     "label": "Overall Emmphysema Severity",
+                     "maxCardinality": "1",
+                     "minCardinality": "0",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "zero severity",
+                           "codeValue": "T35",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "low severity (1-25%)",
+                           "codeValue": "T36",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "moderate severity (26-50%)",
+                           "codeValue": "T37",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "moderately high severity (51-75%)",
+                           "codeValue": "T38",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "high severity (greaterThan 75%)",
+                           "codeValue": "T39",
+                           "codingSchemeDesignator": "LungTemplate"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.196629001251905554888034863981784506133",
+                     "itemNumber": "21",
+                     "label": "Lung Parencyma Features",
+                     "maxCardinality": "8",
+                     "minCardinality": "0",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "airway abnormality",
+                           "codeValue": "RID46026",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "bronchial wall thickening",
+                           "codeValue": "RID46027",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "airway ectasia",
+                           "codeValue": "RID46028",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "bronchiectasis",
+                           "codeValue": "RID28496",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "luminal narrowing",
+                           "codeValue": "RID46029",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "bronchiolar prominence",
+                           "codeValue": "RID46037",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "tree-in-bud sign",
+                           "codeValue": "RID35654",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "mosaic oligemia",
+                           "codeValue": "RID46030",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.168011863615558355498009510206396497638",
+                     "itemNumber": "22",
+                     "label": "Fibrosis",
+                     "maxCardinality": "1",
+                     "minCardinality": "1",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "present",
+                           "codeValue": "RID28472",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "absent",
+                           "codeValue": "RID28473",
+                           "codingSchemeDesignator": "RadLex3.10_NS",
+                           "codingSchemeVersion": "",
+                           "noMoreQuestions": "true"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.279492598017048490216876260893969565992",
+                     "itemNumber": "23",
+                     "label": "Anatomic Fibrosis Distribution",
+                     "maxCardinality": "1",
+                     "minCardinality": "0",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "apical",
+                           "codeValue": "RID5833",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "upper predominant",
+                           "codeValue": "T28",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "middle predominant",
+                           "codeValue": "T29",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "lower predominant",
+                           "codeValue": "T30",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "diffuse, no predominance",
+                           "codeValue": "T31",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "patchy, no predominance",
+                           "codeValue": "T32",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "unable to determin predominance or NA",
+                           "codeValue": "T33",
+                           "codingSchemeDesignator": "LungTemplate"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.56159694178652268995459589930935196338",
+                     "itemNumber": "24",
+                     "label": "Axial Fibrosis Distribution",
+                     "maxCardinality": "1",
+                     "minCardinality": "0",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "subpleural",
+                           "codeValue": "RID46032",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "bronchovascular",
+                           "codeValue": "RID46051",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "subpleural & bronchovascular",
+                           "codeValue": "T46",
+                           "codingSchemeDesignator": "LungTemplate",
+                           "codingSchemeVersion": ""
+                        },
+                        {
+                           "codeMeaning": "random",
+                           "codeValue": "RID46031",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        }
+                     ]
+                  },
+                  {
+                     "annotatorConfidence": "false",
+                     "authors": "Default User",
+                     "explanatoryText": "",
+                     "groupLabel": "",
+                     "id": "2.25.302323631874731272639500154344855572660",
+                     "itemNumber": "25",
+                     "label": "Fibrosis Type",
+                     "maxCardinality": "1",
+                     "minCardinality": "0",
+                     "shouldDisplay": "true",
+                     "AllowedTerm": [
+                        {
+                           "codeMeaning": "usual interstitial pneumonia",
+                           "codeValue": "RID5333",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "nonspecific interstitial pneumonia",
+                           "codeValue": "RID5341",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "hypersensitivity pneumonitis",
+                           "codeValue": "T41",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "sarcoidosis",
+                           "codeValue": "RID34662",
+                           "codingSchemeDesignator": "RadLex3.10_NS"
+                        },
+                        {
+                           "codeMeaning": "smoking-related fibrosis",
+                           "codeValue": "T42",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "post-infectious fibrosis (including OGD)",
+                           "codeValue": "T43",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "other fibrosis",
+                           "codeValue": "T44",
+                           "codingSchemeDesignator": "LungTemplate"
+                        },
+                        {
+                           "codeMeaning": "indeterminate",
+                           "codeValue": "RID39110",
+                           "codingSchemeDesignator": "RadLex3.10_NS",
+                           "codingSchemeVersion": ""
+                        }
+                     ]
+                  }
+               ]
+            },
+            "AllowedTerm": {
+               "codeMeaning": "lung mass",
+               "codeValue": "RID39056",
+               "codingSchemeDesignator": "RadLex3.8",
+               "codingSchemeVersion": "",
+               "defaultAnswer": "true"
+            }
+         }
+      ]
+   }
+}
+
