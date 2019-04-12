@@ -12,6 +12,7 @@ import {
   getSingleSerie
 } from "../annotationsList/action";
 import AlertGridFull from "./alertGridFull";
+import { isLite } from "../../config.json";
 import "react-table/react-table.css";
 
 const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -113,10 +114,6 @@ class Series extends Component {
       {
         Header: "Type",
         Cell: row => row.original.examType
-      },
-      {
-        Header: "Ready",
-        Cell: row => row.original.seriesProcessingStatus
       },
       {
         Header: "Study/Created Date",

@@ -35,7 +35,11 @@ class Subjects extends Component {
   }
 
   async componentDidMount() {
-    const { data } = await getSubjects(this.props.pid);
+    const {
+      data: {
+        ResultSet: { Result: data }
+      }
+    } = await getSubjects(this.props.pid);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
   }

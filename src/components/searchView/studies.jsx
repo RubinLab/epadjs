@@ -100,10 +100,6 @@ class Studies extends Component {
         Cell: row => row.original.examTypes.join("/")
       },
       {
-        //Header: "Ready",
-        Cell: row => row.original.studyProcessingStatus
-      },
-      {
         //Header: "Study/Created Date",
         Cell: row => row.original.insertDate
       },
