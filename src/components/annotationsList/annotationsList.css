@@ -1,14 +1,21 @@
 #annList-modal {
   display: inline-flex;
-  background: #3a3f44;
-  border: 0.2rem solid gray;
-  border-radius: 10px;
+  /* background: #1a1a1d; */
+  /* background: #272727; */
+  /* background: #222629; */
+  /* background: #5f6366; */
+  /* background: #282828; */
+  /* background: #212121; */
+  background: #192a56;
+  /* border: 0.2rem solid gray;
+  border-radius: 10px; */
   color: #d3d3d3;
   left: 80%;
+  max-width: 3rem;
 }
 
 .annList {
-  background-color: #3a3f44;
+  background: #192a56;
   padding: 0.5rem;
   z-index: 1;
   display: inline-flex;
@@ -48,7 +55,8 @@
   width: 90%;
   max-width: 100%;
   border: none;
-  height: 2.5rem;
+  min-height: 2.5rem;
+  height: auto;
   display: inline-flex;
   flex-direction: row;
   margin: 0 auto;
@@ -79,7 +87,8 @@
 .-annotation__container {
   display: flex;
   margin-bottom: 0.2rem;
-  height: 1.3rem;
+  height: auto;
+  min-height: 1.3rem;
 }
 
 .annList-annotations,

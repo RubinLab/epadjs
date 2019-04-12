@@ -5,7 +5,6 @@ import {
   VIEWPORT_FULL_PROJECTS,
   UPDATE_ANNOTATION,
   TOGGLE_ALL_ANNOTATIONS,
-  TOGGLE_ALL_LABELS,
   CHANGE_ACTIVE_PORT,
   LOAD_SERIE_SUCCESS,
   SHOW_ANNOTATION_WINDOW,
@@ -46,7 +45,7 @@ const annotationsLoadingError = error => {
   };
 };
 
-export const viewPortFull = () => {
+export const alertViewPortFull = () => {
   return {
     type: VIEWPORT_FULL_PROJECTS
   };
@@ -77,18 +76,6 @@ export const toggleAllAnnotations = (
   };
 };
 
-export const toggleAllLabels = (
-  ptLabelID,
-  stLabelID,
-  srLabelID,
-  labelDisplay
-) => {
-  return {
-    type: TOGGLE_ALL_LABELS,
-    payload: { ptLabelID, stLabelID, srLabelID, labelDisplay }
-  };
-};
-
 export const changeActivePort = portIndex => {
   return {
     type: CHANGE_ACTIVE_PORT,
@@ -115,7 +102,6 @@ const getAimListFields = (aims, ann) => {
     result[aim.uniqueIdentifier.root] = {
       json: aim,
       isDisplayed: displayStatus,
-      showLabel: displayStatus,
       cornerStoneTools: [],
       color: { ...colors[index] }
     };
@@ -140,8 +126,16 @@ const getRequiredFields = (arr, type, selectedID) => {
           patientID,
           projectID
         } = element;
-        // const isDisplayed = seriesUID === selectedID;
-        obj = { seriesUID, seriesDescription, studyUID, patientID, projectID };
+        const displayAnns = seriesUID === selectedID;
+
+        obj = {
+          seriesUID,
+          seriesDescription,
+          studyUID,
+          patientID,
+          projectID,
+          displayAnns
+        };
         result[seriesUID] = obj;
       } else {
         const { seriesUID, studyUID, name, aimID, comment } = element;
@@ -152,8 +146,7 @@ const getRequiredFields = (arr, type, selectedID) => {
           name,
           aimID,
           comment,
-          isDisplayed,
-          showLabel: true
+          isDisplayed
         };
         result[aimID] = obj;
       }
@@ -212,30 +205,18 @@ const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
 };
 
 const getAnnotationData = async (
-  projectID,
-  patientID,
-  studyID,
-  seriesID,
+  projectId,
+  subjectId,
+  studyId,
+  seriesId,
   selectedID
 ) => {
-  console.log(
-    "in annotation http call",
-    projectID,
-    "=",
-    patientID,
-    "=",
-    studyID,
-    "=",
-    seriesID,
-    "=",
-    selectedID
-  );
   try {
     const {
       data: {
         ResultSet: { Result: annotations }
       }
-    } = await getAnnotations(projectID, patientID, studyID, seriesID);
+    } = await getAnnotations({ projectId, subjectId, studyId, seriesId });
     let formattedAnnotation = [];
     if (annotations) {
       formattedAnnotation = getRequiredFields(

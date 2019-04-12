@@ -17,6 +17,7 @@ import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
 import AnnotationList from "./components/annotationsList";
 import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
+import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 
 // import Modal from './components/management/projectCreationForm';
 // import Modal from './components/common/rndBootModal';
@@ -93,6 +94,7 @@ class App extends Component {
         )}
         {this.props.listOpen && <AnnotationList />}
         {this.props.dockOpen && <AnnotationsDock />}
+        {this.props.isViewPortFull && <MaxViewAlert />}
       </React.Fragment>
     );
   }
@@ -101,7 +103,8 @@ class App extends Component {
 const mapStateToProps = state => {
   return {
     listOpen: state.annotationsListReducer.listOpen,
-    dockOpen: state.annotationsListReducer.dockOpen
+    dockOpen: state.annotationsListReducer.dockOpen,
+    isViewPortFull: state.annotationsListReducer.isViewPortFull
   };
 };
 export default withRouter(connect(mapStateToProps)(App));

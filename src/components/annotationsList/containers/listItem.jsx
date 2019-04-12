@@ -2,12 +2,12 @@ import React from "react";
 import { connect } from "react-redux";
 // import Collapse from "react-bootstrap/Collapse";
 import { FaMinus, FaPlus } from "react-icons/fa";
+import { alertViewPortFull } from "../action";
 
 import Annotations from "./annotations";
 import {
   updateAnnotation,
   toggleAllAnnotations,
-  toggleAllLabels,
   changeActivePort,
   getAnnotationListData,
   getSingleSerie
@@ -26,9 +26,8 @@ class ListItem extends React.Component {
     this.setState({
       isSerieOpen: this.props.selected,
       collapseAnnList: this.checkIfSerieOpen(this.props.serie.seriesUID).isOpen,
-      displayAnnotations: this.checkIfSerieOpen(this.props.serie.seriesUID)
-        .isOpen,
-      displayLabels: this.checkIfSerieOpen(this.props.serie.seriesUID).isOpen
+      displayAnnotations: this.props.serie.displayAnns,
+      displayLabels: this.props.serie.isLabelDisplayed
     });
   };
 
@@ -53,9 +52,9 @@ class ListItem extends React.Component {
     const { value, checked } = e.target;
     const { seriesid } = e.target.dataset;
     //check if the current serie match, if matches update the annotation
-    const openSeriesUID = this.props.openSeries[this.props.activePort]
+    const activeSeriesUID = this.props.openSeries[this.props.activePort]
       .seriesUID;
-    if (openSeriesUID === seriesid) {
+    if (activeSeriesUID === seriesid) {
       this.props.dispatch(
         updateAnnotation(seriesUID, studyUID, patientID, value, checked)
       );
@@ -72,26 +71,29 @@ class ListItem extends React.Component {
         );
       } else {
         //else get single serie dispatch action
-        await this.props.dispatch(getSingleSerie(this.props.serie, value));
-        this.props.dispatch(
-          updateAnnotation(seriesUID, studyUID, patientID, value, checked)
-        );
+        if (this.props.openSeries.length === 6) {
+          this.props.dispatch(alertViewPortFull());
+        } else {
+          await this.props.dispatch(getSingleSerie(this.props.serie, value));
+          this.props.dispatch(
+            updateAnnotation(seriesUID, studyUID, patientID, value, checked)
+          );
+        }
       }
     }
   };
 
   handleToggleSerie = async e => {
     //select de select all anotations
+    console.log(e);
     const { patientID, seriesUID, studyUID } = this.props.serie;
     const { seriesid } = e.target.dataset;
-    const openSeriesUID = this.props.openSeries[this.props.activePort]
+    const activeSeriesUID = this.props.openSeries[this.props.activePort]
       .seriesUID;
-    //if isSerieOpen
-    if (openSeriesUID === seriesid) {
-      // if (this.state.isSerieOpen) {
-      await this.setState(state => ({
-        displayAnnotations: !state.displayAnnotations
-      }));
+    //check if user toggle on or off and change the state accordingly
+    await this.setState({ displayAnnotations: e.target.checked });
+
+    if (activeSeriesUID === seriesid) {
       this.props.dispatch(
         toggleAllAnnotations(
           patientID,
@@ -107,36 +109,24 @@ class ListItem extends React.Component {
       if (isOpen) {
         //if in the open series change the active port
         this.props.dispatch(changeActivePort(index));
+        this.props.dispatch(
+          toggleAllAnnotations(
+            patientID,
+            studyUID,
+            seriesUID,
+            this.state.displayAnnotations
+          )
+        );
+      } else {
+        //if it doesn't exist in the open series dispatch the action to add
+        if (this.props.openSeries.length === 6) {
+          this.props.dispatch(alertViewPortFull());
+        } else {
+          //dispatch yap ve o serie icin viewport ac openSeriese ekle
+          await this.props.dispatch(getSingleSerie(this.props.serie));
+        }
       }
-      //check if user toggle on or off and change the state accordingly
     }
-    //if it doesn't exist in the open series dispatch the action to add
-    //dispatch yap ve o serie icin viewport ac openSeriese ekle
-  };
-
-  handleToggleLabels = async e => {
-    //select de select all anotations
-    const { patientID, seriesUID, studyUID } = this.props.serie;
-    const { seriesid } = e.target.dataset;
-    const openSeriesUID = this.props.openSeries[this.props.activePort]
-      .seriesUID;
-    //if isSerieOpen
-    // if (this.state.isSerieOpen) {
-    if (openSeriesUID === seriesid) {
-      await this.setState(state => ({
-        displayLabels: !state.displayLabels
-      }));
-      this.props.dispatch(
-        toggleAllLabels(
-          patientID,
-          studyUID,
-          seriesUID,
-          this.state.displayLabels
-        )
-      );
-    } else {
-    }
-    //dispatch yap ve o serie icin viewport ac openSeriese ekle
   };
 
   render = () => {
@@ -174,8 +164,6 @@ class ListItem extends React.Component {
             patient={patientID}
             showAnns={this.state.displayAnnotations}
             onToggleSerie={this.handleToggleSerie}
-            showLabels={this.state.displayLabels}
-            onToggleLabels={this.handleToggleLabels}
           />
         )}
       </>

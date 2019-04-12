@@ -9,9 +9,7 @@ const annotations = ({
   handleCheck,
   patients,
   showAnns,
-  onToggleSerie,
-  showLabels,
-  onToggleLabels
+  onToggleSerie
 }) => {
   let annotationsList = [];
   console.log(patients[patient].studies[studyUID].series[seriesUID]);
@@ -50,16 +48,6 @@ const annotations = ({
               <Toggle
                 defaultChecked={showAnns}
                 onClick={onToggleSerie}
-                data-seriesid={seriesUID}
-              />
-            </div>
-          </label>
-          <label className="-collapse-toggle">
-            <span>Show Labels</span>
-            <div>
-              <Toggle
-                defaultChecked={showLabels}
-                onClick={onToggleLabels}
                 data-seriesid={seriesUID}
               />
             </div>
