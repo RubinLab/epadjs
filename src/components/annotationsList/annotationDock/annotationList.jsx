@@ -4,6 +4,9 @@ import Annotation from "./annotation";
 import { updateAnnotation } from "../action";
 
 class annotationsList extends React.Component {
+  state = {
+    labelDisplayAll: true
+  };
   handleDisplayClick = e => {
     const { seriesUID, patientID, studyUID } = this.props.openSeries[
       this.props.activePort
@@ -24,12 +27,21 @@ class annotationsList extends React.Component {
     }
   };
 
+  handleLabelClick = () => {
+    this.setState(state => ({ labelDisplayAll: !state.labelDisplayAll }));
+  };
+
   render = () => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
-    const annotations = Object.values(this.props.aimsList[seriesUID]);
+    let annotations = Object.values(this.props.aimsList[seriesUID]);
     let annList = [];
-    annotations.forEach(aim => {
+    // //annotations.forEach(aim => {
+    // while (annotations.length < 20) {
+    //   annotations = annotations.concat(annotations);
+    // }
+    annotations.forEach((aim, index) => {
       let aimInfo = aim.json.imageAnnotations.ImageAnnotation;
+      console.log(aimInfo);
       let id = aim.json.uniqueIdentifier.root;
       annList.push(
         <Annotation
@@ -39,6 +51,8 @@ class annotationsList extends React.Component {
           key={id}
           displayed={aim.isDisplayed}
           onClick={this.handleDisplayClick}
+          showLabel={this.state.labelDisplayAll}
+          onLabelClick={this.handleLabelClick}
         />
       );
     });

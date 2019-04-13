@@ -272,6 +272,7 @@
 
 .annotation-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 80%;
@@ -280,7 +281,16 @@
   min-width: 10rem;
   margin: 0 auto;
   margin-bottom: 1rem;
-  border-radius: 1rem 1rem;
+  border-top-left-radius: 1em;
+  border-top-right-radius: 1em;
+}
+
+.annotation-button__container {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  border-top-left-radius: 1em;
+  border-top-right-radius: 1em;
 }
 
 .annotation__name--text {
@@ -289,11 +299,11 @@
 .annotation-name__container {
   display: flex;
   justify-content: center;
-  width: 70%;
+  width: 90%;
   font-size: 1rem;
 }
 
-.annotation-icons__container {
+.annotation-icon {
   width: 30%;
   display: flex;
   justify-content: space-evenly;
@@ -307,8 +317,19 @@
   display: inline-block;
   margin: 0 auto;
   cursor: pointer;
+  width: 10%;
 }
 
 svg {
   pointer-events: none;
+}
+.annotation-label__container {
+  border-bottom-left-radius: 1em;
+  border-bottom-right-radius: 1em;
+  width: 100%;
+  padding: 0.5rem;
+}
+
+.aimEntity-item {
+  list-style-type: circle;
 }
