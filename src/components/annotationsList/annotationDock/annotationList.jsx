@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import Toggle from "react-toggle";
 import Annotation from "./annotation";
 import { updateAnnotation } from "../action";
 
@@ -40,8 +41,8 @@ class annotationsList extends React.Component {
     //   annotations = annotations.concat(annotations);
     // }
     annotations.forEach((aim, index) => {
+      console.log(aim);
       let aimInfo = aim.json.imageAnnotations.ImageAnnotation;
-      console.log(aimInfo);
       let id = aim.json.uniqueIdentifier.root;
       annList.push(
         <Annotation
@@ -51,12 +52,24 @@ class annotationsList extends React.Component {
           key={id}
           displayed={aim.isDisplayed}
           onClick={this.handleDisplayClick}
+          user={aim.json.user.name.value}
           showLabel={this.state.labelDisplayAll}
-          onLabelClick={this.handleLabelClick}
+          // onLabelClick={this.handleLabelClick}
         />
       );
     });
-    return <div className="annotationList-container">{annList}</div>;
+    return (
+      <div className="annotationList-container">
+        <label>
+          <span>{this.state.labelDisplayAll ? "Hide" : "Show"} Labels</span>
+          <Toggle
+            defaultChecked={this.state.labelDisplayAll}
+            onChange={this.handleLabelClick}
+          />
+        </label>
+        <div>{annList}</div>
+      </div>
+    );
   };
 }
 

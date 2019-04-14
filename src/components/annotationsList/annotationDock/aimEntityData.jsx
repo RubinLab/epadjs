@@ -20,9 +20,12 @@ const aimEntityData = ({ aimData }) => {
   }
   console.log("aimdata", dataArr);
   const listArr = [];
-  dataArr.forEach(comment => {
+  dataArr.forEach((comment, i) => {
     listArr.push(
-      <li className="aimEntity-item">
+      <li
+        className="aimEntity-item"
+        key={aimData.uniqueIdentifier.root + "ind-" + i}
+      >
         <span className="aimEntity-question">{comment.label.value}: </span>
         <span className="aimEntity-answer">
           {comment.typeCode["iso:displayName"].value}
@@ -30,15 +33,7 @@ const aimEntityData = ({ aimData }) => {
       </li>
     );
   });
-  return (
-    <>
-      <div className="aimEntity-list">{listArr}</div>
-      <div className="annotation-labelData">
-        <span className="annotation-lessionName">Lession 1</span>
-        <span className="annotation-userName">Me </span>
-      </div>
-    </>
-  );
+  return <div className="aimEntity-list">{listArr}</div>;
 };
 
 export default aimEntityData;

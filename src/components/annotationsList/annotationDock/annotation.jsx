@@ -12,13 +12,20 @@ const annotation = props => {
   let borderStyle = `0.15rem solid ${props.style.button.background}`;
   // buttonStyle.border = borderStyle;
   // labelStyle.border = borderStyle;
+  const singleButtonBorder = {
+    "border-bottom-left-radius": "1em",
+    "border-bottom-right-radius": "1em"
+  };
+  const singleButtonStyle = Object.assign({}, buttonStyle, singleButtonBorder);
   const hasEntityData =
     props.aim.magingObservationEntityCollection ||
     props.aim.imagingPhysicalEntityCollection;
+  const finalButtonStyle =
+    !hasEntityData && !props.showLabel ? singleButtonStyle : buttonStyle;
 
   return (
     <div className="annotation-container">
-      <div className="annotation-button__container" style={buttonStyle}>
+      <div className="annotation-button__container" style={finalButtonStyle}>
         <div className="annotation-name__container">
           <span className="annotation__name--text">{annName}</span>
         </div>
@@ -35,17 +42,28 @@ const annotation = props => {
           )}
         </div>
       </div>
-      {/* if label is hidden and there is no entity data dont show the part below
-          change button style here to have bottom edges to be rounded
-      */}
-      <div className="annotation-label__container" style={labelStyle}>
-        <div className="annotation-aimData" />
-        {hasEntityData && <AimEntityData aimData={props.aim} />}
-        <div className="annotation-calculation">
-          {" "}
-          <span>length</span> <span>mean</span> <span>max</span>
+      {(hasEntityData || props.showLabel) && (
+        <div className="annotation-label__container" style={labelStyle}>
+          <div className="annotation-aimData">
+            {hasEntityData && <AimEntityData aimData={props.aim} />}
+          </div>
+
+          {props.showLabel && (
+            <div className="annotation-calculation">
+              {" "}
+              <div className="annotation__userName">user: {props.user}</div>
+              <div className="annotation-calculation__label">
+                <div>length: </div>
+                <div>mean:</div>
+                <div className="-calculation__labelIn">
+                  <span>min: </span>
+                  <span className="-calculation__labelIn--max">max: </span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 };

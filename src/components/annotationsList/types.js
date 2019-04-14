@@ -34,14 +34,13 @@ export const colors = [
     label: { background: "#4a8c99", color: "white" }
   },
   {
-    button: { background: "#ffa500", color: "black" },
+    button: { background: "#ff9000", color: "black" },
     label: { background: "#915d38", color: "white" }
   },
   {
     button: { background: "#4363d8", color: "white" },
     label: { background: "#49598f", color: "white" }
   },
-
   {
     button: { background: "#911eb4", color: "white" },
     label: { background: "#632a73", color: "white" }

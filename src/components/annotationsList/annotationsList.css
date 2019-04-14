@@ -11,7 +11,7 @@
   border-radius: 10px; */
   color: #d3d3d3;
   left: 80%;
-  max-width: 3rem;
+  /* max-width: 3rem; */
 }
 
 .annList {
@@ -275,14 +275,12 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 80%;
+  width: 95%;
   height: auto;
   max-width: 20rem;
   min-width: 10rem;
   margin: 0 auto;
   margin-bottom: 1rem;
-  border-top-left-radius: 1em;
-  border-top-right-radius: 1em;
 }
 
 .annotation-button__container {
@@ -332,4 +330,18 @@ svg {
 
 .aimEntity-item {
   list-style-type: circle;
+}
+.annotation-calculation,
+.annotation-calculation__label {
+  display: flex;
+  flex-direction: column;
+}
+
+.-calculation__labelIn {
+  display: flex;
+  flex-direction: row;
+}
+
+.-calculation__labelIn--max {
+  margin-left: 1rem;
 }
