@@ -10,8 +10,8 @@ const annotation = props => {
   let buttonStyle = { ...props.style.button };
   let labelStyle = { ...props.style.label };
   let borderStyle = `0.15rem solid ${props.style.button.background}`;
-  // buttonStyle.border = borderStyle;
-  // labelStyle.border = borderStyle;
+  buttonStyle.border = borderStyle;
+  labelStyle.border = borderStyle;
   const singleButtonBorder = {
     "border-bottom-left-radius": "1em",
     "border-bottom-right-radius": "1em"

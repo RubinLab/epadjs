@@ -36,12 +36,7 @@ class annotationsList extends React.Component {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     let annotations = Object.values(this.props.aimsList[seriesUID]);
     let annList = [];
-    // //annotations.forEach(aim => {
-    // while (annotations.length < 20) {
-    //   annotations = annotations.concat(annotations);
-    // }
     annotations.forEach((aim, index) => {
-      console.log(aim);
       let aimInfo = aim.json.imageAnnotations.ImageAnnotation;
       let id = aim.json.uniqueIdentifier.root;
       annList.push(
@@ -54,19 +49,19 @@ class annotationsList extends React.Component {
           onClick={this.handleDisplayClick}
           user={aim.json.user.name.value}
           showLabel={this.state.labelDisplayAll}
-          // onLabelClick={this.handleLabelClick}
         />
       );
     });
     return (
       <div className="annotationList-container">
-        <label>
-          <span>{this.state.labelDisplayAll ? "Hide" : "Show"} Labels</span>
+        <div className="label-toggle">
+          <div className="label-toggle__text">Show Labels</div>
           <Toggle
             defaultChecked={this.state.labelDisplayAll}
             onChange={this.handleLabelClick}
+            icons={false}
           />
-        </label>
+        </div>
         <div>{annList}</div>
       </div>
     );
