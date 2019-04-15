@@ -2,7 +2,7 @@ import {
   LOAD_ANNOTATIONS,
   LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
-  VIEWPORT_FULL_PROJECTS,
+  VIEWPORT_FULL,
   UPDATE_ANNOTATION,
   TOGGLE_ALL_ANNOTATIONS,
   CHANGE_ACTIVE_PORT,
@@ -46,8 +46,9 @@ const annotationsLoadingError = error => {
 };
 
 export const alertViewPortFull = () => {
+  console.log("in action");
   return {
-    type: VIEWPORT_FULL_PROJECTS
+    type: VIEWPORT_FULL
   };
 };
 

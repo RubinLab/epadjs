@@ -62,6 +62,7 @@ class App extends Component {
   };
 
   render() {
+    console.log();
     return (
       <React.Fragment>
         <Cornerstone />
@@ -94,17 +95,19 @@ class App extends Component {
         )}
         {this.props.listOpen && <AnnotationList />}
         {this.props.dockOpen && <AnnotationsDock />}
-        {this.props.isViewPortFull && <MaxViewAlert />}
+
+        {this.props.showGridFullAlert && <MaxViewAlert />}
       </React.Fragment>
     );
   }
 }
 
 const mapStateToProps = state => {
+  console.log("state in app.js", state.annotationsListReducer);
   return {
     listOpen: state.annotationsListReducer.listOpen,
     dockOpen: state.annotationsListReducer.dockOpen,
-    isViewPortFull: state.annotationsListReducer.isViewPortFull
+    showGridFullAlert: state.annotationsListReducer.showGridFullAlert
   };
 };
 export default withRouter(connect(mapStateToProps)(App));

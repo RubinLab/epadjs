@@ -7,7 +7,7 @@ import Annotations from "./annotations";
 import { getSeries } from "../../services/seriesServices";
 import { connect } from "react-redux";
 import {
-  showAnnotationDock,
+  alertViewPortFull,
   getAnnotationListData,
   getSingleSerie
 } from "../annotationsList/action";
@@ -265,7 +265,8 @@ class Series extends Component {
     if (!isSerieOpen) {
       //if the grid is full show warning
       if (isGridFull) {
-        this.setState({ showGridFullWarning: true });
+        // this.setState({ showGridFullWarning: true });
+        this.props.dispatch(alertViewPortFull());
       } else {
         //if grid is NOT full check if patient data exists
         if (this.props.patients[selected.patientID]) {

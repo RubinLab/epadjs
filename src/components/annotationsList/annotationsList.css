@@ -502,3 +502,39 @@ svg {
   align-items: center;
   margin-right: 1rem;
 }
+
+.-maxView-container {
+  display: flex;
+  justify-content: space-evenly;
+}
+.-maxView__message--exp {
+  color: grey;
+  /* align-items: center; */
+  margin: 0 auto;
+  text-align: center;
+  font-size: 1.3rem;
+  margin-top: 0.5rem;
+}
+
+.-maxView__header--icon {
+  display: flex;
+  justify-content: center;
+  font-size: 3rem;
+  color: #b20000;
+  padding-top: 0.8rem;
+  margin-right: 1rem;
+}
+
+.-maxView__header__text {
+  color: grey;
+  font-size: 1.8rem;
+}
+
+.-maxView__header {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  /* margin: 0 auto; */
+  /* background: #0099e0; */
+}

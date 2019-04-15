@@ -3,7 +3,7 @@ import {
   LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
   UPDATE_ANNOTATION,
-  VIEWPORT_FULL_PROJECTS,
+  VIEWPORT_FULL,
   TOGGLE_ALL_ANNOTATIONS,
   CHANGE_ACTIVE_PORT,
   LOAD_SERIE_SUCCESS,
@@ -20,7 +20,7 @@ const initialState = {
   patients: {},
   listOpen: false,
   dockOpen: false,
-  isViewPortFull: false
+  showGridFullAlert: false
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -33,7 +33,7 @@ const asyncReducer = (state = initialState, action) => {
     case LOAD_ANNOTATIONS_SUCCESS:
       let indexKey = state.openSeries.length;
       let { summaryData, aimsData, serID, patID, ref } = action.payload;
-      return Object.assign({}, state, {
+      const newResult = Object.assign({}, state, {
         patients: {
           ...state.patients,
           [patID]: summaryData
@@ -44,9 +44,11 @@ const asyncReducer = (state = initialState, action) => {
         aimsList: { ...state.aimsList, [serID]: aimsData },
         openSeries: state.openSeries.concat([ref])
       });
-    case VIEWPORT_FULL_PROJECTS:
-      const viewPortStatus = !state.isViewPortFull;
-      return { ...state, isViewPortFull: viewPortStatus };
+
+      return newResult;
+    case VIEWPORT_FULL:
+      const viewPortStatus = !state.showGridFullAlert;
+      return { ...state, showGridFullAlert: viewPortStatus };
     case LOAD_SERIE_SUCCESS:
       let indexNum = state.openSeries.length;
       const ptID = action.payload.ref.patientID;
@@ -71,7 +73,7 @@ const asyncReducer = (state = initialState, action) => {
         }
       }
       const changedPatients = { ...state.patients, [ptID]: changedPatient };
-      return Object.assign({}, state, {
+      const result = Object.assign({}, state, {
         loading: false,
         error: false,
         activePort: indexNum,
@@ -82,6 +84,8 @@ const asyncReducer = (state = initialState, action) => {
         openSeries: state.openSeries.concat([action.payload.ref]),
         patients: changedPatients
       });
+
+      return result;
     case LOAD_ANNOTATIONS_ERROR:
       return Object.assign({}, state, {
         loading: false,
