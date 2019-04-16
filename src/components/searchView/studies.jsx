@@ -1,9 +1,17 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import { getStudies } from "../../services/studyServices";
+import { getSeries } from "../../services/seriesServices";
+
 import Series from "./series";
+import {
+  openProjectSelectionModal,
+  getSingleSerie,
+  getAnnotationListData
+} from "../annotationsList/action";
 //import "react-table/react-table.css";
 
 function getNodes(data, node = []) {
@@ -216,6 +224,85 @@ class Studies extends Component {
     this.setState({ expanded });
   };
 
+  excludeOpenSeries = allSeriesArr => {
+    const result = [];
+    //get all series number in an array
+    const idArr = this.props.openSeries.reduce((all, item, index) => {
+      all.push(item.seriesUID);
+      return all;
+    }, []);
+    //if array doesnot include that serie number
+    allSeriesArr.forEach(serie => {
+      if (!idArr.includes(serie.seriesUID)) {
+        //push that serie in the result arr
+        result.push(serie);
+      }
+    });
+    return result;
+  };
+
+  getSeriesData = async selected => {
+    const { projectID, patientID, studyUID } = selected;
+    try {
+      const {
+        data: {
+          ResultSet: { Result: series }
+        }
+      } = await getSeries(projectID, patientID, studyUID);
+      return series;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  displaySeries = async selected => {
+    console.log(selected);
+    const { projectID, patientID, studyUID } = selected;
+    //check if the patient already exist
+    //if patient exists extract the open series and control the grid for enough room
+    if (this.props.patients[patientID]) {
+      const study = this.props.patients[patientID].studies[studyUID];
+      const extractedStudy = this.excludeOpenSeries(
+        Object.values(study.series)
+      );
+      //if there is not enough room bring modal
+      if (extractedStudy.length + this.props.openSeries.length > 6) {
+        this.props.dispatch(openProjectSelectionModal());
+        // if there is enough room iterate over the extracted array and call getsingleserie
+      } else {
+        extractedStudy.forEach(serie => {
+          this.props.dispatch(getSingleSerie({ ...serie, projectID }));
+        });
+      }
+    } else {
+      //if patient is not there make the control
+      //if not enough room bring the modal
+      if (selected.numberOfSeries + this.props.openSeries.length > 6) {
+        this.props.dispatch(openProjectSelectionModal());
+      } else {
+        //if enough room bring all series
+        const result = await this.getSeriesData(selected);
+        if (Array.isArray(result) && result.length > 0) {
+          await this.props.dispatch(getAnnotationListData(result[0]));
+          console.log(
+            "patients after loading first serie",
+            this.props.patients[result[0].patientID].studies[result[0].studyUID]
+              .series,
+            Object.keys(
+              this.props.patients[result[0].patientID].studies[
+                result[0].studyUID
+              ]
+            )
+          );
+          for (let i = 1; i < result.length; i++) {
+            console.log("inside the loop", result[i]);
+            this.props.dispatch(getSingleSerie(result[i]));
+          }
+        }
+      }
+    }
+  };
+
   render() {
     const {
       toggleSelection,
@@ -249,7 +336,7 @@ class Studies extends Component {
             showPagination={false}
             {...extraProps}
             getTdProps={(state, rowInfo, column) => ({
-              onDoubleClick: e => console.log("A row was clicked!", rowInfo)
+              onDoubleClick: e => this.displaySeries(rowInfo.original)
             })}
             SubComponent={row => {
               return (
@@ -269,4 +356,10 @@ class Studies extends Component {
   }
 }
 
-export default Studies;
+const mapStateToProps = state => {
+  return {
+    openSeries: state.annotationsListReducer.openSeries,
+    patients: state.annotationsListReducer.patients
+  };
+};
+export default connect(mapStateToProps)(Studies);

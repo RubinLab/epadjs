@@ -9,6 +9,7 @@ import {
   LOAD_SERIE_SUCCESS,
   SHOW_ANNOTATION_WINDOW,
   SHOW_ANNOTATION_DOCK,
+  OPEN_PROJECT_MODAL,
   colors
 } from "./types";
 
@@ -32,6 +33,11 @@ const loadAnnotations = () => {
   };
 };
 
+export const openProjectSelectionModal = () => {
+  return {
+    type: OPEN_PROJECT_MODAL
+  };
+};
 const annotationsLoaded = (summaryData, aimsData, serID, patID, ref) => {
   return {
     type: LOAD_ANNOTATIONS_SUCCESS,
@@ -127,7 +133,7 @@ const getRequiredFields = (arr, type, selectedID) => {
           patientID,
           projectID
         } = element;
-        const displayAnns = seriesUID === selectedID;
+        const displayAnns = seriesUID === selectedID || selectedID === studyUID;
 
         obj = {
           seriesUID,
@@ -140,7 +146,7 @@ const getRequiredFields = (arr, type, selectedID) => {
         result[seriesUID] = obj;
       } else {
         const { seriesUID, studyUID, name, aimID, comment } = element;
-        const isDisplayed = seriesUID === selectedID;
+        const isDisplayed = seriesUID === selectedID || selectedID === studyUID;
         obj = {
           seriesUID,
           studyUID,
@@ -243,15 +249,23 @@ const getAnnotationData = async (
 
 export const getSingleSerie = (serie, annotation) => {
   return async (dispatch, getState) => {
-    dispatch(loadAnnotations());
-    let aimsData = {};
-    let { patientID, studyUID, seriesUID, projectID } = serie;
+    let { patientID, studyUID, seriesUID } = serie;
     let reference = {
       patientID,
       studyUID,
       seriesUID,
       aimID: annotation
     };
+    const aimsData = await dispatch(getSingleSerieData(serie, annotation));
+    dispatch(singleSerieLoaded(reference, aimsData, seriesUID, annotation));
+  };
+};
+
+const getSingleSerieData = (serie, annotation) => {
+  return async (dispatch, getState) => {
+    dispatch(loadAnnotations());
+    let aimsData = {};
+    let { patientID, studyUID, seriesUID, projectID } = serie;
     try {
       const {
         data: {
@@ -262,10 +276,91 @@ export const getSingleSerie = (serie, annotation) => {
     } catch (err) {
       dispatch(annotationsLoadingError(err));
     }
-    dispatch(singleSerieLoaded(reference, aimsData, seriesUID, annotation));
+    return aimsData;
   };
 };
+
 // gets one patient and all the studys->series->annotations under it
+export const getAnnotationListData = (serie, study, annotation) => {
+  return async (dispatch, getState) => {
+    // create an object with patient details
+    dispatch(loadAnnotations());
+    let { projectID, patientID, patientName, studyUID } = serie || study;
+    let selectedID;
+    let seriesUID;
+    if (serie) {
+      selectedID = serie.seriesUID;
+      seriesUID = serie.seriesUID;
+    } else if (study) {
+      selectedID = study.studyUID;
+    }
+    let summaryData = {
+      // seriesUID,
+      projectID,
+      patientID,
+      patientName
+      // studyUID
+    };
+    // make call to get study and populate the studies data
+    try {
+      await getStudiesData(summaryData, projectID, patientID);
+    } catch (error) {
+      dispatch(annotationsLoadingError(error));
+    }
+    // make call to get series and populate studies with series data
+    const studies = Object.values(summaryData["studies"]);
+    studies.forEach(async st => {
+      let series;
+      try {
+        series = await getSeriesData(
+          projectID,
+          patientID,
+          st.studyUID,
+          selectedID
+        );
+        st.series = series;
+        console.log(series);
+        //make call to get annotations and populate series annotations data
+        const seriesArr = Object.values(st.series);
+        seriesArr.forEach(async serie => {
+          try {
+            const annotations = await getAnnotationData(
+              projectID,
+              patientID,
+              st.studyUID,
+              serie.seriesUID,
+              selectedID
+            );
+            serie.annotations = annotations;
+          } catch (error) {
+            dispatch(annotationsLoadingError(error));
+          }
+        });
+      } catch (error) {
+        dispatch(annotationsLoadingError(error));
+      }
+    });
+
+    let aimsData = await dispatch(
+      getSingleSerieData({ projectID, patientID, studyUID, seriesUID })
+    );
+
+    const reference = {
+      patientID,
+      studyUID,
+      seriesUID,
+      aimID: annotation
+    };
+
+    console.log("summ", summaryData);
+    dispatch(
+      annotationsLoaded(summaryData, aimsData, seriesUID, patientID, reference)
+    );
+  };
+};
+
+/* BACK UP 
+
 export const getAnnotationListData = (serie, annotation) => {
   return async (dispatch, getState) => {
     // create an object with patient details
@@ -309,10 +404,8 @@ export const getAnnotationListData = (serie, annotation) => {
               serie.seriesUID,
               selectedID
             );
-            console.log("annotations in big fuction", annotations);
             serie.annotations = annotations;
           } catch (error) {
-            console.log("-------- error ------------");
             dispatch(annotationsLoadingError(error));
           }
         });
@@ -343,3 +436,4 @@ export const getAnnotationListData = (serie, annotation) => {
     );
   };
 };
+ */

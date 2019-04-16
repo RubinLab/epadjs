@@ -4,6 +4,7 @@ export const LOAD_ANNOTATIONS_SUCCESS =
 export const LOAD_ANNOTATIONS_ERROR =
   "epadjs/annotationList/LOAD_ANNOTATIONS_ERROR";
 export const VIEWPORT_FULL = "epadjs/annotationList/VIEWPORT_FULL";
+export const OPEN_PROJECT_MODAL = "epadjs/annotationList/OPEN_PROJECT_MODAL";
 export const UPDATE_ANNOTATION = "epadjs/annotationList/UPDATE_ANNOTATION";
 export const TOGGLE_ALL_ANNOTATIONS =
   "epadjs/annotationList/TOGGLE_ALL_ANNOTATIONS";

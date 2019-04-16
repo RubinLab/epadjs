@@ -157,6 +157,10 @@ class Annotations extends Component {
     this.setState({ expanded });
   };
 
+  dispatchAnnDisplay = selected => {
+    console.log("in annotation function-selected:", selected);
+  };
+
   render() {
     const {
       toggleSelection,
@@ -189,6 +193,13 @@ class Annotations extends Component {
             freezWhenExpanded={false}
             showPagination={false}
             {...extraProps}
+            getTdProps={(state, rowInfo, column, instance) => {
+              return {
+                onDoubleClick: (e, handleOriginal) => {
+                  this.dispatchAnnDisplay(rowInfo);
+                }
+              };
+            }}
           />
         ) : null}
       </div>
