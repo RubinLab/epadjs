@@ -1,5 +1,11 @@
 import React from "react";
-import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
+import {
+  FaRegEye,
+  FaRegEyeSlash,
+  FaInfoCircle,
+  FaCaretDown,
+  FaCaretUp
+} from "react-icons/fa";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import AimEntityData from "./aimEntityData";
 
@@ -13,8 +19,8 @@ const annotation = props => {
   buttonStyle.border = borderStyle;
   labelStyle.border = borderStyle;
   const singleButtonBorder = {
-    "border-bottom-left-radius": "1em",
-    "border-bottom-right-radius": "1em"
+    borderBottomLeftRadius: "1em",
+    borderBottomRightRadius: "1em"
   };
   const singleButtonStyle = Object.assign({}, buttonStyle, singleButtonBorder);
   const hasEntityData =
@@ -26,6 +32,9 @@ const annotation = props => {
   return (
     <div className="annotation-container">
       <div className="annotation-button__container" style={finalButtonStyle}>
+        <div className="annotation-icon showLabel" data-id={props.id}>
+          {props.showLabel ? <FaCaretUp /> : <FaCaretDown />}
+        </div>
         <div className="annotation-name__container">
           <span className="annotation__name--text">{annName}</span>
         </div>

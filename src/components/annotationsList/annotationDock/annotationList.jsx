@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import Toggle from "react-toggle";
 import Annotation from "./annotation";
-import { updateAnnotation } from "../action";
+import { updateAnnotation, toggleAllLabels } from "../action";
 
 class annotationsList extends React.Component {
   state = {
@@ -28,8 +28,10 @@ class annotationsList extends React.Component {
     }
   };
 
-  handleLabelClick = () => {
-    this.setState(state => ({ labelDisplayAll: !state.labelDisplayAll }));
+  handleLabelClick = e => {
+    this.setState({ labelDisplayAll: e.target.checked });
+    const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
+    this.props.dispatch(toggleAllLabels(seriesUID, e.target.checked));
   };
 
   render = () => {
@@ -48,7 +50,7 @@ class annotationsList extends React.Component {
           displayed={aim.isDisplayed}
           onClick={this.handleDisplayClick}
           user={aim.json.user.name.value}
-          showLabel={this.state.labelDisplayAll}
+          showLabel={aim.showLabel}
         />
       );
     });

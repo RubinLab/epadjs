@@ -5,6 +5,8 @@ import {
   UPDATE_ANNOTATION,
   VIEWPORT_FULL,
   TOGGLE_ALL_ANNOTATIONS,
+  TOGGLE_ALL_LABELS,
+  TOGGLE_LABEL,
   CHANGE_ACTIVE_PORT,
   LOAD_SERIE_SUCCESS,
   SHOW_ANNOTATION_WINDOW,
@@ -155,9 +157,14 @@ const asyncReducer = (state = initialState, action) => {
       if (!newValue) {
         // newSerie.isLabelDisplayed = newValue;
       }
-
       return Object.assign({}, state, { patients: toggleAnnPatients });
-
+    case TOGGLE_ALL_LABELS:
+      const toggledLabelSerie = { ...state.aimsList };
+      const anns = toggledLabelSerie[action.payload.serieID];
+      for (let ann in anns) {
+        anns[ann].showLabel = action.payload.checked;
+      }
+      return Object.assign({}, state, { aimsList: toggledLabelSerie });
     default:
       return state;
   }

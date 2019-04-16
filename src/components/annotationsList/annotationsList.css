@@ -441,7 +441,7 @@
 .annotation-name__container {
   display: flex;
   justify-content: center;
-  width: 90%;
+  width: 84%;
   font-size: 1rem;
 }
 
@@ -458,9 +458,12 @@
   display: inline-block;
   margin: 0 auto;
   cursor: pointer;
-  width: 10%;
+  width: 8%;
 }
 
+.showLabel {
+  font-size: 1.8rem;
+}
 svg {
   pointer-events: none;
 }
@@ -468,7 +471,7 @@ svg {
   border-bottom-left-radius: 1em;
   border-bottom-right-radius: 1em;
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.2rem;
 }
 
 .aimEntity-item {

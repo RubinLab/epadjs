@@ -9,6 +9,7 @@ export const UPDATE_ANNOTATION = "epadjs/annotationList/UPDATE_ANNOTATION";
 export const TOGGLE_ALL_ANNOTATIONS =
   "epadjs/annotationList/TOGGLE_ALL_ANNOTATIONS";
 export const TOGGLE_ALL_LABELS = "epadjs/annotationList/TOGGLE_ALL_LABELS";
+export const TOGGLE_LABEL = "epadjs/annotationList/TOGGLE_LABEL";
 export const CHANGE_ACTIVE_PORT = "epadjs/annotationList/CHANGE_ACTIVE_PORT";
 export const LOAD_SERIE_SUCCESS = "epadjs/annotationList/LOAD_SERIE_SUCCESS";
 export const SHOW_ANNOTATION_WINDOW =

@@ -5,6 +5,8 @@ import {
   VIEWPORT_FULL,
   UPDATE_ANNOTATION,
   TOGGLE_ALL_ANNOTATIONS,
+  TOGGLE_ALL_LABELS,
+  TOGGLE_LABEL,
   CHANGE_ACTIVE_PORT,
   LOAD_SERIE_SUCCESS,
   SHOW_ANNOTATION_WINDOW,
@@ -83,6 +85,13 @@ export const toggleAllAnnotations = (
   };
 };
 
+export const toggleAllLabels = (serieID, checked) => {
+  return {
+    type: TOGGLE_ALL_LABELS,
+    payload: { serieID, checked }
+  };
+};
+
 export const changeActivePort = portIndex => {
   return {
     type: CHANGE_ACTIVE_PORT,
@@ -109,6 +118,7 @@ const getAimListFields = (aims, ann) => {
     result[aim.uniqueIdentifier.root] = {
       json: aim,
       isDisplayed: displayStatus,
+      showLabel: true,
       cornerStoneTools: [],
       color: { ...colors[index] }
     };
