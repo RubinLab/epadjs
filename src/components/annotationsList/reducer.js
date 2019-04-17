@@ -70,10 +70,6 @@ const asyncReducer = (state = initialState, action) => {
           ann
         ].isDisplayed = true;
       } else {
-        console.log(changedPatient);
-        console.log(changedPatient.studies);
-        console.log(changedPatient.studies[stID]);
-        console.log(Object.entries(changedPatient.studies[stID]));
         changedPatient.studies[stID].series[srID].displayAnns = true;
         // changedPatient.studies[stID].series[srID].isLabelDisplayed = true;
         for (let annotation in changedPatient.studies[stID].series[srID]

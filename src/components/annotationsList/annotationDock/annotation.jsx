@@ -8,11 +8,12 @@ import {
 } from "react-icons/fa";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import AimEntityData from "./aimEntityData";
+import CalculationLabel from "./calculationLabel";
 
 const annotation = props => {
-  let annName = props.aim.name.value;
-  let index = annName.indexOf("~");
-  annName = annName.substring(0, index);
+  // let annName = props.aim.name.value;
+  // let index = annName.indexOf("~");
+  // annName = annName.substring(0, index);
   let buttonStyle = { ...props.style.button };
   let labelStyle = { ...props.style.label };
   let borderStyle = `0.15rem solid ${props.style.button.background}`;
@@ -22,12 +23,15 @@ const annotation = props => {
     borderBottomLeftRadius: "1em",
     borderBottomRightRadius: "1em"
   };
+  const calculations = props.aim.calculationEntityCollection
+    ? props.aim.calculationEntityCollection.CalculationEntity
+    : [];
   const singleButtonStyle = Object.assign({}, buttonStyle, singleButtonBorder);
   const hasEntityData =
     props.aim.magingObservationEntityCollection ||
     props.aim.imagingPhysicalEntityCollection;
   const finalButtonStyle = !props.showLabel ? singleButtonStyle : buttonStyle;
-
+  console.log(props.aim);
   return (
     <div className="annotation-container">
       <div className="annotation-button__container" style={finalButtonStyle}>
@@ -39,7 +43,7 @@ const annotation = props => {
           {props.showLabel ? <FaCaretUp /> : <FaCaretDown />}
         </div>
         <div className="annotation-name__container">
-          <span className="annotation__name--text">{annName}</span>
+          <span className="annotation__name--text">{props.name}</span>
         </div>
         <div
           className="annotation-icon"
@@ -56,12 +60,21 @@ const annotation = props => {
       </div>
       {props.showLabel && (
         <div className="annotation-label__container" style={labelStyle}>
-          <div className="annotation-aimData">
-            {hasEntityData && <AimEntityData aimData={props.aim} />}
+          <div className="annotation-label__desc">
+            <div className="annotation__userName">{props.user}</div>
+            <div>-</div>
+            <div className="annotation__type">{props.aim.typeCode.code}</div>
           </div>
+          {hasEntityData && (
+            <div className="annotation-aimData">
+              <AimEntityData aimData={props.aim} />
+            </div>
+          )}
+          {calculations.length > 0 && (
+            <CalculationLabel calculations={calculations} />
+          )}
           <div className="annotation-calculation">
             {" "}
-            <div className="annotation__userName">user: {props.user}</div>
             <div className="annotation-calculation__label">
               <div>length: </div>
               <div>mean:</div>

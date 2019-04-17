@@ -283,20 +283,10 @@ class Studies extends Component {
         //if enough room bring all series
         const result = await this.getSeriesData(selected);
         if (Array.isArray(result) && result.length > 0) {
-          await this.props.dispatch(getAnnotationListData(result[0]));
-          console.log(
-            "patients after loading first serie",
-            this.props.patients[result[0].patientID].studies[result[0].studyUID]
-              .series,
-            Object.keys(
-              this.props.patients[result[0].patientID].studies[
-                result[0].studyUID
-              ]
-            )
-          );
+          await this.props.dispatch(await getAnnotationListData(result[0]));
           for (let i = 1; i < result.length; i++) {
             console.log("inside the loop", result[i]);
-            this.props.dispatch(getSingleSerie(result[i]));
+            await this.props.dispatch(getSingleSerie(result[i]));
           }
         }
       }

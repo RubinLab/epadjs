@@ -474,6 +474,26 @@ svg {
   padding: 0.2rem;
 }
 
+.annotation-label__desc {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.annotation__userName {
+  margin-right: 0.5rem;
+}
+
+.annotation__type {
+  margin-left: 0.5rem;
+}
+
+.Length-label,
+.Min-label,
+.Max-label,
+.Mean-label,
+.StdDev-label {
+  display: flex;
+}
 .aimEntity-item {
   list-style-type: circle;
 }
