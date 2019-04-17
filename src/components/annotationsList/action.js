@@ -121,8 +121,13 @@ const getAimListFields = (aims, ann) => {
     if (index >= colors.length) {
       index = index % colors.length;
     }
+
+    let name = aim.imageAnnotations.ImageAnnotation.name.value;
+    let ind = name.indexOf("~");
+    name = name.substring(0, ind);
     let displayStatus = ann ? ann === aim.uniqueIdentifier.root : !ann;
     result[aim.uniqueIdentifier.root] = {
+      name,
       json: aim,
       isDisplayed: displayStatus,
       showLabel: true,

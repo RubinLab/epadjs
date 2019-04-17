@@ -26,8 +26,7 @@ const annotation = props => {
   const hasEntityData =
     props.aim.magingObservationEntityCollection ||
     props.aim.imagingPhysicalEntityCollection;
-  const finalButtonStyle =
-    !hasEntityData && !props.showLabel ? singleButtonStyle : buttonStyle;
+  const finalButtonStyle = !props.showLabel ? singleButtonStyle : buttonStyle;
 
   return (
     <div className="annotation-container">
@@ -55,26 +54,23 @@ const annotation = props => {
           )}
         </div>
       </div>
-      {(hasEntityData || props.showLabel) && (
+      {props.showLabel && (
         <div className="annotation-label__container" style={labelStyle}>
           <div className="annotation-aimData">
             {hasEntityData && <AimEntityData aimData={props.aim} />}
           </div>
-
-          {props.showLabel && (
-            <div className="annotation-calculation">
-              {" "}
-              <div className="annotation__userName">user: {props.user}</div>
-              <div className="annotation-calculation__label">
-                <div>length: </div>
-                <div>mean:</div>
-                <div className="-calculation__labelIn">
-                  <span>min: </span>
-                  <span className="-calculation__labelIn--max">max: </span>
-                </div>
+          <div className="annotation-calculation">
+            {" "}
+            <div className="annotation__userName">user: {props.user}</div>
+            <div className="annotation-calculation__label">
+              <div>length: </div>
+              <div>mean:</div>
+              <div className="-calculation__labelIn">
+                <span>min: </span>
+                <span className="-calculation__labelIn--max">max: </span>
               </div>
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>

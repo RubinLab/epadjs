@@ -166,15 +166,11 @@ const asyncReducer = (state = initialState, action) => {
       }
       return Object.assign({}, state, { aimsList: toggledLabelSerie });
     case TOGGLE_LABEL:
-      console.log("in reducer");
       const singleLabelToggled = { ...state.aimsList };
       const allAnns = singleLabelToggled[action.payload.serieID];
       for (let ann in allAnns) {
         if (ann === action.payload.aimID) {
-          console.log(ann);
           const currentStatus = allAnns[ann].showLabel;
-          console.log(allAnns[ann]);
-          console.log(currentStatus);
           allAnns[ann].showLabel = !currentStatus;
         }
       }
