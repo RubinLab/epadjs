@@ -32,7 +32,11 @@ const annotation = props => {
   return (
     <div className="annotation-container">
       <div className="annotation-button__container" style={finalButtonStyle}>
-        <div className="annotation-icon showLabel" data-id={props.id}>
+        <div
+          className="annotation-icon showLabel"
+          data-id={props.id}
+          onClick={props.onSingleToggle}
+        >
           {props.showLabel ? <FaCaretUp /> : <FaCaretDown />}
         </div>
         <div className="annotation-name__container">

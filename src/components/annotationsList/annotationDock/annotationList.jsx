@@ -2,7 +2,11 @@ import React from "react";
 import { connect } from "react-redux";
 import Toggle from "react-toggle";
 import Annotation from "./annotation";
-import { updateAnnotation, toggleAllLabels } from "../action";
+import {
+  updateAnnotation,
+  toggleAllLabels,
+  toggleSingleLabel
+} from "../action";
 
 class annotationsList extends React.Component {
   state = {
@@ -28,10 +32,15 @@ class annotationsList extends React.Component {
     }
   };
 
-  handleLabelClick = e => {
+  handleToggleAllLabels = e => {
     this.setState({ labelDisplayAll: e.target.checked });
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleAllLabels(seriesUID, e.target.checked));
+  };
+
+  handleToggleSingleLabel = e => {
+    const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
+    this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
   };
 
   render = () => {
@@ -51,6 +60,7 @@ class annotationsList extends React.Component {
           onClick={this.handleDisplayClick}
           user={aim.json.user.name.value}
           showLabel={aim.showLabel}
+          onSingleToggle={this.handleToggleSingleLabel}
         />
       );
     });
@@ -60,7 +70,7 @@ class annotationsList extends React.Component {
           <div className="label-toggle__text">Show Labels</div>
           <Toggle
             defaultChecked={this.state.labelDisplayAll}
-            onChange={this.handleLabelClick}
+            onChange={this.handleToggleAllLabels}
             icons={false}
           />
         </div>

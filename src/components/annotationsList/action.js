@@ -92,6 +92,13 @@ export const toggleAllLabels = (serieID, checked) => {
   };
 };
 
+export const toggleSingleLabel = (serieID, aimID) => {
+  return {
+    type: TOGGLE_LABEL,
+    payload: { serieID, aimID }
+  };
+};
+
 export const changeActivePort = portIndex => {
   return {
     type: CHANGE_ACTIVE_PORT,
