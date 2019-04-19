@@ -14,6 +14,8 @@ const annotation = props => {
   // let annName = props.aim.name.value;
   // let index = annName.indexOf("~");
   // annName = annName.substring(0, index);
+
+  //conditional borderstyling
   let buttonStyle = { ...props.style.button };
   let labelStyle = { ...props.style.label };
   let borderStyle = `0.15rem solid ${props.style.button.background}`;
@@ -23,15 +25,19 @@ const annotation = props => {
     borderBottomLeftRadius: "1em",
     borderBottomRightRadius: "1em"
   };
-  const calculations = props.aim.calculationEntityCollection
-    ? props.aim.calculationEntityCollection.CalculationEntity
-    : [];
   const singleButtonStyle = Object.assign({}, buttonStyle, singleButtonBorder);
+
+  //getting aim details
   const hasEntityData =
     props.aim.magingObservationEntityCollection ||
     props.aim.imagingPhysicalEntityCollection;
   const finalButtonStyle = !props.showLabel ? singleButtonStyle : buttonStyle;
-  console.log(props.aim);
+
+  //getting calculations arr if any
+  const calculations = props.aim.calculationEntityCollection
+    ? props.aim.calculationEntityCollection.CalculationEntity
+    : [];
+
   return (
     <div className="annotation-container">
       <div className="annotation-button__container" style={finalButtonStyle}>
@@ -43,7 +49,7 @@ const annotation = props => {
           {props.showLabel ? <FaCaretUp /> : <FaCaretDown />}
         </div>
         <div className="annotation-name__container">
-          <span className="annotation__name--text">{props.name}</span>
+          <div className="annotation__name--text">{props.name}</div>
         </div>
         <div
           className="annotation-icon"
@@ -70,20 +76,9 @@ const annotation = props => {
               <AimEntityData aimData={props.aim} />
             </div>
           )}
-          {calculations.length > 0 && (
-            <CalculationLabel calculations={calculations} />
+          {calculations.length > 0 && calculations.length <= 10 && (
+            <CalculationLabel calculations={calculations} name={props.name} />
           )}
-          <div className="annotation-calculation">
-            {" "}
-            <div className="annotation-calculation__label">
-              <div>length: </div>
-              <div>mean:</div>
-              <div className="-calculation__labelIn">
-                <span>min: </span>
-                <span className="-calculation__labelIn--max">max: </span>
-              </div>
-            </div>
-          </div>
         </div>
       )}
     </div>

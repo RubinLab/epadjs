@@ -1,38 +1,95 @@
 import React from "react";
 
-const calculationLabel = ({ calculations }) => {
+const calculationLabel = ({ calculations, name, shape }) => {
   const labels = [];
-  calculations.forEach(el => {
+  const longAxisLabels = [];
+  const shortAxisLabels = [];
+  let i = 0;
+  //   let isTableRequired = false;
+  for (let el of calculations) {
+    //   calculations.forEach(el => {
+    const labelType =
+      el.calculationResultCollection.CalculationResult.dimensionCollection
+        .Dimension.label;
+    // isTableRequired = labelType.value.toLowerCase().includes("axis");
+
     let desc = "";
-    let val =
-      el.calculationResultCollection.CalculationResult.value.value ||
-      el.calculationResultCollection.CalculationResult.calculationDataCollection
-        .CalculationData.value.value;
+    let upperLevel = el.calculationResultCollection.CalculationResult.value;
+    let val = upperLevel
+      ? upperLevel.value
+      : el.calculationResultCollection.CalculationResult
+          .calculationDataCollection.CalculationData.value.value;
     let unit =
       el.calculationResultCollection.CalculationResult.unitOfMeasure.value;
+
     if (el.description.value === "Maximum") {
       desc = "Max";
-      val = val.toFixed(3);
+      unit = null;
     } else if (el.description.value === "Minimum") {
       desc = "Min";
+      unit = null;
     } else if (el.description.value === "Standard Deviation") {
       desc = "StdDev";
-      val = val.toFixed(2);
-    } else if (el.description.value === "Length") {
+      val = isNaN(val) ? val : val.toFixed(3);
+      unit = null;
+    } else if (
+      el.description.value === "Length" ||
+      el.description.value === "LongAxis" ||
+      el.description.value === "ShortAxis"
+    ) {
+      desc = "Length";
+      val = isNaN(val) ? val : val.toFixed(3);
+    } else if (el.description.value === "Mean") {
       desc = el.description.value;
-      val = val.toFixed(3);
-    } else {
+      unit = null;
+      val = isNaN(val) ? val : val.toFixed(2);
+    } else if (el.description.value === "Volume") {
       desc = el.description.value;
+      val = isNaN(val) ? val : val.toFixed(3);
     }
+
     let classDesc = desc + "-label";
-    let element = (
-      <div className="-calculation__label--el">
-        <div className={classDesc}>{el.desc}:</div>
-        <div className={classDesc}>{el}</div>
+    let measurement = (
+      <div className="-calculation__label--el" key={i + desc}>
+        <div className={classDesc}>{`${desc}: `}</div>
+        <div className={classDesc}>
+          {val}
+          {unit}
+        </div>
       </div>
     );
-  });
-  return <div className="annotation-calculation__label">{labels}</div>;
+    i++;
+
+    if (labelType.value.toLowerCase().includes("long")) {
+      longAxisLabels.push(measurement);
+    } else if (labelType.value.toLowerCase().includes("short")) {
+      shortAxisLabels.push(measurement);
+    } else {
+      labels.push(measurement);
+    }
+  }
+  console.log(shortAxisLabels);
+  console.log(longAxisLabels);
+  //   });
+  return (
+    <div className="annotation-calculation__label">
+      {labels.length > 0 && (
+        <div className="-calculation__label--list">{labels}</div>
+      )}
+      {shortAxisLabels.length > 0 && (
+        <>
+          <div className="-calculation__label--title">Short Axis</div>
+          <div className="-calculation__label--list">{shortAxisLabels}</div>
+        </>
+      )}
+      {longAxisLabels.length > 0 && (
+        <>
+          <div className="-calculation__label--title">Long Axis</div>
+          <div className="-calculation__label--list">{longAxisLabels}</div>
+        </>
+      )}
+    </div>
+  );
 };
 
 export default calculationLabel;
