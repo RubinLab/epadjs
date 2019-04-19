@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Route, Switch, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
+import Keycloak from "keycloak-js";
 import { getUser } from "./services/userServices";
 import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
@@ -26,7 +27,9 @@ import "./App.css";
 
 class App extends Component {
   state = {
-    isMngMenuOpen: false
+    isMngMenuOpen: false,
+    keycloak: null,
+    authenticated: false
   };
 
   closeMenu = event => {
@@ -45,6 +48,13 @@ class App extends Component {
 
   async componentDidMount() {
     //when comp mount check if the user is set already. If is set then set state
+
+    const keycloak = Keycloak("/keycloak.json");
+    keycloak.init({ onLoad: "login-required" }).then(authenticated => {
+      this.setState({ keycloak: keycloak, authenticated: authenticated });
+    });
+
+    /*
     try {
       const username = sessionStorage.getItem("username");
       if (username) {
@@ -52,7 +62,7 @@ class App extends Component {
         this.setState({ user });
       }
     } catch (ex) {}
-
+    */
     // window.addEventListener('keydown', this.closeMenu, true);
   }
 
@@ -67,8 +77,10 @@ class App extends Component {
         <ToastContainer />
         <NavBar user={this.state.user} openGearMenu={this.openMenu} />
         {this.state.isMngMenuOpen && <Management closeMenu={this.closeMenu} />}
-        {!this.state.user && <Route path="/login" component={LoginForm} />}
-        {this.state.user && (
+        {!this.state.authenticated && (
+          <Route path="/login" component={LoginForm} />
+        )}
+        {this.state.authenticated && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
             <Sidebar>
               <Switch>
