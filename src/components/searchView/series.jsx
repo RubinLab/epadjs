@@ -9,7 +9,8 @@ import { connect } from "react-redux";
 import {
   alertViewPortFull,
   getAnnotationListData,
-  getSingleSerie
+  getSingleSerie,
+  changeActivePort
 } from "../annotationsList/action";
 import AlertGridFull from "./alertGridFull";
 import "react-table/react-table.css";
@@ -252,10 +253,12 @@ class Series extends Component {
     let isGridFull = openSeries.length === 6;
     //check if the serie is already open
     if (openSeries.length > 0) {
-      for (let serie of openSeries) {
-        if (serie) {
-          if (serie.seriesUID === selected.seriesUID) {
+      for (let i = 0; i < openSeries.length; i++) {
+        // for (let serie of openSeries) {
+        if (openSeries[i]) {
+          if (openSeries[i].seriesUID === selected.seriesUID) {
             isSerieOpen = true;
+            this.props.dispatch(changeActivePort(i));
             break;
           }
         }
