@@ -83,17 +83,20 @@ class ListItem extends React.Component {
     }
   };
 
-  handleToggleSerie = async e => {
+  handleToggleSerie = async (checked, e, id) => {
     //select de select all anotations
-    console.log(e);
+    console.log("hereeeee", e.target.dataset);
+    console.log("hereeeee", id);
+    console.log("");
     const { patientID, seriesUID, studyUID } = this.props.serie;
     const { seriesid } = e.target.dataset;
     const activeSeriesUID = this.props.openSeries[this.props.activePort]
       .seriesUID;
     //check if user toggle on or off and change the state accordingly
-    await this.setState({ displayAnnotations: e.target.checked });
+    // await this.setState({ displayAnnotations: e.target.checked });
+    await this.setState({ displayAnnotations: checked });
 
-    if (activeSeriesUID === seriesid) {
+    if (activeSeriesUID === id) {
       this.props.dispatch(
         toggleAllAnnotations(
           patientID,
