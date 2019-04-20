@@ -1,24 +1,29 @@
 import React from "react";
 
 const aimEntityData = ({ aimData }) => {
+  console.log(aimData);
   let observationEnt =
     aimData.imagingObservationEntityCollection.ImagingObservationEntity;
   let physicalEnt =
     aimData.imagingPhysicalEntityCollection.ImagingPhysicalEntity;
-  console.log(aimData);
-
   let dataArr = [];
   if (observationEnt) {
     dataArr = Array.isArray(observationEnt)
       ? dataArr.concat(observationEnt)
       : dataArr.concat([observationEnt]);
+    let chracteristic =
+      observationEnt.imagingObservationCharacteristicCollection;
+    if (chracteristic) {
+      dataArr = Array.isArray(chracteristic.ImagingObservationCharacteristic)
+        ? dataArr.concat(chracteristic.ImagingObservationCharacteristic)
+        : dataArr.concat([chracteristic.ImagingObservationCharacteristic]);
+    }
   }
   if (physicalEnt) {
     dataArr = Array.isArray(physicalEnt)
       ? dataArr.concat(physicalEnt)
       : dataArr.concat([physicalEnt]);
   }
-  console.log("aimdata", dataArr);
   const listArr = [];
   dataArr.forEach((comment, i) => {
     listArr.push(

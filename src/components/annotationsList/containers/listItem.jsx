@@ -85,9 +85,6 @@ class ListItem extends React.Component {
 
   handleToggleSerie = async (checked, e, id) => {
     //select de select all anotations
-    console.log("hereeeee", e.target.dataset);
-    console.log("hereeeee", id);
-    console.log("");
     const { patientID, seriesUID, studyUID } = this.props.serie;
     const { seriesid } = e.target.dataset;
     const activeSeriesUID = this.props.openSeries[this.props.activePort]

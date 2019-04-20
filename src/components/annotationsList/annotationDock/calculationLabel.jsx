@@ -21,30 +21,30 @@ const calculationLabel = ({ calculations, name, shape }) => {
           .calculationDataCollection.CalculationData.value.value;
     let unit =
       el.calculationResultCollection.CalculationResult.unitOfMeasure.value;
-
-    if (el.description.value === "Maximum") {
+    const { value } = el.description;
+    if (value === "Maximum") {
       desc = "Max";
       unit = null;
-    } else if (el.description.value === "Minimum") {
+    } else if (value === "Minimum") {
       desc = "Min";
       unit = null;
-    } else if (el.description.value === "Standard Deviation") {
+    } else if (value === "Standard Deviation") {
       desc = "StdDev";
       val = isNaN(val) ? val : val.toFixed(3);
       unit = null;
     } else if (
-      el.description.value === "Length" ||
-      el.description.value === "LongAxis" ||
-      el.description.value === "ShortAxis"
+      value === "Length" ||
+      value === "LongAxis" ||
+      value === "ShortAxis"
     ) {
       desc = "Length";
       val = isNaN(val) ? val : val.toFixed(3);
-    } else if (el.description.value === "Mean") {
-      desc = el.description.value;
+    } else if (value === "Mean") {
+      desc = value;
       unit = null;
       val = isNaN(val) ? val : val.toFixed(2);
-    } else if (el.description.value === "Volume") {
-      desc = el.description.value;
+    } else if (value === "Volume") {
+      desc = value;
       val = isNaN(val) ? val : val.toFixed(3);
     }
 
@@ -68,8 +68,6 @@ const calculationLabel = ({ calculations, name, shape }) => {
       labels.push(measurement);
     }
   }
-  console.log(shortAxisLabels);
-  console.log(longAxisLabels);
   //   });
   return (
     <div className="annotation-calculation__label">

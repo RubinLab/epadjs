@@ -338,7 +338,7 @@ svg {
   border-bottom-left-radius: 1em;
   border-bottom-right-radius: 1em;
   width: 100%;
-  padding: 0.2rem;
+  padding: 0.3rem;
 }
 
 .annotation-label__desc {
@@ -365,7 +365,15 @@ svg {
 }
 .aimEntity-item {
   list-style-type: circle;
+  padding-left: 0.2rem;
+  text-transform: capitalize;
 }
+
+.aimEntity-question {
+  position: relative;
+  left: -0.5rem;
+}
+
 .annotation-calculation,
 .annotation-calculation__label {
   display: flex;
