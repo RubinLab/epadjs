@@ -10,7 +10,8 @@ import Series from "./series";
 import {
   openProjectSelectionModal,
   getSingleSerie,
-  getAnnotationListData
+  getAnnotationListData,
+  selectStudy
 } from "../annotationsList/action";
 //import "react-table/react-table.css";
 
@@ -258,6 +259,7 @@ class Studies extends Component {
   displaySeries = async selected => {
     console.log(selected);
     const { projectID, patientID, studyUID } = selected;
+    // let total;
     //check if the patient already exist
     //if patient exists extract the open series and control the grid for enough room
     if (this.props.patients[patientID]) {
@@ -266,8 +268,11 @@ class Studies extends Component {
         Object.values(study.series)
       );
       //if there is not enough room bring modal
-      if (extractedStudy.length + this.props.openSeries.length > 6) {
+      // total = extractedStudy.length + this.props.openSeries.length;
+      if (extractedStudy.length + this.props.openSeries.length > 2) {
         this.props.dispatch(openProjectSelectionModal());
+        this.props.dispatch(selectStudy(selected));
+        //add the project to the selected studies
         // if there is enough room iterate over the extracted array and call getsingleserie
       } else {
         extractedStudy.forEach(serie => {
@@ -277,8 +282,11 @@ class Studies extends Component {
     } else {
       //if patient is not there make the control
       //if not enough room bring the modal
-      if (selected.numberOfSeries + this.props.openSeries.length > 6) {
+      // total = selected.numberOfSeries + this.props.openSeries.length;
+      if (selected.numberOfSeries + this.props.openSeries.length > 2) {
         this.props.dispatch(openProjectSelectionModal());
+        this.props.dispatch(selectStudy(selected));
+        //add the project to the selected studies
       } else {
         //if enough room bring all series
         const result = await this.getSeriesData(selected);

@@ -31,7 +31,7 @@ const aimEntityData = ({ aimData }) => {
         className="aimEntity-item"
         key={aimData.uniqueIdentifier.root + "ind-" + i}
       >
-        <span className="aimEntity-question">{comment.label.value}: </span>
+        <span className="aimEntity-question">{comment.label.value}:</span>
         <span className="aimEntity-answer">
           {comment.typeCode["iso:displayName"].value}
         </span>

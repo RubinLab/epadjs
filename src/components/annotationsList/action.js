@@ -12,6 +12,10 @@ import {
   SHOW_ANNOTATION_WINDOW,
   SHOW_ANNOTATION_DOCK,
   OPEN_PROJECT_MODAL,
+  CLEAR_GRID,
+  SELECT_SERIE,
+  SELECT_STUDY,
+  SELECT_ANNOTATION,
   colors
 } from "./types";
 
@@ -21,6 +25,18 @@ import {
   getAnnotations,
   getAnnotationsJSON
 } from "../../services/annotationServices";
+
+export const clearGrid = item => {
+  return { type: CLEAR_GRID };
+};
+
+export const selectStudy = selectedStudyObj => {
+  const { studyUID, patientID, projectID } = selectedStudyObj;
+  return {
+    type: SELECT_STUDY,
+    study: { studyUID, patientID, projectID }
+  };
+};
 
 export const showAnnotationWindow = () => {
   return { type: SHOW_ANNOTATION_WINDOW };
@@ -300,10 +316,8 @@ const getSingleSerieData = (serie, annotation) => {
   };
 };
 
-// gets one patient and all the studys->series->annotations under it
-export const getAnnotationListData = (serie, study, annotation) => {
+const getWholeData = (serie, study, annotation) => {
   return async (dispatch, getState) => {
-    // create an object with patient details
     dispatch(loadAnnotations());
     let { projectID, patientID, patientName, studyUID } = serie || study;
     let selectedID;
@@ -363,6 +377,22 @@ export const getAnnotationListData = (serie, study, annotation) => {
       }
       // });
     }
+    return summaryData;
+  };
+};
+// gets one patient and all the studys->series->annotations under it
+export const getAnnotationListData = (serie, study, annotation) => {
+  return async (dispatch, getState) => {
+    let { projectID, patientID, patientName, studyUID } = serie || study;
+    let selectedID;
+    let seriesUID;
+    if (serie) {
+      selectedID = serie.seriesUID;
+      seriesUID = serie.seriesUID;
+    } else if (study) {
+      selectedID = study.studyUID;
+    }
+    let summaryData = await dispatch(getWholeData(serie, study, annotation));
 
     let aimsData = await dispatch(
       getSingleSerieData({ projectID, patientID, studyUID, seriesUID })

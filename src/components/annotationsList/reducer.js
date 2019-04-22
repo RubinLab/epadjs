@@ -11,7 +11,11 @@ import {
   LOAD_SERIE_SUCCESS,
   SHOW_ANNOTATION_WINDOW,
   SHOW_ANNOTATION_DOCK,
-  OPEN_PROJECT_MODAL
+  OPEN_PROJECT_MODAL,
+  CLEAR_GRID,
+  SELECT_SERIE,
+  SELECT_STUDY,
+  SELECT_ANNOTATION
 } from "./types";
 
 const initialState = {
@@ -24,7 +28,10 @@ const initialState = {
   listOpen: false,
   dockOpen: false,
   showGridFullAlert: false,
-  showProjectModal: false
+  showProjectModal: false,
+  selectedStudies: [],
+  selectedSeries: [],
+  selectedAnnotations: []
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -171,6 +178,48 @@ const asyncReducer = (state = initialState, action) => {
         }
       }
       return Object.assign({}, state, { aimsList: singleLabelToggled });
+    case CLEAR_GRID:
+      const clearedPatients = {};
+      const selectionArr = [];
+      const idType = "";
+      if (state.selectedStudies.length > 0) {
+        selectionArr = state.selectedStudies;
+        idType = "studyUID";
+      } else if (state.selectedSeries.length > 0) {
+        selectionArr = state.selectedSeries;
+        idType = "seriesUID";
+      } else {
+        selectionArr = state.selectedAnnotations;
+        idType = "seriesUID";
+      }
+
+      //keep the patient if already there
+      selectionArr.forEach(item => {
+        if (state.patients[item.patientID]) {
+          clearedPatients[item.patientID] = {
+            ...state.patients[item.patientID]
+          };
+        }
+      });
+
+      for (let patient in clearedPatients) {
+        for (let study in clearedPatients[patient]) {
+          for (let serie in clearedPatients[patient][study]) {
+            serie.displayAnns = false;
+            for (let ann in clearedPatients[patient][study][serie]) {
+              ann.isDisplayed = false;
+            }
+          }
+        }
+      }
+
+      return {
+        ...state,
+        patients: clearedPatients,
+        openSeries: [],
+        aimList: {},
+        activePort: 0
+      };
     default:
       return state;
   }
