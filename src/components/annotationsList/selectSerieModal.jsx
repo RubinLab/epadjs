@@ -7,7 +7,8 @@ import {
   clearGrid,
   getPatient,
   getWholeData,
-  getSingleSerie
+  getSingleSerie,
+  clearSelection
 } from "./action";
 import SerieSelect from "./containers/serieSelection";
 
@@ -99,6 +100,7 @@ class selectSerieModal extends React.Component {
       }
     }
     this.handleCancel();
+    this.props.dispatch(clearSelection());
   };
 
   handleCancel = () => {
@@ -110,7 +112,9 @@ class selectSerieModal extends React.Component {
       selectedToDisplay: [],
       limit: 0
     });
+    console.log("state after handleCancel", this.state);
     this.props.dispatch(openProjectSelectionModal());
+    this.props.dispatch(clearSelection());
   };
 
   render = () => {
