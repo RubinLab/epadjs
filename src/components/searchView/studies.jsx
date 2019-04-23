@@ -269,7 +269,7 @@ class Studies extends Component {
       );
       //if there is not enough room bring modal
       // total = extractedStudy.length + this.props.openSeries.length;
-      if (extractedStudy.length + this.props.openSeries.length > 2) {
+      if (extractedStudy.length + this.props.openSeries.length > 6) {
         await this.props.dispatch(selectStudy(selected));
         this.props.dispatch(openProjectSelectionModal());
         //add the project to the selected studies
@@ -283,7 +283,7 @@ class Studies extends Component {
       //if patient is not there make the control
       //if not enough room bring the modal
       // total = selected.numberOfSeries + this.props.openSeries.length;
-      if (selected.numberOfSeries + this.props.openSeries.length > 2) {
+      if (selected.numberOfSeries + this.props.openSeries.length > 6) {
         await this.props.dispatch(selectStudy(selected));
         this.props.dispatch(openProjectSelectionModal());
         //add the project to the selected studies
