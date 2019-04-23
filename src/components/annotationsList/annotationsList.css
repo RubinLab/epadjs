@@ -493,3 +493,8 @@ svg {
   box-shadow: 1rem 1rem 1rem grey;
   left: 40%;
 }
+
+.serieSelection-text {
+  text-transform: capitalize;
+  margin-left: 0.4rem;
+}

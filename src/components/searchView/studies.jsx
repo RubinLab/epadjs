@@ -270,8 +270,8 @@ class Studies extends Component {
       //if there is not enough room bring modal
       // total = extractedStudy.length + this.props.openSeries.length;
       if (extractedStudy.length + this.props.openSeries.length > 2) {
+        await this.props.dispatch(selectStudy(selected));
         this.props.dispatch(openProjectSelectionModal());
-        this.props.dispatch(selectStudy(selected));
         //add the project to the selected studies
         // if there is enough room iterate over the extracted array and call getsingleserie
       } else {
@@ -284,8 +284,8 @@ class Studies extends Component {
       //if not enough room bring the modal
       // total = selected.numberOfSeries + this.props.openSeries.length;
       if (selected.numberOfSeries + this.props.openSeries.length > 2) {
+        await this.props.dispatch(selectStudy(selected));
         this.props.dispatch(openProjectSelectionModal());
-        this.props.dispatch(selectStudy(selected));
         //add the project to the selected studies
       } else {
         //if enough room bring all series
@@ -334,7 +334,10 @@ class Studies extends Component {
             showPagination={false}
             {...extraProps}
             getTdProps={(state, rowInfo, column) => ({
-              onDoubleClick: e => this.displaySeries(rowInfo.original)
+              onDoubleClick: e => {
+                this.displaySeries(rowInfo.original);
+                console.log(rowInfo.original);
+              }
             })}
             SubComponent={row => {
               return (

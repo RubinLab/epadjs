@@ -20,6 +20,8 @@ export const SELECT_SERIE = "epadjs/annotationList/SELECT_SERIE";
 export const SELECT_STUDY = "epadjs/annotationList/SELECT_STUDY";
 export const SELECT_ANNOTATION = "epadjs/annotationList/SELECT_ANNOTATION";
 export const CLEAR_GRID = "epadjs/annotationList/CLEAR_GRID ";
+export const CLEAR_SELECTION = "epadjs/annotationList/CLEAR_SELECTION ";
+export const GET_PATIENT = "epadjs/annotationList/GET_PATIENT";
 
 export const colors = [
   {

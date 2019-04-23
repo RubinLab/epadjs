@@ -318,6 +318,7 @@ class Series extends Component {
               getTdProps={(state, rowInfo, column, instance) => {
                 return {
                   onDoubleClick: (e, handleOriginal) => {
+                    console.log(rowInfo.original);
                     this.handleSelectSeries(rowInfo.original);
                     if (handleOriginal) {
                       handleOriginal();

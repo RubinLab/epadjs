@@ -13,8 +13,10 @@ import {
   SHOW_ANNOTATION_DOCK,
   OPEN_PROJECT_MODAL,
   CLEAR_GRID,
+  CLEAR_SELECTION,
   SELECT_SERIE,
   SELECT_STUDY,
+  GET_PATIENT,
   SELECT_ANNOTATION
 } from "./types";
 
@@ -180,17 +182,13 @@ const asyncReducer = (state = initialState, action) => {
       return Object.assign({}, state, { aimsList: singleLabelToggled });
     case CLEAR_GRID:
       const clearedPatients = {};
-      const selectionArr = [];
-      const idType = "";
+      let selectionArr = [];
       if (state.selectedStudies.length > 0) {
-        selectionArr = state.selectedStudies;
-        idType = "studyUID";
+        selectionArr = state.selectedStudies.concat([]);
       } else if (state.selectedSeries.length > 0) {
-        selectionArr = state.selectedSeries;
-        idType = "seriesUID";
+        selectionArr = state.selectedSeries.concat([]);
       } else {
-        selectionArr = state.selectedAnnotations;
-        idType = "seriesUID";
+        selectionArr = state.selectedAnnotations.concat([]);
       }
 
       //keep the patient if already there
@@ -217,9 +215,24 @@ const asyncReducer = (state = initialState, action) => {
         ...state,
         patients: clearedPatients,
         openSeries: [],
-        aimList: {},
+        aimsList: {},
         activePort: 0
       };
+    case CLEAR_SELECTION:
+      return {
+        ...state,
+        selectedAnnotations: [],
+        selectedSeries: [],
+        selectedStudies: []
+      };
+    case SELECT_STUDY:
+      let newStudies = state.selectedStudies.concat([action.study]);
+      return { ...state, selectedStudies: newStudies };
+    case GET_PATIENT:
+      let addedNewPatient = { ...state.patients };
+      addedNewPatient[action.patient.patientID] = action.patient;
+      console.log(addedNewPatient);
+      return { ...state, patients: addedNewPatient };
     default:
       return state;
   }

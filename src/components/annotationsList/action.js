@@ -16,6 +16,8 @@ import {
   SELECT_SERIE,
   SELECT_STUDY,
   SELECT_ANNOTATION,
+  CLEAR_SELECTION,
+  GET_PATIENT,
   colors
 } from "./types";
 
@@ -30,11 +32,20 @@ export const clearGrid = item => {
   return { type: CLEAR_GRID };
 };
 
+export const clearSelection = () => {
+  return { type: CLEAR_SELECTION };
+};
 export const selectStudy = selectedStudyObj => {
-  const { studyUID, patientID, projectID } = selectedStudyObj;
+  const {
+    studyUID,
+    patientID,
+    projectID,
+    studyDescription,
+    patientName
+  } = selectedStudyObj;
   return {
     type: SELECT_STUDY,
-    study: { studyUID, patientID, projectID }
+    study: { studyUID, patientID, projectID, studyDescription, patientName }
   };
 };
 
@@ -51,6 +62,12 @@ const loadAnnotations = () => {
   };
 };
 
+export const getPatient = patient => {
+  return {
+    type: GET_PATIENT,
+    patient
+  };
+};
 export const openProjectSelectionModal = () => {
   return {
     type: OPEN_PROJECT_MODAL
@@ -316,9 +333,10 @@ const getSingleSerieData = (serie, annotation) => {
   };
 };
 
-const getWholeData = (serie, study, annotation) => {
+export const getWholeData = (serie, study, annotation) => {
   return async (dispatch, getState) => {
     dispatch(loadAnnotations());
+    console.log(study);
     let { projectID, patientID, patientName, studyUID } = serie || study;
     let selectedID;
     let seriesUID;
@@ -335,6 +353,7 @@ const getWholeData = (serie, study, annotation) => {
       patientName
       // studyUID
     };
+    console.log("in wholeData", summaryData);
     // make call to get study and populate the studies data
     try {
       await getStudiesData(summaryData, projectID, patientID);

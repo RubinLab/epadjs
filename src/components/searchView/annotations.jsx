@@ -197,6 +197,7 @@ class Annotations extends Component {
               return {
                 onDoubleClick: (e, handleOriginal) => {
                   this.dispatchAnnDisplay(rowInfo);
+                  console.log(rowInfo.original);
                 }
               };
             }}
