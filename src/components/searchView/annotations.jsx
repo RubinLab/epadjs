@@ -6,7 +6,12 @@ import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import { getAnnotations } from "../../services/annotationServices";
-import { displaySingleAim } from "../annotationsList/action";
+import {
+  displaySingleAim,
+  alertViewPortFull,
+  getSingleSerie,
+  getAnnotationListData
+} from "../annotationsList/action";
 import "react-table/react-table.css";
 
 const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -163,7 +168,10 @@ class Annotations extends Component {
 
   dispatchAnnDisplay = selected => {
     console.log("in annotation function-selected:", selected);
+    const { projectID, studyUID, seriesUID, aimID } = selected;
+    const patientID = selected.originalSubjectID;
     const openSeries = Object.values(this.props.openSeries);
+    const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
     let isSerieOpen = false;
     //check if there is enough space in the grid
     let isGridFull = openSeries.length === 6;
@@ -171,23 +179,27 @@ class Annotations extends Component {
     if (openSeries.length > 0) {
       for (let i = 0; i < openSeries.length; i++) {
         // for (let serie of openSeries) {
-        if (openSeries[i].seriesUID === selected.seriesUID) {
+        if (openSeries[i].seriesUID === seriesUID) {
           isSerieOpen = true;
           break;
         }
       }
     }
-    console.log("is serie open", isSerieOpen);
     if (isSerieOpen) {
-      console.log("passed isSerieOpen check");
       this.props.dispatch(
-        displaySingleAim(
-          selected.originalSubjectID,
-          selected.studyUID,
-          selected.seriesUID,
-          selected.aimID
-        )
+        displaySingleAim(patientID, studyUID, seriesUID, aimID)
       );
+    } else {
+      if (isGridFull) {
+        this.props.dispatch(alertViewPortFull());
+      } else {
+        if (this.props.patients[patientID]) {
+          this.props.dispatch(getSingleSerie(serieObj, aimID));
+          //if patient doesn't exist dispatch to get data
+        } else {
+          this.props.dispatch(getAnnotationListData(serieObj, null, aimID));
+        }
+      }
     }
   };
 

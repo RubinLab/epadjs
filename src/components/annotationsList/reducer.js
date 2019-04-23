@@ -261,7 +261,6 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
       }
-      console.log("action payload", action.payload);
       //update aimsList data
       let allAims = Object.keys(
         aimPatient.studies[action.payload.studyUID].series[
@@ -269,8 +268,6 @@ const asyncReducer = (state = initialState, action) => {
         ].annotations
       );
 
-      console.log(aimAimsList);
-      console.log(allAims);
       allAims.forEach(ann => {
         if (ann === action.payload.aimID) {
           aimAimsList[ann].isDisplayed = true;

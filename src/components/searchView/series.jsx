@@ -1,11 +1,11 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import { BrowserRouter, withRouter } from "react-router-dom";
 import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import Annotations from "./annotations";
 import { getSeries } from "../../services/seriesServices";
-import { connect } from "react-redux";
 import {
   alertViewPortFull,
   getAnnotationListData,
