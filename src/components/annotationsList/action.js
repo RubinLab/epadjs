@@ -13,6 +13,7 @@ import {
   SHOW_ANNOTATION_DOCK,
   OPEN_PROJECT_MODAL,
   CLEAR_GRID,
+  DISPLAY_SINGLE_AIM,
   SELECT_SERIE,
   SELECT_STUDY,
   SELECT_ANNOTATION,
@@ -34,6 +35,13 @@ export const clearGrid = item => {
 
 export const clearSelection = () => {
   return { type: CLEAR_SELECTION };
+};
+
+export const displaySingleAim = (patientID, studyUID, seriesUID, aimID) => {
+  return {
+    type: DISPLAY_SINGLE_AIM,
+    payload: { patientID, studyUID, seriesUID, aimID }
+  };
 };
 export const selectStudy = selectedStudyObj => {
   const {

@@ -1,8 +1,12 @@
 import React, { Component } from "react";
-import { getAnnotations } from "../../services/annotationServices";
+import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
+
 import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
+import { getAnnotations } from "../../services/annotationServices";
+import { displaySingleAim } from "../annotationsList/action";
 import "react-table/react-table.css";
 
 const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -159,6 +163,32 @@ class Annotations extends Component {
 
   dispatchAnnDisplay = selected => {
     console.log("in annotation function-selected:", selected);
+    const openSeries = Object.values(this.props.openSeries);
+    let isSerieOpen = false;
+    //check if there is enough space in the grid
+    let isGridFull = openSeries.length === 6;
+    //check if the serie is already open
+    if (openSeries.length > 0) {
+      for (let i = 0; i < openSeries.length; i++) {
+        // for (let serie of openSeries) {
+        if (openSeries[i].seriesUID === selected.seriesUID) {
+          isSerieOpen = true;
+          break;
+        }
+      }
+    }
+    console.log("is serie open", isSerieOpen);
+    if (isSerieOpen) {
+      console.log("passed isSerieOpen check");
+      this.props.dispatch(
+        displaySingleAim(
+          selected.originalSubjectID,
+          selected.studyUID,
+          selected.seriesUID,
+          selected.aimID
+        )
+      );
+    }
   };
 
   render() {
@@ -196,7 +226,7 @@ class Annotations extends Component {
             getTdProps={(state, rowInfo, column, instance) => {
               return {
                 onDoubleClick: (e, handleOriginal) => {
-                  this.dispatchAnnDisplay(rowInfo);
+                  this.dispatchAnnDisplay(rowInfo.original);
                   console.log(rowInfo.original);
                 }
               };
@@ -208,4 +238,14 @@ class Annotations extends Component {
   }
 }
 
-export default Annotations;
+const mapStateToProps = state => {
+  const { openSeries, patients, activePort } = state.annotationsListReducer;
+  return {
+    series: state.searchViewReducer.series,
+    openSeries,
+    patients,
+    activePort
+  };
+};
+
+export default withRouter(connect(mapStateToProps)(Annotations));

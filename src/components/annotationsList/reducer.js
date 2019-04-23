@@ -17,7 +17,8 @@ import {
   SELECT_SERIE,
   SELECT_STUDY,
   GET_PATIENT,
-  SELECT_ANNOTATION
+  SELECT_ANNOTATION,
+  DISPLAY_SINGLE_AIM
 } from "./types";
 
 const initialState = {
@@ -235,6 +236,66 @@ const asyncReducer = (state = initialState, action) => {
       addedNewPatient[action.patient.patientID] = action.patient;
       console.log(addedNewPatient);
       return { ...state, patients: addedNewPatient };
+    case DISPLAY_SINGLE_AIM:
+      let aimPatient = { ...state.patients[action.payload.patientID] };
+      let aimOpenSeries = [...state.openSeries];
+      let aimAimsList = { ...state.aimsList[action.payload.seriesUID] };
+      //update patient data
+      for (let stItem in aimPatient.studies) {
+        if (stItem === action.payload.studyUID) {
+          for (let srItem in aimPatient.studies[stItem].series) {
+            if (srItem === action.payload.seriesUID) {
+              for (let annItem in aimPatient.studies[stItem].series[srItem]
+                .annotations) {
+                if (annItem === action.payload.aimID) {
+                  aimPatient.studies[stItem].series[srItem].annotations[
+                    annItem
+                  ].isDisplayed = true;
+                } else {
+                  aimPatient.studies[stItem].series[srItem].annotations[
+                    annItem
+                  ].isDisplayed = false;
+                }
+              }
+            }
+          }
+        }
+      }
+      console.log("action payload", action.payload);
+      //update aimsList data
+      let allAims = Object.keys(
+        aimPatient.studies[action.payload.studyUID].series[
+          action.payload.seriesUID
+        ].annotations
+      );
+
+      console.log(aimAimsList);
+      console.log(allAims);
+      allAims.forEach(ann => {
+        if (ann === action.payload.aimID) {
+          aimAimsList[ann].isDisplayed = true;
+          aimAimsList[ann].showLabel = true;
+        } else {
+          aimAimsList[ann].isDisplayed = false;
+          aimAimsList[ann].showLabel = false;
+        }
+      });
+
+      //update Openseries data
+      aimOpenSeries.forEach(item => {
+        if (item.seriesUID === action.payload.seriesUID) {
+          item.aimID = action.payload.aimID;
+        }
+      });
+      return {
+        ...state,
+        aimsList: {
+          ...state.aimsList,
+          [action.payload.seriesUID]: aimAimsList
+        },
+        patients: { ...state.patients, [action.payload.patientID]: aimPatient },
+        openSeries: aimOpenSeries
+      };
     default:
       return state;
   }
