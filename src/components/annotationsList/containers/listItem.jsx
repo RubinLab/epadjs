@@ -1,6 +1,5 @@
 import React from "react";
 import { connect } from "react-redux";
-// import Collapse from "react-bootstrap/Collapse";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { alertViewPortFull } from "../action";
 
@@ -90,7 +89,6 @@ class ListItem extends React.Component {
     const activeSeriesUID = this.props.openSeries[this.props.activePort]
       .seriesUID;
     //check if user toggle on or off and change the state accordingly
-    // await this.setState({ displayAnnotations: e.target.checked });
     await this.setState({ displayAnnotations: checked });
 
     if (activeSeriesUID === id) {

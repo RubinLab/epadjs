@@ -5,14 +5,10 @@ const calculationLabel = ({ calculations, name, shape }) => {
   const longAxisLabels = [];
   const shortAxisLabels = [];
   let i = 0;
-  //   let isTableRequired = false;
   for (let el of calculations) {
-    //   calculations.forEach(el => {
     const labelType =
       el.calculationResultCollection.CalculationResult.dimensionCollection
         .Dimension.label;
-    // isTableRequired = labelType.value.toLowerCase().includes("axis");
-
     let desc = "";
     let upperLevel = el.calculationResultCollection.CalculationResult.value;
     let val = upperLevel

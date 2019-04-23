@@ -1,7 +1,6 @@
 import React from "react";
 
 const aimEntityData = ({ aimData }) => {
-  console.log(aimData);
   let observationEnt =
     aimData.imagingObservationEntityCollection.ImagingObservationEntity;
   let physicalEnt =

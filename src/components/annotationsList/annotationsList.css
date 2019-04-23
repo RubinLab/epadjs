@@ -313,12 +313,6 @@
   font-size: 1rem;
 }
 
-/* .annotation-icon {
-  width: 30%;
-  padding-right: 0.2rem;
-  margin-right: 0.2rem;
-} */
-
 .annotation-icon {
   display: flex;
   justify-content: center;

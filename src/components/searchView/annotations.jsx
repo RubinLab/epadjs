@@ -167,7 +167,6 @@ class Annotations extends Component {
   };
 
   dispatchAnnDisplay = selected => {
-    console.log("in annotation function-selected:", selected);
     const { projectID, studyUID, seriesUID, aimID } = selected;
     const patientID = selected.originalSubjectID;
     const openSeries = Object.values(this.props.openSeries);
@@ -239,7 +238,6 @@ class Annotations extends Component {
               return {
                 onDoubleClick: (e, handleOriginal) => {
                   this.dispatchAnnDisplay(rowInfo.original);
-                  console.log(rowInfo.original);
                 }
               };
             }}

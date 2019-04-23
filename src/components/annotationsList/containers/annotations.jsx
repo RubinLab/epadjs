@@ -13,8 +13,6 @@ const annotations = ({
   onToggleSerie
 }) => {
   let annotationsList = [];
-  console.log(patients[patient].studies[studyUID].series[seriesUID]);
-
   const annotationsArr = Object.values(
     patients[patient].studies[studyUID].series[seriesUID].annotations
   );
@@ -61,12 +59,6 @@ const annotations = ({
                 height={15}
                 width={40}
               />
-              {/* <Toggle
-                defaultChecked={showAnns}
-                onClick={onToggleSerie}
-                data-seriesid={seriesUID}
-                icons={false}
-              /> */}
             </div>
           </label>
         </div>

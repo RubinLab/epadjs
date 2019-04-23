@@ -246,7 +246,6 @@ class Series extends Component {
   };
 
   dispatchSerieDisplay = selected => {
-    // console.log(this.props);
     const openSeries = Object.values(this.props.openSeries);
     let isSerieOpen = false;
     //check if there is enough space in the grid
@@ -318,7 +317,6 @@ class Series extends Component {
               getTdProps={(state, rowInfo, column, instance) => {
                 return {
                   onDoubleClick: (e, handleOriginal) => {
-                    console.log(rowInfo.original);
                     this.handleSelectSeries(rowInfo.original);
                     if (handleOriginal) {
                       handleOriginal();

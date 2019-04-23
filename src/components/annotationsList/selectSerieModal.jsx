@@ -14,13 +14,8 @@ import SerieSelect from "./containers/serieSelection";
 
 const message = {
   title: "Not enough ports to open series"
-
-  // explanation: "Please close a view screen before open a new one"
 };
 class selectSerieModal extends React.Component {
-  //when the series are selected, if the patient is there get single series,
-  // if the patient is not there, get the first serie with big data action,
-  //
   state = {
     selectionType: "",
     selectionArr: [],
@@ -48,7 +43,6 @@ class selectSerieModal extends React.Component {
       for (let item of selectionArr) {
         if (!this.props.patients[item.patientID]) {
           let patient = await this.props.dispatch(getWholeData(null, item));
-          console.log("patient in modal", patient);
           await this.getPatient(patient);
         }
 
@@ -57,7 +51,6 @@ class selectSerieModal extends React.Component {
         );
         seriesList = seriesList.concat(seriesOfPatient);
       }
-      console.log(seriesList);
       this.setState({ seriesList });
     }
   };
@@ -82,19 +75,12 @@ class selectSerieModal extends React.Component {
 
   displaySelection = async () => {
     for (let i = 0; i < this.state.selectedToDisplay.length; i++) {
-      console.log("in loop", this.state.selectedToDisplay.length[i]);
       if (this.state.selectedToDisplay[i]) {
-        console.log("in first if");
-
         if (this.state.selectionType === "aim") {
-          console.log("in second if");
-
           await this.props.dispatch(
             getSingleSerie(null, this.state.seriesList[i])
           );
         } else {
-          console.log("in else ");
-
           await this.props.dispatch(getSingleSerie(this.state.seriesList[i]));
         }
       }
@@ -104,7 +90,6 @@ class selectSerieModal extends React.Component {
   };
 
   handleCancel = () => {
-    console.log("handle cancel fired");
     this.setState({
       selectionType: "",
       selectionArr: [],
@@ -112,13 +97,11 @@ class selectSerieModal extends React.Component {
       selectedToDisplay: [],
       limit: 0
     });
-    console.log("state after handleCancel", this.state);
     this.props.dispatch(openProjectSelectionModal());
     this.props.dispatch(clearSelection());
   };
 
   render = () => {
-    console.log("state", this.state);
     return (
       <Modal.Dialog dialogClassName="alert-selectSerie">
         <Modal.Header>

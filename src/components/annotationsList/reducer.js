@@ -73,7 +73,6 @@ const asyncReducer = (state = initialState, action) => {
       const srID = action.payload.ref.seriesUID;
       const { ann } = action.payload;
       let changedPatient = Object.assign({}, state.patients[ptID]);
-      // let displayStatus = ann ? ann === aim.uniqueIdentifier.root : !ann;
 
       if (ann) {
         changedPatient.studies[stID].series[srID].annotations[
@@ -81,7 +80,6 @@ const asyncReducer = (state = initialState, action) => {
         ].isDisplayed = true;
       } else {
         changedPatient.studies[stID].series[srID].displayAnns = true;
-        // changedPatient.studies[stID].series[srID].isLabelDisplayed = true;
         for (let annotation in changedPatient.studies[stID].series[srID]
           .annotations) {
           changedPatient.studies[stID].series[srID].annotations[
@@ -161,7 +159,6 @@ const asyncReducer = (state = initialState, action) => {
       ].displayAnns;
       newSerie.displayAnns = newValue;
       if (!newValue) {
-        // newSerie.isLabelDisplayed = newValue;
       }
       return Object.assign({}, state, { patients: toggleAnnPatients });
     case TOGGLE_ALL_LABELS:
@@ -234,7 +231,6 @@ const asyncReducer = (state = initialState, action) => {
     case GET_PATIENT:
       let addedNewPatient = { ...state.patients };
       addedNewPatient[action.patient.patientID] = action.patient;
-      console.log(addedNewPatient);
       return { ...state, patients: addedNewPatient };
     case DISPLAY_SINGLE_AIM:
       let aimPatient = { ...state.patients[action.payload.patientID] };
