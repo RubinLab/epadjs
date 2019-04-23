@@ -6,7 +6,8 @@ import {
   openProjectSelectionModal,
   clearGrid,
   getPatient,
-  getWholeData
+  getWholeData,
+  getSingleSerie
 } from "./action";
 import SerieSelect from "./containers/serieSelection";
 
@@ -20,7 +21,7 @@ class selectSerieModal extends React.Component {
   // if the patient is not there, get the first serie with big data action,
   //
   state = {
-    selection: "",
+    selectionType: "",
     selectionArr: [],
     seriesList: [],
     selectedToDisplay: [],
@@ -30,19 +31,19 @@ class selectSerieModal extends React.Component {
   componentDidMount = async () => {
     let selectionArr = [];
     let seriesList = [];
-    let selection = "";
+    let selectionType = "";
     if (this.props.selectedStudies.length > 0) {
       selectionArr = this.props.selectedStudies;
-      selection = "study";
+      selectionType = "study";
     } else if (this.props.selectedSeries.length > 0) {
       seriesList = this.props.selectedSeries;
-      selection = "series";
+      selectionType = "series";
     } else {
       seriesList = this.props.selectedAnnotations;
-      selection = "aim";
+      selectionType = "aim";
     }
-    this.setState({ selection, selectionArr, seriesList });
-    if (selection === "study") {
+    this.setState({ selectionType, selectionArr, seriesList });
+    if (selectionType === "study") {
       for (let item of selectionArr) {
         if (!this.props.patients[item.patientID]) {
           let patient = await this.props.dispatch(getWholeData(null, item));
@@ -78,6 +79,40 @@ class selectSerieModal extends React.Component {
     this.setState({ limit });
   };
 
+  displaySelection = async () => {
+    for (let i = 0; i < this.state.selectedToDisplay.length; i++) {
+      console.log("in loop", this.state.selectedToDisplay.length[i]);
+      if (this.state.selectedToDisplay[i]) {
+        console.log("in first if");
+
+        if (this.state.selectionType === "aim") {
+          console.log("in second if");
+
+          await this.props.dispatch(
+            getSingleSerie(null, this.state.seriesList[i])
+          );
+        } else {
+          console.log("in else ");
+
+          await this.props.dispatch(getSingleSerie(this.state.seriesList[i]));
+        }
+      }
+    }
+    this.handleCancel();
+  };
+
+  handleCancel = () => {
+    console.log("handle cancel fired");
+    this.setState({
+      selectionType: "",
+      selectionArr: [],
+      seriesList: [],
+      selectedToDisplay: [],
+      limit: 0
+    });
+    this.props.dispatch(openProjectSelectionModal());
+  };
+
   render = () => {
     console.log("state", this.state);
     return (
@@ -105,11 +140,8 @@ class selectSerieModal extends React.Component {
           />
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
-          <button
-            onClick={() => this.props.dispatch(openProjectSelectionModal())}
-          >
-            OK
-          </button>
+          <button onClick={this.displaySelection}>Display selection</button>
+          <button onClick={this.handleCancel}>Cancel</button>
         </Modal.Footer>
       </Modal.Dialog>
     );

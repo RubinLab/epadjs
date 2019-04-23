@@ -202,9 +202,11 @@ const asyncReducer = (state = initialState, action) => {
 
       for (let patient in clearedPatients) {
         for (let study in clearedPatients[patient]) {
-          for (let serie in clearedPatients[patient][study]) {
+          for (let serie in clearedPatients[patient].studies[study]) {
             serie.displayAnns = false;
-            for (let ann in clearedPatients[patient][study][serie]) {
+            for (let ann in clearedPatients[patient].studies[study].series[
+              serie
+            ]) {
               ann.isDisplayed = false;
             }
           }
