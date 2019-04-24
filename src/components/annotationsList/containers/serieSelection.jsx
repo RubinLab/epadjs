@@ -6,6 +6,9 @@ const serieSelection = ({ itemArr, onSelect, limit, checkList }) => {
   itemArr.forEach((item, index) => {
     let { seriesUID } = item;
     let disabled = !checkList[index] && limit >= 6;
+    let desc = item.seriesDescription || item.name;
+    desc = desc ? desc : "Unnamed serie";
+
     itemList.push(
       <div className="serieSelection-item" key={index + seriesUID}>
         <input
@@ -16,9 +19,7 @@ const serieSelection = ({ itemArr, onSelect, limit, checkList }) => {
           onClick={onSelect}
           disabled={disabled}
         />
-        <span className="serieSelection-text">
-          {item.seriesDescription || item.name}
-        </span>
+        <span className="serieSelection-text">{desc}</span>
       </div>
     );
   });

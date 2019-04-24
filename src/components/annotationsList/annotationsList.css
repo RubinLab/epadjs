@@ -6,7 +6,7 @@
   /* background: #5f6366; */
   /* background: #282828; */
   /* background: #212121; */
-  background: #192a56;
+  background: #3a3f44;
   /* border: 0.2rem solid gray;
   border-radius: 10px; */
   color: #d3d3d3;
@@ -125,6 +125,7 @@
   width: 100%;
 }
 
+/*
 .react-toggle {
   touch-action: pan-x;
   min-width: 7rem;
@@ -267,6 +268,8 @@
   -moz-box-shadow: 0px 0px 5px 5px #0099e0;
   box-shadow: 0px 0px 5px 5px #0099e0;
 }
+*/
+
 .annotation-dock {
   width: 10%;
 }

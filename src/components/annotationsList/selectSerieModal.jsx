@@ -11,6 +11,7 @@ import {
   clearSelection
 } from "./action";
 import SerieSelect from "./containers/serieSelection";
+import { getSeries } from "../../services/seriesServices";
 
 const message = {
   title: "Not enough ports to open series"
@@ -41,15 +42,19 @@ class selectSerieModal extends React.Component {
     this.setState({ selectionType, selectionArr, seriesList });
     if (selectionType === "study") {
       for (let item of selectionArr) {
+        let seriesOfSt;
         if (!this.props.patients[item.patientID]) {
-          let patient = await this.props.dispatch(getWholeData(null, item));
-          await this.getPatient(patient);
+          seriesOfSt = await this.getSerieListData(
+            item.projectID,
+            item.patientID,
+            item.studyUID
+          );
+        } else {
+          seriesOfSt = Object.values(
+            this.props.patients[item.patientID].studies[item.studyUID].series
+          );
         }
-
-        let seriesOfPatient = Object.values(
-          this.props.patients[item.patientID].studies[item.studyUID].series
-        );
-        seriesList = seriesList.concat(seriesOfPatient);
+        seriesList = seriesList.concat(seriesOfSt);
       }
       this.setState({ seriesList });
     }
@@ -57,6 +62,15 @@ class selectSerieModal extends React.Component {
 
   getPatient = async study => {
     return this.props.dispatch(getPatient(study));
+  };
+
+  getSerieListData = async (projectID, patientID, studyUID) => {
+    const {
+      data: {
+        ResultSet: { Result: series }
+      }
+    } = await getSeries(projectID, patientID, studyUID);
+    return series;
   };
 
   selectToDisplay = async e => {
@@ -75,13 +89,17 @@ class selectSerieModal extends React.Component {
 
   displaySelection = async () => {
     for (let i = 0; i < this.state.selectedToDisplay.length; i++) {
+      if (!this.props.patients[this.state.seriesList[i].patientID]) {
+        let patient = await this.props.dispatch(
+          getWholeData(null, this.state.seriesList[i])
+        );
+        await this.getPatient(patient);
+      }
       if (this.state.selectedToDisplay[i]) {
         if (this.state.selectionType === "aim") {
-          await this.props.dispatch(
-            getSingleSerie(null, this.state.seriesList[i])
-          );
+          this.props.dispatch(getSingleSerie(null, this.state.seriesList[i]));
         } else {
-          await this.props.dispatch(getSingleSerie(this.state.seriesList[i]));
+          this.props.dispatch(getSingleSerie(this.state.seriesList[i]));
         }
       }
     }

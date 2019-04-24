@@ -1,6 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
 import Toggle from "react-toggle";
+import Switch from "react-switch";
+
 import Annotation from "./annotation";
 import {
   updateAnnotation,
@@ -32,10 +34,10 @@ class annotationsList extends React.Component {
     }
   };
 
-  handleToggleAllLabels = e => {
-    this.setState({ labelDisplayAll: e.target.checked });
+  handleToggleAllLabels = (checked, e, id) => {
+    this.setState({ labelDisplayAll: checked });
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
-    this.props.dispatch(toggleAllLabels(seriesUID, e.target.checked));
+    this.props.dispatch(toggleAllLabels(seriesUID, checked));
   };
 
   handleToggleSingleLabel = e => {
@@ -81,10 +83,12 @@ class annotationsList extends React.Component {
       <div className="annotationList-container">
         <div className="label-toggle">
           <div className="label-toggle__text">Show Labels</div>
-          <Toggle
-            defaultChecked={this.state.labelDisplayAll}
+          <Switch
             onChange={this.handleToggleAllLabels}
-            icons={false}
+            checked={this.state.labelDisplayAll}
+            className="react-switch"
+            uncheckedIcon={false}
+            checkedIcon={false}
           />
         </div>
         <div>{annList}</div>
