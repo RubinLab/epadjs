@@ -8,8 +8,6 @@ import "./flex.css";
 //import viewport from "./viewport.jsx";
 import { FiZoomIn } from "react-icons/fi";
 
-//import * as aim from "../../utils/AimEditorClassV2/parseClass.js";
-
 const mapStateToProps = state => {
   return {
     series: state.searchViewReducer.series,
@@ -56,22 +54,7 @@ class DisplayView extends Component {
     //console.log(viewports);
     //viewports.map(vp => this.props.cornerstoneTools.wwwc.activate(vp, 1));
     //this.props.cornerstoneTools.wwwc.activate(this.state.refs[0], 1);
-    //this.testAimEditor();
   }
-
-  /*testAimEditor = () => {
-    console.log(document.getElementById("cont"));
-    var instanceAimEditor = new aim.AimEditor(document.getElementById("cont"));
-    var myA = [
-      { key: "BeaulieuBoneTemplate_rev18", value: aim.myjson },
-      { key: "asdf", value: aim.myjson1 }
-    ];
-    instanceAimEditor.loadTemplates(myA);
-
-    instanceAimEditor.addButtonsDiv();
-
-    instanceAimEditor.createViewerWindow();
-  };*/
 
   getViewports = () => {
     let numSeries = this.state.series.length;
