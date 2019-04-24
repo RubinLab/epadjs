@@ -1,15 +1,16 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import { BrowserRouter, withRouter } from "react-router-dom";
 import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import Annotations from "./annotations";
 import { getSeries } from "../../services/seriesServices";
-import { connect } from "react-redux";
 import {
-  showAnnotationDock,
+  alertViewPortFull,
   getAnnotationListData,
-  getSingleSerie
+  getSingleSerie,
+  changeActivePort
 } from "../annotationsList/action";
 import AlertGridFull from "./alertGridFull";
 import "react-table/react-table.css";
@@ -245,17 +246,18 @@ class Series extends Component {
   };
 
   dispatchSerieDisplay = selected => {
-    // console.log(this.props);
     const openSeries = Object.values(this.props.openSeries);
     let isSerieOpen = false;
     //check if there is enough space in the grid
     let isGridFull = openSeries.length === 6;
     //check if the serie is already open
     if (openSeries.length > 0) {
-      for (let serie of openSeries) {
-        if (serie) {
-          if (serie.seriesUID === selected.seriesUID) {
+      for (let i = 0; i < openSeries.length; i++) {
+        // for (let serie of openSeries) {
+        if (openSeries[i]) {
+          if (openSeries[i].seriesUID === selected.seriesUID) {
             isSerieOpen = true;
+            this.props.dispatch(changeActivePort(i));
             break;
           }
         }
@@ -265,7 +267,8 @@ class Series extends Component {
     if (!isSerieOpen) {
       //if the grid is full show warning
       if (isGridFull) {
-        this.setState({ showGridFullWarning: true });
+        // this.setState({ showGridFullWarning: true });
+        this.props.dispatch(alertViewPortFull());
       } else {
         //if grid is NOT full check if patient data exists
         if (this.props.patients[selected.patientID]) {

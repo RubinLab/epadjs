@@ -1,8 +1,17 @@
 import React, { Component } from "react";
-import { getAnnotations } from "../../services/annotationServices";
+import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
+
 import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
+import { getAnnotations } from "../../services/annotationServices";
+import {
+  displaySingleAim,
+  alertViewPortFull,
+  getSingleSerie,
+  getAnnotationListData
+} from "../annotationsList/action";
 import "react-table/react-table.css";
 
 const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -157,6 +166,42 @@ class Annotations extends Component {
     this.setState({ expanded });
   };
 
+  dispatchAnnDisplay = selected => {
+    const { projectID, studyUID, seriesUID, aimID } = selected;
+    const patientID = selected.originalSubjectID;
+    const openSeries = Object.values(this.props.openSeries);
+    const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
+    let isSerieOpen = false;
+    //check if there is enough space in the grid
+    let isGridFull = openSeries.length === 6;
+    //check if the serie is already open
+    if (openSeries.length > 0) {
+      for (let i = 0; i < openSeries.length; i++) {
+        // for (let serie of openSeries) {
+        if (openSeries[i].seriesUID === seriesUID) {
+          isSerieOpen = true;
+          break;
+        }
+      }
+    }
+    if (isSerieOpen) {
+      this.props.dispatch(
+        displaySingleAim(patientID, studyUID, seriesUID, aimID)
+      );
+    } else {
+      if (isGridFull) {
+        this.props.dispatch(alertViewPortFull());
+      } else {
+        if (this.props.patients[patientID]) {
+          this.props.dispatch(getSingleSerie(serieObj, aimID));
+          //if patient doesn't exist dispatch to get data
+        } else {
+          this.props.dispatch(getAnnotationListData(serieObj, null, aimID));
+        }
+      }
+    }
+  };
+
   render() {
     const {
       toggleSelection,
@@ -189,6 +234,13 @@ class Annotations extends Component {
             freezWhenExpanded={false}
             showPagination={false}
             {...extraProps}
+            getTdProps={(state, rowInfo, column, instance) => {
+              return {
+                onDoubleClick: (e, handleOriginal) => {
+                  this.dispatchAnnDisplay(rowInfo.original);
+                }
+              };
+            }}
           />
         ) : null}
       </div>
@@ -196,4 +248,14 @@ class Annotations extends Component {
   }
 }
 
-export default Annotations;
+const mapStateToProps = state => {
+  const { openSeries, patients, activePort } = state.annotationsListReducer;
+  return {
+    series: state.searchViewReducer.series,
+    openSeries,
+    patients,
+    activePort
+  };
+};
+
+export default withRouter(connect(mapStateToProps)(Annotations));
