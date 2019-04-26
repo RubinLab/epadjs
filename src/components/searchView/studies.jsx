@@ -11,7 +11,8 @@ import {
   openProjectSelectionModal,
   getSingleSerie,
   getAnnotationListData,
-  selectStudy
+  selectStudy,
+  clearSelection
 } from "../annotationsList/action";
 //import "react-table/react-table.css";
 
@@ -38,6 +39,7 @@ class Studies extends Component {
       selectAll: false,
       selectType: "checkbox",
       expanded: {}
+      // selectedStudy: {}
     };
   }
 
@@ -51,8 +53,34 @@ class Studies extends Component {
     this.setState({ columns: this.setColumns() });
   }
 
+  selectRow = selected => {
+    // const { studyUID, numberOfSeries, patientID, projectID } = selected;
+    // const studyObj = { studyUID, numberOfSeries, patientID, projectID };
+    // const newState = { ...this.state.selectedStudy };
+    // newState[studyUID]
+    //   ? delete newState[studyUID]
+    //   : (newState[studyUID] = studyObj);
+    // this.setState({ selectedStudy: newState });
+    this.props.dispatch(clearSelection("study"));
+    this.props.dispatch(selectStudy(selected));
+  };
+
   setColumns() {
     const columns = [
+      {
+        id: "checkbox",
+        accessor: "",
+        Cell: ({ original }) => {
+          return (
+            <input
+              type="checkbox"
+              className="checkbox-cell"
+              checked={this.props.selectedStudies[original.studyUID] || false}
+              onChange={() => this.selectRow(original)}
+            />
+          );
+        }
+      },
       {
         /*Header: (
           <div>
@@ -340,6 +368,7 @@ class Studies extends Component {
       expanded,
       onExpandedChange
     };
+    const TheadComponent = props => null;
     return (
       <div>
         {this.state.data ? (
@@ -351,6 +380,7 @@ class Studies extends Component {
             className="-striped -highlight"
             freezWhenExpanded={false}
             showPagination={false}
+            TheadComponent={TheadComponent}
             {...extraProps}
             getTdProps={(state, rowInfo, column) => ({
               onDoubleClick: e => {
@@ -380,7 +410,8 @@ const mapStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
-    loading: state.annotationsListReducer.loading
+    loading: state.annotationsListReducer.loading,
+    selectedStudies: state.annotationsListReducer.selectedStudies
   };
 };
 export default connect(mapStateToProps)(Studies);

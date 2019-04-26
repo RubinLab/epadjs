@@ -10,7 +10,9 @@ import {
   alertViewPortFull,
   getAnnotationListData,
   getSingleSerie,
-  changeActivePort
+  changeActivePort,
+  selectSerie,
+  clearSelection
 } from "../annotationsList/action";
 import AlertGridFull from "./alertGridFull";
 import "react-table/react-table.css";
@@ -52,6 +54,7 @@ class Series extends Component {
       selectType: "checkbox",
       expanded: {},
       showGridFullWarning: false
+      // selectedSerie: {}
     };
   }
 
@@ -69,8 +72,32 @@ class Series extends Component {
     this.setState({ columns: this.setColumns() });
   }
 
+  selectRow = selected => {
+    // console.log(selected);
+    // const newState = { ...this.state.selectedSerie };
+    // newState[selected.seriesUID]
+    //   ? delete newState[selected.seriesUID]
+    //   : (newState[selected.seriesUID] = selected.seriesDescription);
+    // this.setState({ selectedSerie: newState });
+    this.props.dispatch(clearSelection("serie"));
+    this.props.dispatch(selectSerie(selected));
+  };
   setColumns() {
     const columns = [
+      {
+        id: "checkbox",
+        accessor: "",
+        Cell: ({ original }) => {
+          return (
+            <input
+              type="checkbox"
+              className="checkbox-cell"
+              checked={this.props.selectedSeries[original.seriesUID] || false}
+              onChange={() => this.selectRow(original)}
+            />
+          );
+        }
+      },
       {
         Header: (
           <div>
@@ -301,6 +328,7 @@ class Series extends Component {
       expanded,
       onExpandedChange
     };
+    const TheadComponent = props => null;
     return (
       <>
         <div>
@@ -313,6 +341,7 @@ class Series extends Component {
               className="-striped -highlight"
               freezWhenExpanded={false}
               showPagination={false}
+              TheadComponent={TheadComponent}
               {...extraProps}
               getTdProps={(state, rowInfo, column, instance) => {
                 return {
@@ -349,12 +378,12 @@ class Series extends Component {
 }
 
 const mapStateToProps = state => {
-  const { openSeries, patients, activePort } = state.annotationsListReducer;
   return {
     series: state.searchViewReducer.series,
-    openSeries,
-    patients,
-    activePort
+    openSeries: state.annotationsListReducer.openSeries,
+    patients: state.annotationsListReducer.patients,
+    activePort: state.annotationsListReducer.activePort,
+    selectedSeries: state.annotationsListReducer.selectedSeries
   };
 };
 

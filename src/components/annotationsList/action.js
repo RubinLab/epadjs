@@ -33,8 +33,8 @@ export const clearGrid = item => {
   return { type: CLEAR_GRID };
 };
 
-export const clearSelection = () => {
-  return { type: CLEAR_SELECTION };
+export const clearSelection = selectionType => {
+  return { type: CLEAR_SELECTION, selectionType };
 };
 
 export const displaySingleAim = (patientID, studyUID, seriesUID, aimID) => {
@@ -49,11 +49,65 @@ export const selectStudy = selectedStudyObj => {
     patientID,
     projectID,
     studyDescription,
-    patientName
+    patientName,
+    numberOfSeries
   } = selectedStudyObj;
   return {
     type: SELECT_STUDY,
-    study: { studyUID, patientID, projectID, studyDescription, patientName }
+    study: {
+      studyUID,
+      patientID,
+      projectID,
+      studyDescription,
+      patientName,
+      numberOfSeries
+    }
+  };
+};
+
+export const selectSerie = selectedSerieObj => {
+  const {
+    seriesUID,
+    studyUID,
+    patientID,
+    projectID,
+    patientName,
+    seriesDescription
+  } = selectedSerieObj;
+  return {
+    type: SELECT_SERIE,
+    serie: {
+      seriesUID,
+      studyUID,
+      patientID,
+      projectID,
+      patientName,
+      seriesDescription
+    }
+  };
+};
+
+export const selectAnnotation = selectedAnnotationObj => {
+  const {
+    aimID,
+    seriesUID,
+    studyUID,
+    subjectID,
+    projectID,
+    patientName,
+    name
+  } = selectedAnnotationObj;
+  return {
+    type: SELECT_ANNOTATION,
+    annotation: {
+      aimID,
+      seriesUID,
+      studyUID,
+      subjectID,
+      projectID,
+      patientName,
+      name
+    }
   };
 };
 
