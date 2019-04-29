@@ -17,6 +17,7 @@ import {
   SELECT_SERIE,
   SELECT_STUDY,
   SELECT_ANNOTATION,
+  SELECT_PATIENT,
   CLEAR_SELECTION,
   GET_PATIENT,
   colors
@@ -43,6 +44,11 @@ export const displaySingleAim = (patientID, studyUID, seriesUID, aimID) => {
     payload: { patientID, studyUID, seriesUID, aimID }
   };
 };
+export const selectPatient = selectedPatientObj => {
+  const { projectID, subjectID } = selectedPatientObj;
+  return { type: SELECT_PATIENT, patient: { projectID, subjectID } };
+};
+
 export const selectStudy = selectedStudyObj => {
   const {
     studyUID,

@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
+
 import ReactTable from "react-table";
 import Chance from "chance";
 import "react-table/react-table.css";
@@ -6,7 +8,7 @@ import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import Studies from "./studies";
 import { getSubjects } from "../../services/subjectServices";
-
+import { selectPatient, clearSelection } from "../annotationsList/action";
 const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
 const chance = new Chance();
 function getNodes(data, node = []) {
@@ -61,8 +63,28 @@ class Subjects extends Component {
     return columns;
   }
 
+  selectRow = selected => {
+    console.log(selected);
+    this.props.dispatch(clearSelection("patient"));
+    this.props.dispatch(selectPatient(selected));
+  };
   setColumns() {
     const columns = [
+      {
+        id: "searchView-checkbox",
+        accessor: "",
+        width: 30,
+        Cell: ({ original }) => {
+          return (
+            <input
+              type="checkbox"
+              className="checkbox-cell"
+              checked={this.props.selectedPatients[original.subjectID] || false}
+              onChange={() => this.selectRow(original)}
+            />
+          );
+        }
+      },
       {
         Header: (
           <div>
@@ -70,6 +92,7 @@ class Subjects extends Component {
             <span className="badge badge-secondary"> # of Annotations </span>
           </div>
         ),
+
         Cell: row => (
           <div>
             {this.cleanCarets(row.original.subjectName)} &nbsp;
@@ -281,4 +304,9 @@ class Subjects extends Component {
   }
 }
 
-export default Subjects;
+const mapStateToProps = state => {
+  return {
+    selectedPatients: state.annotationsListReducer.selectedPatients
+  };
+};
+export default connect(mapStateToProps)(Subjects);

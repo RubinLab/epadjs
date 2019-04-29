@@ -70,6 +70,8 @@ class Studies extends Component {
       {
         id: "checkbox",
         accessor: "",
+        width: 30,
+
         Cell: ({ original }) => {
           return (
             <input

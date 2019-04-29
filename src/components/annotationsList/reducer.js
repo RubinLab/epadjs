@@ -16,6 +16,7 @@ import {
   CLEAR_SELECTION,
   SELECT_SERIE,
   SELECT_STUDY,
+  SELECT_PATIENT,
   GET_PATIENT,
   SELECT_ANNOTATION,
   DISPLAY_SINGLE_AIM
@@ -32,6 +33,8 @@ const initialState = {
   dockOpen: false,
   showGridFullAlert: false,
   showProjectModal: false,
+  selectedProjects: {},
+  selectedPatients: {},
   selectedStudies: {},
   selectedSeries: {},
   selectedAnnotations: {}
@@ -224,18 +227,35 @@ const asyncReducer = (state = initialState, action) => {
       if (action.selectionType === "annotation") {
         selectionState.selectedSeries = {};
         selectionState.selectedStudies = {};
+        selectionState.selectedPatients = {};
       } else if (action.selectionType === "serie") {
         selectionState.selectedAnnotations = {};
         selectionState.selectedStudies = {};
+        selectionState.selectedPatients = {};
       } else if (action.selectionType === "study") {
         selectionState.selectedAnnotations = {};
         selectionState.selectedSeries = {};
+        selectionState.selectedPatients = {};
+      } else if (action.selectionType === "patient") {
+        selectionState.selectedAnnotations = {};
+        selectionState.selectedSeries = {};
+        selectionState.selectedStudies = {};
       } else {
         selectionState.selectedAnnotations = {};
         selectionState.selectedSeries = {};
         selectionState.selectedStudies = {};
+        selectionState.selectedPatients = {};
       }
       return selectionState;
+    case SELECT_PATIENT:
+      console.log("in reducer");
+      let patientsNew = {
+        ...state.selectedPatients
+      };
+      patientsNew[action.patient.subjectID]
+        ? delete patientsNew[action.patient.subjectID]
+        : (patientsNew[action.patient.subjectID] = action.patient);
+      return { ...state, selectedPatients: patientsNew };
     case SELECT_STUDY:
       let newStudies = {
         ...state.selectedStudies
