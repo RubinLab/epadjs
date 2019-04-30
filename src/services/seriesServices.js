@@ -29,16 +29,16 @@ export function getImageIds(series) {
 }
 
 export function downloadSeries(series) {
-  return http.get(
+  const url =
     apiUrl +
-      "/projects/" +
-      series.projectId +
-      "/subjects/" +
-      series.subjectId +
-      "/studies/" +
-      series.studyId +
-      "/series/" +
-      series.seriesId +
-      "?&format=stream&includeAims=true"
-  );
+    "/projects/" +
+    series.projectID +
+    "/subjects/" +
+    series.patientID +
+    "/studies/" +
+    series.studyUID +
+    "/series/" +
+    series.seriesUID +
+    "?&format=stream&includeAims=true";
+  return http.get(url, { responseType: "blob" });
 }

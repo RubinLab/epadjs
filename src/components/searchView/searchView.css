@@ -12,3 +12,18 @@
 .searchView-checkbox {
   width: 2rem;
 }
+
+.progress-done {
+  font-size: 1.5rem;
+  color: green;
+}
+
+.progress-notStarted {
+  font-size: 1.5rem;
+  color: red;
+}
+
+.progress-inProgress {
+  font-size: 1.5rem;
+  color: yellow;
+}

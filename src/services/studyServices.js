@@ -7,15 +7,15 @@ export function getStudies(projectId, subjectId) {
   );
 }
 
-export function downloadStudy(study) {
-  return http.get(
+export function downloadStudies(study) {
+  const url =
     apiUrl +
-      "/projects/" +
-      study.projectId +
-      "/subjects/" +
-      study.subjectId +
-      "/studies/" +
-      study.studyUID +
-      "?format=stream&includeAims=true"
-  );
+    "/projects/" +
+    study.projectID +
+    "/subjects/" +
+    study.patientID +
+    "/studies/" +
+    study.studyUID +
+    "?format=stream&includeAims=true";
+  return http.get(url, { responseType: "blob" });
 }

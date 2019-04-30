@@ -38,7 +38,7 @@ const NavBar = ({ user, openGearMenu, loading }) => {
             </li>
             <li className="nav-item">
               <NavLink className="nav-link" to="/anotate">
-                Anotate
+                Annotate
               </NavLink>
             </li>
             <li className="nav-item">

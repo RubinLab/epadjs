@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-
 import ReactTable from "react-table";
 import Chance from "chance";
 import "react-table/react-table.css";
@@ -9,7 +8,9 @@ import treeTableHOC from "react-table/lib/hoc/treeTable";
 import Studies from "./studies";
 import { getSubjects } from "../../services/subjectServices";
 import { selectPatient, clearSelection } from "../annotationsList/action";
-const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+
+// const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+const TreeTable = treeTableHOC(ReactTable);
 const chance = new Chance();
 function getNodes(data, node = []) {
   data.forEach(item => {
@@ -275,10 +276,12 @@ class Subjects extends Component {
       expanded,
       onExpandedChange
     };
+    const TheadComponent = props => null;
+
     return (
       <div>
         {this.state.data ? (
-          <SelectTreeTable
+          <TreeTable
             data={this.state.data}
             columns={this.state.columns}
             defaultPageSize={this.state.data.length}
@@ -286,6 +289,7 @@ class Subjects extends Component {
             className="-striped -highlight"
             freezWhenExpanded={false}
             showPagination={false}
+            TheadComponent={TheadComponent}
             {...extraProps}
             SubComponent={row => {
               return (

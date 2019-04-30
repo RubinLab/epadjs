@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import ReactTable from "react-table";
+import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf } from "react-icons/fa";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import { getStudies } from "../../services/studyServices";
@@ -27,7 +28,20 @@ function getNodes(data, node = []) {
   return node;
 }
 
-const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+const progressDisplay = status => {
+  if (status === "STUDY_STATUS_COMPLETED") {
+    return <FaBatteryFull className="progress-done" />;
+  } else if (status === "STUDY_STATUS_NOT_STARTED") {
+    return <FaBatteryEmpty className="progress-notStarted" />;
+  } else if (status === "STUDY_STATUS_IN_PROGRESS") {
+    return <FaBatteryHalf className="progress-inProgress" />;
+  } else {
+    return <div>{status}</div>;
+  }
+};
+// const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+
+const TreeTable = treeTableHOC(ReactTable);
 
 class Studies extends Component {
   constructor(props) {
@@ -61,6 +75,7 @@ class Studies extends Component {
     //   ? delete newState[studyUID]
     //   : (newState[studyUID] = studyObj);
     // this.setState({ selectedStudy: newState });
+    console.log(selected);
     this.props.dispatch(clearSelection("study"));
     this.props.dispatch(selectStudy(selected));
   };
@@ -71,7 +86,6 @@ class Studies extends Component {
         id: "checkbox",
         accessor: "",
         width: 30,
-
         Cell: ({ original }) => {
           return (
             <input
@@ -92,7 +106,7 @@ class Studies extends Component {
         ),*/
         Cell: row => (
           <div>
-            {row.original.studyDescription} &nbsp;
+            {row.original.studyDescription || "Unnamed Study"} &nbsp;
             {row.original.numberOfAnnotations === "" ? (
               "merru"
             ) : (
@@ -140,7 +154,9 @@ class Studies extends Component {
       },
       {
         //Header: "Ready",
-        Cell: row => row.original.studyProcessingStatus
+        Cell: row => (
+          <div>{progressDisplay(row.original.studyProcessingStatus)}</div>
+        )
       },
       {
         //Header: "Study/Created Date",
@@ -374,7 +390,7 @@ class Studies extends Component {
     return (
       <div>
         {this.state.data ? (
-          <SelectTreeTable
+          <TreeTable
             data={this.state.data}
             columns={this.state.columns}
             defaultPageSize={this.state.data.length}

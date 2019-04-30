@@ -6,7 +6,7 @@ class AnotateView extends Component {
   }
 
   render() {
-    return <h1>Anotate View</h1>;
+    return <h1>Annotate View</h1>;
   }
 }
 

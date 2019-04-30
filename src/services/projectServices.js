@@ -57,7 +57,7 @@ export function editUserRole(id, user, role) {
     : http.delete(apiUrl + "/projects/" + id + "/users/" + user);
 }
 
-export function downloadProject(projectID) {
+export function downloadProjects(projectID) {
   return http.get(
     apiUrl + "/projects/" + projectID + "?format=stream&includeAims=true"
   );

@@ -16,8 +16,8 @@ import {
 } from "../annotationsList/action";
 import "react-table/react-table.css";
 
-const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
-
+// const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+const TreeTable = treeTableHOC(ReactTable);
 function getNodes(data, node = []) {
   data.forEach(item => {
     if (item.hasOwnProperty("_subRows") && item._subRows) {
@@ -65,7 +65,6 @@ class Annotations extends Component {
         id: "checkbox",
         accessor: "",
         width: 30,
-
         Cell: ({ original }) => {
           return (
             <input
@@ -79,7 +78,7 @@ class Annotations extends Component {
       },
       {
         Header: "Annotation Name",
-        Cell: row => <div>{row.original.name}</div>
+        Cell: row => <div>{row.original.name || "Unnamed annotation"}</div>
       },
       {
         Header: "Type",
@@ -248,9 +247,9 @@ class Annotations extends Component {
     };
     const TheadComponent = props => null;
     return (
-      <div style={{ paddingLeft: "20px" }}>
+      <div style={{ paddingLeft: "35px" }}>
         {this.state.data ? (
-          <SelectTreeTable
+          <TreeTable
             data={this.state.data}
             columns={this.state.columns}
             defaultPageSize={this.state.data.length}

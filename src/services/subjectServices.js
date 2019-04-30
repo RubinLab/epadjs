@@ -5,13 +5,13 @@ export function getSubjects(projectId) {
   return http.get(apiUrl + "/projects/" + projectId + "/subjects/");
 }
 
-export function downloadSubject(subject) {
-  return http.get(
+export function downloadSubjects(subject) {
+  const url =
     apiUrl +
-      "/projects/" +
-      subject.projectID +
-      "/subjects/" +
-      subject.patientID +
-      "format=stream&includeAims=true"
-  );
+    "/projects/" +
+    subject.projectID +
+    "/subjects/" +
+    subject.subjectID +
+    "?format=stream&includeAims=true";
+  return http.get(url, { responseType: "blob" });
 }

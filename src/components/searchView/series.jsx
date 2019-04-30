@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf } from "react-icons/fa";
+
 import { BrowserRouter, withRouter } from "react-router-dom";
 import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
@@ -17,7 +19,8 @@ import {
 import AlertGridFull from "./alertGridFull";
 import "react-table/react-table.css";
 
-const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+// const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+const TreeTable = treeTableHOC(ReactTable);
 
 function getNodes(data, node = []) {
   data.forEach(item => {
@@ -29,6 +32,18 @@ function getNodes(data, node = []) {
   });
   return node;
 }
+
+const progressDisplay = status => {
+  if (status === "DONE") {
+    return <FaBatteryFull className="progress-done" />;
+  } else if (status === "NOT_STARTED") {
+    return <FaBatteryEmpty className="progress-notStarted" />;
+  } else if (status === "IN_PROGRESS") {
+    return <FaBatteryHalf className="progress-inProgress" />;
+  } else {
+    return <div>{status}</div>;
+  }
+};
 
 function selectSeries(projectId, subjectId, studyId, seriesId) {
   return {
@@ -79,6 +94,7 @@ class Series extends Component {
     //   ? delete newState[selected.seriesUID]
     //   : (newState[selected.seriesUID] = selected.seriesDescription);
     // this.setState({ selectedSerie: newState });
+    console.log(selected);
     this.props.dispatch(clearSelection("serie"));
     this.props.dispatch(selectSerie(selected));
   };
@@ -88,7 +104,6 @@ class Series extends Component {
         id: "checkbox",
         accessor: "",
         width: 30,
-
         Cell: ({ original }) => {
           return (
             <input
@@ -109,7 +124,7 @@ class Series extends Component {
         ),
         Cell: row => (
           <div>
-            {row.original.seriesDescription} &nbsp; <br />
+            {row.original.seriesDescription || "Unnamed Serie"} &nbsp; <br />
             {row.original.numberOfAnnotations === "" ? (
               ""
             ) : (
@@ -146,7 +161,9 @@ class Series extends Component {
       },
       {
         Header: "Ready",
-        Cell: row => row.original.seriesProcessingStatus
+        Cell: row => (
+          <div>{progressDisplay(row.original.seriesProcessingStatus)}</div>
+        )
       },
       {
         Header: "Study/Created Date",
@@ -335,7 +352,7 @@ class Series extends Component {
       <>
         <div>
           {this.state.data ? (
-            <SelectTreeTable
+            <TreeTable
               data={this.state.data}
               columns={this.state.columns}
               defaultPageSize={this.state.data.length}
