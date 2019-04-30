@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import ReactTable from "react-table";
+import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf } from "react-icons/fa";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import { getStudies } from "../../services/studyServices";
@@ -11,7 +12,8 @@ import {
   openProjectSelectionModal,
   getSingleSerie,
   getAnnotationListData,
-  selectStudy
+  selectStudy,
+  clearSelection
 } from "../annotationsList/action";
 //import "react-table/react-table.css";
 
@@ -26,7 +28,20 @@ function getNodes(data, node = []) {
   return node;
 }
 
-const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+const progressDisplay = status => {
+  if (status === "STUDY_STATUS_COMPLETED") {
+    return <FaBatteryFull className="progress-done" />;
+  } else if (status === "STUDY_STATUS_NOT_STARTED") {
+    return <FaBatteryEmpty className="progress-notStarted" />;
+  } else if (status === "STUDY_STATUS_IN_PROGRESS") {
+    return <FaBatteryHalf className="progress-inProgress" />;
+  } else {
+    return <div>{status}</div>;
+  }
+};
+// const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+
+const TreeTable = treeTableHOC(ReactTable);
 
 class Studies extends Component {
   constructor(props) {
@@ -38,6 +53,7 @@ class Studies extends Component {
       selectAll: false,
       selectType: "checkbox",
       expanded: {}
+      // selectedStudy: {}
     };
   }
 
@@ -51,8 +67,36 @@ class Studies extends Component {
     this.setState({ columns: this.setColumns() });
   }
 
+  selectRow = selected => {
+    // const { studyUID, numberOfSeries, patientID, projectID } = selected;
+    // const studyObj = { studyUID, numberOfSeries, patientID, projectID };
+    // const newState = { ...this.state.selectedStudy };
+    // newState[studyUID]
+    //   ? delete newState[studyUID]
+    //   : (newState[studyUID] = studyObj);
+    // this.setState({ selectedStudy: newState });
+    console.log(selected);
+    this.props.dispatch(clearSelection("study"));
+    this.props.dispatch(selectStudy(selected));
+  };
+
   setColumns() {
     const columns = [
+      {
+        id: "checkbox",
+        accessor: "",
+        width: 30,
+        Cell: ({ original }) => {
+          return (
+            <input
+              type="checkbox"
+              className="checkbox-cell"
+              checked={this.props.selectedStudies[original.studyUID] || false}
+              onChange={() => this.selectRow(original)}
+            />
+          );
+        }
+      },
       {
         /*Header: (
           <div>
@@ -62,7 +106,7 @@ class Studies extends Component {
         ),*/
         Cell: row => (
           <div>
-            {row.original.studyDescription} &nbsp;
+            {row.original.studyDescription || "Unnamed Study"} &nbsp;
             {row.original.numberOfAnnotations === "" ? (
               "merru"
             ) : (
@@ -110,7 +154,9 @@ class Studies extends Component {
       },
       {
         //Header: "Ready",
-        Cell: row => row.original.studyProcessingStatus
+        Cell: row => (
+          <div>{progressDisplay(row.original.studyProcessingStatus)}</div>
+        )
       },
       {
         //Header: "Study/Created Date",
@@ -340,10 +386,11 @@ class Studies extends Component {
       expanded,
       onExpandedChange
     };
+    const TheadComponent = props => null;
     return (
       <div>
         {this.state.data ? (
-          <SelectTreeTable
+          <TreeTable
             data={this.state.data}
             columns={this.state.columns}
             defaultPageSize={this.state.data.length}
@@ -351,6 +398,7 @@ class Studies extends Component {
             className="-striped -highlight"
             freezWhenExpanded={false}
             showPagination={false}
+            TheadComponent={TheadComponent}
             {...extraProps}
             getTdProps={(state, rowInfo, column) => ({
               onDoubleClick: e => {
@@ -380,7 +428,8 @@ const mapStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
-    loading: state.annotationsListReducer.loading
+    loading: state.annotationsListReducer.loading,
+    selectedStudies: state.annotationsListReducer.selectedStudies
   };
 };
 export default connect(mapStateToProps)(Studies);

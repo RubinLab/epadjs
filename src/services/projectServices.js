@@ -1,12 +1,12 @@
-import http from './httpService';
-import { apiUrl } from '../config.json';
+import http from "./httpService";
+import { apiUrl } from "../config.json";
 
 export function getProjects() {
-  return http.get(apiUrl + '/projects/');
+  return http.get(apiUrl + "/projects/");
 }
 
 export function deleteProject(projectId) {
-  return http.delete(apiUrl + '/projects/' + projectId);
+  return http.delete(apiUrl + "/projects/" + projectId);
 }
 
 export function saveProject(
@@ -19,15 +19,15 @@ export function saveProject(
 ) {
   return http.post(
     apiUrl +
-      '/projects/' +
+      "/projects/" +
       id +
-      '?/username=' +
+      "?/username=" +
       user +
-      '&projectName=' +
+      "&projectName=" +
       projectName +
-      '&projectDescription=' +
+      "&projectDescription=" +
       projectDescription +
-      '&type=' +
+      "&type=" +
       type,
     { projectDescription, defaultTemplate }
   );
@@ -36,23 +36,29 @@ export function saveProject(
 export function updateProject(id, projectName, projectDescription, type) {
   return http.put(
     apiUrl +
-      '/projects/' +
+      "/projects/" +
       id +
-      '?projectName=' +
+      "?projectName=" +
       projectName +
-      '&description=' +
+      "&description=" +
       projectDescription +
-      '&type=' +
+      "&type=" +
       type
   );
 }
 
 export function getProjectUsers(id) {
-  return http.get(apiUrl + '/projects/' + id + '/users/');
+  return http.get(apiUrl + "/projects/" + id + "/users/");
 }
 
 export function editUserRole(id, user, role) {
   return role
-    ? http.put(apiUrl + '/projects/' + id + '/users/' + user + '?role=' + role)
-    : http.delete(apiUrl + '/projects/' + id + '/users/' + user);
+    ? http.put(apiUrl + "/projects/" + id + "/users/" + user + "?role=" + role)
+    : http.delete(apiUrl + "/projects/" + id + "/users/" + user);
+}
+
+export function downloadProjects(projectID) {
+  return http.get(
+    apiUrl + "/projects/" + projectID + "?format=stream&includeAims=true"
+  );
 }

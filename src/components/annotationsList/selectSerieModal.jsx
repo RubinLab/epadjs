@@ -29,14 +29,18 @@ class selectSerieModal extends React.Component {
     let selectionArr = [];
     let seriesList = [];
     let selectionType = "";
-    if (this.props.selectedStudies.length > 0) {
-      selectionArr = this.props.selectedStudies;
+    let { selectedStudies, selectedSeries, selectedAnnotations } = this.props;
+    selectedStudies = Object.values(selectedStudies);
+    selectedSeries = Object.values(selectedSeries);
+    selectedAnnotations = Object.values(selectedAnnotations);
+    if (selectedStudies.length > 0) {
+      selectionArr = selectedStudies;
       selectionType = "study";
-    } else if (this.props.selectedSeries.length > 0) {
-      seriesList = this.props.selectedSeries;
+    } else if (selectedSeries.length > 0) {
+      seriesList = selectedSeries;
       selectionType = "series";
     } else {
-      seriesList = this.props.selectedAnnotations;
+      seriesList = selectedAnnotations;
       selectionType = "aim";
     }
     this.setState({ selectionType, selectionArr, seriesList });

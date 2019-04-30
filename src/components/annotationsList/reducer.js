@@ -9,13 +9,14 @@ import {
   TOGGLE_LABEL,
   CHANGE_ACTIVE_PORT,
   LOAD_SERIE_SUCCESS,
-  SHOW_ANNOTATION_WINDOW,
+  SHOW_ANNOTATION_WINDOW /*???*/,
   SHOW_ANNOTATION_DOCK,
   OPEN_PROJECT_MODAL,
   CLEAR_GRID,
   CLEAR_SELECTION,
   SELECT_SERIE,
   SELECT_STUDY,
+  SELECT_PATIENT,
   GET_PATIENT,
   SELECT_ANNOTATION,
   DISPLAY_SINGLE_AIM
@@ -32,9 +33,11 @@ const initialState = {
   dockOpen: false,
   showGridFullAlert: false,
   showProjectModal: false,
-  selectedStudies: [],
-  selectedSeries: [],
-  selectedAnnotations: []
+  selectedProjects: {},
+  selectedPatients: {},
+  selectedStudies: {},
+  selectedSeries: {},
+  selectedAnnotations: {}
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -180,24 +183,25 @@ const asyncReducer = (state = initialState, action) => {
       return Object.assign({}, state, { aimsList: singleLabelToggled });
     case CLEAR_GRID:
       const clearedPatients = {};
-      let selectionArr = [];
-      if (state.selectedStudies.length > 0) {
-        selectionArr = state.selectedStudies.concat([]);
-      } else if (state.selectedSeries.length > 0) {
-        selectionArr = state.selectedSeries.concat([]);
+      let selectionObj = [];
+      if (Object.keys(state.selectedStudies).length > 0) {
+        selectionObj = { ...state.selectedStudies };
+      } else if (Object.keys(state.selectedSeries).length > 0) {
+        selectionObj = { ...state.selectedSeries };
       } else {
-        selectionArr = state.selectedAnnotations.concat([]);
+        selectionObj = { ...state.selectedAnnotations };
       }
 
       //keep the patient if already there
-      selectionArr.forEach(item => {
+      for (let item in selectionObj) {
         if (state.patients[item.patientID]) {
           clearedPatients[item.patientID] = {
             ...state.patients[item.patientID]
           };
         }
-      });
+      }
 
+      //update the state as not displayed
       for (let patient in clearedPatients) {
         for (let study in clearedPatients[patient]) {
           for (let serie in clearedPatients[patient].studies[study]) {
@@ -219,15 +223,64 @@ const asyncReducer = (state = initialState, action) => {
         activePort: 0
       };
     case CLEAR_SELECTION:
-      return {
-        ...state,
-        selectedAnnotations: [],
-        selectedSeries: [],
-        selectedStudies: []
+      let selectionState = { ...state };
+      if (action.selectionType === "annotation") {
+        selectionState.selectedSeries = {};
+        selectionState.selectedStudies = {};
+        selectionState.selectedPatients = {};
+      } else if (action.selectionType === "serie") {
+        selectionState.selectedAnnotations = {};
+        selectionState.selectedStudies = {};
+        selectionState.selectedPatients = {};
+      } else if (action.selectionType === "study") {
+        selectionState.selectedAnnotations = {};
+        selectionState.selectedSeries = {};
+        selectionState.selectedPatients = {};
+      } else if (action.selectionType === "patient") {
+        selectionState.selectedAnnotations = {};
+        selectionState.selectedSeries = {};
+        selectionState.selectedStudies = {};
+      } else {
+        selectionState.selectedAnnotations = {};
+        selectionState.selectedSeries = {};
+        selectionState.selectedStudies = {};
+        selectionState.selectedPatients = {};
+      }
+      return selectionState;
+    case SELECT_PATIENT:
+      console.log("in reducer");
+      let patientsNew = {
+        ...state.selectedPatients
       };
+      patientsNew[action.patient.subjectID]
+        ? delete patientsNew[action.patient.subjectID]
+        : (patientsNew[action.patient.subjectID] = action.patient);
+      return { ...state, selectedPatients: patientsNew };
     case SELECT_STUDY:
-      let newStudies = state.selectedStudies.concat([action.study]);
+      let newStudies = {
+        ...state.selectedStudies
+      };
+      newStudies[action.study.studyUID]
+        ? delete newStudies[action.study.studyUID]
+        : (newStudies[action.study.studyUID] = action.study);
       return { ...state, selectedStudies: newStudies };
+    case SELECT_SERIE:
+      let newSeries = {
+        ...state.selectedSeries
+      };
+      newSeries[action.serie.seriesUID]
+        ? delete newSeries[action.serie.seriesUID]
+        : (newSeries[action.serie.seriesUID] = action.serie);
+      // state.selectedStudies.concat([action.study]);
+      return { ...state, selectedSeries: newSeries };
+    case SELECT_ANNOTATION:
+      let newAnnotations = {
+        ...state.selectedAnnotations
+      };
+      newAnnotations[action.annotation.aimID]
+        ? delete newAnnotations[action.annotation.aimID]
+        : (newAnnotations[action.annotation.aimID] = action.annotation);
+      return { ...state, selectedAnnotations: newAnnotations };
     case GET_PATIENT:
       let addedNewPatient = { ...state.patients };
       addedNewPatient[action.patient.patientID] = action.patient;

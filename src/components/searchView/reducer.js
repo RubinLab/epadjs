@@ -1,6 +1,7 @@
 const initialState = {
   series: [],
-  viewports: []
+  viewports: [],
+  selectedStudies: {}
 };
 
 export default function searchViewReducer(state = initialState, action) {
@@ -27,6 +28,13 @@ export default function searchViewReducer(state = initialState, action) {
       );
       state.cornerstoneTools.wwwc.activate();
       return state;
+    //New reducer
+    case "CHECK_STUDY":
+      const newSelStudies = { ...state.selectedStudies };
+      newSelStudies[action.study.studyUID]
+        ? delete newSelStudies[action.study.studyUID]
+        : (newSelStudies[action.study.studyUID] = action.study);
+      return { ...state, selectedStudies: newSelStudies };
     default:
       return state;
   }

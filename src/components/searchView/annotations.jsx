@@ -10,12 +10,14 @@ import {
   displaySingleAim,
   alertViewPortFull,
   getSingleSerie,
-  getAnnotationListData
+  getAnnotationListData,
+  clearSelection,
+  selectAnnotation
 } from "../annotationsList/action";
 import "react-table/react-table.css";
 
-const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
-
+// const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+const TreeTable = treeTableHOC(ReactTable);
 function getNodes(data, node = []) {
   data.forEach(item => {
     if (item.hasOwnProperty("_subRows") && item._subRows) {
@@ -51,11 +53,32 @@ class Annotations extends Component {
     this.setState({ columns: this.setColumns() });
   }
 
+  selectRow = selected => {
+    console.log(selected);
+    this.props.dispatch(clearSelection("annotation"));
+    this.props.dispatch(selectAnnotation(selected));
+  };
+
   setColumns() {
     const columns = [
       {
+        id: "checkbox",
+        accessor: "",
+        width: 30,
+        Cell: ({ original }) => {
+          return (
+            <input
+              type="checkbox"
+              className="checkbox-cell"
+              checked={this.props.selectedAnnotations[original.aimID] || false}
+              onChange={() => this.selectRow(original)}
+            />
+          );
+        }
+      },
+      {
         Header: "Annotation Name",
-        Cell: row => <div>{row.original.name}</div>
+        Cell: row => <div>{row.original.name || "Unnamed annotation"}</div>
       },
       {
         Header: "Type",
@@ -222,10 +245,11 @@ class Annotations extends Component {
       expanded,
       onExpandedChange
     };
+    const TheadComponent = props => null;
     return (
-      <div>
+      <div style={{ paddingLeft: "35px" }}>
         {this.state.data ? (
-          <SelectTreeTable
+          <TreeTable
             data={this.state.data}
             columns={this.state.columns}
             defaultPageSize={this.state.data.length}
@@ -233,6 +257,7 @@ class Annotations extends Component {
             className="-striped -highlight"
             freezWhenExpanded={false}
             showPagination={false}
+            TheadComponent={TheadComponent}
             {...extraProps}
             getTdProps={(state, rowInfo, column, instance) => {
               return {
@@ -249,12 +274,12 @@ class Annotations extends Component {
 }
 
 const mapStateToProps = state => {
-  const { openSeries, patients, activePort } = state.annotationsListReducer;
   return {
     series: state.searchViewReducer.series,
-    openSeries,
-    patients,
-    activePort
+    openSeries: state.annotationsListReducer.openSeries,
+    patients: state.annotationsListReducer.patients,
+    activePort: state.annotationsListReducer.activePort,
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
   };
 };
 

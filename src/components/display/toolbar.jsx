@@ -387,7 +387,7 @@ class Toolbar extends Component {
             <TiPencil />
           </div>
           <div className="buttonLabel">
-            <span>Anotate</span>
+            <span>Annotate</span>
           </div>
         </div>
         <div
