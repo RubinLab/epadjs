@@ -1,5 +1,6 @@
 import btoa from "btoa-lite";
 import http from "./httpService";
+import { getUser } from "./userServices";
 import { apiUrlV1, clientKey } from "../config.json";
 
 const apiEndpoint = apiUrlV1 + "/session/";
@@ -14,6 +15,11 @@ export async function login(username, password) {
   sessionStorage.setItem("username", username);
   /*********************************** REMOVE IN PROD  **************************/
   sessionStorage.setItem("header", basicAuth);
+  /*********************************** ******************************************/
+  const {
+    data: { displayname }
+  } = await getUser(username);
+  sessionStorage.setItem("displayName", displayname);
 }
 
 export function logout() {

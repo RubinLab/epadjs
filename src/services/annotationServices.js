@@ -16,7 +16,6 @@ export function getAnnotations(series, opts = {}) {
   if (Object.entries(opts).length === 0 && opts.constructor === Object)
     return http.get(fullUrl + "/aims/?count=0&format=summary");
   else if (opts["json"]) return http.get(fullUrl + "/aims/?format=json");
-  return http.get(+"/aims/?count=0&format=summary");
 }
 
 export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
