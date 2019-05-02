@@ -17,6 +17,7 @@ import {
   clearSelection
 } from "../annotationsList/action";
 import AlertGridFull from "./alertGridFull";
+import { isLite } from "../../config.json";
 import "react-table/react-table.css";
 
 // const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));

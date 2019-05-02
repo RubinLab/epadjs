@@ -1,10 +1,15 @@
 import http from "./httpService";
-import { apiUrl } from "../config.json";
+import { isLite, apiUrl, epadws } from "../config.json";
 
 export function getStudies(projectId, subjectId) {
-  return http.get(
-    apiUrl + "/projects/" + projectId + "/subjects/" + subjectId + "/studies/"
-  );
+  if (isLite)
+    return http.get(
+      epadws + "/projects/lite/subjects/" + subjectId + "/studies"
+    );
+  else
+    return http.get(
+      apiUrl + "/projects/" + projectId + "/subjects/" + subjectId + "/studies/"
+    );
 }
 
 export function downloadStudies(study) {

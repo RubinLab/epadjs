@@ -1,6 +1,10 @@
 {
-  "apiUrl": "http://epad-dev8.stanford.edu:8080/epad/v2",
-  "apiUrlV1": "http://epad-dev8.stanford.edu:8080/epad",
-  "wadoUrl": "wadouri:http://epad-dev8.stanford.edu:8080/epad/wado/",
-  "clientKey": "Swa9Ci6Hr7n8eb6JqlEZpaujC7ZQq1fM"
+  "isLite": true,
+  "apiUrl": "http://epad-dev6.stanford.edu:8080/epad/v2",
+  "apiUrlV1": "http://epad-dev6.stanford.edu:8080/epad",
+  "wadoUrl": "wadouri:http://epad-dev6.stanford.edu:8080/epad/wado/",
+  "wadoUrlLite": "wadouri:http://epad-dev4.stanford.edu:8090",
+  "clientKey": "Swa9Ci6Hr7n8eb6JqlEZpaujC7ZQq1fM",
+  "epadws": "http://epad-dev4.stanford.edu:8080",
+  "dicomweb": "http://epad-dev4.stanford.edu:8090"
 }

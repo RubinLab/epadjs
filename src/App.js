@@ -20,6 +20,8 @@ import AnnotationsDock from "./components/annotationsList/annotationDock/annotat
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import ProjectModal from "./components/annotationsList/selectSerieModal";
 
+import { isLite } from "./config.json";
+
 // import Modal from './components/management/projectCreationForm';
 // import Modal from './components/common/rndBootModal';
 
@@ -72,7 +74,7 @@ class App extends Component {
         <NavBar user={this.state.user} openGearMenu={this.openMenu} />
         {this.state.isMngMenuOpen && <Management closeMenu={this.closeMenu} />}
         {!this.state.user && <Route path="/login" component={LoginForm} />}
-        {this.state.user && (
+        {this.state.user && !isLite && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
             <Sidebar>
               <Switch>
@@ -94,6 +96,15 @@ class App extends Component {
               </Switch>
             </Sidebar>
           </div>
+        )}
+        {this.state.user && isLite && (
+          <Switch>
+            <Route path="/logout" component={Logout} />
+            <ProtectedRoute path="/display" component={DisplayView} />
+            <Route path="/not-found" component={NotFound} />
+            <ProtectedRoute path="/" component={SearchView} />
+            <Redirect to="/not-found" />
+          </Switch>
         )}
         {this.props.listOpen && <AnnotationList />}
         {this.props.dockOpen && <AnnotationsDock />}

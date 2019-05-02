@@ -1,8 +1,11 @@
 import http from "./httpService";
-import { apiUrl } from "../config.json";
+import { isLite, apiUrl, epadws } from "../config.json";
 
 export function getSubjects(projectId) {
-  return http.get(apiUrl + "/projects/" + projectId + "/subjects/");
+  if (isLite) {
+    projectId = "lite";
+    return http.get(epadws + "/projects/" + projectId + "/subjects");
+  } else return http.get(apiUrl + "/projects/" + projectId + "/subjects/");
 }
 
 export function downloadSubjects(subject) {
