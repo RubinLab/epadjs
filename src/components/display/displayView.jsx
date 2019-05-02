@@ -32,17 +32,8 @@ class DisplayView extends Component {
       height: "calc(100% - 60px)",
       refs: props.refs,
       hiding: false,
-      data: [
-        {
-          stack: {
-            currentImageIdIndex: 0,
-            imageIds: [
-              "wadouri:http://epad-dev6.stanford.edu:8080/epad/wado/?requestType=WADO&studyUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.949&seriesUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.950&objectUID=1.3.12.2.1107.5.8.2.484849.837749.68675556.2004110916031631&contentType=application%2Fdicom",
-              "wadouri:http://epad-dev6.stanford.edu:8080/epad/wado/?requestType=WADO&studyUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.949&seriesUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.950&objectUID=1.3.12.2.1107.5.8.2.484849.837749.68675556.2004110916031802&contentType=application%2Fdicom"
-            ]
-          }
-        }
-      ]
+      data: [],
+      isLoading: true
     };
     //this.createRefs();
     //console.log(this.state);
@@ -51,7 +42,7 @@ class DisplayView extends Component {
   componentDidMount() {
     //document.body.classList.add("fixed-page");
     this.getViewports();
-    // this.getData();
+    this.getData();
     const vpList = document.getElementsByClassName("cs");
     const ZoomTool = this.props.cornerstoneTools.ZoomTool;
     //check the logic here
@@ -84,10 +75,16 @@ class DisplayView extends Component {
     instanceAimEditor.createViewerWindow();
   };*/
   getData() {
+    var promises = [];
     for (let i = 0; i < this.state.series.length; i++) {
       console.log("serie", this.state.series[i]);
-      this.getImages(this.state.series[i]);
+      const promise = this.getImages(this.state.series[i]);
+      promises.push(promise);
     }
+    Promise.all(promises).then(res => {
+      console.log(res);
+      this.setState({ isLoading: false });
+    });
   }
 
   async getImages(seri) {
@@ -117,7 +114,7 @@ class DisplayView extends Component {
     stack.imageIds = [...tempArray];
     console.log(JSON.stringify(stack));
     this.setState({
-      data: [...this.state.data, stack]
+      data: [...this.state.data, { stack }]
     });
   }
 
@@ -202,11 +199,13 @@ class DisplayView extends Component {
               setClick={click => (this.updateViewport = click)}
               serie={serie}
             />*/}
-            <CornerstoneViewport
-              viewportData={this.state.data[0]}
-              cornerstone={this.props.cornerstone}
-              cornerstoneTools={this.props.cornerstoneTools}
-            />
+            {!this.state.isLoading && (
+              <CornerstoneViewport
+                viewportData={this.state.data[i]}
+                cornerstone={this.props.cornerstone}
+                cornerstoneTools={this.props.cornerstoneTools}
+              />
+            )}
           </div>
         ))}
         <div id="cont" />
