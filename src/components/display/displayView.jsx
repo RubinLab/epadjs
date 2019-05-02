@@ -1,13 +1,16 @@
 import React, { Component } from "react";
 import Toolbar from "./toolbar";
+import { getImageIds } from "../../services/seriesServices";
 //import Viewport from "./viewport.jsx";
 import ViewportSeg from "./viewportSeg.jsx";
 import { connect } from "react-redux";
+import { wadoUrl } from "../../config.json";
 import { withRouter } from "react-router-dom";
-import CornerstoneViewport from 'react-cornerstone-viewport'
+import CornerstoneViewport from "react-cornerstone-viewport";
 import "./flex.css";
 //import viewport from "./viewport.jsx";
 import { FiZoomIn } from "react-icons/fi";
+import { TiScissors } from "react-icons/ti";
 
 const mapStateToProps = state => {
   return {
@@ -28,7 +31,18 @@ class DisplayView extends Component {
       width: "100%",
       height: "calc(100% - 60px)",
       refs: props.refs,
-      hiding: false
+      hiding: false,
+      data: [
+        {
+          stack: {
+            currentImageIdIndex: 0,
+            imageIds: [
+              "wadouri:http://epad-dev6.stanford.edu:8080/epad/wado/?requestType=WADO&studyUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.949&seriesUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.950&objectUID=1.3.12.2.1107.5.8.2.484849.837749.68675556.2004110916031631&contentType=application%2Fdicom",
+              "wadouri:http://epad-dev6.stanford.edu:8080/epad/wado/?requestType=WADO&studyUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.949&seriesUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.950&objectUID=1.3.12.2.1107.5.8.2.484849.837749.68675556.2004110916031802&contentType=application%2Fdicom"
+            ]
+          }
+        }
+      ]
     };
     //this.createRefs();
     //console.log(this.state);
@@ -37,6 +51,7 @@ class DisplayView extends Component {
   componentDidMount() {
     //document.body.classList.add("fixed-page");
     this.getViewports();
+    // this.getData();
     const vpList = document.getElementsByClassName("cs");
     const ZoomTool = this.props.cornerstoneTools.ZoomTool;
     //check the logic here
@@ -46,8 +61,6 @@ class DisplayView extends Component {
     this.props.cornerstoneTools.setToolActive(ZoomTool.name, {
       mouseButtonMask: 5
     });
-    console.log(this.props.cornerstoneTools);
-
     //make the last element in series as selected viewport since the last open will be added to end
     this.props.dispatch(
       this.defaultSelectVP("viewport" + (this.state.series.length - 1))
@@ -55,6 +68,57 @@ class DisplayView extends Component {
     //console.log(viewports);
     //viewports.map(vp => this.props.cornerstoneTools.wwwc.activate(vp, 1));
     //this.props.cornerstoneTools.wwwc.activate(this.state.refs[0], 1);
+  }
+
+  /*testAimEditor = () => {
+    console.log(document.getElementById("cont"));
+    var instanceAimEditor = new aim.AimEditor(document.getElementById("cont"));
+    var myA = [
+      { key: "BeaulieuBoneTemplate_rev18", value: aim.myjson },
+      { key: "asdf", value: aim.myjson1 }
+    ];
+    instanceAimEditor.loadTemplates(myA);
+
+    instanceAimEditor.addButtonsDiv();
+
+    instanceAimEditor.createViewerWindow();
+  };*/
+  getData() {
+    for (let i = 0; i < this.state.series.length; i++) {
+      console.log("serie", this.state.series[i]);
+      this.getImages(this.state.series[i]);
+    }
+  }
+
+  async getImages(seri) {
+    let stack = {};
+    let tempArray = [];
+    const {
+      data: {
+        ResultSet: { Result: urls }
+      }
+    } = await getImageIds(seri); //get the Wado image ids for this series
+    urls.map(url => {
+      if (url.multiFrameImage === true) {
+        for (var i = 0; i < url.numberOfFrames; i++) {
+          tempArray.push(
+            wadoUrl +
+              url.lossyImage +
+              "&contentType=application%2Fdicom?frame=" +
+              i
+          );
+        }
+      } else
+        tempArray.push(
+          wadoUrl + url.lossyImage + "&contentType=application%2Fdicom"
+        );
+    });
+    stack.currentImageIdIndex = 0;
+    stack.imageIds = [...tempArray];
+    console.log(JSON.stringify(stack));
+    this.setState({
+      data: [...this.state.data, stack]
+    });
   }
 
   getViewports = () => {
@@ -138,9 +202,12 @@ class DisplayView extends Component {
               setClick={click => (this.updateViewport = click)}
               serie={serie}
             />*/}
-            <CornerstoneViewport/>
-          </div> 
-          
+            <CornerstoneViewport
+              viewportData={this.state.data[0]}
+              cornerstone={this.props.cornerstone}
+              cornerstoneTools={this.props.cornerstoneTools}
+            />
+          </div>
         ))}
         <div id="cont" />
       </React.Fragment>
