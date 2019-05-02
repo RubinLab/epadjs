@@ -323,7 +323,11 @@ svg {
   left: 40%;
 }
 
-.serieSelection-text {
+.selectionItem-text {
   text-transform: capitalize;
   margin-left: 0.4rem;
+}
+
+.serieSelection-title {
+  margin-top: 0.6rem;
 }

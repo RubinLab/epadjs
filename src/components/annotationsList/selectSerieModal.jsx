@@ -8,9 +8,13 @@ import {
   getPatient,
   getWholeData,
   getSingleSerie,
-  clearSelection
+  clearSelection,
+  startLoading,
+  loadCompleted
 } from "./action";
 import SerieSelect from "./containers/serieSelection";
+import SelectionItem from "./containers/selectionItem";
+
 import { getSeries } from "../../services/seriesServices";
 
 const message = {
@@ -20,48 +24,45 @@ class selectSerieModal extends React.Component {
   state = {
     selectionType: "",
     selectionArr: [],
-    seriesList: [],
+    // seriesList: [],
     selectedToDisplay: [],
     limit: 0
   };
   //get the serie list
   componentDidMount = async () => {
-    let selectionArr = [];
-    let seriesList = [];
+    console.log(this.props.seriesPassed);
     let selectionType = "";
     let { selectedStudies, selectedSeries, selectedAnnotations } = this.props;
     selectedStudies = Object.values(selectedStudies);
     selectedSeries = Object.values(selectedSeries);
     selectedAnnotations = Object.values(selectedAnnotations);
     if (selectedStudies.length > 0) {
-      selectionArr = selectedStudies;
       selectionType = "study";
     } else if (selectedSeries.length > 0) {
-      seriesList = selectedSeries;
       selectionType = "series";
     } else {
-      seriesList = selectedAnnotations;
       selectionType = "aim";
     }
-    this.setState({ selectionType, selectionArr, seriesList });
-    if (selectionType === "study") {
-      for (let item of selectionArr) {
-        let seriesOfSt;
-        if (!this.props.patients[item.patientID]) {
-          seriesOfSt = await this.getSerieListData(
-            item.projectID,
-            item.patientID,
-            item.studyUID
-          );
-        } else {
-          seriesOfSt = Object.values(
-            this.props.patients[item.patientID].studies[item.studyUID].series
-          );
-        }
-        seriesList = seriesList.concat(seriesOfSt);
-      }
-      this.setState({ seriesList });
-    }
+    this.setState({ selectionType });
+    // this.setState({ selectionType, selectionArr, seriesList });
+    // if (selectionType === "study") {
+    //   for (let item of selectionArr) {
+    //     let seriesOfSt;
+    //     if (!this.props.patients[item.patientID]) {
+    //       seriesOfSt = await this.getSerieListData(
+    //         item.projectID,
+    //         item.patientID,
+    //         item.studyUID
+    //       );
+    //     } else {
+    //       seriesOfSt = Object.values(
+    //         this.props.patients[item.patientID].studies[item.studyUID].series
+    //       );
+    //     }
+    //     seriesList = seriesList.concat(seriesOfSt);
+    //   }
+    //   this.setState({ seriesList });
+    // }
   };
 
   getPatient = async study => {
@@ -74,6 +75,7 @@ class selectSerieModal extends React.Component {
         ResultSet: { Result: series }
       }
     } = await getSeries(projectID, patientID, studyUID);
+
     return series;
   };
 
@@ -92,18 +94,16 @@ class selectSerieModal extends React.Component {
   };
 
   displaySelection = async () => {
+    let series = Object.values(this.props.seriesPassed)[0];
     for (let i = 0; i < this.state.selectedToDisplay.length; i++) {
-      if (!this.props.patients[this.state.seriesList[i].patientID]) {
-        let patient = await this.props.dispatch(
-          getWholeData(null, this.state.seriesList[i])
-        );
-        await this.getPatient(patient);
+      if (!this.props.patients[series[i].patientID]) {
+        this.props.dispatch(getWholeData(null, series[i]));
       }
       if (this.state.selectedToDisplay[i]) {
         if (this.state.selectionType === "aim") {
-          this.props.dispatch(getSingleSerie(null, this.state.seriesList[i]));
+          this.props.dispatch(getSingleSerie(null, series[i]));
         } else {
-          this.props.dispatch(getSingleSerie(this.state.seriesList[i]));
+          this.props.dispatch(getSingleSerie(series[i]));
         }
       }
     }
@@ -123,7 +123,46 @@ class selectSerieModal extends React.Component {
     this.props.dispatch(clearSelection());
   };
 
+  renderSelection = () => {
+    let selectionList = [];
+    let item;
+    console.log(this.props.seriesPassed);
+    let series = Object.values(this.props.seriesPassed);
+    let keys = Object.keys(this.props.seriesPassed);
+    console.log(series);
+    let count = 0;
+
+    for (let i = 0; i < series.length; i++) {
+      let innerList = [];
+      let title = series[i][0].bodyPart || series[i][0].studyDescription;
+      for (let k = 0; k < series[i].length; k++) {
+        let disabled =
+          !this.state.selectedToDisplay[count + k] && this.state.limit >= 6;
+        item = (
+          <SelectionItem
+            desc={series[i][k].seriesDescription}
+            onSelect={this.selectToDisplay}
+            index={count + k}
+            disabled={disabled}
+            key={series[i][k].seriesUID}
+          />
+        );
+        innerList.push(item);
+      }
+      selectionList.push(
+        <div key={keys[i]}>
+          <div className="serieSelection-title">{title}</div>
+          <div>{innerList}</div>
+        </div>
+      );
+      count += series[i].length;
+    }
+    return selectionList;
+  };
+
   render = () => {
+    const list = this.renderSelection();
+    console.log(this.state);
     return (
       <Modal.Dialog dialogClassName="alert-selectSerie">
         <Modal.Header>
@@ -141,12 +180,7 @@ class selectSerieModal extends React.Component {
             Close all views
           </button>
           {this.state.limit >= 6 && <div>You reached Max number of series</div>}
-          <SerieSelect
-            itemArr={this.state.seriesList}
-            onSelect={this.selectToDisplay}
-            limit={this.state.limit}
-            checkList={this.state.selectedToDisplay}
-          />
+          <div>{list}</div>
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
           <button onClick={this.displaySelection}>Display selection</button>
@@ -170,4 +204,36 @@ const mapStateToProps = state => {
     openSeries: state.annotationsListReducer.openSeries
   };
 };
+
 export default connect(mapStateToProps)(selectSerieModal);
+
+// if (series.length === 1) {
+//   console.log("here");
+//   item = (
+//     <SerieSelect
+//       itemArr={series[0]}
+//       onSelect={this.selectToDisplay}
+//       limit={this.state.limit}
+//       checkList={this.state.selectedToDisplay}
+//       key="0"
+//       indexStart={0}
+//     />
+//   );
+//   selectionList.push(item);
+// } else {
+//   for (let i = 0; i < series.length; i++) {
+//     let title = series[i][0].bodyPart || series[i][0].studyDescription;
+//     item = (
+//       <div key={keys[i]}>
+//         <div>{title}</div>
+//         <SerieSelect
+//           itemArr={series[i]}
+//           onSelect={this.selectToDisplay}
+//           limit={this.state.limit}
+//           checkList={this.state.selectedToDisplay}
+//           key="0"
+//           indexStart={count}
+//         />
+//       </div>
+//     );
+//     selectionList.push(item);

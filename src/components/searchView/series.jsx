@@ -96,7 +96,7 @@ class Series extends Component {
     // this.setState({ selectedSerie: newState });
     console.log(selected);
     this.props.dispatch(clearSelection("serie"));
-    this.props.dispatch(selectSerie(selected));
+    this.props.dispatch(selectSerie(selected, this.props.studyDescription));
   };
   setColumns() {
     const columns = [
@@ -300,13 +300,13 @@ class Series extends Component {
     if (openSeries.length > 0) {
       for (let i = 0; i < openSeries.length; i++) {
         // for (let serie of openSeries) {
-        if (openSeries[i]) {
-          if (openSeries[i].seriesUID === selected.seriesUID) {
-            isSerieOpen = true;
-            this.props.dispatch(changeActivePort(i));
-            break;
-          }
+        // if (openSeries[i]) {
+        if (openSeries[i].seriesUID === selected.seriesUID) {
+          isSerieOpen = true;
+          this.props.dispatch(changeActivePort(i));
+          break;
         }
+        // }
       }
     }
     //serie is not already open;
@@ -381,6 +381,8 @@ class Series extends Component {
                       subjectId={this.props.subjectId}
                       studyId={row.original.studyUID}
                       seriesId={row.original.seriesUID}
+                      studyDescription={this.props.studyDescription}
+                      seriesDescription={row.original.seriesDescription}
                     />
                   </div>
                 );

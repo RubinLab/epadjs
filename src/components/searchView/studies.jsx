@@ -6,6 +6,7 @@ import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import { getStudies } from "../../services/studyServices";
 import { getSeries } from "../../services/seriesServices";
+import ProjectModal from "../annotationsList/selectSerieModal";
 
 import Series from "./series";
 import {
@@ -13,7 +14,10 @@ import {
   getSingleSerie,
   getAnnotationListData,
   selectStudy,
-  clearSelection
+  clearSelection,
+  startLoading,
+  loadCompleted,
+  annotationsLoadingError
 } from "../annotationsList/action";
 //import "react-table/react-table.css";
 
@@ -52,8 +56,8 @@ class Studies extends Component {
       selection: [],
       selectAll: false,
       selectType: "checkbox",
-      expanded: {}
-      // selectedStudy: {}
+      expanded: {},
+      selectedStudy: {}
     };
   }
 
@@ -289,6 +293,7 @@ class Studies extends Component {
   };
 
   getSeriesData = async selected => {
+    this.props.dispatch(startLoading());
     const { projectID, patientID, studyUID } = selected;
     try {
       const {
@@ -296,14 +301,17 @@ class Studies extends Component {
           ResultSet: { Result: series }
         }
       } = await getSeries(projectID, patientID, studyUID);
+      // console.log("series from func");
+      // console.log(series);
+      this.props.dispatch(loadCompleted());
       return series;
     } catch (err) {
-      console.log(err);
+      this.props.dispatch(annotationsLoadingError(err));
     }
   };
 
   displaySeries = async selected => {
-    console.log(selected);
+    console.log(this.state);
     const { projectID, patientID, studyUID } = selected;
     // let total;
     //check if the patient already exist
@@ -315,16 +323,7 @@ class Studies extends Component {
       );
       //if there is not enough room bring modal
       // total = extractedStudy.length + this.props.openSeries.length;
-      console.log(
-        "total",
-        extractedStudy.length + this.props.openSeries.length
-      );
       if (extractedStudy.length + this.props.openSeries.length > 6) {
-        if (this.props.loading) {
-          setTimeout(function() {
-            //do what you need here
-          }, 1000);
-        }
         await this.props.dispatch(selectStudy(selected));
         this.props.dispatch(openProjectSelectionModal());
         //add the project to the selected studies
@@ -338,18 +337,11 @@ class Studies extends Component {
       //if patient is not there make the control
       //if not enough room bring the modal
       // total = selected.numberOfSeries + this.props.openSeries.length;
-      console.log(
-        "total",
-        selected.numberOfSeries + this.props.openSeries.length
-      );
 
       if (selected.numberOfSeries + this.props.openSeries.length > 6) {
-        if (this.props.loading) {
-          setTimeout(function() {
-            //do what you need here
-          }, 1000);
-        }
         await this.props.dispatch(selectStudy(selected));
+        const seriesList = await this.getSeriesData(selected);
+        this.setState({ selectedStudy: { [selected.studyUID]: seriesList } });
         this.props.dispatch(openProjectSelectionModal());
         //add the project to the selected studies
       } else {
@@ -358,7 +350,6 @@ class Studies extends Component {
         if (Array.isArray(result) && result.length > 0) {
           await this.props.dispatch(await getAnnotationListData(result[0]));
           for (let i = 1; i < result.length; i++) {
-            console.log("inside the loop", result[i]);
             await this.props.dispatch(getSingleSerie(result[i]));
           }
         }
@@ -387,6 +378,7 @@ class Studies extends Component {
       onExpandedChange
     };
     const TheadComponent = props => null;
+    console.log("state serie", this.state.selectedStudy);
     return (
       <div>
         {this.state.data ? (
@@ -403,7 +395,6 @@ class Studies extends Component {
             getTdProps={(state, rowInfo, column) => ({
               onDoubleClick: e => {
                 this.displaySeries(rowInfo.original);
-                console.log(rowInfo.original);
               }
             })}
             SubComponent={row => {
@@ -413,12 +404,16 @@ class Studies extends Component {
                     projectId={this.props.projectId}
                     subjectId={this.props.subjectId}
                     studyId={row.original.studyUID}
+                    studyDescription={row.original.studyDescription}
                   />
                 </div>
               );
             }}
           />
         ) : null}
+        {this.props.showProjectModal && !this.props.loading && (
+          <ProjectModal seriesPassed={this.state.selectedStudy} />
+        )}
       </div>
     );
   }
@@ -429,7 +424,8 @@ const mapStateToProps = state => {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     loading: state.annotationsListReducer.loading,
-    selectedStudies: state.annotationsListReducer.selectedStudies
+    selectedStudies: state.annotationsListReducer.selectedStudies,
+    showProjectModal: state.annotationsListReducer.showProjectModal
   };
 };
 export default connect(mapStateToProps)(Studies);

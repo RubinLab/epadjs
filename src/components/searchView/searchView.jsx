@@ -2,15 +2,101 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Subjects from "./subjects";
 import Toolbar from "./toolbar";
+import ProjectModal from "../annotationsList/selectSerieModal";
 import { downloadProjects } from "../../services/projectServices";
 import { downloadSubjects } from "../../services/subjectServices";
 import { downloadStudies } from "../../services/studyServices";
-import { downloadSeries } from "../../services/seriesServices";
+import { downloadSeries, getSeries } from "../../services/seriesServices";
+import {
+  openProjectSelectionModal,
+  startLoading,
+  loadCompleted,
+  annotationsLoadingError
+} from "../annotationsList/action";
 
 import "./searchView.css";
 
 class SearchView extends Component {
-  state = {};
+  constructor(props) {
+    super(props);
+    this.state = { seriesList: {} };
+  }
+
+  viewSelection = async () => {
+    const selectedStudies = Object.values(this.props.selectedStudies);
+    const selectedSeries = Object.values(this.props.selectedSeries);
+    let selectedAnnotations = Object.values(this.props.selectedAnnotations);
+    const groupedAnns = this.groupUnderSerie(selectedAnnotations);
+    const serieCountOfAnns = Object.values(groupedAnns).length;
+    console.log("grouped anns");
+    //check if enough room to display selection
+    if (selectedStudies.length > 0) {
+      let total = 0;
+      let studiesObj = {};
+      for (let st of selectedStudies) {
+        total += st.numberOfSeries;
+      }
+      //if more than 6 bring serie selection modal
+      if (total + this.props.openSeries.length > 6) {
+        this.props.dispatch(startLoading());
+        for (let st of selectedStudies) {
+          studiesObj[st.studyUID] = await this.getSeriesData(st);
+        }
+        await this.setState({ seriesList: studiesObj });
+        this.props.dispatch(loadCompleted());
+        this.props.dispatch(openProjectSelectionModal());
+      } else {
+        //her bir studynin altindaki serieler icin single serie cagit
+        //eger patient listte yoksa onu da cagir
+      }
+    } else if (selectedSeries.length > 0) {
+      //if more than 6 bring option
+      if (selectedSeries.length + this.props.openSeries.length > 6) {
+        let groupedObj = this.groupUnderStudy(selectedSeries);
+        await this.setState({ seriesList: groupedObj });
+        this.props.dispatch(openProjectSelectionModal());
+      } else {
+        //serieler icin single serie cagit
+        //eger patient listte yoksa onu da cagir
+      }
+    } else if (selectedAnnotations.length > 0) {
+      if (serieCountOfAnns + this.props.openSeries.length > 6) {
+        console.log("passed the limit in annotations");
+        console.log(groupedAnns);
+        console.log(selectedAnnotations);
+
+        // await this.setState({ seriesList: groupedObj });
+        // this.props.dispatch(openProjectSelectionModal());
+      } else {
+        //serieler icin single serie cagit
+        //eger patient listte yoksa onu da cagir
+      }
+    }
+  };
+
+  groupUnderStudy = objArr => {
+    let groupedObj = {};
+    for (let serie of objArr) {
+      if (groupedObj[serie.studyUID]) {
+        groupedObj[serie.studyUID].push(serie);
+      } else {
+        groupedObj[serie.studyUID] = [serie];
+      }
+    }
+    return groupedObj;
+  };
+
+  groupUnderSerie = objArr => {
+    let groupedObj = {};
+    for (let ann of objArr) {
+      if (groupedObj[ann.seriesUID]) {
+        groupedObj[ann.seriesUID].push(ann);
+      } else {
+        groupedObj[ann.seriesUID] = [ann];
+      }
+    }
+    return groupedObj;
+  };
 
   downloadSelection = async () => {
     const selectedProjects = Object.values(this.props.selectedProjects);
@@ -41,6 +127,22 @@ class SearchView extends Component {
     }
   };
 
+  getSeriesData = async selected => {
+    const { projectID, patientID, studyUID } = selected;
+    try {
+      const {
+        data: {
+          ResultSet: { Result: series }
+        }
+      } = await getSeries(projectID, patientID, studyUID);
+      // console.log("series from func");
+      // console.log(series);
+      return series;
+    } catch (err) {
+      this.props.dispatch(annotationsLoadingError(err));
+    }
+  };
+
   downLoadHelper = (downLoadfunction, arg, fileName) => {
     downLoadfunction(arg).then(result => {
       let blob = new Blob([result.data], { type: "application/zip" });
@@ -62,7 +164,13 @@ class SearchView extends Component {
   render() {
     return (
       <>
-        <Toolbar onDownload={this.downloadSelection} />
+        <Toolbar
+          onDownload={this.downloadSelection}
+          onView={this.viewSelection}
+        />
+        {this.props.showProjectModal && !this.props.loading && (
+          <ProjectModal seriesPassed={this.state.seriesList} />
+        )}
         <Subjects
           key={this.props.match.params.pid}
           pid={this.props.match.params.pid}
@@ -77,7 +185,12 @@ const mapStateToProps = state => {
     selectedProjects: state.annotationsListReducer.selectedProjects,
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
-    selectedSeries: state.annotationsListReducer.selectedSeries
+    selectedSeries: state.annotationsListReducer.selectedSeries,
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+
+    openSeries: state.annotationsListReducer.openSeries,
+    showProjectModal: state.annotationsListReducer.showProjectModal,
+    loading: state.annotationsListReducer.loading
   };
 };
 export default connect(mapStateToProps)(SearchView);

@@ -19,6 +19,8 @@ import {
   SELECT_PATIENT,
   GET_PATIENT,
   SELECT_ANNOTATION,
+  LOAD_COMPLETED,
+  START_LOADING,
   DISPLAY_SINGLE_AIM
 } from "./types";
 
@@ -75,22 +77,25 @@ const asyncReducer = (state = initialState, action) => {
       const stID = action.payload.ref.studyUID;
       const srID = action.payload.ref.seriesUID;
       const { ann } = action.payload;
-      let changedPatient = Object.assign({}, state.patients[ptID]);
+      let changedPatients;
+      if (state.patients[ptID]) {
+        let changedPatient = Object.assign({}, state.patients[ptID]);
 
-      if (ann) {
-        changedPatient.studies[stID].series[srID].annotations[
-          ann
-        ].isDisplayed = true;
-      } else {
-        changedPatient.studies[stID].series[srID].displayAnns = true;
-        for (let annotation in changedPatient.studies[stID].series[srID]
-          .annotations) {
+        if (ann) {
           changedPatient.studies[stID].series[srID].annotations[
-            annotation
+            ann
           ].isDisplayed = true;
+        } else {
+          changedPatient.studies[stID].series[srID].displayAnns = true;
+          for (let annotation in changedPatient.studies[stID].series[srID]
+            .annotations) {
+            changedPatient.studies[stID].series[srID].annotations[
+              annotation
+            ].isDisplayed = true;
+          }
         }
+        changedPatients = { ...state.patients, [ptID]: changedPatient };
       }
-      const changedPatients = { ...state.patients, [ptID]: changedPatient };
       const result = Object.assign({}, state, {
         loading: false,
         error: false,
@@ -99,11 +104,12 @@ const asyncReducer = (state = initialState, action) => {
           ...state.aimsList,
           [action.payload.serID]: action.payload.aimsData
         },
-        openSeries: state.openSeries.concat([action.payload.ref]),
-        patients: changedPatients
+        openSeries: state.openSeries.concat([action.payload.ref])
+        // patients: changedPatients
       });
-
-      return result;
+      return !changedPatients
+        ? result
+        : { ...result, patients: changedPatients };
     case LOAD_ANNOTATIONS_ERROR:
       return Object.assign({}, state, {
         loading: false,
@@ -264,6 +270,12 @@ const asyncReducer = (state = initialState, action) => {
         ? delete newStudies[action.study.studyUID]
         : (newStudies[action.study.studyUID] = action.study);
       return { ...state, selectedStudies: newStudies };
+    case LOAD_COMPLETED:
+      console.log("completed reducer");
+      return { ...state, loading: false };
+    case START_LOADING:
+      console.log("start reducer");
+      return { ...state, loading: true };
     case SELECT_SERIE:
       let newSeries = {
         ...state.selectedSeries
@@ -284,7 +296,12 @@ const asyncReducer = (state = initialState, action) => {
     case GET_PATIENT:
       let addedNewPatient = { ...state.patients };
       addedNewPatient[action.patient.patientID] = action.patient;
-      return { ...state, patients: addedNewPatient };
+      return {
+        ...state,
+        patients: addedNewPatient,
+        loading: false,
+        error: false
+      };
     case DISPLAY_SINGLE_AIM:
       let aimPatient = { ...state.patients[action.payload.patientID] };
       let aimOpenSeries = [...state.openSeries];
