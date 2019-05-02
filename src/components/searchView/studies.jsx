@@ -1,9 +1,20 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import ReactTable from "react-table";
+import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf } from "react-icons/fa";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import { getStudies } from "../../services/studyServices";
+import { getSeries } from "../../services/seriesServices";
+
 import Series from "./series";
+import {
+  openProjectSelectionModal,
+  getSingleSerie,
+  getAnnotationListData,
+  selectStudy,
+  clearSelection
+} from "../annotationsList/action";
 //import "react-table/react-table.css";
 
 function getNodes(data, node = []) {
@@ -17,7 +28,20 @@ function getNodes(data, node = []) {
   return node;
 }
 
-const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+const progressDisplay = status => {
+  if (status === "STUDY_STATUS_COMPLETED") {
+    return <FaBatteryFull className="progress-done" />;
+  } else if (status === "STUDY_STATUS_NOT_STARTED") {
+    return <FaBatteryEmpty className="progress-notStarted" />;
+  } else if (status === "STUDY_STATUS_IN_PROGRESS") {
+    return <FaBatteryHalf className="progress-inProgress" />;
+  } else {
+    return <div>{status}</div>;
+  }
+};
+// const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+
+const TreeTable = treeTableHOC(ReactTable);
 
 class Studies extends Component {
   constructor(props) {
@@ -29,6 +53,7 @@ class Studies extends Component {
       selectAll: false,
       selectType: "checkbox",
       expanded: {}
+      // selectedStudy: {}
     };
   }
 
@@ -42,8 +67,36 @@ class Studies extends Component {
     this.setState({ columns: this.setColumns() });
   }
 
+  selectRow = selected => {
+    // const { studyUID, numberOfSeries, patientID, projectID } = selected;
+    // const studyObj = { studyUID, numberOfSeries, patientID, projectID };
+    // const newState = { ...this.state.selectedStudy };
+    // newState[studyUID]
+    //   ? delete newState[studyUID]
+    //   : (newState[studyUID] = studyObj);
+    // this.setState({ selectedStudy: newState });
+    console.log(selected);
+    this.props.dispatch(clearSelection("study"));
+    this.props.dispatch(selectStudy(selected));
+  };
+
   setColumns() {
     const columns = [
+      {
+        id: "checkbox",
+        accessor: "",
+        width: 30,
+        Cell: ({ original }) => {
+          return (
+            <input
+              type="checkbox"
+              className="checkbox-cell"
+              checked={this.props.selectedStudies[original.studyUID] || false}
+              onChange={() => this.selectRow(original)}
+            />
+          );
+        }
+      },
       {
         /*Header: (
           <div>
@@ -53,7 +106,7 @@ class Studies extends Component {
         ),*/
         Cell: row => (
           <div>
-            {row.original.studyDescription} &nbsp;
+            {row.original.studyDescription || "Unnamed Study"} &nbsp;
             {row.original.numberOfAnnotations === "" ? (
               "merru"
             ) : (
@@ -98,6 +151,12 @@ class Studies extends Component {
       {
         //Header: "Type",
         Cell: row => row.original.examTypes.join("/")
+      },
+      {
+        //Header: "Ready",
+        Cell: row => (
+          <div>{progressDisplay(row.original.studyProcessingStatus)}</div>
+        )
       },
       {
         //Header: "Study/Created Date",
@@ -212,6 +271,101 @@ class Studies extends Component {
     this.setState({ expanded });
   };
 
+  excludeOpenSeries = allSeriesArr => {
+    const result = [];
+    //get all series number in an array
+    const idArr = this.props.openSeries.reduce((all, item, index) => {
+      all.push(item.seriesUID);
+      return all;
+    }, []);
+    //if array doesnot include that serie number
+    allSeriesArr.forEach(serie => {
+      if (!idArr.includes(serie.seriesUID)) {
+        //push that serie in the result arr
+        result.push(serie);
+      }
+    });
+    return result;
+  };
+
+  getSeriesData = async selected => {
+    const { projectID, patientID, studyUID } = selected;
+    try {
+      const {
+        data: {
+          ResultSet: { Result: series }
+        }
+      } = await getSeries(projectID, patientID, studyUID);
+      return series;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  displaySeries = async selected => {
+    console.log(selected);
+    const { projectID, patientID, studyUID } = selected;
+    // let total;
+    //check if the patient already exist
+    //if patient exists extract the open series and control the grid for enough room
+    if (this.props.patients[patientID]) {
+      const study = this.props.patients[patientID].studies[studyUID];
+      const extractedStudy = this.excludeOpenSeries(
+        Object.values(study.series)
+      );
+      //if there is not enough room bring modal
+      // total = extractedStudy.length + this.props.openSeries.length;
+      console.log(
+        "total",
+        extractedStudy.length + this.props.openSeries.length
+      );
+      if (extractedStudy.length + this.props.openSeries.length > 6) {
+        if (this.props.loading) {
+          setTimeout(function() {
+            //do what you need here
+          }, 1000);
+        }
+        await this.props.dispatch(selectStudy(selected));
+        this.props.dispatch(openProjectSelectionModal());
+        //add the project to the selected studies
+        // if there is enough room iterate over the extracted array and call getsingleserie
+      } else {
+        extractedStudy.forEach(serie => {
+          this.props.dispatch(getSingleSerie({ ...serie, projectID }));
+        });
+      }
+    } else {
+      //if patient is not there make the control
+      //if not enough room bring the modal
+      // total = selected.numberOfSeries + this.props.openSeries.length;
+      console.log(
+        "total",
+        selected.numberOfSeries + this.props.openSeries.length
+      );
+
+      if (selected.numberOfSeries + this.props.openSeries.length > 6) {
+        if (this.props.loading) {
+          setTimeout(function() {
+            //do what you need here
+          }, 1000);
+        }
+        await this.props.dispatch(selectStudy(selected));
+        this.props.dispatch(openProjectSelectionModal());
+        //add the project to the selected studies
+      } else {
+        //if enough room bring all series
+        const result = await this.getSeriesData(selected);
+        if (Array.isArray(result) && result.length > 0) {
+          await this.props.dispatch(await getAnnotationListData(result[0]));
+          for (let i = 1; i < result.length; i++) {
+            console.log("inside the loop", result[i]);
+            await this.props.dispatch(getSingleSerie(result[i]));
+          }
+        }
+      }
+    }
+  };
+
   render() {
     const {
       toggleSelection,
@@ -232,10 +386,11 @@ class Studies extends Component {
       expanded,
       onExpandedChange
     };
+    const TheadComponent = props => null;
     return (
       <div>
         {this.state.data ? (
-          <SelectTreeTable
+          <TreeTable
             data={this.state.data}
             columns={this.state.columns}
             defaultPageSize={this.state.data.length}
@@ -243,9 +398,13 @@ class Studies extends Component {
             className="-striped -highlight"
             freezWhenExpanded={false}
             showPagination={false}
+            TheadComponent={TheadComponent}
             {...extraProps}
             getTdProps={(state, rowInfo, column) => ({
-              onDoubleClick: e => console.log("A row was clicked!", rowInfo)
+              onDoubleClick: e => {
+                this.displaySeries(rowInfo.original);
+                console.log(rowInfo.original);
+              }
             })}
             SubComponent={row => {
               return (
@@ -265,4 +424,12 @@ class Studies extends Component {
   }
 }
 
-export default Studies;
+const mapStateToProps = state => {
+  return {
+    openSeries: state.annotationsListReducer.openSeries,
+    patients: state.annotationsListReducer.patients,
+    loading: state.annotationsListReducer.loading,
+    selectedStudies: state.annotationsListReducer.selectedStudies
+  };
+};
+export default connect(mapStateToProps)(Studies);

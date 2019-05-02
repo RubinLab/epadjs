@@ -1,12 +1,23 @@
 import React, { Component } from "react";
-import { getAnnotations } from "../../services/annotationServices";
+import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
+
 import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
+import { getAnnotations } from "../../services/annotationServices";
+import {
+  displaySingleAim,
+  alertViewPortFull,
+  getSingleSerie,
+  getAnnotationListData,
+  clearSelection,
+  selectAnnotation
+} from "../annotationsList/action";
 import "react-table/react-table.css";
 
-const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
-
+// const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+const TreeTable = treeTableHOC(ReactTable);
 function getNodes(data, node = []) {
   data.forEach(item => {
     if (item.hasOwnProperty("_subRows") && item._subRows) {
@@ -42,11 +53,32 @@ class Annotations extends Component {
     this.setState({ columns: this.setColumns() });
   }
 
+  selectRow = selected => {
+    console.log(selected);
+    this.props.dispatch(clearSelection("annotation"));
+    this.props.dispatch(selectAnnotation(selected));
+  };
+
   setColumns() {
     const columns = [
       {
+        id: "checkbox",
+        accessor: "",
+        width: 30,
+        Cell: ({ original }) => {
+          return (
+            <input
+              type="checkbox"
+              className="checkbox-cell"
+              checked={this.props.selectedAnnotations[original.aimID] || false}
+              onChange={() => this.selectRow(original)}
+            />
+          );
+        }
+      },
+      {
         Header: "Annotation Name",
-        Cell: row => <div>{row.original.name}</div>
+        Cell: row => <div>{row.original.name || "Unnamed annotation"}</div>
       },
       {
         Header: "Type",
@@ -157,6 +189,42 @@ class Annotations extends Component {
     this.setState({ expanded });
   };
 
+  dispatchAnnDisplay = selected => {
+    const { projectID, studyUID, seriesUID, aimID } = selected;
+    const patientID = selected.originalSubjectID;
+    const openSeries = Object.values(this.props.openSeries);
+    const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
+    let isSerieOpen = false;
+    //check if there is enough space in the grid
+    let isGridFull = openSeries.length === 6;
+    //check if the serie is already open
+    if (openSeries.length > 0) {
+      for (let i = 0; i < openSeries.length; i++) {
+        // for (let serie of openSeries) {
+        if (openSeries[i].seriesUID === seriesUID) {
+          isSerieOpen = true;
+          break;
+        }
+      }
+    }
+    if (isSerieOpen) {
+      this.props.dispatch(
+        displaySingleAim(patientID, studyUID, seriesUID, aimID)
+      );
+    } else {
+      if (isGridFull) {
+        this.props.dispatch(alertViewPortFull());
+      } else {
+        if (this.props.patients[patientID]) {
+          this.props.dispatch(getSingleSerie(serieObj, aimID));
+          //if patient doesn't exist dispatch to get data
+        } else {
+          this.props.dispatch(getAnnotationListData(serieObj, null, aimID));
+        }
+      }
+    }
+  };
+
   render() {
     const {
       toggleSelection,
@@ -177,10 +245,11 @@ class Annotations extends Component {
       expanded,
       onExpandedChange
     };
+    const TheadComponent = props => null;
     return (
-      <div>
+      <div style={{ paddingLeft: "35px" }}>
         {this.state.data ? (
-          <SelectTreeTable
+          <TreeTable
             data={this.state.data}
             columns={this.state.columns}
             defaultPageSize={this.state.data.length}
@@ -188,7 +257,15 @@ class Annotations extends Component {
             className="-striped -highlight"
             freezWhenExpanded={false}
             showPagination={false}
+            TheadComponent={TheadComponent}
             {...extraProps}
+            getTdProps={(state, rowInfo, column, instance) => {
+              return {
+                onDoubleClick: (e, handleOriginal) => {
+                  this.dispatchAnnDisplay(rowInfo.original);
+                }
+              };
+            }}
           />
         ) : null}
       </div>
@@ -196,4 +273,14 @@ class Annotations extends Component {
   }
 }
 
-export default Annotations;
+const mapStateToProps = state => {
+  return {
+    series: state.searchViewReducer.series,
+    openSeries: state.annotationsListReducer.openSeries,
+    patients: state.annotationsListReducer.patients,
+    activePort: state.annotationsListReducer.activePort,
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+  };
+};
+
+export default withRouter(connect(mapStateToProps)(Annotations));

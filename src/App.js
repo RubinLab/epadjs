@@ -17,6 +17,8 @@ import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
 import AnnotationList from "./components/annotationsList";
 import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
+import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
+import ProjectModal from "./components/annotationsList/selectSerieModal";
 
 import { isLite } from "./config.json";
 
@@ -25,6 +27,7 @@ import { isLite } from "./config.json";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
+import selectSerieModal from "./components/annotationsList/selectSerieModal";
 
 class App extends Component {
   state = {
@@ -63,6 +66,7 @@ class App extends Component {
   };
 
   render() {
+    console.log();
     return (
       <React.Fragment>
         <Cornerstone />
@@ -104,15 +108,21 @@ class App extends Component {
         )}
         {this.props.listOpen && <AnnotationList />}
         {this.props.dockOpen && <AnnotationsDock />}
+        {this.props.showGridFullAlert && <MaxViewAlert />}
+        {this.props.showProjectModal && <ProjectModal />}
       </React.Fragment>
     );
   }
 }
 
 const mapStateToProps = state => {
-  return {
-    listOpen: state.annotationsListReducer.listOpen,
-    dockOpen: state.annotationsListReducer.dockOpen
-  };
+  console.log("state in app.js", state.annotationsListReducer);
+  const {
+    listOpen,
+    dockOpen,
+    showGridFullAlert,
+    showProjectModal
+  } = state.annotationsListReducer;
+  return { listOpen, dockOpen, showGridFullAlert, showProjectModal };
 };
 export default withRouter(connect(mapStateToProps)(App));

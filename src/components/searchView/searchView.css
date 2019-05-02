@@ -1,0 +1,29 @@
+.searchView-toolbar {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: row;
+}
+
+.searchView-toolbar__icon {
+  margin-right: 1rem;
+  cursor: pointer;
+}
+
+.searchView-checkbox {
+  width: 2rem;
+}
+
+.progress-done {
+  font-size: 1.5rem;
+  color: green;
+}
+
+.progress-notStarted {
+  font-size: 1.5rem;
+  color: red;
+}
+
+.progress-inProgress {
+  font-size: 1.5rem;
+  color: yellow;
+}
