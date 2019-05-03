@@ -10,7 +10,9 @@ import {
   FaListAlt,
   FaRegFolderOpen,
   FaRulerHorizontal,
-  FaScrewdriver
+  FaScrewdriver,
+  FaPlayCircle,
+  FaStopCircle
 } from "react-icons/fa";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { MdLoop, MdPanTool } from "react-icons/md";
@@ -29,8 +31,8 @@ import "../../font-icons/styles.css";
 
 const mapStateToProps = state => {
   return {
-    cornerstone: state.searchViewReducer.cornerstone,
-    cornerstoneTools: state.searchViewReducer.cornerstoneTools,
+    // cornerstone: state.searchViewReducer.cornerstone,
+    // cornerstoneTools: state.searchViewReducer.cornerstoneTools,
     activeVP: state.searchViewReducer.activeVP
   };
 };
@@ -68,23 +70,24 @@ const tools = [
 ];
 
 class Toolbar extends Component {
-  state = { activeTool: "", showDrawing: false };
+  state = { activeTool: "", showDrawing: false, playing: false };
 
   //Tools are initialized in viewport.jsx since they are activated on elements. I don't really like this logic, we shall think of a better way.
 
   constructor(props) {
     super(props);
     this.tools = tools;
-    this.csTools = this.props.cornerstoneTools;
+    this.cornerstone = this.props.cornerstone;
+    this.cornerstoneTools = this.props.cornerstoneTools;
   }
 
   //TODO: instead of disabling all tools we can just disable the active tool
 
   disableAllTools = () => {
     Array.from(this.tools).forEach(tool => {
-      const apiTool = this.csTools[`${tool.name}Tool`];
+      const apiTool = this.cornerstoneTools[`${tool.name}Tool`];
       if (apiTool) {
-        this.csTools.setToolPassive(tool.name);
+        this.cornerstoneTools.setToolPassive(tool.name);
       } else {
         throw new Error(`Tool not found: ${tool.name}Tool`);
       }
@@ -94,16 +97,19 @@ class Toolbar extends Component {
   //sets the selected tool active for all of the enabled elements
   setToolActive = (toolName, mouseMask = 1) => {
     this.disableAllTools();
-    this.csTools.setToolActive(toolName, {
+    console.log(this.cornerstone.getEnabledElements());
+    console.log(`Before setting ${toolName} active `, this.cornerstoneTools);
+    this.cornerstoneTools.setToolActive(toolName, {
       mouseButtonMask: mouseMask
     });
+    console.log(`After setting ${toolName} active `, this.cornerstoneTools);
   };
 
   //sets the selected tool active for an enabled elements
   setToolActiveForElement = (toolName, mouseMask = 1) => {
     const element = document.getElementById(this.props.activeVP);
     this.disableAllTools();
-    this.csTools.setToolActiveForElement(element, toolName, {
+    this.cornerstoneTools.setToolActiveForElement(element, toolName, {
       mouseButtonMask: mouseMask
     });
     this.setState({ showDrawing: false });
@@ -169,7 +175,7 @@ class Toolbar extends Component {
     this.disableAllTools();
     const elements = document.getElementsByClassName("cs");
     for (var i = 0; i < elements.length; i++) {
-      this.props.cornerstoneTools.probe.activate(elements[i], 1);
+      this.cornerstoneTools.probe.activate(elements[i], 1);
     }
   };
 
@@ -182,7 +188,7 @@ class Toolbar extends Component {
     //   ]
     // );
     this.dxm = {
-      ...this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState()
+      ...this.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState()
     };
     // console.log(this.dxm);
   };
@@ -198,9 +204,9 @@ class Toolbar extends Component {
     //var appState = this.props.cornerstoneTools.getToolState(element);
     //var serializedState = JSON.stringify(appState);
     //var parsed = JSON.parse(appState);
-    console.log(this.props.cornerstoneTools.state);
+    console.log(this.cornerstoneTools.state);
     console.log(this.dxm);
-    this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+    this.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       this.dxm
     );
   };
@@ -210,17 +216,22 @@ class Toolbar extends Component {
     console.log("state of drawing:" + this.state.showDrawing);
     this.disableAllTools();
     const element = document.getElementById(this.props.activeVP);
-    this.props.cornerstoneTools.length.activate(element, 1);
+    this.cornerstoneTools.length.activate(element, 1);
 
     element.style.cursor = "crosshair";
   };
 
   erase = () => {
     const elem = document.getElementById(this.props.activeVP);
-    this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.clear(
-      elem
-    );
-    console.log(this.props.cornerstoneTools);
+    this.cornerstoneTools.globalImageIdSpecificToolStateManager.clear(elem);
+    console.log(this.cornerstoneTools);
+  };
+
+  handleClip = () => {
+    const elem = document.getElementsByClassName("viewport-element");
+    if (!this.state.playing) this.cornerstoneTools.playClip(elem[0], 40);
+    else this.cornerstoneTools.stopClip(elem[0]);
+    this.setState({ playing: !this.state.playing });
   };
 
   render() {
@@ -378,8 +389,8 @@ class Toolbar extends Component {
           </div>
         </div>*/}
         <div
-          id="drawing"
-          tabIndex="12"
+          id="palyClip"
+          tabIndex="10"
           className="toolbarSectionButton"
           onClick={this.anotate}
         >
@@ -391,7 +402,24 @@ class Toolbar extends Component {
           </div>
         </div>
         <div
-          tabIndex="13"
+          id="drawing"
+          tabIndex="11"
+          className="toolbarSectionButton"
+          onClick={this.handleClip}
+        >
+          <div className="toolContainer">
+            {(!this.state.playing && <FaPlayCircle />) ||
+              (this.state.playing && <FaStopCircle />)}
+          </div>
+          <div className="buttonLabel">
+            <span>
+              {(!this.state.playing && "Play") ||
+                (this.state.playing && "Stop")}
+            </span>
+          </div>
+        </div>
+        <div
+          tabIndex="12"
           className="toolbarSectionButton"
           onClick={this.handlePatientClick}
         >
@@ -403,7 +431,7 @@ class Toolbar extends Component {
           </div>
         </div>
         <div
-          tabIndex="14"
+          tabIndex="13"
           className="toolbarSectionButton"
           onClick={this.handleAnnotationsDockClick}
         >
@@ -425,7 +453,7 @@ class Toolbar extends Component {
                 id="point"
                 tabIndex="1"
                 className="drawingSectionButton"
-                onClick={this.setToolActive("Probe")}
+                onClick={() => this.setToolActive("Probe")}
               >
                 <div className="icon-point fontastic-icons" />
                 <div className="buttonLabel">
@@ -436,7 +464,7 @@ class Toolbar extends Component {
                 id="line"
                 tabIndex="2"
                 className="drawingSectionButton"
-                onClick={() => this.setToolActiveForElement("Length")}
+                onClick={() => this.setToolActiveForElement("LengthTool")}
               >
                 <div className="toolContainer">
                   <FaRulerHorizontal />

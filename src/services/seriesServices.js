@@ -16,10 +16,6 @@ export function getSeries(projectId, subjectId, studyId) {
 export function getImageIds(series) {
   return http.get(
     apiUrl +
-      "/projects/" +
-      series.projectId +
-      "/subjects/" +
-      series.subjectId +
       "/studies/" +
       series.studyId +
       "/series/" +

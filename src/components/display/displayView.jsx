@@ -12,11 +12,54 @@ import "./flex.css";
 import { FiZoomIn } from "react-icons/fi";
 import { TiScissors } from "react-icons/ti";
 
+const tools = [
+  { name: "Wwwc", mouseButtonMasks: [1] },
+  { name: "Pan", mouseButtonMasks: [1, 4] },
+  {
+    name: "Zoom",
+    configuration: {
+      minScale: 0.3,
+      maxScale: 25,
+      preventZoomOutsideImage: true
+    },
+    mouseButtonMasks: [1, 2]
+  },
+  { name: "Probe" },
+  { name: "Length" },
+  {
+    name: "EllipticalRoi",
+    configuration: {
+      showMinMax: true
+    }
+  },
+  {
+    name: "RectangleRoi",
+    configuration: {
+      showMinMax: true
+    }
+  },
+  { name: "Angle" },
+  { name: "Rotate" },
+  { name: "WwwcRegion" },
+  { name: "Probe" },
+  { name: "FreehandMouse" },
+  { name: "Eraser" },
+  { name: "Bidirectional" },
+  { name: "Brush" },
+  { name: "FreehandSculpterMouse" },
+  { name: "StackScroll", mouseButtonMasks: [1] },
+  { name: "PanMultiTouch" },
+  { name: "ZoomTouchPinch" },
+  { name: "StackScrollMouseWheel" },
+  { name: "StackScrollMultiTouch" }
+];
+
 const mapStateToProps = state => {
   return {
     series: state.searchViewReducer.series,
     cornerstone: state.searchViewReducer.cornerstone,
-    cornerstoneTools: state.searchViewReducer.cornerstoneTools
+    cornerstoneTools: state.searchViewReducer.cornerstoneTools,
+    activePort: state.annotationsListReducer.activePort
     //refs: state.searchViewReducer.viewports
   };
 };
@@ -28,6 +71,7 @@ class DisplayView extends Component {
     this.child = React.createRef();
     this.state = {
       series: props.series,
+      activePort: props.activePort,
       width: "100%",
       height: "calc(100% - 60px)",
       refs: props.refs,
@@ -41,6 +85,7 @@ class DisplayView extends Component {
 
   componentDidMount() {
     //document.body.classList.add("fixed-page");
+    console.log("active ", this.props.activePort);
     this.getViewports();
     this.getData();
     const vpList = document.getElementsByClassName("cs");
@@ -77,12 +122,10 @@ class DisplayView extends Component {
   getData() {
     var promises = [];
     for (let i = 0; i < this.state.series.length; i++) {
-      console.log("serie", this.state.series[i]);
       const promise = this.getImages(this.state.series[i]);
       promises.push(promise);
     }
     Promise.all(promises).then(res => {
-      console.log(res);
       this.setState({ isLoading: false });
     });
   }
@@ -112,7 +155,6 @@ class DisplayView extends Component {
     });
     stack.currentImageIdIndex = 0;
     stack.imageIds = [...tempArray];
-    console.log(JSON.stringify(stack));
     this.setState({
       data: [...this.state.data, { stack }]
     });
@@ -174,24 +216,32 @@ class DisplayView extends Component {
     this.props.cornerstone.fitToWindow(elem);*/
   };
 
+  whenSet() {
+    this.props.isActive = true;
+  }
+
   render() {
     return (
       <React.Fragment>
-        <Toolbar />
+        <Toolbar
+          cornerstone={this.props.cornerstone}
+          cornerstoneTools={this.props.cornerstoneTools}
+        />
 
-        {this.state.series.map((serie, i) => (
-          <div
-            className={"viewportContainer"}
-            key={i}
-            style={{
-              width: this.state.width,
-              height: this.state.height,
-              padding: "2px",
-              display: "inline-block"
-            }}
-            onDoubleClick={() => this.hideShow(i)}
-          >
-            {/* <ViewportSeg
+        {!this.state.isLoading &&
+          this.state.series.map((serie, i) => (
+            <div
+              className={"viewportContainer"}
+              key={i}
+              style={{
+                width: this.state.width,
+                height: this.state.height,
+                padding: "2px",
+                display: "inline-block"
+              }}
+              onDoubleClick={() => this.hideShow(i)}
+            >
+              {/* <ViewportSeg
               key={serie.seriesId}
               id={"viewport" + i}
               cs={this.props.cornerstone}
@@ -199,15 +249,17 @@ class DisplayView extends Component {
               setClick={click => (this.updateViewport = click)}
               serie={serie}
             />*/}
-            {!this.state.isLoading && (
+
               <CornerstoneViewport
                 viewportData={this.state.data[i]}
                 cornerstone={this.props.cornerstone}
                 cornerstoneTools={this.props.cornerstoneTools}
+                viewportIndex={i}
+                availableTools={tools}
+                isActive={true}
               />
-            )}
-          </div>
-        ))}
+            </div>
+          ))}
         <div id="cont" />
       </React.Fragment>
     );
