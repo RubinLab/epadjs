@@ -2,10 +2,13 @@ import http from "./httpService";
 
 import { isLite, apiUrl } from "../config.json";
 
+
 export function getSeries(projectId, subjectId, studyId) {
   if (isLite)
     return http.get(
+
       apiUrl +
+
         "/projects/lite/subjects/" +
         subjectId +
         "/studies/" +
@@ -28,6 +31,7 @@ export function getImageIds(series) {
   if (isLite)
     return http.get(
       apiUrl +
+
         "/projects/lite/subjects/" +
         series.subjectId +
         "/studies/" +
@@ -55,13 +59,13 @@ export function downloadSeries(series) {
   const url =
     apiUrl +
     "/projects/" +
-    series.projectId +
+    series.projectID +
     "/subjects/" +
-    series.subjectId +
+    series.patientID +
     "/studies/" +
-    series.studyId +
+    series.studyUID +
     "/series/" +
-    series.seriesId +
-    "/images/";
+    series.seriesUID +
+    "?&format=stream&includeAims=true";
   return http.get(url, { responseType: "blob" });
 }

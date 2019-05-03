@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 import { FaCogs, FaCaretDown } from "react-icons/fa";
 import logo from "../images/logo.png";
 import { connect } from "react-redux";
+import { isLite } from "../config.json";
 
 const NavBar = ({ user, openGearMenu, loading }) => {
   return (
@@ -10,7 +11,7 @@ const NavBar = ({ user, openGearMenu, loading }) => {
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
         <Link className="navbar-brand-right nounderline pr-3 " to="#">
           <img src={logo} alt={"logo"} width="25px" />
-          ePAD
+          {isLite && "eLite"} {!isLite && "ePAD"}
         </Link>
         <button
           className="navbar-toggler"
@@ -36,26 +37,30 @@ const NavBar = ({ user, openGearMenu, loading }) => {
                 Display
               </NavLink>
             </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/anotate">
-                Anotate
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/progress">
-                Progress
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/tools">
-                Tools
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/edit">
-                Edit
-              </NavLink>
-            </li>{" "}
+            {!isLite && (
+              <React.Fragment>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/anotate">
+                    Anotate
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/progress">
+                    Progress
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/tools">
+                    Tools
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/edit">
+                    Edit
+                  </NavLink>
+                </li>{" "}
+              </React.Fragment>
+            )}
           </ul>
           <ul className="navbar-nav ml-auto">
             {!user && (
@@ -67,16 +72,18 @@ const NavBar = ({ user, openGearMenu, loading }) => {
             )}
             {user && (
               <React.Fragment>
-                <li className="nav-item pull-right">
-                  <div
-                    className="nav-link"
-                    style={{ cursor: "pointer" }}
-                    onClick={openGearMenu}
-                  >
-                    <FaCogs style={{ fontSize: "1.25rem" }} />
-                    <FaCaretDown style={{ fontSize: "1rem" }} />
-                  </div>
-                </li>
+                {!isLite && (
+                  <li className="nav-item pull-right">
+                    <div
+                      className="nav-link"
+                      style={{ cursor: "pointer" }}
+                      onClick={openGearMenu}
+                    >
+                      <FaCogs style={{ fontSize: "1.25rem" }} />
+                      <FaCaretDown style={{ fontSize: "1rem" }} />
+                    </div>
+                  </li>
+                )}
                 <li className="nav-item pull-right">
                   <NavLink className="nav-link" to="/profile">
                     {user.displayname}

@@ -238,18 +238,17 @@ class ViewportSeg extends Component {
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
           this.state.imageIds.push(
-            wadoUrl +
-              url.lossyImage +
-              "&contentType=application%2Fdicom?frame=" +
-              i
+            wadoUrl + url.lossyImage
+            // "&contentType=application%2Fdicom?frame=" +
+            // i
           );
         }
       } else
         this.state.imageIds.push(
-          wadoUrl + url.lossyImage + "&contentType=application%2Fdicom"
+          wadoUrl + url.lossyImage //+ "&contentType=application%2Fdicom"
         );
     });
-    console.log(this.state.imageIds);
+    console.log(this.state.imageIds[0]);
   }
 
   async componentDidMount() {

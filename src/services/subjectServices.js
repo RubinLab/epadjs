@@ -2,10 +2,12 @@ import http from "./httpService";
 
 import { isLite, apiUrl } from "../config.json";
 
+
 export function getSubjects(projectId) {
   if (isLite) {
     projectId = "lite";
     return http.get(apiUrl + "/projects/" + projectId + "/subjects");
+
   } else return http.get(apiUrl + "/projects/" + projectId + "/subjects/");
 }
 

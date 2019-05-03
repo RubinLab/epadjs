@@ -24,7 +24,7 @@ export async function login(username, password, keyCloakToken) {
   };
   // const { data: token } = await http.post(apiUrlV1, {}, { headers: header });
   // sessionStorage.setItem("token", token);
-  // sessionStorage.setItem("username", username);
+  sessionStorage.setItem("username", "username");
   /*********************************** REMOVE IN PROD  **************************/
   sessionStorage.setItem("header", basicAuth);
 }

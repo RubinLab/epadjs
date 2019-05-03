@@ -1,12 +1,11 @@
 import http from "./httpService";
-
 import { isLite, apiUrl } from "../config.json";
-
 export function getAnnotations(series, opts = {}) {
   if (isLite) {
     const { projectId, subjectId, studyId, seriesId } = series;
     const fullUrl =
       apiUrl +
+
       "/projects/lite/subjects/" +
       subjectId +
       "/studies/" +
@@ -40,6 +39,7 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
   if (isLite)
     return http.get(
       apiUrl +
+
         "/projects/lite/subjects/" +
         subjectId +
         "/studies/" +

@@ -1,6 +1,7 @@
 import http from "./httpService";
 import { isLite, apiUrl } from "../config.json";
 
+
 export function getStudies(projectId, subjectId) {
   if (isLite)
     return http.get(
