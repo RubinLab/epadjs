@@ -18,6 +18,7 @@ import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
 import AnnotationList from "./components/annotationsList";
 import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
+import auth from "./services/authService";
 
 // import Modal from './components/management/projectCreationForm';
 // import Modal from './components/common/rndBootModal';
@@ -50,8 +51,11 @@ class App extends Component {
     //when comp mount check if the user is set already. If is set then set state
 
     const keycloak = Keycloak("/keycloak.json");
+
     keycloak.init({ onLoad: "login-required" }).then(authenticated => {
+      console.log(keycloak);
       this.setState({ keycloak: keycloak, authenticated: authenticated });
+      auth.login(null, null, keycloak.token);
     });
 
     /*
@@ -63,6 +67,7 @@ class App extends Component {
       }
     } catch (ex) {}
     */
+
     // window.addEventListener('keydown', this.closeMenu, true);
   }
 
