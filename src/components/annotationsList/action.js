@@ -20,7 +20,7 @@ import {
   SELECT_PATIENT,
   CLEAR_SELECTION,
   GET_PATIENT,
-  UPDATE_GRID,
+  ADD_TO_GRID,
   LOAD_COMPLETED,
   START_LOADING,
   colors
@@ -135,8 +135,15 @@ export const selectAnnotation = (
   };
 };
 
-export const updateGrid = item => {
-  return { type: UPDATE_GRID, item };
+export const addToGrid = (serie, annotation) => {
+  let { patientID, studyUID, seriesUID } = serie;
+  let reference = {
+    patientID,
+    studyUID,
+    seriesUID,
+    aimID: annotation
+  };
+  return { type: ADD_TO_GRID, reference };
 };
 
 export const showAnnotationWindow = () => {

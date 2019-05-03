@@ -24,7 +24,7 @@ export const CLEAR_GRID = "epadjs/annotationList/CLEAR_GRID ";
 export const CLEAR_SELECTION = "epadjs/annotationList/CLEAR_SELECTION ";
 export const GET_PATIENT = "epadjs/annotationList/GET_PATIENT";
 export const DISPLAY_SINGLE_AIM = "epadjs/annotationList/DISPLAY_SINGLE_AIM";
-export const UPDATE_GRID = "epadjs/annotationList/UPDATE_GRID";
+export const ADD_TO_GRID = "epadjs/annotationList/ADD_TO_GRID";
 export const LOAD_COMPLETED = "epadjs/annotationList/LOAD_COMPLETED";
 export const START_LOADING = "epadjs/annotationList/START_LOADING";
 

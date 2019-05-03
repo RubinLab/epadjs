@@ -14,7 +14,9 @@ import {
   getSingleSerie,
   changeActivePort,
   selectSerie,
-  clearSelection
+  clearSelection,
+  addToGrid,
+  getWholeData
 } from "../annotationsList/action";
 import AlertGridFull from "./alertGridFull";
 import "react-table/react-table.css";
@@ -318,10 +320,13 @@ class Series extends Component {
       } else {
         //if grid is NOT full check if patient data exists
         if (this.props.patients[selected.patientID]) {
+          this.props.dispatch(addToGrid(selected));
           this.props.dispatch(getSingleSerie(selected));
           //if patient doesn't exist dispatch to get data
         } else {
-          this.props.dispatch(getAnnotationListData(selected));
+          this.props.dispatch(addToGrid(selected));
+          this.props.dispatch(getSingleSerie(selected));
+          this.props.dispatch(getWholeData(selected));
         }
       }
     }

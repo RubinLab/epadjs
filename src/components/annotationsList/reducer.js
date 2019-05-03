@@ -21,6 +21,7 @@ import {
   SELECT_ANNOTATION,
   LOAD_COMPLETED,
   START_LOADING,
+  ADD_TO_GRID,
   DISPLAY_SINGLE_AIM
 } from "./types";
 
@@ -103,9 +104,8 @@ const asyncReducer = (state = initialState, action) => {
         aimsList: {
           ...state.aimsList,
           [action.payload.serID]: action.payload.aimsData
-        },
-        openSeries: state.openSeries.concat([action.payload.ref])
-        // patients: changedPatients
+        }
+        // openSeries: state.openSeries.concat([action.payload.ref])
       });
       return !changedPatients
         ? result
@@ -359,6 +359,10 @@ const asyncReducer = (state = initialState, action) => {
         patients: { ...state.patients, [action.payload.patientID]: aimPatient },
         openSeries: aimOpenSeries
       };
+    case ADD_TO_GRID:
+      console.log("here");
+      let newOpenSeries = state.openSeries.concat(action.reference);
+      return { ...state, openSeries: newOpenSeries };
     default:
       return state;
   }
