@@ -22,11 +22,11 @@ export async function login(username, password, keyCloakToken) {
   const header = {
     Authorization: basicAuth
   };
-  const { data: token } = await http.post(apiUrlV1, {}, { headers: header });
+  // const { data: token } = await http.post(apiUrlV1, {}, { headers: header });
   // sessionStorage.setItem("token", token);
   // sessionStorage.setItem("username", username);
   /*********************************** REMOVE IN PROD  **************************/
-  // sessionStorage.setItem("header", basicAuth);
+  sessionStorage.setItem("header", basicAuth);
 }
 
 export function logout() {

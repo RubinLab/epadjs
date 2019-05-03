@@ -49,15 +49,6 @@ class App extends Component {
 
   async componentDidMount() {
     //when comp mount check if the user is set already. If is set then set state
-
-    const keycloak = Keycloak("/keycloak.json");
-
-    keycloak.init({ onLoad: "login-required" }).then(authenticated => {
-      console.log(keycloak);
-      this.setState({ keycloak: keycloak, authenticated: authenticated });
-      auth.login(null, null, keycloak.token);
-    });
-
     /*
     try {
       const username = sessionStorage.getItem("username");
@@ -67,7 +58,6 @@ class App extends Component {
       }
     } catch (ex) {}
     */
-
     // window.addEventListener('keydown', this.closeMenu, true);
   }
 
