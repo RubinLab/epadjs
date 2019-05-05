@@ -14,7 +14,9 @@ import {
   getSingleSerie,
   changeActivePort,
   selectSerie,
-  clearSelection
+  clearSelection,
+  addToGrid,
+  getWholeData
 } from "../annotationsList/action";
 import AlertGridFull from "./alertGridFull";
 import "react-table/react-table.css";
@@ -291,37 +293,94 @@ class Series extends Component {
     this.setState({ showGridFullWarning: false });
   };
 
+  // dispatchSerieDisplay = selected => {
+  //   const openSeries = Object.values(this.props.openSeries);
+  //   let isSerieOpen = false;
+  //   //check if there is enough space in the grid
+  //   let isGridFull = openSeries.length === 6;
+  //   //check if the serie is already open
+  //   if (openSeries.length > 0) {
+  //     for (let i = 0; i < openSeries.length; i++) {
+  //       // for (let serie of openSeries) {
+  //       if (openSeries[i]) {
+  //         if (openSeries[i].seriesUID === selected.seriesUID) {
+  //           isSerieOpen = true;
+  //           this.props.dispatch(changeActivePort(i));
+  //           break;
+  //         }
+  //       }
+  //     }
+  //   }
+  //   //serie is not already open;
+  //   if (!isSerieOpen) {
+  //     //if the grid is full show warning
+  //     if (isGridFull) {
+  //       // this.setState({ showGridFullWarning: true });
+  //       this.props.dispatch(alertViewPortFull());
+  //     } else {
+  //       //if grid is NOT full check if patient data exists
+  //       if (this.props.patients[selected.patientID]) {
+  //         this.props.dispatch(getSingleSerie(selected));
+  //         //if patient doesn't exist dispatch to get data
+  //       } else {
+  //         this.props.dispatch(getAnnotationListData(selected));
+  //       }
+  //     }
+  //   }
+  // };
   dispatchSerieDisplay = selected => {
     const openSeries = Object.values(this.props.openSeries);
+
     let isSerieOpen = false;
+
     //check if there is enough space in the grid
+
     let isGridFull = openSeries.length === 6;
+
     //check if the serie is already open
+
     if (openSeries.length > 0) {
       for (let i = 0; i < openSeries.length; i++) {
         // for (let serie of openSeries) {
-        if (openSeries[i]) {
-          if (openSeries[i].seriesUID === selected.seriesUID) {
-            isSerieOpen = true;
-            this.props.dispatch(changeActivePort(i));
-            break;
-          }
+
+        // if (openSeries[i]) {
+
+        if (openSeries[i].seriesUID === selected.seriesUID) {
+          isSerieOpen = true;
+
+          this.props.dispatch(changeActivePort(i));
+
+          break;
         }
+
+        // }
       }
     }
+
     //serie is not already open;
+
     if (!isSerieOpen) {
       //if the grid is full show warning
+
       if (isGridFull) {
         // this.setState({ showGridFullWarning: true });
+
         this.props.dispatch(alertViewPortFull());
       } else {
         //if grid is NOT full check if patient data exists
+
         if (this.props.patients[selected.patientID]) {
+          this.props.dispatch(addToGrid(selected));
+
           this.props.dispatch(getSingleSerie(selected));
+
           //if patient doesn't exist dispatch to get data
         } else {
-          this.props.dispatch(getAnnotationListData(selected));
+          this.props.dispatch(addToGrid(selected));
+
+          this.props.dispatch(getSingleSerie(selected));
+
+          this.props.dispatch(getWholeData(selected));
         }
       }
     }

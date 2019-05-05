@@ -19,7 +19,6 @@ import { MdLoop, MdPanTool } from "react-icons/md";
 import { TiDeleteOutline, TiPencil } from "react-icons/ti";
 import { MdWbIridescent } from "react-icons/md";
 import AnnotationList from "../annotationsList";
-//import { FaDraftingCompass } from "react-icons/fa";
 import ResizeAndDrag from "../management/common/resizeAndDrag";
 import CustomModal from "../management/common/resizeAndDrag";
 import {
@@ -31,9 +30,8 @@ import "../../font-icons/styles.css";
 
 const mapStateToProps = state => {
   return {
-    // cornerstone: state.searchViewReducer.cornerstone,
-    // cornerstoneTools: state.searchViewReducer.cornerstoneTools,
-    activeVP: state.searchViewReducer.activeVP
+    // activeVP: state.searchViewReducer.activeVP
+    activeVP: state.annotationsListReducer.activePort
   };
 };
 
@@ -55,7 +53,6 @@ const tools = [
     name: "RectangleRoi",
     configuration: {
       showMinMax: true
-      // showHounsfieldUnits: true
     }
   },
   { name: "Angle" },
@@ -70,8 +67,6 @@ const tools = [
 ];
 
 class Toolbar extends Component {
-  state = { activeTool: "", showDrawing: false, playing: false };
-
   //Tools are initialized in viewport.jsx since they are activated on elements. I don't really like this logic, we shall think of a better way.
 
   constructor(props) {
@@ -79,6 +74,13 @@ class Toolbar extends Component {
     this.tools = tools;
     this.cornerstone = this.props.cornerstone;
     this.cornerstoneTools = this.props.cornerstoneTools;
+
+    this.state = {
+      activeTool: "",
+      showDrawing: false,
+      playing: false,
+      activeVP: this.props.activeVP
+    };
   }
 
   //TODO: instead of disabling all tools we can just disable the active tool
@@ -97,21 +99,23 @@ class Toolbar extends Component {
   //sets the selected tool active for all of the enabled elements
   setToolActive = (toolName, mouseMask = 1) => {
     this.disableAllTools();
-    console.log(this.cornerstone.getEnabledElements());
-    console.log(`Before setting ${toolName} active `, this.cornerstoneTools);
     this.cornerstoneTools.setToolActive(toolName, {
       mouseButtonMask: mouseMask
     });
-    console.log(`After setting ${toolName} active `, this.cornerstoneTools);
   };
 
   //sets the selected tool active for an enabled elements
   setToolActiveForElement = (toolName, mouseMask = 1) => {
-    const element = document.getElementById(this.props.activeVP);
+    // const element = document.getElementById(this.props.activeVP);
+    // const element = this.cornerstone.getEnabledElements()[this.state.activeVP]["element"];
     this.disableAllTools();
-    this.cornerstoneTools.setToolActiveForElement(element, toolName, {
-      mouseButtonMask: mouseMask
-    });
+    this.cornerstoneTools.setToolActiveForElement(
+      this.cornerstone.getEnabledElements()[this.props.activeVP]["element"],
+      toolName,
+      {
+        mouseButtonMask: mouseMask
+      }
+    );
     this.setState({ showDrawing: false });
   };
 
@@ -132,23 +136,25 @@ class Toolbar extends Component {
   };
 
   invert = () => {
-    const element = document.getElementById(this.props.activeVP);
-    if (element) {
-      const viewport = this.props.cornerstone.getViewport(element);
+    // const element = this.cornerstone.getEnabledElements()[this.state.activeVP]["element"];
+    if (this.state.activeElement) {
+      const viewport = this.props.cornerstone.getViewport(
+        this.state.activeElement
+      );
       viewport.invert = !viewport.invert;
-      this.props.cornerstone.setViewport(element, viewport);
+      this.props.cornerstone.setViewport(this.state.activeElement, viewport);
     }
   };
 
   reset = () => {
-    const element = document.getElementById(this.props.activeVP);
-    this.props.cornerstone.reset(element);
+    // const element = document.getElementById(this.props.activeVP);
+    this.props.cornerstone.reset(this.state.activeElement);
   };
 
   toggleMetaData = () => {
     this.disableAllTools();
-    const element = document.getElementById("myForm");
-    element.style.display = "block";
+    // const element = document.getElementById("myForm");
+    this.state.activeElement.style.display = "block";
   };
 
   probe = () => {
@@ -172,10 +178,6 @@ class Toolbar extends Component {
     //   this.dxm
     // );
     this.disableAllTools();
-    const elements = document.getElementsByClassName("cs");
-    for (var i = 0; i < elements.length; i++) {
-      this.cornerstoneTools.probe.activate(elements[i], 1);
-    }
   };
 
   anotate = () => {
@@ -212,17 +214,18 @@ class Toolbar extends Component {
 
   line = () => {
     this.setState({ showDrawing: false });
-    console.log("state of drawing:" + this.state.showDrawing);
     this.disableAllTools();
-    const element = document.getElementById(this.props.activeVP);
-    this.cornerstoneTools.length.activate(element, 1);
+    // const element = document.getElementById(this.props.activeVP);
+    this.cornerstoneTools.length.activate(this.state.activeElement, 1);
 
-    element.style.cursor = "crosshair";
+    // element.style.cursor = "crosshair";
   };
 
   erase = () => {
-    const elem = document.getElementById(this.props.activeVP);
-    this.cornerstoneTools.globalImageIdSpecificToolStateManager.clear(elem);
+    // const elem = document.getElementById(this.props.activeVP);
+    this.cornerstoneTools.globalImageIdSpecificToolStateManager.clear(
+      this.state.activeElement
+    );
     console.log(this.cornerstoneTools);
   };
 

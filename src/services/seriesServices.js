@@ -17,9 +17,9 @@ export function getImageIds(series) {
   return http.get(
     apiUrl +
       "/studies/" +
-      series.studyId +
+      series.studyUID +
       "/series/" +
-      series.seriesId +
+      series.seriesUID +
       "/images/"
   );
 }

@@ -7,10 +7,13 @@ import { connect } from "react-redux";
 import { wadoUrl } from "../../config.json";
 import { withRouter } from "react-router-dom";
 import CornerstoneViewport from "react-cornerstone-viewport";
+import Aim from "../../utils/Aim";
+import AimEditor from "../aimEditor/aimEditor";
 import "./flex.css";
 //import viewport from "./viewport.jsx";
 import { FiZoomIn } from "react-icons/fi";
 import { TiScissors } from "react-icons/ti";
+import { changeActivePort } from "../annotationsList/action";
 
 const tools = [
   { name: "Wwwc", mouseButtonMasks: [1] },
@@ -56,7 +59,7 @@ const tools = [
 
 const mapStateToProps = state => {
   return {
-    series: state.searchViewReducer.series,
+    series: state.annotationsListReducer.openSeries,
     cornerstone: state.searchViewReducer.cornerstone,
     cornerstoneTools: state.searchViewReducer.cornerstoneTools,
     activePort: state.annotationsListReducer.activePort
@@ -67,7 +70,9 @@ const mapStateToProps = state => {
 class DisplayView extends Component {
   constructor(props) {
     super(props);
-    this.csTools = this.props.cornerstoneTools;
+    console.log(props);
+    this.cornerstone = this.props.cornerstone;
+    this.cornerstoneTools = this.props.cornerstoneTools;
     this.child = React.createRef();
     this.state = {
       series: props.series,
@@ -84,26 +89,21 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
-    //document.body.classList.add("fixed-page");
-    console.log("active ", this.props.activePort);
     this.getViewports();
     this.getData();
     const vpList = document.getElementsByClassName("cs");
-    const ZoomTool = this.props.cornerstoneTools.ZoomTool;
-    //check the logic here
-    /*for (var i = 0; i < vpList.length; i++) {
-      this.props.cornerstoneTools.zoom.activate(vpList[i], 5);
-    }*/
-    this.props.cornerstoneTools.setToolActive(ZoomTool.name, {
-      mouseButtonMask: 5
-    });
     //make the last element in series as selected viewport since the last open will be added to end
     this.props.dispatch(
       this.defaultSelectVP("viewport" + (this.state.series.length - 1))
     );
-    //console.log(viewports);
-    //viewports.map(vp => this.props.cornerstoneTools.wwwc.activate(vp, 1));
-    //this.props.cornerstoneTools.wwwc.activate(this.state.refs[0], 1);
+    // this.state.viewport.addEventListener(
+    //   this.cornerstoneTools.EVENTS.MEASUREMENT_ADDED,
+    //   this.annotationCreated
+    // );
+    // this.state.viewport.addEventListener(
+    //   this.cornerstoneTools.EVENTS.MEASUREMENT_REMOVED,
+    //   this.annotationCreated
+    // );
   }
 
   /*testAimEditor = () => {
@@ -119,18 +119,19 @@ class DisplayView extends Component {
 
     instanceAimEditor.createViewerWindow();
   };*/
+
   getData() {
     var promises = [];
     for (let i = 0; i < this.state.series.length; i++) {
-      const promise = this.getImages(this.state.series[i]);
+      const promise = this.getImages(this.state.series[i], i);
       promises.push(promise);
     }
     Promise.all(promises).then(res => {
-      this.setState({ isLoading: false });
+      this.setState({ data: res, isLoading: false });
     });
   }
 
-  async getImages(seri) {
+  async getImages(seri, i) {
     let stack = {};
     let tempArray = [];
     const {
@@ -155,9 +156,12 @@ class DisplayView extends Component {
     });
     stack.currentImageIdIndex = 0;
     stack.imageIds = [...tempArray];
-    this.setState({
-      data: [...this.state.data, { stack }]
-    });
+    return { stack };
+    // console.log("before seting ", this.state.data);
+    // this.setState({
+    //   data: [...this.state.data, stack]
+    // });
+    // console.log("after seting ", this.state.data);
   }
 
   getViewports = () => {
@@ -216,9 +220,45 @@ class DisplayView extends Component {
     this.props.cornerstone.fitToWindow(elem);*/
   };
 
-  whenSet() {
-    this.props.isActive = true;
-  }
+  annotationCreated = event => {
+    alert("I am fired");
+    const { toolType } = event.detail;
+
+    const toolsOfInterest = [
+      "Length",
+      "EllipticalRoi",
+      "RectangleRoi",
+      "FreehandMouse",
+      "Bidirectional"
+    ];
+    if (toolsOfInterest.includes(toolType)) {
+      this.setState({ showAimEditor: true });
+    }
+  };
+
+  measurementChanged = event => {
+    const { toolType } = event.detail;
+
+    const toolsOfInterest = [
+      "Length",
+      "EllipticalRoi",
+      "RectangleRoi",
+      "FreehandMouse",
+      "Bidirectional"
+    ];
+    if (toolsOfInterest.includes(toolType)) {
+      // this.setState({ showAimEditor: true });
+      alert("yooop");
+    }
+  };
+
+  setActive = i => {
+    this.props.dispatch(changeActivePort(i));
+    if (this.state.activePort !== i) {
+      alert(i);
+      this.setState({ activePort: i });
+    }
+  };
 
   render() {
     return (
@@ -229,19 +269,22 @@ class DisplayView extends Component {
         />
 
         {!this.state.isLoading &&
-          this.state.series.map((serie, i) => (
-            <div
-              className={"viewportContainer"}
-              key={i}
-              style={{
-                width: this.state.width,
-                height: this.state.height,
-                padding: "2px",
-                display: "inline-block"
-              }}
-              onDoubleClick={() => this.hideShow(i)}
-            >
-              {/* <ViewportSeg
+          this.state.data.map(
+            (data, i) => (
+              console.log(this.state),
+              (
+                <div
+                  className={"viewportContainer"}
+                  key={i}
+                  style={{
+                    width: this.state.width,
+                    height: this.state.height,
+                    padding: "2px",
+                    display: "inline-block"
+                  }}
+                  onDoubleClick={() => this.hideShow(i)}
+                >
+                  {/* <ViewportSeg
               key={serie.seriesId}
               id={"viewport" + i}
               cs={this.props.cornerstone}
@@ -249,17 +292,21 @@ class DisplayView extends Component {
               setClick={click => (this.updateViewport = click)}
               serie={serie}
             />*/}
-
-              <CornerstoneViewport
-                viewportData={this.state.data[i]}
-                cornerstone={this.props.cornerstone}
-                cornerstoneTools={this.props.cornerstoneTools}
-                viewportIndex={i}
-                availableTools={tools}
-                isActive={true}
-              />
-            </div>
-          ))}
+                  {this.state.showAimEditor && (
+                    <AimEditor csTools={this.cornerstoneTools} />
+                  )}
+                  <CornerstoneViewport
+                    viewportData={data}
+                    viewportIndex={i}
+                    availableTools={tools}
+                    onMeasurementsChanged={this.measurementChanged}
+                    setViewportActive={() => this.setActive(i)}
+                    // isActive={true}
+                  />
+                </div>
+              )
+            )
+          )}
         <div id="cont" />
       </React.Fragment>
     );
