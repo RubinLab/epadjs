@@ -301,14 +301,11 @@ class Series extends Component {
     //check if the serie is already open
     if (openSeries.length > 0) {
       for (let i = 0; i < openSeries.length; i++) {
-        // for (let serie of openSeries) {
-        // if (openSeries[i]) {
         if (openSeries[i].seriesUID === selected.seriesUID) {
           isSerieOpen = true;
           this.props.dispatch(changeActivePort(i));
           break;
         }
-        // }
       }
     }
     //serie is not already open;
@@ -318,14 +315,10 @@ class Series extends Component {
         // this.setState({ showGridFullWarning: true });
         this.props.dispatch(alertViewPortFull());
       } else {
+        this.props.dispatch(addToGrid(selected));
+        this.props.dispatch(getSingleSerie(selected));
         //if grid is NOT full check if patient data exists
-        if (this.props.patients[selected.patientID]) {
-          this.props.dispatch(addToGrid(selected));
-          this.props.dispatch(getSingleSerie(selected));
-          //if patient doesn't exist dispatch to get data
-        } else {
-          this.props.dispatch(addToGrid(selected));
-          this.props.dispatch(getSingleSerie(selected));
+        if (!this.props.patients[selected.patientID]) {
           this.props.dispatch(getWholeData(selected));
         }
       }

@@ -80,8 +80,8 @@ const asyncReducer = (state = initialState, action) => {
       const { ann } = action.payload;
       let changedPatients;
       if (state.patients[ptID]) {
+        console.log("it makes it here");
         let changedPatient = Object.assign({}, state.patients[ptID]);
-
         if (ann) {
           changedPatient.studies[stID].series[srID].annotations[
             ann
@@ -345,11 +345,8 @@ const asyncReducer = (state = initialState, action) => {
       });
 
       //update Openseries data
-      aimOpenSeries.forEach(item => {
-        if (item.seriesUID === action.payload.seriesUID) {
-          item.aimID = action.payload.aimID;
-        }
-      });
+      aimOpenSeries[action.payload.index].aimID = action.payload.aimID;
+
       return {
         ...state,
         aimsList: {

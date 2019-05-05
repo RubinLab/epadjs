@@ -49,7 +49,13 @@ export const startLoading = () => {
   console.log("in action start");
   return { type: START_LOADING };
 };
-export const displaySingleAim = (patientID, studyUID, seriesUID, aimID) => {
+export const displaySingleAim = (
+  patientID,
+  studyUID,
+  seriesUID,
+  aimID,
+  index
+) => {
   return {
     type: DISPLAY_SINGLE_AIM,
     payload: { patientID, studyUID, seriesUID, aimID }
@@ -137,6 +143,7 @@ export const selectAnnotation = (
 
 export const addToGrid = (serie, annotation) => {
   let { patientID, studyUID, seriesUID } = serie;
+  if (annotation) patientID = serie.originalSubjectID;
   let reference = {
     patientID,
     studyUID,
@@ -398,9 +405,6 @@ const getAnnotationData = async (
 };
 
 export const getSingleSerie = (serie, annotation) => {
-  console.log(serie);
-  console.log(annotation);
-
   return async (dispatch, getState) => {
     let { patientID, studyUID, seriesUID } = serie;
     let reference = {
@@ -437,7 +441,9 @@ const getSingleSerieData = (serie, annotation) => {
 export const getWholeData = (serie, study, annotation) => {
   return async (dispatch, getState) => {
     dispatch(loadAnnotations());
-    let { projectID, patientID, patientName, studyUID } = serie || study;
+    let { projectID, patientID, patientName, studyUID } =
+      serie || study || annotation;
+    if (annotation) patientID = annotation.originalSubjectID;
     let selectedID;
     let seriesUID;
     if (serie) {

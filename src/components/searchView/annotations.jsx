@@ -12,7 +12,10 @@ import {
   getSingleSerie,
   getAnnotationListData,
   clearSelection,
-  selectAnnotation
+  selectAnnotation,
+  changeActivePort,
+  addToGrid,
+  getWholeData
 } from "../annotationsList/action";
 import "react-table/react-table.css";
 
@@ -192,11 +195,12 @@ class Annotations extends Component {
     this.setState({ expanded });
   };
 
-  dispatchAnnDisplay = selected => {
+  displayAnnotations = selected => {
+    console.log(selected);
     const { projectID, studyUID, seriesUID, aimID } = selected;
     const patientID = selected.originalSubjectID;
-    const openSeries = Object.values(this.props.openSeries);
-    const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
+    const { openSeries } = this.props;
+    // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
     let isSerieOpen = false;
     //check if there is enough space in the grid
     let isGridFull = openSeries.length === 6;
@@ -206,24 +210,23 @@ class Annotations extends Component {
         // for (let serie of openSeries) {
         if (openSeries[i].seriesUID === seriesUID) {
           isSerieOpen = true;
+          this.props.dispatch(changeActivePort(i));
+          this.props.dispatch(
+            displaySingleAim(patientID, studyUID, seriesUID, aimID, i)
+          );
           break;
         }
       }
     }
-    if (isSerieOpen) {
-      this.props.dispatch(
-        displaySingleAim(patientID, studyUID, seriesUID, aimID)
-      );
+
+    if (isGridFull) {
+      this.props.dispatch(alertViewPortFull());
     } else {
-      if (isGridFull) {
-        this.props.dispatch(alertViewPortFull());
-      } else {
-        if (this.props.patients[patientID]) {
-          this.props.dispatch(getSingleSerie(serieObj, aimID));
-          //if patient doesn't exist dispatch to get data
-        } else {
-          this.props.dispatch(getAnnotationListData(serieObj, null, aimID));
-        }
+      this.props.dispatch(addToGrid(selected, aimID));
+      this.props.dispatch(getSingleSerie(selected, aimID));
+      //if grid is NOT full check if patient data exists
+      if (!this.props.patients[selected.patientID]) {
+        this.props.dispatch(getWholeData(null, null, selected));
       }
     }
   };
@@ -265,7 +268,7 @@ class Annotations extends Component {
             getTdProps={(state, rowInfo, column, instance) => {
               return {
                 onDoubleClick: (e, handleOriginal) => {
-                  this.dispatchAnnDisplay(rowInfo.original);
+                  this.displayAnnotations(rowInfo.original);
                 }
               };
             }}
