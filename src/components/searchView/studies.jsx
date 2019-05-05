@@ -17,7 +17,9 @@ import {
   clearSelection,
   startLoading,
   loadCompleted,
-  annotationsLoadingError
+  annotationsLoadingError,
+  addToGrid,
+  getWholeData
 } from "../annotationsList/action";
 //import "react-table/react-table.css";
 
@@ -57,7 +59,8 @@ class Studies extends Component {
       selectAll: false,
       selectType: "checkbox",
       expanded: {},
-      selectedStudy: {}
+      selectedStudy: {},
+      isSerieSelectionOpen: false
     };
   }
 
@@ -301,8 +304,6 @@ class Studies extends Component {
           ResultSet: { Result: series }
         }
       } = await getSeries(projectID, patientID, studyUID);
-      // console.log("series from func");
-      // console.log(series);
       this.props.dispatch(loadCompleted());
       return series;
     } catch (err) {
@@ -311,50 +312,46 @@ class Studies extends Component {
   };
 
   displaySeries = async selected => {
-    console.log(this.state);
-    const { projectID, patientID, studyUID } = selected;
-    // let total;
-    //check if the patient already exist
-    //if patient exists extract the open series and control the grid for enough room
-    if (this.props.patients[patientID]) {
-      const study = this.props.patients[patientID].studies[studyUID];
-      const extractedStudy = this.excludeOpenSeries(
-        Object.values(study.series)
+    console.log(selected);
+    const { patientID, studyUID } = selected;
+    let seriesArr;
+    //check if the patient is there (create a patient exist flag)
+    const patientExists = this.props.patients[patientID];
+    //if there is patient iterate over the series object of the study (form an array of series)
+    if (patientExists) {
+      seriesArr = Object.values(
+        this.props.patients[patientID].studies[studyUID].series
       );
-      //if there is not enough room bring modal
-      // total = extractedStudy.length + this.props.openSeries.length;
-      if (extractedStudy.length + this.props.openSeries.length > 6) {
-        await this.props.dispatch(selectStudy(selected));
-        this.props.dispatch(openProjectSelectionModal());
-        //add the project to the selected studies
-        // if there is enough room iterate over the extracted array and call getsingleserie
-      } else {
-        extractedStudy.forEach(serie => {
-          this.props.dispatch(getSingleSerie({ ...serie, projectID }));
-        });
-      }
+      //if there is not a patient get series data of the study and (form an array of series)
     } else {
-      //if patient is not there make the control
-      //if not enough room bring the modal
-      // total = selected.numberOfSeries + this.props.openSeries.length;
-
-      if (selected.numberOfSeries + this.props.openSeries.length > 6) {
-        await this.props.dispatch(selectStudy(selected));
-        const seriesList = await this.getSeriesData(selected);
-        this.setState({ selectedStudy: { [selected.studyUID]: seriesList } });
-        this.props.dispatch(openProjectSelectionModal());
-        //add the project to the selected studies
-      } else {
-        //if enough room bring all series
-        const result = await this.getSeriesData(selected);
-        if (Array.isArray(result) && result.length > 0) {
-          await this.props.dispatch(await getAnnotationListData(result[0]));
-          for (let i = 1; i < result.length; i++) {
-            await this.props.dispatch(getSingleSerie(result[i]));
-          }
-        }
-      }
+      seriesArr = await this.getSeriesData(selected);
     }
+    console.log("seriesArr", seriesArr);
+    //get extraction of the series (extract unopen series)
+    seriesArr = this.excludeOpenSeries(seriesArr);
+    //check if there is enough room
+    if (seriesArr.length + this.props.openSeries.length > 6) {
+      //if there is not bring the modal
+      this.setState({ isSerieSelectionOpen: true, selectedStudy: [seriesArr] });
+    } else {
+      //if there is enough room
+      //add serie to the grid
+      for (let serie of seriesArr) {
+        this.props.dispatch(addToGrid(serie));
+      }
+      //getsingleSerie
+      for (let serie of seriesArr) {
+        this.props.dispatch(getSingleSerie(serie));
+      }
+      //if patient doesnot exist get patient
+      if (!patientExists) this.props.dispatch(getWholeData(null, selected));
+    }
+  };
+
+  closeSelectionModal = () => {
+    this.setState(state => ({
+      isSerieSelectionOpen: !state.isSerieSelectionOpen
+    }));
   };
 
   render() {
@@ -411,8 +408,11 @@ class Studies extends Component {
             }}
           />
         ) : null}
-        {this.props.showProjectModal && !this.props.loading && (
-          <ProjectModal seriesPassed={this.state.selectedStudy} />
+        {this.state.isSerieSelectionOpen && !this.props.loading && (
+          <ProjectModal
+            seriesPassed={this.state.selectedStudy}
+            onCancel={this.closeSelectionModal}
+          />
         )}
       </div>
     );

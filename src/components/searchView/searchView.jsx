@@ -19,7 +19,7 @@ import "./searchView.css";
 class SearchView extends Component {
   constructor(props) {
     super(props);
-    this.state = { seriesList: {} };
+    this.state = { seriesList: {}, isSerieSelectionOpen: false };
   }
 
   viewSelection = async () => {
@@ -44,7 +44,8 @@ class SearchView extends Component {
         }
         await this.setState({ seriesList: studiesObj });
         this.props.dispatch(loadCompleted());
-        this.props.dispatch(openProjectSelectionModal());
+        // this.props.dispatch(openProjectSelectionModal());
+        this.setState({ isSerieSelectionOpen: true });
       } else {
         //her bir studynin altindaki serieler icin single serie cagit
         //eger patient listte yoksa onu da cagir
@@ -54,7 +55,8 @@ class SearchView extends Component {
       if (selectedSeries.length + this.props.openSeries.length > 6) {
         let groupedObj = this.groupUnderStudy(selectedSeries);
         await this.setState({ seriesList: groupedObj });
-        this.props.dispatch(openProjectSelectionModal());
+        // this.props.dispatch(openProjectSelectionModal());
+        this.setState({ isSerieSelectionOpen: true });
       } else {
         //serieler icin single serie cagit
         //eger patient listte yoksa onu da cagir
@@ -161,6 +163,12 @@ class SearchView extends Component {
     window.URL.revokeObjectURL(url);
   };
 
+  closeSelectionModal = () => {
+    this.setState(state => ({
+      isSerieSelectionOpen: !state.isSerieSelectionOpen
+    }));
+  };
+
   render() {
     return (
       <>
@@ -168,8 +176,11 @@ class SearchView extends Component {
           onDownload={this.downloadSelection}
           onView={this.viewSelection}
         />
-        {this.props.showProjectModal && !this.props.loading && (
-          <ProjectModal seriesPassed={this.state.seriesList} />
+        {this.state.isSerieSelectionOpen && !this.props.loading && (
+          <ProjectModal
+            seriesPassed={this.state.seriesList}
+            onCancel={this.closeSelectionModal}
+          />
         )}
         <Subjects
           key={this.props.match.params.pid}

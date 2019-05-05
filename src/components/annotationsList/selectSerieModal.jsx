@@ -121,6 +121,7 @@ class selectSerieModal extends React.Component {
     });
     this.props.dispatch(openProjectSelectionModal());
     this.props.dispatch(clearSelection());
+    this.props.onCancel();
   };
 
   renderSelection = () => {
@@ -135,6 +136,7 @@ class selectSerieModal extends React.Component {
     for (let i = 0; i < series.length; i++) {
       let innerList = [];
       let title = series[i][0].bodyPart || series[i][0].studyDescription;
+      title = !title ? "Unnamed Study" : title;
       for (let k = 0; k < series[i].length; k++) {
         let disabled =
           !this.state.selectedToDisplay[count + k] && this.state.limit >= 6;
@@ -163,6 +165,8 @@ class selectSerieModal extends React.Component {
   render = () => {
     const list = this.renderSelection();
     console.log(this.state);
+    console.log(this.props);
+
     return (
       <Modal.Dialog dialogClassName="alert-selectSerie">
         <Modal.Header>
