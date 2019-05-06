@@ -70,7 +70,6 @@ const mapStateToProps = state => {
 class DisplayView extends Component {
   constructor(props) {
     super(props);
-    console.log(props);
     this.cornerstone = this.props.cornerstone;
     this.cornerstoneTools = this.props.cornerstoneTools;
     this.child = React.createRef();
@@ -221,7 +220,6 @@ class DisplayView extends Component {
   };
 
   annotationCreated = event => {
-    alert("I am fired");
     const { toolType } = event.detail;
 
     const toolsOfInterest = [
@@ -255,7 +253,6 @@ class DisplayView extends Component {
   setActive = i => {
     this.props.dispatch(changeActivePort(i));
     if (this.state.activePort !== i) {
-      alert(i);
       this.setState({ activePort: i });
     }
   };
@@ -269,22 +266,19 @@ class DisplayView extends Component {
         />
 
         {!this.state.isLoading &&
-          this.state.data.map(
-            (data, i) => (
-              console.log(this.state),
-              (
-                <div
-                  className={"viewportContainer"}
-                  key={i}
-                  style={{
-                    width: this.state.width,
-                    height: this.state.height,
-                    padding: "2px",
-                    display: "inline-block"
-                  }}
-                  onDoubleClick={() => this.hideShow(i)}
-                >
-                  {/* <ViewportSeg
+          this.state.data.map((data, i) => (
+            <div
+              className={"viewportContainer"}
+              key={i}
+              style={{
+                width: this.state.width,
+                height: this.state.height,
+                padding: "2px",
+                display: "inline-block"
+              }}
+              onDoubleClick={() => this.hideShow(i)}
+            >
+              {/* <ViewportSeg
               key={serie.seriesId}
               id={"viewport" + i}
               cs={this.props.cornerstone}
@@ -292,21 +286,19 @@ class DisplayView extends Component {
               setClick={click => (this.updateViewport = click)}
               serie={serie}
             />*/}
-                  {this.state.showAimEditor && (
-                    <AimEditor csTools={this.cornerstoneTools} />
-                  )}
-                  <CornerstoneViewport
-                    viewportData={data}
-                    viewportIndex={i}
-                    availableTools={tools}
-                    onMeasurementsChanged={this.measurementChanged}
-                    setViewportActive={() => this.setActive(i)}
-                    // isActive={true}
-                  />
-                </div>
-              )
-            )
-          )}
+              {this.state.showAimEditor && (
+                <AimEditor csTools={this.cornerstoneTools} />
+              )}
+              <CornerstoneViewport
+                viewportData={data}
+                viewportIndex={i}
+                availableTools={tools}
+                onMeasurementsChanged={this.measurementChanged}
+                setViewportActive={() => this.setActive(i)}
+                // isActive={true}
+              />
+            </div>
+          ))}
         <div id="cont" />
       </React.Fragment>
     );
