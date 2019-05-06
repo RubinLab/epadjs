@@ -26,9 +26,11 @@ class SearchView extends Component {
     const selectedStudies = Object.values(this.props.selectedStudies);
     const selectedSeries = Object.values(this.props.selectedSeries);
     let selectedAnnotations = Object.values(this.props.selectedAnnotations);
+
     const groupedAnns = this.groupUnderSerie(selectedAnnotations);
     const serieCountOfAnns = Object.values(groupedAnns).length;
-    console.log("grouped anns");
+    console.log("---------grouped anns-----------");
+    console.log(groupedAnns);
     //check if enough room to display selection
     if (selectedStudies.length > 0) {
       let total = 0;
@@ -66,6 +68,7 @@ class SearchView extends Component {
         console.log("passed the limit in annotations");
         console.log(groupedAnns);
         console.log(selectedAnnotations);
+        let groupedObj = this.groupUnderStudy(selectedSeries);
 
         // await this.setState({ seriesList: groupedObj });
         // this.props.dispatch(openProjectSelectionModal());
@@ -91,11 +94,7 @@ class SearchView extends Component {
   groupUnderSerie = objArr => {
     let groupedObj = {};
     for (let ann of objArr) {
-      if (groupedObj[ann.seriesUID]) {
-        groupedObj[ann.seriesUID].push(ann);
-      } else {
-        groupedObj[ann.seriesUID] = [ann];
-      }
+      groupedObj[ann.seriesUID] = ann;
     }
     return groupedObj;
   };

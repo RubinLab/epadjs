@@ -10,11 +10,12 @@ import {
   getSingleSerie,
   clearSelection,
   startLoading,
-  loadCompleted
+  loadCompleted,
+  addToGrid
 } from "./action";
 import SerieSelect from "./containers/serieSelection";
 import SelectionItem from "./containers/selectionItem";
-
+import { FaRegCheckCircle, FaRegCheckSquare } from "react-icons/fa";
 import { getSeries } from "../../services/seriesServices";
 
 const message = {
@@ -94,16 +95,24 @@ class selectSerieModal extends React.Component {
   };
 
   displaySelection = async () => {
-    let series = Object.values(this.props.seriesPassed)[0];
+    let studies = Object.values(this.props.seriesPassed);
+    let series = [];
+    studies.forEach(arr => {
+      series = series.concat(arr);
+    });
+    console.log(series);
+    // let series = Object.values(this.props.seriesPassed)[0];
+    //concatanete all arrays to getther
     for (let i = 0; i < this.state.selectedToDisplay.length; i++) {
-      if (!this.props.patients[series[i].patientID]) {
-        this.props.dispatch(getWholeData(null, series[i]));
-      }
       if (this.state.selectedToDisplay[i]) {
+        this.props.dispatch(addToGrid(series[i]));
         if (this.state.selectionType === "aim") {
-          this.props.dispatch(getSingleSerie(null, series[i]));
+          this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
         } else {
           this.props.dispatch(getSingleSerie(series[i]));
+        }
+        if (!this.props.patients[series[i].patientID]) {
+          this.props.dispatch(getWholeData(null, series[i]));
         }
       }
     }
@@ -127,22 +136,32 @@ class selectSerieModal extends React.Component {
   renderSelection = () => {
     let selectionList = [];
     let item;
-    console.log(this.props.seriesPassed);
     let series = Object.values(this.props.seriesPassed);
     let keys = Object.keys(this.props.seriesPassed);
-    console.log(series);
     let count = 0;
-
+    let openSeriesUIDList = [];
+    this.props.openSeries.forEach(port => {
+      openSeriesUIDList.push(port.seriesUID);
+    });
     for (let i = 0; i < series.length; i++) {
       let innerList = [];
       let title = series[i][0].bodyPart || series[i][0].studyDescription;
       title = !title ? "Unnamed Study" : title;
       for (let k = 0; k < series[i].length; k++) {
+        let alreadyOpen = openSeriesUIDList.includes(series[i][k].seriesUID);
         let disabled =
-          !this.state.selectedToDisplay[count + k] && this.state.limit >= 6;
-        item = (
+          (!this.state.selectedToDisplay[count + k] && this.state.limit >= 6) ||
+          alreadyOpen;
+        let desc = series[i][k].seriesDescription || "Unnamed Serie";
+        // desc = alreadyOpen ? `${desc} - already open` : desc;
+        item = alreadyOpen ? (
+          <div key={series[i][k].seriesUID} className="alreadyOpen-disabled">
+            <FaRegCheckSquare />
+            <div className="selectionItem-text">{desc}</div>
+          </div>
+        ) : (
           <SelectionItem
-            desc={series[i][k].seriesDescription}
+            desc={desc}
             onSelect={this.selectToDisplay}
             index={count + k}
             disabled={disabled}

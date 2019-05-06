@@ -331,3 +331,8 @@ svg {
 .serieSelection-title {
   margin-top: 0.6rem;
 }
+
+.alreadyOpen-disabled {
+  display: flex;
+  align-items: center;
+}
