@@ -16,14 +16,25 @@ export function getSeries(projectId, subjectId, studyId) {
 export function getImageIds(series) {
   return http.get(
     apiUrl +
-      "/projects/" +
-      series.projectId +
-      "/subjects/" +
-      series.subjectId +
       "/studies/" +
-      series.studyId +
+      series.studyUID +
       "/series/" +
-      series.seriesId +
+      series.seriesUID +
       "/images/"
   );
+}
+
+export function downloadSeries(series) {
+  const url =
+    apiUrl +
+    "/projects/" +
+    series.projectID +
+    "/subjects/" +
+    series.patientID +
+    "/studies/" +
+    series.studyUID +
+    "/series/" +
+    series.seriesUID +
+    "?&format=stream&includeAims=true";
+  return http.get(url, { responseType: "blob" });
 }

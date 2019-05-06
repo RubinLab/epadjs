@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { FaPlusCircle, FaRegTrashAlt } from "react-icons/fa";
 import ReactTooltip from "react-tooltip";
+
 import "../menuStyle.css";
 
 const baseToolBar = ({ onAdd, onDelete, selected }) => {

@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import Toggle from "react-toggle";
+import Switch from "react-switch";
 
 const annotations = ({
   seriesUID,
@@ -9,9 +10,7 @@ const annotations = ({
   handleCheck,
   patients,
   showAnns,
-  onToggleSerie,
-  showLabels,
-  onToggleLabels
+  onToggleSerie
 }) => {
   let annotationsList = [];
   const annotationsArr = Object.values(
@@ -45,20 +44,20 @@ const annotations = ({
           <label className="-collapse-toggle">
             <span>Show Annotations</span>
             <div>
-              <Toggle
-                defaultChecked={showAnns}
-                onClick={onToggleSerie}
+              <Switch
+                checked={showAnns}
+                onChange={onToggleSerie}
                 data-seriesid={seriesUID}
-              />
-            </div>
-          </label>
-          <label className="-collapse-toggle">
-            <span>Show Labels</span>
-            <div>
-              <Toggle
-                defaultChecked={showLabels}
-                onClick={onToggleLabels}
-                data-seriesid={seriesUID}
+                id={seriesUID}
+                onColor="#86d3ff"
+                onHandleColor="#007bff"
+                handleDiameter={25}
+                uncheckedIcon={false}
+                checkedIcon={false}
+                boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+                activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+                height={15}
+                width={40}
               />
             </div>
           </label>

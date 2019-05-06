@@ -35,7 +35,6 @@ class DockTest extends Component {
           <div className="-dock__close">
             <div
               onClick={() => {
-                console.log("fired");
                 this.props.dispatch(showAnnotationDock());
               }}
             >

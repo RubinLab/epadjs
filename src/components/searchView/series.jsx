@@ -1,20 +1,28 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
+import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf } from "react-icons/fa";
+
 import { BrowserRouter, withRouter } from "react-router-dom";
 import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import Annotations from "./annotations";
 import { getSeries } from "../../services/seriesServices";
-import { connect } from "react-redux";
 import {
-  showAnnotationDock,
+  alertViewPortFull,
   getAnnotationListData,
-  getSingleSerie
+  getSingleSerie,
+  changeActivePort,
+  selectSerie,
+  clearSelection,
+  addToGrid,
+  getWholeData
 } from "../annotationsList/action";
 import AlertGridFull from "./alertGridFull";
 import "react-table/react-table.css";
 
-const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+// const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+const TreeTable = treeTableHOC(ReactTable);
 
 function getNodes(data, node = []) {
   data.forEach(item => {
@@ -26,6 +34,18 @@ function getNodes(data, node = []) {
   });
   return node;
 }
+
+const progressDisplay = status => {
+  if (status === "DONE") {
+    return <FaBatteryFull className="progress-done" />;
+  } else if (status === "NOT_STARTED") {
+    return <FaBatteryEmpty className="progress-notStarted" />;
+  } else if (status === "IN_PROGRESS") {
+    return <FaBatteryHalf className="progress-inProgress" />;
+  } else {
+    return <div>{status}</div>;
+  }
+};
 
 function selectSeries(projectId, subjectId, studyId, seriesId) {
   return {
@@ -51,6 +71,7 @@ class Series extends Component {
       selectType: "checkbox",
       expanded: {},
       showGridFullWarning: false
+      // selectedSerie: {}
     };
   }
 
@@ -68,8 +89,34 @@ class Series extends Component {
     this.setState({ columns: this.setColumns() });
   }
 
+  selectRow = selected => {
+    // console.log(selected);
+    // const newState = { ...this.state.selectedSerie };
+    // newState[selected.seriesUID]
+    //   ? delete newState[selected.seriesUID]
+    //   : (newState[selected.seriesUID] = selected.seriesDescription);
+    // this.setState({ selectedSerie: newState });
+    console.log(selected);
+    this.props.dispatch(clearSelection("serie"));
+    this.props.dispatch(selectSerie(selected));
+  };
   setColumns() {
     const columns = [
+      {
+        id: "checkbox",
+        accessor: "",
+        width: 30,
+        Cell: ({ original }) => {
+          return (
+            <input
+              type="checkbox"
+              className="checkbox-cell"
+              checked={this.props.selectedSeries[original.seriesUID] || false}
+              onChange={() => this.selectRow(original)}
+            />
+          );
+        }
+      },
       {
         Header: (
           <div>
@@ -79,7 +126,7 @@ class Series extends Component {
         ),
         Cell: row => (
           <div>
-            {row.original.seriesDescription} &nbsp; <br />
+            {row.original.seriesDescription || "Unnamed Serie"} &nbsp; <br />
             {row.original.numberOfAnnotations === "" ? (
               ""
             ) : (
@@ -116,7 +163,9 @@ class Series extends Component {
       },
       {
         Header: "Ready",
-        Cell: row => row.original.seriesProcessingStatus
+        Cell: row => (
+          <div>{progressDisplay(row.original.seriesProcessingStatus)}</div>
+        )
       },
       {
         Header: "Study/Created Date",
@@ -244,35 +293,94 @@ class Series extends Component {
     this.setState({ showGridFullWarning: false });
   };
 
+  // dispatchSerieDisplay = selected => {
+  //   const openSeries = Object.values(this.props.openSeries);
+  //   let isSerieOpen = false;
+  //   //check if there is enough space in the grid
+  //   let isGridFull = openSeries.length === 6;
+  //   //check if the serie is already open
+  //   if (openSeries.length > 0) {
+  //     for (let i = 0; i < openSeries.length; i++) {
+  //       // for (let serie of openSeries) {
+  //       if (openSeries[i]) {
+  //         if (openSeries[i].seriesUID === selected.seriesUID) {
+  //           isSerieOpen = true;
+  //           this.props.dispatch(changeActivePort(i));
+  //           break;
+  //         }
+  //       }
+  //     }
+  //   }
+  //   //serie is not already open;
+  //   if (!isSerieOpen) {
+  //     //if the grid is full show warning
+  //     if (isGridFull) {
+  //       // this.setState({ showGridFullWarning: true });
+  //       this.props.dispatch(alertViewPortFull());
+  //     } else {
+  //       //if grid is NOT full check if patient data exists
+  //       if (this.props.patients[selected.patientID]) {
+  //         this.props.dispatch(getSingleSerie(selected));
+  //         //if patient doesn't exist dispatch to get data
+  //       } else {
+  //         this.props.dispatch(getAnnotationListData(selected));
+  //       }
+  //     }
+  //   }
+  // };
   dispatchSerieDisplay = selected => {
-    // console.log(this.props);
     const openSeries = Object.values(this.props.openSeries);
+
     let isSerieOpen = false;
+
     //check if there is enough space in the grid
+
     let isGridFull = openSeries.length === 6;
+
     //check if the serie is already open
+
     if (openSeries.length > 0) {
-      for (let serie of openSeries) {
-        if (serie) {
-          if (serie.seriesUID === selected.seriesUID) {
-            isSerieOpen = true;
-            break;
-          }
+      for (let i = 0; i < openSeries.length; i++) {
+        // for (let serie of openSeries) {
+
+        // if (openSeries[i]) {
+
+        if (openSeries[i].seriesUID === selected.seriesUID) {
+          isSerieOpen = true;
+
+          this.props.dispatch(changeActivePort(i));
+
+          break;
         }
+
+        // }
       }
     }
+
     //serie is not already open;
+
     if (!isSerieOpen) {
       //if the grid is full show warning
+
       if (isGridFull) {
-        this.setState({ showGridFullWarning: true });
+        // this.setState({ showGridFullWarning: true });
+
+        this.props.dispatch(alertViewPortFull());
       } else {
         //if grid is NOT full check if patient data exists
+
         if (this.props.patients[selected.patientID]) {
+          this.props.dispatch(addToGrid(selected));
+
           this.props.dispatch(getSingleSerie(selected));
+
           //if patient doesn't exist dispatch to get data
         } else {
-          this.props.dispatch(getAnnotationListData(selected));
+          this.props.dispatch(addToGrid(selected));
+
+          this.props.dispatch(getSingleSerie(selected));
+
+          this.props.dispatch(getWholeData(selected));
         }
       }
     }
@@ -298,11 +406,12 @@ class Series extends Component {
       expanded,
       onExpandedChange
     };
+    const TheadComponent = props => null;
     return (
       <>
         <div>
           {this.state.data ? (
-            <SelectTreeTable
+            <TreeTable
               data={this.state.data}
               columns={this.state.columns}
               defaultPageSize={this.state.data.length}
@@ -310,6 +419,7 @@ class Series extends Component {
               className="-striped -highlight"
               freezWhenExpanded={false}
               showPagination={false}
+              TheadComponent={TheadComponent}
               {...extraProps}
               getTdProps={(state, rowInfo, column, instance) => {
                 return {
@@ -346,12 +456,12 @@ class Series extends Component {
 }
 
 const mapStateToProps = state => {
-  const { openSeries, patients, activePort } = state.annotationsListReducer;
   return {
     series: state.searchViewReducer.series,
-    openSeries,
-    patients,
-    activePort
+    openSeries: state.annotationsListReducer.openSeries,
+    patients: state.annotationsListReducer.patients,
+    activePort: state.annotationsListReducer.activePort,
+    selectedSeries: state.annotationsListReducer.selectedSeries
   };
 };
 

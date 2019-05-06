@@ -1,12 +1,12 @@
 import React from "react";
 import { connect } from "react-redux";
-import { BrowserRouter, withRouter } from "react-router-dom";
 import { Rnd } from "react-rnd";
 import Dropdown from "./containers/dropdown";
 import Header from "./containers/header";
 import List from "./containers/list";
-import CustomModal from "../management/common/resizeAndDrag";
 import { showAnnotationWindow } from "../annotationsList/action";
+
+//make it only drable not resiable
 
 const style = {
   left: "70%",
@@ -60,6 +60,13 @@ class AnnotationsList extends React.Component {
         position={{ x: this.state.x, y: this.state.y }}
         onDragStop={(e, d) => {
           this.setState({ x: d.x, y: d.y });
+        }}
+        onResize={(e, direction, ref, delta, position) => {
+          this.setState({
+            width: ref.style.width,
+            height: ref.style.height,
+            ...position
+          });
         }}
       >
         <div className="annList">
