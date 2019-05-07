@@ -5,7 +5,8 @@ import logo from "../images/logo.png";
 import { connect } from "react-redux";
 import { isLite } from "../config.json";
 
-const NavBar = ({ user, openGearMenu, loading }) => {
+const NavBar = ({ user, openGearMenu, loading, logout }) => {
+  console.log(user);
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -90,7 +91,7 @@ const NavBar = ({ user, openGearMenu, loading }) => {
                   </NavLink>
                 </li>
                 <li className="nav-item-right pull-right">
-                  <NavLink className="nav-link" to="/logout">
+                  <NavLink className="nav-link" to="/logout" onClick={logout}>
                     Logout
                   </NavLink>
                 </li>

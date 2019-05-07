@@ -54,17 +54,39 @@ class App extends Component {
     // when comp mount check if the user is set already. If is set then set state
     if (isLite) {
       const keycloak = Keycloak("/keycloak.json");
-      keycloak.init({ onLoad: "login-required" }).then(authenticated => {
-        this.setState({ keycloak: keycloak, authenticated: authenticated });
-        keycloak.loadUserInfo().then(userInfo => {
-          this.setState({
-            name: userInfo.name,
-            email: userInfo.email,
-            id: userInfo.sub
+      let user;
+      let keycloakInit = new Promise((resolve, reject) => {
+        keycloak.init({ onLoad: "login-required" }).then(authenticated => {
+          // this.setState({ keycloak: keycloak, authenticated: authenticated });
+          keycloak.loadUserInfo().then(userInfo => {
+            // let user = { id: userInfo.email, displayname: userInfo.given_name };
+            // this.setState({
+            //   name: userInfo.name,
+            //   user,
+            //   id: userInfo.sub
+            // });
+            resolve({ userInfo, keycloak, authenticated });
+            // reject("Authentication failed!");
           });
-          auth.login(userInfo.email, null, keycloak.token);
         });
       });
+      keycloakInit
+        .then(async result => {
+          let user = {
+            user: result.userInfo.email,
+            displayname: result.userInfo.given_name
+          };
+          await auth.login(user, null, result.keycloak.token);
+          this.setState({
+            keycloak: result.keycloak,
+            authenticated: result.authenticated,
+            id: result.userInfo.sub,
+            user
+          });
+        })
+        .catch(err => {
+          console.log(err);
+        });
     } else {
       try {
         const username = sessionStorage.getItem("username");
@@ -81,16 +103,29 @@ class App extends Component {
     // window.removeEventListener('keydown', this.closeMenu, true);
   };
 
+  onLogout = e => {
+    this.setState({
+      authenticated: false,
+      id: null,
+      keycloak: null,
+      name: null,
+      user: null
+    });
+  };
   render() {
-    console.log("state here", this.state);
+    console.log("App js state", this.state);
     return (
       <React.Fragment>
         <Cornerstone />
         <ToastContainer />
-        <NavBar user={this.state.user} openGearMenu={this.openMenu} />
+        <NavBar
+          user={this.state.user}
+          openGearMenu={this.openMenu}
+          logout={this.onLogout}
+        />
         {this.state.isMngMenuOpen && <Management closeMenu={this.closeMenu} />}
 
-        {!this.state.authenticated && (
+        {!this.state.authenticated && !isLite && (
           <Route path="/login" component={LoginForm} />
         )}
         {this.state.authenticated && !isLite && (
@@ -145,3 +180,18 @@ const mapStateToProps = state => {
   return { listOpen, dockOpen, showGridFullAlert, showProjectModal };
 };
 export default withRouter(connect(mapStateToProps)(App));
+
+/*if (isLite) {
+      const keycloak = Keycloak("/keycloak.json");
+      keycloak.init({ onLoad: "login-required" }).then(authenticated => {
+        this.setState({ keycloak: keycloak, authenticated: authenticated });
+        keycloak.loadUserInfo().then(userInfo => {
+          let user = { id: userInfo.email, displayname: userInfo.given_name };
+          this.setState({
+            name: userInfo.name,
+            user,
+            id: userInfo.sub
+          });
+          auth.login(user, null, keycloak.token);
+        });
+      }); */

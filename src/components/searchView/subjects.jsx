@@ -38,6 +38,7 @@ class Subjects extends Component {
   }
 
   async componentDidMount() {
+    console.log("in subjects before call");
     const {
       data: {
         ResultSet: { Result: data }

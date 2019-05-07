@@ -8,9 +8,10 @@ const apiEndpoint = apiUrlV1 + "/session/";
 export async function login(username, password, keyCloakToken) {
   let basicAuth;
   if (isLite) {
+    console.log("keyclok token", keyCloakToken);
     basicAuth = "Bearer " + keyCloakToken;
-
-    sessionStorage.setItem("username", username);
+    sessionStorage.setItem("token", keyCloakToken);
+    sessionStorage.setItem("username", username.user);
     /*********************************** REMOVE IN PROD  **************************/
     sessionStorage.setItem("header", basicAuth);
   } else {
@@ -36,6 +37,7 @@ export function logout() {
 }
 
 export function getCurrentUser() {
+  console.log("in get user", sessionStorage.getItem("username"));
   return sessionStorage.getItem("username");
 }
 
