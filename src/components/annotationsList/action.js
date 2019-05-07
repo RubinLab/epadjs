@@ -142,9 +142,11 @@ export const selectAnnotation = (
 };
 
 export const addToGrid = (serie, annotation) => {
-  let { patientID, studyUID, seriesUID } = serie;
-  if (annotation) patientID = serie.originalSubjectID;
+  let { patientID, studyUID, seriesUID, projectID } = serie;
+  if (annotation)
+    patientID = serie.originalSubjectID || serie.subjectID || serie.patientID;
   let reference = {
+    projectID,
     patientID,
     studyUID,
     seriesUID,

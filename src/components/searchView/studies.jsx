@@ -7,7 +7,7 @@ import treeTableHOC from "react-table/lib/hoc/treeTable";
 import { getStudies } from "../../services/studyServices";
 import { getSeries } from "../../services/seriesServices";
 import ProjectModal from "../annotationsList/selectSerieModal";
-
+import { MAX_PORT } from "../../constants";
 import Series from "./series";
 import {
   openProjectSelectionModal,
@@ -19,7 +19,8 @@ import {
   loadCompleted,
   annotationsLoadingError,
   addToGrid,
-  getWholeData
+  getWholeData,
+  alertViewPortFull
 } from "../annotationsList/action";
 //import "react-table/react-table.css";
 
@@ -312,39 +313,44 @@ class Studies extends Component {
   };
 
   displaySeries = async selected => {
-    console.log(selected);
-    const { patientID, studyUID } = selected;
-    let seriesArr;
-    //check if the patient is there (create a patient exist flag)
-    const patientExists = this.props.patients[patientID];
-    //if there is patient iterate over the series object of the study (form an array of series)
-    if (patientExists) {
-      seriesArr = Object.values(
-        this.props.patients[patientID].studies[studyUID].series
-      );
-      //if there is not a patient get series data of the study and (form an array of series)
+    if (this.props.openSeries.length === MAX_PORT) {
+      this.props.dispatch(alertViewPortFull());
     } else {
-      seriesArr = await this.getSeriesData(selected);
-    }
-    console.log("seriesArr", seriesArr);
-    //get extraction of the series (extract unopen series)
-    seriesArr = this.excludeOpenSeries(seriesArr);
-    //check if there is enough room
-    if (seriesArr.length + this.props.openSeries.length > 6) {
-      //if there is not bring the modal
-      this.setState({ isSerieSelectionOpen: true, selectedStudy: [seriesArr] });
-    } else {
-      //if there is enough room
-      //add serie to the grid
-      for (let serie of seriesArr) {
-        this.props.dispatch(addToGrid(serie));
+      const { patientID, studyUID } = selected;
+      let seriesArr;
+      //check if the patient is there (create a patient exist flag)
+      const patientExists = this.props.patients[patientID];
+      //if there is patient iterate over the series object of the study (form an array of series)
+      if (patientExists) {
+        seriesArr = Object.values(
+          this.props.patients[patientID].studies[studyUID].series
+        );
+        //if there is not a patient get series data of the study and (form an array of series)
+      } else {
+        seriesArr = await this.getSeriesData(selected);
       }
-      //getsingleSerie
-      for (let serie of seriesArr) {
-        this.props.dispatch(getSingleSerie(serie));
+      //get extraction of the series (extract unopen series)
+      seriesArr = this.excludeOpenSeries(seriesArr);
+      //check if there is enough room
+      if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
+        //if there is not bring the modal
+        this.setState({
+          isSerieSelectionOpen: true,
+          selectedStudy: [seriesArr]
+        });
+      } else {
+        //if there is enough room
+        //add serie to the grid
+        for (let serie of seriesArr) {
+          this.props.dispatch(addToGrid(serie));
+        }
+        //getsingleSerie
+        for (let serie of seriesArr) {
+          this.props.dispatch(getSingleSerie(serie));
+        }
+        //if patient doesnot exist get patient
+        if (!patientExists) this.props.dispatch(getWholeData(null, selected));
       }
-      //if patient doesnot exist get patient
-      if (!patientExists) this.props.dispatch(getWholeData(null, selected));
     }
   };
 
@@ -375,7 +381,6 @@ class Studies extends Component {
       onExpandedChange
     };
     const TheadComponent = props => null;
-    console.log("state serie", this.state.selectedStudy);
     return (
       <div>
         {this.state.data ? (

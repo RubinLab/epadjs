@@ -18,6 +18,8 @@ import {
   addToGrid,
   getWholeData
 } from "../annotationsList/action";
+import { MAX_PORT } from "../../constants";
+
 import AlertGridFull from "./alertGridFull";
 import "react-table/react-table.css";
 
@@ -297,7 +299,7 @@ class Series extends Component {
     const openSeries = Object.values(this.props.openSeries);
     let isSerieOpen = false;
     //check if there is enough space in the grid
-    let isGridFull = openSeries.length === 6;
+    let isGridFull = openSeries.length === MAX_PORT;
     //check if the serie is already open
     if (openSeries.length > 0) {
       for (let i = 0; i < openSeries.length; i++) {

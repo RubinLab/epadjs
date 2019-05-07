@@ -79,24 +79,24 @@ const asyncReducer = (state = initialState, action) => {
       const srID = action.payload.ref.seriesUID;
       const { ann } = action.payload;
       let changedPatients;
-      if (state.patients[ptID]) {
-        console.log("it makes it here");
-        let changedPatient = Object.assign({}, state.patients[ptID]);
-        if (ann) {
-          changedPatient.studies[stID].series[srID].annotations[
-            ann
-          ].isDisplayed = true;
-        } else {
-          changedPatient.studies[stID].series[srID].displayAnns = true;
-          for (let annotation in changedPatient.studies[stID].series[srID]
-            .annotations) {
-            changedPatient.studies[stID].series[srID].annotations[
-              annotation
-            ].isDisplayed = true;
-          }
-        }
-        changedPatients = { ...state.patients, [ptID]: changedPatient };
-      }
+      // if (state.patients[ptID]) {
+      //   console.log("it makes it here");
+      //   let changedPatient = Object.assign({}, state.patients[ptID]);
+      //   if (ann) {
+      //     changedPatient.studies[stID].series[srID].annotations[
+      //       ann
+      //     ].isDisplayed = true;
+      //   } else {
+      //     changedPatient.studies[stID].series[srID].displayAnns = true;
+      //     for (let annotation in changedPatient.studies[stID].series[srID]
+      //       .annotations) {
+      //       changedPatient.studies[stID].series[srID].annotations[
+      //         annotation
+      //       ].isDisplayed = true;
+      //     }
+      //   }
+      //   changedPatients = { ...state.patients, [ptID]: changedPatient };
+      // }
       const result = Object.assign({}, state, {
         loading: false,
         error: false,

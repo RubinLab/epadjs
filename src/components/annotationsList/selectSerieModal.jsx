@@ -17,6 +17,7 @@ import SerieSelect from "./containers/serieSelection";
 import SelectionItem from "./containers/selectionItem";
 import { FaRegCheckCircle, FaRegCheckSquare } from "react-icons/fa";
 import { getSeries } from "../../services/seriesServices";
+import { MAX_PORT } from "../../constants";
 
 const message = {
   title: "Not enough ports to open series"
@@ -80,17 +81,27 @@ class selectSerieModal extends React.Component {
     return series;
   };
 
-  selectToDisplay = async e => {
+  componentDidUpdate = prevProps => {
+    if (this.props.openSeries.length !== prevProps.openSeries.length) {
+      let limit = this.updateLimit();
+      this.setState({ limit });
+    }
+  };
+
+  updateLimit = () => {
     let selectCount = 0;
-    let arr = [...this.state.selectedToDisplay];
-    arr[e.target.dataset.index] = e.target.checked;
-    await this.setState({ selectedToDisplay: arr });
     this.state.selectedToDisplay.forEach(item => {
       if (item) {
         selectCount++;
       }
     });
-    let limit = this.props.openSeries.length + selectCount;
+    return this.props.openSeries.length + selectCount;
+  };
+  selectToDisplay = async e => {
+    let arr = [...this.state.selectedToDisplay];
+    arr[e.target.dataset.index] = e.target.checked;
+    await this.setState({ selectedToDisplay: arr });
+    let limit = this.updateLimit();
     this.setState({ limit });
   };
 
@@ -100,12 +111,11 @@ class selectSerieModal extends React.Component {
     studies.forEach(arr => {
       series = series.concat(arr);
     });
-    console.log(series);
     // let series = Object.values(this.props.seriesPassed)[0];
     //concatanete all arrays to getther
     for (let i = 0; i < this.state.selectedToDisplay.length; i++) {
       if (this.state.selectedToDisplay[i]) {
-        this.props.dispatch(addToGrid(series[i]));
+        this.props.dispatch(addToGrid(series[i], series[i].aimID));
         if (this.state.selectionType === "aim") {
           this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
         } else {
@@ -150,8 +160,8 @@ class selectSerieModal extends React.Component {
       for (let k = 0; k < series[i].length; k++) {
         let alreadyOpen = openSeriesUIDList.includes(series[i][k].seriesUID);
         let disabled =
-          (!this.state.selectedToDisplay[count + k] && this.state.limit >= 6) ||
-          alreadyOpen;
+          !this.state.selectedToDisplay[count + k] &&
+          this.state.limit >= MAX_PORT;
         let desc = series[i][k].seriesDescription || "Unnamed Serie";
         // desc = alreadyOpen ? `${desc} - already open` : desc;
         item = alreadyOpen ? (
@@ -202,7 +212,9 @@ class selectSerieModal extends React.Component {
           >
             Close all views
           </button>
-          {this.state.limit >= 6 && <div>You reached Max number of series</div>}
+          {this.state.limit >= MAX_PORT && (
+            <div>You reached Max number of series</div>
+          )}
           <div>{list}</div>
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
@@ -229,34 +241,3 @@ const mapStateToProps = state => {
 };
 
 export default connect(mapStateToProps)(selectSerieModal);
-
-// if (series.length === 1) {
-//   console.log("here");
-//   item = (
-//     <SerieSelect
-//       itemArr={series[0]}
-//       onSelect={this.selectToDisplay}
-//       limit={this.state.limit}
-//       checkList={this.state.selectedToDisplay}
-//       key="0"
-//       indexStart={0}
-//     />
-//   );
-//   selectionList.push(item);
-// } else {
-//   for (let i = 0; i < series.length; i++) {
-//     let title = series[i][0].bodyPart || series[i][0].studyDescription;
-//     item = (
-//       <div key={keys[i]}>
-//         <div>{title}</div>
-//         <SerieSelect
-//           itemArr={series[i]}
-//           onSelect={this.selectToDisplay}
-//           limit={this.state.limit}
-//           checkList={this.state.selectedToDisplay}
-//           key="0"
-//           indexStart={count}
-//         />
-//       </div>
-//     );
-//     selectionList.push(item);

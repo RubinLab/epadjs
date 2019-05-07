@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
-
 import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
+import { MAX_PORT } from "../../constants";
 import { getAnnotations } from "../../services/annotationServices";
 import {
   displaySingleAim,
@@ -57,7 +57,6 @@ class Annotations extends Component {
   }
 
   selectRow = selected => {
-    console.log(selected);
     const { studyDescription, seriesDescription } = this.props;
     this.props.dispatch(clearSelection("annotation"));
     this.props.dispatch(
@@ -203,7 +202,7 @@ class Annotations extends Component {
     // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
     let isSerieOpen = false;
     //check if there is enough space in the grid
-    let isGridFull = openSeries.length === 6;
+    let isGridFull = openSeries.length === MAX_PORT;
     //check if the serie is already open
     if (openSeries.length > 0) {
       for (let i = 0; i < openSeries.length; i++) {

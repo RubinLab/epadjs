@@ -11,9 +11,13 @@ import {
   openProjectSelectionModal,
   startLoading,
   loadCompleted,
-  annotationsLoadingError
+  annotationsLoadingError,
+  addToGrid,
+  getSingleSerie,
+  getWholeData,
+  alertViewPortFull
 } from "../annotationsList/action";
-
+import { MAX_PORT } from "../../constants";
 import "./searchView.css";
 
 class SearchView extends Component {
@@ -23,60 +27,105 @@ class SearchView extends Component {
   }
 
   viewSelection = async () => {
-    const selectedStudies = Object.values(this.props.selectedStudies);
-    const selectedSeries = Object.values(this.props.selectedSeries);
-    let selectedAnnotations = Object.values(this.props.selectedAnnotations);
-
-    const groupedAnns = this.groupUnderSerie(selectedAnnotations);
-    const serieCountOfAnns = Object.values(groupedAnns).length;
-    console.log("---------grouped anns-----------");
-    console.log(groupedAnns);
-    //check if enough room to display selection
-    if (selectedStudies.length > 0) {
-      let total = 0;
-      let studiesObj = {};
-      for (let st of selectedStudies) {
-        total += st.numberOfSeries;
-      }
-      //if more than 6 bring serie selection modal
-      if (total + this.props.openSeries.length > 6) {
-        this.props.dispatch(startLoading());
+    if (this.props.openSeries.length === MAX_PORT) {
+      this.props.dispatch(alertViewPortFull());
+    } else {
+      const selectedStudies = Object.values(this.props.selectedStudies);
+      const selectedSeries = Object.values(this.props.selectedSeries);
+      let selectedAnnotations = Object.values(this.props.selectedAnnotations);
+      const groupedAnns = this.groupUnderSerie(selectedAnnotations);
+      let patientList;
+      let groupedObj;
+      //if studies selected
+      if (selectedStudies.length > 0) {
+        let total = 0;
+        let studiesObj = {};
+        patientList = this.groupUnderPatient(selectedStudies);
+        for (let st of selectedStudies) {
+          total += st.numberOfSeries;
+        }
         for (let st of selectedStudies) {
           studiesObj[st.studyUID] = await this.getSeriesData(st);
         }
-        await this.setState({ seriesList: studiesObj });
-        this.props.dispatch(loadCompleted());
-        // this.props.dispatch(openProjectSelectionModal());
-        this.setState({ isSerieSelectionOpen: true });
-      } else {
-        //her bir studynin altindaki serieler icin single serie cagit
-        //eger patient listte yoksa onu da cagir
-      }
-    } else if (selectedSeries.length > 0) {
-      //if more than 6 bring option
-      if (selectedSeries.length + this.props.openSeries.length > 6) {
-        let groupedObj = this.groupUnderStudy(selectedSeries);
-        await this.setState({ seriesList: groupedObj });
-        // this.props.dispatch(openProjectSelectionModal());
-        this.setState({ isSerieSelectionOpen: true });
-      } else {
-        //serieler icin single serie cagit
-        //eger patient listte yoksa onu da cagir
-      }
-    } else if (selectedAnnotations.length > 0) {
-      if (serieCountOfAnns + this.props.openSeries.length > 6) {
-        console.log("passed the limit in annotations");
-        console.log(groupedAnns);
-        console.log(selectedAnnotations);
-        let groupedObj = this.groupUnderStudy(selectedSeries);
-
-        // await this.setState({ seriesList: groupedObj });
-        // this.props.dispatch(openProjectSelectionModal());
-      } else {
-        //serieler icin single serie cagit
-        //eger patient listte yoksa onu da cagir
+        //check if enough room to display selection
+        if (total + this.props.openSeries.length > MAX_PORT) {
+          this.props.dispatch(startLoading());
+          await this.setState({ seriesList: studiesObj });
+          this.props.dispatch(loadCompleted());
+          this.setState({ isSerieSelectionOpen: true });
+        } else {
+          for (let study in studiesObj) {
+            for (let serie of studiesObj[study]) {
+              this.props.dispatch(addToGrid(serie));
+              this.props.dispatch(getSingleSerie(serie));
+            }
+          }
+          for (let patient in patientList) {
+            if (!this.props.patients[patient]) {
+              this.props.dispatch(getWholeData(null, patientList[patient]));
+            }
+          }
+        }
+        //if series selected
+      } else if (selectedSeries.length > 0) {
+        patientList = this.groupUnderPatient(selectedSeries);
+        //check if enough room to display selection
+        if (selectedSeries.length + this.props.openSeries.length > MAX_PORT) {
+          groupedObj = this.groupUnderStudy(selectedSeries);
+          await this.setState({ seriesList: groupedObj });
+          this.setState({ isSerieSelectionOpen: true });
+        } else {
+          //else get data for each serie for display
+          selectedSeries.forEach(serie => {
+            this.props.dispatch(addToGrid(serie));
+          });
+          selectedSeries.forEach(serie => {
+            this.props.dispatch(getSingleSerie(serie));
+          });
+          for (let patient in patientList) {
+            if (!this.props.patients[patient]) {
+              this.props.dispatch(getWholeData(patientList[patient]));
+            }
+          }
+        }
+        //if annptations selected
+      } else if (selectedAnnotations.length > 0) {
+        let serieList = Object.values(groupedAnns);
+        groupedObj = this.groupUnderStudy(serieList);
+        patientList = this.groupUnderPatient(selectedAnnotations);
+        //check if enough room to display selection
+        if (serieList.length + this.props.openSeries.length > MAX_PORT) {
+          await this.setState({ seriesList: groupedObj });
+          this.setState({ isSerieSelectionOpen: true });
+          //else get data for each serie for display
+        } else {
+          serieList.forEach(serie => {
+            this.props.dispatch(addToGrid(serie, serie.aimID));
+          });
+          serieList.forEach(serie => {
+            this.props.dispatch(getSingleSerie(serie, serie.aimID));
+          });
+          for (let patient in patientList) {
+            if (!this.props.patients[patient]) {
+              this.props.dispatch(
+                getWholeData(
+                  patientList[patient],
+                  null,
+                  patientList[patient].aimID
+                )
+              );
+            }
+          }
+        }
       }
     }
+  };
+  groupUnderPatient = objArr => {
+    let groupedObj = {};
+    for (let item of objArr) {
+      groupedObj[item.patientID] = item;
+    }
+    return groupedObj;
   };
 
   groupUnderStudy = objArr => {
@@ -197,7 +246,7 @@ const mapStateToProps = state => {
     selectedStudies: state.annotationsListReducer.selectedStudies,
     selectedSeries: state.annotationsListReducer.selectedSeries,
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
-
+    patients: state.annotationsListReducer.patients,
     openSeries: state.annotationsListReducer.openSeries,
     showProjectModal: state.annotationsListReducer.showProjectModal,
     loading: state.annotationsListReducer.loading
