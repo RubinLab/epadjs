@@ -1,5 +1,7 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import Draggable from "react-draggable";
+import { getTemplates } from "../../services/templateServices";
 import * as questionaire from "../../utils/AimEditorReactV1/parseClass";
 import "./aimEditor.css";
 import Aim from "./Aim";
@@ -13,16 +15,27 @@ const enumAimType = {
 class AimEditor extends Component {
   constructor(props) {
     super(props);
-    this.seriesUid = this.props.series.seriesId;
-    this.studyUid = this.props.series.studyId;
-    this.csTools = this.props.csTools;
+    // this.seriesUid = this.props.series.seriesId;
+    // this.studyUid = this.props.series.studyId;
     this.cornerstone = this.props.cornerstone;
-    this.person = this.props.person;
-    this.equipment = this.props.equipment;
-    this.accession = this.props.accession;
+    this.csTools = this.props.csTools;
+    this.image = this.getImage();
+    this.person = this.getPatientData(this.image);
+    this.equipment = this.getEquipmentData(this.image);
+    this.accession = this.getAccession(this.image);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    const templateId = "1";
+    const {
+      data: {
+        ResultSet: { Result: templates }
+      }
+    } = await getTemplates(templateId);
+    //
+    // Change the static projectId above with the value in store
+    //
+
     var shoutOutValidation = message => {
       alert(message);
     };
@@ -33,6 +46,40 @@ class AimEditor extends Component {
     semanticAnswers.loadTemplates(questionaire.myA);
     semanticAnswers.createViewerWindow();
   }
+
+  getImage = () => {
+    return this.cornerstone.getImage(
+      this.cornerstone.getEnabledElements()[this.props.activePort]["element"]
+    );
+  };
+
+  getPatientData = image => {
+    const sex = image.data.string("x00100040") || "";
+    const name = image.data.string("x00100010") || "";
+    const patientId = image.data.string("x00100020") || "";
+    const birthDate = image.data.string("x00100030") || "";
+    const person = {
+      sex: { value: sex },
+      name: { value: name },
+      id: { value: patientId },
+      birthDate: { value: birthDate }
+    };
+  };
+
+  getEquipmentData = image => {
+    const manuName = image.data.string("x00080070") || "";
+    const manuModel = image.data.string("x00081090") || "";
+    const sw = image.data.string("x00181020") || "";
+    const equipment = {
+      manufacturerName: manuName,
+      manufacturerModelName: manuModel,
+      softwareVersion: sw
+    };
+  };
+
+  getAccession = image => {
+    return image.data.string("x00080050") || "";
+  };
 
   render() {
     return (
@@ -52,6 +99,7 @@ class AimEditor extends Component {
   createAim = () => {
     const hasSegmentation = false; //TODO:keep this in store and look dynamically
     var aim = new Aim(
+      this.image,
       this.studyUid,
       this.equipment,
       this.accession,
@@ -153,5 +201,10 @@ class AimEditor extends Component {
   //   instanceAimEditor.createViewerWindow();
   // };
 }
-
-export default AimEditor;
+const mapStateToProps = state => {
+  return {
+    series: state.searchViewReducer.series,
+    activePort: state.annotationsListReducer.activePort
+  };
+};
+export default connect(mapStateToProps)(AimEditor);

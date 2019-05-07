@@ -1,8 +1,10 @@
 import aimConf from "./aimConf";
+import { modalities } from "./modality";
 import { generateUid } from "../../utils/aid";
 
 class Aim {
   constructor(
+    image,
     studyInstanceUid,
     equipment,
     accession,
@@ -12,6 +14,7 @@ class Aim {
     aim = {}
   ) {
     Object.assign(this, aim);
+    this.image = image;
     this.aimVersion = aimConf.aimVersion;
     this.dateTime = this.getDate();
     this.seriesInstanceUid = { root: generateUid() };
@@ -28,11 +31,14 @@ class Aim {
     this.xmlns = aimConf.xmlns;
     this.person = person;
     this.user = this.getUserInfo();
+    this.fillImageSepcificData();
   }
 
   static parse(data) {
     return new Aim(data);
   }
+
+  fillImageSepcificData = () => {};
 
   getUserInfo = () => {
     var obj = {};
@@ -336,54 +342,74 @@ Vehicle.display();//still "General"
     return uId;
   };
 
-  createModality = (code, codeSystemName, displayName, codeSystemVersion) => {
+  _createModality = () => {
+    const sopClassUid = this.image.data.string("x00080016") || "";
+    if (sopClassUid)
+      var {
+        codeValue,
+        codingSchemeDesignator,
+        codeMeaning,
+        codingSchemeVersion
+      } = modalities[sopClassUid];
+    else {
+      const modality = this.image.data.string("x00080060") || "";
+      if (modality) {
+        // look from modalities
+        // var {codeValue, codingSchemeDesignator, codeMeaning, codingSchemeVersion} =;
+      }
+    }
     var obj = {};
-    obj["code"] = code;
-    obj["codeSystemName"] = codeSystemName;
+    obj["code"] = codeValue;
+    obj["codeSystemName"] = codingSchemeDesignator;
     obj["iso:displayName"] = {
       "xmlns:iso:": "uri:iso.org:21090",
-      value: displayName
+      value: codeMeaning
     };
-    obj["codeSystemVersion"] = codeSystemName;
+    obj["codeSystemVersion"] = codingSchemeVersion;
     return obj;
   };
 
-  createImageCollection = (sopClass, sopInstance) => {
+  _createImageCollection = () => {
     var obj = {};
-    var sopClass = { root: sopClass };
-    var sopInstance = { root: sopInstance };
+    const sopClassUid = this.image.data.string("x00080016") || "";
+    const sopInstanceUid = this.image.data.string("x00080018") || "";
+    var sopClass = { root: sopClassUid };
+    var sopInstance = { root: sopInstanceUid };
     obj["Image"] = { sopClassUid: sopClass, sopInstanceUid: sopInstance };
     return obj;
   };
 
-  createImageSeries = () => {
+  _createImageSeries = () => {
     var obj = {};
-    obj["modality"] = this.createModality();
-    obj["imageColletion"] = this.createImageCollection();
+    obj["modality"] = this._createModality();
+    obj["imageColletion"] = this._createImageCollection();
+    obj["instanceUid"] = this.image.data.string("x0020000E") || "";
     return obj;
   };
 
-  createImageStudy = (startTime, instanceUid, startDate, accessionNumber) => {
+  _createImageStudy = () => {
     var obj = {};
-    obj["imageSeries"] = this.createImageSeries();
-    obj["startTime"] = { value: startTime };
-    obj["instanceUid"] = { root: instanceUid };
-    obj["startDate"] = { value: startDate };
-    obj["accessionNumber"] = { value: accessionNumber };
+    obj["imageSeries"] = this._createImageSeries();
+    obj["startTime"] = { value: this.image.data.string("x00080030") || "" };
+    obj["instanceUid"] = { root: this.image.data.string("x0020000D") || "" };
+    obj["startDate"] = { value: this.image.data.string("x00080020") || "" };
+    obj["accessionNumber"] = {
+      value: this.image.data.string("x00080050") || ""
+    };
     return obj;
   };
 
-  createImageReferenceEntity = id => {
+  _createImageReferenceEntity = () => {
     var obj = {};
-    obj["imageStudy"] = this.createImageStudy();
+    obj["imageStudy"] = this._createImageStudy();
     obj["xsi:type"] = "DicomImageReferenceEntity";
-    obj["uniqueIdentifier"] = { root: id };
+    obj["uniqueIdentifier"] = { root: generateUid() };
     return obj;
   };
 
-  createImageReferanceEntityCollection = () => {
+  _createImageReferanceEntityCollection = () => {
     var obj = {};
-    obj["imageReferenceEntityCollection"] = this.createImageReferenceEntity();
+    obj["imageReferenceEntityCollection"] = this._createImageReferenceEntity();
     return obj;
   };
 
@@ -424,7 +450,9 @@ Vehicle.display();//still "General"
   _createImageAnnotations = (aimType, hasSegmentations) => {
     var obj = {};
     obj["dateTime"] = { value: this.getDate() };
-    obj["imageReferenceEntityCollection"] = {};
+    obj[
+      "imageReferenceEntityCollection"
+    ] = this._createImageReferanceEntityCollection();
     obj["name"] = {};
     obj["comment"] = {};
     obj["uniqueIdentifier"] = {};

@@ -7,7 +7,7 @@ import { connect } from "react-redux";
 import { wadoUrl } from "../../config.json";
 import { withRouter } from "react-router-dom";
 import CornerstoneViewport from "react-cornerstone-viewport";
-import Aim from "../../utils/Aim";
+import Aim from "../aimEditor/Aim";
 import AimEditor from "../aimEditor/aimEditor";
 import "./flex.css";
 //import viewport from "./viewport.jsx";
@@ -219,21 +219,6 @@ class DisplayView extends Component {
     this.props.cornerstone.fitToWindow(elem);*/
   };
 
-  annotationCreated = event => {
-    const { toolType } = event.detail;
-
-    const toolsOfInterest = [
-      "Length",
-      "EllipticalRoi",
-      "RectangleRoi",
-      "FreehandMouse",
-      "Bidirectional"
-    ];
-    if (toolsOfInterest.includes(toolType)) {
-      this.setState({ showAimEditor: true });
-    }
-  };
-
   measurementChanged = event => {
     const { toolType } = event.detail;
 
@@ -245,8 +230,7 @@ class DisplayView extends Component {
       "Bidirectional"
     ];
     if (toolsOfInterest.includes(toolType)) {
-      // this.setState({ showAimEditor: true });
-      alert("yooop");
+      this.setState({ showAimEditor: true });
     }
   };
 
@@ -287,7 +271,10 @@ class DisplayView extends Component {
               serie={serie}
             />*/}
               {this.state.showAimEditor && (
-                <AimEditor csTools={this.cornerstoneTools} />
+                <AimEditor
+                  cornerstone={this.props.cornerstone}
+                  csTools={this.cornerstoneTools}
+                />
               )}
               <CornerstoneViewport
                 viewportData={data}
