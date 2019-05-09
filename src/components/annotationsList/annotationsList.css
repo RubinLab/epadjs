@@ -139,6 +139,7 @@
   align-items: center;
   border-top-left-radius: 1em;
   border-top-right-radius: 1em;
+  justify-content: space-between;
 }
 
 .annotation__name--text {
@@ -155,6 +156,7 @@
   justify-content: center;
   width: 84%;
   font-size: 1rem;
+  /* align-items: center; */
 }
 
 .annotation-icon {
@@ -162,14 +164,24 @@
   justify-content: center;
   font-size: 1.2rem;
   display: inline-block;
-  margin: 0 auto;
+  /* margin: 0 auto; */
   cursor: pointer;
   width: 8%;
   margin-right: 0.2rem;
 }
 
+.annotation__inner {
+  display: flex;
+  width: 92%;
+}
+
 .showLabel {
   font-size: 1.8rem;
+  width: 10%;
+}
+
+.annotation-name__container {
+  cursor: pointer;
 }
 svg {
   pointer-events: none;

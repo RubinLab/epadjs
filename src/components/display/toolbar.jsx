@@ -123,7 +123,6 @@ class Toolbar extends Component {
       dockOpen: !state.dockOpen
     }));
     this.props.dispatch(showAnnotationDock());
-    this.setState({ showDrawing: !this.state.showDrawing });
   };
 
   invert = () => {

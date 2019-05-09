@@ -27,6 +27,7 @@ export const DISPLAY_SINGLE_AIM = "epadjs/annotationList/DISPLAY_SINGLE_AIM";
 export const ADD_TO_GRID = "epadjs/annotationList/ADD_TO_GRID";
 export const LOAD_COMPLETED = "epadjs/annotationList/LOAD_COMPLETED";
 export const START_LOADING = "epadjs/annotationList/START_LOADING";
+export const UPDATE_PATIENT = "epadjs/annotationList/UPDATE_PATIENT";
 
 export const colors = [
   {

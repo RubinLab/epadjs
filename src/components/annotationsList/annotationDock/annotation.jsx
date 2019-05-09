@@ -48,8 +48,12 @@ const annotation = props => {
         >
           {props.showLabel ? <FaCaretUp /> : <FaCaretDown />}
         </div>
-        <div className="annotation-name__container">
-          <div className="annotation__name--text">{props.name}</div>
+        <div
+          className="annotation-name__container"
+          data-id={props.id}
+          onClick={props.onSingleToggle}
+        >
+          {props.name}
         </div>
         <div
           className="annotation-icon"

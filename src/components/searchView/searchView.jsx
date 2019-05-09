@@ -15,7 +15,8 @@ import {
   addToGrid,
   getSingleSerie,
   getWholeData,
-  alertViewPortFull
+  alertViewPortFull,
+  updatePatient
 } from "../annotationsList/action";
 import { MAX_PORT } from "../../constants";
 import "./searchView.css";
@@ -60,9 +61,21 @@ class SearchView extends Component {
               this.props.dispatch(getSingleSerie(serie));
             }
           }
-          for (let patient in patientList) {
-            if (!this.props.patients[patient]) {
-              this.props.dispatch(getWholeData(null, patientList[patient]));
+          for (let study in studiesObj) {
+            for (let serie of studiesObj[study]) {
+              if (!this.props.patients[serie.patientID]) {
+                await this.props.dispatch(getWholeData(serie));
+              } else {
+                this.props.dispatch(
+                  updatePatient(
+                    "serie",
+                    true,
+                    serie.patientID,
+                    serie.studyUID,
+                    serie.seriesUID
+                  )
+                );
+              }
             }
           }
         }
@@ -78,13 +91,24 @@ class SearchView extends Component {
           //else get data for each serie for display
           selectedSeries.forEach(serie => {
             this.props.dispatch(addToGrid(serie));
-          });
-          selectedSeries.forEach(serie => {
             this.props.dispatch(getSingleSerie(serie));
           });
-          for (let patient in patientList) {
-            if (!this.props.patients[patient]) {
-              this.props.dispatch(getWholeData(patientList[patient]));
+          // selectedSeries.forEach(serie => {
+          //   this.props.dispatch(getSingleSerie(serie));
+          // });
+          for (let series of selectedSeries) {
+            if (!this.props.patients[series.patientID]) {
+              await this.props.dispatch(getWholeData(series));
+            } else {
+              this.props.dispatch(
+                updatePatient(
+                  "serie",
+                  true,
+                  series.patientID,
+                  series.studyUID,
+                  series.seriesUID
+                )
+              );
             }
           }
         }
@@ -101,17 +125,23 @@ class SearchView extends Component {
         } else {
           serieList.forEach(serie => {
             this.props.dispatch(addToGrid(serie, serie.aimID));
-          });
-          serieList.forEach(serie => {
             this.props.dispatch(getSingleSerie(serie, serie.aimID));
           });
-          for (let patient in patientList) {
-            if (!this.props.patients[patient]) {
+          // serieList.forEach(serie => {
+          //   this.props.dispatch(getSingleSerie(serie, serie.aimID));
+          // });
+          for (let ann of selectedAnnotations) {
+            if (!this.props.patients[ann.subjectID]) {
+              await this.props.dispatch(getWholeData(null, null, ann));
+            } else {
               this.props.dispatch(
-                getWholeData(
-                  patientList[patient],
-                  null,
-                  patientList[patient].aimID
+                updatePatient(
+                  "annotation",
+                  true,
+                  ann.subjectID,
+                  ann.studyUID,
+                  ann.seriesUID,
+                  ann.aimID
                 )
               );
             }

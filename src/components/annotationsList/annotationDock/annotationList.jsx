@@ -41,6 +41,7 @@ class annotationsList extends React.Component {
   };
 
   handleToggleSingleLabel = e => {
+    console.log(e.target.dataset);
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
   };

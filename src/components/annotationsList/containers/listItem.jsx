@@ -25,7 +25,7 @@ class ListItem extends React.Component {
     this.setState({
       isSerieOpen: this.props.selected,
       collapseAnnList: this.checkIfSerieOpen(this.props.serie.seriesUID).isOpen,
-      displayAnnotations: this.props.serie.displayAnns,
+      displayAnnotations: this.props.serie.isDisplayed,
       displayLabels: this.props.serie.isLabelDisplayed
     });
   };

@@ -20,7 +20,8 @@ import {
   annotationsLoadingError,
   addToGrid,
   getWholeData,
-  alertViewPortFull
+  alertViewPortFull,
+  updatePatient
 } from "../annotationsList/action";
 //import "react-table/react-table.css";
 
@@ -349,7 +350,13 @@ class Studies extends Component {
           this.props.dispatch(getSingleSerie(serie));
         }
         //if patient doesnot exist get patient
-        if (!patientExists) this.props.dispatch(getWholeData(null, selected));
+        if (!patientExists) {
+          this.props.dispatch(getWholeData(null, selected));
+        } else {
+          this.props.dispatch(
+            updatePatient("study", true, patientID, studyUID)
+          );
+        }
       }
     }
   };

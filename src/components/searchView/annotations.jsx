@@ -15,7 +15,8 @@ import {
   selectAnnotation,
   changeActivePort,
   addToGrid,
-  getWholeData
+  getWholeData,
+  updatePatient
 } from "../annotationsList/action";
 import "react-table/react-table.css";
 
@@ -197,7 +198,7 @@ class Annotations extends Component {
   displayAnnotations = selected => {
     console.log(selected);
     const { projectID, studyUID, seriesUID, aimID } = selected;
-    const patientID = selected.originalSubjectID;
+    const patientID = selected.subjectID;
     const { openSeries } = this.props;
     // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
     let isSerieOpen = false;
@@ -224,8 +225,19 @@ class Annotations extends Component {
       this.props.dispatch(addToGrid(selected, aimID));
       this.props.dispatch(getSingleSerie(selected, aimID));
       //if grid is NOT full check if patient data exists
-      if (!this.props.patients[selected.patientID]) {
+      if (!this.props.patients[patientID]) {
         this.props.dispatch(getWholeData(null, null, selected));
+      } else {
+        this.props.dispatch(
+          updatePatient(
+            "annotation",
+            true,
+            patientID,
+            studyUID,
+            seriesUID,
+            aimID
+          )
+        );
       }
     }
   };

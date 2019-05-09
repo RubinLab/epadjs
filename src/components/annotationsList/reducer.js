@@ -22,8 +22,10 @@ import {
   LOAD_COMPLETED,
   START_LOADING,
   ADD_TO_GRID,
-  DISPLAY_SINGLE_AIM
+  DISPLAY_SINGLE_AIM,
+  UPDATE_PATIENT
 } from "./types";
+import { FaCommentsDollar } from "react-icons/fa";
 
 const initialState = {
   openSeries: [],
@@ -87,7 +89,7 @@ const asyncReducer = (state = initialState, action) => {
       //       ann
       //     ].isDisplayed = true;
       //   } else {
-      //     changedPatient.studies[stID].series[srID].displayAnns = true;
+      //     changedPatient.studies[stID].series[srID].isDisplayed = true;
       //     for (let annotation in changedPatient.studies[stID].series[srID]
       //       .annotations) {
       //       changedPatient.studies[stID].series[srID].annotations[
@@ -165,8 +167,8 @@ const asyncReducer = (state = initialState, action) => {
       }
       const newValue = !toggleAnnPatients[patientID].studies[studyID].series[
         serieID
-      ].displayAnns;
-      newSerie.displayAnns = newValue;
+      ].isDisplayed;
+      newSerie.isDisplayed = newValue;
       if (!newValue) {
       }
       return Object.assign({}, state, { patients: toggleAnnPatients });
@@ -211,7 +213,7 @@ const asyncReducer = (state = initialState, action) => {
       for (let patient in clearedPatients) {
         for (let study in clearedPatients[patient]) {
           for (let serie in clearedPatients[patient].studies[study]) {
-            serie.displayAnns = false;
+            serie.isDisplayed = false;
             for (let ann in clearedPatients[patient].studies[study].series[
               serie
             ]) {
@@ -254,7 +256,6 @@ const asyncReducer = (state = initialState, action) => {
       }
       return selectionState;
     case SELECT_PATIENT:
-      console.log("in reducer");
       let patientsNew = {
         ...state.selectedPatients
       };
@@ -271,10 +272,8 @@ const asyncReducer = (state = initialState, action) => {
         : (newStudies[action.study.studyUID] = action.study);
       return { ...state, selectedStudies: newStudies };
     case LOAD_COMPLETED:
-      console.log("completed reducer");
       return { ...state, loading: false };
     case START_LOADING:
-      console.log("start reducer");
       return { ...state, loading: true };
     case SELECT_SERIE:
       let newSeries = {
@@ -357,9 +356,29 @@ const asyncReducer = (state = initialState, action) => {
         openSeries: aimOpenSeries
       };
     case ADD_TO_GRID:
-      console.log("here");
       let newOpenSeries = state.openSeries.concat(action.reference);
       return { ...state, openSeries: newOpenSeries };
+    case UPDATE_PATIENT:
+      let updatedPt = { ...state.patients[action.payload.patient] };
+      if (action.payload.type === "study") {
+        let selectedSt = updatedPt.studies[action.payload.study];
+        for (let serie in selectedSt.series) {
+          selectedSt.series[serie].isDisplayed = action.payload.status;
+        }
+      } else if (
+        action.payload.type === "serie" ||
+        action.payload.type === "annotation"
+      ) {
+        let selectedSr =
+          updatedPt.studies[action.payload.study].series[action.payload.serie];
+        selectedSr.isDisplayed = action.payload.status;
+        for (let ann in selectedSr.annotations) {
+          selectedSr.annotations[ann].isDisplayed = action.payload.status;
+        }
+      }
+      let updatedPtPatients = { ...state.patients };
+      updatedPtPatients[action.payload.patient] = updatedPt;
+      return { ...state, patients: updatedPtPatients };
     default:
       return state;
   }

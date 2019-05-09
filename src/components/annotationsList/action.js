@@ -23,6 +23,7 @@ import {
   ADD_TO_GRID,
   LOAD_COMPLETED,
   START_LOADING,
+  UPDATE_PATIENT,
   colors
 } from "./types";
 
@@ -37,16 +38,27 @@ export const clearGrid = item => {
   return { type: CLEAR_GRID };
 };
 
+export const updatePatient = (
+  type,
+  status,
+  patient,
+  study,
+  serie,
+  annotation
+) => {
+  return {
+    type: UPDATE_PATIENT,
+    payload: { type, status, patient, study, serie, annotation }
+  };
+};
 export const clearSelection = selectionType => {
   return { type: CLEAR_SELECTION, selectionType };
 };
 
 export const loadCompleted = () => {
-  console.log("in action complete");
   return { type: LOAD_COMPLETED };
 };
 export const startLoading = () => {
-  console.log("in action start");
   return { type: START_LOADING };
 };
 export const displaySingleAim = (
@@ -231,6 +243,7 @@ export const toggleAllLabels = (serieID, checked) => {
 };
 
 export const toggleSingleLabel = (serieID, aimID) => {
+  console.log("fired action");
   return {
     type: TOGGLE_LABEL,
     payload: { serieID, aimID }
@@ -293,7 +306,7 @@ const getRequiredFields = (arr, type, selectedID) => {
           patientID,
           projectID
         } = element;
-        const displayAnns = seriesUID === selectedID || selectedID === studyUID;
+        const isDisplayed = seriesUID === selectedID || selectedID === studyUID;
 
         obj = {
           seriesUID,
@@ -301,7 +314,7 @@ const getRequiredFields = (arr, type, selectedID) => {
           studyUID,
           patientID,
           projectID,
-          displayAnns
+          isDisplayed
         };
         result[seriesUID] = obj;
       } else {
@@ -322,7 +335,7 @@ const getRequiredFields = (arr, type, selectedID) => {
   return result;
 };
 
-const getStudiesData = async (dataObj, projectID, patientID) => {
+const getStudiesData = async (dataObj, projectID, patientID, selectedID) => {
   try {
     const {
       data: {
@@ -331,7 +344,7 @@ const getStudiesData = async (dataObj, projectID, patientID) => {
     } = await getStudies(projectID, patientID);
     //create an empty object to be "studies" property in the data
     //iterate over the studies array create key/value pairs
-    dataObj["studies"] = getRequiredFields(studies, "study");
+    dataObj["studies"] = getRequiredFields(studies, "study", selectedID);
     return new Promise((resolve, reject) => {
       resolve(dataObj);
     });
@@ -445,7 +458,7 @@ export const getWholeData = (serie, study, annotation) => {
     dispatch(loadAnnotations());
     let { projectID, patientID, patientName, studyUID } =
       serie || study || annotation;
-    if (annotation) patientID = annotation.originalSubjectID;
+    if (annotation) patientID = annotation.subjectID;
     let selectedID;
     let seriesUID;
     if (serie) {
@@ -453,6 +466,8 @@ export const getWholeData = (serie, study, annotation) => {
       seriesUID = serie.seriesUID;
     } else if (study) {
       selectedID = study.studyUID;
+    } else if (annotation) {
+      selectedID = annotation.seriesUID;
     }
     let summaryData = {
       projectID,
@@ -461,7 +476,9 @@ export const getWholeData = (serie, study, annotation) => {
     };
     // make call to get study and populate the studies data
     try {
-      await getStudiesData(summaryData, projectID, patientID);
+      study
+        ? await getStudiesData(summaryData, projectID, patientID, selectedID)
+        : await getStudiesData(summaryData, projectID, patientID);
     } catch (error) {
       dispatch(annotationsLoadingError(error));
     }

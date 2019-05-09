@@ -16,7 +16,8 @@ import {
   selectSerie,
   clearSelection,
   addToGrid,
-  getWholeData
+  getWholeData,
+  updatePatient
 } from "../annotationsList/action";
 import { MAX_PORT } from "../../constants";
 
@@ -297,6 +298,8 @@ class Series extends Component {
 
   dispatchSerieDisplay = selected => {
     const openSeries = Object.values(this.props.openSeries);
+    const { patientID, studyUID } = selected;
+    console.log("in serie", patientID, studyUID);
     let isSerieOpen = false;
     //check if there is enough space in the grid
     let isGridFull = openSeries.length === MAX_PORT;
@@ -322,6 +325,16 @@ class Series extends Component {
         //if grid is NOT full check if patient data exists
         if (!this.props.patients[selected.patientID]) {
           this.props.dispatch(getWholeData(selected));
+        } else {
+          this.props.dispatch(
+            updatePatient(
+              "serie",
+              true,
+              patientID,
+              studyUID,
+              selected.seriesUID
+            )
+          );
         }
       }
     }
