@@ -1,15 +1,17 @@
 import React from "react";
 import { connect } from "react-redux";
 import { FaMinus, FaPlus } from "react-icons/fa";
-import { alertViewPortFull } from "../action";
-
+import { MAX_PORT } from "../../../constants";
 import Annotations from "./annotations";
 import {
   updateAnnotation,
   toggleAllAnnotations,
   changeActivePort,
   getAnnotationListData,
-  getSingleSerie
+  getSingleSerie,
+  alertViewPortFull,
+  addToGrid,
+  updatePatient
 } from "../action";
 
 //single serie will be passed
@@ -70,7 +72,7 @@ class ListItem extends React.Component {
         );
       } else {
         //else get single serie dispatch action
-        if (this.props.openSeries.length === 6) {
+        if (this.props.openSeries.length === MAX_PORT) {
           this.props.dispatch(alertViewPortFull());
         } else {
           await this.props.dispatch(getSingleSerie(this.props.serie, value));
@@ -84,45 +86,57 @@ class ListItem extends React.Component {
 
   handleToggleSerie = async (checked, e, id) => {
     //select de select all anotations
-    const { patientID, seriesUID, studyUID } = this.props.serie;
+    // console.log("check attributes", this.props.serie);
+    const { projectID, patientID, studyUID, seriesUID } = this.props.serie;
     const { seriesid } = e.target.dataset;
     const activeSeriesUID = this.props.openSeries[this.props.activePort]
       .seriesUID;
     //check if user toggle on or off and change the state accordingly
     await this.setState({ displayAnnotations: checked });
+    // if checked true
+    const isOpen = this.checkIfSerieOpen(seriesUID).isOpen;
+    const index = this.checkIfSerieOpen(seriesUID).index;
+    console.log(seriesUID);
+    console.log(this.checkIfSerieOpen(seriesUID));
 
-    if (activeSeriesUID === id) {
-      this.props.dispatch(
-        toggleAllAnnotations(
-          patientID,
-          studyUID,
-          seriesUID,
-          this.state.displayAnnotations
-        )
-      );
-    } else {
-      //if doesn't match check if the serie exists in the open series
-      const isOpen = this.checkIfSerieOpen(seriesid).isOpen;
-      const index = this.checkIfSerieOpen(seriesid).index;
+    if (checked) {
+      //check if the serie is already open
+      //if open
       if (isOpen) {
-        //if in the open series change the active port
+        //update the active port
         this.props.dispatch(changeActivePort(index));
+        // change the annotations as displayed in patient and aimlist
         this.props.dispatch(
-          toggleAllAnnotations(
-            patientID,
-            studyUID,
-            seriesUID,
-            this.state.displayAnnotations
-          )
+          updatePatient("serie", checked, patientID, studyUID, seriesUID)
         );
+        this.props.dispatch(toggleAllAnnotations(seriesUID, checked));
+        //else - if not open
       } else {
-        //if it doesn't exist in the open series dispatch the action to add
-        if (this.props.openSeries.length === 6) {
+        //check if the grid is full
+        if (this.props.openSeries.length === MAX_PORT) {
+          //if full bring modal
           this.props.dispatch(alertViewPortFull());
+          //else - not full
         } else {
-          //dispatch yap ve o serie icin viewport ac openSeriese ekle
-          await this.props.dispatch(getSingleSerie(this.props.serie));
+          //addtogrid
+          this.props.dispatch(addToGrid(this.props.serie));
+          //getsingleserie
+          this.props.dispatch(getSingleSerie(this.props.serie));
+          //update patient?? with serie
+          this.props.dispatch(
+            updatePatient("serie", checked, patientID, studyUID, seriesUID)
+          );
         }
+      }
+      // if checked false
+    } else {
+      //update patients and aimlist just annotations to be false
+      this.props.dispatch(
+        updatePatient("serie", checked, patientID, studyUID, seriesUID)
+      );
+      this.props.dispatch(toggleAllAnnotations(seriesUID, checked));
+      if (isOpen) {
+        this.props.dispatch(changeActivePort(index));
       }
     }
   };

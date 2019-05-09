@@ -10,7 +10,6 @@ import ProjectModal from "../annotationsList/selectSerieModal";
 import { MAX_PORT } from "../../constants";
 import Series from "./series";
 import {
-  openProjectSelectionModal,
   getSingleSerie,
   getAnnotationListData,
   selectStudy,

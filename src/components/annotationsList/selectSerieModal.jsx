@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import {
-  openProjectSelectionModal,
   clearGrid,
   getPatient,
   getWholeData,
@@ -11,7 +10,8 @@ import {
   clearSelection,
   startLoading,
   loadCompleted,
-  addToGrid
+  addToGrid,
+  updatePatient
 } from "./action";
 import SerieSelect from "./containers/serieSelection";
 import SelectionItem from "./containers/selectionItem";
@@ -23,6 +23,7 @@ const message = {
   title: "Not enough ports to open series"
 };
 class selectSerieModal extends React.Component {
+  _isMounted = false;
   state = {
     selectionType: "",
     selectionArr: [],
@@ -32,7 +33,7 @@ class selectSerieModal extends React.Component {
   };
   //get the serie list
   componentDidMount = async () => {
-    console.log(this.props.seriesPassed);
+    this._isMounted = true;
     let selectionType = "";
     let { selectedStudies, selectedSeries, selectedAnnotations } = this.props;
     selectedStudies = Object.values(selectedStudies);
@@ -46,25 +47,9 @@ class selectSerieModal extends React.Component {
       selectionType = "aim";
     }
     this.setState({ selectionType });
-    // this.setState({ selectionType, selectionArr, seriesList });
-    // if (selectionType === "study") {
-    //   for (let item of selectionArr) {
-    //     let seriesOfSt;
-    //     if (!this.props.patients[item.patientID]) {
-    //       seriesOfSt = await this.getSerieListData(
-    //         item.projectID,
-    //         item.patientID,
-    //         item.studyUID
-    //       );
-    //     } else {
-    //       seriesOfSt = Object.values(
-    //         this.props.patients[item.patientID].studies[item.studyUID].series
-    //       );
-    //     }
-    //     seriesList = seriesList.concat(seriesOfSt);
-    //   }
-    //   this.setState({ seriesList });
-    // }
+  };
+  componentWillUnmount = () => {
+    this._isMounted = false;
   };
 
   getPatient = async study => {
@@ -121,13 +106,46 @@ class selectSerieModal extends React.Component {
         } else {
           this.props.dispatch(getSingleSerie(series[i]));
         }
-        if (!this.props.patients[series[i].patientID]) {
-          this.props.dispatch(getWholeData(null, series[i]));
+        if (!this.props.patients[series[i]]) {
+          this.props.dispatch(getWholeData(series[i]));
         }
       }
     }
+
+    //iterate over the open series and update patient with each one
+
+    // let index = 0;
+    // for (let serie of series) {
+    //   if (this.state.selectedToDisplay[index] && this._isMounted) {
+    //     console.log("000000000000000000", index);
+    //     console.log(this.props.patients);
+    //     if (!this.props.patients[serie.patientID]) {
+    //       console.log("should be once");
+    //       await this.props.dispatch(getWholeData(serie));
+    //     } else {
+    //       this.props.dispatch(
+    //         updatePatient(
+    //           "serie",
+    //           true,
+    //           serie.patientID,
+    //           serie.studyUID,
+    //           serie.seriesUID
+    //         )
+    //       );
+    //     }
+    //   }
+    //   index++;
+    // }
+    console.log("here before cancel");
     this.handleCancel();
-    this.props.dispatch(clearSelection());
+  };
+
+  groupUnderPatient = objArr => {
+    let groupedObj = {};
+    for (let item of objArr) {
+      groupedObj[item.patientID] = item;
+    }
+    return groupedObj;
   };
 
   handleCancel = () => {
@@ -138,7 +156,6 @@ class selectSerieModal extends React.Component {
       selectedToDisplay: [],
       limit: 0
     });
-    this.props.dispatch(openProjectSelectionModal());
     this.props.dispatch(clearSelection());
     this.props.onCancel();
   };
@@ -193,8 +210,6 @@ class selectSerieModal extends React.Component {
 
   render = () => {
     const list = this.renderSelection();
-    console.log(this.state);
-    console.log(this.props);
 
     return (
       <Modal.Dialog dialogClassName="alert-selectSerie">
@@ -225,10 +240,6 @@ class selectSerieModal extends React.Component {
     );
   };
 }
-
-selectSerieModal.propTypes = {
-  onOK: PropTypes.func
-};
 
 const mapStateToProps = state => {
   return {

@@ -22,7 +22,8 @@ import ResizeAndDrag from "../management/common/resizeAndDrag";
 import CustomModal from "../management/common/resizeAndDrag";
 import {
   showAnnotationWindow,
-  showAnnotationDock
+  showAnnotationDock,
+  getWholeData
 } from "../annotationsList/action";
 import "./toolbar.css";
 import "../../font-icons/styles.css";
@@ -31,7 +32,9 @@ const mapStateToProps = state => {
   return {
     cornerstone: state.searchViewReducer.cornerstone,
     cornerstoneTools: state.searchViewReducer.cornerstoneTools,
-    activeVP: state.searchViewReducer.activeVP
+    activeVP: state.searchViewReducer.activeVP,
+    openSeries: state.annotationsListReducer.openSeries,
+    patients: state.annotationsListReducer.patients
   };
 };
 
@@ -111,6 +114,27 @@ class Toolbar extends Component {
 
   handlePatientClick = async () => {
     // const showStatus = this.state.showAnnotationList;
+
+    const { openSeries, patients } = this.props;
+    console.log(openSeries);
+    console.log(patients);
+
+    for (let port of openSeries) {
+      const { patientID, seriesUID, studyUID, aimID } = port;
+
+      const serie = patients[patientID].studies[studyUID].series[seriesUID];
+      if (!patients[port.patientID]) {
+        await this.props.dispatch(getWholeData(port, null, aimID));
+      } else {
+        if (serie.isDisplayed === false) {
+          serie.isDisplayed = true;
+          for (let ann in serie.annotations) {
+            serie.annotations[ann].isDisplayed = true;
+          }
+        }
+      }
+    }
+
     await this.setState(state => ({
       showAnnotationList: !state.showAnnotationList
     }));

@@ -223,15 +223,10 @@ export const updateAnnotation = (
   };
 };
 
-export const toggleAllAnnotations = (
-  patientID,
-  studyID,
-  serieID,
-  displayStatus
-) => {
+export const toggleAllAnnotations = (seriesUID, displayStatus) => {
   return {
     type: TOGGLE_ALL_ANNOTATIONS,
-    payload: { patientID, studyID, serieID, displayStatus }
+    payload: { seriesUID, displayStatus }
   };
 };
 

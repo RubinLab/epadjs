@@ -157,21 +157,14 @@ const asyncReducer = (state = initialState, action) => {
       return Object.assign({}, state, { dockOpen: !displayAnnDock });
     case TOGGLE_ALL_ANNOTATIONS:
       //update openSeries
-      let { patientID, studyID, serieID, displayStatus } = action.payload;
-      let toggleAnnPatients = Object.assign({}, state.patients);
-      const newSerie =
-        toggleAnnPatients[patientID].studies[studyID].series[serieID];
-      let annotationsInSerie = newSerie.annotations;
-      for (let ann in annotationsInSerie) {
-        annotationsInSerie[ann].isDisplayed = displayStatus;
+      let { seriesUID, displayStatus } = action.payload;
+      let toggleAnns = Object.assign({}, state.aimsList);
+      for (let ann in toggleAnns[seriesUID]) {
+        toggleAnns[seriesUID][ann].isDisplayed = displayStatus;
       }
-      const newValue = !toggleAnnPatients[patientID].studies[studyID].series[
-        serieID
-      ].isDisplayed;
-      newSerie.isDisplayed = newValue;
-      if (!newValue) {
-      }
-      return Object.assign({}, state, { patients: toggleAnnPatients });
+      return Object.assign({}, state, {
+        aimsList: toggleAnns
+      });
     case TOGGLE_ALL_LABELS:
       const toggledLabelSerie = { ...state.aimsList };
       const anns = toggledLabelSerie[action.payload.serieID];

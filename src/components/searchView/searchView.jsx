@@ -8,7 +8,6 @@ import { downloadSubjects } from "../../services/subjectServices";
 import { downloadStudies } from "../../services/studyServices";
 import { downloadSeries, getSeries } from "../../services/seriesServices";
 import {
-  openProjectSelectionModal,
   startLoading,
   loadCompleted,
   annotationsLoadingError,
@@ -51,7 +50,7 @@ class SearchView extends Component {
         //check if enough room to display selection
         if (total + this.props.openSeries.length > MAX_PORT) {
           this.props.dispatch(startLoading());
-          await this.setState({ seriesList: studiesObj });
+          this.setState({ seriesList: studiesObj });
           this.props.dispatch(loadCompleted());
           this.setState({ isSerieSelectionOpen: true });
         } else {
