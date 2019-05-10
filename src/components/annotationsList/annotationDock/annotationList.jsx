@@ -7,12 +7,14 @@ import Annotation from "./annotation";
 import {
   updateAnnotation,
   toggleAllLabels,
-  toggleSingleLabel
+  toggleSingleLabel,
+  toggleAllAnnotations
 } from "../action";
 
 class annotationsList extends React.Component {
   state = {
-    labelDisplayAll: true
+    labelDisplayAll: true,
+    annsDisplayAll: true
   };
   handleDisplayClick = e => {
     const { seriesUID, patientID, studyUID } = this.props.openSeries[
@@ -38,6 +40,12 @@ class annotationsList extends React.Component {
     this.setState({ labelDisplayAll: checked });
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleAllLabels(seriesUID, checked));
+  };
+
+  handleToggleAllAnnotations = (checked, e, id) => {
+    this.setState({ annsDisplayAll: checked });
+    const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
+    this.props.dispatch(toggleAllAnnotations(seriesUID, checked));
   };
 
   handleToggleSingleLabel = e => {
@@ -92,6 +100,17 @@ class annotationsList extends React.Component {
             checkedIcon={false}
           />
         </div>
+        <div className="label-toggle">
+          <div className="label-toggle__text">Show Annotations</div>
+          <Switch
+            onChange={this.handleToggleAllAnnotations}
+            checked={this.state.annsDisplayAll}
+            className="react-switch"
+            uncheckedIcon={false}
+            checkedIcon={false}
+          />
+        </div>
+
         <div>{annList}</div>
       </div>
     );

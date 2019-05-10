@@ -53,6 +53,15 @@ class ListItem extends React.Component {
     const { value, checked } = e.target;
     const { seriesid } = e.target.dataset;
     //check if the current serie match, if matches update the annotation
+    //if open
+    //update the single annotation
+    //update activeport
+    //if not open
+
+    //addto grid
+    //get serie
+    //update patient
+
     const activeSeriesUID = this.props.openSeries[this.props.activePort]
       .seriesUID;
     if (activeSeriesUID === seriesid) {
@@ -86,19 +95,15 @@ class ListItem extends React.Component {
 
   handleToggleSerie = async (checked, e, id) => {
     //select de select all anotations
-    // console.log("check attributes", this.props.serie);
-    const { projectID, patientID, studyUID, seriesUID } = this.props.serie;
-    const { seriesid } = e.target.dataset;
-    const activeSeriesUID = this.props.openSeries[this.props.activePort]
-      .seriesUID;
+    const { patientID, studyUID, seriesUID } = this.props.serie;
+    // const { seriesid } = e.target.dataset;
+    // const activeSeriesUID = this.props.openSeries[this.props.activePort]
+    //   .seriesUID;
     //check if user toggle on or off and change the state accordingly
     await this.setState({ displayAnnotations: checked });
     // if checked true
     const isOpen = this.checkIfSerieOpen(seriesUID).isOpen;
     const index = this.checkIfSerieOpen(seriesUID).index;
-    console.log(seriesUID);
-    console.log(this.checkIfSerieOpen(seriesUID));
-
     if (checked) {
       //check if the serie is already open
       //if open
