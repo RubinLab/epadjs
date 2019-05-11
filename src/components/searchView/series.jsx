@@ -95,7 +95,6 @@ class Series extends Component {
     //   ? delete newState[selected.seriesUID]
     //   : (newState[selected.seriesUID] = selected.seriesDescription);
     // this.setState({ selectedSerie: newState });
-    console.log(selected);
     this.props.dispatch(clearSelection("serie"));
     this.props.dispatch(selectSerie(selected));
   };

@@ -29,3 +29,30 @@
   font-size: 1.5rem;
   color: yellow;
 }
+
+.alert-annDownload.modal-dialog {
+  max-width: 90%;
+  max-height: 90%;
+  display: inline-block;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 2px solid gray;
+  box-shadow: 1rem 1rem 1rem grey;
+  left: 40%;
+}
+
+.annDownload-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.annDownload-text {
+  margin-left: 0.5rem;
+  margin-top: 4px;
+}
+
+.annDownload-option {
+  display: flex;
+  margin-bottom: 0.2rem;
+  align-items: center;
+}

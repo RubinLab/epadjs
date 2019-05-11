@@ -5,7 +5,6 @@ export function getAnnotations(series, opts = {}) {
     const { projectId, subjectId, studyId, seriesId } = series;
     const fullUrl =
       apiUrl +
-
       "/projects/lite/subjects/" +
       subjectId +
       "/studies/" +
@@ -39,7 +38,6 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
   if (isLite)
     return http.get(
       apiUrl +
-
         "/projects/lite/subjects/" +
         subjectId +
         "/studies/" +
@@ -60,5 +58,19 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
         "/series/" +
         seriesId +
         "/aims/?format=json"
+    );
+}
+
+export function downloadAnnotations(optionObj, aimIDlist, selection) {
+  console.log(arguments);
+  if (isLite)
+    return http.post(
+      apiUrl +
+        "/projects/lite/aims/download?summary=" +
+        optionObj.summary +
+        "&aim=" +
+        optionObj.aim,
+      aimIDlist,
+      { responseType: "blob" }
     );
 }

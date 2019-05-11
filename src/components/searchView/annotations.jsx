@@ -54,7 +54,6 @@ class Annotations extends Component {
   }
 
   selectRow = selected => {
-    console.log(selected);
     this.props.dispatch(clearSelection("annotation"));
     this.props.dispatch(selectAnnotation(selected));
   };

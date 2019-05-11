@@ -38,7 +38,6 @@ class Subjects extends Component {
   }
 
   async componentDidMount() {
-    console.log("in subjects before call");
     const {
       data: {
         ResultSet: { Result: data }
@@ -66,7 +65,6 @@ class Subjects extends Component {
   }
 
   selectRow = selected => {
-    console.log(selected);
     this.props.dispatch(clearSelection("patient"));
     this.props.dispatch(selectPatient(selected));
   };
