@@ -6,17 +6,19 @@ import { downloadProjects } from "../../services/projectServices";
 import { downloadSubjects } from "../../services/subjectServices";
 import { downloadStudies } from "../../services/studyServices";
 import { downloadSeries } from "../../services/seriesServices";
+import DownloadSelection from "./annotationDownloadModal";
 
 import "./searchView.css";
 
 class SearchView extends Component {
-  state = {};
+  state = { showAnnotationModal: false };
 
   downloadSelection = async () => {
     const selectedProjects = Object.values(this.props.selectedProjects);
     const selectedPatients = Object.values(this.props.selectedPatients);
     const selectedStudies = Object.values(this.props.selectedStudies);
     const selectedSeries = Object.values(this.props.selectedSeries);
+    const selectedAnnotations = Object.values(this.props.selectedAnnotations);
     let fileName;
     if (selectedProjects.length > 0) {
       selectedProjects.forEach(project => {
@@ -38,6 +40,8 @@ class SearchView extends Component {
         fileName = `Series - ${serie.seriesUID}`;
         this.downLoadHelper(downloadSeries, serie, fileName);
       });
+    } else if (selectedAnnotations.length > 0) {
+      this.setState({ showAnnotationModal: true });
     }
   };
 
@@ -59,6 +63,10 @@ class SearchView extends Component {
     window.URL.revokeObjectURL(url);
   };
 
+  handleDownloadCancel = () => {
+    this.setState({ showAnnotationModal: false });
+  };
+
   render() {
     return (
       <>
@@ -67,6 +75,9 @@ class SearchView extends Component {
           key={this.props.match.params.pid}
           pid={this.props.match.params.pid}
         />
+        {this.state.showAnnotationModal && (
+          <DownloadSelection onCancel={this.handleDownloadCancel} />
+        )}
       </>
     );
   }
@@ -77,7 +88,8 @@ const mapStateToProps = state => {
     selectedProjects: state.annotationsListReducer.selectedProjects,
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
-    selectedSeries: state.annotationsListReducer.selectedSeries
+    selectedSeries: state.annotationsListReducer.selectedSeries,
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
   };
 };
 export default connect(mapStateToProps)(SearchView);

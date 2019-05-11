@@ -1,11 +1,10 @@
 import http from "./httpService";
-import { isLite, apiUrl, epadws } from "../config.json";
-
+import { isLite, apiUrl } from "../config.json";
 export function getAnnotations(series, opts = {}) {
   if (isLite) {
     const { projectId, subjectId, studyId, seriesId } = series;
     const fullUrl =
-      epadws +
+      apiUrl +
       "/projects/lite/subjects/" +
       subjectId +
       "/studies/" +
@@ -38,7 +37,7 @@ export function getAnnotations(series, opts = {}) {
 export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
   if (isLite)
     return http.get(
-      epadws +
+      apiUrl +
         "/projects/lite/subjects/" +
         subjectId +
         "/studies/" +
@@ -59,5 +58,19 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
         "/series/" +
         seriesId +
         "/aims/?format=json"
+    );
+}
+
+export function downloadAnnotations(optionObj, aimIDlist, selection) {
+  console.log(arguments);
+  if (isLite)
+    return http.post(
+      apiUrl +
+        "/projects/lite/aims/download?summary=" +
+        optionObj.summary +
+        "&aim=" +
+        optionObj.aim,
+      aimIDlist,
+      { responseType: "blob" }
     );
 }

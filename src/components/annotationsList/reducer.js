@@ -48,7 +48,7 @@ const asyncReducer = (state = initialState, action) => {
         error: false
       });
     case LOAD_ANNOTATIONS_SUCCESS:
-      let indexKey = state.openSeries.length;
+      let indexKey = state.openSeries.length - 1;
       let { summaryData, aimsData, serID, patID, ref } = action.payload;
       const newResult = Object.assign({}, state, {
         patients: {
@@ -70,7 +70,7 @@ const asyncReducer = (state = initialState, action) => {
       const projectModalStatus = !state.showProjectModal;
       return { ...state, showProjectModal: projectModalStatus };
     case LOAD_SERIE_SUCCESS:
-      let indexNum = state.openSeries.length;
+      let indexNum = state.openSeries.length - 1;
       const ptID = action.payload.ref.patientID;
       const stID = action.payload.ref.studyUID;
       const srID = action.payload.ref.seriesUID;

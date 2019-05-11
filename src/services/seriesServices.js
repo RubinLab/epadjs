@@ -1,10 +1,11 @@
 import http from "./httpService";
-import { isLite, apiUrl, epadws } from "../config.json";
+
+import { isLite, apiUrl } from "../config.json";
 
 export function getSeries(projectId, subjectId, studyId) {
   if (isLite)
     return http.get(
-      epadws +
+      apiUrl +
         "/projects/lite/subjects/" +
         subjectId +
         "/studies/" +
@@ -26,7 +27,7 @@ export function getSeries(projectId, subjectId, studyId) {
 export function getImageIds(series) {
   if (isLite)
     return http.get(
-      epadws +
+      apiUrl +
         "/projects/lite/subjects/" +
         series.subjectId +
         "/studies/" +
@@ -51,6 +52,7 @@ export function getImageIds(series) {
 }
 
 export function downloadSeries(series) {
+  console.log(series);
   const url =
     apiUrl +
     "/projects/" +
