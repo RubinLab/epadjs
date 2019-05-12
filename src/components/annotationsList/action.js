@@ -3,7 +3,7 @@ import {
   LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
   VIEWPORT_FULL,
-  UPDATE_ANNOTATION,
+  UPDATE_ANNOTATION_DISPLAY,
   TOGGLE_ALL_ANNOTATIONS,
   TOGGLE_ALL_LABELS,
   TOGGLE_LABEL,
@@ -14,6 +14,7 @@ import {
   OPEN_PROJECT_MODAL,
   CLEAR_GRID,
   DISPLAY_SINGLE_AIM,
+  JUMP_TO_AIM,
   SELECT_SERIE,
   SELECT_STUDY,
   SELECT_ANNOTATION,
@@ -60,6 +61,12 @@ export const loadCompleted = () => {
 };
 export const startLoading = () => {
   return { type: START_LOADING };
+};
+export const jumpToAim = (aimID, index) => {
+  return {
+    type: JUMP_TO_AIM,
+    payload: { aimID, index }
+  };
 };
 export const displaySingleAim = (
   patientID,
@@ -210,16 +217,16 @@ export const alertViewPortFull = () => {
   };
 };
 
-export const updateAnnotation = (
-  serie,
-  study,
+export const updateAnnotationDisplay = (
   patient,
+  study,
+  serie,
   annotation,
   isDisplayed
 ) => {
   return {
-    type: UPDATE_ANNOTATION,
-    payload: { serie, study, patient, annotation, isDisplayed }
+    type: UPDATE_ANNOTATION_DISPLAY,
+    payload: { patient, study, serie, annotation, isDisplayed }
   };
 };
 

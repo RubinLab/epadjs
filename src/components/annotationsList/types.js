@@ -5,7 +5,8 @@ export const LOAD_ANNOTATIONS_ERROR =
   "epadjs/annotationList/LOAD_ANNOTATIONS_ERROR";
 export const VIEWPORT_FULL = "epadjs/annotationList/VIEWPORT_FULL";
 export const OPEN_PROJECT_MODAL = "epadjs/annotationList/OPEN_PROJECT_MODAL";
-export const UPDATE_ANNOTATION = "epadjs/annotationList/UPDATE_ANNOTATION";
+export const UPDATE_ANNOTATION_DISPLAY =
+  "epadjs/annotationList/UPDATE_ANNOTATION_DISPLAY";
 export const TOGGLE_ALL_ANNOTATIONS =
   "epadjs/annotationList/TOGGLE_ALL_ANNOTATIONS";
 export const TOGGLE_ALL_LABELS = "epadjs/annotationList/TOGGLE_ALL_LABELS";
@@ -24,6 +25,8 @@ export const CLEAR_GRID = "epadjs/annotationList/CLEAR_GRID ";
 export const CLEAR_SELECTION = "epadjs/annotationList/CLEAR_SELECTION ";
 export const GET_PATIENT = "epadjs/annotationList/GET_PATIENT";
 export const DISPLAY_SINGLE_AIM = "epadjs/annotationList/DISPLAY_SINGLE_AIM";
+export const JUMP_TO_AIM = "epadjs/annotationList/JUMP_TO_AIM";
+
 export const ADD_TO_GRID = "epadjs/annotationList/ADD_TO_GRID";
 export const LOAD_COMPLETED = "epadjs/annotationList/LOAD_COMPLETED";
 export const START_LOADING = "epadjs/annotationList/START_LOADING";

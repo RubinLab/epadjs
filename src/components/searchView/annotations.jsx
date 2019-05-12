@@ -16,7 +16,8 @@ import {
   changeActivePort,
   addToGrid,
   getWholeData,
-  updatePatient
+  updatePatient,
+  jumpToAim
 } from "../annotationsList/action";
 import "react-table/react-table.css";
 
@@ -195,49 +196,51 @@ class Annotations extends Component {
     this.setState({ expanded });
   };
 
+  checkIfSerieOpen = selectedSerie => {
+    let isOpen = false;
+    let index;
+    this.props.openSeries.forEach((serie, i) => {
+      if (serie.seriesUID === selectedSerie) {
+        isOpen = true;
+        index = i;
+      }
+    });
+    return { isOpen, index };
+  };
+
   displayAnnotations = selected => {
-    console.log(selected);
     const { projectID, studyUID, seriesUID, aimID } = selected;
     const patientID = selected.subjectID;
     const { openSeries } = this.props;
     // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
-    let isSerieOpen = false;
     //check if there is enough space in the grid
     let isGridFull = openSeries.length === MAX_PORT;
     //check if the serie is already open
-    if (openSeries.length > 0) {
-      for (let i = 0; i < openSeries.length; i++) {
-        // for (let serie of openSeries) {
-        if (openSeries[i].seriesUID === seriesUID) {
-          isSerieOpen = true;
-          this.props.dispatch(changeActivePort(i));
-          this.props.dispatch(
-            displaySingleAim(patientID, studyUID, seriesUID, aimID, i)
-          );
-          break;
-        }
-      }
-    }
-
-    if (isGridFull) {
-      this.props.dispatch(alertViewPortFull());
+    if (this.checkIfSerieOpen(seriesUID).isOpen) {
+      const { index } = this.checkIfSerieOpen(seriesUID);
+      this.props.dispatch(changeActivePort(index));
+      this.props.dispatch(jumpToAim(aimID, index));
     } else {
-      this.props.dispatch(addToGrid(selected, aimID));
-      this.props.dispatch(getSingleSerie(selected, aimID));
-      //if grid is NOT full check if patient data exists
-      if (!this.props.patients[patientID]) {
-        this.props.dispatch(getWholeData(null, null, selected));
+      if (isGridFull) {
+        this.props.dispatch(alertViewPortFull());
       } else {
-        this.props.dispatch(
-          updatePatient(
-            "annotation",
-            true,
-            patientID,
-            studyUID,
-            seriesUID,
-            aimID
-          )
-        );
+        this.props.dispatch(addToGrid(selected, aimID));
+        this.props.dispatch(getSingleSerie(selected, aimID));
+        //if grid is NOT full check if patient data exists
+        if (!this.props.patients[patientID]) {
+          this.props.dispatch(getWholeData(null, null, selected));
+        } else {
+          this.props.dispatch(
+            updatePatient(
+              "annotation",
+              true,
+              patientID,
+              studyUID,
+              seriesUID,
+              aimID
+            )
+          );
+        }
       }
     }
   };

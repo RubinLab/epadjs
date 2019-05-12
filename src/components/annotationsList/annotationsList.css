@@ -82,15 +82,18 @@
 
 .-annotation__container {
   display: flex;
-  margin-bottom: 0.2rem;
+  /* flex-wrap: wrap; */
+  /* margin-bottom: 0.2rem;
   height: auto;
-  min-height: 1.3rem;
+  min-height: 1.3rem; */
 }
 
-.annList-annotations,
-.-collapse-toggles {
+.annList-annotations {
   margin: 0.2rem 0.5rem 0.5rem 2rem;
   width: 90%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
 .annotations-collapse {

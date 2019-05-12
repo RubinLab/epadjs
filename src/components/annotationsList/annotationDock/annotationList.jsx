@@ -5,17 +5,38 @@ import Switch from "react-switch";
 
 import Annotation from "./annotation";
 import {
-  updateAnnotation,
+  updateAnnotationDisplay,
   toggleAllLabels,
   toggleSingleLabel,
   toggleAllAnnotations
 } from "../action";
 
-class annotationsList extends React.Component {
+class AnnotationsList extends React.Component {
   state = {
     labelDisplayAll: true,
     annsDisplayAll: true
   };
+
+  componentDidUpdate = prevProps => {
+    if (this.props.activePort !== prevProps.activePort) {
+      const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
+      let annotations = Object.values(this.props.aimsList[seriesUID]);
+      let labelDisplayAll = false;
+      let annsDisplayAll = false;
+      for (let ann of annotations) {
+        if (ann.isDisplayed) {
+          annsDisplayAll = true;
+        }
+      }
+      for (let ann of annotations) {
+        if (ann.showLabel) {
+          labelDisplayAll = true;
+        }
+      }
+      this.setState({ labelDisplayAll, annsDisplayAll });
+    }
+  };
+
   handleDisplayClick = e => {
     const { seriesUID, patientID, studyUID } = this.props.openSeries[
       this.props.activePort
@@ -25,10 +46,10 @@ class annotationsList extends React.Component {
       const currentDisplayStatus = this.props.aimsList[seriesUID][aimID]
         .isDisplayed;
       this.props.dispatch(
-        updateAnnotation(
-          seriesUID,
-          studyUID,
+        updateAnnotationDisplay(
           patientID,
+          studyUID,
+          seriesUID,
           aimID,
           !currentDisplayStatus
         )
@@ -124,4 +145,4 @@ const mapStateToProps = state => {
     aimsList: state.annotationsListReducer.aimsList
   };
 };
-export default connect(mapStateToProps)(annotationsList);
+export default connect(mapStateToProps)(AnnotationsList);
