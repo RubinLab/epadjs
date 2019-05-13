@@ -25,6 +25,7 @@ import {
   LOAD_COMPLETED,
   START_LOADING,
   UPDATE_PATIENT,
+  CLOSE_SERIE,
   colors
 } from "./types";
 
@@ -39,6 +40,12 @@ export const clearGrid = item => {
   return { type: CLEAR_GRID };
 };
 
+export const closeSerie = (serie, index) => {
+  return {
+    type: CLOSE_SERIE,
+    payload: { serie, index }
+  };
+};
 export const updatePatient = (
   type,
   status,

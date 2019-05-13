@@ -24,7 +24,8 @@ import {
   ADD_TO_GRID,
   DISPLAY_SINGLE_AIM,
   JUMP_TO_AIM,
-  UPDATE_PATIENT
+  UPDATE_PATIENT,
+  CLOSE_SERIE
 } from "./types";
 const initialState = {
   openSeries: [],
@@ -46,6 +47,44 @@ const initialState = {
 
 const asyncReducer = (state = initialState, action) => {
   switch (action.type) {
+    case CLOSE_SERIE:
+      let delSeriesUID = action.payload.serie.seriesUID;
+      let delStudyUID = action.payload.serie.studyUID;
+      let delPatientID = action.payload.serie.patientID;
+      const delAims = { ...state.aimsList };
+      delete delAims[delSeriesUID];
+      let delGrid = state.openSeries.slice(0, action.payload.index);
+      delGrid = delGrid.concat(
+        state.openSeries.slice(action.payload.index + 1)
+      );
+      let shouldPatientExist = false;
+      for (let item of delGrid) {
+        if (item.patientID === delPatientID) {
+          shouldPatientExist = true;
+          break;
+        }
+      }
+      const delPatients = { ...state.patients };
+      if (shouldPatientExist) {
+        delPatients[delPatientID].studies[delStudyUID].series[
+          delSeriesUID
+        ].isDisplayed = false;
+      } else {
+        delete delPatients[delPatientID];
+      }
+      let delActivePort;
+      if (delGrid.length === 0) {
+        delActivePort = null;
+      } else {
+        delActivePort = delGrid.length - 1;
+      }
+      return {
+        ...state,
+        openSeries: delGrid,
+        aimsList: delAims,
+        patients: delPatients,
+        activePort: delActivePort
+      };
     case LOAD_ANNOTATIONS:
       return Object.assign({}, state, {
         loading: true,
@@ -65,7 +104,6 @@ const asyncReducer = (state = initialState, action) => {
         aimsList: { ...state.aimsList, [serID]: aimsData },
         openSeries: state.openSeries.concat([ref])
       });
-
       return newResult;
     case VIEWPORT_FULL:
       const viewPortStatus = !state.showGridFullAlert;

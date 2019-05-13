@@ -26,11 +26,11 @@ export const CLEAR_SELECTION = "epadjs/annotationList/CLEAR_SELECTION ";
 export const GET_PATIENT = "epadjs/annotationList/GET_PATIENT";
 export const DISPLAY_SINGLE_AIM = "epadjs/annotationList/DISPLAY_SINGLE_AIM";
 export const JUMP_TO_AIM = "epadjs/annotationList/JUMP_TO_AIM";
-
 export const ADD_TO_GRID = "epadjs/annotationList/ADD_TO_GRID";
 export const LOAD_COMPLETED = "epadjs/annotationList/LOAD_COMPLETED";
 export const START_LOADING = "epadjs/annotationList/START_LOADING";
 export const UPDATE_PATIENT = "epadjs/annotationList/UPDATE_PATIENT";
+export const CLOSE_SERIE = "epadjs/annotationList/CLOSE_SERIE";
 
 export const colors = [
   {
