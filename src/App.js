@@ -27,7 +27,6 @@ import { isLite } from "./config.json";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
-import selectSerieModal from "./components/annotationsList/selectSerieModal";
 
 class App extends Component {
   state = {
@@ -163,7 +162,6 @@ class App extends Component {
         {this.props.listOpen && <AnnotationList />}
         {this.props.dockOpen && <AnnotationsDock />}
         {this.props.showGridFullAlert && <MaxViewAlert />}
-        {this.props.showProjectModal && <ProjectModal />}
       </React.Fragment>
     );
   }
@@ -175,9 +173,10 @@ const mapStateToProps = state => {
     listOpen,
     dockOpen,
     showGridFullAlert,
-    showProjectModal
+    showProjectModal,
+    loading
   } = state.annotationsListReducer;
-  return { listOpen, dockOpen, showGridFullAlert, showProjectModal };
+  return { listOpen, dockOpen, showGridFullAlert, showProjectModal, loading };
 };
 export default withRouter(connect(mapStateToProps)(App));
 

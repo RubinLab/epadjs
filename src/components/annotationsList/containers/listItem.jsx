@@ -1,15 +1,18 @@
 import React from "react";
 import { connect } from "react-redux";
-import { FaMinus, FaPlus } from "react-icons/fa";
-import { alertViewPortFull } from "../action";
-
+import { FaMinus, FaPlus, FaEye } from "react-icons/fa";
+import { MAX_PORT } from "../../../constants";
 import Annotations from "./annotations";
 import {
-  updateAnnotation,
+  updateAnnotationDisplay,
   toggleAllAnnotations,
   changeActivePort,
-  getAnnotationListData,
-  getSingleSerie
+  showAnnotationWindow,
+  getSingleSerie,
+  alertViewPortFull,
+  addToGrid,
+  updatePatient,
+  jumpToAim
 } from "../action";
 
 //single serie will be passed
@@ -22,12 +25,27 @@ class ListItem extends React.Component {
   };
 
   componentDidMount = () => {
+    const { patientID, studyUID, seriesUID } = this.props.serie;
     this.setState({
-      isSerieOpen: this.props.selected,
+      isSerieOpen: this.props.patients[patientID].studies[studyUID].series[
+        seriesUID
+      ].isDisplayed,
       collapseAnnList: this.checkIfSerieOpen(this.props.serie.seriesUID).isOpen,
-      displayAnnotations: this.props.serie.displayAnns,
+      displayAnnotations: this.props.serie.isDisplayed,
       displayLabels: this.props.serie.isLabelDisplayed
     });
+  };
+
+  componentDidUpdate = prevProps => {
+    const { patientID, studyUID, seriesUID } = this.props.serie;
+    const prevStatus =
+      prevProps.patients[patientID].studies[studyUID].series[seriesUID]
+        .isDisplayed;
+    const currentStatus = this.props.patients[patientID].studies[studyUID]
+      .series[seriesUID].isDisplayed;
+    if (currentStatus !== prevStatus) {
+      this.setState({ isSerieOpen: currentStatus });
+    }
   };
 
   handleCollapse = () => {
@@ -46,17 +64,24 @@ class ListItem extends React.Component {
     return { isOpen, index };
   };
 
+  openSerie = async e => {
+    const { patientID, studyUID, seriesUID } = this.props.serie;
+    this.props.dispatch(addToGrid(this.props.serie));
+    await this.props.dispatch(getSingleSerie(this.props.serie));
+    this.props.dispatch(
+      updatePatient("serie", true, patientID, studyUID, seriesUID)
+    );
+    this.props.dispatch(showAnnotationWindow());
+  };
+
   handleAnnotationClick = async e => {
     const { seriesUID, studyUID, patientID } = this.props.serie;
-    const { value, checked } = e.target;
-    const { seriesid } = e.target.dataset;
-    //check if the current serie match, if matches update the annotation
+    const { seriesid, aimid } = e.target.dataset;
     const activeSeriesUID = this.props.openSeries[this.props.activePort]
       .seriesUID;
     if (activeSeriesUID === seriesid) {
-      this.props.dispatch(
-        updateAnnotation(seriesUID, studyUID, patientID, value, checked)
-      );
+      // this.checkIfSerieOpen(seriesid).index;
+      this.props.dispatch(jumpToAim(aimid, this.props.activePort));
     } else {
       //if doesn't match check if the serie exists in the open series
       const isOpen = this.checkIfSerieOpen(seriesid).isOpen;
@@ -65,64 +90,73 @@ class ListItem extends React.Component {
         // if it exists in the openSeries update activeport
         this.props.dispatch(changeActivePort(index));
         //update the status of the clicked annotation
-        this.props.dispatch(
-          updateAnnotation(seriesUID, studyUID, patientID, value, checked)
-        );
+        this.props.dispatch(jumpToAim(aimid, index));
       } else {
         //else get single serie dispatch action
-        if (this.props.openSeries.length === 6) {
+        if (this.props.openSeries.length === MAX_PORT) {
           this.props.dispatch(alertViewPortFull());
         } else {
-          await this.props.dispatch(getSingleSerie(this.props.serie, value));
+          // let { patientID, studyUID, seriesUID, projectID } = serie;
+          this.props.dispatch(addToGrid(this.props.serie, aimid));
+          await this.props.dispatch(getSingleSerie(this.props.serie, aimid));
           this.props.dispatch(
-            updateAnnotation(seriesUID, studyUID, patientID, value, checked)
+            updateAnnotationDisplay(patientID, studyUID, seriesUID, aimid, true)
           );
         }
       }
     }
+    this.props.dispatch(showAnnotationWindow());
   };
 
   handleToggleSerie = async (checked, e, id) => {
     //select de select all anotations
-    const { patientID, seriesUID, studyUID } = this.props.serie;
-    const { seriesid } = e.target.dataset;
-    const activeSeriesUID = this.props.openSeries[this.props.activePort]
-      .seriesUID;
+    const { patientID, studyUID, seriesUID } = this.props.serie;
+    // const { seriesid } = e.target.dataset;
+    // const activeSeriesUID = this.props.openSeries[this.props.activePort]
+    //   .seriesUID;
     //check if user toggle on or off and change the state accordingly
     await this.setState({ displayAnnotations: checked });
-
-    if (activeSeriesUID === id) {
-      this.props.dispatch(
-        toggleAllAnnotations(
-          patientID,
-          studyUID,
-          seriesUID,
-          this.state.displayAnnotations
-        )
-      );
-    } else {
-      //if doesn't match check if the serie exists in the open series
-      const isOpen = this.checkIfSerieOpen(seriesid).isOpen;
-      const index = this.checkIfSerieOpen(seriesid).index;
+    // if checked true
+    const isOpen = this.checkIfSerieOpen(seriesUID).isOpen;
+    const index = this.checkIfSerieOpen(seriesUID).index;
+    if (checked) {
+      //check if the serie is already open
+      //if open
       if (isOpen) {
-        //if in the open series change the active port
+        //update the active port
         this.props.dispatch(changeActivePort(index));
+        // change the annotations as displayed in patient and aimlist
         this.props.dispatch(
-          toggleAllAnnotations(
-            patientID,
-            studyUID,
-            seriesUID,
-            this.state.displayAnnotations
-          )
+          updatePatient("serie", checked, patientID, studyUID, seriesUID)
         );
+        this.props.dispatch(toggleAllAnnotations(seriesUID, checked));
+        //else - if not open
       } else {
-        //if it doesn't exist in the open series dispatch the action to add
-        if (this.props.openSeries.length === 6) {
+        //check if the grid is full
+        if (this.props.openSeries.length === MAX_PORT) {
+          //if full bring modal
           this.props.dispatch(alertViewPortFull());
+          //else - not full
         } else {
-          //dispatch yap ve o serie icin viewport ac openSeriese ekle
-          await this.props.dispatch(getSingleSerie(this.props.serie));
+          //addtogrid
+          this.props.dispatch(addToGrid(this.props.serie));
+          //getsingleserie
+          this.props.dispatch(getSingleSerie(this.props.serie));
+          //update patient?? with serie
+          this.props.dispatch(
+            updatePatient("serie", checked, patientID, studyUID, seriesUID)
+          );
         }
+      }
+      // if checked false
+    } else {
+      //update patients and aimlist just annotations to be false
+      this.props.dispatch(
+        updatePatient("serie", checked, patientID, studyUID, seriesUID)
+      );
+      this.props.dispatch(toggleAllAnnotations(seriesUID, checked));
+      if (isOpen) {
+        this.props.dispatch(changeActivePort(index));
       }
     }
   };
@@ -142,25 +176,39 @@ class ListItem extends React.Component {
       : 0;
     return (
       <>
-        <div className="-serieButton__container" onClick={this.handleCollapse}>
-          <button className="annList-serieButton">
+        <div className="-serieButton__container">
+          <div className="annList-serieButton">
             {this.state.collapseAnnList ? (
-              <FaMinus className="-serieButton__icon" />
+              <div className="-serie-icon__cont" onClick={this.handleCollapse}>
+                <FaMinus className="-serieButton__icon" />
+              </div>
             ) : (
-              <FaPlus className="-serieButton__icon" />
+              <div className="-serie-icon__cont" onClick={this.handleCollapse}>
+                <FaPlus className="-serieButton__icon" />
+              </div>
             )}
-            <span className="-serieButton__value">
+            <span
+              className="-serieButton__value"
+              onClick={this.handleCollapse}
+              onDoubleClick={this.openSerie}
+            >
               {desc} - ({numOfAnn})
             </span>
-          </button>
+            {this.state.isSerieOpen ? (
+              <div className="-serie-icon__cont" />
+            ) : (
+              <div className="-serie-icon__cont" onClick={this.openSerie}>
+                <FaEye className="-serieButton__icon" />
+              </div>
+            )}
+          </div>
         </div>
         {this.state.collapseAnnList && (
           <Annotations
-            handleCheck={this.handleAnnotationClick}
+            handleClick={this.handleAnnotationClick}
             seriesUID={seriesUID}
             studyUID={studyUID}
             patient={patientID}
-            showAnns={this.state.displayAnnotations}
             onToggleSerie={this.handleToggleSerie}
           />
         )}
@@ -171,7 +219,8 @@ class ListItem extends React.Component {
 const mapStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
-    activePort: state.annotationsListReducer.activePort
+    activePort: state.annotationsListReducer.activePort,
+    patients: state.annotationsListReducer.patients
   };
 };
 export default connect(mapStateToProps)(ListItem);

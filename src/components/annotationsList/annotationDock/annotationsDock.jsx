@@ -1,8 +1,8 @@
 import React, { Component, PropTypes } from "react";
 import { connect } from "react-redux";
 import Dock from "react-dock";
-import { FaTimes } from "react-icons/fa";
-import { showAnnotationDock } from "../action";
+import { FaTimes, FaTrashAlt } from "react-icons/fa";
+import { showAnnotationDock, closeSerie } from "../action";
 import Annotations from "./annotationList";
 
 const styles = {
@@ -53,7 +53,9 @@ class DockTest extends Component {
 }
 const mapStateToProps = state => {
   return {
-    dockOpen: state.annotationsListReducer.dockOpen
+    dockOpen: state.annotationsListReducer.dockOpen,
+    openSeries: state.annotationsListReducer.openSeries,
+    activePort: state.annotationsListReducer.activePort
   };
 };
 export default connect(mapStateToProps)(DockTest);

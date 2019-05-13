@@ -5,14 +5,14 @@ import { TiPencil } from "react-icons/ti";
 const toolBar = props => {
   return (
     <div className="searchView-toolbar">
-      <div className="searchView-toolbar__icon">
+      <div className="searchView-toolbar__icon" onClick={props.onView}>
         <div>
-          <FaEye />
+          <FaEye style={{ fontSize: "1.2rem" }} />
         </div>
       </div>
       <div className="searchView-toolbar__icon" onClick={props.onDownload}>
         <div>
-          <FaDownload />
+          <FaDownload style={{ fontSize: "1.2rem" }} />
         </div>
       </div>
       <div className="searchView-toolbar__icon">

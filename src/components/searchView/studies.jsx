@@ -6,14 +6,21 @@ import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import { getStudies } from "../../services/studyServices";
 import { getSeries } from "../../services/seriesServices";
-
+import ProjectModal from "../annotationsList/selectSerieModal";
+import { MAX_PORT } from "../../constants";
 import Series from "./series";
 import {
-  openProjectSelectionModal,
   getSingleSerie,
   getAnnotationListData,
   selectStudy,
-  clearSelection
+  clearSelection,
+  startLoading,
+  loadCompleted,
+  annotationsLoadingError,
+  addToGrid,
+  getWholeData,
+  alertViewPortFull,
+  updatePatient
 } from "../annotationsList/action";
 //import "react-table/react-table.css";
 
@@ -52,8 +59,9 @@ class Studies extends Component {
       selection: [],
       selectAll: false,
       selectType: "checkbox",
-      expanded: {}
-      // selectedStudy: {}
+      expanded: {},
+      selectedStudy: {},
+      isSerieSelectionOpen: false
     };
   }
 
@@ -288,6 +296,7 @@ class Studies extends Component {
   };
 
   getSeriesData = async selected => {
+    this.props.dispatch(startLoading());
     const { projectID, patientID, studyUID } = selected;
     try {
       const {
@@ -295,74 +304,65 @@ class Studies extends Component {
           ResultSet: { Result: series }
         }
       } = await getSeries(projectID, patientID, studyUID);
+      this.props.dispatch(loadCompleted());
       return series;
     } catch (err) {
-      console.log(err);
+      this.props.dispatch(annotationsLoadingError(err));
     }
   };
 
   displaySeries = async selected => {
-    console.log(selected);
-    const { projectID, patientID, studyUID } = selected;
-    // let total;
-    //check if the patient already exist
-    //if patient exists extract the open series and control the grid for enough room
-    if (this.props.patients[patientID]) {
-      const study = this.props.patients[patientID].studies[studyUID];
-      const extractedStudy = this.excludeOpenSeries(
-        Object.values(study.series)
-      );
-      //if there is not enough room bring modal
-      // total = extractedStudy.length + this.props.openSeries.length;
-      console.log(
-        "total",
-        extractedStudy.length + this.props.openSeries.length
-      );
-      if (extractedStudy.length + this.props.openSeries.length > 6) {
-        if (this.props.loading) {
-          setTimeout(function() {
-            //do what you need here
-          }, 1000);
-        }
-        await this.props.dispatch(selectStudy(selected));
-        this.props.dispatch(openProjectSelectionModal());
-        //add the project to the selected studies
-        // if there is enough room iterate over the extracted array and call getsingleserie
-      } else {
-        extractedStudy.forEach(serie => {
-          this.props.dispatch(getSingleSerie({ ...serie, projectID }));
-        });
-      }
+    if (this.props.openSeries.length === MAX_PORT) {
+      this.props.dispatch(alertViewPortFull());
     } else {
-      //if patient is not there make the control
-      //if not enough room bring the modal
-      // total = selected.numberOfSeries + this.props.openSeries.length;
-      console.log(
-        "total",
-        selected.numberOfSeries + this.props.openSeries.length
-      );
-
-      if (selected.numberOfSeries + this.props.openSeries.length > 6) {
-        if (this.props.loading) {
-          setTimeout(function() {
-            //do what you need here
-          }, 1000);
-        }
-        await this.props.dispatch(selectStudy(selected));
-        this.props.dispatch(openProjectSelectionModal());
-        //add the project to the selected studies
+      const { patientID, studyUID } = selected;
+      let seriesArr;
+      //check if the patient is there (create a patient exist flag)
+      const patientExists = this.props.patients[patientID];
+      //if there is patient iterate over the series object of the study (form an array of series)
+      if (patientExists) {
+        seriesArr = Object.values(
+          this.props.patients[patientID].studies[studyUID].series
+        );
+        //if there is not a patient get series data of the study and (form an array of series)
       } else {
-        //if enough room bring all series
-        const result = await this.getSeriesData(selected);
-        if (Array.isArray(result) && result.length > 0) {
-          await this.props.dispatch(await getAnnotationListData(result[0]));
-          for (let i = 1; i < result.length; i++) {
-            console.log("inside the loop", result[i]);
-            await this.props.dispatch(getSingleSerie(result[i]));
-          }
+        seriesArr = await this.getSeriesData(selected);
+      }
+      //get extraction of the series (extract unopen series)
+      seriesArr = this.excludeOpenSeries(seriesArr);
+      //check if there is enough room
+      if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
+        //if there is not bring the modal
+        this.setState({
+          isSerieSelectionOpen: true,
+          selectedStudy: [seriesArr]
+        });
+      } else {
+        //if there is enough room
+        //add serie to the grid
+        for (let serie of seriesArr) {
+          this.props.dispatch(addToGrid(serie));
+        }
+        //getsingleSerie
+        for (let serie of seriesArr) {
+          this.props.dispatch(getSingleSerie(serie));
+        }
+        //if patient doesnot exist get patient
+        if (!patientExists) {
+          this.props.dispatch(getWholeData(null, selected));
+        } else {
+          this.props.dispatch(
+            updatePatient("study", true, patientID, studyUID)
+          );
         }
       }
     }
+  };
+
+  closeSelectionModal = () => {
+    this.setState(state => ({
+      isSerieSelectionOpen: !state.isSerieSelectionOpen
+    }));
   };
 
   render() {
@@ -402,7 +402,6 @@ class Studies extends Component {
             getTdProps={(state, rowInfo, column) => ({
               onDoubleClick: e => {
                 this.displaySeries(rowInfo.original);
-                console.log(rowInfo.original);
               }
             })}
             SubComponent={row => {
@@ -412,12 +411,19 @@ class Studies extends Component {
                     projectId={this.props.projectId}
                     subjectId={this.props.subjectId}
                     studyId={row.original.studyUID}
+                    studyDescription={row.original.studyDescription}
                   />
                 </div>
               );
             }}
           />
         ) : null}
+        {this.state.isSerieSelectionOpen && !this.props.loading && (
+          <ProjectModal
+            seriesPassed={this.state.selectedStudy}
+            onCancel={this.closeSelectionModal}
+          />
+        )}
       </div>
     );
   }
@@ -428,7 +434,8 @@ const mapStateToProps = state => {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     loading: state.annotationsListReducer.loading,
-    selectedStudies: state.annotationsListReducer.selectedStudies
+    selectedStudies: state.annotationsListReducer.selectedStudies,
+    showProjectModal: state.annotationsListReducer.showProjectModal
   };
 };
 export default connect(mapStateToProps)(Studies);

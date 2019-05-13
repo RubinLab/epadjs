@@ -14,8 +14,13 @@ import {
   getSingleSerie,
   changeActivePort,
   selectSerie,
-  clearSelection
+  clearSelection,
+  addToGrid,
+  getWholeData,
+  updatePatient
 } from "../annotationsList/action";
+import { MAX_PORT } from "../../constants";
+
 import AlertGridFull from "./alertGridFull";
 import { isLite } from "../../config.json";
 import "react-table/react-table.css";
@@ -96,7 +101,7 @@ class Series extends Component {
     //   : (newState[selected.seriesUID] = selected.seriesDescription);
     // this.setState({ selectedSerie: newState });
     this.props.dispatch(clearSelection("serie"));
-    this.props.dispatch(selectSerie(selected));
+    this.props.dispatch(selectSerie(selected, this.props.studyDescription));
   };
   setColumns() {
     const columns = [
@@ -293,19 +298,18 @@ class Series extends Component {
 
   dispatchSerieDisplay = selected => {
     const openSeries = Object.values(this.props.openSeries);
+    const { patientID, studyUID } = selected;
+    console.log("in serie", patientID, studyUID);
     let isSerieOpen = false;
     //check if there is enough space in the grid
-    let isGridFull = openSeries.length === 6;
+    let isGridFull = openSeries.length === MAX_PORT;
     //check if the serie is already open
     if (openSeries.length > 0) {
       for (let i = 0; i < openSeries.length; i++) {
-        // for (let serie of openSeries) {
-        if (openSeries[i]) {
-          if (openSeries[i].seriesUID === selected.seriesUID) {
-            isSerieOpen = true;
-            this.props.dispatch(changeActivePort(i));
-            break;
-          }
+        if (openSeries[i].seriesUID === selected.seriesUID) {
+          isSerieOpen = true;
+          this.props.dispatch(changeActivePort(i));
+          break;
         }
       }
     }
@@ -316,12 +320,21 @@ class Series extends Component {
         // this.setState({ showGridFullWarning: true });
         this.props.dispatch(alertViewPortFull());
       } else {
+        this.props.dispatch(addToGrid(selected));
+        this.props.dispatch(getSingleSerie(selected));
         //if grid is NOT full check if patient data exists
-        if (this.props.patients[selected.patientID]) {
-          this.props.dispatch(getSingleSerie(selected));
-          //if patient doesn't exist dispatch to get data
+        if (!this.props.patients[selected.patientID]) {
+          this.props.dispatch(getWholeData(selected));
         } else {
-          this.props.dispatch(getAnnotationListData(selected));
+          this.props.dispatch(
+            updatePatient(
+              "serie",
+              true,
+              patientID,
+              studyUID,
+              selected.seriesUID
+            )
+          );
         }
       }
     }
@@ -381,6 +394,8 @@ class Series extends Component {
                       subjectId={this.props.subjectId}
                       studyId={row.original.studyUID}
                       seriesId={row.original.seriesUID}
+                      studyDescription={this.props.studyDescription}
+                      seriesDescription={row.original.seriesDescription}
                     />
                   </div>
                 );

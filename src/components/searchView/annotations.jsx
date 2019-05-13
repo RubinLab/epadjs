@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
-
 import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
+import { MAX_PORT } from "../../constants";
 import { getAnnotations } from "../../services/annotationServices";
 import {
   displaySingleAim,
@@ -12,7 +12,12 @@ import {
   getSingleSerie,
   getAnnotationListData,
   clearSelection,
-  selectAnnotation
+  selectAnnotation,
+  changeActivePort,
+  addToGrid,
+  getWholeData,
+  updatePatient,
+  jumpToAim
 } from "../annotationsList/action";
 import "react-table/react-table.css";
 
@@ -54,8 +59,11 @@ class Annotations extends Component {
   }
 
   selectRow = selected => {
+    const { studyDescription, seriesDescription } = this.props;
     this.props.dispatch(clearSelection("annotation"));
-    this.props.dispatch(selectAnnotation(selected));
+    this.props.dispatch(
+      selectAnnotation(selected, studyDescription, seriesDescription)
+    );
   };
 
   setColumns() {
@@ -188,37 +196,50 @@ class Annotations extends Component {
     this.setState({ expanded });
   };
 
-  dispatchAnnDisplay = selected => {
-    const { projectID, studyUID, seriesUID, aimID } = selected;
-    const patientID = selected.originalSubjectID;
-    const openSeries = Object.values(this.props.openSeries);
-    const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
-    let isSerieOpen = false;
-    //check if there is enough space in the grid
-    let isGridFull = openSeries.length === 6;
-    //check if the serie is already open
-    if (openSeries.length > 0) {
-      for (let i = 0; i < openSeries.length; i++) {
-        // for (let serie of openSeries) {
-        if (openSeries[i].seriesUID === seriesUID) {
-          isSerieOpen = true;
-          break;
-        }
+  checkIfSerieOpen = selectedSerie => {
+    let isOpen = false;
+    let index;
+    this.props.openSeries.forEach((serie, i) => {
+      if (serie.seriesUID === selectedSerie) {
+        isOpen = true;
+        index = i;
       }
-    }
-    if (isSerieOpen) {
-      this.props.dispatch(
-        displaySingleAim(patientID, studyUID, seriesUID, aimID)
-      );
+    });
+    return { isOpen, index };
+  };
+
+  displayAnnotations = selected => {
+    const { projectID, studyUID, seriesUID, aimID } = selected;
+    const patientID = selected.subjectID;
+    const { openSeries } = this.props;
+    // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
+    //check if there is enough space in the grid
+    let isGridFull = openSeries.length === MAX_PORT;
+    //check if the serie is already open
+    if (this.checkIfSerieOpen(seriesUID).isOpen) {
+      const { index } = this.checkIfSerieOpen(seriesUID);
+      this.props.dispatch(changeActivePort(index));
+      this.props.dispatch(jumpToAim(aimID, index));
     } else {
       if (isGridFull) {
         this.props.dispatch(alertViewPortFull());
       } else {
-        if (this.props.patients[patientID]) {
-          this.props.dispatch(getSingleSerie(serieObj, aimID));
-          //if patient doesn't exist dispatch to get data
+        this.props.dispatch(addToGrid(selected, aimID));
+        this.props.dispatch(getSingleSerie(selected, aimID));
+        //if grid is NOT full check if patient data exists
+        if (!this.props.patients[patientID]) {
+          this.props.dispatch(getWholeData(null, null, selected));
         } else {
-          this.props.dispatch(getAnnotationListData(serieObj, null, aimID));
+          this.props.dispatch(
+            updatePatient(
+              "annotation",
+              true,
+              patientID,
+              studyUID,
+              seriesUID,
+              aimID
+            )
+          );
         }
       }
     }
@@ -261,7 +282,7 @@ class Annotations extends Component {
             getTdProps={(state, rowInfo, column, instance) => {
               return {
                 onDoubleClick: (e, handleOriginal) => {
-                  this.dispatchAnnDisplay(rowInfo.original);
+                  this.displayAnnotations(rowInfo.original);
                 }
               };
             }}

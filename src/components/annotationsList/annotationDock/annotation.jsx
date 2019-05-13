@@ -2,7 +2,7 @@ import React from "react";
 import {
   FaRegEye,
   FaRegEyeSlash,
-  FaInfoCircle,
+  FaReply,
   FaCaretDown,
   FaCaretUp
 } from "react-icons/fa";
@@ -11,10 +11,6 @@ import AimEntityData from "./aimEntityData";
 import CalculationLabel from "./calculationLabel";
 
 const annotation = props => {
-  // let annName = props.aim.name.value;
-  // let index = annName.indexOf("~");
-  // annName = annName.substring(0, index);
-
   //conditional borderstyling
   let buttonStyle = { ...props.style.button };
   let labelStyle = { ...props.style.label };
@@ -46,10 +42,26 @@ const annotation = props => {
           data-id={props.id}
           onClick={props.onSingleToggle}
         >
-          {props.showLabel ? <FaCaretUp /> : <FaCaretDown />}
+          {props.showLabel ? (
+            <FaCaretUp className="clickable-icon" />
+          ) : (
+            <FaCaretDown className="clickable-icon" />
+          )}
         </div>
-        <div className="annotation-name__container">
-          <div className="annotation__name--text">{props.name}</div>
+        <div
+          className="annotation-name__container"
+          data-id={props.id}
+          onClick={props.onSingleToggle}
+        >
+          {props.name}
+        </div>
+        <div
+          className="annotation-icon"
+          onClick={props.jumpToAim}
+          id={"id" + props.id}
+          data-id={props.id}
+        >
+          <FaReply className="clickable-icon" />
         </div>
         <div
           className="annotation-icon"
