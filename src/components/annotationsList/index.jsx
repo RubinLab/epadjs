@@ -38,6 +38,20 @@ class AnnotationsList extends React.Component {
     this.setState({ serieList });
   };
 
+  componentDidUpdate = prevProps => {
+    const { patientID, studyUID, seriesUID } = this.openSeries[this.activePort];
+    if (this.props.openSeries.length !== prevProps.openSeries.length) {
+      const selectedStudy = this.props.openSeries[this.props.activePort]
+        .studyUID;
+      this.setState({ selectedStudy });
+
+      const serieList = Object.values(
+        this.props.patients[patientID].studies[selectedStudy].series
+      );
+      this.setState({ serieList });
+    }
+  };
+
   handleStudyChange = e => {
     const newSerieList = Object.values(
       this.patient.studies[e.target.value].series

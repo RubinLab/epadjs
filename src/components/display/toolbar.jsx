@@ -116,9 +116,6 @@ class Toolbar extends Component {
     // const showStatus = this.state.showAnnotationList;
 
     const { openSeries, patients } = this.props;
-    console.log(openSeries);
-    console.log(patients);
-
     for (let port of openSeries) {
       const { patientID, seriesUID, studyUID, aimID } = port;
 

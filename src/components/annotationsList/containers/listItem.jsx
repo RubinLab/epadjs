@@ -1,13 +1,13 @@
 import React from "react";
 import { connect } from "react-redux";
-import { FaMinus, FaPlus } from "react-icons/fa";
+import { FaMinus, FaPlus, FaEye } from "react-icons/fa";
 import { MAX_PORT } from "../../../constants";
 import Annotations from "./annotations";
 import {
   updateAnnotationDisplay,
   toggleAllAnnotations,
   changeActivePort,
-  getAnnotationListData,
+  showAnnotationWindow,
   getSingleSerie,
   alertViewPortFull,
   addToGrid,
@@ -25,12 +25,27 @@ class ListItem extends React.Component {
   };
 
   componentDidMount = () => {
+    const { patientID, studyUID, seriesUID } = this.props.serie;
     this.setState({
-      isSerieOpen: this.props.selected,
+      isSerieOpen: this.props.patients[patientID].studies[studyUID].series[
+        seriesUID
+      ].isDisplayed,
       collapseAnnList: this.checkIfSerieOpen(this.props.serie.seriesUID).isOpen,
       displayAnnotations: this.props.serie.isDisplayed,
       displayLabels: this.props.serie.isLabelDisplayed
     });
+  };
+
+  componentDidUpdate = prevProps => {
+    const { patientID, studyUID, seriesUID } = this.props.serie;
+    const prevStatus =
+      prevProps.patients[patientID].studies[studyUID].series[seriesUID]
+        .isDisplayed;
+    const currentStatus = this.props.patients[patientID].studies[studyUID]
+      .series[seriesUID].isDisplayed;
+    if (currentStatus !== prevStatus) {
+      this.setState({ isSerieOpen: currentStatus });
+    }
   };
 
   handleCollapse = () => {
@@ -47,6 +62,16 @@ class ListItem extends React.Component {
       }
     });
     return { isOpen, index };
+  };
+
+  openSerie = async e => {
+    const { patientID, studyUID, seriesUID } = this.props.serie;
+    this.props.dispatch(addToGrid(this.props.serie));
+    await this.props.dispatch(getSingleSerie(this.props.serie));
+    this.props.dispatch(
+      updatePatient("serie", true, patientID, studyUID, seriesUID)
+    );
+    this.props.dispatch(showAnnotationWindow());
   };
 
   handleAnnotationClick = async e => {
@@ -80,6 +105,7 @@ class ListItem extends React.Component {
         }
       }
     }
+    this.props.dispatch(showAnnotationWindow());
   };
 
   handleToggleSerie = async (checked, e, id) => {
@@ -150,17 +176,32 @@ class ListItem extends React.Component {
       : 0;
     return (
       <>
-        <div className="-serieButton__container" onClick={this.handleCollapse}>
-          <button className="annList-serieButton">
+        <div className="-serieButton__container">
+          <div className="annList-serieButton">
             {this.state.collapseAnnList ? (
-              <FaMinus className="-serieButton__icon" />
+              <div className="-serie-icon__cont" onClick={this.handleCollapse}>
+                <FaMinus className="-serieButton__icon" />
+              </div>
             ) : (
-              <FaPlus className="-serieButton__icon" />
+              <div className="-serie-icon__cont" onClick={this.handleCollapse}>
+                <FaPlus className="-serieButton__icon" />
+              </div>
             )}
-            <span className="-serieButton__value">
+            <span
+              className="-serieButton__value"
+              onClick={this.handleCollapse}
+              onDoubleClick={this.openSerie}
+            >
               {desc} - ({numOfAnn})
             </span>
-          </button>
+            {this.state.isSerieOpen ? (
+              <div className="-serie-icon__cont" />
+            ) : (
+              <div className="-serie-icon__cont" onClick={this.openSerie}>
+                <FaEye className="-serieButton__icon" />
+              </div>
+            )}
+          </div>
         </div>
         {this.state.collapseAnnList && (
           <Annotations
@@ -178,7 +219,8 @@ class ListItem extends React.Component {
 const mapStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
-    activePort: state.annotationsListReducer.activePort
+    activePort: state.annotationsListReducer.activePort,
+    patients: state.annotationsListReducer.patients
   };
 };
 export default connect(mapStateToProps)(ListItem);
