@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { getImageIds } from "../../services/seriesServices";
 import { getAnnotations } from "../../services/annotationServices";
-import { wadoUrl } from "../../config.json";
+import { wadoUrl, isLite } from "../../config.json";
 import Aim from "../../utils/Aim";
 import AimEditor from "../aimEditor/aimEditor";
 //import ImageScrollbar from "./imageScrollbar";
@@ -235,21 +235,22 @@ class ViewportSeg extends Component {
     } = await getImageIds(this.state.series);
 
     urls.map(url => {
+      let baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
-          this.state.imageIds.push(
-            wadoUrl +
-              url.lossyImage +
-              "&contentType=application%2Fdicom?frame=" +
-              i
-          );
+          let multiFrameUrl = !isLite
+            ? baseUrl + "&contentType=application%2Fdicom?frame=" + i
+            : baseUrl;
+          this.state.imageIds.push(multiFrameUrl);
         }
-      } else
-        this.state.imageIds.push(
-          wadoUrl + url.lossyImage + "&contentType=application%2Fdicom"
-        );
+      } else {
+        let singleFrameUrl = !isLite
+          ? baseUrl + "&contentType=application%2Fdicom"
+          : baseUrl;
+        this.state.imageIds.push(singleFrameUrl);
+      }
     });
-    console.log(this.state.imageIds);
+    console.log(this.state.imageIds[0]);
   }
 
   async componentDidMount() {

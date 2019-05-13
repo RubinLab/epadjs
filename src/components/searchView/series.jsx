@@ -22,6 +22,7 @@ import {
 import { MAX_PORT } from "../../constants";
 
 import AlertGridFull from "./alertGridFull";
+import { isLite } from "../../config.json";
 import "react-table/react-table.css";
 
 // const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -99,7 +100,6 @@ class Series extends Component {
     //   ? delete newState[selected.seriesUID]
     //   : (newState[selected.seriesUID] = selected.seriesDescription);
     // this.setState({ selectedSerie: newState });
-    console.log(selected);
     this.props.dispatch(clearSelection("serie"));
     this.props.dispatch(selectSerie(selected, this.props.studyDescription));
   };

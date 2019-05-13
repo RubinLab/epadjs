@@ -4,6 +4,7 @@ import axios from "axios";
 import auth from "./authService";
 
 // axios.defaults.withCredentials = false;
+console.log(auth.getAuthHeader1());
 axios.defaults.headers.common["Authorization"] = auth.getAuthHeader1();
 // axios.defaults.headers.common["Transfer-Encoding"] = "chunked";
 axios.defaults.headers.common["Content-Type"] =

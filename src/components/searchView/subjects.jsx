@@ -65,7 +65,6 @@ class Subjects extends Component {
   }
 
   selectRow = selected => {
-    console.log(selected);
     this.props.dispatch(clearSelection("patient"));
     this.props.dispatch(selectPatient(selected));
   };

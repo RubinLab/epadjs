@@ -177,11 +177,13 @@ class SearchView extends Component {
     return groupedObj;
   };
 
+
   downloadSelection = async () => {
     const selectedProjects = Object.values(this.props.selectedProjects);
     const selectedPatients = Object.values(this.props.selectedPatients);
     const selectedStudies = Object.values(this.props.selectedStudies);
     const selectedSeries = Object.values(this.props.selectedSeries);
+    const selectedAnnotations = Object.values(this.props.selectedAnnotations);
     let fileName;
     if (selectedProjects.length > 0) {
       selectedProjects.forEach(project => {
@@ -203,6 +205,8 @@ class SearchView extends Component {
         fileName = `Series - ${serie.seriesUID}`;
         this.downLoadHelper(downloadSeries, serie, fileName);
       });
+    } else if (selectedAnnotations.length > 0) {
+      this.setState({ showAnnotationModal: true });
     }
   };
 
@@ -263,6 +267,9 @@ class SearchView extends Component {
           key={this.props.match.params.pid}
           pid={this.props.match.params.pid}
         />
+        {this.state.showAnnotationModal && (
+          <DownloadSelection onCancel={this.handleDownloadCancel} />
+        )}
       </>
     );
   }

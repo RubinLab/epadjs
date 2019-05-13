@@ -83,7 +83,6 @@ class Studies extends Component {
     //   ? delete newState[studyUID]
     //   : (newState[studyUID] = studyObj);
     // this.setState({ selectedStudy: newState });
-    console.log(selected);
     this.props.dispatch(clearSelection("study"));
     this.props.dispatch(selectStudy(selected));
   };

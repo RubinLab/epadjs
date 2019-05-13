@@ -1,8 +1,16 @@
 import http from "./httpService";
-import { apiUrl } from "../config.json";
+
+import { isLite, apiUrl } from "../config.json";
+import { getCurrentUser } from "./authService";
 
 export function getSubjects(projectId) {
-  return http.get(apiUrl + "/projects/" + projectId + "/subjects/");
+  console.log("in call");
+  console.log(sessionStorage.getItem("username"));
+  console.log(sessionStorage.getItem("token"));
+  if (isLite) {
+    projectId = "lite";
+    return http.get(apiUrl + "/projects/" + projectId + "/subjects");
+  } else return http.get(apiUrl + "/projects/" + projectId + "/subjects/");
 }
 
 export function downloadSubjects(subject) {

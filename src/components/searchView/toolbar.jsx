@@ -1,5 +1,6 @@
 import React from "react";
 import { FaEye, FaDownload } from "react-icons/fa";
+import { TiPencil } from "react-icons/ti";
 
 const toolBar = props => {
   return (
@@ -13,6 +14,9 @@ const toolBar = props => {
         <div>
           <FaDownload style={{ fontSize: "1.2rem" }} />
         </div>
+      </div>
+      <div className="searchView-toolbar__icon">
+        <TiPencil />
       </div>
     </div>
   );

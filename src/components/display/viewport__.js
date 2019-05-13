@@ -126,7 +126,7 @@ class Viewport extends Component {
     } = await getImageIds({ ...this.state.series }); //get the Wado image ids for this series
     urls.map(url =>
       this.state.imageIds.push(
-        "wadouri:http://epad-dev6.stanford.edu:8080/epad/wado/" +
+        "wadouri:http://epad-dev8.stanford.edu:8080/epad/wado/" +
           url.lossyImage +
           "&contentType=application%2Fdicom"
       )
