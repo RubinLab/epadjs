@@ -198,9 +198,9 @@ svg {
   display: flex;
   justify-content: center;
 }
-/* svg {
+.clickable-icon {
   pointer-events: none;
-} */
+}
 .annotation-label__container {
   border-bottom-left-radius: 1em;
   border-bottom-right-radius: 1em;

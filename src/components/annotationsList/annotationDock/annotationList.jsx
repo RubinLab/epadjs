@@ -8,7 +8,8 @@ import {
   updateAnnotationDisplay,
   toggleAllLabels,
   toggleSingleLabel,
-  toggleAllAnnotations
+  toggleAllAnnotations,
+  jumpToAim
 } from "../action";
 
 class AnnotationsList extends React.Component {
@@ -70,9 +71,14 @@ class AnnotationsList extends React.Component {
   };
 
   handleToggleSingleLabel = e => {
-    console.log(e.target.dataset);
+    console.log("here", e.target.dataset);
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
+  };
+
+  handleJumToAim = e => {
+    const { id } = e.target.dataset;
+    this.props.dispatch(jumpToAim(id, this.props.activePort));
   };
 
   render = () => {
@@ -106,6 +112,7 @@ class AnnotationsList extends React.Component {
           user={aim.json.user.name.value}
           showLabel={aim.showLabel}
           onSingleToggle={this.handleToggleSingleLabel}
+          jumpToAim={this.handleJumToAim}
         />
       );
     });
