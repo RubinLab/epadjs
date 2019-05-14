@@ -33,7 +33,6 @@ const annotation = props => {
   const calculations = props.aim.calculationEntityCollection
     ? props.aim.calculationEntityCollection.CalculationEntity
     : [];
-
   return (
     <div className="annotation-container">
       <div className="annotation-button__container" style={finalButtonStyle}>
@@ -58,8 +57,8 @@ const annotation = props => {
         <div
           className="annotation-icon"
           onClick={props.jumpToAim}
-          id={"id" + props.id}
           data-id={props.id}
+          data-serie={props.serie}
         >
           <FaReply className="clickable-icon" />
         </div>

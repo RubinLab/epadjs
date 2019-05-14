@@ -82,10 +82,10 @@ export const loadPatientError = err => {
 export const loadPatientSuccess = patient => {
   return { type: LOAD_PATIENT_SUCCESS, patient };
 };
-export const jumpToAim = (aimID, index) => {
+export const jumpToAim = (seriesUID, aimID, index) => {
   return {
     type: JUMP_TO_AIM,
-    payload: { aimID, index }
+    payload: { seriesUID, aimID, index }
   };
 };
 export const displaySingleAim = (

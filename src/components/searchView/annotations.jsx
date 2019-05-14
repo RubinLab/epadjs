@@ -219,7 +219,7 @@ class Annotations extends Component {
     if (this.checkIfSerieOpen(seriesUID).isOpen) {
       const { index } = this.checkIfSerieOpen(seriesUID);
       this.props.dispatch(changeActivePort(index));
-      this.props.dispatch(jumpToAim(aimID, index));
+      this.props.dispatch(jumpToAim(seriesUID, aimID, index));
     } else {
       if (isGridFull) {
         this.props.dispatch(alertViewPortFull());

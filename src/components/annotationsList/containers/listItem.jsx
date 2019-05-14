@@ -81,7 +81,7 @@ class ListItem extends React.Component {
       .seriesUID;
     if (activeSeriesUID === seriesid) {
       // this.checkIfSerieOpen(seriesid).index;
-      this.props.dispatch(jumpToAim(aimid, this.props.activePort));
+      this.props.dispatch(jumpToAim(seriesid, aimid, this.props.activePort));
     } else {
       //if doesn't match check if the serie exists in the open series
       const isOpen = this.checkIfSerieOpen(seriesid).isOpen;
@@ -90,7 +90,7 @@ class ListItem extends React.Component {
         // if it exists in the openSeries update activeport
         this.props.dispatch(changeActivePort(index));
         //update the status of the clicked annotation
-        this.props.dispatch(jumpToAim(aimid, index));
+        this.props.dispatch(jumpToAim(seriesid, aimid, index));
       } else {
         //else get single serie dispatch action
         if (this.props.openSeries.length === MAX_PORT) {

@@ -389,9 +389,24 @@ const asyncReducer = (state = initialState, action) => {
       return { ...state, patients: updatedPtPatients };
     case JUMP_TO_AIM:
       let { aimID, index } = action.payload;
+      let serUID = action.payload.seriesUID;
       let updatedGrid = [...state.openSeries];
       updatedGrid[index].aimID = aimID;
-      return { ...state, openSeries: updatedGrid };
+
+      // return { ...state, openSeries: updatedGrid, aimsList: {...state.aimsList} };
+      return Object.assign({}, state, {
+        openSeries: updatedGrid,
+        aimsList: {
+          ...state.aimsList,
+          [serUID]: {
+            ...state.aimsList[serUID],
+            [aimID]: {
+              ...state.aimsList[serUID][aimID],
+              isDisplayed: true
+            }
+          }
+        }
+      });
     default:
       return state;
   }
