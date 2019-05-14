@@ -25,6 +25,7 @@ import {
   showAnnotationDock,
   getWholeData
 } from "../annotationsList/action";
+import Spinner from "../common/spinner";
 import "./toolbar.css";
 import "../../font-icons/styles.css";
 
@@ -34,7 +35,9 @@ const mapStateToProps = state => {
     cornerstoneTools: state.searchViewReducer.cornerstoneTools,
     activeVP: state.searchViewReducer.activeVP,
     openSeries: state.annotationsListReducer.openSeries,
-    patients: state.annotationsListReducer.patients
+    patients: state.annotationsListReducer.patients,
+    patientLoading: state.annotationsListReducer.patientLoading,
+    listOpen: state.annotationsListReducer.listOpen
   };
 };
 
@@ -415,12 +418,18 @@ class Toolbar extends Component {
           className="toolbarSectionButton"
           onClick={this.handlePatientClick}
         >
-          <div className="toolContainer">
-            <FaRegFolderOpen />
-          </div>
-          <div className="buttonLabel">
-            <span>Patient</span>
-          </div>
+          {this.props.patientLoading ? (
+            <Spinner loading={this.props.patientLoading} unit="rem" size={3} />
+          ) : (
+            <>
+              <div className="toolContainer">
+                <FaRegFolderOpen />
+              </div>
+              <div className="buttonLabel">
+                <span>Patient</span>
+              </div>
+            </>
+          )}
         </div>
         <div
           tabIndex="14"

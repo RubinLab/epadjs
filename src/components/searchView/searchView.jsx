@@ -19,11 +19,15 @@ import {
 } from "../annotationsList/action";
 import { MAX_PORT } from "../../constants";
 import "./searchView.css";
-
+import DownloadSelection from "./annotationDownloadModal";
 class SearchView extends Component {
   constructor(props) {
     super(props);
-    this.state = { seriesList: {}, isSerieSelectionOpen: false };
+    this.state = {
+      seriesList: {},
+      isSerieSelectionOpen: false,
+      showAnnotationModal: false
+    };
   }
 
   viewSelection = async () => {
@@ -177,7 +181,6 @@ class SearchView extends Component {
     return groupedObj;
   };
 
-
   downloadSelection = async () => {
     const selectedProjects = Object.values(this.props.selectedProjects);
     const selectedPatients = Object.values(this.props.selectedPatients);
@@ -231,6 +234,10 @@ class SearchView extends Component {
       let blob = new Blob([result.data], { type: "application/zip" });
       this.triggerBrowserDownload(blob, fileName);
     });
+  };
+
+  handleDownloadCancel = () => {
+    this.setState({ showAnnotationModal: false });
   };
 
   triggerBrowserDownload = (blob, fileName) => {

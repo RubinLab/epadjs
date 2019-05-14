@@ -3,6 +3,10 @@ export const LOAD_ANNOTATIONS_SUCCESS =
   "epadjs/annotationList/LOAD_ANNOTATIONS_SUCCESS";
 export const LOAD_ANNOTATIONS_ERROR =
   "epadjs/annotationList/LOAD_ANNOTATIONS_ERROR";
+export const LOAD_PATIENT = "epadjs/annotationList/LOAD_PATIENT";
+export const LOAD_PATIENT_ERROR = "epadjs/annotationList/LOAD_PATIENT_ERROR";
+export const LOAD_PATIENT_SUCCESS =
+  "epadjs/annotationList/LOAD_PATIENT_SUCCESS";
 export const VIEWPORT_FULL = "epadjs/annotationList/VIEWPORT_FULL";
 export const OPEN_PROJECT_MODAL = "epadjs/annotationList/OPEN_PROJECT_MODAL";
 export const UPDATE_ANNOTATION_DISPLAY =

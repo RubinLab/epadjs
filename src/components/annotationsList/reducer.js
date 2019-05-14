@@ -2,6 +2,9 @@ import {
   LOAD_ANNOTATIONS,
   LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
+  LOAD_PATIENT,
+  LOAD_PATIENT_SUCCESS,
+  LOAD_PATIENT_ERROR,
   UPDATE_ANNOTATION_DISPLAY,
   VIEWPORT_FULL,
   TOGGLE_ALL_ANNOTATIONS,
@@ -42,7 +45,9 @@ const initialState = {
   selectedPatients: {},
   selectedStudies: {},
   selectedSeries: {},
-  selectedAnnotations: {}
+  selectedAnnotations: {},
+  patientLoading: false,
+  patientLoadingError: null
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -287,14 +292,22 @@ const asyncReducer = (state = initialState, action) => {
         ? delete newAnnotations[action.annotation.aimID]
         : (newAnnotations[action.annotation.aimID] = action.annotation);
       return { ...state, selectedAnnotations: newAnnotations };
-    case GET_PATIENT:
+    case LOAD_PATIENT:
+      return { ...state, patientLoading: true };
+    case LOAD_PATIENT_ERROR:
+      return {
+        ...state,
+        patientLoadingError: action.err,
+        patientLoading: false
+      };
+    case LOAD_PATIENT_SUCCESS:
       let addedNewPatient = { ...state.patients };
       addedNewPatient[action.patient.patientID] = action.patient;
       return {
         ...state,
         patients: addedNewPatient,
-        loading: false,
-        error: false
+        patientLoading: false,
+        patientLoadingError: false
       };
     case DISPLAY_SINGLE_AIM:
       let aimPatient = { ...state.patients[action.payload.patientID] };

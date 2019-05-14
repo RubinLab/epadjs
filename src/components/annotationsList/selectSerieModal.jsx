@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import {
   clearGrid,
-  getPatient,
+  // getPatient,
   getWholeData,
   getSingleSerie,
   clearSelection,
@@ -52,9 +52,9 @@ class selectSerieModal extends React.Component {
     this._isMounted = false;
   };
 
-  getPatient = async study => {
-    return this.props.dispatch(getPatient(study));
-  };
+  // getPatient = async study => {
+  //   return this.props.dispatch(getPatient(study));
+  // };
 
   getSerieListData = async (projectID, patientID, studyUID) => {
     const {

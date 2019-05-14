@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import { downloadAnnotations } from "../../services/annotationServices";
 
-class annnotationDownloadModal extends React.Component {
+class AnnnotationDownloadModal extends React.Component {
   state = { summary: false, aim: false };
 
   onSelect = e => {
@@ -78,7 +78,7 @@ class annnotationDownloadModal extends React.Component {
   };
 }
 
-annnotationDownloadModal.propTypes = {
+AnnnotationDownloadModal.propTypes = {
   onOK: PropTypes.func
 };
 
@@ -88,4 +88,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps)(annnotationDownloadModal);
+export default connect(mapStateToProps)(AnnnotationDownloadModal);
