@@ -66,7 +66,7 @@ function selectSeries(projectId, subjectId, studyId, seriesId) {
 class Series extends Component {
   constructor(props) {
     super(props);
-
+    this.widthUnit = 20;
     this.state = {
       series: this.props.series,
       columns: [],
@@ -108,7 +108,7 @@ class Series extends Component {
       {
         id: "checkbox",
         accessor: "",
-        width: 30,
+        width: this.widthUnit,
         Cell: ({ original }) => {
           return (
             <input
@@ -127,19 +127,30 @@ class Series extends Component {
             <span className="badge badge-secondary"> # of Annotations </span>
           </div>
         ),
+        width: this.widthUnit * 11,
         Cell: row => (
-          <div>
-            {row.original.seriesDescription || "Unnamed Serie"} &nbsp; <br />
+          <div>{row.original.seriesDescription || "Unnamed Serie"}</div>
+        )
+      },
+      {
+        //annotations
+        width: this.widthUnit * 2,
+        Cell: row => (
+          <div className="searchView-table__cell">
             {row.original.numberOfAnnotations === "" ? (
               ""
             ) : (
               <span className="badge badge-secondary">
-                {" "}
-                {row.original.numberOfAnnotations}{" "}
+                {row.original.numberOfAnnotations}
               </span>
             )}
           </div>
         )
+      },
+      {
+        //subitem
+        width: this.widthUnit * 3,
+        Cell: row => <div />
       },
       {
         Header: (
@@ -147,40 +158,57 @@ class Series extends Component {
             <span className="badge badge-secondary"> # of Images </span>
           </div>
         ),
+        width: this.widthUnit * 3,
         Cell: row => (
-          <div>
+          <div className="searchView-table__cell">
             {row.original.numberOfImages === "" ? (
               ""
             ) : (
-              <span className="badge badge-secondary">
-                {" "}
-                {row.original.numberOfImages}{" "}
-              </span>
+              <span className="badge badge-secondary" />
             )}
           </div>
         )
       },
       {
         Header: "Type",
-        Cell: row => row.original.examType
-      },
-      {
-        Header: "Ready",
+        width: this.widthUnit * 5,
         Cell: row => (
-          <div>{progressDisplay(row.original.seriesProcessingStatus)}</div>
+          <div className="searchView-table__cell">{row.original.examType}</div>
         )
       },
       {
+        width: this.widthUnit * 7,
         Header: "Study/Created Date",
-        Cell: row => row.original.seriesDate
+        Cell: row => (
+          <div className="searchView-table__cell">
+            {row.original.seriesDate}
+          </div>
+        )
       },
       {
+        width: this.widthUnit * 7,
         Header: "Uploaded",
-        Cell: row => row.original.createdTime
+        Cell: row => (
+          <div className="searchView-table__cell">
+            {row.original.createdTime}
+          </div>
+        )
       },
       {
         Header: "Accession",
-        Cell: row => row.original.accessionNumber
+        width: this.widthUnit * 5,
+        Cell: row => (
+          <div className="searchView-table__cell">
+            {row.original.accessionNumber}
+          </div>
+        )
+      },
+      {
+        Header: "Identifier",
+        width: this.widthUnit * 10,
+        Cell: row => (
+          <div className="searchView-table__cell">{row.original.seriesUID}</div>
+        )
       }
     ];
     return columns;

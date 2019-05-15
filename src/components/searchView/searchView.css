@@ -56,3 +56,33 @@
   margin-bottom: 0.2rem;
   align-items: center;
 }
+
+.badge-flex {
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.searchView-header {
+  display: flex;
+  color: red;
+}
+.searchView-header__col--flex {
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.search-header__col {
+  font-size: 1rem;
+}
+
+.searchView-table__cell {
+  text-align: center;
+}
+
+.searchView-table__col--left {
+  text-align: left;
+}
+
+.search-header__col {
+  color: #cf1b2c;
+}

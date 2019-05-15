@@ -20,6 +20,7 @@ import {
 import { MAX_PORT } from "../../constants";
 import "./searchView.css";
 import DownloadSelection from "./annotationDownloadModal";
+import Header from "./header";
 class SearchView extends Component {
   constructor(props) {
     super(props);
@@ -270,6 +271,7 @@ class SearchView extends Component {
             onCancel={this.closeSelectionModal}
           />
         )}
+        {/* <Header /> */}
         <Subjects
           key={this.props.match.params.pid}
           pid={this.props.match.params.pid}

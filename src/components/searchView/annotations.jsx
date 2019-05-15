@@ -37,7 +37,7 @@ function getNodes(data, node = []) {
 class Annotations extends Component {
   constructor(props) {
     super(props);
-
+    this.widthUnit = 20;
     this.series = Object.assign({}, this.props);
     this.state = {
       columns: [],
@@ -71,7 +71,7 @@ class Annotations extends Component {
       {
         id: "checkbox",
         accessor: "",
-        width: 30,
+        width: this.widthUnit,
         Cell: ({ original }) => {
           return (
             <input
@@ -85,18 +85,47 @@ class Annotations extends Component {
       },
       {
         Header: "Annotation Name",
+        width: this.widthUnit * 10,
         Cell: row => <div>{row.original.name || "Unnamed annotation"}</div>
       },
       {
+        //no of aims
+        width: this.widthUnit * 2,
+        Cell: row => <div />
+      },
+      {
+        //no of sub item
+        width: this.widthUnit * 3,
+        Cell: row => <div />
+      },
+      {
+        //no of sub images
+        width: this.widthUnit * 3,
+        Cell: row => <div />
+      },
+      {
         Header: "Type",
+        width: this.widthUnit * 5,
         Cell: row => <div>{row.original.template}</div>
       },
       {
         Header: "Created Date",
+        width: this.widthUnit * 7,
         Cell: row => row.original.date
       },
       {
+        //upload date
+        width: this.widthUnit * 7,
+        Cell: row => <div />
+      },
+      {
+        //uaccession
+        width: this.widthUnit * 5,
+        Cell: row => <div />
+      },
+      {
         Header: "Identifier",
+        width: this.widthUnit * 10,
         Cell: row => row.original.aimID
       }
     ];

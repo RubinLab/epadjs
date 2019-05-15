@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import ReactTable from "react-table";
-import Chance from "chance";
-import "react-table/react-table.css";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
+import ReactTooltip from "react-tooltip";
+import Chance from "chance";
+import "react-table/react-table.css";
 import Studies from "./studies";
 import { getSubjects } from "../../services/subjectServices";
 import { selectPatient, clearSelection } from "../annotationsList/action";
@@ -26,7 +27,7 @@ function getNodes(data, node = []) {
 class Subjects extends Component {
   constructor(props) {
     super(props);
-
+    this.widthUnit = 20;
     this.state = {
       pid: this.props.pid,
       columns: [],
@@ -52,7 +53,6 @@ class Subjects extends Component {
     const columns = [];
     const sample = data[0];
     for (let key in sample) {
-      console.log("key is " + key);
       if (this.incColumns.includes(key)) {
         columns.push({
           accessor: key,
@@ -73,7 +73,7 @@ class Subjects extends Component {
       {
         id: "searchView-checkbox",
         accessor: "",
-        width: 30,
+        width: this.widthUnit,
         Cell: ({ original }) => {
           return (
             <input
@@ -86,22 +86,38 @@ class Subjects extends Component {
         }
       },
       {
+        Header: <div className="search-header__col">Description/Name</div>,
+        width: this.widthUnit * 13,
+        Cell: ({ original }) => {
+          const desc = this.cleanCarets(original.subjectName);
+          const id = "desc" + original.subjectID;
+          return (
+            <>
+              <div data-tip data-for={id}>
+                {desc}
+              </div>
+              <ReactTooltip id={id} place="right" type="info" delayShow={1000}>
+                <span>{desc}</span>
+              </ReactTooltip>
+            </>
+          );
+        }
+      },
+      {
         Header: (
-          <div>
-            Subject{" "}
-            <span className="badge badge-secondary"> # of Annotations </span>
+          <div className="search-header__col badge-flex">
+            <span> # of </span>
+            <span> aims </span>
           </div>
         ),
-
+        width: this.widthUnit * 2,
         Cell: row => (
-          <div>
-            {this.cleanCarets(row.original.subjectName)} &nbsp;
+          <div className="searchView-table__cell">
             {row.original.numberOfAnnotations === 0 ? (
               ""
             ) : (
               <span className="badge badge-secondary">
-                {" "}
-                {row.original.numberOfAnnotations}{" "}
+                {row.original.numberOfAnnotations}
               </span>
             )}
           </div>
@@ -109,22 +125,76 @@ class Subjects extends Component {
       },
       {
         Header: (
-          <div>
-            <span className="badge badge-secondary"> # of Studies </span>
+          <div className="search-header__col badge-flex">
+            <span># of </span>
+            <span> sub </span>
           </div>
         ),
+        width: this.widthUnit * 3,
         Cell: row => (
-          <div>
+          <div className="searchView-table__cell">
             {row.original.numberOfStudies === 0 ? (
               ""
             ) : (
               <span className="badge badge-secondary">
-                {" "}
-                {row.original.numberOfStudies}{" "}
+                {row.original.numberOfStudies}
               </span>
             )}
           </div>
         )
+      },
+      {
+        Header: (
+          <div className="search-header__col badge-flex">
+            <span> # of </span>
+            <span> images </span>
+          </div>
+        ),
+        width: this.widthUnit * 3,
+        // minResizeWidth: this.widthUnit * 3,
+        Cell: row => <div />
+      },
+      {
+        Header: <div className="search-header__col">Type</div>,
+        width: this.widthUnit * 5,
+        // minResizeWidth: this.widthUnit * 5,
+        Cell: row => <div />
+      },
+      {
+        Header: <div className="search-header__col">Creation date</div>,
+        width: this.widthUnit * 7,
+        // minResizeWidth: this.widthUnit * 10,
+        Cell: row => <div />
+      },
+      {
+        Header: <div className="search-header__col">Upload date</div>,
+        width: this.widthUnit * 7,
+        // minResizeWidth: this.widthUnit * 10,
+        Cell: row => <div />
+      },
+      {
+        Header: <div className="search-header__col">Accession</div>,
+        width: this.widthUnit * 5,
+        // minResizeWidth: this.widthUnit * 4,
+        Cell: row => <div />
+      },
+      {
+        Header: <div className="search-header__col">Idendifier</div>,
+        width: this.widthUnit * 10,
+        // minResizeWidth: this.widthUnit * 12,
+        Cell: ({ original }) => {
+          const id = "id" + original.subjectID;
+          return (
+            <>
+              <div className="searchView-table__cell" data-tip data-for={id}>
+                {original.subjectID}
+              </div>
+              <ReactTooltip id={id} place="right" type="info" delayShow={1000}>
+                <span>{original.subjectID}</span>
+              </ReactTooltip>
+            </>
+          );
+        }
       }
     ];
     return columns;
@@ -288,11 +358,11 @@ class Subjects extends Component {
             className="-striped -highlight"
             freezWhenExpanded={false}
             showPagination={false}
-            TheadComponent={TheadComponent}
+            // TheadComponent={TheadComponent}
             {...extraProps}
             SubComponent={row => {
               return (
-                <div style={{ paddingLeft: "20px" }}>
+                <div style={{ paddingLeft: 20 }}>
                   <Studies
                     projectId={this.props.pid}
                     subjectId={row.original.displaySubjectID}
