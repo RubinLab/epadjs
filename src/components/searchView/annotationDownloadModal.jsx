@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import { downloadAnnotations } from "../../services/annotationServices";
+import { ToastContainer, toast } from "react-toastify";
 
 class AnnnotationDownloadModal extends React.Component {
   state = { summary: false, aim: false };
@@ -15,10 +16,16 @@ class AnnnotationDownloadModal extends React.Component {
   onDownload = () => {
     const optionObj = this.state;
     const aimList = Object.keys(this.props.selectedAnnotations);
-    downloadAnnotations(optionObj, aimList).then(result => {
-      let blob = new Blob([result.data], { type: "application/zip" });
-      this.triggerBrowserDownload(blob, "Annotations");
-    });
+    downloadAnnotations(optionObj, aimList)
+      .then(result => {
+        let blob = new Blob([result.data], { type: "application/zip" });
+        this.triggerBrowserDownload(blob, "Annotations");
+      })
+      .catch(err => {
+        if (err.response.status === 503) {
+          toast.error("Select a download format!", { autoClose: false });
+        }
+      });
     this.props.onCancel();
   };
 

@@ -4,7 +4,7 @@ import { withRouter } from "react-router-dom";
 import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
-import { MAX_PORT } from "../../constants";
+import { MAX_PORT, formatDates } from "../../constants";
 import { getAnnotations } from "../../services/annotationServices";
 import {
   displaySingleAim,
@@ -106,12 +106,20 @@ class Annotations extends Component {
       {
         Header: "Type",
         width: this.widthUnit * 5,
-        Cell: row => <div>{row.original.template}</div>
+        Cell: row => (
+          <div className="searchView-table__cell">{row.original.template}</div>
+        )
       },
       {
         Header: "Created Date",
         width: this.widthUnit * 7,
-        Cell: row => row.original.date
+        Cell: row => {
+          return (
+            <div className="searchView-table__cell">
+              {formatDates(row.original.date)}
+            </div>
+          );
+        }
       },
       {
         //upload date
@@ -120,7 +128,7 @@ class Annotations extends Component {
       },
       {
         //uaccession
-        width: this.widthUnit * 5,
+        width: this.widthUnit * 6,
         Cell: row => <div />
       },
       {

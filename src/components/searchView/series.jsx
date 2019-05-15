@@ -19,7 +19,7 @@ import {
   getWholeData,
   updatePatient
 } from "../annotationsList/action";
-import { MAX_PORT } from "../../constants";
+import { MAX_PORT, formatDates } from "../../constants";
 
 import AlertGridFull from "./alertGridFull";
 import { isLite } from "../../config.json";
@@ -181,7 +181,7 @@ class Series extends Component {
         Header: "Study/Created Date",
         Cell: row => (
           <div className="searchView-table__cell">
-            {row.original.seriesDate}
+            {formatDates(row.original.seriesDate)}
           </div>
         )
       },
@@ -190,13 +190,13 @@ class Series extends Component {
         Header: "Uploaded",
         Cell: row => (
           <div className="searchView-table__cell">
-            {row.original.createdTime}
+            {formatDates(row.original.createdTime)}
           </div>
         )
       },
       {
         Header: "Accession",
-        width: this.widthUnit * 5,
+        width: this.widthUnit * 6,
         Cell: row => (
           <div className="searchView-table__cell">
             {row.original.accessionNumber}

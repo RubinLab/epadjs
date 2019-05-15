@@ -7,7 +7,7 @@ import treeTableHOC from "react-table/lib/hoc/treeTable";
 import { getStudies } from "../../services/studyServices";
 import { getSeries } from "../../services/seriesServices";
 import ProjectModal from "../annotationsList/selectSerieModal";
-import { MAX_PORT } from "../../constants";
+import { MAX_PORT, widthUnit, formatDates } from "../../constants";
 import Series from "./series";
 import {
   getSingleSerie,
@@ -168,7 +168,7 @@ class Studies extends Component {
         width: this.widthUnit * 7,
         Cell: row => (
           <div className="searchView-table__cell">
-            {row.original.insertDate}
+            {formatDates(row.original.insertDate)}
           </div>
         )
       },
@@ -177,13 +177,13 @@ class Studies extends Component {
         width: this.widthUnit * 7,
         Cell: row => (
           <div className="searchView-table__cell">
-            {row.original.createdTime}
+            {formatDates(row.original.createdTime)}
           </div>
         )
       },
       {
         //Header: "Accession",
-        width: this.widthUnit * 5,
+        width: this.widthUnit * 6,
         Cell: row => (
           <div className="searchView-table__cell">
             {row.original.studyAccessionNumber}

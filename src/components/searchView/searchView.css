@@ -64,7 +64,6 @@
 
 .searchView-header {
   display: flex;
-  color: red;
 }
 .searchView-header__col--flex {
   display: inline-flex;
@@ -84,5 +83,9 @@
 }
 
 .search-header__col {
-  color: #cf1b2c;
+  /* color: #a70432; */
+  /* color: #09a7da; */
+  /* color: #861737;
+   */
+  color: #db2559;
 }
