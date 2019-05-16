@@ -35,7 +35,7 @@ export const LOAD_COMPLETED = "epadjs/annotationList/LOAD_COMPLETED";
 export const START_LOADING = "epadjs/annotationList/START_LOADING";
 export const UPDATE_PATIENT = "epadjs/annotationList/UPDATE_PATIENT";
 export const CLOSE_SERIE = "epadjs/annotationList/CLOSE_SERIE";
-
+export const CLEAR_ALL_SELECTION = "epadjs/annotationList/CLEAR_ALL_SELECTION";
 export const colors = [
   {
     button: { background: "#e6194B", color: "black" },

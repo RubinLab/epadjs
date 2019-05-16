@@ -1,5 +1,5 @@
 import React from "react";
-import { FaEye, FaDownload } from "react-icons/fa";
+import { FaEye, FaDownload, FaUpload } from "react-icons/fa";
 import { TiPencil } from "react-icons/ti";
 import ReactTooltip from "react-tooltip";
 
@@ -10,7 +10,12 @@ const toolBar = props => {
         <div>
           <FaEye style={{ fontSize: "1.2rem" }} data-tip data-for="view-icon" />
         </div>
-        <ReactTooltip id="view-icon" place="right" type="info" delayShow={1500}>
+        <ReactTooltip
+          id="view-icon"
+          place="bottom"
+          type="info"
+          delayShow={1500}
+        >
           <span>Open selections</span>
         </ReactTooltip>
       </div>
@@ -24,11 +29,28 @@ const toolBar = props => {
         </div>
         <ReactTooltip
           id="download-icon"
-          place="right"
+          place="bottom"
           type="info"
           delayShow={1500}
         >
           <span>Download selections</span>
+        </ReactTooltip>
+      </div>
+      <div className="searchView-toolbar__icon" onClick={props.onUpload}>
+        <div>
+          <FaUpload
+            style={{ fontSize: "1.2rem" }}
+            data-tip
+            data-for="upload-icon"
+          />
+        </div>
+        <ReactTooltip
+          id="upload-icon"
+          place="bottom"
+          type="info"
+          delayShow={1500}
+        >
+          <span>Upload file</span>
         </ReactTooltip>
       </div>
       <div className="searchView-toolbar__icon">
@@ -40,7 +62,7 @@ const toolBar = props => {
           />
         </div>
       </div>
-      <ReactTooltip id="ann-icon" place="right" type="info" delayShow={1500}>
+      <ReactTooltip id="ann-icon" place="bottom" type="info" delayShow={1500}>
         <span>Add annotation</span>
       </ReactTooltip>
     </div>
@@ -62,7 +84,7 @@ data-for="trash-icon"
 />
 <ReactTooltip
 id="trash-icon"
-place="right"
+place="bottom"
 type="info"
 delayShow={1500}
 >

@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import { downloadAnnotations } from "../../services/annotationServices";
 import { ToastContainer, toast } from "react-toastify";
-
+import { clearAllSelection } from "../annotationsList/action";
 class AnnnotationDownloadModal extends React.Component {
   state = { summary: false, aim: false };
 
@@ -26,6 +26,7 @@ class AnnnotationDownloadModal extends React.Component {
           toast.error("Select a download format!", { autoClose: false });
         }
       });
+    this.props.dispatch(clearAllSelection());
     this.props.onCancel();
   };
 

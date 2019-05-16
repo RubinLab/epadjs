@@ -95,7 +95,7 @@ class Annotations extends Component {
               <div data-tip data-for={id}>
                 {desc}
               </div>
-              <ReactTooltip id={id} place="right" type="info" delayShow={1000}>
+              <ReactTooltip id={id} place="right" type="info" delayShow={500}>
                 <span>{desc}</span>
               </ReactTooltip>
             </>

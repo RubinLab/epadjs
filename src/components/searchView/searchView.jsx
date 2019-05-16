@@ -15,7 +15,8 @@ import {
   getSingleSerie,
   getWholeData,
   alertViewPortFull,
-  updatePatient
+  updatePatient,
+  clearAllSelection
 } from "../annotationsList/action";
 import { MAX_PORT } from "../../constants";
 import "./searchView.css";
@@ -27,9 +28,20 @@ class SearchView extends Component {
     this.state = {
       seriesList: {},
       isSerieSelectionOpen: false,
-      showAnnotationModal: false
+      showAnnotationModal: false,
+      showUploadFileModal: false,
+      loading: false,
+      error: false
     };
   }
+
+  updateLoadingStatus = () => {
+    this.setState(state => ({ loading: !state.loading }));
+  };
+
+  updateError = error => {
+    this.setState({ error, loading: false });
+  };
 
   viewSelection = async () => {
     if (this.props.openSeries.length === MAX_PORT) {
@@ -97,9 +109,6 @@ class SearchView extends Component {
             this.props.dispatch(addToGrid(serie));
             this.props.dispatch(getSingleSerie(serie));
           });
-          // selectedSeries.forEach(serie => {
-          //   this.props.dispatch(getSingleSerie(serie));
-          // });
           for (let series of selectedSeries) {
             if (!this.props.patients[series.patientID]) {
               await this.props.dispatch(getWholeData(series));
@@ -116,7 +125,7 @@ class SearchView extends Component {
             }
           }
         }
-        //if annptations selected
+        //if annotations selected
       } else if (selectedAnnotations.length > 0) {
         let serieList = Object.values(groupedAnns);
         groupedObj = this.groupUnderStudy(serieList);
@@ -131,9 +140,6 @@ class SearchView extends Component {
             this.props.dispatch(addToGrid(serie, serie.aimID));
             this.props.dispatch(getSingleSerie(serie, serie.aimID));
           });
-          // serieList.forEach(serie => {
-          //   this.props.dispatch(getSingleSerie(serie, serie.aimID));
-          // });
           for (let ann of selectedAnnotations) {
             if (!this.props.patients[ann.subjectID]) {
               await this.props.dispatch(getWholeData(null, null, ann));
@@ -192,23 +198,27 @@ class SearchView extends Component {
     if (selectedProjects.length > 0) {
       selectedProjects.forEach(project => {
         fileName = `Project - ${project.projectID}`;
-        this.downLoadHelper(downloadProjects, project, fileName);
+        this.downloadHelper(downloadProjects, project, fileName);
       });
+      this.props.dispatch(clearAllSelection());
     } else if (selectedPatients.length > 0) {
       selectedPatients.forEach(patient => {
         fileName = `Patients - ${patient.subjectID}`;
-        this.downLoadHelper(downloadSubjects, patient, fileName);
+        this.downloadHelper(downloadSubjects, patient, fileName);
       });
+      this.props.dispatch(clearAllSelection());
     } else if (selectedStudies.length > 0) {
       selectedStudies.forEach(study => {
         fileName = `Studies - ${study.studyUID}`;
-        this.downLoadHelper(downloadStudies, study, fileName);
+        this.downloadHelper(downloadStudies, study, fileName);
       });
+      this.props.dispatch(clearAllSelection());
     } else if (selectedSeries.length > 0) {
       selectedSeries.forEach(serie => {
         fileName = `Series - ${serie.seriesUID}`;
-        this.downLoadHelper(downloadSeries, serie, fileName);
+        this.downloadHelper(downloadSeries, serie, fileName);
       });
+      this.props.dispatch(clearAllSelection());
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
     }
@@ -222,15 +232,13 @@ class SearchView extends Component {
           ResultSet: { Result: series }
         }
       } = await getSeries(projectID, patientID, studyUID);
-      // console.log("series from func");
-      // console.log(series);
       return series;
     } catch (err) {
       this.props.dispatch(annotationsLoadingError(err));
     }
   };
 
-  downLoadHelper = (downLoadfunction, arg, fileName) => {
+  downloadHelper = (downLoadfunction, arg, fileName) => {
     downLoadfunction(arg).then(result => {
       let blob = new Blob([result.data], { type: "application/zip" });
       this.triggerBrowserDownload(blob, fileName);
@@ -258,6 +266,8 @@ class SearchView extends Component {
     }));
   };
 
+  hanndleUploadFile = () => {};
+
   render() {
     return (
       <>
@@ -271,7 +281,6 @@ class SearchView extends Component {
             onCancel={this.closeSelectionModal}
           />
         )}
-        {/* <Header /> */}
         <Subjects
           key={this.props.match.params.pid}
           pid={this.props.match.params.pid}

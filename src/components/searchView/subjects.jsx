@@ -98,7 +98,7 @@ class Subjects extends Component {
               <div data-tip data-for={id}>
                 {desc}
               </div>
-              <ReactTooltip id={id} place="right" type="info" delayShow={1000}>
+              <ReactTooltip id={id} place="right" type="info" delayShow={500}>
                 <span>{desc}</span>
               </ReactTooltip>
             </>
@@ -191,7 +191,7 @@ class Subjects extends Component {
               <div className="searchView-table__cell" data-tip data-for={id}>
                 {original.subjectID}
               </div>
-              <ReactTooltip id={id} place="right" type="info" delayShow={1000}>
+              <ReactTooltip id={id} place="right" type="info" delayShow={500}>
                 <span>{original.subjectID}</span>
               </ReactTooltip>
             </>

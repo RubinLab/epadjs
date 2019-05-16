@@ -28,7 +28,8 @@ import {
   DISPLAY_SINGLE_AIM,
   JUMP_TO_AIM,
   UPDATE_PATIENT,
-  CLOSE_SERIE
+  CLOSE_SERIE,
+  CLEAR_ALL_SELECTION
 } from "./types";
 const initialState = {
   openSeries: [],
@@ -52,6 +53,15 @@ const initialState = {
 
 const asyncReducer = (state = initialState, action) => {
   switch (action.type) {
+    case CLEAR_ALL_SELECTION:
+      return {
+        ...state,
+        selectedProjects: {},
+        selectedPatients: {},
+        selectedStudies: {},
+        selectedSeries: {},
+        selectedAnnotations: {}
+      };
     case CLOSE_SERIE:
       let delSeriesUID = action.payload.serie.seriesUID;
       let delStudyUID = action.payload.serie.studyUID;
