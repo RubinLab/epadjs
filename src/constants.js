@@ -2,7 +2,6 @@ export const MAX_PORT = 6;
 export const widthUnit = 20;
 
 export const formatDates = timeStamp => {
-  console.log(typeof timeStamp);
   //split it by space
   const dateArr = timeStamp.split(" ");
   let date = (date = dateArr[0]);

@@ -86,7 +86,9 @@ class Subjects extends Component {
         }
       },
       {
-        Header: <div className="search-header__col">Description/Name</div>,
+        Header: (
+          <div className="search-header__col--left">Description/Name</div>
+        ),
         width: this.widthUnit * 13,
         Cell: ({ original }) => {
           const desc = this.cleanCarets(original.subjectName);
@@ -179,7 +181,7 @@ class Subjects extends Component {
         Cell: row => <div />
       },
       {
-        Header: <div className="search-header__col">Idendifier</div>,
+        Header: <div className="search-header__col">Idenditifier</div>,
         width: this.widthUnit * 10,
         // minResizeWidth: this.widthUnit * 12,
         Cell: ({ original }) => {

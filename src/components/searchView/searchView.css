@@ -83,9 +83,15 @@
 }
 
 .search-header__col {
+  /* color: #861737; */
   /* color: #a70432; */
+  /* color: #db2559;  */
   /* color: #09a7da; */
-  /* color: #861737;
-   */
-  color: #db2559;
+}
+
+.search-header__col--left {
+  /* color: #09a7da; */
+  /* color: #a70432; */
+  /* color: #5bc0de; */
+  text-align: left;
 }

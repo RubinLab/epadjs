@@ -9,6 +9,7 @@ import { getSeries } from "../../services/seriesServices";
 import ProjectModal from "../annotationsList/selectSerieModal";
 import { MAX_PORT, widthUnit, formatDates } from "../../constants";
 import Series from "./series";
+import ReactTooltip from "react-tooltip";
 import {
   getSingleSerie,
   getAnnotationListData,
@@ -87,6 +88,15 @@ class Studies extends Component {
     this.props.dispatch(selectStudy(selected));
   };
 
+  cleanCarets(string) {
+    var i = 0,
+      length = string.length;
+    for (i; i < length; i++) {
+      string = string.replace("^", " ");
+    }
+    return string;
+  }
+
   setColumns() {
     const columns = [
       {
@@ -106,9 +116,21 @@ class Studies extends Component {
       },
       {
         width: this.widthUnit * 12,
-        Cell: row => (
-          <div>{row.original.studyDescription || "Unnamed Study"}</div>
-        )
+        Cell: row => {
+          let desc = this.cleanCarets(row.original.studyDescription);
+          desc = desc || "Unnamed Study";
+          const id = "desc" + row.original.studyUID;
+          return (
+            <>
+              <div data-tip data-for={id}>
+                {desc}
+              </div>
+              <ReactTooltip id={id} place="right" type="info" delayShow={500}>
+                <span>{desc}</span>
+              </ReactTooltip>
+            </>
+          );
+        }
       },
       {
         width: this.widthUnit * 2,
@@ -185,15 +207,43 @@ class Studies extends Component {
         //Header: "Accession",
         width: this.widthUnit * 6,
         Cell: row => (
-          <div className="searchView-table__cell">
-            {row.original.studyAccessionNumber}
-          </div>
+          <>
+            <div
+              className="searchView-table__cell"
+              data-tip
+              data-for={row.original.studyAccessionNumber}
+            >
+              {row.original.studyAccessionNumber}
+            </div>
+            <ReactTooltip
+              id={row.original.studyAccessionNumber}
+              place="right"
+              type="info"
+              delayShow={500}
+            >
+              <span>{row.original.studyAccessionNumber}</span>
+            </ReactTooltip>
+          </>
         )
       },
       {
         //Header: "Identifier",
         width: this.widthUnit * 10,
-        Cell: row => row.original.studyUID
+        Cell: row => (
+          <>
+            <div data-tip data-for={row.original.studyUID}>
+              {row.original.studyUID}
+            </div>{" "}
+            <ReactTooltip
+              id={row.original.studyUID}
+              place="right"
+              type="info"
+              delayShow={500}
+            >
+              <span>{row.original.studyUID}</span>
+            </ReactTooltip>
+          </>
+        )
       }
     ];
     return columns;

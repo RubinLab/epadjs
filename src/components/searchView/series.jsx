@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf } from "react-icons/fa";
-
+import ReactTooltip from "react-tooltip";
 import { BrowserRouter, withRouter } from "react-router-dom";
 import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
@@ -128,9 +128,20 @@ class Series extends Component {
           </div>
         ),
         width: this.widthUnit * 11,
-        Cell: row => (
-          <div>{row.original.seriesDescription || "Unnamed Serie"}</div>
-        )
+        Cell: row => {
+          let desc = row.original.seriesDescription || "Unnamed Serie";
+          let id = "desc" + row.original.seriesUID;
+          return (
+            <>
+              <div data-tip data-for={id}>
+                {desc}
+              </div>{" "}
+              <ReactTooltip id={id} place="top" type="info" delayShow={500}>
+                <span>{desc}</span>
+              </ReactTooltip>
+            </>
+          );
+        }
       },
       {
         //annotations
@@ -164,7 +175,9 @@ class Series extends Component {
             {row.original.numberOfImages === "" ? (
               ""
             ) : (
-              <span className="badge badge-secondary" />
+              <span className="badge badge-secondary">
+                {row.original.numberOfImages}
+              </span>
             )}
           </div>
         )
@@ -207,7 +220,23 @@ class Series extends Component {
         Header: "Identifier",
         width: this.widthUnit * 10,
         Cell: row => (
-          <div className="searchView-table__cell">{row.original.seriesUID}</div>
+          <>
+            <div
+              className="searchView-table__cell"
+              data-tip
+              data-for={row.original.seriesUID}
+            >
+              {row.original.seriesUID}
+            </div>{" "}
+            <ReactTooltip
+              id={row.original.seriesUID}
+              place="right"
+              type="info"
+              delayShow={500}
+            >
+              <span>{row.original.seriesUID}</span>
+            </ReactTooltip>
+          </>
         )
       }
     ];

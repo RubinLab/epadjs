@@ -4,6 +4,7 @@ import { withRouter } from "react-router-dom";
 import ReactTable from "react-table";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
+import ReactTooltip from "react-tooltip";
 import { MAX_PORT, formatDates } from "../../constants";
 import { getAnnotations } from "../../services/annotationServices";
 import {
@@ -86,7 +87,20 @@ class Annotations extends Component {
       {
         Header: "Annotation Name",
         width: this.widthUnit * 10,
-        Cell: row => <div>{row.original.name || "Unnamed annotation"}</div>
+        Cell: row => {
+          let desc = row.original.name || "Unnamed annotation";
+          let id = "desc" + row.original.aimID;
+          return (
+            <>
+              <div data-tip data-for={id}>
+                {desc}
+              </div>
+              <ReactTooltip id={id} place="right" type="info" delayShow={1000}>
+                <span>{desc}</span>
+              </ReactTooltip>
+            </>
+          );
+        }
       },
       {
         //no of aims
