@@ -395,6 +395,8 @@ class Series extends Component {
         }
       }
     }
+
+    this.props.dispatch(clearSelection());
   };
 
   render() {
@@ -435,10 +437,10 @@ class Series extends Component {
               getTdProps={(state, rowInfo, column, instance) => {
                 return {
                   onDoubleClick: (e, handleOriginal) => {
-                    this.handleSelectSeries(rowInfo.original);
-                    if (handleOriginal) {
-                      handleOriginal();
-                    }
+                    // this.handleSelectSeries(rowInfo.original);
+                    // if (handleOriginal) {
+                    //   handleOriginal();
+                    // }
                     this.dispatchSerieDisplay(rowInfo.original);
                   }
                 };

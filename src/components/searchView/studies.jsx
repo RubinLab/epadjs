@@ -420,6 +420,7 @@ class Studies extends Component {
           );
         }
       }
+      this.props.dispatch(clearSelection());
     }
   };
 

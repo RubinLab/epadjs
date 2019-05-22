@@ -29,7 +29,6 @@ import {
   START_LOADING,
   UPDATE_PATIENT,
   CLOSE_SERIE,
-  CLEAR_ALL_SELECTION,
   colors
 } from "./types";
 
@@ -40,9 +39,6 @@ import {
   getAnnotationsJSON
 } from "../../services/annotationServices";
 
-export const clearAllSelection = () => {
-  return { type: CLEAR_ALL_SELECTION };
-};
 export const clearGrid = item => {
   return { type: CLEAR_GRID };
 };

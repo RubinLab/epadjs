@@ -294,6 +294,7 @@ class Annotations extends Component {
         }
       }
     }
+    this.props.dispatch(clearSelection());
   };
 
   render() {
