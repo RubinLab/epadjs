@@ -23,7 +23,8 @@ import {
 import { MAX_PORT } from "../../constants";
 import "./searchView.css";
 import DownloadSelection from "./annotationDownloadModal";
-import Header from "./header";
+import UploadModal from "./uploadModal";
+
 class SearchView extends Component {
   constructor(props) {
     super(props);
@@ -33,7 +34,8 @@ class SearchView extends Component {
       showAnnotationModal: false,
       showUploadFileModal: false,
       loading: false,
-      error: false
+      error: false,
+      showUploadModal: false
     };
   }
 
@@ -68,12 +70,12 @@ class SearchView extends Component {
     }, result);
     return result;
   };
+
   viewSelection = async () => {
     let selectedStudies = Object.values(this.props.selectedStudies);
     let selectedSeries = Object.values(this.props.selectedSeries);
     let selectedAnnotations = Object.values(this.props.selectedAnnotations);
     const groupedAnns = this.groupUnderSerie(selectedAnnotations);
-    // let patientList;
     let groupedObj;
     let notOpenSeries = [];
     //if studies selected
@@ -93,7 +95,6 @@ class SearchView extends Component {
           this.props.dispatch(alertViewPortFull());
         }
       } else {
-        // patientList = this.groupUnderPatient(selectedStudies);
         for (let st of selectedStudies) {
           total += st.numberOfSeries;
         }
@@ -135,7 +136,6 @@ class SearchView extends Component {
       }
       //if series selected
     } else if (selectedSeries.length > 0) {
-      // patientList = this.groupUnderPatient(selectedSeries);
       //check if enough room to display selection
       for (let serie of selectedSeries) {
         if (!this.checkIfSerieOpen(serie.seriesUID).isOpen) {
@@ -186,14 +186,12 @@ class SearchView extends Component {
     } else if (selectedAnnotations.length > 0) {
       let serieList = Object.values(groupedAnns);
       groupedObj = this.groupUnderStudy(serieList);
-      // patientList = this.groupUnderPatient(selectedAnnotations);
       //check if enough room to display selection
       for (let serie of serieList) {
         if (!this.checkIfSerieOpen(serie.seriesUID).isOpen) {
           notOpenSeries.push(serie);
         }
       }
-      console.log(notOpenSeries);
       if (
         notOpenSeries.length > 0 &&
         this.props.openSeries.length === MAX_PORT
@@ -236,13 +234,6 @@ class SearchView extends Component {
       }
     }
     this.props.dispatch(clearSelection());
-  };
-  groupUnderPatient = objArr => {
-    let groupedObj = {};
-    for (let item of objArr) {
-      groupedObj[item.patientID] = item;
-    }
-    return groupedObj;
   };
 
   groupUnderStudy = objArr => {
@@ -326,6 +317,10 @@ class SearchView extends Component {
     this.setState({ showAnnotationModal: false });
   };
 
+  handleUploadCancel = () => {
+    this.setState({ showUploadModal: false });
+  };
+
   triggerBrowserDownload = (blob, fileName) => {
     const url = window.URL.createObjectURL(new Blob([blob]));
     const link = document.createElement("a");
@@ -343,13 +338,18 @@ class SearchView extends Component {
     }));
   };
 
-  hanndleUploadFile = () => {};
+  handleFileUpload = () => {
+    this.setState(state => ({
+      showUploadFileModal: !state.showUploadFileModal
+    }));
+  };
 
   render() {
     return (
       <>
         <Toolbar
           onDownload={this.downloadSelection}
+          onUpload={this.handleFileUpload}
           onView={this.viewSelection}
         />
         {this.state.isSerieSelectionOpen && !this.props.loading && (
@@ -364,6 +364,10 @@ class SearchView extends Component {
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection onCancel={this.handleDownloadCancel} />
+        )}
+
+        {this.state.showUploadFileModal && (
+          <UploadModal onCancel={this.handleFileUpload} />
         )}
       </>
     );

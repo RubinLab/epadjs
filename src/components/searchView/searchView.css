@@ -46,7 +46,8 @@
   flex-direction: column;
 }
 
-.annDownload-text {
+.annDownload-text,
+.upload-text {
   margin-left: 0.5rem;
   margin-top: 4px;
 }
@@ -94,4 +95,34 @@
   /* color: #a70432; */
   /* color: #5bc0de; */
   text-align: left;
+}
+
+.upload-file {
+  display: flex;
+  align-items: center;
+}
+
+.upload-display {
+  margin-left: 0.5rem;
+}
+
+.alert-upload.modal-dialog {
+  max-width: 90%;
+  max-height: 90%;
+  display: inline-block;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 2px solid gray;
+  box-shadow: 1rem 1rem 1rem grey;
+  left: 40%;
+}
+
+.upload-select {
+  color: black;
+  margin-left: 0.5rem;
+}
+
+.upload-select__container,
+.upload-file {
+  margin-bottom: 0.8rem;
 }
