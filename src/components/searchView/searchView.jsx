@@ -18,6 +18,7 @@ import {
   updatePatient
 } from "../annotationsList/action";
 import { MAX_PORT } from "../../constants";
+import DownloadSelection from "./annotationDownloadModal";
 import "./searchView.css";
 
 class SearchView extends Component {
@@ -176,7 +177,6 @@ class SearchView extends Component {
     }
     return groupedObj;
   };
-
 
   downloadSelection = async () => {
     const selectedProjects = Object.values(this.props.selectedProjects);
