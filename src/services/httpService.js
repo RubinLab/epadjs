@@ -4,11 +4,16 @@ import axios from "axios";
 import auth from "./authService";
 
 // axios.defaults.withCredentials = false;
-console.log(auth.getAuthHeader1());
-axios.defaults.headers.common["Authorization"] = auth.getAuthHeader1();
-// axios.defaults.headers.common["Transfer-Encoding"] = "chunked";
 axios.defaults.headers.common["Content-Type"] =
   "application/json, multipart/form-data";
+
+axios.interceptors.request.use(
+  config => {
+    config.headers.authorization = auth.getAuthHeader1();
+    return config;
+  },
+  error => Promise.reject(error)
+);
 
 axios.interceptors.response.use(null, error => {
   console.log("ERROR::", error.response.data);

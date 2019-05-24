@@ -1,3 +1,5 @@
+"use strict";
+
 import btoa from "btoa-lite";
 import http from "./httpService";
 import { apiUrlV1, clientKey } from "../config.json";
@@ -7,16 +9,19 @@ const apiEndpoint = apiUrlV1 + "/session/";
 
 export async function login(username, password, keyCloakToken) {
   let basicAuth;
+  let header;
   if (isLite) {
     console.log("keyclok token", keyCloakToken);
+    // await http.post(apiUrlV1, {}, { headers: header });
     basicAuth = "Bearer " + keyCloakToken;
     sessionStorage.setItem("token", keyCloakToken);
     sessionStorage.setItem("username", username.user);
+    // http.post(apiUrlV1, {}, { headers: header });
     /*********************************** REMOVE IN PROD  **************************/
     sessionStorage.setItem("header", basicAuth);
   } else {
     basicAuth = "Basic " + btoa(username + ":" + password);
-    const header = {
+    header = {
       Authorization: basicAuth
     };
     const { data: token } = await http.post(

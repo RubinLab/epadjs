@@ -2,6 +2,9 @@ import {
   LOAD_ANNOTATIONS,
   LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
+  LOAD_PATIENT,
+  LOAD_PATIENT_SUCCESS,
+  LOAD_PATIENT_ERROR,
   VIEWPORT_FULL,
   UPDATE_ANNOTATION_DISPLAY,
   TOGGLE_ALL_ANNOTATIONS,
@@ -69,10 +72,20 @@ export const loadCompleted = () => {
 export const startLoading = () => {
   return { type: START_LOADING };
 };
-export const jumpToAim = (aimID, index) => {
+export const loadPatient = () => {
+  return { type: LOAD_PATIENT };
+};
+export const loadPatientError = err => {
+  return { type: LOAD_PATIENT_ERROR, err };
+};
+
+export const loadPatientSuccess = patient => {
+  return { type: LOAD_PATIENT_SUCCESS, patient };
+};
+export const jumpToAim = (seriesUID, aimID, index) => {
   return {
     type: JUMP_TO_AIM,
-    payload: { aimID, index }
+    payload: { seriesUID, aimID, index }
   };
 };
 export const displaySingleAim = (
@@ -194,12 +207,12 @@ const loadAnnotations = () => {
   };
 };
 
-export const getPatient = patient => {
-  return {
-    type: GET_PATIENT,
-    patient
-  };
-};
+// export const getPatient = patient => {
+//   return {
+//     type: GET_PATIENT,
+//     patient
+//   };
+// };
 export const openProjectSelectionModal = () => {
   return {
     type: OPEN_PROJECT_MODAL
@@ -464,7 +477,7 @@ const getSingleSerieData = (serie, annotation) => {
 
 export const getWholeData = (serie, study, annotation) => {
   return async (dispatch, getState) => {
-    dispatch(loadAnnotations());
+    dispatch(loadPatient());
     let { projectID, patientID, patientName, studyUID } =
       serie || study || annotation;
     if (annotation) patientID = annotation.subjectID;
@@ -489,7 +502,7 @@ export const getWholeData = (serie, study, annotation) => {
         ? await getStudiesData(summaryData, projectID, patientID, selectedID)
         : await getStudiesData(summaryData, projectID, patientID);
     } catch (error) {
-      dispatch(annotationsLoadingError(error));
+      dispatch(loadPatientError(error));
     }
     // make call to get series and populate studies with series data
     const studies = Object.values(summaryData["studies"]);
@@ -516,15 +529,16 @@ export const getWholeData = (serie, study, annotation) => {
             );
             serie.annotations = annotations;
           } catch (error) {
-            dispatch(annotationsLoadingError(error));
+            dispatch(loadPatientError(error));
+            // dispatch(annotationsLoadingError(error));
           }
         }
       } catch (error) {
-        dispatch(annotationsLoadingError(error));
+        dispatch(loadPatientError(error));
       }
     }
     // return summaryData;
-    dispatch(getPatient(summaryData));
+    dispatch(loadPatientSuccess(summaryData));
   };
 };
 

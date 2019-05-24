@@ -3,8 +3,9 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import { downloadAnnotations } from "../../services/annotationServices";
-
-class annnotationDownloadModal extends React.Component {
+import { ToastContainer, toast } from "react-toastify";
+import { clearSelection } from "../annotationsList/action";
+class AnnnotationDownloadModal extends React.Component {
   state = { summary: false, aim: false };
 
   onSelect = e => {
@@ -15,10 +16,17 @@ class annnotationDownloadModal extends React.Component {
   onDownload = () => {
     const optionObj = this.state;
     const aimList = Object.keys(this.props.selectedAnnotations);
-    downloadAnnotations(optionObj, aimList).then(result => {
-      let blob = new Blob([result.data], { type: "application/zip" });
-      this.triggerBrowserDownload(blob, "Annotations");
-    });
+    downloadAnnotations(optionObj, aimList)
+      .then(result => {
+        let blob = new Blob([result.data], { type: "application/zip" });
+        this.triggerBrowserDownload(blob, "Annotations");
+      })
+      .catch(err => {
+        if (err.response.status === 503) {
+          toast.error("Select a download format!", { autoClose: false });
+        }
+      });
+    this.props.dispatch(clearSelection());
     this.props.onCancel();
   };
 
@@ -78,7 +86,7 @@ class annnotationDownloadModal extends React.Component {
   };
 }
 
-annnotationDownloadModal.propTypes = {
+AnnnotationDownloadModal.propTypes = {
   onOK: PropTypes.func
 };
 
@@ -88,4 +96,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps)(annnotationDownloadModal);
+export default connect(mapStateToProps)(AnnnotationDownloadModal);

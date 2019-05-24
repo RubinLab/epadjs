@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import {
   clearGrid,
-  getPatient,
+  // getPatient,
   getWholeData,
   getSingleSerie,
   clearSelection,
@@ -52,9 +52,9 @@ class selectSerieModal extends React.Component {
     this._isMounted = false;
   };
 
-  getPatient = async study => {
-    return this.props.dispatch(getPatient(study));
-  };
+  // getPatient = async study => {
+  //   return this.props.dispatch(getPatient(study));
+  // };
 
   getSerieListData = async (projectID, patientID, studyUID) => {
     const {
@@ -111,32 +111,6 @@ class selectSerieModal extends React.Component {
         }
       }
     }
-
-    //iterate over the open series and update patient with each one
-
-    // let index = 0;
-    // for (let serie of series) {
-    //   if (this.state.selectedToDisplay[index] && this._isMounted) {
-    //     console.log("000000000000000000", index);
-    //     console.log(this.props.patients);
-    //     if (!this.props.patients[serie.patientID]) {
-    //       console.log("should be once");
-    //       await this.props.dispatch(getWholeData(serie));
-    //     } else {
-    //       this.props.dispatch(
-    //         updatePatient(
-    //           "serie",
-    //           true,
-    //           serie.patientID,
-    //           serie.studyUID,
-    //           serie.seriesUID
-    //         )
-    //       );
-    //     }
-    //   }
-    //   index++;
-    // }
-    console.log("here before cancel");
     this.handleCancel();
   };
 
