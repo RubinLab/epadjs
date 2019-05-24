@@ -1,25 +1,40 @@
+"use strict";
+
 import btoa from "btoa-lite";
 import http from "./httpService";
 import { getUser } from "./userServices";
 import { apiUrlV1, clientKey } from "../config.json";
+import { isLite } from "./../config.json";
 
 const apiEndpoint = apiUrlV1 + "/session/";
 
-export async function login(username, password) {
-  const basicAuth = "Basic " + btoa(username + ":" + password);
-  const header = {
-    Authorization: basicAuth
-  };
-  const { data: token } = await http.post(apiEndpoint, {}, { headers: header });
-  sessionStorage.setItem("token", token);
-  sessionStorage.setItem("username", username);
-  /*********************************** REMOVE IN PROD  **************************/
-  sessionStorage.setItem("header", basicAuth);
-  /*********************************** ******************************************/
-  const {
-    data: { displayname }
-  } = await getUser(username);
-  sessionStorage.setItem("displayName", displayname);
+export async function login(username, password, keyCloakToken) {
+  let basicAuth;
+  let header;
+  if (isLite) {
+    console.log("keyclok token", keyCloakToken);
+    // await http.post(apiUrlV1, {}, { headers: header });
+    basicAuth = "Bearer " + keyCloakToken;
+    sessionStorage.setItem("token", keyCloakToken);
+    sessionStorage.setItem("username", username.user);
+    // http.post(apiUrlV1, {}, { headers: header });
+    /*********************************** REMOVE IN PROD  **************************/
+    sessionStorage.setItem("header", basicAuth);
+  } else {
+    basicAuth = "Basic " + btoa(username + ":" + password);
+    header = {
+      Authorization: basicAuth
+    };
+    const { data: token } = await http.post(
+      apiEndpoint,
+      {},
+      { headers: header }
+    );
+    sessionStorage.setItem("token", token);
+    sessionStorage.setItem("username", username);
+    /*********************************** REMOVE IN PROD  **************************/
+    sessionStorage.setItem("header", basicAuth);
+  }
 }
 
 export function logout() {
@@ -28,6 +43,7 @@ export function logout() {
 }
 
 export function getCurrentUser() {
+  console.log("in get user", sessionStorage.getItem("username"));
   return sessionStorage.getItem("username");
 }
 

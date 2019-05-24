@@ -56,7 +56,7 @@
   flex-direction: row;
   margin: 0 auto;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-around;
 }
 
 .annList-serieButton:hover /*,
@@ -64,7 +64,10 @@
   transform: scale(1.1);
 }
 .-serieButton__icon {
-  margin-right: 0.5rem;
+  /* margin-right: 0.5rem; */
+  cursor: pointer;
+  /* background: red; */
+  font-size: 1.1rem;
 }
 
 .-serieButton__container {
@@ -82,15 +85,18 @@
 
 .-annotation__container {
   display: flex;
-  margin-bottom: 0.2rem;
+  /* flex-wrap: wrap; */
+  /* margin-bottom: 0.2rem;
   height: auto;
-  min-height: 1.3rem;
+  min-height: 1.3rem; */
 }
 
-.annList-annotations,
-.-collapse-toggles {
+.annList-annotations {
   margin: 0.2rem 0.5rem 0.5rem 2rem;
   width: 90%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
 .annotations-collapse {
@@ -139,6 +145,7 @@
   align-items: center;
   border-top-left-radius: 1em;
   border-top-right-radius: 1em;
+  justify-content: space-between;
 }
 
 .annotation__name--text {
@@ -155,23 +162,43 @@
   justify-content: center;
   width: 84%;
   font-size: 1rem;
+  /* align-items: center; */
 }
 
 .annotation-icon {
+  cursor: pointer;
   display: flex;
   justify-content: center;
   font-size: 1.2rem;
   display: inline-block;
-  margin: 0 auto;
-  cursor: pointer;
+  /* margin: 0 auto; */
   width: 8%;
   margin-right: 0.2rem;
 }
 
+.annotation__inner {
+  display: flex;
+  width: 92%;
+}
+
 .showLabel {
   font-size: 1.8rem;
+  width: 10%;
+}
+
+.annotation-name__container {
+  cursor: pointer;
 }
 svg {
+  pointer-events: auto;
+}
+
+.-serie-icon__cont {
+  width: 15%;
+  display: flex;
+  justify-content: center;
+}
+.clickable-icon {
   pointer-events: none;
 }
 .annotation-label__container {
@@ -323,7 +350,16 @@ svg {
   left: 40%;
 }
 
-.serieSelection-text {
+.selectionItem-text {
   text-transform: capitalize;
   margin-left: 0.4rem;
+}
+
+.serieSelection-title {
+  margin-top: 0.6rem;
+}
+
+.alreadyOpen-disabled {
+  display: flex;
+  align-items: center;
 }

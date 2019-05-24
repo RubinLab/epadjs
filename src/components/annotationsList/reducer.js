@@ -352,7 +352,10 @@ import {
   LOAD_ANNOTATIONS,
   LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
-  UPDATE_ANNOTATION,
+  LOAD_PATIENT,
+  LOAD_PATIENT_SUCCESS,
+  LOAD_PATIENT_ERROR,
+  UPDATE_ANNOTATION_DISPLAY,
   VIEWPORT_FULL,
   TOGGLE_ALL_ANNOTATIONS,
   TOGGLE_ALL_LABELS,
@@ -372,9 +375,15 @@ import {
   LOAD_COMPLETED,
   START_LOADING,
   ADD_TO_GRID,
+<<<<<<< HEAD
   DISPLAY_SINGLE_AIM
+=======
+  DISPLAY_SINGLE_AIM,
+  JUMP_TO_AIM,
+  UPDATE_PATIENT,
+  CLOSE_SERIE
+>>>>>>> master
 } from "./types";
-
 const initialState = {
   openSeries: [],
 
@@ -403,12 +412,56 @@ const initialState = {
   selectedStudies: {},
 
   selectedSeries: {},
+<<<<<<< HEAD
 
   selectedAnnotations: {}
+=======
+  selectedAnnotations: {},
+  patientLoading: false,
+  patientLoadingError: null
+>>>>>>> master
 };
 
 const asyncReducer = (state = initialState, action) => {
   switch (action.type) {
+    case CLOSE_SERIE:
+      let delSeriesUID = action.payload.serie.seriesUID;
+      let delStudyUID = action.payload.serie.studyUID;
+      let delPatientID = action.payload.serie.patientID;
+      const delAims = { ...state.aimsList };
+      delete delAims[delSeriesUID];
+      let delGrid = state.openSeries.slice(0, action.payload.index);
+      delGrid = delGrid.concat(
+        state.openSeries.slice(action.payload.index + 1)
+      );
+      let shouldPatientExist = false;
+      for (let item of delGrid) {
+        if (item.patientID === delPatientID) {
+          shouldPatientExist = true;
+          break;
+        }
+      }
+      const delPatients = { ...state.patients };
+      if (shouldPatientExist) {
+        delPatients[delPatientID].studies[delStudyUID].series[
+          delSeriesUID
+        ].isDisplayed = false;
+      } else {
+        delete delPatients[delPatientID];
+      }
+      let delActivePort;
+      if (delGrid.length === 0) {
+        delActivePort = null;
+      } else {
+        delActivePort = delGrid.length - 1;
+      }
+      return {
+        ...state,
+        openSeries: delGrid,
+        aimsList: delAims,
+        patients: delPatients,
+        activePort: delActivePort
+      };
     case LOAD_ANNOTATIONS:
       return Object.assign({}, state, {
         loading: true,
@@ -418,7 +471,10 @@ const asyncReducer = (state = initialState, action) => {
 
     case LOAD_ANNOTATIONS_SUCCESS:
       let indexKey = state.openSeries.length - 1;
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
       let { summaryData, aimsData, serID, patID, ref } = action.payload;
 
       const newResult = Object.assign({}, state, {
@@ -438,7 +494,6 @@ const asyncReducer = (state = initialState, action) => {
 
         openSeries: state.openSeries.concat([ref])
       });
-
       return newResult;
 
     case VIEWPORT_FULL:
@@ -453,7 +508,10 @@ const asyncReducer = (state = initialState, action) => {
 
     case LOAD_SERIE_SUCCESS:
       let indexNum = state.openSeries.length - 1;
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
       const ptID = action.payload.ref.patientID;
 
       const stID = action.payload.ref.studyUID;
@@ -461,6 +519,7 @@ const asyncReducer = (state = initialState, action) => {
       const srID = action.payload.ref.seriesUID;
 
       const { ann } = action.payload;
+<<<<<<< HEAD
 
       let changedPatients;
 
@@ -485,6 +544,9 @@ const asyncReducer = (state = initialState, action) => {
         changedPatients = { ...state.patients, [ptID]: changedPatient };
       }
 
+=======
+      let changedPatients;
+>>>>>>> master
       const result = Object.assign({}, state, {
         loading: false,
 
@@ -497,6 +559,7 @@ const asyncReducer = (state = initialState, action) => {
 
           [action.payload.serID]: action.payload.aimsData
         }
+<<<<<<< HEAD
 
         // openSeries: state.openSeries.concat([action.payload.ref])
       });
@@ -505,12 +568,19 @@ const asyncReducer = (state = initialState, action) => {
         ? result
         : { ...result, patients: changedPatients };
 
+=======
+      });
+      return !changedPatients
+        ? result
+        : { ...result, patients: changedPatients };
+>>>>>>> master
     case LOAD_ANNOTATIONS_ERROR:
       return Object.assign({}, state, {
         loading: false,
 
         error: action.error
       });
+<<<<<<< HEAD
 
     case UPDATE_ANNOTATION:
       let { serie, study, patient, annotation, isDisplayed } = action.payload;
@@ -533,6 +603,10 @@ const asyncReducer = (state = initialState, action) => {
         [patient]: updatedPatient
       };
 
+=======
+    case UPDATE_ANNOTATION_DISPLAY:
+      let { patient, study, serie, annotation, isDisplayed } = action.payload;
+>>>>>>> master
       return Object.assign({}, state, {
         aimsList: {
           ...state.aimsList,
@@ -546,9 +620,13 @@ const asyncReducer = (state = initialState, action) => {
               isDisplayed
             }
           }
+<<<<<<< HEAD
         },
 
         patients: newPatients
+=======
+        }
+>>>>>>> master
       });
 
     case CHANGE_ACTIVE_PORT:
@@ -566,6 +644,7 @@ const asyncReducer = (state = initialState, action) => {
 
     case TOGGLE_ALL_ANNOTATIONS:
       //update openSeries
+<<<<<<< HEAD
 
       let { patientID, studyID, serieID, displayStatus } = action.payload;
 
@@ -591,6 +670,16 @@ const asyncReducer = (state = initialState, action) => {
 
       return Object.assign({}, state, { patients: toggleAnnPatients });
 
+=======
+      let { seriesUID, displayStatus } = action.payload;
+      let toggleAnns = Object.assign({}, state.aimsList);
+      for (let ann in toggleAnns[seriesUID]) {
+        toggleAnns[seriesUID][ann].isDisplayed = displayStatus;
+      }
+      return Object.assign({}, state, {
+        aimsList: toggleAnns
+      });
+>>>>>>> master
     case TOGGLE_ALL_LABELS:
       const toggledLabelSerie = { ...state.aimsList };
 
@@ -645,8 +734,12 @@ const asyncReducer = (state = initialState, action) => {
       for (let patient in clearedPatients) {
         for (let study in clearedPatients[patient]) {
           for (let serie in clearedPatients[patient].studies[study]) {
+<<<<<<< HEAD
             serie.displayAnns = false;
 
+=======
+            serie.isDisplayed = false;
+>>>>>>> master
             for (let ann in clearedPatients[patient].studies[study].series[
               serie
             ]) {
@@ -708,8 +801,11 @@ const asyncReducer = (state = initialState, action) => {
       return selectionState;
 
     case SELECT_PATIENT:
+<<<<<<< HEAD
       console.log("in reducer");
 
+=======
+>>>>>>> master
       let patientsNew = {
         ...state.selectedPatients
       };
@@ -730,6 +826,7 @@ const asyncReducer = (state = initialState, action) => {
         : (newStudies[action.study.studyUID] = action.study);
 
       return { ...state, selectedStudies: newStudies };
+<<<<<<< HEAD
 
     case LOAD_COMPLETED:
       console.log("completed reducer");
@@ -741,6 +838,12 @@ const asyncReducer = (state = initialState, action) => {
 
       return { ...state, loading: true };
 
+=======
+    case LOAD_COMPLETED:
+      return { ...state, loading: false };
+    case START_LOADING:
+      return { ...state, loading: true };
+>>>>>>> master
     case SELECT_SERIE:
       let newSeries = {
         ...state.selectedSeries
@@ -764,11 +867,24 @@ const asyncReducer = (state = initialState, action) => {
         : (newAnnotations[action.annotation.aimID] = action.annotation);
 
       return { ...state, selectedAnnotations: newAnnotations };
+<<<<<<< HEAD
 
     case GET_PATIENT:
+=======
+    case LOAD_PATIENT:
+      return { ...state, patientLoading: true };
+    case LOAD_PATIENT_ERROR:
+      return {
+        ...state,
+        patientLoadingError: action.err,
+        patientLoading: false
+      };
+    case LOAD_PATIENT_SUCCESS:
+>>>>>>> master
       let addedNewPatient = { ...state.patients };
 
       addedNewPatient[action.patient.patientID] = action.patient;
+<<<<<<< HEAD
 
       return {
         ...state,
@@ -780,6 +896,14 @@ const asyncReducer = (state = initialState, action) => {
         error: false
       };
 
+=======
+      return {
+        ...state,
+        patients: addedNewPatient,
+        patientLoading: false,
+        patientLoadingError: false
+      };
+>>>>>>> master
     case DISPLAY_SINGLE_AIM:
       let aimPatient = { ...state.patients[action.payload.patientID] };
 
@@ -831,12 +955,16 @@ const asyncReducer = (state = initialState, action) => {
       });
 
       //update Openseries data
+<<<<<<< HEAD
 
       aimOpenSeries.forEach(item => {
         if (item.seriesUID === action.payload.seriesUID) {
           item.aimID = action.payload.aimID;
         }
       });
+=======
+      aimOpenSeries[action.payload.index].aimID = action.payload.aimID;
+>>>>>>> master
 
       return {
         ...state,
@@ -851,6 +979,7 @@ const asyncReducer = (state = initialState, action) => {
 
         openSeries: aimOpenSeries
       };
+<<<<<<< HEAD
 
     case ADD_TO_GRID:
       console.log("here");
@@ -859,6 +988,52 @@ const asyncReducer = (state = initialState, action) => {
 
       return { ...state, openSeries: newOpenSeries };
 
+=======
+    case ADD_TO_GRID:
+      let newOpenSeries = state.openSeries.concat(action.reference);
+      return { ...state, openSeries: newOpenSeries };
+    case UPDATE_PATIENT:
+      let updatedPt = { ...state.patients[action.payload.patient] };
+      if (action.payload.type === "study") {
+        let selectedSt = updatedPt.studies[action.payload.study];
+        for (let serie in selectedSt.series) {
+          selectedSt.series[serie].isDisplayed = action.payload.status;
+        }
+      } else if (
+        action.payload.type === "serie" ||
+        action.payload.type === "annotation"
+      ) {
+        let selectedSr =
+          updatedPt.studies[action.payload.study].series[action.payload.serie];
+        selectedSr.isDisplayed = action.payload.status;
+        for (let ann in selectedSr.annotations) {
+          selectedSr.annotations[ann].isDisplayed = action.payload.status;
+        }
+      }
+      let updatedPtPatients = { ...state.patients };
+      updatedPtPatients[action.payload.patient] = updatedPt;
+      return { ...state, patients: updatedPtPatients };
+    case JUMP_TO_AIM:
+      let { aimID, index } = action.payload;
+      let serUID = action.payload.seriesUID;
+      let updatedGrid = [...state.openSeries];
+      updatedGrid[index].aimID = aimID;
+
+      // return { ...state, openSeries: updatedGrid, aimsList: {...state.aimsList} };
+      return Object.assign({}, state, {
+        openSeries: updatedGrid,
+        aimsList: {
+          ...state.aimsList,
+          [serUID]: {
+            ...state.aimsList[serUID],
+            [aimID]: {
+              ...state.aimsList[serUID][aimID],
+              isDisplayed: true
+            }
+          }
+        }
+      });
+>>>>>>> master
     default:
       return state;
   }

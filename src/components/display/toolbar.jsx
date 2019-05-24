@@ -23,15 +23,22 @@ import ResizeAndDrag from "../management/common/resizeAndDrag";
 import CustomModal from "../management/common/resizeAndDrag";
 import {
   showAnnotationWindow,
-  showAnnotationDock
+  showAnnotationDock,
+  getWholeData
 } from "../annotationsList/action";
+import Spinner from "../common/spinner";
 import "./toolbar.css";
 import "../../font-icons/styles.css";
 
 const mapStateToProps = state => {
   return {
-    // activeVP: state.searchViewReducer.activeVP
-    activeVP: state.annotationsListReducer.activePort
+    cornerstone: state.searchViewReducer.cornerstone,
+    cornerstoneTools: state.searchViewReducer.cornerstoneTools,
+    activeVP: state.annotationsListReducer.activePort,
+    openSeries: state.annotationsListReducer.openSeries,
+    patients: state.annotationsListReducer.patients,
+    patientLoading: state.annotationsListReducer.patientLoading,
+    listOpen: state.annotationsListReducer.listOpen
   };
 };
 
@@ -133,6 +140,24 @@ class Toolbar extends Component {
 
   handlePatientClick = async () => {
     // const showStatus = this.state.showAnnotationList;
+
+    const { openSeries, patients } = this.props;
+    for (let port of openSeries) {
+      const { patientID, seriesUID, studyUID, aimID } = port;
+
+      const serie = patients[patientID].studies[studyUID].series[seriesUID];
+      if (!patients[port.patientID]) {
+        await this.props.dispatch(getWholeData(port, null, aimID));
+      } else {
+        if (serie.isDisplayed === false) {
+          serie.isDisplayed = true;
+          for (let ann in serie.annotations) {
+            serie.annotations[ann].isDisplayed = true;
+          }
+        }
+      }
+    }
+
     await this.setState(state => ({
       showAnnotationList: !state.showAnnotationList
     }));
@@ -183,7 +208,7 @@ class Toolbar extends Component {
     // console.log(this.props.cornerstoneTools.state);
     // console.log(this.dxm);
     // this.dxm[
-    //   "wadouri:http://epad-dev6.stanford.edu:8080/epad/wado/?requestType=WADO&studyUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.949&seriesUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.950&objectUID=1.3.12.2.1107.5.8.2.484849.837749.68675556.2004110916031631&contentType=application%2Fdicom"
+    //   "wadouri:http://epad-dev8.stanford.edu:8080/epad/wado/?requestType=WADO&studyUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.949&seriesUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.950&objectUID=1.3.12.2.1107.5.8.2.484849.837749.68675556.2004110916031631&contentType=application%2Fdicom"
     // ].Length.data[0].handles.textBox = "";
     // console.log(this.dxm);
     // this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
@@ -440,12 +465,18 @@ class Toolbar extends Component {
           className="toolbarSectionButton"
           onClick={this.handlePatientClick}
         >
-          <div className="toolContainer">
-            <FaRegFolderOpen />
-          </div>
-          <div className="buttonLabel">
-            <span>Patient</span>
-          </div>
+          {this.props.patientLoading ? (
+            <Spinner loading={this.props.patientLoading} unit="rem" size={3} />
+          ) : (
+            <>
+              <div className="toolContainer">
+                <FaRegFolderOpen />
+              </div>
+              <div className="buttonLabel">
+                <span>Patient</span>
+              </div>
+            </>
+          )}
         </div>
         <div
           tabIndex="13"

@@ -5,15 +5,39 @@ import Switch from "react-switch";
 
 import Annotation from "./annotation";
 import {
-  updateAnnotation,
+  updateAnnotationDisplay,
   toggleAllLabels,
-  toggleSingleLabel
+  toggleSingleLabel,
+  toggleAllAnnotations,
+  jumpToAim
 } from "../action";
 
-class annotationsList extends React.Component {
+class AnnotationsList extends React.Component {
   state = {
-    labelDisplayAll: true
+    labelDisplayAll: true,
+    annsDisplayAll: true
   };
+
+  componentDidUpdate = prevProps => {
+    if (this.props.activePort !== prevProps.activePort) {
+      const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
+      let annotations = Object.values(this.props.aimsList[seriesUID]);
+      let labelDisplayAll = false;
+      let annsDisplayAll = false;
+      for (let ann of annotations) {
+        if (ann.isDisplayed) {
+          annsDisplayAll = true;
+        }
+      }
+      for (let ann of annotations) {
+        if (ann.showLabel) {
+          labelDisplayAll = true;
+        }
+      }
+      this.setState({ labelDisplayAll, annsDisplayAll });
+    }
+  };
+
   handleDisplayClick = e => {
     const { seriesUID, patientID, studyUID } = this.props.openSeries[
       this.props.activePort
@@ -23,10 +47,10 @@ class annotationsList extends React.Component {
       const currentDisplayStatus = this.props.aimsList[seriesUID][aimID]
         .isDisplayed;
       this.props.dispatch(
-        updateAnnotation(
-          seriesUID,
-          studyUID,
+        updateAnnotationDisplay(
           patientID,
+          studyUID,
+          seriesUID,
           aimID,
           !currentDisplayStatus
         )
@@ -40,9 +64,20 @@ class annotationsList extends React.Component {
     this.props.dispatch(toggleAllLabels(seriesUID, checked));
   };
 
+  handleToggleAllAnnotations = (checked, e, id) => {
+    this.setState({ annsDisplayAll: checked });
+    const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
+    this.props.dispatch(toggleAllAnnotations(seriesUID, checked));
+  };
+
   handleToggleSingleLabel = e => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
+  };
+
+  handleJumToAim = e => {
+    const { id, serie } = e.target.dataset;
+    this.props.dispatch(jumpToAim(serie, id, this.props.activePort));
   };
 
   render = () => {
@@ -76,6 +111,8 @@ class annotationsList extends React.Component {
           user={aim.json.user.name.value}
           showLabel={aim.showLabel}
           onSingleToggle={this.handleToggleSingleLabel}
+          jumpToAim={this.handleJumToAim}
+          serie={seriesUID}
         />
       );
     });
@@ -91,6 +128,17 @@ class annotationsList extends React.Component {
             checkedIcon={false}
           />
         </div>
+        <div className="label-toggle">
+          <div className="label-toggle__text">Show Annotations</div>
+          <Switch
+            onChange={this.handleToggleAllAnnotations}
+            checked={this.state.annsDisplayAll}
+            className="react-switch"
+            uncheckedIcon={false}
+            checkedIcon={false}
+          />
+        </div>
+
         <div>{annList}</div>
       </div>
     );
@@ -104,4 +152,4 @@ const mapStateToProps = state => {
     aimsList: state.annotationsListReducer.aimsList
   };
 };
-export default connect(mapStateToProps)(annotationsList);
+export default connect(mapStateToProps)(AnnotationsList);

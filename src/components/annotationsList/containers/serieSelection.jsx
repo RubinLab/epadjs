@@ -1,6 +1,12 @@
 import React from "react";
 
-const serieSelection = ({ itemArr, onSelect, limit, checkList }) => {
+const serieSelection = ({
+  itemArr,
+  onSelect,
+  limit,
+  checkList,
+  indexStart
+}) => {
   let itemList = [];
 
   itemArr.forEach((item, index) => {
@@ -15,7 +21,7 @@ const serieSelection = ({ itemArr, onSelect, limit, checkList }) => {
           className="serieSelection-check"
           type="checkbox"
           name="item"
-          data-index={index}
+          data-index={index + indexStart}
           onClick={onSelect}
           disabled={disabled}
         />
