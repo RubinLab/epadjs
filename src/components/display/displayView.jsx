@@ -391,6 +391,7 @@ class DisplayView extends Component {
     const aimJson = this.props.aimList[
       this.props.series[this.props.activePort].seriesUID
     ][event.detail].json;
+    console.log(JSON.stringify(aimJson));
     this.setState({ showAimEditor: true, selectedAim: aimJson });
   };
 
