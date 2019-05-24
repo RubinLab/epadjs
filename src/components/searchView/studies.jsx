@@ -4,6 +4,7 @@ import ReactTable from "react-table";
 import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf } from "react-icons/fa";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
+import { toast } from "react-toastify";
 import { getStudies } from "../../services/studyServices";
 import { getSeries } from "../../services/seriesServices";
 import ProjectModal from "../annotationsList/selectSerieModal";
@@ -74,6 +75,16 @@ class Studies extends Component {
     } = await getStudies(this.props.projectId, this.props.subjectId);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
+    if (data.length === 0) {
+      toast.info("No study found", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
   }
 
   selectRow = selected => {
@@ -455,6 +466,7 @@ class Studies extends Component {
       <div>
         {this.state.data ? (
           <TreeTable
+            NoDataComponent={() => null}
             data={this.state.data}
             columns={this.state.columns}
             defaultPageSize={this.state.data.length}

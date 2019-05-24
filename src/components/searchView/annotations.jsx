@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import ReactTable from "react-table";
+import { toast } from "react-toastify";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import ReactTooltip from "react-tooltip";
@@ -57,6 +58,16 @@ class Annotations extends Component {
     } = await getAnnotations(this.series);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
+    if (data.length === 0) {
+      toast.info("No annotations found", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
   }
 
   selectRow = selected => {
@@ -322,6 +333,7 @@ class Annotations extends Component {
       <div style={{ paddingLeft: "35px" }}>
         {this.state.data ? (
           <TreeTable
+            NoDataComponent={() => null}
             data={this.state.data}
             columns={this.state.columns}
             defaultPageSize={this.state.data.length}

@@ -126,3 +126,26 @@
 .upload-file {
   margin-bottom: 0.8rem;
 }
+
+.upload-options {
+  margin-top: 2rem;
+}
+
+.upload-note {
+  width: 30rem;
+}
+
+.tiffForm-item {
+  display: flex;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.tiff-text {
+  min-width: 20rem;
+  color: black;
+}
+
+.tiffForm-label {
+  min-width: 10rem;
+}

@@ -4,6 +4,7 @@ import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf } from "react-icons/fa";
 import ReactTooltip from "react-tooltip";
 import { BrowserRouter, withRouter } from "react-router-dom";
 import ReactTable from "react-table";
+import { toast } from "react-toastify";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import Annotations from "./annotations";
@@ -91,6 +92,16 @@ class Series extends Component {
     );
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
+    if (data.length === 0) {
+      toast.info("No serie found", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
   }
 
   selectRow = selected => {
@@ -425,6 +436,7 @@ class Series extends Component {
         <div>
           {this.state.data ? (
             <TreeTable
+              NoDataComponent={() => null}
               data={this.state.data}
               columns={this.state.columns}
               defaultPageSize={this.state.data.length}

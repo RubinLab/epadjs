@@ -353,6 +353,7 @@ class Subjects extends Component {
       <div>
         {this.state.data ? (
           <TreeTable
+            NoDataComponent={() => null}
             data={this.state.data}
             columns={this.state.columns}
             defaultPageSize={this.state.data.length}
