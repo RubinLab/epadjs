@@ -20,6 +20,7 @@
     "react": "^16.8.6",
     "react-bootstrap": "^0.32.4",
     "react-bootstrap-sweetalert": "^4.4.1",
+    "react-contexify": "^4.1.0",
     "react-cornerstone-viewport": "^0.1.25",
     "react-dock": "^0.2.4",
     "react-dom": "^16.8.6",
@@ -53,5 +54,10 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "devDependencies": {
+    "css-loader": "^2.1.1",
+    "stylus": "^0.54.5",
+    "stylus-loader": "^3.0.2"
+  }
 }

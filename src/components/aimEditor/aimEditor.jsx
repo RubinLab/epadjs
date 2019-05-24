@@ -45,6 +45,8 @@ class AimEditor extends Component {
     );
     semanticAnswers.loadTemplates(questionaire.myA);
     semanticAnswers.createViewerWindow();
+    if (Object.entries(this.props.aim).length)
+      semanticAnswers.loadAimJson(this.props.aim);
   }
 
   getImage = () => {
@@ -93,6 +95,12 @@ class AimEditor extends Component {
   }
 
   save = () => {
+    console.log("cstools are", this.csTools);
+    console.log(
+      this.csTools.getElementToolStateManager(
+        this.cornerstone.getEnabledElements()[0]["element"]
+      )
+    );
     this.createAim();
   };
 
@@ -112,6 +120,7 @@ class AimEditor extends Component {
     console.log("Toolstate ", this.csTools);
     Object.entries(toolState).forEach(([imgId, annotations]) => {
       console.log(annotations);
+      this.cloneAnnotation(annotations);
       const imageReferenceUid = this.parseImgeId(imgId);
       Object.keys(annotations).map(annotation => {
         switch (annotation) {

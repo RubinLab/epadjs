@@ -55,6 +55,12 @@ const tools = [
       showMinMax: true
     }
   },
+  {
+    name: "CircleRoi",
+    configuration: {
+      showMinMax: true
+    }
+  },
   { name: "Angle" },
   { name: "Rotate" },
   { name: "WwwcRegion" },
@@ -236,9 +242,12 @@ class Toolbar extends Component {
   };
 
   handleClip = () => {
-    const elem = document.getElementsByClassName("viewport-element");
-    if (!this.state.playing) this.cornerstoneTools.playClip(elem[0], 40);
-    else this.cornerstoneTools.stopClip(elem[0]);
+    console.log(this.cornerstone);
+    // const elem = document.getElementsByClassName("viewport-element");
+    const element = this.cornerstone.getEnabledElements()[this.props.activeVP]
+      .element;
+    if (!this.state.playing) this.cornerstoneTools.playClip(element, 40);
+    else this.cornerstoneTools.stopClip(element);
     this.setState({ playing: !this.state.playing });
   };
 
@@ -472,7 +481,7 @@ class Toolbar extends Component {
                 id="line"
                 tabIndex="2"
                 className="drawingSectionButton"
-                onClick={() => this.setToolActiveForElement("LengthTool")}
+                onClick={() => this.setToolActiveForElement("Length")}
               >
                 <div className="toolContainer">
                   <FaRulerHorizontal />
@@ -485,7 +494,7 @@ class Toolbar extends Component {
                 id="ellipse"
                 tabIndex="3"
                 className="drawingSectionButton"
-                onClick={() => this.setToolActiveForElement("EllipticalRoi")}
+                onClick={() => this.setToolActiveForElement("CircleRoi")}
               >
                 <div className="icon-ellipse fontastic-icons" />
                 <div className="buttonLabel">

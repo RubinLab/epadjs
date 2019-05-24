@@ -1,5 +1,5 @@
 import http from "./httpService";
-import { apiUrl } from "../config.json";
+import { apiUrl, wadoUrl } from "../config.json";
 
 export function getSeries(projectId, subjectId, studyId) {
   return http.get(
@@ -21,6 +21,20 @@ export function getImageIds(series) {
       "/series/" +
       series.seriesUID +
       "/images/"
+  );
+}
+
+//  seems like this doesn't belong to here but olny services know details about paths&server side
+export function getWadoImagePath(series, imageId) {
+  return (
+    wadoUrl +
+    "?requestType=WADO&studyUID=" +
+    series.studyUID +
+    "&seriesUID=" +
+    series.seriesUID +
+    "&objectUID=" +
+    imageId +
+    "&contentType=application%2Fdicom"
   );
 }
 
