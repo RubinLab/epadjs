@@ -73,6 +73,7 @@ class Subjects extends Component {
       {
         id: "searchView-checkbox",
         accessor: "",
+        resizable: false,
         width: this.widthUnit,
         Cell: ({ original }) => {
           return (
@@ -90,9 +91,11 @@ class Subjects extends Component {
           <div className="search-header__col--left">Description/Name</div>
         ),
         width: this.widthUnit * 13,
+        id: "searchView-desc__col",
+        resizable: false,
         Cell: ({ original }) => {
           const desc = this.cleanCarets(original.subjectName);
-          const id = "desc" + original.subjectID;
+          const id = "desc-tool" + original.subjectID;
           return (
             <>
               <div data-tip data-for={id}>
@@ -113,6 +116,8 @@ class Subjects extends Component {
           </div>
         ),
         width: this.widthUnit * 2,
+        id: "searchView-aims__col",
+        resizable: false,
         Cell: row => (
           <div className="searchView-table__cell">
             {row.original.numberOfAnnotations === 0 ? (
@@ -133,6 +138,8 @@ class Subjects extends Component {
           </div>
         ),
         width: this.widthUnit * 3,
+        id: "searchView-sub__col",
+        resizable: false,
         Cell: row => (
           <div className="searchView-table__cell">
             {row.original.numberOfStudies === 0 ? (
@@ -153,30 +160,40 @@ class Subjects extends Component {
           </div>
         ),
         width: this.widthUnit * 3,
+        id: "searchView-img__col",
+        resizable: false,
         // minResizeWidth: this.widthUnit * 3,
         Cell: row => <div />
       },
       {
         Header: <div className="search-header__col">Type</div>,
         width: this.widthUnit * 5,
+        id: "searchView-type__col",
+        resizable: false,
         // minResizeWidth: this.widthUnit * 5,
         Cell: row => <div />
       },
       {
         Header: <div className="search-header__col">Creation date</div>,
         width: this.widthUnit * 7,
+        id: "searchView-crDate_col",
+        resizable: false,
         // minResizeWidth: this.widthUnit * 10,
         Cell: row => <div />
       },
       {
         Header: <div className="search-header__col">Upload date</div>,
         width: this.widthUnit * 7,
+        id: "searchView-upldDate_col",
+        resizable: false,
         // minResizeWidth: this.widthUnit * 10,
         Cell: row => <div />
       },
       {
         Header: <div className="search-header__col">Accession</div>,
         width: this.widthUnit * 5,
+        id: "searchView-access_col",
+        resizable: false,
         // minResizeWidth: this.widthUnit * 4,
         Cell: row => <div />
       },
@@ -184,14 +201,22 @@ class Subjects extends Component {
         Header: <div className="search-header__col">Idenditifier</div>,
         width: this.widthUnit * 10,
         // minResizeWidth: this.widthUnit * 12,
+        id: "searchView-UID_col",
+        resizable: false,
         Cell: ({ original }) => {
-          const id = "id" + original.subjectID;
+          const id = "id-tool" + original.subjectID;
           return (
             <>
               <div className="searchView-table__cell" data-tip data-for={id}>
                 {original.subjectID}
               </div>
-              <ReactTooltip id={id} place="right" type="info" delayShow={500}>
+              <ReactTooltip
+                id={id}
+                place="right"
+                type="info"
+                delayShow={500}
+                clickable={true}
+              >
                 <span>{original.subjectID}</span>
               </ReactTooltip>
             </>

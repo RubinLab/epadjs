@@ -100,13 +100,19 @@ class Annotations extends Component {
         width: this.widthUnit * 10,
         Cell: row => {
           let desc = row.original.name || "Unnamed annotation";
-          let id = "desc" + row.original.aimID;
+          let id = "aimName-tool" + row.original.aimID;
           return (
             <>
               <div data-tip data-for={id}>
                 {desc}
               </div>
-              <ReactTooltip id={id} place="right" type="info" delayShow={500}>
+              <ReactTooltip
+                id={id}
+                place="right"
+                type="info"
+                delayShow={500}
+                clickable={true}
+              >
                 <span>{desc}</span>
               </ReactTooltip>
             </>
@@ -159,7 +165,25 @@ class Annotations extends Component {
       {
         Header: "Identifier",
         width: this.widthUnit * 10,
-        Cell: row => row.original.aimID
+        Cell: row => {
+          let id = "aimid-tool" + row.original.aimID;
+          return (
+            <>
+              <div data-tip data-for={id}>
+                {row.original.aimID}
+              </div>
+              <ReactTooltip
+                id={id}
+                place="right"
+                type="info"
+                delayShow={500}
+                clickable={true}
+              >
+                <span>{row.original.aimID}</span>
+              </ReactTooltip>
+            </>
+          );
+        }
       }
     ];
     return columns;

@@ -147,7 +147,13 @@ class Series extends Component {
               <div data-tip data-for={id}>
                 {desc}
               </div>{" "}
-              <ReactTooltip id={id} place="top" type="info" delayShow={500}>
+              <ReactTooltip
+                id={id}
+                place="top"
+                type="info"
+                delayShow={500}
+                clickable={true}
+              >
                 <span>{desc}</span>
               </ReactTooltip>
             </>
@@ -244,6 +250,7 @@ class Series extends Component {
               place="right"
               type="info"
               delayShow={500}
+              clickable={true}
             >
               <span>{row.original.seriesUID}</span>
             </ReactTooltip>

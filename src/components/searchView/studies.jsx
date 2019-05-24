@@ -111,7 +111,7 @@ class Studies extends Component {
   setColumns() {
     const columns = [
       {
-        id: "checkbox",
+        id: "searchView-checkbox",
         accessor: "",
         width: this.widthUnit,
         Cell: ({ original }) => {
@@ -136,7 +136,13 @@ class Studies extends Component {
               <div data-tip data-for={id}>
                 {desc}
               </div>
-              <ReactTooltip id={id} place="right" type="info" delayShow={500}>
+              <ReactTooltip
+                id={id}
+                place="right"
+                type="info"
+                delayShow={500}
+                clickable={true}
+              >
                 <span>{desc}</span>
               </ReactTooltip>
             </>
@@ -231,6 +237,7 @@ class Studies extends Component {
               place="right"
               type="info"
               delayShow={500}
+              clickable={true}
             >
               <span>{row.original.studyAccessionNumber}</span>
             </ReactTooltip>
@@ -250,6 +257,7 @@ class Studies extends Component {
               place="right"
               type="info"
               delayShow={500}
+              clickable={true}
             >
               <span>{row.original.studyUID}</span>
             </ReactTooltip>
