@@ -1,8 +1,9 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Modal } from 'react-bootstrap';
+import React from "react";
+import PropTypes from "prop-types";
+import { Modal } from "react-bootstrap";
 
 const alertDeletionModal = ({ message, onCancel, onDelete, error }) => {
+  console.log("in modal");
   return (
     <Modal.Dialog dialogClassName="alert-delete__modal">
       <Modal.Body>

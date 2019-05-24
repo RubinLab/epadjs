@@ -3,26 +3,46 @@ import PropTypes from "prop-types";
 import Table from "react-table";
 import ToolBar from "../common/basicToolBar";
 import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
-import { getWorklists } from "../../../services/worklistServices";
+import {
+  getWorklists,
+  deleteWorklist
+} from "../../../services/worklistServices";
 import { getUsers } from "../../../services/userServices";
 import { Link } from "react-router-dom";
+import DeleteAlert from "../common/alertDeletionModal";
+import CreationForm from "./worklistCreationForm";
 
-class Projects extends React.Component {
-  state = { worklists: [], userList: [] };
+const messages = {
+  deleteSingle: "Delete the worklist? This cannot be undone.",
+  deleteSelected: "Delete selected projects? This cannot be undone."
+};
+
+class WorkList extends React.Component {
+  state = {
+    worklists: [],
+    userList: [],
+    singleDeleteData: {},
+    hasDeleteSingleClicked: false,
+    hasAddClicked: false
+  };
 
   componentDidMount = async () => {
-    const {
-      data: {
-        ResultSet: { Result: worklists }
-      }
-    } = await getWorklists(sessionStorage.getItem("username"));
+    this.getWorkListData();
     const {
       data: {
         ResultSet: { Result: userList }
       }
     } = await getUsers();
-    console.log(worklists, userList);
-    this.setState({ worklists, userList });
+    this.setState({ userList });
+  };
+
+  getWorkListData = async () => {
+    const {
+      data: {
+        ResultSet: { Result: worklists }
+      }
+    } = await getWorklists(sessionStorage.getItem("username"));
+    this.setState({ worklists });
   };
 
   toggleRow = async (id, name) => {
@@ -58,27 +78,43 @@ class Projects extends React.Component {
     });
   }
 
-  handleCancel = () => {};
+  handleCancel = () => {
+    this.setState();
+  };
 
   deleteAllSelected = async () => {};
 
-  deleteSingleWorklist = async () => {};
+  deleteSingleWorklist = async () => {
+    const { name, id } = this.state.singleDeleteData;
+    deleteWorklist(name, id)
+      .then(() => {
+        this.setState({ hasDeleteSingleClicked: false, singleDeleteData: {} });
+        this.getWorkListData();
+      })
+      .catch(err => {
+        this.setState({ errorMessage: err.response.data.message });
+      });
+  };
 
   handleDeleteAll = () => {
     this.setState({ hasDeleteAllClicked: true });
   };
 
-  handleSingleDelete = id => {
-    this.setState({ hasDeleteSingleClicked: true, singleDeleteId: id });
-  };
-
   handleAddWorklist = () => {
+    console.log("hereeeeeekklskdfl");
     this.setState({ hasAddClicked: true });
   };
 
   handleFormInput = e => {
     const { name, value } = e.target;
     this.setState({ [name]: value });
+  };
+
+  handleSingleDelete = (name, id) => {
+    this.setState({
+      hasDeleteSingleClicked: true,
+      singleDeleteData: { name, id }
+    });
   };
 
   defineColumns = () => {
@@ -170,12 +206,11 @@ class Projects extends React.Component {
       },
       {
         Header: "Description",
-        // accessor: "description",
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
-        Cell: original => <div>{original.row.description || ""}</div>
+        Cell: original => <div>{original.row.checkbox.description || ""}</div>
       },
       {
         Header: "",
@@ -184,7 +219,12 @@ class Projects extends React.Component {
         resizable: true,
         Cell: original => (
           <div
-            onClick={() => this.handleSingleDelete(original.row.checkbox.id)}
+            onClick={() =>
+              this.handleSingleDelete(
+                original.row.checkbox.username,
+                original.row.checkbox.workListID
+              )
+            }
           >
             <FaRegTrashAlt className="menu-clickable" />
           </div>
@@ -194,13 +234,12 @@ class Projects extends React.Component {
   };
 
   render = () => {
-    console.log("project", this.props);
-    // const checkboxSelected = Object.values(this.state.selected).length > 0;
+    console.log(this.state);
     return (
-      <div className="projects menu-display" id="projects">
+      <div className="worklist menu-display" id="worklist">
         <ToolBar
           onDelete={this.handleDeleteAll}
-          onAdd={this.handleAddProject}
+          onAdd={this.handleAddWorklist}
           //   selected={checkboxSelected}
         />
         <Table
@@ -208,13 +247,22 @@ class Projects extends React.Component {
           data={this.state.worklists}
           columns={this.defineColumns()}
         />
+        {this.state.hasDeleteSingleClicked && (
+          <DeleteAlert
+            message={messages.deleteSingle}
+            onCancel={this.handleCancel}
+            onDelete={this.deleteSingleWorklist}
+            error={this.state.errorMessage}
+          />
+        )}
+        {this.state.hasAddClicked && <CreationForm />}
       </div>
     );
   };
 }
 
-Projects.propTypes = {
+WorkList.propTypes = {
   selection: PropTypes.string,
   onClose: PropTypes.func
 };
-export default Projects;
+export default WorkList;

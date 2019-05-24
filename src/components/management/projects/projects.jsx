@@ -14,7 +14,7 @@ import {
 } from "../../../services/projectServices";
 import { getUsers } from "../../../services/userServices";
 import ToolBar from "../common/basicToolBar";
-import DeleteAlert from "./alertDeletionModal";
+import DeleteAlert from "../common/alertDeletionModal";
 import ProjectCreationForm from "./projectCreationForm";
 import ProjectEditingForm from "./projectEditingForm";
 import UserRoleEditingForm from "./userRoleEditingForm";
