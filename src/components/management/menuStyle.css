@@ -123,21 +123,31 @@
 }
 
 .add-project__modal--form,
-.edit-project__modal--form {
+.edit-project__modal--form,
+.add-worklist__modal--form
+/* .edit-worklist__modal--form  */
+ {
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: left;
 }
 .add-project__modal--input,
-.edit-project__modal--input {
+.edit-project__modal--input,
+.add-worklist__modal--input
+/* .edit-worklist__modal--input  */
+ {
   width: 100%;
 }
 
 .add-project__modal--label,
-.edit-project__modal--label {
+.edit-project__modal--label,
+.add-worklist__modal--label
+/* .edit-worklist__modal--label  */
+ {
   margin-top: 1rem;
   color: gray;
+  text-align: left;
 }
 
 .form-exp,
@@ -151,6 +161,7 @@
 }
 .required {
   margin-top: 1rem;
+  text-align: left;
 }
 
 .err-message {
@@ -173,7 +184,8 @@
   color: white;
 }
 
-.add-project__modal.modal-dialog {
+.add-project__modal.modal-dialog,
+.add-worklist__modal.modal-dialog {
   max-width: 90%;
   max-height: 90%;
   display: inline-block;
@@ -181,6 +193,7 @@
   overflow-y: auto;
   border: 2px solid gray;
   box-shadow: 1rem 1rem 1rem grey;
+  align-items: ;
 }
 
 .edit-userRole__modal.modal-dialog,
@@ -238,7 +251,8 @@
 }
 
 .-pageJump,
-.add-project__modal--select {
+.add-project__modal--select,
+.add-worklist__modal--select {
   color: rgb(85, 85, 85);
 }
 
@@ -272,7 +286,13 @@
 .add-project__modal--form textarea,
 .edit-project__modal--form input,
 .edit-project__modal--form textarea,
-.edit-project__modal--form select {
+.edit-project__modal--form select,
+.add-worklist__modal--form input,
+.add-worklist__modal--form textarea
+/* .edit-worklist__modal--form input,
+.edit-worklist__modal--form textarea,
+.edit-worklist__modal--form select  */
+ {
   color: black;
 }
 

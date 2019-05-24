@@ -3,8 +3,18 @@ import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import "../menuStyle.css";
 
-const worklistCreationForm = ({ onCancel, onSubmit, onType, error }) => {
-  console.log("add form here");
+const worklistCreationForm = ({ users, onCancel, onSubmit, onType, error }) => {
+  const options = [];
+  let index = 0;
+  for (let user of users) {
+    options.push(
+      <option key={`${index}-${user.username}`} value={user.username}>
+        {user.displayname}
+      </option>
+    );
+    index++;
+  }
+
   return (
     <Modal.Dialog dialogClassName="add-worklist__modal">
       <Modal.Header>
@@ -32,6 +42,9 @@ const worklistCreationForm = ({ onCancel, onSubmit, onType, error }) => {
           <h6 className="form-exp">
             One word only, no special characters, '_' is OK
           </h6>
+          <h5 className="add-worklist__modal--label">User*</h5>
+
+          <select className="add-worklist__modal--select">{options}</select>
           <h5 className="add-worklist__modal--label">Description</h5>
           <textarea
             onMouseDown={e => e.stopPropagation()}
@@ -39,16 +52,6 @@ const worklistCreationForm = ({ onCancel, onSubmit, onType, error }) => {
             name="description"
             onChange={onType}
           />
-          <h5 className="add-worklist__modal--label">Type</h5>
-          <select
-            name="type"
-            className="add-worklist__modal--select"
-            onChange={onType}
-            defaultValue="Private"
-          >
-            <option value="Private">Private</option>
-            <option value="Public">Public</option>
-          </select>
           <h5 className="form-exp required">*Required</h5>
           {error && <div className="err-message">{error}</div>}
         </form>

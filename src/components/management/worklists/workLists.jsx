@@ -79,7 +79,7 @@ class WorkList extends React.Component {
   }
 
   handleCancel = () => {
-    this.setState();
+    this.setState({ hasAddClicked: false });
   };
 
   deleteAllSelected = async () => {};
@@ -101,7 +101,6 @@ class WorkList extends React.Component {
   };
 
   handleAddWorklist = () => {
-    console.log("hereeeeeekklskdfl");
     this.setState({ hasAddClicked: true });
   };
 
@@ -189,7 +188,7 @@ class WorkList extends React.Component {
           for (let user of this.state.userList) {
             options.push(
               <option key={`${index}-${user.username}`} value={user.username}>
-                {user.username}
+                {user.displayname}
               </option>
             );
             index++;
@@ -234,7 +233,6 @@ class WorkList extends React.Component {
   };
 
   render = () => {
-    console.log(this.state);
     return (
       <div className="worklist menu-display" id="worklist">
         <ToolBar
@@ -255,7 +253,12 @@ class WorkList extends React.Component {
             error={this.state.errorMessage}
           />
         )}
-        {this.state.hasAddClicked && <CreationForm />}
+        {this.state.hasAddClicked && (
+          <CreationForm
+            users={this.state.userList}
+            onCancel={this.handleCancel}
+          />
+        )}
       </div>
     );
   };
