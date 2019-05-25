@@ -149,3 +149,22 @@
 .tiffForm-label {
   min-width: 10rem;
 }
+
+.spinner-toolbar {
+  margin-left: 1rem;
+}
+
+.spinner-toolbar__container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toolbar-status {
+  margin-right: 0.5rem;
+}
+
+.css-5ee12h-style,
+.css-1yxrzmr-style {
+  background-color: blue;
+}

@@ -4,10 +4,10 @@ import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import { isLite } from "./../../config.json";
 import { ToastContainer, toast } from "react-toastify";
-import { getProjects } from "../../services/projectServices";
+import { getProjects, uploadFile } from "../../services/projectServices";
 
 class UploadModal extends React.Component {
-  state = { tiff: false, osirix: false, projects: [] };
+  state = { tiff: false, osirix: false, projects: [], file: null };
 
   onSelect = e => {
     const { name, checked } = e.target;
@@ -26,6 +26,40 @@ class UploadModal extends React.Component {
     }
   };
 
+  onSelectFile = e => {
+    this.setState({ file: e.target.files[0] });
+  };
+
+  onUpload = () => {
+    const formData = new FormData();
+    formData.append("file", this.state.file);
+    const config = {
+      headers: {
+        "content-type": "multipart/form-data"
+      }
+    };
+    this.props.onSubmit();
+    uploadFile(formData, config)
+      .then(() => {
+        console.log("resolved");
+        this.props.onSubmit();
+      })
+      .catch(err => {
+        console.log(err);
+        const fileName = this.state.file.name.substring(0, 50);
+        toast.error(
+          `Error occured while uploading ${fileName}${
+            this.state.file.name.length > 50 ? "..." : "!"
+          }`,
+          {
+            autoClose: false
+          }
+        );
+        this.props.onSubmit();
+      });
+    this.props.onCancel();
+  };
+
   renderTiffForm = () => {
     return (
       <div>
@@ -40,7 +74,7 @@ class UploadModal extends React.Component {
             className="tiff-text"
             name="subjectID"
             type="text"
-            // onChange={onType}
+            // onSelectFile={onType}
           />
         </div>
         <div className="tiffForm-item">
@@ -49,7 +83,7 @@ class UploadModal extends React.Component {
             className="tiff-text"
             name="subjectName"
             type="text"
-            // onChange={onType}
+            // onSelectFile={onType}
           />
         </div>
         <div className="tiffForm-item">
@@ -58,7 +92,7 @@ class UploadModal extends React.Component {
             className="tiff-text"
             name="subjectDesc"
             type="text"
-            // onChange={onType}
+            // onSelectFile={onType}
           />
         </div>
         <div className="tiffForm-item">
@@ -67,7 +101,7 @@ class UploadModal extends React.Component {
             className="tiff-text"
             name="serieDesc"
             type="text"
-            // onChange={onType}
+            // onSelectFile={onType}
           />
         </div>
         <h6>*Required</h6>
@@ -75,6 +109,8 @@ class UploadModal extends React.Component {
     );
   };
   render = () => {
+    console.log(this.state);
+
     let disabled = !this.state.summary && !this.state.aim;
     const options = [];
     for (let pr of this.state.projects) {
@@ -84,7 +120,6 @@ class UploadModal extends React.Component {
         </option>
       );
     }
-
     return (
       <Modal.Dialog dialogClassName="alert-upload">
         <Modal.Header>
@@ -105,7 +140,7 @@ class UploadModal extends React.Component {
               type="file"
               className="upload-display"
               // name="tiff"
-              //   onClick={this.onSelect}
+              onChange={this.onSelectFile}
             />
           </div>
           {!isLite && (
@@ -139,12 +174,12 @@ class UploadModal extends React.Component {
           )}
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
-          {disabled ? (
+          {!this.state.file ? (
             <button onClick={this.onUpload} disabled>
               Submit
             </button>
           ) : (
-            <button onClick={this.onDownload}>Submit</button>
+            <button onClick={this.onUpload}>Submit</button>
           )}
 
           <button onClick={this.props.onCancel}>Cancel</button>

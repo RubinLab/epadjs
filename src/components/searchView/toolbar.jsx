@@ -1,9 +1,13 @@
 import React from "react";
 import { FaEye, FaDownload, FaUpload } from "react-icons/fa";
+import { css, jsx } from "@emotion/core";
 import { TiPencil } from "react-icons/ti";
 import ReactTooltip from "react-tooltip";
+import Spinner from "../common/barLoader";
+import { BarLoader } from "react-spinners";
 
 const toolBar = props => {
+  console.log(props);
   return (
     <div className="searchView-toolbar">
       <div className="searchView-toolbar__icon" onClick={props.onView}>
@@ -65,29 +69,16 @@ const toolBar = props => {
       <ReactTooltip id="ann-icon" place="bottom" type="info" delayShow={1500}>
         <span>Add annotation</span>
       </ReactTooltip>
+      <div className="spinner-toolbar__container">
+        {props.status && (
+          <>
+            <div className="toolbar-status">{props.status}</div>
+            <BarLoader loading={true} height={10} width={120} />
+          </>
+        )}
+      </div>
     </div>
   );
 };
 
 export default toolBar;
-
-{
-  /* <p data-tip='' data-for='test'></p>
-<ReactTooltip id='test'>{}</ReactTooltip> */
-}
-{
-  /* <FaRegTrashAlt
-className="tool-icon"
-onClick={onDelete}
-data-tip
-data-for="trash-icon"
-/>
-<ReactTooltip
-id="trash-icon"
-place="bottom"
-type="info"
-delayShow={1500}
->
-<span>Delete selections</span>
-</ReactTooltip> */
-}

@@ -33,14 +33,24 @@ class SearchView extends Component {
       isSerieSelectionOpen: false,
       showAnnotationModal: false,
       showUploadFileModal: false,
-      loading: false,
+      downloading: false,
+      uploading: false,
       error: false,
       showUploadModal: false
     };
   }
 
-  updateLoadingStatus = () => {
-    this.setState(state => ({ loading: !state.loading }));
+  updateDownloadStatus = () => {
+    this.setState(state => ({ downloading: !state.downloading }));
+  };
+
+  updateUploadStatus = async () => {
+    console.log("in upload status change method");
+    await this.setState(state => {
+      console.log(state);
+      return { uploading: !state.uploading };
+    });
+    console.log("new state", this.state);
   };
 
   updateError = error => {
@@ -345,12 +355,19 @@ class SearchView extends Component {
   };
 
   render() {
+    let status;
+    if (this.state.uploading) {
+      status = "Uploading";
+    } else if (this.state.downloading) {
+      status = "Downloading";
+    }
     return (
       <>
         <Toolbar
           onDownload={this.downloadSelection}
           onUpload={this.handleFileUpload}
           onView={this.viewSelection}
+          status={status}
         />
         {this.state.isSerieSelectionOpen && !this.props.loading && (
           <ProjectModal
@@ -367,7 +384,10 @@ class SearchView extends Component {
         )}
 
         {this.state.showUploadFileModal && (
-          <UploadModal onCancel={this.handleFileUpload} />
+          <UploadModal
+            onCancel={this.handleFileUpload}
+            onSubmit={this.updateUploadStatus}
+          />
         )}
       </>
     );
