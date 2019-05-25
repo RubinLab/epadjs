@@ -9,6 +9,7 @@ import "react-table/react-table.css";
 import Studies from "./studies";
 import { getSubjects } from "../../services/subjectServices";
 import { selectPatient, clearSelection } from "../annotationsList/action";
+import { isLite } from "./../../config.json";
 
 // const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
 const TreeTable = treeTableHOC(ReactTable);
@@ -39,11 +40,12 @@ class Subjects extends Component {
   }
 
   async componentDidMount() {
+    const pid = isLite ? "lite" : this.props.pid;
     const {
       data: {
         ResultSet: { Result: data }
       }
-    } = await getSubjects(this.props.pid);
+    } = await getSubjects(pid);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
   }

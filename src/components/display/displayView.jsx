@@ -11,20 +11,16 @@ import Aim from "../aimEditor/Aim";
 import AimEditor from "../aimEditor/aimEditor";
 import "./flex.css";
 //import viewport from "./viewport.jsx";
-import { FiZoomIn } from "react-icons/fi";
-import { TiScissors } from "react-icons/ti";
 import { changeActivePort } from "../annotationsList/action";
-import { ContextMenu } from "./contextMenu";
+import ContextMenu from "./contextMenu";
 
 import { MenuProvider } from "react-contexify";
 import CornerstoneViewport from "react-cornerstone-viewport";
 // import CornerstoneViewport from "../Viewport/CornerstoneViewport/CornerstoneViewport";
-import { getAnnotations } from "../../services/annotationServices";
 import { freehand } from "./Freehand";
 import { line } from "./Line";
 import { probe } from "./Probe";
 import { circle } from "./Circle";
-import aimEntityData from "../annotationsList/annotationDock/aimEntityData";
 
 const tools = [
   { name: "Wwwc", mouseButtonMasks: [1] },
@@ -395,7 +391,12 @@ class DisplayView extends Component {
     this.setState({ showAimEditor: true, selectedAim: aimJson });
   };
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
+    console.log(prevProps);
+    // if (prevState.series.length !== this.state.data.length) {
+    //   this.getViewports();
+    //   this.getData();
+    // }
     if (!this.state.isLoading && Object.entries(this.props.aimList).length) {
       this.parseAims(this.props.aimList);
       window.addEventListener(
@@ -406,6 +407,8 @@ class DisplayView extends Component {
   }
 
   render() {
+    if (!Object.entries(this.props.series).length)
+      this.props.history.push("/search");
     return (
       <React.Fragment>
         <Toolbar
@@ -413,6 +416,7 @@ class DisplayView extends Component {
           cornerstoneTools={this.props.cornerstoneTools}
         />
         {!this.state.isLoading &&
+          // Object.entries(this.props.series).length &&
           this.state.data.map((data, i) => (
             <div
               className={

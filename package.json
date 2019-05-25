@@ -10,6 +10,7 @@
     "cornerstone-tools": "^3.7.2",
     "cornerstone-wado-image-loader": "^2.1.4",
     "dicom-parser": "^1.8.1",
+    "fast-deep-equal": "^2.0.1",
     "font-awesome": "^4.7.0",
     "google-closure-library": "^20190121.0.0",
     "hammerjs": "^2.0.8",

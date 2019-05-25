@@ -28,24 +28,24 @@ export function getImageIds(series) {
     return http.get(
       apiUrl +
         "/projects/lite/subjects/" +
-        series.subjectId +
+        series.subjectUID +
         "/studies/" +
-        series.studyId +
+        series.studyUID +
         "/series/" +
-        series.seriesId +
+        series.seriesUID +
         "/images"
     );
   else
     return http.get(
       apiUrl +
         "/projects/" +
-        series.projectId +
+        series.projectUID +
         "/subjects/" +
-        series.subjectId +
+        series.subjectUID +
         "/studies/" +
-        series.studyId +
+        series.studyUID +
         "/series/" +
-        series.seriesId +
+        series.seriesUID +
         "/images/"
     );
 }

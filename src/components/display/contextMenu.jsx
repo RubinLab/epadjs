@@ -1,32 +1,44 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import { Menu, Item, Separator, Submenu } from "react-contexify";
 import "react-contexify/dist/ReactContexify.min.css";
+import { closeSerie } from "../annotationsList/action";
 
-export function ContextMenu() {
-  return (
-    <Menu id="menu_id">
-      <Submenu label="Draw">
-        <Item onClick={onClick}>
-          Point &nbsp;&nbsp;&nbsp;
-          {/* <FiZo,omIn /> */}
-        </Item>
-        <Item onClick={onClick}>Length</Item>
-        <Item onClick={onClick}>Ellipse</Item>
-        <Item onClick={onClick}>Rectangle</Item>
-        <Item onClick={onClick}>Polygon/Freehand</Item>
-        <Item onClick={onClick}>Sculpt</Item>
-        <Item onClick={onClick}>Brush</Item>
-        <Item onClick={onClick}>Eraser</Item>
-      </Submenu>
-      <Separator />
-      <Item onClick={closeViewport}>Close</Item>
-      <Item onClick={onClick}>Download</Item>
-    </Menu>
-  );
+class ContextMenu extends Component {
+  render() {
+    return (
+      <Menu id="menu_id">
+        <Submenu label="Draw">
+          <Item onClick={this.onClick}>
+            Point &nbsp;&nbsp;&nbsp;
+            {/* <FiZo,omIn /> */}
+          </Item>
+          <Item onClick={this.onClick}>Length</Item>
+          <Item onClick={this.onClick}>Ellipse</Item>
+          <Item onClick={this.onClick}>Rectangle</Item>
+          <Item onClick={this.onClick}>Polygon/Freehand</Item>
+          <Item onClick={this.onClick}>Sculpt</Item>
+          <Item onClick={this.onClick}>Brush</Item>
+          <Item onClick={this.onClick}>Eraser</Item>
+        </Submenu>
+        <Separator />
+        <Item onClick={this.closeViewport}>Close</Item>
+        <Item onClick={this.onClick}>Download</Item>
+      </Menu>
+    );
+  }
+
+  onClick = () => {
+    alert("I have been clicked :)");
+  };
+
+  closeViewport = () => {
+    this.props.dispatch(closeSerie());
+  };
 }
 
-const onClick = () => {
-  alert("I have been clicked :)");
-};
+// const mapDispatchToProps = dispatch => {
+//   return bindActionCreators(closeSerie, dispatch);
+// };
 
-const closeViewport = () => {};
+export default connect()(ContextMenu);

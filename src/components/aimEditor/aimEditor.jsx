@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Draggable from "react-draggable";
 import { getTemplates } from "../../services/templateServices";
-import * as questionaire from "../../utils/AimEditorReactV1/parseClass";
+import * as questionaire from "../../utils/AimEditorReactV1/parseClass.js";
 import "./aimEditor.css";
 import Aim from "./Aim";
 
@@ -15,8 +15,6 @@ const enumAimType = {
 class AimEditor extends Component {
   constructor(props) {
     super(props);
-    // this.seriesUid = this.props.series.seriesId;
-    // this.studyUid = this.props.series.studyId;
     this.cornerstone = this.props.cornerstone;
     this.csTools = this.props.csTools;
     this.image = this.getImage();
@@ -25,13 +23,15 @@ class AimEditor extends Component {
     this.accession = this.getAccession(this.image);
   }
 
-  async componentDidMount() {
-    const templateId = "1";
-    const {
-      data: {
-        ResultSet: { Result: templates }
-      }
-    } = await getTemplates(templateId);
+  componentDidMount() {
+    console.log("mete", document.getElementById("questionaire"));
+    const element = document.getElementById("questionaire");
+    // const templateId = "1";
+    // const {
+    //   data: {
+    //     ResultSet: { Result: templates }
+    //   }
+    // } = await getTemplates(templateId);
     //
     // Change the static projectId above with the value in store
     //
@@ -40,13 +40,13 @@ class AimEditor extends Component {
       alert(message);
     };
     var semanticAnswers = new questionaire.AimEditor(
-      document.getElementById("questionaire"),
+      element,
       shoutOutValidation
     );
-    semanticAnswers.loadTemplates(questionaire.myA);
-    semanticAnswers.createViewerWindow();
-    if (Object.entries(this.props.aim).length)
-      semanticAnswers.loadAimJson(this.props.aim);
+    semanticAnswers.loadTemplates(questionaire.templateArray);
+    semanticAnswers.createViewerWindow(element);
+    // if (Object.entries(this.props.aim).length)
+    //   semanticAnswers.loadAimJson(this.props.aim);
   }
 
   getImage = () => {
@@ -120,7 +120,6 @@ class AimEditor extends Component {
     console.log("Toolstate ", this.csTools);
     Object.entries(toolState).forEach(([imgId, annotations]) => {
       console.log(annotations);
-      this.cloneAnnotation(annotations);
       const imageReferenceUid = this.parseImgeId(imgId);
       Object.keys(annotations).map(annotation => {
         switch (annotation) {
