@@ -155,11 +155,6 @@ class DisplayView extends Component {
     stack.currentImageIdIndex = 0;
     stack.imageIds = [...tempArray];
     return { stack };
-    // console.log("before seting ", this.state.data);
-    // this.setState({
-    //   data: [...this.state.data, stack]
-    // });
-    // console.log("after seting ", this.state.data);
   }
 
   getViewports = () => {
@@ -387,7 +382,7 @@ class DisplayView extends Component {
     const aimJson = this.props.aimList[
       this.props.series[this.props.activePort].seriesUID
     ][event.detail].json;
-    console.log(JSON.stringify(aimJson));
+    console.log("event", JSON.stringify(aimJson));
     this.setState({ showAimEditor: true, selectedAim: aimJson });
   };
 
@@ -416,7 +411,7 @@ class DisplayView extends Component {
           cornerstoneTools={this.props.cornerstoneTools}
         />
         {!this.state.isLoading &&
-          // Object.entries(this.props.series).length &&
+          Object.entries(this.props.series).length &&
           this.state.data.map((data, i) => (
             <div
               className={

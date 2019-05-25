@@ -8,14 +8,5 @@ export const freehand = {
     invalidHandlePlacement: false
   },
   canComplete: false,
-  highlight: false,
-  meanStdDev: {
-    count: undefined,
-    mean: undefined,
-    variance: undefined,
-    stdDev: undefined,
-    min: undefined,
-    max: undefined
-  },
-  area: undefined
+  highlight: false
 };

@@ -16,6 +16,6 @@ export const line = {
     },
     textBox: {}
   },
-  length: undefined,
+  length: 0,
   invalidated: false
 };
