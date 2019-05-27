@@ -2,9 +2,13 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Draggable from "react-draggable";
 import { getTemplates } from "../../services/templateServices";
+import "jquery/dist/jquery.js";
+import "semantic-ui/dist/semantic.min.css";
+import "semantic-ui/dist/semantic.js";
 import * as questionaire from "../../utils/AimEditorReactV1/parseClass.js";
 import "./aimEditor.css";
 import Aim from "./Aim";
+import * as dcmjs from "dcmjs";
 
 const enumAimType = {
   imageAnnotation: 1,
@@ -24,7 +28,6 @@ class AimEditor extends Component {
   }
 
   componentDidMount() {
-    console.log("mete", document.getElementById("questionaire"));
     const element = document.getElementById("questionaire");
     // const templateId = "1";
     // const {
@@ -45,8 +48,8 @@ class AimEditor extends Component {
     );
     semanticAnswers.loadTemplates(questionaire.templateArray);
     semanticAnswers.createViewerWindow(element);
-    // if (Object.entries(this.props.aim).length)
-    //   semanticAnswers.loadAimJson(this.props.aim);
+    if (this.props.aim != null && Object.entries(this.props.aim).length)
+      semanticAnswers.loadAimJson(this.props.aim);
   }
 
   getImage = () => {
@@ -105,7 +108,7 @@ class AimEditor extends Component {
   };
 
   createAim = () => {
-    const hasSegmentation = false; //TODO:keep this in store and look dynamically
+    const hasSegmentation = true; //TODO:keep this in store and look dynamically
     var aim = new Aim(
       this.image,
       this.studyUid,
@@ -115,51 +118,91 @@ class AimEditor extends Component {
       enumAimType.imageAnnotation,
       hasSegmentation
     );
+
+    const updatedAimId = ""; //needs to be setted
+
     const { toolState } = this.csTools.globalImageIdSpecificToolStateManager;
+
+    // get the imagesIds for active viewport
+    const element = document.getElementsByClassName("viewport-element")[
+      this.props.activePort
+    ];
+    const stackToolState = this.csTools.getToolState(element, "stack");
+    // console.log("stack tool state is", stackToolState);
+    const imageIds = stackToolState.data[this.props.activePort].imageIds;
+    // console.log("image ids are", imageIds);
+
+    // check which images has markup or segmentation
+    const markedImageIds = imageIds.filter(imageId => {
+      if (toolState[imageId] === undefined) return false;
+      return true;
+    });
+    // console.log("marked images are", markedImageIds);
+
+    // if has segmentation retrieve the images to generate dicomseg, most should be cached already
+    if (hasSegmentation) {
+      var imagePromises = [];
+      imageIds.map(imageId => {
+        imagePromises.push(this.cornerstone.loadImage(imageId));
+      });
+      this.createSegmentation(toolState, imagePromises, markedImageIds);
+    }
+
+    // check for markups
     var shapeIndex = 1;
-    console.log("Toolstate ", this.csTools);
-    Object.entries(toolState).forEach(([imgId, annotations]) => {
-      console.log(annotations);
-      const imageReferenceUid = this.parseImgeId(imgId);
-      Object.keys(annotations).map(annotation => {
-        switch (annotation) {
+    markedImageIds.map(imageId => {
+      const imageReferenceUid = this.parseImgeId(imageId);
+      const markUps = toolState[imageId];
+      Object.keys(markUps).map(tool => {
+        switch (tool) {
           case "FreehandMouse":
             console.log("FreeHandMouse");
-            const polygons = annotations[annotation].data;
+            const polygons = markUps[tool].data;
             polygons.map(polygon => {
-              this.addPolygonToAim(aim, polygon, shapeIndex, imageReferenceUid);
-              shapeIndex++;
+              if (!polygon.aimId || polygon.aimId === updatedAimId) {
+                //dont save the same markup to different aims
+                this.addPolygonToAim(
+                  aim,
+                  polygon,
+                  shapeIndex,
+                  imageReferenceUid
+                );
+                shapeIndex++;
+              }
             });
             break;
-          case "brush":
-            console.log("brush");
-            console.log("Brush ", annotations[annotation]);
-            shapeIndex++;
-            break;
+          // case "brush":
+          //   console.log("Brush ", annotations[annotation]);
+          //   this.addSegmentationToAim(aim, annotations[annotation]);
+          //   shapeIndex++;
+          //   break;
           case "Bidirectional":
-            console.log("FreeHandMouse");
-            console.log("Bidirectional ", annotations[annotation]);
+            console.log("Bidirectional ", markUps[tool]);
             shapeIndex++;
             break;
           case "RectangleRoi":
-            console.log("RectangleRoi ", annotations[annotation]);
+            console.log("RectangleRoi ", markUps[tool]);
             shapeIndex++;
             break;
           case "EllipticalRoi":
-            console.log("EllipticalRoi ", annotations[annotation]);
+            console.log("EllipticalRoi ", markUps[tool]);
             shapeIndex++;
             break;
           case "Length":
-            const lines = annotations[annotation].data;
+            const lines = markUps[tool].data;
             lines.map(line => {
-              this.addLineToAim(aim, line, shapeIndex);
-              shapeIndex++;
+              if (!line.aimId || line.aimId === updatedAimId) {
+                //dont save the same markup to different aims
+                this.addLineToAim(aim, line, shapeIndex);
+                shapeIndex++;
+              }
             });
         }
       });
     });
     aim.save();
   };
+
   addPolygonToAim = (aim, polygon, shapeIndex, imageReferenceUid) => {
     const { points } = polygon.handles;
     const markupId = aim.addMarkupEntity(
@@ -191,6 +234,84 @@ class AimEditor extends Component {
     ]);
     // aim.add;
   };
+
+  createSegmentation = (toolState, imagePromises, markedImageIds) => {
+    const segments = [];
+    console.log("marked Images are", markedImageIds);
+    markedImageIds
+      .filter(imageId => {
+        if (
+          toolState[imageId].brush === undefined ||
+          toolState[imageId].brush.data === undefined
+        )
+          return false;
+        return true;
+      })
+      .map(imageId => {
+        console.log("I am in");
+        this.setSegmentMetaData(toolState, imageId, segments);
+      });
+    const brushData = {
+      toolState,
+      segments
+    };
+    Promise.all(imagePromises).then(images => {
+      console.log("images are", images, "brush data is", brushData);
+      const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
+        images,
+        brushData
+      );
+      console.log(segBlob);
+      // Create a URL for the binary.
+      // var objectUrl = URL.createObjectURL(segBlob);
+      // window.open(objectUrl);
+    });
+  };
+
+  setSegmentMetaData = (toolState, imageId, segments) => {
+    console.log("imageIds are", imageId, "segments are", segments);
+    const RecommendedDisplayCIELabValue = dcmjs.data.Colors.rgb2DICOMLAB([
+      1,
+      0,
+      0
+    ]);
+    const brushData = toolState[imageId].brush.data;
+    console.log("brush data is", brushData);
+    for (let segIdx = 0; segIdx < 4; segIdx++) {
+      // If there is pixelData for this segment, set the segment metadata
+      // if it hasn't been set yet.
+      if (
+        brushData[segIdx] &&
+        brushData[segIdx].pixelData &&
+        !segments[segIdx]
+      ) {
+        segments[segIdx] = {
+          SegmentedPropertyCategoryCodeSequence: {
+            CodeValue: "T-D0050",
+            CodingSchemeDesignator: "SRT",
+            CodeMeaning: "Tissue"
+          },
+          SegmentNumber: (segIdx + 1).toString(),
+          SegmentLabel: "Tissue " + (segIdx + 1).toString(),
+          SegmentAlgorithmType: "SEMIAUTOMATIC",
+          SegmentAlgorithmName: "Slicer Prototype",
+          RecommendedDisplayCIELabValue,
+          SegmentedPropertyTypeCodeSequence: {
+            CodeValue: "T-D0050",
+            CodingSchemeDesignator: "SRT",
+            CodeMeaning: "Tissue"
+          }
+        };
+      }
+    }
+  };
+
+  addSegmentationToAim = (aim, annotations) => {
+    console.log("neler geliyo", annotations);
+    this.createDicomSeg();
+  };
+
+  createDicomSeg = () => {};
 
   parseImgeId = imageId => {
     return imageId.split("objectUID=")[1].split("&")[0];
