@@ -22,7 +22,6 @@ class UploadModal extends React.Component {
         }
       } = await getProjects();
       this.setState({ projects });
-      console.log(projects);
     }
   };
 
@@ -41,7 +40,6 @@ class UploadModal extends React.Component {
     this.props.onSubmit();
     uploadFile(formData, config)
       .then(() => {
-        console.log("resolved");
         this.props.onSubmit();
       })
       .catch(err => {
@@ -109,8 +107,6 @@ class UploadModal extends React.Component {
     );
   };
   render = () => {
-    console.log(this.state);
-
     let disabled = !this.state.summary && !this.state.aim;
     const options = [];
     for (let pr of this.state.projects) {

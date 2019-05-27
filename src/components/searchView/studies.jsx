@@ -68,7 +68,6 @@ class Studies extends Component {
   }
 
   async componentDidMount() {
-    console.log("attempted");
     const {
       data: {
         ResultSet: { Result: data }

@@ -24,6 +24,8 @@ import { MAX_PORT } from "../../constants";
 import "./searchView.css";
 import DownloadSelection from "./annotationDownloadModal";
 import UploadModal from "./uploadModal";
+import { toast } from "react-toastify";
+import { isLite } from "../../config";
 
 class SearchView extends Component {
   constructor(props) {
@@ -45,12 +47,9 @@ class SearchView extends Component {
   };
 
   updateUploadStatus = async () => {
-    console.log("in upload status change method");
     await this.setState(state => {
-      console.log(state);
       return { uploading: !state.uploading };
     });
-    console.log("new state", this.state);
   };
 
   updateError = error => {
@@ -58,7 +57,6 @@ class SearchView extends Component {
   };
 
   checkIfSerieOpen = selectedSerie => {
-    console.log(selectedSerie);
     let isOpen = false;
     let index;
     this.props.openSeries.forEach((serie, i) => {
@@ -317,10 +315,22 @@ class SearchView extends Component {
   };
 
   downloadHelper = (downLoadfunction, arg, fileName) => {
-    downLoadfunction(arg).then(result => {
-      let blob = new Blob([result.data], { type: "application/zip" });
-      this.triggerBrowserDownload(blob, fileName);
-    });
+    downLoadfunction(arg)
+      .then(result => {
+        let blob = new Blob([result.data], { type: "application/zip" });
+        this.triggerBrowserDownload(blob, fileName);
+      })
+      .catch(err => {
+        if (err.response.status === 503) {
+          isLite
+            ? toast.error("There is no aim file to download!", {
+                autoClose: false
+              })
+            : toast.error("No files to download!", {
+                autoClose: false
+              });
+        }
+      });
   };
 
   handleDownloadCancel = () => {
