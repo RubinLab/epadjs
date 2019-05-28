@@ -43,7 +43,6 @@ class UploadModal extends React.Component {
         this.props.onSubmit();
       })
       .catch(err => {
-        console.log(err);
         const fileName = this.state.file.name.substring(0, 50);
         toast.error(
           `Error occured while uploading ${fileName}${

@@ -38,9 +38,18 @@ class SearchView extends Component {
       downloading: false,
       uploading: false,
       error: false,
-      showUploadModal: false
+      showUploadModal: false,
+      key: null,
+      pid: null
     };
   }
+
+  componentDidMount = () => {
+    this.setState({
+      key: this.props.match.params.pid,
+      pid: this.props.match.params.pid
+    });
+  };
 
   updateDownloadStatus = () => {
     this.setState(state => ({ downloading: !state.downloading }));
@@ -271,29 +280,43 @@ class SearchView extends Component {
     const selectedSeries = Object.values(this.props.selectedSeries);
     const selectedAnnotations = Object.values(this.props.selectedAnnotations);
     let fileName;
+    let promiseArr = [];
+    let fileNameArr = [];
     if (selectedProjects.length > 0) {
-      selectedProjects.forEach(project => {
+      await this.setState({ downloading: true });
+      for (let project of selectedProjects) {
         fileName = `Project - ${project.projectID}`;
-        this.downloadHelper(downloadProjects, project, fileName);
-      });
+        promiseArr.push(downloadProjects(project));
+        fileNameArr.push(fileName);
+      }
+      this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
     } else if (selectedPatients.length > 0) {
-      selectedPatients.forEach(patient => {
+      await this.setState({ downloading: true });
+      for (let patient of selectedPatients) {
         fileName = `Patients - ${patient.subjectID}`;
-        this.downloadHelper(downloadSubjects, patient, fileName);
-      });
+        promiseArr.push(downloadSubjects(patient));
+        fileNameArr.push(fileName);
+      }
+      this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
     } else if (selectedStudies.length > 0) {
-      selectedStudies.forEach(study => {
+      await this.setState({ downloading: true });
+      for (let study of selectedStudies) {
         fileName = `Studies - ${study.studyUID}`;
-        this.downloadHelper(downloadStudies, study, fileName);
-      });
+        promiseArr.push(downloadStudies(study));
+        fileNameArr.push(fileName);
+      }
+      this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
     } else if (selectedSeries.length > 0) {
-      selectedSeries.forEach(serie => {
+      await this.setState({ downloading: true });
+      for (let serie of selectedSeries) {
         fileName = `Series - ${serie.seriesUID}`;
-        this.downloadHelper(downloadSeries, serie, fileName);
-      });
+        promiseArr.push(downloadSeries(serie));
+        fileNameArr.push(fileName);
+      }
+      this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
@@ -314,11 +337,14 @@ class SearchView extends Component {
     }
   };
 
-  downloadHelper = (downLoadfunction, arg, fileName) => {
-    downLoadfunction(arg)
+  downloadHelper = (promiseArr, nameArr) => {
+    Promise.all(promiseArr)
       .then(result => {
-        let blob = new Blob([result.data], { type: "application/zip" });
-        this.triggerBrowserDownload(blob, fileName);
+        for (let i = 0; i < result.length; i++) {
+          let blob = new Blob([result[i].data], { type: "application/zip" });
+          this.triggerBrowserDownload(blob, nameArr[i]);
+        }
+        this.setState({ error: null, downloading: false });
       })
       .catch(err => {
         if (err.response.status === 503) {
@@ -365,6 +391,7 @@ class SearchView extends Component {
   };
 
   render() {
+    console.log(this.props);
     let status;
     if (this.state.uploading) {
       status = "Uploading";

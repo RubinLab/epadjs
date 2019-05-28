@@ -7,7 +7,9 @@ import Spinner from "../common/barLoader";
 import { BarLoader } from "react-spinners";
 
 const toolBar = props => {
-  console.log(props);
+  if (props.status) {
+    console.log("status here");
+  }
   return (
     <div className="searchView-toolbar">
       <div className="searchView-toolbar__icon" onClick={props.onView}>

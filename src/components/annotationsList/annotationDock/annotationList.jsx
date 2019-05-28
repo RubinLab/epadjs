@@ -117,30 +117,32 @@ class AnnotationsList extends React.Component {
       );
     });
     return (
-      <div className="annotationList-container">
-        <div className="label-toggle">
-          <div className="label-toggle__text">Show Labels</div>
-          <Switch
-            onChange={this.handleToggleAllLabels}
-            checked={this.state.labelDisplayAll}
-            className="react-switch"
-            uncheckedIcon={false}
-            checkedIcon={false}
-          />
-        </div>
-        <div className="label-toggle">
-          <div className="label-toggle__text">Show Annotations</div>
-          <Switch
-            onChange={this.handleToggleAllAnnotations}
-            checked={this.state.annsDisplayAll}
-            className="react-switch"
-            uncheckedIcon={false}
-            checkedIcon={false}
-          />
-        </div>
+      <React.Fragment>
+        <div className="annotationList-container">
+          <div className="label-toggle">
+            <div className="label-toggle__text">Show Labels</div>
+            <Switch
+              onChange={this.handleToggleAllLabels}
+              checked={this.state.labelDisplayAll}
+              className="react-switch"
+              uncheckedIcon={false}
+              checkedIcon={false}
+            />
+          </div>
+          <div className="label-toggle">
+            <div className="label-toggle__text">Show Annotations</div>
+            <Switch
+              onChange={this.handleToggleAllAnnotations}
+              checked={this.state.annsDisplayAll}
+              className="react-switch"
+              uncheckedIcon={false}
+              checkedIcon={false}
+            />
+          </div>
 
-        <div>{annList}</div>
-      </div>
+          <div>{annList}</div>
+        </div>
+      </React.Fragment>
     );
   };
 }

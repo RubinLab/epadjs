@@ -7,12 +7,15 @@ import { withRouter } from "react-router-dom";
 import "./flex.css";
 //import viewport from "./viewport.jsx";
 import { FiZoomIn } from "react-icons/fi";
+import { FaTimes } from "react-icons/fa";
+import AnnotationList from "../annotationsList/annotationDock/annotationList";
 
 const mapStateToProps = state => {
   return {
     series: state.searchViewReducer.series,
     cornerstone: state.searchViewReducer.cornerstone,
-    cornerstoneTools: state.searchViewReducer.cornerstoneTools
+    cornerstoneTools: state.searchViewReducer.cornerstoneTools,
+    activePort: state.annotationsListReducer.activePort
     //refs: state.searchViewReducer.viewports
   };
 };
@@ -26,8 +29,10 @@ class DisplayView extends Component {
       series: props.series,
       width: "100%",
       height: "calc(100% - 60px)",
+      // height: "100%",
       refs: props.refs,
-      hiding: false
+      hiding: false,
+      showAnnDetails: true
     };
     //this.createRefs();
     //console.log(this.state);
@@ -112,11 +117,18 @@ class DisplayView extends Component {
     this.props.cornerstone.fitToWindow(elem);*/
   };
 
+  handleHideAnnotations = () => {
+    this.setState({ showAnnDetails: false });
+  };
+
   render() {
+    console.log("props in display");
+    console.log(this.props);
     return (
+      // <div className="displayView-main">
       <React.Fragment>
         <Toolbar />
-
+        {/* <div className="splitted-view"> */}
         {this.state.series.map((serie, i) => (
           <div
             className={"viewportContainer"}
@@ -139,8 +151,21 @@ class DisplayView extends Component {
             />
           </div>
         ))}
+        {/* {this.props.activePort !== null && this.state.showAnnDetails ? (
+            <div className="annList-mainview">
+              <button
+                className="annList-mainview__hide"
+                onClick={this.handleHideAnnotations}
+              >
+                {this.state.showAnnDetails ? "hide" : "show"}
+              </button>
+              <AnnotationList />{" "}
+            </div>
+          ) : null} */}
         <div id="cont" />
+        {/* </div> */}
       </React.Fragment>
+      // </div>
     );
   }
 }
