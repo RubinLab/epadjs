@@ -61,3 +61,6 @@
 .icon-point:before {
   content: "\70";
 }
+.icon-circle:before {
+  content: "\61";
+}

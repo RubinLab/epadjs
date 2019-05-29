@@ -2,13 +2,11 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Draggable from "react-draggable";
 import { getTemplates } from "../../services/templateServices";
-import "jquery/dist/jquery.js";
-import "semantic-ui/dist/semantic.min.css";
-import "semantic-ui/dist/semantic.js";
 import * as questionaire from "../../utils/AimEditorReactV1/parseClass.js";
-import "./aimEditor.css";
 import Aim from "./Aim";
 import * as dcmjs from "dcmjs";
+
+import "./aimEditor.css";
 
 const enumAimType = {
   imageAnnotation: 1,
@@ -48,8 +46,8 @@ class AimEditor extends Component {
     );
     semanticAnswers.loadTemplates(questionaire.templateArray);
     semanticAnswers.createViewerWindow(element);
-    if (this.props.aim != null && Object.entries(this.props.aim).length)
-      semanticAnswers.loadAimJson(this.props.aim);
+    if (this.props.aimId != null && Object.entries(this.props.aimId).length)
+      semanticAnswers.loadAimJson(this.props.aimId);
   }
 
   getImage = () => {
@@ -69,6 +67,7 @@ class AimEditor extends Component {
       id: { value: patientId },
       birthDate: { value: birthDate }
     };
+    return person;
   };
 
   getEquipmentData = image => {
@@ -80,6 +79,7 @@ class AimEditor extends Component {
       manufacturerModelName: manuModel,
       softwareVersion: sw
     };
+    return equipment;
   };
 
   getAccession = image => {
@@ -88,27 +88,40 @@ class AimEditor extends Component {
 
   render() {
     return (
-      <div id="questionaire" className="editorForm">
-        <button type="button" onClick={this.save}>
-          Save
-        </button>
-      </div>
+      <Draggable>
+        <div className="editorForm">
+          <div id="questionaire" />
+          <button type="button" onClick={this.save}>
+            Save
+          </button>
+          <button type="button" onClick={this.cancel}>
+            Cancel
+          </button>
+        </div>
+      </Draggable>
     );
-    // return <div id="questionaire" />;
   }
+
+  cancel = () => {
+    if (this.props.onCancel) {
+      this.props.onCancel();
+    }
+  };
 
   save = () => {
     console.log("cstools are", this.csTools);
     console.log(
-      this.csTools.getElementToolStateManager(
-        this.cornerstone.getEnabledElements()[0]["element"]
+      "yabadabadu",
+      this.csTools.getToolState(
+        this.cornerstone.getEnabledElements()[0]["element"],
+        "BrushTool"
       )
     );
     this.createAim();
   };
 
   createAim = () => {
-    const hasSegmentation = true; //TODO:keep this in store and look dynamically
+    const hasSegmentation = false; //TODO:keep this in store and look dynamically
     var aim = new Aim(
       this.image,
       this.studyUid,
@@ -119,7 +132,7 @@ class AimEditor extends Component {
       hasSegmentation
     );
 
-    const updatedAimId = ""; //needs to be setted
+    const updatedAimId = this.props.aimId; //needs to be setted
 
     const { toolState } = this.csTools.globalImageIdSpecificToolStateManager;
 
@@ -128,16 +141,13 @@ class AimEditor extends Component {
       this.props.activePort
     ];
     const stackToolState = this.csTools.getToolState(element, "stack");
-    // console.log("stack tool state is", stackToolState);
     const imageIds = stackToolState.data[this.props.activePort].imageIds;
-    // console.log("image ids are", imageIds);
 
     // check which images has markup or segmentation
     const markedImageIds = imageIds.filter(imageId => {
       if (toolState[imageId] === undefined) return false;
       return true;
     });
-    // console.log("marked images are", markedImageIds);
 
     // if has segmentation retrieve the images to generate dicomseg, most should be cached already
     if (hasSegmentation) {
@@ -171,11 +181,6 @@ class AimEditor extends Component {
               }
             });
             break;
-          // case "brush":
-          //   console.log("Brush ", annotations[annotation]);
-          //   this.addSegmentationToAim(aim, annotations[annotation]);
-          //   shapeIndex++;
-          //   break;
           case "Bidirectional":
             console.log("Bidirectional ", markUps[tool]);
             shapeIndex++;
@@ -187,6 +192,17 @@ class AimEditor extends Component {
           case "EllipticalRoi":
             console.log("EllipticalRoi ", markUps[tool]);
             shapeIndex++;
+            break;
+          case "CircleRoi":
+            console.log("CircleRoi ", markUps[tool]);
+            const circles = markUps[tool].data;
+            circles.map(circle => {
+              if (!circle.aimId || circle.aimId === updatedAimId) {
+                //dont save the same markup to different aims
+                this.addCircleToAim(aim, circle, shapeIndex, imageReferenceUid);
+                shapeIndex++;
+              }
+            });
             break;
           case "Length":
             const lines = markUps[tool].data;
@@ -232,6 +248,32 @@ class AimEditor extends Component {
       start,
       end
     ]);
+    // aim.add;
+  };
+
+  addCircleToAim = (aim, circle, shapeIndex, imageReferenceUid) => {
+    const { start, end } = circle.handles;
+    const markupId = aim.addMarkupEntity(
+      "TwoDimensionCircle",
+      shapeIndex,
+      [start, end],
+      imageReferenceUid
+    );
+    const { mean, stdDev, min, max } = circle.cachedStats;
+    console.log("circle", circle, "mean", mean, "stdDev", stdDev);
+
+    const meanId = aim.createMeanCalcEntity({ mean, unit: "[hnsf'U]" });
+    aim.createImageAnnotationStatement(1, markupId, meanId);
+
+    const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit: "[hnsf'U]" });
+    aim.createImageAnnotationStatement(1, markupId, stdDevId);
+
+    const minId = aim.createMinCalcEntity({ min, unit: "[hnsf'U]" });
+    aim.createImageAnnotationStatement(1, markupId, minId);
+
+    const maxId = aim.createMaxCalcEntity({ max, unit: "[hnsf'U]" });
+    aim.createImageAnnotationStatement(1, markupId, maxId);
+    console.log();
     // aim.add;
   };
 
@@ -306,9 +348,8 @@ class AimEditor extends Component {
     }
   };
 
-  addSegmentationToAim = (aim, annotations) => {
-    console.log("neler geliyo", annotations);
-    this.createDicomSeg();
+  addSegmentationToAim = (aim, image) => {
+    // aim.
   };
 
   createDicomSeg = () => {};

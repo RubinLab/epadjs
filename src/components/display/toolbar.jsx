@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import MetaData from "./metaData";
 import Draggable from "react-draggable";
+import { WindowLevel } from "./WindowLevel";
 import {
   FaLocationArrow,
   FaEraser,
@@ -97,13 +98,12 @@ class Toolbar extends Component {
     this.state = {
       activeTool: "",
       showDrawing: false,
-      playing: false,
-      activeVP: this.props.activeVP
+      showPresets: false,
+      playing: false
     };
   }
 
   //TODO: instead of disabling all tools we can just disable the active tool
-
   disableAllTools = () => {
     Array.from(this.tools).forEach(tool => {
       const apiTool = this.cornerstoneTools[`${tool.name}Tool`];
@@ -125,8 +125,6 @@ class Toolbar extends Component {
 
   //sets the selected tool active for an enabled elements
   setToolActiveForElement = (toolName, mouseMask = 1) => {
-    // const element = document.getElementById(this.props.activeVP);
-    // const element = this.cornerstone.getEnabledElements()[this.state.activeVP]["element"];
     this.disableAllTools();
     this.cornerstoneTools.setToolActiveForElement(
       this.cornerstone.getEnabledElements()[this.props.activeVP]["element"],
@@ -173,107 +171,39 @@ class Toolbar extends Component {
   };
 
   invert = () => {
-    // const element = this.cornerstone.getEnabledElements()[this.state.activeVP]["element"];
-    if (this.state.activeElement) {
-      const viewport = this.props.cornerstone.getViewport(
-        this.state.activeElement
-      );
-      viewport.invert = !viewport.invert;
-      this.props.cornerstone.setViewport(this.state.activeElement, viewport);
-    }
+    const activeElement = this.cornerstone.getEnabledElements()[
+      this.props.activeVP
+    ].element;
+    const viewport = this.cornerstone.getViewport(activeElement);
+    viewport.invert = !viewport.invert;
+    this.cornerstone.setViewport(activeElement, viewport);
   };
 
   reset = () => {
-    // const element = document.getElementById(this.props.activeVP);
-    this.props.cornerstone.reset(this.state.activeElement);
+    const element = this.cornerstone.getEnabledElements()[this.props.activeVP]
+      .element;
+    this.props.cornerstone.reset(element);
   };
 
   toggleMetaData = () => {
     this.disableAllTools();
-    // const element = document.getElementById("myForm");
-    this.state.activeElement.style.display = "block";
-  };
-
-  probe = () => {
-    // /*console.log(this.props.cornerstoneTools);
-    // const element = document.getElementById(this.props.activeVP);
-    // console.log(
-    //   this.props.cornerstoneTools.getElementToolStateManager(element)
-    // );*/
-    // console.log("Saving state");
-    // const element = [document.getElementById(this.props.activeVP)];
-    // //var appState = this.props.cornerstoneTools.getToolState(element);
-    // //var serializedState = JSON.stringify(appState);
-    // //var parsed = JSON.parse(appState);
-    // console.log(this.props.cornerstoneTools.state);
-    // console.log(this.dxm);
-    // this.dxm[
-    //   "wadouri:http://epad-dev8.stanford.edu:8080/epad/wado/?requestType=WADO&studyUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.949&seriesUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.950&objectUID=1.3.12.2.1107.5.8.2.484849.837749.68675556.2004110916031631&contentType=application%2Fdicom"
-    // ].Length.data[0].handles.textBox = "";
-    // console.log(this.dxm);
-    // this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
-    //   this.dxm
-    // );
-    this.disableAllTools();
+    // this.state.activeElement.style.display = "block";
   };
 
   anotate = () => {
     this.setState({ showDrawing: !this.state.showDrawing });
-    // console.log(
-    //   this.props.cornerstoneTools.globalImageIdSpecificToolStateManager
-    //     .toolState[
-    //     "wadouri:http://epad-dev6.stanford.edu:8080/epad/wado/?requestType=WADO&studyUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.949&seriesUID=1.2.840.113619.2.55.1.1762384564.2037.1100004161.950&objectUID=1.3.12.2.1107.5.8.2.484849.837749.68675556.2004110916031631&contentType=application%2Fdicom"
-    //   ]
-    // );
-    this.dxm = {
-      ...this.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState()
-    };
-    // console.log(this.dxm);
-  };
-
-  point = () => {
-    /*console.log(this.props.cornerstoneTools);
-    const element = document.getElementById(this.props.activeVP);
-    console.log(
-      this.props.cornerstoneTools.getElementToolStateManager(element)
-    );*/
-    console.log("Saving state");
-    const element = [document.getElementById(this.props.activeVP)];
-    //var appState = this.props.cornerstoneTools.getToolState(element);
-    //var serializedState = JSON.stringify(appState);
-    //var parsed = JSON.parse(appState);
-    console.log(this.cornerstoneTools.state);
-    console.log(this.dxm);
-    this.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
-      this.dxm
-    );
-  };
-
-  line = () => {
-    this.setState({ showDrawing: false });
-    this.disableAllTools();
-    // const element = document.getElementById(this.props.activeVP);
-    this.cornerstoneTools.length.activate(this.state.activeElement, 1);
-
-    // element.style.cursor = "crosshair";
-  };
-
-  erase = () => {
-    // const elem = document.getElementById(this.props.activeVP);
-    this.cornerstoneTools.globalImageIdSpecificToolStateManager.clear(
-      this.state.activeElement
-    );
-    console.log(this.cornerstoneTools);
   };
 
   handleClip = () => {
-    console.log(this.cornerstone);
-    // const elem = document.getElementsByClassName("viewport-element");
     const element = this.cornerstone.getEnabledElements()[this.props.activeVP]
       .element;
     if (!this.state.playing) this.cornerstoneTools.playClip(element, 40);
     else this.cornerstoneTools.stopClip(element);
     this.setState({ playing: !this.state.playing });
+  };
+
+  showPresets = () => {
+    this.setState({ showPresets: !this.state.showPresets });
   };
 
   render() {
@@ -305,7 +235,12 @@ class Toolbar extends Component {
             <span>Levels</span>
           </div>
         </div>
-        <div id="preset" tabIndex="1" className="toolbarSectionButton">
+        <div
+          id="preset"
+          tabIndex="1"
+          className="toolbarSectionButton"
+          onClick={this.showPresets}
+        >
           <div className="toolContainer">
             <FiSunset />
           </div>
@@ -416,20 +351,6 @@ class Toolbar extends Component {
             <span>Region</span>
           </div>
         </div>
-        {/*<div
-          id="probe"
-          tabIndex="10"
-          className="toolbarSectionButton"
-          onClick={this.probe}
-          //onClick={() => this.setToolActive("Probe")}
-        >
-          <div className="toolContainer">
-            <TiPipette />
-          </div>
-          <div className="buttonLabel">
-            <span>Probe</span>
-          </div>
-        </div>*/}
         <div
           id="palyClip"
           tabIndex="10"
@@ -501,7 +422,7 @@ class Toolbar extends Component {
                 id="point"
                 tabIndex="1"
                 className="drawingSectionButton"
-                onClick={() => this.setToolActive("Probe")}
+                onClick={() => this.setToolActiveForElement("Probe")}
               >
                 <div className="icon-point fontastic-icons" />
                 <div className="buttonLabel">
@@ -521,7 +442,7 @@ class Toolbar extends Component {
                   <span>Length</span>
                 </div>
               </div>
-              <div
+              {/* <div
                 id="ellipse"
                 tabIndex="3"
                 className="drawingSectionButton"
@@ -531,8 +452,19 @@ class Toolbar extends Component {
                 <div className="buttonLabel">
                   <span>Ellipse</span>
                 </div>
-              </div>
+              </div> */}
               <div
+                id="circle"
+                tabIndex="3"
+                className="drawingSectionButton"
+                onClick={() => this.setToolActiveForElement("CircleRoi")}
+              >
+                <div className="icon-circle fontastic-icons" />
+                <div className="buttonLabel">
+                  <span>Circle</span>
+                </div>
+              </div>
+              {/* <div
                 id="rectangle"
                 tabIndex="4"
                 className="drawingSectionButton"
@@ -542,7 +474,7 @@ class Toolbar extends Component {
                 <div className="buttonLabel">
                   <span>Rectangle</span>
                 </div>
-              </div>
+              </div> */}
               <div
                 id="polygon"
                 tabIndex="5"
@@ -606,6 +538,17 @@ class Toolbar extends Component {
               </div>
             </div>
           </Draggable>
+        )}
+        {this.state.showPresets && (
+          <WindowLevel
+            cornerstone={this.props.cornerstone}
+            activeElement={
+              this.cornerstone.getEnabledElements()[this.props.activeVP][
+                "element"
+              ]
+            }
+            onClose={this.showPresets}
+          />
         )}
       </div>
     );

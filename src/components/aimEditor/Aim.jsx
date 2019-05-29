@@ -259,11 +259,11 @@ Vehicle.display();//still "General"
     return uId;
   };
 
-  createMeanCalcEntity = (mean, preLabel) => {
-    let { unit, value } = mean;
+  createMeanCalcEntity = (value, preLabel) => {
+    var { unit, mean } = value;
     var obj = {};
     obj["calculationResultCollection"] = {
-      CalculationResult: this.createCalcResult(unit, "Mean", value, preLabel)
+      CalculationResult: this.createCalcResult(unit, "Mean", mean, preLabel)
     };
     obj["description"] = { value: "Mean" };
     const uId = generateUid();
@@ -278,14 +278,14 @@ Vehicle.display();//still "General"
     return uId;
   };
 
-  createStdDevCalcEntity = (stdDev, preLabel) => {
-    let { unit, value } = stdDev;
+  createStdDevCalcEntity = (value, preLabel) => {
+    var { unit, stdDev } = value;
     var obj = {};
     obj["calculationResultCollection"] = {
       CalculationResult: this.createCalcResult(
         unit,
         "Standard Deviation",
-        value,
+        stdDev,
         preLabel
       )
     };
@@ -302,11 +302,11 @@ Vehicle.display();//still "General"
     return uId;
   };
 
-  createMinCalcEntity = (min, preLabel) => {
-    let { unit, value } = min;
+  createMinCalcEntity = (value, preLabel) => {
+    var { unit, min } = value;
     var obj = {};
     obj["calculationResultCollection"] = {
-      CalculationResult: this.createCalcResult(unit, "Minimum", value, preLabel)
+      CalculationResult: this.createCalcResult(unit, "Minimum", min, preLabel)
     };
     obj["description"] = { value: "Minimum" };
     const uId = generateUid();
@@ -321,11 +321,11 @@ Vehicle.display();//still "General"
     return uId;
   };
 
-  createMaxCalcEntity = (max, preLabel) => {
-    let { unit, value } = max;
+  createMaxCalcEntity = (value, preLabel) => {
+    var { unit, max } = value;
     var obj = {};
     obj["calculationResultCollection"] = {
-      CalculationResult: this.createCalcResult(unit, "Maximum", value, preLabel)
+      CalculationResult: this.createCalcResult(unit, "Maximum", max, preLabel)
     };
     obj["description"] = { value: "Maximum" };
     const uId = generateUid();
@@ -499,30 +499,28 @@ Vehicle.display();//still "General"
   /*    Segmentation Entitiy Realted Functions      */
   /*                                                */
 
-  createSegmentationEntity = (
-    refrencedSopUid,
-    segmentNumber,
-    seriesUid,
-    studyUid,
-    sopClassUid,
-    sopInstanceUid,
-    uniqueId
-  ) => {
+  _createSegmentationEntity = () => {
     var obj = {};
-    obj["referencedSopInstanceUid"] = { root: refrencedSopUid };
-    obj["segmentNumber"] = { value: segmentNumber };
-    obj["seriesInstanceUid"] = { root: seriesUid };
-    obj["studyInstanceUid"] = { root: studyUid };
+    obj["referencedSopInstanceUid"] = {
+      root: this.image.data.string("x00080018") || ""
+    };
+    obj["segmentNumber"] = { value: 1 };
+    obj["seriesInstanceUid"] = {
+      root: this.image.data.string("x0020000E") || ""
+    };
+    obj["studyInstanceUid"] = {
+      root: this.image.data.string("x0020000D") || ""
+    };
     obj["xsi:type"] = "DicomSegmentationEntity";
-    obj["sopClassUid"] = { root: sopClassUid };
-    obj["sopInstanceUid"] = { root: sopInstanceUid };
-    obj["uniqueIdentifier"] = { root: uniqueId };
+    obj["sopClassUid"] = { root: this.image.data.string("x00080016") || "" };
+    obj["sopInstanceUid"] = { root: this.image.data.string("x00080018") || "" };
+    obj["uniqueIdentifier"] = { root: generateUid() };
     return obj;
   };
 
-  creatSegmentationEntityCollection = segEntities => {
+  creatSegmentationEntityCollection = () => {
     var obj = {};
-    obj["SegmentationEntity"] = segEntities;
+    obj["SegmentationEntity"] = this._createSegmentationEntity();
     return obj;
   };
 
@@ -546,7 +544,10 @@ Vehicle.display();//still "General"
         ImageAnnotationStatement: []
       };
     }
-    if (hasSegmentations) obj["segmentationEntityCollection"] = {};
+    if (hasSegmentations)
+      obj[
+        "segmentationEntityCollection"
+      ] = this.creatSegmentationEntityCollection();
     return { ImageAnnotation: obj };
   };
 

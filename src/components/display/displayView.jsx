@@ -99,6 +99,9 @@ class DisplayView extends Component {
   componentDidMount() {
     this.getViewports();
     this.getData();
+    window.addEventListener("cornerstonetoolsmousedrag", () =>
+      alert("yakaldim")
+    );
   }
 
   /*testAimEditor = () => {
@@ -209,16 +212,15 @@ class DisplayView extends Component {
     );
   };
 
-  measurementChanged = event => {
+  measurementChanged = (event, action) => {
+    console.log("event", event, "action", action);
     const { toolType } = event.detail;
-
     const toolsOfInterest = [
       "Length",
-      "EllipticalRoi",
-      "RectangleRoi",
       "CircleRoi",
       "FreehandMouse",
-      "Bidirectional"
+      "Bidirectional",
+      "Probe"
     ];
     if (toolsOfInterest.includes(toolType)) {
       this.setState({ showAimEditor: true });
@@ -379,6 +381,8 @@ class DisplayView extends Component {
   };
 
   handleAnnotationSelected = event => {
+    alert("I have been triggered");
+    console.log("event is", event);
     const aimJson = this.props.aimList[
       this.props.series[this.props.activePort].seriesUID
     ][event.detail].json;
@@ -386,12 +390,11 @@ class DisplayView extends Component {
     this.setState({ showAimEditor: true, selectedAim: aimJson });
   };
 
+  closeAimEditor = () => {
+    this.setState({ showAimEditor: false, selectedAim: undefined });
+  };
+
   componentDidUpdate(prevProps) {
-    console.log(prevProps);
-    // if (prevState.series.length !== this.state.data.length) {
-    //   this.getViewports();
-    //   this.getData();
-    // }
     if (!this.state.isLoading && Object.entries(this.props.aimList).length) {
       this.parseAims(this.props.aimList);
       window.addEventListener(
@@ -431,7 +434,8 @@ class DisplayView extends Component {
                 <AimEditor
                   cornerstone={this.props.cornerstone}
                   csTools={this.cornerstoneTools}
-                  aim={this.state.selectedAim}
+                  aimId={this.state.selectedAim}
+                  onCancel={this.closeAimEditor}
                 />
               )}
               <MenuProvider
