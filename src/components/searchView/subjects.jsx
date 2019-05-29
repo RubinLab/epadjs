@@ -39,14 +39,25 @@ class Subjects extends Component {
   }
 
   async componentDidMount() {
+    this.getData();
+    this.setState({ columns: this.setColumns() });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.upload !== prevProps.upload) {
+      this.getData();
+      this.setState({ columns: this.setColumns() });
+    }
+  }
+
+  getData = async () => {
     const {
       data: {
         ResultSet: { Result: data }
       }
     } = await getSubjects(this.props.pid);
-    this.setState({ data });
-    this.setState({ columns: this.setColumns() });
-  }
+    await this.setState({ data });
+  };
 
   incColumns = ["subjectName", "numberOfStudies"];
   getColumns(data) {

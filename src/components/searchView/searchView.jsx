@@ -39,26 +39,23 @@ class SearchView extends Component {
       uploading: false,
       error: false,
       showUploadModal: false,
-      key: null,
-      pid: null
+      uploadComplete: 0
     };
   }
-
-  componentDidMount = () => {
-    this.setState({
-      key: this.props.match.params.pid,
-      pid: this.props.match.params.pid
-    });
-  };
 
   updateDownloadStatus = () => {
     this.setState(state => ({ downloading: !state.downloading }));
   };
 
-  updateUploadStatus = async () => {
-    await this.setState(state => {
+  updateUploadStatus = async count => {
+    this.setState(state => {
       return { uploading: !state.uploading };
     });
+    if (count) {
+      this.setState(state => ({
+        uploadComplete: state.uploadComplete + count
+      }));
+    }
   };
 
   updateError = error => {
@@ -285,7 +282,7 @@ class SearchView extends Component {
     if (selectedProjects.length > 0) {
       await this.setState({ downloading: true });
       for (let project of selectedProjects) {
-        fileName = `Project - ${project.projectID}`;
+        fileName = `Project-${project.projectID}`;
         promiseArr.push(downloadProjects(project));
         fileNameArr.push(fileName);
       }
@@ -294,7 +291,7 @@ class SearchView extends Component {
     } else if (selectedPatients.length > 0) {
       await this.setState({ downloading: true });
       for (let patient of selectedPatients) {
-        fileName = `Patients - ${patient.subjectID}`;
+        fileName = `Patients-${patient.subjectID}`;
         promiseArr.push(downloadSubjects(patient));
         fileNameArr.push(fileName);
       }
@@ -303,7 +300,7 @@ class SearchView extends Component {
     } else if (selectedStudies.length > 0) {
       await this.setState({ downloading: true });
       for (let study of selectedStudies) {
-        fileName = `Studies - ${study.studyUID}`;
+        fileName = `Studies-${study.studyUID}`;
         promiseArr.push(downloadStudies(study));
         fileNameArr.push(fileName);
       }
@@ -312,7 +309,7 @@ class SearchView extends Component {
     } else if (selectedSeries.length > 0) {
       await this.setState({ downloading: true });
       for (let serie of selectedSeries) {
-        fileName = `Series - ${serie.seriesUID}`;
+        fileName = `Series-${serie.seriesUID}`;
         promiseArr.push(downloadSeries(serie));
         fileNameArr.push(fileName);
       }
@@ -413,11 +410,17 @@ class SearchView extends Component {
           />
         )}
         <Subjects
+          //yeni props ekle her download uploaddtan sonra degistir
+          //subject the didpropschange state contoller subjectsi rerender et
           key={this.props.match.params.pid}
           pid={this.props.match.params.pid}
+          upload={this.state.uploadComplete}
         />
         {this.state.showAnnotationModal && (
-          <DownloadSelection onCancel={this.handleDownloadCancel} />
+          <DownloadSelection
+            onCancel={this.handleDownloadCancel}
+            updateStatus={this.updateDownloadStatus}
+          />
         )}
 
         {this.state.showUploadFileModal && (
