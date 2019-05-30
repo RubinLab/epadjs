@@ -62,7 +62,6 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
 }
 
 export function downloadAnnotations(optionObj, aimIDlist, selection) {
-  console.log(arguments);
   if (isLite)
     return http.post(
       apiUrl +

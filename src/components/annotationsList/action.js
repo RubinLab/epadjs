@@ -305,7 +305,6 @@ export const toggleAllLabels = (serieID, checked) => {
 };
 
 export const toggleSingleLabel = (serieID, aimID) => {
-  console.log("fired action");
   return {
     type: TOGGLE_LABEL,
     payload: { serieID, aimID }
@@ -337,7 +336,10 @@ const getAimListFields = (aims, ann) => {
 
     let name = aim.imageAnnotations.ImageAnnotation.name.value;
     let ind = name.indexOf("~");
-    name = name.substring(0, ind);
+    if (ind >= 0) {
+      name = name.substring(0, ind);
+    }
+
     let displayStatus = ann ? ann === aim.uniqueIdentifier.root : !ann;
     result[aim.uniqueIdentifier.root] = {
       name,

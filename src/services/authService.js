@@ -12,7 +12,6 @@ export async function login(username, password, keyCloakToken) {
   let basicAuth;
   let header;
   if (isLite) {
-    console.log("keyclok token", keyCloakToken);
     // await http.post(apiUrlV1, {}, { headers: header });
     basicAuth = "Bearer " + keyCloakToken;
     sessionStorage.setItem("token", keyCloakToken);
@@ -45,7 +44,6 @@ export function logout() {
 }
 
 export function getCurrentUser() {
-  console.log("in get user", sessionStorage.getItem("username"));
   return sessionStorage.getItem("username");
 }
 

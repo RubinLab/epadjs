@@ -28,3 +28,12 @@
 .ViewportOverlay {
   color: #8b8a8a !important;
 }
+
+.displayView-main {
+  display: flex;
+  /* flex-direction: column; */
+}
+
+.splitted-view {
+  display: flex;
+}

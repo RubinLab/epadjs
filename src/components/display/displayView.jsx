@@ -70,6 +70,9 @@ const tools = [
   { name: "StackScrollMouseWheel" },
   { name: "StackScrollMultiTouch" }
 ];
+import { FiZoomIn } from "react-icons/fi";
+import { FaTimes } from "react-icons/fa";
+import AnnotationList from "../annotationsList/annotationDock/annotationList";
 
 const mapStateToProps = state => {
   return {
@@ -93,7 +96,11 @@ class DisplayView extends Component {
       data: [],
       isLoading: true,
       selectedAim: undefined
+      // height: "100%",
+      refs: props.refs,
+      showAnnDetails: true
     };
+    //this.createRefs();
   }
 
   componentDidMount() {
@@ -132,7 +139,7 @@ class DisplayView extends Component {
       // if (this.props.aimList) this.parseAims(this.props.aimList);
     });
   }
-
+  
   async getImages(seri, i) {
     let stack = {};
     let tempArray = [];
@@ -445,10 +452,15 @@ class DisplayView extends Component {
     );
   }
 
+  handleHideAnnotations = () => {
+    this.setState({ showAnnDetails: false });
+  };
+
   render() {
     if (!Object.entries(this.props.series).length)
       this.props.history.push("/search");
     return (
+      // <div className="displayView-main">
       <React.Fragment>
         <Toolbar
           cornerstone={this.props.cornerstone}
@@ -522,6 +534,7 @@ class DisplayView extends Component {
           ))}
         <ContextMenu />
       </React.Fragment>
+      // </div>
     );
   }
 }

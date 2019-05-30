@@ -36,12 +36,13 @@
   flex: 1;
   transition: margin-left 0.4s;
   width: calc(100% - 200px);
-
   padding: 10px;
+  /* display: flex; */
 }
 
 .mainView-closed {
   width: 100%;
+  /* display: flex; */
 }
 
 @media screen and (max-height: 450px) {

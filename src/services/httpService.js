@@ -16,16 +16,21 @@ axios.interceptors.request.use(
 );
 
 axios.interceptors.response.use(null, error => {
-  console.log("ERROR::", error.response.data);
-  if (error.response.status === 401) {
+  console.log("ERROR::");
+  console.log(error);
+  // console.log("ERROR::", error.response.data);
+  if (error.response && error.response.status === 401) {
     //possibly session expired so logout the user and redirect to login
     auth.logout();
   }
 
-  const expectedError =
-    error.response &&
-    error.response.status >= 400 &&
-    error.response.status < 500;
+  let expectedError;
+  if (error.response) {
+    expectedError =
+      error.response &&
+      error.response.status >= 400 &&
+      error.response.status < 500;
+  }
 
   if (!expectedError) {
     console.log("Logging the error", error);

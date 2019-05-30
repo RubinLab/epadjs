@@ -27,7 +27,7 @@ import {
   showAnnotationDock,
   getWholeData
 } from "../annotationsList/action";
-import Spinner from "../common/spinner";
+import Spinner from "../common/circleSpinner";
 import "./toolbar.css";
 import "../../font-icons/styles.css";
 

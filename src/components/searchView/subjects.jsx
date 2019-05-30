@@ -30,7 +30,6 @@ class Subjects extends Component {
     super(props);
     this.widthUnit = 20;
     this.state = {
-      pid: this.props.pid,
       columns: [],
       selection: [],
       selectAll: false,
@@ -41,14 +40,27 @@ class Subjects extends Component {
 
   async componentDidMount() {
     const pid = isLite ? "lite" : this.props.pid;
+    const data = await this.getData();
+    this.setState({ data, size: data.length });
+    this.setState({ columns: this.setColumns() });
+  }
+
+  async componentDidUpdate(prevProps) {
+    if (this.props.update !== prevProps.update) {
+      let fetchedData = await this.getData();
+      this.setState({ data: fetchedData });
+    }
+  }
+
+  getData = async () => {
     const {
       data: {
         ResultSet: { Result: data }
       }
-    } = await getSubjects(pid);
-    this.setState({ data });
-    this.setState({ columns: this.setColumns() });
-  }
+    } = await getSubjects(this.props.pid);
+    // await this.setState({ data });
+    return data;
+  };
 
   incColumns = ["subjectName", "numberOfStudies"];
   getColumns(data) {
@@ -239,7 +251,6 @@ class Subjects extends Component {
   }
 
   getData(projects) {
-    console.log("Projects :" + this.projects);
     const data = projects.map(item => {
       // using chancejs to generate guid
       // shortid is probably better but seems to have performance issues
@@ -383,7 +394,7 @@ class Subjects extends Component {
             NoDataComponent={() => null}
             data={this.state.data}
             columns={this.state.columns}
-            defaultPageSize={this.state.data.length}
+            // defaultPageSize={this.state.size}
             ref={r => (this.selectTable = r)}
             className="-striped -highlight"
             freezWhenExpanded={false}
@@ -396,6 +407,7 @@ class Subjects extends Component {
                   <Studies
                     projectId={this.props.pid}
                     subjectId={row.original.displaySubjectID}
+                    update={this.props.update}
                   />
                 </div>
               );

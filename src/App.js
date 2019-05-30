@@ -18,6 +18,8 @@ import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
 import AnnotationList from "./components/annotationsList";
 import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
+import AnnotationsList from "./components/annotationsList/annotationDock/annotationList";
+
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import ProjectModal from "./components/annotationsList/selectSerieModal";
@@ -130,7 +132,7 @@ class App extends Component {
         {this.state.authenticated && !isLite && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
             <Sidebar>
-              <Switch>
+              <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
                 <ProtectedRoute path="/display" component={DisplayView} />
                 <ProtectedRoute path="/search/:pid?" component={SearchView} />
@@ -147,6 +149,7 @@ class App extends Component {
                 />
                 <Redirect to="/not-found" />
               </Switch>
+              {/* {this.props.activePort === 0 ? <AnnotationsList /> : null} */}
             </Sidebar>
           </div>
         )}
@@ -168,29 +171,21 @@ class App extends Component {
 }
 
 const mapStateToProps = state => {
-  console.log("state in app.js", state.annotationsListReducer);
   const {
     listOpen,
     dockOpen,
     showGridFullAlert,
     showProjectModal,
-    loading
+    loading,
+    activePort
   } = state.annotationsListReducer;
-  return { listOpen, dockOpen, showGridFullAlert, showProjectModal, loading };
+  return {
+    listOpen,
+    dockOpen,
+    showGridFullAlert,
+    showProjectModal,
+    loading,
+    activePort
+  };
 };
 export default withRouter(connect(mapStateToProps)(App));
-
-/*if (isLite) {
-      const keycloak = Keycloak("/keycloak.json");
-      keycloak.init({ onLoad: "login-required" }).then(authenticated => {
-        this.setState({ keycloak: keycloak, authenticated: authenticated });
-        keycloak.loadUserInfo().then(userInfo => {
-          let user = { id: userInfo.email, displayname: userInfo.given_name };
-          this.setState({
-            name: userInfo.name,
-            user,
-            id: userInfo.sub
-          });
-          auth.login(user, null, keycloak.token);
-        });
-      }); */

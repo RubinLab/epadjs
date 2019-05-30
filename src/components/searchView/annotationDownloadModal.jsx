@@ -16,10 +16,12 @@ class AnnnotationDownloadModal extends React.Component {
   onDownload = () => {
     const optionObj = this.state;
     const aimList = Object.keys(this.props.selectedAnnotations);
+    this.props.updateStatus();
     downloadAnnotations(optionObj, aimList)
       .then(result => {
         let blob = new Blob([result.data], { type: "application/zip" });
         this.triggerBrowserDownload(blob, "Annotations");
+        this.props.updateStatus();
       })
       .catch(err => {
         if (err.response.status === 503) {
@@ -86,9 +88,7 @@ class AnnnotationDownloadModal extends React.Component {
   };
 }
 
-AnnnotationDownloadModal.propTypes = {
-  onOK: PropTypes.func
-};
+AnnnotationDownloadModal.propTypes = {};
 
 const mapStateToProps = state => {
   return {

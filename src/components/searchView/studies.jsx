@@ -88,6 +88,17 @@ class Studies extends Component {
     }
   }
 
+  async componentDidUpdate(prevProps) {
+    if (this.props.update !== prevProps.update) {
+      const {
+        data: {
+          ResultSet: { Result: data }
+        }
+      } = await getStudies(this.props.projectId, this.props.subjectId);
+      this.setState({ data });
+    }
+  }
+
   selectRow = selected => {
     // const { studyUID, numberOfSeries, patientID, projectID } = selected;
     // const studyObj = { studyUID, numberOfSeries, patientID, projectID };

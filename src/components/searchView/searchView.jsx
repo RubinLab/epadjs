@@ -6,7 +6,11 @@ import ProjectModal from "../annotationsList/selectSerieModal";
 import { downloadProjects } from "../../services/projectServices";
 import { downloadSubjects } from "../../services/subjectServices";
 import { downloadStudies } from "../../services/studyServices";
-import { downloadSeries, getSeries } from "../../services/seriesServices";
+import {
+  downloadSeries,
+  getSeries,
+  deleteSeries
+} from "../../services/seriesServices";
 import {
   startLoading,
   loadCompleted,
@@ -24,6 +28,10 @@ import { MAX_PORT } from "../../constants";
 import "./searchView.css";
 import DownloadSelection from "./annotationDownloadModal";
 import UploadModal from "./uploadModal";
+import { toast } from "react-toastify";
+import { isLite } from "../../config";
+import { getSubjects } from "../../services/subjectServices";
+import DeleteAlert from "./deleteConfirmationModal";
 
 class SearchView extends Component {
   constructor(props) {
@@ -33,14 +41,59 @@ class SearchView extends Component {
       isSerieSelectionOpen: false,
       showAnnotationModal: false,
       showUploadFileModal: false,
-      loading: false,
+      downloading: false,
+      uploading: false,
       error: false,
-      showUploadModal: false
+      showUploadModal: false,
+      numOfsubjects: 0,
+      showDeleteAlert: false
     };
   }
 
-  updateLoadingStatus = () => {
-    this.setState(state => ({ loading: !state.loading }));
+  updateDownloadStatus = () => {
+    this.setState(state => ({ downloading: !state.downloading }));
+  };
+
+  componentDidMount = async () => {
+    const subjects = await this.getData();
+    this.setState({ numOfsubjects: subjects.length });
+  };
+
+  getData = async () => {
+    const {
+      data: {
+        ResultSet: { Result: data }
+      }
+    } = await getSubjects(this.props.match.params.pid);
+    return data;
+  };
+
+  updateUploadStatus = async count => {
+    this.setState(state => {
+      return { uploading: !state.uploading };
+    });
+    this.updateSubjectCount();
+  };
+
+  updateSubjectCount = async () => {
+    const subjects = await this.getData();
+    await this.setState({ numOfsubjects: subjects.length });
+  };
+
+  deleteStudy = async () => {
+    const studiesArr = Object.values(this.props.selectedStudies);
+    this.handleClickDeleteIcon();
+    for (let study of studiesArr) {
+      const series = await this.getSeriesData(study);
+      if (series.length > 0) {
+        this.setState({ deleting: true });
+        deleteSeries(series[0]).then(() => {
+          this.updateSubjectCount();
+          this.setState({ deleting: false });
+          this.props.dispatch(clearSelection());
+        });
+      }
+    }
   };
 
   updateError = error => {
@@ -48,7 +101,6 @@ class SearchView extends Component {
   };
 
   checkIfSerieOpen = selectedSerie => {
-    console.log(selectedSerie);
     let isOpen = false;
     let index;
     this.props.openSeries.forEach((serie, i) => {
@@ -263,29 +315,43 @@ class SearchView extends Component {
     const selectedSeries = Object.values(this.props.selectedSeries);
     const selectedAnnotations = Object.values(this.props.selectedAnnotations);
     let fileName;
+    let promiseArr = [];
+    let fileNameArr = [];
     if (selectedProjects.length > 0) {
-      selectedProjects.forEach(project => {
-        fileName = `Project - ${project.projectID}`;
-        this.downloadHelper(downloadProjects, project, fileName);
-      });
+      await this.setState({ downloading: true });
+      for (let project of selectedProjects) {
+        fileName = `Project-${project.projectID}`;
+        promiseArr.push(downloadProjects(project));
+        fileNameArr.push(fileName);
+      }
+      this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
     } else if (selectedPatients.length > 0) {
-      selectedPatients.forEach(patient => {
-        fileName = `Patients - ${patient.subjectID}`;
-        this.downloadHelper(downloadSubjects, patient, fileName);
-      });
+      await this.setState({ downloading: true });
+      for (let patient of selectedPatients) {
+        fileName = `Patients-${patient.subjectID}`;
+        promiseArr.push(downloadSubjects(patient));
+        fileNameArr.push(fileName);
+      }
+      this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
     } else if (selectedStudies.length > 0) {
-      selectedStudies.forEach(study => {
-        fileName = `Studies - ${study.studyUID}`;
-        this.downloadHelper(downloadStudies, study, fileName);
-      });
+      await this.setState({ downloading: true });
+      for (let study of selectedStudies) {
+        fileName = `Studies-${study.studyUID}`;
+        promiseArr.push(downloadStudies(study));
+        fileNameArr.push(fileName);
+      }
+      this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
     } else if (selectedSeries.length > 0) {
-      selectedSeries.forEach(serie => {
-        fileName = `Series - ${serie.seriesUID}`;
-        this.downloadHelper(downloadSeries, serie, fileName);
-      });
+      await this.setState({ downloading: true });
+      for (let serie of selectedSeries) {
+        fileName = `Series-${serie.seriesUID}`;
+        promiseArr.push(downloadSeries(serie));
+        fileNameArr.push(fileName);
+      }
+      this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
@@ -306,11 +372,26 @@ class SearchView extends Component {
     }
   };
 
-  downloadHelper = (downLoadfunction, arg, fileName) => {
-    downLoadfunction(arg).then(result => {
-      let blob = new Blob([result.data], { type: "application/zip" });
-      this.triggerBrowserDownload(blob, fileName);
-    });
+  downloadHelper = (promiseArr, nameArr) => {
+    Promise.all(promiseArr)
+      .then(result => {
+        for (let i = 0; i < result.length; i++) {
+          let blob = new Blob([result[i].data], { type: "application/zip" });
+          this.triggerBrowserDownload(blob, nameArr[i]);
+        }
+        this.setState({ error: null, downloading: false });
+      })
+      .catch(err => {
+        if (err.response.status === 503) {
+          isLite
+            ? toast.error("There is no aim file to download!", {
+                autoClose: false
+              })
+            : toast.error("No files to download!", {
+                autoClose: false
+              });
+        }
+      });
   };
 
   handleDownloadCancel = () => {
@@ -344,13 +425,29 @@ class SearchView extends Component {
     }));
   };
 
+  handleClickDeleteIcon = () => {
+    this.setState(state => ({ showDeleteAlert: !state.showDeleteAlert }));
+  };
+
   render() {
+    let status;
+    if (this.state.uploading) {
+      status = "Uploading…";
+    } else if (this.state.downloading) {
+      status = "Downloading…";
+    } else if (this.state.deleting) {
+      status = "Deleting…";
+    }
+    const showDelete = Object.values(this.props.selectedStudies).length > 0;
     return (
       <>
         <Toolbar
           onDownload={this.downloadSelection}
           onUpload={this.handleFileUpload}
           onView={this.viewSelection}
+          onDelete={this.handleClickDeleteIcon}
+          status={status}
+          showDelete={showDelete}
         />
         {this.state.isSerieSelectionOpen && !this.props.loading && (
           <ProjectModal
@@ -361,13 +458,26 @@ class SearchView extends Component {
         <Subjects
           key={this.props.match.params.pid}
           pid={this.props.match.params.pid}
+          update={this.state.numOfsubjects}
         />
         {this.state.showAnnotationModal && (
-          <DownloadSelection onCancel={this.handleDownloadCancel} />
+          <DownloadSelection
+            onCancel={this.handleDownloadCancel}
+            updateStatus={this.updateDownloadStatus}
+          />
         )}
 
         {this.state.showUploadFileModal && (
-          <UploadModal onCancel={this.handleFileUpload} />
+          <UploadModal
+            onCancel={this.handleFileUpload}
+            onSubmit={this.updateUploadStatus}
+          />
+        )}
+        {this.state.showDeleteAlert && (
+          <DeleteAlert
+            onCancel={this.handleClickDeleteIcon}
+            onDelete={this.deleteStudy}
+          />
         )}
       </>
     );
