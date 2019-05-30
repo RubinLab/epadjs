@@ -12,3 +12,13 @@
   clear: both;
   display: table;
 }
+
+.annList-mainview {
+  display: flex;
+  flex-direction: column;
+}
+
+.annList-mainview__hide {
+  color: black;
+  width: 5rem;
+}

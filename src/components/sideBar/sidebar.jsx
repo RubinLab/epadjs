@@ -1,10 +1,13 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { Tabs, Nav, Content } from "react-tiny-tabs";
 import { getProjects } from "../../services/projectServices";
 import { getWorklists } from "../../services/worklistServices";
 import { getPacs } from "../../services/pacsServices";
 import { FiZoomIn } from "react-icons/fi";
+import AnnotationsList from "./../annotationsList/annotationDock/annotationList";
+
 import "./w2.css";
 
 class Sidebar extends Component {
@@ -195,12 +198,18 @@ class Sidebar extends Component {
           >
             &#9776;
           </button>
-
           {this.props.children}
+          {/* {this.props.activePort !== null ? <AnnotationsList /> : null} */}
         </div>
       </React.Fragment>
     );
   }
 }
 
-export default withRouter(Sidebar);
+const mapStateToProps = state => {
+  const { activePort } = state.annotationsListReducer;
+  return {
+    activePort
+  };
+};
+export default withRouter(connect(mapStateToProps)(Sidebar));

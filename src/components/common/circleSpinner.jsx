@@ -9,9 +9,9 @@ const override = css`
   border-color: red;
 `;
 
-const spinner = ({ loading, unit, size }) => {
+const circleSpinner = ({ loading, unit, size }) => {
   return (
-    <div className="sweet-loading">
+    <div>
       <ClipLoader
         css={override}
         sizeUnit={unit}
@@ -23,4 +23,4 @@ const spinner = ({ loading, unit, size }) => {
   );
 };
 
-export default spinner;
+export default circleSpinner;

@@ -138,3 +138,12 @@ input[type="range"]:focus::-ms-fill-lower {
 input[type="range"]:focus::-ms-fill-upper {
   background: #367ebd;
 }
+
+.displayView-main {
+  display: flex;
+  /* flex-direction: column; */
+}
+
+.splitted-view {
+  display: flex;
+}
