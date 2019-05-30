@@ -168,3 +168,9 @@
 .css-1yxrzmr-style {
   background-color: blue;
 }
+
+.hide-delete {
+  cursor: not-allowed;
+  color: #5c5c5c;
+  margin-right: 1rem;
+}

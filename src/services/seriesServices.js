@@ -52,7 +52,6 @@ export function getImageIds(series) {
 }
 
 export function downloadSeries(series) {
-  console.log(series);
   const url =
     apiUrl +
     "/projects/" +
@@ -65,4 +64,19 @@ export function downloadSeries(series) {
     series.seriesUID +
     "?&format=stream&includeAims=true";
   return http.get(url, { responseType: "blob" });
+}
+
+export function deleteSeries(series) {
+  console.log(series);
+  if (isLite) {
+    const url =
+      apiUrl +
+      "/projects/lite/subjects/" +
+      series.patientID +
+      "/studies/" +
+      series.studyUID +
+      "/series/" +
+      series.seriesUID;
+    return http.delete(url);
+  }
 }

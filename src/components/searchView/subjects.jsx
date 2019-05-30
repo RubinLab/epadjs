@@ -29,7 +29,6 @@ class Subjects extends Component {
     super(props);
     this.widthUnit = 20;
     this.state = {
-      pid: this.props.pid,
       columns: [],
       selection: [],
       selectAll: false,
@@ -39,14 +38,15 @@ class Subjects extends Component {
   }
 
   async componentDidMount() {
-    this.getData();
+    const data = await this.getData();
+    this.setState({ data, size: data.length });
     this.setState({ columns: this.setColumns() });
   }
 
-  componentDidUpdate(prevProps) {
-    if (this.props.upload !== prevProps.upload) {
-      this.getData();
-      this.setState({ columns: this.setColumns() });
+  async componentDidUpdate(prevProps) {
+    if (this.props.update !== prevProps.update) {
+      let fetchedData = await this.getData();
+      this.setState({ data: fetchedData });
     }
   }
 
@@ -56,7 +56,8 @@ class Subjects extends Component {
         ResultSet: { Result: data }
       }
     } = await getSubjects(this.props.pid);
-    await this.setState({ data });
+    // await this.setState({ data });
+    return data;
   };
 
   incColumns = ["subjectName", "numberOfStudies"];
@@ -392,7 +393,7 @@ class Subjects extends Component {
             NoDataComponent={() => null}
             data={this.state.data}
             columns={this.state.columns}
-            defaultPageSize={this.state.data.length}
+            // defaultPageSize={this.state.size}
             ref={r => (this.selectTable = r)}
             className="-striped -highlight"
             freezWhenExpanded={false}
@@ -405,6 +406,7 @@ class Subjects extends Component {
                   <Studies
                     projectId={this.props.pid}
                     subjectId={row.original.displaySubjectID}
+                    update={this.props.update}
                   />
                 </div>
               );

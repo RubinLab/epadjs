@@ -6,7 +6,11 @@ import ProjectModal from "../annotationsList/selectSerieModal";
 import { downloadProjects } from "../../services/projectServices";
 import { downloadSubjects } from "../../services/subjectServices";
 import { downloadStudies } from "../../services/studyServices";
-import { downloadSeries, getSeries } from "../../services/seriesServices";
+import {
+  downloadSeries,
+  getSeries,
+  deleteSeries
+} from "../../services/seriesServices";
 import {
   startLoading,
   loadCompleted,
@@ -26,6 +30,8 @@ import DownloadSelection from "./annotationDownloadModal";
 import UploadModal from "./uploadModal";
 import { toast } from "react-toastify";
 import { isLite } from "../../config";
+import { getSubjects } from "../../services/subjectServices";
+import DeleteAlert from "./deleteConfirmationModal";
 
 class SearchView extends Component {
   constructor(props) {
@@ -39,7 +45,8 @@ class SearchView extends Component {
       uploading: false,
       error: false,
       showUploadModal: false,
-      uploadComplete: 0
+      numOfsubjects: 0,
+      showDeleteAlert: false
     };
   }
 
@@ -47,14 +54,45 @@ class SearchView extends Component {
     this.setState(state => ({ downloading: !state.downloading }));
   };
 
+  componentDidMount = async () => {
+    const subjects = await this.getData();
+    this.setState({ numOfsubjects: subjects.length });
+  };
+
+  getData = async () => {
+    const {
+      data: {
+        ResultSet: { Result: data }
+      }
+    } = await getSubjects(this.props.match.params.pid);
+    return data;
+  };
+
   updateUploadStatus = async count => {
     this.setState(state => {
       return { uploading: !state.uploading };
     });
-    if (count) {
-      this.setState(state => ({
-        uploadComplete: state.uploadComplete + count
-      }));
+    this.updateSubjectCount();
+  };
+
+  updateSubjectCount = async () => {
+    const subjects = await this.getData();
+    await this.setState({ numOfsubjects: subjects.length });
+  };
+
+  deleteStudy = async () => {
+    const studiesArr = Object.values(this.props.selectedStudies);
+    this.handleClickDeleteIcon();
+    for (let study of studiesArr) {
+      const series = await this.getSeriesData(study);
+      if (series.length > 0) {
+        this.setState({ deleting: true });
+        deleteSeries(series[0]).then(() => {
+          this.updateSubjectCount();
+          this.setState({ deleting: false });
+          this.props.dispatch(clearSelection());
+        });
+      }
     }
   };
 
@@ -387,21 +425,30 @@ class SearchView extends Component {
     }));
   };
 
+  handleClickDeleteIcon = () => {
+    this.setState(state => ({ showDeleteAlert: !state.showDeleteAlert }));
+  };
+
   render() {
-    console.log(this.props);
     let status;
     if (this.state.uploading) {
-      status = "Uploading";
+      status = "Uploading…";
     } else if (this.state.downloading) {
-      status = "Downloading";
+      status = "Downloading…";
+    } else if (this.state.deleting) {
+      status = "Deleting…";
     }
+    const showDelete = Object.values(this.props.selectedStudies).length > 0;
+    console.log(showDelete);
     return (
       <>
         <Toolbar
           onDownload={this.downloadSelection}
           onUpload={this.handleFileUpload}
           onView={this.viewSelection}
+          onDelete={this.handleClickDeleteIcon}
           status={status}
+          showDelete={showDelete}
         />
         {this.state.isSerieSelectionOpen && !this.props.loading && (
           <ProjectModal
@@ -410,11 +457,9 @@ class SearchView extends Component {
           />
         )}
         <Subjects
-          //yeni props ekle her download uploaddtan sonra degistir
-          //subject the didpropschange state contoller subjectsi rerender et
           key={this.props.match.params.pid}
           pid={this.props.match.params.pid}
-          upload={this.state.uploadComplete}
+          update={this.state.numOfsubjects}
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection
@@ -427,6 +472,12 @@ class SearchView extends Component {
           <UploadModal
             onCancel={this.handleFileUpload}
             onSubmit={this.updateUploadStatus}
+          />
+        )}
+        {this.state.showDeleteAlert && (
+          <DeleteAlert
+            onCancel={this.handleClickDeleteIcon}
+            onDelete={this.deleteStudy}
           />
         )}
       </>
