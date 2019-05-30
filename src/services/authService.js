@@ -17,6 +17,7 @@ export async function login(username, password, keyCloakToken) {
     basicAuth = "Bearer " + keyCloakToken;
     sessionStorage.setItem("token", keyCloakToken);
     sessionStorage.setItem("username", username.user);
+    sessionStorage.setItem("displayName", username.user); //TODO: change with fullname
     // http.post(apiUrlV1, {}, { headers: header });
     /*********************************** REMOVE IN PROD  **************************/
     sessionStorage.setItem("header", basicAuth);
@@ -32,6 +33,7 @@ export async function login(username, password, keyCloakToken) {
     );
     sessionStorage.setItem("token", token);
     sessionStorage.setItem("username", username);
+    sessionStorage.setItem("displayName", username);
     /*********************************** REMOVE IN PROD  **************************/
     sessionStorage.setItem("header", basicAuth);
   }

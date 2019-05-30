@@ -4,7 +4,7 @@ import { getImageIds, getWadoImagePath } from "../../services/seriesServices";
 //import Viewport from "./viewport.jsx";
 import ViewportSeg from "./viewportSeg.jsx";
 import { connect } from "react-redux";
-import { wadoUrl } from "../../config.json";
+import { wadoUrl, isLite } from "../../config.json";
 import { withRouter } from "react-router-dom";
 // import CornerstoneViewport from "react-cornerstone-viewport";
 import Aim from "../aimEditor/Aim";
@@ -99,8 +99,9 @@ class DisplayView extends Component {
   componentDidMount() {
     this.getViewports();
     this.getData();
-    window.addEventListener("cornerstonetoolsmousedrag", () =>
-      alert("yakaldim")
+    window.addEventListener(
+      "annotationSelected",
+      this.handleAnnotationSelected
     );
   }
 
@@ -141,19 +142,34 @@ class DisplayView extends Component {
       }
     } = await getImageIds(seri); //get the Wado image ids for this series
     urls.map(url => {
+      const baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
-          tempArray.push(
-            wadoUrl +
-              url.lossyImage +
-              "&contentType=application%2Fdicom?frame=" +
-              i
-          );
+          let multiFrameUrl = !isLite
+            ? baseUrl + "&contentType=application%2Fdicom?frame=" + i
+            : baseUrl;
+          tempArray.push(multiFrameUrl);
         }
-      } else
-        tempArray.push(
-          wadoUrl + url.lossyImage + "&contentType=application%2Fdicom"
-        );
+      } else {
+        let singleFrameUrl = !isLite
+          ? baseUrl + "&contentType=application%2Fdicom"
+          : baseUrl;
+        tempArray.push(singleFrameUrl);
+      }
+
+      //  if (url.multiFrameImage === true) {
+      //     for (var i = 0; i < url.numberOfFrames; i++) {
+      //       tempArray.push(
+      //         wadoUrl +
+      //           url.lossyImage +
+      //           "&contentType=application%2Fdicom?frame=" +
+      //           i
+      //       );
+      //     }
+      //   } else
+      //     tempArray.push(
+      //       wadoUrl + url.lossyImage + "&contentType=application%2Fdicom"
+      //     );
     });
     stack.currentImageIdIndex = 0;
     stack.imageIds = [...tempArray];
@@ -213,7 +229,6 @@ class DisplayView extends Component {
   };
 
   measurementChanged = (event, action) => {
-    console.log("event", event, "action", action);
     const { toolType } = event.detail;
     const toolsOfInterest = [
       "Length",
@@ -235,6 +250,18 @@ class DisplayView extends Component {
   };
 
   parseAims = aimList => {
+    // first clear the tool state
+    // if (this.state.selectedAim) {
+    //   const element = this.cornerstone.getEnabledElements()[
+    //     this.props.activePort
+    //   ]["element"];
+    //   this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.clear(
+    //     element
+    //   );
+    // }
+    console.log(this.props.cornerstoneTools);
+
+    // now parse the aim and render the new marups
     Object.entries(aimList).forEach(([key, value]) => {
       Object.entries(value).forEach(([key, value]) => {
         // get markups for the aim
@@ -249,6 +276,7 @@ class DisplayView extends Component {
   };
 
   renderMarkups = (key, markups, color) => {
+    console.log("Rendering Markups", key, markups, color);
     if (markups.constructor === Array) {
       markups.forEach(markup => {
         this.renderMarkup(key, markup, color);
@@ -378,16 +406,22 @@ class DisplayView extends Component {
     this.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+    console.log("Current state is", currentState);
   };
 
   handleAnnotationSelected = event => {
-    alert("I have been triggered");
     console.log("event is", event);
-    const aimJson = this.props.aimList[
-      this.props.series[this.props.activePort].seriesUID
-    ][event.detail].json;
-    console.log("event", JSON.stringify(aimJson));
-    this.setState({ showAimEditor: true, selectedAim: aimJson });
+    if (
+      this.props.aimList[this.props.series[this.props.activePort].seriesUID][
+        event.detail
+      ]
+    ) {
+      const aimJson = this.props.aimList[
+        this.props.series[this.props.activePort].seriesUID
+      ][event.detail].json;
+      console.log("event", JSON.stringify(aimJson));
+      this.setState({ showAimEditor: true, selectedAim: aimJson });
+    }
   };
 
   closeAimEditor = () => {
@@ -404,6 +438,13 @@ class DisplayView extends Component {
     }
   }
 
+  componentWillUnmount() {
+    window.removeEventListener(
+      "annotationSelected",
+      this.handleAnnotationSelected
+    );
+  }
+
   render() {
     if (!Object.entries(this.props.series).length)
       this.props.history.push("/search");
@@ -413,6 +454,14 @@ class DisplayView extends Component {
           cornerstone={this.props.cornerstone}
           cornerstoneTools={this.props.cornerstoneTools}
         />
+        {this.state.showAimEditor && (
+          <AimEditor
+            cornerstone={this.props.cornerstone}
+            csTools={this.cornerstoneTools}
+            aimId={this.state.selectedAim}
+            onCancel={this.closeAimEditor}
+          />
+        )}
         {!this.state.isLoading &&
           Object.entries(this.props.series).length &&
           this.state.data.map((data, i) => (
@@ -430,14 +479,6 @@ class DisplayView extends Component {
               }}
               onDoubleClick={() => this.hideShow(i)}
             >
-              {this.state.showAimEditor && (
-                <AimEditor
-                  cornerstone={this.props.cornerstone}
-                  csTools={this.cornerstoneTools}
-                  aimId={this.state.selectedAim}
-                  onCancel={this.closeAimEditor}
-                />
-              )}
               <MenuProvider
                 id="menu_id"
                 style={{

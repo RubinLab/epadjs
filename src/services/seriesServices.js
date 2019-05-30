@@ -52,16 +52,27 @@ export function getImageIds(series) {
 
 //  seems like this doesn't belong to here but olny services know details about paths&server side
 export function getWadoImagePath(series, imageId) {
-  return (
-    wadoUrl +
-    "?requestType=WADO&studyUID=" +
-    series.studyUID +
-    "&seriesUID=" +
-    series.seriesUID +
-    "&objectUID=" +
-    imageId +
-    "&contentType=application%2Fdicom"
-  );
+  if (isLite) {
+    return (
+      wadoUrl +
+      "/studies/" +
+      series.studyUID +
+      "/series/" +
+      series.seriesUID +
+      "/instances/" +
+      imageId
+    );
+  } else
+    return (
+      wadoUrl +
+      "?requestType=WADO&studyUID=" +
+      series.studyUID +
+      "&seriesUID=" +
+      series.seriesUID +
+      "&objectUID=" +
+      imageId +
+      "&contentType=application%2Fdicom"
+    );
 }
 
 export function downloadSeries(series) {

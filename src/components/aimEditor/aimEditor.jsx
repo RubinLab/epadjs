@@ -1,12 +1,16 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import Draggable from "react-draggable";
+import { isLite } from "../../config.json";
+import { toast } from "react-toastify";
 import { getTemplates } from "../../services/templateServices";
+import { uploadAim } from "../../services/annotationServices";
 import * as questionaire from "../../utils/AimEditorReactV1/parseClass.js";
 import Aim from "./Aim";
 import * as dcmjs from "dcmjs";
 
 import "./aimEditor.css";
+import { throws } from "assert";
 
 const enumAimType = {
   imageAnnotation: 1,
@@ -20,9 +24,7 @@ class AimEditor extends Component {
     this.cornerstone = this.props.cornerstone;
     this.csTools = this.props.csTools;
     this.image = this.getImage();
-    this.person = this.getPatientData(this.image);
-    this.equipment = this.getEquipmentData(this.image);
-    this.accession = this.getAccession(this.image);
+    this.semanticAnswers = {};
   }
 
   componentDidMount() {
@@ -37,18 +39,19 @@ class AimEditor extends Component {
     // Change the static projectId above with the value in store
     //
 
-    var shoutOutValidation = message => {
-      alert(message);
-    };
-    var semanticAnswers = new questionaire.AimEditor(
+    this.semanticAnswers = new questionaire.AimEditor(
       element,
-      shoutOutValidation
+      this.validateForm
     );
-    semanticAnswers.loadTemplates(questionaire.templateArray);
-    semanticAnswers.createViewerWindow(element);
+    this.semanticAnswers.loadTemplates(questionaire.templateArray);
+    this.semanticAnswers.createViewerWindow(element);
     if (this.props.aimId != null && Object.entries(this.props.aimId).length)
-      semanticAnswers.loadAimJson(this.props.aimId);
+      this.semanticAnswers.loadAimJson(this.props.aimId);
   }
+
+  validateForm = hasError => {
+    if (hasError) console.log("Answer form has error/s!!!");
+  };
 
   getImage = () => {
     return this.cornerstone.getImage(
@@ -56,39 +59,9 @@ class AimEditor extends Component {
     );
   };
 
-  getPatientData = image => {
-    const sex = image.data.string("x00100040") || "";
-    const name = image.data.string("x00100010") || "";
-    const patientId = image.data.string("x00100020") || "";
-    const birthDate = image.data.string("x00100030") || "";
-    const person = {
-      sex: { value: sex },
-      name: { value: name },
-      id: { value: patientId },
-      birthDate: { value: birthDate }
-    };
-    return person;
-  };
-
-  getEquipmentData = image => {
-    const manuName = image.data.string("x00080070") || "";
-    const manuModel = image.data.string("x00081090") || "";
-    const sw = image.data.string("x00181020") || "";
-    const equipment = {
-      manufacturerName: manuName,
-      manufacturerModelName: manuModel,
-      softwareVersion: sw
-    };
-    return equipment;
-  };
-
-  getAccession = image => {
-    return image.data.string("x00080050") || "";
-  };
-
   render() {
     return (
-      <Draggable>
+      <Draggable enableUserSelectHack={false}>
         <div className="editorForm">
           <div id="questionaire" />
           <button type="button" onClick={this.save}>
@@ -110,36 +83,31 @@ class AimEditor extends Component {
 
   save = () => {
     console.log("cstools are", this.csTools);
-    console.log(
-      "yabadabadu",
-      this.csTools.getToolState(
-        this.cornerstone.getEnabledElements()[0]["element"],
-        "BrushTool"
-      )
-    );
-    this.createAim();
+    // get data from questions
+
+    // Logic behind relies on the order of the data in array
+    const answers = this.semanticAnswers.saveAim();
+    this.createAim(answers);
   };
 
-  createAim = () => {
+  createAim = answers => {
     const hasSegmentation = false; //TODO:keep this in store and look dynamically
+    const updatedAimId = this.props.aimId;
+
     var aim = new Aim(
       this.image,
-      this.studyUid,
-      this.equipment,
-      this.accession,
-      this.person,
       enumAimType.imageAnnotation,
-      hasSegmentation
+      hasSegmentation,
+      answers,
+      updatedAimId
     );
-
-    const updatedAimId = this.props.aimId; //needs to be setted
 
     const { toolState } = this.csTools.globalImageIdSpecificToolStateManager;
 
     // get the imagesIds for active viewport
-    const element = document.getElementsByClassName("viewport-element")[
+    const element = this.cornerstone.getEnabledElements()[
       this.props.activePort
-    ];
+    ]["element"];
     const stackToolState = this.csTools.getToolState(element, "stack");
     const imageIds = stackToolState.data[this.props.activePort].imageIds;
 
@@ -216,7 +184,22 @@ class AimEditor extends Component {
         }
       });
     });
-    aim.save();
+    const aimJson = aim.getAim();
+    // const file = new Blob(aimJson, { type: "text/json" });
+    // const series = this.props.series[this.props.activePort];
+    uploadAim(JSON.parse(aimJson))
+      .then(() => {
+        this.props.onCancel();
+        toast.success("Aim succesfully saved.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+      })
+      .catch(error => console.log(error));
   };
 
   addPolygonToAim = (aim, polygon, shapeIndex, imageReferenceUid) => {
@@ -355,7 +338,8 @@ class AimEditor extends Component {
   createDicomSeg = () => {};
 
   parseImgeId = imageId => {
-    return imageId.split("objectUID=")[1].split("&")[0];
+    if (isLite) return imageId.split("/").pop();
+    else return imageId.split("objectUID=")[1].split("&")[0];
   };
   // testAimEditor = () => {
   //   //console.log(document.getElementById("cont"));
@@ -373,7 +357,7 @@ class AimEditor extends Component {
 }
 const mapStateToProps = state => {
   return {
-    series: state.searchViewReducer.series,
+    series: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort
   };
 };

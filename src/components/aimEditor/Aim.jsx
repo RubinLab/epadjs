@@ -3,35 +3,28 @@ import { modalities } from "./modality";
 import { generateUid } from "../../utils/aid";
 
 class Aim {
-  constructor(
-    image,
-    studyInstanceUid,
-    equipment,
-    accession,
-    person,
-    aimType,
-    hasSegmentation,
-    aim = {}
-  ) {
-    Object.assign(this, aim);
+  constructor(image, aimType, hasSegmentation, answers, updatedAimId) {
     this.image = image;
+    this.answers = answers;
     this.aimVersion = aimConf.aimVersion;
-    this.dateTime = this.getDate();
+    this.dateTime = { value: this.getDate() };
     this.seriesInstanceUid = { root: generateUid() };
-    this.studyInstanceUid = { root: studyInstanceUid };
-    this.imageAnnotations = this._createImageAnnotations(
-      aimType,
-      hasSegmentation
-    );
+    this.studyInstanceUid = { root: this.image.data.string("x0020000d") };
+
+    this.imageAnnotations = {
+      ImageAnnotation: this._createImageAnnotations(aimType, hasSegmentation)
+    };
     this["xsi:schemaLocation"] = aimConf["xsi:schemaLocation"];
-    this.equipment = equipment;
+    this.equipment = { equipment: this.getEquipment() };
     this["xmlns:xsi"] = aimConf["xmlns:xsi"];
     this["xmlns:rdf"] = aimConf["xmlns:rdf"];
-    this.accessionNumber = { value: accession };
+    this.accessionNumber = { value: this.getAccession() };
     this.xmlns = aimConf.xmlns;
-    this.person = person;
+    this.person = this.createPerson();
     this.user = this.getUserInfo();
-    this.fillImageSepcificData();
+    if (updatedAimId === undefined)
+      this.uniqueIdentifier = { root: generateUid() };
+    else this.uniqueIdentifier = { root: updatedAimId };
   }
 
   static parse(data) {
@@ -120,12 +113,10 @@ class Aim {
       .CalculationEntity;
   };
 
-  fillImageSepcificData = () => {};
-
   getUserInfo = () => {
     var obj = {};
-    obj.loginName = sessionStorage.getItem("username");
-    obj.name = sessionStorage.getItem("displayName");
+    obj["loginName"] = { value: sessionStorage.getItem("username") };
+    obj["name"] = { value: sessionStorage.getItem("displayName") };
     return obj;
   };
 
@@ -464,8 +455,8 @@ Vehicle.display();//still "General"
   _createImageSeries = () => {
     var obj = {};
     obj["modality"] = this._createModality();
-    obj["imageColletion"] = this._createImageCollection();
-    obj["instanceUid"] = this.image.data.string("x0020000E") || "";
+    obj["imageCollection"] = this._createImageCollection();
+    obj["instanceUid"] = { root: this.image.data.string("x0020000e") || "" };
     return obj;
   };
 
@@ -473,7 +464,7 @@ Vehicle.display();//still "General"
     var obj = {};
     obj["imageSeries"] = this._createImageSeries();
     obj["startTime"] = { value: this.image.data.string("x00080030") || "" };
-    obj["instanceUid"] = { root: this.image.data.string("x0020000D") || "" };
+    obj["instanceUid"] = { root: this.image.data.string("x0020000d") || "" };
     obj["startDate"] = { value: this.image.data.string("x00080020") || "" };
     obj["accessionNumber"] = {
       value: this.image.data.string("x00080050") || ""
@@ -491,36 +482,7 @@ Vehicle.display();//still "General"
 
   _createImageReferanceEntityCollection = () => {
     var obj = {};
-    obj["imageReferenceEntityCollection"] = this._createImageReferenceEntity();
-    return obj;
-  };
-
-  /*                                                */
-  /*    Segmentation Entitiy Realted Functions      */
-  /*                                                */
-
-  _createSegmentationEntity = () => {
-    var obj = {};
-    obj["referencedSopInstanceUid"] = {
-      root: this.image.data.string("x00080018") || ""
-    };
-    obj["segmentNumber"] = { value: 1 };
-    obj["seriesInstanceUid"] = {
-      root: this.image.data.string("x0020000E") || ""
-    };
-    obj["studyInstanceUid"] = {
-      root: this.image.data.string("x0020000D") || ""
-    };
-    obj["xsi:type"] = "DicomSegmentationEntity";
-    obj["sopClassUid"] = { root: this.image.data.string("x00080016") || "" };
-    obj["sopInstanceUid"] = { root: this.image.data.string("x00080018") || "" };
-    obj["uniqueIdentifier"] = { root: generateUid() };
-    return obj;
-  };
-
-  creatSegmentationEntityCollection = () => {
-    var obj = {};
-    obj["SegmentationEntity"] = this._createSegmentationEntity();
+    obj["ImageReferenceEntity"] = this._createImageReferenceEntity();
     return obj;
   };
 
@@ -533,10 +495,18 @@ Vehicle.display();//still "General"
     obj[
       "imageReferenceEntityCollection"
     ] = this._createImageReferanceEntityCollection();
-    obj["name"] = {};
-    obj["comment"] = {};
-    obj["uniqueIdentifier"] = {};
-    obj["typeCode"] = {};
+    obj["name"] = this.answers[0].name;
+    obj["comment"] = this.answers[1].comment;
+    obj["uniqueIdentifier"] = { root: generateUid() };
+    // TODO: make this dynamic
+    obj["typeCode"] = {
+      code: "ROI",
+      codeSystemName: "99EPAD",
+      "iso:displayName": {
+        "xmlns:iso": "uri:iso.org:21090",
+        value: "ROI Only"
+      }
+    };
     if (aimType === 1) {
       obj["calculationEntityCollection"] = { CalculationEntity: [] };
       obj["markupEntityCollection"] = { MarkupEntity: [] };
@@ -548,7 +518,7 @@ Vehicle.display();//still "General"
       obj[
         "segmentationEntityCollection"
       ] = this.creatSegmentationEntityCollection();
-    return { ImageAnnotation: obj };
+    return obj;
   };
 
   createImageAnnotationStatement = (referenceType, objectId, subjectId) => {
@@ -594,16 +564,62 @@ Vehicle.display();//still "General"
     return obj;
   };
 
+  /*                                                */
+  /*    Segmentation Entitiy Realted Functions      */
+  /*                                                */
+
+  _createSegmentationEntity = () => {
+    var obj = {};
+    obj["referencedSopInstanceUid"] = {
+      root: this.image.data.string("x00080018") || ""
+    };
+    obj["segmentNumber"] = { value: 1 };
+    obj["seriesInstanceUid"] = {
+      root: this.image.data.string("x0020000e") || ""
+    };
+    obj["studyInstanceUid"] = {
+      root: this.image.data.string("x0020000d") || ""
+    };
+    obj["xsi:type"] = "DicomSegmentationEntity";
+    obj["sopClassUid"] = { root: this.image.data.string("x00080016") || "" };
+    obj["sopInstanceUid"] = { root: this.image.data.string("x00080018") || "" };
+    obj["uniqueIdentifier"] = { root: generateUid() };
+    return obj;
+  };
+
+  creatSegmentationEntityCollection = () => {
+    var obj = {};
+    obj["SegmentationEntity"] = this._createSegmentationEntity();
+    return obj;
+  };
+
   //
   //
   // Person
-  createPerson = (sex, name, id, birthDate) => {
-    var obj = {};
-    obj["sex"] = { value: sex };
-    obj["name"] = { name: name };
-    obj["id"] = { value: id };
-    obj["birthDate"] = { value: birthDate };
-    return obj;
+  createPerson = () => {
+    const sex = this.image.data.string("x00100040") || "";
+    const name = this.image.data.string("x00100010") || "";
+    const patientId = this.image.data.string("x00100020") || "";
+    const birthDate = this.image.data.string("x00100030") || "";
+    const person = {
+      sex: { value: sex },
+      name: { value: name },
+      id: { value: patientId },
+      birthDate: { value: birthDate }
+    };
+    return person;
+  };
+
+  getEquipment = () => {
+    const manuName = this.image.data.string("x00080070") || "";
+    const manuModel = this.image.data.string("x00081090") || "";
+    const sw = this.image.data.string("x00181020") || "";
+    const equipment = {
+      manufacturerName: { value: manuName },
+      manufacturerModelName: { value: manuModel },
+      softwareVersion: { value: sw }
+    };
+    return equipment;
   };
 
   //
@@ -616,38 +632,19 @@ Vehicle.display();//still "General"
     return obj;
   };
 
-  save = () => {
-    console.log(this);
+  getAccession = () => {
+    return this.image.data.string("x00080050") || "";
   };
 
-  //
-  //
-  // aim
-  // createAim(
-  //   dateTime,
-  //   seriesUid,
-  //   studyUid,
-  //   imageAnnotations,
-  //   accessionNumber,
-  //   person,
-  //   user
-  // ) {
-  //   var obj = {};
-  //   obj["aimVersion"] = aimConf["aimVersion"];
-  //   obj["dateTime"] = { value: dateTime };
-  //   obj["seriesInstanceUid"] = { root: seriesUid };
-  //   obj["studyInstanceUid"] = { root: studyUid };
-  //   obj["imageAnnotations"] = imageAnnotations;
-  //   obj["xsi:schemaLocation"] = aimConf["xsi:schemaLocation"];
-  //   obj["xmlns:xsi"] = aimConf["xmlns:xsi"];
-  //   obj["xmlns:rdf"] = aimConf["xmlns:rdf"];
-  //   obj["accessionNumber"] = { value: accessionNumber };
-  //   obj["xmlns"] = aimConf["xmlns"];
-  //   obj["person"] = person;
-  //   obj["user"] = user;
-  //   // obj["uniqueIdentifier"] = { root: uniqueId };
-  //   return obj;
-  // }
+  getAim = () => {
+    delete this.image;
+    delete this.answers;
+    console.log(this);
+    const stringAim = JSON.stringify(this);
+    const wrappedAim = `{"imageAnnotations": { "ImageAnnotationCollection": ${stringAim} }}`;
+    console.log(wrappedAim);
+    return wrappedAim;
+  };
 }
 
 export default Aim;
