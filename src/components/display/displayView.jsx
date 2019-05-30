@@ -70,9 +70,6 @@ const tools = [
   { name: "StackScrollMouseWheel" },
   { name: "StackScrollMultiTouch" }
 ];
-import { FiZoomIn } from "react-icons/fi";
-import { FaTimes } from "react-icons/fa";
-import AnnotationList from "../annotationsList/annotationDock/annotationList";
 
 const mapStateToProps = state => {
   return {
@@ -95,7 +92,7 @@ class DisplayView extends Component {
       hiding: false,
       data: [],
       isLoading: true,
-      selectedAim: undefined
+      selectedAim: undefined,
       // height: "100%",
       refs: props.refs,
       showAnnDetails: true
@@ -139,7 +136,7 @@ class DisplayView extends Component {
       // if (this.props.aimList) this.parseAims(this.props.aimList);
     });
   }
-  
+
   async getImages(seri, i) {
     let stack = {};
     let tempArray = [];
