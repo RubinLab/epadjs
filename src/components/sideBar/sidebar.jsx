@@ -207,7 +207,6 @@ class Sidebar extends Component {
 }
 
 const mapStateToProps = state => {
-  console.log("state in app.js", state.annotationsListReducer);
   const { activePort } = state.annotationsListReducer;
   return {
     activePort

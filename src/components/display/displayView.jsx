@@ -35,7 +35,6 @@ class DisplayView extends Component {
       showAnnDetails: true
     };
     //this.createRefs();
-    //console.log(this.state);
   }
 
   componentDidMount() {
@@ -50,7 +49,6 @@ class DisplayView extends Component {
     this.props.cornerstoneTools.setToolActive(ZoomTool.name, {
       mouseButtonMask: 5
     });
-    console.log(this.props.cornerstoneTools);
 
     //make the last element in series as selected viewport since the last open will be added to end
     this.props.dispatch(
@@ -122,8 +120,6 @@ class DisplayView extends Component {
   };
 
   render() {
-    console.log("props in display");
-    console.log(this.props);
     return (
       // <div className="displayView-main">
       <React.Fragment>

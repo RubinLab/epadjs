@@ -67,7 +67,6 @@ export function downloadSeries(series) {
 }
 
 export function deleteSeries(series) {
-  console.log(series);
   if (isLite) {
     const url =
       apiUrl +

@@ -439,7 +439,6 @@ class SearchView extends Component {
       status = "Deleting…";
     }
     const showDelete = Object.values(this.props.selectedStudies).length > 0;
-    console.log(showDelete);
     return (
       <>
         <Toolbar

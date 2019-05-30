@@ -249,7 +249,6 @@ class Subjects extends Component {
   }
 
   getData(projects) {
-    console.log("Projects :" + this.projects);
     const data = projects.map(item => {
       // using chancejs to generate guid
       // shortid is probably better but seems to have performance issues

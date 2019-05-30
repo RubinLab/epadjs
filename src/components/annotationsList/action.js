@@ -265,7 +265,6 @@ export const toggleAllLabels = (serieID, checked) => {
 };
 
 export const toggleSingleLabel = (serieID, aimID) => {
-  console.log("fired action");
   return {
     type: TOGGLE_LABEL,
     payload: { serieID, aimID }
