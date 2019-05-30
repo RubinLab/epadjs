@@ -42,6 +42,8 @@
   font-size: 11px;
 }
 .drawBar {
+  top: 3.72em;
+  right: 9em;
   outline: solid;
   outline-width: 1px;
   background-color: #3a3f44;

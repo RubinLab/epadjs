@@ -33,7 +33,9 @@ import {
 } from "./types";
 
 import { getSeries } from "../../services/seriesServices";
+
 import { getStudies } from "../../services/studyServices";
+
 import {
   getAnnotations,
   getAnnotationsJSON
@@ -43,10 +45,9 @@ export const clearGrid = item => {
   return { type: CLEAR_GRID };
 };
 
-export const closeSerie = (serie, index) => {
+export const closeSerie = () => {
   return {
-    type: CLOSE_SERIE,
-    payload: { serie, index }
+    type: CLOSE_SERIE
   };
 };
 export const updatePatient = (
@@ -97,31 +98,46 @@ export const displaySingleAim = (
 ) => {
   return {
     type: DISPLAY_SINGLE_AIM,
+
     payload: { patientID, studyUID, seriesUID, aimID }
   };
 };
+
 export const selectPatient = selectedPatientObj => {
   const { projectID, subjectID } = selectedPatientObj;
+
   return { type: SELECT_PATIENT, patient: { projectID, subjectID } };
 };
 
 export const selectStudy = selectedStudyObj => {
   const {
     studyUID,
+
     patientID,
+
     projectID,
+
     studyDescription,
+
     patientName,
+
     numberOfSeries
   } = selectedStudyObj;
+
   return {
     type: SELECT_STUDY,
+
     study: {
       studyUID,
+
       patientID,
+
       projectID,
+
       studyDescription,
+
       patientName,
+
       numberOfSeries
     }
   };
@@ -130,19 +146,30 @@ export const selectStudy = selectedStudyObj => {
 export const selectSerie = (selectedSerieObj, studyDescription) => {
   const {
     seriesUID,
+
     studyUID,
+
     patientID,
+
     projectID,
+
     patientName,
+
     seriesDescription
   } = selectedSerieObj;
+
   return {
     type: SELECT_SERIE,
+
     serie: {
       seriesUID,
+
       studyUID,
+
       patientID,
+
       projectID,
+
       patientName,
       seriesDescription,
       studyDescription
@@ -157,21 +184,34 @@ export const selectAnnotation = (
 ) => {
   const {
     aimID,
+
     seriesUID,
+
     studyUID,
+
     subjectID,
+
     projectID,
+
     patientName,
+
     name
   } = selectedAnnotationObj;
+
   return {
     type: SELECT_ANNOTATION,
+
     annotation: {
       aimID,
+
       seriesUID,
+
       studyUID,
+
       subjectID,
+
       projectID,
+
       patientName,
       name,
       studyDescription,

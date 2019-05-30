@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { getImageIds } from "../../services/seriesServices";
 import { getAnnotations } from "../../services/annotationServices";
 import { wadoUrl, isLite } from "../../config.json";
-import Aim from "../../utils/Aim";
+import Aim from "../aimEditor/Aim";
 import AimEditor from "../aimEditor/aimEditor";
 //import ImageScrollbar from "./imageScrollbar";
 
@@ -38,7 +38,12 @@ const tools = [
   { name: "Rotate" },
   { name: "WwwcRegion" },
   { name: "Probe" },
-  { name: "FreehandMouse" },
+  {
+    name: "FreehandMouse",
+    configuration: {
+      showMinMax: true
+    }
+  },
   { name: "Eraser" },
   { name: "Bidirectional" },
   { name: "Brush" },
@@ -233,7 +238,6 @@ class ViewportSeg extends Component {
         ResultSet: { Result: urls }
       }
     } = await getImageIds(this.state.series);
-
     urls.map(url => {
       let baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {
@@ -250,18 +254,16 @@ class ViewportSeg extends Component {
         this.state.imageIds.push(singleFrameUrl);
       }
     });
-    console.log(this.state.imageIds[0]);
   }
 
   async componentDidMount() {
-    console.log("state", this.state);
     await this.getImages();
-    const { data: imageAnnotations } = await getAnnotations(
-      { ...this.state.series },
-      { json: true }
-    );
-    const aim = Aim.parse(imageAnnotations);
-    console.log(aim);
+    // const { data: imageAnnotations } = await getAnnotations(
+    //   { ...this.state.series },
+    //   { json: true }
+    // );
+    // const aim = Aim.parse(imageAnnotations);
+    // console.log(aim);
     this.loadDisplayImage();
     this.state.viewport.addEventListener(
       "cornerstoneimagerendered",
@@ -298,6 +300,34 @@ class ViewportSeg extends Component {
     });
   }
 
+  getImageMetadata = image => {
+    try {
+      const accession = image.data.string("x00080050") || "";
+      const sex = image.data.string("x00100040") || "";
+      const name = image.data.string("x00100010") || "";
+      const patientId = image.data.string("x00100020") || "";
+      const birthDate = image.data.string("x00100030") || "";
+      const manuName = image.data.string("x00080070") || "";
+      const manuModel = image.data.string("x00081090") || "";
+      const sw = image.data.string("x00181020") || "";
+      const equipment = {
+        manufacturerName: manuName,
+        manufacturerModelName: manuModel,
+        softwareVersion: sw
+      };
+      const person = {
+        sex: { value: sex },
+        name: { value: name },
+        id: { value: patientId },
+        birthDate: { value: birthDate }
+      };
+      this.setState({
+        accession: accession,
+        equipment: equipment,
+        person: person
+      });
+    } catch (error) {}
+  };
   // Deep copy the imageIds
 
   loadDisplayImage() {
@@ -311,6 +341,8 @@ class ViewportSeg extends Component {
     this.cornerstone.enable(element);
 
     this.cornerstone.loadAndCacheImage(this.state.imageIds[0]).then(image => {
+      //get & prepare image related general data for aim creation
+      this.getImageMetadata(image);
       // first image
       this.cornerstone.displayImage(element, image);
       //this.cornerstoneTools.orientationMarkers.enable(element);
@@ -443,7 +475,14 @@ class ViewportSeg extends Component {
     return (
       <React.Fragment>
         {this.state.showAimEditor && (
-          <AimEditor csTools={this.cornerstoneTools} />
+          <AimEditor
+            cornerstone={this.cornerstone}
+            csTools={this.cornerstoneTools}
+            series={this.state.series}
+            person={this.state.person}
+            equipment={this.state.equipment}
+            accession={this.state.accession}
+          />
         )}
         <div
           ref={this.viewportRef}

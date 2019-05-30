@@ -73,3 +73,10 @@ export function downloadAnnotations(optionObj, aimIDlist, selection) {
       { responseType: "blob" }
     );
 }
+
+export function uploadAim(formData) {
+  const url = apiUrl + "/projects/lite/aims";
+
+  console.log("url is", url);
+  return http.post(url, formData);
+}

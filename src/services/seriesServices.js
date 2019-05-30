@@ -1,6 +1,5 @@
 import http from "./httpService";
-
-import { isLite, apiUrl } from "../config.json";
+import { isLite, apiUrl, wadoUrl } from "../config.json";
 
 export function getSeries(projectId, subjectId, studyId) {
   if (isLite)
@@ -29,25 +28,50 @@ export function getImageIds(series) {
     return http.get(
       apiUrl +
         "/projects/lite/subjects/" +
-        series.subjectId +
+        series.subjectUID +
         "/studies/" +
-        series.studyId +
+        series.studyUID +
         "/series/" +
-        series.seriesId +
+        series.seriesUID +
         "/images"
     );
   else
     return http.get(
       apiUrl +
         "/projects/" +
-        series.projectId +
+        series.projectUID +
         "/subjects/" +
-        series.subjectId +
+        series.subjectUID +
         "/studies/" +
-        series.studyId +
+        series.studyUID +
         "/series/" +
-        series.seriesId +
+        series.seriesUID +
         "/images/"
+    );
+}
+
+//  seems like this doesn't belong to here but olny services know details about paths&server side
+export function getWadoImagePath(series, imageId) {
+  if (isLite) {
+    return (
+      wadoUrl +
+      "/studies/" +
+      series.studyUID +
+      "/series/" +
+      series.seriesUID +
+      "/instances/" +
+      imageId
+    );
+  } else
+    return (
+      wadoUrl +
+      "?requestType=WADO&studyUID=" +
+      series.studyUID +
+      "&seriesUID=" +
+      series.seriesUID +
+      "&objectUID=" +
+      imageId +
+      "&contentType=application%2Fdicom"
     );
 }
 

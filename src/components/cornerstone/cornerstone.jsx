@@ -1,5 +1,5 @@
 import * as cornerstone from "cornerstone-core";
-import * as cornerstoneTools from "cornerstone-tools";
+import * as cornerstoneTools from "cornerstone-tools/dist/cornerstoneTools";
 import * as cornerstoneMath from "cornerstone-math";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import * as dicomParser from "dicom-parser";
@@ -43,7 +43,7 @@ const Cornerstone = ({ dispatch }) => {
   cornerstoneTools.toolColors.setToolColor("rgb(255, 255, 0)");
 
   // Set color for active tools
-  cornerstoneTools.toolColors.setActiveColor("rgb(0, 255, 0)");
+  cornerstoneTools.toolColors.setActiveColor("rgb(255, 255, 0)");
 
   //cornerstoneTools.store.state.touchProximity = 40;
 

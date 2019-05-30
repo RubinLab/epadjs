@@ -114,7 +114,7 @@ class App extends Component {
     });
   };
   render() {
-    console.log("App js state", this.state);
+    // console.log("App js state", this.state);
     return (
       <React.Fragment>
         <Cornerstone />

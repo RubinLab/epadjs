@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import ReactTable from "react-table";
+import { withRouter } from "react-router-dom";
 import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf } from "react-icons/fa";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
@@ -452,6 +453,7 @@ class Studies extends Component {
       }
       this.props.dispatch(clearSelection());
     }
+    this.props.history.push("/display");
   };
 
   closeSelectionModal = () => {
@@ -534,4 +536,4 @@ const mapStateToProps = state => {
     showProjectModal: state.annotationsListReducer.showProjectModal
   };
 };
-export default connect(mapStateToProps)(Studies);
+export default withRouter(connect(mapStateToProps)(Studies));
