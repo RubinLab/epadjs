@@ -7,7 +7,8 @@ import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
 import {
   getWorklists,
   deleteWorklist,
-  saveWorklist
+  saveWorklist,
+  updateWorklist
 } from "../../../services/worklistServices";
 import { getUsers } from "../../../services/userServices";
 import { Link } from "react-router-dom";
@@ -19,7 +20,9 @@ const messages = {
   deleteSelected: "Delete selected projects? This cannot be undone.",
   fillRequiredFields: "Please fill the required fields",
   addWorklistError:
-    "An error occured while saving the worklist. Please try again"
+    "An error occured while saving the worklist. Please try again",
+  updateWorklistError:
+    "An error occured while updating the worklist. Please try again"
 };
 
 class WorkList extends React.Component {
@@ -28,7 +31,9 @@ class WorkList extends React.Component {
     userList: [],
     singleDeleteData: {},
     hasDeleteSingleClicked: false,
-    hasAddClicked: false
+    hasAddClicked: false,
+    selectAll: 0,
+    selected: {}
   };
 
   componentDidMount = async () => {
@@ -122,11 +127,8 @@ class WorkList extends React.Component {
   };
 
   handleSaveWorklist = e => {
-    //check if required fields are filled
     let { name, id, user, description } = this.state;
-    console.log(name, id, user);
     if (!name || !id || !user) {
-      console.log("in here");
       this.setState({ error: messages.fillRequiredFields });
     } else {
       description = description ? description : "";
@@ -134,19 +136,10 @@ class WorkList extends React.Component {
         .then(() => {
           this.getWorkListData();
         })
-        .catch(
-          err =>
-            toast.error(err.response.message + " " + messages.addWorklistError),
-          {
-            autoClose: false
-          }
-        );
-      //close the modal
+        .catch(() => toast.error(messages.addWorklistError), {
+          autoClose: false
+        });
       this.handleCancel();
-      //if all required fields are ok
-      //make api call to save
-
-      //when saved refresh the page to show all worklists
     }
   };
 
@@ -155,6 +148,15 @@ class WorkList extends React.Component {
       hasDeleteSingleClicked: true,
       singleDeleteData: { name, id }
     });
+  };
+
+  updateWorklist = e => {
+    updateWorklist(e.target.value, e.target.dataset.id)
+      .then(() => this.getWorkListData())
+      .catch(() => toast.error(messages.updateWorklistError), {
+        autoClose: false
+      });
+    this.handleCancel();
   };
 
   defineColumns = () => {
@@ -168,8 +170,10 @@ class WorkList extends React.Component {
             <input
               type="checkbox"
               className="checkbox-cell"
-              //   checked={this.state.selected[original.id]}
-              onChange={() => this.toggleRow(original.id, original.name)}
+              checked={this.state.selected[original.workListID]}
+              onChange={() =>
+                this.toggleRow(original.workListID, original.name)
+              }
             />
           );
         },
@@ -238,6 +242,8 @@ class WorkList extends React.Component {
             <select
               className="user-select"
               defaultValue={original.row.checkbox.username}
+              onChange={this.updateWorklist}
+              data-id={original.row.checkbox.workListID}
             >
               {options}
             </select>
@@ -274,13 +280,12 @@ class WorkList extends React.Component {
   };
 
   render = () => {
-    console.log(this.state);
     return (
       <div className="worklist menu-display" id="worklist">
         <ToolBar
           onDelete={this.handleDeleteAll}
           onAdd={this.handleAddWorklist}
-          //   selected={checkboxSelected}
+          selected={checkboxSelected}
         />
         <Table
           className="pro-table"

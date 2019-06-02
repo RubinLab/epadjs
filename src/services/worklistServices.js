@@ -23,4 +23,8 @@ export function saveWorklist(user, id, desc, name) {
   );
 }
 
-// http://epad-dev8.stanford.edu:8080/epad/v2/users/admin/worklists/idtest4?description=desc%20test4&name=test4
+export function updateWorklist(user, id) {
+  return http.put(
+    apiUrl + "/users/" + user + "/worklists/" + id + "?user=" + user
+  );
+}
