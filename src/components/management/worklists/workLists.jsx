@@ -1,11 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
 import Table from "react-table";
+import { toast } from "react-toastify";
 import ToolBar from "../common/basicToolBar";
 import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
 import {
   getWorklists,
-  deleteWorklist
+  deleteWorklist,
+  saveWorklist
 } from "../../../services/worklistServices";
 import { getUsers } from "../../../services/userServices";
 import { Link } from "react-router-dom";
@@ -14,7 +16,10 @@ import CreationForm from "./worklistCreationForm";
 
 const messages = {
   deleteSingle: "Delete the worklist? This cannot be undone.",
-  deleteSelected: "Delete selected projects? This cannot be undone."
+  deleteSelected: "Delete selected projects? This cannot be undone.",
+  fillRequiredFields: "Please fill the required fields",
+  addWorklistError:
+    "An error occured while saving the worklist. Please try again"
 };
 
 class WorkList extends React.Component {
@@ -79,7 +84,14 @@ class WorkList extends React.Component {
   }
 
   handleCancel = () => {
-    this.setState({ hasAddClicked: false });
+    this.setState({
+      hasAddClicked: false,
+      name: "",
+      id: "",
+      user: "",
+      description: "",
+      error: ""
+    });
   };
 
   deleteAllSelected = async () => {};
@@ -107,6 +119,35 @@ class WorkList extends React.Component {
   handleFormInput = e => {
     const { name, value } = e.target;
     this.setState({ [name]: value });
+  };
+
+  handleSaveWorklist = e => {
+    //check if required fields are filled
+    let { name, id, user, description } = this.state;
+    console.log(name, id, user);
+    if (!name || !id || !user) {
+      console.log("in here");
+      this.setState({ error: messages.fillRequiredFields });
+    } else {
+      description = description ? description : "";
+      saveWorklist(user, id, description, name)
+        .then(() => {
+          this.getWorkListData();
+        })
+        .catch(
+          err =>
+            toast.error(err.response.message + " " + messages.addWorklistError),
+          {
+            autoClose: false
+          }
+        );
+      //close the modal
+      this.handleCancel();
+      //if all required fields are ok
+      //make api call to save
+
+      //when saved refresh the page to show all worklists
+    }
   };
 
   handleSingleDelete = (name, id) => {
@@ -233,6 +274,7 @@ class WorkList extends React.Component {
   };
 
   render = () => {
+    console.log(this.state);
     return (
       <div className="worklist menu-display" id="worklist">
         <ToolBar
@@ -257,6 +299,9 @@ class WorkList extends React.Component {
           <CreationForm
             users={this.state.userList}
             onCancel={this.handleCancel}
+            onChange={this.handleFormInput}
+            onSubmit={this.handleSaveWorklist}
+            error={this.state.error}
           />
         )}
       </div>
