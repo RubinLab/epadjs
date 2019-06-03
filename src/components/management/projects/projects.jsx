@@ -220,6 +220,10 @@ class Projects extends React.Component {
   deleteAllSelected = async () => {
     let newSelected = Object.assign({}, this.state.selected);
     const notDeleted = [];
+    //call single delete to an array
+    //Call Promise.all to array
+    //then => refresh the page
+    //catch => push
     for (let project in newSelected) {
       await deleteProject(project)
         .then(() => {
@@ -432,7 +436,6 @@ class Projects extends React.Component {
   };
 
   render = () => {
-    console.log("project", this.props);
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     return (
       <div className="projects menu-display" id="projects">
