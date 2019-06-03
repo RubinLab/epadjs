@@ -315,3 +315,33 @@
 .user-select {
   color: black;
 }
+
+.filter-text {
+  width: 8rem;
+}
+
+.filter-label {
+  font-size: 1rem;
+  margin-left: 1rem;
+  margin-right: 0.2rem;
+}
+
+.annotations-projectSelect {
+  margin-left: 1rem;
+  font-size: 1.1rem;
+}
+
+.filter-group {
+  display: flex;
+  min-width: 750px;
+}
+
+.annotations-toolbar {
+  display: flex;
+  height: 5%;
+  justify-content: flex-start;
+  align-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  margin-top: 0.5rem;
+}

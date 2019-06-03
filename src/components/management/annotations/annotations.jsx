@@ -2,28 +2,19 @@ import React from "react";
 import PropTypes from "prop-types";
 import Table from "react-table";
 import { toast } from "react-toastify";
-import ToolBar from "../common/basicToolBar";
+import ToolBar from "./toolbar";
 import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
-import {
-  getWorklists,
-  deleteWorklist,
-  saveWorklist,
-  updateWorklist
-} from "../../../services/worklistServices";
+import { getSummaryAnnotations } from "../../../services/annotationServices";
 import { getUsers } from "../../../services/userServices";
 import { Link } from "react-router-dom";
-import DeleteAlert from "../common/alertDeletionModal";
-import CreationForm from "./worklistCreationForm";
 
 const messages = {
   deleteSingle: "Delete the worklist? This cannot be undone.",
   deleteSelected: "Delete selected projects? This cannot be undone.",
-  fillRequiredFields: "Please fill the required fields",
-  addWorklistError: "An error occured while saving the worklist.",
-  updateWorklistError: "An error occured while updating the worklist."
+  fillRequiredFields: "Please fill the required fields"
 };
 
-class WorkList extends React.Component {
+class Annotations extends React.Component {
   state = {
     worklists: [],
     userList: [],
@@ -35,23 +26,15 @@ class WorkList extends React.Component {
     selected: {}
   };
 
-  componentDidMount = async () => {
-    this.getWorkListData();
-    const {
-      data: {
-        ResultSet: { Result: userList }
-      }
-    } = await getUsers();
-    this.setState({ userList });
-  };
+  componentDidMount = async () => {};
 
   getWorkListData = async () => {
     const {
       data: {
-        ResultSet: { Result: worklists }
+        ResultSet: { Result: annotations }
       }
-    } = await getWorklists(sessionStorage.getItem("username"));
-    this.setState({ worklists });
+    } = await getSummaryAnnotations();
+    this.setState({ annotations });
   };
 
   toggleRow = async (id, name) => {
@@ -104,7 +87,7 @@ class WorkList extends React.Component {
     let newSelected = Object.assign({}, this.state.selected);
     const promiseArr = [];
     for (let project in newSelected) {
-      promiseArr.push(deleteWorklist(newSelected[project], project));
+      //   promiseArr.push(deleteWorklist(newSelected[project], project));
     }
     Promise.all(promiseArr)
       .then(() => {
@@ -119,14 +102,14 @@ class WorkList extends React.Component {
 
   deleteSingleWorklist = async () => {
     const { name, id } = this.state.singleDeleteData;
-    deleteWorklist(name, id)
-      .then(() => {
-        this.setState({ deleteSingleClicked: false, singleDeleteData: {} });
-        this.getWorkListData();
-      })
-      .catch(err => {
-        this.setState({ errorMessage: err.response.data.message });
-      });
+    // deleteWorklist(name, id)
+    //   .then(() => {
+    //     this.setState({ deleteSingleClicked: false, singleDeleteData: {} });
+    //     this.getWorkListData();
+    //   })
+    //   .catch(err => {
+    //     this.setState({ errorMessage: err.response.data.message });
+    //   });
   };
 
   handleDeleteAll = () => {
@@ -148,18 +131,18 @@ class WorkList extends React.Component {
       this.setState({ error: messages.fillRequiredFields });
     } else {
       description = description ? description : "";
-      saveWorklist(user, id, description, name)
-        .then(() => {
-          this.getWorkListData();
-        })
-        .catch(error =>
-          toast.error(
-            messages.addWorklistError + ": " + error.response.data.message,
-            {
-              autoClose: false
-            }
-          )
-        );
+      //   saveWorklist(user, id, description, name)
+      //     .then(() => {
+      //       this.getWorkListData();
+      //     })
+      //     .catch(error =>
+      //       toast.error(
+      //         messages.addWorklistError + ": " + error.response.data.message,
+      //         {
+      //           autoClose: false
+      //         }
+      //       )
+      //     );
       this.handleCancel();
     }
   };
@@ -172,16 +155,16 @@ class WorkList extends React.Component {
   };
 
   updateWorklist = e => {
-    updateWorklist(e.target.value, e.target.dataset.id)
-      .then(() => this.getWorkListData())
-      .catch(error =>
-        toast.error(
-          messages.updateWorklistError + ": " + error.response.data.message,
-          {
-            autoClose: false
-          }
-        )
-      );
+    // updateWorklist(e.target.value, e.target.dataset.id)
+    //   .then(() => this.getWorkListData())
+    //   .catch(error =>
+    //     toast.error(
+    //       messages.updateWorklistError + ": " + error.response.data.message,
+    //       {
+    //         autoClose: false
+    //       }
+    //     )
+    //   );
     this.handleCancel();
   };
 
@@ -197,10 +180,8 @@ class WorkList extends React.Component {
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={this.state.selected[original.workListID]}
-              onChange={() =>
-                this.toggleRow(original.workListID, original.username)
-              }
+              checked={this.state.selected[original.aimID]}
+              onChange={() => this.toggleRow(original.aimID)}
             />
           );
         },
@@ -236,72 +217,61 @@ class WorkList extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        width: 50,
-        Cell: original => (
-          // <Link
-          //   className="open-link"
-          //   to={"/search/" + original.row.checkbox.id}
-          // >
-          <div onClick={this.props.onClose}>
-            <FaRegEye className="menu-clickable" />
-          </div>
-          // </Link>
-        )
+        width: 50
+        // Cell: original => (
+        //   <Link
+        //     className="open-link"
+        //     to={"/search/" + original.row.checkbox.id}
+        //   >
+        //     <div onClick={this.props.onClose}>
+        //       <FaRegEye className="menu-clickable" />
+        //     </div>
+        //   </Link>
+        // )
+      },
+      {
+        Header: "Subject",
+        accessor: "patientName",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 50
+      },
+      {
+        Header: "Modality / Series / Slice / Series #",
+        accessor: "comment",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 50
+        // Cell: original => <div>{original.row.checkbox.description || ""}</div>
+      },
+      {
+        Header: "Template",
+        accessor: "template",
+        width: 45,
+        minResizeWidth: 20,
+        resizable: true,
+        sortable: true
       },
       {
         Header: "User",
+        accessor: "userName",
+        width: 45,
+        minResizeWidth: 20,
+        resizable: true,
+        sortable: true
+      },
+      {
+        Header: "Study",
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
-          const options = [];
-          let index = 0;
-          for (let user of this.state.userList) {
-            options.push(
-              <option key={`${index}-${user.username}`} value={user.username}>
-                {user.displayname}
-              </option>
-            );
-            index++;
-          }
-          return (
-            <select
-              className="user-select"
-              defaultValue={original.row.checkbox.username}
-              onChange={this.updateWorklist}
-              data-id={original.row.checkbox.workListID}
-            >
-              {options}
-            </select>
-          );
+          const studyDateArr = original.row.checkbox.studyDate.split(" ");
+          return <div>{studyDateArr[0]}</div>;
         }
-      },
-      {
-        Header: "Description",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 20,
-        minWidth: 50,
-        Cell: original => <div>{original.row.checkbox.description || ""}</div>
-      },
-      {
-        Header: "",
-        width: 45,
-        minResizeWidth: 20,
-        resizable: true,
-        Cell: original => (
-          <div
-            onClick={() =>
-              this.handleSingleDelete(
-                original.row.checkbox.username,
-                original.row.checkbox.workListID
-              )
-            }
-          >
-            <FaRegTrashAlt className="menu-clickable" />
-          </div>
-        )
       }
     ];
   };
@@ -316,12 +286,12 @@ class WorkList extends React.Component {
           onAdd={this.handleAddWorklist}
           selected={checkboxSelected}
         />
-        <Table
+        {/* <Table
           className="pro-table"
-          data={this.state.worklists}
+          data={this.state.annotations}
           columns={this.defineColumns()}
-        />
-        {this.state.deleteSingleClicked && (
+        /> */}
+        {/* {this.state.deleteSingleClicked && (
           <DeleteAlert
             message={messages.deleteSingle}
             onCancel={this.handleCancel}
@@ -346,14 +316,10 @@ class WorkList extends React.Component {
             onDelete={this.deleteAllSelected}
             error={this.state.errorMessage}
           />
-        )}
+        )} */}
       </div>
     );
   };
 }
 
-WorkList.propTypes = {
-  selection: PropTypes.string,
-  onClose: PropTypes.func
-};
-export default WorkList;
+export default Annotations;

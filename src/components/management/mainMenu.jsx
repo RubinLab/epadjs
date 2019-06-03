@@ -4,7 +4,7 @@ import Modal from "./common/customModal";
 import Users from "./users";
 import Projects from "./projects/projects";
 import WorkLists from "./worklists/workLists";
-
+import Annotations from "./annotations/annotations";
 import "./menuStyle.css";
 import Header from "./common/managementHeader";
 
@@ -49,6 +49,13 @@ class MainMenu extends React.Component {
       case "Worklists":
         return (
           <WorkLists
+            selection={this.state.selection}
+            onClose={this.handleCloseModal}
+          />
+        );
+      case "Annotations":
+        return (
+          <Annotations
             selection={this.state.selection}
             onClose={this.handleCloseModal}
           />
