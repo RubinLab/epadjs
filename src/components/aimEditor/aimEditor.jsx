@@ -5,7 +5,7 @@ import { isLite } from "../../config.json";
 import { toast } from "react-toastify";
 import { getTemplates } from "../../services/templateServices";
 import { uploadAim } from "../../services/annotationServices";
-import * as questionaire from "../../utils/AimEditorReactV1/parseClass.js";
+import * as questionaire from "./parseClass.js";
 import Aim from "./Aim";
 import * as dcmjs from "dcmjs";
 
