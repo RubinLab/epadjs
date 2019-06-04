@@ -11,9 +11,38 @@ import {
 } from "react-icons/fa";
 import ReactTooltip from "react-tooltip";
 import "../menuStyle.css";
+import { isLite } from "../../../config.json";
 
 const toolBar = props => {
-  const { onDelete, onDownload, onUpload, onSelect, selected } = props;
+  const { onDelete, onDownload, onUpload, onSelect, onType, onClear } = props;
+  const { selected, projects } = props;
+
+  const options = [];
+  for (let project of projects) {
+    // console.log(user);
+    options.push(
+      <option key={project.id} value={project.id}>
+        {project.name}
+      </option>
+    );
+  }
+
+  let name = React.createRef();
+  let subject = React.createRef();
+  let template = React.createRef();
+  let createdStart = React.createRef();
+  let createdEnd = React.createRef();
+
+  console.log(createdStart);
+  function handleClearSelection() {
+    name.current.value = "";
+    subject.current.value = "";
+    template.current.value = "";
+    createdStart.current.value = "";
+    createdEnd.current.value = "";
+    onClear();
+  }
+
   return (
     <div className="annotations-toolbar">
       <>
@@ -96,32 +125,69 @@ const toolBar = props => {
           <span className="filter-label">Delete selections</span>
         </ReactTooltip>
       </>
-      <select
-        className="annotations-projectSelect"
-        name="project"
-        onChange={onSelect}
-        defaultValue="default"
-      >
-        {/* {options} */}
-      </select>
+      {!isLite && (
+        <select
+          className="annotations-projectSelect"
+          name="project"
+          onChange={onSelect}
+          defaultValue="default"
+        >
+          {options}
+        </select>
+      )}
       <div className="filter-group">
         <div className="filter-container">
           <span className="filter-label">Name:</span>
-          <input type="text" className="filter-text" />
+          <input
+            onMouseDown={e => e.stopPropagation()}
+            onChange={onType}
+            type="text"
+            className="filter-text"
+            name="name"
+            ref={name}
+          />
         </div>
         <div className="filter-container">
           <span className="filter-label">Subject:</span>
-          <input type="text" className="filter-text" />
+          <input
+            onMouseDown={e => e.stopPropagation()}
+            onChange={onType}
+            type="text"
+            className="filter-text"
+            name="subject"
+            ref={subject}
+          />
         </div>
         <div className="filter-container">
           <span className="filter-label">Template:</span>
-          <input type="text" className="filter-text" />
+          <input
+            onMouseDown={e => e.stopPropagation()}
+            onChange={onType}
+            type="text"
+            className="filter-text"
+            name="template"
+            ref={template}
+          />
         </div>
         <div className="filter-container">
           <span className="filter-label">Created:</span>
-          <input type="text" className="filter-text" />
+          <input
+            onMouseDown={e => e.stopPropagation()}
+            onChange={onType}
+            type="text"
+            className="filter-text"
+            name="createdStart"
+            ref={createdStart}
+          />
           <span>{" - "}</span>
-          <input type="text" className="filter-text" />
+          <input
+            onMouseDown={e => e.stopPropagation()}
+            onChange={onType}
+            type="text"
+            className="filter-text"
+            name="createdEnd"
+            ref={createdEnd}
+          />
         </div>
       </div>
       <>
@@ -138,7 +204,7 @@ const toolBar = props => {
         </ReactTooltip>
       </>
       <>
-        <div>
+        <div onClick={handleClearSelection}>
           <FaUndo className="tool-icon" data-tip data-for="undo-icon" />
         </div>
         <ReactTooltip id="undo-icon" place="right" type="info" delayShow={1500}>
@@ -148,6 +214,7 @@ const toolBar = props => {
     </div>
   );
 };
+
 toolBar.propTypes = {
   onAdd: PropTypes.func,
   onDelete: PropTypes.func,

@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
 import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
 import { getSummaryAnnotations } from "../../../services/annotationServices";
-import { getUsers } from "../../../services/userServices";
+import { getProjects } from "../../../services/projectServices";
 import { Link } from "react-router-dom";
 
 const messages = {
@@ -16,25 +16,43 @@ const messages = {
 
 class Annotations extends React.Component {
   state = {
-    worklists: [],
-    userList: [],
+    annotations: [],
+    projectList: [],
     singleDeleteData: {},
     deleteSingleClicked: false,
     hasAddClicked: false,
     deleteAllClicked: false,
     selectAll: 0,
-    selected: {}
+    selected: {},
+    filteredData: null
   };
 
-  componentDidMount = async () => {};
+  componentDidMount = async () => {
+    const {
+      data: {
+        ResultSet: { Result: projectList }
+      }
+    } = await getProjects();
+    this.getAnnotationsData(projectList[0].id);
+    this.setState({ projectList });
+  };
 
-  getWorkListData = async () => {
+  getAnnotationsData = async projectID => {
     const {
       data: {
         ResultSet: { Result: annotations }
       }
-    } = await getSummaryAnnotations();
+    } = await getSummaryAnnotations(projectID);
     this.setState({ annotations });
+  };
+
+  handleProjectSelect = e => {
+    this.getAnnotationsData(e.target.value);
+  };
+
+  handleFilterInput = e => {
+    const { name, value } = e.target;
+    this.setState({ name: value });
   };
 
   toggleRow = async (id, name) => {
@@ -147,25 +165,8 @@ class Annotations extends React.Component {
     }
   };
 
-  handleSingleDelete = (name, id) => {
-    this.setState({
-      deleteSingleClicked: true,
-      singleDeleteData: { name, id }
-    });
-  };
-
-  updateWorklist = e => {
-    // updateWorklist(e.target.value, e.target.dataset.id)
-    //   .then(() => this.getWorkListData())
-    //   .catch(error =>
-    //     toast.error(
-    //       messages.updateWorklistError + ": " + error.response.data.message,
-    //       {
-    //         autoClose: false
-    //       }
-    //     )
-    //   );
-    this.handleCancel();
+  handleClearFilter = () => {
+    this.setState({ filteredData: null });
   };
 
   defineColumns = () => {
@@ -175,7 +176,6 @@ class Annotations extends React.Component {
         accessor: "",
         width: 30,
         Cell: ({ original }) => {
-          console.log(original);
           return (
             <input
               type="checkbox"
@@ -285,12 +285,15 @@ class Annotations extends React.Component {
           onDelete={this.handleDeleteAll}
           onAdd={this.handleAddWorklist}
           selected={checkboxSelected}
+          projects={this.state.projectList}
+          onSelect={this.handleProjectSelect}
+          onClear={this.handleClearFilter}
         />
-        {/* <Table
+        <Table
           className="pro-table"
-          data={this.state.annotations}
+          data={this.state.filteredData || this.state.annotations}
           columns={this.defineColumns()}
-        /> */}
+        />
         {/* {this.state.deleteSingleClicked && (
           <DeleteAlert
             message={messages.deleteSingle}

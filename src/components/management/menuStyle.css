@@ -318,6 +318,7 @@
 
 .filter-text {
   width: 8rem;
+  color: #333;
 }
 
 .filter-label {
@@ -329,6 +330,7 @@
 .annotations-projectSelect {
   margin-left: 1rem;
   font-size: 1.1rem;
+  color: #333;
 }
 
 .filter-group {
@@ -344,4 +346,5 @@
   align-items: center;
   font-size: 1.2rem;
   margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
 }
