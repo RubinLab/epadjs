@@ -8,9 +8,9 @@ import { getSummaryAnnotations } from "../../../services/annotationServices";
 import { getProjects } from "../../../services/projectServices";
 import { Link } from "react-router-dom";
 import matchSorter from "match-sorter";
+import { isLite } from "../../../config.json";
 
 const messages = {
-  deleteSingle: "Delete the worklist? This cannot be undone.",
   deleteSelected: "Delete selected projects? This cannot be undone.",
   fillRequiredFields: "Please fill the required fields",
   dateFormat: "Date format should be M/d/yy."
@@ -20,8 +20,8 @@ class Annotations extends React.Component {
   state = {
     annotations: [],
     projectList: [],
-    singleDeleteData: {},
-    deleteSingleClicked: false,
+    // singleDeleteData: {},
+    // deleteSingleClicked: false,
     hasAddClicked: false,
     deleteAllClicked: false,
     selectAll: 0,
@@ -30,13 +30,17 @@ class Annotations extends React.Component {
   };
 
   componentDidMount = async () => {
-    const {
-      data: {
-        ResultSet: { Result: projectList }
-      }
-    } = await getProjects();
-    this.getAnnotationsData(projectList[0].id);
-    this.setState({ projectList });
+    if (!isLite) {
+      const {
+        data: {
+          ResultSet: { Result: projectList }
+        }
+      } = await getProjects();
+      this.getAnnotationsData(projectList[0].id);
+      this.setState({ projectList });
+    } else {
+      this.getAnnotationsData();
+    }
   };
 
   getAnnotationsData = async projectID => {
@@ -45,13 +49,34 @@ class Annotations extends React.Component {
         ResultSet: { Result: annotations }
       }
     } = await getSummaryAnnotations(projectID);
+    if (isLite) {
+      for (let ann of annotations) {
+        let year1 = ann.date.substring(0, 4);
+        let month1 = ann.date.substring(4, 6);
+        let day1 = ann.date.substring(6, 8);
+        let hour = ann.date.substring(8, 10);
+        let min = ann.date.substring(10, 12);
+        let sec = ann.date.substring(12);
+        let dateFormat = year1 + "-" + month1 + "-" + day1;
+        let timeFormat = hour + ":" + min + ":" + sec;
+        let date = dateFormat + " " + timeFormat;
 
+        let year2 = ann.studyDate.substring(0, 4);
+        let month2 = ann.studyDate.substring(4, 6);
+        let day2 = ann.studyDate.substring(6, 8);
+        let studyDate = year2 + "-" + month2 + "-" + day2 + " " + "00:00:00";
+        ann.date = date;
+        ann.studyDate = studyDate;
+      }
+    }
     this.setState({ annotations });
   };
 
   handleProjectSelect = e => {
-    this.getAnnotationsData(e.target.value);
-    this.setState({ filteredData: null });
+    if (!isLite) {
+      this.getAnnotationsData(e.target.value);
+      this.setState({ filteredData: null });
+    }
   };
 
   handleFilterInput = e => {
@@ -100,7 +125,6 @@ class Annotations extends React.Component {
       user: "",
       description: "",
       error: "",
-      deleteSingleClicked: false,
       deleteAllClicked: false
     });
   };
@@ -194,14 +218,7 @@ class Annotations extends React.Component {
     if (this.validateDateFormat(this.state.createdStart)) {
       const input = new Date(this.state.createdStart);
       for (let ann of arr) {
-        console.log("===========================");
-        console.log("raw date", ann.date);
-        console.log(ann.date.split(" ")[0]);
         let date = new Date(ann.date.split(" ")[0] + " 00:00:00");
-        // console.log("in loop");
-        // console.log("input", input);
-        console.log("arr date", date);
-        console.log("===========================");
         if (date >= input) {
           result.push(ann);
         }
@@ -211,17 +228,12 @@ class Annotations extends React.Component {
   };
 
   filterEndDate = arr => {
-    console.log(arr);
     const result = [];
     if (this.validateDateFormat(this.state.createdEnd)) {
       const input = new Date(this.state.createdEnd);
       for (let ann of arr) {
         let date = new Date(ann.date.split(" ")[0] + " 00:00:00");
-        console.log("in loop");
-        console.log("input", input);
-        console.log("arr date", date);
         if (date <= input) {
-          console.log("passed if");
           result.push(ann);
         }
       }
@@ -237,9 +249,17 @@ class Annotations extends React.Component {
     return dateArr[1] + "/" + dateArr[2] + "/" + dateArr[0];
   };
 
+  cleanCarets = string => {
+    var i = 0,
+      length = string.length;
+    for (i; i < length; i++) {
+      string = string.replace("^", " ");
+    }
+    return string;
+  };
+
   validateDateFormat = dateString => {
     const dateArr = dateString.split("/");
-    console.log(dateArr);
     const validFormat = dateArr.length === 3;
     let validMonth;
     let validDay;
@@ -321,7 +341,12 @@ class Annotations extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
+        minWidth: 50,
+        Cell: original => {
+          return (
+            <div>{this.cleanCarets(original.row.checkbox.patientName)}</div>
+          );
+        }
       },
       {
         Header: "Modality / Series / Slice / Series #",
@@ -416,25 +441,7 @@ class Annotations extends React.Component {
           data={this.state.filteredData || this.state.annotations}
           columns={this.defineColumns()}
         />
-        {/* {this.state.deleteSingleClicked && (
-          <DeleteAlert
-            message={messages.deleteSingle}
-            onCancel={this.handleCancel}
-            onDelete={this.deleteSingleWorklist}
-            error={this.state.errorMessage}
-          />
-        )}
-        {this.state.hasAddClicked && (
-          <CreationForm
-            users={this.state.userList}
-            onCancel={this.handleCancel}
-            onChange={this.handleFormInput}
-            onSubmit={this.handleSaveWorklist}
-            error={this.state.error}
-          />
-        )}
-
-        {this.state.deleteAllClicked && (
+        {/* {this.state.deleteAllClicked && (
           <DeleteAlert
             message={messages.deleteSelected}
             onCancel={this.handleCancel}

@@ -7,6 +7,7 @@ import WorkLists from "./worklists/workLists";
 import Annotations from "./annotations/annotations";
 import "./menuStyle.css";
 import Header from "./common/managementHeader";
+import { isLite } from "../../config.json";
 
 class MainMenu extends React.Component {
   state = {
@@ -69,15 +70,19 @@ class MainMenu extends React.Component {
     console.log(this.state);
     return (
       <div className="mng-menu">
-        <div onClick={this.handleSelection}>Users</div>
-        <div onClick={this.handleSelection}>Projects</div>
-        <div onClick={this.handleSelection}>Worklists</div>
         <div onClick={this.handleSelection}>Annotations</div>
         <div onClick={this.handleSelection}>Templates</div>
-        <div onClick={this.handleSelection}>Tools</div>
-        <div onClick={this.handleSelection}>Pluginstore</div>
-        <div onClick={this.handleSelection}>Connections</div>
-        <div onClick={this.handleSelection}>Queries</div>
+        {!isLite && (
+          <>
+            <div onClick={this.handleSelection}>Users</div>
+            <div onClick={this.handleSelection}>Projects</div>
+            <div onClick={this.handleSelection}>Worklists</div>
+            <div onClick={this.handleSelection}>Tools</div>
+            <div onClick={this.handleSelection}>Pluginstore</div>
+            <div onClick={this.handleSelection}>Connections</div>
+            <div onClick={this.handleSelection}>Queries</div>
+          </>
+        )}
         {this.state.isModalOpen && (
           <Modal>
             <Header

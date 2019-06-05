@@ -17,7 +17,7 @@ import CreationForm from "./worklistCreationForm";
 
 const messages = {
   deleteSingle: "Delete the worklist? This cannot be undone.",
-  deleteSelected: "Delete selected projects? This cannot be undone.",
+  deleteSelected: "Delete selected worklists? This cannot be undone.",
   fillRequiredFields: "Please fill the required fields",
   addWorklistError: "An error occured while saving the worklist.",
   updateWorklistError: "An error occured while updating the worklist."
