@@ -14,7 +14,15 @@ import "../menuStyle.css";
 import { isLite } from "../../../config.json";
 
 const toolBar = props => {
-  const { onDelete, onDownload, onUpload, onSelect, onType, onClear } = props;
+  const {
+    onDelete,
+    onDownload,
+    onUpload,
+    onSelect,
+    onType,
+    onClear,
+    onFilter
+  } = props;
   const { selected, projects } = props;
 
   const options = [];
@@ -33,14 +41,12 @@ const toolBar = props => {
   let createdStart = React.createRef();
   let createdEnd = React.createRef();
 
-  console.log(createdStart);
-  function handleClearSelection() {
+  function clearFilters() {
     name.current.value = "";
     subject.current.value = "";
     template.current.value = "";
     createdStart.current.value = "";
     createdEnd.current.value = "";
-    onClear();
   }
 
   return (
@@ -71,42 +77,45 @@ const toolBar = props => {
           <span className="filter-label">Download selections</span>
         </ReactTooltip>
       </>
-
-      <>
-        <div>
-          <FaLayerGroup
-            className="tool-icon"
-            data-tip
-            data-for="applyParalel-icon"
-          />
-        </div>
-        <ReactTooltip
-          id="applyParalel-icon"
-          place="right"
-          type="info"
-          delayShow={1500}
-        >
-          <span className="filter-label">Apply (parallel)</span>
-        </ReactTooltip>
-      </>
-      <>
-        <div onClick={onDelete}>
-          <FaLocationArrow
-            className="tool-icon"
-            onClick={onDelete}
-            data-tip
-            data-for="applyAll-icon"
-          />
-        </div>
-        <ReactTooltip
-          id="applyAll-icon"
-          place="right"
-          type="info"
-          delayShow={1500}
-        >
-          <span className="filter-label">Apply (all together)</span>
-        </ReactTooltip>
-      </>
+      {!isLite && (
+        <>
+          <>
+            <div>
+              <FaLayerGroup
+                className="tool-icon"
+                data-tip
+                data-for="applyParalel-icon"
+              />
+            </div>
+            <ReactTooltip
+              id="applyParalel-icon"
+              place="right"
+              type="info"
+              delayShow={1500}
+            >
+              <span className="filter-label">Apply (parallel)</span>
+            </ReactTooltip>
+          </>
+          <>
+            <div onClick={onDelete}>
+              <FaLocationArrow
+                className="tool-icon"
+                onClick={onDelete}
+                data-tip
+                data-for="applyAll-icon"
+              />
+            </div>
+            <ReactTooltip
+              id="applyAll-icon"
+              place="right"
+              type="info"
+              delayShow={1500}
+            >
+              <span className="filter-label">Apply (all together)</span>
+            </ReactTooltip>
+          </>
+        </>
+      )}
       <>
         <div onClick={onDelete}>
           <FaRegTrashAlt
@@ -154,7 +163,7 @@ const toolBar = props => {
             onChange={onType}
             type="text"
             className="filter-text"
-            name="subject"
+            name="patientName"
             ref={subject}
           />
         </div>
@@ -191,7 +200,11 @@ const toolBar = props => {
         </div>
       </div>
       <>
-        <div>
+        <div
+          onClick={() => {
+            onFilter();
+          }}
+        >
           <FaFilter className="tool-icon" data-tip data-for="filter-icon" />
         </div>
         <ReactTooltip
@@ -204,7 +217,12 @@ const toolBar = props => {
         </ReactTooltip>
       </>
       <>
-        <div onClick={handleClearSelection}>
+        <div
+          onClick={() => {
+            clearFilters();
+            onClear();
+          }}
+        >
           <FaUndo className="tool-icon" data-tip data-for="undo-icon" />
         </div>
         <ReactTooltip id="undo-icon" place="right" type="info" delayShow={1500}>

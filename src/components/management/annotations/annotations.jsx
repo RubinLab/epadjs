@@ -7,11 +7,13 @@ import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
 import { getSummaryAnnotations } from "../../../services/annotationServices";
 import { getProjects } from "../../../services/projectServices";
 import { Link } from "react-router-dom";
+import matchSorter from "match-sorter";
 
 const messages = {
   deleteSingle: "Delete the worklist? This cannot be undone.",
   deleteSelected: "Delete selected projects? This cannot be undone.",
-  fillRequiredFields: "Please fill the required fields"
+  fillRequiredFields: "Please fill the required fields",
+  dateFormat: "Date format should be M/d/yy."
 };
 
 class Annotations extends React.Component {
@@ -43,11 +45,13 @@ class Annotations extends React.Component {
         ResultSet: { Result: annotations }
       }
     } = await getSummaryAnnotations(projectID);
+
     this.setState({ annotations });
   };
 
   handleProjectSelect = e => {
     this.getAnnotationsData(e.target.value);
+    this.setState({ filteredData: null });
   };
 
   handleFilterInput = e => {
@@ -118,24 +122,8 @@ class Annotations extends React.Component {
     this.handleCancel();
   };
 
-  deleteSingleWorklist = async () => {
-    const { name, id } = this.state.singleDeleteData;
-    // deleteWorklist(name, id)
-    //   .then(() => {
-    //     this.setState({ deleteSingleClicked: false, singleDeleteData: {} });
-    //     this.getWorkListData();
-    //   })
-    //   .catch(err => {
-    //     this.setState({ errorMessage: err.response.data.message });
-    //   });
-  };
-
   handleDeleteAll = () => {
     this.setState({ deleteAllClicked: true });
-  };
-
-  handleAddWorklist = () => {
-    this.setState({ hasAddClicked: true });
   };
 
   handleFormInput = e => {
@@ -143,30 +131,128 @@ class Annotations extends React.Component {
     this.setState({ [name]: value });
   };
 
-  handleSaveWorklist = e => {
-    let { name, id, user, description } = this.state;
-    if (!name || !id || !user) {
-      this.setState({ error: messages.fillRequiredFields });
+  handleClearFilter = () => {
+    this.setState({
+      filteredData: null,
+      name: "",
+      subject: "",
+      template: "",
+      createdStart: "",
+      createdEnd: ""
+    });
+  };
+
+  handleFilterInput = e => {
+    const { name, value } = e.target;
+    this.setState({ [name]: value });
+  };
+
+  filterTableData = () => {
+    const {
+      name,
+      patientName,
+      template,
+      createdStart,
+      createdEnd
+    } = this.state;
+    if (!(name || patientName || template || createdStart || createdEnd)) {
+      return;
     } else {
-      description = description ? description : "";
-      //   saveWorklist(user, id, description, name)
-      //     .then(() => {
-      //       this.getWorkListData();
-      //     })
-      //     .catch(error =>
-      //       toast.error(
-      //         messages.addWorklistError + ": " + error.response.data.message,
-      //         {
-      //           autoClose: false
-      //         }
-      //       )
-      //     );
-      this.handleCancel();
+      let filteredData = [].concat(this.state.annotations);
+      filteredData = name
+        ? this.filterText(filteredData, "name")
+        : filteredData;
+      filteredData = patientName
+        ? this.filterText(filteredData, "patientName")
+        : filteredData;
+      filteredData = template
+        ? this.filterText(filteredData, "template")
+        : filteredData;
+      filteredData = createdStart
+        ? this.filterStartDate(filteredData)
+        : filteredData;
+      filteredData = createdEnd
+        ? this.filterEndDate(filteredData)
+        : filteredData;
+      this.setState({ filteredData });
     }
   };
 
-  handleClearFilter = () => {
-    this.setState({ filteredData: null });
+  filterText = (arr, propName) => {
+    const result = [];
+    const input = this.state[propName].toLowerCase();
+    for (let ann of arr) {
+      if (ann[propName].toLowerCase().includes(input)) {
+        result.push(ann);
+      }
+    }
+    return result;
+  };
+
+  filterStartDate = arr => {
+    const result = [];
+    if (this.validateDateFormat(this.state.createdStart)) {
+      const input = new Date(this.state.createdStart);
+      for (let ann of arr) {
+        console.log("===========================");
+        console.log("raw date", ann.date);
+        console.log(ann.date.split(" ")[0]);
+        let date = new Date(ann.date.split(" ")[0] + " 00:00:00");
+        // console.log("in loop");
+        // console.log("input", input);
+        console.log("arr date", date);
+        console.log("===========================");
+        if (date >= input) {
+          result.push(ann);
+        }
+      }
+    }
+    return result;
+  };
+
+  filterEndDate = arr => {
+    console.log(arr);
+    const result = [];
+    if (this.validateDateFormat(this.state.createdEnd)) {
+      const input = new Date(this.state.createdEnd);
+      for (let ann of arr) {
+        let date = new Date(ann.date.split(" ")[0] + " 00:00:00");
+        console.log("in loop");
+        console.log("input", input);
+        console.log("arr date", date);
+        if (date <= input) {
+          console.log("passed if");
+          result.push(ann);
+        }
+      }
+    }
+    return result;
+  };
+
+  formatDate = dateString => {
+    const dateArr = dateString.split("-");
+    dateArr[0] = dateArr[0].substring(2);
+    dateArr[1] = dateArr[1][0] === "0" ? dateArr[1][1] : dateArr[1];
+    dateArr[2] = dateArr[2][0] === "0" ? dateArr[2][1] : dateArr[2];
+    return dateArr[1] + "/" + dateArr[2] + "/" + dateArr[0];
+  };
+
+  validateDateFormat = dateString => {
+    const dateArr = dateString.split("/");
+    console.log(dateArr);
+    const validFormat = dateArr.length === 3;
+    let validMonth;
+    let validDay;
+    let validYear;
+
+    if (validFormat) {
+      validMonth = parseInt(dateArr[0]) <= 12 && parseInt(dateArr[0]) >= 1;
+      validDay = parseInt(dateArr[1]) <= 31 && parseInt(dateArr[1]) >= 1;
+      validYear = dateArr[2].length === 2;
+    }
+    const isValid = validFormat && validMonth && validDay && validYear;
+    if (!isValid) toast.warn(messages.dateFormat + " - " + dateString);
+    return isValid;
   };
 
   defineColumns = () => {
@@ -268,9 +354,43 @@ class Annotations extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
+        accessor: "studyDate",
+        filterMethod: (filter, rows) =>
+          matchSorter(rows, filter.value, { keys: ["date"] }),
+        filterAll: true,
         Cell: original => {
           const studyDateArr = original.row.checkbox.studyDate.split(" ");
-          return <div>{studyDateArr[0]}</div>;
+          return <div>{this.formatDate(studyDateArr[0])}</div>;
+        }
+      },
+      {
+        Header: "Created",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 50,
+        accessor: "date",
+        filterMethod: (filter, rows) =>
+          matchSorter(rows, filter.value, { keys: ["date"] }),
+        filterAll: true,
+        Cell: original => {
+          const studyDateArr = original.row.checkbox.date.split(" ");
+          return <div>{this.formatDate(studyDateArr[0])}</div>;
+        }
+      },
+      {
+        Header: "Created Time",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 50,
+        accessor: "date",
+        filterMethod: (filter, rows) =>
+          matchSorter(rows, filter.value, { keys: ["time"] }),
+        filterAll: true,
+        Cell: original => {
+          const studyDateArr = original.row.checkbox.date.split(" ");
+          return <div>{studyDateArr[1]}</div>;
         }
       }
     ];
@@ -288,6 +408,8 @@ class Annotations extends React.Component {
           projects={this.state.projectList}
           onSelect={this.handleProjectSelect}
           onClear={this.handleClearFilter}
+          onType={this.handleFilterInput}
+          onFilter={this.filterTableData}
         />
         <Table
           className="pro-table"

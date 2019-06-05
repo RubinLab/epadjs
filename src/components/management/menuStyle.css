@@ -335,7 +335,7 @@
 
 .filter-group {
   display: flex;
-  min-width: 750px;
+  /* min-width: 750px; */
 }
 
 .annotations-toolbar {
