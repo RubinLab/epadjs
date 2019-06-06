@@ -335,7 +335,11 @@
 
 .filter-group {
   display: flex;
-  /* min-width: 750px; */
+  width: 80%;
+}
+
+.annotation-toolbar__icon {
+  width: 3%;
 }
 
 .annotations-toolbar {

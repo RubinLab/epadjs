@@ -100,7 +100,7 @@ class WorkList extends React.Component {
     });
   };
 
-  deleteAllSelected = async () => {
+  deleteAllSelected = () => {
     let newSelected = Object.assign({}, this.state.selected);
     const promiseArr = [];
     for (let project in newSelected) {

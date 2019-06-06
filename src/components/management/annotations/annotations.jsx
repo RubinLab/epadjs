@@ -3,15 +3,19 @@ import PropTypes from "prop-types";
 import Table from "react-table";
 import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
-import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
-import { getSummaryAnnotations } from "../../../services/annotationServices";
+import { FaRegEye } from "react-icons/fa";
+import {
+  getSummaryAnnotations,
+  deleteAnnotation
+} from "../../../services/annotationServices";
 import { getProjects } from "../../../services/projectServices";
 import { Link } from "react-router-dom";
 import matchSorter from "match-sorter";
 import { isLite } from "../../../config.json";
+import DeleteAlert from "../common/alertDeletionModal";
 
 const messages = {
-  deleteSelected: "Delete selected projects? This cannot be undone.",
+  deleteSelected: "Delete selected annotations? This cannot be undone.",
   fillRequiredFields: "Please fill the required fields",
   dateFormat: "Date format should be M/d/yy."
 };
@@ -84,7 +88,8 @@ class Annotations extends React.Component {
     this.setState({ name: value });
   };
 
-  toggleRow = async (id, name) => {
+  toggleRow = async (id, projectID) => {
+    projectID = projectID ? projectID : "lite";
     let newSelected = Object.assign({}, this.state.selected);
     if (newSelected[id]) {
       newSelected[id] = false;
@@ -95,7 +100,7 @@ class Annotations extends React.Component {
         });
       }
     } else {
-      newSelected[id] = name;
+      newSelected[id] = projectID;
       await this.setState({
         selectAll: 2
       });
@@ -132,16 +137,16 @@ class Annotations extends React.Component {
   deleteAllSelected = async () => {
     let newSelected = Object.assign({}, this.state.selected);
     const promiseArr = [];
-    for (let project in newSelected) {
-      //   promiseArr.push(deleteWorklist(newSelected[project], project));
+    for (let annotation in newSelected) {
+      promiseArr.push(deleteAnnotation(annotation, newSelected[annotation]));
     }
     Promise.all(promiseArr)
       .then(() => {
-        this.getWorkListData();
+        this.getAnnotationsData();
       })
       .catch(error => {
         toast.error(error.response.data.message, { autoClose: false });
-        this.getWorkListData();
+        this.getAnnotationsData();
       });
     this.handleCancel();
   };
@@ -287,7 +292,9 @@ class Annotations extends React.Component {
               type="checkbox"
               className="checkbox-cell"
               checked={this.state.selected[original.aimID]}
-              onChange={() => this.toggleRow(original.aimID)}
+              onChange={() =>
+                this.toggleRow(original.aimID, original.projectID)
+              }
             />
           );
         },
@@ -441,14 +448,14 @@ class Annotations extends React.Component {
           data={this.state.filteredData || this.state.annotations}
           columns={this.defineColumns()}
         />
-        {/* {this.state.deleteAllClicked && (
+        {this.state.deleteAllClicked && (
           <DeleteAlert
             message={messages.deleteSelected}
             onCancel={this.handleCancel}
             onDelete={this.deleteAllSelected}
             error={this.state.errorMessage}
           />
-        )} */}
+        )}
       </div>
     );
   };

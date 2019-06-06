@@ -80,7 +80,7 @@ const toolBar = props => {
       {!isLite && (
         <>
           <>
-            <div>
+            <div className="annotation-toolbar__icon">
               <FaLayerGroup
                 className="tool-icon"
                 data-tip
@@ -97,7 +97,7 @@ const toolBar = props => {
             </ReactTooltip>
           </>
           <>
-            <div onClick={onDelete}>
+            <div onClick={onDelete} className="annotation-toolbar__icon">
               <FaLocationArrow
                 className="tool-icon"
                 onClick={onDelete}
@@ -117,7 +117,7 @@ const toolBar = props => {
         </>
       )}
       <>
-        <div onClick={onDelete}>
+        <div onClick={onDelete} className="annotation-toolbar__icon">
           <FaRegTrashAlt
             className="tool-icon"
             onClick={onDelete}
@@ -201,6 +201,7 @@ const toolBar = props => {
       </div>
       <>
         <div
+          className="annotation-toolbar__icon"
           onClick={() => {
             onFilter();
           }}
@@ -218,6 +219,7 @@ const toolBar = props => {
       </>
       <>
         <div
+          className="annotation-toolbar__icon"
           onClick={() => {
             clearFilters();
             onClear();

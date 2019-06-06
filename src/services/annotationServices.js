@@ -79,3 +79,10 @@ export function getSummaryAnnotations(projectID) {
     ? http.get(apiUrl + "/projects/lite/aims?format=summary")
     : http.get(apiUrl + "/projects/" + projectID + "/aims/?format=summary");
 }
+
+export function deleteAnnotation(aimID, projectID) {
+  return http.delete(
+    apiUrl + "/epad/v2/projects/" + projectID + "/aims/" + aimID
+    // +"?deleteDSO=true"
+  );
+}
