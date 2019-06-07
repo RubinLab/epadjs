@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import {
   FaDownload,
   FaUpload,
-  FaLayerGroup,
+  FaShareSquare,
   FaLocationArrow,
   FaRegTrashAlt,
   FaFilter,
@@ -81,7 +81,7 @@ const toolBar = props => {
         <>
           <>
             <div className="annotation-toolbar__icon">
-              <FaLayerGroup
+              <FaShareSquare
                 className="tool-icon"
                 data-tip
                 data-for="applyParalel-icon"

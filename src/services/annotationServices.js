@@ -82,7 +82,11 @@ export function getSummaryAnnotations(projectID) {
 
 export function deleteAnnotation(aimID, projectID) {
   return http.delete(
-    apiUrl + "/epad/v2/projects/" + projectID + "/aims/" + aimID
-    // +"?deleteDSO=true"
+    apiUrl +
+      "/epad/v2/projects/" +
+      projectID +
+      "/aims/" +
+      aimID +
+      "?deleteDSO=true"
   );
 }
