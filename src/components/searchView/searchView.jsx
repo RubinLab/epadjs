@@ -27,7 +27,6 @@ import {
 import { MAX_PORT } from "../../constants";
 import DownloadSelection from "./annotationDownloadModal";
 import "./searchView.css";
-import DownloadSelection from "./annotationDownloadModal";
 import UploadModal from "./uploadModal";
 import { toast } from "react-toastify";
 import { isLite } from "../../config";
