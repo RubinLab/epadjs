@@ -37,10 +37,11 @@ class UploadModal extends React.Component {
         "content-type": "multipart/form-data"
       }
     };
+
     this.props.onSubmit();
     uploadFile(formData, config)
       .then(() => {
-        this.props.onSubmit(1);
+        this.props.onSubmit();
       })
       .catch(err => {
         const fileName = this.state.file.name.substring(0, 50);

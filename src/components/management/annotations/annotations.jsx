@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import matchSorter from "match-sorter";
 import { isLite } from "../../../config.json";
 import DeleteAlert from "../common/alertDeletionModal";
+import UploadModal from "../../searchView/uploadModal";
 
 const messages = {
   deleteSelected: "Delete selected annotations? This cannot be undone.",
@@ -30,7 +31,8 @@ class Annotations extends React.Component {
     deleteAllClicked: false,
     selectAll: 0,
     selected: {},
-    filteredData: null
+    filteredData: null,
+    uploadClicked: false
   };
 
   componentDidMount = async () => {
@@ -55,6 +57,10 @@ class Annotations extends React.Component {
     } = await getSummaryAnnotations(projectID);
     if (isLite) {
       for (let ann of annotations) {
+        console.log(ann);
+        ann.date = ann.date + "";
+        ann.studyDate = ann.studyDate + "";
+
         let year1 = ann.date.substring(0, 4);
         let month1 = ann.date.substring(4, 6);
         let day1 = ann.date.substring(6, 8);
@@ -130,7 +136,8 @@ class Annotations extends React.Component {
       user: "",
       description: "",
       error: "",
-      deleteAllClicked: false
+      deleteAllClicked: false,
+      uploadClicked: false
     });
   };
 
@@ -428,6 +435,10 @@ class Annotations extends React.Component {
     ];
   };
 
+  handleUpload = () => {
+    this.setState({ uploadClicked: true });
+  };
+
   render = () => {
     console.log(this.state);
     const checkboxSelected = Object.values(this.state.selected).length > 0;
@@ -435,13 +446,13 @@ class Annotations extends React.Component {
       <div className="worklist menu-display" id="worklist">
         <ToolBar
           onDelete={this.handleDeleteAll}
-          onAdd={this.handleAddWorklist}
           selected={checkboxSelected}
           projects={this.state.projectList}
           onSelect={this.handleProjectSelect}
           onClear={this.handleClearFilter}
           onType={this.handleFilterInput}
           onFilter={this.filterTableData}
+          onUpload={this.handleUpload}
         />
         <Table
           className="pro-table"
@@ -454,6 +465,12 @@ class Annotations extends React.Component {
             onCancel={this.handleCancel}
             onDelete={this.deleteAllSelected}
             error={this.state.errorMessage}
+          />
+        )}
+        {this.state.uploadClicked && (
+          <UploadModal
+            onCancel={this.handleCancel}
+            onSubmit={() => console.log("upload call")}
           />
         )}
       </div>

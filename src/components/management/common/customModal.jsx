@@ -1,5 +1,5 @@
-import React from 'react';
-import ResizeAndDrag from './resizeAndDrag';
+import React from "react";
+import ResizeAndDrag from "./resizeAndDrag";
 
 const customModal = props => {
   return (
@@ -8,6 +8,7 @@ const customModal = props => {
       <div className="modal-content-div">
         <ResizeAndDrag>
           <div className="modal-dialog-div">{props.children}</div>
+          {/* {props.children} */}
         </ResizeAndDrag>
       </div>
     </div>

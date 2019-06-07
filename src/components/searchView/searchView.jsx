@@ -68,7 +68,7 @@ class SearchView extends Component {
     return data;
   };
 
-  updateUploadStatus = async count => {
+  updateUploadStatus = async => {
     this.setState(state => {
       return { uploading: !state.uploading };
     });

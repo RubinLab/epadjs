@@ -1,4 +1,5 @@
 import React from "react";
+import ReactModal from "react-modal-resizable-draggable";
 import Modal from "./common/customModal";
 // import Modal from '../common/rndBootModal';
 import Users from "./users";
@@ -92,6 +93,15 @@ class MainMenu extends React.Component {
             {this.selectDisplay()}
           </Modal>
         )}
+        {/* <ReactModal
+          initWidth={800}
+          initHeight={400}
+          onRequestClose={this.handleCloseModal}
+          isOpen={this.state.isModalOpen}
+          left={20}
+        >
+          {this.selectDisplay()}
+        </ReactModal> */}
       </div>
     );
   }
