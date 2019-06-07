@@ -4,23 +4,33 @@ import axios from "axios";
 import auth from "./authService";
 
 // axios.defaults.withCredentials = false;
-console.log(auth.getAuthHeader1());
-axios.defaults.headers.common["Authorization"] = auth.getAuthHeader1();
-// axios.defaults.headers.common["Transfer-Encoding"] = "chunked";
 axios.defaults.headers.common["Content-Type"] =
   "application/json, multipart/form-data";
 
+axios.interceptors.request.use(
+  config => {
+    config.headers.authorization = auth.getAuthHeader1();
+    return config;
+  },
+  error => Promise.reject(error)
+);
+
 axios.interceptors.response.use(null, error => {
-  console.log("ERROR::", error.response.data);
-  if (error.response.status === 401) {
+  console.log("ERROR::");
+  console.log(error);
+  // console.log("ERROR::", error.response.data);
+  if (error.response && error.response.status === 401) {
     //possibly session expired so logout the user and redirect to login
     auth.logout();
   }
 
-  const expectedError =
-    error.response &&
-    error.response.status >= 400 &&
-    error.response.status < 500;
+  let expectedError;
+  if (error.response) {
+    expectedError =
+      error.response &&
+      error.response.status >= 400 &&
+      error.response.status < 500;
+  }
 
   if (!expectedError) {
     console.log("Logging the error", error);

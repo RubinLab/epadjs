@@ -2,9 +2,11 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import ReactTable from "react-table";
+import { toast } from "react-toastify";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
-import { MAX_PORT } from "../../constants";
+import ReactTooltip from "react-tooltip";
+import { MAX_PORT, formatDates } from "../../constants";
 import { getAnnotations } from "../../services/annotationServices";
 import {
   displaySingleAim,
@@ -37,7 +39,7 @@ function getNodes(data, node = []) {
 class Annotations extends Component {
   constructor(props) {
     super(props);
-
+    this.widthUnit = 20;
     this.series = Object.assign({}, this.props);
     this.state = {
       columns: [],
@@ -56,6 +58,16 @@ class Annotations extends Component {
     } = await getAnnotations(this.series);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
+    if (data.length === 0) {
+      toast.info("No annotations found", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
   }
 
   selectRow = selected => {
@@ -71,7 +83,7 @@ class Annotations extends Component {
       {
         id: "checkbox",
         accessor: "",
-        width: 30,
+        width: this.widthUnit,
         Cell: ({ original }) => {
           return (
             <input
@@ -85,19 +97,93 @@ class Annotations extends Component {
       },
       {
         Header: "Annotation Name",
-        Cell: row => <div>{row.original.name || "Unnamed annotation"}</div>
+        width: this.widthUnit * 10,
+        Cell: row => {
+          let desc = row.original.name || "Unnamed annotation";
+          let id = "aimName-tool" + row.original.aimID;
+          return (
+            <>
+              <div data-tip data-for={id}>
+                {desc}
+              </div>
+              <ReactTooltip
+                id={id}
+                place="right"
+                type="info"
+                delayShow={500}
+                clickable={true}
+              >
+                <span>{desc}</span>
+              </ReactTooltip>
+            </>
+          );
+        }
+      },
+      {
+        //no of aims
+        width: this.widthUnit * 2,
+        Cell: row => <div />
+      },
+      {
+        //no of sub item
+        width: this.widthUnit * 3,
+        Cell: row => <div />
+      },
+      {
+        //no of sub images
+        width: this.widthUnit * 3,
+        Cell: row => <div />
       },
       {
         Header: "Type",
-        Cell: row => <div>{row.original.template}</div>
+        width: this.widthUnit * 5,
+        Cell: row => (
+          <div className="searchView-table__cell">{row.original.template}</div>
+        )
       },
       {
         Header: "Created Date",
-        Cell: row => row.original.date
+        width: this.widthUnit * 7,
+        Cell: row => {
+          return (
+            <div className="searchView-table__cell">
+              {formatDates(row.original.date)}
+            </div>
+          );
+        }
+      },
+      {
+        //upload date
+        width: this.widthUnit * 7,
+        Cell: row => <div />
+      },
+      {
+        //uaccession
+        width: this.widthUnit * 6,
+        Cell: row => <div />
       },
       {
         Header: "Identifier",
-        Cell: row => row.original.aimID
+        width: this.widthUnit * 10,
+        Cell: row => {
+          let id = "aimid-tool" + row.original.aimID;
+          return (
+            <>
+              <div data-tip data-for={id}>
+                {row.original.aimID}
+              </div>
+              <ReactTooltip
+                id={id}
+                place="right"
+                type="info"
+                delayShow={500}
+                clickable={true}
+              >
+                <span>{row.original.aimID}</span>
+              </ReactTooltip>
+            </>
+          );
+        }
       }
     ];
     return columns;
@@ -219,7 +305,7 @@ class Annotations extends Component {
     if (this.checkIfSerieOpen(seriesUID).isOpen) {
       const { index } = this.checkIfSerieOpen(seriesUID);
       this.props.dispatch(changeActivePort(index));
-      this.props.dispatch(jumpToAim(aimID, index));
+      this.props.dispatch(jumpToAim(seriesUID, aimID, index));
     } else {
       if (isGridFull) {
         this.props.dispatch(alertViewPortFull());
@@ -243,6 +329,7 @@ class Annotations extends Component {
         }
       }
     }
+    this.props.dispatch(clearSelection());
   };
 
   render() {
@@ -270,6 +357,7 @@ class Annotations extends Component {
       <div style={{ paddingLeft: "35px" }}>
         {this.state.data ? (
           <TreeTable
+            NoDataComponent={() => null}
             data={this.state.data}
             columns={this.state.columns}
             defaultPageSize={this.state.data.length}

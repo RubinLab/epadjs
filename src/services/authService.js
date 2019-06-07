@@ -1,5 +1,8 @@
+"use strict";
+
 import btoa from "btoa-lite";
 import http from "./httpService";
+import { getUser } from "./userServices";
 import { apiUrlV1, clientKey } from "../config.json";
 import { isLite } from "./../config.json";
 
@@ -7,16 +10,19 @@ const apiEndpoint = apiUrlV1 + "/session/";
 
 export async function login(username, password, keyCloakToken) {
   let basicAuth;
+  let header;
   if (isLite) {
-    console.log("keyclok token", keyCloakToken);
+    // await http.post(apiUrlV1, {}, { headers: header });
     basicAuth = "Bearer " + keyCloakToken;
     sessionStorage.setItem("token", keyCloakToken);
     sessionStorage.setItem("username", username.user);
+    sessionStorage.setItem("displayName", username.user); //TODO: change with fullname
+    // http.post(apiUrlV1, {}, { headers: header });
     /*********************************** REMOVE IN PROD  **************************/
     sessionStorage.setItem("header", basicAuth);
   } else {
     basicAuth = "Basic " + btoa(username + ":" + password);
-    const header = {
+    header = {
       Authorization: basicAuth
     };
     const { data: token } = await http.post(
@@ -26,6 +32,7 @@ export async function login(username, password, keyCloakToken) {
     );
     sessionStorage.setItem("token", token);
     sessionStorage.setItem("username", username);
+    sessionStorage.setItem("displayName", username);
     /*********************************** REMOVE IN PROD  **************************/
     sessionStorage.setItem("header", basicAuth);
   }
@@ -37,7 +44,6 @@ export function logout() {
 }
 
 export function getCurrentUser() {
-  console.log("in get user", sessionStorage.getItem("username"));
   return sessionStorage.getItem("username");
 }
 

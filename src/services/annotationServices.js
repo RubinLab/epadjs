@@ -89,4 +89,9 @@ export function deleteAnnotation(aimID, projectID) {
       aimID +
       "?deleteDSO=true"
   );
+export function uploadAim(formData) {
+  const url = apiUrl + "/projects/lite/aims";
+
+  console.log("url is", url);
+  return http.post(url, formData);
 }

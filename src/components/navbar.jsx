@@ -6,7 +6,6 @@ import { connect } from "react-redux";
 import { isLite } from "../config.json";
 
 const NavBar = ({ user, openGearMenu, loading, logout }) => {
-  console.log(user);
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">

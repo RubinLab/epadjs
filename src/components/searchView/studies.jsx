@@ -1,14 +1,17 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import ReactTable from "react-table";
+import { withRouter } from "react-router-dom";
 import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf } from "react-icons/fa";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
+import { toast } from "react-toastify";
 import { getStudies } from "../../services/studyServices";
 import { getSeries } from "../../services/seriesServices";
 import ProjectModal from "../annotationsList/selectSerieModal";
-import { MAX_PORT } from "../../constants";
+import { MAX_PORT, widthUnit, formatDates } from "../../constants";
 import Series from "./series";
+import ReactTooltip from "react-tooltip";
 import {
   getSingleSerie,
   getAnnotationListData,
@@ -53,7 +56,7 @@ const TreeTable = treeTableHOC(ReactTable);
 class Studies extends Component {
   constructor(props) {
     super(props);
-
+    this.widthUnit = 20;
     this.state = {
       columns: [],
       selection: [],
@@ -73,6 +76,27 @@ class Studies extends Component {
     } = await getStudies(this.props.projectId, this.props.subjectId);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
+    if (data.length === 0) {
+      toast.info("No study found", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
+  }
+
+  async componentDidUpdate(prevProps) {
+    if (this.props.update !== prevProps.update) {
+      const {
+        data: {
+          ResultSet: { Result: data }
+        }
+      } = await getStudies(this.props.projectId, this.props.subjectId);
+      this.setState({ data });
+    }
   }
 
   selectRow = selected => {
@@ -87,12 +111,21 @@ class Studies extends Component {
     this.props.dispatch(selectStudy(selected));
   };
 
+  cleanCarets(string) {
+    var i = 0,
+      length = string.length;
+    for (i; i < length; i++) {
+      string = string.replace("^", " ");
+    }
+    return string;
+  }
+
   setColumns() {
     const columns = [
       {
-        id: "checkbox",
+        id: "searchView-checkbox",
         accessor: "",
-        width: 30,
+        width: this.widthUnit,
         Cell: ({ original }) => {
           return (
             <input
@@ -105,51 +138,68 @@ class Studies extends Component {
         }
       },
       {
-        /*Header: (
-          <div>
-            Study Description{" "}
-            <span className="badge badge-secondary"> # of Annotations </span>
-          </div>
-        ),*/
+        width: this.widthUnit * 12,
+        Cell: row => {
+          let desc = this.cleanCarets(row.original.studyDescription);
+          desc = desc || "Unnamed Study";
+          const id = "desc" + row.original.studyUID;
+          return (
+            <>
+              <div data-tip data-for={id}>
+                {desc}
+              </div>
+              <ReactTooltip
+                id={id}
+                place="right"
+                type="info"
+                delayShow={500}
+                clickable={true}
+              >
+                <span>{desc}</span>
+              </ReactTooltip>
+            </>
+          );
+        }
+      },
+      {
+        width: this.widthUnit * 2,
         Cell: row => (
-          <div>
-            {row.original.studyDescription || "Unnamed Study"} &nbsp;
-            {row.original.numberOfAnnotations === "" ? (
-              "merru"
+          <div className="searchView-table__cell">
+            <span className="badge badge-secondary">
+              {row.original.numberOfAnnotations === 0 ? (
+                ""
+              ) : (
+                <span className="badge badge-secondary">
+                  {row.original.numberOfAnnotations}
+                </span>
+              )}
+            </span>
+          </div>
+        )
+      },
+      {
+        width: this.widthUnit * 3,
+        Cell: row => (
+          <div className="searchView-table__cell">
+            {row.original.numberOfSeries === "" ? (
+              ""
             ) : (
               <span className="badge badge-secondary">
-                {" "}
-                {row.original.numberOfAnnotations}{" "}
+                {row.original.numberOfSeries}{" "}
               </span>
             )}
           </div>
         )
       },
       {
-        /*Header: (
-          <div>
-            <span className="badge badge-secondary"> # of Series </span>
-            &nbsp;&nbsp;
-            <span className="badge badge-secondary"> # of Images </span>
-          </div>
-        ),*/
+        width: this.widthUnit * 3,
         Cell: row => (
-          <div>
-            {row.original.numberOfSeries === "" ? (
-              ""
-            ) : (
-              <span className="badge badge-secondary">
-                {" "}
-                {row.original.numberOfSeries}{" "}
-              </span>
-            )}
-            &nbsp;&nbsp;
+          <div className="searchView-table__cell">
             {row.original.numberOfImages === "" ? (
               ""
             ) : (
               <span className="badge badge-secondary">
-                {" "}
-                {row.original.numberOfImages}{" "}
+                {row.original.numberOfImages}
               </span>
             )}
           </div>
@@ -157,29 +207,74 @@ class Studies extends Component {
       },
       {
         //Header: "Type",
-        Cell: row => row.original.examTypes.join("/")
-      },
-      {
-        //Header: "Ready",
+        width: this.widthUnit * 5,
         Cell: row => (
-          <div>{progressDisplay(row.original.studyProcessingStatus)}</div>
+          <div className="searchView-table__cell">
+            {row.original.examTypes.join("/")}
+          </div>
         )
       },
       {
         //Header: "Study/Created Date",
-        Cell: row => row.original.insertDate
+        width: this.widthUnit * 7,
+        Cell: row => (
+          <div className="searchView-table__cell">
+            {formatDates(row.original.insertDate)}
+          </div>
+        )
       },
       {
         //Header: "Uploaded",
-        Cell: row => row.original.createdTime
+        width: this.widthUnit * 7,
+        Cell: row => (
+          <div className="searchView-table__cell">
+            {formatDates(row.original.createdTime)}
+          </div>
+        )
       },
       {
         //Header: "Accession",
-        Cell: row => row.original.studyAccessionNumber
+        width: this.widthUnit * 6,
+        Cell: row => (
+          <>
+            <div
+              className="searchView-table__cell"
+              data-tip
+              data-for={row.original.studyAccessionNumber}
+            >
+              {row.original.studyAccessionNumber}
+            </div>
+            <ReactTooltip
+              id={row.original.studyAccessionNumber}
+              place="right"
+              type="info"
+              delayShow={500}
+              clickable={true}
+            >
+              <span>{row.original.studyAccessionNumber}</span>
+            </ReactTooltip>
+          </>
+        )
       },
       {
         //Header: "Identifier",
-        Cell: row => row.original.studyUID
+        width: this.widthUnit * 10,
+        Cell: row => (
+          <>
+            <div data-tip data-for={row.original.studyUID}>
+              {row.original.studyUID}
+            </div>{" "}
+            <ReactTooltip
+              id={row.original.studyUID}
+              place="right"
+              type="info"
+              delayShow={500}
+              clickable={true}
+            >
+              <span>{row.original.studyUID}</span>
+            </ReactTooltip>
+          </>
+        )
       }
     ];
     return columns;
@@ -356,7 +451,9 @@ class Studies extends Component {
           );
         }
       }
+      this.props.dispatch(clearSelection());
     }
+    this.props.history.push("/display");
   };
 
   closeSelectionModal = () => {
@@ -390,6 +487,7 @@ class Studies extends Component {
       <div>
         {this.state.data ? (
           <TreeTable
+            NoDataComponent={() => null}
             data={this.state.data}
             columns={this.state.columns}
             defaultPageSize={this.state.data.length}
@@ -438,4 +536,4 @@ const mapStateToProps = state => {
     showProjectModal: state.annotationsListReducer.showProjectModal
   };
 };
-export default connect(mapStateToProps)(Studies);
+export default withRouter(connect(mapStateToProps)(Studies));

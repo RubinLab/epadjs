@@ -71,14 +71,13 @@ class AnnotationsList extends React.Component {
   };
 
   handleToggleSingleLabel = e => {
-    console.log("here", e.target.dataset);
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
   };
 
   handleJumToAim = e => {
-    const { id } = e.target.dataset;
-    this.props.dispatch(jumpToAim(id, this.props.activePort));
+    const { id, serie } = e.target.dataset;
+    this.props.dispatch(jumpToAim(serie, id, this.props.activePort));
   };
 
   render = () => {
@@ -113,34 +112,37 @@ class AnnotationsList extends React.Component {
           showLabel={aim.showLabel}
           onSingleToggle={this.handleToggleSingleLabel}
           jumpToAim={this.handleJumToAim}
+          serie={seriesUID}
         />
       );
     });
     return (
-      <div className="annotationList-container">
-        <div className="label-toggle">
-          <div className="label-toggle__text">Show Labels</div>
-          <Switch
-            onChange={this.handleToggleAllLabels}
-            checked={this.state.labelDisplayAll}
-            className="react-switch"
-            uncheckedIcon={false}
-            checkedIcon={false}
-          />
-        </div>
-        <div className="label-toggle">
-          <div className="label-toggle__text">Show Annotations</div>
-          <Switch
-            onChange={this.handleToggleAllAnnotations}
-            checked={this.state.annsDisplayAll}
-            className="react-switch"
-            uncheckedIcon={false}
-            checkedIcon={false}
-          />
-        </div>
+      <React.Fragment>
+        <div className="annotationList-container">
+          <div className="label-toggle">
+            <div className="label-toggle__text">Show Labels</div>
+            <Switch
+              onChange={this.handleToggleAllLabels}
+              checked={this.state.labelDisplayAll}
+              className="react-switch"
+              uncheckedIcon={false}
+              checkedIcon={false}
+            />
+          </div>
+          <div className="label-toggle">
+            <div className="label-toggle__text">Show Annotations</div>
+            <Switch
+              onChange={this.handleToggleAllAnnotations}
+              checked={this.state.annsDisplayAll}
+              className="react-switch"
+              uncheckedIcon={false}
+              checkedIcon={false}
+            />
+          </div>
 
-        <div>{annList}</div>
-      </div>
+          <div>{annList}</div>
+        </div>
+      </React.Fragment>
     );
   };
 }

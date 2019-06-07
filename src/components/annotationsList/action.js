@@ -2,6 +2,9 @@ import {
   LOAD_ANNOTATIONS,
   LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
+  LOAD_PATIENT,
+  LOAD_PATIENT_SUCCESS,
+  LOAD_PATIENT_ERROR,
   VIEWPORT_FULL,
   UPDATE_ANNOTATION_DISPLAY,
   TOGGLE_ALL_ANNOTATIONS,
@@ -30,7 +33,9 @@ import {
 } from "./types";
 
 import { getSeries } from "../../services/seriesServices";
+
 import { getStudies } from "../../services/studyServices";
+
 import {
   getAnnotations,
   getAnnotationsJSON
@@ -40,10 +45,9 @@ export const clearGrid = item => {
   return { type: CLEAR_GRID };
 };
 
-export const closeSerie = (serie, index) => {
+export const closeSerie = () => {
   return {
-    type: CLOSE_SERIE,
-    payload: { serie, index }
+    type: CLOSE_SERIE
   };
 };
 export const updatePatient = (
@@ -69,10 +73,20 @@ export const loadCompleted = () => {
 export const startLoading = () => {
   return { type: START_LOADING };
 };
-export const jumpToAim = (aimID, index) => {
+export const loadPatient = () => {
+  return { type: LOAD_PATIENT };
+};
+export const loadPatientError = err => {
+  return { type: LOAD_PATIENT_ERROR, err };
+};
+
+export const loadPatientSuccess = patient => {
+  return { type: LOAD_PATIENT_SUCCESS, patient };
+};
+export const jumpToAim = (seriesUID, aimID, index) => {
   return {
     type: JUMP_TO_AIM,
-    payload: { aimID, index }
+    payload: { seriesUID, aimID, index }
   };
 };
 export const displaySingleAim = (
@@ -84,31 +98,46 @@ export const displaySingleAim = (
 ) => {
   return {
     type: DISPLAY_SINGLE_AIM,
+
     payload: { patientID, studyUID, seriesUID, aimID }
   };
 };
+
 export const selectPatient = selectedPatientObj => {
   const { projectID, subjectID } = selectedPatientObj;
+
   return { type: SELECT_PATIENT, patient: { projectID, subjectID } };
 };
 
 export const selectStudy = selectedStudyObj => {
   const {
     studyUID,
+
     patientID,
+
     projectID,
+
     studyDescription,
+
     patientName,
+
     numberOfSeries
   } = selectedStudyObj;
+
   return {
     type: SELECT_STUDY,
+
     study: {
       studyUID,
+
       patientID,
+
       projectID,
+
       studyDescription,
+
       patientName,
+
       numberOfSeries
     }
   };
@@ -117,19 +146,30 @@ export const selectStudy = selectedStudyObj => {
 export const selectSerie = (selectedSerieObj, studyDescription) => {
   const {
     seriesUID,
+
     studyUID,
+
     patientID,
+
     projectID,
+
     patientName,
+
     seriesDescription
   } = selectedSerieObj;
+
   return {
     type: SELECT_SERIE,
+
     serie: {
       seriesUID,
+
       studyUID,
+
       patientID,
+
       projectID,
+
       patientName,
       seriesDescription,
       studyDescription
@@ -144,21 +184,34 @@ export const selectAnnotation = (
 ) => {
   const {
     aimID,
+
     seriesUID,
+
     studyUID,
+
     subjectID,
+
     projectID,
+
     patientName,
+
     name
   } = selectedAnnotationObj;
+
   return {
     type: SELECT_ANNOTATION,
+
     annotation: {
       aimID,
+
       seriesUID,
+
       studyUID,
+
       subjectID,
+
       projectID,
+
       patientName,
       name,
       studyDescription,
@@ -194,12 +247,12 @@ const loadAnnotations = () => {
   };
 };
 
-export const getPatient = patient => {
-  return {
-    type: GET_PATIENT,
-    patient
-  };
-};
+// export const getPatient = patient => {
+//   return {
+//     type: GET_PATIENT,
+//     patient
+//   };
+// };
 export const openProjectSelectionModal = () => {
   return {
     type: OPEN_PROJECT_MODAL
@@ -252,7 +305,6 @@ export const toggleAllLabels = (serieID, checked) => {
 };
 
 export const toggleSingleLabel = (serieID, aimID) => {
-  console.log("fired action");
   return {
     type: TOGGLE_LABEL,
     payload: { serieID, aimID }
@@ -284,7 +336,10 @@ const getAimListFields = (aims, ann) => {
 
     let name = aim.imageAnnotations.ImageAnnotation.name.value;
     let ind = name.indexOf("~");
-    name = name.substring(0, ind);
+    if (ind >= 0) {
+      name = name.substring(0, ind);
+    }
+
     let displayStatus = ann ? ann === aim.uniqueIdentifier.root : !ann;
     result[aim.uniqueIdentifier.root] = {
       name,
@@ -464,7 +519,7 @@ const getSingleSerieData = (serie, annotation) => {
 
 export const getWholeData = (serie, study, annotation) => {
   return async (dispatch, getState) => {
-    dispatch(loadAnnotations());
+    dispatch(loadPatient());
     let { projectID, patientID, patientName, studyUID } =
       serie || study || annotation;
     if (annotation) patientID = annotation.subjectID;
@@ -489,7 +544,7 @@ export const getWholeData = (serie, study, annotation) => {
         ? await getStudiesData(summaryData, projectID, patientID, selectedID)
         : await getStudiesData(summaryData, projectID, patientID);
     } catch (error) {
-      dispatch(annotationsLoadingError(error));
+      dispatch(loadPatientError(error));
     }
     // make call to get series and populate studies with series data
     const studies = Object.values(summaryData["studies"]);
@@ -516,15 +571,16 @@ export const getWholeData = (serie, study, annotation) => {
             );
             serie.annotations = annotations;
           } catch (error) {
-            dispatch(annotationsLoadingError(error));
+            dispatch(loadPatientError(error));
+            // dispatch(annotationsLoadingError(error));
           }
         }
       } catch (error) {
-        dispatch(annotationsLoadingError(error));
+        dispatch(loadPatientError(error));
       }
     }
     // return summaryData;
-    dispatch(getPatient(summaryData));
+    dispatch(loadPatientSuccess(summaryData));
   };
 };
 

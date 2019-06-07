@@ -303,7 +303,6 @@ class Projects extends React.Component {
         id: "checkbox",
         accessor: "",
         width: 30,
-
         Cell: ({ original }) => {
           return (
             <input

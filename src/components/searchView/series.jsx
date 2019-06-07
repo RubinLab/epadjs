@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf } from "react-icons/fa";
-
+import ReactTooltip from "react-tooltip";
 import { BrowserRouter, withRouter } from "react-router-dom";
 import ReactTable from "react-table";
+import { toast } from "react-toastify";
 import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import Annotations from "./annotations";
@@ -19,7 +20,7 @@ import {
   getWholeData,
   updatePatient
 } from "../annotationsList/action";
-import { MAX_PORT } from "../../constants";
+import { MAX_PORT, formatDates } from "../../constants";
 
 import AlertGridFull from "./alertGridFull";
 import { isLite } from "../../config.json";
@@ -66,7 +67,7 @@ function selectSeries(projectId, subjectId, studyId, seriesId) {
 class Series extends Component {
   constructor(props) {
     super(props);
-
+    this.widthUnit = 20;
     this.state = {
       series: this.props.series,
       columns: [],
@@ -91,6 +92,16 @@ class Series extends Component {
     );
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
+    if (data.length === 0) {
+      toast.info("No serie found", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
   }
 
   selectRow = selected => {
@@ -108,7 +119,7 @@ class Series extends Component {
       {
         id: "checkbox",
         accessor: "",
-        width: 30,
+        width: this.widthUnit,
         Cell: ({ original }) => {
           return (
             <input
@@ -127,19 +138,47 @@ class Series extends Component {
             <span className="badge badge-secondary"> # of Annotations </span>
           </div>
         ),
+        width: this.widthUnit * 11,
+        Cell: row => {
+          let desc = row.original.seriesDescription || "Unnamed Serie";
+          let id = "desc" + row.original.seriesUID;
+          return (
+            <>
+              <div data-tip data-for={id}>
+                {desc}
+              </div>{" "}
+              <ReactTooltip
+                id={id}
+                place="top"
+                type="info"
+                delayShow={500}
+                clickable={true}
+              >
+                <span>{desc}</span>
+              </ReactTooltip>
+            </>
+          );
+        }
+      },
+      {
+        //annotations
+        width: this.widthUnit * 2,
         Cell: row => (
-          <div>
-            {row.original.seriesDescription || "Unnamed Serie"} &nbsp; <br />
+          <div className="searchView-table__cell">
             {row.original.numberOfAnnotations === "" ? (
               ""
             ) : (
               <span className="badge badge-secondary">
-                {" "}
-                {row.original.numberOfAnnotations}{" "}
+                {row.original.numberOfAnnotations}
               </span>
             )}
           </div>
         )
+      },
+      {
+        //subitem
+        width: this.widthUnit * 3,
+        Cell: row => <div />
       },
       {
         Header: (
@@ -147,14 +186,14 @@ class Series extends Component {
             <span className="badge badge-secondary"> # of Images </span>
           </div>
         ),
+        width: this.widthUnit * 3,
         Cell: row => (
-          <div>
+          <div className="searchView-table__cell">
             {row.original.numberOfImages === "" ? (
               ""
             ) : (
               <span className="badge badge-secondary">
-                {" "}
-                {row.original.numberOfImages}{" "}
+                {row.original.numberOfImages}
               </span>
             )}
           </div>
@@ -162,25 +201,61 @@ class Series extends Component {
       },
       {
         Header: "Type",
-        Cell: row => row.original.examType
-      },
-      {
-        Header: "Ready",
+        width: this.widthUnit * 5,
         Cell: row => (
-          <div>{progressDisplay(row.original.seriesProcessingStatus)}</div>
+          <div className="searchView-table__cell">{row.original.examType}</div>
         )
       },
       {
+        width: this.widthUnit * 7,
         Header: "Study/Created Date",
-        Cell: row => row.original.seriesDate
+        Cell: row => (
+          <div className="searchView-table__cell">
+            {formatDates(row.original.seriesDate)}
+          </div>
+        )
       },
       {
+        width: this.widthUnit * 7,
         Header: "Uploaded",
-        Cell: row => row.original.createdTime
+        Cell: row => (
+          <div className="searchView-table__cell">
+            {formatDates(row.original.createdTime)}
+          </div>
+        )
       },
       {
         Header: "Accession",
-        Cell: row => row.original.accessionNumber
+        width: this.widthUnit * 6,
+        Cell: row => (
+          <div className="searchView-table__cell">
+            {row.original.accessionNumber}
+          </div>
+        )
+      },
+      {
+        Header: "Identifier",
+        width: this.widthUnit * 10,
+        Cell: row => (
+          <>
+            <div
+              className="searchView-table__cell"
+              data-tip
+              data-for={row.original.seriesUID}
+            >
+              {row.original.seriesUID}
+            </div>{" "}
+            <ReactTooltip
+              id={row.original.seriesUID}
+              place="right"
+              type="info"
+              delayShow={500}
+              clickable={true}
+            >
+              <span>{row.original.seriesUID}</span>
+            </ReactTooltip>
+          </>
+        )
       }
     ];
     return columns;
@@ -296,14 +371,51 @@ class Series extends Component {
     this.setState({ showGridFullWarning: false });
   };
 
+  // dispatchSerieDisplay = selected => {
+  //   const openSeries = Object.values(this.props.openSeries);
+  //   let isSerieOpen = false;
+  //   //check if there is enough space in the grid
+  //   let isGridFull = openSeries.length === 6;
+  //   //check if the serie is already open
+  //   if (openSeries.length > 0) {
+  //     for (let i = 0; i < openSeries.length; i++) {
+  //       // for (let serie of openSeries) {
+  //       if (openSeries[i]) {
+  //         if (openSeries[i].seriesUID === selected.seriesUID) {
+  //           isSerieOpen = true;
+  //           this.props.dispatch(changeActivePort(i));
+  //           break;
+  //         }
+  //       }
+  //     }
+  //   }
+  //   //serie is not already open;
+  //   if (!isSerieOpen) {
+  //     //if the grid is full show warning
+  //     if (isGridFull) {
+  //       // this.setState({ showGridFullWarning: true });
+  //       this.props.dispatch(alertViewPortFull());
+  //     } else {
+  //       //if grid is NOT full check if patient data exists
+  //       if (this.props.patients[selected.patientID]) {
+  //         this.props.dispatch(getSingleSerie(selected));
+  //         //if patient doesn't exist dispatch to get data
+  //       } else {
+  //         this.props.dispatch(getAnnotationListData(selected));
+  //       }
+  //     }
+  //   }
+  // };
   dispatchSerieDisplay = selected => {
     const openSeries = Object.values(this.props.openSeries);
     const { patientID, studyUID } = selected;
     console.log("in serie", patientID, studyUID);
     let isSerieOpen = false;
+
     //check if there is enough space in the grid
     let isGridFull = openSeries.length === MAX_PORT;
     //check if the serie is already open
+
     if (openSeries.length > 0) {
       for (let i = 0; i < openSeries.length; i++) {
         if (openSeries[i].seriesUID === selected.seriesUID) {
@@ -311,13 +423,19 @@ class Series extends Component {
           this.props.dispatch(changeActivePort(i));
           break;
         }
+
+        // }
       }
     }
+
     //serie is not already open;
+
     if (!isSerieOpen) {
       //if the grid is full show warning
+
       if (isGridFull) {
         // this.setState({ showGridFullWarning: true });
+
         this.props.dispatch(alertViewPortFull());
       } else {
         this.props.dispatch(addToGrid(selected));
@@ -338,6 +456,8 @@ class Series extends Component {
         }
       }
     }
+
+    this.props.dispatch(clearSelection());
   };
 
   render() {
@@ -366,6 +486,7 @@ class Series extends Component {
         <div>
           {this.state.data ? (
             <TreeTable
+              NoDataComponent={() => null}
               data={this.state.data}
               columns={this.state.columns}
               defaultPageSize={this.state.data.length}
