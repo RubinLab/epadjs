@@ -14,6 +14,7 @@ import matchSorter from "match-sorter";
 import { isLite } from "../../../config.json";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
+import DownloadModal from "../../searchView/annotationDownloadModal";
 
 const messages = {
   deleteSelected: "Delete selected annotations? This cannot be undone.",
@@ -32,7 +33,8 @@ class Annotations extends React.Component {
     selectAll: 0,
     selected: {},
     filteredData: null,
-    uploadClicked: false
+    uploadClicked: false,
+    downloadClicked: false
   };
 
   componentDidMount = async () => {
@@ -137,7 +139,8 @@ class Annotations extends React.Component {
       description: "",
       error: "",
       deleteAllClicked: false,
-      uploadClicked: false
+      uploadClicked: false,
+      downloadClicked: false
     });
   };
 
@@ -159,7 +162,13 @@ class Annotations extends React.Component {
   };
 
   handleDeleteAll = () => {
-    this.setState({ deleteAllClicked: true });
+    const selectedArr = Object.values(this.state.selected);
+    const notSelected = selectedArr.includes(false) || selectedArr.length === 0;
+    if (notSelected) {
+      return;
+    } else {
+      this.setState({ deleteAllClicked: true });
+    }
   };
 
   handleFormInput = e => {
@@ -439,6 +448,25 @@ class Annotations extends React.Component {
     this.setState({ uploadClicked: true });
   };
 
+  handleDownload = () => {
+    const selectedArr = Object.values(this.state.selected);
+    const notSelected = selectedArr.includes(false) || selectedArr.length === 0;
+    if (notSelected) {
+      return;
+    } else {
+      this.setState({ downloadClicked: true });
+    }
+  };
+
+  handleSubmitUpload = () => {
+    this.getAnnotationsData();
+    this.handleCancel();
+  };
+
+  handleSubmitDownload = () => {
+    this.handleCancel();
+  };
+
   render = () => {
     console.log(this.state);
     const checkboxSelected = Object.values(this.state.selected).length > 0;
@@ -453,6 +481,7 @@ class Annotations extends React.Component {
           onType={this.handleFilterInput}
           onFilter={this.filterTableData}
           onUpload={this.handleUpload}
+          onDownload={this.handleDownload}
         />
         <Table
           className="pro-table"
@@ -470,7 +499,15 @@ class Annotations extends React.Component {
         {this.state.uploadClicked && (
           <UploadModal
             onCancel={this.handleCancel}
-            onSubmit={() => console.log("upload call")}
+            onSubmit={this.handleSubmitUpload}
+          />
+        )}
+        {this.state.downloadClicked && (
+          <DownloadModal
+            onCancel={this.handleCancel}
+            onSubmit={this.handleSubmitDownload}
+            updateStatus={() => console.log("update status")}
+            selected={this.state.selected}
           />
         )}
       </div>

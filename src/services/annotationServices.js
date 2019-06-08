@@ -62,7 +62,7 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
 }
 
 export function downloadAnnotations(optionObj, aimIDlist, selection) {
-  if (isLite)
+  if (isLite) {
     return http.post(
       apiUrl +
         "/projects/lite/aims/download?summary=" +
@@ -72,6 +72,7 @@ export function downloadAnnotations(optionObj, aimIDlist, selection) {
       aimIDlist,
       { responseType: "blob" }
     );
+  }
 }
 
 export function getSummaryAnnotations(projectID) {

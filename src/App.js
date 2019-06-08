@@ -171,6 +171,7 @@ class App extends Component {
 }
 
 const mapStateToProps = state => {
+  console.log(state.annotationsListReducer);
   const {
     listOpen,
     dockOpen,
