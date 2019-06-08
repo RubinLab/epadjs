@@ -7,8 +7,12 @@
   height: 100%;
   width: 100%;
   z-index: 1000;
-  overflow: hidden;
 }
+
+/* body {
+  overflow: hidden;
+  overflow-x: hidden;
+} */
 
 .modal-content-div {
   position: fixed;
@@ -51,7 +55,7 @@
 
 .menu-display {
   display: inline-block;
-  height: 90%;
+  height: 85%;
   width: 100%;
 }
 
@@ -94,6 +98,7 @@
   color: rgb(85, 85, 85);
   position: relative;
   border: 2px solid #702632;
+  overflow: hidden;
 }
 
 .wrapped {

@@ -1,4 +1,5 @@
 import React from "react";
+import { connect } from "react-redux";
 import ReactModal from "react-modal-resizable-draggable";
 import Modal from "./common/customModal";
 // import Modal from '../common/rndBootModal';
@@ -9,6 +10,7 @@ import Annotations from "./annotations/annotations";
 import "./menuStyle.css";
 import Header from "./common/managementHeader";
 import { isLite } from "../../config.json";
+import { managementItemSelected } from "./action";
 
 class MainMenu extends React.Component {
   state = {
@@ -19,9 +21,10 @@ class MainMenu extends React.Component {
   handleSelection = e => {
     const selection = e.target.textContent;
     // this.setState({ selection});
-    this.setState(state => {
-      return { isModalOpen: !state.isModalOpen };
-    });
+    // this.setState(state => {
+    //   return { isModalOpen: !state.isModalOpen };
+    // });
+    this.props.dispatch(managementItemSelected(selection));
     this.setState({ selection });
   };
 
@@ -32,43 +35,44 @@ class MainMenu extends React.Component {
     this.props.closeMenu();
   };
 
-  selectDisplay = () => {
-    switch (this.state.selection) {
-      case "Users":
-        return (
-          <Users
-            selection={this.state.selection}
-            onClose={this.handleCloseModal}
-          />
-        );
-      case "Projects":
-        return (
-          <Projects
-            selection={this.state.selection}
-            onClose={this.handleCloseModal}
-          />
-        );
-      case "Worklists":
-        return (
-          <WorkLists
-            selection={this.state.selection}
-            onClose={this.handleCloseModal}
-          />
-        );
-      case "Annotations":
-        return (
-          <Annotations
-            selection={this.state.selection}
-            onClose={this.handleCloseModal}
-          />
-        );
-      default:
-        return <div />;
-    }
-  };
+  // selectDisplay = () => {
+  //   switch (this.state.selection) {
+  //     case "Users":
+  //       return (
+  //         <Users
+  //           selection={this.state.selection}
+  //           onClose={this.handleCloseModal}
+  //         />
+  //       );
+  //     case "Projects":
+  //       return (
+  //         <Projects
+  //           selection={this.state.selection}
+  //           onClose={this.handleCloseModal}
+  //         />
+  //       );
+  //     case "Worklists":
+  //       return (
+  //         <WorkLists
+  //           selection={this.state.selection}
+  //           onClose={this.handleCloseModal}
+  //         />
+  //       );
+  //     case "Annotations":
+  //       return (
+  //         <Annotations
+  //           selection={this.state.selection}
+  //           onClose={this.handleCloseModal}
+  //         />
+  //       );
+  //     default:
+  //       return <div />;
+  //   }
+  // };
 
   render() {
     console.log(this.state);
+    console.log(this.props);
     return (
       <div className="mng-menu">
         <div onClick={this.handleSelection}>Annotations</div>
@@ -84,7 +88,7 @@ class MainMenu extends React.Component {
             <div onClick={this.handleSelection}>Queries</div>
           </>
         )}
-        {this.state.isModalOpen && (
+        {/* {this.state.isModalOpen && (
           <Modal>
             <Header
               selection={this.state.selection}
@@ -92,7 +96,7 @@ class MainMenu extends React.Component {
             />
             {this.selectDisplay()}
           </Modal>
-        )}
+        )} */}
         {/* <ReactModal
           initWidth={800}
           initHeight={400}
@@ -107,4 +111,4 @@ class MainMenu extends React.Component {
   }
 }
 
-export default MainMenu;
+export default connect()(MainMenu);

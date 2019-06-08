@@ -59,7 +59,7 @@ class Annotations extends React.Component {
     } = await getSummaryAnnotations(projectID);
     if (isLite) {
       for (let ann of annotations) {
-        console.log(ann);
+        // console.log(ann);
         ann.date = ann.date + "";
         ann.studyDate = ann.studyDate + "";
 
