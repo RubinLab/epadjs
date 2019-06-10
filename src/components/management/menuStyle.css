@@ -23,7 +23,7 @@
   left: 0;
   z-index: 10000;
   text-align: center;
-  overflow: hidden;
+  overflow: auto;
   padding: 2rem;
 }
 
@@ -55,7 +55,7 @@
 
 .menu-display {
   display: inline-block;
-  height: 85%;
+  height: 90%;
   width: 100%;
 }
 
@@ -72,7 +72,8 @@
 .mng-header {
   display: flex;
   height: 5%;
-  background: rgb(85, 85, 85);
+  width: 100%;
+  /* background: rgb(85, 85, 85); */
 }
 
 .mng-header__title {
@@ -81,7 +82,7 @@
   font-size: 1.2rem;
   width: 96%;
   text-align: center;
-  margin: auto;
+  /* margin: auto; */
 }
 
 .mng-header__close {
@@ -93,12 +94,16 @@
 
 .rnd-window {
   width: auto;
-  overflow: scroll;
+  height: auto;
+  /* overflow: scroll; */
   background: #333;
-  color: rgb(85, 85, 85);
+  color: #c6c6c6;
   position: relative;
   border: 2px solid #702632;
-  overflow: hidden;
+  /* overflow: hidden; */
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .wrapped {

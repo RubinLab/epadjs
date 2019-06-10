@@ -21,10 +21,10 @@ class MainMenu extends React.Component {
   handleSelection = e => {
     const selection = e.target.textContent;
     // this.setState({ selection});
-    // this.setState(state => {
-    //   return { isModalOpen: !state.isModalOpen };
-    // });
-    this.props.dispatch(managementItemSelected(selection));
+    this.setState(state => {
+      return { isModalOpen: !state.isModalOpen };
+    });
+    // this.props.dispatch(managementItemSelected(selection));
     this.setState({ selection });
   };
 
@@ -35,40 +35,40 @@ class MainMenu extends React.Component {
     this.props.closeMenu();
   };
 
-  // selectDisplay = () => {
-  //   switch (this.state.selection) {
-  //     case "Users":
-  //       return (
-  //         <Users
-  //           selection={this.state.selection}
-  //           onClose={this.handleCloseModal}
-  //         />
-  //       );
-  //     case "Projects":
-  //       return (
-  //         <Projects
-  //           selection={this.state.selection}
-  //           onClose={this.handleCloseModal}
-  //         />
-  //       );
-  //     case "Worklists":
-  //       return (
-  //         <WorkLists
-  //           selection={this.state.selection}
-  //           onClose={this.handleCloseModal}
-  //         />
-  //       );
-  //     case "Annotations":
-  //       return (
-  //         <Annotations
-  //           selection={this.state.selection}
-  //           onClose={this.handleCloseModal}
-  //         />
-  //       );
-  //     default:
-  //       return <div />;
-  //   }
-  // };
+  selectDisplay = () => {
+    switch (this.state.selection) {
+      case "Users":
+        return (
+          <Users
+            selection={this.state.selection}
+            onClose={this.handleCloseModal}
+          />
+        );
+      case "Projects":
+        return (
+          <Projects
+            selection={this.state.selection}
+            onClose={this.handleCloseModal}
+          />
+        );
+      case "Worklists":
+        return (
+          <WorkLists
+            selection={this.state.selection}
+            onClose={this.handleCloseModal}
+          />
+        );
+      case "Annotations":
+        return (
+          <Annotations
+            selection={this.state.selection}
+            onClose={this.handleCloseModal}
+          />
+        );
+      default:
+        return <div />;
+    }
+  };
 
   render() {
     console.log(this.state);
@@ -88,7 +88,7 @@ class MainMenu extends React.Component {
             <div onClick={this.handleSelection}>Queries</div>
           </>
         )}
-        {/* {this.state.isModalOpen && (
+        {this.state.isModalOpen && (
           <Modal>
             <Header
               selection={this.state.selection}
@@ -96,7 +96,7 @@ class MainMenu extends React.Component {
             />
             {this.selectDisplay()}
           </Modal>
-        )} */}
+        )}
         {/* <ReactModal
           initWidth={800}
           initHeight={400}

@@ -166,9 +166,9 @@ class App extends Component {
         {this.props.listOpen && <AnnotationList />}
         {this.props.dockOpen && <AnnotationsDock />}
         {this.props.showGridFullAlert && <MaxViewAlert />}
-        {this.props.selection && (
+        {/* {this.props.selection && (
           <ManagementItemModal selection={this.props.selection} />
-        )}
+        )} */}
       </React.Fragment>
     );
   }

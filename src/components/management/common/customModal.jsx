@@ -27,7 +27,8 @@ const customModal = ({ selection, handleCloseModal, children }) => {
     <>
       <div className="modal-overlay-div" />
       <div className="modal-content-div">
-        <ResizeAndDrag> {selectDisplay()} </ResizeAndDrag>
+        {/* <ResizeAndDrag> {selectDisplay()} </ResizeAndDrag> */}
+        <ResizeAndDrag> {children} </ResizeAndDrag>
       </div>
     </>
   );
