@@ -6,12 +6,14 @@ const style = {
   alignItems: "center",
   justifyContent: "center",
   border: "solid 1px #ddd"
+  // width: "90%",
+  // height: "90%"
 };
 
 class ResizeAndDrag extends React.Component {
   state = {
     width: "90%",
-    height: "auto",
+    height: "90%",
     x: 50,
     y: 50
   };

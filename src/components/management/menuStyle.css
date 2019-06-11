@@ -93,14 +93,11 @@
 }
 
 .rnd-window {
-  width: auto;
-  height: auto;
-  /* overflow: scroll; */
+  overflow: scroll;
   background: #333;
   color: #c6c6c6;
   position: relative;
   border: 2px solid #702632;
-  /* overflow: hidden; */
   display: inline-flex;
   flex-direction: column;
   justify-content: space-between;

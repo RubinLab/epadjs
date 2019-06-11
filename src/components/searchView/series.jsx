@@ -429,10 +429,8 @@ class Series extends Component {
     }
 
     //serie is not already open;
-
     if (!isSerieOpen) {
       //if the grid is full show warning
-
       if (isGridFull) {
         // this.setState({ showGridFullWarning: true });
 

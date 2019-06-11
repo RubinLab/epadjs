@@ -1,4 +1,5 @@
 import React from "react";
+import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import Table from "react-table";
 import { toast } from "react-toastify";
@@ -9,12 +10,12 @@ import {
   deleteAnnotation
 } from "../../../services/annotationServices";
 import { getProjects } from "../../../services/projectServices";
-import { Link } from "react-router-dom";
 import matchSorter from "match-sorter";
 import { isLite } from "../../../config.json";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
 import DownloadModal from "../../searchView/annotationDownloadModal";
+import { MAX_PORT } from "../../../constants";
 
 const messages = {
   deleteSelected: "Delete selected annotations? This cannot be undone.",
@@ -296,6 +297,46 @@ class Annotations extends React.Component {
     return isValid;
   };
 
+  openAnnotation = selected => {
+    const { studyUID, seriesUID, aimID } = selected.original;
+    const patientID = selected.original.subjectID;
+    const projectID = selected.original.projectID
+      ? selected.original.projectID
+      : "lite";
+    // const { openSeries } = this.props;
+    // // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
+    // //check if there is enough space in the grid
+    // let isGridFull = openSeries.length === MAX_PORT;
+    // //check if the serie is already open
+    // if (this.checkIfSerieOpen(seriesUID).isOpen) {
+    //   const { index } = this.checkIfSerieOpen(seriesUID);
+    //   this.props.dispatch(changeActivePort(index));
+    //   this.props.dispatch(jumpToAim(seriesUID, aimID, index));
+    // } else {
+    //   if (isGridFull) {
+    //     this.props.dispatch(alertViewPortFull());
+    //   } else {
+    //     this.props.dispatch(addToGrid(selected, aimID));
+    //     this.props.dispatch(getSingleSerie(selected, aimID));
+    //     //if grid is NOT full check if patient data exists
+    //     if (!this.props.patients[patientID]) {
+    //       this.props.dispatch(getWholeData(null, null, selected));
+    //     } else {
+    //       this.props.dispatch(
+    //         updatePatient(
+    //           "annotation",
+    //           true,
+    //           patientID,
+    //           studyUID,
+    //           seriesUID,
+    //           aimID
+    //         )
+    //       );
+    //     }
+    //   }
+    // }
+    // this.props.dispatch(clearSelection());
+  };
   defineColumns = () => {
     return [
       {
@@ -346,17 +387,14 @@ class Annotations extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        width: 50
-        // Cell: original => (
-        //   <Link
-        //     className="open-link"
-        //     to={"/search/" + original.row.checkbox.id}
-        //   >
-        //     <div onClick={this.props.onClose}>
-        //       <FaRegEye className="menu-clickable" />
-        //     </div>
-        //   </Link>
-        // )
+        width: 50,
+        Cell: original => {
+          return (
+            <div onClick={() => this.openAnnotation(original)}>
+              <FaRegEye className="menu-clickable" />
+            </div>
+          );
+        }
       },
       {
         Header: "Subject",
@@ -469,9 +507,10 @@ class Annotations extends React.Component {
 
   render = () => {
     console.log(this.state);
+    console.log(this.props);
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     return (
-      <div className="worklist menu-display" id="worklist">
+      <div className="annotations menu-display" id="annotation">
         <ToolBar
           onDelete={this.handleDeleteAll}
           selected={checkboxSelected}
@@ -515,4 +554,8 @@ class Annotations extends React.Component {
   };
 }
 
-export default Annotations;
+const mapsStateToProps = state => {
+  return { openSeries: state.annotationsListReducer.openSeries };
+};
+
+export default connect(mapsStateToProps)(Annotations);
