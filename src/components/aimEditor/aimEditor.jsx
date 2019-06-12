@@ -87,6 +87,7 @@ class AimEditor extends Component {
 
     // Logic behind relies on the order of the data in array
     const answers = this.semanticAnswers.saveAim();
+    console.log("Answers are", answers);
     this.createAim(answers);
   };
 
@@ -189,7 +190,7 @@ class AimEditor extends Component {
     // const series = this.props.series[this.props.activePort];
     uploadAim(JSON.parse(aimJson))
       .then(() => {
-        this.props.onCancel();
+        this.props.onCancel(); //closes the aim editor
         toast.success("Aim succesfully saved.", {
           position: "top-right",
           autoClose: 5000,

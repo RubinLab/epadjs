@@ -1,11 +1,11 @@
-
-
 // uncomment 2 imports below for react
 
 import $  from "jquery/dist/jquery.js"
 import "semantic-ui/dist/semantic.min.css"
 import "semantic-ui/dist/semantic.js"
 
+
+//window.onkeydown = KeyPress(this);
 
 //export next variable for react
 export  var AimEditor = function (userWindow, varformCheckHandler){
@@ -19,6 +19,8 @@ export  var AimEditor = function (userWindow, varformCheckHandler){
  	 	this.jsonTemplateCopy="";
 		this.mainWindowDiv="";
 		this.primitiveJson="";
+		this.mapcodeValueShortCutKeys = new Map();
+		this.mapShortCutKeys = new Map();
  		this.mapCardinalitiesToCheckId = new Map();
 		this.mapStatusAllowedTermBlocks = new Map();
 		//this.mapObjCodeValueParent = new Map();
@@ -54,6 +56,41 @@ export  var AimEditor = function (userWindow, varformCheckHandler){
  	function constructor (){
  		if (self.arrayTemplates === "undefined")
  			self.arrayTemplates = [];
+
+ 		document.addEventListener("keydown", self.aimshortCutKeyEvent, false);
+
+ 	}
+ 	
+ 	this.aimshortCutKeyEvent= function(e) {
+     let keyvalue = ""; 
+     let altvalue = "";
+      let ctrlvalue = "";
+      let shiftvalue = "";
+     if (e.altKey){
+     	altvalue = "altKey";
+     	keyvalue = "altKey";
+     }
+     if (e.ctrlKey){
+     	ctrlvalue = "ctrlKey";
+     	keyvalue = keyvalue +  "ctrlKey";
+     }
+     if (e.shiftKey){
+     	shiftvalue = "shiftKey";
+     	keyvalue = keyvalue +  "shiftKey";
+     }
+     keyvalue = keyvalue+"+"+String.fromCharCode(e.keyCode);
+     console.log(keyvalue);
+     if (self.mapShortCutKeys.get(keyvalue)){
+     	console.log("in"+keyvalue);
+     	console.log(self.mapShortCutKeys.get(keyvalue));
+     	document.getElementById(self.mapShortCutKeys.get(keyvalue)).click();
+     }
+      
+	}
+ 	
+ 	this.removeKeyShortCutEvent = function (){
+
+ 		document.getElementById("root").removeEventListener("keydown", self.aimshortCutKeyEvent);
 
  	}
 
@@ -98,7 +135,7 @@ export  var AimEditor = function (userWindow, varformCheckHandler){
 		
 
  		self.mainWindowDiv = document.createElement('div');
- 		self.mainWindowDiv.style = " color: inherit;";
+ 		self.mainWindowDiv.style = " color: inherit;width:inherit;";
  		self.mainButtonsDiv = document.createElement('div');
  		//this.addButtons(this.mainWindowDiv);
 		//this.mainWindowDiv.appendChild(x);
@@ -562,6 +599,8 @@ export  var AimEditor = function (userWindow, varformCheckHandler){
 					   
 						var selectDiv = document.createElement('select');
 						selectDiv.className = "ui fluid multiple dropdown";
+						selectDiv.style="min-width:20px;";
+
 						//selectDiv.multiple=true;
 						selectDiv.id='select'+maindiv;
 
@@ -672,7 +711,13 @@ export  var AimEditor = function (userWindow, varformCheckHandler){
 													parant: parent,
 													allowterm : allowedTermObj
 												}
-												this.mapAllowedTermCollectionByCodeValue.set(allowedTermObj.codeValue,unionPrntAlwtermObj);
+												self.mapAllowedTermCollectionByCodeValue.set(allowedTermObj.codeValue,unionPrntAlwtermObj);
+												if (subEObject.hasOwnProperty("keyShortCut")){
+													
+													self.mapShortCutKeys.set(subEObject.keyShortCut,allowedTermObj.codeValue);
+													self.mapcodeValueShortCutKeys.set(allowedTermObj.codeValue,subEObject.keyShortCut);
+
+												}
 												AllowedTerm.push({
 																AllowedTerm: allowedTermObj
 															}
@@ -1458,6 +1503,10 @@ this.Scale = function(parent, object, parentDiv,mapTagArray,parentTagTypeFromJso
 					  div.style="color:gray;";
 					  var label=document.createElement('label');
 					  label.textContent =  _self.lbl;
+					  if (self.mapcodeValueShortCutKeys.get(_self.id)){
+					  	//alert("createRadio"+self.mapcodeValueShortCutKeys.get(_self.id));
+					  	label.textContent = label.textContent +" (" +self.mapcodeValueShortCutKeys.get(_self.id) + ") " ;
+					  }
 					  label.style = "color:gray;";
 					  var radioInput = document.createElement('input');
 					  radioInput.type = "radio";
@@ -3756,13 +3805,15 @@ export  var TempBeaulieuBoneTemplaterev18 = {
                   "codeMeaning": "right lobe of liver",
                   "codeValue": "RID74",
                   "codingSchemeDesignator": "RadLex",
-                  "codingSchemeVersion": "1.0"
+                  "codingSchemeVersion": "1.0",
+                  "keyShortCut" :"ctrlKeyshiftKey+Y"
                },
                {
                   "codeMeaning": "left lobe of liver",
                   "codeValue": "RID69",
                   "codingSchemeDesignator": "RadLex",
-                  "codingSchemeVersion": "1.0"
+                  "codingSchemeVersion": "1.0",
+                  "keyShortCut" :"ctrlKeyshiftKey+U"
                },
                {
                   "codeMeaning": "caudate lobe of liver",
@@ -11031,14 +11082,14 @@ myjson variable check line 1988. This is the example json object needs to be con
 //export next variable for react
 //key is codeMeaning
 export var templateArray = [
-   // { key: "Tumor assessment", value: RECIST_v2 },
-   // { key: "Lung Template", value: TempLungNoduleV2 },
-   // { key: "liver15", value: TempBeaulieuBoneTemplaterev18 },
-   // { key: "Test 3-1", value: TempAsdf },
-   // { key: "Coordination Template", value: TempCoordinationTest },
-   // { key: "Test 3", value: TempTest3 },
+   { key: "Tumor assessment", value: RECIST_v2 },
+   { key: "Lung Template", value: TempLungNoduleV2 },
+   { key: "liver15", value: TempBeaulieuBoneTemplaterev18 },
+   { key: "Test 3-1", value: TempAsdf },
+   { key: "Coordination Template", value: TempCoordinationTest },
+   { key: "Test 3", value: TempTest3 },
    { key: "ROI Only", value: roiOnly },
-   // { key : "Any_Shape", value :anyShapeTemplate}
+   { key : "Any_Shape", value :anyShapeTemplate}
 
 ];
 
