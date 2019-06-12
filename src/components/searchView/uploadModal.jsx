@@ -102,12 +102,16 @@ class UploadModal extends React.Component {
             // onSelectFile={onType}
           />
         </div>
-        <h6>*Required</h6>
+        <h6 className="upload-required">*Required</h6>
       </div>
     );
   };
   render = () => {
     let disabled = !this.state.summary && !this.state.aim;
+    let className = "alert-upload";
+    className = this.props.className
+      ? `${className} ${this.props.className}`
+      : className;
     const options = [];
     for (let pr of this.state.projects) {
       options.push(
@@ -117,17 +121,15 @@ class UploadModal extends React.Component {
       );
     }
     return (
-      <Modal.Dialog dialogClassName="alert-upload">
+      <Modal.Dialog dialogClassName={className}>
         <Modal.Header>
           <Modal.Title className="upload__header">Upload</Modal.Title>
         </Modal.Header>
         <Modal.Body className="upload-container">
           {!isLite && (
             <div className="upload-select__container">
-              <label>
-                Projects:
-                <select className="upload-select">{options}</select>
-              </label>
+              <span>Projects: </span>
+              <select className="upload-select">{options}</select>
             </div>
           )}
           <div className="upload-file">
@@ -140,7 +142,7 @@ class UploadModal extends React.Component {
             />
           </div>
           {!isLite && (
-            <div>
+            <div className="uploadDetails-container">
               <h6 className="upload-note">
                 *Please note that if you upload a project that you downloaded
                 from ePad, the project will not be recreated.

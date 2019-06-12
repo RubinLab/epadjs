@@ -539,6 +539,7 @@ class Annotations extends React.Component {
           <UploadModal
             onCancel={this.handleCancel}
             onSubmit={this.handleSubmitUpload}
+            className="mng-upload"
           />
         )}
         {this.state.downloadClicked && (

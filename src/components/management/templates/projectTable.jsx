@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal } from "react-bootstrap";
+import { Modal, Table } from "react-bootstrap";
 
 const projectTable = ({ projectList, onSubmit, onCancel, error }) => {
   //get project list
@@ -12,24 +12,56 @@ const projectTable = ({ projectList, onSubmit, onCancel, error }) => {
   for (let project in projectList) {
     let row = (
       <tr key={project} className="projectTable-row">
-        <td>{projectList[project]}</td>
+        <td className="projectTable-row__name">{projectList[project]}</td>
         <td>
-          <input type="checkbox" name="enable" data-id={project} />
+          <input
+            className="projectTable-row__check"
+            type="checkbox"
+            name="enable"
+            data-id={project}
+          />
         </td>
         <td>
-          <input type="checkbox" name="default" data-id={project} />
+          <input
+            className="projectTable-row__check"
+            type="checkbox"
+            name="default"
+            data-id={project}
+          />
         </td>
       </tr>
     );
     tableRows.push(row);
   }
 
+  const renderHeaderCell = label => {
+    const name = `${label}All`;
+    return (
+      <div className="projectTable-header__cont">
+        <input
+          className="projectTable-header__check"
+          type="checkbox"
+          name={name}
+        />
+        <div>{label}</div>
+      </div>
+    );
+  };
+
   return (
-    <Modal.Dialog dialogClassName="projectTable__modal">
-      <Modal.Body>
-        <table>
-          <tbody>{tableRows}</tbody>
-        </table>
+    <Modal.Dialog dialogClassName="projectTable-modal">
+      {/* <Modal> */}
+      <Modal.Body id="proModal-content">
+        <Table className="projectTable" responsive="sm">
+          <thead className="projectTable-header">
+            <tr>
+              <th>Project</th>
+              <th>{renderHeaderCell("Enable")}</th>
+              <th>{renderHeaderCell("Default")}</th>
+            </tr>
+          </thead>
+          <tbody striped="true">{tableRows}</tbody>
+        </Table>
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
         {!error && (
@@ -41,6 +73,7 @@ const projectTable = ({ projectList, onSubmit, onCancel, error }) => {
           Cancel
         </button>
       </Modal.Footer>
+      {/* </Modal> */}
     </Modal.Dialog>
   );
 };

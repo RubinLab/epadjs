@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import Table from "react-table";
 import { toast } from "react-toastify";
-import ToolBar from "./../common/basicToolBar";
+import ToolBar from "./toolbar";
 import { FaRegTrashAlt, FaEdit } from "react-icons/fa";
 import { getAllTemplates } from "../../../services/templateServices";
 import { getProjects } from "../../../services/projectServices";
