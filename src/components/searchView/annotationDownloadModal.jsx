@@ -28,6 +28,7 @@ class AnnnotationDownloadModal extends React.Component {
         let blob = new Blob([result.data], { type: "application/zip" });
         this.triggerBrowserDownload(blob, "Annotations");
         this.props.updateStatus();
+        this.props.onSubmit();
       })
       .catch(err => {
         if (err.response.status === 503) {

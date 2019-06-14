@@ -61,7 +61,6 @@ class Annotations extends React.Component {
     } = await getSummaryAnnotations(projectID);
     if (isLite) {
       for (let ann of annotations) {
-        // console.log(ann);
         ann.date = ann.date + "";
         ann.studyDate = ann.studyDate + "";
 
@@ -275,7 +274,7 @@ class Annotations extends React.Component {
     return dateArr[1] + "/" + dateArr[2] + "/" + dateArr[0];
   };
 
-  cleanCarets = string => {
+  clearCarets = string => {
     var i = 0,
       length = string.length;
     for (i; i < length; i++) {
@@ -409,7 +408,7 @@ class Annotations extends React.Component {
         minWidth: 50,
         Cell: original => {
           return (
-            <div>{this.cleanCarets(original.row.checkbox.patientName)}</div>
+            <div>{this.clearCarets(original.row.checkbox.patientName)}</div>
           );
         }
       },
@@ -506,6 +505,7 @@ class Annotations extends React.Component {
   };
 
   handleSubmitDownload = () => {
+    this.setState({ selected: {}, selectAll: 0 });
     this.handleCancel();
   };
 
