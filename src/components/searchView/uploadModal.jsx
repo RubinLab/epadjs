@@ -5,9 +5,15 @@ import { Modal } from "react-bootstrap";
 import { isLite } from "./../../config.json";
 import { ToastContainer, toast } from "react-toastify";
 import { getProjects, uploadFile } from "../../services/projectServices";
+import { getCurrentUser } from "../../services/authService";
 
 class UploadModal extends React.Component {
-  state = { tiff: false, osirix: false, projects: [], file: null };
+  state = {
+    tiff: false,
+    osirix: false,
+    projects: [],
+    file: null
+  };
 
   onSelect = e => {
     const { name, checked } = e.target;
@@ -30,6 +36,8 @@ class UploadModal extends React.Component {
   };
 
   onUpload = () => {
+    const projectID = this.props.projectID;
+    const userName = getCurrentUser();
     const formData = new FormData();
     formData.append("file", this.state.file);
     const config = {
@@ -39,7 +47,7 @@ class UploadModal extends React.Component {
     };
 
     this.props.onSubmit();
-    uploadFile(formData, config)
+    uploadFile(formData, config, projectID, userName)
       .then(() => {
         this.props.onSubmit();
       })

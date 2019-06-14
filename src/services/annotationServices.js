@@ -1,5 +1,5 @@
 import http from "./httpService";
-import { isLite, apiUrl } from "../config.json";
+import { isLite, apiUrl, apiUrlV1 } from "../config.json";
 export function getAnnotations(series, opts = {}) {
   if (isLite) {
     const { projectId, subjectId, studyId, seriesId } = series;
@@ -83,18 +83,15 @@ export function getSummaryAnnotations(projectID) {
 
 export function deleteAnnotation(aimID, projectID) {
   return http.delete(
-    apiUrl +
-      "/epad/v2/projects/" +
-      projectID +
-      "/aims/" +
-      aimID +
-      "?deleteDSO=true"
+    apiUrl + "/projects/" + projectID + "/aims/" + aimID + "?deleteDSO=true"
   );
 }
 
 export function uploadAim(formData) {
-  const url = apiUrl + "/projects/lite/aims";
-
-  console.log("url is", url);
-  return http.post(url, formData);
+  let url;
+  if (isLite) {
+    url = apiUrl + "/projects/lite/aims";
+    console.log("url is", url);
+    return http.post(url, formData);
+  }
 }

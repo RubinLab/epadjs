@@ -50,9 +50,13 @@ class AnnnotationDownloadModal extends React.Component {
   };
 
   render = () => {
+    let className = "alert-annDownload";
+    className = this.props.className
+      ? `${className} ${this.props.className}`
+      : className;
     let disabled = !this.state.summary && !this.state.aim;
     return (
-      <Modal.Dialog dialogClassName="alert-annDownload">
+      <Modal.Dialog dialogClassName={className}>
         <Modal.Header>
           <Modal.Title className="annDownload__header">
             Select Download Format
@@ -76,6 +80,42 @@ class AnnnotationDownloadModal extends React.Component {
               onClick={this.onSelect}
             />
             <span className="annDownload-text">AIM Document</span>
+          </div>
+          <div className="annDownload-option">
+            <input
+              type="checkbox"
+              className="annDownload-select"
+              name="dcm-img"
+              onClick={this.onSelect}
+            />
+            <span className="annDownload-text">DICOM image</span>
+          </div>
+          <div className="annDownload-option">
+            <input
+              type="checkbox"
+              className="annDownload-select"
+              name="dcm-obj"
+              onClick={this.onSelect}
+            />
+            <span className="annDownload-text">DICOM segmentation object</span>
+          </div>
+          <div className="annDownload-option">
+            <input
+              type="checkbox"
+              className="annDownload-select"
+              name="dcmsr"
+              onClick={this.onSelect}
+            />
+            <span className="annDownload-text">DICOMSR</span>
+          </div>
+          <div className="annDownload-option">
+            <input
+              type="checkbox"
+              className="annDownload-select"
+              name="jpg"
+              onClick={this.onSelect}
+            />
+            <span className="annDownload-text">JPG image</span>
           </div>
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">

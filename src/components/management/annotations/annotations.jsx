@@ -35,7 +35,8 @@ class Annotations extends React.Component {
     selected: {},
     filteredData: null,
     uploadClicked: false,
-    downloadClicked: false
+    downloadClicked: false,
+    projectID: ""
   };
 
   componentDidMount = async () => {
@@ -46,7 +47,7 @@ class Annotations extends React.Component {
         }
       } = await getProjects();
       this.getAnnotationsData(projectList[0].id);
-      this.setState({ projectList });
+      this.setState({ projectList, projectID: projectList[0].id });
     } else {
       this.getAnnotationsData();
     }
@@ -86,6 +87,7 @@ class Annotations extends React.Component {
   };
 
   handleProjectSelect = e => {
+    this.setState({ projectID: e.target.value });
     if (!isLite) {
       this.getAnnotationsData(e.target.value);
       this.setState({ filteredData: null });
@@ -153,7 +155,9 @@ class Annotations extends React.Component {
     }
     Promise.all(promiseArr)
       .then(() => {
-        this.getAnnotationsData();
+        console.log(this.state.projectID);
+        this.getAnnotationsData(this.state.projectID);
+        this.setState({ selectAll: 0 });
       })
       .catch(error => {
         toast.error(error.response.data.message, { autoClose: false });
@@ -506,8 +510,6 @@ class Annotations extends React.Component {
   };
 
   render = () => {
-    console.log(this.state);
-    console.log(this.props);
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     return (
       <div className="annotations menu-display" id="annotation">
@@ -540,6 +542,7 @@ class Annotations extends React.Component {
             onCancel={this.handleCancel}
             onSubmit={this.handleSubmitUpload}
             className="mng-upload"
+            projectID={this.state.projectID}
           />
         )}
         {this.state.downloadClicked && (
@@ -548,6 +551,7 @@ class Annotations extends React.Component {
             onSubmit={this.handleSubmitDownload}
             updateStatus={() => console.log("update status")}
             selected={this.state.selected}
+            className="mng-download"
           />
         )}
       </div>
