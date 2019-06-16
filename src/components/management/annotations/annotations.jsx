@@ -102,7 +102,7 @@ class Annotations extends React.Component {
     projectID = projectID ? projectID : "lite";
     let newSelected = Object.assign({}, this.state.selected);
     if (newSelected[id]) {
-      newSelected[id] = false;
+      delete newSelected[id];
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
@@ -156,7 +156,7 @@ class Annotations extends React.Component {
       .then(() => {
         console.log(this.state.projectID);
         this.getAnnotationsData(this.state.projectID);
-        this.setState({ selectAll: 0 });
+        this.setState({ selectAll: 0, selected: {} });
       })
       .catch(error => {
         toast.error(error.response.data.message, { autoClose: false });
@@ -511,6 +511,7 @@ class Annotations extends React.Component {
 
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
+    console.log(this.state);
     return (
       <div className="annotations menu-display" id="annotation">
         <ToolBar

@@ -17,7 +17,28 @@ import { managementItemSelected } from "./action";
 class MainMenu extends React.Component {
   state = {
     selection: "",
-    isModalOpen: false
+    isModalOpen: false,
+    coordinate: "50%"
+  };
+
+  componentDidMount = () => {
+    this.updateDimensions();
+    window.addEventListener("resize", this.updateDimensions);
+  };
+
+  updateDimensions = () => {
+    const icon = document.getElementsByClassName("mng-icon")[0];
+    const coordinate = icon.getBoundingClientRect().left;
+    this.setState({ coordinate });
+    // this.setState({ width: window.innerWidth, height: window.innerHeight });
+  };
+
+  componentWillMount = () => {
+    this.updateDimensions();
+  };
+
+  componentWillUnmount = () => {
+    window.removeEventListener("resize", this.updateDimensions);
   };
 
   handleSelection = e => {
@@ -82,8 +103,10 @@ class MainMenu extends React.Component {
   render() {
     console.log(this.state);
     console.log(this.props);
+    const style = { left: this.state.coordinate };
+
     return (
-      <div className="mng-menu">
+      <div className="mng-menu" style={style}>
         <div onClick={this.handleSelection}>Annotations</div>
         <div onClick={this.handleSelection}>Templates</div>
         {!isLite && (

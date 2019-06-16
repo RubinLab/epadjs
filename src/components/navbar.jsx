@@ -74,7 +74,7 @@ const NavBar = ({ user, openGearMenu, loading, logout }) => {
               <React.Fragment>
                 <li className="nav-item pull-right">
                   <div
-                    className="nav-link"
+                    className="nav-link mng-icon"
                     style={{ cursor: "pointer" }}
                     onClick={openGearMenu}
                   >
