@@ -2,7 +2,9 @@
   display: inline-flex;
   background: #3a3f44;
   color: #d3d3d3;
-  left: 80%;
+  border: 4px solid #9aa0a9;
+  border-radius: 0.5rem;
+  /* left: 80%; */
 }
 
 .annList {
@@ -29,8 +31,8 @@
 .annList-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 1rem;
-  margin-right: 1rem;
+  /* margin-bottom: 1rem;
+  margin-right: 1rem; */
   margin-left: 1rem;
 }
 
