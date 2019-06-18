@@ -39,6 +39,7 @@
     "react-router-dom": "^4.3.1",
     "react-scripts": "2.1.5",
     "react-spinners": "^0.5.4",
+    "react-sticky-table": "^3.0.1",
     "react-switch": "^4.1.0",
     "react-table": "^6.9.2",
     "react-tiny-tabs": "^0.1.2",

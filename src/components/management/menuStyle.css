@@ -475,3 +475,31 @@
   display: flex;
   justify-content: flex-start;
 }
+
+.pro-edit_table {
+  width: 100%;
+  overflow: scroll;
+  height: 25rem;
+}
+
+.pagination-bottom .-pagination {
+  max-height: 3rem;
+  align-items: center;
+}
+.pagination-bottom .-pagination .-previous,
+.pagination-bottom .-pagination .-next {
+  max-width: 15%;
+  max-height: 2rem;
+}
+
+.pagination-bottom .-pagination .-previous .-btn,
+.pagination-bottom .-pagination .-next .-btn,
+.pagination-bottom .-pagination .-center .-pageInfo {
+  padding: 1px;
+  max-height: 2rem;
+}
+
+.pagination-bottom .-pagination .-center input {
+  padding: 1px;
+  max-height: 2rem;
+}

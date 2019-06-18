@@ -14,6 +14,7 @@ import UploadModal from "../../searchView/uploadModal";
 import DownloadModal from "../../searchView/annotationDownloadModal";
 import EditTemplates from "./projectTable";
 import { MAX_PORT } from "../../../constants";
+import CustomTable from "./CustomTable";
 
 const messages = {
   deleteSelected: "Delete selected annotations? This cannot be undone.",
@@ -46,7 +47,7 @@ class Templates extends React.Component {
       const temp = [];
       for (let project of projectList) {
         const { id, name } = project;
-        temp[id] = name;
+        temp.push({ id, name });
       }
       this.setState({ projectList: temp });
       this.getTemplatesData();
@@ -236,30 +237,19 @@ class Templates extends React.Component {
             }
             projects = projectsArr.join(", ");
           }
-          return <div>{projects}</div>;
+          return (
+            <a
+              role="button"
+              tabindex="0"
+              className="menu-clickable"
+              onClick={this.handleClickProjects}
+            >
+              {projects}
+            </a>
+          );
         }
       },
-      {
-        Header: "",
-        width: 45,
-        minResizeWidth: 20,
-        resizable: true,
-        Cell: original => (
-          <div
-            onClick={() => {
-              this.setState({
-                hasEditClicked: true
-                // id: original.row.checkbox.id,
-                // name: original.row.checkbox.name,
-                // description: original.row.checkbox.description,
-                // type: original.row.checkbox.type
-              });
-            }}
-          >
-            <FaEdit className="menu-clickable" />
-          </div>
-        )
-      },
+
       {
         Header: "",
         width: 45,
@@ -276,6 +266,11 @@ class Templates extends React.Component {
     ];
   };
 
+  handleClickProjects = () => {
+    this.setState({
+      hasEditClicked: true
+    });
+  };
   handleUpload = () => {
     this.setState({ uploadClicked: true });
   };
