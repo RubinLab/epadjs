@@ -240,7 +240,7 @@ class Templates extends React.Component {
           return (
             <a
               role="button"
-              tabindex="0"
+              tabIndex="0"
               className="menu-clickable"
               onClick={this.handleClickProjects}
             >

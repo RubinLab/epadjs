@@ -42,6 +42,7 @@ class CustomTable extends Component {
   };
 
   render = () => {
+    console.log("custom data here");
     console.log(this.props.data);
     return (
       <Table
