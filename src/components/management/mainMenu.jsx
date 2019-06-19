@@ -101,8 +101,6 @@ class MainMenu extends React.Component {
   };
 
   render() {
-    console.log(this.state);
-    console.log(this.props);
     const style = { left: this.state.coordinate };
 
     return (

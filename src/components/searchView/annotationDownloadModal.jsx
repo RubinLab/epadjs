@@ -5,6 +5,8 @@ import { Modal } from "react-bootstrap";
 import { downloadAnnotations } from "../../services/annotationServices";
 import { ToastContainer, toast } from "react-toastify";
 import { clearSelection } from "../annotationsList/action";
+const support = false;
+
 class AnnnotationDownloadModal extends React.Component {
   state = { summary: false, aim: false };
 
@@ -82,42 +84,48 @@ class AnnnotationDownloadModal extends React.Component {
             />
             <span className="annDownload-text">AIM Document</span>
           </div>
-          <div className="annDownload-option">
-            <input
-              type="checkbox"
-              className="annDownload-select"
-              name="dcm-img"
-              onClick={this.onSelect}
-            />
-            <span className="annDownload-text">DICOM image</span>
-          </div>
-          <div className="annDownload-option">
-            <input
-              type="checkbox"
-              className="annDownload-select"
-              name="dcm-obj"
-              onClick={this.onSelect}
-            />
-            <span className="annDownload-text">DICOM segmentation object</span>
-          </div>
-          <div className="annDownload-option">
-            <input
-              type="checkbox"
-              className="annDownload-select"
-              name="dcmsr"
-              onClick={this.onSelect}
-            />
-            <span className="annDownload-text">DICOMSR</span>
-          </div>
-          <div className="annDownload-option">
-            <input
-              type="checkbox"
-              className="annDownload-select"
-              name="jpg"
-              onClick={this.onSelect}
-            />
-            <span className="annDownload-text">JPG image</span>
-          </div>
+          {support && (
+            <>
+              <div className="annDownload-option">
+                <input
+                  type="checkbox"
+                  className="annDownload-select"
+                  name="dcm-img"
+                  onClick={this.onSelect}
+                />
+                <span className="annDownload-text">DICOM image</span>
+              </div>
+              <div className="annDownload-option">
+                <input
+                  type="checkbox"
+                  className="annDownload-select"
+                  name="dcm-obj"
+                  onClick={this.onSelect}
+                />
+                <span className="annDownload-text">
+                  DICOM segmentation object
+                </span>
+              </div>
+              <div className="annDownload-option">
+                <input
+                  type="checkbox"
+                  className="annDownload-select"
+                  name="dcmsr"
+                  onClick={this.onSelect}
+                />
+                <span className="annDownload-text">DICOMSR</span>
+              </div>
+              <div className="annDownload-option">
+                <input
+                  type="checkbox"
+                  className="annDownload-select"
+                  name="jpg"
+                  onClick={this.onSelect}
+                />
+                <span className="annDownload-text">JPG image</span>
+              </div>
+            </>
+          )}
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
           {disabled ? (
