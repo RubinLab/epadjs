@@ -12,7 +12,7 @@ class UploadModal extends React.Component {
     tiff: false,
     osirix: false,
     projects: [],
-    file: null
+    files: []
   };
 
   onSelect = e => {
@@ -32,14 +32,17 @@ class UploadModal extends React.Component {
   };
 
   onSelectFile = e => {
-    this.setState({ file: e.target.files[0] });
+    this.setState({ files: Array.from(e.target.files) });
   };
 
   onUpload = () => {
     const projectID = this.props.projectID;
     const userName = getCurrentUser();
     const formData = new FormData();
-    formData.append("file", this.state.file);
+
+    this.state.files.forEach(file => {
+      formData.append("file", file);
+    });
     const config = {
       headers: {
         "content-type": "multipart/form-data"
@@ -115,7 +118,9 @@ class UploadModal extends React.Component {
     );
   };
   render = () => {
-    let disabled = !this.state.summary && !this.state.aim;
+    console.log(this.state);
+    console.log(Array.isArray(this.state.files));
+    let disabled = this.state.files.length === 0;
     let className = "alert-upload";
     className = this.props.className
       ? `${className} ${this.props.className}`
@@ -145,6 +150,7 @@ class UploadModal extends React.Component {
             <input
               type="file"
               className="upload-display"
+              multiple={true}
               // name="tiff"
               onChange={this.onSelectFile}
             />
@@ -180,7 +186,7 @@ class UploadModal extends React.Component {
           )}
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
-          {!this.state.file ? (
+          {disabled ? (
             <button onClick={this.onUpload} disabled>
               Submit
             </button>

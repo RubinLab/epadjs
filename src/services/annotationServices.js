@@ -35,6 +35,7 @@ export function getAnnotations(series, opts = {}) {
 }
 
 export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
+  console.log(projectId, subjectId, studyId, seriesId);
   if (isLite)
     return http.get(
       apiUrl +

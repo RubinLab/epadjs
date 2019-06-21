@@ -7,14 +7,18 @@ export async function getTemplates(projectId) {
 
 export async function getAllTemplates() {
   return isLite
-    ? http.get(apiUrl + "/projects/lite/templates?format=summary")
+    ? http.get(apiUrl + "/templates?format=summary")
     : http.get(apiUrl + "/templates/");
 }
 
 export function downloadTemplates(tempIDlist, selection) {
   if (isLite) {
-    return http.post(apiUrl + "/projects/lite/templates/download", tempIDlist, {
+    return http.post(apiUrl + "/templates/download", tempIDlist, {
       responseType: "blob"
     });
   }
+}
+
+export function deleteTemplate(templateID, projectID) {
+  return http.delete(apiUrl + "/templates/" + templateID + "?deleteDSO=true");
 }

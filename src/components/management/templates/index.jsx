@@ -1,40 +1,34 @@
 import React from "react";
-import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import Table from "react-table";
 import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
-import { FaRegTrashAlt, FaEdit } from "react-icons/fa";
+import { FaRegTrashAlt } from "react-icons/fa";
 import { getAllTemplates } from "../../../services/templateServices";
 import { getProjects } from "../../../services/projectServices";
-import matchSorter from "match-sorter";
 import { isLite } from "../../../config.json";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
-import DownloadModal from "../../searchView/annotationDownloadModal";
 import EditTemplates from "./projectTable";
-import { MAX_PORT } from "../../../constants";
 import CustomTable from "./CustomTable";
-import { downloadTemplates } from "../../../services/templateServices";
-
-const messages = {
-  deleteSelected: "Delete selected annotations? This cannot be undone.",
-  fillRequiredFields: "Please fill the required fields",
-  dateFormat: "Date format should be M/d/yy."
-};
+import {
+  downloadTemplates,
+  deleteTemplate
+} from "../../../services/templateServices";
 
 class Templates extends React.Component {
   state = {
     templates: [],
     projectList: {},
-    // singleDeleteData: {},
-    // deleteSingleClicked: false,
     hasAddClicked: false,
-    deleteAllClicked: false,
+    delAll: false,
+    delOne: false,
     selectAll: 0,
     selected: {},
+    selectedOne: {},
     uploadClicked: false,
-    hasEditClicked: false
+    hasEditClicked: false,
+    templateName: ""
   };
 
   componentDidMount = async () => {
@@ -56,21 +50,19 @@ class Templates extends React.Component {
     }
   };
 
+  renderMessages = input => {
+    return {
+      deleteAll: "Delete selected templates? This cannot be undone.",
+      deleteOne: `Delete template ${input}? This cannot be undone.`
+    };
+  };
   getTemplatesData = async () => {
-    console.log("getTempateData");
     const {
       data: {
         ResultSet: { Result: templates }
       }
     } = await getAllTemplates();
-    console.log(templates);
-
     this.setState({ templates });
-  };
-
-  handleFilterInput = e => {
-    const { name, value } = e.target;
-    this.setState({ name: value });
   };
 
   toggleRow = async (id, projectID) => {
@@ -97,10 +89,11 @@ class Templates extends React.Component {
     let newSelected = {};
     if (this.state.selectAll === 0) {
       this.state.templates.forEach(temp => {
-        newSelected[temp.templateCode] = temp.templateCode;
+        let tempID = temp.Template[0].templateUID;
+        let projectID = temp.projectID ? temp.projectID : "lite";
+        newSelected[tempID] = projectID;
       });
     }
-
     this.setState({
       selected: newSelected,
       selectAll: this.state.selectAll === 0 ? 1 : 0
@@ -115,37 +108,40 @@ class Templates extends React.Component {
       user: "",
       description: "",
       error: "",
-      deleteAllClicked: false,
+      delAll: false,
       uploadClicked: false,
-      hasEditClicked: false
+      hasEditClicked: false,
+      delOne: false,
+      templateName: "",
+      selectedOne: {}
     });
   };
 
-  deleteAllSelected = async () => {
-    // let newSelected = Object.assign({}, this.state.selected);
-    // const promiseArr = [];
-    // for (let annotation in newSelected) {
-    //   promiseArr.push(deleteAnnotation(annotation, newSelected[annotation]));
-    // }
-    // Promise.all(promiseArr)
-    //   .then(() => {
-    //     this.getTemplatesData();
-    //   })
-    //   .catch(error => {
-    //     toast.error(error.response.data.message, { autoClose: false });
-    //     this.getTemplatesData();
-    //   });
-    // this.handleCancel();
+  deleteAll = async () => {
+    let newSelected = Object.assign({}, this.state.selected);
+    const promiseArr = [];
+    for (let template in newSelected) {
+      promiseArr.push(deleteTemplate(template, newSelected[template]));
+    }
+    Promise.all(promiseArr)
+      .then(() => {
+        this.getTemplatesData();
+        this.setState({ selectAll: 0, selected: {} });
+      })
+      .catch(error => {
+        toast.error(error.response.data.message, { autoClose: false });
+        this.getTemplatesData();
+      });
+    this.handleCancel();
   };
 
   handleDeleteAll = () => {
-    // const selectedArr = Object.values(this.state.selected);
-    // const notSelected = selectedArr.includes(false) || selectedArr.length === 0;
-    // if (notSelected) {
-    //   return;
-    // } else {
-    //   this.setState({ deleteAllClicked: true });
-    //   };
+    const selectedArr = Object.keys(this.state.selected);
+    if (selectedArr.length === 0) {
+      return;
+    } else {
+      this.setState({ delAll: true });
+    }
   };
 
   handleFormInput = e => {
@@ -155,6 +151,39 @@ class Templates extends React.Component {
 
   handleEdit = e => {
     this.setState({ hasEditClicked: true });
+  };
+
+  handleDeleteOne = templateData => {
+    const projectID = templateData.projectID ? templateData.projectID : "lite";
+    const { templateName, templateUID } = templateData.Template[0];
+    this.setState({
+      delOne: true,
+      templateName,
+      selectedOne: { [templateUID]: projectID }
+    });
+  };
+
+  deleteOne = () => {
+    const template = Object.keys(this.state.selectedOne);
+    deleteTemplate(template)
+      .then(() => {
+        const newSelected = { ...this.state.selected };
+        if (newSelected[template]) {
+          delete newSelected[template];
+        }
+        const selectAll = Object.keys(newSelected).length > 0 ? 2 : 0;
+        this.getTemplatesData();
+        this.setState({
+          selectAll,
+          selected: newSelected,
+          selectedOne: {},
+          delOne: false
+        });
+      })
+      .catch(error => {
+        toast.error(error.response.data.message, { autoClose: false });
+        this.getTemplatesData();
+      });
   };
 
   defineColumns = () => {
@@ -256,11 +285,14 @@ class Templates extends React.Component {
       width: 45,
       minResizeWidth: 20,
       resizable: true,
-      Cell: original => (
-        <div onClick={() => this.handleSingleDelete(original.row.checkbox.id)}>
-          <FaRegTrashAlt className="menu-clickable" />
-        </div>
-      )
+      Cell: original => {
+        const template = original.row.checkbox;
+        return (
+          <div onClick={() => this.handleDeleteOne(template)}>
+            <FaRegTrashAlt className="menu-clickable" />
+          </div>
+        );
+      }
     };
     return isLite
       ? [header, container, type, template, projects, deleteIcon]
@@ -315,20 +347,12 @@ class Templates extends React.Component {
   };
 
   render = () => {
-    console.log(this.state);
-    // console.log(this.state.templates);
-    // console.log(this.state.projectList);
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     return (
-      <div className="templates menu-display" id="annotation">
+      <div className="templates menu-display" id="template">
         <ToolBar
-          //   onDelete={this.handleDeleteAll}
-          //   selected={checkboxSelected}
-          //   projects={this.state.projectList}
-          //   onSelect={this.handleProjectSelect}
-          //   onClear={this.handleClearFilter}
-          //   onType={this.handleFilterInput}
-          //   onFilter={this.filterTableData}
+          onDelete={this.handleDeleteAll}
+          selected={checkboxSelected}
           onUpload={this.handleUpload}
           onDownload={this.handleDownload}
         />
@@ -337,11 +361,15 @@ class Templates extends React.Component {
           data={this.state.templates}
           columns={this.defineColumns()}
         />
-        {this.state.deleteAllClicked && (
+        {(this.state.delAll || this.state.delOne) && (
           <DeleteAlert
-            message={messages.deleteSelected}
+            message={
+              this.state.delAll
+                ? this.renderMessages().deleteAll
+                : this.renderMessages(this.state.templateName).deleteOne
+            }
             onCancel={this.handleCancel}
-            onDelete={this.deleteAllSelected}
+            onDelete={this.state.delAll ? this.deleteAll : this.deleteOne}
             error={this.state.errorMessage}
           />
         )}
@@ -362,8 +390,4 @@ class Templates extends React.Component {
   };
 }
 
-const mapsStateToProps = state => {
-  return { openSeries: state.annotationsListReducer.openSeries };
-};
-
-export default connect(mapsStateToProps)(Templates);
+export default Templates;

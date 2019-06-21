@@ -17,6 +17,17 @@ import UploadModal from "../../searchView/uploadModal";
 import DownloadModal from "../../searchView/annotationDownloadModal";
 import { MAX_PORT } from "../../../constants";
 
+import {
+  changeActivePort,
+  jumpToAim,
+  alertViewPortFull,
+  addToGrid,
+  getSingleSerie,
+  getWholeData,
+  updatePatient,
+  clearSelection
+} from "../../annotationsList/action";
+
 const messages = {
   deleteSelected: "Delete selected annotations? This cannot be undone.",
   fillRequiredFields: "Please fill the required fields",
@@ -59,6 +70,7 @@ class Annotations extends React.Component {
         ResultSet: { Result: annotations }
       }
     } = await getSummaryAnnotations(projectID);
+    console.log(annotations);
     if (isLite) {
       for (let ann of annotations) {
         ann.date = ann.date + "";
@@ -121,11 +133,11 @@ class Annotations extends React.Component {
   toggleSelectAll() {
     let newSelected = {};
     if (this.state.selectAll === 0) {
-      this.state.worklists.forEach(project => {
-        newSelected[project.workListID] = project.username;
+      this.state.annotations.forEach(annotation => {
+        let projectID = annotation.projectID ? annotation.projectID : "lite";
+        newSelected[annotation.aimID] = projectID;
       });
     }
-
     this.setState({
       selected: newSelected,
       selectAll: this.state.selectAll === 0 ? 1 : 0
@@ -154,7 +166,6 @@ class Annotations extends React.Component {
     }
     Promise.all(promiseArr)
       .then(() => {
-        console.log(this.state.projectID);
         this.getAnnotationsData(this.state.projectID);
         this.setState({ selectAll: 0, selected: {} });
       })
@@ -275,12 +286,12 @@ class Annotations extends React.Component {
   };
 
   clearCarets = string => {
-    var i = 0,
-      length = string.length;
-    for (i; i < length; i++) {
-      string = string.replace("^", " ");
+    if (string) {
+      for (let i = 0; i < string.length; i++) {
+        string = string.replace("^", " ");
+      }
+      return string;
     }
-    return string;
   };
 
   validateDateFormat = dateString => {
@@ -300,46 +311,59 @@ class Annotations extends React.Component {
     return isValid;
   };
 
+  checkIfSerieOpen = selectedSerie => {
+    let isOpen = false;
+    let index;
+    this.props.openSeries.forEach((serie, i) => {
+      if (serie.seriesUID === selectedSerie) {
+        isOpen = true;
+        index = i;
+      }
+    });
+    return { isOpen, index };
+  };
+
   openAnnotation = selected => {
     const { studyUID, seriesUID, aimID } = selected.original;
     const patientID = selected.original.subjectID;
     const projectID = selected.original.projectID
       ? selected.original.projectID
       : "lite";
-    // const { openSeries } = this.props;
-    // // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
-    // //check if there is enough space in the grid
-    // let isGridFull = openSeries.length === MAX_PORT;
-    // //check if the serie is already open
-    // if (this.checkIfSerieOpen(seriesUID).isOpen) {
-    //   const { index } = this.checkIfSerieOpen(seriesUID);
-    //   this.props.dispatch(changeActivePort(index));
-    //   this.props.dispatch(jumpToAim(seriesUID, aimID, index));
-    // } else {
-    //   if (isGridFull) {
-    //     this.props.dispatch(alertViewPortFull());
-    //   } else {
-    //     this.props.dispatch(addToGrid(selected, aimID));
-    //     this.props.dispatch(getSingleSerie(selected, aimID));
-    //     //if grid is NOT full check if patient data exists
-    //     if (!this.props.patients[patientID]) {
-    //       this.props.dispatch(getWholeData(null, null, selected));
-    //     } else {
-    //       this.props.dispatch(
-    //         updatePatient(
-    //           "annotation",
-    //           true,
-    //           patientID,
-    //           studyUID,
-    //           seriesUID,
-    //           aimID
-    //         )
-    //       );
-    //     }
-    //   }
-    // }
-    // this.props.dispatch(clearSelection());
+    const { openSeries } = this.props;
+    // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
+    //check if there is enough space in the grid
+    let isGridFull = openSeries.length === MAX_PORT;
+    //check if the serie is already open
+    if (this.checkIfSerieOpen(seriesUID).isOpen) {
+      const { index } = this.checkIfSerieOpen(seriesUID);
+      this.props.dispatch(changeActivePort(index));
+      this.props.dispatch(jumpToAim(seriesUID, aimID, index));
+    } else {
+      if (isGridFull) {
+        this.props.dispatch(alertViewPortFull());
+      } else {
+        this.props.dispatch(addToGrid(selected.original, aimID));
+        this.props.dispatch(getSingleSerie(selected.original, aimID));
+        //if grid is NOT full check if patient data exists
+        if (!this.props.patients[patientID]) {
+          this.props.dispatch(getWholeData(null, null, selected.original));
+        }
+        // else {
+        //     this.props.dispatch(
+        //       updatePatient(
+        //         "annotation",
+        //         true,
+        //         patientID,
+        //         studyUID,
+        //         seriesUID,
+        //         aimID
+        //       )
+        //     );
+        //   }
+      }
+    }
   };
+
   defineColumns = () => {
     return [
       {
@@ -407,6 +431,7 @@ class Annotations extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
+          console.log(original);
           return (
             <div>{this.clearCarets(original.row.checkbox.patientName)}</div>
           );
@@ -511,7 +536,6 @@ class Annotations extends React.Component {
 
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
-    console.log(this.state);
     return (
       <div className="annotations menu-display" id="annotation">
         <ToolBar
@@ -561,7 +585,10 @@ class Annotations extends React.Component {
 }
 
 const mapsStateToProps = state => {
-  return { openSeries: state.annotationsListReducer.openSeries };
+  return {
+    openSeries: state.annotationsListReducer.openSeries,
+    patients: state.annotationsListReducer.patients
+  };
 };
 
 export default connect(mapsStateToProps)(Annotations);
