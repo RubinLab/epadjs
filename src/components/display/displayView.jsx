@@ -127,7 +127,7 @@ class DisplayView extends Component {
     var promises = [];
     for (let i = 0; i < this.props.series.length; i++) {
       const promise = this.getImages(this.props.series[i], i);
-      console.log("series", this.props.series[i]);
+      // console.log("series", this.props.series[i]);
       promises.push(promise);
     }
     Promise.all(promises).then(res => {
@@ -263,7 +263,7 @@ class DisplayView extends Component {
     //     element
     //   );
     // }
-    console.log(this.props.cornerstoneTools);
+    // console.log(this.props.cornerstoneTools);
 
     // now parse the aim and render the new marups
     Object.entries(aimList).forEach(([key, value]) => {
@@ -280,7 +280,7 @@ class DisplayView extends Component {
   };
 
   renderMarkups = (key, markups, color) => {
-    console.log("Rendering Markups", key, markups, color);
+    // console.log("Rendering Markups", key, markups, color);
     if (markups.constructor === Array) {
       markups.forEach(markup => {
         this.renderMarkup(key, markup, color);
@@ -410,11 +410,11 @@ class DisplayView extends Component {
     this.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
-    console.log("Current state is", currentState);
+    // console.log("Current state is", currentState);
   };
 
   handleAnnotationSelected = event => {
-    console.log("event is", event);
+    // console.log("event is", event);
     if (
       this.props.aimList[this.props.series[this.props.activePort].seriesUID][
         event.detail
@@ -423,7 +423,7 @@ class DisplayView extends Component {
       const aimJson = this.props.aimList[
         this.props.series[this.props.activePort].seriesUID
       ][event.detail].json;
-      console.log("event", JSON.stringify(aimJson));
+      // console.log("event", JSON.stringify(aimJson));
       this.setState({ showAimEditor: true, selectedAim: aimJson });
     }
   };
@@ -454,6 +454,7 @@ class DisplayView extends Component {
   };
 
   render() {
+    console.log("this props are", this.props);
     if (!Object.entries(this.props.series).length)
       this.props.history.push("/search");
     return (
