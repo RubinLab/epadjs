@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 import Table from "react-table";
 import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
@@ -162,7 +162,9 @@ class Annotations extends React.Component {
     let newSelected = Object.assign({}, this.state.selected);
     const promiseArr = [];
     for (let annotation in newSelected) {
-      promiseArr.push(deleteAnnotation(annotation, newSelected[annotation]));
+      promiseArr.push(
+        deleteAnnotation(null, annotation, newSelected[annotation])
+      );
     }
     Promise.all(promiseArr)
       .then(() => {
@@ -397,29 +399,28 @@ class Annotations extends React.Component {
             />
           );
         },
-        sortable: false,
-        minResizeWidth: 20,
-        width: 45
+        resizable: false
       },
       {
         Header: "Name",
         accessor: "name",
         sortable: true,
         resizable: true,
-        minResizeWidth: 20,
-        minWidth: 50
+        minResizeWidth: 50
       },
       {
         Header: "Open",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 20,
+        sortable: false,
+        resizable: false,
         width: 50,
+        style: { display: "flex", justifyContent: "center" },
         Cell: original => {
           return (
-            <div onClick={() => this.openAnnotation(original)}>
-              <FaRegEye className="menu-clickable" />
-            </div>
+            <Link className="open-link" to={"/display"}>
+              <div onClick={() => this.openAnnotation(original)}>
+                <FaRegEye className="menu-clickable" />
+              </div>
+            </Link>
           );
         }
       },
@@ -429,7 +430,6 @@ class Annotations extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50,
         Cell: original => {
           console.log(original);
           return (
@@ -438,36 +438,45 @@ class Annotations extends React.Component {
         }
       },
       {
-        Header: "Modality / Series / Slice / Series #",
+        // Header: "Modality / Series / Slice / Series #",
         accessor: "comment",
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
-        // Cell: original => <div>{original.row.checkbox.description || ""}</div>
+        className: "wrapped",
+        style: { whiteSpace: "normal" },
+        Header: () => {
+          return (
+            <div className="mng-anns__header-flex">
+              <div>Modality / Series /</div>
+              <div>Slice / Series #</div>
+            </div>
+          );
+        }
       },
       {
         Header: "Template",
         accessor: "template",
-        width: 45,
         minResizeWidth: 20,
+        width: 120,
         resizable: true,
         sortable: true
       },
       {
         Header: "User",
         accessor: "userName",
-        width: 45,
         minResizeWidth: 20,
+        width: 50,
+        style: { whiteSpace: "normal" },
         resizable: true,
         sortable: true
       },
       {
         Header: "Study",
         sortable: true,
-        resizable: true,
-        minResizeWidth: 20,
-        minWidth: 50,
+        // resizable: true,
+        // minResizeWidth: 20,
+        width: 75,
         accessor: "studyDate",
         filterMethod: (filter, rows) =>
           matchSorter(rows, filter.value, { keys: ["date"] }),
@@ -480,9 +489,9 @@ class Annotations extends React.Component {
       {
         Header: "Created",
         sortable: true,
-        resizable: true,
-        minResizeWidth: 20,
-        minWidth: 50,
+        // resizable: true,
+        // minResizeWidth: 20,
+        width: 75,
         accessor: "date",
         filterMethod: (filter, rows) =>
           matchSorter(rows, filter.value, { keys: ["date"] }),
@@ -493,11 +502,18 @@ class Annotations extends React.Component {
         }
       },
       {
-        Header: "Created Time",
+        Header: () => {
+          return (
+            <div className="mng-anns__header-flex">
+              <div>Created</div>
+              <div>Time</div>
+            </div>
+          );
+        },
         sortable: true,
-        resizable: true,
-        minResizeWidth: 20,
-        minWidth: 50,
+        // resizable: true,
+        // minResizeWidth: 20,
+        width: 80,
         accessor: "date",
         filterMethod: (filter, rows) =>
           matchSorter(rows, filter.value, { keys: ["time"] }),
@@ -550,6 +566,7 @@ class Annotations extends React.Component {
           onDownload={this.handleDownload}
         />
         <Table
+          NoDataComponent={() => null}
           className="pro-table"
           data={this.state.filteredData || this.state.annotations}
           columns={this.defineColumns()}

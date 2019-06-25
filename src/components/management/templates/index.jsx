@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Table from "react-table";
+import ReactTable from "react-table";
 import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
 import { FaRegTrashAlt } from "react-icons/fa";
@@ -187,116 +187,90 @@ class Templates extends React.Component {
   };
 
   defineColumns = () => {
-    const header = {
-      id: "checkbox",
-      accessor: "",
-      width: 30,
-      Cell: ({ original }) => {
-        const { templateUID } = original.Template[0];
-        return (
-          <input
-            type="checkbox"
-            className="checkbox-cell"
-            checked={this.state.selected[templateUID]}
-            onChange={() => this.toggleRow(templateUID)}
-          />
-        );
+    return [
+      {
+        id: "checkbox",
+        accessor: "",
+        width: 30,
+        Cell: ({ original }) => {
+          const { templateUID } = original.Template[0];
+          return (
+            <input
+              type="checkbox"
+              className="checkbox-cell"
+              checked={this.state.selected[templateUID]}
+              onChange={() => this.toggleRow(templateUID)}
+            />
+          );
+        },
+        Header: x => {
+          return (
+            <input
+              type="checkbox"
+              className="checkbox-cell"
+              checked={this.state.selectAll === 1}
+              ref={input => {
+                if (input) {
+                  input.indeterminate = this.state.selectAll === 2;
+                }
+              }}
+              onChange={() => this.toggleSelectAll()}
+            />
+          );
+        },
+        // sortable: false,
+        resizable: false
+        // minResizeWidth: 20
+        // maxWidth: 45
       },
-      Header: x => {
-        return (
-          <input
-            type="checkbox"
-            className="checkbox-cell"
-            checked={this.state.selectAll === 1}
-            ref={input => {
-              if (input) {
-                input.indeterminate = this.state.selectAll === 2;
-              }
-            }}
-            onChange={() => this.toggleSelectAll()}
-          />
-        );
+      {
+        Header: "Container",
+        accessor: "containerName",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 100,
+        width: 300
       },
-      sortable: false,
-      minResizeWidth: 20,
-      width: 45
-    };
-    const container = {
-      Header: "Container",
-      accessor: "containerName",
-      sortable: true,
-      resizable: true,
-      minResizeWidth: 20
-    };
+      {
+        Header: "Type",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 20,
+        // resizable: false,
+        width: 180,
 
-    const type = {
-      Header: "Type",
-      sortable: true,
-      resizable: true,
-      minResizeWidth: 20,
-      Cell: original => {
-        return <span>{original.row.checkbox.Template[0].type}</span>;
-      }
-    };
+        Cell: original => {
+          return <div>{original.row.checkbox.Template[0].type}</div>;
+          // return <span>type</span>;
+        }
+      },
+      {
+        Header: "Template",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 100,
+        width: 360,
+        Cell: original => {
+          return <div>{original.row.checkbox.Template[0].templateName}</div>;
+          // return <span>type</span>;
+        }
+      },
 
-    const template = {
-      Header: "Template",
-      sortable: true,
-      resizable: true,
-      minResizeWidth: 20,
-      Cell: original => {
-        return <span>{original.row.checkbox.Template[0].templateName}</span>;
+      {
+        Header: "",
+        // width: 45,
+        // minResizeWidth: 20,
+        // resizable: false,
+        Cell: original => {
+          const template = original.row.checkbox;
+          return (
+            <div onClick={() => this.handleDeleteOne(template)}>
+              <FaRegTrashAlt className="menu-clickable" />
+            </div>
+          );
+        }
       }
-    };
-    const projects = isLite
-      ? {}
-      : {
-          Header: "Projects",
-          // width: 50,
-          minResizeWidth: 20,
-          resizable: true,
-          sortable: true,
-          Cell: original => {
-            const templates = original.row.checkbox.projectTemplates;
-            let projects = "";
-            if (templates.length === 1 && templates[0].projectID === "all") {
-              projects = "All";
-            } else {
-              let projectsArr = [];
-              for (let project of templates) {
-                projectsArr.push(this.state.projectList[project.projectID]);
-              }
-              projects = projectsArr.join(", ");
-            }
-            return (
-              <a
-                role="button"
-                tabIndex="0"
-                className="menu-clickable"
-                onClick={this.handleClickProjects}
-              >
-                {projects}
-              </a>
-            );
-          }
-        };
-    const deleteIcon = {
-      Header: "",
-      width: 45,
-      minResizeWidth: 20,
-      resizable: true,
-      Cell: original => {
-        const template = original.row.checkbox;
-        return (
-          <div onClick={() => this.handleDeleteOne(template)}>
-            <FaRegTrashAlt className="menu-clickable" />
-          </div>
-        );
-      }
-    };
-    return isLite
-      ? [header, container, type, template, projects, deleteIcon]
-      : [header, container, type, template, deleteIcon];
+    ];
   };
 
   handleClickProjects = () => {
@@ -356,7 +330,7 @@ class Templates extends React.Component {
           onUpload={this.handleUpload}
           onDownload={this.handleDownload}
         />
-        <Table
+        <ReactTable
           className="pro-table"
           data={this.state.templates}
           columns={this.defineColumns()}
@@ -391,3 +365,35 @@ class Templates extends React.Component {
 }
 
 export default Templates;
+
+/*
+const projects = {
+      Header: "Projects",
+      // width: 50,
+      // minResizeWidth: 20,
+      // resizable: true,
+      // sortable: true,
+      Cell: original => {
+        const templates = original.row.checkbox.projectTemplates;
+        let projects = "";
+        if (templates.length === 1 && templates[0].projectID === "all") {
+          projects = "All";
+        } else {
+          let projectsArr = [];
+          for (let project of templates) {
+            projectsArr.push(this.state.projectList[project.projectID]);
+          }
+          projects = projectsArr.join(", ");
+        }
+        return (
+          <a
+            role="button"
+            tabIndex="0"
+            className="menu-clickable"
+            onClick={this.handleClickProjects}
+          >
+            {projects}
+          </a>
+        );
+      }
+    }; */

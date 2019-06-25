@@ -508,3 +508,9 @@
 .ReactTable.pro-table {
   height: 95%;
 }
+
+.mng-anns__header-flex {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}

@@ -82,7 +82,11 @@ export function getSummaryAnnotations(projectID) {
     : http.get(apiUrl + "/projects/" + projectID + "/aims/?format=summary");
 }
 
-export function deleteAnnotation(aimID, projectID) {
+export function deleteAnnotation(aimObj, aimID, projectID) {
+  if (aimObj) {
+    aimID = aimObj.aimID;
+    projectID = aimObj.projectID ? projectID : "lite";
+  }
   return http.delete(
     apiUrl + "/projects/" + projectID + "/aims/" + aimID + "?deleteDSO=true"
   );
@@ -92,7 +96,6 @@ export function uploadAim(formData) {
   let url;
   if (isLite) {
     url = apiUrl + "/projects/lite/aims";
-    console.log("url is", url);
     return http.post(url, formData);
   }
 }

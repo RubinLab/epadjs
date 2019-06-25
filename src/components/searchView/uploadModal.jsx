@@ -40,8 +40,8 @@ class UploadModal extends React.Component {
     const userName = getCurrentUser();
     const formData = new FormData();
 
-    this.state.files.forEach(file => {
-      formData.append("file", file);
+    this.state.files.forEach((file, index) => {
+      formData.append(`file${index + 1}`, file);
     });
     const config = {
       headers: {
@@ -55,15 +55,16 @@ class UploadModal extends React.Component {
         this.props.onSubmit();
       })
       .catch(err => {
-        const fileName = this.state.file.name.substring(0, 50);
-        toast.error(
-          `Error occured while uploading ${fileName}${
-            this.state.file.name.length > 50 ? "..." : "!"
-          }`,
-          {
-            autoClose: false
-          }
-        );
+        console.log(err);
+        // const fileName = this.state.file.name.substring(0, 50);
+        // toast.error(
+        //   `Error occured while uploading ${fileName}${
+        //     this.state.file.name.length > 50 ? "..." : "!"
+        //   }`,
+        //   {
+        //     autoClose: false
+        //   }
+        // );
         this.props.onSubmit();
       });
     this.props.onCancel();
