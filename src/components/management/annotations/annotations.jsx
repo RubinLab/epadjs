@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import Table from "react-table";
+import ReactTable from "react-table";
 import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
 import { FaRegEye } from "react-icons/fa";
@@ -552,6 +552,8 @@ class Annotations extends React.Component {
 
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
+    const data = this.state.filteredData || this.state.annotations;
+    const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
     return (
       <div className="annotations menu-display" id="annotation">
         <ToolBar
@@ -565,11 +567,13 @@ class Annotations extends React.Component {
           onUpload={this.handleUpload}
           onDownload={this.handleDownload}
         />
-        <Table
+        <ReactTable
           NoDataComponent={() => null}
           className="pro-table"
           data={this.state.filteredData || this.state.annotations}
           columns={this.defineColumns()}
+          pageSizeOptions={[10, 20, 50]}
+          defaultPageSize={pageSize}
         />
         {this.state.deleteAllClicked && (
           <DeleteAlert

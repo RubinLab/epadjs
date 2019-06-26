@@ -191,7 +191,7 @@ class Templates extends React.Component {
       {
         id: "checkbox",
         accessor: "",
-        width: 30,
+        width: 50,
         Cell: ({ original }) => {
           const { templateUID } = original.Template[0];
           return (
@@ -229,7 +229,7 @@ class Templates extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
-        width: 300
+        width: 420
       },
       {
         Header: "Type",
@@ -249,7 +249,7 @@ class Templates extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
-        width: 360,
+        width: 420,
         Cell: original => {
           return <div>{original.row.checkbox.Template[0].templateName}</div>;
           // return <span>type</span>;
@@ -322,6 +322,8 @@ class Templates extends React.Component {
 
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
+    const data = this.state.templates;
+    const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
     return (
       <div className="templates menu-display" id="template">
         <ToolBar
@@ -334,6 +336,8 @@ class Templates extends React.Component {
           className="pro-table"
           data={this.state.templates}
           columns={this.defineColumns()}
+          pageSizeOptions={[10, 20, 50]}
+          defaultPageSize={pageSize}
         />
         {(this.state.delAll || this.state.delOne) && (
           <DeleteAlert

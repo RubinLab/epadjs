@@ -343,11 +343,18 @@
   color: #333;
 }
 
-.filter-group {
+.filter-group,
+.filter-group__sec1,
+.filter-group__sec2,
+.filter-icons {
   display: flex;
-  width: 80%;
+  /* width: 80%; */
 }
 
+.nowrap {
+  display: flex;
+  flex-wrap: nowrap;
+}
 .annotation-toolbar__icon {
   width: 3%;
 }
@@ -361,6 +368,13 @@
   font-size: 1.2rem;
   margin-top: 0.5rem;
   margin-bottom: 1.5rem;
+}
+
+.annotations-toolbar-basic {
+  display: flex;
+  justify-content: flex-start;
+  align-content: center;
+  align-items: center;
 }
 
 .flexible-modal {

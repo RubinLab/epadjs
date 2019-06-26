@@ -50,7 +50,8 @@ class SearchView extends Component {
       error: false,
       showUploadModal: false,
       numOfsubjects: 0,
-      showDeleteAlert: false
+      showDeleteAlert: false,
+      update: 0
     };
   }
 
@@ -74,7 +75,7 @@ class SearchView extends Component {
 
   updateUploadStatus = async => {
     this.setState(state => {
-      return { uploading: !state.uploading };
+      return { uploading: !state.uploading, update: state.update + 1 };
     });
     this.updateSubjectCount();
   };
@@ -114,6 +115,8 @@ class SearchView extends Component {
       .then(async () => {
         const subjects = await this.getData();
         this.setState({ deleting: false, numOfsubjects: subjects.length });
+        this.setState(state => ({ update: state.update + 1 }));
+        this.props.dispatch(clearSelection());
       })
       .catch(err => {
         console.log(err);
@@ -513,7 +516,8 @@ class SearchView extends Component {
         <Subjects
           key={this.props.match.params.pid}
           pid={this.props.match.params.pid}
-          update={this.state.numOfsubjects}
+          // update={this.state.numOfsubjects}
+          update={this.state.update}
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection

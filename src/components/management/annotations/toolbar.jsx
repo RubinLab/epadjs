@@ -51,190 +51,210 @@ const toolBar = props => {
 
   return (
     <div className="annotations-toolbar">
-      <>
-        <div onClick={onUpload}>
-          <FaUpload className="tool-icon" data-tip data-for="upload-icon" />
-        </div>
-        <ReactTooltip
-          id="upload-icon"
-          place="right"
-          type="info"
-          delayShow={1500}
-        >
-          <span className="filter-label">Upload selections</span>
-        </ReactTooltip>
-      </>
-
-      <>
-        <div onClick={onDownload}>
-          <FaDownload className="tool-icon" data-tip data-for="download-icon" />
-        </div>
-        <ReactTooltip
-          id="download-icon"
-          place="right"
-          type="info"
-          delayShow={1500}
-        >
-          <span className="filter-label">Download selections</span>
-        </ReactTooltip>
-      </>
-      {!isLite && (
+      <div className="annotations-toolbar-basic">
         <>
-          <>
-            <div className="annotation-toolbar__icon">
-              <FaShareSquare
-                className="tool-icon"
-                data-tip
-                data-for="applyParalel-icon"
-              />
-            </div>
-            <ReactTooltip
-              id="applyParalel-icon"
-              place="right"
-              type="info"
-              delayShow={1500}
-            >
-              <span className="filter-label">Apply (parallel)</span>
-            </ReactTooltip>
-          </>
-
-          <>
-            <div onClick={onDelete} className="annotation-toolbar__icon">
-              <FaLocationArrow
-                className="tool-icon"
-                onClick={onDelete}
-                data-tip
-                data-for="applyAll-icon"
-              />
-            </div>
-            <ReactTooltip
-              id="applyAll-icon"
-              place="right"
-              type="info"
-              delayShow={1500}
-            >
-              <span className="filter-label">Apply (all together)</span>
-            </ReactTooltip>
-          </>
+          <div onClick={onUpload}>
+            <FaUpload className="tool-icon" data-tip data-for="upload-icon" />
+          </div>
+          <ReactTooltip
+            id="upload-icon"
+            place="right"
+            type="info"
+            delayShow={1500}
+          >
+            <span className="filter-label">Upload selections</span>
+          </ReactTooltip>
         </>
-      )}
+        <>
+          <div onClick={onDownload}>
+            <FaDownload
+              className="tool-icon"
+              data-tip
+              data-for="download-icon"
+            />
+          </div>
+          <ReactTooltip
+            id="download-icon"
+            place="right"
+            type="info"
+            delayShow={1500}
+          >
+            <span className="filter-label">Download selections</span>
+          </ReactTooltip>
+        </>
+        {!isLite && (
+          <>
+            <>
+              <div className="annotation-toolbar__icon">
+                <FaShareSquare
+                  className="tool-icon"
+                  data-tip
+                  data-for="applyParalel-icon"
+                />
+              </div>
+              <ReactTooltip
+                id="applyParalel-icon"
+                place="right"
+                type="info"
+                delayShow={1500}
+              >
+                <span className="filter-label">Apply (parallel)</span>
+              </ReactTooltip>
+            </>
 
-      <>
-        <div onClick={onDelete} className="annotation-toolbar__icon">
-          <FaRegTrashAlt
-            className="tool-icon"
-            onClick={onDelete}
-            data-tip
-            data-for="trash-icon"
-          />
-        </div>
-        <ReactTooltip
-          id="trash-icon"
-          place="right"
-          type="info"
-          delayShow={1500}
-        >
-          <span className="filter-label">Delete selections</span>
-        </ReactTooltip>
-      </>
+            <>
+              <div onClick={onDelete} className="annotation-toolbar__icon">
+                <FaLocationArrow
+                  className="tool-icon"
+                  onClick={onDelete}
+                  data-tip
+                  data-for="applyAll-icon"
+                />
+              </div>
+              <ReactTooltip
+                id="applyAll-icon"
+                place="right"
+                type="info"
+                delayShow={1500}
+              >
+                <span className="filter-label">Apply (all together)</span>
+              </ReactTooltip>
+            </>
+          </>
+        )}
 
-      {!isLite && (
-        <select
-          className="annotations-projectSelect"
-          name="project"
-          onChange={onSelect}
-          defaultValue="default"
-        >
-          {options}
-        </select>
-      )}
+        <>
+          <div onClick={onDelete} className="annotation-toolbar__icon">
+            <FaRegTrashAlt
+              className="tool-icon"
+              onClick={onDelete}
+              data-tip
+              data-for="trash-icon"
+            />
+          </div>
+          <ReactTooltip
+            id="trash-icon"
+            place="right"
+            type="info"
+            delayShow={1500}
+          >
+            <span className="filter-label">Delete selections</span>
+          </ReactTooltip>
+        </>
+
+        {!isLite && (
+          <select
+            className="annotations-projectSelect"
+            name="project"
+            onChange={onSelect}
+            defaultValue="default"
+          >
+            {options}
+          </select>
+        )}
+      </div>
       <div className="filter-group">
-        <div className="filter-container">
-          <span className="filter-label">Name:</span>
-          <input
-            onMouseDown={e => e.stopPropagation()}
-            onChange={onType}
-            type="text"
-            className="filter-text"
-            name="name"
-            ref={name}
-          />
+        <div className="filter-group__sec1">
+          <div className="filter-container">
+            <span className="filter-label">Name:</span>
+            <input
+              onMouseDown={e => e.stopPropagation()}
+              onChange={onType}
+              type="text"
+              className="filter-text"
+              name="name"
+              ref={name}
+            />
+          </div>
+          <div className="filter-container">
+            <span className="filter-label">Subject:</span>
+            <input
+              onMouseDown={e => e.stopPropagation()}
+              onChange={onType}
+              type="text"
+              className="filter-text"
+              name="patientName"
+              ref={subject}
+            />
+          </div>
+          <div className="filter-container">
+            <span className="filter-label">Template:</span>
+            <input
+              onMouseDown={e => e.stopPropagation()}
+              onChange={onType}
+              type="text"
+              className="filter-text"
+              name="template"
+              ref={template}
+            />
+          </div>
         </div>
-        <div className="filter-container">
-          <span className="filter-label">Subject:</span>
-          <input
-            onMouseDown={e => e.stopPropagation()}
-            onChange={onType}
-            type="text"
-            className="filter-text"
-            name="patientName"
-            ref={subject}
-          />
-        </div>
-        <div className="filter-container">
-          <span className="filter-label">Template:</span>
-          <input
-            onMouseDown={e => e.stopPropagation()}
-            onChange={onType}
-            type="text"
-            className="filter-text"
-            name="template"
-            ref={template}
-          />
-        </div>
-        <div className="filter-container">
-          <span className="filter-label">Created:</span>
-          <input
-            onMouseDown={e => e.stopPropagation()}
-            onChange={onType}
-            type="text"
-            className="filter-text"
-            name="createdStart"
-            ref={createdStart}
-          />
-          <span>{" - "}</span>
-          <input
-            onMouseDown={e => e.stopPropagation()}
-            onChange={onType}
-            type="text"
-            className="filter-text"
-            name="createdEnd"
-            ref={createdEnd}
-          />
+        <div className="filter-group__sec2">
+          <div className="filter-container nowrap">
+            <span className="filter-label">Created:</span>
+            <input
+              onMouseDown={e => e.stopPropagation()}
+              onChange={onType}
+              type="text"
+              className="filter-text"
+              name="createdStart"
+              ref={createdStart}
+            />
+            <span>{" - "}</span>
+            <input
+              onMouseDown={e => e.stopPropagation()}
+              onChange={onType}
+              type="text"
+              className="filter-text"
+              name="createdEnd"
+              ref={createdEnd}
+            />
+          </div>
+          <div className="filter-icons">
+            <div>
+              <div
+                className="annotation-toolbar__icon"
+                onClick={() => {
+                  onFilter();
+                }}
+              >
+                <FaFilter
+                  className="tool-icon"
+                  data-tip
+                  data-for="filter-icon"
+                />
+              </div>
+              <ReactTooltip
+                id="filter-icon"
+                place="right"
+                type="info"
+                delayShow={1500}
+              >
+                <span className="filter-label">Filter annotations</span>
+              </ReactTooltip>
+            </div>
+            <div>
+              <div
+                className="annotation-toolbar__icon"
+                onClick={() => {
+                  clearFilters();
+                  onClear();
+                }}
+              >
+                <FaUndo className="tool-icon" data-tip data-for="undo-icon" />
+              </div>
+              <ReactTooltip
+                id="undo-icon"
+                place="right"
+                type="info"
+                delayShow={1500}
+              >
+                <span className="filter-label">Clear filter</span>
+              </ReactTooltip>
+            </div>
+          </div>
         </div>
       </div>
-      <>
-        <div
-          className="annotation-toolbar__icon"
-          onClick={() => {
-            onFilter();
-          }}
-        >
-          <FaFilter className="tool-icon" data-tip data-for="filter-icon" />
-        </div>
-        <ReactTooltip
-          id="filter-icon"
-          place="right"
-          type="info"
-          delayShow={1500}
-        >
-          <span className="filter-label">Filter annotations</span>
-        </ReactTooltip>
-      </>
-      <>
-        <div
-          className="annotation-toolbar__icon"
-          onClick={() => {
-            clearFilters();
-            onClear();
-          }}
-        >
-          <FaUndo className="tool-icon" data-tip data-for="undo-icon" />
-        </div>
-        <ReactTooltip id="undo-icon" place="right" type="info" delayShow={1500}>
-          <span className="filter-label">Clear filter</span>
-        </ReactTooltip>
-      </>
     </div>
   );
 };

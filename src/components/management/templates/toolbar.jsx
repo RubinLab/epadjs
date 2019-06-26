@@ -30,7 +30,6 @@ const toolBar = props => {
           <span className="filter-label">Upload selections</span>
         </ReactTooltip>
       </>
-
       <>
         <div onClick={onDownload}>
           <FaDownload className="tool-icon" data-tip data-for="download-icon" />
@@ -44,7 +43,6 @@ const toolBar = props => {
           <span className="filter-label">Download selections</span>
         </ReactTooltip>
       </>
-
       <>
         <div onClick={onDelete} className="annotation-toolbar__icon">
           <FaRegTrashAlt
