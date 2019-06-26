@@ -27,7 +27,7 @@ const toolBar = props => {
           type="info"
           delayShow={1500}
         >
-          <span className="filter-label">Upload selections</span>
+          <span className="filter-label">Upload files</span>
         </ReactTooltip>
       </>
       <>

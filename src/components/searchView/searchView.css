@@ -114,7 +114,7 @@
   overflow-y: auto;
   border: 2px solid gray;
   box-shadow: 1rem 1rem 1rem grey;
-  left: auto;
+  left: 40%;
 }
 
 .upload-select {
