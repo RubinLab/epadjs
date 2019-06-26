@@ -34,7 +34,8 @@ class Subjects extends Component {
       selection: [],
       selectAll: false,
       selectType: "checkbox",
-      expanded: {}
+      expanded: {},
+      numOfStudies: 0
     };
   }
 
@@ -353,8 +354,13 @@ class Subjects extends Component {
       this.setState({ pivotBy: [], expanded: {} });
     }
   };
-  onExpandedChange = expanded => {
-    this.setState({ expanded });
+  onExpandedChange = (newExpanded, index, event) => {
+    console.log("subject onExpandedChange");
+    console.log(newExpanded);
+    console.log(index);
+    console.log(event);
+
+    this.setState({ expanded: newExpanded });
   };
 
   render() {
@@ -386,7 +392,6 @@ class Subjects extends Component {
       onExpandedChange
     };
     const TheadComponent = props => null;
-
     return (
       <div>
         {this.state.data ? (
@@ -394,12 +399,13 @@ class Subjects extends Component {
             NoDataComponent={() => null}
             data={this.state.data}
             columns={this.state.columns}
-            // defaultPageSize={this.state.size}
+            pageSize={this.state.size}
             ref={r => (this.selectTable = r)}
             className="-striped -highlight"
             freezWhenExpanded={false}
             showPagination={false}
             // TheadComponent={TheadComponent}
+
             {...extraProps}
             SubComponent={row => {
               return (

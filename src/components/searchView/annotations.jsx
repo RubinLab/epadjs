@@ -70,6 +70,17 @@ class Annotations extends Component {
     }
   }
 
+  async componentDidUpdate(prevProps) {
+    if (this.props.update !== prevProps.update) {
+      const {
+        data: {
+          ResultSet: { Result: data }
+        }
+      } = await getAnnotations(this.series);
+      this.setState({ data });
+    }
+  }
+
   selectRow = selected => {
     const { studyDescription, seriesDescription } = this.props;
     this.props.dispatch(clearSelection("annotation"));
@@ -360,7 +371,7 @@ class Annotations extends Component {
             NoDataComponent={() => null}
             data={this.state.data}
             columns={this.state.columns}
-            defaultPageSize={this.state.data.length}
+            pageSize={this.state.data.length}
             ref={r => (this.selectTable = r)}
             className="-striped -highlight"
             freezWhenExpanded={false}

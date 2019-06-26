@@ -369,8 +369,13 @@ class Studies extends Component {
       this.setState({ pivotBy: [], expanded: {} });
     }
   };
-  onExpandedChange = expanded => {
-    this.setState({ expanded });
+
+  onExpandedChange = (newExpanded, index, event) => {
+    console.log("studies onExpandedChange");
+    console.log(newExpanded);
+    console.log(index);
+    console.log(event);
+    this.setState({ expanded: newExpanded });
   };
 
   excludeOpenSeries = allSeriesArr => {
@@ -490,7 +495,7 @@ class Studies extends Component {
             NoDataComponent={() => null}
             data={this.state.data}
             columns={this.state.columns}
-            defaultPageSize={this.state.data.length}
+            pageSize={this.state.data.length}
             ref={r => (this.selectTable = r)}
             className="-striped -highlight"
             freezWhenExpanded={false}
@@ -510,6 +515,7 @@ class Studies extends Component {
                     subjectId={this.props.subjectId}
                     studyId={row.original.studyUID}
                     studyDescription={row.original.studyDescription}
+                    update={this.props.update}
                   />
                 </div>
               );

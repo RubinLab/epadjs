@@ -4,8 +4,12 @@ import Subjects from "./subjects";
 import Toolbar from "./toolbar";
 import ProjectModal from "../annotationsList/selectSerieModal";
 import { downloadProjects } from "../../services/projectServices";
-import { downloadSubjects } from "../../services/subjectServices";
-import { downloadStudies } from "../../services/studyServices";
+import {
+  downloadSubjects,
+  deleteSubject
+} from "../../services/subjectServices";
+import { downloadStudies, deleteStudy } from "../../services/studyServices";
+import { deleteAnnotation } from "../../services/annotationServices";
 import {
   downloadSeries,
   getSeries,
@@ -25,8 +29,8 @@ import {
   jumpToAim
 } from "../annotationsList/action";
 import { MAX_PORT } from "../../constants";
-import "./searchView.css";
 import DownloadSelection from "./annotationDownloadModal";
+import "./searchView.css";
 import UploadModal from "./uploadModal";
 import { toast } from "react-toastify";
 import { isLite } from "../../config";
@@ -46,7 +50,8 @@ class SearchView extends Component {
       error: false,
       showUploadModal: false,
       numOfsubjects: 0,
-      showDeleteAlert: false
+      showDeleteAlert: false,
+      update: 0
     };
   }
 
@@ -68,9 +73,9 @@ class SearchView extends Component {
     return data;
   };
 
-  updateUploadStatus = async count => {
+  updateUploadStatus = async => {
     this.setState(state => {
-      return { uploading: !state.uploading };
+      return { uploading: !state.uploading, update: state.update + 1 };
     });
     this.updateSubjectCount();
   };
@@ -85,6 +90,8 @@ class SearchView extends Component {
     this.handleClickDeleteIcon();
     for (let study of studiesArr) {
       const series = await this.getSeriesData(study);
+      console.log("series...");
+      console.log(series);
       if (series.length > 0) {
         this.setState({ deleting: true });
         deleteSeries(series[0]).then(() => {
@@ -93,6 +100,48 @@ class SearchView extends Component {
           this.props.dispatch(clearSelection());
         });
       }
+    }
+  };
+
+  deleteSelectionWrapper = async (arr, func) => {
+    this.handleClickDeleteIcon();
+    const promiseArr = [];
+    this.setState({ deleting: true });
+    arr.forEach(item => {
+      console.log(item);
+      promiseArr.push(func(item));
+    });
+    Promise.all(promiseArr)
+      .then(async () => {
+        const subjects = await this.getData();
+        this.setState({ deleting: false, numOfsubjects: subjects.length });
+        this.setState(state => ({ update: state.update + 1 }));
+        this.props.dispatch(clearSelection());
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
+  deleteSelection = () => {
+    const selectedPatients = Object.values(this.props.selectedPatients);
+    const selectedStudies = Object.values(this.props.selectedStudies);
+    const selectedSeries = Object.values(this.props.selectedSeries);
+    const selectedAnnotations = Object.values(this.props.selectedAnnotations);
+
+    if (selectedPatients.length > 0) {
+      console.log("delete patient is called");
+      this.deleteSelectionWrapper(selectedPatients, deleteSubject);
+    } else if (selectedStudies.length > 0) {
+      console.log("delete study is called");
+      this.deleteSelectionWrapper(selectedStudies, deleteStudy);
+    } else if (selectedSeries.length > 0) {
+      console.log("delete serie is called");
+      this.deleteSelectionWrapper(selectedSeries, deleteSeries);
+    } else if (selectedAnnotations.length > 0) {
+      console.log("delete annotation is called");
+      console.log(selectedAnnotations);
+      this.deleteSelectionWrapper(selectedAnnotations, deleteAnnotation);
     }
   };
 
@@ -438,7 +487,16 @@ class SearchView extends Component {
     } else if (this.state.deleting) {
       status = "Deleting…";
     }
-    const showDelete = Object.values(this.props.selectedStudies).length > 0;
+
+    const showDelete =
+      (Object.entries(this.props.selectedAnnotations).length > 0 &&
+        this.props.selectedAnnotations.constructor === Object) ||
+      (Object.entries(this.props.selectedPatients).length > 0 &&
+        this.props.selectedPatients.constructor === Object) ||
+      (Object.entries(this.props.selectedStudies).length > 0 &&
+        this.props.selectedStudies.constructor === Object) ||
+      (Object.entries(this.props.selectedSeries).length > 0 &&
+        this.props.selectedSeries.constructor === Object);
     return (
       <>
         <Toolbar
@@ -458,7 +516,8 @@ class SearchView extends Component {
         <Subjects
           key={this.props.match.params.pid}
           pid={this.props.match.params.pid}
-          update={this.state.numOfsubjects}
+          // update={this.state.numOfsubjects}
+          update={this.state.update}
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection
@@ -476,7 +535,7 @@ class SearchView extends Component {
         {this.state.showDeleteAlert && (
           <DeleteAlert
             onCancel={this.handleClickDeleteIcon}
-            onDelete={this.deleteStudy}
+            onDelete={this.deleteSelection}
           />
         )}
       </>

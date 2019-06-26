@@ -75,7 +75,7 @@ const toolBar = props => {
           type="info"
           delayShow={1500}
         >
-          <span>Delete study</span>
+          <span>Delete selection</span>
         </ReactTooltip>
       </div>
       {/* <div className="searchView-toolbar__icon">
