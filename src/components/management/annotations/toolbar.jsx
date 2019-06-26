@@ -21,7 +21,8 @@ const toolBar = props => {
     onSelect,
     onType,
     onClear,
-    onFilter
+    onFilter,
+    onKeyDown
   } = props;
   const { selected, projects } = props;
 
@@ -164,6 +165,7 @@ const toolBar = props => {
               className="filter-text"
               name="name"
               ref={name}
+              onKeyDown={onKeyDown}
             />
           </div>
           <div className="filter-container">
@@ -175,6 +177,7 @@ const toolBar = props => {
               className="filter-text"
               name="patientName"
               ref={subject}
+              onKeyDown={onKeyDown}
             />
           </div>
           <div className="filter-container">
@@ -186,6 +189,7 @@ const toolBar = props => {
               className="filter-text"
               name="template"
               ref={template}
+              onKeyDown={onKeyDown}
             />
           </div>
         </div>
@@ -199,8 +203,9 @@ const toolBar = props => {
               className="filter-text"
               name="createdStart"
               ref={createdStart}
+              onKeyDown={onKeyDown}
             />
-            <span>{" - "}</span>
+            <span className="filter-space">{" - "}</span>
             <input
               onMouseDown={e => e.stopPropagation()}
               onChange={onType}
@@ -208,16 +213,12 @@ const toolBar = props => {
               className="filter-text"
               name="createdEnd"
               ref={createdEnd}
+              onKeyDown={onKeyDown}
             />
           </div>
           <div className="filter-icons">
             <div>
-              <div
-                className="annotation-toolbar__icon"
-                onClick={() => {
-                  onFilter();
-                }}
-              >
+              <div className="annotation-toolbar__icon" onClick={onFilter}>
                 <FaFilter
                   className="tool-icon"
                   data-tip

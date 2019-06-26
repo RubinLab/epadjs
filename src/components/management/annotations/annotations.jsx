@@ -107,7 +107,7 @@ class Annotations extends React.Component {
 
   handleFilterInput = e => {
     const { name, value } = e.target;
-    this.setState({ name: value });
+    this.setState({ [name]: value });
   };
 
   toggleRow = async (id, projectID) => {
@@ -204,11 +204,12 @@ class Annotations extends React.Component {
     });
   };
 
-  handleFilterInput = e => {
-    const { name, value } = e.target;
-    this.setState({ [name]: value });
+  handleKeyDown = e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      this.filterTableData();
+    }
   };
-
   filterTableData = () => {
     const {
       name,
@@ -431,7 +432,6 @@ class Annotations extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         Cell: original => {
-          console.log(original);
           return (
             <div>{this.clearCarets(original.row.checkbox.patientName)}</div>
           );
@@ -566,6 +566,7 @@ class Annotations extends React.Component {
           onFilter={this.filterTableData}
           onUpload={this.handleUpload}
           onDownload={this.handleDownload}
+          onKeyDown={this.handleKeyDown}
         />
         <ReactTable
           NoDataComponent={() => null}

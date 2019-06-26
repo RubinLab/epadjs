@@ -76,6 +76,7 @@
   display: flex;
   height: 5%;
   width: 100%;
+  min-height: 32px;
   /* background: rgb(85, 85, 85); */
 }
 
@@ -348,12 +349,25 @@
 .filter-group__sec2,
 .filter-icons {
   display: flex;
+  align-items: center;
   /* width: 80%; */
+}
+
+.filter-group {
+  flex-wrap: wrap;
+}
+
+.filter-group__sec1,
+.filter-group__sec2,
+.annotations-toolbar-basic {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .nowrap {
   display: flex;
   flex-wrap: nowrap;
+  align-items: center;
 }
 .annotation-toolbar__icon {
   width: 3%;
@@ -368,6 +382,7 @@
   font-size: 1.2rem;
   margin-top: 0.5rem;
   margin-bottom: 1.5rem;
+  /* flex-wrap: wrap; */
 }
 
 .annotations-toolbar-basic {
@@ -527,4 +542,9 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+}
+
+.filter-space {
+  margin-left: 0.3rem;
+  margin-right: 0.3rem;
 }
