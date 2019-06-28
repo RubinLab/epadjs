@@ -32,8 +32,8 @@ class Aim {
   }
 
   static getMarkups(aim) {
-    var annotations = [];
-    var annotation = {};
+    let annotations = [];
+    let annotation = {};
     const markupEntities =
       aim.imageAnnotations.ImageAnnotation.markupEntityCollection.MarkupEntity;
 
@@ -71,47 +71,78 @@ class Aim {
     }
   }
 
-  static getCalculationEntitiesOfMarkUp(aim, markupUid) {
-    const imageAnnotationStatements = Aim.getImageAnnotationStatements(aim);
-    // console.log("calculations for ", markupUid, " are");
-    var calculations = [];
-    imageAnnotationStatements.forEach(statement => {
-      if (
-        statement["xsi:type"] ==
-          "CalculationEntityReferencesMarkupEntityStatement" &&
-        statement.objectUniqueIdentifier.root === markupUid
-      ) {
-        const calculationUid = statement.subjectUniqueIdentifier.root;
-        const calculationEntities = Aim.getCalculationEntities(aim);
-        calculationEntities.forEach(calculation => {
-          if (calculation.uniqueIdentifier.root === calculationUid)
-            calculations.push(Aim.parseCalculation(calculation));
-        });
-      }
-    });
-    return calculations;
-  }
+  // static parseAim(aim) {
+  //   var imageAnnotation =
+  //     aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
+  //   var markupEntities = imageAnnotation.markupEntityCollection.MarkupEntity;
+  //   console.log(markupEntities);
+  //   markupEntities.forEach(markupEntity => {
+  //     console.log(this.getMarkup(markupEntity));
+  //   });
+  // }
 
-  static parseCalculation(calculation) {
-    const calcResult =
-      calculation.calculationResultCollection.CalculationResult;
-    var obj = {};
-    obj["type"] = calculation["description"]["value"];
-    obj["value"] = calcResult["value"]["value"];
-    obj["unit"] = calcResult["unitOfMeasure"]["value"];
-    // console.log(obj);
-    return obj;
-  }
+  // static getImageIdAnnotations(aims) {
+  //   var annotations = [];
+  //   var annotation = {};
+  //   aims.forEach(aim => this.parseAim(aim));
+  // }
 
-  static getImageAnnotationStatements = aim => {
-    return aim.imageAnnotations.ImageAnnotation
-      .imageAnnotationStatementCollection.ImageAnnotationStatement;
-  };
+  // static getMarkup(markupEntity) {
+  //   const imageId = markupEntity["imageReferenceUid"]["root"];
+  //   const markupUid = markupEntity["uniqueIdentifier"]["root"];
+  //   const calculations = this.getCalculationEntitiesOfMarkUp(aim, markupUid);
+  //   return {
+  //     imageId: {
+  //       markupType: markupEntity["xsi:type"],
+  //       coordinates:
+  //         markupEntity.twoDimensionSpatialCoordinateCollection
+  //           .TwoDimensionSpatialCoordinate,
+  //       calculations: calculations
+  //     }
+  //   };
+  // }
 
-  static getCalculationEntities = aim => {
-    return aim.imageAnnotations.ImageAnnotation.calculationEntityCollection
-      .CalculationEntity;
-  };
+  // static getCalculationEntitiesOfMarkUp(aim, markupUid) {
+  //   const imageAnnotationStatements = Aim.getImageAnnotationStatements(aim);
+  //   // console.log("calculations for ", markupUid, " are");
+  //   var calculations = [];
+  //   imageAnnotationStatements.forEach(statement => {
+  //     if (
+  //       statement["xsi:type"] ==
+  //         "CalculationEntityReferencesMarkupEntityStatement" &&
+  //       statement.objectUniqueIdentifier.root === markupUid
+  //     ) {
+  //       const calculationUid = statement.subjectUniqueIdentifier.root;
+  //       const calculationEntities = Aim.getCalculationEntities(aim);
+  //       calculationEntities.forEach(calculation => {
+  //         if (calculation.uniqueIdentifier.root === calculationUid)
+  //           calculations.push(Aim.parseCalculation(calculation));
+  //       });
+  //     }
+  //   });
+  //   return calculations;
+  // }
+
+  // static parseCalculation(calculation) {
+  //   const calcResult =
+  //     calculation.calculationResultCollection.CalculationResult;
+  //   var obj = {};
+  //   obj["type"] = calculation["description"]["value"];
+  //   obj["value"] = calcResult["value"]["value"];
+  //   obj["unit"] = calcResult["unitOfMeasure"]["value"];
+  //   // console.log(obj);
+  //   return obj;
+  // }
+
+  // static getImageAnnotationStatements = aim => {
+  //   return aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+  //     .imageAnnotationStatementCollection.ImageAnnotationStatement;
+  // };
+
+  // static getCalculationEntities = aim => {
+  //   return aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+  //     .calculationEntityCollection.CalculationEntity;
+  // };
 
   getUserInfo = () => {
     var obj = {};

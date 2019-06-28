@@ -43,8 +43,7 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
         "/studies/" +
         studyId +
         "/series/" +
-        seriesId +
-        "/aims?format=json"
+        seriesId
     );
   else
     return http.get(
@@ -61,6 +60,10 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
     );
 }
 
+export function getAnnotations2() {
+  return http.get(apiUrl + "/projects/lite/aims");
+}
+
 export function downloadAnnotations(optionObj, aimIDlist, selection) {
   if (isLite)
     return http.post(
@@ -74,9 +77,9 @@ export function downloadAnnotations(optionObj, aimIDlist, selection) {
     );
 }
 
-export function uploadAim(formData) {
-  const url = apiUrl + "/projects/lite/aims";
-
-  console.log("url is", url);
-  return http.post(url, formData);
+export function uploadAim(aimJson) {
+  let url;
+  if (isLite) url = apiUrl + "/projects/lite/aims";
+  else url = apiUrl + "/projects/lite/aims"; //should change for thick
+  return http.post(url, aimJson);
 }
