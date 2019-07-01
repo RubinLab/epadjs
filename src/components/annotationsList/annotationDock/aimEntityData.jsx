@@ -1,10 +1,12 @@
 import React from "react";
 
 const aimEntityData = ({ aimData }) => {
-  let observationEnt =
-    aimData.imagingObservationEntityCollection.ImagingObservationEntity;
-  let physicalEnt =
-    aimData.imagingPhysicalEntityCollection.ImagingPhysicalEntity;
+  let observationEnt = aimData.imagingObservationEntityCollection
+    ? aimData.imagingObservationEntityCollection.ImagingObservationEntity
+    : null;
+  let physicalEnt = aimData.imagingPhysicalEntityCollection
+    ? aimData.imagingPhysicalEntityCollection.ImagingPhysicalEntity
+    : null;
   let dataArr = [];
   if (observationEnt) {
     dataArr = Array.isArray(observationEnt)
@@ -23,6 +25,8 @@ const aimEntityData = ({ aimData }) => {
       ? dataArr.concat(physicalEnt)
       : dataArr.concat([physicalEnt]);
   }
+  console.log("dataArr");
+  console.log(dataArr);
   const listArr = [];
   dataArr.forEach((comment, i) => {
     listArr.push(
@@ -32,7 +36,7 @@ const aimEntityData = ({ aimData }) => {
       >
         <span className="aimEntity-question">{comment.label.value}:</span>
         <span className="aimEntity-answer">
-          {comment.typeCode["iso:displayName"].value}
+          {comment.typeCode[0]["iso:displayName"].value}
         </span>
       </li>
     );

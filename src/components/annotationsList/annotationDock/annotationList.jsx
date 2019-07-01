@@ -82,7 +82,9 @@ class AnnotationsList extends React.Component {
 
   render = () => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
+
     let annotations = Object.values(this.props.aimsList[seriesUID]);
+    console.log(annotations);
     annotations.sort(function(a, b) {
       let nameA = a.name.toUpperCase();
       let nameB = b.name.toUpperCase();
@@ -95,10 +97,13 @@ class AnnotationsList extends React.Component {
       return 0;
     });
 
+    // let annotations = [];
     let annList = [];
     annotations.forEach((aim, index) => {
-      let aimInfo = aim.json.imageAnnotations.ImageAnnotation;
-      let id = aim.json.uniqueIdentifier.root;
+      console.log(aim);
+      let aimInfo =
+        aim.json.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
+      let id = aim.json.ImageAnnotationCollection.uniqueIdentifier.root;
       annList.push(
         <Annotation
           name={aim.name}
@@ -108,7 +113,7 @@ class AnnotationsList extends React.Component {
           key={id}
           displayed={aim.isDisplayed}
           onClick={this.handleDisplayClick}
-          user={aim.json.user.name.value}
+          user={aim.json.ImageAnnotationCollection.user.name.value}
           showLabel={aim.showLabel}
           onSingleToggle={this.handleToggleSingleLabel}
           jumpToAim={this.handleJumToAim}
@@ -124,9 +129,16 @@ class AnnotationsList extends React.Component {
             <Switch
               onChange={this.handleToggleAllLabels}
               checked={this.state.labelDisplayAll}
-              className="react-switch"
+              onColor="#86d3ff"
+              onHandleColor="#1986d9"
+              handleDiameter={22}
               uncheckedIcon={false}
               checkedIcon={false}
+              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+              height={15}
+              width={36}
+              className="react-switch"
             />
           </div>
           <div className="label-toggle">
@@ -134,12 +146,18 @@ class AnnotationsList extends React.Component {
             <Switch
               onChange={this.handleToggleAllAnnotations}
               checked={this.state.annsDisplayAll}
-              className="react-switch"
+              onColor="#86d3ff"
+              onHandleColor="#1986d9"
+              handleDiameter={22}
               uncheckedIcon={false}
               checkedIcon={false}
+              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+              height={15}
+              width={36}
+              className="react-switch"
             />
           </div>
-
           <div>{annList}</div>
         </div>
       </React.Fragment>

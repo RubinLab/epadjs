@@ -37,3 +37,23 @@
 .splitted-view {
   display: flex;
 }
+.displayView-cont {
+  display: flex;
+}
+
+.__ports {
+  width: 85%;
+  height: 100%;
+}
+.__ports.__all {
+  width: 100%;
+  height: 100%;
+}
+.__anns {
+  width: 15%;
+  right: 0%;
+  max-width: 220px;
+  min-width: 195px;
+  padding-right: 1rem;
+  padding-top: 1rem;
+}

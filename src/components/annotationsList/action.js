@@ -29,12 +29,13 @@ import {
   START_LOADING,
   UPDATE_PATIENT,
   CLOSE_SERIE,
-  colors
+  colors,
+  commonLabels
 } from "./types";
 
 import { getSeries } from "../../services/seriesServices";
 
-import { getStudies } from "../../services/studyServices";
+import { getStudies, getStudyAims } from "../../services/studyServices";
 
 import {
   getAnnotations,
@@ -333,9 +334,27 @@ const getAimListFields = (aims, ann) => {
   const result = {};
 
   aims.forEach((aim, index) => {
+    const studyRef =
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy;
+    const imgAimUID =
+      studyRef.imageSeries.imageCollection.Image[0].sopInstanceUid.root;
+    const serieAimUID = studyRef.imageSeries.instanceUid.root;
+    const studyAimUID = studyRef.instanceUid.root;
+
     if (index >= colors.length) {
       index = index % colors.length;
     }
+
+    const color = imgAimUID ? { ...colors[index] } : commonLabels;
+    // console.log("--------------");
+    // console.log(color);
+    // console.log("--------------");
+    let type = imgAimUID
+      ? "image"
+      : serieAimUID && !imgAimUID
+      ? "serie"
+      : "study";
 
     let name =
       aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].name
@@ -346,19 +365,17 @@ const getAimListFields = (aims, ann) => {
     }
 
     let displayStatus = ann
-      ? ann ===
-        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-          .uniqueIdentifier.root
+      ? ann === aim.ImageAnnotationCollection.uniqueIdentifier.root
       : !ann;
-    result[
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].uniqueIdentifier.root
-    ] = {
+
+    result[aim.ImageAnnotationCollection.uniqueIdentifier.root] = {
       name,
       json: aim,
       isDisplayed: displayStatus,
       showLabel: true,
       cornerStoneTools: [],
-      color: { ...colors[index] }
+      color,
+      type
     };
   });
   return result;
@@ -504,36 +521,60 @@ export const getSingleSerie = (serie, annotation) => {
       seriesUID,
       aimID: annotation
     };
-    const aimsData = await dispatch(getSingleSerieData(serie, annotation));
+    let aimsData = await dispatch(getSingleSerieData(serie, annotation));
     // dispatch(updateGrid(ref))
+    let studyAim = await getStudyAim(patientID, studyUID);
     dispatch(singleSerieLoaded(reference, aimsData, seriesUID, annotation));
   };
 };
 
+const getStudyAim = async (subjectID, studyID) => {
+  let result;
+  let studyAims = [];
+  try {
+    // const { data: aims } =
+    result = await getStudyAims(subjectID, studyID);
+  } catch (err) {
+    console.log(err);
+  }
+  result = result.data;
+  result.forEach(aim => {
+    const serieUID =
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy
+        .imageSeries.instanceUid.root;
+    if (!serieUID) {
+      studyAims.push(aim);
+    }
+  });
+  return studyAims;
+};
+
 const getSingleSerieData = (serie, annotation) => {
-  console.log("in action serie", serie);
   return async (dispatch, getState) => {
     dispatch(loadAnnotations());
     let aimsData = {};
-    let { studyUID, seriesUID, projectID } = serie;
-    projectID = projectID ? projectID : "lite";
-    const patientID = serie.subjectID;
+    let serieAims = [];
+    let studyAims = [];
 
+    let { studyUID, seriesUID, projectID, patientID } = serie;
+    projectID = projectID ? projectID : "lite";
+    patientID = patientID ? patientID : serie.subjectID;
     try {
-      const { data: aims } = await getAnnotationsJSON(
+      // const { data: aims } = await getAnnotationsJSON(
+      serieAims = await getAnnotationsJSON(
         projectID,
         patientID,
         studyUID,
         seriesUID
       );
-      console.log(aims);
-      aimsData = getAimListFields(aims, annotation);
-      console.log("final aim data");
-      console.log(aimsData);
+      serieAims = serieAims.data;
+      studyAims = await getStudyAim(patientID, studyUID);
     } catch (err) {
-      console.log(err);
       dispatch(annotationsLoadingError(err));
     }
+    aimsData = serieAims.concat(studyAims);
+    aimsData = getAimListFields(aimsData, annotation);
     return aimsData;
   };
 };

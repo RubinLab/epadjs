@@ -253,31 +253,33 @@ class DisplayView extends Component {
     }
   };
 
-  parseAims = aimList => {
-    // first clear the tool state
-    // if (this.state.selectedAim) {
-    //   const element = this.cornerstone.getEnabledElements()[
-    //     this.props.activePort
-    //   ]["element"];
-    //   this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.clear(
-    //     element
-    //   );
-    // }
-    console.log(this.props.cornerstoneTools);
+  //parseAims,
 
-    // now parse the aim and render the new marups
-    Object.entries(aimList).forEach(([key, value]) => {
-      Object.entries(value).forEach(([key, value]) => {
-        // get markups for the aim
-        if (
-          value.json.imageAnnotations.ImageAnnotation.markupEntityCollection
-        ) {
-          const color = value.color.button.background;
-          this.renderMarkups(key, Aim.getMarkups(value.json), color);
-        }
-      });
-    });
-  };
+  // parseAims = aimList => {
+  //   // first clear the tool state
+  //   // if (this.state.selectedAim) {
+  //   //   const element = this.cornerstone.getEnabledElements()[
+  //   //     this.props.activePort
+  //   //   ]["element"];
+  //   //   this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.clear(
+  //   //     element
+  //   //   );
+  //   // }
+  //   console.log(this.props.cornerstoneTools);
+
+  //   // now parse the aim and render the new marups
+  //   Object.entries(aimList).forEach(([key, value]) => {
+  //     Object.entries(value).forEach(([key, value]) => {
+  //       // get markups for the aim
+  //       if (
+  //         value.json.imageAnnotations.ImageAnnotation.markupEntityCollection
+  //       ) {
+  //         const color = value.color.button.background;
+  //         this.renderMarkups(key, Aim.getMarkups(value.json), color);
+  //       }
+  //     });
+  //   });
+  // };
 
   renderMarkups = (key, markups, color) => {
     console.log("Rendering Markups", key, markups, color);
@@ -434,7 +436,7 @@ class DisplayView extends Component {
 
   componentDidUpdate(prevProps) {
     if (!this.state.isLoading && Object.entries(this.props.aimList).length) {
-      this.parseAims(this.props.aimList);
+      // this.parseAims(this.props.aimList);
       window.addEventListener(
         "annotationSelected",
         this.handleAnnotationSelected

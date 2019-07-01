@@ -7,7 +7,8 @@ import { getUser } from "./services/userServices";
 import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
 import SearchView from "./components/searchView/searchView";
-import DisplayView from "./components/display/displayView";
+// import DisplayView from "./components/display/displayView";
+import DisplayViewContainer from "./components/display/displayViewContainer";
 import AnotateView from "./components/anotateView";
 import ProgressView from "./components/progressView";
 import NotFound from "./components/notFound";
@@ -135,7 +136,10 @@ class App extends Component {
             <Sidebar>
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
-                <ProtectedRoute path="/display" component={DisplayView} />
+                <ProtectedRoute
+                  path="/display"
+                  component={DisplayViewContainer}
+                />
                 <ProtectedRoute path="/search/:pid?" component={SearchView} />
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute path="/progress" component={ProgressView} />
@@ -157,7 +161,7 @@ class App extends Component {
         {this.state.authenticated && isLite && (
           <Switch>
             <Route path="/logout" component={Logout} />
-            <ProtectedRoute path="/display" component={DisplayView} />
+            <ProtectedRoute path="/display" component={DisplayViewContainer} />
             <Route path="/not-found" component={NotFound} />
             <ProtectedRoute path="/" component={SearchView} />
             <Redirect to="/not-found" />

@@ -25,7 +25,7 @@ const annotation = props => {
 
   //getting aim details
   const hasEntityData =
-    props.aim.magingObservationEntityCollection ||
+    props.aim.imagingObservationEntityCollection ||
     props.aim.imagingPhysicalEntityCollection;
   const finalButtonStyle = !props.showLabel ? singleButtonStyle : buttonStyle;
 
@@ -80,7 +80,7 @@ const annotation = props => {
           <div className="annotation-label__desc">
             <div className="annotation__userName">{props.user}</div>
             <div>-</div>
-            <div className="annotation__type">{props.aim.typeCode.code}</div>
+            <div className="annotation__type">{props.aim.typeCode[0].code}</div>
           </div>
           {hasEntityData && (
             <div className="annotation-aimData">

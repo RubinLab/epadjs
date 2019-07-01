@@ -288,11 +288,11 @@ svg {
 }
 
 .label-toggle__text {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   align-items: center;
   margin-right: 1rem;
   display: flex;
-  width: 60%;
+  width: 70%;
 }
 
 .-maxView-container {
