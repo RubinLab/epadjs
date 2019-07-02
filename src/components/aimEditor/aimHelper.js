@@ -24,6 +24,7 @@ function getMarkup(markupEntity, aim) {
   const markupUid = markupEntity["uniqueIdentifier"]["root"];
   const calculations = getCalculationEntitiesOfMarkUp(aim, markupUid);
   const aimUid = aim.ImageAnnotationCollection["uniqueIdentifier"]["root"];
+  console.log("CALCULATIONS", calculations);
   return {
     imageId,
     data: {

@@ -61,11 +61,11 @@ const tools = [
   { name: "Rotate" },
   { name: "WwwcRegion" },
   { name: "Probe" },
-  { name: "FreehandMouse", mouseButtonMasks: [1] },
+  { name: "FreehandRoi", mouseButtonMasks: [1] },
   { name: "Eraser" },
   { name: "Bidirectional", mouseButtonMasks: [1] },
   { name: "Brush" },
-  { name: "FreehandSculpterMouse" },
+  { name: "FreehandRoiSculptor" },
   { name: "StackScroll", mouseButtonMasks: [1] },
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
@@ -424,7 +424,9 @@ class DisplayView extends Component {
     if (!this.state.isLoading && Object.entries(this.props.aimList).length) {
       //get the aims for test
       const { data: aims } = await getAnnotations2();
+      console.log("csTool are", this.cornerstoneTools);
       console.log("aims are", aims);
+      debugger;
       getImageIdAnnotations(aims);
 
       // this.parseAims(aims);
