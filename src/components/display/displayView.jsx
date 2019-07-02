@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import cornerstone from "cornerstone-core";
+import cornerstoneTools from "cornerstone-tools";
 import Toolbar from "./toolbar";
 import { getImageIds, getWadoImagePath } from "../../services/seriesServices";
 //import Viewport from "./viewport.jsx";
@@ -59,23 +61,24 @@ const tools = [
   { name: "Rotate" },
   { name: "WwwcRegion" },
   { name: "Probe" },
-  { name: "FreehandMouse", mouseButtonMasks: [1] },
+  { name: "FreehandRoi", mouseButtonMasks: [1] },
   { name: "Eraser" },
   { name: "Bidirectional", mouseButtonMasks: [1] },
   { name: "Brush" },
-  { name: "FreehandSculpterMouse" },
+  { name: "FreehandRoiSculptor" },
   { name: "StackScroll", mouseButtonMasks: [1] },
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
   { name: "StackScrollMouseWheel" },
   { name: "StackScrollMultiTouch" }
+  // { name: "FreehandRoi3D" }
 ];
 
 const mapStateToProps = state => {
   return {
     series: state.annotationsListReducer.openSeries,
-    cornerstone: state.searchViewReducer.cornerstone,
-    cornerstoneTools: state.searchViewReducer.cornerstoneTools,
+    // cornerstone: state.searchViewReducer.cornerstone,
+    // cornerstoneTools: state.searchViewReducer.cornerstoneTools,
     activePort: state.annotationsListReducer.activePort,
     aimList: state.annotationsListReducer.aimsList
   };
@@ -84,8 +87,8 @@ const mapStateToProps = state => {
 class DisplayView extends Component {
   constructor(props) {
     super(props);
-    this.cornerstone = this.props.cornerstone;
-    this.cornerstoneTools = this.props.cornerstoneTools;
+    // this.cornerstone = this.props.cornerstone;
+    // this.cornerstoneTools = this.props.cornerstoneTools;
     this.state = {
       width: "100%",
       height: "calc(100% - 60px)",
@@ -107,6 +110,7 @@ class DisplayView extends Component {
       "annotationSelected",
       this.handleAnnotationSelected
     );
+    console.log("new tools", cornerstoneTools);
   }
 
   /*testAimEditor = () => {
@@ -263,7 +267,7 @@ class DisplayView extends Component {
     //     element
     //   );
     // }
-    console.log(this.props.cornerstoneTools);
+    console.log(cornerstoneTools);
 
     // now parse the aim and render the new marups
     Object.entries(aimList).forEach(([key, value]) => {
@@ -460,8 +464,8 @@ class DisplayView extends Component {
       // <div className="displayView-main">
       <React.Fragment>
         <Toolbar
-          cornerstone={this.props.cornerstone}
-          cornerstoneTools={this.props.cornerstoneTools}
+          cornerstone={this.cornerstone}
+          cornerstoneTools={this.cornerstoneTools}
         />
         {this.state.showAimEditor && (
           <AimEditor

@@ -74,7 +74,7 @@ const tools = [
   { name: "WwwcRegion" },
   { name: "Probe" },
   {
-    name: "FreehandMouse",
+    name: "FreehandRoi",
     configuration: {
       showMinMax: true
       // showHounsfieldUnits: true
@@ -83,7 +83,7 @@ const tools = [
   { name: "Eraser" },
   { name: "Bidirectional" },
   { name: "Brush" },
-  { name: "FreehandSculpterMouse" }
+  { name: "FreehandRoiSculptor" }
 ];
 
 class Toolbar extends Component {
@@ -457,7 +457,7 @@ class Toolbar extends Component {
                 id="circle"
                 tabIndex="3"
                 className="drawingSectionButton"
-                onClick={() => this.setToolActiveForElement("CircleRoi")}
+                onClick={() => this.setToolActive("FreehandRoi3D")}
               >
                 <div className="icon-circle fontastic-icons" />
                 <div className="buttonLabel">

@@ -177,8 +177,10 @@ class ViewportSeg extends Component {
 
   initializeTools = () => {
     Array.from(this.tools).forEach(tool => {
+      console.log();
       const apiTool = this.cornerstoneTools[`${tool.name}Tool`];
-      if (apiTool) {
+      console.log(tool.name);
+      if (apiTool && tool.name != "Brush3DAutoGated") {
         this.cornerstoneTools.addToolForElement(
           this.state.viewport,
           apiTool,
