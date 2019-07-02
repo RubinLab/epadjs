@@ -5,6 +5,8 @@ import { Modal } from "react-bootstrap";
 import { downloadAnnotations } from "../../services/annotationServices";
 import { ToastContainer, toast } from "react-toastify";
 import { clearSelection } from "../annotationsList/action";
+const support = false;
+
 class AnnnotationDownloadModal extends React.Component {
   state = { summary: false, aim: false };
 
@@ -15,13 +17,20 @@ class AnnnotationDownloadModal extends React.Component {
 
   onDownload = () => {
     const optionObj = this.state;
-    const aimList = Object.keys(this.props.selectedAnnotations);
+
+    const annsToDownload =
+      Object.keys(this.props.selectedAnnotations).length > 0
+        ? this.props.selectedAnnotations
+        : this.props.selected;
+    const aimList = Object.keys(annsToDownload);
+    console.log(aimList);
     this.props.updateStatus();
     downloadAnnotations(optionObj, aimList)
       .then(result => {
         let blob = new Blob([result.data], { type: "application/zip" });
         this.triggerBrowserDownload(blob, "Annotations");
         this.props.updateStatus();
+        this.props.onSubmit();
       })
       .catch(err => {
         if (err.response.status === 503) {
@@ -44,9 +53,13 @@ class AnnnotationDownloadModal extends React.Component {
   };
 
   render = () => {
+    let className = "alert-annDownload";
+    className = this.props.className
+      ? `${className} ${this.props.className}`
+      : className;
     let disabled = !this.state.summary && !this.state.aim;
     return (
-      <Modal.Dialog dialogClassName="alert-annDownload">
+      <Modal.Dialog dialogClassName={className}>
         <Modal.Header>
           <Modal.Title className="annDownload__header">
             Select Download Format
@@ -71,6 +84,48 @@ class AnnnotationDownloadModal extends React.Component {
             />
             <span className="annDownload-text">AIM Document</span>
           </div>
+          {support && (
+            <>
+              <div className="annDownload-option">
+                <input
+                  type="checkbox"
+                  className="annDownload-select"
+                  name="dcm-img"
+                  onClick={this.onSelect}
+                />
+                <span className="annDownload-text">DICOM image</span>
+              </div>
+              <div className="annDownload-option">
+                <input
+                  type="checkbox"
+                  className="annDownload-select"
+                  name="dcm-obj"
+                  onClick={this.onSelect}
+                />
+                <span className="annDownload-text">
+                  DICOM segmentation object
+                </span>
+              </div>
+              <div className="annDownload-option">
+                <input
+                  type="checkbox"
+                  className="annDownload-select"
+                  name="dcmsr"
+                  onClick={this.onSelect}
+                />
+                <span className="annDownload-text">DICOMSR</span>
+              </div>
+              <div className="annDownload-option">
+                <input
+                  type="checkbox"
+                  className="annDownload-select"
+                  name="jpg"
+                  onClick={this.onSelect}
+                />
+                <span className="annDownload-text">JPG image</span>
+              </div>
+            </>
+          )}
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
           {disabled ? (

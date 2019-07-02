@@ -104,6 +104,21 @@ class Series extends Component {
     }
   }
 
+  async componentDidUpdate(prevProps) {
+    if (this.props.update !== prevProps.update) {
+      const {
+        data: {
+          ResultSet: { Result: data }
+        }
+      } = await getSeries(
+        this.props.projectId,
+        this.props.subjectId,
+        this.props.studyId
+      );
+      this.setState({ data });
+    }
+  }
+
   selectRow = selected => {
     // console.log(selected);
     // const newState = { ...this.state.selectedSerie };
@@ -429,10 +444,8 @@ class Series extends Component {
     }
 
     //serie is not already open;
-
     if (!isSerieOpen) {
       //if the grid is full show warning
-
       if (isGridFull) {
         // this.setState({ showGridFullWarning: true });
 
@@ -489,7 +502,7 @@ class Series extends Component {
               NoDataComponent={() => null}
               data={this.state.data}
               columns={this.state.columns}
-              defaultPageSize={this.state.data.length}
+              pageSize={this.state.data.length}
               ref={r => (this.selectTable = r)}
               className="-striped -highlight"
               freezWhenExpanded={false}
@@ -517,6 +530,7 @@ class Series extends Component {
                       seriesId={row.original.seriesUID}
                       studyDescription={this.props.studyDescription}
                       seriesDescription={row.original.seriesDescription}
+                      update={this.props.update}
                     />
                   </div>
                 );

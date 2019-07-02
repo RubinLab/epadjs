@@ -390,7 +390,7 @@ class Toolbar extends Component {
             <Spinner loading={this.props.patientLoading} unit="rem" size={3} />
           ) : (
             <>
-              <div className="toolContainer">
+              <div className="toolContainer patient-icon">
                 <FaRegFolderOpen />
               </div>
               <div className="buttonLabel">

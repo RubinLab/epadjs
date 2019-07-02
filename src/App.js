@@ -19,6 +19,7 @@ import Management from "./components/management/mainMenu";
 import AnnotationList from "./components/annotationsList";
 import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import AnnotationsList from "./components/annotationsList/annotationDock/annotationList";
+import ManagementItemModal from "./components/management/common/customModal";
 
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
@@ -165,12 +166,18 @@ class App extends Component {
         {this.props.listOpen && <AnnotationList />}
         {this.props.dockOpen && <AnnotationsDock />}
         {this.props.showGridFullAlert && <MaxViewAlert />}
+        {/* {this.props.selection && (
+          <ManagementItemModal selection={this.props.selection} />
+        )} */}
       </React.Fragment>
     );
   }
 }
 
 const mapStateToProps = state => {
+  console.log(state.annotationsListReducer);
+  console.log(state.managementReducer);
+
   const {
     listOpen,
     dockOpen,
@@ -185,7 +192,8 @@ const mapStateToProps = state => {
     showGridFullAlert,
     showProjectModal,
     loading,
-    activePort
+    activePort,
+    selection: state.managementReducer.selection
   };
 };
 export default withRouter(connect(mapStateToProps)(App));

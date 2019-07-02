@@ -104,13 +104,14 @@ export const displaySingleAim = (
 };
 
 export const selectPatient = selectedPatientObj => {
-  const { projectID, subjectID } = selectedPatientObj;
+  let { projectID, subjectID } = selectedPatientObj;
+  projectID = projectID ? projectID : "lite";
 
   return { type: SELECT_PATIENT, patient: { projectID, subjectID } };
 };
 
 export const selectStudy = selectedStudyObj => {
-  const {
+  let {
     studyUID,
 
     patientID,
@@ -123,6 +124,7 @@ export const selectStudy = selectedStudyObj => {
 
     numberOfSeries
   } = selectedStudyObj;
+  projectID = projectID ? projectID : "lite";
 
   return {
     type: SELECT_STUDY,
@@ -222,6 +224,7 @@ export const selectAnnotation = (
 
 export const addToGrid = (serie, annotation) => {
   let { patientID, studyUID, seriesUID, projectID } = serie;
+  projectID = projectID ? projectID : "lite";
   if (annotation)
     patientID = serie.originalSubjectID || serie.subjectID || serie.patientID;
   let reference = {
@@ -334,14 +337,22 @@ const getAimListFields = (aims, ann) => {
       index = index % colors.length;
     }
 
-    let name = aim.imageAnnotations.ImageAnnotation.name.value;
+    let name =
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].name
+        .value;
     let ind = name.indexOf("~");
     if (ind >= 0) {
       name = name.substring(0, ind);
     }
 
-    let displayStatus = ann ? ann === aim.uniqueIdentifier.root : !ann;
-    result[aim.uniqueIdentifier.root] = {
+    let displayStatus = ann
+      ? ann ===
+        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+          .uniqueIdentifier.root
+      : !ann;
+    result[
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].uniqueIdentifier.root
+    ] = {
       name,
       json: aim,
       isDisplayed: displayStatus,
@@ -363,13 +374,14 @@ const getRequiredFields = (arr, type, selectedID) => {
         obj = { studyUID, studyDescription };
         result[studyUID] = obj;
       } else if (type === "serie") {
-        const {
+        let {
           seriesUID,
           seriesDescription,
           studyUID,
           patientID,
           projectID
         } = element;
+        projectID = projectID ? projectID : "lite";
         const isDisplayed = seriesUID === selectedID || selectedID === studyUID;
 
         obj = {
@@ -499,18 +511,27 @@ export const getSingleSerie = (serie, annotation) => {
 };
 
 const getSingleSerieData = (serie, annotation) => {
+  console.log("in action serie", serie);
   return async (dispatch, getState) => {
     dispatch(loadAnnotations());
     let aimsData = {};
-    let { patientID, studyUID, seriesUID, projectID } = serie;
+    let { studyUID, seriesUID, projectID } = serie;
+    projectID = projectID ? projectID : "lite";
+    const patientID = serie.subjectID;
+
     try {
-      const {
-        data: {
-          imageAnnotations: { ImageAnnotationCollection: aims }
-        }
-      } = await getAnnotationsJSON(projectID, patientID, studyUID, seriesUID);
-      aimsData = getAimListFields(aims);
+      const { data: aims } = await getAnnotationsJSON(
+        projectID,
+        patientID,
+        studyUID,
+        seriesUID
+      );
+      console.log(aims);
+      aimsData = getAimListFields(aims, annotation);
+      console.log("final aim data");
+      console.log(aimsData);
     } catch (err) {
+      console.log(err);
       dispatch(annotationsLoadingError(err));
     }
     return aimsData;
@@ -522,6 +543,8 @@ export const getWholeData = (serie, study, annotation) => {
     dispatch(loadPatient());
     let { projectID, patientID, patientName, studyUID } =
       serie || study || annotation;
+    projectID = projectID ? projectID : "lite";
+
     if (annotation) patientID = annotation.subjectID;
     let selectedID;
     let seriesUID;
@@ -588,6 +611,8 @@ export const getWholeData = (serie, study, annotation) => {
 export const getAnnotationListData = (serie, study, annotation) => {
   return async (dispatch, getState) => {
     let { projectID, patientID, patientName, studyUID } = serie || study;
+    projectID = projectID ? projectID : "lite";
+
     let selectedID;
     let seriesUID;
     if (serie) {
