@@ -33,6 +33,9 @@ const annotation = props => {
   const calculations = props.aim.calculationEntityCollection
     ? props.aim.calculationEntityCollection.CalculationEntity
     : [];
+  console.log("------------calculations-----------");
+
+  console.log(calculations);
   return (
     <div className="annotation-container">
       <div className="annotation-button__container" style={finalButtonStyle}>

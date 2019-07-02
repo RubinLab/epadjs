@@ -7,16 +7,16 @@ const calculationLabel = ({ calculations, name, shape }) => {
   let i = 0;
   for (let el of calculations) {
     const labelType =
-      el.calculationResultCollection.CalculationResult.dimensionCollection
-        .Dimension.label;
+      el.calculationResultCollection.CalculationResult[0].dimensionCollection
+        .Dimension[0].label;
     let desc = "";
-    let upperLevel = el.calculationResultCollection.CalculationResult.value;
+    let upperLevel = el.calculationResultCollection.CalculationResult[0].value;
     let val = upperLevel
       ? upperLevel.value
-      : el.calculationResultCollection.CalculationResult
-          .calculationDataCollection.CalculationData.value.value;
+      : el.calculationResultCollection.CalculationResult[0]
+          .calculationDataCollection.CalculationData[0].value.value;
     let unit =
-      el.calculationResultCollection.CalculationResult.unitOfMeasure.value;
+      el.calculationResultCollection.CalculationResult[0].unitOfMeasure.value;
     const { value } = el.description;
     if (value === "Maximum") {
       desc = "Max";
@@ -26,6 +26,7 @@ const calculationLabel = ({ calculations, name, shape }) => {
       unit = null;
     } else if (value === "Standard Deviation") {
       desc = "StdDev";
+      val = parseFloat(val);
       val = isNaN(val) ? val : val.toFixed(3);
       unit = null;
     } else if (
@@ -34,13 +35,16 @@ const calculationLabel = ({ calculations, name, shape }) => {
       value === "ShortAxis"
     ) {
       desc = "Length";
+      val = parseFloat(val);
       val = isNaN(val) ? val : val.toFixed(3);
     } else if (value === "Mean") {
       desc = value;
       unit = null;
+      val = parseFloat(val);
       val = isNaN(val) ? val : val.toFixed(2);
     } else if (value === "Volume") {
       desc = value;
+      val = parseFloat(val);
       val = isNaN(val) ? val : val.toFixed(3);
     }
 
