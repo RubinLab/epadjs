@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import Toolbar from "./toolbar";
 import { getImageIds, getWadoImagePath } from "../../services/seriesServices";
+import { getAnnotations2 } from "../../services/annotationServices";
+import getImageIdAnnotations from "../aimEditor/aimHelper.js";
 //import Viewport from "./viewport.jsx";
 import ViewportSeg from "./viewportSeg.jsx";
 import { connect } from "react-redux";
@@ -59,11 +61,11 @@ const tools = [
   { name: "Rotate" },
   { name: "WwwcRegion" },
   { name: "Probe" },
-  { name: "FreehandMouse", mouseButtonMasks: [1] },
+  { name: "FreehandRoi", mouseButtonMasks: [1] },
   { name: "Eraser" },
   { name: "Bidirectional", mouseButtonMasks: [1] },
   { name: "Brush" },
-  { name: "FreehandSculpterMouse" },
+  { name: "FreehandRoiSculptor" },
   { name: "StackScroll", mouseButtonMasks: [1] },
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
@@ -108,20 +110,6 @@ class DisplayView extends Component {
       this.handleAnnotationSelected
     );
   }
-
-  /*testAimEditor = () => {
-    console.log(document.getElementById("cont"));
-    var instanceAimEditor = new aim.AimEditor(document.getElementById("cont"));
-    var myA = [
-      { key: "BeaulieuBoneTemplate_rev18", value: aim.myjson },
-      { key: "asdf", value: aim.myjson1 }
-    ];
-    instanceAimEditor.loadTemplates(myA);
-
-    instanceAimEditor.addButtonsDiv();
-
-    instanceAimEditor.createViewerWindow();
-  };*/
 
   getData() {
     var promises = [];
@@ -432,9 +420,16 @@ class DisplayView extends Component {
     this.setState({ showAimEditor: false, selectedAim: undefined });
   };
 
-  componentDidUpdate(prevProps) {
+  async componentDidUpdate(prevProps) {
     if (!this.state.isLoading && Object.entries(this.props.aimList).length) {
-      this.parseAims(this.props.aimList);
+      //get the aims for test
+      const { data: aims } = await getAnnotations2();
+      console.log("csTool are", this.cornerstoneTools);
+      console.log("aims are", aims);
+      debugger;
+      getImageIdAnnotations(aims);
+
+      // this.parseAims(aims);
       window.addEventListener(
         "annotationSelected",
         this.handleAnnotationSelected
