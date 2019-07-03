@@ -14,7 +14,6 @@ class DisplayViewContainer extends React.Component {
 
   render = () => {
     const { dockOpen } = this.props;
-    console.log(this.props.dockOpen);
     return (
       <div className="displayView-cont">
         <div className={dockOpen ? "__ports" : "__ports __all"}>

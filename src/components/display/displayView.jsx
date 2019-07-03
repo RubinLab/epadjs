@@ -429,7 +429,7 @@ class DisplayView extends Component {
       const { data: aims } = await getAnnotations2();
       console.log("csTool are", this.cornerstoneTools);
       console.log("aims are", aims);
-      debugger;
+      // debugger;
       getImageIdAnnotations(aims);
 
       // this.parseAims(aims);

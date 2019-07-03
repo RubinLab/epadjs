@@ -355,11 +355,6 @@ class Subjects extends Component {
     }
   };
   onExpandedChange = (newExpanded, index, event) => {
-    console.log("subject onExpandedChange");
-    console.log(newExpanded);
-    console.log(index);
-    console.log(event);
-
     this.setState({ expanded: newExpanded });
   };
 

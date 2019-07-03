@@ -492,6 +492,8 @@ const asyncReducer = (state = initialState, action) => {
 
     case LOAD_SERIE_SUCCESS:
       let indexNum = state.openSeries.length - 1;
+      let imageAddedSeries = [...state.openSeries];
+      imageAddedSeries[indexNum].imageAnnotations = action.payload.imageData;
       const result = Object.assign({}, state, {
         loading: false,
         error: false,
@@ -499,7 +501,8 @@ const asyncReducer = (state = initialState, action) => {
         aimsList: {
           ...state.aimsList,
           [action.payload.ref.seriesUID]: action.payload.aimsData
-        }
+        },
+        openSeries: imageAddedSeries
       });
       return result;
 

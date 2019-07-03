@@ -371,10 +371,6 @@ class Studies extends Component {
   };
 
   onExpandedChange = (newExpanded, index, event) => {
-    console.log("studies onExpandedChange");
-    console.log(newExpanded);
-    console.log(index);
-    console.log(event);
     this.setState({ expanded: newExpanded });
   };
 

@@ -82,9 +82,9 @@ class AnnotationsList extends React.Component {
 
   render = () => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
-
+    // console.log(annotations);
     let annotations = Object.values(this.props.aimsList[seriesUID]);
-    console.log(annotations);
+    // console.log(annotations);
     annotations.sort(function(a, b) {
       let nameA = a.name.toUpperCase();
       let nameB = b.name.toUpperCase();
@@ -100,20 +100,17 @@ class AnnotationsList extends React.Component {
     // let annotations = [];
     let annList = [];
     annotations.forEach((aim, index) => {
-      console.log(aim);
-      let aimInfo =
-        aim.json.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
-      let id = aim.json.ImageAnnotationCollection.uniqueIdentifier.root;
+      // console.log(aim);
       annList.push(
         <Annotation
           name={aim.name}
           style={aim.color}
-          aim={aimInfo}
-          id={id}
-          key={id}
+          aim={aim.json}
+          id={aim.id}
+          key={aim.id}
           displayed={aim.isDisplayed}
           onClick={this.handleDisplayClick}
-          user={aim.json.ImageAnnotationCollection.user.name.value}
+          user={aim.user}
           showLabel={aim.showLabel}
           onSingleToggle={this.handleToggleSingleLabel}
           jumpToAim={this.handleJumToAim}

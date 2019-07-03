@@ -1,6 +1,6 @@
 import React from "react";
 
-const aimEntityData = ({ aimData }) => {
+const aimEntityData = ({ aimData, id }) => {
   let observationEnt = aimData.imagingObservationEntityCollection
     ? aimData.imagingObservationEntityCollection.ImagingObservationEntity
     : null;
@@ -25,15 +25,12 @@ const aimEntityData = ({ aimData }) => {
       ? dataArr.concat(physicalEnt)
       : dataArr.concat([physicalEnt]);
   }
-  console.log("dataArr");
-  console.log(dataArr);
+  // console.log("dataArr");
+  // console.log(dataArr);
   const listArr = [];
   dataArr.forEach((comment, i) => {
     listArr.push(
-      <li
-        className="aimEntity-item"
-        key={aimData.uniqueIdentifier.root + "ind-" + i}
-      >
+      <li className="aimEntity-item" key={id + "ind-" + i}>
         <span className="aimEntity-question">{comment.label.value}:</span>
         <span className="aimEntity-answer">
           {comment.typeCode[0]["iso:displayName"].value}

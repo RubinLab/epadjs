@@ -33,9 +33,9 @@ const annotation = props => {
   const calculations = props.aim.calculationEntityCollection
     ? props.aim.calculationEntityCollection.CalculationEntity
     : [];
-  console.log("------------calculations-----------");
+  // console.log("------------calculations-----------");
+  // console.log(calculations);
 
-  console.log(calculations);
   return (
     <div className="annotation-container">
       <div className="annotation-button__container" style={finalButtonStyle}>
@@ -87,7 +87,7 @@ const annotation = props => {
           </div>
           {hasEntityData && (
             <div className="annotation-aimData">
-              <AimEntityData aimData={props.aim} />
+              <AimEntityData aimData={props.aim} id={props.id} />
             </div>
           )}
           {calculations.length > 0 && calculations.length <= 10 && (
