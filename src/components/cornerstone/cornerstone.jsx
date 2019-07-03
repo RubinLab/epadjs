@@ -29,9 +29,9 @@ const Cornerstone = ({ dispatch }) => {
   cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
   cornerstoneTools.external.Hammer = Hammer;
 
-  OHIFSegmentationExtension.preRegistration();
-
   cornerstoneTools.init();
+
+  OHIFSegmentationExtension.preRegistration();
 
   // Set the tool font and font size
   // context.font = "[style] [variant] [weight] [size]/[line height] [font family]";
@@ -97,13 +97,13 @@ const Cornerstone = ({ dispatch }) => {
     }
   });*/
 
-  // dispatch({
-  //   type: "INIT_CORNER",
-  //   payload: {
-  //     cs: cornerstone,
-  //     csT: cornerstoneTools
-  //   }
-  // });
+  dispatch({
+    type: "INIT_CORNER",
+    payload: {
+      cs: cornerstone,
+      csT: cornerstoneTools
+    }
+  });
   return null;
 };
 

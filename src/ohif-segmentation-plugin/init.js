@@ -59,6 +59,8 @@ export default function init(configuration = {}) {
   freehand3DStore.state.displayStats = config.showFreehandStats;
 
   addTool(Brush3DTool, { name: config.brush3dToolName });
+  console.log("store is", store);
+  debugger;
   addTool(Brush3DHUGatedTool, { name: config.brush3DHUGatedToolName });
   addTool(Brush3DAutoGatedTool, { name: config.brush3DAutoGatedTool });
   addTool(FreehandRoi3DTool, { name: config.freehandRoi3DTool });
