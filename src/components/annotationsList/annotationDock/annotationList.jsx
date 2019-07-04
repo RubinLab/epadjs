@@ -80,10 +80,26 @@ class AnnotationsList extends React.Component {
     this.props.dispatch(jumpToAim(serie, id, this.props.activePort));
   };
 
+  getLabelArray = () => {
+    const imageAnnotations = this.props.openSeries[this.props.activePort]
+      .imageAnnotations[this.props.imageID];
+    const calculations = {};
+    console.log(this.props.imageID);
+    console.log(imageAnnotations);
+    if (imageAnnotations) {
+      for (let aim of imageAnnotations) {
+        calculations[aim.aimUid] = aim.calculations;
+      }
+    }
+    return calculations;
+  };
+
   render = () => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     // console.log(annotations);
     let annotations = Object.values(this.props.aimsList[seriesUID]);
+    const calculations = this.getLabelArray();
+    console.log(calculations);
     // console.log(annotations);
     annotations.sort(function(a, b) {
       let nameA = a.name.toUpperCase();
@@ -115,6 +131,7 @@ class AnnotationsList extends React.Component {
           onSingleToggle={this.handleToggleSingleLabel}
           jumpToAim={this.handleJumToAim}
           serie={seriesUID}
+          label={calculations[aim.id]}
         />
       );
     });

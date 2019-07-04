@@ -41,7 +41,7 @@ class DockTest extends Component {
               <FaTimes />
             </div>
           </div>
-          <Annotations />
+          <Annotations imageUID={this.props.imageUID} />
         </Dock>
       </div>
     );

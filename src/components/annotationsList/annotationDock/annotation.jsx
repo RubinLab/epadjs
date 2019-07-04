@@ -30,9 +30,9 @@ const annotation = props => {
   const finalButtonStyle = !props.showLabel ? singleButtonStyle : buttonStyle;
 
   //getting calculations arr if any
-  const calculations = props.aim.calculationEntityCollection
-    ? props.aim.calculationEntityCollection.CalculationEntity
-    : [];
+  // const calculations = props.aim.calculationEntityCollection
+  //   ? props.aim.calculationEntityCollection.CalculationEntity
+  //   : [];
   // console.log("------------calculations-----------");
   // console.log(calculations);
 
@@ -90,9 +90,9 @@ const annotation = props => {
               <AimEntityData aimData={props.aim} id={props.id} />
             </div>
           )}
-          {calculations.length > 0 && calculations.length <= 10 && (
-            <CalculationLabel calculations={calculations} name={props.name} />
-          )}
+          {/* {calculations.length > 0 && calculations.length <= 10 && ( */}
+          <CalculationLabel calculations={props.label} name={props.name} />
+          {/* )} */}
         </div>
       )}
     </div>
