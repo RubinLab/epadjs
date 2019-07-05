@@ -1,9 +1,6 @@
 import React from "react";
 
 const calculationLabel = ({ calculations, name }) => {
-  console.log(calculations);
-  console.log(name);
-
   const labelArr = [];
 
   if (calculations) {

@@ -10,12 +10,13 @@ class DisplayViewContainer extends React.Component {
     window.addEventListener("cornerstonenewimage", this.handleImageChange);
   }
   state = {
-    imageID: "1.2.840.113704.1.111.3844.1212776204.2784"
+    imageId: "1.2.840.113704.1.111.2128.1223562659.906"
   };
 
   handleNewImage = event => {
     const imageId = event.detail.image.imageId;
-    // this.setState({ imageId });
+    console.log(imageId);
+    this.setState({ imageId });
   };
 
   render = () => {

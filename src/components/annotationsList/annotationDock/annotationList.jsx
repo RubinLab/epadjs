@@ -84,8 +84,6 @@ class AnnotationsList extends React.Component {
     const imageAnnotations = this.props.openSeries[this.props.activePort]
       .imageAnnotations[this.props.imageID];
     const calculations = {};
-    console.log(this.props.imageID);
-    console.log(imageAnnotations);
     if (imageAnnotations) {
       for (let aim of imageAnnotations) {
         calculations[aim.aimUid] = aim.calculations;
@@ -97,10 +95,13 @@ class AnnotationsList extends React.Component {
   render = () => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     // console.log(annotations);
-    let annotations = Object.values(this.props.aimsList[seriesUID]);
+    const annotations = [];
+    const imageAnnotations = this.props.openSeries[this.props.activePort]
+      .imageAnnotations[this.props.imageID];
+    for (let aim of imageAnnotations) {
+      annotations.push(this.props.aimsList[seriesUID][aim.aimUid]);
+    }
     const calculations = this.getLabelArray();
-    console.log(calculations);
-    // console.log(annotations);
     annotations.sort(function(a, b) {
       let nameA = a.name.toUpperCase();
       let nameB = b.name.toUpperCase();
