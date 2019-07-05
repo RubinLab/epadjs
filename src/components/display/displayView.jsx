@@ -501,6 +501,8 @@ class DisplayView extends Component {
                   availableTools={tools}
                   onMeasurementsChanged={this.measurementChanged}
                   setViewportActive={() => this.setActive(i)}
+                  onNewImage={event => this.props.onNewImage(event)}
+
                   // onRightClick={this.showRightMenu}
                 />
               </MenuProvider>
