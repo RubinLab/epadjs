@@ -544,7 +544,7 @@ export const getSingleSerie = (serie, annotation) => {
     await dispatch(
       singleSerieLoaded(reference, aimsData, imageData, seriesUID, annotation)
     );
-    dispatch(showAnnotationDock());
+    // dispatch(showAnnotationDock());
   };
 };
 

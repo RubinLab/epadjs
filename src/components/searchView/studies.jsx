@@ -14,7 +14,6 @@ import Series from "./series";
 import ReactTooltip from "react-tooltip";
 import {
   getSingleSerie,
-  getAnnotationListData,
   selectStudy,
   clearSelection,
   startLoading,
@@ -23,7 +22,8 @@ import {
   addToGrid,
   getWholeData,
   alertViewPortFull,
-  updatePatient
+  updatePatient,
+  showAnnotationDock
 } from "../annotationsList/action";
 //import "react-table/react-table.css";
 
@@ -408,6 +408,11 @@ class Studies extends Component {
   };
 
   displaySeries = async selected => {
+    if (this.props.dockOpen) {
+      console.log("here in studies");
+      this.props.dispatch(showAnnotationDock());
+    }
+
     if (this.props.openSeries.length === MAX_PORT) {
       this.props.dispatch(alertViewPortFull());
     } else {
@@ -436,13 +441,16 @@ class Studies extends Component {
       } else {
         //if there is enough room
         //add serie to the grid
+        const promiseArr = [];
         for (let serie of seriesArr) {
           this.props.dispatch(addToGrid(serie));
+          promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
         }
         //getsingleSerie
-        for (let serie of seriesArr) {
-          this.props.dispatch(getSingleSerie(serie));
-        }
+        Promise.all(promiseArr)
+          .then(() => this.props.dispatch(showAnnotationDock()))
+          .catch(err => console.log(err));
+
         //if patient doesnot exist get patient
         if (!patientExists) {
           this.props.dispatch(getWholeData(null, selected));
@@ -531,6 +539,7 @@ class Studies extends Component {
 
 const mapStateToProps = state => {
   return {
+    dockOpen: state.annotationsListReducer.dockOpen,
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     loading: state.annotationsListReducer.loading,

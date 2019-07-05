@@ -11,7 +11,6 @@ import Annotations from "./annotations";
 import { getSeries } from "../../services/seriesServices";
 import {
   alertViewPortFull,
-  getAnnotationListData,
   getSingleSerie,
   changeActivePort,
   selectSerie,
@@ -419,7 +418,10 @@ class Series extends Component {
         this.props.dispatch(alertViewPortFull());
       } else {
         this.props.dispatch(addToGrid(selected));
-        this.props.dispatch(getSingleSerie(selected));
+        this.props
+          .dispatch(getSingleSerie(selected))
+          .then(() => this.props.dispatch(showAnnotationDock()))
+          .catch(err => console.log(err));
         //if grid is NOT full check if patient data exists
         if (!this.props.patients[selected.patientID]) {
           this.props.dispatch(getWholeData(selected));
