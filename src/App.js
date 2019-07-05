@@ -168,7 +168,7 @@ class App extends Component {
           </Switch>
         )}
         {this.props.listOpen && <AnnotationList />}
-        {this.props.dockOpen && <AnnotationsDock />}
+        {/* {this.props.dockOpen && <AnnotationsDock />} */}
         {this.props.showGridFullAlert && <MaxViewAlert />}
         {/* {this.props.selection && (
           <ManagementItemModal selection={this.props.selection} />
