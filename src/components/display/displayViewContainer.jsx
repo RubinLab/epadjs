@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import DisplayView from "./displayView";
 import Annotations from "../annotationsList/annotationDock/annotationList";
-import cornerstone from "cornerstone-core";
 
 class DisplayViewContainer extends React.Component {
   constructor(props) {
@@ -10,12 +9,11 @@ class DisplayViewContainer extends React.Component {
     window.addEventListener("cornerstonenewimage", this.handleImageChange);
   }
   state = {
-    imageId: "1.2.840.113704.1.111.2128.1223562659.906"
+    imageId: null
   };
 
   handleNewImage = event => {
-    const imageId = event.detail.image.imageId;
-    console.log(imageId);
+    const imageId = event.detail.image.imageId.split("/").pop();
     this.setState({ imageId });
   };
 

@@ -94,12 +94,19 @@ class AnnotationsList extends React.Component {
 
   render = () => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
-    // console.log(annotations);
     const annotations = [];
-    const imageAnnotations = this.props.openSeries[this.props.activePort]
+    let aims = this.props.aimsList[seriesUID];
+    for (let aim in aims) {
+      if (aims[aim].type === "study" || aims[aim].type === "serie") {
+        annotations.push(aims[aim]);
+      }
+    }
+    let imageAnnotations = this.props.openSeries[this.props.activePort]
       .imageAnnotations[this.props.imageID];
-    for (let aim of imageAnnotations) {
-      annotations.push(this.props.aimsList[seriesUID][aim.aimUid]);
+    if (imageAnnotations) {
+      for (let aim of imageAnnotations) {
+        annotations.push(this.props.aimsList[seriesUID][aim.aimUid]);
+      }
     }
     const calculations = this.getLabelArray();
     annotations.sort(function(a, b) {
