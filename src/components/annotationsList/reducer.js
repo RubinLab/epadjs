@@ -531,7 +531,16 @@ const asyncReducer = (state = initialState, action) => {
       });
 
     case CHANGE_ACTIVE_PORT:
-      return Object.assign({}, state, { activePort: action.portIndex });
+      //get openseries iterate over the
+      const changedPortSeries = [...state.openSeries];
+      for (let serie of changedPortSeries) {
+        serie.aimID = null;
+      }
+      return Object.assign({}, state, {
+        activePort: action.portIndex,
+        openSeries: changedPortSeries,
+        dockOpen: true
+      });
 
     case SHOW_ANNOTATION_WINDOW:
       const showStatus = state.listOpen;
