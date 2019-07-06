@@ -74,7 +74,7 @@ const tools = [
   { name: "WwwcRegion" },
   { name: "Probe" },
   {
-    name: "Freehand",
+    name: "FreehandRoi",
     configuration: {
       showMinMax: true
       // showHounsfieldUnits: true
@@ -83,7 +83,7 @@ const tools = [
   { name: "Eraser" },
   { name: "Bidirectional" },
   { name: "Brush" },
-  { name: "FreehandSculpter" }
+  { name: "FreehandRoiSculptor" }
 ];
 
 class Toolbar extends Component {

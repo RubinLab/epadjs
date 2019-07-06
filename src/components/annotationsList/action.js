@@ -29,18 +29,17 @@ import {
   START_LOADING,
   UPDATE_PATIENT,
   CLOSE_SERIE,
-  colors
+  colors,
+  commonLabels
 } from "./types";
 
 import { getSeries } from "../../services/seriesServices";
-
-import { getStudies } from "../../services/studyServices";
-
+import { getStudies, getStudyAims } from "../../services/studyServices";
 import {
   getAnnotations,
   getAnnotationsJSON
 } from "../../services/annotationServices";
-
+import getImageIdAnnotations from "../aimEditor/aimHelper.js";
 export const clearGrid = item => {
   return { type: CLEAR_GRID };
 };
@@ -321,10 +320,10 @@ export const changeActivePort = portIndex => {
   };
 };
 
-export const singleSerieLoaded = (ref, aimsData, serID, ann) => {
+export const singleSerieLoaded = (ref, aimsData, imageData, serID, ann) => {
   return {
     type: LOAD_SERIE_SUCCESS,
-    payload: { ref, aimsData, serID, ann }
+    payload: { ref, aimsData, imageData, serID, ann }
   };
 };
 
@@ -333,32 +332,66 @@ const getAimListFields = (aims, ann) => {
   const result = {};
 
   aims.forEach((aim, index) => {
+    const studyRef =
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy;
+    const imgAimUID =
+      studyRef.imageSeries.imageCollection.Image[0].sopInstanceUid.root;
+    const serieAimUID = studyRef.imageSeries.instanceUid.root;
+    const studyAimUID = studyRef.instanceUid.root;
+
     if (index >= colors.length) {
       index = index % colors.length;
     }
 
-    let name =
+    const color = imgAimUID ? { ...colors[index] } : commonLabels;
+    let type = imgAimUID
+      ? "image"
+      : serieAimUID && !imgAimUID
+      ? "serie"
+      : "study";
+
+    let aimName =
       aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].name
         .value;
-    let ind = name.indexOf("~");
+    let ind = aimName.indexOf("~");
     if (ind >= 0) {
-      name = name.substring(0, ind);
+      aimName = aimName.substring(0, ind);
     }
 
     let displayStatus = ann
-      ? ann ===
-        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-          .uniqueIdentifier.root
+      ? ann === aim.ImageAnnotationCollection.uniqueIdentifier.root
       : !ann;
-    result[
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].uniqueIdentifier.root
-    ] = {
+
+    const {
       name,
-      json: aim,
+      comment,
+      imagingObservationEntityCollection,
+      imagingPhysicalEntityCollection,
+      inferenceEntityCollection,
+      typeCode
+    } = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
+    const aimFields = {
+      name,
+      comment,
+      imagingObservationEntityCollection,
+      imagingPhysicalEntityCollection,
+      inferenceEntityCollection,
+      typeCode
+    };
+    const user = aim.ImageAnnotationCollection.user.name.value;
+    const id = aim.ImageAnnotationCollection.uniqueIdentifier.root;
+    result[aim.ImageAnnotationCollection.uniqueIdentifier.root] = {
+      name: aimName,
+      id,
+      user,
+      // json1: aim,
+      json: aimFields,
       isDisplayed: displayStatus,
       showLabel: true,
       cornerStoneTools: [],
-      color: { ...colors[index] }
+      color,
+      type
     };
   });
   return result;
@@ -504,37 +537,65 @@ export const getSingleSerie = (serie, annotation) => {
       seriesUID,
       aimID: annotation
     };
-    const aimsData = await dispatch(getSingleSerieData(serie, annotation));
-    // dispatch(updateGrid(ref))
-    dispatch(singleSerieLoaded(reference, aimsData, seriesUID, annotation));
+    const { aimsData, imageData } = await dispatch(
+      getSingleSerieData(serie, annotation)
+    );
+
+    await dispatch(
+      singleSerieLoaded(reference, aimsData, imageData, seriesUID, annotation)
+    );
   };
 };
 
+const getStudyAim = async (subjectID, studyID) => {
+  let result;
+  let studyAims = [];
+  try {
+    // const { data: aims } =
+    result = await getStudyAims(subjectID, studyID);
+  } catch (err) {
+    console.log(err);
+  }
+  result = result.data;
+  result.forEach(aim => {
+    const serieUID =
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy
+        .imageSeries.instanceUid.root;
+    if (!serieUID) {
+      studyAims.push(aim);
+    }
+  });
+  return studyAims;
+};
+
 const getSingleSerieData = (serie, annotation) => {
-  console.log("in action serie", serie);
   return async (dispatch, getState) => {
     dispatch(loadAnnotations());
     let aimsData = {};
-    let { studyUID, seriesUID, projectID } = serie;
-    projectID = projectID ? projectID : "lite";
-    const patientID = serie.subjectID;
+    let serieAims = [];
+    let studyAims = [];
 
+    let { studyUID, seriesUID, projectID, patientID } = serie;
+    projectID = projectID ? projectID : "lite";
+    patientID = patientID ? patientID : serie.subjectID;
     try {
-      const { data: aims } = await getAnnotationsJSON(
+      // const { data: aims } = await getAnnotationsJSON(
+      serieAims = await getAnnotationsJSON(
         projectID,
         patientID,
         studyUID,
         seriesUID
       );
-      console.log(aims);
-      aimsData = getAimListFields(aims, annotation);
-      console.log("final aim data");
-      console.log(aimsData);
+      serieAims = serieAims.data;
+      studyAims = await getStudyAim(patientID, studyUID);
     } catch (err) {
-      console.log(err);
       dispatch(annotationsLoadingError(err));
     }
-    return aimsData;
+    aimsData = serieAims.concat(studyAims);
+    const imageData = getImageIdAnnotations(serieAims);
+    aimsData = getAimListFields(aimsData, annotation);
+    return { aimsData, imageData };
   };
 };
 

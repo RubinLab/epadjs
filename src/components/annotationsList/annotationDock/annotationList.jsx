@@ -80,9 +80,35 @@ class AnnotationsList extends React.Component {
     this.props.dispatch(jumpToAim(serie, id, this.props.activePort));
   };
 
+  getLabelArray = () => {
+    const imageAnnotations = this.props.openSeries[this.props.activePort]
+      .imageAnnotations[this.props.imageID];
+    const calculations = {};
+    if (imageAnnotations) {
+      for (let aim of imageAnnotations) {
+        calculations[aim.aimUid] = aim.calculations;
+      }
+    }
+    return calculations;
+  };
+
   render = () => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
-    let annotations = Object.values(this.props.aimsList[seriesUID]);
+    const annotations = [];
+    let aims = this.props.aimsList[seriesUID];
+    for (let aim in aims) {
+      if (aims[aim].type === "study" || aims[aim].type === "serie") {
+        annotations.push(aims[aim]);
+      }
+    }
+    let imageAnnotations = this.props.openSeries[this.props.activePort]
+      .imageAnnotations[this.props.imageID];
+    if (imageAnnotations) {
+      for (let aim of imageAnnotations) {
+        annotations.push(this.props.aimsList[seriesUID][aim.aimUid]);
+      }
+    }
+    const calculations = this.getLabelArray();
     annotations.sort(function(a, b) {
       let nameA = a.name.toUpperCase();
       let nameB = b.name.toUpperCase();
@@ -95,24 +121,24 @@ class AnnotationsList extends React.Component {
       return 0;
     });
 
+    // let annotations = [];
     let annList = [];
     annotations.forEach((aim, index) => {
-      let aimInfo = aim.json.imageAnnotations.ImageAnnotation;
-      let id = aim.json.uniqueIdentifier.root;
       annList.push(
         <Annotation
           name={aim.name}
           style={aim.color}
-          aim={aimInfo}
-          id={id}
-          key={id}
+          aim={aim.json}
+          id={aim.id}
+          key={aim.id}
           displayed={aim.isDisplayed}
           onClick={this.handleDisplayClick}
-          user={aim.json.user.name.value}
+          user={aim.user}
           showLabel={aim.showLabel}
           onSingleToggle={this.handleToggleSingleLabel}
           jumpToAim={this.handleJumToAim}
           serie={seriesUID}
+          label={calculations[aim.id]}
         />
       );
     });
@@ -124,9 +150,16 @@ class AnnotationsList extends React.Component {
             <Switch
               onChange={this.handleToggleAllLabels}
               checked={this.state.labelDisplayAll}
-              className="react-switch"
+              onColor="#86d3ff"
+              onHandleColor="#1986d9"
+              handleDiameter={22}
               uncheckedIcon={false}
               checkedIcon={false}
+              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+              height={15}
+              width={36}
+              className="react-switch"
             />
           </div>
           <div className="label-toggle">
@@ -134,12 +167,18 @@ class AnnotationsList extends React.Component {
             <Switch
               onChange={this.handleToggleAllAnnotations}
               checked={this.state.annsDisplayAll}
-              className="react-switch"
+              onColor="#86d3ff"
+              onHandleColor="#1986d9"
+              handleDiameter={22}
               uncheckedIcon={false}
               checkedIcon={false}
+              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+              height={15}
+              width={36}
+              className="react-switch"
             />
           </div>
-
           <div>{annList}</div>
         </div>
       </React.Fragment>

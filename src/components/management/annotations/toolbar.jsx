@@ -28,7 +28,6 @@ const toolBar = props => {
 
   const options = [];
   for (let project of projects) {
-    // console.log(user);
     options.push(
       <option key={project.id} value={project.id}>
         {project.name}

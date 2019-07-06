@@ -105,17 +105,35 @@ class MainMenu extends React.Component {
 
     return (
       <div className="mng-menu" style={style}>
-        <div onClick={this.handleSelection}>Annotations</div>
-        <div onClick={this.handleSelection}>Templates</div>
+        <div className="mng-menu__option" onClick={this.handleSelection}>
+          Annotations
+        </div>
+        <div className="mng-menu__option" onClick={this.handleSelection}>
+          Templates
+        </div>
         {!isLite && (
           <>
-            <div onClick={this.handleSelection}>Users</div>
-            <div onClick={this.handleSelection}>Projects</div>
-            <div onClick={this.handleSelection}>Worklists</div>
-            <div onClick={this.handleSelection}>Tools</div>
-            <div onClick={this.handleSelection}>Pluginstore</div>
-            <div onClick={this.handleSelection}>Connections</div>
-            <div onClick={this.handleSelection}>Queries</div>
+            <div className="mng-menu__option" onClick={this.handleSelection}>
+              Users
+            </div>
+            <div className="mng-menu__option" onClick={this.handleSelection}>
+              Projects
+            </div>
+            <div className="mng-menu__option" onClick={this.handleSelection}>
+              Worklists
+            </div>
+            <div className="mng-menu__option" onClick={this.handleSelection}>
+              Tools
+            </div>
+            <div className="mng-menu__option" onClick={this.handleSelection}>
+              Pluginstore
+            </div>
+            <div className="mng-menu__option" onClick={this.handleSelection}>
+              Connections
+            </div>
+            <div className="mng-menu__option" onClick={this.handleSelection}>
+              Queries
+            </div>
           </>
         )}
         {this.state.isModalOpen && (

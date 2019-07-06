@@ -119,8 +119,6 @@ class UploadModal extends React.Component {
     );
   };
   render = () => {
-    console.log(this.state);
-    console.log(Array.isArray(this.state.files));
     let disabled = this.state.files.length === 0;
     let className = "alert-upload";
     className = this.props.className

@@ -492,30 +492,20 @@ const asyncReducer = (state = initialState, action) => {
 
     case LOAD_SERIE_SUCCESS:
       let indexNum = state.openSeries.length - 1;
-      const ptID = action.payload.ref.patientID;
-
-      const stID = action.payload.ref.studyUID;
-
-      const srID = action.payload.ref.seriesUID;
-
-      const { ann } = action.payload;
-      let changedPatients;
+      let imageAddedSeries = [...state.openSeries];
+      imageAddedSeries[indexNum].imageAnnotations = action.payload.imageData;
       const result = Object.assign({}, state, {
         loading: false,
-
         error: false,
-
         activePort: indexNum,
-
         aimsList: {
           ...state.aimsList,
-
-          [action.payload.serID]: action.payload.aimsData
-        }
+          [action.payload.ref.seriesUID]: action.payload.aimsData
+        },
+        openSeries: imageAddedSeries
       });
-      return !changedPatients
-        ? result
-        : { ...result, patients: changedPatients };
+      return result;
+
     case LOAD_ANNOTATIONS_ERROR:
       return Object.assign({}, state, {
         loading: false,
@@ -541,7 +531,16 @@ const asyncReducer = (state = initialState, action) => {
       });
 
     case CHANGE_ACTIVE_PORT:
-      return Object.assign({}, state, { activePort: action.portIndex });
+      //get openseries iterate over the
+      const changedPortSeries = [...state.openSeries];
+      for (let serie of changedPortSeries) {
+        serie.aimID = null;
+      }
+      return Object.assign({}, state, {
+        activePort: action.portIndex,
+        openSeries: changedPortSeries,
+        dockOpen: true
+      });
 
     case SHOW_ANNOTATION_WINDOW:
       const showStatus = state.listOpen;
@@ -812,7 +811,11 @@ const asyncReducer = (state = initialState, action) => {
       };
     case ADD_TO_GRID:
       let newOpenSeries = state.openSeries.concat(action.reference);
-      return { ...state, openSeries: newOpenSeries };
+      return {
+        ...state,
+        openSeries: newOpenSeries,
+        activePort: newOpenSeries.length - 1
+      };
     case UPDATE_PATIENT:
       let updatedPt = { ...state.patients[action.payload.patient] };
       if (action.payload.type === "study") {

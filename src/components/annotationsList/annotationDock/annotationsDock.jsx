@@ -41,7 +41,7 @@ class DockTest extends Component {
               <FaTimes />
             </div>
           </div>
-          <Annotations />
+          <Annotations imageUID={this.props.imageUID} />
         </Dock>
       </div>
     );
@@ -53,7 +53,7 @@ class DockTest extends Component {
 }
 const mapStateToProps = state => {
   return {
-    dockOpen: state.annotationsListReducer.dockOpen,
+    // dockOpen: state.annotationsListReducer.dockOpen,
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort
   };

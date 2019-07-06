@@ -25,14 +25,10 @@ const annotation = props => {
 
   //getting aim details
   const hasEntityData =
-    props.aim.magingObservationEntityCollection ||
+    props.aim.imagingObservationEntityCollection ||
     props.aim.imagingPhysicalEntityCollection;
   const finalButtonStyle = !props.showLabel ? singleButtonStyle : buttonStyle;
 
-  //getting calculations arr if any
-  const calculations = props.aim.calculationEntityCollection
-    ? props.aim.calculationEntityCollection.CalculationEntity
-    : [];
   return (
     <div className="annotation-container">
       <div className="annotation-button__container" style={finalButtonStyle}>
@@ -80,16 +76,16 @@ const annotation = props => {
           <div className="annotation-label__desc">
             <div className="annotation__userName">{props.user}</div>
             <div>-</div>
-            <div className="annotation__type">{props.aim.typeCode.code}</div>
+            <div className="annotation__type">{props.aim.typeCode[0].code}</div>
           </div>
           {hasEntityData && (
             <div className="annotation-aimData">
-              <AimEntityData aimData={props.aim} />
+              <AimEntityData aimData={props.aim} id={props.id} />
             </div>
           )}
-          {calculations.length > 0 && calculations.length <= 10 && (
-            <CalculationLabel calculations={calculations} name={props.name} />
-          )}
+          {/* {calculations.length > 0 && calculations.length <= 10 && ( */}
+          <CalculationLabel calculations={props.label} name={props.name} />
+          {/* )} */}
         </div>
       )}
     </div>

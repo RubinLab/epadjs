@@ -241,31 +241,33 @@ class DisplayView extends Component {
     }
   };
 
-  parseAims = aimList => {
-    // first clear the tool state
-    // if (this.state.selectedAim) {
-    //   const element = this.cornerstone.getEnabledElements()[
-    //     this.props.activePort
-    //   ]["element"];
-    //   this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.clear(
-    //     element
-    //   );
-    // }
-    console.log(this.props.cornerstoneTools);
+  //parseAims,
 
-    // now parse the aim and render the new marups
-    Object.entries(aimList).forEach(([key, value]) => {
-      Object.entries(value).forEach(([key, value]) => {
-        // get markups for the aim
-        if (
-          value.json.imageAnnotations.ImageAnnotation.markupEntityCollection
-        ) {
-          const color = value.color.button.background;
-          this.renderMarkups(key, Aim.getMarkups(value.json), color);
-        }
-      });
-    });
-  };
+  // parseAims = aimList => {
+  //   // first clear the tool state
+  //   // if (this.state.selectedAim) {
+  //   //   const element = this.cornerstone.getEnabledElements()[
+  //   //     this.props.activePort
+  //   //   ]["element"];
+  //   //   this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.clear(
+  //   //     element
+  //   //   );
+  //   // }
+  //   console.log(this.props.cornerstoneTools);
+
+  //   // now parse the aim and render the new marups
+  //   Object.entries(aimList).forEach(([key, value]) => {
+  //     Object.entries(value).forEach(([key, value]) => {
+  //       // get markups for the aim
+  //       if (
+  //         value.json.imageAnnotations.ImageAnnotation.markupEntityCollection
+  //       ) {
+  //         const color = value.color.button.background;
+  //         this.renderMarkups(key, Aim.getMarkups(value.json), color);
+  //       }
+  //     });
+  //   });
+  // };
 
   renderMarkups = (key, markups, color) => {
     console.log("Rendering Markups", key, markups, color);
@@ -422,11 +424,12 @@ class DisplayView extends Component {
 
   async componentDidUpdate(prevProps) {
     if (!this.state.isLoading && Object.entries(this.props.aimList).length) {
+      // this.parseAims(this.props.aimList);
       //get the aims for test
       const { data: aims } = await getAnnotations2();
       console.log("csTool are", this.cornerstoneTools);
       console.log("aims are", aims);
-      debugger;
+      // debugger;
       getImageIdAnnotations(aims);
 
       // this.parseAims(aims);
@@ -498,6 +501,8 @@ class DisplayView extends Component {
                   availableTools={tools}
                   onMeasurementsChanged={this.measurementChanged}
                   setViewportActive={() => this.setActive(i)}
+                  onNewImage={event => this.props.onNewImage(event)}
+
                   // onRightClick={this.showRightMenu}
                 />
               </MenuProvider>

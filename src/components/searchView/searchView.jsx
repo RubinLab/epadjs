@@ -78,6 +78,42 @@ class SearchView extends Component {
       return { uploading: !state.uploading, update: state.update + 1 };
     });
     this.updateSubjectCount();
+    //update patients after upload
+    // filter the patients from openSeries with the first index they appear
+    const patients = this.props.openSeries.reduce((all, item, index) => {
+      if (!all[item.patientID]) {
+        all[item.patientID] = index;
+      }
+      return all;
+    }, {});
+    // pass it to getwholedata
+    const promiseArr = [];
+    for (let patient in patients) {
+      promiseArr.push(
+        this.props.dispatch(
+          getWholeData(this.props.openSeries[patients[patient]])
+        )
+      );
+    }
+    Promise.all(promiseArr)
+      .then(() => {
+        //keep the current state
+        for (let serie in this.props.openSeries) {
+          let type = serie.aimID ? "annotation" : "serie";
+          this.props.dispatch(
+            updatePatient(
+              type,
+              true,
+              serie.patientID,
+              serie.studyUID,
+              serie.seriesUID
+            )
+          );
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   updateSubjectCount = async () => {
@@ -90,8 +126,7 @@ class SearchView extends Component {
     this.handleClickDeleteIcon();
     for (let study of studiesArr) {
       const series = await this.getSeriesData(study);
-      console.log("series...");
-      console.log(series);
+
       if (series.length > 0) {
         this.setState({ deleting: true });
         deleteSeries(series[0]).then(() => {
@@ -108,7 +143,6 @@ class SearchView extends Component {
     const promiseArr = [];
     this.setState({ deleting: true });
     arr.forEach(item => {
-      console.log(item);
       promiseArr.push(func(item));
     });
     Promise.all(promiseArr)
@@ -130,17 +164,12 @@ class SearchView extends Component {
     const selectedAnnotations = Object.values(this.props.selectedAnnotations);
 
     if (selectedPatients.length > 0) {
-      console.log("delete patient is called");
       this.deleteSelectionWrapper(selectedPatients, deleteSubject);
     } else if (selectedStudies.length > 0) {
-      console.log("delete study is called");
       this.deleteSelectionWrapper(selectedStudies, deleteStudy);
     } else if (selectedSeries.length > 0) {
-      console.log("delete serie is called");
       this.deleteSelectionWrapper(selectedSeries, deleteSeries);
     } else if (selectedAnnotations.length > 0) {
-      console.log("delete annotation is called");
-      console.log(selectedAnnotations);
       this.deleteSelectionWrapper(selectedAnnotations, deleteAnnotation);
     }
   };

@@ -11,14 +11,14 @@ import Annotations from "./annotations";
 import { getSeries } from "../../services/seriesServices";
 import {
   alertViewPortFull,
-  getAnnotationListData,
   getSingleSerie,
   changeActivePort,
   selectSerie,
   clearSelection,
   addToGrid,
   getWholeData,
-  updatePatient
+  updatePatient,
+  showAnnotationDock
 } from "../annotationsList/action";
 import { MAX_PORT, formatDates } from "../../constants";
 
@@ -386,45 +386,12 @@ class Series extends Component {
     this.setState({ showGridFullWarning: false });
   };
 
-  // dispatchSerieDisplay = selected => {
-  //   const openSeries = Object.values(this.props.openSeries);
-  //   let isSerieOpen = false;
-  //   //check if there is enough space in the grid
-  //   let isGridFull = openSeries.length === 6;
-  //   //check if the serie is already open
-  //   if (openSeries.length > 0) {
-  //     for (let i = 0; i < openSeries.length; i++) {
-  //       // for (let serie of openSeries) {
-  //       if (openSeries[i]) {
-  //         if (openSeries[i].seriesUID === selected.seriesUID) {
-  //           isSerieOpen = true;
-  //           this.props.dispatch(changeActivePort(i));
-  //           break;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   //serie is not already open;
-  //   if (!isSerieOpen) {
-  //     //if the grid is full show warning
-  //     if (isGridFull) {
-  //       // this.setState({ showGridFullWarning: true });
-  //       this.props.dispatch(alertViewPortFull());
-  //     } else {
-  //       //if grid is NOT full check if patient data exists
-  //       if (this.props.patients[selected.patientID]) {
-  //         this.props.dispatch(getSingleSerie(selected));
-  //         //if patient doesn't exist dispatch to get data
-  //       } else {
-  //         this.props.dispatch(getAnnotationListData(selected));
-  //       }
-  //     }
-  //   }
-  // };
   dispatchSerieDisplay = selected => {
+    if (this.props.dockOpen) {
+      this.props.dispatch(showAnnotationDock());
+    }
     const openSeries = Object.values(this.props.openSeries);
     const { patientID, studyUID } = selected;
-    console.log("in serie", patientID, studyUID);
     let isSerieOpen = false;
 
     //check if there is enough space in the grid
@@ -438,7 +405,6 @@ class Series extends Component {
           this.props.dispatch(changeActivePort(i));
           break;
         }
-
         // }
       }
     }
@@ -452,7 +418,10 @@ class Series extends Component {
         this.props.dispatch(alertViewPortFull());
       } else {
         this.props.dispatch(addToGrid(selected));
-        this.props.dispatch(getSingleSerie(selected));
+        this.props
+          .dispatch(getSingleSerie(selected))
+          .then(() => this.props.dispatch(showAnnotationDock()))
+          .catch(err => console.log(err));
         //if grid is NOT full check if patient data exists
         if (!this.props.patients[selected.patientID]) {
           this.props.dispatch(getWholeData(selected));
@@ -469,7 +438,6 @@ class Series extends Component {
         }
       }
     }
-
     this.props.dispatch(clearSelection());
   };
 
@@ -549,6 +517,7 @@ class Series extends Component {
 const mapStateToProps = state => {
   return {
     series: state.searchViewReducer.series,
+    dockOpen: state.annotationsListReducer.dockOpen,
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     activePort: state.annotationsListReducer.activePort,

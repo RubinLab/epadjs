@@ -36,3 +36,16 @@ export function deleteStudy(study) {
     return http.delete(url);
   }
 }
+
+export function getStudyAims(subjectID, studyUID) {
+  if (isLite) {
+    return http.get(
+      apiUrl +
+        "/projects/lite/subjects/" +
+        subjectID +
+        "/studies/" +
+        studyUID +
+        "/aims"
+    );
+  }
+}
