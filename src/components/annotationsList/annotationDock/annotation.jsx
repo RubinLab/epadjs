@@ -29,13 +29,6 @@ const annotation = props => {
     props.aim.imagingPhysicalEntityCollection;
   const finalButtonStyle = !props.showLabel ? singleButtonStyle : buttonStyle;
 
-  //getting calculations arr if any
-  // const calculations = props.aim.calculationEntityCollection
-  //   ? props.aim.calculationEntityCollection.CalculationEntity
-  //   : [];
-  // console.log("------------calculations-----------");
-  // console.log(calculations);
-
   return (
     <div className="annotation-container">
       <div className="annotation-button__container" style={finalButtonStyle}>

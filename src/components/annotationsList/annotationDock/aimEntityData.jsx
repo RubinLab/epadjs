@@ -25,8 +25,7 @@ const aimEntityData = ({ aimData, id }) => {
       ? dataArr.concat(physicalEnt)
       : dataArr.concat([physicalEnt]);
   }
-  // console.log("dataArr");
-  // console.log(dataArr);
+
   const listArr = [];
   dataArr.forEach((comment, i) => {
     listArr.push(

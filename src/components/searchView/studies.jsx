@@ -409,7 +409,6 @@ class Studies extends Component {
 
   displaySeries = async selected => {
     if (this.props.dockOpen) {
-      console.log("here in studies");
       this.props.dispatch(showAnnotationDock());
     }
 
@@ -455,6 +454,7 @@ class Studies extends Component {
         if (!patientExists) {
           this.props.dispatch(getWholeData(null, selected));
         } else {
+          //check if study exist
           this.props.dispatch(
             updatePatient("study", true, patientID, studyUID)
           );

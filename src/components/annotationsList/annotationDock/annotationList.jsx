@@ -124,7 +124,6 @@ class AnnotationsList extends React.Component {
     // let annotations = [];
     let annList = [];
     annotations.forEach((aim, index) => {
-      // console.log(aim);
       annList.push(
         <Annotation
           name={aim.name}

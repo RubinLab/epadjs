@@ -8,7 +8,6 @@ import Annotations from "./../annotations/annotations";
 
 const customModal = ({ selection, handleCloseModal, children }) => {
   const selectDisplay = () => {
-    console.log("selection here", selection);
     switch (selection) {
       case "Users":
         return <Users selection={selection} onClose={handleCloseModal} />;

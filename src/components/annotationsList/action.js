@@ -544,7 +544,6 @@ export const getSingleSerie = (serie, annotation) => {
     await dispatch(
       singleSerieLoaded(reference, aimsData, imageData, seriesUID, annotation)
     );
-    // dispatch(showAnnotationDock());
   };
 };
 
@@ -593,8 +592,6 @@ const getSingleSerieData = (serie, annotation) => {
     } catch (err) {
       dispatch(annotationsLoadingError(err));
     }
-    // console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$");
-    // console.log(getImageIdAnnotations(serieAims));
     aimsData = serieAims.concat(studyAims);
     const imageData = getImageIdAnnotations(serieAims);
     aimsData = getAimListFields(aimsData, annotation);
