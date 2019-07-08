@@ -27,15 +27,13 @@ class AimEditor extends Component {
     this.semanticAnswers = {};
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     const element = document.getElementById("questionaire");
-    // const templateId = "1";
-    // const {
-    //   data: {
-    //     ResultSet: { Result: templates }
-    //   }
-    // } = await getTemplates(templateId);
-    //
+    const { data: templates } = await getTemplates();
+
+    // console.log("Templates", await getTemplates());
+    console.log("TEMPLATES", templates);
+
     // Change the static projectId above with the value in store
     //
 
