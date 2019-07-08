@@ -74,7 +74,7 @@ const tools = [
   { name: "WwwcRegion" },
   { name: "Probe" },
   {
-    name: "FreehandRoi",
+    name: "FreehandMouse",
     configuration: {
       showMinMax: true
       // showHounsfieldUnits: true
@@ -83,7 +83,7 @@ const tools = [
   { name: "Eraser" },
   { name: "Bidirectional" },
   { name: "Brush" },
-  { name: "FreehandRoiSculptor" }
+  { name: "FreehandMouseSculpter" }
 ];
 
 class Toolbar extends Component {
@@ -117,7 +117,7 @@ class Toolbar extends Component {
 
   //sets the selected tool active for all of the enabled elements
   setToolActive = (toolName, mouseMask = 1) => {
-    this.disableAllTools();
+    // this.disableAllTools();
     this.cornerstoneTools.setToolActive(toolName, {
       mouseButtonMask: mouseMask
     });
@@ -125,7 +125,7 @@ class Toolbar extends Component {
 
   //sets the selected tool active for an enabled elements
   setToolActiveForElement = (toolName, mouseMask = 1) => {
-    this.disableAllTools();
+    // this.disableAllTools();
     this.cornerstoneTools.setToolActiveForElement(
       this.cornerstone.getEnabledElements()[this.props.activeVP]["element"],
       toolName,

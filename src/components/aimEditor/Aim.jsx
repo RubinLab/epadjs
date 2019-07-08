@@ -3,25 +3,36 @@ import { modalities } from "./modality";
 import { generateUid } from "../../utils/aid";
 
 class Aim {
-  constructor(image, aimType, hasSegmentation, answers, updatedAimId) {
-    this.image = image;
-    this.answers = answers;
-    this.aimVersion = aimConf.aimVersion;
-    this.dateTime = { value: this.getDate() };
-    this.seriesInstanceUid = { root: generateUid() };
-    this.studyInstanceUid = { root: this.image.data.string("x0020000d") };
-
-    this.imageAnnotations = {
-      ImageAnnotation: this._createImageAnnotations(aimType, hasSegmentation)
-    };
-    this["xsi:schemaLocation"] = aimConf["xsi:schemaLocation"];
-    this.equipment = { equipment: this.getEquipment() };
-    this["xmlns:xsi"] = aimConf["xmlns:xsi"];
-    this["xmlns:rdf"] = aimConf["xmlns:rdf"];
-    this.accessionNumber = { value: this.getAccession() };
+  constructor(imageData, aimType, hasSegmentation, answers, updatedAimId) {
+    const {
+      aim,
+      study,
+      series,
+      image,
+      segmentation,
+      equipment,
+      user,
+      person
+    } = imageData;
+    // this.imageAnnotations.ImageAnnotationCollection = {};
+    // const newAim = this.imageAnnotations.ImageAnnotationCollection; //this can be used instead of the wrapper in getAim
     this.xmlns = aimConf.xmlns;
-    this.person = this.createPerson();
-    this.user = this.getUserInfo();
+    this["xmlns:rdf"] = aimConf["xmlns:rdf"];
+    this["xmlns:xsi"] = aimConf["xmlns:xsi"];
+    this.aimVersion = aimConf.aimVersion;
+    this["xsi:schemaLocation"] = aimConf["xsi:schemaLocation"];
+    this.uniqueIdentifier = "";
+    this.studyInstanceUid = { root: this.aim.studyInstanceUid };
+    this.seriesInstanceUid = { root: generateUid() };
+    this.accessionNumber = { value: study.accessionNumber };
+    this.dateTime = { value: this.getDate() };
+    this.user = this._createUser(user);
+    this.equipment = this._createEquipment(equipment);
+    this.person = this._createPerson(person);
+    this.imageAnnotations = {
+      ImageAnnotation: [this._createImageAnnotations(aimType, hasSegmentation)]
+    };
+    this.answers = answers;
     if (updatedAimId === undefined)
       this.uniqueIdentifier = { root: generateUid() };
     else this.uniqueIdentifier = { root: updatedAimId };
@@ -31,125 +42,45 @@ class Aim {
     return new Aim(data);
   }
 
-  static getMarkups(aim) {
-    let annotations = [];
-    let annotation = {};
-    const markupEntities =
-      aim.imageAnnotations.ImageAnnotation.markupEntityCollection.MarkupEntity;
+  // static getMarkups(aim) {
+  //   let annotations = [];
+  //   let annotation = {};
+  //   const markupEntities =
+  //     aim.imageAnnotations.ImageAnnotation.markupEntityCollection.MarkupEntity;
 
-    if (markupEntities.constructor === Array) {
-      markupEntities.map(markupEntity => {
-        var imageId = markupEntity["imageReferenceUid"]["root"];
-        var markupUid = markupEntity["uniqueIdentifier"]["root"];
-        var calculations = this.getCalculationEntitiesOfMarkUp(aim, markupUid);
-        annotations.push({
-          imageId: imageId,
-          markupType: markupEntity["xsi:type"],
-          coordinates:
-            markupEntity.twoDimensionSpatialCoordinateCollection
-              .TwoDimensionSpatialCoordinate,
-          calculations: calculations
-        });
-        this.getCalculationEntitiesOfMarkUp(aim);
-      });
-      return annotations;
-    } else if (
-      Object.entries(markupEntities).length !== 0 &&
-      markupEntities.constructor === Object
-    ) {
-      const imageId = markupEntities["imageReferenceUid"]["root"];
-      const markupUid = markupEntities["uniqueIdentifier"]["root"];
-      const calculations = this.getCalculationEntitiesOfMarkUp(aim, markupUid);
-      return {
-        imageId: imageId,
-        markupType: markupEntities["xsi:type"],
-        coordinates:
-          markupEntities.twoDimensionSpatialCoordinateCollection
-            .TwoDimensionSpatialCoordinate,
-        calculations: calculations
-      };
-    }
-  }
-
-  // static parseAim(aim) {
-  //   var imageAnnotation =
-  //     aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
-  //   var markupEntities = imageAnnotation.markupEntityCollection.MarkupEntity;
-  //   console.log(markupEntities);
-  //   markupEntities.forEach(markupEntity => {
-  //     console.log(this.getMarkup(markupEntity));
-  //   });
-  // }
-
-  // static getImageIdAnnotations(aims) {
-  //   var annotations = [];
-  //   var annotation = {};
-  //   aims.forEach(aim => this.parseAim(aim));
-  // }
-
-  // static getMarkup(markupEntity) {
-  //   const imageId = markupEntity["imageReferenceUid"]["root"];
-  //   const markupUid = markupEntity["uniqueIdentifier"]["root"];
-  //   const calculations = this.getCalculationEntitiesOfMarkUp(aim, markupUid);
-  //   return {
-  //     imageId: {
-  //       markupType: markupEntity["xsi:type"],
+  //   if (markupEntities.constructor === Array) {
+  //     markupEntities.map(markupEntity => {
+  //       var imageId = markupEntity["imageReferenceUid"]["root"];
+  //       var markupUid = markupEntity["uniqueIdentifier"]["root"];
+  //       var calculations = this.getCalculationEntitiesOfMarkUp(aim, markupUid);
+  //       annotations.push({
+  //         imageId: imageId,
+  //         markupType: markupEntity["xsi:type"],
+  //         coordinates:
+  //           markupEntity.twoDimensionSpatialCoordinateCollection
+  //             .TwoDimensionSpatialCoordinate,
+  //         calculations: calculations
+  //       });
+  //       this.getCalculationEntitiesOfMarkUp(aim);
+  //     });
+  //     return annotations;
+  //   } else if (
+  //     Object.entries(markupEntities).length !== 0 &&
+  //     markupEntities.constructor === Object
+  //   ) {
+  //     const imageId = markupEntities["imageReferenceUid"]["root"];
+  //     const markupUid = markupEntities["uniqueIdentifier"]["root"];
+  //     const calculations = this.getCalculationEntitiesOfMarkUp(aim, markupUid);
+  //     return {
+  //       imageId: imageId,
+  //       markupType: markupEntities["xsi:type"],
   //       coordinates:
-  //         markupEntity.twoDimensionSpatialCoordinateCollection
+  //         markupEntities.twoDimensionSpatialCoordinateCollection
   //           .TwoDimensionSpatialCoordinate,
   //       calculations: calculations
-  //     }
-  //   };
+  //     };
+  //   }
   // }
-
-  // static getCalculationEntitiesOfMarkUp(aim, markupUid) {
-  //   const imageAnnotationStatements = Aim.getImageAnnotationStatements(aim);
-  //   // console.log("calculations for ", markupUid, " are");
-  //   var calculations = [];
-  //   imageAnnotationStatements.forEach(statement => {
-  //     if (
-  //       statement["xsi:type"] ==
-  //         "CalculationEntityReferencesMarkupEntityStatement" &&
-  //       statement.objectUniqueIdentifier.root === markupUid
-  //     ) {
-  //       const calculationUid = statement.subjectUniqueIdentifier.root;
-  //       const calculationEntities = Aim.getCalculationEntities(aim);
-  //       calculationEntities.forEach(calculation => {
-  //         if (calculation.uniqueIdentifier.root === calculationUid)
-  //           calculations.push(Aim.parseCalculation(calculation));
-  //       });
-  //     }
-  //   });
-  //   return calculations;
-  // }
-
-  // static parseCalculation(calculation) {
-  //   const calcResult =
-  //     calculation.calculationResultCollection.CalculationResult;
-  //   var obj = {};
-  //   obj["type"] = calculation["description"]["value"];
-  //   obj["value"] = calcResult["value"]["value"];
-  //   obj["unit"] = calcResult["unitOfMeasure"]["value"];
-  //   // console.log(obj);
-  //   return obj;
-  // }
-
-  // static getImageAnnotationStatements = aim => {
-  //   return aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-  //     .imageAnnotationStatementCollection.ImageAnnotationStatement;
-  // };
-
-  // static getCalculationEntities = aim => {
-  //   return aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-  //     .calculationEntityCollection.CalculationEntity;
-  // };
-
-  getUserInfo = () => {
-    var obj = {};
-    obj["loginName"] = { value: sessionStorage.getItem("username") };
-    obj["name"] = { value: sessionStorage.getItem("displayName") };
-    return obj;
-  };
 
   getDate = () => {
     const now = new Date();
@@ -162,40 +93,30 @@ class Aim {
     return year + month + day + hours + minutes + seconds;
   };
 
-  createObject = (name, value) => {
+  _createObject = (name, value) => {
     var obj = {};
     obj[name] = { value };
     return obj;
   };
 
-  // IN REFACTORING WE SHOULD CHANGE THIS CODE TO FOLLOWING FOR EFFICIENCY
-  /*
-var Vehicle = {
-    type: "General",
-    display: function(){console.log(this.type);}
-}
-var Car = Object.create(Vehicle); //create a new Car inherits from Vehicle
-Car.type = "Car"; //overwrite the property
-Car.display();//"Car"
-Vehicle.display();//still "General"
-*/
-
   /*                                          */
   /*  Calculation Entitiy Realted Functions   */
   /*                                          */
 
-  createDimension = (label, index = 0, size = 1) => {
+  _createDimension = (label, index = 0, size = 1) => {
     return {
-      Dimension: Object.assign(
-        {},
-        this.createObject("size", size),
-        this.createObject("index", index),
-        this.createObject("label", label)
-      )
+      Dimension: [
+        Object.assign(
+          {},
+          this.createObject("size", size),
+          this.createObject("index", index),
+          this.createObject("label", label)
+        )
+      ]
     };
   };
 
-  createDoubleDataType = () => {
+  _createDoubleDataType = () => {
     var obj = {
       dataType: {
         code: "C48870",
@@ -207,9 +128,9 @@ Vehicle.display();//still "General"
   };
 
   //preLabel is used for preceding the name like LongAxis || ShortAxis
-  createCalcResult = (unit, label, value, preLabel = "") => {
-    var obj = this.createObject("unitOfMeasure", unit);
-    Object.assign(obj, this.createDoubleDataType());
+  _createCalcResult = (unit, label, value, preLabel = "") => {
+    var obj = this._createObject("unitOfMeasure", unit);
+    Object.assign(obj, this._createDoubleDataType());
     obj["xsi:type"] = "CompactCalculationResult";
     obj["dimensionCollection"] = this.createDimension(preLabel + label);
     obj["type"] = "scalar";
@@ -218,7 +139,7 @@ Vehicle.display();//still "General"
   };
 
   //if called with the default values returns DCM type code
-  createTypeCode = (
+  _createTypeCode = (
     code = 11203,
     codeSystemName = "DCM",
     displayNameValue = "Attenuation Coefficient"
@@ -237,12 +158,12 @@ Vehicle.display();//still "General"
     let { unit, value } = length;
     var obj = {};
     obj["calculationResultCollection"] = {
-      CalculationResult: this.createCalcResult(unit, "LineLength", value)
+      CalculationResult: [this._createCalcResult(unit, "LineLength", value)]
     };
     obj["description"] = { value: "Length" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
-    obj["typeCode"] = [this.createTypeCode("G-D7FE", "SRT", "Length")];
+    obj["typeCode"] = [this._createTypeCode("G-D7FE", "SRT", "Length")];
     this.aim.imageAnnotations.ImageAnnotation.calculationEntityCollection[
       "CalculationEntity"
     ].push(obj);
@@ -253,12 +174,12 @@ Vehicle.display();//still "General"
     let { unit, value } = longAxis;
     var obj = {};
     obj["calculationResultCollection"] = {
-      CalculationResult: this.createCalcResult(unit, "LongAxis", value)
+      CalculationResult: [this._createCalcResult(unit, "LongAxis", value)]
     };
     obj["description"] = { value: "LongAxis" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
-    obj["typeCode"] = [this.createTypeCode("G-A185", "SRT", "LongAxis")];
+    obj["typeCode"] = [this._createTypeCode("G-A185", "SRT", "LongAxis")];
     this.aim.imageAnnotations.ImageAnnotation.calculationEntityCollection[
       "CalculationEntity"
     ].push(obj);
@@ -269,12 +190,12 @@ Vehicle.display();//still "General"
     let { unit, value } = shortAxis;
     var obj = {};
     obj["calculationResultCollection"] = {
-      CalculationResult: this.createCalcResult(unit, "ShortAxis", value)
+      CalculationResult: [this._createCalcResult(unit, "ShortAxis", value)]
     };
     obj["description"] = { value: "ShortAxis" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
-    obj["typeCode"] = [this.createTypeCode("G-A186", "SRT", "ShortAxis")];
+    obj["typeCode"] = [this._createTypeCode("G-A186", "SRT", "ShortAxis")];
     this.aim.imageAnnotations.ImageAnnotation.calculationEntityCollection[
       "CalculationEntity"
     ].push(obj);
@@ -285,14 +206,14 @@ Vehicle.display();//still "General"
     var { unit, mean } = value;
     var obj = {};
     obj["calculationResultCollection"] = {
-      CalculationResult: this.createCalcResult(unit, "Mean", mean, preLabel)
+      CalculationResult: [this._createCalcResult(unit, "Mean", mean, preLabel)]
     };
     obj["description"] = { value: "Mean" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
-      this.createTypeCode(),
-      this.createTypeCode("R-00317", "SRT", "Mean")
+      this._createTypeCode(),
+      this._createTypeCode("R-00317", "SRT", "Mean")
     ];
     this.imageAnnotations.ImageAnnotation.calculationEntityCollection.CalculationEntity.push(
       obj
@@ -304,19 +225,16 @@ Vehicle.display();//still "General"
     var { unit, stdDev } = value;
     var obj = {};
     obj["calculationResultCollection"] = {
-      CalculationResult: this.createCalcResult(
-        unit,
-        "Standard Deviation",
-        stdDev,
-        preLabel
-      )
+      CalculationResult: [
+        this._createCalcResult(unit, "Standard Deviation", stdDev, preLabel)
+      ]
     };
     obj["description"] = { value: "Standard Deviation" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
-      this.createTypeCode(),
-      this.createTypeCode("R-10047", "SRT", "Standard Deviation")
+      this._createTypeCode(),
+      this._createTypeCode("R-10047", "SRT", "Standard Deviation")
     ];
     this.imageAnnotations.ImageAnnotation.calculationEntityCollection[
       "CalculationEntity"
@@ -328,14 +246,16 @@ Vehicle.display();//still "General"
     var { unit, min } = value;
     var obj = {};
     obj["calculationResultCollection"] = {
-      CalculationResult: this.createCalcResult(unit, "Minimum", min, preLabel)
+      CalculationResult: [
+        this._createCalcResult(unit, "Minimum", min, preLabel)
+      ]
     };
     obj["description"] = { value: "Minimum" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
-      this.createTypeCode(),
-      this.createTypeCode("R-404FB", "SRT", "Minimum")
+      this._createTypeCode(),
+      this._createTypeCode("R-404FB", "SRT", "Minimum")
     ];
     this.imageAnnotations.ImageAnnotation.calculationEntityCollection[
       "CalculationEntity"
@@ -347,14 +267,16 @@ Vehicle.display();//still "General"
     var { unit, max } = value;
     var obj = {};
     obj["calculationResultCollection"] = {
-      CalculationResult: this.createCalcResult(unit, "Maximum", max, preLabel)
+      CalculationResult: [
+        this._createCalcResult(unit, "Maximum", max, preLabel)
+      ]
     };
     obj["description"] = { value: "Maximum" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
-      this.createTypeCode(),
-      this.createTypeCode("G-A437", "SRT", "Maximum")
+      this._createTypeCode(),
+      this._createTypeCode("G-A437", "SRT", "Maximum")
     ];
     this.imageAnnotations.ImageAnnotation.calculationEntityCollection[
       "CalculationEntity"
@@ -405,7 +327,7 @@ Vehicle.display();//still "General"
   /*  Markup Entitiy Realted Functions        */
   /*                                          */
 
-  createCoordinate = (coordinate, index) => {
+  _createCoordinate = (coordinate, index) => {
     var obj = {};
     obj["x"] = { value: coordinate.x };
     obj["coordinateIndex"] = { value: index };
@@ -413,10 +335,10 @@ Vehicle.display();//still "General"
     return obj;
   };
 
-  createCoordinateArray = points => {
+  _createCoordinateArray = points => {
     var coordinates = [];
     points.forEach((point, index) => {
-      coordinates.push(this.createCoordinate(point, index));
+      coordinates.push(this._createCoordinate(point, index));
     });
     return coordinates;
   };
@@ -435,7 +357,7 @@ Vehicle.display();//still "General"
     obj["referencedFrameNumber"] = { value: frameNumber };
     obj["xsi:type"] = type;
     obj["twoDimensionSpatialCoordinateCollection"] = {
-      TwoDimensionSpatialCoordinate: this.createCoordinateArray(points)
+      TwoDimensionSpatialCoordinate: this._createCoordinateArray(points)
     };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
@@ -446,8 +368,11 @@ Vehicle.display();//still "General"
     return uId;
   };
 
+  /*                                          */
+  /*  Image Refrence Entity Collection        */
+  /*                                          */
   _createModality = () => {
-    const sopClassUid = this.image.data.string("x00080016") || "";
+    const sopClassUid = this.image.sopClassUid;
     if (sopClassUid)
       var {
         codeValue,
@@ -456,10 +381,14 @@ Vehicle.display();//still "General"
         codingSchemeVersion
       } = modalities[sopClassUid];
     else {
-      const modality = this.image.data.string("x00080060") || "";
+      const modality = this.series.modality;
       if (modality) {
-        // look from modalities
-        // var {codeValue, codingSchemeDesignator, codeMeaning, codingSchemeVersion} =;
+        var {
+          codeValue,
+          codingSchemeDesignator,
+          codeMeaning,
+          codingSchemeVersion
+        } = modalities.modality;
       }
     }
     var obj = {};
@@ -474,12 +403,13 @@ Vehicle.display();//still "General"
   };
 
   _createImageCollection = () => {
+    const { sopClassUid, sopInstanceUid } = this.image;
     var obj = {};
-    const sopClassUid = this.image.data.string("x00080016") || "";
-    const sopInstanceUid = this.image.data.string("x00080018") || "";
-    var sopClass = { root: sopClassUid };
-    var sopInstance = { root: sopInstanceUid };
-    obj["Image"] = { sopClassUid: sopClass, sopInstanceUid: sopInstance };
+    // const sopClassUid = sopClassUid;
+    // const sopInstanceUid = sopInstanceUid;
+    // var sopClass = { root: sopClassUid };
+    // var sopInstance = { root: sopInstanceUid };
+    obj["Image"] = [{ sopClassUid, sopInstanceUid }];
     return obj;
   };
 
@@ -487,19 +417,18 @@ Vehicle.display();//still "General"
     var obj = {};
     obj["modality"] = this._createModality();
     obj["imageCollection"] = this._createImageCollection();
-    obj["instanceUid"] = { root: this.image.data.string("x0020000e") || "" };
+    obj["instanceUid"] = { root: this.series.instanceUid };
     return obj;
   };
 
   _createImageStudy = () => {
+    const { accessionNumber } = this.study;
     var obj = {};
     obj["imageSeries"] = this._createImageSeries();
-    obj["startTime"] = { value: this.image.data.string("x00080030") || "" };
-    obj["instanceUid"] = { root: this.image.data.string("x0020000d") || "" };
-    obj["startDate"] = { value: this.image.data.string("x00080020") || "" };
-    obj["accessionNumber"] = {
-      value: this.image.data.string("x00080050") || ""
-    };
+    obj["startTime"] = { value: this.study.startTime };
+    obj["instanceUid"] = { root: this.study.instanceUid };
+    obj["startDate"] = { value: this.study.startDate };
+    obj["accessionNumber"] = { value: accessionNumber };
     return obj;
   };
 
@@ -520,48 +449,55 @@ Vehicle.display();//still "General"
   //
   //
   //
-  _createImageAnnotations = (aimType, hasSegmentations) => {
+  _createImageAnnotations = aimType => {
+    const {
+      name,
+      comment,
+      typeCode,
+      imagingPhysicalEntityCollection,
+      imagingObservationEntityCollection,
+      inferenceEntityCollection
+    } = this.aim;
     var obj = {};
-    obj["dateTime"] = { value: this.getDate() };
-    obj[
-      "imageReferenceEntityCollection"
-    ] = this._createImageReferanceEntityCollection();
-    obj["name"] = this.answers[0].name;
-    obj["comment"] = this.answers[1].comment;
     obj["uniqueIdentifier"] = { root: generateUid() };
-    // TODO: make this dynamic
-    obj["typeCode"] = {
-      code: "ROI",
-      codeSystemName: "99EPAD",
-      "iso:displayName": {
-        "xmlns:iso": "uri:iso.org:21090",
-        value: "ROI Only"
-      }
-    };
+    obj["typeCode"] = typeCode;
+    obj["dateTime"] = { value: this.getDate() };
+    obj["name"] = name;
+    obj["comment"] = comment;
+    obj["precedentReferencedAnnotationUid"] = { root: "" };
+    if (imagingPhysicalEntityCollection)
+      obj["imagingPhysicalEntityCollection"] = imagingPhysicalEntityCollection;
     if (aimType === 1) {
+      //if this is an image annotation
       obj["calculationEntityCollection"] = { CalculationEntity: [] };
       obj["markupEntityCollection"] = { MarkupEntity: [] };
       obj["imageAnnotationStatementCollection"] = {
         ImageAnnotationStatement: []
       };
     }
-    if (hasSegmentations)
+    if (imagingObservationEntityCollection)
+      obj[
+        "imagingObservationEntityCollection"
+      ] = imagingObservationEntityCollection;
+    if (inferenceEntityCollection)
+      obj["inferenceEntityCollection"] = inferenceEntityCollection;
+    obj[
+      "imageReferenceEntityCollection"
+    ] = this._createImageReferanceEntityCollection();
+    if (this.segmentation)
       obj[
         "segmentationEntityCollection"
       ] = this.creatSegmentationEntityCollection();
     return obj;
   };
 
-  createImageAnnotationStatement = (referenceType, objectId, subjectId) => {
+  createImageAnnotationStatement = (referenceType, objectId, subjectId) => { //this is called externally
     var obj = {};
     var references;
-    if (
-      referenceType === 1
-        ? (references = "CalculationEntityReferencesMarkupEntityStatement")
-        : (references =
-            "CalculationEntityReferencesSegmentationEntityStatement")
-    )
-      obj["xsi:type"] = referenceType;
+    referenceType === 1
+      ? (references = "CalculationEntityReferencesMarkupEntityStatement")
+      : (references = "CalculationEntityReferencesSegmentationEntityStatement");
+    obj["xsi:type"] = references;
     obj["objectUniqueIdentifier"] = { root: objectId };
     obj["subjectUniqueIdentifier"] = { root: subjectId };
     this.imageAnnotations.ImageAnnotation.imageAnnotationStatementCollection.ImageAnnotationStatement.push(
@@ -569,31 +505,29 @@ Vehicle.display();//still "General"
     );
   };
 
-  createImageAnnotationStatementCollection = (
-    imageAnnotationStatements = []
-  ) => {
-    var obj = {};
-    obj["ImageAnnotationStatement"] = imageAnnotationStatements;
-    return obj;
-  };
+  // createImageAnnotationStatementCollection = () => {
+  //   var obj = {};
+  //   obj["ImageAnnotationStatement"] = [];
+  //   return obj;
+  // };
 
-  //
-  //
-  // Image Annotations
-  createImageAnnotation = (annotationStatementCollection = {}) => {
-    var obj = {};
-    obj["dateTime"] = { value: this.getDate() };
-    obj[
-      "imageAnnotationStatementCollection"
-    ] = this.createImageAnnotationStatementCollection();
-    return obj;
-  };
+  // //
+  // //
+  // // Image Annotations
+  // createImageAnnotation = (annotationStatementCollection = {}) => {
+  //   var obj = {};
+  //   obj["dateTime"] = { value: this.getDate() };
+  //   obj[
+  //     "imageAnnotationStatementCollection"
+  //   ] = this.createImageAnnotationStatementCollection();
+  //   return obj;
+  // };
 
-  createImageAnnotations = imageAnnotation => {
-    var obj = {};
-    obj["imageAnnotations"] = imageAnnotation;
-    return obj;
-  };
+  // createImageAnnotations = imageAnnotation => {
+  //   var obj = {};
+  //   obj["imageAnnotations"] = imageAnnotation;
+  //   return obj;
+  // };
 
   /*                                                */
   /*    Segmentation Entitiy Realted Functions      */
@@ -602,18 +536,18 @@ Vehicle.display();//still "General"
   _createSegmentationEntity = () => {
     var obj = {};
     obj["referencedSopInstanceUid"] = {
-      root: this.image.data.string("x00080018") || ""
+      root: this.segmentation.referencedSopInstanceUid
     };
     obj["segmentNumber"] = { value: 1 };
     obj["seriesInstanceUid"] = {
-      root: this.image.data.string("x0020000e") || ""
+      root: this.segmentation.seriesInstanceUid
     };
     obj["studyInstanceUid"] = {
-      root: this.image.data.string("x0020000d") || ""
+      root: this.segmentation.studyInstanceUid
     };
     obj["xsi:type"] = "DicomSegmentationEntity";
-    obj["sopClassUid"] = { root: this.image.data.string("x00080016") || "" };
-    obj["sopInstanceUid"] = { root: this.image.data.string("x00080018") || "" };
+    obj["sopClassUid"] = { root: "1.2.840.10008.5.1.4.1.1.66.4" };
+    obj["sopInstanceUid"] = { root: this.segmentation.sopInstanceUid };
     obj["uniqueIdentifier"] = { root: generateUid() };
     return obj;
   };
@@ -627,49 +561,44 @@ Vehicle.display();//still "General"
   //
   //
   // Person
-  createPerson = () => {
-    const sex = this.image.data.string("x00100040") || "";
-    const name = this.image.data.string("x00100010") || "";
-    const patientId = this.image.data.string("x00100020") || "";
-    const birthDate = this.image.data.string("x00100030") || "";
-    const person = {
+  _createPerson = person => {
+    const { sex, name, patientId, birthDate } = person;
+    return {
       sex: { value: sex },
       name: { value: name },
       id: { value: patientId },
       birthDate: { value: birthDate }
     };
-    return person;
   };
 
-  getEquipment = () => {
-    const manuName = this.image.data.string("x00080070") || "";
-    const manuModel = this.image.data.string("x00081090") || "";
-    const sw = this.image.data.string("x00181020") || "";
-    const equipment = {
-      manufacturerName: { value: manuName },
-      manufacturerModelName: { value: manuModel },
-      softwareVersion: { value: sw }
+  //
+  //
+  // Eqipment
+  _createEquipment = equipment => {
+    const {
+      manufacturerName,
+      manufacturerModelName,
+      softwareVersion
+    } = equipment;
+    return {
+      manufacturerName: { value: manufacturerName },
+      manufacturerModelName: { value: manufacturerModelName },
+      softwareVersion: { value: softwareVersion }
     };
-    return equipment;
   };
 
   //
   //
   // User
-  createUser = (loginName, name) => {
-    var obj = {};
-    obj["loginName"] = { value: loginName };
-    obj["name"] = { value: name };
-    return obj;
-  };
-
-  getAccession = () => {
-    return this.image.data.string("x00080050") || "";
+  _createUser = user => {
+    const { loginName, name } = user;
+    return {
+      loginName: { value: loginName },
+      name: { value: name }
+    };
   };
 
   getAim = () => {
-    delete this.image;
-    delete this.answers;
     console.log(this);
     const stringAim = JSON.stringify(this);
     const wrappedAim = `{"imageAnnotations": { "ImageAnnotationCollection": ${stringAim} }}`;
