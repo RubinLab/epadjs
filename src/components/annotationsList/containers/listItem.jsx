@@ -1,6 +1,5 @@
 import React from "react";
 import { connect } from "react-redux";
-import { BrowserRouter, withRouter } from "react-router-dom";
 import { FaMinus, FaPlus, FaEye } from "react-icons/fa";
 import { MAX_PORT } from "../../../constants";
 import Annotations from "./annotations";
@@ -79,7 +78,6 @@ class ListItem extends React.Component {
     this.props.dispatch(
       updatePatient("serie", true, patientID, studyUID, seriesUID)
     );
-    this.props.history.push("/display");
     this.props.dispatch(showAnnotationWindow());
   };
 
@@ -129,7 +127,6 @@ class ListItem extends React.Component {
         }
       }
     }
-    this.props.history.push("/display");
     this.props.dispatch(showAnnotationWindow());
   };
 
@@ -255,4 +252,4 @@ const mapStateToProps = state => {
     patients: state.annotationsListReducer.patients
   };
 };
-export default withRouter(connect(mapStateToProps)(ListItem));
+export default connect(mapStateToProps)(ListItem);
