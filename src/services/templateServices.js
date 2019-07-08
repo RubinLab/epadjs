@@ -1,9 +1,9 @@
 import http from "./httpService";
 import { apiUrl, isLite } from "../config.json";
 
-export async function getTemplates(projectId) {
-  return http.get(apiUrl + "/projects/" + projectId + "/templates/");
-}
+// export async function getTemplates(projectId) {
+//   return http.get(apiUrl + "/projects/" + projectId + "/templates/");
+// }
 
 export async function getAllTemplates() {
   return isLite
@@ -12,8 +12,7 @@ export async function getAllTemplates() {
 }
 
 export async function getTemplates() {
-  return isLite
-    ? http.get(apiUrl + "/templates") : "";
+  return isLite ? http.get(apiUrl + "/templates") : "";
 }
 
 export function downloadTemplates(tempIDlist, selection) {
