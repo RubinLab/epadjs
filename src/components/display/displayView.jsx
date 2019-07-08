@@ -2,8 +2,6 @@ import React, { Component } from "react";
 import Toolbar from "./toolbar";
 import { getImageIds, getWadoImagePath } from "../../services/seriesServices";
 import { getAnnotations2 } from "../../services/annotationServices";
-import getImageIdAnnotations from "../aimEditor/aimHelper.js";
-//import Viewport from "./viewport.jsx";
 import ViewportSeg from "./viewportSeg.jsx";
 import { connect } from "react-redux";
 import { wadoUrl, isLite } from "../../config.json";
@@ -232,6 +230,7 @@ class DisplayView extends Component {
     if (toolsOfInterest.includes(toolType)) {
       this.setState({ showAimEditor: true });
     }
+    console.log(event);
   };
 
   setActive = i => {
@@ -426,9 +425,6 @@ class DisplayView extends Component {
       const { data: aims } = await getAnnotations2();
       console.log("csTool are", this.cornerstoneTools);
       console.log("aims are", aims);
-      debugger;
-      getImageIdAnnotations(aims);
-
       // this.parseAims(aims);
       window.addEventListener(
         "annotationSelected",

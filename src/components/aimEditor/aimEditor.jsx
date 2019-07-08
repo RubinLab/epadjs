@@ -81,6 +81,10 @@ class AimEditor extends Component {
     }
   };
 
+  getAccession = () => {
+    return this.image.data.string("x00080050") || "";
+  };
+
   save = () => {
     console.log("cstools are", this.csTools);
     // get data from questions
@@ -93,6 +97,7 @@ class AimEditor extends Component {
   createAim = answers => {
     const hasSegmentation = false; //TODO:keep this in store and look dynamically
     const updatedAimId = this.props.aimId;
+    console.log("IMAGE is", this.image);
 
     var aim = new Aim(
       this.image,
