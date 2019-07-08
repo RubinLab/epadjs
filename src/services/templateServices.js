@@ -11,6 +11,11 @@ export async function getAllTemplates() {
     : http.get(apiUrl + "/templates/");
 }
 
+export async function getTemplates() {
+  return isLite
+    ? http.get(apiUrl + "/templates") : "";
+}
+
 export function downloadTemplates(tempIDlist, selection) {
   if (isLite) {
     return http.post(apiUrl + "/templates/download", tempIDlist, {
