@@ -438,6 +438,10 @@ class DisplayView extends Component {
         this.handleAnnotationSelected
       );
     }
+    if (prevProps.series.length !== this.props.series.length) {
+      this.getViewports();
+      this.getData();
+    }
   }
 
   componentWillUnmount() {
