@@ -17,7 +17,8 @@ import { changeActivePort } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
 
 import { MenuProvider } from "react-contexify";
-import CornerstoneViewport from "react-cornerstone-viewport";
+import CornerstoneViewport from "../../reactCornerstoneViewport";
+// import CornerstoneViewport from "react-cornerstone-viewport";
 // import CornerstoneViewport from "../Viewport/CornerstoneViewport/CornerstoneViewport";
 import { freehand } from "./Freehand";
 import { line } from "./Line";
@@ -61,11 +62,11 @@ const tools = [
   { name: "Rotate" },
   { name: "WwwcRegion" },
   { name: "Probe" },
-  { name: "FreehandRoi", mouseButtonMasks: [1] },
+  { name: "FreehandMouse", mouseButtonMasks: [1] },
   { name: "Eraser" },
   { name: "Bidirectional", mouseButtonMasks: [1] },
   { name: "Brush" },
-  { name: "FreehandRoiSculptor" },
+  { name: "FreehandSculpterMouse" },
   { name: "StackScroll", mouseButtonMasks: [1] },
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
@@ -422,27 +423,27 @@ class DisplayView extends Component {
     this.setState({ showAimEditor: false, selectedAim: undefined });
   };
 
-  async componentDidUpdate(prevProps) {
-    if (!this.state.isLoading && Object.entries(this.props.aimList).length) {
-      // this.parseAims(this.props.aimList);
-      //get the aims for test
-      const { data: aims } = await getAnnotations2();
-      console.log("csTool are", this.cornerstoneTools);
-      console.log("aims are", aims);
-      // debugger;
-      getImageIdAnnotations(aims);
+  // async componentDidUpdate(prevProps) {
+  //   if (!this.state.isLoading && Object.entries(this.props.aimList).length) {
+  //     // this.parseAims(this.props.aimList);
+  //     //get the aims for test
+  //     const { data: aims } = await getAnnotations2();
+  //     // console.log("csTool are", this.cornerstoneTools);
+  //     // console.log("aims are", aims);
+  //     // debugger;
+  //     getImageIdAnnotations(aims);
 
-      // this.parseAims(aims);
-      window.addEventListener(
-        "annotationSelected",
-        this.handleAnnotationSelected
-      );
-    }
-    if (prevProps.series.length !== this.props.series.length) {
-      this.getViewports();
-      this.getData();
-    }
-  }
+  //     // this.parseAims(aims);
+  //     window.addEventListener(
+  //       "annotationSelected",
+  //       this.handleAnnotationSelected
+  //     );
+  //   }
+  //   if (prevProps.series.length !== this.props.series.length) {
+  //     this.getViewports();
+  //     this.getData();
+  //   }
+  // }
 
   componentWillUnmount() {
     window.removeEventListener(
@@ -456,8 +457,8 @@ class DisplayView extends Component {
   };
 
   render() {
-    if (!Object.entries(this.props.series).length)
-      this.props.history.push("/search");
+    // if (!Object.entries(this.props.series).length)
+    //   this.props.history.push("/search");
     return (
       // <div className="displayView-main">
       <React.Fragment>
@@ -505,7 +506,7 @@ class DisplayView extends Component {
                   availableTools={tools}
                   onMeasurementsChanged={this.measurementChanged}
                   setViewportActive={() => this.setActive(i)}
-                  onNewImage={event => this.props.onNewImage(event)}
+                  // onNewImage={event => this.props.onNewImage(event)}
 
                   // onRightClick={this.showRightMenu}
                 />
