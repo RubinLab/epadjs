@@ -7,6 +7,7 @@ import getImageIdAnnotations from "../aimEditor/aimHelper.js";
 import ViewportSeg from "./viewportSeg.jsx";
 import { connect } from "react-redux";
 import { wadoUrl, isLite } from "../../config.json";
+import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
 // import CornerstoneViewport from "react-cornerstone-viewport";
 import Aim from "../aimEditor/Aim";
@@ -457,9 +458,9 @@ class DisplayView extends Component {
   };
 
   render() {
-    // if (!Object.entries(this.props.series).length)
-    //   this.props.history.push("/search");
-    return (
+    return !Object.entries(this.props.series).length ? (
+      <Redirect to="/search" />
+    ) : (
       // <div className="displayView-main">
       <React.Fragment>
         <Toolbar
@@ -536,8 +537,8 @@ class DisplayView extends Component {
           ))}
         <ContextMenu />
       </React.Fragment>
-      // </div>
     );
+    // </div>
   }
 }
 
