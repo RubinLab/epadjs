@@ -1,7 +1,7 @@
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
+import React, { PureComponent } from "react";
+import PropTypes from "prop-types";
 
-import './LoadingIndicator.styl';
+import "./LoadingIndicator.css";
 
 class LoadingIndicator extends PureComponent {
   static propTypes = {
@@ -34,7 +34,7 @@ class LoadingIndicator extends PureComponent {
           <div className="imageViewerLoadingIndicator loadingIndicator">
             <div className="indicatorContents">
               <p>
-                Loading... <i className="fa fa-spin fa-circle-o-notch fa-fw" />{' '}
+                Loading... <i className="fa fa-spin fa-circle-o-notch fa-fw" />{" "}
                 {percComplete}
               </p>
             </div>

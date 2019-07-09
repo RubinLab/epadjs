@@ -1,10 +1,10 @@
-import { PureComponent } from 'react';
-import React from 'react';
-import PropTypes from 'prop-types';
-import cornerstone from 'cornerstone-core';
-import dicomParser from 'dicom-parser';
-import { helpers } from '../helpers/index.js';
-import './ViewportOverlay.styl';
+import { PureComponent } from "react";
+import React from "react";
+import PropTypes from "prop-types";
+import cornerstone from "cornerstone-core";
+import dicomParser from "dicom-parser";
+import { helpers } from "../helpers/index.js";
+import "./ViewportOverlay.css";
 
 const {
   formatPN,
@@ -16,23 +16,23 @@ const {
 
 function getCompression(imageId) {
   const generalImageModule =
-    cornerstone.metaData.get('generalImageModule', imageId) || {};
+    cornerstone.metaData.get("generalImageModule", imageId) || {};
   const {
     lossyImageCompression,
     lossyImageCompressionRatio,
     lossyImageCompressionMethod
   } = generalImageModule;
 
-  if (lossyImageCompression === '01' && lossyImageCompressionRatio !== '') {
-    const compressionMethod = lossyImageCompressionMethod || 'Lossy: ';
+  if (lossyImageCompression === "01" && lossyImageCompressionRatio !== "") {
+    const compressionMethod = lossyImageCompressionMethod || "Lossy: ";
     const compressionRatio = formatNumberPrecision(
       lossyImageCompressionRatio,
       2
     );
-    return compressionMethod + compressionRatio + ' : 1';
+    return compressionMethod + compressionRatio + " : 1";
   }
 
-  return 'Lossless / Uncompressed';
+  return "Lossless / Uncompressed";
 }
 
 class ViewportOverlay extends PureComponent {
@@ -50,25 +50,25 @@ class ViewportOverlay extends PureComponent {
 
     const zoom = this.props.viewport.scale * 100;
     const seriesMetadata =
-      cornerstone.metaData.get('generalSeriesModule', imageId) || {};
+      cornerstone.metaData.get("generalSeriesModule", imageId) || {};
     const imagePlaneModule =
-      cornerstone.metaData.get('imagePlaneModule', imageId) || {};
+      cornerstone.metaData.get("imagePlaneModule", imageId) || {};
     const { rows, columns, sliceThickness, sliceLocation } = imagePlaneModule;
     const { seriesNumber, seriesDescription } = seriesMetadata;
 
     const generalStudyModule =
-      cornerstone.metaData.get('generalStudyModule', imageId) || {};
+      cornerstone.metaData.get("generalStudyModule", imageId) || {};
     const { studyDate, studyTime, studyDescription } = generalStudyModule;
 
     const patientModule =
-      cornerstone.metaData.get('patientModule', imageId) || {};
+      cornerstone.metaData.get("patientModule", imageId) || {};
     const { patientId, patientName } = patientModule;
 
     const generalImageModule =
-      cornerstone.metaData.get('generalImageModule', imageId) || {};
+      cornerstone.metaData.get("generalImageModule", imageId) || {};
     const { instanceNumber } = generalImageModule;
 
-    const cineModule = cornerstone.metaData.get('cineModule', imageId) || {};
+    const cineModule = cornerstone.metaData.get("cineModule", imageId) || {};
     const { frameTime } = cineModule;
 
     const frameRate = formatNumberPrecision(1000 / frameTime, 1);
@@ -100,22 +100,22 @@ class ViewportOverlay extends PureComponent {
           <div className="compressionIndicator">{compression}</div>
         </div>
         <div className="bottom-left overlay-element">
-          <div>{seriesNumber >= 0 ? `Ser: ${seriesNumber}` : ''}</div>
+          <div>{seriesNumber >= 0 ? `Ser: ${seriesNumber}` : ""}</div>
           <div>
             {numImages > 1
               ? `Img: ${instanceNumber} ${imageIndex}/${numImages}`
-              : ''}
+              : ""}
           </div>
           <div>
-            {frameRate >= 0 ? `${formatNumberPrecision(frameRate, 2)} FPS` : ''}
+            {frameRate >= 0 ? `${formatNumberPrecision(frameRate, 2)} FPS` : ""}
             <div>{imageDimensions}</div>
             <div>
               {isValidNumber(sliceLocation)
                 ? `Loc: ${formatNumberPrecision(sliceLocation, 2)} mm `
-                : ''}
+                : ""}
               {sliceThickness
                 ? `Thick: ${formatNumberPrecision(sliceThickness, 2)} mm`
-                : ''}
+                : ""}
             </div>
             <div>{seriesDescription}</div>
           </div>
@@ -134,14 +134,14 @@ class ViewportOverlay extends PureComponent {
           </div>
         </div>
         <div className="bottom-right overlay-element">
-          <div>{seriesNumber >= 0 ? `Ser: ${seriesNumber}` : ''}</div>
+          <div>{seriesNumber >= 0 ? `Ser: ${seriesNumber}` : ""}</div>
           <div>
             {numImages > 1
               ? `Img: ${instanceNumber} ${imageIndex}/${numImages}`
-              : ''}
+              : ""}
           </div>
           <div>
-            {frameRate >= 0 ? `${formatNumberPrecision(frameRate, 2)} FPS` : ''}
+            {frameRate >= 0 ? `${formatNumberPrecision(frameRate, 2)} FPS` : ""}
           </div>
           <div>{imageDimensions}</div>
           <div>{seriesDescription}</div>
@@ -163,14 +163,14 @@ class ViewportOverlay extends PureComponent {
           </div>
         </div>
         <div className="bottom-left overlay-element">
-          <div>{seriesNumber >= 0 ? `Ser: ${seriesNumber}` : ''}</div>
+          <div>{seriesNumber >= 0 ? `Ser: ${seriesNumber}` : ""}</div>
           <div>
             {numImages > 1
               ? `Img: ${instanceNumber} ${imageIndex}/${numImages}`
-              : ''}
+              : ""}
           </div>
           <div>
-            {frameRate >= 0 ? `${formatNumberPrecision(frameRate, 2)} FPS` : ''}
+            {frameRate >= 0 ? `${formatNumberPrecision(frameRate, 2)} FPS` : ""}
           </div>
           <div>{imageDimensions}</div>
           <div>{seriesDescription}</div>
