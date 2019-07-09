@@ -120,10 +120,15 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
    this.loadTemplates = function (templateList) {
 
       self.arrayTemplatesJsonObjects = templateList;
+      console.log("JsonObjects", self.arrayTemplatesJsonObjects);
       if (self.arrayTemplatesJsonObjects.length > 0) {
          for (var i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {
             var object = {};
-            object.codeValue = self.arrayTemplatesJsonObjects[i].value.TemplateContainer.Template[0]["codeValue"];
+            console.log(
+              "CAVIIITTTT",
+              self.arrayTemplatesJsonObjects[i]
+            );
+            object.codeValue = self.arrayTemplatesJsonObjects[i].TemplateContainer.Template[0]["codeValue"];
             object.arrayIndex = i;
             self.mapTemplateCodeValueByIndex.set(object.codeValue, i);
 
@@ -174,7 +179,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
          //self.mainWindowDiv.appendChild(self.mainButtonsDiv);
 
       //creating template select drop down
-      self.arrayTemplates = ["Select ", "short.json", "multiImage.json", "short1.json", "test3.json", "ATS_Template.json", "BeaulieuBoneTemplate_rev13.json", "coordinationTest.json", "Liver_Template_ePad_CFB_rev15.json", "LT.json", "asdf.json", "BeaulieuBoneTemplate_rev18.json", "LungNoduleFeaturesV2LT1.json", "meduloblastoma.json"];
+      // self.arrayTemplates = ["Select ", "short.json", "multiImage.json", "short1.json", "test3.json", "ATS_Template.json", "BeaulieuBoneTemplate_rev13.json", "coordinationTest.json", "Liver_Template_ePad_CFB_rev15.json", "LT.json", "asdf.json", "BeaulieuBoneTemplate_rev18.json", "LungNoduleFeaturesV2LT1.json", "meduloblastoma.json"];
       var templateDiv = document.createElement('div');
       self.templateSelect = document.createElement('select');
       templateDiv.id = 'Temp';

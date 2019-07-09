@@ -41,6 +41,7 @@ class AimEditor extends Component {
       element,
       this.validateForm
     );
+    this.semanticAnswers.loadTemplates(templates);
     this.semanticAnswers.loadTemplates(questionaire.templateArray);
     this.semanticAnswers.createViewerWindow(element);
     if (this.props.aimId != null && Object.entries(this.props.aimId).length)
