@@ -2,10 +2,6 @@ import React, { Component } from "react";
 import Toolbar from "./toolbar";
 import { getImageIds, getWadoImagePath } from "../../services/seriesServices";
 import { getAnnotations2 } from "../../services/annotationServices";
-<<<<<<< HEAD
-import getImageIdAnnotations from "../aimEditor/aimHelper.js";
-=======
->>>>>>> feature/newAimWriter
 import ViewportSeg from "./viewportSeg.jsx";
 import { connect } from "react-redux";
 import { wadoUrl, isLite } from "../../config.json";
