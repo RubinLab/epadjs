@@ -2,23 +2,22 @@ import React, { Component } from "react";
 import Toolbar from "./toolbar";
 import { getImageIds, getWadoImagePath } from "../../services/seriesServices";
 import { getAnnotations2 } from "../../services/annotationServices";
+<<<<<<< HEAD
 import getImageIdAnnotations from "../aimEditor/aimHelper.js";
-//import Viewport from "./viewport.jsx";
+=======
+>>>>>>> feature/newAimWriter
 import ViewportSeg from "./viewportSeg.jsx";
 import { connect } from "react-redux";
 import { wadoUrl, isLite } from "../../config.json";
+import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
-// import CornerstoneViewport from "react-cornerstone-viewport";
 import Aim from "../aimEditor/Aim";
 import AimEditor from "../aimEditor/aimEditor";
 import "./flex.css";
-//import viewport from "./viewport.jsx";
 import { changeActivePort } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
-
 import { MenuProvider } from "react-contexify";
-import CornerstoneViewport from "react-cornerstone-viewport";
-// import CornerstoneViewport from "../Viewport/CornerstoneViewport/CornerstoneViewport";
+import CornerstoneViewport from "../../reactCornerstoneViewport";
 import { freehand } from "./Freehand";
 import { line } from "./Line";
 import { probe } from "./Probe";
@@ -61,11 +60,11 @@ const tools = [
   { name: "Rotate" },
   { name: "WwwcRegion" },
   { name: "Probe" },
-  { name: "FreehandRoi", mouseButtonMasks: [1] },
+  { name: "FreehandMouse", mouseButtonMasks: [1] },
   { name: "Eraser" },
   { name: "Bidirectional", mouseButtonMasks: [1] },
   { name: "Brush" },
-  { name: "FreehandRoiSculptor" },
+  { name: "FreehandSculpterMouse" },
   { name: "StackScroll", mouseButtonMasks: [1] },
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
@@ -232,6 +231,7 @@ class DisplayView extends Component {
     if (toolsOfInterest.includes(toolType)) {
       this.setState({ showAimEditor: true });
     }
+    console.log(event);
   };
 
   setActive = i => {
@@ -424,14 +424,10 @@ class DisplayView extends Component {
 
   async componentDidUpdate(prevProps) {
     if (!this.state.isLoading && Object.entries(this.props.aimList).length) {
-      // this.parseAims(this.props.aimList);
       //get the aims for test
       const { data: aims } = await getAnnotations2();
       console.log("csTool are", this.cornerstoneTools);
       console.log("aims are", aims);
-      // debugger;
-      getImageIdAnnotations(aims);
-
       // this.parseAims(aims);
       window.addEventListener(
         "annotationSelected",
@@ -456,9 +452,9 @@ class DisplayView extends Component {
   };
 
   render() {
-    if (!Object.entries(this.props.series).length)
-      this.props.history.push("/search");
-    return (
+    return !Object.entries(this.props.series).length ? (
+      <Redirect to="/search" />
+    ) : (
       // <div className="displayView-main">
       <React.Fragment>
         <Toolbar
@@ -505,7 +501,7 @@ class DisplayView extends Component {
                   availableTools={tools}
                   onMeasurementsChanged={this.measurementChanged}
                   setViewportActive={() => this.setActive(i)}
-                  onNewImage={event => this.props.onNewImage(event)}
+                  // onNewImage={event => this.props.onNewImage(event)}
 
                   // onRightClick={this.showRightMenu}
                 />
@@ -535,8 +531,8 @@ class DisplayView extends Component {
           ))}
         <ContextMenu />
       </React.Fragment>
-      // </div>
     );
+    // </div>
   }
 }
 
