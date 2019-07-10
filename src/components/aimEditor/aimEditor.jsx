@@ -27,25 +27,24 @@ class AimEditor extends Component {
     this.semanticAnswers = {};
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     const element = document.getElementById("questionaire");
-    const { data: templates } = await getTemplates();
-
-    // console.log("Templates", await getTemplates());
-    console.log("TEMPLATES", templates);
-
-    // Change the static projectId above with the value in store
-    //
-
-    this.semanticAnswers = new questionaire.AimEditor(
-      element,
-      this.validateForm
-    );
-    this.semanticAnswers.loadTemplates(templates);
-    this.semanticAnswers.loadTemplates(questionaire.templateArray);
-    this.semanticAnswers.createViewerWindow(element);
-    if (this.props.aimId != null && Object.entries(this.props.aimId).length)
-      this.semanticAnswers.loadAimJson(this.props.aimId);
+    // const { data: templates } = await getTemplates();
+    const templatePromise = new Promise(resolve => {
+      resolve(getTemplates());
+    });
+    templatePromise.then(result => {
+      console.log("TEMPLATES", result.data);
+      this.semanticAnswers = new questionaire.AimEditor(
+        element,
+        this.validateForm
+      );
+      // this.semanticAnswers.loadTemplates(questionaire.templateArray);
+      this.semanticAnswers.createViewerWindow(element);
+      if (this.props.aimId != null && Object.entries(this.props.aimId).length)
+        this.semanticAnswers.loadAimJson(this.props.aimId);
+      this.semanticAnswers.loadTemplates(result.data);
+    });
   }
 
   validateForm = hasError => {
