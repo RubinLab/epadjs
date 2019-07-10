@@ -8,7 +8,7 @@ import Projects from "./projects/projects";
 import WorkLists from "./worklists/workLists";
 import Annotations from "./annotations/annotations";
 import Templates from "./templates";
-
+import Tools from "./tools";
 import "./menuStyle.css";
 import Header from "./common/managementHeader";
 import { isLite } from "../../config.json";
@@ -91,6 +91,13 @@ class MainMenu extends React.Component {
       case "Templates":
         return (
           <Templates
+            selection={this.state.selection}
+            onClose={this.handleCloseModal}
+          />
+        );
+      case "Tools":
+        return (
+          <Tools
             selection={this.state.selection}
             onClose={this.handleCloseModal}
           />
