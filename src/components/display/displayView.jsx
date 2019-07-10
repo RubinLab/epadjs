@@ -2,7 +2,10 @@ import React, { Component } from "react";
 import Toolbar from "./toolbar";
 import { getImageIds, getWadoImagePath } from "../../services/seriesServices";
 import { getAnnotations2 } from "../../services/annotationServices";
+<<<<<<< HEAD
 import getImageIdAnnotations from "../aimEditor/aimHelper.js";
+=======
+>>>>>>> feature/newAimWriter
 import ViewportSeg from "./viewportSeg.jsx";
 import { connect } from "react-redux";
 import { wadoUrl, isLite } from "../../config.json";
@@ -228,6 +231,7 @@ class DisplayView extends Component {
     if (toolsOfInterest.includes(toolType)) {
       this.setState({ showAimEditor: true });
     }
+    console.log(event);
   };
 
   setActive = i => {
@@ -418,27 +422,23 @@ class DisplayView extends Component {
     this.setState({ showAimEditor: false, selectedAim: undefined });
   };
 
-  // async componentDidUpdate(prevProps) {
-  //   if (!this.state.isLoading && Object.entries(this.props.aimList).length) {
-  //     // this.parseAims(this.props.aimList);
-  //     //get the aims for test
-  //     const { data: aims } = await getAnnotations2();
-  //     // console.log("csTool are", this.cornerstoneTools);
-  //     // console.log("aims are", aims);
-  //     // debugger;
-  //     getImageIdAnnotations(aims);
-
-  //     // this.parseAims(aims);
-  //     window.addEventListener(
-  //       "annotationSelected",
-  //       this.handleAnnotationSelected
-  //     );
-  //   }
-  //   if (prevProps.series.length !== this.props.series.length) {
-  //     this.getViewports();
-  //     this.getData();
-  //   }
-  // }
+  async componentDidUpdate(prevProps) {
+    if (!this.state.isLoading && Object.entries(this.props.aimList).length) {
+      //get the aims for test
+      const { data: aims } = await getAnnotations2();
+      console.log("csTool are", this.cornerstoneTools);
+      console.log("aims are", aims);
+      // this.parseAims(aims);
+      window.addEventListener(
+        "annotationSelected",
+        this.handleAnnotationSelected
+      );
+    }
+    if (prevProps.series.length !== this.props.series.length) {
+      this.getViewports();
+      this.getData();
+    }
+  }
 
   componentWillUnmount() {
     window.removeEventListener(
