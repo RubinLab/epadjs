@@ -34,7 +34,8 @@ class Subjects extends Component {
       selection: [],
       selectAll: false,
       selectType: "checkbox",
-      // expanded: {},
+      expanded: {},
+      expandedIDs: {},
       numOfStudies: 0
     };
   }
@@ -352,21 +353,23 @@ class Subjects extends Component {
       selectAll: false
     });
   };
-  // toggleTree = () => {
-  //   if (this.state.pivotBy.length) {
-  //     this.setState({ pivotBy: [], expanded: {} });
-  //   } else {
-  //     this.setState({ pivotBy: [], expanded: {} });
-  //   }
-  // };
+  toggleTree = () => {
+    if (this.state.pivotBy.length) {
+      this.setState({ pivotBy: [], expanded: {} });
+    } else {
+      this.setState({ pivotBy: [], expanded: {} });
+    }
+  };
   onExpandedChange = (newExpanded, index, event) => {
-    console.log("expanded change");
-    console.log(newExpanded, index, event);
     this.setState({ expanded: newExpanded });
   };
 
   onSortedChange = () => {
-    const expandedIDs = 0;
+    const { expanded } = this.state;
+    for (let subject in expanded) {
+      expanded[subject] = false;
+    }
+    this.setState({ expanded });
   };
 
   render() {
@@ -376,7 +379,7 @@ class Subjects extends Component {
       isSelected,
       logSelection,
       toggleType,
-      // onExpandedChange,
+      onExpandedChange,
       toggleTree
     } = this;
     const {
@@ -384,8 +387,8 @@ class Subjects extends Component {
       columns,
       selectAll,
       selectType,
-      pivotBy
-      // expanded
+      pivotBy,
+      expanded
     } = this.state;
     const extraProps = {
       selectAll,
@@ -393,9 +396,9 @@ class Subjects extends Component {
       toggleAll,
       toggleSelection,
       selectType,
-      pivotBy
-      // expanded,
-      // onExpandedChange
+      pivotBy,
+      expanded,
+      onExpandedChange
     };
     const TheadComponent = props => null;
     return (
@@ -403,25 +406,21 @@ class Subjects extends Component {
         {this.state.data ? (
           <TreeTable
             NoDataComponent={() => null}
-            data={this.state.data}
-            columns={this.state.columns}
-            pageSize={this.state.data.length}
+            data={data}
+            columns={columns}
+            pageSize={data.length}
             ref={r => (this.selectTable = r)}
             className="-striped -highlight"
             // freezWhenExpanded={false}
             showPagination={false}
-            // collapseOnDataChange={false}
-            // collapseOnPageChange={false}
+            collapseOnDataChange={true}
+            collapseOnPageChange={true}
             collapseOnSortingChange={true}
-            // subRowsKey={"children"}
             // TheadComponent={TheadComponent}
-            expanded={this.state.expanded}
-            onExpandedChange={(expanded, index, event) => {
-              this.onExpandedChange(expanded, index, event);
-              console.log(data[index]);
-              this.setState({ expanded });
+            onSortedChange={() => {
+              console.log("1");
+              this.onSortedChange();
             }}
-            onSortedChange={() => console.log("heyo!!")}
             {...extraProps}
             SubComponent={row => {
               return (
