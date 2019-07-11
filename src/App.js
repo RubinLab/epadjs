@@ -107,12 +107,18 @@ class App extends Component {
   };
 
   onLogout = e => {
+    auth.logout();
     this.setState({
       authenticated: false,
       id: null,
-      keycloak: null,
       name: null,
       user: null
+    });
+    this.state.keycloak.logout().then(() => {
+      this.setState({
+        keycloak: null
+      });
+      auth.logout();
     });
   };
   render() {
