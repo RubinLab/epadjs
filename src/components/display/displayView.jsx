@@ -5,18 +5,15 @@ import { getAnnotations2 } from "../../services/annotationServices";
 import ViewportSeg from "./viewportSeg.jsx";
 import { connect } from "react-redux";
 import { wadoUrl, isLite } from "../../config.json";
+import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
-// import CornerstoneViewport from "react-cornerstone-viewport";
 import Aim from "../aimEditor/Aim";
 import AimEditor from "../aimEditor/aimEditor";
 import "./flex.css";
-//import viewport from "./viewport.jsx";
 import { changeActivePort } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
-
 import { MenuProvider } from "react-contexify";
-import CornerstoneViewport from "react-cornerstone-viewport";
-// import CornerstoneViewport from "../Viewport/CornerstoneViewport/CornerstoneViewport";
+import CornerstoneViewport from "../../reactCornerstoneViewport";
 import { freehand } from "./Freehand";
 import { line } from "./Line";
 import { probe } from "./Probe";
@@ -423,7 +420,6 @@ class DisplayView extends Component {
 
   async componentDidUpdate(prevProps) {
     if (!this.state.isLoading && Object.entries(this.props.aimList).length) {
-      // this.parseAims(this.props.aimList);
       //get the aims for test
       const { data: aims } = await getAnnotations2();
       console.log("csTool are", this.cornerstoneTools);
@@ -452,9 +448,9 @@ class DisplayView extends Component {
   };
 
   render() {
-    if (!Object.entries(this.props.series).length)
-      this.props.history.push("/search");
-    return (
+    return !Object.entries(this.props.series).length ? (
+      <Redirect to="/search" />
+    ) : (
       // <div className="displayView-main">
       <React.Fragment>
         <Toolbar
@@ -531,8 +527,8 @@ class DisplayView extends Component {
           ))}
         <ContextMenu />
       </React.Fragment>
-      // </div>
     );
+    // </div>
   }
 }
 
