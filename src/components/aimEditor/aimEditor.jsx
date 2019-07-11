@@ -39,11 +39,11 @@ class AimEditor extends Component {
         element,
         this.validateForm
       );
-      // this.semanticAnswers.loadTemplates(questionaire.templateArray);
-      this.semanticAnswers.createViewerWindow(element);
+      this.semanticAnswers.loadTemplates(questionaire.templateArray);
+      this.semanticAnswers.createViewerWindow();
       if (this.props.aimId != null && Object.entries(this.props.aimId).length)
         this.semanticAnswers.loadAimJson(this.props.aimId);
-      this.semanticAnswers.loadTemplates(result.data);
+      //this.semanticAnswers.loadTemplates(questionaire.templateArray);
     });
   }
 

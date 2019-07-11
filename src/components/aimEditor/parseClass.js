@@ -3,8 +3,8 @@
 // uncomment 2 imports below for react
 
 import $ from "jquery/dist/jquery.js";
+import "semantic-ui/dist/semantic.css";
 import "semantic-ui/dist/semantic.js";
-
 
 //export next variable for react
 export var AimEditor = function (userWindow, varformCheckHandler) {
@@ -128,7 +128,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
               "CAVIIITTTT",
               self.arrayTemplatesJsonObjects[i]
             );
-            object.codeValue = self.arrayTemplatesJsonObjects[i].TemplateContainer.Template[0]["codeValue"];
+            object.codeValue = self.arrayTemplatesJsonObjects[i]["value"].TemplateContainer.Template[0]["codeValue"];
             object.arrayIndex = i;
             self.mapTemplateCodeValueByIndex.set(object.codeValue, i);
 
@@ -197,7 +197,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
 
          var templateOption = document.createElement("option");
          templateOption.value = i;
-         templateOption.text = self.arrayTemplatesJsonObjects[i].value.TemplateContainer.Template[0].codeMeaning;
+         templateOption.text = self.arrayTemplatesJsonObjects[i]["value"].TemplateContainer.Template[0].codeMeaning;
          //templateOption.innerHTML = this.arrayTemplatesJsonObjects[i].key;
          self.templateSelect.appendChild(templateOption);
 
@@ -236,7 +236,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
             self.mapLabelCommentJson = new Map();
             self.mapLabelUid = new Map();
             if (templateSelectedIndex > -1){
-               self.jsonTemplateCopy = self.arrayTemplatesJsonObjects[this.value].value;
+               self.jsonTemplateCopy = self.arrayTemplatesJsonObjects[this.value]["value"];
                self.extractTemplate(self.jsonTemplateCopy);
             }
          
@@ -3306,7 +3306,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
 
    this.saveAim = function () {
 
-      //console.log("____________save aim : self.jsonTemplateCopy"+JSON.stringify(self.jsonTemplateCopy));
+      console.log("____________save aim : self.jsonTemplateCopy"+JSON.stringify(self.jsonTemplateCopy));
       var jsonComponents = {};
       var finaljson = {};
       var mainHolder = [];
@@ -3476,6 +3476,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
       }
        self.addUid(finaljson);
       finaljson = self.replaceTagNamingHierarchy(finaljson);
+      console.log("============= final"+JSON.stringify(finaljson));
      
       return finaljson;
 
@@ -16965,30 +16966,30 @@ export var Vasari_41 = {
 };
 
  export var templateArray = [
-   {value : Recist_v2 },
-   {value : Recist},
-   {value : AcLivTempBealieuLiver_Template_ePad_CFB_rev18},
-   {value : coordinationTest},
-   {value : Desmoid_Tumor_Template_Rev1_1},
-   {value : lungnodulefeaturesv2},
-   {value : medulloblastoma},
-   {value : segmentation_templatev2_1},
-   {value : test3asdf},
-   {value : testing_quantifiers},
-   {value : VASARILGG42ePAD},
-   {value : brain_hemorrhage2},
-   {value : ICRradiogenomics},
-   {value : kircenhancement},
-   {value : LungNoduleTemplate},
-   {value : pheumothrax},
-   {value : testing_quantifiers_minnie},
-   {value : HGG_v2},
-   {value : HIRADS},
-   {value : LIDC_CR_DR},
-   {value : LiverSegmentationsample},
-   {value : mammography},
-   {value : TNMLiverTemplates},
-   {value : Vasari_41}
+   {"value" : Recist_v2 },
+   {"value" : Recist},
+   {"value" : AcLivTempBealieuLiver_Template_ePad_CFB_rev18},
+   {"value" : coordinationTest},
+   {"value" : Desmoid_Tumor_Template_Rev1_1},
+   {"value" : lungnodulefeaturesv2},
+   {"value" : medulloblastoma},
+   {"value" : segmentation_templatev2_1},
+   {"value" : test3asdf},
+   {"value" : testing_quantifiers},
+   {"value" : VASARILGG42ePAD},
+   {"value" : brain_hemorrhage2},
+   {"value" : ICRradiogenomics},
+   {"value" : kircenhancement},
+   {"value" : LungNoduleTemplate},
+   {"value" : pheumothrax},
+   {"value" : testing_quantifiers_minnie},
+   {"value" : HGG_v2},
+   {"value" : HIRADS},
+   {"value" : LIDC_CR_DR},
+   {"value" : LiverSegmentationsample},
+   {"value" : mammography},
+   {"value" : TNMLiverTemplates},
+   {"value" : Vasari_41}
 
 ];
 
