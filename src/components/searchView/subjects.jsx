@@ -34,7 +34,7 @@ class Subjects extends Component {
       selection: [],
       selectAll: false,
       selectType: "checkbox",
-      expanded: {},
+      // expanded: {},
       numOfStudies: 0
     };
   }
@@ -42,12 +42,13 @@ class Subjects extends Component {
   async componentDidMount() {
     const pid = isLite ? "lite" : this.props.pid;
     const data = await this.getData();
-    this.setState({ data, size: data.length });
+    this.setState({ data });
     this.setState({ columns: this.setColumns() });
   }
 
   async componentDidUpdate(prevProps) {
     if (this.props.update !== prevProps.update) {
+      console.log("updating");
       let fetchedData = await this.getData();
       this.setState({ data: fetchedData });
     }
@@ -60,6 +61,9 @@ class Subjects extends Component {
       }
     } = await getSubjects(this.props.pid);
     // await this.setState({ data });
+    for (let subject of data) {
+      subject.children = [];
+    }
     return data;
   };
 
@@ -108,6 +112,7 @@ class Subjects extends Component {
         width: this.widthUnit * 13,
         id: "searchView-desc__col",
         resizable: false,
+        accessor: "subjectName",
         Cell: ({ original }) => {
           const desc = this.cleanCarets(original.subjectName);
           const id = "desc-tool" + original.subjectID;
@@ -347,15 +352,21 @@ class Subjects extends Component {
       selectAll: false
     });
   };
-  toggleTree = () => {
-    if (this.state.pivotBy.length) {
-      this.setState({ pivotBy: [], expanded: {} });
-    } else {
-      this.setState({ pivotBy: [], expanded: {} });
-    }
-  };
+  // toggleTree = () => {
+  //   if (this.state.pivotBy.length) {
+  //     this.setState({ pivotBy: [], expanded: {} });
+  //   } else {
+  //     this.setState({ pivotBy: [], expanded: {} });
+  //   }
+  // };
   onExpandedChange = (newExpanded, index, event) => {
+    console.log("expanded change");
+    console.log(newExpanded, index, event);
     this.setState({ expanded: newExpanded });
+  };
+
+  onSortedChange = () => {
+    const expandedIDs = 0;
   };
 
   render() {
@@ -365,7 +376,7 @@ class Subjects extends Component {
       isSelected,
       logSelection,
       toggleType,
-      onExpandedChange,
+      // onExpandedChange,
       toggleTree
     } = this;
     const {
@@ -373,8 +384,8 @@ class Subjects extends Component {
       columns,
       selectAll,
       selectType,
-      pivotBy,
-      expanded
+      pivotBy
+      // expanded
     } = this.state;
     const extraProps = {
       selectAll,
@@ -382,9 +393,9 @@ class Subjects extends Component {
       toggleAll,
       toggleSelection,
       selectType,
-      pivotBy,
-      expanded,
-      onExpandedChange
+      pivotBy
+      // expanded,
+      // onExpandedChange
     };
     const TheadComponent = props => null;
     return (
@@ -394,13 +405,23 @@ class Subjects extends Component {
             NoDataComponent={() => null}
             data={this.state.data}
             columns={this.state.columns}
-            pageSize={this.state.size}
+            pageSize={this.state.data.length}
             ref={r => (this.selectTable = r)}
             className="-striped -highlight"
-            freezWhenExpanded={false}
+            // freezWhenExpanded={false}
             showPagination={false}
+            // collapseOnDataChange={false}
+            // collapseOnPageChange={false}
+            collapseOnSortingChange={true}
+            // subRowsKey={"children"}
             // TheadComponent={TheadComponent}
-
+            expanded={this.state.expanded}
+            onExpandedChange={(expanded, index, event) => {
+              this.onExpandedChange(expanded, index, event);
+              console.log(data[index]);
+              this.setState({ expanded });
+            }}
+            onSortedChange={() => console.log("heyo!!")}
             {...extraProps}
             SubComponent={row => {
               return (

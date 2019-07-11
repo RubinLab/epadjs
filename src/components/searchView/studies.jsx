@@ -62,7 +62,7 @@ class Studies extends Component {
       selection: [],
       selectAll: false,
       selectType: "checkbox",
-      expanded: {},
+      // expanded: {},
       selectedStudy: {},
       isSerieSelectionOpen: false
     };
@@ -362,17 +362,17 @@ class Studies extends Component {
       selectAll: true
     });
   };
-  toggleTree = () => {
-    if (this.state.pivotBy.length) {
-      this.setState({ pivotBy: [], expanded: {} });
-    } else {
-      this.setState({ pivotBy: [], expanded: {} });
-    }
-  };
+  // toggleTree = () => {
+  //   if (this.state.pivotBy.length) {
+  //     this.setState({ pivotBy: [], expanded: {} });
+  //   } else {
+  //     this.setState({ pivotBy: [], expanded: {} });
+  //   }
+  // };
 
-  onExpandedChange = (newExpanded, index, event) => {
-    this.setState({ expanded: newExpanded });
-  };
+  // onExpandedChange = (newExpanded, index, event) => {
+  //   this.setState({ expanded: newExpanded });
+  // };
 
   excludeOpenSeries = allSeriesArr => {
     const result = [];
@@ -478,7 +478,7 @@ class Studies extends Component {
       isSelected,
       logSelection,
       toggleType,
-      onExpandedChange,
+      // onExpandedChange,
       toggleTree
     } = this;
     const { data, columns, selectAll, selectType, expanded } = this.state;
@@ -487,9 +487,9 @@ class Studies extends Component {
       isSelected,
       toggleAll,
       toggleSelection,
-      selectType,
-      expanded,
-      onExpandedChange
+      selectType
+      // expanded,
+      // onExpandedChange
     };
     const TheadComponent = props => null;
     return (
@@ -502,7 +502,7 @@ class Studies extends Component {
             pageSize={this.state.data.length}
             ref={r => (this.selectTable = r)}
             className="-striped -highlight"
-            freezWhenExpanded={false}
+            // freezWhenExpanded={false}
             showPagination={false}
             TheadComponent={TheadComponent}
             {...extraProps}
@@ -511,6 +511,14 @@ class Studies extends Component {
                 this.displaySeries(rowInfo.original);
               }
             })}
+            // collapseOnDataChange={false}
+            // collapseOnPageChange={false}
+            // collapseOnSortingChange={true}
+            expanded={this.state.expanded}
+            onExpandedChange={expanded => {
+              console.log(expanded);
+              this.setState({ expanded });
+            }}
             SubComponent={row => {
               return (
                 <div style={{ paddingLeft: "20px" }}>
