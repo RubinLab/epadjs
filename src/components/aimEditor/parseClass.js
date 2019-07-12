@@ -3,8 +3,8 @@
 // uncomment 2 imports below for react
 
 import $ from "jquery/dist/jquery.js";
+import "semantic-ui/dist/semantic.css";
 import "semantic-ui/dist/semantic.js";
-
 
 //export next variable for react
 export var AimEditor = function (userWindow, varformCheckHandler) {
@@ -120,10 +120,15 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
    this.loadTemplates = function (templateList) {
 
       self.arrayTemplatesJsonObjects = templateList;
+      console.log("JsonObjects", self.arrayTemplatesJsonObjects);
       if (self.arrayTemplatesJsonObjects.length > 0) {
          for (var i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {
             var object = {};
-            object.codeValue = self.arrayTemplatesJsonObjects[i].value.TemplateContainer.Template[0]["codeValue"];
+            console.log(
+              "CAVIIITTTT",
+              self.arrayTemplatesJsonObjects[i]
+            );
+            object.codeValue = self.arrayTemplatesJsonObjects[i]["value"].TemplateContainer.Template[0]["codeValue"];
             object.arrayIndex = i;
             self.mapTemplateCodeValueByIndex.set(object.codeValue, i);
 
@@ -174,7 +179,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
          //self.mainWindowDiv.appendChild(self.mainButtonsDiv);
 
       //creating template select drop down
-      self.arrayTemplates = ["Select ", "short.json", "multiImage.json", "short1.json", "test3.json", "ATS_Template.json", "BeaulieuBoneTemplate_rev13.json", "coordinationTest.json", "Liver_Template_ePad_CFB_rev15.json", "LT.json", "asdf.json", "BeaulieuBoneTemplate_rev18.json", "LungNoduleFeaturesV2LT1.json", "meduloblastoma.json"];
+      // self.arrayTemplates = ["Select ", "short.json", "multiImage.json", "short1.json", "test3.json", "ATS_Template.json", "BeaulieuBoneTemplate_rev13.json", "coordinationTest.json", "Liver_Template_ePad_CFB_rev15.json", "LT.json", "asdf.json", "BeaulieuBoneTemplate_rev18.json", "LungNoduleFeaturesV2LT1.json", "meduloblastoma.json"];
       var templateDiv = document.createElement('div');
       self.templateSelect = document.createElement('select');
       templateDiv.id = 'Temp';
@@ -192,7 +197,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
 
          var templateOption = document.createElement("option");
          templateOption.value = i;
-         templateOption.text = self.arrayTemplatesJsonObjects[i].value.TemplateContainer.Template[0].codeMeaning;
+         templateOption.text = self.arrayTemplatesJsonObjects[i]["value"].TemplateContainer.Template[0].codeMeaning;
          //templateOption.innerHTML = this.arrayTemplatesJsonObjects[i].key;
          self.templateSelect.appendChild(templateOption);
 
@@ -231,7 +236,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
             self.mapLabelCommentJson = new Map();
             self.mapLabelUid = new Map();
             if (templateSelectedIndex > -1){
-               self.jsonTemplateCopy = self.arrayTemplatesJsonObjects[this.value].value;
+               self.jsonTemplateCopy = self.arrayTemplatesJsonObjects[this.value]["value"];
                self.extractTemplate(self.jsonTemplateCopy);
             }
          
@@ -505,7 +510,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
          var selectHolder;
          if ((control != "radioBtn")) {
             if (validTermButtonClass != "ui") {
-               var ar = new self.createCheckboxVT(parent, subEObject.codeValue, ATparent.label, "ui checkbox mylbl", false, allowTermText + " " + subEObject.codeMeaning, ATallowedTermObj, ValidTermObj, ATparent);
+               var ar = new self.createCheckboxVT(parent, subEObject.codeValue, ATparent.label, "checkbox mylbl", false, allowTermText + " " + subEObject.codeMeaning, ATallowedTermObj, ValidTermObj, ATparent);
                parentDiv.appendChild(ar.getelementHtml());
             } else {
                self.subOrderLabelTracking = self.subOrderLabelTracking + 1;
@@ -518,7 +523,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
          } else {
 
 
-            var ar = new self.createRadioVT(parent, subEObject.codeValue, ATparent.label, "ui radio checkbox mylbl", false, allowTermText + " " + subEObject.codeMeaning, ATallowedTermObj, ValidTermObj, ATparent);
+            var ar = new self.createRadioVT(parent, subEObject.codeValue, ATparent.label, "radio checkbox mylbl", false, allowTermText + " " + subEObject.codeMeaning, ATallowedTermObj, ValidTermObj, ATparent);
             parentDiv.appendChild(ar.getelementHtml());
          }
 
@@ -763,8 +768,8 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
 
             } else {
                validTermInputType = "checkbox"
-               validTermButtonClass = "ui checkbox mylbl";
-               ar = new self.createCheckbox(parent, subEObject.codeValue, parent.label, "ui checkbox mylbl", subEObject.codeMeaning, subEObject.codeMeaning, allowedTermObj);
+               validTermButtonClass = "checkbox mylbl";
+               ar = new self.createCheckbox(parent, subEObject.codeValue, parent.label, "checkbox mylbl", subEObject.codeMeaning, subEObject.codeMeaning, allowedTermObj);
                if (!subEObject.hasOwnProperty("ValidTerm"))
                   contentDiv.appendChild(ar.getelementHtml());
                validTermButtonClassDiv = contentDiv;
@@ -785,9 +790,9 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
             else {
 
                validTermInputType = "radio"
-               validTermButtonClass = "ui radio checkbox mylbl";
+               validTermButtonClass = "radio checkbox mylbl";
 
-               ar = new self.createRadio(parent, subEObject.codeValue, parent.label, "ui radio checkbox mylbl", false, subEObject.codeMeaning, allowedTermObj);
+               ar = new self.createRadio(parent, subEObject.codeValue, parent.label, "radio checkbox mylbl", false, subEObject.codeMeaning, allowedTermObj);
 
                if (!subEObject.hasOwnProperty("ValidTerm"))
                   contentDiv.appendChild(ar.getelementHtml());
@@ -1531,7 +1536,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
       label.textContent = _self.lbl;
       var radioInput = document.createElement('input');
       radioInput.type = "radio";
-      radioInput.className = "ui radio checkbox";
+      radioInput.className = "radio checkbox";
       radioInput.id = _self.id;
       radioInput.name = _self.name;
       radioInput.checked = _self.checked;
@@ -1603,7 +1608,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
       label.textContent = _self.lbl;
       var radioInput = document.createElement('input');
       radioInput.type = "radio";
-      radioInput.className = "ui radio checkbox";
+      radioInput.className = "radio checkbox";
       radioInput.id = _self.id;
       radioInput.name = _self.name;
       radioInput.checked = _self.checked;
@@ -1841,7 +1846,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
       label.textContent = this.lbl;
       var checkbox = document.createElement('input');
       checkbox.type = "checkbox";
-      checkbox.className = "ui checkbox";
+      checkbox.className = "checkbox";
       checkbox.name = this.name;
       checkbox.value = this.value;
       checkbox.id = this.id;
@@ -1905,7 +1910,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
       label.textContent = this.lbl;
       var checkbox = document.createElement('input');
       checkbox.type = "checkbox";
-      checkbox.className = "ui checkbox";
+      checkbox.className = "checkbox";
       checkbox.name = this.name;
       checkbox.value = this.value;
       checkbox.id = this.id;
@@ -3301,7 +3306,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
 
    this.saveAim = function () {
 
-      //console.log("____________save aim : self.jsonTemplateCopy"+JSON.stringify(self.jsonTemplateCopy));
+      console.log("____________save aim : self.jsonTemplateCopy"+JSON.stringify(self.jsonTemplateCopy));
       var jsonComponents = {};
       var finaljson = {};
       var mainHolder = [];
@@ -3471,6 +3476,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
       }
        self.addUid(finaljson);
       finaljson = self.replaceTagNamingHierarchy(finaljson);
+      console.log("============= final"+JSON.stringify(finaljson));
      
       return finaljson;
 
@@ -16960,30 +16966,30 @@ export var Vasari_41 = {
 };
 
  export var templateArray = [
-   {value : Recist_v2 },
-   {value : Recist},
-   {value : AcLivTempBealieuLiver_Template_ePad_CFB_rev18},
-   {value : coordinationTest},
-   {value : Desmoid_Tumor_Template_Rev1_1},
-   {value : lungnodulefeaturesv2},
-   {value : medulloblastoma},
-   {value : segmentation_templatev2_1},
-   {value : test3asdf},
-   {value : testing_quantifiers},
-   {value : VASARILGG42ePAD},
-   {value : brain_hemorrhage2},
-   {value : ICRradiogenomics},
-   {value : kircenhancement},
-   {value : LungNoduleTemplate},
-   {value : pheumothrax},
-   {value : testing_quantifiers_minnie},
-   {value : HGG_v2},
-   {value : HIRADS},
-   {value : LIDC_CR_DR},
-   {value : LiverSegmentationsample},
-   {value : mammography},
-   {value : TNMLiverTemplates},
-   {value : Vasari_41}
+   {"value" : Recist_v2 },
+   {"value" : Recist},
+   {"value" : AcLivTempBealieuLiver_Template_ePad_CFB_rev18},
+   {"value" : coordinationTest},
+   {"value" : Desmoid_Tumor_Template_Rev1_1},
+   {"value" : lungnodulefeaturesv2},
+   {"value" : medulloblastoma},
+   {"value" : segmentation_templatev2_1},
+   {"value" : test3asdf},
+   {"value" : testing_quantifiers},
+   {"value" : VASARILGG42ePAD},
+   {"value" : brain_hemorrhage2},
+   {"value" : ICRradiogenomics},
+   {"value" : kircenhancement},
+   {"value" : LungNoduleTemplate},
+   {"value" : pheumothrax},
+   {"value" : testing_quantifiers_minnie},
+   {"value" : HGG_v2},
+   {"value" : HIRADS},
+   {"value" : LIDC_CR_DR},
+   {"value" : LiverSegmentationsample},
+   {"value" : mammography},
+   {"value" : TNMLiverTemplates},
+   {"value" : Vasari_41}
 
 ];
 
