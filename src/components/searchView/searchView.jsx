@@ -26,7 +26,8 @@ import {
   updatePatient,
   clearSelection,
   changeActivePort,
-  jumpToAim
+  jumpToAim,
+  showAnnotationDock
 } from "../annotationsList/action";
 import { MAX_PORT } from "../../constants";
 import DownloadSelection from "./annotationDownloadModal";
@@ -60,6 +61,9 @@ class SearchView extends Component {
   };
 
   componentDidMount = async () => {
+    if (this.props.dockOpen) {
+      this.props.dispatch(showAnnotationDock());
+    }
     const subjects = await this.getData();
     this.setState({ numOfsubjects: subjects.length });
   };
@@ -460,6 +464,7 @@ class SearchView extends Component {
         this.setState({ error: null, downloading: false });
       })
       .catch(err => {
+        this.setState({ downloading: false });
         if (err.response.status === 503) {
           isLite
             ? toast.error("There is no aim file to download!", {
@@ -515,8 +520,9 @@ class SearchView extends Component {
       status = "Downloading…";
     } else if (this.state.deleting) {
       status = "Deleting…";
+    } else {
+      status = null;
     }
-
     const showDelete =
       (Object.entries(this.props.selectedAnnotations).length > 0 &&
         this.props.selectedAnnotations.constructor === Object) ||
@@ -574,6 +580,7 @@ class SearchView extends Component {
 
 const mapStateToProps = state => {
   return {
+    dockOpen: state.annotationsListReducer.dockOpen,
     selectedProjects: state.annotationsListReducer.selectedProjects,
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,

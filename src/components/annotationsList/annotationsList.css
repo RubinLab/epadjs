@@ -369,3 +369,8 @@ svg {
   display: flex;
   align-items: center;
 }
+
+.-dock__close {
+  cursor: pointer;
+  width: 1.5rem;
+}

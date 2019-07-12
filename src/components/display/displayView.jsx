@@ -10,7 +10,7 @@ import { withRouter } from "react-router-dom";
 import Aim from "../aimEditor/Aim";
 import AimEditor from "../aimEditor/aimEditor";
 import "./flex.css";
-import { changeActivePort } from "../annotationsList/action";
+import { changeActivePort, updateImageId } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
 import CornerstoneViewport from "../../reactCornerstoneViewport";
@@ -422,8 +422,8 @@ class DisplayView extends Component {
     if (!this.state.isLoading && Object.entries(this.props.aimList).length) {
       //get the aims for test
       const { data: aims } = await getAnnotations2();
-      console.log("csTool are", this.cornerstoneTools);
-      console.log("aims are", aims);
+      // console.log("csTool are", this.cornerstoneTools);
+      // console.log("aims are", aims);
       // this.parseAims(aims);
       window.addEventListener(
         "annotationSelected",
@@ -448,6 +448,7 @@ class DisplayView extends Component {
   };
 
   render() {
+    console.log(this.props);
     return !Object.entries(this.props.series).length ? (
       <Redirect to="/search" />
     ) : (
@@ -497,8 +498,9 @@ class DisplayView extends Component {
                   availableTools={tools}
                   onMeasurementsChanged={this.measurementChanged}
                   setViewportActive={() => this.setActive(i)}
-                  // onNewImage={event => this.props.onNewImage(event)}
-
+                  onNewImage={event =>
+                    this.props.dispatch(updateImageId(event))
+                  }
                   // onRightClick={this.showRightMenu}
                 />
               </MenuProvider>

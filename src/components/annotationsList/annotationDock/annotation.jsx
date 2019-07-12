@@ -65,9 +65,9 @@ const annotation = props => {
           id={props.id}
         >
           {props.displayed ? (
-            <FaRegEye id={props.id} />
+            <FaRegEye id={props.id} className="clickable-icon" />
           ) : (
-            <FaRegEyeSlash id={props.id} />
+            <FaRegEyeSlash id={props.id} className="clickable-icon" />
           )}
         </div>
       </div>

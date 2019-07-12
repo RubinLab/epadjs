@@ -29,6 +29,7 @@ import {
   START_LOADING,
   UPDATE_PATIENT,
   CLOSE_SERIE,
+  UPDATE_IMAGEID,
   colors,
   commonLabels
 } from "./types";
@@ -44,11 +45,21 @@ export const clearGrid = item => {
   return { type: CLEAR_GRID };
 };
 
+export const updateImageId = event => {
+  const imageID = event.detail.image.imageId.split("/").pop();
+  console.log(imageID);
+  return {
+    type: UPDATE_IMAGEID,
+    imageID
+  };
+};
+
 export const closeSerie = () => {
   return {
     type: CLOSE_SERIE
   };
 };
+
 export const updatePatient = (
   type,
   status,
