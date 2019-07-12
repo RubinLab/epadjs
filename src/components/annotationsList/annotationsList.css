@@ -1,4 +1,5 @@
-#annList-modal {
+#annList-modal,
+#dock-modal {
   display: inline-flex;
   background: #3a3f44;
   color: #d3d3d3;

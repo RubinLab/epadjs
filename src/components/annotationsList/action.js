@@ -399,7 +399,7 @@ const getAimListFields = (aims, ann) => {
       // json1: aim,
       json: aimFields,
       isDisplayed: displayStatus,
-      showLabel: true,
+      showLabel: false,
       cornerStoneTools: [],
       color,
       type

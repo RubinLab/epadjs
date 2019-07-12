@@ -23,21 +23,30 @@ class DockTest extends Component {
     };
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    const icon = document.getElementsByClassName("patient-icon")[0];
+    const x = Math.ceil(icon.getBoundingClientRect().left);
+    let y = Math.ceil(icon.getBoundingClientRect().bottom);
+    y = window.innerWidth <= 932 ? (y = y * 3) : y * 2;
+
+    this.setState({ x, y });
+  }
 
   render() {
     const style = {
       minWidth: "215px",
       maxWidth: "30%",
-      maxHeight: "30%",
       overflow: "scroll"
     };
     console.log(this.props.imageID);
     return (
       <Rnd
-        id="annList-modal"
+        id="dock-modal"
         style={style}
-        size={{ width: this.state.width, height: this.state.height }}
+        size={{
+          width: this.state.width,
+          height: this.state.height
+        }}
         position={{ x: this.state.x, y: this.state.y }}
         onDragStop={(e, d) => {
           this.setState({ x: d.x, y: d.y });
