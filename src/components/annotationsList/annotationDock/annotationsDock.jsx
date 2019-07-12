@@ -24,19 +24,17 @@ class DockTest extends Component {
   }
 
   componentDidMount() {
-    const icon = document.getElementsByClassName("patient-icon")[0];
-    const x = Math.ceil(icon.getBoundingClientRect().left);
-    let y = Math.ceil(icon.getBoundingClientRect().bottom);
-    y = window.innerWidth <= 932 ? (y = y * 3) : y * 2;
-
+    const icon = document.getElementsByClassName("annotations-icon")[0];
+    const x = Math.ceil(icon.getBoundingClientRect().right) + 8;
+    let y = Math.ceil(icon.getBoundingClientRect().top);
     this.setState({ x, y });
   }
 
   render() {
     const style = {
       minWidth: "215px",
-      maxWidth: "30%",
-      overflow: "scroll"
+      maxWidth: "30%"
+      // overflow: "scroll"
     };
     console.log(this.props.imageID);
     return (

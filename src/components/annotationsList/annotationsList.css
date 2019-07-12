@@ -11,6 +11,10 @@
   /* left: 80%; */
 }
 
+#dock-modal {
+  padding: 0.3rem;
+  overflow-x: hidden;
+}
 .annList {
   background: #3a3f44;
   padding: 0.5rem;
