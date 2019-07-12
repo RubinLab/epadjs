@@ -510,7 +510,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
          var selectHolder;
          if ((control != "radioBtn")) {
             if (validTermButtonClass != "ui") {
-               var ar = new self.createCheckboxVT(parent, subEObject.codeValue, ATparent.label, "ui checkbox mylbl", false, allowTermText + " " + subEObject.codeMeaning, ATallowedTermObj, ValidTermObj, ATparent);
+               var ar = new self.createCheckboxVT(parent, subEObject.codeValue, ATparent.label, "checkbox mylbl", false, allowTermText + " " + subEObject.codeMeaning, ATallowedTermObj, ValidTermObj, ATparent);
                parentDiv.appendChild(ar.getelementHtml());
             } else {
                self.subOrderLabelTracking = self.subOrderLabelTracking + 1;
@@ -523,7 +523,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
          } else {
 
 
-            var ar = new self.createRadioVT(parent, subEObject.codeValue, ATparent.label, "ui radio checkbox mylbl", false, allowTermText + " " + subEObject.codeMeaning, ATallowedTermObj, ValidTermObj, ATparent);
+            var ar = new self.createRadioVT(parent, subEObject.codeValue, ATparent.label, "radio checkbox mylbl", false, allowTermText + " " + subEObject.codeMeaning, ATallowedTermObj, ValidTermObj, ATparent);
             parentDiv.appendChild(ar.getelementHtml());
          }
 
@@ -768,8 +768,8 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
 
             } else {
                validTermInputType = "checkbox"
-               validTermButtonClass = "ui checkbox mylbl";
-               ar = new self.createCheckbox(parent, subEObject.codeValue, parent.label, "ui checkbox mylbl", subEObject.codeMeaning, subEObject.codeMeaning, allowedTermObj);
+               validTermButtonClass = "checkbox mylbl";
+               ar = new self.createCheckbox(parent, subEObject.codeValue, parent.label, "checkbox mylbl", subEObject.codeMeaning, subEObject.codeMeaning, allowedTermObj);
                if (!subEObject.hasOwnProperty("ValidTerm"))
                   contentDiv.appendChild(ar.getelementHtml());
                validTermButtonClassDiv = contentDiv;
@@ -790,9 +790,9 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
             else {
 
                validTermInputType = "radio"
-               validTermButtonClass = "ui radio checkbox mylbl";
+               validTermButtonClass = "radio checkbox mylbl";
 
-               ar = new self.createRadio(parent, subEObject.codeValue, parent.label, "ui radio checkbox mylbl", false, subEObject.codeMeaning, allowedTermObj);
+               ar = new self.createRadio(parent, subEObject.codeValue, parent.label, "radio checkbox mylbl", false, subEObject.codeMeaning, allowedTermObj);
 
                if (!subEObject.hasOwnProperty("ValidTerm"))
                   contentDiv.appendChild(ar.getelementHtml());
@@ -1536,7 +1536,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
       label.textContent = _self.lbl;
       var radioInput = document.createElement('input');
       radioInput.type = "radio";
-      radioInput.className = "ui radio checkbox";
+      radioInput.className = "radio checkbox";
       radioInput.id = _self.id;
       radioInput.name = _self.name;
       radioInput.checked = _self.checked;
@@ -1608,7 +1608,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
       label.textContent = _self.lbl;
       var radioInput = document.createElement('input');
       radioInput.type = "radio";
-      radioInput.className = "ui radio checkbox";
+      radioInput.className = "radio checkbox";
       radioInput.id = _self.id;
       radioInput.name = _self.name;
       radioInput.checked = _self.checked;
@@ -1846,7 +1846,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
       label.textContent = this.lbl;
       var checkbox = document.createElement('input');
       checkbox.type = "checkbox";
-      checkbox.className = "ui checkbox";
+      checkbox.className = "checkbox";
       checkbox.name = this.name;
       checkbox.value = this.value;
       checkbox.id = this.id;
@@ -1910,7 +1910,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
       label.textContent = this.lbl;
       var checkbox = document.createElement('input');
       checkbox.type = "checkbox";
-      checkbox.className = "ui checkbox";
+      checkbox.className = "checkbox";
       checkbox.name = this.name;
       checkbox.value = this.value;
       checkbox.id = this.id;
