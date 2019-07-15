@@ -114,43 +114,42 @@ export const displaySingleAim = (
 };
 
 export const selectPatient = selectedPatientObj => {
-  let { projectID, subjectID } = selectedPatientObj;
+  let {
+    projectID,
+    subjectID,
+    subjectName,
+    numberOfAnnotations
+  } = selectedPatientObj;
   projectID = projectID ? projectID : "lite";
 
-  return { type: SELECT_PATIENT, patient: { projectID, subjectID } };
+  return {
+    type: SELECT_PATIENT,
+    patient: { projectID, subjectID, numberOfAnnotations, subjectName }
+  };
 };
 
 export const selectStudy = selectedStudyObj => {
   let {
     studyUID,
-
     patientID,
-
     projectID,
-
     studyDescription,
-
     patientName,
-
-    numberOfSeries
+    numberOfSeries,
+    numberOfAnnotations
   } = selectedStudyObj;
   projectID = projectID ? projectID : "lite";
 
   return {
     type: SELECT_STUDY,
-
     study: {
       studyUID,
-
       patientID,
-
       projectID,
-
       studyDescription,
-
       patientName,
-
-      numberOfSeries
+      numberOfSeries,
+      numberOfAnnotations
     }
   };
 };
@@ -158,16 +157,12 @@ export const selectStudy = selectedStudyObj => {
 export const selectSerie = (selectedSerieObj, studyDescription) => {
   const {
     seriesUID,
-
     studyUID,
-
     patientID,
-
     projectID,
-
     patientName,
-
-    seriesDescription
+    seriesDescription,
+    numberOfAnnotations
   } = selectedSerieObj;
 
   return {
@@ -175,16 +170,13 @@ export const selectSerie = (selectedSerieObj, studyDescription) => {
 
     serie: {
       seriesUID,
-
       studyUID,
-
       patientID,
-
       projectID,
-
       patientName,
       seriesDescription,
-      studyDescription
+      studyDescription,
+      numberOfAnnotations
     }
   };
 };

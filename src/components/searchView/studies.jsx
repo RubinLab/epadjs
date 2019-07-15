@@ -511,12 +511,8 @@ class Studies extends Component {
                 this.displaySeries(rowInfo.original);
               }
             })}
-            // collapseOnDataChange={false}
-            // collapseOnPageChange={false}
-            // collapseOnSortingChange={true}
             expanded={this.state.expanded}
             onExpandedChange={expanded => {
-              console.log(expanded);
               this.setState({ expanded });
             }}
             SubComponent={row => {

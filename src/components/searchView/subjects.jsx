@@ -43,13 +43,13 @@ class Subjects extends Component {
   async componentDidMount() {
     const pid = isLite ? "lite" : this.props.pid;
     const data = await this.getData();
+    console.log(data);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
   }
 
   async componentDidUpdate(prevProps) {
     if (this.props.update !== prevProps.update) {
-      console.log("updating");
       let fetchedData = await this.getData();
       this.setState({ data: fetchedData });
     }
@@ -61,7 +61,6 @@ class Subjects extends Component {
         ResultSet: { Result: data }
       }
     } = await getSubjects(this.props.pid);
-    // await this.setState({ data });
     for (let subject of data) {
       subject.children = [];
     }
@@ -413,9 +412,6 @@ class Subjects extends Component {
             className="-striped -highlight"
             // freezWhenExpanded={false}
             showPagination={false}
-            collapseOnDataChange={true}
-            collapseOnPageChange={true}
-            collapseOnSortingChange={true}
             // TheadComponent={TheadComponent}
             onSortedChange={() => {
               console.log("1");

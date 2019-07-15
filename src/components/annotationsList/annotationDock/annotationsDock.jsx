@@ -34,9 +34,7 @@ class DockTest extends Component {
     const style = {
       minWidth: "215px",
       maxWidth: "30%"
-      // overflow: "scroll"
     };
-    console.log(this.props.imageID);
     return (
       <Rnd
         id="dock-modal"
@@ -77,7 +75,6 @@ class DockTest extends Component {
 }
 const mapStateToProps = state => {
   return {
-    // dockOpen: state.annotationsListReducer.dockOpen,
     imageID: state.annotationsListReducer.imageID,
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort
