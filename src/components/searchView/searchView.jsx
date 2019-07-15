@@ -26,7 +26,8 @@ import {
   updatePatient,
   clearSelection,
   changeActivePort,
-  jumpToAim
+  jumpToAim,
+  showAnnotationDock
 } from "../annotationsList/action";
 import { MAX_PORT } from "../../constants";
 import DownloadSelection from "./annotationDownloadModal";
@@ -36,6 +37,7 @@ import { toast } from "react-toastify";
 import { isLite } from "../../config";
 import { getSubjects } from "../../services/subjectServices";
 import DeleteAlert from "./deleteConfirmationModal";
+import DownloadWarning from "./downloadWarningModal";
 
 class SearchView extends Component {
   constructor(props) {
@@ -51,7 +53,8 @@ class SearchView extends Component {
       showUploadModal: false,
       numOfsubjects: 0,
       showDeleteAlert: false,
-      update: 0
+      update: 0,
+      missingAnns: []
     };
   }
 
@@ -60,6 +63,9 @@ class SearchView extends Component {
   };
 
   componentDidMount = async () => {
+    if (this.props.dockOpen) {
+      this.props.dispatch(showAnnotationDock());
+    }
     const subjects = await this.getData();
     this.setState({ numOfsubjects: subjects.length });
   };
@@ -395,6 +401,7 @@ class SearchView extends Component {
     let fileName;
     let promiseArr = [];
     let fileNameArr = [];
+    let missingAnns = [];
     if (selectedProjects.length > 0) {
       await this.setState({ downloading: true });
       for (let project of selectedProjects) {
@@ -408,8 +415,12 @@ class SearchView extends Component {
       await this.setState({ downloading: true });
       for (let patient of selectedPatients) {
         fileName = `Patients-${patient.subjectID}`;
-        promiseArr.push(downloadSubjects(patient));
-        fileNameArr.push(fileName);
+        if (patient.numberOfAnnotations) {
+          promiseArr.push(downloadSubjects(patient));
+          fileNameArr.push(fileName);
+        } else {
+          missingAnns.push(patient.subjectName);
+        }
       }
       this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
@@ -417,8 +428,12 @@ class SearchView extends Component {
       await this.setState({ downloading: true });
       for (let study of selectedStudies) {
         fileName = `Studies-${study.studyUID}`;
-        promiseArr.push(downloadStudies(study));
-        fileNameArr.push(fileName);
+        if (study.numberOfAnnotations) {
+          promiseArr.push(downloadStudies(study));
+          fileNameArr.push(fileName);
+        } else {
+          missingAnns.push(study.studyDescription);
+        }
       }
       this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
@@ -426,14 +441,19 @@ class SearchView extends Component {
       await this.setState({ downloading: true });
       for (let serie of selectedSeries) {
         fileName = `Series-${serie.seriesUID}`;
-        promiseArr.push(downloadSeries(serie));
-        fileNameArr.push(fileName);
+        if (serie.numberOfAnnotations) {
+          promiseArr.push(downloadSeries(serie));
+          fileNameArr.push(fileName);
+        } else {
+          missingAnns.push(serie.seriesDescription);
+        }
       }
       this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
     }
+    this.setState({ missingAnns });
   };
 
   getSeriesData = async selected => {
@@ -460,6 +480,7 @@ class SearchView extends Component {
         this.setState({ error: null, downloading: false });
       })
       .catch(err => {
+        this.setState({ downloading: false });
         if (err.response.status === 503) {
           isLite
             ? toast.error("There is no aim file to download!", {
@@ -507,6 +528,9 @@ class SearchView extends Component {
     this.setState(state => ({ showDeleteAlert: !state.showDeleteAlert }));
   };
 
+  handleOK = () => {
+    this.setState({ missingAnns: [] });
+  };
   render() {
     let status;
     if (this.state.uploading) {
@@ -515,8 +539,9 @@ class SearchView extends Component {
       status = "Downloading…";
     } else if (this.state.deleting) {
       status = "Deleting…";
+    } else {
+      status = null;
     }
-
     const showDelete =
       (Object.entries(this.props.selectedAnnotations).length > 0 &&
         this.props.selectedAnnotations.constructor === Object) ||
@@ -567,6 +592,12 @@ class SearchView extends Component {
             onDelete={this.deleteSelection}
           />
         )}
+        {this.state.missingAnns.length > 0 && (
+          <DownloadWarning
+            details={this.state.missingAnns}
+            onOK={this.handleOK}
+          />
+        )}
       </>
     );
   }
@@ -574,6 +605,7 @@ class SearchView extends Component {
 
 const mapStateToProps = state => {
   return {
+    dockOpen: state.annotationsListReducer.dockOpen,
     selectedProjects: state.annotationsListReducer.selectedProjects,
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,

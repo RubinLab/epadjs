@@ -14,7 +14,7 @@ import {
 
 class AnnotationsList extends React.Component {
   state = {
-    labelDisplayAll: true,
+    labelDisplayAll: false,
     annsDisplayAll: true
   };
 
@@ -93,6 +93,7 @@ class AnnotationsList extends React.Component {
   };
 
   render = () => {
+    const maxHeight = window.innerHeight * 0.6;
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     const annotations = [];
     let aims = this.props.aimsList[seriesUID];
@@ -179,7 +180,7 @@ class AnnotationsList extends React.Component {
               className="react-switch"
             />
           </div>
-          <div>{annList}</div>
+          <div style={{ maxHeight, overflow: "scroll" }}>{annList}</div>
         </div>
       </React.Fragment>
     );

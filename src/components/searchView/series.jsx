@@ -91,6 +91,7 @@ class Series extends Component {
       this.props.studyId
     );
     this.setState({ data });
+    console.log(data);
     this.setState({ columns: this.setColumns() });
     if (data.length === 0) {
       toast.info("No serie found", {

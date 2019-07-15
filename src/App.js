@@ -107,12 +107,18 @@ class App extends Component {
   };
 
   onLogout = e => {
+    auth.logout();
     this.setState({
       authenticated: false,
       id: null,
-      keycloak: null,
       name: null,
       user: null
+    });
+    this.state.keycloak.logout().then(() => {
+      this.setState({
+        keycloak: null
+      });
+      auth.logout();
     });
   };
   render() {
@@ -136,7 +142,11 @@ class App extends Component {
             <Sidebar>
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
-                <ProtectedRoute path="/display" component={DisplayView} />
+                <ProtectedRoute
+                  path="/display"
+                  component={DisplayView}
+                  test={"test"}
+                />
                 <ProtectedRoute path="/search/:pid?" component={SearchView} />
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute path="/progress" component={ProgressView} />
@@ -165,7 +175,7 @@ class App extends Component {
           </Switch>
         )}
         {this.props.listOpen && <AnnotationList />}
-        {/* {this.props.dockOpen && <AnnotationsDock />} */}
+        {this.props.dockOpen && <AnnotationsDock />}
         {this.props.showGridFullAlert && <MaxViewAlert />}
         {/* {this.props.selection && (
           <ManagementItemModal selection={this.props.selection} />
@@ -176,7 +186,7 @@ class App extends Component {
 }
 
 const mapStateToProps = state => {
-  // console.log(state.annotationsListReducer);
+  console.log(state.annotationsListReducer);
   // console.log(state.managementReducer);
 
   const {
@@ -185,7 +195,8 @@ const mapStateToProps = state => {
     showGridFullAlert,
     showProjectModal,
     loading,
-    activePort
+    activePort,
+    imageID
   } = state.annotationsListReducer;
   return {
     listOpen,
@@ -194,6 +205,7 @@ const mapStateToProps = state => {
     showProjectModal,
     loading,
     activePort,
+    imageID,
     selection: state.managementReducer.selection
   };
 };

@@ -377,8 +377,10 @@ import {
   DISPLAY_SINGLE_AIM,
   JUMP_TO_AIM,
   UPDATE_PATIENT,
-  CLOSE_SERIE
+  CLOSE_SERIE,
+  UPDATE_IMAGEID
 } from "./types";
+import { MdSatellite } from "react-icons/md";
 const initialState = {
   openSeries: [],
 
@@ -409,15 +411,19 @@ const initialState = {
   selectedSeries: {},
   selectedAnnotations: {},
   patientLoading: false,
-  patientLoadingError: null
+  patientLoadingError: null,
+  imageID: null
 };
 
 const asyncReducer = (state = initialState, action) => {
   switch (action.type) {
+    case UPDATE_IMAGEID:
+      return { ...state, imageID: action.imageID };
     case CLOSE_SERIE:
       let delSeriesUID = state.openSeries[state.activePort].seriesUID;
       let delStudyUID = state.openSeries[state.activePort].studyUID;
       let delPatientID = state.openSeries[state.activePort].patientID;
+      let dockStatus = state.dockOpen;
       const delAims = { ...state.aimsList };
       delete delAims[delSeriesUID];
       let delGrid = state.openSeries.slice(0, state.activePort);
@@ -440,6 +446,7 @@ const asyncReducer = (state = initialState, action) => {
       let delActivePort;
       if (delGrid.length === 0) {
         delActivePort = null;
+        dockStatus = false;
       } else {
         delActivePort = delGrid.length - 1;
       }
@@ -448,7 +455,8 @@ const asyncReducer = (state = initialState, action) => {
         openSeries: delGrid,
         aimsList: delAims,
         patients: delPatients,
-        activePort: delActivePort
+        activePort: delActivePort,
+        dockOpen: dockStatus
       };
     case LOAD_ANNOTATIONS:
       return Object.assign({}, state, {
@@ -509,7 +517,6 @@ const asyncReducer = (state = initialState, action) => {
     case LOAD_ANNOTATIONS_ERROR:
       return Object.assign({}, state, {
         loading: false,
-
         error: action.error
       });
     case UPDATE_ANNOTATION_DISPLAY:

@@ -29,6 +29,7 @@ import {
   START_LOADING,
   UPDATE_PATIENT,
   CLOSE_SERIE,
+  UPDATE_IMAGEID,
   colors,
   commonLabels
 } from "./types";
@@ -44,11 +45,21 @@ export const clearGrid = item => {
   return { type: CLEAR_GRID };
 };
 
+export const updateImageId = event => {
+  const imageID = event.detail.image.imageId.split("/").pop();
+  console.log(imageID);
+  return {
+    type: UPDATE_IMAGEID,
+    imageID
+  };
+};
+
 export const closeSerie = () => {
   return {
     type: CLOSE_SERIE
   };
 };
+
 export const updatePatient = (
   type,
   status,
@@ -103,43 +114,42 @@ export const displaySingleAim = (
 };
 
 export const selectPatient = selectedPatientObj => {
-  let { projectID, subjectID } = selectedPatientObj;
+  let {
+    projectID,
+    subjectID,
+    subjectName,
+    numberOfAnnotations
+  } = selectedPatientObj;
   projectID = projectID ? projectID : "lite";
 
-  return { type: SELECT_PATIENT, patient: { projectID, subjectID } };
+  return {
+    type: SELECT_PATIENT,
+    patient: { projectID, subjectID, numberOfAnnotations, subjectName }
+  };
 };
 
 export const selectStudy = selectedStudyObj => {
   let {
     studyUID,
-
     patientID,
-
     projectID,
-
     studyDescription,
-
     patientName,
-
-    numberOfSeries
+    numberOfSeries,
+    numberOfAnnotations
   } = selectedStudyObj;
   projectID = projectID ? projectID : "lite";
 
   return {
     type: SELECT_STUDY,
-
     study: {
       studyUID,
-
       patientID,
-
       projectID,
-
       studyDescription,
-
       patientName,
-
-      numberOfSeries
+      numberOfSeries,
+      numberOfAnnotations
     }
   };
 };
@@ -147,16 +157,12 @@ export const selectStudy = selectedStudyObj => {
 export const selectSerie = (selectedSerieObj, studyDescription) => {
   const {
     seriesUID,
-
     studyUID,
-
     patientID,
-
     projectID,
-
     patientName,
-
-    seriesDescription
+    seriesDescription,
+    numberOfAnnotations
   } = selectedSerieObj;
 
   return {
@@ -164,16 +170,13 @@ export const selectSerie = (selectedSerieObj, studyDescription) => {
 
     serie: {
       seriesUID,
-
       studyUID,
-
       patientID,
-
       projectID,
-
       patientName,
       seriesDescription,
-      studyDescription
+      studyDescription,
+      numberOfAnnotations
     }
   };
 };
@@ -388,7 +391,7 @@ const getAimListFields = (aims, ann) => {
       // json1: aim,
       json: aimFields,
       isDisplayed: displayStatus,
-      showLabel: true,
+      showLabel: false,
       cornerStoneTools: [],
       color,
       type

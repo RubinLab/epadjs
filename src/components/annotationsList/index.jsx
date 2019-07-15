@@ -29,7 +29,6 @@ class AnnotationsList extends React.Component {
     let y = Math.ceil(icon.getBoundingClientRect().bottom);
     y = window.innerWidth <= 932 ? (y = y * 3) : y * 2;
 
-    console.log(y);
     this.setState({ x, y });
 
     const selectedStudy = this.openSeries[this.activePort].studyUID;
