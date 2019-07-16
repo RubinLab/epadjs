@@ -530,7 +530,7 @@ class Studies extends Component {
             }}
           />
         ) : null}
-        {this.state.isSerieSelectionOpen && !this.props.loading && (
+        {this.state.isSerieSelectionOpen && (
           <ProjectModal
             seriesPassed={this.state.selectedStudy}
             onCancel={this.closeSelectionModal}

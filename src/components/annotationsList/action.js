@@ -225,6 +225,7 @@ export const selectAnnotation = (
 };
 
 export const addToGrid = (serie, annotation) => {
+  console.log("addtogrid");
   let { patientID, studyUID, seriesUID, projectID } = serie;
   projectID = projectID ? projectID : "lite";
   if (annotation)
@@ -236,6 +237,7 @@ export const addToGrid = (serie, annotation) => {
     seriesUID,
     aimID: annotation
   };
+  console.log({ ...reference });
   return { type: ADD_TO_GRID, reference };
 };
 
@@ -247,6 +249,8 @@ export const showAnnotationDock = () => {
   return { type: SHOW_ANNOTATION_DOCK };
 };
 const loadAnnotations = () => {
+  console.log("in loadAnnotations");
+
   return {
     type: LOAD_ANNOTATIONS
   };
@@ -263,10 +267,9 @@ export const openProjectSelectionModal = () => {
     type: OPEN_PROJECT_MODAL
   };
 };
-const annotationsLoaded = (summaryData, aimsData, serID, patID, ref) => {
+const annotationsLoaded = () => {
   return {
-    type: LOAD_ANNOTATIONS_SUCCESS,
-    payload: { summaryData, aimsData, serID, patID, ref }
+    type: LOAD_ANNOTATIONS_SUCCESS
   };
 };
 
@@ -323,10 +326,10 @@ export const changeActivePort = portIndex => {
   };
 };
 
-export const singleSerieLoaded = (ref, aimsData, imageData, serID, ann) => {
+export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann) => {
   return {
     type: LOAD_SERIE_SUCCESS,
-    payload: { ref, aimsData, imageData, serID, ann }
+    payload: { ref, aimsData, serID, imageData, ann }
   };
 };
 
@@ -533,11 +536,13 @@ const getAnnotationData = async (
 
 export const getSingleSerie = (serie, annotation) => {
   return async (dispatch, getState) => {
-    let { patientID, studyUID, seriesUID } = serie;
+    await dispatch(loadAnnotations());
+    let { patientID, studyUID, seriesUID, numberOfAnnotations } = serie;
     let reference = {
       patientID,
       studyUID,
       seriesUID,
+      numberOfAnnotations,
       aimID: annotation
     };
     const { aimsData, imageData } = await dispatch(
@@ -545,7 +550,7 @@ export const getSingleSerie = (serie, annotation) => {
     );
 
     await dispatch(
-      singleSerieLoaded(reference, aimsData, imageData, seriesUID, annotation)
+      singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation)
     );
   };
 };
@@ -574,11 +579,10 @@ const getStudyAim = async (subjectID, studyID) => {
 
 const getSingleSerieData = (serie, annotation) => {
   return async (dispatch, getState) => {
-    dispatch(loadAnnotations());
     let aimsData = {};
     let serieAims = [];
     let studyAims = [];
-
+    let imageData;
     let { studyUID, seriesUID, projectID, patientID } = serie;
     projectID = projectID ? projectID : "lite";
     patientID = patientID ? patientID : serie.subjectID;
@@ -590,14 +594,16 @@ const getSingleSerieData = (serie, annotation) => {
         studyUID,
         seriesUID
       );
+      console.log("in then");
       serieAims = serieAims.data;
       studyAims = await getStudyAim(patientID, studyUID);
+      aimsData = serieAims.concat(studyAims);
+      imageData = getImageIdAnnotations(serieAims);
+      aimsData = getAimListFields(aimsData, annotation);
+      // dispatch(annotationsLoaded());
     } catch (err) {
       dispatch(annotationsLoadingError(err));
     }
-    aimsData = serieAims.concat(studyAims);
-    const imageData = getImageIdAnnotations(serieAims);
-    aimsData = getAimListFields(aimsData, annotation);
     return { aimsData, imageData };
   };
 };
