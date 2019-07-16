@@ -459,6 +459,7 @@ const asyncReducer = (state = initialState, action) => {
         dockOpen: dockStatus
       };
     case LOAD_ANNOTATIONS:
+      console.log({ ...state });
       return Object.assign({}, state, {
         loading: true,
 
@@ -466,27 +467,7 @@ const asyncReducer = (state = initialState, action) => {
       });
 
     case LOAD_ANNOTATIONS_SUCCESS:
-      let indexKey = state.openSeries.length - 1;
-      let { summaryData, aimsData, serID, patID, ref } = action.payload;
-
-      const newResult = Object.assign({}, state, {
-        patients: {
-          ...state.patients,
-
-          [patID]: summaryData
-        },
-
-        loading: false,
-
-        error: false,
-
-        activePort: indexKey,
-
-        aimsList: { ...state.aimsList, [serID]: aimsData },
-
-        openSeries: state.openSeries.concat([ref])
-      });
-      return newResult;
+      return { ...state, loading: false };
 
     case VIEWPORT_FULL:
       const viewPortStatus = !state.showGridFullAlert;
@@ -501,7 +482,16 @@ const asyncReducer = (state = initialState, action) => {
     case LOAD_SERIE_SUCCESS:
       let indexNum = state.openSeries.length - 1;
       let imageAddedSeries = [...state.openSeries];
-      imageAddedSeries[indexNum].imageAnnotations = action.payload.imageData;
+      console.log(action.payload.ref);
+      if (action.payload.ref.numberOfAnnotations > 0) {
+        console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        console.log(Object.assign({}, state));
+        let annCalc = Object.keys(action.payload.imageData);
+        if (annCalc.length > 0) {
+          imageAddedSeries[indexNum].imageAnnotations =
+            action.payload.imageData;
+        }
+      }
       const result = Object.assign({}, state, {
         loading: false,
         error: false,
@@ -556,7 +546,7 @@ const asyncReducer = (state = initialState, action) => {
 
     case SHOW_ANNOTATION_DOCK:
       const displayAnnDock = state.dockOpen;
-
+      console.log(displayAnnDock);
       return Object.assign({}, state, { dockOpen: !displayAnnDock });
 
     case TOGGLE_ALL_ANNOTATIONS:
@@ -707,8 +697,7 @@ const asyncReducer = (state = initialState, action) => {
       return { ...state, selectedStudies: newStudies };
     case LOAD_COMPLETED:
       return { ...state, loading: false };
-    case START_LOADING:
-      return { ...state, loading: true };
+
     case SELECT_SERIE:
       let newSeries = {
         ...state.selectedSeries
