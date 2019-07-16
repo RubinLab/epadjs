@@ -115,7 +115,7 @@ class DisplayView extends Component {
     }
     Promise.all(promises).then(res => {
       this.setState({ data: res, isLoading: false });
-      console.log(this.props.aimList);
+      console.log("Props Serie", this.props.series);
       this.props.series.forEach(serie => {
         this.parseAims(serie.imageAnnotations, serie.seriesUID);
       });

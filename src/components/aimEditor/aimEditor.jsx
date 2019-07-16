@@ -241,15 +241,17 @@ class AimEditor extends Component {
     let seedData = getAimImageData(image);
     console.log("imaj geldiii", seedData);
     this.addSemanticAnswersToSeedData(seedData, answers);
+    this.addUserToSeedData(seedData);
     console.log("Degisiklikler kaydedildi", seedData);
 
-    // var aim = new Aim(
-    //   this.image,
-    //   enumAimType.imageAnnotation,
-    //   hasSegmentation,
-    //   answers,
-    //   updatedAimId
-    // );
+    var aim = new Aim(
+      seedData,
+      enumAimType.imageAnnotation,
+      hasSegmentation,
+      updatedAimId
+    );
+
+    console.log("Aim Geldii", aim);
 
     // const aimJson = aim.getAim();
     // // const file = new Blob(aimJson, { type: "text/json" });
@@ -286,6 +288,13 @@ class AimEditor extends Component {
       seedData.aim.imagingObservationEntityCollection = imagingObservationEntityCollection;
     if (inferenceEntity) seedData.aim.inferenceEntity = inferenceEntity;
     if (typeCode) seedData.aim.typeCode = typeCode;
+  };
+
+  addUserToSeedData = seedData => {
+    let obj = {};
+    obj.loginName = sessionStorage.getItem("username");
+    obj.name = sessionStorage.getItem("displayName");
+    seedData.user = obj;
   };
 
   getCornerstoneImage = (imageId, markupsToSave) => {

@@ -3,7 +3,7 @@ import { modalities } from "./modality";
 import { generateUid } from "../../utils/aid";
 
 class Aim {
-  constructor(imageData, aimType, hasSegmentation, answers, updatedAimId) {
+  constructor(imageData, aimType, hasSegmentation, updatedAimId) {
     const {
       aim,
       study,
@@ -32,7 +32,6 @@ class Aim {
     this.imageAnnotations = {
       ImageAnnotation: [this._createImageAnnotations(aimType, hasSegmentation)]
     };
-    this.answers = answers;
     if (updatedAimId === undefined)
       this.uniqueIdentifier = { root: generateUid() };
     else this.uniqueIdentifier = { root: updatedAimId };
@@ -491,7 +490,8 @@ class Aim {
     return obj;
   };
 
-  createImageAnnotationStatement = (referenceType, objectId, subjectId) => { //this is called externally
+  createImageAnnotationStatement = (referenceType, objectId, subjectId) => {
+    //this is called externally
     var obj = {};
     var references;
     referenceType === 1
