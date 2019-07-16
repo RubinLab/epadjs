@@ -1,14 +1,13 @@
 import React from "react";
 import { connect } from "react-redux";
-import ReactModal from "react-modal-resizable-draggable";
 import Modal from "./common/customModal";
-// import Modal from '../common/rndBootModal';
 import Users from "./users";
 import Projects from "./projects/projects";
 import WorkLists from "./worklists/workLists";
 import Annotations from "./annotations/annotations";
 import Templates from "./templates";
 import Tools from "./tools";
+import Connections from "./connections";
 import "./menuStyle.css";
 import Header from "./common/managementHeader";
 import { isLite } from "../../config.json";
@@ -102,6 +101,13 @@ class MainMenu extends React.Component {
             onClose={this.handleCloseModal}
           />
         );
+      case "Connections":
+        return (
+          <Connections
+            selection={this.state.selection}
+            onClose={this.handleCloseModal}
+          />
+        );
       default:
         return <div />;
     }
@@ -129,18 +135,24 @@ class MainMenu extends React.Component {
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Worklists
             </div>
-            <div className="mng-menu__option" onClick={this.handleSelection}>
-              Tools
-            </div>
-            <div className="mng-menu__option" onClick={this.handleSelection}>
-              Pluginstore
-            </div>
+            {false && (
+              <div className="mng-menu__option" onClick={this.handleSelection}>
+                Tools
+              </div>
+            )}
+            {false && (
+              <div className="mng-menu__option" onClick={this.handleSelection}>
+                Pluginstore
+              </div>
+            )}
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Connections
             </div>
-            <div className="mng-menu__option" onClick={this.handleSelection}>
-              Queries
-            </div>
+            {false && (
+              <div className="mng-menu__option" onClick={this.handleSelection}>
+                Queries
+              </div>
+            )}
           </>
         )}
         {this.state.isModalOpen && (
@@ -152,15 +164,6 @@ class MainMenu extends React.Component {
             {this.selectDisplay()}
           </Modal>
         )}
-        {/* <ReactModal
-          initWidth={800}
-          initHeight={400}
-          onRequestClose={this.handleCloseModal}
-          isOpen={this.state.isModalOpen}
-          left={20}
-        >
-          {this.selectDisplay()}
-        </ReactModal> */}
       </div>
     );
   }
