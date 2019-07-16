@@ -24,5 +24,5 @@ export function downloadTemplates(tempIDlist, selection) {
 }
 
 export function deleteTemplate(templateID, projectID) {
-  return http.delete(apiUrl + "/templates/" + templateID + "?deleteDSO=true");
+  return http.delete(apiUrl + "/templates/" + templateID);
 }

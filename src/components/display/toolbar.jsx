@@ -404,7 +404,7 @@ class Toolbar extends Component {
           className="toolbarSectionButton"
           onClick={this.handleAnnotationsDockClick}
         >
-          <div className="toolContainer">
+          <div className="toolContainer annotations-icon">
             <FaList />
           </div>
           <div className="buttonLabel">
