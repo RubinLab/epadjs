@@ -120,14 +120,9 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
    this.loadTemplates = function (templateList) {
 
       self.arrayTemplatesJsonObjects = templateList;
-      console.log("JsonObjects", self.arrayTemplatesJsonObjects);
       if (self.arrayTemplatesJsonObjects.length > 0) {
          for (var i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {
             var object = {};
-            console.log(
-              "CAVIIITTTT",
-              self.arrayTemplatesJsonObjects[i]
-            );
             object.codeValue = self.arrayTemplatesJsonObjects[i]["value"].TemplateContainer.Template[0]["codeValue"];
             object.arrayIndex = i;
             self.mapTemplateCodeValueByIndex.set(object.codeValue, i);

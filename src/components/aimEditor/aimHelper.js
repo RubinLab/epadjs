@@ -1,7 +1,8 @@
-export default function getImageIdAnnotations(aims) {
+export function getImageIdAnnotations(aims) {
   let imageIdSpecificMarkups = {};
   aims.forEach(aim => parseAim(aim, imageIdSpecificMarkups));
   // console.log(imageIdSpecificMarkups);
+  console.log("ImageIdSpecifi", imageIdSpecificMarkups);
   return imageIdSpecificMarkups;
 }
 
@@ -88,7 +89,7 @@ function parseCalculation(calculation) {
   return obj;
 }
 
-function getAimImageData(image) {
+export function getAimImageData(image) {
   var obj = {};
   obj.aim = {};
   obj.study = {};
@@ -97,6 +98,8 @@ function getAimImageData(image) {
   obj.person = {};
   obj.image = [];
   const { aim, study, series, equipment, person } = obj;
+
+  console.log("Image Data", image.data);
 
   aim.studyInstanceUid = image.data.string("x0020000d") || "";
 
@@ -117,7 +120,9 @@ function getAimImageData(image) {
   person.sex = image.data.string("x00100040") || "";
   person.name = image.data.string("x00100010") || "";
   person.patientId = image.data.string("x00100020") || "";
-  person.nbirthDate = image.data.string("x00100030") || "";
+  person.birthDate = image.data.string("x00100030") || "";
+
+  return obj;
 }
 
 function getSingleImageData(image) {

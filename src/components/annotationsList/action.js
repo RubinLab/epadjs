@@ -39,7 +39,7 @@ import {
   getAnnotations,
   getAnnotationsJSON
 } from "../../services/annotationServices";
-import getImageIdAnnotations from "../aimEditor/aimHelper.js";
+import { getImageIdAnnotations } from "../aimEditor/aimHelper.js";
 export const clearGrid = item => {
   return { type: CLEAR_GRID };
 };
