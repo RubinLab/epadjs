@@ -433,9 +433,10 @@ class Studies extends Component {
       //check if there is enough room
       if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
         //if there is not bring the modal
-        this.setState({
+        await this.setState({
           isSerieSelectionOpen: true,
-          selectedStudy: [seriesArr]
+          selectedStudy: [seriesArr],
+          studyName: selected.studyDescription
         });
       } else {
         //if there is enough room
@@ -459,10 +460,10 @@ class Studies extends Component {
             updatePatient("study", true, patientID, studyUID)
           );
         }
+        this.props.history.push("/display");
       }
       this.props.dispatch(clearSelection());
     }
-    this.props.history.push("/display");
   };
 
   closeSelectionModal = () => {
@@ -534,6 +535,7 @@ class Studies extends Component {
           <ProjectModal
             seriesPassed={this.state.selectedStudy}
             onCancel={this.closeSelectionModal}
+            studyName={this.state.studyName}
           />
         )}
       </div>

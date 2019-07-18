@@ -225,7 +225,6 @@ export const selectAnnotation = (
 };
 
 export const addToGrid = (serie, annotation) => {
-  console.log("addtogrid");
   let { patientID, studyUID, seriesUID, projectID } = serie;
   projectID = projectID ? projectID : "lite";
   if (annotation)
@@ -237,7 +236,6 @@ export const addToGrid = (serie, annotation) => {
     seriesUID,
     aimID: annotation
   };
-  console.log({ ...reference });
   return { type: ADD_TO_GRID, reference };
 };
 
@@ -594,7 +592,6 @@ const getSingleSerieData = (serie, annotation) => {
         studyUID,
         seriesUID
       );
-      console.log("in then");
       serieAims = serieAims.data;
       studyAims = await getStudyAim(patientID, studyUID);
       aimsData = serieAims.concat(studyAims);

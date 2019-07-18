@@ -267,6 +267,7 @@ class SearchView extends Component {
               }
             }
           }
+          this.props.history.push("/display");
           this.props.dispatch(clearSelection());
         }
       }
@@ -315,6 +316,8 @@ class SearchView extends Component {
                 );
               }
             }
+            this.props.history.push("/display");
+            this.props.dispatch(clearSelection());
           }
         }
       }
@@ -365,11 +368,12 @@ class SearchView extends Component {
                 );
               }
             }
+            this.props.history.push("/display");
+            this.props.dispatch(clearSelection());
           }
         }
       }
     }
-    this.props.dispatch(clearSelection());
   };
 
   groupUnderStudy = objArr => {
