@@ -87,6 +87,9 @@ const asyncReducer = (state = initialState, action) => {
       } else {
         delActivePort = delGrid.length - 1;
       }
+      console.log(state.activePort);
+      console.log(state.openSeries);
+      console.log(delGrid);
       return {
         ...state,
         openSeries: delGrid,

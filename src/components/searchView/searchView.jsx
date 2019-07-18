@@ -276,6 +276,7 @@ class SearchView extends Component {
       //check if enough room to display selection
       for (let serie of selectedSeries) {
         if (!this.checkIfSerieOpen(serie.seriesUID).isOpen) {
+          console.log("not okay to see");
           notOpenSeries.push(serie);
         }
       }
@@ -288,13 +289,18 @@ class SearchView extends Component {
       } else {
         //if all series already open update active port
         if (notOpenSeries.length === 0) {
+          console.log("you should see this");
           let index = this.checkIfSerieOpen(selectedSeries[0].seriesUID).index;
+          console.log(index);
           this.props.dispatch(changeActivePort(index));
+          this.props.history.push("/display");
+          this.props.dispatch(clearSelection());
         } else {
           if (selectedSeries.length + this.props.openSeries.length > MAX_PORT) {
             groupedObj = this.groupUnderStudy(selectedSeries);
             await this.setState({ seriesList: groupedObj });
             this.setState({ isSerieSelectionOpen: true });
+            // this.props.history.push("/display");
           } else {
             //else get data for each serie for display
             selectedSeries.forEach(serie => {
