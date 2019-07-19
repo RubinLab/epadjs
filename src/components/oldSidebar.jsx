@@ -19,7 +19,6 @@ class Sidebar extends Component {
       }
     } = await getProjects();
     this.setState({ projects });
-    console.log(this.state.projects);
   }
 
   onSetSidebarOpen(open) {
