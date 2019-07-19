@@ -175,6 +175,10 @@
   width: 100%;
 }
 
+.add-connection__modal--input {
+  color: black;
+}
+
 .edit-project__modal--input::placeholder,
 .edit-connection__modal--input::placeholder,
 .add-connection__modal--input::placeholder {

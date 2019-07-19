@@ -7,7 +7,8 @@ import { FaRegTrashAlt, FaRegEye, FaEdit } from "react-icons/fa";
 import {
   getPacs,
   deletePacs,
-  updatePacs
+  updatePacs,
+  createPacs
 } from "../../../services/pacsServices";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
@@ -35,7 +36,8 @@ class Connections extends React.Component {
   renderMessages = input => {
     return {
       deleteAll: "Delete selected connections? This cannot be undone.",
-      deleteOne: `Delete the connection? This cannot be undone.`
+      deleteOne: `Delete the connection? This cannot be undone.`,
+      missingFormInput: `Please fill the required fields!`
     };
   };
   getConnectionsData = async () => {
@@ -129,13 +131,18 @@ class Connections extends React.Component {
 
   handleFormInput = e => {
     const { name, value } = e.target;
+    if (
+      this.state.error === this.renderMessages().missingFormInput &&
+      !this.state[name]
+    ) {
+      this.setState({ error: "" });
+    }
     console.log({ [name]: value });
     this.setState({ [name]: value });
   };
 
   handleDeleteOne = connectionData => {
     const { pacID } = connectionData;
-    console.log(pacID);
     this.setState({
       delOne: true,
       pacID
@@ -171,7 +178,7 @@ class Connections extends React.Component {
         accessor: "",
         width: 50,
         Cell: ({ original }) => {
-          console.log(original);
+          // console.log(original);
           const { pacID } = original;
           return (
             <input
@@ -277,31 +284,6 @@ class Connections extends React.Component {
       }
     ];
   };
-
-  handleUpload = () => {
-    this.setState({ uploadClicked: true });
-  };
-
-  triggerBrowserDownload = (blob, fileName) => {
-    const url = window.URL.createObjectURL(new Blob([blob]));
-    const link = document.createElement("a");
-    document.body.appendChild(link);
-    link.style = "display: none";
-    link.href = url;
-    link.download = `${fileName}.zip`;
-    link.click();
-    window.URL.revokeObjectURL(url);
-  };
-
-  handleSubmitUpload = () => {
-    this.getConnectionsData();
-    this.handleCancel();
-  };
-
-  handleSubmitDownload = () => {
-    this.handleCancel();
-  };
-
   clearConenctionInfo = () => {
     this.setState({ connectionToEdit: {} });
   };
@@ -322,7 +304,7 @@ class Connections extends React.Component {
       .then(res => {
         this.getConnectionsData();
         this.handleCancel();
-        console.log("passed through");
+        // console.log("passed through");
       })
       .catch(error => {
         this.setState({
@@ -333,12 +315,34 @@ class Connections extends React.Component {
       });
   };
 
-  createConnection = e => {};
+  createConnection = e => {
+    const { abbreviation, aeTitle, hostName, port } = this.state;
+    if (!abbreviation || !aeTitle || !hostName || !port) {
+      this.setState({ error: this.renderMessages().missingFormInput });
+    } else {
+      createPacs(abbreviation, aeTitle, hostName, port)
+        .then(() => {
+          this.getConnectionsData();
+          this.setState({
+            abbreviation: "",
+            aeTitle: "",
+            hostName: "",
+            port: ""
+          });
+          this.handleCancel();
+        })
+        .catch(error => {
+          toast.error(error.response.data.message, { autoClose: false });
+          this.getConnectionsData();
+          this.handleCancel();
+        });
+    }
+  };
 
   handleClickAdd = () => {
-    console.log("called!!");
     this.setState({ displayCreationForm: true });
   };
+
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     const data = this.state.connections;
@@ -371,7 +375,12 @@ class Connections extends React.Component {
           />
         )}
         {this.state.displayCreationForm && (
-          <ConnectionCreationForm onCancel={this.handleCancel} />
+          <ConnectionCreationForm
+            onCancel={this.handleCancel}
+            onType={this.handleFormInput}
+            error={this.state.error}
+            onSubmit={this.createConnection}
+          />
         )}
         {this.state.hasEditClicked && (
           <EditConnections

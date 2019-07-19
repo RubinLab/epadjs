@@ -15,7 +15,7 @@ const connectionCreationForm = ({ onCancel, onSubmit, onType, error }) => {
           <input
             onMouseDown={e => e.stopPropagation()}
             className="add-connection__modal--input"
-            name="name"
+            name="aeTitle"
             type="text"
             onChange={onType}
             placeholder="aeTitle"
