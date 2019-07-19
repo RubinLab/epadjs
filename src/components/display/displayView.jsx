@@ -110,7 +110,7 @@ class DisplayView extends Component {
     var promises = [];
     for (let i = 0; i < this.props.series.length; i++) {
       const promise = this.getImages(this.props.series[i], i);
-      console.log("series", this.props.series[i]);
+      // console.log("series", this.props.series[i]);
       promises.push(promise);
     }
     Promise.all(promises).then(res => {
@@ -448,7 +448,6 @@ class DisplayView extends Component {
   };
 
   render() {
-    console.log(this.props);
     return !Object.entries(this.props.series).length ? (
       <Redirect to="/search" />
     ) : (

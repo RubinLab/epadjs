@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from "react";
 import { connect } from "react-redux";
 import Dock from "react-dock";
+import Draggable from "react-draggable";
 import { Rnd } from "react-rnd";
 import { FaTimes, FaTrashAlt } from "react-icons/fa";
 import { showAnnotationDock, closeSerie } from "../action";
@@ -66,6 +67,20 @@ class DockTest extends Component {
         </div>
         <Annotations imageID={this.props.imageID} />
       </Rnd>
+      // <Draggable>
+      //   <>
+      //     <div className="-dock__close">
+      //       <div
+      //         onClick={() => {
+      //           this.props.dispatch(showAnnotationDock());
+      //         }}
+      //       >
+      //         <FaTimes />
+      //       </div>
+      //     </div>
+      //     <Annotations imageID={this.props.imageID} />
+      //   </>
+      // </Draggable>
     );
   }
 

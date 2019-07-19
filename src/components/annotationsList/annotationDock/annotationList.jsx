@@ -81,8 +81,11 @@ class AnnotationsList extends React.Component {
   };
 
   getLabelArray = () => {
-    const imageAnnotations = this.props.openSeries[this.props.activePort]
-      .imageAnnotations[this.props.imageID];
+    let imageAnnotations;
+    if (this.props.openSeries[this.props.activePort].imageAnnotations) {
+      imageAnnotations = this.props.openSeries[this.props.activePort]
+        .imageAnnotations[this.props.imageID];
+    }
     const calculations = {};
     if (imageAnnotations) {
       for (let aim of imageAnnotations) {
@@ -102,11 +105,14 @@ class AnnotationsList extends React.Component {
         annotations.push(aims[aim]);
       }
     }
-    let imageAnnotations = this.props.openSeries[this.props.activePort]
-      .imageAnnotations[this.props.imageID];
-    if (imageAnnotations) {
-      for (let aim of imageAnnotations) {
-        annotations.push(this.props.aimsList[seriesUID][aim.aimUid]);
+    let imageAnnotations;
+    if (this.props.openSeries[this.props.activePort].imageAnnotations) {
+      imageAnnotations = this.props.openSeries[this.props.activePort]
+        .imageAnnotations[this.props.imageID];
+      if (imageAnnotations) {
+        for (let aim of imageAnnotations) {
+          annotations.push(this.props.aimsList[seriesUID][aim.aimUid]);
+        }
       }
     }
     const calculations = this.getLabelArray();
