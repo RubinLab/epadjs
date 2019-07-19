@@ -4,18 +4,19 @@ import { generateUid } from "../../utils/aid";
 
 class Aim {
   constructor(imageData, aimType, hasSegmentation, updatedAimId) {
-    const {
-      aim,
-      study,
-      series,
-      image,
-      segmentation,
-      equipment,
-      user,
-      person
-    } = imageData;
+    ({
+      aim: this.aim,
+      study: this.study,
+      series: this.series,
+      image: this.image,
+      segmentation: this.segmentation,
+      equipment: this.equipment,
+      user: this.user,
+      person: this.person
+    } = imageData);
     // this.imageAnnotations.ImageAnnotationCollection = {};
     // const newAim = this.imageAnnotations.ImageAnnotationCollection; //this can be used instead of the wrapper in getAim
+    console.log("AY OLDU MU", this.aim);
     this.xmlns = aimConf.xmlns;
     this["xmlns:rdf"] = aimConf["xmlns:rdf"];
     this["xmlns:xsi"] = aimConf["xmlns:xsi"];
@@ -24,11 +25,11 @@ class Aim {
     this.uniqueIdentifier = "";
     this.studyInstanceUid = { root: this.aim.studyInstanceUid };
     this.seriesInstanceUid = { root: generateUid() };
-    this.accessionNumber = { value: study.accessionNumber };
+    this.accessionNumber = { value: this.study.accessionNumber };
     this.dateTime = { value: this.getDate() };
-    this.user = this._createUser(user);
-    this.equipment = this._createEquipment(equipment);
-    this.person = this._createPerson(person);
+    this.user = this._createUser(this.user);
+    this.equipment = this._createEquipment(this.equipment);
+    this.person = this._createPerson(this.person);
     this.imageAnnotations = {
       ImageAnnotation: [this._createImageAnnotations(aimType, hasSegmentation)]
     };
@@ -449,6 +450,7 @@ class Aim {
   //
   //
   _createImageAnnotations = aimType => {
+    console.log("AYIMM", this.aim);
     const {
       name,
       comment,

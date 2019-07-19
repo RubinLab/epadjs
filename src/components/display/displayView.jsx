@@ -71,6 +71,7 @@ const tools = [
 const mapStateToProps = state => {
   return {
     series: state.annotationsListReducer.openSeries,
+    loading: state.annotationsListReducer.loading,
     cornerstone: state.searchViewReducer.cornerstone,
     cornerstoneTools: state.searchViewReducer.cornerstoneTools,
     activePort: state.annotationsListReducer.activePort,
@@ -106,6 +107,11 @@ class DisplayView extends Component {
     );
   }
 
+  componentDidUpdate = prevProps => {
+    if (this.props.loading !== prevProps.loading && !this.props.loading)
+      this.getData();
+  };
+
   getData() {
     var promises = [];
     for (let i = 0; i < this.props.series.length; i++) {
@@ -117,7 +123,8 @@ class DisplayView extends Component {
       this.setState({ data: res, isLoading: false });
       console.log("Props Serie", this.props.series);
       this.props.series.forEach(serie => {
-        this.parseAims(serie.imageAnnotations, serie.seriesUID);
+        if (serie.imageAnnotations)
+          this.parseAims(serie.imageAnnotations, serie.seriesUID);
       });
     });
   }

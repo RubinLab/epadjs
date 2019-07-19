@@ -253,6 +253,8 @@ class AimEditor extends Component {
 
     console.log("Aim Geldii", aim);
 
+    console.log("Markups to save", markupsToSave);
+
     // const aimJson = aim.getAim();
     // // const file = new Blob(aimJson, { type: "text/json" });
     // // const series = this.props.series[this.props.activePort];
