@@ -39,6 +39,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
    this.aimComment = "";
    this.aimType = "";
    this.aimName = "";
+   this.aimTypeCode = "";
    var domelements = [];
    this.geoshapeidCounter = 0;
 
@@ -210,6 +211,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
          self.aimComment = "";
          self.aimName = "";
          self.aimType = "";
+         self.aimTypeCode = "";
          let templateSelectedIndex = this.value;
         
        
@@ -299,7 +301,16 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
       }
 
 
-
+      self.typeCode = [
+        {
+            "code": json.TemplateContainer.Template[0].codeValue,
+            "codeSystemName": json.TemplateContainer.Template[0].codingSchemeDesignator,
+            "iso:displayName": {
+                "xmlns:iso": "uri:iso.org:21090",
+                "value": json.TemplateContainer.Template[0].codeMeaning
+            }
+        }
+      ]
 
       document.getElementById("accordion1").appendChild(annotationNameLabelDiv);
       document.getElementById("accordion1").appendChild(annotationNameDiv);
@@ -3321,7 +3332,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
       finaljson.name =  { value: self.aimName } ;
       finaljson.comment = { value: self.aimComment } ;
       finaljson.modality =  { value: self.aimType } ;
-
+      finaljson.typeCode =  self.aimTypeCode;
 
       for (index = 0; index < innerJsonCount; index++) {
 
@@ -3758,7 +3769,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
       //console.log("xxxx_"+JSON.stringify(imagingObservationEntityCollection))
       var comment = aimjson.comment.value;
       var annotationName = aimjson.name.value;
-
+      self.aimTypeCode = aimjson.typeCode;
      // console.log("comment" + comment);
      // console.log("comment" + annotationName);
       if (comment.includes("~")){
