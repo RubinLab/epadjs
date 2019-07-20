@@ -96,7 +96,11 @@ class Connections extends React.Component {
       delOne: false,
       selectedOne: {},
       pacID: null,
-      displayCreationForm: false
+      displayCreationForm: false,
+      abbreviation: "",
+      aeTitle: "",
+      hostName: "",
+      port: ""
     });
   };
 
@@ -214,20 +218,20 @@ class Connections extends React.Component {
         minResizeWidth: 100,
         width: 250
       },
-      {
-        Header: "Open",
-        sortable: false,
-        resizable: false,
-        width: 75,
-        Cell: original => {
-          //   console.log(original.row.checkbox);
-          return (
-            <div>
-              <FaRegEye className="menu-clickable" />
-            </div>
-          );
-        }
-      },
+      // {
+      //   Header: "Open",
+      //   sortable: false,
+      //   resizable: false,
+      //   width: 75,
+      //   Cell: original => {
+      //     //   console.log(original.row.checkbox);
+      //     return (
+      //       <div>
+      //         <FaRegEye className="menu-clickable" />
+      //       </div>
+      //     );
+      //   }
+      // },
       {
         Header: "Host",
         accessor: "hostname",
