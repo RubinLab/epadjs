@@ -47,7 +47,6 @@ export const clearGrid = item => {
 
 export const updateImageId = event => {
   const imageID = event.detail.image.imageId.split("/").pop();
-  console.log(imageID);
   return {
     type: UPDATE_IMAGEID,
     imageID

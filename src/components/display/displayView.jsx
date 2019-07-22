@@ -442,7 +442,7 @@ class DisplayView extends Component {
   };
 
   render() {
-    console.log(this.props);
+    // console.log(this.props);
     return !Object.entries(this.props.series).length ? (
       <Redirect to="/search" />
     ) : (

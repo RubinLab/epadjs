@@ -4,32 +4,33 @@ import { generateUid } from "../../utils/aid";
 
 class Aim {
   constructor(imageData, aimType, hasSegmentation, updatedAimId) {
+    this.temp = {};
     ({
-      aim: this.aim,
-      study: this.study,
-      series: this.series,
-      image: this.image,
-      segmentation: this.segmentation,
-      equipment: this.equipment,
-      user: this.user,
-      person: this.person
+      aim: this.temp.aim,
+      study: this.temp.study,
+      series: this.temp.series,
+      image: this.temp.image,
+      segmentation: this.temp.segmentation,
+      equipment: this.temp.equipment,
+      user: this.temp.user,
+      person: this.temp.person
     } = imageData);
+    console.log("TEMPLI", this);
     // this.imageAnnotations.ImageAnnotationCollection = {};
     // const newAim = this.imageAnnotations.ImageAnnotationCollection; //this can be used instead of the wrapper in getAim
-    console.log("AY OLDU MU", this.aim);
     this.xmlns = aimConf.xmlns;
     this["xmlns:rdf"] = aimConf["xmlns:rdf"];
     this["xmlns:xsi"] = aimConf["xmlns:xsi"];
     this.aimVersion = aimConf.aimVersion;
     this["xsi:schemaLocation"] = aimConf["xsi:schemaLocation"];
     this.uniqueIdentifier = "";
-    this.studyInstanceUid = { root: this.aim.studyInstanceUid };
+    this.studyInstanceUid = { root: this.temp.aim.studyInstanceUid };
     this.seriesInstanceUid = { root: generateUid() };
-    this.accessionNumber = { value: this.study.accessionNumber };
+    this.accessionNumber = { value: this.temp.study.accessionNumber };
     this.dateTime = { value: this.getDate() };
-    this.user = this._createUser(this.user);
-    this.equipment = this._createEquipment(this.equipment);
-    this.person = this._createPerson(this.person);
+    this.user = this._createUser(this.temp.user);
+    this.equipment = this._createEquipment(this.temp.equipment);
+    this.person = this._createPerson(this.temp.person);
     this.imageAnnotations = {
       ImageAnnotation: [this._createImageAnnotations(aimType, hasSegmentation)]
     };
@@ -164,7 +165,7 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [this._createTypeCode("G-D7FE", "SRT", "Length")];
-    this.aim.imageAnnotations.ImageAnnotation.calculationEntityCollection[
+    this.imageAnnotations.ImageAnnotation.calculationEntityCollection[
       "CalculationEntity"
     ].push(obj);
     return uId;
@@ -180,7 +181,7 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [this._createTypeCode("G-A185", "SRT", "LongAxis")];
-    this.aim.imageAnnotations.ImageAnnotation.calculationEntityCollection[
+    this.imageAnnotations.ImageAnnotation.calculationEntityCollection[
       "CalculationEntity"
     ].push(obj);
     return uId;
@@ -196,7 +197,7 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [this._createTypeCode("G-A186", "SRT", "ShortAxis")];
-    this.aim.imageAnnotations.ImageAnnotation.calculationEntityCollection[
+    this.imageAnnotations.ImageAnnotation.calculationEntityCollection[
       "CalculationEntity"
     ].push(obj);
     return uId;
@@ -362,7 +363,8 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["imageReferenceUid"] = { root: imageReferenceUid };
-    this.imageAnnotations.ImageAnnotation.markupEntityCollection.MarkupEntity.push(
+    console.log("GELIYOO", this);
+    this.imageAnnotations.ImageAnnotation[0].markupEntityCollection.MarkupEntity.push(
       obj
     );
     return uId;
@@ -372,7 +374,7 @@ class Aim {
   /*  Image Refrence Entity Collection        */
   /*                                          */
   _createModality = () => {
-    const sopClassUid = this.image.sopClassUid;
+    const sopClassUid = this.temp.image[0].sopClassUid;
     if (sopClassUid)
       var {
         codeValue,
@@ -381,14 +383,14 @@ class Aim {
         codingSchemeVersion
       } = modalities[sopClassUid];
     else {
-      const modality = this.series.modality;
+      const modality = this.temp.series.modality;
       if (modality) {
         var {
           codeValue,
           codingSchemeDesignator,
           codeMeaning,
           codingSchemeVersion
-        } = modalities.modality;
+        } = modalities[modality];
       }
     }
     var obj = {};
@@ -403,13 +405,15 @@ class Aim {
   };
 
   _createImageCollection = () => {
-    const { sopClassUid, sopInstanceUid } = this.image;
-    var obj = {};
-    // const sopClassUid = sopClassUid;
-    // const sopInstanceUid = sopInstanceUid;
-    // var sopClass = { root: sopClassUid };
-    // var sopInstance = { root: sopInstanceUid };
-    obj["Image"] = [{ sopClassUid, sopInstanceUid }];
+    let obj = {};
+    obj["Image"] = [];
+    this.temp.image.forEach(image => {
+      let { sopClassUid, sopInstanceUid } = image;
+      sopClassUid = { root: sopClassUid };
+      sopInstanceUid = { root: sopInstanceUid };
+      obj["Image"].push({ sopClassUid, sopInstanceUid });
+    });
+    console.log("YENI IMAJ", obj);
     return obj;
   };
 
@@ -417,17 +421,22 @@ class Aim {
     var obj = {};
     obj["modality"] = this._createModality();
     obj["imageCollection"] = this._createImageCollection();
-    obj["instanceUid"] = { root: this.series.instanceUid };
+    obj["instanceUid"] = { root: this.temp.series.instanceUid };
     return obj;
   };
 
   _createImageStudy = () => {
-    const { accessionNumber } = this.study;
+    const {
+      accessionNumber,
+      startTime,
+      instanceUid,
+      startDate
+    } = this.temp.study;
     var obj = {};
     obj["imageSeries"] = this._createImageSeries();
-    obj["startTime"] = { value: this.study.startTime };
-    obj["instanceUid"] = { root: this.study.instanceUid };
-    obj["startDate"] = { value: this.study.startDate };
+    obj["startTime"] = { value: startTime };
+    obj["instanceUid"] = { root: instanceUid };
+    obj["startDate"] = { value: startDate };
     obj["accessionNumber"] = { value: accessionNumber };
     return obj;
   };
@@ -450,7 +459,6 @@ class Aim {
   //
   //
   _createImageAnnotations = aimType => {
-    console.log("AYIMM", this.aim);
     const {
       name,
       comment,
@@ -458,7 +466,7 @@ class Aim {
       imagingPhysicalEntityCollection,
       imagingObservationEntityCollection,
       inferenceEntityCollection
-    } = this.aim;
+    } = this.temp.aim;
     var obj = {};
     obj["uniqueIdentifier"] = { root: generateUid() };
     obj["typeCode"] = typeCode;
@@ -485,7 +493,7 @@ class Aim {
     obj[
       "imageReferenceEntityCollection"
     ] = this._createImageReferanceEntityCollection();
-    if (this.segmentation)
+    if (this.temp.segmentation)
       obj[
         "segmentationEntityCollection"
       ] = this.creatSegmentationEntityCollection();
@@ -538,14 +546,14 @@ class Aim {
   _createSegmentationEntity = () => {
     var obj = {};
     obj["referencedSopInstanceUid"] = {
-      root: this.segmentation.referencedSopInstanceUid
+      root: this.temp.segmentation.referencedSopInstanceUid
     };
     obj["segmentNumber"] = { value: 1 };
     obj["seriesInstanceUid"] = {
-      root: this.segmentation.seriesInstanceUid
+      root: this.temp.segmentation.seriesInstanceUid
     };
     obj["studyInstanceUid"] = {
-      root: this.segmentation.studyInstanceUid
+      root: this.temp.segmentation.studyInstanceUid
     };
     obj["xsi:type"] = "DicomSegmentationEntity";
     obj["sopClassUid"] = { root: "1.2.840.10008.5.1.4.1.1.66.4" };
@@ -601,9 +609,9 @@ class Aim {
   };
 
   getAim = () => {
-    console.log(this);
+    delete this["temp"];
     const stringAim = JSON.stringify(this);
-    const wrappedAim = `{"imageAnnotations": { "ImageAnnotationCollection": ${stringAim} }}`;
+    const wrappedAim = `{"ImageAnnotationCollection": ${stringAim} } `;
     console.log(wrappedAim);
     return wrappedAim;
   };

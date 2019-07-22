@@ -8,6 +8,7 @@ import { uploadAim } from "../../services/annotationServices";
 import { getAimImageData } from "./aimHelper";
 import * as questionaire from "./parseClass.js";
 import Aim from "./Aim";
+import { modalities } from "./modality";
 import * as dcmjs from "dcmjs";
 
 import "./aimEditor.css";
@@ -151,12 +152,6 @@ class AimEditor extends Component {
                   },
                   markupsToSave
                 );
-                // this.addPolygonToAim(
-                //   aim,
-                //   polygon,
-                //   shapeIndex,
-                //   imageReferenceUid
-                // );
                 shapeIndex++;
               }
             });
@@ -224,6 +219,7 @@ class AimEditor extends Component {
                 shapeIndex++;
               }
             });
+            break;
           case "brush":
             const brush = markUps[tool].data;
             hasSegmentation = true;
@@ -243,6 +239,7 @@ class AimEditor extends Component {
     this.addSemanticAnswersToSeedData(seedData, answers);
     this.addUserToSeedData(seedData);
     console.log("Degisiklikler kaydedildi", seedData);
+    // this.addModalityObjectToSeedData(seedData);
 
     var aim = new Aim(
       seedData,
@@ -254,26 +251,57 @@ class AimEditor extends Component {
     console.log("Aim Geldii", aim);
 
     console.log("Markups to save", markupsToSave);
+    Object.entries(markupsToSave).forEach(([key, values]) => {
+      values.map(value => {
+        const { type, markup, shapeIndex, imageReferenceUid } = value;
+        switch (type) {
+          case "line":
+            this.addLineToAim(aim, markup, shapeIndex, imageReferenceUid);
+            break;
+          case "circle":
+            this.addCircleToAim(aim, markup, shapeIndex, imageReferenceUid);
+            break;
+          case "polygon":
+            this.addPolygonToAim(aim, markup, shapeIndex, imageReferenceUid);
+            break;
+          case "bidirectional":
+            this.addBidirectionalToAim(
+              aim.markup,
+              shapeIndex,
+              imageReferenceUid
+            );
+        }
+      });
+    });
 
-    // const aimJson = aim.getAim();
-    // // const file = new Blob(aimJson, { type: "text/json" });
-    // // const series = this.props.series[this.props.activePort];
-    // uploadAim(JSON.parse(aimJson))
-    //   .then(() => {
-    //     this.props.onCancel();
-    //     toast.success("Aim succesfully saved.", {
-    //       position: "top-right",
-    //       autoClose: 5000,
-    //       hideProgressBar: false,
-    //       closeOnClick: true,
-    //       pauseOnHover: true,
-    //       draggable: true
-    //     });
-    //   })
-    //   .catch(error => console.log(error));
+    const aimJson = aim.getAim();
+    console.log("Son AYIMMMM", aimJson);
+    // const file = new Blob(aimJson, { type: "text/json" });
+    // const series = this.props.series[this.props.activePort];
+    uploadAim(JSON.parse(aimJson))
+      .then(() => {
+        this.props.onCancel();
+        toast.success("Aim succesfully saved.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+      })
+      .catch(error => console.log(error));
+  };
+
+  addModalityObjectToSeedData = seedData => {
+    const modality = modalities[seedData.series.modality];
+    seedData.series.modality = { ...modality };
+    console.log("Siid data", seedData);
   };
 
   addSemanticAnswersToSeedData = (seedData, answers) => {
+    console.log("ANSWERS", answers);
+    console.log("SEED DATA", seedData);
     const {
       name,
       comment,
@@ -333,7 +361,7 @@ class AimEditor extends Component {
     aim.createImageAnnotationStatement(1, markupId, maxId);
   };
 
-  addLineToAim = (aim, line, shapeIndex) => {
+  addLineToAim = (aim, line, shapeIndex, imageReferenceUid) => {
     const { start, end } = line.handles;
     const markupId = aim.addMarkupEntity("TwoDimensionPolyline", shapeIndex, [
       start,
@@ -367,6 +395,13 @@ class AimEditor extends Component {
     console.log();
     // aim.add;
   };
+
+  addBidirectionalToAim = (
+    aim,
+    bidirectional,
+    shapeIndex,
+    imageReferenceUid
+  ) => {};
 
   createSegmentation = (toolState, imagePromises, markedImageIds) => {
     const segments = [];
