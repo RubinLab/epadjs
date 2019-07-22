@@ -1,8 +1,9 @@
 import React from "react";
-import Table from "react-table";
-import "./menuStyle.css";
-import { getUsers } from "../../services/userServices";
-import ToolBar from "./common/basicToolBar";
+import ReactTable from "react-table";
+import { FaRegTrashAlt, FaEdit, FaCheck } from "react-icons/fa";
+import "../menuStyle.css";
+import { getUsers } from "../../../services/userServices";
+import ToolBar from "../common/basicToolBar";
 
 class Users extends React.Component {
   state = {
@@ -63,22 +64,25 @@ class Users extends React.Component {
       {
         Header: "First",
         accessor: "firstname",
+        className: "usersTable-cell",
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
+        minWidth: 35
       },
       {
         Header: "Last",
         accessor: "lastname",
+        className: "usersTable-cell",
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
+        minWidth: 35
       },
       {
         Header: "Email",
         accessor: "email",
+        className: "usersTable-cell",
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
@@ -86,13 +90,23 @@ class Users extends React.Component {
       },
       {
         Header: "Color",
-        accessor: "colorpreference",
+        className: "usersTable-cell",
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
+        minWidth: 20,
+        Cell: original => {
+          let color = original.row.checkbox.colorpreference;
+          color = color ? `#${color}` : `#19ff75`;
+          return (
+            <p className="menu-clickable wrapped" style={{ color }}>
+              {original.row.checkbox.username}
+            </p>
+          );
+        }
       },
       {
         Header: "Projects",
+        className: "usersTable-cell",
         accessor: "projects",
         sortable: true,
         resizable: true,
@@ -106,14 +120,21 @@ class Users extends React.Component {
       },
       {
         Header: "Admin",
-        accessor: "admin",
+        className: "usersTable-cell",
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
+        minWidth: 20,
+        Cell: original => {
+          return original.row.checkbox.admin ? (
+            <div className="centeredCell"> {<FaCheck />}</div>
+          ) : null;
+        }
       },
+
       {
         Header: "Permissions",
         accessor: "permissions",
+        className: "usersTable-cell",
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
@@ -124,27 +145,72 @@ class Users extends React.Component {
         )
       },
       {
-        Header: "Enable",
-        accessor: "enabled",
+        Header: "Enabled",
+        className: "usersTable-cell",
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
+        minWidth: 30,
+        Cell: original => {
+          return original.row.checkbox.enabled ? (
+            <div className="centeredCell"> {<FaCheck />}</div>
+          ) : null;
+        }
+      },
+      // {
+      //   Header: "Password",
+      //   className: "usersTable-cell",
+      //   resizable: true,
+      //   minResizeWidth: 20,
+      //   minWidth: 30,
+      //   Cell: original => <p className="menu-clickable wrapped">Reset</p>
+      // }
+      {
+        Header: "",
+        width: 45,
+        minResizeWidth: 20,
+        resizable: true,
+        Cell: original => (
+          <div
+            onClick={() => {
+              this.setState({
+                hasEditClicked: true
+              });
+            }}
+          >
+            <FaEdit className="menu-clickable" />
+          </div>
+        )
       },
       {
-        Header: "Password",
-        resizable: true,
+        Header: "",
+        width: 45,
         minResizeWidth: 20,
-        minWidth: 50
+        resizable: true,
+        Cell: original => (
+          <div
+            onClick={() => this.handleSingleDelete(original.row.checkbox.id)}
+          >
+            <FaRegTrashAlt className="menu-clickable" />
+          </div>
+        )
       }
     ];
   };
 
   render = () => {
     // const col =
+    const pageSize =
+      this.state.data.length < 10 ? 10 : this.state.data.length >= 40 ? 50 : 20;
     return (
       <div className="users menu-display">
         <ToolBar />
-        <Table data={this.state.data} columns={this.defineColumns()} />
+        <ReactTable
+          className="pro-table"
+          data={this.state.data}
+          columns={this.defineColumns()}
+          pageSizeOptions={[10, 20, 50]}
+          defaultPageSize={pageSize}
+        />
       </div>
     );
   };

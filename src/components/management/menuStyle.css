@@ -600,3 +600,14 @@
 .edit-project__modal--select {
   width: fit-content;
 }
+
+.users .rt-resizable-header-content,
+.edit-userRole__table--col,
+.user-table__header--user,
+.usersTable-cell {
+  text-align: left;
+}
+
+.centeredCell {
+  text-align: center;
+}

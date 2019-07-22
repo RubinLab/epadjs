@@ -353,7 +353,7 @@ class Connections extends React.Component {
     const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
     console.log(this.state);
     return (
-      <div className="connections menu-display" id="template">
+      <div className="connections menu-display">
         <ToolBar
           onDelete={this.handleDeleteAll}
           selected={checkboxSelected}
