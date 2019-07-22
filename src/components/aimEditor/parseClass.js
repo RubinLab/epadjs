@@ -301,7 +301,7 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
       }
 
 
-      self.typeCode = [
+      self.aimTypeCode = [
         {
             "code": json.TemplateContainer.Template[0].codeValue,
             "codeSystemName": json.TemplateContainer.Template[0].codingSchemeDesignator,
@@ -310,8 +310,9 @@ export var AimEditor = function (userWindow, varformCheckHandler) {
                 "value": json.TemplateContainer.Template[0].codeMeaning
             }
         }
-      ]
+      ];
 
+      
       document.getElementById("accordion1").appendChild(annotationNameLabelDiv);
       document.getElementById("accordion1").appendChild(annotationNameDiv);
       document.getElementById("accordion1").appendChild(labelDiv);
