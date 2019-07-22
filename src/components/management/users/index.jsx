@@ -4,6 +4,7 @@ import { FaRegTrashAlt, FaEdit, FaCheck } from "react-icons/fa";
 import "../menuStyle.css";
 import { getUsers } from "../../../services/userServices";
 import ToolBar from "../common/basicToolBar";
+import EditUsers from "./editUsersForm";
 
 class Users extends React.Component {
   state = {
@@ -125,6 +126,7 @@ class Users extends React.Component {
         minResizeWidth: 20,
         minWidth: 20,
         Cell: original => {
+          // console.log(original.row.checkbox);
           return original.row.checkbox.admin ? (
             <div className="centeredCell"> {<FaCheck />}</div>
           ) : null;
@@ -151,6 +153,7 @@ class Users extends React.Component {
         minResizeWidth: 20,
         minWidth: 30,
         Cell: original => {
+          console.log(original.row.checkbox);
           return original.row.checkbox.enabled ? (
             <div className="centeredCell"> {<FaCheck />}</div>
           ) : null;
@@ -169,32 +172,39 @@ class Users extends React.Component {
         width: 45,
         minResizeWidth: 20,
         resizable: true,
-        Cell: original => (
-          <div
-            onClick={() => {
-              this.setState({
-                hasEditClicked: true
-              });
-            }}
-          >
-            <FaEdit className="menu-clickable" />
-          </div>
-        )
-      },
-      {
-        Header: "",
-        width: 45,
-        minResizeWidth: 20,
-        resizable: true,
-        Cell: original => (
-          <div
-            onClick={() => this.handleSingleDelete(original.row.checkbox.id)}
-          >
-            <FaRegTrashAlt className="menu-clickable" />
-          </div>
-        )
+        Cell: original => {
+          return original.row.checkbox.username ===
+            sessionStorage.getItem("username") ? (
+            <div
+              onClick={() => {
+                this.setState({
+                  hasEditClicked: true,
+                  userToEdit: original.row.checkbox
+                });
+              }}
+            >
+              <FaEdit className="menu-clickable" />
+            </div>
+          ) : null;
+        }
       }
     ];
+  };
+
+  handleCancel = () => {
+    this.setState({
+      hasAddClicked: false,
+      error: "",
+      delAll: false,
+      hasEditClicked: false,
+      delOne: false,
+      selectedOne: {},
+      displayCreationForm: false,
+      firstname: "",
+      lastname: "",
+      email: "",
+      colorpreference: ""
+    });
   };
 
   render = () => {
@@ -211,6 +221,14 @@ class Users extends React.Component {
           pageSizeOptions={[10, 20, 50]}
           defaultPageSize={pageSize}
         />
+        {this.state.hasEditClicked && (
+          <EditUsers
+            onCancel={this.handleCancel}
+            userToEdit={this.state.userToEdit}
+            // onType={this.handleFormInput}
+            // onSubmit={this.editConnection}
+          />
+        )}
       </div>
     );
   };
