@@ -37,12 +37,12 @@ class AimEditor extends Component {
       resolve(getTemplates());
     });
     templatePromise.then(result => {
-      // console.log("TEMPLATES", result.data);
+      console.log("TEMPLATES", result.data);
       this.semanticAnswers = new questionaire.AimEditor(
         element,
         this.validateForm
       );
-      this.semanticAnswers.loadTemplates(questionaire.templateArray);
+      this.semanticAnswers.loadTemplates(result.data);
       this.semanticAnswers.createViewerWindow();
       if (this.props.aimId != null && Object.entries(this.props.aimId).length)
         this.semanticAnswers.loadAimJson(this.props.aimId);
