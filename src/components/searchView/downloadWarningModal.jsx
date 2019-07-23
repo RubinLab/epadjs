@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 
 const alertDownloadModal = ({ details, onOK }) => {
-  console.log(details);
   const clearCarets = string => {
     if (string) {
       for (let i = 0; i < string.length; i++) {

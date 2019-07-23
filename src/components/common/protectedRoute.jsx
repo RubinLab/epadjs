@@ -9,7 +9,6 @@ const ProtectedRoute = ({ path, component: Component, render, ...rest }) => {
       {...rest}
       render={props => {
         if (!auth.getCurrentUser() && !isLite) {
-          console.log("in protected route");
           return <Redirect to="/login" />;
         }
         // } else if (!auth.getCurrentUser() && isLite) {

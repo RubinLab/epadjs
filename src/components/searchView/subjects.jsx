@@ -43,7 +43,6 @@ class Subjects extends Component {
   async componentDidMount() {
     const pid = isLite ? "lite" : this.props.pid;
     const data = await this.getData();
-    console.log(data);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
   }
@@ -414,7 +413,6 @@ class Subjects extends Component {
             showPagination={false}
             // TheadComponent={TheadComponent}
             onSortedChange={() => {
-              console.log("1");
               this.onSortedChange();
             }}
             {...extraProps}

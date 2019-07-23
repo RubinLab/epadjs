@@ -47,7 +47,6 @@ export const clearGrid = item => {
 
 export const updateImageId = event => {
   const imageID = event.detail.image.imageId.split("/").pop();
-  console.log(imageID);
   return {
     type: UPDATE_IMAGEID,
     imageID
@@ -247,8 +246,6 @@ export const showAnnotationDock = () => {
   return { type: SHOW_ANNOTATION_DOCK };
 };
 const loadAnnotations = () => {
-  console.log("in loadAnnotations");
-
   return {
     type: LOAD_ANNOTATIONS
   };
@@ -557,7 +554,6 @@ const getStudyAim = async (subjectID, studyID) => {
   let result;
   let studyAims = [];
   try {
-    // const { data: aims } =
     result = await getStudyAims(subjectID, studyID);
   } catch (err) {
     console.log(err);

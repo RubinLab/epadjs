@@ -66,7 +66,6 @@ class AnnotationsList extends React.Component {
   render = () => {
     const selectedSerie = this.openSeries[this.activePort].seriesUID;
     //find the study in the studies array
-    console.log(this.state.coordinate);
     const style = {
       minWidth: "215px",
       maxWidth: "30%",
