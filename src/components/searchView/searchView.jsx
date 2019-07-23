@@ -54,7 +54,8 @@ class SearchView extends Component {
       numOfsubjects: 0,
       showDeleteAlert: false,
       update: 0,
-      missingAnns: []
+      missingAnns: [],
+      expandLevel: 0
     };
   }
 
@@ -79,6 +80,9 @@ class SearchView extends Component {
     return data;
   };
 
+  handleExpand = () => {
+    this.setState(state => ({ expandLevel: state.expandLevel + 1 }));
+  };
   updateUploadStatus = async => {
     this.setState(state => {
       return { uploading: !state.uploading, update: state.update + 1 };
@@ -565,6 +569,8 @@ class SearchView extends Component {
           onUpload={this.handleFileUpload}
           onView={this.viewSelection}
           onDelete={this.handleClickDeleteIcon}
+          onExpand={this.handleExpand}
+          onClose={this.handleClose}
           status={status}
           showDelete={showDelete}
         />
@@ -578,6 +584,7 @@ class SearchView extends Component {
           key={this.props.match.params.pid}
           pid={this.props.match.params.pid}
           // update={this.state.numOfsubjects}
+          expandLevel={this.state.expandLevel}
           update={this.state.update}
         />
         {this.state.showAnnotationModal && (

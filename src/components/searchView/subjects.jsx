@@ -45,6 +45,7 @@ class Subjects extends Component {
     const data = await this.getData();
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
+    console.log(data);
   }
 
   async componentDidUpdate(prevProps) {
@@ -415,6 +416,7 @@ class Subjects extends Component {
             onSortedChange={() => {
               this.onSortedChange();
             }}
+            expanded={true}
             {...extraProps}
             SubComponent={row => {
               return (

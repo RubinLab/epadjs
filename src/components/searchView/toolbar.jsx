@@ -1,5 +1,13 @@
 import React from "react";
-import { FaEye, FaDownload, FaUpload, FaTrashAlt } from "react-icons/fa";
+import {
+  FaEye,
+  FaDownload,
+  FaUpload,
+  FaTrashAlt,
+  FaStepForward,
+  FaStepBackward,
+  FaPlusCircle
+} from "react-icons/fa";
 import { css, jsx } from "@emotion/core";
 import { TiPencil } from "react-icons/ti";
 import ReactTooltip from "react-tooltip";
@@ -76,6 +84,52 @@ const toolBar = props => {
           delayShow={1500}
         >
           <span>Delete selection</span>
+        </ReactTooltip>
+      </div>
+      <div className="searchView-toolbar__icon" onClick={props.onExpand}>
+        <div>
+          <FaStepForward
+            style={{ fontSize: "1.2rem" }}
+            data-tip
+            data-for="forward-icon"
+          />
+        </div>
+        <ReactTooltip
+          id="forward-icon"
+          place="bottom"
+          type="info"
+          delayShow={1500}
+        >
+          <span>Expand to Next Level</span>
+        </ReactTooltip>
+      </div>
+      <div className="searchView-toolbar__icon" onClick={props.onShrink}>
+        <div>
+          <FaStepBackward
+            style={{ fontSize: "1.2rem" }}
+            data-tip
+            data-for="back-icon"
+          />
+        </div>
+        <ReactTooltip
+          id="back-icon"
+          place="bottom"
+          type="info"
+          delayShow={1500}
+        >
+          <span>Close One Level</span>
+        </ReactTooltip>
+      </div>
+      <div className="searchView-toolbar__icon" onClick={props.onNew}>
+        <div>
+          <FaPlusCircle
+            style={{ fontSize: "1.2rem" }}
+            data-tip
+            data-for="new-icon"
+          />
+        </div>
+        <ReactTooltip id="new-icon" place="bottom" type="info" delayShow={1500}>
+          <span>New</span>
         </ReactTooltip>
       </div>
       {/* <div className="searchView-toolbar__icon">
