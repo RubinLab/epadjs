@@ -107,10 +107,15 @@ class DisplayView extends Component {
     );
   }
 
-  componentDidUpdate = prevProps => {
-    if (this.props.loading !== prevProps.loading && !this.props.loading)
-      this.getData();
-  };
+  // componentDidUpdate = prevProps => {
+  //   if (
+  //     (this.props.loading !== prevProps.loading && !this.props.loading) ||
+  //     this.props.series !== prevProps.series
+  //   ) {
+  //     this.getViewports();
+  //     this.getData();
+  //   }
+  // };
 
   getData() {
     var promises = [];
@@ -173,6 +178,8 @@ class DisplayView extends Component {
 
   getViewports = () => {
     let numSeries = this.props.series.length;
+    console.log("Viewports", numSeries);
+
     let numCols = numSeries % 3;
     if (numSeries > 3) {
       this.setState({ height: "calc((100% - 60px)/2)" });
@@ -182,7 +189,7 @@ class DisplayView extends Component {
     if (numCols === 1) {
       this.setState({ width: "100%" });
     } else if (numCols === 2) this.setState({ width: "50%" });
-    else this.setState({ width: "33%" });
+    else this.setState({ width: "33%", height: "calc(100% - 60px)" });
   };
 
   createRefs() {
@@ -423,6 +430,7 @@ class DisplayView extends Component {
       );
     }
     if (prevProps.series.length !== this.props.series.length) {
+      await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
     }
