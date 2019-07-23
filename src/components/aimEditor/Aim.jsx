@@ -109,9 +109,9 @@ class Aim {
       Dimension: [
         Object.assign(
           {},
-          this.createObject("size", size),
-          this.createObject("index", index),
-          this.createObject("label", label)
+          this._createObject("size", size),
+          this._createObject("index", index),
+          this._createObject("label", label)
         )
       ]
     };
@@ -133,9 +133,9 @@ class Aim {
     var obj = this._createObject("unitOfMeasure", unit);
     Object.assign(obj, this._createDoubleDataType());
     obj["xsi:type"] = "CompactCalculationResult";
-    obj["dimensionCollection"] = this.createDimension(preLabel + label);
+    obj["dimensionCollection"] = this._createDimension(preLabel + label);
     obj["type"] = "scalar";
-    Object.assign(obj, this.createObject("value", value));
+    Object.assign(obj, this._createObject("value", value));
     return obj;
   };
 
