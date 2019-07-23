@@ -647,3 +647,8 @@
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
+
+.colorPicker__modal.modal-dialog {
+  width: fit-content;
+  outline: 0;
+}

@@ -1,14 +1,16 @@
 import React from "react";
 import ReactTable from "react-table";
-import { FaRegTrashAlt, FaEdit, FaCheck } from "react-icons/fa";
+import { FaEdit, FaCheck } from "react-icons/fa";
 import "../menuStyle.css";
 import { getUsers } from "../../../services/userServices";
 import ToolBar from "../common/basicToolBar";
 import EditUsers from "./editUsersForm";
+import ColorPicker from "./colorPicker";
 
 class Users extends React.Component {
   state = {
-    data: []
+    data: [],
+    showColorpicker: false
   };
 
   componentDidMount = () => {
@@ -153,22 +155,14 @@ class Users extends React.Component {
         minResizeWidth: 20,
         minWidth: 30,
         Cell: original => {
-          console.log(original.row.checkbox);
+          // console.log(original.row.checkbox);
           return original.row.checkbox.enabled ? (
             <div className="centeredCell"> {<FaCheck />}</div>
           ) : null;
         }
       },
-      // {
-      //   Header: "Password",
-      //   className: "usersTable-cell",
-      //   resizable: true,
-      //   minResizeWidth: 20,
-      //   minWidth: 30,
-      //   Cell: original => <p className="menu-clickable wrapped">Reset</p>
-      // }
       {
-        Header: "",
+        Header: "Edit",
         width: 45,
         minResizeWidth: 20,
         resizable: true,
@@ -203,33 +197,46 @@ class Users extends React.Component {
       firstname: "",
       lastname: "",
       email: "",
-      colorpreference: ""
+      colorpreference: "",
+      showColorpicker: false
     });
+  };
+
+  handleColorClick = () => {
+    this.setState(state => ({ showColorPicker: !state.showColorPicker }));
   };
 
   render = () => {
     // const col =
+    console.log(this.state);
     const pageSize =
       this.state.data.length < 10 ? 10 : this.state.data.length >= 40 ? 50 : 20;
     return (
-      <div className="users menu-display">
-        <ToolBar />
-        <ReactTable
-          className="pro-table"
-          data={this.state.data}
-          columns={this.defineColumns()}
-          pageSizeOptions={[10, 20, 50]}
-          defaultPageSize={pageSize}
-        />
-        {this.state.hasEditClicked && (
-          <EditUsers
-            onCancel={this.handleCancel}
-            userToEdit={this.state.userToEdit}
-            // onType={this.handleFormInput}
-            // onSubmit={this.editConnection}
+      <>
+        <div className="users menu-display">
+          <ToolBar />
+          <ReactTable
+            className="pro-table"
+            data={this.state.data}
+            columns={this.defineColumns()}
+            pageSizeOptions={[10, 20, 50]}
+            defaultPageSize={pageSize}
           />
+          {this.state.hasEditClicked && (
+            <EditUsers
+              onCancel={this.handleCancel}
+              userToEdit={this.state.userToEdit}
+              handleColorClick={this.handleColorClick}
+              // onType={this.handleFormInput}
+              // onSubmit={this.editConnection}
+            />
+          )}
+        </div>
+        {this.state.showColorPicker && (
+          <ColorPicker onCancel={this.handleColorClick} />
         )}
-      </div>
+        {/* {this.state.showColorPicker && <div>here</div>} */}
+      </>
     );
   };
 }
