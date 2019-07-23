@@ -40,7 +40,6 @@ class App extends Component {
   };
 
   closeMenu = event => {
-    console.log(event);
     // if (event && event.type === "keydown") {
     //   if (event.key === 'Escape' || event.keyCode === 27) {
     //     this.setState({ isMngMenuOpen: false });
@@ -122,7 +121,6 @@ class App extends Component {
     });
   };
   render() {
-    // console.log("App js state", this.state);
     return (
       <React.Fragment>
         <Cornerstone />

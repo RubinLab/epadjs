@@ -267,6 +267,7 @@ class SearchView extends Component {
               }
             }
           }
+          this.props.history.push("/display");
           this.props.dispatch(clearSelection());
         }
       }
@@ -289,11 +290,14 @@ class SearchView extends Component {
         if (notOpenSeries.length === 0) {
           let index = this.checkIfSerieOpen(selectedSeries[0].seriesUID).index;
           this.props.dispatch(changeActivePort(index));
+          this.props.history.push("/display");
+          this.props.dispatch(clearSelection());
         } else {
           if (selectedSeries.length + this.props.openSeries.length > MAX_PORT) {
             groupedObj = this.groupUnderStudy(selectedSeries);
             await this.setState({ seriesList: groupedObj });
             this.setState({ isSerieSelectionOpen: true });
+            // this.props.history.push("/display");
           } else {
             //else get data for each serie for display
             selectedSeries.forEach(serie => {
@@ -315,6 +319,8 @@ class SearchView extends Component {
                 );
               }
             }
+            this.props.history.push("/display");
+            this.props.dispatch(clearSelection());
           }
         }
       }
@@ -365,11 +371,12 @@ class SearchView extends Component {
                 );
               }
             }
+            this.props.history.push("/display");
+            this.props.dispatch(clearSelection());
           }
         }
       }
     }
-    this.props.dispatch(clearSelection());
   };
 
   groupUnderStudy = objArr => {

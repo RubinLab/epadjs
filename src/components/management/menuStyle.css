@@ -94,7 +94,7 @@
 
 .mng-header {
   display: flex;
-  height: 5%;
+  height: 3%;
   width: 100%;
   min-height: 32px;
   /* background: rgb(85, 85, 85); */
@@ -126,6 +126,7 @@
   display: inline-flex;
   flex-direction: column;
   justify-content: space-between;
+  /* overflow: hidden; */
 }
 
 .wrapped {
@@ -394,7 +395,8 @@
   width: 3%;
 }
 
-.annotations-toolbar {
+.annotations-toolbar,
+.templates-toolbar {
   display: flex;
   height: 5%;
   justify-content: flex-start;

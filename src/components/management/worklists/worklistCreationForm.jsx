@@ -14,7 +14,6 @@ const worklistCreationForm = props => {
     </option>
   );
   for (let user of users) {
-    // console.log(user);
     options.push(
       <option key={`${index}-${user.username}`} value={user.username}>
         {user.displayname}

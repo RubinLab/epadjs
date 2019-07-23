@@ -13,7 +13,6 @@ class CustomTable extends Component {
       {
         Header: "Enable",
         Cell: original => {
-          console.log(original.row);
           return (
             <input
               className="projectTable-row__check"
@@ -27,7 +26,6 @@ class CustomTable extends Component {
       {
         Header: "Default",
         Cell: original => {
-          console.log(original.row);
           return (
             <input
               className="projectTable-row__check"
@@ -42,8 +40,6 @@ class CustomTable extends Component {
   };
 
   render = () => {
-    console.log("custom data here");
-    console.log(this.props.data);
     return (
       <Table
         className="pro-edit_table"

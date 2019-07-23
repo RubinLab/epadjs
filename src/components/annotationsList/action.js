@@ -224,7 +224,6 @@ export const selectAnnotation = (
 };
 
 export const addToGrid = (serie, annotation) => {
-  console.log("addtogrid");
   let { patientID, studyUID, seriesUID, projectID } = serie;
   projectID = projectID ? projectID : "lite";
   if (annotation)
@@ -236,7 +235,6 @@ export const addToGrid = (serie, annotation) => {
     seriesUID,
     aimID: annotation
   };
-  console.log({ ...reference });
   return { type: ADD_TO_GRID, reference };
 };
 
@@ -248,8 +246,6 @@ export const showAnnotationDock = () => {
   return { type: SHOW_ANNOTATION_DOCK };
 };
 const loadAnnotations = () => {
-  console.log("in loadAnnotations");
-
   return {
     type: LOAD_ANNOTATIONS
   };
@@ -558,7 +554,6 @@ const getStudyAim = async (subjectID, studyID) => {
   let result;
   let studyAims = [];
   try {
-    // const { data: aims } =
     result = await getStudyAims(subjectID, studyID);
   } catch (err) {
     console.log(err);
@@ -593,7 +588,6 @@ const getSingleSerieData = (serie, annotation) => {
         studyUID,
         seriesUID
       );
-      console.log("in then");
       serieAims = serieAims.data;
       studyAims = await getStudyAim(patientID, studyUID);
       aimsData = serieAims.concat(studyAims);
