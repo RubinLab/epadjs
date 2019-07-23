@@ -165,7 +165,7 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [this._createTypeCode("G-D7FE", "SRT", "Length")];
-    this.imageAnnotations.ImageAnnotation.calculationEntityCollection[
+    this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
       "CalculationEntity"
     ].push(obj);
     return uId;
@@ -181,7 +181,7 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [this._createTypeCode("G-A185", "SRT", "LongAxis")];
-    this.imageAnnotations.ImageAnnotation.calculationEntityCollection[
+    this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
       "CalculationEntity"
     ].push(obj);
     return uId;
@@ -197,7 +197,7 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [this._createTypeCode("G-A186", "SRT", "ShortAxis")];
-    this.imageAnnotations.ImageAnnotation.calculationEntityCollection[
+    this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
       "CalculationEntity"
     ].push(obj);
     return uId;
@@ -216,7 +216,7 @@ class Aim {
       this._createTypeCode(),
       this._createTypeCode("R-00317", "SRT", "Mean")
     ];
-    this.imageAnnotations.ImageAnnotation.calculationEntityCollection.CalculationEntity.push(
+    this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection.CalculationEntity.push(
       obj
     );
     return uId;
@@ -237,7 +237,7 @@ class Aim {
       this._createTypeCode(),
       this._createTypeCode("R-10047", "SRT", "Standard Deviation")
     ];
-    this.imageAnnotations.ImageAnnotation.calculationEntityCollection[
+    this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
       "CalculationEntity"
     ].push(obj);
     return uId;
@@ -258,7 +258,7 @@ class Aim {
       this._createTypeCode(),
       this._createTypeCode("R-404FB", "SRT", "Minimum")
     ];
-    this.imageAnnotations.ImageAnnotation.calculationEntityCollection[
+    this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
       "CalculationEntity"
     ].push(obj);
     return uId;
@@ -279,7 +279,7 @@ class Aim {
       this._createTypeCode(),
       this._createTypeCode("G-A437", "SRT", "Maximum")
     ];
-    this.imageAnnotations.ImageAnnotation.calculationEntityCollection[
+    this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
       "CalculationEntity"
     ].push(obj);
     return uId;
@@ -451,7 +451,7 @@ class Aim {
 
   _createImageReferanceEntityCollection = () => {
     var obj = {};
-    obj["ImageReferenceEntity"] = this._createImageReferenceEntity();
+    obj["ImageReferenceEntity"] = [this._createImageReferenceEntity()];
     return obj;
   };
 
@@ -510,7 +510,7 @@ class Aim {
     obj["xsi:type"] = references;
     obj["objectUniqueIdentifier"] = { root: objectId };
     obj["subjectUniqueIdentifier"] = { root: subjectId };
-    this.imageAnnotations.ImageAnnotation.imageAnnotationStatementCollection.ImageAnnotationStatement.push(
+    this.imageAnnotations.ImageAnnotation[0].imageAnnotationStatementCollection.ImageAnnotationStatement.push(
       obj
     );
   };

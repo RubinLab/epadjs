@@ -9,6 +9,7 @@ import { getAimImageData } from "./aimHelper";
 import * as questionaire from "./parseClass.js";
 import Aim from "./Aim";
 import { modalities } from "./modality";
+import testAim from "./testAim.json";
 import * as dcmjs from "dcmjs";
 
 import "./aimEditor.css";
@@ -111,6 +112,7 @@ class AimEditor extends Component {
       this.props.activePort
     ]["element"];
     const stackToolState = this.props.csTools.getToolState(element, "stack");
+    console.log("Mete", stackToolState);
     const imageIds = stackToolState.data[this.props.activePort].imageIds;
 
     // check which images has markup or segmentation
@@ -278,7 +280,7 @@ class AimEditor extends Component {
     console.log("Son AYIMMMM", aimJson);
     // const file = new Blob(aimJson, { type: "text/json" });
     // const series = this.props.series[this.props.activePort];
-    uploadAim(JSON.parse(aimJson))
+    uploadAim(testAim)
       .then(() => {
         this.props.onCancel();
         toast.success("Aim succesfully saved.", {
@@ -392,7 +394,7 @@ class AimEditor extends Component {
 
     const maxId = aim.createMaxCalcEntity({ max, unit: "[hnsf'U]" });
     aim.createImageAnnotationStatement(1, markupId, maxId);
-    console.log();
+
     // aim.add;
   };
 
