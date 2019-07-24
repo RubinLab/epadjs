@@ -55,7 +55,8 @@ class SearchView extends Component {
       showDeleteAlert: false,
       update: 0,
       missingAnns: [],
-      expandLevel: 0
+      expandLevel: 0,
+      expanded: {}
     };
   }
 
@@ -80,8 +81,26 @@ class SearchView extends Component {
     return data;
   };
 
-  handleExpand = () => {
-    this.setState(state => ({ expandLevel: state.expandLevel + 1 }));
+  handleExpand = async () => {
+    if (this.state.expandLevel < 3) {
+      this.setState(state => ({ expandLevel: state.expandLevel + 1 }));
+    }
+    let expanded = {};
+    console.log(this.state.numOfsubjects);
+    for (let i = 0; i < this.state.numOfsubjects; i++) {
+      expanded[i] = true;
+    }
+    this.setState({ expanded });
+    console.log(expanded);
+  };
+
+  handleShrink = async () => {
+    if (this.state.expandLevel > 0) {
+      await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
+      if (this.state.expandLevel === 0) {
+        this.setState({ expanded: {} });
+      }
+    }
   };
   updateUploadStatus = async => {
     this.setState(state => {
@@ -543,6 +562,7 @@ class SearchView extends Component {
     this.setState({ missingAnns: [] });
   };
   render() {
+    console.log(this.state);
     let status;
     if (this.state.uploading) {
       status = "Uploading…";
@@ -570,7 +590,7 @@ class SearchView extends Component {
           onView={this.viewSelection}
           onDelete={this.handleClickDeleteIcon}
           onExpand={this.handleExpand}
-          onClose={this.handleClose}
+          onShrink={this.handleShrink}
           status={status}
           showDelete={showDelete}
         />
@@ -585,6 +605,7 @@ class SearchView extends Component {
           pid={this.props.match.params.pid}
           // update={this.state.numOfsubjects}
           expandLevel={this.state.expandLevel}
+          expanded={this.state.expanded}
           update={this.state.update}
         />
         {this.state.showAnnotationModal && (

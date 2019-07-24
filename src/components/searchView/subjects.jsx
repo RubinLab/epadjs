@@ -43,17 +43,32 @@ class Subjects extends Component {
   async componentDidMount() {
     const pid = isLite ? "lite" : this.props.pid;
     const data = await this.getData();
+    // const { expanded } = this.props;
+    console.log("expanded in did mount", this.props);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
+
     console.log(data);
   }
 
   async componentDidUpdate(prevProps) {
     if (this.props.update !== prevProps.update) {
       let fetchedData = await this.getData();
-      this.setState({ data: fetchedData });
+      await this.setState({ data: fetchedData });
+    }
+    if (this.props.expandLevel != prevProps.expandLevel) {
+      this.props.expandLevel >= 1
+        ? this.expandCurrentLevel()
+        : this.setState({ expanded: {} });
     }
   }
+  expandCurrentLevel = () => {
+    const expanded = {};
+    for (let i = 0; i < this.state.data.length; i++) {
+      expanded[i] = true;
+    }
+    this.setState({ expanded });
+  };
 
   getData = async () => {
     const {
@@ -399,6 +414,7 @@ class Subjects extends Component {
       expanded,
       onExpandedChange
     };
+    console.log("expanded", expanded);
     const TheadComponent = props => null;
     return (
       <div>
@@ -416,7 +432,6 @@ class Subjects extends Component {
             onSortedChange={() => {
               this.onSortedChange();
             }}
-            expanded={true}
             {...extraProps}
             SubComponent={row => {
               return (
@@ -425,6 +440,8 @@ class Subjects extends Component {
                     projectId={this.props.pid}
                     subjectId={row.original.displaySubjectID}
                     update={this.props.update}
+                    expandLevel={this.props.expandLevel}
+                    expanded={this.state.expandedChildren}
                   />
                 </div>
               );
