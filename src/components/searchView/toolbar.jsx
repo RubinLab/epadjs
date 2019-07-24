@@ -128,7 +128,7 @@ const toolBar = props => {
             <span>Close One Level</span>
           </ReactTooltip>
         </div>
-        <div className="searchView-toolbar__icon" onClick={props.onShrink}>
+        <div className="searchView-toolbar__icon" onClick={props.onCloseAll}>
           <div>
             <FiMinimize2
               style={{ fontSize: "1.5rem", strokeWidth: "3px" }}

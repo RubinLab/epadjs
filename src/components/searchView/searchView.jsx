@@ -100,6 +100,10 @@ class SearchView extends Component {
       }
     }
   };
+
+  handleCloseAll = () => {
+    this.setState({ expandLevel: 0 });
+  };
   updateUploadStatus = async => {
     this.setState(state => {
       return { uploading: !state.uploading, update: state.update + 1 };
@@ -588,6 +592,7 @@ class SearchView extends Component {
           onDelete={this.handleClickDeleteIcon}
           onExpand={this.handleExpand}
           onShrink={this.handleShrink}
+          onCloseAll={this.handleCloseAll}
           status={status}
           showDelete={showDelete}
         />
