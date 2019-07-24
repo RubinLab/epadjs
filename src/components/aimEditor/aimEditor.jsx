@@ -9,7 +9,6 @@ import { getAimImageData } from "./aimHelper";
 import * as questionaire from "./parseClass.js";
 import Aim from "./Aim";
 import { modalities } from "./modality";
-//import testAim from "./testAim.json";
 import * as dcmjs from "dcmjs";
 
 import "./aimEditor.css";
@@ -45,9 +44,7 @@ class AimEditor extends Component {
       this.semanticAnswers.createViewerWindow();
       if (this.props.aimId != null && Object.entries(this.props.aimId).length) {
         this.semanticAnswers.loadAimJson(this.props.aimId);
-        console.log("am in and ", this.props.aimId);
       }
-      //this.semanticAnswers.loadTemplates(questionaire.templateArray);
     });
   }
 
@@ -263,11 +260,7 @@ class AimEditor extends Component {
     });
 
     const aimJson = aim.getAim();
-    console.log("Son AYIMMMM", aimJson);
-    console.log("Son AYIMMMM", JSON.stringify(aimJson));
-    // const file = new Blob(aimJson, { type: "text/json" });
-    // const series = this.props.series[this.props.activePort];
-    //console.log("DEST", testAim);
+
     uploadAim(JSON.parse(aimJson))
       .then(() => {
         this.props.onCancel();
@@ -286,12 +279,9 @@ class AimEditor extends Component {
   addModalityObjectToSeedData = seedData => {
     const modality = modalities[seedData.series.modality];
     seedData.series.modality = { ...modality };
-    console.log("Siid data", seedData);
   };
 
   addSemanticAnswersToSeedData = (seedData, answers) => {
-    console.log("ANSWERS", answers);
-    console.log("SEED DATA", seedData);
     const {
       name,
       comment,
@@ -474,24 +464,13 @@ class AimEditor extends Component {
     if (isLite) return imageId.split("/").pop();
     else return imageId.split("objectUID=")[1].split("&")[0];
   };
-  // testAimEditor = () => {
-  //   //console.log(document.getElementById("cont"));
-  //   var instanceAimEditor = new aim.AimEditor(document.getElementById("cont"));
-  //   var myA = [
-  //     { key: "BeaulieuBoneTemplate_rev18", value: aim.myjson },
-  //     { key: "asdf", value: aim.myjson1 }
-  //   ];
-  //   instanceAimEditor.loadTemplates(myA);
-
-  //   instanceAimEditor.addButtonsDiv();
-
-  //   instanceAimEditor.createViewerWindow();
-  // };
 }
+
 const mapStateToProps = state => {
   return {
     series: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort
   };
 };
+
 export default connect(mapStateToProps)(AimEditor);

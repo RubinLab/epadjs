@@ -250,7 +250,7 @@ class DisplayView extends Component {
       "Probe"
     ];
     if (toolsOfInterest.includes(toolType)) {
-      this.setState({ showAimEditor: true });
+      this.setState({ showAimEditor: true, selectedAim: undefined });
     }
   };
 
@@ -399,8 +399,6 @@ class DisplayView extends Component {
   };
 
   handleAnnotationSelected = event => {
-    console.log("event is", event);
-    console.log("Props in aim selected is", this.props);
     if (
       this.props.aimList[this.props.series[this.props.activePort].seriesUID][
         event.detail
@@ -411,7 +409,8 @@ class DisplayView extends Component {
       ][event.detail].json;
       const markupTypes = this.getMarkupTypesForAim(event.detail);
       aimJson["markupType"] = [...markupTypes];
-      console.log("event", JSON.stringify(aimJson));
+      if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
+        this.setState({ showAimEditor: false });
       this.setState({ showAimEditor: true, selectedAim: aimJson });
     }
   };
@@ -433,7 +432,6 @@ class DisplayView extends Component {
         if (value.aimUid === aimUid) markupTypes.push(value.markupType);
       });
     });
-    console.log("Markup Types", markupTypes);
     return markupTypes;
   };
 
