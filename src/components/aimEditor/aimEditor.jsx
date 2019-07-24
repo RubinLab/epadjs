@@ -9,7 +9,7 @@ import { getAimImageData } from "./aimHelper";
 import * as questionaire from "./parseClass.js";
 import Aim from "./Aim";
 import { modalities } from "./modality";
-import testAim from "./testAim.json";
+//import testAim from "./testAim.json";
 import * as dcmjs from "dcmjs";
 
 import "./aimEditor.css";
@@ -267,7 +267,7 @@ class AimEditor extends Component {
     console.log("Son AYIMMMM", JSON.stringify(aimJson));
     // const file = new Blob(aimJson, { type: "text/json" });
     // const series = this.props.series[this.props.activePort];
-    console.log("DEST", testAim);
+    //console.log("DEST", testAim);
     uploadAim(JSON.parse(aimJson))
       .then(() => {
         this.props.onCancel();
