@@ -91,17 +91,30 @@ class DisplayView extends Component {
       data: [],
       isLoading: true,
       selectedAim: undefined,
-      // height: "100%",
       refs: props.refs,
       showAnnDetails: true
     };
-    //this.createRefs();
   }
 
   componentDidMount() {
     this.getViewports();
     this.getData();
     window.addEventListener(
+      "annotationSelected",
+      this.handleAnnotationSelected
+    );
+  }
+
+  async componentDidUpdate(prevProps) {
+    if (prevProps.series.length !== this.props.series.length) {
+      await this.setState({ isLoading: true });
+      this.getViewports();
+      this.getData();
+    }
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener(
       "annotationSelected",
       this.handleAnnotationSelected
     );
@@ -125,7 +138,6 @@ class DisplayView extends Component {
     }
     Promise.all(promises).then(res => {
       this.setState({ data: res, isLoading: false });
-      console.log("Props Serie", this.props.series);
       this.props.series.forEach(serie => {
         if (serie.imageAnnotations)
           this.parseAims(serie.imageAnnotations, serie.seriesUID);
@@ -178,8 +190,6 @@ class DisplayView extends Component {
 
   getViewports = () => {
     let numSeries = this.props.series.length;
-    console.log("Viewports", numSeries);
-
     let numCols = numSeries % 3;
     if (numSeries > 3) {
       this.setState({ height: "calc((100% - 60px)/2)" });
@@ -252,23 +262,11 @@ class DisplayView extends Component {
   };
 
   parseAims = (aimList, seriesUid) => {
-    console.log("Aim List", aimList);
-    console.log("Props", this.props);
-    // first clear the tool state
-    // if (this.state.selectedAim) {
-    //   const element = this.cornerstone.getEnabledElements()[
-    //     this.props.activePort
-    //   ]["element"];
-    //   this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.clear(
-    //     element
-    //   );
-    // }
-    // console.log(this.props.cornerstoneTools);
-
-    // now parse the aim and render the new markups
-    Object.entries(aimList).forEach(([key, value], i) => {
-      const color = this.getColorOfMarkup(value[i].aimUid, seriesUid);
-      this.renderMarkup(key, value[i], color);
+    Object.entries(aimList).forEach(([key, values]) => {
+      values.forEach(value => {
+        const color = this.getColorOfMarkup(value.aimUid, seriesUid);
+        this.renderMarkup(key, value, color);
+      });
     });
   };
 
@@ -402,6 +400,7 @@ class DisplayView extends Component {
 
   handleAnnotationSelected = event => {
     console.log("event is", event);
+    console.log("Props in aim selected is", this.props);
     if (
       this.props.aimList[this.props.series[this.props.activePort].seriesUID][
         event.detail
@@ -410,6 +409,8 @@ class DisplayView extends Component {
       const aimJson = this.props.aimList[
         this.props.series[this.props.activePort].seriesUID
       ][event.detail].json;
+      const markupTypes = this.getMarkupTypesForAim(event.detail);
+      aimJson["markupType"] = [...markupTypes];
       console.log("event", JSON.stringify(aimJson));
       this.setState({ showAimEditor: true, selectedAim: aimJson });
     }
@@ -419,32 +420,21 @@ class DisplayView extends Component {
     this.setState({ showAimEditor: false, selectedAim: undefined });
   };
 
-  async componentDidUpdate(prevProps) {
-    if (!this.state.isLoading && Object.entries(this.props.aimList).length) {
-      //get the aims for test
-      const { data: aims } = await getAnnotations2();
-      // this.parseAims(aims);
-      window.addEventListener(
-        "annotationSelected",
-        this.handleAnnotationSelected
-      );
-    }
-    if (prevProps.series.length !== this.props.series.length) {
-      await this.setState({ isLoading: true });
-      this.getViewports();
-      this.getData();
-    }
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener(
-      "annotationSelected",
-      this.handleAnnotationSelected
-    );
-  }
-
   handleHideAnnotations = () => {
     this.setState({ showAnnDetails: false });
+  };
+
+  getMarkupTypesForAim = aimUid => {
+    let markupTypes = [];
+    const imageAnnotations = this.props.series[this.props.activePort]
+      .imageAnnotations;
+    Object.entries(imageAnnotations).forEach(([key, values]) => {
+      values.forEach(value => {
+        if (value.aimUid === aimUid) markupTypes.push(value.markupType);
+      });
+    });
+    console.log("Markup Types", markupTypes);
+    return markupTypes;
   };
 
   render() {

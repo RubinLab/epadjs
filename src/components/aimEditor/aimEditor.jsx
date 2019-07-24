@@ -37,15 +37,16 @@ class AimEditor extends Component {
       resolve(getTemplates());
     });
     templatePromise.then(result => {
-      console.log("TEMPLATES", result.data);
       this.semanticAnswers = new questionaire.AimEditor(
         element,
         this.validateForm
       );
       this.semanticAnswers.loadTemplates(result.data);
       this.semanticAnswers.createViewerWindow();
-      if (this.props.aimId != null && Object.entries(this.props.aimId).length)
+      if (this.props.aimId != null && Object.entries(this.props.aimId).length) {
         this.semanticAnswers.loadAimJson(this.props.aimId);
+        console.log("am in and ", this.props.aimId);
+      }
       //this.semanticAnswers.loadTemplates(questionaire.templateArray);
     });
   }
@@ -89,9 +90,6 @@ class AimEditor extends Component {
   };
 
   save = () => {
-    console.log("cstools are", this.props.csTools);
-    // get data from questions
-
     // Logic behind relies on the order of the data in array
     const answers = this.semanticAnswers.saveAim();
     this.createAim(answers);
@@ -100,8 +98,6 @@ class AimEditor extends Component {
   createAim = answers => {
     let hasSegmentation = false; //TODO:keep this in store and look dynamically
     const updatedAimId = this.props.aimId;
-    console.log("Cornerstone", this.props.cornerstone);
-    console.log("IMAGE is", this.image);
 
     const {
       toolState
@@ -112,7 +108,6 @@ class AimEditor extends Component {
       this.props.activePort
     ]["element"];
     const stackToolState = this.props.csTools.getToolState(element, "stack");
-    console.log("Mete", stackToolState);
     const imageIds = stackToolState.data[this.props.activePort].imageIds;
 
     // check which images has markup or segmentation
@@ -230,17 +225,11 @@ class AimEditor extends Component {
       });
     });
 
-    console.log("MARKUPS TO BE SAVED", markupsToSave);
-    console.log("First Object is", Object.keys(markupsToSave)[0]);
-
     const cornerStoneImageId = Object.keys(markupsToSave)[0];
     const image = this.getCornerstoneImage(cornerStoneImageId, markupsToSave);
-    console.log("Image is", image);
     let seedData = getAimImageData(image);
-    console.log("imaj geldiii", seedData);
     this.addSemanticAnswersToSeedData(seedData, answers);
     this.addUserToSeedData(seedData);
-    console.log("Degisiklikler kaydedildi", seedData);
     // this.addModalityObjectToSeedData(seedData);
 
     var aim = new Aim(
@@ -250,9 +239,6 @@ class AimEditor extends Component {
       updatedAimId
     );
 
-    console.log("Aim Geldii", aim);
-
-    console.log("Markups to save", markupsToSave);
     Object.entries(markupsToSave).forEach(([key, values]) => {
       values.map(value => {
         const { type, markup, shapeIndex, imageReferenceUid } = value;
@@ -278,9 +264,11 @@ class AimEditor extends Component {
 
     const aimJson = aim.getAim();
     console.log("Son AYIMMMM", aimJson);
+    console.log("Son AYIMMMM", JSON.stringify(aimJson));
     // const file = new Blob(aimJson, { type: "text/json" });
     // const series = this.props.series[this.props.activePort];
-    uploadAim(testAim)
+    console.log("DEST", testAim);
+    uploadAim(JSON.parse(aimJson))
       .then(() => {
         this.props.onCancel();
         toast.success("Aim succesfully saved.", {

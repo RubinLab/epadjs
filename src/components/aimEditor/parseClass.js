@@ -3484,12 +3484,12 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
   this.checkAnnotationShapes = function(prmtrShapeArray) {
     //self.templateShapeArray.push({"shape":object.GeometricShape, "domid" : object.id});
-    let prmtrShapeArrayLength = prmtrShapeArray.length();
+    let prmtrShapeArrayLength = prmtrShapeArray.length;
     for (let k = 0; k < prmtrShapeArrayLength; k++) {
       // this.mapShapesSchemaToTemplate.set("TwoDimensionMultiPoint", [{"formshape" : 'Line'}, {"formshape" : 'Perpendicular'}]);
       let jsonShapeObj = this.mapShapesSchemaToTemplate.get(prmtrShapeArray[k]);
       if (Array.isArray(jsonShapeObj)) {
-        let templateShapeArrayLength = self.templateShapeArray.length();
+        let templateShapeArrayLength = self.templateShapeArray.length;
         for (let t = 0; t < templateShapeArrayLength; t++) {
           for (let j = 0; j < jsonShapeObj.length; j++) {
             if (
@@ -3684,7 +3684,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     //var ImageAnnotation = aimjson.imageAnnotations.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
 
     var templateIndex = self.mapTemplateCodeValueByIndex.get(
-      aimjson.typeCode.code
+      aimjson.typeCode[0].code
     );
     if (typeof templateIndex === "undefined") {
       return 1;
@@ -3700,7 +3700,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       //console.log("xxxx_"+JSON.stringify(imagingObservationEntityCollection))
       var comment = aimjson.comment.value;
       var annotationName = aimjson.name.value;
-      self.aimTypeCode = aimjson.typeCode;
+      self.aimTypeCode = aimjson.typeCode[0];
       // console.log("comment" + comment);
       // console.log("comment" + annotationName);
       if (comment.includes("~")) {

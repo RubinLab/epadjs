@@ -1,8 +1,6 @@
 export function getImageIdAnnotations(aims) {
   let imageIdSpecificMarkups = {};
   aims.forEach(aim => parseAim(aim, imageIdSpecificMarkups));
-  // console.log(imageIdSpecificMarkups);
-  console.log("ImageIdSpecifi", imageIdSpecificMarkups);
   return imageIdSpecificMarkups;
 }
 

@@ -501,7 +501,7 @@ class Toolbar extends Component {
                   <span>Sculpt</span>
                 </div>
               </div>
-              <div
+              {/* <div
                 id="perpendicular"
                 tabIndex="7"
                 className="drawingSectionButton"
@@ -511,8 +511,8 @@ class Toolbar extends Component {
                 <div className="buttonLabel">
                   <span>Perpendicular</span>
                 </div>
-              </div>
-              <div
+              </div> */}
+              {/* <div
                 id="brush"
                 tabIndex="8"
                 className="drawingSectionButton"
@@ -522,7 +522,7 @@ class Toolbar extends Component {
                 <div className="buttonLabel">
                   <span>Brush</span>
                 </div>
-              </div>
+              </div> */}
               <div
                 id="line"
                 tabIndex="9"
