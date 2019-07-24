@@ -5,8 +5,11 @@ import { isLite } from "../../config.json";
 import { toast } from "react-toastify";
 import { getTemplates } from "../../services/templateServices";
 import { uploadAim } from "../../services/annotationServices";
+import { getAimImageData } from "./aimHelper";
 import * as questionaire from "./parseClass.js";
 import Aim from "./Aim";
+import { modalities } from "./modality";
+import testAim from "./testAim.json";
 import * as dcmjs from "dcmjs";
 
 import "./aimEditor.css";
@@ -27,24 +30,25 @@ class AimEditor extends Component {
     this.semanticAnswers = {};
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     const element = document.getElementById("questionaire");
-    const { data: templates } = await getTemplates();
-
-    // console.log("Templates", await getTemplates());
-    console.log("TEMPLATES", templates);
-
-    // Change the static projectId above with the value in store
-    //
-
-    this.semanticAnswers = new questionaire.AimEditor(
-      element,
-      this.validateForm
-    );
-    this.semanticAnswers.loadTemplates(questionaire.templateArray);
-    this.semanticAnswers.createViewerWindow(element);
-    if (this.props.aimId != null && Object.entries(this.props.aimId).length)
-      this.semanticAnswers.loadAimJson(this.props.aimId);
+    // const { data: templates } = await getTemplates();
+    const templatePromise = new Promise(resolve => {
+      resolve(getTemplates());
+    });
+    templatePromise.then(result => {
+      this.semanticAnswers = new questionaire.AimEditor(
+        element,
+        this.validateForm
+      );
+      this.semanticAnswers.loadTemplates(result.data);
+      this.semanticAnswers.createViewerWindow();
+      if (this.props.aimId != null && Object.entries(this.props.aimId).length) {
+        this.semanticAnswers.loadAimJson(this.props.aimId);
+        console.log("am in and ", this.props.aimId);
+      }
+      //this.semanticAnswers.loadTemplates(questionaire.templateArray);
+    });
   }
 
   validateForm = hasError => {
@@ -52,8 +56,10 @@ class AimEditor extends Component {
   };
 
   getImage = () => {
-    return this.cornerstone.getImage(
-      this.cornerstone.getEnabledElements()[this.props.activePort]["element"]
+    return this.props.cornerstone.getImage(
+      this.props.cornerstone.getEnabledElements()[this.props.activePort][
+        "element"
+      ]
     );
   };
 
@@ -84,34 +90,24 @@ class AimEditor extends Component {
   };
 
   save = () => {
-    console.log("cstools are", this.csTools);
-    // get data from questions
-
     // Logic behind relies on the order of the data in array
     const answers = this.semanticAnswers.saveAim();
     this.createAim(answers);
   };
 
   createAim = answers => {
-    const hasSegmentation = false; //TODO:keep this in store and look dynamically
+    let hasSegmentation = false; //TODO:keep this in store and look dynamically
     const updatedAimId = this.props.aimId;
-    console.log("IMAGE is", this.image);
 
-    var aim = new Aim(
-      this.image,
-      enumAimType.imageAnnotation,
-      hasSegmentation,
-      answers,
-      updatedAimId
-    );
-
-    const { toolState } = this.csTools.globalImageIdSpecificToolStateManager;
+    const {
+      toolState
+    } = this.props.csTools.globalImageIdSpecificToolStateManager;
 
     // get the imagesIds for active viewport
-    const element = this.cornerstone.getEnabledElements()[
+    const element = this.props.cornerstone.getEnabledElements()[
       this.props.activePort
     ]["element"];
-    const stackToolState = this.csTools.getToolState(element, "stack");
+    const stackToolState = this.props.csTools.getToolState(element, "stack");
     const imageIds = stackToolState.data[this.props.activePort].imageIds;
 
     // check which images has markup or segmentation
@@ -124,13 +120,14 @@ class AimEditor extends Component {
     if (hasSegmentation) {
       var imagePromises = [];
       imageIds.map(imageId => {
-        imagePromises.push(this.cornerstone.loadImage(imageId));
+        imagePromises.push(this.props.cornerstone.loadImage(imageId));
       });
       this.createSegmentation(toolState, imagePromises, markedImageIds);
     }
 
     // check for markups
     var shapeIndex = 1;
+    var markupsToSave = {};
     markedImageIds.map(imageId => {
       const imageReferenceUid = this.parseImgeId(imageId);
       const markUps = toolState[imageId];
@@ -142,11 +139,15 @@ class AimEditor extends Component {
             polygons.map(polygon => {
               if (!polygon.aimId || polygon.aimId === updatedAimId) {
                 //dont save the same markup to different aims
-                this.addPolygonToAim(
-                  aim,
-                  polygon,
-                  shapeIndex,
-                  imageReferenceUid
+                this.storeMarkupsToBeSaved(
+                  imageId,
+                  {
+                    type: "polygon",
+                    markup: polygon,
+                    shapeIndex,
+                    imageReferenceUid
+                  },
+                  markupsToSave
                 );
                 shapeIndex++;
               }
@@ -154,15 +155,26 @@ class AimEditor extends Component {
             break;
           case "Bidirectional":
             console.log("Bidirectional ", markUps[tool]);
-            shapeIndex++;
-            break;
-          case "RectangleRoi":
-            console.log("RectangleRoi ", markUps[tool]);
-            shapeIndex++;
-            break;
-          case "EllipticalRoi":
-            console.log("EllipticalRoi ", markUps[tool]);
-            shapeIndex++;
+            const bidirectionals = markUps[tool].data;
+            bidirectionals.map(bidirectional => {
+              if (
+                !bidirectional.aimId ||
+                bidirectional.aimId === updatedAimId
+              ) {
+                //dont save the same markup to different aims
+                this.storeMarkupsToBeSaved(
+                  imageId,
+                  {
+                    type: "bidirectional",
+                    markup: bidirectional,
+                    shapeIndex,
+                    imageReferenceUid
+                  },
+                  markupsToSave
+                );
+                shapeIndex++;
+              }
+            });
             break;
           case "CircleRoi":
             console.log("CircleRoi ", markUps[tool]);
@@ -170,7 +182,17 @@ class AimEditor extends Component {
             circles.map(circle => {
               if (!circle.aimId || circle.aimId === updatedAimId) {
                 //dont save the same markup to different aims
-                this.addCircleToAim(aim, circle, shapeIndex, imageReferenceUid);
+                this.storeMarkupsToBeSaved(
+                  imageId,
+                  {
+                    type: "circle",
+                    markup: circle,
+                    shapeIndex,
+                    imageReferenceUid
+                  },
+                  markupsToSave
+                );
+                // this.addCircleToAim(aim, circle, shapeIndex, imageReferenceUid);
                 shapeIndex++;
               }
             });
@@ -180,16 +202,72 @@ class AimEditor extends Component {
             lines.map(line => {
               if (!line.aimId || line.aimId === updatedAimId) {
                 //dont save the same markup to different aims
-                this.addLineToAim(aim, line, shapeIndex);
+                this.storeMarkupsToBeSaved(
+                  imageId,
+                  {
+                    type: "line",
+                    markup: line,
+                    shapeIndex,
+                    imageReferenceUid
+                  },
+                  markupsToSave
+                );
+                // this.addLineToAim(aim, line, shapeIndex);
                 shapeIndex++;
               }
             });
+            break;
+          case "brush":
+            const brush = markUps[tool].data;
+            hasSegmentation = true;
+          // TODO: check if it's a new brush data
         }
       });
     });
+
+    const cornerStoneImageId = Object.keys(markupsToSave)[0];
+    const image = this.getCornerstoneImage(cornerStoneImageId, markupsToSave);
+    let seedData = getAimImageData(image);
+    this.addSemanticAnswersToSeedData(seedData, answers);
+    this.addUserToSeedData(seedData);
+    // this.addModalityObjectToSeedData(seedData);
+
+    var aim = new Aim(
+      seedData,
+      enumAimType.imageAnnotation,
+      hasSegmentation,
+      updatedAimId
+    );
+
+    Object.entries(markupsToSave).forEach(([key, values]) => {
+      values.map(value => {
+        const { type, markup, shapeIndex, imageReferenceUid } = value;
+        switch (type) {
+          case "line":
+            this.addLineToAim(aim, markup, shapeIndex, imageReferenceUid);
+            break;
+          case "circle":
+            this.addCircleToAim(aim, markup, shapeIndex, imageReferenceUid);
+            break;
+          case "polygon":
+            this.addPolygonToAim(aim, markup, shapeIndex, imageReferenceUid);
+            break;
+          case "bidirectional":
+            this.addBidirectionalToAim(
+              aim.markup,
+              shapeIndex,
+              imageReferenceUid
+            );
+        }
+      });
+    });
+
     const aimJson = aim.getAim();
+    console.log("Son AYIMMMM", aimJson);
+    console.log("Son AYIMMMM", JSON.stringify(aimJson));
     // const file = new Blob(aimJson, { type: "text/json" });
     // const series = this.props.series[this.props.activePort];
+    console.log("DEST", testAim);
     uploadAim(JSON.parse(aimJson))
       .then(() => {
         this.props.onCancel();
@@ -203,6 +281,51 @@ class AimEditor extends Component {
         });
       })
       .catch(error => console.log(error));
+  };
+
+  addModalityObjectToSeedData = seedData => {
+    const modality = modalities[seedData.series.modality];
+    seedData.series.modality = { ...modality };
+    console.log("Siid data", seedData);
+  };
+
+  addSemanticAnswersToSeedData = (seedData, answers) => {
+    console.log("ANSWERS", answers);
+    console.log("SEED DATA", seedData);
+    const {
+      name,
+      comment,
+      imagingPhysicalEntityCollection,
+      imagingObservationEntityCollection,
+      inferenceEntity,
+      typeCode
+    } = answers;
+    seedData.aim.name = name;
+    if (comment) seedData.aim.comment = comment;
+    if (imagingPhysicalEntityCollection)
+      seedData.aim.imagingPhysicalEntityCollection = imagingPhysicalEntityCollection;
+    if (imagingObservationEntityCollection)
+      seedData.aim.imagingObservationEntityCollection = imagingObservationEntityCollection;
+    if (inferenceEntity) seedData.aim.inferenceEntity = inferenceEntity;
+    if (typeCode) seedData.aim.typeCode = typeCode;
+  };
+
+  addUserToSeedData = seedData => {
+    let obj = {};
+    obj.loginName = sessionStorage.getItem("username");
+    obj.name = sessionStorage.getItem("displayName");
+    seedData.user = obj;
+  };
+
+  getCornerstoneImage = (imageId, markupsToSave) => {
+    return this.props.cornerstone.default.imageCache.imageCache[
+      Object.keys(markupsToSave)[0]
+    ].image;
+  };
+
+  storeMarkupsToBeSaved = (imageId, markupData, markupsToSave) => {
+    if (!markupsToSave[imageId]) markupsToSave[imageId] = [];
+    markupsToSave[imageId].push(markupData);
   };
 
   addPolygonToAim = (aim, polygon, shapeIndex, imageReferenceUid) => {
@@ -228,7 +351,7 @@ class AimEditor extends Component {
     aim.createImageAnnotationStatement(1, markupId, maxId);
   };
 
-  addLineToAim = (aim, line, shapeIndex) => {
+  addLineToAim = (aim, line, shapeIndex, imageReferenceUid) => {
     const { start, end } = line.handles;
     const markupId = aim.addMarkupEntity("TwoDimensionPolyline", shapeIndex, [
       start,
@@ -259,9 +382,16 @@ class AimEditor extends Component {
 
     const maxId = aim.createMaxCalcEntity({ max, unit: "[hnsf'U]" });
     aim.createImageAnnotationStatement(1, markupId, maxId);
-    console.log();
+
     // aim.add;
   };
+
+  addBidirectionalToAim = (
+    aim,
+    bidirectional,
+    shapeIndex,
+    imageReferenceUid
+  ) => {};
 
   createSegmentation = (toolState, imagePromises, markedImageIds) => {
     const segments = [];

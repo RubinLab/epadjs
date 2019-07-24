@@ -71,6 +71,7 @@ const tools = [
 const mapStateToProps = state => {
   return {
     series: state.annotationsListReducer.openSeries,
+    loading: state.annotationsListReducer.loading,
     cornerstone: state.searchViewReducer.cornerstone,
     cornerstoneTools: state.searchViewReducer.cornerstoneTools,
     activePort: state.annotationsListReducer.activePort,
@@ -90,11 +91,9 @@ class DisplayView extends Component {
       data: [],
       isLoading: true,
       selectedAim: undefined,
-      // height: "100%",
       refs: props.refs,
       showAnnDetails: true
     };
-    //this.createRefs();
   }
 
   componentDidMount() {
@@ -106,6 +105,31 @@ class DisplayView extends Component {
     );
   }
 
+  async componentDidUpdate(prevProps) {
+    if (prevProps.series.length !== this.props.series.length) {
+      await this.setState({ isLoading: true });
+      this.getViewports();
+      this.getData();
+    }
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener(
+      "annotationSelected",
+      this.handleAnnotationSelected
+    );
+  }
+
+  // componentDidUpdate = prevProps => {
+  //   if (
+  //     (this.props.loading !== prevProps.loading && !this.props.loading) ||
+  //     this.props.series !== prevProps.series
+  //   ) {
+  //     this.getViewports();
+  //     this.getData();
+  //   }
+  // };
+
   getData() {
     var promises = [];
     for (let i = 0; i < this.props.series.length; i++) {
@@ -114,7 +138,10 @@ class DisplayView extends Component {
     }
     Promise.all(promises).then(res => {
       this.setState({ data: res, isLoading: false });
-      // if (this.props.aimList) this.parseAims(this.props.aimList);
+      this.props.series.forEach(serie => {
+        if (serie.imageAnnotations)
+          this.parseAims(serie.imageAnnotations, serie.seriesUID);
+      });
     });
   }
 
@@ -172,7 +199,7 @@ class DisplayView extends Component {
     if (numCols === 1) {
       this.setState({ width: "100%" });
     } else if (numCols === 2) this.setState({ width: "50%" });
-    else this.setState({ width: "33%" });
+    else this.setState({ width: "33%", height: "calc(100% - 60px)" });
   };
 
   createRefs() {
@@ -234,57 +261,33 @@ class DisplayView extends Component {
     }
   };
 
-  //parseAims,
-
-  // parseAims = aimList => {
-  //   // first clear the tool state
-  //   // if (this.state.selectedAim) {
-  //   //   const element = this.cornerstone.getEnabledElements()[
-  //   //     this.props.activePort
-  //   //   ]["element"];
-  //   //   this.props.cornerstoneTools.globalImageIdSpecificToolStateManager.clear(
-  //   //     element
-  //   //   );
-  //   // }
-  //   console.log(this.props.cornerstoneTools);
-
-  //   // now parse the aim and render the new marups
-  //   Object.entries(aimList).forEach(([key, value]) => {
-  //     Object.entries(value).forEach(([key, value]) => {
-  //       // get markups for the aim
-  //       if (
-  //         value.json.imageAnnotations.ImageAnnotation.markupEntityCollection
-  //       ) {
-  //         const color = value.color.button.background;
-  //         this.renderMarkups(key, Aim.getMarkups(value.json), color);
-  //       }
-  //     });
-  //   });
-  // };
-
-  renderMarkups = (key, markups, color) => {
-    console.log("Rendering Markups", key, markups, color);
-    if (markups.constructor === Array) {
-      markups.forEach(markup => {
-        this.renderMarkup(key, markup, color);
+  parseAims = (aimList, seriesUid) => {
+    Object.entries(aimList).forEach(([key, values]) => {
+      values.forEach(value => {
+        const color = this.getColorOfMarkup(value.aimUid, seriesUid);
+        this.renderMarkup(key, value, color);
       });
-    } else this.renderMarkup(key, markups, color);
+    });
   };
 
-  renderMarkup = (key, markup, color) => {
+  getColorOfMarkup = (aimUid, seriesUid) => {
+    return this.props.aimList[seriesUid][aimUid].color.button.background;
+  };
+
+  renderMarkup = (imageId, markup, color) => {
     const type = markup.markupType;
     switch (type) {
       case "TwoDimensionPolyline":
-        this.renderPolygon(key, markup, color);
+        this.renderPolygon(imageId, markup, color);
         break;
       case "TwoDimensionMultiPoint":
-        this.renderLine(key, markup, color);
+        this.renderLine(imageId, markup, color);
         break;
       case "TwoDimensionCircle":
-        this.renderCircle(key, markup, color);
+        this.renderCircle(imageId, markup, color);
         break;
       case "TwoDimensionPoint":
-        this.renderPoint(key, markup, color);
+        this.renderPoint(imageId, markup, color);
         break;
       default:
         return;
@@ -298,14 +301,14 @@ class DisplayView extends Component {
       toolState[imageId] = { ...toolState[imageId], [tool]: { data: [] } };
   };
 
-  renderLine = (key, markup, color) => {
+  renderLine = (imageId, markup, color) => {
     const imgId = getWadoImagePath(
       this.props.series[this.props.activePort],
-      markup.imageId
+      imageId
     );
     const data = JSON.parse(JSON.stringify(line));
     data.color = color;
-    data.aimId = key;
+    data.aimId = markup.aimUid;
     this.createLinePoints(data, markup.coordinates);
     const currentState = this.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imgId, "Length");
@@ -322,14 +325,14 @@ class DisplayView extends Component {
     data.handles.end.y = points[1].y.value;
   };
 
-  renderPolygon = (key, markup, color) => {
+  renderPolygon = (imageId, markup, color) => {
     const imgId = getWadoImagePath(
       this.props.series[this.props.activePort],
-      markup.imageId
+      imageId
     );
     const data = JSON.parse(JSON.stringify(freehand));
     data.color = color;
-    data.aimId = key;
+    data.aimId = markup.aimUid;
     this.createPolygonPoints(data, markup.coordinates);
     const currentState = this.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imgId, "FreehandMouse");
@@ -357,14 +360,14 @@ class DisplayView extends Component {
     data.handles.points = [...freehandPoints];
   };
 
-  renderPoint = (key, markup, color) => {
+  renderPoint = (imageId, markup, color) => {
     const imgId = getWadoImagePath(
       this.props.series[this.props.activePort],
-      markup.imageId
+      imageId
     );
     const data = JSON.parse(JSON.stringify(probe));
     data.color = color;
-    data.aimId = key;
+    data.aimId = markup.aimUid;
     data.handles.end.x = markup.coordinates.x.value;
     data.handles.end.y = markup.coordinates.y.value;
     const currentState = this.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
@@ -375,14 +378,14 @@ class DisplayView extends Component {
     );
   };
 
-  renderCircle = (key, markup, color) => {
+  renderCircle = (imageId, markup, color) => {
     const imgId = getWadoImagePath(
       this.props.series[this.props.activePort],
-      markup.imageId
+      imageId
     );
     const data = JSON.parse(JSON.stringify(circle));
     data.color = color;
-    data.aimId = key;
+    data.aimId = markup.aimUid;
     data.handles.start.x = markup.coordinates[0].x.value;
     data.handles.start.y = markup.coordinates[0].y.value;
     data.handles.end.x = markup.coordinates[1].x.value;
@@ -393,11 +396,11 @@ class DisplayView extends Component {
     this.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
-    console.log("Current state is", currentState);
   };
 
   handleAnnotationSelected = event => {
     console.log("event is", event);
+    console.log("Props in aim selected is", this.props);
     if (
       this.props.aimList[this.props.series[this.props.activePort].seriesUID][
         event.detail
@@ -406,6 +409,8 @@ class DisplayView extends Component {
       const aimJson = this.props.aimList[
         this.props.series[this.props.activePort].seriesUID
       ][event.detail].json;
+      const markupTypes = this.getMarkupTypesForAim(event.detail);
+      aimJson["markupType"] = [...markupTypes];
       console.log("event", JSON.stringify(aimJson));
       this.setState({ showAimEditor: true, selectedAim: aimJson });
     }
@@ -415,33 +420,21 @@ class DisplayView extends Component {
     this.setState({ showAimEditor: false, selectedAim: undefined });
   };
 
-  async componentDidUpdate(prevProps) {
-    if (!this.state.isLoading && Object.entries(this.props.aimList).length) {
-      //get the aims for test
-      const { data: aims } = await getAnnotations2();
-      // console.log("csTool are", this.cornerstoneTools);
-      // console.log("aims are", aims);
-      // this.parseAims(aims);
-      window.addEventListener(
-        "annotationSelected",
-        this.handleAnnotationSelected
-      );
-    }
-    if (prevProps.series.length !== this.props.series.length) {
-      this.getViewports();
-      this.getData();
-    }
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener(
-      "annotationSelected",
-      this.handleAnnotationSelected
-    );
-  }
-
   handleHideAnnotations = () => {
     this.setState({ showAnnDetails: false });
+  };
+
+  getMarkupTypesForAim = aimUid => {
+    let markupTypes = [];
+    const imageAnnotations = this.props.series[this.props.activePort]
+      .imageAnnotations;
+    Object.entries(imageAnnotations).forEach(([key, values]) => {
+      values.forEach(value => {
+        if (value.aimUid === aimUid) markupTypes.push(value.markupType);
+      });
+    });
+    console.log("Markup Types", markupTypes);
+    return markupTypes;
   };
 
   render() {
