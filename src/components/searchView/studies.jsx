@@ -86,8 +86,6 @@ class Studies extends Component {
         pauseOnHover: true,
         draggable: true
       });
-      console.log(this.props.expanded);
-      this.setState({ expanded: this.props.expanded });
     }
   }
 
@@ -489,8 +487,6 @@ class Studies extends Component {
   };
 
   render() {
-    console.log("////////////////");
-    console.log(this.state);
     const {
       toggleSelection,
       toggleAll,
@@ -543,7 +539,6 @@ class Studies extends Component {
                     studyId={row.original.studyUID}
                     studyDescription={row.original.studyDescription}
                     update={this.props.update}
-                    // expnaded={this.state.childExpanded}
                     expandLevel={this.props.expandLevel}
                   />
                 </div>

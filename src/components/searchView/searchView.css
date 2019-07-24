@@ -7,10 +7,13 @@
 }
 
 .searchView-toolbar__icon {
-  margin-right: 1rem;
+  margin: 0.5rem;
   cursor: pointer;
 }
 
+.searchView-toolbar__icon:hover {
+  color: white;
+}
 .searchView-checkbox {
   width: 2rem;
 }
@@ -172,7 +175,7 @@
 .hide-delete {
   cursor: not-allowed;
   color: #5c5c5c;
-  margin-right: 1rem;
+  margin: 0.5rem;
 }
 
 .alert-download__modal {
@@ -189,4 +192,15 @@
   padding-left: 1rem;
   padding-right: 1rem;
   padding-top: 1rem;
+}
+
+.searchView-toolbar__group {
+  display: flex;
+  margin-right: 1rem;
+  margin-bottom: 0.3rem;
+
+  align-items: center;
+  border-radius: 4px;
+  box-shadow: 0.5px 0px 0px 0.2px #999;
+  /* background: #861737; */
 }

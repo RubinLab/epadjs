@@ -43,12 +43,8 @@ class Subjects extends Component {
   async componentDidMount() {
     const pid = isLite ? "lite" : this.props.pid;
     const data = await this.getData();
-    // const { expanded } = this.props;
-    console.log("expanded in did mount", this.props);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
-
-    console.log(data);
   }
 
   async componentDidUpdate(prevProps) {
@@ -414,7 +410,6 @@ class Subjects extends Component {
       expanded,
       onExpandedChange
     };
-    console.log("expanded", expanded);
     const TheadComponent = props => null;
     return (
       <div>
@@ -441,7 +436,6 @@ class Subjects extends Component {
                     subjectId={row.original.displaySubjectID}
                     update={this.props.update}
                     expandLevel={this.props.expandLevel}
-                    expanded={this.state.expandedChildren}
                   />
                 </div>
               );

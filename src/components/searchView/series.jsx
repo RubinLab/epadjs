@@ -102,8 +102,6 @@ class Series extends Component {
         draggable: true
       });
     }
-    const expanded = this.props.childExpanded;
-    this.setState({ expanded });
   }
 
   async componentDidUpdate(prevProps) {
@@ -129,7 +127,7 @@ class Series extends Component {
   expandCurrentLevel = () => {
     const expanded = {};
     for (let i = 0; i < this.state.data.length; i++) {
-      expanded[i] = true;
+      expanded[i] = this.state.data[i].numberOfAnnotations ? true : false;
     }
     this.setState({ expanded });
   };

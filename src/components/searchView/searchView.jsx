@@ -86,12 +86,10 @@ class SearchView extends Component {
       this.setState(state => ({ expandLevel: state.expandLevel + 1 }));
     }
     let expanded = {};
-    console.log(this.state.numOfsubjects);
     for (let i = 0; i < this.state.numOfsubjects; i++) {
       expanded[i] = true;
     }
     this.setState({ expanded });
-    console.log(expanded);
   };
 
   handleShrink = async () => {
@@ -562,7 +560,6 @@ class SearchView extends Component {
     this.setState({ missingAnns: [] });
   };
   render() {
-    console.log(this.state);
     let status;
     if (this.state.uploading) {
       status = "Uploading…";
