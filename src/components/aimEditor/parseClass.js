@@ -3502,7 +3502,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           }
         }
       } else {
-        let templateShapeArrayLength = self.templateShapeArray.length();
+        let templateShapeArrayLength = self.templateShapeArray.length;
         for (let t = 0; t < templateShapeArrayLength; t++) {
           if (self.templateShapeArray[t].shape === jsonShapeObj.formshape) {
             document.getElementById(
