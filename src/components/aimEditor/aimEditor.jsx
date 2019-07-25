@@ -131,7 +131,7 @@ class AimEditor extends Component {
       Object.keys(markUps).map(tool => {
         switch (tool) {
           case "FreehandMouse":
-            console.log("FreeHandMouse");
+            // console.log("FreeHandMouse");
             const polygons = markUps[tool].data;
             polygons.map(polygon => {
               if (!polygon.aimId || polygon.aimId === updatedAimId) {
@@ -151,7 +151,7 @@ class AimEditor extends Component {
             });
             break;
           case "Bidirectional":
-            console.log("Bidirectional ", markUps[tool]);
+            // console.log("Bidirectional ", markUps[tool]);
             const bidirectionals = markUps[tool].data;
             bidirectionals.map(bidirectional => {
               if (
@@ -174,7 +174,7 @@ class AimEditor extends Component {
             });
             break;
           case "CircleRoi":
-            console.log("CircleRoi ", markUps[tool]);
+            // console.log("CircleRoi ", markUps[tool]);
             const circles = markUps[tool].data;
             circles.map(circle => {
               if (!circle.aimId || circle.aimId === updatedAimId) {
@@ -343,11 +343,18 @@ class AimEditor extends Component {
 
   addLineToAim = (aim, line, shapeIndex, imageReferenceUid) => {
     const { start, end } = line.handles;
-    const markupId = aim.addMarkupEntity("TwoDimensionPolyline", shapeIndex, [
-      start,
-      end
-    ]);
-    // aim.add;
+    const markupId = aim.addMarkupEntity(
+      "TwoDimensionMultiPoint",
+      shapeIndex,
+      [start, end],
+      imageReferenceUid
+    );
+
+    const lengthId = aim.createLengthCalcEntity({
+      length: line.length,
+      unit: "mm"
+    });
+    aim.createImageAnnotationStatement(1, markupId, lengthId);
   };
 
   addCircleToAim = (aim, circle, shapeIndex, imageReferenceUid) => {
@@ -359,7 +366,6 @@ class AimEditor extends Component {
       imageReferenceUid
     );
     const { mean, stdDev, min, max } = circle.cachedStats;
-    console.log("circle", circle, "mean", mean, "stdDev", stdDev);
 
     const meanId = aim.createMeanCalcEntity({ mean, unit: "[hnsf'U]" });
     aim.createImageAnnotationStatement(1, markupId, meanId);
@@ -385,7 +391,6 @@ class AimEditor extends Component {
 
   createSegmentation = (toolState, imagePromises, markedImageIds) => {
     const segments = [];
-    console.log("marked Images are", markedImageIds);
     markedImageIds
       .filter(imageId => {
         if (
@@ -396,7 +401,6 @@ class AimEditor extends Component {
         return true;
       })
       .map(imageId => {
-        console.log("I am in");
         this.setSegmentMetaData(toolState, imageId, segments);
       });
     const brushData = {
