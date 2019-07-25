@@ -15,9 +15,6 @@ class Aim {
       user: this.temp.user,
       person: this.temp.person
     } = imageData);
-    console.log("TEMPLI", this);
-    // this.imageAnnotations.ImageAnnotationCollection = {};
-    // const newAim = this.imageAnnotations.ImageAnnotationCollection; //this can be used instead of the wrapper in getAim
     this.xmlns = aimConf.xmlns;
     this["xmlns:rdf"] = aimConf["xmlns:rdf"];
     this["xmlns:xsi"] = aimConf["xmlns:xsi"];
@@ -363,7 +360,6 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["imageReferenceUid"] = { root: imageReferenceUid };
-    console.log("GELIYOO", this);
     this.imageAnnotations.ImageAnnotation[0].markupEntityCollection.MarkupEntity.push(
       obj
     );
@@ -413,7 +409,6 @@ class Aim {
       sopInstanceUid = { root: sopInstanceUid };
       obj["Image"].push({ sopClassUid, sopInstanceUid });
     });
-    console.log("YENI IMAJ", obj);
     return obj;
   };
 
@@ -612,7 +607,6 @@ class Aim {
     delete this["temp"];
     const stringAim = JSON.stringify(this);
     const wrappedAim = `{"ImageAnnotationCollection": ${stringAim} } `;
-    console.log(wrappedAim);
     return wrappedAim;
   };
 }

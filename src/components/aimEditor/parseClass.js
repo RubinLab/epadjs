@@ -103,11 +103,11 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     }
 
     keyvalue = keyvalue + "+" + String.fromCharCode(e.keyCode);
-    console.log(keyvalue);
+    // console.log(keyvalue);
 
     if (self.mapShortCutKeys.get(keyvalue)) {
-      console.log("in" + keyvalue);
-      console.log(self.mapShortCutKeys.get(keyvalue));
+      // console.log("in" + keyvalue);
+      // console.log(self.mapShortCutKeys.get(keyvalue));
       document.getElementById(self.mapShortCutKeys.get(keyvalue)).click();
     }
   };
@@ -590,7 +590,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     //GSDiv.style.color = 'black';
     GSDiv.innerHTML = "Required shape : " + object.GeometricShape;
     parentDiv.appendChild(GSDiv);
-    console.log("shape " + JSON.stringify(object.id));
+    // console.log("shape " + JSON.stringify(object.id));
     self.templateShapeArray.push({
       shape: object.GeometricShape,
       domid: object.id
@@ -2135,10 +2135,10 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     var oSerializer = new XMLSerializer();
     var sXML = oSerializer.serializeToString(data);
 
-    console.log(
-      "..................................................aim Saved data" +
-        JSON.stringify(sXML)
-    );
+    // // console.log(
+    //   "..................................................aim Saved data" +
+    //     JSON.stringify(sXML)
+    // );
     for (var i = 0; i < xmlArray.length; i++) {
       var arrayXML = oSerializer.serializeToString(xmlArray[i].value);
       //console.log("..................................................xml array data" + (JSON.stringify(arrayXML)));
@@ -3060,7 +3060,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
               value: parentObject.value.label
             }
           };
-          console.log("-------" + parentObject.value.selectac);
+          // console.log("-------" + parentObject.value.selectac);
 
           for (var key in instanceAllowedTerms) {
             if (typeof instanceAllowedTerms[key] == "object") {
@@ -3261,10 +3261,10 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
   };
 
   this.saveAim = function() {
-    console.log(
-      "____________save aim : self.jsonTemplateCopy" +
-        JSON.stringify(self.jsonTemplateCopy)
-    );
+    // console.log(
+    //   "____________save aim : self.jsonTemplateCopy" +
+    //     JSON.stringify(self.jsonTemplateCopy)
+    // );
     var jsonComponents = {};
     var finaljson = {};
     var mainHolder = [];
@@ -3430,7 +3430,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     }
     self.addUid(finaljson);
     finaljson = self.replaceTagNamingHierarchy(finaljson);
-    console.log("============= final" + JSON.stringify(finaljson));
+    // console.log("============= final" + JSON.stringify(finaljson));
 
     return finaljson;
   };
