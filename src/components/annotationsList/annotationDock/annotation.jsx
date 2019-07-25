@@ -12,6 +12,8 @@ import CalculationLabel from "./calculationLabel";
 
 const annotation = props => {
   //conditional borderstyling
+  console.log("///////////////////////");
+  console.log(props);
   let buttonStyle = { ...props.style.button };
   let labelStyle = { ...props.style.label };
   let borderStyle = `0.15rem solid ${props.style.button.background}`;
@@ -84,7 +86,11 @@ const annotation = props => {
             </div>
           )}
           {/* {calculations.length > 0 && calculations.length <= 10 && ( */}
-          <CalculationLabel calculations={props.label} name={props.name} />
+          <CalculationLabel
+            calculations={props.label}
+            name={props.name}
+            markupType={props.markupType}
+          />
           {/* )} */}
         </div>
       )}
