@@ -138,7 +138,6 @@ class DisplayView extends Component {
     }
     Promise.all(promises).then(res => {
       this.setState({ data: res, isLoading: false });
-      // this.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState();
       console.log("Cs Tools", this.cornerstoneTools);
       this.props.series.forEach(serie => {
         if (serie.imageAnnotations)
@@ -264,7 +263,6 @@ class DisplayView extends Component {
   };
 
   parseAims = (aimList, seriesUid) => {
-    console.log("Atim list", aimList);
     Object.entries(aimList).forEach(([key, values]) => {
       values.forEach(value => {
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
@@ -284,7 +282,6 @@ class DisplayView extends Component {
         this.renderPolygon(imageId, markup, color);
         break;
       case "TwoDimensionMultiPoint":
-        console.log("line a geldik", imageId, markup, color);
         this.renderLine(imageId, markup, color);
         break;
       case "TwoDimensionCircle":
@@ -310,7 +307,6 @@ class DisplayView extends Component {
       this.props.series[this.props.activePort],
       imageId
     );
-    console.log("imajaydi", imgId);
     const data = JSON.parse(JSON.stringify(line));
     data.color = color;
     data.aimId = markup.aimUid;
