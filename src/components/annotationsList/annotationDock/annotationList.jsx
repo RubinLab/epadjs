@@ -89,12 +89,22 @@ class AnnotationsList extends React.Component {
     const calculations = {};
     if (imageAnnotations) {
       for (let aim of imageAnnotations) {
-        calculations[aim.aimUid]
-          ? calculations[aim.aimUid].push(aim.calculations)
-          : (calculations[aim.aimUid] = [aim.calculations]);
+        if (calculations[aim.aimUid]) {
+          calculations[aim.aimUid][aim.markupUid] = {
+            calculations: [...aim.calculations],
+            markupType: aim.markupType
+          };
+          // calculations[aim.markupUid].push({ markupType: aim.markupType });
+        } else {
+          calculations[aim.aimUid] = {};
+          calculations[aim.aimUid][aim.markupUid] = {
+            calculations: [...aim.calculations],
+            markupType: aim.markupType
+          };
+          // calculations[aim.markupUid].push({ markupType: aim.markupType });
+        }
       }
     }
-    console.log();
     return calculations;
   };
 
@@ -115,18 +125,8 @@ class AnnotationsList extends React.Component {
     if (this.props.openSeries[this.props.activePort].imageAnnotations) {
       imageAnnotations = this.props.openSeries[this.props.activePort]
         .imageAnnotations[this.props.imageID];
-      // console.log("one step before");
-      // console.log(
-      //   this.props.openSeries[this.props.activePort].imageAnnotations
-      // );
-      // console.log(this.props.imageID);
-      // console.log(
-      //   this.props.openSeries[this.props.activePort].imageAnnotations[
-      //     this.props.imageID
-      //   ]
-      // );
+
       if (imageAnnotations) {
-        console.log(imageAnnotations);
         for (let aim of imageAnnotations) {
           let { aimUid } = aim;
           annotations[aimUid]
@@ -156,7 +156,6 @@ class AnnotationsList extends React.Component {
     let annList = [];
     annotations = Object.values(annotations);
     annotations.forEach((aim, index) => {
-      console.log("aim in foreach", aim);
       aim = aim[0];
       annList.push(
         <Annotation

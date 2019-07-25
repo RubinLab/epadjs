@@ -2,28 +2,36 @@ import React from "react";
 
 const calculationLabel = ({ calculations, name }) => {
   const labelArr = [];
-  console.log(calculations);
   if (calculations) {
+    calculations = Object.values(calculations);
     for (let k = 0; k < calculations.length; k++) {
-      for (let i = 0; i < calculations[k].length; i++) {
-        let item = calculations[k][i];
-
-        let classDesc = item.type + "-label";
-        let val = parseFloat(item.value);
+      labelArr.push(
+        <div key={k + "markupType"} className="-calculation__label--title ">
+          {calculations[k].markupType}
+        </div>
+      );
+      let calcArr = calculations[k].calculations;
+      for (let i = 0; i < calcArr.length; i++) {
+        let classDesc = calcArr[i].type + "-label";
+        let val = parseFloat(calcArr[i].value);
         val = isNaN(val) ? val : val.toFixed(3);
 
-        let unit = item.type === "Length" ? item.unit : null;
+        let unit =
+          calcArr[i].type === "Length" && !isNaN(val) ? calcArr[i].unit : null;
 
         let type =
-          item.type === "Standard Deviation"
+          calcArr[i].type === "Standard Deviation"
             ? "Std Dev"
-            : item.type === "Maximum"
+            : calcArr[i].type === "Maximum"
             ? "Max"
-            : item.type === "Minimum"
+            : calcArr[i].type === "Minimum"
             ? "Min"
-            : item.type;
+            : calcArr[i].type;
         labelArr.push(
-          <div className="-calculation__label--el" key={k + i + item.type}>
+          <div
+            className="-calculation__label--el"
+            key={k + i + calcArr[i].type}
+          >
             <div className={classDesc}>{`${type}: `}</div>
             <div className={classDesc}>
               {val}
