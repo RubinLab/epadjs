@@ -19,12 +19,8 @@ import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
 import AnnotationList from "./components/annotationsList";
 import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
-import AnnotationsList from "./components/annotationsList/annotationDock/annotationList";
-import ManagementItemModal from "./components/management/common/customModal";
-
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
-import ProjectModal from "./components/annotationsList/selectSerieModal";
 import { isLite } from "./config.json";
 // import Modal from './components/management/projectCreationForm';
 // import Modal from './components/common/rndBootModal';

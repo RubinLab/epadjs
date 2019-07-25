@@ -38,6 +38,7 @@ import { isLite } from "../../config";
 import { getSubjects } from "../../services/subjectServices";
 import DeleteAlert from "./deleteConfirmationModal";
 import DownloadWarning from "./downloadWarningModal";
+import NewMenu from "./newMenu";
 
 class SearchView extends Component {
   constructor(props) {
@@ -56,7 +57,8 @@ class SearchView extends Component {
       update: 0,
       missingAnns: [],
       expandLevel: 0,
-      expanded: {}
+      expanded: {},
+      showNew: false
     };
   }
 
@@ -563,7 +565,13 @@ class SearchView extends Component {
   handleOK = () => {
     this.setState({ missingAnns: [] });
   };
-  render() {
+
+  handleNewSelected = () => {
+    console.log("here");
+    this.setState(state => ({ showNew: !state.showNew }));
+  };
+
+  render = () => {
     let status;
     if (this.state.uploading) {
       status = "Uploading…";
@@ -593,6 +601,7 @@ class SearchView extends Component {
           onExpand={this.handleExpand}
           onShrink={this.handleShrink}
           onCloseAll={this.handleCloseAll}
+          onNew={this.handleNewSelected}
           status={status}
           showDelete={showDelete}
         />
@@ -635,9 +644,12 @@ class SearchView extends Component {
             onOK={this.handleOK}
           />
         )}
+
+        {this.state.showNew && <NewMenu />}
+        {this.state.newSelected && this.handleNewSelected()}
       </>
     );
-  }
+  };
 }
 
 const mapStateToProps = state => {
