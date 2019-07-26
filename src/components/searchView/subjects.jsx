@@ -34,14 +34,16 @@ class Subjects extends Component {
       selection: [],
       selectAll: false,
       selectType: "checkbox",
-      expanded: {}
+      expanded: {},
+      expandedIDs: {},
+      numOfStudies: 0
     };
   }
 
   async componentDidMount() {
     const pid = isLite ? "lite" : this.props.pid;
     const data = await this.getData();
-    this.setState({ data, size: data.length });
+    this.setState({ data });
     this.setState({ columns: this.setColumns() });
   }
 
@@ -58,7 +60,9 @@ class Subjects extends Component {
         ResultSet: { Result: data }
       }
     } = await getSubjects(this.props.pid);
-    // await this.setState({ data });
+    for (let subject of data) {
+      subject.children = [];
+    }
     return data;
   };
 
@@ -107,6 +111,7 @@ class Subjects extends Component {
         width: this.widthUnit * 13,
         id: "searchView-desc__col",
         resizable: false,
+        accessor: "subjectName",
         Cell: ({ original }) => {
           const desc = this.cleanCarets(original.subjectName);
           const id = "desc-tool" + original.subjectID;
@@ -353,7 +358,15 @@ class Subjects extends Component {
       this.setState({ pivotBy: [], expanded: {} });
     }
   };
-  onExpandedChange = expanded => {
+  onExpandedChange = (newExpanded, index, event) => {
+    this.setState({ expanded: newExpanded });
+  };
+
+  onSortedChange = () => {
+    const { expanded } = this.state;
+    for (let subject in expanded) {
+      expanded[subject] = false;
+    }
     this.setState({ expanded });
   };
 
@@ -386,20 +399,22 @@ class Subjects extends Component {
       onExpandedChange
     };
     const TheadComponent = props => null;
-
     return (
       <div>
         {this.state.data ? (
           <TreeTable
             NoDataComponent={() => null}
-            data={this.state.data}
-            columns={this.state.columns}
-            // defaultPageSize={this.state.size}
+            data={data}
+            columns={columns}
+            pageSize={data.length}
             ref={r => (this.selectTable = r)}
             className="-striped -highlight"
-            freezWhenExpanded={false}
+            // freezWhenExpanded={false}
             showPagination={false}
             // TheadComponent={TheadComponent}
+            onSortedChange={() => {
+              this.onSortedChange();
+            }}
             {...extraProps}
             SubComponent={row => {
               return (

@@ -1,5 +1,5 @@
 import http from "./httpService";
-import { isLite, apiUrl } from "../config.json";
+import { isLite, apiUrl, apiUrlV1 } from "../config.json";
 export function getAnnotations(series, opts = {}) {
   if (isLite) {
     const { projectId, subjectId, studyId, seriesId } = series;
@@ -43,8 +43,7 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
         "/studies/" +
         studyId +
         "/series/" +
-        seriesId +
-        "/aims?format=json"
+        seriesId
     );
   else
     return http.get(
@@ -61,8 +60,12 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
     );
 }
 
+export function getAnnotations2() {
+  return http.get(apiUrl + "/projects/lite/aims");
+}
+
 export function downloadAnnotations(optionObj, aimIDlist, selection) {
-  if (isLite)
+  if (isLite) {
     return http.post(
       apiUrl +
         "/projects/lite/aims/download?summary=" +
@@ -72,11 +75,29 @@ export function downloadAnnotations(optionObj, aimIDlist, selection) {
       aimIDlist,
       { responseType: "blob" }
     );
+  }
+}
+
+export function getSummaryAnnotations(projectID) {
+  return isLite
+    ? http.get(apiUrl + "/projects/lite/aims?format=summary")
+    : http.get(apiUrl + "/projects/" + projectID + "/aims/?format=summary");
+}
+
+export function deleteAnnotation(aimObj, aimID, projectID) {
+  if (aimObj) {
+    aimID = aimObj.aimID;
+    projectID = aimObj.projectID ? projectID : "lite";
+  }
+  return http.delete(
+    apiUrl + "/projects/" + projectID + "/aims/" + aimID + "?deleteDSO=true"
+  );
 }
 
 export function uploadAim(formData) {
-  const url = apiUrl + "/projects/lite/aims";
-
-  console.log("url is", url);
-  return http.post(url, formData);
+  let url;
+  if (isLite) {
+    url = apiUrl + "/projects/lite/aims";
+    return http.post(url, formData);
+  }
 }

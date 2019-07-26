@@ -9,17 +9,16 @@ import ReactTooltip from "react-tooltip";
 import { MAX_PORT, formatDates } from "../../constants";
 import { getAnnotations } from "../../services/annotationServices";
 import {
-  displaySingleAim,
   alertViewPortFull,
   getSingleSerie,
-  getAnnotationListData,
   clearSelection,
   selectAnnotation,
   changeActivePort,
   addToGrid,
   getWholeData,
   updatePatient,
-  jumpToAim
+  jumpToAim,
+  showAnnotationDock
 } from "../annotationsList/action";
 import "react-table/react-table.css";
 
@@ -67,6 +66,17 @@ class Annotations extends Component {
         pauseOnHover: true,
         draggable: true
       });
+    }
+  }
+
+  async componentDidUpdate(prevProps) {
+    if (this.props.update !== prevProps.update) {
+      const {
+        data: {
+          ResultSet: { Result: data }
+        }
+      } = await getAnnotations(this.series);
+      this.setState({ data });
     }
   }
 
@@ -295,6 +305,9 @@ class Annotations extends Component {
   };
 
   displayAnnotations = selected => {
+    if (this.props.dockOpen) {
+      this.props.dispatch(showAnnotationDock());
+    }
     const { projectID, studyUID, seriesUID, aimID } = selected;
     const patientID = selected.subjectID;
     const { openSeries } = this.props;
@@ -311,7 +324,10 @@ class Annotations extends Component {
         this.props.dispatch(alertViewPortFull());
       } else {
         this.props.dispatch(addToGrid(selected, aimID));
-        this.props.dispatch(getSingleSerie(selected, aimID));
+        this.props
+          .dispatch(getSingleSerie(selected, aimID))
+          .then(() => this.props.dispatch(showAnnotationDock()))
+          .catch(err => console.log(err));
         //if grid is NOT full check if patient data exists
         if (!this.props.patients[patientID]) {
           this.props.dispatch(getWholeData(null, null, selected));
@@ -330,6 +346,7 @@ class Annotations extends Component {
       }
     }
     this.props.dispatch(clearSelection());
+    this.props.history.push("/display");
   };
 
   render() {
@@ -360,7 +377,7 @@ class Annotations extends Component {
             NoDataComponent={() => null}
             data={this.state.data}
             columns={this.state.columns}
-            defaultPageSize={this.state.data.length}
+            pageSize={this.state.data.length}
             ref={r => (this.selectTable = r)}
             className="-striped -highlight"
             freezWhenExpanded={false}
@@ -383,6 +400,7 @@ class Annotations extends Component {
 
 const mapStateToProps = state => {
   return {
+    dockOpen: state.annotationsListReducer.dockOpen,
     series: state.searchViewReducer.series,
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,

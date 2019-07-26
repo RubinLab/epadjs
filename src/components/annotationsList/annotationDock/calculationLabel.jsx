@@ -1,89 +1,49 @@
 import React from "react";
 
-const calculationLabel = ({ calculations, name, shape }) => {
-  const labels = [];
-  const longAxisLabels = [];
-  const shortAxisLabels = [];
-  let i = 0;
-  for (let el of calculations) {
-    const labelType =
-      el.calculationResultCollection.CalculationResult.dimensionCollection
-        .Dimension.label;
-    let desc = "";
-    let upperLevel = el.calculationResultCollection.CalculationResult.value;
-    let val = upperLevel
-      ? upperLevel.value
-      : el.calculationResultCollection.CalculationResult
-          .calculationDataCollection.CalculationData.value.value;
-    let unit =
-      el.calculationResultCollection.CalculationResult.unitOfMeasure.value;
-    const { value } = el.description;
-    if (value === "Maximum") {
-      desc = "Max";
-      unit = null;
-    } else if (value === "Minimum") {
-      desc = "Min";
-      unit = null;
-    } else if (value === "Standard Deviation") {
-      desc = "StdDev";
-      val = isNaN(val) ? val : val.toFixed(3);
-      unit = null;
-    } else if (
-      value === "Length" ||
-      value === "LongAxis" ||
-      value === "ShortAxis"
-    ) {
-      desc = "Length";
-      val = isNaN(val) ? val : val.toFixed(3);
-    } else if (value === "Mean") {
-      desc = value;
-      unit = null;
-      val = isNaN(val) ? val : val.toFixed(2);
-    } else if (value === "Volume") {
-      desc = value;
-      val = isNaN(val) ? val : val.toFixed(3);
-    }
-
-    let classDesc = desc + "-label";
-    let measurement = (
-      <div className="-calculation__label--el" key={i + desc}>
-        <div className={classDesc}>{`${desc}: `}</div>
-        <div className={classDesc}>
-          {val}
-          {unit}
+const calculationLabel = ({ calculations, name }) => {
+  const labelArr = [];
+  if (calculations) {
+    calculations = Object.values(calculations);
+    for (let k = 0; k < calculations.length; k++) {
+      labelArr.push(
+        <div key={k + "markupType"} className="-calculation__label--title ">
+          {calculations[k].markupType}
         </div>
-      </div>
-    );
-    i++;
+      );
+      let calcArr = calculations[k].calculations;
+      for (let i = 0; i < calcArr.length; i++) {
+        let classDesc = calcArr[i].type + "-label";
+        let val = parseFloat(calcArr[i].value);
+        val = isNaN(val) ? val : val.toFixed(3);
 
-    if (labelType.value.toLowerCase().includes("long")) {
-      longAxisLabels.push(measurement);
-    } else if (labelType.value.toLowerCase().includes("short")) {
-      shortAxisLabels.push(measurement);
-    } else {
-      labels.push(measurement);
+        let unit =
+          calcArr[i].type === "Length" && !isNaN(val) ? calcArr[i].unit : null;
+
+        let type =
+          calcArr[i].type === "Standard Deviation"
+            ? "Std Dev"
+            : calcArr[i].type === "Maximum"
+            ? "Max"
+            : calcArr[i].type === "Minimum"
+            ? "Min"
+            : calcArr[i].type;
+        labelArr.push(
+          <div
+            className="-calculation__label--el"
+            key={k + i + calcArr[i].type}
+          >
+            <div className={classDesc}>{`${type}: `}</div>
+            <div className={classDesc}>
+              {val}
+              {unit}
+            </div>
+          </div>
+        );
+      }
     }
   }
-  //   });
-  return (
-    <div className="annotation-calculation__label">
-      {labels.length > 0 && (
-        <div className="-calculation__label--list">{labels}</div>
-      )}
-      {shortAxisLabels.length > 0 && (
-        <>
-          <div className="-calculation__label--title">Short Axis</div>
-          <div className="-calculation__label--list">{shortAxisLabels}</div>
-        </>
-      )}
-      {longAxisLabels.length > 0 && (
-        <>
-          <div className="-calculation__label--title">Long Axis</div>
-          <div className="-calculation__label--list">{longAxisLabels}</div>
-        </>
-      )}
-    </div>
-  );
+
+  return <div className="annotation-calculation__label">{labelArr}</div>;
 };
 
 export default calculationLabel;

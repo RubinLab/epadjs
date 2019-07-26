@@ -15,7 +15,6 @@ const annotations = ({
     patients[patient].studies[studyUID].series[seriesUID].annotations
   );
   annotationsArr.forEach(ann => {
-    // console.log("ann in lop", ann);
     let item = (
       <div className="-annotation__container" key={ann.aimID}>
         <Button

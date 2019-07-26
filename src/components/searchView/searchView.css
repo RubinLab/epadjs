@@ -164,13 +164,29 @@
   margin-right: 0.5rem;
 }
 
-.css-5ee12h-style,
+/* .css-5ee12h-style,
 .css-1yxrzmr-style {
   background-color: blue;
-}
+} */
 
 .hide-delete {
   cursor: not-allowed;
   color: #5c5c5c;
   margin-right: 1rem;
+}
+
+.alert-download__modal {
+  font-size: 1.2rem;
+  display: inline-block;
+  left: 40%;
+}
+
+.__modal--content {
+  display: inline-block;
+}
+
+.__message--container {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 1rem;
 }

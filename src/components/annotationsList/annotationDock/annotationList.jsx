@@ -14,7 +14,7 @@ import {
 
 class AnnotationsList extends React.Component {
   state = {
-    labelDisplayAll: true,
+    labelDisplayAll: false,
     annsDisplayAll: true
   };
 
@@ -80,39 +80,98 @@ class AnnotationsList extends React.Component {
     this.props.dispatch(jumpToAim(serie, id, this.props.activePort));
   };
 
-  render = () => {
-    const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
-    let annotations = Object.values(this.props.aimsList[seriesUID]);
-    annotations.sort(function(a, b) {
-      let nameA = a.name.toUpperCase();
-      let nameB = b.name.toUpperCase();
-      if (nameA < nameB) {
-        return -1;
+  getLabelArray = () => {
+    let imageAnnotations;
+    if (this.props.openSeries[this.props.activePort].imageAnnotations) {
+      imageAnnotations = this.props.openSeries[this.props.activePort]
+        .imageAnnotations[this.props.imageID];
+    }
+    const calculations = {};
+    if (imageAnnotations) {
+      for (let aim of imageAnnotations) {
+        if (calculations[aim.aimUid]) {
+          calculations[aim.aimUid][aim.markupUid] = {
+            calculations: [...aim.calculations],
+            markupType: aim.markupType
+          };
+          // calculations[aim.markupUid].push({ markupType: aim.markupType });
+        } else {
+          calculations[aim.aimUid] = {};
+          calculations[aim.aimUid][aim.markupUid] = {
+            calculations: [...aim.calculations],
+            markupType: aim.markupType
+          };
+          // calculations[aim.markupUid].push({ markupType: aim.markupType });
+        }
       }
-      if (nameA > nameB) {
-        return 1;
-      }
-      return 0;
-    });
+    }
+    return calculations;
+  };
 
+  render = () => {
+    const maxHeight = window.innerHeight * 0.6;
+    const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
+    let annotations = {};
+    let aims = this.props.aimsList[seriesUID];
+    for (let aim in aims) {
+      if (aims[aim].type === "study" || aims[aim].type === "serie") {
+        let { id } = aims[aim];
+        annotations[id]
+          ? annotations[id].push(aims[aim])
+          : (annotations[id] = [aims[aim]]);
+      }
+    }
+    let imageAnnotations;
+    if (this.props.openSeries[this.props.activePort].imageAnnotations) {
+      imageAnnotations = this.props.openSeries[this.props.activePort]
+        .imageAnnotations[this.props.imageID];
+
+      if (imageAnnotations) {
+        for (let aim of imageAnnotations) {
+          let { aimUid } = aim;
+          annotations[aimUid]
+            ? annotations[aimUid].push(
+                this.props.aimsList[seriesUID][aim.aimUid]
+              )
+            : (annotations[aimUid] = [
+                this.props.aimsList[seriesUID][aim.aimUid]
+              ]);
+        }
+      }
+    }
+    const calculations = this.getLabelArray();
+    // annotations.sort(function(a, b) {
+    //   let nameA = a.name.toUpperCase();
+    //   let nameB = b.name.toUpperCase();
+    //   if (nameA < nameB) {
+    //     return -1;
+    //   }
+    //   if (nameA > nameB) {
+    //     return 1;
+    //   }
+    //   return 0;
+    // });
+
+    // let annotations = [];
     let annList = [];
+    annotations = Object.values(annotations);
     annotations.forEach((aim, index) => {
-      let aimInfo = aim.json.imageAnnotations.ImageAnnotation;
-      let id = aim.json.uniqueIdentifier.root;
+      aim = aim[0];
       annList.push(
         <Annotation
           name={aim.name}
           style={aim.color}
-          aim={aimInfo}
-          id={id}
-          key={id}
+          aim={aim.json}
+          id={aim.id}
+          key={aim.id}
           displayed={aim.isDisplayed}
           onClick={this.handleDisplayClick}
-          user={aim.json.user.name.value}
+          user={aim.user}
           showLabel={aim.showLabel}
           onSingleToggle={this.handleToggleSingleLabel}
           jumpToAim={this.handleJumToAim}
           serie={seriesUID}
+          label={calculations[aim.id]}
         />
       );
     });
@@ -124,9 +183,16 @@ class AnnotationsList extends React.Component {
             <Switch
               onChange={this.handleToggleAllLabels}
               checked={this.state.labelDisplayAll}
-              className="react-switch"
+              onColor="#86d3ff"
+              onHandleColor="#1986d9"
+              handleDiameter={22}
               uncheckedIcon={false}
               checkedIcon={false}
+              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+              height={15}
+              width={36}
+              className="react-switch"
             />
           </div>
           <div className="label-toggle">
@@ -134,13 +200,19 @@ class AnnotationsList extends React.Component {
             <Switch
               onChange={this.handleToggleAllAnnotations}
               checked={this.state.annsDisplayAll}
-              className="react-switch"
+              onColor="#86d3ff"
+              onHandleColor="#1986d9"
+              handleDiameter={22}
               uncheckedIcon={false}
               checkedIcon={false}
+              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+              height={15}
+              width={36}
+              className="react-switch"
             />
           </div>
-
-          <div>{annList}</div>
+          <div style={{ maxHeight, overflow: "scroll" }}>{annList}</div>
         </div>
       </React.Fragment>
     );

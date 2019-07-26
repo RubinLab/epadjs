@@ -20,3 +20,10 @@ export function downloadSubjects(subject) {
     "?format=stream&includeAims=true";
   return http.get(url, { responseType: "blob" });
 }
+
+export function deleteSubject(subject) {
+  if (isLite) {
+    const url = apiUrl + "/projects/lite/subjects/" + subject.subjectID;
+    return http.delete(url);
+  }
+}

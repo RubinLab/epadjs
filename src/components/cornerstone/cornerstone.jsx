@@ -1,5 +1,6 @@
 import * as cornerstone from "cornerstone-core";
-import * as cornerstoneTools from "cornerstone-tools/dist/cornerstoneTools";
+// import * as cornerstoneTools from "cornerstone-tools/dist/cornerstoneTools";
+import * as cornerstoneTools from "../../cornerstoneTools";
 import * as cornerstoneMath from "cornerstone-math";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import * as dicomParser from "dicom-parser";
@@ -75,23 +76,6 @@ const Cornerstone = ({ dispatch }) => {
   //cornerstoneWebImageLoader.external.cornerstone = cornerstone;
   cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
   cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
-
-  //Following configuration is an unsuccessfull attempt to solve cors problem, needs to be studied more
-  /*cornerstoneWADOImageLoader.configure({
-    beforeSend: function(xhr, imageId, headers) {
-      delete headers.accept;
-
-      const header = auth.getAuthHeader1();
-
-      // JPEG2000 Lossless Image Compression
-      //const accept = 'multipart/related; type="image/jp2"';
-      const accept =
-        'multipart/related; type="application/octet-stream"; transfer-syntax="1.2.840.10008.1.2.1"';
-
-      //xhr.setRequestHeader("Accept", accept);
-      xhr.setRequestHeader("Authorization", header);
-    }
-  });*/
 
   dispatch({
     type: "INIT_CORNER",

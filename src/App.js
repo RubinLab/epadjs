@@ -8,6 +8,7 @@ import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
 import SearchView from "./components/searchView/searchView";
 import DisplayView from "./components/display/displayView";
+// import DisplayViewContainer from "./components/display/displayViewContainer";
 import AnotateView from "./components/anotateView";
 import ProgressView from "./components/progressView";
 import NotFound from "./components/notFound";
@@ -19,6 +20,7 @@ import Management from "./components/management/mainMenu";
 import AnnotationList from "./components/annotationsList";
 import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import AnnotationsList from "./components/annotationsList/annotationDock/annotationList";
+import ManagementItemModal from "./components/management/common/customModal";
 
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
@@ -38,7 +40,6 @@ class App extends Component {
   };
 
   closeMenu = event => {
-    console.log(event);
     // if (event && event.type === "keydown") {
     //   if (event.key === 'Escape' || event.keyCode === 27) {
     //     this.setState({ isMngMenuOpen: false });
@@ -105,16 +106,21 @@ class App extends Component {
   };
 
   onLogout = e => {
+    auth.logout();
     this.setState({
       authenticated: false,
       id: null,
-      keycloak: null,
       name: null,
       user: null
     });
+    this.state.keycloak.logout().then(() => {
+      this.setState({
+        keycloak: null
+      });
+      auth.logout();
+    });
   };
   render() {
-    // console.log("App js state", this.state);
     return (
       <React.Fragment>
         <Cornerstone />
@@ -134,7 +140,11 @@ class App extends Component {
             <Sidebar>
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
-                <ProtectedRoute path="/display" component={DisplayView} />
+                <ProtectedRoute
+                  path="/display"
+                  component={DisplayView}
+                  test={"test"}
+                />
                 <ProtectedRoute path="/search/:pid?" component={SearchView} />
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute path="/progress" component={ProgressView} />
@@ -165,19 +175,25 @@ class App extends Component {
         {this.props.listOpen && <AnnotationList />}
         {this.props.dockOpen && <AnnotationsDock />}
         {this.props.showGridFullAlert && <MaxViewAlert />}
+        {/* {this.props.selection && (
+          <ManagementItemModal selection={this.props.selection} />
+        )} */}
       </React.Fragment>
     );
   }
 }
 
 const mapStateToProps = state => {
+  // console.log(state.annotationsListReducer);
+  // console.log(state.managementReducer);
   const {
     listOpen,
     dockOpen,
     showGridFullAlert,
     showProjectModal,
     loading,
-    activePort
+    activePort,
+    imageID
   } = state.annotationsListReducer;
   return {
     listOpen,
@@ -185,7 +201,9 @@ const mapStateToProps = state => {
     showGridFullAlert,
     showProjectModal,
     loading,
-    activePort
+    activePort,
+    imageID,
+    selection: state.managementReducer.selection
   };
 };
 export default withRouter(connect(mapStateToProps)(App));

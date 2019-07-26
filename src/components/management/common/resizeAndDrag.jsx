@@ -1,17 +1,19 @@
-import React from 'react';
-import { Rnd } from 'react-rnd';
+import React from "react";
+import { Rnd } from "react-rnd";
 
 const style = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  border: 'solid 1px #ddd'
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  border: "solid 1px #ddd"
+  // width: "90%",
+  // height: "90%"
 };
 
 class ResizeAndDrag extends React.Component {
   state = {
-    width: '90%',
-    height: '90%',
+    width: "90%",
+    height: "90%",
     x: 50,
     y: 50
   };

@@ -17,9 +17,9 @@ const baseToolBar = ({ onAdd, onDelete, selected }) => {
           onClick={onAdd}
         />
       </div>
-      {/* <ReactTooltip id="plus-icon" place="right" type="info" delayShow={1500}> */}
-      <span>New Project</span>
-      {/* </ReactTooltip> */}
+      <ReactTooltip id="plus-icon" place="right" type="info" delayShow={1500}>
+        <span>Add new</span>
+      </ReactTooltip>
       {selected && (
         <>
           <div onClick={onDelete}>
