@@ -1,7 +1,5 @@
 import React from "react";
 import { Modal } from "react-bootstrap";
-import { toast } from "react-toastify";
-import { getSubjects } from "../../services/subjectServices";
 
 class StudyCreationForm extends React.Component {
   state = {

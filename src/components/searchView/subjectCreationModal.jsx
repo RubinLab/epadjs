@@ -1,5 +1,7 @@
 import React from "react";
 import { Modal } from "react-bootstrap";
+import { saveSubject } from "../../services/subjectServices";
+import { toast } from "react-toastify";
 import "./searchView.css";
 
 class SubjectCreationForm extends React.Component {
@@ -8,6 +10,17 @@ class SubjectCreationForm extends React.Component {
     if (!this.state.name || !this.state.abbreviation) {
       this.setState({ error: "Please fill the required fields!" });
     } else {
+      saveSubject(this.props.project, this.state.abbreviation, this.state.name)
+        .then(() => {
+          this.props.onSubmit();
+          this.handleCancel();
+          this.props.onResolve();
+          toast.success("Subject successfully saved!");
+        })
+        .catch(error => {
+          toast.error(error.response.data.message, { autoClose: false });
+          this.props.onResolve();
+        });
     }
   };
 

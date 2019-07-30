@@ -155,7 +155,7 @@ class SearchView extends Component {
 
   updateSubjectCount = async () => {
     const subjects = await this.getData();
-    await this.setState({ numOfsubjects: subjects.length });
+    await this.setState({ numOfsubjects: subjects.length, subjects });
   };
 
   deleteStudy = async () => {
@@ -582,6 +582,10 @@ class SearchView extends Component {
     this.setState({ newSelected: "" });
   };
 
+  updateStatus = () => {
+    this.setState({ downloading: false, uploading: false, deleting: false });
+  };
+
   handleNewSelected = () => {
     switch (this.state.newSelected) {
       case "subject":
@@ -589,6 +593,8 @@ class SearchView extends Component {
           <SubjectCreationModal
             onCancel={this.handleNewModalCancel}
             project={this.props.match.params.pid}
+            onSubmit={this.updateUploadStatus}
+            onResolve={this.updateStatus}
           />
         );
       case "study":
