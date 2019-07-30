@@ -10,7 +10,8 @@ import ColorPicker from "./colorPicker";
 class Users extends React.Component {
   state = {
     data: [],
-    showColorpicker: false
+    showColorpicker: false,
+    hasAdminPermission: false
   };
 
   componentDidMount = () => {
@@ -19,7 +20,16 @@ class Users extends React.Component {
 
   getUserData = async () => {
     const result = await getUsers();
-    this.setState({ data: result.data.ResultSet.Result });
+    const data = result.data.ResultSet.Result;
+    this.setState({ data });
+    let hasAdminPermission = false;
+    //check if the signed in user has admin permissions
+    for (let user of data) {
+      if (user.username === sessionStorage.getItem("username")) {
+        hasAdminPermission = user.admin;
+      }
+    }
+    this.setState({ hasAdminPermission });
   };
 
   convertArrToStr = arr => {
@@ -128,7 +138,6 @@ class Users extends React.Component {
         minResizeWidth: 20,
         minWidth: 20,
         Cell: original => {
-          // console.log(original.row.checkbox);
           return original.row.checkbox.admin ? (
             <div className="centeredCell"> {<FaCheck />}</div>
           ) : null;
@@ -155,7 +164,6 @@ class Users extends React.Component {
         minResizeWidth: 20,
         minWidth: 30,
         Cell: original => {
-          // console.log(original.row.checkbox);
           return original.row.checkbox.enabled ? (
             <div className="centeredCell"> {<FaCheck />}</div>
           ) : null;
@@ -168,7 +176,8 @@ class Users extends React.Component {
         resizable: true,
         Cell: original => {
           return original.row.checkbox.username ===
-            sessionStorage.getItem("username") ? (
+            sessionStorage.getItem("username") ||
+            this.state.hasAdminPermission ? (
             <div
               onClick={() => {
                 this.setState({
@@ -227,6 +236,7 @@ class Users extends React.Component {
               onCancel={this.handleCancel}
               userToEdit={this.state.userToEdit}
               handleColorClick={this.handleColorClick}
+              admin={this.state.hasAdminPermission}
               // onType={this.handleFormInput}
               // onSubmit={this.editConnection}
             />
