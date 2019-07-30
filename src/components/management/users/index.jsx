@@ -11,7 +11,10 @@ class Users extends React.Component {
   state = {
     data: [],
     showColorpicker: false,
-    hasAdminPermission: false
+    hasAdminPermission: false,
+    deleteAllClicked: false,
+    selectAll: 0,
+    selected: {}
   };
 
   componentDidMount = () => {
@@ -41,6 +44,39 @@ class Users extends React.Component {
     }, "");
   };
 
+  toggleRow = async username => {
+    let newSelected = Object.assign({}, this.state.selected);
+    if (newSelected[username]) {
+      delete newSelected[username];
+      let values = Object.values(newSelected);
+      if (values.length === 0) {
+        this.setState({
+          selectAll: 0
+        });
+      }
+    } else {
+      newSelected[username] = true;
+      await this.setState({
+        selectAll: 2
+      });
+    }
+    this.setState({ selected: newSelected });
+  };
+
+  toggleSelectAll() {
+    let newSelected = {};
+    if (this.state.selectAll === 0) {
+      this.state.data.forEach(users => {
+        newSelected[users.username] = true;
+      });
+    }
+
+    this.setState({
+      selected: newSelected,
+      selectAll: this.state.selectAll === 0 ? 1 : 0
+    });
+  }
+
   defineColumns = () => {
     return [
       {
@@ -51,8 +87,8 @@ class Users extends React.Component {
             <input
               type="checkbox"
               className="checkbox"
-              // checked={this.state.selected[original.firstName] === true}
-              // onChange={() => this.toggleRow(original.firstName)}
+              checked={this.state.selected[original.username]}
+              onChange={() => this.toggleRow(original.username)}
             />
           );
         },
@@ -61,13 +97,13 @@ class Users extends React.Component {
             <input
               type="checkbox"
               className="checkbox"
-              // checked={this.state.selectAll === 1}
-              //   ref={input => {
-              //     if (input) {
-              //       input.indeterminate = this.state.selectAll === 2;
-              //     }
-              //   }}
-              //   onChange={() => this.toggleSelectAll()}
+              checked={this.state.selectAll === 1}
+              ref={input => {
+                if (input) {
+                  input.indeterminate = this.state.selectAll === 2;
+                }
+              }}
+              onChange={() => this.toggleSelectAll()}
             />
           );
         },
@@ -216,7 +252,6 @@ class Users extends React.Component {
   };
 
   render = () => {
-    // const col =
     console.log(this.state);
     const pageSize =
       this.state.data.length < 10 ? 10 : this.state.data.length >= 40 ? 50 : 20;
