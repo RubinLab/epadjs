@@ -63,23 +63,45 @@ class NewMenu extends React.Component {
     const dragHandlers = { onStart: this.onStart, onStop: this.onStop };
     const { deltaPosition, controlledPosition } = this.state;
 
+    const element = document.getElementsByClassName(
+      "searchView-toolbar__icon new-icon"
+    );
+    var rect = element[0].getBoundingClientRect();
+
     return (
-      <Draggable>
-        <div className="new-popup">
-          <div className="new-popup__option" data-opt="subject">
-            New subject
-          </div>
-          <div className="new-popup__option" data-opt="study">
-            New study
-          </div>
-          <div className="new-popup__option" data-opt="series">
-            New series
-          </div>
-          <div className="new-popup__option" data-opt="annotation">
-            New annotation
-          </div>
+      <div
+        className="new-popup"
+        style={{ left: rect.right - 10, top: rect.bottom + 10 }}
+      >
+        <div
+          className="new-popup__option"
+          data-opt="subject"
+          onClick={this.props.onSelect}
+        >
+          New subject
         </div>
-      </Draggable>
+        <div
+          className="new-popup__option"
+          data-opt="study"
+          onClick={this.props.onSelect}
+        >
+          New study
+        </div>
+        <div
+          className="new-popup__option"
+          data-opt="series"
+          onClick={this.props.onSelect}
+        >
+          New series
+        </div>
+        <div
+          className="new-popup__option"
+          data-opt="annotation"
+          onClick={this.props.onSelect}
+        >
+          New annotation
+        </div>
+      </div>
     );
   }
 }

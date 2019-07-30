@@ -39,6 +39,10 @@ import { getSubjects } from "../../services/subjectServices";
 import DeleteAlert from "./deleteConfirmationModal";
 import DownloadWarning from "./downloadWarningModal";
 import NewMenu from "./newMenu";
+import SubjectCreationModal from "./subjectCreationModal.jsx";
+import StudyCreationModal from "./studyCreationModal.jsx";
+import SeriesCreationModal from "./seriesCreationModal.jsx";
+import AnnotationCreationModal from "./annotationCreationModal.jsx";
 
 class SearchView extends Component {
   constructor(props) {
@@ -71,7 +75,7 @@ class SearchView extends Component {
       this.props.dispatch(showAnnotationDock());
     }
     const subjects = await this.getData();
-    this.setState({ numOfsubjects: subjects.length });
+    this.setState({ numOfsubjects: subjects.length, subjects });
   };
 
   getData = async () => {
@@ -566,9 +570,52 @@ class SearchView extends Component {
     this.setState({ missingAnns: [] });
   };
 
-  handleNewSelected = () => {
-    console.log("here");
+  handleNewClick = () => {
     this.setState(state => ({ showNew: !state.showNew }));
+  };
+
+  handleSelectNewOption = e => {
+    this.setState({ newSelected: e.target.dataset.opt, showNew: false });
+  };
+
+  handleNewModalCancel = () => {
+    this.setState({ newSelected: "" });
+  };
+
+  handleNewSelected = () => {
+    switch (this.state.newSelected) {
+      case "subject":
+        return (
+          <SubjectCreationModal
+            onCancel={this.handleNewModalCancel}
+            project={this.props.match.params.pid}
+          />
+        );
+      case "study":
+        return (
+          <StudyCreationModal
+            onCancel={this.handleNewModalCancel}
+            subjects={this.state.subjects}
+          />
+        );
+      case "series":
+        return (
+          <SeriesCreationModal
+            onCancel={this.handleNewModalCancel}
+            project={this.props.match.params.pid}
+            subjects={this.state.subjects}
+          />
+        );
+      case "annotation":
+        return (
+          <AnnotationCreationModal
+            onCancel={this.handleNewModalCancel}
+            project={this.props.match.params.pid}
+          />
+        );
+      default:
+        return null;
+    }
   };
 
   render = () => {
@@ -601,9 +648,10 @@ class SearchView extends Component {
           onExpand={this.handleExpand}
           onShrink={this.handleShrink}
           onCloseAll={this.handleCloseAll}
-          onNew={this.handleNewSelected}
+          onNew={this.handleNewClick}
           status={status}
           showDelete={showDelete}
+          project={this.props.match.params.pid}
         />
         {this.state.isSerieSelectionOpen && !this.props.loading && (
           <ProjectModal
@@ -645,7 +693,9 @@ class SearchView extends Component {
           />
         )}
 
-        {this.state.showNew && <NewMenu />}
+        {this.state.showNew && (
+          <NewMenu onSelect={this.handleSelectNewOption} />
+        )}
         {this.state.newSelected && this.handleNewSelected()}
       </>
     );

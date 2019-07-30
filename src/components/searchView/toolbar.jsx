@@ -147,7 +147,12 @@ const toolBar = props => {
         </div>
       </div>
       <div className="searchView-toolbar__group">
-        <div className="searchView-toolbar__icon" onClick={props.onNew}>
+        <div
+          className={
+            props.project ? "searchView-toolbar__icon new-icon" : "hide-delete"
+          }
+          onClick={props.onNew}
+        >
           <div>
             <FaPlusCircle
               style={{ fontSize: "1.2rem" }}
