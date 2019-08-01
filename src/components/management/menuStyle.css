@@ -586,7 +586,8 @@
 .info-about__mbody.modal-body {
   font-size: 1.1rem;
 }
-.info-about__desc {
+.info-about__desc,
+.info-team__desc {
   padding-left: 1rem;
   margin-bottom: 0.5rem;
 }

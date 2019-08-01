@@ -5,6 +5,7 @@ import { getUsers } from "../../services/userServices";
 import { getCurrentUser } from "../../services/authService";
 import { isLite } from "../../config.json";
 import About from "./about";
+import Team from "./team";
 
 class InfoMenu extends React.Component {
   state = {
@@ -31,7 +32,6 @@ class InfoMenu extends React.Component {
     const icon = document.getElementsByClassName("info-icon")[0];
     const coordinate = icon.getBoundingClientRect().left;
     this.setState({ coordinate });
-    // this.setState({ width: window.innerWidth, height: window.innerHeight });
   };
 
   handleSelection = async e => {
@@ -49,18 +49,21 @@ class InfoMenu extends React.Component {
     this.props.closeMenu();
   };
 
-  // closeInfoMenu = () => {
-  //   this.props.closeMenu();
-  // };
-
   selectDisplay = () => {
-    // this.props.closeMenu();
     let selection;
     switch (this.state.selection) {
       case "About":
-        return (
-          <About onOK={this.handleCloseModal} closeInfo={this.closeInfoMenu} />
+        return <About onOK={this.handleCloseModal} />;
+      case "Help":
+        window.open(
+          "https://epad.stanford.edu/documentation/user",
+          "_blank",
+          ""
         );
+      case "What's New":
+        window.open("https://epad.stanford.edu/", "_blank", "");
+      case "Team":
+        return <Team onOK={this.handleCloseModal} />;
       default:
         return <div />;
     }
