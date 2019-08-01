@@ -2,17 +2,30 @@ import React from "react";
 import { connect } from "react-redux";
 import Line from "./common/coloredLine";
 import { getUsers } from "../../services/userServices";
+import { getCurrentUser } from "../../services/authService";
+import { isLite } from "../../config.json";
+import About from "./about";
 
 class InfoMenu extends React.Component {
   state = {
     selection: "",
-    isModalOpen: false
+    isModalOpen: false,
+    isAdmin: false
   };
 
   componentDidMount = async () => {
     this.updateDimensions();
-    const users = await getUsers();
-    console.log(users.data.ResultSet.Result);
+    if (!isLite) {
+      const currentUser = getCurrentUser();
+      let users = await getUsers();
+      users = users.data.ResultSet.Result;
+      for (let user of users) {
+        if (user.username === currentUser && user.admin) {
+          this.setState({ isAdmin: true });
+          break;
+        }
+      }
+    }
   };
   updateDimensions = () => {
     const icon = document.getElementsByClassName("info-icon")[0];
@@ -21,14 +34,12 @@ class InfoMenu extends React.Component {
     // this.setState({ width: window.innerWidth, height: window.innerHeight });
   };
 
-  handleSelection = e => {
+  handleSelection = async e => {
     const selection = e.target.textContent;
-    // this.setState({ selection});
     this.setState(state => {
       return { isModalOpen: !state.isModalOpen };
     });
-    // this.props.dispatch(managementItemSelected(selection));
-    this.setState({ selection });
+    await this.setState({ selection });
   };
 
   handleCloseModal = e => {
@@ -38,10 +49,18 @@ class InfoMenu extends React.Component {
     this.props.closeMenu();
   };
 
+  // closeInfoMenu = () => {
+  //   this.props.closeMenu();
+  // };
+
   selectDisplay = () => {
+    // this.props.closeMenu();
+    let selection;
     switch (this.state.selection) {
-      case "Users":
-        return <div />;
+      case "About":
+        return (
+          <About onOK={this.handleCloseModal} closeInfo={this.closeInfoMenu} />
+        );
       default:
         return <div />;
     }
@@ -49,39 +68,51 @@ class InfoMenu extends React.Component {
 
   render() {
     const style = { left: this.state.coordinate };
-
     return (
-      <div className="info-menu" style={style}>
-        <div className="info-menu__option" onClick={this.handleSelection}>
-          Notifications
-        </div>
-        <div className="info-menu__break" />
-        <div className="info-menu__option" onClick={this.handleSelection}>
-          Shortcuts
-        </div>
-        <div className="info-menu__option" onClick={this.handleSelection}>
-          Settings
-        </div>
-        <div className="info-menu__break" />
-        <div className="info-menu__option" onClick={this.handleSelection}>
-          About
-        </div>
-        <div className="info-menu__option" onClick={this.handleSelection}>
-          Help
-        </div>
-        <div className="info-menu__option" onClick={this.handleSelection}>
-          What's New
-        </div>
-        <div className="info-menu__option" onClick={this.handleSelection}>
-          Team
-        </div>
-        <div className="info-menu__break" />
-        <div className="info-menu__option" onClick={this.handleSelection}>
-          Admin
-        </div>
-
-        {this.state.isModalOpen && <div />}
-      </div>
+      <>
+        {!this.state.isModalOpen && (
+          <div className="info-menu" style={style}>
+            <div className="info-menu__option" onClick={this.handleSelection}>
+              Notifications
+            </div>
+            <div className="info-menu__option" onClick={this.handleSelection}>
+              Log
+            </div>
+            <div className="info-menu__break" />
+            <div className="info-menu__option" onClick={this.handleSelection}>
+              Shortcuts
+            </div>
+            <div className="info-menu__option" onClick={this.handleSelection}>
+              Settings
+            </div>
+            <div className="info-menu__break" />
+            <div className="info-menu__option" onClick={this.handleSelection}>
+              About
+            </div>
+            <div className="info-menu__option" onClick={this.handleSelection}>
+              Help
+            </div>
+            <div className="info-menu__option" onClick={this.handleSelection}>
+              What's New
+            </div>
+            <div className="info-menu__option" onClick={this.handleSelection}>
+              Team
+            </div>
+            {this.state.isAdmin && (
+              <>
+                <div className="info-menu__break" />
+                <div
+                  className="info-menu__option"
+                  onClick={this.handleSelection}
+                >
+                  Admin
+                </div>
+              </>
+            )}
+          </div>
+        )}
+        {this.state.isModalOpen && this.selectDisplay()}
+      </>
     );
   }
 }

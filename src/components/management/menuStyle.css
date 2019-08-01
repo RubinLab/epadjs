@@ -578,3 +578,46 @@
   border-top: 1px solid #7b7f88;
   margin: 0.5rem 1rem 0.5rem 1rem;
 }
+
+.info-about__modal.modal-dialog {
+  top: 10%;
+}
+
+.info-about__mbody.modal-body {
+  font-size: 1.1rem;
+}
+.info-about__desc {
+  padding-left: 1rem;
+  margin-bottom: 0.5rem;
+}
+.info-about__link {
+  color: #fff;
+  font-weight: 450;
+}
+
+.info-about__link:visited {
+  color: #fff;
+}
+
+.info-about__button {
+  background: #3a3f44;
+  color: #5bc0de;
+  border: 1px solid #5bc0de;
+  padding: 0.5rem 2rem 0.5rem 2rem;
+  margin: 0.5rem 1rem 1rem 1rem;
+  border-radius: 8px;
+}
+
+.info-about__button:hover {
+  background: #5bc0de;
+  color: #3a3f44;
+  padding: 0.5rem 2rem 0.5rem 2rem;
+  border-radius: 8px;
+  margin: 0.5rem 1rem 1rem 1rem;
+}
+
+.info-about__buttonCont {
+  display: flex;
+  /* justify-content: center; */
+  margin-left: 1rem;
+}
