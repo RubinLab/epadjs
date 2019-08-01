@@ -1,11 +1,11 @@
 import React from "react";
 import { Link, NavLink } from "react-router-dom";
-import { FaCogs, FaCaretDown } from "react-icons/fa";
+import { FaCogs, FaCaretDown, FaInfoCircle } from "react-icons/fa";
 import logo from "../images/logo.png";
 import { connect } from "react-redux";
 import { isLite } from "../config.json";
 
-const NavBar = ({ user, openGearMenu, loading, logout }) => {
+const NavBar = ({ user, openGearMenu, openInfoMenu, loading, logout }) => {
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -75,14 +75,21 @@ const NavBar = ({ user, openGearMenu, loading, logout }) => {
                 <li className="nav-item pull-right">
                   <div
                     className="nav-link mng-icon"
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", paddingBottom: "8px" }}
                     onClick={openGearMenu}
                   >
-                    <FaCogs style={{ fontSize: "1.25rem" }} />
-                    <FaCaretDown style={{ fontSize: "1rem" }} />
+                    <FaCogs style={{ fontSize: "1.5rem" }} />
                   </div>
                 </li>
-
+                <li className="nav-item pull-right">
+                  <div
+                    className="nav-link info-icon"
+                    style={{ cursor: "pointer", paddingBottom: "8px" }}
+                    onClick={openInfoMenu}
+                  >
+                    <FaInfoCircle style={{ fontSize: "1.5rem" }} />
+                  </div>
+                </li>
                 <li className="nav-item pull-right">
                   <NavLink className="nav-link" to="/profile">
                     {user.displayname}

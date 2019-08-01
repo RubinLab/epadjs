@@ -60,7 +60,8 @@
   width: 100%;
 }
 
-.mng-menu {
+.mng-menu,
+.info-menu {
   z-index: 5;
   display: flex;
   flex-direction: column;
@@ -75,7 +76,8 @@
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
 }
 
-.mng-menu__option {
+.mng-menu__option,
+.info-menu__option {
   width: 100%;
   padding-bottom: 0.3rem;
   padding-top: 0.3rem;
@@ -86,7 +88,8 @@
   /* margin: 0.5rem; */
 }
 
-.mng-menu__option:hover {
+.mng-menu__option:hover,
+.info-menu__option:hover {
   color: whitesmoke;
   background: #70142e;
   /* background: #861737; */
@@ -570,4 +573,8 @@
 .filter-space {
   margin-left: 0.3rem;
   margin-right: 0.3rem;
+}
+.info-menu__break {
+  border-top: 1px solid #7b7f88;
+  margin: 0.5rem 1rem 0.5rem 1rem;
 }

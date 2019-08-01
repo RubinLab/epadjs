@@ -17,39 +17,41 @@ import Logout from "./components/logout";
 import ProtectedRoute from "./components/common/protectedRoute";
 import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
+import InfoMenu from "./components/infoMenu";
+
 import AnnotationList from "./components/annotationsList";
 import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
-import AnnotationsList from "./components/annotationsList/annotationDock/annotationList";
-import ManagementItemModal from "./components/management/common/customModal";
 
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
-import ProjectModal from "./components/annotationsList/selectSerieModal";
 import { isLite } from "./config.json";
-// import Modal from './components/management/projectCreationForm';
-// import Modal from './components/common/rndBootModal';
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
 class App extends Component {
   state = {
-    isMngMenuOpen: false,
+    openMngMenu: false,
     keycloak: null,
-    authenticated: false
+    authenticated: false,
+    openInfoMenu: false
   };
 
   closeMenu = event => {
     // if (event && event.type === "keydown") {
     //   if (event.key === 'Escape' || event.keyCode === 27) {
-    //     this.setState({ isMngMenuOpen: false });
+    //     this.setState({ openMngMenu: false });
     //   }
     // }
-    this.setState({ isMngMenuOpen: false });
+    this.setState({ openMngMenu: false, openInfoMenu: false });
   };
 
-  openMenu = () => {
-    this.setState(state => ({ isMngMenuOpen: !state.isMngMenuOpen }));
+  handleMngMenu = () => {
+    this.setState(state => ({ openMngMenu: !state.openMngMenu }));
+  };
+
+  handleInfoMenu = () => {
+    this.setState(state => ({ openInfoMenu: !state.openInfoMenu }));
   };
 
   async componentDidMount() {
@@ -127,10 +129,12 @@ class App extends Component {
         <ToastContainer />
         <NavBar
           user={this.state.user}
-          openGearMenu={this.openMenu}
+          openGearMenu={this.handleMngMenu}
+          openInfoMenu={this.handleInfoMenu}
           logout={this.onLogout}
         />
-        {this.state.isMngMenuOpen && <Management closeMenu={this.closeMenu} />}
+        {this.state.openMngMenu && <Management closeMenu={this.closeMenu} />}
+        {this.state.openInfoMenu && <InfoMenu closeMenu={this.closeMenu} />}
 
         {!this.state.authenticated && !isLite && (
           <Route path="/login" component={LoginForm} />
