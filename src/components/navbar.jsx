@@ -5,7 +5,14 @@ import logo from "../images/logo.png";
 import { connect } from "react-redux";
 import { isLite } from "../config.json";
 
-const NavBar = ({ user, openGearMenu, openInfoMenu, loading, logout }) => {
+const NavBar = ({
+  user,
+  openGearMenu,
+  openInfoMenu,
+  openMenu,
+  loading,
+  logout
+}) => {
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -75,19 +82,28 @@ const NavBar = ({ user, openGearMenu, openInfoMenu, loading, logout }) => {
                 <li className="nav-item pull-right">
                   <div
                     className="nav-link mng-icon"
+                    data-name="mng"
                     style={{ cursor: "pointer", paddingBottom: "8px" }}
-                    onClick={openGearMenu}
+                    onClick={openMenu}
+                    onMouseEnter={openGearMenu}
+                    // onMouseLeave={openGearMenu}
                   >
-                    <FaCogs style={{ fontSize: "1.5rem" }} />
+                    <FaCogs style={{ fontSize: "1.5rem" }} data-name="mng" />
                   </div>
                 </li>
                 <li className="nav-item pull-right">
                   <div
                     className="nav-link info-icon"
+                    data-name="info"
                     style={{ cursor: "pointer", paddingBottom: "8px" }}
-                    onClick={openInfoMenu}
+                    onClick={openMenu}
+                    onMouseEnter={openInfoMenu}
+                    // onMouseLeave={openInfoMenu}
                   >
-                    <FaInfoCircle style={{ fontSize: "1.5rem" }} />
+                    <FaInfoCircle
+                      style={{ fontSize: "1.5rem" }}
+                      data-name="info"
+                    />
                   </div>
                 </li>
                 <li className="nav-item pull-right">

@@ -31,27 +31,44 @@ import "./App.css";
 
 class App extends Component {
   state = {
-    openMngMenu: false,
+    openMng: false,
     keycloak: null,
     authenticated: false,
-    openInfoMenu: false
+    openInfo: false,
+    openMenu: false
   };
 
   closeMenu = event => {
     // if (event && event.type === "keydown") {
     //   if (event.key === 'Escape' || event.keyCode === 27) {
-    //     this.setState({ openMngMenu: false });
+    //     this.setState({ openMng: false });
     //   }
     // }
-    this.setState({ openMngMenu: false, openInfoMenu: false });
+    this.setState({ openMng: false, openInfo: false });
   };
 
   handleMngMenu = () => {
-    this.setState(state => ({ openMngMenu: !state.openMngMenu }));
+    if (this.state.openMenu) {
+      this.setState({ openMng: true, openInfo: false });
+    }
   };
 
   handleInfoMenu = () => {
-    this.setState(state => ({ openInfoMenu: !state.openInfoMenu }));
+    if (this.state.openMenu) {
+      this.setState({ openInfo: true, openMng: false });
+    }
+  };
+
+  handleOpenMenu = e => {
+    if (!this.state.openMenu) {
+      this.setState(state => ({ openMenu: !state.openMenu }));
+      e.target.dataset.name === "mng"
+        ? this.setState(state => ({ openMng: !state.openMng }))
+        : this.setState(state => ({ openInfo: !state.openInfo }));
+    } else {
+      this.setState(state => ({ openMenu: !state.openMenu }));
+      this.setState({ openMng: false, openInfo: false });
+    }
   };
 
   async componentDidMount() {
@@ -88,9 +105,7 @@ class App extends Component {
             user
           });
         })
-        .catch(err => {
-          console.log(err);
-        });
+        .catch(err => {});
     } else {
       try {
         const username = sessionStorage.getItem("username");
@@ -102,10 +117,6 @@ class App extends Component {
     }
     // window.addEventListener("keydown", this.closeMenu, true);
   }
-
-  componentWillUnmount = () => {
-    // window.removeEventListener('keydown', this.closeMenu, true);
-  };
 
   onLogout = e => {
     auth.logout();
@@ -132,9 +143,14 @@ class App extends Component {
           openGearMenu={this.handleMngMenu}
           openInfoMenu={this.handleInfoMenu}
           logout={this.onLogout}
+          openMenu={this.handleOpenMenu}
         />
-        {this.state.openMngMenu && <Management closeMenu={this.closeMenu} />}
-        {this.state.openInfoMenu && <InfoMenu closeMenu={this.closeMenu} />}
+        {this.state.openMng && this.state.openMenu && (
+          <Management closeMenu={this.closeMenu} />
+        )}
+        {this.state.openInfo && this.state.openMenu && (
+          <InfoMenu closeMenu={this.closeMenu} />
+        )}
 
         {!this.state.authenticated && !isLite && (
           <Route path="/login" component={LoginForm} />
