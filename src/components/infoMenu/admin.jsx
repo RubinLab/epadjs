@@ -50,11 +50,10 @@ class Admin extends React.Component {
   toggleSelectAll() {
     let newSelected = {};
     if (this.state.selectAll === 0) {
-      this.state.data.forEach(project => {
-        newSelected[project.id] = true;
+      this.state.data.forEach((item, index) => {
+        newSelected[item.host + index] = true;
       });
     }
-
     this.setState({
       selected: newSelected,
       selectAll: this.state.selectAll === 0 ? 1 : 0
@@ -129,6 +128,7 @@ class Admin extends React.Component {
           );
         },
         sortable: false,
+        resizable: false,
         width: 30
       },
 
