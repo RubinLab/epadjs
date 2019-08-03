@@ -10,6 +10,7 @@ const NavBar = ({
   openGearMenu,
   openInfoMenu,
   openMenu,
+  openUser,
   loading,
   logout
 }) => {
@@ -79,7 +80,11 @@ const NavBar = ({
             )}
             {user && (
               <React.Fragment>
-                <li className="nav-item pull-right">
+                <li
+                  className="nav-item pull-right"
+                  data-name="mng"
+                  onClick={openMenu}
+                >
                   <div
                     className="nav-link mng-icon"
                     data-name="mng"
@@ -88,10 +93,18 @@ const NavBar = ({
                     onMouseEnter={openGearMenu}
                     // onMouseLeave={openGearMenu}
                   >
-                    <FaCogs style={{ fontSize: "1.5rem" }} data-name="mng" />
+                    <FaCogs
+                      style={{ fontSize: "1.5rem" }}
+                      data-name="mng"
+                      onClick={openMenu}
+                    />
                   </div>
                 </li>
-                <li className="nav-item pull-right">
+                <li
+                  className="nav-item pull-right"
+                  data-name="info"
+                  onClick={openMenu}
+                >
                   <div
                     className="nav-link info-icon"
                     data-name="info"
@@ -103,13 +116,19 @@ const NavBar = ({
                     <FaInfoCircle
                       style={{ fontSize: "1.5rem" }}
                       data-name="info"
+                      onClick={openMenu}
                     />
                   </div>
                 </li>
-                <li className="nav-item pull-right">
-                  <NavLink className="nav-link" to="/profile">
+                <li className="nav-item pull-right" data-name="user">
+                  <div
+                    className="nav-link user-profile"
+                    data-name="user"
+                    onClick={openMenu}
+                    onMouseEnter={openUser}
+                  >
                     {user.displayname}
-                  </NavLink>
+                  </div>
                 </li>
                 <li className="nav-item-right pull-right">
                   <NavLink className="nav-link" to="/logout" onClick={logout}>

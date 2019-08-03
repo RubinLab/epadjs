@@ -1,11 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
-import Line from "./common/coloredLine";
-import { getUsers } from "../../services/userServices";
-import { getCurrentUser } from "../../services/authService";
 import { isLite } from "../../config.json";
 import About from "./about";
 import Team from "./team";
+import Admin from "./admin";
+import Modal from "../management/common/customModal";
 
 class InfoMenu extends React.Component {
   state = {
@@ -16,15 +15,10 @@ class InfoMenu extends React.Component {
 
   componentDidMount = async () => {
     this.updateDimensions();
+    // console.log(this.props.user);
     if (!isLite) {
-      const currentUser = getCurrentUser();
-      let users = await getUsers();
-      users = users.data.ResultSet.Result;
-      for (let user of users) {
-        if (user.username === currentUser && user.admin) {
-          this.setState({ isAdmin: true });
-          break;
-        }
+      if (this.props.user.admin) {
+        this.setState({ isAdmin: true });
       }
     }
   };
@@ -50,7 +44,6 @@ class InfoMenu extends React.Component {
   };
 
   selectDisplay = () => {
-    let selection;
     switch (this.state.selection) {
       case "About":
         return <About onOK={this.handleCloseModal} />;
@@ -64,6 +57,12 @@ class InfoMenu extends React.Component {
         window.open("https://epad.stanford.edu/", "_blank", "");
       case "Team":
         return <Team onOK={this.handleCloseModal} />;
+      case "Admin":
+        return (
+          <Modal>
+            <Admin onOK={this.handleCloseModal} />
+          </Modal>
+        );
       default:
         return <div />;
     }

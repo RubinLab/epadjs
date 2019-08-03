@@ -18,6 +18,7 @@ import ProtectedRoute from "./components/common/protectedRoute";
 import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
 import InfoMenu from "./components/infoMenu";
+import UserMenu from "./components/userProfileMenu";
 
 import AnnotationList from "./components/annotationsList";
 import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
@@ -35,7 +36,8 @@ class App extends Component {
     keycloak: null,
     authenticated: false,
     openInfo: false,
-    openMenu: false
+    openMenu: false,
+    openUser: false
   };
 
   closeMenu = event => {
@@ -44,30 +46,49 @@ class App extends Component {
     //     this.setState({ openMng: false });
     //   }
     // }
-    this.setState({ openMng: false, openInfo: false });
+    this.setState({
+      openMng: false,
+      openInfo: false,
+      openUser: false,
+      openMenu: false
+    });
   };
 
   handleMngMenu = () => {
+    console.log("this mng menu");
     if (this.state.openMenu) {
-      this.setState({ openMng: true, openInfo: false });
+      this.setState({ openMng: true, openInfo: false, openUser: false });
     }
   };
 
   handleInfoMenu = () => {
+    console.log("this info menu");
     if (this.state.openMenu) {
-      this.setState({ openInfo: true, openMng: false });
+      this.setState({ openInfo: true, openMng: false, openUser: false });
     }
   };
 
+  handleUserProfileMenu = () => {
+    if (this.state.openMenu) {
+      this.setState({ openUser: true, openInfo: false, openMng: false });
+    }
+  };
   handleOpenMenu = e => {
+    console.log("this open menu");
+    console.log("openMenu is ", this.state.openMenu);
     if (!this.state.openMenu) {
-      this.setState(state => ({ openMenu: !state.openMenu }));
-      e.target.dataset.name === "mng"
-        ? this.setState(state => ({ openMng: !state.openMng }))
-        : this.setState(state => ({ openInfo: !state.openInfo }));
+      console.log("openMenu was false, being set to true");
+      this.setState({ openMenu: true });
+      if (e.target.dataset.name === "mng") {
+        this.setState({ openMng: true });
+      } else if (e.target.dataset.name === "info") {
+        this.setState({ openInfo: true });
+      } else if (e.target.dataset.name === "user") {
+        this.setState({ openUser: true });
+      }
     } else {
-      this.setState(state => ({ openMenu: !state.openMenu }));
-      this.setState({ openMng: false, openInfo: false });
+      this.setState({ openMenu: false });
+      this.setState({ openMng: false, openInfo: false, openUser: false });
     }
   };
 
@@ -142,6 +163,7 @@ class App extends Component {
           user={this.state.user}
           openGearMenu={this.handleMngMenu}
           openInfoMenu={this.handleInfoMenu}
+          openUser={this.handleUserProfileMenu}
           logout={this.onLogout}
           openMenu={this.handleOpenMenu}
         />
@@ -149,9 +171,11 @@ class App extends Component {
           <Management closeMenu={this.closeMenu} />
         )}
         {this.state.openInfo && this.state.openMenu && (
-          <InfoMenu closeMenu={this.closeMenu} />
+          <InfoMenu closeMenu={this.closeMenu} user={this.state.user} />
         )}
-
+        {this.state.openUser && this.state.openMenu && (
+          <UserMenu closeMenu={this.closeMenu} />
+        )}
         {!this.state.authenticated && !isLite && (
           <Route path="/login" component={LoginForm} />
         )}

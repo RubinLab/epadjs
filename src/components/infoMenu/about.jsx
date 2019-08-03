@@ -2,8 +2,6 @@ import React from "react";
 import { Modal } from "react-bootstrap";
 import { apiUrl } from "../../config.json";
 import http from "../../services/httpService";
-import { Button } from "react-bootstrap";
-// import "../menuStyle.css";
 
 class About extends React.Component {
   state = { data: {} };
@@ -11,13 +9,11 @@ class About extends React.Component {
     this.getData();
   };
   getData = () => {
-    let info = {};
     const url = apiUrl + "/epads/version/";
     http.get(url).then(res => this.setState({ data: res.data }));
   };
 
   render = () => {
-    console.log(this.state.data);
     const version = this.state.data.description;
     return (
       <Modal.Dialog dialogClassName="info-about__modal">
