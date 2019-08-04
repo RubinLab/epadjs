@@ -5,16 +5,22 @@ import ToolBar from "../management/common/basicToolBar";
 import { apiUrl } from "../../config.json";
 import http from "../../services/httpService";
 import Header from "../management/common/managementHeader";
-
+import HostCreation from "./hostCreationForm";
 const messages = {
   deleteSingle: "Delete the host? This cannot be undone.",
-  deleteSelected: "Delete selected hostss? This cannot be undone."
+  deleteSelected: "Delete selected hostss? This cannot be undone.",
+  inValidPort: "Port must be numeric",
+  fillRequired: "Please fill required fields"
 };
 
 class Admin extends React.Component {
   state = {
     data: [],
-    selected: {}
+    selected: {},
+    addClicked: false,
+    name: "",
+    abbreviation: "",
+    port: ""
   };
 
   componentDidMount = () => {
@@ -65,8 +71,12 @@ class Admin extends React.Component {
       hasDeleteSingleClicked: false,
       hasDeleteAllClicked: false,
       singleDeleteId: "",
-      hasAddClicked: false,
-      errorMessage: null
+      addClicked: false,
+      errorMessage: null,
+      error: "",
+      name: "",
+      abbreviation: "",
+      port: ""
     });
   };
 
@@ -88,10 +98,50 @@ class Admin extends React.Component {
   handleSingleDelete = id => {
     this.setState({ hasDeleteSingleClicked: true, singleDeleteId: id });
   };
+  handleAddHost = () => {
+    this.setState({ addClicked: true });
+  };
 
+  checkRequiredFieldsFilled = () => {
+    const { name, abbreviation, port } = this.state;
+    return name && abbreviation && port;
+  };
   handleFormInput = e => {
+    const formFilled = this.checkRequiredFieldsFilled();
     const { name, value } = e.target;
-    this.setState({ [name]: value });
+    const { error } = this.state;
+    let port;
+    if (name === "port") {
+      port = parseInt(value);
+    }
+
+    if (name === "port" && value && isNaN(port)) {
+      this.setState({ error: messages.inValidPort });
+    } else if (
+      name === "port" &&
+      !isNaN(port) &&
+      error === messages.inValidPort
+    ) {
+      this.setState({ [name]: value, error: "" });
+    } else if (
+      name === "port" &&
+      !isNaN(port) &&
+      error === messages.fillRequired &&
+      formFilled
+    ) {
+      this.setState({ [name]: value, error: "" });
+    } else if (error === messages.fillRequired && formFilled) {
+      this.setState({ [name]: value, error: "" });
+    } else {
+      this.setState({ [name]: value });
+    }
+  };
+
+  saveNewHost = () => {
+    if (!this.checkRequiredFieldsFilled()) {
+      console.log("testing", messages.fillRequired);
+      this.setState({ error: messages.fillRequired });
+    }
   };
 
   defineColumns = () => {
@@ -255,7 +305,7 @@ class Admin extends React.Component {
         <Header onClose={this.props.onOK} selection="Usage" />
         <ToolBar
           onDelete={this.handleDeleteAll}
-          onAdd={this.handleAddProject}
+          onAdd={this.handleAddHost}
           selected={checkboxSelected}
         />
         <Table
@@ -264,7 +314,16 @@ class Admin extends React.Component {
           columns={this.defineColumns()}
           pageSizeOptions={[10, 20, 50]}
           defaultPageSize={pageSize}
+          NoDataComponent={() => null}
         />
+        {this.state.addClicked && (
+          <HostCreation
+            onCancel={this.handleCancel}
+            onType={this.handleFormInput}
+            error={this.state.error}
+            onSubmit={this.saveNewHost}
+          />
+        )}
       </>
     );
   };

@@ -164,7 +164,8 @@
 
 .add-project__modal--form,
 .edit-project__modal--form,
-.add-worklist__modal--form
+.add-worklist__modal--form,
+.add-host__modal--form
 /* .edit-worklist__modal--form  */
  {
   height: 100%;
@@ -174,7 +175,8 @@
 }
 .add-project__modal--input,
 .edit-project__modal--input,
-.add-worklist__modal--input
+.add-worklist__modal--input,
+.add-host__modal--input
 /* .edit-worklist__modal--input  */
  {
   width: 100%;
@@ -182,7 +184,8 @@
 
 .add-project__modal--label,
 .edit-project__modal--label,
-.add-worklist__modal--label
+.add-worklist__modal--label,
+.add-host__modal--label
 /* .edit-worklist__modal--label  */
  {
   margin-top: 1rem;
@@ -694,4 +697,16 @@
 .pro-table.info-admin .rt-thead.-header {
   font-size: 0.9rem;
   text-align: left;
+}
+
+.add-host__modal.modal-dialog .modal-content {
+  border: 2px solid gray;
+  box-shadow: 1rem 1rem 1rem grey;
+  color: white;
+  width: fit-content;
+  margin: auto;
+}
+
+.add-host__modal--input {
+  color: black;
 }
