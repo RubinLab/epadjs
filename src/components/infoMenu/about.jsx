@@ -1,12 +1,14 @@
 import React from "react";
 import { Modal } from "react-bootstrap";
-import { apiUrl } from "../../config.json";
+import { isLite, apiUrl } from "../../config.json";
 import http from "../../services/httpService";
 
 class About extends React.Component {
   state = { data: {} };
   componentDidMount = () => {
-    this.getData();
+    if (!isLite) {
+      this.getData();
+    }
   };
   getData = () => {
     const url = apiUrl + "/epads/version/";
@@ -14,11 +16,13 @@ class About extends React.Component {
   };
 
   render = () => {
-    const version = this.state.data.description;
+    const version = this.state.data.description
+      ? this.state.data.description
+      : "beta";
     return (
       <Modal.Dialog dialogClassName="info-about__modal">
         <Modal.Header>
-          <Modal.Title>About ePAD</Modal.Title>
+          <Modal.Title>About ePAD {isLite ? "Lite" : ""}</Modal.Title>
         </Modal.Header>
         <Modal.Body className="info-about__mbody">
           <div className="info-about__desc">
@@ -26,13 +30,33 @@ class About extends React.Component {
             workflow.
           </div>
           <div className="info-about__buttonCont">
-            <button className="info-about__button">Get help with ePAD</button>
-            <button className="info-about__button">Report an issue</button>
+            <button
+              className="info-about__button"
+              onClick={() => {
+                window.open(
+                  "https://epad.stanford.edu/ways-contact-us",
+                  "_blank",
+                  ""
+                );
+              }}
+            >
+              Get help with ePAD
+            </button>
+            <button
+              className="info-about__button"
+              onClick={() => {
+                window.open(
+                  "https://epad.stanford.edu/ways-contact-us",
+                  "_blank",
+                  ""
+                );
+              }}
+            >
+              Report an issue
+            </button>
           </div>
 
-          <div className="info-about__desc">
-            Version {version ? version : ""}
-          </div>
+          <div className="info-about__desc">Version {version}</div>
           <div className="info-about__desc">
             ePAD Copyright 2016 Stanford University. All rights reserved.
           </div>

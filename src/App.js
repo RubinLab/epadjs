@@ -55,14 +55,12 @@ class App extends Component {
   };
 
   handleMngMenu = () => {
-    console.log("this mng menu");
     if (this.state.openMenu) {
       this.setState({ openMng: true, openInfo: false, openUser: false });
     }
   };
 
   handleInfoMenu = () => {
-    console.log("this info menu");
     if (this.state.openMenu) {
       this.setState({ openInfo: true, openMng: false, openUser: false });
     }
@@ -74,10 +72,7 @@ class App extends Component {
     }
   };
   handleOpenMenu = e => {
-    console.log("this open menu");
-    console.log("openMenu is ", this.state.openMenu);
     if (!this.state.openMenu) {
-      console.log("openMenu was false, being set to true");
       this.setState({ openMenu: true });
       if (e.target.dataset.name === "mng") {
         this.setState({ openMng: true });
@@ -173,7 +168,7 @@ class App extends Component {
         {this.state.openInfo && this.state.openMenu && (
           <InfoMenu closeMenu={this.closeMenu} user={this.state.user} />
         )}
-        {this.state.openUser && this.state.openMenu && (
+        {!isLite && this.state.openUser && this.state.openMenu && (
           <UserMenu closeMenu={this.closeMenu} user={this.state.user} />
         )}
         {!this.state.authenticated && !isLite && (
@@ -228,7 +223,7 @@ class App extends Component {
 }
 
 const mapStateToProps = state => {
-  // console.log(state.annotationsListReducer);
+  console.log(state.annotationsListReducer);
   // console.log(state.managementReducer);
   const {
     listOpen,

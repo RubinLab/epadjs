@@ -53,8 +53,10 @@ class InfoMenu extends React.Component {
           "_blank",
           ""
         );
+        return;
       case "What's New":
         window.open("https://epad.stanford.edu/", "_blank", "");
+        return;
       case "Team":
         return <Team onOK={this.handleCloseModal} />;
       case "Admin":

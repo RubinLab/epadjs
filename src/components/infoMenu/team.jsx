@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal } from "react-bootstrap";
+import { isLite } from "../../config.json";
 
 // import "../menuStyle.css";
 
@@ -16,8 +17,8 @@ const team = props => {
             mechanisms and sources.
           </p>
           <p className="info-team__desc">
-            Major contributors for the ePAD 4.x release include (in alphabetic
-            order):
+            Major contributors for the ePAD {isLite ? "Lite Beta " : "4.x "}
+            release include (in alphabetic order):
           </p>
           <ul>
             <li>Mete Ugur Akdogan</li>
