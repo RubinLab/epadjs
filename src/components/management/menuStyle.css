@@ -607,62 +607,52 @@
   color: #fff;
 }
 
-/* .info-about__button,
-.user-profile__button {
-  background: #32383e;
-  color: #5bc0de;
-  border: 1px solid #5bc0de;
-  padding: 0.5rem 2rem 0.5rem 2rem;
-  margin: 0.5rem 1rem 1rem 1rem;
-  border-radius: 8px;
-}
-
-.info-about__button:hover,
-.user-profile__button:hover {
-  background: #5bc0de;
-  color: #3a3f44;
-  padding: 0.5rem 2rem 0.5rem 2rem;
-  border-radius: 8px;
-  margin: 0.5rem 1rem 1rem 1rem;
-} */
-
-.info-about__button,
-.user-profile__button {
+.info-about__button {
   background: #32383e;
   border: 1px solid #956a76;
   padding: 0.5rem 2rem 0.5rem 2rem;
   margin: 0.5rem 1rem 1rem 1rem;
   border-radius: 8px;
+  cursor: pointer;
 }
 
-.info-about__button:hover,
-.user-profile__button:hover {
+.info-about__button:hover {
   background: #70142e;
   color: #fff;
   padding: 0.5rem 2rem 0.5rem 2rem;
   border-radius: 8px;
   margin: 0.5rem 1rem 1rem 1rem;
+  cursor: pointer;
 }
 
-/*
-.info-about__button,
 .user-profile__button {
-  background: #32383e;
-  border: 2px solid #861737;
+  background: #3a3f44;
+  border: 1px solid #956a76;
   padding: 0.5rem 2rem 0.5rem 2rem;
-  margin: 0.5rem 1rem 1rem 1rem;
+  /* margin: 0.5rem 1rem 1rem 1rem; */
   border-radius: 8px;
+  cursor: pointer;
 }
-
-.info-about__button:hover,
 .user-profile__button:hover {
   background: #70142e;
   color: #fff;
   padding: 0.5rem 2rem 0.5rem 2rem;
   border-radius: 8px;
-  margin: 0.5rem 1rem 1rem 1rem;
+  /* margin: 0.5rem 1rem 1rem 1rem; */
+  cursor: pointer;
 }
-*/
+
+.user-profile__button.clicked {
+  background: #70142e;
+  color: #fff;
+  padding: 0.5rem 2rem 0.5rem 2rem;
+  border-radius: 0;
+  /* margin: 0.5rem 1rem 1rem 1rem; */
+  cursor: pointer;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+}
+
 .info-about__buttonCont {
   display: flex;
   /* justify-content: center; */
@@ -671,11 +661,15 @@
 
 .user-profile__buttonCont {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .user-profile__button {
-  width: 20rem;
+  /* width: 20rem; */
+  width: -webkit-fill-available;
+  text-align: center;
 }
 /* .user-profile__button:hover {
   font-size: 1.2rem;
@@ -709,4 +703,55 @@
 
 .add-host__modal--input {
   color: black;
+}
+
+.-updatePw,
+.-updateEmail {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.user-profile__mbody.modal-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.update-profile__modal--form {
+  padding: 1rem;
+  border: 1px solid #956a76;
+  /* border-left: 1px solid #956a76;
+  border-right: 1px solid #956a76;
+  border-bottom: 1px solid #956a76; */
+  border-top: none;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+  background: #3a3f44;
+}
+.update-profile__modal--form button {
+  width: 5rem;
+}
+
+.update-profile__modal--label {
+  margin-bottom: 0.2rem;
+  font-size: 1rem;
+}
+
+.user-profile__modal .modal-content {
+  width: 50%;
+  min-width: 20rem;
+  margin: auto;
+}
+
+.update-profile__modal--input {
+  margin-bottom: 0.8rem;
+  color: black;
+}
+
+.update-profile__modal--form .form-exp.required {
+  margin-top: 0;
 }

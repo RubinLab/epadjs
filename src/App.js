@@ -174,7 +174,7 @@ class App extends Component {
           <InfoMenu closeMenu={this.closeMenu} user={this.state.user} />
         )}
         {this.state.openUser && this.state.openMenu && (
-          <UserMenu closeMenu={this.closeMenu} />
+          <UserMenu closeMenu={this.closeMenu} user={this.state.user} />
         )}
         {!this.state.authenticated && !isLite && (
           <Route path="/login" component={LoginForm} />

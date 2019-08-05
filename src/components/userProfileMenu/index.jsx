@@ -36,7 +36,9 @@ class InfoMenu extends React.Component {
   selectDisplay = () => {
     switch (this.state.selection) {
       case "User Profile":
-        return <UserProfile onOK={this.handleCloseModal} />;
+        return (
+          <UserProfile onOK={this.handleCloseModal} user={this.props.user} />
+        );
       default:
         return <div />;
     }
