@@ -49,3 +49,18 @@ export function getStudyAims(subjectID, studyUID) {
     );
   }
 }
+
+export function saveStudy(projectID, subjectID, abbreviation, description) {
+  // http://epad-dev8.stanford.edu:8080/epad/v2/projects/test1id/subjects/test/studies/test2_?description=test2
+  const url =
+    apiUrl +
+    "/projects/" +
+    projectID +
+    "/subjects/" +
+    subjectID +
+    "/studies/" +
+    abbreviation +
+    "?description=" +
+    description;
+  return http.put(url);
+}

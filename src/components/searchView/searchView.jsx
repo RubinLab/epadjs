@@ -602,6 +602,9 @@ class SearchView extends Component {
           <StudyCreationModal
             onCancel={this.handleNewModalCancel}
             subjects={this.state.subjects}
+            project={this.props.match.params.pid}
+            onSubmit={this.updateUploadStatus}
+            onResolve={this.updateStatus}
           />
         );
       case "series":

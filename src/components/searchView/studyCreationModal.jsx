@@ -1,35 +1,60 @@
 import React from "react";
 import { Modal } from "react-bootstrap";
+import { toast } from "react-toastify";
+import { saveStudy } from "../../services/studyServices";
 
+const messages = {
+  fillRequredFields: "Please fill the required fields!"
+};
 class StudyCreationForm extends React.Component {
   state = {
     description: "",
     abbreviation: "",
     error: "",
     study: "",
-    subjects: []
+    subjects: [],
+    subjectID: ""
   };
 
+  componentDidMount = () => {
+    this.setState({ subjectID: this.props.subjects[0].subjectID });
+  };
   handleSubmit = () => {
-    const { description, abbreviation, patient } = this.state;
-    if (!description || !abbreviation || !patient) {
-      this.setState({ error: "Please fill the required fields!" });
+    const { description, abbreviation, subjectID } = this.state;
+    if (!description || !abbreviation || !subjectID) {
+      this.setState({ error: messages.fillRequredFields });
     } else {
+      saveStudy(this.props.project, subjectID, abbreviation, description)
+        .then(() => {
+          this.props.onSubmit();
+          this.props.onCancel();
+          this.props.onResolve();
+          toast.success("Study successfully saved!");
+        })
+        .catch(error => {
+          toast.error(error.response.data.message, { autoClose: false });
+          this.props.onResolve();
+        });
     }
   };
 
-  handleInput = e => {
-    this.setState({ [e.target.name]: e.target.value });
+  checkRequiredFilled = () => {
+    const { description, abbreviation, subjectID } = this.state;
+    if (description && abbreviation && subjectID) {
+      return true;
+    } else {
+      return false;
+    }
   };
-
-  handleCancel = () => {
-    this.setState({
-      description: "",
-      patient: "",
-      abbreviation: "",
-      error: ""
-    });
-    this.props.onCancel();
+  handleInput = async e => {
+    console.log([e.target.name], e.target.value);
+    await this.setState({ [e.target.name]: e.target.value });
+    if (this.state.error === messages.fillRequredFields) {
+      const { description, abbreviation, subjectID } = this.state;
+      if (description && abbreviation && subjectID) {
+        this.setState({ error: "" });
+      }
+    }
   };
 
   clearCarets = string => {
@@ -54,6 +79,7 @@ class StudyCreationForm extends React.Component {
   };
 
   render = () => {
+    console.log(this.state);
     return (
       <Modal.Dialog dialogClassName="add-study__modal">
         <Modal.Header>
@@ -83,7 +109,7 @@ class StudyCreationForm extends React.Component {
             />
             <h5 className="add-study__modal--label">Patient</h5>
             <select
-              name="patient"
+              name="subjectID"
               className="add-study__modal--select"
               onChange={this.handleInput}
             >
@@ -99,7 +125,7 @@ class StudyCreationForm extends React.Component {
           <button variant="primary" onClick={this.handleSubmit}>
             Submit
           </button>
-          <button variant="secondary" onClick={this.handleCancel}>
+          <button variant="secondary" onClick={this.props.onCancel}>
             Cancel
           </button>
         </Modal.Footer>
