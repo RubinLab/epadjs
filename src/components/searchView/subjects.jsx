@@ -61,7 +61,7 @@ class Subjects extends Component {
   expandCurrentLevel = () => {
     const expanded = {};
     for (let i = 0; i < this.state.data.length; i++) {
-      expanded[i] = true;
+      expanded[i] = this.state.data[i].numberOfStudies ? true : false;
     }
     this.setState({ expanded });
   };

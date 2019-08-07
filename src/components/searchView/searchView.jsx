@@ -624,13 +624,13 @@ class SearchView extends Component {
             onResolve={this.updateStatus}
           />
         );
-      case "annotation":
-        return (
-          <AnnotationCreationModal
-            onCancel={this.handleNewModalCancel}
-            project={this.props.match.params.pid}
-          />
-        );
+      // case "annotation":
+      //   return (
+      //     <AnnotationCreationModal
+      //       onCancel={this.handleNewModalCancel}
+      //       project={this.props.match.params.pid}
+      //     />
+      //   );
       default:
         return null;
     }
@@ -712,7 +712,10 @@ class SearchView extends Component {
         )}
 
         {this.state.showNew && (
-          <NewMenu onSelect={this.handleSelectNewOption} />
+          <NewMenu
+            onSelect={this.handleSelectNewOption}
+            onClose={this.handleNewClick}
+          />
         )}
         {this.state.newSelected && this.handleNewSelected()}
       </>

@@ -49,13 +49,11 @@ class SeriesCreationForm extends React.Component {
     try {
       const result = await getStudies(this.props.project, subjectID);
       studies = result.data.ResultSet.Result;
-      // console.log(studies);
       const studyID = studies.length > 0 ? studies[0].studyUID : null;
       this.setState({ studies, studyID });
     } catch (error) {
       let { message } = error.response.data;
       message = message ? message : error;
-      // console.log(error);
       toast.error(message, { autoClose: false });
     }
   };
@@ -103,7 +101,6 @@ class SeriesCreationForm extends React.Component {
 
   renderStudies = () => {
     const options = [];
-    // console.log(this.state.studies);
     for (let study of this.state.studies) {
       let desc = study.studyDescription
         ? study.studyDescription
@@ -118,8 +115,6 @@ class SeriesCreationForm extends React.Component {
   };
 
   render = () => {
-    console.log(this.state);
-
     return (
       <Modal.Dialog dialogClassName="add-series__modal">
         <Modal.Header>

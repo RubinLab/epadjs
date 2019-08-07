@@ -59,6 +59,23 @@ class NewMenu extends React.Component {
     this.onStop();
   }
 
+  setWrapperRef = node => {
+    this.wrapperRef = node;
+  };
+
+  componentDidMount() {
+    document.addEventListener("mousedown", this.handleClickOutside);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("mousedown", this.handleClickOutside);
+  }
+
+  handleClickOutside = event => {
+    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
+      this.props.onClose();
+    }
+  };
   render() {
     const dragHandlers = { onStart: this.onStart, onStop: this.onStop };
     const { deltaPosition, controlledPosition } = this.state;
@@ -69,37 +86,39 @@ class NewMenu extends React.Component {
     var rect = element[0].getBoundingClientRect();
 
     return (
-      <div
-        className="new-popup"
-        style={{ left: rect.right - 10, top: rect.bottom + 10 }}
-      >
+      <div ref={this.setWrapperRef}>
         <div
-          className="new-popup__option"
-          data-opt="subject"
-          onClick={this.props.onSelect}
+          className="new-popup"
+          style={{ left: rect.right - 10, top: rect.bottom + 10 }}
         >
-          New subject
-        </div>
-        <div
-          className="new-popup__option"
-          data-opt="study"
-          onClick={this.props.onSelect}
-        >
-          New study
-        </div>
-        <div
-          className="new-popup__option"
-          data-opt="series"
-          onClick={this.props.onSelect}
-        >
-          New series
-        </div>
-        <div
-          className="new-popup__option"
-          data-opt="annotation"
-          onClick={this.props.onSelect}
-        >
-          New annotation
+          <div
+            className="new-popup__option"
+            data-opt="subject"
+            onClick={this.props.onSelect}
+          >
+            New subject
+          </div>
+          <div
+            className="new-popup__option"
+            data-opt="study"
+            onClick={this.props.onSelect}
+          >
+            New study
+          </div>
+          <div
+            className="new-popup__option"
+            data-opt="series"
+            onClick={this.props.onSelect}
+          >
+            New series
+          </div>
+          <div
+            className="new-popup__option"
+            data-opt="annotation"
+            onClick={this.props.onSelect}
+          >
+            New annotation
+          </div>
         </div>
       </div>
     );

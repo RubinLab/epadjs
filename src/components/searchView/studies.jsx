@@ -108,7 +108,8 @@ class Studies extends Component {
   expandCurrentLevel = () => {
     const expanded = {};
     for (let i = 0; i < this.state.data.length; i++) {
-      expanded[i] = true;
+      // expanded[i] = true;
+      expanded[i] = this.state.data[i].numberOfSeries ? true : false;
     }
     this.setState({ expanded });
   };
