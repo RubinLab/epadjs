@@ -78,6 +78,13 @@ class SearchView extends Component {
     this.setState({ numOfsubjects: subjects.length, subjects });
   };
 
+  componentDidUpdate = async prevProps => {
+    if (prevProps.match.params.pid !== this.props.match.params.pid) {
+      const subjects = await this.getData();
+      this.setState({ numOfsubjects: subjects.length, subjects });
+    }
+  };
+
   getData = async () => {
     const {
       data: {
@@ -613,6 +620,8 @@ class SearchView extends Component {
             onCancel={this.handleNewModalCancel}
             project={this.props.match.params.pid}
             subjects={this.state.subjects}
+            onSubmit={this.updateUploadStatus}
+            onResolve={this.updateStatus}
           />
         );
       case "annotation":

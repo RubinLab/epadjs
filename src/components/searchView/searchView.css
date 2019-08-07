@@ -255,7 +255,8 @@ h5.add-subject__modal--label,
 }
 
 .add-subject__modal--input,
-.add-study__modal--input {
+.add-study__modal--input,
+.add-series__modal--input {
   margin-top: 0.1rem;
   width: -webkit-fill-available;
   color: black;

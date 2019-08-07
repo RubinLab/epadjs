@@ -47,7 +47,6 @@ class StudyCreationForm extends React.Component {
     }
   };
   handleInput = async e => {
-    console.log([e.target.name], e.target.value);
     await this.setState({ [e.target.name]: e.target.value });
     if (this.state.error === messages.fillRequredFields) {
       const { description, abbreviation, subjectID } = this.state;
@@ -69,9 +68,11 @@ class StudyCreationForm extends React.Component {
   renderPatients = () => {
     const options = [];
     for (let patient of this.props.subjects) {
+      let patientName = this.clearCarets(patient.subjectName);
+      patientName = patientName || "Unnamed Patient";
       options.push(
         <option value={patient.subjectID} key={patient.subjectID}>
-          {this.clearCarets(patient.subjectName)}
+          {patientName}
         </option>
       );
     }
@@ -79,7 +80,6 @@ class StudyCreationForm extends React.Component {
   };
 
   render = () => {
-    console.log(this.state);
     return (
       <Modal.Dialog dialogClassName="add-study__modal">
         <Modal.Header>

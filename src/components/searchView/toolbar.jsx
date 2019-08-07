@@ -146,30 +146,30 @@ const toolBar = props => {
           </ReactTooltip>
         </div>
       </div>
-      <div className="searchView-toolbar__group">
-        <div
-          className={
-            props.project ? "searchView-toolbar__icon new-icon" : "hide-delete"
-          }
-          onClick={props.onNew}
-        >
-          <div>
-            <FaPlusCircle
-              style={{ fontSize: "1.2rem" }}
-              data-tip
-              data-for="new-icon"
-            />
-          </div>
-          <ReactTooltip
-            id="new-icon"
-            place="bottom"
-            type="info"
-            delayShow={1500}
+      {props.project && (
+        <div className="searchView-toolbar__group">
+          <div
+            className="searchView-toolbar__icon new-icon"
+            onClick={props.onNew}
           >
-            <span>New</span>
-          </ReactTooltip>
+            <div>
+              <FaPlusCircle
+                style={{ fontSize: "1.2rem" }}
+                data-tip
+                data-for="new-icon"
+              />
+            </div>
+            <ReactTooltip
+              id="new-icon"
+              place="bottom"
+              type="info"
+              delayShow={1500}
+            >
+              <span>New</span>
+            </ReactTooltip>
+          </div>
         </div>
-      </div>
+      )}
       {/* <div className="searchView-toolbar__icon">
         <div>
           <TiPencil

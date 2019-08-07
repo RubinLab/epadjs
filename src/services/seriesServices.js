@@ -103,3 +103,26 @@ export function deleteSeries(series) {
     return http.delete(url);
   }
 }
+
+export function saveSeries(
+  projectID,
+  subjectID,
+  studyID,
+  abbreviation,
+  description
+) {
+  //http://epad-dev8.stanford.edu:8080/epad/v2/projects/test1id/subjects/test/studies/test2_/series/test2?description=test2
+  const url =
+    apiUrl +
+    "/projects/" +
+    projectID +
+    "/subjects/" +
+    subjectID +
+    "/studies/" +
+    studyID +
+    "/series/" +
+    abbreviation +
+    "?description=" +
+    description;
+  return http.put(url);
+}

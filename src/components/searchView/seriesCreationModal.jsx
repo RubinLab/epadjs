@@ -1,8 +1,8 @@
 import React from "react";
 import { Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
-import { getSubjects } from "../../services/subjectServices";
 import { getStudies } from "../../services/studyServices";
+import { saveSeries } from "../../services/seriesServices";
 
 class SeriesCreationForm extends React.Component {
   state = {
@@ -14,39 +14,57 @@ class SeriesCreationForm extends React.Component {
   };
 
   componentDidMount = async () => {
-    let studies = [];
-    console.log(this.props.subjects);
-    try {
-      const result = await getStudies(
-        this.props.project,
-        this.props.subjects[0].subjectID
-      );
-      studies = result.data.ResultSet.Result;
-    } catch (error) {
-      toast.error(error.response.data.message, { autoClose: false });
-    }
-    this.setState({ studies });
+    this.getStudies();
+    this.setState({ subjectID: this.props.subjects[0].subjectID });
   };
 
   handleSubmit = () => {
-    const { description, abbreviation, patient } = this.state;
-    if (!description || !abbreviation || !patient) {
+    const { description, abbreviation, subjectID, studyID } = this.state;
+    if (!description || !abbreviation || !subjectID || !studyID) {
       this.setState({ error: "Please fill the required fields!" });
     } else {
+      saveSeries(
+        this.props.project,
+        subjectID,
+        studyID,
+        abbreviation,
+        description
+      )
+        .then(() => {
+          this.props.onSubmit();
+          this.props.onCancel();
+          this.props.onResolve();
+          toast.success("Series successfully saved!");
+        })
+        .catch(error => {
+          toast.error(error.response.data.message, { autoClose: false });
+          this.props.onResolve();
+        });
     }
   };
 
-  getData = async () => {
-    const {
-      data: {
-        ResultSet: { Result: subjects }
-      }
-    } = await getSubjects(this.props.project);
-    return subjects;
+  getStudies = async selectedSubjectID => {
+    let studies = [];
+    const subjectID = selectedSubjectID || this.props.subjects[0].subjectID;
+    try {
+      const result = await getStudies(this.props.project, subjectID);
+      studies = result.data.ResultSet.Result;
+      // console.log(studies);
+      const studyID = studies.length > 0 ? studies[0].studyUID : null;
+      this.setState({ studies, studyID });
+    } catch (error) {
+      let { message } = error.response.data;
+      message = message ? message : error;
+      // console.log(error);
+      toast.error(message, { autoClose: false });
+    }
   };
 
   handleInput = e => {
     this.setState({ [e.target.name]: e.target.value });
+    if (e.target.name === "subjectID") {
+      this.getStudies(e.target.value);
+    }
   };
 
   handleCancel = () => {
@@ -72,9 +90,11 @@ class SeriesCreationForm extends React.Component {
   renderPatients = () => {
     const options = [];
     for (let patient of this.props.subjects) {
+      let patientName = this.clearCarets(patient.subjectName);
+      patientName = patientName || "Unnamed Patient";
       options.push(
         <option value={patient.subjectID} key={patient.subjectID}>
-          {this.clearCarets(patient.subjectName)}
+          {patientName}
         </option>
       );
     }
@@ -83,6 +103,7 @@ class SeriesCreationForm extends React.Component {
 
   renderStudies = () => {
     const options = [];
+    // console.log(this.state.studies);
     for (let study of this.state.studies) {
       let desc = study.studyDescription
         ? study.studyDescription
@@ -97,6 +118,8 @@ class SeriesCreationForm extends React.Component {
   };
 
   render = () => {
+    console.log(this.state);
+
     return (
       <Modal.Dialog dialogClassName="add-series__modal">
         <Modal.Header>
@@ -126,7 +149,7 @@ class SeriesCreationForm extends React.Component {
             />
             <h5 className="add-series__modal--label">Patient</h5>
             <select
-              name="patient"
+              name="subjectID"
               className="add-series__modal--select"
               onChange={this.handleInput}
             >
@@ -147,9 +170,15 @@ class SeriesCreationForm extends React.Component {
           </form>
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
-          <button variant="primary" onClick={this.handleSubmit}>
-            Submit
-          </button>
+          {this.state.studies.length > 0 ? (
+            <button variant="primary" onClick={this.handleSubmit}>
+              Submit
+            </button>
+          ) : (
+            <button variant="primary" onClick={this.handleSubmit} disabled>
+              Submit
+            </button>
+          )}
           <button variant="secondary" onClick={this.handleCancel}>
             Cancel
           </button>
