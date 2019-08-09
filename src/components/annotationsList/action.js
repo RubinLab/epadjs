@@ -543,7 +543,6 @@ export const getSingleSerie = (serie, annotation) => {
     const { aimsData, imageData } = await dispatch(
       getSingleSerieData(serie, annotation)
     );
-
     await dispatch(
       singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation)
     );
@@ -591,7 +590,7 @@ const getSingleSerieData = (serie, annotation) => {
       serieAims = serieAims.data;
       studyAims = await getStudyAim(patientID, studyUID);
       aimsData = serieAims.concat(studyAims);
-      imageData = getImageIdAnnotations(serieAims);
+      imageData = await getImageIdAnnotations(serieAims);
       aimsData = getAimListFields(aimsData, annotation);
       // dispatch(annotationsLoaded());
     } catch (err) {

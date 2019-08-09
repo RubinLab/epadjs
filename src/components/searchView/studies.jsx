@@ -448,7 +448,9 @@ class Studies extends Component {
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => this.props.dispatch(showAnnotationDock()))
+          .then(() => {
+            this.props.dispatch(showAnnotationDock());
+          })
           .catch(err => console.log(err));
 
         //if patient doesnot exist get patient

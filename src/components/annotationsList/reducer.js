@@ -118,11 +118,12 @@ const asyncReducer = (state = initialState, action) => {
     case LOAD_SERIE_SUCCESS:
       let indexNum = state.openSeries.length - 1;
       let imageAddedSeries = [...state.openSeries];
-      if (action.payload.ref.numberOfAnnotations > 0) {
-        let annCalc = Object.keys(action.payload.imageData);
-        if (annCalc.length > 0) {
-          imageAddedSeries[indexNum].imageAnnotations =
-            action.payload.imageData;
+      let annCalc = Object.keys(action.payload.imageData);
+      if (annCalc.length > 0) {
+        for (let i = 0; i < imageAddedSeries.length; i++) {
+          if (imageAddedSeries[i].seriesUID === action.payload.serID) {
+            imageAddedSeries[i].imageAnnotations = action.payload.imageData;
+          }
         }
       }
       const result = Object.assign({}, state, {
