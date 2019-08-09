@@ -141,7 +141,6 @@ class Connections extends React.Component {
     ) {
       this.setState({ error: "" });
     }
-    console.log({ [name]: value });
     this.setState({ [name]: value });
   };
 
@@ -182,7 +181,6 @@ class Connections extends React.Component {
         accessor: "",
         width: 50,
         Cell: ({ original }) => {
-          // console.log(original);
           const { pacID } = original;
           return (
             <input
@@ -216,7 +214,7 @@ class Connections extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
-        width: 250
+        width: 350
       },
       // {
       //   Header: "Open",
@@ -246,13 +244,13 @@ class Connections extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
-        width: 100
+        width: 150
       },
       {
         Header: "",
-        width: 45,
-        minResizeWidth: 20,
-        resizable: true,
+        // width: 45,
+        // minResizeWidth: 20,
+        // resizable: true,
         Cell: original => (
           <div
             onClick={() => {

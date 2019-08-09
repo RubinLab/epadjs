@@ -653,3 +653,8 @@
   width: fit-content;
   outline: 0;
 }
+
+.mng-user__cell {
+  cursor: pointer;
+  text-align: left;
+}

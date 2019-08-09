@@ -1,11 +1,12 @@
 import React from "react";
 import ReactTable from "react-table";
-import { FaEdit, FaCheck } from "react-icons/fa";
+import { FaEdit, FaCheck, FaSave } from "react-icons/fa";
 import "../menuStyle.css";
 import { getUsers } from "../../../services/userServices";
 import ToolBar from "../common/basicToolBar";
 import EditUsers from "./editUsersForm";
 import ColorPicker from "./colorPicker";
+import EditField from "./editField";
 
 class Users extends React.Component {
   state = {
@@ -14,13 +15,24 @@ class Users extends React.Component {
     hasAdminPermission: false,
     deleteAllClicked: false,
     selectAll: 0,
-    selected: {}
+    selected: {},
+    edit: {}
   };
 
   componentDidMount = () => {
     this.getUserData();
+    document.addEventListener("mousedown", this.handleClickOutside);
   };
 
+  handleEditField = (field, id) => {
+    const { edit } = this.state;
+    edit[field] ? delete edit[field] : (edit[field] = id);
+    this.setState({ edit });
+  };
+
+  handleOutClick = () => {
+    this.setState({ edit: {} });
+  };
   getUserData = async () => {
     const result = await getUsers();
     const data = result.data.ResultSet.Result;
@@ -77,6 +89,26 @@ class Users extends React.Component {
     });
   }
 
+  componentWillUnmount = () => {
+    document.removeEventListener("mousedown", this.handleClickOutside);
+  };
+
+  /**
+   * Set the wrapper ref
+   */
+  setWrapperRef = node => {
+    this.wrapperRef = node;
+  };
+
+  /**
+   * Alert if clicked on outside of element
+   */
+  handleClickOutside = event => {
+    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
+      this.handleOutClick();
+    }
+  };
+
   defineColumns = () => {
     return [
       {
@@ -117,7 +149,27 @@ class Users extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 35
+        minWidth: 35,
+        className: "mng-user__cell",
+        Cell: original => {
+          console.log(original.row.checkbox);
+          const { firstname, username } = original.row.checkbox;
+          return this.state.edit.firstname === username ? (
+            <div ref={this.setWrapperRef}>
+              <EditField />
+            </div>
+          ) : (
+            <div
+              data-name="firstname"
+              onClick={() => {
+                console.log("clicked");
+                this.handleEditField("firstname", username);
+              }}
+            >
+              {firstname}
+            </div>
+          );
+        }
       },
       {
         Header: "Last",
@@ -126,7 +178,8 @@ class Users extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 35
+        minWidth: 35,
+        className: "mng-user__cell"
       },
       {
         Header: "Email",
@@ -135,7 +188,8 @@ class Users extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
+        minWidth: 50,
+        className: "mng-user__cell"
       },
       {
         Header: "Color",
@@ -143,6 +197,7 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 20,
+        className: "mng-user__cell",
         Cell: original => {
           let color = original.row.checkbox.colorpreference;
           color = color ? `#${color}` : `#19ff75`;
@@ -161,6 +216,7 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
+        className: "mng-user__cell",
         Cell: original => (
           <p className="menu-clickable wrapped">
             {original.row.projects.join(", ")}
@@ -173,6 +229,7 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 20,
+        className: "mng-user__cell",
         Cell: original => {
           return original.row.checkbox.admin ? (
             <div className="centeredCell"> {<FaCheck />}</div>
@@ -187,6 +244,7 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
+        className: "mng-user__cell",
         Cell: original => (
           <p className="menu-clickable wrapped">
             {this.convertArrToStr(original.row.permissions)}
@@ -199,6 +257,7 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 30,
+        className: "mng-user__cell",
         Cell: original => {
           return original.row.checkbox.enabled ? (
             <div className="centeredCell"> {<FaCheck />}</div>
@@ -210,6 +269,7 @@ class Users extends React.Component {
         width: 45,
         minResizeWidth: 20,
         resizable: true,
+        className: "mng-user__cell",
         Cell: original => {
           return original.row.checkbox.username ===
             sessionStorage.getItem("username") ||
