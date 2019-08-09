@@ -5,9 +5,15 @@ import { Modal } from "react-bootstrap";
 import { isLite } from "./../../config.json";
 import { ToastContainer, toast } from "react-toastify";
 import { getProjects, uploadFile } from "../../services/projectServices";
+import { getCurrentUser } from "../../services/authService";
 
 class UploadModal extends React.Component {
-  state = { tiff: false, osirix: false, projects: [], file: null };
+  state = {
+    tiff: false,
+    osirix: false,
+    projects: [],
+    files: []
+  };
 
   onSelect = e => {
     const { name, checked } = e.target;
@@ -26,32 +32,39 @@ class UploadModal extends React.Component {
   };
 
   onSelectFile = e => {
-    this.setState({ file: e.target.files[0] });
+    this.setState({ files: Array.from(e.target.files) });
   };
 
   onUpload = () => {
+    const projectID = this.props.projectID;
+    const userName = getCurrentUser();
     const formData = new FormData();
-    formData.append("file", this.state.file);
+
+    this.state.files.forEach((file, index) => {
+      formData.append(`file${index + 1}`, file);
+    });
     const config = {
       headers: {
         "content-type": "multipart/form-data"
       }
     };
+
     this.props.onSubmit();
-    uploadFile(formData, config)
+    uploadFile(formData, config, projectID, userName)
       .then(() => {
-        this.props.onSubmit(1);
+        this.props.onSubmit();
       })
       .catch(err => {
-        const fileName = this.state.file.name.substring(0, 50);
-        toast.error(
-          `Error occured while uploading ${fileName}${
-            this.state.file.name.length > 50 ? "..." : "!"
-          }`,
-          {
-            autoClose: false
-          }
-        );
+        console.log(err);
+        // const fileName = this.state.file.name.substring(0, 50);
+        // toast.error(
+        //   `Error occured while uploading ${fileName}${
+        //     this.state.file.name.length > 50 ? "..." : "!"
+        //   }`,
+        //   {
+        //     autoClose: false
+        //   }
+        // );
         this.props.onSubmit();
       });
     this.props.onCancel();
@@ -101,12 +114,16 @@ class UploadModal extends React.Component {
             // onSelectFile={onType}
           />
         </div>
-        <h6>*Required</h6>
+        <h6 className="upload-required">*Required</h6>
       </div>
     );
   };
   render = () => {
-    let disabled = !this.state.summary && !this.state.aim;
+    let disabled = this.state.files.length === 0;
+    let className = "alert-upload";
+    className = this.props.className
+      ? `${className} ${this.props.className}`
+      : className;
     const options = [];
     for (let pr of this.state.projects) {
       options.push(
@@ -116,17 +133,15 @@ class UploadModal extends React.Component {
       );
     }
     return (
-      <Modal.Dialog dialogClassName="alert-upload">
+      <Modal.Dialog dialogClassName={className}>
         <Modal.Header>
           <Modal.Title className="upload__header">Upload</Modal.Title>
         </Modal.Header>
         <Modal.Body className="upload-container">
           {!isLite && (
             <div className="upload-select__container">
-              <label>
-                Projects:
-                <select className="upload-select">{options}</select>
-              </label>
+              <span>Projects: </span>
+              <select className="upload-select">{options}</select>
             </div>
           )}
           <div className="upload-file">
@@ -134,12 +149,13 @@ class UploadModal extends React.Component {
             <input
               type="file"
               className="upload-display"
+              multiple={true}
               // name="tiff"
               onChange={this.onSelectFile}
             />
           </div>
           {!isLite && (
-            <div>
+            <div className="uploadDetails-container">
               <h6 className="upload-note">
                 *Please note that if you upload a project that you downloaded
                 from ePad, the project will not be recreated.
@@ -169,7 +185,7 @@ class UploadModal extends React.Component {
           )}
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
-          {!this.state.file ? (
+          {disabled ? (
             <button onClick={this.onUpload} disabled>
               Submit
             </button>

@@ -1,5 +1,5 @@
 import http from "./httpService";
-import { isLite, apiUrl } from "../config.json";
+import { isLite, apiUrl, apiUrlV1 } from "../config.json";
 
 export function getProjects() {
   return http.get(apiUrl + "/projects/");
@@ -63,8 +63,17 @@ export function downloadProjects(projectID) {
   );
 }
 
-export function uploadFile(formData, config) {
+export function uploadFile(formData, config, projectID, username) {
   if (isLite) {
     return http.post(apiUrl + "/projects/lite/files", formData, config);
+  } else {
+    const url =
+      apiUrlV1 +
+      "/rest/upload?projectID=" +
+      projectID +
+      "&username=" +
+      username;
+    console.log("url is", url);
+    return http.post(url, formData, config);
   }
 }

@@ -1,10 +1,20 @@
-#annList-modal {
+#annList-modal,
+#dock-modal {
   display: inline-flex;
   background: #3a3f44;
   color: #d3d3d3;
-  left: 80%;
+  border: 4px solid #9aa0a9;
+  border-radius: 0.5rem;
+  width: 250px;
+  min-width: 100px;
+
+  /* left: 80%; */
 }
 
+#dock-modal {
+  padding: 0.3rem;
+  overflow-x: hidden;
+}
 .annList {
   background: #3a3f44;
   padding: 0.5rem;
@@ -13,6 +23,7 @@
   flex-direction: column;
   position: relative;
   width: 100%;
+  height: 100%;
   overflow: scroll;
   margin: auto;
 }
@@ -29,8 +40,8 @@
 .annList-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 1rem;
-  margin-right: 1rem;
+  /* margin-bottom: 1rem;
+  margin-right: 1rem; */
   margin-left: 1rem;
 }
 
@@ -282,11 +293,11 @@ svg {
 }
 
 .label-toggle__text {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   align-items: center;
   margin-right: 1rem;
   display: flex;
-  width: 60%;
+  width: 70%;
 }
 
 .-maxView-container {
@@ -362,4 +373,9 @@ svg {
 .alreadyOpen-disabled {
   display: flex;
   align-items: center;
+}
+
+.-dock__close {
+  cursor: pointer;
+  width: 1.5rem;
 }

@@ -3,9 +3,16 @@ import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import "../menuStyle.css";
 
-const worklistCreationForm = ({ users, onCancel, onSubmit, onType, error }) => {
+const worklistCreationForm = props => {
+  const { users, onCancel, onSubmit, onChange, error } = props;
+
   const options = [];
   let index = 0;
+  options.push(
+    <option disabled value="default" key="0-default">
+      -- select a user --
+    </option>
+  );
   for (let user of users) {
     options.push(
       <option key={`${index}-${user.username}`} value={user.username}>
@@ -28,7 +35,7 @@ const worklistCreationForm = ({ users, onCancel, onSubmit, onType, error }) => {
             className="add-worklist__modal--input"
             name="name"
             type="text"
-            onChange={onType}
+            onChange={onChange}
             id="form-first-element"
           />
           <h5 className="add-worklist__modal--label">ID*</h5>
@@ -37,23 +44,30 @@ const worklistCreationForm = ({ users, onCancel, onSubmit, onType, error }) => {
             className="add-worklist__modal--input"
             name="id"
             type="text"
-            onChange={onType}
+            onChange={onChange}
           />
           <h6 className="form-exp">
             One word only, no special characters, '_' is OK
           </h6>
           <h5 className="add-worklist__modal--label">User*</h5>
 
-          <select className="add-worklist__modal--select">{options}</select>
+          <select
+            className="add-worklist__modal--select"
+            name="user"
+            onChange={onChange}
+            defaultValue="default"
+          >
+            {options}
+          </select>
           <h5 className="add-worklist__modal--label">Description</h5>
           <textarea
             onMouseDown={e => e.stopPropagation()}
             className="add-worklist__modal--input"
             name="description"
-            onChange={onType}
+            onChange={onChange}
           />
           <h5 className="form-exp required">*Required</h5>
-          {error && <div className="err-message">{error}</div>}
+          {error ? <div className="err-message">{error}</div> : null}
         </form>
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
@@ -67,11 +81,12 @@ const worklistCreationForm = ({ users, onCancel, onSubmit, onType, error }) => {
     </Modal.Dialog>
   );
 };
+// }
 
 worklistCreationForm.propTypes = {
   onCancel: PropTypes.func,
   onSubmit: PropTypes.func,
-  onType: PropTypes.func,
+  onChange: PropTypes.func,
   error: PropTypes.string
 };
 

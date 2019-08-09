@@ -14,7 +14,6 @@ import Series from "./series";
 import ReactTooltip from "react-tooltip";
 import {
   getSingleSerie,
-  getAnnotationListData,
   selectStudy,
   clearSelection,
   startLoading,
@@ -23,7 +22,8 @@ import {
   addToGrid,
   getWholeData,
   alertViewPortFull,
-  updatePatient
+  updatePatient,
+  showAnnotationDock
 } from "../annotationsList/action";
 //import "react-table/react-table.css";
 
@@ -62,7 +62,7 @@ class Studies extends Component {
       selection: [],
       selectAll: false,
       selectType: "checkbox",
-      expanded: {},
+      // expanded: {},
       selectedStudy: {},
       isSerieSelectionOpen: false
     };
@@ -362,16 +362,17 @@ class Studies extends Component {
       selectAll: true
     });
   };
-  toggleTree = () => {
-    if (this.state.pivotBy.length) {
-      this.setState({ pivotBy: [], expanded: {} });
-    } else {
-      this.setState({ pivotBy: [], expanded: {} });
-    }
-  };
-  onExpandedChange = expanded => {
-    this.setState({ expanded });
-  };
+  // toggleTree = () => {
+  //   if (this.state.pivotBy.length) {
+  //     this.setState({ pivotBy: [], expanded: {} });
+  //   } else {
+  //     this.setState({ pivotBy: [], expanded: {} });
+  //   }
+  // };
+
+  // onExpandedChange = (newExpanded, index, event) => {
+  //   this.setState({ expanded: newExpanded });
+  // };
 
   excludeOpenSeries = allSeriesArr => {
     const result = [];
@@ -407,6 +408,10 @@ class Studies extends Component {
   };
 
   displaySeries = async selected => {
+    if (this.props.dockOpen) {
+      this.props.dispatch(showAnnotationDock());
+    }
+
     if (this.props.openSeries.length === MAX_PORT) {
       this.props.dispatch(alertViewPortFull());
     } else {
@@ -428,32 +433,37 @@ class Studies extends Component {
       //check if there is enough room
       if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
         //if there is not bring the modal
-        this.setState({
+        await this.setState({
           isSerieSelectionOpen: true,
-          selectedStudy: [seriesArr]
+          selectedStudy: [seriesArr],
+          studyName: selected.studyDescription
         });
       } else {
         //if there is enough room
         //add serie to the grid
+        const promiseArr = [];
         for (let serie of seriesArr) {
           this.props.dispatch(addToGrid(serie));
+          promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
         }
         //getsingleSerie
-        for (let serie of seriesArr) {
-          this.props.dispatch(getSingleSerie(serie));
-        }
+        Promise.all(promiseArr)
+          .then(() => this.props.dispatch(showAnnotationDock()))
+          .catch(err => console.log(err));
+
         //if patient doesnot exist get patient
         if (!patientExists) {
           this.props.dispatch(getWholeData(null, selected));
         } else {
+          //check if study exist
           this.props.dispatch(
             updatePatient("study", true, patientID, studyUID)
           );
         }
+        this.props.history.push("/display");
       }
       this.props.dispatch(clearSelection());
     }
-    this.props.history.push("/display");
   };
 
   closeSelectionModal = () => {
@@ -469,7 +479,7 @@ class Studies extends Component {
       isSelected,
       logSelection,
       toggleType,
-      onExpandedChange,
+      // onExpandedChange,
       toggleTree
     } = this;
     const { data, columns, selectAll, selectType, expanded } = this.state;
@@ -478,9 +488,9 @@ class Studies extends Component {
       isSelected,
       toggleAll,
       toggleSelection,
-      selectType,
-      expanded,
-      onExpandedChange
+      selectType
+      // expanded,
+      // onExpandedChange
     };
     const TheadComponent = props => null;
     return (
@@ -490,10 +500,10 @@ class Studies extends Component {
             NoDataComponent={() => null}
             data={this.state.data}
             columns={this.state.columns}
-            defaultPageSize={this.state.data.length}
+            pageSize={this.state.data.length}
             ref={r => (this.selectTable = r)}
             className="-striped -highlight"
-            freezWhenExpanded={false}
+            // freezWhenExpanded={false}
             showPagination={false}
             TheadComponent={TheadComponent}
             {...extraProps}
@@ -502,6 +512,10 @@ class Studies extends Component {
                 this.displaySeries(rowInfo.original);
               }
             })}
+            expanded={this.state.expanded}
+            onExpandedChange={expanded => {
+              this.setState({ expanded });
+            }}
             SubComponent={row => {
               return (
                 <div style={{ paddingLeft: "20px" }}>
@@ -510,16 +524,18 @@ class Studies extends Component {
                     subjectId={this.props.subjectId}
                     studyId={row.original.studyUID}
                     studyDescription={row.original.studyDescription}
+                    update={this.props.update}
                   />
                 </div>
               );
             }}
           />
         ) : null}
-        {this.state.isSerieSelectionOpen && !this.props.loading && (
+        {this.state.isSerieSelectionOpen && (
           <ProjectModal
             seriesPassed={this.state.selectedStudy}
             onCancel={this.closeSelectionModal}
+            studyName={this.state.studyName}
           />
         )}
       </div>
@@ -529,6 +545,7 @@ class Studies extends Component {
 
 const mapStateToProps = state => {
   return {
+    dockOpen: state.annotationsListReducer.dockOpen,
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     loading: state.annotationsListReducer.loading,

@@ -8,13 +8,6 @@ import { showAnnotationWindow } from "../annotationsList/action";
 
 //make it only drable not resiable
 
-const style = {
-  left: "70%",
-  maxWidth: "30%",
-  maxHeight: "100%"
-  // color: "red"
-};
-
 class AnnotationsList extends React.Component {
   constructor(props) {
     super(props);
@@ -23,14 +16,21 @@ class AnnotationsList extends React.Component {
     this.patients = this.props.patients;
     this.patient = this.patients[this.openSeries[this.activePort].patientID];
     this.state = {
-      width: "20%",
+      width: "215px",
       x: 1000,
-      y: 50,
+      y: 75,
       selectedStudy: "",
       serieList: []
     };
   }
   componentDidMount = () => {
+    const icon = document.getElementsByClassName("patient-icon")[0];
+    const x = Math.ceil(icon.getBoundingClientRect().left);
+    let y = Math.ceil(icon.getBoundingClientRect().bottom);
+    y = window.innerWidth <= 932 ? (y = y * 3) : y * 2;
+
+    this.setState({ x, y });
+
     const selectedStudy = this.openSeries[this.activePort].studyUID;
     this.setState({ selectedStudy });
 
@@ -66,6 +66,11 @@ class AnnotationsList extends React.Component {
   render = () => {
     const selectedSerie = this.openSeries[this.activePort].seriesUID;
     //find the study in the studies array
+    const style = {
+      minWidth: "215px",
+      maxWidth: "30%",
+      maxHeight: "100%"
+    };
     return (
       <Rnd
         id="annList-modal"
