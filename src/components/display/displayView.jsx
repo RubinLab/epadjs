@@ -126,11 +126,13 @@ class DisplayView extends Component {
     );
   }
 
-  // componentDidUpdate = prevProps => {
+  // componentDidUpdate = async prevProps => {
   //   if (
   //     (this.props.loading !== prevProps.loading && !this.props.loading) ||
   //     this.props.series !== prevProps.series
   //   ) {
+  //     await this.setState({ isLoading: true });
+
   //     this.getViewports();
   //     this.getData();
   //   }
@@ -196,11 +198,10 @@ class DisplayView extends Component {
       //     );
     });
     let imageIndex = 0;
-    // const tempAimId = "2.25.557390383704738170910715800563679895099";
     if (serie.aimID) {
-      imageIndex = this.getImadeIndex(serie, cornerstoneImageIds);
+      imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
     }
-    stack.currentImageIdIndex = imageIndex;
+    stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
     return { stack };
   };
