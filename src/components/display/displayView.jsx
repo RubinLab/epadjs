@@ -97,6 +97,7 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
+    console.log("CDM", this.props);
     this.getViewports();
     this.getData();
     window.addEventListener(
@@ -106,8 +107,13 @@ class DisplayView extends Component {
   }
 
   async componentDidUpdate(prevProps) {
-    if (prevProps.series.length !== this.props.series.length) {
+    if (
+      prevProps.series !== this.props.series &&
+      prevProps.loading === true &&
+      this.props.loading === false
+    ) {
       await this.setState({ isLoading: true });
+      console.log("CDU", this.props);
       this.getViewports();
       this.getData();
     }
@@ -120,11 +126,13 @@ class DisplayView extends Component {
     );
   }
 
-  // componentDidUpdate = prevProps => {
+  // componentDidUpdate = async prevProps => {
   //   if (
   //     (this.props.loading !== prevProps.loading && !this.props.loading) ||
   //     this.props.series !== prevProps.series
   //   ) {
+  //     await this.setState({ isLoading: true });
+
   //     this.getViewports();
   //     this.getData();
   //   }
@@ -133,7 +141,7 @@ class DisplayView extends Component {
   getData() {
     var promises = [];
     for (let i = 0; i < this.props.series.length; i++) {
-      const promise = this.getImages(this.props.series[i], i);
+      const promise = this.getImageStack(this.props.series[i]);
       promises.push(promise);
     }
     Promise.all(promises).then(res => {
@@ -146,28 +154,33 @@ class DisplayView extends Component {
     });
   }
 
-  async getImages(seri, i) {
-    let stack = {};
-    let tempArray = [];
+  async getImages(serie) {
     const {
       data: {
         ResultSet: { Result: urls }
       }
-    } = await getImageIds(seri); //get the Wado image ids for this series
-    urls.map(url => {
+    } = await getImageIds(serie); //get the Wado image ids for this series
+    return urls;
+  }
+
+  getImageStack = async serie => {
+    let stack = {};
+    let cornerstoneImageIds = [];
+    const imageUrls = await this.getImages(serie);
+    imageUrls.map(url => {
       const baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
           let multiFrameUrl = !isLite
             ? baseUrl + "&contentType=application%2Fdicom?frame=" + i
             : baseUrl;
-          tempArray.push(multiFrameUrl);
+          cornerstoneImageIds.push(multiFrameUrl);
         }
       } else {
         let singleFrameUrl = !isLite
           ? baseUrl + "&contentType=application%2Fdicom"
           : baseUrl;
-        tempArray.push(singleFrameUrl);
+        cornerstoneImageIds.push(singleFrameUrl);
       }
 
       //  if (url.multiFrameImage === true) {
@@ -184,10 +197,43 @@ class DisplayView extends Component {
       //       wadoUrl + url.lossyImage + "&contentType=application%2Fdicom"
       //     );
     });
-    stack.currentImageIdIndex = 0;
-    stack.imageIds = [...tempArray];
+    let imageIndex = 0;
+    if (serie.aimID) {
+      imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+    }
+    stack.currentImageIdIndex = parseInt(imageIndex, 10);
+    stack.imageIds = [...cornerstoneImageIds];
     return { stack };
-  }
+  };
+
+  getImageIndex = (serie, cornerstoneImageIds) => {
+    let { aimID, imageAnnotations } = serie;
+    if (imageAnnotations) {
+      for (let [key, values] of Object.entries(imageAnnotations)) {
+        for (let value of values) {
+          if (value.aimUid === aimID) {
+            const cornerstoneImageId = getWadoImagePath(
+              this.props.series[this.props.activePort],
+              key
+            );
+            const ret = this.getImageIndexFromImageId(
+              cornerstoneImageIds,
+              cornerstoneImageId
+            );
+            return ret;
+          }
+        }
+      }
+    }
+    return 0;
+  };
+
+  getImageIndexFromImageId = (cornerstoneImageIds, cornerstoneImageId) => {
+    for (let [key, value] of Object.entries(cornerstoneImageIds)) {
+      if (value == cornerstoneImageId) return key;
+    }
+    return 0;
+  };
 
   getViewports = () => {
     let numSeries = this.props.series.length;

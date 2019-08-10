@@ -19,15 +19,10 @@ import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
 import AnnotationList from "./components/annotationsList";
 import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
-import AnnotationsList from "./components/annotationsList/annotationDock/annotationList";
-import ManagementItemModal from "./components/management/common/customModal";
-
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
-import ProjectModal from "./components/annotationsList/selectSerieModal";
 import { isLite } from "./config.json";
-// import Modal from './components/management/projectCreationForm';
-// import Modal from './components/common/rndBootModal';
+import { clearAimId } from "./components/annotationsList/action";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -120,6 +115,10 @@ class App extends Component {
       auth.logout();
     });
   };
+
+  switchSearhView = () => {
+    this.props.dispatch(clearAimId());
+  };
   render() {
     return (
       <React.Fragment>
@@ -129,6 +128,7 @@ class App extends Component {
           user={this.state.user}
           openGearMenu={this.openMenu}
           logout={this.onLogout}
+          onSearchViewClick={this.switchSearhView}
         />
         {this.state.isMngMenuOpen && <Management closeMenu={this.closeMenu} />}
 

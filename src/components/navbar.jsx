@@ -5,7 +5,7 @@ import logo from "../images/logo.png";
 import { connect } from "react-redux";
 import { isLite } from "../config.json";
 
-const NavBar = ({ user, openGearMenu, loading, logout }) => {
+const NavBar = ({ user, openGearMenu, loading, logout, onSearchViewClick }) => {
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -27,7 +27,7 @@ const NavBar = ({ user, openGearMenu, loading, logout }) => {
 
         <div className="collapse navbar-collapse pl-0" id="navbarColor01">
           <ul className="navbar-nav mr-auto">
-            <li className="nav-item">
+            <li className="nav-item" onClick={onSearchViewClick}>
               <NavLink className="nav-link" to="/search">
                 Search
               </NavLink>
