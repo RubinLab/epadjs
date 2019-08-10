@@ -28,7 +28,8 @@ import {
   JUMP_TO_AIM,
   UPDATE_PATIENT,
   CLOSE_SERIE,
-  UPDATE_IMAGEID
+  UPDATE_IMAGEID,
+  CLEAR_AIMID
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -54,6 +55,12 @@ const initialState = {
 
 const asyncReducer = (state = initialState, action) => {
   switch (action.type) {
+    case CLEAR_AIMID:
+      let aimIDClearedOPenSeries = [...state.openSeries];
+      for (let serie of aimIDClearedOPenSeries) {
+        serie.aimID = null;
+      }
+      return { ...state, openSeries: aimIDClearedOPenSeries };
     case UPDATE_IMAGEID:
       return { ...state, imageID: action.imageID };
     case CLOSE_SERIE:
@@ -126,6 +133,11 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
       }
+      for (let serie of imageAddedSeries) {
+        if (serie.seriesUID !== action.payload.serID) {
+          serie.aimID = null;
+        }
+      }
       const result = Object.assign({}, state, {
         loading: false,
         error: false,
@@ -164,8 +176,10 @@ const asyncReducer = (state = initialState, action) => {
     case CHANGE_ACTIVE_PORT:
       //get openseries iterate over the
       const changedPortSeries = [...state.openSeries];
-      for (let serie of changedPortSeries) {
-        serie.aimID = null;
+      for (let i = 0; i < changedPortSeries.length; i++) {
+        if (i !== action.portIndex) {
+          changedPortSeries[i].aimID = null;
+        }
       }
       return Object.assign({}, state, {
         activePort: action.portIndex,

@@ -30,6 +30,7 @@ import {
   UPDATE_PATIENT,
   CLOSE_SERIE,
   UPDATE_IMAGEID,
+  CLEAR_AIMID,
   colors,
   commonLabels
 } from "./types";
@@ -43,6 +44,12 @@ import {
 import { getImageIdAnnotations } from "../aimEditor/aimHelper.js";
 export const clearGrid = item => {
   return { type: CLEAR_GRID };
+};
+
+export const clearAimId = () => {
+  return {
+    type: CLEAR_AIMID
+  };
 };
 
 export const updateImageId = event => {
