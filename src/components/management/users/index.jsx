@@ -22,11 +22,23 @@ class Users extends React.Component {
   componentDidMount = () => {
     this.getUserData();
     document.addEventListener("mousedown", this.handleClickOutside);
+    document.addEventListener("keydown", this.escapeFieldInput);
+  };
+
+  componentWillUnmount = () => {
+    document.removeEventListener("mousedown", this.handleClickOutside);
+    document.removeEventListener("keydown", this.escapeFieldInput);
+  };
+
+  escapeFieldInput = e => {
+    if (e.key === "Escape") {
+      this.handleOutClick();
+    }
   };
 
   handleEditField = (field, id) => {
     const { edit } = this.state;
-    edit[field] ? delete edit[field] : (edit[field] = id);
+    edit[field] = id;
     this.setState({ edit });
   };
 
@@ -89,14 +101,10 @@ class Users extends React.Component {
     });
   }
 
-  componentWillUnmount = () => {
-    document.removeEventListener("mousedown", this.handleClickOutside);
-  };
-
   /**
    * Set the wrapper ref
    */
-  setWrapperRef = node => {
+  setWrapperRef = (node, id) => {
     this.wrapperRef = node;
   };
 
@@ -152,17 +160,15 @@ class Users extends React.Component {
         minWidth: 35,
         className: "mng-user__cell",
         Cell: original => {
-          console.log(original.row.checkbox);
           const { firstname, username } = original.row.checkbox;
           return this.state.edit.firstname === username ? (
             <div ref={this.setWrapperRef}>
-              <EditField />
+              <EditField default={firstname} />
             </div>
           ) : (
             <div
               data-name="firstname"
               onClick={() => {
-                console.log("clicked");
                 this.handleEditField("firstname", username);
               }}
             >
@@ -179,7 +185,24 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 35,
-        className: "mng-user__cell"
+        className: "mng-user__cell",
+        Cell: original => {
+          const { lastname, username } = original.row.checkbox;
+          return this.state.edit.lastname === username ? (
+            <div ref={this.setWrapperRef}>
+              <EditField default={lastname} />
+            </div>
+          ) : (
+            <div
+              data-name="lastname"
+              onClick={() => {
+                this.handleEditField("lastname", username);
+              }}
+            >
+              {lastname}
+            </div>
+          );
+        }
       },
       {
         Header: "Email",
@@ -189,7 +212,24 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
-        className: "mng-user__cell"
+        className: "mng-user__cell",
+        Cell: original => {
+          const { email, username } = original.row.checkbox;
+          return this.state.edit.email === username ? (
+            <div ref={this.setWrapperRef}>
+              <EditField default={email} />
+            </div>
+          ) : (
+            <div
+              data-name="email"
+              onClick={() => {
+                this.handleEditField("email", username);
+              }}
+            >
+              {email}
+            </div>
+          );
+        }
       },
       {
         Header: "Color",
