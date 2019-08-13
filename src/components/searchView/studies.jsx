@@ -62,9 +62,10 @@ class Studies extends Component {
       selection: [],
       selectAll: false,
       selectType: "checkbox",
-      // expanded: {},
+      expanded: {},
       selectedStudy: {},
-      isSerieSelectionOpen: false
+      isSerieSelectionOpen: false,
+      childExpanded: {}
     };
   }
 
@@ -95,9 +96,23 @@ class Studies extends Component {
           ResultSet: { Result: data }
         }
       } = await getStudies(this.props.projectId, this.props.subjectId);
-      this.setState({ data });
+      await this.setState({ data });
+    }
+    if (this.props.expandLevel != prevProps.expandLevel) {
+      this.props.expandLevel >= 2
+        ? this.expandCurrentLevel()
+        : this.setState({ expanded: {} });
     }
   }
+
+  expandCurrentLevel = () => {
+    const expanded = {};
+    for (let i = 0; i < this.state.data.length; i++) {
+      // expanded[i] = true;
+      expanded[i] = this.state.data[i].numberOfSeries ? true : false;
+    }
+    this.setState({ expanded });
+  };
 
   selectRow = selected => {
     // const { studyUID, numberOfSeries, patientID, projectID } = selected;
@@ -484,7 +499,7 @@ class Studies extends Component {
       // onExpandedChange,
       toggleTree
     } = this;
-    const { data, columns, selectAll, selectType, expanded } = this.state;
+    const { data, columns, selectAll, selectType } = this.state;
     const extraProps = {
       selectAll,
       isSelected,
@@ -527,6 +542,7 @@ class Studies extends Component {
                     studyId={row.original.studyUID}
                     studyDescription={row.original.studyDescription}
                     update={this.props.update}
+                    expandLevel={this.props.expandLevel}
                   />
                 </div>
               );

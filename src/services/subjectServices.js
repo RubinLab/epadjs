@@ -27,3 +27,16 @@ export function deleteSubject(subject) {
     return http.delete(url);
   }
 }
+
+export function saveSubject(projectID, subjectAbr, subjectName) {
+  // http://epad-dev8.stanford.edu:8080/epad/v2/projects/test1id/subjects/test?subjectName=test
+  return http.put(
+    apiUrl +
+      "/projects/" +
+      projectID +
+      "/subjects/" +
+      subjectAbr +
+      "?subjectName=" +
+      subjectName
+  );
+}

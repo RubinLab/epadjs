@@ -50,9 +50,21 @@ class Subjects extends Component {
   async componentDidUpdate(prevProps) {
     if (this.props.update !== prevProps.update) {
       let fetchedData = await this.getData();
-      this.setState({ data: fetchedData });
+      await this.setState({ data: fetchedData });
+    }
+    if (this.props.expandLevel != prevProps.expandLevel) {
+      this.props.expandLevel >= 1
+        ? this.expandCurrentLevel()
+        : this.setState({ expanded: {} });
     }
   }
+  expandCurrentLevel = () => {
+    const expanded = {};
+    for (let i = 0; i < this.state.data.length; i++) {
+      expanded[i] = this.state.data[i].numberOfStudies ? true : false;
+    }
+    this.setState({ expanded });
+  };
 
   getData = async () => {
     const {
@@ -423,6 +435,7 @@ class Subjects extends Component {
                     projectId={this.props.pid}
                     subjectId={row.original.displaySubjectID}
                     update={this.props.update}
+                    expandLevel={this.props.expandLevel}
                   />
                 </div>
               );

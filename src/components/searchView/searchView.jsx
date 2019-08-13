@@ -38,6 +38,11 @@ import { isLite } from "../../config";
 import { getSubjects } from "../../services/subjectServices";
 import DeleteAlert from "./deleteConfirmationModal";
 import DownloadWarning from "./downloadWarningModal";
+import NewMenu from "./newMenu";
+import SubjectCreationModal from "./subjectCreationModal.jsx";
+import StudyCreationModal from "./studyCreationModal.jsx";
+import SeriesCreationModal from "./seriesCreationModal.jsx";
+import AnnotationCreationModal from "./annotationCreationModal.jsx";
 
 class SearchView extends Component {
   constructor(props) {
@@ -54,7 +59,10 @@ class SearchView extends Component {
       numOfsubjects: 0,
       showDeleteAlert: false,
       update: 0,
-      missingAnns: []
+      missingAnns: [],
+      expandLevel: 0,
+      expanded: {},
+      showNew: false
     };
   }
 
@@ -67,7 +75,14 @@ class SearchView extends Component {
       this.props.dispatch(showAnnotationDock());
     }
     const subjects = await this.getData();
-    this.setState({ numOfsubjects: subjects.length });
+    this.setState({ numOfsubjects: subjects.length, subjects });
+  };
+
+  componentDidUpdate = async prevProps => {
+    if (prevProps.match.params.pid !== this.props.match.params.pid) {
+      const subjects = await this.getData();
+      this.setState({ numOfsubjects: subjects.length, subjects });
+    }
   };
 
   getData = async () => {
@@ -79,6 +94,29 @@ class SearchView extends Component {
     return data;
   };
 
+  handleExpand = async () => {
+    if (this.state.expandLevel < 3) {
+      this.setState(state => ({ expandLevel: state.expandLevel + 1 }));
+    }
+    let expanded = {};
+    for (let i = 0; i < this.state.numOfsubjects; i++) {
+      expanded[i] = true;
+    }
+    this.setState({ expanded });
+  };
+
+  handleShrink = async () => {
+    if (this.state.expandLevel > 0) {
+      await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
+      if (this.state.expandLevel === 0) {
+        this.setState({ expanded: {} });
+      }
+    }
+  };
+
+  handleCloseAll = () => {
+    this.setState({ expandLevel: 0 });
+  };
   updateUploadStatus = async => {
     this.setState(state => {
       return { uploading: !state.uploading, update: state.update + 1 };
@@ -124,7 +162,7 @@ class SearchView extends Component {
 
   updateSubjectCount = async () => {
     const subjects = await this.getData();
-    await this.setState({ numOfsubjects: subjects.length });
+    await this.setState({ numOfsubjects: subjects.length, subjects });
   };
 
   deleteStudy = async () => {
@@ -538,7 +576,67 @@ class SearchView extends Component {
   handleOK = () => {
     this.setState({ missingAnns: [] });
   };
-  render() {
+
+  handleNewClick = () => {
+    this.setState(state => ({ showNew: !state.showNew }));
+  };
+
+  handleSelectNewOption = e => {
+    this.setState({ newSelected: e.target.dataset.opt, showNew: false });
+  };
+
+  handleNewModalCancel = () => {
+    this.setState({ newSelected: "" });
+  };
+
+  updateStatus = () => {
+    this.setState({ downloading: false, uploading: false, deleting: false });
+  };
+
+  handleNewSelected = () => {
+    switch (this.state.newSelected) {
+      case "subject":
+        return (
+          <SubjectCreationModal
+            onCancel={this.handleNewModalCancel}
+            project={this.props.match.params.pid}
+            onSubmit={this.updateUploadStatus}
+            onResolve={this.updateStatus}
+          />
+        );
+      case "study":
+        return (
+          <StudyCreationModal
+            onCancel={this.handleNewModalCancel}
+            subjects={this.state.subjects}
+            project={this.props.match.params.pid}
+            onSubmit={this.updateUploadStatus}
+            onResolve={this.updateStatus}
+          />
+        );
+      case "series":
+        return (
+          <SeriesCreationModal
+            onCancel={this.handleNewModalCancel}
+            project={this.props.match.params.pid}
+            subjects={this.state.subjects}
+            onSubmit={this.updateUploadStatus}
+            onResolve={this.updateStatus}
+          />
+        );
+      // case "annotation":
+      //   return (
+      //     <AnnotationCreationModal
+      //       onCancel={this.handleNewModalCancel}
+      //       project={this.props.match.params.pid}
+      //     />
+      //   );
+      default:
+        return null;
+    }
+  };
+
+  render = () => {
     let status;
     if (this.state.uploading) {
       status = "Uploading…";
@@ -565,8 +663,13 @@ class SearchView extends Component {
           onUpload={this.handleFileUpload}
           onView={this.viewSelection}
           onDelete={this.handleClickDeleteIcon}
+          onExpand={this.handleExpand}
+          onShrink={this.handleShrink}
+          onCloseAll={this.handleCloseAll}
+          onNew={this.handleNewClick}
           status={status}
           showDelete={showDelete}
+          project={this.props.match.params.pid}
         />
         {this.state.isSerieSelectionOpen && !this.props.loading && (
           <ProjectModal
@@ -578,6 +681,8 @@ class SearchView extends Component {
           key={this.props.match.params.pid}
           pid={this.props.match.params.pid}
           // update={this.state.numOfsubjects}
+          expandLevel={this.state.expandLevel}
+          expanded={this.state.expanded}
           update={this.state.update}
         />
         {this.state.showAnnotationModal && (
@@ -605,9 +710,17 @@ class SearchView extends Component {
             onOK={this.handleOK}
           />
         )}
+
+        {this.state.showNew && (
+          <NewMenu
+            onSelect={this.handleSelectNewOption}
+            onClose={this.handleNewClick}
+          />
+        )}
+        {this.state.newSelected && this.handleNewSelected()}
       </>
     );
-  }
+  };
 }
 
 const mapStateToProps = state => {
