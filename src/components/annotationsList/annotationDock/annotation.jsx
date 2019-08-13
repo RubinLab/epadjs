@@ -84,7 +84,11 @@ const annotation = props => {
             </div>
           )}
           {/* {calculations.length > 0 && calculations.length <= 10 && ( */}
-          <CalculationLabel calculations={props.label} name={props.name} />
+          <CalculationLabel
+            calculations={props.label}
+            name={props.name}
+            markupType={props.markupType}
+          />
           {/* )} */}
         </div>
       )}

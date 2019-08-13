@@ -17,35 +17,73 @@ import Logout from "./components/logout";
 import ProtectedRoute from "./components/common/protectedRoute";
 import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
+import InfoMenu from "./components/infoMenu";
+import UserMenu from "./components/userProfileMenu";
+
 import AnnotationList from "./components/annotationsList";
 import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import { isLite } from "./config.json";
-// import Modal from './components/management/projectCreationForm';
-// import Modal from './components/common/rndBootModal';
-
+import { clearAimId } from "./components/annotationsList/action";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
 class App extends Component {
   state = {
-    isMngMenuOpen: false,
+    openMng: false,
     keycloak: null,
-    authenticated: false
+    authenticated: false,
+    openInfo: false,
+    openMenu: false,
+    openUser: false
   };
 
   closeMenu = event => {
     // if (event && event.type === "keydown") {
     //   if (event.key === 'Escape' || event.keyCode === 27) {
-    //     this.setState({ isMngMenuOpen: false });
+    //     this.setState({ openMng: false });
     //   }
     // }
-    this.setState({ isMngMenuOpen: false });
+    this.setState({
+      openMng: false,
+      openInfo: false,
+      openUser: false,
+      openMenu: false
+    });
   };
 
-  openMenu = () => {
-    this.setState(state => ({ isMngMenuOpen: !state.isMngMenuOpen }));
+  handleMngMenu = () => {
+    if (this.state.openMenu) {
+      this.setState({ openMng: true, openInfo: false, openUser: false });
+    }
+  };
+
+  handleInfoMenu = () => {
+    if (this.state.openMenu) {
+      this.setState({ openInfo: true, openMng: false, openUser: false });
+    }
+  };
+
+  handleUserProfileMenu = () => {
+    if (this.state.openMenu) {
+      this.setState({ openUser: true, openInfo: false, openMng: false });
+    }
+  };
+  handleOpenMenu = e => {
+    if (!this.state.openMenu) {
+      this.setState({ openMenu: true });
+      if (e.target.dataset.name === "mng") {
+        this.setState({ openMng: true });
+      } else if (e.target.dataset.name === "info") {
+        this.setState({ openInfo: true });
+      } else if (e.target.dataset.name === "user") {
+        this.setState({ openUser: true });
+      }
+    } else {
+      this.setState({ openMenu: false });
+      this.setState({ openMng: false, openInfo: false, openUser: false });
+    }
   };
 
   async componentDidMount() {
@@ -82,9 +120,7 @@ class App extends Component {
             user
           });
         })
-        .catch(err => {
-          console.log(err);
-        });
+        .catch(err => {});
     } else {
       try {
         const username = sessionStorage.getItem("username");
@@ -95,10 +131,21 @@ class App extends Component {
       } catch (ex) {}
     }
     // window.addEventListener("keydown", this.closeMenu, true);
+    document.addEventListener("mousedown", this.handleClickOutside);
   }
 
   componentWillUnmount = () => {
-    // window.removeEventListener('keydown', this.closeMenu, true);
+    document.removeEventListener("mousedown", this.handleClickOutside);
+  };
+
+  handleClickOutside = event => {
+    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
+      this.handleOpenMenu(event);
+    }
+  };
+
+  setWrapperRef = node => {
+    this.wrapperRef = node;
   };
 
   onLogout = e => {
@@ -116,6 +163,10 @@ class App extends Component {
       auth.logout();
     });
   };
+
+  switchSearhView = () => {
+    this.props.dispatch(clearAimId());
+  };
   render() {
     return (
       <React.Fragment>
@@ -123,11 +174,28 @@ class App extends Component {
         <ToastContainer />
         <NavBar
           user={this.state.user}
-          openGearMenu={this.openMenu}
+          openGearMenu={this.handleMngMenu}
+          openInfoMenu={this.handleInfoMenu}
+          openUser={this.handleUserProfileMenu}
           logout={this.onLogout}
+          openMenu={this.handleOpenMenu}
+          onSearchViewClick={this.switchSearhView}
         />
-        {this.state.isMngMenuOpen && <Management closeMenu={this.closeMenu} />}
-
+        {this.state.openMng && this.state.openMenu && (
+          <div ref={this.setWrapperRef}>
+            <Management closeMenu={this.closeMenu} />
+          </div>
+        )}
+        {this.state.openInfo && this.state.openMenu && (
+          <div ref={this.setWrapperRef}>
+            <InfoMenu closeMenu={this.closeMenu} user={this.state.user} />
+          </div>
+        )}
+        {!isLite && this.state.openUser && this.state.openMenu && (
+          <div ref={this.setWrapperRef}>
+            <UserMenu closeMenu={this.closeMenu} user={this.state.user} />
+          </div>
+        )}
         {!this.state.authenticated && !isLite && (
           <Route path="/login" component={LoginForm} />
         )}
@@ -181,6 +249,7 @@ class App extends Component {
 
 const mapStateToProps = state => {
   console.log(state.annotationsListReducer);
+  // console.log(state.managementReducer);
   const {
     listOpen,
     dockOpen,
