@@ -8,10 +8,9 @@ import "../menuStyle.css";
 const baseToolBar = ({ onAdd, onDelete, selected }) => {
   return (
     <div className="basic-toolbar">
-      <div onClick={onAdd}>
+      <div onClick={onAdd} className="tool-icon">
         <FaPlusCircle
           data-tip="New Project"
-          className="tool-icon"
           data-tip
           data-for="plus-icon"
           onClick={onAdd}
@@ -20,26 +19,20 @@ const baseToolBar = ({ onAdd, onDelete, selected }) => {
       <ReactTooltip id="plus-icon" place="right" type="info" delayShow={1500}>
         <span>Add new</span>
       </ReactTooltip>
-      {selected && (
-        <>
-          <div onClick={onDelete}>
-            <FaRegTrashAlt
-              className="tool-icon"
-              onClick={onDelete}
-              data-tip
-              data-for="trash-icon"
-            />
-          </div>
-          <ReactTooltip
-            id="trash-icon"
-            place="right"
-            type="info"
-            delayShow={1500}
-          >
-            <span>Delete selections</span>
-          </ReactTooltip>
-        </>
-      )}
+      <div
+        onClick={onDelete}
+        className={selected ? "tool-icon" : "hide-delete "}
+      >
+        <FaRegTrashAlt
+          className="tool-icon"
+          onClick={onDelete}
+          data-tip
+          data-for="trash-icon"
+        />
+      </div>
+      <ReactTooltip id="trash-icon" place="right" type="info" delayShow={1500}>
+        <span>Delete selections</span>
+      </ReactTooltip>
     </div>
   );
 };

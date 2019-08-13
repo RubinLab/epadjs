@@ -100,6 +100,7 @@
 
 .mng-header {
   display: flex;
+  height: 10%;
   height: 3%;
   width: 100%;
   min-height: 32px;
@@ -150,11 +151,12 @@
   align-content: center;
   align-items: center;
   font-size: 1.2rem;
+  padding-left: 1.2rem;
   width: 100%;
 }
 
 .tool-icon {
-  margin-left: 1.2rem;
+  margin-right: 1rem;
   cursor: pointer;
 }
 
@@ -163,6 +165,7 @@
 }
 
 .add-project__modal--form,
+.add-connection__modal--form,
 .edit-project__modal--form,
 .add-worklist__modal--form,
 .add-host__modal--form
@@ -174,23 +177,43 @@
   align-items: left;
 }
 .add-project__modal--input,
+.add-connection__modal--input,
 .edit-project__modal--input,
 .add-worklist__modal--input,
+.edit-connection__modal--input
 .add-host__modal--input
 /* .edit-worklist__modal--input  */
  {
   width: 100%;
 }
 
+.add-connection__modal--input {
+  color: black;
+}
+
+.edit-project__modal--input::placeholder,
+.edit-connection__modal--input::placeholder,
+.add-connection__modal--input::placeholder,
+.edit-user__modal--input::placeholder {
+  color: #ababab;
+}
+
 .add-project__modal--label,
 .edit-project__modal--label,
 .add-worklist__modal--label,
+.edit-connection__modal--label,
+.add-connection__modal--label
 .add-host__modal--label
 /* .edit-worklist__modal--label  */
  {
   margin-top: 1rem;
   color: gray;
   text-align: left;
+}
+
+.edit-connection__modal--input,
+.edit-user__modal--input {
+  color: black;
 }
 
 .form-exp,
@@ -228,7 +251,8 @@
 }
 
 .add-project__modal.modal-dialog,
-.add-worklist__modal.modal-dialog {
+.add-worklist__modal.modal-dialog,
+.add-connection__modal.modal-dialog {
   max-width: 90%;
   max-height: 90%;
   display: inline-block;
@@ -236,12 +260,14 @@
   overflow-y: auto;
   border: 2px solid gray;
   box-shadow: 1rem 1rem 1rem grey;
-  align-items: ;
+  /* align-items: ; */
 }
 
 .edit-userRole__modal.modal-dialog,
-.edit-project__modal.modal-dialog {
-  width: 40%;
+.edit-project__modal.modal-dialog,
+.edit-connection__modal.modal-dialog {
+  width: fit-content;
+  min-width: 20rem;
   max-width: 90%;
   max-height: 90%;
   display: inline-block;
@@ -249,6 +275,23 @@
   overflow-y: auto;
   border: 2px solid gray;
   box-shadow: 1rem 1rem 1rem grey;
+}
+
+.edit-user__modal.modal-dialog {
+  width: 30rem;
+  min-width: 20rem;
+  max-width: 90%;
+  max-height: 90%;
+  display: inline-block;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 2px solid gray;
+  box-shadow: 1rem 1rem 1rem grey;
+}
+.edit-userRole__modal .modal-content,
+.edit-project__modal .modal-content,
+.edit-connection__modal .modal-content {
+  padding: 1rem;
 }
 
 .edit-userRole.modal-body {
@@ -581,6 +624,53 @@
   margin-left: 0.3rem;
   margin-right: 0.3rem;
 }
+
+
+.edit-project__modal--select {
+  width: fit-content;
+}
+
+.users .rt-resizable-header-content,
+.edit-userRole__table--col,
+.user-table__header--user,
+.usersTable-cell {
+  text-align: left;
+}
+
+.centeredCell {
+  text-align: center;
+}
+
+.edit-user__modal--cont {
+  display: flex;
+  margin-bottom: 1rem;
+  /* flex-direction: column */
+}
+
+.edit-user__modal--label {
+  width: 20%;
+  margin-right: 1rem;
+  text-align: left;
+}
+
+.edit-user__modal--input {
+  width: 80%;
+}
+
+.edit-user__modal--form {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.colorPicker__modal.modal-dialog {
+  width: fit-content;
+  outline: 0;
+}
+
+.mng-user__cell {
+  cursor: pointer;
+  text-align: left;
+
 .info-menu__break {
   border-top: 1px solid #7b7f88;
   margin: 0.5rem 1rem 0.5rem 1rem;
