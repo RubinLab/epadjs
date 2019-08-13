@@ -14,6 +14,7 @@ const NavBar = ({
   loading,
   logout
 }) => {
+  const style = { "padding-bottom": "8px" };
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -88,7 +89,7 @@ const NavBar = ({
                   <div
                     className="nav-link mng-icon"
                     data-name="mng"
-                    style={{ cursor: "pointer", paddingBottom: "8px" }}
+                    style={{ ...style, cursor: "pointer" }}
                     onClick={openMenu}
                     onMouseEnter={openGearMenu}
                     // onMouseLeave={openGearMenu}
@@ -108,7 +109,7 @@ const NavBar = ({
                   <div
                     className="nav-link info-icon"
                     data-name="info"
-                    style={{ cursor: "pointer", paddingBottom: "8px" }}
+                    style={{ ...style, cursor: "pointer" }}
                     onClick={openMenu}
                     onMouseEnter={openInfoMenu}
                     // onMouseLeave={openInfoMenu}
@@ -126,7 +127,7 @@ const NavBar = ({
                     data-name="user"
                     onClick={openMenu}
                     onMouseEnter={openUser}
-                    style={{ cursor: "pointer", "padding-bottom": "8px" }}
+                    style={isLite ? style : { ...style, cursor: "pointer" }}
                   >
                     {user.displayname}
                   </div>
