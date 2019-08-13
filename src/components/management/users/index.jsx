@@ -239,10 +239,20 @@ class Users extends React.Component {
         minWidth: 20,
         className: "mng-user__cell",
         Cell: original => {
+          const { username } = original.row.checkbox;
+          const className =
+            this.state.edit.color === username ? "user-color" : "";
           let color = original.row.checkbox.colorpreference;
           color = color ? `#${color}` : `#19ff75`;
           return (
-            <p className="menu-clickable wrapped" style={{ color }}>
+            <p
+              className={`menu-clickable wrapped ${className}`}
+              style={{ color }}
+              data-name="color"
+              onClick={() => {
+                this.handleEditField("color", username);
+              }}
+            >
               {original.row.checkbox.username}
             </p>
           );
@@ -377,10 +387,9 @@ class Users extends React.Component {
             />
           )}
         </div>
-        {this.state.showColorPicker && (
+        {/* {this.state.edit.color && (
           <ColorPicker onCancel={this.handleColorClick} />
-        )}
-        {/* {this.state.showColorPicker && <div>here</div>} */}
+        )} */}
       </>
     );
   };

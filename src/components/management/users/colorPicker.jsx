@@ -22,8 +22,9 @@ class ColorPicker extends React.Component {
   };
 
   render() {
-    const anchorElement = document.getElementById("user-color");
-    var rect = anchorElement.getBoundingClientRect();
+    const anchorElement = document.getElementsByClassName("user-color");
+    console.log(anchorElement);
+    var rect = anchorElement[0].getBoundingClientRect();
     console.log(rect.top, rect.right, rect.bottom, rect.left);
     console.log("rendered");
     return (
