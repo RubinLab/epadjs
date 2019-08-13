@@ -1,11 +1,22 @@
 import React from "react";
 import { Link, NavLink } from "react-router-dom";
-import { FaCogs, FaCaretDown } from "react-icons/fa";
+import { FaCogs, FaCaretDown, FaInfoCircle } from "react-icons/fa";
 import logo from "../images/logo.png";
 import { connect } from "react-redux";
 import { isLite } from "../config.json";
 
-const NavBar = ({ user, openGearMenu, loading, logout, onSearchViewClick }) => {
+const NavBar = ({
+  user,
+  openGearMenu,
+  openInfoMenu,
+  openMenu,
+  openUser,
+  loading,
+  logout, 
+  // onSearchViewClick
+}) => {
+  const style = { "padding-bottom": "8px" };
+
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -72,21 +83,56 @@ const NavBar = ({ user, openGearMenu, loading, logout, onSearchViewClick }) => {
             )}
             {user && (
               <React.Fragment>
-                <li className="nav-item pull-right">
+                <li
+                  className="nav-item pull-right"
+                  data-name="mng"
+                  onClick={openMenu}
+                >
                   <div
                     className="nav-link mng-icon"
-                    style={{ cursor: "pointer" }}
-                    onClick={openGearMenu}
+                    data-name="mng"
+                    style={{ ...style, cursor: "pointer" }}
+                    onClick={openMenu}
+                    onMouseEnter={openGearMenu}
+                    // onMouseLeave={openGearMenu}
                   >
-                    <FaCogs style={{ fontSize: "1.25rem" }} />
-                    <FaCaretDown style={{ fontSize: "1rem" }} />
+                    <FaCogs
+                      style={{ fontSize: "1.5rem" }}
+                      data-name="mng"
+                      onClick={openMenu}
+                    />
                   </div>
                 </li>
-
-                <li className="nav-item pull-right">
-                  <NavLink className="nav-link" to="/profile">
+                <li
+                  className="nav-item pull-right"
+                  data-name="info"
+                  onClick={openMenu}
+                >
+                  <div
+                    className="nav-link info-icon"
+                    data-name="info"
+                    style={{ ...style, cursor: "pointer" }}
+                    onClick={openMenu}
+                    onMouseEnter={openInfoMenu}
+                    // onMouseLeave={openInfoMenu}
+                  >
+                    <FaInfoCircle
+                      style={{ fontSize: "1.5rem" }}
+                      data-name="info"
+                      onClick={openMenu}
+                    />
+                  </div>
+                </li>
+                <li className="nav-item pull-right" data-name="user">
+                  <div
+                    className="nav-link user-profile"
+                    data-name="user"
+                    onClick={openMenu}
+                    onMouseEnter={openUser}
+                    style={isLite ? style : { ...style, cursor: "pointer" }}
+                  >
                     {user.displayname}
-                  </NavLink>
+                  </div>
                 </li>
                 <li className="nav-item-right pull-right">
                   <NavLink className="nav-link" to="/logout" onClick={logout}>
