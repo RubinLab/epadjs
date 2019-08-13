@@ -64,7 +64,8 @@ class Studies extends Component {
       selectType: "checkbox",
       expanded: {},
       selectedStudy: {},
-      isSerieSelectionOpen: false
+      isSerieSelectionOpen: false,
+      childExpanded: {}
     };
   }
 
@@ -95,9 +96,23 @@ class Studies extends Component {
           ResultSet: { Result: data }
         }
       } = await getStudies(this.props.projectId, this.props.subjectId);
-      this.setState({ data });
+      await this.setState({ data });
+    }
+    if (this.props.expandLevel != prevProps.expandLevel) {
+      this.props.expandLevel >= 2
+        ? this.expandCurrentLevel()
+        : this.setState({ expanded: {} });
     }
   }
+
+  expandCurrentLevel = () => {
+    const expanded = {};
+    for (let i = 0; i < this.state.data.length; i++) {
+      // expanded[i] = true;
+      expanded[i] = this.state.data[i].numberOfSeries ? true : false;
+    }
+    this.setState({ expanded });
+  };
 
   selectRow = selected => {
     // const { studyUID, numberOfSeries, patientID, projectID } = selected;
@@ -362,17 +377,17 @@ class Studies extends Component {
       selectAll: true
     });
   };
-  toggleTree = () => {
-    if (this.state.pivotBy.length) {
-      this.setState({ pivotBy: [], expanded: {} });
-    } else {
-      this.setState({ pivotBy: [], expanded: {} });
-    }
-  };
+  // toggleTree = () => {
+  //   if (this.state.pivotBy.length) {
+  //     this.setState({ pivotBy: [], expanded: {} });
+  //   } else {
+  //     this.setState({ pivotBy: [], expanded: {} });
+  //   }
+  // };
 
-  onExpandedChange = (newExpanded, index, event) => {
-    this.setState({ expanded: newExpanded });
-  };
+  // onExpandedChange = (newExpanded, index, event) => {
+  //   this.setState({ expanded: newExpanded });
+  // };
 
   excludeOpenSeries = allSeriesArr => {
     const result = [];
@@ -433,9 +448,10 @@ class Studies extends Component {
       //check if there is enough room
       if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
         //if there is not bring the modal
-        this.setState({
+        await this.setState({
           isSerieSelectionOpen: true,
-          selectedStudy: [seriesArr]
+          selectedStudy: [seriesArr],
+          studyName: selected.studyDescription
         });
       } else {
         //if there is enough room
@@ -447,7 +463,9 @@ class Studies extends Component {
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => this.props.dispatch(showAnnotationDock()))
+          .then(() => {
+            this.props.dispatch(showAnnotationDock());
+          })
           .catch(err => console.log(err));
 
         //if patient doesnot exist get patient
@@ -459,10 +477,10 @@ class Studies extends Component {
             updatePatient("study", true, patientID, studyUID)
           );
         }
+        this.props.history.push("/display");
       }
       this.props.dispatch(clearSelection());
     }
-    this.props.history.push("/display");
   };
 
   closeSelectionModal = () => {
@@ -478,18 +496,18 @@ class Studies extends Component {
       isSelected,
       logSelection,
       toggleType,
-      onExpandedChange,
+      // onExpandedChange,
       toggleTree
     } = this;
-    const { data, columns, selectAll, selectType, expanded } = this.state;
+    const { data, columns, selectAll, selectType } = this.state;
     const extraProps = {
       selectAll,
       isSelected,
       toggleAll,
       toggleSelection,
-      selectType,
-      expanded,
-      onExpandedChange
+      selectType
+      // expanded,
+      // onExpandedChange
     };
     const TheadComponent = props => null;
     return (
@@ -502,7 +520,7 @@ class Studies extends Component {
             pageSize={this.state.data.length}
             ref={r => (this.selectTable = r)}
             className="-striped -highlight"
-            freezWhenExpanded={false}
+            // freezWhenExpanded={false}
             showPagination={false}
             TheadComponent={TheadComponent}
             {...extraProps}
@@ -511,6 +529,10 @@ class Studies extends Component {
                 this.displaySeries(rowInfo.original);
               }
             })}
+            expanded={this.state.expanded}
+            onExpandedChange={expanded => {
+              this.setState({ expanded });
+            }}
             SubComponent={row => {
               return (
                 <div style={{ paddingLeft: "20px" }}>
@@ -520,16 +542,18 @@ class Studies extends Component {
                     studyId={row.original.studyUID}
                     studyDescription={row.original.studyDescription}
                     update={this.props.update}
+                    expandLevel={this.props.expandLevel}
                   />
                 </div>
               );
             }}
           />
         ) : null}
-        {this.state.isSerieSelectionOpen && !this.props.loading && (
+        {this.state.isSerieSelectionOpen && (
           <ProjectModal
             seriesPassed={this.state.selectedStudy}
             onCancel={this.closeSelectionModal}
+            studyName={this.state.studyName}
           />
         )}
       </div>

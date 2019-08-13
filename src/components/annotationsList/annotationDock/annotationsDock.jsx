@@ -1,6 +1,8 @@
 import React, { Component, PropTypes } from "react";
 import { connect } from "react-redux";
 import Dock from "react-dock";
+import Draggable from "react-draggable";
+import { Rnd } from "react-rnd";
 import { FaTimes, FaTrashAlt } from "react-icons/fa";
 import { showAnnotationDock, closeSerie } from "../action";
 import Annotations from "./annotationList";
@@ -15,35 +17,70 @@ class DockTest extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      size: 0.1
+      size: 0.1,
+      width: "215px",
+      x: 1000,
+      y: 75
     };
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    const icon = document.getElementsByClassName("annotations-icon")[0];
+    const x = Math.ceil(icon.getBoundingClientRect().right) + 8;
+    let y = Math.ceil(icon.getBoundingClientRect().top);
+    this.setState({ x, y });
+  }
 
   render() {
+    const style = {
+      minWidth: "215px",
+      maxWidth: "30%"
+    };
     return (
-      <div>
-        <Dock
-          position="right"
-          size={this.state.size}
-          dockStyle={styles}
-          dimMode="none"
-          isVisible={this.props.dockOpen}
-          onSizeChange={this.handleSizeChange}
-        >
-          <div className="-dock__close">
-            <div
-              onClick={() => {
-                this.props.dispatch(showAnnotationDock());
-              }}
-            >
-              <FaTimes />
-            </div>
+      <Rnd
+        id="dock-modal"
+        style={style}
+        size={{
+          width: this.state.width,
+          height: this.state.height
+        }}
+        position={{ x: this.state.x, y: this.state.y }}
+        onDragStop={(e, d) => {
+          this.setState({ x: d.x, y: d.y });
+        }}
+        onResize={(e, direction, ref, delta, position) => {
+          this.setState({
+            width: ref.style.width,
+            height: ref.style.height,
+            ...position
+          });
+        }}
+      >
+        <div className="-dock__close">
+          <div
+            onClick={() => {
+              this.props.dispatch(showAnnotationDock());
+            }}
+          >
+            <FaTimes />
           </div>
-          <Annotations imageUID={this.props.imageUID} />
-        </Dock>
-      </div>
+        </div>
+        <Annotations imageID={this.props.imageID} />
+      </Rnd>
+      // <Draggable>
+      //   <>
+      //     <div className="-dock__close">
+      //       <div
+      //         onClick={() => {
+      //           this.props.dispatch(showAnnotationDock());
+      //         }}
+      //       >
+      //         <FaTimes />
+      //       </div>
+      //     </div>
+      //     <Annotations imageID={this.props.imageID} />
+      //   </>
+      // </Draggable>
     );
   }
 
@@ -53,7 +90,7 @@ class DockTest extends Component {
 }
 const mapStateToProps = state => {
   return {
-    // dockOpen: state.annotationsListReducer.dockOpen,
+    imageID: state.annotationsListReducer.imageID,
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort
   };

@@ -60,7 +60,9 @@
   width: 100%;
 }
 
-.mng-menu {
+.mng-menu,
+.info-menu,
+.userProfile-menu {
   z-index: 5;
   display: flex;
   flex-direction: column;
@@ -75,7 +77,9 @@
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
 }
 
-.mng-menu__option {
+.mng-menu__option,
+.info-menu__option,
+.userProfile-menu__option {
   width: 100%;
   padding-bottom: 0.3rem;
   padding-top: 0.3rem;
@@ -86,7 +90,9 @@
   /* margin: 0.5rem; */
 }
 
-.mng-menu__option:hover {
+.mng-menu__option:hover,
+.info-menu__option:hover,
+.userProfile-menu__option:hover {
   color: whitesmoke;
   background: #70142e;
   /* background: #861737; */
@@ -95,6 +101,7 @@
 .mng-header {
   display: flex;
   height: 10%;
+  height: 3%;
   width: 100%;
   min-height: 32px;
   /* background: rgb(85, 85, 85); */
@@ -126,6 +133,7 @@
   display: inline-flex;
   flex-direction: column;
   justify-content: space-between;
+  /* overflow: hidden; */
 }
 
 .wrapped {
@@ -144,6 +152,7 @@
   align-items: center;
   font-size: 1.2rem;
   padding-left: 1.2rem;
+  width: 100%;
 }
 
 .tool-icon {
@@ -158,7 +167,8 @@
 .add-project__modal--form,
 .add-connection__modal--form,
 .edit-project__modal--form,
-.add-worklist__modal--form
+.add-worklist__modal--form,
+.add-host__modal--form
 /* .edit-worklist__modal--form  */
  {
   height: 100%;
@@ -171,7 +181,7 @@
 .edit-project__modal--input,
 .add-worklist__modal--input,
 .edit-connection__modal--input
-
+.add-host__modal--input
 /* .edit-worklist__modal--input  */
  {
   width: 100%;
@@ -193,6 +203,7 @@
 .add-worklist__modal--label,
 .edit-connection__modal--label,
 .add-connection__modal--label
+.add-host__modal--label
 /* .edit-worklist__modal--label  */
  {
   margin-top: 1rem;
@@ -437,7 +448,8 @@
   width: 3%;
 }
 
-.annotations-toolbar {
+.annotations-toolbar,
+.templates-toolbar {
   display: flex;
   height: 5%;
   justify-content: flex-start;
@@ -613,6 +625,7 @@
   margin-right: 0.3rem;
 }
 
+
 .edit-project__modal--select {
   width: fit-content;
 }
@@ -657,4 +670,178 @@
 .mng-user__cell {
   cursor: pointer;
   text-align: left;
+
+.info-menu__break {
+  border-top: 1px solid #7b7f88;
+  margin: 0.5rem 1rem 0.5rem 1rem;
+}
+
+.info-about__modal.modal-dialog {
+  top: 10%;
+}
+
+.info-about__mbody.modal-body {
+  font-size: 1.1rem;
+}
+.info-about__desc,
+.info-team__desc {
+  padding-left: 1rem;
+  margin-bottom: 0.5rem;
+}
+.info-about__link {
+  color: #fff;
+  font-weight: 450;
+}
+
+.info-about__link:visited {
+  color: #fff;
+}
+
+.info-about__button {
+  background: #32383e;
+  border: 1px solid #956a76;
+  padding: 0.5rem 2rem 0.5rem 2rem;
+  margin: 0.5rem 1rem 1rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.info-about__button:hover {
+  background: #70142e;
+  color: #fff;
+  padding: 0.5rem 2rem 0.5rem 2rem;
+  border-radius: 8px;
+  margin: 0.5rem 1rem 1rem 1rem;
+  cursor: pointer;
+}
+
+.user-profile__button {
+  background: #3a3f44;
+  border: 1px solid #956a76;
+  padding: 0.5rem 2rem 0.5rem 2rem;
+  /* margin: 0.5rem 1rem 1rem 1rem; */
+  border-radius: 8px;
+  cursor: pointer;
+}
+.user-profile__button:hover {
+  background: #70142e;
+  color: #fff;
+  padding: 0.5rem 2rem 0.5rem 2rem;
+  border-radius: 8px;
+  /* margin: 0.5rem 1rem 1rem 1rem; */
+  cursor: pointer;
+}
+
+.user-profile__button.clicked {
+  background: #70142e;
+  color: #fff;
+  padding: 0.5rem 2rem 0.5rem 2rem;
+  border-radius: 0;
+  /* margin: 0.5rem 1rem 1rem 1rem; */
+  cursor: pointer;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+}
+
+.info-about__buttonCont {
+  display: flex;
+  /* justify-content: center; */
+  margin-left: 1rem;
+}
+
+.user-profile__buttonCont {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.user-profile__button {
+  /* width: 20rem; */
+  width: -webkit-fill-available;
+  text-align: center;
+}
+/* .user-profile__button:hover {
+  font-size: 1.2rem;
+  border-bottom: 2px solid #5bc0de;
+} */
+
+.user-profile__desc {
+  display: flex;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.pro-table.info-admin {
+  width: 100%;
+  height: 92%;
+}
+
+.pro-table.info-admin .rt-thead.-header {
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.add-host__modal.modal-dialog .modal-content {
+  border: 2px solid gray;
+  box-shadow: 1rem 1rem 1rem grey;
+  color: white;
+  width: fit-content;
+  margin: auto;
+}
+
+.add-host__modal--input {
+  color: black;
+}
+
+.-updatePw,
+.-updateEmail {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.user-profile__mbody.modal-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.update-profile__modal--form {
+  padding: 1rem;
+  border: 1px solid #956a76;
+  /* border-left: 1px solid #956a76;
+  border-right: 1px solid #956a76;
+  border-bottom: 1px solid #956a76; */
+  border-top: none;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+  background: #3a3f44;
+}
+.update-profile__modal--form button {
+  width: 5rem;
+}
+
+.update-profile__modal--label {
+  margin-bottom: 0.2rem;
+  font-size: 1rem;
+}
+
+.user-profile__modal .modal-content {
+  width: 50%;
+  min-width: 20rem;
+  margin: auto;
+}
+
+.update-profile__modal--input {
+  margin-bottom: 0.8rem;
+  color: black;
+}
+
+.update-profile__modal--form .form-exp.required {
+  margin-top: 0;
 }

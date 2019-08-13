@@ -7,10 +7,13 @@
 }
 
 .searchView-toolbar__icon {
-  margin-right: 1rem;
+  margin: 0.5rem;
   cursor: pointer;
 }
 
+.searchView-toolbar__icon:hover {
+  color: white;
+}
 .searchView-checkbox {
   width: 2rem;
 }
@@ -164,13 +167,102 @@
   margin-right: 0.5rem;
 }
 
-.css-5ee12h-style,
+/* .css-5ee12h-style,
 .css-1yxrzmr-style {
   background-color: blue;
-}
+} */
 
 .hide-delete {
   cursor: not-allowed;
   color: #5c5c5c;
+  margin: 0.5rem;
+}
+
+.alert-download__modal {
+  font-size: 1.2rem;
+  display: inline-block;
+  left: 40%;
+}
+
+.__modal--content {
+  display: inline-block;
+}
+
+.__message--container {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 1rem;
+}
+
+.searchView-toolbar__group {
+  display: flex;
   margin-right: 1rem;
+  margin-bottom: 0.3rem;
+
+  align-items: center;
+  border-radius: 4px;
+  box-shadow: 0.5px 0px 0px 0.2px #999;
+  /* background: #861737; */
+}
+
+.new-popup {
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  min-width: 10rem;
+  position: absolute;
+  background-color: #3a3f44;
+  color: #c3c5c9;
+  outline-color: black;
+  border: 1px solid #861737;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+.new-popup__option {
+  width: 100%;
+  padding: 0.3rem;
+
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.new-popup__option:hover {
+  color: whitesmoke;
+  background: #70142e;
+}
+
+.add-annotation__modal.modal-dialog,
+.add-series__modal.modal-dialog,
+.add-study__modal.modal-dialog,
+.add-subject__modal.modal-dialog {
+  max-width: 90%;
+  max-height: 90%;
+  display: inline-block;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 2px solid gray;
+  box-shadow: 1rem 1rem 1rem grey;
+  left: 40%;
+  top: 10%;
+}
+
+h5.add-subject__modal--label,
+.add-study__modal--label,
+.add-series__modal--label {
+  margin-top: 0.5rem;
+  margin-bottom: 0.1rem;
+}
+
+.add-subject__modal--input,
+.add-study__modal--input,
+.add-series__modal--input {
+  margin-top: 0.1rem;
+  width: -webkit-fill-available;
+  color: black;
+}
+
+.add-study__modal--select,
+.add-series__modal--select {
+  color: black;
 }

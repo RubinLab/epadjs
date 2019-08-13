@@ -103,3 +103,25 @@ export function deleteSeries(series) {
     return http.delete(url);
   }
 }
+
+export function saveSeries(
+  projectID,
+  subjectID,
+  studyID,
+  abbreviation,
+  description
+) {
+  const url =
+    apiUrl +
+    "/projects/" +
+    projectID +
+    "/subjects/" +
+    subjectID +
+    "/studies/" +
+    studyID +
+    "/series/" +
+    abbreviation +
+    "?description=" +
+    description;
+  return http.put(url);
+}

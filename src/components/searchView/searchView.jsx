@@ -26,7 +26,8 @@ import {
   updatePatient,
   clearSelection,
   changeActivePort,
-  jumpToAim
+  jumpToAim,
+  showAnnotationDock
 } from "../annotationsList/action";
 import { MAX_PORT } from "../../constants";
 import DownloadSelection from "./annotationDownloadModal";
@@ -36,6 +37,12 @@ import { toast } from "react-toastify";
 import { isLite } from "../../config";
 import { getSubjects } from "../../services/subjectServices";
 import DeleteAlert from "./deleteConfirmationModal";
+import DownloadWarning from "./downloadWarningModal";
+import NewMenu from "./newMenu";
+import SubjectCreationModal from "./subjectCreationModal.jsx";
+import StudyCreationModal from "./studyCreationModal.jsx";
+import SeriesCreationModal from "./seriesCreationModal.jsx";
+import AnnotationCreationModal from "./annotationCreationModal.jsx";
 
 class SearchView extends Component {
   constructor(props) {
@@ -51,7 +58,11 @@ class SearchView extends Component {
       showUploadModal: false,
       numOfsubjects: 0,
       showDeleteAlert: false,
-      update: 0
+      update: 0,
+      missingAnns: [],
+      expandLevel: 0,
+      expanded: {},
+      showNew: false
     };
   }
 
@@ -60,8 +71,18 @@ class SearchView extends Component {
   };
 
   componentDidMount = async () => {
+    if (this.props.dockOpen) {
+      this.props.dispatch(showAnnotationDock());
+    }
     const subjects = await this.getData();
-    this.setState({ numOfsubjects: subjects.length });
+    this.setState({ numOfsubjects: subjects.length, subjects });
+  };
+
+  componentDidUpdate = async prevProps => {
+    if (prevProps.match.params.pid !== this.props.match.params.pid) {
+      const subjects = await this.getData();
+      this.setState({ numOfsubjects: subjects.length, subjects });
+    }
   };
 
   getData = async () => {
@@ -73,6 +94,29 @@ class SearchView extends Component {
     return data;
   };
 
+  handleExpand = async () => {
+    if (this.state.expandLevel < 3) {
+      this.setState(state => ({ expandLevel: state.expandLevel + 1 }));
+    }
+    let expanded = {};
+    for (let i = 0; i < this.state.numOfsubjects; i++) {
+      expanded[i] = true;
+    }
+    this.setState({ expanded });
+  };
+
+  handleShrink = async () => {
+    if (this.state.expandLevel > 0) {
+      await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
+      if (this.state.expandLevel === 0) {
+        this.setState({ expanded: {} });
+      }
+    }
+  };
+
+  handleCloseAll = () => {
+    this.setState({ expandLevel: 0 });
+  };
   updateUploadStatus = async => {
     this.setState(state => {
       return { uploading: !state.uploading, update: state.update + 1 };
@@ -118,7 +162,7 @@ class SearchView extends Component {
 
   updateSubjectCount = async () => {
     const subjects = await this.getData();
-    await this.setState({ numOfsubjects: subjects.length });
+    await this.setState({ numOfsubjects: subjects.length, subjects });
   };
 
   deleteStudy = async () => {
@@ -261,6 +305,7 @@ class SearchView extends Component {
               }
             }
           }
+          this.props.history.push("/display");
           this.props.dispatch(clearSelection());
         }
       }
@@ -283,11 +328,14 @@ class SearchView extends Component {
         if (notOpenSeries.length === 0) {
           let index = this.checkIfSerieOpen(selectedSeries[0].seriesUID).index;
           this.props.dispatch(changeActivePort(index));
+          this.props.history.push("/display");
+          this.props.dispatch(clearSelection());
         } else {
           if (selectedSeries.length + this.props.openSeries.length > MAX_PORT) {
             groupedObj = this.groupUnderStudy(selectedSeries);
             await this.setState({ seriesList: groupedObj });
             this.setState({ isSerieSelectionOpen: true });
+            // this.props.history.push("/display");
           } else {
             //else get data for each serie for display
             selectedSeries.forEach(serie => {
@@ -309,6 +357,8 @@ class SearchView extends Component {
                 );
               }
             }
+            this.props.history.push("/display");
+            this.props.dispatch(clearSelection());
           }
         }
       }
@@ -359,11 +409,12 @@ class SearchView extends Component {
                 );
               }
             }
+            this.props.history.push("/display");
+            this.props.dispatch(clearSelection());
           }
         }
       }
     }
-    this.props.dispatch(clearSelection());
   };
 
   groupUnderStudy = objArr => {
@@ -395,6 +446,7 @@ class SearchView extends Component {
     let fileName;
     let promiseArr = [];
     let fileNameArr = [];
+    let missingAnns = [];
     if (selectedProjects.length > 0) {
       await this.setState({ downloading: true });
       for (let project of selectedProjects) {
@@ -408,8 +460,12 @@ class SearchView extends Component {
       await this.setState({ downloading: true });
       for (let patient of selectedPatients) {
         fileName = `Patients-${patient.subjectID}`;
-        promiseArr.push(downloadSubjects(patient));
-        fileNameArr.push(fileName);
+        if (patient.numberOfAnnotations) {
+          promiseArr.push(downloadSubjects(patient));
+          fileNameArr.push(fileName);
+        } else {
+          missingAnns.push(patient.subjectName);
+        }
       }
       this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
@@ -417,8 +473,12 @@ class SearchView extends Component {
       await this.setState({ downloading: true });
       for (let study of selectedStudies) {
         fileName = `Studies-${study.studyUID}`;
-        promiseArr.push(downloadStudies(study));
-        fileNameArr.push(fileName);
+        if (study.numberOfAnnotations) {
+          promiseArr.push(downloadStudies(study));
+          fileNameArr.push(fileName);
+        } else {
+          missingAnns.push(study.studyDescription);
+        }
       }
       this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
@@ -426,14 +486,19 @@ class SearchView extends Component {
       await this.setState({ downloading: true });
       for (let serie of selectedSeries) {
         fileName = `Series-${serie.seriesUID}`;
-        promiseArr.push(downloadSeries(serie));
-        fileNameArr.push(fileName);
+        if (serie.numberOfAnnotations) {
+          promiseArr.push(downloadSeries(serie));
+          fileNameArr.push(fileName);
+        } else {
+          missingAnns.push(serie.seriesDescription);
+        }
       }
       this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
     }
+    this.setState({ missingAnns });
   };
 
   getSeriesData = async selected => {
@@ -460,6 +525,7 @@ class SearchView extends Component {
         this.setState({ error: null, downloading: false });
       })
       .catch(err => {
+        this.setState({ downloading: false });
         if (err.response.status === 503) {
           isLite
             ? toast.error("There is no aim file to download!", {
@@ -507,7 +573,70 @@ class SearchView extends Component {
     this.setState(state => ({ showDeleteAlert: !state.showDeleteAlert }));
   };
 
-  render() {
+  handleOK = () => {
+    this.setState({ missingAnns: [] });
+  };
+
+  handleNewClick = () => {
+    this.setState(state => ({ showNew: !state.showNew }));
+  };
+
+  handleSelectNewOption = e => {
+    this.setState({ newSelected: e.target.dataset.opt, showNew: false });
+  };
+
+  handleNewModalCancel = () => {
+    this.setState({ newSelected: "" });
+  };
+
+  updateStatus = () => {
+    this.setState({ downloading: false, uploading: false, deleting: false });
+  };
+
+  handleNewSelected = () => {
+    switch (this.state.newSelected) {
+      case "subject":
+        return (
+          <SubjectCreationModal
+            onCancel={this.handleNewModalCancel}
+            project={this.props.match.params.pid}
+            onSubmit={this.updateUploadStatus}
+            onResolve={this.updateStatus}
+          />
+        );
+      case "study":
+        return (
+          <StudyCreationModal
+            onCancel={this.handleNewModalCancel}
+            subjects={this.state.subjects}
+            project={this.props.match.params.pid}
+            onSubmit={this.updateUploadStatus}
+            onResolve={this.updateStatus}
+          />
+        );
+      case "series":
+        return (
+          <SeriesCreationModal
+            onCancel={this.handleNewModalCancel}
+            project={this.props.match.params.pid}
+            subjects={this.state.subjects}
+            onSubmit={this.updateUploadStatus}
+            onResolve={this.updateStatus}
+          />
+        );
+      // case "annotation":
+      //   return (
+      //     <AnnotationCreationModal
+      //       onCancel={this.handleNewModalCancel}
+      //       project={this.props.match.params.pid}
+      //     />
+      //   );
+      default:
+        return null;
+    }
+  };
+
+  render = () => {
     let status;
     if (this.state.uploading) {
       status = "Uploading…";
@@ -515,8 +644,9 @@ class SearchView extends Component {
       status = "Downloading…";
     } else if (this.state.deleting) {
       status = "Deleting…";
+    } else {
+      status = null;
     }
-
     const showDelete =
       (Object.entries(this.props.selectedAnnotations).length > 0 &&
         this.props.selectedAnnotations.constructor === Object) ||
@@ -533,8 +663,13 @@ class SearchView extends Component {
           onUpload={this.handleFileUpload}
           onView={this.viewSelection}
           onDelete={this.handleClickDeleteIcon}
+          onExpand={this.handleExpand}
+          onShrink={this.handleShrink}
+          onCloseAll={this.handleCloseAll}
+          onNew={this.handleNewClick}
           status={status}
           showDelete={showDelete}
+          project={this.props.match.params.pid}
         />
         {this.state.isSerieSelectionOpen && !this.props.loading && (
           <ProjectModal
@@ -546,6 +681,8 @@ class SearchView extends Component {
           key={this.props.match.params.pid}
           pid={this.props.match.params.pid}
           // update={this.state.numOfsubjects}
+          expandLevel={this.state.expandLevel}
+          expanded={this.state.expanded}
           update={this.state.update}
         />
         {this.state.showAnnotationModal && (
@@ -567,13 +704,28 @@ class SearchView extends Component {
             onDelete={this.deleteSelection}
           />
         )}
+        {this.state.missingAnns.length > 0 && (
+          <DownloadWarning
+            details={this.state.missingAnns}
+            onOK={this.handleOK}
+          />
+        )}
+
+        {this.state.showNew && (
+          <NewMenu
+            onSelect={this.handleSelectNewOption}
+            onClose={this.handleNewClick}
+          />
+        )}
+        {this.state.newSelected && this.handleNewSelected()}
       </>
     );
-  }
+  };
 }
 
 const mapStateToProps = state => {
   return {
+    dockOpen: state.annotationsListReducer.dockOpen,
     selectedProjects: state.annotationsListReducer.selectedProjects,
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,

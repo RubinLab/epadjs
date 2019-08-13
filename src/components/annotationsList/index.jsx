@@ -29,7 +29,6 @@ class AnnotationsList extends React.Component {
     let y = Math.ceil(icon.getBoundingClientRect().bottom);
     y = window.innerWidth <= 932 ? (y = y * 3) : y * 2;
 
-    console.log(y);
     this.setState({ x, y });
 
     const selectedStudy = this.openSeries[this.activePort].studyUID;
@@ -67,7 +66,6 @@ class AnnotationsList extends React.Component {
   render = () => {
     const selectedSerie = this.openSeries[this.activePort].seriesUID;
     //find the study in the studies array
-    console.log(this.state.coordinate);
     const style = {
       minWidth: "215px",
       maxWidth: "30%",

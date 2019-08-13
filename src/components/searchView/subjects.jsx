@@ -35,6 +35,7 @@ class Subjects extends Component {
       selectAll: false,
       selectType: "checkbox",
       expanded: {},
+      expandedIDs: {},
       numOfStudies: 0
     };
   }
@@ -42,16 +43,28 @@ class Subjects extends Component {
   async componentDidMount() {
     const pid = isLite ? "lite" : this.props.pid;
     const data = await this.getData();
-    this.setState({ data, size: data.length });
+    this.setState({ data });
     this.setState({ columns: this.setColumns() });
   }
 
   async componentDidUpdate(prevProps) {
     if (this.props.update !== prevProps.update) {
       let fetchedData = await this.getData();
-      this.setState({ data: fetchedData });
+      await this.setState({ data: fetchedData });
+    }
+    if (this.props.expandLevel != prevProps.expandLevel) {
+      this.props.expandLevel >= 1
+        ? this.expandCurrentLevel()
+        : this.setState({ expanded: {} });
     }
   }
+  expandCurrentLevel = () => {
+    const expanded = {};
+    for (let i = 0; i < this.state.data.length; i++) {
+      expanded[i] = this.state.data[i].numberOfStudies ? true : false;
+    }
+    this.setState({ expanded });
+  };
 
   getData = async () => {
     const {
@@ -59,7 +72,9 @@ class Subjects extends Component {
         ResultSet: { Result: data }
       }
     } = await getSubjects(this.props.pid);
-    // await this.setState({ data });
+    for (let subject of data) {
+      subject.children = [];
+    }
     return data;
   };
 
@@ -108,6 +123,7 @@ class Subjects extends Component {
         width: this.widthUnit * 13,
         id: "searchView-desc__col",
         resizable: false,
+        accessor: "subjectName",
         Cell: ({ original }) => {
           const desc = this.cleanCarets(original.subjectName);
           const id = "desc-tool" + original.subjectID;
@@ -358,6 +374,14 @@ class Subjects extends Component {
     this.setState({ expanded: newExpanded });
   };
 
+  onSortedChange = () => {
+    const { expanded } = this.state;
+    for (let subject in expanded) {
+      expanded[subject] = false;
+    }
+    this.setState({ expanded });
+  };
+
   render() {
     const {
       toggleSelection,
@@ -392,15 +416,17 @@ class Subjects extends Component {
         {this.state.data ? (
           <TreeTable
             NoDataComponent={() => null}
-            data={this.state.data}
-            columns={this.state.columns}
-            pageSize={this.state.size}
+            data={data}
+            columns={columns}
+            pageSize={data.length}
             ref={r => (this.selectTable = r)}
             className="-striped -highlight"
-            freezWhenExpanded={false}
+            // freezWhenExpanded={false}
             showPagination={false}
             // TheadComponent={TheadComponent}
-
+            onSortedChange={() => {
+              this.onSortedChange();
+            }}
             {...extraProps}
             SubComponent={row => {
               return (
@@ -409,6 +435,7 @@ class Subjects extends Component {
                     projectId={this.props.pid}
                     subjectId={row.original.displaySubjectID}
                     update={this.props.update}
+                    expandLevel={this.props.expandLevel}
                   />
                 </div>
               );

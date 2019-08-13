@@ -117,7 +117,20 @@ class Series extends Component {
       );
       this.setState({ data });
     }
+    if (this.props.expandLevel != prevProps.expandLevel) {
+      this.props.expandLevel >= 3
+        ? this.expandCurrentLevel()
+        : this.setState({ expanded: {} });
+    }
   }
+
+  expandCurrentLevel = () => {
+    const expanded = {};
+    for (let i = 0; i < this.state.data.length; i++) {
+      expanded[i] = this.state.data[i].numberOfAnnotations ? true : false;
+    }
+    this.setState({ expanded });
+  };
 
   selectRow = selected => {
     // console.log(selected);
@@ -458,9 +471,10 @@ class Series extends Component {
       toggleAll,
       toggleSelection,
       selectType,
-      expanded,
-      onExpandedChange
+      onExpandedChange,
+      expanded
     };
+
     const TheadComponent = props => null;
     return (
       <>

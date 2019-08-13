@@ -14,7 +14,7 @@ import {
 
 class AnnotationsList extends React.Component {
   state = {
-    labelDisplayAll: true,
+    labelDisplayAll: false,
     annsDisplayAll: true
   };
 
@@ -81,49 +81,82 @@ class AnnotationsList extends React.Component {
   };
 
   getLabelArray = () => {
-    const imageAnnotations = this.props.openSeries[this.props.activePort]
-      .imageAnnotations[this.props.imageID];
+    let imageAnnotations;
+    if (this.props.openSeries[this.props.activePort].imageAnnotations) {
+      imageAnnotations = this.props.openSeries[this.props.activePort]
+        .imageAnnotations[this.props.imageID];
+    }
     const calculations = {};
     if (imageAnnotations) {
       for (let aim of imageAnnotations) {
-        calculations[aim.aimUid] = aim.calculations;
+        if (calculations[aim.aimUid]) {
+          calculations[aim.aimUid][aim.markupUid] = {
+            calculations: [...aim.calculations],
+            markupType: aim.markupType
+          };
+          // calculations[aim.markupUid].push({ markupType: aim.markupType });
+        } else {
+          calculations[aim.aimUid] = {};
+          calculations[aim.aimUid][aim.markupUid] = {
+            calculations: [...aim.calculations],
+            markupType: aim.markupType
+          };
+          // calculations[aim.markupUid].push({ markupType: aim.markupType });
+        }
       }
     }
     return calculations;
   };
 
   render = () => {
+    const maxHeight = window.innerHeight * 0.6;
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
-    const annotations = [];
+    let annotations = {};
     let aims = this.props.aimsList[seriesUID];
     for (let aim in aims) {
       if (aims[aim].type === "study" || aims[aim].type === "serie") {
-        annotations.push(aims[aim]);
+        let { id } = aims[aim];
+        annotations[id]
+          ? annotations[id].push(aims[aim])
+          : (annotations[id] = [aims[aim]]);
       }
     }
-    let imageAnnotations = this.props.openSeries[this.props.activePort]
-      .imageAnnotations[this.props.imageID];
-    if (imageAnnotations) {
-      for (let aim of imageAnnotations) {
-        annotations.push(this.props.aimsList[seriesUID][aim.aimUid]);
+    let imageAnnotations;
+    if (this.props.openSeries[this.props.activePort].imageAnnotations) {
+      imageAnnotations = this.props.openSeries[this.props.activePort]
+        .imageAnnotations[this.props.imageID];
+
+      if (imageAnnotations) {
+        for (let aim of imageAnnotations) {
+          let { aimUid } = aim;
+          annotations[aimUid]
+            ? annotations[aimUid].push(
+                this.props.aimsList[seriesUID][aim.aimUid]
+              )
+            : (annotations[aimUid] = [
+                this.props.aimsList[seriesUID][aim.aimUid]
+              ]);
+        }
       }
     }
     const calculations = this.getLabelArray();
-    annotations.sort(function(a, b) {
-      let nameA = a.name.toUpperCase();
-      let nameB = b.name.toUpperCase();
-      if (nameA < nameB) {
-        return -1;
-      }
-      if (nameA > nameB) {
-        return 1;
-      }
-      return 0;
-    });
+    // annotations.sort(function(a, b) {
+    //   let nameA = a.name.toUpperCase();
+    //   let nameB = b.name.toUpperCase();
+    //   if (nameA < nameB) {
+    //     return -1;
+    //   }
+    //   if (nameA > nameB) {
+    //     return 1;
+    //   }
+    //   return 0;
+    // });
 
     // let annotations = [];
     let annList = [];
+    annotations = Object.values(annotations);
     annotations.forEach((aim, index) => {
+      aim = aim[0];
       annList.push(
         <Annotation
           name={aim.name}
@@ -179,7 +212,7 @@ class AnnotationsList extends React.Component {
               className="react-switch"
             />
           </div>
-          <div>{annList}</div>
+          <div style={{ maxHeight, overflow: "scroll" }}>{annList}</div>
         </div>
       </React.Fragment>
     );

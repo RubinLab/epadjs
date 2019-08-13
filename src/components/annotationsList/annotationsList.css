@@ -1,4 +1,5 @@
-#annList-modal {
+#annList-modal,
+#dock-modal {
   display: inline-flex;
   background: #3a3f44;
   color: #d3d3d3;
@@ -10,6 +11,10 @@
   /* left: 80%; */
 }
 
+#dock-modal {
+  padding: 0.3rem;
+  overflow-x: hidden;
+}
 .annList {
   background: #3a3f44;
   padding: 0.5rem;
@@ -368,4 +373,9 @@ svg {
 .alreadyOpen-disabled {
   display: flex;
   align-items: center;
+}
+
+.-dock__close {
+  cursor: pointer;
+  width: 1.5rem;
 }

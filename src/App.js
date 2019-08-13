@@ -7,8 +7,8 @@ import { getUser } from "./services/userServices";
 import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
 import SearchView from "./components/searchView/searchView";
-// import DisplayView from "./components/display/displayView";
-import DisplayViewContainer from "./components/display/displayViewContainer";
+import DisplayView from "./components/display/displayView";
+// import DisplayViewContainer from "./components/display/displayViewContainer";
 import AnotateView from "./components/anotateView";
 import ProgressView from "./components/progressView";
 import NotFound from "./components/notFound";
@@ -17,40 +17,73 @@ import Logout from "./components/logout";
 import ProtectedRoute from "./components/common/protectedRoute";
 import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
+import InfoMenu from "./components/infoMenu";
+import UserMenu from "./components/userProfileMenu";
+
 import AnnotationList from "./components/annotationsList";
 import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
-import AnnotationsList from "./components/annotationsList/annotationDock/annotationList";
-import ManagementItemModal from "./components/management/common/customModal";
-
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
-import ProjectModal from "./components/annotationsList/selectSerieModal";
 import { isLite } from "./config.json";
-// import Modal from './components/management/projectCreationForm';
-// import Modal from './components/common/rndBootModal';
-
+import { clearAimId } from "./components/annotationsList/action";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
 class App extends Component {
   state = {
-    isMngMenuOpen: false,
+    openMng: false,
     keycloak: null,
-    authenticated: false
+    authenticated: false,
+    openInfo: false,
+    openMenu: false,
+    openUser: false
   };
 
   closeMenu = event => {
-    console.log(event);
     // if (event && event.type === "keydown") {
     //   if (event.key === 'Escape' || event.keyCode === 27) {
-    //     this.setState({ isMngMenuOpen: false });
+    //     this.setState({ openMng: false });
     //   }
     // }
-    this.setState({ isMngMenuOpen: false });
+    this.setState({
+      openMng: false,
+      openInfo: false,
+      openUser: false,
+      openMenu: false
+    });
   };
 
-  openMenu = () => {
-    this.setState(state => ({ isMngMenuOpen: !state.isMngMenuOpen }));
+  handleMngMenu = () => {
+    if (this.state.openMenu) {
+      this.setState({ openMng: true, openInfo: false, openUser: false });
+    }
+  };
+
+  handleInfoMenu = () => {
+    if (this.state.openMenu) {
+      this.setState({ openInfo: true, openMng: false, openUser: false });
+    }
+  };
+
+  handleUserProfileMenu = () => {
+    if (this.state.openMenu) {
+      this.setState({ openUser: true, openInfo: false, openMng: false });
+    }
+  };
+  handleOpenMenu = e => {
+    if (!this.state.openMenu) {
+      this.setState({ openMenu: true });
+      if (e.target.dataset.name === "mng") {
+        this.setState({ openMng: true });
+      } else if (e.target.dataset.name === "info") {
+        this.setState({ openInfo: true });
+      } else if (e.target.dataset.name === "user") {
+        this.setState({ openUser: true });
+      }
+    } else {
+      this.setState({ openMenu: false });
+      this.setState({ openMng: false, openInfo: false, openUser: false });
+    }
   };
 
   async componentDidMount() {
@@ -87,9 +120,7 @@ class App extends Component {
             user
           });
         })
-        .catch(err => {
-          console.log(err);
-        });
+        .catch(err => {});
     } else {
       try {
         const username = sessionStorage.getItem("username");
@@ -100,34 +131,71 @@ class App extends Component {
       } catch (ex) {}
     }
     // window.addEventListener("keydown", this.closeMenu, true);
+    document.addEventListener("mousedown", this.handleClickOutside);
   }
 
   componentWillUnmount = () => {
-    // window.removeEventListener('keydown', this.closeMenu, true);
+    document.removeEventListener("mousedown", this.handleClickOutside);
+  };
+
+  handleClickOutside = event => {
+    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
+      this.handleOpenMenu(event);
+    }
+  };
+
+  setWrapperRef = node => {
+    this.wrapperRef = node;
   };
 
   onLogout = e => {
+    auth.logout();
     this.setState({
       authenticated: false,
       id: null,
-      keycloak: null,
       name: null,
       user: null
     });
+    this.state.keycloak.logout().then(() => {
+      this.setState({
+        keycloak: null
+      });
+      auth.logout();
+    });
+  };
+
+  switchSearhView = () => {
+    this.props.dispatch(clearAimId());
   };
   render() {
-    // console.log("App js state", this.state);
     return (
       <React.Fragment>
         <Cornerstone />
         <ToastContainer />
         <NavBar
           user={this.state.user}
-          openGearMenu={this.openMenu}
+          openGearMenu={this.handleMngMenu}
+          openInfoMenu={this.handleInfoMenu}
+          openUser={this.handleUserProfileMenu}
           logout={this.onLogout}
+          openMenu={this.handleOpenMenu}
+          onSearchViewClick={this.switchSearhView}
         />
-        {this.state.isMngMenuOpen && <Management closeMenu={this.closeMenu} />}
-
+        {this.state.openMng && this.state.openMenu && (
+          <div ref={this.setWrapperRef}>
+            <Management closeMenu={this.closeMenu} />
+          </div>
+        )}
+        {this.state.openInfo && this.state.openMenu && (
+          <div ref={this.setWrapperRef}>
+            <InfoMenu closeMenu={this.closeMenu} user={this.state.user} />
+          </div>
+        )}
+        {!isLite && this.state.openUser && this.state.openMenu && (
+          <div ref={this.setWrapperRef}>
+            <UserMenu closeMenu={this.closeMenu} user={this.state.user} />
+          </div>
+        )}
         {!this.state.authenticated && !isLite && (
           <Route path="/login" component={LoginForm} />
         )}
@@ -138,7 +206,8 @@ class App extends Component {
                 <Route path="/logout" component={Logout} />
                 <ProtectedRoute
                   path="/display"
-                  component={DisplayViewContainer}
+                  component={DisplayView}
+                  test={"test"}
                 />
                 <ProtectedRoute path="/search/:pid?" component={SearchView} />
                 <ProtectedRoute path="/anotate" component={AnotateView} />
@@ -161,14 +230,14 @@ class App extends Component {
         {this.state.authenticated && isLite && (
           <Switch>
             <Route path="/logout" component={Logout} />
-            <ProtectedRoute path="/display" component={DisplayViewContainer} />
+            <ProtectedRoute path="/display" component={DisplayView} />
             <Route path="/not-found" component={NotFound} />
             <ProtectedRoute path="/" component={SearchView} />
             <Redirect to="/not-found" />
           </Switch>
         )}
         {this.props.listOpen && <AnnotationList />}
-        {/* {this.props.dockOpen && <AnnotationsDock />} */}
+        {this.props.dockOpen && <AnnotationsDock />}
         {this.props.showGridFullAlert && <MaxViewAlert />}
         {/* {this.props.selection && (
           <ManagementItemModal selection={this.props.selection} />
@@ -180,15 +249,15 @@ class App extends Component {
 
 const mapStateToProps = state => {
   console.log(state.annotationsListReducer);
-  console.log(state.managementReducer);
-
+  // console.log(state.managementReducer);
   const {
     listOpen,
     dockOpen,
     showGridFullAlert,
     showProjectModal,
     loading,
-    activePort
+    activePort,
+    imageID
   } = state.annotationsListReducer;
   return {
     listOpen,
@@ -197,6 +266,7 @@ const mapStateToProps = state => {
     showProjectModal,
     loading,
     activePort,
+    imageID,
     selection: state.managementReducer.selection
   };
 };

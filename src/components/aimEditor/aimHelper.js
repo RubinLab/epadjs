@@ -1,7 +1,6 @@
-export default function getImageIdAnnotations(aims) {
+export function getImageIdAnnotations(aims) {
   let imageIdSpecificMarkups = {};
   aims.forEach(aim => parseAim(aim, imageIdSpecificMarkups));
-  // console.log(imageIdSpecificMarkups);
   return imageIdSpecificMarkups;
 }
 
@@ -86,4 +85,52 @@ function parseCalculation(calculation) {
   obj["type"] = calculation["description"]["value"];
   obj["unit"] = calcResult["unitOfMeasure"]["value"];
   return obj;
+}
+
+export function getAimImageData(image) {
+  var obj = {};
+  obj.aim = {};
+  obj.study = {};
+  obj.series = {};
+  obj.equipment = {};
+  obj.person = {};
+  obj.image = [];
+  const { aim, study, series, equipment, person } = obj;
+
+  console.log("Image Data", image.data);
+
+  aim.studyInstanceUid = image.data.string("x0020000d") || "";
+
+  study.startTime = image.data.string("x00080030") || "";
+  study.instanceUid = image.data.string("x0020000d") || "";
+  study.startDate = image.data.string("x00080020") || "";
+  study.accessionNumber = image.data.string("x00080050") || "";
+
+  series.instanceUid = image.data.string("x0020000e") || "";
+  series.modality = image.data.string("x00080060") || "";
+
+  obj.image.push(getSingleImageData(image));
+
+  equipment.manufacturerName = image.data.string("x00080070") || "";
+  equipment.manufacturerModelName = image.data.string("x00081090") || "";
+  equipment.softwareVersion = image.data.string("x00181020") || "";
+
+  person.sex = image.data.string("x00100040") || "";
+  person.name = image.data.string("x00100010") || "";
+  person.patientId = image.data.string("x00100020") || "";
+  person.birthDate = image.data.string("x00100030") || "";
+
+  return obj;
+}
+
+function getSingleImageData(image) {
+  return {
+    sopClassUid: image.data.string("x00080016") || "",
+    sopInstanceUid: image.data.string("x00080018") || ""
+  };
+}
+
+function addSingleImageDataToAim(aim, image) {
+  if (!aim.image) return;
+  aim.image.push(getSingleImageData(image));
 }
