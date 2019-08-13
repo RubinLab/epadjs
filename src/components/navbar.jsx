@@ -12,10 +12,10 @@ const NavBar = ({
   openMenu,
   openUser,
   loading,
-  logout, 
-  // onSearchViewClick
+  logout,
+  onSearchViewClick
 }) => {
-  const style = { "padding-bottom": "8px" };
+  const style = { paddingBottom: "8px" };
 
   return (
     <div>
