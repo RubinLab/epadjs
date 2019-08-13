@@ -126,6 +126,7 @@ const NavBar = ({
                     data-name="user"
                     onClick={openMenu}
                     onMouseEnter={openUser}
+                    style={{ cursor: "pointer", "padding-bottom": "8px" }}
                   >
                     {user.displayname}
                   </div>

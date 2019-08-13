@@ -132,7 +132,22 @@ class App extends Component {
       } catch (ex) {}
     }
     // window.addEventListener("keydown", this.closeMenu, true);
+    document.addEventListener("mousedown", this.handleClickOutside);
   }
+
+  componentWillUnmount = () => {
+    document.removeEventListener("mousedown", this.handleClickOutside);
+  };
+
+  handleClickOutside = event => {
+    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
+      this.handleOpenMenu(event);
+    }
+  };
+
+  setWrapperRef = node => {
+    this.wrapperRef = node;
+  };
 
   onLogout = e => {
     auth.logout();
@@ -163,13 +178,19 @@ class App extends Component {
           openMenu={this.handleOpenMenu}
         />
         {this.state.openMng && this.state.openMenu && (
-          <Management closeMenu={this.closeMenu} />
+          <div ref={this.setWrapperRef}>
+            <Management closeMenu={this.closeMenu} />
+          </div>
         )}
         {this.state.openInfo && this.state.openMenu && (
-          <InfoMenu closeMenu={this.closeMenu} user={this.state.user} />
+          <div ref={this.setWrapperRef}>
+            <InfoMenu closeMenu={this.closeMenu} user={this.state.user} />
+          </div>
         )}
         {!isLite && this.state.openUser && this.state.openMenu && (
-          <UserMenu closeMenu={this.closeMenu} user={this.state.user} />
+          <div ref={this.setWrapperRef}>
+            <UserMenu closeMenu={this.closeMenu} user={this.state.user} />
+          </div>
         )}
         {!this.state.authenticated && !isLite && (
           <Route path="/login" component={LoginForm} />
