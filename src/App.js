@@ -22,11 +22,10 @@ import UserMenu from "./components/userProfileMenu";
 
 import AnnotationList from "./components/annotationsList";
 import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
-
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import { isLite } from "./config.json";
-
+import { clearAimId } from "./components/annotationsList/action";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
@@ -164,6 +163,10 @@ class App extends Component {
       auth.logout();
     });
   };
+
+  switchSearhView = () => {
+    this.props.dispatch(clearAimId());
+  };
   render() {
     return (
       <React.Fragment>
@@ -176,6 +179,7 @@ class App extends Component {
           openUser={this.handleUserProfileMenu}
           logout={this.onLogout}
           openMenu={this.handleOpenMenu}
+          onSearchViewClick={this.switchSearhView}
         />
         {this.state.openMng && this.state.openMenu && (
           <div ref={this.setWrapperRef}>

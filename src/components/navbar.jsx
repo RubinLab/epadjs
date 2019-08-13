@@ -12,9 +12,11 @@ const NavBar = ({
   openMenu,
   openUser,
   loading,
-  logout
+  logout, 
+  // onSearchViewClick
 }) => {
   const style = { "padding-bottom": "8px" };
+
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -36,7 +38,7 @@ const NavBar = ({
 
         <div className="collapse navbar-collapse pl-0" id="navbarColor01">
           <ul className="navbar-nav mr-auto">
-            <li className="nav-item">
+            <li className="nav-item" onClick={onSearchViewClick}>
               <NavLink className="nav-link" to="/search">
                 Search
               </NavLink>

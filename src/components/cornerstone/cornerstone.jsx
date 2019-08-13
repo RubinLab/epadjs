@@ -9,22 +9,22 @@ import auth from "../../services/authService";
 import { connect } from "react-redux";
 import { FaLess } from "react-icons/fa";
 
-function getBlobUrl(url) {
-  const baseUrl = window.URL || window.webkitURL;
-  const blob = new Blob([`importScripts('${url}')`], {
-    type: "application/javascript"
-  });
+// function getBlobUrl(url) {
+//   const baseUrl = window.URL || window.webkitURL;
+//   const blob = new Blob([`importScripts('${url}')`], {
+//     type: "application/javascript"
+//   });
 
-  return baseUrl.createObjectURL(blob);
-}
+//   return baseUrl.createObjectURL(blob);
+// }
 
 const Cornerstone = ({ dispatch }) => {
-  let webWorkerUrl = getBlobUrl(
-    "https://unpkg.com/cornerstone-wado-image-loader/dist/cornerstoneWADOImageLoaderWebWorker.min.js"
-  );
-  let codecsUrl = getBlobUrl(
-    "https://unpkg.com/cornerstone-wado-image-loader/dist/cornerstoneWADOImageLoaderCodecs.js"
-  );
+  // let webWorkerUrl = getBlobUrl(
+  //   "https://unpkg.com/cornerstone-wado-image-loader/dist/cornerstoneWADOImageLoaderWebWorker.min.js"
+  // );
+  // let codecsUrl = getBlobUrl(
+  //   "https://unpkg.com/cornerstone-wado-image-loader/dist/cornerstoneWADOImageLoaderCodecs.js"
+  // );
 
   cornerstoneTools.external.cornerstone = cornerstone;
   cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
@@ -51,27 +51,19 @@ const Cornerstone = ({ dispatch }) => {
   const config = {
     maxWebWorkers: navigator.hardwareConcurrency || 1,
     startWebWorkersOnDemand: true,
-    webWorkerPath: webWorkerUrl,
+    // webWorkerPath: webWorkerUrl,
     webWorkerTaskPaths: [],
     taskConfiguration: {
       decodeTask: {
-        loadCodecsOnStartup: true,
+        // loadCodecsOnStartup: true,
         initializeCodecsOnStartup: false,
-        codecsPath: codecsUrl,
+        // codecsPath: codecsUrl,
         usePDFJS: false,
         strict: false
       }
     }
   };
 
-  const confug = {
-    drawAllMarkers: true
-  };
-  const confag = {
-    touchEnabled: false
-  };
-
-  //cornerstoneTools.orientationMarkers.setConfiguration(confug);
   cornerstoneWADOImageLoader.webWorkerManager.initialize(config);
   //cornerstoneWebImageLoader.external.cornerstone = cornerstone;
   cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
