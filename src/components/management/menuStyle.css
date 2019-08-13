@@ -625,7 +625,6 @@
   margin-right: 0.3rem;
 }
 
-
 .edit-project__modal--select {
   width: fit-content;
 }
@@ -670,6 +669,7 @@
 .mng-user__cell {
   cursor: pointer;
   text-align: left;
+}
 
 .info-menu__break {
   border-top: 1px solid #7b7f88;

@@ -362,7 +362,6 @@ class Users extends React.Component {
   };
 
   render = () => {
-    console.log(this.state);
     const pageSize =
       this.state.data.length < 10 ? 10 : this.state.data.length >= 40 ? 50 : 20;
     return (
