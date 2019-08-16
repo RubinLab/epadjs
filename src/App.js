@@ -25,6 +25,7 @@ import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import { isLite } from "./config.json";
 import { clearAimId } from "./components/annotationsList/action";
+import Worklist from "./components/sideBar/worklist";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
@@ -211,6 +212,7 @@ class App extends Component {
                 <ProtectedRoute path="/search/:pid?" component={SearchView} />
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute path="/progress" component={ProgressView} />
+                <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 <Route path="/tools" />
                 <Route path="/edit" />
                 <Route path="/not-found" component={NotFound} />
@@ -220,6 +222,7 @@ class App extends Component {
                   to="/search"
                   component={SearchView}
                 />
+
                 <Redirect to="/not-found" />
               </Switch>
               {/* {this.props.activePort === 0 ? <AnnotationsList /> : null} */}

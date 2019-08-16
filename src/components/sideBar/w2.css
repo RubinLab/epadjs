@@ -250,3 +250,7 @@ body {
   display: block;
   font-size: 75%;
 }
+
+.ReactTable.__table .rt-thead.-header .rt-th {
+  text-align: left;
+}

@@ -28,3 +28,15 @@ export function updateWorklist(user, id) {
     apiUrl + "/users/" + user + "/worklists/" + id + "?user=" + user
   );
 }
+
+export function getWorklist(user, id) {
+  // /users/admin/worklists/tes5/subjects/?annotationCount=true
+  return http.get(
+    apiUrl +
+      "/users/" +
+      user +
+      "/worklists/" +
+      id +
+      "/subjects/?annotationCount=true"
+  );
+}

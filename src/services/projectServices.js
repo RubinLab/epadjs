@@ -77,3 +77,9 @@ export function uploadFile(formData, config, projectID, username) {
     return http.post(url, formData, config);
   }
 }
+
+export function getProject(projectID) {
+  return http.get(apiUrl + "/projects/" + projectID);
+}
+
+// http://epad-dev8.stanford.edu:8080/epad/v2/projects/test1id

@@ -6,8 +6,6 @@ import { getProjects } from "../../services/projectServices";
 import { getWorklists } from "../../services/worklistServices";
 import { getPacs } from "../../services/pacsServices";
 import { FiZoomIn } from "react-icons/fi";
-import AnnotationsList from "./../annotationsList/annotationDock/annotationList";
-
 import "./w2.css";
 
 class Sidebar extends Component {
@@ -15,6 +13,7 @@ class Sidebar extends Component {
     super(props);
     this.handleClose = this.handleClose.bind(this);
     this.handleOpen = this.handleOpen.bind(this);
+    this.handleRoute = this.handleRoute.bind(this);
 
     this.state = {
       projects: [],
@@ -23,7 +22,8 @@ class Sidebar extends Component {
       width: "200px",
       marginLeft: "200px",
       buttonDisplay: "none",
-      open: true
+      open: true,
+      index: 0
     };
   }
 
@@ -68,8 +68,14 @@ class Sidebar extends Component {
     });
   }
 
-  handleRoute(projectId) {
-    this.props.history.push(`/search/${projectId}`);
+  handleRoute(type, id) {
+    if (type === "project") {
+      this.props.history.push(`/search/${id}`);
+      this.setState({ index: 0 });
+    } else if (type === "worklist") {
+      this.props.history.push(`/worklist/${id}`);
+      this.setState({ index: 1 });
+    }
   }
 
   render() {
@@ -80,13 +86,16 @@ class Sidebar extends Component {
           className="sidenav"
           style={{ width: this.state.width }}
         >
-          <Tabs className="theme-default">
+          <Tabs
+            className="theme-default"
+            settings={{ index: this.state.index }}
+          >
             <Nav>
               <div>
                 <FiZoomIn />
               </div>
               <div>Worklist</div>
-              <div>Connections</div>
+              {/* <div>Connections</div> */}
               <div>Users</div>
             </Nav>
             <Content>
@@ -105,11 +114,11 @@ class Sidebar extends Component {
                       </td>
                     </tr>
                     {this.state.projects.map(project => (
-                      <tr key={project.id}>
+                      <tr key={project.id} className="sidebar-row">
                         <td>
                           <p
                             onClick={() => {
-                              this.handleRoute(project.id);
+                              this.handleRoute("project", project.id);
                             }}
                           >
                             {project.name}
@@ -139,7 +148,8 @@ class Sidebar extends Component {
                         <td>
                           <p
                             onClick={() => {
-                              alert("clicked");
+                              console.log(worklist);
+                              this.handleRoute("worklist", worklist.workListID);
                             }}
                           >
                             {worklist.name}

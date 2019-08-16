@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { toast } from "react-toastify";
 import Subjects from "./subjects";
 import Toolbar from "./toolbar";
 import ProjectModal from "../annotationsList/selectSerieModal";
@@ -33,7 +34,6 @@ import { MAX_PORT } from "../../constants";
 import DownloadSelection from "./annotationDownloadModal";
 import "./searchView.css";
 import UploadModal from "./uploadModal";
-import { toast } from "react-toastify";
 import { isLite } from "../../config";
 import { getSubjects } from "../../services/subjectServices";
 import DeleteAlert from "./deleteConfirmationModal";
