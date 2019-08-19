@@ -41,6 +41,10 @@ export async function login(username, password, keyCloakToken) {
 export function logout() {
   sessionStorage.removeItem("token");
   sessionStorage.removeItem("username");
+  sessionStorage.removeItem("displayName");
+  if (isLite) {
+    sessionStorage.removeItem("header");
+  }
 }
 
 export function getCurrentUser() {

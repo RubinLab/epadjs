@@ -36,3 +36,30 @@ export function deleteStudy(study) {
     return http.delete(url);
   }
 }
+
+export function getStudyAims(subjectID, studyUID) {
+  if (isLite) {
+    return http.get(
+      apiUrl +
+        "/projects/lite/subjects/" +
+        subjectID +
+        "/studies/" +
+        studyUID +
+        "/aims"
+    );
+  }
+}
+
+export function saveStudy(projectID, subjectID, abbreviation, description) {
+  const url =
+    apiUrl +
+    "/projects/" +
+    projectID +
+    "/subjects/" +
+    subjectID +
+    "/studies/" +
+    abbreviation +
+    "?description=" +
+    description;
+  return http.put(url);
+}

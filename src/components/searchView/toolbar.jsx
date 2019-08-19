@@ -1,83 +1,175 @@
 import React from "react";
-import { FaEye, FaDownload, FaUpload, FaTrashAlt } from "react-icons/fa";
-import { css, jsx } from "@emotion/core";
-import { TiPencil } from "react-icons/ti";
+import {
+  FaEye,
+  FaDownload,
+  FaUpload,
+  FaTrashAlt,
+  FaPlusCircle,
+  FaLevelDownAlt,
+  FaLevelUpAlt
+} from "react-icons/fa";
+import { FiMinimize2 } from "react-icons/fi";
 import ReactTooltip from "react-tooltip";
-import Spinner from "../common/barLoader";
 import { BarLoader } from "react-spinners";
+import { isLite } from "../../config";
 
 const toolBar = props => {
   return (
     <div className="searchView-toolbar">
-      <div className="searchView-toolbar__icon" onClick={props.onView}>
-        <div>
-          <FaEye style={{ fontSize: "1.2rem" }} data-tip data-for="view-icon" />
+      <div className="searchView-toolbar__group">
+        <div className="searchView-toolbar__icon" onClick={props.onView}>
+          <div>
+            <FaEye
+              style={{ fontSize: "1.2rem" }}
+              data-tip
+              data-for="view-icon"
+            />
+          </div>
+          <ReactTooltip
+            id="view-icon"
+            place="bottom"
+            type="info"
+            delayShow={1500}
+          >
+            <span>Open selections</span>
+          </ReactTooltip>
         </div>
-        <ReactTooltip
-          id="view-icon"
-          place="bottom"
-          type="info"
-          delayShow={1500}
-        >
-          <span>Open selections</span>
-        </ReactTooltip>
-      </div>
-      <div className="searchView-toolbar__icon" onClick={props.onDownload}>
-        <div>
-          <FaDownload
-            style={{ fontSize: "1.2rem" }}
-            data-tip
-            data-for="download-icon"
-          />
+        <div className="searchView-toolbar__icon" onClick={props.onDownload}>
+          <div>
+            <FaDownload
+              style={{ fontSize: "1.2rem" }}
+              data-tip
+              data-for="download-icon"
+            />
+          </div>
+          <ReactTooltip
+            id="download-icon"
+            place="bottom"
+            type="info"
+            delayShow={1500}
+          >
+            <span>Download selections</span>
+          </ReactTooltip>
         </div>
-        <ReactTooltip
-          id="download-icon"
-          place="bottom"
-          type="info"
-          delayShow={1500}
-        >
-          <span>Download selections</span>
-        </ReactTooltip>
-      </div>
-      <div className="searchView-toolbar__icon" onClick={props.onUpload}>
-        <div>
-          <FaUpload
-            style={{ fontSize: "1.2rem" }}
-            data-tip
-            data-for="upload-icon"
-          />
+        <div className="searchView-toolbar__icon" onClick={props.onUpload}>
+          <div>
+            <FaUpload
+              style={{ fontSize: "1.2rem" }}
+              data-tip
+              data-for="upload-icon"
+            />
+          </div>
+          <ReactTooltip
+            id="upload-icon"
+            place="bottom"
+            type="info"
+            delayShow={1500}
+          >
+            <span>Upload file</span>
+          </ReactTooltip>
         </div>
-        <ReactTooltip
-          id="upload-icon"
-          place="bottom"
-          type="info"
-          delayShow={1500}
+        <div
+          onClick={props.onDelete}
+          className={
+            props.showDelete ? "searchView-toolbar__icon" : "hide-delete"
+          }
         >
-          <span>Upload file</span>
-        </ReactTooltip>
-      </div>
-      <div
-        onClick={props.onDelete}
-        className={
-          props.showDelete ? "searchView-toolbar__icon" : "hide-delete"
-        }
-      >
-        <div>
-          <FaTrashAlt
-            style={{ fontSize: "1.2rem" }}
-            data-tip
-            data-for="delete-icon"
-          />
+          <div>
+            <FaTrashAlt
+              style={{ fontSize: "1.2rem" }}
+              data-tip
+              data-for="delete-icon"
+            />
+          </div>
+          <ReactTooltip
+            id="delete-icon"
+            place="bottom"
+            type="info"
+            delayShow={1500}
+          >
+            <span>Delete selection</span>
+          </ReactTooltip>
         </div>
-        <ReactTooltip
-          id="delete-icon"
-          place="bottom"
-          type="info"
-          delayShow={1500}
-        >
-          <span>Delete selection</span>
-        </ReactTooltip>
       </div>
+      {!isLite && (
+        <div className="searchView-toolbar__group">
+          <div className="searchView-toolbar__icon" onClick={props.onExpand}>
+            <div>
+              <FaLevelDownAlt
+                style={{ fontSize: "1.2rem" }}
+                data-tip
+                data-for="forward-icon"
+              />
+            </div>
+            <ReactTooltip
+              id="forward-icon"
+              place="bottom"
+              type="info"
+              delayShow={1500}
+            >
+              <span>Expand to Next Level</span>
+            </ReactTooltip>
+          </div>
+          <div className="searchView-toolbar__icon" onClick={props.onShrink}>
+            <div>
+              <FaLevelUpAlt
+                style={{ fontSize: "1.2rem" }}
+                data-tip
+                data-for="back-icon"
+              />
+            </div>
+            <ReactTooltip
+              id="back-icon"
+              place="bottom"
+              type="info"
+              delayShow={1500}
+            >
+              <span>Close One Level</span>
+            </ReactTooltip>
+          </div>
+          <div className="searchView-toolbar__icon" onClick={props.onCloseAll}>
+            <div>
+              <FiMinimize2
+                style={{ fontSize: "1.5rem", strokeWidth: "3px" }}
+                data-tip
+                data-for="minimize-icon"
+              />
+            </div>
+            <ReactTooltip
+              id="minimize-icon"
+              place="bottom"
+              type="info"
+              delayShow={1500}
+            >
+              <span>Close All Levels</span>
+            </ReactTooltip>
+          </div>
+        </div>
+      )}
+      {props.project && !isLite && (
+        <div className="searchView-toolbar__group">
+          <div
+            className="searchView-toolbar__icon new-icon"
+            onClick={props.onNew}
+          >
+            <div>
+              <FaPlusCircle
+                style={{ fontSize: "1.2rem" }}
+                data-tip
+                data-for="new-icon"
+              />
+            </div>
+            <ReactTooltip
+              id="new-icon"
+              place="bottom"
+              type="info"
+              delayShow={1500}
+            >
+              <span>New</span>
+            </ReactTooltip>
+          </div>
+        </div>
+      )}
       {/* <div className="searchView-toolbar__icon">
         <div>
           <TiPencil

@@ -70,7 +70,6 @@ class Annotations extends React.Component {
         ResultSet: { Result: annotations }
       }
     } = await getSummaryAnnotations(projectID);
-    console.log(annotations);
     if (isLite) {
       for (let ann of annotations) {
         ann.date = ann.date + "";

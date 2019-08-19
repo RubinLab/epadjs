@@ -436,6 +436,7 @@ class Projects extends React.Component {
 
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
+    console.log(this.state);
     return (
       <div className="projects menu-display" id="projects">
         <ToolBar

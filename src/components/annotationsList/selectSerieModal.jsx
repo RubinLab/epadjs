@@ -1,21 +1,17 @@
 import React from "react";
 import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import {
   clearGrid,
-  // getPatient,
   getWholeData,
   getSingleSerie,
   clearSelection,
-  startLoading,
-  loadCompleted,
-  addToGrid,
-  updatePatient
+  addToGrid
 } from "./action";
-import SerieSelect from "./containers/serieSelection";
 import SelectionItem from "./containers/selectionItem";
-import { FaRegCheckCircle, FaRegCheckSquare } from "react-icons/fa";
+import { FaRegCheckSquare } from "react-icons/fa";
 import { getSeries } from "../../services/seriesServices";
 import { MAX_PORT } from "../../constants";
 
@@ -111,6 +107,7 @@ class selectSerieModal extends React.Component {
         }
       }
     }
+    this.props.history.push("/display");
     this.handleCancel();
   };
 
@@ -146,7 +143,15 @@ class selectSerieModal extends React.Component {
     });
     for (let i = 0; i < series.length; i++) {
       let innerList = [];
-      let title = series[i][0].bodyPart || series[i][0].studyDescription;
+      let title = this.props.studyName
+        ? this.props.studyName
+        : series[i][0].bodyPart || series[i][0].studyDescription;
+      if (!title) {
+        if (this.props.selectedStudies[series[i][0].studyUID]) {
+          title = this.props.selectedStudies[series[i][0].studyUID]
+            .studyDescription;
+        }
+      }
       title = !title ? "Unnamed Study" : title;
       for (let k = 0; k < series[i].length; k++) {
         let alreadyOpen = openSeriesUIDList.includes(series[i][k].seriesUID);
@@ -184,7 +189,6 @@ class selectSerieModal extends React.Component {
 
   render = () => {
     const list = this.renderSelection();
-
     return (
       <Modal.Dialog dialogClassName="alert-selectSerie">
         <Modal.Header>
@@ -225,4 +229,4 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps)(selectSerieModal);
+export default withRouter(connect(mapStateToProps)(selectSerieModal));

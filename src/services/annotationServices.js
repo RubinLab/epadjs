@@ -35,7 +35,6 @@ export function getAnnotations(series, opts = {}) {
 }
 
 export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
-  console.log(projectId, subjectId, studyId, seriesId);
   if (isLite)
     return http.get(
       apiUrl +
@@ -44,8 +43,7 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
         "/studies/" +
         studyId +
         "/series/" +
-        seriesId +
-        "/aims?format=json"
+        seriesId
     );
   else
     return http.get(
@@ -60,6 +58,10 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
         seriesId +
         "/aims/?format=json"
     );
+}
+
+export function getAnnotations2() {
+  return http.get(apiUrl + "/projects/lite/aims");
 }
 
 export function downloadAnnotations(optionObj, aimIDlist, selection) {

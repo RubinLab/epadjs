@@ -1,14 +1,13 @@
 import React from "react";
 import ResizeAndDrag from "./resizeAndDrag";
 import Header from "./managementHeader";
-import Users from "./../users";
+import Users from "../users";
 import Projects from "./../projects/projects";
 import WorkLists from "./../worklists/workLists";
 import Annotations from "./../annotations/annotations";
 
 const customModal = ({ selection, handleCloseModal, children }) => {
   const selectDisplay = () => {
-    console.log("selection here", selection);
     switch (selection) {
       case "Users":
         return <Users selection={selection} onClose={handleCloseModal} />;

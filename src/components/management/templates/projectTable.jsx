@@ -9,8 +9,6 @@ const projectTable = ({ projectList, onSubmit, onCancel, error }) => {
   // set enable all  selected = item.enable and default selected = item.default;
   // else if item.project
 
-  console.log(projectList);
-
   return (
     <Modal.Dialog dialogClassName="projectTable-modal">
       <Modal.Body id="proModal-content">

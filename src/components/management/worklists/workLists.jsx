@@ -192,7 +192,6 @@ class WorkList extends React.Component {
         accessor: "",
         width: 30,
         Cell: ({ original }) => {
-          console.log(original);
           return (
             <input
               type="checkbox"
@@ -307,7 +306,6 @@ class WorkList extends React.Component {
   };
 
   render = () => {
-    console.log(this.state);
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     return (
       <div className="worklist menu-display" id="worklist">

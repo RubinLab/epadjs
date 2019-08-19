@@ -23,7 +23,6 @@ class AnnnotationDownloadModal extends React.Component {
         ? this.props.selectedAnnotations
         : this.props.selected;
     const aimList = Object.keys(annsToDownload);
-    console.log(aimList);
     this.props.updateStatus();
     downloadAnnotations(optionObj, aimList)
       .then(result => {
