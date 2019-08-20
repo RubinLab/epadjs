@@ -254,3 +254,33 @@ body {
 .ReactTable.__table .rt-thead.-header .rt-th {
   text-align: left;
 }
+
+.sidebar-row p {
+  padding: 0.3em;
+  cursor: pointer;
+}
+
+.sidebar-row.__bold {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.badge.badge-secondary.worklist {
+  margin-left: 0.5rem;
+}
+
+.worklist-page .__table .--commentCont {
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.worklist-page .__table .--commentInput {
+  width: 100%;
+  height: 100%;
+}
+
+.worklist-page .__table .--commentField {
+  width: 100%;
+  height: 100%;
+}

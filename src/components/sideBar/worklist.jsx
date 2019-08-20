@@ -1,11 +1,11 @@
 import React from "react";
 import Table from "react-table";
-import { toast } from "react-toastify";
 import { FaRegTrashAlt, FaRegEye } from "react-icons/fa";
-import { Link } from "react-router-dom";
 import { getWorklist, deleteWorklist } from "./../../services/worklistServices";
 import { getProject } from "./../../services/projectServices";
 import DeleteAlert from "./../management/common/alertDeletionModal";
+import EditField from "../management/users/editField";
+import editField from "../management/users/editField";
 
 const messages = {
   deleteSingle: "Delete the worklist? This cannot be undone.",
@@ -17,14 +17,19 @@ class WorkList extends React.Component {
     worklists: [],
     singleDeleteData: {},
     deleteSingleClicked: false,
-    hasAddClicked: false,
-    deleteAllClicked: false,
-    selectAll: 0,
-    selected: {}
+    commentClicked: false,
+    clickedIndex: null
   };
 
   componentDidMount = async () => {
     this.getWorkListData();
+    document.addEventListener("mousedown", this.handleClickOutside);
+    document.addEventListener("keydown", this.escapeFieldInput);
+  };
+
+  componentWillUnmount = () => {
+    document.removeEventListener("mousedown", this.handleClickOutside);
+    document.removeEventListener("keydown", this.escapeFieldInput);
   };
 
   componentDidUpdate = prevProps => {
@@ -49,38 +54,12 @@ class WorkList extends React.Component {
     this.setState({ worklists });
   };
 
-  toggleRow = async (id, name) => {
-    let newSelected = Object.assign({}, this.state.selected);
-    if (newSelected[id]) {
-      newSelected[id] = false;
-      let values = Object.values(newSelected);
-      if (values.length === 0) {
-        this.setState({
-          selectAll: 0
-        });
-      }
-    } else {
-      newSelected[id] = name;
-      await this.setState({
-        selectAll: 2
-      });
-    }
-    this.setState({ selected: newSelected });
+  handleComment = index => {
+    this.setState(state => ({
+      commentClicked: !state.commentClicked,
+      clickedIndex: index
+    }));
   };
-
-  toggleSelectAll() {
-    let newSelected = {};
-    if (this.state.selectAll === 0) {
-      this.state.worklists.forEach(project => {
-        newSelected[project.workListID] = project.username;
-      });
-    }
-
-    this.setState({
-      selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
-    });
-  }
 
   handleCancel = () => {
     this.setState({
@@ -90,26 +69,8 @@ class WorkList extends React.Component {
       user: "",
       description: "",
       error: "",
-      deleteSingleClicked: false,
-      deleteAllClicked: false
+      deleteSingleClicked: false
     });
-  };
-
-  deleteAllSelected = () => {
-    let newSelected = Object.assign({}, this.state.selected);
-    const promiseArr = [];
-    for (let project in newSelected) {
-      promiseArr.push(deleteWorklist(newSelected[project], project));
-    }
-    Promise.all(promiseArr)
-      .then(() => {
-        this.getWorkListData();
-      })
-      .catch(error => {
-        toast.error(error.response.data.message, { autoClose: false });
-        this.getWorkListData();
-      });
-    this.handleCancel();
   };
 
   deleteSingleWorklist = async () => {
@@ -133,19 +94,6 @@ class WorkList extends React.Component {
     }
   };
 
-  handleDeleteAll = () => {
-    this.setState({ deleteAllClicked: true });
-  };
-
-  handleAddWorklist = () => {
-    this.setState({ hasAddClicked: true });
-  };
-
-  handleFormInput = e => {
-    const { name, value } = e.target;
-    this.setState({ [name]: value });
-  };
-
   handleSingleDelete = (name, id) => {
     this.setState({
       deleteSingleClicked: true,
@@ -153,43 +101,24 @@ class WorkList extends React.Component {
     });
   };
 
+  setWrapperRef = (node, id) => {
+    this.wrapperRef = node;
+  };
+
+  handleClickOutside = event => {
+    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
+      this.handleComment(null);
+    }
+  };
+
+  escapeFieldInput = e => {
+    if (e.key === "Escape") {
+      this.handleComment(null);
+    }
+  };
+
   defineColumns = () => {
     return [
-      {
-        id: "checkbox",
-        accessor: "",
-        width: 30,
-        Cell: ({ original }) => {
-          return (
-            <input
-              type="checkbox"
-              className="checkbox-cell"
-              checked={this.state.selected[original.workListID]}
-              onChange={() =>
-                this.toggleRow(original.workListID, original.username)
-              }
-            />
-          );
-        },
-        Header: x => {
-          return (
-            <input
-              type="checkbox"
-              className="checkbox-cell"
-              checked={this.state.selectAll === 1}
-              ref={input => {
-                if (input) {
-                  input.indeterminate = this.state.selectAll === 2;
-                }
-              }}
-              onChange={() => this.toggleSelectAll()}
-            />
-          );
-        },
-        sortable: false,
-        minResizeWidth: 20,
-        width: 45
-      },
       {
         Header: "Open",
         minResizeWidth: 20,
@@ -201,15 +130,22 @@ class WorkList extends React.Component {
         )
       },
       {
+        Header: "Status",
+        minResizeWidth: 20,
+        width: 50,
+        Cell: original => <div>20%</div>
+      },
+      {
         Header: "Subject",
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
-          const subjectName = this.clearCarets(
-            original.row.checkbox.subjectName
+          let subjectName = this.clearCarets(
+            original.row._original.subjectName
           );
+          subjectName = subjectName ? subjectName : "Unnamed Subject";
           return <div>{subjectName}</div>;
         }
       },
@@ -218,16 +154,36 @@ class WorkList extends React.Component {
         accessor: "projectName",
         sortable: true,
         resizable: true,
-        minWidth: 50
-        // Cell: original => <div>{original.row.checkbox.projectName}</div>
+        minWidth: 40,
+        Cell: original => {
+          let projectName = this.clearCarets(
+            original.row._original.projectName
+          );
+          projectName = projectName ? projectName : "Unnamed Subject";
+          return <div>{original.row._original.projectName}</div>;
+        }
       },
       {
         Header: "Comment",
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
-        // Cell: original => <div>{original.row.checkbox.description || ""}</div>
+        minWidth: 50,
+        Cell: original => {
+          console.log(original.row._original);
+          console.log(original);
+          const { commentClicked, clickedIndex } = this.state;
+          return commentClicked && clickedIndex === original.index ? (
+            <div ref={this.setWrapperRef} className="--commentInput">
+              <EditField />
+            </div>
+          ) : (
+            <div
+              className="--commentCont"
+              onClick={() => this.handleComment(original.index)}
+            />
+          );
+        }
       },
       {
         Header: "",
@@ -238,8 +194,8 @@ class WorkList extends React.Component {
           <div
             onClick={() =>
               this.handleSingleDelete(
-                original.row.checkbox.username,
-                original.row.checkbox.workListID
+                original.row._original.username,
+                original.row._original.workListID
               )
             }
           >
@@ -251,14 +207,15 @@ class WorkList extends React.Component {
   };
 
   render = () => {
-    const checkboxSelected = Object.values(this.state.selected).length > 0;
     return (
       <div className="worklist-page">
-        <div>{this.state.worklists.length}</div>
         <Table
           className="__table"
           data={this.state.worklists}
           columns={this.defineColumns()}
+          pageSize={this.state.worklists.length}
+          showPagination={false}
+          NoDataComponent={() => null}
         />
         {this.state.deleteSingleClicked && (
           <DeleteAlert

@@ -362,8 +362,7 @@ class Users extends React.Component {
   };
 
   render = () => {
-    const pageSize =
-      this.state.data.length < 10 ? 10 : this.state.data.length >= 40 ? 50 : 20;
+    console.log();
     return (
       <>
         <div className="users menu-display">
@@ -372,8 +371,6 @@ class Users extends React.Component {
             className="pro-table"
             data={this.state.data}
             columns={this.defineColumns()}
-            pageSizeOptions={[10, 20, 50]}
-            defaultPageSize={pageSize}
           />
           {this.state.hasEditClicked && (
             <EditUsers

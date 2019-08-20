@@ -6,6 +6,7 @@ const editField = props => {
       <input
         onMouseDown={e => e.stopPropagation()}
         type="text"
+        className="--commentField"
         //   className="edit-user__modal--input"
         style={{ color: "black" }}
         name={props.name}

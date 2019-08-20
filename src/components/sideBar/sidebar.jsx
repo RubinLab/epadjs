@@ -143,20 +143,32 @@ class Sidebar extends Component {
                         </button>
                       </td>
                     </tr>
-                    {this.state.worklists.map(worklist => (
-                      <tr key={worklist.workListID}>
-                        <td>
-                          <p
-                            onClick={() => {
-                              console.log(worklist);
-                              this.handleRoute("worklist", worklist.workListID);
-                            }}
-                          >
-                            {worklist.name}
-                          </p>
-                        </td>
-                      </tr>
-                    ))}
+                    {this.state.worklists.map(worklist => {
+                      const className = worklist.projectIDs.length
+                        ? "sidebar-row __bold"
+                        : "sidebar-row";
+                      return (
+                        <tr key={worklist.workListID} className={className}>
+                          <td>
+                            <p
+                              onClick={() => {
+                                this.handleRoute(
+                                  "worklist",
+                                  worklist.workListID
+                                );
+                              }}
+                            >
+                              {worklist.name}
+                              {worklist.projectIDs.length ? (
+                                <span className="badge badge-secondary worklist">
+                                  {worklist.projectIDs.length}
+                                </span>
+                              ) : null}
+                            </p>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
