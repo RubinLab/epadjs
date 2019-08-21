@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
-import cornerstoneTools from "cornerstone-tools";
 import Toolbar from "./toolbar";
 import { getImageIds, getWadoImagePath } from "../../services/seriesServices";
 import { getAnnotations2 } from "../../services/annotationServices";
@@ -20,6 +19,8 @@ import { freehand } from "./Freehand";
 import { line } from "./Line";
 import { probe } from "./Probe";
 import { circle } from "./Circle";
+
+// import FreehandRoi3DTool from "ohif-segmentation-plugin/tools/FreehandRoi3DTool.js";
 
 const tools = [
   { name: "Wwwc", mouseButtonMasks: [1] },
@@ -58,17 +59,16 @@ const tools = [
   { name: "Rotate" },
   { name: "WwwcRegion" },
   { name: "Probe" },
-  { name: "FreehandRoi", mouseButtonMasks: [1] },
+  // { name: "FreehandRoi", mouseButtonMasks: [1] },
   { name: "Eraser" },
   { name: "Bidirectional", mouseButtonMasks: [1] },
   { name: "Brush" },
-  { name: "FreehandRoiSculptor" },
+  // { name: "FreehandRoiSculptor" },
   { name: "StackScroll", mouseButtonMasks: [1] },
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
   { name: "StackScrollMouseWheel" },
   { name: "StackScrollMultiTouch" }
-  // { name: "FreehandRoi3D" }
 ];
 
 const mapStateToProps = state => {
@@ -86,7 +86,7 @@ class DisplayView extends Component {
   constructor(props) {
     super(props);
     // this.cornerstone = this.props.cornerstone;
-    // this.cornerstoneTools = this.props.cornerstoneTools;
+    this.cornerstoneTools = this.props.cornerstoneTools;
     this.state = {
       width: "100%",
       height: "calc(100% - 60px)",
@@ -107,7 +107,7 @@ class DisplayView extends Component {
       "annotationSelected",
       this.handleAnnotationSelected
     );
-    console.log("new tools", cornerstoneTools);
+    console.log("new tools", this.props.cornerstoneTools);
   }
 
   async componentDidUpdate(prevProps) {

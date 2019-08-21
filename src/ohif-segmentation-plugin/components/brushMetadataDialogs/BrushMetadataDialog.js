@@ -1,16 +1,16 @@
-import React from 'react';
-import GeneralAnatomyList from '../../../../lib/GeneralAnatomylist.js';
-import cornerstone from 'cornerstone';
-import cornerstoneTools from 'cornerstone-tools';
+import React from "react";
+import GeneralAnatomyList from "../../../../lib/GeneralAnatomylist.js";
+import cornerstone from "cornerstone";
+import cornerstoneTools from "../'cornerstone-tools'";
 
 const brushModule = cornerstoneTools.store.modules.brush;
 const categories = GeneralAnatomyList.SegmentationCodes.Category;
 
-const validIcon = 'fa fa-check fa-2x';
-const invalidIcon = 'fa fa-times fa-2x';
+const validIcon = "fa fa-check fa-2x";
+const invalidIcon = "fa fa-times fa-2x";
 
-const validColor = 'limegreen';
-const invalidColor = 'firebrick';
+const validColor = "limegreen";
+const invalidColor = "firebrick";
 
 /**
  * @class BrushMetadataDialog - A component that allows the user to input
@@ -20,8 +20,8 @@ export default class BrushMetadataDialog extends React.Component {
   constructor(props = {}) {
     super(props);
 
-    let categoryUID = 'T-D0050';
-    let typeUID = 'T-D0050';
+    let categoryUID = "T-D0050";
+    let typeUID = "T-D0050";
     let modifierUID = null;
 
     if (this.props.metadata) {
@@ -32,11 +32,16 @@ export default class BrushMetadataDialog extends React.Component {
       categoryUID = metadata.SegmentedPropertyCategoryCodeSequence.CodeValue;
       typeUID = metadata.SegmentedPropertyTypeCodeSequence.CodeValue;
 
-      if (metadata.SegmentedPropertyTypeCodeSequence.SegmentedPropertyTypeModifierCodeSequence) {
-        modifierUID = metadata.SegmentedPropertyTypeCodeSequence.SegmentedPropertyTypeModifierCodeSequence.CodeValue;
+      if (
+        metadata.SegmentedPropertyTypeCodeSequence
+          .SegmentedPropertyTypeModifierCodeSequence
+      ) {
+        modifierUID =
+          metadata.SegmentedPropertyTypeCodeSequence
+            .SegmentedPropertyTypeModifierCodeSequence.CodeValue;
       }
     } else {
-      this._maskName = '';
+      this._maskName = "";
     }
 
     this.state = {
@@ -90,7 +95,9 @@ export default class BrushMetadataDialog extends React.Component {
   onCategoryChange(evt) {
     const categoryUID = evt.target.value;
 
-    const category = categories.find(categoriesI => categoriesI.CodeValue === categoryUID);
+    const category = categories.find(
+      categoriesI => categoriesI.CodeValue === categoryUID
+    );
     const firstType = category.Type[0];
 
     const typeUID = firstType.CodeValue;
@@ -114,7 +121,9 @@ export default class BrushMetadataDialog extends React.Component {
     const { categoryUID } = this.state;
     const typeUID = evt.target.value;
 
-    const category = categories.find(categoriesI => categoriesI.CodeValue === categoryUID);
+    const category = categories.find(
+      categoriesI => categoriesI.CodeValue === categoryUID
+    );
 
     const types = category.Type;
     const type = types.find(typesI => typesI.CodeValue === typeUID);
@@ -177,7 +186,7 @@ export default class BrushMetadataDialog extends React.Component {
    * @returns {null}
    */
   _closeDialog() {
-    const dialog = document.getElementById('brushMetadataDialog');
+    const dialog = document.getElementById("brushMetadataDialog");
 
     dialog.close();
   }
@@ -219,10 +228,10 @@ export default class BrushMetadataDialog extends React.Component {
    */
   _confirmButtonClasses() {
     if (this._isValidInput()) {
-      return 'brush-metadata-new-button btn btn-sm btn-primary';
+      return "brush-metadata-new-button btn btn-sm btn-primary";
     }
 
-    return 'brush-metadata-new-button-invalid btn btn-sm btn-primary';
+    return "brush-metadata-new-button-invalid btn btn-sm btn-primary";
   }
 
   /**
@@ -240,7 +249,9 @@ export default class BrushMetadataDialog extends React.Component {
     }
     const activeElement = activeEnabledElement.element;
 
-    const colormap = brushModule.getters.activeCornerstoneColorMap(activeElement);
+    const colormap = brushModule.getters.activeCornerstoneColorMap(
+      activeElement
+    );
 
     if (!colormap) {
       return;
@@ -264,7 +275,11 @@ export default class BrushMetadataDialog extends React.Component {
     const categorySelect = (
       <>
         <label>Category</label>
-        <select className="form-themed form-control" onChange={this.onCategoryChange} value={categoryUID}>
+        <select
+          className="form-themed form-control"
+          onChange={this.onCategoryChange}
+          value={categoryUID}
+        >
           {categories.map(category => (
             <option key={category.CodeValue} value={category.CodeValue}>
               {category.CodeMeaning}
@@ -274,13 +289,19 @@ export default class BrushMetadataDialog extends React.Component {
       </>
     );
 
-    const category = categories.find(categoriesI => categoriesI.CodeValue === categoryUID);
+    const category = categories.find(
+      categoriesI => categoriesI.CodeValue === categoryUID
+    );
     const types = category.Type;
 
     const typeSelect = (
       <>
         <label>Type</label>
-        <select className="form-themed form-control" onChange={this.onTypeChange} value={typeUID}>
+        <select
+          className="form-themed form-control"
+          onChange={this.onTypeChange}
+          value={typeUID}
+        >
           {types.map(type => (
             <option key={type.CodeValue} value={type.CodeValue}>
               {type.CodeMeaning}
@@ -300,7 +321,11 @@ export default class BrushMetadataDialog extends React.Component {
       modiferSelect = (
         <>
           <label>Modifier</label>
-          <select className="form-themed form-control" onChange={this.onModifierChange} value={modifierUID}>
+          <select
+            className="form-themed form-control"
+            onChange={this.onModifierChange}
+            value={modifierUID}
+          >
             {modifiers.map(modifier => (
               <option key={modifier.CodeValue} value={modifier.CodeValue}>
                 {modifier.CodeMeaning}
@@ -314,8 +339,13 @@ export default class BrushMetadataDialog extends React.Component {
     return (
       <div>
         <div className="brush-metadata-horizontal-box">
-          <h3 style={{ border: `2px solid ${this._segmentColor()}` }}>{segmentIndexText}</h3>
-          <a className="btn btn-sm btn-secondary" onClick={this.onCancelButtonClick}>
+          <h3 style={{ border: `2px solid ${this._segmentColor()}` }}>
+            {segmentIndexText}
+          </h3>
+          <a
+            className="btn btn-sm btn-secondary"
+            onClick={this.onCancelButtonClick}
+          >
             <i className="fa fa-times-circle fa-2x" />
           </a>
         </div>
@@ -336,7 +366,10 @@ export default class BrushMetadataDialog extends React.Component {
               placeholder="Enter Segmentation Label.."
               tabIndex="1"
             />
-            <i className={validLabelIndicator.iconClasses} style={{ color: validLabelIndicator.color }} />
+            <i
+              className={validLabelIndicator.iconClasses}
+              style={{ color: validLabelIndicator.color }}
+            />
           </div>
 
           <div>
@@ -347,7 +380,10 @@ export default class BrushMetadataDialog extends React.Component {
         </div>
 
         <hr />
-        <a className={this._confirmButtonClasses()} onClick={this.onConfirmButtonClick}>
+        <a
+          className={this._confirmButtonClasses()}
+          onClick={this.onConfirmButtonClick}
+        >
           <i className="fa fa fa-check-circle fa-2x" />
         </a>
       </div>

@@ -26,17 +26,26 @@ export default function extendBrushModule(brushModule, config) {
     const gates = brushState.gates;
 
     const gateIndex = gates.findIndex(element => {
-      return element.name === 'custom';
+      return element.name === "custom";
     });
 
     return brushState.gates[gateIndex].range;
+  };
+
+  getters.activeGate = () => {
+    return brushState.activeGate;
+  };
+
+  setters.activeGate = gateName => {
+    console.log("GATE NAME", gateName);
+    brushState.activeGate = gateName;
   };
 
   setters.customGateRange = (min, max) => {
     const gates = brushState.gates;
 
     const gateIndex = gates.findIndex(element => {
-      return element.name === 'custom';
+      return element.name === "custom";
     });
 
     const customGateRange = brushState.gates[gateIndex].range;
@@ -51,7 +60,10 @@ export default function extendBrushModule(brushModule, config) {
   };
 
   getters.importMetadata = seriesInstanceUid => {
-    if (brushModule.state.import && brushModule.state.import[seriesInstanceUid]) {
+    if (
+      brushModule.state.import &&
+      brushModule.state.import[seriesInstanceUid]
+    ) {
       return brushModule.state.import[seriesInstanceUid];
     }
 

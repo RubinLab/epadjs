@@ -1,7 +1,7 @@
-import getActiveBrushToolsForElement from './util/getActiveBrushToolsForElement.js';
-import getActiveViewportEnabledElement from './util/getActiveViewportEnabledElement.js';
-import getActiveFreehandToolsForElement from './util/getActiveFreehandToolsForElement.js';
-import { store } from 'cornerstone-tools';
+import getActiveBrushToolsForElement from "./util/getActiveBrushToolsForElement.js";
+import getActiveViewportEnabledElement from "./util/getActiveViewportEnabledElement.js";
+import getActiveFreehandToolsForElement from "./util/getActiveFreehandToolsForElement.js";
+import { store } from "../cornerstone-tools";
 
 const brushModule = store.modules.brush;
 
@@ -65,11 +65,11 @@ const actions = {
 const definitions = {
   nextSegmentForActiveViewport: {
     commandFn: actions.nextSegmentForActiveViewport,
-    storeContexts: ['viewports']
+    storeContexts: ["viewports"]
   },
   previousSegmentForActiveViewport: {
     commandFn: actions.previousSegmentForActiveViewport,
-    storeContexts: ['viewports']
+    storeContexts: ["viewports"]
   },
   increaseBrushSize: {
     commandFn: actions.increaseBrushSize
@@ -79,12 +79,12 @@ const definitions = {
   },
   cancelFreehandDrawing: {
     commandFn: actions.cancelFreehandDrawing,
-    storeContexts: ['viewports']
+    storeContexts: ["viewports"]
   }
 };
 
 export default {
   actions,
   definitions,
-  defaultContext: 'ACTIVE_VIEWPORT::CORNERSTONE'
+  defaultContext: "ACTIVE_VIEWPORT::CORNERSTONE"
 };

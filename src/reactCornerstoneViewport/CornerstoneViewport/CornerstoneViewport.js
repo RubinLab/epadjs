@@ -1,19 +1,20 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import debounce from 'lodash.debounce';
-import ReactResizeDetector from 'react-resize-detector';
-import ImageScrollbar from '../ImageScrollbar/ImageScrollbar.js';
-import ViewportOverlay from '../ViewportOverlay/ViewportOverlay.js';
-import LoadingIndicator from '../LoadingIndicator/LoadingIndicator.js';
-import ViewportOrientationMarkers from '../ViewportOrientationMarkers/ViewportOrientationMarkers.js';
-import cornerstone from 'cornerstone-core';
-import * as cornerstoneTools from "../../cornerstoneTools";
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import debounce from "lodash.debounce";
+import ReactResizeDetector from "react-resize-detector";
+import ImageScrollbar from "../ImageScrollbar/ImageScrollbar.js";
+import ViewportOverlay from "../ViewportOverlay/ViewportOverlay.js";
+import LoadingIndicator from "../LoadingIndicator/LoadingIndicator.js";
+import ViewportOrientationMarkers from "../ViewportOrientationMarkers/ViewportOrientationMarkers.js";
+import cornerstone from "cornerstone-core";
+import * as cornerstoneTools from "../../cornerstone-tools";
+import SegmentationExtension from "ohif-segmentation-plugin";
 
-import './CornerstoneViewport.css';
+import "./CornerstoneViewport.css";
 
-const EVENT_RESIZE = 'resize';
+const EVENT_RESIZE = "resize";
 
-const scrollToIndex = cornerstoneTools.import('util/scrollToIndex');
+const scrollToIndex = cornerstoneTools.import("util/scrollToIndex");
 
 function setToolsPassive(cornerstoneTools, tools) {
   tools.forEach(tool => {
@@ -41,11 +42,12 @@ function initializeTools(cornerstoneTools, tools, element) {
       );
     }
   });
+  SegmentationExtension.preRegistration();
 }
 
 class CornerstoneViewport extends Component {
   static defaultProps = {
-    activeTool: 'Wwwc',
+    activeTool: "Wwwc",
     viewportData: {
       stack: {
         imageIds: [],
@@ -59,29 +61,6 @@ class CornerstoneViewport extends Component {
       isPlaying: false,
       cineFrameRate: 24
     },
-    availableTools: [
-      { name: 'Pan', mouseButtonMasks: [1, 4] },
-      {
-        name: 'Zoom',
-        props: {
-          minScale: 0.3,
-          maxScale: 25,
-          preventZoomOutsideImage: true
-        },
-        mouseButtonMasks: [1, 2]
-      },
-      { name: 'Wwwc', mouseButtonMasks: [1] },
-      { name: 'Bidirectional', mouseButtonMasks: [1] },
-      { name: 'Length', mouseButtonMasks: [1] },
-	    { name: 'FreehandMouse', mouseButtonMasks: [1] },
-      { name: 'Angle', mouseButtonMasks: [1] },
-      { name: 'StackScroll', mouseButtonMasks: [1] },
-      { name: 'Brush', mouseButtonMasks: [1] },
-      { name: 'PanMultiTouch' },
-      { name: 'ZoomTouchPinch' },
-      { name: 'StackScrollMouseWheel' },
-      { name: 'StackScrollMultiTouch' }
-    ],
     viewportOverlayComponent: ViewportOverlay
   };
 
@@ -124,7 +103,7 @@ class CornerstoneViewport extends Component {
       stack,
       displaySetInstanceUid: props.viewportData.displaySetInstanceUid,
       imageId: stack.imageIds[stack.currentImageIdIndex || 0],
-      viewportHeight: '100%',
+      viewportHeight: "100%",
       isLoading: false,
       numImagesLoaded: 0,
       error: null,
@@ -187,7 +166,7 @@ class CornerstoneViewport extends Component {
       return;
     }
 
-    const stackData = cornerstoneTools.getToolState(this.element, 'stack');
+    const stackData = cornerstoneTools.getToolState(this.element, "stack");
     let stack = stackData && stackData.data[0];
 
     // Use viewport stack if cornerstone stack is not ready yet
@@ -197,7 +176,7 @@ class CornerstoneViewport extends Component {
 
     const imageId = stack.imageIds[stack.currentImageIdIndex];
     const sopCommonModule = cornerstone.metaData.get(
-      'sopCommonModule',
+      "sopCommonModule",
       imageId
     );
     if (!sopCommonModule) {
@@ -219,9 +198,9 @@ class CornerstoneViewport extends Component {
 
     const displayLoadingIndicator = isLoading || this.state.error;
 
-    let className = 'CornerstoneViewport';
+    let className = "CornerstoneViewport";
     if (this.props.isActive) {
-      className += ' active';
+      className += " active";
     }
 
     const getOverlay = () => {
@@ -447,18 +426,18 @@ class CornerstoneViewport extends Component {
         cornerstone.displayImage(element, image, viewport);
 
         // Clear any previous tool state
-        cornerstoneTools.clearToolState(this.element, 'stack');
+        cornerstoneTools.clearToolState(this.element, "stack");
 
         /* Add the stack tool state to the enabled element, and
            add stack state managers for the stack tool, CINE tool, and reference lines
         */
         const stack = this.state.stack;
         cornerstoneTools.addStackStateManager(element, [
-          'stack',
-          'playClip',
-          'referenceLines'
+          "stack",
+          "playClip",
+          "referenceLines"
         ]);
-        cornerstoneTools.addToolState(element, 'stack', stack);
+        cornerstoneTools.addToolState(element, "stack", stack);
 
         if (this.props.enableStackPrefetch) {
           cornerstoneTools.stackPrefetch.enable(this.element);
@@ -472,16 +451,16 @@ class CornerstoneViewport extends Component {
           - Two-finger Pan
           - Three (or more) finger Stack Scroll
         */
-        cornerstoneTools.setToolActive('PanMultiTouch', {
+        cornerstoneTools.setToolActive("PanMultiTouch", {
           mouseButtonMask: 0,
           isTouchActive: true
         });
-        cornerstoneTools.setToolActive('ZoomTouchPinch', {
+        cornerstoneTools.setToolActive("ZoomTouchPinch", {
           mouseButtonMask: 0,
           isTouchActive: true
         });
 
-        cornerstoneTools.setToolActive('StackScrollMultiTouch', {
+        cornerstoneTools.setToolActive("StackScrollMultiTouch", {
           mouseButtonMask: 0,
           isTouchActive: true
         });
@@ -499,7 +478,7 @@ class CornerstoneViewport extends Component {
         - Pan with middle click
         - Zoom with right click
         */
-        cornerstoneTools.setToolActive('StackScrollMouseWheel', {
+        cornerstoneTools.setToolActive("StackScrollMouseWheel", {
           mouseButtonMask: 0,
           isTouchActive: true
         });
@@ -535,7 +514,7 @@ class CornerstoneViewport extends Component {
 
     // Clear the stack prefetch data
     // TODO[cornerstoneTools]: Make this happen internally
-    cornerstoneTools.clearToolState(element, 'stackPrefetch');
+    cornerstoneTools.clearToolState(element, "stackPrefetch");
 
     // Disable the viewport element with Cornerstone
     // This also triggers the removal of the element from all available
@@ -575,7 +554,7 @@ class CornerstoneViewport extends Component {
         .currentImageIdIndex;
 
       const stack = this.props.viewportData.stack;
-      const stackData = cornerstoneTools.getToolState(this.element, 'stack');
+      const stackData = cornerstoneTools.getToolState(this.element, "stack");
       let currentStack = stackData && stackData.data[0];
 
       if (!currentStack) {
@@ -586,8 +565,8 @@ class CornerstoneViewport extends Component {
           imageIds: stack.imageIds
         };
 
-        cornerstoneTools.addStackStateManager(this.element, ['stack']);
-        cornerstoneTools.addToolState(this.element, 'stack', currentStack);
+        cornerstoneTools.addStackStateManager(this.element, ["stack"]);
+        cornerstoneTools.addToolState(this.element, "stack", currentStack);
       } else {
         // TODO: we should make something like setToolState by an ID
         currentStack.displaySetInstanceUid = displaySetInstanceUid;
@@ -649,7 +628,7 @@ class CornerstoneViewport extends Component {
 
       const viewportDataStack = this.props.viewportData.stack;
       const stack = Object.assign({}, viewportDataStack);
-      const stackData = cornerstoneTools.getToolState(this.element, 'stack');
+      const stackData = cornerstoneTools.getToolState(this.element, "stack");
       let currentStack = stackData && stackData.data[0];
 
       if (!currentStack) {
@@ -660,8 +639,8 @@ class CornerstoneViewport extends Component {
           imageIds: stack.imageIds
         };
 
-        cornerstoneTools.addStackStateManager(this.element, ['stack']);
-        cornerstoneTools.addToolState(this.element, 'stack', currentStack);
+        cornerstoneTools.addStackStateManager(this.element, ["stack"]);
+        cornerstoneTools.addToolState(this.element, "stack", currentStack);
       } else {
         scrollToIndex(this.element, currentImageIdIndex);
 
@@ -686,7 +665,7 @@ class CornerstoneViewport extends Component {
       this.setActiveTool(this.props.activeTool);
 
       // TODO: Why do we need to do this in v3?
-      cornerstoneTools.setToolActive('StackScrollMouseWheel', {
+      cornerstoneTools.setToolActive("StackScrollMouseWheel", {
         mouseButtonMask: 0,
         isTouchActive: true
       });
@@ -789,7 +768,7 @@ class CornerstoneViewport extends Component {
     this.setViewportActive();
 
     const element = event.currentTarget;
-    const stackData = cornerstoneTools.getToolState(element, 'stack');
+    const stackData = cornerstoneTools.getToolState(element, "stack");
     const stack = stackData.data[0];
 
     this.setState({
@@ -822,19 +801,19 @@ class CornerstoneViewport extends Component {
 
   onMeasurementAdded = event => {
     if (this.props.onMeasurementsChanged) {
-      this.props.onMeasurementsChanged(event, 'added');
+      this.props.onMeasurementsChanged(event, "added");
     }
   };
 
   onMeasurementRemoved = event => {
     if (this.props.onMeasurementsChanged) {
-      this.props.onMeasurementsChanged(event, 'removed');
+      this.props.onMeasurementsChanged(event, "removed");
     }
   };
 
   onMeasurementModified = event => {
     if (this.props.onMeasurementsChanged) {
-      this.props.onMeasurementsChanged(event, 'modified');
+      this.props.onMeasurementsChanged(event, "modified");
     }
   };
 

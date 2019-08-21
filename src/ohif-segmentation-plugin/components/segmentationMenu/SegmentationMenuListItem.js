@@ -1,7 +1,7 @@
-import React from 'react';
-import cornerstoneTools from 'cornerstone-tools';
+import React from "react";
+import cornerstoneTools from "cornerstone-tools";
 
-import './segmentationMenu.styl';
+import "./segmentationMenu.styl";
 
 const brushModule = cornerstoneTools.store.modules.brush;
 
@@ -21,9 +21,12 @@ export default class SegmentationMenuListItem extends React.Component {
   _getTypeWithModifier() {
     const { metadata } = this.props;
 
-    let typeWithModifier = metadata.SegmentedPropertyTypeCodeSequence.CodeMeaning;
+    let typeWithModifier =
+      metadata.SegmentedPropertyTypeCodeSequence.CodeMeaning;
 
-    const modifier = metadata.SegmentedPropertyTypeCodeSequence.SegmentedPropertyTypeModifierCodeSequence;
+    const modifier =
+      metadata.SegmentedPropertyTypeCodeSequence
+        .SegmentedPropertyTypeModifierCodeSequence;
 
     if (modifier) {
       typeWithModifier += ` (${modifier.CodeMeaning})`;
@@ -33,20 +36,31 @@ export default class SegmentationMenuListItem extends React.Component {
   }
 
   render() {
-    const { metadata, segmentIndex, onSegmentChange, onEditClick, onDeleteClick, checked, enabledElement } = this.props;
+    const {
+      metadata,
+      segmentIndex,
+      onSegmentChange,
+      onEditClick,
+      onDeleteClick,
+      checked,
+      enabledElement
+    } = this.props;
 
     const segmentLabel = metadata.SegmentLabel;
-    const colormap = brushModule.getters.activeCornerstoneColorMap(enabledElement);
+    const colormap = brushModule.getters.activeCornerstoneColorMap(
+      enabledElement
+    );
     const color = colormap.getColor(segmentIndex);
     const segmentColor = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 1.0 )`;
 
-    const segmentCategory = metadata.SegmentedPropertyCategoryCodeSequence.CodeMeaning;
+    const segmentCategory =
+      metadata.SegmentedPropertyCategoryCodeSequence.CodeMeaning;
     const typeWithModifier = this._getTypeWithModifier();
 
     return (
       <tr>
         <td className="centered-cell">
-          <i className="fa fa-square" style={{ color: segmentColor }} />{' '}
+          <i className="fa fa-square" style={{ color: segmentColor }} />{" "}
           <input
             type="radio"
             checked={checked}
@@ -73,7 +87,7 @@ export default class SegmentationMenuListItem extends React.Component {
             }}
           >
             {typeWithModifier}
-            {' - '}
+            {" - "}
             {segmentCategory}
           </a>
         </td>

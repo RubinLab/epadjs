@@ -1,5 +1,5 @@
-import React from 'react';
-import cornerstoneTools from 'cornerstone-tools';
+import React from "react";
+import cornerstoneTools from "cornerstone-tools";
 
 // import './roiContourMenu.styl';
 
@@ -44,7 +44,10 @@ export default class LockedCollectionsListItem extends React.Component {
   onShowHideClick() {
     const { collection, seriesInstanceUid } = this.props;
     const { visible } = this.state;
-    const structureSet = modules.freehand3D.getters.structureSet(seriesInstanceUid, collection.metadata.uid);
+    const structureSet = modules.freehand3D.getters.structureSet(
+      seriesInstanceUid,
+      collection.metadata.uid
+    );
 
     structureSet.visible = !visible;
     this.setState({ visible: !visible });
@@ -62,20 +65,26 @@ export default class LockedCollectionsListItem extends React.Component {
     const metadata = collection.metadata;
     const ROIContourArray = collection.ROIContourArray;
 
-    const visibleButton = expanded ? 'fa fa-minus-square' : 'fa fa-plus-square';
-    const showHideIcon = visible ? 'fa fa-eye' : 'fa fa-eye-slash';
+    const visibleButton = expanded ? "fa fa-minus-square" : "fa fa-plus-square";
+    const showHideIcon = visible ? "fa fa-eye" : "fa fa-eye-slash";
 
     return (
       <React.Fragment>
         <tr className="roi-list-header">
           <td className="centered-cell">
-            <a className="btn btn-sm btn-secondary" onClick={this.onToggleVisibilityClick}>
+            <a
+              className="btn btn-sm btn-secondary"
+              onClick={this.onToggleVisibilityClick}
+            >
               <i className={visibleButton} />
             </a>
           </td>
           <th colSpan="2">{metadata.name}</th>
           <td className="centered-cell">
-            <a className="btn btn-sm btn-secondary" onClick={this.onShowHideClick}>
+            <a
+              className="btn btn-sm btn-secondary"
+              onClick={this.onShowHideClick}
+            >
               <i className={showHideIcon} />
             </a>
           </td>
@@ -101,10 +110,17 @@ export default class LockedCollectionsListItem extends React.Component {
             {ROIContourArray.map(roiContour => (
               <tr key={roiContour.metadata.uid}>
                 <td className="left-aligned-cell">
-                  <i className="fa fa-square" style={{ color: roiContour.metadata.color }} />
+                  <i
+                    className="fa fa-square"
+                    style={{ color: roiContour.metadata.color }}
+                  />
                 </td>
-                <td className="left-aligned-cell">{roiContour.metadata.name}</td>
-                <td className="centered-cell">{roiContour.metadata.polygonCount}</td>
+                <td className="left-aligned-cell">
+                  {roiContour.metadata.name}
+                </td>
+                <td className="centered-cell">
+                  {roiContour.metadata.polygonCount}
+                </td>
               </tr>
             ))}
           </React.Fragment>

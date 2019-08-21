@@ -1,17 +1,17 @@
-import React from 'react';
-import MenuIOButtons from '../common/MenuIOButtons.js';
-import WorkingCollectionList from './WorkingCollectionList.js';
-import LockedCollectionsList from './LockedCollectionsList.js';
-import RoiContourSettings from './RoiContourSettings.js';
-import cornerstoneTools from 'cornerstone-tools';
-import unlockStructureSet from '../../util/unlockStructureSet.js';
-import onIOCancel from '../common/helpers/onIOCancel.js';
-import onImportButtonClick from '../common/helpers/onImportButtonClick.js';
-import onExportButtonClick from '../common/helpers/onExportButtonClick.js';
+import React from "react";
+import MenuIOButtons from "../common/MenuIOButtons.js";
+import WorkingCollectionList from "./WorkingCollectionList.js";
+import LockedCollectionsList from "./LockedCollectionsList.js";
+import RoiContourSettings from "./RoiContourSettings.js";
+import cornerstoneTools from "cornerstone-tools";
+import unlockStructureSet from "../../util/unlockStructureSet.js";
+import onIOCancel from "../common/helpers/onIOCancel.js";
+import onImportButtonClick from "../common/helpers/onImportButtonClick.js";
+import onExportButtonClick from "../common/helpers/onExportButtonClick.js";
 // import './roiContourMenu.styl';
 
-import getActiveViewportEnabledElement from '../../util/getActiveViewportEnabledElement.js';
-import getSeriesInstanceUidFromEnabledElement from '../../util/getSeriesInstanceUidFromEnabledElement.js';
+import getActiveViewportEnabledElement from "../../util/getActiveViewportEnabledElement.js";
+import getSeriesInstanceUidFromEnabledElement from "../../util/getSeriesInstanceUidFromEnabledElement.js";
 
 const modules = cornerstoneTools.store.modules;
 
@@ -26,8 +26,13 @@ export default class RoiContourMenu extends React.Component {
 
     // add event listners to cornerstone.
 
-    const enabledElement = getActiveViewportEnabledElement(props.viewports, props.activeIndex);
-    const seriesInstanceUid = getSeriesInstanceUidFromEnabledElement(enabledElement);
+    const enabledElement = getActiveViewportEnabledElement(
+      props.viewports,
+      props.activeIndex
+    );
+    const seriesInstanceUid = getSeriesInstanceUidFromEnabledElement(
+      enabledElement
+    );
 
     this.getRoiContourList = this.getRoiContourList.bind(this);
 
@@ -47,7 +52,7 @@ export default class RoiContourMenu extends React.Component {
       workingCollection,
       lockedCollections,
       unlockConfirmationOpen: false,
-      roiCollectionToUnlock: '',
+      roiCollectionToUnlock: "",
       activeROIContourIndex,
       importing: false,
       exporting: false,
@@ -57,7 +62,9 @@ export default class RoiContourMenu extends React.Component {
     this.onNewRoiButtonClick = this.onNewRoiButtonClick.bind(this);
     this.onRoiChange = this.onRoiChange.bind(this);
     this.onRenameButtonClick = this.onRenameButtonClick.bind(this);
-    this.confirmUnlockOnUnlockClick = this.confirmUnlockOnUnlockClick.bind(this);
+    this.confirmUnlockOnUnlockClick = this.confirmUnlockOnUnlockClick.bind(
+      this
+    );
     this.onUnlockCancelClick = this.onUnlockCancelClick.bind(this);
     this.onUnlockConfirmClick = this.onUnlockConfirmClick.bind(this);
     this.onIOComplete = this.onIOComplete.bind(this);
@@ -83,11 +90,17 @@ export default class RoiContourMenu extends React.Component {
       const freehand3DStore = modules.freehand3D;
 
       if (modules.freehand3D.getters.series(seriesInstanceUid)) {
-        activeROIContourIndex = freehand3DStore.getters.activeROIContourIndex(seriesInstanceUid);
+        activeROIContourIndex = freehand3DStore.getters.activeROIContourIndex(
+          seriesInstanceUid
+        );
       }
 
-      workingCollection = this.constructor._workingCollection(seriesInstanceUid);
-      lockedCollections = this.constructor._lockedCollections(seriesInstanceUid);
+      workingCollection = this.constructor._workingCollection(
+        seriesInstanceUid
+      );
+      lockedCollections = this.constructor._lockedCollections(
+        seriesInstanceUid
+      );
     }
 
     return {
@@ -106,7 +119,11 @@ export default class RoiContourMenu extends React.Component {
   refreshRoiContourList() {
     const seriesInstanceUid = this.state.seriesInstanceUid;
 
-    const { workingCollection, lockedCollections, activeROIContourIndex } = this.getRoiContourList(seriesInstanceUid);
+    const {
+      workingCollection,
+      lockedCollections,
+      activeROIContourIndex
+    } = this.getRoiContourList(seriesInstanceUid);
 
     this.setState({
       workingCollection,
@@ -127,11 +144,17 @@ export default class RoiContourMenu extends React.Component {
     let activeROIContourIndex = 0;
 
     if (modules.freehand3D.getters.series(seriesInstanceUid)) {
-      activeROIContourIndex = freehand3DStore.getters.activeROIContourIndex(seriesInstanceUid);
+      activeROIContourIndex = freehand3DStore.getters.activeROIContourIndex(
+        seriesInstanceUid
+      );
     }
 
-    const workingCollection = this.constructor._workingCollection(seriesInstanceUid);
-    const lockedCollections = this.constructor._lockedCollections(seriesInstanceUid);
+    const workingCollection = this.constructor._workingCollection(
+      seriesInstanceUid
+    );
+    const lockedCollections = this.constructor._lockedCollections(
+      seriesInstanceUid
+    );
 
     this.setState({
       workingCollection,
@@ -161,11 +184,13 @@ export default class RoiContourMenu extends React.Component {
 
     const activeROIContourIndex = freehand3DStore.setters.ROIContourAndSetIndexActive(
       seriesInstanceUid,
-      'DEFAULT',
-      'Unnamed Lesion'
+      "DEFAULT",
+      "Unnamed Lesion"
     );
 
-    const workingCollection = this.constructor._workingCollection(seriesInstanceUid);
+    const workingCollection = this.constructor._workingCollection(
+      seriesInstanceUid
+    );
 
     this.setState({ workingCollection, activeROIContourIndex });
   }
@@ -179,7 +204,10 @@ export default class RoiContourMenu extends React.Component {
   onRoiChange(roiContourIndex) {
     const seriesInstanceUid = this.state.seriesInstanceUid;
 
-    modules.freehand3D.setters.activeROIContourIndex(roiContourIndex, seriesInstanceUid);
+    modules.freehand3D.setters.activeROIContourIndex(
+      roiContourIndex,
+      seriesInstanceUid
+    );
 
     this.setState({ activeROIContourIndex: roiContourIndex });
   }
@@ -220,8 +248,12 @@ export default class RoiContourMenu extends React.Component {
 
     unlockStructureSet(seriesInstanceUid, roiCollectionToUnlock);
 
-    const workingCollection = this.constructor._workingCollection(seriesInstanceUid);
-    const lockedCollections = this.constructor._lockedCollections(seriesInstanceUid);
+    const workingCollection = this.constructor._workingCollection(
+      seriesInstanceUid
+    );
+    const lockedCollections = this.constructor._lockedCollections(
+      seriesInstanceUid
+    );
 
     this.setState({
       unlockConfirmationOpen: false,
@@ -256,7 +288,9 @@ export default class RoiContourMenu extends React.Component {
       series = freehand3DStore.getters.series(seriesInstanceUid);
     }
 
-    const structureSet = freehand3DStore.getters.structureSet(seriesInstanceUid);
+    const structureSet = freehand3DStore.getters.structureSet(
+      seriesInstanceUid
+    );
 
     const ROIContourCollection = structureSet.ROIContourCollection;
 
@@ -295,7 +329,7 @@ export default class RoiContourMenu extends React.Component {
     for (let i = 0; i < structureSetCollection.length; i++) {
       const structureSet = structureSetCollection[i];
 
-      if (structureSet.uid === 'DEFAULT') {
+      if (structureSet.uid === "DEFAULT") {
         continue;
       }
 
@@ -338,11 +372,24 @@ export default class RoiContourMenu extends React.Component {
     let component;
 
     if (importing) {
-      component = <ImportCallbackOrComponent onImportComplete={this.onIOComplete} onImportCancel={this.onIOCancel} />;
+      component = (
+        <ImportCallbackOrComponent
+          onImportComplete={this.onIOComplete}
+          onImportCancel={this.onIOCancel}
+        />
+      );
     } else if (exporting) {
-      component = <ExportCallbackOrComponent onExportComplete={this.onIOComplete} onExportCancel={this.onIOCancel} />;
+      component = (
+        <ExportCallbackOrComponent
+          onExportComplete={this.onIOComplete}
+          onExportCancel={this.onIOCancel}
+        />
+      );
     } else if (unlockConfirmationOpen) {
-      const collection = freehand3DStore.getters.structureSet(seriesInstanceUid, roiCollectionToUnlock);
+      const collection = freehand3DStore.getters.structureSet(
+        seriesInstanceUid,
+        roiCollectionToUnlock
+      );
 
       const collectionName = collection.name;
 
@@ -350,13 +397,22 @@ export default class RoiContourMenu extends React.Component {
         <div>
           <div>
             <h5>Unlock</h5>
-            <p>Unlock {collectionName} for editing? The ROIs will be moved to the Working ROI Collection.</p>
+            <p>
+              Unlock {collectionName} for editing? The ROIs will be moved to the
+              Working ROI Collection.
+            </p>
           </div>
           <div>
-            <a className="btn btn-sm btn-primary" onClick={this.onUnlockConfirmClick}>
+            <a
+              className="btn btn-sm btn-primary"
+              onClick={this.onUnlockConfirmClick}
+            >
               <i className="fa fa fa-check-circle fa-2x" />
             </a>
-            <a className="btn btn-sm btn-primary" onClick={this.onUnlockCancelClick}>
+            <a
+              className="btn btn-sm btn-primary"
+              onClick={this.onUnlockCancelClick}
+            >
               <i className="fa fa fa-times-circle fa-2x" />
             </a>
           </div>

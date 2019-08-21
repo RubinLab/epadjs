@@ -3,7 +3,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import cornerstone from "cornerstone-core";
 // import cornerstoneTools from 'cornerstone-tools';
-import * as cornerstoneTools from "../../cornerstoneTools";
+import * as cornerstoneTools from "../../cornerstone-tools";
 import "./ViewportOrientationMarkers.css";
 
 /**

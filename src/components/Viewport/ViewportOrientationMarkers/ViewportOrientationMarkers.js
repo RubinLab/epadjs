@@ -1,9 +1,9 @@
-import { PureComponent } from 'react';
-import React from 'react';
-import PropTypes from 'prop-types';
-import cornerstone from 'cornerstone-core';
-import cornerstoneTools from 'cornerstone-tools';
-import './ViewportOrientationMarkers.styl';
+import { PureComponent } from "react";
+import React from "react";
+import PropTypes from "prop-types";
+import cornerstone from "cornerstone-core";
+import cornerstoneTools from "../cornerstone-tools";
+import "./ViewportOrientationMarkers.styl";
 
 /**
  * Computes the orientation labels on a Cornerstone-enabled Viewport element
@@ -13,7 +13,7 @@ import './ViewportOrientationMarkers.styl';
  * @param viewport The current viewport
  */
 export function getOrientationMarkers(imageId, viewport) {
-  const imagePlane = cornerstone.metaData.get('imagePlaneModule', imageId);
+  const imagePlane = cornerstone.metaData.get("imagePlaneModule", imageId);
   if (!imagePlane || !imagePlane.rowCosines || !imagePlane.columnCosines) {
     return;
   }
@@ -87,7 +87,7 @@ class ViewportOrientationMarkers extends PureComponent {
     const markers = getOrientationMarkers(imageId, viewport);
 
     if (!markers) {
-      return '';
+      return "";
     }
 
     return (

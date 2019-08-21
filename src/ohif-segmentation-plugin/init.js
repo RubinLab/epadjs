@@ -20,7 +20,7 @@ const defaultConfig = {
   holeFillRange: [0, 20],
   strayRemove: 5,
   strayRemoveRange: [0, 99],
-  interpolate: false,
+  interpolate: true,
   showFreehandStats: false,
   brush3dToolName: "Brush3DTool",
   brush3DHUGatedToolName: "Brush3DHUGatedTool",
@@ -31,16 +31,39 @@ const defaultConfig = {
     {
       // https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4309522/
       name: "adipose",
-      range: [-190, -30]
+      range: [-190, -30],
+      displayName: "Adipose"
     },
     {
       // https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4309522/
       name: "muscle",
-      range: [-29, 150]
+      range: [-29, 150],
+      displayName: "Muscle"
+    },
+    {
+      name: "bone",
+      range: [250, 3071],
+      displayName: "Bone"
+    },
+    {
+      name: "fat",
+      range: [-200, -6],
+      displayName: "Fat"
+    },
+    {
+      name: "softTissue",
+      range: [-700, 125],
+      displayName: "Soft Tissue"
+    },
+    {
+      name: "airDensity",
+      range: [-1000, -950],
+      displayName: "Air Density"
     },
     {
       name: "custom",
-      range: [0, 100]
+      range: [0, 100],
+      displayName: "Custom"
     }
   ]
 };
@@ -60,6 +83,7 @@ export default function init(configuration = {}) {
 
   addTool(Brush3DTool, { name: config.brush3dToolName });
   console.log("store is", store);
+  console.log("Add Tool", addTool);
   // debugger;
   addTool(Brush3DHUGatedTool, { name: config.brush3DHUGatedToolName });
   addTool(Brush3DAutoGatedTool, { name: config.brush3DAutoGatedTool });
