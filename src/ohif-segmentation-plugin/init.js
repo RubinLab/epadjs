@@ -69,7 +69,6 @@ const defaultConfig = {
 };
 
 export default function init(configuration = {}) {
-  console.log("Triggered");
   const brushModule = modules.brush;
   const config = Object.assign({}, defaultConfig, configuration);
 
@@ -82,9 +81,6 @@ export default function init(configuration = {}) {
   freehand3DStore.state.displayStats = config.showFreehandStats;
 
   addTool(Brush3DTool, { name: config.brush3dToolName });
-  console.log("store is", store);
-  console.log("Add Tool", addTool);
-  // debugger;
   addTool(Brush3DHUGatedTool, { name: config.brush3DHUGatedToolName });
   addTool(Brush3DAutoGatedTool, { name: config.brush3DAutoGatedTool });
   addTool(FreehandRoi3DTool, { name: config.freehandRoi3DTool });
@@ -93,16 +89,10 @@ export default function init(configuration = {}) {
     referencedToolName: config.freehandRoi3DTool
   });
 
-  console.log("Hadi bakalim", store);
-
   // TODO -> Clean this up a bit after PW.
   TOOL_NAMES.FREEHAND_ROI_3D_TOOL = config.freehandRoi3DTool;
   TOOL_NAMES.FREEHAND_ROI_3D_SCULPTOR_TOOL = config.freehandRoi3DSculptorTool;
   TOOL_NAMES.BRUSH_3D_TOOL = config.brush3dToolName;
   TOOL_NAMES.BRUSH_3D_AUTO_GATED_TOOL = config.brush3DAutoGatedTool;
   TOOL_NAMES.BRUSH_3D_HU_GATED_TOOL = config.brush3DHUGatedToolName;
-
-  console.log("Konfig geliyo", config);
-
-  console.log(TOOL_NAMES);
 }

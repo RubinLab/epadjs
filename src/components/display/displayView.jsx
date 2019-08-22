@@ -100,28 +100,25 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
-    console.log("CDM", this.props);
     this.getViewports();
     this.getData();
     window.addEventListener(
       "annotationSelected",
       this.handleAnnotationSelected
     );
-    console.log("new tools", this.props.cornerstoneTools);
   }
 
-  async componentDidUpdate(prevProps) {
-    if (
-      prevProps.series !== this.props.series &&
-      prevProps.loading === true &&
-      this.props.loading === false
-    ) {
-      await this.setState({ isLoading: true });
-      console.log("CDU", this.props);
-      this.getViewports();
-      this.getData();
-    }
-  }
+  // async componentDidUpdate(prevProps) {
+  //   if (
+  //     prevProps.series !== this.props.series &&
+  //     prevProps.loading === true &&
+  //     this.props.loading === false
+  //   ) {
+  //     await this.setState({ isLoading: true });
+  //     this.getViewports();
+  //     this.getData();
+  //   }
+  // }
 
   componentWillUnmount() {
     window.removeEventListener(
@@ -150,7 +147,6 @@ class DisplayView extends Component {
     }
     Promise.all(promises).then(res => {
       this.setState({ data: res, isLoading: false });
-      console.log("Cs Tools", this.cornerstoneTools);
       this.props.series.forEach(serie => {
         if (serie.imageAnnotations)
           this.parseAims(serie.imageAnnotations, serie.seriesUID);
@@ -513,6 +509,7 @@ class DisplayView extends Component {
                 (this.props.activePort == i ? " selected" : "")
               }
               key={i}
+              id={"viewportContainer" + i}
               style={{
                 width: this.state.width,
                 height: this.state.height,

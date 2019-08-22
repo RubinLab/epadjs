@@ -30,8 +30,10 @@ import {
   getWholeData
 } from "../annotationsList/action";
 import Spinner from "../common/circleSpinner";
-import "./toolbar.css";
 import "../../font-icons/styles.css";
+import "react-input-range/lib/css/index.css";
+import "./toolbar.css";
+import InputRange from "react-input-range";
 
 const mapStateToProps = state => {
   return {
@@ -103,7 +105,12 @@ class Toolbar extends Component {
       showDrawing: false,
       showSegmentation: false,
       showPresets: false,
-      playing: false
+      playing: false,
+      customBrush: {
+        min: -1000,
+        max: 3000
+      },
+      rangeDisabled: true
     };
   }
 
@@ -132,13 +139,7 @@ class Toolbar extends Component {
     // this.disableAllTools();
     if (toolName == "Brush3DHUGatedTool") {
       this.cornerstoneTools.store.modules.brush.setters.activeGate("muscle");
-      console.log(
-        "Active gate",
-        this.cornerstoneTools.store.modules.brush.getters.activeGateRange()
-      );
     }
-    console.log("Basiyorum", this.cornerstoneTools);
-
     this.cornerstoneTools.setToolActiveForElement(
       this.cornerstone.getEnabledElements()[this.props.activeVP]["element"],
       toolName,
@@ -224,11 +225,20 @@ class Toolbar extends Component {
   };
 
   handleBrushChange = gateName => {
-    alert(gateName);
+    if (gateName === "custom") this.setState({ rangeDisabled: false });
+    else this.setState({ rangeDisabled: true });
     this.cornerstoneTools.store.modules.brush.setters.activeGate(gateName);
   };
 
+  applyCustomBrushValues = values => {
+    const { min, max } = values;
+    this.cornerstoneTools.store.modules.brush.setters.customGateRange(min, max);
+  };
+
   render() {
+    const inputRange = {
+      top: "5em"
+    };
     const brushModule = this.cornerstoneTools.store.modules.brush;
     return (
       <div className="toolbar">
@@ -612,13 +622,41 @@ class Toolbar extends Component {
                             gate.name === brushModule.getters.activeGate()
                           }
                         />
-                        {" " +
-                          gate.displayName +
-                          "[" +
-                          gate.range.toString() +
-                          "]" +
-                          " HU"}
-                        <br />
+                        {gate.name !== "custom" &&
+                          " " +
+                            gate.displayName +
+                            " [" +
+                            gate.range.toString() +
+                            "]" +
+                            " HU"}
+                        {gate.name === "custom" &&
+                          " " +
+                            gate.displayName +
+                            " [" +
+                            this.state.customBrush.min +
+                            ", " +
+                            this.state.customBrush.max +
+                            "]" +
+                            " HU"}
+                        {gate.name === "custom" && (
+                          <div className="range-container">
+                            <InputRange
+                              style={inputRange}
+                              disabled={this.state.rangeDisabled}
+                              step={1}
+                              maxValue={3000}
+                              minValue={-1000}
+                              // formatLabel={value => `${value} HU`}
+                              value={this.state.customBrush}
+                              onChange={value =>
+                                this.setState({ customBrush: value })
+                              }
+                              onChangeComplete={value =>
+                                this.applyCustomBrushValues(value)
+                              }
+                            />
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

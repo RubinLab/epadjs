@@ -1,4 +1,7 @@
-import { globalImageIdSpecificToolStateManager, getToolState } from 'cornerstone-tools';
+import {
+  globalImageIdSpecificToolStateManager,
+  getToolState
+} from "cornerstone-tools";
 
 const globalToolStateManager = globalImageIdSpecificToolStateManager;
 
@@ -11,7 +14,7 @@ const globalToolStateManager = globalImageIdSpecificToolStateManager;
  * @return {object} An object containing the ROIContourData and the
  * interpolationList.
  */
-export default function (toolData, element) {
+export default function(toolData, element) {
   const ROIContourUid = toolData.ROIContourUid;
   const imageIds = _getImageIdsOfActiveSeries(element);
   const ROIContourData = _getROIContourData(imageIds, ROIContourUid);
@@ -25,7 +28,10 @@ export default function (toolData, element) {
     if (_sliceNeedsInterpolating(ROIContourData, i)) {
       const contourPair = _getBoundingPair(i, extent, ROIContourData);
 
-      if (contourPair && (contourPair[0] === sliceEdited || contourPair[1] === sliceEdited)) {
+      if (
+        contourPair &&
+        (contourPair[0] === sliceEdited || contourPair[1] === sliceEdited)
+      ) {
         _appendinterpolationList(contourPair, interpolationList);
       }
     }
@@ -68,7 +74,7 @@ function _getSlicePositionOfToolData(ROIContourData, polygonUid) {
  */
 
 function _getImageIdsOfActiveSeries(element) {
-  const stackToolState = getToolState(element, 'stack');
+  const stackToolState = getToolState(element, "stack");
 
   return stackToolState.data[0].imageIds;
 }
@@ -90,12 +96,12 @@ function _getROIContourData(imageIds, ROIContourUid) {
     const imageId = imageIds[i];
     const imageToolState = toolStateManager[imageId];
 
-    if (!imageToolState || !imageToolState.freehandRoi) {
+    if (!imageToolState || !imageToolState.FreehandRoi3DTool) {
       ROIContourData.push({
         imageId
       });
     } else {
-      const contours = imageToolState.freehandRoi.data.filter(contour => {
+      const contours = imageToolState.FreehandRoi3DTool.data.filter(contour => {
         return contour.ROIContourUid === ROIContourUid;
       });
 
@@ -156,7 +162,8 @@ function _getExtentOfRegion(ROIContourData) {
 function _sliceNeedsInterpolating(ROIContourData, sliceIndex) {
   return (
     !ROIContourData[sliceIndex].contours ||
-    (ROIContourData[sliceIndex].contours.length === 1 && ROIContourData[sliceIndex].contours[0].interpolated)
+    (ROIContourData[sliceIndex].contours.length === 1 &&
+      ROIContourData[sliceIndex].contours[0].interpolated)
   );
 }
 
@@ -176,9 +183,13 @@ function _appendinterpolationList(contourPair, interpolationList) {
   if (!interpolationList[contourPair[0]]) {
     interpolationList[contourPair[0]] = {
       pair: contourPair,
-      list: []
+      list: _getList(contourPair[0], contourPair[1])
     };
   }
+}
+
+function _getList(start, end) {
+  return [...Array(end - start).keys()].map(v => start + v + 1);
 }
 
 /**

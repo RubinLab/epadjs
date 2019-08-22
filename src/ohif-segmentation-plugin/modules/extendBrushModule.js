@@ -37,7 +37,6 @@ export default function extendBrushModule(brushModule, config) {
   };
 
   setters.activeGate = gateName => {
-    console.log("GATE NAME", gateName);
     brushState.activeGate = gateName;
   };
 

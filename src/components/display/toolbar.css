@@ -64,12 +64,12 @@
 
 .segmentation-menu {
   top: 30em;
-  left: 6.8em;
+  left: 6.87em;
   outline: solid;
   outline-width: 1px;
   background-color: #3a3f44;
   outline-color: black;
-  width: 200px;
+  width: 250px;
   cursor: pointer;
   z-index: 1;
   position: absolute;
@@ -81,4 +81,17 @@
   flex-direction: column;
   margin-left: 1em;
   align-content: left;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.range-container {
+  margin-top: 1.5em;
+  margin-left: 1em;
+  margin-right: 2em;
+  margin-bottom: 1em;
+}
+
+.input-range__track {
+  height: 0.5rem;
 }

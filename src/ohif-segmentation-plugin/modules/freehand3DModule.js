@@ -1,6 +1,6 @@
-import cornerstone from 'cornerstone-core';
-import generateUID from '../util/generateUID.js';
-import getSeriesInstanceUidFromEnabledElement from '../util/getSeriesInstanceUidFromEnabledElement.js';
+import cornerstone from "cornerstone-core";
+import generateUID from "../util/generateUID.js";
+import getSeriesInstanceUidFromEnabledElement from "../util/getSeriesInstanceUidFromEnabledElement.js";
 
 /**
  * @typedef {series[]} seriesCollection
@@ -66,7 +66,7 @@ import getSeriesInstanceUidFromEnabledElement from '../util/getSeriesInstanceUid
 
 const state = {
   seriesCollection: [],
-  interpolate: false,
+  interpolate: true,
   displayStats: false
 };
 
@@ -77,15 +77,15 @@ function check(object, name) {
 }
 
 function getSeries(seriesInstanceUid) {
-  check(seriesInstanceUid, 'seriesInstanceUid');
+  check(seriesInstanceUid, "seriesInstanceUid");
 
   return state.seriesCollection.find(series => {
     return series.uid === seriesInstanceUid;
   });
 }
 
-function getStructureSet(seriesInstanceUid, structureSetUid = 'DEFAULT') {
-  check(structureSetUid, 'structureSetUid');
+function getStructureSet(seriesInstanceUid, structureSetUid = "DEFAULT") {
+  check(structureSetUid, "structureSetUid");
 
   const series = getSeries(seriesInstanceUid);
 
@@ -99,7 +99,7 @@ function getStructureSet(seriesInstanceUid, structureSetUid = 'DEFAULT') {
 }
 
 function getROIContour(seriesInstanceUid, structureSetUid, ROIContourUid) {
-  check(ROIContourUid, 'ROIContourUid');
+  check(ROIContourUid, "ROIContourUid");
 
   const structureSet = getStructureSet(seriesInstanceUid, structureSetUid);
 
@@ -113,7 +113,7 @@ function getROIContour(seriesInstanceUid, structureSetUid, ROIContourUid) {
 }
 
 function getROIContourIndex(seriesInstanceUid, structureSetUid, ROIContourUid) {
-  check(ROIContourUid, 'ROIContourUid');
+  check(ROIContourUid, "ROIContourUid");
 
   const structureSet = getStructureSet(seriesInstanceUid, structureSetUid);
 
@@ -132,13 +132,16 @@ function getActiveStructureSetIndex(seriesInstanceUid) {
   return series.activeStructureSetIndex;
 }
 
-function getActiveROIContourIndex(seriesInstanceUid, structureSetUid = 'DEFAULT') {
+function getActiveROIContourIndex(
+  seriesInstanceUid,
+  structureSetUid = "DEFAULT"
+) {
   const structureSet = getStructureSet(seriesInstanceUid, structureSetUid);
 
   return structureSet.activeROIContourIndex;
 }
 
-function getActiveROIContour(seriesInstanceUid, structureSetUid = 'DEFAULT') {
+function getActiveROIContour(seriesInstanceUid, structureSetUid = "DEFAULT") {
   const structureSet = getStructureSet(seriesInstanceUid, structureSetUid);
 
   const activeROIContourIndex = structureSet.activeROIContourIndex;
@@ -162,13 +165,13 @@ function setSeries(seriesInstanceUid) {
   state.seriesCollection.push(series);
 
   // Add a default structureSet for the series.
-  setStructureSet(seriesInstanceUid, 'default', {
-    uid: 'DEFAULT'
+  setStructureSet(seriesInstanceUid, "default", {
+    uid: "DEFAULT"
   });
 }
 
 function setStructureSet(seriesInstanceUid, name, options = {}) {
-  check(name, 'name');
+  check(name, "name");
 
   let series = getSeries(seriesInstanceUid);
 
@@ -183,7 +186,10 @@ function setStructureSet(seriesInstanceUid, name, options = {}) {
     name,
     isLocked: options.isLocked ? options.isLocked : false,
     visible: options.visible ? options.visible : true,
-    activeROIContourIndex: options.activeROIContourIndex !== undefined ? options.activeROIContourIndex : null,
+    activeROIContourIndex:
+      options.activeROIContourIndex !== undefined
+        ? options.activeROIContourIndex
+        : null,
     ROIContourCollection: []
   };
 
@@ -191,13 +197,15 @@ function setStructureSet(seriesInstanceUid, name, options = {}) {
 }
 
 function setROIContour(seriesInstanceUid, structureSetUid, name, options = {}) {
-  check(name, 'name');
+  check(name, "name");
 
   const structureSet = getStructureSet(seriesInstanceUid, structureSetUid);
 
   if (!structureSet) {
     // Can't generate the structureSet as not enough info (no name).
-    throw new Error(`Cannot generate ROIContour, as the structureSet with ${structureSetUid} does not exist.`);
+    throw new Error(
+      `Cannot generate ROIContour, as the structureSet with ${structureSetUid} does not exist.`
+    );
   }
 
   const ROIContour = {
@@ -212,7 +220,12 @@ function setROIContour(seriesInstanceUid, structureSetUid, name, options = {}) {
   return ROIContour.uid;
 }
 
-function setROIContourAndSetIndexActive(seriesInstanceUid, structureSetUid, name, options = {}) {
+function setROIContourAndSetIndexActive(
+  seriesInstanceUid,
+  structureSetUid,
+  name,
+  options = {}
+) {
   setROIContour(seriesInstanceUid, structureSetUid, name, options);
 
   const structureSet = getStructureSet(seriesInstanceUid, structureSetUid);
@@ -224,7 +237,11 @@ function setROIContourAndSetIndexActive(seriesInstanceUid, structureSetUid, name
   return index;
 }
 
-function setDeleteROIFromStructureSet(seriesInstanceUid, structureSetUid, ROIContourUid) {
+function setDeleteROIFromStructureSet(
+  seriesInstanceUid,
+  structureSetUid,
+  ROIContourUid
+) {
   const structureSet = getStructureSet(seriesInstanceUid, structureSetUid);
   const ROIContourCollection = structureSet.ROIContourCollection;
 
@@ -236,7 +253,7 @@ function setDeleteROIFromStructureSet(seriesInstanceUid, structureSetUid, ROICon
 }
 
 function setStructureSetName(name, seriesInstanceUid, structureSetUid) {
-  check(name, 'name');
+  check(name, "name");
 
   const structureSet = getStructureSet(seriesInstanceUid, structureSetUid);
 
@@ -255,16 +272,25 @@ function setDeleteStructureSet(seriesInstanceUid, structureSetUid) {
   structureSetCollection.splice(structureSetIndex, 1);
 }
 
-function setROIContourName(name, seriesInstanceUid, structureSetUid, ROIContourUid) {
-  check(name, 'name');
+function setROIContourName(
+  name,
+  seriesInstanceUid,
+  structureSetUid,
+  ROIContourUid
+) {
+  check(name, "name");
 
-  const ROIContour = getROIContour(seriesInstanceUid, structureSetUid, ROIContourUid);
+  const ROIContour = getROIContour(
+    seriesInstanceUid,
+    structureSetUid,
+    ROIContourUid
+  );
 
   ROIContour.name = name;
 }
 
 function setActiveStructureSetIndex(index, seriesInstanceUid) {
-  check(index, 'index');
+  check(index, "index");
 
   const series = getSeries(seriesInstanceUid);
 
@@ -272,7 +298,7 @@ function setActiveStructureSetIndex(index, seriesInstanceUid) {
 }
 
 function setActiveStructureSet(seriesInstanceUid, structureSetUid) {
-  check(structureSetUid, 'structureSetUid');
+  check(structureSetUid, "structureSetUid");
 
   const series = getSeries(seriesInstanceUid);
   const structureSetCollection = series.structureSetCollection;
@@ -284,14 +310,22 @@ function setActiveStructureSet(seriesInstanceUid, structureSetUid) {
   series.activeStructureSetIndex = structureSetIndex;
 }
 
-function setActiveROIContourIndex(index, seriesInstanceUid, structureSetUid = 'DEFAULT') {
+function setActiveROIContourIndex(
+  index,
+  seriesInstanceUid,
+  structureSetUid = "DEFAULT"
+) {
   const structureSet = getStructureSet(seriesInstanceUid, structureSetUid);
 
   structureSet.activeROIContourIndex = index;
 }
 
-function setActiveROIContour(seriesInstanceUid, structureSetUid = 'DEFAULT', ROIContourUid) {
-  check(ROIContourUid, 'ROIContourUid');
+function setActiveROIContour(
+  seriesInstanceUid,
+  structureSetUid = "DEFAULT",
+  ROIContourUid
+) {
+  check(ROIContourUid, "ROIContourUid");
 
   const structureSet = getStructureSet(seriesInstanceUid, structureSetUid);
   const ROIContourCollection = structureSet.ROIContourCollection;
@@ -303,14 +337,30 @@ function setActiveROIContour(seriesInstanceUid, structureSetUid = 'DEFAULT', ROI
   structureSet.activeROIContourIndex = ROIContourIndex;
 }
 
-function incrementPolygonCount(seriesInstanceUid, structureSetUid, ROIContourUid) {
-  const ROIContour = getROIContour(seriesInstanceUid, structureSetUid, ROIContourUid);
+function incrementPolygonCount(
+  seriesInstanceUid,
+  structureSetUid,
+  ROIContourUid
+) {
+  const ROIContour = getROIContour(
+    seriesInstanceUid,
+    structureSetUid,
+    ROIContourUid
+  );
 
   ROIContour.polygonCount++;
 }
 
-function decrementPolygonCount(seriesInstanceUid, structureSetUid, ROIContourUid) {
-  const ROIContour = getROIContour(seriesInstanceUid, structureSetUid, ROIContourUid);
+function decrementPolygonCount(
+  seriesInstanceUid,
+  structureSetUid,
+  ROIContourUid
+) {
+  const ROIContour = getROIContour(
+    seriesInstanceUid,
+    structureSetUid,
+    ROIContourUid
+  );
 
   ROIContour.polygonCount--;
 }
@@ -361,7 +411,9 @@ function enabledElementCallback(element) {
     return;
   }
 
-  const seriesInstanceUid = getSeriesInstanceUidFromEnabledElement(enabledElement);
+  const seriesInstanceUid = getSeriesInstanceUidFromEnabledElement(
+    enabledElement
+  );
 
   if (!getSeries(seriesInstanceUid)) {
     // Generate series store.
@@ -377,24 +429,24 @@ export default {
 };
 
 const importColors = [
-  'cornflowerblue',
-  'firebrick',
-  'goldenrod',
-  'blueviolet',
-  'indianred',
-  'orange',
-  'mediumturquoise',
-  'lightcoral',
-  'khaki',
-  'darkmagenta',
-  'lightseagreen',
-  'tomato',
-  'aquamarine',
-  'darksalmon',
-  'moccasin',
-  'orchid',
-  'skyblue',
-  'peru'
+  "cornflowerblue",
+  "firebrick",
+  "goldenrod",
+  "blueviolet",
+  "indianred",
+  "orange",
+  "mediumturquoise",
+  "lightcoral",
+  "khaki",
+  "darkmagenta",
+  "lightseagreen",
+  "tomato",
+  "aquamarine",
+  "darksalmon",
+  "moccasin",
+  "orchid",
+  "skyblue",
+  "peru"
 ];
 
 // Such that first color will be the first in roiColors

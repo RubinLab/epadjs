@@ -495,6 +495,7 @@ class CornerstoneViewport extends Component {
         });
       }
     );
+    console.log("CS essas", cornerstone.getEnabledElements());
   }
 
   onDoubleClick = event => {

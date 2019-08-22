@@ -1,5 +1,11 @@
-import { metaData, updateImage, pixelToCanvas, getEnabledElement, getPixels } from 'cornerstone-core';
-import { point } from 'cornerstone-math';
+import {
+  metaData,
+  updateImage,
+  pixelToCanvas,
+  getEnabledElement,
+  getPixels
+} from "cornerstone-core";
+import { point } from "cornerstone-math";
 import {
   importInternalModule,
   FreehandRoiTool,
@@ -8,24 +14,32 @@ import {
   toolStyle,
   toolColors,
   EVENTS
-} from 'cornerstone-tools';
+} from "cornerstone-tools";
 
-import generateUID from '../util/generateUID.js';
-import interpolate from '../util/freehandInterpolate/interpolate.js';
-import getSeriesInstanceUidFromEnabledElement from '../util/getSeriesInstanceUidFromEnabledElement.js';
+import generateUID from "../util/generateUID.js";
+import interpolate from "../util/freehandInterpolate/interpolate.js";
+import getSeriesInstanceUidFromEnabledElement from "../util/getSeriesInstanceUidFromEnabledElement.js";
 
 // Cornerstone 3rd party dev kit imports
-const { insertOrDelete, freehandArea, calculateFreehandStatistics } = importInternalModule('util/freehandUtils');
-const draw = importInternalModule('drawing/draw');
-const drawJoinedLines = importInternalModule('drawing/drawJoinedLines');
-const drawHandles = importInternalModule('drawing/drawHandles');
-const drawLinkedTextBox = importInternalModule('drawing/drawLinkedTextBox');
-const moveHandleNearImagePoint = importInternalModule('manipulators/moveHandleNearImagePoint');
-const getNewContext = importInternalModule('drawing/getNewContext');
+const {
+  insertOrDelete,
+  freehandArea,
+  calculateFreehandStatistics
+} = importInternalModule("util/freehandUtils");
+const draw = importInternalModule("drawing/draw");
+const drawJoinedLines = importInternalModule("drawing/drawJoinedLines");
+const drawHandles = importInternalModule("drawing/drawHandles");
+const drawLinkedTextBox = importInternalModule("drawing/drawLinkedTextBox");
+const moveHandleNearImagePoint = importInternalModule(
+  "manipulators/moveHandleNearImagePoint"
+);
+const getNewContext = importInternalModule("drawing/getNewContext");
 const modules = store.modules;
-const numbersWithCommas = importInternalModule('util/numbersWithCommas');
-const pointInsideBoundingBox = importInternalModule('util/pointInsideBoundingBox');
-const calculateSUV = importInternalModule('util/calculateSUV');
+const numbersWithCommas = importInternalModule("util/numbersWithCommas");
+const pointInsideBoundingBox = importInternalModule(
+  "util/pointInsideBoundingBox"
+);
+const calculateSUV = importInternalModule("util/calculateSUV");
 
 export default class FreehandRoi3DTool extends FreehandRoiTool {
   constructor(configuration = {}) {
@@ -52,23 +66,35 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
    */
   createNewMeasurement(eventData) {
     const freehand3DStore = this._freehand3DStore;
-    const goodEventData = eventData && eventData.currentPoints && eventData.currentPoints.image;
+    const goodEventData =
+      eventData && eventData.currentPoints && eventData.currentPoints.image;
 
     if (!goodEventData) {
-      console.error(`required eventData not supplied to tool ${this.name}'s createNewMeasurement`);
+      console.error(
+        `required eventData not supplied to tool ${
+          this.name
+        }'s createNewMeasurement`
+      );
 
       return;
     }
 
     const enabledElement = getEnabledElement(this.element);
-    const seriesInstanceUid = getSeriesInstanceUidFromEnabledElement(enabledElement);
-    const referencedStructureSet = freehand3DStore.getters.structureSet(seriesInstanceUid, 'DEFAULT');
-    const referencedROIContour = freehand3DStore.getters.activeROIContour(seriesInstanceUid);
+    const seriesInstanceUid = getSeriesInstanceUidFromEnabledElement(
+      enabledElement
+    );
+    const referencedStructureSet = freehand3DStore.getters.structureSet(
+      seriesInstanceUid,
+      "DEFAULT"
+    );
+    const referencedROIContour = freehand3DStore.getters.activeROIContour(
+      seriesInstanceUid
+    );
 
     const measurementData = {
       uid: generateUID(),
       seriesInstanceUid,
-      structureSetUid: 'DEFAULT',
+      structureSetUid: "DEFAULT",
       ROIContourUid: referencedROIContour.uid,
       referencedROIContour,
       referencedStructureSet,
@@ -89,7 +115,11 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
       hasBoundingBox: true
     };
 
-    freehand3DStore.setters.incrementPolygonCount(seriesInstanceUid, 'DEFAULT', referencedROIContour.uid);
+    freehand3DStore.setters.incrementPolygonCount(
+      seriesInstanceUid,
+      "DEFAULT",
+      referencedROIContour.uid
+    );
 
     return measurementData;
   }
@@ -116,7 +146,9 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
 
   _addAndSetVolumeIfNoVolumes() {
     const enabledElement = getEnabledElement(this.element);
-    const seriesInstanceUid = getSeriesInstanceUidFromEnabledElement(enabledElement);
+    const seriesInstanceUid = getSeriesInstanceUidFromEnabledElement(
+      enabledElement
+    );
     const freehand3DStore = modules.freehand3D;
     let series = freehand3DStore.getters.series(seriesInstanceUid);
 
@@ -125,10 +157,16 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
       series = freehand3DStore.getters.series(seriesInstanceUid);
     }
 
-    const activeROIContour = freehand3DStore.getters.activeROIContour(seriesInstanceUid);
+    const activeROIContour = freehand3DStore.getters.activeROIContour(
+      seriesInstanceUid
+    );
 
     if (!activeROIContour) {
-      freehand3DStore.setters.ROIContourAndSetIndexActive(seriesInstanceUid, 'DEFAULT', 'Unnamed Lesion');
+      freehand3DStore.setters.ROIContourAndSetIndexActive(
+        seriesInstanceUid,
+        "DEFAULT",
+        "Unnamed Lesion"
+      );
     }
   }
 
@@ -207,7 +245,10 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
     const data = toolData.data[nearby.toolIndex];
 
     // Check if locked and return
-    const structureSet = freehand3DStore.getters.structureSet(data.seriesInstanceUid, data.structureSetUid);
+    const structureSet = freehand3DStore.getters.structureSet(
+      data.seriesInstanceUid,
+      data.structureSetUid
+    );
 
     if (structureSet.isLocked) {
       return false;
@@ -222,7 +263,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
    * @param  {Object} evt
    * @param  {Object} handle The selected handle.
    */
-  handleSelectedCallback(evt, data, handle, interactionType = 'mouse') {
+  handleSelectedCallback(evt, data, handle, interactionType = "mouse") {
     const freehand3DStore = this._freehand3DStore;
     const eventData = evt.detail;
     const element = eventData.element;
@@ -241,7 +282,10 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
     }
 
     // Check if locked and return
-    const structureSet = freehand3DStore.getters.structureSet(data.seriesInstanceUid, data.structureSetUid);
+    const structureSet = freehand3DStore.getters.structureSet(
+      data.seriesInstanceUid,
+      data.structureSetUid
+    );
 
     if (structureSet.isLocked) {
       return false;
@@ -275,7 +319,11 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
   _switchROIContour(evt, data) {
     const freehand3DStore = this._freehand3DStore;
 
-    freehand3DStore.setters.activeROIContour(data.seriesInstanceUid, data.structureSetUid, data.ROIContourUid);
+    freehand3DStore.setters.activeROIContour(
+      data.seriesInstanceUid,
+      data.structureSetUid,
+      data.ROIContourUid
+    );
 
     updateImage(evt.detail.element);
   }
@@ -300,7 +348,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
     const image = eventData.image;
     const element = eventData.element;
     const config = this.configuration;
-    const seriesModule = metaData.get('generalSeriesModule', image.imageId);
+    const seriesModule = metaData.get("generalSeriesModule", image.imageId);
 
     let modality;
 
@@ -323,7 +371,11 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
       }
 
       const isROIActive =
-        freehand3DStore.getters.ROIContourIndex(data.seriesInstanceUid, data.structureSetUid, data.ROIContourUid) ===
+        freehand3DStore.getters.ROIContourIndex(
+          data.seriesInstanceUid,
+          data.structureSetUid,
+          data.ROIContourUid
+        ) ===
         freehand3DStore.getters.activeROIContourIndex(data.seriesInstanceUid);
 
       draw(context, context => {
@@ -358,7 +410,13 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
               // The mouse location
               lines.push(config.mouseLocation.handles.start);
             }
-            drawJoinedLines(context, eventData.element, data.handles.points[j], lines, { color });
+            drawJoinedLines(
+              context,
+              eventData.element,
+              data.handles.points[j],
+              lines,
+              { color }
+            );
           }
         }
 
@@ -375,7 +433,10 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
           // Render dotted line
           options.handleRadius = config.interpolatedHandleRadius;
           drawHandles(context, eventData, points, options);
-        } else if (config.alwaysShowHandles || (data.active && data.polyBoundingBox)) {
+        } else if (
+          config.alwaysShowHandles ||
+          (data.active && data.polyBoundingBox)
+        ) {
           // Render all handles
           options.handleRadius = config.activeHandleRadius;
           drawHandles(context, eventData, points, options);
@@ -390,7 +451,12 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
         if (data.active && !data.polyBoundingBox) {
           // Draw handle at origin and at mouse if actively drawing
           options.handleRadius = config.activeHandleRadius;
-          drawHandles(context, eventData, config.mouseLocation.handles, options);
+          drawHandles(
+            context,
+            eventData,
+            config.mouseLocation.handles,
+            options
+          );
           drawHandles(context, eventData, [points[0]], options);
         }
 
@@ -447,9 +513,14 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
             );
 
             // Calculate the mean & standard deviation from the pixels and the object shape
-            meanStdDev = calculateFreehandStatistics.call(this, pixels, polyBoundingBox, points);
+            meanStdDev = calculateFreehandStatistics.call(
+              this,
+              pixels,
+              polyBoundingBox,
+              points
+            );
 
-            if (modality === 'PT') {
+            if (modality === "PT") {
               // If the image is from a PET scan, use the DICOM tags to
               // Calculate the SUV from the mean and standard deviation.
 
@@ -458,8 +529,14 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
               // Returning the values to storedPixel values before calcuating SUV with them.
               // TODO: Clean this up? Should we add an option to not scale in calculateSUV?
               meanStdDevSUV = {
-                mean: calculateSUV(image, (meanStdDev.mean - image.intercept) / image.slope),
-                stdDev: calculateSUV(image, (meanStdDev.stdDev - image.intercept) / image.slope)
+                mean: calculateSUV(
+                  image,
+                  (meanStdDev.mean - image.intercept) / image.slope
+                ),
+                stdDev: calculateSUV(
+                  image,
+                  (meanStdDev.stdDev - image.intercept) / image.slope
+                )
               };
             }
 
@@ -489,15 +566,20 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
 
         // Only render text if polygon ROI has been completed, and is active,
         // Or config is set to show the textBox all the time
-        if (data.polyBoundingBox && (freehand3DStore.state.displayStats || data.active)) {
+        if (
+          data.polyBoundingBox &&
+          (freehand3DStore.state.displayStats || data.active)
+        ) {
           // If the textbox has not been moved by the user, it should be displayed on the right-most
           // Side of the tool.
 
           if (!data.handles.textBox.hasMoved) {
             // Find the rightmost side of the polyBoundingBox at its vertical center, and place the textbox here
             // Note that this calculates it in image coordinates
-            data.handles.textBox.x = data.polyBoundingBox.left + data.polyBoundingBox.width;
-            data.handles.textBox.y = data.polyBoundingBox.top + data.polyBoundingBox.height / 2;
+            data.handles.textBox.x =
+              data.polyBoundingBox.left + data.polyBoundingBox.width;
+            data.handles.textBox.y =
+              data.polyBoundingBox.top + data.polyBoundingBox.height / 2;
           }
 
           const text = textBoxText.call(this, data);
@@ -528,8 +610,8 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
 
       textLines.push(ROIContour.name);
 
-      if (structureSet.name === 'DEFAULT') {
-        textLines.push('Working ROI Collection');
+      if (structureSet.name === "DEFAULT") {
+        textLines.push("Working ROI Collection");
       } else {
         textLines.push(structureSet.name);
       }
@@ -537,23 +619,29 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
       // If the mean and standard deviation values are present, display them
       if (meanStdDev && meanStdDev.mean !== undefined) {
         // If the modality is CT, add HU to denote Hounsfield Units
-        let moSuffix = '';
+        let moSuffix = "";
 
-        if (modality === 'CT') {
-          moSuffix = ' HU';
+        if (modality === "CT") {
+          moSuffix = " HU";
         }
 
         // Create a line of text to display the mean and any units that were specified (i.e. HU)
-        let meanText = `Mean: ${numbersWithCommas(meanStdDev.mean.toFixed(2))}${moSuffix}`;
+        let meanText = `Mean: ${numbersWithCommas(
+          meanStdDev.mean.toFixed(2)
+        )}${moSuffix}`;
         // Create a line of text to display the standard deviation and any units that were specified (i.e. HU)
-        let stdDevText = `StdDev: ${numbersWithCommas(meanStdDev.stdDev.toFixed(2))}${moSuffix}`;
+        let stdDevText = `StdDev: ${numbersWithCommas(
+          meanStdDev.stdDev.toFixed(2)
+        )}${moSuffix}`;
 
         // If this image has SUV values to display, concatenate them to the text line
         if (meanStdDevSUV && meanStdDevSUV.mean !== undefined) {
-          const SUVtext = ' SUV: ';
+          const SUVtext = " SUV: ";
 
-          meanText += SUVtext + numbersWithCommas(meanStdDevSUV.mean.toFixed(2));
-          stdDevText += SUVtext + numbersWithCommas(meanStdDevSUV.stdDev.toFixed(2));
+          meanText +=
+            SUVtext + numbersWithCommas(meanStdDevSUV.mean.toFixed(2));
+          stdDevText +=
+            SUVtext + numbersWithCommas(meanStdDevSUV.stdDev.toFixed(2));
         }
 
         // Add these text lines to the array to be displayed in the textbox
@@ -630,7 +718,9 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
       this._deactivateDraw(element);
     }
 
+    console.log("I am interpolating", modules.freehand3D.state.interpolate);
     if (modules.freehand3D.state.interpolate) {
+      console.log("I will interpolate", element);
       interpolate(data, element);
     }
 
@@ -674,12 +764,21 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
 
   disabledCallback(element) {
     this._closeToolIfDrawing(element);
-    element.removeEventListener(EVENTS.MEASUREMENT_REMOVED, this._onMeasurementRemoved);
+    element.removeEventListener(
+      EVENTS.MEASUREMENT_REMOVED,
+      this._onMeasurementRemoved
+    );
   }
 
   _addMeasurementRemovedListener(element) {
-    element.removeEventListener(EVENTS.MEASUREMENT_REMOVED, this._onMeasurementRemoved);
-    element.addEventListener(EVENTS.MEASUREMENT_REMOVED, this._onMeasurementRemoved);
+    element.removeEventListener(
+      EVENTS.MEASUREMENT_REMOVED,
+      this._onMeasurementRemoved
+    );
+    element.addEventListener(
+      EVENTS.MEASUREMENT_REMOVED,
+      this._onMeasurementRemoved
+    );
   }
 }
 
@@ -700,7 +799,7 @@ function defaultFreehandConfiguration() {
     completeHandleRadius: 6,
     completeHandleRadiusTouch: 28,
     alwaysShowHandles: false,
-    invalidColor: 'crimson',
+    invalidColor: "crimson",
     currentHandle: 0,
     currentTool: -1
   };

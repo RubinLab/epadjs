@@ -1,8 +1,11 @@
-import { globalImageIdSpecificToolStateManager, store } from 'cornerstone-tools';
+import {
+  globalImageIdSpecificToolStateManager,
+  store
+} from "cornerstone-tools";
 
-import { Polygon } from '../classes/Polygon.js';
-import generateUID from '../generateUID.js';
-import generateInterpolationData from './generateInterpolationData.js';
+import { Polygon } from "../classes/Polygon.js";
+import generateUID from "../generateUID.js";
+import generateInterpolationData from "./generateInterpolationData.js";
 
 const globalToolStateManager = globalImageIdSpecificToolStateManager;
 const dP = 0.2; // Aim for < 0.2mm between interpolated nodes when super-sampling.
@@ -14,12 +17,20 @@ const modules = store.modules;
  * @param  {object} toolData The tool data of the freehand3D contour.
  * @return {null}
  */
-export default function (toolData, element) {
-  const { ROIContourData, interpolationList } = generateInterpolationData(toolData, element);
+export default function(toolData, element) {
+  const { ROIContourData, interpolationList } = generateInterpolationData(
+    toolData,
+    element
+  );
+  console.log("In Interpolation", ROIContourData, interpolationList);
 
   for (let i = 0; i < interpolationList.length; i++) {
     if (interpolationList[i]) {
-      _linearlyInterpolateBetween(interpolationList[i].list, interpolationList[i].pair, ROIContourData);
+      _linearlyInterpolateBetween(
+        interpolationList[i].list,
+        interpolationList[i].pair,
+        ROIContourData
+      );
     }
   }
 }
@@ -36,14 +47,26 @@ export default function (toolData, element) {
  */
 
 function _linearlyInterpolateBetween(indicies, contourPair, ROIContourData) {
-  const c1 = _generateClosedContour(ROIContourData[contourPair[0]].contours[0].handles.points);
-  const c2 = _generateClosedContour(ROIContourData[contourPair[1]].contours[0].handles.points);
+  const c1 = _generateClosedContour(
+    ROIContourData[contourPair[0]].contours[0].handles.points
+  );
+  const c2 = _generateClosedContour(
+    ROIContourData[contourPair[1]].contours[0].handles.points
+  );
 
   const { c1Interp, c2Interp } = _generateInterpolationContourPair(c1, c2);
+  console.log("Indicies", indicies);
 
   // Using the newly constructed contours, interpolate each ROI.
-  indicies.forEach(function (index) {
-    _linearlyInterpolateContour(c1Interp, c2Interp, index, contourPair, ROIContourData, c1.x.length > c2.x.length);
+  indicies.forEach(function(index) {
+    _linearlyInterpolateContour(
+      c1Interp,
+      c2Interp,
+      index,
+      contourPair,
+      ROIContourData,
+      c1.x.length > c2.x.length
+    );
   });
 }
 
@@ -60,16 +83,38 @@ function _linearlyInterpolateBetween(indicies, contourPair, ROIContourData) {
  * @param  {boolean} c1HasMoreNodes True if c1 has more nodes than c2.
  * @return {null}
  */
-function _linearlyInterpolateContour(c1Interp, c2Interp, sliceIndex, contourPair, ROIContourData, c1HasMoreNodes) {
-  const zInterp = (sliceIndex - contourPair[0]) / (contourPair[1] - contourPair[0]);
-  const interpolated2DContour = _generateInterpolatedOpenContour(c1Interp, c2Interp, zInterp, c1HasMoreNodes);
+function _linearlyInterpolateContour(
+  c1Interp,
+  c2Interp,
+  sliceIndex,
+  contourPair,
+  ROIContourData,
+  c1HasMoreNodes
+) {
+  console.log("In lenarly");
+  const zInterp =
+    (sliceIndex - contourPair[0]) / (contourPair[1] - contourPair[0]);
+  const interpolated2DContour = _generateInterpolatedOpenContour(
+    c1Interp,
+    c2Interp,
+    zInterp,
+    c1HasMoreNodes
+  );
 
   const c1Metadata = ROIContourData[contourPair[0]].contours[0];
 
   if (ROIContourData[sliceIndex].contours) {
-    _editInterpolatedContour(interpolated2DContour, ROIContourData[sliceIndex].imageId, c1Metadata);
+    _editInterpolatedContour(
+      interpolated2DContour,
+      ROIContourData[sliceIndex].imageId,
+      c1Metadata
+    );
   } else {
-    _addInterpolatedContour(interpolated2DContour, ROIContourData[sliceIndex].imageId, c1Metadata);
+    _addInterpolatedContour(
+      interpolated2DContour,
+      ROIContourData[sliceIndex].imageId,
+      c1Metadata
+    );
   }
 }
 
@@ -124,7 +169,13 @@ function _generateInterpolationContourPair(c1, c2) {
  * ROIContour, to assign appropriate metadata to the new polygon.
  * @return {null}
  */
-function _addInterpolatedContour(interpolated2DContour, imageId, referencedToolData) {
+function _addInterpolatedContour(
+  interpolated2DContour,
+  imageId,
+  referencedToolData
+) {
+  console.log("Adding new contours");
+
   const points = [];
 
   for (let i = 0; i < interpolated2DContour.x.length; i++) {
@@ -153,14 +204,16 @@ function _addInterpolatedContour(interpolated2DContour, imageId, referencedToolD
 
   const imageToolState = toolStateManager[imageId];
 
-  if (!imageToolState.freehandRoi) {
-    imageToolState.freehandRoi = {};
-    imageToolState.freehandRoi.data = [];
-  } else if (!imageToolState.freehandRoi.data) {
-    imageToolState.freehandRoi.data = [];
+  if (!imageToolState.FreehandRoi3DTool) {
+    imageToolState.FreehandRoi3DTool = {};
+    imageToolState.FreehandRoi3DTool.data = [];
+  } else if (!imageToolState.FreehandRoi3DTool.data) {
+    imageToolState.FreehandRoi3DTool.data = [];
   }
 
-  imageToolState.freehandRoi.data.push(polygon.getFreehandToolData(false));
+  imageToolState.FreehandRoi3DTool.data.push(
+    polygon.getFreehandToolData(false)
+  );
 
   modules.freehand3D.setters.incrementPolygonCount(
     referencedToolData.seriesInstanceUid,
@@ -179,26 +232,35 @@ function _addInterpolatedContour(interpolated2DContour, imageId, referencedToolD
  * ROIContour, to assign appropriate metadata to the new polygon.
  * @return {null}
  */
-function _editInterpolatedContour(interpolated2DContour, imageId, referencedToolData) {
+function _editInterpolatedContour(
+  interpolated2DContour,
+  imageId,
+  referencedToolData
+) {
   const toolStateManager = globalToolStateManager.saveToolState();
   const imageToolState = toolStateManager[imageId];
 
   if (!imageToolState) {
-    throw new Error('Image toolstate does not exist. This should not be reached in this case!');
+    throw new Error(
+      "Image toolstate does not exist. This should not be reached in this case!"
+    );
   }
 
   // Find the index of the polygon on this slice corresponding to
   // The ROIContour.
   let toolDataIndex;
 
-  for (let i = 0; i < imageToolState.freehandRoi.data.length; i++) {
-    if (imageToolState.freehandRoi.data[i].ROIContourUid === referencedToolData.ROIContourUid) {
+  for (let i = 0; i < imageToolState.FreehandRoi3DTool.data.length; i++) {
+    if (
+      imageToolState.FreehandRoi3DTool.data[i].ROIContourUid ===
+      referencedToolData.ROIContourUid
+    ) {
       toolDataIndex = i;
       break;
     }
   }
 
-  const oldPolygon = imageToolState.freehandRoi.data[toolDataIndex];
+  const oldPolygon = imageToolState.FreehandRoi3DTool.data[toolDataIndex];
   const points = [];
 
   for (let i = 0; i < interpolated2DContour.x.length; i++) {
@@ -219,7 +281,9 @@ function _editInterpolatedContour(interpolated2DContour, imageId, referencedTool
     true
   );
 
-  imageToolState.freehandRoi.data[toolDataIndex] = updatedPolygon.getFreehandToolData(false);
+  imageToolState.FreehandRoi3DTool.data[
+    toolDataIndex
+  ] = updatedPolygon.getFreehandToolData(false);
 }
 
 /**
@@ -316,7 +380,9 @@ function _shiftSuperSampledContourInPlace(c1i, c2i) {
     let totalSquaredXYLengths = 0;
 
     for (let itteration = 0; itteration < c1iLength; itteration++) {
-      totalSquaredXYLengths += (c1i.x[node] - c2i.x[itteration]) ** 2 + (c1i.y[node] - c2i.y[itteration]) ** 2;
+      totalSquaredXYLengths +=
+        (c1i.x[node] - c2i.x[itteration]) ** 2 +
+        (c1i.y[node] - c2i.y[itteration]) ** 2;
 
       node++;
 
@@ -401,8 +467,10 @@ function _getNodesPerSegment(perimInterp, perimInd) {
   const idx = [];
 
   for (let i = 0; i < perimInterp.length; ++i) idx[i] = i;
-  idx.sort(function (a, b) {
-    return perimInterp[a] < perimInterp[b] ? -1 : perimInterp[a] > perimInterp[b];
+  idx.sort(function(a, b) {
+    return perimInterp[a] < perimInterp[b]
+      ? -1
+      : perimInterp[a] > perimInterp[b];
   });
 
   const perimIndSorted = [];
@@ -411,15 +479,22 @@ function _getNodesPerSegment(perimInterp, perimInd) {
     perimIndSorted.push(perimInd[idx[i]]);
   }
 
-  const indiciesOfOriginNodes = perimIndSorted.reduce(function (arr, elementValue, i) {
+  const indiciesOfOriginNodes = perimIndSorted.reduce(function(
+    arr,
+    elementValue,
+    i
+  ) {
     if (elementValue) arr.push(i);
     return arr;
-  }, []);
+  },
+  []);
 
   const nodesPerSegment = [];
 
   for (let i = 0; i < indiciesOfOriginNodes.length - 1; i++) {
-    nodesPerSegment.push(indiciesOfOriginNodes[i + 1] - indiciesOfOriginNodes[i]);
+    nodesPerSegment.push(
+      indiciesOfOriginNodes[i + 1] - indiciesOfOriginNodes[i]
+    );
   }
 
   return nodesPerSegment;
@@ -478,7 +553,10 @@ function _getCumulativePerimeter(contour) {
   let cumulativePerimeter = [0];
 
   for (let i = 1; i < contour.x.length; i++) {
-    const lengthOfSegment = Math.sqrt((contour.x[i] - contour.x[i - 1]) ** 2 + (contour.y[i] - contour.y[i - 1]) ** 2);
+    const lengthOfSegment = Math.sqrt(
+      (contour.x[i] - contour.x[i - 1]) ** 2 +
+        (contour.y[i] - contour.y[i - 1]) ** 2
+    );
 
     cumulativePerimeter.push(cumulativePerimeter[i - 1] + lengthOfSegment);
   }
