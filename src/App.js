@@ -29,6 +29,13 @@ import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
 class App extends Component {
+  constructor(props) {
+    super();
+    this.eventSource = new EventSource(
+      "https://epad-dev4.stanford.edu:8080/projects/lite/notifications"
+    );
+  }
+
   state = {
     openMng: false,
     keycloak: null,
@@ -86,6 +93,8 @@ class App extends Component {
   };
 
   async componentDidMount() {
+    // log the the erver sent events to console
+    this.eventSource.onmessage = e => console(JSON.parse(e));
     // when comp mount check if the user is set already. If is set then set state
     if (isLite) {
       const keycloak = Keycloak("/keycloak.json");
