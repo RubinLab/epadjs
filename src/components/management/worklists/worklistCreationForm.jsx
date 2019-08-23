@@ -22,6 +22,13 @@ const worklistCreationForm = props => {
     index++;
   }
 
+  // let date = new Date();
+  // const day = date.getDate() + "";
+  // let month = date.getMonth() + 1;
+  // month = month < 10 ? `0${month}` : `${month}`;
+  // const year = date.getFullYear();
+  // date = `${year}-${month}-${day}`;
+
   return (
     <Modal.Dialog dialogClassName="add-worklist__modal">
       <Modal.Header>
@@ -50,7 +57,6 @@ const worklistCreationForm = props => {
             One word only, no special characters, '_' is OK
           </h6>
           <h5 className="add-worklist__modal--label">User*</h5>
-
           <select
             className="add-worklist__modal--select"
             name="user"
@@ -59,6 +65,8 @@ const worklistCreationForm = props => {
           >
             {options}
           </select>
+          <h5 className="form-exp">Due date:</h5>
+          <input type="date" name="due" onChange={onChange} />
           <h5 className="add-worklist__modal--label">Description</h5>
           <textarea
             onMouseDown={e => e.stopPropagation()}

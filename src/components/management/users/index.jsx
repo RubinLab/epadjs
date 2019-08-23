@@ -101,16 +101,10 @@ class Users extends React.Component {
     });
   }
 
-  /**
-   * Set the wrapper ref
-   */
   setWrapperRef = (node, id) => {
     this.wrapperRef = node;
   };
 
-  /**
-   * Alert if clicked on outside of element
-   */
   handleClickOutside = event => {
     if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
       this.handleOutClick();
