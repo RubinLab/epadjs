@@ -34,6 +34,7 @@ import "../../font-icons/styles.css";
 import "react-input-range/lib/css/index.css";
 import "./toolbar.css";
 import InputRange from "react-input-range";
+import Switch from "react-switch";
 
 const mapStateToProps = state => {
   return {
@@ -110,7 +111,8 @@ class Toolbar extends Component {
         min: -1000,
         max: 3000
       },
-      rangeDisabled: true
+      rangeDisabled: true,
+      interpolate: false
     };
   }
 
@@ -233,6 +235,11 @@ class Toolbar extends Component {
   applyCustomBrushValues = values => {
     const { min, max } = values;
     this.cornerstoneTools.store.modules.brush.setters.customGateRange(min, max);
+  };
+
+  setInterpolation = checked => {
+    this.setState({ interpolate: checked });
+    this.cornerstoneTools.store.modules.freehand3D.state.interpolate = this.state.interpolate;
   };
 
   render() {
@@ -519,6 +526,25 @@ class Toolbar extends Component {
                 <div className="icon-polygon fontastic-icons" />
                 <div className="buttonLabel">
                   <span>Poly/Freehand</span>
+                  <br />
+                  <span>
+                    Interpolation{" "}
+                    <Switch
+                      onChange={this.setInterpolation}
+                      checked={this.state.interpolate}
+                      onColor="#86d3ff"
+                      onHandleColor="#2693e6"
+                      handleDiameter={10}
+                      uncheckedIcon={false}
+                      checkedIcon={false}
+                      boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+                      activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+                      height={5}
+                      width={20}
+                      className="react-switch"
+                      id="material-switch"
+                    />
+                  </span>
                 </div>
               </div>
               <div

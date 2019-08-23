@@ -114,7 +114,8 @@ class AimEditor extends Component {
     });
 
     // if has segmentation retrieve the images to generate dicomseg, most should be cached already
-    if (hasSegmentation) {
+    if (this.props.hasSegmentation) {
+      alert("creating segments");
       var imagePromises = [];
       imageIds.map(imageId => {
         imagePromises.push(this.props.cornerstone.loadImage(imageId));

@@ -95,36 +95,33 @@ class DisplayView extends Component {
       isLoading: true,
       selectedAim: undefined,
       refs: props.refs,
-      showAnnDetails: true
+      showAnnDetails: true,
+      hasSegmentation: false
     };
   }
 
   componentDidMount() {
     this.getViewports();
     this.getData();
-    window.addEventListener(
-      "annotationSelected",
-      this.handleAnnotationSelected
-    );
+    window.addEventListener("markupSelected", this.handleMarkupSelected);
+    window.addEventListener("markupCreated", this.handleMarkupCreated);
   }
 
-  // async componentDidUpdate(prevProps) {
-  //   if (
-  //     prevProps.series !== this.props.series &&
-  //     prevProps.loading === true &&
-  //     this.props.loading === false
-  //   ) {
-  //     await this.setState({ isLoading: true });
-  //     this.getViewports();
-  //     this.getData();
-  //   }
-  // }
+  async componentDidUpdate(prevProps) {
+    if (
+      prevProps.series !== this.props.series &&
+      prevProps.loading === true &&
+      this.props.loading === false
+    ) {
+      await this.setState({ isLoading: true });
+      this.getViewports();
+      this.getData();
+    }
+  }
 
   componentWillUnmount() {
-    window.removeEventListener(
-      "annotationSelected",
-      this.handleAnnotationSelected
-    );
+    window.removeEventListener("markupSelected", this.handleMarkupSelected);
+    window.removeEventListener("markupCreated", this.handleMarkupCreated);
   }
 
   // componentDidUpdate = async prevProps => {
@@ -301,6 +298,29 @@ class DisplayView extends Component {
     }
   };
 
+  handleMarkupSelected = event => {
+    if (
+      this.props.aimList[this.props.series[this.props.activePort].seriesUID][
+        event.detail
+      ]
+    ) {
+      const aimJson = this.props.aimList[
+        this.props.series[this.props.activePort].seriesUID
+      ][event.detail].json;
+      const markupTypes = this.getMarkupTypesForAim(event.detail);
+      aimJson["markupType"] = [...markupTypes];
+      if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
+        this.setState({ showAimEditor: false });
+      this.setState({ showAimEditor: true, selectedAim: aimJson });
+    }
+  };
+
+  handleMarkupCreated = event => {
+    const { detail } = event;
+    this.setState({ showAimEditor: true, selectedAim: undefined });
+    if (detail === "brush") this.setState({ hasSegmentation: true });
+  };
+
   setActive = i => {
     this.props.dispatch(changeActivePort(i));
     if (this.props.activePort !== i) {
@@ -445,23 +465,6 @@ class DisplayView extends Component {
     );
   };
 
-  handleAnnotationSelected = event => {
-    if (
-      this.props.aimList[this.props.series[this.props.activePort].seriesUID][
-        event.detail
-      ]
-    ) {
-      const aimJson = this.props.aimList[
-        this.props.series[this.props.activePort].seriesUID
-      ][event.detail].json;
-      const markupTypes = this.getMarkupTypesForAim(event.detail);
-      aimJson["markupType"] = [...markupTypes];
-      if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
-        this.setState({ showAimEditor: false });
-      this.setState({ showAimEditor: true, selectedAim: aimJson });
-    }
-  };
-
   closeAimEditor = () => {
     this.setState({ showAimEditor: false, selectedAim: undefined });
   };
@@ -498,6 +501,7 @@ class DisplayView extends Component {
             csTools={this.cornerstoneTools}
             aimId={this.state.selectedAim}
             onCancel={this.closeAimEditor}
+            hasSegmentation={this.state.hasSegmentation}
           />
         )}
         {!this.state.isLoading &&

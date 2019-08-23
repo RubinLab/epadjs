@@ -1,5 +1,5 @@
-import { BrushTool, store } from 'cornerstone-tools';
-import generateBrushMetadata from '../util/generateBrushMetadata.js';
+import { BrushTool, store } from "cornerstone-tools";
+import generateBrushMetadata from "../util/generateBrushMetadata.js";
 
 const brushModule = store.modules.brush;
 
@@ -24,9 +24,14 @@ export default class Brush3DTool extends BrushTool {
     const eventData = evt.detail;
     const element = eventData.element;
 
-    const { labelmap3D, currentImageIdIndex, activeLabelmapIndex } = brushModule.getters.getAndCacheLabelmap2D(element);
+    const {
+      labelmap3D,
+      currentImageIdIndex,
+      activeLabelmapIndex
+    } = brushModule.getters.getAndCacheLabelmap2D(element);
 
-    const shouldErase = this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;
+    const shouldErase =
+      this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;
 
     this.paintEventData = {
       labelmap3D,
@@ -39,9 +44,14 @@ export default class Brush3DTool extends BrushTool {
     let metadata = labelmap3D.metadata[segmentIndex];
 
     if (!metadata) {
-      metadata = generateBrushMetadata('Unnamed Segment');
+      metadata = generateBrushMetadata("Unnamed Segment");
 
-      brushModule.setters.metadata(element, activeLabelmapIndex, segmentIndex, metadata);
+      brushModule.setters.metadata(
+        element,
+        activeLabelmapIndex,
+        segmentIndex,
+        metadata
+      );
     }
 
     // Metadata assigned, start drawing.
@@ -50,5 +60,11 @@ export default class Brush3DTool extends BrushTool {
     }
     this._drawing = true;
     this._startListeningForMouseUp(element);
+
+    // Dispatch event to open the Aim Editor
+    let evnt = new CustomEvent("markupCreated", {
+      detail: "brush"
+    });
+    window.dispatchEvent(evnt);
   }
 }

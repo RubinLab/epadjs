@@ -20,7 +20,7 @@ const defaultConfig = {
   holeFillRange: [0, 20],
   strayRemove: 5,
   strayRemoveRange: [0, 99],
-  interpolate: true,
+  interpolate: false,
   showFreehandStats: false,
   brush3dToolName: "Brush3DTool",
   brush3DHUGatedToolName: "Brush3DHUGatedTool",

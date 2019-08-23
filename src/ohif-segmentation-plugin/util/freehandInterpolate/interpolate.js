@@ -22,7 +22,6 @@ export default function(toolData, element) {
     toolData,
     element
   );
-  console.log("In Interpolation", ROIContourData, interpolationList);
 
   for (let i = 0; i < interpolationList.length; i++) {
     if (interpolationList[i]) {
@@ -55,7 +54,6 @@ function _linearlyInterpolateBetween(indicies, contourPair, ROIContourData) {
   );
 
   const { c1Interp, c2Interp } = _generateInterpolationContourPair(c1, c2);
-  console.log("Indicies", indicies);
 
   // Using the newly constructed contours, interpolate each ROI.
   indicies.forEach(function(index) {
@@ -91,7 +89,6 @@ function _linearlyInterpolateContour(
   ROIContourData,
   c1HasMoreNodes
 ) {
-  console.log("In lenarly");
   const zInterp =
     (sliceIndex - contourPair[0]) / (contourPair[1] - contourPair[0]);
   const interpolated2DContour = _generateInterpolatedOpenContour(
@@ -174,8 +171,6 @@ function _addInterpolatedContour(
   imageId,
   referencedToolData
 ) {
-  console.log("Adding new contours");
-
   const points = [];
 
   for (let i = 0; i < interpolated2DContour.x.length; i++) {
