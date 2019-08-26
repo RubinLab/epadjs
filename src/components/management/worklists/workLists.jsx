@@ -237,14 +237,14 @@ class WorkList extends React.Component {
         minResizeWidth: 20,
         width: 50,
         Cell: original => (
-          // <Link
-          //   className="open-link"
-          //   to={"/search/" + original.row.checkbox.id}
-          // >
-          <div onClick={this.props.onClose}>
-            <FaRegEye className="menu-clickable" />
-          </div>
-          // </Link>
+          <Link
+            className="open-link"
+            to={"/worklist/" + original.row.checkbox.workListID}
+          >
+            <div onClick={this.props.onClose}>
+              <FaRegEye className="menu-clickable" />
+            </div>
+          </Link>
         )
       },
       {

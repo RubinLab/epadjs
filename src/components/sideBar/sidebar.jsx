@@ -50,6 +50,15 @@ class Sidebar extends Component {
     this.setState({ pacs });
   }
 
+  componentDidUpdate = prevProps => {
+    if (
+      this.props.history.location.pathname.includes("worklist") &&
+      this.state.index !== 1
+    ) {
+      this.setState({ index: 1 });
+    }
+  };
+
   handleClose() {
     this.setState({
       width: "0",
@@ -78,6 +87,10 @@ class Sidebar extends Component {
     }
   }
 
+  updateState = () => {
+    this.setState({ index: 1 });
+  };
+
   render() {
     return (
       <React.Fragment>
@@ -96,7 +109,7 @@ class Sidebar extends Component {
               </div>
               <div>Worklist</div>
               {/* <div>Connections</div> */}
-              <div>Users</div>
+              {/* <div>Users</div> */}
             </Nav>
             <Content>
               <div>

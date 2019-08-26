@@ -1,11 +1,11 @@
 import React from "react";
 import Table from "react-table";
+import { Link } from "react-router-dom";
 import { FaRegTrashAlt, FaRegEye } from "react-icons/fa";
 import { getWorklist, deleteWorklist } from "./../../services/worklistServices";
 import { getProject } from "./../../services/projectServices";
 import DeleteAlert from "./../management/common/alertDeletionModal";
 import EditField from "../management/users/editField";
-import editField from "../management/users/editField";
 
 const messages = {
   deleteSingle: "Delete the worklist? This cannot be undone.",
@@ -123,11 +123,13 @@ class WorkList extends React.Component {
         Header: "Open",
         minResizeWidth: 20,
         width: 50,
-        Cell: original => (
-          <div onClick={this.props.onClose}>
-            <FaRegEye className="menu-clickable" />
-          </div>
-        )
+        Cell: original => {
+          return (
+            <div onClick={this.props.onClose}>
+              <FaRegEye className="menu-clickable" />
+            </div>
+          );
+        }
       },
       {
         Header: "Status",
@@ -170,8 +172,8 @@ class WorkList extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
-          console.log(original.row._original);
-          console.log(original);
+          // console.log(original.row._original);
+          // console.log(original);
           const { commentClicked, clickedIndex } = this.state;
           return commentClicked && clickedIndex === original.index ? (
             <div ref={this.setWrapperRef} className="--commentInput">
