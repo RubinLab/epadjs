@@ -1,11 +1,12 @@
 import React from "react";
 import ReactTable from "react-table";
-import { projectData } from "./data";
+import _ from "lodash";
+import { users } from "./userLevelData";
 
 class Users extends React.Component {
-  state = { projectData: [] };
+  state = { data: [], view: "User" };
   componentDidMount = () => {
-    this.setState({ projectData });
+    this.setState({ data: users });
   };
 
   componentWillUnmount = () => {};
@@ -44,17 +45,50 @@ class Users extends React.Component {
   }
 
   defineColumns = () => {
-    return [];
+    return [
+      {
+        Header: "User",
+        accessor: "userName"
+      },
+      {
+        Header: "# of Patients",
+        accessor: "patientname",
+        aggregate: vals => vals.length,
+        Aggregated: row => {
+          return <span>{row.value}</span>;
+        }
+      },
+      {
+        Header: "Completion",
+        accessor: "completion",
+        aggregate: vals => _.round(_.mean(vals)),
+        Aggregated: row => {
+          return <span>{row.value}%</span>;
+        }
+      }
+    ];
   };
 
+  switchTableView = () => {
+    if (this.state.view === "User") {
+      this.setState({ view: "Patient" });
+    } else {
+      this.setState({ view: "User" });
+    }
+  };
   render = () => {
-    console.log();
+    const { view } = this.state;
     return (
       <>
+        <button onClick={this.switchTableView} style={{ color: "black" }}>
+          Show {this.state.view} Based View{" "}
+        </button>
         <ReactTable
           className="pro-table"
           data={this.state.data}
           columns={this.defineColumns()}
+          pivotBy={view === "User" ? ["userName"] : ["patientname"]}
+          showPagination={false}
         />
       </>
     );

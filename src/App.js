@@ -26,6 +26,7 @@ import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import { isLite } from "./config.json";
 import { clearAimId } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/worklist";
+
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
