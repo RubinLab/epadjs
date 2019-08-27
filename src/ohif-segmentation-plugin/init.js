@@ -42,8 +42,18 @@ const defaultConfig = {
     },
     {
       name: "bone",
-      range: [250, 3071],
+      range: [400, 2000],
       displayName: "Bone"
+    },
+    {
+      name: "lung",
+      range: [-1000, -150],
+      displayName: "Lung"
+    },
+    {
+      name: "parenchymal organs",
+      range: [10, 70],
+      displayName: "Par. Organs"
     },
     {
       name: "fat",

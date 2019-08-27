@@ -93,12 +93,18 @@ class AimEditor extends Component {
   };
 
   createAim = answers => {
-    let hasSegmentation = false; //TODO:keep this in store and look dynamically
+    let hasSegmentation = this.props.hasSegmentation;
     const updatedAimId = this.props.aimId;
+
+    if (hasSegmentation) {
+      this.handleSegmentation();
+      return;
+    }
 
     const {
       toolState
     } = this.props.csTools.globalImageIdSpecificToolStateManager;
+    console.log("Tool state", this.props.csTools);
 
     // get the imagesIds for active viewport
     const element = this.props.cornerstone.getEnabledElements()[
@@ -114,7 +120,7 @@ class AimEditor extends Component {
     });
 
     // if has segmentation retrieve the images to generate dicomseg, most should be cached already
-    if (this.props.hasSegmentation) {
+    if (hasSegmentation) {
       alert("creating segments");
       var imagePromises = [];
       imageIds.map(imageId => {
@@ -122,6 +128,8 @@ class AimEditor extends Component {
       });
       this.createSegmentation(toolState, imagePromises, markedImageIds);
     }
+
+    console.log("Marked Images", markedImageIds);
 
     // check for markups
     var shapeIndex = 1;
@@ -276,6 +284,8 @@ class AimEditor extends Component {
       })
       .catch(error => console.log(error));
   };
+
+  hadleSegmentation = () => {};
 
   addModalityObjectToSeedData = seedData => {
     const modality = modalities[seedData.series.modality];
