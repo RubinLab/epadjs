@@ -2,6 +2,7 @@ import React from "react";
 import ReactTable from "react-table";
 import _ from "lodash";
 import { users } from "./userLevelData";
+import "./proView.css";
 
 class Users extends React.Component {
   state = { data: [], view: "User" };
@@ -45,28 +46,58 @@ class Users extends React.Component {
   }
 
   defineColumns = () => {
-    return [
+    const userHeader =
+      this.state.view === "User" ? "  User (#)" : "List of Users";
+    const patientHeader =
+      this.state.view === "Patient" ? "  Patient (#)" : "List of Patients";
+    let columns = [
       {
-        Header: "User",
-        accessor: "userName"
-      },
-      {
-        Header: "# of Patients",
-        accessor: "patientname",
-        aggregate: vals => vals.length,
+        Header: userHeader,
+        accessor: "userName",
+        aggregate: vals => _.join(vals, ", "),
         Aggregated: row => {
-          return <span>{row.value}</span>;
+          return (
+            <div className="--aggregated">
+              <span>{row.value}</span>
+            </div>
+          );
         }
       },
       {
-        Header: "Completion",
+        Header: patientHeader,
+        accessor: "patientname",
+        aggregate: vals => _.join(vals, ", "),
+        Aggregated: row => {
+          return (
+            <div className="--aggregated">
+              <span>{row.value}</span>
+            </div>
+          );
+        }
+      },
+      {
+        Header: "Completion(%)",
         accessor: "completion",
+        width: 150,
+        style: { textAlign: "center" },
         aggregate: vals => _.round(_.mean(vals)),
         Aggregated: row => {
-          return <span>{row.value}%</span>;
+          return (
+            <div className="--aggregated">
+              <span>{row.value}</span>
+            </div>
+          );
         }
       }
     ];
+
+    if (this.state.view === "User") {
+      columns[0] = { ...columns[0], width: 300 };
+    } else {
+      columns[1] = { ...columns[1], width: 300 };
+    }
+
+    return columns;
   };
 
   switchTableView = () => {
@@ -84,9 +115,10 @@ class Users extends React.Component {
           Show {this.state.view} Based View{" "}
         </button>
         <ReactTable
-          className="pro-table"
+          className="progressView"
           data={this.state.data}
           columns={this.defineColumns()}
+          pageSize={this.defineColumns().length}
           pivotBy={view === "User" ? ["userName"] : ["patientname"]}
           showPagination={false}
         />

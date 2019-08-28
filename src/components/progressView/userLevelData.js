@@ -25,6 +25,39 @@ export const users = [
   },
 
   {
+    patientname: "patient33-1",
+    patientid: "ID-patient333-1",
+    completion: 10,
+    userName: "user1",
+    projectID: "ID-project1",
+    projectName: "project1"
+  },
+  {
+    patientname: "patient333-2",
+    patientid: "ID-patient333-2",
+    completion: 20,
+    userName: "user1",
+    projectID: "ID-project1",
+    projectName: "project1"
+  },
+  {
+    patientname: "patient333-3",
+    patientid: "ID-patient333-3",
+    completion: 30,
+    userName: "user1",
+    projectID: "ID-project1",
+    projectName: "project1"
+  },
+  {
+    patientname: "patient333-4",
+    patientid: "ID-patient333-4",
+    completion: 40,
+    userName: "user1",
+    projectID: "ID-project1",
+    projectName: "project1"
+  },
+
+  {
     patientname: "patient2",
     patientid: "ID-patient2",
     completion: 10,
