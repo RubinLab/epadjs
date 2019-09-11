@@ -47,15 +47,27 @@ class Users extends React.Component {
   };
   getUserData = async () => {
     const result = await getUsers();
-    const data = result.data.ResultSet.Result;
-    this.setState({ data });
+    let data = result.data.ResultSet.Result;
+    let usersProjects = [];
     let hasAdminPermission = false;
+
     //check if the signed in user has admin permissions
     for (let user of data) {
       if (user.username === sessionStorage.getItem("username")) {
         hasAdminPermission = user.admin;
+        usersProjects = user.projects;
       }
     }
+    for (let user of data) {
+      let filteredProjects = [];
+      for (let project of user.projects) {
+        if (usersProjects.includes(project)) {
+          filteredProjects.push(this.props.projectMap[project]);
+        }
+      }
+      user.projects = filteredProjects;
+    }
+    this.setState({ data });
     this.setState({ hasAdminPermission });
   };
 

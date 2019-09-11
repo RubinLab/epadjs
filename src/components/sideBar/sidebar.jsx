@@ -7,6 +7,7 @@ import { getWorklists } from "../../services/worklistServices";
 import { getPacs } from "../../services/pacsServices";
 import { FiZoomIn } from "react-icons/fi";
 import "./w2.css";
+import { throws } from "assert";
 
 class Sidebar extends Component {
   constructor(props) {
@@ -48,6 +49,11 @@ class Sidebar extends Component {
       }
     } = await getPacs();
     this.setState({ pacs });
+    const projectMap = {};
+    for (let project of projects) {
+      projectMap[project.id] = project.name;
+    }
+    this.props.onData(projectMap);
   }
 
   componentDidUpdate = prevProps => {

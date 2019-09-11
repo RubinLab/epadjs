@@ -37,7 +37,8 @@ class App extends Component {
     authenticated: false,
     openInfo: false,
     openMenu: false,
-    openUser: false
+    openUser: false,
+    projectMap: {}
   };
 
   closeMenu = event => {
@@ -87,6 +88,9 @@ class App extends Component {
     }
   };
 
+  getProjectMap = projectMap => {
+    this.setState({ projectMap });
+  };
   async componentDidMount() {
     // when comp mount check if the user is set already. If is set then set state
     if (isLite) {
@@ -184,7 +188,10 @@ class App extends Component {
         />
         {this.state.openMng && this.state.openMenu && (
           <div ref={this.setWrapperRef}>
-            <Management closeMenu={this.closeMenu} />
+            <Management
+              closeMenu={this.closeMenu}
+              projectMap={this.state.projectMap}
+            />
           </div>
         )}
         {this.state.openInfo && this.state.openMenu && (
@@ -202,7 +209,7 @@ class App extends Component {
         )}
         {this.state.authenticated && !isLite && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
-            <Sidebar>
+            <Sidebar onData={this.getProjectMap}>
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
                 <ProtectedRoute
