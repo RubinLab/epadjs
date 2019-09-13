@@ -1,10 +1,11 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Modal } from 'react-bootstrap';
-import '../menuStyle.css';
-import UserTable from './userTable';
+import React from "react";
+import PropTypes from "prop-types";
+import { Modal } from "react-bootstrap";
+import "../menuStyle.css";
+import UserTable from "./userTable";
 
 const userRoleEditingForm = ({ onCancel, onSubmit, onType, error, users }) => {
+  // users = users || projects;
   return (
     <Modal.Dialog dialogClassName="edit-userRole__modal">
       <Modal.Header>

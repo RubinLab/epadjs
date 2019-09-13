@@ -5,8 +5,8 @@ import "../menuStyle.css";
 import { getUsers } from "../../../services/userServices";
 import ToolBar from "../common/basicToolBar";
 import EditUsers from "./editUsersForm";
-import ColorPicker from "./colorPicker";
 import EditField from "./editField";
+import UserRoleEditForm from "../projects/userRoleEditingForm";
 
 class Users extends React.Component {
   state = {
@@ -16,7 +16,8 @@ class Users extends React.Component {
     deleteAllClicked: false,
     selectAll: 0,
     selected: {},
-    edit: {}
+    edit: {},
+    showUserRoleEdit: false
   };
 
   componentDidMount = () => {
@@ -45,6 +46,11 @@ class Users extends React.Component {
   handleOutClick = () => {
     this.setState({ edit: {} });
   };
+
+  displayUserRoleEdit = () => {
+    this.setState(state => ({ showUserRoleEdit: !state.showUserRoleEdit }));
+  };
+
   getUserData = async () => {
     const result = await getUsers();
     let data = result.data.ResultSet.Result;
@@ -99,6 +105,10 @@ class Users extends React.Component {
     this.setState({ selected: newSelected });
   };
 
+  updateUserRole = () => {};
+
+  getUserRole = () => {};
+
   toggleSelectAll() {
     let newSelected = {};
     if (this.state.selectAll === 0) {
@@ -121,6 +131,19 @@ class Users extends React.Component {
     if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
       this.handleOutClick();
     }
+  };
+
+  handleCancel = () => {
+    this.setState({
+      hasAddClicked: false,
+      error: "",
+      delAll: false,
+      hasEditClicked: false,
+      delOne: false,
+      selectedOne: {},
+      displayCreationForm: false,
+      showUserRoleEdit: false
+    });
   };
 
   defineColumns = () => {
@@ -274,9 +297,11 @@ class Users extends React.Component {
         minWidth: 50,
         className: "mng-user__cell",
         Cell: original => (
-          <p className="menu-clickable wrapped">
-            {original.row.projects.join(", ")}
-          </p>
+          <div onClick={this.showUserRoleEdit}>
+            <p className="menu-clickable wrapped">
+              {original.row.projects.join(", ")}
+            </p>
+          </div>
         )
       },
       {
@@ -319,56 +344,36 @@ class Users extends React.Component {
             <div className="centeredCell"> {<FaCheck />}</div>
           ) : null;
         }
-      },
-      {
-        Header: "Edit",
-        width: 45,
-        minResizeWidth: 20,
-        resizable: true,
-        className: "mng-user__cell",
-        Cell: original => {
-          return original.row.checkbox.username ===
-            sessionStorage.getItem("username") ||
-            this.state.hasAdminPermission ? (
-            <div
-              onClick={() => {
-                this.setState({
-                  hasEditClicked: true,
-                  userToEdit: original.row.checkbox
-                });
-              }}
-            >
-              <FaEdit className="menu-clickable" />
-            </div>
-          ) : null;
-        }
       }
+      // {
+      //   Header: "Edit",
+      //   width: 45,
+      //   minResizeWidth: 20,
+      //   resizable: true,
+      //   className: "mng-user__cell",
+      //   Cell: original => {
+      //     return original.row.checkbox.username ===
+      //       sessionStorage.getItem("username") ||
+      //       this.state.hasAdminPermission ? (
+      //       <div
+      //         onClick={() => {
+      //           this.setState({
+      //             hasEditClicked: true,
+      //             userToEdit: original.row.checkbox
+      //           });
+      //         }}
+      //       >
+      //         <FaEdit className="menu-clickable" />
+      //       </div>
+      //     ) : null;
+      //   }
+      // }
     ];
-  };
-
-  handleCancel = () => {
-    this.setState({
-      hasAddClicked: false,
-      error: "",
-      delAll: false,
-      hasEditClicked: false,
-      delOne: false,
-      selectedOne: {},
-      displayCreationForm: false,
-      firstname: "",
-      lastname: "",
-      email: "",
-      colorpreference: "",
-      showColorpicker: false
-    });
-  };
-
-  handleColorClick = () => {
-    this.setState(state => ({ showColorPicker: !state.showColorPicker }));
   };
 
   render = () => {
     console.log();
+
     return (
       <>
         <div className="users menu-display">
@@ -378,14 +383,13 @@ class Users extends React.Component {
             data={this.state.data}
             columns={this.defineColumns()}
           />
-          {this.state.hasEditClicked && (
-            <EditUsers
+          {this.state.showUserRoleEdit && (
+            <UserRoleEditForm
+              onSubmit={this.updateUserRole}
+              onType={this.getUserRole}
+              error={this.state.error}
+              projects={this.props.projectMap}
               onCancel={this.handleCancel}
-              userToEdit={this.state.userToEdit}
-              handleColorClick={this.handleColorClick}
-              admin={this.state.hasAdminPermission}
-              // onType={this.handleFormInput}
-              // onSubmit={this.editConnection}
             />
           )}
         </div>
