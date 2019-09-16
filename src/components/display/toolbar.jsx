@@ -78,18 +78,14 @@ const tools = [
   { name: "Rotate" },
   { name: "WwwcRegion" },
   { name: "Probe" },
-  {
-    name: "FreehandRoi",
-    configuration: {
-      showMinMax: true
-      // showHounsfieldUnits: true
-    }
-  },
-  { name: "Eraser" },
   { name: "Bidirectional" },
-  { name: "Brush" },
-  { name: "FreehandRoiSculptor" }
-  //{ name: "FreehandMouseSculpter" }
+  { name: "Eraser" }
+
+  // { name: "FreehandRoi3D" },
+  // { name: "FreehandRoi3DSculptor" },
+  // { name: "Brush3D" },
+  // { name: "Brush3DHUGated" },
+  // { name: "Brush3DAutoGated" }
 ];
 
 class Toolbar extends Component {
@@ -138,7 +134,8 @@ class Toolbar extends Component {
 
   //sets the selected tool active for an enabled elements
   setToolActiveForElement = (toolName, mouseMask = 1) => {
-    // this.disableAllTools();
+    this.disableAllTools();
+    console.log("CStools", this.cornerstoneTools);
     if (toolName == "Brush3DHUGatedTool") {
       this.cornerstoneTools.store.modules.brush.setters.activeGate("muscle");
     }
@@ -519,9 +516,7 @@ class Toolbar extends Component {
                 id="polygon"
                 tabIndex="5"
                 className="drawingSectionButton"
-                onClick={() =>
-                  this.setToolActiveForElement("FreehandRoi3DTool")
-                }
+                onClick={() => this.setToolActiveForElement("FreehandRoi3D")}
               >
                 <div className="icon-polygon fontastic-icons" />
                 <div className="buttonLabel">
@@ -552,7 +547,7 @@ class Toolbar extends Component {
                 tabIndex="6"
                 className="drawingSectionButton"
                 onClick={() =>
-                  this.setToolActiveForElement("FreehandSculpterMouse")
+                  this.setToolActiveForElement("FreehandRoi3DSculptor")
                 }
               >
                 <div className="toolContainer">
@@ -577,7 +572,7 @@ class Toolbar extends Component {
                 id="brush"
                 tabIndex="8"
                 className="drawingSectionButton"
-                onClick={() => this.setToolActiveForElement("Brush3DTool")}
+                onClick={() => this.setToolActiveForElement("Brush3D")}
               >
                 <div className="icon-brush" />
                 <div className="buttonLabel">
@@ -589,7 +584,7 @@ class Toolbar extends Component {
                 tabIndex="9"
                 className="drawingSectionButton"
                 onClick={() => {
-                  this.setToolActiveForElement("Brush3DHUGatedTool");
+                  this.setToolActiveForElement("Brush3DHUGated");
                 }}
                 onMouseOver={() => {
                   this.setState({ showSegmentation: true });

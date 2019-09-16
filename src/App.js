@@ -87,7 +87,6 @@ class App extends Component {
 
   async componentDidMount() {
     // when comp mount check if the user is set already. If is set then set state
-<<<<<<< HEAD
     // if (isLite) {
     //   const keycloak = Keycloak("/keycloak.json");
     //   let user;
@@ -132,50 +131,6 @@ class App extends Component {
     //     }
     //   } catch (ex) {}
     // }
-=======
-    if (isLite) {
-      const keycloak = Keycloak("/keycloak.json");
-      let user;
-      let keycloakInit = new Promise((resolve, reject) => {
-        keycloak.init({ onLoad: "login-required" }).then(authenticated => {
-          // this.setState({ keycloak: keycloak, authenticated: authenticated });
-          keycloak.loadUserInfo().then(userInfo => {
-            // let user = { id: userInfo.email, displayname: userInfo.given_name };
-            // this.setState({
-            //   name: userInfo.name,
-            //   user,
-            //   id: userInfo.sub
-            // });
-            resolve({ userInfo, keycloak, authenticated });
-            // reject("Authentication failed!");
-          });
-        });
-      });
-      keycloakInit
-        .then(async result => {
-          let user = {
-            user: result.userInfo.email,
-            displayname: result.userInfo.given_name
-          };
-          await auth.login(user, null, result.keycloak.token);
-          this.setState({
-            keycloak: result.keycloak,
-            authenticated: result.authenticated,
-            id: result.userInfo.sub,
-            user
-          });
-        })
-        .catch(err => {});
-    } else {
-      try {
-        const username = sessionStorage.getItem("username");
-        if (username) {
-          const { data: user } = await getUser(username);
-          this.setState({ user, authenticated: true });
-        }
-      } catch (ex) {}
-    }
->>>>>>> master
     // window.addEventListener("keydown", this.closeMenu, true);
     document.addEventListener("mousedown", this.handleClickOutside);
   }
@@ -294,7 +249,7 @@ class App extends Component {
 }
 
 const mapStateToProps = state => {
-  console.log(state.annotationsListReducer);
+  // console.log(state.annotationsListReducer);
   // console.log(state.managementReducer);
   const {
     listOpen,
