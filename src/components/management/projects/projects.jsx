@@ -98,11 +98,7 @@ class Projects extends React.Component {
 
   getProjectData = async () => {
     try {
-      const {
-        data: {
-          ResultSet: { Result: data }
-        }
-      } = await getProjects();
+      const { data } = await getProjects();
       this.setState({ data });
     } catch (err) {
       // this.setState({ error: true });
@@ -436,7 +432,6 @@ class Projects extends React.Component {
 
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
-    console.log(this.state);
     return (
       <div className="projects menu-display" id="projects">
         <ToolBar

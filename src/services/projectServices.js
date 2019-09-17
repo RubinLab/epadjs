@@ -2,7 +2,7 @@ import http from "./httpService";
 import { isLite, apiUrl, apiUrlV1 } from "../config.json";
 
 export function getProjects() {
-  return http.get(apiUrl + "/projects/");
+  return http.get(apiUrl + "/projects");
 }
 
 export function deleteProject(projectId) {
@@ -13,24 +13,18 @@ export function saveProject(
   projectName,
   projectDescription,
   defaultTemplate,
-  id,
-  user,
+  projectId,
+  userName,
   type
 ) {
-  return http.post(
-    apiUrl +
-      "/projects/" +
-      id +
-      "?/username=" +
-      user +
-      "&projectName=" +
-      projectName +
-      "&projectDescription=" +
-      projectDescription +
-      "&type=" +
-      type,
-    { projectDescription, defaultTemplate }
-  );
+  return http.post(apiUrl + "/projects", {
+    projectName,
+    projectDescription,
+    defaultTemplate,
+    projectId,
+    userName,
+    type
+  });
 }
 
 export function updateProject(id, projectName, projectDescription, type) {

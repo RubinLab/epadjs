@@ -30,13 +30,15 @@ class Sidebar extends Component {
 
   async componentDidMount() {
     //get the porjects
-    const {
-      data: {
-        ResultSet: { Result: projects }
-      }
-    } = await getProjects();
+    const { data: projects } = await getProjects();
     this.setState({ projects, pId: projects[0].id });
     //get the worklists
+    const projectMap = {};
+    for (let project of projects) {
+      projectMap[project.id] = project.name;
+    }
+
+    this.props.onData(projectMap);
     const {
       data: {
         ResultSet: { Result: worklists }
@@ -49,11 +51,6 @@ class Sidebar extends Component {
       }
     } = await getPacs();
     this.setState({ pacs });
-    const projectMap = {};
-    for (let project of projects) {
-      projectMap[project.id] = project.name;
-    }
-    this.props.onData(projectMap);
   }
 
   componentDidUpdate = prevProps => {

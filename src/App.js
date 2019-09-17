@@ -3,7 +3,7 @@ import { Route, Switch, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import Keycloak from "keycloak-js";
-import { getUser } from "./services/userServices";
+import { getUser, createUser } from "./services/userServices";
 import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
 import SearchView from "./components/searchView/searchView";
@@ -124,8 +124,29 @@ class App extends Component {
           id: result.userInfo.sub,
           user
         });
+        const { email, family_name, given_name } = result.userInfo;
+        //username, firstname, lastname, email
+        //get the user with username
+        let userData;
+        try {
+          userData = await getUser(email);
+        } catch (err) {
+          createUser(email, given_name, family_name, email)
+            .then(async () => {
+              {
+                userData = await getUser(email);
+              }
+            })
+            .catch(error => console.log(error));
+          console.log(err);
+        }
+
+        //if users exits constinue
       })
-      .catch(err => {});
+
+      .catch(err2 => {
+        console.log(err2);
+      });
     // } else {
     //   try {
     //     const username = sessionStorage.getItem("username");

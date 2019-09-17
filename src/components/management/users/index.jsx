@@ -2,22 +2,24 @@ import React from "react";
 import ReactTable from "react-table";
 import { FaEdit, FaCheck, FaSave } from "react-icons/fa";
 import "../menuStyle.css";
-import { getUsers } from "../../../services/userServices";
+import {
+  getUsers,
+  updateUserProjectRole
+} from "../../../services/userServices";
 import ToolBar from "../common/basicToolBar";
-import EditUsers from "./editUsersForm";
 import EditField from "./editField";
-import UserRoleEditForm from "../projects/userRoleEditingForm";
-
+import UserRoleEditForm from "./userRoleEdit";
 class Users extends React.Component {
   state = {
     data: [],
-    showColorpicker: false,
     hasAdminPermission: false,
     deleteAllClicked: false,
     selectAll: 0,
     selected: {},
-    edit: {},
-    showUserRoleEdit: false
+    edit: [],
+    roleEdit: [],
+    showUserRoleEdit: false,
+    userToEdit: ""
   };
 
   componentDidMount = () => {
@@ -43,23 +45,61 @@ class Users extends React.Component {
     this.setState({ edit });
   };
 
-  handleOutClick = () => {
-    this.setState({ edit: {} });
+  getUserRole = async e => {
+    const { value } = e.target;
+    const { projectid } = e.target.dataset;
+    if (this.state.roleEdit.length > 0) {
+      this.setState(state => ({
+        roleEdit: state.roleEdit.concat([{ [projectid]: { role: value } }])
+      }));
+    } else {
+      this.setState({ roleEdit: [{ [projectid]: { role: value } }] });
+    }
+  };
+  updateUserRole = () => {
+    const updates = [];
+    const updatedBy = sessionStorage.getItem("username");
+    for (let item of this.state.roleEdit) {
+      const projectid = Object.keys(item);
+      const role = Object.values(item);
+      const body = { ...role[0], updatedBy };
+      updates.push(
+        updateUserProjectRole(projectid, this.state.userToEdit, body)
+      );
+    }
+    this.handleCancel();
+    Promise.all(updates)
+      .then(() => {
+        this.getUserData();
+        this.handleCancel();
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
 
-  displayUserRoleEdit = () => {
+  handleOutClick = () => {
+    this.setState({ edit: [] });
+  };
+
+  displayUserRoleEdit = userToEdit => {
+    console.log(userToEdit);
     this.setState(state => ({ showUserRoleEdit: !state.showUserRoleEdit }));
+    this.setState({ userToEdit });
+  };
+
+  saveUSerClicked = index => {
+    this.setState({ userClicked: index });
   };
 
   getUserData = async () => {
-    const result = await getUsers();
-    let data = result.data.ResultSet.Result;
+    const { data } = await getUsers();
     let usersProjects = [];
     let hasAdminPermission = false;
-
     //check if the signed in user has admin permissions
+    const signInName = sessionStorage.getItem("username");
     for (let user of data) {
-      if (user.username === sessionStorage.getItem("username")) {
+      if (user.username === signInName) {
         hasAdminPermission = user.admin;
         usersProjects = user.projects;
       }
@@ -73,8 +113,7 @@ class Users extends React.Component {
       }
       user.projects = filteredProjects;
     }
-    this.setState({ data });
-    this.setState({ hasAdminPermission });
+    this.setState({ data, hasAdminPermission, usersProjects });
   };
 
   convertArrToStr = arr => {
@@ -104,10 +143,6 @@ class Users extends React.Component {
     }
     this.setState({ selected: newSelected });
   };
-
-  updateUserRole = () => {};
-
-  getUserRole = () => {};
 
   toggleSelectAll() {
     let newSelected = {};
@@ -142,7 +177,9 @@ class Users extends React.Component {
       delOne: false,
       selectedOne: {},
       displayCreationForm: false,
-      showUserRoleEdit: false
+      showUserRoleEdit: false,
+      edit: [],
+      roleEdit: []
     });
   };
 
@@ -260,33 +297,33 @@ class Users extends React.Component {
           );
         }
       },
-      {
-        Header: "Color",
-        className: "usersTable-cell",
-        resizable: true,
-        minResizeWidth: 20,
-        minWidth: 20,
-        className: "mng-user__cell",
-        Cell: original => {
-          const { username } = original.row.checkbox;
-          const className =
-            this.state.edit.color === username ? "user-color" : "";
-          let color = original.row.checkbox.colorpreference;
-          color = color ? `#${color}` : `#19ff75`;
-          return (
-            <p
-              className={`menu-clickable wrapped ${className}`}
-              style={{ color }}
-              data-name="color"
-              onClick={() => {
-                this.handleEditField("color", username);
-              }}
-            >
-              {original.row.checkbox.username}
-            </p>
-          );
-        }
-      },
+      // {
+      //   Header: "Color",
+      //   className: "usersTable-cell",
+      //   resizable: true,
+      //   minResizeWidth: 20,
+      //   minWidth: 20,
+      //   className: "mng-user__cell",
+      //   Cell: original => {
+      //     const { username } = original.row.checkbox;
+      //     const className =
+      //       this.state.edit.color === username ? "user-color" : "";
+      //     let color = original.row.checkbox.colorpreference;
+      //     color = color ? `#${color}` : `#19ff75`;
+      //     return (
+      //       <p
+      //         className={`menu-clickable wrapped ${className}`}
+      //         style={{ color }}
+      //         data-name="color"
+      //         onClick={() => {
+      //           this.handleEditField("color", username);
+      //         }}
+      //       >
+      //         {original.row.checkbox.username}
+      //       </p>
+      //     );
+      //   }
+      // },
       {
         Header: "Projects",
         className: "usersTable-cell",
@@ -297,7 +334,12 @@ class Users extends React.Component {
         minWidth: 50,
         className: "mng-user__cell",
         Cell: original => (
-          <div onClick={this.showUserRoleEdit}>
+          <div
+            onClick={() => {
+              this.displayUserRoleEdit(original.row.checkbox.username);
+              this.saveUSerClicked(original.index);
+            }}
+          >
             <p className="menu-clickable wrapped">
               {original.row.projects.join(", ")}
             </p>
@@ -345,34 +387,11 @@ class Users extends React.Component {
           ) : null;
         }
       }
-      // {
-      //   Header: "Edit",
-      //   width: 45,
-      //   minResizeWidth: 20,
-      //   resizable: true,
-      //   className: "mng-user__cell",
-      //   Cell: original => {
-      //     return original.row.checkbox.username ===
-      //       sessionStorage.getItem("username") ||
-      //       this.state.hasAdminPermission ? (
-      //       <div
-      //         onClick={() => {
-      //           this.setState({
-      //             hasEditClicked: true,
-      //             userToEdit: original.row.checkbox
-      //           });
-      //         }}
-      //       >
-      //         <FaEdit className="menu-clickable" />
-      //       </div>
-      //     ) : null;
-      //   }
-      // }
     ];
   };
 
   render = () => {
-    console.log();
+    const { data, userClicked, usersProjects } = this.state;
 
     return (
       <>
@@ -380,22 +399,20 @@ class Users extends React.Component {
           <ToolBar />
           <ReactTable
             className="pro-table"
-            data={this.state.data}
+            data={data}
             columns={this.defineColumns()}
           />
           {this.state.showUserRoleEdit && (
             <UserRoleEditForm
               onSubmit={this.updateUserRole}
-              onType={this.getUserRole}
-              error={this.state.error}
-              projects={this.props.projectMap}
+              onSelect={this.getUserRole}
+              projectMap={this.props.projectMap}
+              projects={usersProjects}
               onCancel={this.handleCancel}
+              projectToRole={data[userClicked].projectToRole}
             />
           )}
         </div>
-        {/* {this.state.edit.color && (
-          <ColorPicker onCancel={this.handleColorClick} />
-        )} */}
       </>
     );
   };

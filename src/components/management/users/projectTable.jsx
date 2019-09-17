@@ -2,23 +2,36 @@ import React from "react";
 import PropTypes from "prop-types";
 import Row from "./tableRow";
 
-const projectTable = ({ onSelect, projects }) => {
+const projectTable = ({ onSelect, projects, projectToRole, projectMap }) => {
   const rows = [];
-  projects.forEach(el => {
+  // projects.forEach
+  const userRoles = {};
+  for (let role of projectToRole) {
+    const roleArr = role.split(":");
+    userRoles[roleArr[0]] = roleArr[1];
+  }
+
+  projects.forEach(project => {
     rows.push(
-      <Row name={el.id} key={el.id} user={el.user} onSelect={onSelect} />
+      <Row
+        name={projectMap[project]}
+        key={project}
+        role={userRoles[project] || "None"}
+        onSelect={onSelect}
+        projectId={project}
+      />
     );
   });
   return (
-    <table>
+    <table className="project-table">
       <thead>
         <tr>
-          <th className="project-table__header--user">User</th>
-          <th className="project-table__header">Owner</th>
-          <th className="project-table__header">Member</th>
-          <th className="project-table__header">Collaborator</th>
-          <th className="project-table__header">StudyOnly</th>
-          <th className="project-table__header">None</th>
+          <th className="project-table __header --user">Project</th>
+          <th className="project-table __header">Owner</th>
+          <th className="project-table __header">Member</th>
+          <th className="project-table __header">Collaborator</th>
+          <th className="project-table __header">StudyOnly</th>
+          <th className="project-table __header">None</th>
         </tr>
       </thead>
       <tbody>{rows}</tbody>
@@ -28,7 +41,9 @@ const projectTable = ({ onSelect, projects }) => {
 
 PropTypes.projectTable = {
   onSelect: PropTypes.func,
-  projects: PropTypes.string
+  projects: PropTypes.Array,
+  projectMap: PropTypes.Object,
+  projectToRole: PropTypes.Array
 };
 
 export default projectTable;

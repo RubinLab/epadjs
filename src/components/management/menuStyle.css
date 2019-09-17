@@ -845,3 +845,17 @@
 .update-profile__modal--form .form-exp.required {
   margin-top: 0;
 }
+
+.project-table {
+  width: 100%;
+}
+.project-table.__header {
+  margin: 0.3rem;
+}
+
+.edit-userRole__modal.project_user {
+}
+
+.edit-userRole.project_user {
+  width: 100%;
+}
