@@ -19,8 +19,7 @@ import { freehand } from "./Freehand";
 import { line } from "./Line";
 import { probe } from "./Probe";
 import { circle } from "./Circle";
-
-// import FreehandRoi3DTool from "ohif-segmentation-plugin/tools/FreehandRoi3DTool.js";
+import RightsideBar from "../RightsideBar/RightsideBar";
 
 const tools = [
   { name: "Wwwc", mouseButtonMasks: [1] },
@@ -495,78 +494,80 @@ class DisplayView extends Component {
           cornerstone={this.cornerstone}
           cornerstoneTools={this.cornerstoneTools}
         />
-        {this.state.showAimEditor && (
-          <AimEditor
-            cornerstone={this.props.cornerstone}
-            csTools={this.cornerstoneTools}
-            aimId={this.state.selectedAim}
-            onCancel={this.closeAimEditor}
-            hasSegmentation={this.state.hasSegmentation}
-          />
-        )}
-        {!this.state.isLoading &&
-          Object.entries(this.props.series).length &&
-          this.state.data.map((data, i) => (
-            <div
-              className={
-                "viewportContainer" +
-                (this.props.activePort == i ? " selected" : "")
-              }
-              key={i}
-              id={"viewportContainer" + i}
-              style={{
-                width: this.state.width,
-                height: this.state.height,
-                padding: "2px",
-                display: "inline-block"
-              }}
-              onDoubleClick={() => this.hideShow(i)}
-            >
-              <MenuProvider
-                id="menu_id"
+        <RightsideBar>
+          {this.state.showAimEditor && (
+            <AimEditor
+              cornerstone={this.props.cornerstone}
+              csTools={this.cornerstoneTools}
+              aimId={this.state.selectedAim}
+              onCancel={this.closeAimEditor}
+              hasSegmentation={this.state.hasSegmentation}
+            />
+          )}
+          {!this.state.isLoading &&
+            Object.entries(this.props.series).length &&
+            this.state.data.map((data, i) => (
+              <div
+                className={
+                  "viewportContainer" +
+                  (this.props.activePort == i ? " selected" : "")
+                }
+                key={i}
+                id={"viewportContainer" + i}
                 style={{
-                  width: "100%",
-                  height: "100%",
+                  width: this.state.width,
+                  height: this.state.height,
+                  padding: "2px",
                   display: "inline-block"
                 }}
+                onDoubleClick={() => this.hideShow(i)}
               >
-                <CornerstoneViewport
-                  key={i}
-                  viewportData={data}
-                  viewportIndex={i}
-                  availableTools={tools}
-                  onMeasurementsChanged={this.measurementChanged}
-                  setViewportActive={() => this.setActive(i)}
-                  onNewImage={event =>
-                    this.props.dispatch(updateImageId(event))
-                  }
-                  // onRightClick={this.showRightMenu}
-                />
-              </MenuProvider>
-            </div>
-            // <div
-            //   className={"viewportContainer"}
-            //   key={i}
-            //   style={{
-            //     width: this.state.width,
-            //     height: this.state.height,
-            //     padding: "2px",
-            //     display: "inline-block"
-            //   }}
-            //   onDoubleClick={() => this.hideShow(i)}
-            // >
+                <MenuProvider
+                  id="menu_id"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    display: "inline-block"
+                  }}
+                >
+                  <CornerstoneViewport
+                    key={i}
+                    viewportData={data}
+                    viewportIndex={i}
+                    availableTools={tools}
+                    onMeasurementsChanged={this.measurementChanged}
+                    setViewportActive={() => this.setActive(i)}
+                    onNewImage={event =>
+                      this.props.dispatch(updateImageId(event))
+                    }
+                    // onRightClick={this.showRightMenu}
+                  />
+                </MenuProvider>
+              </div>
+              // <div
+              //   className={"viewportContainer"}
+              //   key={i}
+              //   style={{
+              //     width: this.state.width,
+              //     height: this.state.height,
+              //     padding: "2px",
+              //     display: "inline-block"
+              //   }}
+              //   onDoubleClick={() => this.hideShow(i)}
+              // >
 
-            // {this.state.showAimEditor && (
-            //   <AimEditor
-            //     cornerstone={this.props.cornerstone}
-            //     csTools={this.cornerstoneTools}
-            //   />
-            // )}
+              // {this.state.showAimEditor && (
+              //   <AimEditor
+              //     cornerstone={this.props.cornerstone}
+              //     csTools={this.cornerstoneTools}
+              //   />
+              // )}
 
-            //{" "}
-            // </div>
-          ))}
-        <ContextMenu />
+              //{" "}
+              // </div>
+            ))}
+          <ContextMenu />
+        </RightsideBar>
       </React.Fragment>
     );
     // </div>

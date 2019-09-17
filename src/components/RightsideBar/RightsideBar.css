@@ -1,0 +1,100 @@
+.rightsidenav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  right: 0;
+  background-color: #3a3f44;
+  overflow-x: hidden;
+  transition: 0.4s;
+}
+
+.openbtn {
+  display: block;
+  position: fixed;
+  font-size: 14px;
+  right: 0px;
+}
+
+.closebtn {
+  display: block;
+  position: relative;
+  font-size: 14px;
+  left: 0px;
+  padding-top: 0px;
+  margin-top: 0px;
+}
+
+.mainView {
+  height: 100%;
+  flex: 1;
+  transition: margin-right 0.4s;
+  width: calc(100% - 300px);
+  padding: 10px;
+}
+
+.mainView-closed {
+  width: 100%;
+  padding: 10px;
+  transition: margin-right 0.4s;
+  padding-right: 40px;
+  padding-top: 10px;
+}
+
+.Collapsible__contentInner {
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 0;
+}
+
+.Collapsible__contentInner p {
+  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.Collapsible__contentInner p:last-child {
+  margin-bottom: 0;
+}
+
+.Collapsible__trigger {
+  display: block;
+  font-weight: 400;
+  text-decoration: none;
+  color: #3a3f44;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  background: #3a3f44;
+  color: white;
+}
+
+.Collapsible__trigger:after {
+  font-family: 'FontAwesome';
+  content: '\f107';
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: block;
+
+}
+
+.Collapsible__trigger.is-open:after {
+  transform: rotateZ(180deg);
+}
+
+.Collapsible__trigger.is-disabled {
+  opacity: 0.5;
+  background-color: grey;
+}
+
+.CustomTriggerCSS--open {
+  background-color: darkslateblue;
+}
+
+.Collapsible__custom-sibling {
+  padding: 5px;
+  font-size: 12px;
+  background-color: #CBB700;
+  color: black;
+}
