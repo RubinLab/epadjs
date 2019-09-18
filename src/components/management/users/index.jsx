@@ -1,25 +1,24 @@
 import React from "react";
 import ReactTable from "react-table";
-import {
-  FaEdit,
-  FaCheck,
-  FaSave,
-  FaRegTrashAlt,
-  FaUserLock,
-  FaTimesCircle,
-  FaMinus,
-  FaTimes
-} from "react-icons/fa";
+import { FaCheck, FaRegTrashAlt, FaTimes } from "react-icons/fa";
 import "../menuStyle.css";
 import {
   getUsers,
   updateUserProjectRole,
-  updateUser
+  updateUser,
+  deleteUser
 } from "../../../services/userServices";
 import ToolBar from "../common/basicToolBar";
 import EditField from "./editField";
 import UserRoleEditForm from "./userRoleEdit";
 import UserPermissionEdit from "./userPermissionEdit";
+import DeleteAlert from "../common/alertDeletionModal";
+
+const messages = {
+  deleteSingle: "Delete the user? This cannot be undone.",
+  deleteSelected: "Delete selected users? This cannot be undone."
+};
+
 class Users extends React.Component {
   state = {
     data: [],
@@ -32,7 +31,7 @@ class Users extends React.Component {
     permissionEdit: {},
     showRoleEdit: false,
     userToEdit: "",
-    userClicked: null,
+    clickedUserIndex: null,
     showPermissionEdit: false
   };
 
@@ -90,19 +89,23 @@ class Users extends React.Component {
         this.handleCancel();
       })
       .catch(err => {
+        this.setState({ errorMessage: err.response.data.message });
+
         console.log(err);
       });
   };
 
-  updateAdmin = async username => {
+  updateAdmin = async (username, admin) => {
     updateUser(username, {
-      admin: !this.state.hasAdminPermission
+      admin: !admin
     })
       .then(() => {
         this.getUserData();
         this.handleCancel();
       })
       .catch(err => {
+        this.setState({ errorMessage: err.response.data.message });
+
         console.log(err);
       });
   };
@@ -125,6 +128,29 @@ class Users extends React.Component {
         this.handleCancel();
       })
       .catch(err => {
+        this.setState({ errorMessage: err.response.data.message });
+
+        console.log(err);
+      });
+  };
+
+  handleSingleDelete = () => {
+    this.setState({ hasDeleteSingleClicked: true });
+  };
+
+  handleDeleteAll = () => {
+    this.setState({ hasDeleteSingleClicked: true });
+  };
+
+  deleteUser = username => {
+    deleteUser(this.state.userToEdit)
+      .then(() => {
+        this.getUserData();
+        this.handleCancel();
+      })
+      .catch(err => {
+        this.setState({ errorMessage: err.response.data.message });
+
         console.log(err);
       });
   };
@@ -148,8 +174,8 @@ class Users extends React.Component {
     this.setState({ permissionEdit: obj });
   };
 
-  saveUserClicked = userToEdit => {
-    this.setState({ userClicked: userToEdit.index });
+  saveClickedUser = userToEdit => {
+    this.setState({ clickedUserIndex: userToEdit.index });
     this.setState({ userToEdit: userToEdit.row.checkbox.username });
   };
 
@@ -242,8 +268,11 @@ class Users extends React.Component {
       edit: [],
       roleEdit: [],
       userToEdit: "",
-      userClicked: null,
-      showPermissionEdit: false
+      clickedUserIndex: null,
+      showPermissionEdit: false,
+      hasDeleteAllClicked: false,
+      hasDeleteSingleClicked: false,
+      errorMessage: ""
     });
   };
 
@@ -401,7 +430,7 @@ class Users extends React.Component {
           <div
             onClick={() => {
               this.displayUserRoleEdit();
-              this.saveUserClicked(original);
+              this.saveClickedUser(original);
             }}
           >
             <p className="menu-clickable wrapped">
@@ -418,11 +447,12 @@ class Users extends React.Component {
         minWidth: 20,
         className: "mng-user__cell",
         Cell: original => {
+          const { username, admin } = original.row.checkbox;
           return (
             <div
               className="centeredCell"
               onClick={async () => {
-                this.updateAdmin(original.row.checkbox.username);
+                this.updateAdmin(username, admin);
               }}
             >
               {original.row.checkbox.admin ? <FaCheck /> : <FaTimes />}
@@ -449,7 +479,7 @@ class Users extends React.Component {
               onClick={() => {
                 console.log("clicked in div");
                 this.displayUserPermissionEdit(original.index);
-                this.saveUserClicked(original);
+                this.saveClickedUser(original);
               }}
             >
               <p className={className}>{text}</p>
@@ -465,7 +495,10 @@ class Users extends React.Component {
         Cell: original =>
           this.state.hasAdminPermission ? (
             <div
-              onClick={() => this.handleSingleDelete(original.row.checkbox.id)}
+              onClick={() => {
+                this.handleSingleDelete();
+                this.saveClickedUser(original);
+              }}
             >
               <FaRegTrashAlt className="menu-clickable" />
             </div>
@@ -477,7 +510,7 @@ class Users extends React.Component {
   render = () => {
     const {
       data,
-      userClicked,
+      clickedUserIndex,
       usersProjects,
       showRoleEdit,
       showPermissionEdit
@@ -499,15 +532,31 @@ class Users extends React.Component {
               projectMap={this.props.projectMap}
               projects={usersProjects}
               onCancel={this.handleCancel}
-              projectToRole={data[userClicked].projectToRole}
+              projectToRole={data[clickedUserIndex].projectToRole}
             />
           )}
           {showPermissionEdit && (
             <UserPermissionEdit
-              userPermission={data[userClicked].permissions}
+              userPermission={data[clickedUserIndex].permissions}
               onSelect={this.getUserPermission}
               onCancel={this.handleCancel}
               onSubmit={this.updateUserPermission}
+            />
+          )}
+          {this.state.hasDeleteAllClicked && (
+            <DeleteAlert
+              message={messages.deleteSelected}
+              onCancel={this.handleCancel}
+              onDelete={this.deleteAllSelected}
+              error={this.state.errorMessage}
+            />
+          )}
+          {this.state.hasDeleteSingleClicked && (
+            <DeleteAlert
+              message={messages.deleteSingle}
+              onCancel={this.handleCancel}
+              onDelete={this.deleteUser}
+              error={this.state.errorMessage}
             />
           )}
         </div>

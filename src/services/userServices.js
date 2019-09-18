@@ -23,3 +23,7 @@ export async function updateUserProjectRole(projectid, username, body) {
 export async function updateUser(username, body) {
   return http.put(apiUrl + "/users/" + username, body);
 }
+
+export async function deleteUser(username) {
+  return http.delete(apiUrl + "/users/" + username);
+}
