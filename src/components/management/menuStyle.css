@@ -859,3 +859,32 @@
 .edit-userRole.project_user {
   width: 100%;
 }
+
+.edit-userPermission {
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-userPermission.__row {
+  display: flex;
+  flex-direction: row;
+}
+
+.edit-permission__modal.modal-dialog {
+  width: fit-content;
+}
+
+.edit-userPermission.__row.--label,
+.edit-permission__modal--button {
+  margin-left: 0.3rem;
+}
+
+.add-permission {
+  font-size: 0.9rem;
+  color: #5bc0de;
+  font-style: italic;
+}
+
+.user-permission__icon {
+  font-size: 1.5 rem;
+}

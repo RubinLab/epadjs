@@ -1,14 +1,25 @@
 import React from "react";
 import ReactTable from "react-table";
-import { FaEdit, FaCheck, FaSave } from "react-icons/fa";
+import {
+  FaEdit,
+  FaCheck,
+  FaSave,
+  FaRegTrashAlt,
+  FaUserLock,
+  FaTimesCircle,
+  FaMinus,
+  FaTimes
+} from "react-icons/fa";
 import "../menuStyle.css";
 import {
   getUsers,
-  updateUserProjectRole
+  updateUserProjectRole,
+  updateUser
 } from "../../../services/userServices";
 import ToolBar from "../common/basicToolBar";
 import EditField from "./editField";
 import UserRoleEditForm from "./userRoleEdit";
+import UserPermissionEdit from "./userPermissionEdit";
 class Users extends React.Component {
   state = {
     data: [],
@@ -18,8 +29,11 @@ class Users extends React.Component {
     selected: {},
     edit: [],
     roleEdit: [],
-    showUserRoleEdit: false,
-    userToEdit: ""
+    permissionEdit: {},
+    showRoleEdit: false,
+    userToEdit: "",
+    userClicked: null,
+    showPermissionEdit: false
   };
 
   componentDidMount = () => {
@@ -45,7 +59,7 @@ class Users extends React.Component {
     this.setState({ edit });
   };
 
-  getUserRole = async e => {
+  getUserRole = e => {
     const { value } = e.target;
     const { projectid } = e.target.dataset;
     if (this.state.roleEdit.length > 0) {
@@ -56,6 +70,43 @@ class Users extends React.Component {
       this.setState({ roleEdit: [{ [projectid]: { role: value } }] });
     }
   };
+  getUserPermission = e => {
+    const { value, checked } = e.target;
+    const newPermission = { ...this.state.permissionEdit, [value]: checked };
+    this.setState({ permissionEdit: newPermission });
+  };
+  updateUserPermission = () => {
+    let string = "";
+    const keys = Object.keys(this.state.permissionEdit);
+    const values = Object.values(this.state.permissionEdit);
+    for (let i = 0; i < keys.length; i += 1) {
+      if (values[i]) {
+        string = string ? string + "," + keys[i] : "" + keys[i];
+      }
+    }
+    updateUser(this.state.userToEdit, { permissions: string })
+      .then(() => {
+        this.getUserData();
+        this.handleCancel();
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
+  updateAdmin = async username => {
+    updateUser(username, {
+      admin: !this.state.hasAdminPermission
+    })
+      .then(() => {
+        this.getUserData();
+        this.handleCancel();
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
   updateUserRole = () => {
     const updates = [];
     const updatedBy = sessionStorage.getItem("username");
@@ -64,7 +115,7 @@ class Users extends React.Component {
       const role = Object.values(item);
       const body = { ...role[0], updatedBy };
       updates.push(
-        updateUserProjectRole(projectid, this.state.userToEdit, body)
+        updateUserProjectRole(projectid[0], this.state.userToEdit, body)
       );
     }
     this.handleCancel();
@@ -83,13 +134,23 @@ class Users extends React.Component {
   };
 
   displayUserRoleEdit = userToEdit => {
-    console.log(userToEdit);
-    this.setState(state => ({ showUserRoleEdit: !state.showUserRoleEdit }));
-    this.setState({ userToEdit });
+    this.setState(state => ({ showRoleEdit: !state.showRoleEdit }));
   };
 
-  saveUSerClicked = index => {
-    this.setState({ userClicked: index });
+  displayUserPermissionEdit = index => {
+    this.setState(state => ({
+      showPermissionEdit: !state.showPermissionEdit
+    }));
+    const obj = {};
+    this.state.data[index].permissions.forEach(el => {
+      obj[el] = true;
+    });
+    this.setState({ permissionEdit: obj });
+  };
+
+  saveUserClicked = userToEdit => {
+    this.setState({ userClicked: userToEdit.index });
+    this.setState({ userToEdit: userToEdit.row.checkbox.username });
   };
 
   getUserData = async () => {
@@ -177,9 +238,12 @@ class Users extends React.Component {
       delOne: false,
       selectedOne: {},
       displayCreationForm: false,
-      showUserRoleEdit: false,
+      showRoleEdit: false,
       edit: [],
-      roleEdit: []
+      roleEdit: [],
+      userToEdit: "",
+      userClicked: null,
+      showPermissionEdit: false
     });
   };
 
@@ -336,8 +400,8 @@ class Users extends React.Component {
         Cell: original => (
           <div
             onClick={() => {
-              this.displayUserRoleEdit(original.row.checkbox.username);
-              this.saveUSerClicked(original.index);
+              this.displayUserRoleEdit();
+              this.saveUserClicked(original);
             }}
           >
             <p className="menu-clickable wrapped">
@@ -354,9 +418,16 @@ class Users extends React.Component {
         minWidth: 20,
         className: "mng-user__cell",
         Cell: original => {
-          return original.row.checkbox.admin ? (
-            <div className="centeredCell"> {<FaCheck />}</div>
-          ) : null;
+          return (
+            <div
+              className="centeredCell"
+              onClick={async () => {
+                this.updateAdmin(original.row.checkbox.username);
+              }}
+            >
+              {original.row.checkbox.admin ? <FaCheck /> : <FaTimes />}
+            </div>
+          );
         }
       },
 
@@ -368,30 +439,49 @@ class Users extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         className: "mng-user__cell",
-        Cell: original => (
-          <p className="menu-clickable wrapped">
-            {this.convertArrToStr(original.row.permissions)}
-          </p>
-        )
+        Cell: original => {
+          let text = this.convertArrToStr(original.row.permissions);
+          const className = text ? "wrapped" : "wrapped add-permission";
+          text = text ? text : "Change permissions";
+          return (
+            <div
+              className="menu-clickable"
+              onClick={() => {
+                console.log("clicked in div");
+                this.displayUserPermissionEdit(original.index);
+                this.saveUserClicked(original);
+              }}
+            >
+              <p className={className}>{text}</p>
+            </div>
+          );
+        }
       },
       {
-        Header: "Enabled",
-        className: "usersTable-cell",
-        resizable: true,
+        Header: "",
+        width: 45,
         minResizeWidth: 20,
-        minWidth: 30,
-        className: "mng-user__cell",
-        Cell: original => {
-          return original.row.checkbox.enabled ? (
-            <div className="centeredCell"> {<FaCheck />}</div>
-          ) : null;
-        }
+        resizable: true,
+        Cell: original =>
+          this.state.hasAdminPermission ? (
+            <div
+              onClick={() => this.handleSingleDelete(original.row.checkbox.id)}
+            >
+              <FaRegTrashAlt className="menu-clickable" />
+            </div>
+          ) : null
       }
     ];
   };
 
   render = () => {
-    const { data, userClicked, usersProjects } = this.state;
+    const {
+      data,
+      userClicked,
+      usersProjects,
+      showRoleEdit,
+      showPermissionEdit
+    } = this.state;
 
     return (
       <>
@@ -402,7 +492,7 @@ class Users extends React.Component {
             data={data}
             columns={this.defineColumns()}
           />
-          {this.state.showUserRoleEdit && (
+          {showRoleEdit && (
             <UserRoleEditForm
               onSubmit={this.updateUserRole}
               onSelect={this.getUserRole}
@@ -410,6 +500,14 @@ class Users extends React.Component {
               projects={usersProjects}
               onCancel={this.handleCancel}
               projectToRole={data[userClicked].projectToRole}
+            />
+          )}
+          {showPermissionEdit && (
+            <UserPermissionEdit
+              userPermission={data[userClicked].permissions}
+              onSelect={this.getUserPermission}
+              onCancel={this.handleCancel}
+              onSubmit={this.updateUserPermission}
             />
           )}
         </div>
