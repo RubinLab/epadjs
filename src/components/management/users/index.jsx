@@ -32,31 +32,39 @@ class Users extends React.Component {
     showRoleEdit: false,
     userToEdit: "",
     clickedUserIndex: null,
-    showPermissionEdit: false
+    showPermissionEdit: false,
+    errorMessage: ""
   };
 
   componentDidMount = () => {
     this.getUserData();
-    document.addEventListener("mousedown", this.handleClickOutside);
-    document.addEventListener("keydown", this.escapeFieldInput);
   };
 
-  componentWillUnmount = () => {
-    document.removeEventListener("mousedown", this.handleClickOutside);
-    document.removeEventListener("keydown", this.escapeFieldInput);
-  };
-
-  escapeFieldInput = e => {
-    if (e.key === "Escape") {
-      this.handleOutClick();
+  getUserData = async () => {
+    const { data } = await getUsers();
+    let usersProjects = [];
+    let hasAdminPermission = false;
+    //check if the signed in user has admin permissions
+    const signInName = sessionStorage.getItem("username");
+    for (let user of data) {
+      if (user.username === signInName) {
+        hasAdminPermission = user.admin;
+        usersProjects = user.projects;
+      }
     }
+    for (let user of data) {
+      let filteredProjects = [];
+      for (let project of user.projects) {
+        if (usersProjects.includes(project)) {
+          filteredProjects.push(this.props.projectMap[project]);
+        }
+      }
+      user.projects = filteredProjects;
+    }
+    this.setState({ data, hasAdminPermission, usersProjects });
   };
 
-  handleEditField = (field, id) => {
-    const { edit } = this.state;
-    edit[field] = id;
-    this.setState({ edit });
-  };
+  createUser = () => {};
 
   getUserRole = e => {
     const { value } = e.target;
@@ -90,7 +98,6 @@ class Users extends React.Component {
       })
       .catch(err => {
         this.setState({ errorMessage: err.response.data.message });
-
         console.log(err);
       });
   };
@@ -139,7 +146,7 @@ class Users extends React.Component {
   };
 
   handleDeleteAll = () => {
-    this.setState({ hasDeleteSingleClicked: true });
+    this.setState({ hasDeleteAllClicked: true });
   };
 
   deleteUser = username => {
@@ -150,16 +157,28 @@ class Users extends React.Component {
       })
       .catch(err => {
         this.setState({ errorMessage: err.response.data.message });
-
         console.log(err);
       });
   };
 
-  handleOutClick = () => {
-    this.setState({ edit: [] });
+  deleteAllSelected = () => {
+    const promises = [];
+    const usernNames = Object.keys(this.state.selected);
+    usernNames.forEach(user => {
+      promises.push(deleteUser(user));
+    });
+    Promise.all(promises)
+      .then(() => {
+        this.getUserData();
+        this.handleCancel();
+      })
+      .catch(err => {
+        this.setState({ errorMessage: err.response.data.message });
+        console.log(err);
+      });
   };
 
-  displayUserRoleEdit = userToEdit => {
+  displayUserRoleEdit = () => {
     this.setState(state => ({ showRoleEdit: !state.showRoleEdit }));
   };
 
@@ -177,30 +196,6 @@ class Users extends React.Component {
   saveClickedUser = userToEdit => {
     this.setState({ clickedUserIndex: userToEdit.index });
     this.setState({ userToEdit: userToEdit.row.checkbox.username });
-  };
-
-  getUserData = async () => {
-    const { data } = await getUsers();
-    let usersProjects = [];
-    let hasAdminPermission = false;
-    //check if the signed in user has admin permissions
-    const signInName = sessionStorage.getItem("username");
-    for (let user of data) {
-      if (user.username === signInName) {
-        hasAdminPermission = user.admin;
-        usersProjects = user.projects;
-      }
-    }
-    for (let user of data) {
-      let filteredProjects = [];
-      for (let project of user.projects) {
-        if (usersProjects.includes(project)) {
-          filteredProjects.push(this.props.projectMap[project]);
-        }
-      }
-      user.projects = filteredProjects;
-    }
-    this.setState({ data, hasAdminPermission, usersProjects });
   };
 
   convertArrToStr = arr => {
@@ -245,34 +240,21 @@ class Users extends React.Component {
     });
   }
 
-  setWrapperRef = (node, id) => {
-    this.wrapperRef = node;
-  };
-
-  handleClickOutside = event => {
-    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
-      this.handleOutClick();
-    }
-  };
-
   handleCancel = () => {
     this.setState({
-      hasAddClicked: false,
-      error: "",
-      delAll: false,
-      hasEditClicked: false,
-      delOne: false,
-      selectedOne: {},
-      displayCreationForm: false,
-      showRoleEdit: false,
       edit: [],
       roleEdit: [],
+      permissionEdit: {},
+      showRoleEdit: false,
       userToEdit: "",
       clickedUserIndex: null,
       showPermissionEdit: false,
       hasDeleteAllClicked: false,
       hasDeleteSingleClicked: false,
-      errorMessage: ""
+      errorMessage: "",
+
+      hasAddClicked: false,
+      displayCreationForm: false
     });
   };
 
@@ -390,33 +372,6 @@ class Users extends React.Component {
           );
         }
       },
-      // {
-      //   Header: "Color",
-      //   className: "usersTable-cell",
-      //   resizable: true,
-      //   minResizeWidth: 20,
-      //   minWidth: 20,
-      //   className: "mng-user__cell",
-      //   Cell: original => {
-      //     const { username } = original.row.checkbox;
-      //     const className =
-      //       this.state.edit.color === username ? "user-color" : "";
-      //     let color = original.row.checkbox.colorpreference;
-      //     color = color ? `#${color}` : `#19ff75`;
-      //     return (
-      //       <p
-      //         className={`menu-clickable wrapped ${className}`}
-      //         style={{ color }}
-      //         data-name="color"
-      //         onClick={() => {
-      //           this.handleEditField("color", username);
-      //         }}
-      //       >
-      //         {original.row.checkbox.username}
-      //       </p>
-      //     );
-      //   }
-      // },
       {
         Header: "Projects",
         className: "usersTable-cell",
@@ -515,11 +470,16 @@ class Users extends React.Component {
       showRoleEdit,
       showPermissionEdit
     } = this.state;
+    const checkboxSelected = Object.values(this.state.selected).length > 0;
 
     return (
       <>
         <div className="users menu-display">
-          <ToolBar />
+          <ToolBar
+            onAdd={this.createUser}
+            onDelete={this.handleDeleteAll}
+            selected={checkboxSelected}
+          />
           <ReactTable
             className="pro-table"
             data={data}
