@@ -313,6 +313,7 @@
 
 .edit-userRole__table--row {
   padding: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .edit-userRole__modal--button {
@@ -636,6 +637,10 @@
   text-align: left;
 }
 
+.edit-userRole__table--col {
+  font-weight: 200;
+}
+
 .centeredCell {
   text-align: center;
 }
@@ -863,6 +868,10 @@
 .edit-userPermission {
   display: flex;
   flex-direction: column;
+  width: fit-content;
+  margin: auto;
+  margin-left: 0.5rem;
+  margin-bottom: 0.2rem;
 }
 
 .edit-userPermission.__row {
@@ -870,12 +879,14 @@
   flex-direction: row;
 }
 
-.edit-permission__modal.modal-dialog {
+.edit-permission__modal.modal-dialog,
+.create-user__modal.modal-dialog {
   width: fit-content;
 }
 
 .edit-userPermission.__row.--label,
-.edit-permission__modal--button {
+.edit-permission__modal--button,
+.user-create__button {
   margin-left: 0.3rem;
 }
 
@@ -887,4 +898,25 @@
 
 .user-permission__icon {
   font-size: 1.5 rem;
+}
+
+.create-user__p1 {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.create-user__p1 .--label {
+  margin-right: 0.5rem;
+  width: 30%;
+}
+
+.create-user__p1 .--email {
+  width: 70%;
+  min-width: 20rem;
+  color: black;
+}
+
+.project-table.__header.--project {
+  text-align: left;
 }

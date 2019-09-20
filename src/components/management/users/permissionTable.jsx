@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 const permissionTable = ({ userPermission, onSelect }) => {
   const permission = ["projects", "users", "connections", "queries"];
   const rows = [];
+  userPermission = userPermission || [];
 
   permission.forEach(el => {
     rows.push(

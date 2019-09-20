@@ -4,12 +4,14 @@ import Row from "./tableRow";
 
 const projectTable = ({ onSelect, projects, projectToRole, projectMap }) => {
   const rows = [];
-  // projects.forEach
   const userRoles = {};
+  projectToRole = projectToRole = [];
   for (let role of projectToRole) {
     const roleArr = role.split(":");
     userRoles[roleArr[0]] = roleArr[1];
   }
+  console.log(projectMap);
+  console.log(projects);
 
   projects.forEach(project => {
     rows.push(
@@ -26,7 +28,7 @@ const projectTable = ({ onSelect, projects, projectToRole, projectMap }) => {
     <table className="project-table">
       <thead>
         <tr>
-          <th className="project-table __header --user">Project</th>
+          <th className="project-table __header --project">Project</th>
           <th className="project-table __header">Owner</th>
           <th className="project-table __header">Member</th>
           <th className="project-table __header">Collaborator</th>

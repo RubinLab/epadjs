@@ -5,7 +5,7 @@ import { FaRegTrashAlt, FaRegEye } from "react-icons/fa";
 import { getWorklist, deleteWorklist } from "./../../services/worklistServices";
 import { getProject } from "./../../services/projectServices";
 import DeleteAlert from "./../management/common/alertDeletionModal";
-import EditField from "../management/users/editField";
+import EditField from "./editField";
 
 const messages = {
   deleteSingle: "Delete the worklist? This cannot be undone.",

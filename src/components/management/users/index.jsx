@@ -6,13 +6,14 @@ import {
   getUsers,
   updateUserProjectRole,
   updateUser,
-  deleteUser
+  deleteUser,
+  createUser
 } from "../../../services/userServices";
 import ToolBar from "../common/basicToolBar";
-import EditField from "./editField";
 import UserRoleEditForm from "./userRoleEdit";
 import UserPermissionEdit from "./userPermissionEdit";
 import DeleteAlert from "../common/alertDeletionModal";
+import CreateUser from "./CreateUserForm";
 
 const messages = {
   deleteSingle: "Delete the user? This cannot be undone.",
@@ -33,7 +34,8 @@ class Users extends React.Component {
     userToEdit: "",
     clickedUserIndex: null,
     showPermissionEdit: false,
-    errorMessage: ""
+    errorMessage: "",
+    hasAddClicked: false
   };
 
   componentDidMount = () => {
@@ -64,7 +66,9 @@ class Users extends React.Component {
     this.setState({ data, hasAdminPermission, usersProjects });
   };
 
-  createUser = () => {};
+  handleAdd = () => {
+    this.setState({ hasAddClicked: true });
+  };
 
   getUserRole = e => {
     const { value } = e.target;
@@ -82,16 +86,20 @@ class Users extends React.Component {
     const newPermission = { ...this.state.permissionEdit, [value]: checked };
     this.setState({ permissionEdit: newPermission });
   };
+  getUserName = e => {
+    const { value } = e.target;
+    this.setState({ userToEdit: value });
+  };
   updateUserPermission = () => {
-    let string = "";
+    let permissions = "";
     const keys = Object.keys(this.state.permissionEdit);
     const values = Object.values(this.state.permissionEdit);
     for (let i = 0; i < keys.length; i += 1) {
       if (values[i]) {
-        string = string ? string + "," + keys[i] : "" + keys[i];
+        permissions = permissions ? permissions + "," + keys[i] : "" + keys[i];
       }
     }
-    updateUser(this.state.userToEdit, { permissions: string })
+    updateUser(this.state.userToEdit, { permissions: permissions })
       .then(() => {
         this.getUserData();
         this.handleCancel();
@@ -112,7 +120,6 @@ class Users extends React.Component {
       })
       .catch(err => {
         this.setState({ errorMessage: err.response.data.message });
-
         console.log(err);
       });
   };
@@ -136,7 +143,6 @@ class Users extends React.Component {
       })
       .catch(err => {
         this.setState({ errorMessage: err.response.data.message });
-
         console.log(err);
       });
   };
@@ -252,10 +258,42 @@ class Users extends React.Component {
       hasDeleteAllClicked: false,
       hasDeleteSingleClicked: false,
       errorMessage: "",
-
-      hasAddClicked: false,
-      displayCreationForm: false
+      hasAddClicked: false
     });
+  };
+
+  handleAdd = () => {
+    this.setState({ hasAddClicked: true });
+  };
+
+  createUser = () => {
+    let body = {};
+    const { userToEdit } = this.state;
+    if (userToEdit) {
+      let permissions = "";
+      const keys = Object.keys(this.state.permissionEdit);
+      const values = Object.values(this.state.permissionEdit);
+      for (let i = 0; i < keys.length; i += 1) {
+        if (values[i]) {
+          permissions = permissions
+            ? permissions + "," + keys[i]
+            : "" + keys[i];
+        }
+      }
+      body = permissions
+        ? { ...body, username: userToEdit, email: userToEdit, permissions }
+        : { ...body, username: userToEdit, email: userToEdit };
+      createUser(body)
+        .then(async () => {
+          await this.updateUserRole();
+          this.getUserData();
+          this.handleCancel();
+        })
+        .catch(err => {
+          this.setState({ errorMessage: err.response.data.message });
+          console.log(err);
+        });
+    }
   };
 
   defineColumns = () => {
@@ -299,24 +337,8 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 35,
-        className: "mng-user__cell",
-        Cell: original => {
-          const { firstname, username } = original.row.checkbox;
-          return this.state.edit.firstname === username ? (
-            <div ref={this.setWrapperRef}>
-              <EditField default={firstname} />
-            </div>
-          ) : (
-            <div
-              data-name="firstname"
-              onClick={() => {
-                this.handleEditField("firstname", username);
-              }}
-            >
-              {firstname}
-            </div>
-          );
-        }
+        className: "mng-user__cell"
+        // Cell: original => <div data-name="firstname">{firstname}</div>
       },
       {
         Header: "Last",
@@ -326,24 +348,8 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 35,
-        className: "mng-user__cell",
-        Cell: original => {
-          const { lastname, username } = original.row.checkbox;
-          return this.state.edit.lastname === username ? (
-            <div ref={this.setWrapperRef}>
-              <EditField default={lastname} />
-            </div>
-          ) : (
-            <div
-              data-name="lastname"
-              onClick={() => {
-                this.handleEditField("lastname", username);
-              }}
-            >
-              {lastname}
-            </div>
-          );
-        }
+        className: "mng-user__cell"
+        // Cell: original => <div data-name="lastname">{lastname}</div>
       },
       {
         Header: "Email",
@@ -353,24 +359,8 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
-        className: "mng-user__cell",
-        Cell: original => {
-          const { email, username } = original.row.checkbox;
-          return this.state.edit.email === username ? (
-            <div ref={this.setWrapperRef}>
-              <EditField default={email} />
-            </div>
-          ) : (
-            <div
-              data-name="email"
-              onClick={() => {
-                this.handleEditField("email", username);
-              }}
-            >
-              {email}
-            </div>
-          );
-        }
+        className: "mng-user__cell"
+        // Cell: original => <div data-name="email">{email}</div>
       },
       {
         Header: "Projects",
@@ -381,18 +371,22 @@ class Users extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         className: "mng-user__cell",
-        Cell: original => (
-          <div
-            onClick={() => {
-              this.displayUserRoleEdit();
-              this.saveClickedUser(original);
-            }}
-          >
-            <p className="menu-clickable wrapped">
-              {original.row.projects.join(", ")}
-            </p>
-          </div>
-        )
+        Cell: original => {
+          const text =
+            original.row.projects.length > 0
+              ? original.row.projects.join(", ")
+              : "Add user to a project";
+          return (
+            <div
+              onClick={() => {
+                this.displayUserRoleEdit();
+                this.saveClickedUser(original);
+              }}
+            >
+              <p className="menu-clickable wrapped">{text}</p>
+            </div>
+          );
+        }
       },
       {
         Header: "Admin",
@@ -427,12 +421,11 @@ class Users extends React.Component {
         Cell: original => {
           let text = this.convertArrToStr(original.row.permissions);
           const className = text ? "wrapped" : "wrapped add-permission";
-          text = text ? text : "Change permissions";
+          text = text ? text : "Give user permission";
           return (
             <div
               className="menu-clickable"
               onClick={() => {
-                console.log("clicked in div");
                 this.displayUserPermissionEdit(original.index);
                 this.saveClickedUser(original);
               }}
@@ -471,12 +464,11 @@ class Users extends React.Component {
       showPermissionEdit
     } = this.state;
     const checkboxSelected = Object.values(this.state.selected).length > 0;
-
     return (
       <>
         <div className="users menu-display">
           <ToolBar
-            onAdd={this.createUser}
+            onAdd={this.handleAdd}
             onDelete={this.handleDeleteAll}
             selected={checkboxSelected}
           />
@@ -517,6 +509,18 @@ class Users extends React.Component {
               onCancel={this.handleCancel}
               onDelete={this.deleteUser}
               error={this.state.errorMessage}
+            />
+          )}
+          {this.state.hasAddClicked && (
+            <CreateUser
+              onCancel={this.handleCancel}
+              onSelectRole={this.getUserRole}
+              onSelectPermission={this.getUserPermission}
+              onSubmit={this.createUser}
+              projectMap={this.props.projectMap}
+              projects={usersProjects}
+              error={this.state.errorMessage}
+              getUserName={this.getUserName}
             />
           )}
         </div>
