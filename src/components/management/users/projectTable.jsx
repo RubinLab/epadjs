@@ -5,7 +5,7 @@ import Row from "./tableRow";
 const projectTable = ({ onSelect, projects, projectToRole, projectMap }) => {
   const rows = [];
   const userRoles = {};
-  projectToRole = projectToRole = [];
+  projectToRole = projectToRole || [];
   for (let role of projectToRole) {
     const roleArr = role.split(":");
     userRoles[roleArr[0]] = roleArr[1];

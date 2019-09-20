@@ -372,6 +372,11 @@ class Users extends React.Component {
         minWidth: 50,
         className: "mng-user__cell",
         Cell: original => {
+          const className =
+            original.row.projects.length > 0
+              ? "wrapped"
+              : "wrapped click-to-add";
+
           const text =
             original.row.projects.length > 0
               ? original.row.projects.join(", ")
@@ -383,7 +388,7 @@ class Users extends React.Component {
                 this.saveClickedUser(original);
               }}
             >
-              <p className="menu-clickable wrapped">{text}</p>
+              <p className={className}>{text}</p>
             </div>
           );
         }
@@ -420,7 +425,7 @@ class Users extends React.Component {
         className: "mng-user__cell",
         Cell: original => {
           let text = this.convertArrToStr(original.row.permissions);
-          const className = text ? "wrapped" : "wrapped add-permission";
+          const className = text ? "wrapped" : "wrapped click-to-add";
           text = text ? text : "Give user permission";
           return (
             <div

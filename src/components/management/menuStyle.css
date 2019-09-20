@@ -638,7 +638,7 @@
 }
 
 .edit-userRole__table--col {
-  font-weight: 200;
+  font-weight: 250;
 }
 
 .centeredCell {
@@ -890,7 +890,7 @@
   margin-left: 0.3rem;
 }
 
-.add-permission {
+.click-to-add {
   font-size: 0.9rem;
   color: #5bc0de;
   font-style: italic;
