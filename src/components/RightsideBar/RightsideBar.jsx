@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
 import Collapsible from "react-collapsible";
-import AnnotationsDock from "../annotationsList/annotationDock/annotationsDock";
+import AnnotationList from "../annotationsList/annotationDock/annotationList";
 
 import "./RightsideBar.css";
 
@@ -60,7 +60,7 @@ class Rightsidebar extends Component {
             </div>
           )}
           <Collapsible trigger={"Annotations"} transitionTime={100}>
-            <AnnotationsDock />
+            <AnnotationList />
           </Collapsible>
           <Collapsible trigger={"Message Center"} transitionTime={100}>
             <p>
