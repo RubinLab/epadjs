@@ -209,6 +209,7 @@ class WorkList extends React.Component {
   };
 
   render = () => {
+    console.log(this.state);
     return (
       <div className="worklist-page">
         <Table

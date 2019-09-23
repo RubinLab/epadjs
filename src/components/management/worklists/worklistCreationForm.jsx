@@ -14,9 +14,10 @@ const worklistCreationForm = props => {
     </option>
   );
   for (let user of users) {
+    console.log(user);
     options.push(
       <option key={`${index}-${user.username}`} value={user.username}>
-        {user.displayname}
+        {user.lastname && user.firstname ? user.displayname : user.email}
       </option>
     );
     index++;
@@ -65,8 +66,8 @@ const worklistCreationForm = props => {
           >
             {options}
           </select>
-          <h5 className="form-exp">Due date:</h5>
-          <input type="date" name="due" onChange={onChange} />
+          <h5 className="form-exp add-worklist__modal--label">Due date:</h5>
+          <input type="date" name="dueDate" onChange={onChange} />
           <h5 className="add-worklist__modal--label">Description</h5>
           <textarea
             onMouseDown={e => e.stopPropagation()}

@@ -37,20 +37,14 @@ class WorkList extends React.Component {
 
   componentDidMount = async () => {
     this.getWorkListData();
-    const {
-      data: {
-        ResultSet: { Result: userList }
-      }
-    } = await getUsers();
+    const { data: userList } = await getUsers();
     this.setState({ userList });
   };
 
   getWorkListData = async () => {
-    const {
-      data: {
-        ResultSet: { Result: worklists }
-      }
-    } = await getWorklists(sessionStorage.getItem("username"));
+    const { data: worklists } = await getWorklists(
+      sessionStorage.getItem("username")
+    );
     this.setState({ worklists });
   };
 
@@ -143,12 +137,19 @@ class WorkList extends React.Component {
   };
 
   handleSaveWorklist = e => {
-    let { name, id, user, description } = this.state;
+    let { name, id, user, description, dueDate } = this.state;
     if (!name || !id || !user) {
       this.setState({ error: messages.fillRequiredFields });
     } else {
       description = description ? description : "";
-      saveWorklist(user, id, description, name)
+      saveWorklist(
+        sessionStorage.getItem("username"),
+        id,
+        name,
+        user,
+        description,
+        dueDate
+      )
         .then(() => {
           this.getWorkListData();
         })
@@ -315,6 +316,7 @@ class WorkList extends React.Component {
           selected={checkboxSelected}
         />
         <Table
+          NoDataComponent={() => null}
           className="pro-table"
           data={this.state.worklists}
           columns={this.defineColumns()}
