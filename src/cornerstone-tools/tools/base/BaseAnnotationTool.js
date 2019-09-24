@@ -1,13 +1,13 @@
-import BaseTool from "./BaseTool.js";
-import { getToolState } from "./../../stateManagement/toolState.js";
-import handleActivator from "./../../manipulators/handleActivator.js";
+import BaseTool from './BaseTool.js';
+import { getToolState } from './../../stateManagement/toolState.js';
+import handleActivator from './../../manipulators/handleActivator.js';
 import {
   moveHandleNearImagePoint,
-  moveAnnotation
-} from "./../../util/findAndMoveHelpers.js";
-import { getLogger } from "../../util/logger";
+  moveAnnotation,
+} from './../../util/findAndMoveHelpers.js';
+import { getLogger } from '../../util/logger';
 
-const logger = getLogger("baseAnnotationTool");
+const logger = getLogger('baseAnnotationTool');
 
 /**
  * @memberof Tools.Base
@@ -16,10 +16,6 @@ const logger = getLogger("baseAnnotationTool");
  * @extends Tools.Base.BaseTool
  */
 class BaseAnnotationTool extends BaseTool {
-  constructor(...args) {
-    super(...args);
-  }
-
   // ===================================================================
   // Abstract Methods - Must be implemented.
   // ===================================================================
@@ -35,12 +31,9 @@ class BaseAnnotationTool extends BaseTool {
    */
   // eslint-disable-next-line no-unused-vars
   createNewMeasurement(evt) {
-    // Dispatch event to open the Aim Editor
-    let evnt = new CustomEvent("markupCreated", {
-      markupType: "annotationTool"
-    });
-    window.dispatchEvent(evnt);
-    alert("Annotating");
+    throw new Error(
+      `Method createNewMeasurement not implemented for ${this.name}.`
+    );
   }
 
   /**
@@ -57,7 +50,7 @@ class BaseAnnotationTool extends BaseTool {
    * @returns {boolean} If the point is near the tool
    */
   // eslint-disable-next-line no-unused-vars
-  pointNearTool(element, data, coords, interactionType = "mouse") {
+  pointNearTool(element, data, coords, interactionType = 'mouse') {
     throw new Error(`Method pointNearTool not implemented for ${this.name}.`);
   }
 
@@ -123,9 +116,9 @@ class BaseAnnotationTool extends BaseTool {
       // Tool data's 'active' does not match coordinates
       // TODO: can't we just do an if/else and save on a pointNearTool check?
       const nearToolAndNotMarkedActive =
-        this.pointNearTool(element, data, coords, "mouse") && !data.active;
+        this.pointNearTool(element, data, coords, 'mouse') && !data.active;
       const notNearToolAndMarkedActive =
-        !this.pointNearTool(element, data, coords, "mouse") && data.active;
+        !this.pointNearTool(element, data, coords, 'mouse') && data.active;
 
       if (nearToolAndNotMarkedActive || notNearToolAndMarkedActive) {
         data.active = !data.active;
@@ -147,14 +140,8 @@ class BaseAnnotationTool extends BaseTool {
    * @param  {String} interactionType -
    * @returns {void}
    */
-  handleSelectedCallback(evt, toolData, handle, interactionType = "mouse") {
+  handleSelectedCallback(evt, toolData, handle, interactionType = 'mouse') {
     moveHandleNearImagePoint(evt, this, toolData, handle, interactionType);
-
-    // Dispatch an event to open the Aim Editor
-    let evnt = new CustomEvent("markupSelected", {
-      detail: toolData.aimId
-    });
-    window.dispatchEvent(evnt);
   }
 
   /**
@@ -168,13 +155,8 @@ class BaseAnnotationTool extends BaseTool {
    * @param  {string} [interactionType=mouse]
    * @returns {void}
    */
-  toolSelectedCallback(evt, annotation, interactionType = "mouse") {
+  toolSelectedCallback(evt, annotation, interactionType = 'mouse') {
     moveAnnotation(evt, this, annotation, interactionType);
-    const evnt = new CustomEvent("annotationSelected", {
-      detail: annotation.aimId
-    });
-
-    window.dispatchEvent(evnt);
   }
 
   /**
@@ -186,6 +168,7 @@ class BaseAnnotationTool extends BaseTool {
    * @returns {void}
    */
   updateCachedStats(image, element, data) {
+    // eslint-disable-line
     logger.warn(`updateCachedStats not implemented for ${this.name}.`);
   }
 }

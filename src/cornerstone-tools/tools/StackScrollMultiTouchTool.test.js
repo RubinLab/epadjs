@@ -4,10 +4,6 @@ import scroll from '../util/scroll.js';
 
 jest.mock('../util/scroll.js');
 
-jest.mock('../importInternalModule.js', () => ({
-  default: jest.fn(),
-}));
-
 const mockEvent = {
   detail: {
     direction: 1,

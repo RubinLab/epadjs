@@ -1,15 +1,12 @@
 import external from './../../externalModules.js';
 import { BaseBrushTool } from '../base';
-import store from './../../store/index.js';
-import brushUtils from '../../util/segmentation/brush/index.js';
-import EVENTS from '../../events.js';
+import { getModule } from './../../store/index.js';
+import { drawBrushPixels, getCircle } from '../../util/segmentation/index.js';
 import { getLogger } from '../../util/logger.js';
 
 const logger = getLogger('tools:BrushTool');
 
-const { drawBrushPixels, getCircle } = brushUtils;
-
-const brushModule = store.modules.brush;
+const { configuration } = getModule('segmentation');
 
 /**
  * @public
@@ -23,7 +20,8 @@ export default class BrushTool extends BaseBrushTool {
     const defaultProps = {
       name: 'Brush',
       supportedInteractionTypes: ['Mouse', 'Touch'],
-      configuration: { alwaysEraseOnClick: false },
+      configuration: {},
+      mixins: ['renderBrushMixin'],
     };
 
     super(props, defaultProps);
@@ -32,66 +30,7 @@ export default class BrushTool extends BaseBrushTool {
   }
 
   /**
-   * Called by the event dispatcher to render the image.
-   *
-   * @param {Object} evt - The event.
-   * @returns {void}
-   */
-  renderBrush(evt) {
-    const eventData = evt.detail;
-    const viewport = eventData.viewport;
-
-    let mousePosition;
-
-    if (this._drawing) {
-      mousePosition = this._lastImageCoords;
-    } else if (this._mouseUpRender) {
-      mousePosition = this._lastImageCoords;
-      this._mouseUpRender = false;
-    } else {
-      mousePosition = store.state.mousePositionImage;
-    }
-
-    if (!mousePosition) {
-      return;
-    }
-
-    const { rows, columns } = eventData.image;
-    const { x, y } = mousePosition;
-
-    if (x < 0 || x > columns || y < 0 || y > rows) {
-      return;
-    }
-
-    // Draw the hover overlay on top of the pixel data
-    const radius = brushModule.state.radius;
-    const context = eventData.canvasContext;
-    const element = eventData.element;
-    const color = brushModule.getters.brushColor(element, this._drawing);
-
-    context.setTransform(1, 0, 0, 1, 0, 0);
-
-    const { cornerstone } = external;
-
-    const circleRadius = radius * viewport.scale;
-    const mouseCoordsCanvas = cornerstone.pixelToCanvas(element, mousePosition);
-
-    context.beginPath();
-    context.strokeStyle = color;
-    context.ellipse(
-      mouseCoordsCanvas.x,
-      mouseCoordsCanvas.y,
-      circleRadius,
-      circleRadius,
-      0,
-      0,
-      2 * Math.PI
-    );
-    context.stroke();
-  }
-
-  /**
-   * Paints the data to the canvas.
+   * Paints the data to the labelmap.
    *
    * @protected
    * @param  {Object} evt The data object associated with the event.
@@ -107,28 +46,19 @@ export default class BrushTool extends BaseBrushTool {
       return;
     }
 
-    const radius = brushModule.state.radius;
+    const radius = configuration.radius;
     const pointerArray = getCircle(radius, rows, columns, x, y);
 
-    const {
-      labelmap3D,
-      currentImageIdIndex,
-      activeLabelmapIndex,
-      shouldErase,
-    } = this.paintEventData;
+    const { labelmap2D, labelmap3D, shouldErase } = this.paintEventData;
 
     // Draw / Erase the active color.
     drawBrushPixels(
       pointerArray,
-      labelmap3D,
-      currentImageIdIndex,
+      labelmap2D.pixelData,
+      labelmap3D.activeSegmentIndex,
       columns,
       shouldErase
     );
-
-    external.cornerstone.triggerEvent(element, EVENTS.LABELMAP_MODIFIED, {
-      activeLabelmapIndex,
-    });
 
     external.cornerstone.updateImage(evt.detail.element);
   }

@@ -7,7 +7,7 @@ jest.mock('./../../stateManagement/toolState.js', () => ({
   getToolState: jest.fn(),
 }));
 
-jest.mock('./../../importInternalModule.js', () => ({
+jest.mock('./../../importInternal.js', () => ({
   default: jest.fn(),
 }));
 
@@ -16,7 +16,9 @@ jest.mock('./../../externalModules.js', () => ({
     metaData: {
       get: jest.fn(),
     },
+    /* eslint-enable prettier/prettier */
     getPixels: () => [100, 100, 100, 100, 4, 5, 100, 3, 6],
+    /* eslint-enable prettier/prettier */
   },
 }));
 

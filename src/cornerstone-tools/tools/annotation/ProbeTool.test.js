@@ -7,17 +7,15 @@ jest.mock('../../stateManagement/toolState.js', () => ({
   getToolState: jest.fn(),
 }));
 
-jest.mock('../../importInternalModule.js', () => ({
-  default: jest.fn(),
-}));
-
 jest.mock('./../../externalModules.js', () => ({
   cornerstone: {
     metaData: {
       get: jest.fn(),
     },
     getStoredPixels: (element, x, y) => {
+      /* eslint-disable prettier/prettier */
       const storedPixels = [10, 20, 30, 40, 50, 60, 70, 80, 90];
+      /* eslint-enable prettier/prettier */
 
       return [storedPixels[x * 2 + y]];
     },

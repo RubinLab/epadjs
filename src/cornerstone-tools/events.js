@@ -201,6 +201,16 @@ const EVENTS = {
   /**
    *  @type {String}
    */
+  STACK_PREFETCH_IMAGE_LOADED: 'cornerstonetoolsstackprefetchimageloaded',
+
+  /**
+   *  @type {String}
+   */
+  STACK_PREFETCH_DONE: 'cornerstonetoolsstackprefetchdone',
+
+  /**
+   *  @type {String}
+   */
   LABELMAP_MODIFIED: 'cornersontetoolslabelmapmodified',
 };
 

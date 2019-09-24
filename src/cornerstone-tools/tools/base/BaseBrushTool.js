@@ -1,13 +1,14 @@
-import external from "./../../externalModules.js";
-import EVENTS from "./../../events.js";
-import BaseTool from "./BaseTool.js";
-import isToolActive from "./../../store/isToolActive.js";
-import store from "./../../store/index.js";
-import { getLogger } from "../../util/logger.js";
+import BaseTool from './BaseTool.js';
+import EVENTS from './../../events.js';
+import external from './../../externalModules.js';
+import isToolActiveForElement from './../../store/isToolActiveForElement.js';
+import { getModule } from './../../store/index.js';
+import {
+  getDiffBetweenPixelData,
+  triggerLabelmapModifiedEvent,
+} from '../../util/segmentation';
 
-const logger = getLogger("tools:BaseBrushTool");
-
-const { state, getters, setters } = store.modules.brush;
+const { configuration, getters, setters } = getModule('segmentation');
 
 /**
  * @abstract
@@ -21,8 +22,6 @@ class BaseBrushTool extends BaseTool {
     if (!defaultProps.configuration) {
       defaultProps.configuration = { alwaysEraseOnClick: false };
     }
-    defaultProps.configuration.referencedToolData = "brush";
-    defaultProps.mixins = ["segmentationAPI"];
 
     super(props, defaultProps);
 
@@ -50,7 +49,7 @@ class BaseBrushTool extends BaseTool {
   }
 
   /**
-   * Paints the data to the canvas.
+   * Paints the data to the labelmap.
    *
    * @protected
    * @abstract
@@ -70,6 +69,7 @@ class BaseBrushTool extends BaseTool {
    * Event handler for MOUSE_DRAG event.
    *
    * @override
+   * @abstract
    * @event
    * @param {Object} evt - The event.
    */
@@ -89,6 +89,7 @@ class BaseBrushTool extends BaseTool {
    * Event handler for MOUSE_DOWN event.
    *
    * @override
+   * @abstract
    * @event
    * @param {Object} evt - The event.
    */
@@ -107,9 +108,9 @@ class BaseBrushTool extends BaseTool {
   }
 
   /**
-   * Initialise painting with baseBrushTool
+   * Initialise painting with BaseBrushTool.
    *
-   * @protected
+   * @abstract
    * @event
    * @param {Object} evt - The event.
    * @returns {void}
@@ -119,31 +120,40 @@ class BaseBrushTool extends BaseTool {
     const element = eventData.element;
 
     const {
+      labelmap2D,
       labelmap3D,
       currentImageIdIndex,
-      activeLabelmapIndex
-    } = getters.getAndCacheLabelmap2D(element);
+      activeLabelmapIndex,
+    } = getters.labelmap2D(element);
 
     const shouldErase =
       this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;
 
     this.paintEventData = {
+      labelmap2D,
       labelmap3D,
       currentImageIdIndex,
       activeLabelmapIndex,
-      shouldErase
+      shouldErase,
     };
+
+    if (configuration.storeHistory) {
+      const previousPixelData = labelmap2D.pixelData.slice();
+
+      this.paintEventData.previousPixelData = previousPixelData;
+    }
   }
 
+  /**
+   * End painting with BaseBrushTool.
+   *
+   * @abstract
+   * @event
+   * @param {Object} evt - The event.
+   * @returns {void}
+   */
   _endPainting(evt) {
-    const {
-      labelmap3D,
-      currentImageIdIndex,
-      activeLabelmapIndex,
-      shouldErase
-    } = this.paintEventData;
-
-    const labelmap2D = labelmap3D.labelmaps2D[currentImageIdIndex];
+    const { labelmap2D, currentImageIdIndex } = this.paintEventData;
 
     // Grab the labels on the slice.
     const segmentSet = new Set(labelmap2D.pixelData);
@@ -164,20 +174,29 @@ class BaseBrushTool extends BaseTool {
 
     labelmap2D.segmentsOnLabelmap = segmentsOnLabelmap;
 
-    // If labelmap2D now empty, delete it.
-    if (
-      shouldErase &&
-      labelmap2D.segmentsOnLabelmap.length === 1 &&
-      labelmap2D.segmentsOnLabelmap[0] === 0
-    ) {
-      delete labelmap3D.labelmaps2D[currentImageIdIndex];
+    if (configuration.storeHistory) {
+      const { previousPixelData } = this.paintEventData;
+      const newPixelData = labelmap2D.pixelData;
+      const operation = {
+        imageIdIndex: currentImageIdIndex,
+        diff: getDiffBetweenPixelData(previousPixelData, newPixelData),
+      };
+
+      setters.pushState(this.element, [operation]);
     }
+
+    triggerLabelmapModifiedEvent(this.element);
   }
+
+  // ===================================================================
+  // Implementation interface
+  // ===================================================================
 
   /**
    * Event handler for MOUSE_MOVE event.
    *
    * @override
+   * @abstract
    * @event
    * @param {Object} evt - The event.
    */
@@ -188,7 +207,24 @@ class BaseBrushTool extends BaseTool {
   }
 
   /**
-   * Event handler for switching mode to passive;
+   * Used to redraw the tool's cursor per render.
+   *
+   * @override
+   * @param {Object} evt - The event.
+   */
+  renderToolData(evt) {
+    const eventData = evt.detail;
+    const element = eventData.element;
+
+    // Only brush needs to render.
+    if (isToolActiveForElement(element, this.name)) {
+      // Call the hover event for the brush
+      this.renderBrush(evt);
+    }
+  }
+
+  /**
+   * Event handler for switching mode to passive.
    *
    * @override
    * @event
@@ -204,27 +240,6 @@ class BaseBrushTool extends BaseTool {
       return;
     }
   }
-
-  /**
-   * Used to redraw the tool's annotation data per render.
-   *
-   * @override
-   * @param {Object} evt - The event.
-   */
-  renderToolData(evt) {
-    const eventData = evt.detail;
-    const element = eventData.element;
-
-    // Only brush needs to render.
-    if (isToolActive(element, this.name)) {
-      // Call the hover event for the brush
-      this.renderBrush(evt);
-    }
-  }
-
-  // ===================================================================
-  // Implementation interface
-  // ===================================================================
 
   /**
    * Event handler for MOUSE_UP during the drawing event loop.
@@ -293,7 +308,7 @@ class BaseBrushTool extends BaseTool {
   }
 
   // ===================================================================
-  // Segmentation API. This is effectively a wrapper around the store.
+  // Brush API. This is effectively a wrapper around the store.
   // ===================================================================
 
   /**
@@ -304,7 +319,7 @@ class BaseBrushTool extends BaseTool {
    * @returns {void}
    */
   increaseBrushSize() {
-    const oldRadius = state.radius;
+    const oldRadius = configuration.radius;
     let newRadius = Math.floor(oldRadius * 1.2);
 
     // If e.g. only 2 pixels big. Math.floor(2*1.2) = 2.
@@ -324,51 +339,14 @@ class BaseBrushTool extends BaseTool {
    * @returns {void}
    */
   decreaseBrushSize() {
-    const oldRadius = state.radius;
+    const oldRadius = configuration.radius;
     const newRadius = Math.floor(oldRadius * 0.8);
 
     setters.radius(newRadius);
   }
 
-  get alpha() {
-    return state.alpha;
-  }
-
-  set alpha(value) {
-    const enabledElement = this._getEnabledElement();
-
-    state.alpha = value;
-    external.cornerstone.updateImage(enabledElement.element);
-  }
-
-  get alphaOfInactiveLabelmap() {
-    return state.alphaOfInactiveLabelmap;
-  }
-
-  set alphaOfInactiveLabelmap(value) {
-    const enabledElement = this._getEnabledElement();
-
-    state.alphaOfInactiveLabelmap = value;
-    external.cornerstone.updateImage(enabledElement.element);
-  }
-
-  _getEnabledElement() {
-    return external.cornerstone.getEnabledElement(this.element);
-  }
-
   _isCtrlDown(eventData) {
     return (eventData.event && eventData.event.ctrlKey) || eventData.ctrlKey;
-  }
-
-  /**
-   * Returns the toolData type assoicated with this type of tool.
-   *
-   * @static
-   * @public
-   * @returns {String} The number of colors in the color map.
-   */
-  static getReferencedToolDataName() {
-    return "brush";
   }
 }
 

@@ -1,8 +1,8 @@
-import store from "./index.js";
-import getToolForElement from "./getToolForElement.js";
-import { getLogger } from "../util/logger.js";
+import store, { getModule } from './index.js';
+import getToolForElement from './getToolForElement.js';
+import { getLogger } from '../util/logger.js';
 
-const logger = getLogger("addTool");
+const logger = getLogger('addTool');
 
 /**
  * Adds a tool to an enabled element.
@@ -24,7 +24,7 @@ const addToolForElement = function(element, ApiTool, props) {
   const toolAlreadyAddedToElement = getToolForElement(element, tool.name);
 
   if (toolAlreadyAddedToElement) {
-    logger.warn("%s has already been added to the target element", tool.name);
+    logger.warn('%s has already been added to the target element', tool.name);
 
     return;
   }
@@ -63,7 +63,9 @@ const addTool = function(ApiTool, props) {
  * @returns {undefined}
  */
 const _addToolGlobally = function(ApiTool, props) {
-  if (!store.modules.globalConfiguration.state.globalToolSyncEnabled) {
+  const { configuration } = getModule('globalConfiguration');
+
+  if (!configuration.globalToolSyncEnabled) {
     return;
   }
 
@@ -72,7 +74,7 @@ const _addToolGlobally = function(ApiTool, props) {
     store.state.globalTools[tool.name] !== undefined;
 
   if (toolAlreadyAddedGlobally) {
-    logger.warn("%s has already been added globally", tool.name);
+    logger.warn('%s has already been added globally', tool.name);
 
     return;
   }
@@ -80,7 +82,7 @@ const _addToolGlobally = function(ApiTool, props) {
   store.state.globalTools[tool.name] = {
     tool: ApiTool,
     props,
-    activeBindings: []
+    activeBindings: [],
   };
 };
 

@@ -128,6 +128,8 @@ import { playClip, stopClip } from './stackTools/playClip.js';
 
 // ~~~~~~ STATE MANAGEMENT ~~~~~ //
 import { default as store } from './store/index.js';
+import { getModule } from './store/index.js';
+
 import { default as getToolForElement } from './store/getToolForElement.js';
 import { addTool, addToolForElement } from './store/addTool.js';
 import { removeTool, removeToolForElement } from './store/removeTool.js';
@@ -145,6 +147,7 @@ import {
   setToolPassive,
   setToolPassiveForElement,
 } from './store/setToolMode.js';
+import isToolActiveForElement from './store/isToolActiveForElement';
 import {
   addToolState,
   getToolState,
@@ -204,7 +207,7 @@ import { default as external } from './externalModules.js';
 import { default as EVENTS } from './events.js';
 import { default as version } from './version.js';
 
-import importInternalModule from './importInternalModule.js';
+import importInternal from './importInternal.js';
 
 const cornerstoneTools = {
   // ~~~ TOOLS
@@ -223,6 +226,7 @@ const cornerstoneTools = {
   // ~ Segmentation Tools
   BrushTool,
   SphericalBrushTool,
+  RectangleScissorsTool,
   FreehandScissorsTool,
   CircleScissorsTool,
   CorrectionScissorsTool,
@@ -253,6 +257,7 @@ const cornerstoneTools = {
   playClip,
   stopClip,
   store,
+  getModule,
   getToolForElement,
   addTool,
   addToolForElement,
@@ -260,6 +265,7 @@ const cornerstoneTools = {
   removeToolForElement,
   setToolOptions,
   setToolOptionsForElement,
+  isToolActiveForElement,
   setToolActive,
   setToolActiveForElement,
   setToolEnabled,
@@ -291,8 +297,8 @@ const cornerstoneTools = {
   SaveAs,
   enableLogger,
   disableLogger,
-  importInternalModule,
-  import: importInternalModule,
+  importInternal,
+  import: importInternal,
   register,
   registerSome,
   wwwcSynchronizer,
@@ -358,6 +364,7 @@ export {
   playClip,
   stopClip,
   store,
+  getModule,
   getToolForElement,
   addTool,
   addToolForElement,
@@ -365,6 +372,7 @@ export {
   removeToolForElement,
   setToolOptions,
   setToolOptionsForElement,
+  isToolActiveForElement,
   setToolActive,
   setToolActiveForElement,
   setToolEnabled,
@@ -407,12 +415,12 @@ export {
   stackImageIndexSynchronizer,
   panZoomSynchronizer,
   requestPoolManager,
-  importInternalModule,
+  importInternal,
   external,
   EVENTS,
   version,
 };
 
-export { default as import } from './importInternalModule.js';
+export { default as import } from './importInternal.js';
 
 export default cornerstoneTools;

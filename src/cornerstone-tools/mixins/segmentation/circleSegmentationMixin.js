@@ -1,24 +1,10 @@
 import { draw, drawCircle, getNewContext } from '../../drawing';
 import external from '../../externalModules';
 import _isEmptyObject from '../../util/isEmptyObject';
-import store from '../../store';
-import { getCursor } from './../../util/segmentation';
+import { getModule } from '../../store';
+import { getDiffBetweenPixelData } from '../../util/segmentation';
 
-const brushModule = store.modules.brush;
-const { getters } = brushModule;
-
-/**
- * Gets The cursor according to strategy.
- *
- * @protected
- * @abstract
- * @param  {string} toolName the name of the tool.
- * @param  {string} strategy the operation strategy.
- * @returns {MouseCursor}
- */
-function _getCursor(toolName, strategy) {
-  return getCursor(toolName, strategy);
-}
+const { getters, setters } = getModule('segmentation');
 
 /**
  * Sets the start and end handle points to empty objects
@@ -122,49 +108,62 @@ function _applyStrategy(evt) {
   evt.detail.handles = this.handles;
   const { element } = evt.detail;
 
-  const { labelmap3D, currentImageIdIndex } = getters.getAndCacheLabelmap2D(
+  const { labelmap2D, labelmap3D, currentImageIdIndex } = getters.labelmap2D(
     element
   );
 
-  const points = [
-    {
+  const pixelData = labelmap2D.pixelData;
+  const previousPixeldata = pixelData.slice();
+
+  const points = {
+    start: {
       x: this.handles.start.x,
       y: this.handles.start.y,
     },
-    {
+    end: {
       x: this.handles.end.x,
       y: this.handles.end.y,
     },
-  ];
+  };
 
-  const pixelData = labelmap3D.labelmaps2D[currentImageIdIndex].pixelData;
-
-  evt.operationData = {
+  const operationData = {
     points,
     pixelData,
     segmentIndex: labelmap3D.activeSegmentIndex,
+    segmentationMixinType: `circleSegmentationMixin`,
   };
 
-  this.applyActiveStrategy(evt);
+  this.applyActiveStrategy(evt, operationData);
 
-  // TODO: Future: 3D propagation (unlimited, positive, negative, symmetric)
+  const operation = {
+    imageIdIndex: currentImageIdIndex,
+    diff: getDiffBetweenPixelData(previousPixeldata, pixelData),
+  };
+
+  setters.pushState(this.element, [operation]);
 
   // Invalidate the brush tool data so it is redrawn
-  labelmap3D.labelmaps2D[currentImageIdIndex].invalidated = true;
+  setters.updateSegmentsOnLabelmap2D(labelmap2D);
   external.cornerstone.updateImage(element);
 
   this._resetHandles();
 }
 
 /**
- * @mixin circleSegmentationMixin - segmentation operations for circles
+ * @mixin circleSegmentationMixin - Segmentation operations for circles.
  * @memberof Mixins
  */
 export default {
-  _applyStrategy,
-  _getCursor,
+  postTouchStartCallback: _startOutliningRegion,
+  postMouseDownCallback: _startOutliningRegion,
+  mouseClickCallback: _startOutliningRegion,
+  touchDragCallback: _setHandlesAndUpdate,
+  mouseDragCallback: _setHandlesAndUpdate,
+  mouseMoveCallback: _setHandlesAndUpdate,
+  touchEndCallback: _applyStrategy,
+  mouseUpCallback: _applyStrategy,
+  initializeMixin: _resetHandles,
   renderToolData,
   _resetHandles,
-  _setHandlesAndUpdate,
-  _startOutliningRegion,
+  _applyStrategy,
 };

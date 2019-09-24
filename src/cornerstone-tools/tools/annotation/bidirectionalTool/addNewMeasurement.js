@@ -9,7 +9,6 @@ import {
 import triggerEvent from '../../../util/triggerEvent.js';
 import getActiveTool from '../../../util/getActiveTool';
 import BaseAnnotationTool from '../../base/BaseAnnotationTool';
-import calculateLongestAndShortestDiameters from './utils/calculateLongestAndShortestDiameters.js';
 
 export default function(evt, interactionType) {
   const eventData = evt.detail;
@@ -39,7 +38,7 @@ export default function(evt, interactionType) {
     this.name,
     measurementData,
     end,
-    this.options,
+    {},
     interactionType,
     () => {
       const { handles, longestDiameter, shortestDiameter } = measurementData;
@@ -65,7 +64,15 @@ export default function(evt, interactionType) {
       // Perpendicular line is not connected to long-line
       perpendicularStart.locked = false;
 
+      measurementData.invalidated = true;
+
       external.cornerstone.updateImage(element);
+
+      const activeTool = getActiveTool(element, buttons, interactionType);
+
+      if (activeTool instanceof BaseAnnotationTool) {
+        activeTool.updateCachedStats(image, element, measurementData);
+      }
 
       const modifiedEventData = {
         toolType: this.name,
@@ -73,13 +80,8 @@ export default function(evt, interactionType) {
         measurementData,
       };
 
-      calculateLongestAndShortestDiameters(eventData, measurementData);
-
-      external.cornerstone.triggerEvent(
-        element,
-        EVENTS.MEASUREMENT_MODIFIED,
-        modifiedEventData
-      );
+      triggerEvent(element, EVENTS.MEASUREMENT_MODIFIED, modifiedEventData);
+      triggerEvent(element, EVENTS.MEASUREMENT_COMPLETED, modifiedEventData);
     }
   );
 }

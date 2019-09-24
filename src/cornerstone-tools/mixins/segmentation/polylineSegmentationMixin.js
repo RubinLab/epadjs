@@ -1,29 +1,16 @@
 import { draw, drawJoinedLines, getNewContext } from '../../drawing';
-import { getCursor } from '../../util/segmentation';
-import store from '../../store';
+import { getModule } from '../../store';
+import freehandSegmentationMixin from './freehandSegmentationMixin';
 
-const brushModule = store.modules.brush;
-const { getters } = brushModule;
-
-/**
- * Gets The cursor according to strategy.
- *
- * @protected
- * @abstract
- * @param  {string} toolName the name of the tool.
- * @param  {string} strategy the operation strategy.
- * @returns {MouseCursor}
- */
-function _getCursor(toolName, strategy) {
-  return getCursor(toolName, strategy);
-}
+const { getters } = getModule('segmentation');
 
 /**
- * Render hook: draws the FreehandScissors's outline
+ * Override for `freehandSegmentationMixin`'s `renderToolData` method to render a polyline instead
+ * of a freehand region with the first and last point connected. Apply after the `freehandSegmentationMixin`.
  *
- * @param {Object} evt Cornerstone.event#cornerstoneimagerendered > cornerstoneimagerendered event
- * @memberof Tools.CorrectionTool
- * @returns {void}
+ * @override
+ * @param {Object} evt The cornerstone render event.
+ * @returns {null}
  */
 function renderToolData(evt) {
   const eventData = evt.detail;
@@ -47,11 +34,12 @@ function renderToolData(evt) {
   });
 }
 
+const polylineSegmentationMixin = Object.assign({}, freehandSegmentationMixin, {
+  renderToolData,
+});
+
 /**
- * @mixin polylineSegmentationMixin - segmentation operations for corrections Polyline
+ * @mixin freehandPolylineRenderOverride - segmentation operations for corrections Polyline
  * @memberof Mixins
  */
-export default {
-  _getCursor,
-  renderToolData,
-};
+export default polylineSegmentationMixin;

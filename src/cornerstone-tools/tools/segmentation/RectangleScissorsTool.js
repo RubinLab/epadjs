@@ -1,36 +1,43 @@
-import { BaseSegmentationTool } from '../base';
+import { BaseTool } from '../base';
 import {
-  fillInsideBoundingBox,
+  fillInsideRectangle,
   fillOutsideRectangle,
   eraseOutsideRectangle,
-  eraseInsideBoundingBox,
-} from '../../util/segmentation/operations';
-import { segRectangleFillInsideCursor } from '../cursors';
+  eraseInsideRectangle,
+} from './strategies';
+import {
+  segRectangleFillInsideCursor,
+  segRectangleFillOutsideCursor,
+  segRectangleEraseInsideCursor,
+  segRectangleEraseOutsideCursor,
+} from '../cursors';
 
 /**
  * @public
  * @class RectangleScissorsTool
  * @memberof Tools
- * @classdesc Tool for slicing brush pixel data within a rectangle shape
- * @extends Tools.Base.BaseSegmentationTool
+ * @classdesc Tool for manipulating labelmap data by drawing a rectangle.
+ * @extends Tools.Base.BaseTool
  */
-export default class RectangleScissorsTool extends BaseSegmentationTool {
+export default class RectangleScissorsTool extends BaseTool {
   /** @inheritdoc */
   constructor(props = {}) {
     const defaultProps = {
       name: 'RectangleScissors',
-      configuration: {
-        referencedToolData: 'segmentation',
-      },
       strategies: {
-        FILL_INSIDE: fillInsideBoundingBox,
+        FILL_INSIDE: fillInsideRectangle,
         FILL_OUTSIDE: fillOutsideRectangle,
         ERASE_OUTSIDE: eraseOutsideRectangle,
-        ERASE_INSIDE: eraseInsideBoundingBox,
+        ERASE_INSIDE: eraseInsideRectangle,
+      },
+      cursors: {
+        FILL_INSIDE: segRectangleFillInsideCursor,
+        FILL_OUTSIDE: segRectangleFillOutsideCursor,
+        ERASE_OUTSIDE: segRectangleEraseOutsideCursor,
+        ERASE_INSIDE: segRectangleEraseInsideCursor,
       },
       defaultStrategy: 'FILL_INSIDE',
       supportedInteractionTypes: ['Mouse', 'Touch'],
-      svgCursor: segRectangleFillInsideCursor,
       mixins: ['rectangleSegmentationMixin'],
     };
 

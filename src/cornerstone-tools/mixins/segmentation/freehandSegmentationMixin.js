@@ -1,26 +1,12 @@
 import external from '../../externalModules.js';
-import store from '../../store';
+import { getModule } from '../../store';
 import { getLogger } from '../../util/logger.js';
 import { draw, drawJoinedLines, getNewContext } from '../../drawing';
-import { getCursor } from '../../util/segmentation';
+import { getDiffBetweenPixelData } from '../../util/segmentation';
 
 const logger = getLogger('tools:ScissorsTool');
 
-const brushModule = store.modules.brush;
-const { getters } = brushModule;
-
-/**
- * Gets The cursor according to strategy.
- *
- * @protected
- * @abstract
- * @param  {string} toolName the name of the tool.
- * @param  {string} strategy the operation strategy.
- * @returns {MouseCursor}
- */
-function _getCursor(toolName, strategy) {
-  return getCursor(toolName, strategy);
-}
+const { getters, setters } = getModule('segmentation');
 
 /**
  * Render hook: draws the FreehandScissors's outline
@@ -34,23 +20,24 @@ function renderToolData(evt) {
   const { element } = eventData;
   const color = getters.brushColor(element, true);
   const context = getNewContext(eventData.canvasContext.canvas);
-  const handles = this.handles;
+  const points = this.handles.points;
+
+  if (points.length < 2) {
+    return;
+  }
 
   draw(context, context => {
-    if (handles.points.length > 1) {
-      for (let j = 0; j < handles.points.length; j++) {
-        const lines = [...handles.points[j].lines];
-        const points = handles.points;
+    for (let j = 0; j < points.length; j++) {
+      const lines = [...points[j].lines];
 
-        if (j === points.length - 1) {
-          // If it's still being actively drawn, keep the last line to
-          // The mouse location
-          lines.push(this.handles.points[0]);
-        }
-        drawJoinedLines(context, element, this.handles.points[j], lines, {
-          color,
-        });
+      if (j === points.length - 1) {
+        // If it's still being actively drawn, keep the last line to
+        // The mouse location
+        lines.push(points[0]);
       }
+      drawJoinedLines(context, element, points[j], lines, {
+        color,
+      });
     }
   });
 }
@@ -65,14 +52,15 @@ function renderToolData(evt) {
 function _startOutliningRegion(evt) {
   const element = evt.detail.element;
   const image = evt.detail.currentPoints.image;
+  const points = this.handles.points;
 
-  if (!this.handles.points.length) {
+  if (!points.length) {
     logger.warn('Something went wrong, empty handles detected.');
 
     return null;
   }
 
-  this.handles.points.push({
+  points.push({
     x: image.x,
     y: image.y,
     lines: [],
@@ -111,25 +99,34 @@ function _applyStrategy(evt) {
   const points = this.handles.points;
   const { element } = evt.detail;
 
-  const { labelmap3D, currentImageIdIndex } = getters.getAndCacheLabelmap2D(
+  const { labelmap2D, labelmap3D, currentImageIdIndex } = getters.labelmap2D(
     element
   );
 
-  const pixelData = labelmap3D.labelmaps2D[currentImageIdIndex].pixelData;
+  const pixelData = labelmap2D.pixelData;
+  const previousPixeldata = pixelData.slice();
 
-  evt.operationData = {
+  const operationData = {
     points,
     pixelData,
     segmentIndex: labelmap3D.activeSegmentIndex,
+    segmentationMixinType: `freehandSegmentationMixin`,
   };
 
-  this.applyActiveStrategy(evt);
+  this.applyActiveStrategy(evt, operationData);
+
+  const operation = {
+    imageIdIndex: currentImageIdIndex,
+    diff: getDiffBetweenPixelData(previousPixeldata, pixelData),
+  };
+
+  setters.pushState(this.element, [operation]);
 
   // Invalidate the brush tool data so it is redrawn
-  labelmap3D.labelmaps2D[currentImageIdIndex].invalidated = true;
+  setters.updateSegmentsOnLabelmap2D(labelmap2D);
+  external.cornerstone.updateImage(element);
 
   this._resetHandles();
-  external.cornerstone.updateImage(evt.detail.element);
 }
 
 /**
@@ -155,9 +152,11 @@ function _resetHandles() {
  * @returns {void}
  */
 function _addPoint(evt) {
-  if (this.handles.points.length) {
+  const points = this.handles.points;
+
+  if (points.length) {
     // Add the line from the current handle to the new handle
-    this.handles.points[this.currentHandle - 1].lines.push({
+    points[this.currentHandle - 1].lines.push({
       x: evt.currentPoints.image.x,
       y: evt.currentPoints.image.y,
       lines: [],
@@ -165,7 +164,7 @@ function _addPoint(evt) {
   }
 
   // Add the new handle
-  this.handles.points.push({
+  points.push({
     x: evt.currentPoints.image.x,
     y: evt.currentPoints.image.y,
     lines: [],
@@ -183,11 +182,17 @@ function _addPoint(evt) {
  * @memberof Mixins
  */
 export default {
-  _addPoint,
-  _applyStrategy,
-  _getCursor,
+  postTouchStartCallback: _startOutliningRegion,
+  postMouseDownCallback: _startOutliningRegion,
+  mouseClickCallback: _startOutliningRegion,
+  touchDragCallback: _setHandlesAndUpdate,
+  mouseDragCallback: _setHandlesAndUpdate,
+  mouseMoveCallback: _setHandlesAndUpdate,
+  touchEndCallback: _applyStrategy,
+  mouseUpCallback: _applyStrategy,
+  initializeMixin: _resetHandles,
   renderToolData,
   _resetHandles,
-  _startOutliningRegion,
-  _setHandlesAndUpdate,
+  _addPoint,
+  _applyStrategy,
 };

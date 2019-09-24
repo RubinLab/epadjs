@@ -1,29 +1,29 @@
-import { BaseSegmentationTool } from '../base';
+import { BaseTool } from '../base';
 import { freehandFillInsideCursor } from '../cursors';
-import { correction } from '../../util/segmentation/operations';
+import { correction } from './strategies';
 
 /**
  * @public
  * @class CorrectionScissorsTool
  * @memberof Tools
- * @classdesc Tool for slicing brush pixel data
- * @extends Tools.Base.BaseSegmentationTool
+ * @classdesc Tool for correcting segments on a labelmap.
+ * @extends Tools.Base.BaseTool
  */
-export default class CorrectionScissorsTool extends BaseSegmentationTool {
+export default class CorrectionScissorsTool extends BaseTool {
   /** @inheritdoc */
   constructor(props = {}) {
     const defaultProps = {
       name: 'CorrectionScissors',
-      configuration: {
-        referencedToolData: 'segmentation',
-      },
       strategies: {
         CORRECTION: correction,
+      },
+      cursors: {
+        CORRECTION: freehandFillInsideCursor,
       },
       defaultStrategy: 'CORRECTION',
       supportedInteractionTypes: ['Mouse', 'Touch'],
       svgCursor: freehandFillInsideCursor,
-      mixins: ['freehandSegmentationMixin', 'polylineSegmentationMixin'],
+      mixins: ['polylineSegmentationMixin'],
     };
 
     super(props, defaultProps);

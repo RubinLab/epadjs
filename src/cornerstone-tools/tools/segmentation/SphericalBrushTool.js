@@ -1,16 +1,18 @@
 import external from './../../externalModules.js';
-import BrushTool from './BrushTool.js';
-import store from './../../store/index.js';
-import brushUtils from './../../util/segmentation/brush/index.js';
-import EVENTS from '../../events.js';
+import BaseBrushTool from './../base/BaseBrushTool.js';
+import { getModule } from './../../store/index.js';
+import {
+  drawBrushPixels,
+  getCircle,
+  triggerLabelmapModifiedEvent,
+} from './../../util/segmentation';
 import { getToolState } from '../../stateManagement/toolState.js';
 import { getLogger } from '../../util/logger.js';
+import { getDiffBetweenPixelData } from '../../util/segmentation';
 
 const logger = getLogger('tools:SphericalBrushTool');
 
-const { drawBrushPixels, getCircle } = brushUtils;
-
-const brushModule = store.modules.brush;
+const { getters, setters, configuration } = getModule('segmentation');
 
 /**
  * @public
@@ -19,52 +21,57 @@ const brushModule = store.modules.brush;
  * @classdesc Tool for drawing segmentations on an image.
  * @extends Tools.Base.BaseBrushTool
  */
-export default class SphericalBrushTool extends BrushTool {
+export default class SphericalBrushTool extends BaseBrushTool {
   constructor(props = {}) {
     const defaultProps = {
       name: 'SphericalBrush',
       supportedInteractionTypes: ['Mouse', 'Touch'],
       configuration: { alwaysEraseOnClick: false },
+      mixins: ['renderBrushMixin'],
     };
 
-    super(defaultProps);
+    super(props, defaultProps);
 
     this.touchDragCallback = this._paint.bind(this);
   }
 
   /**
-   * Paints the data to the canvas.
+   * Initialise painting with BaseBrushTool.
    *
-   * @private
-   * @param  {Object} evt The data object associated with the event.
+   * @abstract
+   * @event
+   * @param {Object} evt - The event.
    * @returns {void}
    */
-  _paint(evt) {
-    const { cornerstone, cornerstoneMath } = external;
+  _startPainting(evt) {
     const eventData = evt.detail;
-    const element = eventData.element;
-    const image = eventData.image;
+    const { element, image } = eventData;
+    const { cornerstone } = external;
+    const radius = configuration.radius;
     const { rows, columns } = image;
-    const { x, y } = eventData.currentPoints.image;
-    const radius = brushModule.state.radius;
-
     const pixelSpacing = Math.max(
       image.rowPixelSpacing,
       image.columnPixelSpacing
     );
 
-    if (x < 0 || x > columns || y < 0 || y > rows) {
-      return;
-    }
+    const stackState = getToolState(element, 'stack');
+    const stackData = stackState.data[0];
+    const { imageIds } = stackData;
+
+    const {
+      labelmap2D,
+      labelmap3D,
+      currentImageIdIndex,
+      activeLabelmapIndex,
+    } = getters.labelmap2D(element);
+
+    const shouldErase =
+      this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;
 
     const imagePlaneOfCurrentImage = cornerstone.metaData.get(
       'imagePlaneModule',
       image.imageId
     );
-
-    const stackState = getToolState(element, 'stack');
-    const stackData = stackState.data[0];
-    const { imageIds, currentImageIdIndex } = stackData;
 
     let imagesInRange;
 
@@ -92,20 +99,62 @@ export default class SphericalBrushTool extends BrushTool {
       ];
     }
 
-    const {
+    this.paintEventData = {
+      labelmap2D,
       labelmap3D,
+      currentImageIdIndex,
       activeLabelmapIndex,
-    } = brushModule.getters.getAndCacheLabelmap2D(element);
+      shouldErase,
+      imagesInRange,
+    };
 
-    const shouldErase =
-      this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;
+    if (configuration.storeHistory) {
+      const previousPixeldataForImagesInRange = [];
+
+      for (let i = 0; i < imagesInRange.length; i++) {
+        const { imageIdIndex } = imagesInRange[i];
+        const labelmap2DForImageIdIndex = getters.labelmap2DByImageIdIndex(
+          labelmap3D,
+          imageIdIndex,
+          rows,
+          columns
+        );
+
+        const previousPixeldata = labelmap2DForImageIdIndex.pixelData.slice();
+
+        previousPixeldataForImagesInRange.push(previousPixeldata);
+      }
+
+      this.paintEventData.previousPixeldataForImagesInRange = previousPixeldataForImagesInRange;
+    }
+  }
+
+  /**
+   * Paints the data to the labelmap.
+   *
+   * @private
+   * @param  {Object} evt The data object associated with the event.
+   * @returns {void}
+   */
+  _paint(evt) {
+    const eventData = evt.detail;
+    const element = eventData.element;
+    const image = eventData.image;
+    const { rows, columns } = image;
+    const { x, y } = eventData.currentPoints.image;
+
+    if (x < 0 || x > columns || y < 0 || y > rows) {
+      return;
+    }
+
+    const { labelmap3D, imagesInRange, shouldErase } = this.paintEventData;
 
     for (let i = 0; i < imagesInRange.length; i++) {
       const { imageIdIndex, radiusOnImage } = imagesInRange[i];
       const pointerArray = getCircle(radiusOnImage, rows, columns, x, y);
 
       // Cache the view on this image if its not present.
-      brushModule.setters.cacheLabelMap2DView(
+      const labelmap2DForImageIdIndex = getters.labelmap2DByImageIdIndex(
         labelmap3D,
         imageIdIndex,
         rows,
@@ -115,16 +164,12 @@ export default class SphericalBrushTool extends BrushTool {
       // Draw / Erase the active color.
       drawBrushPixels(
         pointerArray,
-        labelmap3D,
-        imageIdIndex,
+        labelmap2DForImageIdIndex.pixelData,
+        labelmap3D.activeSegmentIndex,
         columns,
         shouldErase
       );
     }
-
-    external.cornerstone.triggerEvent(element, EVENTS.LABELMAP_MODIFIED, {
-      activeLabelmapIndex,
-    });
 
     external.cornerstone.updateImage(evt.detail.element);
   }
@@ -240,5 +285,53 @@ export default class SphericalBrushTool extends BrushTool {
     return Math.floor(
       Math.sqrt(Math.pow(radiusInMM, 2) - Math.pow(distance, 2)) / pixelSpacing
     );
+  }
+
+  _endPainting(evt) {
+    const { labelmap3D, imagesInRange } = this.paintEventData;
+    const operations = [];
+
+    for (let i = 0; i < imagesInRange.length; i++) {
+      const { imageIdIndex } = imagesInRange[i];
+      const labelmap2D = labelmap3D.labelmaps2D[imageIdIndex];
+
+      // Grab the labels on the slice.
+      const segmentSet = new Set(labelmap2D.pixelData);
+      const iterator = segmentSet.values();
+
+      const segmentsOnLabelmap = [];
+      let done = false;
+
+      while (!done) {
+        const next = iterator.next();
+
+        done = next.done;
+
+        if (!done) {
+          segmentsOnLabelmap.push(next.value);
+        }
+      }
+
+      labelmap2D.segmentsOnLabelmap = segmentsOnLabelmap;
+
+      if (configuration.storeHistory) {
+        const { previousPixeldataForImagesInRange } = this.paintEventData;
+
+        const previousPixeldata = previousPixeldataForImagesInRange[i];
+        const labelmap2D = labelmap3D.labelmaps2D[imageIdIndex];
+        const newPixelData = labelmap2D.pixelData;
+
+        operations.push({
+          imageIdIndex,
+          diff: getDiffBetweenPixelData(previousPixeldata, newPixelData),
+        });
+      }
+    }
+
+    if (configuration.storeHistory) {
+      setters.pushState(this.element, operations);
+    }
+
+    triggerLabelmapModifiedEvent(this.element);
   }
 }
