@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 const editField = props => {
   return (
@@ -16,6 +17,12 @@ const editField = props => {
       />
     </>
   );
+};
+
+editField.propTypes = {
+  name: PropTypes.string,
+  onType: PropTypes.func,
+  default: PropTypes.string
 };
 
 export default editField;

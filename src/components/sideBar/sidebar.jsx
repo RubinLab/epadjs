@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { Tabs, Nav, Content } from "react-tiny-tabs";
 import { getProjects } from "../../services/projectServices";
-import { getWorklists } from "../../services/worklistServices";
+import { getWorklistsOfAssignee } from "../../services/worklistServices";
 import { getPacs } from "../../services/pacsServices";
 import { FiZoomIn } from "react-icons/fi";
 import "./w2.css";
@@ -43,7 +43,7 @@ class Sidebar extends Component {
       data: {
         ResultSet: { Result: worklists }
       }
-    } = await getWorklists(sessionStorage.getItem("username"));
+    } = await getWorklistsOfAssignee(sessionStorage.getItem("username"));
     this.setState({ worklists });
     const {
       data: {

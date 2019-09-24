@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import ToolBar from "../common/basicToolBar";
 import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
 import {
-  getWorklists,
+  getWorklistsOfCreator,
   deleteWorklist,
   saveWorklist,
   updateWorklist
@@ -14,6 +14,7 @@ import { getUsers } from "../../../services/userServices";
 import { Link } from "react-router-dom";
 import DeleteAlert from "../common/alertDeletionModal";
 import CreationForm from "./worklistCreationForm";
+import EditField from "../../sideBar/editField";
 
 const messages = {
   deleteSingle: "Delete the worklist? This cannot be undone.",
@@ -32,17 +33,27 @@ class WorkList extends React.Component {
     hasAddClicked: false,
     deleteAllClicked: false,
     selectAll: 0,
-    selected: {}
+    selected: {},
+    cellDoubleClicked: false,
+    clickedIndex: null,
+    workListId: null
   };
 
   componentDidMount = async () => {
     this.getWorkListData();
     const { data: userList } = await getUsers();
     this.setState({ userList });
+    document.addEventListener("mousedown", this.handleClickOutside);
+    document.addEventListener("keydown", this.escapeFieldInput);
+  };
+
+  componentWillUnmount = () => {
+    document.removeEventListener("mousedown", this.handleClickOutside);
+    document.removeEventListener("keydown", this.escapeFieldInput);
   };
 
   getWorkListData = async () => {
-    const { data: worklists } = await getWorklists(
+    const { data: worklists } = await getWorklistsOfCreator(
       sessionStorage.getItem("username")
     );
     this.setState({ worklists });
@@ -89,6 +100,7 @@ class WorkList extends React.Component {
       user: "",
       description: "",
       error: "",
+      dueDate: "",
       deleteSingleClicked: false,
       deleteAllClicked: false
     });
@@ -136,20 +148,18 @@ class WorkList extends React.Component {
     this.setState({ [name]: value });
   };
 
+  getUpdate = e => {
+    const { name, value } = e.target;
+    this.setState({ [name]: value });
+  };
+
   handleSaveWorklist = e => {
     let { name, id, user, description, dueDate } = this.state;
     if (!name || !id || !user) {
       this.setState({ error: messages.fillRequiredFields });
     } else {
       description = description ? description : "";
-      saveWorklist(
-        sessionStorage.getItem("username"),
-        id,
-        name,
-        user,
-        description,
-        dueDate
-      )
+      saveWorklist(id, name, user, description, dueDate)
         .then(() => {
           this.getWorkListData();
         })
@@ -172,8 +182,34 @@ class WorkList extends React.Component {
     });
   };
 
-  updateWorklist = e => {
-    updateWorklist(e.target.value, e.target.dataset.id)
+  handleUpdateField = (index, fieldName, worklistId) => {
+    this.setState(state => ({
+      cellDoubleClicked: fieldName,
+      clickedIndex: index,
+      worklistId
+    }));
+  };
+
+  escapeFieldInput = e => {
+    if (e.key === "Escape") {
+      this.handleUpdateField(null, null);
+    }
+  };
+
+  setWrapperRef = (node, id) => {
+    this.wrapperRef = node;
+  };
+
+  handleClickOutside = event => {
+    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
+      this.handleUpdateField(null);
+    }
+  };
+
+  updateWorklistUser = e => {
+    updateWorklist(sessionStorage.getItem("username"), e.target.dataset.id, {
+      user: e.target.value
+    })
       .then(() => this.getWorkListData())
       .catch(error =>
         toast.error(
@@ -184,6 +220,15 @@ class WorkList extends React.Component {
         )
       );
     this.handleCancel();
+  };
+
+  updateWorklist = () => {
+    const { name, description } = this.state;
+    const body = name ? { name } : { description };
+  };
+
+  setWorklistId = workListId => {
+    this.setState({ workListId });
   };
 
   defineColumns = () => {
@@ -229,7 +274,33 @@ class WorkList extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
+        minWidth: 50,
+        Cell: original => {
+          const { cellDoubleClicked, clickedIndex } = this.state;
+          return cellDoubleClicked === "name" &&
+            clickedIndex === original.index ? (
+            <div ref={this.setWrapperRef} className="--commentInput">
+              <EditField
+                name="name"
+                onType={this.getUpdate}
+                default={original.row.checkbox.name}
+              />
+            </div>
+          ) : (
+            <div
+              className="--commentCont"
+              onClick={() =>
+                this.handleUpdateField(
+                  original.index,
+                  "name",
+                  original.row.checkbox.workListID
+                )
+              }
+            >
+              {original.row.checkbox.name}
+            </div>
+          );
+        }
       },
       {
         Header: "Open",
@@ -260,7 +331,7 @@ class WorkList extends React.Component {
           for (let user of this.state.userList) {
             options.push(
               <option key={`${index}-${user.username}`} value={user.username}>
-                {user.displayname}
+                {user.username}
               </option>
             );
             index++;
@@ -268,8 +339,9 @@ class WorkList extends React.Component {
           return (
             <select
               className="user-select"
+              name="user_id"
               defaultValue={original.row.checkbox.username}
-              onChange={this.updateWorklist}
+              onChange={this.updateWorklistUser}
               data-id={original.row.checkbox.workListID}
             >
               {options}
@@ -283,7 +355,35 @@ class WorkList extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
-        Cell: original => <div>{original.row.checkbox.description || ""}</div>
+        Cell: original => {
+          const className = original.row.checkbox.description
+            ? "wrapped"
+            : "wrapped click-to-add";
+          const { cellDoubleClicked, clickedIndex } = this.state;
+          return cellDoubleClicked === "description" &&
+            clickedIndex === original.index ? (
+            <div ref={this.setWrapperRef} className="--commentInput">
+              <EditField
+                name="description"
+                onType={this.getUpdate}
+                default={original.row.checkbox.description || ""}
+              />
+            </div>
+          ) : (
+            <div
+              className={`--commentCont ${className}`}
+              onClick={() =>
+                this.handleUpdateField(
+                  original.index,
+                  "description",
+                  original.row.checkbox.workListID
+                )
+              }
+            >
+              {original.row.checkbox.description || "Add description"}
+            </div>
+          );
+        }
       },
       {
         Header: "",

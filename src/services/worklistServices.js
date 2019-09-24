@@ -1,43 +1,29 @@
 import http from "./httpService";
 import { isLite, apiUrl } from "../config.json";
 
-export function getWorklists(userName) {
+export function getWorklistsOfCreator(userName) {
   return http.get(
-    apiUrl +
-      "/users/" +
-      userName +
-      "/worklists" +
-      "?username=ozge.ikiz.yurtsever@gmail.com"
+    apiUrl + "/worklists" + "?username=ozge.ikiz.yurtsever@gmail.com"
   );
 }
 
-export function deleteWorklist(userName, id) {
-  return http.delete(apiUrl + "/users/" + userName + "/worklists/" + id);
+export function getWorklistsOfAssignee(userName) {}
+
+export function deleteWorklist(user, worklistId) {
+  return http.delete(apiUrl + "/users/" + user + "/worklists/" + worklistId);
 }
 
 export function saveWorklist(
-  user,
   worklistId,
   worklistName,
   userId,
   description,
   dueDate
 ) {
-  // return http.post(
-  //   apiUrl +
-  //     "/users/" +
-  //     user +
-  //     "/worklists/" +
-  //     id +
-  //     "?description=" +
-  //     desc +
-  //     "&name=" +
-  //     name
-  // );
   return http.post(
     apiUrl +
       "/users/" +
-      user +
+      userId +
       "/worklists" +
       "?username=ozge.ikiz.yurtsever@gmail.com",
     {
@@ -50,10 +36,8 @@ export function saveWorklist(
   );
 }
 
-export function updateWorklist(user, id) {
-  return http.put(
-    apiUrl + "/users/" + user + "/worklists/" + id + "?user=" + user
-  );
+export function updateWorklist(user, id, body) {
+  return http.put(apiUrl + "/users/" + user + "/worklists/" + id, body);
 }
 
 export function getWorklist(user, id) {
