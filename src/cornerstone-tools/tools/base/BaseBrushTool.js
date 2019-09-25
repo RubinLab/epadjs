@@ -94,7 +94,6 @@ class BaseBrushTool extends BaseTool {
    * @param {Object} evt - The event.
    */
   preMouseDownCallback(evt) {
-    alert("MouseDown");
     const eventData = evt.detail;
     const { element, currentPoints } = eventData;
 
@@ -143,6 +142,10 @@ class BaseBrushTool extends BaseTool {
 
       this.paintEventData.previousPixelData = previousPixelData;
     }
+    let evnt = new CustomEvent("markupCreated", {
+      detail: "brush"
+    });
+    window.dispatchEvent(evnt);
   }
 
   /**
@@ -155,7 +158,6 @@ class BaseBrushTool extends BaseTool {
    */
   _endPainting(evt) {
     console.log(this.paintEventData);
-    alert("end painting");
     const { labelmap2D, currentImageIdIndex } = this.paintEventData;
 
     // Grab the labels on the slice.

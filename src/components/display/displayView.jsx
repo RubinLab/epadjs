@@ -67,7 +67,11 @@ const tools = [
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
   { name: "StackScrollMouseWheel" },
-  { name: "StackScrollMultiTouch" }
+  { name: "StackScrollMultiTouch" },
+  { name: "FreehandScissors", mouseButtonMasks: [1] },
+  { name: "RectangleScissors", mouseButtonMasks: [1] },
+  { name: "CircleScissors", mouseButtonMasks: [1] },
+  { name: "CorrectionScissors", mouseButtonMasks: [1] }
 ];
 
 const mapStateToProps = state => {

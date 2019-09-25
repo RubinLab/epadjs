@@ -15,11 +15,14 @@ import {
   FaPlayCircle,
   FaStopCircle,
   FaBroom,
-  FaAngleRight
+  FaAngleRight,
+  FaHandScissors,
+  FaCut,
+  FaCircle
 } from "react-icons/fa";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { MdLoop, MdPanTool } from "react-icons/md";
-import { TiDeleteOutline, TiPencil } from "react-icons/ti";
+import { TiDeleteOutline, TiPencil, TiScissorsOutline } from "react-icons/ti";
 import { MdWbIridescent } from "react-icons/md";
 import AnnotationList from "../annotationsList";
 import ResizeAndDrag from "../management/common/resizeAndDrag";
@@ -601,6 +604,47 @@ class Toolbar extends Component {
                   <span>Brush Auto Gated</span>
                 </div>
               </div> */}
+              <div
+                id="freehandScisssors"
+                tabIndex="9"
+                className="drawingSectionButton"
+                onClick={() => this.setToolActiveForElement("FreehandScissors")}
+              >
+                <div className="toolContainer">
+                  <FaHandScissors />
+                </div>
+                <div className="buttonLabel">
+                  <span>Freehand Scissors</span>
+                </div>
+              </div>
+              <div
+                id="circleScissors"
+                tabIndex="10"
+                className="drawingSectionButton"
+                onClick={() => this.setToolActiveForElement("CircleScissors")}
+              >
+                <div className="toolContainer">
+                  <FaCircle />
+                </div>
+                <div className="buttonLabel">
+                  <span>Circle Scissors</span>
+                </div>
+              </div>
+              <div
+                id="correctionScissors"
+                tabIndex="11"
+                className="drawingSectionButton"
+                onClick={() =>
+                  this.setToolActiveForElement("CorrectionScissors")
+                }
+              >
+                <div className="toolContainer">
+                  <TiScissorsOutline />
+                </div>
+                <div className="buttonLabel">
+                  <span>Correction Scissors</span>
+                </div>
+              </div>
               <div
                 id="line"
                 tabIndex="9"
