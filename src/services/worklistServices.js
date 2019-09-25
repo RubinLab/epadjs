@@ -1,13 +1,21 @@
 import http from "./httpService";
 import { isLite, apiUrl } from "../config.json";
 
-export function getWorklistsOfCreator(userName) {
+export function getWorklistsOfCreator() {
   return http.get(
     apiUrl + "/worklists" + "?username=ozge.ikiz.yurtsever@gmail.com"
   );
 }
 
-export function getWorklistsOfAssignee(userName) {}
+export function getWorklistsOfAssignee(userName) {
+  return http.get(
+    apiUrl +
+      "/users/" +
+      userName +
+      "/worklists" +
+      "?username=ozge.ikiz.yurtsever@gmail.com"
+  );
+}
 
 export function deleteWorklist(user, worklistId) {
   return http.delete(apiUrl + "/users/" + user + "/worklists/" + worklistId);

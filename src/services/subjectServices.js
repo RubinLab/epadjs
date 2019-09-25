@@ -7,7 +7,7 @@ export function getSubjects(projectId) {
   if (isLite) {
     projectId = "lite";
     return http.get(apiUrl + "/projects/" + projectId + "/subjects");
-  } else return http.get(apiUrl + "/projects/" + projectId + "/subjects/");
+  } else return http.get(apiUrl + "/projects/" + projectId + "/subjects");
 }
 
 export function downloadSubjects(subject) {

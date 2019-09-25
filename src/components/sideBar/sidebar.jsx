@@ -39,11 +39,11 @@ class Sidebar extends Component {
     }
 
     this.props.onData(projectMap);
-    const {
-      data: {
-        ResultSet: { Result: worklists }
-      }
-    } = await getWorklistsOfAssignee(sessionStorage.getItem("username"));
+    const { data: worklists } = await getWorklistsOfAssignee(
+      sessionStorage.getItem("username")
+    );
+    console.log("--- worklists here ");
+    console.log(worklists);
     this.setState({ worklists });
     const {
       data: {
@@ -164,13 +164,13 @@ class Sidebar extends Component {
                         ? "sidebar-row __bold"
                         : "sidebar-row";
                       return (
-                        <tr key={worklist.workListID} className={className}>
+                        <tr key={worklist.worklistID} className={className}>
                           <td>
                             <p
                               onClick={() => {
                                 this.handleRoute(
                                   "worklist",
-                                  worklist.workListID
+                                  worklist.worklistID
                                 );
                               }}
                             >
