@@ -20,7 +20,7 @@ import Management from "./components/management/mainMenu";
 import InfoMenu from "./components/infoMenu";
 import UserMenu from "./components/userProfileMenu";
 import AnnotationList from "./components/annotationsList";
-import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
+// import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import { isLite } from "./config.json";

@@ -439,18 +439,6 @@ class Toolbar extends Component {
             </>
           )}
         </div>
-        <div
-          tabIndex="13"
-          className="toolbarSectionButton"
-          onClick={this.handleAnnotationsDockClick}
-        >
-          <div className="toolContainer annotations-icon">
-            <FaList />
-          </div>
-          <div className="buttonLabel">
-            <span>Annotations</span>
-          </div>
-        </div>
 
         {/* Drawing Bar Starts here. Extract it to another component later  */}
         {this.state.showDrawing && (

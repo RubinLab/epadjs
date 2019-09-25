@@ -223,7 +223,8 @@ const mapStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
-    aimsList: state.annotationsListReducer.aimsList
+    aimsList: state.annotationsListReducer.aimsList,
+    imageID: state.annotationsListReducer.imageID
   };
 };
 export default connect(mapStateToProps)(AnnotationsList);
