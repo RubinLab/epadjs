@@ -66,6 +66,7 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
     } = this.paintEventData;
 
     // Draw / Erase the active color.
+    console.log("About to draw", pointerArray, labelmap3D, currentImageIdIndex);
     drawBrushPixels(
       pointerArray,
       labelmap3D,

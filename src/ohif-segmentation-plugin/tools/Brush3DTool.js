@@ -25,20 +25,30 @@ export default class Brush3DTool extends BrushTool {
     const element = eventData.element;
 
     const {
+      labelmap2D,
       labelmap3D,
       currentImageIdIndex,
       activeLabelmapIndex
     } = brushModule.getters.labelmap2D(element);
+    console.log(labelmap3D, currentImageIdIndex, activeLabelmapIndex);
 
     const shouldErase =
       this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;
 
     this.paintEventData = {
+      labelmap2D,
       labelmap3D,
       currentImageIdIndex,
       activeLabelmapIndex,
       shouldErase
     };
+
+    // if (configuration.storeHistory) {
+    if (1) {
+      const previousPixelData = labelmap2D.pixelData.slice();
+
+      this.paintEventData.previousPixelData = previousPixelData;
+    }
 
     const segmentIndex = labelmap3D.activeSegmentIndex;
     let metadata = labelmap3D.metadata[segmentIndex];
