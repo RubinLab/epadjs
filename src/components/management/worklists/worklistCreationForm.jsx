@@ -14,7 +14,6 @@ const worklistCreationForm = props => {
     </option>
   );
   for (let user of users) {
-    console.log(user);
     options.push(
       <option key={`${index}-${user.username}`} value={user.username}>
         {user.lastname && user.firstname ? user.displayname : user.email}
@@ -22,7 +21,6 @@ const worklistCreationForm = props => {
     );
     index++;
   }
-
   // let date = new Date();
   // const day = date.getDate() + "";
   // let month = date.getMonth() + 1;

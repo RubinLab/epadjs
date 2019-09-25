@@ -36,10 +36,24 @@ export function saveWorklist(
   );
 }
 
-export function updateWorklist(user, id, body) {
-  return http.put(apiUrl + "/users/" + user + "/worklists/" + id, body);
+export function updateWorklistAssignee(user, id, body) {
+  return http.put(
+    apiUrl +
+      "/users/" +
+      user +
+      "/worklists/" +
+      id +
+      "?username=ozge.ikiz.yurtsever@gmail.com",
+    body
+  );
 }
 
+export function updateWorklist(id, body) {
+  return http.put(
+    apiUrl + "/worklists/" + id + "?username=ozge.ikiz.yurtsever@gmail.com",
+    body
+  );
+}
 export function getWorklist(user, id) {
   // /users/admin/worklists/tes5/subjects/?annotationCount=true
   return http.get(

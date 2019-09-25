@@ -8,6 +8,7 @@ import {
   getWorklistsOfCreator,
   deleteWorklist,
   saveWorklist,
+  updateWorklistAssignee,
   updateWorklist
 } from "../../../services/worklistServices";
 import { getUsers } from "../../../services/userServices";
@@ -36,7 +37,7 @@ class WorkList extends React.Component {
     selected: {},
     cellDoubleClicked: false,
     clickedIndex: null,
-    workListId: null
+    worklistId: null
   };
 
   componentDidMount = async () => {
@@ -44,12 +45,12 @@ class WorkList extends React.Component {
     const { data: userList } = await getUsers();
     this.setState({ userList });
     document.addEventListener("mousedown", this.handleClickOutside);
-    document.addEventListener("keydown", this.escapeFieldInput);
+    document.addEventListener("keydown", this.handleKeyboardEvent);
   };
 
   componentWillUnmount = () => {
     document.removeEventListener("mousedown", this.handleClickOutside);
-    document.removeEventListener("keydown", this.escapeFieldInput);
+    document.removeEventListener("keydown", this.handleKeyboardEvent);
   };
 
   getWorkListData = async () => {
@@ -82,7 +83,7 @@ class WorkList extends React.Component {
     let newSelected = {};
     if (this.state.selectAll === 0) {
       this.state.worklists.forEach(project => {
-        newSelected[project.workListID] = project.username;
+        newSelected[project.worklistID] = project.username;
       });
     }
 
@@ -102,7 +103,11 @@ class WorkList extends React.Component {
       error: "",
       dueDate: "",
       deleteSingleClicked: false,
-      deleteAllClicked: false
+      deleteAllClicked: false,
+      selected: {},
+      user: "",
+      cellDoubleClicked: false,
+      worklistId: ""
     });
   };
 
@@ -115,6 +120,7 @@ class WorkList extends React.Component {
     Promise.all(promiseArr)
       .then(() => {
         this.getWorkListData();
+        this.setState({ selectAll: 0 });
       })
       .catch(error => {
         toast.error(error.response.data.message, { autoClose: false });
@@ -148,11 +154,6 @@ class WorkList extends React.Component {
     this.setState({ [name]: value });
   };
 
-  getUpdate = e => {
-    const { name, value } = e.target;
-    this.setState({ [name]: value });
-  };
-
   handleSaveWorklist = e => {
     let { name, id, user, description, dueDate } = this.state;
     if (!name || !id || !user) {
@@ -182,17 +183,27 @@ class WorkList extends React.Component {
     });
   };
 
-  handleUpdateField = (index, fieldName, worklistId) => {
-    this.setState(state => ({
+  handleUpdateField = (index, fieldName, worklistId, defaultValue) => {
+    console.log("id: ", worklistId);
+    this.setState({
       cellDoubleClicked: fieldName,
       clickedIndex: index,
-      worklistId
-    }));
+      worklistId: worklistId
+    });
+    fieldName === "name"
+      ? this.setState({ name: defaultValue })
+      : this.setState({ description: defaultValue });
   };
 
-  escapeFieldInput = e => {
+  handleKeyboardEvent = e => {
+    const { name, description, worklistId, cellDoubleClicked } = this.state;
+    const fieldUpdateValidation =
+      (name || description) && worklistId && cellDoubleClicked;
     if (e.key === "Escape") {
       this.handleUpdateField(null, null);
+    } else if (e.key === "Enter" && fieldUpdateValidation) {
+      console.log("detect enter");
+      this.updateWorklist();
     }
   };
 
@@ -206,8 +217,15 @@ class WorkList extends React.Component {
     }
   };
 
-  updateWorklistUser = e => {
-    updateWorklist(sessionStorage.getItem("username"), e.target.dataset.id, {
+  getUpdate = e => {
+    // e.stopPropagation();
+    const { name, value } = e.target;
+    console.log(name, value);
+    this.setState({ [name]: value });
+  };
+
+  updateWorklistAssignee = (e, username, worklistID) => {
+    updateWorklistAssignee(username, worklistID, {
       user: e.target.value
     })
       .then(() => this.getWorkListData())
@@ -223,12 +241,19 @@ class WorkList extends React.Component {
   };
 
   updateWorklist = () => {
-    const { name, description } = this.state;
+    const { name, description, worklistId } = this.state;
     const body = name ? { name } : { description };
-  };
-
-  setWorklistId = workListId => {
-    this.setState({ workListId });
+    updateWorklist(worklistId, body)
+      .then(() => this.getWorkListData())
+      .catch(error =>
+        toast.error(
+          messages.updateWorklistError + ": " + error.response.data.message,
+          {
+            autoClose: false
+          }
+        )
+      );
+    this.handleCancel();
   };
 
   defineColumns = () => {
@@ -242,9 +267,9 @@ class WorkList extends React.Component {
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={this.state.selected[original.workListID]}
+              checked={this.state.selected[original.worklistID]}
               onChange={() =>
-                this.toggleRow(original.workListID, original.username)
+                this.toggleRow(original.worklistID, original.username)
               }
             />
           );
@@ -283,7 +308,7 @@ class WorkList extends React.Component {
               <EditField
                 name="name"
                 onType={this.getUpdate}
-                default={original.row.checkbox.name}
+                default={this.state.name}
               />
             </div>
           ) : (
@@ -293,7 +318,8 @@ class WorkList extends React.Component {
                 this.handleUpdateField(
                   original.index,
                   "name",
-                  original.row.checkbox.workListID
+                  original.row.checkbox.worklistID,
+                  original.row.checkbox.name
                 )
               }
             >
@@ -311,7 +337,7 @@ class WorkList extends React.Component {
         Cell: original => (
           <Link
             className="open-link"
-            to={"/worklist/" + original.row.checkbox.workListID}
+            to={"/worklist/" + original.row.checkbox.worklistID}
           >
             <div onClick={this.props.onClose}>
               <FaRegEye className="menu-clickable" />
@@ -326,6 +352,7 @@ class WorkList extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
+          const { username, worklistID } = original.row.checkbox;
           const options = [];
           let index = 0;
           for (let user of this.state.userList) {
@@ -341,8 +368,9 @@ class WorkList extends React.Component {
               className="user-select"
               name="user_id"
               defaultValue={original.row.checkbox.username}
-              onChange={this.updateWorklistUser}
-              data-id={original.row.checkbox.workListID}
+              onChange={e =>
+                this.updateWorklistAssignee(e, username, worklistID)
+              }
             >
               {options}
             </select>
@@ -356,6 +384,8 @@ class WorkList extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
+          let { description } = original.row.checkbox;
+          description = description || "";
           const className = original.row.checkbox.description
             ? "wrapped"
             : "wrapped click-to-add";
@@ -366,7 +396,7 @@ class WorkList extends React.Component {
               <EditField
                 name="description"
                 onType={this.getUpdate}
-                default={original.row.checkbox.description || ""}
+                default={this.state.description}
               />
             </div>
           ) : (
@@ -376,11 +406,12 @@ class WorkList extends React.Component {
                 this.handleUpdateField(
                   original.index,
                   "description",
-                  original.row.checkbox.workListID
+                  original.row.checkbox.worklistID,
+                  description
                 )
               }
             >
-              {original.row.checkbox.description || "Add description"}
+              {description || "Add description"}
             </div>
           );
         }
@@ -395,7 +426,7 @@ class WorkList extends React.Component {
             onClick={() =>
               this.handleSingleDelete(
                 original.row.checkbox.username,
-                original.row.checkbox.workListID
+                original.row.checkbox.worklistID
               )
             }
           >
