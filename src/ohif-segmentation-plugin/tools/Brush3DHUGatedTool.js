@@ -1,11 +1,13 @@
-import { store, EVENTS, importInternalModule } from "cornerstone-tools";
+import { store, EVENTS, importInternal } from "cornerstone-tools";
 import cornerstone from "cornerstone-core";
 
 import Brush3DTool from "./Brush3DTool.js";
 import floodFill from "./n-dimensional-flood-fill.js";
 
-const brushModule = store.modules.brush;
-const { getCircle, drawBrushPixels } = importInternalModule("util/brushUtils");
+import { getCircle, drawBrushPixels } from "cornerstone-tools";
+
+const brushModule = store.modules.segmentation;
+console.log(importInternal("util/segmentation"));
 
 export default class Brush3DHUGatedTool extends Brush3DTool {
   constructor(configuration = {}) {
@@ -49,7 +51,8 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       return;
     }
 
-    const radius = brushModule.state.radius;
+    const radius = brushModule.configuration.radius;
+
     const pointerArray = this._gateCircle(
       image,
       getCircle(radius, rows, columns, x, y)

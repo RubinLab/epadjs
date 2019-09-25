@@ -1,7 +1,7 @@
 import { BrushTool, store } from "cornerstone-tools";
 import generateBrushMetadata from "../util/generateBrushMetadata.js";
 
-const brushModule = store.modules.brush;
+const brushModule = store.modules.segmentation;
 
 export default class Brush3DTool extends BrushTool {
   constructor(configuration = {}) {
@@ -28,7 +28,7 @@ export default class Brush3DTool extends BrushTool {
       labelmap3D,
       currentImageIdIndex,
       activeLabelmapIndex
-    } = brushModule.getters.getAndCacheLabelmap2D(element);
+    } = brushModule.getters.labelmap2D(element);
 
     const shouldErase =
       this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;

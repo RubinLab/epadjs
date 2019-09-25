@@ -1,14 +1,14 @@
-import { fillInsideFreehand, eraseInsideFreehand } from './index.js';
+import { fillInsideFreehand, eraseInsideFreehand } from "./index.js";
 import {
   getPixelPathBetweenPixels,
-  floodFill,
-} from '../../../util/segmentation';
-import clip from '../../../util/clip';
-import isPointInImage from '../../../util/isPointInImage';
+  floodFill
+} from "../../../util/segmentation";
+import clip from "../../../util/clip";
+import isPointInImage from "../../../util/isPointInImage";
 
-import { getLogger } from '../../../util/logger';
+import { getLogger } from "../../../util/logger";
 
-const logger = getLogger('util:segmentation:operations:correction');
+const logger = getLogger("util:segmentation:operations:correction");
 
 /**
  * Using the stroke given, determine which action(s) to perfom:
@@ -39,11 +39,11 @@ export default function correction(evt, operationData) {
   const scissorOperation = checkIfSimpleScissorOperation(nodes, segmentIndex);
 
   if (scissorOperation.isScissorOperation) {
-    if (scissorOperation.operation === 'fillInsideFreehand') {
-      logger.warn('The line never intersects a segment.');
+    if (scissorOperation.operation === "fillInsideFreehand") {
+      logger.warn("The line never intersects a segment.");
       fillInsideFreehand(evt, operationData);
-    } else if (scissorOperation.operation === 'eraseInsideFreehand') {
-      logger.warn('The line is only ever inside the segment.');
+    } else if (scissorOperation.operation === "eraseInsideFreehand") {
+      logger.warn("The line is only ever inside the segment.");
       eraseInsideFreehand(evt, operationData);
     }
 
@@ -96,7 +96,7 @@ function snapPointsToGrid(evt, operationData) {
     nodes.push({
       x,
       y,
-      segment: pixelData[y * cols + x],
+      segment: pixelData[y * cols + x]
     });
   }
 
@@ -129,9 +129,9 @@ function checkIfSimpleScissorOperation(nodes, segmentIndex) {
   }
 
   if (allOutside) {
-    return { isScissorOperation: true, operation: 'fillInsideFreehand' };
+    return { isScissorOperation: true, operation: "fillInsideFreehand" };
   } else if (allInside) {
-    return { isScissorOperation: true, operation: 'eraseInsideFreehand' };
+    return { isScissorOperation: true, operation: "eraseInsideFreehand" };
   }
 
   return { isScissorOperation: false };
@@ -163,13 +163,13 @@ function performOperation(
   const getPixelIndex = pixelCoord => pixelCoord.y * cols + pixelCoord.x;
   const getPixelCoordinateFromPixelIndex = pixelIndex => ({
     x: pixelIndex % cols,
-    y: Math.floor(pixelIndex / cols),
+    y: Math.floor(pixelIndex / cols)
   });
 
   if (additive) {
-    logger.warn('additive operation...');
+    logger.warn("additive operation...");
   } else {
-    logger.warn('subtractive operation...');
+    logger.warn("subtractive operation...");
   }
 
   const { pixelPath, leftPath, rightPath } = getPixelPaths(nodes);
@@ -182,7 +182,7 @@ function performOperation(
     xMin: firstPixelOnPath.x,
     xMax: firstPixelOnPath.x,
     yMin: firstPixelOnPath.y,
-    yMax: firstPixelOnPath.y,
+    yMax: firstPixelOnPath.y
   };
 
   // ...whilst also initializing the workingLabelmap
@@ -362,7 +362,7 @@ function getPixelPaths(nodes) {
   }
 
   // Push final node.
-  pixelPath.push[nodes[nodes.length - 1]];
+  pixelPath.push(nodes[nodes.length - 1]);
 
   // Get paths on either side.
 
@@ -394,7 +394,7 @@ function getPixelPaths(nodes) {
 function getNodesPerpendicularToPathPixel(pathPixel, nextPathPixel) {
   const direction = {
     x: nextPathPixel.x - pathPixel.x,
-    y: nextPathPixel.y - pathPixel.y,
+    y: nextPathPixel.y - pathPixel.y
   };
 
   // P = pathPixel, n = nextPathPixel, L = left, R = right
@@ -414,42 +414,42 @@ function getNodesPerpendicularToPathPixel(pathPixel, nextPathPixel) {
   if (direction.x === -1 && direction.y === 1) {
     return {
       left: { x: pathPixel.x - 1, y: pathPixel.y - 1 },
-      right: { x: pathPixel.x + 1, y: pathPixel.y + 1 },
+      right: { x: pathPixel.x + 1, y: pathPixel.y + 1 }
     };
   } else if (direction.x === 0 && direction.y === 1) {
     return {
       left: { x: pathPixel.x - 1, y: pathPixel.y },
-      right: { x: pathPixel.x + 1, y: pathPixel.y },
+      right: { x: pathPixel.x + 1, y: pathPixel.y }
     };
   } else if (direction.x === 1 && direction.y === 1) {
     return {
       left: { x: pathPixel.x - 1, y: pathPixel.y + 1 },
-      right: { x: pathPixel.x + 1, y: pathPixel.y - 1 },
+      right: { x: pathPixel.x + 1, y: pathPixel.y - 1 }
     };
   } else if (direction.x === 1 && direction.y === 0) {
     return {
       left: { x: pathPixel.x, y: pathPixel.y + 1 },
-      right: { x: pathPixel.x, y: pathPixel.y - 1 },
+      right: { x: pathPixel.x, y: pathPixel.y - 1 }
     };
   } else if (direction.x === 1 && direction.y === -1) {
     return {
       left: { x: pathPixel.x + 1, y: pathPixel.y + 1 },
-      right: { x: pathPixel.x - 1, y: pathPixel.y - 1 },
+      right: { x: pathPixel.x - 1, y: pathPixel.y - 1 }
     };
   } else if (direction.x === 0 && direction.y === -1) {
     return {
       left: { x: pathPixel.x + 1, y: pathPixel.y },
-      right: { x: pathPixel.x - 1, y: pathPixel.y },
+      right: { x: pathPixel.x - 1, y: pathPixel.y }
     };
   } else if (direction.x === -1 && direction.y === -1) {
     return {
       left: { x: pathPixel.x + 1, y: pathPixel.y - 1 },
-      right: { x: pathPixel.x - 1, y: pathPixel.y + 1 },
+      right: { x: pathPixel.x - 1, y: pathPixel.y + 1 }
     };
   } else if (direction.x === -1 && direction.y === 0) {
     return {
       left: { x: pathPixel.x, y: pathPixel.y - 1 },
-      right: { x: pathPixel.x, y: pathPixel.y + 1 },
+      right: { x: pathPixel.x, y: pathPixel.y + 1 }
     };
   }
 
@@ -478,7 +478,7 @@ function splitLineIntoSeperateOperations(nodes, segmentIndex) {
 
   operations.push({
     additive: !isLabel,
-    nodes: [],
+    nodes: []
   });
 
   let operationIndex = 0;
@@ -496,7 +496,7 @@ function splitLineIntoSeperateOperations(nodes, segmentIndex) {
         isLabel = !isLabel;
         operations.push({
           additive: true,
-          nodes: [],
+          nodes: []
         });
         operations[operationIndex].nodes.push(nodes[i - 1]);
         operations[operationIndex].nodes.push(node);
@@ -510,7 +510,7 @@ function splitLineIntoSeperateOperations(nodes, segmentIndex) {
         isLabel = !isLabel;
         operations.push({
           additive: false,
-          nodes: [],
+          nodes: []
         });
         operations[operationIndex].nodes.push(nodes[i - 1]);
         operations[operationIndex].nodes.push(node);

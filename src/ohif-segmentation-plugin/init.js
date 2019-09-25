@@ -79,7 +79,7 @@ const defaultConfig = {
 };
 
 export default function init(configuration = {}) {
-  const brushModule = modules.brush;
+  const brushModule = modules.segmentation;
   const config = Object.assign({}, defaultConfig, configuration);
 
   extendBrushModule(brushModule, config);

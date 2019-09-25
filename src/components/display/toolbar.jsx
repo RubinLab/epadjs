@@ -224,14 +224,17 @@ class Toolbar extends Component {
   };
 
   handleBrushChange = gateName => {
+    alert("hop");
     if (gateName === "custom") this.setState({ rangeDisabled: false });
     else this.setState({ rangeDisabled: true });
-    this.cornerstoneTools.store.modules.brush.setters.activeGate(gateName);
+    this.cornerstoneTools.store.modules.segmentation.setters.activeGate(
+      gateName
+    );
   };
 
   applyCustomBrushValues = values => {
     const { min, max } = values;
-    this.cornerstoneTools.store.modules.brush.setters.customGateRange(min, max);
+    this.cornerstoneTools.store.modules.segmentation.customGateRange(min, max);
   };
 
   setInterpolation = checked => {
@@ -243,7 +246,7 @@ class Toolbar extends Component {
     const inputRange = {
       top: "5em"
     };
-    const brushModule = this.cornerstoneTools.store.modules.brush;
+    const brushModule = this.cornerstoneTools.store.modules.segmentation;
     return (
       <div className="toolbar">
         <div
@@ -572,7 +575,7 @@ class Toolbar extends Component {
                 id="brush"
                 tabIndex="8"
                 className="drawingSectionButton"
-                onClick={() => this.setToolActiveForElement("Brush3D")}
+                onClick={() => this.setToolActiveForElement("Brush")}
               >
                 <div className="icon-brush" />
                 <div className="buttonLabel">

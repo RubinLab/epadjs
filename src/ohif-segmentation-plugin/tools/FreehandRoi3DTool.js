@@ -7,7 +7,7 @@ import {
 } from "cornerstone-core";
 import { point } from "cornerstone-math";
 import {
-  importInternalModule,
+  importInternal,
   FreehandRoiTool,
   getToolState,
   store,
@@ -25,21 +25,19 @@ const {
   insertOrDelete,
   freehandArea,
   calculateFreehandStatistics
-} = importInternalModule("util/freehandUtils");
-const draw = importInternalModule("drawing/draw");
-const drawJoinedLines = importInternalModule("drawing/drawJoinedLines");
-const drawHandles = importInternalModule("drawing/drawHandles");
-const drawLinkedTextBox = importInternalModule("drawing/drawLinkedTextBox");
-const moveHandleNearImagePoint = importInternalModule(
+} = importInternal("util/freehandUtils");
+const draw = importInternal("drawing/draw");
+const drawJoinedLines = importInternal("drawing/drawJoinedLines");
+const drawHandles = importInternal("drawing/drawHandles");
+const drawLinkedTextBox = importInternal("drawing/drawLinkedTextBox");
+const moveHandleNearImagePoint = importInternal(
   "manipulators/moveHandleNearImagePoint"
 );
-const getNewContext = importInternalModule("drawing/getNewContext");
+const getNewContext = importInternal("drawing/getNewContext");
 const modules = store.modules;
-const numbersWithCommas = importInternalModule("util/numbersWithCommas");
-const pointInsideBoundingBox = importInternalModule(
-  "util/pointInsideBoundingBox"
-);
-const calculateSUV = importInternalModule("util/calculateSUV");
+const numbersWithCommas = importInternal("util/numbersWithCommas");
+const pointInsideBoundingBox = importInternal("util/pointInsideBoundingBox");
+const calculateSUV = importInternal("util/calculateSUV");
 
 export default class FreehandRoi3DTool extends FreehandRoiTool {
   constructor(configuration = {}) {
@@ -71,9 +69,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
 
     if (!goodEventData) {
       console.error(
-        `required eventData not supplied to tool ${
-          this.name
-        }'s createNewMeasurement`
+        `required eventData not supplied to tool ${this.name}'s createNewMeasurement`
       );
 
       return;
