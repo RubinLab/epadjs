@@ -32,7 +32,7 @@ class App extends Component {
   constructor(props) {
     super();
     this.eventSource = new EventSource(
-      "https://epad-dev4.stanford.edu:8080/projects/lite/notifications"
+      "http://localhost:8080/projects/lite/notifications"
     );
   }
 
