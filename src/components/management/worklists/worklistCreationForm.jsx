@@ -13,7 +13,7 @@ const messages = {
 
 class WorklistCreationForm extends React.Component {
   state = {
-    page: 1,
+    page: 0,
     assigneeList: {},
     name: "",
     id: "",

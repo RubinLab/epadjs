@@ -54,9 +54,7 @@ class WorkList extends React.Component {
   };
 
   getWorkListData = async () => {
-    const { data: worklists } = await getWorklistsOfCreator(
-      sessionStorage.getItem("username")
-    );
+    const { data: worklists } = await getWorklistsOfCreator();
     this.setState({ worklists });
   };
 
