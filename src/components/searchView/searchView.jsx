@@ -86,12 +86,16 @@ class SearchView extends Component {
   };
 
   getData = async () => {
-    const {
-      data: {
-        ResultSet: { Result: data }
-      }
-    } = await getSubjects(this.props.match.params.pid);
-    return data;
+    if (this.props.match.params.pid) {
+      const {
+        data: {
+          ResultSet: { Result: data }
+        }
+      } = await getSubjects(this.props.match.params.pid);
+      return data;
+    } else {
+      return [];
+    }
   };
 
   handleExpand = async () => {

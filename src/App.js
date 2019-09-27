@@ -25,7 +25,7 @@ import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import { isLite } from "./config.json";
 import { clearAimId } from "./components/annotationsList/action";
-import Worklist from "./components/sideBar/worklist";
+import Worklist from "./components/sideBar/sideBarWorklist";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -113,6 +113,8 @@ class App extends Component {
     });
     keycloakInit
       .then(async result => {
+        console.log("keycloack");
+        console.log(result);
         let user = {
           user: result.userInfo.email,
           displayname: result.userInfo.given_name
@@ -124,14 +126,21 @@ class App extends Component {
           id: result.userInfo.sub,
           user
         });
-        const { email, family_name, given_name } = result.userInfo;
+        const {
+          email,
+          family_name,
+          given_name,
+          preferred_username
+        } = result.userInfo;
+        console.log("email address to look up db");
+        const username = preferred_username || email;
         //username, firstname, lastname, email
         //get the user with username
         let userData;
         try {
-          userData = await getUser(email);
+          userData = await getUser(username);
         } catch (err) {
-          createUser(email, given_name, family_name, email)
+          createUser(username, given_name, family_name, email)
             .then(async () => {
               {
                 userData = await getUser(email);

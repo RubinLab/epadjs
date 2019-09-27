@@ -22,11 +22,7 @@ class UploadModal extends React.Component {
 
   componentDidMount = async () => {
     if (!isLite) {
-      const {
-        data: {
-          ResultSet: { Result: projects }
-        }
-      } = await getProjects();
+      const { data: projects } = await getProjects();
       this.setState({ projects });
     }
   };

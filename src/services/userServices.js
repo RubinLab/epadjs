@@ -9,8 +9,13 @@ export async function getUsers() {
   return http.get(apiUrl + "/users");
 }
 
-export async function createUser(requestBody) {
-  return http.post(apiUrl + "/users", requestBody);
+export async function createUser(username, firstname, lastname, email) {
+  return http.post(apiUrl + "/users", {
+    username,
+    firstname,
+    lastname,
+    email
+  });
 }
 
 export async function updateUserProjectRole(projectid, username, body) {

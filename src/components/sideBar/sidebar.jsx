@@ -45,12 +45,13 @@ class Sidebar extends Component {
     console.log("--- worklists here ");
     console.log(worklists);
     this.setState({ worklists });
+    /*
     const {
       data: {
         ResultSet: { Result: pacs }
       }
     } = await getPacs();
-    this.setState({ pacs });
+    this.setState({ pacs }); */
   }
 
   componentDidUpdate = prevProps => {

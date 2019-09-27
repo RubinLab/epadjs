@@ -7,7 +7,6 @@ import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
 import {
   getWorklistsOfCreator,
   deleteWorklist,
-  saveWorklist,
   updateWorklistAssignee,
   updateWorklist
 } from "../../../services/worklistServices";
@@ -43,6 +42,7 @@ class WorkList extends React.Component {
   componentDidMount = async () => {
     this.getWorkListData();
     const { data: userList } = await getUsers();
+    console.log(userList);
     this.setState({ userList });
     document.addEventListener("mousedown", this.handleClickOutside);
     document.addEventListener("keydown", this.handleKeyboardEvent);
@@ -154,27 +154,27 @@ class WorkList extends React.Component {
     this.setState({ [name]: value });
   };
 
-  handleSaveWorklist = e => {
-    let { name, id, user, description, dueDate } = this.state;
-    if (!name || !id || !user) {
-      this.setState({ error: messages.fillRequiredFields });
-    } else {
-      description = description ? description : "";
-      saveWorklist(id, name, user, description, dueDate)
-        .then(() => {
-          this.getWorkListData();
-        })
-        .catch(error =>
-          toast.error(
-            messages.addWorklistError + ": " + error.response.data.message,
-            {
-              autoClose: false
-            }
-          )
-        );
-      this.handleCancel();
-    }
-  };
+  // handleSaveWorklist = (e, assigneeList) => {
+  //   let { name, id, assigneeList, description, dueDate } = this.state;
+  //   if (!name || !id || !assigneeList.length) {
+  //     this.setState({ error: messages.fillRequiredFields });
+  //   } else {
+  //     description = description ? description : "";
+  //     saveWorklist(id, name, assigneeList, description, dueDate)
+  //       .then(() => {
+  //         this.getWorkListData();
+  //       })
+  //       .catch(error =>
+  //         toast.error(
+  //           messages.addWorklistError + ": " + error.response.data.message,
+  //           {
+  //             autoClose: false
+  //           }
+  //         )
+  //       );
+  //     this.handleCancel();
+  //   }
+  // };
 
   handleSingleDelete = (name, id) => {
     this.setState({

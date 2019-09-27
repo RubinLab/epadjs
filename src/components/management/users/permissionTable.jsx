@@ -2,11 +2,22 @@ import React from "react";
 import PropTypes from "prop-types";
 
 const permissionTable = ({ userPermission, onSelect }) => {
-  const permission = ["projects", "users", "connections", "queries"];
+  const permission = [
+    "CreateUser",
+    "CreatePAC",
+    "CreateAutoPACQuery",
+    "CreateProject"
+  ];
   const rows = [];
   userPermission = userPermission || [];
 
   permission.forEach(el => {
+    const label =
+      el === "CreatePAC"
+        ? "Create Connections"
+        : el === "CreateAutoPACQuery"
+        ? "Create Queries"
+        : `${el.substring(0, 6)} ${el.substring(6)}s`;
     rows.push(
       <div className="edit-userPermission __row" key={el}>
         <input
@@ -16,7 +27,7 @@ const permissionTable = ({ userPermission, onSelect }) => {
           onChange={onSelect}
           defaultChecked={userPermission.includes(el)}
         />
-        <label className="edit-userPermission __row --label">{`Create ${el}`}</label>
+        <label className="edit-userPermission __row --label">{label}</label>
       </div>
     );
   });

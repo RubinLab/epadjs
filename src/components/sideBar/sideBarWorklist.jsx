@@ -2,10 +2,11 @@ import React from "react";
 import Table from "react-table";
 import { Link } from "react-router-dom";
 import { FaRegTrashAlt, FaRegEye } from "react-icons/fa";
-import { getWorklist, deleteWorklist } from "./../../services/worklistServices";
-import { getProject } from "./../../services/projectServices";
-import DeleteAlert from "./../management/common/alertDeletionModal";
+import { getWorklist, deleteWorklist } from "../../services/worklistServices";
+import { getProject } from "../../services/projectServices";
+import DeleteAlert from "../management/common/alertDeletionModal";
 import EditField from "./editField";
+import { getUsers } from "../../services/userServices";
 
 const messages = {
   deleteSingle: "Delete the worklist? This cannot be undone.",
@@ -18,7 +19,8 @@ class WorkList extends React.Component {
     singleDeleteData: {},
     deleteSingleClicked: false,
     commentClicked: false,
-    clickedIndex: null
+    clickedIndex: null,
+    users: []
   };
 
   componentDidMount = async () => {
@@ -37,6 +39,7 @@ class WorkList extends React.Component {
       this.getWorkListData();
     }
   };
+
   getWorkListData = async () => {
     const {
       data: {
