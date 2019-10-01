@@ -290,11 +290,11 @@ class DisplayView extends Component {
   measurementChanged = (event, action) => {
     const { toolType } = event.detail;
     const toolsOfInterest = [
+      "Probe",
       "Length",
       "CircleRoi",
-      "FreehandMouse",
-      "Bidirectional",
-      "Probe"
+      "FreehandRoi3D",
+      "Bidirectional"
     ];
     if (toolsOfInterest.includes(toolType)) {
       this.setState({ showAimEditor: true, selectedAim: undefined });
@@ -498,16 +498,14 @@ class DisplayView extends Component {
           cornerstone={this.cornerstone}
           cornerstoneTools={this.cornerstoneTools}
         />
-        <RightsideBar>
-          {this.state.showAimEditor && (
-            <AimEditor
-              cornerstone={this.props.cornerstone}
-              csTools={this.cornerstoneTools}
-              aimId={this.state.selectedAim}
-              onCancel={this.closeAimEditor}
-              hasSegmentation={this.state.hasSegmentation}
-            />
-          )}
+        <RightsideBar
+          cornerstone={this.props.cornerstone}
+          csTools={this.cornerstoneTools}
+          showAimEditor={this.state.showAimEditor}
+          aimId={this.state.selectedAim}
+          onCancel={this.closeAimEditor}
+          hasSegmentation={this.state.hasSegmentation}
+        >
           {!this.state.isLoading &&
             Object.entries(this.props.series).length &&
             this.state.data.map((data, i) => (

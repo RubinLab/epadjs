@@ -1,5 +1,4 @@
 export default function extendBrushModule(brushModule, config) {
-  console.log(brushModule);
   const brushState = brushModule.state;
   const getters = brushModule.getters;
   const setters = brushModule.setters;
