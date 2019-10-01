@@ -13,11 +13,16 @@ import {
   FaRulerHorizontal,
   FaScrewdriver,
   FaPlayCircle,
-  FaStopCircle
+  FaStopCircle,
+  FaBroom,
+  FaAngleRight,
+  FaHandScissors,
+  FaCut,
+  FaCircle
 } from "react-icons/fa";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { MdLoop, MdPanTool } from "react-icons/md";
-import { TiDeleteOutline, TiPencil } from "react-icons/ti";
+import { TiDeleteOutline, TiPencil, TiScissorsOutline } from "react-icons/ti";
 import { MdWbIridescent } from "react-icons/md";
 import AnnotationList from "../annotationsList";
 import ResizeAndDrag from "../management/common/resizeAndDrag";
@@ -28,8 +33,11 @@ import {
   getWholeData
 } from "../annotationsList/action";
 import Spinner from "../common/circleSpinner";
-import "./toolbar.css";
 import "../../font-icons/styles.css";
+import "react-input-range/lib/css/index.css";
+import "./toolbar.css";
+import InputRange from "react-input-range";
+import Switch from "react-switch";
 
 const mapStateToProps = state => {
   return {
@@ -73,17 +81,14 @@ const tools = [
   { name: "Rotate" },
   { name: "WwwcRegion" },
   { name: "Probe" },
-  {
-    name: "FreehandMouse",
-    configuration: {
-      showMinMax: true
-      // showHounsfieldUnits: true
-    }
-  },
-  { name: "Eraser" },
   { name: "Bidirectional" },
-  { name: "Brush" },
-  { name: "FreehandMouseSculpter" }
+  { name: "Eraser" }
+
+  // { name: "FreehandRoi3D" },
+  // { name: "FreehandRoi3DSculptor" },
+  // { name: "Brush3D" },
+  // { name: "Brush3DHUGated" },
+  // { name: "Brush3DAutoGated" }
 ];
 
 class Toolbar extends Component {
@@ -98,8 +103,15 @@ class Toolbar extends Component {
     this.state = {
       activeTool: "",
       showDrawing: false,
+      showSegmentation: false,
       showPresets: false,
-      playing: false
+      playing: false,
+      customBrush: {
+        min: -1000,
+        max: 3000
+      },
+      rangeDisabled: true,
+      interpolate: false
     };
   }
 
@@ -125,7 +137,11 @@ class Toolbar extends Component {
 
   //sets the selected tool active for an enabled elements
   setToolActiveForElement = (toolName, mouseMask = 1) => {
-    // this.disableAllTools();
+    this.disableAllTools();
+    console.log("CStools", this.cornerstoneTools);
+    if (toolName == "Brush3DHUGatedTool") {
+      this.cornerstoneTools.store.modules.brush.setters.activeGate("muscle");
+    }
     this.cornerstoneTools.setToolActiveForElement(
       this.cornerstone.getEnabledElements()[this.props.activeVP]["element"],
       toolName,
@@ -206,7 +222,34 @@ class Toolbar extends Component {
     this.setState({ showPresets: !this.state.showPresets });
   };
 
+  closeSegmentationMenu = () => {
+    this.setState({ showSegmentation: false });
+  };
+
+  handleBrushChange = gateName => {
+    alert("hop");
+    if (gateName === "custom") this.setState({ rangeDisabled: false });
+    else this.setState({ rangeDisabled: true });
+    this.cornerstoneTools.store.modules.segmentation.setters.activeGate(
+      gateName
+    );
+  };
+
+  applyCustomBrushValues = values => {
+    const { min, max } = values;
+    this.cornerstoneTools.store.modules.segmentation.customGateRange(min, max);
+  };
+
+  setInterpolation = checked => {
+    this.setState({ interpolate: checked });
+    this.cornerstoneTools.store.modules.freehand3D.state.interpolate = this.state.interpolate;
+  };
+
   render() {
+    const inputRange = {
+      top: "5em"
+    };
+    const brushModule = this.cornerstoneTools.store.modules.segmentation;
     return (
       <div className="toolbar">
         <div
@@ -399,18 +442,6 @@ class Toolbar extends Component {
             </>
           )}
         </div>
-        <div
-          tabIndex="13"
-          className="toolbarSectionButton"
-          onClick={this.handleAnnotationsDockClick}
-        >
-          <div className="toolContainer annotations-icon">
-            <FaList />
-          </div>
-          <div className="buttonLabel">
-            <span>Annotations</span>
-          </div>
-        </div>
 
         {/* Drawing Bar Starts here. Extract it to another component later  */}
         {this.state.showDrawing && (
@@ -457,7 +488,7 @@ class Toolbar extends Component {
                 id="circle"
                 tabIndex="3"
                 className="drawingSectionButton"
-                onClick={() => this.setToolActiveForElement("CircleRoi")}
+                onClick={() => this.setToolActive("CircleRoi")}
               >
                 <div className="icon-circle fontastic-icons" />
                 <div className="buttonLabel">
@@ -479,11 +510,30 @@ class Toolbar extends Component {
                 id="polygon"
                 tabIndex="5"
                 className="drawingSectionButton"
-                onClick={() => this.setToolActiveForElement("FreehandMouse")}
+                onClick={() => this.setToolActiveForElement("FreehandRoi3D")}
               >
                 <div className="icon-polygon fontastic-icons" />
                 <div className="buttonLabel">
                   <span>Poly/Freehand</span>
+                  <br />
+                  <span>
+                    Interpolation{" "}
+                    <Switch
+                      onChange={this.setInterpolation}
+                      checked={this.state.interpolate}
+                      onColor="#86d3ff"
+                      onHandleColor="#2693e6"
+                      handleDiameter={10}
+                      uncheckedIcon={false}
+                      checkedIcon={false}
+                      boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+                      activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+                      height={5}
+                      width={20}
+                      className="react-switch"
+                      id="material-switch"
+                    />
+                  </span>
                 </div>
               </div>
               <div
@@ -491,7 +541,7 @@ class Toolbar extends Component {
                 tabIndex="6"
                 className="drawingSectionButton"
                 onClick={() =>
-                  this.setToolActiveForElement("FreehandSculpterMouse")
+                  this.setToolActiveForElement("FreehandRoi3DSculptor")
                 }
               >
                 <div className="toolContainer">
@@ -501,7 +551,7 @@ class Toolbar extends Component {
                   <span>Sculpt</span>
                 </div>
               </div>
-              {/* <div
+              <div
                 id="perpendicular"
                 tabIndex="7"
                 className="drawingSectionButton"
@@ -511,8 +561,8 @@ class Toolbar extends Component {
                 <div className="buttonLabel">
                   <span>Perpendicular</span>
                 </div>
-              </div> */}
-              {/* <div
+              </div>
+              <div
                 id="brush"
                 tabIndex="8"
                 className="drawingSectionButton"
@@ -522,7 +572,79 @@ class Toolbar extends Component {
                 <div className="buttonLabel">
                   <span>Brush</span>
                 </div>
+              </div>
+              <div
+                id="brush"
+                tabIndex="9"
+                className="drawingSectionButton"
+                onClick={() => {
+                  this.setToolActiveForElement("Brush3DHUGated");
+                }}
+                onMouseOver={() => {
+                  this.setState({ showSegmentation: true });
+                }}
+              >
+                <FaBroom />
+                <div className="buttonLabel">
+                  <span>
+                    Brush HU Gated <FaAngleRight />
+                  </span>
+                </div>
+              </div>
+              {/* <div
+                id="brush"
+                tabIndex="10"
+                className="drawingSectionButton"
+                onClick={() =>
+                  this.setToolActiveForElement("Brush3DAutoGatedTool")
+                }
+              >
+                <div className="icon-brush" />
+                <div className="buttonLabel">
+                  <span>Brush Auto Gated</span>
+                </div>
               </div> */}
+              <div
+                id="freehandScisssors"
+                tabIndex="9"
+                className="drawingSectionButton"
+                onClick={() => this.setToolActiveForElement("FreehandScissors")}
+              >
+                <div className="toolContainer">
+                  <FaHandScissors />
+                </div>
+                <div className="buttonLabel">
+                  <span>Freehand Scissors</span>
+                </div>
+              </div>
+              <div
+                id="circleScissors"
+                tabIndex="10"
+                className="drawingSectionButton"
+                onClick={() => this.setToolActiveForElement("CircleScissors")}
+              >
+                <div className="toolContainer">
+                  <FaCircle />
+                </div>
+                <div className="buttonLabel">
+                  <span>Circle Scissors</span>
+                </div>
+              </div>
+              <div
+                id="correctionScissors"
+                tabIndex="11"
+                className="drawingSectionButton"
+                onClick={() =>
+                  this.setToolActiveForElement("CorrectionScissors")
+                }
+              >
+                <div className="toolContainer">
+                  <TiScissorsOutline />
+                </div>
+                <div className="buttonLabel">
+                  <span>Correction Scissors</span>
+                </div>
+              </div>
               <div
                 id="line"
                 tabIndex="9"
@@ -536,6 +658,66 @@ class Toolbar extends Component {
                   <span>Eraser</span>
                 </div>
               </div>
+              {this.state.showSegmentation && (
+                <div
+                  className="segmentation-menu"
+                  onMouseLeave={() => this.closeSegmentationMenu()}
+                >
+                  <div className="buttonLabel">
+                    <span>Preset Brushes</span>
+                  </div>
+                  <div className="brush-presets">
+                    {brushModule.state.gates.map((gate, i) => (
+                      <div key={i}>
+                        <input
+                          type="radio"
+                          name="brushPresets"
+                          value={gate.name}
+                          onChange={() => this.handleBrushChange(gate.name)}
+                          defaultChecked={
+                            gate.name === brushModule.getters.activeGate()
+                          }
+                        />
+                        {gate.name !== "custom" &&
+                          " " +
+                            gate.displayName +
+                            " [" +
+                            gate.range.toString() +
+                            "]" +
+                            " HU"}
+                        {gate.name === "custom" &&
+                          " " +
+                            gate.displayName +
+                            " [" +
+                            this.state.customBrush.min +
+                            ", " +
+                            this.state.customBrush.max +
+                            "]" +
+                            " HU"}
+                        {gate.name === "custom" && (
+                          <div className="range-container">
+                            <InputRange
+                              style={inputRange}
+                              disabled={this.state.rangeDisabled}
+                              step={1}
+                              maxValue={3000}
+                              minValue={-1000}
+                              // formatLabel={value => `${value} HU`}
+                              value={this.state.customBrush}
+                              onChange={value =>
+                                this.setState({ customBrush: value })
+                              }
+                              onChangeComplete={value =>
+                                this.applyCustomBrushValues(value)
+                              }
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </Draggable>
         )}

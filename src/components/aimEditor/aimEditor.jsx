@@ -4,7 +4,10 @@ import Draggable from "react-draggable";
 import { isLite } from "../../config.json";
 import { toast } from "react-toastify";
 import { getTemplates } from "../../services/templateServices";
-import { uploadAim } from "../../services/annotationServices";
+import {
+  uploadAim,
+  uploadSegmentation
+} from "../../services/annotationServices";
 import { getAimImageData } from "./aimHelper";
 import * as questionaire from "./parseClass.js";
 import Aim from "./Aim";
@@ -62,17 +65,15 @@ class AimEditor extends Component {
 
   render() {
     return (
-      <Draggable enableUserSelectHack={false}>
-        <div className="editorForm">
-          <div id="questionaire" />
-          <button type="button" onClick={this.save}>
-            Save
-          </button>
-          <button type="button" onClick={this.cancel}>
-            Cancel
-          </button>
-        </div>
-      </Draggable>
+      <div className="editorForm">
+        <div id="questionaire" />
+        <button type="button" onClick={this.save}>
+          Save
+        </button>
+        <button type="button" onClick={this.cancel}>
+          Cancel
+        </button>
+      </div>
     );
   }
 
@@ -93,12 +94,22 @@ class AimEditor extends Component {
   };
 
   createAim = answers => {
-    let hasSegmentation = false; //TODO:keep this in store and look dynamically
+    let hasSegmentation = this.props.hasSegmentation;
     const updatedAimId = this.props.aimId;
 
+    // if (hasSegmentation) {
+    //   this.handleSegmentation();
+    //   return;
+    // }
+
+    console.log(
+      "cstools",
+      this.props.csTools.globalImageIdSpecificToolStateManager
+    );
     const {
       toolState
     } = this.props.csTools.globalImageIdSpecificToolStateManager;
+    console.log("Tool state", this.props.csTools);
 
     // get the imagesIds for active viewport
     const element = this.props.cornerstone.getEnabledElements()[
@@ -119,8 +130,12 @@ class AimEditor extends Component {
       imageIds.map(imageId => {
         imagePromises.push(this.props.cornerstone.loadImage(imageId));
       });
-      this.createSegmentation(toolState, imagePromises, markedImageIds);
+      // this.createSegmentation(toolState, imagePromises, markedImageIds);
+      this.createSegmentation3D();
+      return;
     }
+
+    console.log("Marked Images", markedImageIds);
 
     // check for markups
     var shapeIndex = 1;
@@ -276,6 +291,8 @@ class AimEditor extends Component {
       .catch(error => console.log(error));
   };
 
+  hadleSegmentation = () => {};
+
   addModalityObjectToSeedData = seedData => {
     const modality = modalities[seedData.series.modality];
     seedData.series.modality = { ...modality };
@@ -420,6 +437,104 @@ class AimEditor extends Component {
     });
   };
 
+  createSegmentation3D = () => {
+    const { element } = this.cornerstone.getEnabledElements()[
+      this.props.activePort
+    ];
+
+    const globalToolStateManager = this.csTools
+      .globalImageIdSpecificToolStateManager;
+    const toolState = globalToolStateManager.saveToolState();
+    const stackToolState = this.csTools.getToolState(element, "stack");
+    const imageIds = stackToolState.data[0].imageIds;
+    let imagePromises = [];
+    for (let i = 0; i < imageIds.length; i++) {
+      imagePromises.push(this.cornerstone.loadImage(imageIds[i]));
+    }
+
+    const { getters } = this.csTools.getModule("segmentation");
+    const { labelmaps3D } = getters.labelmaps3D(element);
+    if (!labelmaps3D) {
+      return;
+    }
+
+    for (
+      let labelmapIndex = 0;
+      labelmapIndex < labelmaps3D.length;
+      labelmapIndex++
+    ) {
+      const labelmap3D = labelmaps3D[labelmapIndex];
+      const labelmaps2D = labelmap3D.labelmaps2D;
+
+      for (let i = 0; i < labelmaps2D.length; i++) {
+        if (!labelmaps2D[i]) {
+          continue;
+        }
+        const segmentsOnLabelmap = labelmaps2D[i].segmentsOnLabelmap;
+        segmentsOnLabelmap.forEach(segmentIndex => {
+          if (segmentIndex !== 0 && !labelmap3D.metadata[segmentIndex]) {
+            labelmap3D.metadata[segmentIndex] = this.generateMockMetadata(
+              segmentIndex
+            );
+          }
+        });
+      }
+    }
+    Promise.all(imagePromises)
+      .then(images => {
+        const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
+          images,
+          labelmaps3D
+        );
+        this.saveSegmentation(segBlob);
+      })
+      .catch(err => console.log(err));
+  };
+
+  saveSegmentation = segmentation => {
+    const { patientID, projectID } = this.props.series[this.props.activePort];
+    console.log("IDS", patientID, projectID);
+    uploadSegmentation(segmentation, patientID, projectID)
+      .then(() => {
+        this.props.onCancel();
+        toast.success("Segmentation succesfully saved.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+      })
+      .catch(error => console.log(error));
+  };
+
+  generateMockMetadata = segmentIndex => {
+    // TODO -> Use colors from the cornerstoneTools LUT.
+    const RecommendedDisplayCIELabValue = dcmjs.data.Colors.rgb2DICOMLAB([
+      1,
+      0,
+      0
+    ]);
+    return {
+      SegmentedPropertyCategoryCodeSequence: {
+        CodeValue: "T-D0050",
+        CodingSchemeDesignator: "SRT",
+        CodeMeaning: "Tissue"
+      },
+      SegmentNumber: (segmentIndex + 1).toString(),
+      SegmentLabel: "Tissue " + (segmentIndex + 1).toString(),
+      SegmentAlgorithmType: "SEMIAUTOMATIC",
+      SegmentAlgorithmName: "Slicer Prototype",
+      RecommendedDisplayCIELabValue,
+      SegmentedPropertyTypeCodeSequence: {
+        CodeValue: "T-D0050",
+        CodingSchemeDesignator: "SRT",
+        CodeMeaning: "Tissue"
+      }
+    };
+  };
+
   setSegmentMetaData = (toolState, imageId, segments) => {
     console.log("imageIds are", imageId, "segments are", segments);
     const RecommendedDisplayCIELabValue = dcmjs.data.Colors.rgb2DICOMLAB([
@@ -446,7 +561,7 @@ class AimEditor extends Component {
           SegmentNumber: (segIdx + 1).toString(),
           SegmentLabel: "Tissue " + (segIdx + 1).toString(),
           SegmentAlgorithmType: "SEMIAUTOMATIC",
-          SegmentAlgorithmName: "Slicer Prototype",
+          SegmentAlgorithmName: "ePAD",
           RecommendedDisplayCIELabValue,
           SegmentedPropertyTypeCodeSequence: {
             CodeValue: "T-D0050",
@@ -462,8 +577,6 @@ class AimEditor extends Component {
     // aim.
   };
 
-  createDicomSeg = () => {};
-
   parseImgeId = imageId => {
     if (isLite) return imageId.split("/").pop();
     else return imageId.split("objectUID=")[1].split("&")[0];
@@ -471,6 +584,7 @@ class AimEditor extends Component {
 }
 
 const mapStateToProps = state => {
+  console.log("State is", state.annotationsListReducer);
   return {
     series: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort

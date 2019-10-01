@@ -3,6 +3,7 @@
   top: 5px;
   right: 250px;
 }
+
 .toolbarSectionButton {
   cursor: pointer;
   display: inline-block;
@@ -14,10 +15,12 @@
   color: white;
   transition: all 0.2s ease-in-out;
 }
+
 .toolbarSectionButton:hover {
   color: #aaa;
   transform: scale(1.1);
 }
+
 .drawingSectionButton {
   cursor: pointer;
   min-width: 30px;
@@ -28,19 +31,24 @@
   transition: all 0.2s ease-in-out;
   margin-bottom: 5px;
 }
+
 .drawingSectionButton:hover {
   color: #aaa;
   transform: scale(1.1);
 }
+
 .toolContainer {
   font-size: 16px;
 }
+
 .fontastic-icons {
   font-size: 22px;
 }
+
 .buttonLabel {
   font-size: 11px;
 }
+
 .drawBar {
   top: 3.72em;
   right: 9em;
@@ -52,4 +60,38 @@
   cursor: pointer;
   z-index: 1;
   position: absolute;
+}
+
+.segmentation-menu {
+  top: 30em;
+  left: 6.87em;
+  outline: solid;
+  outline-width: 1px;
+  background-color: #3a3f44;
+  outline-color: black;
+  width: 250px;
+  cursor: pointer;
+  z-index: 1;
+  position: absolute;
+  align-content: left;
+}
+
+.brush-presets {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1em;
+  align-content: left;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.range-container {
+  margin-top: 1.5em;
+  margin-left: 1em;
+  margin-right: 2em;
+  margin-bottom: 1em;
+}
+
+.input-range__track {
+  height: 0.5rem;
 }

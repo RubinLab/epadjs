@@ -188,7 +188,7 @@ class Sidebar extends Component {
           className={this.state.open ? "mainView" : "mainView-closed"}
           style={{
             marginLeft: this.state.marginLeft,
-            height: "calc(100% - 50px"
+            height: "calc(100% - 50px)"
           }}
         >
           <button
