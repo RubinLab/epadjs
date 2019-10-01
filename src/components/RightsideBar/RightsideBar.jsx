@@ -4,6 +4,7 @@ import { withRouter } from "react-router-dom";
 import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
 import Collapsible from "react-collapsible";
 import AnnotationList from "../annotationsList/annotationDock/annotationList";
+import AimEditor from "../aimEditor/aimEditor";
 
 import "./RightsideBar.css";
 
@@ -58,6 +59,24 @@ class Rightsidebar extends Component {
                 <FaArrowAltCircleRight />
               </button>
             </div>
+          )}
+          {this.props.showAimEditor && (
+            <Collapsible
+              trigger={"Aim Editor"}
+              open={true}
+              transitionTime={100}
+              triggerOpenedClassName={"test"}
+            >
+              <div className="AimEditor-Wrapper">
+                <AimEditor
+                  cornerstone={this.props.cornerstone}
+                  csTools={this.props.csTools}
+                  aimId={this.props.selectedAim}
+                  // onCancel={this.closeAimEditor}
+                  hasSegmentation={this.props.hasSegmentation}
+                />
+              </div>
+            </Collapsible>
           )}
           <Collapsible trigger={"Annotations"} transitionTime={100}>
             <AnnotationList />

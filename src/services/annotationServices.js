@@ -94,10 +94,21 @@ export function deleteAnnotation(aimObj, aimID, projectID) {
   );
 }
 
-export function uploadAim(formData) {
+export function uploadAim(aim) {
   let url;
   if (isLite) {
     url = apiUrl + "/projects/lite/aims";
-    return http.post(url, formData);
+    return http.post(url, aim);
   }
+}
+
+export function uploadSegmentation(
+  segmentation,
+  subjectId,
+  projectId = "lite"
+) {
+  let url;
+  url = apiUrl + "/projects/" + projectId + "/files";
+  console.log(url);
+  return http.post(url, segmentation);
 }

@@ -7,7 +7,6 @@ import floodFill from "./n-dimensional-flood-fill.js";
 import { getCircle, drawBrushPixels } from "cornerstone-tools";
 
 const brushModule = store.modules.segmentation;
-console.log(importInternal("util/segmentation"));
 
 export default class Brush3DHUGatedTool extends Brush3DTool {
   constructor(configuration = {}) {
@@ -66,7 +65,6 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
     } = this.paintEventData;
 
     // Draw / Erase the active color.
-    console.log("About to draw", pointerArray, labelmap3D, currentImageIdIndex);
     drawBrushPixels(
       pointerArray,
       labelmap3D,
