@@ -102,13 +102,14 @@ export function uploadAim(aim) {
   }
 }
 
-export function uploadSegmentation(
-  segmentation,
-  subjectId,
-  projectId = "lite"
-) {
-  let url;
-  url = apiUrl + "/projects/" + projectId + "/files";
-  console.log(url);
-  return http.post(url, segmentation);
+export function uploadSegmentation(segmentation, projectId = "lite") {
+  const url = apiUrl + "/projects/" + projectId + "/files";
+  const segData = new FormData();
+  segData.append("file", segmentation);
+  const config = {
+    headers: {
+      "content-type": "multipart/form-data"
+    }
+  };
+  return http.post(url, segData, config);
 }
