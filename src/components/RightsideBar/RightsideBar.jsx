@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
+import ToolMenu from "../ToolMenu/ToolMenu";
 import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
 import Collapsible from "react-collapsible";
 import AnnotationList from "../annotationsList/annotationDock/annotationList";
@@ -60,6 +61,12 @@ class Rightsidebar extends Component {
               </button>
             </div>
           )}
+          <Collapsible trigger={"Tools"} transitionTime={100}>
+            <ToolMenu
+              cornerstone={this.props.cornerstone}
+              cornerstoneTools={this.props.csTools}
+            />
+          </Collapsible>
           {this.props.showAimEditor && (
             <Collapsible
               trigger={"Aim Editor"}

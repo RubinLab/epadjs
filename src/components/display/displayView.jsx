@@ -1,9 +1,7 @@
 import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
-import Toolbar from "./toolbar";
 import { getImageIds, getWadoImagePath } from "../../services/seriesServices";
 import { getAnnotations2 } from "../../services/annotationServices";
-import ViewportSeg from "./viewportSeg.jsx";
 import { connect } from "react-redux";
 import { wadoUrl, isLite } from "../../config.json";
 import { Redirect } from "react-router";
@@ -11,6 +9,7 @@ import { withRouter } from "react-router-dom";
 import Aim from "../aimEditor/Aim";
 import AimEditor from "../aimEditor/aimEditor";
 import "./flex.css";
+import "./viewport.css";
 import { changeActivePort, updateImageId } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
@@ -319,6 +318,7 @@ class DisplayView extends Component {
   };
 
   handleMarkupCreated = event => {
+    console.log("Event", event);
     const { detail } = event;
     this.setState({ showAimEditor: true, selectedAim: undefined });
     if (detail === "brush") this.setState({ hasSegmentation: true });
@@ -494,10 +494,10 @@ class DisplayView extends Component {
     ) : (
       // <div className="displayView-main">
       <React.Fragment>
-        <Toolbar
+        {/* <Toolbar
           cornerstone={this.cornerstone}
           cornerstoneTools={this.cornerstoneTools}
-        />
+        /> */}
         <RightsideBar
           cornerstone={this.props.cornerstone}
           csTools={this.cornerstoneTools}
