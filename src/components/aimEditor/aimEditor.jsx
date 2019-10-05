@@ -94,6 +94,7 @@ class AimEditor extends Component {
   };
 
   createAim = answers => {
+    console.log("Segmentation", this.props.hasSegmentation);
     let hasSegmentation = this.props.hasSegmentation;
     const updatedAimId = this.props.aimId;
 
@@ -584,7 +585,6 @@ class AimEditor extends Component {
 }
 
 const mapStateToProps = state => {
-  console.log("State is", state.annotationsListReducer);
   return {
     series: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort

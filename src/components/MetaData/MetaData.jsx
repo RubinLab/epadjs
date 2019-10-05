@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 
-import "./metaData.css";
+import "./MetaData.css";
 
 const mapStateToProps = state => {
   return {
