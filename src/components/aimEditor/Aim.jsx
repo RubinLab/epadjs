@@ -540,19 +540,20 @@ class Aim {
 
   _createSegmentationEntity = () => {
     var obj = {};
+    const { segmentation } = this.temp;
     obj["referencedSopInstanceUid"] = {
-      root: this.temp.segmentation.referencedSopInstanceUid
+      root: segmentation.referencedSopInstanceUid
     };
     obj["segmentNumber"] = { value: 1 };
     obj["seriesInstanceUid"] = {
-      root: this.temp.segmentation.seriesInstanceUid
+      root: segmentation.seriesInstanceUid
     };
     obj["studyInstanceUid"] = {
-      root: this.temp.segmentation.studyInstanceUid
+      root: segmentation.studyInstanceUid
     };
     obj["xsi:type"] = "DicomSegmentationEntity";
     obj["sopClassUid"] = { root: "1.2.840.10008.5.1.4.1.1.66.4" };
-    obj["sopInstanceUid"] = { root: this.segmentation.sopInstanceUid };
+    obj["sopInstanceUid"] = { root: segmentation.sopInstanceUid };
     obj["uniqueIdentifier"] = { root: generateUid() };
     return obj;
   };
