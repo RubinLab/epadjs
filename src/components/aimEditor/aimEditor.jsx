@@ -495,9 +495,9 @@ class AimEditor extends Component {
   saveSegmentation = segmentation => {
     const { patientID, projectID } = this.props.series[this.props.activePort];
     console.log("IDS", patientID, projectID);
-    uploadSegmentation(segmentation, patientID, projectID)
+    uploadSegmentation(segmentation, projectID)
       .then(() => {
-        this.props.onCancel();
+        // this.props.onCancel();
         toast.success("Segmentation succesfully saved.", {
           position: "top-right",
           autoClose: 5000,
