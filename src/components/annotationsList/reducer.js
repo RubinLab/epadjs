@@ -125,6 +125,7 @@ const asyncReducer = (state = initialState, action) => {
     case LOAD_SERIE_SUCCESS:
       let indexNum = state.openSeries.length - 1;
       let imageAddedSeries = [...state.openSeries];
+      console.log("LOAD SERIE SUCCESS", action.payload);
       let annCalc = Object.keys(action.payload.imageData);
       if (annCalc.length > 0) {
         for (let i = 0; i < imageAddedSeries.length; i++) {

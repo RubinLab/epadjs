@@ -147,6 +147,7 @@ class DisplayView extends Component {
     Promise.all(promises).then(res => {
       this.setState({ data: res, isLoading: false });
       this.props.series.forEach(serie => {
+        console.log("Serie", serie);
         if (serie.imageAnnotations)
           this.parseAims(serie.imageAnnotations, serie.seriesUID);
       });
@@ -334,6 +335,7 @@ class DisplayView extends Component {
   parseAims = (aimList, seriesUid) => {
     Object.entries(aimList).forEach(([key, values]) => {
       values.forEach(value => {
+        console.log("Value", value);
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
         this.renderMarkup(key, value, color);
       });

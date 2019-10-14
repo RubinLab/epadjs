@@ -94,23 +94,12 @@ class AimEditor extends Component {
   };
 
   createAim = answers => {
-    console.log("Segmentation", this.props.hasSegmentation);
     let hasSegmentation = this.props.hasSegmentation;
     const updatedAimId = this.props.aimId;
 
-    // if (hasSegmentation) {
-    //   this.handleSegmentation();
-    //   return;
-    // }
-
-    console.log(
-      "cstools",
-      this.props.csTools.globalImageIdSpecificToolStateManager
-    );
     const {
       toolState
     } = this.props.csTools.globalImageIdSpecificToolStateManager;
-    console.log("Tool state", this.props.csTools);
 
     // get the imagesIds for active viewport
     const element = this.props.cornerstone.getEnabledElements()[
@@ -136,8 +125,6 @@ class AimEditor extends Component {
       return;
     }
 
-    console.log("Marked Images", markedImageIds);
-
     // check for markups
     var shapeIndex = 1;
     var markupsToSave = {};
@@ -147,7 +134,6 @@ class AimEditor extends Component {
       Object.keys(markUps).map(tool => {
         switch (tool) {
           case "FreehandMouse":
-            // console.log("FreeHandMouse");
             const polygons = markUps[tool].data;
             polygons.map(polygon => {
               if (!polygon.aimId || polygon.aimId === updatedAimId) {
@@ -167,7 +153,6 @@ class AimEditor extends Component {
             });
             break;
           case "Bidirectional":
-            // console.log("Bidirectional ", markUps[tool]);
             const bidirectionals = markUps[tool].data;
             bidirectionals.map(bidirectional => {
               if (
@@ -190,7 +175,6 @@ class AimEditor extends Component {
             });
             break;
           case "CircleRoi":
-            // console.log("CircleRoi ", markUps[tool]);
             const circles = markUps[tool].data;
             circles.map(circle => {
               if (!circle.aimId || circle.aimId === updatedAimId) {
@@ -426,15 +410,10 @@ class AimEditor extends Component {
       segments
     };
     Promise.all(imagePromises).then(images => {
-      console.log("images are", images, "brush data is", brushData);
       const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
         images,
         brushData
       );
-      console.log(segBlob);
-      // Create a URL for the binary.
-      // var objectUrl = URL.createObjectURL(segBlob);
-      // window.open(objectUrl);
     });
   };
 
@@ -494,7 +473,6 @@ class AimEditor extends Component {
 
   saveSegmentation = segmentation => {
     const { patientID, projectID } = this.props.series[this.props.activePort];
-    console.log("IDS", patientID, projectID);
     uploadSegmentation(segmentation, patientID, projectID)
       .then(() => {
         this.props.onCancel();
@@ -537,14 +515,12 @@ class AimEditor extends Component {
   };
 
   setSegmentMetaData = (toolState, imageId, segments) => {
-    console.log("imageIds are", imageId, "segments are", segments);
     const RecommendedDisplayCIELabValue = dcmjs.data.Colors.rgb2DICOMLAB([
       1,
       0,
       0
     ]);
     const brushData = toolState[imageId].brush.data;
-    console.log("brush data is", brushData);
     for (let segIdx = 0; segIdx < 4; segIdx++) {
       // If there is pixelData for this segment, set the segment metadata
       // if it hasn't been set yet.
