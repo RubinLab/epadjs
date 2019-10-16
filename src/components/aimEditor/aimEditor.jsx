@@ -93,7 +93,7 @@ class AimEditor extends Component {
     this.createAim(answers);
   };
 
-  createAim = answers => {
+  createAim = async answers => {
     let hasSegmentation = this.props.hasSegmentation;
     const updatedAimId = this.props.aimId;
 
@@ -102,32 +102,104 @@ class AimEditor extends Component {
     } = this.props.csTools.globalImageIdSpecificToolStateManager;
 
     // get the imagesIds for active viewport
-    const element = this.props.cornerstone.getEnabledElements()[
+    const { element } = this.props.cornerstone.getEnabledElements()[
       this.props.activePort
-    ]["element"];
+    ];
     const stackToolState = this.props.csTools.getToolState(element, "stack");
     const imageIds = stackToolState.data[this.props.activePort].imageIds;
 
-    // check which images has markup or segmentation
+    // check which images has markup
     const markedImageIds = imageIds.filter(imageId => {
       if (toolState[imageId] === undefined) return false;
       return true;
     });
 
-    // if has segmentation retrieve the images to generate dicomseg, most should be cached already
-    if (hasSegmentation) {
-      var imagePromises = [];
-      imageIds.map(imageId => {
-        imagePromises.push(this.props.cornerstone.loadImage(imageId));
-      });
-      // this.createSegmentation(toolState, imagePromises, markedImageIds);
-      this.createSegmentation3D();
-      return;
+    // find the markups to save in markedImages
+    const markupsToSave = this.getNewMarkups(markedImageIds, toolState);
+
+    let seedData, segBlobGlobal, imageIdx;
+    console.log("Markups to save", Object.entries(markupsToSave).length);
+    if (Object.entries(markupsToSave).length !== 0) {
+      const cornerStoneImageId = Object.keys(markupsToSave)[0];
+      const image = this.getCornerstoneImagebyId(cornerStoneImageId);
+      seedData = getAimImageData(image);
+    } else if (hasSegmentation) {
+      const { segBlob, imageIdx } = this.createSegmentation3D();
+      console.log("ImageIdx is", imageIdx);
+      const image = this.getCornerstoneImagebyIdx(imageIdx);
+      seedData = getAimImageData(image);
+      const dataset = await this.getDatasetFromBlob(segBlob, imageIdx);
+
+      const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
+      this.addSegmentationEntityToSeedData(seedData, segEntityData);
+
+      // set segmentation series description with the aim name
+      dataset.SeriesDescription = answers.name.value;
+
+      const modifiedSegBlob = dcmjs.data.datasetToBlob(dataset);
+      segBlobGlobal = modifiedSegBlob;
     }
 
+    this.addSemanticAnswersToSeedData(seedData, answers);
+
+    this.addUserToSeedData(seedData);
+    // this.addModalityObjectToSeedData(seedData);
+    console.log("Final SeedData is", seedData);
+
+    var aim = new Aim(
+      seedData,
+      enumAimType.imageAnnotation,
+      hasSegmentation,
+      updatedAimId
+    );
+
+    Object.entries(markupsToSave).forEach(([key, values]) => {
+      values.map(value => {
+        const { type, markup, shapeIndex, imageReferenceUid } = value;
+        switch (type) {
+          case "line":
+            this.addLineToAim(aim, markup, shapeIndex, imageReferenceUid);
+            break;
+          case "circle":
+            this.addCircleToAim(aim, markup, shapeIndex, imageReferenceUid);
+            break;
+          case "polygon":
+            this.addPolygonToAim(aim, markup, shapeIndex, imageReferenceUid);
+            break;
+          case "bidirectional":
+            this.addBidirectionalToAim(
+              aim.markup,
+              shapeIndex,
+              imageReferenceUid
+            );
+        }
+      });
+    });
+
+    const aimJson = aim.getAim();
+    console.log("Here is the aim", JSON.parse(aimJson));
+
+    uploadAim(JSON.parse(aimJson))
+      .then(() => {
+        this.saveSegmentation(segBlobGlobal);
+        this.props.onCancel();
+        toast.success("Aim succesfully saved.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+      })
+      .catch(error => console.log(error));
+  };
+
+  getNewMarkups = (markedImageIds, toolState) => {
     // check for markups
     var shapeIndex = 1;
     var markupsToSave = {};
+    const updatedAimId = this.props.aimId;
     markedImageIds.map(imageId => {
       const imageReferenceUid = this.parseImgeId(imageId);
       const markUps = toolState[imageId];
@@ -214,69 +286,15 @@ class AimEditor extends Component {
               }
             });
             break;
-          case "brush":
-            const brush = markUps[tool].data;
-            hasSegmentation = true;
-          // TODO: check if it's a new brush data
+          // case "brush":
+          //   const brush = markUps[tool].data;
+          //   hasSegmentation = true;
+          // // TODO: check if it's a new brush data
         }
       });
     });
-
-    const cornerStoneImageId = Object.keys(markupsToSave)[0];
-    const image = this.getCornerstoneImage(cornerStoneImageId, markupsToSave);
-    let seedData = getAimImageData(image);
-    this.addSemanticAnswersToSeedData(seedData, answers);
-    this.addUserToSeedData(seedData);
-    // this.addModalityObjectToSeedData(seedData);
-
-    var aim = new Aim(
-      seedData,
-      enumAimType.imageAnnotation,
-      hasSegmentation,
-      updatedAimId
-    );
-
-    Object.entries(markupsToSave).forEach(([key, values]) => {
-      values.map(value => {
-        const { type, markup, shapeIndex, imageReferenceUid } = value;
-        switch (type) {
-          case "line":
-            this.addLineToAim(aim, markup, shapeIndex, imageReferenceUid);
-            break;
-          case "circle":
-            this.addCircleToAim(aim, markup, shapeIndex, imageReferenceUid);
-            break;
-          case "polygon":
-            this.addPolygonToAim(aim, markup, shapeIndex, imageReferenceUid);
-            break;
-          case "bidirectional":
-            this.addBidirectionalToAim(
-              aim.markup,
-              shapeIndex,
-              imageReferenceUid
-            );
-        }
-      });
-    });
-
-    const aimJson = aim.getAim();
-
-    uploadAim(JSON.parse(aimJson))
-      .then(() => {
-        this.props.onCancel();
-        toast.success("Aim succesfully saved.", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        });
-      })
-      .catch(error => console.log(error));
+    return markupsToSave;
   };
-
-  hadleSegmentation = () => {};
 
   addModalityObjectToSeedData = seedData => {
     const modality = modalities[seedData.series.modality];
@@ -309,10 +327,21 @@ class AimEditor extends Component {
     seedData.user = obj;
   };
 
-  getCornerstoneImage = (imageId, markupsToSave) => {
-    return this.props.cornerstone.default.imageCache.imageCache[
-      Object.keys(markupsToSave)[0]
-    ].image;
+  addSegmentationEntityToSeedData = (seedData, segEntityData) => {
+    console.log("Seed data and seg Entity", seedData, segEntityData);
+    seedData["segmentation"] = segEntityData;
+    console.log("After Seed Data is", seedData);
+  };
+
+  // get the image object by index
+  getCornerstoneImagebyIdx = imageIdx => {
+    const imageCache = this.props.cornerstone.default.imageCache.imageCache;
+    const imageId = Object.keys(imageCache)[imageIdx];
+    return imageCache[imageId].image;
+  };
+
+  getCornerstoneImagebyId = imageId => {
+    return this.props.cornerstone.default.imageCache.imageCache[imageId].image;
   };
 
   storeMarkupsToBeSaved = (imageId, markupData, markupsToSave) => {
@@ -391,33 +420,10 @@ class AimEditor extends Component {
     imageReferenceUid
   ) => {};
 
-  createSegmentation = (toolState, imagePromises, markedImageIds) => {
-    const segments = [];
-    markedImageIds
-      .filter(imageId => {
-        if (
-          toolState[imageId].brush === undefined ||
-          toolState[imageId].brush.data === undefined
-        )
-          return false;
-        return true;
-      })
-      .map(imageId => {
-        this.setSegmentMetaData(toolState, imageId, segments);
-      });
-    const brushData = {
-      toolState,
-      segments
-    };
-    Promise.all(imagePromises).then(images => {
-      const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
-        images,
-        brushData
-      );
-    });
-  };
-
   createSegmentation3D = () => {
+    // following is to know the image index which has the first segment
+    let firstSegImageIndex;
+
     const { element } = this.cornerstone.getEnabledElements()[
       this.props.activePort
     ];
@@ -429,6 +435,10 @@ class AimEditor extends Component {
     const imageIds = stackToolState.data[0].imageIds;
     let imagePromises = [];
     for (let i = 0; i < imageIds.length; i++) {
+      if (i == 1)
+        this.cornerstone
+          .loadImage(imageIds[i])
+          .then(image => console.log("Yuklenen image", image));
       imagePromises.push(this.cornerstone.loadImage(imageIds[i]));
     }
 
@@ -450,6 +460,10 @@ class AimEditor extends Component {
         if (!labelmaps2D[i]) {
           continue;
         }
+
+        // following is to know the image index which has the first segment
+        if (!firstSegImageIndex) firstSegImageIndex = i;
+
         const segmentsOnLabelmap = labelmaps2D[i].segmentsOnLabelmap;
         segmentsOnLabelmap.forEach(segmentIndex => {
           if (segmentIndex !== 0 && !labelmap3D.metadata[segmentIndex]) {
@@ -460,19 +474,98 @@ class AimEditor extends Component {
         });
       }
     }
-    Promise.all(imagePromises)
-      .then(images => {
-        const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
-          images,
-          labelmaps3D
+    const cachedImages = this.cornerstone.imageCache.imageCache;
+    let images = [];
+    Object.keys(cachedImages).forEach(key => {
+      images.push(cachedImages[key].image);
+    });
+    // console.log("ImageCache", images);
+
+    // Promise.all(imagePromises).then(images => {
+    //   console.log("Images", images);
+
+    // this.cornerstone.imageCache;
+    const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
+      images,
+      labelmaps3D
+    );
+
+    return {
+      segBlob,
+      imageIdx: firstSegImageIndex
+    };
+    // });
+
+    // .catch(err => console.log(err));
+  };
+
+  parseSegmentation = arrayBuffer => {
+    alert("Will parse now");
+    const cornerstoneTools = this.props.csTools;
+    const cornerstone = this.props.cornerstone;
+
+    console.log("Cornerstone", this.props.cornerstone);
+    console.log("Cornerstone Tools", cornerstoneTools);
+
+    const { element } = cornerstone.getEnabledElements()[this.props.activePort];
+    const stackToolState = cornerstoneTools.getToolState(element, "stack");
+    const imageIds = stackToolState.data[0].imageIds;
+    const t0 = performance.now();
+    const {
+      labelmapBuffer,
+      segMetadata,
+      segmentsOnFrame
+    } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
+      imageIds,
+      arrayBuffer,
+      cornerstone.metaData
+    );
+    const t1 = performance.now();
+    const { setters, state } = cornerstoneTools.getModule("segmentation");
+    setters.labelmap3DByFirstImageId(
+      imageIds[0],
+      labelmapBuffer,
+      0,
+      segMetadata,
+      imageIds.length,
+      segmentsOnFrame
+    );
+  };
+
+  getDatasetFromBlob = (segBlob, imageIdx) => {
+    return new Promise(resolve => {
+      let segArrayBuffer;
+      var fileReader = new FileReader();
+      fileReader.onload = event => {
+        segArrayBuffer = event.target.result;
+        const dicomData = dcmjs.data.DicomMessage.readFile(segArrayBuffer);
+        const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(
+          dicomData.dict
         );
-        this.saveSegmentation(segBlob);
-      })
-      .catch(err => console.log(err));
+        dataset._meta = dcmjs.data.DicomMetaDictionary.namifyDataset(
+          dicomData.meta
+        );
+        resolve(dataset);
+      };
+      fileReader.readAsArrayBuffer(segBlob);
+    });
+  };
+
+  getSegmentationEntityData = (dataset, imageIdx) => {
+    let obj = {};
+    obj["referencedSopInstanceUid"] =
+      dataset.ReferencedSeriesSequence.ReferencedInstanceSequence[
+        imageIdx
+      ].ReferencedSOPInstanceUID;
+    obj["seriesInstanceUid"] = dataset.SeriesInstanceUID;
+    obj["studyInstanceUid"] = dataset.StudyInstanceUID;
+    obj["sopClassUid"] = dataset.SOPClassUID;
+    obj["sopInstanceUid"] = dataset.SOPInstanceUID;
+    return obj;
   };
 
   saveSegmentation = segmentation => {
-    const { patientID, projectID } = this.props.series[this.props.activePort];
+    const { projectID } = this.props.series[this.props.activePort];
     uploadSegmentation(segmentation, projectID)
       .then(() => {
         // this.props.onCancel();
@@ -484,8 +577,12 @@ class AimEditor extends Component {
           pauseOnHover: true,
           draggable: true
         });
+        return "success";
       })
-      .catch(error => console.log(error));
+      .catch(error => {
+        console.log(error);
+        return "error";
+      });
   };
 
   generateMockMetadata = segmentIndex => {
@@ -504,7 +601,7 @@ class AimEditor extends Component {
       SegmentNumber: (segmentIndex + 1).toString(),
       SegmentLabel: "Tissue " + (segmentIndex + 1).toString(),
       SegmentAlgorithmType: "SEMIAUTOMATIC",
-      SegmentAlgorithmName: "Slicer Prototype",
+      SegmentAlgorithmName: "ePAD",
       RecommendedDisplayCIELabValue,
       SegmentedPropertyTypeCodeSequence: {
         CodeValue: "T-D0050",
@@ -512,46 +609,6 @@ class AimEditor extends Component {
         CodeMeaning: "Tissue"
       }
     };
-  };
-
-  setSegmentMetaData = (toolState, imageId, segments) => {
-    const RecommendedDisplayCIELabValue = dcmjs.data.Colors.rgb2DICOMLAB([
-      1,
-      0,
-      0
-    ]);
-    const brushData = toolState[imageId].brush.data;
-    for (let segIdx = 0; segIdx < 4; segIdx++) {
-      // If there is pixelData for this segment, set the segment metadata
-      // if it hasn't been set yet.
-      if (
-        brushData[segIdx] &&
-        brushData[segIdx].pixelData &&
-        !segments[segIdx]
-      ) {
-        segments[segIdx] = {
-          SegmentedPropertyCategoryCodeSequence: {
-            CodeValue: "T-D0050",
-            CodingSchemeDesignator: "SRT",
-            CodeMeaning: "Tissue"
-          },
-          SegmentNumber: (segIdx + 1).toString(),
-          SegmentLabel: "Tissue " + (segIdx + 1).toString(),
-          SegmentAlgorithmType: "SEMIAUTOMATIC",
-          SegmentAlgorithmName: "ePAD",
-          RecommendedDisplayCIELabValue,
-          SegmentedPropertyTypeCodeSequence: {
-            CodeValue: "T-D0050",
-            CodingSchemeDesignator: "SRT",
-            CodeMeaning: "Tissue"
-          }
-        };
-      }
-    }
-  };
-
-  addSegmentationToAim = (aim, image) => {
-    // aim.
   };
 
   parseImgeId = imageId => {

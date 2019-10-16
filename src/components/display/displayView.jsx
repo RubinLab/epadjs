@@ -1,6 +1,10 @@
 import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
-import { getImageIds, getWadoImagePath } from "../../services/seriesServices";
+import {
+  getImageIds,
+  getWadoImagePath,
+  getSegmentation
+} from "../../services/seriesServices";
 import { getAnnotations2 } from "../../services/annotationServices";
 import { connect } from "react-redux";
 import { wadoUrl, isLite } from "../../config.json";
@@ -335,10 +339,24 @@ class DisplayView extends Component {
   parseAims = (aimList, seriesUid) => {
     Object.entries(aimList).forEach(([key, values]) => {
       values.forEach(value => {
+        const { markupUid, markupType } = value;
         console.log("Value", value);
+        if (markupType === "DicomSegmentationEntity")
+          this.getSegmentationBlob(markupUid);
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
         this.renderMarkup(key, value, color);
       });
+    });
+  };
+
+  getSegmentationBlob = async markupUid => {
+    const { projectID, patientID, studyUID } = this.props.series[
+      this.props.activePort
+    ];
+    const series = { projectID, patientID, studyUID, seriesUID: markupUid };
+    console.log("Blob series is", series);
+    getSegmentation(series).then(blob => {
+      console.log("Seg Blob from server is", blob);
     });
   };
 

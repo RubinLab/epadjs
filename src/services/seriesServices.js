@@ -90,6 +90,20 @@ export function downloadSeries(series) {
   return http.get(url, { responseType: "blob" });
 }
 
+export function getSegmentation(series) {
+  const url =
+    apiUrl +
+    "/projects/" +
+    series.projectID +
+    "/subjects/" +
+    series.patientID +
+    "/studies/" +
+    series.studyUID +
+    "/series/" +
+    series.seriesUID;
+  return http.get(url, { responseType: "blob" });
+}
+
 export function deleteSeries(series) {
   if (isLite) {
     const url =

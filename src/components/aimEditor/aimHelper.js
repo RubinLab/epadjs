@@ -1,15 +1,12 @@
 export function getImageIdAnnotations(aims) {
-  alert("1 called");
   let imageIdSpecificMarkups = {};
   aims.forEach(aim => parseAim(aim, imageIdSpecificMarkups));
   return imageIdSpecificMarkups;
 }
 
 function parseAim(aim, imageIdSpecificMarkups) {
-  alert("I'm called");
   var imageAnnotation =
     aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
-  console.log("image Annotation", imageAnnotation);
   //check if the aim has markup
   if (imageAnnotation.markupEntityCollection) {
     var markupEntities = imageAnnotation.markupEntityCollection.MarkupEntity;
@@ -22,7 +19,6 @@ function parseAim(aim, imageIdSpecificMarkups) {
   }
   //check if it has segmentation
   if (imageAnnotation.segmentationEntityCollection) {
-    alert("1.5 called");
     var segmentationEntities =
       imageAnnotation.segmentationEntityCollection.SegmentationEntity;
     segmentationEntities.forEach(segmentationEntity => {
@@ -54,7 +50,6 @@ function getMarkup(markupEntity, aim) {
 }
 
 function getSegmentation(segmentationEntity, aim) {
-  alert("2 called");
   const imageId = segmentationEntity["referencedSopInstanceUid"]["root"];
   const markupUid = segmentationEntity["uniqueIdentifier"]["root"];
   const calculations = getCalculationEntitiesOfMarkUp(aim, markupUid);
@@ -123,8 +118,6 @@ export function getAimImageData(image) {
   obj.person = {};
   obj.image = [];
   const { aim, study, series, equipment, person } = obj;
-
-  console.log("Image Data", image.data);
 
   aim.studyInstanceUid = image.data.string("x0020000d") || "";
 
