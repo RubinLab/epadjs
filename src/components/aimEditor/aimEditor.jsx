@@ -182,7 +182,6 @@ class AimEditor extends Component {
     uploadAim(JSON.parse(aimJson))
       .then(() => {
         this.saveSegmentation(segBlobGlobal);
-        this.props.onCancel();
         toast.success("Aim succesfully saved.", {
           position: "top-right",
           autoClose: 5000,

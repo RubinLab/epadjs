@@ -337,27 +337,30 @@ class DisplayView extends Component {
   };
 
   parseAims = (aimList, seriesUid) => {
+    console.log();
     Object.entries(aimList).forEach(([key, values]) => {
       values.forEach(value => {
-        const { markupUid, markupType } = value;
+        const { markupUid, markupType, aimUid } = value;
         console.log("Value", value);
         if (markupType === "DicomSegmentationEntity")
-          this.getSegmentationBlob(markupUid);
+          this.getSegmentation(aimUid);
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
         this.renderMarkup(key, value, color);
       });
     });
   };
 
-  getSegmentationBlob = async markupUid => {
-    const { projectID, patientID, studyUID } = this.props.series[
-      this.props.activePort
-    ];
-    const series = { projectID, patientID, studyUID, seriesUID: markupUid };
-    console.log("Blob series is", series);
-    getSegmentation(series).then(blob => {
-      console.log("Seg Blob from server is", blob);
-    });
+  getSegmentation = async aimId => {
+    console.log("Aim Id is", aimId);
+    console.log(this.props.aimList);
+    // const { projectID, patientID, studyUID } = this.props.series[
+    //   this.props.activePort
+    // ];
+    // const series = { projectID, patientID, studyUID, seriesUID: markupUid };
+    // console.log("Blob series is", series);
+    // getSegmentation(series).then(blob => {
+    //   console.log("Seg Blob from server is", blob);
+    // });
   };
 
   getColorOfMarkup = (aimUid, seriesUid) => {
