@@ -49,7 +49,8 @@ export function getWorklistOfAssignee(user, id) {
       id +
       "/users/" +
       user +
-      "/subjects/?annotationCount=true"
+      // "/subjects/?annotationCount=true"
+      "/subjects"
   );
 }
 

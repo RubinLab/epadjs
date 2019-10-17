@@ -207,19 +207,13 @@ class WorkList extends React.Component {
   };
 
   getUpdate = e => {
-    // e.stopPropagation();
     const { name, value } = e.target;
-    console.log(" --- setting state name-value ---");
-    console.log(name, value);
     this.setState({ [name]: value });
   };
 
   updateWorklist = () => {
     const { name, description, duedate, worklistId } = this.state;
-    console.log(name, description, duedate, worklistId);
     const body = name ? { name } : description ? { description } : { duedate };
-    console.log(" --- body ---");
-    console.log(body);
     updateWorklist(worklistId, body)
       .then(() => this.getWorkListData())
       .catch(error =>
@@ -251,8 +245,6 @@ class WorkList extends React.Component {
     newAssigneeMap[name] = checked;
     this.setState({ assigneeMap: newAssigneeMap });
   };
-
-  submitUpdateWorklist = () => {};
 
   submitUpdateAssignees = () => {
     const assigneeList = [];
@@ -412,7 +404,6 @@ class WorkList extends React.Component {
             const day = date.getDate();
             today = `${year}-${month + 1}-${day}`;
           }
-          console.log(today);
           const defaultDate = dueDate || today;
           return cellDoubleClicked === "duedate" &&
             clickedIndex === original.index ? (
@@ -503,13 +494,6 @@ class WorkList extends React.Component {
 
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
-    // const userList = [];
-    // for (let i = 0; i < this.state.userList.length; i += 1) {
-    //   userList.push(this.state.userList[i].username);
-    // }
-
-    console.log(this.state.description);
-    console.log(this.state.duedate);
 
     return (
       <div className="worklist menu-display" id="worklist">
