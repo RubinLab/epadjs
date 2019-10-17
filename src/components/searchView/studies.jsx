@@ -70,11 +70,10 @@ class Studies extends Component {
   }
 
   async componentDidMount() {
-    const {
-      data: {
-        ResultSet: { Result: data }
-      }
-    } = await getStudies(this.props.projectId, this.props.subjectId);
+    const { data: data } = await getStudies(
+      this.props.projectId,
+      this.props.subjectId
+    );
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
     if (data.length === 0) {
@@ -91,11 +90,10 @@ class Studies extends Component {
 
   async componentDidUpdate(prevProps) {
     if (this.props.update !== prevProps.update) {
-      const {
-        data: {
-          ResultSet: { Result: data }
-        }
-      } = await getStudies(this.props.projectId, this.props.subjectId);
+      const { data: data } = await getStudies(
+        this.props.projectId,
+        this.props.subjectId
+      );
       await this.setState({ data });
     }
     if (this.props.expandLevel != prevProps.expandLevel) {
@@ -410,11 +408,7 @@ class Studies extends Component {
     this.props.dispatch(startLoading());
     const { projectID, patientID, studyUID } = selected;
     try {
-      const {
-        data: {
-          ResultSet: { Result: series }
-        }
-      } = await getSeries(projectID, patientID, studyUID);
+      const { data: series } = await getSeries(projectID, patientID, studyUID);
       this.props.dispatch(loadCompleted());
       return series;
     } catch (err) {
@@ -444,7 +438,7 @@ class Studies extends Component {
         seriesArr = await this.getSeriesData(selected);
       }
       //get extraction of the series (extract unopen series)
-      seriesArr = this.excludeOpenSeries(seriesArr);
+      if (seriesArr.length > 0) seriesArr = this.excludeOpenSeries(seriesArr);
       //check if there is enough room
       if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
         //if there is not bring the modal

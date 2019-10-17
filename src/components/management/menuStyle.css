@@ -176,6 +176,10 @@
   flex-direction: column;
   align-items: left;
 }
+
+.updateAssignee__modal.modal-dialog {
+  width: fit-content;
+}
 .add-project__modal--input,
 .add-connection__modal--input,
 .edit-project__modal--input,
@@ -234,6 +238,7 @@
   background: rgb(199, 3, 3);
   color: white;
   padding: 0.5rem;
+  max-width: fit-content;
 }
 
 .project-edit__error {

@@ -2,7 +2,10 @@ import React from "react";
 import Table from "react-table";
 import { Link } from "react-router-dom";
 import { FaRegTrashAlt, FaRegEye } from "react-icons/fa";
-import { getWorklist, deleteWorklist } from "../../services/worklistServices";
+import {
+  getWorklistOfAssignee,
+  deleteWorklist
+} from "../../services/worklistServices";
 import { getProject } from "../../services/projectServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
 import EditField from "./editField";
@@ -41,11 +44,7 @@ class WorkList extends React.Component {
   };
 
   getWorkListData = async () => {
-    const {
-      data: {
-        ResultSet: { Result: worklists }
-      }
-    } = await getWorklist(
+    const { data: worklists } = await getWorklistOfAssignee(
       sessionStorage.getItem("username"),
       this.props.match.params.wid
     );

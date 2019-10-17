@@ -75,11 +75,7 @@ class Subjects extends Component {
     console.log(this.props.pid);
     if (this.props.pid) {
       console.log("yeap");
-      const {
-        data: {
-          ResultSet: { Result: data }
-        }
-      } = await getSubjects(this.props.pid);
+      const { data: data } = await getSubjects(this.props.pid);
       for (let subject of data) {
         subject.children = [];
       }

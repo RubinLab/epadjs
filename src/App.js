@@ -116,7 +116,7 @@ class App extends Component {
         console.log("keycloack");
         console.log(result);
         let user = {
-          user: result.userInfo.email,
+          user: result.userInfo.preferred_username || result.userInfo.email,
           displayname: result.userInfo.given_name
         };
         await auth.login(user, null, result.keycloak.token);

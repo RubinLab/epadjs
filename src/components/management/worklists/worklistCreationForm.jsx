@@ -18,7 +18,8 @@ class WorklistCreationForm extends React.Component {
     name: "",
     id: "",
     description: "",
-    dueDate: ""
+    dueDate: "",
+    error: ""
   };
 
   goPrevPage = () => {
@@ -29,6 +30,16 @@ class WorklistCreationForm extends React.Component {
     }
   };
 
+  handleCancel = () => {
+    this.setState({
+      assigneeList: {},
+      name: "",
+      id: "",
+      description: "",
+      dueDate: "",
+      error: ""
+    });
+  };
   goNextPage = () => {
     if (this.state.page === 0) {
       this.setState(state => ({
@@ -39,28 +50,36 @@ class WorklistCreationForm extends React.Component {
 
   handleSaveWorklist = () => {
     let { name, id, assigneeList, description, dueDate } = this.state;
+    assigneeList = Object.keys(assigneeList);
     if (!name || !id || !assigneeList.length) {
       this.setState({ error: messages.fillRequiredFields });
     } else {
       description = description ? description : "";
       saveWorklist(id, name, assigneeList, description, dueDate)
         .then(() => {
-          this.getWorkListData();
+          this.props.onSubmit();
+          this.handleCancel();
+          this.props.onCancel();
         })
-        .catch(error =>
-          toast.error(
-            messages.addWorklistError + ": " + error.response.data.message,
-            {
-              autoClose: false
-            }
-          )
-        );
-      this.handleCancel();
+        .catch(error => {
+          console.log("err here");
+          console.log(error);
+          console.log("err here");
+
+          if (
+            error.response.data &&
+            error.response.data === "Validation error"
+          ) {
+            let errMesage = `${errMesage} - ID "${id}" might already exist`;
+            this.setState({ error: errMesage });
+          }
+          this.setState({ page: 0 });
+        });
     }
   };
 
   handleFormInput = e => {
-    if (this.state.id || this.state.name) this.setState({ error: "" });
+    if (this.state.id && this.state.name) this.setState({ error: "" });
     const { name, value } = e.target;
     this.setState({ [name]: value });
   };
@@ -82,7 +101,7 @@ class WorklistCreationForm extends React.Component {
     let button2Func = this.goNextPage;
     let button3Func = onCancel;
     let disableSubmit = false;
-    let disableNext = id || name;
+    let disableNext = !id || !name;
 
     if (page === 1) {
       button2Text = "Submit";
@@ -129,6 +148,7 @@ class WorklistCreationForm extends React.Component {
                 type="text"
                 onChange={this.handleFormInput}
                 id="form-first-element"
+                defaultValue={this.state.name}
               />
               <h5 className="add-worklist__modal--label">ID*</h5>
               <input
@@ -137,6 +157,7 @@ class WorklistCreationForm extends React.Component {
                 name="id"
                 type="text"
                 onChange={this.handleFormInput}
+                defaultValue={this.state.id}
               />
               <h6 className="form-exp">
                 One word only, no special characters, '_' is OK
@@ -146,6 +167,7 @@ class WorklistCreationForm extends React.Component {
                 type="date"
                 name="dueDate"
                 onChange={this.handleFormInput}
+                defaultValue={this.state.dueDate}
               />
               <h5 className="add-worklist__modal--label">Description</h5>
               <textarea
@@ -153,6 +175,7 @@ class WorklistCreationForm extends React.Component {
                 className="add-worklist__modal--input"
                 name="description"
                 onChange={this.handleFormInput}
+                defaultValue={this.state.description}
               />
               <h5 className="form-exp required">*Required</h5>
             </form>

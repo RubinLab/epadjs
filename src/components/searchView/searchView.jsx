@@ -42,6 +42,7 @@ import NewMenu from "./newMenu";
 import SubjectCreationModal from "./subjectCreationModal.jsx";
 import StudyCreationModal from "./studyCreationModal.jsx";
 import SeriesCreationModal from "./seriesCreationModal.jsx";
+import Worklists from "./addWorklist";
 import AnnotationCreationModal from "./annotationCreationModal.jsx";
 
 class SearchView extends Component {
@@ -87,11 +88,7 @@ class SearchView extends Component {
 
   getData = async () => {
     if (this.props.match.params.pid) {
-      const {
-        data: {
-          ResultSet: { Result: data }
-        }
-      } = await getSubjects(this.props.match.params.pid);
+      const { data: data } = await getSubjects(this.props.match.params.pid);
       return data;
     } else {
       return [];
@@ -508,11 +505,7 @@ class SearchView extends Component {
   getSeriesData = async selected => {
     const { projectID, patientID, studyUID } = selected;
     try {
-      const {
-        data: {
-          ResultSet: { Result: series }
-        }
-      } = await getSeries(projectID, patientID, studyUID);
+      const { data: series } = await getSeries(projectID, patientID, studyUID);
       return series;
     } catch (err) {
       this.props.dispatch(annotationsLoadingError(err));
@@ -597,6 +590,10 @@ class SearchView extends Component {
     this.setState({ downloading: false, uploading: false, deleting: false });
   };
 
+  handleWorklistClick = () => {
+    this.setState({ showWorklists: true });
+  };
+
   handleNewSelected = () => {
     switch (this.state.newSelected) {
       case "subject":
@@ -671,6 +668,7 @@ class SearchView extends Component {
           onShrink={this.handleShrink}
           onCloseAll={this.handleCloseAll}
           onNew={this.handleNewClick}
+          onWorklist={this.handleWorklistClick}
           status={status}
           showDelete={showDelete}
           project={this.props.match.params.pid}
@@ -721,6 +719,8 @@ class SearchView extends Component {
             onClose={this.handleNewClick}
           />
         )}
+
+        {this.state.showWorklists && <Worklists />}
         {this.state.newSelected && this.handleNewSelected()}
       </>
     );

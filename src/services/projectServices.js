@@ -62,11 +62,8 @@ export function uploadFile(formData, config, projectID, username) {
     return http.post(apiUrl + "/projects/lite/files", formData, config);
   } else {
     const url =
-      apiUrlV1 +
-      "/rest/upload?projectID=" +
-      projectID +
-      "&username=" +
-      username;
+      apiUrl + "/projects/" + projectID + "/files?username=" + username;
+
     console.log("url is", url);
     return http.post(url, formData, config);
   }

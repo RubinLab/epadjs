@@ -5,10 +5,12 @@ export function getWorklistsOfCreator() {
   return http.get(apiUrl + "/worklists");
 }
 
+// TODO update /worklists/:w/users/:u
 export function getWorklistsOfAssignee(userName) {
   return http.get(apiUrl + "/users/" + userName + "/worklists");
 }
 
+// TODO update /worklists/:w
 export function deleteWorklist(user, worklistId) {
   return http.delete(apiUrl + "/users/" + user + "/worklists/" + worklistId);
 }
@@ -20,8 +22,6 @@ export function saveWorklist(
   description,
   dueDate
 ) {
-  console.log("--- in worklist service---");
-  console.log(worklistId, worklistName, assignees, description, dueDate);
   return http.post(apiUrl + "/worklists", {
     worklistId,
     worklistName,
@@ -31,21 +31,52 @@ export function saveWorklist(
   });
 }
 
+// TODO update /worklists/:w/users/:u, body
 export function updateWorklistAssignee(user, id, body) {
-  return http.put(apiUrl + "/users/" + user + "/worklists/" + id, body);
+  return http.put(apiUrl + "/worklists/" + id + "/users/" + user, body);
 }
 
 export function updateWorklist(id, body) {
   return http.put(apiUrl + "/worklists/" + id, body);
 }
-export function getWorklist(user, id) {
+
+// TODO update /worklists/:w/users/:u
+export function getWorklistOfAssignee(user, id) {
   // /users/admin/worklists/tes5/subjects/?annotationCount=true
   return http.get(
     apiUrl +
-      "/users/" +
-      user +
       "/worklists/" +
       id +
+      "/users/" +
+      user +
       "/subjects/?annotationCount=true"
+  );
+}
+
+export function addStudyToWorklist(worklistId, projectID, patientID, studyUID) {
+  // '/worklists/:worklist/projects/:project/subjects/:subject/studies/:study',
+  return http.post(
+    apiUrl +
+      "/worklists/" +
+      worklistId +
+      "/projects/" +
+      projectID +
+      "/subjects/" +
+      patientID +
+      "/studies/" +
+      studyUID
+  );
+}
+
+export function addSubjectToWorklist(worklistId, projectID, patientID) {
+  // '/worklists/:worklist/projects/:project/subjects/:subject',
+  return http.post(
+    apiUrl +
+      "/worklists/" +
+      worklistId +
+      "/projects/" +
+      projectID +
+      "/subjects/" +
+      patientID
   );
 }

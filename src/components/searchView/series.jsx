@@ -81,15 +81,13 @@ class Series extends Component {
   }
 
   async componentDidMount() {
-    const {
-      data: {
-        ResultSet: { Result: data }
-      }
-    } = await getSeries(
+    const { data: data } = await getSeries(
       this.props.projectId,
       this.props.subjectId,
       this.props.studyId
     );
+    console.log("series data");
+    console.log(data);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
     if (data.length === 0) {
@@ -106,11 +104,7 @@ class Series extends Component {
 
   async componentDidUpdate(prevProps) {
     if (this.props.update !== prevProps.update) {
-      const {
-        data: {
-          ResultSet: { Result: data }
-        }
-      } = await getSeries(
+      const { data: data } = await getSeries(
         this.props.projectId,
         this.props.subjectId,
         this.props.studyId

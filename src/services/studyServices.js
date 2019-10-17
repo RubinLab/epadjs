@@ -8,7 +8,7 @@ export function getStudies(projectId, subjectId) {
     );
   else
     return http.get(
-      apiUrl + "/projects/" + projectId + "/subjects/" + subjectId + "/studies/"
+      apiUrl + "/projects/" + projectId + "/subjects/" + subjectId + "/studies"
     );
 }
 

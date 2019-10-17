@@ -2,10 +2,11 @@ import React from "react";
 import PropTypes from "prop-types";
 
 const editField = props => {
+  const type = props.inputType ? props.inputType : "text";
   return (
     <input
       onMouseDown={e => e.stopPropagation()}
-      type="text"
+      type={type}
       className="--commentField"
       className="edit-user__modal--input"
       name={props.name}
