@@ -1,13 +1,14 @@
-import getElement from './getElement';
-import { getToolState } from '../../../stateManagement/toolState.js';
-import addLabelmap3D from './addLabelmap3D';
-import addLabelmap2D from './addLabelmap2D';
-import external from '../../../externalModules';
-import state from './state';
+import getElement from "./getElement";
+import { getToolState } from "../../../stateManagement/toolState.js";
+import getSegmentsOnPixelData from "./getSegmentsOnPixeldata";
+import addLabelmap3D from "./addLabelmap3D";
+import addLabelmap2D from "./addLabelmap2D";
+import external from "../../../externalModules";
+import state from "./state";
 
-import { getLogger } from '../../../util/logger';
+import { getLogger } from "../../../util/logger";
 
-const logger = getLogger('store:modules:segmentationModule:getLabelmap2D');
+const logger = getLogger("store:modules:segmentationModule:getLabelmap2D");
 
 /**
  * Returns the active `labelmap3D` and the `currentImageIdIndex`. If a labelmap does
@@ -26,11 +27,11 @@ export default function getLabelmap2D(elementOrEnabledElementUID) {
   }
 
   const cornerstone = external.cornerstone;
-  const stackState = getToolState(element, 'stack');
+  const stackState = getToolState(element, "stack");
 
   if (!stackState) {
     logger.error(
-      'Consumers must define stacks in their application if using segmentations in cornerstoneTools.'
+      "Consumers must define stacks in their application if using segmentations in cornerstoneTools."
     );
 
     return;
@@ -77,7 +78,7 @@ export default function getLabelmap2D(elementOrEnabledElementUID) {
 
     state.series[firstImageId] = {
       activeLabelmapIndex,
-      labelmaps3D: [],
+      labelmaps3D: []
     };
 
     brushStackState = state.series[firstImageId];
@@ -101,7 +102,7 @@ export default function getLabelmap2D(elementOrEnabledElementUID) {
     labelmap2D: labelmap3D.labelmaps2D[currentImageIdIndex],
     labelmap3D,
     currentImageIdIndex,
-    activeLabelmapIndex,
+    activeLabelmapIndex
   };
 }
 
@@ -133,7 +134,7 @@ export function getLabelmap2DByImageIdIndex(
 
     labelmap3D.labelmaps2D[imageIdIndex] = {
       pixelData,
-      getSegmentIndexes: () => new Set(pixelData),
+      segmentsOnLabelmap: getSegmentsOnPixelData(pixelData)
     };
   }
 

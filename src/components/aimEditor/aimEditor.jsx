@@ -125,74 +125,84 @@ class AimEditor extends Component {
       seedData = getAimImageData(image);
     } else if (hasSegmentation) {
       const { segBlob, imageIdx } = this.createSegmentation3D();
-      console.log("ImageIdx is", imageIdx);
       const image = this.getCornerstoneImagebyIdx(imageIdx);
       seedData = getAimImageData(image);
       const dataset = await this.getDatasetFromBlob(segBlob, imageIdx);
 
-      const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
-      this.addSegmentationEntityToSeedData(seedData, segEntityData);
+      console.log("Dataset is", dataset);
 
-      // set segmentation series description with the aim name
-      dataset.SeriesDescription = answers.name.value;
+      this.renderSegmentation(segBlob);
 
-      const modifiedSegBlob = dcmjs.data.datasetToBlob(dataset);
-      segBlobGlobal = modifiedSegBlob;
+      // const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
+      // this.addSegmentationEntityToSeedData(seedData, segEntityData);
+
+      // // set segmentation series description with the aim name
+      // dataset.SeriesDescription = answers.name.value;
+
+      // const modifiedSegBlob = dcmjs.data.datasetToBlob(dataset);
+      // segBlobGlobal = modifiedSegBlob;
     }
 
-    this.addSemanticAnswersToSeedData(seedData, answers);
+    // this.addSemanticAnswersToSeedData(seedData, answers);
 
-    this.addUserToSeedData(seedData);
-    // this.addModalityObjectToSeedData(seedData);
-    console.log("Final SeedData is", seedData);
+    // this.addUserToSeedData(seedData);
+    // // this.addModalityObjectToSeedData(seedData);
+    // console.log("Final SeedData is", seedData);
 
-    var aim = new Aim(
-      seedData,
-      enumAimType.imageAnnotation,
-      hasSegmentation,
-      updatedAimId
-    );
+    // var aim = new Aim(
+    //   seedData,
+    //   enumAimType.imageAnnotation,
+    //   hasSegmentation,
+    //   updatedAimId
+    // );
 
-    Object.entries(markupsToSave).forEach(([key, values]) => {
-      values.map(value => {
-        const { type, markup, shapeIndex, imageReferenceUid } = value;
-        switch (type) {
-          case "line":
-            this.addLineToAim(aim, markup, shapeIndex, imageReferenceUid);
-            break;
-          case "circle":
-            this.addCircleToAim(aim, markup, shapeIndex, imageReferenceUid);
-            break;
-          case "polygon":
-            this.addPolygonToAim(aim, markup, shapeIndex, imageReferenceUid);
-            break;
-          case "bidirectional":
-            this.addBidirectionalToAim(
-              aim.markup,
-              shapeIndex,
-              imageReferenceUid
-            );
-        }
-      });
+    // Object.entries(markupsToSave).forEach(([key, values]) => {
+    //   values.map(value => {
+    //     const { type, markup, shapeIndex, imageReferenceUid } = value;
+    //     switch (type) {
+    //       case "line":
+    //         this.addLineToAim(aim, markup, shapeIndex, imageReferenceUid);
+    //         break;
+    //       case "circle":
+    //         this.addCircleToAim(aim, markup, shapeIndex, imageReferenceUid);
+    //         break;
+    //       case "polygon":
+    //         this.addPolygonToAim(aim, markup, shapeIndex, imageReferenceUid);
+    //         break;
+    //       case "bidirectional":
+    //         this.addBidirectionalToAim(
+    //           aim.markup,
+    //           shapeIndex,
+    //           imageReferenceUid
+    //         );
+    //     }
+    //   });
+    // });
+
+    // const aimJson = aim.getAim();
+    // console.log("Here is the aim", JSON.parse(aimJson));
+
+    // uploadAim(JSON.parse(aimJson))
+    //   .then(() => {
+    //     this.saveSegmentation(segBlobGlobal);
+    //     this.props.onCancel();
+    //     toast.success("Aim succesfully saved.", {
+    //       position: "top-right",
+    //       autoClose: 5000,
+    //       hideProgressBar: false,
+    //       closeOnClick: true,
+    //       pauseOnHover: true,
+    //       draggable: true
+    //     });
+    //   })
+    //   .catch(error => console.log(error));
+  };
+
+  renderSegmentation = segBlob => {
+    console.log("In render Segmentation");
+    new Response(segBlob).arrayBuffer().then(arrayBuffer => {
+      this.parseSegmentation(arrayBuffer);
     });
-
-    const aimJson = aim.getAim();
-    console.log("Here is the aim", JSON.parse(aimJson));
-
-    uploadAim(JSON.parse(aimJson))
-      .then(() => {
-        this.saveSegmentation(segBlobGlobal);
-        this.props.onCancel();
-        toast.success("Aim succesfully saved.", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        });
-      })
-      .catch(error => console.log(error));
   };
 
   getNewMarkups = (markedImageIds, toolState) => {
