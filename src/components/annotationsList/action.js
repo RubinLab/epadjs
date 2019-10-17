@@ -377,6 +377,7 @@ const getAimListFields = (aims, ann) => {
       imagingObservationEntityCollection,
       imagingPhysicalEntityCollection,
       inferenceEntityCollection,
+      segmentationEntityCollection,
       typeCode
     } = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
     const aimFields = {
@@ -385,6 +386,7 @@ const getAimListFields = (aims, ann) => {
       imagingObservationEntityCollection,
       imagingPhysicalEntityCollection,
       inferenceEntityCollection,
+      segmentationEntityCollection,
       typeCode
     };
     const user = aim.ImageAnnotationCollection.user.name.value;
