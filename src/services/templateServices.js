@@ -8,7 +8,7 @@ import { apiUrl, isLite } from "../config.json";
 export async function getAllTemplates() {
   return isLite
     ? http.get(apiUrl + "/templates?format=summary")
-    : http.get(apiUrl + "/templates/");
+    : http.get(apiUrl + "/templates");
 }
 
 export async function getTemplates() {

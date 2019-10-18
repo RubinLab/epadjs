@@ -11,8 +11,8 @@ export function getWorklistsOfAssignee(userName) {
 }
 
 // TODO update /worklists/:w
-export function deleteWorklist(user, worklistId) {
-  return http.delete(apiUrl + "/users/" + user + "/worklists/" + worklistId);
+export function deleteWorklist(worklistId) {
+  return http.delete(apiUrl + "/worklists/" + worklistId);
 }
 
 export function saveWorklist(

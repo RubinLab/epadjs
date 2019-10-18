@@ -58,7 +58,7 @@ class WorkList extends React.Component {
     this.setState({ worklists });
   };
 
-  toggleRow = async (id, name) => {
+  toggleRow = async id => {
     let newSelected = Object.assign({}, this.state.selected);
     if (newSelected[id]) {
       newSelected[id] = false;
@@ -69,7 +69,7 @@ class WorkList extends React.Component {
         });
       }
     } else {
-      newSelected[id] = name;
+      newSelected[id] = true;
       await this.setState({
         selectAll: 2
       });
@@ -115,8 +115,8 @@ class WorkList extends React.Component {
   deleteAllSelected = () => {
     let newSelected = Object.assign({}, this.state.selected);
     const promiseArr = [];
-    for (let project in newSelected) {
-      promiseArr.push(deleteWorklist(newSelected[project], project));
+    for (let worklist in newSelected) {
+      promiseArr.push(deleteWorklist(worklist));
     }
     Promise.all(promiseArr)
       .then(() => {
@@ -131,10 +131,9 @@ class WorkList extends React.Component {
   };
 
   deleteSingleWorklist = async () => {
-    const { name, id } = this.state.singleDeleteData;
-    deleteWorklist(name, id)
+    deleteWorklist(this.state.singleDeleteData)
       .then(() => {
-        this.setState({ deleteSingleClicked: false, singleDeleteData: {} });
+        this.setState({ deleteSingleClicked: false, singleDeleteData: null });
         this.getWorkListData();
       })
       .catch(err => {
@@ -159,10 +158,10 @@ class WorkList extends React.Component {
     this.getWorkListData();
   };
 
-  handleSingleDelete = (name, id) => {
+  handleSingleDelete = id => {
     this.setState({
       deleteSingleClicked: true,
-      singleDeleteData: { name, id }
+      singleDeleteData: id
     });
   };
 
@@ -276,10 +275,8 @@ class WorkList extends React.Component {
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={this.state.selected[original.worklistID]}
-              onChange={() =>
-                this.toggleRow(original.worklistID, original.username)
-              }
+              checked={this.state.selected[original.workListID]}
+              onChange={() => this.toggleRow(original.workListID)}
             />
           );
         },
@@ -398,7 +395,6 @@ class WorkList extends React.Component {
           let today;
           if (!dueDate) {
             const date = new Date();
-            console.log(date);
             const year = date.getFullYear();
             const month = date.getMonth();
             const day = date.getDate();
@@ -476,18 +472,17 @@ class WorkList extends React.Component {
         width: 45,
         minResizeWidth: 20,
         resizable: true,
-        Cell: original => (
-          <div
-            onClick={() =>
-              this.handleSingleDelete(
-                original.row.checkbox.username,
-                original.row.checkbox.worklistID
-              )
-            }
-          >
-            <FaRegTrashAlt className="menu-clickable" />
-          </div>
-        )
+        Cell: original => {
+          return (
+            <div
+              onClick={() =>
+                this.handleSingleDelete(original.row.checkbox.workListID)
+              }
+            >
+              <FaRegTrashAlt className="menu-clickable" />
+            </div>
+          );
+        }
       }
     ];
   };
