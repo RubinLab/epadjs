@@ -27,11 +27,7 @@ class Tools extends React.Component {
   };
 
   componentDidMount = async () => {
-    const {
-      data: {
-        ResultSet: { Result: projectList }
-      }
-    } = await getProjects();
+    const { data: projectList } = await getProjects();
     const temp = [];
     for (let project of projectList) {
       const { id, name } = project;
@@ -61,11 +57,7 @@ class Tools extends React.Component {
     };
   };
   getToolsData = async () => {
-    const {
-      data: {
-        ResultSet: { Result: tools }
-      }
-    } = await getTools();
+    const { data: tools } = await getTools();
     const toolsByProjects = this.groupByProjects(tools);
     this.setState({ tools, toolsByProjects });
   };

@@ -29,8 +29,9 @@ class Admin extends React.Component {
 
   getData = async () => {
     const url = apiUrl + "/epads/?summary=true";
-    let data = await http.get(url);
-    data = data.data.ResultSet.Result;
+    // let data = await http.get(url);
+    // data = data.data.ResultSet.Result;
+    const { data } = await http.get(url);
     this.setState({ data });
   };
 

@@ -155,11 +155,7 @@ class DisplayView extends Component {
   }
 
   async getImages(serie) {
-    const {
-      data: {
-        ResultSet: { Result: urls }
-      }
-    } = await getImageIds(serie); //get the Wado image ids for this series
+    const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
     return urls;
   }
 

@@ -42,8 +42,6 @@ class Sidebar extends Component {
     const { data: worklists } = await getWorklistsOfAssignee(
       sessionStorage.getItem("username")
     );
-    console.log("--- worklists here ");
-    console.log(worklists);
     this.setState({ worklists });
     /*
     const {
@@ -165,13 +163,13 @@ class Sidebar extends Component {
                         ? "sidebar-row __bold"
                         : "sidebar-row";
                       return (
-                        <tr key={worklist.worklistID} className={className}>
+                        <tr key={worklist.workListID} className={className}>
                           <td>
                             <p
                               onClick={() => {
                                 this.handleRoute(
                                   "worklist",
-                                  worklist.worklistID
+                                  worklist.workListID
                                 );
                               }}
                             >

@@ -454,11 +454,7 @@ const getRequiredFields = (arr, type, selectedID) => {
 
 const getStudiesData = async (dataObj, projectID, patientID, selectedID) => {
   try {
-    const {
-      data: {
-        ResultSet: { Result: studies }
-      }
-    } = await getStudies(projectID, patientID);
+    const { data: studies } = await getStudies(projectID, patientID);
     //create an empty object to be "studies" property in the data
     //iterate over the studies array create key/value pairs
     dataObj["studies"] = getRequiredFields(studies, "study", selectedID);
@@ -479,11 +475,7 @@ const getStudiesData = async (dataObj, projectID, patientID, selectedID) => {
 
 const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
   try {
-    const {
-      data: {
-        ResultSet: { Result: series }
-      }
-    } = await getSeries(projectID, patientID, studyID);
+    const { data: series } = await getSeries(projectID, patientID, studyID);
     const formattedSeries = getRequiredFields(series, "serie", selectedID);
     return new Promise((resolve, reject) => {
       resolve(formattedSeries);
@@ -508,11 +500,12 @@ const getAnnotationData = async (
   selectedID
 ) => {
   try {
-    const {
-      data: {
-        ResultSet: { Result: annotations }
-      }
-    } = await getAnnotations({ projectId, subjectId, studyId, seriesId });
+    const { data: annotations } = await getAnnotations({
+      projectId,
+      subjectId,
+      studyId,
+      seriesId
+    });
     let formattedAnnotation = [];
     if (annotations) {
       formattedAnnotation = getRequiredFields(

@@ -119,11 +119,7 @@ class Viewport extends Component {
   }
 
   async getImages() {
-    const {
-      data: {
-        ResultSet: { Result: urls }
-      }
-    } = await getImageIds({ ...this.state.series }); //get the Wado image ids for this series
+    const { data: urls } = await getImageIds({ ...this.state.series }); //get the Wado image ids for this series
     urls.map(url =>
       this.state.imageIds.push(
         "wadouri:http://epad-dev8.stanford.edu:8080/epad/wado/" +

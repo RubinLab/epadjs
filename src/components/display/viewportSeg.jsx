@@ -233,11 +233,7 @@ class ViewportSeg extends Component {
   }
 
   async getImages() {
-    const {
-      data: {
-        ResultSet: { Result: urls }
-      }
-    } = await getImageIds(this.state.series);
+    const { data: urls } = await getImageIds(this.state.series);
     urls.map(url => {
       let baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {

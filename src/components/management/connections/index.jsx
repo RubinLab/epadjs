@@ -41,11 +41,7 @@ class Connections extends React.Component {
     };
   };
   getConnectionsData = async () => {
-    const {
-      data: {
-        ResultSet: { Result: connections }
-      }
-    } = await getPacs();
+    const { data: connections } = await getPacs();
     this.setState({ connections });
   };
 

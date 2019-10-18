@@ -68,17 +68,9 @@ class Projects extends React.Component {
   handleClickUSerRoles = async id => {
     const userRoles = [];
     try {
-      const {
-        data: {
-          ResultSet: { Result: users }
-        }
-      } = await getUsers();
+      const { data: users } = await getUsers();
 
-      const {
-        data: {
-          ResultSet: { Result: roles }
-        }
-      } = await getProjectUsers(id);
+      const { data: roles } = await getProjectUsers(id);
       for (let i = 0; i < users.length; i++) {
         for (let k = 0; k < roles.length; k++) {
           if (users[i].username === roles[k].username) {
