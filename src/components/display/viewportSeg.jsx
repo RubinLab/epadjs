@@ -239,14 +239,16 @@ class ViewportSeg extends Component {
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
           let multiFrameUrl = !isLite
-            ? baseUrl + "&contentType=application%2Fdicom?frame=" + i
-            : baseUrl;
+            ? baseUrl
+            : //  + "&contentType=application%2Fdicom?frame=" + i
+              baseUrl;
           this.state.imageIds.push(multiFrameUrl);
         }
       } else {
         let singleFrameUrl = !isLite
-          ? baseUrl + "&contentType=application%2Fdicom"
-          : baseUrl;
+          ? baseUrl
+          : // + "&contentType=application%2Fdicom"
+            baseUrl;
         this.state.imageIds.push(singleFrameUrl);
       }
     });

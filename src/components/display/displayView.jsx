@@ -167,15 +167,11 @@ class DisplayView extends Component {
       const baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
-          let multiFrameUrl = !isLite
-            ? baseUrl + "&contentType=application%2Fdicom?frame=" + i
-            : baseUrl;
+          let multiFrameUrl = !isLite ? baseUrl + "/frames/" + i : baseUrl;
           cornerstoneImageIds.push(multiFrameUrl);
         }
       } else {
-        let singleFrameUrl = !isLite
-          ? baseUrl + "&contentType=application%2Fdicom"
-          : baseUrl;
+        let singleFrameUrl = !isLite ? baseUrl : baseUrl;
         cornerstoneImageIds.push(singleFrameUrl);
       }
 
