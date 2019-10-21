@@ -1,14 +1,16 @@
-import BaseTool from "./BaseTool.js";
-import EVENTS from "./../../events.js";
-import external from "./../../externalModules.js";
-import isToolActiveForElement from "./../../store/isToolActiveForElement.js";
-import { getModule } from "./../../store/index.js";
+import BaseTool from './BaseTool.js';
+import EVENTS from './../../events.js';
+import external from './../../externalModules.js';
+import isToolActiveForElement from './../../store/isToolActiveForElement.js';
+import { getModule } from './../../store/index.js';
 import {
   getDiffBetweenPixelData,
-  triggerLabelmapModifiedEvent
-} from "../../util/segmentation";
+  triggerLabelmapModifiedEvent,
+} from '../../util/segmentation';
 
-const { configuration, getters, setters } = getModule("segmentation");
+// Const { configuration, getters, setters } = getModule("segmentation");
+
+const segmentationModule = getModule('segmentation');
 
 /**
  * @abstract
@@ -118,12 +120,13 @@ class BaseBrushTool extends BaseTool {
   _startPainting(evt) {
     const eventData = evt.detail;
     const element = eventData.element;
+    const { configuration, getters } = segmentationModule;
 
     const {
       labelmap2D,
       labelmap3D,
       currentImageIdIndex,
-      activeLabelmapIndex
+      activeLabelmapIndex,
     } = getters.labelmap2D(element);
 
     const shouldErase =
@@ -134,7 +137,7 @@ class BaseBrushTool extends BaseTool {
       labelmap3D,
       currentImageIdIndex,
       activeLabelmapIndex,
-      shouldErase
+      shouldErase,
     };
 
     if (configuration.storeHistory) {
@@ -142,9 +145,10 @@ class BaseBrushTool extends BaseTool {
 
       this.paintEventData.previousPixelData = previousPixelData;
     }
-    let evnt = new CustomEvent("markupCreated", {
-      detail: "brush"
+    const evnt = new CustomEvent('markupCreated', {
+      detail: 'brush',
     });
+
     window.dispatchEvent(evnt);
   }
 
@@ -158,6 +162,7 @@ class BaseBrushTool extends BaseTool {
    */
   _endPainting(evt) {
     console.log(this.paintEventData);
+    const { configuration, setters } = segmentationModule;
     const { labelmap2D, currentImageIdIndex } = this.paintEventData;
 
     // Grab the labels on the slice.
@@ -184,7 +189,7 @@ class BaseBrushTool extends BaseTool {
       const newPixelData = labelmap2D.pixelData;
       const operation = {
         imageIdIndex: currentImageIdIndex,
-        diff: getDiffBetweenPixelData(previousPixelData, newPixelData)
+        diff: getDiffBetweenPixelData(previousPixelData, newPixelData),
       };
 
       setters.pushState(this.element, [operation]);
@@ -324,6 +329,7 @@ class BaseBrushTool extends BaseTool {
    * @returns {void}
    */
   increaseBrushSize() {
+    const { configuration, setters } = segmentationModule;
     const oldRadius = configuration.radius;
     let newRadius = Math.floor(oldRadius * 1.2);
 
@@ -344,6 +350,7 @@ class BaseBrushTool extends BaseTool {
    * @returns {void}
    */
   decreaseBrushSize() {
+    const { configuration, setters } = segmentationModule;
     const oldRadius = configuration.radius;
     const newRadius = Math.floor(oldRadius * 0.8);
 
