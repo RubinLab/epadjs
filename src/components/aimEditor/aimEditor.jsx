@@ -117,7 +117,7 @@ class AimEditor extends Component {
     // find the markups to save in markedImages
     const markupsToSave = this.getNewMarkups(markedImageIds, toolState);
 
-    let seedData, segBlob, imageIdx;
+    let seedData, segBlobGlobal, imageIdx;
     console.log("Markups to save", Object.entries(markupsToSave).length);
     if (Object.entries(markupsToSave).length !== 0) {
       const cornerStoneImageId = Object.keys(markupsToSave)[0];
@@ -125,21 +125,30 @@ class AimEditor extends Component {
       seedData = getAimImageData(image);
     } else if (hasSegmentation) {
       const { segBlob, imageIdx } = this.createSegmentation3D();
-      this.segBlob = segBlob;
+      console.log("ImageIdx is", imageIdx);
       const image = this.getCornerstoneImagebyIdx(imageIdx);
-      console.log("Image new", image);
       seedData = getAimImageData(image);
-      const segEntityData = await this.getSegmentationEntityData(
-        segBlob,
-        imageIdx
-      );
+      let dataset = await this.getDatasetFromBlob(segBlob, imageIdx);
+      console.log("Dataset series uid", dataset);
+
+      const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
       this.addSegmentationEntityToSeedData(seedData, segEntityData);
-      console.log(this.props.cornerstone);
+
+      // set segmentation series description with the aim name
+      dataset.SeriesDescription = answers.name.value;
+
+      const modifiedSegBlob = dcmjs.data.datasetToBlob(dataset);
+      segBlobGlobal = modifiedSegBlob;
+
+      dataset = await this.getDatasetFromBlob(modifiedSegBlob, imageIdx);
+      console.log("Dataset series uid after", dataset);
     }
+
     this.addSemanticAnswersToSeedData(seedData, answers);
 
     this.addUserToSeedData(seedData);
     // this.addModalityObjectToSeedData(seedData);
+    console.log("Final SeedData is", seedData);
 
     var aim = new Aim(
       seedData,
@@ -176,16 +185,14 @@ class AimEditor extends Component {
 
     uploadAim(JSON.parse(aimJson))
       .then(() => {
-        this.saveSegmentation(segBlob).then(() => {
-          this.props.onCancel();
-          toast.success("Aim succesfully saved.", {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true
-          });
+        this.saveSegmentation(segBlobGlobal);
+        toast.success("Aim succesfully saved.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
         });
       })
       .catch(error => console.log(error));
@@ -202,7 +209,6 @@ class AimEditor extends Component {
       Object.keys(markUps).map(tool => {
         switch (tool) {
           case "FreehandMouse":
-            // console.log("FreeHandMouse");
             const polygons = markUps[tool].data;
             polygons.map(polygon => {
               if (!polygon.aimId || polygon.aimId === updatedAimId) {
@@ -222,7 +228,6 @@ class AimEditor extends Component {
             });
             break;
           case "Bidirectional":
-            // console.log("Bidirectional ", markUps[tool]);
             const bidirectionals = markUps[tool].data;
             bidirectionals.map(bidirectional => {
               if (
@@ -245,7 +250,6 @@ class AimEditor extends Component {
             });
             break;
           case "CircleRoi":
-            // console.log("CircleRoi ", markUps[tool]);
             const circles = markUps[tool].data;
             circles.map(circle => {
               if (!circle.aimId || circle.aimId === updatedAimId) {
@@ -328,7 +332,7 @@ class AimEditor extends Component {
 
   addSegmentationEntityToSeedData = (seedData, segEntityData) => {
     console.log("Seed data and seg Entity", seedData, segEntityData);
-    seedData["segmentation"] = { segEntityData };
+    seedData["segmentation"] = segEntityData;
     console.log("After Seed Data is", seedData);
   };
 
@@ -498,10 +502,9 @@ class AimEditor extends Component {
     // .catch(err => console.log(err));
   };
 
-  getSegmentationEntityData = (segBlob, imageIdx) => {
-    return new Promise((resolve, reject) => {
+  getDatasetFromBlob = (segBlob, imageIdx) => {
+    return new Promise(resolve => {
       let segArrayBuffer;
-      let obj = {};
       var fileReader = new FileReader();
       fileReader.onload = event => {
         segArrayBuffer = event.target.result;
@@ -512,20 +515,23 @@ class AimEditor extends Component {
         dataset._meta = dcmjs.data.DicomMetaDictionary.namifyDataset(
           dicomData.meta
         );
-        obj["referencedSopInstanceUid"] = {
-          root:
-            dataset.ReferencedSeriesSequence.ReferencedInstanceSequence[
-              imageIdx
-            ].ReferencedSOPInstanceUID
-        };
-        obj["seriesInstanceUid"] = { root: dataset.SeriesInstanceUID };
-        obj["studyInstanceUid"] = { root: dataset.StudyInstanceUID };
-        obj["sopClassUid"] = { root: dataset.SOPClassUID };
-        obj["sopInstanceUid"] = { root: dataset.SOPInstanceUID };
-        resolve(obj);
+        resolve(dataset);
       };
       fileReader.readAsArrayBuffer(segBlob);
     });
+  };
+
+  getSegmentationEntityData = (dataset, imageIdx) => {
+    let obj = {};
+    obj["referencedSopInstanceUid"] =
+      dataset.ReferencedSeriesSequence.ReferencedInstanceSequence[
+        imageIdx
+      ].ReferencedSOPInstanceUID;
+    obj["seriesInstanceUid"] = dataset.SeriesInstanceUID;
+    obj["studyInstanceUid"] = dataset.StudyInstanceUID;
+    obj["sopClassUid"] = dataset.SOPClassUID;
+    obj["sopInstanceUid"] = dataset.SOPInstanceUID;
+    return obj;
   };
 
   saveSegmentation = segmentation => {
@@ -565,7 +571,7 @@ class AimEditor extends Component {
       SegmentNumber: (segmentIndex + 1).toString(),
       SegmentLabel: "Tissue " + (segmentIndex + 1).toString(),
       SegmentAlgorithmType: "SEMIAUTOMATIC",
-      SegmentAlgorithmName: "Slicer Prototype",
+      SegmentAlgorithmName: "ePAD",
       RecommendedDisplayCIELabValue,
       SegmentedPropertyTypeCodeSequence: {
         CodeValue: "T-D0050",

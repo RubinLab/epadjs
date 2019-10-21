@@ -555,12 +555,13 @@ class Aim {
     obj["sopClassUid"] = { root: "1.2.840.10008.5.1.4.1.1.66.4" };
     obj["sopInstanceUid"] = { root: segmentation.sopInstanceUid };
     obj["uniqueIdentifier"] = { root: generateUid() };
+    console.log("Segmentation Entity", obj);
     return obj;
   };
 
   creatSegmentationEntityCollection = () => {
     var obj = {};
-    obj["SegmentationEntity"] = this._createSegmentationEntity();
+    obj["SegmentationEntity"] = [this._createSegmentationEntity()];
     return obj;
   };
 
