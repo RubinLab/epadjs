@@ -128,7 +128,8 @@ class AimEditor extends Component {
       console.log("ImageIdx is", imageIdx);
       const image = this.getCornerstoneImagebyIdx(imageIdx);
       seedData = getAimImageData(image);
-      const dataset = await this.getDatasetFromBlob(segBlob, imageIdx);
+      let dataset = await this.getDatasetFromBlob(segBlob, imageIdx);
+      console.log("Dataset series uid", dataset);
 
       const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
       this.addSegmentationEntityToSeedData(seedData, segEntityData);
@@ -138,6 +139,9 @@ class AimEditor extends Component {
 
       const modifiedSegBlob = dcmjs.data.datasetToBlob(dataset);
       segBlobGlobal = modifiedSegBlob;
+
+      dataset = await this.getDatasetFromBlob(modifiedSegBlob, imageIdx);
+      console.log("Dataset series uid after", dataset);
     }
 
     this.addSemanticAnswersToSeedData(seedData, answers);
@@ -496,39 +500,6 @@ class AimEditor extends Component {
     // });
 
     // .catch(err => console.log(err));
-  };
-
-  parseSegmentation = arrayBuffer => {
-    alert("Will parse now");
-    const cornerstoneTools = this.props.csTools;
-    const cornerstone = this.props.cornerstone;
-
-    console.log("Cornerstone", this.props.cornerstone);
-    console.log("Cornerstone Tools", cornerstoneTools);
-
-    const { element } = cornerstone.getEnabledElements()[this.props.activePort];
-    const stackToolState = cornerstoneTools.getToolState(element, "stack");
-    const imageIds = stackToolState.data[0].imageIds;
-    const t0 = performance.now();
-    const {
-      labelmapBuffer,
-      segMetadata,
-      segmentsOnFrame
-    } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
-      imageIds,
-      arrayBuffer,
-      cornerstone.metaData
-    );
-    const t1 = performance.now();
-    const { setters, state } = cornerstoneTools.getModule("segmentation");
-    setters.labelmap3DByFirstImageId(
-      imageIds[0],
-      labelmapBuffer,
-      0,
-      segMetadata,
-      imageIds.length,
-      segmentsOnFrame
-    );
   };
 
   getDatasetFromBlob = (segBlob, imageIdx) => {

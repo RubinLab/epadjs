@@ -23,6 +23,7 @@ import { line } from "./Line";
 import { probe } from "./Probe";
 import { circle } from "./Circle";
 import RightsideBar from "../RightsideBar/RightsideBar";
+import * as dcmjs from "dcmjs";
 
 const tools = [
   { name: "Wwwc", mouseButtonMasks: [1] },
@@ -142,6 +143,10 @@ class DisplayView extends Component {
   //   }
   // };
 
+  sleep = ms => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  };
+
   getData() {
     var promises = [];
     for (let i = 0; i < this.props.series.length; i++) {
@@ -150,10 +155,12 @@ class DisplayView extends Component {
     }
     Promise.all(promises).then(res => {
       this.setState({ data: res, isLoading: false });
-      this.props.series.forEach(serie => {
-        console.log("Serie", serie);
-        if (serie.imageAnnotations)
-          this.parseAims(serie.imageAnnotations, serie.seriesUID);
+      this.sleep(3900).then(() => {
+        this.props.series.forEach(serie => {
+          console.log("Serie", serie);
+          if (serie.imageAnnotations)
+            this.parseAims(serie.imageAnnotations, serie.seriesUID);
+        });
       });
     });
   }
@@ -340,27 +347,67 @@ class DisplayView extends Component {
     console.log();
     Object.entries(aimList).forEach(([key, values]) => {
       values.forEach(value => {
-        const { markupUid, markupType, aimUid } = value;
+        const { markupType, aimUid } = value;
         console.log("Value", value);
         if (markupType === "DicomSegmentationEntity")
-          this.getSegmentation(aimUid);
+          this.getSegmentationData(aimUid);
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
         this.renderMarkup(key, value, color);
       });
     });
   };
 
-  getSegmentation = async aimId => {
-    console.log("Aim Id is", aimId);
-    console.log(this.props.aimList);
-    // const { projectID, patientID, studyUID } = this.props.series[
-    //   this.props.activePort
-    // ];
-    // const series = { projectID, patientID, studyUID, seriesUID: markupUid };
-    // console.log("Blob series is", series);
-    // getSegmentation(series).then(blob => {
-    //   console.log("Seg Blob from server is", blob);
-    // });
+  getSegmentationData = aimId => {
+    const { series, activePort, aimList } = this.props;
+    const { seriesUID, studyUID } = series[activePort];
+
+    const segmentationEntity =
+      aimList[seriesUID][aimId].json.segmentationEntityCollection
+        .SegmentationEntity[0];
+
+    const { seriesInstanceUid, sopInstanceUid } = segmentationEntity;
+
+    const pathVariables = { studyUID, seriesUID: seriesInstanceUid.root };
+
+    getSegmentation(pathVariables, sopInstanceUid.root).then(segData => {
+      // segData.arrayBuffer().then(segBuffer => {
+      console.log("Seg Data is", segData.data);
+      this.renderSegmentation(segData.data);
+      // });
+    });
+  };
+
+  renderSegmentation = arrayBuffer => {
+    const cornerstoneTools = this.cornerstoneTools;
+    const cornerstone = this.props.cornerstone;
+
+    const { element } = cornerstone.getEnabledElements()[this.props.activePort];
+    const stackToolState = this.props.cornerstoneTools.getToolState(
+      element,
+      "stack"
+    );
+    console.log("Stack toolstate", stackToolState);
+    const imageIds = stackToolState.data[0].imageIds;
+    const t0 = performance.now();
+    const {
+      labelmapBuffer,
+      segMetadata,
+      segmentsOnFrame
+    } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
+      imageIds,
+      arrayBuffer,
+      cornerstone.metaData
+    );
+    const t1 = performance.now();
+    const { setters, state } = cornerstoneTools.getModule("segmentation");
+    setters.labelmap3DByFirstImageId(
+      imageIds[0],
+      labelmapBuffer,
+      0,
+      segMetadata,
+      imageIds.length,
+      segmentsOnFrame
+    );
   };
 
   getColorOfMarkup = (aimUid, seriesUid) => {

@@ -90,18 +90,10 @@ export function downloadSeries(series) {
   return http.get(url, { responseType: "blob" });
 }
 
-export function getSegmentation(series) {
-  const url =
-    apiUrl +
-    "/projects/" +
-    series.projectID +
-    "/subjects/" +
-    series.patientID +
-    "/studies/" +
-    series.studyUID +
-    "/series/" +
-    series.seriesUID;
-  return http.get(url, { responseType: "blob" });
+export function getSegmentation(series, imageId) {
+  const url = getWadoImagePath(series, imageId).replace("wadouri:", "");
+  console.log("URL is", url);
+  return http.get(url, { responseType: "arraybuffer" });
 }
 
 export function deleteSeries(series) {
