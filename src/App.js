@@ -11,6 +11,7 @@ import DisplayView from "./components/display/displayView";
 // import DisplayViewContainer from "./components/display/displayViewContainer";
 import AnotateView from "./components/anotateView";
 import ProgressView from "./components/progressView";
+import FlexView from "./components/flexView";
 import NotFound from "./components/notFound";
 import LoginForm from "./components/loginForm";
 import Logout from "./components/logout";
@@ -215,6 +216,7 @@ class App extends Component {
           logout={this.onLogout}
           openMenu={this.handleOpenMenu}
           onSearchViewClick={this.switchSearhView}
+          onSwitchView={() => console.log("here")}
         />
         {this.state.openMng && this.state.openMenu && (
           <div ref={this.setWrapperRef}>
@@ -250,6 +252,7 @@ class App extends Component {
                 <ProtectedRoute path="/search/:pid?" component={SearchView} />
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute path="/progress" component={ProgressView} />
+                <ProtectedRoute path="/flex" component={FlexView} />
                 <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 <Route path="/tools" />
                 <Route path="/edit" />

@@ -13,7 +13,8 @@ const NavBar = ({
   openUser,
   loading,
   logout,
-  onSearchViewClick
+  onSearchViewClick,
+  onSwitchView
 }) => {
   const style = { paddingBottom: "8px" };
 
@@ -68,6 +69,16 @@ const NavBar = ({
                 <li className="nav-item">
                   <NavLink className="nav-link" to="/edit">
                     Edit
+                  </NavLink>
+                </li>{" "}
+                <li
+                  className="nav-item"
+                  onClick={() => {
+                    onSwitchView("flex");
+                  }}
+                >
+                  <NavLink className="nav-link" to="/flex">
+                    Flex
                   </NavLink>
                 </li>{" "}
               </React.Fragment>
