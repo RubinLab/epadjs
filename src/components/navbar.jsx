@@ -39,7 +39,13 @@ const NavBar = ({
 
         <div className="collapse navbar-collapse pl-0" id="navbarColor01">
           <ul className="navbar-nav mr-auto">
-            <li className="nav-item" onClick={onSearchViewClick}>
+            <li
+              className="nav-item"
+              onClick={() => {
+                onSearchViewClick();
+                onSwitchView("search");
+              }}
+            >
               <NavLink className="nav-link" to="/search">
                 Search
               </NavLink>

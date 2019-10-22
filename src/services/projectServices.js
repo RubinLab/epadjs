@@ -73,4 +73,6 @@ export function getProject(projectID) {
   return http.get(apiUrl + "/projects/" + projectID);
 }
 
-// http://epad-dev8.stanford.edu:8080/epad/v2/projects/test1id
+export function getStudies(projectID) {
+  return http.get(apiUrl + "/projects/" + projectID + "/studies");
+}

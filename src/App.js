@@ -39,7 +39,8 @@ class App extends Component {
     openInfo: false,
     openMenu: false,
     openUser: false,
-    projectMap: {}
+    projectMap: {},
+    viewType: "search"
   };
 
   closeMenu = event => {
@@ -54,6 +55,10 @@ class App extends Component {
       openUser: false,
       openMenu: false
     });
+  };
+
+  switchView = viewType => {
+    this.setState({ viewType });
   };
 
   handleMngMenu = () => {
@@ -216,7 +221,7 @@ class App extends Component {
           logout={this.onLogout}
           openMenu={this.handleOpenMenu}
           onSearchViewClick={this.switchSearhView}
-          onSwitchView={() => console.log("here")}
+          onSwitchView={this.switchView}
         />
         {this.state.openMng && this.state.openMenu && (
           <div ref={this.setWrapperRef}>
@@ -241,7 +246,7 @@ class App extends Component {
         )}
         {this.state.authenticated && !isLite && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
-            <Sidebar onData={this.getProjectMap}>
+            <Sidebar onData={this.getProjectMap} type={this.state.viewType}>
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
                 <ProtectedRoute
@@ -252,7 +257,7 @@ class App extends Component {
                 <ProtectedRoute path="/search/:pid?" component={SearchView} />
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute path="/progress" component={ProgressView} />
-                <ProtectedRoute path="/flex" component={FlexView} />
+                <ProtectedRoute path="/flex/:pid?" component={FlexView} />
                 <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 <Route path="/tools" />
                 <Route path="/edit" />

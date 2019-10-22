@@ -1,24 +1,40 @@
+// birthdate: "19441101";
+// createdTime: "";
+// firstSeriesDateAcquired: "";
+// firstSeriesUID: "";
+// physicianName: "";
+// referringPhysicianName: "UNKNOWN";
+// studyAccessionNumber: "0";
+
 export const studyColumns = [
   {
-    Header: "patient Name",
-    accessor: "patientName",
-    sortable: true,
+    Header: "Exam Types",
+    accessor: "examTypes",
+    sortable: false,
     show: true
+    // Cell: row => <div>{row.original.examTypes.join(" ,")}</div>
   },
+  { Header: "Patient", accessor: "patientName", sortable: true, show: true },
+  { Header: "PatientID", accessor: "patientID", sortable: true, show: true },
+  { Header: "Sex", accessor: "sex", sortable: true, show: true },
   {
-    Header: "study Description",
+    Header: "Study Desc",
     accessor: "studyDescription",
     sortable: true,
     show: true
   },
+  { Header: "Insert Date", accessor: "insertDate", sortable: true, show: true },
+  { Header: "Study Date", accessor: "studyDate", sortable: true, show: true },
+  { Header: "Study Time", accessor: "studyTime", sortable: true, show: true },
+  { Header: "Study UID", accessor: "studyUID", sortable: true, show: true },
   {
-    Header: "# of Annotations",
+    Header: "# of Aims",
     accessor: "numberOfAnnotations",
     sortable: true,
     show: true
   },
   {
-    Header: "# Of Images",
+    Header: "# Of Img",
     accessor: "numberOfImages",
     sortable: true,
     show: true

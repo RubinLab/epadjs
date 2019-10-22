@@ -80,8 +80,11 @@ class Sidebar extends Component {
   }
 
   handleRoute(type, id) {
-    if (type === "project") {
+    if (type === "project" && this.props.type === "search") {
       this.props.history.push(`/search/${id}`);
+      this.setState({ index: 0 });
+    } else if (type === "project" && this.props.type === "flex") {
+      this.props.history.push(`/flex/${id}`);
       this.setState({ index: 0 });
     } else if (type === "worklist") {
       this.props.history.push(`/worklist/${id}`);

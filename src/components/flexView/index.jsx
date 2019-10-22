@@ -4,8 +4,7 @@ import treeTableHOC from "react-table/lib/hoc/treeTable";
 import _ from "lodash";
 import { toast } from "react-toastify";
 import { Button } from "react-bootstrap";
-import { getSubjects } from "../../services/subjectServices";
-import { getStudies } from "../../services/studyServices";
+import { getStudies } from "../../services/projectServices";
 import { studyColumns } from "./columns";
 import DropDownMenu from "./dropdownMenu";
 import Series from "./series";
@@ -58,28 +57,17 @@ class FlexView extends React.Component {
     this.mountEvents();
   };
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = async prevProps => {
     if (prevProps.match.params.pid !== this.props.match.params.pid) {
-      this.getData();
+      await this.getData();
+      await this.defineColumns();
     }
   };
   getData = async () => {
-    let allStudies = [];
-    const {
-      data: {
-        ResultSet: { Result: subjects }
-      }
-    } = await getSubjects(this.props.match.params.pid);
-    for (let subject of subjects) {
-      let {
-        data: {
-          ResultSet: { Result: studies }
-        }
-      } = await getStudies(this.props.match.params.pid, subject.subjectID);
-      allStudies.push(studies);
-    }
-    allStudies = _.flatten(allStudies);
-    this.setState({ data: allStudies });
+    const { data: studies } = await getStudies(this.props.match.params.pid);
+    console.log("studies");
+    console.log(studies);
+    this.setState({ data: studies });
   };
 
   componentWillUnmount = () => {};
