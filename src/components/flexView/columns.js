@@ -18,15 +18,20 @@ export const studyColumns = [
   { Header: "PatientID", accessor: "patientID", sortable: true, show: true },
   { Header: "Sex", accessor: "sex", sortable: true, show: true },
   {
-    Header: "Study Desc",
-    accessor: "studyDescription",
+    Header: "Description",
+    accessor: "seriesDescription" || "studyDescription",
     sortable: true,
     show: true
   },
   { Header: "Insert Date", accessor: "insertDate", sortable: true, show: true },
   { Header: "Study Date", accessor: "studyDate", sortable: true, show: true },
   { Header: "Study Time", accessor: "studyTime", sortable: true, show: true },
-  { Header: "Study UID", accessor: "studyUID", sortable: true, show: true },
+  {
+    Header: "UID",
+    accessor: "seriesUID" || "studyUID",
+    sortable: true,
+    show: true
+  },
   {
     Header: "# of Aims",
     accessor: "numberOfAnnotations",

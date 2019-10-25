@@ -10,11 +10,11 @@ import {
   updateWorklist
 } from "../../../services/worklistServices";
 import { getUsers } from "../../../services/userServices";
-import { Link } from "react-router-dom";
 import DeleteAlert from "../common/alertDeletionModal";
 import CreationForm from "./worklistCreationForm";
 import EditField from "../../sideBar/editField";
 import UpdateAssignee from "./updateAssigneeModal";
+import UpdateDueDateModal from "./updateDueDate";
 
 const messages = {
   deleteSingle: "Delete the worklist? This cannot be undone.",
@@ -37,7 +37,9 @@ class WorkList extends React.Component {
     cellDoubleClicked: false,
     clickedIndex: null,
     worklistId: null,
-    updateAssignee: false
+    updateAssignee: false,
+    updateDueDate: false,
+    duedate: ""
   };
 
   componentDidMount = async () => {
@@ -99,7 +101,7 @@ class WorkList extends React.Component {
       user: "",
       description: "",
       error: "",
-      dueDate: "",
+      duedate: "",
       deleteSingleClicked: false,
       deleteAllClicked: false,
       selected: {},
@@ -108,7 +110,8 @@ class WorkList extends React.Component {
       worklistId: "",
       updateAssignee: false,
       assigneeMap: {},
-      initialAssignees: []
+      initialAssignees: [],
+      updateDueDate: false
     });
   };
 
@@ -151,6 +154,7 @@ class WorkList extends React.Component {
 
   handleFormInput = e => {
     const { name, value } = e.target;
+    console.log(name, value);
     this.setState({ [name]: value });
   };
 
@@ -173,21 +177,21 @@ class WorkList extends React.Component {
     });
     fieldName === "name"
       ? this.setState({ name: defaultValue })
-      : fieldName === "description"
-      ? this.setState({ description: defaultValue })
-      : this.setState({ duedate: defaultValue });
+      : // fieldName === "description"?
+        this.setState({ description: defaultValue });
+    // : this.setState({ duedate: defaultValue });
   };
 
   handleKeyboardEvent = e => {
     const {
       name,
       description,
-      duedate,
+      // duedate,
       worklistId,
       cellDoubleClicked
     } = this.state;
     const fieldUpdateValidation =
-      (name || description || duedate) && worklistId && cellDoubleClicked;
+      (name || description) && worklistId && cellDoubleClicked;
     if (e.key === "Escape") {
       this.handleUpdateField(null, null);
     } else if (e.key === "Enter" && fieldUpdateValidation) {
@@ -224,6 +228,10 @@ class WorkList extends React.Component {
         )
       );
     this.handleCancel();
+  };
+
+  handleUpdateDueDate = () => {
+    this.setState({ updateDueDate: true });
   };
 
   handleUpdateAssignee = (assignee, worklistId) => {
@@ -339,23 +347,6 @@ class WorkList extends React.Component {
         }
       },
       {
-        Header: "Open",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 20,
-        width: 50,
-        Cell: original => (
-          <Link
-            className="open-link"
-            to={"/worklist/" + original.row.checkbox.worklistID}
-          >
-            <div onClick={this.props.onClose}>
-              <FaRegEye className="menu-clickable" />
-            </div>
-          </Link>
-        )
-      },
-      {
         Header: "Assignees",
         sortable: true,
         resizable: true,
@@ -387,41 +378,20 @@ class WorkList extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
-          let { dueDate } = original.row.checkbox;
-          const className = original.row.checkbox.dueDate
+          const { dueDate, workListID } = original.row.checkbox;
+          const className = dueDate
             ? "wrapped menu-clickable"
             : "wrapped click-to-add menu-clickable";
-          const { cellDoubleClicked, clickedIndex } = this.state;
-          let today;
-          if (!dueDate) {
-            const date = new Date();
-            const year = date.getFullYear();
-            const month = date.getMonth();
-            const day = date.getDate();
-            today = `${year}-${month + 1}-${day}`;
-          }
-          const defaultDate = dueDate || today;
-          return cellDoubleClicked === "duedate" &&
-            clickedIndex === original.index ? (
-            <div ref={this.setWrapperRef} className="--commentInput">
-              <EditField
-                name="duedate"
-                onType={this.getUpdate}
-                default={this.state.duedate}
-                inputType="date"
-              />
-            </div>
-          ) : (
+          return (
             <div
               className={`--commentCont ${className}`}
-              onClick={() =>
-                this.handleUpdateField(
-                  original.index,
-                  "duedate",
-                  original.row.checkbox.workListID,
-                  defaultDate
-                )
-              }
+              onClick={async () => {
+                await this.setState({
+                  duedate: dueDate,
+                  worklistId: workListID
+                });
+                this.handleUpdateDueDate();
+              }}
             >
               {dueDate || "Add due date"}
             </div>
@@ -536,6 +506,14 @@ class WorkList extends React.Component {
             users={this.state.userList}
             onSubmit={this.submitUpdateAssignees}
             initialAssignees={this.state.initialAssignees}
+          />
+        )}
+        {this.state.updateDueDate && (
+          <UpdateDueDateModal
+            onCancel={this.handleCancel}
+            onSubmit={this.updateWorklist}
+            onChange={this.handleFormInput}
+            dueDate={this.state.duedate}
           />
         )}
       </div>

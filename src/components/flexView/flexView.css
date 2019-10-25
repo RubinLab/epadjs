@@ -1,8 +1,9 @@
 .flexView .__dropdown {
   position: absolute;
   z-index: 1;
-  background: gray;
+  background: #3a3f44;
   padding: 1rem;
+  border: 1px solid gray;
 }
 
 .flexView .__dropdown .--option .--text {

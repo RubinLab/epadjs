@@ -5,7 +5,7 @@ import _ from "lodash";
 import { toast } from "react-toastify";
 import { Button } from "react-bootstrap";
 import { getStudies } from "../../services/projectServices";
-import { studyColumns } from "./columns";
+// import { studyColumns } from "./columns";
 import DropDownMenu from "./dropdownMenu";
 import Series from "./series";
 import "./flexView.css";
@@ -19,6 +19,106 @@ class FlexView extends React.Component {
     dropdownSelected: false,
     expanded: {}
   };
+
+  clearCarets = string => {
+    if (string) {
+      for (let i = 0; i < string.length; i++) {
+        string = string.replace("^", " ");
+      }
+      return string;
+    }
+  };
+  studyColumns = [
+    {
+      Header: "Exam",
+      sortable: false,
+      show: true,
+      Cell: row => {
+        return Array.isArray(row.original.examTypes) ? (
+          <div>{row.original.examTypes.join(" ,")}</div>
+        ) : (
+          <div>{row.original.examType}</div>
+        );
+      }
+    },
+    {
+      Header: "Patient",
+      // accessor: "patientName",
+      sortable: true,
+      show: true,
+      Cell: row => {
+        return <div>{this.clearCarets(row.original.patientName)}</div>;
+      }
+    },
+    { Header: "PatientID", accessor: "patientID", sortable: true, show: true },
+    { Header: "Sex", accessor: "sex", sortable: true, show: true },
+    {
+      Header: "Description",
+      // accessor: "seriesDescription" || "studyDescription",
+      sortable: true,
+      show: true,
+      Cell: row => {
+        let desc = row.original.seriesUID
+          ? row.original.seriesDescription
+          : row.original.studyDescription;
+        if (!desc) {
+          desc = row.original.seriesUID ? "Unnamed Series" : "Unnamed Study";
+        }
+        return <div>{desc}</div>;
+      }
+    },
+    {
+      Header: "Insert Date",
+      accessor: "insertDate",
+      sortable: true,
+      show: true
+    },
+    { Header: "Study Date", accessor: "studyDate", sortable: true, show: true },
+    { Header: "Study Time", accessor: "studyTime", sortable: true, show: true },
+    {
+      Header: "UID",
+      // accessor: "seriesUID" || "studyUID",
+      sortable: true,
+      show: true,
+      Cell: row => {
+        const UID = row.original.seriesUID
+          ? row.original.seriesUID
+          : row.original.studyUID;
+
+        return <div>{UID}</div>;
+      }
+    },
+    {
+      Header: "# of Aims",
+      accessor: "numberOfAnnotations",
+      sortable: true,
+      show: true
+    },
+    {
+      Header: "# Of Img",
+      accessor: "numberOfImages",
+      sortable: true,
+      show: true
+    },
+    {
+      Header: "# Of Series",
+      accessor: "numberOfSeries",
+      sortable: true,
+      show: true
+    },
+    {
+      Header: "created Time",
+      accessor: "createdTime",
+      sortable: true,
+      show: true
+    },
+    {
+      Header: "birth date",
+      accessor: "birthdate",
+      sortable: true,
+      show: true
+    }
+  ];
 
   mountEvents = () => {
     let headers = Array.prototype.slice.call(
@@ -42,8 +142,12 @@ class FlexView extends React.Component {
       header.ondrop = async e => {
         e.preventDefault();
         // Remove item from array and stick it in a new position.
+        console.log("i");
+        console.log(i);
         let newOrder = [...this.state.order];
         newOrder.splice(i, 0, newOrder.splice(this.draggedCol, 1)[0]);
+        console.log("neworder");
+        console.log(newOrder);
         await this.setState({ order: newOrder });
         this.defineColumns();
         this.mountEvents();
@@ -65,8 +169,6 @@ class FlexView extends React.Component {
   };
   getData = async () => {
     const { data: studies } = await getStudies(this.props.match.params.pid);
-    console.log("studies");
-    console.log(studies);
     this.setState({ data: studies });
   };
 
@@ -76,7 +178,7 @@ class FlexView extends React.Component {
     const { order } = this.state;
     const tableColumns = [];
     for (let item of order) {
-      tableColumns.push(studyColumns[item]);
+      tableColumns.push(this.studyColumns[item]);
     }
     this.setState({ columns: tableColumns });
   };
@@ -110,6 +212,8 @@ class FlexView extends React.Component {
   };
   render = () => {
     const { dropdownSelected, order } = this.state;
+    console.log("-----order");
+    console.log(order);
     return (
       <div className="flexView">
         <Button
@@ -125,6 +229,7 @@ class FlexView extends React.Component {
             selected={dropdownSelected}
             order={order}
             onChecked={this.toggleColumn}
+            studyColumns={this.studyColumns}
           />
         ) : null}
         <TreeTable
@@ -139,7 +244,14 @@ class FlexView extends React.Component {
           SubComponent={row => {
             return (
               <div style={{ paddingLeft: 40 }}>
-                <Series data={this.state.data} order={this.state.order} />
+                <Series
+                  // data={this.state.data}
+                  order={this.state.order}
+                  projectId={row.original.projectID}
+                  subjectId={row.original.patientID}
+                  studyId={row.original.studyUID}
+                  studyColumns={this.studyColumns}
+                />
               </div>
             );
           }}

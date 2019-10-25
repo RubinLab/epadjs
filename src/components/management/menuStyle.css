@@ -177,9 +177,15 @@
   align-items: left;
 }
 
-.updateAssignee__modal.modal-dialog {
+.updateAssignee__modal.modal-dialog,
+.updateDueDate__modal.modal-dialog {
   width: fit-content;
 }
+
+.updateDueDate__mbody input {
+  color: black;
+}
+
 .add-project__modal--input,
 .add-connection__modal--input,
 .edit-project__modal--input,
@@ -924,4 +930,16 @@
 
 .project-table.__header.--project {
   text-align: left;
+}
+
+.worklist-requirementForm {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.worklist-requirementForm .__field {
+  color: #7a8288;
+  margin-top: 1rem;
+  margin-left: 1rem;
 }

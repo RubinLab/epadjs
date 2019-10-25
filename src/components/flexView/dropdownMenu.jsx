@@ -1,9 +1,9 @@
 import React from "react";
 import Draggable from "react-draggable";
 
-import { studyColumns } from "./columns";
+// import { studyColumns } from "./columns";
 
-const dropDownMenu = ({ order, onChecked }) => {
+const dropDownMenu = ({ order, onChecked, studyColumns }) => {
   const button = document.getElementById("flexMenu-button");
   const { x, y } = button.getBoundingClientRect();
 

@@ -59,7 +59,7 @@ const NavBar = ({
               <React.Fragment>
                 <li className="nav-item">
                   <NavLink className="nav-link" to="/anotate">
-                    Anotate
+                    Annotate
                   </NavLink>
                 </li>
                 <li className="nav-item">

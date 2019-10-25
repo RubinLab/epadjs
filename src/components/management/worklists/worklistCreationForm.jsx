@@ -4,6 +4,7 @@ import { Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import FormButton from "../users/formButton";
 import UserList from "./userList";
+import RequirementForm from "./requirementForm";
 import { saveWorklist } from "../../../services/worklistServices";
 import "../menuStyle.css";
 
@@ -23,7 +24,7 @@ class WorklistCreationForm extends React.Component {
   };
 
   goPrevPage = () => {
-    if (this.state.page === 1) {
+    if (this.state.page >= 1) {
       this.setState(state => ({
         page: state.page - 1
       }));
@@ -41,7 +42,7 @@ class WorklistCreationForm extends React.Component {
     });
   };
   goNextPage = () => {
-    if (this.state.page === 0) {
+    if (this.state.page <= 1) {
       this.setState(state => ({
         page: state.page + 1
       }));
@@ -103,7 +104,7 @@ class WorklistCreationForm extends React.Component {
     let disableSubmit = false;
     let disableNext = !id || !name;
 
-    if (page === 1) {
+    if (page === 2) {
       button2Text = "Submit";
       const assigneeListArr = Object.keys(this.state.assigneeList);
       button2Func = this.handleSaveWorklist;
@@ -190,6 +191,14 @@ class WorklistCreationForm extends React.Component {
                 onChange={this.selectUser}
                 assignees={this.state.assigneeList}
               />
+            </>
+          )}
+          {this.state.page === 2 && (
+            <>
+              <h5 className="add-worklist__modal--label">
+                Add Requirements to monitor progress
+              </h5>
+              <RequirementForm />
             </>
           )}
           {error ? <div className="err-message">{error}</div> : null}
