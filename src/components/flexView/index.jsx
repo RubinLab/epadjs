@@ -28,6 +28,15 @@ class FlexView extends React.Component {
       return string;
     }
   };
+
+  onSortedChange = () => {
+    const { expanded } = this.state;
+    for (let subject in expanded) {
+      expanded[subject] = false;
+    }
+    this.setState({ expanded });
+  };
+
   studyColumns = [
     {
       Header: "Exam",
@@ -142,12 +151,9 @@ class FlexView extends React.Component {
       header.ondrop = async e => {
         e.preventDefault();
         // Remove item from array and stick it in a new position.
-        console.log("i");
-        console.log(i);
+
         let newOrder = [...this.state.order];
         newOrder.splice(i, 0, newOrder.splice(this.draggedCol, 1)[0]);
-        console.log("neworder");
-        console.log(newOrder);
         await this.setState({ order: newOrder });
         this.defineColumns();
         this.mountEvents();
@@ -212,8 +218,6 @@ class FlexView extends React.Component {
   };
   render = () => {
     const { dropdownSelected, order } = this.state;
-    console.log("-----order");
-    console.log(order);
     return (
       <div className="flexView">
         <Button
@@ -241,6 +245,9 @@ class FlexView extends React.Component {
           pageSize={this.state.columns.length}
           expanded={this.state.expanded}
           onExpandedChange={this.handleExpand}
+          onSortedChange={() => {
+            this.onSortedChange();
+          }}
           SubComponent={row => {
             return (
               <div style={{ paddingLeft: 40 }}>

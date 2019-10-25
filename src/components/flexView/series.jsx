@@ -20,7 +20,6 @@ class Series extends React.Component {
       this.props.subjectId,
       this.props.studyId
     );
-    console.log(data);
     this.setState({ data });
   };
 
@@ -35,13 +34,7 @@ class Series extends React.Component {
 
   componentDidUpdate = prevProps => {
     const columnAdded = prevProps.order.length !== this.props.order.length;
-    const orderChanged = !_.isEqual(
-      _.sortBy(prevProps.order),
-      _.sortBy(this.props.order)
-    );
-    console.log(prevProps.order);
-    console.log(this.props.order);
-    console.log(columnAdded, orderChanged);
+    const orderChanged = !_.isEqual(prevProps.order, this.props.order);
     if (columnAdded || orderChanged) {
       this.defineColumns();
     }

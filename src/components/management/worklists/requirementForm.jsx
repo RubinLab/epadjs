@@ -28,6 +28,9 @@ class RequirementForm extends React.Component {
   renderOptions = (arr, field) => {
     const firstItem = <option key="first">{`--- Select ${field} ---`}</option>;
     const options = [firstItem];
+    if (field === "Template") {
+      options.push(<option key="any">{"Any"}</option>);
+    }
     arr.forEach((el, i) => {
       options.push(<option key={`${el}-${i}`}>{el}</option>);
     });

@@ -7,7 +7,6 @@ import "../menuStyle.css";
 
 const updateDueDate = props => {
   let today;
-  console.log(props);
   if (!props.dueDate) {
     const date = new Date();
     const year = date.getFullYear();
