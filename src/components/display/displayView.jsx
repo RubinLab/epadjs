@@ -157,7 +157,6 @@ class DisplayView extends Component {
       this.setState({ data: res, isLoading: false });
       this.sleep(3900).then(() => {
         this.props.series.forEach(serie => {
-          console.log("Serie", serie);
           if (serie.imageAnnotations)
             this.parseAims(serie.imageAnnotations, serie.seriesUID);
         });
@@ -345,19 +344,19 @@ class DisplayView extends Component {
 
   parseAims = (aimList, seriesUid) => {
     console.log();
-    Object.entries(aimList).forEach(([key, values]) => {
+    Object.entries(aimList).forEach(([key, values], i) => {
       values.forEach(value => {
         const { markupType, aimUid } = value;
         console.log("Value", value);
         if (markupType === "DicomSegmentationEntity")
-          this.getSegmentationData(aimUid);
+          this.getSegmentationData(aimUid, i);
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
         this.renderMarkup(key, value, color);
       });
     });
   };
 
-  getSegmentationData = aimId => {
+  getSegmentationData = (aimId, i) => {
     const { series, activePort, aimList } = this.props;
     const { seriesUID, studyUID } = series[activePort];
 
@@ -372,12 +371,13 @@ class DisplayView extends Component {
     getSegmentation(pathVariables, sopInstanceUid.root).then(segData => {
       // segData.arrayBuffer().then(segBuffer => {
       console.log("Seg Data is", segData.data);
-      this.renderSegmentation(segData.data);
+      this.renderSegmentation(segData.data, i);
       // });
     });
   };
 
-  renderSegmentation = arrayBuffer => {
+  renderSegmentation = (arrayBuffer, i) => {
+    alert(i);
     const cornerstoneTools = this.cornerstoneTools;
     const cornerstone = this.props.cornerstone;
 
@@ -403,7 +403,7 @@ class DisplayView extends Component {
     setters.labelmap3DByFirstImageId(
       imageIds[0],
       labelmapBuffer,
-      0,
+      i,
       segMetadata,
       imageIds.length,
       segmentsOnFrame

@@ -124,7 +124,9 @@ class AimEditor extends Component {
       const image = this.getCornerstoneImagebyId(cornerStoneImageId);
       seedData = getAimImageData(image);
     } else if (hasSegmentation) {
-      const { segBlob, imageIdx } = this.createSegmentation3D();
+      const labelMapIndex = this.getNumOfSegs();
+      console.log("Seg count is", labelMapIndex);
+      const { segBlob, imageIdx } = this.createSegmentation3D(labelMapIndex);
       console.log("ImageIdx is", imageIdx);
       const image = this.getCornerstoneImagebyIdx(imageIdx);
       seedData = getAimImageData(image);
@@ -186,6 +188,8 @@ class AimEditor extends Component {
     uploadAim(JSON.parse(aimJson))
       .then(() => {
         this.saveSegmentation(segBlobGlobal);
+        var objectUrl = URL.createObjectURL(segBlobGlobal);
+        window.open(objectUrl);
         toast.success("Aim succesfully saved.", {
           position: "top-right",
           autoClose: 5000,
@@ -196,6 +200,22 @@ class AimEditor extends Component {
         });
       })
       .catch(error => console.log(error));
+  };
+
+  getNumOfSegs = () => {
+    const { imageAnnotations } = this.props.series[this.props.activePort];
+    console.log("Get Num segs imageAnnotations", imageAnnotations);
+    let segCount = 0;
+    Object.values(imageAnnotations).map(imageAnnotation => {
+      imageAnnotation.forEach(markup => {
+        if (markup.markupType === "DicomSegmentationEntity") {
+          segCount++;
+          console.log("Markup", markup, segCount);
+        }
+      });
+    });
+    console.log("I'm returning segCount", segCount);
+    return segCount;
   };
 
   getNewMarkups = (markedImageIds, toolState) => {
@@ -423,7 +443,7 @@ class AimEditor extends Component {
     imageReferenceUid
   ) => {};
 
-  createSegmentation3D = () => {
+  createSegmentation3D = labelmapIndex => {
     // following is to know the image index which has the first segment
     let firstSegImageIndex;
 
@@ -445,38 +465,47 @@ class AimEditor extends Component {
       imagePromises.push(this.cornerstone.loadImage(imageIds[i]));
     }
 
-    const { getters } = this.csTools.getModule("segmentation");
+    const { getters, getLabelmapStats } = this.csTools.getModule(
+      "segmentation"
+    );
+    console.log("Seg module", this.csTools.getModule("segmentation"));
     const { labelmaps3D } = getters.labelmaps3D(element);
+    console.log("Label maps3D", labelmaps3D);
     if (!labelmaps3D) {
       return;
     }
 
-    for (
-      let labelmapIndex = 0;
-      labelmapIndex < labelmaps3D.length;
-      labelmapIndex++
-    ) {
-      const labelmap3D = labelmaps3D[labelmapIndex];
-      const labelmaps2D = labelmap3D.labelmaps2D;
+    // for (
+    //   let labelmapIndex = 0;
+    //   labelmapIndex < labelmaps3D.length;
+    //   labelmapIndex++
+    // ) {
+    const labelmap3D = labelmaps3D[labelmapIndex];
+    const labelmaps2D = labelmap3D.labelmaps2D;
 
-      for (let i = 0; i < labelmaps2D.length; i++) {
-        if (!labelmaps2D[i]) {
-          continue;
-        }
-
-        // following is to know the image index which has the first segment
-        if (!firstSegImageIndex) firstSegImageIndex = i;
-
-        const segmentsOnLabelmap = labelmaps2D[i].segmentsOnLabelmap;
-        segmentsOnLabelmap.forEach(segmentIndex => {
-          if (segmentIndex !== 0 && !labelmap3D.metadata[segmentIndex]) {
-            labelmap3D.metadata[segmentIndex] = this.generateMockMetadata(
-              segmentIndex
-            );
-          }
-        });
+    for (let i = 0; i < labelmaps2D.length; i++) {
+      if (!labelmaps2D[i]) {
+        continue;
       }
+
+      // Following is to store the image index in Aim that has the first segment
+      if (!firstSegImageIndex) firstSegImageIndex = i;
+
+      const segmentsOnLabelmap = labelmaps2D[i].segmentsOnLabelmap;
+      segmentsOnLabelmap.forEach(segmentIndex => {
+        if (segmentIndex !== 0 && !labelmap3D.metadata[segmentIndex]) {
+          labelmap3D.metadata[segmentIndex] = this.generateMockMetadata(
+            segmentIndex
+          );
+        }
+      });
     }
+    // }
+    // For now we support single segments
+    getters
+      .labelmapStats(element, 1, labelmapIndex)
+      .then(stats => console.log("Seg Stats are", stats));
+
     const cachedImages = this.cornerstone.imageCache.imageCache;
     let images = [];
     Object.keys(cachedImages).forEach(key => {
@@ -490,7 +519,8 @@ class AimEditor extends Component {
     // this.cornerstone.imageCache;
     const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
       images,
-      labelmaps3D
+      labelmap3D,
+      { rleEncode: false }
     );
 
     return {
@@ -568,8 +598,8 @@ class AimEditor extends Component {
         CodingSchemeDesignator: "SRT",
         CodeMeaning: "Tissue"
       },
-      SegmentNumber: (segmentIndex + 1).toString(),
-      SegmentLabel: "Tissue " + (segmentIndex + 1).toString(),
+      SegmentNumber: segmentIndex.toString(),
+      SegmentLabel: "Tissue " + segmentIndex.toString(),
       SegmentAlgorithmType: "SEMIAUTOMATIC",
       SegmentAlgorithmName: "ePAD",
       RecommendedDisplayCIELabValue,
