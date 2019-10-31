@@ -126,7 +126,9 @@ class AimEditor extends Component {
     } else if (hasSegmentation) {
       const labelMapIndex = this.getNumOfSegs();
       console.log("Seg count is", labelMapIndex);
-      const { segBlob, imageIdx } = this.createSegmentation3D(labelMapIndex);
+      const { segBlob, imageIdx, segStats } = this.createSegmentation3D(
+        labelMapIndex
+      );
       console.log("ImageIdx is", imageIdx);
       const image = this.getCornerstoneImagebyIdx(imageIdx);
       seedData = getAimImageData(image);
@@ -134,7 +136,7 @@ class AimEditor extends Component {
       console.log("Dataset series uid", dataset);
 
       const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
-      this.addSegmentationEntityToSeedData(seedData, segEntityData);
+      this.addSegmentationToAim(seedData, segEntityData, segStats);
 
       // set segmentation series description with the aim name
       dataset.SeriesDescription = answers.name.value;
@@ -372,6 +374,27 @@ class AimEditor extends Component {
     markupsToSave[imageId].push(markupData);
   };
 
+  addSegmentationToAim = (seedData, segEntityData, segStats) => {
+    this.addSegmentationEntityToSeedData(seedData, segEntityData);
+
+    const {} = segEntityData;
+    const { volume, min, max, mean, stdDev } = segStats;
+
+    const meanId = aim.createMeanCalcEntity({ mean, unit: "[hnsf'U]" });
+    aim.createImageAnnotationStatement(1, markupId, meanId);
+
+    const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit: "[hnsf'U]" });
+    aim.createImageAnnotationStatement(1, markupId, stdDevId);
+
+    const minId = aim.createMinCalcEntity({ min, unit: "[hnsf'U]" });
+    aim.createImageAnnotationStatement(1, markupId, minId);
+
+    const maxId = aim.createMaxCalcEntity({ max, unit: "[hnsf'U]" });
+    aim.createImageAnnotationStatement(1, markupId, maxId);
+
+    // aim.add;
+  };
+
   addPolygonToAim = (aim, polygon, shapeIndex, imageReferenceUid) => {
     const { points } = polygon.handles;
     const markupId = aim.addMarkupEntity(
@@ -502,9 +525,11 @@ class AimEditor extends Component {
     }
     // }
     // For now we support single segments
+
+    const segStats = {};
     getters
       .labelmapStats(element, 1, labelmapIndex)
-      .then(stats => console.log("Seg Stats are", stats));
+      .then(stats => (segStats = stats));
 
     const cachedImages = this.cornerstone.imageCache.imageCache;
     let images = [];
@@ -525,7 +550,8 @@ class AimEditor extends Component {
 
     return {
       segBlob,
-      imageIdx: firstSegImageIndex
+      imageIdx: firstSegImageIndex,
+      segStats
     };
     // });
 
