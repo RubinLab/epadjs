@@ -216,7 +216,11 @@ class WorkList extends React.Component {
 
   updateWorklist = () => {
     const { name, description, duedate, worklistId } = this.state;
-    const body = name ? { name } : description ? { description } : { duedate };
+    const body = name
+      ? { name }
+      : description
+      ? { description }
+      : { dueDate: duedate };
     updateWorklist(worklistId, body)
       .then(() => this.getWorkListData())
       .catch(error =>

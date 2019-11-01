@@ -591,7 +591,7 @@ class SearchView extends Component {
   };
 
   handleWorklistClick = () => {
-    this.setState({ showWorklists: true });
+    this.setState(state => ({ showWorklists: !state.showWorklists }));
   };
 
   handleNewSelected = () => {
@@ -720,7 +720,9 @@ class SearchView extends Component {
           />
         )}
 
-        {this.state.showWorklists && <Worklists />}
+        {this.state.showWorklists && (
+          <Worklists onClose={this.handleWorklistClick} />
+        )}
         {this.state.newSelected && this.handleNewSelected()}
       </>
     );

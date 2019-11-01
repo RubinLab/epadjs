@@ -63,10 +63,7 @@ class WorklistCreationForm extends React.Component {
           this.props.onCancel();
         })
         .catch(error => {
-          console.log("err here");
           console.log(error);
-          console.log("err here");
-
           if (
             error.response.data &&
             error.response.data === "Validation error"

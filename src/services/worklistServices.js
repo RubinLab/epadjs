@@ -43,7 +43,13 @@ export function getWorklistOfAssignee(user, id) {
   // "/subjects/?annotationCount=true"
 }
 
-export function addStudyToWorklist(worklistId, projectID, patientID, studyUID) {
+export function addStudyToWorklist(
+  worklistId,
+  projectID,
+  patientID,
+  studyUID,
+  body
+) {
   return http.post(
     apiUrl +
       "/worklists/" +
@@ -53,11 +59,12 @@ export function addStudyToWorklist(worklistId, projectID, patientID, studyUID) {
       "/subjects/" +
       patientID +
       "/studies/" +
-      studyUID
+      studyUID,
+    body
   );
 }
 
-export function addSubjectToWorklist(worklistId, projectID, patientID) {
+export function addSubjectToWorklist(worklistId, projectID, patientID, body) {
   return http.post(
     apiUrl +
       "/worklists/" +
@@ -65,6 +72,7 @@ export function addSubjectToWorklist(worklistId, projectID, patientID) {
       "/projects/" +
       projectID +
       "/subjects/" +
-      patientID
+      patientID,
+    body
   );
 }
