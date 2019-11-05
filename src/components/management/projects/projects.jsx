@@ -261,6 +261,7 @@ class Projects extends React.Component {
 
   handleRoleEditing = e => {
     const { name, value } = e.target;
+    console.log(name, value);
     const newObj = { [name]: value };
     const oldState = Object.assign({}, this.state.newRoles);
     const newRoles = Object.assign(oldState, newObj);
@@ -281,6 +282,7 @@ class Projects extends React.Component {
         this.getProjectData();
       })
       .catch(error => {
+        console.log(error);
         this.setState({ errorMessage: error.response.data.message });
       });
   };

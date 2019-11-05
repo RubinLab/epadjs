@@ -3,7 +3,7 @@ import Table from "react-table";
 import { Link } from "react-router-dom";
 import { FaRegTrashAlt, FaRegEye } from "react-icons/fa";
 import {
-  getWorklistOfAssignee,
+  getStudiesOfWorklist,
   deleteWorklist
 } from "../../services/worklistServices";
 import { getProject } from "../../services/projectServices";
@@ -44,7 +44,7 @@ class WorkList extends React.Component {
   };
 
   getWorkListData = async () => {
-    const { data: worklists } = await getWorklistOfAssignee(
+    const { data: worklists } = await getStudiesOfWorklist(
       sessionStorage.getItem("username"),
       this.props.match.params.wid
     );
@@ -123,7 +123,6 @@ class WorkList extends React.Component {
     return [
       {
         Header: "Open",
-        minResizeWidth: 20,
         width: 50,
         Cell: original => {
           return (
@@ -134,17 +133,20 @@ class WorkList extends React.Component {
         }
       },
       {
-        Header: "Status",
-        minResizeWidth: 20,
-        width: 50,
-        Cell: original => <div>20%</div>
-      },
-      {
-        Header: "Subject",
+        Header: "Study Description",
         sortable: true,
-        resizable: true,
-        minResizeWidth: 20,
-        minWidth: 50,
+        Cell: original => {
+          let studyDesc = this.clearCarets(
+            original.row._original.studyDescription
+          );
+          studyDesc = studyDesc ? studyDesc : "Unnamed Study";
+          return <div>{studyDesc}</div>;
+        }
+      },
+
+      {
+        Header: "Subject Name",
+        sortable: true,
         Cell: original => {
           let subjectName = this.clearCarets(
             original.row._original.subjectName
@@ -154,11 +156,9 @@ class WorkList extends React.Component {
         }
       },
       {
-        Header: "Project",
+        Header: "Project Name",
         accessor: "projectName",
         sortable: true,
-        resizable: true,
-        minWidth: 40,
         Cell: original => {
           let projectName = this.clearCarets(
             original.row._original.projectName
@@ -168,32 +168,20 @@ class WorkList extends React.Component {
         }
       },
       {
-        Header: "Comment",
+        Header: "Due Date",
         sortable: true,
-        resizable: true,
-        minResizeWidth: 20,
-        minWidth: 50,
-        Cell: original => {
-          // console.log(original.row._original);
-          // console.log(original);
-          const { commentClicked, clickedIndex } = this.state;
-          return commentClicked && clickedIndex === original.index ? (
-            <div ref={this.setWrapperRef} className="--commentInput">
-              <EditField />
-            </div>
-          ) : (
-            <div
-              className="--commentCont"
-              onClick={() => this.handleComment(original.index)}
-            />
-          );
-        }
+        accessor: "worklistDuedate"
       },
+      {
+        Header: "StudyUID",
+        sortable: true,
+        accessor: "studyUID"
+      },
+
       {
         Header: "",
         width: 45,
-        minResizeWidth: 20,
-        resizable: true,
+
         Cell: original => (
           <div
             onClick={() =>

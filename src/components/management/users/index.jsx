@@ -205,12 +205,21 @@ class Users extends React.Component {
   };
 
   convertArrToStr = arr => {
-    return arr.reduce((all, item, index) => {
-      if (item.length > 0) {
-        all.length > 0 ? (all += ", " + item) : (all += item);
-      }
-      return all;
-    }, "");
+    if (arr.length > 0) {
+      const result = [];
+      const displayMap = {
+        CreateUser: "user",
+        CreatePAC: "connection",
+        CreateAutoPACQuery: "query",
+        CreateProject: "project"
+      };
+      arr.forEach(el => {
+        result.push(displayMap[el]);
+      });
+      return result.join(", ");
+    } else {
+      return "";
+    }
   };
 
   toggleRow = async username => {

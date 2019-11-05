@@ -38,7 +38,7 @@ export function updateWorklist(id, body) {
   return http.put(apiUrl + "/worklists/" + id, body);
 }
 
-export function getWorklistOfAssignee(user, id) {
+export function getStudiesOfWorklist(user, id) {
   return http.get(apiUrl + "/worklists/" + id + "/users/" + user + "/subjects");
   // "/subjects/?annotationCount=true"
 }

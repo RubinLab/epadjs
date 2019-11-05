@@ -24,25 +24,29 @@ class Sidebar extends Component {
       marginLeft: "200px",
       buttonDisplay: "none",
       open: true,
-      index: 0
+      index: 0,
+      pId: null
     };
   }
 
   async componentDidMount() {
     //get the porjects
     const { data: projects } = await getProjects();
-    this.setState({ projects, pId: projects[0].id });
-    //get the worklists
-    const projectMap = {};
-    for (let project of projects) {
-      projectMap[project.id] = project.name;
+    if (projects.length > 0) {
+      this.setState({ projects, pId: projects[0].id });
+      const projectMap = {};
+      for (let project of projects) {
+        projectMap[project.id] = project.name;
+      }
+      this.props.onData(projectMap);
     }
+    //get the worklists
 
-    this.props.onData(projectMap);
     const { data: worklists } = await getWorklistsOfAssignee(
       sessionStorage.getItem("username")
     );
     this.setState({ worklists });
+
     /*
     const {
       data: {
