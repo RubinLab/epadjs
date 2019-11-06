@@ -20,7 +20,8 @@ class WorklistCreationForm extends React.Component {
     id: "",
     description: "",
     dueDate: "",
-    error: ""
+    error: "",
+    requirement: []
   };
 
   goPrevPage = () => {
@@ -50,13 +51,20 @@ class WorklistCreationForm extends React.Component {
   };
 
   handleSaveWorklist = () => {
-    let { name, id, assigneeList, description, dueDate } = this.state;
+    let {
+      name,
+      id,
+      assigneeList,
+      description,
+      dueDate,
+      requirement
+    } = this.state;
     assigneeList = Object.keys(assigneeList);
     if (!name || !id || !assigneeList.length) {
       this.setState({ error: messages.fillRequiredFields });
     } else {
       description = description ? description : "";
-      saveWorklist(id, name, assigneeList, description, dueDate)
+      saveWorklist(id, name, assigneeList, description, dueDate, requirement)
         .then(() => {
           this.props.onSubmit();
           this.handleCancel();
@@ -87,6 +95,10 @@ class WorklistCreationForm extends React.Component {
     const { name, checked } = e.target;
     checked ? (assigneeList[name] = true) : delete assigneeList[name];
     this.setState({ assigneeList });
+  };
+
+  getRequirement = requirement => {
+    this.setState({ requirement });
   };
 
   render = () => {
@@ -195,7 +207,7 @@ class WorklistCreationForm extends React.Component {
               <h5 className="add-worklist__modal--label">
                 Add Requirements to monitor progress
               </h5>
-              <RequirementForm />
+              <RequirementForm onAddRequirement={this.getRequirement} />
             </>
           )}
           {error ? <div className="err-message">{error}</div> : null}

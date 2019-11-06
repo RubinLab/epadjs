@@ -19,14 +19,16 @@ export function saveWorklist(
   worklistName,
   assignees,
   description,
-  dueDate
+  dueDate,
+  requirement
 ) {
   return http.post(apiUrl + "/worklists", {
     worklistId,
     worklistName,
     assignees,
     description,
-    dueDate
+    dueDate,
+    requirement
   });
 }
 

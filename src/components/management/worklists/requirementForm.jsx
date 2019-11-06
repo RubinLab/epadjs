@@ -64,6 +64,7 @@ class RequirementForm extends React.Component {
     const newRequirements = [...this.state.requirements];
     newRequirements.push({ level, numOfAims, template });
     this.setState({ requirements: newRequirements, error: null });
+    this.props.onAddRequirement(newRequirements);
   };
 
   clearRequirement = index => {
