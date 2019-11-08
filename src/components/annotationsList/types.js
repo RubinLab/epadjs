@@ -37,6 +37,10 @@ export const UPDATE_PATIENT = "epadjs/annotationList/UPDATE_PATIENT";
 export const CLOSE_SERIE = "epadjs/annotationList/CLOSE_SERIE";
 export const UPDATE_IMAGEID = "epadjs/annotationList/UPDATE_IMAGEID";
 export const CLEAR_AIMID = "epadjs/annotationList/CLEAR_AIMID";
+export const UPDATE_PATIENT_AIM_SAVE =
+  "epadjs/annotationList/UPDATE_PATIENT_AIM_SAVE";
+export const UPDATE_PATIENT_AIM_DELETE =
+  "epadjs/annotationList/UPDATE_PATIENT_AIM_DELETE";
 
 export const commonLabels = {
   button: { background: "#c0c0c0", color: "black" },

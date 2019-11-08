@@ -29,7 +29,9 @@ import {
   UPDATE_PATIENT,
   CLOSE_SERIE,
   UPDATE_IMAGEID,
-  CLEAR_AIMID
+  CLEAR_AIMID,
+  UPDATE_PATIENT_AIM_SAVE,
+  UPDATE_PATIENT_AIM_DELETE
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -55,6 +57,19 @@ const initialState = {
 
 const asyncReducer = (state = initialState, action) => {
   switch (action.type) {
+    case UPDATE_PATIENT_AIM_DELETE:
+      let patientAimDelete = { ...state.patients };
+      let { aimRefs } = action;
+      delete patientAimDelete[aimRefs.subjectID].studies[aimRefs.studyUID]
+        .series[aimRefs.seriesUID].annotations[aimRefs.aimID];
+      return { ...state, patient: patientAimDelete };
+    case UPDATE_PATIENT_AIM_SAVE:
+      let patientAimSave = { ...state.patients };
+      aimRefs = action.aimRefs;
+      patientAimSave[aimRefs.patientID].studies[aimRefs.studyUID].series[
+        aimRefs.seriesUID
+      ].annotations[aimRefs.aimID] = { ...aimRefs };
+      return { ...state, patient: patientAimSave };
     case CLEAR_AIMID:
       let aimIDClearedOPenSeries = [...state.openSeries];
       for (let serie of aimIDClearedOPenSeries) {
@@ -125,7 +140,6 @@ const asyncReducer = (state = initialState, action) => {
     case LOAD_SERIE_SUCCESS:
       let indexNum = state.openSeries.length - 1;
       let imageAddedSeries = [...state.openSeries];
-      console.log("LOAD SERIE SUCCESS", action.payload);
       let annCalc = Object.keys(action.payload.imageData);
       if (annCalc.length > 0) {
         for (let i = 0; i < imageAddedSeries.length; i++) {

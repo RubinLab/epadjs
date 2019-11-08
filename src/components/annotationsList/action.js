@@ -31,6 +31,8 @@ import {
   CLOSE_SERIE,
   UPDATE_IMAGEID,
   CLEAR_AIMID,
+  UPDATE_PATIENT_AIM_SAVE,
+  UPDATE_PATIENT_AIM_DELETE,
   colors,
   commonLabels
 } from "./types";
@@ -79,6 +81,15 @@ export const updatePatient = (
     payload: { type, status, patient, study, serie, annotation }
   };
 };
+
+export const updatePatientOnAimSave = aimRefs => {
+  return { type: UPDATE_PATIENT_AIM_SAVE, aimRefs };
+};
+
+export const updatePatientOnAimDelete = aimRefs => {
+  return { type: UPDATE_PATIENT_AIM_DELETE, aimRefs };
+};
+
 export const clearSelection = selectionType => {
   return { type: CLEAR_SELECTION, selectionType };
 };
@@ -558,6 +569,25 @@ export const getSingleSerie = (serie, annotation) => {
   };
 };
 
+export const updateSingleSerie = (serie, annotation) => {
+  return async (dispatch, getState) => {
+    let { patientID, studyUID, seriesUID, numberOfAnnotations } = serie;
+    let reference = {
+      patientID,
+      studyUID,
+      seriesUID,
+      numberOfAnnotations,
+      aimID: annotation
+    };
+    const { aimsData, imageData } = await dispatch(
+      getSingleSerieData(serie, annotation)
+    );
+    await dispatch(
+      singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation)
+    );
+  };
+};
+
 const getStudyAim = async (subjectID, studyID) => {
   let result;
   let studyAims = [];
@@ -581,10 +611,10 @@ const getStudyAim = async (subjectID, studyID) => {
 
 const getSingleSerieData = (serie, annotation) => {
   return async (dispatch, getState) => {
-    let aimsData = {};
+    let aimsData = [];
     let serieAims = [];
     let studyAims = [];
-    let imageData;
+    let imageData = {};
     let { studyUID, seriesUID, projectID, patientID } = serie;
     projectID = projectID ? projectID : "lite";
     patientID = patientID ? patientID : serie.subjectID;
@@ -596,11 +626,14 @@ const getSingleSerieData = (serie, annotation) => {
         studyUID,
         seriesUID
       );
+
       serieAims = serieAims.data;
       studyAims = await getStudyAim(patientID, studyUID);
       aimsData = serieAims.concat(studyAims);
-      imageData = await getImageIdAnnotations(serieAims);
+      imageData = getImageIdAnnotations(serieAims);
+
       aimsData = getAimListFields(aimsData, annotation);
+
       // dispatch(annotationsLoaded());
     } catch (err) {
       dispatch(annotationsLoadingError(err));
@@ -679,34 +712,34 @@ export const getWholeData = (serie, study, annotation) => {
 };
 
 // gets one patient and all the studys->series->annotations under it
-export const getAnnotationListData = (serie, study, annotation) => {
-  return async (dispatch, getState) => {
-    let { projectID, patientID, patientName, studyUID } = serie || study;
-    projectID = projectID ? projectID : "lite";
+// export const getAnnotationListData = (serie, study, annotation) => {
+//   return async (dispatch, getState) => {
+//     let { projectID, patientID, patientName, studyUID } = serie || study;
+//     projectID = projectID ? projectID : "lite";
 
-    let selectedID;
-    let seriesUID;
-    if (serie) {
-      selectedID = serie.seriesUID;
-      seriesUID = serie.seriesUID;
-    } else if (study) {
-      selectedID = study.studyUID;
-    }
-    let summaryData = await dispatch(getWholeData(serie, study, annotation));
+//     let selectedID;
+//     let seriesUID;
+//     if (serie) {
+//       selectedID = serie.seriesUID;
+//       seriesUID = serie.seriesUID;
+//     } else if (study) {
+//       selectedID = study.studyUID;
+//     }
+//     let summaryData = await dispatch(getWholeData(serie, study, annotation));
 
-    let aimsData = await dispatch(
-      getSingleSerieData({ projectID, patientID, studyUID, seriesUID })
-    );
+//     let aimsData = await dispatch(
+//       getSingleSerieData({ projectID, patientID, studyUID, seriesUID })
+//     );
 
-    const reference = {
-      patientID,
-      studyUID,
-      seriesUID,
-      aimID: annotation
-    };
+//     const reference = {
+//       patientID,
+//       studyUID,
+//       seriesUID,
+//       aimID: annotation
+//     };
 
-    dispatch(
-      annotationsLoaded(summaryData, aimsData, seriesUID, patientID, reference)
-    );
-  };
-};
+//     dispatch(
+//       annotationsLoaded(summaryData, aimsData, seriesUID, patientID, reference)
+//     );
+//   };
+// };
