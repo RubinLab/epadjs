@@ -432,10 +432,9 @@ class Series extends Component {
         this.props.dispatch(addToGrid(selected));
         this.props
           .dispatch(getSingleSerie(selected))
-          .then(
-            () => console.log("resolved")
+          .then(() => {
             // this.props.dispatch(showAnnotationDock())
-          )
+          })
           .catch(err => console.log(err));
         //if grid is NOT full check if patient data exists
         if (!this.props.patients[selected.patientID]) {

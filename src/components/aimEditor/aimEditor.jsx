@@ -10,7 +10,8 @@ import {
 } from "../../services/annotationServices";
 import {
   updateSingleSerie,
-  updatePatientOnAimSave
+  updatePatientOnAimSave,
+  getSingleSerie
 } from "../annotationsList/action";
 import { getAimImageData } from "./aimHelper";
 import * as questionaire from "./parseClass.js";
@@ -218,6 +219,9 @@ class AimEditor extends Component {
           pauseOnHover: true,
           draggable: true
         });
+        // this.props.dispatch(
+        //   getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+        // );
         this.props.dispatch(
           updateSingleSerie({
             subjectID: patientID,
@@ -226,8 +230,7 @@ class AimEditor extends Component {
             studyUID
           })
         );
-        // TODO add aimUID to update patient
-        // check UPDATEPATIENT
+
         this.props.dispatch(updatePatientOnAimSave(aimRefs));
       })
       .catch(error => console.log(error));
