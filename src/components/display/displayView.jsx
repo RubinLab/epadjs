@@ -114,6 +114,7 @@ class DisplayView extends Component {
       prevProps.loading === true &&
       this.props.loading === false
     ) {
+      console.log("Display view Update", prevProps, this.props);
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
@@ -144,22 +145,17 @@ class DisplayView extends Component {
   getData() {
     const { series } = this.props;
     var promises = [];
-    for (let i = 0; i < this.props.series.length; i++) {
-      const promise = this.getImageStack(this.props.series[i]);
+    for (let i = 0; i < series.length; i++) {
+      const promise = this.getImageStack(series[i]);
       promises.push(promise);
     }
     Promise.all(promises).then(res => {
       this.setState({ data: res, isLoading: false });
-      this.sleep(3900).then(() => {
-        series.forEach(serie => {
-          if (serie.imageAnnotations)
-            this.parseAims(
-              serie.imageAnnotations,
-              serie.seriesUID,
-              serie.studyUID
-            );
-        });
-      });
+    });
+
+    series.forEach(serie => {
+      if (serie.imageAnnotations)
+        this.parseAims(serie.imageAnnotations, serie.seriesUID, serie.studyUID);
     });
   }
 
@@ -377,29 +373,40 @@ class DisplayView extends Component {
 
   renderSegmentation = (arrayBuffer, i) => {
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
+    console.log(
+      "CsTools get enabled elements",
+      cornerstone.getEnabledElements()
+    );
+
     const stackToolState = cornerstoneTools.getToolState(element, "stack");
     console.log("Stack toolstate", stackToolState);
-    const imageIds = stackToolState.data[0].imageIds;
-    const t0 = performance.now();
-    const {
-      labelmapBuffer,
-      segMetadata,
-      segmentsOnFrame
-    } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
-      imageIds,
-      arrayBuffer,
-      cornerstone.metaData
-    );
-    const t1 = performance.now();
-    const { setters, state } = cornerstoneTools.getModule("segmentation");
-    setters.labelmap3DByFirstImageId(
-      imageIds[0],
-      labelmapBuffer,
-      i,
-      segMetadata,
-      imageIds.length,
-      segmentsOnFrame
-    );
+    // const imageIds = stackToolState.data[0].imageIds;
+    // console.log(
+    //   "Tool state genrated",
+    //   dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
+    //     imageIds,
+    //     arrayBuffer,
+    //     cornerstone.metaData
+    //   )
+    // );
+    // const {
+    //   labelmapBuffer,
+    //   segMetadata,
+    //   segmentsOnFrame
+    // } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
+    //   imageIds,
+    //   arrayBuffer,
+    //   cornerstone.metaData
+    // );
+    // const { setters, state } = cornerstoneTools.getModule("segmentation");
+    // setters.labelmap3DByFirstImageId(
+    //   imageIds[0],
+    //   labelmapBuffer,
+    //   i,
+    //   segMetadata,
+    //   imageIds.length,
+    //   segmentsOnFrame
+    // );
   };
 
   getColorOfMarkup = (aimUid, seriesUid) => {

@@ -373,7 +373,6 @@ class ToolMenu extends Component {
   };
 
   render() {
-    console.log("Cs Tools", cornerstoneTools);
     const inputRange = {
       top: "5em"
     };
