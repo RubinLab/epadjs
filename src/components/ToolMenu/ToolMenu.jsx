@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import MetaData from "../MetaData/MetaData";
 import { WindowLevel } from "../WindowLevel/WindowLevel";
+import cornerstone from "cornerstone-core";
+import cornerstoneTools from "cornerstone-tools";
 import {
   FaLocationArrow,
   FaEraser,
@@ -43,8 +45,6 @@ import getNumOfSegs from "../../Utils/Segmentation/getNumOfSegments";
 
 const mapStateToProps = state => {
   return {
-    cornerstone: state.searchViewReducer.cornerstone,
-    cornerstoneTools: state.searchViewReducer.cornerstoneTools,
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     patientLoading: state.annotationsListReducer.patientLoading,
@@ -99,8 +99,6 @@ class ToolMenu extends Component {
   constructor(props) {
     super(props);
     this.tools = tools;
-    this.cornerstone = this.props.cornerstone;
-    this.cornerstoneTools = this.props.cornerstoneTools;
     this.invert = this.invert.bind(this);
 
     this.state = {
@@ -210,9 +208,9 @@ class ToolMenu extends Component {
   disableAllTools = () => {
     this.setState({ activeToolIdx: 0 });
     Array.from(this.tools).forEach(tool => {
-      const apiTool = this.cornerstoneTools[`${tool.name}Tool`];
+      const apiTool = cornerstoneTools[`${tool.name}Tool`];
       if (apiTool) {
-        this.cornerstoneTools.setToolPassive(tool.name);
+        cornerstoneTools.setToolPassive(tool.name);
       } else {
         throw new Error(`Tool not found: ${tool.name}Tool`);
       }
@@ -222,7 +220,7 @@ class ToolMenu extends Component {
   //sets the selected tool active for all of the enabled elements
   setToolActive = (toolName, mouseMask = 1) => {
     // this.disableAllTools();
-    this.cornerstoneTools.setToolActive(toolName, {
+    cornerstoneTools.setToolActive(toolName, {
       mouseButtonMask: mouseMask
     });
     if (toolName === "Brush") this.handleBrushSelected();
@@ -231,32 +229,35 @@ class ToolMenu extends Component {
   handleBrushSelected = () => {
     const { openSeries, activePort } = this.props;
     const { imageAnnotations } = openSeries[activePort];
-    const { element } = this.cornerstone.getEnabledElements()[activePort];
-    const newLabelMapIndex = getNumOfSegs(imageAnnotations);
-    console.log("New Label Map Index", newLabelMapIndex);
-    console.log(
-      "Segmenatation Module Before",
-      this.cornerstoneTools.getModule("segmentation")
-    );
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    // if there are already image annotations and segmentations change the labelmap accordingly
+    console.log("Image annotations for seg Count", imageAnnotations);
+    if (imageAnnotations !== undefined) {
+      const newLabelMapIndex = getNumOfSegs(imageAnnotations);
+      console.log("New Label Map Index", newLabelMapIndex);
+      console.log(
+        "Segmenatation Module Before",
+        cornerstoneTools.getModule("segmentation")
+      );
 
-    const { setters } = this.cornerstoneTools.getModule("segmentation");
-    setters.activeLabelmapIndex(element, newLabelMapIndex);
-    console.log(
-      "Segmenatation Module After",
-      this.cornerstoneTools.getModule("segmentation")
-    );
+      const { setters } = cornerstoneTools.getModule("segmentation");
+      setters.activeLabelmapIndex(element, newLabelMapIndex);
+      console.log(
+        "Segmenatation Module After",
+        cornerstoneTools.getModule("segmentation")
+      );
+    }
   };
 
   //sets the selected tool active for an enabled elements
   setToolActiveForElement = (toolName, mouseMask = 1) => {
     this.disableAllTools();
-    alert(toolName);
-    console.log("CStools", this.cornerstoneTools);
+    console.log("CStools", cornerstoneTools);
     if (toolName == "Brush3DHUGatedTool") {
-      this.cornerstoneTools.store.modules.brush.setters.activeGate("muscle");
+      cornerstoneTools.store.modules.brush.setters.activeGate("muscle");
     }
-    this.cornerstoneTools.setToolActiveForElement(
-      this.cornerstone.getEnabledElements()[this.props.activePort]["element"],
+    cornerstoneTools.setToolActiveForElement(
+      cornerstone.getEnabledElements()[this.props.activePort]["element"],
       toolName,
       {
         mouseButtonMask: mouseMask
@@ -300,18 +301,18 @@ class ToolMenu extends Component {
   };
 
   invert() {
-    const activeElement = this.cornerstone.getEnabledElements()[
+    const activeElement = cornerstone.getEnabledElements()[
       this.props.activePort
     ].element;
-    const viewport = this.cornerstone.getViewport(activeElement);
+    const viewport = cornerstone.getViewport(activeElement);
     viewport.invert = !viewport.invert;
-    this.cornerstone.setViewport(activeElement, viewport);
+    cornerstone.setViewport(activeElement, viewport);
   }
 
   reset = () => {
-    const element = this.cornerstone.getEnabledElements()[this.props.activePort]
+    const element = cornerstone.getEnabledElements()[this.props.activePort]
       .element;
-    this.props.cornerstone.reset(element);
+    cornerstone.reset(element);
   };
 
   toggleMetaData = () => {
@@ -324,10 +325,10 @@ class ToolMenu extends Component {
   };
 
   handleClip = () => {
-    const element = this.cornerstone.getEnabledElements()[this.props.activePort]
+    const element = cornerstone.getEnabledElements()[this.props.activePort]
       .element;
-    if (!this.state.playing) this.cornerstoneTools.playClip(element, 40);
-    else this.cornerstoneTools.stopClip(element);
+    if (!this.state.playing) cornerstoneTools.playClip(element, 40);
+    else cornerstoneTools.stopClip(element);
     this.setState({ playing: !this.state.playing });
   };
 
@@ -340,22 +341,19 @@ class ToolMenu extends Component {
   };
 
   handleBrushChange = gateName => {
-    alert("hop");
     if (gateName === "custom") this.setState({ rangeDisabled: false });
     else this.setState({ rangeDisabled: true });
-    this.cornerstoneTools.store.modules.segmentation.setters.activeGate(
-      gateName
-    );
+    cornerstoneTools.store.modules.segmentation.setters.activeGate(gateName);
   };
 
   applyCustomBrushValues = values => {
     const { min, max } = values;
-    this.cornerstoneTools.store.modules.segmentation.customGateRange(min, max);
+    cornerstoneTools.store.modules.segmentation.customGateRange(min, max);
   };
 
   setInterpolation = checked => {
     this.setState({ interpolate: checked });
-    this.cornerstoneTools.store.modules.freehand3D.state.interpolate = this.state.interpolate;
+    cornerstoneTools.store.modules.freehand3D.state.interpolate = this.state.interpolate;
   };
 
   handleToolClicked = (index, tool) => {
@@ -375,11 +373,11 @@ class ToolMenu extends Component {
   };
 
   render() {
-    console.log("Cs Tools", this.cornerstoneTools);
+    console.log("Cs Tools", cornerstoneTools);
     const inputRange = {
       top: "5em"
     };
-    const brushModule = this.cornerstoneTools.store.modules.segmentation;
+    const brushModule = cornerstoneTools.store.modules.segmentation;
     return (
       <div className="toolbar">
         <Collapsible trigger={"Imaging Tools"} transitionTime={100}>
@@ -747,12 +745,7 @@ class ToolMenu extends Component {
 
         {this.state.showPresets && (
           <WindowLevel
-            cornerstone={this.props.cornerstone}
-            activeElement={
-              this.cornerstone.getEnabledElements()[this.props.activePort][
-                "element"
-              ]
-            }
+            activePort={this.props.activePort}
             onClose={this.showPresets}
           />
         )}

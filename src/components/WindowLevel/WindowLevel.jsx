@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import cornerstone from "cornerstone-core";
 import { FaTimes } from "react-icons/fa";
 import "./WindowLevel.css";
 
@@ -11,10 +12,13 @@ export class WindowLevel extends Component {
     };
   }
   setPreset = preset => {
-    const vp = this.props.cornerstone.getViewport(this.props.activeElement);
+    const activeElement = cornerstone.getEnabledElements()[
+      this.props.activePort
+    ]["element"];
+    const vp = cornerstone.getViewport(activeElement);
     vp.voi.windowCenter = preset.level;
     vp.voi.windowWidth = preset.window;
-    this.props.cornerstone.setViewport(this.props.activeElement, vp);
+    cornerstone.setViewport(this.props.activeElement, vp);
     this.setState({ level: preset.level, window: preset.window });
   };
   handleChange = e => {};

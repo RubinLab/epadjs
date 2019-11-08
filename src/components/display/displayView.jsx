@@ -1,17 +1,15 @@
 import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
+import cornerstoneTools from "cornerstone-tools";
 import {
   getImageIds,
   getWadoImagePath,
   getSegmentation
 } from "../../services/seriesServices";
-import { getAnnotations2 } from "../../services/annotationServices";
 import { connect } from "react-redux";
 import { wadoUrl, isLite } from "../../config.json";
 import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
-import Aim from "../aimEditor/Aim";
-import AimEditor from "../aimEditor/aimEditor";
 import "./flex.css";
 import "./viewport.css";
 import { changeActivePort, updateImageId } from "../annotationsList/action";
@@ -82,8 +80,6 @@ const mapStateToProps = state => {
   return {
     series: state.annotationsListReducer.openSeries,
     loading: state.annotationsListReducer.loading,
-    cornerstone: state.searchViewReducer.cornerstone,
-    cornerstoneTools: state.searchViewReducer.cornerstoneTools,
     activePort: state.annotationsListReducer.activePort,
     aimList: state.annotationsListReducer.aimsList
   };
@@ -92,8 +88,6 @@ const mapStateToProps = state => {
 class DisplayView extends Component {
   constructor(props) {
     super(props);
-    // this.cornerstone = this.props.cornerstone;
-    this.cornerstoneTools = this.props.cornerstoneTools;
     this.state = {
       width: "100%",
       height: "calc(100% - 60px)",
@@ -148,6 +142,7 @@ class DisplayView extends Component {
   };
 
   getData() {
+    const { series } = this.props;
     var promises = [];
     for (let i = 0; i < this.props.series.length; i++) {
       const promise = this.getImageStack(this.props.series[i]);
@@ -156,9 +151,13 @@ class DisplayView extends Component {
     Promise.all(promises).then(res => {
       this.setState({ data: res, isLoading: false });
       this.sleep(3900).then(() => {
-        this.props.series.forEach(serie => {
+        series.forEach(serie => {
           if (serie.imageAnnotations)
-            this.parseAims(serie.imageAnnotations, serie.seriesUID);
+            this.parseAims(
+              serie.imageAnnotations,
+              serie.seriesUID,
+              serie.studyUID
+            );
         });
       });
     });
@@ -342,24 +341,24 @@ class DisplayView extends Component {
     }
   };
 
-  parseAims = (aimList, seriesUid) => {
+  parseAims = (aimList, seriesUid, studyUid) => {
     console.log();
     Object.entries(aimList).forEach(([key, values], i) => {
       values.forEach(value => {
         const { markupType, aimUid } = value;
         console.log("Value", value);
         if (markupType === "DicomSegmentationEntity")
-          this.getSegmentationData(aimUid, i);
+          this.getSegmentationData(seriesUid, studyUid, aimUid, i);
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
         this.renderMarkup(key, value, color);
       });
     });
   };
 
-  getSegmentationData = (aimId, i) => {
-    const { series, activePort, aimList } = this.props;
-    const { seriesUID, studyUID } = series[activePort];
+  getSegmentationData = (seriesUID, studyUID, aimId, i) => {
+    const { aimList } = this.props;
 
+    console.log("New bug, seriesUID, aimId, activePort", seriesUID, aimId);
     const segmentationEntity =
       aimList[seriesUID][aimId].json.segmentationEntityCollection
         .SegmentationEntity[0];
@@ -377,15 +376,8 @@ class DisplayView extends Component {
   };
 
   renderSegmentation = (arrayBuffer, i) => {
-    alert(i);
-    const cornerstoneTools = this.cornerstoneTools;
-    const cornerstone = this.props.cornerstone;
-
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
-    const stackToolState = this.props.cornerstoneTools.getToolState(
-      element,
-      "stack"
-    );
+    const stackToolState = cornerstoneTools.getToolState(element, "stack");
     console.log("Stack toolstate", stackToolState);
     const imageIds = stackToolState.data[0].imageIds;
     const t0 = performance.now();
@@ -450,10 +442,10 @@ class DisplayView extends Component {
     data.color = color;
     data.aimId = markup.aimUid;
     this.createLinePoints(data, markup.coordinates);
-    const currentState = this.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imgId, "Length");
     currentState[imgId]["Length"].data.push(data);
-    this.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
   };
@@ -474,10 +466,10 @@ class DisplayView extends Component {
     data.color = color;
     data.aimId = markup.aimUid;
     this.createPolygonPoints(data, markup.coordinates);
-    const currentState = this.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imgId, "FreehandMouse");
     currentState[imgId]["FreehandMouse"].data.push(data);
-    this.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
   };
@@ -510,19 +502,17 @@ class DisplayView extends Component {
     data.aimId = markup.aimUid;
     data.handles.end.x = markup.coordinates.x.value;
     data.handles.end.y = markup.coordinates.y.value;
-    const currentState = this.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imgId, "Probe");
     currentState[imgId]["Probe"].data.push(data);
-    this.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
   };
 
   renderCircle = (imageId, markup, color) => {
-    const imgId = getWadoImagePath(
-      this.props.series[this.props.activePort],
-      imageId
-    );
+    const { series, activePort } = this.props;
+    const imgId = getWadoImagePath(series[activePort], imageId);
     const data = JSON.parse(JSON.stringify(circle));
     data.color = color;
     data.aimId = markup.aimUid;
@@ -530,10 +520,10 @@ class DisplayView extends Component {
     data.handles.start.y = markup.coordinates[0].y.value;
     data.handles.end.x = markup.coordinates[1].x.value;
     data.handles.end.y = markup.coordinates[1].y.value;
-    const currentState = this.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imgId, "CircleRoi");
     currentState[imgId]["CircleRoi"].data.push(data);
-    this.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
   };
@@ -564,13 +554,7 @@ class DisplayView extends Component {
     ) : (
       // <div className="displayView-main">
       <React.Fragment>
-        {/* <Toolbar
-          cornerstone={this.cornerstone}
-          cornerstoneTools={this.cornerstoneTools}
-        /> */}
         <RightsideBar
-          cornerstone={this.props.cornerstone}
-          csTools={this.cornerstoneTools}
           showAimEditor={this.state.showAimEditor}
           aimId={this.state.selectedAim}
           onCancel={this.closeAimEditor}
@@ -616,27 +600,6 @@ class DisplayView extends Component {
                   />
                 </MenuProvider>
               </div>
-              // <div
-              //   className={"viewportContainer"}
-              //   key={i}
-              //   style={{
-              //     width: this.state.width,
-              //     height: this.state.height,
-              //     padding: "2px",
-              //     display: "inline-block"
-              //   }}
-              //   onDoubleClick={() => this.hideShow(i)}
-              // >
-
-              // {this.state.showAimEditor && (
-              //   <AimEditor
-              //     cornerstone={this.props.cornerstone}
-              //     csTools={this.cornerstoneTools}
-              //   />
-              // )}
-
-              //{" "}
-              // </div>
             ))}
           <ContextMenu />
         </RightsideBar>
