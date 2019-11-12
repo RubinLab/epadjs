@@ -6,7 +6,6 @@ import {
   FaCaretDown,
   FaCaretUp
 } from "react-icons/fa";
-import { IoMdInformationCircleOutline } from "react-icons/io";
 import AimEntityData from "./aimEntityData";
 import CalculationLabel from "./calculationLabel";
 

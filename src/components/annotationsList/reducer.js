@@ -42,7 +42,7 @@ const initialState = {
   error: false,
   patients: {},
   listOpen: false,
-  dockOpen: false,
+  // dockOpen: false,
   showGridFullAlert: false,
   showProjectModal: false,
   selectedProjects: {},
@@ -51,8 +51,8 @@ const initialState = {
   selectedSeries: {},
   selectedAnnotations: {},
   patientLoading: false,
-  patientLoadingError: null,
-  imageID: null
+  patientLoadingError: null
+  // imageID: null
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -77,12 +77,14 @@ const asyncReducer = (state = initialState, action) => {
       }
       return { ...state, openSeries: aimIDClearedOPenSeries };
     case UPDATE_IMAGEID:
-      return { ...state, imageID: action.imageID };
+      const openSeriesToUpdate = [...state.openSeries];
+      openSeriesToUpdate[state.activePort].imageID = action.imageID;
+      return { ...state, openSeries: openSeriesToUpdate };
     case CLOSE_SERIE:
       let delSeriesUID = state.openSeries[state.activePort].seriesUID;
       let delStudyUID = state.openSeries[state.activePort].studyUID;
       let delPatientID = state.openSeries[state.activePort].patientID;
-      let dockStatus = state.dockOpen;
+      // let dockStatus = state.dockOpen;
       const delAims = { ...state.aimsList };
       delete delAims[delSeriesUID];
       let delGrid = state.openSeries.slice(0, state.activePort);
@@ -105,7 +107,7 @@ const asyncReducer = (state = initialState, action) => {
       let delActivePort;
       if (delGrid.length === 0) {
         delActivePort = null;
-        dockStatus = false;
+        // dockStatus = false;
       } else {
         delActivePort = delGrid.length - 1;
       }
@@ -114,8 +116,8 @@ const asyncReducer = (state = initialState, action) => {
         openSeries: delGrid,
         aimsList: delAims,
         patients: delPatients,
-        activePort: delActivePort,
-        dockOpen: dockStatus
+        activePort: delActivePort
+        // dockOpen: dockStatus
       };
     case LOAD_ANNOTATIONS:
       return Object.assign({}, state, {
@@ -198,8 +200,8 @@ const asyncReducer = (state = initialState, action) => {
       }
       return Object.assign({}, state, {
         activePort: action.portIndex,
-        openSeries: changedPortSeries,
-        dockOpen: true
+        openSeries: changedPortSeries
+        // dockOpen: true
       });
 
     case SHOW_ANNOTATION_WINDOW:
@@ -207,9 +209,9 @@ const asyncReducer = (state = initialState, action) => {
 
       return Object.assign({}, state, { listOpen: !showStatus });
 
-    case SHOW_ANNOTATION_DOCK:
-      const displayAnnDock = state.dockOpen;
-      return Object.assign({}, state, { dockOpen: !displayAnnDock });
+    // case SHOW_ANNOTATION_DOCK:
+    //   const displayAnnDock = state.dockOpen;
+    //   return Object.assign({}, state, { dockOpen: !displayAnnDock });
 
     case TOGGLE_ALL_ANNOTATIONS:
       //update openSeries

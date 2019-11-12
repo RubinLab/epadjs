@@ -11,14 +11,19 @@
   /* left: 80%; */
 }
 
+#annList-modal {
+  z-index: 2;
+}
+
 #dock-modal {
   padding: 0.3rem;
   overflow-x: hidden;
 }
 .annList {
-  background: #3a3f44;
+  background: #861737;
+  /* background: #3a3f44; */
   padding: 0.5rem;
-  z-index: 1;
+  z-index: 1000;
   display: inline-flex;
   flex-direction: column;
   position: relative;

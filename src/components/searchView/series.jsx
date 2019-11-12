@@ -400,9 +400,9 @@ class Series extends Component {
   };
 
   dispatchSerieDisplay = selected => {
-    if (this.props.dockOpen) {
-      this.props.dispatch(showAnnotationDock());
-    }
+    // if (this.props.dockOpen) {
+    //   this.props.dispatch(showAnnotationDock());
+    // }
     const openSeries = Object.values(this.props.openSeries);
     const { patientID, studyUID } = selected;
     let isSerieOpen = false;
@@ -532,7 +532,7 @@ class Series extends Component {
 const mapStateToProps = state => {
   return {
     series: state.searchViewReducer.series,
-    dockOpen: state.annotationsListReducer.dockOpen,
+    // dockOpen: state.annotationsListReducer.dockOpen,
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     activePort: state.annotationsListReducer.activePort,

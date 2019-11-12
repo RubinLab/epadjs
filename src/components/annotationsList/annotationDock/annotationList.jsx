@@ -19,7 +19,10 @@ class AnnotationsList extends React.Component {
   };
 
   componentDidUpdate = prevProps => {
-    if (this.props.activePort !== prevProps.activePort) {
+    if (
+      (this.props.activePort !== prevProps.activePort && !this.props.loading) ||
+      (!this.props.loading && prevProps.loading)
+    ) {
       const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
       let annotations = Object.values(this.props.aimsList[seriesUID]);
       let labelDisplayAll = false;
@@ -81,10 +84,11 @@ class AnnotationsList extends React.Component {
   };
 
   getLabelArray = () => {
+    const { imageID } = this.props.openSeries[this.props.activePort];
     let imageAnnotations;
     if (this.props.openSeries[this.props.activePort].imageAnnotations) {
       imageAnnotations = this.props.openSeries[this.props.activePort]
-        .imageAnnotations[this.props.imageID];
+        .imageAnnotations[imageID];
     }
     const calculations = {};
     if (imageAnnotations) {
@@ -109,6 +113,7 @@ class AnnotationsList extends React.Component {
   };
 
   render = () => {
+    const { imageID } = this.props.openSeries[this.props.activePort];
     const maxHeight = window.innerHeight * 0.6;
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     let annotations = {};
@@ -124,7 +129,7 @@ class AnnotationsList extends React.Component {
     let imageAnnotations;
     if (this.props.openSeries[this.props.activePort].imageAnnotations) {
       imageAnnotations = this.props.openSeries[this.props.activePort]
-        .imageAnnotations[this.props.imageID];
+        .imageAnnotations[imageID];
 
       if (imageAnnotations) {
         for (let aim of imageAnnotations) {
@@ -224,7 +229,8 @@ const mapStateToProps = state => {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
     aimsList: state.annotationsListReducer.aimsList,
-    imageID: state.annotationsListReducer.imageID
+    imageID: state.annotationsListReducer.imageID,
+    loading: state.annotationsListReducer.loading
   };
 };
 export default connect(mapStateToProps)(AnnotationsList);

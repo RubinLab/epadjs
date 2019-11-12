@@ -271,10 +271,10 @@ class ToolMenu extends Component {
 
   handleAnnotationsDockClick = async () => {
     // const showStatus = this.state.showAnnotationList;
-    await this.setState(state => ({
-      dockOpen: !state.dockOpen
-    }));
-    this.props.dispatch(showAnnotationDock());
+    // await this.setState(state => ({
+    //   dockOpen: !state.dockOpen
+    // }));
+    // this.props.dispatch(showAnnotationDock());
   };
 
   invert() {

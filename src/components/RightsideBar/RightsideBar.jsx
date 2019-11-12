@@ -111,10 +111,9 @@ class Rightsidebar extends Component {
 }
 
 const mapStateToProps = state => {
-  const { activePort, dockOpen } = state.annotationsListReducer;
+  const { activePort } = state.annotationsListReducer;
   return {
-    activePort,
-    dockOpen
+    activePort
   };
 };
 export default withRouter(connect(mapStateToProps)(Rightsidebar));

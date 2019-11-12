@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { FaMinus, FaPlus, FaEye } from "react-icons/fa";
+import { FaMinus, FaPlus, FaEye, FaCheck } from "react-icons/fa";
 import { MAX_PORT } from "../../../constants";
 import Annotations from "./annotations";
 import {
@@ -38,14 +38,12 @@ class ListItem extends React.Component {
   };
 
   componentDidUpdate = prevProps => {
-    const { patientID, studyUID, seriesUID } = this.props.serie;
-    const prevStatus =
-      prevProps.patients[patientID].studies[studyUID].series[seriesUID]
-        .isDisplayed;
-    const currentStatus = this.props.patients[patientID].studies[studyUID]
-      .series[seriesUID].isDisplayed;
-    if (currentStatus !== prevStatus) {
-      this.setState({ isSerieOpen: currentStatus });
+    if (prevProps.activePort !== this.props.activePort) {
+      const { patientID, studyUID, seriesUID } = this.props.serie;
+      const collapseAnnList = this.checkIfSerieOpen(seriesUID).isOpen;
+      const currentStatus = this.props.patients[patientID].studies[studyUID]
+        .series[seriesUID].isDisplayed;
+      this.setState({ isSerieOpen: currentStatus, collapseAnnList });
     }
   };
 
@@ -66,25 +64,30 @@ class ListItem extends React.Component {
   };
 
   openSerie = async e => {
-    if (this.props.dockOpen) {
-      this.props.dispatch(showAnnotationDock());
-    }
+    // if (this.props.dockOpen) {
+    //   this.props.dispatch(showAnnotationDock());
+    // }
     const { patientID, studyUID, seriesUID } = this.props.serie;
+    // TODO check if already open
+    // TODO check if the grid is full
+
     this.props.dispatch(addToGrid(this.props.serie));
     this.props
       .dispatch(getSingleSerie(this.props.serie))
-      .then(() => this.props.dispatch(showAnnotationDock()))
+      .then(() => {
+        // this.props.dispatch(showAnnotationDock())
+      })
       .catch(err => console.log(err));
     this.props.dispatch(
       updatePatient("serie", true, patientID, studyUID, seriesUID)
     );
-    this.props.dispatch(showAnnotationWindow());
+    // this.props.dispatch(showAnnotationWindow());
   };
 
   handleAnnotationClick = async e => {
-    if (this.props.dockOpen) {
-      this.props.dispatch(showAnnotationDock());
-    }
+    // if (this.props.dockOpen) {
+    //   this.props.dispatch(showAnnotationDock());
+    // }
     const { seriesUID, studyUID, patientID } = this.props.serie;
     const { seriesid, aimid } = e.target.dataset;
     const activeSeriesUID = this.props.openSeries[this.props.activePort]
@@ -111,7 +114,7 @@ class ListItem extends React.Component {
           this.props
             .dispatch(getSingleSerie(this.props.serie, aimid))
             .then(() => {
-              this.props.dispatch(showAnnotationDock());
+              // this.props.dispatch(showAnnotationDock());
 
               this.props.dispatch(
                 updateAnnotationDisplay(
@@ -131,9 +134,9 @@ class ListItem extends React.Component {
   };
 
   handleToggleSerie = async (checked, e, id) => {
-    if (this.props.dockOpen) {
-      this.props.dispatch(showAnnotationDock());
-    }
+    // if (this.props.dockOpen) {
+    //   this.props.dispatch(showAnnotationDock());
+    // }
     //select de select all anotations
     const { patientID, studyUID, seriesUID } = this.props.serie;
     // const { seriesid } = e.target.dataset;
@@ -168,7 +171,9 @@ class ListItem extends React.Component {
           //getsingleserie
           this.props
             .dispatch(getSingleSerie(this.props.serie))
-            .then(() => this.props.dispatch(showAnnotationDock()))
+            .then(() => {
+              // this.props.dispatch(showAnnotationDock())
+            })
             .catch(err => console.log(err));
           //update patient?? with serie
           this.props.dispatch(
@@ -223,7 +228,9 @@ class ListItem extends React.Component {
               {desc} - ({numOfAnn})
             </span>
             {this.state.isSerieOpen ? (
-              <div className="-serie-icon__cont" />
+              <div className="-serie-icon__cont">
+                <FaCheck className="-serieButton__icon" />
+              </div>
             ) : (
               <div className="-serie-icon__cont" onClick={this.openSerie}>
                 <FaEye className="-serieButton__icon" />
@@ -246,7 +253,7 @@ class ListItem extends React.Component {
 }
 const mapStateToProps = state => {
   return {
-    dockOpen: state.annotationsListReducer.dockOpen,
+    // dockOpen: state.annotationsListReducer.dockOpen,
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
     patients: state.annotationsListReducer.patients

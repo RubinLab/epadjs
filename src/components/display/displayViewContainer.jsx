@@ -18,17 +18,19 @@ class DisplayViewContainer extends React.Component {
   };
 
   render = () => {
-    const { dockOpen } = this.props;
+    // const { dockOpen } = this.props;
+    // TODO check here
+    const dockOpen = false;
     return (
       <div className="displayView-cont">
         <div className={dockOpen ? "__ports" : "__ports __all"}>
           <DisplayView onNewImage={this.handleNewImage} />
         </div>
-        {this.props.dockOpen && (
-          <div className="__anns">
-            <Annotations imageID={this.state.imageId} />
-          </div>
-        )}
+        {/* {this.props.dockOpen && ( */}
+        <div className="__anns">
+          <Annotations imageID={this.state.imageId} />
+        </div>
+        {/* )} */}
       </div>
     );
   };
@@ -36,7 +38,7 @@ class DisplayViewContainer extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    dockOpen: state.annotationsListReducer.dockOpen
+    // dockOpen: state.annotationsListReducer.dockOpen
   };
 };
 
