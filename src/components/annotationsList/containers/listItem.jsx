@@ -64,30 +64,32 @@ class ListItem extends React.Component {
   };
 
   openSerie = async e => {
-    // if (this.props.dockOpen) {
-    //   this.props.dispatch(showAnnotationDock());
-    // }
     const { patientID, studyUID, seriesUID } = this.props.serie;
-    // TODO check if already open
-    // TODO check if the grid is full
-
-    this.props.dispatch(addToGrid(this.props.serie));
-    this.props
-      .dispatch(getSingleSerie(this.props.serie))
-      .then(() => {
-        // this.props.dispatch(showAnnotationDock())
-      })
-      .catch(err => console.log(err));
-    this.props.dispatch(
-      updatePatient("serie", true, patientID, studyUID, seriesUID)
-    );
-    // this.props.dispatch(showAnnotationWindow());
+    const openSeries = Object.values(this.props.openSeries);
+    let serieCheck = this.checkIfSerieOpen(this.props.serie);
+    //check if there is enough space in the grid
+    let isGridFull = openSeries.length === MAX_PORT;
+    //check if the serie is already open
+    if (serieCheck.isOpen) {
+      this.props.dispatch(changeActivePort(serieCheck.index));
+    }
+    if (!serieCheck.isOpen) {
+      if (isGridFull) {
+        this.props.dispatch(alertViewPortFull());
+      } else {
+        this.props.dispatch(addToGrid(this.props.serie));
+        this.props
+          .dispatch(getSingleSerie(this.props.serie))
+          .then(() => {})
+          .catch(err => console.log(err));
+        this.props.dispatch(
+          updatePatient("serie", true, patientID, studyUID, seriesUID)
+        );
+      }
+    }
   };
 
   handleAnnotationClick = async e => {
-    // if (this.props.dockOpen) {
-    //   this.props.dispatch(showAnnotationDock());
-    // }
     const { seriesUID, studyUID, patientID } = this.props.serie;
     const { seriesid, aimid } = e.target.dataset;
     const activeSeriesUID = this.props.openSeries[this.props.activePort]
@@ -134,9 +136,6 @@ class ListItem extends React.Component {
   };
 
   handleToggleSerie = async (checked, e, id) => {
-    // if (this.props.dockOpen) {
-    //   this.props.dispatch(showAnnotationDock());
-    // }
     //select de select all anotations
     const { patientID, studyUID, seriesUID } = this.props.serie;
     // const { seriesid } = e.target.dataset;
@@ -171,9 +170,7 @@ class ListItem extends React.Component {
           //getsingleserie
           this.props
             .dispatch(getSingleSerie(this.props.serie))
-            .then(() => {
-              // this.props.dispatch(showAnnotationDock())
-            })
+            .then(() => {})
             .catch(err => console.log(err));
           //update patient?? with serie
           this.props.dispatch(
@@ -253,7 +250,6 @@ class ListItem extends React.Component {
 }
 const mapStateToProps = state => {
   return {
-    // dockOpen: state.annotationsListReducer.dockOpen,
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
     patients: state.annotationsListReducer.patients

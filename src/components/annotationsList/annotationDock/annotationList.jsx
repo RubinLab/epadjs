@@ -19,9 +19,12 @@ class AnnotationsList extends React.Component {
   };
 
   componentDidUpdate = prevProps => {
+    const series = Object.keys(this.props.aimsList);
     if (
       (this.props.activePort !== prevProps.activePort && !this.props.loading) ||
-      (!this.props.loading && prevProps.loading)
+      (!this.props.loading &&
+        prevProps.loading &&
+        series.length === this.props.openSeries.length)
     ) {
       const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
       let annotations = Object.values(this.props.aimsList[seriesUID]);

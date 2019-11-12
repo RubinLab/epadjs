@@ -19,8 +19,6 @@ export const CHANGE_ACTIVE_PORT = "epadjs/annotationList/CHANGE_ACTIVE_PORT";
 export const LOAD_SERIE_SUCCESS = "epadjs/annotationList/LOAD_SERIE_SUCCESS";
 export const SHOW_ANNOTATION_WINDOW =
   "epadjs/annotationList/SHOW_ANNOTATION_WINDOW";
-export const SHOW_ANNOTATION_DOCK =
-  "epadjs/annotationList/SHOW_ANNOTATION_DOCK";
 export const SELECT_PATIENT = "epadjs/annotationList/SELECT_PATIENT";
 export const SELECT_SERIE = "epadjs/annotationList/SELECT_SERIE";
 export const SELECT_STUDY = "epadjs/annotationList/SELECT_STUDY";

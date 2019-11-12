@@ -8,7 +8,6 @@ import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
 import SearchView from "./components/searchView/searchView";
 import DisplayView from "./components/display/displayView";
-// import DisplayViewContainer from "./components/display/displayViewContainer";
 import AnotateView from "./components/anotateView";
 import ProgressView from "./components/progressView";
 import NotFound from "./components/notFound";

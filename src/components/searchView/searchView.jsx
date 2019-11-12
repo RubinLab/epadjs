@@ -73,9 +73,6 @@ class SearchView extends Component {
   };
 
   componentDidMount = async () => {
-    // if (this.props.dockOpen) {
-    //   this.props.dispatch(showAnnotationDock());
-    // }
     const subjects = await this.getData();
     this.setState({ numOfsubjects: subjects.length, subjects });
   };
@@ -754,7 +751,6 @@ class SearchView extends Component {
 
 const mapStateToProps = state => {
   return {
-    // dockOpen: state.annotationsListReducer.dockOpen,
     selectedProjects: state.annotationsListReducer.selectedProjects,
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,

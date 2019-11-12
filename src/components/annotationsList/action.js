@@ -13,7 +13,6 @@ import {
   CHANGE_ACTIVE_PORT,
   LOAD_SERIE_SUCCESS,
   SHOW_ANNOTATION_WINDOW,
-  SHOW_ANNOTATION_DOCK,
   OPEN_PROJECT_MODAL,
   CLEAR_GRID,
   DISPLAY_SINGLE_AIM,
@@ -260,9 +259,6 @@ export const showAnnotationWindow = () => {
   return { type: SHOW_ANNOTATION_WINDOW };
 };
 
-export const showAnnotationDock = () => {
-  return { type: SHOW_ANNOTATION_DOCK };
-};
 const loadAnnotations = () => {
   return {
     type: LOAD_ANNOTATIONS
