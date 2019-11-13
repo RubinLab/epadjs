@@ -8,6 +8,11 @@ import {
   uploadAim,
   uploadSegmentation
 } from "../../services/annotationServices";
+import {
+  updateSingleSerie,
+  updatePatientOnAimSave,
+  getSingleSerie
+} from "../annotationsList/action";
 import { getAimImageData } from "./aimHelper";
 import * as questionaire from "./parseClass.js";
 import Aim from "./Aim";
@@ -182,9 +187,29 @@ class AimEditor extends Component {
 
     const aimJson = aim.getAim();
     console.log("Here is the aim", JSON.parse(aimJson));
+    const aimSaved = JSON.parse(aimJson);
+    const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
+    const { patientID, projectID, seriesUID, studyUID } = this.props.series[
+      this.props.activePort
+    ];
+    const name =
+      aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .name.value;
+    const comment =
+      aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .comment.value;
+    const aimRefs = {
+      aimID,
+      patientID,
+      projectID,
+      seriesUID,
+      studyUID,
+      name,
+      comment
+    };
 
-    uploadAim(JSON.parse(aimJson))
-      .then(() => {
+    uploadAim(aimSaved)
+      .then(async () => {
         if (hasSegmentation) this.saveSegmentation(segBlobGlobal);
         toast.success("Aim succesfully saved.", {
           position: "top-right",
@@ -194,6 +219,19 @@ class AimEditor extends Component {
           pauseOnHover: true,
           draggable: true
         });
+        // this.props.dispatch(
+        //   getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+        // );
+        this.props.dispatch(
+          updateSingleSerie({
+            subjectID: patientID,
+            projectID,
+            seriesUID,
+            studyUID
+          })
+        );
+
+        this.props.dispatch(updatePatientOnAimSave(aimRefs));
       })
       .catch(error => console.log(error));
   };
