@@ -71,7 +71,9 @@ class WorklistCreationForm extends React.Component {
           this.props.onCancel();
         })
         .catch(error => {
-          console.log(error);
+          console.log(error.response.data.message);
+          console.log(error.response.data);
+
           if (
             error.response.data &&
             error.response.data === "Validation error"
@@ -79,6 +81,7 @@ class WorklistCreationForm extends React.Component {
             let errMesage = `${errMesage} - ID "${id}" might already exist`;
             this.setState({ error: errMesage });
           }
+          this.setState({ error: error.response.data.message });
           this.setState({ page: 0 });
         });
     }
