@@ -58,6 +58,7 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
     );
 
     const {
+      labelmap2D,
       labelmap3D,
       currentImageIdIndex,
       activeLabelmapIndex,
@@ -67,8 +68,8 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
     // Draw / Erase the active color.
     drawBrushPixels(
       pointerArray,
-      labelmap3D,
-      currentImageIdIndex,
+      labelmap2D.pixelData,
+      labelmap3D.activeSegmentIndex,
       columns,
       shouldErase
     );

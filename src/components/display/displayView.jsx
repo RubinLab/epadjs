@@ -15,7 +15,8 @@ import "./viewport.css";
 import { changeActivePort, updateImageId } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
-import CornerstoneViewport from "../../reactCornerstoneViewport";
+import CornerstoneViewport from "react-cornerstone-viewport";
+import OHIFSegmentationExtension from "../../ohif-segmentation-plugin";
 import { freehand } from "./Freehand";
 import { line } from "./Line";
 import { probe } from "./Probe";
@@ -24,8 +25,8 @@ import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
 
 const tools = [
-  { name: "Wwwc", mouseButtonMasks: [1] },
-  { name: "Pan", mouseButtonMasks: [1] },
+  { name: "Wwwc", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "Pan", modeOptions: { mouseButtonMasks: [1] } },
   {
     name: "Zoom",
     configuration: {
@@ -33,10 +34,10 @@ const tools = [
       maxScale: 25,
       preventZoomOutsideImage: true
     },
-    mouseButtonMasks: [1, 2]
+    modeOptions: { mouseButtonMasks: [1, 2] }
   },
-  { name: "Probe", mouseButtonMasks: [1] },
-  { name: "Length", mouseButtonMasks: [1] },
+  { name: "Probe", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "Length", modeOptions: { mouseButtonMasks: [1] } },
   {
     name: "EllipticalRoi",
     configuration: {
@@ -54,26 +55,26 @@ const tools = [
     configuration: {
       showMinMax: true
     },
-    mouseButtonMasks: [1]
+    modeOptions: { mouseButtonMasks: [1] }
   },
   { name: "Angle" },
   { name: "Rotate" },
   { name: "WwwcRegion" },
   { name: "Probe" },
-  // { name: "FreehandRoi", mouseButtonMasks: [1] },
+  { name: "FreehandRoi3DTool", moreOptions: { mouseButtonMasks: [1] } },
+  { name: "FreehandRoiSculptorTool", modeOptions: { mouseButtonMasks: [1] } },
   { name: "Eraser" },
-  { name: "Bidirectional", mouseButtonMasks: [1] },
-  { name: "Brush" },
-  // { name: "FreehandRoiSculptor" },
-  { name: "StackScroll", mouseButtonMasks: [1] },
+  { name: "Bidirectional", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "Brush3DTool" },
+  { name: "StackScroll", modeOptions: { mouseButtonMasks: [1] } },
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
-  { name: "StackScrollMouseWheel" },
+  { name: "StackScrollMouseWheel", mode: "active" },
   { name: "StackScrollMultiTouch" },
-  { name: "FreehandScissors", mouseButtonMasks: [1] },
-  { name: "RectangleScissors", mouseButtonMasks: [1] },
-  { name: "CircleScissors", mouseButtonMasks: [1] },
-  { name: "CorrectionScissors", mouseButtonMasks: [1] }
+  { name: "FreehandScissors", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "RectangleScissors", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "CircleScissors", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "CorrectionScissors", modeOptions: { mouseButtonMasks: [1] } }
 ];
 
 const mapStateToProps = state => {
@@ -366,47 +367,43 @@ class DisplayView extends Component {
     getSegmentation(pathVariables, sopInstanceUid.root).then(segData => {
       // segData.arrayBuffer().then(segBuffer => {
       console.log("Seg Data is", segData.data);
-      this.renderSegmentation(segData.data, i);
+      // this.renderSegmentation(segData.data, i);
       // });
     });
   };
 
   renderSegmentation = (arrayBuffer, i) => {
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
-    console.log(
-      "CsTools get enabled elements",
-      cornerstone.getEnabledElements()
-    );
 
     const stackToolState = cornerstoneTools.getToolState(element, "stack");
     console.log("Stack toolstate", stackToolState);
-    // const imageIds = stackToolState.data[0].imageIds;
-    // console.log(
-    //   "Tool state genrated",
-    //   dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
-    //     imageIds,
-    //     arrayBuffer,
-    //     cornerstone.metaData
-    //   )
-    // );
-    // const {
-    //   labelmapBuffer,
-    //   segMetadata,
-    //   segmentsOnFrame
-    // } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
-    //   imageIds,
-    //   arrayBuffer,
-    //   cornerstone.metaData
-    // );
-    // const { setters, state } = cornerstoneTools.getModule("segmentation");
-    // setters.labelmap3DByFirstImageId(
-    //   imageIds[0],
-    //   labelmapBuffer,
-    //   i,
-    //   segMetadata,
-    //   imageIds.length,
-    //   segmentsOnFrame
-    // );
+    const imageIds = stackToolState.data[0].imageIds;
+    console.log(
+      "Tool state genrated",
+      dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
+        imageIds,
+        arrayBuffer,
+        cornerstone.metaData
+      )
+    );
+    const {
+      labelmapBuffer,
+      segMetadata,
+      segmentsOnFrame
+    } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
+      imageIds,
+      arrayBuffer,
+      cornerstone.metaData
+    );
+    const { setters, state } = cornerstoneTools.getModule("segmentation");
+    setters.labelmap3DByFirstImageId(
+      imageIds[0],
+      labelmapBuffer,
+      i,
+      segMetadata,
+      imageIds.length,
+      segmentsOnFrame
+    );
   };
 
   getColorOfMarkup = (aimUid, seriesUid) => {
@@ -556,6 +553,9 @@ class DisplayView extends Component {
   };
 
   render() {
+    // OHIFSegmentationExtension.preRegistration();
+    // console.log("CornerstoneTools in dp view", cornerstoneTools);
+    // console.log("Datata", this.state.data);
     return !Object.entries(this.props.series).length ? (
       <Redirect to="/search" />
     ) : (
@@ -595,9 +595,9 @@ class DisplayView extends Component {
                 >
                   <CornerstoneViewport
                     key={i}
-                    viewportData={data}
+                    imageIds={data.stack.imageIds}
                     viewportIndex={i}
-                    availableTools={tools}
+                    tools={tools}
                     onMeasurementsChanged={this.measurementChanged}
                     setViewportActive={() => this.setActive(i)}
                     onNewImage={event =>

@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import MetaData from "../MetaData/MetaData";
+import SmartBrushMenu from "../SmartBrushMenu/SmartBrushMenu";
 import { WindowLevel } from "../WindowLevel/WindowLevel";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
@@ -23,7 +24,12 @@ import {
 } from "react-icons/fa";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { MdLoop, MdPanTool } from "react-icons/md";
-import { TiDeleteOutline, TiPencil, TiScissorsOutline } from "react-icons/ti";
+import {
+  TiDeleteOutline,
+  TiPencil,
+  TiScissorsOutline,
+  TiEject
+} from "react-icons/ti";
 import { MdWbIridescent } from "react-icons/md";
 import AnnotationList from "../annotationsList";
 import ResizeAndDrag from "../management/common/resizeAndDrag";
@@ -38,7 +44,7 @@ import "../../font-icons/styles.css";
 import "react-input-range/lib/css/index.css";
 import Collapsible from "react-collapsible";
 import "./ToolMenu.css";
-import InputRange from "react-input-range";
+
 import Switch from "react-switch";
 import ToolMenuItem from "../ToolMenu/ToolMenuItem";
 import getNumOfSegs from "../../Utils/Segmentation/getNumOfSegments";
@@ -103,7 +109,7 @@ class ToolMenu extends Component {
 
     this.state = {
       showDrawing: false,
-      showSegmentation: false,
+      showBrushMenu: false,
       showPresets: false,
       playing: false,
       customBrush: {
@@ -112,6 +118,7 @@ class ToolMenu extends Component {
       },
       rangeDisabled: true,
       interpolate: false,
+      activeTool: "",
       activeToolIdx: 0
     };
 
@@ -153,7 +160,7 @@ class ToolMenu extends Component {
         name: "Poly/Freehand",
         icon: <div className="icon-polygon fontastic-icons" />,
         tool: "Presets",
-        tool: "FreehandRoi3D",
+        tool: "FreehandRoi3DTool",
         child: (
           <span>
             Interpolation{" "}
@@ -178,13 +185,17 @@ class ToolMenu extends Component {
       {
         name: "Sculpt",
         icon: <FaScrewdriver />,
-        tool: "FreehandRoi3DSculptor"
+        tool: "FreehandRoi3DSculptorTool"
       },
       { name: "Eraser", icon: <FaEraser />, tool: "Eraser" }
     ];
 
     this.segmentationTools = [
-      { name: "Brush", icon: <div className="icon-brush" />, tool: "Brush" },
+      {
+        name: "Brush",
+        icon: <div className="icon-brush" />,
+        tool: "Brush3DTool"
+      },
       {
         name: "Brush HU Gated",
         icon: <FaBroom />,
@@ -219,9 +230,9 @@ class ToolMenu extends Component {
 
   //sets the selected tool active for all of the enabled elements
   setToolActive = (toolName, mouseMask = 1) => {
-    // this.disableAllTools();
+    alert(toolName);
     cornerstoneTools.setToolActive(toolName, {
-      mouseButtonMask: mouseMask
+      mouseButtonMask: [mouseMask]
     });
     if (toolName === "Brush") this.handleBrushSelected();
   };
@@ -336,47 +347,33 @@ class ToolMenu extends Component {
     this.setState({ showPresets: !this.state.showPresets });
   };
 
-  closeSegmentationMenu = () => {
-    this.setState({ showSegmentation: false });
-  };
-
-  handleBrushChange = gateName => {
-    if (gateName === "custom") this.setState({ rangeDisabled: false });
-    else this.setState({ rangeDisabled: true });
-    cornerstoneTools.store.modules.segmentation.setters.activeGate(gateName);
-  };
-
-  applyCustomBrushValues = values => {
-    const { min, max } = values;
-    cornerstoneTools.store.modules.segmentation.customGateRange(min, max);
-  };
-
   setInterpolation = checked => {
     this.setState({ interpolate: checked });
     cornerstoneTools.store.modules.freehand3D.state.interpolate = this.state.interpolate;
   };
 
+  closeBrushMenu = () => {
+    this.setState({ showBrushMenu: false });
+  };
+
   handleToolClicked = (index, tool) => {
     this.disableAllTools();
     if (tool === "Noop") {
-      this.setState({ activeToolIdx: index });
+      this.setState({ activeTool: "", activeToolIdx: index });
       return;
     } else if (tool === "Presets") this.showPresets();
     else if (tool === "Invert") this.invert();
     else if (tool === "Reset") this.reset();
     else if (tool === "MetaData") this.toggleMetaData();
     else {
-      this.setState({ activeToolIdx: index }, () => {
+      this.setState({ activeTool: tool, activeToolIdx: index }, () => {
         this.setToolActive(tool);
       });
     }
+    console.log("Tool clicked", cornerstoneTools);
   };
 
   render() {
-    const inputRange = {
-      top: "5em"
-    };
-    const brushModule = cornerstoneTools.store.modules.segmentation;
     return (
       <div className="toolbar">
         <Collapsible trigger={"Imaging Tools"} transitionTime={100}>
@@ -456,6 +453,7 @@ class ToolMenu extends Component {
                 index={i}
                 isActive={this.state.activeToolIdx === i}
                 onClick={() => this.handleToolClicked(i, markupTool.tool)}
+                children={markupTool.child}
               />
             );
           })}
@@ -681,66 +679,8 @@ class ToolMenu extends Component {
                             <span>Eraser</span>
                         </div>
                     </div> */}
-
-          {/* <div
-                        className="segmentation-menu"
-                    // onMouseLeave={() => this.closeSegmentationMenu()}
-                    >
-                        <div className="buttonLabel">
-                            <span>Preset Brushes</span>
-                        </div>
-                        <div className="brush-presets">
-                            {brushModule.state.gates.map((gate, i) => (
-                                <div key={i}>
-                                    <input
-                                        type="radio"
-                                        name="brushPresets"
-                                        value={gate.name}
-                                        onChange={() => this.handleBrushChange(gate.name)}
-                                        defaultChecked={
-                                            gate.name === brushModule.getters.activeGate()
-                                        }
-                                    />
-                                    {gate.name !== "custom" &&
-                                        " " +
-                                        gate.displayName +
-                                        " [" +
-                                        gate.range.toString() +
-                                        "]" +
-                                        " HU"}
-                                    {gate.name === "custom" &&
-                                        " " +
-                                        gate.displayName +
-                                        " [" +
-                                        this.state.customBrush.min +
-                                        ", " +
-                                        this.state.customBrush.max +
-                                        "]" +
-                                        " HU"}
-                                    {gate.name === "custom" && (
-                                        <div className="range-container">
-                                            <InputRange
-                                                style={inputRange}
-                                                disabled={this.state.rangeDisabled}
-                                                step={1}
-                                                maxValue={3000}
-                                                minValue={-1000}
-                                                // formatLabel={value => `${value} HU`}
-                                                value={this.state.customBrush}
-                                                onChange={value =>
-                                                    this.setState({ customBrush: value })
-                                                }
-                                                onChangeComplete={value =>
-                                                    this.applyCustomBrushValues(value)
-                                                }
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div> */}
         </Collapsible>
+        {this.state.activeTool === "Brush3DHUGated" && <SmartBrushMenu />}
 
         {this.state.showPresets && (
           <WindowLevel

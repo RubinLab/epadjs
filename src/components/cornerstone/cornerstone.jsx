@@ -30,8 +30,9 @@ const Cornerstone = ({ dispatch }) => {
   cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
   cornerstoneTools.external.Hammer = Hammer;
 
-  cornerstoneTools.init();
+  cornerstoneTools.init({ globalToolSyncEnabled: true, showSVGCursors: true });
 
+  // OHIFSegmentationExtension.preRegistration();
   OHIFSegmentationExtension.preRegistration();
 
   // Set the tool font and font size
@@ -49,7 +50,7 @@ const Cornerstone = ({ dispatch }) => {
   // Set color for active tools
   cornerstoneTools.toolColors.setActiveColor("rgb(255, 255, 0)");
 
-  //cornerstoneTools.store.state.touchProximity = 40;
+  cornerstoneTools.store.state.touchProximity = 40;
 
   const config = {
     globalToolSyncEnabled: true,
@@ -65,7 +66,8 @@ const Cornerstone = ({ dispatch }) => {
         usePDFJS: false,
         strict: false
       }
-    }
+    },
+    showSVGCursors: true
   };
 
   cornerstoneWADOImageLoader.webWorkerManager.initialize(config);

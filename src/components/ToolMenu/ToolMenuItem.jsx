@@ -6,20 +6,20 @@ class ToolMenuItem extends Component {
   };
 
   render() {
+    const { index, isActive, icon, name, children } = this.props;
     return (
       <div
-        tabIndex={this.props.index}
+        tabIndex={index}
         className={
-          this.props.isActive
-            ? "toolbarSectionButton_Active"
-            : "toolbarSectionButton"
+          isActive ? "toolbarSectionButton_Active" : "toolbarSectionButton"
         }
         onClick={this.handleClick}
       >
-        <div className="toolContainer">{this.props.icon}</div>
+        <div className="toolContainer">{icon}</div>
         <div className="buttonLabel">
-          <span>{this.props.name}</span>
+          <span>{name}</span>
         </div>
+        {children}
       </div>
     );
   }
