@@ -71,17 +71,13 @@ class Subjects extends Component {
   };
 
   getData = async () => {
-    console.log("=== getdata in subject, this.props.pid");
-    console.log(this.props.pid);
     if (this.props.pid) {
-      console.log("yeap");
       const { data: data } = await getSubjects(this.props.pid);
       for (let subject of data) {
         subject.children = [];
       }
       return data;
     } else {
-      console.log("nope");
       return [];
     }
   };

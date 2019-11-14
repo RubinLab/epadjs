@@ -33,8 +33,6 @@ class UploadModal extends React.Component {
   };
 
   onUpload = () => {
-    // console.log(" ------ projectID");
-    // console.log(this.props.projectID);
     const projectID = this.props.projectID
       ? this.props.projectID
       : this.state.projectID;
@@ -73,8 +71,6 @@ class UploadModal extends React.Component {
   };
 
   selectProject = e => {
-    console.log("--- select something ---");
-    console.log(e.target.value);
     this.setState({ projectID: e.target.value });
   };
 
@@ -134,7 +130,6 @@ class UploadModal extends React.Component {
       : className;
     const options = [];
     for (let pr of this.state.projects) {
-      // console.log(pr);
       options.push(
         <option key={pr.id} value={pr.id}>
           {pr.name}

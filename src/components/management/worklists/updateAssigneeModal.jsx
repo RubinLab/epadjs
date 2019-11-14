@@ -28,7 +28,6 @@ class UpdateAssignee extends React.Component {
   };
 
   render = () => {
-    console.log(this.state);
     return (
       <Modal.Dialog dialogClassName="updateAssignee__modal">
         <Modal.Header>

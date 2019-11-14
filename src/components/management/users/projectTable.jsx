@@ -10,8 +10,6 @@ const projectTable = ({ onSelect, projects, projectToRole, projectMap }) => {
     const roleArr = role.split(":");
     userRoles[roleArr[0]] = roleArr[1];
   }
-  console.log(projectMap);
-  console.log(projects);
 
   projects.forEach(project => {
     rows.push(

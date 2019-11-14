@@ -67,9 +67,7 @@ class WorklistAdd extends React.Component {
     });
 
     Promise.all(promises)
-      .then(() => {
-        console.log("yeap");
-      })
+      .then(() => {})
       .catch(err => console.log(err));
   };
 

@@ -80,6 +80,5 @@ export function addSubjectToWorklist(worklistId, projectID, patientID, body) {
 }
 
 export function deleteStudyFromWorklist(worklist, body) {
-  console.log(Array.isArray(body));
   return http.delete(apiUrl + "/worklists/" + worklist + "/studies", body);
 }

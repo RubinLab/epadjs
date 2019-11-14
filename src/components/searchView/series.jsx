@@ -86,8 +86,6 @@ class Series extends Component {
       this.props.subjectId,
       this.props.studyId
     );
-    console.log("series data");
-    console.log(data);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
     if (data.length === 0) {
@@ -127,7 +125,6 @@ class Series extends Component {
   };
 
   selectRow = selected => {
-    // console.log(selected);
     // const newState = { ...this.state.selectedSerie };
     // newState[selected.seriesUID]
     //   ? delete newState[selected.seriesUID]

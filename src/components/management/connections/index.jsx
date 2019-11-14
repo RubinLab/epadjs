@@ -212,20 +212,6 @@ class Connections extends React.Component {
         minResizeWidth: 100,
         width: 350
       },
-      // {
-      //   Header: "Open",
-      //   sortable: false,
-      //   resizable: false,
-      //   width: 75,
-      //   Cell: original => {
-      //     //   console.log(original.row.checkbox);
-      //     return (
-      //       <div>
-      //         <FaRegEye className="menu-clickable" />
-      //       </div>
-      //     );
-      //   }
-      // },
       {
         Header: "Host",
         accessor: "hostname",
@@ -302,7 +288,6 @@ class Connections extends React.Component {
       .then(res => {
         this.getConnectionsData();
         this.handleCancel();
-        // console.log("passed through");
       })
       .catch(error => {
         this.setState({
@@ -345,7 +330,6 @@ class Connections extends React.Component {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     const data = this.state.connections;
     const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
-    console.log(this.state);
     return (
       <div className="connections menu-display">
         <ToolBar

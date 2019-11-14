@@ -154,7 +154,6 @@ class WorkList extends React.Component {
 
   handleFormInput = e => {
     const { name, value } = e.target;
-    console.log(name, value);
     this.setState({ [name]: value });
   };
 

@@ -64,9 +64,7 @@ class WorkList extends React.Component {
       subjectID,
       studyUID
     } = this.state.singleDeleteData;
-    console.log(worklist, projectID, subjectID, studyUID);
     const body = [{ projectID, subjectID, studyUID }];
-    console.log(Array.isArray(body));
     deleteStudyFromWorklist(worklist, body)
       .then(() => {
         this.setState({ deleteSingleClicked: false, singleDeleteData: {} });
@@ -263,7 +261,6 @@ class WorkList extends React.Component {
   };
 
   render = () => {
-    console.log(this.state);
     const selected = this.state.selectAll < 2;
     return (
       <div className="worklist-page">

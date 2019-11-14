@@ -32,7 +32,6 @@ class SubjectCreationForm extends React.Component {
     this.props.onCancel();
   };
   render = () => {
-    console.log(this.props);
     return (
       <Modal.Dialog dialogClassName="add-subject__modal">
         <Modal.Header>

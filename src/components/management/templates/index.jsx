@@ -54,7 +54,6 @@ class Templates extends React.Component {
   };
   getTemplatesData = async () => {
     const { data: templates } = await getAllTemplates();
-    console.log(templates);
     this.setState({ templates });
   };
 

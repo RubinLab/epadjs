@@ -15,8 +15,6 @@ export async function login(username, password, keyCloakToken) {
   // await http.post(apiUrlV1, {}, { headers: header });
   basicAuth = "Bearer " + keyCloakToken;
   sessionStorage.setItem("token", keyCloakToken);
-  console.log(" ----- auth ----");
-  console.log(username);
   sessionStorage.setItem("username", username.user);
   sessionStorage.setItem("displayName", username.user); //TODO: change with fullname
   // http.post(apiUrlV1, {}, { headers: header });

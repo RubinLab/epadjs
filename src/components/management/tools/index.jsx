@@ -35,8 +35,6 @@ class Tools extends React.Component {
     }
     this.setState({ projectList: temp });
     this.getToolsData();
-
-    console.log("component did mount");
   };
 
   groupByProjects = tools => {
@@ -190,7 +188,6 @@ class Tools extends React.Component {
         accessor: "",
         width: 50,
         Cell: ({ original }) => {
-          console.log(original);
           const { pluginId } = original;
           return (
             <input

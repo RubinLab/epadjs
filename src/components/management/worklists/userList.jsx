@@ -3,8 +3,6 @@ import PropTypes from "prop-types";
 import Table from "react-table";
 
 const userList = props => {
-  console.log(" --- userlist props ---");
-  console.log(props);
   const columns = [
     {
       sortable: true,

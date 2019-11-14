@@ -119,8 +119,6 @@ class App extends Component {
     });
     keycloakInit
       .then(async result => {
-        console.log("keycloack");
-        console.log(result);
         let user = {
           user: result.userInfo.preferred_username || result.userInfo.email,
           displayname: result.userInfo.given_name
@@ -138,7 +136,6 @@ class App extends Component {
           given_name,
           preferred_username
         } = result.userInfo;
-        console.log("email address to look up db");
         const username = preferred_username || email;
         //username, firstname, lastname, email
         //get the user with username
