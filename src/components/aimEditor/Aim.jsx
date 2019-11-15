@@ -3,7 +3,7 @@ import { modalities } from "./modality";
 import { generateUid } from "../../Utils/aid";
 
 class Aim {
-  constructor(imageData, aimType, hasSegmentation, updatedAimId) {
+  constructor(imageData, aimType, updatedAimId) {
     this.temp = {};
     ({
       aim: this.temp.aim,
@@ -29,7 +29,7 @@ class Aim {
     this.equipment = this._createEquipment(this.temp.equipment);
     this.person = this._createPerson(this.temp.person);
     this.imageAnnotations = {
-      ImageAnnotation: [this._createImageAnnotations(aimType, hasSegmentation)]
+      ImageAnnotation: [this._createImageAnnotations(aimType)]
     };
     if (updatedAimId === undefined)
       this.uniqueIdentifier = { root: generateUid() };
@@ -131,14 +131,14 @@ class Aim {
     Object.assign(obj, this._createDoubleDataType());
     obj["xsi:type"] = "CompactCalculationResult";
     obj["dimensionCollection"] = this._createDimension(preLabel + label);
-    obj["type"] = "scalar";
-    Object.assign(obj, this._createObject("value", value));
+    obj["type"] = "Scalar";
+    Object.assign(obj, this._createObject("value", `${value}`));
     return obj;
   };
 
   //if called with the default values returns DCM type code
   _createTypeCode = (
-    code = 11203,
+    code = "11203",
     codeSystemName = "DCM",
     displayNameValue = "Attenuation Coefficient"
   ) => {
@@ -282,6 +282,24 @@ class Aim {
     return uId;
   };
 
+  createVolumeCalcEntity = (value, preLabel) => {
+    var { unit, volume } = value;
+    var obj = {};
+    obj["calculationResultCollection"] = {
+      CalculationResult: [
+        this._createCalcResult(unit, "Volume", volume, preLabel)
+      ]
+    };
+    obj["description"] = { value: "Volume" };
+    const uId = generateUid();
+    obj["uniqueIdentifier"] = { root: uId };
+    obj["typeCode"] = [this._createTypeCode("RID28668", "Radlex", "Volume")];
+    this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
+      "CalculationEntity"
+    ].push(obj);
+    return uId;
+  };
+
   createCommonCalcEntites = (mean, stdDev, min, max, preLabel) => {
     var entities = [];
     entities.push(this.createMeanCalcEntity(mean, preLabel));
@@ -393,7 +411,7 @@ class Aim {
     obj["code"] = codeValue;
     obj["codeSystemName"] = codingSchemeDesignator;
     obj["iso:displayName"] = {
-      "xmlns:iso:": "uri:iso.org:21090",
+      "xmlns:iso": "uri:iso.org:21090",
       value: codeMeaning
     };
     obj["codeSystemVersion"] = codingSchemeVersion;
@@ -488,10 +506,6 @@ class Aim {
     obj[
       "imageReferenceEntityCollection"
     ] = this._createImageReferanceEntityCollection();
-    if (this.temp.segmentation)
-      obj[
-        "segmentationEntityCollection"
-      ] = this.creatSegmentationEntityCollection();
     return obj;
   };
 
@@ -538,9 +552,8 @@ class Aim {
   /*    Segmentation Entitiy Realted Functions      */
   /*                                                */
 
-  _createSegmentationEntity = () => {
+  createSegmentationEntity = segmentation => {
     var obj = {};
-    const { segmentation } = this.temp;
     obj["referencedSopInstanceUid"] = {
       root: segmentation.referencedSopInstanceUid
     };
@@ -555,14 +568,13 @@ class Aim {
     obj["sopClassUid"] = { root: "1.2.840.10008.5.1.4.1.1.66.4" };
     obj["sopInstanceUid"] = { root: segmentation.sopInstanceUid };
     obj["uniqueIdentifier"] = { root: generateUid() };
-    console.log("Segmentation Entity", obj);
-    return obj;
-  };
-
-  creatSegmentationEntityCollection = () => {
-    var obj = {};
-    obj["SegmentationEntity"] = [this._createSegmentationEntity()];
-    return obj;
+    const imageAnnotation = this.imageAnnotations.ImageAnnotation[0];
+    if (!imageAnnotation.segmentationEntityCollection) {
+      imageAnnotation.segmentationEntityCollection = {};
+      imageAnnotation.segmentationEntityCollection.SegmentationEntity = [];
+    }
+    imageAnnotation.segmentationEntityCollection.SegmentationEntity.push(obj);
+    return obj["uniqueIdentifier"];
   };
 
   //

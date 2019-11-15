@@ -1,23 +1,22 @@
 import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
+import cornerstoneTools from "cornerstone-tools";
 import {
   getImageIds,
   getWadoImagePath,
   getSegmentation
 } from "../../services/seriesServices";
-import { getAnnotations2 } from "../../services/annotationServices";
 import { connect } from "react-redux";
 import { wadoUrl, isLite } from "../../config.json";
 import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
-import Aim from "../aimEditor/Aim";
-import AimEditor from "../aimEditor/aimEditor";
 import "./flex.css";
 import "./viewport.css";
 import { changeActivePort, updateImageId } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
-import CornerstoneViewport from "../../reactCornerstoneViewport";
+import CornerstoneViewport from "react-cornerstone-viewport";
+import OHIFSegmentationExtension from "../../ohif-segmentation-plugin";
 import { freehand } from "./Freehand";
 import { line } from "./Line";
 import { probe } from "./Probe";
@@ -26,8 +25,8 @@ import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
 
 const tools = [
-  { name: "Wwwc", mouseButtonMasks: [1] },
-  { name: "Pan", mouseButtonMasks: [1] },
+  { name: "Wwwc", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "Pan", modeOptions: { mouseButtonMasks: [1] } },
   {
     name: "Zoom",
     configuration: {
@@ -35,10 +34,10 @@ const tools = [
       maxScale: 25,
       preventZoomOutsideImage: true
     },
-    mouseButtonMasks: [1, 2]
+    modeOptions: { mouseButtonMasks: [1, 2] }
   },
-  { name: "Probe", mouseButtonMasks: [1] },
-  { name: "Length", mouseButtonMasks: [1] },
+  { name: "Probe", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "Length", modeOptions: { mouseButtonMasks: [1] } },
   {
     name: "EllipticalRoi",
     configuration: {
@@ -56,34 +55,32 @@ const tools = [
     configuration: {
       showMinMax: true
     },
-    mouseButtonMasks: [1]
+    modeOptions: { mouseButtonMasks: [1] }
   },
   { name: "Angle" },
   { name: "Rotate" },
   { name: "WwwcRegion" },
   { name: "Probe" },
-  // { name: "FreehandRoi", mouseButtonMasks: [1] },
+  { name: "FreehandRoi3DTool", moreOptions: { mouseButtonMasks: [1] } },
+  { name: "FreehandRoiSculptorTool", modeOptions: { mouseButtonMasks: [1] } },
   { name: "Eraser" },
-  { name: "Bidirectional", mouseButtonMasks: [1] },
-  { name: "Brush" },
-  // { name: "FreehandRoiSculptor" },
-  { name: "StackScroll", mouseButtonMasks: [1] },
+  { name: "Bidirectional", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "Brush3DTool" },
+  { name: "StackScroll", modeOptions: { mouseButtonMasks: [1] } },
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
-  { name: "StackScrollMouseWheel" },
+  { name: "StackScrollMouseWheel", mode: "active" },
   { name: "StackScrollMultiTouch" },
-  { name: "FreehandScissors", mouseButtonMasks: [1] },
-  { name: "RectangleScissors", mouseButtonMasks: [1] },
-  { name: "CircleScissors", mouseButtonMasks: [1] },
-  { name: "CorrectionScissors", mouseButtonMasks: [1] }
+  { name: "FreehandScissors", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "RectangleScissors", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "CircleScissors", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "CorrectionScissors", modeOptions: { mouseButtonMasks: [1] } }
 ];
 
 const mapStateToProps = state => {
   return {
     series: state.annotationsListReducer.openSeries,
     loading: state.annotationsListReducer.loading,
-    cornerstone: state.searchViewReducer.cornerstone,
-    cornerstoneTools: state.searchViewReducer.cornerstoneTools,
     activePort: state.annotationsListReducer.activePort,
     aimList: state.annotationsListReducer.aimsList
   };
@@ -92,8 +89,6 @@ const mapStateToProps = state => {
 class DisplayView extends Component {
   constructor(props) {
     super(props);
-    // this.cornerstone = this.props.cornerstone;
-    this.cornerstoneTools = this.props.cornerstoneTools;
     this.state = {
       width: "100%",
       height: "calc(100% - 60px)",
@@ -120,6 +115,7 @@ class DisplayView extends Component {
       prevProps.loading === true &&
       this.props.loading === false
     ) {
+      console.log("Display view Update", prevProps, this.props);
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
@@ -148,20 +144,19 @@ class DisplayView extends Component {
   };
 
   getData() {
+    const { series } = this.props;
     var promises = [];
-    for (let i = 0; i < this.props.series.length; i++) {
-      const promise = this.getImageStack(this.props.series[i]);
+    for (let i = 0; i < series.length; i++) {
+      const promise = this.getImageStack(series[i]);
       promises.push(promise);
     }
     Promise.all(promises).then(res => {
       this.setState({ data: res, isLoading: false });
-      this.sleep(3900).then(() => {
-        this.props.series.forEach(serie => {
-          console.log("Serie", serie);
-          if (serie.imageAnnotations)
-            this.parseAims(serie.imageAnnotations, serie.seriesUID);
-        });
-      });
+    });
+
+    series.forEach(serie => {
+      if (serie.imageAnnotations)
+        this.parseAims(serie.imageAnnotations, serie.seriesUID, serie.studyUID);
     });
   }
 
@@ -335,24 +330,24 @@ class DisplayView extends Component {
     }
   };
 
-  parseAims = (aimList, seriesUid) => {
+  parseAims = (aimList, seriesUid, studyUid) => {
     console.log();
-    Object.entries(aimList).forEach(([key, values]) => {
+    Object.entries(aimList).forEach(([key, values], i) => {
       values.forEach(value => {
         const { markupType, aimUid } = value;
         console.log("Value", value);
         if (markupType === "DicomSegmentationEntity")
-          this.getSegmentationData(aimUid);
+          this.getSegmentationData(seriesUid, studyUid, aimUid, i);
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
         this.renderMarkup(key, value, color);
       });
     });
   };
 
-  getSegmentationData = aimId => {
-    const { series, activePort, aimList } = this.props;
-    const { seriesUID, studyUID } = series[activePort];
+  getSegmentationData = (seriesUID, studyUID, aimId, i) => {
+    const { aimList } = this.props;
 
+    console.log("New bug, seriesUID, aimId, activePort", seriesUID, aimId);
     const segmentationEntity =
       aimList[seriesUID][aimId].json.segmentationEntityCollection
         .SegmentationEntity[0];
@@ -364,23 +359,25 @@ class DisplayView extends Component {
     getSegmentation(pathVariables, sopInstanceUid.root).then(segData => {
       // segData.arrayBuffer().then(segBuffer => {
       console.log("Seg Data is", segData.data);
-      this.renderSegmentation(segData.data);
+      // this.renderSegmentation(segData.data, i);
       // });
     });
   };
 
-  renderSegmentation = arrayBuffer => {
-    const cornerstoneTools = this.cornerstoneTools;
-    const cornerstone = this.props.cornerstone;
-
+  renderSegmentation = (arrayBuffer, i) => {
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
-    const stackToolState = this.props.cornerstoneTools.getToolState(
-      element,
-      "stack"
-    );
+
+    const stackToolState = cornerstoneTools.getToolState(element, "stack");
     console.log("Stack toolstate", stackToolState);
     const imageIds = stackToolState.data[0].imageIds;
-    const t0 = performance.now();
+    console.log(
+      "Tool state genrated",
+      dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
+        imageIds,
+        arrayBuffer,
+        cornerstone.metaData
+      )
+    );
     const {
       labelmapBuffer,
       segMetadata,
@@ -390,12 +387,11 @@ class DisplayView extends Component {
       arrayBuffer,
       cornerstone.metaData
     );
-    const t1 = performance.now();
     const { setters, state } = cornerstoneTools.getModule("segmentation");
     setters.labelmap3DByFirstImageId(
       imageIds[0],
       labelmapBuffer,
-      0,
+      i,
       segMetadata,
       imageIds.length,
       segmentsOnFrame
@@ -442,10 +438,10 @@ class DisplayView extends Component {
     data.color = color;
     data.aimId = markup.aimUid;
     this.createLinePoints(data, markup.coordinates);
-    const currentState = this.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imgId, "Length");
     currentState[imgId]["Length"].data.push(data);
-    this.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
   };
@@ -466,10 +462,10 @@ class DisplayView extends Component {
     data.color = color;
     data.aimId = markup.aimUid;
     this.createPolygonPoints(data, markup.coordinates);
-    const currentState = this.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imgId, "FreehandMouse");
     currentState[imgId]["FreehandMouse"].data.push(data);
-    this.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
   };
@@ -502,19 +498,17 @@ class DisplayView extends Component {
     data.aimId = markup.aimUid;
     data.handles.end.x = markup.coordinates.x.value;
     data.handles.end.y = markup.coordinates.y.value;
-    const currentState = this.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imgId, "Probe");
     currentState[imgId]["Probe"].data.push(data);
-    this.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
   };
 
   renderCircle = (imageId, markup, color) => {
-    const imgId = getWadoImagePath(
-      this.props.series[this.props.activePort],
-      imageId
-    );
+    const { series, activePort } = this.props;
+    const imgId = getWadoImagePath(series[activePort], imageId);
     const data = JSON.parse(JSON.stringify(circle));
     data.color = color;
     data.aimId = markup.aimUid;
@@ -522,10 +516,10 @@ class DisplayView extends Component {
     data.handles.start.y = markup.coordinates[0].y.value;
     data.handles.end.x = markup.coordinates[1].x.value;
     data.handles.end.y = markup.coordinates[1].y.value;
-    const currentState = this.cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imgId, "CircleRoi");
     currentState[imgId]["CircleRoi"].data.push(data);
-    this.cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
   };
@@ -551,18 +545,15 @@ class DisplayView extends Component {
   };
 
   render() {
+    // OHIFSegmentationExtension.preRegistration();
+    // console.log("CornerstoneTools in dp view", cornerstoneTools);
+    // console.log("Datata", this.state.data);
     return !Object.entries(this.props.series).length ? (
       <Redirect to="/search" />
     ) : (
       // <div className="displayView-main">
       <React.Fragment>
-        {/* <Toolbar
-          cornerstone={this.cornerstone}
-          cornerstoneTools={this.cornerstoneTools}
-        /> */}
         <RightsideBar
-          cornerstone={this.props.cornerstone}
-          csTools={this.cornerstoneTools}
           showAimEditor={this.state.showAimEditor}
           aimId={this.state.selectedAim}
           onCancel={this.closeAimEditor}
@@ -596,9 +587,9 @@ class DisplayView extends Component {
                 >
                   <CornerstoneViewport
                     key={i}
-                    viewportData={data}
+                    imageIds={data.stack.imageIds}
                     viewportIndex={i}
-                    availableTools={tools}
+                    tools={tools}
                     onMeasurementsChanged={this.measurementChanged}
                     setViewportActive={() => this.setActive(i)}
                     onNewImage={event =>
@@ -608,27 +599,6 @@ class DisplayView extends Component {
                   />
                 </MenuProvider>
               </div>
-              // <div
-              //   className={"viewportContainer"}
-              //   key={i}
-              //   style={{
-              //     width: this.state.width,
-              //     height: this.state.height,
-              //     padding: "2px",
-              //     display: "inline-block"
-              //   }}
-              //   onDoubleClick={() => this.hideShow(i)}
-              // >
-
-              // {this.state.showAimEditor && (
-              //   <AimEditor
-              //     cornerstone={this.props.cornerstone}
-              //     csTools={this.cornerstoneTools}
-              //   />
-              // )}
-
-              //{" "}
-              // </div>
             ))}
           <ContextMenu />
         </RightsideBar>

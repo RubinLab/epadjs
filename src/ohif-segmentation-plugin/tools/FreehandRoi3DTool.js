@@ -714,9 +714,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
       this._deactivateDraw(element);
     }
 
-    console.log("I am interpolating", modules.freehand3D.state.interpolate);
     if (modules.freehand3D.state.interpolate) {
-      console.log("I will interpolate", element);
       interpolate(data, element);
     }
 

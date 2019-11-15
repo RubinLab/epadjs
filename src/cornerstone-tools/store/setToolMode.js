@@ -1,16 +1,16 @@
-import EVENTS from './../events.js';
-import triggerEvent from './../util/triggerEvent.js';
-import getToolForElement from './getToolForElement.js';
+import EVENTS from "./../events.js";
+import triggerEvent from "./../util/triggerEvent.js";
+import getToolForElement from "./getToolForElement.js";
 import {
   setToolCursor,
   resetToolCursor,
-  hideToolCursor,
-} from './setToolCursor.js';
-import { getLogger } from '../util/logger.js';
-import store, { getModule } from './index.js';
+  hideToolCursor
+} from "./setToolCursor.js";
+import { getLogger } from "../util/logger.js";
+import store, { getModule } from "./index.js";
 
-const globalConfiguration = getModule('globalConfiguration');
-const logger = getLogger('store:setToolMode');
+const globalConfiguration = getModule("globalConfiguration");
+const logger = getLogger("store:setToolMode");
 
 /**
  * Sets a tool's state, with the provided toolName and element, to 'active'. Active tools are rendered,
@@ -68,20 +68,20 @@ const setToolActiveForElement = function(
 
     if (
       globalConfiguration.configuration.showSVGCursors &&
-      tool.supportedInteractionTypes.includes('Mouse')
+      tool.supportedInteractionTypes.includes("Mouse")
     ) {
       _setToolCursorIfPrimary(element, options, tool);
     }
   }
 
   // Resume normal behavior
-  setToolModeForElement('active', null, element, toolName, options);
+  setToolModeForElement("active", null, element, toolName, options);
 };
 
 function _setToolCursorIfPrimary(element, options, tool) {
   let mouseButtonMask;
 
-  if (typeof options === 'number') {
+  if (typeof options === "number") {
     mouseButtonMask = [options];
   } else {
     mouseButtonMask = options.mouseButtonMask;
@@ -111,7 +111,7 @@ function _setToolCursorIfPrimary(element, options, tool) {
  * @returns {undefined}
  */
 const setToolActive = function(toolName, options, interactionTypes) {
-  _trackGlobalToolModeChange('active', toolName, options, interactionTypes);
+  _trackGlobalToolModeChange("active", toolName, options, interactionTypes);
   store.state.enabledElements.forEach(element => {
     setToolActiveForElement(element, toolName, options, interactionTypes);
   });
@@ -131,7 +131,7 @@ const setToolActive = function(toolName, options, interactionTypes) {
  */
 const setToolDisabledForElement = setToolModeForElement.bind(
   null,
-  'disabled',
+  "disabled",
   null
 );
 
@@ -146,7 +146,7 @@ const setToolDisabledForElement = setToolModeForElement.bind(
  * @param {(Object|number)} options
  * @returns {undefined}
  */
-const setToolDisabled = setToolMode.bind(null, 'disabled', null);
+const setToolDisabled = setToolMode.bind(null, "disabled", null);
 
 /**
  * Sets a tool's state, with the provided toolName and element, to 'enabled'. Enabled tools are rendered,
@@ -162,7 +162,7 @@ const setToolDisabled = setToolMode.bind(null, 'disabled', null);
  */
 const setToolEnabledForElement = setToolModeForElement.bind(
   null,
-  'enabled',
+  "enabled",
   null
 );
 
@@ -177,7 +177,7 @@ const setToolEnabledForElement = setToolModeForElement.bind(
  * @param {(Object|number)} options
  * @returns {undefined}
  */
-const setToolEnabled = setToolMode.bind(null, 'enabled', null);
+const setToolEnabled = setToolMode.bind(null, "enabled", null);
 
 /**
  * Sets a tool's state, with the provided toolName and element, to 'passive'. Passive tools are rendered and respond to user input,
@@ -193,7 +193,7 @@ const setToolEnabled = setToolMode.bind(null, 'enabled', null);
  */
 const setToolPassiveForElement = setToolModeForElement.bind(
   null,
-  'passive',
+  "passive",
   EVENTS.TOOL_DEACTIVATED
 );
 
@@ -210,7 +210,7 @@ const setToolPassiveForElement = setToolModeForElement.bind(
  */
 const setToolPassive = setToolMode.bind(
   null,
-  'passive',
+  "passive",
   EVENTS.TOOL_DEACTIVATED
 );
 
@@ -266,7 +266,7 @@ function setToolModeForElement(mode, changeEvent, element, toolName, options) {
     const statusChangeEventData = {
       options,
       toolName,
-      type: changeEvent,
+      type: changeEvent
     };
 
     triggerEvent(element, changeEvent, statusChangeEventData);
@@ -324,7 +324,7 @@ function _resolveInputConflicts(element, tool, options, interactionTypes) {
         inputResolver(tool, element, options);
       } else {
         logger.warn(
-          'Unable to resolve input conflicts for type %s',
+          "Unable to resolve input conflicts for type %s",
           interactionType
         );
       }
@@ -334,7 +334,7 @@ function _resolveInputConflicts(element, tool, options, interactionTypes) {
   const activeToolsForElement = store.state.tools.filter(
     t =>
       t.element === element &&
-      t.mode === 'active' &&
+      t.mode === "active" &&
       t.supportedInteractionTypes.length > 0
   );
 
@@ -376,7 +376,7 @@ function _resolveMouseInputConflicts(tool, element, options) {
   const activeToolWithMatchingMouseButtonMask = store.state.tools.find(
     t =>
       t.element === element &&
-      t.mode === 'active' &&
+      t.mode === "active" &&
       t.options.isMouseActive === true &&
       Array.isArray(t.options.mouseButtonMask) &&
       t.options.mouseButtonMask.some(v => mouseButtonMask.includes(v))
@@ -410,14 +410,14 @@ function _resolveTouchInputConflicts(tool, element) {
   const activeTouchTool = store.state.tools.find(
     t =>
       t.element === element &&
-      t.mode === 'active' &&
+      t.mode === "active" &&
       t.options.isTouchActive === true
   );
 
   const activeMultiTouchToolWithOneTouchPointer = store.state.tools.find(
     t =>
       t.element === element &&
-      t.mode === 'active' &&
+      t.mode === "active" &&
       t.options.isMultiTouchActive === true &&
       t.configuration.touchPointers === 1
   );
@@ -451,7 +451,7 @@ function _resolveMultiTouchInputConflicts(tool, element) {
   const activeMultiTouchTool = store.state.tools.find(
     t =>
       t.element === element &&
-      t.mode === 'active' &&
+      t.mode === "active" &&
       t.options.isMultiTouchActive === true &&
       t.configuration.touchPointers === tool.configuration.touchPointers
   );
@@ -462,7 +462,7 @@ function _resolveMultiTouchInputConflicts(tool, element) {
     activeTouchTool = store.state.tools.find(
       t =>
         t.element === element &&
-        t.mode === 'active' &&
+        t.mode === "active" &&
         t.options.isTouchActive === true
     );
   }
@@ -502,7 +502,7 @@ function _resolveGenericInputConflicts(interactionType, tool, element) {
   const activeToolWithActiveInteractionType = store.state.tools.find(
     t =>
       t.element === element &&
-      t.mode === 'active' &&
+      t.mode === "active" &&
       t.options[interactionTypeFlag] === true
   );
 
@@ -524,7 +524,7 @@ function _trackGlobalToolModeChange(mode, toolName, options, interactionTypes) {
   // Update Tool History
   const historyEvent = {
     mode,
-    args: [toolName, options],
+    args: [toolName, options]
   };
 
   if (interactionTypes) {
@@ -552,7 +552,7 @@ function _trackGlobalToolModeChange(mode, toolName, options, interactionTypes) {
     return;
   }
 
-  if (mode === 'active') {
+  if (mode === "active") {
     let stringBindings = _determineStringBindings(
       toolName,
       options,
@@ -569,12 +569,12 @@ function _trackGlobalToolModeChange(mode, toolName, options, interactionTypes) {
     });
 
     // @HACK: Clear mouse bindings
-    if (stringBindings.some(binding => binding.includes('Mouse-DELETE'))) {
+    if (stringBindings.some(binding => binding.includes("Mouse-DELETE"))) {
       globalTool.activeBindings = globalTool.activeBindings.filter(
-        binding => !binding.includes('Mouse')
+        binding => !binding.includes("Mouse")
       );
       stringBindings = stringBindings.filter(
-        binding => !binding.includes('Mouse')
+        binding => !binding.includes("Mouse")
       );
     }
 
@@ -604,7 +604,7 @@ function _determineStringBindings(toolName, options, interactionTypes) {
         interactionTypes === undefined ||
         interactionTypes.includes(interactionType)
       ) {
-        if (interactionType === 'Mouse') {
+        if (interactionType === "Mouse") {
           const mouseButtonMasks = _getNormalizedOptions(options)
             .mouseButtonMask;
 
@@ -619,7 +619,7 @@ function _determineStringBindings(toolName, options, interactionTypes) {
           ) {
             stringBindings.push(`${interactionType}-DELETE`);
           }
-        } else if (interactionType === 'MultiTouch') {
+        } else if (interactionType === "MultiTouch") {
           stringBindings.push(
             `${interactionType}-${tool.configuration.touchPointers}`
           );
@@ -635,12 +635,12 @@ function _determineStringBindings(toolName, options, interactionTypes) {
 
 const _inputResolvers = {
   Mouse: _resolveMouseInputConflicts,
-  MouseWheel: _resolveGenericInputConflicts.bind(this, 'MouseWheel'),
+  MouseWheel: _resolveGenericInputConflicts.bind(this, "MouseWheel"),
   Touch: _resolveTouchInputConflicts,
-  TouchPinch: _resolveGenericInputConflicts.bind(this, 'TouchPinch'),
-  TouchRotate: _resolveGenericInputConflicts.bind(this, 'TouchRotate'),
-  DoubleTap: _resolveGenericInputConflicts.bind(this, 'DoubleTap'),
-  MultiTouch: _resolveMultiTouchInputConflicts,
+  TouchPinch: _resolveGenericInputConflicts.bind(this, "TouchPinch"),
+  TouchRotate: _resolveGenericInputConflicts.bind(this, "TouchRotate"),
+  DoubleTap: _resolveGenericInputConflicts.bind(this, "DoubleTap"),
+  MultiTouch: _resolveMultiTouchInputConflicts
 };
 
 function _getNormalizedOptions(options) {
@@ -654,7 +654,7 @@ function _getNormalizedOptions(options) {
   }
 
   // If there is still no 'mouseButtonMask' default it to an empty array
-  if (!options.hasOwnProperty('mouseButtonMask')) {
+  if (!options.hasOwnProperty("mouseButtonMask")) {
     options.mouseButtonMask = [];
   }
 
@@ -664,7 +664,7 @@ function _getNormalizedOptions(options) {
 
   // Now filter out anything that is not an number or is the number 0
   options.mouseButtonMask = options.mouseButtonMask.filter(
-    o => typeof o === 'number' && o !== 0
+    o => typeof o === "number" && o !== 0
   );
 
   return options;
@@ -694,5 +694,5 @@ export {
   setToolMode,
   setToolModeForElement,
   _getNormalizedOptions,
-  _mergeMouseButtonMask,
+  _mergeMouseButtonMask
 };

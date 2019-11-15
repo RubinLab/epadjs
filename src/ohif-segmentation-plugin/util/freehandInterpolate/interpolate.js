@@ -18,9 +18,15 @@ const modules = store.modules;
  * @return {null}
  */
 export default function(toolData, element) {
+  console.log("In interpolate", toolData, element);
   const { ROIContourData, interpolationList } = generateInterpolationData(
     toolData,
     element
+  );
+  console.log(
+    "Roi contour data and interpolation list",
+    ROIContourData,
+    interpolationList
   );
 
   for (let i = 0; i < interpolationList.length; i++) {

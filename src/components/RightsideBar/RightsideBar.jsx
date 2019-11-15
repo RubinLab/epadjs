@@ -62,10 +62,7 @@ class Rightsidebar extends Component {
             </div>
           )}
           <Collapsible trigger={"Tools"} transitionTime={100}>
-            <ToolMenu
-              cornerstone={this.props.cornerstone}
-              cornerstoneTools={this.props.csTools}
-            />
+            <ToolMenu />
           </Collapsible>
           {this.props.showAimEditor && (
             <Collapsible
@@ -76,8 +73,6 @@ class Rightsidebar extends Component {
             >
               <div className="AimEditor-Wrapper">
                 <AimEditor
-                  cornerstone={this.props.cornerstone}
-                  csTools={this.props.csTools}
                   aimId={this.props.selectedAim}
                   // onCancel={this.closeAimEditor}
                   hasSegmentation={this.props.hasSegmentation}

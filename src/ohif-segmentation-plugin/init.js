@@ -1,4 +1,4 @@
-import { store, register, addTool } from "../cornerstone-tools";
+import { store, register, addTool } from "cornerstone-tools";
 import freehand3DModule from "./modules/freehand3DModule.js";
 import extendBrushModule from "./modules/extendBrushModule.js";
 
@@ -15,18 +15,19 @@ export { TOOL_NAMES };
 const modules = store.modules;
 
 const defaultConfig = {
+  renderOutline: false,
   maxRadius: 64,
   holeFill: 2,
   holeFillRange: [0, 20],
   strayRemove: 5,
   strayRemoveRange: [0, 99],
   interpolate: false,
-  showFreehandStats: false,
+  showFreehandStats: true,
   brush3dToolName: "Brush3DTool",
   brush3DHUGatedToolName: "Brush3DHUGated",
   brush3DAutoGatedTool: "Brush3DAutoGated",
-  freehandRoi3DTool: "FreehandRoi3D",
-  freehandRoi3DSculptorTool: "FreehandRoi3DSculptor",
+  freehandRoi3DTool: "FreehandRoi3DTool",
+  freehandRoi3DSculptorTool: "FreehandRoi3DSculptorTool",
   gates: [
     {
       // https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4309522/

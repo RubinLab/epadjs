@@ -1,6 +1,12 @@
-import { FreehandRoiSculptorTool, toolColors, store, getToolState } from 'cornerstone-tools';
-import { updateImage } from 'cornerstone-core';
-import interpolate from '../util/freehandInterpolate/interpolate.js';
+import {
+  FreehandRoiSculptorTool,
+  toolColors,
+  store,
+  getToolState
+} from "cornerstone-tools";
+import cornerstoneTools from "cornerstone-tools";
+import { updateImage } from "cornerstone-core";
+import interpolate from "../util/freehandInterpolate/interpolate.js";
 
 const { modules, state } = store;
 
@@ -27,7 +33,10 @@ export default class FreehandRoi3DSculptorTool extends FreehandRoiSculptorTool {
   _selectFreehandTool(eventData) {
     const config = this.configuration;
     const element = eventData.element;
-    const closestToolIndex = this._getClosestFreehandToolOnElement(element, eventData);
+    const closestToolIndex = this._getClosestFreehandToolOnElement(
+      element,
+      eventData
+    );
 
     if (closestToolIndex === undefined) {
       return;
@@ -72,7 +81,10 @@ export default class FreehandRoi3DSculptorTool extends FreehandRoiSculptorTool {
     const toolData = getToolState(element, this.referencedToolName);
     const data = toolData.data[config.currentTool];
 
-    if (modules.freehand3D.getters.interpolate()) {
+    console.log("In active End", cornerstoneTools);
+    console.log("Now data", data);
+
+    if (modules.freehand3D.getters.interpolate) {
       interpolate(data);
     }
 
