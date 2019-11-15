@@ -71,15 +71,15 @@ class Subjects extends Component {
   };
 
   getData = async () => {
-    if (this.props.pid) {
-      const { data: data } = await getSubjects(this.props.pid);
-      for (let subject of data) {
-        subject.children = [];
-      }
-      return data;
-    } else {
-      return [];
+    // if (this.props.pid) {
+    const { data: data } = await getSubjects(this.props.pid);
+    for (let subject of data) {
+      subject.children = [];
     }
+    return data;
+    // } else {
+    //   return [];
+    // }
   };
 
   incColumns = ["subjectName", "numberOfStudies"];
