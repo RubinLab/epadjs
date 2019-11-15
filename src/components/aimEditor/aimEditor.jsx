@@ -10,6 +10,11 @@ import {
   uploadAim,
   uploadSegmentation
 } from "../../services/annotationServices";
+import {
+  updateSingleSerie,
+  updatePatientOnAimSave,
+  getSingleSerie
+} from "../annotationsList/action";
 import { getAimImageData } from "./aimHelper";
 import * as questionaire from "./parseClass.js";
 import Aim from "./Aim";
@@ -216,6 +221,7 @@ class AimEditor extends Component {
         if (segmentationBlob) this.saveSegmentation(segmentationBlob);
         // var objectUrl = URL.createObjectURL(segBlobGlobal);
         // window.open(objectUrl);
+
         toast.success("Aim succesfully saved.", {
           position: "top-right",
           autoClose: 5000,
@@ -224,6 +230,19 @@ class AimEditor extends Component {
           pauseOnHover: true,
           draggable: true
         });
+        // this.props.dispatch(
+        //   getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+        // );
+        this.props.dispatch(
+          updateSingleSerie({
+            subjectID: patientID,
+            projectID,
+            seriesUID,
+            studyUID
+          })
+        );
+
+        this.props.dispatch(updatePatientOnAimSave(aimRefs));
       })
       .catch(error => console.log(error));
   };

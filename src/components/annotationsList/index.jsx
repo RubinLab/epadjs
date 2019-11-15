@@ -17,7 +17,7 @@ class AnnotationsList extends React.Component {
     this.patient = this.patients[this.openSeries[this.activePort].patientID];
     this.state = {
       width: "215px",
-      x: 1000,
+      x: 100,
       y: 75,
       selectedStudy: "",
       serieList: []
@@ -25,9 +25,10 @@ class AnnotationsList extends React.Component {
   }
   componentDidMount = () => {
     const icon = document.getElementsByClassName("patient-icon")[0];
-    const x = Math.ceil(icon.getBoundingClientRect().left);
+    let x = Math.ceil(icon.getBoundingClientRect().left);
     let y = Math.ceil(icon.getBoundingClientRect().bottom);
-    y = window.innerWidth <= 932 ? (y = y * 3) : y * 2;
+    x = x - 200;
+    // y = window.innerWidth <= 932 ? (y = y * 2) : y * 1.5;
 
     this.setState({ x, y });
 

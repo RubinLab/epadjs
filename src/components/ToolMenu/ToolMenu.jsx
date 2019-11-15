@@ -303,14 +303,6 @@ class ToolMenu extends Component {
     this.props.dispatch(showAnnotationWindow());
   };
 
-  handleAnnotationsDockClick = async () => {
-    // const showStatus = this.state.showAnnotationList;
-    await this.setState(state => ({
-      dockOpen: !state.dockOpen
-    }));
-    this.props.dispatch(showAnnotationDock());
-  };
-
   invert() {
     const activeElement = cornerstone.getEnabledElements()[
       this.props.activePort

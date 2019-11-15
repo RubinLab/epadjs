@@ -27,7 +27,9 @@ import {
   clearSelection,
   changeActivePort,
   jumpToAim,
-  showAnnotationDock
+  showAnnotationDock,
+  updateSingleSerie,
+  updatePatientOnAimDelete
 } from "../annotationsList/action";
 import { MAX_PORT } from "../../constants";
 import DownloadSelection from "./annotationDownloadModal";
@@ -71,9 +73,6 @@ class SearchView extends Component {
   };
 
   componentDidMount = async () => {
-    if (this.props.dockOpen) {
-      this.props.dispatch(showAnnotationDock());
-    }
     const subjects = await this.getData();
     this.setState({ numOfsubjects: subjects.length, subjects });
   };
@@ -194,6 +193,9 @@ class SearchView extends Component {
         const subjects = await this.getData();
         this.setState({ deleting: false, numOfsubjects: subjects.length });
         this.setState(state => ({ update: state.update + 1 }));
+        if (Object.values(this.props.selectedAnnotations).length > 0) {
+          this.updateStoreOnAnnotationDelete(arr);
+        }
         this.props.dispatch(clearSelection());
       })
       .catch(err => {
@@ -216,6 +218,30 @@ class SearchView extends Component {
     } else if (selectedAnnotations.length > 0) {
       this.deleteSelectionWrapper(selectedAnnotations, deleteAnnotation);
     }
+  };
+
+  updateStoreOnAnnotationDelete = arr => {
+    const seriesToUpdate = {};
+    const patientsToUpdate = [];
+    const openSeriesUIDs = this.props.openSeries.reduce((all, item, index) => {
+      all.push(item.seriesUID);
+      return all;
+    }, []);
+    arr.forEach((el, index) => {
+      if (openSeriesUIDs.includes(el.seriesUID)) {
+        seriesToUpdate[el.seriesUID] = openSeriesUIDs.indexOf(el.seriesUID);
+        patientsToUpdate.push(el);
+      }
+    });
+    Object.values(seriesToUpdate).forEach(el => {
+      const subjectID = this.props.openSeries[el].patientID;
+      this.props.dispatch(
+        updateSingleSerie({ ...this.props.openSeries[el], subjectID })
+      );
+    });
+    patientsToUpdate.forEach(el => {
+      this.props.dispatch(updatePatientOnAimDelete(el));
+    });
   };
 
   updateError = error => {
@@ -725,7 +751,6 @@ class SearchView extends Component {
 
 const mapStateToProps = state => {
   return {
-    dockOpen: state.annotationsListReducer.dockOpen,
     selectedProjects: state.annotationsListReducer.selectedProjects,
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
