@@ -13,7 +13,6 @@ import {
   CHANGE_ACTIVE_PORT,
   LOAD_SERIE_SUCCESS,
   SHOW_ANNOTATION_WINDOW /*???*/,
-  SHOW_ANNOTATION_DOCK,
   OPEN_PROJECT_MODAL,
   CLEAR_GRID,
   CLEAR_SELECTION,
@@ -29,7 +28,9 @@ import {
   UPDATE_PATIENT,
   CLOSE_SERIE,
   UPDATE_IMAGEID,
-  CLEAR_AIMID
+  CLEAR_AIMID,
+  UPDATE_PATIENT_AIM_SAVE,
+  UPDATE_PATIENT_AIM_DELETE
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -40,7 +41,6 @@ const initialState = {
   error: false,
   patients: {},
   listOpen: false,
-  dockOpen: false,
   showGridFullAlert: false,
   showProjectModal: false,
   selectedProjects: {},
@@ -49,12 +49,24 @@ const initialState = {
   selectedSeries: {},
   selectedAnnotations: {},
   patientLoading: false,
-  patientLoadingError: null,
-  imageID: null
+  patientLoadingError: null
 };
 
 const asyncReducer = (state = initialState, action) => {
   switch (action.type) {
+    case UPDATE_PATIENT_AIM_DELETE:
+      let patientAimDelete = { ...state.patients };
+      let { aimRefs } = action;
+      delete patientAimDelete[aimRefs.subjectID].studies[aimRefs.studyUID]
+        .series[aimRefs.seriesUID].annotations[aimRefs.aimID];
+      return { ...state, patient: patientAimDelete };
+    case UPDATE_PATIENT_AIM_SAVE:
+      let patientAimSave = { ...state.patients };
+      aimRefs = action.aimRefs;
+      patientAimSave[aimRefs.patientID].studies[aimRefs.studyUID].series[
+        aimRefs.seriesUID
+      ].annotations[aimRefs.aimID] = { ...aimRefs };
+      return { ...state, patient: patientAimSave };
     case CLEAR_AIMID:
       let aimIDClearedOPenSeries = [...state.openSeries];
       for (let serie of aimIDClearedOPenSeries) {
@@ -62,12 +74,13 @@ const asyncReducer = (state = initialState, action) => {
       }
       return { ...state, openSeries: aimIDClearedOPenSeries };
     case UPDATE_IMAGEID:
-      return { ...state, imageID: action.imageID };
+      const openSeriesToUpdate = [...state.openSeries];
+      openSeriesToUpdate[state.activePort].imageID = action.imageID;
+      return { ...state, openSeries: openSeriesToUpdate };
     case CLOSE_SERIE:
       let delSeriesUID = state.openSeries[state.activePort].seriesUID;
       let delStudyUID = state.openSeries[state.activePort].studyUID;
       let delPatientID = state.openSeries[state.activePort].patientID;
-      let dockStatus = state.dockOpen;
       const delAims = { ...state.aimsList };
       delete delAims[delSeriesUID];
       let delGrid = state.openSeries.slice(0, state.activePort);
@@ -90,7 +103,6 @@ const asyncReducer = (state = initialState, action) => {
       let delActivePort;
       if (delGrid.length === 0) {
         delActivePort = null;
-        dockStatus = false;
       } else {
         delActivePort = delGrid.length - 1;
       }
@@ -99,8 +111,7 @@ const asyncReducer = (state = initialState, action) => {
         openSeries: delGrid,
         aimsList: delAims,
         patients: delPatients,
-        activePort: delActivePort,
-        dockOpen: dockStatus
+        activePort: delActivePort
       };
     case LOAD_ANNOTATIONS:
       return Object.assign({}, state, {
@@ -183,19 +194,11 @@ const asyncReducer = (state = initialState, action) => {
       }
       return Object.assign({}, state, {
         activePort: action.portIndex,
-        openSeries: changedPortSeries,
-        dockOpen: true
+        openSeries: changedPortSeries
       });
-
     case SHOW_ANNOTATION_WINDOW:
       const showStatus = state.listOpen;
-
       return Object.assign({}, state, { listOpen: !showStatus });
-
-    case SHOW_ANNOTATION_DOCK:
-      const displayAnnDock = state.dockOpen;
-      return Object.assign({}, state, { dockOpen: !displayAnnDock });
-
     case TOGGLE_ALL_ANNOTATIONS:
       //update openSeries
       let { seriesUID, displayStatus } = action.payload;
@@ -208,35 +211,25 @@ const asyncReducer = (state = initialState, action) => {
       });
     case TOGGLE_ALL_LABELS:
       const toggledLabelSerie = { ...state.aimsList };
-
       const anns = toggledLabelSerie[action.payload.serieID];
-
       for (let ann in anns) {
         anns[ann].showLabel = action.payload.checked;
       }
-
       return Object.assign({}, state, { aimsList: toggledLabelSerie });
 
     case TOGGLE_LABEL:
       const singleLabelToggled = { ...state.aimsList };
-
       const allAnns = singleLabelToggled[action.payload.serieID];
-
       for (let ann in allAnns) {
         if (ann === action.payload.aimID) {
           const currentStatus = allAnns[ann].showLabel;
-
           allAnns[ann].showLabel = !currentStatus;
         }
       }
-
       return Object.assign({}, state, { aimsList: singleLabelToggled });
-
     case CLEAR_GRID:
       const clearedPatients = {};
-
       let selectionObj = [];
-
       if (Object.keys(state.selectedStudies).length > 0) {
         selectionObj = { ...state.selectedStudies };
       } else if (Object.keys(state.selectedSeries).length > 0) {
@@ -244,9 +237,7 @@ const asyncReducer = (state = initialState, action) => {
       } else {
         selectionObj = { ...state.selectedAnnotations };
       }
-
       //keep the patient if already there
-
       for (let item in selectionObj) {
         if (state.patients[item.patientID]) {
           clearedPatients[item.patientID] = {
@@ -254,9 +245,7 @@ const asyncReducer = (state = initialState, action) => {
           };
         }
       }
-
       //update the state as not displayed
-
       for (let patient in clearedPatients) {
         for (let study in clearedPatients[patient]) {
           for (let serie in clearedPatients[patient].studies[study]) {

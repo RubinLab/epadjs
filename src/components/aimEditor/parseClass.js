@@ -1,8 +1,8 @@
 // uncomment 2 imports below for react
 
 import $ from "jquery/dist/jquery.js";
-import "semantic-ui/dist/semantic.css";
-import "semantic-ui/dist/semantic.js";
+import "./semantic/semantic.css";
+import "./semantic/semantic.js";
 
 //export next variable for react
 export var AimEditor = function(userWindow, varformCheckHandler) {

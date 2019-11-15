@@ -1,0 +1,79 @@
+@import "../peppermint-table.styl"
+
+.roi-contour-menu
+  color: var(--text-primary-color)
+
+  text-align: center
+  height: 100%
+
+  .roi-contour-menu-component
+    height: 100%
+
+  h3
+    font-weight: 400
+
+  .roi-contour-menu-header
+    display: -webkit-flex
+    display: -ms-flexbox
+    display: flex
+    flex-direction: row
+    justify-content: space-between
+    align-items: center
+    padding-right: 18px
+    padding-left: 18px
+    width: 100%
+
+    a
+      height: 30px
+      width: 80px
+
+  .roi-contour-menu-collection-list-body
+    height: calc(90% - 180px)
+    padding-right: 18px
+    padding-left: 18px
+    overflow-y: auto
+    overflow-x: hidden
+    scrollbar-color: var(--text-secondary-color) var(ui-gray-darkest)
+    word-wrap: break-word
+
+    &::-webkit-scrollbar
+      background: var(--ui-gray-darkest)
+      width: 10px
+
+    &::-webkit-scrollbar-thumb
+      background: var(--text-secondary-color)
+      border-radius: 10px
+      border-right: 2px solid var(--ui-gray-darkest)
+
+    .roi-contour-menu-name-link
+      color: var(--text-primary-color)
+
+      &:hover
+        color: var(--text-secondary-color)
+
+  .roi-contour-menu-new-button
+    float: center
+    width: 100%
+
+  .roi-list-header
+    border-width: 1px
+    border-top-style: solid
+    border-bottom-style: solid
+
+  .roi-contour-menu-footer
+    margin: 10px
+    padding: 10px
+    background: var(--ui-gray-dark)
+    border: 1px solid var(--ui-border-color)
+
+    .roi-contour-menu-option
+      display: -webkit-flex
+      display: -ms-flexbox
+      display: flex
+      flex-direction: column
+      align-items: center
+
+      svg
+        background-color: transparent
+        width: 50px
+        height: 50px

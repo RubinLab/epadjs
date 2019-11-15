@@ -94,10 +94,23 @@ export function deleteAnnotation(aimObj, aimID, projectID) {
   );
 }
 
-export function uploadAim(formData) {
+export function uploadAim(aim) {
   let url;
   if (isLite) {
     url = apiUrl + "/projects/lite/aims";
-    return http.post(url, formData);
+    return http.post(url, aim);
   }
+}
+
+export function uploadSegmentation(segmentation, projectId = "lite") {
+  const url = apiUrl + "/projects/" + projectId + "/files";
+  const segData = new FormData();
+  segData.append("file", segmentation, "blob.dcm");
+  console.log("Segmentation Data", segmentation);
+  const config = {
+    headers: {
+      "content-type": "multipart/form-data"
+    }
+  };
+  return http.post(url, segData, config);
 }

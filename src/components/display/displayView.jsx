@@ -1,8 +1,11 @@
 import React, { Component } from "react";
-import Toolbar from "./toolbar";
-import { getImageIds, getWadoImagePath } from "../../services/seriesServices";
+import cornerstone from "cornerstone-core";
+import {
+  getImageIds,
+  getWadoImagePath,
+  getSegmentation
+} from "../../services/seriesServices";
 import { getAnnotations2 } from "../../services/annotationServices";
-import ViewportSeg from "./viewportSeg.jsx";
 import { connect } from "react-redux";
 import { wadoUrl, isLite } from "../../config.json";
 import { Redirect } from "react-router";
@@ -10,6 +13,7 @@ import { withRouter } from "react-router-dom";
 import Aim from "../aimEditor/Aim";
 import AimEditor from "../aimEditor/aimEditor";
 import "./flex.css";
+import "./viewport.css";
 import { changeActivePort, updateImageId } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
@@ -18,6 +22,8 @@ import { freehand } from "./Freehand";
 import { line } from "./Line";
 import { probe } from "./Probe";
 import { circle } from "./Circle";
+import RightsideBar from "../RightsideBar/RightsideBar";
+import * as dcmjs from "dcmjs";
 
 const tools = [
   { name: "Wwwc", mouseButtonMasks: [1] },
@@ -56,16 +62,20 @@ const tools = [
   { name: "Rotate" },
   { name: "WwwcRegion" },
   { name: "Probe" },
-  { name: "FreehandMouse", mouseButtonMasks: [1] },
+  // { name: "FreehandRoi", mouseButtonMasks: [1] },
   { name: "Eraser" },
   { name: "Bidirectional", mouseButtonMasks: [1] },
   { name: "Brush" },
-  { name: "FreehandSculpterMouse" },
+  // { name: "FreehandRoiSculptor" },
   { name: "StackScroll", mouseButtonMasks: [1] },
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
   { name: "StackScrollMouseWheel" },
-  { name: "StackScrollMultiTouch" }
+  { name: "StackScrollMultiTouch" },
+  { name: "FreehandScissors", mouseButtonMasks: [1] },
+  { name: "RectangleScissors", mouseButtonMasks: [1] },
+  { name: "CircleScissors", mouseButtonMasks: [1] },
+  { name: "CorrectionScissors", mouseButtonMasks: [1] }
 ];
 
 const mapStateToProps = state => {
@@ -82,7 +92,7 @@ const mapStateToProps = state => {
 class DisplayView extends Component {
   constructor(props) {
     super(props);
-    this.cornerstone = this.props.cornerstone;
+    // this.cornerstone = this.props.cornerstone;
     this.cornerstoneTools = this.props.cornerstoneTools;
     this.state = {
       width: "100%",
@@ -92,18 +102,16 @@ class DisplayView extends Component {
       isLoading: true,
       selectedAim: undefined,
       refs: props.refs,
-      showAnnDetails: true
+      showAnnDetails: true,
+      hasSegmentation: false
     };
   }
 
   componentDidMount() {
-    console.log("CDM", this.props);
     this.getViewports();
     this.getData();
-    window.addEventListener(
-      "annotationSelected",
-      this.handleAnnotationSelected
-    );
+    window.addEventListener("markupSelected", this.handleMarkupSelected);
+    window.addEventListener("markupCreated", this.handleMarkupCreated);
   }
 
   async componentDidUpdate(prevProps) {
@@ -113,17 +121,14 @@ class DisplayView extends Component {
       this.props.loading === false
     ) {
       await this.setState({ isLoading: true });
-      console.log("CDU", this.props);
       this.getViewports();
       this.getData();
     }
   }
 
   componentWillUnmount() {
-    window.removeEventListener(
-      "annotationSelected",
-      this.handleAnnotationSelected
-    );
+    window.removeEventListener("markupSelected", this.handleMarkupSelected);
+    window.removeEventListener("markupCreated", this.handleMarkupCreated);
   }
 
   // componentDidUpdate = async prevProps => {
@@ -138,6 +143,10 @@ class DisplayView extends Component {
   //   }
   // };
 
+  sleep = ms => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  };
+
   getData() {
     var promises = [];
     for (let i = 0; i < this.props.series.length; i++) {
@@ -146,10 +155,12 @@ class DisplayView extends Component {
     }
     Promise.all(promises).then(res => {
       this.setState({ data: res, isLoading: false });
-      console.log("Cs Tools", this.cornerstoneTools);
-      this.props.series.forEach(serie => {
-        if (serie.imageAnnotations)
-          this.parseAims(serie.imageAnnotations, serie.seriesUID);
+      this.sleep(3900).then(() => {
+        this.props.series.forEach(serie => {
+          console.log("Serie", serie);
+          if (serie.imageAnnotations)
+            this.parseAims(serie.imageAnnotations, serie.seriesUID);
+        });
       });
     });
   }
@@ -282,15 +293,39 @@ class DisplayView extends Component {
   measurementChanged = (event, action) => {
     const { toolType } = event.detail;
     const toolsOfInterest = [
+      "Probe",
       "Length",
       "CircleRoi",
-      "FreehandMouse",
-      "Bidirectional",
-      "Probe"
+      "FreehandRoi3D",
+      "Bidirectional"
     ];
     if (toolsOfInterest.includes(toolType)) {
       this.setState({ showAimEditor: true, selectedAim: undefined });
     }
+  };
+
+  handleMarkupSelected = event => {
+    if (
+      this.props.aimList[this.props.series[this.props.activePort].seriesUID][
+        event.detail
+      ]
+    ) {
+      const aimJson = this.props.aimList[
+        this.props.series[this.props.activePort].seriesUID
+      ][event.detail].json;
+      const markupTypes = this.getMarkupTypesForAim(event.detail);
+      aimJson["markupType"] = [...markupTypes];
+      if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
+        this.setState({ showAimEditor: false });
+      this.setState({ showAimEditor: true, selectedAim: aimJson });
+    }
+  };
+
+  handleMarkupCreated = event => {
+    console.log("Event", event);
+    const { detail } = event;
+    this.setState({ showAimEditor: true, selectedAim: undefined });
+    if (detail === "brush") this.setState({ hasSegmentation: true });
   };
 
   setActive = i => {
@@ -301,12 +336,70 @@ class DisplayView extends Component {
   };
 
   parseAims = (aimList, seriesUid) => {
+    console.log();
     Object.entries(aimList).forEach(([key, values]) => {
       values.forEach(value => {
+        const { markupType, aimUid } = value;
+        console.log("Value", value);
+        if (markupType === "DicomSegmentationEntity")
+          this.getSegmentationData(aimUid);
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
         this.renderMarkup(key, value, color);
       });
     });
+  };
+
+  getSegmentationData = aimId => {
+    const { series, activePort, aimList } = this.props;
+    const { seriesUID, studyUID } = series[activePort];
+
+    const segmentationEntity =
+      aimList[seriesUID][aimId].json.segmentationEntityCollection
+        .SegmentationEntity[0];
+
+    const { seriesInstanceUid, sopInstanceUid } = segmentationEntity;
+
+    const pathVariables = { studyUID, seriesUID: seriesInstanceUid.root };
+
+    getSegmentation(pathVariables, sopInstanceUid.root).then(segData => {
+      // segData.arrayBuffer().then(segBuffer => {
+      console.log("Seg Data is", segData.data);
+      this.renderSegmentation(segData.data);
+      // });
+    });
+  };
+
+  renderSegmentation = arrayBuffer => {
+    const cornerstoneTools = this.cornerstoneTools;
+    const cornerstone = this.props.cornerstone;
+
+    const { element } = cornerstone.getEnabledElements()[this.props.activePort];
+    const stackToolState = this.props.cornerstoneTools.getToolState(
+      element,
+      "stack"
+    );
+    console.log("Stack toolstate", stackToolState);
+    const imageIds = stackToolState.data[0].imageIds;
+    const t0 = performance.now();
+    const {
+      labelmapBuffer,
+      segMetadata,
+      segmentsOnFrame
+    } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
+      imageIds,
+      arrayBuffer,
+      cornerstone.metaData
+    );
+    const t1 = performance.now();
+    const { setters, state } = cornerstoneTools.getModule("segmentation");
+    setters.labelmap3DByFirstImageId(
+      imageIds[0],
+      labelmapBuffer,
+      0,
+      segMetadata,
+      imageIds.length,
+      segmentsOnFrame
+    );
   };
 
   getColorOfMarkup = (aimUid, seriesUid) => {
@@ -437,23 +530,6 @@ class DisplayView extends Component {
     );
   };
 
-  handleAnnotationSelected = event => {
-    if (
-      this.props.aimList[this.props.series[this.props.activePort].seriesUID][
-        event.detail
-      ]
-    ) {
-      const aimJson = this.props.aimList[
-        this.props.series[this.props.activePort].seriesUID
-      ][event.detail].json;
-      const markupTypes = this.getMarkupTypesForAim(event.detail);
-      aimJson["markupType"] = [...markupTypes];
-      if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
-        this.setState({ showAimEditor: false });
-      this.setState({ showAimEditor: true, selectedAim: aimJson });
-    }
-  };
-
   closeAimEditor = () => {
     this.setState({ showAimEditor: false, selectedAim: undefined });
   };
@@ -480,80 +556,82 @@ class DisplayView extends Component {
     ) : (
       // <div className="displayView-main">
       <React.Fragment>
-        <Toolbar
+        {/* <Toolbar
+          cornerstone={this.cornerstone}
+          cornerstoneTools={this.cornerstoneTools}
+        /> */}
+        <RightsideBar
           cornerstone={this.props.cornerstone}
-          cornerstoneTools={this.props.cornerstoneTools}
-        />
-        {this.state.showAimEditor && (
-          <AimEditor
-            cornerstone={this.props.cornerstone}
-            csTools={this.cornerstoneTools}
-            aimId={this.state.selectedAim}
-            onCancel={this.closeAimEditor}
-          />
-        )}
-        {!this.state.isLoading &&
-          Object.entries(this.props.series).length &&
-          this.state.data.map((data, i) => (
-            <div
-              className={
-                "viewportContainer" +
-                (this.props.activePort == i ? " selected" : "")
-              }
-              key={i}
-              style={{
-                width: this.state.width,
-                height: this.state.height,
-                padding: "2px",
-                display: "inline-block"
-              }}
-              onDoubleClick={() => this.hideShow(i)}
-            >
-              <MenuProvider
-                id="menu_id"
+          csTools={this.cornerstoneTools}
+          showAimEditor={this.state.showAimEditor}
+          aimId={this.state.selectedAim}
+          onCancel={this.closeAimEditor}
+          hasSegmentation={this.state.hasSegmentation}
+        >
+          {!this.state.isLoading &&
+            Object.entries(this.props.series).length &&
+            this.state.data.map((data, i) => (
+              <div
+                className={
+                  "viewportContainer" +
+                  (this.props.activePort == i ? " selected" : "")
+                }
+                key={i}
+                id={"viewportContainer" + i}
                 style={{
-                  width: "100%",
-                  height: "100%",
+                  width: this.state.width,
+                  height: this.state.height,
+                  padding: "2px",
                   display: "inline-block"
                 }}
+                onDoubleClick={() => this.hideShow(i)}
               >
-                <CornerstoneViewport
-                  key={i}
-                  viewportData={data}
-                  viewportIndex={i}
-                  availableTools={tools}
-                  onMeasurementsChanged={this.measurementChanged}
-                  setViewportActive={() => this.setActive(i)}
-                  onNewImage={event =>
-                    this.props.dispatch(updateImageId(event))
-                  }
-                  // onRightClick={this.showRightMenu}
-                />
-              </MenuProvider>
-            </div>
-            // <div
-            //   className={"viewportContainer"}
-            //   key={i}
-            //   style={{
-            //     width: this.state.width,
-            //     height: this.state.height,
-            //     padding: "2px",
-            //     display: "inline-block"
-            //   }}
-            //   onDoubleClick={() => this.hideShow(i)}
-            // >
+                <MenuProvider
+                  id="menu_id"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    display: "inline-block"
+                  }}
+                >
+                  <CornerstoneViewport
+                    key={i}
+                    viewportData={data}
+                    viewportIndex={i}
+                    availableTools={tools}
+                    onMeasurementsChanged={this.measurementChanged}
+                    setViewportActive={() => this.setActive(i)}
+                    onNewImage={event =>
+                      this.props.dispatch(updateImageId(event))
+                    }
+                    // onRightClick={this.showRightMenu}
+                  />
+                </MenuProvider>
+              </div>
+              // <div
+              //   className={"viewportContainer"}
+              //   key={i}
+              //   style={{
+              //     width: this.state.width,
+              //     height: this.state.height,
+              //     padding: "2px",
+              //     display: "inline-block"
+              //   }}
+              //   onDoubleClick={() => this.hideShow(i)}
+              // >
 
-            // {this.state.showAimEditor && (
-            //   <AimEditor
-            //     cornerstone={this.props.cornerstone}
-            //     csTools={this.cornerstoneTools}
-            //   />
-            // )}
+              // {this.state.showAimEditor && (
+              //   <AimEditor
+              //     cornerstone={this.props.cornerstone}
+              //     csTools={this.cornerstoneTools}
+              //   />
+              // )}
 
-            //{" "}
-            // </div>
-          ))}
-        <ContextMenu />
+              //{" "}
+              // </div>
+            ))}
+          <ContextMenu />
+        </RightsideBar>
       </React.Fragment>
     );
     // </div>

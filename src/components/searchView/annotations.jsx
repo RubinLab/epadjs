@@ -297,9 +297,6 @@ class Annotations extends Component {
   };
 
   displayAnnotations = selected => {
-    if (this.props.dockOpen) {
-      this.props.dispatch(showAnnotationDock());
-    }
     const { projectID, studyUID, seriesUID, aimID } = selected;
     const patientID = selected.subjectID;
     const { openSeries } = this.props;
@@ -318,7 +315,7 @@ class Annotations extends Component {
         this.props.dispatch(addToGrid(selected, aimID));
         this.props
           .dispatch(getSingleSerie(selected, aimID))
-          .then(() => this.props.dispatch(showAnnotationDock()))
+          .then(() => {})
           .catch(err => console.log(err));
         //if grid is NOT full check if patient data exists
         if (!this.props.patients[patientID]) {
@@ -392,7 +389,6 @@ class Annotations extends Component {
 
 const mapStateToProps = state => {
   return {
-    dockOpen: state.annotationsListReducer.dockOpen,
     series: state.searchViewReducer.series,
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,

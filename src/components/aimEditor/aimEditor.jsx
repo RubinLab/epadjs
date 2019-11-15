@@ -4,7 +4,15 @@ import Draggable from "react-draggable";
 import { isLite } from "../../config.json";
 import { toast } from "react-toastify";
 import { getTemplates } from "../../services/templateServices";
-import { uploadAim } from "../../services/annotationServices";
+import {
+  uploadAim,
+  uploadSegmentation
+} from "../../services/annotationServices";
+import {
+  updateSingleSerie,
+  updatePatientOnAimSave,
+  getSingleSerie
+} from "../annotationsList/action";
 import { getAimImageData } from "./aimHelper";
 import * as questionaire from "./parseClass.js";
 import Aim from "./Aim";
@@ -62,17 +70,15 @@ class AimEditor extends Component {
 
   render() {
     return (
-      <Draggable enableUserSelectHack={false}>
-        <div className="editorForm">
-          <div id="questionaire" />
-          <button type="button" onClick={this.save}>
-            Save
-          </button>
-          <button type="button" onClick={this.cancel}>
-            Cancel
-          </button>
-        </div>
-      </Draggable>
+      <div className="editorForm">
+        <div id="questionaire" />
+        <button type="button" onClick={this.save}>
+          Save
+        </button>
+        <button type="button" onClick={this.cancel}>
+          Cancel
+        </button>
+      </div>
     );
   }
 
@@ -92,8 +98,8 @@ class AimEditor extends Component {
     this.createAim(answers);
   };
 
-  createAim = answers => {
-    let hasSegmentation = false; //TODO:keep this in store and look dynamically
+  createAim = async answers => {
+    let hasSegmentation = this.props.hasSegmentation;
     const updatedAimId = this.props.aimId;
 
     const {
@@ -101,37 +107,146 @@ class AimEditor extends Component {
     } = this.props.csTools.globalImageIdSpecificToolStateManager;
 
     // get the imagesIds for active viewport
-    const element = this.props.cornerstone.getEnabledElements()[
+    const { element } = this.props.cornerstone.getEnabledElements()[
       this.props.activePort
-    ]["element"];
+    ];
     const stackToolState = this.props.csTools.getToolState(element, "stack");
     const imageIds = stackToolState.data[this.props.activePort].imageIds;
 
-    // check which images has markup or segmentation
+    // check which images has markup
     const markedImageIds = imageIds.filter(imageId => {
       if (toolState[imageId] === undefined) return false;
       return true;
     });
 
-    // if has segmentation retrieve the images to generate dicomseg, most should be cached already
-    if (hasSegmentation) {
-      var imagePromises = [];
-      imageIds.map(imageId => {
-        imagePromises.push(this.props.cornerstone.loadImage(imageId));
-      });
-      this.createSegmentation(toolState, imagePromises, markedImageIds);
+    // find the markups to save in markedImages
+    const markupsToSave = this.getNewMarkups(markedImageIds, toolState);
+
+    let seedData, segBlobGlobal, imageIdx;
+    console.log("Markups to save", Object.entries(markupsToSave).length);
+    if (Object.entries(markupsToSave).length !== 0) {
+      const cornerStoneImageId = Object.keys(markupsToSave)[0];
+      const image = this.getCornerstoneImagebyId(cornerStoneImageId);
+      seedData = getAimImageData(image);
+    } else if (hasSegmentation) {
+      const { segBlob, imageIdx } = this.createSegmentation3D();
+      console.log("ImageIdx is", imageIdx);
+      const image = this.getCornerstoneImagebyIdx(imageIdx);
+      seedData = getAimImageData(image);
+      let dataset = await this.getDatasetFromBlob(segBlob, imageIdx);
+      console.log("Dataset series uid", dataset);
+
+      const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
+      this.addSegmentationEntityToSeedData(seedData, segEntityData);
+
+      // set segmentation series description with the aim name
+      dataset.SeriesDescription = answers.name.value;
+
+      const modifiedSegBlob = dcmjs.data.datasetToBlob(dataset);
+      segBlobGlobal = modifiedSegBlob;
+
+      dataset = await this.getDatasetFromBlob(modifiedSegBlob, imageIdx);
+      console.log("Dataset series uid after", dataset);
     }
 
+    this.addSemanticAnswersToSeedData(seedData, answers);
+
+    this.addUserToSeedData(seedData);
+    // this.addModalityObjectToSeedData(seedData);
+    console.log("Final SeedData is", seedData);
+
+    var aim = new Aim(
+      seedData,
+      enumAimType.imageAnnotation,
+      hasSegmentation,
+      updatedAimId
+    );
+
+    Object.entries(markupsToSave).forEach(([key, values]) => {
+      values.map(value => {
+        const { type, markup, shapeIndex, imageReferenceUid } = value;
+        switch (type) {
+          case "line":
+            this.addLineToAim(aim, markup, shapeIndex, imageReferenceUid);
+            break;
+          case "circle":
+            this.addCircleToAim(aim, markup, shapeIndex, imageReferenceUid);
+            break;
+          case "polygon":
+            this.addPolygonToAim(aim, markup, shapeIndex, imageReferenceUid);
+            break;
+          case "bidirectional":
+            this.addBidirectionalToAim(
+              aim.markup,
+              shapeIndex,
+              imageReferenceUid
+            );
+        }
+      });
+    });
+
+    const aimJson = aim.getAim();
+    console.log("Here is the aim", JSON.parse(aimJson));
+    const aimSaved = JSON.parse(aimJson);
+    const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
+    const { patientID, projectID, seriesUID, studyUID } = this.props.series[
+      this.props.activePort
+    ];
+    const name =
+      aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .name.value;
+    const comment =
+      aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .comment.value;
+    const aimRefs = {
+      aimID,
+      patientID,
+      projectID,
+      seriesUID,
+      studyUID,
+      name,
+      comment
+    };
+
+    uploadAim(aimSaved)
+      .then(async () => {
+        if (hasSegmentation) this.saveSegmentation(segBlobGlobal);
+        toast.success("Aim succesfully saved.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+        // this.props.dispatch(
+        //   getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+        // );
+        this.props.dispatch(
+          updateSingleSerie({
+            subjectID: patientID,
+            projectID,
+            seriesUID,
+            studyUID
+          })
+        );
+
+        this.props.dispatch(updatePatientOnAimSave(aimRefs));
+      })
+      .catch(error => console.log(error));
+  };
+
+  getNewMarkups = (markedImageIds, toolState) => {
     // check for markups
     var shapeIndex = 1;
     var markupsToSave = {};
+    const updatedAimId = this.props.aimId;
     markedImageIds.map(imageId => {
       const imageReferenceUid = this.parseImgeId(imageId);
       const markUps = toolState[imageId];
       Object.keys(markUps).map(tool => {
         switch (tool) {
           case "FreehandMouse":
-            // console.log("FreeHandMouse");
             const polygons = markUps[tool].data;
             polygons.map(polygon => {
               if (!polygon.aimId || polygon.aimId === updatedAimId) {
@@ -151,7 +266,6 @@ class AimEditor extends Component {
             });
             break;
           case "Bidirectional":
-            // console.log("Bidirectional ", markUps[tool]);
             const bidirectionals = markUps[tool].data;
             bidirectionals.map(bidirectional => {
               if (
@@ -174,7 +288,6 @@ class AimEditor extends Component {
             });
             break;
           case "CircleRoi":
-            // console.log("CircleRoi ", markUps[tool]);
             const circles = markUps[tool].data;
             circles.map(circle => {
               if (!circle.aimId || circle.aimId === updatedAimId) {
@@ -214,66 +327,14 @@ class AimEditor extends Component {
               }
             });
             break;
-          case "brush":
-            const brush = markUps[tool].data;
-            hasSegmentation = true;
-          // TODO: check if it's a new brush data
+          // case "brush":
+          //   const brush = markUps[tool].data;
+          //   hasSegmentation = true;
+          // // TODO: check if it's a new brush data
         }
       });
     });
-
-    const cornerStoneImageId = Object.keys(markupsToSave)[0];
-    const image = this.getCornerstoneImage(cornerStoneImageId, markupsToSave);
-    let seedData = getAimImageData(image);
-    this.addSemanticAnswersToSeedData(seedData, answers);
-    this.addUserToSeedData(seedData);
-    // this.addModalityObjectToSeedData(seedData);
-
-    var aim = new Aim(
-      seedData,
-      enumAimType.imageAnnotation,
-      hasSegmentation,
-      updatedAimId
-    );
-
-    Object.entries(markupsToSave).forEach(([key, values]) => {
-      values.map(value => {
-        const { type, markup, shapeIndex, imageReferenceUid } = value;
-        switch (type) {
-          case "line":
-            this.addLineToAim(aim, markup, shapeIndex, imageReferenceUid);
-            break;
-          case "circle":
-            this.addCircleToAim(aim, markup, shapeIndex, imageReferenceUid);
-            break;
-          case "polygon":
-            this.addPolygonToAim(aim, markup, shapeIndex, imageReferenceUid);
-            break;
-          case "bidirectional":
-            this.addBidirectionalToAim(
-              aim.markup,
-              shapeIndex,
-              imageReferenceUid
-            );
-        }
-      });
-    });
-
-    const aimJson = aim.getAim();
-
-    uploadAim(JSON.parse(aimJson))
-      .then(() => {
-        this.props.onCancel();
-        toast.success("Aim succesfully saved.", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        });
-      })
-      .catch(error => console.log(error));
+    return markupsToSave;
   };
 
   addModalityObjectToSeedData = seedData => {
@@ -307,10 +368,21 @@ class AimEditor extends Component {
     seedData.user = obj;
   };
 
-  getCornerstoneImage = (imageId, markupsToSave) => {
-    return this.props.cornerstone.default.imageCache.imageCache[
-      Object.keys(markupsToSave)[0]
-    ].image;
+  addSegmentationEntityToSeedData = (seedData, segEntityData) => {
+    console.log("Seed data and seg Entity", seedData, segEntityData);
+    seedData["segmentation"] = segEntityData;
+    console.log("After Seed Data is", seedData);
+  };
+
+  // get the image object by index
+  getCornerstoneImagebyIdx = imageIdx => {
+    const imageCache = this.props.cornerstone.default.imageCache.imageCache;
+    const imageId = Object.keys(imageCache)[imageIdx];
+    return imageCache[imageId].image;
+  };
+
+  getCornerstoneImagebyId = imageId => {
+    return this.props.cornerstone.default.imageCache.imageCache[imageId].image;
   };
 
   storeMarkupsToBeSaved = (imageId, markupData, markupsToSave) => {
@@ -389,80 +461,163 @@ class AimEditor extends Component {
     imageReferenceUid
   ) => {};
 
-  createSegmentation = (toolState, imagePromises, markedImageIds) => {
-    const segments = [];
-    markedImageIds
-      .filter(imageId => {
-        if (
-          toolState[imageId].brush === undefined ||
-          toolState[imageId].brush.data === undefined
-        )
-          return false;
-        return true;
-      })
-      .map(imageId => {
-        this.setSegmentMetaData(toolState, imageId, segments);
-      });
-    const brushData = {
-      toolState,
-      segments
+  createSegmentation3D = () => {
+    // following is to know the image index which has the first segment
+    let firstSegImageIndex;
+
+    const { element } = this.cornerstone.getEnabledElements()[
+      this.props.activePort
+    ];
+
+    const globalToolStateManager = this.csTools
+      .globalImageIdSpecificToolStateManager;
+    const toolState = globalToolStateManager.saveToolState();
+    const stackToolState = this.csTools.getToolState(element, "stack");
+    const imageIds = stackToolState.data[0].imageIds;
+    let imagePromises = [];
+    for (let i = 0; i < imageIds.length; i++) {
+      if (i == 1)
+        this.cornerstone
+          .loadImage(imageIds[i])
+          .then(image => console.log("Yuklenen image", image));
+      imagePromises.push(this.cornerstone.loadImage(imageIds[i]));
+    }
+
+    const { getters } = this.csTools.getModule("segmentation");
+    const { labelmaps3D } = getters.labelmaps3D(element);
+    if (!labelmaps3D) {
+      return;
+    }
+
+    for (
+      let labelmapIndex = 0;
+      labelmapIndex < labelmaps3D.length;
+      labelmapIndex++
+    ) {
+      const labelmap3D = labelmaps3D[labelmapIndex];
+      const labelmaps2D = labelmap3D.labelmaps2D;
+
+      for (let i = 0; i < labelmaps2D.length; i++) {
+        if (!labelmaps2D[i]) {
+          continue;
+        }
+
+        // following is to know the image index which has the first segment
+        if (!firstSegImageIndex) firstSegImageIndex = i;
+
+        const segmentsOnLabelmap = labelmaps2D[i].segmentsOnLabelmap;
+        segmentsOnLabelmap.forEach(segmentIndex => {
+          if (segmentIndex !== 0 && !labelmap3D.metadata[segmentIndex]) {
+            labelmap3D.metadata[segmentIndex] = this.generateMockMetadata(
+              segmentIndex
+            );
+          }
+        });
+      }
+    }
+    const cachedImages = this.cornerstone.imageCache.imageCache;
+    let images = [];
+    Object.keys(cachedImages).forEach(key => {
+      images.push(cachedImages[key].image);
+    });
+    // console.log("ImageCache", images);
+
+    // Promise.all(imagePromises).then(images => {
+    //   console.log("Images", images);
+
+    // this.cornerstone.imageCache;
+    const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
+      images,
+      labelmaps3D
+    );
+
+    return {
+      segBlob,
+      imageIdx: firstSegImageIndex
     };
-    Promise.all(imagePromises).then(images => {
-      console.log("images are", images, "brush data is", brushData);
-      const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
-        images,
-        brushData
-      );
-      console.log(segBlob);
-      // Create a URL for the binary.
-      // var objectUrl = URL.createObjectURL(segBlob);
-      // window.open(objectUrl);
+    // });
+
+    // .catch(err => console.log(err));
+  };
+
+  getDatasetFromBlob = (segBlob, imageIdx) => {
+    return new Promise(resolve => {
+      let segArrayBuffer;
+      var fileReader = new FileReader();
+      fileReader.onload = event => {
+        segArrayBuffer = event.target.result;
+        const dicomData = dcmjs.data.DicomMessage.readFile(segArrayBuffer);
+        const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(
+          dicomData.dict
+        );
+        dataset._meta = dcmjs.data.DicomMetaDictionary.namifyDataset(
+          dicomData.meta
+        );
+        resolve(dataset);
+      };
+      fileReader.readAsArrayBuffer(segBlob);
     });
   };
 
-  setSegmentMetaData = (toolState, imageId, segments) => {
-    console.log("imageIds are", imageId, "segments are", segments);
+  getSegmentationEntityData = (dataset, imageIdx) => {
+    let obj = {};
+    obj["referencedSopInstanceUid"] =
+      dataset.ReferencedSeriesSequence.ReferencedInstanceSequence[
+        imageIdx
+      ].ReferencedSOPInstanceUID;
+    obj["seriesInstanceUid"] = dataset.SeriesInstanceUID;
+    obj["studyInstanceUid"] = dataset.StudyInstanceUID;
+    obj["sopClassUid"] = dataset.SOPClassUID;
+    obj["sopInstanceUid"] = dataset.SOPInstanceUID;
+    return obj;
+  };
+
+  saveSegmentation = segmentation => {
+    const { projectID } = this.props.series[this.props.activePort];
+    uploadSegmentation(segmentation, projectID)
+      .then(() => {
+        // this.props.onCancel();
+        toast.success("Segmentation succesfully saved.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+        return "success";
+      })
+      .catch(error => {
+        console.log(error);
+        return "error";
+      });
+  };
+
+  generateMockMetadata = segmentIndex => {
+    // TODO -> Use colors from the cornerstoneTools LUT.
     const RecommendedDisplayCIELabValue = dcmjs.data.Colors.rgb2DICOMLAB([
       1,
       0,
       0
     ]);
-    const brushData = toolState[imageId].brush.data;
-    console.log("brush data is", brushData);
-    for (let segIdx = 0; segIdx < 4; segIdx++) {
-      // If there is pixelData for this segment, set the segment metadata
-      // if it hasn't been set yet.
-      if (
-        brushData[segIdx] &&
-        brushData[segIdx].pixelData &&
-        !segments[segIdx]
-      ) {
-        segments[segIdx] = {
-          SegmentedPropertyCategoryCodeSequence: {
-            CodeValue: "T-D0050",
-            CodingSchemeDesignator: "SRT",
-            CodeMeaning: "Tissue"
-          },
-          SegmentNumber: (segIdx + 1).toString(),
-          SegmentLabel: "Tissue " + (segIdx + 1).toString(),
-          SegmentAlgorithmType: "SEMIAUTOMATIC",
-          SegmentAlgorithmName: "Slicer Prototype",
-          RecommendedDisplayCIELabValue,
-          SegmentedPropertyTypeCodeSequence: {
-            CodeValue: "T-D0050",
-            CodingSchemeDesignator: "SRT",
-            CodeMeaning: "Tissue"
-          }
-        };
+    return {
+      SegmentedPropertyCategoryCodeSequence: {
+        CodeValue: "T-D0050",
+        CodingSchemeDesignator: "SRT",
+        CodeMeaning: "Tissue"
+      },
+      SegmentNumber: (segmentIndex + 1).toString(),
+      SegmentLabel: "Tissue " + (segmentIndex + 1).toString(),
+      SegmentAlgorithmType: "SEMIAUTOMATIC",
+      SegmentAlgorithmName: "ePAD",
+      RecommendedDisplayCIELabValue,
+      SegmentedPropertyTypeCodeSequence: {
+        CodeValue: "T-D0050",
+        CodingSchemeDesignator: "SRT",
+        CodeMeaning: "Tissue"
       }
-    }
+    };
   };
-
-  addSegmentationToAim = (aim, image) => {
-    // aim.
-  };
-
-  createDicomSeg = () => {};
 
   parseImgeId = imageId => {
     if (isLite) return imageId.split("/").pop();

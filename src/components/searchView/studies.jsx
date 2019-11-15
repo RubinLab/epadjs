@@ -22,8 +22,8 @@ import {
   addToGrid,
   getWholeData,
   alertViewPortFull,
-  updatePatient,
-  showAnnotationDock
+  updatePatient
+  // showAnnotationDock
 } from "../annotationsList/action";
 //import "react-table/react-table.css";
 
@@ -417,10 +417,6 @@ class Studies extends Component {
   };
 
   displaySeries = async selected => {
-    if (this.props.dockOpen) {
-      this.props.dispatch(showAnnotationDock());
-    }
-
     if (this.props.openSeries.length === MAX_PORT) {
       this.props.dispatch(alertViewPortFull());
     } else {
@@ -457,9 +453,7 @@ class Studies extends Component {
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => {
-            this.props.dispatch(showAnnotationDock());
-          })
+          .then(() => {})
           .catch(err => console.log(err));
 
         //if patient doesnot exist get patient
@@ -557,7 +551,6 @@ class Studies extends Component {
 
 const mapStateToProps = state => {
   return {
-    dockOpen: state.annotationsListReducer.dockOpen,
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     loading: state.annotationsListReducer.loading,

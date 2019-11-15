@@ -1,59 +1,64 @@
 .viewportContainer.active,
-.viewerMain
-  #layoutManagerTarget
-  #imageViewerViewports
-  .viewportContainer:hover.active {
-  border: 1px solid #00a4d9;
+.viewerMain #layoutManagerTarget #imageViewerViewports .viewportContainer:hover.active {
+    border: 1px solid #00a4d9;
 }
+
 #mrtopright {
-  text-align: right;
+    text-align: right;
 }
+
 .cs {
-  font-size: 10px;
+    font-size: 10px;
 }
+
 .viewportContainer {
-  border: 1px solid #272b30;
-  text-decoration-color: azure !important;
+    border: 1px solid #272b30;
+    text-decoration-color: azure !important;
 }
+
 .viewportContainer.selected {
-  border: 1px solid #861737;
-  /* border: 1px solid #3c5d80; */
+    border: 1px solid #861737;
+    /* border: 1px solid #3c5d80; */
 }
+
 .menuProvider {
-  width: "100%";
-  height: "100%";
-  display: "inline-block";
+    width: "100%";
+    height: "100%";
+    display: "inline-block";
 }
 
 .ViewportOverlay {
-  color: #8b8a8a !important;
+    color: #8b8a8a !important;
 }
 
 .displayView-main {
-  display: flex;
-  /* flex-direction: column; */
+    display: flex;
+    /* flex-direction: column; */
 }
 
 .splitted-view {
-  display: flex;
+    display: flex;
 }
+
 .displayView-cont {
-  display: flex;
+    display: flex;
 }
 
 .__ports {
-  width: 85%;
-  height: 100%;
+    width: 85%;
+    height: 100%;
 }
+
 .__ports.__all {
-  width: 100%;
-  height: 100%;
+    width: 100%;
+    height: 100%;
 }
+
 .__anns {
-  width: 15%;
-  right: 0%;
-  max-width: 220px;
-  min-width: 195px;
-  padding-right: 1rem;
-  padding-top: 1rem;
+    width: 15%;
+    right: 0%;
+    max-width: 220px;
+    min-width: 195px;
+    padding-right: 1rem;
+    padding-top: 1rem;
 }

@@ -8,7 +8,6 @@ import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
 import SearchView from "./components/searchView/searchView";
 import DisplayView from "./components/display/displayView";
-// import DisplayViewContainer from "./components/display/displayViewContainer";
 import AnotateView from "./components/anotateView";
 import ProgressView from "./components/progressView";
 import FlexView from "./components/flexView";
@@ -21,7 +20,7 @@ import Management from "./components/management/mainMenu";
 import InfoMenu from "./components/infoMenu";
 import UserMenu from "./components/userProfileMenu";
 import AnnotationList from "./components/annotationsList";
-import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
+// import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import { isLite } from "./config.json";
@@ -282,7 +281,6 @@ class App extends Component {
           </Switch>
         )}
         {this.props.listOpen && <AnnotationList />}
-        {this.props.dockOpen && <AnnotationsDock />}
         {this.props.showGridFullAlert && <MaxViewAlert />}
         {/* {this.props.selection && (
           <ManagementItemModal selection={this.props.selection} />
@@ -297,7 +295,6 @@ const mapStateToProps = state => {
   // console.log(state.managementReducer);
   const {
     listOpen,
-    dockOpen,
     showGridFullAlert,
     showProjectModal,
     loading,
@@ -306,7 +303,6 @@ const mapStateToProps = state => {
   } = state.annotationsListReducer;
   return {
     listOpen,
-    dockOpen,
     showGridFullAlert,
     showProjectModal,
     loading,

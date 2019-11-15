@@ -17,6 +17,17 @@ function parseAim(aim, imageIdSpecificMarkups) {
       else imageIdSpecificMarkups[imageId].push(data);
     });
   }
+  //check if it has segmentation
+  if (imageAnnotation.segmentationEntityCollection) {
+    var segmentationEntities =
+      imageAnnotation.segmentationEntityCollection.SegmentationEntity;
+    segmentationEntities.forEach(segmentationEntity => {
+      const { imageId, data } = getSegmentation(segmentationEntity, aim);
+      if (!imageIdSpecificMarkups[imageId])
+        imageIdSpecificMarkups[imageId] = [data];
+      else imageIdSpecificMarkups[imageId].push(data);
+    });
+  }
 }
 
 function getMarkup(markupEntity, aim) {
@@ -24,7 +35,6 @@ function getMarkup(markupEntity, aim) {
   const markupUid = markupEntity["uniqueIdentifier"]["root"];
   const calculations = getCalculationEntitiesOfMarkUp(aim, markupUid);
   const aimUid = aim.ImageAnnotationCollection["uniqueIdentifier"]["root"];
-  // console.log("CALCULATIONS", calculations);
   return {
     imageId,
     data: {
@@ -39,15 +49,27 @@ function getMarkup(markupEntity, aim) {
   };
 }
 
+function getSegmentation(segmentationEntity, aim) {
+  const imageId = segmentationEntity["referencedSopInstanceUid"]["root"];
+  const markupUid = segmentationEntity["uniqueIdentifier"]["root"];
+  const calculations = getCalculationEntitiesOfMarkUp(aim, markupUid);
+  const aimUid = aim.ImageAnnotationCollection["uniqueIdentifier"]["root"];
+  return {
+    imageId,
+    data: {
+      markupType: segmentationEntity["xsi:type"],
+      calculations,
+      markupUid,
+      aimUid
+    }
+  };
+}
+
 function getCalculationEntitiesOfMarkUp(aim, markupUid) {
   const imageAnnotationStatements = getImageAnnotationStatements(aim);
   let calculations = [];
   imageAnnotationStatements.forEach(statement => {
-    if (
-      statement["xsi:type"] ==
-        "CalculationEntityReferencesMarkupEntityStatement" &&
-      statement.objectUniqueIdentifier.root === markupUid
-    ) {
+    if (statement.objectUniqueIdentifier.root === markupUid) {
       const calculationUid = statement.subjectUniqueIdentifier.root;
       const calculationEntities = getCalculationEntities(aim);
       calculationEntities.forEach(calculation => {
@@ -96,8 +118,6 @@ export function getAimImageData(image) {
   obj.person = {};
   obj.image = [];
   const { aim, study, series, equipment, person } = obj;
-
-  console.log("Image Data", image.data);
 
   aim.studyInstanceUid = image.data.string("x0020000d") || "";
 

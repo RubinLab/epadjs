@@ -90,6 +90,12 @@ export function downloadSeries(series) {
   return http.get(url, { responseType: "blob" });
 }
 
+export function getSegmentation(series, imageId) {
+  const url = getWadoImagePath(series, imageId).replace("wadouri:", "");
+  console.log("URL is", url);
+  return http.get(url, { responseType: "arraybuffer" });
+}
+
 export function deleteSeries(series) {
   if (isLite) {
     const url =
