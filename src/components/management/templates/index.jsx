@@ -33,11 +33,7 @@ class Templates extends React.Component {
 
   componentDidMount = async () => {
     if (!isLite) {
-      const {
-        data: {
-          ResultSet: { Result: projectList }
-        }
-      } = await getProjects();
+      const { data: projectList } = await getProjects();
       const temp = [];
       for (let project of projectList) {
         const { id, name } = project;
@@ -57,11 +53,8 @@ class Templates extends React.Component {
     };
   };
   getTemplatesData = async () => {
-    const {
-      data: {
-        ResultSet: { Result: templates }
-      }
-    } = await getAllTemplates();
+    const { data: templates } = await getAllTemplates();
+    console.log(templates);
     this.setState({ templates });
   };
 

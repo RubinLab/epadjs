@@ -1,0 +1,22 @@
+.flexView .__dropdown {
+  position: absolute;
+  z-index: 1;
+  background: #3a3f44;
+  padding: 1rem;
+  border: 1px solid gray;
+}
+
+.flexView .__dropdown .--option .--text {
+  margin-left: 0.3rem;
+}
+
+.ReactTable.flexView-table .rt-th {
+  text-align: left;
+}
+
+.flexView-table {
+}
+
+.flexView-table__sub {
+  background: #3a3f44;
+}

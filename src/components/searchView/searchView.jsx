@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { toast } from "react-toastify";
 import Subjects from "./subjects";
 import Toolbar from "./toolbar";
 import ProjectModal from "../annotationsList/selectSerieModal";
@@ -35,7 +36,6 @@ import { MAX_PORT } from "../../constants";
 import DownloadSelection from "./annotationDownloadModal";
 import "./searchView.css";
 import UploadModal from "./uploadModal";
-import { toast } from "react-toastify";
 import { isLite } from "../../config";
 import { getSubjects } from "../../services/subjectServices";
 import DeleteAlert from "./deleteConfirmationModal";
@@ -44,6 +44,7 @@ import NewMenu from "./newMenu";
 import SubjectCreationModal from "./subjectCreationModal.jsx";
 import StudyCreationModal from "./studyCreationModal.jsx";
 import SeriesCreationModal from "./seriesCreationModal.jsx";
+import Worklists from "./addWorklist";
 import AnnotationCreationModal from "./annotationCreationModal.jsx";
 
 class SearchView extends Component {
@@ -85,12 +86,12 @@ class SearchView extends Component {
   };
 
   getData = async () => {
-    const {
-      data: {
-        ResultSet: { Result: data }
-      }
-    } = await getSubjects(this.props.match.params.pid);
+    // if (this.props.match.params.pid) {
+    const { data: data } = await getSubjects(this.props.match.params.pid);
     return data;
+    // } else {
+    //   return [];
+    // }
   };
 
   handleExpand = async () => {
@@ -530,11 +531,7 @@ class SearchView extends Component {
   getSeriesData = async selected => {
     const { projectID, patientID, studyUID } = selected;
     try {
-      const {
-        data: {
-          ResultSet: { Result: series }
-        }
-      } = await getSeries(projectID, patientID, studyUID);
+      const { data: series } = await getSeries(projectID, patientID, studyUID);
       return series;
     } catch (err) {
       this.props.dispatch(annotationsLoadingError(err));
@@ -619,6 +616,10 @@ class SearchView extends Component {
     this.setState({ downloading: false, uploading: false, deleting: false });
   };
 
+  handleWorklistClick = () => {
+    this.setState(state => ({ showWorklists: !state.showWorklists }));
+  };
+
   handleNewSelected = () => {
     switch (this.state.newSelected) {
       case "subject":
@@ -693,6 +694,7 @@ class SearchView extends Component {
           onShrink={this.handleShrink}
           onCloseAll={this.handleCloseAll}
           onNew={this.handleNewClick}
+          onWorklist={this.handleWorklistClick}
           status={status}
           showDelete={showDelete}
           project={this.props.match.params.pid}
@@ -742,6 +744,10 @@ class SearchView extends Component {
             onSelect={this.handleSelectNewOption}
             onClose={this.handleNewClick}
           />
+        )}
+
+        {this.state.showWorklists && (
+          <Worklists onClose={this.handleWorklistClick} />
         )}
         {this.state.newSelected && this.handleNewSelected()}
       </>

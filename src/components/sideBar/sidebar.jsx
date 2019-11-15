@@ -3,18 +3,18 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { Tabs, Nav, Content } from "react-tiny-tabs";
 import { getProjects } from "../../services/projectServices";
-import { getWorklists } from "../../services/worklistServices";
+import { getWorklistsOfAssignee } from "../../services/worklistServices";
 import { getPacs } from "../../services/pacsServices";
 import { FiZoomIn } from "react-icons/fi";
-import AnnotationsList from "./../annotationsList/annotationDock/annotationList";
-
 import "./w2.css";
+import { throws } from "assert";
 
 class Sidebar extends Component {
   constructor(props) {
     super(props);
     this.handleClose = this.handleClose.bind(this);
     this.handleOpen = this.handleOpen.bind(this);
+    this.handleRoute = this.handleRoute.bind(this);
 
     this.state = {
       projects: [],
@@ -23,32 +23,47 @@ class Sidebar extends Component {
       width: "200px",
       marginLeft: "200px",
       buttonDisplay: "none",
-      open: true
+      open: true,
+      index: 0,
+      pId: null
     };
   }
 
   async componentDidMount() {
     //get the porjects
-    const {
-      data: {
-        ResultSet: { Result: projects }
+    const { data: projects } = await getProjects();
+    if (projects.length > 0) {
+      this.setState({ projects, pId: projects[0].id });
+      const projectMap = {};
+      for (let project of projects) {
+        projectMap[project.id] = project.name;
       }
-    } = await getProjects();
-    this.setState({ projects, pId: projects[0].id });
+      this.props.onData(projectMap);
+    }
     //get the worklists
-    const {
-      data: {
-        ResultSet: { Result: worklists }
-      }
-    } = await getWorklists(sessionStorage.getItem("username"));
+
+    const { data: worklists } = await getWorklistsOfAssignee(
+      sessionStorage.getItem("username")
+    );
     this.setState({ worklists });
+
+    /*
     const {
       data: {
         ResultSet: { Result: pacs }
       }
     } = await getPacs();
-    this.setState({ pacs });
+    this.setState({ pacs }); */
   }
+
+  componentDidUpdate = prevProps => {
+    if (
+      this.props.history.location.pathname.includes("worklist") &&
+      this.state.index !== 1
+    ) {
+      this.setState({ index: 1 });
+    }
+  };
 
   handleClose() {
     this.setState({
@@ -68,9 +83,22 @@ class Sidebar extends Component {
     });
   }
 
-  handleRoute(projectId) {
-    this.props.history.push(`/search/${projectId}`);
+  handleRoute(type, id) {
+    if (type === "project" && this.props.type === "search") {
+      this.props.history.push(`/search/${id}`);
+      this.setState({ index: 0 });
+    } else if (type === "project" && this.props.type === "flex") {
+      this.props.history.push(`/flex/${id}`);
+      this.setState({ index: 0 });
+    } else if (type === "worklist") {
+      this.props.history.push(`/worklist/${id}`);
+      this.setState({ index: 1 });
+    }
   }
+
+  updateState = () => {
+    this.setState({ index: 1 });
+  };
 
   render() {
     return (
@@ -80,14 +108,17 @@ class Sidebar extends Component {
           className="sidenav"
           style={{ width: this.state.width }}
         >
-          <Tabs className="theme-default">
+          <Tabs
+            className="theme-default"
+            settings={{ index: this.state.index }}
+          >
             <Nav>
               <div>
                 <FiZoomIn />
               </div>
               <div>Worklist</div>
-              <div>Connections</div>
-              <div>Users</div>
+              {/* <div>Connections</div> */}
+              {/* <div>Users</div> */}
             </Nav>
             <Content>
               <div>
@@ -105,11 +136,11 @@ class Sidebar extends Component {
                       </td>
                     </tr>
                     {this.state.projects.map(project => (
-                      <tr key={project.id}>
+                      <tr key={project.id} className="sidebar-row">
                         <td>
                           <p
                             onClick={() => {
-                              this.handleRoute(project.id);
+                              this.handleRoute("project", project.id);
                             }}
                           >
                             {project.name}
@@ -134,19 +165,32 @@ class Sidebar extends Component {
                         </button>
                       </td>
                     </tr>
-                    {this.state.worklists.map(worklist => (
-                      <tr key={worklist.workListID}>
-                        <td>
-                          <p
-                            onClick={() => {
-                              alert("clicked");
-                            }}
-                          >
-                            {worklist.name}
-                          </p>
-                        </td>
-                      </tr>
-                    ))}
+                    {this.state.worklists.map(worklist => {
+                      const className = worklist.projectIDs.length
+                        ? "sidebar-row __bold"
+                        : "sidebar-row";
+                      return (
+                        <tr key={worklist.workListID} className={className}>
+                          <td>
+                            <p
+                              onClick={() => {
+                                this.handleRoute(
+                                  "worklist",
+                                  worklist.workListID
+                                );
+                              }}
+                            >
+                              {worklist.name}
+                              {worklist.projectIDs.length ? (
+                                <span className="badge badge-secondary worklist">
+                                  {worklist.projectIDs.length}
+                                </span>
+                              ) : null}
+                            </p>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

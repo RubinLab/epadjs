@@ -176,6 +176,16 @@
   flex-direction: column;
   align-items: left;
 }
+
+.updateAssignee__modal.modal-dialog,
+.updateDueDate__modal.modal-dialog {
+  width: fit-content;
+}
+
+.updateDueDate__mbody input {
+  color: black;
+}
+
 .add-project__modal--input,
 .add-connection__modal--input,
 .edit-project__modal--input,
@@ -234,6 +244,7 @@
   background: rgb(199, 3, 3);
   color: white;
   padding: 0.5rem;
+  max-width: fit-content;
 }
 
 .project-edit__error {
@@ -313,6 +324,7 @@
 
 .edit-userRole__table--row {
   padding: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .edit-userRole__modal--button {
@@ -636,6 +648,10 @@
   text-align: left;
 }
 
+.edit-userRole__table--col {
+  font-weight: 250;
+}
+
 .centeredCell {
   text-align: center;
 }
@@ -844,4 +860,86 @@
 
 .update-profile__modal--form .form-exp.required {
   margin-top: 0;
+}
+
+.project-table {
+  width: 100%;
+}
+.project-table.__header {
+  margin: 0.3rem;
+}
+
+.edit-userRole__modal.project_user {
+}
+
+.edit-userRole.project_user {
+  width: 100%;
+}
+
+.edit-userPermission {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  margin: auto;
+  margin-left: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+
+.edit-userPermission.__row {
+  display: flex;
+  flex-direction: row;
+}
+
+.edit-permission__modal.modal-dialog,
+.create-user__modal.modal-dialog {
+  width: fit-content;
+}
+
+.edit-userPermission.__row.--label,
+.edit-permission__modal--button,
+.user-create__button {
+  margin-left: 0.3rem;
+}
+
+.click-to-add {
+  font-size: 0.9rem;
+  color: #5bc0de;
+  font-style: italic;
+}
+
+.user-permission__icon {
+  font-size: 1.5 rem;
+}
+
+.create-user__p1 {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.create-user__p1 .--label {
+  margin-right: 0.5rem;
+  width: 30%;
+}
+
+.create-user__p1 .--email {
+  width: 70%;
+  min-width: 20rem;
+  color: black;
+}
+
+.project-table.__header.--project {
+  text-align: left;
+}
+
+.worklist-requirementForm {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.worklist-requirementForm .__field {
+  color: #7a8288;
+  margin-top: 1rem;
+  margin-left: 1rem;
 }

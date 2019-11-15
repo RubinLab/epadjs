@@ -50,11 +50,7 @@ class Annotations extends Component {
   }
 
   async componentDidMount() {
-    const {
-      data: {
-        ResultSet: { Result: data }
-      }
-    } = await getAnnotations(this.series);
+    const { data } = await getAnnotations(this.series);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
     if (data.length === 0) {
@@ -71,11 +67,7 @@ class Annotations extends Component {
 
   async componentDidUpdate(prevProps) {
     if (this.props.update !== prevProps.update) {
-      const {
-        data: {
-          ResultSet: { Result: data }
-        }
-      } = await getAnnotations(this.series);
+      const { data } = await getAnnotations(this.series);
       this.setState({ data });
     }
   }

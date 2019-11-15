@@ -1,6 +1,6 @@
 {
   "realm": "ePad",
-  "auth-server-url": "https://epad-dev4.stanford.edu/auth",
+  "auth-server-url": "http://bds-c02xf0r0jhd5.local:8899/auth",
   "ssl-required": "external",
   "resource": "epad-auth",
   "public-client": true,

@@ -20,6 +20,7 @@
     "jquery": "^3.4.1",
     "js-file-download": "^0.4.5",
     "keycloak-js": "4.0.0-beta.2",
+    "lodash": "^4.17.15",
     "lodash.debounce": "^4.0.8",
     "match-sorter": "^3.0.0",
     "moment": "^2.24.0",

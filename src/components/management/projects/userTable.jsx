@@ -17,6 +17,7 @@ const userTable = ({ onSelect, users }) => {
           <th className="user-table__header">Owner</th>
           <th className="user-table__header">Member</th>
           <th className="user-table__header">Collaborator</th>
+          <th className="user-table__header">StudyOnly</th>
           <th className="user-table__header">None</th>
         </tr>
       </thead>

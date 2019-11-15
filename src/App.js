@@ -3,13 +3,14 @@ import { Route, Switch, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import Keycloak from "keycloak-js";
-import { getUser } from "./services/userServices";
+import { getUser, createUser } from "./services/userServices";
 import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
 import SearchView from "./components/searchView/searchView";
 import DisplayView from "./components/display/displayView";
 import AnotateView from "./components/anotateView";
 import ProgressView from "./components/progressView";
+import FlexView from "./components/flexView";
 import NotFound from "./components/notFound";
 import LoginForm from "./components/loginForm";
 import Logout from "./components/logout";
@@ -24,6 +25,8 @@ import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import { isLite } from "./config.json";
 import { clearAimId } from "./components/annotationsList/action";
+import Worklist from "./components/sideBar/sideBarWorklist";
+
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
@@ -34,7 +37,9 @@ class App extends Component {
     authenticated: false,
     openInfo: false,
     openMenu: false,
-    openUser: false
+    openUser: false,
+    projectMap: {},
+    viewType: "search"
   };
 
   closeMenu = event => {
@@ -49,6 +54,10 @@ class App extends Component {
       openUser: false,
       openMenu: false
     });
+  };
+
+  switchView = viewType => {
+    this.setState({ viewType });
   };
 
   handleMngMenu = () => {
@@ -84,43 +93,71 @@ class App extends Component {
     }
   };
 
+  getProjectMap = projectMap => {
+    this.setState({ projectMap });
+  };
   async componentDidMount() {
     // when comp mount check if the user is set already. If is set then set state
     // if (isLite) {
-    //   const keycloak = Keycloak("/keycloak.json");
-    //   let user;
-    //   let keycloakInit = new Promise((resolve, reject) => {
-    //     keycloak.init({ onLoad: "login-required" }).then(authenticated => {
-    //       // this.setState({ keycloak: keycloak, authenticated: authenticated });
-    //       keycloak.loadUserInfo().then(userInfo => {
-    //         // let user = { id: userInfo.email, displayname: userInfo.given_name };
-    //         // this.setState({
-    //         //   name: userInfo.name,
-    //         //   user,
-    //         //   id: userInfo.sub
-    //         // });
-    //         resolve({ userInfo, keycloak, authenticated });
-    //         // reject("Authentication failed!");
-    //       });
-    //     });
-    //   });
-    //   keycloakInit
-    //     .then(async result => {
-    let user = {
-      user: "muakdogan@gmail.com", //result.userInfo.email,
-      displayname: "Mete" //result.userInfo.given_name
-    };
-    // await auth.login(user, null, result.keycloak.token);
-    this.setState({
-      // keycloak: result.keycloak,
-      authenticated: "ture", //result.authenticated,
-      // id: result.userInfo.sub,
-      user
+    const keycloak = Keycloak("/keycloak.json");
+    let user;
+    let keycloakInit = new Promise((resolve, reject) => {
+      keycloak.init({ onLoad: "login-required" }).then(authenticated => {
+        // this.setState({ keycloak: keycloak, authenticated: authenticated });
+        keycloak.loadUserInfo().then(userInfo => {
+          // let user = { id: userInfo.email, displayname: userInfo.given_name };
+          // this.setState({
+          //   name: userInfo.name,
+          //   user,
+          //   id: userInfo.sub
+          // });
+          resolve({ userInfo, keycloak, authenticated });
+          // reject("Authentication failed!");
+        });
+      });
     });
-    // })
-    //     .catch(err => {
-    //       console.log(err);
-    //     });
+    keycloakInit
+      .then(async result => {
+        let user = {
+          user: result.userInfo.preferred_username || result.userInfo.email,
+          displayname: result.userInfo.given_name
+        };
+        await auth.login(user, null, result.keycloak.token);
+        this.setState({
+          keycloak: result.keycloak,
+          authenticated: result.authenticated,
+          id: result.userInfo.sub,
+          user
+        });
+        const {
+          email,
+          family_name,
+          given_name,
+          preferred_username
+        } = result.userInfo;
+        const username = preferred_username || email;
+        //username, firstname, lastname, email
+        //get the user with username
+        let userData;
+        try {
+          userData = await getUser(username);
+        } catch (err) {
+          createUser(username, given_name, family_name, email)
+            .then(async () => {
+              {
+                userData = await getUser(email);
+              }
+            })
+            .catch(error => console.log(error));
+          console.log(err);
+        }
+
+        //if users exits constinue
+      })
+
+      .catch(err2 => {
+        console.log(err2);
+      });
     // } else {
     //   try {
     //     const username = sessionStorage.getItem("username");
@@ -180,10 +217,14 @@ class App extends Component {
           logout={this.onLogout}
           openMenu={this.handleOpenMenu}
           onSearchViewClick={this.switchSearhView}
+          onSwitchView={this.switchView}
         />
         {this.state.openMng && this.state.openMenu && (
           <div ref={this.setWrapperRef}>
-            <Management closeMenu={this.closeMenu} />
+            <Management
+              closeMenu={this.closeMenu}
+              projectMap={this.state.projectMap}
+            />
           </div>
         )}
         {this.state.openInfo && this.state.openMenu && (
@@ -201,7 +242,7 @@ class App extends Component {
         )}
         {this.state.authenticated && !isLite && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
-            <Sidebar>
+            <Sidebar onData={this.getProjectMap} type={this.state.viewType}>
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
                 <ProtectedRoute
@@ -212,6 +253,8 @@ class App extends Component {
                 <ProtectedRoute path="/search/:pid?" component={SearchView} />
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute path="/progress" component={ProgressView} />
+                <ProtectedRoute path="/flex/:pid?" component={FlexView} />
+                <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 <Route path="/tools" />
                 <Route path="/edit" />
                 <Route path="/not-found" component={NotFound} />
@@ -221,6 +264,7 @@ class App extends Component {
                   to="/search"
                   component={SearchView}
                 />
+
                 <Redirect to="/not-found" />
               </Switch>
               {/* {this.props.activePort === 0 ? <AnnotationsList /> : null} */}

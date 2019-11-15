@@ -28,9 +28,9 @@ export function getAnnotations(series, opts = {}) {
       "/series/" +
       seriesId;
     if (Object.entries(opts).length === 0 && opts.constructor === Object)
-      return http.get(fullUrl + "/aims/?count=0&format=summary");
-    else if (opts["json"]) return http.get(fullUrl + "/aims/?format=json");
-    return http.get(+"/aims/?count=0&format=summary");
+      return http.get(fullUrl + "/aims?count=0&format=summary");
+    else if (opts["json"]) return http.get(fullUrl + "/aims?format=json");
+    return http.get(+"/aims?count=0&format=summary");
   }
 }
 
@@ -56,7 +56,7 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
         studyId +
         "/series/" +
         seriesId +
-        "/aims/?format=json"
+        "/aims?format=json"
     );
 }
 
@@ -81,7 +81,7 @@ export function downloadAnnotations(optionObj, aimIDlist, selection) {
 export function getSummaryAnnotations(projectID) {
   return isLite
     ? http.get(apiUrl + "/projects/lite/aims?format=summary")
-    : http.get(apiUrl + "/projects/" + projectID + "/aims/?format=summary");
+    : http.get(apiUrl + "/projects/" + projectID + "/aims?format=summary");
 }
 
 export function deleteAnnotation(aimObj, aimID, projectID) {

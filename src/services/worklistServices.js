@@ -1,30 +1,84 @@
 import http from "./httpService";
 import { isLite, apiUrl } from "../config.json";
 
-export function getWorklists(userName) {
-  return http.get(apiUrl + "/users/" + userName + "/worklists/");
+export function getWorklistsOfCreator() {
+  return http.get(apiUrl + "/worklists");
 }
 
-export function deleteWorklist(userName, id) {
-  return http.delete(apiUrl + "/users/" + userName + "/worklists/" + id);
+// TODO update /worklists/:w/users/:u
+export function getWorklistsOfAssignee(userName) {
+  return http.get(apiUrl + "/users/" + userName + "/worklists");
 }
 
-export function saveWorklist(user, id, desc, name) {
+export function deleteWorklist(worklistId) {
+  return http.delete(apiUrl + "/worklists/" + worklistId);
+}
+
+export function saveWorklist(
+  worklistId,
+  worklistName,
+  assignees,
+  description,
+  dueDate,
+  requirement
+) {
+  return http.post(apiUrl + "/worklists", {
+    worklistId,
+    worklistName,
+    assignees,
+    description,
+    dueDate,
+    requirement
+  });
+}
+
+export function updateWorklistAssignee(user, id, body) {
+  return http.put(apiUrl + "/worklists/" + id + "/users/" + user, body);
+}
+
+export function updateWorklist(id, body) {
+  return http.put(apiUrl + "/worklists/" + id, body);
+}
+
+export function getStudiesOfWorklist(user, id) {
+  return http.get(apiUrl + "/worklists/" + id + "/users/" + user + "/subjects");
+  // "/subjects/?annotationCount=true"
+}
+
+export function addStudyToWorklist(
+  worklistId,
+  projectID,
+  patientID,
+  studyUID,
+  body
+) {
   return http.post(
     apiUrl +
-      "/users/" +
-      user +
       "/worklists/" +
-      id +
-      "?description=" +
-      desc +
-      "&name=" +
-      name
+      worklistId +
+      "/projects/" +
+      projectID +
+      "/subjects/" +
+      patientID +
+      "/studies/" +
+      studyUID,
+    body
   );
 }
 
-export function updateWorklist(user, id) {
-  return http.put(
-    apiUrl + "/users/" + user + "/worklists/" + id + "?user=" + user
+export function addSubjectToWorklist(worklistId, projectID, patientID, body) {
+  return http.post(
+    apiUrl +
+      "/worklists/" +
+      worklistId +
+      "/projects/" +
+      projectID +
+      "/subjects/" +
+      patientID,
+    body
   );
+}
+
+export function deleteStudyFromWorklist(worklist, body) {
+  return http.delete(apiUrl + "/worklists/" + worklist + "/studies", body);
 }

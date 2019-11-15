@@ -12,7 +12,8 @@ class UploadModal extends React.Component {
     tiff: false,
     osirix: false,
     projects: [],
-    files: []
+    files: [],
+    projectID: ""
   };
 
   onSelect = e => {
@@ -22,11 +23,7 @@ class UploadModal extends React.Component {
 
   componentDidMount = async () => {
     if (!isLite) {
-      const {
-        data: {
-          ResultSet: { Result: projects }
-        }
-      } = await getProjects();
+      const { data: projects } = await getProjects();
       this.setState({ projects });
     }
   };
@@ -36,7 +33,9 @@ class UploadModal extends React.Component {
   };
 
   onUpload = () => {
-    const projectID = this.props.projectID;
+    const projectID = this.props.projectID
+      ? this.props.projectID
+      : this.state.projectID;
     const userName = getCurrentUser();
     const formData = new FormData();
 
@@ -68,6 +67,11 @@ class UploadModal extends React.Component {
         this.props.onSubmit();
       });
     this.props.onCancel();
+    this.setState({ projectID: "" });
+  };
+
+  selectProject = e => {
+    this.setState({ projectID: e.target.value });
   };
 
   renderTiffForm = () => {
@@ -127,7 +131,7 @@ class UploadModal extends React.Component {
     const options = [];
     for (let pr of this.state.projects) {
       options.push(
-        <option key={pr.id} data-id={pr.id}>
+        <option key={pr.id} value={pr.id}>
           {pr.name}
         </option>
       );
@@ -141,7 +145,12 @@ class UploadModal extends React.Component {
           {!isLite && (
             <div className="upload-select__container">
               <span>Projects: </span>
-              <select className="upload-select">{options}</select>
+              <select
+                className="upload-select"
+                onChange={e => this.selectProject(e)}
+              >
+                {options}
+              </select>
             </div>
           )}
           <div className="upload-file">

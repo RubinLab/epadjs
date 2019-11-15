@@ -20,7 +20,7 @@ export function getSeries(projectId, subjectId, studyId) {
         subjectId +
         "/studies/" +
         studyId +
-        "/series/?&filterDSO=true"
+        "/series?filterDSO=true"
     );
 }
 export function getImageIds(series) {
@@ -46,7 +46,7 @@ export function getImageIds(series) {
         series.studyUID +
         "/series/" +
         series.seriesUID +
-        "/images/"
+        "/images"
     );
 }
 

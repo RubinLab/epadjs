@@ -1,0 +1,14 @@
+.progressView .--aggregated,
+.progressView .rt-expandable {
+  font-weight: bold;
+  /* font-size: 1.2rem; */
+  color: #dedee0;
+}
+
+.progressView .rt-resizable-header {
+  text-align: left;
+}
+
+.progressView .rt-resizable-header:last-child {
+  text-align: center;
+}

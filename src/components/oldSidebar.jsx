@@ -13,11 +13,7 @@ class Sidebar extends Component {
   }
 
   async componentDidMount() {
-    const {
-      data: {
-        ResultSet: { Result: projects }
-      }
-    } = await getProjects();
+    const { data: projects } = await getProjects();
     this.setState({ projects });
   }
 

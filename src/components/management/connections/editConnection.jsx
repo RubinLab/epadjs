@@ -10,7 +10,6 @@ const connectionEditingForm = ({
   error,
   connectionToEdit
 }) => {
-  console.log(connectionToEdit);
   return (
     <Modal.Dialog dialogClassName="edit-connection__modal">
       <Modal.Header>

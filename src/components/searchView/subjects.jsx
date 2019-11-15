@@ -57,6 +57,10 @@ class Subjects extends Component {
         ? this.expandCurrentLevel()
         : this.setState({ expanded: {} });
     }
+    if (this.props.pid !== prevProps.pid) {
+      let data = await this.getData();
+      await this.setState({ data });
+    }
   }
   expandCurrentLevel = () => {
     const expanded = {};
@@ -67,15 +71,15 @@ class Subjects extends Component {
   };
 
   getData = async () => {
-    const {
-      data: {
-        ResultSet: { Result: data }
-      }
-    } = await getSubjects(this.props.pid);
+    // if (this.props.pid) {
+    const { data: data } = await getSubjects(this.props.pid);
     for (let subject of data) {
       subject.children = [];
     }
     return data;
+    // } else {
+    //   return [];
+    // }
   };
 
   incColumns = ["subjectName", "numberOfStudies"];

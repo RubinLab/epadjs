@@ -2,7 +2,7 @@ import http from "./httpService";
 import { isLite, apiUrl, apiUrlV1 } from "../config.json";
 
 export function getProjects() {
-  return http.get(apiUrl + "/projects/");
+  return http.get(apiUrl + "/projects");
 }
 
 export function deleteProject(projectId) {
@@ -13,24 +13,18 @@ export function saveProject(
   projectName,
   projectDescription,
   defaultTemplate,
-  id,
-  user,
+  projectId,
+  userName,
   type
 ) {
-  return http.post(
-    apiUrl +
-      "/projects/" +
-      id +
-      "?/username=" +
-      user +
-      "&projectName=" +
-      projectName +
-      "&projectDescription=" +
-      projectDescription +
-      "&type=" +
-      type,
-    { projectDescription, defaultTemplate }
-  );
+  return http.post(apiUrl + "/projects", {
+    projectName,
+    projectDescription,
+    defaultTemplate,
+    projectId,
+    userName,
+    type
+  });
 }
 
 export function updateProject(id, projectName, projectDescription, type) {
@@ -48,12 +42,12 @@ export function updateProject(id, projectName, projectDescription, type) {
 }
 
 export function getProjectUsers(id) {
-  return http.get(apiUrl + "/projects/" + id + "/users/");
+  return http.get(apiUrl + "/projects/" + id + "/users");
 }
 
 export function editUserRole(id, user, role) {
   return role
-    ? http.put(apiUrl + "/projects/" + id + "/users/" + user + "?role=" + role)
+    ? http.put(apiUrl + "/projects/" + id + "/users/" + user, { role })
     : http.delete(apiUrl + "/projects/" + id + "/users/" + user);
 }
 
@@ -68,12 +62,15 @@ export function uploadFile(formData, config, projectID, username) {
     return http.post(apiUrl + "/projects/lite/files", formData, config);
   } else {
     const url =
-      apiUrlV1 +
-      "/rest/upload?projectID=" +
-      projectID +
-      "&username=" +
-      username;
-    console.log("url is", url);
+      apiUrl + "/projects/" + projectID + "/files?username=" + username;
     return http.post(url, formData, config);
   }
+}
+
+export function getProject(projectID) {
+  return http.get(apiUrl + "/projects/" + projectID);
+}
+
+export function getStudies(projectID) {
+  return http.get(apiUrl + "/projects/" + projectID + "/studies");
 }

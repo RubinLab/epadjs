@@ -13,7 +13,8 @@ const NavBar = ({
   openUser,
   loading,
   logout,
-  onSearchViewClick
+  onSearchViewClick,
+  onSwitchView
 }) => {
   const style = { paddingBottom: "8px" };
 
@@ -38,7 +39,13 @@ const NavBar = ({
 
         <div className="collapse navbar-collapse pl-0" id="navbarColor01">
           <ul className="navbar-nav mr-auto">
-            <li className="nav-item" onClick={onSearchViewClick}>
+            <li
+              className="nav-item"
+              onClick={() => {
+                onSearchViewClick();
+                onSwitchView("search");
+              }}
+            >
               <NavLink className="nav-link" to="/search">
                 Search
               </NavLink>
@@ -52,7 +59,7 @@ const NavBar = ({
               <React.Fragment>
                 <li className="nav-item">
                   <NavLink className="nav-link" to="/anotate">
-                    Anotate
+                    Annotate
                   </NavLink>
                 </li>
                 <li className="nav-item">
@@ -68,6 +75,16 @@ const NavBar = ({
                 <li className="nav-item">
                   <NavLink className="nav-link" to="/edit">
                     Edit
+                  </NavLink>
+                </li>{" "}
+                <li
+                  className="nav-item"
+                  onClick={() => {
+                    onSwitchView("flex");
+                  }}
+                >
+                  <NavLink className="nav-link" to="/flex">
+                    Flex
                   </NavLink>
                 </li>{" "}
               </React.Fragment>

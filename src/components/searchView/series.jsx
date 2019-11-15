@@ -81,11 +81,7 @@ class Series extends Component {
   }
 
   async componentDidMount() {
-    const {
-      data: {
-        ResultSet: { Result: data }
-      }
-    } = await getSeries(
+    const { data: data } = await getSeries(
       this.props.projectId,
       this.props.subjectId,
       this.props.studyId
@@ -106,11 +102,7 @@ class Series extends Component {
 
   async componentDidUpdate(prevProps) {
     if (this.props.update !== prevProps.update) {
-      const {
-        data: {
-          ResultSet: { Result: data }
-        }
-      } = await getSeries(
+      const { data: data } = await getSeries(
         this.props.projectId,
         this.props.subjectId,
         this.props.studyId
@@ -133,7 +125,6 @@ class Series extends Component {
   };
 
   selectRow = selected => {
-    // console.log(selected);
     // const newState = { ...this.state.selectedSerie };
     // newState[selected.seriesUID]
     //   ? delete newState[selected.seriesUID]

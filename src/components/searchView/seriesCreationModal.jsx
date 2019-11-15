@@ -47,8 +47,8 @@ class SeriesCreationForm extends React.Component {
     let studies = [];
     const subjectID = selectedSubjectID || this.props.subjects[0].subjectID;
     try {
-      const result = await getStudies(this.props.project, subjectID);
-      studies = result.data.ResultSet.Result;
+      const { data: studies } = await getStudies(this.props.project, subjectID);
+      // studies = result.data.ResultSet.Result;
       const studyID = studies.length > 0 ? studies[0].studyUID : null;
       this.setState({ studies, studyID });
     } catch (error) {

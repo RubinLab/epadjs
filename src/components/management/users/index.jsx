@@ -1,71 +1,225 @@
 import React from "react";
 import ReactTable from "react-table";
-import { FaEdit, FaCheck, FaSave } from "react-icons/fa";
+import { FaCheck, FaRegTrashAlt, FaTimes } from "react-icons/fa";
 import "../menuStyle.css";
-import { getUsers } from "../../../services/userServices";
+import {
+  getUsers,
+  updateUserProjectRole,
+  updateUser,
+  deleteUser,
+  createUser
+} from "../../../services/userServices";
 import ToolBar from "../common/basicToolBar";
-import EditUsers from "./editUsersForm";
-import ColorPicker from "./colorPicker";
-import EditField from "./editField";
+import UserRoleEditForm from "./userRoleEdit";
+import UserPermissionEdit from "./userPermissionEdit";
+import DeleteAlert from "../common/alertDeletionModal";
+import CreateUser from "./CreateUserForm";
+
+const messages = {
+  deleteSingle: "Delete the user? This cannot be undone.",
+  deleteSelected: "Delete selected users? This cannot be undone."
+};
 
 class Users extends React.Component {
   state = {
     data: [],
-    showColorpicker: false,
     hasAdminPermission: false,
     deleteAllClicked: false,
     selectAll: 0,
     selected: {},
-    edit: {}
+    edit: [],
+    roleEdit: [],
+    permissionEdit: {},
+    showRoleEdit: false,
+    userToEdit: "",
+    clickedUserIndex: null,
+    showPermissionEdit: false,
+    errorMessage: "",
+    hasAddClicked: false
   };
 
   componentDidMount = () => {
     this.getUserData();
-    document.addEventListener("mousedown", this.handleClickOutside);
-    document.addEventListener("keydown", this.escapeFieldInput);
   };
 
-  componentWillUnmount = () => {
-    document.removeEventListener("mousedown", this.handleClickOutside);
-    document.removeEventListener("keydown", this.escapeFieldInput);
-  };
-
-  escapeFieldInput = e => {
-    if (e.key === "Escape") {
-      this.handleOutClick();
-    }
-  };
-
-  handleEditField = (field, id) => {
-    const { edit } = this.state;
-    edit[field] = id;
-    this.setState({ edit });
-  };
-
-  handleOutClick = () => {
-    this.setState({ edit: {} });
-  };
   getUserData = async () => {
-    const result = await getUsers();
-    const data = result.data.ResultSet.Result;
-    this.setState({ data });
+    const { data } = await getUsers();
+    let usersProjects = [];
     let hasAdminPermission = false;
     //check if the signed in user has admin permissions
+    const signInName = sessionStorage.getItem("username");
     for (let user of data) {
-      if (user.username === sessionStorage.getItem("username")) {
+      if (user.username === signInName) {
         hasAdminPermission = user.admin;
+        usersProjects = user.projects;
       }
     }
-    this.setState({ hasAdminPermission });
+    for (let user of data) {
+      let filteredProjects = [];
+      for (let project of user.projects) {
+        if (usersProjects.includes(project)) {
+          filteredProjects.push(this.props.projectMap[project]);
+        }
+      }
+      user.projects = filteredProjects;
+    }
+    this.setState({ data, hasAdminPermission, usersProjects });
+  };
+
+  handleAdd = () => {
+    this.setState({ hasAddClicked: true });
+  };
+
+  getUserRole = e => {
+    const { value } = e.target;
+    const { projectid } = e.target.dataset;
+    if (this.state.roleEdit.length > 0) {
+      this.setState(state => ({
+        roleEdit: state.roleEdit.concat([{ [projectid]: { role: value } }])
+      }));
+    } else {
+      this.setState({ roleEdit: [{ [projectid]: { role: value } }] });
+    }
+  };
+  getUserPermission = e => {
+    const { value, checked } = e.target;
+    const newPermission = { ...this.state.permissionEdit, [value]: checked };
+    this.setState({ permissionEdit: newPermission });
+  };
+  getUserName = e => {
+    const { value } = e.target;
+    this.setState({ userToEdit: value });
+  };
+  updateUserPermission = () => {
+    let permissions = "";
+    const keys = Object.keys(this.state.permissionEdit);
+    const values = Object.values(this.state.permissionEdit);
+    for (let i = 0; i < keys.length; i += 1) {
+      if (values[i]) {
+        permissions = permissions ? permissions + "," + keys[i] : "" + keys[i];
+      }
+    }
+    updateUser(this.state.userToEdit, { permissions: permissions })
+      .then(() => {
+        this.getUserData();
+        this.handleCancel();
+      })
+      .catch(err => {
+        this.setState({ errorMessage: err.response.data.message });
+        console.log(err);
+      });
+  };
+
+  updateAdmin = async (username, admin) => {
+    updateUser(username, {
+      admin: !admin
+    })
+      .then(() => {
+        this.getUserData();
+        this.handleCancel();
+      })
+      .catch(err => {
+        this.setState({ errorMessage: err.response.data.message });
+        console.log(err);
+      });
+  };
+
+  updateUserRole = () => {
+    const updates = [];
+    const updatedBy = sessionStorage.getItem("username");
+    for (let item of this.state.roleEdit) {
+      const projectid = Object.keys(item);
+      const role = Object.values(item);
+      const body = { ...role[0], updatedBy };
+      updates.push(
+        updateUserProjectRole(projectid[0], this.state.userToEdit, body)
+      );
+    }
+    this.handleCancel();
+    Promise.all(updates)
+      .then(() => {
+        this.getUserData();
+        this.handleCancel();
+      })
+      .catch(err => {
+        this.setState({ errorMessage: err.response.data.message });
+        console.log(err);
+      });
+  };
+
+  handleSingleDelete = () => {
+    this.setState({ hasDeleteSingleClicked: true });
+  };
+
+  handleDeleteAll = () => {
+    this.setState({ hasDeleteAllClicked: true });
+  };
+
+  deleteUser = username => {
+    deleteUser(this.state.userToEdit)
+      .then(() => {
+        this.getUserData();
+        this.handleCancel();
+      })
+      .catch(err => {
+        this.setState({ errorMessage: err.response.data.message });
+        console.log(err);
+      });
+  };
+
+  deleteAllSelected = () => {
+    const promises = [];
+    const usernNames = Object.keys(this.state.selected);
+    usernNames.forEach(user => {
+      promises.push(deleteUser(user));
+    });
+    Promise.all(promises)
+      .then(() => {
+        this.getUserData();
+        this.handleCancel();
+      })
+      .catch(err => {
+        this.setState({ errorMessage: err.response.data.message });
+        console.log(err);
+      });
+  };
+
+  displayUserRoleEdit = () => {
+    this.setState(state => ({ showRoleEdit: !state.showRoleEdit }));
+  };
+
+  displayUserPermissionEdit = index => {
+    this.setState(state => ({
+      showPermissionEdit: !state.showPermissionEdit
+    }));
+    const obj = {};
+    this.state.data[index].permissions.forEach(el => {
+      obj[el] = true;
+    });
+    this.setState({ permissionEdit: obj });
+  };
+
+  saveClickedUser = userToEdit => {
+    this.setState({ clickedUserIndex: userToEdit.index });
+    this.setState({ userToEdit: userToEdit.row.checkbox.username });
   };
 
   convertArrToStr = arr => {
-    return arr.reduce((all, item, index) => {
-      if (item.length > 0) {
-        all.length > 0 ? (all += ", " + item) : (all += item);
-      }
-      return all;
-    }, "");
+    if (arr.length > 0) {
+      const result = [];
+      const displayMap = {
+        CreateUser: "user",
+        CreatePAC: "connection",
+        CreateAutoPACQuery: "query",
+        CreateProject: "project"
+      };
+      arr.forEach(el => {
+        result.push(displayMap[el]);
+      });
+      return result.join(", ");
+    } else {
+      return "";
+    }
   };
 
   toggleRow = async username => {
@@ -101,19 +255,53 @@ class Users extends React.Component {
     });
   }
 
-  /**
-   * Set the wrapper ref
-   */
-  setWrapperRef = (node, id) => {
-    this.wrapperRef = node;
+  handleCancel = () => {
+    this.setState({
+      edit: [],
+      roleEdit: [],
+      permissionEdit: {},
+      showRoleEdit: false,
+      userToEdit: "",
+      clickedUserIndex: null,
+      showPermissionEdit: false,
+      hasDeleteAllClicked: false,
+      hasDeleteSingleClicked: false,
+      errorMessage: "",
+      hasAddClicked: false
+    });
   };
 
-  /**
-   * Alert if clicked on outside of element
-   */
-  handleClickOutside = event => {
-    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
-      this.handleOutClick();
+  handleAdd = () => {
+    this.setState({ hasAddClicked: true });
+  };
+
+  createUser = () => {
+    let body = {};
+    const { userToEdit } = this.state;
+    if (userToEdit) {
+      let permissions = "";
+      const keys = Object.keys(this.state.permissionEdit);
+      const values = Object.values(this.state.permissionEdit);
+      for (let i = 0; i < keys.length; i += 1) {
+        if (values[i]) {
+          permissions = permissions
+            ? permissions + "," + keys[i]
+            : "" + keys[i];
+        }
+      }
+      body = permissions
+        ? { ...body, username: userToEdit, email: userToEdit, permissions }
+        : { ...body, username: userToEdit, email: userToEdit };
+      createUser(body)
+        .then(async () => {
+          await this.updateUserRole();
+          this.getUserData();
+          this.handleCancel();
+        })
+        .catch(err => {
+          this.setState({ errorMessage: err.response.data.message });
+          console.log(err);
+        });
     }
   };
 
@@ -158,24 +346,8 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 35,
-        className: "mng-user__cell",
-        Cell: original => {
-          const { firstname, username } = original.row.checkbox;
-          return this.state.edit.firstname === username ? (
-            <div ref={this.setWrapperRef}>
-              <EditField default={firstname} />
-            </div>
-          ) : (
-            <div
-              data-name="firstname"
-              onClick={() => {
-                this.handleEditField("firstname", username);
-              }}
-            >
-              {firstname}
-            </div>
-          );
-        }
+        className: "mng-user__cell"
+        // Cell: original => <div data-name="firstname">{firstname}</div>
       },
       {
         Header: "Last",
@@ -185,24 +357,8 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 35,
-        className: "mng-user__cell",
-        Cell: original => {
-          const { lastname, username } = original.row.checkbox;
-          return this.state.edit.lastname === username ? (
-            <div ref={this.setWrapperRef}>
-              <EditField default={lastname} />
-            </div>
-          ) : (
-            <div
-              data-name="lastname"
-              onClick={() => {
-                this.handleEditField("lastname", username);
-              }}
-            >
-              {lastname}
-            </div>
-          );
-        }
+        className: "mng-user__cell"
+        // Cell: original => <div data-name="lastname">{lastname}</div>
       },
       {
         Header: "Email",
@@ -212,51 +368,8 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
-        className: "mng-user__cell",
-        Cell: original => {
-          const { email, username } = original.row.checkbox;
-          return this.state.edit.email === username ? (
-            <div ref={this.setWrapperRef}>
-              <EditField default={email} />
-            </div>
-          ) : (
-            <div
-              data-name="email"
-              onClick={() => {
-                this.handleEditField("email", username);
-              }}
-            >
-              {email}
-            </div>
-          );
-        }
-      },
-      {
-        Header: "Color",
-        className: "usersTable-cell",
-        resizable: true,
-        minResizeWidth: 20,
-        minWidth: 20,
-        className: "mng-user__cell",
-        Cell: original => {
-          const { username } = original.row.checkbox;
-          const className =
-            this.state.edit.color === username ? "user-color" : "";
-          let color = original.row.checkbox.colorpreference;
-          color = color ? `#${color}` : `#19ff75`;
-          return (
-            <p
-              className={`menu-clickable wrapped ${className}`}
-              style={{ color }}
-              data-name="color"
-              onClick={() => {
-                this.handleEditField("color", username);
-              }}
-            >
-              {original.row.checkbox.username}
-            </p>
-          );
-        }
+        className: "mng-user__cell"
+        // Cell: original => <div data-name="email">{email}</div>
       },
       {
         Header: "Projects",
@@ -267,11 +380,27 @@ class Users extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         className: "mng-user__cell",
-        Cell: original => (
-          <p className="menu-clickable wrapped">
-            {original.row.projects.join(", ")}
-          </p>
-        )
+        Cell: original => {
+          const className =
+            original.row.projects.length > 0
+              ? "wrapped"
+              : "wrapped click-to-add";
+
+          const text =
+            original.row.projects.length > 0
+              ? original.row.projects.join(", ")
+              : "Add user to a project";
+          return (
+            <div
+              onClick={() => {
+                this.displayUserRoleEdit();
+                this.saveClickedUser(original);
+              }}
+            >
+              <p className={className}>{text}</p>
+            </div>
+          );
+        }
       },
       {
         Header: "Admin",
@@ -281,9 +410,17 @@ class Users extends React.Component {
         minWidth: 20,
         className: "mng-user__cell",
         Cell: original => {
-          return original.row.checkbox.admin ? (
-            <div className="centeredCell"> {<FaCheck />}</div>
-          ) : null;
+          const { username, admin } = original.row.checkbox;
+          return (
+            <div
+              className="centeredCell"
+              onClick={async () => {
+                this.updateAdmin(username, admin);
+              }}
+            >
+              {original.row.checkbox.admin ? <FaCheck /> : <FaTimes />}
+            </div>
+          );
         }
       },
 
@@ -295,100 +432,112 @@ class Users extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         className: "mng-user__cell",
-        Cell: original => (
-          <p className="menu-clickable wrapped">
-            {this.convertArrToStr(original.row.permissions)}
-          </p>
-        )
-      },
-      {
-        Header: "Enabled",
-        className: "usersTable-cell",
-        resizable: true,
-        minResizeWidth: 20,
-        minWidth: 30,
-        className: "mng-user__cell",
         Cell: original => {
-          return original.row.checkbox.enabled ? (
-            <div className="centeredCell"> {<FaCheck />}</div>
-          ) : null;
+          let text = this.convertArrToStr(original.row.permissions);
+          const className = text ? "wrapped" : "wrapped click-to-add";
+          text = text ? text : "Give user permission";
+          return (
+            <div
+              className="menu-clickable"
+              onClick={() => {
+                this.displayUserPermissionEdit(original.index);
+                this.saveClickedUser(original);
+              }}
+            >
+              <p className={className}>{text}</p>
+            </div>
+          );
         }
       },
       {
-        Header: "Edit",
+        Header: "",
         width: 45,
         minResizeWidth: 20,
         resizable: true,
-        className: "mng-user__cell",
-        Cell: original => {
-          return original.row.checkbox.username ===
-            sessionStorage.getItem("username") ||
-            this.state.hasAdminPermission ? (
+        Cell: original =>
+          this.state.hasAdminPermission ? (
             <div
               onClick={() => {
-                this.setState({
-                  hasEditClicked: true,
-                  userToEdit: original.row.checkbox
-                });
+                this.handleSingleDelete();
+                this.saveClickedUser(original);
               }}
             >
-              <FaEdit className="menu-clickable" />
+              <FaRegTrashAlt className="menu-clickable" />
             </div>
-          ) : null;
-        }
+          ) : null
       }
     ];
   };
 
-  handleCancel = () => {
-    this.setState({
-      hasAddClicked: false,
-      error: "",
-      delAll: false,
-      hasEditClicked: false,
-      delOne: false,
-      selectedOne: {},
-      displayCreationForm: false,
-      firstname: "",
-      lastname: "",
-      email: "",
-      colorpreference: "",
-      showColorpicker: false
-    });
-  };
-
-  handleColorClick = () => {
-    this.setState(state => ({ showColorPicker: !state.showColorPicker }));
-  };
-
   render = () => {
-    const pageSize =
-      this.state.data.length < 10 ? 10 : this.state.data.length >= 40 ? 50 : 20;
+    const {
+      data,
+      clickedUserIndex,
+      usersProjects,
+      showRoleEdit,
+      showPermissionEdit
+    } = this.state;
+    const checkboxSelected = Object.values(this.state.selected).length > 0;
     return (
       <>
         <div className="users menu-display">
-          <ToolBar />
+          <ToolBar
+            onAdd={this.handleAdd}
+            onDelete={this.handleDeleteAll}
+            selected={checkboxSelected}
+          />
           <ReactTable
             className="pro-table"
-            data={this.state.data}
+            data={data}
             columns={this.defineColumns()}
-            pageSizeOptions={[10, 20, 50]}
-            defaultPageSize={pageSize}
           />
-          {this.state.hasEditClicked && (
-            <EditUsers
+          {showRoleEdit && (
+            <UserRoleEditForm
+              onSubmit={this.updateUserRole}
+              onSelect={this.getUserRole}
+              projectMap={this.props.projectMap}
+              projects={usersProjects}
               onCancel={this.handleCancel}
-              userToEdit={this.state.userToEdit}
-              handleColorClick={this.handleColorClick}
-              admin={this.state.hasAdminPermission}
-              // onType={this.handleFormInput}
-              // onSubmit={this.editConnection}
+              projectToRole={data[clickedUserIndex].projectToRole}
+            />
+          )}
+          {showPermissionEdit && (
+            <UserPermissionEdit
+              userPermission={data[clickedUserIndex].permissions}
+              onSelect={this.getUserPermission}
+              onCancel={this.handleCancel}
+              onSubmit={this.updateUserPermission}
+            />
+          )}
+          {this.state.hasDeleteAllClicked && (
+            <DeleteAlert
+              message={messages.deleteSelected}
+              onCancel={this.handleCancel}
+              onDelete={this.deleteAllSelected}
+              error={this.state.errorMessage}
+            />
+          )}
+          {this.state.hasDeleteSingleClicked && (
+            <DeleteAlert
+              message={messages.deleteSingle}
+              onCancel={this.handleCancel}
+              onDelete={this.deleteUser}
+              error={this.state.errorMessage}
+            />
+          )}
+          {this.state.hasAddClicked && (
+            <CreateUser
+              onCancel={this.handleCancel}
+              onSelectRole={this.getUserRole}
+              onSelectPermission={this.getUserPermission}
+              onSubmit={this.createUser}
+              projectMap={this.props.projectMap}
+              projects={usersProjects}
+              error={this.state.errorMessage}
+              getUserName={this.getUserName}
             />
           )}
         </div>
-        {/* {this.state.edit.color && (
-          <ColorPicker onCancel={this.handleColorClick} />
-        )} */}
       </>
     );
   };

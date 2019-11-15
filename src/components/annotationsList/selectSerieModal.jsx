@@ -53,11 +53,7 @@ class selectSerieModal extends React.Component {
   // };
 
   getSerieListData = async (projectID, patientID, studyUID) => {
-    const {
-      data: {
-        ResultSet: { Result: series }
-      }
-    } = await getSeries(projectID, patientID, studyUID);
+    const { data: series } = await getSeries(projectID, patientID, studyUID);
 
     return series;
   };

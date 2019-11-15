@@ -52,11 +52,7 @@ class Annotations extends React.Component {
 
   componentDidMount = async () => {
     if (!isLite) {
-      const {
-        data: {
-          ResultSet: { Result: projectList }
-        }
-      } = await getProjects();
+      const { data: projectList } = await getProjects();
       this.getAnnotationsData(projectList[0].id);
       this.setState({ projectList, projectID: projectList[0].id });
     } else {
@@ -65,11 +61,7 @@ class Annotations extends React.Component {
   };
 
   getAnnotationsData = async projectID => {
-    const {
-      data: {
-        ResultSet: { Result: annotations }
-      }
-    } = await getSummaryAnnotations(projectID);
+    const { data: annotations } = await getSummaryAnnotations(projectID);
     if (isLite) {
       for (let ann of annotations) {
         ann.date = ann.date + "";

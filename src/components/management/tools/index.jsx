@@ -27,11 +27,7 @@ class Tools extends React.Component {
   };
 
   componentDidMount = async () => {
-    const {
-      data: {
-        ResultSet: { Result: projectList }
-      }
-    } = await getProjects();
+    const { data: projectList } = await getProjects();
     const temp = [];
     for (let project of projectList) {
       const { id, name } = project;
@@ -39,8 +35,6 @@ class Tools extends React.Component {
     }
     this.setState({ projectList: temp });
     this.getToolsData();
-
-    console.log("component did mount");
   };
 
   groupByProjects = tools => {
@@ -61,11 +55,7 @@ class Tools extends React.Component {
     };
   };
   getToolsData = async () => {
-    const {
-      data: {
-        ResultSet: { Result: tools }
-      }
-    } = await getTools();
+    const { data: tools } = await getTools();
     const toolsByProjects = this.groupByProjects(tools);
     this.setState({ tools, toolsByProjects });
   };
@@ -198,7 +188,6 @@ class Tools extends React.Component {
         accessor: "",
         width: 50,
         Cell: ({ original }) => {
-          console.log(original);
           const { pluginId } = original;
           return (
             <input
