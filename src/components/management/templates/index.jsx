@@ -54,6 +54,7 @@ class Templates extends React.Component {
   };
   getTemplatesData = async () => {
     const { data: templates } = await getAllTemplates();
+    console.log(templates);
     this.setState({ templates });
   };
 
@@ -185,7 +186,7 @@ class Templates extends React.Component {
         accessor: "",
         width: 50,
         Cell: ({ original }) => {
-          const { templateUID } = original.TemplateContainer.Template[0];
+          const { templateUID } = original.Template[0];
           return (
             <input
               type="checkbox"
@@ -232,11 +233,7 @@ class Templates extends React.Component {
         width: 180,
 
         Cell: original => {
-          return (
-            <div>
-              {original.row.checkbox.TemplateContainer.Template[0].type}
-            </div>
-          );
+          return <div>{original.row.checkbox.Template[0].type}</div>;
           // return <span>type</span>;
         }
       },
@@ -247,11 +244,7 @@ class Templates extends React.Component {
         minResizeWidth: 100,
         width: 420,
         Cell: original => {
-          return (
-            <div>
-              {original.row.checkbox.TemplateContainer.Template[0].templateName}
-            </div>
-          );
+          return <div>{original.row.checkbox.Template[0].templateName}</div>;
           // return <span>type</span>;
         }
       },
