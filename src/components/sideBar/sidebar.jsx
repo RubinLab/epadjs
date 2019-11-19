@@ -1,11 +1,17 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
-import { Tabs, Nav, Content } from "react-tiny-tabs";
-import { getProjects } from "../../services/projectServices";
-import { getWorklistsOfAssignee } from "../../services/worklistServices";
-import { getPacs } from "../../services/pacsServices";
 import { FiZoomIn } from "react-icons/fi";
+import { Tabs, Nav, Content } from "react-tiny-tabs";
+import WorklistSelect from "./worklistSelect";
+import { getProjects } from "../../services/projectServices";
+import Collapsible from "react-collapsible";
+
+import {
+  getWorklistsOfAssignee,
+  getWorklistsOfCreator
+} from "../../services/worklistServices";
+import { getPacs } from "../../services/pacsServices";
 import "./w2.css";
 import { throws } from "assert";
 
@@ -18,7 +24,8 @@ class Sidebar extends Component {
 
     this.state = {
       projects: [],
-      worklists: [],
+      worklistsAssigned: [],
+      worklistsCreated: [],
       pacs: [],
       width: "200px",
       marginLeft: "200px",
@@ -42,11 +49,13 @@ class Sidebar extends Component {
     }
     //get the worklists
 
-    const { data: worklists } = await getWorklistsOfAssignee(
+    const { data: worklistsAssigned } = await getWorklistsOfAssignee(
       sessionStorage.getItem("username")
     );
-    this.setState({ worklists });
+    this.setState({ worklistsAssigned });
 
+    const { data: worklistsCreated } = await getWorklistsOfCreator();
+    this.setState({ worklistsCreated });
     /*
     const {
       data: {
@@ -93,6 +102,9 @@ class Sidebar extends Component {
     } else if (type === "worklist") {
       this.props.history.push(`/worklist/${id}`);
       this.setState({ index: 1 });
+    } else if (type === "progress") {
+      this.props.history.push(`/progress/${id}`);
+      this.setState({ index: 2 });
     }
   }
 
@@ -117,6 +129,7 @@ class Sidebar extends Component {
                 <FiZoomIn />
               </div>
               <div>Worklist</div>
+              <div>Progress</div>
               {/* <div>Connections</div> */}
               {/* <div>Users</div> */}
             </Nav>
@@ -165,7 +178,7 @@ class Sidebar extends Component {
                         </button>
                       </td>
                     </tr>
-                    {this.state.worklists.map(worklist => {
+                    {this.state.worklistsAssigned.map(worklist => {
                       const className = worklist.projectIDs.length
                         ? "sidebar-row __bold"
                         : "sidebar-row";
@@ -191,6 +204,35 @@ class Sidebar extends Component {
                         </tr>
                       );
                     })}
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <table>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <button
+                          to="#"
+                          className="closebtn"
+                          onClick={this.handleClose}
+                        >
+                          Close &times;
+                        </button>
+                      </td>
+                    </tr>
+                    <Collapsible trigger="Created by me">
+                      <WorklistSelect
+                        list={this.state.worklistsCreated}
+                        handleRoute={this.handleRoute}
+                      />
+                    </Collapsible>
+                    <Collapsible trigger="Assigned to me">
+                      <WorklistSelect
+                        list={this.state.worklistsAssigned}
+                        handleRoute={this.handleRoute}
+                      />
+                    </Collapsible>
                   </tbody>
                 </table>
               </div>

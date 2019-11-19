@@ -1,13 +1,19 @@
 import React from "react";
 import ReactTable from "react-table";
 import _ from "lodash";
-import { users } from "./userLevelData";
+// import { users } from "./userLevelData";
+import { getWorklistProgress } from "../../services/worklistServices";
 import "./proView.css";
 
-class Users extends React.Component {
+class ProgressView extends React.Component {
   state = { data: [], view: "User" };
-  componentDidMount = () => {
-    this.setState({ data: users });
+  componentDidMount = async () => {
+    this.getWorkListData();
+  };
+
+  getWorkListData = async () => {
+    const { data } = await getWorklistProgress(this.props.match.params.wid);
+    this.setState({ data });
   };
 
   componentWillUnmount = () => {};
@@ -47,13 +53,13 @@ class Users extends React.Component {
 
   defineColumns = () => {
     const userHeader =
-      this.state.view === "User" ? "  User (#)" : "List of Users";
+      this.state.view === "User" ? "  Assignee (#)" : "List of Users";
     const patientHeader =
       this.state.view === "Patient" ? "  Patient (#)" : "List of Patients";
     let columns = [
       {
         Header: userHeader,
-        accessor: "userName",
+        accessor: "assignee",
         aggregate: vals => _.join(vals, ", "),
         Aggregated: row => {
           return (
@@ -65,7 +71,7 @@ class Users extends React.Component {
       },
       {
         Header: patientHeader,
-        accessor: "patientname",
+        accessor: "subject_name",
         aggregate: vals => _.join(vals, ", "),
         Aggregated: row => {
           return (
@@ -77,7 +83,7 @@ class Users extends React.Component {
       },
       {
         Header: "Completion(%)",
-        accessor: "completion",
+        accessor: "completeness",
         width: 150,
         style: { textAlign: "center" },
         aggregate: vals => _.round(_.mean(vals)),
@@ -119,7 +125,7 @@ class Users extends React.Component {
           data={this.state.data}
           columns={this.defineColumns()}
           pageSize={this.defineColumns().length}
-          pivotBy={view === "User" ? ["userName"] : ["patientname"]}
+          pivotBy={view === "User" ? ["assignee"] : ["subject_name"]}
           showPagination={false}
         />
       </>
@@ -127,4 +133,4 @@ class Users extends React.Component {
   };
 }
 
-export default Users;
+export default ProgressView;
