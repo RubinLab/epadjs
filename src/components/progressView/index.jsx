@@ -11,6 +11,12 @@ class ProgressView extends React.Component {
     this.getWorkListData();
   };
 
+  componentDidUpdate = prevProps => {
+    if (this.props.match.params.wid !== prevProps.match.params.wid) {
+      this.getWorkListData();
+    }
+  };
+
   getWorkListData = async () => {
     const { data } = await getWorklistProgress(this.props.match.params.wid);
     this.setState({ data });
@@ -82,6 +88,12 @@ class ProgressView extends React.Component {
         }
       },
       {
+        Header: "Due Date",
+        accessor: "duedate",
+        width: 150,
+        style: { textAlign: "center" }
+      },
+      {
         Header: "Completion(%)",
         accessor: "completeness",
         width: 150,
@@ -90,7 +102,7 @@ class ProgressView extends React.Component {
         Aggregated: row => {
           return (
             <div className="--aggregated">
-              <span>{row.value}</span>
+              <span>{row.value}%</span>
             </div>
           );
         }
@@ -121,6 +133,7 @@ class ProgressView extends React.Component {
           Show {this.state.view} Based View{" "}
         </button>
         <ReactTable
+          NoDataComponent={() => null}
           className="progressView"
           data={this.state.data}
           columns={this.defineColumns()}

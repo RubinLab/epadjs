@@ -6,7 +6,7 @@ import { Tabs, Nav, Content } from "react-tiny-tabs";
 import WorklistSelect from "./worklistSelect";
 import { getProjects } from "../../services/projectServices";
 import Collapsible from "react-collapsible";
-
+import { FaArrowAltCircleLeft } from "react-icons/fa";
 import {
   getWorklistsOfAssignee,
   getWorklistsOfCreator
@@ -120,6 +120,13 @@ class Sidebar extends Component {
           className="sidenav"
           style={{ width: this.state.width }}
         >
+          <button
+            to="#"
+            className="closebtn __leftBar"
+            onClick={this.handleClose}
+          >
+            <FaArrowAltCircleLeft />
+          </button>
           <Tabs
             className="theme-default"
             settings={{ index: this.state.index }}
@@ -139,13 +146,13 @@ class Sidebar extends Component {
                   <tbody>
                     <tr>
                       <td>
-                        <button
+                        {/* <button
                           to="#"
                           className="closebtn"
                           onClick={this.handleClose}
                         >
                           Close &times;
-                        </button>
+                        </button> */}
                       </td>
                     </tr>
                     {this.state.projects.map(project => (
@@ -169,13 +176,13 @@ class Sidebar extends Component {
                   <tbody>
                     <tr>
                       <td>
-                        <button
+                        {/* <button
                           to="#"
                           className="closebtn"
                           onClick={this.handleClose}
                         >
                           Close &times;
-                        </button>
+                        </button> */}
                       </td>
                     </tr>
                     {this.state.worklistsAssigned.map(worklist => {
@@ -208,33 +215,18 @@ class Sidebar extends Component {
                 </table>
               </div>
               <div>
-                <table>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <button
-                          to="#"
-                          className="closebtn"
-                          onClick={this.handleClose}
-                        >
-                          Close &times;
-                        </button>
-                      </td>
-                    </tr>
-                    <Collapsible trigger="Created by me">
-                      <WorklistSelect
-                        list={this.state.worklistsCreated}
-                        handleRoute={this.handleRoute}
-                      />
-                    </Collapsible>
-                    <Collapsible trigger="Assigned to me">
-                      <WorklistSelect
-                        list={this.state.worklistsAssigned}
-                        handleRoute={this.handleRoute}
-                      />
-                    </Collapsible>
-                  </tbody>
-                </table>
+                <Collapsible trigger="Created by me">
+                  <WorklistSelect
+                    list={this.state.worklistsCreated}
+                    handleRoute={this.handleRoute}
+                  />
+                </Collapsible>
+                <Collapsible trigger="Assigned to me">
+                  <WorklistSelect
+                    list={this.state.worklistsAssigned}
+                    handleRoute={this.handleRoute}
+                  />
+                </Collapsible>
               </div>
               <div>
                 <table>
