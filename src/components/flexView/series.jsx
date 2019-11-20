@@ -4,7 +4,7 @@ import { getSeries } from "../../services/seriesServices";
 import _ from "lodash";
 // import { studyColumns } from "./columns";
 import "./flexView.css";
-import { clearToolOptionsByToolType } from "../../cornerstoneTools/toolOptions";
+// import { clearToolOptionsByToolType } from "../../cornerstoneTools/toolOptions";
 
 class Series extends React.Component {
   state = {

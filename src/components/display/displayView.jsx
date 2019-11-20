@@ -36,35 +36,45 @@ const tools = [
     },
     modeOptions: { mouseButtonMasks: [1, 2] }
   },
-  { name: "Probe", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "Probe", modeOptions: { mouseButtonMasks: [1] }, mode: "active" },
   { name: "Length", modeOptions: { mouseButtonMasks: [1] } },
-  {
-    name: "EllipticalRoi",
-    configuration: {
-      showMinMax: true
-    }
-  },
-  {
-    name: "RectangleRoi",
-    configuration: {
-      showMinMax: true
-    }
-  },
+  // {
+  //   name: "EllipticalRoi",
+  //   configuration: {
+  //     showMinMax: true
+  //   }
+  // },
+  // {
+  //   name: "RectangleRoi",
+  //   configuration: {
+  //     showMinMax: true
+  //   }
+  // },
   {
     name: "CircleRoi",
     configuration: {
       showMinMax: true
     },
-    modeOptions: { mouseButtonMasks: [1] }
+    modeOptions: { mouseButtonMasks: [1] },
+    mode: "active"
   },
   { name: "Angle" },
   { name: "Rotate" },
   { name: "WwwcRegion" },
-  { name: "Probe" },
+  {
+    name: "FreehandRoi",
+    moreOptions: { mouseButtonMasks: [1] },
+    mode: "active"
+  },
+  { name: "FreehandRoiSculptor", modeOptions: { mouseButtonMasks: [1] } },
   { name: "FreehandRoi3DTool", moreOptions: { mouseButtonMasks: [1] } },
   { name: "FreehandRoiSculptorTool", modeOptions: { mouseButtonMasks: [1] } },
   { name: "Eraser" },
-  { name: "Bidirectional", modeOptions: { mouseButtonMasks: [1] } },
+  {
+    name: "Bidirectional",
+    modeOptions: { mouseButtonMasks: [1] },
+    mode: "active"
+  },
   { name: "Brush3DTool" },
   { name: "StackScroll", modeOptions: { mouseButtonMasks: [1] } },
   { name: "PanMultiTouch" },
@@ -115,7 +125,6 @@ class DisplayView extends Component {
       prevProps.loading === true &&
       this.props.loading === false
     ) {
-      console.log("Display view Update", prevProps, this.props);
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
@@ -285,16 +294,16 @@ class DisplayView extends Component {
     );
   };
 
-  measurementChanged = (event, action) => {
-    const { toolType } = event.detail;
+  // TODO: Can this be done without checking the tools of interest?
+  measurementCompleted = (event, action) => {
+    const { toolName, toolType } = event.detail;
     const toolsOfInterest = [
       "Probe",
       "Length",
       "CircleRoi",
-      "FreehandRoi3D",
-      "Bidirectional"
+      "FreehandRoi3DTool"
     ];
-    if (toolsOfInterest.includes(toolType)) {
+    if (toolsOfInterest.includes(toolName) || toolType === "Bidirectional") {
       this.setState({ showAimEditor: true, selectedAim: undefined });
     }
   };
@@ -317,7 +326,6 @@ class DisplayView extends Component {
   };
 
   handleMarkupCreated = event => {
-    console.log("Event", event);
     const { detail } = event;
     this.setState({ showAimEditor: true, selectedAim: undefined });
     if (detail === "brush") this.setState({ hasSegmentation: true });
@@ -331,11 +339,9 @@ class DisplayView extends Component {
   };
 
   parseAims = (aimList, seriesUid, studyUid) => {
-    console.log();
     Object.entries(aimList).forEach(([key, values], i) => {
       values.forEach(value => {
         const { markupType, aimUid } = value;
-        console.log("Value", value);
         if (markupType === "DicomSegmentationEntity")
           this.getSegmentationData(seriesUid, studyUid, aimUid, i);
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
@@ -463,11 +469,12 @@ class DisplayView extends Component {
     data.aimId = markup.aimUid;
     this.createPolygonPoints(data, markup.coordinates);
     const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    this.checkNCreateToolForImage(currentState, imgId, "FreehandMouse");
-    currentState[imgId]["FreehandMouse"].data.push(data);
+    this.checkNCreateToolForImage(currentState, imgId, "FreehandRoi");
+    currentState[imgId]["FreehandRoi"].data.push(data);
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+    console.log("After polyogn rendering cornerstone tool", cornerstoneTools);
   };
 
   createPolygonPoints = (data, points) => {
@@ -590,7 +597,13 @@ class DisplayView extends Component {
                     imageIds={data.stack.imageIds}
                     viewportIndex={i}
                     tools={tools}
-                    onMeasurementsChanged={this.measurementChanged}
+                    eventListeners={[
+                      {
+                        target: "element",
+                        eventName: "cornerstonetoolsmeasurementcompleted",
+                        handler: this.measurementCompleted
+                      }
+                    ]}
                     setViewportActive={() => this.setActive(i)}
                     onNewImage={event =>
                       this.props.dispatch(updateImageId(event))

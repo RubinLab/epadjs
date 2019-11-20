@@ -719,6 +719,8 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
     }
 
     updateImage(element);
+    this.fireModifiedEvent(element, data);
+    this.fireCompletedEvent(element, data);
   }
 
   /**

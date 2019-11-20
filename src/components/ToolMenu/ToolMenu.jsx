@@ -74,6 +74,12 @@ const tools = [
   { name: "Length" },
   { name: "EllipticalRoi" },
   {
+    name: "FreehandRoi",
+    configuration: {
+      showMinMax: true
+    }
+  },
+  {
     name: "RectangleRoi",
     configuration: {
       showMinMax: true
@@ -160,7 +166,7 @@ class ToolMenu extends Component {
         name: "Poly/Freehand",
         icon: <div className="icon-polygon fontastic-icons" />,
         tool: "Presets",
-        tool: "FreehandRoi3DTool",
+        tool: "FreehandRoi",
         child: (
           <span>
             Interpolation{" "}
@@ -230,7 +236,6 @@ class ToolMenu extends Component {
 
   //sets the selected tool active for all of the enabled elements
   setToolActive = (toolName, mouseMask = 1) => {
-    alert(toolName);
     cornerstoneTools.setToolActive(toolName, {
       mouseButtonMask: [mouseMask]
     });
@@ -362,7 +367,6 @@ class ToolMenu extends Component {
         this.setToolActive(tool);
       });
     }
-    console.log("Tool clicked", cornerstoneTools);
   };
 
   render() {

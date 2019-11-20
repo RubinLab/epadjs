@@ -192,6 +192,7 @@ class AimEditor extends Component {
   };
 
   createAim = async answers => {
+    console.log("Data cornerstone tools", cornerstoneTools);
     const { hasSegmentation } = this.props;
     const markupsToSave = this.getNewMarkups();
     console.log("Markups to be saved", markupsToSave);
@@ -215,6 +216,10 @@ class AimEditor extends Component {
   saveAim = (aim, segmentationBlob) => {
     console.log("Aim in SAVE", aim);
     const aimJson = aim.getAim();
+    const { openSeries, activePort } = this.props;
+    const { patientID, projectID, seriesUID, studyUID } = openSeries[
+      activePort
+    ];
 
     uploadAim(JSON.parse(aimJson))
       .then(() => {
@@ -233,16 +238,16 @@ class AimEditor extends Component {
         // this.props.dispatch(
         //   getSingleSerie({ patientID, projectID, seriesUID, studyUID })
         // );
-        this.props.dispatch(
-          updateSingleSerie({
-            subjectID: patientID,
-            projectID,
-            seriesUID,
-            studyUID
-          })
-        );
+        // this.props.dispatch(
+        //   updateSingleSerie({
+        //     subjectID: patientID,
+        //     projectID,
+        //     seriesUID,
+        //     studyUID
+        //   })
+        // );
 
-        this.props.dispatch(updatePatientOnAimSave(aimRefs));
+        // this.props.dispatch(updatePatientOnAimSave(aimRefs));
       })
       .catch(error => console.log(error));
   };
@@ -261,7 +266,7 @@ class AimEditor extends Component {
       const markUps = toolState[imageId];
       Object.keys(markUps).map(tool => {
         switch (tool) {
-          case "FreehandMouse":
+          case "FreehandRoi3DTool":
             const polygons = markUps[tool].data;
             polygons.map(polygon => {
               if (!polygon.aimId || polygon.aimId === updatedAimId) {
@@ -387,7 +392,7 @@ class AimEditor extends Component {
   };
 
   getCornerstoneImagebyId = imageId => {
-    return this.props.cornerstone.default.imageCache.imageCache[imageId].image;
+    return cornerstone.imageCache.imageCache[imageId].image;
   };
 
   storeMarkupsToBeSaved = (imageId, markupData, markupsToSave) => {
