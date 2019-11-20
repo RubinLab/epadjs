@@ -9,7 +9,8 @@ import Collapsible from "react-collapsible";
 import { FaArrowAltCircleLeft } from "react-icons/fa";
 import {
   getWorklistsOfAssignee,
-  getWorklistsOfCreator
+  getWorklistsOfCreator,
+  getWorklistProgress
 } from "../../services/worklistServices";
 import { getPacs } from "../../services/pacsServices";
 import "./w2.css";
@@ -32,11 +33,12 @@ class Sidebar extends Component {
       buttonDisplay: "none",
       open: true,
       index: 0,
-      pId: null
+      pId: null,
+      progressView: [false, false]
     };
   }
 
-  async componentDidMount() {
+  componentDidMount = async () => {
     //get the porjects
     const { data: projects } = await getProjects();
     if (projects.length > 0) {
@@ -47,52 +49,61 @@ class Sidebar extends Component {
       }
       this.props.onData(projectMap);
     }
-    //get the worklists
-
     const { data: worklistsAssigned } = await getWorklistsOfAssignee(
       sessionStorage.getItem("username")
     );
-    this.setState({ worklistsAssigned });
-
     const { data: worklistsCreated } = await getWorklistsOfCreator();
-    this.setState({ worklistsCreated });
-    /*
-    const {
-      data: {
-        ResultSet: { Result: pacs }
-      }
-    } = await getPacs();
-    this.setState({ pacs }); */
-  }
-
-  componentDidUpdate = prevProps => {
-    if (
-      this.props.history.location.pathname.includes("worklist") &&
-      this.state.index !== 1
-    ) {
-      this.setState({ index: 1 });
-    }
+    this.getProgressTotal(worklistsCreated, "worklistsCreated");
+    this.getProgressTotal(worklistsAssigned, "worklistsAssigned");
   };
 
-  handleClose() {
+  getProgressTotal = (list, attribute) => {
+    const promises = [];
+    const result = [...list];
+    list.forEach(wl => {
+      promises.push(getWorklistProgress(wl.workListID));
+    });
+    Promise.all(promises)
+      .then(data => {
+        const progressArr = data.map(el => {
+          return el.data;
+        });
+        let total;
+        progressArr.forEach((el, i) => {
+          total = el.reduce((all, item, index) => {
+            return (all += item.completeness);
+          }, 0);
+          const mean = total / el.length;
+          result[i] = { ...result[i], progress: mean };
+        });
+        this.setState({ [attribute]: result });
+      })
+      .catch(err => console.log(err));
+  };
+  componentDidUpdate = prevProps => {};
+
+  handleClose = () => {
     this.setState({
       width: "0",
       marginLeft: "0",
       buttonDisplay: "block",
       open: false
     });
-  }
+  };
 
-  handleOpen() {
+  handleOpen = () => {
     this.setState({
       width: "200px",
       marginLeft: "200px",
       buttonDisplay: "none",
       open: true
     });
-  }
+  };
 
-  handleRoute(type, id) {
+  handleRoute = (type, id) => {
+    if (type !== "progress") {
+      this.collapseAll();
+    }
     if (type === "project" && this.props.type === "search") {
       this.props.history.push(`/search/${id}`);
       this.setState({ index: 0 });
@@ -106,13 +117,23 @@ class Sidebar extends Component {
       this.props.history.push(`/progress/${id}`);
       this.setState({ index: 2 });
     }
-  }
-
-  updateState = () => {
-    this.setState({ index: 1 });
   };
 
-  render() {
+  handleCollapse = (index, open) => {
+    const state = [...this.state.progressView];
+    state[index] = open;
+    this.setState({ progressView: state });
+    if (open) this.setState({ index: 2 });
+  };
+
+  collapseAll = () => {
+    const progressView = [false, false];
+    this.setState({ progressView });
+  };
+
+  render = () => {
+    const { progressView } = this.state;
+    console.log(this.state);
     return (
       <React.Fragment>
         <div
@@ -132,10 +153,10 @@ class Sidebar extends Component {
             settings={{ index: this.state.index }}
           >
             <Nav>
-              <div>
+              <div onClick={this.collapseAll}>
                 <FiZoomIn />
               </div>
-              <div>Worklist</div>
+              <div onClick={this.collapseAll}>Worklist</div>
               <div>Progress</div>
               {/* <div>Connections</div> */}
               {/* <div>Users</div> */}
@@ -215,13 +236,23 @@ class Sidebar extends Component {
                 </table>
               </div>
               <div>
-                <Collapsible trigger="Created by me">
+                <Collapsible
+                  trigger="Created by me"
+                  onOpen={() => this.handleCollapse(0, true)}
+                  onClose={() => this.handleCollapse(0, false)}
+                  open={progressView[0]}
+                >
                   <WorklistSelect
                     list={this.state.worklistsCreated}
                     handleRoute={this.handleRoute}
                   />
                 </Collapsible>
-                <Collapsible trigger="Assigned to me">
+                <Collapsible
+                  trigger="Assigned to me"
+                  onOpen={() => this.handleCollapse(1, true)}
+                  onClose={() => this.handleCollapse(1, false)}
+                  open={progressView[1]}
+                >
                   <WorklistSelect
                     list={this.state.worklistsAssigned}
                     handleRoute={this.handleRoute}
@@ -281,7 +312,7 @@ class Sidebar extends Component {
         </div>
       </React.Fragment>
     );
-  }
+  };
 }
 
 const mapStateToProps = state => {

@@ -88,12 +88,6 @@ class ProgressView extends React.Component {
         }
       },
       {
-        Header: "Due Date",
-        accessor: "duedate",
-        width: 150,
-        style: { textAlign: "center" }
-      },
-      {
         Header: "Completion(%)",
         accessor: "completeness",
         width: 150,
