@@ -43,7 +43,8 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
         "/studies/" +
         studyId +
         "/series/" +
-        seriesId
+        seriesId +
+        "/aims?format=json"
     );
   else
     return http.get(
