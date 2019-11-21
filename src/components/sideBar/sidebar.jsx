@@ -133,7 +133,6 @@ class Sidebar extends Component {
 
   render = () => {
     const { progressView } = this.state;
-    console.log(this.state);
     return (
       <React.Fragment>
         <div

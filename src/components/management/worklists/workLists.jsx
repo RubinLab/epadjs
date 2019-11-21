@@ -15,6 +15,7 @@ import CreationForm from "./worklistCreationForm";
 import EditField from "../../sideBar/editField";
 import UpdateAssignee from "./updateAssigneeModal";
 import UpdateDueDateModal from "./updateDueDate";
+import UpdateRequirement from "./updateRequirement";
 
 const messages = {
   deleteSingle: "Delete the worklist? This cannot be undone.",
@@ -39,7 +40,9 @@ class WorkList extends React.Component {
     worklistId: null,
     updateAssignee: false,
     updateDueDate: false,
-    duedate: ""
+    duedate: "",
+    updateRequirement: false,
+    requirements: []
   };
 
   componentDidMount = async () => {
@@ -111,7 +114,9 @@ class WorkList extends React.Component {
       updateAssignee: false,
       assigneeMap: {},
       initialAssignees: [],
-      updateDueDate: false
+      updateDueDate: false,
+      updateRequirement: false,
+      requirements: []
     });
   };
 
@@ -275,6 +280,19 @@ class WorkList extends React.Component {
     this.handleCancel();
   };
 
+  saveUpdatedRequirements = requirements => {
+    updateWorklist(this.state.worklistId, { requirements })
+      .then(() => {
+        this.getWorkListData();
+        toast.info("Update successful!", { autoClose: true });
+      })
+      .catch(error => {
+        toast.error(error.response.data.message, { autoClose: false });
+        this.getWorkListData();
+      });
+    this.handleCancel();
+  };
+
   defineColumns = () => {
     return [
       {
@@ -402,6 +420,38 @@ class WorkList extends React.Component {
         }
       },
       {
+        Header: "Requirement",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 50,
+        Cell: original => {
+          const { requirements, workListID } = original.row.checkbox;
+          const displayReq = requirements.reduce((all, item, index) => {
+            const { level, numOfAims, template } = item;
+            all.push(`${numOfAims}:${template}:${level}`);
+            return all;
+          }, []);
+          const className = requirements.length
+            ? "wrapped menu-clickable"
+            : "wrapped click-to-add menu-clickable";
+          return (
+            <div
+              className={`--commentCont ${className}`}
+              onClick={() => {
+                this.setState({
+                  worklistId: workListID,
+                  requirements,
+                  updateRequirement: true
+                });
+              }}
+            >
+              {displayReq.join(", ") || "Define requirement"}
+            </div>
+          );
+        }
+      },
+      {
         Header: "Description",
         sortable: true,
         resizable: true,
@@ -517,6 +567,14 @@ class WorkList extends React.Component {
             onSubmit={this.updateWorklist}
             onChange={this.handleFormInput}
             dueDate={this.state.duedate}
+          />
+        )}
+        {this.state.updateRequirement && (
+          <UpdateRequirement
+            requirements={this.state.requirements}
+            onCancel={this.handleCancel}
+            worklistID={this.state.worklistId}
+            onSubmit={this.saveUpdatedRequirements}
           />
         )}
       </div>

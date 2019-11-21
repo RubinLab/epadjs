@@ -20,7 +20,7 @@ export function saveWorklist(
   assignees,
   description,
   dueDate,
-  requirement
+  requirements
 ) {
   return http.post(apiUrl + "/worklists", {
     worklistId,
@@ -28,7 +28,7 @@ export function saveWorklist(
     assignees,
     description,
     dueDate,
-    requirement
+    requirements
   });
 }
 
