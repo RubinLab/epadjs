@@ -218,6 +218,7 @@ class App extends Component {
           openMenu={this.handleOpenMenu}
           onSearchViewClick={this.switchSearhView}
           onSwitchView={this.switchView}
+          viewType={this.state.viewType}
         />
         {this.state.openMng && this.state.openMenu && (
           <div ref={this.setWrapperRef}>
@@ -252,7 +253,10 @@ class App extends Component {
                 />
                 <ProtectedRoute path="/search/:pid?" component={SearchView} />
                 <ProtectedRoute path="/anotate" component={AnotateView} />
-                <ProtectedRoute path="/progress" component={ProgressView} />
+                <ProtectedRoute
+                  path="/progress/:wid?"
+                  component={ProgressView}
+                />
                 <ProtectedRoute path="/flex/:pid?" component={FlexView} />
                 <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 <Route path="/tools" />

@@ -25,6 +25,11 @@
   margin-top: 0px;
 }
 
+.closebtn.__leftBar {
+  left: 120px;
+  font-size: 14px;
+}
+
 .mainView {
   height: 100%;
   flex: 1;
@@ -82,13 +87,12 @@
 }
 
 .Collapsible__trigger:after {
-  font-family: 'FontAwesome';
-  content: '\f107';
+  font-family: "FontAwesome";
+  content: "\f107";
   position: absolute;
   right: 10px;
   top: 10px;
   display: block;
-
 }
 
 .Collapsible__trigger.is-open:after {
@@ -107,7 +111,7 @@
 .Collapsible__custom-sibling {
   padding: 5px;
   font-size: 12px;
-  background-color: #CBB700;
+  background-color: #cbb700;
   color: black;
 }
 

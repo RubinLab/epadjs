@@ -57,16 +57,21 @@ const NavBar = ({
             </li>
             {!isLite && (
               <React.Fragment>
-                <li className="nav-item">
+                {/* <li className="nav-item">
                   <NavLink className="nav-link" to="/anotate">
                     Annotate
                   </NavLink>
                 </li>
-                <li className="nav-item">
+                <li
+                  className="nav-item"
+                  onClick={() => {
+                    onSwitchView("progress");
+                  }}
+                >
                   <NavLink className="nav-link" to="/progress">
                     Progress
                   </NavLink>
-                </li>
+                </li> */}
                 <li className="nav-item">
                   <NavLink className="nav-link" to="/tools">
                     Tools

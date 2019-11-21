@@ -16,19 +16,19 @@ export function deleteWorklist(worklistId) {
 
 export function saveWorklist(
   worklistId,
-  worklistName,
+  name,
   assignees,
   description,
   dueDate,
-  requirement
+  requirements
 ) {
   return http.post(apiUrl + "/worklists", {
     worklistId,
-    worklistName,
+    name,
     assignees,
     description,
     dueDate,
-    requirement
+    requirements
   });
 }
 
@@ -79,6 +79,10 @@ export function addSubjectToWorklist(worklistId, projectID, patientID, body) {
   );
 }
 
-export function deleteStudyFromWorklist(worklist, body) {
-  return http.delete(apiUrl + "/worklists/" + worklist + "/studies", body);
+export function deleteStudyFromWorklist(worklist, data) {
+  return http.delete(apiUrl + "/worklists/" + worklist + "/studies", { data });
+}
+
+export function getWorklistProgress(worklist) {
+  return http.get(apiUrl + "/worklists/" + worklist + "/progress");
 }

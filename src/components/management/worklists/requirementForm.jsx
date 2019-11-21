@@ -8,7 +8,6 @@ import { getAllTemplates } from "../../../services/templateServices";
 class RequirementForm extends React.Component {
   state = {
     templates: {},
-    requirements: [],
     error: null,
     level: null,
     numOfAims: null,
@@ -25,6 +24,7 @@ class RequirementForm extends React.Component {
     });
     this.setState({ templates });
   };
+
   renderOptions = (arr, field) => {
     const firstItem = <option key="first">{`--- Select ${field} ---`}</option>;
     const options = [firstItem];
@@ -38,13 +38,11 @@ class RequirementForm extends React.Component {
   };
 
   handleFormInput = e => {
-    const { name, value, checked } = e.target;
+    const { name, value } = e.target;
     if (name === "numOfAims" && !isNaN(parseInt(value))) {
       this.setState({ error: null });
     }
-    e.target.type === "checkbox"
-      ? this.setState({ [name]: checked })
-      : this.setState({ [name]: value });
+    this.setState({ [name]: value });
   };
 
   handleAddRequirement = () => {
@@ -60,18 +58,13 @@ class RequirementForm extends React.Component {
       this.setState({ error: "No of aims should be a number!" });
       return;
     }
+    this.setState({ error: null });
 
-    const newRequirements = [...this.state.requirements];
+    const newRequirements = [...this.props.requirements];
     newRequirements.push({ level, numOfAims, template });
-    this.setState({ requirements: newRequirements, error: null });
     this.props.onAddRequirement(newRequirements);
   };
 
-  clearRequirement = index => {
-    const newRequirements = [...this.state.requirements];
-    newRequirements.splice(index, 1);
-    this.setState({ requirements: newRequirements });
-  };
   setColumns = () => {
     return [
       {
@@ -100,7 +93,7 @@ class RequirementForm extends React.Component {
           <div
             className="menu-clickable"
             onClick={() => {
-              this.clearRequirement(row.index);
+              this.props.deleteRequirement(row.index);
             }}
           >
             <FaTrashAlt />
@@ -111,9 +104,8 @@ class RequirementForm extends React.Component {
   };
 
   render = () => {
-    const { error, requirements } = this.state;
-    const levels = ["Patient", "Study", "Serie", "Image"];
-
+    const { error } = this.state;
+    const levels = ["Patient", "Study", "Series", "Image"];
     return (
       <>
         <div className="worklist-requirementForm">
@@ -148,15 +140,6 @@ class RequirementForm extends React.Component {
               onChange={this.handleFormInput}
             />
           </div>
-          {/* <div>
-            <input
-              className="__field"
-              type="checkbox"
-              name="required"
-              onChange={this.handleFormInput}
-            />
-            <span>Required</span>
-          </div> */}
           <div>
             <button className="__field" onClick={this.handleAddRequirement}>
               Add Requirement
@@ -165,12 +148,12 @@ class RequirementForm extends React.Component {
         </div>
         {error ? <div className="err-message __field">{error}</div> : null}
 
-        {requirements.length > 0 && (
+        {this.props.requirements.length > 0 && (
           <ReactTable
             NoDataComponent={() => null}
-            data={requirements}
+            data={this.props.requirements}
             columns={this.setColumns()}
-            pageSize={requirements.length}
+            pageSize={this.props.requirements.length}
             showPagination={false}
           />
         )}

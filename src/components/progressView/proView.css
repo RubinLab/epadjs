@@ -12,3 +12,18 @@
 .progressView .rt-resizable-header:last-child {
   text-align: center;
 }
+.progress-wl {
+  /* background: red; */
+  border-bottom: 1px solid rgba(34, 36, 38, 0.15);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.progress-wl .__inner {
+  display: flex;
+  justify-content: space-between;
+}
+
+.__dueDate {
+  font-size: 0.85rem;
+}

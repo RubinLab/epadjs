@@ -21,7 +21,7 @@ class WorklistCreationForm extends React.Component {
     description: "",
     dueDate: "",
     error: "",
-    requirement: []
+    requirements: []
   };
 
   goPrevPage = () => {
@@ -57,14 +57,14 @@ class WorklistCreationForm extends React.Component {
       assigneeList,
       description,
       dueDate,
-      requirement
+      requirements
     } = this.state;
     assigneeList = Object.keys(assigneeList);
     if (!name || !id || !assigneeList.length) {
       this.setState({ error: messages.fillRequiredFields });
     } else {
       description = description ? description : "";
-      saveWorklist(id, name, assigneeList, description, dueDate, requirement)
+      saveWorklist(id, name, assigneeList, description, dueDate, requirements)
         .then(() => {
           this.props.onSubmit();
           this.handleCancel();
@@ -97,13 +97,19 @@ class WorklistCreationForm extends React.Component {
     this.setState({ assigneeList });
   };
 
-  getRequirement = requirement => {
-    this.setState({ requirement });
+  getRequirement = requirements => {
+    this.setState({ requirements });
+  };
+
+  clearRequirement = index => {
+    const newRequirements = [...this.state.requirements];
+    newRequirements.splice(index, 1);
+    this.setState({ requirements: newRequirements });
   };
 
   render = () => {
     const { users, onCancel } = this.props;
-    const { page, id, name, error } = this.state;
+    const { page, id, name, error, requirements } = this.state;
     let button1Text = "Back";
     let button2Text = "Next";
     let button3Text = "Cancel";
@@ -207,7 +213,11 @@ class WorklistCreationForm extends React.Component {
               <h5 className="add-worklist__modal--label">
                 Add Requirements to monitor progress
               </h5>
-              <RequirementForm onAddRequirement={this.getRequirement} />
+              <RequirementForm
+                onAddRequirement={this.getRequirement}
+                requirements={requirements}
+                deleteRequirement={this.clearRequirement}
+              />
             </>
           )}
           {error ? <div className="err-message">{error}</div> : null}

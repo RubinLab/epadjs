@@ -216,12 +216,27 @@ class AimEditor extends Component {
   saveAim = (aim, segmentationBlob) => {
     console.log("Aim in SAVE", aim);
     const aimJson = aim.getAim();
-    const { openSeries, activePort } = this.props;
-    const { patientID, projectID, seriesUID, studyUID } = openSeries[
-      activePort
-    ];
+    const aimSaved = JSON.parse(aimJson);
+    const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
+    const { series, activePort } = this.props;
+    const { patientID, projectID, seriesUID, studyUID } = series[activePort];
+    const name =
+      aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .name.value;
+    const comment =
+      aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .comment.value;
+    const aimRefs = {
+      aimID,
+      patientID,
+      projectID,
+      seriesUID,
+      studyUID,
+      name,
+      comment
+    };
 
-    uploadAim(JSON.parse(aimJson))
+    uploadAim(aimSaved)
       .then(() => {
         if (segmentationBlob) this.saveSegmentation(segmentationBlob);
         // var objectUrl = URL.createObjectURL(segBlobGlobal);
