@@ -605,9 +605,9 @@ class DisplayView extends Component {
                       }
                     ]}
                     setViewportActive={() => this.setActive(i)}
-                    onNewImage={event =>
-                      this.props.dispatch(updateImageId(event))
-                    }
+                    onNewImage={event => {
+                      this.props.dispatch(updateImageId(event));
+                    }}
                     // onRightClick={this.showRightMenu}
                   />
                 </MenuProvider>
