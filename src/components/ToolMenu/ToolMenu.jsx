@@ -166,7 +166,7 @@ class ToolMenu extends Component {
         name: "Poly/Freehand",
         icon: <div className="icon-polygon fontastic-icons" />,
         tool: "Presets",
-        tool: "FreehandRoi",
+        tool: "FreehandRoi3DTool",
         child: (
           <span>
             Interpolation{" "}
