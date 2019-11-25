@@ -15,7 +15,7 @@ import "./viewport.css";
 import { changeActivePort, updateImageId } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
-import CornerstoneViewport from "react-cornerstone-viewport";
+import CornerstoneViewport from "reactCornerstoneViewport";
 import OHIFSegmentationExtension from "../../ohif-segmentation-plugin";
 import { freehand } from "./Freehand";
 import { line } from "./Line";
@@ -23,6 +23,7 @@ import { probe } from "./Probe";
 import { circle } from "./Circle";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
+import { isEyeTracker } from "../../config.json";
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: [1] } },
@@ -108,7 +109,8 @@ class DisplayView extends Component {
       selectedAim: undefined,
       refs: props.refs,
       showAnnDetails: true,
-      hasSegmentation: false
+      hasSegmentation: false,
+      showAimEditor: isEyeTracker ? true : false
     };
   }
 
@@ -607,9 +609,9 @@ class DisplayView extends Component {
                       }
                     ]}
                     setViewportActive={() => this.setActive(i)}
-                    onNewImage={event =>
-                      this.props.dispatch(updateImageId(event))
-                    }
+                    // onNewImage={event =>
+                    //   this.props.dispatch(updateImageId(event))
+                    // }
                     isStackPrefetchEnabled={true}
                     // onRightClick={this.showRightMenu}
                   />

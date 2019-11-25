@@ -1,22 +1,24 @@
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
+import React, { PureComponent } from "react";
+import PropTypes from "prop-types";
 
-import './LoadingIndicator.css';
+import "./LoadingIndicator.css";
 
 class LoadingIndicator extends PureComponent {
   static propTypes = {
     percentComplete: PropTypes.number.isRequired,
-    error: PropTypes.object,
+    error: PropTypes.object
   };
 
   static defaultProps = {
     percentComplete: 0,
-    error: null,
+    error: null
   };
 
   render() {
-    const pc = this.props.percentComplete;
-    const percComplete = `${pc}%`;
+    let percComplete;
+    if (this.props.percentComplete && this.props.percentComplete !== 100) {
+      percComplete = `${this.props.percentComplete}%`;
+    }
 
     return (
       <React.Fragment>
@@ -31,12 +33,10 @@ class LoadingIndicator extends PureComponent {
         ) : (
           <div className="imageViewerLoadingIndicator loadingIndicator">
             <div className="indicatorContents">
-              <h2>
-                {pc < 100 ? 'Loading...' : 'Loaded -'}
-                <i className="fa fa-spin fa-circle-o-notch fa-fw" />{' '}
+              <p>
+                Loading... <i className="fa fa-spin fa-circle-o-notch fa-fw" />{" "}
                 {percComplete}
-              </h2>
-              {pc === 100 && <p>Processing...</p>}
+              </p>
             </div>
           </div>
         )}

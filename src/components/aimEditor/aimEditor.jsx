@@ -34,7 +34,7 @@ const enumAimType = {
 class AimEditor extends Component {
   constructor(props) {
     super(props);
-    this.image = this.getImage();
+    this.image = {};
     this.semanticAnswers = {};
   }
 
@@ -53,6 +53,7 @@ class AimEditor extends Component {
       this.semanticAnswers.createViewerWindow();
       const { aimId } = this.props;
       if (aimId != null && Object.entries(aimId).length) {
+        this.image = this.getImage();
         this.semanticAnswers.loadAimJson(aimId);
       }
     });
@@ -218,8 +219,10 @@ class AimEditor extends Component {
     const aimJson = aim.getAim();
     const aimSaved = JSON.parse(aimJson);
     const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
-    const { series, activePort } = this.props;
-    const { patientID, projectID, seriesUID, studyUID } = series[activePort];
+    const { openSeries, activePort } = this.props;
+    const { patientID, projectID, seriesUID, studyUID } = openSeries[
+      activePort
+    ];
     const name =
       aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
         .name.value;

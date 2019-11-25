@@ -8,6 +8,7 @@ import AnnotationList from "../annotationsList/annotationDock/annotationList";
 import AimEditor from "../aimEditor/aimEditor";
 
 import "./RightsideBar.css";
+import EyeTracker from "../EyeTracker/EyeTracker";
 
 class Rightsidebar extends Component {
   constructor(props) {
@@ -83,12 +84,8 @@ class Rightsidebar extends Component {
           <Collapsible trigger={"Annotations"} transitionTime={100}>
             <AnnotationList />
           </Collapsible>
-          <Collapsible trigger={"Message Center"} transitionTime={100}>
-            <p>
-              This is the collapsible message content. Messages will be shown
-              here.
-            </p>
-            <p>No New Message!</p>
+          <Collapsible trigger={"Eye Tracker"} transitionTime={100}>
+            <EyeTracker />
           </Collapsible>
         </div>
         <div

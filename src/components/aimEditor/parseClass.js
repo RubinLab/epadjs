@@ -39,6 +39,8 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
   this.aimTypeCode = "";
   var domelements = [];
   this.geoshapeidCounter = 0;
+  this.mapShortCutKeys = new Map();
+  this.mapcodeValueShortCutKeys = new Map();
 
   var selectid = 0;
   var mathOperators = new Map();
@@ -68,6 +70,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
   function constructor() {
     if (self.arrayTemplates === "undefined") self.arrayTemplates = [];
+    document.addEventListener("keydown", self.aimshortCutKeyEvent, false);
   }
 
   this.arrayDifference = function(base, compareto) {
@@ -755,10 +758,20 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
         parant: parent,
         allowterm: allowedTermObj
       };
-      this.mapAllowedTermCollectionByCodeValue.set(
+      self.mapAllowedTermCollectionByCodeValue.set(
         allowedTermObj.codeValue,
         unionPrntAlwtermObj
       );
+      if (subEObject.hasOwnProperty("keyShortCut")) {
+        self.mapShortCutKeys.set(
+          subEObject.keyShortCut,
+          allowedTermObj.codeValue
+        );
+        self.mapcodeValueShortCutKeys.set(
+          allowedTermObj.codeValue,
+          subEObject.keyShortCut
+        );
+      }
       AllowedTerm.push({
         AllowedTerm: allowedTermObj
       });
@@ -1526,6 +1539,13 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     div.className = _self.className;
     var label = document.createElement("label");
     label.textContent = _self.lbl;
+    if (self.mapcodeValueShortCutKeys.get(_self.id)) {
+      label.textContent =
+        label.textContent +
+        " (" +
+        self.mapcodeValueShortCutKeys.get(_self.id) +
+        ") ";
+    }
     var radioInput = document.createElement("input");
     radioInput.type = "radio";
     radioInput.className = "radio checkbox";

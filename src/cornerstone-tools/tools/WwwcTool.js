@@ -1,6 +1,6 @@
-import external from '../externalModules.js';
-import BaseTool from './base/BaseTool.js';
-import { wwwcCursor } from './cursors/index.js';
+import external from "../externalModules.js";
+import BaseTool from "./base/BaseTool.js";
+import { wwwcCursor } from "./cursors/index.js";
 
 /**
  * @public
@@ -13,21 +13,30 @@ import { wwwcCursor } from './cursors/index.js';
 export default class WwwcTool extends BaseTool {
   constructor(props = {}) {
     const defaultProps = {
-      name: 'Wwwc',
+      name: "Wwwc",
       strategies: { basicLevelingStrategy },
-      supportedInteractionTypes: ['Mouse', 'Touch'],
+      supportedInteractionTypes: ["Mouse", "Touch"],
       configuration: {
-        orientation: 0,
+        orientation: 0
       },
-      svgCursor: wwwcCursor,
+      svgCursor: wwwcCursor
     };
 
     super(props, defaultProps);
   }
 
+  //Mete: Needed for EyeTracker Log
+  fireEyeTrackerLog = () => {
+    let evnt = new CustomEvent("eyeTrackerShouldLog", {
+      detail: "windowLevel"
+    });
+    window.dispatchEvent(evnt);
+  };
+
   mouseDragCallback(evt) {
     this.applyActiveStrategy(evt);
     external.cornerstone.setViewport(evt.detail.element, evt.detail.viewport);
+    this.fireEyeTrackerLog();
   }
 
   touchDragCallback(evt) {

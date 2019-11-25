@@ -1,6 +1,6 @@
-import external from './../externalModules.js';
-import BaseTool from './base/BaseTool.js';
-import { panCursor } from './cursors/index.js';
+import external from "./../externalModules.js";
+import BaseTool from "./base/BaseTool.js";
+import { panCursor } from "./cursors/index.js";
 
 /**
  * @public
@@ -13,9 +13,9 @@ import { panCursor } from './cursors/index.js';
 export default class PanTool extends BaseTool {
   constructor(props = {}) {
     const defaultProps = {
-      name: 'Pan',
-      supportedInteractionTypes: ['Mouse', 'Touch'],
-      svgCursor: panCursor,
+      name: "Pan",
+      supportedInteractionTypes: ["Mouse", "Touch"],
+      svgCursor: panCursor
     };
 
     super(props, defaultProps);
@@ -26,6 +26,14 @@ export default class PanTool extends BaseTool {
     this.mouseDragCallback = this._dragCallback.bind(this);
   }
 
+  //Mete: Needed for EyeTracker Log
+  fireEyeTrackerLog = () => {
+    let evnt = new CustomEvent("eyeTrackerShouldLog", {
+      detail: "pan"
+    });
+    window.dispatchEvent(evnt);
+  };
+
   _dragCallback(evt) {
     const eventData = evt.detail;
     const { element, viewport } = eventData;
@@ -34,6 +42,8 @@ export default class PanTool extends BaseTool {
 
     this._applyTranslation(viewport, translation);
     external.cornerstone.setViewport(element, viewport);
+
+    this.fireEyeTrackerLog();
   }
 
   _getTranslation(eventData) {
@@ -50,7 +60,7 @@ export default class PanTool extends BaseTool {
 
     return {
       x: deltaPoints.page.x / widthScale,
-      y: deltaPoints.page.y / heightScale,
+      y: deltaPoints.page.y / heightScale
     };
   }
 
