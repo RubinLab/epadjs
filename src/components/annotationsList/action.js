@@ -570,9 +570,7 @@ export const updateSingleSerie = (serie, annotation) => {
       numberOfAnnotations,
       aimID: annotation
     };
-    const { aimsData, imageData } = await dispatch(
-      getSingleSerieData(serie, annotation)
-    );
+    const { aimsData, imageData } = await getSingleSerieData(serie, annotation);
     await dispatch(
       singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation)
     );

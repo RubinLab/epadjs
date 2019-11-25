@@ -218,8 +218,10 @@ class AimEditor extends Component {
     const aimJson = aim.getAim();
     const aimSaved = JSON.parse(aimJson);
     const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
-    const { series, activePort } = this.props;
-    const { patientID, projectID, seriesUID, studyUID } = series[activePort];
+    const { openSeries, activePort } = this.props;
+    const { patientID, projectID, seriesUID, studyUID } = openSeries[
+      activePort
+    ];
     const name =
       aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
         .name.value;
@@ -250,19 +252,19 @@ class AimEditor extends Component {
           pauseOnHover: true,
           draggable: true
         });
-        // this.props.dispatch(
-        //   getSingleSerie({ patientID, projectID, seriesUID, studyUID })
-        // );
-        // this.props.dispatch(
-        //   updateSingleSerie({
-        //     subjectID: patientID,
-        //     projectID,
-        //     seriesUID,
-        //     studyUID
-        //   })
-        // );
+        this.props.dispatch(
+          getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+        );
+        this.props.dispatch(
+          updateSingleSerie({
+            subjectID: patientID,
+            projectID,
+            seriesUID,
+            studyUID
+          })
+        );
 
-        // this.props.dispatch(updatePatientOnAimSave(aimRefs));
+        this.props.dispatch(updatePatientOnAimSave(aimRefs));
       })
       .catch(error => console.log(error));
   };

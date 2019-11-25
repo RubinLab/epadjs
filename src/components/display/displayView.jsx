@@ -607,6 +607,7 @@ class DisplayView extends Component {
                       }
                     ]}
                     setViewportActive={() => this.setActive(i)}
+
                     onNewImage={event =>
                       this.props.dispatch(updateImageId(event))
                     }
