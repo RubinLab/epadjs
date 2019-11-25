@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Route, Switch, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
+import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
 import { getUser, createUser } from "./services/userServices";
 import NavBar from "./components/navbar";
@@ -23,7 +24,7 @@ import AnnotationList from "./components/annotationsList";
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
-import { isLite } from "./config.json";
+import { isLite, apiUrl } from "./config.json";
 import { clearAimId } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 
@@ -31,16 +32,21 @@ import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
 class App extends Component {
-  state = {
-    openMng: false,
-    keycloak: null,
-    authenticated: false,
-    openInfo: false,
-    openMenu: false,
-    openUser: false,
-    projectMap: {},
-    viewType: "search"
-  };
+  constructor(props) {
+    super(props);
+    this.eventSource = null;
+    this.state = {
+      openMng: false,
+      keycloak: null,
+      authenticated: false,
+      openInfo: false,
+      openMenu: false,
+      openUser: false,
+      projectMap: {},
+      viewType: "search",
+      notifications: []
+    };
+  }
 
   closeMenu = event => {
     // if (event && event.type === "keydown") {
@@ -97,6 +103,9 @@ class App extends Component {
     this.setState({ projectMap });
   };
   async componentDidMount() {
+    // log the the erver sent events to console
+    // this.eventSource.onmessage = e => console(JSON.parse(e));
+
     // when comp mount check if the user is set already. If is set then set state
     // if (isLite) {
     const keycloak = Keycloak("/keycloak.json");
@@ -123,6 +132,7 @@ class App extends Component {
           displayname: result.userInfo.given_name
         };
         await auth.login(user, null, result.keycloak.token);
+        // console.log("toekn: ", result.keycloak.token);
         this.setState({
           keycloak: result.keycloak,
           authenticated: result.authenticated,
@@ -151,8 +161,18 @@ class App extends Component {
             .catch(error => console.log(error));
           console.log(err);
         }
-
-        //if users exits constinue
+        // this.eventSource = new EventSource(`${apiUrl}/notifications`, {
+        //   authorization: `Bearer ${result.keycloak.token}`
+        // });
+        this.eventSource = new EventSourcePolyfill(`${apiUrl}/notifications`, {
+          headers: {
+            authorization: `Bearer ${result.keycloak.token}`
+          }
+        });
+        this.eventSource.addEventListener(
+          "message",
+          this.getMessageFromEventSrc
+        );
       })
 
       .catch(err2 => {
@@ -171,8 +191,20 @@ class App extends Component {
     document.addEventListener("mousedown", this.handleClickOutside);
   }
 
+  getMessageFromEventSrc = res => {
+    // this.getNotifications(message.data);
+    const parsedRes = JSON.parse(res.data);
+    const message = parsedRes.notification.params;
+    const time = parsedRes.notification.createdtime;
+    let notifications = [...this.state.notifications];
+    notifications.push({ message, time, seen: false });
+    notifications = notifications.reverse();
+    this.setState({ notifications });
+  };
+
   componentWillUnmount = () => {
     document.removeEventListener("mousedown", this.handleClickOutside);
+    // this.eventSource.close();
   };
 
   handleClickOutside = event => {
@@ -284,7 +316,6 @@ class App extends Component {
             <Redirect to="/not-found" />
           </Switch>
         )}
-        {this.props.listOpen && <AnnotationList />}
         {this.props.showGridFullAlert && <MaxViewAlert />}
         {/* {this.props.selection && (
           <ManagementItemModal selection={this.props.selection} />
@@ -298,7 +329,6 @@ const mapStateToProps = state => {
   // console.log(state.annotationsListReducer);
   // console.log(state.managementReducer);
   const {
-    listOpen,
     showGridFullAlert,
     showProjectModal,
     loading,
@@ -306,7 +336,6 @@ const mapStateToProps = state => {
     imageID
   } = state.annotationsListReducer;
   return {
-    listOpen,
     showGridFullAlert,
     showProjectModal,
     loading,

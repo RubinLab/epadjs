@@ -40,7 +40,6 @@ const initialState = {
   loading: false,
   error: false,
   patients: {},
-  listOpen: false,
   showGridFullAlert: false,
   showProjectModal: false,
   selectedProjects: {},
@@ -196,9 +195,7 @@ const asyncReducer = (state = initialState, action) => {
         activePort: action.portIndex,
         openSeries: changedPortSeries
       });
-    case SHOW_ANNOTATION_WINDOW:
-      const showStatus = state.listOpen;
-      return Object.assign({}, state, { listOpen: !showStatus });
+
     case TOGGLE_ALL_ANNOTATIONS:
       //update openSeries
       let { seriesUID, displayStatus } = action.payload;
