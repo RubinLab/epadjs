@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import * as cornerstone from "cornerstone-core";
+import { toast } from "react-toastify";
 import "./EyeTracker.css";
 
 class EyeTracker extends Component {
@@ -11,11 +12,36 @@ class EyeTracker extends Component {
     };
   }
 
-  eyeTrackerLogger = () => {};
+  keyPress = event => {
+    console.log("event object", event);
+    if (event.keyCode == 89 && event.shiftKey) {
+      this.captureLog({ detail: "Shift+Y pressed" });
+      toast.error("Phneumothorax", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    } else if (event.keyCode == 78 && event.shiftKey) {
+      this.captureLog({ detail: "Shift+N pressed" });
+      toast.success("No Phneumothorax", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
+  };
 
   startLogging = () => {
     this.setState({ logging: true });
     window.addEventListener("eyeTrackerShouldLog", this.captureLog);
+    document.onkeypress = this.keyPress;
+    this.captureLog({ detail: "loggingStarted" });
   };
 
   captureLog = event => {
@@ -79,6 +105,7 @@ class EyeTracker extends Component {
   };
 
   stopLogging = () => {
+    this.captureLog({ detail: "loggingStopped" });
     this.setState({ logging: false });
     window.removeEventListener("eyeTrackerShouldLog", this.captureLog);
     this.downloadLog();
@@ -91,6 +118,20 @@ class EyeTracker extends Component {
     var objectUrl = URL.createObjectURL(blob);
 
     window.open(objectUrl);
+  };
+
+  clearLog = () => {
+    this.logs.length = 0;
+    toast.info("Log Cleared", {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true
+    });
+    this.captureLog({ detail: "logCleared" });
+    this.captureLog({ detail: "loggingStarted" });
   };
 
   render() {
@@ -114,6 +155,14 @@ class EyeTracker extends Component {
             Stop
           </button>
         )}
+        <span>&nbsp;</span>
+        <button
+          className="log-stop-button"
+          name="clear"
+          onClick={this.clearLog}
+        >
+          Clear Log
+        </button>
       </div>
     );
   }

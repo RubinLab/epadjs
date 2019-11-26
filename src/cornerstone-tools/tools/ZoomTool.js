@@ -1,8 +1,8 @@
-import external from '../externalModules.js';
-import BaseTool from './base/BaseTool.js';
-import { clipToBox } from '../util/clip.js';
-import zoomUtils from '../util/zoom/index.js';
-import { zoomCursor } from './cursors/index.js';
+import external from "../externalModules.js";
+import BaseTool from "./base/BaseTool.js";
+import { clipToBox } from "../util/clip.js";
+import zoomUtils from "../util/zoom/index.js";
+import { zoomCursor } from "./cursors/index.js";
 
 const { correctShift, changeViewportScale } = zoomUtils;
 
@@ -17,25 +17,33 @@ const { correctShift, changeViewportScale } = zoomUtils;
 export default class ZoomTool extends BaseTool {
   constructor(props = {}) {
     const defaultProps = {
-      name: 'Zoom',
+      name: "Zoom",
       strategies: {
         default: defaultStrategy,
         translate: translateStrategy,
-        zoomToCenter: zoomToCenterStrategy,
+        zoomToCenter: zoomToCenterStrategy
       },
-      defaultStrategy: 'default',
-      supportedInteractionTypes: ['Mouse', 'Touch'],
+      defaultStrategy: "default",
+      supportedInteractionTypes: ["Mouse", "Touch"],
       configuration: {
         invert: false,
         preventZoomOutsideImage: false,
         minScale: 0.25,
-        maxScale: 20.0,
+        maxScale: 20.0
       },
-      svgCursor: zoomCursor,
+      svgCursor: zoomCursor
     };
 
     super(props, defaultProps);
   }
+
+  //Mete: Needed for EyeTracker Log
+  fireEyeTrackerLog = () => {
+    let evnt = new CustomEvent("eyeTrackerShouldLog", {
+      detail: "zoom"
+    });
+    window.dispatchEvent(evnt);
+  };
 
   touchDragCallback(evt) {
     dragCallback.call(this, evt);
@@ -43,6 +51,7 @@ export default class ZoomTool extends BaseTool {
 
   mouseDragCallback(evt) {
     dragCallback.call(this, evt);
+    this.fireEyeTrackerLog();
   }
 }
 
@@ -74,13 +83,13 @@ function defaultStrategy(evt) {
     evt.detail.startPoints.page.x,
     evt.detail.startPoints.page.y,
     evt.detail.startPoints.image.x,
-    evt.detail.startPoints.image.y,
+    evt.detail.startPoints.image.y
   ];
 
   // Calculate the new scale factor based on how far the mouse has changed
   const updatedViewport = changeViewportScale(viewport, ticks, {
     maxScale,
-    minScale,
+    minScale
   });
 
   external.cornerstone.setViewport(element, updatedViewport);
@@ -94,7 +103,7 @@ function defaultStrategy(evt) {
   // This shift is in image coordinates, and is designed to keep the target location fixed on the page.
   let shift = {
     x: imageX - newCoords.x,
-    y: imageY - newCoords.y,
+    y: imageY - newCoords.y
   };
 
   // Correct the required shift using the viewport rotation and flip parameters
@@ -110,7 +119,7 @@ function translateStrategy(evt) {
     invert,
     preventZoomOutsideImage,
     maxScale,
-    minScale,
+    minScale
   } = this.configuration;
   const deltaY = evt.detail.deltaPoints.page.y;
   const ticks = invert ? -deltaY / 100 : deltaY / 100;
@@ -118,7 +127,7 @@ function translateStrategy(evt) {
   const viewport = evt.detail.viewport;
   const [startX, startY] = [
     evt.detail.startPoints.image.x,
-    evt.detail.startPoints.image.y,
+    evt.detail.startPoints.image.y
   ];
 
   // Calculate the new scale factor based on how far the mouse has changed
@@ -127,13 +136,13 @@ function translateStrategy(evt) {
   // The page
   const updatedViewport = changeViewportScale(viewport, ticks, {
     maxScale,
-    minScale,
+    minScale
   });
 
   // Define the default shift to take place during this zoom step
   const shift = {
     x: 0,
-    y: 0,
+    y: 0
   };
 
   // Define the parameters for the translate strategy
@@ -174,7 +183,7 @@ function translateStrategy(evt) {
     // Of the viewport
     let desiredTranslation = {
       x: image.width / 2 - startX,
-      y: image.height / 2 - startY,
+      y: image.height / 2 - startY
     };
 
     // Correct the target location using the viewport rotation and flip parameters
@@ -184,7 +193,7 @@ function translateStrategy(evt) {
     // Final desired translation values
     const distanceToDesired = {
       x: updatedViewport.translation.x - desiredTranslation.x,
-      y: updatedViewport.translation.y - desiredTranslation.y,
+      y: updatedViewport.translation.y - desiredTranslation.y
     };
 
     // If the current translation is smaller than the minimum desired translation,
@@ -220,6 +229,6 @@ function zoomToCenterStrategy(evt) {
   // Calculate the new scale factor based on how far the mouse has changed
   changeViewportScale(viewport, ticks, {
     maxScale,
-    minScale,
+    minScale
   });
 }
