@@ -15,7 +15,7 @@ class EyeTracker extends Component {
   keyPress = event => {
     console.log("event object", event);
     if (event.keyCode == 89 && event.shiftKey) {
-      this.captureLog({ detail: "Shift+Y pressed" });
+      this.captureLog({ detail: "Shift+Y_pressed" });
       toast.error("Phneumothorax", {
         position: "top-right",
         autoClose: 2000,
@@ -25,7 +25,7 @@ class EyeTracker extends Component {
         draggable: true
       });
     } else if (event.keyCode == 78 && event.shiftKey) {
-      this.captureLog({ detail: "Shift+N pressed" });
+      this.captureLog({ detail: "Shift+N_pressed" });
       toast.success("No Phneumothorax", {
         position: "top-right",
         autoClose: 2000,
@@ -46,7 +46,6 @@ class EyeTracker extends Component {
 
   captureLog = event => {
     const newLog = this.getLogData();
-    console.log({ event: event.detail, ...newLog });
     this.logs.push({ event: event.detail, ...newLog });
   };
 
@@ -62,7 +61,6 @@ class EyeTracker extends Component {
   getBoundingBoxCoordinates = () => {
     const { element } = cornerstone.getEnabledElements()[0];
     const bb = element.getBoundingClientRect();
-    console.log("BB", bb);
     const x = window.screenX + bb.left;
     const y = window.screenY + this.getToolbarHeight() + bb.top;
     return {
@@ -92,7 +90,6 @@ class EyeTracker extends Component {
   getViewportData = () => {
     const { element } = cornerstone.getEnabledElements()[0];
     const viewport = cornerstone.getViewport(element);
-    console.log("Viewport", viewport);
 
     const { x, y } = viewport.translation;
 
@@ -112,7 +109,6 @@ class EyeTracker extends Component {
   };
 
   downloadLog = () => {
-    console.log("Logs", ...this.logs);
     var json = JSON.stringify(this.logs);
     var blob = new Blob([json]);
     var objectUrl = URL.createObjectURL(blob);
