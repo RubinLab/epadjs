@@ -25,7 +25,7 @@ import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
 
 const tools = [
-  { name: "Wwwc", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "Wwwc", modeOptions: { mouseButtonMasks: [1] }, mode: "active" },
   { name: "Pan", modeOptions: { mouseButtonMasks: [1] } },
   {
     name: "Zoom",
@@ -36,7 +36,7 @@ const tools = [
     },
     modeOptions: { mouseButtonMasks: [1, 2] }
   },
-  { name: "Probe", modeOptions: { mouseButtonMasks: [1] }, mode: "active" },
+  { name: "Probe", modeOptions: { mouseButtonMasks: [1] } },
   { name: "Length", modeOptions: { mouseButtonMasks: [1] } },
   // {
   //   name: "EllipticalRoi",
@@ -553,6 +553,12 @@ class DisplayView extends Component {
     return markupTypes;
   };
 
+  newImage = event => {
+    // console.log("event", event);
+    // alert("new image");
+    this.props.dispatch(updateImageId(event));
+  };
+
   render() {
     // OHIFSegmentationExtension.preRegistration();
     // console.log("CornerstoneTools in dp view", cornerstoneTools);
@@ -604,13 +610,17 @@ class DisplayView extends Component {
                         target: "element",
                         eventName: "cornerstonetoolsmeasurementcompleted",
                         handler: this.measurementCompleted
+                      },
+                      {
+                        target: "element",
+                        eventName: "cornerstonenewimage",
+                        handler: this.newImage
                       }
                     ]}
                     setViewportActive={() => this.setActive(i)}
-
-                    onNewImage={event =>
-                      this.props.dispatch(updateImageId(event))
-                    }
+                    // onNewImage={event =>
+                    //   this.props.dispatch(updateImageId(event))
+                    // }
                     isStackPrefetchEnabled={true}
                     // onRightClick={this.showRightMenu}
                   />
