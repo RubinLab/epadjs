@@ -44,11 +44,12 @@ class App extends Component {
       openUser: false,
       projectMap: {},
       viewType: "search",
-      notifications: []
+      // showNotifications: false,
+      showLog: false
     };
   }
 
-  closeMenu = event => {
+  closeMenu = notification => {
     // if (event && event.type === "keydown") {
     //   if (event.key === 'Escape' || event.keyCode === 27) {
     //     this.setState({ openMng: false });
@@ -60,6 +61,7 @@ class App extends Component {
       openUser: false,
       openMenu: false
     });
+    if (notification) this.updateNoticationSeen();
   };
 
   switchView = viewType => {
@@ -108,6 +110,16 @@ class App extends Component {
 
     // when comp mount check if the user is set already. If is set then set state
     // if (isLite) {
+
+    //get notifications from sessionStorage and setState
+    let notifications = sessionStorage.getItem("notifications");
+    if (!notifications) {
+      sessionStorage.setItem("notifications", JSON.stringify([]));
+      this.setState({ notifications: [] });
+    }
+    notifications = JSON.parse(notifications);
+    this.setState({ notifications });
+
     const keycloak = Keycloak("/keycloak.json");
     let user;
     let keycloakInit = new Promise((resolve, reject) => {
@@ -164,6 +176,7 @@ class App extends Component {
         // this.eventSource = new EventSource(`${apiUrl}/notifications`, {
         //   authorization: `Bearer ${result.keycloak.token}`
         // });
+
         this.eventSource = new EventSourcePolyfill(`${apiUrl}/notifications`, {
           headers: {
             authorization: `Bearer ${result.keycloak.token}`
@@ -195,11 +208,14 @@ class App extends Component {
     // this.getNotifications(message.data);
     const parsedRes = JSON.parse(res.data);
     const message = parsedRes.notification.params;
-    const time = parsedRes.notification.createdtime;
+    let time = new Date(parsedRes.notification.createdtime).toString();
+    const GMTIndex = time.indexOf(" G");
+    time = time.substring(0, GMTIndex - 3);
     let notifications = [...this.state.notifications];
-    notifications.push({ message, time, seen: false });
-    notifications = notifications.reverse();
+    notifications.unshift({ message, time, seen: false });
     this.setState({ notifications });
+    const stringified = JSON.stringify(notifications);
+    sessionStorage.setItem("notifications", stringified);
   };
 
   componentWillUnmount = () => {
@@ -219,6 +235,8 @@ class App extends Component {
 
   onLogout = e => {
     auth.logout();
+    // sessionStorage.removeItem("annotations");
+    sessionStorage.setItem("notifications", JSON.stringify([]));
     this.setState({
       authenticated: false,
       id: null,
@@ -233,9 +251,20 @@ class App extends Component {
     });
   };
 
+  updateNoticationSeen = () => {
+    const notifications = [...this.state.notifications];
+    notifications.forEach(notification => {
+      notification.seen = true;
+    });
+    this.setState({ notifications });
+    const stringified = JSON.stringify(notifications);
+    sessionStorage.setItem("notifications", stringified);
+  };
+
   switchSearhView = () => {
     this.props.dispatch(clearAimId());
   };
+
   render() {
     return (
       <React.Fragment>
@@ -262,7 +291,11 @@ class App extends Component {
         )}
         {this.state.openInfo && this.state.openMenu && (
           <div ref={this.setWrapperRef}>
-            <InfoMenu closeMenu={this.closeMenu} user={this.state.user} />
+            <InfoMenu
+              closeMenu={this.closeMenu}
+              user={this.state.user}
+              notifications={this.state.notifications}
+            />
           </div>
         )}
         {!isLite && this.state.openUser && this.state.openMenu && (
