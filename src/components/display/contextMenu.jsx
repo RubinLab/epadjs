@@ -22,6 +22,7 @@ class ContextMenu extends Component {
           <Item onClick={this.onClick}>Eraser</Item>
         </Submenu>
         <Separator />
+        <Item onClick={this.props.onAnnotate}>Annotate</Item>
         <Item onClick={this.closeViewport}>Close</Item>
         <Item onClick={this.onClick}>Download</Item>
       </Menu>

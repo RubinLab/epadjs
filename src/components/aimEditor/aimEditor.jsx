@@ -210,6 +210,8 @@ class AimEditor extends Component {
       const aim = new Aim(seedData, enumAimType.imageAnnotation);
       this.createAimMarkups(aim, markupsToSave);
       this.saveAim(aim);
+    } else {
+      console.log("cornerstone", cornerstone);
     }
   };
 
