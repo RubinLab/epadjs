@@ -403,7 +403,9 @@ class AimEditor extends Component {
 
   // get the image object by index
   getCornerstoneImagebyIdx = imageIdx => {
-    const imageCache = this.props.cornerstone.default.imageCache.imageCache;
+    console.log("Cornerstone", cornerstone);
+    const { imageCache } = cornerstone.imageCache;
+    console.log("ImageCache", imageCache);
     const imageId = Object.keys(imageCache)[imageIdx];
     return imageCache[imageId].image;
   };
