@@ -108,9 +108,6 @@ class App extends Component {
     this.setState({ projectMap });
   };
   async componentDidMount() {
-    // log the the erver sent events to console
-    // this.eventSource.onmessage = e => console(JSON.parse(e));
-
     // when comp mount check if the user is set already. If is set then set state
     // if (isLite) {
 
@@ -228,7 +225,10 @@ class App extends Component {
 
   componentWillUnmount = () => {
     document.removeEventListener("mousedown", this.handleClickOutside);
-    // this.eventSource.close();
+    this.eventSource.removeEventListener(
+      "message",
+      this.getMessageFromEventSrc
+    );
   };
 
   handleClickOutside = event => {
