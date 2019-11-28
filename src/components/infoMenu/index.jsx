@@ -7,6 +7,7 @@ import Admin from "./admin";
 import Modal from "../management/common/customModal";
 import Notifications from "./notifications";
 import ResponseList from "./common/responseList";
+import { FaCogs, FaInfoCircle, FaExclamation } from "react-icons/fa";
 
 class InfoMenu extends React.Component {
   state = {
@@ -88,6 +89,12 @@ class InfoMenu extends React.Component {
           <div className="info-menu" style={style}>
             <div className="info-menu__option" onClick={this.handleSelection}>
               Notifications
+              {this.props.notificationWarning ? (
+                <FaExclamation
+                  style={{ fontSize: "1rem", color: "orangered" }}
+                  onClick={this.handleSelection}
+                />
+              ) : null}
             </div>
             <div className="info-menu__option" onClick={this.handleSelection}>
               Log

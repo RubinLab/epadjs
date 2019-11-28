@@ -30,7 +30,8 @@ import {
   UPDATE_IMAGEID,
   CLEAR_AIMID,
   UPDATE_PATIENT_AIM_SAVE,
-  UPDATE_PATIENT_AIM_DELETE
+  UPDATE_PATIENT_AIM_DELETE,
+  GET_NOTIFICATIONS
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -48,11 +49,16 @@ const initialState = {
   selectedSeries: {},
   selectedAnnotations: {},
   patientLoading: false,
-  patientLoadingError: null
+  patientLoadingError: null,
+  uploadedPid: null,
+  lastEventId: null
 };
 
 const asyncReducer = (state = initialState, action) => {
   switch (action.type) {
+    case GET_NOTIFICATIONS:
+      const { uploadedPid, lastEventId } = action.payload;
+      return { ...state, uploadedPid, lastEventId };
     case UPDATE_PATIENT_AIM_DELETE:
       let patientAimDelete = { ...state.patients };
       let { aimRefs } = action;

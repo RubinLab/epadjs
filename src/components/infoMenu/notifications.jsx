@@ -15,7 +15,9 @@ class Notifications extends React.Component {
         <Modal.Body className="response__mbody">
           {!list.length
             ? `There is not any ${title.toLowerCase()} yet`
-            : list.map(item => <ListItem item={item} />)}
+            : list.map((item, index) => (
+                <ListItem item={item} key={item.time + index} />
+              ))}
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
           <button variant="secondary" onClick={() => onOK(true)}>

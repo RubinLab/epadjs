@@ -25,7 +25,10 @@ import AnnotationList from "./components/annotationsList";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import { isLite, apiUrl } from "./config.json";
-import { clearAimId } from "./components/annotationsList/action";
+import {
+  clearAimId,
+  getNotificationsData
+} from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -44,6 +47,7 @@ class App extends Component {
       openUser: false,
       projectMap: {},
       viewType: "search",
+      lastEventId: null,
       // showNotifications: false,
       showLog: false
     };
@@ -205,15 +209,25 @@ class App extends Component {
   }
 
   getMessageFromEventSrc = res => {
-    // this.getNotifications(message.data);
     const parsedRes = JSON.parse(res.data);
-    const message = parsedRes.notification.params;
-    let time = new Date(parsedRes.notification.createdtime).toString();
+    const { lastEventId } = res;
+    const { params, createdtime, projectID, error } = parsedRes.notification;
+    const upload = parsedRes.notification.function.startsWith("Upload");
+    const message = params;
+    if (upload)
+      this.props.dispatch(getNotificationsData(projectID, lastEventId));
+    let time = new Date(createdtime).toString();
     const GMTIndex = time.indexOf(" G");
     time = time.substring(0, GMTIndex - 3);
     let notifications = [...this.state.notifications];
-    notifications.unshift({ message, time, seen: false });
-    this.setState({ notifications });
+    notifications.unshift({
+      message,
+      time,
+      seen: false,
+      action: parsedRes.notification.function,
+      error
+    });
+    this.setState({ notifications, lastEventId });
     const stringified = JSON.stringify(notifications);
     sessionStorage.setItem("notifications", stringified);
   };
@@ -266,6 +280,14 @@ class App extends Component {
   };
 
   render() {
+    const { notifications, uploadedPid, lastEventId } = this.state;
+    let noOfUnseen;
+    if (notifications) {
+      noOfUnseen = notifications.reduce((all, item) => {
+        if (!item.seen) all += 1;
+        return all;
+      }, 0);
+    }
     return (
       <React.Fragment>
         <Cornerstone />
@@ -280,6 +302,7 @@ class App extends Component {
           onSearchViewClick={this.switchSearhView}
           onSwitchView={this.switchView}
           viewType={this.state.viewType}
+          notificationWarning={noOfUnseen}
         />
         {this.state.openMng && this.state.openMenu && (
           <div ref={this.setWrapperRef}>
@@ -294,7 +317,8 @@ class App extends Component {
             <InfoMenu
               closeMenu={this.closeMenu}
               user={this.state.user}
-              notifications={this.state.notifications}
+              notifications={notifications}
+              notificationWarning={noOfUnseen}
             />
           </div>
         )}
@@ -316,7 +340,12 @@ class App extends Component {
                   component={DisplayView}
                   test={"test"}
                 />
-                <ProtectedRoute path="/search/:pid?" component={SearchView} />
+                <ProtectedRoute
+                  path="/search/:pid?"
+                  component={SearchView}
+                  uploadedPid={uploadedPid}
+                  lastEventId={lastEventId}
+                />
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute
                   path="/progress/:wid?"

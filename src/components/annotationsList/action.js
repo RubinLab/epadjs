@@ -32,6 +32,7 @@ import {
   CLEAR_AIMID,
   UPDATE_PATIENT_AIM_SAVE,
   UPDATE_PATIENT_AIM_DELETE,
+  GET_NOTIFICATIONS,
   colors,
   commonLabels
 } from "./types";
@@ -64,6 +65,13 @@ export const updateImageId = event => {
 export const closeSerie = () => {
   return {
     type: CLOSE_SERIE
+  };
+};
+
+export const getNotificationsData = (uploadedPid, lastEventId) => {
+  return {
+    type: GET_NOTIFICATIONS,
+    payload: { uploadedPid, lastEventId }
   };
 };
 

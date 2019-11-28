@@ -698,7 +698,8 @@
 }
 
 .response__mbody.modal-body {
-  height: 300px;
+  height: fit-content;
+  max-height: 300px;
   overflow: scroll;
 }
 
@@ -726,6 +727,14 @@
 
 .response-item__time {
   font-size: 0.9rem;
+}
+.notification-warning {
+  color: orangered;
+  /* color: rgb(199, 3, 3); */
+  left: -5px;
+  top: 5px;
+  position: relative;
+  font-size: 1.2rem;
 }
 
 .info-about__mbody.modal-body,

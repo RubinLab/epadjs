@@ -11,6 +11,9 @@ const responseList = ({ item }) => {
         {item.seen ? <FaCheck /> : <FaBell />}
       </div>
       <div className="response-item__wrap">
+        {item.error ? (
+          <div className="response-item__msg">Error: {item.action}</div>
+        ) : null}
         <div className="response-item__msg">{item.message}</div>
         <div className="response-item__time">{item.time}</div>
       </div>
