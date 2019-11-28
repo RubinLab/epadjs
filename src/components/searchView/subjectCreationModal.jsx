@@ -20,6 +20,7 @@ class SubjectCreationForm extends React.Component {
         .catch(error => {
           toast.error(error.response.data.message, { autoClose: false });
           this.props.onResolve();
+          this.props.onSubmit();
         });
     }
   };

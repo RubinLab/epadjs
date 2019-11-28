@@ -392,7 +392,6 @@ class Subjects extends Component {
   };
 
   render() {
-    console.log(this.props);
     const {
       toggleSelection,
       toggleAll,

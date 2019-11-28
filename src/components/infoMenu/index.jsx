@@ -6,8 +6,7 @@ import Team from "./team";
 import Admin from "./admin";
 import Modal from "../management/common/customModal";
 import Notifications from "./notifications";
-import ResponseList from "./common/responseList";
-import { FaCogs, FaInfoCircle, FaExclamation } from "react-icons/fa";
+import { FaExclamation } from "react-icons/fa";
 
 class InfoMenu extends React.Component {
   state = {

@@ -210,6 +210,7 @@ class SearchView extends Component {
       })
       .catch(err => {
         console.log(err);
+        this.setState(state => ({ update: state.update + 1 }));
       });
   };
 
@@ -677,7 +678,6 @@ class SearchView extends Component {
   };
 
   render = () => {
-    console.log(this.props);
     let status;
     if (this.state.uploading) {
       status = "Uploading…";

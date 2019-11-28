@@ -17,8 +17,6 @@ export async function login(username, password, keyCloakToken) {
   sessionStorage.setItem("token", keyCloakToken);
   sessionStorage.setItem("username", username.user);
   sessionStorage.setItem("displayName", username.user); //TODO: change with fullname
-  // localStorage.setItem("notifications", JSON.stringify([]));
-  // localStorage.setItem("notifications", JSON.stringify([]));
   // http.post(apiUrlV1, {}, { headers: header });
   /*********************************** REMOVE IN PROD  **************************/
   sessionStorage.setItem("header", basicAuth);

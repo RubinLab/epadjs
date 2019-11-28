@@ -48,7 +48,6 @@ class App extends Component {
       projectMap: {},
       viewType: "search",
       lastEventId: null,
-      // showNotifications: false,
       showLog: false
     };
   }
@@ -65,7 +64,7 @@ class App extends Component {
       openUser: false,
       openMenu: false
     });
-    if (notification) this.updateNoticationSeen();
+    if (notification) this.updateNotificationSeen();
   };
 
   switchView = viewType => {
@@ -120,9 +119,10 @@ class App extends Component {
     if (!notifications) {
       sessionStorage.setItem("notifications", JSON.stringify([]));
       this.setState({ notifications: [] });
+    } else {
+      notifications = JSON.parse(notifications);
+      this.setState({ notifications });
     }
-    notifications = JSON.parse(notifications);
-    this.setState({ notifications });
 
     const keycloak = Keycloak("/keycloak.json");
     let user;
@@ -148,7 +148,6 @@ class App extends Component {
           displayname: result.userInfo.given_name
         };
         await auth.login(user, null, result.keycloak.token);
-        // console.log("toekn: ", result.keycloak.token);
         this.setState({
           keycloak: result.keycloak,
           authenticated: result.authenticated,
@@ -162,8 +161,7 @@ class App extends Component {
           preferred_username
         } = result.userInfo;
         const username = preferred_username || email;
-        //username, firstname, lastname, email
-        //get the user with username
+
         let userData;
         try {
           userData = await getUser(username);
@@ -177,9 +175,6 @@ class App extends Component {
             .catch(error => console.log(error));
           console.log(err);
         }
-        // this.eventSource = new EventSource(`${apiUrl}/notifications`, {
-        //   authorization: `Bearer ${result.keycloak.token}`
-        // });
 
         this.eventSource = new EventSourcePolyfill(`${apiUrl}/notifications`, {
           headers: {
@@ -191,7 +186,6 @@ class App extends Component {
           this.getMessageFromEventSrc
         );
       })
-
       .catch(err2 => {
         console.log(err2);
       });
@@ -227,7 +221,7 @@ class App extends Component {
       action: parsedRes.notification.function,
       error
     });
-    this.setState({ notifications, lastEventId });
+    this.setState({ notifications });
     const stringified = JSON.stringify(notifications);
     sessionStorage.setItem("notifications", stringified);
   };
@@ -265,7 +259,7 @@ class App extends Component {
     });
   };
 
-  updateNoticationSeen = () => {
+  updateNotificationSeen = () => {
     const notifications = [...this.state.notifications];
     notifications.forEach(notification => {
       notification.seen = true;
@@ -280,7 +274,7 @@ class App extends Component {
   };
 
   render() {
-    const { notifications, uploadedPid, lastEventId } = this.state;
+    const { notifications } = this.state;
     let noOfUnseen;
     if (notifications) {
       noOfUnseen = notifications.reduce((all, item) => {
@@ -340,12 +334,7 @@ class App extends Component {
                   component={DisplayView}
                   test={"test"}
                 />
-                <ProtectedRoute
-                  path="/search/:pid?"
-                  component={SearchView}
-                  uploadedPid={uploadedPid}
-                  lastEventId={lastEventId}
-                />
+                <ProtectedRoute path="/search/:pid?" component={SearchView} />
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute
                   path="/progress/:wid?"
