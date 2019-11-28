@@ -30,7 +30,8 @@ import {
   UPDATE_IMAGEID,
   CLEAR_AIMID,
   UPDATE_PATIENT_AIM_SAVE,
-  UPDATE_PATIENT_AIM_DELETE
+  UPDATE_PATIENT_AIM_DELETE,
+  GET_NOTIFICATIONS
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -40,7 +41,6 @@ const initialState = {
   loading: false,
   error: false,
   patients: {},
-  listOpen: false,
   showGridFullAlert: false,
   showProjectModal: false,
   selectedProjects: {},
@@ -49,11 +49,16 @@ const initialState = {
   selectedSeries: {},
   selectedAnnotations: {},
   patientLoading: false,
-  patientLoadingError: null
+  patientLoadingError: null,
+  uploadedPid: null,
+  lastEventId: null
 };
 
 const asyncReducer = (state = initialState, action) => {
   switch (action.type) {
+    case GET_NOTIFICATIONS:
+      const { uploadedPid, lastEventId } = action.payload;
+      return { ...state, uploadedPid, lastEventId };
     case UPDATE_PATIENT_AIM_DELETE:
       let patientAimDelete = { ...state.patients };
       let { aimRefs } = action;
@@ -196,9 +201,7 @@ const asyncReducer = (state = initialState, action) => {
         activePort: action.portIndex,
         openSeries: changedPortSeries
       });
-    case SHOW_ANNOTATION_WINDOW:
-      const showStatus = state.listOpen;
-      return Object.assign({}, state, { listOpen: !showStatus });
+
     case TOGGLE_ALL_ANNOTATIONS:
       //update openSeries
       let { seriesUID, displayStatus } = action.payload;

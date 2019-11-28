@@ -54,7 +54,6 @@ const mapStateToProps = state => {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     patientLoading: state.annotationsListReducer.patientLoading,
-    listOpen: state.annotationsListReducer.listOpen,
     activePort: state.annotationsListReducer.activePort
   };
 };

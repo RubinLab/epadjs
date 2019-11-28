@@ -48,9 +48,12 @@ class Subjects extends Component {
   }
 
   async componentDidUpdate(prevProps) {
+    const { uploadedPid, lastEventId, pid } = this.props;
+
+    let data;
     if (this.props.update !== prevProps.update) {
-      let fetchedData = await this.getData();
-      await this.setState({ data: fetchedData });
+      data = await this.getData();
+      this.setState({ data });
     }
     if (this.props.expandLevel != prevProps.expandLevel) {
       this.props.expandLevel >= 1
@@ -58,8 +61,10 @@ class Subjects extends Component {
         : this.setState({ expanded: {} });
     }
     if (this.props.pid !== prevProps.pid) {
-      let data = await this.getData();
-      await this.setState({ data });
+      if (!data) {
+        data = await this.getData();
+      }
+      this.setState({ data });
     }
   }
   expandCurrentLevel = () => {

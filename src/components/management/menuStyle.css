@@ -692,28 +692,74 @@
   margin: 0.5rem 1rem 0.5rem 1rem;
 }
 
-.info-about__modal.modal-dialog {
+.info-about__modal.modal-dialog,
+.response__modal.modal-dialog {
   top: 10%;
 }
 
-.info-about__mbody.modal-body {
+.response__mbody.modal-body {
+  height: fit-content;
+  max-height: 300px;
+  overflow: scroll;
+}
+
+.response-item {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  border-bottom: 0.2px solid grey;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.response-item.newNotification {
+  color: white;
+  font-weight: bold;
+}
+.response-item__icon {
+  margin-right: 1rem;
+  font-size: 1.2rem;
+}
+
+.response-item:last-child {
+  border: none;
+}
+
+.response-item__time {
+  font-size: 0.9rem;
+}
+.notification-warning {
+  color: orangered;
+  /* color: rgb(199, 3, 3); */
+  left: -5px;
+  top: 5px;
+  position: relative;
+  font-size: 1.2rem;
+}
+
+.info-about__mbody.modal-body,
+.response__mbody.modal-body {
   font-size: 1.1rem;
 }
-.info-about__desc,
+.info-about__des,
+.response__des c,
 .info-team__desc {
   padding-left: 1rem;
   margin-bottom: 0.5rem;
 }
-.info-about__link {
+.info-about__link,
+.response__link {
   color: #fff;
   font-weight: 450;
 }
 
-.info-about__link:visited {
+.info-about__link:visited,
+.response__link:visited {
   color: #fff;
 }
 
-.info-about__button {
+.info-about__button,
+.response__button {
   background: #32383e;
   border: 1px solid #956a76;
   padding: 0.5rem 2rem 0.5rem 2rem;
@@ -722,7 +768,8 @@
   cursor: pointer;
 }
 
-.info-about__button:hover {
+.info-about__button:hover,
+.response__button:hover {
   background: #70142e;
   color: #fff;
   padding: 0.5rem 2rem 0.5rem 2rem;
@@ -759,7 +806,8 @@
   border-top-left-radius: 8px;
 }
 
-.info-about__buttonCont {
+.info-about__buttonCont,
+.response__buttonCont {
   display: flex;
   /* justify-content: center; */
   margin-left: 1rem;

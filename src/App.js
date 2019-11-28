@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Route, Switch, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
+import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
 import { getUser, createUser } from "./services/userServices";
 import NavBar from "./components/navbar";
@@ -23,26 +24,35 @@ import AnnotationList from "./components/annotationsList";
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
-import { isLite } from "./config.json";
-import { clearAimId } from "./components/annotationsList/action";
+import { isLite, apiUrl } from "./config.json";
+import {
+  clearAimId,
+  getNotificationsData
+} from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
 class App extends Component {
-  state = {
-    openMng: false,
-    keycloak: null,
-    authenticated: false,
-    openInfo: false,
-    openMenu: false,
-    openUser: false,
-    projectMap: {},
-    viewType: "search"
-  };
+  constructor(props) {
+    super(props);
+    this.eventSource = null;
+    this.state = {
+      openMng: false,
+      keycloak: null,
+      authenticated: false,
+      openInfo: false,
+      openMenu: false,
+      openUser: false,
+      projectMap: {},
+      viewType: "search",
+      lastEventId: null,
+      showLog: false
+    };
+  }
 
-  closeMenu = event => {
+  closeMenu = notification => {
     // if (event && event.type === "keydown") {
     //   if (event.key === 'Escape' || event.keyCode === 27) {
     //     this.setState({ openMng: false });
@@ -54,6 +64,7 @@ class App extends Component {
       openUser: false,
       openMenu: false
     });
+    if (notification) this.updateNotificationSeen();
   };
 
   switchView = viewType => {
@@ -99,6 +110,17 @@ class App extends Component {
   async componentDidMount() {
     // when comp mount check if the user is set already. If is set then set state
     // if (isLite) {
+
+    //get notifications from sessionStorage and setState
+    let notifications = sessionStorage.getItem("notifications");
+    if (!notifications) {
+      sessionStorage.setItem("notifications", JSON.stringify([]));
+      this.setState({ notifications: [] });
+    } else {
+      notifications = JSON.parse(notifications);
+      this.setState({ notifications });
+    }
+
     const keycloak = Keycloak("/keycloak.json");
     let user;
     let keycloakInit = new Promise((resolve, reject) => {
@@ -136,8 +158,7 @@ class App extends Component {
           preferred_username
         } = result.userInfo;
         const username = preferred_username || email;
-        //username, firstname, lastname, email
-        //get the user with username
+
         let userData;
         try {
           userData = await getUser(username);
@@ -152,9 +173,16 @@ class App extends Component {
           console.log(err);
         }
 
-        //if users exits constinue
+        this.eventSource = new EventSourcePolyfill(`${apiUrl}/notifications`, {
+          headers: {
+            authorization: `Bearer ${result.keycloak.token}`
+          }
+        });
+        this.eventSource.addEventListener(
+          "message",
+          this.getMessageFromEventSrc
+        );
       })
-
       .catch(err2 => {
         console.log(err2);
       });
@@ -171,8 +199,36 @@ class App extends Component {
     document.addEventListener("mousedown", this.handleClickOutside);
   }
 
+  getMessageFromEventSrc = res => {
+    const parsedRes = JSON.parse(res.data);
+    const { lastEventId } = res;
+    const { params, createdtime, projectID, error } = parsedRes.notification;
+    const upload = parsedRes.notification.function.startsWith("Upload");
+    const message = params;
+    if (upload)
+      this.props.dispatch(getNotificationsData(projectID, lastEventId));
+    let time = new Date(createdtime).toString();
+    const GMTIndex = time.indexOf(" G");
+    time = time.substring(0, GMTIndex - 3);
+    let notifications = [...this.state.notifications];
+    notifications.unshift({
+      message,
+      time,
+      seen: false,
+      action: parsedRes.notification.function,
+      error
+    });
+    this.setState({ notifications });
+    const stringified = JSON.stringify(notifications);
+    sessionStorage.setItem("notifications", stringified);
+  };
+
   componentWillUnmount = () => {
     document.removeEventListener("mousedown", this.handleClickOutside);
+    this.eventSource.removeEventListener(
+      "message",
+      this.getMessageFromEventSrc
+    );
   };
 
   handleClickOutside = event => {
@@ -187,6 +243,8 @@ class App extends Component {
 
   onLogout = e => {
     auth.logout();
+    // sessionStorage.removeItem("annotations");
+    sessionStorage.setItem("notifications", JSON.stringify([]));
     this.setState({
       authenticated: false,
       id: null,
@@ -201,10 +259,29 @@ class App extends Component {
     });
   };
 
+  updateNotificationSeen = () => {
+    const notifications = [...this.state.notifications];
+    notifications.forEach(notification => {
+      notification.seen = true;
+    });
+    this.setState({ notifications });
+    const stringified = JSON.stringify(notifications);
+    sessionStorage.setItem("notifications", stringified);
+  };
+
   switchSearhView = () => {
     this.props.dispatch(clearAimId());
   };
+
   render() {
+    const { notifications } = this.state;
+    let noOfUnseen;
+    if (notifications) {
+      noOfUnseen = notifications.reduce((all, item) => {
+        if (!item.seen) all += 1;
+        return all;
+      }, 0);
+    }
     return (
       <React.Fragment>
         <Cornerstone />
@@ -219,6 +296,7 @@ class App extends Component {
           onSearchViewClick={this.switchSearhView}
           onSwitchView={this.switchView}
           viewType={this.state.viewType}
+          notificationWarning={noOfUnseen}
         />
         {this.state.openMng && this.state.openMenu && (
           <div ref={this.setWrapperRef}>
@@ -230,7 +308,12 @@ class App extends Component {
         )}
         {this.state.openInfo && this.state.openMenu && (
           <div ref={this.setWrapperRef}>
-            <InfoMenu closeMenu={this.closeMenu} user={this.state.user} />
+            <InfoMenu
+              closeMenu={this.closeMenu}
+              user={this.state.user}
+              notifications={notifications}
+              notificationWarning={noOfUnseen}
+            />
           </div>
         )}
         {!isLite && this.state.openUser && this.state.openMenu && (
@@ -284,7 +367,6 @@ class App extends Component {
             <Redirect to="/not-found" />
           </Switch>
         )}
-        {this.props.listOpen && <AnnotationList />}
         {this.props.showGridFullAlert && <MaxViewAlert />}
         {/* {this.props.selection && (
           <ManagementItemModal selection={this.props.selection} />
@@ -298,7 +380,6 @@ const mapStateToProps = state => {
   // console.log(state.annotationsListReducer);
   // console.log(state.managementReducer);
   const {
-    listOpen,
     showGridFullAlert,
     showProjectModal,
     loading,
@@ -306,7 +387,6 @@ const mapStateToProps = state => {
     imageID
   } = state.annotationsListReducer;
   return {
-    listOpen,
     showGridFullAlert,
     showProjectModal,
     loading,

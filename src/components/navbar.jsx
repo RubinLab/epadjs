@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, NavLink } from "react-router-dom";
-import { FaCogs, FaCaretDown, FaInfoCircle } from "react-icons/fa";
+import { FaCogs, FaInfoCircle, FaBell } from "react-icons/fa";
 import logo from "../images/logo.png";
 import { connect } from "react-redux";
 import { isLite } from "../config.json";
@@ -11,10 +11,10 @@ const NavBar = ({
   openInfoMenu,
   openMenu,
   openUser,
-  loading,
   logout,
   onSearchViewClick,
-  onSwitchView
+  onSwitchView,
+  notificationWarning
 }) => {
   const style = { paddingBottom: "8px" };
 
@@ -139,10 +139,17 @@ const NavBar = ({
                     // onMouseLeave={openInfoMenu}
                   >
                     <FaInfoCircle
-                      style={{ fontSize: "1.5rem" }}
+                      style={{ fontSize: "1.5rem", position: "relative" }}
                       data-name="info"
                       onClick={openMenu}
+                      // className="infoMenu-icon"
                     />
+                    {notificationWarning ? (
+                      <FaBell
+                        className="notification-warning"
+                        onClick={openMenu}
+                      />
+                    ) : null}
                   </div>
                 </li>
                 <li className="nav-item pull-right" data-name="user">

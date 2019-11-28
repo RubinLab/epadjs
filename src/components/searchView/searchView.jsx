@@ -79,9 +79,18 @@ class SearchView extends Component {
   };
 
   componentDidUpdate = async prevProps => {
+    const { uploadedPid, lastEventId } = this.props;
+    const { pid } = this.props.match.params;
+    const samePid = !isLite && uploadedPid === pid;
+
+    let subjects;
     if (prevProps.match.params.pid !== this.props.match.params.pid) {
-      const subjects = await this.getData();
+      subjects = await this.getData();
       this.setState({ numOfsubjects: subjects.length, subjects });
+    }
+
+    if ((samePid || isLite) && prevProps.lastEventId !== lastEventId) {
+      this.setState(state => ({ update: state.update + 1 }));
     }
   };
 
@@ -201,6 +210,7 @@ class SearchView extends Component {
       })
       .catch(err => {
         console.log(err);
+        this.setState(state => ({ update: state.update + 1 }));
       });
   };
 
@@ -663,6 +673,10 @@ class SearchView extends Component {
     }
   };
 
+  handleSubmitDownload = () => {
+    this.setState({ showAnnotationModal: false });
+  };
+
   render = () => {
     let status;
     if (this.state.uploading) {
@@ -717,6 +731,7 @@ class SearchView extends Component {
           <DownloadSelection
             onCancel={this.handleDownloadCancel}
             updateStatus={this.updateDownloadStatus}
+            onSubmit={this.handleSubmitDownload}
           />
         )}
 
@@ -756,16 +771,31 @@ class SearchView extends Component {
 }
 
 const mapStateToProps = state => {
+  const {
+    selectedProjects,
+    selectedPatients,
+    selectedStudies,
+    selectedSeries,
+    selectedAnnotations,
+    patients,
+    openSeries,
+    showProjectModal,
+    loading,
+    uploadedPid,
+    lastEventId
+  } = state.annotationsListReducer;
   return {
-    selectedProjects: state.annotationsListReducer.selectedProjects,
-    selectedPatients: state.annotationsListReducer.selectedPatients,
-    selectedStudies: state.annotationsListReducer.selectedStudies,
-    selectedSeries: state.annotationsListReducer.selectedSeries,
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
-    patients: state.annotationsListReducer.patients,
-    openSeries: state.annotationsListReducer.openSeries,
-    showProjectModal: state.annotationsListReducer.showProjectModal,
-    loading: state.annotationsListReducer.loading
+    selectedProjects,
+    selectedPatients,
+    selectedStudies,
+    selectedSeries,
+    selectedAnnotations,
+    patients,
+    openSeries,
+    showProjectModal,
+    loading,
+    uploadedPid,
+    lastEventId
   };
 };
 export default connect(mapStateToProps)(SearchView);

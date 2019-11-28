@@ -5,6 +5,8 @@ import About from "./about";
 import Team from "./team";
 import Admin from "./admin";
 import Modal from "../management/common/customModal";
+import Notifications from "./notifications";
+import { FaExclamation } from "react-icons/fa";
 
 class InfoMenu extends React.Component {
   state = {
@@ -40,7 +42,7 @@ class InfoMenu extends React.Component {
     this.setState(state => {
       return { isModalOpen: !state.isModalOpen };
     });
-    this.props.closeMenu();
+    this.props.closeMenu(true);
   };
 
   selectDisplay = () => {
@@ -65,6 +67,14 @@ class InfoMenu extends React.Component {
             <Admin onOK={this.handleCloseModal} />
           </Modal>
         );
+      case "Notifications":
+        return (
+          <Notifications
+            onOK={this.handleCloseModal}
+            list={this.props.notifications}
+            title="Notifications"
+          />
+        );
       default:
         return <div />;
     }
@@ -78,6 +88,12 @@ class InfoMenu extends React.Component {
           <div className="info-menu" style={style}>
             <div className="info-menu__option" onClick={this.handleSelection}>
               Notifications
+              {this.props.notificationWarning ? (
+                <FaExclamation
+                  style={{ fontSize: "1rem", color: "orangered" }}
+                  onClick={this.handleSelection}
+                />
+              ) : null}
             </div>
             <div className="info-menu__option" onClick={this.handleSelection}>
               Log
