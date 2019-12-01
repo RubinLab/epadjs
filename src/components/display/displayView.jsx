@@ -297,7 +297,6 @@ class DisplayView extends Component {
   // TODO: Can this be done without checking the tools of interest?
   measurementCompleted = (event, action) => {
     const { toolName, toolType } = event.detail;
-    alert(toolName);
 
     const toolsOfInterest = [
       "Probe",
