@@ -182,9 +182,16 @@ class AimEditor extends Component {
     return markedImageIds;
   };
 
-  getAimSeedData = (markupsToSave, answers) => {
+  getAimSeedDataFromMarkup = (markupsToSave, answers) => {
     const cornerStoneImageId = Object.keys(markupsToSave)[0];
     const image = this.getCornerstoneImagebyId(cornerStoneImageId);
+    const seedData = getAimImageData(image);
+    this.addSemanticAnswersToSeedData(seedData, answers);
+    this.addUserToSeedData(seedData);
+    return seedData;
+  };
+
+  getAimSeedDataFromCurrentImage = (image, answers) => {
     const seedData = getAimImageData(image);
     this.addSemanticAnswersToSeedData(seedData, answers);
     this.addUserToSeedData(seedData);
@@ -198,6 +205,7 @@ class AimEditor extends Component {
     console.log("Markups to be saved", markupsToSave);
 
     if (hasSegmentation) {
+      // segmentation and markups
       this.createAimSegmentation(answers).then(({ aim, segmentationBlob }) => {
         // also add the markups to aim if there is any
         if (Object.entries(markupsToSave).length !== 0)
@@ -206,9 +214,19 @@ class AimEditor extends Component {
         this.saveAim(aim, segmentationBlob);
       });
     } else if (Object.entries(markupsToSave).length !== 0) {
-      const seedData = this.getAimSeedData(markupsToSave, answers);
+      // markups without segmentation
+      const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
       const aim = new Aim(seedData, enumAimType.imageAnnotation);
       this.createAimMarkups(aim, markupsToSave);
+      this.saveAim(aim);
+    } else {
+      //Non markup image annotation
+      const { activePort } = this.props;
+      const { element } = cornerstone.getEnabledElements()[activePort];
+      const image = cornerstone.getImage(element);
+      const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
+
+      const aim = new Aim(seedData, enumAimType.imageAnnotation);
       this.saveAim(aim);
     }
   };

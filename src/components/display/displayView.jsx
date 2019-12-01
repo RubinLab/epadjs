@@ -297,7 +297,6 @@ class DisplayView extends Component {
   // TODO: Can this be done without checking the tools of interest?
   measurementCompleted = (event, action) => {
     const { toolName, toolType } = event.detail;
-    alert(toolName);
 
     const toolsOfInterest = [
       "Probe",
@@ -558,6 +557,9 @@ class DisplayView extends Component {
     // alert("new image");
     this.props.dispatch(updateImageId(event));
   };
+  onAnnotate = () => {
+    this.setState({ showAimEditor: true });
+  };
 
   render() {
     // OHIFSegmentationExtension.preRegistration();
@@ -627,7 +629,7 @@ class DisplayView extends Component {
                 </MenuProvider>
               </div>
             ))}
-          <ContextMenu />
+          <ContextMenu onAnnotate={this.onAnnotate} />
         </RightsideBar>
       </React.Fragment>
     );
