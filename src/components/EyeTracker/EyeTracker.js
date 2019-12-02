@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import * as cornerstone from "cornerstone-core";
 import { toast } from "react-toastify";
 import "./EyeTracker.css";
+import cornerstoneTools from "../../cornerstone-tools/index";
 
 class EyeTracker extends Component {
   constructor(props) {
@@ -10,6 +11,7 @@ class EyeTracker extends Component {
     this.state = {
       logging: false
     };
+    console.log("cornerstone", cornerstoneTools);
   }
 
   keyPress = event => {

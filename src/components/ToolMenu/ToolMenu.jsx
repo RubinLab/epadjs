@@ -236,10 +236,12 @@ class ToolMenu extends Component {
 
   //sets the selected tool active for all of the enabled elements
   setToolActive = (toolName, mouseMask = 1) => {
+    alert(toolName);
     cornerstoneTools.setToolActive(toolName, {
       mouseButtonMask: [mouseMask]
     });
     if (toolName === "Brush") this.handleBrushSelected();
+    // console.log("Cornerstone tools in set tool active", cornerstoneTools);
   };
 
   handleBrushSelected = () => {
@@ -268,7 +270,6 @@ class ToolMenu extends Component {
   //sets the selected tool active for an enabled elements
   setToolActiveForElement = (toolName, mouseMask = 1) => {
     this.disableAllTools();
-    console.log("CStools", cornerstoneTools);
     if (toolName == "Brush3DHUGatedTool") {
       cornerstoneTools.store.modules.brush.setters.activeGate("muscle");
     }

@@ -37,7 +37,7 @@ const tools = [
     },
     modeOptions: { mouseButtonMasks: [1, 2] }
   },
-  { name: "Probe", modeOptions: { mouseButtonMasks: [1] }, mode: "active" },
+  { name: "Probe", modeOptions: { mouseButtonMasks: [1] } },
   { name: "Length", modeOptions: { mouseButtonMasks: [1] } },
   // {
   //   name: "EllipticalRoi",
@@ -68,7 +68,7 @@ const tools = [
     mode: "active"
   },
   { name: "FreehandRoiSculptor", modeOptions: { mouseButtonMasks: [1] } },
-  { name: "FreehandRoi3DTool", moreOptions: { mouseButtonMasks: [1] } },
+  { name: "FreehandRoi3DTool", modeOptions: { mouseButtonMasks: [1] } },
   { name: "FreehandRoiSculptorTool", modeOptions: { mouseButtonMasks: [1] } },
   { name: "Eraser" },
   {
@@ -613,6 +613,7 @@ class DisplayView extends Component {
                     //   this.props.dispatch(updateImageId(event))
                     // }
                     isStackPrefetchEnabled={true}
+                    activeTool={"Wwwc"}
                     // onRightClick={this.showRightMenu}
                   />
                 </MenuProvider>
