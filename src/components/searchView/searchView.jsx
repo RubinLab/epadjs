@@ -46,6 +46,7 @@ import StudyCreationModal from "./studyCreationModal.jsx";
 import SeriesCreationModal from "./seriesCreationModal.jsx";
 import Worklists from "./addWorklist";
 import AnnotationCreationModal from "./annotationCreationModal.jsx";
+import UpLoadWizard from "./uploadWizard";
 
 class SearchView extends Component {
   constructor(props) {
@@ -65,7 +66,8 @@ class SearchView extends Component {
       missingAnns: [],
       expandLevel: 0,
       expanded: {},
-      showNew: false
+      showNew: false,
+      showUploadWizard: false
     };
   }
 
@@ -677,6 +679,11 @@ class SearchView extends Component {
     this.setState({ showAnnotationModal: false });
   };
 
+  handleUploadWizardClick = () => {
+    console.log("here");
+    this.setState(state => ({ showUploadWizard: !state.showUploadWizard }));
+  };
+
   render = () => {
     let status;
     if (this.state.uploading) {
@@ -709,6 +716,7 @@ class SearchView extends Component {
           onCloseAll={this.handleCloseAll}
           onNew={this.handleNewClick}
           onWorklist={this.handleWorklistClick}
+          onUploadWizard={this.handleUploadWizardClick}
           status={status}
           showDelete={showDelete}
           project={this.props.match.params.pid}
@@ -763,6 +771,10 @@ class SearchView extends Component {
 
         {this.state.showWorklists && (
           <Worklists onClose={this.handleWorklistClick} />
+        )}
+
+        {this.state.showUploadWizard && (
+          <UpLoadWizard onClose={this.handleUploadWizardClick} />
         )}
         {this.state.newSelected && this.handleNewSelected()}
       </>

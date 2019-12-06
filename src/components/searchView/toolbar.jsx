@@ -7,8 +7,10 @@ import {
   FaPlusCircle,
   FaLevelDownAlt,
   FaLevelUpAlt,
-  FaClipboardList
+  FaClipboardList,
+  FaFileUpload
 } from "react-icons/fa";
+// import { FaFileUpload } from "react-icons/ai";
 import { FiMinimize2 } from "react-icons/fi";
 import ReactTooltip from "react-tooltip";
 import { BarLoader } from "react-spinners";
@@ -30,7 +32,7 @@ const toolBar = props => {
             id="view-icon"
             place="bottom"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span>Open selections</span>
           </ReactTooltip>
@@ -47,7 +49,7 @@ const toolBar = props => {
             id="download-icon"
             place="bottom"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span>Download selections</span>
           </ReactTooltip>
@@ -64,9 +66,26 @@ const toolBar = props => {
             id="upload-icon"
             place="bottom"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span>Upload file</span>
+          </ReactTooltip>
+        </div>
+        <div
+          onClick={props.onUploadWizard}
+          className="searchView-toolbar__icon"
+        >
+          <div style={{ fontSize: "1.2rem" }}>
+            <FaFileUpload data-tip data-for="editor-icon" />
+          </div>
+
+          <ReactTooltip
+            id="editor-icon"
+            place="right"
+            type="info"
+            delayShow={1000}
+          >
+            <span className="filter-label">Upload with tag editor</span>
           </ReactTooltip>
         </div>
         <div
@@ -86,7 +105,7 @@ const toolBar = props => {
             id="delete-icon"
             place="bottom"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span>Delete selection</span>
           </ReactTooltip>
@@ -106,7 +125,7 @@ const toolBar = props => {
               id="forward-icon"
               place="bottom"
               type="info"
-              delayShow={1500}
+              delayShow={1000}
             >
               <span>Expand to Next Level</span>
             </ReactTooltip>
@@ -123,7 +142,7 @@ const toolBar = props => {
               id="back-icon"
               place="bottom"
               type="info"
-              delayShow={1500}
+              delayShow={1000}
             >
               <span>Close One Level</span>
             </ReactTooltip>
@@ -140,7 +159,7 @@ const toolBar = props => {
               id="minimize-icon"
               place="bottom"
               type="info"
-              delayShow={1500}
+              delayShow={1000}
             >
               <span>Close All Levels</span>
             </ReactTooltip>
@@ -164,7 +183,7 @@ const toolBar = props => {
               id="new-icon"
               place="bottom"
               type="info"
-              delayShow={1500}
+              delayShow={1000}
             >
               <span>New</span>
             </ReactTooltip>
@@ -184,7 +203,7 @@ const toolBar = props => {
               id="worklist-icon"
               place="bottom"
               type="info"
-              delayShow={1500}
+              delayShow={1000}
             >
               <span>Add to worklist</span>
             </ReactTooltip>
@@ -200,7 +219,7 @@ const toolBar = props => {
           />
         </div>
       </div>
-      <ReactTooltip id="ann-icon" place="bottom" type="info" delayShow={1500}>
+      <ReactTooltip id="ann-icon" place="bottom" type="info" delayShow={1000}>
         <span>Add annotation</span>
       </ReactTooltip> */}
       <div className="spinner-toolbar__container">

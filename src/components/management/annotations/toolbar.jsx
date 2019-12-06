@@ -22,6 +22,7 @@ const toolBar = props => {
     onType,
     onClear,
     onFilter,
+    onUploadWizard,
     onKeyDown
   } = props;
   const { selected, projects } = props;
@@ -60,7 +61,7 @@ const toolBar = props => {
             id="upload-icon"
             place="right"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span className="filter-label">Upload files</span>
           </ReactTooltip>
@@ -77,7 +78,7 @@ const toolBar = props => {
             id="download-icon"
             place="right"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span className="filter-label">Download selections</span>
           </ReactTooltip>
@@ -96,7 +97,7 @@ const toolBar = props => {
                 id="applyParalel-icon"
                 place="right"
                 type="info"
-                delayShow={1500}
+                delayShow={1000}
               >
                 <span className="filter-label">Apply (parallel)</span>
               </ReactTooltip>
@@ -115,7 +116,7 @@ const toolBar = props => {
                 id="applyAll-icon"
                 place="right"
                 type="info"
-                delayShow={1500}
+                delayShow={1000}
               >
                 <span className="filter-label">Apply (all together)</span>
               </ReactTooltip>
@@ -136,7 +137,7 @@ const toolBar = props => {
             id="trash-icon"
             place="right"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span className="filter-label">Delete selections</span>
           </ReactTooltip>
@@ -228,7 +229,7 @@ const toolBar = props => {
                 id="filter-icon"
                 place="right"
                 type="info"
-                delayShow={1500}
+                delayShow={1000}
               >
                 <span className="filter-label">Filter annotations</span>
               </ReactTooltip>
@@ -247,7 +248,7 @@ const toolBar = props => {
                 id="undo-icon"
                 place="right"
                 type="info"
-                delayShow={1500}
+                delayShow={1000}
               >
                 <span className="filter-label">Clear filter</span>
               </ReactTooltip>
