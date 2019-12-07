@@ -24,42 +24,20 @@ class UploadWizard extends React.Component {
       y: 100,
       path: null,
       showRequirements: false,
-      requirements: {}
+      requirements: {},
+      treeData: null,
+      rawData: null
     };
   }
-
-  // walk = (obj, dir, done) => {
-  //   var results = [];
-  //   fs.readdir(dir, function(err, list) {
-  //     if (err) return done(err);
-  //     var pending = list.length;
-  //     if (!pending) return done(null, results);
-  //     list.forEach(function(file) {
-  //       file = path.resolve(dir, file);
-  //       fs.stat(file, function(err, stat) {
-  //         if (stat && stat.isDirectory()) {
-  //           walk(file, function(err, res) {
-  //             results = results.concat(res);
-  //             if (!--pending) done(null, results);
-  //           });
-  //         } else {
-  //           results.push(file);
-  //           if (!--pending) done(null, results);
-  //         }
-  //     });
-  //   });
-  // };
 
   handleRequirements = () => {
     this.setState(state => ({ showRequirements: !state.showRequirements }));
   };
 
-  handleReqSelect = e => {
+  handleReqSelect = async e => {
     const { name, checked } = e.target;
-    console.log(name, checked);
     if (name === "RequireAll" && checked) {
-      console.log(" ---- 000 here");
-      this.setState({
+      await this.setState({
         requirements: {
           PatientID: true,
           PatientName: true,
@@ -70,24 +48,23 @@ class UploadWizard extends React.Component {
         }
       });
     } else if (name === "RequireAll" && !checked) {
-      this.setState({ requirements: {} });
+      await this.setState({ requirements: {} });
     } else {
       const newRequirements = { ...this.state.requirements };
       newRequirements[name] && !checked
         ? delete newRequirements[name]
         : (newRequirements[name] = true);
-      this.setState({ requirements: newRequirements });
+      await this.setState({ requirements: newRequirements });
     }
+
+    this.extractTreeData(this.state.rawData);
   };
   onSelectFile = async e => {
     const { files } = e.target;
     const nonDicomFiles = [];
     const promises = [];
-    // iterate over the files
-    console.log(Date.now());
     for (let i = 0, f; i < files.length; i += 1) {
       let extension = files[i].name.split(".").pop();
-      // if file does not have dcm extension put them in another array for warning
       if (extension !== "dcm") {
         nonDicomFiles.push(files[i].name);
         continue;
@@ -100,27 +77,127 @@ class UploadWizard extends React.Component {
 
     Promise.all(promises)
       .then(datasets => {
-        console.log(datasets);
-        //   datasets.forEach(data => {
-        //     console.log(data);
-        //   });
-        console.log(Date.now());
+        this.setState({ rawData: datasets });
+        this.extractTreeData(datasets);
       })
       .catch(err => console.log(err));
-    // if file is dicom check if it meets the requirements
-    // form the object stucture as
-    // {patientID: {studyUID: {seriesUID: {countOfDicom: #, tagReq: imgID: {dataset}}}}}
   };
 
-  checkRequirements = dataset => {
-    const result = [];
+  extractTreeData = datasets => {
+    const result = {};
+
+    datasets.forEach(data => {
+      const { PatientID, StudyInstanceUID, SeriesInstanceUID } = data;
+      const patient = result[PatientID];
+      if (patient) {
+        const study = patient.studies[StudyInstanceUID];
+        if (study) {
+          const series = study.series[SeriesInstanceUID];
+          if (series) {
+            series.imageCount += 1;
+            if (this.checkMissingTags(data).length > 0 && !series.tagRequired) {
+              series.tagRequired = data;
+            }
+          } else {
+            result[PatientID].studies[StudyInstanceUID].series[
+              SeriesInstanceUID
+            ] = this.createSeries(data);
+          }
+        } else {
+          result[PatientID].studies[StudyInstanceUID] = this.createStudy(data);
+        }
+      } else {
+        result[PatientID] = this.createPatient(data);
+      }
+    });
+    this.setState({ treeData: result });
+  };
+
+  createSeries = data => {
+    const { SeriesInstanceUID, SeriesDescription } = data;
+    const result = {
+      seriesUID: SeriesInstanceUID,
+      seriesDesc: SeriesDescription,
+      imageCount: 1
+    };
+    if (this.checkMissingTags(data).length > 0) {
+      result.tagRequired = data;
+    }
+    return result;
+  };
+
+  createStudy = data => {
+    const {
+      StudyInstanceUID,
+      StudyDescription,
+      SeriesInstanceUID,
+      SeriesDescription
+    } = data;
+    const result = {
+      studyUID: StudyInstanceUID,
+      studyDesc: StudyDescription,
+      series: {
+        [SeriesInstanceUID]: {
+          seriesUID: SeriesInstanceUID,
+          seriesDesc: SeriesDescription,
+          imageCount: 1
+        }
+      }
+    };
+    const series = result.series[SeriesInstanceUID];
+    if (this.checkMissingTags(data).length > 0) {
+      series.tagRequired = data;
+    }
+    return result;
+  };
+
+  createPatient = data => {
+    const {
+      PatientID,
+      PatientName,
+      StudyInstanceUID,
+      StudyDescription,
+      SeriesInstanceUID,
+      SeriesDescription
+    } = data;
+
+    const result = {
+      id: PatientID,
+      Name: PatientName,
+      studies: {
+        [StudyInstanceUID]: {
+          studyUID: StudyInstanceUID,
+          studyDesc: StudyDescription,
+          series: {
+            [SeriesInstanceUID]: {
+              seriesUID: SeriesInstanceUID,
+              seriesDesc: SeriesDescription,
+              imageCount: 1
+            }
+          }
+        }
+      }
+    };
+    const series = result.studies[StudyInstanceUID].series[SeriesInstanceUID];
+    if (this.checkMissingTags(data).length > 0) {
+      series.tagRequired = data;
+    }
+    return result;
+  };
+
+  checkMissingTags = dataset => {
+    const missingTags = [];
     const requirements = Object.keys(this.state.requirements);
     requirements.forEach(req => {
       if (!dataset[req]) {
-        result.push(req);
+        missingTags.push(req);
       }
     });
-    return result;
+    return missingTags;
+  };
+
+  clearSelectedFiles = () => {
+    const element = document.getElementById("uploadWizard");
   };
 
   getDataset = fileBlob => {
@@ -174,6 +251,7 @@ class UploadWizard extends React.Component {
           <input
             type="file"
             className="upload-display"
+            id="uploadWizard"
             multiple={true}
             // name="tiff"
             webkitdirectory="true"
@@ -192,14 +270,6 @@ class UploadWizard extends React.Component {
           )}
         </div>
       </Rnd>
-      // read file and get the path use the following code to read data
-      /* 
-        const filePath = "/Users/pieper/data/public-dicom/MRHead-multiframe+seg/MRHead-multiframe.dcm"
-        let arrayBuffer = fs.readFileSync(filePath).buffer;
-        let DicomDict = dcmjs.data.DicomMessage.readFile(arrayBuffer);
-        const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(DicomDict.dict);
-        console.log(dataset);
-      */
     );
   }
 }

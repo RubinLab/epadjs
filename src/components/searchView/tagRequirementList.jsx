@@ -1,5 +1,4 @@
-import React, { useRef, useEffect } from "react";
-import _ from "lodash";
+import React from "react";
 import { FaTimes } from "react-icons/fa";
 
 const tagRequirements = ({ onClose, requirements, handleInput }) => {
