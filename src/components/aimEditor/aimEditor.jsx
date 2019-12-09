@@ -493,6 +493,7 @@ class AimEditor extends Component {
   };
 
   addLineToAim = (aim, line, shapeIndex, imageReferenceUid) => {
+    console.log("Line", line.length);
     const { start, end } = line.handles;
     const markupId = aim.addMarkupEntity(
       "TwoDimensionMultiPoint",
@@ -500,9 +501,10 @@ class AimEditor extends Component {
       [start, end],
       imageReferenceUid
     );
+    const abc = line.length;
 
     const lengthId = aim.createLengthCalcEntity({
-      length: line.length,
+      value: line.length,
       unit: "mm"
     });
     aim.createImageAnnotationStatement(1, markupId, lengthId);

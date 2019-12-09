@@ -37,7 +37,7 @@ const tools = [
     modeOptions: { mouseButtonMasks: [1, 2] }
   },
   { name: "Probe", modeOptions: { mouseButtonMasks: [1] } },
-  { name: "Length", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "Length", modeOptions: { mouseButtonMasks: [1] }, mode: "enabled" },
   // {
   //   name: "EllipticalRoi",
   //   configuration: {
