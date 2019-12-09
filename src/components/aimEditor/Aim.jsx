@@ -309,13 +309,13 @@ class Aim {
     return entities;
   };
 
-  createLineCalcEntities = (length, mean, stdDev, min, max) => {
-    var entities = [];
-    entities.push(this.createLengthCalcEntity(length));
-    return entities.concat(
-      this.createCommonCalcEntites(mean, stdDev, min, max)
-    );
-  };
+  // createLineCalcEntities = (length, mean, stdDev, min, max) => {
+  //   var entities = [];
+  //   entities.push(this.createLengthCalcEntity(length));
+  //   return entities.concat(
+  //     this.createCommonCalcEntites(mean, stdDev, min, max)
+  //   );
+  // };
 
   createLongAxisCalcEntities = (longAxis, mean, stdDev, min, max) => {
     var entities = [];
