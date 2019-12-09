@@ -4,7 +4,8 @@ import cornerstoneTools from "cornerstone-tools";
 import {
   getImageIds,
   getWadoImagePath,
-  getSegmentation
+  getSegmentation,
+  getAllSeriesofProject
 } from "../../services/seriesServices";
 import { connect } from "react-redux";
 import { wadoUrl, isLite } from "../../config.json";
@@ -35,7 +36,7 @@ const tools = [
       maxScale: 25,
       preventZoomOutsideImage: true
     },
-    modeOptions: { mouseButtonMasks: [1, 2] }
+    modeOptions: { mouseButtonMasks: [4] }
   },
   { name: "Probe", modeOptions: { mouseButtonMasks: [1] } },
   { name: "Length", modeOptions: { mouseButtonMasks: [1] } },
@@ -80,7 +81,7 @@ const tools = [
   { name: "StackScroll", modeOptions: { mouseButtonMasks: [1] } },
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
-  { name: "StackScrollMouseWheel", mode: "active" },
+  { name: "StackScrollMouseWheel" },
   { name: "StackScrollMultiTouch" },
   { name: "FreehandScissors", modeOptions: { mouseButtonMasks: [1] } },
   { name: "RectangleScissors", modeOptions: { mouseButtonMasks: [1] } },
@@ -157,13 +158,31 @@ class DisplayView extends Component {
   getData() {
     const { series } = this.props;
     var promises = [];
-    for (let i = 0; i < series.length; i++) {
-      const promise = this.getImageStack(series[i]);
-      promises.push(promise);
+    if (isEyeTracker) {
+      this.getImageStack(series[0])
+        .then(promise => {
+          promises.push(promise);
+        })
+        .then(() => {
+          Promise.all(promises).then(res => {
+            this.setState({ data: res, isLoading: false });
+            console.log("Data 1 is", this.state.data);
+          });
+        });
+    } else {
+      for (let i = 0; i < series.length; i++) {
+        this.getImageStack(series[i])
+          .then(promise => {
+            promises.push(promise);
+          })
+          .then(() => {
+            Promise.all(promises).then(res => {
+              this.setState({ data: res, isLoading: false });
+              console.log("Data 2 is", this.state.data);
+            });
+          });
+      }
     }
-    Promise.all(promises).then(res => {
-      this.setState({ data: res, isLoading: false });
-    });
 
     series.forEach(serie => {
       if (serie.imageAnnotations)
@@ -177,42 +196,54 @@ class DisplayView extends Component {
   }
 
   getImageStack = async serie => {
+    console.log("Serie is", serie);
     let stack = {};
     let cornerstoneImageIds = [];
-    const imageUrls = await this.getImages(serie);
-    imageUrls.map(url => {
-      const baseUrl = wadoUrl + url.lossyImage;
-      if (url.multiFrameImage === true) {
-        for (var i = 0; i < url.numberOfFrames; i++) {
-          let multiFrameUrl = !isLite ? baseUrl + "/frames/" + i : baseUrl;
-          cornerstoneImageIds.push(multiFrameUrl);
+    if (isEyeTracker) {
+      getAllSeriesofProject(serie).then(series => {
+        series.data.map(async serie => {
+          if (serie.examType === "CR") {
+            this.getImages(serie)
+              .then(imageUrls => {
+                imageUrls.map(url => {
+                  const baseUrl = wadoUrl + url.lossyImage;
+                  let singleFrameUrl = !isLite ? baseUrl : baseUrl;
+                  console.log("Kornere", singleFrameUrl);
+                  cornerstoneImageIds.push(singleFrameUrl);
+                });
+              })
+              .then(() => {
+                stack.currentImageIdIndex = 0;
+                stack.imageIds = [...cornerstoneImageIds];
+                console.log("Stack", stack);
+                return { stack };
+              });
+          }
+        });
+      });
+    } else {
+      const imageUrls = await this.getImages(serie);
+      imageUrls.map(url => {
+        const baseUrl = wadoUrl + url.lossyImage;
+        if (url.multiFrameImage === true) {
+          for (var i = 0; i < url.numberOfFrames; i++) {
+            let multiFrameUrl = !isLite ? baseUrl + "/frames/" + i : baseUrl;
+            cornerstoneImageIds.push(multiFrameUrl);
+          }
+        } else {
+          let singleFrameUrl = !isLite ? baseUrl : baseUrl;
+          cornerstoneImageIds.push(singleFrameUrl);
         }
-      } else {
-        let singleFrameUrl = !isLite ? baseUrl : baseUrl;
-        cornerstoneImageIds.push(singleFrameUrl);
+      });
+      let imageIndex = 0;
+      if (serie.aimID) {
+        imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
       }
-
-      //  if (url.multiFrameImage === true) {
-      //     for (var i = 0; i < url.numberOfFrames; i++) {
-      //       tempArray.push(
-      //         wadoUrl +
-      //           url.lossyImage +
-      //           "&contentType=application%2Fdicom?frame=" +
-      //           i
-      //       );
-      //     }
-      //   } else
-      //     tempArray.push(
-      //       wadoUrl + url.lossyImage + "&contentType=application%2Fdicom"
-      //     );
-    });
-    let imageIndex = 0;
-    if (serie.aimID) {
-      imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+      stack.currentImageIdIndex = parseInt(imageIndex, 10);
+      stack.imageIds = [...cornerstoneImageIds];
+      console.log("Stack", stack);
+      return { stack };
     }
-    stack.currentImageIdIndex = parseInt(imageIndex, 10);
-    stack.imageIds = [...cornerstoneImageIds];
-    return { stack };
   };
 
   getImageIndex = (serie, cornerstoneImageIds) => {
@@ -613,7 +644,7 @@ class DisplayView extends Component {
                     //   this.props.dispatch(updateImageId(event))
                     // }
                     isStackPrefetchEnabled={true}
-                    activeTool={"Wwwc"}
+                    activeTool={("Wwwc", "Zoom")}
                     // onRightClick={this.showRightMenu}
                   />
                 </MenuProvider>
