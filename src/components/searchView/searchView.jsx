@@ -46,7 +46,7 @@ import StudyCreationModal from "./studyCreationModal.jsx";
 import SeriesCreationModal from "./seriesCreationModal.jsx";
 import Worklists from "./addWorklist";
 import AnnotationCreationModal from "./annotationCreationModal.jsx";
-import UpLoadWizard from "./uploadWizard";
+import UpLoadWizard from "../tagEditor/uploadWizard";
 
 class SearchView extends Component {
   constructor(props) {

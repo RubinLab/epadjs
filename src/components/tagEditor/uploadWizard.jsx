@@ -2,10 +2,12 @@ import React from "react";
 import { Rnd } from "react-rnd";
 import * as dcmjs from "dcmjs";
 import { FaTimes } from "react-icons/fa";
-import { Tabs, Nav, Content } from "react-tiny-tabs";
 import TagRequirements from "./tagRequirementList";
-import "./searchView.css";
-import { th } from "date-fns/esm/locale";
+import TagEditTree from "./tagEditTree";
+import "../searchView/searchView.css";
+import TagEditor from "./tagEditor";
+import { isEmpty } from "../../Utils/aid";
+import Modal from "../management/common/customModal";
 
 const style = {
   display: "flex",
@@ -26,12 +28,18 @@ class UploadWizard extends React.Component {
       showRequirements: false,
       requirements: {},
       treeData: null,
-      rawData: null
+      rawData: null,
+      showTagEditor: false
     };
   }
 
   handleRequirements = () => {
     this.setState(state => ({ showRequirements: !state.showRequirements }));
+  };
+
+  handleTagEditorSelect = (patientID, studyUID, seriesUID) => {
+    this.setState(state => ({ showTagEditor: !state.showTagEditor }));
+    this.setState({ pathToSeries: { patientID, studyUID, seriesUID } });
   };
 
   handleReqSelect = async e => {
@@ -85,43 +93,58 @@ class UploadWizard extends React.Component {
 
   extractTreeData = datasets => {
     const result = {};
-
-    datasets.forEach(data => {
-      const { PatientID, StudyInstanceUID, SeriesInstanceUID } = data;
-      const patient = result[PatientID];
-      if (patient) {
-        const study = patient.studies[StudyInstanceUID];
-        if (study) {
-          const series = study.series[SeriesInstanceUID];
-          if (series) {
-            series.imageCount += 1;
-            if (this.checkMissingTags(data).length > 0 && !series.tagRequired) {
-              series.tagRequired = data;
+    if (datasets) {
+      datasets.forEach(data => {
+        console.log(data);
+        const { PatientID, StudyInstanceUID, SeriesInstanceUID } = data;
+        const patient = result[PatientID];
+        if (patient) {
+          const study = patient.studies[StudyInstanceUID];
+          if (study) {
+            const series = study.series[SeriesInstanceUID];
+            if (series) {
+              series.imageCount += 1;
+              const missingTags = this.checkMissingTags(data);
+              if (missingTags.length > 0 && !series.tagRequired) {
+                series.tagRequired = missingTags;
+                series.data = data;
+              }
+            } else {
+              result[PatientID].studies[StudyInstanceUID].series[
+                SeriesInstanceUID
+              ] = this.createSeries(data);
             }
           } else {
-            result[PatientID].studies[StudyInstanceUID].series[
-              SeriesInstanceUID
-            ] = this.createSeries(data);
+            result[PatientID].studies[StudyInstanceUID] = this.createStudy(
+              data
+            );
           }
         } else {
-          result[PatientID].studies[StudyInstanceUID] = this.createStudy(data);
+          result[PatientID] = this.createPatient(data);
         }
-      } else {
-        result[PatientID] = this.createPatient(data);
-      }
-    });
-    this.setState({ treeData: result });
+      });
+      this.setState({ treeData: result });
+    }
   };
 
   createSeries = data => {
-    const { SeriesInstanceUID, SeriesDescription } = data;
+    const {
+      SeriesInstanceUID,
+      SeriesDescription,
+      PatientID,
+      StudyInstanceUID
+    } = data;
     const result = {
       seriesUID: SeriesInstanceUID,
       seriesDesc: SeriesDescription,
+      patientID: PatientID,
+      studyUID: StudyInstanceUID,
       imageCount: 1
     };
-    if (this.checkMissingTags(data).length > 0) {
-      result.tagRequired = data;
+    const missingTags = this.checkMissingTags(data);
+    if (missingTags.length > 0) {
+      result.tagRequired = missingTags;
+      result.data = data;
     }
     return result;
   };
@@ -131,7 +154,8 @@ class UploadWizard extends React.Component {
       StudyInstanceUID,
       StudyDescription,
       SeriesInstanceUID,
-      SeriesDescription
+      SeriesDescription,
+      PatientID
     } = data;
     const result = {
       studyUID: StudyInstanceUID,
@@ -140,13 +164,17 @@ class UploadWizard extends React.Component {
         [SeriesInstanceUID]: {
           seriesUID: SeriesInstanceUID,
           seriesDesc: SeriesDescription,
+          patientID: PatientID,
+          studyUID: StudyInstanceUID,
           imageCount: 1
         }
       }
     };
     const series = result.series[SeriesInstanceUID];
-    if (this.checkMissingTags(data).length > 0) {
-      series.tagRequired = data;
+    const missingTags = this.checkMissingTags(data);
+    if (missingTags.length > 0) {
+      series.tagRequired = missingTags;
+      series.data = data;
     }
     return result;
   };
@@ -162,8 +190,8 @@ class UploadWizard extends React.Component {
     } = data;
 
     const result = {
-      id: PatientID,
-      Name: PatientName,
+      patientID: PatientID,
+      patientName: PatientName,
       studies: {
         [StudyInstanceUID]: {
           studyUID: StudyInstanceUID,
@@ -172,6 +200,8 @@ class UploadWizard extends React.Component {
             [SeriesInstanceUID]: {
               seriesUID: SeriesInstanceUID,
               seriesDesc: SeriesDescription,
+              patientID: PatientID,
+              studyUID: StudyInstanceUID,
               imageCount: 1
             }
           }
@@ -179,8 +209,10 @@ class UploadWizard extends React.Component {
       }
     };
     const series = result.studies[StudyInstanceUID].series[SeriesInstanceUID];
-    if (this.checkMissingTags(data).length > 0) {
-      series.tagRequired = data;
+    const missingTags = this.checkMissingTags(data);
+    if (missingTags.length > 0) {
+      series.tagRequired = missingTags;
+      series.data = data;
     }
     return result;
   };
@@ -193,6 +225,7 @@ class UploadWizard extends React.Component {
         missingTags.push(req);
       }
     });
+
     return missingTags;
   };
 
@@ -212,8 +245,6 @@ class UploadWizard extends React.Component {
           dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(
             DicomDict.dict
           );
-          //   return dataset;
-          // };
           resolve(dataset);
         };
       } catch (err) {
@@ -223,24 +254,28 @@ class UploadWizard extends React.Component {
     });
   };
 
-  render() {
+  render = () => {
+    const { treeData, requirements } = this.state;
+    const requirementKeys = Object.keys(requirements);
+
     return (
-      <Rnd
-        style={style}
-        // size={{ width: this.state.width, height: this.state.height }}
-        position={{ x: this.state.x, y: this.state.y }}
-        onDragStop={(e, d) => {
-          this.setState({ x: d.x, y: d.y });
-        }}
-        onResizeStop={(e, direction, ref, delta, position) => {
-          this.setState({
-            width: ref.style.width,
-            height: ref.style.height,
-            ...position
-          });
-        }}
-        className="uploadWizard-modal"
-      >
+      // <Rnd
+      //   style={style}
+      //   // size={{ width: this.state.width, height: this.state.height }}
+      //   position={{ x: this.state.x, y: this.state.y }}
+      //   onDragStop={(e, d) => {
+      //     this.setState({ x: d.x, y: d.y });
+      //   }}
+      //   onResizeStop={(e, direction, ref, delta, position) => {
+      //     this.setState({
+      //       width: ref.style.width,
+      //       height: ref.style.height,
+      //       ...position
+      //     });
+      //   }}
+      //   className="uploadWizard-modal"
+      // >
+      <Modal>
         <div className="uploadWizard">
           <div className="uploadWizard-header">
             <div className="uploadWizard-header__title">ePAD Upload Wizard</div>
@@ -268,10 +303,24 @@ class UploadWizard extends React.Component {
               requirements={Object.keys(this.state.requirements)}
             />
           )}
+          {!isEmpty(treeData) && (
+            <TagEditTree
+              dataset={treeData}
+              onEditClick={this.handleTagEditorSelect}
+            />
+          )}
+          {this.state.showTagEditor && (
+            <TagEditor
+              requirements={requirementKeys}
+              treeData={treeData}
+              path={this.state.pathToSeries}
+            />
+          )}
         </div>
-      </Rnd>
+        {/* </Rnd> */}
+      </Modal>
     );
-  }
+  };
 }
 
 export default UploadWizard;

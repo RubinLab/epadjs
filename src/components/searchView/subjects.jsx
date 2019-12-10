@@ -392,6 +392,7 @@ class Subjects extends Component {
   };
 
   render() {
+    console.log("reload???");
     const {
       toggleSelection,
       toggleAll,
@@ -420,6 +421,7 @@ class Subjects extends Component {
       onExpandedChange
     };
     const TheadComponent = props => null;
+    console.log("on random click");
     return (
       <div>
         {this.state.data ? (

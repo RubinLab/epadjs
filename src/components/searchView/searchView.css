@@ -289,6 +289,7 @@ h5.add-subject__modal--label,
   padding: 0.5rem 0.5rem 1.2rem 1.2rem;
   background: #3a3f44;
   width: -webkit-fill-available;
+  height: -webkit-fill-available;
 }
 .uploadWizard-header {
   display: flex;
@@ -298,4 +299,8 @@ h5.add-subject__modal--label,
 
 .uploadWizard-header__title {
   font-size: 1.7rem;
+}
+
+.menu-clickable {
+  cursor: pointer;
 }

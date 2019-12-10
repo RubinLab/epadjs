@@ -50,6 +50,7 @@
     "react-sticky-table": "^3.0.1",
     "react-switch": "^4.1.0",
     "react-table": "^6.9.2",
+    "react-tabs": "^3.0.0",
     "react-tiny-tabs": "^0.1.2",
     "react-toastify": "^4.3.0",
     "react-toggle": "^4.0.2",
