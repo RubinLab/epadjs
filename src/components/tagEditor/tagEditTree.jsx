@@ -34,7 +34,6 @@ class TagEditTree extends React.Component {
       }
     ];
 
-    console.log("tree props", this.props);
     return (
       <div>
         <ReactTable

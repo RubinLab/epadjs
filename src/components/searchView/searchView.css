@@ -304,3 +304,64 @@ h5.add-subject__modal--label,
 .menu-clickable {
   cursor: pointer;
 }
+
+.uploadWizard-define {
+  align-self: left;
+  color: black;
+}
+
+.tagEditForm__el {
+  display: flex;
+  margin-bottom: 0.5rem;
+  align-items: flex-end;
+}
+
+.tagEditForm__el .--exp {
+  width: 10rem;
+  text-align: left;
+}
+
+.tagEditForm__el .--check {
+  font-size: 1.5rem;
+  color: #45a163;
+  margin-left: 0.2rem;
+  text-shadow: 1px 1px 1px #ccc;
+}
+
+.tagEditForm__el .--text {
+  margin-right: 0.2rem;
+}
+
+.react-tabs__tab-list {
+  display: flex;
+}
+
+.uploadWizard-define {
+  color: #272b30;
+  margin: 0.5rem;
+  display: block;
+}
+
+.tagRequirements {
+  width: 13rem;
+  min-width: fit-content;
+  height: fit-content;
+}
+
+.tagRequirements .__header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.tagRequirements .__list {
+  margin-left: 0.2rem;
+  text-align: left;
+  padding: 0.1rem;
+}
+.tagRequirements .__option {
+  display: flex;
+}
+
+.tagRequirements .__select {
+  margin-right: 0.2rem;
+}

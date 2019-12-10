@@ -6,9 +6,6 @@ class TagEditSeries extends React.Component {
   state = {
     expanded: {}
   };
-  trigger = () => {
-    console.log("here");
-  };
   render = () => {
     const columns = [
       {
@@ -43,8 +40,6 @@ class TagEditSeries extends React.Component {
         }
       }
     ];
-
-    console.log("series props", this.props);
 
     return (
       <div>

@@ -680,7 +680,6 @@ class SearchView extends Component {
   };
 
   handleUploadWizardClick = () => {
-    console.log("here");
     this.setState(state => ({ showUploadWizard: !state.showUploadWizard }));
   };
 

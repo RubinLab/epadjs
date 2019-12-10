@@ -293,9 +293,14 @@ class UploadWizard extends React.Component {
             directory="true"
             onChange={this.onSelectFile}
           />
-          <button className="upload-display" onClick={this.handleRequirements}>
-            Define Requirements
-          </button>
+          <input
+            className="uploadWizard-define"
+            onClick={this.handleRequirements}
+            value="Define Requirements"
+            type="button"
+          />
+          {/* Define Requirements
+          </button> */}
           {this.state.showRequirements && (
             <TagRequirements
               handleInput={this.handleReqSelect}

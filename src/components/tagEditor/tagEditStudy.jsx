@@ -17,7 +17,6 @@ class TagEditStudy extends React.Component {
       { width: 80 },
       { width: 80 }
     ];
-    console.log("study props", this.props);
 
     return (
       <div>
@@ -30,9 +29,7 @@ class TagEditStudy extends React.Component {
           expanded={this.state.expanded}
           onExpandedChange={this.onExpandedChange}
           SubComponent={row => {
-            console.log(row.original);
             const series = Object.values(row.original.series);
-            console.log(series);
             return (
               <div style={{ paddingLeft: 20 }}>
                 <TagEditSeries

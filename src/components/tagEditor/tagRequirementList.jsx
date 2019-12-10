@@ -4,17 +4,17 @@ import { FaTimes } from "react-icons/fa";
 const tagRequirements = ({ onClose, requirements, handleInput }) => {
   return (
     <div className="tagRequirements">
-      <div className="tagRequirements">
-        <div className="tagRequirements__title">Define Requirements</div>
+      <div className="__header">
+        <div className="__title">Define Requirements</div>
         <div className="menu-clickable" onClick={onClose}>
           <FaTimes />
         </div>
       </div>
-      <ul className="tagRequirements__list">
-        <div>
+      <ul className="__list">
+        <div className="__option">
           <input
             type="checkbox"
-            className="requirement-select__all"
+            className="__select __all"
             name="RequireAll"
             onChange={handleInput}
             checked={requirements.length === 6}
@@ -24,7 +24,7 @@ const tagRequirements = ({ onClose, requirements, handleInput }) => {
         <div>
           <input
             type="checkbox"
-            className="requirement-select"
+            className="__select"
             name="PatientID"
             onChange={handleInput}
             checked={requirements.includes("PatientID")}
@@ -34,7 +34,7 @@ const tagRequirements = ({ onClose, requirements, handleInput }) => {
         <div>
           <input
             type="checkbox"
-            className="requirement-select"
+            className="__select"
             name="PatientName"
             onChange={handleInput}
             checked={requirements.includes("PatientName")}
@@ -44,7 +44,7 @@ const tagRequirements = ({ onClose, requirements, handleInput }) => {
         <div>
           <input
             type="checkbox"
-            className="requirement-select"
+            className="__select"
             name="StudyInstanceUID"
             onChange={handleInput}
             checked={requirements.includes("StudyInstanceUID")}
@@ -54,7 +54,7 @@ const tagRequirements = ({ onClose, requirements, handleInput }) => {
         <div>
           <input
             type="checkbox"
-            className="requirement-select"
+            className="__select"
             name="StudyDescription"
             onChange={handleInput}
             checked={requirements.includes("StudyDescription")}
@@ -64,7 +64,7 @@ const tagRequirements = ({ onClose, requirements, handleInput }) => {
         <div>
           <input
             type="checkbox"
-            className="requirement-select"
+            className="__select"
             name="SeriesInstanceUID"
             onChange={handleInput}
             checked={requirements.includes("SeriesInstanceUID")}
@@ -74,7 +74,7 @@ const tagRequirements = ({ onClose, requirements, handleInput }) => {
         <div>
           <input
             type="checkbox"
-            className="requirement-select"
+            className="__select"
             name="SeriesDescription"
             onChange={handleInput}
             checked={requirements.includes("SeriesDescription")}
