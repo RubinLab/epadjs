@@ -62,13 +62,12 @@ class Rightsidebar extends Component {
               </button>
             </div>
           )}
-          <Collapsible trigger={"Tools"} transitionTime={100}>
+          <Collapsible trigger={"Tools"} transitionTime={100} open={true}>
             <ToolMenu />
           </Collapsible>
           {this.props.showAimEditor && (
             <Collapsible
               trigger={"Aim Editor"}
-              open={true}
               transitionTime={100}
               triggerOpenedClassName={"test"}
             >
@@ -84,7 +83,7 @@ class Rightsidebar extends Component {
           <Collapsible trigger={"Annotations"} transitionTime={100}>
             <AnnotationList />
           </Collapsible>
-          <Collapsible trigger={"Eye Tracker"} transitionTime={100}>
+          <Collapsible trigger={"Eye Tracker"} transitionTime={100} open={true}>
             <EyeTracker />
           </Collapsible>
         </div>

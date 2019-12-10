@@ -4,8 +4,7 @@ import cornerstoneTools from "cornerstone-tools";
 import {
   getImageIds,
   getWadoImagePath,
-  getSegmentation,
-  getAllSeriesofProject
+  getSegmentation
 } from "../../services/seriesServices";
 import { connect } from "react-redux";
 import { wadoUrl, isLite } from "../../config.json";
@@ -28,7 +27,7 @@ import { isEyeTracker } from "../../config.json";
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: [1] } },
-  { name: "Pan", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "Pan", modeOptions: { mouseButtonMasks: [2] }, mode: "active" },
   {
     name: "Zoom",
     configuration: {
@@ -36,9 +35,9 @@ const tools = [
       maxScale: 25,
       preventZoomOutsideImage: true
     },
-    modeOptions: { mouseButtonMasks: [4] }
+    modeOptions: { mouseButtonMasks: [1, 2] }
   },
-  { name: "Probe", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "Probe", modeOptions: { mouseButtonMasks: [1] }, mode: "active" },
   { name: "Length", modeOptions: { mouseButtonMasks: [1] } },
   // {
   //   name: "EllipticalRoi",
@@ -69,7 +68,7 @@ const tools = [
     mode: "active"
   },
   { name: "FreehandRoiSculptor", modeOptions: { mouseButtonMasks: [1] } },
-  { name: "FreehandRoi3DTool", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "FreehandRoi3DTool", moreOptions: { mouseButtonMasks: [1] } },
   { name: "FreehandRoiSculptorTool", modeOptions: { mouseButtonMasks: [1] } },
   { name: "Eraser" },
   {
@@ -81,7 +80,7 @@ const tools = [
   { name: "StackScroll", modeOptions: { mouseButtonMasks: [1] } },
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
-  { name: "StackScrollMouseWheel" },
+  { name: "StackScrollMouseWheel", mode: "active" },
   { name: "StackScrollMultiTouch" },
   { name: "FreehandScissors", modeOptions: { mouseButtonMasks: [1] } },
   { name: "RectangleScissors", modeOptions: { mouseButtonMasks: [1] } },
@@ -115,21 +114,17 @@ class DisplayView extends Component {
     };
   }
 
-  componentWillMount() {
-    getAllSeriesofProject(this.props.series[0]).then(series => {
-      console.log("Don't know what will happen", series);
-    });
-  }
-
   componentDidMount() {
-    getAllSeriesofProject(this.props.series[0]).then(series => {
-      console.log("Don't know what will happen", series);
-      this.getViewports();
-      this.getData();
-    });
-
+    this.getViewports();
+    this.getData();
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
+    cornerstoneTools.setToolActive("Wwwc", {
+      mouseButtonMask: 1
+    });
+    cornerstoneTools.setToolActive("Zoom", {
+      mouseButtonMask: 2
+    });
   }
 
   async componentDidUpdate(prevProps) {
@@ -167,36 +162,14 @@ class DisplayView extends Component {
 
   getData() {
     const { series } = this.props;
-    console.log("Props are", this.props);
-
     var promises = [];
-    if (isEyeTracker) {
-      console.log("I'm in eyetracker");
-      this.getImageStack(series[0])
-        .then(promise => {
-          console.log("Promise is", promise);
-          promises.push(promise);
-        })
-        .then(() => {
-          Promise.all(promises).then(res => {
-            console.log("Return from promise", res);
-            this.setState({ data: res, isLoading: false });
-          });
-        });
-    } else {
-      for (let i = 0; i < series.length; i++) {
-        this.getImageStack(series[i])
-          .then(promise => {
-            promises.push(promise);
-          })
-          .then(() => {
-            Promise.all(promises).then(res => {
-              this.setState({ data: res, isLoading: false });
-              console.log("Data 2 is", this.state.data);
-            });
-          });
-      }
+    for (let i = 0; i < series.length; i++) {
+      const promise = this.getImageStack(series[i]);
+      promises.push(promise);
     }
+    Promise.all(promises).then(res => {
+      this.setState({ data: res, isLoading: false });
+    });
 
     series.forEach(serie => {
       if (serie.imageAnnotations)
@@ -209,66 +182,43 @@ class DisplayView extends Component {
     return urls;
   }
 
-  getImageStack = serie => {
-    console.log("Serie is", serie);
+  getImageStack = async serie => {
     let stack = {};
     let cornerstoneImageIds = [];
-    let imagePromises = [];
-    if (isEyeTracker) {
-      console.log("This is eyetracker");
-      console.log("series all", getAllSeriesofProject(serie));
-      getAllSeriesofProject(serie).then(series => {
-        console.log("I have the all series of project", series);
-        series.data.map(async serie => {
-          if (serie.examType === "CR") {
-            this.getImages(serie)
-              .then(imageUrls => {
-                console.log(
-                  "I have the image urls of filtered series",
-                  imageUrls
-                );
-                imagePromises = imageUrls.map(url => {
-                  const baseUrl = wadoUrl + url.lossyImage;
-                  let singleFrameUrl = !isLite ? baseUrl : baseUrl;
-                  cornerstoneImageIds.push(singleFrameUrl);
-                  console.log("I have the path of images", singleFrameUrl);
-                  return cornerstone.loadAndCacheImage(singleFrameUrl);
-                });
-              })
-              .then(
-                Promise.all(imagePromises).then(() => {
-                  stack.currentImageIdIndex = 0;
-                  stack.imageIds = [...cornerstoneImageIds];
-                  console.log("Stack", stack);
-                  return { stack, imagePromises };
-                })
-              );
-          }
-        });
-      });
-    } else {
-      const imageUrls = this.getImages(serie);
-      imageUrls.map(url => {
-        const baseUrl = wadoUrl + url.lossyImage;
-        if (url.multiFrameImage === true) {
-          for (var i = 0; i < url.numberOfFrames; i++) {
-            let multiFrameUrl = !isLite ? baseUrl + "/frames/" + i : baseUrl;
-            cornerstoneImageIds.push(multiFrameUrl);
-          }
-        } else {
-          let singleFrameUrl = !isLite ? baseUrl : baseUrl;
-          cornerstoneImageIds.push(singleFrameUrl);
+    const imageUrls = await this.getImages(serie);
+    imageUrls.map(url => {
+      const baseUrl = wadoUrl + url.lossyImage;
+      if (url.multiFrameImage === true) {
+        for (var i = 0; i < url.numberOfFrames; i++) {
+          let multiFrameUrl = !isLite ? baseUrl + "/frames/" + i : baseUrl;
+          cornerstoneImageIds.push(multiFrameUrl);
         }
-      });
-      let imageIndex = 0;
-      if (serie.aimID) {
-        imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+      } else {
+        let singleFrameUrl = !isLite ? baseUrl : baseUrl;
+        cornerstoneImageIds.push(singleFrameUrl);
       }
-      stack.currentImageIdIndex = parseInt(imageIndex, 10);
-      stack.imageIds = [...cornerstoneImageIds];
-      console.log("Stack", stack);
-      return { stack };
+
+      //  if (url.multiFrameImage === true) {
+      //     for (var i = 0; i < url.numberOfFrames; i++) {
+      //       tempArray.push(
+      //         wadoUrl +
+      //           url.lossyImage +
+      //           "&contentType=application%2Fdicom?frame=" +
+      //           i
+      //       );
+      //     }
+      //   } else
+      //     tempArray.push(
+      //       wadoUrl + url.lossyImage + "&contentType=application%2Fdicom"
+      //     );
+    });
+    let imageIndex = 0;
+    if (serie.aimID) {
+      imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
     }
+    stack.currentImageIdIndex = parseInt(imageIndex, 10);
+    stack.imageIds = [...cornerstoneImageIds];
+    return { stack };
   };
 
   getImageIndex = (serie, cornerstoneImageIds) => {
@@ -669,7 +619,7 @@ class DisplayView extends Component {
                     //   this.props.dispatch(updateImageId(event))
                     // }
                     isStackPrefetchEnabled={true}
-                    activeTool={("Wwwc", "Zoom")}
+                    activeTool={"Wwwc"}
                     // onRightClick={this.showRightMenu}
                   />
                 </MenuProvider>

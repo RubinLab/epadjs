@@ -11,11 +11,17 @@ class EyeTracker extends Component {
     this.state = {
       logging: false
     };
-    console.log("cornerstone", cornerstoneTools);
+  }
+  componentDidMount() {
+    if (localStorage.getItem("eyeTrackerLogs"))
+      this.logs = JSON.parse(localStorage.getItem("eyeTrackerLogs"));
+    setTimeout(this.startLogging, 1000);
+  }
+  componentWillUnmount() {
+    localStorage.setItem("eyeTrackerLogs", JSON.stringify(this.logs));
   }
 
   keyPress = event => {
-    console.log("event object", event);
     if (event.keyCode == 89 && event.shiftKey) {
       this.captureLog({ detail: "Shift+Y_pressed" });
       toast.error("Phneumothorax", {
@@ -120,6 +126,7 @@ class EyeTracker extends Component {
 
   clearLog = () => {
     this.logs.length = 0;
+    localStorage.setItem("eyeTrackerLogs", JSON.stringify(this.logs));
     toast.info("Log Cleared", {
       position: "top-right",
       autoClose: 2000,

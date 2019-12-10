@@ -60,8 +60,8 @@ const mapStateToProps = state => {
 };
 
 const tools = [
-  { name: "Wwwc", mouseButtonMasks: [1] },
-  { name: "Pan", mouseButtonMasks: [2] },
+  { name: "Wwwc" },
+  { name: "Pan" },
   {
     name: "Zoom",
     configuration: {
@@ -132,10 +132,10 @@ class ToolMenu extends Component {
       { name: "No Op", icon: <FaLocationArrow /> },
       { name: "Levels", icon: <FiSun />, tool: "Wwwc" },
       { name: "Presets", icon: <FiSunset />, tool: "Presets" },
-      { name: "Zoom", icon: <FiZoomIn />, tool: "Zoom", mouseButtonMasks: [1] },
+      { name: "Zoom", icon: <FiZoomIn />, tool: "Zoom" },
       { name: "Invert", icon: <FaAdjust />, tool: "Invert" },
       { name: "Reset", icon: <MdLoop />, tool: "Reset" },
-      { name: "Pan", icon: <MdPanTool />, tool: "Pan", mouseButtonMasks: [2] },
+      { name: "Pan", icon: <MdPanTool />, tool: "Pan" },
       { name: "SeriesData", icon: <FaListAlt />, tool: "MetaData" },
       { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate" },
       { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" }
@@ -235,18 +235,11 @@ class ToolMenu extends Component {
   };
 
   //sets the selected tool active for all of the enabled elements
-  setToolActive = (toolName, mouseMask = [1]) => {
-    console.log("Setting tool active", toolName, mouseMask);
-    if (toolName === "Wwwc")
-      cornerstoneTools.setToolActive(toolName, {
-        mouseButtonMask: 1
-      });
-    else if (toolName === "Zoom")
-      cornerstoneTools.setToolActive(toolName, {
-        mouseButtonMask: [1, 4]
-      });
+  setToolActive = (toolName, mouseMask = 1) => {
+    cornerstoneTools.setToolActive(toolName, {
+      mouseButtonMask: [mouseMask]
+    });
     if (toolName === "Brush") this.handleBrushSelected();
-    // console.log("Cornerstone tools in set tool active", cornerstoneTools);
   };
 
   handleBrushSelected = () => {
@@ -275,6 +268,7 @@ class ToolMenu extends Component {
   //sets the selected tool active for an enabled elements
   setToolActiveForElement = (toolName, mouseMask = 1) => {
     this.disableAllTools();
+    console.log("CStools", cornerstoneTools);
     if (toolName == "Brush3DHUGatedTool") {
       cornerstoneTools.store.modules.brush.setters.activeGate("muscle");
     }
@@ -360,7 +354,7 @@ class ToolMenu extends Component {
   };
 
   handleToolClicked = (index, tool) => {
-    // this.disableAllTools();
+    this.disableAllTools();
     if (tool === "Noop") {
       this.setState({ activeTool: "", activeToolIdx: index });
       return;
@@ -370,8 +364,7 @@ class ToolMenu extends Component {
     else if (tool === "MetaData") this.toggleMetaData();
     else {
       this.setState({ activeTool: tool, activeToolIdx: index }, () => {
-        console.log("handle Tool clicked", tool);
-        this.setToolActive(tool, tool.mouseButtonMasks);
+        this.setToolActive(tool);
       });
     }
   };
@@ -379,7 +372,7 @@ class ToolMenu extends Component {
   render() {
     return (
       <div className="toolbar">
-        <Collapsible trigger={"Imaging Tools"} transitionTime={100}>
+        <Collapsible trigger={"Imaging Tools"} transitionTime={100} open={true}>
           {this.imagingTools.map((imagingTool, i) => {
             return (
               <ToolMenuItem
@@ -695,5 +688,4 @@ class ToolMenu extends Component {
     );
   }
 }
-
 export default connect(mapStateToProps)(ToolMenu);

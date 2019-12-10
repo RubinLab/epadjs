@@ -169,6 +169,7 @@ class App extends Component {
     // }
     // window.addEventListener("keydown", this.closeMenu, true);
     document.addEventListener("mousedown", this.handleClickOutside);
+    localStorage.removeItem("eyeTrackerLogs");
   }
 
   componentWillUnmount = () => {
