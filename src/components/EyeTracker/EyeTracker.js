@@ -15,7 +15,7 @@ class EyeTracker extends Component {
   componentDidMount() {
     if (localStorage.getItem("eyeTrackerLogs"))
       this.logs = JSON.parse(localStorage.getItem("eyeTrackerLogs"));
-    setTimeout(this.startLogging, 1000);
+    setTimeout(this.startLogging, 3000);
   }
   componentWillUnmount() {
     localStorage.setItem("eyeTrackerLogs", JSON.stringify(this.logs));
