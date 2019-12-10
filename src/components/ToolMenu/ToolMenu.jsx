@@ -124,8 +124,8 @@ class ToolMenu extends Component {
       },
       rangeDisabled: true,
       interpolate: false,
-      activeTool: "",
-      activeToolIdx: 0
+      activeTool: "Wwwc",
+      activeToolIdx: 1
     };
 
     this.imagingTools = [

@@ -134,3 +134,7 @@ export function saveSeries(
     description;
   return http.put(url);
 }
+
+export function getSeriesOfProject() {
+  return http.get(apiUrl + "/projects/lite/series?filterDSO=true");
+}

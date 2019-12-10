@@ -115,9 +115,19 @@ class DisplayView extends Component {
     };
   }
 
+  componentWillMount() {
+    getAllSeriesofProject(this.props.series[0]).then(series => {
+      console.log("Don't know what will happen", series);
+    });
+  }
+
   componentDidMount() {
-    this.getViewports();
-    this.getData();
+    getAllSeriesofProject(this.props.series[0]).then(series => {
+      console.log("Don't know what will happen", series);
+      this.getViewports();
+      this.getData();
+    });
+
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
   }
@@ -157,16 +167,20 @@ class DisplayView extends Component {
 
   getData() {
     const { series } = this.props;
+    console.log("Props are", this.props);
+
     var promises = [];
     if (isEyeTracker) {
+      console.log("I'm in eyetracker");
       this.getImageStack(series[0])
         .then(promise => {
+          console.log("Promise is", promise);
           promises.push(promise);
         })
         .then(() => {
           Promise.all(promises).then(res => {
+            console.log("Return from promise", res);
             this.setState({ data: res, isLoading: false });
-            console.log("Data 1 is", this.state.data);
           });
         });
     } else {
@@ -195,34 +209,45 @@ class DisplayView extends Component {
     return urls;
   }
 
-  getImageStack = async serie => {
+  getImageStack = serie => {
     console.log("Serie is", serie);
     let stack = {};
     let cornerstoneImageIds = [];
+    let imagePromises = [];
     if (isEyeTracker) {
+      console.log("This is eyetracker");
+      console.log("series all", getAllSeriesofProject(serie));
       getAllSeriesofProject(serie).then(series => {
+        console.log("I have the all series of project", series);
         series.data.map(async serie => {
           if (serie.examType === "CR") {
             this.getImages(serie)
               .then(imageUrls => {
-                imageUrls.map(url => {
+                console.log(
+                  "I have the image urls of filtered series",
+                  imageUrls
+                );
+                imagePromises = imageUrls.map(url => {
                   const baseUrl = wadoUrl + url.lossyImage;
                   let singleFrameUrl = !isLite ? baseUrl : baseUrl;
-                  console.log("Kornere", singleFrameUrl);
                   cornerstoneImageIds.push(singleFrameUrl);
+                  console.log("I have the path of images", singleFrameUrl);
+                  return cornerstone.loadAndCacheImage(singleFrameUrl);
                 });
               })
-              .then(() => {
-                stack.currentImageIdIndex = 0;
-                stack.imageIds = [...cornerstoneImageIds];
-                console.log("Stack", stack);
-                return { stack };
-              });
+              .then(
+                Promise.all(imagePromises).then(() => {
+                  stack.currentImageIdIndex = 0;
+                  stack.imageIds = [...cornerstoneImageIds];
+                  console.log("Stack", stack);
+                  return { stack, imagePromises };
+                })
+              );
           }
         });
       });
     } else {
-      const imageUrls = await this.getImages(serie);
+      const imageUrls = this.getImages(serie);
       imageUrls.map(url => {
         const baseUrl = wadoUrl + url.lossyImage;
         if (url.multiFrameImage === true) {
