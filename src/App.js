@@ -24,7 +24,6 @@ import AnnotationList from "./components/annotationsList";
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
-import { isLite, apiUrl } from "./config.json";
 import {
   clearAimId,
   getNotificationsData
@@ -108,9 +107,19 @@ class App extends Component {
     this.setState({ projectMap });
   };
   async componentDidMount() {
-    // when comp mount check if the user is set already. If is set then set state
-    // if (isLite) {
-
+    fetch("/config.json")
+      .then(async res => {
+        const data = await res.json();
+        const { mode, apiUrl, wadoUrl } = data;
+        sessionStorage.setItem("mode", mode);
+        sessionStorage.setItem("apiUrl", apiUrl);
+        sessionStorage.setItem("wadoUrl", wadoUrl);
+        this.setState({ mode, apiUrl, wadoUrl });
+        this.completeAutorization(apiUrl);
+      })
+      .catch(err => {
+        console.log(err);
+      });
     //get notifications from sessionStorage and setState
     let notifications = sessionStorage.getItem("notifications");
     if (!notifications) {
@@ -120,9 +129,11 @@ class App extends Component {
       notifications = JSON.parse(notifications);
       this.setState({ notifications });
     }
+    document.addEventListener("mousedown", this.handleClickOutside);
+  }
 
+  completeAutorization = apiUrl => {
     const keycloak = Keycloak("/keycloak.json");
-    let user;
     let keycloakInit = new Promise((resolve, reject) => {
       keycloak.init({ onLoad: "login-required" }).then(authenticated => {
         // this.setState({ keycloak: keycloak, authenticated: authenticated });
@@ -186,19 +197,7 @@ class App extends Component {
       .catch(err2 => {
         console.log(err2);
       });
-    // } else {
-    //   try {
-    //     const username = sessionStorage.getItem("username");
-    //     if (username) {
-    //       const { data: user } = await getUser(username);
-    //       this.setState({ user, authenticated: true });
-    //     }
-    //   } catch (ex) {}
-    // }
-    // window.addEventListener("keydown", this.closeMenu, true);
-    document.addEventListener("mousedown", this.handleClickOutside);
-  }
-
+  };
   getMessageFromEventSrc = res => {
     const parsedRes = JSON.parse(res.data);
     const { lastEventId } = res;
@@ -274,7 +273,7 @@ class App extends Component {
   };
 
   render() {
-    const { notifications } = this.state;
+    const { notifications, mode } = this.state;
     let noOfUnseen;
     if (notifications) {
       noOfUnseen = notifications.reduce((all, item) => {
@@ -316,15 +315,15 @@ class App extends Component {
             />
           </div>
         )}
-        {!isLite && this.state.openUser && this.state.openMenu && (
+        {mode !== "lite" && this.state.openUser && this.state.openMenu && (
           <div ref={this.setWrapperRef}>
             <UserMenu closeMenu={this.closeMenu} user={this.state.user} />
           </div>
         )}
-        {!this.state.authenticated && !isLite && (
+        {!this.state.authenticated && mode !== "lite" && (
           <Route path="/login" component={LoginForm} />
         )}
-        {this.state.authenticated && !isLite && (
+        {this.state.authenticated && mode !== "lite" && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
             <Sidebar onData={this.getProjectMap} type={this.state.viewType}>
               <Switch className="splitted-mainview">
@@ -358,7 +357,7 @@ class App extends Component {
             </Sidebar>
           </div>
         )}
-        {this.state.authenticated && isLite && (
+        {this.state.authenticated && mode === "lite" && (
           <Switch>
             <Route path="/logout" component={Logout} />
             <ProtectedRoute path="/display" component={DisplayView} />

@@ -12,7 +12,7 @@ import {
 import { FiMinimize2 } from "react-icons/fi";
 import ReactTooltip from "react-tooltip";
 import { BarLoader } from "react-spinners";
-import { isLite } from "../../config";
+const mode = sessionStorage.getItem("mode");
 
 const toolBar = props => {
   return (
@@ -92,7 +92,7 @@ const toolBar = props => {
           </ReactTooltip>
         </div>
       </div>
-      {!isLite && (
+      {mode !== "lite" && (
         <div className="searchView-toolbar__group">
           <div className="searchView-toolbar__icon" onClick={props.onExpand}>
             <div>
@@ -147,7 +147,7 @@ const toolBar = props => {
           </div>
         </div>
       )}
-      {props.project && !isLite && (
+      {props.project && mode !== "lite" && (
         <div className="searchView-toolbar__group">
           <div
             className="searchView-toolbar__icon new-icon"

@@ -10,8 +10,7 @@ import Tools from "./tools";
 import Connections from "./connections";
 import "./menuStyle.css";
 import Header from "./common/managementHeader";
-import { isLite } from "../../config.json";
-import { managementItemSelected } from "./action";
+const mode = sessionStorage.getItem("mode");
 
 class MainMenu extends React.Component {
   state = {
@@ -125,7 +124,7 @@ class MainMenu extends React.Component {
         <div className="mng-menu__option" onClick={this.handleSelection}>
           Templates
         </div>
-        {!isLite && (
+        {mode !== "lite" && (
           <>
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Users

@@ -1,12 +1,13 @@
 import React from "react";
 import { Modal } from "react-bootstrap";
-import { isLite, apiUrl } from "../../config.json";
 import http from "../../services/httpService";
+const mode = sessionStorage.getItem("mode");
+const apiUrl = sessionStorage.getItem("apiUrl");
 
 class About extends React.Component {
   state = { data: {} };
   componentDidMount = () => {
-    if (!isLite) {
+    if (mode !== "lite") {
       this.getData();
     }
   };
@@ -22,7 +23,7 @@ class About extends React.Component {
     return (
       <Modal.Dialog dialogClassName="info-about__modal">
         <Modal.Header>
-          <Modal.Title>About ePAD {isLite ? "Lite" : ""}</Modal.Title>
+          <Modal.Title>About ePAD {mode === "lite" ? "Lite" : ""}</Modal.Title>
         </Modal.Header>
         <Modal.Body className="info-about__mbody">
           <div className="info-about__desc">

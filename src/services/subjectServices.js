@@ -1,10 +1,9 @@
 import http from "./httpService";
-
-import { isLite, apiUrl } from "../config.json";
-import { getCurrentUser } from "./authService";
+const apiUrl = sessionStorage.getItem("apiUrl");
+const mode = sessionStorage.getItem("mode");
 
 export function getSubjects(projectId) {
-  if (isLite) {
+  if (mode === "lite") {
     projectId = "lite";
     return http.get(apiUrl + "/projects/" + projectId + "/subjects");
   } else return http.get(apiUrl + "/projects/" + projectId + "/subjects");
@@ -22,7 +21,7 @@ export function downloadSubjects(subject) {
 }
 
 export function deleteSubject(subject) {
-  if (isLite) {
+  if (mode === "lite") {
     const url = apiUrl + "/projects/lite/subjects/" + subject.subjectID;
     return http.delete(url);
   }

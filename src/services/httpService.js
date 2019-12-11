@@ -1,5 +1,4 @@
 import { toast } from "react-toastify";
-
 import axios from "axios";
 import auth from "./authService";
 

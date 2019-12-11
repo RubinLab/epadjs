@@ -1,7 +1,9 @@
 import http from "./httpService";
-import { isLite, apiUrl, apiUrlV1 } from "../config.json";
+const apiUrl = sessionStorage.getItem("apiUrl");
+const mode = sessionStorage.getItem("mode");
+
 export function getAnnotations(series, opts = {}) {
-  if (isLite) {
+  if (mode === "lite") {
     const { projectId, subjectId, studyId, seriesId } = series;
     const fullUrl =
       apiUrl +
@@ -35,7 +37,7 @@ export function getAnnotations(series, opts = {}) {
 }
 
 export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
-  if (isLite)
+  if (mode === "lite")
     return http.get(
       apiUrl +
         "/projects/lite/subjects/" +
@@ -66,7 +68,7 @@ export function getAnnotations2() {
 }
 
 export function downloadAnnotations(optionObj, aimIDlist, selection) {
-  if (isLite) {
+  if (mode === "lite") {
     return http.post(
       apiUrl +
         "/projects/lite/aims/download?summary=" +
@@ -80,7 +82,7 @@ export function downloadAnnotations(optionObj, aimIDlist, selection) {
 }
 
 export function getSummaryAnnotations(projectID) {
-  return isLite
+  return mode === "lite"
     ? http.get(apiUrl + "/projects/lite/aims?format=summary")
     : http.get(apiUrl + "/projects/" + projectID + "/aims?format=summary");
 }
@@ -97,7 +99,7 @@ export function deleteAnnotation(aimObj, aimID, projectID) {
 
 export function uploadAim(aim) {
   let url;
-  if (isLite) {
+  if (mode === "lite") {
     url = apiUrl + "/projects/lite/aims";
     return http.post(url, aim);
   }

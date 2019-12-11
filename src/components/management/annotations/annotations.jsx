@@ -11,22 +11,19 @@ import {
 } from "../../../services/annotationServices";
 import { getProjects } from "../../../services/projectServices";
 import matchSorter from "match-sorter";
-import { isLite } from "../../../config.json";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
 import DownloadModal from "../../searchView/annotationDownloadModal";
 import { MAX_PORT } from "../../../constants";
-
 import {
   changeActivePort,
   jumpToAim,
   alertViewPortFull,
   addToGrid,
   getSingleSerie,
-  getWholeData,
-  updatePatient,
-  clearSelection
+  getWholeData
 } from "../../annotationsList/action";
+const mode = sessionStorage.getItem("mode");
 
 const messages = {
   deleteSelected: "Delete selected annotations? This cannot be undone.",
@@ -51,7 +48,7 @@ class Annotations extends React.Component {
   };
 
   componentDidMount = async () => {
-    if (!isLite) {
+    if (mode !== "lite") {
       const { data: projectList } = await getProjects();
       this.getAnnotationsData(projectList[0].id);
       this.setState({ projectList, projectID: projectList[0].id });
@@ -62,7 +59,7 @@ class Annotations extends React.Component {
 
   getAnnotationsData = async projectID => {
     const { data: annotations } = await getSummaryAnnotations(projectID);
-    if (isLite) {
+    if (mode === "lite") {
       for (let ann of annotations) {
         ann.date = ann.date + "";
         ann.studyDate = ann.studyDate + "";
@@ -90,7 +87,7 @@ class Annotations extends React.Component {
 
   handleProjectSelect = e => {
     this.setState({ projectID: e.target.value });
-    if (!isLite) {
+    if (mode !== "lite") {
       this.getAnnotationsData(e.target.value);
       this.setState({ filteredData: null });
     }

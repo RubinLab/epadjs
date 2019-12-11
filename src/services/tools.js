@@ -1,5 +1,5 @@
 import http from "./httpService";
-import { apiUrl } from "../config.json";
+const apiUrl = sessionStorage.getItem("apiUrl");
 
 export async function getTools() {
   return http.get(apiUrl + "/plugins?format=json");

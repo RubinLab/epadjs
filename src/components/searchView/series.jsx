@@ -17,13 +17,10 @@ import {
   clearSelection,
   addToGrid,
   getWholeData,
-  updatePatient,
-  showAnnotationDock
+  updatePatient
 } from "../annotationsList/action";
 import { MAX_PORT, formatDates } from "../../constants";
-
 import AlertGridFull from "./alertGridFull";
-import { isLite } from "../../config.json";
 import "react-table/react-table.css";
 
 // const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));

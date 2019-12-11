@@ -6,7 +6,6 @@ import ToolBar from "./toolbar";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { getAllTemplates } from "../../../services/templateServices";
 import { getProjects } from "../../../services/projectServices";
-import { isLite } from "../../../config.json";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
 import EditTemplates from "./projectTable";
@@ -15,6 +14,7 @@ import {
   downloadTemplates,
   deleteTemplate
 } from "../../../services/templateServices";
+const mode = sessionStorage.getItem("mode");
 
 class Templates extends React.Component {
   state = {
@@ -32,7 +32,7 @@ class Templates extends React.Component {
   };
 
   componentDidMount = async () => {
-    if (!isLite) {
+    if (mode !== "lite") {
       const { data: projectList } = await getProjects();
       const temp = [];
       for (let project of projectList) {

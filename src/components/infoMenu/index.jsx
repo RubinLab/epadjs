@@ -1,12 +1,12 @@
 import React from "react";
 import { connect } from "react-redux";
-import { isLite } from "../../config.json";
 import About from "./about";
 import Team from "./team";
 import Admin from "./admin";
 import Modal from "../management/common/customModal";
 import Notifications from "./notifications";
 import { FaExclamation } from "react-icons/fa";
+const mode = sessionStorage.getItem("mode");
 
 class InfoMenu extends React.Component {
   state = {
@@ -18,7 +18,7 @@ class InfoMenu extends React.Component {
   componentDidMount = async () => {
     this.updateDimensions();
     // console.log(this.props.user);
-    if (!isLite) {
+    if (mode !== "lite") {
       if (this.props.user.admin) {
         this.setState({ isAdmin: true });
       }

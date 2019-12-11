@@ -11,7 +11,7 @@ import {
 } from "react-icons/fa";
 import ReactTooltip from "react-tooltip";
 import "../menuStyle.css";
-import { isLite } from "../../../config.json";
+const mode = sessionStorage.getItem("mode");
 
 const toolBar = props => {
   const {
@@ -82,7 +82,7 @@ const toolBar = props => {
             <span className="filter-label">Download selections</span>
           </ReactTooltip>
         </>
-        {!isLite && (
+        {mode !== "lite" && (
           <>
             <>
               <div className="annotation-toolbar__icon">
@@ -142,7 +142,7 @@ const toolBar = props => {
           </ReactTooltip>
         </>
 
-        {!isLite && (
+        {mode !== "lite" && (
           <select
             className="annotations-projectSelect"
             name="project"

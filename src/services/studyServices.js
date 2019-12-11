@@ -1,8 +1,8 @@
 import http from "./httpService";
-import { isLite, apiUrl } from "../config.json";
-
+const apiUrl = sessionStorage.getItem("apiUrl");
+const mode = sessionStorage.getItem("mode");
 export function getStudies(projectId, subjectId) {
-  if (isLite)
+  if (mode === "lite")
     return http.get(
       apiUrl + "/projects/lite/subjects/" + subjectId + "/studies"
     );
@@ -26,7 +26,7 @@ export function downloadStudies(study) {
 }
 
 export function deleteStudy(study) {
-  if (isLite) {
+  if (mode === "lite") {
     const url =
       apiUrl +
       "/projects/lite/subjects/" +
@@ -38,7 +38,7 @@ export function deleteStudy(study) {
 }
 
 export function getStudyAims(subjectID, studyUID) {
-  if (isLite) {
+  if (mode === "lite") {
     return http.get(
       apiUrl +
         "/projects/lite/subjects/" +

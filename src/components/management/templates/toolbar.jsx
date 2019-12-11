@@ -1,15 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import {
-  FaDownload,
-  FaUpload,
-  FaShareSquare,
-  FaLocationArrow,
-  FaRegTrashAlt
-} from "react-icons/fa";
+import { FaDownload, FaUpload, FaRegTrashAlt } from "react-icons/fa";
 import ReactTooltip from "react-tooltip";
 import "../menuStyle.css";
-import { isLite } from "../../../config.json";
 
 const toolBar = props => {
   const { onDelete, onDownload, onUpload, onSelect } = props;

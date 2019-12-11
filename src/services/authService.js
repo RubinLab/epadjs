@@ -3,10 +3,9 @@
 import btoa from "btoa-lite";
 import http from "./httpService";
 import { getUser } from "./userServices";
-import { apiUrlV1, clientKey } from "../config.json";
-import { isLite } from "./../config.json";
-
-const apiEndpoint = apiUrlV1 + "/session/";
+const apiUrl = sessionStorage.getItem("apiUrl");
+const mode = sessionStorage.getItem("mode");
+// const apiEndpoint = apiUrlV1 + "/session/";
 
 export async function login(username, password, keyCloakToken) {
   let basicAuth;
@@ -42,7 +41,7 @@ export function logout() {
   sessionStorage.removeItem("token");
   sessionStorage.removeItem("username");
   sessionStorage.removeItem("displayName");
-  if (isLite) {
+  if (mode === "lite") {
     sessionStorage.removeItem("header");
   }
 }
@@ -51,12 +50,12 @@ export function getCurrentUser() {
   return sessionStorage.getItem("username");
 }
 
-export function getAuthHeader() {
-  const token = sessionStorage.getItem("token");
-  const header = "JSESSIONID=" + token + ",CLIENT_KEY=" + clientKey;
-  if (token) return header;
-  return undefined;
-}
+// export function getAuthHeader() {
+//   const token = sessionStorage.getItem("token");
+//   const header = "JSESSIONID=" + token + ",CLIENT_KEY=" + clientKey;
+//   if (token) return header;
+//   return undefined;
+// }
 
 export function getAuthHeader1() {
   const header = sessionStorage.getItem("header");
@@ -68,6 +67,6 @@ export default {
   login,
   logout,
   getCurrentUser,
-  getAuthHeader,
+  // getAuthHeader,
   getAuthHeader1
 };

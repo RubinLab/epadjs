@@ -1,17 +1,17 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
 import auth from "../../services/authService";
-import { isLite } from "../../config.json";
+const mode = sessionStorage.getItem("mode");
 
 const ProtectedRoute = ({ path, component: Component, render, ...rest }) => {
   return (
     <Route
       {...rest}
       render={props => {
-        if (!auth.getCurrentUser() && !isLite) {
+        if (!auth.getCurrentUser() && mode !== "lite") {
           return <Redirect to="/login" />;
         }
-        // } else if (!auth.getCurrentUser() && isLite) {
+        // } else if (!auth.getCurrentUser() &&mode  == "lite") {
         //   return <Redirect to="/search" />;
         // }
         return Component ? <Component {...props} /> : render(props);
