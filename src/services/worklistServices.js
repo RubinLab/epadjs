@@ -1,5 +1,5 @@
 import http from "./httpService";
-import { isLite, apiUrl } from "../config.json";
+const apiUrl = sessionStorage.getItem("apiUrl");
 
 export function getWorklistsOfCreator() {
   return http.get(apiUrl + "/worklists");

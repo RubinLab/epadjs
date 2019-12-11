@@ -1,5 +1,6 @@
 import http from "./httpService";
-import { isLite, apiUrl, apiUrlV1 } from "../config.json";
+const apiUrl = sessionStorage.getItem("apiUrl");
+const mode = sessionStorage.getItem("mode");
 
 export function getProjects() {
   return http.get(apiUrl + "/projects");
@@ -58,7 +59,7 @@ export function downloadProjects(projectID) {
 }
 
 export function uploadFile(formData, config, projectID, username) {
-  if (isLite) {
+  if (mode === "lite") {
     return http.post(apiUrl + "/projects/lite/files", formData, config);
   } else {
     const url =

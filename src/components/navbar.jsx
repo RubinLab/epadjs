@@ -3,7 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 import { FaCogs, FaInfoCircle, FaBell } from "react-icons/fa";
 import logo from "../images/logo.png";
 import { connect } from "react-redux";
-import { isLite } from "../config.json";
+const mode = sessionStorage.getItem("mode");
 
 const NavBar = ({
   user,
@@ -23,7 +23,7 @@ const NavBar = ({
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
         <Link className="navbar-brand-right nounderline pr-3 " to="#">
           <img src={logo} alt={"logo"} width="25px" />
-          {isLite && "eLite"} {!isLite && "ePAD"}
+          {mode === "lite" && "eLite"} {mode !== "lite" && "ePAD"}
         </Link>
         <button
           className="navbar-toggler"
@@ -55,7 +55,7 @@ const NavBar = ({
                 Display
               </NavLink>
             </li>
-            {!isLite && (
+            {mode !== "lite" && (
               <React.Fragment>
                 {/* <li className="nav-item">
                   <NavLink className="nav-link" to="/anotate">
@@ -158,7 +158,9 @@ const NavBar = ({
                     data-name="user"
                     onClick={openMenu}
                     onMouseEnter={openUser}
-                    style={isLite ? style : { ...style, cursor: "pointer" }}
+                    style={
+                      mode === "lite" ? style : { ...style, cursor: "pointer" }
+                    }
                   >
                     {user.displayname}
                   </div>

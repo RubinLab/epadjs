@@ -2,10 +2,11 @@ import React from "react";
 import Table from "react-table";
 import { FaRegTrashAlt } from "react-icons/fa";
 import ToolBar from "../management/common/basicToolBar";
-import { apiUrl } from "../../config.json";
 import http from "../../services/httpService";
 import Header from "../management/common/managementHeader";
 import HostCreation from "./hostCreationForm";
+const apiUrl = sessionStorage.getItem("apiUrl");
+
 const messages = {
   deleteSingle: "Delete the host? This cannot be undone.",
   deleteSelected: "Delete selected hostss? This cannot be undone.",

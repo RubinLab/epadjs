@@ -1,5 +1,5 @@
 import http from "./httpService";
-import { apiUrl } from "../config.json";
+const apiUrl = sessionStorage.getItem("apiUrl");
 
 export function getPacs() {
   return http.get(apiUrl + "/pacs/");
