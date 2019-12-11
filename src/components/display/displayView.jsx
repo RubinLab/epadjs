@@ -189,25 +189,22 @@ class DisplayView extends Component {
         let singleFrameUrl = !isLite ? baseUrl : baseUrl;
         cornerstoneImageIds.push(singleFrameUrl);
       }
-
-      //  if (url.multiFrameImage === true) {
-      //     for (var i = 0; i < url.numberOfFrames; i++) {
-      //       tempArray.push(
-      //         wadoUrl +
-      //           url.lossyImage +
-      //           "&contentType=application%2Fdicom?frame=" +
-      //           i
-      //       );
-      //     }
-      //   } else
-      //     tempArray.push(
-      //       wadoUrl + url.lossyImage + "&contentType=application%2Fdicom"
-      //     );
     });
-    let imageIndex = 0;
+    //to jump to the same image after aim save
+    let imageIndex;
+    if (
+      this.state.data.length &&
+      this.state.data[this.props.activePort].stack.currentImageIdIndex
+    )
+      imageIndex = this.state.data[this.props.activePort].stack
+        .currentImageIdIndex;
+    else imageIndex = 0;
+
     if (serie.aimID) {
       imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+      // TODO: dispatch an event to clear aimId from the serie not to jump to that image again and again
     }
+
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
     return { stack };
@@ -354,7 +351,6 @@ class DisplayView extends Component {
   getSegmentationData = (seriesUID, studyUID, aimId, i) => {
     const { aimList } = this.props;
 
-    console.log("New bug, seriesUID, aimId, activePort", seriesUID, aimId);
     const segmentationEntity =
       aimList[seriesUID][aimId].json.segmentationEntityCollection
         .SegmentationEntity[0];
@@ -475,7 +471,6 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
-    console.log("After polyogn rendering cornerstone tool", cornerstoneTools);
   };
 
   createPolygonPoints = (data, points) => {
@@ -553,22 +548,25 @@ class DisplayView extends Component {
   };
 
   newImage = event => {
-    // console.log("event", event);
-    // alert("new image");
+    const { activePort } = this.props;
+    const tempData = this.state.data;
+    const newStack =
+      event.detail.enabledElement.toolStateManager.toolState.stack.data[
+        activePort
+      ];
+    tempData[activePort].stack = newStack;
+    this.setState({ data: tempData });
     this.props.dispatch(updateImageId(event));
   };
+
   onAnnotate = () => {
     this.setState({ showAimEditor: true });
   };
 
   render() {
-    // OHIFSegmentationExtension.preRegistration();
-    // console.log("CornerstoneTools in dp view", cornerstoneTools);
-    // console.log("Datata", this.state.data);
     return !Object.entries(this.props.series).length ? (
       <Redirect to="/search" />
     ) : (
-      // <div className="displayView-main">
       <React.Fragment>
         <RightsideBar
           showAimEditor={this.state.showAimEditor}
@@ -605,6 +603,7 @@ class DisplayView extends Component {
                   <CornerstoneViewport
                     key={i}
                     imageIds={data.stack.imageIds}
+                    imageIdIndex={data.stack.currentImageIdIndex}
                     viewportIndex={i}
                     tools={tools}
                     eventListeners={[
@@ -620,11 +619,7 @@ class DisplayView extends Component {
                       }
                     ]}
                     setViewportActive={() => this.setActive(i)}
-                    // onNewImage={event =>
-                    //   this.props.dispatch(updateImageId(event))
-                    // }
                     isStackPrefetchEnabled={true}
-                    // onRightClick={this.showRightMenu}
                   />
                 </MenuProvider>
               </div>
