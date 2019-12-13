@@ -97,7 +97,7 @@ class Studies extends Component {
       await this.setState({ data });
     }
     if (this.props.expandLevel != prevProps.expandLevel) {
-      this.props.expandLevel >= 2
+      this.props.expandLevel >= 2 && this.state.data.length
         ? this.expandCurrentLevel()
         : this.setState({ expanded: {} });
     }

@@ -36,7 +36,8 @@ class Subjects extends Component {
       selectType: "checkbox",
       expanded: {},
       expandedIDs: {},
-      numOfStudies: 0
+      numOfStudies: 0,
+      data: []
     };
   }
 
@@ -53,10 +54,11 @@ class Subjects extends Component {
     let data;
     if (this.props.update !== prevProps.update) {
       data = await this.getData();
-      this.setState({ data });
+      console.log(data);
+      await this.setState({ data });
     }
     if (this.props.expandLevel != prevProps.expandLevel) {
-      this.props.expandLevel >= 1
+      this.props.expandLevel >= 1 && this.state.data.length
         ? this.expandCurrentLevel()
         : this.setState({ expanded: {} });
     }
