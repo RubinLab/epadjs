@@ -5,6 +5,21 @@ import "../searchView/searchView.css";
 import "react-tabs/style/react-tabs.css";
 
 class TagEditor extends React.Component {
+  state = { tagValues: {} };
+  handleTagInput = (e, tagName, tagValue) => {
+    let name, value;
+    if (e) {
+      name = e.target.name;
+      value = e.target.value;
+    }
+    if (name || value) {
+      // handle empty name case
+    } else if (tagName && tagValue) {
+      const tags = { ...this.state.tagValues };
+      tags[tagName] = tagValue;
+      this.setState({ tagValues: tags });
+    }
+  };
   render = () => {
     return (
       <Tabs>
@@ -18,6 +33,8 @@ class TagEditor extends React.Component {
             requirements={this.props.requirements}
             treeData={this.props.treeData}
             path={this.props.path}
+            onTagInput={this.handleTagInput}
+            onSave={this.saveTags}
           />
         </TabPanel>
         <TabPanel>

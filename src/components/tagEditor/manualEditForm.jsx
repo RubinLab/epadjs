@@ -1,29 +1,34 @@
 import React from "react";
 import { FaCheck } from "react-icons/fa";
+import { makeDeIdentifiedValue } from "../../Utils/aid";
 
-const manualUpdateForm = ({ requirements, treeData, path }) => {
+const manualUpdateForm = ({ requirements, treeData, path, onTagInput }) => {
   const { patientID, studyUID, seriesUID } = path;
   const fields = [];
   const series = treeData[patientID].studies[studyUID].series[seriesUID];
   const { tagRequired, data } = series;
   requirements.forEach((el, i) => {
-    console.log(data);
-    console.log(data.el);
-
-    const missing = tagRequired.includes(el);
+    const tag = el.substring(0, el.length - 2);
+    const vr = el.substring(el.length - 2);
+    const missing = tagRequired.includes(tag);
+    const value = missing ? makeDeIdentifiedValue(null, vr) : data[tag];
+    if (missing) onTagInput(null, tag, value);
     fields.push(
       <div key={`${series.seriesUID}-${i}`} className="tagEditForm__el">
-        <div className="--exp">{`${el}:`}</div>
+        <div className="--exp">{`${tag}:`}</div>
         {missing ? (
-          <input type="text" className="--text" />
+          <input
+            onMouseDown={e => e.stopPropagation()}
+            type="text"
+            className="--textFilled"
+            defaultValue={value}
+            name={tag}
+            onChange={onTagInput}
+          />
         ) : (
-          <input type="text" value={data.el} disabled className="--text" />
+          <input type="text" value={value} disabled className="--text" />
         )}
-        {missing ? (
-          <button className="--refresh" />
-        ) : (
-          <FaCheck className="--check" />
-        )}
+        {missing ? null : <FaCheck className="--check" />}
       </div>
     );
   });

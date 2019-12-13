@@ -47,12 +47,12 @@ class UploadWizard extends React.Component {
     if (name === "RequireAll" && checked) {
       await this.setState({
         requirements: {
-          PatientID: true,
-          PatientName: true,
-          StudyInstanceUID: true,
-          StudyDescription: true,
-          SeriesInstanceUID: true,
-          SeriesDescription: true
+          PatientIDLO: true,
+          PatientNamePN: true,
+          StudyInstanceUIDUI: true,
+          StudyDescriptionLO: true,
+          SeriesInstanceUIDUI: true,
+          SeriesDescriptionLO: true
         }
       });
     } else if (name === "RequireAll" && !checked) {
@@ -95,7 +95,6 @@ class UploadWizard extends React.Component {
     const result = {};
     if (datasets) {
       datasets.forEach(data => {
-        console.log(data);
         const { PatientID, StudyInstanceUID, SeriesInstanceUID } = data;
         const patient = result[PatientID];
         if (patient) {
@@ -221,11 +220,11 @@ class UploadWizard extends React.Component {
     const missingTags = [];
     const requirements = Object.keys(this.state.requirements);
     requirements.forEach(req => {
-      if (!dataset[req]) {
-        missingTags.push(req);
+      const tag = req.substring(0, req.length - 2);
+      if (!dataset[tag]) {
+        missingTags.push(tag);
       }
     });
-
     return missingTags;
   };
 

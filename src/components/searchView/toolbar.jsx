@@ -8,9 +8,8 @@ import {
   FaLevelDownAlt,
   FaLevelUpAlt,
   FaClipboardList,
-  FaFileUpload
+  FaEdit
 } from "react-icons/fa";
-// import { FaFileUpload } from "react-icons/ai";
 import { FiMinimize2 } from "react-icons/fi";
 import ReactTooltip from "react-tooltip";
 import { BarLoader } from "react-spinners";
@@ -76,7 +75,7 @@ const toolBar = props => {
           className="searchView-toolbar__icon"
         >
           <div style={{ fontSize: "1.2rem" }}>
-            <FaFileUpload data-tip data-for="editor-icon" />
+            <FaEdit data-tip data-for="editor-icon" />
           </div>
 
           <ReactTooltip

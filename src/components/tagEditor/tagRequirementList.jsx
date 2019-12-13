@@ -25,9 +25,9 @@ const tagRequirements = ({ onClose, requirements, handleInput }) => {
           <input
             type="checkbox"
             className="__select"
-            name="PatientID"
+            name="PatientIDLO"
             onChange={handleInput}
-            checked={requirements.includes("PatientID")}
+            checked={requirements.includes("PatientIDLO")}
           />
           Patient ID
         </div>
@@ -35,9 +35,9 @@ const tagRequirements = ({ onClose, requirements, handleInput }) => {
           <input
             type="checkbox"
             className="__select"
-            name="PatientName"
+            name="PatientNamePN"
             onChange={handleInput}
-            checked={requirements.includes("PatientName")}
+            checked={requirements.includes("PatientNamePN")}
           />
           Patient Name
         </div>
@@ -45,9 +45,9 @@ const tagRequirements = ({ onClose, requirements, handleInput }) => {
           <input
             type="checkbox"
             className="__select"
-            name="StudyInstanceUID"
+            name="StudyInstanceUIDUI"
             onChange={handleInput}
-            checked={requirements.includes("StudyInstanceUID")}
+            checked={requirements.includes("StudyInstanceUIDUI")}
           />
           Study UID
         </div>
@@ -55,9 +55,9 @@ const tagRequirements = ({ onClose, requirements, handleInput }) => {
           <input
             type="checkbox"
             className="__select"
-            name="StudyDescription"
+            name="StudyDescriptionLO"
             onChange={handleInput}
-            checked={requirements.includes("StudyDescription")}
+            checked={requirements.includes("StudyDescriptionLO")}
           />
           Study Description
         </div>
@@ -65,9 +65,9 @@ const tagRequirements = ({ onClose, requirements, handleInput }) => {
           <input
             type="checkbox"
             className="__select"
-            name="SeriesInstanceUID"
+            name="SeriesInstanceUIDUI"
             onChange={handleInput}
-            checked={requirements.includes("SeriesInstanceUID")}
+            checked={requirements.includes("SeriesInstanceUIDUI")}
           />
           Series UID
         </div>
@@ -75,9 +75,9 @@ const tagRequirements = ({ onClose, requirements, handleInput }) => {
           <input
             type="checkbox"
             className="__select"
-            name="SeriesDescription"
+            name="SeriesDescriptionLO"
             onChange={handleInput}
-            checked={requirements.includes("SeriesDescription")}
+            checked={requirements.includes("SeriesDescriptionLO")}
           />
           Series Description
         </div>

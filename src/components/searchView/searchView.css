@@ -312,8 +312,8 @@ h5.add-subject__modal--label,
 
 .tagEditForm__el {
   display: flex;
-  margin-bottom: 0.5rem;
-  align-items: flex-end;
+  margin-bottom: 0.8rem;
+  align-items: center;
 }
 
 .tagEditForm__el .--exp {
@@ -330,6 +330,13 @@ h5.add-subject__modal--label,
 
 .tagEditForm__el .--text {
   margin-right: 0.2rem;
+  width: 25rem;
+  padding: 0.2rem;
+}
+
+.tagEditForm__el .--textFilled {
+  color: #272b30;
+  width: 25rem;
 }
 
 .react-tabs__tab-list {
@@ -340,6 +347,10 @@ h5.add-subject__modal--label,
   color: #272b30;
   margin: 0.5rem;
   display: block;
+}
+
+.tagEditForm__el .--refresh {
+  color: #272b30;
 }
 
 .tagRequirements {
