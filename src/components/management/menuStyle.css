@@ -133,7 +133,9 @@
   display: inline-flex;
   flex-direction: column;
   justify-content: space-between;
-  /* overflow: hidden; */
+  height: 500px;
+  min-width: 800px;
+  width: fit-content;
 }
 
 .wrapped {
@@ -622,9 +624,14 @@
   max-height: 2rem;
 }
 
-.ReactTable.pro-table {
-  height: 95%;
+/* .ReactTable.pro-table {
+  width: 800px;
+  height: 500px;
 }
+
+.annotations-toolbar {
+  width: 800px;
+} */
 
 .mng-anns__header-flex {
   display: flex;

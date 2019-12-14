@@ -42,7 +42,6 @@ class App extends Component {
       keycloak: null,
       authenticated: false,
       openInfo: false,
-      openMenu: false,
       openUser: false,
       projectMap: {},
       viewType: "search",
@@ -71,36 +70,27 @@ class App extends Component {
   };
 
   handleMngMenu = () => {
-    if (this.state.openMenu) {
-      this.setState({ openMng: true, openInfo: false, openUser: false });
-    }
+    this.setState(state => ({
+      openInfo: false,
+      openMng: !state.openMng,
+      openUser: false
+    }));
   };
 
   handleInfoMenu = () => {
-    if (this.state.openMenu) {
-      this.setState({ openInfo: true, openMng: false, openUser: false });
-    }
+    this.setState(state => ({
+      openInfo: !state.openInfo,
+      openMng: false,
+      openUser: false
+    }));
   };
 
   handleUserProfileMenu = () => {
-    if (this.state.openMenu) {
-      this.setState({ openUser: true, openInfo: false, openMng: false });
-    }
-  };
-  handleOpenMenu = e => {
-    if (!this.state.openMenu) {
-      this.setState({ openMenu: true });
-      if (e.target.dataset.name === "mng") {
-        this.setState({ openMng: true });
-      } else if (e.target.dataset.name === "info") {
-        this.setState({ openInfo: true });
-      } else if (e.target.dataset.name === "user") {
-        this.setState({ openUser: true });
-      }
-    } else {
-      this.setState({ openMenu: false });
-      this.setState({ openMng: false, openInfo: false, openUser: false });
-    }
+    this.setState(state => ({
+      openInfo: false,
+      openMng: false,
+      openUser: !state.openUser
+    }));
   };
 
   getProjectMap = projectMap => {
@@ -129,7 +119,6 @@ class App extends Component {
       notifications = JSON.parse(notifications);
       this.setState({ notifications });
     }
-    document.addEventListener("mousedown", this.handleClickOutside);
   }
 
   completeAutorization = apiUrl => {
@@ -177,7 +166,7 @@ class App extends Component {
           createUser(username, given_name, family_name, email)
             .then(async () => {
               {
-                userData = await getUser(email);
+                console.log(`User ${username} created!`);
               }
             })
             .catch(error => console.log(error));
@@ -223,21 +212,10 @@ class App extends Component {
   };
 
   componentWillUnmount = () => {
-    document.removeEventListener("mousedown", this.handleClickOutside);
     this.eventSource.removeEventListener(
       "message",
       this.getMessageFromEventSrc
     );
-  };
-
-  handleClickOutside = event => {
-    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
-      this.handleOpenMenu(event);
-    }
-  };
-
-  setWrapperRef = node => {
-    this.wrapperRef = node;
   };
 
   onLogout = e => {
@@ -291,34 +269,27 @@ class App extends Component {
           openInfoMenu={this.handleInfoMenu}
           openUser={this.handleUserProfileMenu}
           logout={this.onLogout}
-          openMenu={this.handleOpenMenu}
           onSearchViewClick={this.switchSearhView}
           onSwitchView={this.switchView}
           viewType={this.state.viewType}
           notificationWarning={noOfUnseen}
         />
-        {this.state.openMng && this.state.openMenu && (
-          <div ref={this.setWrapperRef}>
-            <Management
-              closeMenu={this.closeMenu}
-              projectMap={this.state.projectMap}
-            />
-          </div>
+        {this.state.openMng && (
+          <Management
+            closeMenu={this.closeMenu}
+            projectMap={this.state.projectMap}
+          />
         )}
-        {this.state.openInfo && this.state.openMenu && (
-          <div ref={this.setWrapperRef}>
-            <InfoMenu
-              closeMenu={this.closeMenu}
-              user={this.state.user}
-              notifications={notifications}
-              notificationWarning={noOfUnseen}
-            />
-          </div>
+        {this.state.openInfo && (
+          <InfoMenu
+            closeMenu={this.closeMenu}
+            user={this.state.user}
+            notifications={notifications}
+            notificationWarning={noOfUnseen}
+          />
         )}
         {mode !== "lite" && this.state.openUser && this.state.openMenu && (
-          <div ref={this.setWrapperRef}>
-            <UserMenu closeMenu={this.closeMenu} user={this.state.user} />
-          </div>
+          <UserMenu closeMenu={this.closeMenu} user={this.state.user} />
         )}
         {!this.state.authenticated && mode !== "lite" && (
           <Route path="/login" component={LoginForm} />

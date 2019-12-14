@@ -18,6 +18,9 @@ const NavBar = ({
 }) => {
   const style = { paddingBottom: "8px" };
 
+  // handleClick = () => {
+  //   openMenu();
+  // };
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -105,50 +108,33 @@ const NavBar = ({
             )}
             {user && (
               <React.Fragment>
-                <li
-                  className="nav-item pull-right"
-                  data-name="mng"
-                  onClick={openMenu}
-                >
+                <li className="nav-item pull-right" data-name="mng">
                   <div
                     className="nav-link mng-icon"
                     data-name="mng"
                     style={{ ...style, cursor: "pointer" }}
-                    onClick={openMenu}
-                    onMouseEnter={openGearMenu}
-                    // onMouseLeave={openGearMenu}
+                    onClick={e => {
+                      openGearMenu(e);
+                    }}
                   >
-                    <FaCogs
-                      style={{ fontSize: "1.5rem" }}
-                      data-name="mng"
-                      onClick={openMenu}
-                    />
+                    <FaCogs style={{ fontSize: "1.5rem" }} data-name="mng" />
                   </div>
                 </li>
-                <li
-                  className="nav-item pull-right"
-                  data-name="info"
-                  onClick={openMenu}
-                >
+                <li className="nav-item pull-right" data-name="info">
                   <div
                     className="nav-link info-icon"
                     data-name="info"
                     style={{ ...style, cursor: "pointer" }}
-                    onClick={openMenu}
-                    onMouseEnter={openInfoMenu}
-                    // onMouseLeave={openInfoMenu}
+                    onClick={e => {
+                      openInfoMenu(e);
+                    }}
                   >
                     <FaInfoCircle
                       style={{ fontSize: "1.5rem", position: "relative" }}
                       data-name="info"
-                      onClick={openMenu}
-                      // className="infoMenu-icon"
                     />
                     {notificationWarning ? (
-                      <FaBell
-                        className="notification-warning"
-                        onClick={openMenu}
-                      />
+                      <FaBell className="notification-warning" />
                     ) : null}
                   </div>
                 </li>
@@ -157,7 +143,7 @@ const NavBar = ({
                     className="nav-link user-profile"
                     data-name="user"
                     onClick={openMenu}
-                    onMouseEnter={openUser}
+                    // onMouseEnter={openUser}
                     style={
                       mode === "lite" ? style : { ...style, cursor: "pointer" }
                     }
