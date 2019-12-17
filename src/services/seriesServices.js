@@ -23,8 +23,8 @@ export function getSeries(projectId, subjectId, studyId) {
         "/series?filterDSO=true"
     );
 }
-export function getAllSeriesofProject(serie) {
-  return http.get(apiUrl + "/projects/" + serie.projectID + "/series");
+export function getAllSeriesofProject(projectID) {
+  return http.get(apiUrl + "/projects/" + projectID + "/series");
 }
 export function getImageIds(series) {
   if (isLite)

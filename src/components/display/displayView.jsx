@@ -305,7 +305,6 @@ class DisplayView extends Component {
   // TODO: Can this be done without checking the tools of interest?
   measurementCompleted = (event, action) => {
     const { toolName, toolType } = event.detail;
-    alert(toolName);
 
     const toolsOfInterest = [
       "Probe",
@@ -565,10 +564,11 @@ class DisplayView extends Component {
     // OHIFSegmentationExtension.preRegistration();
     // console.log("CornerstoneTools in dp view", cornerstoneTools);
     // console.log("Datata", this.state.data);
-    return !Object.entries(this.props.series).length ? (
-      <Redirect to="/search" />
-    ) : (
-      // <div className="displayView-main">
+    // return !Object.entries(this.props.series).length ? (
+    //   <Redirect to="/search" />
+    // ) : (
+    // <div className="displayView-main">
+    return (
       <React.Fragment>
         <RightsideBar
           showAimEditor={this.state.showAimEditor}

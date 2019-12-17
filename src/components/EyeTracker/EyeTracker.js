@@ -1,27 +1,80 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import * as cornerstone from "cornerstone-core";
 import { toast } from "react-toastify";
 import "./EyeTracker.css";
+import {
+  closeSerie,
+  getSingleSerie,
+  addToGrid
+} from "../annotationsList/action";
+import { getAllSeriesofProject } from "../../services/seriesServices";
 import cornerstoneTools from "../../cornerstone-tools/index";
 
 class EyeTracker extends Component {
   constructor(props) {
     super(props);
     this.logs = [];
+    this.lastSkippedLog = {};
     this.state = {
       logging: false
     };
   }
   componentDidMount() {
-    if (localStorage.getItem("eyeTrackerLogs"))
-      this.logs = JSON.parse(localStorage.getItem("eyeTrackerLogs"));
-    setTimeout(this.startLogging, 3000);
+    if (this.props.series.length) {
+      getAllSeriesofProject("lite").then(({ data }) => {
+        this.setState({ series: data });
+        const currentSeries = this.getCurrentSeries();
+        const currentSeriesIdx = this.findIndexOfSeries(currentSeries);
+        this.setState({ currentSeriesIdx });
+      });
+    }
   }
-  componentWillUnmount() {
-    localStorage.setItem("eyeTrackerLogs", JSON.stringify(this.logs));
-  }
+  // componentWillUnmount() {
+  //   localStorage.setItem("eyeTrackerLogs", JSON.stringify(this.logs));
+  // }
+
+  loadNextSeries = () => {
+    const { series, currentSeriesIdx } = this.state;
+    if (series.length > currentSeriesIdx + 1) {
+      this.props.dispatch(closeSerie());
+      this.props.dispatch(addToGrid(series[currentSeriesIdx + 1]));
+      this.props.dispatch(getSingleSerie(series[currentSeriesIdx + 1]));
+      this.setState({ currentSeriesIdx: currentSeriesIdx + 1 });
+    } else {
+      toast.error("No More Series / Images to Display", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
+  };
+
+  loadPreviousSeries = () => {
+    const { series, currentSeriesIdx } = this.state;
+    if (currentSeriesIdx) {
+      this.props.dispatch(closeSerie());
+      this.props.dispatch(addToGrid(series[currentSeriesIdx - 1]));
+      this.props.dispatch(getSingleSerie(series[currentSeriesIdx - 1]));
+      this.setState({ currentSeriesIdx: currentSeriesIdx - 1 });
+    } else {
+      toast.error("No More Series / Images to Display", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
+  };
 
   keyPress = event => {
+    if (event.keyCode == 97) this.loadPreviousSeries();
+    if (event.keyCode == 100) this.loadNextSeries();
     if (event.keyCode == 89 && event.shiftKey) {
       this.captureLog({ detail: "Shift+Y_pressed" });
       toast.error("Phneumothorax", {
@@ -54,7 +107,18 @@ class EyeTracker extends Component {
 
   captureLog = event => {
     const newLog = this.getLogData();
-    this.logs.push({ event: event.detail, ...newLog });
+    if (
+      this.lastSkippedLog.event &&
+      this.lastSkippedLog.event === "windowLevel" &&
+      newLog.event !== "windowLevel"
+    )
+      this.logs.push({ event: event.detail, ...newLog }); // log the last windowLevel value
+    if (event.detail === "windowLevel") {
+      // if the even is windowLevel log it if over threshold
+      if (this.isOverThreshold(newLog))
+        this.logs.push({ event: event.detail, ...newLog });
+      else this.lastSkippedLog = newLog;
+    } else this.logs.push({ event: event.detail, ...newLog });
   };
 
   getLogData = () => {
@@ -126,7 +190,7 @@ class EyeTracker extends Component {
 
   clearLog = () => {
     this.logs.length = 0;
-    localStorage.setItem("eyeTrackerLogs", JSON.stringify(this.logs));
+    // localStorage.setItem("eyeTrackerLogs", JSON.stringify(this.logs));
     toast.info("Log Cleared", {
       position: "top-right",
       autoClose: 2000,
@@ -137,6 +201,32 @@ class EyeTracker extends Component {
     });
     this.captureLog({ detail: "logCleared" });
     this.captureLog({ detail: "loggingStarted" });
+  };
+
+  // returns the displayed series Id
+  getCurrentSeries = () => {
+    const { imageId } = this.getImageData();
+    return imageId.split("series/")[1].split("/instances/")[0];
+  };
+
+  findIndexOfSeries = seriesId => {
+    for (var i = 0; i < this.state.series.length; i++) {
+      if (this.state.series[i].seriesUID === seriesId) return i;
+    }
+  };
+
+  isOverThreshold = newLog => {
+    const { windowCenter, windowWidth } = newLog;
+    const lastLog = this.logs[this.logs.length - 1];
+    if (
+      lastLog &&
+      0.95 < windowCenter / lastLog.windowCenter &&
+      windowCenter / lastLog.windowCenter < 1.05 &&
+      0.95 < windowWidth / lastLog.windowWidth &&
+      windowWidth / lastLog.windowWidth < 1.05
+    ) {
+      return false;
+    } else return true;
   };
 
   render() {
@@ -173,4 +263,10 @@ class EyeTracker extends Component {
   }
 }
 
-export default EyeTracker;
+const mapStateToProps = state => {
+  return {
+    series: state.annotationsListReducer.openSeries
+  };
+};
+
+export default connect(mapStateToProps)(EyeTracker);

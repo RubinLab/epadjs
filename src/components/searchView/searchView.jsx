@@ -313,6 +313,7 @@ class SearchView extends Component {
             for (let serie of studiesObj[study]) {
               this.props.dispatch(addToGrid(serie));
               this.props.dispatch(getSingleSerie(serie));
+              console.log("Serie", serie);
             }
           }
           for (let study in studiesObj) {
@@ -364,10 +365,12 @@ class SearchView extends Component {
             this.setState({ isSerieSelectionOpen: true });
             // this.props.history.push("/display");
           } else {
+            console.log("Selected serues", selectedSeries);
             //else get data for each serie for display
             selectedSeries.forEach(serie => {
               this.props.dispatch(addToGrid(serie));
               this.props.dispatch(getSingleSerie(serie));
+              console.log("Dispatching serie", serie);
             });
             for (let series of selectedSeries) {
               if (!this.props.patients[series.patientID]) {
