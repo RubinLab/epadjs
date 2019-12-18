@@ -25,6 +25,8 @@ import {
   updatePatient
   // showAnnotationDock
 } from "../annotationsList/action";
+import { persistExpandView } from "../../Utils/aid";
+
 //import "react-table/react-table.css";
 
 function getNodes(data, node = []) {
@@ -94,7 +96,13 @@ class Studies extends Component {
         this.props.projectId,
         this.props.subjectId
       );
-      await this.setState({ data });
+      const expanded = persistExpandView(
+        this.state.expanded,
+        this.state.data,
+        data,
+        "studyUID"
+      );
+      await this.setState({ data, expanded });
     }
     if (this.props.expandLevel != prevProps.expandLevel) {
       this.props.expandLevel >= 2 && this.state.data.length
@@ -158,7 +166,7 @@ class Studies extends Component {
           const id = "desc" + row.original.studyUID;
           return (
             <>
-              <div data-tip data-for={id}>
+              <div data-tip data-for={id} style={{ whiteSpace: "pre-wrap" }}>
                 {desc}
               </div>
               <ReactTooltip

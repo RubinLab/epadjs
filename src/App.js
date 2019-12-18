@@ -19,7 +19,7 @@ import ProtectedRoute from "./components/common/protectedRoute";
 import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
 import InfoMenu from "./components/infoMenu";
-import UserMenu from "./components/userProfileMenu";
+import UserMenu from "./components/userProfileMenu.jsx";
 import AnnotationList from "./components/annotationsList";
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
@@ -46,7 +46,8 @@ class App extends Component {
       projectMap: {},
       viewType: "search",
       lastEventId: null,
-      showLog: false
+      showLog: false,
+      admin: false
     };
   }
 
@@ -110,6 +111,18 @@ class App extends Component {
       .catch(err => {
         console.log(err);
       });
+
+    fetch("/keycloak.json")
+      .then(async res => {
+        const data = await res.json();
+        console.log(data);
+        const auth = data["uth-server-url"];
+        console.log(auth);
+        sessionStorage.setItem("auth", auth);
+      })
+      .catch(err => {
+        console.log(err);
+      });
     //get notifications from sessionStorage and setState
     let notifications = sessionStorage.getItem("notifications");
     if (!notifications) {
@@ -162,7 +175,9 @@ class App extends Component {
         let userData;
         try {
           userData = await getUser(username);
+          this.setState({ admin: userData.data.admin });
         } catch (err) {
+          // console.log(err);
           createUser(username, given_name, family_name, email)
             .then(async () => {
               {
@@ -288,8 +303,12 @@ class App extends Component {
             notificationWarning={noOfUnseen}
           />
         )}
-        {mode !== "lite" && this.state.openUser && this.state.openMenu && (
-          <UserMenu closeMenu={this.closeMenu} user={this.state.user} />
+        {this.state.openUser && (
+          <UserMenu
+            closeMenu={this.closeMenu}
+            user={this.state.user}
+            admin={this.state.admin}
+          />
         )}
         {!this.state.authenticated && mode !== "lite" && (
           <Route path="/login" component={LoginForm} />

@@ -9,7 +9,6 @@ const NavBar = ({
   user,
   openGearMenu,
   openInfoMenu,
-  openMenu,
   openUser,
   logout,
   onSearchViewClick,
@@ -142,7 +141,9 @@ const NavBar = ({
                   <div
                     className="nav-link user-profile"
                     data-name="user"
-                    onClick={openMenu}
+                    onClick={e => {
+                      openUser(e);
+                    }}
                     // onMouseEnter={openUser}
                     style={
                       mode === "lite" ? style : { ...style, cursor: "pointer" }

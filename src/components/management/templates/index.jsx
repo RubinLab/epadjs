@@ -221,17 +221,7 @@ class Templates extends React.Component {
         resizable: true
       },
       {
-        Header: "Type",
-        sortable: true,
-        resizable: true,
-
-        Cell: original => {
-          return <div>{original.row.checkbox.Template[0].type}</div>;
-          // return <span>type</span>;
-        }
-      },
-      {
-        Header: "Template",
+        Header: "Template Name",
         sortable: true,
         resizable: true,
         Cell: original => {
@@ -239,9 +229,30 @@ class Templates extends React.Component {
           // return <span>type</span>;
         }
       },
+      {
+        Header: "Template Code",
+        sortable: true,
+        resizable: true,
+        Cell: original => {
+          return (
+            <div>{original.row.checkbox.Template[0].templateCodeValue}</div>
+          );
+          // return <span>type</span>;
+        }
+      },
 
       {
+        Header: "Type",
+        sortable: true,
+        resizable: true,
+        Cell: original => {
+          return <div>{original.row.checkbox.Template[0].type}</div>;
+          // return <span>type</span>;
+        }
+      },
+      {
         Header: "",
+        width: 30,
         Cell: original => {
           const template = original.row.checkbox;
           return (
