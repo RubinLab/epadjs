@@ -115,9 +115,7 @@ class App extends Component {
     fetch("/keycloak.json")
       .then(async res => {
         const data = await res.json();
-        console.log(data);
-        const auth = data["uth-server-url"];
-        console.log(auth);
+        const auth = data["auth-server-url"];
         sessionStorage.setItem("auth", auth);
       })
       .catch(err => {

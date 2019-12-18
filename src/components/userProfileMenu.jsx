@@ -1,37 +1,36 @@
 import React, { Component } from "react";
 
-const userProfile = async props => {
+const userProfile = props => {
   const element = document.getElementsByClassName("nav-link user-profile");
   var rect = element[0].getBoundingClientRect();
-  console.log(props);
-  fetch("/keycloak.json")
-    .then(async res => {
-      const data = await res.json();
-      console.log(data);
-      return (
-        <div>
-          <div className="userProfile-menu" style={{ left: rect.left }}>
-            <div className="userProfile-menu__option"> My account</div>
-            {props.admin ? (
-              <div className="userProfile-menu__option">Manage users</div>
-            ) : null}
-          </div>
+  const url = sessionStorage.getItem("auth");
+  const admin = "/admin/ePad/console/#/realms/ePad/users";
+  const user = "/realms/ePad/account";
+  return (
+    <div>
+      <div className="userProfile-menu" style={{ left: rect.left }}>
+        <div
+          className="userProfile-menu__option"
+          onClick={() => {
+            window.open(url + user, "_blank", "");
+          }}
+        >
+          {" "}
+          My account
         </div>
-      );
-    })
-    .catch(err => {
-      console.log(err);
-      return (
-        <div>
-          <div className="userProfile-menu" style={{ left: rect.left }}>
-            <div className="userProfile-menu__option"> My account</div>
-            {props.admin ? (
-              <div className="userProfile-menu__option">Manage users</div>
-            ) : null}
+        {props.admin ? (
+          <div
+            className="userProfile-menu__option"
+            onClick={() => {
+              window.open(url + admin, "_blank", "");
+            }}
+          >
+            Manage users
           </div>
-        </div>
-      );
-    });
+        ) : null}
+      </div>
+    </div>
+  );
 };
 
 export default userProfile;

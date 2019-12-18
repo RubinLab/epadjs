@@ -424,7 +424,6 @@ class Subjects extends Component {
       onExpandedChange
     };
     const TheadComponent = props => null;
-    console.log(expanded);
     return (
       <div>
         {this.state.data ? (
