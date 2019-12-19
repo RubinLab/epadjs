@@ -95,17 +95,17 @@ class InfoMenu extends React.Component {
                 />
               ) : null}
             </div>
-            <div className="info-menu__option" onClick={this.handleSelection}>
+            {/* <div className="info-menu__option" onClick={this.handleSelection}>
               Log
-            </div>
-            <div className="info-menu__break" />
-            <div className="info-menu__option" onClick={this.handleSelection}>
+            </div> */}
+            {/* <div className="info-menu__break" /> */}
+            {/* <div className="info-menu__option" onClick={this.handleSelection}>
               Shortcuts
             </div>
             <div className="info-menu__option" onClick={this.handleSelection}>
               Settings
-            </div>
-            <div className="info-menu__break" />
+            </div> */}
+            {/* <div className="info-menu__break" /> */}
             <div className="info-menu__option" onClick={this.handleSelection}>
               About
             </div>

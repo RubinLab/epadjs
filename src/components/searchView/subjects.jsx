@@ -9,6 +9,7 @@ import "react-table/react-table.css";
 import Studies from "./studies";
 import { getSubjects } from "../../services/subjectServices";
 import { selectPatient, clearSelection } from "../annotationsList/action";
+import { persistExpandView } from "../../Utils/aid";
 const mode = sessionStorage.getItem("mode");
 
 // const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -36,7 +37,8 @@ class Subjects extends Component {
       selectType: "checkbox",
       expanded: {},
       expandedIDs: {},
-      numOfStudies: 0
+      numOfStudies: 0,
+      data: []
     };
   }
 
@@ -53,10 +55,16 @@ class Subjects extends Component {
     let data;
     if (this.props.update !== prevProps.update) {
       data = await this.getData();
-      this.setState({ data });
+      const expanded = persistExpandView(
+        this.state.expanded,
+        this.state.data,
+        data,
+        "subjectID"
+      );
+      await this.setState({ data, expanded });
     }
     if (this.props.expandLevel != prevProps.expandLevel) {
-      this.props.expandLevel >= 1
+      this.props.expandLevel >= 1 && this.state.data.length
         ? this.expandCurrentLevel()
         : this.setState({ expanded: {} });
     }
@@ -76,15 +84,11 @@ class Subjects extends Component {
   };
 
   getData = async () => {
-    // if (this.props.pid) {
-    const { data: data } = await getSubjects(this.props.pid);
+    const { data } = await getSubjects(this.props.pid);
     for (let subject of data) {
       subject.children = [];
     }
     return data;
-    // } else {
-    //   return [];
-    // }
   };
 
   incColumns = ["subjectName", "numberOfStudies"];
@@ -130,15 +134,15 @@ class Subjects extends Component {
           <div className="search-header__col--left">Description/Name</div>
         ),
         width: this.widthUnit * 13,
-        id: "searchView-desc__col",
-        resizable: false,
+        id: "searchView-desc",
+        resizable: true,
         accessor: "subjectName",
         Cell: ({ original }) => {
           const desc = this.cleanCarets(original.subjectName);
           const id = "desc-tool" + original.subjectID;
           return (
             <>
-              <div data-tip data-for={id}>
+              <div data-tip data-for={id} style={{ whiteSpace: "pre-wrap" }}>
                 {desc}
               </div>
               <ReactTooltip id={id} place="right" type="info" delayShow={500}>
@@ -156,7 +160,7 @@ class Subjects extends Component {
           </div>
         ),
         width: this.widthUnit * 2,
-        id: "searchView-aims__col",
+        id: "searchView-aims",
         resizable: false,
         Cell: row => (
           <div className="searchView-table__cell">
@@ -178,7 +182,7 @@ class Subjects extends Component {
           </div>
         ),
         width: this.widthUnit * 3,
-        id: "searchView-sub__col",
+        id: "searchView-sub",
         resizable: false,
         Cell: row => (
           <div className="searchView-table__cell">
@@ -200,7 +204,7 @@ class Subjects extends Component {
           </div>
         ),
         width: this.widthUnit * 3,
-        id: "searchView-img__col",
+        id: "searchView-img",
         resizable: false,
         // minResizeWidth: this.widthUnit * 3,
         Cell: row => <div />
@@ -208,7 +212,7 @@ class Subjects extends Component {
       {
         Header: <div className="search-header__col">Type</div>,
         width: this.widthUnit * 5,
-        id: "searchView-type__col",
+        id: "searchView-type",
         resizable: false,
         // minResizeWidth: this.widthUnit * 5,
         Cell: row => <div />
@@ -216,7 +220,7 @@ class Subjects extends Component {
       {
         Header: <div className="search-header__col">Creation date</div>,
         width: this.widthUnit * 7,
-        id: "searchView-crDate_col",
+        id: "searchView-crDate",
         resizable: false,
         // minResizeWidth: this.widthUnit * 10,
         Cell: row => <div />
@@ -224,7 +228,7 @@ class Subjects extends Component {
       {
         Header: <div className="search-header__col">Upload date</div>,
         width: this.widthUnit * 7,
-        id: "searchView-upldDate_col",
+        id: "searchView-upldDate",
         resizable: false,
         // minResizeWidth: this.widthUnit * 10,
         Cell: row => <div />
@@ -232,7 +236,7 @@ class Subjects extends Component {
       {
         Header: <div className="search-header__col">Accession</div>,
         width: this.widthUnit * 5,
-        id: "searchView-access_col",
+        id: "searchView-access",
         resizable: false,
         // minResizeWidth: this.widthUnit * 4,
         Cell: row => <div />
@@ -241,7 +245,7 @@ class Subjects extends Component {
         Header: <div className="search-header__col">Idenditifier</div>,
         width: this.widthUnit * 10,
         // minResizeWidth: this.widthUnit * 12,
-        id: "searchView-UID_col",
+        id: "searchView-UID",
         resizable: false,
         Cell: ({ original }) => {
           const id = "id-tool" + original.subjectID;

@@ -12,8 +12,8 @@ const style = {
 
 class ResizeAndDrag extends React.Component {
   state = {
-    width: "90%",
-    height: "90%",
+    // width: "90%",
+    // height: "90%",
     x: 50,
     y: 50
   };
@@ -23,7 +23,7 @@ class ResizeAndDrag extends React.Component {
       <Rnd
         className="rnd-window"
         style={style}
-        size={{ width: this.state.width, height: this.state.height }}
+        // size={{ width: this.state.width, height: this.state.height }}
         position={{ x: this.state.x, y: this.state.y }}
         onDragStop={(e, d) => {
           this.setState({ x: d.x, y: d.y });

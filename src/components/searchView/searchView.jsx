@@ -126,12 +126,19 @@ class SearchView extends Component {
   handleCloseAll = () => {
     this.setState({ expandLevel: 0 });
   };
+
+  keepExpandedPatientsInOrder = newSubjects => {
+    console.log(this.state.expanded);
+    this.updateUploadStatus();
+    // get the patient ID of the maps, and the level they are open
+    // get the new array of subjects and iterate over it and form the new expanded object
+  };
   updateUploadStatus = async => {
     this.setState(state => {
       return { uploading: !state.uploading, update: state.update + 1 };
     });
     this.updateSubjectCount();
-    //update patients after upload
+    // update patients after upload
     // filter the patients from openSeries with the first index they appear
     const patients = this.props.openSeries.reduce((all, item, index) => {
       if (!all[item.patientID]) {

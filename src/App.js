@@ -19,7 +19,7 @@ import ProtectedRoute from "./components/common/protectedRoute";
 import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
 import InfoMenu from "./components/infoMenu";
-import UserMenu from "./components/userProfileMenu";
+import UserMenu from "./components/userProfileMenu.jsx";
 import AnnotationList from "./components/annotationsList";
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
@@ -42,12 +42,12 @@ class App extends Component {
       keycloak: null,
       authenticated: false,
       openInfo: false,
-      openMenu: false,
       openUser: false,
       projectMap: {},
       viewType: "search",
       lastEventId: null,
-      showLog: false
+      showLog: false,
+      admin: false
     };
   }
 
@@ -71,36 +71,27 @@ class App extends Component {
   };
 
   handleMngMenu = () => {
-    if (this.state.openMenu) {
-      this.setState({ openMng: true, openInfo: false, openUser: false });
-    }
+    this.setState(state => ({
+      openInfo: false,
+      openMng: !state.openMng,
+      openUser: false
+    }));
   };
 
   handleInfoMenu = () => {
-    if (this.state.openMenu) {
-      this.setState({ openInfo: true, openMng: false, openUser: false });
-    }
+    this.setState(state => ({
+      openInfo: !state.openInfo,
+      openMng: false,
+      openUser: false
+    }));
   };
 
   handleUserProfileMenu = () => {
-    if (this.state.openMenu) {
-      this.setState({ openUser: true, openInfo: false, openMng: false });
-    }
-  };
-  handleOpenMenu = e => {
-    if (!this.state.openMenu) {
-      this.setState({ openMenu: true });
-      if (e.target.dataset.name === "mng") {
-        this.setState({ openMng: true });
-      } else if (e.target.dataset.name === "info") {
-        this.setState({ openInfo: true });
-      } else if (e.target.dataset.name === "user") {
-        this.setState({ openUser: true });
-      }
-    } else {
-      this.setState({ openMenu: false });
-      this.setState({ openMng: false, openInfo: false, openUser: false });
-    }
+    this.setState(state => ({
+      openInfo: false,
+      openMng: false,
+      openUser: !state.openUser
+    }));
   };
 
   getProjectMap = projectMap => {
@@ -120,6 +111,16 @@ class App extends Component {
       .catch(err => {
         console.log(err);
       });
+
+    fetch("/keycloak.json")
+      .then(async res => {
+        const data = await res.json();
+        const auth = data["auth-server-url"];
+        sessionStorage.setItem("auth", auth);
+      })
+      .catch(err => {
+        console.log(err);
+      });
     //get notifications from sessionStorage and setState
     let notifications = sessionStorage.getItem("notifications");
     if (!notifications) {
@@ -129,7 +130,6 @@ class App extends Component {
       notifications = JSON.parse(notifications);
       this.setState({ notifications });
     }
-    document.addEventListener("mousedown", this.handleClickOutside);
   }
 
   completeAutorization = apiUrl => {
@@ -173,11 +173,13 @@ class App extends Component {
         let userData;
         try {
           userData = await getUser(username);
+          this.setState({ admin: userData.data.admin });
         } catch (err) {
+          // console.log(err);
           createUser(username, given_name, family_name, email)
             .then(async () => {
               {
-                userData = await getUser(email);
+                console.log(`User ${username} created!`);
               }
             })
             .catch(error => console.log(error));
@@ -223,21 +225,10 @@ class App extends Component {
   };
 
   componentWillUnmount = () => {
-    document.removeEventListener("mousedown", this.handleClickOutside);
     this.eventSource.removeEventListener(
       "message",
       this.getMessageFromEventSrc
     );
-  };
-
-  handleClickOutside = event => {
-    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
-      this.handleOpenMenu(event);
-    }
-  };
-
-  setWrapperRef = node => {
-    this.wrapperRef = node;
   };
 
   onLogout = e => {
@@ -291,34 +282,31 @@ class App extends Component {
           openInfoMenu={this.handleInfoMenu}
           openUser={this.handleUserProfileMenu}
           logout={this.onLogout}
-          openMenu={this.handleOpenMenu}
           onSearchViewClick={this.switchSearhView}
           onSwitchView={this.switchView}
           viewType={this.state.viewType}
           notificationWarning={noOfUnseen}
         />
-        {this.state.openMng && this.state.openMenu && (
-          <div ref={this.setWrapperRef}>
-            <Management
-              closeMenu={this.closeMenu}
-              projectMap={this.state.projectMap}
-            />
-          </div>
+        {this.state.openMng && (
+          <Management
+            closeMenu={this.closeMenu}
+            projectMap={this.state.projectMap}
+          />
         )}
-        {this.state.openInfo && this.state.openMenu && (
-          <div ref={this.setWrapperRef}>
-            <InfoMenu
-              closeMenu={this.closeMenu}
-              user={this.state.user}
-              notifications={notifications}
-              notificationWarning={noOfUnseen}
-            />
-          </div>
+        {this.state.openInfo && (
+          <InfoMenu
+            closeMenu={this.closeMenu}
+            user={this.state.user}
+            notifications={notifications}
+            notificationWarning={noOfUnseen}
+          />
         )}
-        {mode !== "lite" && this.state.openUser && this.state.openMenu && (
-          <div ref={this.setWrapperRef}>
-            <UserMenu closeMenu={this.closeMenu} user={this.state.user} />
-          </div>
+        {this.state.openUser && (
+          <UserMenu
+            closeMenu={this.closeMenu}
+            user={this.state.user}
+            admin={this.state.admin}
+          />
         )}
         {!this.state.authenticated && mode !== "lite" && (
           <Route path="/login" component={LoginForm} />

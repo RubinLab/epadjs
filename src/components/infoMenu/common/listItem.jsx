@@ -1,21 +1,36 @@
 import React from "react";
-import { FaCheck, FaBell } from "react-icons/fa";
+import { FaCheckCircle, FaBell, FaExclamationCircle } from "react-icons/fa";
+
+const checkStyle = {
+  color: "#62c462",
+  textShadow: "1px 1px 1px #ccc",
+  fontSize: "1.5em"
+};
+
+const exclamationStyle = {
+  color: "orangered",
+  textShadow: "1px 1px 1px #ccc",
+  fontSize: "1.5em"
+};
 
 const responseList = ({ item }) => {
-  const className = item.seen
-    ? "response-item"
-    : "response-item newNotification";
+  const { seen, error, action, message, time } = item;
+  const className = seen ? "response-item" : "response-item newNotification";
   return (
     <li className={className}>
       <div className="response-item__icon">
-        {item.seen ? <FaCheck /> : <FaBell />}
+        {!seen ? (
+          <FaBell style={error ? exclamationStyle : checkStyle} />
+        ) : error ? (
+          <FaExclamationCircle style={exclamationStyle} />
+        ) : (
+          <FaCheckCircle style={checkStyle} />
+        )}
       </div>
       <div className="response-item__wrap">
-        {item.error ? (
-          <div className="response-item__msg">Error: {item.action}</div>
-        ) : null}
-        <div className="response-item__msg">{item.message}</div>
-        <div className="response-item__time">{item.time}</div>
+        <div className="response-item__msg">{action}</div>
+        <div className="response-item__msg">{message}</div>
+        <div className="response-item__time">{time}</div>
       </div>
     </li>
   );

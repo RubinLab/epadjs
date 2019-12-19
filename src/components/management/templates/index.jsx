@@ -213,47 +213,46 @@ class Templates extends React.Component {
         },
         // sortable: false,
         resizable: false
-        // minResizeWidth: 20
-        // maxWidth: 45
       },
       {
         Header: "Container",
         accessor: "containerName",
         sortable: true,
-        resizable: true,
-        minResizeWidth: 100,
-        width: 420
+        resizable: true
       },
+      {
+        Header: "Template Name",
+        sortable: true,
+        resizable: true,
+        Cell: original => {
+          return <div>{original.row.checkbox.Template[0].templateName}</div>;
+          // return <span>type</span>;
+        }
+      },
+      {
+        Header: "Template Code",
+        sortable: true,
+        resizable: true,
+        Cell: original => {
+          return (
+            <div>{original.row.checkbox.Template[0].templateCodeValue}</div>
+          );
+          // return <span>type</span>;
+        }
+      },
+
       {
         Header: "Type",
         sortable: true,
         resizable: true,
-        minResizeWidth: 20,
-        // resizable: false,
-        width: 180,
-
         Cell: original => {
           return <div>{original.row.checkbox.Template[0].type}</div>;
           // return <span>type</span>;
         }
       },
       {
-        Header: "Template",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 100,
-        width: 420,
-        Cell: original => {
-          return <div>{original.row.checkbox.Template[0].templateName}</div>;
-          // return <span>type</span>;
-        }
-      },
-
-      {
         Header: "",
-        // width: 45,
-        // minResizeWidth: 20,
-        // resizable: false,
+        width: 30,
         Cell: original => {
           const template = original.row.checkbox;
           return (
@@ -363,35 +362,3 @@ class Templates extends React.Component {
 }
 
 export default Templates;
-
-/*
-const projects = {
-      Header: "Projects",
-      // width: 50,
-      // minResizeWidth: 20,
-      // resizable: true,
-      // sortable: true,
-      Cell: original => {
-        const templates = original.row.checkbox.projectTemplates;
-        let projects = "";
-        if (templates.length === 1 && templates[0].projectID === "all") {
-          projects = "All";
-        } else {
-          let projectsArr = [];
-          for (let project of templates) {
-            projectsArr.push(this.state.projectList[project.projectID]);
-          }
-          projects = projectsArr.join(", ");
-        }
-        return (
-          <a
-            role="button"
-            tabIndex="0"
-            className="menu-clickable"
-            onClick={this.handleClickProjects}
-          >
-            {projects}
-          </a>
-        );
-      }
-    }; */
