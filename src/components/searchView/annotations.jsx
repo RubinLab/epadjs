@@ -66,23 +66,6 @@ class Annotations extends Component {
     }
   }
 
-  persistExpandView = newData => {
-    const expandMap = {};
-    const { expanded, data } = this.state;
-    let counter = 0;
-    newData.forEach((el, i) => {
-      if (counter < data.length) {
-        if (el.aimID === data[counter].aimID) {
-          expandMap[i] = expanded[counter];
-          counter += 1;
-        } else {
-          expandMap[i] = false;
-        }
-      }
-    });
-    return expandMap;
-  };
-
   async componentDidUpdate(prevProps) {
     if (this.props.update !== prevProps.update) {
       const { data } = await getAnnotations(this.series);
