@@ -1,6 +1,5 @@
 import React from "react";
 import { connect } from "react-redux";
-import Toggle from "react-toggle";
 import Switch from "react-switch";
 
 import Annotation from "./annotation";
