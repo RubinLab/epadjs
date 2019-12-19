@@ -204,9 +204,10 @@ class App extends Component {
     const parsedRes = JSON.parse(res.data);
     const { lastEventId } = res;
     const { params, createdtime, projectID, error } = parsedRes.notification;
-    const upload = parsedRes.notification.function.startsWith("Upload");
+    const action = parsedRes.notification.function;
+    const complete = action.startsWith("Upload") || action.startsWith("Delete");
     const message = params;
-    if (upload)
+    if (complete)
       this.props.dispatch(getNotificationsData(projectID, lastEventId));
     let time = new Date(createdtime).toString();
     const GMTIndex = time.indexOf(" G");
@@ -216,7 +217,7 @@ class App extends Component {
       message,
       time,
       seen: false,
-      action: parsedRes.notification.function,
+      action,
       error
     });
     this.setState({ notifications });
