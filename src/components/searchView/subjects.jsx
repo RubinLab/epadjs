@@ -84,7 +84,7 @@ class Subjects extends Component {
   };
 
   getData = async () => {
-    const { data: data } = await getSubjects(this.props.pid);
+    const { data } = await getSubjects(this.props.pid);
     for (let subject of data) {
       subject.children = [];
     }

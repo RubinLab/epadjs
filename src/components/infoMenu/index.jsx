@@ -98,7 +98,7 @@ class InfoMenu extends React.Component {
             {/* <div className="info-menu__option" onClick={this.handleSelection}>
               Log
             </div> */}
-            <div className="info-menu__break" />
+            {/* <div className="info-menu__break" /> */}
             {/* <div className="info-menu__option" onClick={this.handleSelection}>
               Shortcuts
             </div>
