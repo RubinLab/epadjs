@@ -1,5 +1,5 @@
 import React from "react";
-import { Rnd } from "react-rnd";
+import { connect } from "react-redux";
 import * as dcmjs from "dcmjs";
 import { FaTimes } from "react-icons/fa";
 import TagRequirements from "./tagRequirementList";
@@ -8,6 +8,10 @@ import "../searchView/searchView.css";
 import TagEditor from "./tagEditor";
 import { isEmpty } from "../../Utils/aid";
 import Modal from "../management/common/customModal";
+import {
+  getImageIds,
+  getImageArrayBuffer
+} from "../../services/seriesServices";
 
 const style = {
   display: "flex",
@@ -32,6 +36,22 @@ class UploadWizard extends React.Component {
       showTagEditor: false
     };
   }
+
+  componentDidMount = () => {
+    let {
+      selectedPatients,
+      selectedProjects,
+      selectedStudies,
+      selectedSeries
+    } = this.props;
+    selectedPatients = Object.values(selectedPatients);
+    selectedProjects = Object.values(selectedProjects);
+    selectedStudies = Object.values(selectedStudies);
+    selectedSeries = Object.values(selectedSeries);
+    if (selectedSeries.length) {
+      this.getFirstImgOfSeries(selectedSeries);
+    }
+  };
 
   handleRequirements = () => {
     this.setState(state => ({ showRequirements: !state.showRequirements }));
@@ -64,31 +84,39 @@ class UploadWizard extends React.Component {
         : (newRequirements[name] = true);
       await this.setState({ requirements: newRequirements });
     }
-
     this.extractTreeData(this.state.rawData);
   };
-  onSelectFile = async e => {
-    const { files } = e.target;
-    const nonDicomFiles = [];
-    const promises = [];
-    for (let i = 0, f; i < files.length; i += 1) {
-      let extension = files[i].name.split(".").pop();
-      if (extension !== "dcm") {
-        nonDicomFiles.push(files[i].name);
-        continue;
-      }
-      const blob = new Blob([files[i]], {
-        type: "application/dicom"
-      });
-      promises.push(this.getDataset(blob));
-    }
 
+  // getDatasetsOf first images for list of series
+  getFirstImgOfSeries = seriesList => {
+    const promises = [];
+    let rawData = [];
+    for (let i = 0; i < seriesList.length; i += 1) {
+      const projectUID = seriesList[i].projectID;
+      const subjectUID = seriesList[i].subjectID;
+      const { studyUID, seriesUID } = seriesList[i];
+      promises.push(
+        getImageIds({ projectUID, subjectUID, studyUID, seriesUID })
+      );
+    }
     Promise.all(promises)
-      .then(datasets => {
-        this.setState({ rawData: datasets });
-        this.extractTreeData(datasets);
+      .then(res => {
+        const imgIDPromises = [];
+        res.forEach(item => {
+          imgIDPromises.push(getImageArrayBuffer(item.data[0].lossyImage));
+        });
+        Promise.all(imgIDPromises)
+          .then(buffers => {
+            rawData = buffers.map(buffer => {
+              return this.getDataset(buffer.data);
+            });
+            this.setState({ rawData });
+          })
+          .catch();
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   extractTreeData = datasets => {
@@ -228,52 +256,22 @@ class UploadWizard extends React.Component {
     return missingTags;
   };
 
-  clearSelectedFiles = () => {
-    const element = document.getElementById("uploadWizard");
-  };
-
-  getDataset = fileBlob => {
-    const fileReader = new FileReader();
-    return new Promise((resolve, reject) => {
-      try {
-        let dataset;
-        let arrayBuffer;
-        fileReader.onload = event => {
-          arrayBuffer = event.target.result;
-          let DicomDict = dcmjs.data.DicomMessage.readFile(arrayBuffer);
-          dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(
-            DicomDict.dict
-          );
-          resolve(dataset);
-        };
-      } catch (err) {
-        reject("Error in reading dicom dataset", err);
-      }
-      fileReader.readAsArrayBuffer(fileBlob);
-    });
+  getDataset = arrayBuffer => {
+    try {
+      let DicomDict = dcmjs.data.DicomMessage.readFile(arrayBuffer);
+      const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(
+        DicomDict.dict
+      );
+      return dataset;
+    } catch (err) {
+      console.log("Error in reading dicom dataset", err);
+    }
   };
 
   render = () => {
     const { treeData, requirements } = this.state;
     const requirementKeys = Object.keys(requirements);
-
     return (
-      // <Rnd
-      //   style={style}
-      //   // size={{ width: this.state.width, height: this.state.height }}
-      //   position={{ x: this.state.x, y: this.state.y }}
-      //   onDragStop={(e, d) => {
-      //     this.setState({ x: d.x, y: d.y });
-      //   }}
-      //   onResizeStop={(e, direction, ref, delta, position) => {
-      //     this.setState({
-      //       width: ref.style.width,
-      //       height: ref.style.height,
-      //       ...position
-      //     });
-      //   }}
-      //   className="uploadWizard-modal"
-      // >
       <Modal>
         <div className="uploadWizard">
           <div className="uploadWizard-header">
@@ -282,16 +280,6 @@ class UploadWizard extends React.Component {
               <FaTimes />
             </div>
           </div>
-          <input
-            type="file"
-            className="upload-display"
-            id="uploadWizard"
-            multiple={true}
-            // name="tiff"
-            webkitdirectory="true"
-            directory="true"
-            onChange={this.onSelectFile}
-          />
           <input
             className="uploadWizard-define"
             onClick={this.handleRequirements}
@@ -321,10 +309,17 @@ class UploadWizard extends React.Component {
             />
           )}
         </div>
-        {/* </Rnd> */}
       </Modal>
     );
   };
 }
 
-export default UploadWizard;
+const mapStateToProps = state => {
+  return {
+    selectedProjects: state.annotationsListReducer.selectedProjects,
+    selectedPatients: state.annotationsListReducer.selectedPatients,
+    selectedStudies: state.annotationsListReducer.selectedStudies,
+    selectedSeries: state.annotationsListReducer.selectedSeries
+  };
+};
+export default connect(mapStateToProps)(UploadWizard);

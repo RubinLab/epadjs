@@ -70,25 +70,25 @@ const toolBar = props => {
             <span>Upload file</span>
           </ReactTooltip>
         </div>
-        {!isLite && (
-          <div
-            onClick={props.onUploadWizard}
-            className="searchView-toolbar__icon"
-          >
-            <div style={{ fontSize: "1.2rem" }}>
-              <FaEdit data-tip data-for="editor-icon" />
-            </div>
-
-            <ReactTooltip
-              id="editor-icon"
-              place="right"
-              type="info"
-              delayShow={1000}
-            >
-              <span className="filter-label">Upload with tag editor</span>
-            </ReactTooltip>
+        {/* {!isLite && ( */}
+        <div
+          onClick={props.onUploadWizard}
+          className="searchView-toolbar__icon"
+        >
+          <div style={{ fontSize: "1.2rem" }}>
+            <FaEdit data-tip data-for="editor-icon" />
           </div>
-        )}
+
+          <ReactTooltip
+            id="editor-icon"
+            place="right"
+            type="info"
+            delayShow={1000}
+          >
+            <span className="filter-label">Upload with tag editor</span>
+          </ReactTooltip>
+        </div>
+        {/* )} */}
         <div
           onClick={props.onDelete}
           className={

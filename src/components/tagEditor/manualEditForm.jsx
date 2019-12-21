@@ -1,5 +1,5 @@
 import React from "react";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaExclamationTriangle } from "react-icons/fa";
 import { makeDeIdentifiedValue } from "../../Utils/aid";
 
 const manualUpdateForm = ({ requirements, treeData, path, onTagInput }) => {
@@ -12,7 +12,7 @@ const manualUpdateForm = ({ requirements, treeData, path, onTagInput }) => {
     const vr = el.substring(el.length - 2);
     const missing = tagRequired.includes(tag);
     const value = missing ? makeDeIdentifiedValue(null, vr) : data[tag];
-    if (missing) onTagInput(null, tag, value);
+    // if (missing) onTagInput(null, tag, value);
     fields.push(
       <div key={`${series.seriesUID}-${i}`} className="tagEditForm__el">
         <div className="--exp">{`${tag}:`}</div>
@@ -26,9 +26,19 @@ const manualUpdateForm = ({ requirements, treeData, path, onTagInput }) => {
             onChange={onTagInput}
           />
         ) : (
-          <input type="text" value={value} disabled className="--text" />
+          <input
+            onMouseDown={e => e.stopPropagation()}
+            type="text"
+            defaultValue={value}
+            onChange={onTagInput}
+            className="--text"
+          />
         )}
-        {missing ? null : <FaCheck className="--check" />}
+        {missing ? (
+          <FaExclamationTriangle className="--warnning" />
+        ) : (
+          <FaCheck className="--check" />
+        )}
       </div>
     );
   });

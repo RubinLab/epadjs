@@ -288,8 +288,10 @@ h5.add-subject__modal--label,
 .uploadWizard {
   padding: 0.5rem 0.5rem 1.2rem 1.2rem;
   background: #3a3f44;
-  width: -webkit-fill-available;
-  height: -webkit-fill-available;
+  min-width: -webkit-fill-available;
+  width: 50rem;
+  margin: auto;
+  height: 30rem;
 }
 .uploadWizard-header {
   display: flex;
@@ -328,15 +330,25 @@ h5.add-subject__modal--label,
   text-shadow: 1px 1px 1px #ccc;
 }
 
+.tagEditForm__el .--warnning {
+  font-size: 1.5rem;
+  color: orange;
+  margin-left: 0.2rem;
+  text-shadow: 1px 1px 1px #ccc;
+}
+
 .tagEditForm__el .--text {
   margin-right: 0.2rem;
   width: 25rem;
   padding: 0.2rem;
+  font-weight: normal;
+  color: #272b30;
 }
 
 .tagEditForm__el .--textFilled {
   color: #272b30;
   width: 25rem;
+  font-weight: bolder;
 }
 
 .react-tabs__tab-list {
