@@ -546,16 +546,18 @@ class DisplayView extends Component {
     });
     return markupTypes;
   };
-
   newImage = event => {
     const { activePort } = this.props;
     const tempData = this.state.data;
-    const newStack =
-      event.detail.enabledElement.toolStateManager.toolState.stack.data[
-        activePort
-      ];
-    tempData[activePort].stack = newStack;
+    const activeElement = cornerstone.getEnabledElements()[activePort];
+    const { data } = cornerstoneTools.getToolState(
+      activeElement.element,
+      "stack"
+    );
+    tempData[activePort].stack = data[0];
+    // set the state to preserve the imageId
     this.setState({ data: tempData });
+    // dispatch to write the newImageId to store
     this.props.dispatch(updateImageId(event));
   };
 
