@@ -1,4 +1,5 @@
 import React from "react";
+import { Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { getSubjects } from "../../services/subjectServices";
 import { getStudies } from "../../services/studyServices";
@@ -42,10 +43,10 @@ class SeriesBrowser extends React.Component {
   renderProjects = () => {
     const options = [];
     for (let project of this.state.projects) {
-      let description = this.clearCarets(project.description);
+      let name = this.clearCarets(project.name);
       options.push(
         <option value={project.id} key={project.id}>
-          {description}
+          {name}
         </option>
       );
     }
@@ -114,7 +115,16 @@ class SeriesBrowser extends React.Component {
       const { data: subjects } = await getSubjects(projectID);
       const subject = subjects.length ? subjects[0].subjectID : null;
       await this.setState({ subjects, subject });
-      if (subject) this.getStudies();
+      if (subject) {
+        this.getStudies();
+      } else {
+        this.setState({
+          studies: [],
+          study: null,
+          series: [],
+          seriesUID: null
+        });
+      }
     } catch (error) {
       let { message } = error.response.data;
       message = message ? message : error;
@@ -128,7 +138,11 @@ class SeriesBrowser extends React.Component {
       const { data: studies } = await getStudies(this.state.project, subjectID);
       const study = studies.length ? studies[0].studyUID : null;
       await this.setState({ studies, study });
-      if (study) this.getSeries();
+      if (study) {
+        this.getSeries();
+      } else {
+        this.setState({ series: [], seriesUID: null });
+      }
     } catch (error) {
       let { message } = error.response.data;
       message = message ? message : error;
@@ -142,7 +156,10 @@ class SeriesBrowser extends React.Component {
     try {
       const { data: series } = await getSeries(project, patienID, studyUID);
       const seriesUID = series.length ? series[0].seriesUID : null;
+      //   if (seriesUID) {
       this.setState({ series, seriesUID });
+      //   } else {
+      //   }
     } catch (error) {
       let { message } = error.response.data;
       message = message ? message : error;
@@ -152,48 +169,60 @@ class SeriesBrowser extends React.Component {
 
   render = () => {
     return (
-      <div className="seriesBrowser">
-        <div className="seriesBrowser--group">
-          <h5 className="seriesBrowser--label">Project:</h5>
-          <select
-            name="project"
-            className="seriesBrowser--select"
-            onChange={this.handleInput}
-          >
-            {this.renderProjects()}
-          </select>
-        </div>
-        <div className="seriesBrowser--group">
-          <h5 className="seriesBrowser--label">Patient:</h5>
-          <select
-            name="subject"
-            className="seriesBrowser--select"
-            onChange={this.handleInput}
-          >
-            {this.renderPatients()}
-          </select>
-        </div>
-        <div className="seriesBrowser--group">
-          <h5 className="seriesBrowser--label">Study:</h5>
-          <select
-            name="study"
-            className="seriesBrowser--select"
-            onChange={this.handleInput}
-          >
-            {this.renderStudies()}
-          </select>
-        </div>
-        <div className="seriesBrowser--group">
-          <h5 className="seriesBrowser--label">Series:</h5>
-          <select
-            name="seriesUID"
-            className="seriesBrowser--select"
-            onChange={this.handleInput}
-          >
-            {this.renderSeries()}
-          </select>
-        </div>
-      </div>
+      <Modal.Dialog dialogClassName="tagRequirements_modal">
+        <Modal.Header>
+          <Modal.Title>Define Required Fields</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="seriesBrowser">
+            <div className="seriesBrowser--group">
+              <h5 className="seriesBrowser--label">Project:</h5>
+              <select
+                name="project"
+                className="seriesBrowser--select"
+                onChange={this.handleInput}
+              >
+                {this.renderProjects()}
+              </select>
+            </div>
+            <div className="seriesBrowser--group">
+              <h5 className="seriesBrowser--label">Patient:</h5>
+              <select
+                name="subject"
+                className="seriesBrowser--select"
+                onChange={this.handleInput}
+              >
+                {this.renderPatients()}
+              </select>
+            </div>
+            <div className="seriesBrowser--group">
+              <h5 className="seriesBrowser--label">Study:</h5>
+              <select
+                name="study"
+                className="seriesBrowser--select"
+                onChange={this.handleInput}
+              >
+                {this.renderStudies()}
+              </select>
+            </div>
+            <div className="seriesBrowser--group">
+              <h5 className="seriesBrowser--label">Series:</h5>
+              <select
+                name="seriesUID"
+                className="seriesBrowser--select"
+                onChange={this.handleInput}
+              >
+                {this.renderSeries()}
+              </select>
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer className="modal-footer__buttons">
+          <button variant="secondary" onClick={this.props.onClose}>
+            OK
+          </button>
+        </Modal.Footer>
+      </Modal.Dialog>
     );
   };
 }

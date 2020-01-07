@@ -68,3 +68,142 @@ const newUID = () => {
   }
   return uid;
 };
+
+export const extractTreeData = (datasets, requirements) => {
+  const result = {};
+  if (datasets) {
+    datasets.forEach(data => {
+      const { PatientID, StudyInstanceUID, SeriesInstanceUID } = data;
+      const patient = result[PatientID];
+      if (patient) {
+        const study = patient.studies[StudyInstanceUID];
+        if (study) {
+          const series = study.series[SeriesInstanceUID];
+          if (series) {
+            series.imageCount += 1;
+            const missingTags = checkMissingTags(data, requirements);
+            if (missingTags.length > 0 && !series.tagRequired) {
+              series.tagRequired = missingTags;
+              series.data = data;
+            }
+          } else {
+            result[PatientID].studies[StudyInstanceUID].series[
+              SeriesInstanceUID
+            ] = createSeries(data, requirements);
+          }
+        } else {
+          result[PatientID].studies[StudyInstanceUID] = createStudy(
+            data,
+            requirements
+          );
+        }
+      } else {
+        result[PatientID] = createPatient(data, requirements);
+      }
+    });
+    // this.setState({ treeData: result });
+    return result;
+  }
+};
+
+const createSeries = (data, requirements) => {
+  const {
+    SeriesInstanceUID,
+    SeriesDescription,
+    PatientID,
+    StudyInstanceUID
+  } = data;
+  const result = {
+    seriesUID: SeriesInstanceUID,
+    seriesDesc: SeriesDescription,
+    patientID: PatientID,
+    studyUID: StudyInstanceUID,
+    imageCount: 1
+  };
+  const missingTags = checkMissingTags(data, requirements);
+  if (missingTags.length > 0) {
+    result.tagRequired = missingTags;
+    result.data = data;
+  }
+  return result;
+};
+
+const createStudy = (data, requirements) => {
+  const {
+    StudyInstanceUID,
+    StudyDescription,
+    SeriesInstanceUID,
+    SeriesDescription,
+    PatientID
+  } = data;
+  const result = {
+    studyUID: StudyInstanceUID,
+    studyDesc: StudyDescription,
+    series: {
+      [SeriesInstanceUID]: {
+        seriesUID: SeriesInstanceUID,
+        seriesDesc: SeriesDescription,
+        patientID: PatientID,
+        studyUID: StudyInstanceUID,
+        imageCount: 1
+      }
+    }
+  };
+  const series = result.series[SeriesInstanceUID];
+  const missingTags = checkMissingTags(data, requirements);
+  if (missingTags.length > 0) {
+    series.tagRequired = missingTags;
+    series.data = data;
+  }
+  return result;
+};
+
+const createPatient = (data, requirements) => {
+  const {
+    PatientID,
+    PatientName,
+    StudyInstanceUID,
+    StudyDescription,
+    SeriesInstanceUID,
+    SeriesDescription
+  } = data;
+
+  const result = {
+    patientID: PatientID,
+    patientName: PatientName,
+    studies: {
+      [StudyInstanceUID]: {
+        studyUID: StudyInstanceUID,
+        studyDesc: StudyDescription,
+        series: {
+          [SeriesInstanceUID]: {
+            seriesUID: SeriesInstanceUID,
+            seriesDesc: SeriesDescription,
+            patientID: PatientID,
+            studyUID: StudyInstanceUID,
+            imageCount: 1
+          }
+        }
+      }
+    }
+  };
+  const series = result.studies[StudyInstanceUID].series[SeriesInstanceUID];
+  const missingTags = checkMissingTags(data, requirements);
+  if (missingTags.length > 0) {
+    series.tagRequired = missingTags;
+    series.data = data;
+  }
+  return result;
+};
+
+const checkMissingTags = (dataset, requirementsObj) => {
+  const missingTags = [];
+  const requirements = Object.keys(requirementsObj);
+  requirements.forEach(req => {
+    const tag = req.substring(0, req.length - 2);
+    if (!dataset[tag]) {
+      missingTags.push(tag);
+    }
+  });
+  return missingTags;
+};

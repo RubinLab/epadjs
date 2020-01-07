@@ -6,7 +6,7 @@ import TagRequirements from "./tagRequirementList";
 import TagEditTree from "./tagEditTree";
 import "../searchView/searchView.css";
 import TagEditor from "./tagEditor";
-import { isEmpty } from "../../Utils/aid";
+import { isEmpty, extractTreeData } from "../../Utils/aid";
 import Modal from "../management/common/customModal";
 import {
   getImageIds,
@@ -64,6 +64,7 @@ class UploadWizard extends React.Component {
 
   handleReqSelect = async e => {
     const { name, checked } = e.target;
+    // const { rawData, requirements } = this.state;
     if (name === "RequireAll" && checked) {
       await this.setState({
         requirements: {
@@ -84,7 +85,12 @@ class UploadWizard extends React.Component {
         : (newRequirements[name] = true);
       await this.setState({ requirements: newRequirements });
     }
-    this.extractTreeData(this.state.rawData);
+    // console.log(requirements);
+    const treeData = extractTreeData(
+      this.state.rawData,
+      this.state.requirements
+    );
+    this.setState({ treeData });
   };
 
   // getDatasetsOf first images for list of series
@@ -119,142 +125,142 @@ class UploadWizard extends React.Component {
       });
   };
 
-  extractTreeData = datasets => {
-    const result = {};
-    if (datasets) {
-      datasets.forEach(data => {
-        const { PatientID, StudyInstanceUID, SeriesInstanceUID } = data;
-        const patient = result[PatientID];
-        if (patient) {
-          const study = patient.studies[StudyInstanceUID];
-          if (study) {
-            const series = study.series[SeriesInstanceUID];
-            if (series) {
-              series.imageCount += 1;
-              const missingTags = this.checkMissingTags(data);
-              if (missingTags.length > 0 && !series.tagRequired) {
-                series.tagRequired = missingTags;
-                series.data = data;
-              }
-            } else {
-              result[PatientID].studies[StudyInstanceUID].series[
-                SeriesInstanceUID
-              ] = this.createSeries(data);
-            }
-          } else {
-            result[PatientID].studies[StudyInstanceUID] = this.createStudy(
-              data
-            );
-          }
-        } else {
-          result[PatientID] = this.createPatient(data);
-        }
-      });
-      this.setState({ treeData: result });
-    }
-  };
+  // extractTreeData = datasets => {
+  //   const result = {};
+  //   if (datasets) {
+  //     datasets.forEach(data => {
+  //       const { PatientID, StudyInstanceUID, SeriesInstanceUID } = data;
+  //       const patient = result[PatientID];
+  //       if (patient) {
+  //         const study = patient.studies[StudyInstanceUID];
+  //         if (study) {
+  //           const series = study.series[SeriesInstanceUID];
+  //           if (series) {
+  //             series.imageCount += 1;
+  //             const missingTags = this.checkMissingTags(data);
+  //             if (missingTags.length > 0 && !series.tagRequired) {
+  //               series.tagRequired = missingTags;
+  //               series.data = data;
+  //             }
+  //           } else {
+  //             result[PatientID].studies[StudyInstanceUID].series[
+  //               SeriesInstanceUID
+  //             ] = this.createSeries(data);
+  //           }
+  //         } else {
+  //           result[PatientID].studies[StudyInstanceUID] = this.createStudy(
+  //             data
+  //           );
+  //         }
+  //       } else {
+  //         result[PatientID] = this.createPatient(data);
+  //       }
+  //     });
+  //     this.setState({ treeData: result });
+  //   }
+  // };
 
-  createSeries = data => {
-    const {
-      SeriesInstanceUID,
-      SeriesDescription,
-      PatientID,
-      StudyInstanceUID
-    } = data;
-    const result = {
-      seriesUID: SeriesInstanceUID,
-      seriesDesc: SeriesDescription,
-      patientID: PatientID,
-      studyUID: StudyInstanceUID,
-      imageCount: 1
-    };
-    const missingTags = this.checkMissingTags(data);
-    if (missingTags.length > 0) {
-      result.tagRequired = missingTags;
-      result.data = data;
-    }
-    return result;
-  };
+  // createSeries = data => {
+  //   const {
+  //     SeriesInstanceUID,
+  //     SeriesDescription,
+  //     PatientID,
+  //     StudyInstanceUID
+  //   } = data;
+  //   const result = {
+  //     seriesUID: SeriesInstanceUID,
+  //     seriesDesc: SeriesDescription,
+  //     patientID: PatientID,
+  //     studyUID: StudyInstanceUID,
+  //     imageCount: 1
+  //   };
+  //   const missingTags = this.checkMissingTags(data);
+  //   if (missingTags.length > 0) {
+  //     result.tagRequired = missingTags;
+  //     result.data = data;
+  //   }
+  //   return result;
+  // };
 
-  createStudy = data => {
-    const {
-      StudyInstanceUID,
-      StudyDescription,
-      SeriesInstanceUID,
-      SeriesDescription,
-      PatientID
-    } = data;
-    const result = {
-      studyUID: StudyInstanceUID,
-      studyDesc: StudyDescription,
-      series: {
-        [SeriesInstanceUID]: {
-          seriesUID: SeriesInstanceUID,
-          seriesDesc: SeriesDescription,
-          patientID: PatientID,
-          studyUID: StudyInstanceUID,
-          imageCount: 1
-        }
-      }
-    };
-    const series = result.series[SeriesInstanceUID];
-    const missingTags = this.checkMissingTags(data);
-    if (missingTags.length > 0) {
-      series.tagRequired = missingTags;
-      series.data = data;
-    }
-    return result;
-  };
+  // createStudy = data => {
+  //   const {
+  //     StudyInstanceUID,
+  //     StudyDescription,
+  //     SeriesInstanceUID,
+  //     SeriesDescription,
+  //     PatientID
+  //   } = data;
+  //   const result = {
+  //     studyUID: StudyInstanceUID,
+  //     studyDesc: StudyDescription,
+  //     series: {
+  //       [SeriesInstanceUID]: {
+  //         seriesUID: SeriesInstanceUID,
+  //         seriesDesc: SeriesDescription,
+  //         patientID: PatientID,
+  //         studyUID: StudyInstanceUID,
+  //         imageCount: 1
+  //       }
+  //     }
+  //   };
+  //   const series = result.series[SeriesInstanceUID];
+  //   const missingTags = this.checkMissingTags(data);
+  //   if (missingTags.length > 0) {
+  //     series.tagRequired = missingTags;
+  //     series.data = data;
+  //   }
+  //   return result;
+  // };
 
-  createPatient = data => {
-    const {
-      PatientID,
-      PatientName,
-      StudyInstanceUID,
-      StudyDescription,
-      SeriesInstanceUID,
-      SeriesDescription
-    } = data;
+  // createPatient = data => {
+  //   const {
+  //     PatientID,
+  //     PatientName,
+  //     StudyInstanceUID,
+  //     StudyDescription,
+  //     SeriesInstanceUID,
+  //     SeriesDescription
+  //   } = data;
 
-    const result = {
-      patientID: PatientID,
-      patientName: PatientName,
-      studies: {
-        [StudyInstanceUID]: {
-          studyUID: StudyInstanceUID,
-          studyDesc: StudyDescription,
-          series: {
-            [SeriesInstanceUID]: {
-              seriesUID: SeriesInstanceUID,
-              seriesDesc: SeriesDescription,
-              patientID: PatientID,
-              studyUID: StudyInstanceUID,
-              imageCount: 1
-            }
-          }
-        }
-      }
-    };
-    const series = result.studies[StudyInstanceUID].series[SeriesInstanceUID];
-    const missingTags = this.checkMissingTags(data);
-    if (missingTags.length > 0) {
-      series.tagRequired = missingTags;
-      series.data = data;
-    }
-    return result;
-  };
+  //   const result = {
+  //     patientID: PatientID,
+  //     patientName: PatientName,
+  //     studies: {
+  //       [StudyInstanceUID]: {
+  //         studyUID: StudyInstanceUID,
+  //         studyDesc: StudyDescription,
+  //         series: {
+  //           [SeriesInstanceUID]: {
+  //             seriesUID: SeriesInstanceUID,
+  //             seriesDesc: SeriesDescription,
+  //             patientID: PatientID,
+  //             studyUID: StudyInstanceUID,
+  //             imageCount: 1
+  //           }
+  //         }
+  //       }
+  //     }
+  //   };
+  //   const series = result.studies[StudyInstanceUID].series[SeriesInstanceUID];
+  //   const missingTags = this.checkMissingTags(data);
+  //   if (missingTags.length > 0) {
+  //     series.tagRequired = missingTags;
+  //     series.data = data;
+  //   }
+  //   return result;
+  // };
 
-  checkMissingTags = dataset => {
-    const missingTags = [];
-    const requirements = Object.keys(this.state.requirements);
-    requirements.forEach(req => {
-      const tag = req.substring(0, req.length - 2);
-      if (!dataset[tag]) {
-        missingTags.push(tag);
-      }
-    });
-    return missingTags;
-  };
+  // checkMissingTags = dataset => {
+  //   const missingTags = [];
+  //   const requirements = Object.keys(this.state.requirements);
+  //   requirements.forEach(req => {
+  //     const tag = req.substring(0, req.length - 2);
+  //     if (!dataset[tag]) {
+  //       missingTags.push(tag);
+  //     }
+  //   });
+  //   return missingTags;
+  // };
 
   getDataset = arrayBuffer => {
     try {
