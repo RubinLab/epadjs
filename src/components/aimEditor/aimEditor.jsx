@@ -94,6 +94,7 @@ class AimEditor extends Component {
   };
 
   save = () => {
+    console.log("Cornerstonetools", cornerstoneTools);
     // Logic behind relies on the order of the data in array
     const answers = this.semanticAnswers.saveAim();
     if (this.props.updatedAimId) this.updateAim(answers);
@@ -347,6 +348,10 @@ class AimEditor extends Component {
             circles.map(circle => {
               if (!circle.aimId || circle.aimId === updatedAimId) {
                 //dont save the same markup to different aims
+                const enElem = cornerstone.getEnabledElements()[0].element;
+
+                cornerstoneTools.removeToolState(enElem, "CircleRoi", circle);
+
                 this.storeMarkupsToBeSaved(
                   imageId,
                   {

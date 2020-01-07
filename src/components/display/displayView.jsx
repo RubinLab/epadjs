@@ -113,7 +113,10 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
+    console.log("Cs tools in dv CDM", cornerstoneTools);
+    console.log("CDM");
     this.getViewports();
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
     this.getData();
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
@@ -127,6 +130,7 @@ class DisplayView extends Component {
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
+      console.log("CDU");
       this.getData();
     }
   }
@@ -343,7 +347,7 @@ class DisplayView extends Component {
         if (markupType === "DicomSegmentationEntity")
           this.getSegmentationData(seriesUid, studyUid, aimUid, i);
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
-        this.renderMarkup(key, value, color);
+        this.renderMarkup(key, value, color, seriesUid, studyUid);
       });
     });
   };
@@ -405,20 +409,20 @@ class DisplayView extends Component {
     return this.props.aimList[seriesUid][aimUid].color.button.background;
   };
 
-  renderMarkup = (imageId, markup, color) => {
+  renderMarkup = (imageId, markup, color, seriesUid, studyUid) => {
     const type = markup.markupType;
     switch (type) {
       case "TwoDimensionPolyline":
-        this.renderPolygon(imageId, markup, color);
+        this.renderPolygon(imageId, markup, color, seriesUid, studyUid);
         break;
       case "TwoDimensionMultiPoint":
-        this.renderLine(imageId, markup, color);
+        this.renderLine(imageId, markup, color, seriesUid, studyUid);
         break;
       case "TwoDimensionCircle":
-        this.renderCircle(imageId, markup, color);
+        this.renderCircle(imageId, markup, color, seriesUid, studyUid);
         break;
       case "TwoDimensionPoint":
-        this.renderPoint(imageId, markup, color);
+        this.renderPoint(imageId, markup, color, seriesUid, studyUid);
         break;
       default:
         return;
@@ -432,11 +436,8 @@ class DisplayView extends Component {
       toolState[imageId] = { ...toolState[imageId], [tool]: { data: [] } };
   };
 
-  renderLine = (imageId, markup, color) => {
-    const imgId = getWadoImagePath(
-      this.props.series[this.props.activePort],
-      imageId
-    );
+  renderLine = (imageId, markup, color, seriesUid, studyUid) => {
+    const imgId = getWadoImagePath(seriesUid, studyUid, imageId);
     const data = JSON.parse(JSON.stringify(line));
     data.color = color;
     data.aimId = markup.aimUid;
@@ -456,11 +457,8 @@ class DisplayView extends Component {
     data.handles.end.y = points[1].y.value;
   };
 
-  renderPolygon = (imageId, markup, color) => {
-    const imgId = getWadoImagePath(
-      this.props.series[this.props.activePort],
-      imageId
-    );
+  renderPolygon = (imageId, markup, color, seriesUid, studyUid) => {
+    const imgId = getWadoImagePath(seriesUid, studyUid, imageId);
     const data = JSON.parse(JSON.stringify(freehand));
     data.color = color;
     data.aimId = markup.aimUid;
@@ -491,11 +489,8 @@ class DisplayView extends Component {
     data.handles.points = [...freehandPoints];
   };
 
-  renderPoint = (imageId, markup, color) => {
-    const imgId = getWadoImagePath(
-      this.props.series[this.props.activePort],
-      imageId
-    );
+  renderPoint = (imageId, markup, color, seriesUid, studyUid) => {
+    const imgId = getWadoImagePath(seriesUid, studyUid, imageId);
     const data = JSON.parse(JSON.stringify(probe));
     data.color = color;
     data.aimId = markup.aimUid;
@@ -509,9 +504,8 @@ class DisplayView extends Component {
     );
   };
 
-  renderCircle = (imageId, markup, color) => {
-    const { series, activePort } = this.props;
-    const imgId = getWadoImagePath(series[activePort], imageId);
+  renderCircle = (imageId, markup, color, seriesUid, studyUid) => {
+    const imgId = getWadoImagePath(seriesUid, studyUid, imageId);
     const data = JSON.parse(JSON.stringify(circle));
     data.color = color;
     data.aimId = markup.aimUid;
