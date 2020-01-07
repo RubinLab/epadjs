@@ -40,3 +40,6 @@ export function saveSubject(projectID, subjectAbr, subjectName) {
       subjectName
   );
 }
+export function getAllSubjects() {
+  return http.get(apiUrl + "/subjects");
+}

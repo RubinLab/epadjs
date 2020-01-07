@@ -4,7 +4,6 @@ import ReactTable from "react-table";
 import { FaCheck, FaTrashAlt } from "react-icons/fa";
 import { getAllTemplates } from "../../../services/templateServices";
 
-// accept only integers for aims field
 class RequirementForm extends React.Component {
   state = {
     templates: {},
