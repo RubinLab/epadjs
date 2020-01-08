@@ -1,7 +1,0 @@
-{
-  "isLite": true,
-  "wadoUrl": "wadouri:https://epad-dev4.stanford.edu:8090/pacs",
-  "clientKey": "Swa9Ci6Hr7n8eb6JqlEZpaujC7ZQq1fM",
-  "apiUrl": "https://epad-dev4.stanford.edu:8080",
-  "apiUrlV1": ""
-}

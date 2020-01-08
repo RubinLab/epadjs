@@ -10,3 +10,19 @@ export function generateUid() {
   }
   return uid;
 }
+
+export function persistExpandView(expanded, data, newData, id) {
+  const expandMap = {};
+  let counter = 0;
+  newData.forEach((el, i) => {
+    if (counter < data.length) {
+      if (el[id] === data[counter][id]) {
+        expandMap[i] = expanded[counter];
+        counter += 1;
+      } else {
+        expandMap[i] = false;
+      }
+    }
+  });
+  return expandMap;
+}

@@ -12,7 +12,7 @@ import {
 import { FiMinimize2 } from "react-icons/fi";
 import ReactTooltip from "react-tooltip";
 import { BarLoader } from "react-spinners";
-import { isLite } from "../../config";
+const mode = sessionStorage.getItem("mode");
 
 const toolBar = props => {
   return (
@@ -92,62 +92,62 @@ const toolBar = props => {
           </ReactTooltip>
         </div>
       </div>
-      {!isLite && (
-        <div className="searchView-toolbar__group">
-          <div className="searchView-toolbar__icon" onClick={props.onExpand}>
-            <div>
-              <FaLevelDownAlt
-                style={{ fontSize: "1.2rem" }}
-                data-tip
-                data-for="forward-icon"
-              />
-            </div>
-            <ReactTooltip
-              id="forward-icon"
-              place="bottom"
-              type="info"
-              delayShow={1500}
-            >
-              <span>Expand to Next Level</span>
-            </ReactTooltip>
-          </div>
-          <div className="searchView-toolbar__icon" onClick={props.onShrink}>
-            <div>
-              <FaLevelUpAlt
-                style={{ fontSize: "1.2rem" }}
-                data-tip
-                data-for="back-icon"
-              />
-            </div>
-            <ReactTooltip
-              id="back-icon"
-              place="bottom"
-              type="info"
-              delayShow={1500}
-            >
-              <span>Close One Level</span>
-            </ReactTooltip>
-          </div>
-          <div className="searchView-toolbar__icon" onClick={props.onCloseAll}>
-            <div>
-              <FiMinimize2
-                style={{ fontSize: "1.5rem", strokeWidth: "3px" }}
-                data-tip
-                data-for="minimize-icon"
-              />
-            </div>
-            <ReactTooltip
-              id="minimize-icon"
-              place="bottom"
-              type="info"
-              delayShow={1500}
-            >
-              <span>Close All Levels</span>
-            </ReactTooltip>
-          </div>
+      {/* {mode !== "lite" && ( */}
+      {/* <div className="searchView-toolbar__group"> */}
+      <div className="searchView-toolbar__icon" onClick={props.onExpand}>
+        <div>
+          <FaLevelDownAlt
+            style={{ fontSize: "1.2rem" }}
+            data-tip
+            data-for="forward-icon"
+          />
         </div>
-      )}
-      {props.project && !isLite && (
+        <ReactTooltip
+          id="forward-icon"
+          place="bottom"
+          type="info"
+          delayShow={1500}
+        >
+          <span>Expand to Next Level</span>
+        </ReactTooltip>
+      </div>
+      <div className="searchView-toolbar__icon" onClick={props.onShrink}>
+        <div>
+          <FaLevelUpAlt
+            style={{ fontSize: "1.2rem" }}
+            data-tip
+            data-for="back-icon"
+          />
+        </div>
+        <ReactTooltip
+          id="back-icon"
+          place="bottom"
+          type="info"
+          delayShow={1500}
+        >
+          <span>Close One Level</span>
+        </ReactTooltip>
+      </div>
+      <div className="searchView-toolbar__icon" onClick={props.onCloseAll}>
+        <div>
+          <FiMinimize2
+            style={{ fontSize: "1.5rem", strokeWidth: "3px" }}
+            data-tip
+            data-for="minimize-icon"
+          />
+        </div>
+        <ReactTooltip
+          id="minimize-icon"
+          place="bottom"
+          type="info"
+          delayShow={1500}
+        >
+          <span>Close All Levels</span>
+        </ReactTooltip>
+      </div>
+      {/* </div>
+      )} */}
+      {props.project && mode !== "lite" && (
         <div className="searchView-toolbar__group">
           <div
             className="searchView-toolbar__icon new-icon"

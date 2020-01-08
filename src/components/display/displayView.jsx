@@ -7,7 +7,6 @@ import {
   getSegmentation
 } from "../../services/seriesServices";
 import { connect } from "react-redux";
-import { wadoUrl, isLite } from "../../config.json";
 import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
 import "./flex.css";
@@ -23,6 +22,8 @@ import { probe } from "./Probe";
 import { circle } from "./Circle";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
+const mode = sessionStorage.getItem("mode");
+const wadoUrl = sessionStorage.getItem("wadoUrl");
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: [1] }, mode: "active" },
@@ -185,11 +186,12 @@ class DisplayView extends Component {
       const baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
-          let multiFrameUrl = !isLite ? baseUrl + "/frames/" + i : baseUrl;
+          let multiFrameUrl =
+            mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           cornerstoneImageIds.push(multiFrameUrl);
         }
       } else {
-        let singleFrameUrl = !isLite ? baseUrl : baseUrl;
+        let singleFrameUrl = mode !== "lite" ? baseUrl : baseUrl;
         cornerstoneImageIds.push(singleFrameUrl);
       }
     });

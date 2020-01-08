@@ -2,10 +2,10 @@ import React from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
-import { isLite } from "./../../config.json";
 import { ToastContainer, toast } from "react-toastify";
 import { getProjects, uploadFile } from "../../services/projectServices";
 import { getCurrentUser } from "../../services/authService";
+const mode = sessionStorage.getItem("mode");
 
 class UploadModal extends React.Component {
   state = {
@@ -22,7 +22,7 @@ class UploadModal extends React.Component {
   };
 
   componentDidMount = async () => {
-    if (!isLite) {
+    if (mode !== "lite") {
       const { data: projects } = await getProjects();
       this.setState({ projects });
     }
@@ -142,7 +142,7 @@ class UploadModal extends React.Component {
           <Modal.Title className="upload__header">Upload</Modal.Title>
         </Modal.Header>
         <Modal.Body className="upload-container">
-          {!isLite && (
+          {mode !== "lite" && (
             <div className="upload-select__container">
               <span>Projects: </span>
               <select
@@ -163,7 +163,7 @@ class UploadModal extends React.Component {
               onChange={this.onSelectFile}
             />
           </div>
-          {!isLite && (
+          {mode !== "lite" && (
             <div className="uploadDetails-container">
               <h6 className="upload-note">
                 *Please note that if you upload a project that you downloaded

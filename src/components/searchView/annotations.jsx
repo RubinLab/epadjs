@@ -20,6 +20,7 @@ import {
   jumpToAim,
   showAnnotationDock
 } from "../annotationsList/action";
+import { persistExpandView } from "../../Utils/aid";
 import "react-table/react-table.css";
 
 // const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -68,7 +69,13 @@ class Annotations extends Component {
   async componentDidUpdate(prevProps) {
     if (this.props.update !== prevProps.update) {
       const { data } = await getAnnotations(this.series);
-      this.setState({ data });
+      const expanded = persistExpandView(
+        this.state.expanded,
+        this.state.data,
+        data,
+        "aimID"
+      );
+      this.setState({ data, expanded });
     }
   }
 
@@ -105,7 +112,7 @@ class Annotations extends Component {
           let id = "aimName-tool" + row.original.aimID;
           return (
             <>
-              <div data-tip data-for={id}>
+              <div data-tip data-for={id} style={{ whiteSpace: "pre-wrap" }}>
                 {desc}
               </div>
               <ReactTooltip

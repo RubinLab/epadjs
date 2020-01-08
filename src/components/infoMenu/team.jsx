@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "react-bootstrap";
-import { isLite } from "../../config.json";
+const mode = sessionStorage.getItem("mode");
 
 // import "../menuStyle.css";
 
@@ -17,7 +17,8 @@ const team = props => {
             mechanisms and sources.
           </p>
           <p className="info-team__desc">
-            Major contributors for the ePAD {isLite ? "Lite Beta " : "4.x "}
+            Major contributors for the ePAD{" "}
+            {mode === "lite" ? "Lite Beta " : "4.x "}
             release include (in alphabetic order):
           </p>
           <ul>

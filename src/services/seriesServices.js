@@ -1,8 +1,10 @@
 import http from "./httpService";
-import { isLite, apiUrl, wadoUrl } from "../config.json";
+const apiUrl = sessionStorage.getItem("apiUrl");
+const mode = sessionStorage.getItem("mode");
+const wadoUrl = sessionStorage.getItem("wadoUrl");
 
 export function getSeries(projectId, subjectId, studyId) {
-  if (isLite)
+  if (mode === "lite")
     return http.get(
       apiUrl +
         "/projects/lite/subjects/" +
@@ -24,7 +26,7 @@ export function getSeries(projectId, subjectId, studyId) {
     );
 }
 export function getImageIds(series) {
-  if (isLite)
+  if (mode === "lite")
     return http.get(
       apiUrl +
         "/projects/lite/subjects/" +
@@ -51,8 +53,8 @@ export function getImageIds(series) {
 }
 
 //  seems like this doesn't belong to here but olny services know details about paths&server side
-export function getWadoImagePath(seriesUid, studyUid, imageId) {
-  if (isLite) {
+export function getWadoImagePath(series, imageId) {
+  if (mode === "lite") {
     return (
       wadoUrl +
       "/studies/" +
@@ -97,7 +99,7 @@ export function getSegmentation(series, imageId) {
 }
 
 export function deleteSeries(series) {
-  if (isLite) {
+  if (mode === "lite") {
     const url =
       apiUrl +
       "/projects/lite/subjects/" +

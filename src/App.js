@@ -19,12 +19,11 @@ import ProtectedRoute from "./components/common/protectedRoute";
 import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
 import InfoMenu from "./components/infoMenu";
-import UserMenu from "./components/userProfileMenu";
+import UserMenu from "./components/userProfileMenu.jsx";
 import AnnotationList from "./components/annotationsList";
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
-import { isLite, apiUrl } from "./config.json";
 import {
   clearAimId,
   getNotificationsData
@@ -43,12 +42,12 @@ class App extends Component {
       keycloak: null,
       authenticated: false,
       openInfo: false,
-      openMenu: false,
       openUser: false,
       projectMap: {},
       viewType: "search",
       lastEventId: null,
-      showLog: false
+      showLog: false,
+      admin: false
     };
   }
 
@@ -72,45 +71,56 @@ class App extends Component {
   };
 
   handleMngMenu = () => {
-    if (this.state.openMenu) {
-      this.setState({ openMng: true, openInfo: false, openUser: false });
-    }
+    this.setState(state => ({
+      openInfo: false,
+      openMng: !state.openMng,
+      openUser: false
+    }));
   };
 
   handleInfoMenu = () => {
-    if (this.state.openMenu) {
-      this.setState({ openInfo: true, openMng: false, openUser: false });
-    }
+    this.setState(state => ({
+      openInfo: !state.openInfo,
+      openMng: false,
+      openUser: false
+    }));
   };
 
   handleUserProfileMenu = () => {
-    if (this.state.openMenu) {
-      this.setState({ openUser: true, openInfo: false, openMng: false });
-    }
-  };
-  handleOpenMenu = e => {
-    if (!this.state.openMenu) {
-      this.setState({ openMenu: true });
-      if (e.target.dataset.name === "mng") {
-        this.setState({ openMng: true });
-      } else if (e.target.dataset.name === "info") {
-        this.setState({ openInfo: true });
-      } else if (e.target.dataset.name === "user") {
-        this.setState({ openUser: true });
-      }
-    } else {
-      this.setState({ openMenu: false });
-      this.setState({ openMng: false, openInfo: false, openUser: false });
-    }
+    this.setState(state => ({
+      openInfo: false,
+      openMng: false,
+      openUser: !state.openUser
+    }));
   };
 
   getProjectMap = projectMap => {
     this.setState({ projectMap });
   };
   async componentDidMount() {
-    // when comp mount check if the user is set already. If is set then set state
-    // if (isLite) {
+    fetch("/config.json")
+      .then(async res => {
+        const data = await res.json();
+        const { mode, apiUrl, wadoUrl } = data;
+        sessionStorage.setItem("mode", mode);
+        sessionStorage.setItem("apiUrl", apiUrl);
+        sessionStorage.setItem("wadoUrl", wadoUrl);
+        this.setState({ mode, apiUrl, wadoUrl });
+        this.completeAutorization(apiUrl);
+      })
+      .catch(err => {
+        console.log(err);
+      });
 
+    fetch("/keycloak.json")
+      .then(async res => {
+        const data = await res.json();
+        const auth = data["auth-server-url"];
+        sessionStorage.setItem("auth", auth);
+      })
+      .catch(err => {
+        console.log(err);
+      });
     //get notifications from sessionStorage and setState
     let notifications = sessionStorage.getItem("notifications");
     if (!notifications) {
@@ -120,9 +130,10 @@ class App extends Component {
       notifications = JSON.parse(notifications);
       this.setState({ notifications });
     }
+  }
 
+  completeAutorization = apiUrl => {
     const keycloak = Keycloak("/keycloak.json");
-    let user;
     let keycloakInit = new Promise((resolve, reject) => {
       keycloak.init({ onLoad: "login-required" }).then(authenticated => {
         // this.setState({ keycloak: keycloak, authenticated: authenticated });
@@ -162,11 +173,13 @@ class App extends Component {
         let userData;
         try {
           userData = await getUser(username);
+          this.setState({ admin: userData.data.admin });
         } catch (err) {
+          // console.log(err);
           createUser(username, given_name, family_name, email)
             .then(async () => {
               {
-                userData = await getUser(email);
+                console.log(`User ${username} created!`);
               }
             })
             .catch(error => console.log(error));
@@ -186,26 +199,15 @@ class App extends Component {
       .catch(err2 => {
         console.log(err2);
       });
-    // } else {
-    //   try {
-    //     const username = sessionStorage.getItem("username");
-    //     if (username) {
-    //       const { data: user } = await getUser(username);
-    //       this.setState({ user, authenticated: true });
-    //     }
-    //   } catch (ex) {}
-    // }
-    // window.addEventListener("keydown", this.closeMenu, true);
-    document.addEventListener("mousedown", this.handleClickOutside);
-  }
-
+  };
   getMessageFromEventSrc = res => {
     const parsedRes = JSON.parse(res.data);
     const { lastEventId } = res;
     const { params, createdtime, projectID, error } = parsedRes.notification;
-    const upload = parsedRes.notification.function.startsWith("Upload");
+    const action = parsedRes.notification.function;
+    const complete = action.startsWith("Upload") || action.startsWith("Delete");
     const message = params;
-    if (upload)
+    if (complete)
       this.props.dispatch(getNotificationsData(projectID, lastEventId));
     let time = new Date(createdtime).toString();
     const GMTIndex = time.indexOf(" G");
@@ -215,7 +217,7 @@ class App extends Component {
       message,
       time,
       seen: false,
-      action: parsedRes.notification.function,
+      action,
       error
     });
     this.setState({ notifications });
@@ -224,21 +226,10 @@ class App extends Component {
   };
 
   componentWillUnmount = () => {
-    document.removeEventListener("mousedown", this.handleClickOutside);
     this.eventSource.removeEventListener(
       "message",
       this.getMessageFromEventSrc
     );
-  };
-
-  handleClickOutside = event => {
-    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
-      this.handleOpenMenu(event);
-    }
-  };
-
-  setWrapperRef = node => {
-    this.wrapperRef = node;
   };
 
   onLogout = e => {
@@ -274,7 +265,7 @@ class App extends Component {
   };
 
   render() {
-    const { notifications } = this.state;
+    const { notifications, mode } = this.state;
     let noOfUnseen;
     if (notifications) {
       noOfUnseen = notifications.reduce((all, item) => {
@@ -292,39 +283,36 @@ class App extends Component {
           openInfoMenu={this.handleInfoMenu}
           openUser={this.handleUserProfileMenu}
           logout={this.onLogout}
-          openMenu={this.handleOpenMenu}
           onSearchViewClick={this.switchSearhView}
           onSwitchView={this.switchView}
           viewType={this.state.viewType}
           notificationWarning={noOfUnseen}
         />
-        {this.state.openMng && this.state.openMenu && (
-          <div ref={this.setWrapperRef}>
-            <Management
-              closeMenu={this.closeMenu}
-              projectMap={this.state.projectMap}
-            />
-          </div>
+        {this.state.openMng && (
+          <Management
+            closeMenu={this.closeMenu}
+            projectMap={this.state.projectMap}
+          />
         )}
-        {this.state.openInfo && this.state.openMenu && (
-          <div ref={this.setWrapperRef}>
-            <InfoMenu
-              closeMenu={this.closeMenu}
-              user={this.state.user}
-              notifications={notifications}
-              notificationWarning={noOfUnseen}
-            />
-          </div>
+        {this.state.openInfo && (
+          <InfoMenu
+            closeMenu={this.closeMenu}
+            user={this.state.user}
+            notifications={notifications}
+            notificationWarning={noOfUnseen}
+          />
         )}
-        {!isLite && this.state.openUser && this.state.openMenu && (
-          <div ref={this.setWrapperRef}>
-            <UserMenu closeMenu={this.closeMenu} user={this.state.user} />
-          </div>
+        {this.state.openUser && (
+          <UserMenu
+            closeMenu={this.closeMenu}
+            user={this.state.user}
+            admin={this.state.admin}
+          />
         )}
-        {!this.state.authenticated && !isLite && (
+        {!this.state.authenticated && mode !== "lite" && (
           <Route path="/login" component={LoginForm} />
         )}
-        {this.state.authenticated && !isLite && (
+        {this.state.authenticated && mode !== "lite" && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
             <Sidebar onData={this.getProjectMap} type={this.state.viewType}>
               <Switch className="splitted-mainview">
@@ -358,7 +346,7 @@ class App extends Component {
             </Sidebar>
           </div>
         )}
-        {this.state.authenticated && isLite && (
+        {this.state.authenticated && mode === "lite" && (
           <Switch>
             <Route path="/logout" component={Logout} />
             <ProtectedRoute path="/display" component={DisplayView} />

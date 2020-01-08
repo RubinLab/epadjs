@@ -36,7 +36,6 @@ import { MAX_PORT } from "../../constants";
 import DownloadSelection from "./annotationDownloadModal";
 import "./searchView.css";
 import UploadModal from "./uploadModal";
-import { isLite } from "../../config";
 import { getSubjects } from "../../services/subjectServices";
 import DeleteAlert from "./deleteConfirmationModal";
 import DownloadWarning from "./downloadWarningModal";
@@ -46,6 +45,7 @@ import StudyCreationModal from "./studyCreationModal.jsx";
 import SeriesCreationModal from "./seriesCreationModal.jsx";
 import Worklists from "./addWorklist";
 import AnnotationCreationModal from "./annotationCreationModal.jsx";
+const mode = sessionStorage.getItem("mode");
 
 class SearchView extends Component {
   constructor(props) {
@@ -81,7 +81,7 @@ class SearchView extends Component {
   componentDidUpdate = async prevProps => {
     const { uploadedPid, lastEventId } = this.props;
     const { pid } = this.props.match.params;
-    const samePid = !isLite && uploadedPid === pid;
+    const samePid = mode !== "lite" && uploadedPid === pid;
 
     let subjects;
     if (prevProps.match.params.pid !== this.props.match.params.pid) {
@@ -89,7 +89,7 @@ class SearchView extends Component {
       this.setState({ numOfsubjects: subjects.length, subjects });
     }
 
-    if ((samePid || isLite) && prevProps.lastEventId !== lastEventId) {
+    if ((samePid || mode === "lite") && prevProps.lastEventId !== lastEventId) {
       this.setState(state => ({ update: state.update + 1 }));
     }
   };
@@ -126,12 +126,19 @@ class SearchView extends Component {
   handleCloseAll = () => {
     this.setState({ expandLevel: 0 });
   };
+
+  keepExpandedPatientsInOrder = newSubjects => {
+    console.log(this.state.expanded);
+    this.updateUploadStatus();
+    // get the patient ID of the maps, and the level they are open
+    // get the new array of subjects and iterate over it and form the new expanded object
+  };
   updateUploadStatus = async => {
     this.setState(state => {
       return { uploading: !state.uploading, update: state.update + 1 };
     });
     this.updateSubjectCount();
-    //update patients after upload
+    // update patients after upload
     // filter the patients from openSeries with the first index they appear
     const patients = this.props.openSeries.reduce((all, item, index) => {
       if (!all[item.patientID]) {
@@ -560,7 +567,7 @@ class SearchView extends Component {
       .catch(err => {
         this.setState({ downloading: false });
         if (err.response.status === 503) {
-          isLite
+          mode === "lite"
             ? toast.error("There is no aim file to download!", {
                 autoClose: false
               })

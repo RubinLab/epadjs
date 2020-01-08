@@ -17,13 +17,11 @@ import {
   clearSelection,
   addToGrid,
   getWholeData,
-  updatePatient,
-  showAnnotationDock
+  updatePatient
 } from "../annotationsList/action";
 import { MAX_PORT, formatDates } from "../../constants";
-
 import AlertGridFull from "./alertGridFull";
-import { isLite } from "../../config.json";
+import { persistExpandView } from "../../Utils/aid";
 import "react-table/react-table.css";
 
 // const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -107,7 +105,13 @@ class Series extends Component {
         this.props.subjectId,
         this.props.studyId
       );
-      this.setState({ data });
+      const expanded = persistExpandView(
+        this.state.expanded,
+        this.state.data,
+        data,
+        "seriesUID"
+      );
+      this.setState({ data, expanded });
     }
     if (this.props.expandLevel != prevProps.expandLevel) {
       this.props.expandLevel >= 3
@@ -163,7 +167,7 @@ class Series extends Component {
           let id = "desc" + row.original.seriesUID;
           return (
             <>
-              <div data-tip data-for={id}>
+              <div data-tip data-for={id} style={{ whiteSpace: "pre-wrap" }}>
                 {desc}
               </div>{" "}
               <ReactTooltip

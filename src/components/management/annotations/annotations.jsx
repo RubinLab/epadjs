@@ -11,22 +11,19 @@ import {
 } from "../../../services/annotationServices";
 import { getProjects } from "../../../services/projectServices";
 import matchSorter from "match-sorter";
-import { isLite } from "../../../config.json";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
 import DownloadModal from "../../searchView/annotationDownloadModal";
 import { MAX_PORT } from "../../../constants";
-
 import {
   changeActivePort,
   jumpToAim,
   alertViewPortFull,
   addToGrid,
   getSingleSerie,
-  getWholeData,
-  updatePatient,
-  clearSelection
+  getWholeData
 } from "../../annotationsList/action";
+const mode = sessionStorage.getItem("mode");
 
 const messages = {
   deleteSelected: "Delete selected annotations? This cannot be undone.",
@@ -51,7 +48,7 @@ class Annotations extends React.Component {
   };
 
   componentDidMount = async () => {
-    if (!isLite) {
+    if (mode !== "lite") {
       const { data: projectList } = await getProjects();
       this.getAnnotationsData(projectList[0].id);
       this.setState({ projectList, projectID: projectList[0].id });
@@ -62,7 +59,7 @@ class Annotations extends React.Component {
 
   getAnnotationsData = async projectID => {
     const { data: annotations } = await getSummaryAnnotations(projectID);
-    if (isLite) {
+    if (mode === "lite") {
       for (let ann of annotations) {
         ann.date = ann.date + "";
         ann.studyDate = ann.studyDate + "";
@@ -90,7 +87,7 @@ class Annotations extends React.Component {
 
   handleProjectSelect = e => {
     this.setState({ projectID: e.target.value });
-    if (!isLite) {
+    if (mode !== "lite") {
       this.getAnnotationsData(e.target.value);
       this.setState({ filteredData: null });
     }
@@ -397,14 +394,12 @@ class Annotations extends React.Component {
         Header: "Name",
         accessor: "name",
         sortable: true,
-        resizable: true,
-        minResizeWidth: 50
+        resizable: true
       },
       {
         Header: "Open",
         sortable: false,
         resizable: false,
-        width: 50,
         style: { display: "flex", justifyContent: "center" },
         Cell: original => {
           return (
@@ -421,7 +416,6 @@ class Annotations extends React.Component {
         accessor: "patientName",
         sortable: true,
         resizable: true,
-        minResizeWidth: 20,
         Cell: original => {
           return (
             <div>{this.clearCarets(original.row.checkbox.patientName)}</div>
@@ -433,7 +427,6 @@ class Annotations extends React.Component {
         accessor: "comment",
         sortable: true,
         resizable: true,
-        minResizeWidth: 20,
         className: "wrapped",
         style: { whiteSpace: "normal" },
         Header: () => {
@@ -448,16 +441,12 @@ class Annotations extends React.Component {
       {
         Header: "Template",
         accessor: "template",
-        minResizeWidth: 20,
-        width: 120,
         resizable: true,
         sortable: true
       },
       {
         Header: "User",
         accessor: "userName",
-        minResizeWidth: 20,
-        width: 50,
         style: { whiteSpace: "normal" },
         resizable: true,
         sortable: true
@@ -465,8 +454,6 @@ class Annotations extends React.Component {
       {
         Header: "Study",
         sortable: true,
-        // resizable: true,
-        // minResizeWidth: 20,
         width: 75,
         accessor: "studyDate",
         filterMethod: (filter, rows) =>
@@ -481,8 +468,6 @@ class Annotations extends React.Component {
         Header: "Created",
         sortable: true,
         // resizable: true,
-        // minResizeWidth: 20,
-        width: 75,
         accessor: "date",
         filterMethod: (filter, rows) =>
           matchSorter(rows, filter.value, { keys: ["date"] }),
@@ -503,8 +488,6 @@ class Annotations extends React.Component {
         },
         sortable: true,
         // resizable: true,
-        // minResizeWidth: 20,
-        width: 80,
         accessor: "date",
         filterMethod: (filter, rows) =>
           matchSorter(rows, filter.value, { keys: ["time"] }),
@@ -548,6 +531,7 @@ class Annotations extends React.Component {
     return (
       <div className="annotations menu-display" id="annotation">
         <ToolBar
+          className="pro-table"
           onDelete={this.handleDeleteAll}
           selected={checkboxSelected}
           projects={this.state.projectList}

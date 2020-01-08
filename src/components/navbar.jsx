@@ -3,13 +3,12 @@ import { Link, NavLink } from "react-router-dom";
 import { FaCogs, FaInfoCircle, FaBell } from "react-icons/fa";
 import logo from "../images/logo.png";
 import { connect } from "react-redux";
-import { isLite } from "../config.json";
+const mode = sessionStorage.getItem("mode");
 
 const NavBar = ({
   user,
   openGearMenu,
   openInfoMenu,
-  openMenu,
   openUser,
   logout,
   onSearchViewClick,
@@ -18,12 +17,15 @@ const NavBar = ({
 }) => {
   const style = { paddingBottom: "8px" };
 
+  // handleClick = () => {
+  //   openMenu();
+  // };
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
         <Link className="navbar-brand-right nounderline pr-3 " to="#">
           <img src={logo} alt={"logo"} width="25px" />
-          {isLite && "eLite"} {!isLite && "ePAD"}
+          {mode === "lite" && "eLite"} {mode !== "lite" && "ePAD"}
         </Link>
         <button
           className="navbar-toggler"
@@ -55,7 +57,7 @@ const NavBar = ({
                 Display
               </NavLink>
             </li>
-            {!isLite && (
+            {mode !== "lite" && (
               <React.Fragment>
                 {/* <li className="nav-item">
                   <NavLink className="nav-link" to="/anotate">
@@ -105,50 +107,33 @@ const NavBar = ({
             )}
             {user && (
               <React.Fragment>
-                <li
-                  className="nav-item pull-right"
-                  data-name="mng"
-                  onClick={openMenu}
-                >
+                <li className="nav-item pull-right" data-name="mng">
                   <div
                     className="nav-link mng-icon"
                     data-name="mng"
                     style={{ ...style, cursor: "pointer" }}
-                    onClick={openMenu}
-                    onMouseEnter={openGearMenu}
-                    // onMouseLeave={openGearMenu}
+                    onClick={e => {
+                      openGearMenu(e);
+                    }}
                   >
-                    <FaCogs
-                      style={{ fontSize: "1.5rem" }}
-                      data-name="mng"
-                      onClick={openMenu}
-                    />
+                    <FaCogs style={{ fontSize: "1.5rem" }} data-name="mng" />
                   </div>
                 </li>
-                <li
-                  className="nav-item pull-right"
-                  data-name="info"
-                  onClick={openMenu}
-                >
+                <li className="nav-item pull-right" data-name="info">
                   <div
                     className="nav-link info-icon"
                     data-name="info"
                     style={{ ...style, cursor: "pointer" }}
-                    onClick={openMenu}
-                    onMouseEnter={openInfoMenu}
-                    // onMouseLeave={openInfoMenu}
+                    onClick={e => {
+                      openInfoMenu(e);
+                    }}
                   >
                     <FaInfoCircle
                       style={{ fontSize: "1.5rem", position: "relative" }}
                       data-name="info"
-                      onClick={openMenu}
-                      // className="infoMenu-icon"
                     />
                     {notificationWarning ? (
-                      <FaBell
-                        className="notification-warning"
-                        onClick={openMenu}
-                      />
+                      <FaBell className="notification-warning" />
                     ) : null}
                   </div>
                 </li>
@@ -156,9 +141,13 @@ const NavBar = ({
                   <div
                     className="nav-link user-profile"
                     data-name="user"
-                    onClick={openMenu}
-                    onMouseEnter={openUser}
-                    style={isLite ? style : { ...style, cursor: "pointer" }}
+                    onClick={e => {
+                      openUser(e);
+                    }}
+                    // onMouseEnter={openUser}
+                    style={
+                      mode === "lite" ? style : { ...style, cursor: "pointer" }
+                    }
                   >
                     {user.displayname}
                   </div>

@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import Draggable from "react-draggable";
-import { isLite } from "../../config.json";
 import { toast } from "react-toastify";
 import { getTemplates } from "../../services/templateServices";
 import cornerstone from "cornerstone-core";
@@ -24,6 +23,7 @@ import * as dcmjs from "dcmjs";
 import "./aimEditor.css";
 import { throws } from "assert";
 import getNumOfSegs from "../../Utils/Segmentation/getNumOfSegments";
+const mode = sessionStorage.getItem("mode");
 
 const enumAimType = {
   imageAnnotation: 1,
@@ -704,7 +704,7 @@ class AimEditor extends Component {
   };
 
   parseImgeId = imageId => {
-    if (isLite) return imageId.split("/").pop();
+    if (mode == "lite") return imageId.split("/").pop();
     else return imageId.split("objectUID=")[1].split("&")[0];
   };
 }
