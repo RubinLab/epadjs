@@ -58,9 +58,9 @@ export function getWadoImagePath(series, imageId) {
     return (
       wadoUrl +
       "/studies/" +
-      series.studyUID +
+      studyUid +
       "/series/" +
-      series.seriesUID +
+      seriesUid +
       "/instances/" +
       imageId
     );
@@ -68,9 +68,9 @@ export function getWadoImagePath(series, imageId) {
     return (
       wadoUrl +
       "?requestType=WADO&studyUID=" +
-      series.studyUID +
+      studyUid +
       "&seriesUID=" +
-      series.seriesUID +
+      seriesUid +
       "&objectUID=" +
       imageId +
       "&contentType=application%2Fdicom"
