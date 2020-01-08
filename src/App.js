@@ -347,13 +347,15 @@ class App extends Component {
           </div>
         )}
         {this.state.authenticated && mode === "lite" && (
-          <Switch>
-            <Route path="/logout" component={Logout} />
-            <ProtectedRoute path="/display" component={DisplayView} />
-            <Route path="/not-found" component={NotFound} />
-            <ProtectedRoute path="/" component={SearchView} />
-            <Redirect to="/not-found" />
-          </Switch>
+          <Sidebar onData={this.getProjectMap} type={this.state.viewType}>
+            <Switch>
+              <Route path="/logout" component={Logout} />
+              <ProtectedRoute path="/display" component={DisplayView} />
+              <Route path="/not-found" component={NotFound} />
+              <ProtectedRoute path="/" component={SearchView} />
+              <Redirect to="/not-found" />
+            </Switch>
+          </Sidebar>
         )}
         {this.props.showGridFullAlert && <MaxViewAlert />}
         {/* {this.props.selection && (

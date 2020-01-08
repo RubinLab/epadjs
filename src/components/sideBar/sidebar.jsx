@@ -12,9 +12,10 @@ import {
   getWorklistsOfCreator,
   getWorklistProgress
 } from "../../services/worklistServices";
-import { getPacs } from "../../services/pacsServices";
+// import { getPacs } from "../../services/pacsServices";
 import "./w2.css";
-import { throws } from "assert";
+// import { throws } from "assert";
+const mode = sessionStorage.getItem("mode");
 
 class Sidebar extends Component {
   constructor(props) {
@@ -40,14 +41,16 @@ class Sidebar extends Component {
 
   componentDidMount = async () => {
     //get the porjects
-    const { data: projects } = await getProjects();
-    if (projects.length > 0) {
-      this.setState({ projects, pId: projects[0].id });
-      const projectMap = {};
-      for (let project of projects) {
-        projectMap[project.id] = project.name;
+    if (mode !== "lite") {
+      const { data: projects } = await getProjects();
+      if (projects.length > 0) {
+        this.setState({ projects, pId: projects[0].id });
+        const projectMap = {};
+        for (let project of projects) {
+          projectMap[project.id] = project.name;
+        }
+        this.props.onData(projectMap);
       }
-      this.props.onData(projectMap);
     }
     const { data: worklistsAssigned } = await getWorklistsOfAssignee(
       sessionStorage.getItem("username")
@@ -131,6 +134,71 @@ class Sidebar extends Component {
     this.setState({ progressView });
   };
 
+  renderNav = () => {
+    if (mode === "thick") {
+      return (
+        <>
+          <div onClick={this.collapseAll}>
+            <FiZoomIn />
+          </div>
+          <div onClick={this.collapseAll}>Worklist</div>
+          <div>Progress</div>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <div onClick={this.collapseAll}>Worklist</div>
+          <div>Progress</div>
+        </>
+      );
+    }
+  };
+
+  renderProjects = () => {
+    return this.state.projects.map(project => (
+      <tr key={project.id} className="sidebar-row">
+        <td>
+          <p
+            onClick={() => {
+              this.handleRoute("project", project.id);
+            }}
+          >
+            {project.name}
+          </p>
+        </td>
+      </tr>
+    ));
+  };
+
+  renderWorklists = () => {
+    return this.state.worklistsAssigned.map(worklist => {
+      const className = worklist.projectIDs.length
+        ? "sidebar-row __bold"
+        : "sidebar-row";
+      return (
+        <tr key={worklist.workListID} className={className}>
+          <td>
+            <p
+              onClick={() => {
+                this.handleRoute("worklist", worklist.workListID);
+              }}
+            >
+              {worklist.name}
+              {worklist.projectIDs.length ? (
+                <span className="badge badge-secondary worklist">
+                  {worklist.projectIDs.length}
+                </span>
+              ) : null}
+            </p>
+          </td>
+        </tr>
+      );
+    });
+  };
+
+  renderContent = () => {};
+
   render = () => {
     const { progressView } = this.state;
     return (
@@ -152,10 +220,12 @@ class Sidebar extends Component {
             settings={{ index: this.state.index }}
           >
             <Nav>
-              <div onClick={this.collapseAll}>
+              {/* <div onClick={this.collapseAll}>
                 <FiZoomIn />
-              </div>
-              <div onClick={this.collapseAll}>Worklist</div>
+              </div> */}
+              {mode === "lite" && (
+                <div onClick={this.collapseAll}>Worklist</div>
+              )}
               <div>Progress</div>
               {/* <div>Connections</div> */}
               {/* <div>Users</div> */}
