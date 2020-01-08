@@ -126,6 +126,9 @@ class MainMenu extends React.Component {
         <div className="mng-menu__option" onClick={this.handleSelection}>
           Templates
         </div>
+        <div className="mng-menu__option" onClick={this.handleSelection}>
+          Worklists
+        </div>
         {mode !== "lite" && (
           <>
             <div className="mng-menu__option" onClick={this.handleSelection}>
@@ -133,9 +136,6 @@ class MainMenu extends React.Component {
             </div>
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Projects
-            </div>
-            <div className="mng-menu__option" onClick={this.handleSelection}>
-              Worklists
             </div>
             {false && (
               <div className="mng-menu__option" onClick={this.handleSelection}>

@@ -184,28 +184,28 @@ const toolBar = props => {
               <span>New</span>
             </ReactTooltip>
           </div>
-          <div
-            className="searchView-toolbar__icon worklist-icon"
-            onClick={props.onWorklist}
-          >
-            <div>
-              <FaClipboardList
-                style={{ fontSize: "1.2rem" }}
-                data-tip
-                data-for="worklist-icon"
-              />
-            </div>
-            <ReactTooltip
-              id="worklist-icon"
-              place="bottom"
-              type="info"
-              delayShow={1500}
-            >
-              <span>Add to worklist</span>
-            </ReactTooltip>
-          </div>
         </div>
       )}
+      <div
+        className="searchView-toolbar__icon worklist-icon"
+        onClick={props.onWorklist}
+      >
+        <div>
+          <FaClipboardList
+            style={{ fontSize: "1.2rem" }}
+            data-tip
+            data-for="worklist-icon"
+          />
+        </div>
+        <ReactTooltip
+          id="worklist-icon"
+          place="bottom"
+          type="info"
+          delayShow={1500}
+        >
+          <span>Add to worklist</span>
+        </ReactTooltip>
+      </div>
       {/* <div className="searchView-toolbar__icon">
         <div>
           <TiPencil
