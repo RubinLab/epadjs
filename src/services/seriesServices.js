@@ -1,7 +1,7 @@
 import http from "./httpService";
 const apiUrl = sessionStorage.getItem("apiUrl");
 const mode = sessionStorage.getItem("mode");
-const wadoUrl = sessionStorage.getItem("apiUrl");
+const wadoUrl = sessionStorage.getItem("wadoUrl");
 
 export function getSeries(projectId, subjectId, studyId) {
   if (mode === "lite")
