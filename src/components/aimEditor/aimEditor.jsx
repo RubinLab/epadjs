@@ -94,11 +94,41 @@ class AimEditor extends Component {
   };
 
   save = () => {
-    console.log("Cornerstonetools", cornerstoneTools);
     // Logic behind relies on the order of the data in array
     const answers = this.semanticAnswers.saveAim();
     if (this.props.updatedAimId) this.updateAim(answers);
     else this.createAim(answers);
+  };
+
+  createAim = async answers => {
+    const { hasSegmentation } = this.props;
+    const markupsToSave = this.getNewMarkups();
+
+    if (hasSegmentation) {
+      // segmentation and markups
+      this.createAimSegmentation(answers).then(({ aim, segmentationBlob }) => {
+        // also add the markups to aim if there is any
+        if (Object.entries(markupsToSave).length !== 0)
+          this.createAimMarkups(aim, markupsToSave);
+        console.log("AYIMMM", aim);
+        this.saveAim(aim, segmentationBlob);
+      });
+    } else if (Object.entries(markupsToSave).length !== 0) {
+      // markups without segmentation
+      const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
+      const aim = new Aim(seedData, enumAimType.imageAnnotation);
+      this.createAimMarkups(aim, markupsToSave);
+      this.saveAim(aim);
+    } else {
+      //Non markup image annotation
+      const { activePort } = this.props;
+      const { element } = cornerstone.getEnabledElements()[activePort];
+      const image = cornerstone.getImage(element);
+      const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
+
+      const aim = new Aim(seedData, enumAimType.imageAnnotation);
+      this.saveAim(aim);
+    }
   };
 
   createAimSegmentation = async answers => {
@@ -165,14 +195,12 @@ class AimEditor extends Component {
   getMarkedImageIds = () => {
     const { activePort } = this.props;
 
-    const {
-      toolState
-    } = cornerstoneTools.globalImageIdSpecificToolStateManager;
+    const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
 
     // get the imagesIds for active viewport
     const { element } = cornerstone.getEnabledElements()[activePort];
     const stackToolState = cornerstoneTools.getToolState(element, "stack");
-    const imageIds = stackToolState.data[activePort].imageIds;
+    const imageIds = stackToolState.data[0].imageIds;
 
     // check which images has markup
     const markedImageIds = imageIds.filter(imageId => {
@@ -197,39 +225,6 @@ class AimEditor extends Component {
     this.addSemanticAnswersToSeedData(seedData, answers);
     this.addUserToSeedData(seedData);
     return seedData;
-  };
-
-  createAim = async answers => {
-    console.log("Data cornerstone tools", cornerstoneTools);
-    const { hasSegmentation } = this.props;
-    const markupsToSave = this.getNewMarkups();
-    console.log("Markups to be saved", markupsToSave);
-
-    if (hasSegmentation) {
-      // segmentation and markups
-      this.createAimSegmentation(answers).then(({ aim, segmentationBlob }) => {
-        // also add the markups to aim if there is any
-        if (Object.entries(markupsToSave).length !== 0)
-          this.createAimMarkups(aim, markupsToSave);
-        console.log("AYIMMM", aim);
-        this.saveAim(aim, segmentationBlob);
-      });
-    } else if (Object.entries(markupsToSave).length !== 0) {
-      // markups without segmentation
-      const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
-      const aim = new Aim(seedData, enumAimType.imageAnnotation);
-      this.createAimMarkups(aim, markupsToSave);
-      this.saveAim(aim);
-    } else {
-      //Non markup image annotation
-      const { activePort } = this.props;
-      const { element } = cornerstone.getEnabledElements()[activePort];
-      const image = cornerstone.getImage(element);
-      const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
-
-      const aim = new Aim(seedData, enumAimType.imageAnnotation);
-      this.saveAim(aim);
-    }
   };
 
   saveAim = (aim, segmentationBlob) => {
@@ -289,9 +284,7 @@ class AimEditor extends Component {
   };
 
   getNewMarkups = () => {
-    const {
-      toolState
-    } = cornerstoneTools.globalImageIdSpecificToolStateManager;
+    const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     const markedImageIds = this.getMarkedImageIds();
     // check for markups
     var shapeIndex = 1;
@@ -348,10 +341,6 @@ class AimEditor extends Component {
             circles.map(circle => {
               if (!circle.aimId || circle.aimId === updatedAimId) {
                 //dont save the same markup to different aims
-                const enElem = cornerstone.getEnabledElements()[0].element;
-
-                cornerstoneTools.removeToolState(enElem, "CircleRoi", circle);
-
                 this.storeMarkupsToBeSaved(
                   imageId,
                   {
@@ -426,9 +415,7 @@ class AimEditor extends Component {
 
   // get the image object by index
   getCornerstoneImagebyIdx = imageIdx => {
-    console.log("Cornerstone", cornerstone);
     const { imageCache } = cornerstone.imageCache;
-    console.log("ImageCache", imageCache);
     const imageId = Object.keys(imageCache)[imageIdx];
     return imageCache[imageId].image;
   };
@@ -498,7 +485,6 @@ class AimEditor extends Component {
   };
 
   addLineToAim = (aim, line, shapeIndex, imageReferenceUid) => {
-    console.log("Line", line.length);
     const { start, end } = line.handles;
     const markupId = aim.addMarkupEntity(
       "TwoDimensionMultiPoint",

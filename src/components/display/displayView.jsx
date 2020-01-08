@@ -113,10 +113,7 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
-    console.log("Cs tools in dv CDM", cornerstoneTools);
-    console.log("CDM");
     this.getViewports();
-    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
     this.getData();
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
@@ -130,7 +127,6 @@ class DisplayView extends Component {
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      console.log("CDU");
       this.getData();
     }
   }
@@ -157,6 +153,9 @@ class DisplayView extends Component {
   };
 
   getData() {
+    // clear the toolState they will be rendered again on next load
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+
     const { series } = this.props;
     var promises = [];
     for (let i = 0; i < series.length; i++) {
@@ -448,6 +447,7 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+    const csTools = cornerstoneTools.globalImageIdSpecificToolStateManager;
   };
 
   createLinePoints = (data, points) => {
