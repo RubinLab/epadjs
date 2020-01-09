@@ -220,9 +220,13 @@ class DisplayView extends Component {
     if (imageAnnotations) {
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
+          const { studyUID, seriesUID } = this.props.series[
+            this.props.activePort
+          ];
           if (value.aimUid === aimID) {
             const cornerstoneImageId = getWadoImagePath(
-              this.props.series[this.props.activePort],
+              seriesUID,
+              studyUID,
               key
             );
             const ret = this.getImageIndexFromImageId(
