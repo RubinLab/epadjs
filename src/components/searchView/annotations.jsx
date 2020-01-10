@@ -52,6 +52,7 @@ class Annotations extends Component {
 
   async componentDidMount() {
     const { data } = await getAnnotations(this.series);
+    console.log(data);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
     if (data.length === 0) {

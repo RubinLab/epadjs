@@ -9,11 +9,11 @@ const mode = sessionStorage.getItem("mode");
 export async function getAllTemplates() {
   return mode === "lite"
     ? http.get(apiUrl + "/templates?format=summary")
-    : http.get(apiUrl + "/templates");
+    : http.get(apiUrl + "/templates?format=summary");
 }
 
 export async function getTemplates() {
-  return mode === "lite" ? http.get(apiUrl + "/templates") : "";
+  return http.get(apiUrl + "/templates");
 }
 
 export function downloadTemplates(tempIDlist, selection) {
