@@ -5,12 +5,16 @@ import { toast } from "react-toastify";
 import ToolBar from "../common/basicToolBar";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { getProjects } from "../../../services/projectServices";
-import { getTools, deleteTool } from "../../../services/tools";
+import {
+  getTools,
+  getPlugins,
+  deleteTool
+} from "../../../services/pluginServices";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
 import EditTools from "../templates/projectTable";
 
-class Tools extends React.Component {
+class Plugins extends React.Component {
   state = {
     tools: [],
     projectList: {},
@@ -28,6 +32,8 @@ class Tools extends React.Component {
 
   componentDidMount = async () => {
     const { data: projectList } = await getProjects();
+    const { data: pluginList } = await getPlugins();
+    console.log("------>plugin list" + pluginList);
     const temp = [];
     for (let project of projectList) {
       const { id, name } = project;
@@ -227,8 +233,8 @@ class Tools extends React.Component {
         width: 420
       },
       {
-        Header: "Description",
-        accessor: "description",
+        Header: "container image",
+        accessor: "image",
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
@@ -343,4 +349,4 @@ class Tools extends React.Component {
   };
 }
 
-export default Tools;
+export default Plugins;
