@@ -116,7 +116,6 @@ class Sidebar extends Component {
   handleRoute = (type, id) => {
     let index;
     const isThick = mode === "thick";
-    console.log(type);
     if (type !== "progress") {
       this.collapseAll();
     }
@@ -141,7 +140,8 @@ class Sidebar extends Component {
     const state = [...this.state.progressView];
     state[index] = open;
     this.setState({ progressView: state });
-    if (open) this.setState({ index: 2 });
+    const conditionalIndex = mode === "thick" ? 2 : 1;
+    if (open) this.setState({ index: conditionalIndex });
   };
 
   collapseAll = () => {
@@ -171,20 +171,22 @@ class Sidebar extends Component {
   };
 
   renderProjects = () => {
-    const projects = this.state.projects.map(project => (
-      <tr key={project.id} className="sidebar-row">
-        <td>
-          <p
-            onClick={() => {
-              this.handleRoute("project", project.id);
-            }}
-          >
-            {project.name}
-          </p>
-        </td>
-      </tr>
-    ));
-    return <SidebarContent key="projectContent">{projects}</SidebarContent>;
+    if (mode === "thick") {
+      const projects = this.state.projects.map(project => (
+        <tr key={project.id} className="sidebar-row">
+          <td>
+            <p
+              onClick={() => {
+                this.handleRoute("project", project.id);
+              }}
+            >
+              {project.name}
+            </p>
+          </td>
+        </tr>
+      ));
+      return <SidebarContent key="projectContent">{projects}</SidebarContent>;
+    }
   };
 
   renderWorklists = () => {
@@ -192,7 +194,6 @@ class Sidebar extends Component {
       const className = worklist.projectIDs.length
         ? "sidebar-row __bold"
         : "sidebar-row";
-      // const className = "this";
       return (
         <tr key={worklist.workListID} className={className}>
           <td>
@@ -215,16 +216,60 @@ class Sidebar extends Component {
     return <SidebarContent key="worklistContent">{worklists}</SidebarContent>;
   };
 
-  renderContent = () => {
-    let projects, worklists, progress;
-    const isThick = mode === "thick";
-    if (isThick) {
-      projects = this.renderProjects();
-    }
-    worklists = this.renderWorklists();
-    return isThick ? [projects, worklists] : [worklists];
+  renderProgress = () => {
+    const { progressView } = this.state;
+    return (
+      <div>
+        <Collapsible
+          trigger="Created by me"
+          onOpen={() => this.handleCollapse(0, true)}
+          onClose={() => this.handleCollapse(0, false)}
+          open={progressView[0]}
+        >
+          <WorklistSelect
+            list={this.state.worklistsCreated}
+            handleRoute={this.handleRoute}
+          />
+        </Collapsible>
+        <Collapsible
+          trigger="Assigned to me"
+          onOpen={() => this.handleCollapse(1, true)}
+          onClose={() => this.handleCollapse(1, false)}
+          open={progressView[1]}
+        >
+          <WorklistSelect
+            list={this.state.worklistsAssigned}
+            handleRoute={this.handleRoute}
+          />
+        </Collapsible>
+      </div>
+    );
   };
 
+  renderContent = () => {
+    if (mode === "thick") {
+      return (
+        <Tabs className="theme-default" settings={{ index: this.state.index }}>
+          <Nav>{this.renderNav()}</Nav>
+          <Content>
+            <div>{this.renderProjects()}</div>
+            <div>{this.renderWorklists()}</div>
+            <div>{this.renderProgress()}</div>
+          </Content>
+        </Tabs>
+      );
+    } else {
+      return (
+        <Tabs className="theme-default" settings={{ index: this.state.index }}>
+          <Nav>{this.renderNav()}</Nav>
+          <Content>
+            <div>{this.renderWorklists()}</div>
+            <div>{this.renderProgress()}</div>
+          </Content>
+        </Tabs>
+      );
+    }
+  };
   render = () => {
     const { progressView } = this.state;
     return (
@@ -241,39 +286,7 @@ class Sidebar extends Component {
           >
             <FaArrowAltCircleLeft />
           </button>
-          <Tabs
-            className="theme-default"
-            settings={{ index: this.state.index }}
-          >
-            <Nav>{this.renderNav()}</Nav>
-            <Content>
-              <div>{this.renderContent()}</div>
-              <div>
-                <Collapsible
-                  trigger="Created by me"
-                  onOpen={() => this.handleCollapse(0, true)}
-                  onClose={() => this.handleCollapse(0, false)}
-                  open={progressView[0]}
-                >
-                  <WorklistSelect
-                    list={this.state.worklistsCreated}
-                    handleRoute={this.handleRoute}
-                  />
-                </Collapsible>
-                <Collapsible
-                  trigger="Assigned to me"
-                  onOpen={() => this.handleCollapse(1, true)}
-                  onClose={() => this.handleCollapse(1, false)}
-                  open={progressView[1]}
-                >
-                  <WorklistSelect
-                    list={this.state.worklistsAssigned}
-                    handleRoute={this.handleRoute}
-                  />
-                </Collapsible>
-              </div>
-            </Content>
-          </Tabs>
+          {this.renderContent()}
         </div>
         <div
           className={this.state.open ? "mainView" : "mainView-closed"}
