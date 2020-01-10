@@ -41,6 +41,7 @@ class Rightsidebar extends Component {
 
   render() {
     const { activePort, openSeries } = this.props;
+    console.log(activePort, openSeries);
     const { projectID } = openSeries[activePort];
     return (
       <React.Fragment>

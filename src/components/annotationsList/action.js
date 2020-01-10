@@ -560,6 +560,7 @@ const getAnnotationData = async (
 };
 
 export const getSingleSerie = (serie, annotation) => {
+  console.log(serie);
   return async (dispatch, getState) => {
     await dispatch(loadAnnotations());
     let { patientID, studyUID, seriesUID, numberOfAnnotations } = serie;
@@ -619,10 +620,12 @@ const getSingleSerieData = (serie, annotation) => {
     projectID = projectID ? projectID : "lite";
     patientID = patientID ? patientID : serie.subjectID;
     const promises = [];
+
     promises.push(
       getAnnotationsJSON(projectID, patientID, studyUID, seriesUID)
     );
-    promises.push(getStudyAims(patientID, studyUID));
+    console.log("1", projectID, "2", patientID, "3", studyUID, "4", seriesUID);
+    promises.push(getStudyAims(patientID, studyUID, projectID));
     Promise.all(promises)
       .then(async result => {
         serieAims = result[0].data;

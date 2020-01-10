@@ -320,7 +320,7 @@ class AimEditor extends Component {
       comment
     };
 
-    uploadAim(aimSaved)
+    uploadAim(aimSaved, this.props.projectID)
       .then(() => {
         if (segmentationBlob) this.saveSegmentation(segmentationBlob);
         // var objectUrl = URL.createObjectURL(segBlobGlobal);
@@ -879,8 +879,8 @@ class AimEditor extends Component {
   };
 
   parseImgeId = imageId => {
-    if (mode == "lite") return imageId.split("/").pop();
-    else return imageId.split("objectUID=")[1].split("&")[0];
+    return imageId.split("/").pop();
+    // else return imageId.split("objectUID=")[1].split("&")[0];
   };
 }
 
