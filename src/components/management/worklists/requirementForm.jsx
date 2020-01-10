@@ -17,10 +17,9 @@ class RequirementForm extends React.Component {
   componentDidMount = async () => {
     const { data } = await getAllTemplates();
     const templates = {};
-
+    console.log(data);
     data.forEach((el, i) => {
-      templates[el.TemplateContainer.Template[0].uid] =
-        el.TemplateContainer.Template[0].codeValue;
+      templates[el.Template[0].templateUID] = el.Template[0].templateCodeValue;
     });
     this.setState({ templates });
   };

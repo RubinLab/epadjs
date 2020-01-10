@@ -352,7 +352,15 @@ class App extends Component {
               <Route path="/logout" component={Logout} />
               <ProtectedRoute path="/display" component={DisplayView} />
               <Route path="/not-found" component={NotFound} />
+              <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
+              <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute path="/" component={SearchView} />
+              {/* <ProtectedRoute
+                from="/"
+                exact
+                to="/search"
+                component={SearchView}
+              /> */}
               <Redirect to="/not-found" />
             </Switch>
           </Sidebar>
