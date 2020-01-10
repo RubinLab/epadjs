@@ -7,9 +7,7 @@ const mode = sessionStorage.getItem("mode");
 // }
 
 export async function getAllTemplates() {
-  return mode === "lite"
-    ? http.get(apiUrl + "/templates?format=summary")
-    : http.get(apiUrl + "/templates?format=summary");
+  return http.get(apiUrl + "/templates?format=summary");
 }
 
 export async function getTemplates() {

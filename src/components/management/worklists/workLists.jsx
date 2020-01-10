@@ -584,6 +584,8 @@ class WorkList extends React.Component {
           className="pro-table"
           data={this.state.worklists}
           columns={this.defineColumns()}
+          pageSizeOptions={[10, 20, 50]}
+          defaultPageSize={10}
         />
         {this.state.deleteSingleClicked && (
           <DeleteAlert

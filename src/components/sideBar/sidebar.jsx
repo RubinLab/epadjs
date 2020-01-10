@@ -114,6 +114,8 @@ class Sidebar extends Component {
   };
 
   handleRoute = (type, id) => {
+    let index;
+    const isThick = mode === "thick";
     console.log(type);
     if (type !== "progress") {
       this.collapseAll();
@@ -126,10 +128,12 @@ class Sidebar extends Component {
       this.setState({ index: 0 });
     } else if (type === "worklist") {
       this.props.history.push(`/worklist/${id}`);
-      this.setState({ index: 1 });
+      index = isThick ? 1 : 0;
+      this.setState({ index });
     } else if (type === "progress") {
       this.props.history.push(`/progress/${id}`);
-      this.setState({ index: 2 });
+      index = isThick ? 2 : 1;
+      this.setState({ index });
     }
   };
 
