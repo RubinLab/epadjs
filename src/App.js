@@ -329,7 +329,13 @@ class App extends Component {
                   component={ProgressView}
                 />
                 <ProtectedRoute path="/flex/:pid?" component={FlexView} />
-                <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
+                <ProtectedRoute
+                  path="/worklist/:wid?"
+                  render={props => (
+                    <Worklist projectMap={this.state.projectMap} />
+                  )}
+                />
+                {/* component={Worklist} /> */}
                 <Route path="/tools" />
                 <Route path="/edit" />
                 <Route path="/not-found" component={NotFound} />
