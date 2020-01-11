@@ -37,6 +37,16 @@ export function getAnnotations(series, opts = {}) {
 }
 
 export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
+  console.log(
+    "project",
+    projectId,
+    "sub",
+    subjectId,
+    "st",
+    studyId,
+    "ser",
+    seriesId
+  );
   if (mode === "lite")
     return http.get(
       apiUrl +
@@ -90,19 +100,21 @@ export function getSummaryAnnotations(projectID) {
 export function deleteAnnotation(aimObj, aimID, projectID) {
   if (aimObj) {
     aimID = aimObj.aimID;
-    projectID = aimObj.projectID ? projectID : "lite";
+    projectID = aimObj.projectID ? aimObj.projectID : "lite";
   }
   return http.delete(
     apiUrl + "/projects/" + projectID + "/aims/" + aimID + "?deleteDSO=true"
   );
 }
 
-export function uploadAim(aim) {
+export function uploadAim(aim, projectId) {
   let url;
   if (mode === "lite") {
     url = apiUrl + "/projects/lite/aims";
-    return http.post(url, aim);
+  } else {
+    url = apiUrl + "/projects/" + projectId + "/aims";
   }
+  return http.post(url, aim);
 }
 
 export function uploadSegmentation(segmentation, projectId = "lite") {

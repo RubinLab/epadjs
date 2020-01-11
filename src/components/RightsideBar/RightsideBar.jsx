@@ -40,6 +40,9 @@ class Rightsidebar extends Component {
   };
 
   render() {
+    const { activePort, openSeries } = this.props;
+    console.log(activePort, openSeries);
+    const { projectID } = openSeries[activePort];
     return (
       <React.Fragment>
         {!this.state.open && (
@@ -75,6 +78,7 @@ class Rightsidebar extends Component {
                 <AimEditor
                   aimId={this.props.selectedAim}
                   // onCancel={this.closeAimEditor}
+                  projectID={projectID}
                   hasSegmentation={this.props.hasSegmentation}
                 />
               </div>
@@ -106,9 +110,10 @@ class Rightsidebar extends Component {
 }
 
 const mapStateToProps = state => {
-  const { activePort } = state.annotationsListReducer;
+  const { activePort, openSeries } = state.annotationsListReducer;
   return {
-    activePort
+    activePort,
+    openSeries
   };
 };
 export default withRouter(connect(mapStateToProps)(Rightsidebar));

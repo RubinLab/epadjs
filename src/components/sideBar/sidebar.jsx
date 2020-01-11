@@ -12,9 +12,11 @@ import {
   getWorklistsOfCreator,
   getWorklistProgress
 } from "../../services/worklistServices";
-import { getPacs } from "../../services/pacsServices";
+// import { getPacs } from "../../services/pacsServices";
 import "./w2.css";
-import { throws } from "assert";
+// import { throws } from "assert";
+import SidebarContent from "./sidebarContent";
+const mode = sessionStorage.getItem("mode");
 
 class Sidebar extends Component {
   constructor(props) {
@@ -40,14 +42,16 @@ class Sidebar extends Component {
 
   componentDidMount = async () => {
     //get the porjects
-    const { data: projects } = await getProjects();
-    if (projects.length > 0) {
-      this.setState({ projects, pId: projects[0].id });
-      const projectMap = {};
-      for (let project of projects) {
-        projectMap[project.id] = project.name;
+    if (mode !== "lite") {
+      const { data: projects } = await getProjects();
+      if (projects.length > 0) {
+        this.setState({ projects, pId: projects[0].id });
+        const projectMap = {};
+        for (let project of projects) {
+          projectMap[project.id] = project.name;
+        }
+        this.props.onData(projectMap);
       }
-      this.props.onData(projectMap);
     }
     const { data: worklistsAssigned } = await getWorklistsOfAssignee(
       sessionStorage.getItem("username")
@@ -101,6 +105,8 @@ class Sidebar extends Component {
   };
 
   handleRoute = (type, id) => {
+    let index;
+    const isThick = mode === "thick";
     if (type !== "progress") {
       this.collapseAll();
     }
@@ -112,10 +118,12 @@ class Sidebar extends Component {
       this.setState({ index: 0 });
     } else if (type === "worklist") {
       this.props.history.push(`/worklist/${id}`);
-      this.setState({ index: 1 });
+      index = isThick ? 1 : 0;
+      this.setState({ index });
     } else if (type === "progress") {
       this.props.history.push(`/progress/${id}`);
-      this.setState({ index: 2 });
+      index = isThick ? 2 : 1;
+      this.setState({ index });
     }
   };
 
@@ -123,7 +131,8 @@ class Sidebar extends Component {
     const state = [...this.state.progressView];
     state[index] = open;
     this.setState({ progressView: state });
-    if (open) this.setState({ index: 2 });
+    const conditionalIndex = mode === "thick" ? 2 : 1;
+    if (open) this.setState({ index: conditionalIndex });
   };
 
   collapseAll = () => {
@@ -131,6 +140,127 @@ class Sidebar extends Component {
     this.setState({ progressView });
   };
 
+  renderNav = () => {
+    if (mode === "thick") {
+      return [
+        <div onClick={this.collapseAll} key="project">
+          <FiZoomIn />
+        </div>,
+        <div onClick={this.collapseAll} key="worklist">
+          Worklist
+        </div>,
+        <div key="progress">Progress</div>
+      ];
+    } else {
+      return [
+        <div onClick={this.collapseAll} key="worklist">
+          Worklist
+        </div>,
+        <div key="progress">Progress</div>
+      ];
+    }
+  };
+
+  renderProjects = () => {
+    if (mode === "thick") {
+      const projects = this.state.projects.map(project => (
+        <tr key={project.id} className="sidebar-row">
+          <td>
+            <p
+              onClick={() => {
+                this.handleRoute("project", project.id);
+              }}
+            >
+              {project.name}
+            </p>
+          </td>
+        </tr>
+      ));
+      return <SidebarContent key="projectContent">{projects}</SidebarContent>;
+    }
+  };
+
+  renderWorklists = () => {
+    const worklists = this.state.worklistsAssigned.map(worklist => {
+      const className = worklist.projectIDs.length
+        ? "sidebar-row __bold"
+        : "sidebar-row";
+      return (
+        <tr key={worklist.workListID} className={className}>
+          <td>
+            <p
+              onClick={() => {
+                this.handleRoute("worklist", worklist.workListID);
+              }}
+            >
+              {worklist.name}
+              {worklist.projectIDs.length ? (
+                <span className="badge badge-secondary worklist">
+                  {worklist.projectIDs.length}
+                </span>
+              ) : null}
+            </p>
+          </td>
+        </tr>
+      );
+    });
+    return <SidebarContent key="worklistContent">{worklists}</SidebarContent>;
+  };
+
+  renderProgress = () => {
+    const { progressView } = this.state;
+    return (
+      <div>
+        <Collapsible
+          trigger="Created by me"
+          onOpen={() => this.handleCollapse(0, true)}
+          onClose={() => this.handleCollapse(0, false)}
+          open={progressView[0]}
+        >
+          <WorklistSelect
+            list={this.state.worklistsCreated}
+            handleRoute={this.handleRoute}
+          />
+        </Collapsible>
+        <Collapsible
+          trigger="Assigned to me"
+          onOpen={() => this.handleCollapse(1, true)}
+          onClose={() => this.handleCollapse(1, false)}
+          open={progressView[1]}
+        >
+          <WorklistSelect
+            list={this.state.worklistsAssigned}
+            handleRoute={this.handleRoute}
+          />
+        </Collapsible>
+      </div>
+    );
+  };
+
+  renderContent = () => {
+    if (mode === "thick") {
+      return (
+        <Tabs className="theme-default" settings={{ index: this.state.index }}>
+          <Nav>{this.renderNav()}</Nav>
+          <Content>
+            <div>{this.renderProjects()}</div>
+            <div>{this.renderWorklists()}</div>
+            <div>{this.renderProgress()}</div>
+          </Content>
+        </Tabs>
+      );
+    } else {
+      return (
+        <Tabs className="theme-default" settings={{ index: this.state.index }}>
+          <Nav>{this.renderNav()}</Nav>
+          <Content>
+            <div>{this.renderWorklists()}</div>
+            <div>{this.renderProgress()}</div>
+          </Content>
+        </Tabs>
+      );
+    }
+  };
   render = () => {
     const { progressView } = this.state;
     return (
@@ -147,150 +277,7 @@ class Sidebar extends Component {
           >
             <FaArrowAltCircleLeft />
           </button>
-          <Tabs
-            className="theme-default"
-            settings={{ index: this.state.index }}
-          >
-            <Nav>
-              <div onClick={this.collapseAll}>
-                <FiZoomIn />
-              </div>
-              <div onClick={this.collapseAll}>Worklist</div>
-              <div>Progress</div>
-              {/* <div>Connections</div> */}
-              {/* <div>Users</div> */}
-            </Nav>
-            <Content>
-              <div>
-                <table>
-                  <tbody>
-                    <tr>
-                      <td>
-                        {/* <button
-                          to="#"
-                          className="closebtn"
-                          onClick={this.handleClose}
-                        >
-                          Close &times;
-                        </button> */}
-                      </td>
-                    </tr>
-                    {this.state.projects.map(project => (
-                      <tr key={project.id} className="sidebar-row">
-                        <td>
-                          <p
-                            onClick={() => {
-                              this.handleRoute("project", project.id);
-                            }}
-                          >
-                            {project.name}
-                          </p>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div>
-                <table>
-                  <tbody>
-                    <tr>
-                      <td>
-                        {/* <button
-                          to="#"
-                          className="closebtn"
-                          onClick={this.handleClose}
-                        >
-                          Close &times;
-                        </button> */}
-                      </td>
-                    </tr>
-                    {this.state.worklistsAssigned.map(worklist => {
-                      const className = worklist.projectIDs.length
-                        ? "sidebar-row __bold"
-                        : "sidebar-row";
-                      return (
-                        <tr key={worklist.workListID} className={className}>
-                          <td>
-                            <p
-                              onClick={() => {
-                                this.handleRoute(
-                                  "worklist",
-                                  worklist.workListID
-                                );
-                              }}
-                            >
-                              {worklist.name}
-                              {worklist.projectIDs.length ? (
-                                <span className="badge badge-secondary worklist">
-                                  {worklist.projectIDs.length}
-                                </span>
-                              ) : null}
-                            </p>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              <div>
-                <Collapsible
-                  trigger="Created by me"
-                  onOpen={() => this.handleCollapse(0, true)}
-                  onClose={() => this.handleCollapse(0, false)}
-                  open={progressView[0]}
-                >
-                  <WorklistSelect
-                    list={this.state.worklistsCreated}
-                    handleRoute={this.handleRoute}
-                  />
-                </Collapsible>
-                <Collapsible
-                  trigger="Assigned to me"
-                  onOpen={() => this.handleCollapse(1, true)}
-                  onClose={() => this.handleCollapse(1, false)}
-                  open={progressView[1]}
-                >
-                  <WorklistSelect
-                    list={this.state.worklistsAssigned}
-                    handleRoute={this.handleRoute}
-                  />
-                </Collapsible>
-              </div>
-              <div>
-                <table>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <button
-                          to="#"
-                          className="closebtn"
-                          onClick={this.handleClose}
-                        >
-                          Close &times;
-                        </button>
-                      </td>
-                    </tr>
-                    {this.state.pacs.map(pac => (
-                      <tr key={pac.pacID}>
-                        <td>
-                          <p
-                            onClick={() => {
-                              alert("clicked");
-                            }}
-                          >
-                            {pac.aeTitle}
-                          </p>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div>Users</div>
-            </Content>
-          </Tabs>
+          {this.renderContent()}
         </div>
         <div
           className={this.state.open ? "mainView" : "mainView-closed"}

@@ -149,9 +149,11 @@ class Annotations extends React.Component {
   deleteAllSelected = async () => {
     let newSelected = Object.assign({}, this.state.selected);
     const promiseArr = [];
+    console.log(" )))))))))))");
+    console.log(newSelected);
     for (let annotation in newSelected) {
       promiseArr.push(
-        deleteAnnotation(null, annotation, newSelected[annotation])
+        deleteAnnotation(null, annotation, newSelected[annotation].projectID)
       );
     }
     Promise.all(promiseArr)

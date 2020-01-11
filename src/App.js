@@ -329,7 +329,13 @@ class App extends Component {
                   component={ProgressView}
                 />
                 <ProtectedRoute path="/flex/:pid?" component={FlexView} />
-                <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
+                <ProtectedRoute
+                  path="/worklist/:wid?"
+                  render={props => (
+                    <Worklist projectMap={this.state.projectMap} />
+                  )}
+                />
+                {/* component={Worklist} /> */}
                 <Route path="/tools" />
                 <Route path="/edit" />
                 <Route path="/not-found" component={NotFound} />
@@ -347,13 +353,23 @@ class App extends Component {
           </div>
         )}
         {this.state.authenticated && mode === "lite" && (
-          <Switch>
-            <Route path="/logout" component={Logout} />
-            <ProtectedRoute path="/display" component={DisplayView} />
-            <Route path="/not-found" component={NotFound} />
-            <ProtectedRoute path="/" component={SearchView} />
-            <Redirect to="/not-found" />
-          </Switch>
+          <Sidebar onData={this.getProjectMap} type={this.state.viewType}>
+            <Switch>
+              <Route path="/logout" component={Logout} />
+              <ProtectedRoute path="/display" component={DisplayView} />
+              <Route path="/not-found" component={NotFound} />
+              <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
+              <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
+              <ProtectedRoute path="/" component={SearchView} />
+              {/* <ProtectedRoute
+                from="/"
+                exact
+                to="/search"
+                component={SearchView}
+              /> */}
+              <Redirect to="/not-found" />
+            </Switch>
+          </Sidebar>
         )}
         {this.props.showGridFullAlert && <MaxViewAlert />}
         {/* {this.props.selection && (
@@ -365,7 +381,7 @@ class App extends Component {
 }
 
 const mapStateToProps = state => {
-  // console.log(state.annotationsListReducer);
+  console.log(state.annotationsListReducer);
   // console.log(state.managementReducer);
   const {
     showGridFullAlert,

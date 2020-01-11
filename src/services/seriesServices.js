@@ -26,55 +26,45 @@ export function getSeries(projectId, subjectId, studyId) {
     );
 }
 export function getImageIds(series) {
-  if (mode === "lite")
+  console.log(series);
+  if (mode === "lite") {
     return http.get(
       apiUrl +
         "/projects/lite/subjects/" +
-        series.subjectUID +
+        series.patientID +
         "/studies/" +
         series.studyUID +
         "/series/" +
         series.seriesUID +
         "/images"
     );
-  else
+  } else {
     return http.get(
       apiUrl +
         "/projects/" +
-        series.projectUID +
+        series.projectID +
         "/subjects/" +
-        series.subjectUID +
+        series.patientID +
         "/studies/" +
         series.studyUID +
         "/series/" +
         series.seriesUID +
         "/images"
     );
+  }
 }
 
 //  seems like this doesn't belong to here but olny services know details about paths&server side
 export function getWadoImagePath(studyUid, seriesUid, imageId) {
-  if (mode === "lite") {
-    return (
-      wadoUrl +
-      "/studies/" +
-      studyUid +
-      "/series/" +
-      seriesUid +
-      "/instances/" +
-      imageId
-    );
-  } else
-    return (
-      wadoUrl +
-      "?requestType=WADO&studyUID=" +
-      studyUid +
-      "&seriesUID=" +
-      seriesUid +
-      "&objectUID=" +
-      imageId +
-      "&contentType=application%2Fdicom"
-    );
+  return (
+    wadoUrl +
+    "/studies/" +
+    studyUid +
+    "/series/" +
+    seriesUid +
+    "/instances/" +
+    imageId
+  );  
 }
 
 export function downloadSeries(series) {
