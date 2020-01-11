@@ -3,6 +3,8 @@ import { connect } from "react-redux";
 import { Menu, Item, Separator, Submenu } from "react-contexify";
 import "react-contexify/dist/ReactContexify.min.css";
 import { closeSerie } from "../annotationsList/action";
+import cornerstone from "cornerstone-core";
+import cornerstoneTools from "../../cornerstone-tools";
 
 class ContextMenu extends Component {
   render() {

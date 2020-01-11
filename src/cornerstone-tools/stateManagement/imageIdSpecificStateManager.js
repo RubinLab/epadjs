@@ -1,4 +1,4 @@
-import external from '../externalModules.js';
+import external from "../externalModules.js";
 
 /**
  * Implements an imageId specific tool state management strategy.  This means that
@@ -52,7 +52,7 @@ function newImageIdSpecificToolStateManager() {
     // If we don't have tool state for this type of tool, add an empty object
     if (imageIdToolState.hasOwnProperty(toolType) === false) {
       imageIdToolState[toolType] = {
-        data: [],
+        data: []
       };
     }
 
@@ -109,7 +109,7 @@ function newImageIdSpecificToolStateManager() {
     restoreImageIdToolState,
     saveToolState,
     restoreToolState,
-    toolState,
+    toolState
   };
 }
 
@@ -119,5 +119,5 @@ const globalImageIdSpecificToolStateManager = newImageIdSpecificToolStateManager
 
 export {
   newImageIdSpecificToolStateManager,
-  globalImageIdSpecificToolStateManager,
+  globalImageIdSpecificToolStateManager
 };

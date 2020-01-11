@@ -389,7 +389,7 @@ class Aim {
   /*                                          */
   _createModality = () => {
     const sopClassUid = this.temp.image[0].sopClassUid;
-    if (sopClassUid)
+    if (sopClassUid && modalities[sopClassUid])
       var {
         codeValue,
         codingSchemeDesignator,
@@ -398,7 +398,7 @@ class Aim {
       } = modalities[sopClassUid];
     else {
       const modality = this.temp.series.modality;
-      if (modality) {
+      if (modality && modalities[modality]) {
         var {
           codeValue,
           codingSchemeDesignator,
@@ -408,13 +408,13 @@ class Aim {
       }
     }
     var obj = {};
-    obj["code"] = codeValue;
-    obj["codeSystemName"] = codingSchemeDesignator;
+    obj["code"] = codeValue || "";
+    obj["codeSystemName"] = codingSchemeDesignator || "";
     obj["iso:displayName"] = {
       "xmlns:iso": "uri:iso.org:21090",
-      value: codeMeaning
+      value: codeMeaning || ""
     };
-    obj["codeSystemVersion"] = codingSchemeVersion;
+    obj["codeSystemVersion"] = codingSchemeVersion || "";
     return obj;
   };
 

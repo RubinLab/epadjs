@@ -139,7 +139,6 @@ const asyncReducer = (state = initialState, action) => {
       return { ...state, showProjectModal: projectModalStatus };
 
     case LOAD_SERIE_SUCCESS:
-      let indexNum = state.openSeries.length - 1;
       let imageAddedSeries = [...state.openSeries];
       let annCalc = Object.keys(action.payload.imageData);
       if (annCalc.length > 0) {
@@ -157,7 +156,6 @@ const asyncReducer = (state = initialState, action) => {
       const result = Object.assign({}, state, {
         loading: false,
         error: false,
-        activePort: indexNum,
         aimsList: {
           ...state.aimsList,
           [action.payload.ref.seriesUID]: action.payload.aimsData

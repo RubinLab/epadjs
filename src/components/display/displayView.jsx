@@ -154,10 +154,13 @@ class DisplayView extends Component {
   };
 
   getData() {
+    // clear the toolState they will be rendered again on next load
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+
     const { series } = this.props;
     var promises = [];
     for (let i = 0; i < series.length; i++) {
-      const promise = this.getImageStack(series[i]);
+      const promise = this.getImageStack(series[i], i);
       promises.push(promise);
     }
     Promise.all(promises).then(res => {
@@ -175,7 +178,7 @@ class DisplayView extends Component {
     return urls;
   }
 
-  getImageStack = async serie => {
+  getImageStack = async (serie, index) => {
     let stack = {};
     let cornerstoneImageIds = [];
     const imageUrls = await this.getImages(serie);
@@ -196,10 +199,9 @@ class DisplayView extends Component {
     let imageIndex;
     if (
       this.state.data.length &&
-      this.state.data[this.props.activePort].stack.currentImageIdIndex
+      this.state.data[index].stack.currentImageIdIndex
     )
-      imageIndex = this.state.data[this.props.activePort].stack
-        .currentImageIdIndex;
+      imageIndex = this.state.data[index].stack.currentImageIdIndex;
     else imageIndex = 0;
 
     if (serie.aimID) {
@@ -217,9 +219,13 @@ class DisplayView extends Component {
     if (imageAnnotations) {
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
+          const { studyUID, seriesUID } = this.props.series[
+            this.props.activePort
+          ];
           if (value.aimUid === aimID) {
             const cornerstoneImageId = getWadoImagePath(
-              this.props.series[this.props.activePort],
+              studyUID,
+              seriesUID,
               key
             );
             const ret = this.getImageIndexFromImageId(
@@ -345,7 +351,7 @@ class DisplayView extends Component {
         if (markupType === "DicomSegmentationEntity")
           this.getSegmentationData(seriesUid, studyUid, aimUid, i);
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
-        this.renderMarkup(key, value, color);
+        this.renderMarkup(key, value, color, seriesUid, studyUid);
       });
     });
   };
@@ -407,20 +413,20 @@ class DisplayView extends Component {
     return this.props.aimList[seriesUid][aimUid].color.button.background;
   };
 
-  renderMarkup = (imageId, markup, color) => {
+  renderMarkup = (imageId, markup, color, seriesUid, studyUid) => {
     const type = markup.markupType;
     switch (type) {
       case "TwoDimensionPolyline":
-        this.renderPolygon(imageId, markup, color);
+        this.renderPolygon(imageId, markup, color, seriesUid, studyUid);
         break;
       case "TwoDimensionMultiPoint":
-        this.renderLine(imageId, markup, color);
+        this.renderLine(imageId, markup, color, seriesUid, studyUid);
         break;
       case "TwoDimensionCircle":
-        this.renderCircle(imageId, markup, color);
+        this.renderCircle(imageId, markup, color, seriesUid, studyUid);
         break;
       case "TwoDimensionPoint":
-        this.renderPoint(imageId, markup, color);
+        this.renderPoint(imageId, markup, color, seriesUid, studyUid);
         break;
       default:
         return;
@@ -434,11 +440,8 @@ class DisplayView extends Component {
       toolState[imageId] = { ...toolState[imageId], [tool]: { data: [] } };
   };
 
-  renderLine = (imageId, markup, color) => {
-    const imgId = getWadoImagePath(
-      this.props.series[this.props.activePort],
-      imageId
-    );
+  renderLine = (imageId, markup, color, seriesUid, studyUid) => {
+    const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
     const data = JSON.parse(JSON.stringify(line));
     data.color = color;
     data.aimId = markup.aimUid;
@@ -449,6 +452,7 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
+    const csTools = cornerstoneTools.globalImageIdSpecificToolStateManager;
   };
 
   createLinePoints = (data, points) => {
@@ -458,11 +462,8 @@ class DisplayView extends Component {
     data.handles.end.y = points[1].y.value;
   };
 
-  renderPolygon = (imageId, markup, color) => {
-    const imgId = getWadoImagePath(
-      this.props.series[this.props.activePort],
-      imageId
-    );
+  renderPolygon = (imageId, markup, color, seriesUid, studyUid) => {
+    const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
     const data = JSON.parse(JSON.stringify(freehand));
     data.color = color;
     data.aimId = markup.aimUid;
@@ -493,11 +494,8 @@ class DisplayView extends Component {
     data.handles.points = [...freehandPoints];
   };
 
-  renderPoint = (imageId, markup, color) => {
-    const imgId = getWadoImagePath(
-      this.props.series[this.props.activePort],
-      imageId
-    );
+  renderPoint = (imageId, markup, color, seriesUid, studyUid) => {
+    const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
     const data = JSON.parse(JSON.stringify(probe));
     data.color = color;
     data.aimId = markup.aimUid;
@@ -511,9 +509,8 @@ class DisplayView extends Component {
     );
   };
 
-  renderCircle = (imageId, markup, color) => {
-    const { series, activePort } = this.props;
-    const imgId = getWadoImagePath(series[activePort], imageId);
+  renderCircle = (imageId, markup, color, seriesUid, studyUid) => {
+    const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
     const data = JSON.parse(JSON.stringify(circle));
     data.color = color;
     data.aimId = markup.aimUid;
