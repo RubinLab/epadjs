@@ -286,6 +286,7 @@ class AimEditor extends Component {
 
   getNewMarkups = () => {
     const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    console.log("Tool state", toolState);
     const markedImageIds = this.getMarkedImageIds();
     // check for markups
     var shapeIndex = 1;

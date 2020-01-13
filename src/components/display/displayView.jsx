@@ -439,6 +439,7 @@ class DisplayView extends Component {
     const data = JSON.parse(JSON.stringify(line));
     data.color = color;
     data.aimId = markup.aimUid;
+    data.invalidated = true;
     this.createLinePoints(data, markup.coordinates);
     const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imgId, "Length");
@@ -461,6 +462,7 @@ class DisplayView extends Component {
     const data = JSON.parse(JSON.stringify(freehand));
     data.color = color;
     data.aimId = markup.aimUid;
+    data.invalidated = true;
     this.createPolygonPoints(data, markup.coordinates);
     const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imgId, "FreehandRoi");
