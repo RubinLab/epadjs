@@ -201,8 +201,7 @@ class DisplayView extends Component {
       this.state.data.length &&
       this.state.data[index].stack.currentImageIdIndex
     )
-      imageIndex = this.state.data[this.props.activePort].stack
-        .currentImageIdIndex;
+      imageIndex = this.state.data[index].stack.currentImageIdIndex;
     else imageIndex = 0;
 
     if (serie.aimID) {
@@ -218,7 +217,8 @@ class DisplayView extends Component {
 
   getImageIndex = (serie, cornerstoneImageIds) => {
     let { aimID, imageAnnotations } = serie;
-    const { studyUID, seriesUID } = this.props.activePort;
+    const { series, activePort } = this.props;
+    const { studyUid, seriesUid } = series[activePort];
     if (imageAnnotations) {
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
