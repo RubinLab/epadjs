@@ -207,6 +207,7 @@ class DisplayView extends Component {
     if (serie.aimID) {
       console.log("Serie", serie);
       imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+      console.log("Aim selected, imageIndex is:", imageIndex);
       // TODO: dispatch an event to clear aimId from the serie not to jump to that image again and again
     }
 
@@ -218,16 +219,19 @@ class DisplayView extends Component {
   getImageIndex = (serie, cornerstoneImageIds) => {
     let { aimID, imageAnnotations } = serie;
     const { series, activePort } = this.props;
-    const { studyUid, seriesUid } = series[activePort];
+    console.log("Props", this.props);
+    const { studyUID, seriesUID } = series[activePort];
+    console.log("Study Uid, seriesUid", studyUID, seriesUID);
     if (imageAnnotations) {
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
           if (value.aimUid === aimID) {
             const cornerstoneImageId = getWadoImagePath(
-              studyUid,
-              seriesUid,
+              studyUID,
+              seriesUID,
               key
             );
+            console.log("Image id is", cornerstoneImageId);
             const ret = this.getImageIndexFromImageId(
               cornerstoneImageIds,
               cornerstoneImageId
