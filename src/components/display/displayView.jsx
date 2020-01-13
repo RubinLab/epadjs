@@ -525,7 +525,17 @@ class DisplayView extends Component {
   };
 
   closeAimEditor = () => {
+    var answer = window.confirm(
+      "All unsaved data will be lost! Do you want to continue?"
+    );
+    if (!answer) {
+      return;
+    }
     this.setState({ showAimEditor: false, selectedAim: undefined });
+    // clear all unsaved markups by calling getData
+    this.getData();
+    const { element } = cornerstone.getEnabledElements()[this.props.activePort];
+    cornerstone.updateImage(element);
   };
 
   handleHideAnnotations = () => {
