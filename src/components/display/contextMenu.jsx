@@ -3,17 +3,15 @@ import { connect } from "react-redux";
 import { Menu, Item, Separator, Submenu } from "react-contexify";
 import "react-contexify/dist/ReactContexify.min.css";
 import { closeSerie } from "../annotationsList/action";
-import cornerstone from "cornerstone-core";
-import cornerstoneTools from "../../cornerstone-tools";
 
 class ContextMenu extends Component {
   render() {
     return (
       <Menu id="menu_id">
-        <Submenu label="Draw">
+        {/* <Submenu label="Draw">
           <Item onClick={this.onClick}>
             Point &nbsp;&nbsp;&nbsp;
-            {/* <FiZo,omIn /> */}
+            <FiZoomIn />
           </Item>
           <Item onClick={this.onClick}>Length</Item>
           <Item onClick={this.onClick}>Ellipse</Item>
@@ -22,11 +20,11 @@ class ContextMenu extends Component {
           <Item onClick={this.onClick}>Sculpt</Item>
           <Item onClick={this.onClick}>Brush</Item>
           <Item onClick={this.onClick}>Eraser</Item>
-        </Submenu>
-        <Separator />
-        <Item onClick={this.props.onAnnotate}>Annotate</Item>
+        </Submenu> */}
+        {/* <Separator /> */}
+        {/* <Item onClick={this.props.onAnnotate}>Annotate</Item> */}
         <Item onClick={this.closeViewport}>Close</Item>
-        <Item onClick={this.onClick}>Download</Item>
+        {/* <Item onClick={this.onClick}>Download</Item> */}
       </Menu>
     );
   }

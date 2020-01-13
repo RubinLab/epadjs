@@ -122,9 +122,11 @@ class DisplayView extends Component {
 
   async componentDidUpdate(prevProps) {
     if (
-      prevProps.series !== this.props.series &&
-      prevProps.loading === true &&
-      this.props.loading === false
+      (prevProps.series !== this.props.series &&
+        prevProps.loading === true &&
+        this.props.loading === false) ||
+      (prevProps.series.length !== this.props.series.length &&
+        this.props.loading === false)
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
