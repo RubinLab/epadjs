@@ -76,7 +76,7 @@ class AimEditor extends Component {
         <button type="button" onClick={this.save}>
           Save
         </button>
-        <button type="button" onClick={this.cancel}>
+        <button type="button" onClick={this.props.onCancel}>
           Cancel
         </button>
       </div>
@@ -281,6 +281,7 @@ class AimEditor extends Component {
         this.props.dispatch(updatePatientOnAimSave(aimRefs));
       })
       .catch(error => console.log(error));
+    this.props.onCancel();
   };
 
   getNewMarkups = () => {

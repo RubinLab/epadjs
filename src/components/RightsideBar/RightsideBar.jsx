@@ -74,7 +74,7 @@ class Rightsidebar extends Component {
               <div className="AimEditor-Wrapper">
                 <AimEditor
                   aimId={this.props.selectedAim}
-                  // onCancel={this.closeAimEditor}
+                  onCancel={this.props.onCancel}
                   hasSegmentation={this.props.hasSegmentation}
                 />
               </div>
