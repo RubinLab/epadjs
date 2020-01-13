@@ -206,6 +206,7 @@ class DisplayView extends Component {
     else imageIndex = 0;
 
     if (serie.aimID) {
+      console.log("Serie", serie);
       imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
       // TODO: dispatch an event to clear aimId from the serie not to jump to that image again and again
     }
@@ -217,12 +218,14 @@ class DisplayView extends Component {
 
   getImageIndex = (serie, cornerstoneImageIds) => {
     let { aimID, imageAnnotations } = serie;
+    const { series, activePort } = this.props;
     if (imageAnnotations) {
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
           if (value.aimUid === aimID) {
             const cornerstoneImageId = getWadoImagePath(
-              this.props.series[this.props.activePort],
+              series[activePort].studyUid,
+              series[activePort].seriesUid,
               key
             );
             const ret = this.getImageIndexFromImageId(
@@ -438,7 +441,7 @@ class DisplayView extends Component {
   };
 
   renderLine = (imageId, markup, color, seriesUid, studyUid) => {
-    const imgId = getWadoImagePath(seriesUid, studyUid, imageId);
+    const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
     const data = JSON.parse(JSON.stringify(line));
     data.color = color;
     data.aimId = markup.aimUid;
@@ -460,7 +463,7 @@ class DisplayView extends Component {
   };
 
   renderPolygon = (imageId, markup, color, seriesUid, studyUid) => {
-    const imgId = getWadoImagePath(seriesUid, studyUid, imageId);
+    const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
     const data = JSON.parse(JSON.stringify(freehand));
     data.color = color;
     data.aimId = markup.aimUid;
@@ -492,7 +495,7 @@ class DisplayView extends Component {
   };
 
   renderPoint = (imageId, markup, color, seriesUid, studyUid) => {
-    const imgId = getWadoImagePath(seriesUid, studyUid, imageId);
+    const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
     const data = JSON.parse(JSON.stringify(probe));
     data.color = color;
     data.aimId = markup.aimUid;
@@ -507,7 +510,7 @@ class DisplayView extends Component {
   };
 
   renderCircle = (imageId, markup, color, seriesUid, studyUid) => {
-    const imgId = getWadoImagePath(seriesUid, studyUid, imageId);
+    const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
     const data = JSON.parse(JSON.stringify(circle));
     data.color = color;
     data.aimId = markup.aimUid;
