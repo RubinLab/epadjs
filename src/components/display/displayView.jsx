@@ -160,7 +160,7 @@ class DisplayView extends Component {
     const { series } = this.props;
     var promises = [];
     for (let i = 0; i < series.length; i++) {
-      const promise = this.getImageStack(series[i]);
+      const promise = this.getImageStack(series[i], i);
       promises.push(promise);
     }
     Promise.all(promises).then(res => {
@@ -178,7 +178,7 @@ class DisplayView extends Component {
     return urls;
   }
 
-  getImageStack = async serie => {
+  getImageStack = async (serie, index) => {
     let stack = {};
     let cornerstoneImageIds = [];
     const imageUrls = await this.getImages(serie);
@@ -199,7 +199,7 @@ class DisplayView extends Component {
     let imageIndex;
     if (
       this.state.data.length &&
-      this.state.data[this.props.activePort].stack.currentImageIdIndex
+      this.state.data[index].stack.currentImageIdIndex
     )
       imageIndex = this.state.data[this.props.activePort].stack
         .currentImageIdIndex;
@@ -218,14 +218,14 @@ class DisplayView extends Component {
 
   getImageIndex = (serie, cornerstoneImageIds) => {
     let { aimID, imageAnnotations } = serie;
-    const { series, activePort } = this.props;
+    const { studyUID, seriesUID } = this.props.activePort;
     if (imageAnnotations) {
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
           if (value.aimUid === aimID) {
             const cornerstoneImageId = getWadoImagePath(
-              series[activePort].studyUid,
-              series[activePort].seriesUid,
+              studyUid,
+              seriesUid,
               key
             );
             const ret = this.getImageIndexFromImageId(

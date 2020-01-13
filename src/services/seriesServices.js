@@ -93,11 +93,11 @@ export function downloadSeries(series) {
 }
 
 export function getSegmentation(series, imageId) {
-  const url = getWadoImagePath(
-    series.studyUID,
-    series.seriesUID,
-    imageId
-  ).replace("wadouri:", "");
+  const { studyUID, seriesUID } = series;
+  const url = getWadoImagePath(studyUID, seriesUID, imageId).replace(
+    "wadouri:",
+    ""
+  );
   console.log("URL is", url);
   return http.get(url, { responseType: "arraybuffer" });
 }
