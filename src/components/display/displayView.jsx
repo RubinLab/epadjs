@@ -319,15 +319,18 @@ class DisplayView extends Component {
   };
 
   handleMarkupSelected = event => {
-    if (
-      this.props.aimList[this.props.series[this.props.activePort].seriesUID][
-        event.detail
-      ]
-    ) {
+    console.log("event", event);
+    const { aimList, series, activePort } = this.props;
+    console.log("props", this.props);
+    console.log("Aim list, series, activePort", aimList, series, activePort);
+    if (aimList[series[activePort].seriesUID][event.detail]) {
+      console.log("Yes it has");
       const aimJson = this.props.aimList[
         this.props.series[this.props.activePort].seriesUID
       ][event.detail].json;
+      console.log("aimJson", aimJson);
       const markupTypes = this.getMarkupTypesForAim(event.detail);
+      console.log("markupTypes", markupTypes);
       aimJson["markupType"] = [...markupTypes];
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
         this.setState({ showAimEditor: false });
