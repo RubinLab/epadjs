@@ -39,7 +39,6 @@ class AimEditor extends Component {
   }
 
   componentDidMount() {
-    console.log("Mounted", this.props.aimId);
     const element = document.getElementById("questionaire");
     // const { data: templates } = await getTemplates();
     const templatePromise = new Promise(resolve => {

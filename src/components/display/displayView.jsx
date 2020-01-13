@@ -205,9 +205,7 @@ class DisplayView extends Component {
     else imageIndex = 0;
 
     if (serie.aimID) {
-      console.log("Serie", serie);
       imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
-      console.log("Aim selected, imageIndex is:", imageIndex);
       // TODO: dispatch an event to clear aimId from the serie not to jump to that image again and again
     }
 
@@ -219,9 +217,7 @@ class DisplayView extends Component {
   getImageIndex = (serie, cornerstoneImageIds) => {
     let { aimID, imageAnnotations } = serie;
     const { series, activePort } = this.props;
-    console.log("Props", this.props);
     const { studyUID, seriesUID } = series[activePort];
-    console.log("Study Uid, seriesUid", studyUID, seriesUID);
     if (imageAnnotations) {
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
@@ -231,7 +227,6 @@ class DisplayView extends Component {
               seriesUID,
               key
             );
-            console.log("Image id is", cornerstoneImageId);
             const ret = this.getImageIndexFromImageId(
               cornerstoneImageIds,
               cornerstoneImageId
@@ -319,18 +314,10 @@ class DisplayView extends Component {
   };
 
   handleMarkupSelected = event => {
-    console.log("event", event);
     const { aimList, series, activePort } = this.props;
-    console.log("props", this.props);
-    console.log("Aim list, series, activePort", aimList, series, activePort);
     if (aimList[series[activePort].seriesUID][event.detail]) {
-      console.log("Yes it has");
-      const aimJson = this.props.aimList[
-        this.props.series[this.props.activePort].seriesUID
-      ][event.detail].json;
-      console.log("aimJson", aimJson);
+      const aimJson = aimList[series[activePort].seriesUID][event.detail].json;
       const markupTypes = this.getMarkupTypesForAim(event.detail);
-      console.log("markupTypes", markupTypes);
       aimJson["markupType"] = [...markupTypes];
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
         this.setState({ showAimEditor: false });
@@ -578,7 +565,7 @@ class DisplayView extends Component {
       <React.Fragment>
         <RightsideBar
           showAimEditor={this.state.showAimEditor}
-          aimId={this.state.selectedAim}
+          selectedAim={this.state.selectedAim}
           onCancel={this.closeAimEditor}
           hasSegmentation={this.state.hasSegmentation}
         >
