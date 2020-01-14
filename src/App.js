@@ -575,13 +575,31 @@ class App extends Component {
         )}
         {this.state.authenticated && mode !== "lite" && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
-            <Sidebar onData={this.getProjectMap} type={this.state.viewType}>
+            <Sidebar
+              onData={this.getProjectMap}
+              type={this.state.viewType}
+              progressUpdated={progressUpdated}
+            >
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
                 <ProtectedRoute
                   path="/display"
-                  component={DisplayView}
-                  test={"test"}
+                  render={props => (
+                    <DisplayView
+                      {...props}
+                      updateProgress={this.updateProgress}
+                    />
+                  )}
+                />
+
+                <ProtectedRoute
+                  path="/search/:pid?"
+                  render={props => (
+                    <SearchView
+                      {...props}
+                      updateProgress={this.updateProgress}
+                    />
+                  )}
                 />
                 <ProtectedRoute
                   path="/search/:pid?"
@@ -603,7 +621,13 @@ class App extends Component {
                   component={ProgressView}
                 />
                 <ProtectedRoute path="/flex/:pid?" component={FlexView} />
-                <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
+                <ProtectedRoute
+                  path="/worklist/:wid?"
+                  render={props => (
+                    <Worklist {...props} projectMap={this.state.projectMap} />
+                  )}
+                />
+                {/* component={Worklist} /> */}
                 <Route path="/tools" />
                 <Route path="/edit" />
                 <Route path="/not-found" component={NotFound} />
@@ -635,33 +659,46 @@ class App extends Component {
           </div>
         )}
         {this.state.authenticated && mode === "lite" && (
-          <Switch>
-            <Route path="/logout" component={Logout} />
-            <ProtectedRoute path="/display" component={DisplayView} />
-            <Route path="/not-found" component={NotFound} />
-            <ProtectedRoute
-              path="/"
-              render={props => (
-                <SearchView
-                  {...props}
-                  updateProgress={this.updateProgress}
-                  progressUpdated={progressUpdated}
-                  expandLevel={this.state.expandLevel}
-                  getTreeExpandSingle={this.getTreeExpandSingle}
-                  getTreeExpandAll={this.getTreeExpandAll}
-                  treeExpand={treeExpand}
-                  getExpandLevel={this.getExpandLevel}
-                  expandLoading={expandLoading}
-                  updateExpandedLevelNums={this.updateExpandedLevelNums}
-                  onShrink={this.handleShrink}
-                  onCloseAll={this.handleCloseAll}
-                  treeData={this.state.treeData}
-                  getTreeData={this.getTreeData}
-                />
-              )}
-            />
-            <Redirect to="/not-found" />
-          </Switch>
+          <Sidebar
+            onData={this.getProjectMap}
+            type={this.state.viewType}
+            progressUpdated={progressUpdated}
+          >
+            <Switch>
+              <Route path="/logout" component={Logout} />
+              <ProtectedRoute path="/display" component={DisplayView} />
+              <Route path="/not-found" component={NotFound} />
+              <ProtectedRoute
+                path="/worklist/:wid?"
+                render={props => (
+                  <Worklist {...props} projectMap={this.state.projectMap} />
+                )}
+              />
+              <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
+              <ProtectedRoute
+                path="/"
+                render={props => (
+                  <SearchView
+                    {...props}
+                    updateProgress={this.updateProgress}
+                    progressUpdated={progressUpdated}
+                    expandLevel={this.state.expandLevel}
+                    getTreeExpandSingle={this.getTreeExpandSingle}
+                    getTreeExpandAll={this.getTreeExpandAll}
+                    treeExpand={treeExpand}
+                    getExpandLevel={this.getExpandLevel}
+                    expandLoading={expandLoading}
+                    updateExpandedLevelNums={this.updateExpandedLevelNums}
+                    onShrink={this.handleShrink}
+                    onCloseAll={this.handleCloseAll}
+                    treeData={this.state.treeData}
+                    getTreeData={this.getTreeData}
+                  />
+                )}
+              />
+              <Redirect to="/not-found" />
+            </Switch>
+          </Sidebar>
         )}
         {this.props.showGridFullAlert && <MaxViewAlert />}
         {/* {this.props.selection && (

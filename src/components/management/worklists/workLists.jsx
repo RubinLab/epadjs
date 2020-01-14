@@ -143,6 +143,7 @@ class WorkList extends React.Component {
       .then(() => {
         this.getWorkListData();
         this.setState({ selectAll: 0 });
+        this.props.updateProgress();
       })
       .catch(error => {
         toast.error(error.response.data.message, { autoClose: false });
@@ -156,6 +157,7 @@ class WorkList extends React.Component {
       .then(() => {
         this.setState({ deleteSingleClicked: false, singleDeleteData: null });
         this.getWorkListData();
+        this.props.updateProgress();
       })
       .catch(err => {
         this.setState({ errorMessage: err.response.data.message });
@@ -177,6 +179,7 @@ class WorkList extends React.Component {
 
   handleSaveWorklist = () => {
     this.getWorkListData();
+    this.props.updateProgress();
   };
 
   handleSingleDelete = id => {

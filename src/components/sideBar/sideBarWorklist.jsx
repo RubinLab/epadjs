@@ -20,6 +20,7 @@ import {
   clearSelection,
   changeActivePort
 } from "../annotationsList/action";
+const mode = sessionStorage.getItem("mode");
 
 const messages = {
   deleteSingle: "Remove study from the worklist? This cannot be undone.",
@@ -216,6 +217,7 @@ class WorkList extends React.Component {
         accessor: "projectName",
         sortable: true,
         resizable: true,
+        show: mode === "thick",
         Cell: original => {
           let projectName = this.clearCarets(
             original.row._original.projectName

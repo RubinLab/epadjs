@@ -345,8 +345,8 @@ class AimEditor extends Component {
             studyUID
           })
         );
-
         this.props.dispatch(updatePatientOnAimSave(aimRefs));
+        this.props.updateProgress();
       })
       .catch(error => console.log(error));
     this.props.onCancel(false);
