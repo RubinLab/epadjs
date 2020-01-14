@@ -343,6 +343,10 @@ class AimEditor extends Component {
             circles.map(circle => {
               if (!circle.aimId || circle.aimId === updatedAimId) {
                 //dont save the same markup to different aims
+                const enElem = cornerstone.getEnabledElements()[0].element;
+
+                cornerstoneTools.removeToolState(enElem, "CircleRoi", circle);
+
                 this.storeMarkupsToBeSaved(
                   imageId,
                   {

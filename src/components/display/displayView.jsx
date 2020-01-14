@@ -114,6 +114,7 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
+    console.log("CDM");
     this.getViewports();
     this.getData();
     window.addEventListener("markupSelected", this.handleMarkupSelected);
@@ -130,6 +131,7 @@ class DisplayView extends Component {
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
+      console.log("CDU");
       this.getData();
     }
   }
@@ -160,6 +162,7 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
 
     const { series } = this.props;
+    console.log("Series", series);
     var promises = [];
     for (let i = 0; i < series.length; i++) {
       const promise = this.getImageStack(series[i], i);
@@ -169,10 +172,16 @@ class DisplayView extends Component {
       this.setState({ data: res, isLoading: false });
     });
 
+    // console.log("Before erasinG toolState", cornerstoneTools);
+
+    // // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    // console.log("After erasing tool state", cornerstoneTools);
+
     series.forEach(serie => {
       if (serie.imageAnnotations)
         this.parseAims(serie.imageAnnotations, serie.seriesUID, serie.studyUID);
     });
+    // console.log("After restoring", cornerstoneTools);
   }
 
   async getImages(serie) {
