@@ -41,7 +41,6 @@ class Rightsidebar extends Component {
 
   render() {
     const { activePort, openSeries } = this.props;
-    console.log(activePort, openSeries);
     const { projectID } = openSeries[activePort];
     return (
       <React.Fragment>
@@ -78,6 +77,7 @@ class Rightsidebar extends Component {
                 <AimEditor
                   aimId={this.props.selectedAim}
                   // onCancel={this.closeAimEditor}
+                  updateProgress={this.props.updateProgress}
                   projectID={projectID}
                   hasSegmentation={this.props.hasSegmentation}
                 />

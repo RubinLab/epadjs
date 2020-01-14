@@ -8,6 +8,7 @@ import {
 } from "../../services/worklistServices";
 import { getProject } from "../../services/projectServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
+const mode = sessionStorage.getItem("mode");
 
 const messages = {
   deleteSingle: "Remove study from the worklist? This cannot be undone.",
@@ -42,13 +43,11 @@ class WorkList extends React.Component {
       this.props.match.params.wid
     );
 
-    console.log(" ---- in page ");
-    console.log(worklists);
-    console.log(this.props);
-    // for (let worklist of worklists) {
-    //   const { data: projectDetails } = await getProject(worklist.projectID);
-    //   worklist.projectName = projectDetails.name;
-    // }
+    const { projectMap } = this.props;
+    for (let worklist of worklists) {
+      worklist.projectName = projectMap[worklist.projectID];
+    }
+
     this.setState({ worklists });
   };
 
@@ -218,6 +217,7 @@ class WorkList extends React.Component {
         accessor: "projectName",
         sortable: true,
         resizable: true,
+        show: mode === "thick",
         Cell: original => {
           let projectName = this.clearCarets(
             original.row._original.projectName

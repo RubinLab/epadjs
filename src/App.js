@@ -47,7 +47,8 @@ class App extends Component {
       viewType: "search",
       lastEventId: null,
       showLog: false,
-      admin: false
+      admin: false,
+      progressUpdated: 0
     };
   }
 
@@ -92,6 +93,10 @@ class App extends Component {
       openMng: false,
       openUser: !state.openUser
     }));
+  };
+
+  updateProgress = () => {
+    this.setState(state => ({ progressUpdated: state.progressUpdated + 1 }));
   };
 
   getProjectMap = projectMap => {
@@ -265,7 +270,7 @@ class App extends Component {
   };
 
   render() {
-    const { notifications, mode } = this.state;
+    const { notifications, mode, progressUpdated } = this.state;
     let noOfUnseen;
     if (notifications) {
       noOfUnseen = notifications.reduce((all, item) => {
@@ -292,6 +297,7 @@ class App extends Component {
           <Management
             closeMenu={this.closeMenu}
             projectMap={this.state.projectMap}
+            updateProgress={this.updateProgress}
           />
         )}
         {this.state.openInfo && (
@@ -314,15 +320,33 @@ class App extends Component {
         )}
         {this.state.authenticated && mode !== "lite" && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
-            <Sidebar onData={this.getProjectMap} type={this.state.viewType}>
+            <Sidebar
+              onData={this.getProjectMap}
+              type={this.state.viewType}
+              progressUpdated={progressUpdated}
+            >
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
                 <ProtectedRoute
                   path="/display"
-                  component={DisplayView}
-                  test={"test"}
+                  render={props => (
+                    <DisplayView
+                      {...props}
+                      updateProgress={this.updateProgress}
+                    />
+                  )}
                 />
-                <ProtectedRoute path="/search/:pid?" component={SearchView} />
+
+                <ProtectedRoute
+                  path="/search/:pid?"
+                  render={props => (
+                    <SearchView
+                      {...props}
+                      updateProgress={this.updateProgress}
+                    />
+                  )}
+                />
+
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute
                   path="/progress/:wid?"
@@ -332,7 +356,7 @@ class App extends Component {
                 <ProtectedRoute
                   path="/worklist/:wid?"
                   render={props => (
-                    <Worklist projectMap={this.state.projectMap} />
+                    <Worklist {...props} projectMap={this.state.projectMap} />
                   )}
                 />
                 {/* component={Worklist} /> */}
@@ -343,7 +367,12 @@ class App extends Component {
                   from="/"
                   exact
                   to="/search"
-                  component={SearchView}
+                  render={props => (
+                    <SearchView
+                      {...props}
+                      updateProgress={this.updateProgress}
+                    />
+                  )}
                 />
 
                 <Redirect to="/not-found" />
@@ -353,14 +382,28 @@ class App extends Component {
           </div>
         )}
         {this.state.authenticated && mode === "lite" && (
-          <Sidebar onData={this.getProjectMap} type={this.state.viewType}>
+          <Sidebar
+            onData={this.getProjectMap}
+            type={this.state.viewType}
+            progressUpdated={progressUpdated}
+          >
             <Switch>
               <Route path="/logout" component={Logout} />
               <ProtectedRoute path="/display" component={DisplayView} />
               <Route path="/not-found" component={NotFound} />
-              <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
+              <ProtectedRoute
+                path="/worklist/:wid?"
+                render={props => (
+                  <Worklist {...props} projectMap={this.state.projectMap} />
+                )}
+              />
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
-              <ProtectedRoute path="/" component={SearchView} />
+              <ProtectedRoute
+                path="/"
+                render={props => (
+                  <SearchView {...props} updateProgress={this.updateProgress} />
+                )}
+              />
               {/* <ProtectedRoute
                 from="/"
                 exact
@@ -381,7 +424,7 @@ class App extends Component {
 }
 
 const mapStateToProps = state => {
-  console.log(state.annotationsListReducer);
+  // console.log(state.annotationsListReducer);
   // console.log(state.managementReducer);
   const {
     showGridFullAlert,

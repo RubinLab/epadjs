@@ -30,10 +30,10 @@ class Sidebar extends Component {
       worklistsAssigned: [],
       worklistsCreated: [],
       pacs: [],
-      width: "200px",
-      marginLeft: "200px",
-      buttonDisplay: "none",
-      open: true,
+      width: mode === "thick" ? "200px" : "0",
+      marginLeft: mode === "thick" ? "200px" : "0",
+      buttonDisplay: mode === "thick" ? "none" : "block",
+      open: mode === "thick",
       index: 0,
       pId: null,
       progressView: [false, false]
@@ -53,6 +53,10 @@ class Sidebar extends Component {
         this.props.onData(projectMap);
       }
     }
+    this.getWorklistandProgressData();
+  };
+
+  getWorklistandProgressData = async () => {
     const { data: worklistsAssigned } = await getWorklistsOfAssignee(
       sessionStorage.getItem("username")
     );
@@ -84,7 +88,12 @@ class Sidebar extends Component {
       })
       .catch(err => console.log(err));
   };
-  componentDidUpdate = prevProps => {};
+
+  componentDidUpdate = prevProps => {
+    if (prevProps.progressUpdated !== this.props.progressUpdated) {
+      this.getWorklistandProgressData();
+    }
+  };
 
   handleClose = () => {
     this.setState({

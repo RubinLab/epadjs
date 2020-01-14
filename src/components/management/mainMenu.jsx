@@ -78,6 +78,7 @@ class MainMenu extends React.Component {
           <WorkLists
             selection={this.state.selection}
             onClose={this.handleCloseModal}
+            updateProgress={this.props.updateProgress}
           />
         );
       case "Annotations":
@@ -85,6 +86,7 @@ class MainMenu extends React.Component {
           <Annotations
             selection={this.state.selection}
             onClose={this.handleCloseModal}
+            updateProgress={this.props.updateProgress}
           />
         );
       case "Templates":

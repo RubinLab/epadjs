@@ -574,6 +574,7 @@ class DisplayView extends Component {
           aimId={this.state.selectedAim}
           onCancel={this.closeAimEditor}
           hasSegmentation={this.state.hasSegmentation}
+          updateProgress={this.props.updateProgress}
         >
           {!this.state.isLoading &&
             Object.entries(this.props.series).length &&

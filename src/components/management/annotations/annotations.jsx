@@ -149,8 +149,6 @@ class Annotations extends React.Component {
   deleteAllSelected = async () => {
     let newSelected = Object.assign({}, this.state.selected);
     const promiseArr = [];
-    console.log(" )))))))))))");
-    console.log(newSelected);
     for (let annotation in newSelected) {
       promiseArr.push(
         deleteAnnotation(null, annotation, newSelected[annotation].projectID)
@@ -160,6 +158,7 @@ class Annotations extends React.Component {
       .then(() => {
         this.getAnnotationsData(this.state.projectID);
         this.setState({ selectAll: 0, selected: {} });
+        this.props.updateProgress();
       })
       .catch(error => {
         toast.error(error.response.data.message, { autoClose: false });

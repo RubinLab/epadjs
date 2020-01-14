@@ -95,12 +95,8 @@ class SearchView extends Component {
   };
 
   getData = async () => {
-    // if (this.props.match.params.pid) {
     const { data: data } = await getSubjects(this.props.match.params.pid);
     return data;
-    // } else {
-    //   return [];
-    // }
   };
 
   handleExpand = async () => {
@@ -214,6 +210,7 @@ class SearchView extends Component {
           this.updateStoreOnAnnotationDelete(arr);
         }
         this.props.dispatch(clearSelection());
+        this.props.updateProgress();
       })
       .catch(err => {
         console.log(err);
@@ -769,7 +766,10 @@ class SearchView extends Component {
         )}
 
         {this.state.showWorklists && (
-          <Worklists onClose={this.handleWorklistClick} />
+          <Worklists
+            onClose={this.handleWorklistClick}
+            updateProgress={this.props.updateProgress}
+          />
         )}
         {this.state.newSelected && this.handleNewSelected()}
       </>

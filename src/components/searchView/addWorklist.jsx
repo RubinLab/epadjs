@@ -49,7 +49,7 @@ class WorklistAdd extends React.Component {
     });
     Promise.all(promises)
       .then(() => {
-        console.log("yeap");
+        this.props.updateProgress();
       })
       .catch(err => console.log(err));
   };
@@ -67,7 +67,9 @@ class WorklistAdd extends React.Component {
     });
 
     Promise.all(promises)
-      .then(() => {})
+      .then(() => {
+        this.props.updateProgress();
+      })
       .catch(err => console.log(err));
   };
 
