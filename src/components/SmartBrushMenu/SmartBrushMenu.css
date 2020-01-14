@@ -1,4 +1,4 @@
-.pop-up {
+.smb-pop-up {
     position: absolute;
     background-color: #3a3f44;
     padding: 10px 20px;
@@ -8,7 +8,7 @@
     outline-color: black;
     width: 270px;
     right: 20px;
-    top: 175px;
+    top: 250px;
     z-index: 1000;
 }
 

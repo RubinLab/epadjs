@@ -53,7 +53,7 @@ export class WindowLevel extends Component {
         />
       </div>
     );
-    console.log(winLevel);
+    // console.log(winLevel);
     const presets = [
       { name: "CT Abdomen (L:40, W:350)", level: 40, window: 350 },
       { name: "CT Bone (L:300, W:1500)", level: 300, window: 1500 },

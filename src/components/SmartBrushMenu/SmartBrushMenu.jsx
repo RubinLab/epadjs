@@ -34,7 +34,7 @@ class SmartBrushMenu extends Component {
   render() {
     return (
       <Draggable>
-        <div className="segmentation-menu">
+        <div className="smb-pop-up">
           <div className="buttonLabel">
             <span>Preset Brushes</span>
           </div>
