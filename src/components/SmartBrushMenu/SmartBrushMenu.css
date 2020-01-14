@@ -1,0 +1,32 @@
+.pop-up {
+    position: absolute;
+    background-color: #3a3f44;
+    padding: 10px 20px;
+    outline: solid;
+    outline-width: 1px;
+    background-color: #3a3f44;
+    outline-color: black;
+    width: 270px;
+    right: 20px;
+    top: 175px;
+    z-index: 1000;
+}
+
+label {
+    font-weight: 400;
+}
+
+hr {
+    margin-top: 1em;
+    margin-bottom: 0em;
+}
+
+h5 {
+    font-size: 2em;
+    margin-bottom: 0em;
+}
+
+a {
+    color: red;
+    text-align: right !important;
+}
