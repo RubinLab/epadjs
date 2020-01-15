@@ -114,7 +114,6 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
-    console.log("CDM");
     this.getViewports();
     this.getData();
     window.addEventListener("markupSelected", this.handleMarkupSelected);
@@ -131,7 +130,6 @@ class DisplayView extends Component {
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
-      console.log("CDU");
       this.getData();
     }
   }
@@ -162,7 +160,6 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
 
     const { series } = this.props;
-    console.log("Series", series);
     var promises = [];
     for (let i = 0; i < series.length; i++) {
       const promise = this.getImageStack(series[i], i);
@@ -172,16 +169,11 @@ class DisplayView extends Component {
       this.setState({ data: res, isLoading: false });
     });
 
-    // console.log("Before erasinG toolState", cornerstoneTools);
-
-    // // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
-    // console.log("After erasing tool state", cornerstoneTools);
-
     series.forEach(serie => {
+      // if (serie.aimID) this.openAimEditor(serie);
       if (serie.imageAnnotations)
         this.parseAims(serie.imageAnnotations, serie.seriesUID, serie.studyUID);
     });
-    // console.log("After restoring", cornerstoneTools);
   }
 
   async getImages(serie) {
@@ -215,14 +207,28 @@ class DisplayView extends Component {
       imageIndex = this.state.data[index].stack.currentImageIdIndex;
     else imageIndex = 0;
 
+    // if serie is being open from the annotation jump to that image and load the aim editor
     if (serie.aimID) {
       imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
-      // TODO: dispatch an event to clear aimId from the serie not to jump to that image again and again
+      this.openAimEditor(serie);
     }
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
     return { stack };
+  };
+
+  openAimEditor = serie => {
+    const { aimList } = this.props;
+    const { aimID, seriesUID } = serie;
+    if (Object.entries(aimList).length !== 0) {
+      const aimJson = aimList[seriesUID][aimID].json;
+      const markupTypes = this.getMarkupTypesForAim(aimID);
+      aimJson["markupType"] = [...markupTypes];
+      if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
+        this.setState({ showAimEditor: false });
+      this.setState({ showAimEditor: true, selectedAim: aimJson });
+    }
   };
 
   getImageIndex = (serie, cornerstoneImageIds) => {

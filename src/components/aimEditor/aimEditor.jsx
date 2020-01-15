@@ -64,9 +64,11 @@ class AimEditor extends Component {
 
   getImage = () => {
     const { activePort } = this.props;
-    return cornerstone.getImage(
-      cornerstone.getEnabledElements()[activePort]["element"]
-    );
+    if (cornerstone.getEnabledElements().length)
+      return cornerstone.getImage(
+        cornerstone.getEnabledElements()[activePort]["element"]
+      );
+    return "";
   };
 
   render() {
@@ -280,7 +282,6 @@ class AimEditor extends Component {
 
   getNewMarkups = () => {
     const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    console.log("Tool state", toolState);
     const markedImageIds = this.getMarkedImageIds();
     // check for markups
     var shapeIndex = 1;
