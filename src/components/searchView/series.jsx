@@ -124,7 +124,8 @@ class Series extends Component {
   expandCurrentLevel = () => {
     const expanded = {};
     for (let i = 0; i < this.state.data.length; i++) {
-      expanded[i] = this.state.data[i].numberOfAnnotations ? true : false;
+      // expanded[i] = this.state.data[i].numberOfAnnotations ? true : false;
+      expanded[i] = this.state.data[i];
     }
     this.setState({ expanded });
   };
@@ -506,6 +507,7 @@ class Series extends Component {
                       seriesDescription={row.original.seriesDescription}
                       update={this.props.update}
                       getNumOfSeriesLoaded={this.props.getNumOfSeriesLoaded}
+                      expandLevel={this.props.expandLevel}
                     />
                   </div>
                 );

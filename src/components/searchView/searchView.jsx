@@ -758,17 +758,21 @@ class SearchView extends Component {
       numOfPresentStudies,
       numOfPatientsLoaded,
       numOfStudiesLoaded,
+      numOfPresentSeries,
+      numOfSeriesLoaded,
       expandLevel
     } = this.state;
 
     const patientExpandComplete = numOfsubjects === numOfPatientsLoaded;
-    const StudyExpandComplete = numOfPresentStudies === numOfStudiesLoaded;
-    // const SeriesExpandComplete = numOfPresentSeries === numOfSeriesLoaded;
+    const studyExpandComplete = numOfPresentStudies === numOfStudiesLoaded;
+    const seriesExpandComplete = numOfPresentSeries === numOfSeriesLoaded;
     let expanding;
     if (expandLevel === 1) {
       expanding = !patientExpandComplete;
     } else if (expandLevel === 2) {
-      expanding = !StudyExpandComplete;
+      expanding = !studyExpandComplete;
+    } else if (expandLevel === 3) {
+      expanding = !seriesExpandComplete;
     }
 
     return (
@@ -786,6 +790,7 @@ class SearchView extends Component {
           status={status}
           showDelete={showDelete}
           project={this.props.match.params.pid}
+          expanding={expanding}
         />
         {this.state.isSerieSelectionOpen && !this.props.loading && (
           <ProjectModal

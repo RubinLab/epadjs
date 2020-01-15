@@ -55,7 +55,7 @@ class Annotations extends Component {
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
     this.props.getNumOfSeriesLoaded();
-    if (data.length === 0) {
+    if (data.length === 0 && this.props.expandLevel !== 3) {
       toast.info("No annotations found", {
         position: "top-right",
         autoClose: 5000,
