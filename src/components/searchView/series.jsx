@@ -86,6 +86,7 @@ class Series extends Component {
     );
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
+    this.props.getNumOfStudiesLoaded(data.length);
     if (data.length === 0) {
       toast.info("No serie found", {
         position: "top-right",
@@ -123,7 +124,8 @@ class Series extends Component {
   expandCurrentLevel = () => {
     const expanded = {};
     for (let i = 0; i < this.state.data.length; i++) {
-      expanded[i] = this.state.data[i].numberOfAnnotations ? true : false;
+      // expanded[i] = this.state.data[i].numberOfAnnotations ? true : false;
+      expanded[i] = this.state.data[i];
     }
     this.setState({ expanded });
   };
@@ -504,6 +506,8 @@ class Series extends Component {
                       studyDescription={this.props.studyDescription}
                       seriesDescription={row.original.seriesDescription}
                       update={this.props.update}
+                      getNumOfSeriesLoaded={this.props.getNumOfSeriesLoaded}
+                      expandLevel={this.props.expandLevel}
                     />
                   </div>
                 );
