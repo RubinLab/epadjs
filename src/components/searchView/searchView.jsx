@@ -160,6 +160,7 @@ class SearchView extends Component {
         this.setState({ numOfPresentSeries: 0, numOfStudiesLoaded: 0 });
       }
       if (expandLevel === 3) {
+        this.setState({ numOfSeriesLoaded: 0 });
       }
     }
   };
