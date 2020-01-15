@@ -33,7 +33,7 @@ import {
   UPDATE_PATIENT_AIM_SAVE,
   UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
-  CLEAR_ACTIVEAIMID,
+  CLEAR_ACTIVE_AIMID,
   colors,
   commonLabels
 } from "./types";
@@ -50,7 +50,7 @@ export const clearGrid = item => {
 };
 
 export const clearActivePortAimID = () => {
-  return { type: CLEAR_ACTIVEAIMID };
+  return { type: CLEAR_ACTIVE_AIMID };
 };
 
 export const clearAimId = () => {

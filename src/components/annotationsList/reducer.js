@@ -32,7 +32,7 @@ import {
   UPDATE_PATIENT_AIM_SAVE,
   UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
-  CLEAR_ACTIVEAIMID
+  CLEAR_ACTIVE_AIMID
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -79,7 +79,7 @@ const asyncReducer = (state = initialState, action) => {
         serie.aimID = null;
       }
       return { ...state, openSeries: aimIDClearedOPenSeries };
-    case CLEAR_ACTIVEAIMID:
+    case CLEAR_ACTIVE_AIMID:
       aimIDClearedOPenSeries = [...state.openSeries];
       aimIDClearedOPenSeries[state.activePort].aimID = null;
       return { ...state, openSeries: aimIDClearedOPenSeries };
