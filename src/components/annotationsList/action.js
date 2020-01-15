@@ -33,6 +33,7 @@ import {
   UPDATE_PATIENT_AIM_SAVE,
   UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
+  CLEAR_ACTIVE_AIMID,
   colors,
   commonLabels
 } from "./types";
@@ -46,6 +47,10 @@ import {
 import { getImageIdAnnotations } from "../aimEditor/aimHelper.js";
 export const clearGrid = item => {
   return { type: CLEAR_GRID };
+};
+
+export const clearActivePortAimID = () => {
+  return { type: CLEAR_ACTIVE_AIMID };
 };
 
 export const clearAimId = () => {
