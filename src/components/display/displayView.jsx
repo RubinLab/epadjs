@@ -209,6 +209,7 @@ class DisplayView extends Component {
 
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (serie.aimID) {
+      console.log("Serie", serie);
       imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
       this.openAimEditor(serie);
     }

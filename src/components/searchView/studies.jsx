@@ -78,6 +78,7 @@ class Studies extends Component {
     );
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
+    this.props.getNumOfPatientsLoaded(data.length);
     if (data.length === 0) {
       toast.info("No study found", {
         position: "top-right",
@@ -539,6 +540,8 @@ class Studies extends Component {
                     studyDescription={row.original.studyDescription}
                     update={this.props.update}
                     expandLevel={this.props.expandLevel}
+                    getNumOfStudiesLoaded={this.props.getNumOfStudiesLoaded}
+                    getNumOfSeriesLoaded={this.props.getNumOfSeriesLoaded}
                   />
                 </div>
               );

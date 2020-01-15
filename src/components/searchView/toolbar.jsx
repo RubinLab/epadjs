@@ -12,6 +12,8 @@ import {
 import { FiMinimize2 } from "react-icons/fi";
 import ReactTooltip from "react-tooltip";
 import { BarLoader } from "react-spinners";
+import Spinner from "../common/circleSpinner";
+
 const mode = sessionStorage.getItem("mode");
 
 const toolBar = props => {
@@ -94,23 +96,28 @@ const toolBar = props => {
       </div>
       {/* {mode !== "lite" && ( */}
       {/* <div className="searchView-toolbar__group"> */}
-      <div className="searchView-toolbar__icon" onClick={props.onExpand}>
-        <div>
-          <FaLevelDownAlt
-            style={{ fontSize: "1.2rem" }}
-            data-tip
-            data-for="forward-icon"
-          />
+      {props.expanding ? (
+        <Spinner loading={props.expanding} unit="rem" size={2} />
+      ) : (
+        <div className="searchView-toolbar__icon" onClick={props.onExpand}>
+          <div>
+            <FaLevelDownAlt
+              style={{ fontSize: "1.2rem" }}
+              data-tip
+              data-for="forward-icon"
+            />
+          </div>
+
+          <ReactTooltip
+            id="forward-icon"
+            place="bottom"
+            type="info"
+            delayShow={1500}
+          >
+            <span>Expand to Next Level</span>
+          </ReactTooltip>
         </div>
-        <ReactTooltip
-          id="forward-icon"
-          place="bottom"
-          type="info"
-          delayShow={1500}
-        >
-          <span>Expand to Next Level</span>
-        </ReactTooltip>
-      </div>
+      )}
       <div className="searchView-toolbar__icon" onClick={props.onShrink}>
         <div>
           <FaLevelUpAlt

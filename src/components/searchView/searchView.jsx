@@ -65,7 +65,12 @@ class SearchView extends Component {
       missingAnns: [],
       expandLevel: 0,
       expanded: {},
-      showNew: false
+      showNew: false,
+      numOfPresentStudies: 0,
+      numOfPresentSeries: 0,
+      numOfPatientsLoaded: 0,
+      numOfStudiesLoaded: 0,
+      numOfSeriesLoaded: 0
     };
   }
 
@@ -103,6 +108,26 @@ class SearchView extends Component {
     // }
   };
 
+  getNumOfPatientsLoaded = numOfStudies => {
+    this.setState(state => ({
+      numOfPatientsLoaded: state.numOfPatientsLoaded + 1,
+      numOfPresentStudies: state.numOfPresentStudies + numOfStudies
+    }));
+  };
+
+  getNumOfStudiesLoaded = numOfSeries => {
+    this.setState(state => ({
+      numOfStudiesLoaded: state.numOfStudiesLoaded + 1,
+      numOfPresentSeries: state.numOfPresentSeries + numOfSeries
+    }));
+  };
+
+  getNumOfSeriesLoaded = () => {
+    this.setState(state => ({
+      numOfSeriesLoaded: state.numOfSeriesLoaded + 1
+    }));
+  };
+
   handleExpand = async () => {
     if (this.state.expandLevel < 3) {
       this.setState(state => ({ expandLevel: state.expandLevel + 1 }));
@@ -115,16 +140,40 @@ class SearchView extends Component {
   };
 
   handleShrink = async () => {
-    if (this.state.expandLevel > 0) {
+    const { expandLevel } = this.state;
+    if (expandLevel > 0) {
       await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
-      if (this.state.expandLevel === 0) {
-        this.setState({ expanded: {} });
+      if (expandLevel === 0) {
+        this.setState({
+          expanded: {},
+          numOfPresentStudies: 0,
+          numOfPresentSeries: 0,
+          numOfPatientsLoaded: 0,
+          numOfStudiesLoaded: 0,
+          numOfSeriesLoaded: 0
+        });
+      }
+      if (expandLevel === 1) {
+        this.setState({ numOfPresentStudies: 0, numOfPatientsLoaded: 0 });
+      }
+      if (expandLevel === 2) {
+        this.setState({ numOfPresentSeries: 0, numOfStudiesLoaded: 0 });
+      }
+      if (expandLevel === 3) {
+        this.setState({ numOfSeriesLoaded: 0 });
       }
     }
   };
 
   handleCloseAll = () => {
-    this.setState({ expandLevel: 0 });
+    this.setState({
+      expandLevel: 0,
+      numOfPresentStudies: 0,
+      numOfPresentSeries: 0,
+      numOfPatientsLoaded: 0,
+      numOfStudiesLoaded: 0,
+      numOfSeriesLoaded: 0
+    });
   };
 
   keepExpandedPatientsInOrder = newSubjects => {
@@ -704,6 +753,29 @@ class SearchView extends Component {
         this.props.selectedStudies.constructor === Object) ||
       (Object.entries(this.props.selectedSeries).length > 0 &&
         this.props.selectedSeries.constructor === Object);
+
+    const {
+      numOfsubjects,
+      numOfPresentStudies,
+      numOfPatientsLoaded,
+      numOfStudiesLoaded,
+      numOfPresentSeries,
+      numOfSeriesLoaded,
+      expandLevel
+    } = this.state;
+
+    const patientExpandComplete = numOfsubjects === numOfPatientsLoaded;
+    const studyExpandComplete = numOfPresentStudies === numOfStudiesLoaded;
+    const seriesExpandComplete = numOfPresentSeries === numOfSeriesLoaded;
+    let expanding;
+    if (expandLevel === 1) {
+      expanding = !patientExpandComplete;
+    } else if (expandLevel === 2) {
+      expanding = !studyExpandComplete;
+    } else if (expandLevel === 3) {
+      expanding = !seriesExpandComplete;
+    }
+
     return (
       <>
         <Toolbar
@@ -719,6 +791,7 @@ class SearchView extends Component {
           status={status}
           showDelete={showDelete}
           project={this.props.match.params.pid}
+          expanding={expanding}
         />
         {this.state.isSerieSelectionOpen && !this.props.loading && (
           <ProjectModal
@@ -733,6 +806,10 @@ class SearchView extends Component {
           expandLevel={this.state.expandLevel}
           expanded={this.state.expanded}
           update={this.state.update}
+          handleCloseAll={this.handleCloseAll}
+          getNumOfPatientsLoaded={this.getNumOfPatientsLoaded}
+          getNumOfStudiesLoaded={this.getNumOfStudiesLoaded}
+          getNumOfSeriesLoaded={this.getNumOfSeriesLoaded}
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection
