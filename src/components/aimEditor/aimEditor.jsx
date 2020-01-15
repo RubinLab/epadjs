@@ -76,18 +76,12 @@ class AimEditor extends Component {
         <button type="button" onClick={this.save}>
           Save
         </button>
-        <button type="button" onClick={this.cancel}>
+        <button type="button" onClick={() => this.props.onCancel(true)}>
           Cancel
         </button>
       </div>
     );
   }
-
-  cancel = () => {
-    if (this.props.onCancel) {
-      this.props.onCancel();
-    }
-  };
 
   getAccession = () => {
     return this.image.data.string("x00080050") || "";
@@ -281,10 +275,12 @@ class AimEditor extends Component {
         this.props.dispatch(updatePatientOnAimSave(aimRefs));
       })
       .catch(error => console.log(error));
+    this.props.onCancel(false);
   };
 
   getNewMarkups = () => {
     const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    console.log("Tool state", toolState);
     const markedImageIds = this.getMarkedImageIds();
     // check for markups
     var shapeIndex = 1;
@@ -341,6 +337,10 @@ class AimEditor extends Component {
             circles.map(circle => {
               if (!circle.aimId || circle.aimId === updatedAimId) {
                 //dont save the same markup to different aims
+                const enElem = cornerstone.getEnabledElements()[0].element;
+
+                cornerstoneTools.removeToolState(enElem, "CircleRoi", circle);
+
                 this.storeMarkupsToBeSaved(
                   imageId,
                   {

@@ -37,8 +37,8 @@ const tools = [
     },
     modeOptions: { mouseButtonMasks: [1, 2] }
   },
-  { name: "Probe", modeOptions: { mouseButtonMasks: [1] } },
-  { name: "Length", modeOptions: { mouseButtonMasks: [1] }, mode: "enabled" },
+  { name: "Probe", modeOptions: { mouseButtonMasks: [1] }, mode: "active" },
+  { name: "Length", modeOptions: { mouseButtonMasks: [1] }, mode: "active" },
   // {
   //   name: "EllipticalRoi",
   //   configuration: {
@@ -114,6 +114,7 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
+    console.log("CDM");
     this.getViewports();
     this.getData();
     window.addEventListener("markupSelected", this.handleMarkupSelected);
@@ -122,12 +123,15 @@ class DisplayView extends Component {
 
   async componentDidUpdate(prevProps) {
     if (
-      prevProps.series !== this.props.series &&
-      prevProps.loading === true &&
-      this.props.loading === false
+      (prevProps.series !== this.props.series &&
+        prevProps.loading === true &&
+        this.props.loading === false) ||
+      (prevProps.series.length !== this.props.series.length &&
+        this.props.loading === false)
     ) {
       await this.setState({ isLoading: true });
       this.getViewports();
+      console.log("CDU");
       this.getData();
     }
   }
@@ -158,6 +162,7 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
 
     const { series } = this.props;
+    console.log("Series", series);
     var promises = [];
     for (let i = 0; i < series.length; i++) {
       const promise = this.getImageStack(series[i], i);
@@ -167,10 +172,16 @@ class DisplayView extends Component {
       this.setState({ data: res, isLoading: false });
     });
 
+    // console.log("Before erasinG toolState", cornerstoneTools);
+
+    // // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    // console.log("After erasing tool state", cornerstoneTools);
+
     series.forEach(serie => {
       if (serie.imageAnnotations)
         this.parseAims(serie.imageAnnotations, serie.seriesUID, serie.studyUID);
     });
+    // console.log("After restoring", cornerstoneTools);
   }
 
   async getImages(serie) {
@@ -216,6 +227,8 @@ class DisplayView extends Component {
 
   getImageIndex = (serie, cornerstoneImageIds) => {
     let { aimID, imageAnnotations } = serie;
+    const { series, activePort } = this.props;
+    const { studyUID, seriesUID } = series[activePort];
     if (imageAnnotations) {
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
@@ -315,14 +328,9 @@ class DisplayView extends Component {
   };
 
   handleMarkupSelected = event => {
-    if (
-      this.props.aimList[this.props.series[this.props.activePort].seriesUID][
-        event.detail
-      ]
-    ) {
-      const aimJson = this.props.aimList[
-        this.props.series[this.props.activePort].seriesUID
-      ][event.detail].json;
+    const { aimList, series, activePort } = this.props;
+    if (aimList[series[activePort].seriesUID][event.detail]) {
+      const aimJson = aimList[series[activePort].seriesUID][event.detail].json;
       const markupTypes = this.getMarkupTypesForAim(event.detail);
       aimJson["markupType"] = [...markupTypes];
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
@@ -445,6 +453,7 @@ class DisplayView extends Component {
     const data = JSON.parse(JSON.stringify(line));
     data.color = color;
     data.aimId = markup.aimUid;
+    data.invalidated = true;
     this.createLinePoints(data, markup.coordinates);
     const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imgId, "Length");
@@ -467,6 +476,7 @@ class DisplayView extends Component {
     const data = JSON.parse(JSON.stringify(freehand));
     data.color = color;
     data.aimId = markup.aimUid;
+    data.invalidated = true;
     this.createPolygonPoints(data, markup.coordinates);
     const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imgId, "FreehandRoi");
@@ -526,8 +536,21 @@ class DisplayView extends Component {
     );
   };
 
-  closeAimEditor = () => {
+  closeAimEditor = isCancel => {
+    // if aim editor has been cancelled ask to user
+    if (isCancel === true) {
+      var answer = window.confirm(
+        "All unsaved data will be lost! Do you want to continue?"
+      );
+      if (!answer) {
+        return;
+      }
+    }
     this.setState({ showAimEditor: false, selectedAim: undefined });
+    // clear all unsaved markups by calling getData
+    this.getData();
+    const { element } = cornerstone.getEnabledElements()[this.props.activePort];
+    cornerstone.updateImage(element);
   };
 
   handleHideAnnotations = () => {
@@ -571,7 +594,7 @@ class DisplayView extends Component {
       <React.Fragment>
         <RightsideBar
           showAimEditor={this.state.showAimEditor}
-          aimId={this.state.selectedAim}
+          selectedAim={this.state.selectedAim}
           onCancel={this.closeAimEditor}
           hasSegmentation={this.state.hasSegmentation}
         >
