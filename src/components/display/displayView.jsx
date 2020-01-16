@@ -11,7 +11,11 @@ import { Redirect } from "react-router";
 import { withRouter } from "react-router-dom";
 import "./flex.css";
 import "./viewport.css";
-import { changeActivePort, updateImageId } from "../annotationsList/action";
+import {
+  changeActivePort,
+  updateImageId,
+  clearActivePortAimID
+} from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
 import CornerstoneViewport from "react-cornerstone-viewport";
@@ -167,10 +171,10 @@ class DisplayView extends Component {
     }
     Promise.all(promises).then(res => {
       this.setState({ data: res, isLoading: false });
+      this.props.dispatch(clearActivePortAimID());
     });
 
     series.forEach(serie => {
-      // if (serie.aimID) this.openAimEditor(serie);
       if (serie.imageAnnotations)
         this.parseAims(serie.imageAnnotations, serie.seriesUID, serie.studyUID);
     });
@@ -209,7 +213,6 @@ class DisplayView extends Component {
 
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (serie.aimID) {
-      console.log("Serie", serie);
       imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
       this.openAimEditor(serie);
     }
