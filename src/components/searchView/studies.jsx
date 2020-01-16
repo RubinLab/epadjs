@@ -542,6 +542,7 @@ class Studies extends Component {
                     expandLevel={this.props.expandLevel}
                     getNumOfStudiesLoaded={this.props.getNumOfStudiesLoaded}
                     getNumOfSeriesLoaded={this.props.getNumOfSeriesLoaded}
+                    progressUpdated={this.props.progressUpdated}
                   />
                 </div>
               );
