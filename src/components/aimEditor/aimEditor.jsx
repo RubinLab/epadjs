@@ -167,6 +167,10 @@ class AimEditor extends Component {
       values.map(value => {
         const { type, markup, shapeIndex, imageReferenceUid } = value;
         switch (type) {
+          case "point":
+            alert("Point");
+            this.addPointToAim(aim, markup, shapeIndex, imageReferenceUid);
+            break;
           case "line":
             this.addLineToAim(aim, markup, shapeIndex, imageReferenceUid);
             break;
@@ -377,6 +381,26 @@ class AimEditor extends Component {
               }
             });
             break;
+          case "Probe":
+            const points = markUps[tool].data;
+            points.map(point => {
+              if (!point.aimId || point.aimId === updatedAimId) {
+                //dont save the same markup to different aims
+                this.storeMarkupsToBeSaved(
+                  imageId,
+                  {
+                    type: "point",
+                    markup: point,
+                    shapeIndex,
+                    imageReferenceUid
+                  },
+                  markupsToSave
+                );
+                // this.addLineToAim(aim, line, shapeIndex);
+                shapeIndex++;
+              }
+            });
+            break;
         }
       });
     });
@@ -483,6 +507,16 @@ class AimEditor extends Component {
 
     const maxId = aim.createMaxCalcEntity({ max, unit: "[hnsf'U]" });
     aim.createImageAnnotationStatement(1, markupId, maxId);
+  };
+
+  addPointToAim = (aim, point, shapeIndex, imageReferenceUid) => {
+    const { end } = point.handles;
+    aim.addMarkupEntity(
+      "TwoDimensionPoint",
+      shapeIndex,
+      [end],
+      imageReferenceUid
+    );
   };
 
   addLineToAim = (aim, line, shapeIndex, imageReferenceUid) => {

@@ -512,12 +512,13 @@ class DisplayView extends Component {
   };
 
   renderPoint = (imageId, markup, color, seriesUid, studyUid) => {
+    console.log("Markup", markup);
     const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
     const data = JSON.parse(JSON.stringify(probe));
     data.color = color;
     data.aimId = markup.aimUid;
-    data.handles.end.x = markup.coordinates.x.value;
-    data.handles.end.y = markup.coordinates.y.value;
+    data.handles.end.x = markup.coordinates[0].x.value;
+    data.handles.end.y = markup.coordinates[0].y.value;
     const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imgId, "Probe");
     currentState[imgId]["Probe"].data.push(data);
