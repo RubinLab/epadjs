@@ -141,9 +141,9 @@ const NavBar = ({
                   <div
                     className="nav-link user-profile"
                     data-name="user"
-                    onClick={e => {
-                      openUser(e);
-                    }}
+                    // onClick={e => {
+                    //   openUser(e);
+                    // }}
                     // onMouseEnter={openUser}
                     style={
                       mode === "lite" ? style : { ...style, cursor: "pointer" }
@@ -152,11 +152,11 @@ const NavBar = ({
                     {user.displayname}
                   </div>
                 </li>
-                <li className="nav-item-right pull-right">
+                {/* <li className="nav-item-right pull-right">
                   <NavLink className="nav-link" to="/logout" onClick={logout}>
                     Logout
                   </NavLink>
-                </li>
+                </li> */}
               </React.Fragment>
             )}
           </ul>

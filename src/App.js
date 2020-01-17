@@ -111,7 +111,8 @@ class App extends Component {
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
         this.setState({ mode, apiUrl, wadoUrl });
-        this.completeAutorization(apiUrl);
+        // this.completeAutorization(apiUrl);
+        this.setNoAuthDefaultVals();
       })
       .catch(err => {
         console.log(err);
@@ -137,6 +138,11 @@ class App extends Component {
     }
   }
 
+  setNoAuthDefaultVals = () => {
+    const user = "admin";
+    const displayname = "Admin";
+    this.setState({ user: { user, displayname }, authenticated: true });
+  };
   completeAutorization = apiUrl => {
     const keycloak = Keycloak("/keycloak.json");
     let keycloakInit = new Promise((resolve, reject) => {
