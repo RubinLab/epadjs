@@ -453,6 +453,7 @@ class Subjects extends Component {
                     getNumOfPatientsLoaded={this.props.getNumOfPatientsLoaded}
                     getNumOfStudiesLoaded={this.props.getNumOfStudiesLoaded}
                     getNumOfSeriesLoaded={this.props.getNumOfSeriesLoaded}
+                    progressUpdated={this.props.progressUpdated}
                   />
                 </div>
               );

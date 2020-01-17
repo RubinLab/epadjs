@@ -100,7 +100,8 @@ class Series extends Component {
   }
 
   async componentDidUpdate(prevProps) {
-    if (this.props.update !== prevProps.update) {
+    const { update } = this.props;
+    if (update !== prevProps.update) {
       const { data: data } = await getSeries(
         this.props.projectId,
         this.props.subjectId,
@@ -508,6 +509,7 @@ class Series extends Component {
                       update={this.props.update}
                       getNumOfSeriesLoaded={this.props.getNumOfSeriesLoaded}
                       expandLevel={this.props.expandLevel}
+                      progressUpdated={this.props.progressUpdated}
                     />
                   </div>
                 );

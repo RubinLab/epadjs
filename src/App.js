@@ -47,7 +47,8 @@ class App extends Component {
       viewType: "search",
       lastEventId: null,
       showLog: false,
-      admin: false
+      admin: false,
+      progressUpdated: 0
     };
   }
 
@@ -92,6 +93,10 @@ class App extends Component {
       openMng: false,
       openUser: !state.openUser
     }));
+  };
+
+  updateProgress = () => {
+    this.setState(state => ({ progressUpdated: state.progressUpdated + 1 }));
   };
 
   getProjectMap = projectMap => {
@@ -265,7 +270,7 @@ class App extends Component {
   };
 
   render() {
-    const { notifications, mode } = this.state;
+    const { notifications, mode, progressUpdated } = this.state;
     let noOfUnseen;
     if (notifications) {
       noOfUnseen = notifications.reduce((all, item) => {
@@ -292,6 +297,7 @@ class App extends Component {
           <Management
             closeMenu={this.closeMenu}
             projectMap={this.state.projectMap}
+            updateProgress={this.updateProgress}
           />
         )}
         {this.state.openInfo && (
@@ -322,7 +328,16 @@ class App extends Component {
                   component={DisplayView}
                   test={"test"}
                 />
-                <ProtectedRoute path="/search/:pid?" component={SearchView} />
+                <ProtectedRoute
+                  path="/search/:pid?"
+                  render={props => (
+                    <SearchView
+                      {...props}
+                      updateProgress={this.updateProgress}
+                      progressUpdated={progressUpdated}
+                    />
+                  )}
+                />
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute
                   path="/progress/:wid?"
@@ -337,7 +352,13 @@ class App extends Component {
                   from="/"
                   exact
                   to="/search"
-                  component={SearchView}
+                  render={props => (
+                    <SearchView
+                      {...props}
+                      updateProgress={this.updateProgress}
+                      progressUpdated={progressUpdated}
+                    />
+                  )}
                 />
 
                 <Redirect to="/not-found" />
@@ -351,7 +372,16 @@ class App extends Component {
             <Route path="/logout" component={Logout} />
             <ProtectedRoute path="/display" component={DisplayView} />
             <Route path="/not-found" component={NotFound} />
-            <ProtectedRoute path="/" component={SearchView} />
+            <ProtectedRoute
+              path="/"
+              render={props => (
+                <SearchView
+                  {...props}
+                  updateProgress={this.updateProgress}
+                  progressUpdated={progressUpdated}
+                />
+              )}
+            />
             <Redirect to="/not-found" />
           </Switch>
         )}

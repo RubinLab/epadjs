@@ -810,6 +810,7 @@ class SearchView extends Component {
           getNumOfPatientsLoaded={this.getNumOfPatientsLoaded}
           getNumOfStudiesLoaded={this.getNumOfStudiesLoaded}
           getNumOfSeriesLoaded={this.getNumOfSeriesLoaded}
+          progressUpdated={this.props.progressUpdated}
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection

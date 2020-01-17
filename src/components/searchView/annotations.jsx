@@ -68,7 +68,11 @@ class Annotations extends Component {
   }
 
   async componentDidUpdate(prevProps) {
-    if (this.props.update !== prevProps.update) {
+    const { progressUpdated, update } = this.props;
+    if (
+      update !== prevProps.update ||
+      progressUpdated !== prevProps.progressUpdated
+    ) {
       const { data } = await getAnnotations(this.series);
       const expanded = persistExpandView(
         this.state.expanded,
