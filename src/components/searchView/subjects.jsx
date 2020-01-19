@@ -450,9 +450,7 @@ class Subjects extends Component {
                     subjectId={row.original.displaySubjectID}
                     update={this.props.update}
                     expandLevel={this.props.expandLevel}
-                    getNumOfPatientsLoaded={this.props.getNumOfPatientsLoaded}
-                    getNumOfStudiesLoaded={this.props.getNumOfStudiesLoaded}
-                    getNumOfSeriesLoaded={this.props.getNumOfSeriesLoaded}
+                    updateExpandedLevelNums={this.props.updateExpandedLevelNums}
                     progressUpdated={this.props.progressUpdated}
                   />
                 </div>

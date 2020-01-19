@@ -86,7 +86,7 @@ class Series extends Component {
     );
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
-    this.props.getNumOfStudiesLoaded(data.length);
+    this.props.updateExpandedLevelNums("study", data.length, 1);
     if (data.length === 0) {
       toast.info("No serie found", {
         position: "top-right",
@@ -507,7 +507,9 @@ class Series extends Component {
                       studyDescription={this.props.studyDescription}
                       seriesDescription={row.original.seriesDescription}
                       update={this.props.update}
-                      getNumOfSeriesLoaded={this.props.getNumOfSeriesLoaded}
+                      updateExpandedLevelNums={
+                        this.props.updateExpandedLevelNums
+                      }
                       expandLevel={this.props.expandLevel}
                       progressUpdated={this.props.progressUpdated}
                     />
