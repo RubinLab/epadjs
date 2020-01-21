@@ -67,18 +67,23 @@ class Studies extends Component {
       expanded: {},
       selectedStudy: {},
       isSerieSelectionOpen: false,
-      childExpanded: {}
+      childExpanded: {},
+      expansionArr: []
     };
   }
 
   async componentDidMount() {
-    const { data: data } = await getStudies(
-      this.props.projectId,
-      this.props.subjectId
-    );
+    const { projectId, subjectId, expansionArr, expandLevel } = this.props;
+    const { data: data } = await getStudies(projectId, subjectId);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
-    this.props.updateExpandedLevelNums("subject", data.length, 1);
+    const studyOpened = expansionArr.includes(subjectId);
+    if (!studyOpened && expandLevel === 1) {
+      this.props.updateExpandedLevelNums("subject", data.length, 1);
+    }
+    if (expandLevel > 1) {
+      this.expandCurrentLevel();
+    }
     if (data.length === 0) {
       toast.info("No study found", {
         position: "top-right",
@@ -105,18 +110,34 @@ class Studies extends Component {
       );
       await this.setState({ data, expanded });
     }
-    if (this.props.expandLevel != prevProps.expandLevel) {
-      this.props.expandLevel >= 2 && this.state.data.length
+    const { expansionArr, expandLevel, subjectId } = this.props;
+    const studyOpened = expansionArr.includes(subjectId);
+    if (expandLevel != prevProps.expandLevel) {
+      expandLevel >= 2 && this.state.data.length
         ? this.expandCurrentLevel()
         : this.setState({ expanded: {} });
+
+      const expandedToSeries =
+        prevProps.expandLevel < expandLevel && expandLevel === 1;
+      if (expandLevel === 1 && studyOpened) {
+        this.props.updateExpandedLevelNums(
+          "subject",
+          this.state.data.length,
+          1
+        );
+      }
+      const shrinkedToStudy =
+        prevProps.expandLevel > expandLevel && expandLevel === 1;
+      if (shrinkedToStudy) this.setState({ expansionArr: [] });
     }
   }
 
-  expandCurrentLevel = () => {
+  expandCurrentLevel = async () => {
+    const expansionArr = [];
     const expanded = {};
     for (let i = 0; i < this.state.data.length; i++) {
-      // expanded[i] = true;
       expanded[i] = this.state.data[i].numberOfSeries ? true : false;
+      // expansionArr[i] = this.state.data[i].studyUID;
     }
     this.setState({ expanded });
   };
@@ -486,6 +507,14 @@ class Studies extends Component {
     }));
   };
 
+  onExpandedChange = (newExpanded, index, event) => {
+    const { data } = this.state;
+    this.setState({ expanded: newExpanded });
+    const expansionArr = [...this.state.expansionArr];
+    expansionArr[index] = expansionArr[index] ? false : data[index].studyUID;
+    this.setState({ expansionArr });
+  };
+
   render() {
     const {
       toggleSelection,
@@ -493,7 +522,7 @@ class Studies extends Component {
       isSelected,
       logSelection,
       toggleType,
-      // onExpandedChange,
+      onExpandedChange,
       toggleTree
     } = this;
     const { data, columns, selectAll, selectType } = this.state;
@@ -502,9 +531,9 @@ class Studies extends Component {
       isSelected,
       toggleAll,
       toggleSelection,
-      selectType
+      selectType,
       // expanded,
-      // onExpandedChange
+      onExpandedChange
     };
     const TheadComponent = props => null;
     return (
@@ -527,9 +556,6 @@ class Studies extends Component {
               }
             })}
             expanded={this.state.expanded}
-            onExpandedChange={expanded => {
-              this.setState({ expanded });
-            }}
             SubComponent={row => {
               return (
                 <div style={{ paddingLeft: "20px" }}>
@@ -542,6 +568,7 @@ class Studies extends Component {
                     expandLevel={this.props.expandLevel}
                     updateExpandedLevelNums={this.props.updateExpandedLevelNums}
                     progressUpdated={this.props.progressUpdated}
+                    expansionArr={this.state.expansionArr}
                   />
                 </div>
               );

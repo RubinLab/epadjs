@@ -187,7 +187,6 @@ class SearchView extends Component {
   };
 
   keepExpandedPatientsInOrder = newSubjects => {
-    console.log(this.state.expanded);
     this.updateUploadStatus();
     // get the patient ID of the maps, and the level they are open
     // get the new array of subjects and iterate over it and form the new expanded object
@@ -773,6 +772,16 @@ class SearchView extends Component {
       numOfSeriesLoaded,
       expandLevel
     } = this.state;
+
+    console.log(" ------ ");
+    console.log("numOfsubjects", numOfsubjects);
+    console.log("numOfPresentStudies", numOfPresentStudies);
+    console.log("numOfPatientsLoaded", numOfPatientsLoaded);
+    console.log("numOfStudiesLoaded", numOfStudiesLoaded);
+    console.log("numOfPresentSeries", numOfPresentSeries);
+    console.log("numOfSeriesLoaded", numOfSeriesLoaded);
+    console.log("expandLevel", expandLevel);
+    console.log(" ------ ");
 
     const patientExpandComplete = numOfsubjects === numOfPatientsLoaded;
     const studyExpandComplete = numOfPresentStudies === numOfStudiesLoaded;

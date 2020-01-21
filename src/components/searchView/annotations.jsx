@@ -51,10 +51,14 @@ class Annotations extends Component {
   }
 
   async componentDidMount() {
+    const { updateExpandedLevelNums, expansionArr, seriesId } = this.props;
     const { data } = await getAnnotations(this.series);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
-    this.props.updateExpandedLevelNums("series", data.length, 1);
+    console.log(expansionArr);
+    console.log(seriesId);
+    const annsOpened = expansionArr.includes(seriesId);
+    if (!annsOpened) updateExpandedLevelNums("series", data.length, 1);
     if (data.length === 0 && this.props.expandLevel !== 3) {
       toast.info("No annotations found", {
         position: "top-right",
@@ -68,7 +72,15 @@ class Annotations extends Component {
   }
 
   async componentDidUpdate(prevProps) {
-    const { progressUpdated, update } = this.props;
+    const {
+      progressUpdated,
+      update,
+      expandLevel,
+      expansionArr,
+      seriesId,
+      updateExpandedLevelNums
+    } = this.props;
+    const annsOpened = expansionArr.includes(seriesId);
     if (
       update !== prevProps.update ||
       progressUpdated !== prevProps.progressUpdated
@@ -81,6 +93,12 @@ class Annotations extends Component {
         "aimID"
       );
       this.setState({ data, expanded });
+    }
+
+    if (expandLevel != prevProps.expandLevel) {
+      if (expandLevel === 3 && annsOpened) {
+        updateExpandedLevelNums("series", this.state.data.length, 1);
+      }
     }
   }
 

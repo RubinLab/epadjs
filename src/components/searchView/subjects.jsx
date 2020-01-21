@@ -38,7 +38,8 @@ class Subjects extends Component {
       expanded: {},
       expandedIDs: {},
       numOfStudies: 0,
-      data: []
+      data: [],
+      expansionArr: []
     };
   }
 
@@ -50,7 +51,7 @@ class Subjects extends Component {
   }
 
   async componentDidUpdate(prevProps) {
-    const { uploadedPid, lastEventId, pid } = this.props;
+    const { uploadedPid, lastEventId, pid, expandLevel } = this.props;
 
     let data;
     if (this.props.update !== prevProps.update) {
@@ -67,6 +68,9 @@ class Subjects extends Component {
       this.props.expandLevel >= 1 && this.state.data.length
         ? this.expandCurrentLevel()
         : this.setState({ expanded: {} });
+      const shrinkedToSubject =
+        prevProps.expandLevel > expandLevel && expandLevel === 0;
+      if (shrinkedToSubject) this.setState({ expansionArr: [] });
     }
     if (this.props.pid !== prevProps.pid) {
       if (!data) {
@@ -75,10 +79,12 @@ class Subjects extends Component {
       this.setState({ data });
     }
   }
-  expandCurrentLevel = () => {
+  expandCurrentLevel = async () => {
+    const expansionArr = [];
     const expanded = {};
     for (let i = 0; i < this.state.data.length; i++) {
       expanded[i] = this.state.data[i].numberOfStudies ? true : false;
+      // expansionArr[i] = this.state.data[i].subjectID;
     }
     this.setState({ expanded });
   };
@@ -383,8 +389,13 @@ class Subjects extends Component {
       this.setState({ pivotBy: [], expanded: {} });
     }
   };
+
   onExpandedChange = (newExpanded, index, event) => {
+    const { data } = this.state;
     this.setState({ expanded: newExpanded });
+    const expansionArr = [...this.state.expansionArr];
+    expansionArr[index] = expansionArr[index] ? false : data[index].subjectID;
+    this.setState({ expansionArr });
   };
 
   onSortedChange = () => {
@@ -435,9 +446,7 @@ class Subjects extends Component {
             pageSize={data.length}
             ref={r => (this.selectTable = r)}
             className="-striped -highlight"
-            // freezWhenExpanded={false}
             showPagination={false}
-            // TheadComponent={TheadComponent}
             onSortedChange={() => {
               this.onSortedChange();
             }}
@@ -452,6 +461,7 @@ class Subjects extends Component {
                     expandLevel={this.props.expandLevel}
                     updateExpandedLevelNums={this.props.updateExpandedLevelNums}
                     progressUpdated={this.props.progressUpdated}
+                    expansionArr={this.state.expansionArr}
                   />
                 </div>
               );
