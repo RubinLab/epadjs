@@ -773,16 +773,6 @@ class SearchView extends Component {
       expandLevel
     } = this.state;
 
-    console.log(" ------ ");
-    console.log("numOfsubjects", numOfsubjects);
-    console.log("numOfPresentStudies", numOfPresentStudies);
-    console.log("numOfPatientsLoaded", numOfPatientsLoaded);
-    console.log("numOfStudiesLoaded", numOfStudiesLoaded);
-    console.log("numOfPresentSeries", numOfPresentSeries);
-    console.log("numOfSeriesLoaded", numOfSeriesLoaded);
-    console.log("expandLevel", expandLevel);
-    console.log(" ------ ");
-
     const patientExpandComplete = numOfsubjects === numOfPatientsLoaded;
     const studyExpandComplete = numOfPresentStudies === numOfStudiesLoaded;
     const seriesExpandComplete = numOfPresentSeries === numOfSeriesLoaded;

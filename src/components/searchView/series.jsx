@@ -141,7 +141,7 @@ class Series extends Component {
 
       const expandedToSeries =
         prevProps.expandLevel < expandLevel && expandLevel === 2;
-      if (expandLevel === 2 && seriesOpened) {
+      if (expandedToSeries && seriesOpened) {
         updateExpandedLevelNums("study", this.state.data.length, 1);
       }
       const shrinkedToSeries =
@@ -155,7 +155,6 @@ class Series extends Component {
     for (let i = 0; i < this.state.data.length; i++) {
       // expanded[i] = this.state.data[i].numberOfAnnotations ? true : false;
       expanded[i] = this.state.data[i];
-      // expansionArr[i] = this.state.data[i].seriesUID;
     }
     this.setState({ expanded });
   };

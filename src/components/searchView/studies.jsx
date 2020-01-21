@@ -117,9 +117,9 @@ class Studies extends Component {
         ? this.expandCurrentLevel()
         : this.setState({ expanded: {} });
 
-      const expandedToSeries =
+      const expandedToStudies =
         prevProps.expandLevel < expandLevel && expandLevel === 1;
-      if (expandLevel === 1 && studyOpened) {
+      if (expandedToStudies && studyOpened) {
         this.props.updateExpandedLevelNums(
           "subject",
           this.state.data.length,
@@ -137,7 +137,6 @@ class Studies extends Component {
     const expanded = {};
     for (let i = 0; i < this.state.data.length; i++) {
       expanded[i] = this.state.data[i].numberOfSeries ? true : false;
-      // expansionArr[i] = this.state.data[i].studyUID;
     }
     this.setState({ expanded });
   };
