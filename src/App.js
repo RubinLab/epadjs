@@ -103,7 +103,7 @@ class App extends Component {
     this.setState({ projectMap });
   };
   async componentDidMount() {
-    fetch("/config.json")
+    fetch(`${process.env.PUBLIC_URL}/config.json`)
       .then(async res => {
         const data = await res.json();
         const { mode, apiUrl, wadoUrl } = data;
@@ -118,7 +118,7 @@ class App extends Component {
         console.log(err);
       });
 
-    fetch("/keycloak.json")
+    fetch(`${process.env.PUBLIC_URL}/keycloak.json`)
       .then(async res => {
         const data = await res.json();
         const auth = data["auth-server-url"];
@@ -144,7 +144,7 @@ class App extends Component {
     this.setState({ user: { user, displayname }, authenticated: true });
   };
   completeAutorization = apiUrl => {
-    const keycloak = Keycloak("/keycloak.json");
+    const keycloak = Keycloak(`${process.env.PUBLIC_URL}/keycloak.json`);
     let keycloakInit = new Promise((resolve, reject) => {
       keycloak.init({ onLoad: "login-required" }).then(authenticated => {
         // this.setState({ keycloak: keycloak, authenticated: authenticated });
