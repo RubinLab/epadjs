@@ -73,20 +73,32 @@ class Series extends Component {
       selectAll: false,
       selectType: "checkbox",
       expanded: {},
-      showGridFullWarning: false
+      showGridFullWarning: false,
       // selectedSerie: {}
+      expansionArr: []
     };
   }
 
   async componentDidMount() {
-    const { data: data } = await getSeries(
-      this.props.projectId,
-      this.props.subjectId,
-      this.props.studyId
-    );
+    const {
+      projectId,
+      subjectId,
+      studyId,
+      expansionArr,
+      updateExpandedLevelNums,
+      expandLevel
+    } = this.props;
+
+    const { data: data } = await getSeries(projectId, subjectId, studyId);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
-    this.props.getNumOfStudiesLoaded(data.length);
+    const seriesOpened = expansionArr.includes(studyId);
+    if (!seriesOpened && expandLevel === 2) {
+      updateExpandedLevelNums("study", data.length, 1);
+    }
+    if (expandLevel > 2) {
+      this.expandCurrentLevel();
+    }
     if (data.length === 0) {
       toast.info("No serie found", {
         position: "top-right",
@@ -100,7 +112,14 @@ class Series extends Component {
   }
 
   async componentDidUpdate(prevProps) {
-    const { update } = this.props;
+    const {
+      update,
+      studyId,
+      expansionArr,
+      updateExpandedLevelNums,
+      expandLevel
+    } = this.props;
+    const seriesOpened = expansionArr.includes(studyId);
     if (update !== prevProps.update) {
       const { data: data } = await getSeries(
         this.props.projectId,
@@ -119,6 +138,15 @@ class Series extends Component {
       this.props.expandLevel >= 3
         ? this.expandCurrentLevel()
         : this.setState({ expanded: {} });
+
+      const expandedToSeries =
+        prevProps.expandLevel < expandLevel && expandLevel === 2;
+      if (expandedToSeries && seriesOpened) {
+        updateExpandedLevelNums("study", this.state.data.length, 1);
+      }
+      const shrinkedToSeries =
+        prevProps.expandLevel > expandLevel && expandLevel === 2;
+      if (shrinkedToSeries) this.setState({ expansionArr: [] });
     }
   }
 
@@ -376,9 +404,15 @@ class Series extends Component {
       this.setState({ pivotBy: [], expanded: {} });
     }
   };
-  onExpandedChange = expanded => {
-    this.setState({ expanded });
+
+  onExpandedChange = (newExpanded, index, event) => {
+    const { data } = this.state;
+    this.setState({ expanded: newExpanded });
+    const expansionArr = [...this.state.expansionArr];
+    expansionArr[index] = expansionArr[index] ? false : data[index].seriesUID;
+    this.setState({ expansionArr });
   };
+
   handleSelectSeries = row => {
     if (!this.state.series.find(serie => serie.seriesId === row.seriesUID)) {
       this.props.dispatch(
@@ -507,9 +541,13 @@ class Series extends Component {
                       studyDescription={this.props.studyDescription}
                       seriesDescription={row.original.seriesDescription}
                       update={this.props.update}
-                      getNumOfSeriesLoaded={this.props.getNumOfSeriesLoaded}
+                      updateExpandedLevelNums={
+                        this.props.updateExpandedLevelNums
+                      }
                       expandLevel={this.props.expandLevel}
                       progressUpdated={this.props.progressUpdated}
+                      expansionArr={this.state.expansionArr}
+                      expandLevel={this.props.expandLevel}
                     />
                   </div>
                 );

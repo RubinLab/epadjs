@@ -34,6 +34,7 @@ import {
   UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
   CLEAR_ACTIVE_AIMID,
+  UPDATE_IMAGE_INDEX,
   colors,
   commonLabels
 } from "./types";
@@ -59,6 +60,9 @@ export const clearAimId = () => {
   };
 };
 
+export const updateImageIndex = imageIndex => {
+  return { type: UPDATE_IMAGE_INDEX, imageIndex };
+};
 export const updateImageId = event => {
   const imageID = event.detail.image.imageId.split("/").pop();
   return {
@@ -263,7 +267,8 @@ export const addToGrid = (serie, annotation) => {
     patientID,
     studyUID,
     seriesUID,
-    aimID: annotation
+    aimID: annotation,
+    imageIndex: 0
   };
   return { type: ADD_TO_GRID, reference };
 };

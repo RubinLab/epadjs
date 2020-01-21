@@ -32,7 +32,8 @@ import {
   UPDATE_PATIENT_AIM_SAVE,
   UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
-  CLEAR_ACTIVE_AIMID
+  CLEAR_ACTIVE_AIMID,
+  UPDATE_IMAGE_INDEX
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -57,6 +58,10 @@ const initialState = {
 
 const asyncReducer = (state = initialState, action) => {
   switch (action.type) {
+    case UPDATE_IMAGE_INDEX:
+      const updatedOpenSeries = [...state.openSeries];
+      updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
+      return { ...state, openSeries: updatedOpenSeries };
     case GET_NOTIFICATIONS:
       const { uploadedPid, lastEventId } = action.payload;
       return { ...state, uploadedPid, lastEventId };

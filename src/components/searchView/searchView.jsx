@@ -128,6 +128,16 @@ class SearchView extends Component {
     }));
   };
 
+  updateExpandedLevelNums = (level, numOfChild, numOfParent) => {
+    if (level === "subject") {
+      this.getNumOfPatientsLoaded(numOfChild, numOfParent);
+    } else if (level === "study") {
+      this.getNumOfStudiesLoaded(numOfChild, numOfParent);
+    } else if (level === "series") {
+      this.getNumOfSeriesLoaded(numOfChild, numOfParent);
+    }
+  };
+
   handleExpand = async () => {
     if (this.state.expandLevel < 3) {
       this.setState(state => ({ expandLevel: state.expandLevel + 1 }));
@@ -177,7 +187,6 @@ class SearchView extends Component {
   };
 
   keepExpandedPatientsInOrder = newSubjects => {
-    console.log(this.state.expanded);
     this.updateUploadStatus();
     // get the patient ID of the maps, and the level they are open
     // get the new array of subjects and iterate over it and form the new expanded object
@@ -807,9 +816,7 @@ class SearchView extends Component {
           expanded={this.state.expanded}
           update={this.state.update}
           handleCloseAll={this.handleCloseAll}
-          getNumOfPatientsLoaded={this.getNumOfPatientsLoaded}
-          getNumOfStudiesLoaded={this.getNumOfStudiesLoaded}
-          getNumOfSeriesLoaded={this.getNumOfSeriesLoaded}
+          updateExpandedLevelNums={this.updateExpandedLevelNums}
           progressUpdated={this.props.progressUpdated}
         />
         {this.state.showAnnotationModal && (
