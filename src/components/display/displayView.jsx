@@ -24,6 +24,7 @@ import { freehand } from "./Freehand";
 import { line } from "./Line";
 import { probe } from "./Probe";
 import { circle } from "./Circle";
+import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
 const mode = sessionStorage.getItem("mode");
@@ -161,7 +162,7 @@ class DisplayView extends Component {
 
   getData() {
     // clear the toolState they will be rendered again on next load
-    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
 
     const { series } = this.props;
     var promises = [];
@@ -361,6 +362,7 @@ class DisplayView extends Component {
 
   parseAims = (aimList, seriesUid, studyUid) => {
     Object.entries(aimList).forEach(([key, values], i) => {
+      this.linesToPerpendicular(values); //change the perendicular lines to bidirectional to render by CS
       values.forEach(value => {
         const { markupType, aimUid } = value;
         if (markupType === "DicomSegmentationEntity")
@@ -369,6 +371,65 @@ class DisplayView extends Component {
         this.renderMarkup(key, value, color, seriesUid, studyUid);
       });
     });
+    console.log("CS tools", cornerstoneTools);
+  };
+
+  linesToPerpendicular = values => {
+    // Takes two lines on the same image, checks if they belong to same Aima and if they are perpendicular.
+    // If so, merges two lines on line1, cnahges the markup type from line to perpendicular
+    // And deletes the second line not to be reRendered as line agai
+    const lines = values.filter(this.checkIfLine);
+
+    const groupedLines = Object.values(this.groupBy(lines, "aimUid"));
+    groupedLines.forEach(lines => {
+      if (lines.length > 1)
+        if (this.checkIfPerpendicular(lines)) {
+          // there are multiple lines on the same image that belongs to same aim, a potential perpendicular
+          // they are perpendicular, remove them from the values list and render them as perpendicular
+          lines[0].markupType = "Bidirectional";
+          lines[0].calculations = lines[0].calculations.concat(
+            lines[1].calculations
+          );
+          lines[0].coordinates = lines[0].coordinates.concat(
+            lines[1].coordinates
+          );
+
+          const index = values.indexOf(lines[1]);
+          if (index > -1) {
+            values.splice(index, 1);
+          }
+        }
+    });
+  };
+
+  checkIfPerpendicular = lines => {
+    const slope1 = this.getSlopeOfLine(
+      lines[0]["coordinates"][0],
+      lines[0]["coordinates"][1]
+    );
+    const slope2 = this.getSlopeOfLine(
+      lines[1]["coordinates"][0],
+      lines[1]["coordinates"][1]
+    );
+    if (Math.round((slope1 * slope2 * 100) / 100) == -1) return true;
+    return false;
+  };
+
+  getSlopeOfLine = (p1, p2) => {
+    return (p1.x.value - p2.x.value) / (p1.y.value - p2.y.value);
+  };
+
+  checkIfLine = markup => {
+    if (markup) {
+      return markup.markupType === "TwoDimensionMultiPoint";
+    }
+  };
+
+  groupBy = (xs, key) => {
+    return xs.reduce(function(rv, x) {
+      (rv[x[key]] = rv[x[key]] || []).push(x);
+      return rv;
+    }, {});
   };
 
   getSegmentationData = (seriesUID, studyUID, aimId, i) => {
@@ -443,6 +504,9 @@ class DisplayView extends Component {
       case "TwoDimensionPoint":
         this.renderPoint(imageId, markup, color, seriesUid, studyUid);
         break;
+      case "Bidirectional":
+        this.renderBidirectional(imageId, markup, color, seriesUid, studyUid);
+        break;
       default:
         return;
     }
@@ -453,6 +517,32 @@ class DisplayView extends Component {
       toolState[imageId] = { [tool]: { data: [] } };
     else if (!toolState[imageId].hasOwnProperty(tool))
       toolState[imageId] = { ...toolState[imageId], [tool]: { data: [] } };
+  };
+
+  renderBidirectional = (imageId, markup, color, seriesUid, studyUid) => {
+    const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
+    const data = JSON.parse(JSON.stringify(bidirectional));
+    data.color = color;
+    data.aimId = markup.aimUid;
+    data.invalidated = true;
+    this.createBidirectionalPoints(data, markup.coordinates);
+    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    this.checkNCreateToolForImage(currentState, imgId, "Bidirectional");
+    currentState[imgId]["Bidirectional"].data.push(data);
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+      currentState
+    );
+  };
+
+  createBidirectionalPoints = (data, points) => {
+    data.handles.start.x = points[0].x.value;
+    data.handles.start.y = points[0].y.value;
+    data.handles.end.x = points[1].x.value;
+    data.handles.end.y = points[1].y.value;
+    data.handles.perpendicularStart.x = points[2].x.value;
+    data.handles.perpendicularStart.y = points[2].y.value;
+    data.handles.perpendicularEnd.x = points[3].x.value;
+    data.handles.perpendicularEnd.y = points[3].y.value;
   };
 
   renderLine = (imageId, markup, color, seriesUid, studyUid) => {
@@ -468,7 +558,6 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
-    const csTools = cornerstoneTools.globalImageIdSpecificToolStateManager;
   };
 
   createLinePoints = (data, points) => {
@@ -512,7 +601,6 @@ class DisplayView extends Component {
   };
 
   renderPoint = (imageId, markup, color, seriesUid, studyUid) => {
-    console.log("Markup", markup);
     const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
     const data = JSON.parse(JSON.stringify(probe));
     data.color = color;

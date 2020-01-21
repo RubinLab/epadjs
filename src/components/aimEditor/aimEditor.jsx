@@ -181,8 +181,10 @@ class AimEditor extends Component {
             this.addPolygonToAim(aim, markup, shapeIndex, imageReferenceUid);
             break;
           case "bidirectional":
+            console.log("BD", markup);
             this.addBidirectionalToAim(
-              aim.markup,
+              aim,
+              markup,
               shapeIndex,
               imageReferenceUid
             );
@@ -228,6 +230,7 @@ class AimEditor extends Component {
   };
 
   saveAim = (aim, segmentationBlob) => {
+    console.log("Cs tools", cornerstoneTools);
     console.log("Aim in SAVE", aim);
     const aimJson = aim.getAim();
     const aimSaved = JSON.parse(aimJson);
@@ -333,7 +336,7 @@ class AimEditor extends Component {
                   },
                   markupsToSave
                 );
-                shapeIndex++;
+                shapeIndex = shapeIndex + 2; //because bidirectional consists of two lines inc the shapeindex by two
               }
             });
             break;
@@ -527,7 +530,6 @@ class AimEditor extends Component {
       [start, end],
       imageReferenceUid
     );
-    const abc = line.length;
 
     const lengthId = aim.createLengthCalcEntity({
       value: line.length,
@@ -566,7 +568,75 @@ class AimEditor extends Component {
     bidirectional,
     shapeIndex,
     imageReferenceUid
-  ) => {};
+  ) => {
+    const { longAxis, shortAxis } = this.getAxisOfBidirectional(bidirectional);
+
+    // add longAxis
+    const longAxisMarkupId = aim.addMarkupEntity(
+      "TwoDimensionMultiPoint",
+      shapeIndex,
+      [longAxis.start, longAxis.end],
+      imageReferenceUid
+    );
+    const longAxisLengthId = aim.createLongAxisCalcEntity({
+      value: longAxis.length,
+      unit: "mm"
+    });
+    aim.createImageAnnotationStatement(1, longAxisMarkupId, longAxisLengthId);
+
+    // add shortAxis
+    const shortAxisMarkupId = aim.addMarkupEntity(
+      "TwoDimensionMultiPoint",
+      shapeIndex + 1,
+      [shortAxis.start, shortAxis.end],
+      imageReferenceUid
+    );
+    const shortAxisLengthId = aim.createShortAxisCalcEntity({
+      value: shortAxis.length,
+      unit: "mm"
+    });
+    aim.createImageAnnotationStatement(1, shortAxisMarkupId, shortAxisLengthId);
+  };
+
+  getAxisOfBidirectional = bidirectional => {
+    // takes two lines of b.directional and distincs the short and long axis
+    const { element } = cornerstone.getEnabledElements()[this.props.activePort];
+    const { rowPixelSpacing, columnPixelSpacing } = cornerstone.getViewport(
+      element
+    ).displayedArea;
+    const {
+      start,
+      end,
+      perpendicularStart,
+      perpendicularEnd
+    } = bidirectional.handles;
+    const length = Math.hypot(
+      (start.x - end.x) * (columnPixelSpacing || 1),
+      (start.y - end.y) * (rowPixelSpacing || 1)
+    );
+    const perpendicularLength = Math.hypot(
+      (perpendicularStart.x - perpendicularEnd.x) * (columnPixelSpacing || 1),
+      (perpendicularStart.y - perpendicularEnd.y) * (rowPixelSpacing || 1)
+    );
+    if (length > perpendicularLength)
+      return {
+        longAxis: { start, end, length },
+        shortAxis: {
+          start: perpendicularStart,
+          end: perpendicularEnd,
+          length: perpendicularLength
+        }
+      };
+    else
+      return {
+        longAxis: {
+          start: perpendicularStart,
+          end: perpendicularEnd,
+          length: perpendicularLength
+        },
+        shortAxis: { start, end, length }
+      };
+  };
 
   createSegmentation3D = labelmapIndex => {
     // following is to know the image index which has the first segment

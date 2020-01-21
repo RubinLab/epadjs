@@ -1,18 +1,18 @@
 /* eslint no-loop-func: 0 */ // --> OFF
-import drawHandles from './../../../drawing/drawHandles.js';
-import updatePerpendicularLineHandles from './utils/updatePerpendicularLineHandles.js';
+import drawHandles from "./../../../drawing/drawHandles.js";
+import updatePerpendicularLineHandles from "./utils/updatePerpendicularLineHandles.js";
 
-import toolStyle from './../../../stateManagement/toolStyle.js';
-import toolColors from './../../../stateManagement/toolColors.js';
-import { getToolState } from './../../../stateManagement/toolState.js';
+import toolStyle from "./../../../stateManagement/toolStyle.js";
+import toolColors from "./../../../stateManagement/toolColors.js";
+import { getToolState } from "./../../../stateManagement/toolState.js";
 import {
   getNewContext,
   draw,
   setShadow,
-  drawLine,
-} from './../../../drawing/index.js';
-import drawLinkedTextBox from './../../../drawing/drawLinkedTextBox.js';
-import getPixelSpacing from '../../../util/getPixelSpacing';
+  drawLine
+} from "./../../../drawing/index.js";
+import drawLinkedTextBox from "./../../../drawing/drawLinkedTextBox.js";
+import getPixelSpacing from "../../../util/getPixelSpacing";
 
 export default function(evt) {
   const eventData = evt.detail;
@@ -47,7 +47,8 @@ export default function(evt) {
       continue;
     }
 
-    color = data.active ? activeColor : toolColors.getToolColor();
+    // color = data.active ? activeColor : toolColors.getToolColor();
+    color = data.active ? activeColor : data.color;
 
     // Calculate the data measurements
     if (data.invalidated === true) {
@@ -67,7 +68,7 @@ export default function(evt) {
         end,
         perpendicularStart,
         perpendicularEnd,
-        textBox,
+        textBox
       } = data.handles;
 
       // Draw the measurement line
@@ -79,14 +80,14 @@ export default function(evt) {
       updatePerpendicularLineHandles(eventData, data);
       drawLine(context, element, perpendicularStart, perpendicularEnd, {
         color,
-        strokeWidth,
+        strokeWidth
       });
 
       // Draw the handles
       const handleOptions = {
         color,
         handleRadius,
-        drawHandlesIfActive: drawHandlesOnHover,
+        drawHandlesIfActive: drawHandlesOnHover
       };
 
       // Draw the handles
@@ -100,7 +101,7 @@ export default function(evt) {
         handles.start,
         handles.end,
         handles.perpendicularStart,
-        handles.perpendicularEnd,
+        handles.perpendicularEnd
       ];
       const textLines = getTextBoxText(data, rowPixelSpacing, colPixelSpacing);
 
@@ -121,10 +122,10 @@ export default function(evt) {
 }
 
 const getTextBoxText = (data, rowPixelSpacing, colPixelSpacing) => {
-  let suffix = ' mm';
+  let suffix = " mm";
 
   if (!rowPixelSpacing || !colPixelSpacing) {
-    suffix = ' pixels';
+    suffix = " pixels";
   }
 
   const lengthText = ` L ${data.longestDiameter}${suffix}`;
