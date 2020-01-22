@@ -1,24 +1,24 @@
-import BaseAnnotationTool from '../base/BaseAnnotationTool.js';
+import BaseAnnotationTool from "../base/BaseAnnotationTool.js";
 // State
-import { getToolState } from './../../stateManagement/toolState.js';
-import toolStyle from './../../stateManagement/toolStyle.js';
-import toolColors from './../../stateManagement/toolColors.js';
+import { getToolState } from "./../../stateManagement/toolState.js";
+import toolStyle from "./../../stateManagement/toolStyle.js";
+import toolColors from "./../../stateManagement/toolColors.js";
 // Drawing
 import {
   getNewContext,
   draw,
   setShadow,
-  drawLine,
-} from './../../drawing/index.js';
-import drawLinkedTextBox from './../../drawing/drawLinkedTextBox.js';
-import drawHandles from './../../drawing/drawHandles.js';
-import lineSegDistance from './../../util/lineSegDistance.js';
-import { lengthCursor } from '../cursors/index.js';
-import { getLogger } from '../../util/logger.js';
-import getPixelSpacing from '../../util/getPixelSpacing';
-import throttle from '../../util/throttle';
+  drawLine
+} from "./../../drawing/index.js";
+import drawLinkedTextBox from "./../../drawing/drawLinkedTextBox.js";
+import drawHandles from "./../../drawing/drawHandles.js";
+import lineSegDistance from "./../../util/lineSegDistance.js";
+import { lengthCursor } from "../cursors/index.js";
+import { getLogger } from "../../util/logger.js";
+import getPixelSpacing from "../../util/getPixelSpacing";
+import throttle from "../../util/throttle";
 
-const logger = getLogger('tools:annotation:LengthTool');
+const logger = getLogger("tools:annotation:LengthTool");
 
 /**
  * @public
@@ -30,9 +30,9 @@ const logger = getLogger('tools:annotation:LengthTool');
 export default class LengthTool extends BaseAnnotationTool {
   constructor(props = {}) {
     const defaultProps = {
-      name: 'Length',
-      supportedInteractionTypes: ['Mouse', 'Touch'],
-      svgCursor: lengthCursor,
+      name: "Length",
+      supportedInteractionTypes: ["Mouse", "Touch"],
+      svgCursor: lengthCursor
     };
 
     super(props, defaultProps);
@@ -64,13 +64,13 @@ export default class LengthTool extends BaseAnnotationTool {
           x,
           y,
           highlight: true,
-          active: false,
+          active: false
         },
         end: {
           x,
           y,
           highlight: true,
-          active: true,
+          active: true
         },
         textBox: {
           active: false,
@@ -78,9 +78,9 @@ export default class LengthTool extends BaseAnnotationTool {
           movesIndependently: false,
           drawnIndependently: true,
           allowedOutsideImage: true,
-          hasBoundingBox: true,
-        },
-      },
+          hasBoundingBox: true
+        }
+      }
     };
   }
 
@@ -159,25 +159,28 @@ export default class LengthTool extends BaseAnnotationTool {
         // Configurable shadow
         setShadow(context, this.configuration);
 
-        const color = toolColors.getColorIfActive(data);
+        let color;
+        const activeColor = toolColors.getActiveColor(data);
+        if (data.active) color = activeColor;
+        else color = data.color ? data.color : toolColors.getToolColor();
 
         // Draw the measurement line
         drawLine(context, element, data.handles.start, data.handles.end, {
-          color,
+          color
         });
 
         // Draw the handles
         const handleOptions = {
           color,
           handleRadius,
-          drawHandlesIfActive: drawHandlesOnHover,
+          drawHandlesIfActive: drawHandlesOnHover
         };
 
         drawHandles(context, eventData, data.handles, handleOptions);
 
         if (!data.handles.textBox.hasMoved) {
           const coords = {
-            x: Math.max(data.handles.start.x, data.handles.end.x),
+            x: Math.max(data.handles.start.x, data.handles.end.x)
           };
 
           // Depending on which handle has the largest x-value,
@@ -224,10 +227,10 @@ export default class LengthTool extends BaseAnnotationTool {
 
     function textBoxText(data, rowPixelSpacing, colPixelSpacing) {
       // Set the length text suffix depending on whether or not pixelSpacing is available
-      let suffix = 'mm';
+      let suffix = "mm";
 
       if (!rowPixelSpacing || !colPixelSpacing) {
-        suffix = 'pixels';
+        suffix = "pixels";
       }
 
       data.unit = suffix;
@@ -238,7 +241,7 @@ export default class LengthTool extends BaseAnnotationTool {
     function textBoxAnchorPoints(handles) {
       const midpoint = {
         x: (handles.start.x + handles.end.x) / 2,
-        y: (handles.start.y + handles.end.y) / 2,
+        y: (handles.start.y + handles.end.y) / 2
       };
 
       return [handles.start, midpoint, handles.end];

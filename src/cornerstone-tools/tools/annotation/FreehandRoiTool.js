@@ -369,7 +369,8 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       }
 
       draw(context, context => {
-        let color = toolColors.getColorIfActive(data);
+        const activeColor = toolColors.getActiveColor(data);
+        let color = data.active ? activeColor : data.color;
         let fillColor;
 
         if (data.active) {

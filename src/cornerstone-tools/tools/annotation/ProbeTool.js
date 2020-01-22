@@ -1,21 +1,21 @@
-import external from '../../externalModules.js';
-import BaseAnnotationTool from '../base/BaseAnnotationTool.js';
+import external from "../../externalModules.js";
+import BaseAnnotationTool from "../base/BaseAnnotationTool.js";
 // State
-import { getToolState } from '../../stateManagement/toolState.js';
-import textStyle from '../../stateManagement/textStyle.js';
-import toolColors from '../../stateManagement/toolColors.js';
+import { getToolState } from "../../stateManagement/toolState.js";
+import textStyle from "../../stateManagement/textStyle.js";
+import toolColors from "../../stateManagement/toolColors.js";
 // Drawing
-import { getNewContext, draw } from '../../drawing/index.js';
-import drawTextBox from '../../drawing/drawTextBox.js';
-import drawHandles from '../../drawing/drawHandles.js';
+import { getNewContext, draw } from "../../drawing/index.js";
+import drawTextBox from "../../drawing/drawTextBox.js";
+import drawHandles from "../../drawing/drawHandles.js";
 // Utilities
-import getRGBPixels from '../../util/getRGBPixels.js';
-import calculateSUV from '../../util/calculateSUV.js';
-import { probeCursor } from '../cursors/index.js';
-import { getLogger } from '../../util/logger.js';
-import throttle from '../../util/throttle';
+import getRGBPixels from "../../util/getRGBPixels.js";
+import calculateSUV from "../../util/calculateSUV.js";
+import { probeCursor } from "../cursors/index.js";
+import { getLogger } from "../../util/logger.js";
+import throttle from "../../util/throttle";
 
-const logger = getLogger('tools:annotation:ProbeTool');
+const logger = getLogger("tools:annotation:ProbeTool");
 
 /**
  * @public
@@ -28,9 +28,9 @@ const logger = getLogger('tools:annotation:ProbeTool');
 export default class ProbeTool extends BaseAnnotationTool {
   constructor(props = {}) {
     const defaultProps = {
-      name: 'Probe',
-      supportedInteractionTypes: ['Mouse', 'Touch'],
-      svgCursor: probeCursor,
+      name: "Probe",
+      supportedInteractionTypes: ["Mouse", "Touch"],
+      svgCursor: probeCursor
     };
 
     super(props, defaultProps);
@@ -60,9 +60,9 @@ export default class ProbeTool extends BaseAnnotationTool {
           x: eventData.currentPoints.image.x,
           y: eventData.currentPoints.image.y,
           highlight: true,
-          active: true,
-        },
-      },
+          active: true
+        }
+      }
     };
   }
 
@@ -148,12 +148,15 @@ export default class ProbeTool extends BaseAnnotationTool {
       }
 
       draw(context, context => {
-        const color = toolColors.getColorIfActive(data);
+        let color;
+        const activeColor = toolColors.getActiveColor(data);
+        if (data.active) color = activeColor;
+        else color = data.color ? data.color : toolColors.getToolColor();
 
         // Draw the handles
         drawHandles(context, eventData, data.handles, {
           handleRadius,
-          color,
+          color
         });
 
         // Update textbox stats
@@ -173,9 +176,7 @@ export default class ProbeTool extends BaseAnnotationTool {
           text = `${x}, ${y}`;
 
           if (image.color) {
-            str = `R: ${storedPixels[0]} G: ${storedPixels[1]} B: ${
-              storedPixels[2]
-            }`;
+            str = `R: ${storedPixels[0]} G: ${storedPixels[1]} B: ${storedPixels[2]}`;
           } else {
             // Draw text
             str = `SP: ${sp} MO: ${parseFloat(mo.toFixed(3))}`;
@@ -188,7 +189,7 @@ export default class ProbeTool extends BaseAnnotationTool {
           const coords = {
             // Translate the x/y away from the cursor
             x: data.handles.end.x + 3,
-            y: data.handles.end.y - 3,
+            y: data.handles.end.y - 3
           };
           const textCoords = external.cornerstone.pixelToCanvas(
             eventData.element,
