@@ -5,9 +5,11 @@ import { toast } from "react-toastify";
 import ToolBar from "../common/basicToolBar";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { getProjects } from "../../../services/projectServices";
+import PluginProjectTable from "./pluginProjectTable";
 import {
   getTools,
   getPlugins,
+  getPluginsWithProject,
   deleteTool
 } from "../../../services/pluginServices";
 import DeleteAlert from "../common/alertDeletionModal";
@@ -16,57 +18,120 @@ import EditTools from "../templates/projectTable";
 
 class Plugins extends React.Component {
   state = {
-    tools: [],
-    projectList: {},
-    hasAddClicked: false,
+    plugins: [], //using
+    projectList: [], //using
+    selectedProjects: [], //using
+    tableSelectedData: {}, //using
+    hasAddClicked: false, //using
     delAll: false,
     delOne: false,
     selectAll: 0,
     selected: {},
-    selectedOne: {},
     uploadClicked: false,
-    hasEditClicked: false,
-    templateName: "",
-    toolsByProjects: {}
+    hasEditClicked: false
   };
 
   componentDidMount = async () => {
-    const { data: projectList } = await getProjects();
-    const { data: pluginList } = await getPlugins();
-    console.log("------>plugin list" + pluginList);
-    const temp = [];
-    for (let project of projectList) {
-      const { id, name } = project;
-      temp.push({ id, name });
-    }
-    this.setState({ projectList: temp });
-    this.getToolsData();
+    const pluginList = await getPluginsWithProject();
+    let projectList = await getProjects();
+    const plugins = pluginList.data;
+    projectList = projectList.data;
+    this.setState({ plugins, projectList });
+    console.log("projects ------>  ", projectList);
+    console.log("plugins ------>  ", plugins);
   };
 
-  groupByProjects = tools => {
-    // const projects = {};
-    return tools.reduce((all, item, index) => {
-      if (item.projectId !== "all") {
-        all[item.pluginId]
-          ? all[item.pluginId].push(item.projectName)
-          : (all[item.pluginId] = [item.projectName]);
-      }
-      return all;
-    }, {});
+  getPlugins = () => {
+    return this.state.plugins;
   };
-  renderMessages = input => {
-    return {
-      deleteAll: "Delete selected tools? This cannot be undone.",
-      deleteOne: `Delete template ${input}? This cannot be undone.`
-    };
+
+  arrayToMap = arrayObj => {
+    const tempmap = new Map();
+    arrayObj.forEach(temp => {
+      console.log("array map", temp);
+      tempmap.set(temp, temp);
+    });
+    console.log("map itself", tempmap);
+    return tempmap;
   };
-  getToolsData = async () => {
-    const { data: tools } = await getTools();
-    const toolsByProjects = this.groupByProjects(tools);
-    this.setState({ tools, toolsByProjects });
+
+  showme = rowinfo => {
+    console.log("row info &&&&&&&&&&&", rowinfo);
+  };
+
+  handleProjectSelect = (selectedProject, tableData) => {
+    console.log(
+      "selected project and selected row data   ",
+      selectedProject,
+      " ",
+      tableData
+    );
+    let tempSelectedProjects = this.state.selectedProjects;
+    let elementIndex = tempSelectedProjects.indexOf(selectedProject);
+    if (elementIndex === -1) {
+      tempSelectedProjects.push(selectedProject);
+    } else {
+      //tempSelectedProjects[elementIndex] = "";
+      tempSelectedProjects = this.state.selectedProjects.filter(project => {
+        return project !== selectedProject;
+      });
+    }
+    this.setState({ selectedProjects: tempSelectedProjects });
+  };
+
+  handleAddProjectCancel = () => {
+    this.setState({
+      selectedProjects: [],
+      tableSelectedData: {},
+      hasAddClicked: false
+    });
+  };
+
+  handleAddProjectSave = () => {
+    console.log("table selected data to save", this.state.tableSelectedData);
+    console.log("new projects for the row", this.state.selectedProjects);
+  };
+
+  addProject = (projectArray, tableSelectedData) => {
+    const tempProjectMap = this.arrayToMap(projectArray);
+    this.setState({
+      hasAddClicked: true,
+      selectedProjectsAsMap: tempProjectMap,
+      tableSelectedData: tableSelectedData,
+      selectedProjects: projectArray
+    });
+  };
+
+  handleDeleteAll = () => {
+    /*
+    const selectedArr = Object.keys(this.state.selected);
+    if (selectedArr.length === 0) {
+      return;
+    } else {
+      this.setState({ delAll: true });
+    }
+    */
+  };
+
+  toggleSelectAll = () => {
+    /*
+    let newSelected = {};
+    if (this.state.selectAll === 0) {
+      this.state.tools.forEach(temp => {
+        let tempID = temp.Template[0].templateUID;
+        let projectID = temp.projectID ? temp.projectID : "lite";
+        newSelected[tempID] = projectID;
+      });
+    }
+    this.setState({
+      selected: newSelected,
+      selectAll: this.state.selectAll === 0 ? 1 : 0
+    });
+    */
   };
 
   toggleRow = async (id, projectID) => {
+    /*
     projectID = projectID ? projectID : "lite";
     let newSelected = Object.assign({}, this.state.selected);
     if (newSelected[id]) {
@@ -84,39 +149,42 @@ class Plugins extends React.Component {
       });
     }
     this.setState({ selected: newSelected });
+    */
+  };
+  /*
+  groupByProjects = tools => {
+    //console.log("--->tools ", tools);
+    // const projects = {};
+    return tools.reduce((all, item, index) => {
+      if (item.projectId !== "all") {
+        all[item.pluginId]
+          ? all[item.pluginId].push(item.projectName)
+          : (all[item.pluginId] = [item.projectName]);
+      }
+      return all;
+    }, {});
+  };
+  renderMessages = input => {
+    return {
+      deleteAll: "Delete selected tools? This cannot be undone.",
+      deleteOne: `Delete template ${input}? This cannot be undone.`
+    };
+  };
+  getToolsData = async () => {
+    //cavit
+    const { data: tools } = await getPluginsWithProject();
+    //cavit
+    // cavit commented const { data: tools } = await getTools();
+    console.log("tools --->", tools);
+    const toolsByProjects = this.groupByProjects(tools);
+    this.setState({ tools, toolsByProjects });
   };
 
-  toggleSelectAll() {
-    let newSelected = {};
-    if (this.state.selectAll === 0) {
-      this.state.tools.forEach(temp => {
-        let tempID = temp.Template[0].templateUID;
-        let projectID = temp.projectID ? temp.projectID : "lite";
-        newSelected[tempID] = projectID;
-      });
-    }
-    this.setState({
-      selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
-    });
-  }
 
-  handleCancel = () => {
-    this.setState({
-      hasAddClicked: false,
-      name: "",
-      id: "",
-      user: "",
-      description: "",
-      error: "",
-      delAll: false,
-      uploadClicked: false,
-      hasEditClicked: false,
-      delOne: false,
-      templateName: "",
-      selectedOne: {}
-    });
-  };
+
+
+
+
 
   deleteAll = async () => {
     let newSelected = Object.assign({}, this.state.selected);
@@ -136,14 +204,7 @@ class Plugins extends React.Component {
     this.handleCancel();
   };
 
-  handleDeleteAll = () => {
-    const selectedArr = Object.keys(this.state.selected);
-    if (selectedArr.length === 0) {
-      return;
-    } else {
-      this.setState({ delAll: true });
-    }
-  };
+
 
   handleFormInput = e => {
     const { name, value } = e.target;
@@ -185,6 +246,65 @@ class Plugins extends React.Component {
         toast.error(error.response.data.message, { autoClose: false });
         this.getToolsData();
       });
+  };
+
+  handleClickProjects = () => {
+    this.setState({
+      hasEditClicked: true
+    });
+  };
+  handleUpload = () => {
+    this.setState({ uploadClicked: true });
+  };
+
+  triggerBrowserDownload = (blob, fileName) => {
+    const url = window.URL.createObjectURL(new Blob([blob]));
+    const link = document.createElement("a");
+    document.body.appendChild(link);
+    link.style = "display: none";
+    link.href = url;
+    link.download = `${fileName}.zip`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  handleSubmitUpload = () => {
+    this.getToolsData();
+    this.handleCancel();
+  };
+
+  handleSubmitDownload = () => {
+    this.handleCancel();
+  };
+*/
+
+  //cavit
+  projectDataToCell = tableData => {
+    console.log("cell ----------- >>>>", tableData);
+    const {
+      projectId,
+      projectName,
+      projectid,
+      projectID,
+      projects
+    } = tableData.row;
+    const tempProjects = [];
+    let projectArray = [];
+    for (let project of projects) {
+      const { id, projectid } = project;
+      tempProjects.push(projectid);
+    }
+    projectArray = tempProjects.join(",");
+
+    return (
+      <div
+        onClick={() => {
+          this.addProject(tempProjects, tableData);
+        }}
+      >
+        {projectArray.length === 0 ? "add project" : projectArray}
+      </div>
+    );
   };
 
   defineColumns = () => {
@@ -232,27 +352,34 @@ class Plugins extends React.Component {
         minResizeWidth: 100,
         width: 420
       },
-      {
+      /*{
         Header: "container image",
-        accessor: "image",
+        accessor: "container_image",
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
         width: 420
-      },
+      },*/
       {
         Header: "Projects",
+        accessor: "projects",
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
-        width: 420,
+        width: 100,
+        Cell: original => {
+          return this.projectDataToCell(original);
+        }
+      },
+      {
+        Header: "Templates",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 100,
+        width: 100,
         Cell: original => {
           const { projectId, projectName, pluginId } = original.row.checkbox;
-          return projectId === "all" ? (
-            <div>{projectName}</div>
-          ) : (
-            <div>{this.state.toolsByProjects[pluginId].join(",")}</div>
-          );
+          return projectId === "all" ? <div>{projectName}</div> : <div></div>;
         }
       },
       {
@@ -272,38 +399,9 @@ class Plugins extends React.Component {
     ];
   };
 
-  handleClickProjects = () => {
-    this.setState({
-      hasEditClicked: true
-    });
-  };
-  handleUpload = () => {
-    this.setState({ uploadClicked: true });
-  };
-
-  triggerBrowserDownload = (blob, fileName) => {
-    const url = window.URL.createObjectURL(new Blob([blob]));
-    const link = document.createElement("a");
-    document.body.appendChild(link);
-    link.style = "display: none";
-    link.href = url;
-    link.download = `${fileName}.zip`;
-    link.click();
-    window.URL.revokeObjectURL(url);
-  };
-
-  handleSubmitUpload = () => {
-    this.getToolsData();
-    this.handleCancel();
-  };
-
-  handleSubmitDownload = () => {
-    this.handleCancel();
-  };
-
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
-    const data = this.state.tools;
+    const data = this.state.plugins;
     const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
     return (
       <div className="tools menu-display" id="template">
@@ -313,9 +411,12 @@ class Plugins extends React.Component {
           onUpload={this.handleUpload}
           onDownload={this.handleDownload}
         />
+        <div style={{ textAlign: "left", margin: "10px", marginLeft: "10px" }}>
+          <FaRegTrashAlt className="menu-clickable" />
+        </div>
         <ReactTable
           className="pro-table"
-          data={this.state.tools}
+          data={this.state.plugins}
           columns={this.defineColumns()}
           pageSizeOptions={[10, 20, 50]}
           defaultPageSize={pageSize}
@@ -342,6 +443,16 @@ class Plugins extends React.Component {
           <EditTools
             projectList={this.state.projectList}
             onCancel={this.handleCancel}
+          />
+        )}
+        {this.state.hasAddClicked && (
+          <PluginProjectTable
+            onChange={this.handleProjectSelect}
+            onCancel={this.handleAddProjectCancel}
+            onSave={this.handleAddProjectSave}
+            selectedProjectsAsMap={this.state.selectedProjectsAsMap}
+            allprojects={this.state.projectList}
+            tableSelectedData={this.state.tableSelectedData}
           />
         )}
       </div>

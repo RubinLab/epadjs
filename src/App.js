@@ -97,6 +97,11 @@ class App extends Component {
   getProjectMap = projectMap => {
     this.setState({ projectMap });
   };
+  setNoAuthDefaultVals = () => {
+    const user = "admin";
+    const displayname = "Admin";
+    this.setState({ user: { user, displayname }, authenticated: true });
+  };
   async componentDidMount() {
     fetch("/config.json")
       .then(async res => {
@@ -106,7 +111,8 @@ class App extends Component {
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
         this.setState({ mode, apiUrl, wadoUrl });
-        this.completeAutorization(apiUrl);
+        //this.completeAutorization(apiUrl);
+        this.setNoAuthDefaultVals();
       })
       .catch(err => {
         console.log(err);
