@@ -181,7 +181,6 @@ class AimEditor extends Component {
             this.addPolygonToAim(aim, markup, shapeIndex, imageReferenceUid);
             break;
           case "bidirectional":
-            console.log("BD", markup);
             this.addBidirectionalToAim(
               aim,
               markup,

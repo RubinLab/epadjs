@@ -159,8 +159,10 @@ export default class LengthTool extends BaseAnnotationTool {
         // Configurable shadow
         setShadow(context, this.configuration);
 
+        let color;
         const activeColor = toolColors.getActiveColor(data);
-        const color = data.active ? activeColor : data.color;
+        if (data.active) color = activeColor;
+        else color = data.color ? data.color : toolColors.getToolColor();
 
         // Draw the measurement line
         drawLine(context, element, data.handles.start, data.handles.end, {

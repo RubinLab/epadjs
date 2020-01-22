@@ -93,6 +93,17 @@ const tools = [
   { name: "CorrectionScissors", modeOptions: { mouseButtonMasks: [1] } }
 ];
 
+Array.prototype.pairs = function(func) {
+  const ret = [];
+  for (var i = 0; i < this.length - 1; i++) {
+    for (var j = i; j < this.length - 1; j++) {
+      ret.push([this[i], this[j + 1]]);
+      // func([this[i], this[j + 1]]);
+    }
+  }
+  return ret;
+};
+
 const mapStateToProps = state => {
   return {
     series: state.annotationsListReducer.openSeries,
@@ -162,7 +173,7 @@ class DisplayView extends Component {
 
   getData() {
     // clear the toolState they will be rendered again on next load
-    // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
 
     const { series } = this.props;
     var promises = [];
@@ -371,7 +382,6 @@ class DisplayView extends Component {
         this.renderMarkup(key, value, color, seriesUid, studyUid);
       });
     });
-    console.log("CS tools", cornerstoneTools);
   };
 
   linesToPerpendicular = values => {
@@ -383,22 +393,24 @@ class DisplayView extends Component {
     const groupedLines = Object.values(this.groupBy(lines, "aimUid"));
     groupedLines.forEach(lines => {
       if (lines.length > 1)
-        if (this.checkIfPerpendicular(lines)) {
-          // there are multiple lines on the same image that belongs to same aim, a potential perpendicular
-          // they are perpendicular, remove them from the values list and render them as perpendicular
-          lines[0].markupType = "Bidirectional";
-          lines[0].calculations = lines[0].calculations.concat(
-            lines[1].calculations
-          );
-          lines[0].coordinates = lines[0].coordinates.concat(
-            lines[1].coordinates
-          );
+        lines.pairs().forEach(pair => {
+          if (this.checkIfPerpendicular(pair)) {
+            // there are multiple lines on the same image that belongs to same aim, a potential perpendicular
+            // they are perpendicular, remove them from the values list and render them as perpendicular
+            pair[0].markupType = "Bidirectional";
+            pair[0].calculations = pair[0].calculations.concat(
+              pair[1].calculations
+            );
+            pair[0].coordinates = pair[0].coordinates.concat(
+              pair[1].coordinates
+            );
 
-          const index = values.indexOf(lines[1]);
-          if (index > -1) {
-            values.splice(index, 1);
+            const index = values.indexOf(pair[1]);
+            if (index > -1) {
+              values.splice(index, 1);
+            }
           }
-        }
+        });
     });
   };
 
@@ -543,6 +555,9 @@ class DisplayView extends Component {
     data.handles.perpendicularStart.y = points[2].y.value;
     data.handles.perpendicularEnd.x = points[3].x.value;
     data.handles.perpendicularEnd.y = points[3].y.value;
+    // need to set the text box coordinates for this too
+    data.handles.textBox.x = points[0].x.value;
+    data.handles.textBox.y = points[0].y.value;
   };
 
   renderLine = (imageId, markup, color, seriesUid, studyUid) => {

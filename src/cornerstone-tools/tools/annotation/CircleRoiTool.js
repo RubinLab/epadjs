@@ -187,8 +187,10 @@ export default class CircleRoiTool extends BaseAnnotationTool {
         }
 
         // Configure
+        let color;
         const activeColor = toolColors.getActiveColor(data);
-        const color = data.active ? activeColor : data.color;
+        if (data.active) color = activeColor;
+        else color = data.color ? data.color : toolColors.getToolColor();
         const handleOptions = {
           color,
           handleRadius,
