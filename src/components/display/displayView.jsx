@@ -125,11 +125,13 @@ class DisplayView extends Component {
       selectedAim: undefined,
       refs: props.refs,
       showAnnDetails: true,
-      hasSegmentation: false
+      hasSegmentation: false,
+      redirect: this.props.series.length < 1 ? true : false
     };
   }
 
   componentDidMount() {
+    if (this.props.series.length < 1) return;
     this.getViewports();
     this.getData();
     window.addEventListener("markupSelected", this.handleMarkupSelected);
@@ -137,6 +139,7 @@ class DisplayView extends Component {
   }
 
   async componentDidUpdate(prevProps) {
+    if (this.props.series.length < 1) return;
     if (
       (prevProps.series !== this.props.series &&
         prevProps.loading === true &&
@@ -699,6 +702,7 @@ class DisplayView extends Component {
   };
 
   render() {
+    if (this.state.redirect) return <Redirect to="/search" />;
     return !Object.entries(this.props.series).length ? (
       <Redirect to="/search" />
     ) : (
