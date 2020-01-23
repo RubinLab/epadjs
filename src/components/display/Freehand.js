@@ -1,6 +1,6 @@
 export const freehand = {
   visible: true,
-  active: false,
+  active: true,
   invalidated: true,
   handles: {
     points: [],

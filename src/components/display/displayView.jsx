@@ -69,11 +69,15 @@ const tools = [
   { name: "WwwcRegion" },
   {
     name: "FreehandRoi",
-    moreOptions: { mouseButtonMasks: [1] },
+    modeOptions: { mouseButtonMasks: [1] },
     mode: "active"
   },
   { name: "FreehandRoiSculptor", modeOptions: { mouseButtonMasks: [1] } },
-  { name: "FreehandRoi3DTool", moreOptions: { mouseButtonMasks: [1] } },
+  {
+    name: "FreehandRoi3DTool",
+    modeOptions: { mouseButtonMasks: [1] },
+    mode: "active"
+  },
   { name: "FreehandRoiSculptorTool", modeOptions: { mouseButtonMasks: [1] } },
   { name: "Eraser" },
   {
@@ -682,7 +686,7 @@ class DisplayView extends Component {
     // clear all unsaved markups by calling getData
     this.getData();
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
-    cornerstone.updateImage(element);
+    if (element) cornerstone.updateImage(element);
   };
 
   handleHideAnnotations = () => {

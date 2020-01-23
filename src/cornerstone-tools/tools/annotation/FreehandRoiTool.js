@@ -1,42 +1,42 @@
-import EVENTS from './../../events.js';
-import external from './../../externalModules.js';
-import BaseAnnotationTool from './../base/BaseAnnotationTool.js';
+import EVENTS from "./../../events.js";
+import external from "./../../externalModules.js";
+import BaseAnnotationTool from "./../base/BaseAnnotationTool.js";
 // State
 import {
   addToolState,
   getToolState,
-  removeToolState,
-} from './../../stateManagement/toolState.js';
-import toolStyle from './../../stateManagement/toolStyle.js';
-import toolColors from './../../stateManagement/toolColors.js';
-import { state } from '../../store/index.js';
-import triggerEvent from '../../util/triggerEvent.js';
+  removeToolState
+} from "./../../stateManagement/toolState.js";
+import toolStyle from "./../../stateManagement/toolStyle.js";
+import toolColors from "./../../stateManagement/toolColors.js";
+import { state } from "../../store/index.js";
+import triggerEvent from "../../util/triggerEvent.js";
 // Manipulators
-import { moveHandleNearImagePoint } from '../../util/findAndMoveHelpers.js';
+import { moveHandleNearImagePoint } from "../../util/findAndMoveHelpers.js";
 // Implementation Logic
-import pointInsideBoundingBox from '../../util/pointInsideBoundingBox.js';
-import calculateSUV from '../../util/calculateSUV.js';
-import numbersWithCommas from '../../util/numbersWithCommas.js';
+import pointInsideBoundingBox from "../../util/pointInsideBoundingBox.js";
+import calculateSUV from "../../util/calculateSUV.js";
+import numbersWithCommas from "../../util/numbersWithCommas.js";
 
 // Drawing
-import { getNewContext, draw, drawJoinedLines } from '../../drawing/index.js';
-import drawLinkedTextBox from '../../drawing/drawLinkedTextBox.js';
-import drawHandles from '../../drawing/drawHandles.js';
-import { clipToBox } from '../../util/clip.js';
-import { hideToolCursor, setToolCursor } from '../../store/setToolCursor.js';
-import { freehandRoiCursor } from '../cursors/index.js';
-import freehandUtils from '../../util/freehand/index.js';
-import { getLogger } from '../../util/logger.js';
-import throttle from '../../util/throttle';
+import { getNewContext, draw, drawJoinedLines } from "../../drawing/index.js";
+import drawLinkedTextBox from "../../drawing/drawLinkedTextBox.js";
+import drawHandles from "../../drawing/drawHandles.js";
+import { clipToBox } from "../../util/clip.js";
+import { hideToolCursor, setToolCursor } from "../../store/setToolCursor.js";
+import { freehandRoiCursor } from "../cursors/index.js";
+import freehandUtils from "../../util/freehand/index.js";
+import { getLogger } from "../../util/logger.js";
+import throttle from "../../util/throttle";
 
-const logger = getLogger('tools:annotation:FreehandRoiTool');
+const logger = getLogger("tools:annotation:FreehandRoiTool");
 
 const {
   insertOrDelete,
   freehandArea,
   calculateFreehandStatistics,
   freehandIntersect,
-  FreehandHandleData,
+  FreehandHandleData
 } = freehandUtils;
 
 /**
@@ -50,10 +50,10 @@ const {
 export default class FreehandRoiTool extends BaseAnnotationTool {
   constructor(props = {}) {
     const defaultProps = {
-      name: 'FreehandRoi',
-      supportedInteractionTypes: ['Mouse', 'Touch'],
+      name: "FreehandRoi",
+      supportedInteractionTypes: ["Mouse", "Touch"],
       configuration: defaultFreehandConfiguration(),
-      svgCursor: freehandRoiCursor,
+      svgCursor: freehandRoiCursor
     };
 
     super(props, defaultProps);
@@ -105,8 +105,8 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       invalidated: true,
       color: undefined,
       handles: {
-        points: [],
-      },
+        points: []
+      }
     };
 
     measurementData.handles.textBox = {
@@ -115,7 +115,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       movesIndependently: false,
       drawnIndependently: true,
       allowedOutsideImage: true,
-      hasBoundingBox: true,
+      hasBoundingBox: true
     };
 
     return measurementData;
@@ -235,7 +235,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     let meanStdDev, meanStdDevSUV;
 
     const seriesModule = external.cornerstone.metaData.get(
-      'generalSeriesModule',
+      "generalSeriesModule",
       image.imageId
     );
     const modality = seriesModule ? seriesModule.modality : null;
@@ -249,7 +249,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       left: points[0].x,
       right: points[0].x,
       bottom: points[0].y,
-      top: points[0].x,
+      top: points[0].x
     };
 
     for (let i = 0; i < points.length; i++) {
@@ -263,7 +263,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       left: bounds.left,
       top: bounds.bottom,
       width: Math.abs(bounds.right - bounds.left),
-      height: Math.abs(bounds.top - bounds.bottom),
+      height: Math.abs(bounds.top - bounds.bottom)
     };
 
     // Store the bounding box information for the text box
@@ -289,7 +289,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
         data.handles.points
       );
 
-      if (modality === 'PT') {
+      if (modality === "PT") {
         // If the image is from a PET scan, use the DICOM tags to
         // Calculate the SUV from the mean and standard deviation.
 
@@ -305,7 +305,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
           stdDev: calculateSUV(
             image,
             (meanStdDev.stdDev - image.intercept) / image.slope
-          ),
+          )
         };
       }
 
@@ -352,7 +352,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     const { image, element } = eventData;
     const config = this.configuration;
     const seriesModule = external.cornerstone.metaData.get(
-      'generalSeriesModule',
+      "generalSeriesModule",
       image.imageId
     );
     const modality = seriesModule ? seriesModule.modality : null;
@@ -396,7 +396,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
               lines.push(config.mouseLocation.handles.start);
             }
             drawJoinedLines(context, element, data.handles.points[j], lines, {
-              color,
+              color
             });
           }
         }
@@ -405,7 +405,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
 
         const options = {
           color,
-          fill: fillColor,
+          fill: fillColor
         };
 
         if (config.alwaysShowHandles || (data.active && data.polyBoundingBox)) {
@@ -485,10 +485,10 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       // If the mean and standard deviation values are present, display them
       if (meanStdDev && meanStdDev.mean !== undefined) {
         // If the modality is CT, add HU to denote Hounsfield Units
-        let moSuffix = '';
+        let moSuffix = "";
 
-        if (modality === 'CT') {
-          moSuffix = 'HU';
+        if (modality === "CT") {
+          moSuffix = "HU";
         }
         data.unit = moSuffix;
 
@@ -503,7 +503,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
 
         // If this image has SUV values to display, concatenate them to the text line
         if (meanStdDevSUV && meanStdDevSUV.mean !== undefined) {
-          const SUVtext = ' SUV: ';
+          const SUVtext = " SUV: ";
 
           meanText +=
             SUVtext + numbersWithCommas(meanStdDevSUV.mean.toFixed(2));
@@ -570,7 +570,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     return false;
   }
 
-  handleSelectedCallback(evt, toolData, handle, interactionType = 'mouse') {
+  handleSelectedCallback(evt, toolData, handle, interactionType = "mouse") {
     const { element } = evt.detail;
     const toolState = getToolState(element, this.name);
 
@@ -585,7 +585,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
 
     config.dragOrigin = {
       x: handle.x,
-      y: handle.y,
+      y: handle.y
     };
 
     // Iterating over handles of all toolData instances to find the indices of the selected handle
@@ -603,6 +603,11 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     this._modifying = true;
 
     this._activateModify(element);
+
+    const evnt = new CustomEvent("markupSelected", {
+      detail: toolData.aimId
+    });
+    window.dispatchEvent(evnt);
 
     // Interupt eventDispatchers
     preventPropagation(evt);
@@ -1036,9 +1041,9 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     let interactionType;
 
     if (evt.type === EVENTS.MOUSE_DOWN_ACTIVATE) {
-      interactionType = 'Mouse';
+      interactionType = "Mouse";
     } else if (evt.type === EVENTS.TOUCH_START_ACTIVE) {
-      interactionType = 'Touch';
+      interactionType = "Touch";
     }
     this._activateDraw(element, interactionType);
     this._getMouseLocation(eventData);
@@ -1222,7 +1227,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       if (handleNearby !== undefined) {
         return {
           handleNearby,
-          toolIndex,
+          toolIndex
         };
       }
     }
@@ -1385,9 +1390,9 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
 
     let completeHandleRadius;
 
-    if (this._drawingInteractionType === 'Mouse') {
+    if (this._drawingInteractionType === "Mouse") {
       completeHandleRadius = this.configuration.completeHandleRadius;
-    } else if (this._drawingInteractionType === 'Touch') {
+    } else if (this._drawingInteractionType === "Touch") {
       completeHandleRadius = this.configuration.completeHandleRadiusTouch;
     }
 
@@ -1395,7 +1400,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       element,
       p1Canvas,
       p2Canvas,
-      '<',
+      "<",
       completeHandleRadius
     );
   }
@@ -1411,7 +1416,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
    *                              allowed canvas spacing.
    */
   _isDistanceSmallerThanSpacing(element, p1, p2) {
-    return this._compareDistanceToSpacing(element, p1, p2, '<');
+    return this._compareDistanceToSpacing(element, p1, p2, "<");
   }
 
   /**
@@ -1425,7 +1430,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
    *                              allowed canvas spacing.
    */
   _isDistanceLargerThanSpacing(element, p1, p2) {
-    return this._compareDistanceToSpacing(element, p1, p2, '>');
+    return this._compareDistanceToSpacing(element, p1, p2, ">");
   }
 
   /**
@@ -1444,10 +1449,10 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     element,
     p1,
     p2,
-    comparison = '>',
+    comparison = ">",
     spacing = this.configuration.spacing
   ) {
-    if (comparison === '>') {
+    if (comparison === ">") {
       return external.cornerstoneMath.point.distance(p1, p2) > spacing;
     }
 
@@ -1463,7 +1468,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
    * @modifies {element}
    * @returns {undefined}
    */
-  _activateDraw(element, interactionType = 'Mouse') {
+  _activateDraw(element, interactionType = "Mouse") {
     this._drawing = true;
     this._drawingInteractionType = interactionType;
 
@@ -1629,7 +1634,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     const eventData = {
       toolName: this.name,
       element,
-      measurementData,
+      measurementData
     };
 
     triggerEvent(element, eventType, eventData);
@@ -1640,7 +1645,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     const eventData = {
       toolName: this.name,
       element,
-      measurementData,
+      measurementData
     };
 
     triggerEvent(element, eventType, eventData);
@@ -1655,9 +1660,9 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
   }
 
   set spacing(value) {
-    if (typeof value !== 'number') {
+    if (typeof value !== "number") {
       throw new Error(
-        'Attempting to set freehand spacing to a value other than a number.'
+        "Attempting to set freehand spacing to a value other than a number."
       );
     }
 
@@ -1670,9 +1675,9 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
   }
 
   set activeHandleRadius(value) {
-    if (typeof value !== 'number') {
+    if (typeof value !== "number") {
       throw new Error(
-        'Attempting to set freehand activeHandleRadius to a value other than a number.'
+        "Attempting to set freehand activeHandleRadius to a value other than a number."
       );
     }
 
@@ -1685,9 +1690,9 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
   }
 
   set completeHandleRadius(value) {
-    if (typeof value !== 'number') {
+    if (typeof value !== "number") {
       throw new Error(
-        'Attempting to set freehand completeHandleRadius to a value other than a number.'
+        "Attempting to set freehand completeHandleRadius to a value other than a number."
       );
     }
 
@@ -1700,9 +1705,9 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
   }
 
   set alwaysShowHandles(value) {
-    if (typeof value !== 'boolean') {
+    if (typeof value !== "boolean") {
       throw new Error(
-        'Attempting to set freehand alwaysShowHandles to a value other than a boolean.'
+        "Attempting to set freehand alwaysShowHandles to a value other than a boolean."
       );
     }
 
@@ -1804,18 +1809,18 @@ function defaultFreehandConfiguration() {
       handles: {
         start: {
           highlight: true,
-          active: true,
-        },
-      },
+          active: true
+        }
+      }
     },
     spacing: 1,
     activeHandleRadius: 3,
     completeHandleRadius: 6,
     completeHandleRadiusTouch: 28,
     alwaysShowHandles: false,
-    invalidColor: 'crimson',
+    invalidColor: "crimson",
     currentHandle: 0,
-    currentTool: -1,
+    currentTool: -1
   };
 }
 
