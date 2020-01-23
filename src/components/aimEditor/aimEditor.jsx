@@ -7,7 +7,8 @@ import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import {
   uploadAim,
-  uploadSegmentation
+  uploadSegmentation,
+  updateAim
 } from "../../services/annotationServices";
 import {
   updateSingleSerie,
@@ -40,6 +41,7 @@ class AimEditor extends Component {
   }
 
   componentDidMount() {
+    console.log("Props", this.props);
     const element = document.getElementById("questionaire");
     // const { data: templates } = await getTemplates();
     const templatePromise = new Promise(resolve => {
@@ -93,8 +95,10 @@ class AimEditor extends Component {
   save = () => {
     // Logic behind relies on the order of the data in array
     const answers = this.semanticAnswers.saveAim();
-    if (this.props.updatedAimId) this.updateAim(answers);
-    else this.createAim(answers);
+    console.log("Answers are", answers);
+    // if (this.props.aimId) this.updateAim(answers);
+    // else this.createAim(answers);
+    this.createAim(answers);
   };
 
   createAim = async answers => {
@@ -230,11 +234,12 @@ class AimEditor extends Component {
   };
 
   saveAim = (aim, segmentationBlob) => {
+    console.log("Props in save", this.props);
     console.log("Cs tools", cornerstoneTools);
     console.log("Aim in SAVE", aim);
     const aimJson = aim.getAim();
-    const aimSaved = JSON.parse(aimJson);
-    const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
+    let aimSaved = JSON.parse(aimJson);
+    let aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
     const { openSeries, activePort } = this.props;
     const { patientID, projectID, seriesUID, studyUID } = openSeries[
       activePort
@@ -245,6 +250,50 @@ class AimEditor extends Component {
     const comment =
       aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
         .comment.value;
+
+    // if update delete the current aim
+    if (this.props.aimId) {
+      console.log("Props", this.props);
+      console.log("aimId, projectId", this.props.aimId.aimId, projectID);
+      // deleteAim(this.props.aimId.aimId, projectID).then(() => {
+      //   console.log("Deleted");
+      aimSaved.ImageAnnotationCollection.uniqueIdentifier.root = this.props.aimId.aimId;
+      aimID = this.props.aimId.aimId;
+      // });
+      updateAim(aimSaved, aimID)
+        .then(() => {
+          console.log("Aim saved", aimSaved);
+          if (segmentationBlob) this.saveSegmentation(segmentationBlob);
+          // var objectUrl = URL.createObjectURL(segBlobGlobal);
+          // window.open(objectUrl);
+
+          toast.success("Aim succesfully saved.", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true
+          });
+          this.props.dispatch(
+            getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+          );
+          this.props.dispatch(
+            updateSingleSerie({
+              subjectID: patientID,
+              projectID,
+              seriesUID,
+              studyUID
+            })
+          );
+
+          this.props.dispatch(updatePatientOnAimSave(aimRefs));
+        })
+        .catch(error => console.log(error));
+      this.props.onCancel(false);
+      return;
+    }
+
     const aimRefs = {
       aimID,
       patientID,
@@ -257,6 +306,7 @@ class AimEditor extends Component {
 
     uploadAim(aimSaved)
       .then(() => {
+        console.log("Aim saved", aimSaved);
         if (segmentationBlob) this.saveSegmentation(segmentationBlob);
         // var objectUrl = URL.createObjectURL(segBlobGlobal);
         // window.open(objectUrl);
@@ -293,7 +343,7 @@ class AimEditor extends Component {
     // check for markups
     var shapeIndex = 1;
     var markupsToSave = {};
-    const updatedAimId = this.props.aimId;
+    const updatedAimId = this.props.aimId ? this.props.aimId : {};
     markedImageIds.map(imageId => {
       const imageReferenceUid = this.parseImgeId(imageId);
       const markUps = toolState[imageId];

@@ -88,10 +88,17 @@ export function getSummaryAnnotations(projectID) {
 }
 
 export function deleteAnnotation(aimObj, aimID, projectID) {
+  console.log("Aim id", aimID);
   if (aimObj) {
     aimID = aimObj.aimID;
     projectID = aimObj.projectID ? projectID : "lite";
   }
+  return http.delete(
+    apiUrl + "/projects/" + projectID + "/aims/" + aimID + "?deleteDSO=true"
+  );
+}
+
+export function deleteAim(aimID, projectID) {
   return http.delete(
     apiUrl + "/projects/" + projectID + "/aims/" + aimID + "?deleteDSO=true"
   );
@@ -102,6 +109,14 @@ export function uploadAim(aim) {
   if (mode === "lite") {
     url = apiUrl + "/projects/lite/aims";
     return http.post(url, aim);
+  }
+}
+
+export function updateAim(aim, aimId) {
+  let url;
+  if (mode === "lite") {
+    url = apiUrl + "/projects/lite/aims/" + aimId;
+    return http.put(url, aim);
   }
 }
 

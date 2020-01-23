@@ -360,6 +360,8 @@ class DisplayView extends Component {
     const { aimList, series, activePort } = this.props;
     if (aimList[series[activePort].seriesUID][event.detail]) {
       const aimJson = aimList[series[activePort].seriesUID][event.detail].json;
+      // add the aimId to aimJson
+      aimJson.aimId = event.detail;
       const markupTypes = this.getMarkupTypesForAim(event.detail);
       aimJson["markupType"] = [...markupTypes];
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
