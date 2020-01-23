@@ -186,17 +186,16 @@ class DisplayView extends Component {
     }
     Promise.all(promises).then(res => {
       this.setState({ data: res, isLoading: false });
+      series.forEach((serie, serieIndex) => {
+        if (serie.imageAnnotations)
+          this.parseAims(
+            serie.imageAnnotations,
+            serie.seriesUID,
+            serie.studyUID,
+            serieIndex
+          );
+      });
       this.props.dispatch(clearActivePortAimID());
-    });
-
-    series.forEach((serie, serieIndex) => {
-      if (serie.imageAnnotations)
-        this.parseAims(
-          serie.imageAnnotations,
-          serie.seriesUID,
-          serie.studyUID,
-          serieIndex
-        );
     });
   }
 
@@ -471,8 +470,6 @@ class DisplayView extends Component {
     const pathVariables = { studyUID, seriesUID: seriesInstanceUid.root };
 
     getSegmentation(pathVariables, sopInstanceUid.root).then(({ data }) => {
-      console.log("seg data", data);
-
       this.renderSegmentation(data, aimIndex, serieIndex);
     });
   };
@@ -482,33 +479,20 @@ class DisplayView extends Component {
   };
 
   renderSegmentation = (arrayBuffer, aimIndex, serieIndex) => {
-    console.log("Aim Index, serie Index", aimIndex, serieIndex);
-    console.log("Props", this.props);
     const { imageIds } = this.state.data[serieIndex].stack;
-    console.log("Imageids", imageIds);
 
     var imagePromises = imageIds.map(imageId => {
       return cornerstone.loadAndCacheImage(imageId);
     });
 
     Promise.all(imagePromises).then(() => {
-      console.log("I is", aimIndex);
       const { element } = cornerstone.getEnabledElements()[
         this.props.activePort
       ];
 
       const stackToolState = cornerstoneTools.getToolState(element, "stack");
 
-      console.log("Stack toolstate", stackToolState);
       const imageIds = stackToolState.data[0].imageIds;
-      console.log(
-        "Tool state genrated",
-        dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
-          imageIds,
-          arrayBuffer,
-          cornerstone.metaData
-        )
-      );
       const {
         labelmapBuffer,
         segMetadata,
@@ -518,16 +502,8 @@ class DisplayView extends Component {
         arrayBuffer,
         cornerstone.metaData
       );
+
       const { setters, state } = cornerstoneTools.getModule("segmentation");
-      console.log(
-        "imageIds[0], labelmapBuffer, segMetadata, imageIds.length, segmenetsOnFrame",
-        imageIds[0],
-        labelmapBuffer,
-        aimIndex,
-        segMetadata,
-        imageIds.length,
-        segmentsOnFrame
-      );
       setters.labelmap3DByFirstImageId(
         imageIds[0],
         labelmapBuffer,
