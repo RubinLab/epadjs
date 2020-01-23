@@ -238,7 +238,7 @@ class ToolMenu extends Component {
     cornerstoneTools.setToolActive(toolName, {
       mouseButtonMask: [mouseMask]
     });
-    if (toolName === "Brush") this.handleBrushSelected();
+    if (toolName === "Brush3DTool") this.handleBrushSelected();
   };
 
   handleBrushSelected = () => {
@@ -246,28 +246,27 @@ class ToolMenu extends Component {
     const { imageAnnotations } = openSeries[activePort];
     const { element } = cornerstone.getEnabledElements()[activePort];
     // if there are already image annotations and segmentations change the labelmap accordingly
-    console.log("Image annotations for seg Count", imageAnnotations);
+    // console.log("Image annotations for seg Count", imageAnnotations);
     if (imageAnnotations !== undefined) {
       const newLabelMapIndex = getNumOfSegs(imageAnnotations);
-      console.log("New Label Map Index", newLabelMapIndex);
-      console.log(
-        "Segmenatation Module Before",
-        cornerstoneTools.getModule("segmentation")
-      );
+      // console.log("New Label Map Index", newLabelMapIndex);
+      // console.log(
+      //   "Segmenatation Module Before",
+      //   cornerstoneTools.getModule("segmentation")
+      // );
 
       const { setters } = cornerstoneTools.getModule("segmentation");
       setters.activeLabelmapIndex(element, newLabelMapIndex);
-      console.log(
-        "Segmenatation Module After",
-        cornerstoneTools.getModule("segmentation")
-      );
+      // console.log(
+      //   "Segmenatation Module After",
+      //   cornerstoneTools.getModule("segmentation")
+      // );
     }
   };
 
   //sets the selected tool active for an enabled elements
   setToolActiveForElement = (toolName, mouseMask = 1) => {
     this.disableAllTools();
-    console.log("CStools", cornerstoneTools);
     if (toolName == "Brush3DHUGatedTool") {
       cornerstoneTools.store.modules.brush.setters.activeGate("muscle");
     }
