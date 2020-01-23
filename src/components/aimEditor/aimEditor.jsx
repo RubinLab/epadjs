@@ -23,6 +23,7 @@ import * as dcmjs from "dcmjs";
 import "./aimEditor.css";
 import { throws } from "assert";
 import getNumOfSegs from "../../Utils/Segmentation/getNumOfSegments";
+import { concat } from "joi-browser";
 const mode = sessionStorage.getItem("mode");
 
 const enumAimType = {
@@ -638,6 +639,7 @@ class AimEditor extends Component {
   };
 
   createSegmentation3D = labelmapIndex => {
+    console.log("Cornerstone tools", cornerstoneTools);
     // following is to know the image index which has the first segment
     let firstSegImageIndex;
 
@@ -673,6 +675,7 @@ class AimEditor extends Component {
     //   labelmapIndex++
     // ) {
     const labelmap3D = labelmaps3D[labelmapIndex];
+    console.log("Labelmap index, labelmap3D", labelmapIndex, labelmap3D);
     const labelmaps2D = labelmap3D.labelmaps2D;
 
     for (let i = 0; i < labelmaps2D.length; i++) {
