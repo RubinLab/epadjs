@@ -177,6 +177,8 @@ class DisplayView extends Component {
   getData() {
     // clear the toolState they will be rendered again on next load
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    // clear the segmentation data as well
+    cornerstoneTools.store.modules.segmentation.state.series = {};
 
     const { series } = this.props;
     var promises = [];
@@ -512,6 +514,7 @@ class DisplayView extends Component {
         imageIds.length,
         segmentsOnFrame
       );
+      cornerstone.updateImage(element); //update the image to show newly loaded segmentations
     });
   };
 
