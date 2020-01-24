@@ -180,7 +180,7 @@ class DisplayView extends Component {
 
   getData() {
     // clear the toolState they will be rendered again on next load
-    // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
 

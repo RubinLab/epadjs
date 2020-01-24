@@ -40,7 +40,6 @@ class AimEditor extends Component {
   }
 
   componentDidMount() {
-    console.log("Cornerstone tools", cornerstoneTools);
     const element = document.getElementById("questionaire");
     // const { data: templates } = await getTemplates();
     const templatePromise = new Promise(resolve => {

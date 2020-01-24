@@ -741,7 +741,6 @@ function _enableStackPrefetching(element, clear = false) {
  */
 function _addAndConfigureInitialToolsForElement(tools, element) {
   for (let i = 0; i < tools.length; i++) {
-    console.log("Tool", tools[i]);
     const tool =
       typeof tools[i] === "string"
         ? { name: tools[i] }
@@ -769,7 +768,6 @@ function _addAndConfigureInitialToolsForElement(tools, element) {
       // to determine the name it registered with cornerstone. `tool.name` is not
       // reliable.
       const setToolModeFn = TOOL_MODE_FUNCTIONS[tool.mode];
-      console.log("setting tool mode", element, tool.name, tool.modeOptions);
       setToolModeFn(element, tool.name, tool.modeOptions || {});
     }
   }
