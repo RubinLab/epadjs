@@ -31,8 +31,8 @@ const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
 
 const tools = [
-  { name: "Wwwc", modeOptions: { mouseButtonMasks: [1] }, mode: "active" },
-  { name: "Pan", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 }, mode: "active" },
+  { name: "Pan", modeOptions: { mouseButtonMasks: 1 } },
   {
     name: "Zoom",
     configuration: {
@@ -42,8 +42,8 @@ const tools = [
     },
     modeOptions: { mouseButtonMasks: [1, 2] }
   },
-  { name: "Probe", modeOptions: { mouseButtonMasks: [1] }, mode: "active" },
-  { name: "Length", modeOptions: { mouseButtonMasks: [1] }, mode: "active" },
+  { name: "Probe", modeOptions: { mouseButtonMasks: 1 }, mode: "passive" },
+  { name: "Length", modeOptions: { mouseButtonMasks: 1 }, mode: "passive" },
   // {
   //   name: "EllipticalRoi",
   //   configuration: {
@@ -61,36 +61,40 @@ const tools = [
     configuration: {
       showMinMax: true
     },
-    modeOptions: { mouseButtonMasks: [1] },
-    mode: "active"
+    modeOptions: { mouseButtonMask: 1 },
+    mode: "enabled"
   },
   { name: "Angle" },
   { name: "Rotate" },
   { name: "WwwcRegion" },
   {
     name: "FreehandRoi",
-    moreOptions: { mouseButtonMasks: [1] },
-    mode: "active"
+    modeOptions: { mouseButtonMask: [1] },
+    mode: "passive"
   },
-  { name: "FreehandRoiSculptor", modeOptions: { mouseButtonMasks: [1] } },
-  { name: "FreehandRoi3DTool", moreOptions: { mouseButtonMasks: [1] } },
-  { name: "FreehandRoiSculptorTool", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "FreehandRoiSculptor", modeOptions: { mouseButtonMask: 1 } },
+  {
+    name: "FreehandRoi3DTool",
+    modeOptions: { mouseButtonMask: 1 },
+    mode: "passive"
+  },
+  { name: "FreehandRoiSculptorTool", modeOptions: { mouseButtonMask: 1 } },
   { name: "Eraser" },
   {
     name: "Bidirectional",
-    modeOptions: { mouseButtonMasks: [1] },
-    mode: "active"
+    modeOptions: { mouseButtonMask: 1 },
+    mode: "passive"
   },
   { name: "Brush3DTool" },
-  { name: "StackScroll", modeOptions: { mouseButtonMasks: [1] } },
+  { name: "StackScroll", modeOptions: { mouseButtonMask: 1 } },
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
-  { name: "StackScrollMouseWheel", mode: "active" },
+  { name: "StackScrollMouseWheel", mode: "passive" },
   { name: "StackScrollMultiTouch" },
-  { name: "FreehandScissors", modeOptions: { mouseButtonMasks: [1] } },
-  { name: "RectangleScissors", modeOptions: { mouseButtonMasks: [1] } },
-  { name: "CircleScissors", modeOptions: { mouseButtonMasks: [1] } },
-  { name: "CorrectionScissors", modeOptions: { mouseButtonMasks: [1] } }
+  { name: "FreehandScissors", modeOptions: { mouseButtonMask: 1 } },
+  { name: "RectangleScissors", modeOptions: { mouseButtonMask: 1 } },
+  { name: "CircleScissors", modeOptions: { mouseButtonMask: 1 } },
+  { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } }
 ];
 
 Array.prototype.pairs = function(func) {
@@ -682,7 +686,7 @@ class DisplayView extends Component {
     // clear all unsaved markups by calling getData
     this.getData();
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
-    cornerstone.updateImage(element);
+    if (element) cornerstone.updateImage(element);
   };
 
   handleHideAnnotations = () => {

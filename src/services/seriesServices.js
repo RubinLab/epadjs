@@ -98,7 +98,6 @@ export function getSegmentation(series, imageId) {
     "wadouri:",
     ""
   );
-  console.log("URL is", url);
   return http.get(url, { responseType: "arraybuffer" });
 }
 
