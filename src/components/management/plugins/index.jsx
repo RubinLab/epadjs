@@ -307,6 +307,28 @@ class Plugins extends React.Component {
     );
   };
 
+  templateDataToCell = tableData => {
+    console.log("cell ----------- >>>>", tableData);
+    const { id, templateName, templates } = tableData.row;
+    const tempTemplates = [];
+    let templateArray = [];
+    for (let template of templates) {
+      const { id, templateName } = template;
+      tempTemplates.push(templateName);
+    }
+    templateArray = tempTemplates.join(",");
+
+    return (
+      <div
+        onClick={() => {
+          this.addProject(tempTemplates, tableData);
+        }}
+      >
+        {templateArray.length === 0 ? "add template" : templateArray}
+      </div>
+    );
+  };
+
   defineColumns = () => {
     return [
       {
@@ -373,13 +395,13 @@ class Plugins extends React.Component {
       },
       {
         Header: "Templates",
+        accessor: "templates",
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
         width: 100,
         Cell: original => {
-          const { projectId, projectName, pluginId } = original.row.checkbox;
-          return projectId === "all" ? <div>{projectName}</div> : <div></div>;
+          return this.templateDataToCell(original);
         }
       },
       {
