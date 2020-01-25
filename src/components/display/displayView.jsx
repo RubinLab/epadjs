@@ -392,6 +392,7 @@ class DisplayView extends Component {
           //means going to another viewport in the middle of creating/editing an aim
           return;
       this.setState({ activePort: i });
+      this.props.dispatch(changeActivePort(i));
     }
   };
 
