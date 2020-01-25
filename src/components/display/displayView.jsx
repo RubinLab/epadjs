@@ -89,7 +89,7 @@ const tools = [
   { name: "StackScroll", modeOptions: { mouseButtonMask: 1 } },
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
-  { name: "StackScrollMouseWheel", mode: "passive" },
+  { name: "StackScrollMouseWheel", mode: "active" },
   { name: "StackScrollMultiTouch" },
   { name: "FreehandScissors", modeOptions: { mouseButtonMask: 1 } },
   { name: "RectangleScissors", modeOptions: { mouseButtonMask: 1 } },
@@ -180,7 +180,7 @@ class DisplayView extends Component {
 
   getData() {
     // clear the toolState they will be rendered again on next load
-    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
 
@@ -192,7 +192,14 @@ class DisplayView extends Component {
     }
     Promise.all(promises).then(res => {
       this.setState({ data: res, isLoading: false });
+      // clear the toolState they will be rendered again on next load
+      cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+        {}
+      );
+      // clear the segmentation data as well
+      // cornerstoneTools.store.modules.segmentation.state.series = {};
       series.forEach((serie, serieIndex) => {
+        console.log("Serie", serie);
         if (serie.imageAnnotations)
           this.parseAims(
             serie.imageAnnotations,
@@ -379,8 +386,11 @@ class DisplayView extends Component {
   };
 
   setActive = i => {
-    this.props.dispatch(changeActivePort(i));
     if (this.props.activePort !== i) {
+      if (this.state.showAimEditor)
+        if (!this.closeAimEditor(true))
+          //means going to another viewport in the middle of creating/editing an aim
+          return;
       this.setState({ activePort: i });
     }
   };
@@ -389,6 +399,7 @@ class DisplayView extends Component {
     Object.entries(aimList).forEach(([key, values], aimIndex) => {
       this.linesToPerpendicular(values); //change the perendicular lines to bidirectional to render by CS
       values.forEach(value => {
+        console.log("Value", value);
         const { markupType, aimUid } = value;
         if (markupType === "DicomSegmentationEntity")
           this.getSegmentationData(
@@ -486,19 +497,16 @@ class DisplayView extends Component {
 
   renderSegmentation = (arrayBuffer, aimIndex, serieIndex) => {
     const { imageIds } = this.state.data[serieIndex].stack;
+    console.log("Image Ids", imageIds);
 
     var imagePromises = imageIds.map(imageId => {
       return cornerstone.loadAndCacheImage(imageId);
     });
 
     Promise.all(imagePromises).then(() => {
-      const { element } = cornerstone.getEnabledElements()[
-        this.props.activePort
-      ];
+      // const stackToolState = cornerstoneTools.getToolState(element, "stack");
 
-      const stackToolState = cornerstoneTools.getToolState(element, "stack");
-
-      const imageIds = stackToolState.data[0].imageIds;
+      // const imageIds = stackToolState.data[0].imageIds;
       const {
         labelmapBuffer,
         segMetadata,
@@ -518,6 +526,9 @@ class DisplayView extends Component {
         imageIds.length,
         segmentsOnFrame
       );
+      const { element } = cornerstone.getEnabledElements()[
+        this.props.activePort
+      ];
       cornerstone.updateImage(element); //update the image to show newly loaded segmentations
     });
   };
@@ -679,7 +690,7 @@ class DisplayView extends Component {
         "All unsaved data will be lost! Do you want to continue?"
       );
       if (!answer) {
-        return;
+        return 0;
       }
     }
     this.setState({ showAimEditor: false, selectedAim: undefined });
@@ -687,6 +698,7 @@ class DisplayView extends Component {
     this.getData();
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
     if (element) cornerstone.updateImage(element);
+    return 1;
   };
 
   handleHideAnnotations = () => {
