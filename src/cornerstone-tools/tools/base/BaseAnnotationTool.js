@@ -161,7 +161,6 @@ class BaseAnnotationTool extends BaseTool {
    * @returns {void}
    */
   toolSelectedCallback(evt, annotation, interactionType = "mouse") {
-    alert("hop");
     moveAnnotation(evt, this, annotation, interactionType);
     const evnt = new CustomEvent("markupSelected", {
       detail: annotation.aimId
