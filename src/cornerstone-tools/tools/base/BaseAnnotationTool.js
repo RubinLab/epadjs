@@ -141,6 +141,11 @@ class BaseAnnotationTool extends BaseTool {
    * @returns {void}
    */
   handleSelectedCallback(evt, toolData, handle, interactionType = "mouse") {
+    const evnt = new CustomEvent("markupSelected", {
+      detail: toolData.aimId
+    });
+
+    window.dispatchEvent(evnt);
     moveHandleNearImagePoint(evt, this, toolData, handle, interactionType);
   }
 
@@ -156,6 +161,7 @@ class BaseAnnotationTool extends BaseTool {
    * @returns {void}
    */
   toolSelectedCallback(evt, annotation, interactionType = "mouse") {
+    alert("hop");
     moveAnnotation(evt, this, annotation, interactionType);
     const evnt = new CustomEvent("markupSelected", {
       detail: annotation.aimId

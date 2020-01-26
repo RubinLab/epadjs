@@ -62,7 +62,7 @@ const tools = [
       showMinMax: true
     },
     modeOptions: { mouseButtonMask: 1 },
-    mode: "enabled"
+    mode: "passive"
   },
   { name: "Angle" },
   { name: "Rotate" },
