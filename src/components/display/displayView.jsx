@@ -180,7 +180,7 @@ class DisplayView extends Component {
 
   getData() {
     // clear the toolState they will be rendered again on next load
-    // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
 
@@ -199,7 +199,6 @@ class DisplayView extends Component {
       // clear the segmentation data as well
       // cornerstoneTools.store.modules.segmentation.state.series = {};
       series.forEach((serie, serieIndex) => {
-        console.log("Serie", serie);
         if (serie.imageAnnotations)
           this.parseAims(
             serie.imageAnnotations,
@@ -387,10 +386,12 @@ class DisplayView extends Component {
 
   setActive = i => {
     if (this.props.activePort !== i) {
-      if (this.state.showAimEditor)
-        if (!this.closeAimEditor(true))
+      if (this.state.showAimEditor) {
+        if (!this.closeAimEditor(true)) {
           //means going to another viewport in the middle of creating/editing an aim
           return;
+        }
+      }
       this.setState({ activePort: i });
       this.props.dispatch(changeActivePort(i));
     }
@@ -400,7 +401,6 @@ class DisplayView extends Component {
     Object.entries(aimList).forEach(([key, values], aimIndex) => {
       this.linesToPerpendicular(values); //change the perendicular lines to bidirectional to render by CS
       values.forEach(value => {
-        console.log("Value", value);
         const { markupType, aimUid } = value;
         if (markupType === "DicomSegmentationEntity")
           this.getSegmentationData(
@@ -498,7 +498,6 @@ class DisplayView extends Component {
 
   renderSegmentation = (arrayBuffer, aimIndex, serieIndex) => {
     const { imageIds } = this.state.data[serieIndex].stack;
-    console.log("Image Ids", imageIds);
 
     var imagePromises = imageIds.map(imageId => {
       return cornerstone.loadAndCacheImage(imageId);
@@ -527,10 +526,12 @@ class DisplayView extends Component {
         imageIds.length,
         segmentsOnFrame
       );
-      const { element } = cornerstone.getEnabledElements()[
-        this.props.activePort
-      ];
-      cornerstone.updateImage(element); //update the image to show newly loaded segmentations
+      if (cornerstone.getEnabledElements().length) {
+        const enabledElements = cornerstone.getEnabledElements();
+        enabledElements.map(({ element }) => {
+          cornerstone.updateImage(element); //update the image to show newly loaded segmentations}
+        });
+      }
     });
   };
 
