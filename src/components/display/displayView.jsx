@@ -526,13 +526,21 @@ class DisplayView extends Component {
         imageIds.length,
         segmentsOnFrame
       );
-      if (cornerstone.getEnabledElements().length) {
-        const enabledElements = cornerstone.getEnabledElements();
-        enabledElements.map(({ element }) => {
-          cornerstone.updateImage(element); //update the image to show newly loaded segmentations}
-        });
-      }
+      this.refreshAllViewports();
     });
+  };
+
+  refreshAllViewports = () => {
+    if (cornerstone.getEnabledElements().length) {
+      const enabledElements = cornerstone.getEnabledElements();
+      enabledElements.map(({ element }) => {
+        try {
+          cornerstone.updateImage(element); //update the image to show newly loaded segmentations}
+        } catch (error) {
+          console.warn("Error:", error);
+        }
+      });
+    }
   };
 
   getColorOfMarkup = (aimUid, seriesUid) => {
@@ -698,8 +706,7 @@ class DisplayView extends Component {
     this.setState({ showAimEditor: false, selectedAim: undefined });
     // clear all unsaved markups by calling getData
     this.getData();
-    const { element } = cornerstone.getEnabledElements()[this.props.activePort];
-    if (element) cornerstone.updateImage(element);
+    this.refreshAllViewports();
     return 1;
   };
 
