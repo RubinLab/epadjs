@@ -89,7 +89,7 @@ const tools = [
   { name: "StackScroll", modeOptions: { mouseButtonMask: 1 } },
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
-  { name: "StackScrollMouseWheel", mode: "passive" },
+  { name: "StackScrollMouseWheel", mode: "active" },
   { name: "StackScrollMultiTouch" },
   { name: "FreehandScissors", modeOptions: { mouseButtonMask: 1 } },
   { name: "RectangleScissors", modeOptions: { mouseButtonMask: 1 } },
@@ -192,6 +192,12 @@ class DisplayView extends Component {
     }
     Promise.all(promises).then(res => {
       this.setState({ data: res, isLoading: false });
+      // clear the toolState they will be rendered again on next load
+      cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+        {}
+      );
+      // clear the segmentation data as well
+      // cornerstoneTools.store.modules.segmentation.state.series = {};
       series.forEach((serie, serieIndex) => {
         if (serie.imageAnnotations)
           this.parseAims(
@@ -379,9 +385,15 @@ class DisplayView extends Component {
   };
 
   setActive = i => {
-    this.props.dispatch(changeActivePort(i));
     if (this.props.activePort !== i) {
+      if (this.state.showAimEditor) {
+        if (!this.closeAimEditor(true)) {
+          //means going to another viewport in the middle of creating/editing an aim
+          return;
+        }
+      }
       this.setState({ activePort: i });
+      this.props.dispatch(changeActivePort(i));
     }
   };
 
@@ -492,13 +504,9 @@ class DisplayView extends Component {
     });
 
     Promise.all(imagePromises).then(() => {
-      const { element } = cornerstone.getEnabledElements()[
-        this.props.activePort
-      ];
+      // const stackToolState = cornerstoneTools.getToolState(element, "stack");
 
-      const stackToolState = cornerstoneTools.getToolState(element, "stack");
-
-      const imageIds = stackToolState.data[0].imageIds;
+      // const imageIds = stackToolState.data[0].imageIds;
       const {
         labelmapBuffer,
         segMetadata,
@@ -518,7 +526,12 @@ class DisplayView extends Component {
         imageIds.length,
         segmentsOnFrame
       );
-      cornerstone.updateImage(element); //update the image to show newly loaded segmentations
+      if (cornerstone.getEnabledElements().length) {
+        const enabledElements = cornerstone.getEnabledElements();
+        enabledElements.map(({ element }) => {
+          cornerstone.updateImage(element); //update the image to show newly loaded segmentations}
+        });
+      }
     });
   };
 
@@ -679,7 +692,7 @@ class DisplayView extends Component {
         "All unsaved data will be lost! Do you want to continue?"
       );
       if (!answer) {
-        return;
+        return 0;
       }
     }
     this.setState({ showAimEditor: false, selectedAim: undefined });
@@ -687,6 +700,7 @@ class DisplayView extends Component {
     this.getData();
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
     if (element) cornerstone.updateImage(element);
+    return 1;
   };
 
   handleHideAnnotations = () => {
