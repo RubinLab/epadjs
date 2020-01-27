@@ -9,7 +9,7 @@ const ProtectedRoute = ({ path, component: Component, render, ...rest }) => {
       {...rest}
       render={props => {
         if (!auth.getCurrentUser() && mode !== "lite") {
-          return <Redirect to="/login" />;
+          return <Redirect to={`${process.env.PUBLIC_URL}/login`} />;
         }
         // } else if (!auth.getCurrentUser() &&mode  == "lite") {
         //   return <Redirect to="/search" />;

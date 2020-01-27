@@ -481,7 +481,7 @@ class Projects extends React.Component {
           />
         )}
         {this.state.hasOpenClicked && (
-          <ProtectedRoute from="/" exact to="/search" component={SearchView} />
+          <ProtectedRoute from={`${process.env.PUBLIC_URL}/`} exact to={`${process.env.PUBLIC_URL}/search`} component={SearchView} />
         )}
       </div>
     );
