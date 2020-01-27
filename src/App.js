@@ -54,10 +54,15 @@ class App extends Component {
   }
 
   getTreeExpand = expandObj => {
+    console.log("---- expandObj ----");
+    console.log(expandObj);
     const { patient, study, series } = expandObj;
     const treeExpand = { ...this.state.treeExpand };
     let index, val;
-    if (patient) {
+    const patientLevel = patient && !study && !series;
+    const studyLevel = study && !series;
+    const seriesLevel = series;
+    if (patientLevel) {
       index = Object.keys(patient);
       index = index[0];
       val = Object.values(patient);
@@ -65,12 +70,17 @@ class App extends Component {
       treeExpand[index] = val;
     }
     if (study) {
-      treeExpand[patient][study] = {};
+      index = Object.keys(study);
+      index = index[0];
+      val = Object.values(study);
+      val = val[0];
+      treeExpand[patient][index] = val;
     }
     if (series) {
       treeExpand[patient][study][series] = {};
     }
-
+    console.log("treeExpp ------>");
+    console.log(treeExpand);
     this.setState({ treeExpand });
   };
 

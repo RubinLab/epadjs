@@ -73,7 +73,14 @@ class Studies extends Component {
   }
 
   async componentDidMount() {
-    const { projectId, subjectId, expansionArr, expandLevel } = this.props;
+    const {
+      projectId,
+      subjectId,
+      expansionArr,
+      expandLevel,
+      treeExpand,
+      patientIndex
+    } = this.props;
     const { data: data } = await getStudies(projectId, subjectId);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
@@ -94,6 +101,13 @@ class Studies extends Component {
         draggable: true
       });
     }
+    const expanded = {};
+    const ptExpandKeys = Object.keys(treeExpand[patientIndex]);
+    const ptExpandVal = Object.values(treeExpand[patientIndex]);
+    ptExpandKeys.forEach((el, index) => {
+      expanded[el] = ptExpandVal[index];
+    });
+    this.setState({ expanded });
   }
 
   async componentDidUpdate(prevProps) {
@@ -512,6 +526,11 @@ class Studies extends Component {
     const expansionArr = [...this.state.expansionArr];
     expansionArr[index] = expansionArr[index] ? false : data[index].studyUID;
     this.setState({ expansionArr });
+    const obj = {
+      patient: this.props.patientIndex,
+      study: { [index]: newExpanded[index] }
+    };
+    this.props.getTreeExpand(obj);
   };
 
   render() {
@@ -568,6 +587,10 @@ class Studies extends Component {
                     updateExpandedLevelNums={this.props.updateExpandedLevelNums}
                     progressUpdated={this.props.progressUpdated}
                     expansionArr={this.state.expansionArr}
+                    getTreeExpand={this.props.getTreeExpand}
+                    treeExpand={this.props.treeExpand}
+                    patientIndex={this.props.patientIndex}
+                    studyIndex={row.index}
                   />
                 </div>
               );

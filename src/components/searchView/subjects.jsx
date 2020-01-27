@@ -461,6 +461,7 @@ class Subjects extends Component {
             }}
             {...extraProps}
             SubComponent={row => {
+              console.log(row.index);
               return (
                 <div style={{ paddingLeft: 20 }}>
                   <Studies
@@ -471,6 +472,9 @@ class Subjects extends Component {
                     updateExpandedLevelNums={this.props.updateExpandedLevelNums}
                     progressUpdated={this.props.progressUpdated}
                     expansionArr={this.state.expansionArr}
+                    getTreeExpand={this.props.getTreeExpand}
+                    treeExpand={this.props.treeExpand}
+                    patientIndex={row.index}
                   />
                 </div>
               );
