@@ -48,9 +48,31 @@ class App extends Component {
       lastEventId: null,
       showLog: false,
       admin: false,
-      progressUpdated: 0
+      progressUpdated: 0,
+      treeExpand: {}
     };
   }
+
+  getTreeExpand = expandObj => {
+    const { patient, study, series } = expandObj;
+    const treeExpand = { ...this.state.treeExpand };
+    let index, val;
+    if (patient) {
+      index = Object.keys(patient);
+      index = index[0];
+      val = Object.values(patient);
+      val = val[0];
+      treeExpand[index] = val;
+    }
+    if (study) {
+      treeExpand[patient][study] = {};
+    }
+    if (series) {
+      treeExpand[patient][study][series] = {};
+    }
+
+    this.setState({ treeExpand });
+  };
 
   closeMenu = notification => {
     // if (event && event.type === "keydown") {
@@ -270,7 +292,7 @@ class App extends Component {
   };
 
   render() {
-    const { notifications, mode, progressUpdated } = this.state;
+    const { notifications, mode, progressUpdated, treeExpand } = this.state;
     let noOfUnseen;
     if (notifications) {
       noOfUnseen = notifications.reduce((all, item) => {
@@ -379,6 +401,8 @@ class App extends Component {
                   {...props}
                   updateProgress={this.updateProgress}
                   progressUpdated={progressUpdated}
+                  getTreeExpand={this.getTreeExpand}
+                  treeExpand={treeExpand}
                 />
               )}
             />

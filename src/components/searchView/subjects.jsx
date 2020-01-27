@@ -46,8 +46,15 @@ class Subjects extends Component {
   async componentDidMount() {
     const pid = mode === "lite" ? "lite" : this.props.pid;
     const data = await this.getData();
+    const expanded = {};
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
+    const ptExpandKeys = Object.keys(this.props.treeExpand);
+    const ptExpandVal = Object.values(this.props.treeExpand);
+    ptExpandKeys.forEach((el, index) => {
+      expanded[el] = ptExpandVal[index];
+    });
+    this.setState({ expanded });
   }
 
   async componentDidUpdate(prevProps) {
@@ -396,6 +403,8 @@ class Subjects extends Component {
     const expansionArr = [...this.state.expansionArr];
     expansionArr[index] = expansionArr[index] ? false : data[index].subjectID;
     this.setState({ expansionArr });
+    const obj = { patient: { [index]: newExpanded[index] } };
+    this.props.getTreeExpand(obj);
   };
 
   onSortedChange = () => {

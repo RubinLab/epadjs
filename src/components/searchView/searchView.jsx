@@ -784,7 +784,6 @@ class SearchView extends Component {
     } else if (expandLevel === 3) {
       expanding = !seriesExpandComplete;
     }
-
     return (
       <>
         <Toolbar
@@ -818,6 +817,8 @@ class SearchView extends Component {
           handleCloseAll={this.handleCloseAll}
           updateExpandedLevelNums={this.updateExpandedLevelNums}
           progressUpdated={this.props.progressUpdated}
+          getTreeExpand={this.props.getTreeExpand}
+          treeExpand={this.props.treeExpand}
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection
