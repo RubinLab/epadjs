@@ -322,13 +322,13 @@ class App extends Component {
           />
         )}
         {!this.state.authenticated && mode !== "lite" && (
-          <Route path="/login" component={LoginForm} />
+          <Route path={`${process.env.PUBLIC_URL}/login`} component={LoginForm} />
         )}
         {this.state.authenticated && mode !== "lite" && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
             <Sidebar onData={this.getProjectMap} type={this.state.viewType}>
               <Switch className="splitted-mainview">
-                <Route path="/logout" component={Logout} />
+                <Route path={`${process.env.PUBLIC_URL}/logout`} component={Logout} />
                 <ProtectedRoute
                   path="/display"
                   component={DisplayView}
@@ -351,9 +351,9 @@ class App extends Component {
                 />
                 <ProtectedRoute path="/flex/:pid?" component={FlexView} />
                 <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
-                <Route path="/tools" />
-                <Route path="/edit" />
-                <Route path="/not-found" component={NotFound} />
+                <Route path={`${process.env.PUBLIC_URL}/tools`} />
+                <Route path={`${process.env.PUBLIC_URL}/edit`} />
+                <Route path={`${process.env.PUBLIC_URL}/not-found`} component={NotFound} />
                 <ProtectedRoute
                   from="/"
                   exact
@@ -375,11 +375,11 @@ class App extends Component {
         )}
         {this.state.authenticated && mode === "lite" && (
           <Switch>
-            <Route path="/logout" component={Logout} />
-            <ProtectedRoute path="/display" component={DisplayView} />
-            <Route path="/not-found" component={NotFound} />
+            <Route path={`${process.env.PUBLIC_URL}/logout`} component={Logout} />
+            <ProtectedRoute path={`${process.env.PUBLIC_URL}/display`} component={DisplayView} />
+            <Route path={`${process.env.PUBLIC_URL}/not-found`} component={NotFound} />
             <ProtectedRoute
-              path="/"
+              path={`${process.env.PUBLIC_URL}/`}
               render={props => (
                 <SearchView
                   {...props}
@@ -388,7 +388,7 @@ class App extends Component {
                 />
               )}
             />
-            <Redirect to="/not-found" />
+            <Redirect to={`${process.env.PUBLIC_URL}/not-found`} />
           </Switch>
         )}
         {this.props.showGridFullAlert && <MaxViewAlert />}
