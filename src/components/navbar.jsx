@@ -48,12 +48,12 @@ const NavBar = ({
                 onSwitchView("search");
               }}
             >
-              <NavLink className="nav-link" to={`${process.env.PUBLIC_URL}/search`}>
+              <NavLink className="nav-link" to="/search">
                 Search
               </NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" to={`${process.env.PUBLIC_URL}/display`}>
+              <NavLink className="nav-link" to="/display">
                 Display
               </NavLink>
             </li>
@@ -75,12 +75,12 @@ const NavBar = ({
                   </NavLink>
                 </li> */}
                 <li className="nav-item">
-                  <NavLink className="nav-link" to={`${process.env.PUBLIC_URL}/tools`}>
+                  <NavLink className="nav-link" to="/tools">
                     Tools
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" to={`${process.env.PUBLIC_URL}/edit`}>
+                  <NavLink className="nav-link" to="/edit">
                     Edit
                   </NavLink>
                 </li>{" "}
@@ -90,7 +90,7 @@ const NavBar = ({
                     onSwitchView("flex");
                   }}
                 >
-                  <NavLink className="nav-link" to={`${process.env.PUBLIC_URL}/flex`}>
+                  <NavLink className="nav-link" to="/flex">
                     Flex
                   </NavLink>
                 </li>{" "}
@@ -100,7 +100,7 @@ const NavBar = ({
           <ul className="navbar-nav ml-auto">
             {!user && (
               <li className="nav-item pull-right">
-                <NavLink className="nav-link" to={`${process.env.PUBLIC_URL}/login`}>
+                <NavLink className="nav-link" to="/login">
                   Login
                 </NavLink>
               </li>

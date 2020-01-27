@@ -388,7 +388,7 @@ class App extends Component {
                 />
               )}
             />
-            <Redirect to={`${process.env.PUBLIC_URL}/not-found`} />
+            <Redirect to="/not-found" />
           </Switch>
         )}
         {this.props.showGridFullAlert && <MaxViewAlert />}
