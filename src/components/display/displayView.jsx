@@ -208,6 +208,7 @@ class DisplayView extends Component {
           );
       });
       this.props.dispatch(clearActivePortAimID());
+      this.refreshAllViewports();
     });
   }
 

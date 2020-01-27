@@ -238,7 +238,19 @@ class ToolMenu extends Component {
     cornerstoneTools.setToolActive(toolName, {
       mouseButtonMask: [mouseMask]
     });
-    if (toolName === "Brush3DTool") this.handleBrushSelected();
+    if (toolName === "Brush3DTool" || toolName === "Brush3DHUGated")
+      this.handleBrushSelected();
+  };
+
+  checkIfCT = () => {
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    const image = cornerstone.getImage(element);
+    const seriesModule =
+      cornerstone.metaData.get("generalSeriesModule", image.imageId) || {};
+    const modality = seriesModule.modality;
+    if (modality === "CT") return true;
+    return false;
   };
 
   handleBrushSelected = () => {
@@ -266,6 +278,7 @@ class ToolMenu extends Component {
 
   //sets the selected tool active for an enabled elements
   setToolActiveForElement = (toolName, mouseMask = 1) => {
+    console.log("");
     this.disableAllTools();
     if (toolName == "Brush3DHUGatedTool") {
       cornerstoneTools.store.modules.brush.setters.activeGate("muscle");
@@ -352,15 +365,27 @@ class ToolMenu extends Component {
   };
 
   handleToolClicked = (index, tool) => {
-    this.disableAllTools();
     if (tool === "Noop") {
+      this.disableAllTools();
       this.setState({ activeTool: "", activeToolIdx: index });
       return;
     } else if (tool === "Presets") this.showPresets();
     else if (tool === "Invert") this.invert();
     else if (tool === "Reset") this.reset();
     else if (tool === "MetaData") this.toggleMetaData();
-    else {
+    else if (tool === "Brush3DHUGated") {
+      if (!this.checkIfCT()) {
+        alert("HU Gated tool only works with CT images");
+        return false;
+      } //Dont' select the HUGated if the modality is not CT
+      {
+        this.disableAllTools();
+        this.setState({ activeTool: tool, activeToolIdx: index }, () => {
+          this.setToolActive(tool);
+        });
+      }
+    } else {
+      this.disableAllTools();
       this.setState({ activeTool: tool, activeToolIdx: index }, () => {
         this.setToolActive(tool);
       });
