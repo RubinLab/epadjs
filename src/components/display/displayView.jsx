@@ -260,6 +260,7 @@ class DisplayView extends Component {
     const { aimID, seriesUID } = serie;
     if (Object.entries(aimList).length !== 0) {
       const aimJson = aimList[seriesUID][aimID].json;
+      aimJson.aimID = aimID;
       const markupTypes = this.getMarkupTypesForAim(aimID);
       aimJson["markupType"] = [...markupTypes];
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
@@ -373,9 +374,11 @@ class DisplayView extends Component {
       const aimJson = aimList[series[activePort].seriesUID][event.detail].json;
       const markupTypes = this.getMarkupTypesForAim(event.detail);
       aimJson["markupType"] = [...markupTypes];
+      aimJson["aimId"] = event.detail;
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
         this.setState({ showAimEditor: false });
       this.setState({ showAimEditor: true, selectedAim: aimJson });
+      // console.log("Selected Aim", this.state.selectedAim);
     }
   };
 
