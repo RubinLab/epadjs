@@ -1,18 +1,18 @@
 import http from "./httpService";
 const apiUrl = sessionStorage.getItem("apiUrl");
 
-export async function getPlugins() {
+export function getPlugins() {
   return http.get(apiUrl + "/plugins");
 }
 
-export async function getPluginsWithProject() {
+export function getPluginsWithProject() {
   return http.get(apiUrl + "/pluginswithproject");
 }
 
-export async function getTools() {
+export function getTools() {
   return http.get(apiUrl + "/plugins");
 }
 
-export async function deleteTool() {
+export function deleteTool() {
   return http.delete(apiUrl + "/plugins");
 }

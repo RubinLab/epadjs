@@ -1,0 +1,28 @@
+.pluginnavbar {
+  width: 100%;
+  background-color: rgb(65, 65, 65);
+}
+.pluginform.nav-item {
+  color: gray;
+  font-family: Arial;
+  text-align: center;
+}
+.pluginform.nav-link {
+  color: gray;
+}
+.pluginform.nav-link:active {
+  background-color: #7c7c7c;
+  color: black;
+  font-family: Arial;
+  text-align: center;
+}
+.pluginform.nav-link:visited {
+  background-color: rgb(65, 65, 65);
+  font-family: Arial;
+  text-align: center;
+}
+.pluginform.nav-link:hover {
+  background-color: #7c7c7c;
+  font-family: Arial;
+  text-align: center;
+}

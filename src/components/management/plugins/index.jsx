@@ -5,7 +5,9 @@ import { toast } from "react-toastify";
 import ToolBar from "../common/basicToolBar";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { getProjects } from "../../../services/projectServices";
+import { getTemplatesDataFromDb } from "../../../services/templateServices";
 import PluginProjectTable from "./pluginProjectTable";
+import PluginTemplateTable from "./pluginTemplateTable";
 import {
   getTools,
   getPlugins,
@@ -15,14 +17,21 @@ import {
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
 import EditTools from "../templates/projectTable";
+import "./plugin.css";
 
 class Plugins extends React.Component {
   state = {
     plugins: [], //using
     projectList: [], //using
+    templateList: [], //using
     selectedProjects: [], //using
+    selectedTemplates: [], //using
     tableSelectedData: {}, //using
-    hasAddClicked: false, //using
+    manageTabActive: true, //using
+    trackTabActive: false, //using
+    triggerTabActive: false, //using
+    hasAddProjectClicked: false, //using
+    hasAddTemplateClicked: false, //using
     delAll: false,
     delOne: false,
     selectAll: 0,
@@ -34,11 +43,15 @@ class Plugins extends React.Component {
   componentDidMount = async () => {
     const pluginList = await getPluginsWithProject();
     let projectList = await getProjects();
+    let templateList = await getTemplatesDataFromDb();
+    templateList = templateList.data;
+
     const plugins = pluginList.data;
     projectList = projectList.data;
-    this.setState({ plugins, projectList });
+    this.setState({ plugins, projectList, templateList });
     console.log("projects ------>  ", projectList);
     console.log("plugins ------>  ", plugins);
+    console.log("plugins ------>  ", templateList);
   };
 
   getPlugins = () => {
@@ -83,22 +96,60 @@ class Plugins extends React.Component {
     this.setState({
       selectedProjects: [],
       tableSelectedData: {},
-      hasAddClicked: false
+      hasAddProjectClicked: false
     });
   };
 
   handleAddProjectSave = () => {
     console.log("table selected data to save", this.state.tableSelectedData);
     console.log("new projects for the row", this.state.selectedProjects);
+    this.setState({
+      hasAddProjectClicked: false
+    });
   };
 
   addProject = (projectArray, tableSelectedData) => {
     const tempProjectMap = this.arrayToMap(projectArray);
     this.setState({
-      hasAddClicked: true,
+      hasAddProjectClicked: true,
       selectedProjectsAsMap: tempProjectMap,
       tableSelectedData: tableSelectedData,
       selectedProjects: projectArray
+    });
+  };
+
+  addTemplate = (templateArray, tableSelectedData) => {
+    console.log("check template arry before the map", templateArray);
+    const tempTemplateMap = this.arrayToMap(templateArray);
+    this.setState({
+      hasAddTemplateClicked: true,
+      selectedTemplateAsMap: tempTemplateMap,
+      tableSelectedData: tableSelectedData,
+      selectedTemplates: templateArray
+    });
+  };
+
+  handleAddTemplateSave = () => {
+    console.log("table selected data to save", this.state.tableSelectedData);
+    console.log("new projects for the row", this.state.selectedTemplates);
+    this.setState({
+      hasAddTemplateClicked: false
+    });
+  };
+
+  handleAddTemplateCancel = () => {
+    this.setState({
+      selectedTemplates: [],
+      tableSelectedData: {},
+      hasAddTemplateClicked: false
+    });
+  };
+  handleTabClic = whichtab => {
+    this.setState({
+      manageTabActive: false,
+      trackTabActive: false,
+      triggerTabActive: false,
+      [whichtab]: true
     });
   };
 
@@ -280,7 +331,7 @@ class Plugins extends React.Component {
 
   //cavit
   projectDataToCell = tableData => {
-    console.log("cell ----------- >>>>", tableData);
+    //console.log("cell ----------- >>>>", tableData);
     const {
       projectId,
       projectName,
@@ -308,7 +359,7 @@ class Plugins extends React.Component {
   };
 
   templateDataToCell = tableData => {
-    console.log("cell ----------- >>>>", tableData);
+    //console.log("template data from table cell ----------- >>>>", tableData);
     const { id, templateName, templates } = tableData.row;
     const tempTemplates = [];
     let templateArray = [];
@@ -321,7 +372,7 @@ class Plugins extends React.Component {
     return (
       <div
         onClick={() => {
-          this.addProject(tempTemplates, tableData);
+          this.addTemplate(tempTemplates, tableData);
         }}
       >
         {templateArray.length === 0 ? "add template" : templateArray}
@@ -433,16 +484,64 @@ class Plugins extends React.Component {
           onUpload={this.handleUpload}
           onDownload={this.handleDownload}
         />
-        <div style={{ textAlign: "left", margin: "10px", marginLeft: "10px" }}>
-          <FaRegTrashAlt className="menu-clickable" />
+        <div className="pluginnavbar">
+          <ul className="pluginform nav nav-tabs" id="myTab">
+            <li className="pluginform nav-item ">
+              <a
+                href="#"
+                className={
+                  this.state.manageTabActive === true
+                    ? "pluginform nav-link active"
+                    : "pluginform nav-link"
+                }
+                onClick={() => {
+                  this.handleTabClic("manageTabActive");
+                }}
+              >
+                manage
+              </a>
+            </li>
+            <li className="pluginform nav-item">
+              <a
+                href="#"
+                className={
+                  this.state.trackTabActive === true
+                    ? "pluginform nav-link active"
+                    : "pluginform nav-link"
+                }
+                onClick={() => {
+                  this.handleTabClic("trackTabActive");
+                }}
+              >
+                track
+              </a>
+            </li>
+            <li className="pluginform nav-item">
+              <a
+                href="#"
+                className={
+                  this.state.triggerTabActive === true
+                    ? "pluginform nav-link active"
+                    : "pluginform nav-link"
+                }
+                onClick={() => {
+                  this.handleTabClic("triggerTabActive");
+                }}
+              >
+                trigger
+              </a>
+            </li>
+          </ul>
         </div>
-        <ReactTable
-          className="pro-table"
-          data={this.state.plugins}
-          columns={this.defineColumns()}
-          pageSizeOptions={[10, 20, 50]}
-          defaultPageSize={pageSize}
-        />
+        {this.state.manageTabActive && (
+          <ReactTable
+            className="pro-table"
+            data={this.state.plugins}
+            columns={this.defineColumns()}
+            pageSizeOptions={[10, 20, 50]}
+            defaultPageSize={pageSize}
+          />
+        )}
         {(this.state.delAll || this.state.delOne) && (
           <DeleteAlert
             message={
@@ -467,13 +566,23 @@ class Plugins extends React.Component {
             onCancel={this.handleCancel}
           />
         )}
-        {this.state.hasAddClicked && (
+        {this.state.hasAddProjectClicked && (
           <PluginProjectTable
             onChange={this.handleProjectSelect}
             onCancel={this.handleAddProjectCancel}
             onSave={this.handleAddProjectSave}
             selectedProjectsAsMap={this.state.selectedProjectsAsMap}
-            allprojects={this.state.projectList}
+            allProjects={this.state.projectList}
+            tableSelectedData={this.state.tableSelectedData}
+          />
+        )}
+        {this.state.hasAddTemplateClicked && (
+          <PluginTemplateTable
+            onChange={this.handleTemplateSelect}
+            onCancel={this.handleAddTemplateCancel}
+            onSave={this.handleAddTemplateSave}
+            selectedTemplateAsMap={this.state.selectedTemplateAsMap}
+            allTemplates={this.state.templateList}
             tableSelectedData={this.state.tableSelectedData}
           />
         )}

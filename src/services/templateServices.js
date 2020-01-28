@@ -6,13 +6,19 @@ const mode = sessionStorage.getItem("mode");
 //   return http.get(apiUrl + "/projects/" + projectId + "/templates/");
 // }
 
-export async function getAllTemplates() {
+export function getAllTemplates() {
   return mode === "lite"
     ? http.get(apiUrl + "/templates?format=summary")
     : http.get(apiUrl + "/templates");
 }
 
-export async function getTemplates() {
+export function getTemplatesDataFromDb() {
+  return mode === "lite"
+    ? http.get(apiUrl + "/templatesdatafromdb?format=summary")
+    : http.get(apiUrl + "/templatesdatafromdb");
+}
+
+export function getTemplates() {
   return mode === "lite" ? http.get(apiUrl + "/templates") : "";
 }
 
