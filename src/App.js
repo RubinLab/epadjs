@@ -77,7 +77,11 @@ class App extends Component {
       treeExpand[patient][index] = val;
     }
     if (series) {
-      treeExpand[patient][study][series] = {};
+      index = Object.keys(series);
+      index = index[0];
+      val = Object.values(series);
+      val = val[0];
+      treeExpand[patient][study][index] = val;
     }
     console.log("treeExpp ------>");
     console.log(treeExpand);

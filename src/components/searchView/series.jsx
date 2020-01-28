@@ -86,7 +86,10 @@ class Series extends Component {
       studyId,
       expansionArr,
       updateExpandedLevelNums,
-      expandLevel
+      expandLevel,
+      treeExpand,
+      patientIndex,
+      studyIndex
     } = this.props;
 
     const { data: data } = await getSeries(projectId, subjectId, studyId);
@@ -109,6 +112,13 @@ class Series extends Component {
         draggable: true
       });
     }
+    const expanded = {};
+    const ptExpandKeys = Object.keys(treeExpand[patientIndex][studyIndex]);
+    const ptExpandVal = Object.values(treeExpand[patientIndex][studyIndex]);
+    ptExpandKeys.forEach((el, index) => {
+      expanded[el] = ptExpandVal[index];
+    });
+    this.setState({ expanded });
   }
 
   async componentDidUpdate(prevProps) {
@@ -411,6 +421,12 @@ class Series extends Component {
     const expansionArr = [...this.state.expansionArr];
     expansionArr[index] = expansionArr[index] ? false : data[index].seriesUID;
     this.setState({ expansionArr });
+    const obj = {
+      patient: this.props.patientIndex,
+      study: this.props.studyIndex,
+      series: { [index]: newExpanded[index] }
+    };
+    this.props.getTreeExpand(obj);
   };
 
   handleSelectSeries = row => {
