@@ -54,6 +54,7 @@ class AimEditor extends Component {
       this.semanticAnswers.loadTemplates(result.data);
       this.semanticAnswers.createViewerWindow();
       const { aimId } = this.props;
+      console.log("Aim josn", aimId);
       if (aimId != null && Object.entries(aimId).length) {
         try {
           this.semanticAnswers.loadAimJson(aimId);
@@ -98,6 +99,7 @@ class AimEditor extends Component {
   save = () => {
     // Logic behind relies on the order of the data in array
     const answers = this.semanticAnswers.saveAim();
+    console.log("Answers", answers);
     // if (this.props.aimI) {
     //   console.log("props", this.props);
     //   this.updateAim(answers);
@@ -121,6 +123,7 @@ class AimEditor extends Component {
     } else if (Object.entries(markupsToSave).length !== 0) {
       // markups without segmentation
       const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
+      console.log("Seed data", seedData);
       const aim = new Aim(
         seedData,
         enumAimType.imageAnnotation,
@@ -435,6 +438,7 @@ class AimEditor extends Component {
   };
 
   addSemanticAnswersToSeedData = (seedData, answers) => {
+    console.log("Answers", answers);
     const {
       name,
       comment,

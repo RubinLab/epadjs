@@ -1,8 +1,8 @@
-import external from '../externalModules.js';
-import BaseTool from './base/BaseTool.js';
-import { getToolState, removeToolState } from '../stateManagement/toolState.js';
-import { state } from '../store/index.js';
-import { eraserCursor } from './cursors/index.js';
+import external from "../externalModules.js";
+import BaseTool from "./base/BaseTool.js";
+import { getToolState, removeToolState } from "../stateManagement/toolState.js";
+import { state } from "../store/index.js";
+import { eraserCursor } from "./cursors/index.js";
 
 /**
  * @public
@@ -15,9 +15,9 @@ import { eraserCursor } from './cursors/index.js';
 export default class EraserTool extends BaseTool {
   constructor(props = {}) {
     const defaultProps = {
-      name: 'Eraser',
-      supportedInteractionTypes: ['Mouse', 'Touch'],
-      svgCursor: eraserCursor,
+      name: "Eraser",
+      supportedInteractionTypes: ["Mouse", "Touch"],
+      svgCursor: eraserCursor
     };
 
     super(props, defaultProps);
@@ -27,6 +27,7 @@ export default class EraserTool extends BaseTool {
   }
 
   _deleteAllNearbyTools(evt) {
+    console.log("Event", evt);
     const coords = evt.detail.currentPoints.canvas;
     const element = evt.detail.element;
 
@@ -37,9 +38,16 @@ export default class EraserTool extends BaseTool {
         // Modifying in a foreach? Probably not ideal
         toolState.data.forEach(function(data) {
           if (
-            typeof tool.pointNearTool === 'function' &&
+            typeof tool.pointNearTool === "function" &&
             tool.pointNearTool(element, data, coords)
           ) {
+            if (data.aimId) {
+              const evnt = new CustomEvent("markupSelected", {
+                detail: data.aimId
+              });
+
+              window.dispatchEvent(evnt);
+            }
             removeToolState(element, tool.name, data);
             external.cornerstone.updateImage(element);
           }
