@@ -79,13 +79,15 @@ class Studies extends Component {
       expansionArr,
       expandLevel,
       treeExpand,
-      patientIndex
+      patientIndex,
+      expandLoading
     } = this.props;
     const { data: data } = await getStudies(projectId, subjectId);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
     const studyOpened = expansionArr.includes(subjectId);
-    if (!studyOpened && expandLevel === 1) {
+    const alreadyCounted = expandLoading.numOfPresentStudies > 0;
+    if (!studyOpened && expandLevel === 1 && !alreadyCounted) {
       this.props.updateExpandedLevelNums("subject", data.length, 1);
     }
     if (expandLevel > 1) {
@@ -102,12 +104,14 @@ class Studies extends Component {
       });
     }
     const expanded = {};
-    const ptExpandKeys = Object.keys(treeExpand[patientIndex]);
-    const ptExpandVal = Object.values(treeExpand[patientIndex]);
-    ptExpandKeys.forEach((el, index) => {
-      expanded[el] = ptExpandVal[index];
-    });
-    this.setState({ expanded });
+    if (treeExpand[patientIndex]) {
+      const ptExpandKeys = Object.keys(treeExpand[patientIndex]);
+      const ptExpandVal = Object.values(treeExpand[patientIndex]);
+      ptExpandKeys.forEach((el, index) => {
+        expanded[el] = ptExpandVal[index];
+      });
+      this.setState({ expanded });
+    }
   }
 
   async componentDidUpdate(prevProps) {
@@ -142,7 +146,27 @@ class Studies extends Component {
       }
       const shrinkedToStudy =
         prevProps.expandLevel > expandLevel && expandLevel === 1;
-      if (shrinkedToStudy) this.setState({ expansionArr: [] });
+      const expandToSeries =
+        prevProps.expandLevel < expandLevel && expandLevel === 2;
+      if (shrinkedToStudy) {
+        this.setState({ expansionArr: [] });
+        this.state.data.forEach((el, index) => {
+          const obj = {
+            patient: this.props.patientIndex,
+            study: { [index]: false }
+          };
+          this.props.getTreeExpand(obj, false, true);
+        });
+      }
+      if (expandToSeries) {
+        this.state.data.forEach((el, index) => {
+          const obj = {
+            patient: this.props.patientIndex,
+            study: { [index]: {} }
+          };
+          this.props.getTreeExpand(obj, true);
+        });
+      }
     }
   }
 
@@ -591,6 +615,7 @@ class Studies extends Component {
                     treeExpand={this.props.treeExpand}
                     patientIndex={this.props.patientIndex}
                     studyIndex={row.index}
+                    expandLoading={this.props.expandLoading}
                   />
                 </div>
               );

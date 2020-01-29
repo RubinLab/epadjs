@@ -89,14 +89,16 @@ class Series extends Component {
       expandLevel,
       treeExpand,
       patientIndex,
-      studyIndex
+      studyIndex,
+      expandLoading
     } = this.props;
 
     const { data: data } = await getSeries(projectId, subjectId, studyId);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
     const seriesOpened = expansionArr.includes(studyId);
-    if (!seriesOpened && expandLevel === 2) {
+    const alreadyCounted = expandLoading.numOfPresentSeries > 0;
+    if (!seriesOpened && expandLevel === 2 && !alreadyCounted) {
       updateExpandedLevelNums("study", data.length, 1);
     }
     if (expandLevel > 2) {
@@ -154,9 +156,31 @@ class Series extends Component {
       if (expandedToSeries && seriesOpened) {
         updateExpandedLevelNums("study", this.state.data.length, 1);
       }
+      const expandToAnnotations =
+        prevProps.expandLevel < expandLevel && expandLevel === 3;
       const shrinkedToSeries =
         prevProps.expandLevel > expandLevel && expandLevel === 2;
-      if (shrinkedToSeries) this.setState({ expansionArr: [] });
+      if (shrinkedToSeries) {
+        this.setState({ expansionArr: [] });
+        this.state.data.forEach((el, index) => {
+          const obj = {
+            patient: this.props.patientIndex,
+            study: this.props.studyIndex,
+            series: { [index]: false }
+          };
+          this.props.getTreeExpand(obj, false, true);
+        });
+      }
+      if (expandToAnnotations) {
+        this.state.data.forEach((el, index) => {
+          const obj = {
+            patient: this.props.patientIndex,
+            study: this.props.studyIndex,
+            series: { [index]: {} }
+          };
+          this.props.getTreeExpand(obj, true);
+        });
+      }
     }
   }
 
@@ -564,6 +588,7 @@ class Series extends Component {
                       progressUpdated={this.props.progressUpdated}
                       expansionArr={this.state.expansionArr}
                       expandLevel={this.props.expandLevel}
+                      expandLoading={this.props.expandLoading}
                     />
                   </div>
                 );

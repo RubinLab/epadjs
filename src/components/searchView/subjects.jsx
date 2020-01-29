@@ -77,7 +77,20 @@ class Subjects extends Component {
         : this.setState({ expanded: {} });
       const shrinkedToSubject =
         prevProps.expandLevel > expandLevel && expandLevel === 0;
-      if (shrinkedToSubject) this.setState({ expansionArr: [] });
+      const expandedToStudy =
+        prevProps.expandLevel < expandLevel && expandLevel === 1;
+      let obj = {};
+      if (shrinkedToSubject) {
+        this.setState({ expansionArr: [] });
+        for (let index = 0; index < this.state.data.length; index += 1)
+          obj[index] = {};
+        this.props.getTreeExpand({ patient: obj }, false, true);
+      }
+      if (expandedToStudy) {
+        for (let index = 0; index < this.state.data.length; index += 1)
+          obj[index] = {};
+        this.props.getTreeExpand({ patient: obj }, true);
+      }
     }
     if (this.props.pid !== prevProps.pid) {
       if (!data) {
@@ -444,6 +457,8 @@ class Subjects extends Component {
       expanded,
       onExpandedChange
     };
+    // console.log(" ===== expand ==== ");
+    // console.log(this.props.expandLevel);
     const TheadComponent = props => null;
     return (
       <div>
@@ -461,7 +476,7 @@ class Subjects extends Component {
             }}
             {...extraProps}
             SubComponent={row => {
-              console.log(row.index);
+              // console.log(row.index);
               return (
                 <div style={{ paddingLeft: 20 }}>
                   <Studies
@@ -475,6 +490,7 @@ class Subjects extends Component {
                     getTreeExpand={this.props.getTreeExpand}
                     treeExpand={this.props.treeExpand}
                     patientIndex={row.index}
+                    expandLoading={this.props.expandLoading}
                   />
                 </div>
               );

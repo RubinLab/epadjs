@@ -63,14 +63,14 @@ class SearchView extends Component {
       showDeleteAlert: false,
       update: 0,
       missingAnns: [],
-      expandLevel: 0,
       expanded: {},
       showNew: false,
       numOfPresentStudies: 0,
       numOfPresentSeries: 0,
       numOfPatientsLoaded: 0,
       numOfStudiesLoaded: 0,
-      numOfSeriesLoaded: 0
+      numOfSeriesLoaded: 0,
+      expandLevel: 0
     };
   }
 
@@ -80,11 +80,32 @@ class SearchView extends Component {
 
   componentDidMount = async () => {
     const subjects = await this.getData();
-    this.setState({ numOfsubjects: subjects.length, subjects });
+    console.log(" ---- expandLoading ---");
+    console.log(this.props);
+    const { expandLevel, expandLoading } = this.props;
+    const {
+      numOfPresentStudies,
+      numOfPresentSeries,
+      numOfPatientsLoaded,
+      numOfStudiesLoaded,
+      numOfSeriesLoaded
+    } = expandLoading;
+    this.setState({
+      numOfsubjects: subjects.length,
+      subjects,
+      expandLevel,
+      numOfPresentStudies,
+      numOfPresentSeries,
+      numOfPatientsLoaded,
+      numOfStudiesLoaded,
+      numOfSeriesLoaded
+    });
   };
 
   componentDidUpdate = async prevProps => {
-    const { uploadedPid, lastEventId } = this.props;
+    // console.log("comp did update");
+    // console.log(this.props.expandLevel, prevProps.expandLevel);
+    const { uploadedPid, lastEventId, expandLevel, expandLoading } = this.props;
     const { pid } = this.props.match.params;
     const samePid = mode !== "lite" && uploadedPid === pid;
 
@@ -97,6 +118,37 @@ class SearchView extends Component {
     if ((samePid || mode === "lite") && prevProps.lastEventId !== lastEventId) {
       this.setState(state => ({ update: state.update + 1 }));
     }
+    const {
+      numOfPresentStudies,
+      numOfPresentSeries,
+      numOfPatientsLoaded,
+      numOfStudiesLoaded,
+      numOfSeriesLoaded
+    } = expandLoading;
+
+    const studiesUpdated =
+      numOfPresentStudies !== prevProps.expandLoading.numOfPresentStudies;
+    const seriesUpdated =
+      numOfPresentSeries !== prevProps.expandLoading.numOfPresentSeries;
+    const patientsLoaded =
+      numOfPatientsLoaded !== prevProps.expandLoading.numOfPatientsLoaded;
+    const studiesLoaded =
+      numOfStudiesLoaded !== prevProps.expandLoading.numOfStudiesLoaded;
+    const seriesLoaded =
+      numOfSeriesLoaded !== prevProps.expandLoading.numOfSeriesLoaded;
+    if (expandLevel !== prevProps.expandLevel) {
+      this.setState({
+        expandLevel
+      });
+      if (expandLevel === 0) {
+        this.setState({ expanded: {} });
+      }
+    }
+    if (studiesUpdated) this.setState({ numOfPresentStudies });
+    if (seriesUpdated) this.setState({ numOfPresentSeries });
+    if (patientsLoaded) this.setState({ numOfPatientsLoaded });
+    if (studiesLoaded) this.setState({ numOfStudiesLoaded });
+    if (seriesLoaded) this.setState({ numOfSeriesLoaded });
   };
 
   getData = async () => {
@@ -108,39 +160,11 @@ class SearchView extends Component {
     // }
   };
 
-  getNumOfPatientsLoaded = numOfStudies => {
-    this.setState(state => ({
-      numOfPatientsLoaded: state.numOfPatientsLoaded + 1,
-      numOfPresentStudies: state.numOfPresentStudies + numOfStudies
-    }));
-  };
-
-  getNumOfStudiesLoaded = numOfSeries => {
-    this.setState(state => ({
-      numOfStudiesLoaded: state.numOfStudiesLoaded + 1,
-      numOfPresentSeries: state.numOfPresentSeries + numOfSeries
-    }));
-  };
-
-  getNumOfSeriesLoaded = () => {
-    this.setState(state => ({
-      numOfSeriesLoaded: state.numOfSeriesLoaded + 1
-    }));
-  };
-
-  updateExpandedLevelNums = (level, numOfChild, numOfParent) => {
-    if (level === "subject") {
-      this.getNumOfPatientsLoaded(numOfChild, numOfParent);
-    } else if (level === "study") {
-      this.getNumOfStudiesLoaded(numOfChild, numOfParent);
-    } else if (level === "series") {
-      this.getNumOfSeriesLoaded(numOfChild, numOfParent);
-    }
-  };
-
   handleExpand = async () => {
+    console.log("expand clicked");
     if (this.state.expandLevel < 3) {
-      this.setState(state => ({ expandLevel: state.expandLevel + 1 }));
+      // this.setState(state => ({ expandLevel: state.expandLevel + 1 }));
+      this.props.getExpandLevel(this.props.expandLevel + 1);
     }
     let expanded = {};
     for (let i = 0; i < this.state.numOfsubjects; i++) {
@@ -149,42 +173,16 @@ class SearchView extends Component {
     this.setState({ expanded });
   };
 
-  handleShrink = async () => {
-    const { expandLevel } = this.state;
-    if (expandLevel > 0) {
-      await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
-      if (expandLevel === 0) {
-        this.setState({
-          expanded: {},
-          numOfPresentStudies: 0,
-          numOfPresentSeries: 0,
-          numOfPatientsLoaded: 0,
-          numOfStudiesLoaded: 0,
-          numOfSeriesLoaded: 0
-        });
-      }
-      if (expandLevel === 1) {
-        this.setState({ numOfPresentStudies: 0, numOfPatientsLoaded: 0 });
-      }
-      if (expandLevel === 2) {
-        this.setState({ numOfPresentSeries: 0, numOfStudiesLoaded: 0 });
-      }
-      if (expandLevel === 3) {
-        this.setState({ numOfSeriesLoaded: 0 });
-      }
-    }
-  };
-
-  handleCloseAll = () => {
-    this.setState({
-      expandLevel: 0,
-      numOfPresentStudies: 0,
-      numOfPresentSeries: 0,
-      numOfPatientsLoaded: 0,
-      numOfStudiesLoaded: 0,
-      numOfSeriesLoaded: 0
-    });
-  };
+  // handleCloseAll = () => {
+  //   this.setState({
+  //     // expandLevel: 0,
+  //     numOfPresentStudies: 0,
+  //     numOfPresentSeries: 0,
+  //     numOfPatientsLoaded: 0,
+  //     numOfStudiesLoaded: 0,
+  //     numOfSeriesLoaded: 0
+  //   });
+  // };
 
   keepExpandedPatientsInOrder = newSubjects => {
     this.updateUploadStatus();
@@ -772,7 +770,16 @@ class SearchView extends Component {
       numOfSeriesLoaded,
       expandLevel
     } = this.state;
-
+    // console.log("all calc");
+    // console.log(
+    //   numOfsubjects,
+    //   numOfPresentStudies,
+    //   numOfPatientsLoaded,
+    //   numOfStudiesLoaded,
+    //   numOfPresentSeries,
+    //   numOfSeriesLoaded
+    // );
+    // const { expandLevel } = this.props;
     const patientExpandComplete = numOfsubjects === numOfPatientsLoaded;
     const studyExpandComplete = numOfPresentStudies === numOfStudiesLoaded;
     const seriesExpandComplete = numOfPresentSeries === numOfSeriesLoaded;
@@ -792,8 +799,8 @@ class SearchView extends Component {
           onView={this.viewSelection}
           onDelete={this.handleClickDeleteIcon}
           onExpand={this.handleExpand}
-          onShrink={this.handleShrink}
-          onCloseAll={this.handleCloseAll}
+          onShrink={this.props.onShrink}
+          onCloseAll={this.props.onCloseAll}
           onNew={this.handleNewClick}
           onWorklist={this.handleWorklistClick}
           status={status}
@@ -811,14 +818,15 @@ class SearchView extends Component {
           key={this.props.match.params.pid}
           pid={this.props.match.params.pid}
           // update={this.state.numOfsubjects}
-          expandLevel={this.state.expandLevel}
+          expandLevel={this.props.expandLevel}
           expanded={this.state.expanded}
           update={this.state.update}
           handleCloseAll={this.handleCloseAll}
-          updateExpandedLevelNums={this.updateExpandedLevelNums}
+          updateExpandedLevelNums={this.props.updateExpandedLevelNums}
           progressUpdated={this.props.progressUpdated}
           getTreeExpand={this.props.getTreeExpand}
           treeExpand={this.props.treeExpand}
+          expandLoading={this.props.expandLoading}
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection

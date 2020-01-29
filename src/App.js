@@ -49,43 +49,125 @@ class App extends Component {
       showLog: false,
       admin: false,
       progressUpdated: 0,
-      treeExpand: {}
+      treeExpand: {},
+      expandLevel: 0,
+      numOfPresentStudies: 0,
+      numOfPresentSeries: 0,
+      numOfPatientsLoaded: 0,
+      numOfStudiesLoaded: 0,
+      numOfSeriesLoaded: 0
     };
   }
 
-  getTreeExpand = expandObj => {
-    console.log("---- expandObj ----");
-    console.log(expandObj);
+  getExpandLevel = expandLevel => {
+    this.setState({ expandLevel });
+    console.log(expandLevel);
+    // if expandeLevel  === 1
+    // if expanding
+    // open all patients else close all
+    // if expandeLevel  === 2
+    // if expanding open all patients
+    // iterate over sub level and open all of them too
+  };
+
+  getTreeExpand = async (expandObj, expandAll, shrinkAll) => {
     const { patient, study, series } = expandObj;
-    const treeExpand = { ...this.state.treeExpand };
+    let treeExpand = { ...this.state.treeExpand };
     let index, val;
     const patientLevel = patient && !study && !series;
     const studyLevel = study && !series;
     const seriesLevel = series;
     if (patientLevel) {
-      index = Object.keys(patient);
-      index = index[0];
-      val = Object.values(patient);
-      val = val[0];
-      treeExpand[index] = val;
+      if (expandAll) {
+        const patientArr = Object.values(Object.values(expandObj)[0]);
+        patientArr.forEach((el, index) => {
+          treeExpand[index] = {};
+        });
+      } else if (shrinkAll) {
+        const patientArr = Object.values(Object.values(expandObj)[0]);
+        patientArr.forEach((el, index) => {
+          treeExpand[index] = false;
+        });
+      } else {
+        // if (expandAll) = treeExpand =
+        index = Object.keys(patient);
+        index = index[0];
+        val = Object.values(patient);
+        val = val[0];
+        treeExpand[index] = val;
+      }
     }
-    if (study) {
+    if (studyLevel) {
       index = Object.keys(study);
       index = index[0];
       val = Object.values(study);
       val = val[0];
       treeExpand[patient][index] = val;
     }
-    if (series) {
+    if (seriesLevel) {
       index = Object.keys(series);
       index = index[0];
       val = Object.values(series);
       val = val[0];
       treeExpand[patient][study][index] = val;
     }
-    console.log("treeExpp ------>");
-    console.log(treeExpand);
     this.setState({ treeExpand });
+  };
+
+  getNumOfPatientsLoaded = numOfStudies => {
+    this.setState(state => ({
+      numOfPatientsLoaded: state.numOfPatientsLoaded + 1,
+      numOfPresentStudies: state.numOfPresentStudies + numOfStudies
+    }));
+  };
+
+  getNumOfStudiesLoaded = numOfSeries => {
+    this.setState(state => ({
+      numOfStudiesLoaded: state.numOfStudiesLoaded + 1,
+      numOfPresentSeries: state.numOfPresentSeries + numOfSeries
+    }));
+  };
+
+  getNumOfSeriesLoaded = () => {
+    this.setState(state => ({
+      numOfSeriesLoaded: state.numOfSeriesLoaded + 1
+    }));
+  };
+
+  updateExpandedLevelNums = (level, numOfChild, numOfParent) => {
+    if (level === "subject") {
+      this.getNumOfPatientsLoaded(numOfChild, numOfParent);
+    } else if (level === "study") {
+      this.getNumOfStudiesLoaded(numOfChild, numOfParent);
+    } else if (level === "series") {
+      this.getNumOfSeriesLoaded(numOfChild, numOfParent);
+    }
+  };
+
+  handleShrink = async () => {
+    const { expandLevel } = this.state;
+    console.log("shrink clicked");
+    if (expandLevel > 0) {
+      await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
+      if (expandLevel === 0) {
+        this.setState({
+          numOfPresentStudies: 0,
+          numOfPresentSeries: 0,
+          numOfPatientsLoaded: 0,
+          numOfStudiesLoaded: 0,
+          numOfSeriesLoaded: 0
+        });
+      }
+      if (expandLevel === 1) {
+        this.setState({ numOfPresentStudies: 0, numOfPatientsLoaded: 0 });
+      }
+      if (expandLevel === 2) {
+        this.setState({ numOfPresentSeries: 0, numOfStudiesLoaded: 0 });
+      }
+      if (expandLevel === 3) {
+        this.setState({ numOfSeriesLoaded: 0 });
+      }
+    }
   };
 
   closeMenu = notification => {
@@ -305,8 +387,33 @@ class App extends Component {
     this.props.dispatch(clearAimId());
   };
 
+  handleCloseAll = () => {
+    this.setState({
+      expandLevel: 0,
+      numOfPresentStudies: 0,
+      numOfPresentSeries: 0,
+      numOfPatientsLoaded: 0,
+      numOfStudiesLoaded: 0,
+      numOfSeriesLoaded: 0
+    });
+  };
+
   render() {
-    const { notifications, mode, progressUpdated, treeExpand } = this.state;
+    // console.log(this.state.treeExpand);
+    const {
+      notifications,
+      mode,
+      progressUpdated,
+      treeExpand,
+      expandLevel
+    } = this.state;
+    const expandLoading = {
+      numOfPresentStudies: this.state.numOfPresentStudies,
+      numOfPresentSeries: this.state.numOfPresentSeries,
+      numOfPatientsLoaded: this.state.numOfPatientsLoaded,
+      numOfStudiesLoaded: this.state.numOfStudiesLoaded,
+      numOfSeriesLoaded: this.state.numOfSeriesLoaded
+    };
     let noOfUnseen;
     if (notifications) {
       noOfUnseen = notifications.reduce((all, item) => {
@@ -371,6 +478,10 @@ class App extends Component {
                       {...props}
                       updateProgress={this.updateProgress}
                       progressUpdated={progressUpdated}
+                      expandLevel={this.state.expandLevel}
+                      getExpandLevel={this.getExpandLevel}
+                      expandLoading={expandLoading}
+                      updateExpandedLevelNums={this.updateExpandedLevelNums}
                     />
                   )}
                 />
@@ -393,6 +504,14 @@ class App extends Component {
                       {...props}
                       updateProgress={this.updateProgress}
                       progressUpdated={progressUpdated}
+                      expandLevel={this.state.expandLevel}
+                      getTreeExpand={this.getTreeExpand}
+                      treeExpand={treeExpand}
+                      getExpandLevel={this.getExpandLevel}
+                      expandLoading={expandLoading}
+                      updateExpandedLevelNums={this.updateExpandedLevelNums}
+                      onShrink={this.handleShrink}
+                      onCloseAll={this.handleCloseAll}
                     />
                   )}
                 />
@@ -415,8 +534,14 @@ class App extends Component {
                   {...props}
                   updateProgress={this.updateProgress}
                   progressUpdated={progressUpdated}
+                  expandLevel={this.state.expandLevel}
                   getTreeExpand={this.getTreeExpand}
                   treeExpand={treeExpand}
+                  getExpandLevel={this.getExpandLevel}
+                  expandLoading={expandLoading}
+                  updateExpandedLevelNums={this.updateExpandedLevelNums}
+                  onShrink={this.handleShrink}
+                  onCloseAll={this.handleCloseAll}
                 />
               )}
             />

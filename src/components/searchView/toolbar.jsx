@@ -72,7 +72,7 @@ const toolBar = props => {
           </ReactTooltip>
         </div>
         <div
-          onClick={props.onDelete}
+          onClick={props.showDelete ? props.onDelete : null}
           className={
             props.showDelete ? "searchView-toolbar__icon" : "hide-delete"
           }
@@ -118,7 +118,10 @@ const toolBar = props => {
           </ReactTooltip>
         </div>
       )}
-      <div className="searchView-toolbar__icon" onClick={props.onShrink}>
+      <div
+        className="searchView-toolbar__icon"
+        onClick={props.expanding ? null : props.onShrink}
+      >
         <div>
           <FaLevelUpAlt
             style={{ fontSize: "1.2rem" }}
@@ -135,7 +138,10 @@ const toolBar = props => {
           <span>Close One Level</span>
         </ReactTooltip>
       </div>
-      <div className="searchView-toolbar__icon" onClick={props.onCloseAll}>
+      <div
+        className="searchView-toolbar__icon"
+        onClick={props.expanding ? null : props.onCloseAll}
+      >
         <div>
           <FiMinimize2
             style={{ fontSize: "1.5rem", strokeWidth: "3px" }}

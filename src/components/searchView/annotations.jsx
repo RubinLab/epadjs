@@ -51,12 +51,20 @@ class Annotations extends Component {
   }
 
   async componentDidMount() {
-    const { updateExpandedLevelNums, expansionArr, seriesId } = this.props;
+    const {
+      updateExpandedLevelNums,
+      expansionArr,
+      seriesId,
+      expandLoading
+    } = this.props;
     const { data } = await getAnnotations(this.series);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
     const annsOpened = expansionArr.includes(seriesId);
-    if (!annsOpened) updateExpandedLevelNums("series", data.length, 1);
+    const alreadyCounted = expandLoading.numOfSeriesLoaded > 0;
+
+    if (!annsOpened && !alreadyCounted)
+      updateExpandedLevelNums("series", data.length, 1);
     if (data.length === 0 && this.props.expandLevel !== 3) {
       toast.info("No annotations found", {
         position: "top-right",
