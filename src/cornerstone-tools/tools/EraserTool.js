@@ -27,7 +27,6 @@ export default class EraserTool extends BaseTool {
   }
 
   _deleteAllNearbyTools(evt) {
-    console.log("Event", evt);
     const coords = evt.detail.currentPoints.canvas;
     const element = evt.detail.element;
 
@@ -41,18 +40,29 @@ export default class EraserTool extends BaseTool {
             typeof tool.pointNearTool === "function" &&
             tool.pointNearTool(element, data, coords)
           ) {
-            if (data.aimId) {
-              const detail = { aimId: data.aimId, ancestorEvent: evt };
-              const evnt = new CustomEvent("markupSelected", {
-                detail
-              });
+            // var shouldStop = false;
+            // if (data.aimId) {
+            const ancestorEvent = {
+              element,
+              data
+            };
+            const detail = { aimId: data.aimId, ancestorEvent };
+            const evnt = new CustomEvent("markupSelected", {
+              cancelable: true,
+              detail
+            });
 
-              window.dispatchEvent(evnt);
-            }
-            try {
-              removeToolState(element, tool.name, data);
-              external.cornerstone.updateImage(element);
-            } catch (error) {}
+            const shouldStop = window.dispatchEvent(evnt);
+            console.log("Should continue", shouldStop);
+            // }
+            if (shouldStop) {
+              try {
+                removeToolState(element, tool.name, data);
+                external.cornerstone.updateImage(element);
+              } catch (error) {
+                console.log("WARN:", error);
+              }
+            } else evt.preventDefault();
           }
         });
       }

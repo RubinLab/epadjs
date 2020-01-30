@@ -364,36 +364,66 @@ class DisplayView extends Component {
       "FreehandRoi3DTool"
     ];
     if (toolsOfInterest.includes(toolName) || toolType === "Bidirectional") {
-      this.setState({ showAimEditor: true, selectedAim: undefined });
+      this.setState({ showAimEditor: true });
     }
   };
 
   handleMarkupSelected = event => {
     console.log("Event", event);
     const { aimList, series, activePort } = this.props;
-    if (aimList[series[activePort].seriesUID][event.detail.aimId]) {
-      const aimJson =
-        aimList[series[activePort].seriesUID][event.detail.aimId].json;
-      const markupTypes = this.getMarkupTypesForAim(event.detail.aimId);
+    const { aimId, ancestorEvent } = event.detail;
+    const { element, data } = ancestorEvent;
+
+    if (aimList[series[activePort].seriesUID][aimId]) {
+      const aimJson = aimList[series[activePort].seriesUID][aimId].json;
+      console.log("Aim json", aimJson);
+      const markupTypes = this.getMarkupTypesForAim(aimId);
       aimJson["markupType"] = [...markupTypes];
-      aimJson["aimId"] = event.detail.aimId;
+      aimJson["aimId"] = aimId;
       console.log("event", event);
+      console.log("Aimjson", aimJson);
+      console.log("state aimjson", this.state.selectedAim);
       // check if is already editing an aim
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
-        // if
-        event.detail.ancestorEvent.preventDefault();
-        const cancelAncestor = this.closeAimEditor(true);
-        console.log("Cancel Ancestor", cancelAncestor);
+        let message = "";
+        if (this.state.selectedAim) {
+          message = this.prepWarningMessage(
+            this.state.selectedAim.name.value,
+            aimJson.name.value
+          );
+        }
+        // event.detail.ancestorEvent.preventDefault();
+        const shouldContinue = this.closeAimEditor(true, message);
+        if (!shouldContinue) {
+          event.preventDefault();
+          data.active = false;
+          cornerstone.updateImage(element);
+          return;
+        }
+        console.log("Should continue", shouldContinue);
+        // continue to the event that has been canceled
+        // if (sourceTool === "eraser" && shouldContinue) {
+        //   console.log("Cancel Ancestor", shouldContinue);
+        //   cornerstoneTools.removeToolState(element, targetTool, data);
+        //   cornerstone.updateImage(element);
+        // }
+
         // if (!cancelAncestor)
       }
+
       this.setState({ showAimEditor: true, selectedAim: aimJson });
       // console.log("Selected Aim", this.state.selectedAim);
     }
   };
 
+  prepWarningMessage = (currentAim, destinationAim) => {
+    return `You are trying to edit Aim named: ${destinationAim}. All unsaved changes in Aim named: ${currentAim} will be lost!!!`;
+  };
+
   handleMarkupCreated = event => {
     const { detail } = event;
-    this.setState({ showAimEditor: true, selectedAim: undefined });
+    if (!this.state.selectedAim)
+      this.setState({ showAimEditor: true, selectedAim: undefined });
     if (detail === "brush") this.setState({ hasSegmentation: true });
   };
 
@@ -706,12 +736,12 @@ class DisplayView extends Component {
     );
   };
 
-  closeAimEditor = isCancel => {
+  closeAimEditor = (isCancel, message = "") => {
     // if aim editor has been cancelled ask to user
     if (isCancel === true) {
-      var answer = window.confirm(
-        "All unsaved data will be lost! Do you want to continue?"
-      );
+      if (message === "")
+        message = "All unsaved data will be lost! Do you want to continue?";
+      var answer = window.confirm(message);
       if (!answer) {
         return 0;
       }
