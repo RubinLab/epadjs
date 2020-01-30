@@ -42,14 +42,17 @@ export default class EraserTool extends BaseTool {
             tool.pointNearTool(element, data, coords)
           ) {
             if (data.aimId) {
+              const detail = { aimId: data.aimId, ancestorEvent: evt };
               const evnt = new CustomEvent("markupSelected", {
-                detail: data.aimId
+                detail
               });
 
               window.dispatchEvent(evnt);
             }
-            removeToolState(element, tool.name, data);
-            external.cornerstone.updateImage(element);
+            try {
+              removeToolState(element, tool.name, data);
+              external.cornerstone.updateImage(element);
+            } catch (error) {}
           }
         });
       }

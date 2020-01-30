@@ -369,14 +369,23 @@ class DisplayView extends Component {
   };
 
   handleMarkupSelected = event => {
+    console.log("Event", event);
     const { aimList, series, activePort } = this.props;
-    if (aimList[series[activePort].seriesUID][event.detail]) {
-      const aimJson = aimList[series[activePort].seriesUID][event.detail].json;
-      const markupTypes = this.getMarkupTypesForAim(event.detail);
+    if (aimList[series[activePort].seriesUID][event.detail.aimId]) {
+      const aimJson =
+        aimList[series[activePort].seriesUID][event.detail.aimId].json;
+      const markupTypes = this.getMarkupTypesForAim(event.detail.aimId);
       aimJson["markupType"] = [...markupTypes];
-      aimJson["aimId"] = event.detail;
-      if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
-        this.setState({ showAimEditor: false });
+      aimJson["aimId"] = event.detail.aimId;
+      console.log("event", event);
+      // check if is already editing an aim
+      if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
+        // if
+        event.detail.ancestorEvent.preventDefault();
+        const cancelAncestor = this.closeAimEditor(true);
+        console.log("Cancel Ancestor", cancelAncestor);
+        // if (!cancelAncestor)
+      }
       this.setState({ showAimEditor: true, selectedAim: aimJson });
       // console.log("Selected Aim", this.state.selectedAim);
     }
