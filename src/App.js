@@ -111,7 +111,7 @@ class App extends Component {
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
         this.setState({ mode, apiUrl, wadoUrl });
-        this.completeAutorization(apiUrl);
+        //this.completeAutorization(apiUrl);
         this.setNoAuthDefaultVals();
       })
       .catch(err => {
