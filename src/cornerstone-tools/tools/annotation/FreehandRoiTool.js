@@ -231,106 +231,108 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
    * @returns {void}  void
    */
   updateCachedStats(image, element, data) {
-    // Define variables for the area and mean/standard deviation
-    let meanStdDev, meanStdDevSUV;
+    try {
+      // Define variables for the area and mean/standard deviation
+      let meanStdDev, meanStdDevSUV;
 
-    const seriesModule = external.cornerstone.metaData.get(
-      "generalSeriesModule",
-      image.imageId
-    );
-    const modality = seriesModule ? seriesModule.modality : null;
-
-    const points = data.handles.points;
-    // If the data has been invalidated, and the tool is not currently active,
-    // We need to calculate it again.
-
-    // Retrieve the bounds of the ROI in image coordinates
-    const bounds = {
-      left: points[0].x,
-      right: points[0].x,
-      bottom: points[0].y,
-      top: points[0].x
-    };
-
-    for (let i = 0; i < points.length; i++) {
-      bounds.left = Math.min(bounds.left, points[i].x);
-      bounds.right = Math.max(bounds.right, points[i].x);
-      bounds.bottom = Math.min(bounds.bottom, points[i].y);
-      bounds.top = Math.max(bounds.top, points[i].y);
-    }
-
-    const polyBoundingBox = {
-      left: bounds.left,
-      top: bounds.bottom,
-      width: Math.abs(bounds.right - bounds.left),
-      height: Math.abs(bounds.top - bounds.bottom)
-    };
-
-    // Store the bounding box information for the text box
-    data.polyBoundingBox = polyBoundingBox;
-
-    // First, make sure this is not a color image, since no mean / standard
-    // Deviation will be calculated for color images.
-    if (!image.color) {
-      // Retrieve the array of pixels that the ROI bounds cover
-      const pixels = external.cornerstone.getPixels(
-        element,
-        polyBoundingBox.left,
-        polyBoundingBox.top,
-        polyBoundingBox.width,
-        polyBoundingBox.height
+      const seriesModule = external.cornerstone.metaData.get(
+        "generalSeriesModule",
+        image.imageId
       );
+      const modality = seriesModule ? seriesModule.modality : null;
 
-      // Calculate the mean & standard deviation from the pixels and the object shape
-      meanStdDev = calculateFreehandStatistics.call(
-        this,
-        pixels,
-        polyBoundingBox,
-        data.handles.points
-      );
+      const points = data.handles.points;
+      // If the data has been invalidated, and the tool is not currently active,
+      // We need to calculate it again.
 
-      if (modality === "PT") {
-        // If the image is from a PET scan, use the DICOM tags to
-        // Calculate the SUV from the mean and standard deviation.
+      // Retrieve the bounds of the ROI in image coordinates
+      const bounds = {
+        left: points[0].x,
+        right: points[0].x,
+        bottom: points[0].y,
+        top: points[0].x
+      };
 
-        // Note that because we are using modality pixel values from getPixels, and
-        // The calculateSUV routine also rescales to modality pixel values, we are first
-        // Returning the values to storedPixel values before calcuating SUV with them.
-        // TODO: Clean this up? Should we add an option to not scale in calculateSUV?
-        meanStdDevSUV = {
-          mean: calculateSUV(
-            image,
-            (meanStdDev.mean - image.intercept) / image.slope
-          ),
-          stdDev: calculateSUV(
-            image,
-            (meanStdDev.stdDev - image.intercept) / image.slope
-          )
-        };
+      for (let i = 0; i < points.length; i++) {
+        bounds.left = Math.min(bounds.left, points[i].x);
+        bounds.right = Math.max(bounds.right, points[i].x);
+        bounds.bottom = Math.min(bounds.bottom, points[i].y);
+        bounds.top = Math.max(bounds.top, points[i].y);
       }
 
-      // If the mean and standard deviation values are sane, store them for later retrieval
-      if (meanStdDev && !isNaN(meanStdDev.mean)) {
-        data.meanStdDev = meanStdDev;
-        data.meanStdDevSUV = meanStdDevSUV;
+      const polyBoundingBox = {
+        left: bounds.left,
+        top: bounds.bottom,
+        width: Math.abs(bounds.right - bounds.left),
+        height: Math.abs(bounds.top - bounds.bottom)
+      };
+
+      // Store the bounding box information for the text box
+      data.polyBoundingBox = polyBoundingBox;
+
+      // First, make sure this is not a color image, since no mean / standard
+      // Deviation will be calculated for color images.
+      if (!image.color) {
+        // Retrieve the array of pixels that the ROI bounds cover
+        const pixels = external.cornerstone.getPixels(
+          element,
+          polyBoundingBox.left,
+          polyBoundingBox.top,
+          polyBoundingBox.width,
+          polyBoundingBox.height
+        );
+
+        // Calculate the mean & standard deviation from the pixels and the object shape
+        meanStdDev = calculateFreehandStatistics.call(
+          this,
+          pixels,
+          polyBoundingBox,
+          data.handles.points
+        );
+
+        if (modality === "PT") {
+          // If the image is from a PET scan, use the DICOM tags to
+          // Calculate the SUV from the mean and standard deviation.
+
+          // Note that because we are using modality pixel values from getPixels, and
+          // The calculateSUV routine also rescales to modality pixel values, we are first
+          // Returning the values to storedPixel values before calcuating SUV with them.
+          // TODO: Clean this up? Should we add an option to not scale in calculateSUV?
+          meanStdDevSUV = {
+            mean: calculateSUV(
+              image,
+              (meanStdDev.mean - image.intercept) / image.slope
+            ),
+            stdDev: calculateSUV(
+              image,
+              (meanStdDev.stdDev - image.intercept) / image.slope
+            )
+          };
+        }
+
+        // If the mean and standard deviation values are sane, store them for later retrieval
+        if (meanStdDev && !isNaN(meanStdDev.mean)) {
+          data.meanStdDev = meanStdDev;
+          data.meanStdDevSUV = meanStdDevSUV;
+        }
       }
-    }
 
-    // Retrieve the pixel spacing values, and if they are not
-    // Real non-zero values, set them to 1
-    const columnPixelSpacing = image.columnPixelSpacing || 1;
-    const rowPixelSpacing = image.rowPixelSpacing || 1;
-    const scaling = columnPixelSpacing * rowPixelSpacing;
+      // Retrieve the pixel spacing values, and if they are not
+      // Real non-zero values, set them to 1
+      const columnPixelSpacing = image.columnPixelSpacing || 1;
+      const rowPixelSpacing = image.rowPixelSpacing || 1;
+      const scaling = columnPixelSpacing * rowPixelSpacing;
 
-    const area = freehandArea(data.handles.points, scaling);
+      const area = freehandArea(data.handles.points, scaling);
 
-    // If the area value is sane, store it for later retrieval
-    if (!isNaN(area)) {
-      data.area = area;
-    }
+      // If the area value is sane, store it for later retrieval
+      if (!isNaN(area)) {
+        data.area = area;
+      }
 
-    // Set the invalidated flag to false so that this data won't automatically be recalculated
-    data.invalidated = false;
+      // Set the invalidated flag to false so that this data won't automatically be recalculated
+      data.invalidated = false;
+    } catch (error) {}
   }
 
   /**
@@ -571,46 +573,58 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
   }
 
   handleSelectedCallback(evt, toolData, handle, interactionType = "mouse") {
-    const { element } = evt.detail;
-    const toolState = getToolState(element, this.name);
-
-    if (handle.hasBoundingBox) {
-      // Use default move handler.
-      moveHandleNearImagePoint(evt, this, toolData, handle, interactionType);
-
-      return;
-    }
-
-    const config = this.configuration;
-
-    config.dragOrigin = {
-      x: handle.x,
-      y: handle.y
+    const ancestorEvent = {
+      element: evt.detail.element,
+      data: toolData
     };
+    const detail = { aimId: toolData.aimId, ancestorEvent };
+    const evnt = new CustomEvent("markupSelected", {
+      cancelable: true,
+      detail
+    });
+    const shouldContinue = window.dispatchEvent(evnt);
+    console.log("Should continue", shouldContinue);
+    console.log("tooldata", toolData);
+    if (shouldContinue) {
+      // //////
+      const { element } = evt.detail;
+      const toolState = getToolState(element, this.name);
+      console.log("Element", element);
+      console.log("toolState", toolState, this.name);
 
-    // Iterating over handles of all toolData instances to find the indices of the selected handle
-    for (let toolIndex = 0; toolIndex < toolState.data.length; toolIndex++) {
-      const points = toolState.data[toolIndex].handles.points;
+      if (handle.hasBoundingBox) {
+        // Use default move handler.
+        moveHandleNearImagePoint(evt, this, toolData, handle, interactionType);
 
-      for (let p = 0; p < points.length; p++) {
-        if (points[p] === handle) {
-          config.currentHandle = p;
-          config.currentTool = toolIndex;
+        return;
+      }
+
+      const config = this.configuration;
+
+      config.dragOrigin = {
+        x: handle.x,
+        y: handle.y
+      };
+
+      // Iterating over handles of all toolData instances to find the indices of the selected handle
+      for (let toolIndex = 0; toolIndex < toolState.data.length; toolIndex++) {
+        const points = toolState.data[toolIndex].handles.points;
+
+        for (let p = 0; p < points.length; p++) {
+          if (points[p] === handle) {
+            config.currentHandle = p;
+            config.currentTool = toolIndex;
+          }
         }
       }
-    }
 
-    this._modifying = true;
+      this._modifying = true;
 
-    this._activateModify(element);
+      this._activateModify(element);
 
-    const evnt = new CustomEvent("markupSelected", {
-      detail: toolData.aimId
-    });
-    window.dispatchEvent(evnt);
-
-    // Interupt eventDispatchers
-    preventPropagation(evt);
+      // Interupt eventDispatchers
+      preventPropagation(evt);
+    } else evt.preventDefault();
   }
 
   /**
