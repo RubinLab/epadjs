@@ -80,8 +80,6 @@ class SearchView extends Component {
 
   componentDidMount = async () => {
     const subjects = await this.getData();
-    console.log(" ---- expandLoading ---");
-    console.log(this.props);
     const { expandLevel, expandLoading } = this.props;
     const {
       numOfPresentStudies,
@@ -161,7 +159,6 @@ class SearchView extends Component {
   };
 
   handleExpand = async () => {
-    console.log("expand clicked");
     if (this.state.expandLevel < 3) {
       // this.setState(state => ({ expandLevel: state.expandLevel + 1 }));
       this.props.getExpandLevel(this.props.expandLevel + 1);
@@ -172,17 +169,6 @@ class SearchView extends Component {
     }
     this.setState({ expanded });
   };
-
-  // handleCloseAll = () => {
-  //   this.setState({
-  //     // expandLevel: 0,
-  //     numOfPresentStudies: 0,
-  //     numOfPresentSeries: 0,
-  //     numOfPatientsLoaded: 0,
-  //     numOfStudiesLoaded: 0,
-  //     numOfSeriesLoaded: 0
-  //   });
-  // };
 
   keepExpandedPatientsInOrder = newSubjects => {
     this.updateUploadStatus();
@@ -817,16 +803,17 @@ class SearchView extends Component {
         <Subjects
           key={this.props.match.params.pid}
           pid={this.props.match.params.pid}
-          // update={this.state.numOfsubjects}
           expandLevel={this.props.expandLevel}
           expanded={this.state.expanded}
           update={this.state.update}
           handleCloseAll={this.handleCloseAll}
           updateExpandedLevelNums={this.props.updateExpandedLevelNums}
           progressUpdated={this.props.progressUpdated}
-          getTreeExpand={this.props.getTreeExpand}
+          getTreeExpandSingle={this.props.getTreeExpandSingle}
+          getTreeExpandAll={this.props.getTreeExpandAll}
           treeExpand={this.props.treeExpand}
           expandLoading={this.props.expandLoading}
+          patientExpandComplete={patientExpandComplete}
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection

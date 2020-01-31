@@ -80,117 +80,127 @@ class Series extends Component {
   }
 
   async componentDidMount() {
-    const {
-      projectId,
-      subjectId,
-      studyId,
-      expansionArr,
-      updateExpandedLevelNums,
-      expandLevel,
-      treeExpand,
-      patientIndex,
-      studyIndex,
-      expandLoading
-    } = this.props;
+    try {
+      const {
+        projectId,
+        subjectId,
+        studyId,
+        expansionArr,
+        updateExpandedLevelNums,
+        expandLevel,
+        treeExpand,
+        patientIndex,
+        studyIndex,
+        expandLoading
+      } = this.props;
+      const { numOfPresentStudies, numOfStudiesLoaded } = expandLoading;
+      const { data: data } = await getSeries(projectId, subjectId, studyId);
+      this.setState({ data });
+      this.setState({ columns: this.setColumns() });
+      const seriesOpened = expansionArr.includes(studyId);
+      const alreadyCounted = numOfPresentStudies === numOfStudiesLoaded;
+      if (!seriesOpened && expandLevel === 2 && !alreadyCounted) {
+        updateExpandedLevelNums("study", data.length, 1);
+      }
+      if (expandLevel > 2) {
+        this.expandCurrentLevel();
+        const obj = {
+          patient: this.props.patientIndex,
+          study: this.props.studyIndex,
+          series: data.length
+        };
+        this.props.getTreeExpandAll(obj, true, expandLevel);
+      }
 
-    const { data: data } = await getSeries(projectId, subjectId, studyId);
-    this.setState({ data });
-    this.setState({ columns: this.setColumns() });
-    const seriesOpened = expansionArr.includes(studyId);
-    const alreadyCounted = expandLoading.numOfPresentSeries > 0;
-    if (!seriesOpened && expandLevel === 2 && !alreadyCounted) {
-      updateExpandedLevelNums("study", data.length, 1);
-    }
-    if (expandLevel > 2) {
-      this.expandCurrentLevel();
-    }
-    if (data.length === 0) {
-      toast.info("No serie found", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+      if (data.length === 0) {
+        toast.info("No serie found", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+      }
+      const expanded = {};
+      const ptExpandKeys = Object.keys(treeExpand[patientIndex][studyIndex]);
+      const ptExpandVal = Object.values(treeExpand[patientIndex][studyIndex]);
+      ptExpandKeys.forEach((el, index) => {
+        expanded[el] = ptExpandVal[index];
       });
+      this.setState({ expanded });
+    } catch (err) {
+      console.log("Couldn't load all series data. Please Try again!");
     }
-    const expanded = {};
-    const ptExpandKeys = Object.keys(treeExpand[patientIndex][studyIndex]);
-    const ptExpandVal = Object.values(treeExpand[patientIndex][studyIndex]);
-    ptExpandKeys.forEach((el, index) => {
-      expanded[el] = ptExpandVal[index];
-    });
-    this.setState({ expanded });
   }
 
   async componentDidUpdate(prevProps) {
-    const {
-      update,
-      studyId,
-      expansionArr,
-      updateExpandedLevelNums,
-      expandLevel
-    } = this.props;
-    const seriesOpened = expansionArr.includes(studyId);
-    if (update !== prevProps.update) {
-      const { data: data } = await getSeries(
-        this.props.projectId,
-        this.props.subjectId,
-        this.props.studyId
-      );
-      const expanded = persistExpandView(
-        this.state.expanded,
-        this.state.data,
-        data,
-        "seriesUID"
-      );
-      this.setState({ data, expanded });
-    }
-    if (this.props.expandLevel != prevProps.expandLevel) {
-      this.props.expandLevel >= 3
-        ? this.expandCurrentLevel()
-        : this.setState({ expanded: {} });
+    try {
+      const {
+        update,
+        studyId,
+        expansionArr,
+        updateExpandedLevelNums,
+        expandLevel
+      } = this.props;
+      const seriesOpened = expansionArr.includes(studyId);
+      if (update !== prevProps.update) {
+        const { data: data } = await getSeries(
+          this.props.projectId,
+          this.props.subjectId,
+          this.props.studyId
+        );
+        const expanded = persistExpandView(
+          this.state.expanded,
+          this.state.data,
+          data,
+          "seriesUID"
+        );
+        this.setState({ data, expanded });
+      }
+      if (this.props.expandLevel != prevProps.expandLevel) {
+        this.props.expandLevel >= 3
+          ? this.expandCurrentLevel()
+          : this.setState({ expanded: {} });
 
-      const expandedToSeries =
-        prevProps.expandLevel < expandLevel && expandLevel === 2;
-      if (expandedToSeries && seriesOpened) {
-        updateExpandedLevelNums("study", this.state.data.length, 1);
+        const expandedToSeries =
+          prevProps.expandLevel < expandLevel && expandLevel === 2;
+        if (expandedToSeries && seriesOpened) {
+          updateExpandedLevelNums("study", this.state.data.length, 1);
+        }
+        const expandToAnnotations =
+          prevProps.expandLevel < expandLevel && expandLevel === 3;
+        const shrinkedToSeries =
+          prevProps.expandLevel > expandLevel && expandLevel === 2;
+        const obj = {
+          patient: this.props.patientIndex,
+          study: this.props.studyIndex,
+          series: this.state.data.length
+        };
+        if (shrinkedToSeries) {
+          this.setState({ expansionArr: [] });
+          this.props.getTreeExpandAll(obj, false, this.props.expandLevel);
+        }
+
+        if (expandToAnnotations)
+          this.props.getTreeExpandAll(obj, true, this.props.expandLevel);
       }
-      const expandToAnnotations =
-        prevProps.expandLevel < expandLevel && expandLevel === 3;
-      const shrinkedToSeries =
-        prevProps.expandLevel > expandLevel && expandLevel === 2;
-      if (shrinkedToSeries) {
-        this.setState({ expansionArr: [] });
-        this.state.data.forEach((el, index) => {
-          const obj = {
-            patient: this.props.patientIndex,
-            study: this.props.studyIndex,
-            series: { [index]: false }
-          };
-          this.props.getTreeExpand(obj, false, true);
-        });
-      }
-      if (expandToAnnotations) {
-        this.state.data.forEach((el, index) => {
-          const obj = {
-            patient: this.props.patientIndex,
-            study: this.props.studyIndex,
-            series: { [index]: {} }
-          };
-          this.props.getTreeExpand(obj, true);
-        });
-      }
+    } catch (err) {
+      console.log("Couldn't load all series data. Please Try again!");
     }
   }
 
   expandCurrentLevel = () => {
-    const expanded = {};
-    for (let i = 0; i < this.state.data.length; i++) {
-      // expanded[i] = this.state.data[i].numberOfAnnotations ? true : false;
-      expanded[i] = this.state.data[i];
+    try {
+      const expanded = {};
+      for (let i = 0; i < this.state.data.length; i++) {
+        // expanded[i] = this.state.data[i].numberOfAnnotations ? true : false;
+        expanded[i] = this.state.data[i];
+      }
+      this.setState({ expanded });
+    } catch (err) {
+      console.log("Couldn't load all series data. Please Try again!");
     }
-    this.setState({ expanded });
   };
 
   selectRow = selected => {
@@ -450,7 +460,7 @@ class Series extends Component {
       study: this.props.studyIndex,
       series: { [index]: newExpanded[index] }
     };
-    this.props.getTreeExpand(obj);
+    this.props.getTreeExpandSingle(obj);
   };
 
   handleSelectSeries = row => {
@@ -589,6 +599,10 @@ class Series extends Component {
                       expansionArr={this.state.expansionArr}
                       expandLevel={this.props.expandLevel}
                       expandLoading={this.props.expandLoading}
+                      treeExpand={this.props.treeExpand}
+                      patientIndex={this.props.patientIndex}
+                      studyIndex={this.props.studyIndex}
+                      seriesIndex={row.index}
                     />
                   </div>
                 );

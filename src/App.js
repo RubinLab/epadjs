@@ -51,6 +51,8 @@ class App extends Component {
       progressUpdated: 0,
       treeExpand: {},
       expandLevel: 0,
+      maxLevel: 0,
+      refTree: {},
       numOfPresentStudies: 0,
       numOfPresentSeries: 0,
       numOfPatientsLoaded: 0,
@@ -59,47 +61,94 @@ class App extends Component {
     };
   }
 
-  getExpandLevel = expandLevel => {
-    this.setState({ expandLevel });
-    console.log(expandLevel);
-    // if expandeLevel  === 1
-    // if expanding
-    // open all patients else close all
-    // if expandeLevel  === 2
-    // if expanding open all patients
-    // iterate over sub level and open all of them too
+  getTreeExpandAll = (expandObj, expanded, expandLevel) => {
+    // console.log("getTreeExpandAll");
+    // console.log(expandObj, expanded, expandLevel);
+    const { patient, study, series } = expandObj;
+    let treeExpand = { ...this.state.treeExpand };
+    // let treeExpand = {};
+    let refPatients, refStudies, subSeries, subStudies;
+    const patientLevel = patient && !study && !series;
+    const studyLevel = study && !series;
+    const seriesLevel = series;
+    if (patientLevel) {
+      if (expanded) {
+        for (let i = 0; i < patient; i += 1) treeExpand[i] = {};
+        if (expandLevel >= this.state.maxLevel)
+          this.setState({ maxLevel: expandLevel, refTree: treeExpand });
+      }
+      if (!expanded) {
+        for (let i = 0; i < patient; i += 1) {
+          treeExpand[i] = false;
+        }
+      }
+    }
+
+    if (studyLevel) {
+      refPatients = Object.values(this.state.refTree);
+      for (let i = 0; i < refPatients.length; i += 1) {
+        if (!treeExpand[i]) treeExpand[i] = {};
+      }
+      if (expanded) {
+        for (let i = 0; i < study; i += 1) {
+          treeExpand[patient][i] = {};
+        }
+        if (expandLevel >= this.state.maxLevel)
+          this.setState({ maxLevel: expandLevel, refTree: treeExpand });
+      }
+      if (!expanded) {
+        for (let i = 0; i < study; i += 1) {
+          treeExpand[patient][i] = false;
+        }
+      }
+    }
+
+    if (seriesLevel) {
+      refPatients = Object.values(this.state.refTree);
+      for (let i = 0; i < refPatients.length; i += 1) {
+        refStudies = Object.values(refPatients[i]);
+        if (!treeExpand[i]) {
+          treeExpand[i] = {};
+        }
+        for (let k = 0; k < refStudies.length; k++) {
+          treeExpand[i][k] = {};
+        }
+      }
+      if (expanded) {
+        for (let i = 0; i < series; i += 1) {
+          treeExpand[patient][study][i] = {};
+        }
+        if (expandLevel >= this.state.maxLevel)
+          this.setState({ maxLevel: expandLevel, refTree: treeExpand });
+      }
+      if (!expanded) {
+        for (let i = 0; i < study; i += 1) {
+          treeExpand[patient][study][i] = false;
+        }
+      }
+    }
+    this.setState({ treeExpand });
   };
 
-  getTreeExpand = async (expandObj, expandAll, shrinkAll) => {
+  getTreeExpandSingle = async expandObj => {
     const { patient, study, series } = expandObj;
     let treeExpand = { ...this.state.treeExpand };
     let index, val;
     const patientLevel = patient && !study && !series;
     const studyLevel = study && !series;
     const seriesLevel = series;
+
     if (patientLevel) {
-      if (expandAll) {
-        const patientArr = Object.values(Object.values(expandObj)[0]);
-        patientArr.forEach((el, index) => {
-          treeExpand[index] = {};
-        });
-      } else if (shrinkAll) {
-        const patientArr = Object.values(Object.values(expandObj)[0]);
-        patientArr.forEach((el, index) => {
-          treeExpand[index] = false;
-        });
-      } else {
-        // if (expandAll) = treeExpand =
-        index = Object.keys(patient);
-        index = index[0];
-        val = Object.values(patient);
-        val = val[0];
-        treeExpand[index] = val;
-      }
+      index = Object.keys(patient);
+      index = index[0];
+      val = Object.values(patient);
+      val = val[0];
+      treeExpand[index] = val;
     }
     if (studyLevel) {
       index = Object.keys(study);
       index = index[0];
+
       val = Object.values(study);
       val = val[0];
       treeExpand[patient][index] = val;
@@ -107,6 +156,7 @@ class App extends Component {
     if (seriesLevel) {
       index = Object.keys(series);
       index = index[0];
+
       val = Object.values(series);
       val = val[0];
       treeExpand[patient][study][index] = val;
@@ -144,9 +194,12 @@ class App extends Component {
     }
   };
 
+  getExpandLevel = expandLevel => {
+    this.setState({ expandLevel });
+  };
+
   handleShrink = async () => {
     const { expandLevel } = this.state;
-    console.log("shrink clicked");
     if (expandLevel > 0) {
       await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
       if (expandLevel === 0) {
@@ -505,7 +558,7 @@ class App extends Component {
                       updateProgress={this.updateProgress}
                       progressUpdated={progressUpdated}
                       expandLevel={this.state.expandLevel}
-                      getTreeExpand={this.getTreeExpand}
+                      getTreeExpandSingle={this.getTreeExpandSingle}
                       treeExpand={treeExpand}
                       getExpandLevel={this.getExpandLevel}
                       expandLoading={expandLoading}
@@ -535,7 +588,8 @@ class App extends Component {
                   updateProgress={this.updateProgress}
                   progressUpdated={progressUpdated}
                   expandLevel={this.state.expandLevel}
-                  getTreeExpand={this.getTreeExpand}
+                  getTreeExpandSingle={this.getTreeExpandSingle}
+                  getTreeExpandAll={this.getTreeExpandAll}
                   treeExpand={treeExpand}
                   getExpandLevel={this.getExpandLevel}
                   expandLoading={expandLoading}
