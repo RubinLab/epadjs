@@ -16,3 +16,11 @@ export function getTools() {
 export function deleteTool() {
   return http.delete(apiUrl + "/plugins");
 }
+
+export function updateProjectsForPlugin(pluginid, projectids) {
+  return http.put(apiUrl + "/plugins/" + pluginid + "/projects/", projectids);
+}
+
+export function updateTemplatesForPlugin(pluginid, templateids) {
+  return http.put(apiUrl + "/plugins/" + pluginid + "/templates/", templateids);
+}

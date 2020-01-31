@@ -4,15 +4,17 @@ import ReactTable from "react-table";
 import { toast } from "react-toastify";
 import ToolBar from "../common/basicToolBar";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { getProjects } from "../../../services/projectServices";
-import { getTemplatesDataFromDb } from "../../../services/templateServices";
-import PluginProjectTable from "./pluginProjectTable";
-import PluginTemplateTable from "./pluginTemplateTable";
 import {
-  getTools,
-  getPlugins,
+  getProjects,
+  getProjectsWithPkAsId
+} from "../../../services/projectServices";
+import { getTemplatesFromDb } from "../../../services/templateServices";
+import PluginProjectWindow from "./pluginProjectWindow";
+import PluginTemplateWindow from "./pluginTemplateWindow";
+import {
   getPluginsWithProject,
-  deleteTool
+  updateProjectsForPlugin,
+  updateTemplatesForPlugin
 } from "../../../services/pluginServices";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
@@ -42,17 +44,19 @@ class Plugins extends React.Component {
 
   componentDidMount = async () => {
     const pluginList = await getPluginsWithProject();
-    let projectList = await getProjects();
-    let templateList = await getTemplatesDataFromDb();
+    let projectList = await getProjectsWithPkAsId();
+    let templateList = await getTemplatesFromDb();
     templateList = templateList.data;
 
     const plugins = pluginList.data;
     projectList = projectList.data;
     this.setState({ plugins, projectList, templateList });
-    console.log("projects ------>  ", projectList);
-    console.log("plugins ------>  ", plugins);
-    console.log("plugins ------>  ", templateList);
+    //console.log("projects ------>  ", projectList);
+    //console.log("plugins ------>  ", plugins);
+    //console.log("plugins ------>  ", templateList);
   };
+
+  componentDidUpdate = async () => {};
 
   getPlugins = () => {
     return this.state.plugins;
@@ -61,51 +65,37 @@ class Plugins extends React.Component {
   arrayToMap = arrayObj => {
     const tempmap = new Map();
     arrayObj.forEach(temp => {
-      console.log("array map", temp);
+      //console.log("array map", temp);
       tempmap.set(temp, temp);
     });
-    console.log("map itself", tempmap);
+    // console.log("map itself", tempmap);
     return tempmap;
   };
 
   showme = rowinfo => {
-    console.log("row info &&&&&&&&&&&", rowinfo);
+    //console.log("row info &&&&&&&&&&&", rowinfo);
   };
 
-  handleProjectSelect = (selectedProject, tableData) => {
+  handleProjectSelect = (onclickselectedProject, tableData) => {
+    //console.log("event clieck ------", e.target);
+    /*
     console.log(
       "selected project and selected row data   ",
-      selectedProject,
+      onclickselectedProject,
       " ",
       tableData
-    );
+    );*/
     let tempSelectedProjects = this.state.selectedProjects;
-    let elementIndex = tempSelectedProjects.indexOf(selectedProject);
+    let elementIndex = tempSelectedProjects.indexOf(onclickselectedProject);
     if (elementIndex === -1) {
-      tempSelectedProjects.push(selectedProject);
+      tempSelectedProjects.push(onclickselectedProject);
     } else {
       //tempSelectedProjects[elementIndex] = "";
       tempSelectedProjects = this.state.selectedProjects.filter(project => {
-        return project !== selectedProject;
+        return project !== onclickselectedProject;
       });
     }
     this.setState({ selectedProjects: tempSelectedProjects });
-  };
-
-  handleAddProjectCancel = () => {
-    this.setState({
-      selectedProjects: [],
-      tableSelectedData: {},
-      hasAddProjectClicked: false
-    });
-  };
-
-  handleAddProjectSave = () => {
-    console.log("table selected data to save", this.state.tableSelectedData);
-    console.log("new projects for the row", this.state.selectedProjects);
-    this.setState({
-      hasAddProjectClicked: false
-    });
   };
 
   addProject = (projectArray, tableSelectedData) => {
@@ -118,8 +108,57 @@ class Plugins extends React.Component {
     });
   };
 
+  handleAddProjectCancel = () => {
+    this.setState({
+      selectedProjects: [],
+      tableSelectedData: {},
+      hasAddProjectClicked: false
+    });
+  };
+
+  handleAddProjectSave = async () => {
+    const selectedPluginId = this.state.tableSelectedData.original.id;
+    const newProjects = this.state.selectedProjects;
+    const tempoldProjects = this.state.tableSelectedData.original.projects;
+    const oldProjects = [];
+
+    tempoldProjects.forEach(project => {
+      oldProjects.push(project.id);
+    });
+
+    let projectsToRemove = [];
+    let projectsToAdd = [];
+
+    projectsToAdd = newProjects.filter(prid => !oldProjects.includes(prid));
+    projectsToRemove = oldProjects.filter(prid => !newProjects.includes(prid));
+
+    const projectsArrayAsResponse = await updateProjectsForPlugin(
+      selectedPluginId,
+      {
+        projectsToAdd,
+        projectsToRemove
+      }
+    );
+
+    const tempPlugins = this.state.plugins;
+    console.log("------------------------");
+    let arrayIndex = -1;
+    for (let i = 0; i < tempPlugins.length; i++) {
+      if (tempPlugins[i].id === selectedPluginId) {
+        tempPlugins[i].projects = projectsArrayAsResponse.data;
+      }
+      console.log("--------------------------", tempPlugins[i].projects);
+    }
+    console.log("------------------------");
+    this.setState({
+      hasAddProjectClicked: false,
+      plugins: tempPlugins,
+      tableSelectedData: {}
+    });
+  };
+
   addTemplate = (templateArray, tableSelectedData) => {
-    console.log("check template arry before the map", templateArray);
+    //console.log("check template arry before the map", templateArray);
     const tempTemplateMap = this.arrayToMap(templateArray);
     this.setState({
       hasAddTemplateClicked: true,
@@ -129,12 +168,71 @@ class Plugins extends React.Component {
     });
   };
 
-  handleAddTemplateSave = () => {
-    console.log("table selected data to save", this.state.tableSelectedData);
-    console.log("new projects for the row", this.state.selectedTemplates);
-    this.setState({
-      hasAddTemplateClicked: false
+  handleAddTemplateSave = async () => {
+    const selectedPluginId = this.state.tableSelectedData.original.id;
+    const newTemplates = this.state.selectedTemplates;
+    const tempoldTemplates = this.state.tableSelectedData.original.templates;
+    const oldTemplates = [];
+
+    tempoldTemplates.forEach(template => {
+      oldTemplates.push(template.id);
     });
+    let templatesToRemove = [];
+    let templatesToAdd = [];
+    templatesToAdd = newTemplates.filter(
+      templateid => !oldTemplates.includes(templateid)
+    );
+    templatesToRemove = oldTemplates.filter(
+      templateid => !newTemplates.includes(templateid)
+    );
+
+    const templatesArrayAsResponse = await updateTemplatesForPlugin(
+      selectedPluginId,
+      {
+        templatesToAdd,
+        templatesToRemove
+      }
+    );
+
+    const tempPlugins = this.state.plugins;
+    let arrayIndex = -1;
+    for (let i = 0; i < tempPlugins.length; i++) {
+      if (tempPlugins[i].id === selectedPluginId) {
+        tempPlugins[i].templates = templatesArrayAsResponse.data;
+      }
+    }
+
+    this.setState({
+      hasAddTemplateClicked: false,
+      plugins: tempPlugins,
+      tableSelectedData: {}
+    });
+  };
+
+  handleTemplateSelect = (onclickselectedTemplate, tableData) => {
+    //console.log("event clieck ------", e.target);
+
+    console.log(
+      "selected template id : ",
+      onclickselectedTemplate,
+      " table raw data :",
+      tableData,
+      " selectedTemplates :",
+      this.state.selectedTemplates
+    );
+
+    let tempSelectedTemplates = this.state.selectedTemplates;
+    let elementIndex = tempSelectedTemplates.indexOf(onclickselectedTemplate);
+    if (elementIndex === -1) {
+      tempSelectedTemplates.push(onclickselectedTemplate);
+    } else {
+      //tempSelectedProjects[elementIndex] = "";
+      tempSelectedTemplates = this.state.selectedTemplates.filter(template => {
+        return template !== onclickselectedTemplate;
+      });
+    }
+    console.log("sending selected templates", tempSelectedTemplates);
+    this.setState({ selectedTemplates: tempSelectedTemplates });
   };
 
   handleAddTemplateCancel = () => {
@@ -144,6 +242,7 @@ class Plugins extends React.Component {
       hasAddTemplateClicked: false
     });
   };
+
   handleTabClic = whichtab => {
     this.setState({
       manageTabActive: false,
@@ -151,6 +250,19 @@ class Plugins extends React.Component {
       triggerTabActive: false,
       [whichtab]: true
     });
+  };
+
+  handleDeleteOne = rowdata => {
+    //console.log(" row data on Delete one ", rowdata);
+    /*
+    const projectID = templateData.projectID ? templateData.projectID : "lite";
+    const { templateName, templateUID } = templateData.Template[0];
+    this.setState({
+      delOne: true,
+      templateName,
+      selectedOne: { [templateUID]: projectID }
+    });
+*/
   };
 
   handleDeleteAll = () => {
@@ -266,15 +378,7 @@ class Plugins extends React.Component {
     this.setState({ hasEditClicked: true });
   };
 
-  handleDeleteOne = templateData => {
-    const projectID = templateData.projectID ? templateData.projectID : "lite";
-    const { templateName, templateUID } = templateData.Template[0];
-    this.setState({
-      delOne: true,
-      templateName,
-      selectedOne: { [templateUID]: projectID }
-    });
-  };
+
 
   deleteOne = () => {
     const template = Object.keys(this.state.selectedOne);
@@ -331,21 +435,17 @@ class Plugins extends React.Component {
 
   //cavit
   projectDataToCell = tableData => {
-    //console.log("cell ----------- >>>>", tableData);
-    const {
-      projectId,
-      projectName,
-      projectid,
-      projectID,
-      projects
-    } = tableData.row;
+    ///console.log("cell ----------- >>>>", tableData);
+    const { projects } = tableData.row;
     const tempProjects = [];
     let projectArray = [];
+    let projectNameArray = [];
     for (let project of projects) {
-      const { id, projectid } = project;
-      tempProjects.push(projectid);
+      const { id, projectname } = project;
+      tempProjects.push(id);
+      projectNameArray.push(projectname);
     }
-    projectArray = tempProjects.join(",");
+    projectArray = projectNameArray.join(" ,");
 
     return (
       <div
@@ -360,14 +460,16 @@ class Plugins extends React.Component {
 
   templateDataToCell = tableData => {
     //console.log("template data from table cell ----------- >>>>", tableData);
-    const { id, templateName, templates } = tableData.row;
+    const { templates } = tableData.row;
     const tempTemplates = [];
     let templateArray = [];
+    const templateNameArray = [];
     for (let template of templates) {
       const { id, templateName } = template;
-      tempTemplates.push(templateName);
+      tempTemplates.push(id);
+      templateNameArray.push(templateName);
     }
-    templateArray = tempTemplates.join(",");
+    templateArray = templateNameArray.join(" ,");
 
     return (
       <div
@@ -439,10 +541,11 @@ class Plugins extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
-        width: 100,
+        width: 200,
         Cell: original => {
           return this.projectDataToCell(original);
-        }
+        },
+        style: { whiteSpace: "unset" }
       },
       {
         Header: "Templates",
@@ -450,20 +553,18 @@ class Plugins extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
-        width: 100,
+        width: 200,
         Cell: original => {
           return this.templateDataToCell(original);
-        }
+        },
+        style: { whiteSpace: "unset" }
       },
       {
         Header: "",
-        // width: 45,
-        // minResizeWidth: 20,
-        // resizable: false,
         Cell: original => {
-          const template = original.row.checkbox;
+          const rowdata = original.row.checkbox;
           return (
-            <div onClick={() => this.handleDeleteOne(template)}>
+            <div onClick={() => this.handleDeleteOne(rowdata)}>
               <FaRegTrashAlt className="menu-clickable" />
             </div>
           );
@@ -567,7 +668,7 @@ class Plugins extends React.Component {
           />
         )}
         {this.state.hasAddProjectClicked && (
-          <PluginProjectTable
+          <PluginProjectWindow
             onChange={this.handleProjectSelect}
             onCancel={this.handleAddProjectCancel}
             onSave={this.handleAddProjectSave}
@@ -577,7 +678,7 @@ class Plugins extends React.Component {
           />
         )}
         {this.state.hasAddTemplateClicked && (
-          <PluginTemplateTable
+          <PluginTemplateWindow
             onChange={this.handleTemplateSelect}
             onCancel={this.handleAddTemplateCancel}
             onSave={this.handleAddTemplateSave}

@@ -41,7 +41,6 @@ class MainMenu extends React.Component {
 
   handleSelection = e => {
     const selection = e.target.textContent;
-    console.log("--------selection --------------" + selection);
     // this.setState({ selection});
     this.setState(state => {
       return { isModalOpen: !state.isModalOpen };

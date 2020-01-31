@@ -12,7 +12,7 @@ export function getAllTemplates() {
     : http.get(apiUrl + "/templates");
 }
 
-export function getTemplatesDataFromDb() {
+export function getTemplatesFromDb() {
   return mode === "lite"
     ? http.get(apiUrl + "/templatesdatafromdb?format=summary")
     : http.get(apiUrl + "/templatesdatafromdb");
