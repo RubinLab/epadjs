@@ -46,7 +46,13 @@ class Subjects extends Component {
   async componentDidMount() {
     try {
       const pid = mode === "lite" ? "lite" : this.props.pid;
-      const data = await this.getData();
+      let data = Object.values(this.props.treeData);
+      if (data.length > 0) {
+        data = data.map(el => el.data);
+      } else {
+        data = await this.getData();
+        this.props.getTreeData("subject", data);
+      }
       const expanded = {};
       this.setState({ data });
       this.setState({ columns: this.setColumns() });
@@ -513,6 +519,8 @@ class Subjects extends Component {
                     patientIndex={row.index}
                     expandLoading={this.props.expandLoading}
                     patientExpandComplete={this.props.patientExpandComplete}
+                    treeData={this.props.treeData}
+                    getTreeData={this.props.getTreeData}
                   />
                 </div>
               );

@@ -91,10 +91,19 @@ class Series extends Component {
         treeExpand,
         patientIndex,
         studyIndex,
-        expandLoading
+        expandLoading,
+        treeData
       } = this.props;
       const { numOfPresentStudies, numOfStudiesLoaded } = expandLoading;
-      const { data: data } = await getSeries(projectId, subjectId, studyId);
+      // const { data: data } = await getSeries(projectId, subjectId, studyId);
+      let data = Object.values(treeData[subjectId].studies[studyId].series);
+      if (data.length > 0) {
+        data = data.map(el => el.data);
+      } else {
+        let series = await getSeries(projectId, subjectId, studyId);
+        data = series.data;
+        this.props.getTreeData("series", data);
+      }
       this.setState({ data });
       this.setState({ columns: this.setColumns() });
       const seriesOpened = expansionArr.includes(studyId);

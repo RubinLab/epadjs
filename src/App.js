@@ -57,7 +57,8 @@ class App extends Component {
       numOfPresentSeries: 0,
       numOfPatientsLoaded: 0,
       numOfStudiesLoaded: 0,
-      numOfSeriesLoaded: 0
+      numOfSeriesLoaded: 0,
+      treeData: {}
     };
   }
 
@@ -451,6 +452,35 @@ class App extends Component {
     });
   };
 
+  getTreeData = (level, data) => {
+    const treeData = { ...this.state.treeData };
+    if (level === "subject") {
+      data.forEach(el => {
+        if (!treeData[el.subjectID])
+          treeData[el.subjectID] = { data: el, studies: {} };
+      });
+    } else if (level === "studies") {
+      data.forEach(el => {
+        if (!treeData[el.patientID].studies[el.studyUID]) {
+          treeData[el.patientID].studies[el.studyUID] = {
+            data: el,
+            series: {}
+          };
+        }
+      });
+    } else if (level === "series") {
+      data.forEach(el => {
+        if (!treeData[el.patientID].studies[el.studyUID].series[el.seriesUID]) {
+          treeData[el.patientID].studies[el.studyUID].series[el.seriesUID] = {
+            data: el
+          };
+        }
+      });
+    }
+    console.log(treeData);
+    this.setState({ treeData });
+  };
+
   render() {
     // console.log(this.state.treeExpand);
     const {
@@ -596,6 +626,8 @@ class App extends Component {
                   updateExpandedLevelNums={this.updateExpandedLevelNums}
                   onShrink={this.handleShrink}
                   onCloseAll={this.handleCloseAll}
+                  treeData={this.state.treeData}
+                  getTreeData={this.getTreeData}
                 />
               )}
             />

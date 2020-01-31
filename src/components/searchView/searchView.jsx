@@ -79,7 +79,13 @@ class SearchView extends Component {
   };
 
   componentDidMount = async () => {
-    const subjects = await this.getData();
+    let subjects = Object.values(this.props.treeData);
+    if (subjects.length > 0) {
+      subjects = subjects.map(el => el.data);
+    } else {
+      subjects = await this.getData();
+      // this.props.getTreeData("subject", subjects);
+    }
     const { expandLevel, expandLoading } = this.props;
     const {
       numOfPresentStudies,
@@ -106,10 +112,10 @@ class SearchView extends Component {
     const { uploadedPid, lastEventId, expandLevel, expandLoading } = this.props;
     const { pid } = this.props.match.params;
     const samePid = mode !== "lite" && uploadedPid === pid;
-
     let subjects;
     if (prevProps.match.params.pid !== this.props.match.params.pid) {
       subjects = await this.getData();
+      console.log(" subjects", subjects);
       this.setState({ numOfsubjects: subjects.length, subjects });
     }
 
@@ -814,6 +820,8 @@ class SearchView extends Component {
           treeExpand={this.props.treeExpand}
           expandLoading={this.props.expandLoading}
           patientExpandComplete={patientExpandComplete}
+          treeData={this.props.treeData}
+          getTreeData={this.props.getTreeData}
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection

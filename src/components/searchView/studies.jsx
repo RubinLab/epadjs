@@ -82,9 +82,17 @@ class Studies extends Component {
         treeExpand,
         patientIndex,
         expandLoading,
-        patientExpandComplete
+        patientExpandComplete,
+        treeData
       } = this.props;
-      const { data: data } = await getStudies(projectId, subjectId);
+      let data = Object.values(treeData[subjectId].studies);
+      if (data.length > 0) {
+        data = data.map(el => el.data);
+      } else {
+        let studies = await getStudies(projectId, subjectId);
+        data = studies.data;
+        this.props.getTreeData("studies", data);
+      }
       this.setState({ data });
       this.setState({ columns: this.setColumns() });
       const studyOpened = expansionArr.includes(subjectId);
@@ -628,6 +636,8 @@ class Studies extends Component {
                     patientIndex={this.props.patientIndex}
                     studyIndex={row.index}
                     expandLoading={this.props.expandLoading}
+                    treeData={this.props.treeData}
+                    getTreeData={this.props.getTreeData}
                   />
                 </div>
               );
