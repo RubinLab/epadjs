@@ -120,7 +120,8 @@ const toolBar = props => {
       )}
       <div
         className="searchView-toolbar__icon"
-        onClick={props.expanding ? null : props.onShrink}
+        // onClick={props.expanding ? null : props.onShrink}
+        onClick={props.onShrink}
       >
         <div>
           <FaLevelUpAlt
@@ -140,7 +141,8 @@ const toolBar = props => {
       </div>
       <div
         className="searchView-toolbar__icon"
-        onClick={props.expanding ? null : props.onCloseAll}
+        // onClick={props.expanding ? null : props.onCloseAll}
+        onClick={props.onCloseAll}
       >
         <div>
           <FiMinimize2
