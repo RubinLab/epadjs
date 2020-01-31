@@ -63,11 +63,8 @@ class App extends Component {
   }
 
   getTreeExpandAll = (expandObj, expanded, expandLevel) => {
-    // console.log("getTreeExpandAll");
-    // console.log(expandObj, expanded, expandLevel);
     const { patient, study, series } = expandObj;
     let treeExpand = { ...this.state.treeExpand };
-    // let treeExpand = {};
     let refPatients, refStudies, subSeries, subStudies;
     const patientLevel = patient && !study && !series;
     const studyLevel = study && !series;
@@ -511,12 +508,10 @@ class App extends Component {
         }
       }
     }
-    console.log(treeData);
     this.setState({ treeData });
   };
 
   render() {
-    // console.log(this.state.treeExpand);
     const {
       notifications,
       mode,

@@ -107,15 +107,12 @@ class SearchView extends Component {
   };
 
   componentDidUpdate = async prevProps => {
-    // console.log("comp did update");
-    // console.log(this.props.expandLevel, prevProps.expandLevel);
     const { uploadedPid, lastEventId, expandLevel, expandLoading } = this.props;
     const { pid } = this.props.match.params;
     const samePid = mode !== "lite" && uploadedPid === pid;
     let subjects;
     if (prevProps.match.params.pid !== this.props.match.params.pid) {
       subjects = await this.getData();
-      console.log(" subjects", subjects);
       this.setState({ numOfsubjects: subjects.length, subjects });
     }
 
@@ -762,16 +759,7 @@ class SearchView extends Component {
       numOfSeriesLoaded,
       expandLevel
     } = this.state;
-    // console.log("all calc");
-    // console.log(
-    //   numOfsubjects,
-    //   numOfPresentStudies,
-    //   numOfPatientsLoaded,
-    //   numOfStudiesLoaded,
-    //   numOfPresentSeries,
-    //   numOfSeriesLoaded
-    // );
-    // const { expandLevel } = this.props;
+
     const patientExpandComplete = numOfsubjects === numOfPatientsLoaded;
     const studyExpandComplete = numOfPresentStudies === numOfStudiesLoaded;
     const seriesExpandComplete = numOfPresentSeries === numOfSeriesLoaded;

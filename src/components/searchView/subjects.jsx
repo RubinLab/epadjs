@@ -82,7 +82,6 @@ class Subjects extends Component {
         );
         this.props.getTreeData("subject", data);
         await this.setState({ data, expanded });
-        console.log("data in did update");
       }
       if (this.props.expandLevel != prevProps.expandLevel) {
         this.props.expandLevel >= 1 && this.state.data.length
@@ -438,7 +437,6 @@ class Subjects extends Component {
   };
 
   onExpandedChange = (newExpanded, index, event) => {
-    console.log("newExpanded", newExpanded);
     const { data } = this.state;
     this.setState({ expanded: newExpanded });
     const expansionArr = [...this.state.expansionArr];
@@ -485,8 +483,7 @@ class Subjects extends Component {
       expanded,
       onExpandedChange
     };
-    // console.log(" ===== expand ==== ");
-    // console.log(this.props.expandLevel);
+
     const TheadComponent = props => null;
     return (
       <div>
@@ -504,7 +501,6 @@ class Subjects extends Component {
             }}
             {...extraProps}
             SubComponent={row => {
-              // console.log(row.index);
               return (
                 <div style={{ paddingLeft: 20 }}>
                   <Studies

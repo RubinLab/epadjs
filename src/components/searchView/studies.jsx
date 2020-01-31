@@ -188,7 +188,6 @@ class Studies extends Component {
   expandCurrentLevel = async () => {
     try {
       const expansionArr = [];
-      // console.log("expand current level called");
       const expanded = {};
       for (let i = 0; i < this.state.data.length; i++) {
         expanded[i] = this.state.data[i].numberOfSeries ? true : false;
