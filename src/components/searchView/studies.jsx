@@ -146,6 +146,7 @@ class Studies extends Component {
           "studyUID"
         );
         await this.setState({ data, expanded });
+        this.props.getTreeData("studies", data);
       }
       const { expansionArr, expandLevel, subjectId } = this.props;
       const studyOpened = expansionArr.includes(subjectId);

@@ -166,6 +166,7 @@ class Series extends Component {
           "seriesUID"
         );
         this.setState({ data, expanded });
+        this.props.getTreeData("series", data);
       }
       if (this.props.expandLevel != prevProps.expandLevel) {
         this.props.expandLevel >= 3

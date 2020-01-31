@@ -454,12 +454,23 @@ class App extends Component {
 
   getTreeData = (level, data) => {
     const treeData = { ...this.state.treeData };
+    const patientIDs = [];
     if (level === "subject") {
       data.forEach(el => {
         if (!treeData[el.subjectID])
           treeData[el.subjectID] = { data: el, studies: {} };
+        patientIDs.push(el.subjectID);
       });
+      if (data.length < Object.keys(treeData).length) {
+        for (let patient in treeData) {
+          if (!patientIDs.includes(patient)) {
+            delete treeData[patient];
+          }
+        }
+      }
     } else if (level === "studies") {
+      const studyUIDs = [];
+      const patientID = data[0].patientID;
       data.forEach(el => {
         if (!treeData[el.patientID].studies[el.studyUID]) {
           treeData[el.patientID].studies[el.studyUID] = {
@@ -467,15 +478,38 @@ class App extends Component {
             series: {}
           };
         }
+        studyUIDs.push(el.studyUID);
       });
+      const studiesObj = treeData[patientID].studies;
+      const studiesArr = Object.values(studiesObj);
+      if (data.length < studiesArr.length) {
+        for (let study in studiesObj) {
+          if (!studyUIDs.includes(study)) {
+            delete studiesObj[study];
+          }
+        }
+      }
     } else if (level === "series") {
+      const patientID = data[0].patientID;
+      const studyUID = data[0].studyUID;
+      const seriesUIDs = [];
       data.forEach(el => {
         if (!treeData[el.patientID].studies[el.studyUID].series[el.seriesUID]) {
           treeData[el.patientID].studies[el.studyUID].series[el.seriesUID] = {
             data: el
           };
         }
+        seriesUIDs.push(el.seriesUID);
       });
+      const seriesObj = treeData[patientID].studies[studyUID].series;
+      const seriesArr = Object.values(seriesObj);
+      if (data.length < seriesArr.length) {
+        for (let series in seriesObj) {
+          if (!seriesUIDs.includes(series)) {
+            delete seriesObj[series];
+          }
+        }
+      }
     }
     console.log(treeData);
     this.setState({ treeData });

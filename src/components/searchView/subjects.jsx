@@ -80,7 +80,9 @@ class Subjects extends Component {
           data,
           "subjectID"
         );
+        this.props.getTreeData("subject", data);
         await this.setState({ data, expanded });
+        console.log("data in did update");
       }
       if (this.props.expandLevel != prevProps.expandLevel) {
         this.props.expandLevel >= 1 && this.state.data.length

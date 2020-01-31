@@ -96,28 +96,28 @@ const toolBar = props => {
       </div>
       {/* {mode !== "lite" && ( */}
       {/* <div className="searchView-toolbar__group"> */}
-      {props.expanding ? (
+      {/* {props.expanding ? (
         <Spinner loading={props.expanding} unit="rem" size={2} />
-      ) : (
-        <div className="searchView-toolbar__icon" onClick={props.onExpand}>
-          <div>
-            <FaLevelDownAlt
-              style={{ fontSize: "1.2rem" }}
-              data-tip
-              data-for="forward-icon"
-            />
-          </div>
-
-          <ReactTooltip
-            id="forward-icon"
-            place="bottom"
-            type="info"
-            delayShow={1500}
-          >
-            <span>Expand to Next Level</span>
-          </ReactTooltip>
+      ) : ( */}
+      <div className="searchView-toolbar__icon" onClick={props.onExpand}>
+        <div>
+          <FaLevelDownAlt
+            style={{ fontSize: "1.2rem" }}
+            data-tip
+            data-for="forward-icon"
+          />
         </div>
-      )}
+
+        <ReactTooltip
+          id="forward-icon"
+          place="bottom"
+          type="info"
+          delayShow={1500}
+        >
+          <span>Expand to Next Level</span>
+        </ReactTooltip>
+      </div>
+      {/* )} */}
       <div
         className="searchView-toolbar__icon"
         // onClick={props.expanding ? null : props.onShrink}
