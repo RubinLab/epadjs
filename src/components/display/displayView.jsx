@@ -14,7 +14,8 @@ import "./viewport.css";
 import {
   changeActivePort,
   updateImageId,
-  clearActivePortAimID
+  clearActivePortAimID,
+  closeSerie
 } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
@@ -337,11 +338,11 @@ class DisplayView extends Component {
 
   hideShow = current => {
     if (this.state.hideShowDisabled) {
-      this.setState({ hideShowDisabled: false });
+      // this.setState({ hideShowDisabled: false });
       return;
     }
     const element = cornerstone.getEnabledElements()[this.state.activePort];
-    console.log("element", element);
+    console.log("element", cornerstone.getEnabledElements());
     const elements = document.getElementsByClassName("viewportContainer");
     if (this.state.hiding === false) {
       for (var i = 0; i < elements.length; i++) {
@@ -370,13 +371,9 @@ class DisplayView extends Component {
       "FreehandRoi3DTool"
     ];
     if (toolsOfInterest.includes(toolName) || toolType === "Bidirectional") {
-<<<<<<< HEAD
-      this.setState({ showAimEditor: true, selectedAim: undefined });
+      this.setState({ showAimEditor: true });
       if (toolName === "FreehandRoi3DTool")
         this.setState({ hideShowDisabled: true });
-=======
-      this.setState({ showAimEditor: true });
->>>>>>> bugfix/aimUpdate
     }
   };
 
@@ -748,8 +745,7 @@ class DisplayView extends Component {
     );
   };
 
-  closeAimEditor = (isCancel, message = "") => {
-    // if aim editor has been cancelled ask to user
+  checkUnsavedData = (isCancel, message) => {
     if (isCancel === true) {
       if (message === "")
         message = "All unsaved data will be lost! Do you want to continue?";
@@ -758,11 +754,26 @@ class DisplayView extends Component {
         return 0;
       }
     }
+    return 1;
+  };
+
+  closeAimEditor = (isCancel, message = "") => {
+    // if aim editor has been cancelled ask to user
+    if (!this.checkUnsavedData(isCancel, message)) return;
     this.setState({ showAimEditor: false, selectedAim: undefined });
     // clear all unsaved markups by calling getData
     this.getData();
     this.refreshAllViewports();
     return 1;
+  };
+
+  closeViewport = () => {
+    console.log("In close viewport");
+    // closes the active viewport
+    if (this.state.showAimEditor) {
+      if (!this.checkUnsavedData(true)) return;
+      this.props.dispatch(closeSerie());
+    } else this.props.dispatch(closeSerie());
   };
 
   handleHideAnnotations = () => {
@@ -861,7 +872,10 @@ class DisplayView extends Component {
                 </MenuProvider>
               </div>
             ))}
-          <ContextMenu onAnnotate={this.onAnnotate} />
+          <ContextMenu
+            onAnnotate={this.onAnnotate}
+            closeViewport={this.closeViewport}
+          />
         </RightsideBar>
       </React.Fragment>
     );
