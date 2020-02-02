@@ -335,6 +335,12 @@ class DisplayView extends Component {
   }
 
   hideShow = current => {
+    if (this.state.hideShowDisabled) {
+      this.setState({ hideShowDisabled: false });
+      return;
+    }
+    const element = cornerstone.getEnabledElements()[this.state.activePort];
+    console.log("element", element);
     const elements = document.getElementsByClassName("viewportContainer");
     if (this.state.hiding === false) {
       for (var i = 0; i < elements.length; i++) {
@@ -364,6 +370,8 @@ class DisplayView extends Component {
     ];
     if (toolsOfInterest.includes(toolName) || toolType === "Bidirectional") {
       this.setState({ showAimEditor: true, selectedAim: undefined });
+      if (toolName === "FreehandRoi3DTool")
+        this.setState({ hideShowDisabled: true });
     }
   };
 
