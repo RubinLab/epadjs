@@ -47,7 +47,6 @@ import "./ToolMenu.css";
 
 import Switch from "react-switch";
 import ToolMenuItem from "../ToolMenu/ToolMenuItem";
-import getNumOfSegs from "../../Utils/Segmentation/getNumOfSegments";
 
 const mapStateToProps = state => {
   return {
@@ -253,28 +252,7 @@ class ToolMenu extends Component {
     return false;
   };
 
-  handleBrushSelected = () => {
-    const { openSeries, activePort } = this.props;
-    const { imageAnnotations } = openSeries[activePort];
-    const { element } = cornerstone.getEnabledElements()[activePort];
-    // if there are already image annotations and segmentations change the labelmap accordingly
-    // console.log("Image annotations for seg Count", imageAnnotations);
-    if (imageAnnotations !== undefined) {
-      const newLabelMapIndex = getNumOfSegs(imageAnnotations);
-      // console.log("New Label Map Index", newLabelMapIndex);
-      // console.log(
-      //   "Segmenatation Module Before",
-      //   cornerstoneTools.getModule("segmentation")
-      // );
-
-      const { setters } = cornerstoneTools.getModule("segmentation");
-      setters.activeLabelmapIndex(element, newLabelMapIndex);
-      // console.log(
-      //   "Segmenatation Module After",
-      //   cornerstoneTools.getModule("segmentation")
-      // );
-    }
-  };
+  handleBrushSelected = () => {};
 
   //sets the selected tool active for an enabled elements
   setToolActiveForElement = (toolName, mouseMask = 1) => {

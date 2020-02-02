@@ -22,7 +22,7 @@ import * as dcmjs from "dcmjs";
 
 import "./aimEditor.css";
 import { throws } from "assert";
-import getNumOfSegs from "../../Utils/Segmentation/getNumOfSegments";
+import { getNumOfSegs } from "../../Utils/Segmentation/helpers";
 import { concat } from "joi-browser";
 const mode = sessionStorage.getItem("mode");
 
@@ -128,13 +128,32 @@ class AimEditor extends Component {
     }
   };
 
+  getActiveElement = () => {
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort] || {};
+    return element;
+  };
+
+  getActiveLabelMapIndex = () => {
+    const { getters } = cornerstoneTools.getModule("segmentation");
+    const element = this.getActiveElement();
+    console.log(
+      "Getting active label map index: ",
+      getters.activeLabelmapIndex(element)
+    );
+    return getters.activeLabelmapIndex(element);
+    // console.log("active lbel map index", getters.activeLabelmapIndex(element));
+    // this.setState({ activeLabelMapIndex: index });
+  };
+
   createAimSegmentation = async answers => {
-    const { activePort, openSeries } = this.props;
-    const { imageAnnotations } = openSeries[activePort];
-    const labelMapIndex = getNumOfSegs(imageAnnotations);
+    const activeLabelMapIndex = this.getActiveLabelMapIndex();
+    console.log("Acitve label map index", activeLabelMapIndex);
+    // const { imageAnnotations } = openSeries[activePort];
+    // const labelMapIndex = getNumOfSegs(openSeries);
     // console.log("Seg count is", labelMapIndex);
     const { segBlob, imageIdx, segStats } = this.createSegmentation3D(
-      labelMapIndex
+      activeLabelMapIndex
     );
 
     // praper the seed data and create aim
