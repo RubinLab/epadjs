@@ -3700,7 +3700,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       //console.log("xxxx_"+JSON.stringify(imagingObservationEntityCollection))
       var comment = aimjson.comment.value;
       var annotationName = aimjson.name.value;
-      self.aimTypeCode = aimjson.typeCode[0];
+      self.aimTypeCode = aimjson.typeCode;
       // console.log("comment" + comment);
       // console.log("comment" + annotationName);
       if (comment.includes("~")) {

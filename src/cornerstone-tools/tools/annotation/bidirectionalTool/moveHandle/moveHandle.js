@@ -1,9 +1,9 @@
-import external from './../../../../externalModules.js';
-import { state } from '../../../../store/index.js';
-import EVENTS from './../../../../events.js';
-import setHandlesPosition from './setHandlesPosition.js';
-import getActiveTool from '../../../../util/getActiveTool';
-import BaseAnnotationTool from '../../../base/BaseAnnotationTool';
+import external from "./../../../../externalModules.js";
+import { state } from "../../../../store/index.js";
+import EVENTS from "./../../../../events.js";
+import setHandlesPosition from "./setHandlesPosition.js";
+import getActiveTool from "../../../../util/getActiveTool";
+import BaseAnnotationTool from "../../../base/BaseAnnotationTool";
 
 export default function(
   mouseEventData,
@@ -16,50 +16,65 @@ export default function(
   const { element, image, buttons } = mouseEventData;
   const distanceFromTool = {
     x: handle.x - mouseEventData.currentPoints.image.x,
-    y: handle.y - mouseEventData.currentPoints.image.y,
+    y: handle.y - mouseEventData.currentPoints.image.y
   };
 
   const _dragCallback = event => {
     const eventData = event.detail;
-
-    handle.hasMoved = true;
-
-    if (handle.index === undefined || handle.index === null) {
-      handle.x = eventData.currentPoints.image.x + distanceFromTool.x;
-      handle.y = eventData.currentPoints.image.y + distanceFromTool.y;
-    } else {
-      setHandlesPosition(handle, eventData, data, distanceFromTool);
-    }
-
-    if (preventHandleOutsideImage) {
-      handle.x = Math.max(handle.x, 0);
-      handle.x = Math.min(handle.x, eventData.image.width);
-
-      handle.y = Math.max(handle.y, 0);
-      handle.y = Math.min(handle.y, eventData.image.height);
-    }
-
-    data.invalidated = true;
-
-    external.cornerstone.updateImage(element);
-
-    const activeTool = getActiveTool(element, buttons, 'mouse');
-
-    if (activeTool instanceof BaseAnnotationTool) {
-      activeTool.updateCachedStats(image, element, data);
-    }
-
-    const modifiedEventData = {
-      toolType,
+    const ancestorEvent = {
       element,
-      measurementData: data,
+      data
     };
+    const detail = { aimId: data.aimId, ancestorEvent };
+    const evnt = new CustomEvent("markupSelected", {
+      cancelable: true,
+      detail
+    });
+    const shouldContinue = window.dispatchEvent(evnt);
 
-    external.cornerstone.triggerEvent(
-      element,
-      EVENTS.MEASUREMENT_MODIFIED,
-      modifiedEventData
-    );
+    if (shouldContinue) {
+      handle.hasMoved = true;
+
+      if (handle.index === undefined || handle.index === null) {
+        handle.x = eventData.currentPoints.image.x + distanceFromTool.x;
+        handle.y = eventData.currentPoints.image.y + distanceFromTool.y;
+      } else {
+        setHandlesPosition(handle, eventData, data, distanceFromTool);
+      }
+
+      if (preventHandleOutsideImage) {
+        handle.x = Math.max(handle.x, 0);
+        handle.x = Math.min(handle.x, eventData.image.width);
+
+        handle.y = Math.max(handle.y, 0);
+        handle.y = Math.min(handle.y, eventData.image.height);
+      }
+
+      data.invalidated = true;
+
+      external.cornerstone.updateImage(element);
+
+      const activeTool = getActiveTool(element, buttons, "mouse");
+
+      if (activeTool instanceof BaseAnnotationTool) {
+        activeTool.updateCachedStats(image, element, data);
+      }
+
+      const modifiedEventData = {
+        toolType,
+        element,
+        measurementData: data
+      };
+
+      external.cornerstone.triggerEvent(
+        element,
+        EVENTS.MEASUREMENT_MODIFIED,
+        modifiedEventData
+      );
+    } else {
+      event.preventDefault();
+      interactionEndCallback();
+    }
   };
 
   handle.active = true;
@@ -103,7 +118,7 @@ export default function(
 
     external.cornerstone.updateImage(element);
 
-    if (typeof doneMovingCallback === 'function') {
+    if (typeof doneMovingCallback === "function") {
       doneMovingCallback();
     }
   };
