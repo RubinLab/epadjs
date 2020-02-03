@@ -109,7 +109,6 @@ export function uploadSegmentation(segmentation, projectId = "lite") {
   const url = apiUrl + "/projects/" + projectId + "/files";
   const segData = new FormData();
   segData.append("file", segmentation, "blob.dcm");
-  console.log("Segmentation Data", segmentation);
   const config = {
     headers: {
       "content-type": "multipart/form-data"

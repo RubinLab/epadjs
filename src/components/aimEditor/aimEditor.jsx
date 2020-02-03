@@ -54,7 +54,6 @@ class AimEditor extends Component {
       this.semanticAnswers.loadTemplates(result.data);
       this.semanticAnswers.createViewerWindow();
       const { aimId } = this.props;
-      console.log("Aim josn", aimId);
       if (aimId != null && Object.entries(aimId).length) {
         try {
           this.semanticAnswers.loadAimJson(aimId);
@@ -99,7 +98,6 @@ class AimEditor extends Component {
   save = () => {
     // Logic behind relies on the order of the data in array
     const answers = this.semanticAnswers.saveAim();
-    console.log("Answers", answers);
     // if (this.props.aimI) {
     //   console.log("props", this.props);
     //   this.updateAim(answers);
@@ -118,19 +116,19 @@ class AimEditor extends Component {
     }
     const labelmap3D = labelmaps3D[labelmapIndex];
     const labelmaps2D = labelmap3D.labelmaps2D;
-    console.log("Props", this.props);
     if (Object.values(labelmaps2D).length < 2) {
       alert(
         "This version of ePAD lite currently doesn't support single slice segmentations. Please make sure you have multiple slice of segmentations! "
       );
       return false;
-    } else if (this.updatedAimId) {
-      //has segmentation and is upadting the aim
-      alert(
-        "This version of ePAD lite currently doesn't support segmentation update."
-      );
-      return false;
     }
+    // } else if (this.updatedAimId) {
+    //   //has segmentation and is upadting the aim
+    //   alert(
+    //     "This version of ePAD lite currently doesn't support segmentation update."
+    //   );
+    //   return false;
+    // }
     return true;
   };
 
@@ -145,13 +143,11 @@ class AimEditor extends Component {
         // also add the markups to aim if there is any
         if (Object.entries(markupsToSave).length !== 0)
           this.createAimMarkups(aim, markupsToSave);
-        console.log("AYIMMM", aim);
         this.saveAim(aim, segmentationBlob);
       });
     } else if (Object.entries(markupsToSave).length !== 0) {
       // markups without segmentation
       const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
-      console.log("Seed data", seedData);
       const aim = new Aim(
         seedData,
         enumAimType.imageAnnotation,
@@ -184,10 +180,6 @@ class AimEditor extends Component {
   getActiveLabelMapIndex = () => {
     const { getters } = cornerstoneTools.getModule("segmentation");
     const element = this.getActiveElement();
-    console.log(
-      "Getting active label map index: ",
-      getters.activeLabelmapIndex(element)
-    );
     return getters.activeLabelmapIndex(element);
     // console.log("active lbel map index", getters.activeLabelmapIndex(element));
     // this.setState({ activeLabelMapIndex: index });
@@ -195,7 +187,6 @@ class AimEditor extends Component {
 
   createAimSegmentation = async answers => {
     const activeLabelMapIndex = this.getActiveLabelMapIndex();
-    console.log("Acitve label map index", activeLabelMapIndex);
     // const { imageAnnotations } = openSeries[activePort];
     // const labelMapIndex = getNumOfSegs(openSeries);
     // console.log("Seg count is", labelMapIndex);
@@ -217,10 +208,8 @@ class AimEditor extends Component {
     let dataset = await this.getDatasetFromBlob(segBlob, imageIdx);
     // set segmentation series description with the aim name
     dataset.SeriesDescription = answers.name.value;
-    console.log("Dataset series uid after", dataset);
 
     // if update segmentation Uid should be same as the previous one
-    console.log("Dataset series uid", dataset);
 
     // fill the segmentation related aim parts
     const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
@@ -229,7 +218,6 @@ class AimEditor extends Component {
     // create the modified blob
     const segmentationBlob = dcmjs.data.datasetToBlob(dataset);
 
-    console.log("AIM in segmentation", aim);
     return { aim, segmentationBlob };
   };
 
@@ -300,8 +288,6 @@ class AimEditor extends Component {
   };
 
   saveAim = (aim, segmentationBlob) => {
-    console.log("Cs tools", cornerstoneTools);
-    console.log("Aim in SAVE", aim);
     const aimJson = aim.getAim();
     const aimSaved = JSON.parse(aimJson);
     const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
@@ -485,7 +471,6 @@ class AimEditor extends Component {
   };
 
   addSemanticAnswersToSeedData = (seedData, answers) => {
-    console.log("Answers", answers);
     const {
       name,
       comment,
@@ -528,7 +513,6 @@ class AimEditor extends Component {
   };
 
   addSegmentationToAim = (aim, segEntityData, segStats) => {
-    console.log("Seg stats are", segStats);
     const segId = aim.createSegmentationEntity(segEntityData);
 
     const { volume, min, max, mean, stdDev } = segStats;
@@ -709,7 +693,6 @@ class AimEditor extends Component {
   };
 
   createSegmentation3D = labelmapIndex => {
-    console.log("Cornerstone tools", cornerstoneTools);
     // following is to know the image index which has the first segment
     let firstSegImageIndex;
 
@@ -722,19 +705,12 @@ class AimEditor extends Component {
     const imageIds = stackToolState.data[0].imageIds;
     let imagePromises = [];
     for (let i = 0; i < imageIds.length; i++) {
-      if (i == 1)
-        cornerstone
-          .loadImage(imageIds[i])
-          .then(image => console.log("Yuklenen image", image));
       imagePromises.push(cornerstone.loadImage(imageIds[i]));
     }
-
     const { getters, getLabelmapStats } = cornerstoneTools.getModule(
       "segmentation"
     );
-    console.log("Seg module", cornerstoneTools.getModule("segmentation"));
     const { labelmaps3D } = getters.labelmaps3D(element);
-    console.log("Label maps3D", labelmaps3D);
     if (!labelmaps3D) {
       return;
     }
@@ -745,7 +721,6 @@ class AimEditor extends Component {
     //   labelmapIndex++
     // ) {
     const labelmap3D = labelmaps3D[labelmapIndex];
-    console.log("Labelmap index, labelmap3D", labelmapIndex, labelmap3D);
     const labelmaps2D = labelmap3D.labelmaps2D;
 
     for (let i = 0; i < labelmaps2D.length; i++) {
@@ -778,12 +753,7 @@ class AimEditor extends Component {
     Object.keys(cachedImages).forEach(key => {
       images.push(cachedImages[key].image);
     });
-    // console.log("ImageCache", images);
 
-    // Promise.all(imagePromises).then(images => {
-    //   console.log("Images", images);
-
-    // this.cornerstone.imageCache;
     const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
       images,
       labelmap3D,
