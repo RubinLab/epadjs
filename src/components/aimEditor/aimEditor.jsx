@@ -705,13 +705,8 @@ class AimEditor extends Component {
     const imageIds = stackToolState.data[0].imageIds;
     let imagePromises = [];
     for (let i = 0; i < imageIds.length; i++) {
-      if (i == 1)
-        cornerstone
-          .loadImage(imageIds[i])
-          .then(image => console.log("Yuklenen image", image));
       imagePromises.push(cornerstone.loadImage(imageIds[i]));
     }
-
     const { getters, getLabelmapStats } = cornerstoneTools.getModule(
       "segmentation"
     );
