@@ -652,6 +652,7 @@ class DisplayView extends Component {
       );
       console.log("Label map buffer", labelmapBuffer);
       console.log("segments on frame", segmentsOnFrame);
+      console.log("Seg metadata", segMetadata);
 
       const { setters } = cornerstoneTools.getModule("segmentation");
       const { activeLabelMapIndex } = this.state;
@@ -662,7 +663,7 @@ class DisplayView extends Component {
         imageIds[0],
         labelmapBuffer,
         activeLabelMapIndex,
-        segMetadata,
+        segMetadata.data,
         imageIds.length,
         segmentsOnFrame
       );

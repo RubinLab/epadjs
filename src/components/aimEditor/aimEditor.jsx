@@ -124,13 +124,14 @@ class AimEditor extends Component {
         "This version of ePAD lite currently doesn't support single slice segmentations. Please make sure you have multiple slice of segmentations! "
       );
       return false;
-    } else if (this.updatedAimId) {
-      //has segmentation and is upadting the aim
-      alert(
-        "This version of ePAD lite currently doesn't support segmentation update."
-      );
-      return false;
     }
+    // } else if (this.updatedAimId) {
+    //   //has segmentation and is upadting the aim
+    //   alert(
+    //     "This version of ePAD lite currently doesn't support segmentation update."
+    //   );
+    //   return false;
+    // }
     return true;
   };
 
@@ -784,6 +785,7 @@ class AimEditor extends Component {
     //   console.log("Images", images);
 
     // this.cornerstone.imageCache;
+    console.log("Final labelmap3D before creating the seg blob", labelmap3D);
     const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
       images,
       labelmap3D,
