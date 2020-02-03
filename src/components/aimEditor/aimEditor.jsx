@@ -107,11 +107,39 @@ class AimEditor extends Component {
     this.createAim(answers);
   };
 
+  checkSegmentationFrames = () => {
+    // check if it has multiple frames
+    const element = this.getActiveElement();
+    const labelmapIndex = this.getActiveLabelMapIndex();
+    const { getters } = cornerstoneTools.getModule("segmentation");
+    const { labelmaps3D } = getters.labelmaps3D(element);
+    if (!labelmaps3D) {
+      return 0;
+    }
+    const labelmap3D = labelmaps3D[labelmapIndex];
+    const labelmaps2D = labelmap3D.labelmaps2D;
+    console.log("Props", this.props);
+    if (Object.values(labelmaps2D).length < 2) {
+      alert(
+        "This version of ePAD lite currently doesn't support single slice segmentations. Please make sure you have multiple slice of segmentations! "
+      );
+      return false;
+    } else if (this.updatedAimId) {
+      //has segmentation and is upadting the aim
+      alert(
+        "This version of ePAD lite currently doesn't support segmentation update."
+      );
+      return false;
+    }
+    return true;
+  };
+
   createAim = async answers => {
     const { hasSegmentation } = this.props;
     const markupsToSave = this.getNewMarkups();
 
     if (hasSegmentation) {
+      if (!this.checkSegmentationFrames()) return;
       // segmentation and markups
       this.createAimSegmentation(answers).then(({ aim, segmentationBlob }) => {
         // also add the markups to aim if there is any
