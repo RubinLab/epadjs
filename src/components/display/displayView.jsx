@@ -192,7 +192,6 @@ class DisplayView extends Component {
     cornerstoneTools.store.modules.segmentation.state.series = {};
 
     const { series } = this.props;
-    console.log("Series", this.props.series);
     var promises = [];
     for (let i = 0; i < series.length; i++) {
       const promise = this.getImageStack(series[i], i);
@@ -212,7 +211,6 @@ class DisplayView extends Component {
       // clear the segmentation data as well
       cornerstoneTools.store.modules.segmentation.state.series = {};
       series.forEach((serie, serieIndex) => {
-        console.log("Serie", serie);
         if (serie.aimID) {
           this.openAimEditor(serie);
         }
@@ -255,7 +253,6 @@ class DisplayView extends Component {
     });
     //to jump to the same image after aim save
     let imageIndex;
-    console.log("State data, index", this.state.data, index);
     if (
       this.state.data[index] &&
       this.state.data[index].stack.currentImageIdIndex
@@ -264,10 +261,8 @@ class DisplayView extends Component {
     else imageIndex = 0;
 
     // if serie is being open from the annotation jump to that image and load the aim editor
-    console.log("Serie", serie);
     if (serie.aimID) {
       imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
-      // this.openAimEditor(serie);
     }
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
@@ -280,7 +275,6 @@ class DisplayView extends Component {
     const { aimID, seriesUID } = serie;
     if (Object.entries(aimList).length !== 0) {
       const aimJson = aimList[seriesUID][aimID].json;
-      console.log("aimjson", aimJson);
       aimJson.aimID = aimID;
       const markupTypes = this.getMarkupTypesForAim(aimID);
       aimJson["markupType"] = [...markupTypes];
@@ -288,20 +282,13 @@ class DisplayView extends Component {
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
         this.setState({ showAimEditor: false });
       this.setState({ showAimEditor: true, selectedAim: aimJson });
-      // this.checkAndSetActiveLabelMap(aimJson);
     }
   };
 
   setActiveLabelMapOfAim = aimJson => {
-    const { series } = this.props;
-    // if we aren't opening a segmentation set the potential segment Index for new aim
-    // if (!this.hasSegmentation(aimJson)) {
-    //   this.setActiveLabelMapIndex(this.state.activeLabelMapIndex);
-    //   return;
-    // }
     // Means aim has segmentation alreay, find its segment index and set to edit it
+    const { series } = this.props;
     const labelMapOfAim = getSegIndexOfAim(series, aimJson);
-    console.log("Label map of aim is", labelMapOfAim);
     this.setActiveLabelMapIndex(labelMapOfAim);
   };
 
@@ -309,25 +296,6 @@ class DisplayView extends Component {
     const { setters, getters } = cornerstoneTools.getModule("segmentation");
     const element = this.getActiveElement();
     setters.activeLabelmapIndex(element, index);
-    // console.log("active lbel map index", getters.activeLabelmapIndex(element));
-    // this.setState({ activeLabelMapIndex: index });
-    console.log(
-      "Set the active label map index to:",
-      index,
-      getters.activeLabelmapIndex(element)
-    );
-  };
-
-  getActiveLabelMapIndex = () => {
-    const { getters } = cornerstoneTools.getModule("segmentation");
-    const element = this.getActiveElement();
-    console.log(
-      "Getting active label map index: ",
-      getters.activeLabelmapIndex(element)
-    );
-    return getters.activeLabelmapIndex(element);
-    // console.log("active lbel map index", getters.activeLabelmapIndex(element));
-    // this.setState({ activeLabelMapIndex: index });
   };
 
   getActiveElement = () => {
@@ -363,7 +331,6 @@ class DisplayView extends Component {
               cornerstoneImageIds,
               cornerstoneImageId
             );
-            console.log("Image index", ret);
             return ret;
           }
         }
@@ -419,7 +386,6 @@ class DisplayView extends Component {
       return;
     }
     const element = cornerstone.getEnabledElements()[this.state.activePort];
-    console.log("element", cornerstone.getEnabledElements());
     const elements = document.getElementsByClassName("viewportContainer");
     if (this.state.hiding === false) {
       for (var i = 0; i < elements.length; i++) {
@@ -455,20 +421,15 @@ class DisplayView extends Component {
   };
 
   handleMarkupSelected = event => {
-    console.log("Event", event);
     const { aimList, series, activePort } = this.props;
     const { aimId, ancestorEvent } = event.detail;
     const { element, data } = ancestorEvent;
 
     if (aimList[series[activePort].seriesUID][aimId]) {
       const aimJson = aimList[series[activePort].seriesUID][aimId].json;
-      console.log("Aim json", aimJson);
       const markupTypes = this.getMarkupTypesForAim(aimId);
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimId;
-      console.log("event", event);
-      console.log("Aimjson", aimJson);
-      console.log("state aimjson", this.state.selectedAim);
       // check if is already editing an aim
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
         let message = "";
@@ -486,19 +447,8 @@ class DisplayView extends Component {
           cornerstone.updateImage(element);
           return;
         }
-        console.log("Should continue", shouldContinue);
-        // continue to the event that has been canceled
-        // if (sourceTool === "eraser" && shouldContinue) {
-        //   console.log("Cancel Ancestor", shouldContinue);
-        //   cornerstoneTools.removeToolState(element, targetTool, data);
-        //   cornerstone.updateImage(element);
-        // }
-
-        // if (!cancelAncestor)
       }
-
       this.setState({ showAimEditor: true, selectedAim: aimJson });
-      // console.log("Selected Aim", this.state.selectedAim);
     }
   };
 
@@ -630,7 +580,6 @@ class DisplayView extends Component {
   };
 
   renderSegmentation = (arrayBuffer, aimIndex, serieIndex) => {
-    console.log("render segmentation called");
     const { imageIds } = this.state.data[serieIndex].stack;
 
     var imagePromises = imageIds.map(imageId => {
@@ -650,15 +599,11 @@ class DisplayView extends Component {
         arrayBuffer,
         cornerstone.metaData
       );
-      console.log("Label map buffer", labelmapBuffer);
-      console.log("segments on frame", segmentsOnFrame);
-      console.log("Seg metadata", segMetadata);
 
       const { setters } = cornerstoneTools.getModule("segmentation");
       const { activeLabelMapIndex } = this.state;
       this.setState({ activeLabelMapIndex: activeLabelMapIndex + 1 }); //set the index state for next render
 
-      console.log("Rendering label Map:", activeLabelMapIndex);
       setters.labelmap3DByFirstImageId(
         imageIds[0],
         labelmapBuffer,
@@ -670,18 +615,9 @@ class DisplayView extends Component {
 
       if (this.state.selectedAim) {
         //if an aim is selected find its label map index, 0 if no segmentation in aim
-        console.log("This aim is selected", this.state.selectedAim);
         //an aim is being edited don't set the label map index because aim's segs should be brushed
         this.setActiveLabelMapOfAim(this.state.selectedAim);
-        // this.setActiveLabelMapIndex(labelMapIndex);
       } else this.setActiveLabelMapIndex(this.state.activeLabelMapIndex);
-
-      // console.log(
-      //   "Rendered label map ",
-      //   labelMapIndex,
-      //   "now icremented the label map index to ",
-      //   this.state.activeLabelMapIndex
-      // );
 
       this.refreshAllViewports();
     });
@@ -873,7 +809,6 @@ class DisplayView extends Component {
   };
 
   closeViewport = () => {
-    console.log("In close viewport");
     // closes the active viewport
     if (this.state.showAimEditor) {
       if (!this.checkUnsavedData(true)) return;
