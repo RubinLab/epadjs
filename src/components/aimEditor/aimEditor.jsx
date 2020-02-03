@@ -37,6 +37,7 @@ class AimEditor extends Component {
     super(props);
     this.image = this.getImage();
     this.semanticAnswers = {};
+    if (this.props.aimId) this.updatedAimId = this.props.aimId.aimId;
   }
 
   componentDidMount() {
@@ -53,8 +54,13 @@ class AimEditor extends Component {
       this.semanticAnswers.loadTemplates(result.data);
       this.semanticAnswers.createViewerWindow();
       const { aimId } = this.props;
+      console.log("Aim josn", aimId);
       if (aimId != null && Object.entries(aimId).length) {
-        this.semanticAnswers.loadAimJson(aimId);
+        try {
+          this.semanticAnswers.loadAimJson(aimId);
+        } catch (error) {
+          console.error("Error loading aim to aim editor:", error);
+        }
       }
     });
   }
@@ -93,8 +99,12 @@ class AimEditor extends Component {
   save = () => {
     // Logic behind relies on the order of the data in array
     const answers = this.semanticAnswers.saveAim();
-    if (this.props.updatedAimId) this.updateAim(answers);
-    else this.createAim(answers);
+    console.log("Answers", answers);
+    // if (this.props.aimI) {
+    //   console.log("props", this.props);
+    //   this.updateAim(answers);
+    // } else this.createAim(answers);
+    this.createAim(answers);
   };
 
   createAim = async answers => {
@@ -113,7 +123,12 @@ class AimEditor extends Component {
     } else if (Object.entries(markupsToSave).length !== 0) {
       // markups without segmentation
       const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
-      const aim = new Aim(seedData, enumAimType.imageAnnotation);
+      console.log("Seed data", seedData);
+      const aim = new Aim(
+        seedData,
+        enumAimType.imageAnnotation,
+        this.updatedAimId
+      );
       this.createAimMarkups(aim, markupsToSave);
       this.saveAim(aim);
     } else {
@@ -123,7 +138,11 @@ class AimEditor extends Component {
       const image = cornerstone.getImage(element);
       const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
 
-      const aim = new Aim(seedData, enumAimType.imageAnnotation);
+      const aim = new Aim(
+        seedData,
+        enumAimType.imageAnnotation,
+        this.updatedAimId
+      );
       this.saveAim(aim);
     }
   };
@@ -161,7 +180,11 @@ class AimEditor extends Component {
     const seedData = getAimImageData(image);
     this.addSemanticAnswersToSeedData(seedData, answers);
     this.addUserToSeedData(seedData);
-    const aim = new Aim(seedData, enumAimType.imageAnnotation);
+    const aim = new Aim(
+      seedData,
+      enumAimType.imageAnnotation,
+      this.updatedAimId
+    );
 
     let dataset = await this.getDatasetFromBlob(segBlob, imageIdx);
     // set segmentation series description with the aim name
@@ -312,7 +335,6 @@ class AimEditor extends Component {
     // check for markups
     var shapeIndex = 1;
     var markupsToSave = {};
-    const updatedAimId = this.props.aimId;
     markedImageIds.map(imageId => {
       const imageReferenceUid = this.parseImgeId(imageId);
       const markUps = toolState[imageId];
@@ -321,7 +343,7 @@ class AimEditor extends Component {
           case "FreehandRoi3DTool":
             const polygons = markUps[tool].data;
             polygons.map(polygon => {
-              if (!polygon.aimId || polygon.aimId === updatedAimId) {
+              if (!polygon.aimId || polygon.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
                   imageId,
@@ -342,7 +364,7 @@ class AimEditor extends Component {
             bidirectionals.map(bidirectional => {
               if (
                 !bidirectional.aimId ||
-                bidirectional.aimId === updatedAimId
+                bidirectional.aimId === this.updatedAimId
               ) {
                 //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
@@ -362,7 +384,7 @@ class AimEditor extends Component {
           case "CircleRoi":
             const circles = markUps[tool].data;
             circles.map(circle => {
-              if (!circle.aimId || circle.aimId === updatedAimId) {
+              if (!circle.aimId || circle.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
                 const enElem = cornerstone.getEnabledElements()[0].element;
 
@@ -386,7 +408,7 @@ class AimEditor extends Component {
           case "Length":
             const lines = markUps[tool].data;
             lines.map(line => {
-              if (!line.aimId || line.aimId === updatedAimId) {
+              if (!line.aimId || line.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
                   imageId,
@@ -406,7 +428,7 @@ class AimEditor extends Component {
           case "Probe":
             const points = markUps[tool].data;
             points.map(point => {
-              if (!point.aimId || point.aimId === updatedAimId) {
+              if (!point.aimId || point.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
                   imageId,
@@ -435,6 +457,7 @@ class AimEditor extends Component {
   };
 
   addSemanticAnswersToSeedData = (seedData, answers) => {
+    console.log("Answers", answers);
     const {
       name,
       comment,

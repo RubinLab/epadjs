@@ -14,7 +14,8 @@ import "./viewport.css";
 import {
   changeActivePort,
   updateImageId,
-  clearActivePortAimID
+  clearActivePortAimID,
+  closeSerie
 } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
@@ -191,6 +192,7 @@ class DisplayView extends Component {
     cornerstoneTools.store.modules.segmentation.state.series = {};
 
     const { series } = this.props;
+    console.log("Series", this.props.series);
     var promises = [];
     for (let i = 0; i < series.length; i++) {
       const promise = this.getImageStack(series[i], i);
@@ -253,8 +255,9 @@ class DisplayView extends Component {
     });
     //to jump to the same image after aim save
     let imageIndex;
+    console.log("State data, index", this.state.data, index);
     if (
-      this.state.data.length &&
+      this.state.data[index] &&
       this.state.data[index].stack.currentImageIdIndex
     )
       imageIndex = this.state.data[index].stack.currentImageIdIndex;
@@ -278,6 +281,7 @@ class DisplayView extends Component {
     if (Object.entries(aimList).length !== 0) {
       const aimJson = aimList[seriesUID][aimID].json;
       console.log("aimjson", aimJson);
+      aimJson.aimID = aimID;
       const markupTypes = this.getMarkupTypesForAim(aimID);
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimID;
@@ -410,6 +414,12 @@ class DisplayView extends Component {
   }
 
   hideShow = current => {
+    if (this.state.hideShowDisabled) {
+      // this.setState({ hideShowDisabled: false });
+      return;
+    }
+    const element = cornerstone.getEnabledElements()[this.state.activePort];
+    console.log("element", cornerstone.getEnabledElements());
     const elements = document.getElementsByClassName("viewportContainer");
     if (this.state.hiding === false) {
       for (var i = 0; i < elements.length; i++) {
@@ -438,20 +448,62 @@ class DisplayView extends Component {
       "FreehandRoi3DTool"
     ];
     if (toolsOfInterest.includes(toolName) || toolType === "Bidirectional") {
-      this.setState({ showAimEditor: true, selectedAim: undefined });
+      this.setState({ showAimEditor: true });
+      if (toolName === "FreehandRoi3DTool")
+        this.setState({ hideShowDisabled: true });
     }
   };
 
   handleMarkupSelected = event => {
+    console.log("Event", event);
     const { aimList, series, activePort } = this.props;
-    if (aimList[series[activePort].seriesUID][event.detail]) {
-      const aimJson = aimList[series[activePort].seriesUID][event.detail].json;
-      const markupTypes = this.getMarkupTypesForAim(event.detail);
+    const { aimId, ancestorEvent } = event.detail;
+    const { element, data } = ancestorEvent;
+
+    if (aimList[series[activePort].seriesUID][aimId]) {
+      const aimJson = aimList[series[activePort].seriesUID][aimId].json;
+      console.log("Aim json", aimJson);
+      const markupTypes = this.getMarkupTypesForAim(aimId);
       aimJson["markupType"] = [...markupTypes];
-      if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
-        this.setState({ showAimEditor: false });
+      aimJson["aimId"] = aimId;
+      console.log("event", event);
+      console.log("Aimjson", aimJson);
+      console.log("state aimjson", this.state.selectedAim);
+      // check if is already editing an aim
+      if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
+        let message = "";
+        if (this.state.selectedAim) {
+          message = this.prepWarningMessage(
+            this.state.selectedAim.name.value,
+            aimJson.name.value
+          );
+        }
+        // event.detail.ancestorEvent.preventDefault();
+        const shouldContinue = this.closeAimEditor(true, message);
+        if (!shouldContinue) {
+          event.preventDefault();
+          data.active = false;
+          cornerstone.updateImage(element);
+          return;
+        }
+        console.log("Should continue", shouldContinue);
+        // continue to the event that has been canceled
+        // if (sourceTool === "eraser" && shouldContinue) {
+        //   console.log("Cancel Ancestor", shouldContinue);
+        //   cornerstoneTools.removeToolState(element, targetTool, data);
+        //   cornerstone.updateImage(element);
+        // }
+
+        // if (!cancelAncestor)
+      }
+
       this.setState({ showAimEditor: true, selectedAim: aimJson });
+      // console.log("Selected Aim", this.state.selectedAim);
     }
+  };
+
+  prepWarningMessage = (currentAim, destinationAim) => {
+    return `You are trying to edit Aim named: ${destinationAim}. All unsaved changes in Aim named: ${currentAim} will be lost!!!`;
   };
 
   handleMarkupCreated = event => {
@@ -797,21 +849,35 @@ class DisplayView extends Component {
     );
   };
 
-  closeAimEditor = isCancel => {
-    // if aim editor has been cancelled ask to user
+  checkUnsavedData = (isCancel, message) => {
     if (isCancel === true) {
-      var answer = window.confirm(
-        "All unsaved data will be lost! Do you want to continue?"
-      );
+      if (message === "")
+        message = "All unsaved data will be lost! Do you want to continue?";
+      var answer = window.confirm(message);
       if (!answer) {
         return 0;
       }
     }
+    return 1;
+  };
+
+  closeAimEditor = (isCancel, message = "") => {
+    // if aim editor has been cancelled ask to user
+    if (!this.checkUnsavedData(isCancel, message)) return;
     this.setState({ showAimEditor: false, selectedAim: undefined });
     // clear all unsaved markups by calling getData
     this.getData();
     this.refreshAllViewports();
     return 1;
+  };
+
+  closeViewport = () => {
+    console.log("In close viewport");
+    // closes the active viewport
+    if (this.state.showAimEditor) {
+      if (!this.checkUnsavedData(true)) return;
+      this.props.dispatch(closeSerie());
+    } else this.props.dispatch(closeSerie());
   };
 
   handleHideAnnotations = () => {
@@ -911,7 +977,10 @@ class DisplayView extends Component {
                 </MenuProvider>
               </div>
             ))}
-          <ContextMenu onAnnotate={this.onAnnotate} />
+          <ContextMenu
+            onAnnotate={this.onAnnotate}
+            closeViewport={this.closeViewport}
+          />
         </RightsideBar>
       </React.Fragment>
     );

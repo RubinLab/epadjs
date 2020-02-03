@@ -4,6 +4,7 @@ import { generateUid } from "../../Utils/aid";
 
 class Aim {
   constructor(imageData, aimType, updatedAimId) {
+    console.log("Image data", imageData);
     this.temp = {};
     ({
       aim: this.temp.aim,
