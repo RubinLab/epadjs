@@ -141,12 +141,19 @@ class BaseAnnotationTool extends BaseTool {
    * @returns {void}
    */
   handleSelectedCallback(evt, toolData, handle, interactionType = "mouse") {
+    const ancestorEvent = {
+      element: evt.target,
+      data: toolData
+    };
+    const detail = { aimId: toolData.aimId, ancestorEvent };
     const evnt = new CustomEvent("markupSelected", {
-      detail: toolData.aimId
+      cancelable: true,
+      detail
     });
-
-    window.dispatchEvent(evnt);
-    moveHandleNearImagePoint(evt, this, toolData, handle, interactionType);
+    const shouldContinue = window.dispatchEvent(evnt);
+    if (shouldContinue)
+      moveHandleNearImagePoint(evt, this, toolData, handle, interactionType);
+    else evt.preventDefault();
   }
 
   /**
@@ -161,12 +168,19 @@ class BaseAnnotationTool extends BaseTool {
    * @returns {void}
    */
   toolSelectedCallback(evt, annotation, interactionType = "mouse") {
-    moveAnnotation(evt, this, annotation, interactionType);
+    console.log("Evt, annotation ", evt, annotation);
+    const ancestorEvent = {
+      element: evt.target,
+      data: annotation
+    };
+    const detail = { aimId: annotation.aimId, ancestorEvent };
     const evnt = new CustomEvent("markupSelected", {
-      detail: annotation.aimId
+      cancelable: true,
+      detail
     });
-
-    window.dispatchEvent(evnt);
+    const shouldContinue = window.dispatchEvent(evnt);
+    if (shouldContinue) moveAnnotation(evt, this, annotation, interactionType);
+    else evt.preventDefault();
   }
 
   /**

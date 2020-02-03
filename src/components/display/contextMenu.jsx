@@ -23,7 +23,7 @@ class ContextMenu extends Component {
         </Submenu> */}
         {/* <Separator /> */}
         {/* <Item onClick={this.props.onAnnotate}>Annotate</Item> */}
-        <Item onClick={this.closeViewport}>Close</Item>
+        <Item onClick={this.props.closeViewport}>Close</Item>
         {/* <Item onClick={this.onClick}>Download</Item> */}
       </Menu>
     );
@@ -33,9 +33,9 @@ class ContextMenu extends Component {
     alert("I have been clicked :)");
   };
 
-  closeViewport = () => {
-    this.props.dispatch(closeSerie());
-  };
+  // closeViewport = () => {
+  //   this.props.dispatch(closeSerie());
+  // };
 }
 
 // const mapDispatchToProps = dispatch => {
