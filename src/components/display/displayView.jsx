@@ -185,6 +185,7 @@ class DisplayView extends Component {
     cornerstoneTools.store.modules.segmentation.state.series = {};
 
     const { series } = this.props;
+    console.log("Series", this.props.series);
     var promises = [];
     for (let i = 0; i < series.length; i++) {
       const promise = this.getImageStack(series[i], i);
@@ -237,8 +238,9 @@ class DisplayView extends Component {
     });
     //to jump to the same image after aim save
     let imageIndex;
+    console.log("State data, index", this.state.data, index);
     if (
-      this.state.data.length &&
+      this.state.data[index] &&
       this.state.data[index].stack.currentImageIdIndex
     )
       imageIndex = this.state.data[index].stack.currentImageIdIndex;
