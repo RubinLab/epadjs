@@ -76,6 +76,7 @@ class Rightsidebar extends Component {
                   aimId={this.props.selectedAim}
                   onCancel={this.props.onCancel}
                   hasSegmentation={this.props.hasSegmentation}
+                  activeLabelMapIndex={this.props.activeLabelMapIndex}
                 />
               </div>
             </Collapsible>
