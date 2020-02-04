@@ -1,12 +1,12 @@
-import mixins from './../../mixins/index.js';
-import { getLogger } from '../../util/logger.js';
-import deepmerge from './../../util/deepmerge.js';
-import { setToolCursor } from '../../store/setToolCursor.js';
-import { getModule } from '../../store';
+import mixins from "./../../mixins/index.js";
+import { getLogger } from "../../util/logger.js";
+import deepmerge from "./../../util/deepmerge.js";
+import { setToolCursor } from "../../store/setToolCursor.js";
+import { getModule } from "../../store";
 
-const logger = getLogger('tools:base:BaseTool');
+const logger = getLogger("tools:base:BaseTool");
 
-const globalConfigurationModule = getModule('globalConfiguration');
+const globalConfigurationModule = getModule("globalConfiguration");
 
 /**
  * @typedef ToolConfiguration
@@ -41,7 +41,7 @@ class BaseTool {
       configuration,
       supportedInteractionTypes,
       mixins,
-      svgCursor,
+      svgCursor
     } = this.initialConfiguration;
 
     /**
@@ -51,7 +51,7 @@ class BaseTool {
     this.name = name;
 
     /** @type {String} */
-    this.mode = 'disabled';
+    this.mode = "disabled";
     this.element = undefined;
     this.supportedInteractionTypes = supportedInteractionTypes || [];
 
@@ -179,10 +179,10 @@ class BaseTool {
     for (let i = 0; i < mixinsArray.length; i++) {
       const mixin = mixins[`${mixinsArray[i]}`];
 
-      if (typeof mixin === 'object') {
+      if (typeof mixin === "object") {
         Object.assign(this, mixin);
 
-        if (typeof this.initializeMixin === 'function') {
+        if (typeof this.initializeMixin === "function") {
           // Run the mixin's initialisation process.
           this.initializeMixin();
         }
@@ -192,7 +192,7 @@ class BaseTool {
     }
 
     // Don't keep initialiseMixin from last mixin.
-    if (this.initializeMixin === 'function') {
+    if (this.initializeMixin === "function") {
       delete this.initializeMixin;
     }
   }
@@ -232,7 +232,7 @@ class BaseTool {
     if (cursor) {
       this.svgCursor = cursor;
 
-      if (this.mode === 'active') {
+      if (this.mode === "active") {
         setToolCursor(element, cursor);
         // External.cornerstone.updateImage(element);
       }
@@ -255,6 +255,7 @@ class BaseTool {
    * @param  {CornerstoneTools.event:cornerstonetoolsmousedown} evt
    * @returns {boolean} consumedEvent - True if function consumed the event.
    */
+
   /**
    * Callback that takes priority if the tool is active, after `MOUSE_DOWN`
    * events are processed. Does nothing by default.
