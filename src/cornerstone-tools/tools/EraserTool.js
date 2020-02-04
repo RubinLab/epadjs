@@ -53,7 +53,6 @@ export default class EraserTool extends BaseTool {
             });
 
             const shouldStop = window.dispatchEvent(evnt);
-            console.log("Should continue", shouldStop);
             // }
             if (shouldStop) {
               try {
