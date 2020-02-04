@@ -583,14 +583,10 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       detail
     });
     const shouldContinue = window.dispatchEvent(evnt);
-    console.log("Should continue", shouldContinue);
-    console.log("tooldata", toolData);
     if (shouldContinue) {
       // //////
       const { element } = evt.detail;
       const toolState = getToolState(element, this.name);
-      console.log("Element", element);
-      console.log("toolState", toolState, this.name);
 
       if (handle.hasBoundingBox) {
         // Use default move handler.

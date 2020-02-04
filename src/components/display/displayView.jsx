@@ -279,6 +279,8 @@ class DisplayView extends Component {
       const markupTypes = this.getMarkupTypesForAim(aimID);
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimID;
+      if (this.hasSegmentation(aimJson))
+        this.setState({ hasSegmentation: true });
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
         this.setState({ showAimEditor: false });
       this.setState({ showAimEditor: true, selectedAim: aimJson });
@@ -430,6 +432,10 @@ class DisplayView extends Component {
       const markupTypes = this.getMarkupTypesForAim(aimId);
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimId;
+
+      // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
+      if (this.hasSegmentation(aimJson)) this.setActiveLabelMapOfAim(aimJson);
+
       // check if is already editing an aim
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
         let message = "";

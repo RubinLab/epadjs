@@ -205,17 +205,17 @@ class ToolMenu extends Component {
         icon: <FaBroom />,
         tool: "Brush3DHUGated"
       },
-      {
-        name: "Freehand Scissors",
-        icon: <FaHandScissors />,
-        tool: "FreehandScissors"
-      },
-      { name: "Circle Scissors", icon: <FaCircle />, tool: "CircleScissors" },
-      {
-        name: "Correction Scissors",
-        icon: <TiScissorsOutline />,
-        tool: "CorrectionScissors"
-      }
+      // {
+      //   name: "Freehand Scissors",
+      //   icon: <FaHandScissors />,
+      //   tool: "FreehandScissors"
+      // },
+      { name: "Circle Scissors", icon: <FaCircle />, tool: "CircleScissors" }
+      // {
+      //   name: "Correction Scissors",
+      //   icon: <TiScissorsOutline />,
+      //   tool: "CorrectionScissors"
+      // }
     ];
   }
 
