@@ -106,6 +106,7 @@ export const extractTreeData = (datasets, requirements) => {
   }
 };
 
+// extractTreeData
 const createSeries = (data, requirements) => {
   const {
     SeriesInstanceUID,
@@ -192,6 +193,35 @@ const createPatient = (data, requirements) => {
   if (missingTags.length > 0) {
     series.tagRequired = missingTags;
     series.data = data;
+  }
+  return result;
+};
+
+export const extractTableData = (dataset, requirementsObj) => {
+  const result = [];
+  const isDataArray = Array.isArray(dataset);
+  if (isDataArray) {
+    dataset.forEach(el => {
+      const {
+        PatientID,
+        PatientName,
+        StudyInstanceUID,
+        StudyDescription,
+        SeriesInstanceUID,
+        SeriesDescription
+      } = el;
+      const missingTags = checkMissingTags(el, requirementsObj);
+      result.push({
+        patientID: PatientID,
+        patientName: PatientName,
+        studyUID: StudyInstanceUID,
+        studyDesc: StudyDescription,
+        seriesUID: SeriesInstanceUID,
+        seriesDesc: SeriesDescription,
+        missingTags,
+        data: el
+      });
+    });
   }
   return result;
 };

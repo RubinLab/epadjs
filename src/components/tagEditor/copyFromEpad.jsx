@@ -24,7 +24,7 @@ class CopyFromEpad extends React.Component {
           <ManualEditingForm
             requirements={this.props.requirements}
             treeData={this.props.treeData}
-            path={this.props.path}
+            index={this.props.index}
             onTagInput={this.props.onTagInput}
           />
           {this.state.showBrowser && (

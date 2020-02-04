@@ -1,12 +1,14 @@
 import React from "react";
 import { connect } from "react-redux";
+import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import * as dcmjs from "dcmjs";
 import { FaTimes } from "react-icons/fa";
 import TagRequirements from "./tagRequirementList";
-import TagEditTree from "./tagEditTree";
+import TagEditTree from "./tagEditTable";
 import "../searchView/searchView.css";
 import TagEditor from "./tagEditor";
-import { isEmpty, extractTreeData } from "../../Utils/aid";
+import TagEditTable from "./tagEditTable";
+import { isEmpty, extractTreeData, extractTableData } from "../../Utils/aid";
 import Modal from "../management/common/customModal";
 import {
   getImageIds,
@@ -33,7 +35,9 @@ class UploadWizard extends React.Component {
       requirements: {},
       treeData: null,
       rawData: null,
-      showTagEditor: false
+      showTagEditor: false,
+      tabIndex: 0,
+      seriesIndex: null
     };
   }
 
@@ -57,9 +61,11 @@ class UploadWizard extends React.Component {
     this.setState(state => ({ showRequirements: !state.showRequirements }));
   };
 
-  handleTagEditorSelect = (patientID, studyUID, seriesUID) => {
+  handleTagEditorSelect = (seriesIndex, patientID, studyUID, seriesUID) => {
+    console.log("clicked", seriesIndex);
     this.setState(state => ({ showTagEditor: !state.showTagEditor }));
-    this.setState({ pathToSeries: { patientID, studyUID, seriesUID } });
+    // this.setState({ pathToSeries: { patientID, studyUID, seriesUID } });
+    this.setState({ seriesIndex, tabIndex: 2 });
   };
 
   handleReqSelect = async e => {
@@ -85,8 +91,7 @@ class UploadWizard extends React.Component {
         : (newRequirements[name] = true);
       await this.setState({ requirements: newRequirements });
     }
-    // console.log(requirements);
-    const treeData = extractTreeData(
+    const treeData = extractTableData(
       this.state.rawData,
       this.state.requirements
     );
@@ -138,7 +143,7 @@ class UploadWizard extends React.Component {
   };
 
   render = () => {
-    const { treeData, requirements } = this.state;
+    const { treeData, requirements, seriesIndex } = this.state;
     const requirementKeys = Object.keys(requirements);
     return (
       <Modal>
@@ -149,34 +154,47 @@ class UploadWizard extends React.Component {
               <FaTimes />
             </div>
           </div>
-          <input
+          {/* <input
             className="uploadWizard-define"
             onClick={this.handleRequirements}
             value="Define Requirements"
             type="button"
-          />
+          /> */}
           {/* Define Requirements
           </button> */}
-          {this.state.showRequirements && (
-            <TagRequirements
-              handleInput={this.handleReqSelect}
-              onClose={this.handleRequirements}
-              requirements={Object.keys(this.state.requirements)}
-            />
-          )}
-          {!isEmpty(treeData) && (
-            <TagEditTree
-              dataset={treeData}
-              onEditClick={this.handleTagEditorSelect}
-            />
-          )}
-          {this.state.showTagEditor && (
-            <TagEditor
-              requirements={requirementKeys}
-              treeData={treeData}
-              path={this.state.pathToSeries}
-            />
-          )}
+          <Tabs
+            selectedIndex={this.state.tabIndex}
+            onSelect={tabIndex => this.setState({ tabIndex })}
+          >
+            <TabList>
+              <Tab>Requirements</Tab>
+              <Tab>Series List</Tab>
+              <Tab>Tag Editor</Tab>
+            </TabList>
+            <TabPanel>
+              <TagRequirements
+                handleInput={this.handleReqSelect}
+                onClose={this.handleRequirements}
+                requirements={Object.keys(this.state.requirements)}
+              />
+            </TabPanel>
+            <TabPanel>
+              {!isEmpty(treeData) && (
+                <TagEditTree
+                  dataset={treeData}
+                  onEditClick={this.handleTagEditorSelect}
+                />
+              )}
+            </TabPanel>
+            <TabPanel>
+              <TagEditor
+                requirements={requirementKeys}
+                treeData={treeData}
+                seriesIndex={seriesIndex}
+                // path={this.state.pathToSeries}
+              />
+            </TabPanel>
+          </Tabs>
         </div>
       </Modal>
     );
@@ -192,3 +210,31 @@ const mapStateToProps = state => {
   };
 };
 export default connect(mapStateToProps)(UploadWizard);
+
+// {this.state.showRequirements && (
+//   <TagRequirements
+//     handleInput={this.handleReqSelect}
+//     onClose={this.handleRequirements}
+//     requirements={Object.keys(this.state.requirements)}
+//   />
+// )}
+// {/* {!isEmpty(treeData) && (
+//   <TagEditTree
+//     dataset={treeData}
+//     onEditClick={this.handleTagEditorSelect}
+//   />
+// )} */}
+// {!isEmpty(treeData) && (
+//   <TagEditTable
+//     dataset={treeData}
+//     onEditClick={this.handleTagEditorSelect}
+//   />
+// )}
+// {this.state.showTagEditor && (
+//   <TagEditor
+//     requirements={requirementKeys}
+//     treeData={treeData}
+//     index={index}
+//     // path={this.state.pathToSeries}
+//   />
+// )}

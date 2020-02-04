@@ -293,7 +293,7 @@ h5.add-subject__modal--label,
   margin: auto;
   min-height: 30rem;
   height: fit-content;
-  width: fit-content;
+  width: -webkit-fill-available;
 }
 .uploadWizard-header {
   display: flex;
@@ -393,6 +393,8 @@ h5.add-subject__modal--label,
 
 .copyFromEpad {
   display: inline-flex;
+  float: left;
+  margin-left: 0.5rem;
 }
 
 .seriesBrowser {
@@ -412,6 +414,7 @@ h5.add-subject__modal--label,
   width: fit-content;
   min-width: 15rem;
   color: #272b30;
+  overflow-wrap: break-word;
 }
 .seriesBrowser--label {
   min-width: 5rem;

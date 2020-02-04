@@ -32,16 +32,16 @@ class TagEditor extends React.Component {
           <ManualEditForm
             requirements={this.props.requirements}
             treeData={this.props.treeData}
-            path={this.props.path}
             onTagInput={this.handleTagInput}
+            index={this.props.index}
           />
         </TabPanel>
         <TabPanel>
           <CopyFromEpad
             requirements={this.props.requirements}
             treeData={this.props.treeData}
-            path={this.props.path}
             onTagInput={this.handleTagInput}
+            index={this.props.index}
           />
         </TabPanel>
       </Tabs>

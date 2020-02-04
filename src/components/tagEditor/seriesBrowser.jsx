@@ -171,7 +171,7 @@ class SeriesBrowser extends React.Component {
     return (
       <Modal.Dialog dialogClassName="tagRequirements_modal">
         <Modal.Header>
-          <Modal.Title>Define Required Fields</Modal.Title>
+          <Modal.Title>Browse Series</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="seriesBrowser">
