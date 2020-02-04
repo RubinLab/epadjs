@@ -354,6 +354,25 @@ class AimEditor extends Component {
       Object.keys(markUps).map(tool => {
         switch (tool) {
           case "FreehandRoi3DTool":
+            const polygons3d = markUps[tool].data;
+            polygons3d.map(polygon => {
+              if (!polygon.aimId || polygon.aimId === this.updatedAimId) {
+                //dont save the same markup to different aims
+                this.storeMarkupsToBeSaved(
+                  imageId,
+                  {
+                    type: "polygon",
+                    markup: polygon,
+                    shapeIndex,
+                    imageReferenceUid
+                  },
+                  markupsToSave
+                );
+                shapeIndex++;
+              }
+            });
+            break;
+          case "FreehandRoi": //Saved Polygons3Ds are rendered as normal
             const polygons = markUps[tool].data;
             polygons.map(polygon => {
               if (!polygon.aimId || polygon.aimId === this.updatedAimId) {
