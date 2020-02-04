@@ -1,13 +1,13 @@
-import { pointInEllipse } from '../../../util/ellipse';
-import { getLogger } from '../../../util/logger';
+import { pointInEllipse } from "../../../util/ellipse";
+import { getLogger } from "../../../util/logger";
 import {
   eraseInsideShape,
   eraseOutsideShape,
-  getBoundingBoxAroundCircle,
-} from '../../../util/segmentation';
-import getCircleCoords from '../../../util/getCircleCoords.js';
+  getBoundingBoxAroundCircle
+} from "../../../util/segmentation";
+import getCircleCoords from "../../../util/getCircleCoords.js";
 
-const logger = getLogger('util:segmentation:operations:eraseInsideCircle');
+const logger = getLogger("util:segmentation:operations:eraseInsideCircle");
 
 /**
  * EraseInsideCircle - Erase all pixels labeled with the activeSegmentIndex,

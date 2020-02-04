@@ -279,6 +279,8 @@ class DisplayView extends Component {
       const markupTypes = this.getMarkupTypesForAim(aimID);
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimID;
+      if (this.hasSegmentation(aimJson))
+        this.setState({ hasSegmentation: true });
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
         this.setState({ showAimEditor: false });
       this.setState({ showAimEditor: true, selectedAim: aimJson });
@@ -457,6 +459,8 @@ class DisplayView extends Component {
   };
 
   handleMarkupCreated = event => {
+    console.log("markupCreated", event);
+
     const { detail } = event;
     const { hasSegmentation } = this.state;
 
