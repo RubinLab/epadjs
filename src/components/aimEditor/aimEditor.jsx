@@ -227,7 +227,6 @@ class AimEditor extends Component {
         const { type, markup, shapeIndex, imageReferenceUid } = value;
         switch (type) {
           case "point":
-            alert("Point");
             this.addPointToAim(aim, markup, shapeIndex, imageReferenceUid);
             break;
           case "line":
