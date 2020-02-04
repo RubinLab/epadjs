@@ -421,46 +421,50 @@ function _formatArea(area, hasPixelSpacing) {
  * @returns {Object} The Stats object
  */
 function _calculateStats(image, element, handles, modality, pixelSpacing) {
-  // Retrieve the bounds of the ellipse in image coordinates
-  const circleCoordinates = getCircleCoords(handles.start, handles.end);
+  try {
+    // Retrieve the bounds of the ellipse in image coordinates
+    const circleCoordinates = getCircleCoords(handles.start, handles.end);
 
-  // Retrieve the array of pixels that the ellipse bounds cover
-  const pixels = external.cornerstone.getPixels(
-    element,
-    circleCoordinates.left,
-    circleCoordinates.top,
-    circleCoordinates.width,
-    circleCoordinates.height
-  );
+    // Retrieve the array of pixels that the ellipse bounds cover
+    const pixels = external.cornerstone.getPixels(
+      element,
+      circleCoordinates.left,
+      circleCoordinates.top,
+      circleCoordinates.width,
+      circleCoordinates.height
+    );
 
-  // Calculate the mean & standard deviation from the pixels and the ellipse details.
-  const ellipseMeanStdDev = calculateEllipseStatistics(
-    pixels,
-    circleCoordinates
-  );
+    // Calculate the mean & standard deviation from the pixels and the ellipse details.
+    const ellipseMeanStdDev = calculateEllipseStatistics(
+      pixels,
+      circleCoordinates
+    );
 
-  let meanStdDevSUV;
+    let meanStdDevSUV;
 
-  if (modality === "PT") {
-    meanStdDevSUV = {
-      mean: calculateSUV(image, ellipseMeanStdDev.mean, true) || 0,
-      stdDev: calculateSUV(image, ellipseMeanStdDev.stdDev, true) || 0
+    if (modality === "PT") {
+      meanStdDevSUV = {
+        mean: calculateSUV(image, ellipseMeanStdDev.mean, true) || 0,
+        stdDev: calculateSUV(image, ellipseMeanStdDev.stdDev, true) || 0
+      };
+    }
+
+    const area =
+      Math.PI *
+      ((circleCoordinates.width * (pixelSpacing.colPixelSpacing || 1)) / 2) *
+      ((circleCoordinates.height * (pixelSpacing.rowPixelSpacing || 1)) / 2);
+
+    return {
+      area: area || 0,
+      count: ellipseMeanStdDev.count || 0,
+      mean: ellipseMeanStdDev.mean || 0,
+      variance: ellipseMeanStdDev.variance || 0,
+      stdDev: ellipseMeanStdDev.stdDev || 0,
+      min: ellipseMeanStdDev.min || 0,
+      max: ellipseMeanStdDev.max || 0,
+      meanStdDevSUV
     };
+  } catch (error) {
+    console.log("WARN:", error);
   }
-
-  const area =
-    Math.PI *
-    ((circleCoordinates.width * (pixelSpacing.colPixelSpacing || 1)) / 2) *
-    ((circleCoordinates.height * (pixelSpacing.rowPixelSpacing || 1)) / 2);
-
-  return {
-    area: area || 0,
-    count: ellipseMeanStdDev.count || 0,
-    mean: ellipseMeanStdDev.mean || 0,
-    variance: ellipseMeanStdDev.variance || 0,
-    stdDev: ellipseMeanStdDev.stdDev || 0,
-    min: ellipseMeanStdDev.min || 0,
-    max: ellipseMeanStdDev.max || 0,
-    meanStdDevSUV
-  };
 }

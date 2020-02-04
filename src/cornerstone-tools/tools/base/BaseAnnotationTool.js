@@ -168,7 +168,6 @@ class BaseAnnotationTool extends BaseTool {
    * @returns {void}
    */
   toolSelectedCallback(evt, annotation, interactionType = "mouse") {
-    console.log("Evt, annotation ", evt, annotation);
     const ancestorEvent = {
       element: evt.target,
       data: annotation
