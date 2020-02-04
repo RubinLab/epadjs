@@ -44,49 +44,95 @@ class Subjects extends Component {
   }
 
   async componentDidMount() {
-    const pid = mode === "lite" ? "lite" : this.props.pid;
-    const data = await this.getData();
-    this.setState({ data });
-    this.setState({ columns: this.setColumns() });
+    try {
+      const pid = mode === "lite" ? "lite" : this.props.pid;
+      let data = Object.values(this.props.treeData);
+      if (data.length > 0) {
+        data = data.map(el => el.data);
+      } else {
+        data = await this.getData();
+        this.props.getTreeData("subject", data);
+      }
+      const expanded = {};
+      this.setState({ data });
+      this.setState({ columns: this.setColumns() });
+      const ptExpandKeys = Object.keys(this.props.treeExpand);
+      const ptExpandVal = Object.values(this.props.treeExpand);
+      ptExpandKeys.forEach((el, index) => {
+        expanded[el] = ptExpandVal[index];
+      });
+      this.setState({ expanded });
+    } catch (err) {
+      console.log("Couldn't load all subjects data. Please Try again!");
+    }
   }
 
   async componentDidUpdate(prevProps) {
-    const { uploadedPid, lastEventId, pid, expandLevel } = this.props;
+    try {
+      const { uploadedPid, lastEventId, pid, expandLevel } = this.props;
 
-    let data;
-    if (this.props.update !== prevProps.update) {
-      data = await this.getData();
-      const expanded = persistExpandView(
-        this.state.expanded,
-        this.state.data,
-        data,
-        "subjectID"
-      );
-      await this.setState({ data, expanded });
-    }
-    if (this.props.expandLevel != prevProps.expandLevel) {
-      this.props.expandLevel >= 1 && this.state.data.length
-        ? this.expandCurrentLevel()
-        : this.setState({ expanded: {} });
-      const shrinkedToSubject =
-        prevProps.expandLevel > expandLevel && expandLevel === 0;
-      if (shrinkedToSubject) this.setState({ expansionArr: [] });
-    }
-    if (this.props.pid !== prevProps.pid) {
-      if (!data) {
+      let data;
+      if (this.props.update !== prevProps.update) {
         data = await this.getData();
+        const expanded = persistExpandView(
+          this.state.expanded,
+          this.state.data,
+          data,
+          "subjectID"
+        );
+        this.props.getTreeData("subject", data);
+        await this.setState({ data, expanded });
       }
-      this.setState({ data });
+      if (this.props.expandLevel != prevProps.expandLevel) {
+        this.props.expandLevel >= 1 && this.state.data.length
+          ? this.expandCurrentLevel()
+          : this.setState({ expanded: {} });
+        const shrinkedToSubject =
+          prevProps.expandLevel > expandLevel && expandLevel === 0;
+        const expandedToStudy =
+          prevProps.expandLevel < expandLevel && expandLevel === 1;
+        let obj = {};
+        if (shrinkedToSubject) {
+          this.setState({ expansionArr: [] });
+          this.props.getTreeExpandAll(
+            { patient: this.state.data.length },
+            false,
+            this.props.expandLevel
+          );
+        }
+
+        if (expandedToStudy) {
+          for (let index = 0; index < this.state.data.length; index += 1)
+            obj[index] = {};
+          this.props.getTreeExpandAll(
+            { patient: this.state.data.length },
+            true,
+            this.props.expandLevel
+          );
+        }
+      }
+      if (this.props.pid !== prevProps.pid) {
+        if (!data) {
+          data = await this.getData();
+        }
+        this.setState({ data });
+      }
+    } catch (err) {
+      console.log("Couldn't load all subjects data. Please Try again!");
     }
   }
   expandCurrentLevel = async () => {
-    const expansionArr = [];
-    const expanded = {};
-    for (let i = 0; i < this.state.data.length; i++) {
-      expanded[i] = this.state.data[i].numberOfStudies ? true : false;
-      // expansionArr[i] = this.state.data[i].subjectID;
+    try {
+      const expansionArr = [];
+      const expanded = {};
+      for (let i = 0; i < this.state.data.length; i++) {
+        expanded[i] = this.state.data[i].numberOfStudies ? true : false;
+        // expansionArr[i] = this.state.data[i].subjectID;
+      }
+      this.setState({ expanded });
+    } catch (err) {
+      console.log("Couldn't load all subjects data. Please Try again!");
     }
-    this.setState({ expanded });
   };
 
   getData = async () => {
@@ -396,6 +442,8 @@ class Subjects extends Component {
     const expansionArr = [...this.state.expansionArr];
     expansionArr[index] = expansionArr[index] ? false : data[index].subjectID;
     this.setState({ expansionArr });
+    const obj = { patient: { [index]: newExpanded[index] } };
+    this.props.getTreeExpandSingle(obj);
   };
 
   onSortedChange = () => {
@@ -435,6 +483,7 @@ class Subjects extends Component {
       expanded,
       onExpandedChange
     };
+
     const TheadComponent = props => null;
     return (
       <div>
@@ -462,6 +511,14 @@ class Subjects extends Component {
                     updateExpandedLevelNums={this.props.updateExpandedLevelNums}
                     progressUpdated={this.props.progressUpdated}
                     expansionArr={this.state.expansionArr}
+                    getTreeExpandSingle={this.props.getTreeExpandSingle}
+                    getTreeExpandAll={this.props.getTreeExpandAll}
+                    treeExpand={this.props.treeExpand}
+                    patientIndex={row.index}
+                    expandLoading={this.props.expandLoading}
+                    patientExpandComplete={this.props.patientExpandComplete}
+                    treeData={this.props.treeData}
+                    getTreeData={this.props.getTreeData}
                   />
                 </div>
               );

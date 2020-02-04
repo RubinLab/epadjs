@@ -72,7 +72,7 @@ const toolBar = props => {
           </ReactTooltip>
         </div>
         <div
-          onClick={props.onDelete}
+          onClick={props.showDelete ? props.onDelete : null}
           className={
             props.showDelete ? "searchView-toolbar__icon" : "hide-delete"
           }
@@ -96,29 +96,33 @@ const toolBar = props => {
       </div>
       {/* {mode !== "lite" && ( */}
       {/* <div className="searchView-toolbar__group"> */}
-      {props.expanding ? (
+      {/* {props.expanding ? (
         <Spinner loading={props.expanding} unit="rem" size={2} />
-      ) : (
-        <div className="searchView-toolbar__icon" onClick={props.onExpand}>
-          <div>
-            <FaLevelDownAlt
-              style={{ fontSize: "1.2rem" }}
-              data-tip
-              data-for="forward-icon"
-            />
-          </div>
-
-          <ReactTooltip
-            id="forward-icon"
-            place="bottom"
-            type="info"
-            delayShow={1500}
-          >
-            <span>Expand to Next Level</span>
-          </ReactTooltip>
+      ) : ( */}
+      <div className="searchView-toolbar__icon" onClick={props.onExpand}>
+        <div>
+          <FaLevelDownAlt
+            style={{ fontSize: "1.2rem" }}
+            data-tip
+            data-for="forward-icon"
+          />
         </div>
-      )}
-      <div className="searchView-toolbar__icon" onClick={props.onShrink}>
+
+        <ReactTooltip
+          id="forward-icon"
+          place="bottom"
+          type="info"
+          delayShow={1500}
+        >
+          <span>Expand to Next Level</span>
+        </ReactTooltip>
+      </div>
+      {/* )} */}
+      <div
+        className="searchView-toolbar__icon"
+        // onClick={props.expanding ? null : props.onShrink}
+        onClick={props.onShrink}
+      >
         <div>
           <FaLevelUpAlt
             style={{ fontSize: "1.2rem" }}
@@ -135,7 +139,11 @@ const toolBar = props => {
           <span>Close One Level</span>
         </ReactTooltip>
       </div>
-      <div className="searchView-toolbar__icon" onClick={props.onCloseAll}>
+      <div
+        className="searchView-toolbar__icon"
+        // onClick={props.expanding ? null : props.onCloseAll}
+        onClick={props.onCloseAll}
+      >
         <div>
           <FiMinimize2
             style={{ fontSize: "1.5rem", strokeWidth: "3px" }}

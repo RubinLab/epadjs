@@ -48,9 +48,178 @@ class App extends Component {
       lastEventId: null,
       showLog: false,
       admin: false,
-      progressUpdated: 0
+      progressUpdated: 0,
+      treeExpand: {},
+      expandLevel: 0,
+      maxLevel: 0,
+      refTree: {},
+      numOfPresentStudies: 0,
+      numOfPresentSeries: 0,
+      numOfPatientsLoaded: 0,
+      numOfStudiesLoaded: 0,
+      numOfSeriesLoaded: 0,
+      treeData: {}
     };
   }
+
+  getTreeExpandAll = (expandObj, expanded, expandLevel) => {
+    const { patient, study, series } = expandObj;
+    let treeExpand = { ...this.state.treeExpand };
+    let refPatients, refStudies, subSeries, subStudies;
+    const patientLevel = patient && !study && !series;
+    const studyLevel = study && !series;
+    const seriesLevel = series;
+    if (patientLevel) {
+      if (expanded) {
+        for (let i = 0; i < patient; i += 1) treeExpand[i] = {};
+        if (expandLevel >= this.state.maxLevel)
+          this.setState({ maxLevel: expandLevel, refTree: treeExpand });
+      }
+      if (!expanded) {
+        for (let i = 0; i < patient; i += 1) {
+          treeExpand[i] = false;
+        }
+      }
+    }
+
+    if (studyLevel) {
+      refPatients = Object.values(this.state.refTree);
+      for (let i = 0; i < refPatients.length; i += 1) {
+        if (!treeExpand[i]) treeExpand[i] = {};
+      }
+      if (expanded) {
+        for (let i = 0; i < study; i += 1) {
+          treeExpand[patient][i] = {};
+        }
+        if (expandLevel >= this.state.maxLevel)
+          this.setState({ maxLevel: expandLevel, refTree: treeExpand });
+      }
+      if (!expanded) {
+        for (let i = 0; i < study; i += 1) {
+          treeExpand[patient][i] = false;
+        }
+      }
+    }
+
+    if (seriesLevel) {
+      refPatients = Object.values(this.state.refTree);
+      for (let i = 0; i < refPatients.length; i += 1) {
+        refStudies = Object.values(refPatients[i]);
+        if (!treeExpand[i]) {
+          treeExpand[i] = {};
+        }
+        for (let k = 0; k < refStudies.length; k++) {
+          treeExpand[i][k] = {};
+        }
+      }
+      if (expanded) {
+        for (let i = 0; i < series; i += 1) {
+          treeExpand[patient][study][i] = {};
+        }
+        if (expandLevel >= this.state.maxLevel)
+          this.setState({ maxLevel: expandLevel, refTree: treeExpand });
+      }
+      if (!expanded) {
+        for (let i = 0; i < study; i += 1) {
+          treeExpand[patient][study][i] = false;
+        }
+      }
+    }
+    this.setState({ treeExpand });
+  };
+
+  getTreeExpandSingle = async expandObj => {
+    const { patient, study, series } = expandObj;
+    let treeExpand = { ...this.state.treeExpand };
+    let index, val;
+    const patientLevel = patient && !study && !series;
+    const studyLevel = study && !series;
+    const seriesLevel = series;
+
+    if (patientLevel) {
+      index = Object.keys(patient);
+      index = index[0];
+      val = Object.values(patient);
+      val = val[0];
+      treeExpand[index] = val;
+    }
+    if (studyLevel) {
+      index = Object.keys(study);
+      index = index[0];
+
+      val = Object.values(study);
+      val = val[0];
+      treeExpand[patient][index] = val;
+    }
+    if (seriesLevel) {
+      index = Object.keys(series);
+      index = index[0];
+
+      val = Object.values(series);
+      val = val[0];
+      treeExpand[patient][study][index] = val;
+    }
+    this.setState({ treeExpand });
+  };
+
+  getNumOfPatientsLoaded = numOfStudies => {
+    this.setState(state => ({
+      numOfPatientsLoaded: state.numOfPatientsLoaded + 1,
+      numOfPresentStudies: state.numOfPresentStudies + numOfStudies
+    }));
+  };
+
+  getNumOfStudiesLoaded = numOfSeries => {
+    this.setState(state => ({
+      numOfStudiesLoaded: state.numOfStudiesLoaded + 1,
+      numOfPresentSeries: state.numOfPresentSeries + numOfSeries
+    }));
+  };
+
+  getNumOfSeriesLoaded = () => {
+    this.setState(state => ({
+      numOfSeriesLoaded: state.numOfSeriesLoaded + 1
+    }));
+  };
+
+  updateExpandedLevelNums = (level, numOfChild, numOfParent) => {
+    if (level === "subject") {
+      this.getNumOfPatientsLoaded(numOfChild, numOfParent);
+    } else if (level === "study") {
+      this.getNumOfStudiesLoaded(numOfChild, numOfParent);
+    } else if (level === "series") {
+      this.getNumOfSeriesLoaded(numOfChild, numOfParent);
+    }
+  };
+
+  getExpandLevel = expandLevel => {
+    this.setState({ expandLevel });
+  };
+
+  handleShrink = async () => {
+    const { expandLevel } = this.state;
+    if (expandLevel > 0) {
+      await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
+      if (expandLevel === 0) {
+        this.setState({
+          numOfPresentStudies: 0,
+          numOfPresentSeries: 0,
+          numOfPatientsLoaded: 0,
+          numOfStudiesLoaded: 0,
+          numOfSeriesLoaded: 0
+        });
+      }
+      if (expandLevel === 1) {
+        this.setState({ numOfPresentStudies: 0, numOfPatientsLoaded: 0 });
+      }
+      if (expandLevel === 2) {
+        this.setState({ numOfPresentSeries: 0, numOfStudiesLoaded: 0 });
+      }
+      if (expandLevel === 3) {
+        this.setState({ numOfSeriesLoaded: 0 });
+      }
+    }
+  };
 
   closeMenu = notification => {
     // if (event && event.type === "keydown") {
@@ -269,8 +438,94 @@ class App extends Component {
     this.props.dispatch(clearAimId());
   };
 
+  handleCloseAll = () => {
+    this.setState({
+      expandLevel: 0,
+      numOfPresentStudies: 0,
+      numOfPresentSeries: 0,
+      numOfPatientsLoaded: 0,
+      numOfStudiesLoaded: 0,
+      numOfSeriesLoaded: 0
+    });
+  };
+
+  getTreeData = (level, data) => {
+    const treeData = { ...this.state.treeData };
+    const patientIDs = [];
+    if (level === "subject") {
+      data.forEach(el => {
+        if (!treeData[el.subjectID])
+          treeData[el.subjectID] = { data: el, studies: {} };
+        patientIDs.push(el.subjectID);
+      });
+      if (data.length < Object.keys(treeData).length) {
+        for (let patient in treeData) {
+          if (!patientIDs.includes(patient)) {
+            delete treeData[patient];
+          }
+        }
+      }
+    } else if (level === "studies") {
+      const studyUIDs = [];
+      const patientID = data[0].patientID;
+      data.forEach(el => {
+        if (!treeData[el.patientID].studies[el.studyUID]) {
+          treeData[el.patientID].studies[el.studyUID] = {
+            data: el,
+            series: {}
+          };
+        }
+        studyUIDs.push(el.studyUID);
+      });
+      const studiesObj = treeData[patientID].studies;
+      const studiesArr = Object.values(studiesObj);
+      if (data.length < studiesArr.length) {
+        for (let study in studiesObj) {
+          if (!studyUIDs.includes(study)) {
+            delete studiesObj[study];
+          }
+        }
+      }
+    } else if (level === "series") {
+      const patientID = data[0].patientID;
+      const studyUID = data[0].studyUID;
+      const seriesUIDs = [];
+      data.forEach(el => {
+        if (!treeData[el.patientID].studies[el.studyUID].series[el.seriesUID]) {
+          treeData[el.patientID].studies[el.studyUID].series[el.seriesUID] = {
+            data: el
+          };
+        }
+        seriesUIDs.push(el.seriesUID);
+      });
+      const seriesObj = treeData[patientID].studies[studyUID].series;
+      const seriesArr = Object.values(seriesObj);
+      if (data.length < seriesArr.length) {
+        for (let series in seriesObj) {
+          if (!seriesUIDs.includes(series)) {
+            delete seriesObj[series];
+          }
+        }
+      }
+    }
+    this.setState({ treeData });
+  };
+
   render() {
-    const { notifications, mode, progressUpdated } = this.state;
+    const {
+      notifications,
+      mode,
+      progressUpdated,
+      treeExpand,
+      expandLevel
+    } = this.state;
+    const expandLoading = {
+      numOfPresentStudies: this.state.numOfPresentStudies,
+      numOfPresentSeries: this.state.numOfPresentSeries,
+      numOfPatientsLoaded: this.state.numOfPatientsLoaded,
+      numOfStudiesLoaded: this.state.numOfStudiesLoaded,
+      numOfSeriesLoaded: this.state.numOfSeriesLoaded
+    };
     let noOfUnseen;
     if (notifications) {
       noOfUnseen = notifications.reduce((all, item) => {
@@ -335,6 +590,10 @@ class App extends Component {
                       {...props}
                       updateProgress={this.updateProgress}
                       progressUpdated={progressUpdated}
+                      expandLevel={this.state.expandLevel}
+                      getExpandLevel={this.getExpandLevel}
+                      expandLoading={expandLoading}
+                      updateExpandedLevelNums={this.updateExpandedLevelNums}
                     />
                   )}
                 />
@@ -357,6 +616,14 @@ class App extends Component {
                       {...props}
                       updateProgress={this.updateProgress}
                       progressUpdated={progressUpdated}
+                      expandLevel={this.state.expandLevel}
+                      getTreeExpandSingle={this.getTreeExpandSingle}
+                      treeExpand={treeExpand}
+                      getExpandLevel={this.getExpandLevel}
+                      expandLoading={expandLoading}
+                      updateExpandedLevelNums={this.updateExpandedLevelNums}
+                      onShrink={this.handleShrink}
+                      onCloseAll={this.handleCloseAll}
                     />
                   )}
                 />
@@ -379,6 +646,17 @@ class App extends Component {
                   {...props}
                   updateProgress={this.updateProgress}
                   progressUpdated={progressUpdated}
+                  expandLevel={this.state.expandLevel}
+                  getTreeExpandSingle={this.getTreeExpandSingle}
+                  getTreeExpandAll={this.getTreeExpandAll}
+                  treeExpand={treeExpand}
+                  getExpandLevel={this.getExpandLevel}
+                  expandLoading={expandLoading}
+                  updateExpandedLevelNums={this.updateExpandedLevelNums}
+                  onShrink={this.handleShrink}
+                  onCloseAll={this.handleCloseAll}
+                  treeData={this.state.treeData}
+                  getTreeData={this.getTreeData}
                 />
               )}
             />
