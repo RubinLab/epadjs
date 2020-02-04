@@ -432,6 +432,10 @@ class DisplayView extends Component {
       const markupTypes = this.getMarkupTypesForAim(aimId);
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimId;
+
+      // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
+      if (this.hasSegmentation(aimJson)) this.setActiveLabelMapOfAim(aimJson);
+
       // check if is already editing an aim
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
         let message = "";
@@ -459,8 +463,6 @@ class DisplayView extends Component {
   };
 
   handleMarkupCreated = event => {
-    console.log("markupCreated", event);
-
     const { detail } = event;
     const { hasSegmentation } = this.state;
 

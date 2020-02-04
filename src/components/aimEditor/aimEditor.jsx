@@ -135,7 +135,6 @@ class AimEditor extends Component {
   createAim = async answers => {
     const { hasSegmentation } = this.props;
     const markupsToSave = this.getNewMarkups();
-    console.log("Has segmentations", hasSegmentation);
 
     if (hasSegmentation) {
       if (!this.checkSegmentationFrames()) return;
