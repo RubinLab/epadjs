@@ -37,6 +37,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
   this.aimType = "";
   this.aimName = "";
   this.aimTypeCode = "";
+  this.templateSelectedIndex = -1;
   var domelements = [];
   this.geoshapeidCounter = 0;
 
@@ -204,7 +205,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       self.aimName = "";
       self.aimType = "";
       self.aimTypeCode = "";
-      let templateSelectedIndex = this.value;
+      self.templateSelectedIndex = this.value;
 
       self.jsonTemplateCopy = "";
       self.accordion1Div.innerHTML = "";
@@ -223,7 +224,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       self.mapLabelSubComment = new Map();
       self.mapLabelCommentJson = new Map();
       self.mapLabelUid = new Map();
-      if (templateSelectedIndex > -1) {
+      if (self.templateSelectedIndex > -1) {
         self.jsonTemplateCopy = self.arrayTemplatesJsonObjects[this.value];
         self.extractTemplate(self.jsonTemplateCopy);
       }

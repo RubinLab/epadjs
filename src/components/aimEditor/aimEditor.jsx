@@ -97,12 +97,22 @@ class AimEditor extends Component {
 
   save = () => {
     // Logic behind relies on the order of the data in array
+    if (!this.checkAimTemplate()) return;
     const answers = this.semanticAnswers.saveAim();
+
     // if (this.props.aimI) {
     //   console.log("props", this.props);
     //   this.updateAim(answers);
     // } else this.createAim(answers);
     this.createAim(answers);
+  };
+
+  checkAimTemplate = () => {
+    if (this.semanticAnswers.templateSelectedIndex === -1) {
+      alert("Please select an Aim template!");
+      return false;
+    }
+    return true;
   };
 
   checkSegmentationFrames = () => {
