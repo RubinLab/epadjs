@@ -792,7 +792,7 @@ class DisplayView extends Component {
     );
   };
 
-  checkUnsavedData = (isCancel, message) => {
+  checkUnsavedData = (isCancel, message = "") => {
     if (isCancel === true) {
       if (message === "")
         message = "All unsaved data will be lost! Do you want to continue?";
