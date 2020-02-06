@@ -21,19 +21,24 @@ class TagEditor extends React.Component {
       this.setState({ tagValues: tags });
     }
   };
+  saveTags = () => {
+    console.log("save tags clicked");
+  };
+
   render = () => {
     return (
       <Tabs>
         <TabList>
           <Tab>Manual Edit</Tab>
-          <Tab>ePad</Tab>
+          <Tab>Copy from ePad</Tab>
         </TabList>
         <TabPanel>
           <ManualEditForm
             requirements={this.props.requirements}
             treeData={this.props.treeData}
             onTagInput={this.handleTagInput}
-            index={this.props.index}
+            seriesIndex={this.props.seriesIndex}
+            onSave={this.saveTags}
           />
         </TabPanel>
         <TabPanel>
@@ -41,7 +46,9 @@ class TagEditor extends React.Component {
             requirements={this.props.requirements}
             treeData={this.props.treeData}
             onTagInput={this.handleTagInput}
-            index={this.props.index}
+            seriesIndex={this.props.seriesIndex}
+            onSave={this.saveTags}
+            requirementsObj={this.props.requirementsObj}
           />
         </TabPanel>
       </Tabs>

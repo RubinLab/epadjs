@@ -1,0 +1,42 @@
+.tagEditForm-wrapper,
+.tagCopyForm-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+}
+
+.tagEditForm {
+  height: 90%;
+}
+
+.tagEditForm-save {
+  color: #272b30;
+  margin: 0.5rem;
+  display: block;
+  align-self: left;
+  width: 10rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  height: 10%;
+}
+
+.seriesBrowser-getTags {
+  align-self: right;
+  color: #272b30;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.tagCopyForm-wrapper {
+  margin-left: 2rem;
+}
+.tagCopyForm-wrapper .--copy {
+  margin-right: 0.5rem;
+  font-size: 1.4rem;
+}
+
+.tagCopyForm__el {
+  display: flex;
+  margin-bottom: 0.8rem;
+  align-items: center;
+}

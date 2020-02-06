@@ -14,6 +14,8 @@ import {
   getImageIds,
   getImageArrayBuffer
 } from "../../services/seriesServices";
+import "react-tabs/style/react-tabs.css";
+import "./tagEditor.css";
 
 const style = {
   display: "flex",
@@ -62,7 +64,6 @@ class UploadWizard extends React.Component {
   };
 
   handleTagEditorSelect = (seriesIndex, patientID, studyUID, seriesUID) => {
-    console.log("clicked", seriesIndex);
     this.setState(state => ({ showTagEditor: !state.showTagEditor }));
     // this.setState({ pathToSeries: { patientID, studyUID, seriesUID } });
     this.setState({ seriesIndex, tabIndex: 2 });
@@ -167,15 +168,16 @@ class UploadWizard extends React.Component {
             onSelect={tabIndex => this.setState({ tabIndex })}
           >
             <TabList>
-              <Tab>Requirements</Tab>
-              <Tab>Series List</Tab>
-              <Tab>Tag Editor</Tab>
+              <Tab>Define Requirements</Tab>
+              <Tab>Select Series</Tab>
+              <Tab>Edit Tags</Tab>
             </TabList>
             <TabPanel>
               <TagRequirements
                 handleInput={this.handleReqSelect}
                 onClose={this.handleRequirements}
                 requirements={Object.keys(this.state.requirements)}
+                // requirements={requirements}
               />
             </TabPanel>
             <TabPanel>
@@ -189,6 +191,7 @@ class UploadWizard extends React.Component {
             <TabPanel>
               <TagEditor
                 requirements={requirementKeys}
+                requirementsObj={requirements}
                 treeData={treeData}
                 seriesIndex={seriesIndex}
                 // path={this.state.pathToSeries}

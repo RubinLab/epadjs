@@ -1,16 +1,16 @@
 import React from "react";
-import { FaCheck, FaExclamationTriangle } from "react-icons/fa";
+import {
+  FaCheck,
+  FaExclamationTriangle,
+  FaArrowAltCircleLeft
+} from "react-icons/fa";
+import { TiArrowLeftOutline } from "react-icons/ti";
 import { makeDeIdentifiedValue } from "../../Utils/aid";
+import "./tagEditor.css";
 
-const manualUpdateForm = ({
-  requirements,
-  treeData,
-  seriesIndex,
-  onTagInput,
-  onSave
-}) => {
+const manualUpdateForm = ({ requirements, treeData, onTagInput, onSave }) => {
   try {
-    const { seriesUID, missingTags, data } = treeData[seriesIndex];
+    const { seriesUID, missingTags, data } = treeData[0];
     const fields = [];
     // const series = treeData[patientID].studies[studyUID].series[seriesUID];
 
@@ -21,8 +21,10 @@ const manualUpdateForm = ({
       const value = missing ? makeDeIdentifiedValue(null, vr) : data[tag];
       // if (missing) onTagInput(null, tag, value);
       fields.push(
-        <div key={`${seriesUID}-${i}`} className="tagEditForm__el">
-          <div className="--exp">{`${tag}:`}</div>
+        <div key={`${seriesUID}-${i}`} className="tagCopyForm__el">
+          <div className="--copy">
+            <FaArrowAltCircleLeft />
+          </div>
           <input
             onMouseDown={e => e.stopPropagation()}
             type="text"
@@ -40,12 +42,12 @@ const manualUpdateForm = ({
       );
     });
     return (
-      <div className="tagEditForm-wrapper">
-        <div className="tagEditForm">{fields}</div>
+      <div className="tagCopyForm-wrapper">
+        <div className="tagCopyForm">{fields}</div>
         <input
-          className="tagEditForm-save"
+          className="tagCopyForm-save"
           onClick={onSave}
-          value="Save tags"
+          value="Back to Series Browse"
           type="button"
         />
       </div>

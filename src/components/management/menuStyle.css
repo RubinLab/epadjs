@@ -245,6 +245,7 @@
   color: white;
   padding: 0.5rem;
   max-width: fit-content;
+  margin-top: 0.5rem;
 }
 
 .project-edit__error {

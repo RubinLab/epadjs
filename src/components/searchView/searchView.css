@@ -309,12 +309,8 @@ h5.add-subject__modal--label,
   cursor: pointer;
 }
 
-.uploadWizard-define {
-  align-self: left;
-  color: black;
-}
-
-.tagEditForm__el {
+.tagEditForm__el,
+.tagCopyForm__el {
   display: flex;
   margin-bottom: 0.8rem;
   align-items: center;
@@ -325,21 +321,24 @@ h5.add-subject__modal--label,
   text-align: left;
 }
 
-.tagEditForm__el .--check {
+.tagEditForm__el .--check,
+.tagCopyForm__el .--check {
   font-size: 1.5rem;
   color: #45a163;
   margin-left: 0.2rem;
   text-shadow: 1px 1px 1px #ccc;
 }
 
-.tagEditForm__el .--warnning {
+.tagEditForm__el .--warnning,
+.tagCopyForm__el .--warnning {
   font-size: 1.5rem;
   color: orange;
   margin-left: 0.2rem;
   text-shadow: 1px 1px 1px #ccc;
 }
 
-.tagEditForm__el .--text {
+.tagEditForm__el .--text,
+.tagCopyForm__el .--text {
   margin-right: 0.2rem;
   width: 25rem;
   padding: 0.2rem;
@@ -347,7 +346,8 @@ h5.add-subject__modal--label,
   color: #272b30;
 }
 
-.tagEditForm__el .--textFilled {
+.tagEditForm__el .--textFilled,
+.tagCopyForm__el .--textFilled {
   color: #272b30;
   width: 25rem;
   font-weight: bolder;
@@ -355,12 +355,6 @@ h5.add-subject__modal--label,
 
 .react-tabs__tab-list {
   display: flex;
-}
-
-.uploadWizard-define {
-  color: #272b30;
-  margin: 0.5rem;
-  display: block;
 }
 
 .tagEditForm__el .--refresh {
@@ -392,9 +386,8 @@ h5.add-subject__modal--label,
 }
 
 .copyFromEpad {
-  display: inline-flex;
+  display: flex;
   float: left;
-  margin-left: 0.5rem;
 }
 
 .seriesBrowser {
@@ -410,7 +403,7 @@ h5.add-subject__modal--label,
 }
 .seriesBrowser--select {
   display: inline-flex;
-  margin-bottom: 0.5rem;
+  /* margin-bottom: 0.5rem; */
   width: fit-content;
   min-width: 15rem;
   color: #272b30;
@@ -418,6 +411,7 @@ h5.add-subject__modal--label,
 }
 .seriesBrowser--label {
   min-width: 5rem;
+  text-align: left;
 }
 
 .tagRequirements_modal .modal-content {
@@ -427,4 +421,8 @@ h5.add-subject__modal--label,
 
 .tagRequirements_modal .modal-title {
   color: white;
+}
+
+.seriesBrowser-wrapper {
+  margin-left: 2rem;
 }

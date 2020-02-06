@@ -26,6 +26,7 @@ class SeriesBrowser extends React.Component {
           project: projects[0].id
         });
         this.getSubjects();
+        this.props.onChange("project", projects[0].id);
       }
     } catch (err) {
       console.log(err);
@@ -56,6 +57,7 @@ class SeriesBrowser extends React.Component {
   renderPatients = () => {
     const options = [];
     for (let patient of this.state.subjects) {
+      // console.log(patient);
       let patientName = this.clearCarets(patient.subjectName);
       patientName = patientName || "Unnamed Patient";
       options.push(
@@ -70,6 +72,7 @@ class SeriesBrowser extends React.Component {
   renderStudies = () => {
     const options = [];
     for (let study of this.state.studies) {
+      // console.log(study);
       let desc = study.studyDescription
         ? study.studyDescription
         : "Unnamed Study";
@@ -84,22 +87,23 @@ class SeriesBrowser extends React.Component {
 
   renderSeries = () => {
     const options = [];
-    for (let series of this.state.series) {
+    this.state.series.forEach((series, index) => {
+      // console.log(series);
       let desc = series.seriesDescription
         ? series.seriesDescription
         : "Unnamed series";
       options.push(
-        <option value={series.seriesUID} key={series.seriesUID}>
+        <option value={series.seriesUID} key={`${series.seriesUID}-${index}`}>
           {this.clearCarets(desc)}
         </option>
       );
-    }
+    });
     return options;
   };
 
   handleInput = e => {
     const { name, value } = e.target;
-    this.setState({ [name]: value });
+    if (name !== "series") this.setState({ [name]: value });
     if (name === "project") {
       this.getSubjects(value);
     } else if (name === "subject") {
@@ -107,6 +111,7 @@ class SeriesBrowser extends React.Component {
     } else if (name === "study") {
       this.getSeries(value);
     }
+    this.props.onChange(name, value);
   };
 
   getSubjects = async selectedProjectID => {
@@ -114,6 +119,7 @@ class SeriesBrowser extends React.Component {
     try {
       const { data: subjects } = await getSubjects(projectID);
       const subject = subjects.length ? subjects[0].subjectID : null;
+      if (subjects.length) this.props.onChange("subject", subject);
       await this.setState({ subjects, subject });
       if (subject) {
         this.getStudies();
@@ -137,6 +143,7 @@ class SeriesBrowser extends React.Component {
     try {
       const { data: studies } = await getStudies(this.state.project, subjectID);
       const study = studies.length ? studies[0].studyUID : null;
+      if (studies.length) this.props.onChange("study", study);
       await this.setState({ studies, study });
       if (study) {
         this.getSeries();
@@ -156,6 +163,7 @@ class SeriesBrowser extends React.Component {
     try {
       const { data: series } = await getSeries(project, patienID, studyUID);
       const seriesUID = series.length ? series[0].seriesUID : null;
+      if (series.length) this.props.onChange("series", seriesUID);
       //   if (seriesUID) {
       this.setState({ series, seriesUID });
       //   } else {
@@ -168,61 +176,72 @@ class SeriesBrowser extends React.Component {
   };
 
   render = () => {
+    const { error } = this.props;
     return (
-      <Modal.Dialog dialogClassName="tagRequirements_modal">
-        <Modal.Header>
-          <Modal.Title>Browse Series</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="seriesBrowser">
-            <div className="seriesBrowser--group">
-              <h5 className="seriesBrowser--label">Project:</h5>
-              <select
-                name="project"
-                className="seriesBrowser--select"
-                onChange={this.handleInput}
-              >
-                {this.renderProjects()}
-              </select>
-            </div>
-            <div className="seriesBrowser--group">
-              <h5 className="seriesBrowser--label">Patient:</h5>
-              <select
-                name="subject"
-                className="seriesBrowser--select"
-                onChange={this.handleInput}
-              >
-                {this.renderPatients()}
-              </select>
-            </div>
-            <div className="seriesBrowser--group">
-              <h5 className="seriesBrowser--label">Study:</h5>
-              <select
-                name="study"
-                className="seriesBrowser--select"
-                onChange={this.handleInput}
-              >
-                {this.renderStudies()}
-              </select>
-            </div>
-            <div className="seriesBrowser--group">
-              <h5 className="seriesBrowser--label">Series:</h5>
-              <select
-                name="seriesUID"
-                className="seriesBrowser--select"
-                onChange={this.handleInput}
-              >
-                {this.renderSeries()}
-              </select>
-            </div>
+      // <Modal.Dialog dialogClassName="tagRequirements_modal">
+      //   <Modal.Header>
+      //     <Modal.Title>Browse Series</Modal.Title>
+      //   </Modal.Header>
+      //   <Modal.Body>
+      <div className="seriesBrowser-wrapper">
+        <h5 style={{ textAlign: "left" }}>Browse series </h5>
+        <div className="seriesBrowser">
+          <div className="seriesBrowser--group">
+            <div className="seriesBrowser--label">Project:</div>
+            <select
+              name="project"
+              className="seriesBrowser--select"
+              onChange={this.handleInput}
+            >
+              {this.renderProjects()}
+            </select>
           </div>
-        </Modal.Body>
-        <Modal.Footer className="modal-footer__buttons">
-          <button variant="secondary" onClick={this.props.onClose}>
-            OK
-          </button>
-        </Modal.Footer>
-      </Modal.Dialog>
+          <div className="seriesBrowser--group">
+            <div className="seriesBrowser--label">Patient:</div>
+            <select
+              name="subject"
+              className="seriesBrowser--select"
+              onChange={this.handleInput}
+            >
+              {this.renderPatients()}
+            </select>
+          </div>
+          <div className="seriesBrowser--group">
+            <div className="seriesBrowser--label">Study:</div>
+            <select
+              name="study"
+              className="seriesBrowser--select"
+              onChange={this.handleInput}
+            >
+              {this.renderStudies()}
+            </select>
+          </div>
+          <div className="seriesBrowser--group">
+            <div className="seriesBrowser--label">Series:</div>
+            <select
+              name="series"
+              className="seriesBrowser--select"
+              onChange={this.handleInput}
+            >
+              {this.renderSeries()}
+            </select>
+          </div>
+          <input
+            className="seriesBrowser-getTags"
+            onClick={this.props.onGetTags}
+            value="Get tags"
+            type="button"
+          />
+          {error ? <div className="err-message">{error}</div> : null}
+        </div>
+      </div>
+      //   </Modal.Body>
+      //   <Modal.Footer className="modal-footer__buttons">
+      //     <button variant="secondary" onClick={this.props.onClose}>
+      //       OK
+      //     </button>
+      //   </Modal.Footer>
+      // </Modal.Dialog>
     );
   };
 }
