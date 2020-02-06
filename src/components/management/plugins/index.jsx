@@ -11,10 +11,12 @@ import {
 import { getTemplatesFromDb } from "../../../services/templateServices";
 import PluginProjectWindow from "./pluginProjectWindow";
 import PluginTemplateWindow from "./pluginTemplateWindow";
+import NewPluginWindow from "./newPluginWindow";
 import {
   getPluginsWithProject,
   updateProjectsForPlugin,
-  updateTemplatesForPlugin
+  updateTemplatesForPlugin,
+  deletePlugin
 } from "../../../services/pluginServices";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
@@ -34,10 +36,11 @@ class Plugins extends React.Component {
     triggerTabActive: false, //using
     hasAddProjectClicked: false, //using
     hasAddTemplateClicked: false, //using
+    newPluginClicked: false, //using
     delAll: false,
     delOne: false,
-    selectAll: 0,
-    selected: {},
+    selectAll: 0, //using
+    selected: {}, //uising
     uploadClicked: false,
     hasEditClicked: false
   };
@@ -51,12 +54,7 @@ class Plugins extends React.Component {
     const plugins = pluginList.data;
     projectList = projectList.data;
     this.setState({ plugins, projectList, templateList });
-    //console.log("projects ------>  ", projectList);
-    //console.log("plugins ------>  ", plugins);
-    //console.log("plugins ------>  ", templateList);
   };
-
-  componentDidUpdate = async () => {};
 
   getPlugins = () => {
     return this.state.plugins;
@@ -65,32 +63,17 @@ class Plugins extends React.Component {
   arrayToMap = arrayObj => {
     const tempmap = new Map();
     arrayObj.forEach(temp => {
-      //console.log("array map", temp);
       tempmap.set(temp, temp);
     });
-    // console.log("map itself", tempmap);
     return tempmap;
   };
 
-  showme = rowinfo => {
-    //console.log("row info &&&&&&&&&&&", rowinfo);
-  };
-
   handleProjectSelect = (onclickselectedProject, tableData) => {
-    //console.log("event clieck ------", e.target);
-    /*
-    console.log(
-      "selected project and selected row data   ",
-      onclickselectedProject,
-      " ",
-      tableData
-    );*/
     let tempSelectedProjects = this.state.selectedProjects;
     let elementIndex = tempSelectedProjects.indexOf(onclickselectedProject);
     if (elementIndex === -1) {
       tempSelectedProjects.push(onclickselectedProject);
     } else {
-      //tempSelectedProjects[elementIndex] = "";
       tempSelectedProjects = this.state.selectedProjects.filter(project => {
         return project !== onclickselectedProject;
       });
@@ -141,15 +124,12 @@ class Plugins extends React.Component {
     );
 
     const tempPlugins = this.state.plugins;
-    console.log("------------------------");
     let arrayIndex = -1;
     for (let i = 0; i < tempPlugins.length; i++) {
       if (tempPlugins[i].id === selectedPluginId) {
         tempPlugins[i].projects = projectsArrayAsResponse.data;
       }
-      console.log("--------------------------", tempPlugins[i].projects);
     }
-    console.log("------------------------");
     this.setState({
       hasAddProjectClicked: false,
       plugins: tempPlugins,
@@ -158,7 +138,6 @@ class Plugins extends React.Component {
   };
 
   addTemplate = (templateArray, tableSelectedData) => {
-    //console.log("check template arry before the map", templateArray);
     const tempTemplateMap = this.arrayToMap(templateArray);
     this.setState({
       hasAddTemplateClicked: true,
@@ -210,28 +189,16 @@ class Plugins extends React.Component {
   };
 
   handleTemplateSelect = (onclickselectedTemplate, tableData) => {
-    //console.log("event clieck ------", e.target);
-
-    console.log(
-      "selected template id : ",
-      onclickselectedTemplate,
-      " table raw data :",
-      tableData,
-      " selectedTemplates :",
-      this.state.selectedTemplates
-    );
-
     let tempSelectedTemplates = this.state.selectedTemplates;
     let elementIndex = tempSelectedTemplates.indexOf(onclickselectedTemplate);
     if (elementIndex === -1) {
       tempSelectedTemplates.push(onclickselectedTemplate);
     } else {
-      //tempSelectedProjects[elementIndex] = "";
       tempSelectedTemplates = this.state.selectedTemplates.filter(template => {
         return template !== onclickselectedTemplate;
       });
     }
-    console.log("sending selected templates", tempSelectedTemplates);
+
     this.setState({ selectedTemplates: tempSelectedTemplates });
   };
 
@@ -252,20 +219,33 @@ class Plugins extends React.Component {
     });
   };
 
-  handleDeleteOne = rowdata => {
-    //console.log(" row data on Delete one ", rowdata);
-    /*
-    const projectID = templateData.projectID ? templateData.projectID : "lite";
-    const { templateName, templateUID } = templateData.Template[0];
-    this.setState({
-      delOne: true,
-      templateName,
-      selectedOne: { [templateUID]: projectID }
+  handleDeleteOne = async rowdata => {
+    const selectedRowPluginId = rowdata.id;
+    const tempPlugins = this.state.plugins;
+
+    let resultPlugins = [];
+    const deletePluginResult = await deletePlugin({ selectedRowPluginId });
+
+    console.log("delete plugin result :", deletePluginResult);
+    resultPlugins = tempPlugins.filter(plugin => {
+      return plugin.id !== selectedRowPluginId;
     });
-*/
+    this.setState({ plugins: resultPlugins });
   };
 
-  handleDeleteAll = () => {
+  handleDeleteAll = async () => {
+    console.log(" ------------------ALL ", this.state.selected);
+    const tempPlugins = this.state.plugins;
+    const selectedCheckBoxes = this.state.selected;
+    let resultPlugins = [];
+    resultPlugins = tempPlugins.filter(plugin => {
+      return typeof selectedCheckBoxes[plugin.id] === "undefined";
+    });
+    const pluginIdsToDelete = Object.values(selectedCheckBoxes);
+    const deletePluginResult = await deletePlugin({ pluginIdsToDelete });
+    this.setState({ plugins: resultPlugins });
+    console.log("selected plugin ids", pluginIdsToDelete);
+    console.log(" ------------------ALL ", this.state.selected);
     /*
     const selectedArr = Object.keys(this.state.selected);
     if (selectedArr.length === 0) {
@@ -276,43 +256,40 @@ class Plugins extends React.Component {
     */
   };
 
-  toggleSelectAll = () => {
-    /*
+  handleSelectAll = () => {
     let newSelected = {};
     if (this.state.selectAll === 0) {
-      this.state.tools.forEach(temp => {
-        let tempID = temp.Template[0].templateUID;
-        let projectID = temp.projectID ? temp.projectID : "lite";
-        newSelected[tempID] = projectID;
+      this.state.plugins.forEach(plugin => {
+        let pluginid = plugin.id;
+
+        newSelected[pluginid] = pluginid;
       });
     }
     this.setState({
       selected: newSelected,
       selectAll: this.state.selectAll === 0 ? 1 : 0
     });
-    */
   };
 
-  toggleRow = async (id, projectID) => {
-    /*
-    projectID = projectID ? projectID : "lite";
-    let newSelected = Object.assign({}, this.state.selected);
-    if (newSelected[id]) {
-      delete newSelected[id];
-      let values = Object.values(newSelected);
-      if (values.length === 0) {
-        this.setState({
-          selectAll: 0
-        });
-      }
+  handleSelectRow = async id => {
+    console.log(this.state.selected, id);
+    let selectedCheckBoxes = this.state.selected;
+    console.log(selectedCheckBoxes[id]);
+    if (typeof selectedCheckBoxes[id] === "undefined") {
+      selectedCheckBoxes = { ...selectedCheckBoxes, [id]: id };
     } else {
-      newSelected[id] = projectID;
-      await this.setState({
-        selectAll: 2
-      });
+      delete selectedCheckBoxes[id];
     }
-    this.setState({ selected: newSelected });
-    */
+    this.setState({ selected: selectedCheckBoxes });
+  };
+  handleAddPlugin = () => {
+    this.setState({ newPluginClicked: true });
+  };
+  handleAddPluginCancel = () => {
+    this.setState({ newPluginClicked: false });
+  };
+  handleAddPluginSave = () => {
+    alert("save plugin clicked");
   };
   /*
   groupByProjects = tools => {
@@ -435,7 +412,6 @@ class Plugins extends React.Component {
 
   //cavit
   projectDataToCell = tableData => {
-    ///console.log("cell ----------- >>>>", tableData);
     const { projects } = tableData.row;
     const tempProjects = [];
     let projectArray = [];
@@ -459,7 +435,6 @@ class Plugins extends React.Component {
   };
 
   templateDataToCell = tableData => {
-    //console.log("template data from table cell ----------- >>>>", tableData);
     const { templates } = tableData.row;
     const tempTemplates = [];
     let templateArray = [];
@@ -489,13 +464,13 @@ class Plugins extends React.Component {
         accessor: "",
         width: 50,
         Cell: ({ original }) => {
-          const { pluginId } = original;
+          const { id } = original;
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={this.state.selected[pluginId]}
-              onChange={() => this.toggleRow(pluginId)}
+              checked={this.state.selected[id]}
+              onChange={() => this.handleSelectRow(id)}
             />
           );
         },
@@ -510,7 +485,7 @@ class Plugins extends React.Component {
                   input.indeterminate = this.state.selectAll === 2;
                 }
               }}
-              onChange={() => this.toggleSelectAll()}
+              onChange={() => this.handleSelectAll()}
             />
           );
         },
@@ -580,10 +555,9 @@ class Plugins extends React.Component {
     return (
       <div className="tools menu-display" id="template">
         <ToolBar
+          onAdd={this.handleAddPlugin}
           onDelete={this.handleDeleteAll}
           selected={checkboxSelected}
-          onUpload={this.handleUpload}
-          onDownload={this.handleDownload}
         />
         <div className="pluginnavbar">
           <ul className="pluginform nav nav-tabs" id="myTab">
@@ -685,6 +659,14 @@ class Plugins extends React.Component {
             selectedTemplateAsMap={this.state.selectedTemplateAsMap}
             allTemplates={this.state.templateList}
             tableSelectedData={this.state.tableSelectedData}
+          />
+        )}
+        {this.state.newPluginClicked && (
+          <NewPluginWindow
+            onCancel={this.handleAddPluginCancel}
+            onSave={this.handleAddPluginSave}
+            onType={this.handleTemplateSelect}
+            error={this.error}
           />
         )}
       </div>

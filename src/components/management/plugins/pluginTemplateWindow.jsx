@@ -64,7 +64,6 @@ class PluginTemplateWindow extends React.Component {
           <div className="create-user__modal--buttons">
             <button
               variant="primary"
-              type="button"
               className="btn btn-sm btn-outline-light"
               onClick={this.props.onSave}
             >
@@ -72,7 +71,6 @@ class PluginTemplateWindow extends React.Component {
             </button>
             <button
               variant="secondary"
-              type="button"
               className="btn btn-sm btn-outline-light"
               onClick={this.props.onCancel}
             >

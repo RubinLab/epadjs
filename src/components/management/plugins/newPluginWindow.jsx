@@ -2,34 +2,40 @@ import React from "react";
 import PropTypes from "prop-types";
 import ReactTable from "react-table";
 import { Modal } from "react-bootstrap";
-import { getProjects } from "../../../services/projectServices";
-class PluginProjectWindow extends React.Component {
+import { getTemplatesDataFromDb } from "../../../services/templateServices";
+class NewPluginWindow extends React.Component {
   constructor(props) {
     super(props);
-    //this.state = { allprojects: props.allProjects };
-    //console.log("modal log projects", props.allProjects);
+    this.state = { allTemplates: props.allTemplates };
+    //console.log("modal log templates", props.allTemplates);
   }
+
+  state = {
+    allTemplates: []
+  };
 
   populateRows = () => {
     let rows = [];
 
-    this.props.allProjects.forEach(project => {
+    this.props.allTemplates.forEach(template => {
+      //console.log("template modal ---->>>>>> ", template);
       rows.push(
-        <tr key={project.id} className="edit-userRole__table--row">
+        <tr key={template.id} className="edit-userRole__table--row">
           <td>
             <input
               type="checkbox"
-              value={project.id}
-              name={project.name}
+              value={template.id}
+              name={template.id}
               defaultChecked={
-                project.id === this.props.selectedProjectsAsMap.get(project.id)
+                template.id ===
+                this.props.selectedTemplateAsMap.get(template.id)
               }
               onChange={() => {
-                this.props.onChange(project.id, this.props.tableSelectedData);
+                this.props.onChange(template.id, this.props.tableSelectedData);
               }}
             />
           </td>
-          <td>{project.name}</td>
+          <td>{template.templateName}</td>
         </tr>
       );
     });
@@ -40,17 +46,17 @@ class PluginProjectWindow extends React.Component {
     return (
       <Modal.Dialog dialogClassName="create-user__modal">
         <Modal.Header>
-          <Modal.Title>Projects</Modal.Title>
+          <Modal.Title>New Plugin</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="create-user__modal --body">
+        <Modal.Body className="create-user__modal--body">
           <table>
             <thead>
               <tr>
                 <th className="user-table__header--user">add/remove</th>
-                <th className="user-table__header">project</th>
+                <th className="user-table__header">template</th>
               </tr>
             </thead>
-            <tbody>{this.populateRows()}</tbody>
+            <tbody></tbody>
           </table>
         </Modal.Body>
 
@@ -77,13 +83,9 @@ class PluginProjectWindow extends React.Component {
   }
 }
 
-export default PluginProjectWindow;
-PropTypes.projectTable = {
+export default NewPluginWindow;
+PropTypes.NewPluginWindow = {
   //onSelect: PropTypes.func,
-
   onCancel: PropTypes.func,
-  onSave: PropTypes.func,
-  allprojects: PropTypes.Array,
-  tableSelectedData: PropTypes.Array,
-  selectedProjectsAsMap: PropTypes.Array
+  onSave: PropTypes.func
 };

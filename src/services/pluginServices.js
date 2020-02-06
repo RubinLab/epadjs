@@ -24,3 +24,7 @@ export function updateProjectsForPlugin(pluginid, projectids) {
 export function updateTemplatesForPlugin(pluginid, templateids) {
   return http.put(apiUrl + "/plugins/" + pluginid + "/templates/", templateids);
 }
+
+export function deletePlugin(pluginid) {
+  return http.post(apiUrl + "/plugins", pluginid);
+}
