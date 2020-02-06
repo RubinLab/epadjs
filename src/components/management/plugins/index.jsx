@@ -16,7 +16,8 @@ import {
   getPluginsWithProject,
   updateProjectsForPlugin,
   updateTemplatesForPlugin,
-  deletePlugin
+  deletePlugin,
+  savePlugin
 } from "../../../services/pluginServices";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
@@ -42,7 +43,18 @@ class Plugins extends React.Component {
     selectAll: 0, //using
     selected: {}, //uising
     uploadClicked: false,
-    hasEditClicked: false
+    hasEditClicked: false,
+    pluginFormElements: {
+      //using
+      name: "",
+      id: "",
+      image: "",
+      description: "",
+      enabled: "",
+      modality: "",
+      developer: "",
+      documentation: ""
+    }
   };
 
   componentDidMount = async () => {
@@ -234,7 +246,6 @@ class Plugins extends React.Component {
   };
 
   handleDeleteAll = async () => {
-    console.log(" ------------------ALL ", this.state.selected);
     const tempPlugins = this.state.plugins;
     const selectedCheckBoxes = this.state.selected;
     let resultPlugins = [];
@@ -244,16 +255,6 @@ class Plugins extends React.Component {
     const pluginIdsToDelete = Object.values(selectedCheckBoxes);
     const deletePluginResult = await deletePlugin({ pluginIdsToDelete });
     this.setState({ plugins: resultPlugins });
-    console.log("selected plugin ids", pluginIdsToDelete);
-    console.log(" ------------------ALL ", this.state.selected);
-    /*
-    const selectedArr = Object.keys(this.state.selected);
-    if (selectedArr.length === 0) {
-      return;
-    } else {
-      this.setState({ delAll: true });
-    }
-    */
   };
 
   handleSelectAll = () => {
@@ -288,8 +289,13 @@ class Plugins extends React.Component {
   handleAddPluginCancel = () => {
     this.setState({ newPluginClicked: false });
   };
-  handleAddPluginSave = () => {
-    alert("save plugin clicked");
+  handleAddPluginSave = async () => {
+    const pluginform = this.state.pluginFormElements;
+    this.setState({ newPluginClicked: false });
+    const responseSavePlugin = await savePlugin({
+      pluginform
+    });
+    //pluginFomElements
   };
   /*
   groupByProjects = tools => {
@@ -409,7 +415,12 @@ class Plugins extends React.Component {
     this.handleCancel();
   };
 */
-
+  handleTAddPluginChange = e => {
+    const plElements = { ...this.state.pluginFormElements };
+    plElements[e.currentTarget.name] = e.currentTarget.value;
+    this.setState({ pluginFormElements: plElements });
+    console.log("form elements : ", this.state.pluginFormElements);
+  };
   //cavit
   projectDataToCell = tableData => {
     const { projects } = tableData.row;
@@ -665,8 +676,9 @@ class Plugins extends React.Component {
           <NewPluginWindow
             onCancel={this.handleAddPluginCancel}
             onSave={this.handleAddPluginSave}
-            onType={this.handleTemplateSelect}
-            error={this.error}
+            onChange={this.handleTAddPluginChange}
+            error={this.handleTAddPluginError}
+            pluginFormElements={this.state.pluginFormElements}
           />
         )}
       </div>

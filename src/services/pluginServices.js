@@ -28,3 +28,6 @@ export function updateTemplatesForPlugin(pluginid, templateids) {
 export function deletePlugin(pluginid) {
   return http.post(apiUrl + "/plugins", pluginid);
 }
+export function savePlugin(pluginform) {
+  return http.post(apiUrl + "/plugins/addnew", pluginform);
+}

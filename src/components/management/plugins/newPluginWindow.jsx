@@ -14,50 +14,92 @@ class NewPluginWindow extends React.Component {
     allTemplates: []
   };
 
-  populateRows = () => {
-    let rows = [];
-
-    this.props.allTemplates.forEach(template => {
-      //console.log("template modal ---->>>>>> ", template);
-      rows.push(
-        <tr key={template.id} className="edit-userRole__table--row">
-          <td>
-            <input
-              type="checkbox"
-              value={template.id}
-              name={template.id}
-              defaultChecked={
-                template.id ===
-                this.props.selectedTemplateAsMap.get(template.id)
-              }
-              onChange={() => {
-                this.props.onChange(template.id, this.props.tableSelectedData);
-              }}
-            />
-          </td>
-          <td>{template.templateName}</td>
-        </tr>
-      );
-    });
-    return rows;
-  };
-
   render() {
+    const { onChange, error, pluginFormElements } = this.props;
     return (
-      <Modal.Dialog dialogClassName="create-user__modal">
+      <Modal.Dialog className="create-plugin__modal">
         <Modal.Header>
           <Modal.Title>New Plugin</Modal.Title>
         </Modal.Header>
         <Modal.Body className="create-user__modal--body">
-          <table>
-            <thead>
-              <tr>
-                <th className="user-table__header--user">add/remove</th>
-                <th className="user-table__header">template</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+          <form className="add-project__modal--form">
+            <h5 className="add-project__modal--label">Name*</h5>
+            <input
+              onMouseDown={e => e.stopPropagation()}
+              className="add-project__modal--input"
+              name="name"
+              type="text"
+              onChange={onChange}
+              id="form-first-element"
+              value={pluginFormElements.name}
+            />
+            <h5 className="add-project__modal--label">ID*</h5>
+            <input
+              onMouseDown={e => e.stopPropagation()}
+              className="add-project__modal--input"
+              name="id"
+              type="text"
+              value={pluginFormElements.id}
+              onChange={onChange}
+            />
+            <h5 className="add-project__modal--label">Image*</h5>
+            <input
+              onMouseDown={e => e.stopPropagation()}
+              className="add-project__modal--input"
+              name="image"
+              type="text"
+              value={pluginFormElements.image}
+              onChange={onChange}
+            />
+            <h5 className="add-project__modal--label">Description</h5>
+            <input
+              onMouseDown={e => e.stopPropagation()}
+              className="add-project__modal--input"
+              name="description"
+              type="text"
+              value={pluginFormElements.description}
+              onChange={onChange}
+            />
+            <h5 className="add-project__modal--label">Enabled</h5>
+            <input
+              onMouseDown={e => e.stopPropagation()}
+              className="add-project__modal--input"
+              name="enabled"
+              type="text"
+              value={pluginFormElements.enabled}
+              onChange={onChange}
+            />
+            <h5 className="add-project__modal--label">Modality</h5>
+            <input
+              onMouseDown={e => e.stopPropagation()}
+              className="add-project__modal--input"
+              name="modality"
+              type="text"
+              value={pluginFormElements.modality}
+              onChange={onChange}
+            />
+            <h5 className="add-project__modal--label">Developer</h5>
+            <input
+              onMouseDown={e => e.stopPropagation()}
+              className="add-project__modal--input"
+              name="developer"
+              type="text"
+              value={pluginFormElements.developer}
+              onChange={onChange}
+            />
+            <h5 className="add-project__modal--label">Documentation</h5>
+            <input
+              onMouseDown={e => e.stopPropagation()}
+              className="add-project__modal--input"
+              name="documentation"
+              type="text"
+              value={pluginFormElements.documentation}
+              onChange={onChange}
+            />
+
+            <h5 className="form-exp required">*Required</h5>
+            {error && <div className="err-message">{error}</div>}
+          </form>
         </Modal.Body>
 
         <Modal.Footer className="create-user__modal--footer">
