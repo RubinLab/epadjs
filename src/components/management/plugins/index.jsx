@@ -23,7 +23,9 @@ import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
 import EditTools from "../templates/projectTable";
 import "./plugin.css";
-
+import PluginNavBar from "./pluginNavBar";
+import ManageTab from "./manageTab";
+import TriggerTab from "./triggerTab";
 class Plugins extends React.Component {
   state = {
     plugins: [], //using
@@ -468,97 +470,6 @@ class Plugins extends React.Component {
     );
   };
 
-  defineColumns = () => {
-    return [
-      {
-        id: "checkbox",
-        accessor: "",
-        width: 50,
-        Cell: ({ original }) => {
-          const { id } = original;
-          return (
-            <input
-              type="checkbox"
-              className="checkbox-cell"
-              checked={this.state.selected[id]}
-              onChange={() => this.handleSelectRow(id)}
-            />
-          );
-        },
-        Header: x => {
-          return (
-            <input
-              type="checkbox"
-              className="checkbox-cell"
-              checked={this.state.selectAll === 1}
-              ref={input => {
-                if (input) {
-                  input.indeterminate = this.state.selectAll === 2;
-                }
-              }}
-              onChange={() => this.handleSelectAll()}
-            />
-          );
-        },
-        // sortable: false,
-        resizable: false
-        // minResizeWidth: 20
-        // maxWidth: 45
-      },
-      {
-        Header: "Name",
-        accessor: "name",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 100,
-        width: 420
-      },
-      /*{
-        Header: "container image",
-        accessor: "container_image",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 100,
-        width: 420
-      },*/
-      {
-        Header: "Projects",
-        accessor: "projects",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 100,
-        width: 200,
-        Cell: original => {
-          return this.projectDataToCell(original);
-        },
-        style: { whiteSpace: "unset" }
-      },
-      {
-        Header: "Templates",
-        accessor: "templates",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 100,
-        width: 200,
-        Cell: original => {
-          return this.templateDataToCell(original);
-        },
-        style: { whiteSpace: "unset" }
-      },
-      {
-        Header: "",
-        Cell: original => {
-          const rowdata = original.row.checkbox;
-          return (
-            <div onClick={() => this.handleDeleteOne(rowdata)}>
-              <FaRegTrashAlt className="menu-clickable" />
-            </div>
-          );
-        }
-      }
-    ];
-  };
-
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     const data = this.state.plugins;
@@ -570,64 +481,28 @@ class Plugins extends React.Component {
           onDelete={this.handleDeleteAll}
           selected={checkboxSelected}
         />
-        <div className="pluginnavbar">
-          <ul className="pluginform nav nav-tabs" id="myTab">
-            <li className="pluginform nav-item ">
-              <a
-                href="#"
-                className={
-                  this.state.manageTabActive === true
-                    ? "pluginform nav-link active"
-                    : "pluginform nav-link"
-                }
-                onClick={() => {
-                  this.handleTabClic("manageTabActive");
-                }}
-              >
-                manage
-              </a>
-            </li>
-            <li className="pluginform nav-item">
-              <a
-                href="#"
-                className={
-                  this.state.trackTabActive === true
-                    ? "pluginform nav-link active"
-                    : "pluginform nav-link"
-                }
-                onClick={() => {
-                  this.handleTabClic("trackTabActive");
-                }}
-              >
-                track
-              </a>
-            </li>
-            <li className="pluginform nav-item">
-              <a
-                href="#"
-                className={
-                  this.state.triggerTabActive === true
-                    ? "pluginform nav-link active"
-                    : "pluginform nav-link"
-                }
-                onClick={() => {
-                  this.handleTabClic("triggerTabActive");
-                }}
-              >
-                trigger
-              </a>
-            </li>
-          </ul>
-        </div>
+        <PluginNavBar
+          handleTabClic={this.handleTabClic}
+          trackTabActive={this.state.trackTabActive}
+          manageTabActive={this.state.manageTabActive}
+          triggerTabActive={this.state.triggerTabActive}
+        />
         {this.state.manageTabActive && (
-          <ReactTable
+          <ManageTab
             className="pro-table"
             data={this.state.plugins}
-            columns={this.defineColumns()}
             pageSizeOptions={[10, 20, 50]}
             defaultPageSize={pageSize}
+            handleDeleteOne={this.handleDeleteOne}
+            templateDataToCell={this.templateDataToCell}
+            projectDataToCell={this.projectDataToCell}
+            handleSelectAll={this.handleSelectAll}
+            handleSelectRow={this.handleSelectRow}
+            selectAll={this.state.selectAll}
+            selected={this.state.selected}
           />
         )}
+        {this.state.triggerTabActive && <TriggerTab />}
         {(this.state.delAll || this.state.delOne) && (
           <DeleteAlert
             message={

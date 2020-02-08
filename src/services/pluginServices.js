@@ -31,3 +31,6 @@ export function deletePlugin(pluginid) {
 export function savePlugin(pluginform) {
   return http.post(apiUrl + "/plugins/addnew", pluginform);
 }
+export function getDockerImages() {
+  return http.get(apiUrl + "/plugins/docker/images");
+}
