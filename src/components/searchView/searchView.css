@@ -254,7 +254,7 @@
 
 .updateReq__modal.modal-dialog,
 .updateReq__mbody.modal-body {
-  width: 256px;
+  /* width: 256px; */
   max-width: fit-content;
 }
 

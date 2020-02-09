@@ -65,43 +65,43 @@ class RequirementForm extends React.Component {
     this.props.onAddRequirement(newRequirements);
   };
 
-  setColumns = () => {
-    return [
-      {
-        Header: "Level",
-        width: 70,
-        accessor: "level"
-      },
-      {
-        Header: "Template",
-        accessor: "template"
-      },
-      {
-        Header: "Aims",
-        width: 40,
-        accessor: "numOfAims"
-      },
-      //   {
-      //     Header: "Required",
-      //     width: 70,
-      //     Cell: row => <div>{row.original.required ? <FaCheck /> : null}</div>
-      //   },
-      {
-        Header: "",
-        width: 20,
-        Cell: row => (
-          <div
-            className="menu-clickable"
-            onClick={() => {
-              this.props.deleteRequirement(row.index);
-            }}
-          >
-            <FaTrashAlt />
-          </div>
-        )
-      }
-    ];
-  };
+  // setColumns = () => {
+  //   return [
+  //     {
+  //       Header: "Level",
+  //       width: 70,
+  //       accessor: "level"
+  //     },
+  //     {
+  //       Header: "Template",
+  //       accessor: "template"
+  //     },
+  //     {
+  //       Header: "Aims",
+  //       width: 40,
+  //       accessor: "numOfAims"
+  //     },
+  //     //   {
+  //     //     Header: "Required",
+  //     //     width: 70,
+  //     //     Cell: row => <div>{row.original.required ? <FaCheck /> : null}</div>
+  //     //   },
+  //     {
+  //       Header: "",
+  //       width: 20,
+  //       Cell: row => (
+  //         <div
+  //           className="menu-clickable"
+  //           onClick={() => {
+  //             this.props.deleteRequirement(row.index);
+  //           }}
+  //         >
+  //           <FaTrashAlt />
+  //         </div>
+  //       )
+  //     }
+  //   ];
+  // };
 
   render = () => {
     const { error } = this.state;
@@ -140,15 +140,15 @@ class RequirementForm extends React.Component {
               onChange={this.handleFormInput}
             />
           </div>
-          <div>
+          {/* <div>
             <button className="__field" onClick={this.handleAddRequirement}>
               Add Requirement
             </button>
-          </div>
+          </div> */}
         </div>
         {error ? <div className="err-message __field">{error}</div> : null}
 
-        {this.props.requirements.length > 0 && (
+        {/* {this.props.requirements.length > 0 && (
           <ReactTable
             NoDataComponent={() => null}
             data={this.props.requirements}
@@ -156,7 +156,7 @@ class RequirementForm extends React.Component {
             pageSize={this.props.requirements.length}
             showPagination={false}
           />
-        )}
+        )} */}
       </>
     );
   };
