@@ -19,11 +19,6 @@ class UpdateRequirement extends React.Component {
   addRequirement = newReq => {
     this.setState({ requirements: newReq });
   };
-  clearRequirement = index => {
-    const newRequirements = [...this.state.requirements];
-    newRequirements.splice(index, 1);
-    this.setState({ requirements: newRequirements });
-  };
 
   changePage = e => {
     const { name } = e.target;
@@ -87,14 +82,16 @@ class UpdateRequirement extends React.Component {
             <>
               <RequirementForm
                 requirements={this.state.requirements}
-                deleteRequirement={this.clearRequirement}
                 onNewReqInfo={this.props.onNewReqInfo}
               />
               {error && <div className="err-message __field">{error}</div>}
             </>
           )}
           {page === 2 && (
-            <RequirementEdit requirements={this.state.requirements} />
+            <RequirementEdit
+              requirements={this.state.requirements}
+              onDelete={this.props.onDelete}
+            />
           )}
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">

@@ -14,53 +14,10 @@ class RequirementEditTable extends React.Component {
     template: null
   };
 
-  componentDidMount = async () => {
-    const { data } = await getAllTemplates();
-    const templates = {};
-    data.forEach((el, i) => {
-      templates[el.Template[0].templateUID] = el.Template[0].templateCodeValue;
-    });
-    this.setState({ templates });
-  };
-
-  renderOptions = (arr, field) => {
-    const firstItem = <option key="first">{`--- Select ${field} ---`}</option>;
-    const options = [firstItem];
-    if (field === "Template") {
-      options.push(<option key="any">{"Any"}</option>);
+  onClickTable = (id, button) => {
+    if (button === "delete") {
+      this.props.onDelete(id);
     }
-    arr.forEach((el, i) => {
-      options.push(<option key={`${el}-${i}`}>{el}</option>);
-    });
-    return options;
-  };
-
-  handleFormInput = e => {
-    const { name, value } = e.target;
-    if (name === "numOfAims" && !isNaN(parseInt(value))) {
-      this.setState({ error: null });
-    }
-    this.setState({ [name]: value });
-  };
-
-  handleAddRequirement = () => {
-    const { level, numOfAims, template } = this.state;
-    const unselectedLevel = !level || level === `--- Select Level ---`;
-    const unSelectedTemplate =
-      !template || template === "--- Select Template ---";
-    if (unselectedLevel || unSelectedTemplate || numOfAims === null) {
-      this.setState({ error: "Please fill all fields!" });
-      return;
-    }
-    if (isNaN(parseInt(this.state.numOfAims))) {
-      this.setState({ error: "No of aims should be a number!" });
-      return;
-    }
-    this.setState({ error: null });
-
-    const newRequirements = [...this.props.requirements];
-    newRequirements.push({ level, numOfAims, template });
-    this.props.onAddRequirement(newRequirements);
   };
 
   setColumns = () => {
@@ -79,11 +36,6 @@ class RequirementEditTable extends React.Component {
         width: 40,
         accessor: "numOfAims"
       },
-      //   {
-      //     Header: "Required",
-      //     width: 70,
-      //     Cell: row => <div>{row.original.required ? <FaCheck /> : null}</div>
-      //   },
       {
         Header: "",
         width: 20,
@@ -100,7 +52,7 @@ class RequirementEditTable extends React.Component {
           <div
             className="menu-clickable"
             onClick={() => {
-              this.props.deleteRequirement(row.index);
+              this.onClickTable(row.original.id, "delete");
             }}
           >
             <FaTrashAlt />

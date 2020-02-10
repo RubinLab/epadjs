@@ -101,12 +101,6 @@ class WorklistCreationForm extends React.Component {
     this.setState({ requirements });
   };
 
-  clearRequirement = index => {
-    const newRequirements = [...this.state.requirements];
-    newRequirements.splice(index, 1);
-    this.setState({ requirements: newRequirements });
-  };
-
   render = () => {
     const { users, onCancel } = this.props;
     const { page, id, name, error, requirements } = this.state;
@@ -216,7 +210,6 @@ class WorklistCreationForm extends React.Component {
               <RequirementForm
                 onAddRequirement={this.getRequirement}
                 requirements={requirements}
-                deleteRequirement={this.clearRequirement}
               />
             </>
           )}

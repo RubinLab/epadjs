@@ -8,7 +8,8 @@ import {
   getWorklistsOfCreator,
   deleteWorklist,
   updateWorklist,
-  addWorklistRequirement
+  addWorklistRequirement,
+  deleteWorklistRequirement
 } from "../../../services/worklistServices";
 import { getUsers } from "../../../services/userServices";
 import DeleteAlert from "../common/alertDeletionModal";
@@ -296,9 +297,7 @@ class WorkList extends React.Component {
     updateWorklist(this.state.worklistId, { requirements })
       .then(() => {
         this.getWorkListData();
-        console.log("before");
         this.setState({ updateRequirement: false });
-        console.log("after");
         toast.info("Update successful!", { autoClose: true });
       })
       .catch(error => {
@@ -306,6 +305,19 @@ class WorkList extends React.Component {
         this.getWorkListData();
       });
     this.handleCancel();
+  };
+
+  deleteRequirement = requirementId => {
+    deleteWorklistRequirement(this.state.worklistId, requirementId)
+      .then(() => {
+        this.getWorkListData();
+        this.setState({ updateRequirement: false });
+        toast.info("Delete successful!", { autoClose: true });
+      })
+      .catch(error => {
+        toast.error(error.response.data.message, { autoClose: false });
+        this.getWorkListData();
+      });
   };
 
   addNewRequirement = () => {
@@ -620,6 +632,7 @@ class WorkList extends React.Component {
             worklistID={this.state.worklistId}
             onAddNew={this.addNewRequirement}
             onEdit={this.saveUpdatedRequirements}
+            onDelete={this.deleteRequirement}
             onNewReqInfo={this.handleRequirementFormInput}
             error={this.state.error}
           />
