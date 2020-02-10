@@ -44,8 +44,17 @@ class UpdateRequirement extends React.Component {
       this.setState({ page: 0 });
     }
   };
+
+  onSubmit = () => {
+    const { page } = this.state;
+    if (page === 1) {
+      this.props.onAddNew();
+    }
+  };
+
   render = () => {
     const { page } = this.state;
+    const { error } = this.props;
     const changeStarted = page === 1 || page === 2;
     const secondButton = changeStarted ? "Back" : "Cancel";
     return (
@@ -75,11 +84,14 @@ class UpdateRequirement extends React.Component {
             </>
           )}
           {page === 1 && (
-            <RequirementForm
-              onAddRequirement={this.addRequirement}
-              requirements={this.state.requirements}
-              deleteRequirement={this.clearRequirement}
-            />
+            <>
+              <RequirementForm
+                requirements={this.state.requirements}
+                deleteRequirement={this.clearRequirement}
+                onNewReqInfo={this.props.onNewReqInfo}
+              />
+              {error && <div className="err-message __field">{error}</div>}
+            </>
           )}
           {page === 2 && (
             <RequirementEdit requirements={this.state.requirements} />
@@ -91,7 +103,7 @@ class UpdateRequirement extends React.Component {
               <button
                 className="updateReq__modal--button"
                 variant="secondary"
-                onClick={() => this.props.onSubmit(this.state.requirements)}
+                onClick={this.onSubmit}
               >
                 Submit
               </button>

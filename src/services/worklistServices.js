@@ -36,6 +36,10 @@ export function updateWorklistAssignee(user, id, body) {
   return http.put(apiUrl + "/worklists/" + id + "/users/" + user, body);
 }
 
+export function addWorklistRequirement(worklist, body) {
+  return http.post(apiUrl + "/worklists/" + worklist + "/requirements", body);
+}
+
 export function updateWorklist(id, body) {
   return http.put(apiUrl + "/worklists/" + id, body);
 }
