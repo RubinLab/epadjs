@@ -18,7 +18,7 @@ const store = createStore(
 
 /* eslint-enable */
 render(
-  <BrowserRouter>
+  <BrowserRouter basename='/gateway/acrconnect-epad/'>
     <Provider store={store}>
       <App />
     </Provider>
