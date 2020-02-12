@@ -55,7 +55,7 @@ class UpdateRequirement extends React.Component {
     return (
       <Modal.Dialog dialogClassName="updateReq__modal">
         <Modal.Header>
-          <Modal.Title>Update Assignees</Modal.Title>
+          <Modal.Title>Update Requirements</Modal.Title>
         </Modal.Header>
         <Modal.Body className="updateReq__mbody">
           {page === 0 && (
@@ -74,7 +74,7 @@ class UpdateRequirement extends React.Component {
                 style={buttonStyle}
                 onClick={this.changePage}
               >
-                Edit-Delete Requirement
+                Delete Requirement
               </Button>
             </>
           )}

@@ -36,15 +36,15 @@ class RequirementEditTable extends React.Component {
         width: 40,
         accessor: "numOfAims"
       },
-      {
-        Header: "",
-        width: 20,
-        Cell: row => (
-          <div className="menu-clickable" onClick={() => {}}>
-            <FaEdit />
-          </div>
-        )
-      },
+      //   {
+      //     Header: "",
+      //     width: 20,
+      //     Cell: row => (
+      //       <div className="menu-clickable" onClick={() => {}}>
+      //         <FaEdit />
+      //       </div>
+      //     )
+      //   },
       {
         Header: "",
         width: 20,

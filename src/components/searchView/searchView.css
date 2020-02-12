@@ -277,3 +277,18 @@ h5.add-subject__modal--label,
 .add-series__modal--select {
   color: black;
 }
+
+.openSeries__modal .modal-content {
+  width: fit-content;
+  margin: auto;
+  top: 5rem;
+}
+
+.openSeries-select .seriesDesc {
+  margin-left: 0.5rem;
+}
+
+.openSeries-select {
+  margin-top: 0.3rem;
+  display: flex;
+}
