@@ -9,7 +9,6 @@ axios.defaults.headers.common["Content-Type"] =
 axios.interceptors.request.use(
   config => {
     config.headers.authorization = auth.getAuthHeader1();
-    console.log('Making http request with header: ' + config.headers.authorization);
     return config;
   },
   error => Promise.reject(error)

@@ -13,7 +13,6 @@ export async function login(username, password, keyCloakToken) {
   // if (isLite) {
   // await http.post(apiUrlV1, {}, { headers: header });
   basicAuth = "Bearer " + keyCloakToken;
-  console.log('Key cloak token for epadjs' + keyCloakToken);
   sessionStorage.setItem("token", keyCloakToken);
   sessionStorage.setItem("username", username.user);
   sessionStorage.setItem("displayName", username.user); //TODO: change with fullname
