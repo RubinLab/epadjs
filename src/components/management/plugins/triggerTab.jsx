@@ -1,18 +1,34 @@
 import React from "react";
 import ReactTable from "react-table";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { getDockerImages } from "../../../services/pluginServices";
+import {
+  getDockerImages,
+  getAnnotationTemplates,
+  getAnnotationProjects
+} from "../../../services/pluginServices";
 class TriggerTab extends React.Component {
   state = {
     plImages: {},
     plContainers: {},
-    selected: [],
-    selectAll: 0
+    selectedTemplates: [],
+    selectedProjects: [],
+    selectedAnnotations: [],
+    selectAll: 0,
+    templates: [],
+    projects: [],
+    annotations: []
   };
 
   componentDidMount = async () => {
-    const tempPlImages = await getDockerImages();
-    this.setState({ plImages: tempPlImages });
+    //const tempPlImages = await getDockerImages();
+    //this.setState({ plImages: tempPlImages });
+    const tempTemplates = await getAnnotationTemplates();
+    const tempProjects = await getAnnotationProjects();
+    this.setState({ templates: tempTemplates.data });
+    this.setState({ projects: tempProjects.data });
+  };
+  componentDidUpdate = () => {
+    console.log("did update", this.state.projects);
   };
   handleSelectRow = id => {};
   handleSelectAll = () => {};
@@ -111,6 +127,53 @@ class TriggerTab extends React.Component {
       },*/
     ];
   };
+
+  populateProjectRows = () => {
+    let rows = [];
+
+    this.state.projects.forEach(project => {
+      //console.log("template modal ---->>>>>> ", template);
+      rows.push(
+        <tr key={project.id} className="edit-userRole__table--row">
+          <td>
+            <input
+              type="checkbox"
+              value={project.id}
+              name={project.id}
+              onChange={this.handleOnChange}
+            />
+          </td>
+          <td>{project.name}</td>
+        </tr>
+      );
+    });
+    return rows;
+  };
+  populateTemplateRows = () => {
+    let rows = [];
+
+    this.state.templates.forEach(template => {
+      //console.log("template modal ---->>>>>> ", template);
+      rows.push(
+        <tr key={template.id} className="edit-userRole__table--row">
+          <td>
+            <input
+              type="checkbox"
+              value={template.id}
+              name={template.id}
+              onChange={this.handleOnChange}
+            />
+          </td>
+          <td>{template.templateName}</td>
+        </tr>
+      );
+    });
+    return rows;
+  };
+
+  handleProjectOnChange = () => {};
+  handleTemplateOnChange = () => {};
+
   render() {
     // const data = this.state.plImages;
     // const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
@@ -123,7 +186,37 @@ class TriggerTab extends React.Component {
     //     defaultPageSize={pageSize}
     //   />
     // );
-    return <div>cavit</div>;
+    return (
+      <div>
+        <div className="create-user__modal--buttons">
+          <button variant="primary" className="btn btn-sm btn-outline-light">
+            Trigger
+          </button>
+          <button variant="secondary" className="btn btn-sm btn-outline-light">
+            Clear
+          </button>
+        </div>
+
+        <div className="row">
+          <div className="column">
+            <h2>Projects</h2>
+            <table>
+              <tbody>{this.populateProjectRows()}</tbody>
+            </table>
+          </div>
+          <div className="column">
+            <h2>Templates</h2>
+
+            <table>
+              <tbody>{this.populateTemplateRows()}</tbody>
+            </table>
+          </div>
+          <div className="column">
+            <h2>Annotations</h2>
+          </div>
+        </div>
+      </div>
+    );
   }
 }
 

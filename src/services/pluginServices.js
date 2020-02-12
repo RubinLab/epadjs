@@ -34,3 +34,12 @@ export function savePlugin(pluginform) {
 export function getDockerImages() {
   return http.get(apiUrl + "/plugins/docker/images");
 }
+
+//pluhin trigger section
+export function getAnnotationTemplates() {
+  return http.get(apiUrl + "/plugins/annotation/templates");
+}
+export function getAnnotationProjects() {
+  return http.get(apiUrl + "/plugins/annotation/projects");
+}
+//plugin trigger section ends
