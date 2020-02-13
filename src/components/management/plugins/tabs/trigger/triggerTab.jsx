@@ -1,11 +1,17 @@
 import React from "react";
 import ReactTable from "react-table";
 import { FaRegTrashAlt } from "react-icons/fa";
+
 import {
   getDockerImages,
   getAnnotationTemplates,
   getAnnotationProjects
-} from "../../../services/pluginServices";
+} from "../../../../../services/pluginServices";
+import TemplateColumn from "./templateColumn";
+import ProjectColumn from "./projectColumn";
+import Annotationcolumn from "./annotationColumn";
+import AnnotationColumn from "./annotationColumn";
+
 class TriggerTab extends React.Component {
   state = {
     plImages: {},
@@ -27,9 +33,7 @@ class TriggerTab extends React.Component {
     this.setState({ templates: tempTemplates.data });
     this.setState({ projects: tempProjects.data });
   };
-  componentDidUpdate = () => {
-    console.log("did update", this.state.projects);
-  };
+
   handleSelectRow = id => {};
   handleSelectAll = () => {};
   handleDeleteOne = rowdata => {};
@@ -128,52 +132,26 @@ class TriggerTab extends React.Component {
     ];
   };
 
-  populateProjectRows = () => {
-    let rows = [];
-
-    this.state.projects.forEach(project => {
-      //console.log("template modal ---->>>>>> ", template);
-      rows.push(
-        <tr key={project.id} className="edit-userRole__table--row">
-          <td>
-            <input
-              type="checkbox"
-              value={project.id}
-              name={project.id}
-              onChange={this.handleOnChange}
-            />
-          </td>
-          <td>{project.name}</td>
-        </tr>
-      );
-    });
-    return rows;
+  handleProjectOnChange = projectid => {
+    const tempSelProjects = this.state.selectedProjects;
+    tempSelProjects.push(projectid);
+    this.setState({ selectedProjects: tempSelProjects });
   };
-  populateTemplateRows = () => {
-    let rows = [];
-
-    this.state.templates.forEach(template => {
-      //console.log("template modal ---->>>>>> ", template);
-      rows.push(
-        <tr key={template.id} className="edit-userRole__table--row">
-          <td>
-            <input
-              type="checkbox"
-              value={template.id}
-              name={template.id}
-              onChange={this.handleOnChange}
-            />
-          </td>
-          <td>{template.templateName}</td>
-        </tr>
-      );
-    });
-    return rows;
+  handleTemplateOnChange = templateid => {
+    const tempSelTemplates = this.state.selectedTemplates;
+    tempSelTemplates.push(templateid);
+    this.setState({ selectedTemplates: tempSelTemplates });
   };
-
-  handleProjectOnChange = () => {};
-  handleTemplateOnChange = () => {};
-
+  componentDidUpdate() {
+    console.log(
+      "componant updated -->selecetd projects",
+      this.state.selectedProjects
+    );
+    console.log(
+      "componant updated -->selecetd projects",
+      this.state.selectedTemplates
+    );
+  }
   render() {
     // const data = this.state.plImages;
     // const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
@@ -198,22 +176,18 @@ class TriggerTab extends React.Component {
         </div>
 
         <div className="row">
-          <div className="column">
-            <h2>Projects</h2>
-            <table>
-              <tbody>{this.populateProjectRows()}</tbody>
-            </table>
-          </div>
-          <div className="column">
-            <h2>Templates</h2>
-
-            <table>
-              <tbody>{this.populateTemplateRows()}</tbody>
-            </table>
-          </div>
-          <div className="column">
-            <h2>Annotations</h2>
-          </div>
+          <ProjectColumn
+            projects={this.state.projects}
+            onChange={this.handleProjectOnChange}
+          />
+          <TemplateColumn
+            templates={this.state.templates}
+            onChange={this.handleTemplateOnChange}
+          />
+          <AnnotationColumn
+            templates={this.state.annotations}
+            onChange={this.handleAnnotationsOnChange}
+          />
         </div>
       </div>
     );

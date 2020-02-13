@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import ReactTable from "react-table";
 import { Modal } from "react-bootstrap";
-import { getTemplatesDataFromDb } from "../../../services/templateServices";
+import { getTemplatesDataFromDb } from "../../../../../services/templateServices";
 class PluginTemplateWindow extends React.Component {
   constructor(props) {
     super(props);

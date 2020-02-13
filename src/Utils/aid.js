@@ -26,3 +26,11 @@ export function persistExpandView(expanded, data, newData, id) {
   });
   return expandMap;
 }
+
+export function arrayToMap(arrayObj) {
+  const tempmap = new Map();
+  arrayObj.forEach(temp => {
+    tempmap.set(temp, temp);
+  });
+  return tempmap;
+}

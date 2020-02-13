@@ -2,30 +2,31 @@ import React from "react";
 import PropTypes from "prop-types";
 import ReactTable from "react-table";
 import { toast } from "react-toastify";
-import ToolBar from "../common/basicToolBar";
+import ToolBar from "../../common/basicToolBar";
 import { FaRegTrashAlt } from "react-icons/fa";
 import {
   getProjects,
   getProjectsWithPkAsId
-} from "../../../services/projectServices";
-import { getTemplatesFromDb } from "../../../services/templateServices";
-import PluginProjectWindow from "./pluginProjectWindow";
-import PluginTemplateWindow from "./pluginTemplateWindow";
-import NewPluginWindow from "./newPluginWindow";
+} from "../../../../services/projectServices";
+import { getTemplatesFromDb } from "../../../../services/templateServices";
+import PluginProjectWindow from "../tabs/manage/pluginProjectWindow";
+import PluginTemplateWindow from "../tabs/manage/pluginTemplateWindow";
+import NewPluginWindow from "../tabs/manage/newPluginWindow";
 import {
   getPluginsWithProject,
   updateProjectsForPlugin,
   updateTemplatesForPlugin,
   deletePlugin,
   savePlugin
-} from "../../../services/pluginServices";
-import DeleteAlert from "../common/alertDeletionModal";
-import UploadModal from "../../searchView/uploadModal";
-import EditTools from "../templates/projectTable";
-import "./plugin.css";
+} from "../../../../services/pluginServices";
+import DeleteAlert from "../../common/alertDeletionModal";
+import UploadModal from "../../../searchView/uploadModal";
+import EditTools from "../../templates/projectTable";
+import "../css/plugin.css";
 import PluginNavBar from "./pluginNavBar";
-import ManageTab from "./manageTab";
-import TriggerTab from "./triggerTab";
+import ManageTab from "./../tabs/manage/manageTab";
+import TriggerTab from "./../tabs/trigger/triggerTab";
+import { arrayToMap } from "../../../../Utils/aid";
 class Plugins extends React.Component {
   state = {
     plugins: [], //using
@@ -74,14 +75,6 @@ class Plugins extends React.Component {
     return this.state.plugins;
   };
 
-  arrayToMap = arrayObj => {
-    const tempmap = new Map();
-    arrayObj.forEach(temp => {
-      tempmap.set(temp, temp);
-    });
-    return tempmap;
-  };
-
   handleProjectSelect = (onclickselectedProject, tableData) => {
     let tempSelectedProjects = this.state.selectedProjects;
     let elementIndex = tempSelectedProjects.indexOf(onclickselectedProject);
@@ -96,7 +89,7 @@ class Plugins extends React.Component {
   };
 
   addProject = (projectArray, tableSelectedData) => {
-    const tempProjectMap = this.arrayToMap(projectArray);
+    const tempProjectMap = arrayToMap(projectArray);
     this.setState({
       hasAddProjectClicked: true,
       selectedProjectsAsMap: tempProjectMap,
@@ -152,7 +145,7 @@ class Plugins extends React.Component {
   };
 
   addTemplate = (templateArray, tableSelectedData) => {
-    const tempTemplateMap = this.arrayToMap(templateArray);
+    const tempTemplateMap = arrayToMap(templateArray);
     this.setState({
       hasAddTemplateClicked: true,
       selectedTemplateAsMap: tempTemplateMap,

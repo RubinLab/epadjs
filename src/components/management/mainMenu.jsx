@@ -6,7 +6,7 @@ import Projects from "./projects/projects";
 import WorkLists from "./worklists/workLists";
 import Annotations from "./annotations/annotations";
 import Templates from "./templates";
-import Plugins from "./plugins";
+import Plugins from "./plugins/main";
 import Connections from "./connections";
 import "./menuStyle.css";
 import Header from "./common/managementHeader";

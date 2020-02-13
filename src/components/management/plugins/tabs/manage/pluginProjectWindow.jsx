@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import ReactTable from "react-table";
 import { Modal } from "react-bootstrap";
-import { getProjects } from "../../../services/projectServices";
+import { getProjects } from "../../../../../services/projectServices";
 class PluginProjectWindow extends React.Component {
   constructor(props) {
     super(props);
