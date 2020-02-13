@@ -81,25 +81,23 @@ class Studies extends Component {
         expandLevel,
         treeExpand,
         patientIndex,
-        expandLoading,
-        patientExpandComplete,
         treeData
       } = this.props;
-      let data = Object.values(treeData[subjectId].studies);
+      let data = Object.values(treeData[projectId][subjectId].studies);
       if (data.length > 0) {
         data = data.map(el => el.data);
       } else {
         let studies = await getStudies(projectId, subjectId);
         data = studies.data;
-        this.props.getTreeData("studies", data);
+        this.props.getTreeData(projectId, "studies", data);
       }
       this.setState({ data });
       this.setState({ columns: this.setColumns() });
       const studyOpened = expansionArr.includes(subjectId);
       // const alreadyCounted = expandLoading.numOfPresentStudies > 0;
-      if (!studyOpened && expandLevel === 1 && !patientExpandComplete) {
-        this.props.updateExpandedLevelNums("subject", data.length, 1);
-      }
+      // if (!studyOpened && expandLevel === 1 && !patientExpandComplete) {
+      //   this.props.updateExpandedLevelNums("subject", data.length, 1);
+      // }
       if (expandLevel > 1) {
         this.expandCurrentLevel();
         const obj = {
@@ -146,7 +144,7 @@ class Studies extends Component {
           "studyUID"
         );
         await this.setState({ data, expanded });
-        this.props.getTreeData("studies", data);
+        this.props.getTreeData(this.props.projectId, "studies", data);
       }
       const { expansionArr, expandLevel, subjectId } = this.props;
       const studyOpened = expansionArr.includes(subjectId);
@@ -157,13 +155,13 @@ class Studies extends Component {
 
         const expandedToStudies =
           prevProps.expandLevel < expandLevel && expandLevel === 1;
-        if (expandedToStudies && studyOpened) {
-          this.props.updateExpandedLevelNums(
-            "subject",
-            this.state.data.length,
-            1
-          );
-        }
+        // if (expandedToStudies && studyOpened) {
+        //   this.props.updateExpandedLevelNums(
+        //     "subject",
+        //     this.state.data.length,
+        //     1
+        //   );
+        // }
         const shrinkedToStudy =
           prevProps.expandLevel > expandLevel && expandLevel === 1;
         const expandToSeries =
@@ -627,7 +625,7 @@ class Studies extends Component {
                     studyDescription={row.original.studyDescription}
                     update={this.props.update}
                     expandLevel={this.props.expandLevel}
-                    updateExpandedLevelNums={this.props.updateExpandedLevelNums}
+                    // updateExpandedLevelNums={this.props.updateExpandedLevelNums}
                     progressUpdated={this.props.progressUpdated}
                     expansionArr={this.state.expansionArr}
                     getTreeExpandSingle={this.props.getTreeExpandSingle}
@@ -635,7 +633,7 @@ class Studies extends Component {
                     treeExpand={this.props.treeExpand}
                     patientIndex={this.props.patientIndex}
                     studyIndex={row.index}
-                    expandLoading={this.props.expandLoading}
+                    // expandLoading={this.props.expandLoading}
                     treeData={this.props.treeData}
                     getTreeData={this.props.getTreeData}
                   />

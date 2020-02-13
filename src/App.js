@@ -53,11 +53,11 @@ class App extends Component {
       expandLevel: 0,
       maxLevel: 0,
       refTree: {},
-      numOfPresentStudies: 0,
-      numOfPresentSeries: 0,
-      numOfPatientsLoaded: 0,
-      numOfStudiesLoaded: 0,
-      numOfSeriesLoaded: 0,
+      // numOfPresentStudies: 0,
+      // numOfPresentSeries: 0,
+      // numOfPatientsLoaded: 0,
+      // numOfStudiesLoaded: 0,
+      // numOfSeriesLoaded: 0,
       treeData: {}
     };
   }
@@ -162,35 +162,35 @@ class App extends Component {
     this.setState({ treeExpand });
   };
 
-  getNumOfPatientsLoaded = numOfStudies => {
-    this.setState(state => ({
-      numOfPatientsLoaded: state.numOfPatientsLoaded + 1,
-      numOfPresentStudies: state.numOfPresentStudies + numOfStudies
-    }));
-  };
+  // getNumOfPatientsLoaded = numOfStudies => {
+  //   this.setState(state => ({
+  //     numOfPatientsLoaded: state.numOfPatientsLoaded + 1,
+  //     numOfPresentStudies: state.numOfPresentStudies + numOfStudies
+  //   }));
+  // };
 
-  getNumOfStudiesLoaded = numOfSeries => {
-    this.setState(state => ({
-      numOfStudiesLoaded: state.numOfStudiesLoaded + 1,
-      numOfPresentSeries: state.numOfPresentSeries + numOfSeries
-    }));
-  };
+  // getNumOfStudiesLoaded = numOfSeries => {
+  //   this.setState(state => ({
+  //     numOfStudiesLoaded: state.numOfStudiesLoaded + 1,
+  //     numOfPresentSeries: state.numOfPresentSeries + numOfSeries
+  //   }));
+  // };
 
-  getNumOfSeriesLoaded = () => {
-    this.setState(state => ({
-      numOfSeriesLoaded: state.numOfSeriesLoaded + 1
-    }));
-  };
+  // getNumOfSeriesLoaded = () => {
+  //   this.setState(state => ({
+  //     numOfSeriesLoaded: state.numOfSeriesLoaded + 1
+  //   }));
+  // };
 
-  updateExpandedLevelNums = (level, numOfChild, numOfParent) => {
-    if (level === "subject") {
-      this.getNumOfPatientsLoaded(numOfChild, numOfParent);
-    } else if (level === "study") {
-      this.getNumOfStudiesLoaded(numOfChild, numOfParent);
-    } else if (level === "series") {
-      this.getNumOfSeriesLoaded(numOfChild, numOfParent);
-    }
-  };
+  // updateExpandedLevelNums = (level, numOfChild, numOfParent) => {
+  //   if (level === "subject") {
+  //     this.getNumOfPatientsLoaded(numOfChild, numOfParent);
+  //   } else if (level === "study") {
+  //     this.getNumOfStudiesLoaded(numOfChild, numOfParent);
+  //   } else if (level === "series") {
+  //     this.getNumOfSeriesLoaded(numOfChild, numOfParent);
+  //   }
+  // };
 
   getExpandLevel = expandLevel => {
     this.setState({ expandLevel });
@@ -200,24 +200,24 @@ class App extends Component {
     const { expandLevel } = this.state;
     if (expandLevel > 0) {
       await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
-      if (expandLevel === 0) {
-        this.setState({
-          numOfPresentStudies: 0,
-          numOfPresentSeries: 0,
-          numOfPatientsLoaded: 0,
-          numOfStudiesLoaded: 0,
-          numOfSeriesLoaded: 0
-        });
-      }
-      if (expandLevel === 1) {
-        this.setState({ numOfPresentStudies: 0, numOfPatientsLoaded: 0 });
-      }
-      if (expandLevel === 2) {
-        this.setState({ numOfPresentSeries: 0, numOfStudiesLoaded: 0 });
-      }
-      if (expandLevel === 3) {
-        this.setState({ numOfSeriesLoaded: 0 });
-      }
+      // if (expandLevel === 0) {
+      //   this.setState({
+      //     numOfPresentStudies: 0,
+      //     numOfPresentSeries: 0,
+      //     numOfPatientsLoaded: 0,
+      //     numOfStudiesLoaded: 0,
+      //     numOfSeriesLoaded: 0
+      //   });
+      // }
+      // if (expandLevel === 1) {
+      //   this.setState({ numOfPresentStudies: 0, numOfPatientsLoaded: 0 });
+      // }
+      // if (expandLevel === 2) {
+      //   this.setState({ numOfPresentSeries: 0, numOfStudiesLoaded: 0 });
+      // }
+      // if (expandLevel === 3) {
+      //   this.setState({ numOfSeriesLoaded: 0 });
+      // }
     }
   };
 
@@ -440,26 +440,28 @@ class App extends Component {
 
   handleCloseAll = () => {
     this.setState({
-      expandLevel: 0,
-      numOfPresentStudies: 0,
-      numOfPresentSeries: 0,
-      numOfPatientsLoaded: 0,
-      numOfStudiesLoaded: 0,
-      numOfSeriesLoaded: 0
+      expandLevel: 0
+      // numOfPresentStudies: 0,
+      // numOfPresentSeries: 0,
+      // numOfPatientsLoaded: 0,
+      // numOfStudiesLoaded: 0,
+      // numOfSeriesLoaded: 0
     });
   };
 
-  getTreeData = (level, data) => {
+  getTreeData = (projectID, level, data) => {
+    console.log("called in getTreeDatae", projectID, level, data);
     const treeData = { ...this.state.treeData };
     const patientIDs = [];
     if (level === "subject") {
+      if (!treeData[projectID]) treeData[projectID] = {};
       data.forEach(el => {
-        if (!treeData[el.subjectID])
-          treeData[el.subjectID] = { data: el, studies: {} };
+        if (!treeData[projectID][el.subjectID])
+          treeData[projectID][el.subjectID] = { data: el, studies: {} };
         patientIDs.push(el.subjectID);
       });
-      if (data.length < Object.keys(treeData).length) {
-        for (let patient in treeData) {
+      if (data.length < Object.keys(treeData[projectID]).length) {
+        for (let patient in treeData[projectID]) {
           if (!patientIDs.includes(patient)) {
             delete treeData[patient];
           }
@@ -469,15 +471,15 @@ class App extends Component {
       const studyUIDs = [];
       const patientID = data[0].patientID;
       data.forEach(el => {
-        if (!treeData[el.patientID].studies[el.studyUID]) {
-          treeData[el.patientID].studies[el.studyUID] = {
+        if (!treeData[projectID][el.patientID].studies[el.studyUID]) {
+          treeData[projectID][el.patientID].studies[el.studyUID] = {
             data: el,
             series: {}
           };
         }
         studyUIDs.push(el.studyUID);
       });
-      const studiesObj = treeData[patientID].studies;
+      const studiesObj = treeData[projectID][patientID].studies;
       const studiesArr = Object.values(studiesObj);
       if (data.length < studiesArr.length) {
         for (let study in studiesObj) {
@@ -491,14 +493,20 @@ class App extends Component {
       const studyUID = data[0].studyUID;
       const seriesUIDs = [];
       data.forEach(el => {
-        if (!treeData[el.patientID].studies[el.studyUID].series[el.seriesUID]) {
-          treeData[el.patientID].studies[el.studyUID].series[el.seriesUID] = {
+        if (
+          !treeData[projectID][el.patientID].studies[el.studyUID].series[
+            el.seriesUID
+          ]
+        ) {
+          treeData[projectID][el.patientID].studies[el.studyUID].series[
+            el.seriesUID
+          ] = {
             data: el
           };
         }
         seriesUIDs.push(el.seriesUID);
       });
-      const seriesObj = treeData[patientID].studies[studyUID].series;
+      const seriesObj = treeData[projectID][patientID].studies[studyUID].series;
       const seriesArr = Object.values(seriesObj);
       if (data.length < seriesArr.length) {
         for (let series in seriesObj) {
@@ -519,13 +527,13 @@ class App extends Component {
       treeExpand,
       expandLevel
     } = this.state;
-    const expandLoading = {
-      numOfPresentStudies: this.state.numOfPresentStudies,
-      numOfPresentSeries: this.state.numOfPresentSeries,
-      numOfPatientsLoaded: this.state.numOfPatientsLoaded,
-      numOfStudiesLoaded: this.state.numOfStudiesLoaded,
-      numOfSeriesLoaded: this.state.numOfSeriesLoaded
-    };
+    // const expandLoading = {
+    //   numOfPresentStudies: this.state.numOfPresentStudies,
+    //   numOfPresentSeries: this.state.numOfPresentSeries,
+    //   numOfPatientsLoaded: this.state.numOfPatientsLoaded,
+    //   numOfStudiesLoaded: this.state.numOfStudiesLoaded,
+    //   numOfSeriesLoaded: this.state.numOfSeriesLoaded
+    // };
     let noOfUnseen;
     if (notifications) {
       noOfUnseen = notifications.reduce((all, item) => {
@@ -591,13 +599,24 @@ class App extends Component {
                     />
                   )}
                 />
-
                 <ProtectedRoute
                   path="/search/:pid?"
                   render={props => (
                     <SearchView
                       {...props}
                       updateProgress={this.updateProgress}
+                      progressUpdated={progressUpdated}
+                      expandLevel={this.state.expandLevel}
+                      getTreeExpandSingle={this.getTreeExpandSingle}
+                      getTreeExpandAll={this.getTreeExpandAll}
+                      treeExpand={treeExpand}
+                      getExpandLevel={this.getExpandLevel}
+                      // expandLoading={expandLoading}
+                      // updateExpandedLevelNums={this.updateExpandedLevelNums}
+                      onShrink={this.handleShrink}
+                      onCloseAll={this.handleCloseAll}
+                      treeData={this.state.treeData}
+                      getTreeData={this.getTreeData}
                     />
                   )}
                 />
@@ -609,9 +628,16 @@ class App extends Component {
                       updateProgress={this.updateProgress}
                       progressUpdated={progressUpdated}
                       expandLevel={this.state.expandLevel}
+                      getTreeExpandSingle={this.getTreeExpandSingle}
+                      getTreeExpandAll={this.getTreeExpandAll}
+                      treeExpand={treeExpand}
                       getExpandLevel={this.getExpandLevel}
-                      expandLoading={expandLoading}
-                      updateExpandedLevelNums={this.updateExpandedLevelNums}
+                      // expandLoading={expandLoading}
+                      // updateExpandedLevelNums={this.updateExpandedLevelNums}
+                      onShrink={this.handleShrink}
+                      onCloseAll={this.handleCloseAll}
+                      treeData={this.state.treeData}
+                      getTreeData={this.getTreeData}
                     />
                   )}
                 />
@@ -642,12 +668,15 @@ class App extends Component {
                       progressUpdated={progressUpdated}
                       expandLevel={this.state.expandLevel}
                       getTreeExpandSingle={this.getTreeExpandSingle}
+                      getTreeExpandAll={this.getTreeExpandAll}
                       treeExpand={treeExpand}
                       getExpandLevel={this.getExpandLevel}
-                      expandLoading={expandLoading}
-                      updateExpandedLevelNums={this.updateExpandedLevelNums}
+                      // expandLoading={expandLoading}
+                      // updateExpandedLevelNums={this.updateExpandedLevelNums}
                       onShrink={this.handleShrink}
                       onCloseAll={this.handleCloseAll}
+                      treeData={this.state.treeData}
+                      getTreeData={this.getTreeData}
                     />
                   )}
                 />
@@ -687,8 +716,8 @@ class App extends Component {
                     getTreeExpandAll={this.getTreeExpandAll}
                     treeExpand={treeExpand}
                     getExpandLevel={this.getExpandLevel}
-                    expandLoading={expandLoading}
-                    updateExpandedLevelNums={this.updateExpandedLevelNums}
+                    // expandLoading={expandLoading}
+                    // updateExpandedLevelNums={this.updateExpandedLevelNums}
                     onShrink={this.handleShrink}
                     onCloseAll={this.handleCloseAll}
                     treeData={this.state.treeData}

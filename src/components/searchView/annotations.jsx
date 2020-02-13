@@ -53,20 +53,20 @@ class Annotations extends Component {
   async componentDidMount() {
     try {
       const {
-        updateExpandedLevelNums,
+        // updateExpandedLevelNums,
         expansionArr,
-        seriesId,
-        expandLoading
+        seriesId
+        // expandLoading
       } = this.props;
-      const { numOfSeriesLoaded, numOfPresentSeries } = expandLoading;
+      // const { numOfSeriesLoaded, numOfPressentSeries } = expandLoading;
       const { data } = await getAnnotations(this.series);
       this.setState({ data });
       this.setState({ columns: this.setColumns() });
       const annsOpened = expansionArr.includes(seriesId);
-      const alreadyCounted = numOfSeriesLoaded === numOfPresentSeries;
+      // const alreadyCounted = numOfSeriesLoaded === numOfPresentSeries;
 
-      if (!annsOpened && !alreadyCounted)
-        updateExpandedLevelNums("series", data.length, 1);
+      // if (!annsOpened && !alreadyCounted)
+      //   updateExpandedLevelNums("series", data.length, 1);
       if (data.length === 0 && this.props.expandLevel !== 3) {
         toast.info("No annotations found", {
           position: "top-right",
@@ -89,8 +89,8 @@ class Annotations extends Component {
         update,
         expandLevel,
         expansionArr,
-        seriesId,
-        updateExpandedLevelNums
+        seriesId
+        // updateExpandedLevelNums
       } = this.props;
       const annsOpened = expansionArr.includes(seriesId);
       if (
@@ -107,11 +107,11 @@ class Annotations extends Component {
         this.setState({ data, expanded });
       }
 
-      if (expandLevel != prevProps.expandLevel) {
-        if (expandLevel === 3 && annsOpened) {
-          updateExpandedLevelNums("series", this.state.data.length, 1);
-        }
-      }
+      // if (expandLevel != prevProps.expandLevel) {
+      //   if (expandLevel === 3 && annsOpened) {
+      //     updateExpandedLevelNums("series", this.state.data.length, 1);
+      //   }
+      // }
     } catch (err) {
       console.log("Couldn't load all annotation data. Please Try again!");
     }

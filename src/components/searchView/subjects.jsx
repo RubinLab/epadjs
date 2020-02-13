@@ -46,12 +46,16 @@ class Subjects extends Component {
   async componentDidMount() {
     try {
       const pid = mode === "lite" ? "lite" : this.props.pid;
-      let data = Object.values(this.props.treeData);
+      console.log(this.props);
+      let data = [];
+      if (this.props.treeData[pid])
+        data = Object.values(this.props.treeData[pid]);
       if (data.length > 0) {
         data = data.map(el => el.data);
       } else {
         data = await this.getData();
-        this.props.getTreeData("subject", data);
+        console.log("data in didMount");
+        this.props.getTreeData(pid, "subject", data);
       }
       const expanded = {};
       this.setState({ data });
@@ -63,6 +67,7 @@ class Subjects extends Component {
       });
       this.setState({ expanded });
     } catch (err) {
+      // console.log(err);
       console.log("Couldn't load all subjects data. Please Try again!");
     }
   }
@@ -80,7 +85,7 @@ class Subjects extends Component {
           data,
           "subjectID"
         );
-        this.props.getTreeData("subject", data);
+        this.props.getTreeData(pid, "subject", data);
         await this.setState({ data, expanded });
       }
       if (this.props.expandLevel != prevProps.expandLevel) {
@@ -112,10 +117,12 @@ class Subjects extends Component {
         }
       }
       if (this.props.pid !== prevProps.pid) {
+        console.log("pid changed");
         if (!data) {
           data = await this.getData();
+          this.props.getTreeData(pid, "subject", data);
         }
-        this.setState({ data });
+        // this.setState({ data });
       }
     } catch (err) {
       console.log("Couldn't load all subjects data. Please Try again!");
@@ -136,10 +143,15 @@ class Subjects extends Component {
   };
 
   getData = async () => {
-    const { data } = await getSubjects(this.props.pid);
+    console.log("get data called");
+    let data = [];
+    if (this.props.pid || mode === "lite")
+      data = await getSubjects(this.props.pid);
+    data = data.data;
     for (let subject of data) {
       subject.children = [];
     }
+    console.log("data", data);
     return data;
   };
 
@@ -508,17 +520,18 @@ class Subjects extends Component {
                     subjectId={row.original.displaySubjectID}
                     update={this.props.update}
                     expandLevel={this.props.expandLevel}
-                    updateExpandedLevelNums={this.props.updateExpandedLevelNums}
+                    // updateExpandedLevelNums={this.props.updateExpandedLevelNums}
                     progressUpdated={this.props.progressUpdated}
                     expansionArr={this.state.expansionArr}
                     getTreeExpandSingle={this.props.getTreeExpandSingle}
                     getTreeExpandAll={this.props.getTreeExpandAll}
                     treeExpand={this.props.treeExpand}
                     patientIndex={row.index}
-                    expandLoading={this.props.expandLoading}
-                    patientExpandComplete={this.props.patientExpandComplete}
+                    // expandLoading={this.props.expandLoading}
+                    // patientExpandComplete={this.props.patientExpandComplete}
                     treeData={this.props.treeData}
                     getTreeData={this.props.getTreeData}
+                    pid={this.props.pid}
                   />
                 </div>
               );
