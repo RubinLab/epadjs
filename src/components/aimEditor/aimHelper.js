@@ -33,7 +33,12 @@ function parseAim(aim, imageIdSpecificMarkups) {
 function getMarkup(markupEntity, aim) {
   const imageId = markupEntity["imageReferenceUid"]["root"];
   const markupUid = markupEntity["uniqueIdentifier"]["root"];
-  const calculations = getCalculationEntitiesOfMarkUp(aim, markupUid);
+  let calculations = [];
+  try {
+    calculations = getCalculationEntitiesOfMarkUp(aim, markupUid);
+  } catch (error) {
+    console.log("Can not get calculations", error);
+  }
   const aimUid = aim.ImageAnnotationCollection["uniqueIdentifier"]["root"];
   return {
     imageId,
