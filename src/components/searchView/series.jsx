@@ -203,16 +203,17 @@ class Series extends Component {
   }
 
   expandCurrentLevel = () => {
-    try {
-      const expanded = {};
+    // try {
+    const expanded = {};
+    if (this.state.data)
       for (let i = 0; i < this.state.data.length; i++) {
         // expanded[i] = this.state.data[i].numberOfAnnotations ? true : false;
         expanded[i] = this.state.data[i];
       }
-      this.setState({ expanded });
-    } catch (err) {
-      console.log("Couldn't load all series data. Please Try again!");
-    }
+    this.setState({ expanded });
+    // } catch (err) {
+    //   console.log("Couldn't load all series data. Please Try again!");
+    // }
   };
 
   selectRow = selected => {

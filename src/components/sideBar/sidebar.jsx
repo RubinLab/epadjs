@@ -35,7 +35,7 @@ class Sidebar extends Component {
       buttonDisplay: mode === "thick" ? "none" : "block",
       open: mode === "thick",
       index: 0,
-      pId: null,
+      pid: null,
       progressView: [false, false]
     };
   }
@@ -45,7 +45,10 @@ class Sidebar extends Component {
     if (mode !== "lite") {
       const { data: projects } = await getProjects();
       if (projects.length > 0) {
-        this.setState({ projects, pId: projects[0].id });
+        const pid = projects[0].id;
+        this.setState({ projects, pid });
+        this.props.history.push(`/search/${pid}`);
+        this.props.getPidUpdate(pid);
         const projectMap = {};
         for (let project of projects) {
           projectMap[project.id] = project.name;
@@ -122,6 +125,8 @@ class Sidebar extends Component {
     if (type === "project" && this.props.type === "search") {
       this.props.history.push(`/search/${id}`);
       this.setState({ index: 0 });
+      this.props.getPidUpdate(id);
+      this.props.clearTreeExpand();
     } else if (type === "project" && this.props.type === "flex") {
       this.props.history.push(`/flex/${id}`);
       this.setState({ index: 0 });

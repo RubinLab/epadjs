@@ -58,7 +58,8 @@ class App extends Component {
       // numOfPatientsLoaded: 0,
       // numOfStudiesLoaded: 0,
       // numOfSeriesLoaded: 0,
-      treeData: {}
+      treeData: {},
+      pid: null
     };
   }
 
@@ -450,7 +451,6 @@ class App extends Component {
   };
 
   getTreeData = (projectID, level, data) => {
-    console.log("called in getTreeDatae", projectID, level, data);
     const treeData = { ...this.state.treeData };
     const patientIDs = [];
     if (level === "subject") {
@@ -517,6 +517,14 @@ class App extends Component {
       }
     }
     this.setState({ treeData });
+  };
+
+  getPidUpdate = pid => {
+    this.setState({ pid });
+  };
+
+  clearTreeExpand = () => {
+    this.setState({ treeExpand: {}, expandLevel: 0 });
   };
 
   render() {
@@ -587,6 +595,9 @@ class App extends Component {
               onData={this.getProjectMap}
               type={this.state.viewType}
               progressUpdated={progressUpdated}
+              getPidUpdate={this.getPidUpdate}
+              pid={this.state.pid}
+              clearTreeExpand={this.clearTreeExpand}
             >
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
@@ -617,6 +628,7 @@ class App extends Component {
                       onCloseAll={this.handleCloseAll}
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
+                      pid={this.state.pid}
                     />
                   )}
                 />
@@ -638,6 +650,7 @@ class App extends Component {
                       onCloseAll={this.handleCloseAll}
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
+                      pid={this.state.pid}
                     />
                   )}
                 />
@@ -677,6 +690,7 @@ class App extends Component {
                       onCloseAll={this.handleCloseAll}
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
+                      pid={this.state.pid}
                     />
                   )}
                 />

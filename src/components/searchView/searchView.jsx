@@ -80,6 +80,8 @@ class SearchView extends Component {
 
   componentDidMount = async () => {
     try {
+      const { pid } = this.props;
+      if (mode === "thick" && !pid) this.props.history.push(`/search/${pid}`);
       let subjects = Object.values(this.props.treeData);
       if (subjects.length > 0) {
         subjects = subjects.map(el => el.data);
@@ -156,7 +158,7 @@ class SearchView extends Component {
 
   getData = async () => {
     let data = [];
-    if (this.props.match.params.pid || mode === "lite") {
+    if (this.props.match.params.pid || this.props.pid || mode === "lite") {
       data = await getSubjects(this.props.match.params.pid);
     }
     return data;
@@ -773,6 +775,7 @@ class SearchView extends Component {
     // } else if (expandLevel === 3) {
     //   expanding = !seriesExpandComplete;
     // }
+    const pid = this.props.match.params.pid || this.props.pid || "lite";
     return (
       <>
         <Toolbar
@@ -798,7 +801,7 @@ class SearchView extends Component {
         )}
         <Subjects
           key={this.props.match.params.pid}
-          pid={this.props.match.params.pid}
+          pid={pid}
           expandLevel={this.props.expandLevel}
           expanded={this.state.expanded}
           update={this.state.update}
