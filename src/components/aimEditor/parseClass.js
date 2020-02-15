@@ -7,6 +7,10 @@ import "./semantic/semantic.js";
 //export next variable for react
 export var AimEditor = function(userWindow, varformCheckHandler) {
   var self = this;
+  this.fontcolor = "gray";
+  this.fontsize = 60;
+  this.fontweight = "0";
+
   this.formCheckHandler = varformCheckHandler;
   this.userWindow = userWindow;
   this.arrayTemplates = [];
@@ -321,6 +325,9 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       componentDiv.disabled = "true";
 
       var headerDiv = document.createElement("div");
+      headerDiv.style.color = self.fontcolor; //editing
+      headerDiv.style.fontWeight = self.fontweight; //editing
+
       headerDiv.className = "title active";
       headerDiv.id = a;
 
@@ -473,11 +480,15 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     //checkAnnotatorConfidence(parentDiv,object);
     var ValidTerm = [];
     var i = 0;
+    //console.log("array length", arrayLength);
     for (i = 0; i < arrayLength; i++) {
       var subEObject = null;
-      if (arrayLength > 1) subEObject = object[i];
-      else subEObject = object;
-
+      if (isArray === 1) {
+        subEObject = object[i];
+      } else {
+        subEObject = object;
+      }
+      //console.log("undefined object", subEObject);
       var ValidTermObj = {
         type: "ValidTerm",
         codeValue: subEObject.codeValue,
@@ -511,6 +522,8 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       }
       var allowTermText = parent.codeMeaning;
       var selectHolder;
+      //console.log("valid term section : parent", parent); //editing
+
       if (control != "radioBtn") {
         if (validTermButtonClass != "ui") {
           var ar = new self.createCheckboxVT(
@@ -555,11 +568,6 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           ATparent
         );
         parentDiv.appendChild(ar.getelementHtml());
-      }
-
-      for (var key in subEObject) {
-        if (typeof subEObject[key] == "object") {
-        }
       }
     }
   };
@@ -606,6 +614,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     mapTagArray,
     parentTagTypeFromJson
   ) {
+    //console.log("allowed term object", parent);
     var athis = this;
     athis.parent = parent;
 
@@ -627,7 +636,11 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     uiAccordionDiv.className = " accordion allowedTermlbl";
     var titleDiv = document.createElement("div");
     titleDiv.className = "title active";
-
+    titleDiv.style.fontFamily =
+      "Lato, Helvetica Neue, Arial, Helvetica, sans-serif;";
+    titleDiv.style.color = self.fontcolor; //editing
+    //uiAccordionDiv.style.fontWeight = self.fontweight; //editing
+    titleDiv.style.fontSize = self.fontsize; //editing
     var titleI = document.createElement("i");
     titleI.className = "dropdown icon";
     var contentDiv = document.createElement("div");
@@ -655,7 +668,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     titleDiv.appendChild(titleI);
     titleDiv.appendChild(lblTxt);
     uiAccordionDiv.appendChild(contentDiv);
-    uiAccordionDiv.style.marginLeft = "20px";
+    uiAccordionDiv.style.marginLeft = "0px";
 
     var mainSelectDiv = document.createElement("div");
     mainSelectDiv.className = "ui container";
@@ -773,7 +786,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           validTermButtonClass = "ui";
           ar = new self.createOption(
             parent,
-            subEObject.codeValue,
+            parent.label.replace(/\s/g, "") + "-" + subEObject.codeValue,
             parent.label,
             "ui ",
             false,
@@ -790,7 +803,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           validTermButtonClass = "checkbox mylbl";
           ar = new self.createCheckbox(
             parent,
-            subEObject.codeValue,
+            parent.label.replace(/\s/g, "") + "-" + subEObject.codeValue,
             parent.label,
             "checkbox mylbl",
             subEObject.codeMeaning,
@@ -808,7 +821,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           validTermButtonClass = "ui";
           ar = new self.createOption(
             parent,
-            subEObject.codeValue,
+            parent.label.replace(/\s/g, "") + "-" + subEObject.codeValue,
             parent.label,
             "ui ",
             false,
@@ -826,7 +839,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
           ar = new self.createRadio(
             parent,
-            subEObject.codeValue,
+            parent.label.replace(/\s/g, "") + "-" + subEObject.codeValue,
             parent.label,
             "radio checkbox mylbl",
             false,
@@ -1524,6 +1537,8 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     _self.className = className;
     _self.lbl = lbl;
     var div = document.createElement("div");
+    div.style.marginLeft = "20px";
+    div.style.fontsize = self.fontsize;
     div.className = _self.className;
     var label = document.createElement("label");
     label.textContent = _self.lbl;
@@ -1560,11 +1575,12 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       checkmarkObj.actualSelected++;
 
       self.mapCardinalitiesToCheckId.set(checkmarkObj.id, checkmarkObj);
-
+      console.log("next id catched", allowedTermObj.nextId);
       if (checkmarkObj.actualSelected >= checkmarkObj.min)
         document.getElementById(checkmarkObj.id).className =
           "green check circle outline icon";
       if (allowedTermObj.nextId != "0") {
+        console.log("next id catched", allowedTermObj.nextId);
         self.DisableTillNext(
           _self.par.id,
           allowedTermObj.nextId,
@@ -1612,6 +1628,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     _self.className = className;
     _self.lbl = lbl;
     var div = document.createElement("div");
+    div.style.marginLeft = "20px";
     div.className = _self.className;
     var label = document.createElement("label");
     label.textContent = _self.lbl;
@@ -1630,6 +1647,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       var getAllowTGroup = validTermObj.primitiveObjATSparent;
       var getAllowTGroupSize = getAllowTGroup.AllowedTerm.length;
       var i = 0;
+      //console.log("gettin alowed terms", getAllowTGroup);
       for (i = 0; i < getAllowTGroupSize; i++) {
         if (
           getAllowTGroup.AllowedTerm[i].codeValue !==
@@ -1709,6 +1727,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     _self.className = className;
     _self.lbl = lbl;
     var div = document.createElement("div");
+    div.style.marginLeft = "20px";
     div.className = _self.className;
     var labelHolder = document.createElement("label");
     var label = document.createTextNode(_self.lbl);
@@ -1788,6 +1807,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     _self.className = className;
     _self.lbl = lbl;
     var div = document.createElement("div");
+    div.style.marginLeft = "20px";
     div.className = _self.className;
     var labelHolder = document.createElement("label");
     var label = document.createTextNode(_self.lbl);
@@ -1867,6 +1887,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     this.value = value;
     this.lbl = lbl;
     var div = document.createElement("div");
+    div.style.marginLeft = "20px";
     div.className = this.className;
     var label = document.createElement("label");
     label.textContent = this.lbl;
@@ -2061,6 +2082,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
   var disabledefined = [];
   this.DisableTillNext = function(actualid, nextid, call) {
+    console.log("disable next called");
     let nextControl = 0;
     for (var [key, value] of self.mapCardinalitiesToCheckId) {
       if (key == actualid) {
@@ -3125,6 +3147,12 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     let tempTypecode = jsonInner.typeCode;
     jsonInner.typeCode = [];
     jsonInner.typeCode.push(tempTypecode);
+    console.log("**********************************************");
+    console.log("**********************************************");
+    console.log("**********************************************");
+    console.log("**********************************************");
+    console.log("valid term saving section code checkk");
+    console.log("temptype code :--->", tempTypecode);
 
     for (i = 0; i < arraySize; i++) {
       if (arrayCheck == true) {
@@ -3138,6 +3166,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
         value: instanceObject
       };
       if (i == 0 && arraySize == 1) {
+        console.log("valid term instance object", instanceObject);
         defaultCodeValue = instanceObject.codeValue;
         defaultCodingSchemeDesignator = instanceObject.codingSchemeDesignator;
         defaultCodingSchemeVersion = instanceObject.codingSchemeVersion;
@@ -3145,6 +3174,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       } else {
         if (instanceObject.hasOwnProperty("select")) {
           if (instanceObject.select == "1") {
+            console.log("valid term instance object selecetd", instanceObject);
             defaultCodeValue = instanceObject.codeValue;
             defaultCodingSchemeDesignator =
               instanceObject.codingSchemeDesignator;
@@ -3156,7 +3186,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
       if (defaultCodeMeaning !== "") {
         let jsonValidTerm = {
-          code: defaultCodeMeaning,
+          code: defaultCodeValue,
           codeSystemName: defaultCodingSchemeDesignator,
           codeSystemVersion: defaultCodingSchemeVersion,
           "iso:displayName": {
@@ -3164,7 +3194,13 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
             "xmlns:iso": "uri:iso.org:21090"
           }
         };
-        jsonInner.typeCode.push(jsonValidTerm);
+        console.log("json valid term before push", jsonValidTerm);
+        if (Array.isArray(jsonInner.typeCode)) {
+          jsonInner.typeCode[0].push(jsonValidTerm);
+        } else {
+          jsonInner.typeCode.push(jsonValidTerm);
+        }
+        jsonInner.typeCode[0].push(jsonValidTerm); //edited to be compatible with array to fix the error xml->json (json creates array)
         defaultCodeMeaning = "";
       }
     }
@@ -3431,7 +3467,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     }
     self.addUid(finaljson);
     finaljson = self.replaceTagNamingHierarchy(finaljson);
-    // console.log("============= final" + JSON.stringify(finaljson));
+    console.log("============= final" + JSON.stringify(finaljson));
 
     return finaljson;
   };
@@ -3548,8 +3584,10 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       }
     }
   };
-
+  //degistir
   this.traverseJsonOnLoad = function(jsonObj) {
+    let label = "";
+
     if (jsonObj !== null && typeof jsonObj == "object") {
       Object.entries(jsonObj).forEach(([key, value]) => {
         if (key === "CharacteristicQuantification") {
@@ -3558,14 +3596,18 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           ]);
         }
         if (key === "typeCode") {
-          //console.log("type code load : "+ JSON.stringify(value));
-          var docElement = document.getElementById(value[0].code);
+          label = jsonObj.label.value.replace(/\s/g, "");
+
+          var docElement = document.getElementById(label + "-" + value[0].code);
+          console.log("aarray check : >", Array.isArray(value[0]));
+          console.log("code in type code", value);
           //console.log("type code load : docElement"+ JSON.stringify(docElement));
           if (docElement != null) {
             var parentDiv = docElement.parentNode;
 
             if (typeof parentDiv[0] != "undefined") {
               var crop = parentDiv[0].name;
+
               crop = crop.replace(
                 /[`~!@#$%^&*()_|+\-=?;:'",.<>/ /\{\}\[\]\\\/]/gi,
                 ""
@@ -3575,14 +3617,33 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
               var subDivs = prDiv.getElementsByTagName("div");
 
               var splittedLabel = docElement.label.split("-");
+
+              let splittedLabelMergeRest = "";
+              for (let k = 1; k < splittedLabel.length; k++) {
+                if (k !== splittedLabel.length - 1) {
+                  splittedLabelMergeRest =
+                    splittedLabelMergeRest + splittedLabel[k] + "-";
+                } else {
+                  splittedLabelMergeRest =
+                    splittedLabelMergeRest + splittedLabel[k];
+                }
+              }
+
               $(subDivs[0]).addClass("disabled");
-              $(subDivs[0]).dropdown("set selected", [splittedLabel[1]]);
+              $(subDivs[0]).dropdown("set selected", [splittedLabelMergeRest]);
               $(subDivs[0]).removeClass("disabled");
             } else {
               if (docElement.checked != true) {
                 docElement.click();
                 //docElement.checked = true;
               }
+            }
+          }
+          if (Array.isArray(value[0])) {
+            const objSize = value[0].length;
+            const codeObjs = value[0];
+            for (let cnt = 0; cnt < objSize; cnt++) {
+              console.log(codeObjs[cnt]);
             }
           }
         }
@@ -3643,7 +3704,6 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
         self.traverseJsonOnLoad(value);
       });
-    } else {
     }
   };
 
@@ -3681,7 +3741,6 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
    }
    */
   this.loadAimJson = function(aimjson) {
-    //console.log("____________load aim json :"+JSON.stringify(aimjson));
     //var ImageAnnotation = aimjson.imageAnnotations.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
 
     var templateIndex = self.mapTemplateCodeValueByIndex.get(
