@@ -6,6 +6,11 @@ import "./semantic/semantic.js";
 
 //export next variable for react
 export var AimEditor = function(userWindow, varformCheckHandler) {
+  //this.mapObjCodeValueParent = new Map();
+  //this.mapHtmlObjects = new Map(); not used
+  //this.mapHtmlSelectObjectsKeyValue = new Map(); not used
+  // this.mapAllowedTermCollectionByCodeValue = new Map(); not used
+
   var self = this;
   this.fontcolor = "gray";
   this.fontsize = 60;
@@ -21,10 +26,6 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
   this.primitiveJson = "";
   this.mapCardinalitiesToCheckId = new Map();
   this.mapStatusAllowedTermBlocks = new Map();
-  //this.mapObjCodeValueParent = new Map();
-  this.mapHtmlObjects = new Map();
-  this.mapHtmlSelectObjectsKeyValue = new Map();
-  this.mapAllowedTermCollectionByCodeValue = new Map();
   this.mapTemplateCodeValueByIndex = new Map();
   this.mapLabelAnnotatorConfidence = new Map(); // combine each label with annotator confidence. annotator confidence exist if label exists for that component or sub component
   this.mapLabelAnnotConfJson = new Map(); // records json object to change the annotator confidence value associated with label
@@ -219,9 +220,9 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
       self.mapCardinalitiesToCheckId = new Map();
       self.mapStatusAllowedTermBlocks = new Map();
-      self.mapHtmlObjects = new Map();
-      self.mapHtmlSelectObjectsKeyValue = new Map();
-      self.mapAllowedTermCollectionByCodeValue = new Map();
+      //self.mapHtmlObjects = new Map(); not used
+      //self.mapHtmlSelectObjectsKeyValue = new Map(); not used
+      //self.mapAllowedTermCollectionByCodeValue = new Map(); not used
       //self.mapTemplateCodeValueByIndex = new Map();
       self.mapLabelAnnotatorConfidence = new Map();
       self.mapLabelAnnotConfJson = new Map();
@@ -769,10 +770,10 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
         parant: parent,
         allowterm: allowedTermObj
       };
-      this.mapAllowedTermCollectionByCodeValue.set(
-        allowedTermObj.codeValue,
-        unionPrntAlwtermObj
-      );
+      // this.mapAllowedTermCollectionByCodeValue.set(
+      //   allowedTermObj.codeValue,
+      //   unionPrntAlwtermObj
+      // ); not used
       AllowedTerm.push({
         AllowedTerm: allowedTermObj
       });
@@ -1274,7 +1275,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       for (i = 0; i < scaleArraysize; i++) {
         if (object[i].valueLabel == this.value) {
           object[i].select = "1";
-          self.mapHtmlSelectObjectsKeyValue.set(this.value, quantileSelect.id);
+          //self.mapHtmlSelectObjectsKeyValue.set(this.value, quantileSelect.id); not used
         } else {
           object[i].select = "0";
         }
@@ -1606,7 +1607,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     this.getelementHtml = function() {
       return div;
     };
-    self.mapHtmlObjects.set(allowedTermObj.codeValue, radioInput);
+    //self.mapHtmlObjects.set(allowedTermObj.codeValue, radioInput); not used
   };
   this.createRadioVT = function(
     prObject,
@@ -1700,7 +1701,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       return div;
     };
 
-    self.mapHtmlObjects.set(allowedTermObj.codeValue, radioInput);
+    //self.mapHtmlObjects.set(allowedTermObj.codeValue, radioInput); not used
   };
 
   this.createOption = function(
@@ -1944,26 +1945,25 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     validTermObj,
     vtPrObject
   ) {
-    //var _self = this;
-    //_self.allowedTermObj = validTermObj;
+    let labelForUniqueness = self.removeEmptySpace(
+      validTermObj.primitiveObjATSparent.label
+    );
+    id = labelForUniqueness + "-" + id + allowedTermObj.codeValue;
+
     this.par = prObject;
     //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
-    this.allowedTermObj = validTermObj;
-    this.id = id;
-    this.name = name;
-    this.className = className;
-    this.value = value;
-    this.lbl = lbl;
+
     var div = document.createElement("div");
-    div.className = this.className;
+    div.style.marginLeft = "20px";
+    div.className = className;
     var label = document.createElement("label");
-    label.textContent = this.lbl;
+    label.textContent = lbl;
     var checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.className = "checkbox";
-    checkbox.name = this.name;
-    checkbox.value = this.value;
-    checkbox.id = this.id;
+    checkbox.name = name;
+    checkbox.value = value;
+    checkbox.id = id;
     div.appendChild(checkbox);
     div.appendChild(label);
     // document.getElementById(this.par).appendChild(div);
