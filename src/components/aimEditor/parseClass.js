@@ -786,7 +786,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           validTermButtonClass = "ui";
           ar = new self.createOption(
             parent,
-            parent.label.replace(/\s/g, "") + "-" + subEObject.codeValue,
+            self.removeEmptySpace(parent.label) + "-" + subEObject.codeValue,
             parent.label,
             "ui ",
             false,
@@ -803,7 +803,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           validTermButtonClass = "checkbox mylbl";
           ar = new self.createCheckbox(
             parent,
-            parent.label.replace(/\s/g, "") + "-" + subEObject.codeValue,
+            self.removeEmptySpace(parent.label) + "-" + subEObject.codeValue,
             parent.label,
             "checkbox mylbl",
             subEObject.codeMeaning,
@@ -821,7 +821,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           validTermButtonClass = "ui";
           ar = new self.createOption(
             parent,
-            parent.label.replace(/\s/g, "") + "-" + subEObject.codeValue,
+            self.removeEmptySpace(parent.label) + "-" + subEObject.codeValue,
             parent.label,
             "ui ",
             false,
@@ -839,7 +839,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
           ar = new self.createRadio(
             parent,
-            parent.label.replace(/\s/g, "") + "-" + subEObject.codeValue,
+            self.removeEmptySpace(parent.label) + "-" + subEObject.codeValue,
             parent.label,
             "radio checkbox mylbl",
             false,
@@ -1619,25 +1619,22 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     validTermObj,
     vtPrObject
   ) {
-    var _self = this;
-    _self.allowedTermObj = validTermObj;
-    _self.par = prObject;
-    _self.id = id + allowedTermObj.codeValue;
-    _self.name = name;
-    _self.checked = checked;
-    _self.className = className;
-    _self.lbl = lbl;
+    let labelForUniqueness = self.removeEmptySpace(
+      validTermObj.primitiveObjATSparent.label
+    );
+    id = labelForUniqueness + "-" + id + allowedTermObj.codeValue;
+
     var div = document.createElement("div");
     div.style.marginLeft = "20px";
-    div.className = _self.className;
+    div.className = className;
     var label = document.createElement("label");
-    label.textContent = _self.lbl;
+    label.textContent = lbl;
     var radioInput = document.createElement("input");
     radioInput.type = "radio";
     radioInput.className = "radio checkbox";
-    radioInput.id = _self.id;
-    radioInput.name = _self.name;
-    radioInput.checked = _self.checked;
+    radioInput.id = id;
+    radioInput.name = name;
+    radioInput.checked = checked;
 
     div.appendChild(radioInput);
     div.appendChild(label);
@@ -1703,7 +1700,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       return div;
     };
 
-    self.mapHtmlObjects.set(_self.allowedTermObj.codeValue, radioInput);
+    self.mapHtmlObjects.set(allowedTermObj.codeValue, radioInput);
   };
 
   this.createOption = function(
@@ -3200,7 +3197,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
         } else {
           jsonInner.typeCode.push(jsonValidTerm);
         }
-        jsonInner.typeCode[0].push(jsonValidTerm); //edited to be compatible with array to fix the error xml->json (json creates array)
+        //jsonInner.typeCode[0].push(jsonValidTerm); //edited to be compatible with array to fix the error xml->json (json creates array)
         defaultCodeMeaning = "";
       }
     }
@@ -3596,7 +3593,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           ]);
         }
         if (key === "typeCode") {
-          label = jsonObj.label.value.replace(/\s/g, "");
+          label = self.removeEmptySpace(jsonObj.label.value);
 
           var docElement = document.getElementById(label + "-" + value[0].code);
           console.log("aarray check : >", Array.isArray(value[0]));
@@ -3922,6 +3919,10 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     }
   };
 
+  this.removeEmptySpace = function(removeFrom) {
+    let retVal = removeFrom.replace(/\s/g, "");
+    return retVal;
+  };
   constructor();
 };
 
