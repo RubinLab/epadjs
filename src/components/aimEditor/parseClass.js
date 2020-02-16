@@ -3593,11 +3593,26 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           ]);
         }
         if (key === "typeCode") {
+          let ValidtermCode = "";
           label = self.removeEmptySpace(jsonObj.label.value);
-
-          var docElement = document.getElementById(label + "-" + value[0].code);
           console.log("aarray check : >", Array.isArray(value[0]));
           console.log("code in type code", value);
+          if (Array.isArray(value[0])) {
+            ValidtermCode = value[0][1].code;
+            console.log("valid term code : ", ValidtermCode);
+            var docElement = document.getElementById(
+              label + "-" + ValidtermCode + value[0][0].code
+            );
+          } else {
+            var docElement = document.getElementById(
+              label + "-" + value[0].code
+            );
+          }
+
+          console.log(
+            "validterm exist",
+            label + "-" + ValidtermCode + value[0].code
+          );
           //console.log("type code load : docElement"+ JSON.stringify(docElement));
           if (docElement != null) {
             var parentDiv = docElement.parentNode;
