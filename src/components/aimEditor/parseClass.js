@@ -547,7 +547,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
             ATparent.label,
             "ui ",
             false,
-            allowTermText + "  " + subEObject.codeMeaning,
+            allowTermText + " " + subEObject.codeMeaning,
             ATallowedTermObj,
             ValidTermObj,
             ATparent
@@ -1530,25 +1530,18 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     lbl,
     allowedTermObj
   ) {
-    var _self = this;
-    _self.par = prObject;
-    _self.id = id;
-    _self.name = name;
-    _self.checked = checked;
-    _self.className = className;
-    _self.lbl = lbl;
     var div = document.createElement("div");
     div.style.marginLeft = "20px";
     div.style.fontsize = self.fontsize;
-    div.className = _self.className;
+    div.className = className;
     var label = document.createElement("label");
-    label.textContent = _self.lbl;
+    label.textContent = lbl;
     var radioInput = document.createElement("input");
     radioInput.type = "radio";
     radioInput.className = "radio checkbox";
-    radioInput.id = _self.id;
-    radioInput.name = _self.name;
-    radioInput.checked = _self.checked;
+    radioInput.id = id;
+    radioInput.name = name;
+    radioInput.checked = checked;
 
     div.appendChild(radioInput);
     div.appendChild(label);
@@ -1583,7 +1576,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       if (allowedTermObj.nextId != "0") {
         console.log("next id catched", allowedTermObj.nextId);
         self.DisableTillNext(
-          _self.par.id,
+          prObject.id,
           allowedTermObj.nextId,
           self.callDisable
         );
@@ -1714,21 +1707,14 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     allowedTermObj
   ) {
     //drop down select and add input box object
-    var _self = this;
-    _self.allowedTermObj = allowedTermObj;
-    _self.par = prObject;
+
     //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
-    _self.id = id;
-    _self.name = name;
-    _self.value = name;
-    _self.checked = checked;
-    _self.className = className;
-    _self.lbl = lbl;
+
     var div = document.createElement("div");
     div.style.marginLeft = "20px";
-    div.className = _self.className;
+    div.className = className;
     var labelHolder = document.createElement("label");
-    var label = document.createTextNode(_self.lbl);
+    var label = document.createTextNode(lbl);
 
     var square = document.createElement("div");
     square.className = "ui mini Tiny blue label";
@@ -1738,10 +1724,10 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     square.appendChild(lab);
 
     var optionInput = document.createElement("option");
-    optionInput.id = _self.id;
-    optionInput.name = _self.name;
-    optionInput.checked = _self.checked;
-    optionInput.value = _self.lbl;
+    optionInput.id = id;
+    optionInput.name = name;
+    optionInput.checked = checked;
+    optionInput.value = lbl;
     //div.appendChild(radioInput);
 
     div.appendChild(optionInput);
@@ -1794,35 +1780,29 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     vtPrObject
   ) {
     //drop down multiple selectable list
-    var _self = this;
-    _self.allowedTermObj = validTermObj;
-    _self.par = prObject;
-    //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
-    _self.id = id;
-    _self.name = name;
-    _self.value = name;
-    _self.checked = checked;
-    _self.className = className;
-    _self.lbl = lbl;
+    let labelForUniqueness = self.removeEmptySpace(
+      validTermObj.primitiveObjATSparent.label
+    );
+    id = labelForUniqueness + "-" + id + allowedTermObj.codeValue;
     var div = document.createElement("div");
     div.style.marginLeft = "20px";
-    div.className = _self.className;
+    div.className = className;
     var labelHolder = document.createElement("label");
-    var label = document.createTextNode(_self.lbl);
+    var label = document.createTextNode(lbl);
 
     var square = document.createElement("div");
     square.className = "ui mini Tiny blue label";
+    self.subOrderLabelTracking = self.subOrderLabelTracking - 1;
     var lab = document.createTextNode(
       String.fromCharCode(self.subOrderLabelTracking) + "-"
     );
     square.appendChild(lab);
 
     var optionInput = document.createElement("option");
-    optionInput.id = _self.id;
-    optionInput.name = _self.name;
-    optionInput.checked = _self.checked;
-    optionInput.value = _self.lbl;
-    //div.appendChild(radioInput);
+    optionInput.id = id;
+    optionInput.name = name;
+    optionInput.checked = checked;
+    optionInput.value = lbl;
 
     div.appendChild(optionInput);
     optionInput.appendChild(square);
@@ -1874,27 +1854,19 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     lbl,
     allowedTermObj
   ) {
-    var _self = this;
-    _self.allowedTermObj = allowedTermObj;
-    this.par = prObject;
     //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
-    this.allowedTermObj = allowedTermObj;
-    this.id = id;
-    this.name = name;
-    this.className = className;
-    this.value = value;
-    this.lbl = lbl;
+
     var div = document.createElement("div");
     div.style.marginLeft = "20px";
-    div.className = this.className;
+    div.className = className;
     var label = document.createElement("label");
-    label.textContent = this.lbl;
+    label.textContent = lbl;
     var checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.className = "checkbox";
-    checkbox.name = this.name;
-    checkbox.value = this.value;
-    checkbox.id = this.id;
+    checkbox.name = name;
+    checkbox.value = value;
+    checkbox.id = id;
     div.appendChild(checkbox);
     div.appendChild(label);
     // document.getElementById(this.par).appendChild(div);
@@ -3595,11 +3567,10 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
         if (key === "typeCode") {
           let ValidtermCode = "";
           label = self.removeEmptySpace(jsonObj.label.value);
-          console.log("aarray check : >", Array.isArray(value[0]));
-          console.log("code in type code", value);
+
           if (Array.isArray(value[0])) {
             ValidtermCode = value[0][1].code;
-            console.log("valid term code : ", ValidtermCode);
+
             var docElement = document.getElementById(
               label + "-" + ValidtermCode + value[0][0].code
             );
@@ -3609,11 +3580,6 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
             );
           }
 
-          console.log(
-            "validterm exist",
-            label + "-" + ValidtermCode + value[0].code
-          );
-          //console.log("type code load : docElement"+ JSON.stringify(docElement));
           if (docElement != null) {
             var parentDiv = docElement.parentNode;
 
@@ -3642,20 +3608,15 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
               }
 
               $(subDivs[0]).addClass("disabled");
-              $(subDivs[0]).dropdown("set selected", [splittedLabelMergeRest]);
+              $(subDivs[0]).dropdown("set selected", [
+                splittedLabelMergeRest.trim()
+              ]);
               $(subDivs[0]).removeClass("disabled");
             } else {
               if (docElement.checked != true) {
                 docElement.click();
                 //docElement.checked = true;
               }
-            }
-          }
-          if (Array.isArray(value[0])) {
-            const objSize = value[0].length;
-            const codeObjs = value[0];
-            for (let cnt = 0; cnt < objSize; cnt++) {
-              console.log(codeObjs[cnt]);
             }
           }
         }
