@@ -1998,7 +1998,7 @@ export var AimEditor = function(
         objectToCheckAnnConf.hasOwnProperty("label") ||
         objectToCheckAnnConf.hasOwnProperty("name")
       ) {
-        if (objectToCheckAnnConf.annotatorConfidence == "true") {
+        if (objectToCheckAnnConf.annotatorConfidence == true) {
           //console.log("after selecting template"+objectToCheckAnnConf.label);
 
           if (objectToCheckAnnConf.hasOwnProperty("label")) {
