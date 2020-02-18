@@ -3534,11 +3534,12 @@ export var AimEditor = function(
 
   this.checkIfCommentRequired = function(object, parentDiv) {
     if (object.hasOwnProperty("requireComment")) {
-      if (object.requireComment == "true") {
+      if (object.requireComment == true) {
         let annoCommentDomid = object.label.replace(
           /[`~!@# $%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,
           ""
         );
+
         self.mapLabelSubComment.set(annoCommentDomid, annoCommentDomid);
         self.mapLabelCommentJson.set(annoCommentDomid, object); //changing
         //console.log("comment true"+object.label);
