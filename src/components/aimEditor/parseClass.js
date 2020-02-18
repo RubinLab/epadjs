@@ -5,7 +5,11 @@ import "./semantic/semantic.css";
 import "./semantic/semantic.js";
 
 //export next variable for react
-export var AimEditor = function(userWindow, varformCheckHandler) {
+export var AimEditor = function(
+  userWindow,
+  varformCheckHandler,
+  varRenderButtonHandler
+) {
   //this.mapObjCodeValueParent = new Map();
   //this.mapHtmlObjects = new Map(); not used
   //this.mapHtmlSelectObjectsKeyValue = new Map(); not used
@@ -15,7 +19,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
   this.fontcolor = "gray";
   this.fontsize = 60;
   this.fontweight = "0";
-
+  this.renderButtonhandler = varRenderButtonHandler;
   this.formCheckHandler = varformCheckHandler;
   this.userWindow = userWindow;
   this.arrayTemplates = [];
@@ -232,6 +236,9 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       if (self.templateSelectedIndex > -1) {
         self.jsonTemplateCopy = self.arrayTemplatesJsonObjects[this.value];
         self.extractTemplate(self.jsonTemplateCopy);
+        self.renderButtonhandler(true);
+      } else {
+        self.renderButtonhandler(false);
       }
     };
     $('select[class^="ui dropdown"]').dropdown();
