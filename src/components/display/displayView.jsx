@@ -241,8 +241,8 @@ class DisplayView extends Component {
       const baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
-          let multiFrameUrl =
-            mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
+          let multiFrameUrl = baseUrl + "&frame=" + i;
+          // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           cornerstoneImageIds.push(multiFrameUrl);
         }
       } else {
@@ -251,6 +251,7 @@ class DisplayView extends Component {
         cornerstone.loadAndCacheImage(singleFrameUrl);
       }
     });
+
     //to jump to the same image after aim save
     let imageIndex;
     if (

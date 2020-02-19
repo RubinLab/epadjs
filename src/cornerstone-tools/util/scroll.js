@@ -1,7 +1,7 @@
-import scrollToIndex from './scrollToIndex.js';
-import { getToolState } from '../stateManagement/toolState.js';
-import clip from './clip.js';
-import external from './../externalModules.js';
+import scrollToIndex from "./scrollToIndex.js";
+import { getToolState } from "../stateManagement/toolState.js";
+import clip from "./clip.js";
+import external from "./../externalModules.js";
 
 /**
  * Scrolls through the stack.
@@ -15,7 +15,7 @@ import external from './../externalModules.js';
  * @returns {void}
  */
 export default function(element, images, loop = false, allowSkipping = true) {
-  const toolData = getToolState(element, 'stack');
+  const toolData = getToolState(element, "stack");
 
   if (!toolData || !toolData.data || !toolData.data.length) {
     return;
@@ -41,7 +41,7 @@ export default function(element, images, loop = false, allowSkipping = true) {
     scrollToIndex(element, newImageIdIndex);
   } else {
     const pendingEvent = {
-      index: newImageIdIndex,
+      index: newImageIdIndex
     };
 
     stackData.pending.push(pendingEvent);
