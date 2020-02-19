@@ -129,6 +129,7 @@ export var AimEditor = function(
   };
 
   this.loadTemplates = function(templateList) {
+    console.log("template list ::: --->", templateList);
     self.arrayTemplatesJsonObjects = templateList;
     if (self.arrayTemplatesJsonObjects.length > 0) {
       for (var i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {
@@ -197,9 +198,7 @@ export var AimEditor = function(
       var templateOption = document.createElement("option");
       templateOption.value = i;
       templateOption.text =
-        self.arrayTemplatesJsonObjects[
-          i
-        ].TemplateContainer.Template[0].codeMeaning;
+        self.arrayTemplatesJsonObjects[i].TemplateContainer.Template[0].name;
       //templateOption.innerHTML = this.arrayTemplatesJsonObjects[i].key;
       self.templateSelect.appendChild(templateOption);
     }
