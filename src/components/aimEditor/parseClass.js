@@ -1991,6 +1991,7 @@ export var AimEditor = function(
     }
   };
   this.checkAnnotatorConfidence = function(prentDiv, objectToCheckAnnConf) {
+    let isMouseButtondown = false;
     if (typeof objectToCheckAnnConf.annotatorConfidence != "undefined") {
       // Assign value to the property here
       if (
@@ -2029,12 +2030,28 @@ export var AimEditor = function(
             annotConfShowValueInput.value = this.value;
             objectToCheckAnnConf.selectac = this.value / 100;
           };
+          annotConfInput.onmousedown = function(event) {
+            isMouseButtondown = true;
+          };
+          annotConfInput.onmouseup = function(event) {
+            isMouseButtondown = false;
+          };
+          annotConfInput.onmousemove = function(event) {
+            if (isMouseButtondown) {
+              annotConfShowValueInput.value = this.value;
+              objectToCheckAnnConf.selectac = this.value / 100;
+              console.log(event.clientX);
+            }
+          };
+
           annotConfDiv.className = "ui range";
+          annotConfDiv.style.textAlign = "center";
+          annotConfDiv.style.marginBottom = "10px";
 
           var annotConfShowValueInput = document.createElement("input");
           annotConfShowValueInput.style.width = "52px";
           annotConfShowValueInput.style.height = "28px";
-          //annotConfShowValueInput.style.float = "left";
+
           annotConfShowValueInput.setAttribute("type", "text");
           annotConfShowValueInput.setAttribute("class", "ui  input");
           annotConfShowValueInput.setAttribute("id", "inputRange" + rangeid);
