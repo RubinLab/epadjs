@@ -16,9 +16,10 @@ export var AimEditor = function(
   // this.mapAllowedTermCollectionByCodeValue = new Map(); not used
 
   var self = this;
-  this.fontcolor = "gray";
-  this.fontsize = 60;
-  this.fontweight = "0";
+  this.fontcolor = "#c9cdd4";
+  this.fontsize = "13px";
+  this.fontweight = "1500";
+  this.fontfamily = "Lato, Helvetica Neue, Arial, Helvetica, sans-serif;";
   this.renderButtonhandler = varRenderButtonHandler;
   this.formCheckHandler = varformCheckHandler;
   this.userWindow = userWindow;
@@ -159,6 +160,7 @@ export var AimEditor = function(
     // above section needs to be uncommented for testing purpose
     self.templateListDiv = document.createElement("div");
     self.templateListDiv.id = "tlist";
+    self.templateListDiv.style.width = "100%";
 
     self.shapeDiv = document.createElement("div");
     self.shapeDiv.id = "shape";
@@ -192,7 +194,7 @@ export var AimEditor = function(
     var i = 0;
     var templateOption = document.createElement("option");
     templateOption.value = "-1";
-    templateOption.text = "Select";
+    templateOption.text = "Select Template";
     self.templateSelect.appendChild(templateOption);
 
     for (i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {
@@ -242,6 +244,9 @@ export var AimEditor = function(
       }
     };
     $('select[class^="ui dropdown"]').dropdown();
+
+    self.templateSelect.style.width = "100%";
+    templateDiv.style.width = "100%";
   };
 
   this.extractTemplate = function(json) {
@@ -261,14 +266,22 @@ export var AimEditor = function(
     var component = null;
     //adding comment textarea for the template
     var commentDiv = document.createElement("div");
+    commentDiv.style.width = "100%";
     var labelDiv = document.createElement("div");
     var annotationNameDiv = document.createElement("div");
     var annotationNameLabelDiv = document.createElement("div");
 
     var labelAnnotationName = document.createElement("label");
 
-    labelAnnotationName.textContent = "Name";
+    labelAnnotationName.textContent = "Annotation Name";
     var labelAnnotationNameInput = document.createElement("INPUT");
+    labelAnnotationNameInput.style.fontFamily = self.fontfamily;
+    labelAnnotationNameInput.style.fontSize = "14px";
+    labelAnnotationNameInput.style.paddingLeft = "2px";
+    //labelAnnotationNameInput.style.fontWeight = "1000";
+    labelAnnotationNameInput.style.lineHeight = "14px";
+    labelAnnotationNameInput.style.width = "100%";
+
     labelAnnotationNameInput.onkeyup = function() {
       self.aimName = this.value;
     };
@@ -280,16 +293,22 @@ export var AimEditor = function(
     annotationNameDiv.appendChild(labelAnnotationNameInput);
     annotationNameLabelDiv.appendChild(labelAnnotationName);
     annotationNameDiv.className = "comment ui input";
+    annotationNameDiv.style.width = "100%";
 
     var label = document.createElement("label");
     annotationNameLabelDiv.className = "comment";
-    label.textContent = "comment";
+    annotationNameLabelDiv.style.paddingTop = "10px";
+    label.textContent = "Comment";
     labelDiv.className = "comment";
-    commentDiv.className = "comment";
+    labelDiv.style.paddingTop = "10px";
+    //commentDiv.className = "comment";
 
     var textareaDomObject = document.createElement("textarea");
     labelDiv.appendChild(label);
     textareaDomObject.id = "comment";
+    textareaDomObject.style.color = "black";
+    textareaDomObject.style.width = "100%";
+
     commentDiv.appendChild(textareaDomObject);
 
     textareaDomObject.onkeyup = function() {
@@ -335,6 +354,8 @@ export var AimEditor = function(
       var headerDiv = document.createElement("div");
       headerDiv.style.color = self.fontcolor; //editing
       headerDiv.style.fontWeight = self.fontweight; //editing
+      headerDiv.style.fontFamily = self.fontfamily;
+      headerDiv.style.fontSize = self.fontsize; //editing
 
       headerDiv.className = "title active";
       headerDiv.id = a;
@@ -644,8 +665,7 @@ export var AimEditor = function(
     uiAccordionDiv.className = " accordion allowedTermlbl";
     var titleDiv = document.createElement("div");
     titleDiv.className = "title active";
-    titleDiv.style.fontFamily =
-      "Lato, Helvetica Neue, Arial, Helvetica, sans-serif;";
+    titleDiv.style.fontFamily = self.fontfamily;
     titleDiv.style.color = self.fontcolor; //editing
     //uiAccordionDiv.style.fontWeight = self.fontweight; //editing
     titleDiv.style.fontSize = self.fontsize; //editing
@@ -1539,7 +1559,7 @@ export var AimEditor = function(
   ) {
     var div = document.createElement("div");
     div.style.marginLeft = "20px";
-    div.style.fontsize = self.fontsize;
+    //div.style.fontsize = self.fontsize;
     div.className = className;
     var label = document.createElement("label");
     label.textContent = lbl;
@@ -3650,15 +3670,17 @@ export var AimEditor = function(
 
         var req = document.createElement("div");
         var label = document.createElement("label");
-        label.textContent = "component comment";
+        label.textContent = "Comment";
 
         //console.log("coment for subs"+JSON.stringify(object));
         let textaDomObject = document.createElement("textarea");
+        textaDomObject.style.color = "black";
+        textaDomObject.style.width = "100%";
         textaDomObject.id = "comment" + object.label;
         textaDomObject.onkeyup = function() {
           object.commentSelect = this.value;
         };
-
+        req.appendChild(label);
         req.appendChild(textaDomObject);
         parentDiv.appendChild(req);
         req.className = "requiredcomment";
