@@ -2171,10 +2171,12 @@ export var AimEditor = function(
             "class",
             "ui input disabled small"
           );
-
+          let confidenceText = document.createTextNode("Confidence level");
+          //loadButton.appendChild(loadButtonText);
           annotConfDiv.appendChild(annotConfInput);
           annotConfDiv.appendChild(annotConfShowValueInputDiv);
           annotConfShowValueInputDiv.appendChild(annotConfShowValueInput);
+          prentDiv.appendChild(confidenceText);
           prentDiv.appendChild(annotConfDiv);
         }
       }
