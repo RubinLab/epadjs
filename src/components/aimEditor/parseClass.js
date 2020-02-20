@@ -118,6 +118,7 @@ export var AimEditor = function(
     if (self.mapShortCutKeys.get(keyvalue)) {
       // console.log("in" + keyvalue);
       // console.log(self.mapShortCutKeys.get(keyvalue));
+
       document.getElementById(self.mapShortCutKeys.get(keyvalue)).click();
     }
   };
@@ -1600,6 +1601,11 @@ export var AimEditor = function(
           );
       }
 
+      if (allowedTermObj.getPrimitive().noMoreQuestions == true) {
+        console.log("nomore question situation : === true");
+        self.DisableTillNext(prObject.id, "tillend", self.callDisable);
+      }
+      console.log(allowedTermObj);
       self.formCheckHandler(self.checkFormSaveReady());
     };
 
@@ -2074,7 +2080,7 @@ export var AimEditor = function(
 
   var disabledefined = [];
   this.DisableTillNext = function(actualid, nextid, call) {
-    console.log("disable next called");
+    console.log("disable next called", nextid);
     let nextControl = 0;
     for (var [key, value] of self.mapCardinalitiesToCheckId) {
       if (key == actualid) {
@@ -2091,16 +2097,15 @@ export var AimEditor = function(
           document.getElementById(key).className =
             "blue check circle outline icon";
           let ely = document.getElementById(key).parentNode;
-
+          console.log("disabling", ely.parentnode);
           //$(ely.parentNode).dropdown({action: 'hide'});
-          $(ely.parentNode)
-            .dropdown()
-            .hide();
+          $(ely.parentNode).hide();
         } else nextControl = 0;
       }
     }
     call();
   };
+
   this.EnableTillNext = function(actualid, nextid) {
     let nextControl = 0;
     for (var [key, value] of self.mapCardinalitiesToCheckId) {
@@ -2118,10 +2123,8 @@ export var AimEditor = function(
           document.getElementById(key).className =
             "green check circle outline icon";
           let ely = document.getElementById(key).parentNode;
-
-          $(ely.parentNode)
-            .dropdown()
-            .show();
+          console.log("enabling", ely.parentNode);
+          $(ely.parentNode).show();
         } else nextControl = 0;
       }
     }
@@ -2144,7 +2147,9 @@ export var AimEditor = function(
 
   this.solveAimCompnent = function(object) {};
 
-  this.AfterClick = function(obj) {};
+  this.AfterClick = function(obj) {
+    //alert():
+  };
 
   this.printXmlAim = function(data, xmlArray) {
     var oSerializer = new XMLSerializer();
