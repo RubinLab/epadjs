@@ -359,14 +359,9 @@ class Aim {
     return coordinates;
   };
 
-  addMarkupEntity = (
-    type,
-    shapeIndex,
-    points,
-    imageReferenceUid,
-    frameNumber = 1
-  ) => {
-    //frameNumber should only be sent in multiframes
+  addMarkupEntity = (type, shapeIndex, points, imageReferenceUid) => {
+    const frameNumber = this._getFrameNumber(imageReferenceUid);
+
     var obj = {};
     obj["includeFlag"] = { value: true };
     obj["shapeIdentifier"] = { value: shapeIndex };
@@ -382,6 +377,12 @@ class Aim {
       obj
     );
     return uId;
+  };
+
+  _getFrameNumber = imageReferenceUid => {
+    const frameNumber = imageReferenceUid.split("frame=");
+    if (frameNumber.length > 1) return frameNumber[1];
+    return 1;
   };
 
   /*                                          */

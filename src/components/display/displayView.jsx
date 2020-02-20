@@ -211,6 +211,7 @@ class DisplayView extends Component {
       // clear the segmentation data as well
       cornerstoneTools.store.modules.segmentation.state.series = {};
       series.forEach((serie, serieIndex) => {
+        console.log("Serie Image annotations", serie.imageAnnotations);
         if (serie.aimID) {
           this.openAimEditor(serie);
         }
@@ -251,6 +252,7 @@ class DisplayView extends Component {
         cornerstone.loadAndCacheImage(singleFrameUrl);
       }
     });
+    console.log("Cornerstone Image Ids", cornerstoneImageIds);
 
     //to jump to the same image after aim save
     let imageIndex;
@@ -500,6 +502,7 @@ class DisplayView extends Component {
             serieIndex
           );
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
+        console.log("Key, value", key, value);
         this.renderMarkup(key, value, color, seriesUid, studyUid);
         if (aimUid === serie.aimID) this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
       });

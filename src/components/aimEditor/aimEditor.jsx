@@ -359,7 +359,9 @@ class AimEditor extends Component {
     var shapeIndex = 1;
     var markupsToSave = {};
     markedImageIds.map(imageId => {
+      console.log("Image id", imageId);
       const imageReferenceUid = this.parseImgeId(imageId);
+      console.log("ImageReferenceUid", imageReferenceUid);
       const markUps = toolState[imageId];
       Object.keys(markUps).map(tool => {
         switch (tool) {
@@ -879,8 +881,9 @@ class AimEditor extends Component {
   };
 
   parseImgeId = imageId => {
-    if (mode == "lite") return imageId.split("/").pop();
-    else return imageId.split("objectUID=")[1].split("&")[0];
+    // if (mode == "lite") return imageId.split("/").pop();
+    // else return imageId.split("objectUID=")[1].split("&")[0];
+    return imageId.split("objectUID=")[1];
   };
 }
 
