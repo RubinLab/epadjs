@@ -244,7 +244,7 @@ export var AimEditor = function(
       }
     };
     $('select[class^="ui dropdown"]').dropdown();
-
+    document.getElementById("tlist").children[0].style.width = "100%";
     self.templateSelect.style.width = "100%";
     templateDiv.style.width = "100%";
   };
