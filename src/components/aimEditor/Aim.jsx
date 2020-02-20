@@ -364,15 +364,15 @@ class Aim {
 
     var obj = {};
     obj["includeFlag"] = { value: true };
-    obj["shapeIdentifier"] = { value: shapeIndex };
-    obj["referencedFrameNumber"] = { value: frameNumber };
-    obj["xsi:type"] = type;
     obj["twoDimensionSpatialCoordinateCollection"] = {
       TwoDimensionSpatialCoordinate: this._createCoordinateArray(points)
     };
     const uId = generateUid();
+    obj["shapeIdentifier"] = { value: shapeIndex };
     obj["uniqueIdentifier"] = { root: uId };
+    obj["xsi:type"] = type;
     obj["imageReferenceUid"] = { root: imageReferenceUid };
+    obj["referencedFrameNumber"] = { value: frameNumber };
     this.imageAnnotations.ImageAnnotation[0].markupEntityCollection.MarkupEntity.push(
       obj
     );

@@ -553,6 +553,7 @@ class App extends Component {
             closeMenu={this.closeMenu}
             projectMap={this.state.projectMap}
             updateProgress={this.updateProgress}
+            admin={this.state.admin}
           />
         )}
         {this.state.openInfo && (
