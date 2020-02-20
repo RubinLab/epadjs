@@ -1885,8 +1885,10 @@ export var AimEditor = function(
     this.getelementHtml = function() {
       return div;
     };
-
+    let nextIdExist = false;
+    let nomoreQuestionExist = false;
     checkbox.onclick = function() {
+      console.log("check box parent :", prObject);
       allowedTermObj.changeOnSelect("1", self.AfterClick);
 
       var checkmarkObj = self.mapCardinalitiesToCheckId.get(prObject.id);
@@ -1907,12 +1909,58 @@ export var AimEditor = function(
       if (
         checkmarkObj.actualSelected >= checkmarkObj.min &&
         checkmarkObj.actualSelected <= checkmarkObj.max
-      )
+      ) {
         document.getElementById(prObject.id).className =
           "green check circle outline icon";
-      else
+      } else {
         document.getElementById(prObject.id).className =
           "red check circle outline icon";
+      }
+
+      let allowedTermGroup = prObject.AllowedTerm;
+      let clickedAllowedTermIndex = -1;
+      for (let i = 0; i < allowedTermGroup.length; i++) {
+        console.log(allowedTermGroup[i].select);
+        if (allowedTermGroup[i].codeValue == allowedTermObj.codeValue) {
+          clickedAllowedTermIndex = i;
+        }
+        //Do something
+      }
+
+      console.log("clickeed AT at index", checkbox.checked);
+      //disable enable ccomponent seection
+      if (allowedTermObj.nextId != "0" && checkbox.checked == true) {
+        console.log("next id catched", allowedTermObj.nextId);
+        self.DisableTillNext(
+          prObject.id,
+          allowedTermObj.nextId,
+          self.callDisable
+        );
+      } else if (
+        typeof self.mapStatusAllowedTermBlocks.get(checkmarkObj.id) !==
+          "undefined" &&
+        allowedTermObj.nextId != "0" &&
+        checkbox.checked == false
+      ) {
+        var statusCheckAllowTermObject = self.mapStatusAllowedTermBlocks.get(
+          checkmarkObj.id
+        );
+        if (statusCheckAllowTermObject.status == "disabled")
+          self.EnableTillNext(
+            statusCheckAllowTermObject.startid,
+            statusCheckAllowTermObject.endid
+          );
+      }
+
+      if (allowedTermObj.getPrimitive().noMoreQuestions == true) {
+        if (this.checked == true) {
+          console.log("nomore question situation : === true");
+          self.DisableTillNext(prObject.id, "tillend", self.callDisable);
+        } else {
+          console.log("nomore question situation : === true");
+          self.EnableTillNext(prObject.id, "tillend");
+        }
+      }
 
       self.formCheckHandler(self.checkFormSaveReady());
     };
