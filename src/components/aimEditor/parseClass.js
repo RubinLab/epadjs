@@ -2348,30 +2348,30 @@ export var AimEditor = function(
    }
 */
   //load aim end
-  this.readx = function readx(evt) {
-    return self.readFile(evt);
-  };
+  // this.readx = function readx(evt) {
+  //   return self.readFile(evt);
+  // };
 
   //return self.loadAim(self.textXml, self.checkSaveReady);
 
-  this.readFile = function(e) {
-    //Retrieve all the files from the FileList object
+  // this.readFile = function(e) {
+  //   //Retrieve all the files from the FileList object
 
-    var file = e.target.files[0];
-    if (!file) {
-      return;
-    }
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var contents = e.target.result;
-      self.textXml = contents;
-      // Display file content
-      //displayContents(contents);
-    };
-    reader.readAsText(file);
+  //   var file = e.target.files[0];
+  //   if (!file) {
+  //     return;
+  //   }
+  //   var reader = new FileReader();
+  //   reader.onload = function(e) {
+  //     var contents = e.target.result;
+  //     self.textXml = contents;
+  //     // Display file content
+  //     //displayContents(contents);
+  //   };
+  //   reader.readAsText(file);
 
-    // return self.loadAim(self.textXml, self.checkSaveReady);
-  };
+  //   // return self.loadAim(self.textXml, self.checkSaveReady);
+  // };
 
   // Save Aim
   this.savetextFreeInput = function(
@@ -2740,7 +2740,8 @@ export var AimEditor = function(
   };
 
   this.saveScaleLevel = function(parentObject, itself, Entitytype, jsonInner) {
-    jsonInner["xsi:type"] = parentObject.value.scaleType;
+    //jsonInner["xsi:type"] = parentObject.value.scaleType;
+    jsonInner["type"] = parentObject.value.scaleType;
     let prntObject = null;
 
     let ScaleLevels = itself.value;
@@ -2810,7 +2811,7 @@ export var AimEditor = function(
     }
     let jsonCharacteristicQuantification = {
       type: "Scale",
-      "xsi:type": "",
+      "xsi:type": "Scale",
       annotatorConfidence: { value: anotconf },
       label: { value: parentObject.value.name },
       valueLabel: {
