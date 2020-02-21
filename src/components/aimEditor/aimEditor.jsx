@@ -359,9 +359,7 @@ class AimEditor extends Component {
     var shapeIndex = 1;
     var markupsToSave = {};
     markedImageIds.map(imageId => {
-      console.log("Image id", imageId);
       const imageReferenceUid = this.parseImgeId(imageId);
-      console.log("ImageReferenceUid", imageReferenceUid);
       const markUps = toolState[imageId];
       Object.keys(markUps).map(tool => {
         switch (tool) {

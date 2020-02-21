@@ -64,7 +64,7 @@ export const updateImageIndex = imageIndex => {
   return { type: UPDATE_IMAGE_INDEX, imageIndex };
 };
 export const updateImageId = event => {
-  const imageID = event.detail.image.imageId.split("/").pop();
+  const imageID = event.detail.image.imageId.split("objectUID=").pop();
   return {
     type: UPDATE_IMAGEID,
     imageID

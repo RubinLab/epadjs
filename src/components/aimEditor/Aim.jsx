@@ -361,6 +361,8 @@ class Aim {
 
   addMarkupEntity = (type, shapeIndex, points, imageReferenceUid) => {
     const frameNumber = this._getFrameNumber(imageReferenceUid);
+    if (frameNumber > -1)
+      imageReferenceUid = imageReferenceUid.split("&frame=")[0]; //if multiframe strip the frame number from imageUID
 
     var obj = {};
     obj["includeFlag"] = { value: true };
@@ -382,7 +384,7 @@ class Aim {
   _getFrameNumber = imageReferenceUid => {
     const frameNumber = imageReferenceUid.split("frame=");
     if (frameNumber.length > 1) return frameNumber[1];
-    return 1;
+    return -1;
   };
 
   /*                                          */
