@@ -3697,11 +3697,32 @@ export var AimEditor = function(
     if (jsonObj !== null && typeof jsonObj == "object") {
       Object.entries(jsonObj).forEach(([key, value]) => {
         if (key === "CharacteristicQuantification") {
-          $("#Select" + value.label.value).dropdown("set selected", [
-            value.valueLabel.value
-          ]);
+          let CharQuantArray = value;
+          let arrayCheck = false;
+          let arrayIndex = -1;
+          let arraySize = -1;
+          console.log("CharacteristicQuantification", value);
+          if (Array.isArray(CharQuantArray)) {
+            arrayCheck = true;
+            arraySize = CharQuantArray.length;
+          } else {
+            arraySize = 1;
+          }
+          let eachCharactQuantfObj = "";
+          for (let i = 0; i < arraySize; i++) {
+            if (arrayCheck) {
+              eachCharactQuantfObj = CharQuantArray[i];
+            } else {
+              eachCharactQuantfObj = CharQuantArray;
+            }
+            $(
+              "#Select" + eachCharactQuantfObj.label.value
+            ).dropdown("set selected", [eachCharactQuantfObj.valueLabel.value]);
+            console.log("each char quantf object :", eachCharactQuantfObj);
+          }
         }
         if (key === "typeCode") {
+          //for allowed terms and valid terms
           let ValidtermCode = "";
           label = self.removeEmptySpace(jsonObj.label.value);
 
@@ -3757,6 +3778,7 @@ export var AimEditor = function(
             }
           }
         }
+
         if (key === "annotatorConfidence") {
           if (jsonObj.hasOwnProperty("label")) {
             let annotatorConflabel = jsonObj["label"]["value"].replace(
