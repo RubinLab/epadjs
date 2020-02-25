@@ -2434,110 +2434,94 @@ export var AimEditor = function(
 
   //****************** used components ***********************************
 
-  this.saveInterval = function(
-    parentArray,
-    parentObject,
-    itself,
-    Entitytype,
-    jsonInner
-  ) {
-    //console.log("interval :"+JSON.stringify(parentObject));
-    //console.log("interval :"+JSON.stringify(jsonInner));
-    /*
-      var _inself = this;
+  this.saveInterval = function(parentObject, itself, Entitytype, jsonInner) {
+    var Intervals = itself.value;
+    var arraySize = -1;
+    var arrayCheck = false;
 
-      var prntObject = null;
+    if (Array.isArray(Intervals)) {
+      arraySize = Intervals.length;
+      arrayCheck = true;
+    } else {
+      arraySize = 1;
+    }
+    console.log("numerical parent object", parentObject);
+    let jsonCharacteristicQuantification = {
+      "xsi:type": "Interval",
+      minOperator: "",
+      maxOperator: "",
+      annotatorConfidence: { value: parentObject.value.selectac },
+      label: { value: parentObject.value.name },
+      ucumString: { value: "" },
+      minValue: { value: "" },
+      maxValue: { value: "" },
+      valueLabel: {
+        value: ""
+      }
+    };
 
+    var defaultSelectedValueLabel = "";
+    var defaultSelectedOperator = "";
+    var defaultSelectedMinOperator = "";
+    var defaultSelectedMaxOperator = "";
+    var defaultSelectedMinValue = "";
+    var defaultSelectedMaxValue = "";
+    var defaultSelectedUcumString = "";
 
-      var Intervals = itself.value;
+    var i = 0;
 
-      var arraySize = -1;
-      var arrayCheck = false;
-      if (Array.isArray(Intervals)) {
-         arraySize = Intervals.length;
-         arrayCheck = true;
+    for (i = 0; i < arraySize; i++) {
+      if (arrayCheck == true) {
+        var instanceObject = Intervals[i];
       } else {
-         arraySize = 1;
+        var instanceObject = Intervals;
       }
 
-
-      var defaultMaxOperator = "";
-      var defaultMinOperator = "";
-      var defaultMinValue = "";
-      var defaultMaxValue = "";
-      var defaultUcumString = "";
-      var defaultValue = "";
-
-
-      var xmlCharacteristicQuantification = xmldoc.createElement("CharacteristicQuantification");
-
-
-      var xmlAnnotatorConfidence = xmldoc.createElement("annotatorConfidence");
-      xmlAnnotatorConfidence.setAttribute("value", parentObject.value.selectac);
-
-      var xmlLabel = xmldoc.createElement("label");
-
-      var xmlMinValue = xmldoc.createElement("minValue");
-      var xmlMaxValue = xmldoc.createElement("maxValue");
-      var xmlUcumString = xmldoc.createElement("ucumString");
-
-      xmlCharacteristicQuantification.appendChild(xmlAnnotatorConfidence);
-
-
-
-      var i = 0;
-      for (i = 0; i < arraySize; i++) {
-
-         if (arrayCheck == true) {
-            var instanceObject = Intervals[i];
-         } else {
-            var instanceObject = Intervals;
-         }
-
-         var prntObject = {
-            type: "Intervals",
-            value: instanceObject
-         }
-         if (i == 0) {
-
-            defaultMaxOperator = instanceObject.maxOperator;
-            defaultMinOperator = instanceObject.minOperator;
-            defaultMinValue = instanceObject.minValue;
-            defaultMaxValue = instanceObject.maxValue;
-            defaultUcumString = instanceObject.ucumString;
-            defaultValue = instanceObject.valueLabel;
-
-         } else {
-            if (instanceObject.hasOwnProperty("select")) {
-               if (instanceObject.select == "1") {
-
-                  defaultMaxOperator = instanceObject.maxOperator;
-                  defaultMinOperator = instanceObject.minOperator;
-                  defaultMinValue = instanceObject.minValue;
-                  defaultMaxValue = instanceObject.maxValue;
-                  defaultUcumString = instanceObject.ucumString;
-                  defaultValue = instanceObject.valueLabel;
-               }
-            }
-         }
-
-
+      var prntObject = {
+        type: "Numerical",
+        value: instanceObject
+      };
+      console.log("numerical instance object", instanceObject);
+      if (i == 0) {
+        defaultSelectedValueLabel = instanceObject.valueLabel;
+        defaultSelectedOperator = instanceObject.operator;
+        defaultSelectedUcumString = instanceObject.ucumString;
+        defaultSelectedMinOperator = instanceObject.minOperator;
+        defaultSelectedMaxOperator = instanceObject.maxOperator;
+        defaultSelectedMinValue = instanceObject.minValue;
+        defaultSelectedMaxValue = instanceObject.maxValue;
+      } else {
+        if (instanceObject.hasOwnProperty("select")) {
+          if (instanceObject.select === "1") {
+            defaultSelectedValueLabel = instanceObject.valueLabel;
+            defaultSelectedOperator = instanceObject.operator;
+            defaultSelectedUcumString = instanceObject.ucumString;
+            defaultSelectedMinOperator = instanceObject.minOperator;
+            defaultSelectedMaxOperator = instanceObject.maxOperator;
+            defaultSelectedMinValue = instanceObject.minValue;
+            defaultSelectedMaxValue = instanceObject.maxValue;
+          }
+        }
       }
-      xmlCharacteristicQuantification.setAttribute("maxOperator", defaultMaxOperator);
-      xmlCharacteristicQuantification.setAttribute("minOperator", defaultMinOperator);
-      xmlCharacteristicQuantification.setAttribute("xsi:type", "Interval");
-      xmlLabel.setAttribute("value", defaultValue);
-      xmlMinValue.setAttribute("value", defaultMinValue);
-      xmlMaxValue.setAttribute("value", defaultMaxValue);
-      xmlUcumString.setAttribute("value", defaultUcumString);
+      jsonCharacteristicQuantification.valueLabel = {
+        value: defaultSelectedValueLabel
+      };
 
-      xmlCharacteristicQuantification.appendChild(xmlLabel);
-      xmlCharacteristicQuantification.appendChild(xmlMinValue);
-      xmlCharacteristicQuantification.appendChild(xmlMaxValue);
-      xmlCharacteristicQuantification.appendChild(xmlUcumString);
-      xmlParent.appendChild(xmlCharacteristicQuantification);
+      jsonCharacteristicQuantification.operator = defaultSelectedOperator;
+      jsonCharacteristicQuantification.minOperator = defaultSelectedMinOperator;
+      jsonCharacteristicQuantification.maxOperator = defaultSelectedMaxOperator;
+      jsonCharacteristicQuantification.ucumString = {
+        value: defaultSelectedUcumString
+      };
+      jsonCharacteristicQuantification.minValue = {
+        value: defaultSelectedMinValue
+      };
+      jsonCharacteristicQuantification.maxValue = {
+        value: defaultSelectedMaxValue
+      };
+    }
 
-*/
+    jsonInner.push(jsonCharacteristicQuantification);
   };
 
   this.saveNonQuantifiable = function(
@@ -2682,7 +2666,6 @@ export var AimEditor = function(
   };
 
   this.saveNumerical = function(parentObject, itself, Entitytype, jsonInner) {
-    //rectified double check 02.24.2020
     var Numericals = itself.value;
     var arraySize = -1;
     var arrayCheck = false;
@@ -3771,7 +3754,11 @@ export var AimEditor = function(
                 break;
               case "Interval":
                 console.log("Interval", eachCharactQuantfObj);
-
+                $(
+                  "#Select" + eachCharactQuantfObj.label.value
+                ).dropdown("set selected", [
+                  eachCharactQuantfObj.valueLabel.value
+                ]);
                 break;
               default:
               // code block
