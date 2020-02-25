@@ -52,13 +52,13 @@ export var AimEditor = function(
   this.geoshapeidCounter = 0;
 
   var selectid = 0;
-  var mathOperators = new Map();
-  mathOperators.set("Equal", "=");
-  mathOperators.set("NotEqual", "!=");
-  mathOperators.set("LessThan", "<");
-  mathOperators.set("GreaterThan", ">");
-  mathOperators.set("LessThanEqual", "<=");
-  mathOperators.set("GreaterThanEqual", ">=");
+  this.mathOperators = new Map();
+  this.mathOperators.set("Equal", "=");
+  this.mathOperators.set("NotEqual", "!=");
+  this.mathOperators.set("LessThan", "<");
+  this.mathOperators.set("GreaterThan", ">");
+  this.mathOperators.set("LessThanEqual", "<=");
+  this.mathOperators.set("GreaterThanEqual", ">=");
 
   this.mapShapesSchemaToTemplate = new Map();
   this.mapShapesSchemaToTemplate.set("TwoDimensionPolyline", {
@@ -1357,7 +1357,7 @@ export var AimEditor = function(
       var scaleArraysize = object.length;
       for (i = 0; i < scaleArraysize; i++) {
         var createFormValue =
-          mathOperators.get(object[i].operator) +
+          self.mathOperators.get(object[i].operator) +
           " " +
           object[i].valueLabel +
           " " +
@@ -1390,7 +1390,7 @@ export var AimEditor = function(
 
       var quantileOption = document.createElement("option");
       quantileOption.innerHTML =
-        mathOperators.get(subEObject.operator) +
+        self.mathOperators.get(subEObject.operator) +
         " " +
         subEObject.valueLabel +
         " " +
@@ -2682,63 +2682,76 @@ export var AimEditor = function(
   };
 
   this.saveNumerical = function(parentObject, itself, Entitytype, jsonInner) {
-    /*
+    //rectified double check 02.24.2020
+    var Numericals = itself.value;
+    var arraySize = -1;
+    var arrayCheck = false;
 
-      let prntObject = null;
+    if (Array.isArray(Numericals)) {
+      arraySize = Numericals.length;
+      arrayCheck = true;
+    } else {
+      arraySize = 1;
+    }
+    console.log("numerical parent object", parentObject);
+    let jsonCharacteristicQuantification = {
+      "xsi:type": "Numerical",
+      operator: "",
+      annotatorConfidence: { value: parentObject.value.selectac },
+      label: { value: parentObject.value.name },
+      ucumString: { value: "" },
+      valueLabel: {
+        value: ""
+      },
+      value: {
+        value: ""
+      }
+    };
+    var defaultSelectedValue = "";
+    var defaultSelectedValueLabel = "";
+    var defaultSelectedOperator = "";
+    var defaultSelectedUcumString = "";
 
+    var i = 0;
 
-      let Numericals = itself.value;
-      let i = 0;
-      let arraySize = -1;
-      let arrayCheck = false;
-      let instanceObject = null;
-
-      if (Array.isArray(Numericals)) {
-         arraySize = Numericals.length;
-         arrayCheck = true;
+    for (i = 0; i < arraySize; i++) {
+      if (arrayCheck == true) {
+        var instanceObject = Numericals[i];
       } else {
-         arraySize = 1;
+        var instanceObject = Numericals;
       }
 
-
-
-      for (i = 0; i < arraySize; i++) {
-
-         if (arrayCheck === true) {
-            instanceObject = Numericals[i];
-         } else {
-            instanceObject = Numericals;
-         }
-
-         let prntObject = {
-            type: "Numerical",
-            value: instanceObject
-         }
-
-
-
-         for (var key in instanceObject) {
-
-            if (typeof instanceObject[key] === "object") {
-
-
-               let subObject = {
-                  type: key,
-                  value: instanceObject[key]
-               }
-
-
-
-
-               //parentHolder -> each component creates it's own copy of the array and passes to the next object
-               //componentOpject is the parent object for the callee
-               //is the callee object
-               //Entitytype should be null from this point 
-               self["save" + key](prntObject, subObject, Entitytype, jsonInner);
-            }
-         }
+      var prntObject = {
+        type: "Numerical",
+        value: instanceObject
+      };
+      console.log("numerical instance object", instanceObject);
+      if (i == 0) {
+        defaultSelectedValue = instanceObject.value;
+        defaultSelectedValueLabel = instanceObject.valueLabel;
+        defaultSelectedOperator = instanceObject.operator;
+        defaultSelectedUcumString = instanceObject.ucumString;
+      } else {
+        if (instanceObject.hasOwnProperty("select")) {
+          if (instanceObject.select === "1") {
+            defaultSelectedValue = instanceObject.value;
+            defaultSelectedValueLabel = instanceObject.valueLabel;
+            defaultSelectedOperator = instanceObject.operator;
+            defaultSelectedUcumString = instanceObject.ucumString;
+          }
+        }
       }
-*/
+      jsonCharacteristicQuantification.valueLabel = {
+        value: defaultSelectedValueLabel
+      };
+      jsonCharacteristicQuantification.value = { value: defaultSelectedValue };
+      jsonCharacteristicQuantification.operator = defaultSelectedOperator;
+      jsonCharacteristicQuantification.ucumString = {
+        value: defaultSelectedUcumString
+      };
+    }
+
+    jsonInner.push(jsonCharacteristicQuantification);
   };
 
   this.saveScaleLevel = function(parentObject, itself, Entitytype, jsonInner) {
@@ -3742,7 +3755,15 @@ export var AimEditor = function(
                 break;
               case "Numerical":
                 console.log("Numerical", eachCharactQuantfObj);
-
+                $(
+                  "#Select" + eachCharactQuantfObj.label.value
+                ).dropdown("set selected", [
+                  self.mathOperators.get(eachCharactQuantfObj.operator) +
+                    " " +
+                    eachCharactQuantfObj.valueLabel.value +
+                    " " +
+                    eachCharactQuantfObj.ucumString.value
+                ]);
                 break;
               case "Quantile":
                 console.log("Quantile", eachCharactQuantfObj);
