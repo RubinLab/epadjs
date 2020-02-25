@@ -1344,13 +1344,14 @@ export var AimEditor = function(
     mapTagArray,
     parentTagTypeFromJson
   ) {
+    console.log("numerical parent :", "Select" + parent.name);
     var arrayLength = -1;
     var quantileDiv = document.createElement("div");
     quantileDiv.className = "mylbl";
     var quantileSelect = document.createElement("select");
     quantileSelect.className = "ui dropdown mylbl";
     selectid++;
-    quantileSelect.id = selectid;
+    quantileSelect.id = "Select" + parent.name;
     quantileSelect.addEventListener("change", function() {
       var i = 0;
       var scaleArraysize = object.length;
@@ -1427,6 +1428,7 @@ export var AimEditor = function(
       var quantileDiv = document.createElement("div");
       quantileDiv.className = "mylbl";
       var quantileSelect = document.createElement("select");
+      quantileSelect.id = "Select" + parent.name;
       quantileSelect.className = "ui dropdown mylbl";
       quantileDiv.appendChild(quantileSelect);
       parentDiv.appendChild(quantileDiv);
@@ -1472,7 +1474,7 @@ export var AimEditor = function(
     intervalSelect.className = "ui dropdown mylbl";
 
     selectid++;
-    intervalSelect.id = selectid;
+    intervalSelect.id = "Select" + parent.name;
     intervalSelect.addEventListener("change", function() {
       var i = 0;
       var scaleArraysize = object.length;
@@ -1513,7 +1515,7 @@ export var AimEditor = function(
     var quantileSelect = document.createElement("select");
     quantileSelect.className = "ui dropdown mylbl";
     selectid++;
-    quantileSelect.id = selectid;
+    quantileSelect.id = "Select" + parent.name;
     quantileSelect.addEventListener("change", function() {
       var i = 0;
       var scaleArraysize = object.length;
@@ -3701,6 +3703,7 @@ export var AimEditor = function(
           let arrayCheck = false;
           let arrayIndex = -1;
           let arraySize = -1;
+
           console.log("CharacteristicQuantification", value);
           if (Array.isArray(CharQuantArray)) {
             arrayCheck = true;
@@ -3715,9 +3718,44 @@ export var AimEditor = function(
             } else {
               eachCharactQuantfObj = CharQuantArray;
             }
-            $(
-              "#Select" + eachCharactQuantfObj.label.value
-            ).dropdown("set selected", [eachCharactQuantfObj.valueLabel.value]);
+            console.log("eachCharactQuantfObj", eachCharactQuantfObj);
+            console.log(
+              "eachCharactQuantfObj",
+              eachCharactQuantfObj["xsi:type"]
+            );
+            let chartQuantfType = eachCharactQuantfObj["xsi:type"];
+            switch (chartQuantfType) {
+              case "Scale":
+                $(
+                  "#Select" + eachCharactQuantfObj.label.value
+                ).dropdown("set selected", [
+                  eachCharactQuantfObj.valueLabel.value
+                ]);
+                break;
+              case "NonQuantifiable":
+                console.log("NonQuantifiable", eachCharactQuantfObj);
+                $(
+                  "#Select" + eachCharactQuantfObj.label.value
+                ).dropdown("set selected", [
+                  eachCharactQuantfObj.typeCode[0].codeSystem
+                ]);
+                break;
+              case "Numerical":
+                console.log("Numerical", eachCharactQuantfObj);
+
+                break;
+              case "Quantile":
+                console.log("Quantile", eachCharactQuantfObj);
+
+                break;
+              case "Interval":
+                console.log("Interval", eachCharactQuantfObj);
+
+                break;
+              default:
+              // code block
+            }
+
             console.log("each char quantf object :", eachCharactQuantfObj);
           }
         }
