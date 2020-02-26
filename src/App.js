@@ -275,7 +275,7 @@ class App extends Component {
     fetch("/config.json")
       .then(async res => {
         const data = await res.json();
-        const { mode, apiUrl, wadoUrl } = data;
+        let { mode, apiUrl, wadoUrl } = data;
         // check and use environment variables if any
         mode = process.env.REACT_APP_MODE || mode;
         apiUrl = process.env.REACT_APP_API_URL || apiUrl;
