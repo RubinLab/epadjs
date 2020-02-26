@@ -277,9 +277,9 @@ class App extends Component {
         const data = await res.json();
         const { mode, apiUrl, wadoUrl } = data;
         // check and use environment variables if any
-        mode = REACT_APP_MODE || mode;
-        apiUrl = REACT_APP_API_URL || apiUrl;
-        wadoUrl = REACT_APP_WADO_URL || wadoUrl;
+        mode = process.env.REACT_APP_MODE || mode;
+        apiUrl = process.env.REACT_APP_API_URL || apiUrl;
+        wadoUrl = process.env.REACT_APP_WADO_URL || wadoUrl;
         sessionStorage.setItem("mode", mode);
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
@@ -293,7 +293,7 @@ class App extends Component {
     fetch("/keycloak.json")
       .then(async res => {
         const data = await res.json();
-        const auth = REACT_APP_AUTH_URL || data["auth-server-url"];
+        const auth = process.env.REACT_APP_AUTH_URL || data["auth-server-url"];
         sessionStorage.setItem("auth", auth);
       })
       .catch(err => {
@@ -313,16 +313,18 @@ class App extends Component {
   completeAutorization = apiUrl => {
     const keycloak = Keycloak("/keycloak.json");
     // check and use environment variables if any
-    keycloak.realm = REACT_APP_AUTH_REALM || keycloak.realm;
+    keycloak.realm = process.env.REACT_APP_AUTH_REALM || keycloak.realm;
     keycloak["auth-server-url"] =
-      REACT_APP_AUTH_URL || keycloak["auth-server-url"];
+      process.env.REACT_APP_AUTH_URL || keycloak["auth-server-url"];
     keycloak["ssl-required"] =
-      REACT_APP_AUTH_SSL_REQUIRED || keycloak["ssl-required"];
-    keycloak.resource = REACT_APP_AUTH_RESOURCE || keycloak.resource;
+      process.env.REACT_APP_AUTH_SSL_REQUIRED || keycloak["ssl-required"];
+    keycloak.resource =
+      process.env.REACT_APP_AUTH_RESOURCE || keycloak.resource;
     keycloak["public-client"] =
-      REACT_APP_AUTH_PUBLIC_CLIENT || keycloak["public-client"];
+      process.env.REACT_APP_AUTH_PUBLIC_CLIENT || keycloak["public-client"];
     keycloak["confidential-port"] =
-      REACT_APP_AUTH_CONFIDENTIAL_PORT || keycloak["confidential-port"];
+      process.env.REACT_APP_AUTH_CONFIDENTIAL_PORT ||
+      keycloak["confidential-port"];
 
     let keycloakInit = new Promise((resolve, reject) => {
       keycloak.init({ onLoad: "login-required" }).then(authenticated => {
