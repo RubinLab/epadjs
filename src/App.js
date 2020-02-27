@@ -272,10 +272,10 @@ class App extends Component {
     this.setState({ projectMap });
   };
   async componentDidMount() {
-    fetch("/config.json")
-      .then(async res => {
-        const data = await res.json();
-        let { mode, apiUrl, wadoUrl } = data;
+    Promise.all([fetch("/config.json"), fetch("/keycloak.json")])
+      .then(async results => {
+        const configData = await results[0].json();
+        let { mode, apiUrl, wadoUrl } = configData;
         // check and use environment variables if any
         mode = process.env.REACT_APP_MODE || mode;
         apiUrl = process.env.REACT_APP_API_URL || apiUrl;
@@ -284,33 +284,33 @@ class App extends Component {
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
         this.setState({ mode, apiUrl, wadoUrl });
-        this.completeAutorization(apiUrl);
-      })
-      .catch(err => {
-        console.log(err);
-      });
 
-    fetch("/keycloak.json")
-      .then(async res => {
-        const data = await res.json();
-        const auth = process.env.REACT_APP_AUTH_URL || data["auth-server-url"];
-        const keycloak = data;
+        const keycloakData = await results[1].json();
+        const auth =
+          process.env.REACT_APP_AUTH_URL || keycloakData["auth-server-url"];
+        const keycloak = keycloakData;
         // check and use environment variables if any
         keycloak.realm = process.env.REACT_APP_AUTH_REALM || keycloak.realm;
-        keycloak["auth-server-url"] =
+        // keycloak["auth-server-url"] =
+        //   process.env.REACT_APP_AUTH_URL || keycloak["auth-server-url"];
+        keycloak.url =
           process.env.REACT_APP_AUTH_URL || keycloak["auth-server-url"];
-        keycloak["ssl-required"] =
-          process.env.REACT_APP_AUTH_SSL_REQUIRED || keycloak["ssl-required"];
-        keycloak.resource =
+        // keycloak["ssl-required"] =
+        //   process.env.REACT_APP_AUTH_SSL_REQUIRED || keycloak["ssl-required"];
+        // keycloak.resource =
+        //   process.env.REACT_APP_AUTH_RESOURCE || keycloak.resource;
+        keycloak.clientId =
           process.env.REACT_APP_AUTH_RESOURCE || keycloak.resource;
-        keycloak["public-client"] =
-          process.env.REACT_APP_AUTH_PUBLIC_CLIENT || keycloak["public-client"];
-        keycloak["confidential-port"] =
-          process.env.REACT_APP_AUTH_CONFIDENTIAL_PORT ||
-          keycloak["confidential-port"];
+        // keycloak["public-client"] =
+        //   process.env.REACT_APP_AUTH_PUBLIC_CLIENT || keycloak["public-client"];
+        // keycloak["confidential-port"] =
+        //   process.env.REACT_APP_AUTH_CONFIDENTIAL_PORT ||
+        //   keycloak["confidential-port"];
         sessionStorage.setItem("auth", auth);
         console.log("keycloakJson", keycloak);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloak));
+
+        this.completeAutorization(apiUrl);
       })
       .catch(err => {
         console.log(err);
@@ -327,6 +327,11 @@ class App extends Component {
   }
 
   completeAutorization = apiUrl => {
+    console.log(
+      "keycloak",
+      JSON.stringify(JSON.parse(sessionStorage.getItem("keycloakJson")))
+    );
+    console.log(JSON.parse(sessionStorage.getItem("keycloakJson")));
     const keycloak = Keycloak(
       JSON.parse(sessionStorage.getItem("keycloakJson"))
     );
