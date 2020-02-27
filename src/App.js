@@ -310,7 +310,7 @@ class App extends Component {
           keycloak["confidential-port"];
         sessionStorage.setItem("auth", auth);
         console.log("keycloakJson", keycloak);
-        sessionStorage.setItem("keycloakJson", keycloak);
+        sessionStorage.setItem("keycloakJson", JSON.stringify(keycloak));
       })
       .catch(err => {
         console.log(err);
@@ -327,7 +327,9 @@ class App extends Component {
   }
 
   completeAutorization = apiUrl => {
-    const keycloak = Keycloak(sessionStorage.getItem("keycloakJson"));
+    const keycloak = Keycloak(
+      JSON.parse(sessionStorage.getItem("keycloakJson"))
+    );
     console.log("keycloak", keycloak);
     let keycloakInit = new Promise((resolve, reject) => {
       keycloak.init({ onLoad: "login-required" }).then(authenticated => {
