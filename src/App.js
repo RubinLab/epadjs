@@ -309,8 +309,8 @@ class App extends Component {
           process.env.REACT_APP_AUTH_CONFIDENTIAL_PORT ||
           keycloak["confidential-port"];
         sessionStorage.setItem("auth", auth);
-        console.log("keycloakJson", keycloakJson);
-        sessionStorage.setItem("keycloakJson", keycloakJson);
+        console.log("keycloakJson", keycloak);
+        sessionStorage.setItem("keycloakJson", keycloak);
       })
       .catch(err => {
         console.log(err);
