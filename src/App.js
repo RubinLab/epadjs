@@ -294,7 +294,23 @@ class App extends Component {
       .then(async res => {
         const data = await res.json();
         const auth = process.env.REACT_APP_AUTH_URL || data["auth-server-url"];
+        const keycloak = data;
+        // check and use environment variables if any
+        keycloak.realm = process.env.REACT_APP_AUTH_REALM || keycloak.realm;
+        keycloak["auth-server-url"] =
+          process.env.REACT_APP_AUTH_URL || keycloak["auth-server-url"];
+        keycloak["ssl-required"] =
+          process.env.REACT_APP_AUTH_SSL_REQUIRED || keycloak["ssl-required"];
+        keycloak.resource =
+          process.env.REACT_APP_AUTH_RESOURCE || keycloak.resource;
+        keycloak["public-client"] =
+          process.env.REACT_APP_AUTH_PUBLIC_CLIENT || keycloak["public-client"];
+        keycloak["confidential-port"] =
+          process.env.REACT_APP_AUTH_CONFIDENTIAL_PORT ||
+          keycloak["confidential-port"];
         sessionStorage.setItem("auth", auth);
+        console.log("keycloakJson", keycloakJson);
+        sessionStorage.setItem("keycloakJson", keycloakJson);
       })
       .catch(err => {
         console.log(err);
@@ -311,21 +327,8 @@ class App extends Component {
   }
 
   completeAutorization = apiUrl => {
-    const keycloak = Keycloak("/keycloak.json");
-    // check and use environment variables if any
-    keycloak.realm = process.env.REACT_APP_AUTH_REALM || keycloak.realm;
-    keycloak["auth-server-url"] =
-      process.env.REACT_APP_AUTH_URL || keycloak["auth-server-url"];
-    keycloak["ssl-required"] =
-      process.env.REACT_APP_AUTH_SSL_REQUIRED || keycloak["ssl-required"];
-    keycloak.resource =
-      process.env.REACT_APP_AUTH_RESOURCE || keycloak.resource;
-    keycloak["public-client"] =
-      process.env.REACT_APP_AUTH_PUBLIC_CLIENT || keycloak["public-client"];
-    keycloak["confidential-port"] =
-      process.env.REACT_APP_AUTH_CONFIDENTIAL_PORT ||
-      keycloak["confidential-port"];
-
+    const keycloak = Keycloak(sessionStorage.getItem("keycloakJson"));
+    console.log("keycloak", keycloak);
     let keycloakInit = new Promise((resolve, reject) => {
       keycloak.init({ onLoad: "login-required" }).then(authenticated => {
         // this.setState({ keycloak: keycloak, authenticated: authenticated });
