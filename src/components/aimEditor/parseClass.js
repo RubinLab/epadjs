@@ -1455,7 +1455,7 @@ export var AimEditor = function(
         var i = 0;
         var scaleArraysize = object.length;
         console.log("quatile on select : ", object);
-        object[0].selectedBin.value = this.selectedIndex;
+        object.selectedBin = this.selectedIndex;
         // for (i = 0; i < scaleArraysize; i++) {
         //   var createFormValue =
         //     self.mathOperators.get(object[i].operator) +
@@ -2579,18 +2579,16 @@ export var AimEditor = function(
       "xsi:type": "NonQuantifiable",
       annotatorConfidence: { value: anotconf },
       label: { value: parentObject.value.name },
-      typeCode: [
-        {
-          code: "",
-          codeSystem: "",
-          codeSystemName: "",
-          "iso:displayName": {
-            "xmlns:iso": "uri:iso.org:21090",
-            value: ""
-          },
-          codeSystemVersion: ""
-        }
-      ]
+      typeCode: {
+        code: "",
+        codeSystem: "",
+        codeSystemName: "",
+        "iso:displayName": {
+          "xmlns:iso": "uri:iso.org:21090",
+          value: ""
+        },
+        codeSystemVersion: ""
+      }
     };
     var defaultCode = "";
     var defaultCodeSystem = "";
@@ -2628,11 +2626,11 @@ export var AimEditor = function(
       }
     }
 
-    jsonCharacteristicQuantification.typeCode[0].code = defaultCode;
-    jsonCharacteristicQuantification.typeCode[0].codeSystem = defaultCodeSystem;
-    jsonCharacteristicQuantification.typeCode[0].codeSystemName = defaultCodeSystemName;
-    jsonCharacteristicQuantification.typeCode[0].codeSystemVersion = defaultCodeSystemVersion;
-    jsonCharacteristicQuantification.typeCode[0][
+    jsonCharacteristicQuantification.typeCode.code = defaultCode;
+    jsonCharacteristicQuantification.typeCode.codeSystem = defaultCodeSystem;
+    jsonCharacteristicQuantification.typeCode.codeSystemName = defaultCodeSystemName;
+    jsonCharacteristicQuantification.typeCode.codeSystemVersion = defaultCodeSystemVersion;
+    jsonCharacteristicQuantification.typeCode[
       "iso:displayName"
     ].value = defaultCodeSystem;
     jsonInner.push(jsonCharacteristicQuantification);
