@@ -1279,8 +1279,9 @@ export var AimEditor = function(
           );
         }
       }
-      self.checkAnnotatorConfidence(parentDiv, object);
+      console.log("scale checking object", parent);
     }
+    self.checkAnnotatorConfidence(parentDiv, parent);
   };
 
   this.ScaleLevel = function(
@@ -1378,7 +1379,7 @@ export var AimEditor = function(
       arrayLength = 1;
     }
     var subEObject = null;
-    self.checkAnnotatorConfidence(parentDiv, object);
+    //self.checkAnnotatorConfidence(parentDiv, object);
     for (var i = 0; i < arrayLength; i++) {
       if (isArray === 1) subEObject = object[i];
       else subEObject = object;
@@ -1397,6 +1398,7 @@ export var AimEditor = function(
         subEObject.ucumString;
       quantileSelect.appendChild(quantileOption);
     }
+    self.checkAnnotatorConfidence(parentDiv, parent);
   };
 
   this.Quantile = function(
@@ -1416,7 +1418,7 @@ export var AimEditor = function(
       arrayLength = 1;
     }
     var subEObject = null;
-    self.checkAnnotatorConfidence(parentDiv, object);
+    //self.checkAnnotatorConfidence(parentDiv, object);
     for (var i = 0; i < arrayLength; i++) {
       if (isArray === 1) subEObject = object[i];
       else subEObject = object;
@@ -1425,6 +1427,7 @@ export var AimEditor = function(
           self[key](subEObject, subEObject[key], parentDiv, mapTagArray, null);
         }
       }
+      console.log("each quantile ", subEObject);
       var quantileDiv = document.createElement("div");
       quantileDiv.className = "mylbl";
       var quantileSelect = document.createElement("select");
@@ -1447,7 +1450,26 @@ export var AimEditor = function(
           parseFloat(parseFloat(minValue) + parseFloat(step));
         minValue = minValue + step;
       }
+
+      quantileSelect.addEventListener("change", function() {
+        var i = 0;
+        var scaleArraysize = object.length;
+        console.log("quatile on select : ", object);
+        object[0].selectedBin.value = this.selectedIndex;
+        // for (i = 0; i < scaleArraysize; i++) {
+        //   var createFormValue =
+        //     self.mathOperators.get(object[i].operator) +
+        //     " " +
+        //     object[i].valueLabel +
+        //     " " +
+        //     object[i].ucumString;
+
+        //   if (createFormValue == this.value) object[i].select = "1";
+        //   else object[i].select = "0";
+        // }
+      });
     }
+    self.checkAnnotatorConfidence(parentDiv, parent);
   };
 
   this.Interval = function(
@@ -1467,7 +1489,7 @@ export var AimEditor = function(
       arrayLength = 1;
     }
     var subEObject = null;
-    self.checkAnnotatorConfidence(parentDiv, object);
+    //self.checkAnnotatorConfidence(parentDiv, object);
     var intervalDiv = document.createElement("div");
     intervalDiv.className = "mylbl";
     var intervalSelect = document.createElement("select");
@@ -1498,6 +1520,7 @@ export var AimEditor = function(
       intervalSelect.appendChild(intervalOption);
     }
     parentDiv.appendChild(intervalDiv);
+    self.checkAnnotatorConfidence(parentDiv, parent);
   };
 
   this.NonQuantifiable = function(
@@ -1535,7 +1558,7 @@ export var AimEditor = function(
       arrayLength = 1;
     }
     var subEObject = null;
-    self.checkAnnotatorConfidence(parentDiv, object);
+    //self.checkAnnotatorConfidence(parentDiv, object);
     for (var i = 0; i < arrayLength; i++) {
       if (isArray === 1) subEObject = object[i];
       else subEObject = object;
@@ -1548,6 +1571,7 @@ export var AimEditor = function(
       quantileOption.innerHTML = subEObject.codeMeaning;
       quantileSelect.appendChild(quantileOption);
     }
+    self.checkAnnotatorConfidence(parentDiv, parent);
   };
 
   this.createRadio = function(
@@ -2102,6 +2126,7 @@ export var AimEditor = function(
     }
   };
   this.checkAnnotatorConfidence = function(prentDiv, objectToCheckAnnConf) {
+    console.log("checking annotator confidence for : ", objectToCheckAnnConf);
     let isMouseButtondown = false;
     if (typeof objectToCheckAnnConf.annotatorConfidence != "undefined") {
       // Assign value to the property here
@@ -2446,11 +2471,15 @@ export var AimEditor = function(
       arraySize = 1;
     }
     console.log("numerical parent object", parentObject);
+    let anotconf = 0.0;
+    if (typeof parentObject.value.selectac !== "undefined") {
+      anotconf = parentObject.value.selectac;
+    }
     let jsonCharacteristicQuantification = {
       "xsi:type": "Interval",
       minOperator: "",
       maxOperator: "",
-      annotatorConfidence: { value: parentObject.value.selectac },
+      annotatorConfidence: { value: anotconf },
       label: { value: parentObject.value.name },
       ucumString: { value: "" },
       minValue: { value: "" },
@@ -2488,8 +2517,8 @@ export var AimEditor = function(
         defaultSelectedUcumString = instanceObject.ucumString;
         defaultSelectedMinOperator = instanceObject.minOperator;
         defaultSelectedMaxOperator = instanceObject.maxOperator;
-        defaultSelectedMinValue = instanceObject.minValue;
-        defaultSelectedMaxValue = instanceObject.maxValue;
+        defaultSelectedMinValue = parseFloat(instanceObject.minValue);
+        defaultSelectedMaxValue = parseFloat(instanceObject.maxValue);
       } else {
         if (instanceObject.hasOwnProperty("select")) {
           if (instanceObject.select === "1") {
@@ -2498,8 +2527,8 @@ export var AimEditor = function(
             defaultSelectedUcumString = instanceObject.ucumString;
             defaultSelectedMinOperator = instanceObject.minOperator;
             defaultSelectedMaxOperator = instanceObject.maxOperator;
-            defaultSelectedMinValue = instanceObject.minValue;
-            defaultSelectedMaxValue = instanceObject.maxValue;
+            defaultSelectedMinValue = parseFloat(instanceObject.minValue);
+            defaultSelectedMaxValue = parseFloat(instanceObject.maxValue);
           }
         }
       }
@@ -2542,10 +2571,13 @@ export var AimEditor = function(
     } else {
       arraySize = 1;
     }
-
+    let anotconf = 0.0;
+    if (typeof parentObject.value.selectac !== "undefined") {
+      anotconf = parentObject.value.selectac;
+    }
     let jsonCharacteristicQuantification = {
       "xsi:type": "NonQuantifiable",
-      annotatorConfidence: { value: parentObject.value.selectac },
+      annotatorConfidence: { value: anotconf },
       label: { value: parentObject.value.name },
       typeCode: [
         {
@@ -2607,62 +2639,90 @@ export var AimEditor = function(
   };
 
   this.saveQuantile = function(parentObject, itself, Entitytype, jsonInner) {
-    /*
+    var Quantiles = itself.value;
+    var arraySize = -1;
+    var arrayCheck = false;
 
+    if (Array.isArray(Quantiles)) {
+      arraySize = Quantiles.length;
+      arrayCheck = true;
+    } else {
+      arraySize = 1;
+    }
+    console.log("numerical parent object", parentObject);
+    let anotconf = 0.0;
+    if (typeof parentObject.value.selectac !== "undefined") {
+      anotconf = parentObject.value.selectac;
+    }
+    let jsonCharacteristicQuantification = {
+      "xsi:type": "Quantile",
+      annotatorConfidence: { value: anotconf },
+      label: { value: parentObject.value.name },
+      minValue: { value: "" },
+      maxValue: { value: "" },
+      bins: { value: "" },
+      selectedBin: { value: "" },
+      valueLabel: {
+        value: ""
+      }
+    };
 
-      let prntObject = null;
+    var defaultSelectedValueLabel = "";
+    var defaultSelectedBins = "";
+    var defaultSelectedSelectedBin = "";
+    var defaultSelectedMinValue = "";
+    var defaultSelectedMaxValue = "";
 
+    var i = 0;
 
-      let Quantiles = itself.value;
-      let i = 0;
-      let arraySize = -1;
-      let arrayCheck = false;
-      let instanceObject = null;
-      if (Array.isArray(Quantiles)) {
-         arraySize = Quantiles.length;
-         arrayCheck = true;
+    for (i = 0; i < arraySize; i++) {
+      if (arrayCheck == true) {
+        var instanceObject = Quantiles[i];
       } else {
-         arraySize = 1;
+        var instanceObject = Quantiles;
       }
 
-
-
-      for (i = 0; i < arraySize; i++) {
-
-         if (arrayCheck === true) {
-            instanceObject = Quantiles[i];
-         } else {
-            instanceObject = Quantiles;
-         }
-
-         let prntObject = {
-            type: "Quantile",
-            value: instanceObject
-         }
-
-
-
-         for (var key in instanceObject) {
-
-            if (typeof instanceObject[key] === "object") {
-
-
-               let subObject = {
-                  type: key,
-                  value: instanceObject[key]
-               }
-
-
-
-               //parentHolder -> each component creates it's own copy of the array and passes to the next object
-               //componentOpject is the parent object for the callee
-               //is the callee object
-               //Entitytype should be null from this point 
-               self["save" + key](prntObject, subObject, Entitytype, jsonInner);
-            }
-         }
+      var prntObject = {
+        type: "Numerical",
+        value: instanceObject
+      };
+      console.log("numerical instance object", instanceObject);
+      if (i == 0) {
+        defaultSelectedValueLabel = instanceObject.valueLabel;
+        defaultSelectedBins = parseInt(instanceObject.bins);
+        defaultSelectedSelectedBin = parseInt(instanceObject.selectedBin);
+        defaultSelectedMinValue = parseFloat(instanceObject.minValue);
+        defaultSelectedMaxValue = parseFloat(instanceObject.maxValue);
+      } else {
+        if (instanceObject.hasOwnProperty("select")) {
+          if (instanceObject.select === "1") {
+            defaultSelectedValueLabel = instanceObject.valueLabel;
+            defaultSelectedBins = parseInt(instanceObject.bins);
+            defaultSelectedSelectedBin = parseInt(instanceObject.selectedBin);
+            defaultSelectedMinValue = parseFloat(instanceObject.minValue);
+            defaultSelectedMaxValue = parseFloat(instanceObject.maxValue);
+          }
+        }
       }
-*/
+      jsonCharacteristicQuantification.valueLabel = {
+        value: defaultSelectedValueLabel
+      };
+
+      jsonCharacteristicQuantification.bins = {
+        value: defaultSelectedBins
+      };
+      jsonCharacteristicQuantification.selectedBin = {
+        value: defaultSelectedSelectedBin
+      };
+      jsonCharacteristicQuantification.minValue = {
+        value: defaultSelectedMinValue
+      };
+      jsonCharacteristicQuantification.maxValue = {
+        value: defaultSelectedMaxValue
+      };
+    }
+
+    jsonInner.push(jsonCharacteristicQuantification);
   };
 
   this.saveNumerical = function(parentObject, itself, Entitytype, jsonInner) {
@@ -2676,11 +2736,15 @@ export var AimEditor = function(
     } else {
       arraySize = 1;
     }
-    console.log("numerical parent object", parentObject);
+    let anotconf = 0;
+    if (typeof parentObject.value.selectac !== "undefined") {
+      anotconf = parentObject.value.selectac;
+    }
+    console.log("anotconf".anotconf);
     let jsonCharacteristicQuantification = {
       "xsi:type": "Numerical",
       operator: "",
-      annotatorConfidence: { value: parentObject.value.selectac },
+      annotatorConfidence: { value: anotconf },
       label: { value: parentObject.value.name },
       ucumString: { value: "" },
       valueLabel: {
@@ -2710,14 +2774,14 @@ export var AimEditor = function(
       };
       console.log("numerical instance object", instanceObject);
       if (i == 0) {
-        defaultSelectedValue = instanceObject.value;
+        defaultSelectedValue = parseFloat(instanceObject.value);
         defaultSelectedValueLabel = instanceObject.valueLabel;
         defaultSelectedOperator = instanceObject.operator;
         defaultSelectedUcumString = instanceObject.ucumString;
       } else {
         if (instanceObject.hasOwnProperty("select")) {
           if (instanceObject.select === "1") {
-            defaultSelectedValue = instanceObject.value;
+            defaultSelectedValue = parseFloat(instanceObject.value);
             defaultSelectedValueLabel = instanceObject.valueLabel;
             defaultSelectedOperator = instanceObject.operator;
             defaultSelectedUcumString = instanceObject.ucumString;
@@ -2801,11 +2865,9 @@ export var AimEditor = function(
       arraySize = 1;
     }
 
-    let anotconf = "";
+    let anotconf = 0.0;
     if (typeof parentObject.value.selectac !== "undefined") {
       anotconf = parentObject.value.selectac;
-    } else {
-      anotconf = 0;
     }
     let jsonCharacteristicQuantification = {
       type: "Scale",
@@ -2958,7 +3020,7 @@ export var AimEditor = function(
       arraySize = 1;
     }
     let tempjson = {};
-    tempjson.imagingObservationCharachteristicCollection = [];
+    tempjson.imagingObservationCharacteristicCollection = [];
     //console.log("XXX ___  itself : im ob char : " + JSON.stringify(itself));
 
     var i = 0;
@@ -2991,7 +3053,7 @@ export var AimEditor = function(
               prntObject,
               subObject,
               Entitytype,
-              tempjson.imagingObservationCharachteristicCollection
+              tempjson.imagingObservationCharacteristicCollection
             );
           }
         }
@@ -2999,8 +3061,8 @@ export var AimEditor = function(
 
       if (commentvalue !== "") {
         let lastImObCharColl =
-          tempjson.imagingObservationCharachteristicCollection[
-            tempjson.imagingObservationCharachteristicCollection.length - 1
+          tempjson.imagingObservationCharacteristicCollection[
+            tempjson.imagingObservationCharacteristicCollection.length - 1
           ];
         lastImObCharColl["comment"] = { value: commentvalue };
         commentvalue = "";
@@ -4007,9 +4069,9 @@ export var AimEditor = function(
 
       for (let i = 0; i < tempJson.length; i++) {
         if (
-          tempJson[i].hasOwnProperty("imagingPhysicalCharachteristicCollection")
+          tempJson[i].hasOwnProperty("imagingPhysicalCharacteristicCollection")
         ) {
-          tempSubJson = tempJson[i]["imagingPhysicalCharachteristicCollection"];
+          tempSubJson = tempJson[i]["imagingPhysicalCharacteristicCollection"];
 
           for (let k = 0; k < tempSubJson.length; k++) {
             if (
@@ -4026,8 +4088,8 @@ export var AimEditor = function(
             }
           }
 
-          delete tempJson[i].imagingPhysicalCharachteristicCollection;
-          tempJson[i].imagingPhysicalCharachteristicCollection = {
+          delete tempJson[i].imagingPhysicalCharacteristicCollection;
+          tempJson[i].imagingPhysicalCharacteristicCollection = {
             imagingPhysicalCharacteristic: tempSubJson
           };
         }
@@ -4047,11 +4109,11 @@ export var AimEditor = function(
       for (let i = 0; i < tempJson.length; i++) {
         if (
           tempJson[i].hasOwnProperty(
-            "imagingObservationCharachteristicCollection"
+            "imagingObservationCharacteristicCollection"
           )
         ) {
           tempSubJson =
-            tempJson[i]["imagingObservationCharachteristicCollection"];
+            tempJson[i]["imagingObservationCharacteristicCollection"];
 
           for (let k = 0; k < tempSubJson.length; k++) {
             if (
@@ -4068,8 +4130,8 @@ export var AimEditor = function(
             }
           }
 
-          delete tempJson[i].imagingObservationCharachteristicCollection;
-          tempJson[i].imagingObservationCharachteristicCollection = {
+          delete tempJson[i].imagingObservationCharacteristicCollection;
+          tempJson[i].imagingObservationCharacteristicCollection = {
             ImagingObservationCharacteristic: tempSubJson
           };
         }
