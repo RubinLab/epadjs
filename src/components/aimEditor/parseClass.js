@@ -1450,12 +1450,15 @@ export var AimEditor = function(
           parseFloat(parseFloat(minValue) + parseFloat(step));
         minValue = minValue + step;
       }
+      subEObject.valueLabel = quantileSelect.options[0].value;
 
       quantileSelect.addEventListener("change", function() {
         var i = 0;
         var scaleArraysize = object.length;
         console.log("quatile on select : ", object);
-        object.selectedBin = this.selectedIndex;
+        object.selectedBin = this.selectedIndex + 1;
+        object.select = 1;
+        object.valueLabel = this.options[this.selectedIndex].value;
         // for (i = 0; i < scaleArraysize; i++) {
         //   var createFormValue =
         //     self.mathOperators.get(object[i].operator) +
@@ -2718,6 +2721,9 @@ export var AimEditor = function(
       jsonCharacteristicQuantification.maxValue = {
         value: defaultSelectedMaxValue
       };
+      jsonCharacteristicQuantification.valueLabel = {
+        value: defaultSelectedValueLabel
+      };
     }
 
     jsonInner.push(jsonCharacteristicQuantification);
@@ -3793,7 +3799,7 @@ export var AimEditor = function(
                 $(
                   "#Select" + eachCharactQuantfObj.label.value
                 ).dropdown("set selected", [
-                  eachCharactQuantfObj.typeCode[0].codeSystem
+                  eachCharactQuantfObj.typeCode.codeSystem
                 ]);
                 break;
               case "Numerical":
@@ -3810,6 +3816,11 @@ export var AimEditor = function(
                 break;
               case "Quantile":
                 console.log("Quantile", eachCharactQuantfObj);
+                $(
+                  "#Select" + eachCharactQuantfObj.label.value
+                ).dropdown("set selected", [
+                  eachCharactQuantfObj.valueLabel.value
+                ]);
 
                 break;
               case "Interval":
