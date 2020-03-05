@@ -272,7 +272,10 @@ class App extends Component {
     this.setState({ projectMap });
   };
   async componentDidMount() {
-    Promise.all([fetch("/config.json"), fetch("/keycloak.json")])
+    Promise.all([
+      fetch(`${process.env.PUBLIC_URL}/config.json`),
+      fetch(`${process.env.PUBLIC_URL}/keycloak.json`)
+    ])
       .then(async results => {
         const configData = await results[0].json();
         let { mode, apiUrl, wadoUrl } = configData;
