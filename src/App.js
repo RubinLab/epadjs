@@ -322,17 +322,11 @@ class App extends Component {
 
   completeAutorization = apiUrl => {
     let getAuthUser = null;
-    console.log(
-      "keycloak",
-      JSON.stringify(JSON.parse(sessionStorage.getItem("keycloakJson")))
-    );
-    console.log(JSON.parse(sessionStorage.getItem("keycloakJson")));
 
     if (sessionStorage.getItem("authMode") !== "external") {
       const keycloak = Keycloak(
         JSON.parse(sessionStorage.getItem("keycloakJson"))
       );
-      console.log("keycloak", keycloak);
       getAuthUser = new Promise((resolve, reject) => {
         keycloak
           .init({ onLoad: "login-required" })
@@ -401,11 +395,13 @@ class App extends Component {
 
           this.eventSource = new EventSourcePolyfill(
             `${apiUrl}/notifications`,
-            {
-              headers: {
-                authorization: `Bearer ${result.keycloak.token}`
-              }
-            }
+            sessionStorage.getItem("authMode") !== "external"
+              ? {
+                  headers: {
+                    authorization: `Bearer ${result.keycloak.token}`
+                  }
+                }
+              : {}
           );
           this.eventSource.addEventListener(
             "message",
