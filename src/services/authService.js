@@ -34,6 +34,5 @@ export default {
   login,
   logout,
   getCurrentUser,
-  // getAuthHeader,
-  getAuthHeader1
+  getAuthHeader
 };
