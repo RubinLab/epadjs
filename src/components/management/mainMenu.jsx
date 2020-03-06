@@ -10,6 +10,8 @@ import Tools from "./tools";
 import Connections from "./connections";
 import "./menuStyle.css";
 import Header from "./common/managementHeader";
+import { scanDataFolder } from "./dataFolderScan";
+
 const mode = sessionStorage.getItem("mode");
 
 class MainMenu extends React.Component {
@@ -126,6 +128,17 @@ class MainMenu extends React.Component {
         <div className="mng-menu__option" onClick={this.handleSelection}>
           Templates
         </div>
+        {this.props.admin && (
+          <div
+            className="mng-menu__option"
+            onClick={() => {
+              scanDataFolder();
+              this.props.closeMenu();
+            }}
+          >
+            Scan Data Folder
+          </div>
+        )}
         <div className="mng-menu__option" onClick={this.handleSelection}>
           Worklists
         </div>

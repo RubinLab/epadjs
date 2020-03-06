@@ -58,11 +58,11 @@ export function getImageIds(series) {
 export function getWadoImagePath(studyUid, seriesUid, imageId) {
   return (
     wadoUrl +
-    "/studies/" +
+    "/?requestType=WADO&studyUID=" +
     studyUid +
-    "/series/" +
+    "&seriesUID=" +
     seriesUid +
-    "/instances/" +
+    "&objectUID=" +
     imageId
   );
 }

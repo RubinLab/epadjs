@@ -1,5 +1,5 @@
-import BaseTool from './base/BaseTool.js';
-import scroll from '../util/scroll.js';
+import BaseTool from "./base/BaseTool.js";
+import scroll from "../util/scroll.js";
 
 /**
  * @public
@@ -12,13 +12,13 @@ import scroll from '../util/scroll.js';
 export default class StackScrollMouseWheelTool extends BaseTool {
   constructor(props = {}) {
     const defaultProps = {
-      name: 'StackScrollMouseWheel',
-      supportedInteractionTypes: ['MouseWheel'],
+      name: "StackScrollMouseWheel",
+      supportedInteractionTypes: ["MouseWheel"],
       configuration: {
         loop: false,
         allowSkipping: true,
-        invert: false,
-      },
+        invert: false
+      }
     };
 
     super(props, defaultProps);

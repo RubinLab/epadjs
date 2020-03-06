@@ -235,22 +235,28 @@ class DisplayView extends Component {
 
   getImageStack = async (serie, index) => {
     let stack = {};
+    let imageIds = {};
     let cornerstoneImageIds = [];
     const imageUrls = await this.getImages(serie);
     imageUrls.map(url => {
       const baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
-          let multiFrameUrl =
-            mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
+          let multiFrameUrl = baseUrl + "&frame=" + i;
+          // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           cornerstoneImageIds.push(multiFrameUrl);
+          imageIds[multiFrameUrl] = true;
         }
       } else {
-        let singleFrameUrl = mode !== "lite" ? baseUrl : baseUrl;
+        let singleFrameUrl = baseUrl;
         cornerstoneImageIds.push(singleFrameUrl);
         cornerstone.loadAndCacheImage(singleFrameUrl);
+        imageIds[singleFrameUrl] = false;
       }
     });
+
+    this.setState({ imageIds: { ...imageIds } });
+
     //to jump to the same image after aim save
     let imageIndex;
     if (
@@ -267,6 +273,7 @@ class DisplayView extends Component {
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
+    // stack.mu
     return { stack };
   };
 
@@ -499,7 +506,14 @@ class DisplayView extends Component {
             serieIndex
           );
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
-        this.renderMarkup(key, value, color, seriesUid, studyUid);
+
+        let imageId = getWadoImagePath(studyUid, seriesUid, key);
+
+        if (!this.state.imageIds[imageId])
+          //image is not multiframe so strip the frame number from the imageId
+          imageId = imageId.split("&frame=")[0];
+
+        this.renderMarkup(imageId, value, color);
         if (aimUid === serie.aimID) this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
       });
     });
@@ -676,16 +690,15 @@ class DisplayView extends Component {
       toolState[imageId] = { ...toolState[imageId], [tool]: { data: [] } };
   };
 
-  renderBidirectional = (imageId, markup, color, seriesUid, studyUid) => {
-    const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
+  renderBidirectional = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(bidirectional));
     data.color = color;
     data.aimId = markup.aimUid;
     data.invalidated = true;
     this.createBidirectionalPoints(data, markup.coordinates);
     const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    this.checkNCreateToolForImage(currentState, imgId, "Bidirectional");
-    currentState[imgId]["Bidirectional"].data.push(data);
+    this.checkNCreateToolForImage(currentState, imageId, "Bidirectional");
+    currentState[imageId]["Bidirectional"].data.push(data);
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
@@ -705,16 +718,15 @@ class DisplayView extends Component {
     data.handles.textBox.y = points[0].y.value;
   };
 
-  renderLine = (imageId, markup, color, seriesUid, studyUid) => {
-    const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
+  renderLine = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(line));
     data.color = color;
     data.aimId = markup.aimUid;
     data.invalidated = true;
     this.createLinePoints(data, markup.coordinates);
     const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    this.checkNCreateToolForImage(currentState, imgId, "Length");
-    currentState[imgId]["Length"].data.push(data);
+    this.checkNCreateToolForImage(currentState, imageId, "Length");
+    currentState[imageId]["Length"].data.push(data);
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
@@ -727,16 +739,15 @@ class DisplayView extends Component {
     data.handles.end.y = points[1].y.value;
   };
 
-  renderPolygon = (imageId, markup, color, seriesUid, studyUid) => {
-    const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
+  renderPolygon = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(freehand));
     data.color = color;
     data.aimId = markup.aimUid;
     data.invalidated = true;
     this.createPolygonPoints(data, markup.coordinates);
     const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    this.checkNCreateToolForImage(currentState, imgId, "FreehandRoi");
-    currentState[imgId]["FreehandRoi"].data.push(data);
+    this.checkNCreateToolForImage(currentState, imageId, "FreehandRoi");
+    currentState[imageId]["FreehandRoi"].data.push(data);
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
@@ -760,23 +771,21 @@ class DisplayView extends Component {
     data.handles.points = [...freehandPoints];
   };
 
-  renderPoint = (imageId, markup, color, seriesUid, studyUid) => {
-    const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
+  renderPoint = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(probe));
     data.color = color;
     data.aimId = markup.aimUid;
     data.handles.end.x = markup.coordinates[0].x.value;
     data.handles.end.y = markup.coordinates[0].y.value;
     const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    this.checkNCreateToolForImage(currentState, imgId, "Probe");
-    currentState[imgId]["Probe"].data.push(data);
+    this.checkNCreateToolForImage(currentState, imageId, "Probe");
+    currentState[imageId]["Probe"].data.push(data);
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
   };
 
-  renderCircle = (imageId, markup, color, seriesUid, studyUid) => {
-    const imgId = getWadoImagePath(studyUid, seriesUid, imageId);
+  renderCircle = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(circle));
     data.color = color;
     data.aimId = markup.aimUid;
@@ -785,8 +794,8 @@ class DisplayView extends Component {
     data.handles.end.x = markup.coordinates[1].x.value;
     data.handles.end.y = markup.coordinates[1].y.value;
     const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    this.checkNCreateToolForImage(currentState, imgId, "CircleRoi");
-    currentState[imgId]["CircleRoi"].data.push(data);
+    this.checkNCreateToolForImage(currentState, imageId, "CircleRoi");
+    currentState[imageId]["CircleRoi"].data.push(data);
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
@@ -838,6 +847,8 @@ class DisplayView extends Component {
     return markupTypes;
   };
   newImage = event => {
+    let { imageId } = event.detail.image;
+    imageId = imageId.split("objectUID=").pop(); //strip from cs imagePath to imageId
     const { activePort } = this.props;
     const tempData = this.state.data;
     const activeElement = cornerstone.getEnabledElements()[activePort];
@@ -849,7 +860,7 @@ class DisplayView extends Component {
     // set the state to preserve the imageId
     this.setState({ data: tempData });
     // dispatch to write the newImageId to store
-    this.props.dispatch(updateImageId(event));
+    this.props.dispatch(updateImageId(imageId));
   };
 
   onAnnotate = () => {

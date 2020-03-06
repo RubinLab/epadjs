@@ -359,29 +359,32 @@ class Aim {
     return coordinates;
   };
 
-  addMarkupEntity = (
-    type,
-    shapeIndex,
-    points,
-    imageReferenceUid,
-    frameNumber = 1
-  ) => {
-    //frameNumber should only be sent in multiframes
+  addMarkupEntity = (type, shapeIndex, points, imageReferenceUid) => {
+    const frameNumber = this._getFrameNumber(imageReferenceUid);
+    if (frameNumber > -1)
+      imageReferenceUid = imageReferenceUid.split("&frame=")[0]; //if multiframe strip the frame number from imageUID
+
     var obj = {};
     obj["includeFlag"] = { value: true };
-    obj["shapeIdentifier"] = { value: shapeIndex };
-    obj["referencedFrameNumber"] = { value: frameNumber };
-    obj["xsi:type"] = type;
     obj["twoDimensionSpatialCoordinateCollection"] = {
       TwoDimensionSpatialCoordinate: this._createCoordinateArray(points)
     };
     const uId = generateUid();
+    obj["shapeIdentifier"] = { value: shapeIndex };
     obj["uniqueIdentifier"] = { root: uId };
+    obj["xsi:type"] = type;
     obj["imageReferenceUid"] = { root: imageReferenceUid };
+    obj["referencedFrameNumber"] = { value: frameNumber };
     this.imageAnnotations.ImageAnnotation[0].markupEntityCollection.MarkupEntity.push(
       obj
     );
     return uId;
+  };
+
+  _getFrameNumber = imageReferenceUid => {
+    const frameNumber = imageReferenceUid.split("frame=");
+    if (frameNumber.length > 1) return frameNumber[1];
+    return 1;
   };
 
   /*                                          */

@@ -87,11 +87,15 @@ class AnnotationsList extends React.Component {
   };
 
   getLabelArray = () => {
+    const { openSeries, activePort } = this.props;
     const { imageID } = this.props.openSeries[this.props.activePort];
     let imageAnnotations;
     if (this.props.openSeries[this.props.activePort].imageAnnotations) {
       imageAnnotations = this.props.openSeries[this.props.activePort]
         .imageAnnotations[imageID];
+      if (!imageAnnotations)
+        imageAnnotations =
+          openSeries[activePort].imageAnnotations[imageID + "&frame=1"];
     }
     const calculations = {};
     if (imageAnnotations) {
@@ -116,11 +120,12 @@ class AnnotationsList extends React.Component {
   };
 
   render = () => {
-    const { imageID } = this.props.openSeries[this.props.activePort];
+    const { openSeries, activePort, aimsList } = this.props;
+    const { imageID } = openSeries[activePort];
     const maxHeight = window.innerHeight * 0.6;
-    const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
+    const seriesUID = openSeries[activePort].seriesUID;
     let annotations = {};
-    let aims = this.props.aimsList[seriesUID];
+    let aims = aimsList[seriesUID];
     for (let aim in aims) {
       if (aims[aim].type === "study" || aims[aim].type === "serie") {
         let { id } = aims[aim];
@@ -129,21 +134,26 @@ class AnnotationsList extends React.Component {
           : (annotations[id] = [aims[aim]]);
       }
     }
-    let imageAnnotations;
-    if (this.props.openSeries[this.props.activePort].imageAnnotations) {
-      imageAnnotations = this.props.openSeries[this.props.activePort]
-        .imageAnnotations[imageID];
-
+    if (openSeries[activePort].imageAnnotations) {
+      let imageAnnotations;
+      const singleFrameAnnotations =
+        openSeries[activePort].imageAnnotations[imageID];
+      const multiFrameAnnotations =
+        openSeries[activePort].imageAnnotations[imageID + "&frame=1"];
+      if (singleFrameAnnotations && multiFrameAnnotations)
+        imageAnnotations = [
+          ...singleFrameAnnotations,
+          ...multiFrameAnnotations
+        ];
+      else if (singleFrameAnnotations)
+        imageAnnotations = singleFrameAnnotations;
+      else if (multiFrameAnnotations) imageAnnotations = multiFrameAnnotations;
       if (imageAnnotations) {
         for (let aim of imageAnnotations) {
           let { aimUid } = aim;
           annotations[aimUid]
-            ? annotations[aimUid].push(
-                this.props.aimsList[seriesUID][aim.aimUid]
-              )
-            : (annotations[aimUid] = [
-                this.props.aimsList[seriesUID][aim.aimUid]
-              ]);
+            ? annotations[aimUid].push(aimsList[seriesUID][aim.aimUid])
+            : (annotations[aimUid] = [aimsList[seriesUID][aim.aimUid]]);
         }
       }
     }

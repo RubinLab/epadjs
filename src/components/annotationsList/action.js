@@ -63,8 +63,7 @@ export const clearAimId = () => {
 export const updateImageIndex = imageIndex => {
   return { type: UPDATE_IMAGE_INDEX, imageIndex };
 };
-export const updateImageId = event => {
-  const imageID = event.detail.image.imageId.split("/").pop();
+export const updateImageId = imageID => {
   return {
     type: UPDATE_IMAGEID,
     imageID
