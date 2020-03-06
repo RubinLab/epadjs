@@ -32,3 +32,7 @@ export async function updateUser(username, body) {
 export async function deleteUser(username) {
   return http.delete(apiUrl + "/users/" + username);
 }
+
+export async function getUserInfo() {
+  return http.get(apiUrl + "/userinfo");
+}
