@@ -395,7 +395,7 @@ class App extends Component {
 
           this.eventSource = new EventSourcePolyfill(
             `${apiUrl}/notifications`,
-            sessionStorage.getItem("authMode") !== "external"
+            result.keycloak.token
               ? {
                   headers: {
                     authorization: `Bearer ${result.keycloak.token}`
