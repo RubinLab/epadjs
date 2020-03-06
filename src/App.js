@@ -457,12 +457,14 @@ class App extends Component {
       name: null,
       user: null
     });
-    this.state.keycloak.logout().then(() => {
-      this.setState({
-        keycloak: null
+    if (sessionStorage.getItem("authMode") !== "external")
+      this.state.keycloak.logout().then(() => {
+        this.setState({
+          keycloak: null
+        });
+        auth.logout();
       });
-      auth.logout();
-    });
+    else console.log("No logout in external authentication mode");
   };
 
   updateNotificationSeen = () => {
