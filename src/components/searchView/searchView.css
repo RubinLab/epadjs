@@ -254,7 +254,7 @@
 
 .updateReq__modal.modal-dialog,
 .updateReq__mbody.modal-body {
-  width: 256px;
+  /* width: 256px; */
   max-width: fit-content;
 }
 
@@ -276,4 +276,19 @@ h5.add-subject__modal--label,
 .add-study__modal--select,
 .add-series__modal--select {
   color: black;
+}
+
+.openSeries__modal .modal-content {
+  width: fit-content;
+  margin: auto;
+  top: 5rem;
+}
+
+.openSeries-select .seriesDesc {
+  margin-left: 0.5rem;
+}
+
+.openSeries-select {
+  margin-top: 0.3rem;
+  display: flex;
 }

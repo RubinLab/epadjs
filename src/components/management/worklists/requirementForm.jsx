@@ -17,10 +17,9 @@ class RequirementForm extends React.Component {
   componentDidMount = async () => {
     const { data } = await getAllTemplates();
     const templates = {};
-
+    console.log(data);
     data.forEach((el, i) => {
-      templates[el.TemplateContainer.Template[0].uid] =
-        el.TemplateContainer.Template[0].codeValue;
+      templates[el.Template[0].templateUID] = el.Template[0].templateCodeValue;
     });
     this.setState({ templates });
   };
@@ -37,72 +36,6 @@ class RequirementForm extends React.Component {
     return options;
   };
 
-  handleFormInput = e => {
-    const { name, value } = e.target;
-    if (name === "numOfAims" && !isNaN(parseInt(value))) {
-      this.setState({ error: null });
-    }
-    this.setState({ [name]: value });
-  };
-
-  handleAddRequirement = () => {
-    const { level, numOfAims, template } = this.state;
-    const unselectedLevel = !level || level === `--- Select Level ---`;
-    const unSelectedTemplate =
-      !template || template === "--- Select Template ---";
-    if (unselectedLevel || unSelectedTemplate || numOfAims === null) {
-      this.setState({ error: "Please fill all fields!" });
-      return;
-    }
-    if (isNaN(parseInt(this.state.numOfAims))) {
-      this.setState({ error: "No of aims should be a number!" });
-      return;
-    }
-    this.setState({ error: null });
-
-    const newRequirements = [...this.props.requirements];
-    newRequirements.push({ level, numOfAims, template });
-    this.props.onAddRequirement(newRequirements);
-  };
-
-  setColumns = () => {
-    return [
-      {
-        Header: "Level",
-        width: 70,
-        accessor: "level"
-      },
-      {
-        Header: "Template",
-        accessor: "template"
-      },
-      {
-        Header: "Aims",
-        width: 40,
-        accessor: "numOfAims"
-      },
-      //   {
-      //     Header: "Required",
-      //     width: 70,
-      //     Cell: row => <div>{row.original.required ? <FaCheck /> : null}</div>
-      //   },
-      {
-        Header: "",
-        width: 20,
-        Cell: row => (
-          <div
-            className="menu-clickable"
-            onClick={() => {
-              this.props.deleteRequirement(row.index);
-            }}
-          >
-            <FaTrashAlt />
-          </div>
-        )
-      }
-    ];
-  };
-
   render = () => {
     const { error } = this.state;
     const levels = ["Patient", "Study", "Series", "Image"];
@@ -113,7 +46,7 @@ class RequirementForm extends React.Component {
             <select
               className="__field"
               name="level"
-              onChange={this.handleFormInput}
+              onChange={this.props.onNewReqInfo}
             >
               {this.renderOptions(levels, "Level")}
             </select>
@@ -122,7 +55,7 @@ class RequirementForm extends React.Component {
             <select
               className="__field"
               name="template"
-              onChange={this.handleFormInput}
+              onChange={this.props.onNewReqInfo}
             >
               {this.renderOptions(
                 Object.values(this.state.templates),
@@ -137,26 +70,15 @@ class RequirementForm extends React.Component {
               name="numOfAims"
               placeholder="No of aims"
               onMouseDown={e => e.stopPropagation()}
-              onChange={this.handleFormInput}
+              onChange={this.props.onNewReqInfo}
             />
           </div>
-          <div>
+          {/* <div>
             <button className="__field" onClick={this.handleAddRequirement}>
               Add Requirement
             </button>
-          </div>
+          </div> */}
         </div>
-        {error ? <div className="err-message __field">{error}</div> : null}
-
-        {this.props.requirements.length > 0 && (
-          <ReactTable
-            NoDataComponent={() => null}
-            data={this.props.requirements}
-            columns={this.setColumns()}
-            pageSize={this.props.requirements.length}
-            showPagination={false}
-          />
-        )}
       </>
     );
   };

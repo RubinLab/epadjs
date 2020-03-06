@@ -80,137 +80,140 @@ class Series extends Component {
   }
 
   async componentDidMount() {
-    try {
-      const {
-        projectId,
-        subjectId,
-        studyId,
-        expansionArr,
-        updateExpandedLevelNums,
-        expandLevel,
-        treeExpand,
-        patientIndex,
-        studyIndex,
-        expandLoading,
-        treeData
-      } = this.props;
-      const { numOfPresentStudies, numOfStudiesLoaded } = expandLoading;
-      // const { data: data } = await getSeries(projectId, subjectId, studyId);
-      let data = Object.values(treeData[subjectId].studies[studyId].series);
-      if (data.length > 0) {
-        data = data.map(el => el.data);
-      } else {
-        let series = await getSeries(projectId, subjectId, studyId);
-        data = series.data;
-        this.props.getTreeData("series", data);
-      }
-      this.setState({ data });
-      this.setState({ columns: this.setColumns() });
-      const seriesOpened = expansionArr.includes(studyId);
-      const alreadyCounted = numOfPresentStudies === numOfStudiesLoaded;
-      if (!seriesOpened && expandLevel === 2 && !alreadyCounted) {
-        updateExpandedLevelNums("study", data.length, 1);
-      }
-      if (expandLevel > 2) {
-        this.expandCurrentLevel();
-        const obj = {
-          patient: this.props.patientIndex,
-          study: this.props.studyIndex,
-          series: data.length
-        };
-        this.props.getTreeExpandAll(obj, true, expandLevel);
-      }
-
-      if (data.length === 0) {
-        toast.info("No serie found", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        });
-      }
-      const expanded = {};
-      const ptExpandKeys = Object.keys(treeExpand[patientIndex][studyIndex]);
-      const ptExpandVal = Object.values(treeExpand[patientIndex][studyIndex]);
-      ptExpandKeys.forEach((el, index) => {
-        expanded[el] = ptExpandVal[index];
-      });
-      this.setState({ expanded });
-    } catch (err) {
-      console.log("Couldn't load all series data. Please Try again!");
+    // try {
+    const {
+      projectId,
+      subjectId,
+      studyId,
+      expansionArr,
+      // updateExpandedLevelNums,
+      expandLevel,
+      treeExpand,
+      patientIndex,
+      studyIndex,
+      expandLoading,
+      treeData
+    } = this.props;
+    // const { numOfPresentStudies, numOfStudiesLoaded } = expandLoading;
+    // const { data: data } = await getSeries(projectId, subjectId, studyId);
+    let data = Object.values(
+      treeData[projectId][subjectId].studies[studyId].series
+    );
+    if (data.length > 0) {
+      data = data.map(el => el.data);
+    } else {
+      let series = await getSeries(projectId, subjectId, studyId);
+      data = series.data;
+      this.props.getTreeData(projectId, "series", data);
     }
+    this.setState({ data });
+    this.setState({ columns: this.setColumns() });
+    const seriesOpened = expansionArr.includes(studyId);
+    // const alreadyCounted = numOfPresentStudies === numOfStudiesLoaded;
+    // if (!seriesOpened && expandLevel === 2 && !alreadyCounted) {
+    //   updateExpandedLevelNums("study", data.length, 1);
+    // }
+    if (expandLevel > 2) {
+      this.expandCurrentLevel();
+      const obj = {
+        patient: this.props.patientIndex,
+        study: this.props.studyIndex,
+        series: data.length
+      };
+      this.props.getTreeExpandAll(obj, true, expandLevel);
+    }
+
+    if (data.length === 0) {
+      toast.info("No serie found", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
+    const expanded = {};
+    const ptExpandKeys = Object.keys(treeExpand[patientIndex][studyIndex]);
+    const ptExpandVal = Object.values(treeExpand[patientIndex][studyIndex]);
+    ptExpandKeys.forEach((el, index) => {
+      expanded[el] = ptExpandVal[index];
+    });
+    this.setState({ expanded });
+    // } catch (err) {
+    //   console.log("Couldn't load all series data. Please Try again!");
+    // }
   }
 
   async componentDidUpdate(prevProps) {
-    try {
-      const {
-        update,
-        studyId,
-        expansionArr,
-        updateExpandedLevelNums,
-        expandLevel
-      } = this.props;
-      const seriesOpened = expansionArr.includes(studyId);
-      if (update !== prevProps.update) {
-        const { data: data } = await getSeries(
-          this.props.projectId,
-          this.props.subjectId,
-          this.props.studyId
-        );
-        const expanded = persistExpandView(
-          this.state.expanded,
-          this.state.data,
-          data,
-          "seriesUID"
-        );
-        this.setState({ data, expanded });
-        this.props.getTreeData("series", data);
-      }
-      if (this.props.expandLevel != prevProps.expandLevel) {
-        this.props.expandLevel >= 3
-          ? this.expandCurrentLevel()
-          : this.setState({ expanded: {} });
-
-        const expandedToSeries =
-          prevProps.expandLevel < expandLevel && expandLevel === 2;
-        if (expandedToSeries && seriesOpened) {
-          updateExpandedLevelNums("study", this.state.data.length, 1);
-        }
-        const expandToAnnotations =
-          prevProps.expandLevel < expandLevel && expandLevel === 3;
-        const shrinkedToSeries =
-          prevProps.expandLevel > expandLevel && expandLevel === 2;
-        const obj = {
-          patient: this.props.patientIndex,
-          study: this.props.studyIndex,
-          series: this.state.data.length
-        };
-        if (shrinkedToSeries) {
-          this.setState({ expansionArr: [] });
-          this.props.getTreeExpandAll(obj, false, this.props.expandLevel);
-        }
-
-        if (expandToAnnotations)
-          this.props.getTreeExpandAll(obj, true, this.props.expandLevel);
-      }
-    } catch (err) {
-      console.log("Couldn't load all series data. Please Try again!");
+    // try {
+    const {
+      update,
+      studyId,
+      expansionArr,
+      // updateExpandedLevelNums,
+      expandLevel
+    } = this.props;
+    const seriesOpened = expansionArr.includes(studyId);
+    if (update !== prevProps.update) {
+      const { data: data } = await getSeries(
+        this.props.projectId,
+        this.props.subjectId,
+        this.props.studyId
+      );
+      const expanded = persistExpandView(
+        this.state.expanded,
+        this.state.data,
+        data,
+        "seriesUID"
+      );
+      this.setState({ data, expanded });
+      this.props.getTreeData(this.props.projectId, "series", data);
     }
+    if (this.props.expandLevel != prevProps.expandLevel) {
+      this.props.expandLevel >= 3
+        ? this.expandCurrentLevel()
+        : this.setState({ expanded: {} });
+
+      const expandedToSeries =
+        prevProps.expandLevel < expandLevel && expandLevel === 2;
+      // if (expandedToSeries && seriesOpened) {
+      //   updateExpandedLevelNums("study", this.state.data.length, 1);
+      // }
+      const expandToAnnotations =
+        prevProps.expandLevel < expandLevel && expandLevel === 3;
+      const shrinkedToSeries =
+        prevProps.expandLevel > expandLevel && expandLevel === 2;
+      const obj = {
+        patient: this.props.patientIndex,
+        study: this.props.studyIndex,
+        series: this.state.data.length
+      };
+      if (shrinkedToSeries) {
+        this.setState({ expansionArr: [] });
+        this.props.getTreeExpandAll(obj, false, this.props.expandLevel);
+      }
+
+      if (expandToAnnotations)
+        this.props.getTreeExpandAll(obj, true, this.props.expandLevel);
+    }
+    // } catch (err) {
+    //   console.log("Couldn't load all series data. Please Try again!");
+    // }
   }
 
   expandCurrentLevel = () => {
-    try {
-      const expanded = {};
+    // try {
+    const expanded = {};
+    if (this.state.data)
       for (let i = 0; i < this.state.data.length; i++) {
         // expanded[i] = this.state.data[i].numberOfAnnotations ? true : false;
         expanded[i] = this.state.data[i];
       }
-      this.setState({ expanded });
-    } catch (err) {
-      console.log("Couldn't load all series data. Please Try again!");
-    }
+    this.setState({ expanded });
+    // } catch (err) {
+    //   console.log("Couldn't load all series data. Please Try again!");
+    // }
   };
 
   selectRow = selected => {
@@ -601,14 +604,14 @@ class Series extends Component {
                       studyDescription={this.props.studyDescription}
                       seriesDescription={row.original.seriesDescription}
                       update={this.props.update}
-                      updateExpandedLevelNums={
-                        this.props.updateExpandedLevelNums
-                      }
+                      // updateExpandedLevelNums={
+                      //   this.props.updateExpandedLevelNums
+                      // }
                       expandLevel={this.props.expandLevel}
                       progressUpdated={this.props.progressUpdated}
                       expansionArr={this.state.expansionArr}
                       expandLevel={this.props.expandLevel}
-                      expandLoading={this.props.expandLoading}
+                      // expandLoading={this.props.expandLoading}
                       treeExpand={this.props.treeExpand}
                       patientIndex={this.props.patientIndex}
                       studyIndex={this.props.studyIndex}

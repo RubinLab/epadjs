@@ -80,6 +80,7 @@ class MainMenu extends React.Component {
           <WorkLists
             selection={this.state.selection}
             onClose={this.handleCloseModal}
+            updateProgress={this.props.updateProgress}
           />
         );
       case "Annotations":
@@ -138,6 +139,9 @@ class MainMenu extends React.Component {
             Scan Data Folder
           </div>
         )}
+        <div className="mng-menu__option" onClick={this.handleSelection}>
+          Worklists
+        </div>
         {mode !== "lite" && (
           <>
             <div className="mng-menu__option" onClick={this.handleSelection}>
@@ -145,9 +149,6 @@ class MainMenu extends React.Component {
             </div>
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Projects
-            </div>
-            <div className="mng-menu__option" onClick={this.handleSelection}>
-              Worklists
             </div>
             {false && (
               <div className="mng-menu__option" onClick={this.handleSelection}>

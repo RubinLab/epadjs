@@ -243,9 +243,13 @@
 }
 
 .err-message {
-  background: rgb(199, 3, 3);
-  color: white;
+  /* background: rgb(199, 3, 3); */
+  /* color: white; */
+  color: orangered;
+  font-size: 1.2rem;
   padding: 0.5rem;
+  margin: auto;
+  margin-top: 0.5rem;
   max-width: fit-content;
 }
 

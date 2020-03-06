@@ -36,7 +36,12 @@ function getMarkup(markupEntity, aim) {
   // if (frameNumber > -1) imageId = imageId + "&frame=" + frameNumber; //if multiframe reconstruct the imageId
   imageId = imageId + "&frame=" + frameNumber;
   const markupUid = markupEntity["uniqueIdentifier"]["root"];
-  const calculations = getCalculationEntitiesOfMarkUp(aim, markupUid);
+  let calculations = [];
+  try {
+    calculations = getCalculationEntitiesOfMarkUp(aim, markupUid);
+  } catch (error) {
+    console.log("Can not get calculations", error);
+  }
   const aimUid = aim.ImageAnnotationCollection["uniqueIdentifier"]["root"];
   return {
     imageId,

@@ -39,7 +39,9 @@ class AimEditor extends Component {
     this.semanticAnswers = {};
     if (this.props.aimId) this.updatedAimId = this.props.aimId.aimId;
   }
-
+  state = {
+    buttonGroupShow: false
+  };
   componentDidMount() {
     const element = document.getElementById("questionaire");
     // const { data: templates } = await getTemplates();
@@ -49,7 +51,8 @@ class AimEditor extends Component {
     templatePromise.then(result => {
       this.semanticAnswers = new questionaire.AimEditor(
         element,
-        this.validateForm
+        this.validateForm,
+        this.renderButtons
       );
       this.semanticAnswers.loadTemplates(result.data);
       this.semanticAnswers.createViewerWindow();
@@ -63,7 +66,12 @@ class AimEditor extends Component {
       }
     });
   }
-
+  //cavit
+  renderButtons = buttonsState => {
+    console.log("rendr buttons state : ", buttonsState);
+    this.setState({ buttonGroupShow: buttonsState });
+  };
+  //cavit end
   validateForm = hasError => {
     if (hasError) console.log("Answer form has error/s!!!");
   };
@@ -81,12 +89,23 @@ class AimEditor extends Component {
     return (
       <div className="editorForm">
         <div id="questionaire" />
-        <button type="button" onClick={this.save}>
-          Save
-        </button>
-        <button type="button" onClick={() => this.props.onCancel(true)}>
-          Cancel
-        </button>
+        {this.state.buttonGroupShow && (
+          <div className="AimEditorButtonGroup">
+            <button
+              className="btn btn-sm btn-outline-light AimEditorButton "
+              onClick={this.save}
+            >
+              Save
+            </button>
+            &nbsp;
+            <button
+              className="btn btn-sm btn-outline-light AimEditorButton"
+              onClick={() => this.props.onCancel(true)}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -313,7 +332,7 @@ class AimEditor extends Component {
       comment
     };
 
-    uploadAim(aimSaved)
+    uploadAim(aimSaved, this.props.projectID)
       .then(() => {
         if (segmentationBlob) this.saveSegmentation(segmentationBlob);
         // var objectUrl = URL.createObjectURL(segBlobGlobal);
@@ -338,8 +357,8 @@ class AimEditor extends Component {
             studyUID
           })
         );
-
         this.props.dispatch(updatePatientOnAimSave(aimRefs));
+        this.props.updateProgress();
       })
       .catch(error => console.log(error));
     this.props.onCancel(false);
@@ -875,6 +894,7 @@ class AimEditor extends Component {
     // if (mode == "lite") return imageId.split("/").pop();
     // else return imageId.split("objectUID=")[1].split("&")[0];
     return imageId.split("objectUID=")[1];
+
   };
 }
 

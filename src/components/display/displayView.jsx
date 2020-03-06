@@ -879,6 +879,7 @@ class DisplayView extends Component {
           onCancel={this.closeAimEditor}
           hasSegmentation={this.state.hasSegmentation}
           activeLabelMapIndex={this.state.activeLabelMapIndex}
+          updateProgress={this.props.updateProgress}
         >
           {!this.state.isLoading &&
             Object.entries(this.props.series).length &&

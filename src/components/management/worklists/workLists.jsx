@@ -7,7 +7,9 @@ import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
 import {
   getWorklistsOfCreator,
   deleteWorklist,
-  updateWorklist
+  updateWorklist,
+  addWorklistRequirement,
+  deleteWorklistRequirement
 } from "../../../services/worklistServices";
 import { getUsers } from "../../../services/userServices";
 import DeleteAlert from "../common/alertDeletionModal";
@@ -42,7 +44,8 @@ class WorkList extends React.Component {
     updateDueDate: false,
     duedate: "",
     updateRequirement: false,
-    requirements: []
+    requirements: [],
+    newRequirement: {}
   };
 
   componentDidMount = async () => {
@@ -61,6 +64,16 @@ class WorkList extends React.Component {
   getWorkListData = async () => {
     const { data: worklists } = await getWorklistsOfCreator();
     this.setState({ worklists });
+  };
+
+  handleRequirementFormInput = e => {
+    const { name, value } = e.target;
+    const newRequirement = { ...this.state.newRequirement };
+    newRequirement[name] = value;
+    if (name === "numOfAims" && !isNaN(parseInt(value))) {
+      this.setState({ error: null });
+    }
+    this.setState({ newRequirement });
   };
 
   toggleRow = async id => {
@@ -130,6 +143,7 @@ class WorkList extends React.Component {
       .then(() => {
         this.getWorkListData();
         this.setState({ selectAll: 0 });
+        this.props.updateProgress();
       })
       .catch(error => {
         toast.error(error.response.data.message, { autoClose: false });
@@ -143,6 +157,7 @@ class WorkList extends React.Component {
       .then(() => {
         this.setState({ deleteSingleClicked: false, singleDeleteData: null });
         this.getWorkListData();
+        this.props.updateProgress();
       })
       .catch(err => {
         this.setState({ errorMessage: err.response.data.message });
@@ -164,6 +179,7 @@ class WorkList extends React.Component {
 
   handleSaveWorklist = () => {
     this.getWorkListData();
+    this.props.updateProgress();
   };
 
   handleSingleDelete = id => {
@@ -284,6 +300,7 @@ class WorkList extends React.Component {
     updateWorklist(this.state.worklistId, { requirements })
       .then(() => {
         this.getWorkListData();
+        this.setState({ updateRequirement: false });
         toast.info("Update successful!", { autoClose: true });
       })
       .catch(error => {
@@ -291,6 +308,48 @@ class WorkList extends React.Component {
         this.getWorkListData();
       });
     this.handleCancel();
+  };
+
+  deleteRequirement = requirementId => {
+    deleteWorklistRequirement(this.state.worklistId, requirementId)
+      .then(() => {
+        this.getWorkListData();
+        this.setState({ updateRequirement: false });
+        toast.info("Delete successful!", { autoClose: true });
+      })
+      .catch(error => {
+        toast.error(error.response.data.message, { autoClose: false });
+        this.getWorkListData();
+      });
+  };
+
+  addNewRequirement = () => {
+    const { level, template, numOfAims } = this.state.newRequirement;
+    const unselectedLevel = !level || level === `--- Select Level ---`;
+    const intAims = parseInt(numOfAims);
+    const unSelectedTemplate =
+      !template || template === "--- Select Template ---";
+    if (unselectedLevel || unSelectedTemplate || !numOfAims) {
+      this.setState({ error: "Please fill all fields!" });
+      return;
+    } else if (isNaN(parseInt(intAims)) || intAims === 0) {
+      this.setState({
+        error: "No of aims should be a non-zero number!"
+      });
+      return;
+    } else {
+      this.setState({ error: null });
+      addWorklistRequirement(this.state.worklistId, [this.state.newRequirement])
+        .then(() => {
+          this.getWorkListData();
+          this.setState({ updateRequirement: false });
+          toast.info("Update successful!", { autoClose: true });
+        })
+        .catch(error => {
+          toast.error(error.response.data.message, { autoClose: false });
+          this.getWorkListData();
+        });
+    }
   };
 
   defineColumns = () => {
@@ -525,6 +584,8 @@ class WorkList extends React.Component {
           className="pro-table"
           data={this.state.worklists}
           columns={this.defineColumns()}
+          pageSizeOptions={[10, 20, 50]}
+          defaultPageSize={10}
         />
         {this.state.deleteSingleClicked && (
           <DeleteAlert
@@ -574,7 +635,11 @@ class WorkList extends React.Component {
             requirements={this.state.requirements}
             onCancel={this.handleCancel}
             worklistID={this.state.worklistId}
-            onSubmit={this.saveUpdatedRequirements}
+            onAddNew={this.addNewRequirement}
+            onEdit={this.saveUpdatedRequirements}
+            onDelete={this.deleteRequirement}
+            onNewReqInfo={this.handleRequirementFormInput}
+            error={this.state.error}
           />
         )}
       </div>
