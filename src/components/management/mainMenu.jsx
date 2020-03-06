@@ -127,7 +127,7 @@ class MainMenu extends React.Component {
         <div className="mng-menu__option" onClick={this.handleSelection}>
           Templates
         </div>
-        {!this.props.admin && (
+        {this.props.admin && (
           <div
             className="mng-menu__option"
             onClick={() => {

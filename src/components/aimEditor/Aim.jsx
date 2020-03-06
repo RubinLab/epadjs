@@ -384,7 +384,7 @@ class Aim {
   _getFrameNumber = imageReferenceUid => {
     const frameNumber = imageReferenceUid.split("frame=");
     if (frameNumber.length > 1) return frameNumber[1];
-    return -1;
+    return 1;
   };
 
   /*                                          */
