@@ -134,14 +134,20 @@ class AnnotationsList extends React.Component {
           : (annotations[id] = [aims[aim]]);
       }
     }
-    let imageAnnotations;
     if (openSeries[activePort].imageAnnotations) {
-      imageAnnotations = openSeries[activePort].imageAnnotations[imageID];
-      console.log("Image annotations", imageAnnotations);
-      if (!imageAnnotations)
-        imageAnnotations =
-          openSeries[activePort].imageAnnotations[imageID + "&frame=1"];
-
+      let imageAnnotations;
+      const singleFrameAnnotations =
+        openSeries[activePort].imageAnnotations[imageID];
+      const multiFrameAnnotations =
+        openSeries[activePort].imageAnnotations[imageID + "&frame=1"];
+      if (singleFrameAnnotations && multiFrameAnnotations)
+        imageAnnotations = [
+          ...singleFrameAnnotations,
+          ...multiFrameAnnotations
+        ];
+      else if (singleFrameAnnotations)
+        imageAnnotations = singleFrameAnnotations;
+      else if (multiFrameAnnotations) imageAnnotations = multiFrameAnnotations;
       if (imageAnnotations) {
         for (let aim of imageAnnotations) {
           let { aimUid } = aim;

@@ -132,13 +132,6 @@ class AimEditor extends Component {
       );
       return false;
     }
-    // } else if (this.updatedAimId) {
-    //   //has segmentation and is upadting the aim
-    //   alert(
-    //     "This version of ePAD lite currently doesn't support segmentation update."
-    //   );
-    //   return false;
-    // }
     return true;
   };
 
