@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
-import { getUser, createUser } from "./services/userServices";
+import { getUser, createUser, getUserInfo } from "./services/userServices";
 import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
 import SearchView from "./components/searchView/searchView";
@@ -273,25 +273,39 @@ class App extends Component {
     this.setState({ projectMap });
   };
   async componentDidMount() {
-    fetch("/config.json")
-      .then(async res => {
-        const data = await res.json();
-        const { mode, apiUrl, wadoUrl } = data;
+    Promise.all([
+      fetch(`${process.env.PUBLIC_URL}/config.json`),
+      fetch(`${process.env.PUBLIC_URL}/keycloak.json`)
+    ])
+      .then(async results => {
+        const configData = await results[0].json();
+        let { mode, apiUrl, wadoUrl, authMode } = configData;
+        // check and use environment variables if any
+        mode = process.env.REACT_APP_MODE || mode;
+        apiUrl = process.env.REACT_APP_API_URL || apiUrl;
+        wadoUrl = process.env.REACT_APP_WADO_URL || wadoUrl;
+        authMode = process.env.REACT_APP_AUTH_MODE || authMode;
         sessionStorage.setItem("mode", mode);
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
-        this.setState({ mode, apiUrl, wadoUrl });
-        this.completeAutorization(apiUrl);
-      })
-      .catch(err => {
-        console.log(err);
-      });
+        sessionStorage.setItem("authMode", authMode);
+        this.setState({ mode, apiUrl, wadoUrl, authMode });
 
-    fetch("/keycloak.json")
-      .then(async res => {
-        const data = await res.json();
-        const auth = data["auth-server-url"];
+        const keycloakData = await results[1].json();
+        const auth =
+          process.env.REACT_APP_AUTH_URL || keycloakData["auth-server-url"];
+        const keycloakJson = {};
+        // check and use environment variables if any
+        keycloakJson.realm =
+          process.env.REACT_APP_AUTH_REALM || keycloakData.realm;
+        keycloakJson.url =
+          process.env.REACT_APP_AUTH_URL || keycloakData["auth-server-url"];
+        keycloakJson.clientId =
+          process.env.REACT_APP_AUTH_RESOURCE || keycloakData.resource;
         sessionStorage.setItem("auth", auth);
+        sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
+
+        this.completeAutorization(apiUrl);
       })
       .catch(err => {
         console.log(err);
@@ -308,71 +322,98 @@ class App extends Component {
   }
 
   completeAutorization = apiUrl => {
-    const keycloak = Keycloak("/keycloak.json");
-    let keycloakInit = new Promise((resolve, reject) => {
-      keycloak.init({ onLoad: "login-required" }).then(authenticated => {
-        // this.setState({ keycloak: keycloak, authenticated: authenticated });
-        keycloak.loadUserInfo().then(userInfo => {
-          // let user = { id: userInfo.email, displayname: userInfo.given_name };
-          // this.setState({
-          //   name: userInfo.name,
-          //   user,
-          //   id: userInfo.sub
-          // });
-          resolve({ userInfo, keycloak, authenticated });
-          // reject("Authentication failed!");
-        });
+    let getAuthUser = null;
+
+    if (sessionStorage.getItem("authMode") !== "external") {
+      const keycloak = Keycloak(
+        JSON.parse(sessionStorage.getItem("keycloakJson"))
+      );
+      getAuthUser = new Promise((resolve, reject) => {
+        keycloak
+          .init({ onLoad: "login-required" })
+          .then(authenticated => {
+            keycloak
+              .loadUserInfo()
+              .then(userInfo => {
+                resolve({ userInfo, keycloak, authenticated });
+              })
+              .catch(err => reject(err));
+          })
+          .catch(err => reject(err));
       });
-    });
-    keycloakInit
+    } else {
+      // authMode is external ask backend for user
+      getAuthUser = new Promise((resolve, reject) => {
+        getUserInfo()
+          .then(userInfoResponse => {
+            resolve({
+              userInfo: userInfoResponse.data,
+              keycloak: {},
+              authenticated: true
+            });
+          })
+          .catch(err => reject(err));
+      });
+    }
+
+    getAuthUser
       .then(async result => {
-        let user = {
-          user: result.userInfo.preferred_username || result.userInfo.email,
-          displayname: result.userInfo.given_name
-        };
-        await auth.login(user, null, result.keycloak.token);
-        this.setState({
-          keycloak: result.keycloak,
-          authenticated: result.authenticated,
-          id: result.userInfo.sub,
-          user
-        });
-        const {
-          email,
-          family_name,
-          given_name,
-          preferred_username
-        } = result.userInfo;
-        const username = preferred_username || email;
-
-        let userData;
         try {
-          userData = await getUser(username);
-          this.setState({ admin: userData.data.admin });
-        } catch (err) {
-          // console.log(err);
-          createUser(username, given_name, family_name, email)
-            .then(async () => {
-              {
-                console.log(`User ${username} created!`);
-              }
-            })
-            .catch(error => console.log(error));
-          console.log(err);
-        }
+          let user = {
+            user: result.userInfo.preferred_username || result.userInfo.email,
+            displayname: result.userInfo.given_name
+          };
+          await auth.login(user, null, result.keycloak.token);
+          this.setState({
+            keycloak: result.keycloak,
+            authenticated: result.authenticated,
+            id: result.userInfo.sub,
+            user
+          });
+          const {
+            email,
+            family_name,
+            given_name,
+            preferred_username
+          } = result.userInfo;
+          const username = preferred_username || email;
 
-        this.eventSource = new EventSourcePolyfill(`${apiUrl}/notifications`, {
-          headers: {
-            authorization: `Bearer ${result.keycloak.token}`
+          let userData;
+          try {
+            userData = await getUser(username);
+            this.setState({ admin: userData.data.admin });
+          } catch (err) {
+            // console.log(err);
+            createUser(username, given_name, family_name, email)
+              .then(async () => {
+                {
+                  console.log(`User ${username} created!`);
+                }
+              })
+              .catch(error => console.log(error));
+            console.log(err);
           }
-        });
-        this.eventSource.addEventListener(
-          "message",
-          this.getMessageFromEventSrc
-        );
+
+          this.eventSource = new EventSourcePolyfill(
+            `${apiUrl}/notifications`,
+            result.keycloak.token
+              ? {
+                  headers: {
+                    authorization: `Bearer ${result.keycloak.token}`
+                  }
+                }
+              : {}
+          );
+          this.eventSource.addEventListener(
+            "message",
+            this.getMessageFromEventSrc
+          );
+        } catch (err) {
+          console.log("Error in user retrieval!", err);
+        }
       })
       .catch(err2 => {
-        console.log(err2);
+        console.log("Authentication failed!", err2);
       });
   };
   getMessageFromEventSrc = res => {
@@ -417,12 +458,14 @@ class App extends Component {
       name: null,
       user: null
     });
-    this.state.keycloak.logout().then(() => {
-      this.setState({
-        keycloak: null
+    if (sessionStorage.getItem("authMode") !== "external")
+      this.state.keycloak.logout().then(() => {
+        this.setState({
+          keycloak: null
+        });
+        auth.logout();
       });
-      auth.logout();
-    });
+    else console.log("No logout in external authentication mode");
   };
 
   updateNotificationSeen = () => {
