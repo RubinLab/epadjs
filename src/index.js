@@ -18,7 +18,7 @@ const store = createStore(
 
 /* eslint-enable */
 render(
-  <BrowserRouter basename={`${process.env.BASE_URL}`}>
+  <BrowserRouter basename={`${process.env.REACT_APP_BASE_URL}`}>
     <Provider store={store}>
       <App />
     </Provider>
