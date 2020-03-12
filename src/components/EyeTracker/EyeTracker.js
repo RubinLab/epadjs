@@ -9,7 +9,10 @@ import {
   addToGrid
 } from "../annotationsList/action";
 import { getAllSeriesofProject } from "../../services/seriesServices";
-import cornerstoneTools from "../../cornerstone-tools/index";
+import {
+  startEyeTrackerLog,
+  stopEyeTrackerLog
+} from "../../services/eyeTrackerServices";
 
 class EyeTracker extends Component {
   constructor(props) {
@@ -99,10 +102,12 @@ class EyeTracker extends Component {
   };
 
   startLogging = () => {
-    this.setState({ logging: true });
-    window.addEventListener("eyeTrackerShouldLog", this.captureLog);
-    document.onkeypress = this.keyPress;
-    this.captureLog({ detail: "loggingStarted" });
+    startEyeTrackerLog().then(() => {
+      this.setState({ logging: true });
+      window.addEventListener("eyeTrackerShouldLog", this.captureLog);
+      document.onkeypress = this.keyPress;
+      this.captureLog({ detail: "loggingStarted" });
+    });
   };
 
   captureLog = event => {
@@ -176,8 +181,10 @@ class EyeTracker extends Component {
   stopLogging = () => {
     this.captureLog({ detail: "loggingStopped" });
     this.setState({ logging: false });
+    const log = JSON.stringify(this.logs);
     window.removeEventListener("eyeTrackerShouldLog", this.captureLog);
-    this.downloadLog();
+
+    stopEyeTrackerLog(log);
   };
 
   downloadLog = () => {
@@ -206,7 +213,10 @@ class EyeTracker extends Component {
   // returns the displayed series Id
   getCurrentSeries = () => {
     const { imageId } = this.getImageData();
-    return imageId.split("series/")[1].split("/instances/")[0];
+    console.log("Image id", imageId);
+    // return imageId.split("series/")[1].split("/instances/")[0];
+    console.log("Image Id", imageId.split("&objectUID=")[1]);
+    return imageId.split("&objectUID=")[1];
   };
 
   findIndexOfSeries = seriesId => {
