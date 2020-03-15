@@ -20,7 +20,8 @@ const editField = props => {
 editField.propTypes = {
   name: PropTypes.string,
   onType: PropTypes.func,
-  default: PropTypes.string
+  default: PropTypes.string,
+  inputType:PropTypes.string
 };
 
 export default editField;
