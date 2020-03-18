@@ -290,6 +290,21 @@ class Plugins extends React.Component {
     const responseSavePlugin = await savePlugin({
       pluginform
     });
+    console.log(" ---->   handleAddPluginSave : ", responseSavePlugin.status);
+    if (responseSavePlugin.status === 200) {
+      const pluginList = await getPluginsWithProject();
+      const plugins = pluginList.data;
+
+      let projectList = await getProjectsWithPkAsId();
+      projectList = projectList.data;
+
+      let templateList = await getTemplatesFromDb();
+      templateList = templateList.data;
+
+      this.setState({ plugins, projectList, templateList });
+    } else {
+      alert("error happened while saving plugin");
+    }
     //pluginFomElements
   };
   /*
@@ -410,7 +425,7 @@ class Plugins extends React.Component {
     this.handleCancel();
   };
 */
-  handleTAddPluginChange = e => {
+  handleAddPluginChange = e => {
     const plElements = { ...this.state.pluginFormElements };
     plElements[e.currentTarget.name] = e.currentTarget.value;
     this.setState({ pluginFormElements: plElements });
@@ -544,7 +559,7 @@ class Plugins extends React.Component {
           <NewPluginWindow
             onCancel={this.handleAddPluginCancel}
             onSave={this.handleAddPluginSave}
-            onChange={this.handleTAddPluginChange}
+            onChange={this.handleAddPluginChange}
             error={this.handleTAddPluginError}
             pluginFormElements={this.state.pluginFormElements}
           />

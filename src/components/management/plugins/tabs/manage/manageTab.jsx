@@ -1,6 +1,7 @@
 import React from "react";
 import ReactTable from "react-table";
 import { FaRegTrashAlt } from "react-icons/fa";
+import PluginNavBar from "./../../main/pluginNavBar";
 class ManageTab extends React.Component {
   state = {};
   defineManageTabColumns = () => {
@@ -48,14 +49,39 @@ class ManageTab extends React.Component {
         minResizeWidth: 100,
         width: 420
       },
-      /*{
-        Header: "container image",
-        accessor: "container_image",
+      {
+        Header: "Image",
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
-        width: 420
-      },*/
+        width: 200,
+        Cell: original => {
+          return "add,edit,see";
+        },
+        style: { whiteSpace: "unset" }
+      },
+      {
+        Header: "Config",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 100,
+        width: 200,
+        Cell: original => {
+          return "add,edit,see";
+        },
+        style: { whiteSpace: "unset" }
+      },
+      {
+        Header: "Parameters",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 100,
+        width: 200,
+        Cell: original => {
+          return "add,edit,see";
+        },
+        style: { whiteSpace: "unset" }
+      },
       {
         Header: "Projects",
         accessor: "projects",
