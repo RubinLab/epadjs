@@ -42,7 +42,7 @@ class WorkList extends React.Component {
     worklistId: null,
     updateAssignee: false,
     updateDueDate: false,
-    duedate: '',
+    duedate: null,
     updateRequirement: false,
     requirements: [],
     newRequirement: {},
@@ -112,12 +112,12 @@ class WorkList extends React.Component {
   handleCancel = () => {
     this.setState({
       hasAddClicked: false,
-      name: '',
+      name: null,
       id: '',
       user: '',
-      description: '',
+      description: null,
       error: '',
-      duedate: '',
+      duedate: null,
       deleteSingleClicked: false,
       deleteAllClicked: false,
       selected: {},
@@ -240,13 +240,11 @@ class WorkList extends React.Component {
 
   updateWorklist = () => {
     const { name, description, duedate, worklistId } = this.state;
-    console.log('description', description);
-
     const body = name
       ? { name }
       : description === '' || description
       ? { description }
-      : { dueDate: duedate };
+      : { duedate };
     updateWorklist(worklistId, body)
       .then(() => this.getWorkListData())
       .catch(error =>
@@ -301,6 +299,7 @@ class WorkList extends React.Component {
       });
     this.handleCancel();
   };
+
 
   saveUpdatedRequirements = requirements => {
     updateWorklist(this.state.worklistId, { requirements })
@@ -466,8 +465,8 @@ class WorkList extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
-          const { dueDate, workListID } = original.row.checkbox;
-          const className = dueDate
+          const { duedate, workListID } = original.row.checkbox;
+          const className = duedate
             ? 'wrapped menu-clickable'
             : 'wrapped click-to-add menu-clickable';
           return (
@@ -475,13 +474,13 @@ class WorkList extends React.Component {
               className={`--commentCont ${className}`}
               onClick={async () => {
                 await this.setState({
-                  duedate: dueDate,
+                  duedate: duedate,
                   worklistId: workListID,
                 });
                 this.handleUpdateDueDate();
               }}
             >
-              {dueDate || 'Add due date'}
+              {duedate || 'Add due date'}
             </div>
           );
         },
@@ -635,7 +634,7 @@ class WorkList extends React.Component {
             onCancel={this.handleCancel}
             onSubmit={this.updateWorklist}
             onChange={this.handleFormInput}
-            dueDate={this.state.duedate}
+            duedate={this.state.duedate}
           />
         )}
         {this.state.updateRequirement && (

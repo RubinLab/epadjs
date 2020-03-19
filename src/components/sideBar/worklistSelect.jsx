@@ -20,7 +20,7 @@ const worklistSelect = ({ list, handleRoute }) => {
           <span>{worklist.name}</span>
           <span>{completeness}</span>
         </div>
-        <div className="__dueDate">Due: {worklist.dueDate}</div>
+        <div className="__dueDate">Due: {worklist.duedate}</div>
       </div>
     );
   });
