@@ -1,3 +1,11 @@
 .editorForm {
   z-index: 1000;
 }
+.AimEditorButtonGroup {
+  padding-top: 35px;
+  padding-left: 20px;
+}
+.AimEditorButton {
+  width: 100px;
+  margin-right: 10px;
+}

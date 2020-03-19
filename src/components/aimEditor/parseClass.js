@@ -5,8 +5,22 @@ import "./semantic/semantic.css";
 import "./semantic/semantic.js";
 
 //export next variable for react
-export var AimEditor = function(userWindow, varformCheckHandler) {
+export var AimEditor = function(
+  userWindow,
+  varformCheckHandler,
+  varRenderButtonHandler
+) {
+  //this.mapObjCodeValueParent = new Map();
+  //this.mapHtmlObjects = new Map(); not used
+  //this.mapHtmlSelectObjectsKeyValue = new Map(); not used
+  // this.mapAllowedTermCollectionByCodeValue = new Map(); not used
+
   var self = this;
+  this.fontcolor = "#c9cdd4";
+  this.fontsize = "13px";
+  this.fontweight = "1500";
+  this.fontfamily = "Lato, Helvetica Neue, Arial, Helvetica, sans-serif;";
+  this.renderButtonhandler = varRenderButtonHandler;
   this.formCheckHandler = varformCheckHandler;
   this.userWindow = userWindow;
   this.arrayTemplates = [];
@@ -17,10 +31,6 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
   this.primitiveJson = "";
   this.mapCardinalitiesToCheckId = new Map();
   this.mapStatusAllowedTermBlocks = new Map();
-  //this.mapObjCodeValueParent = new Map();
-  this.mapHtmlObjects = new Map();
-  this.mapHtmlSelectObjectsKeyValue = new Map();
-  this.mapAllowedTermCollectionByCodeValue = new Map();
   this.mapTemplateCodeValueByIndex = new Map();
   this.mapLabelAnnotatorConfidence = new Map(); // combine each label with annotator confidence. annotator confidence exist if label exists for that component or sub component
   this.mapLabelAnnotConfJson = new Map(); // records json object to change the annotator confidence value associated with label
@@ -42,13 +52,13 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
   this.geoshapeidCounter = 0;
 
   var selectid = 0;
-  var mathOperators = new Map();
-  mathOperators.set("Equal", "=");
-  mathOperators.set("NotEqual", "!=");
-  mathOperators.set("LessThan", "<");
-  mathOperators.set("GreaterThan", ">");
-  mathOperators.set("LessThanEqual", "<=");
-  mathOperators.set("GreaterThanEqual", ">=");
+  this.mathOperators = new Map();
+  this.mathOperators.set("Equal", "=");
+  this.mathOperators.set("NotEqual", "!=");
+  this.mathOperators.set("LessThan", "<");
+  this.mathOperators.set("GreaterThan", ">");
+  this.mathOperators.set("LessThanEqual", "<=");
+  this.mathOperators.set("GreaterThanEqual", ">=");
 
   this.mapShapesSchemaToTemplate = new Map();
   this.mapShapesSchemaToTemplate.set("TwoDimensionPolyline", {
@@ -66,7 +76,76 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
   });
 
   this.templateShapeArray = []; //each array element is a json object {"shape":'Point', "domid" : '2.25.33554445511225454'});
-
+  this.defaultTemplateJson = {
+    TemplateContainer: {
+      uid: "2.25.5886502342623758457547593170234",
+      name: "example template",
+      authors: "epad team",
+      version: "1.0",
+      creationDate: "2020-03-18",
+      description:
+        "This template is used to collect annotations for RECIST evaluation",
+      "xsi:schemaLocation":
+        "gme://caCORE.caCORE/3.2/edu.northwestern.radiology.AIMTemplate AIMTemplate_v2rv13.xsd",
+      xmlns: "gme://caCORE.caCORE/3.2/edu.northwestern.radiology.AIMTemplate",
+      "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+      Template: [
+        {
+          uid: "2.25.14127115639382804046523562737575775778671",
+          name: "example template",
+          authors: "epad team",
+          version: "1.0",
+          creationDate: "2020-03-18",
+          description: "Template used for RECIST measurements",
+          codeMeaning: "Tumor assessment",
+          codeValue: "example template",
+          codingSchemeDesignator: "99EPAD",
+          codingSchemeVersion: "1.0",
+          Component: [
+            {
+              label: "Vessel side (if applicable)",
+              itemNumber: 3,
+              authors: "epaduser",
+              explanatoryText: "Status of lesion",
+              minCardinality: 1,
+              maxCardinality: 1,
+              shouldDisplay: true,
+              annotatorConfidence: false,
+              id: "2.25.436905441089.13054168484973.21324571207",
+              ImagingObservation: {
+                annotatorConfidence: false
+              },
+              AllowedTerm: [
+                {
+                  codeValue: "epadcdv_none",
+                  codeMeaning: "None",
+                  codingSchemeDesignator: "99EPAD"
+                },
+                {
+                  codeValue: "epadcdv_left",
+                  codeMeaning: "Left",
+                  codingSchemeDesignator: "99EPAD"
+                },
+                {
+                  codeValue: "epadcdv_right",
+                  codeMeaning: "Right",
+                  codingSchemeDesignator: "99EPAD",
+                  codingSchemeVersion: "1.0"
+                },
+                {
+                  codeValue: "epadcdv_midline",
+                  codeMeaning: "Midline",
+                  codingSchemeDesignator: "99EPAD",
+                  codingSchemeVersion: "1.0"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  };
+  self.annotationNames = [];
   function constructor() {
     if (self.arrayTemplates === "undefined") self.arrayTemplates = [];
   }
@@ -109,6 +188,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     if (self.mapShortCutKeys.get(keyvalue)) {
       // console.log("in" + keyvalue);
       // console.log(self.mapShortCutKeys.get(keyvalue));
+
       document.getElementById(self.mapShortCutKeys.get(keyvalue)).click();
     }
   };
@@ -120,6 +200,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
   };
 
   this.loadTemplates = function(templateList) {
+    console.log("template list ::: --->", templateList);
     self.arrayTemplatesJsonObjects = templateList;
     if (self.arrayTemplatesJsonObjects.length > 0) {
       for (var i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {
@@ -148,6 +229,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     // above section needs to be uncommented for testing purpose
     self.templateListDiv = document.createElement("div");
     self.templateListDiv.id = "tlist";
+    self.templateListDiv.style.width = "100%";
 
     self.shapeDiv = document.createElement("div");
     self.shapeDiv.id = "shape";
@@ -181,16 +263,14 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     var i = 0;
     var templateOption = document.createElement("option");
     templateOption.value = "-1";
-    templateOption.text = "Select";
+    templateOption.text = "Select Template";
     self.templateSelect.appendChild(templateOption);
 
     for (i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {
       var templateOption = document.createElement("option");
       templateOption.value = i;
       templateOption.text =
-        self.arrayTemplatesJsonObjects[
-          i
-        ].TemplateContainer.Template[0].codeMeaning;
+        self.arrayTemplatesJsonObjects[i].TemplateContainer.Template[0].name;
       //templateOption.innerHTML = this.arrayTemplatesJsonObjects[i].key;
       self.templateSelect.appendChild(templateOption);
     }
@@ -215,9 +295,9 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
       self.mapCardinalitiesToCheckId = new Map();
       self.mapStatusAllowedTermBlocks = new Map();
-      self.mapHtmlObjects = new Map();
-      self.mapHtmlSelectObjectsKeyValue = new Map();
-      self.mapAllowedTermCollectionByCodeValue = new Map();
+      //self.mapHtmlObjects = new Map(); not used
+      //self.mapHtmlSelectObjectsKeyValue = new Map(); not used
+      //self.mapAllowedTermCollectionByCodeValue = new Map(); not used
       //self.mapTemplateCodeValueByIndex = new Map();
       self.mapLabelAnnotatorConfidence = new Map();
       self.mapLabelAnnotConfJson = new Map();
@@ -227,9 +307,232 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       if (self.templateSelectedIndex > -1) {
         self.jsonTemplateCopy = self.arrayTemplatesJsonObjects[this.value];
         self.extractTemplate(self.jsonTemplateCopy);
+        self.renderButtonhandler(true);
+      } else {
+        self.renderButtonhandler(false);
       }
     };
     $('select[class^="ui dropdown"]').dropdown();
+    document.getElementById("tlist").children[0].style.width = "100%";
+    self.templateSelect.style.width = "100%";
+    templateDiv.style.width = "100%";
+  };
+
+  // below the function to use to switch the annotation name to a dropdown list
+  this.createViewerWindowWithNamesAsDropDown = function() {
+    //var x = document.createElement("INPUT");
+    //x.setAttribute("type", "file");
+    //x.addEventListener('change', self.readx, false);
+    self.templateSelectedIndex = 1;
+    self.annotationNames = [
+      {
+        text: "Width (AP Working Projection)",
+        value: "Width (AP Working Projection)"
+      },
+      {
+        text: "Height (AP Working Projection)",
+        value: "Height (AP Working Projection)"
+      },
+      {
+        text: "Neck (AP Working Projection)",
+        value: "Neck (AP Working Projection)"
+      },
+      {
+        text: "--------------------------------------------------------",
+        value: "--------------------------------------------------------"
+      },
+      {
+        text: "Width (Lateral Working Projection)",
+        value: "Width (Lateral Working Projection)"
+      },
+      {
+        text: "Height (Lateral Working Projection)",
+        value: "Height (Lateral Working Projection)"
+      },
+      {
+        text: "Neck (Lateral Working Projection)",
+        value: "Neck (Lateral Working Projection)"
+      },
+      {
+        text: "--------------------------------------------------------",
+        value: "--------------------------------------------------------"
+      },
+
+      { text: "1. Basilar aneurysm ", value: "Basilar aneurysm " },
+
+      {
+        text: "____a. Parent vessel – Basilar artery",
+        value: "Parent vessel – Basilar artery"
+      },
+      {
+        text: "____b. Daughter branches of relevance",
+        value: "Daughter branches of relevance"
+      },
+      {
+        text: "________i. Left Posterior Cerebral Artery (PCA)",
+        value: "Left Posterior Cerebral Artery (PCA)"
+      },
+      {
+        text: "________ii. Right Posterior Cerebral Artery (PCA)",
+        value: "Right Posterior Cerebral Artery (PCA)"
+      },
+
+      { text: "2. MCA aneurysm", value: "MCA aneurysm" },
+      {
+        text: "____a. Parent vessel – Middle cerebral Artery (MCA) M1 branch",
+        value: "Parent vessel – Middle cerebral Artery (MCA) M1 branch"
+      },
+      {
+        text: "____b. Daughter branches of relevance",
+        value: "Daughter branches of relevance"
+      },
+      {
+        text: "________i. MCA M2 superior branch",
+        value: "MCA M2 superior branch"
+      },
+      {
+        text: "________ii. MCA M2 inferior branch",
+        value: "MCA M2 inferior branch"
+      },
+
+      { text: "3. AComm aneurysm", value: "3. AComm aneurysm" },
+      {
+        text: "____a. Parent vessel – Anterior Cerebral Artery (ACA) A1 branch",
+        value: "Parent vessel – Anterior Cerebral Artery (ACA) A1 branch"
+      },
+      {
+        text: "____b. Daughter branches of relevance",
+        value: "Daughter branches of relevance"
+      },
+      {
+        text: "________i. ACA A2 ipsilateral branch",
+        value: "ACA A2 ipsilateral branch"
+      },
+      {
+        text: "________ii. ACA A2 contralateral branch",
+        value: "ACA A2 contralateral branch"
+      },
+
+      { text: "4. ICA Terminus aneurysm", value: "4. ICA Terminus aneurysm" },
+      {
+        text: "____a. Parent vessel – Internal Carotid Artery (ICA)",
+        value: "Parent vessel – Internal Carotid Artery (ICA)"
+      },
+      {
+        text: "____b. Daughter branches of relevance",
+        value: "Daughter branches of relevance"
+      },
+      {
+        text: "________i. MCA – M1",
+        value: "MCA – M1"
+      },
+      {
+        text: "________ii. ACA – A1",
+        value: "ACA – A1"
+      },
+
+      {
+        text: "--------------------------------------------------------",
+        value: "--------------------------------------------------------"
+      },
+      { text: "Other", value: "Other" },
+      {
+        text: "--------------------------------------------------------",
+        value: "--------------------------------------------------------"
+      }
+    ];
+    self.mainWindowDiv = document.createElement("div");
+    self.userWindow.innerHTML = "";
+    // below section needs to be uncommented for testing purpose
+    //self.mainButtonsDiv = document.createElement('div');
+    //this.addButtons(this.mainWindowDiv);
+    //this.mainWindowDiv.appendChild(x);
+    // above section needs to be uncommented for testing purpose
+    self.templateListDiv = document.createElement("div");
+    self.templateListDiv.id = "tlist";
+    self.templateListDiv.style.width = "100%";
+
+    self.shapeDiv = document.createElement("div");
+    self.shapeDiv.id = "shape";
+
+    self.accordion1Div = document.createElement("div");
+    self.accordion1Div.id = "accordion1";
+    self.accordion1Div.className = " ui accordion";
+    self.accordion1Div.style = "background-color: inherit; width:inherit;";
+
+    var accordion2Div = document.createElement("div");
+    accordion2Div.id = "accordion2";
+    accordion2Div.className = " ui accordion";
+    let labelAnnotationName = document.createElement("label");
+    labelAnnotationName.textContent = "Annotation Name";
+    self.mainWindowDiv.appendChild(labelAnnotationName);
+    self.mainWindowDiv.appendChild(self.templateListDiv);
+    self.mainWindowDiv.appendChild(self.shapeDiv);
+    self.mainWindowDiv.appendChild(self.accordion1Div);
+    //self.mainWindowDiv.appendChild(accordion2Div);
+
+    //below line needs to be uncommented for testing purpose
+    //self.mainWindowDiv.appendChild(self.mainButtonsDiv);
+
+    //creating template select drop down
+    // self.arrayTemplates = ["Select ", "short.json", "multiImage.json", "short1.json", "test3.json", "ATS_Template.json", "BeaulieuBoneTemplate_rev13.json", "coordinationTest.json", "Liver_Template_ePad_CFB_rev15.json", "LT.json", "asdf.json", "BeaulieuBoneTemplate_rev18.json", "LungNoduleFeaturesV2LT1.json", "meduloblastoma.json"];
+
+    var templateDiv = document.createElement("div");
+    self.templateSelect = document.createElement("select");
+    templateDiv.id = "Temp";
+    self.templateSelect.id = "S1";
+
+    self.templateSelect.className = "ui dropdown";
+    templateDiv.appendChild(self.templateSelect);
+    var i = 0;
+    var templateOption = document.createElement("option");
+    templateOption.value = "Select Name";
+    templateOption.text = "Select Name";
+    self.templateSelect.appendChild(templateOption);
+
+    self.annotationNames.forEach(nameobject => {
+      let templateOption = document.createElement("option");
+      templateOption.value = nameobject.value;
+      templateOption.text = nameobject.text;
+      templateOption.style.paddingLeft = "100px";
+      //templateOption.innerHTML = this.arrayTemplatesJsonObjects[i].key;
+      self.templateSelect.appendChild(templateOption);
+      //let optGroup = document.createElement("optgroup");
+      //optGroup.label = "opt grp";
+      //optGroup.appendChild(templateOption);
+      //self.templateSelect.appendChild(optGroup);
+    });
+
+    // var lblTxt = document.createTextNode("Select template:");
+
+    self.templateListDiv.appendChild(self.templateSelect);
+    self.userWindow.appendChild(self.mainWindowDiv);
+    self.aimComment = "";
+    self.aimName = "";
+    self.aimType = "";
+    self.aimTypeCode = "";
+
+    self.jsonTemplateCopy = "";
+    self.accordion1Div.innerHTML = "";
+    self.shapeDiv.innerHTML = "";
+    self.mapCardinalitiesToCheckId = new Map();
+    self.mapStatusAllowedTermBlocks = new Map();
+
+    self.mapLabelAnnotatorConfidence = new Map();
+    self.mapLabelAnnotConfJson = new Map();
+    self.mapLabelSubComment = new Map();
+    self.mapLabelCommentJson = new Map();
+    self.mapLabelUid = new Map();
+    self.templateSelect.onchange = function() {
+      self.aimName = this.value;
+    };
+    self.jsonTemplateCopy = self.defaultTemplateJson;
+    self.extractTemplate(self.jsonTemplateCopy);
+    self.renderButtonhandler(true);
+    $('select[class^="ui dropdown"]').dropdown();
+    document.getElementById("tlist").children[0].style.width = "100%";
+    self.templateSelect.style.width = "100%";
+    templateDiv.style.width = "100%";
   };
 
   this.extractTemplate = function(json) {
@@ -249,35 +552,49 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     var component = null;
     //adding comment textarea for the template
     var commentDiv = document.createElement("div");
+    commentDiv.style.width = "100%";
     var labelDiv = document.createElement("div");
     var annotationNameDiv = document.createElement("div");
     var annotationNameLabelDiv = document.createElement("div");
 
-    var labelAnnotationName = document.createElement("label");
+    // var labelAnnotationName = document.createElement("label");
 
-    labelAnnotationName.textContent = "Name";
-    var labelAnnotationNameInput = document.createElement("INPUT");
-    labelAnnotationNameInput.onkeyup = function() {
-      self.aimName = this.value;
-    };
+    // labelAnnotationName.textContent = "Annotation Name";
+    // var labelAnnotationNameInput = document.createElement("INPUT");
+    // labelAnnotationNameInput.style.fontFamily = self.fontfamily;
+    // labelAnnotationNameInput.style.fontSize = "14px";
+    // labelAnnotationNameInput.style.paddingLeft = "2px";
+    // //labelAnnotationNameInput.style.fontWeight = "1000";
+    // labelAnnotationNameInput.style.lineHeight = "14px";
+    // labelAnnotationNameInput.style.width = "100%";
 
-    labelAnnotationNameInput.setAttribute("type", "text");
-    labelAnnotationNameInput.id = "annotationName";
+    // labelAnnotationNameInput.onkeyup = function() {
+    //   self.aimName = this.value;
+    // };
 
-    annotationNameDiv.appendChild(labelAnnotationName);
-    annotationNameDiv.appendChild(labelAnnotationNameInput);
-    annotationNameLabelDiv.appendChild(labelAnnotationName);
-    annotationNameDiv.className = "comment ui input";
+    // labelAnnotationNameInput.setAttribute("type", "text");
+    // labelAnnotationNameInput.id = "annotationName";
+
+    // annotationNameDiv.appendChild(labelAnnotationName);
+    // annotationNameDiv.appendChild(labelAnnotationNameInput);
+    // annotationNameLabelDiv.appendChild(labelAnnotationName);
+    // annotationNameDiv.className = "comment ui input";
+    // annotationNameDiv.style.width = "100%";
 
     var label = document.createElement("label");
     annotationNameLabelDiv.className = "comment";
-    label.textContent = "comment";
+    annotationNameLabelDiv.style.paddingTop = "10px";
+    label.textContent = "Comment";
     labelDiv.className = "comment";
-    commentDiv.className = "comment";
+    labelDiv.style.paddingTop = "10px";
+    //commentDiv.className = "comment";
 
     var textareaDomObject = document.createElement("textarea");
     labelDiv.appendChild(label);
     textareaDomObject.id = "comment";
+    textareaDomObject.style.color = "black";
+    textareaDomObject.style.width = "100%";
+
     commentDiv.appendChild(textareaDomObject);
 
     textareaDomObject.onkeyup = function() {
@@ -298,8 +615,8 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
     document.getElementById("accordion1").appendChild(annotationNameLabelDiv);
     document.getElementById("accordion1").appendChild(annotationNameDiv);
-    document.getElementById("accordion1").appendChild(labelDiv);
-    document.getElementById("accordion1").appendChild(commentDiv);
+    //// removed for annot name drop down //// document.getElementById("accordion1").appendChild(labelDiv);
+    //// removed for annot name drop down //// document.getElementById("accordion1").appendChild(commentDiv);
     //end adding comment textarea for the template
     var a = 0;
     for (var i = 0; i < arrayLength; i++) {
@@ -321,6 +638,11 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       componentDiv.disabled = "true";
 
       var headerDiv = document.createElement("div");
+      headerDiv.style.color = self.fontcolor; //editing
+      headerDiv.style.fontWeight = self.fontweight; //editing
+      headerDiv.style.fontFamily = self.fontfamily;
+      headerDiv.style.fontSize = self.fontsize; //editing
+
       headerDiv.className = "title active";
       headerDiv.id = a;
 
@@ -403,6 +725,9 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     $('select[class^="ui dropdown"]').dropdown();
     $(".ui.accordion").accordion();
     self.formCheckHandler(self.checkFormSaveReady());
+    ////added here for annot name drop down
+    document.getElementById("accordion1").appendChild(labelDiv);
+    document.getElementById("accordion1").appendChild(commentDiv);
   };
 
   this.QuestionType = function(
@@ -473,11 +798,15 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     //checkAnnotatorConfidence(parentDiv,object);
     var ValidTerm = [];
     var i = 0;
+    //console.log("array length", arrayLength);
     for (i = 0; i < arrayLength; i++) {
       var subEObject = null;
-      if (arrayLength > 1) subEObject = object[i];
-      else subEObject = object;
-
+      if (isArray === 1) {
+        subEObject = object[i];
+      } else {
+        subEObject = object;
+      }
+      //console.log("undefined object", subEObject);
       var ValidTermObj = {
         type: "ValidTerm",
         codeValue: subEObject.codeValue,
@@ -511,6 +840,8 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       }
       var allowTermText = parent.codeMeaning;
       var selectHolder;
+      //console.log("valid term section : parent", parent); //editing
+
       if (control != "radioBtn") {
         if (validTermButtonClass != "ui") {
           var ar = new self.createCheckboxVT(
@@ -533,7 +864,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
             ATparent.label,
             "ui ",
             false,
-            allowTermText + "  " + subEObject.codeMeaning,
+            allowTermText + " " + subEObject.codeMeaning,
             ATallowedTermObj,
             ValidTermObj,
             ATparent
@@ -555,11 +886,6 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           ATparent
         );
         parentDiv.appendChild(ar.getelementHtml());
-      }
-
-      for (var key in subEObject) {
-        if (typeof subEObject[key] == "object") {
-        }
       }
     }
   };
@@ -606,6 +932,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     mapTagArray,
     parentTagTypeFromJson
   ) {
+    //console.log("allowed term object", parent);
     var athis = this;
     athis.parent = parent;
 
@@ -627,7 +954,10 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     uiAccordionDiv.className = " accordion allowedTermlbl";
     var titleDiv = document.createElement("div");
     titleDiv.className = "title active";
-
+    titleDiv.style.fontFamily = self.fontfamily;
+    titleDiv.style.color = self.fontcolor; //editing
+    //uiAccordionDiv.style.fontWeight = self.fontweight; //editing
+    titleDiv.style.fontSize = self.fontsize; //editing
     var titleI = document.createElement("i");
     titleI.className = "dropdown icon";
     var contentDiv = document.createElement("div");
@@ -655,7 +985,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     titleDiv.appendChild(titleI);
     titleDiv.appendChild(lblTxt);
     uiAccordionDiv.appendChild(contentDiv);
-    uiAccordionDiv.style.marginLeft = "20px";
+    uiAccordionDiv.style.marginLeft = "0px";
 
     var mainSelectDiv = document.createElement("div");
     mainSelectDiv.className = "ui container";
@@ -756,10 +1086,10 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
         parant: parent,
         allowterm: allowedTermObj
       };
-      this.mapAllowedTermCollectionByCodeValue.set(
-        allowedTermObj.codeValue,
-        unionPrntAlwtermObj
-      );
+      // this.mapAllowedTermCollectionByCodeValue.set(
+      //   allowedTermObj.codeValue,
+      //   unionPrntAlwtermObj
+      // ); not used
       AllowedTerm.push({
         AllowedTerm: allowedTermObj
       });
@@ -773,7 +1103,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           validTermButtonClass = "ui";
           ar = new self.createOption(
             parent,
-            subEObject.codeValue,
+            self.removeEmptySpace(parent.label) + "-" + subEObject.codeValue,
             parent.label,
             "ui ",
             false,
@@ -790,7 +1120,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           validTermButtonClass = "checkbox mylbl";
           ar = new self.createCheckbox(
             parent,
-            subEObject.codeValue,
+            self.removeEmptySpace(parent.label) + "-" + subEObject.codeValue,
             parent.label,
             "checkbox mylbl",
             subEObject.codeMeaning,
@@ -808,7 +1138,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           validTermButtonClass = "ui";
           ar = new self.createOption(
             parent,
-            subEObject.codeValue,
+            self.removeEmptySpace(parent.label) + "-" + subEObject.codeValue,
             parent.label,
             "ui ",
             false,
@@ -826,7 +1156,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
           ar = new self.createRadio(
             parent,
-            subEObject.codeValue,
+            self.removeEmptySpace(parent.label) + "-" + subEObject.codeValue,
             parent.label,
             "radio checkbox mylbl",
             false,
@@ -1238,8 +1568,9 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           );
         }
       }
-      self.checkAnnotatorConfidence(parentDiv, object);
+      console.log("scale checking object", parent);
     }
+    self.checkAnnotatorConfidence(parentDiv, parent);
   };
 
   this.ScaleLevel = function(
@@ -1261,7 +1592,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       for (i = 0; i < scaleArraysize; i++) {
         if (object[i].valueLabel == this.value) {
           object[i].select = "1";
-          self.mapHtmlSelectObjectsKeyValue.set(this.value, quantileSelect.id);
+          //self.mapHtmlSelectObjectsKeyValue.set(this.value, quantileSelect.id); not used
         } else {
           object[i].select = "0";
         }
@@ -1303,19 +1634,20 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     mapTagArray,
     parentTagTypeFromJson
   ) {
+    console.log("numerical parent :", "Select" + parent.name);
     var arrayLength = -1;
     var quantileDiv = document.createElement("div");
     quantileDiv.className = "mylbl";
     var quantileSelect = document.createElement("select");
     quantileSelect.className = "ui dropdown mylbl";
     selectid++;
-    quantileSelect.id = selectid;
+    quantileSelect.id = "Select" + parent.name;
     quantileSelect.addEventListener("change", function() {
       var i = 0;
       var scaleArraysize = object.length;
       for (i = 0; i < scaleArraysize; i++) {
         var createFormValue =
-          mathOperators.get(object[i].operator) +
+          self.mathOperators.get(object[i].operator) +
           " " +
           object[i].valueLabel +
           " " +
@@ -1336,7 +1668,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       arrayLength = 1;
     }
     var subEObject = null;
-    self.checkAnnotatorConfidence(parentDiv, object);
+    //self.checkAnnotatorConfidence(parentDiv, object);
     for (var i = 0; i < arrayLength; i++) {
       if (isArray === 1) subEObject = object[i];
       else subEObject = object;
@@ -1348,13 +1680,14 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
       var quantileOption = document.createElement("option");
       quantileOption.innerHTML =
-        mathOperators.get(subEObject.operator) +
+        self.mathOperators.get(subEObject.operator) +
         " " +
         subEObject.valueLabel +
         " " +
         subEObject.ucumString;
       quantileSelect.appendChild(quantileOption);
     }
+    self.checkAnnotatorConfidence(parentDiv, parent);
   };
 
   this.Quantile = function(
@@ -1374,7 +1707,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       arrayLength = 1;
     }
     var subEObject = null;
-    self.checkAnnotatorConfidence(parentDiv, object);
+    //self.checkAnnotatorConfidence(parentDiv, object);
     for (var i = 0; i < arrayLength; i++) {
       if (isArray === 1) subEObject = object[i];
       else subEObject = object;
@@ -1383,9 +1716,11 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           self[key](subEObject, subEObject[key], parentDiv, mapTagArray, null);
         }
       }
+      console.log("each quantile ", subEObject);
       var quantileDiv = document.createElement("div");
       quantileDiv.className = "mylbl";
       var quantileSelect = document.createElement("select");
+      quantileSelect.id = "Select" + parent.name;
       quantileSelect.className = "ui dropdown mylbl";
       quantileDiv.appendChild(quantileSelect);
       parentDiv.appendChild(quantileDiv);
@@ -1404,7 +1739,29 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           parseFloat(parseFloat(minValue) + parseFloat(step));
         minValue = minValue + step;
       }
+      subEObject.valueLabel = quantileSelect.options[0].value;
+
+      quantileSelect.addEventListener("change", function() {
+        var i = 0;
+        var scaleArraysize = object.length;
+        console.log("quatile on select : ", object);
+        object.selectedBin = this.selectedIndex + 1;
+        object.select = 1;
+        object.valueLabel = this.options[this.selectedIndex].value;
+        // for (i = 0; i < scaleArraysize; i++) {
+        //   var createFormValue =
+        //     self.mathOperators.get(object[i].operator) +
+        //     " " +
+        //     object[i].valueLabel +
+        //     " " +
+        //     object[i].ucumString;
+
+        //   if (createFormValue == this.value) object[i].select = "1";
+        //   else object[i].select = "0";
+        // }
+      });
     }
+    self.checkAnnotatorConfidence(parentDiv, parent);
   };
 
   this.Interval = function(
@@ -1424,14 +1781,14 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       arrayLength = 1;
     }
     var subEObject = null;
-    self.checkAnnotatorConfidence(parentDiv, object);
+    //self.checkAnnotatorConfidence(parentDiv, object);
     var intervalDiv = document.createElement("div");
     intervalDiv.className = "mylbl";
     var intervalSelect = document.createElement("select");
     intervalSelect.className = "ui dropdown mylbl";
 
     selectid++;
-    intervalSelect.id = selectid;
+    intervalSelect.id = "Select" + parent.name;
     intervalSelect.addEventListener("change", function() {
       var i = 0;
       var scaleArraysize = object.length;
@@ -1455,6 +1812,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       intervalSelect.appendChild(intervalOption);
     }
     parentDiv.appendChild(intervalDiv);
+    self.checkAnnotatorConfidence(parentDiv, parent);
   };
 
   this.NonQuantifiable = function(
@@ -1472,7 +1830,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     var quantileSelect = document.createElement("select");
     quantileSelect.className = "ui dropdown mylbl";
     selectid++;
-    quantileSelect.id = selectid;
+    quantileSelect.id = "Select" + parent.name;
     quantileSelect.addEventListener("change", function() {
       var i = 0;
       var scaleArraysize = object.length;
@@ -1492,7 +1850,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       arrayLength = 1;
     }
     var subEObject = null;
-    self.checkAnnotatorConfidence(parentDiv, object);
+    //self.checkAnnotatorConfidence(parentDiv, object);
     for (var i = 0; i < arrayLength; i++) {
       if (isArray === 1) subEObject = object[i];
       else subEObject = object;
@@ -1505,6 +1863,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       quantileOption.innerHTML = subEObject.codeMeaning;
       quantileSelect.appendChild(quantileOption);
     }
+    self.checkAnnotatorConfidence(parentDiv, parent);
   };
 
   this.createRadio = function(
@@ -1516,23 +1875,18 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     lbl,
     allowedTermObj
   ) {
-    var _self = this;
-    _self.par = prObject;
-    _self.id = id;
-    _self.name = name;
-    _self.checked = checked;
-    _self.className = className;
-    _self.lbl = lbl;
     var div = document.createElement("div");
-    div.className = _self.className;
+    div.style.marginLeft = "20px";
+    //div.style.fontsize = self.fontsize;
+    div.className = className;
     var label = document.createElement("label");
-    label.textContent = _self.lbl;
+    label.textContent = lbl;
     var radioInput = document.createElement("input");
     radioInput.type = "radio";
     radioInput.className = "radio checkbox";
-    radioInput.id = _self.id;
-    radioInput.name = _self.name;
-    radioInput.checked = _self.checked;
+    radioInput.id = id;
+    radioInput.name = name;
+    radioInput.checked = checked;
 
     div.appendChild(radioInput);
     div.appendChild(label);
@@ -1560,13 +1914,14 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       checkmarkObj.actualSelected++;
 
       self.mapCardinalitiesToCheckId.set(checkmarkObj.id, checkmarkObj);
-
+      console.log("next id catched", allowedTermObj.nextId);
       if (checkmarkObj.actualSelected >= checkmarkObj.min)
         document.getElementById(checkmarkObj.id).className =
           "green check circle outline icon";
       if (allowedTermObj.nextId != "0") {
+        console.log("next id catched", allowedTermObj.nextId);
         self.DisableTillNext(
-          _self.par.id,
+          prObject.id,
           allowedTermObj.nextId,
           self.callDisable
         );
@@ -1584,13 +1939,18 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           );
       }
 
+      if (allowedTermObj.getPrimitive().noMoreQuestions == true) {
+        console.log("nomore question situation : === true");
+        self.DisableTillNext(prObject.id, "tillend", self.callDisable);
+      }
+      console.log(allowedTermObj);
       self.formCheckHandler(self.checkFormSaveReady());
     };
 
     this.getelementHtml = function() {
       return div;
     };
-    self.mapHtmlObjects.set(allowedTermObj.codeValue, radioInput);
+    //self.mapHtmlObjects.set(allowedTermObj.codeValue, radioInput); not used
   };
   this.createRadioVT = function(
     prObject,
@@ -1603,24 +1963,22 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     validTermObj,
     vtPrObject
   ) {
-    var _self = this;
-    _self.allowedTermObj = validTermObj;
-    _self.par = prObject;
-    _self.id = id + allowedTermObj.codeValue;
-    _self.name = name;
-    _self.checked = checked;
-    _self.className = className;
-    _self.lbl = lbl;
+    let labelForUniqueness = self.removeEmptySpace(
+      validTermObj.primitiveObjATSparent.label
+    );
+    id = labelForUniqueness + "-" + id + allowedTermObj.codeValue;
+
     var div = document.createElement("div");
-    div.className = _self.className;
+    div.style.marginLeft = "20px";
+    div.className = className;
     var label = document.createElement("label");
-    label.textContent = _self.lbl;
+    label.textContent = lbl;
     var radioInput = document.createElement("input");
     radioInput.type = "radio";
     radioInput.className = "radio checkbox";
-    radioInput.id = _self.id;
-    radioInput.name = _self.name;
-    radioInput.checked = _self.checked;
+    radioInput.id = id;
+    radioInput.name = name;
+    radioInput.checked = checked;
 
     div.appendChild(radioInput);
     div.appendChild(label);
@@ -1630,6 +1988,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       var getAllowTGroup = validTermObj.primitiveObjATSparent;
       var getAllowTGroupSize = getAllowTGroup.AllowedTerm.length;
       var i = 0;
+      //console.log("gettin alowed terms", getAllowTGroup);
       for (i = 0; i < getAllowTGroupSize; i++) {
         if (
           getAllowTGroup.AllowedTerm[i].codeValue !==
@@ -1685,7 +2044,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       return div;
     };
 
-    self.mapHtmlObjects.set(_self.allowedTermObj.codeValue, radioInput);
+    //self.mapHtmlObjects.set(allowedTermObj.codeValue, radioInput); not used
   };
 
   this.createOption = function(
@@ -1698,20 +2057,14 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     allowedTermObj
   ) {
     //drop down select and add input box object
-    var _self = this;
-    _self.allowedTermObj = allowedTermObj;
-    _self.par = prObject;
+
     //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
-    _self.id = id;
-    _self.name = name;
-    _self.value = name;
-    _self.checked = checked;
-    _self.className = className;
-    _self.lbl = lbl;
+
     var div = document.createElement("div");
-    div.className = _self.className;
+    div.style.marginLeft = "20px";
+    div.className = className;
     var labelHolder = document.createElement("label");
-    var label = document.createTextNode(_self.lbl);
+    var label = document.createTextNode(lbl);
 
     var square = document.createElement("div");
     square.className = "ui mini Tiny blue label";
@@ -1721,10 +2074,10 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     square.appendChild(lab);
 
     var optionInput = document.createElement("option");
-    optionInput.id = _self.id;
-    optionInput.name = _self.name;
-    optionInput.checked = _self.checked;
-    optionInput.value = _self.lbl;
+    optionInput.id = id;
+    optionInput.name = name;
+    optionInput.checked = checked;
+    optionInput.value = lbl;
     //div.appendChild(radioInput);
 
     div.appendChild(optionInput);
@@ -1733,6 +2086,8 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     labelHolder.appendChild(label);
 
     optionInput.addEventListener("click", function() {
+      console.log("next id", allowedTermObj.nextId);
+      console.log("clicked situation", this.selected);
       var checkmarkObj = self.mapCardinalitiesToCheckId.get(prObject.id);
       checkmarkObj.ok = "true";
 
@@ -1757,6 +2112,40 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
         document.getElementById(prObject.id).className =
           "red check circle outline icon";
 
+      //disable enable component seection
+      if (allowedTermObj.nextId != "0" && this.selected == true) {
+        console.log("next id catched", allowedTermObj.nextId);
+        self.DisableTillNext(
+          prObject.id,
+          allowedTermObj.nextId,
+          self.callDisable
+        );
+      } else if (
+        typeof self.mapStatusAllowedTermBlocks.get(checkmarkObj.id) !==
+          "undefined" &&
+        allowedTermObj.nextId != "0" &&
+        this.selected == false
+      ) {
+        var statusCheckAllowTermObject = self.mapStatusAllowedTermBlocks.get(
+          checkmarkObj.id
+        );
+        if (statusCheckAllowTermObject.status == "disabled")
+          self.EnableTillNext(
+            statusCheckAllowTermObject.startid,
+            statusCheckAllowTermObject.endid
+          );
+      }
+
+      if (allowedTermObj.getPrimitive().noMoreQuestions == true) {
+        if (this.checked == true) {
+          console.log("nomore question situation : === true");
+          self.DisableTillNext(prObject.id, "tillend", self.callDisable);
+        } else {
+          console.log("nomore question situation : === true");
+          self.EnableTillNext(prObject.id, "tillend");
+        }
+      }
+
       self.formCheckHandler(self.checkFormSaveReady());
     });
 
@@ -1777,34 +2166,29 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     vtPrObject
   ) {
     //drop down multiple selectable list
-    var _self = this;
-    _self.allowedTermObj = validTermObj;
-    _self.par = prObject;
-    //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
-    _self.id = id;
-    _self.name = name;
-    _self.value = name;
-    _self.checked = checked;
-    _self.className = className;
-    _self.lbl = lbl;
+    let labelForUniqueness = self.removeEmptySpace(
+      validTermObj.primitiveObjATSparent.label
+    );
+    id = labelForUniqueness + "-" + id + allowedTermObj.codeValue;
     var div = document.createElement("div");
-    div.className = _self.className;
+    div.style.marginLeft = "20px";
+    div.className = className;
     var labelHolder = document.createElement("label");
-    var label = document.createTextNode(_self.lbl);
+    var label = document.createTextNode(lbl);
 
     var square = document.createElement("div");
     square.className = "ui mini Tiny blue label";
+    self.subOrderLabelTracking = self.subOrderLabelTracking - 1;
     var lab = document.createTextNode(
       String.fromCharCode(self.subOrderLabelTracking) + "-"
     );
     square.appendChild(lab);
 
     var optionInput = document.createElement("option");
-    optionInput.id = _self.id;
-    optionInput.name = _self.name;
-    optionInput.checked = _self.checked;
-    optionInput.value = _self.lbl;
-    //div.appendChild(radioInput);
+    optionInput.id = id;
+    optionInput.name = name;
+    optionInput.checked = checked;
+    optionInput.value = lbl;
 
     div.appendChild(optionInput);
     optionInput.appendChild(square);
@@ -1856,34 +2240,29 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     lbl,
     allowedTermObj
   ) {
-    var _self = this;
-    _self.allowedTermObj = allowedTermObj;
-    this.par = prObject;
     //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
-    this.allowedTermObj = allowedTermObj;
-    this.id = id;
-    this.name = name;
-    this.className = className;
-    this.value = value;
-    this.lbl = lbl;
+
     var div = document.createElement("div");
-    div.className = this.className;
+    div.style.marginLeft = "20px";
+    div.className = className;
     var label = document.createElement("label");
-    label.textContent = this.lbl;
+    label.textContent = lbl;
     var checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.className = "checkbox";
-    checkbox.name = this.name;
-    checkbox.value = this.value;
-    checkbox.id = this.id;
+    checkbox.name = name;
+    checkbox.value = value;
+    checkbox.id = id;
     div.appendChild(checkbox);
     div.appendChild(label);
     // document.getElementById(this.par).appendChild(div);
     this.getelementHtml = function() {
       return div;
     };
-
+    let nextIdExist = false;
+    let nomoreQuestionExist = false;
     checkbox.onclick = function() {
+      console.log("check box parent :", prObject);
       allowedTermObj.changeOnSelect("1", self.AfterClick);
 
       var checkmarkObj = self.mapCardinalitiesToCheckId.get(prObject.id);
@@ -1904,12 +2283,57 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       if (
         checkmarkObj.actualSelected >= checkmarkObj.min &&
         checkmarkObj.actualSelected <= checkmarkObj.max
-      )
+      ) {
         document.getElementById(prObject.id).className =
           "green check circle outline icon";
-      else
+      } else {
         document.getElementById(prObject.id).className =
           "red check circle outline icon";
+      }
+
+      // let allowedTermGroup = prObject.AllowedTerm;
+      // let clickedAllowedTermIndex = -1;
+      // for (let i = 0; i < allowedTermGroup.length; i++) {
+      //   console.log(allowedTermGroup[i].select);
+      //   if (allowedTermGroup[i].codeValue == allowedTermObj.codeValue) {
+      //     clickedAllowedTermIndex = i;
+      //   }
+      //   //Do something
+      // }
+
+      //disable enable component seection
+      if (allowedTermObj.nextId != "0" && checkbox.checked == true) {
+        console.log("next id catched", allowedTermObj.nextId);
+        self.DisableTillNext(
+          prObject.id,
+          allowedTermObj.nextId,
+          self.callDisable
+        );
+      } else if (
+        typeof self.mapStatusAllowedTermBlocks.get(checkmarkObj.id) !==
+          "undefined" &&
+        allowedTermObj.nextId != "0" &&
+        checkbox.checked == false
+      ) {
+        var statusCheckAllowTermObject = self.mapStatusAllowedTermBlocks.get(
+          checkmarkObj.id
+        );
+        if (statusCheckAllowTermObject.status == "disabled")
+          self.EnableTillNext(
+            statusCheckAllowTermObject.startid,
+            statusCheckAllowTermObject.endid
+          );
+      }
+
+      if (allowedTermObj.getPrimitive().noMoreQuestions == true) {
+        if (this.checked == true) {
+          console.log("nomore question situation : === true");
+          self.DisableTillNext(prObject.id, "tillend", self.callDisable);
+        } else {
+          console.log("nomore question situation : === true");
+          self.EnableTillNext(prObject.id, "tillend");
+        }
+      }
 
       self.formCheckHandler(self.checkFormSaveReady());
     };
@@ -1926,26 +2350,25 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     validTermObj,
     vtPrObject
   ) {
-    //var _self = this;
-    //_self.allowedTermObj = validTermObj;
+    let labelForUniqueness = self.removeEmptySpace(
+      validTermObj.primitiveObjATSparent.label
+    );
+    id = labelForUniqueness + "-" + id + allowedTermObj.codeValue;
+
     this.par = prObject;
     //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
-    this.allowedTermObj = validTermObj;
-    this.id = id;
-    this.name = name;
-    this.className = className;
-    this.value = value;
-    this.lbl = lbl;
+
     var div = document.createElement("div");
-    div.className = this.className;
+    div.style.marginLeft = "20px";
+    div.className = className;
     var label = document.createElement("label");
-    label.textContent = this.lbl;
+    label.textContent = lbl;
     var checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.className = "checkbox";
-    checkbox.name = this.name;
-    checkbox.value = this.value;
-    checkbox.id = this.id;
+    checkbox.name = name;
+    checkbox.value = value;
+    checkbox.id = id;
     div.appendChild(checkbox);
     div.appendChild(label);
     // document.getElementById(this.par).appendChild(div);
@@ -1995,13 +2418,15 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     }
   };
   this.checkAnnotatorConfidence = function(prentDiv, objectToCheckAnnConf) {
+    console.log("checking annotator confidence for : ", objectToCheckAnnConf);
+    let isMouseButtondown = false;
     if (typeof objectToCheckAnnConf.annotatorConfidence != "undefined") {
       // Assign value to the property here
       if (
         objectToCheckAnnConf.hasOwnProperty("label") ||
         objectToCheckAnnConf.hasOwnProperty("name")
       ) {
-        if (objectToCheckAnnConf.annotatorConfidence == "true") {
+        if (objectToCheckAnnConf.annotatorConfidence == true) {
           //console.log("after selecting template"+objectToCheckAnnConf.label);
 
           if (objectToCheckAnnConf.hasOwnProperty("label")) {
@@ -2033,12 +2458,28 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
             annotConfShowValueInput.value = this.value;
             objectToCheckAnnConf.selectac = this.value / 100;
           };
+          annotConfInput.onmousedown = function(event) {
+            isMouseButtondown = true;
+          };
+          annotConfInput.onmouseup = function(event) {
+            isMouseButtondown = false;
+          };
+          annotConfInput.onmousemove = function(event) {
+            if (isMouseButtondown) {
+              annotConfShowValueInput.value = this.value;
+              objectToCheckAnnConf.selectac = this.value / 100;
+              console.log(event.clientX);
+            }
+          };
+
           annotConfDiv.className = "ui range";
+          annotConfDiv.style.textAlign = "center";
+          annotConfDiv.style.marginBottom = "10px";
 
           var annotConfShowValueInput = document.createElement("input");
           annotConfShowValueInput.style.width = "52px";
           annotConfShowValueInput.style.height = "28px";
-          //annotConfShowValueInput.style.float = "left";
+
           annotConfShowValueInput.setAttribute("type", "text");
           annotConfShowValueInput.setAttribute("class", "ui  input");
           annotConfShowValueInput.setAttribute("id", "inputRange" + rangeid);
@@ -2049,10 +2490,12 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
             "class",
             "ui input disabled small"
           );
-
+          let confidenceText = document.createTextNode("Confidence level");
+          //loadButton.appendChild(loadButtonText);
           annotConfDiv.appendChild(annotConfInput);
           annotConfDiv.appendChild(annotConfShowValueInputDiv);
           annotConfShowValueInputDiv.appendChild(annotConfShowValueInput);
+          prentDiv.appendChild(confidenceText);
           prentDiv.appendChild(annotConfDiv);
         }
       }
@@ -2061,6 +2504,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
   var disabledefined = [];
   this.DisableTillNext = function(actualid, nextid, call) {
+    console.log("disable next called", nextid);
     let nextControl = 0;
     for (var [key, value] of self.mapCardinalitiesToCheckId) {
       if (key == actualid) {
@@ -2077,16 +2521,15 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           document.getElementById(key).className =
             "blue check circle outline icon";
           let ely = document.getElementById(key).parentNode;
-
+          console.log("disabling", ely.parentnode);
           //$(ely.parentNode).dropdown({action: 'hide'});
-          $(ely.parentNode)
-            .dropdown()
-            .hide();
+          $(ely.parentNode).hide();
         } else nextControl = 0;
       }
     }
     call();
   };
+
   this.EnableTillNext = function(actualid, nextid) {
     let nextControl = 0;
     for (var [key, value] of self.mapCardinalitiesToCheckId) {
@@ -2104,10 +2547,8 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
           document.getElementById(key).className =
             "green check circle outline icon";
           let ely = document.getElementById(key).parentNode;
-
-          $(ely.parentNode)
-            .dropdown()
-            .show();
+          console.log("enabling", ely.parentNode);
+          $(ely.parentNode).show();
         } else nextControl = 0;
       }
     }
@@ -2130,7 +2571,9 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
   this.solveAimCompnent = function(object) {};
 
-  this.AfterClick = function(obj) {};
+  this.AfterClick = function(obj) {
+    //alert():
+  };
 
   this.printXmlAim = function(data, xmlArray) {
     var oSerializer = new XMLSerializer();
@@ -2224,30 +2667,30 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
    }
 */
   //load aim end
-  this.readx = function readx(evt) {
-    return self.readFile(evt);
-  };
+  // this.readx = function readx(evt) {
+  //   return self.readFile(evt);
+  // };
 
   //return self.loadAim(self.textXml, self.checkSaveReady);
 
-  this.readFile = function(e) {
-    //Retrieve all the files from the FileList object
+  // this.readFile = function(e) {
+  //   //Retrieve all the files from the FileList object
 
-    var file = e.target.files[0];
-    if (!file) {
-      return;
-    }
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var contents = e.target.result;
-      self.textXml = contents;
-      // Display file content
-      //displayContents(contents);
-    };
-    reader.readAsText(file);
+  //   var file = e.target.files[0];
+  //   if (!file) {
+  //     return;
+  //   }
+  //   var reader = new FileReader();
+  //   reader.onload = function(e) {
+  //     var contents = e.target.result;
+  //     self.textXml = contents;
+  //     // Display file content
+  //     //displayContents(contents);
+  //   };
+  //   reader.readAsText(file);
 
-    // return self.loadAim(self.textXml, self.checkSaveReady);
-  };
+  //   // return self.loadAim(self.textXml, self.checkSaveReady);
+  // };
 
   // Save Aim
   this.savetextFreeInput = function(
@@ -2308,110 +2751,98 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
   //****************** used components ***********************************
 
-  this.saveInterval = function(
-    parentArray,
-    parentObject,
-    itself,
-    Entitytype,
-    jsonInner
-  ) {
-    //console.log("interval :"+JSON.stringify(parentObject));
-    //console.log("interval :"+JSON.stringify(jsonInner));
-    /*
-      var _inself = this;
+  this.saveInterval = function(parentObject, itself, Entitytype, jsonInner) {
+    var Intervals = itself.value;
+    var arraySize = -1;
+    var arrayCheck = false;
 
-      var prntObject = null;
+    if (Array.isArray(Intervals)) {
+      arraySize = Intervals.length;
+      arrayCheck = true;
+    } else {
+      arraySize = 1;
+    }
+    console.log("numerical parent object", parentObject);
+    let anotconf = 0.0;
+    if (typeof parentObject.value.selectac !== "undefined") {
+      anotconf = parentObject.value.selectac;
+    }
+    let jsonCharacteristicQuantification = {
+      "xsi:type": "Interval",
+      minOperator: "",
+      maxOperator: "",
+      annotatorConfidence: { value: anotconf },
+      label: { value: parentObject.value.name },
+      ucumString: { value: "" },
+      minValue: { value: "" },
+      maxValue: { value: "" },
+      valueLabel: {
+        value: ""
+      }
+    };
 
+    var defaultSelectedValueLabel = "";
+    var defaultSelectedOperator = "";
+    var defaultSelectedMinOperator = "";
+    var defaultSelectedMaxOperator = "";
+    var defaultSelectedMinValue = "";
+    var defaultSelectedMaxValue = "";
+    var defaultSelectedUcumString = "";
 
-      var Intervals = itself.value;
+    var i = 0;
 
-      var arraySize = -1;
-      var arrayCheck = false;
-      if (Array.isArray(Intervals)) {
-         arraySize = Intervals.length;
-         arrayCheck = true;
+    for (i = 0; i < arraySize; i++) {
+      if (arrayCheck == true) {
+        var instanceObject = Intervals[i];
       } else {
-         arraySize = 1;
+        var instanceObject = Intervals;
       }
 
-
-      var defaultMaxOperator = "";
-      var defaultMinOperator = "";
-      var defaultMinValue = "";
-      var defaultMaxValue = "";
-      var defaultUcumString = "";
-      var defaultValue = "";
-
-
-      var xmlCharacteristicQuantification = xmldoc.createElement("CharacteristicQuantification");
-
-
-      var xmlAnnotatorConfidence = xmldoc.createElement("annotatorConfidence");
-      xmlAnnotatorConfidence.setAttribute("value", parentObject.value.selectac);
-
-      var xmlLabel = xmldoc.createElement("label");
-
-      var xmlMinValue = xmldoc.createElement("minValue");
-      var xmlMaxValue = xmldoc.createElement("maxValue");
-      var xmlUcumString = xmldoc.createElement("ucumString");
-
-      xmlCharacteristicQuantification.appendChild(xmlAnnotatorConfidence);
-
-
-
-      var i = 0;
-      for (i = 0; i < arraySize; i++) {
-
-         if (arrayCheck == true) {
-            var instanceObject = Intervals[i];
-         } else {
-            var instanceObject = Intervals;
-         }
-
-         var prntObject = {
-            type: "Intervals",
-            value: instanceObject
-         }
-         if (i == 0) {
-
-            defaultMaxOperator = instanceObject.maxOperator;
-            defaultMinOperator = instanceObject.minOperator;
-            defaultMinValue = instanceObject.minValue;
-            defaultMaxValue = instanceObject.maxValue;
-            defaultUcumString = instanceObject.ucumString;
-            defaultValue = instanceObject.valueLabel;
-
-         } else {
-            if (instanceObject.hasOwnProperty("select")) {
-               if (instanceObject.select == "1") {
-
-                  defaultMaxOperator = instanceObject.maxOperator;
-                  defaultMinOperator = instanceObject.minOperator;
-                  defaultMinValue = instanceObject.minValue;
-                  defaultMaxValue = instanceObject.maxValue;
-                  defaultUcumString = instanceObject.ucumString;
-                  defaultValue = instanceObject.valueLabel;
-               }
-            }
-         }
-
-
+      var prntObject = {
+        type: "Numerical",
+        value: instanceObject
+      };
+      console.log("numerical instance object", instanceObject);
+      if (i == 0) {
+        defaultSelectedValueLabel = instanceObject.valueLabel;
+        defaultSelectedOperator = instanceObject.operator;
+        defaultSelectedUcumString = instanceObject.ucumString;
+        defaultSelectedMinOperator = instanceObject.minOperator;
+        defaultSelectedMaxOperator = instanceObject.maxOperator;
+        defaultSelectedMinValue = parseFloat(instanceObject.minValue);
+        defaultSelectedMaxValue = parseFloat(instanceObject.maxValue);
+      } else {
+        if (instanceObject.hasOwnProperty("select")) {
+          if (instanceObject.select === "1") {
+            defaultSelectedValueLabel = instanceObject.valueLabel;
+            defaultSelectedOperator = instanceObject.operator;
+            defaultSelectedUcumString = instanceObject.ucumString;
+            defaultSelectedMinOperator = instanceObject.minOperator;
+            defaultSelectedMaxOperator = instanceObject.maxOperator;
+            defaultSelectedMinValue = parseFloat(instanceObject.minValue);
+            defaultSelectedMaxValue = parseFloat(instanceObject.maxValue);
+          }
+        }
       }
-      xmlCharacteristicQuantification.setAttribute("maxOperator", defaultMaxOperator);
-      xmlCharacteristicQuantification.setAttribute("minOperator", defaultMinOperator);
-      xmlCharacteristicQuantification.setAttribute("xsi:type", "Interval");
-      xmlLabel.setAttribute("value", defaultValue);
-      xmlMinValue.setAttribute("value", defaultMinValue);
-      xmlMaxValue.setAttribute("value", defaultMaxValue);
-      xmlUcumString.setAttribute("value", defaultUcumString);
+      jsonCharacteristicQuantification.valueLabel = {
+        value: defaultSelectedValueLabel
+      };
 
-      xmlCharacteristicQuantification.appendChild(xmlLabel);
-      xmlCharacteristicQuantification.appendChild(xmlMinValue);
-      xmlCharacteristicQuantification.appendChild(xmlMaxValue);
-      xmlCharacteristicQuantification.appendChild(xmlUcumString);
-      xmlParent.appendChild(xmlCharacteristicQuantification);
+      jsonCharacteristicQuantification.operator = defaultSelectedOperator;
+      jsonCharacteristicQuantification.minOperator = defaultSelectedMinOperator;
+      jsonCharacteristicQuantification.maxOperator = defaultSelectedMaxOperator;
+      jsonCharacteristicQuantification.ucumString = {
+        value: defaultSelectedUcumString
+      };
+      jsonCharacteristicQuantification.minValue = {
+        value: defaultSelectedMinValue
+      };
+      jsonCharacteristicQuantification.maxValue = {
+        value: defaultSelectedMaxValue
+      };
+    }
 
-*/
+    jsonInner.push(jsonCharacteristicQuantification);
   };
 
   this.saveNonQuantifiable = function(
@@ -2432,23 +2863,24 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     } else {
       arraySize = 1;
     }
-
+    let anotconf = 0.0;
+    if (typeof parentObject.value.selectac !== "undefined") {
+      anotconf = parentObject.value.selectac;
+    }
     let jsonCharacteristicQuantification = {
       "xsi:type": "NonQuantifiable",
-      annotatorConfidence: { value: parentObject.value.selectac },
+      annotatorConfidence: { value: anotconf },
       label: { value: parentObject.value.name },
-      typeCode: [
-        {
-          code: "",
-          codeSystem: "",
-          codeSystemName: "",
-          "iso:displayName": {
-            "xmlns:iso": "uri:iso.org:21090",
-            value: ""
-          },
-          codeSystemVersion: ""
-        }
-      ]
+      typeCode: {
+        code: "",
+        codeSystem: "",
+        codeSystemName: "",
+        "iso:displayName": {
+          "xmlns:iso": "uri:iso.org:21090",
+          value: ""
+        },
+        codeSystemVersion: ""
+      }
     };
     var defaultCode = "";
     var defaultCodeSystem = "";
@@ -2486,137 +2918,185 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       }
     }
 
-    jsonCharacteristicQuantification.typeCode[0].code = defaultCode;
-    jsonCharacteristicQuantification.typeCode[0].codeSystem = defaultCodeSystem;
-    jsonCharacteristicQuantification.typeCode[0].codeSystemName = defaultCodeSystemName;
-    jsonCharacteristicQuantification.typeCode[0].codeSystemVersion = defaultCodeSystemVersion;
-    jsonCharacteristicQuantification.typeCode[0][
+    jsonCharacteristicQuantification.typeCode.code = defaultCode;
+    jsonCharacteristicQuantification.typeCode.codeSystem = defaultCodeSystem;
+    jsonCharacteristicQuantification.typeCode.codeSystemName = defaultCodeSystemName;
+    jsonCharacteristicQuantification.typeCode.codeSystemVersion = defaultCodeSystemVersion;
+    jsonCharacteristicQuantification.typeCode[
       "iso:displayName"
     ].value = defaultCodeSystem;
     jsonInner.push(jsonCharacteristicQuantification);
   };
 
   this.saveQuantile = function(parentObject, itself, Entitytype, jsonInner) {
-    /*
+    var Quantiles = itself.value;
+    var arraySize = -1;
+    var arrayCheck = false;
 
+    if (Array.isArray(Quantiles)) {
+      arraySize = Quantiles.length;
+      arrayCheck = true;
+    } else {
+      arraySize = 1;
+    }
+    console.log("numerical parent object", parentObject);
+    let anotconf = 0.0;
+    if (typeof parentObject.value.selectac !== "undefined") {
+      anotconf = parentObject.value.selectac;
+    }
+    let jsonCharacteristicQuantification = {
+      "xsi:type": "Quantile",
+      annotatorConfidence: { value: anotconf },
+      label: { value: parentObject.value.name },
+      minValue: { value: "" },
+      maxValue: { value: "" },
+      bins: { value: "" },
+      selectedBin: { value: "" },
+      valueLabel: {
+        value: ""
+      }
+    };
 
-      let prntObject = null;
+    var defaultSelectedValueLabel = "";
+    var defaultSelectedBins = "";
+    var defaultSelectedSelectedBin = "";
+    var defaultSelectedMinValue = "";
+    var defaultSelectedMaxValue = "";
 
+    var i = 0;
 
-      let Quantiles = itself.value;
-      let i = 0;
-      let arraySize = -1;
-      let arrayCheck = false;
-      let instanceObject = null;
-      if (Array.isArray(Quantiles)) {
-         arraySize = Quantiles.length;
-         arrayCheck = true;
+    for (i = 0; i < arraySize; i++) {
+      if (arrayCheck == true) {
+        var instanceObject = Quantiles[i];
       } else {
-         arraySize = 1;
+        var instanceObject = Quantiles;
       }
 
-
-
-      for (i = 0; i < arraySize; i++) {
-
-         if (arrayCheck === true) {
-            instanceObject = Quantiles[i];
-         } else {
-            instanceObject = Quantiles;
-         }
-
-         let prntObject = {
-            type: "Quantile",
-            value: instanceObject
-         }
-
-
-
-         for (var key in instanceObject) {
-
-            if (typeof instanceObject[key] === "object") {
-
-
-               let subObject = {
-                  type: key,
-                  value: instanceObject[key]
-               }
-
-
-
-               //parentHolder -> each component creates it's own copy of the array and passes to the next object
-               //componentOpject is the parent object for the callee
-               //is the callee object
-               //Entitytype should be null from this point 
-               self["save" + key](prntObject, subObject, Entitytype, jsonInner);
-            }
-         }
+      var prntObject = {
+        type: "Numerical",
+        value: instanceObject
+      };
+      console.log("numerical instance object", instanceObject);
+      if (i == 0) {
+        defaultSelectedValueLabel = instanceObject.valueLabel;
+        defaultSelectedBins = parseInt(instanceObject.bins);
+        defaultSelectedSelectedBin = parseInt(instanceObject.selectedBin);
+        defaultSelectedMinValue = parseFloat(instanceObject.minValue);
+        defaultSelectedMaxValue = parseFloat(instanceObject.maxValue);
+      } else {
+        if (instanceObject.hasOwnProperty("select")) {
+          if (instanceObject.select === "1") {
+            defaultSelectedValueLabel = instanceObject.valueLabel;
+            defaultSelectedBins = parseInt(instanceObject.bins);
+            defaultSelectedSelectedBin = parseInt(instanceObject.selectedBin);
+            defaultSelectedMinValue = parseFloat(instanceObject.minValue);
+            defaultSelectedMaxValue = parseFloat(instanceObject.maxValue);
+          }
+        }
       }
-*/
+      jsonCharacteristicQuantification.valueLabel = {
+        value: defaultSelectedValueLabel
+      };
+
+      jsonCharacteristicQuantification.bins = {
+        value: defaultSelectedBins
+      };
+      jsonCharacteristicQuantification.selectedBin = {
+        value: defaultSelectedSelectedBin
+      };
+      jsonCharacteristicQuantification.minValue = {
+        value: defaultSelectedMinValue
+      };
+      jsonCharacteristicQuantification.maxValue = {
+        value: defaultSelectedMaxValue
+      };
+      jsonCharacteristicQuantification.valueLabel = {
+        value: defaultSelectedValueLabel
+      };
+    }
+
+    jsonInner.push(jsonCharacteristicQuantification);
   };
 
   this.saveNumerical = function(parentObject, itself, Entitytype, jsonInner) {
-    /*
+    var Numericals = itself.value;
+    var arraySize = -1;
+    var arrayCheck = false;
 
-      let prntObject = null;
+    if (Array.isArray(Numericals)) {
+      arraySize = Numericals.length;
+      arrayCheck = true;
+    } else {
+      arraySize = 1;
+    }
+    let anotconf = 0;
+    if (typeof parentObject.value.selectac !== "undefined") {
+      anotconf = parentObject.value.selectac;
+    }
+    console.log("anotconf".anotconf);
+    let jsonCharacteristicQuantification = {
+      "xsi:type": "Numerical",
+      operator: "",
+      annotatorConfidence: { value: anotconf },
+      label: { value: parentObject.value.name },
+      ucumString: { value: "" },
+      valueLabel: {
+        value: ""
+      },
+      value: {
+        value: ""
+      }
+    };
+    var defaultSelectedValue = "";
+    var defaultSelectedValueLabel = "";
+    var defaultSelectedOperator = "";
+    var defaultSelectedUcumString = "";
 
+    var i = 0;
 
-      let Numericals = itself.value;
-      let i = 0;
-      let arraySize = -1;
-      let arrayCheck = false;
-      let instanceObject = null;
-
-      if (Array.isArray(Numericals)) {
-         arraySize = Numericals.length;
-         arrayCheck = true;
+    for (i = 0; i < arraySize; i++) {
+      if (arrayCheck == true) {
+        var instanceObject = Numericals[i];
       } else {
-         arraySize = 1;
+        var instanceObject = Numericals;
       }
 
-
-
-      for (i = 0; i < arraySize; i++) {
-
-         if (arrayCheck === true) {
-            instanceObject = Numericals[i];
-         } else {
-            instanceObject = Numericals;
-         }
-
-         let prntObject = {
-            type: "Numerical",
-            value: instanceObject
-         }
-
-
-
-         for (var key in instanceObject) {
-
-            if (typeof instanceObject[key] === "object") {
-
-
-               let subObject = {
-                  type: key,
-                  value: instanceObject[key]
-               }
-
-
-
-
-               //parentHolder -> each component creates it's own copy of the array and passes to the next object
-               //componentOpject is the parent object for the callee
-               //is the callee object
-               //Entitytype should be null from this point 
-               self["save" + key](prntObject, subObject, Entitytype, jsonInner);
-            }
-         }
+      var prntObject = {
+        type: "Numerical",
+        value: instanceObject
+      };
+      console.log("numerical instance object", instanceObject);
+      if (i == 0) {
+        defaultSelectedValue = parseFloat(instanceObject.value);
+        defaultSelectedValueLabel = instanceObject.valueLabel;
+        defaultSelectedOperator = instanceObject.operator;
+        defaultSelectedUcumString = instanceObject.ucumString;
+      } else {
+        if (instanceObject.hasOwnProperty("select")) {
+          if (instanceObject.select === "1") {
+            defaultSelectedValue = parseFloat(instanceObject.value);
+            defaultSelectedValueLabel = instanceObject.valueLabel;
+            defaultSelectedOperator = instanceObject.operator;
+            defaultSelectedUcumString = instanceObject.ucumString;
+          }
+        }
       }
-*/
+      jsonCharacteristicQuantification.valueLabel = {
+        value: defaultSelectedValueLabel
+      };
+      jsonCharacteristicQuantification.value = { value: defaultSelectedValue };
+      jsonCharacteristicQuantification.operator = defaultSelectedOperator;
+      jsonCharacteristicQuantification.ucumString = {
+        value: defaultSelectedUcumString
+      };
+    }
+
+    jsonInner.push(jsonCharacteristicQuantification);
   };
 
   this.saveScaleLevel = function(parentObject, itself, Entitytype, jsonInner) {
-    jsonInner["xsi:type"] = parentObject.value.scaleType;
+    //jsonInner["xsi:type"] = parentObject.value.scaleType;
+    jsonInner["type"] = parentObject.value.scaleType;
     let prntObject = null;
 
     let ScaleLevels = itself.value;
@@ -2678,15 +3158,13 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       arraySize = 1;
     }
 
-    let anotconf = "";
+    let anotconf = 0.0;
     if (typeof parentObject.value.selectac !== "undefined") {
       anotconf = parentObject.value.selectac;
-    } else {
-      anotconf = 0;
     }
     let jsonCharacteristicQuantification = {
       type: "Scale",
-      "xsi:type": "",
+      "xsi:type": "Scale",
       annotatorConfidence: { value: anotconf },
       label: { value: parentObject.value.name },
       valueLabel: {
@@ -2835,7 +3313,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       arraySize = 1;
     }
     let tempjson = {};
-    tempjson.imagingObservationCharachteristicCollection = [];
+    tempjson.imagingObservationCharacteristicCollection = [];
     //console.log("XXX ___  itself : im ob char : " + JSON.stringify(itself));
 
     var i = 0;
@@ -2868,7 +3346,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
               prntObject,
               subObject,
               Entitytype,
-              tempjson.imagingObservationCharachteristicCollection
+              tempjson.imagingObservationCharacteristicCollection
             );
           }
         }
@@ -2876,8 +3354,8 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
       if (commentvalue !== "") {
         let lastImObCharColl =
-          tempjson.imagingObservationCharachteristicCollection[
-            tempjson.imagingObservationCharachteristicCollection.length - 1
+          tempjson.imagingObservationCharacteristicCollection[
+            tempjson.imagingObservationCharacteristicCollection.length - 1
           ];
         lastImObCharColl["comment"] = { value: commentvalue };
         commentvalue = "";
@@ -3125,6 +3603,12 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     let tempTypecode = jsonInner.typeCode;
     jsonInner.typeCode = [];
     jsonInner.typeCode.push(tempTypecode);
+    console.log("**********************************************");
+    console.log("**********************************************");
+    console.log("**********************************************");
+    console.log("**********************************************");
+    console.log("valid term saving section code checkk");
+    console.log("temptype code :--->", tempTypecode);
 
     for (i = 0; i < arraySize; i++) {
       if (arrayCheck == true) {
@@ -3138,6 +3622,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
         value: instanceObject
       };
       if (i == 0 && arraySize == 1) {
+        console.log("valid term instance object", instanceObject);
         defaultCodeValue = instanceObject.codeValue;
         defaultCodingSchemeDesignator = instanceObject.codingSchemeDesignator;
         defaultCodingSchemeVersion = instanceObject.codingSchemeVersion;
@@ -3145,6 +3630,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       } else {
         if (instanceObject.hasOwnProperty("select")) {
           if (instanceObject.select == "1") {
+            console.log("valid term instance object selecetd", instanceObject);
             defaultCodeValue = instanceObject.codeValue;
             defaultCodingSchemeDesignator =
               instanceObject.codingSchemeDesignator;
@@ -3156,7 +3642,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
       if (defaultCodeMeaning !== "") {
         let jsonValidTerm = {
-          code: defaultCodeMeaning,
+          code: defaultCodeValue,
           codeSystemName: defaultCodingSchemeDesignator,
           codeSystemVersion: defaultCodingSchemeVersion,
           "iso:displayName": {
@@ -3164,7 +3650,13 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
             "xmlns:iso": "uri:iso.org:21090"
           }
         };
-        jsonInner.typeCode.push(jsonValidTerm);
+        console.log("json valid term before push", jsonValidTerm);
+        if (Array.isArray(jsonInner.typeCode)) {
+          jsonInner.typeCode[0].push(jsonValidTerm);
+        } else {
+          jsonInner.typeCode.push(jsonValidTerm);
+        }
+        //jsonInner.typeCode[0].push(jsonValidTerm); //edited to be compatible with array to fix the error xml->json (json creates array)
         defaultCodeMeaning = "";
       }
     }
@@ -3431,7 +3923,7 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     }
     self.addUid(finaljson);
     finaljson = self.replaceTagNamingHierarchy(finaljson);
-    // console.log("============= final" + JSON.stringify(finaljson));
+    console.log("============= final" + JSON.stringify(finaljson));
 
     return finaljson;
   };
@@ -3522,50 +4014,142 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
   this.checkIfCommentRequired = function(object, parentDiv) {
     if (object.hasOwnProperty("requireComment")) {
-      if (object.requireComment == "true") {
+      if (object.requireComment == true) {
         let annoCommentDomid = object.label.replace(
           /[`~!@# $%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,
           ""
         );
+
         self.mapLabelSubComment.set(annoCommentDomid, annoCommentDomid);
         self.mapLabelCommentJson.set(annoCommentDomid, object); //changing
         //console.log("comment true"+object.label);
 
         var req = document.createElement("div");
         var label = document.createElement("label");
-        label.textContent = "component comment";
+        label.textContent = "Comment";
 
         //console.log("coment for subs"+JSON.stringify(object));
         let textaDomObject = document.createElement("textarea");
+        textaDomObject.style.color = "black";
+        textaDomObject.style.width = "100%";
         textaDomObject.id = "comment" + object.label;
         textaDomObject.onkeyup = function() {
           object.commentSelect = this.value;
         };
-
+        req.appendChild(label);
         req.appendChild(textaDomObject);
         parentDiv.appendChild(req);
         req.className = "requiredcomment";
       }
     }
   };
-
+  //degistir
   this.traverseJsonOnLoad = function(jsonObj) {
+    let label = "";
+
     if (jsonObj !== null && typeof jsonObj == "object") {
       Object.entries(jsonObj).forEach(([key, value]) => {
         if (key === "CharacteristicQuantification") {
-          $("#Select" + value.label.value).dropdown("set selected", [
-            value.valueLabel.value
-          ]);
+          let CharQuantArray = value;
+          let arrayCheck = false;
+          let arrayIndex = -1;
+          let arraySize = -1;
+
+          console.log("CharacteristicQuantification", value);
+          if (Array.isArray(CharQuantArray)) {
+            arrayCheck = true;
+            arraySize = CharQuantArray.length;
+          } else {
+            arraySize = 1;
+          }
+          let eachCharactQuantfObj = "";
+          for (let i = 0; i < arraySize; i++) {
+            if (arrayCheck) {
+              eachCharactQuantfObj = CharQuantArray[i];
+            } else {
+              eachCharactQuantfObj = CharQuantArray;
+            }
+            console.log("eachCharactQuantfObj", eachCharactQuantfObj);
+            console.log(
+              "eachCharactQuantfObj",
+              eachCharactQuantfObj["xsi:type"]
+            );
+            let chartQuantfType = eachCharactQuantfObj["xsi:type"];
+            switch (chartQuantfType) {
+              case "Scale":
+                $(
+                  "#Select" + eachCharactQuantfObj.label.value
+                ).dropdown("set selected", [
+                  eachCharactQuantfObj.valueLabel.value
+                ]);
+                break;
+              case "NonQuantifiable":
+                console.log("NonQuantifiable", eachCharactQuantfObj);
+                $(
+                  "#Select" + eachCharactQuantfObj.label.value
+                ).dropdown("set selected", [
+                  eachCharactQuantfObj.typeCode.codeSystem
+                ]);
+                break;
+              case "Numerical":
+                console.log("Numerical", eachCharactQuantfObj);
+                $(
+                  "#Select" + eachCharactQuantfObj.label.value
+                ).dropdown("set selected", [
+                  self.mathOperators.get(eachCharactQuantfObj.operator) +
+                    " " +
+                    eachCharactQuantfObj.valueLabel.value +
+                    " " +
+                    eachCharactQuantfObj.ucumString.value
+                ]);
+                break;
+              case "Quantile":
+                console.log("Quantile", eachCharactQuantfObj);
+                $(
+                  "#Select" + eachCharactQuantfObj.label.value
+                ).dropdown("set selected", [
+                  eachCharactQuantfObj.valueLabel.value
+                ]);
+
+                break;
+              case "Interval":
+                console.log("Interval", eachCharactQuantfObj);
+                $(
+                  "#Select" + eachCharactQuantfObj.label.value
+                ).dropdown("set selected", [
+                  eachCharactQuantfObj.valueLabel.value
+                ]);
+                break;
+              default:
+              // code block
+            }
+
+            console.log("each char quantf object :", eachCharactQuantfObj);
+          }
         }
         if (key === "typeCode") {
-          //console.log("type code load : "+ JSON.stringify(value));
-          var docElement = document.getElementById(value[0].code);
-          //console.log("type code load : docElement"+ JSON.stringify(docElement));
+          //for allowed terms and valid terms
+          let ValidtermCode = "";
+          label = self.removeEmptySpace(jsonObj.label.value);
+
+          if (Array.isArray(value[0])) {
+            ValidtermCode = value[0][1].code;
+
+            var docElement = document.getElementById(
+              label + "-" + ValidtermCode + value[0][0].code
+            );
+          } else {
+            var docElement = document.getElementById(
+              label + "-" + value[0].code
+            );
+          }
+
           if (docElement != null) {
             var parentDiv = docElement.parentNode;
 
             if (typeof parentDiv[0] != "undefined") {
               var crop = parentDiv[0].name;
+
               crop = crop.replace(
                 /[`~!@#$%^&*()_|+\-=?;:'",.<>/ /\{\}\[\]\\\/]/gi,
                 ""
@@ -3575,17 +4159,33 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
               var subDivs = prDiv.getElementsByTagName("div");
 
               var splittedLabel = docElement.label.split("-");
+
+              let splittedLabelMergeRest = "";
+              for (let k = 1; k < splittedLabel.length; k++) {
+                if (k !== splittedLabel.length - 1) {
+                  splittedLabelMergeRest =
+                    splittedLabelMergeRest + splittedLabel[k] + "-";
+                } else {
+                  splittedLabelMergeRest =
+                    splittedLabelMergeRest + splittedLabel[k];
+                }
+              }
+
               $(subDivs[0]).addClass("disabled");
-              $(subDivs[0]).dropdown("set selected", [splittedLabel[1]]);
+              $(subDivs[0]).dropdown("set selected", [
+                splittedLabelMergeRest.trim()
+              ]);
               $(subDivs[0]).removeClass("disabled");
             } else {
               if (docElement.checked != true) {
                 docElement.click();
+                //console.log("doc element here :::: ", docElement.stringify);
                 //docElement.checked = true;
               }
             }
           }
         }
+
         if (key === "annotatorConfidence") {
           if (jsonObj.hasOwnProperty("label")) {
             let annotatorConflabel = jsonObj["label"]["value"].replace(
@@ -3643,7 +4243,6 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
         self.traverseJsonOnLoad(value);
       });
-    } else {
     }
   };
 
@@ -3681,7 +4280,6 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
    }
    */
   this.loadAimJson = function(aimjson) {
-    //console.log("____________load aim json :"+JSON.stringify(aimjson));
     //var ImageAnnotation = aimjson.imageAnnotations.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
 
     var templateIndex = self.mapTemplateCodeValueByIndex.get(
@@ -3736,6 +4334,69 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     }
   };
 
+  this.loadAimJsonForAnnotNameDropDown = function(aimjson) {
+    console.log("aim josn on load : ", aimjson);
+    self.createViewerWindowWithNamesAsDropDown();
+    //var ImageAnnotation = aimjson.imageAnnotations.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
+
+    // self.templateSelect.selectedIndex = templateIndex + 1;
+    // let evObj = document.createEvent("Events");
+    // evObj.initEvent("change", true, true);
+    // self.templateSelect.dispatchEvent(evObj);
+
+    var imagingObservationEntityCollection =
+      aimjson.imagingObservationEntityCollection;
+    var imagingPhysicalEntityCollection =
+      aimjson.imagingPhysicalEntityCollection;
+    //console.log("xxxx_"+JSON.stringify(imagingObservationEntityCollection))
+    var comment = aimjson.comment.value;
+    var annotationName = aimjson.name.value;
+    self.aimTypeCode = aimjson.typeCode;
+    // console.log("comment" + comment);
+    // console.log("comment" + annotationName);
+    if (comment.includes("~")) {
+      var commentArray = comment.split("~~");
+      document.getElementById("comment").value = commentArray[1];
+      self.aimComment = commentArray[1];
+      var modality = commentArray[0].split("/");
+      self.aimType = modality[0];
+    } else {
+      document.getElementById("comment").value = comment;
+      self.aimComment = comment;
+      self.aimType = "";
+    }
+
+    if (annotationName.includes("~")) {
+      var annotationNameArray = annotationName.split("~");
+      for (let k = 0; k < self.annotationNames.length; k++) {
+        if (annotationNameArray[0] === self.annotationNames[k].value) {
+          self.aimName = annotationNameArray[0];
+          $("#S1").dropdown("set selected", [self.annotationNames[k].value]);
+          break;
+        }
+      }
+    } else {
+      for (let k = 0; k < self.annotationNames.length; k++) {
+        if (annotationName === self.annotationNames[k].value) {
+          self.aimName = annotationName;
+          $("#S1").dropdown("set selected", [self.annotationNames[k].value]);
+          break;
+        }
+      }
+
+      //////document.getElementById("annotationName").value = annotationName;
+      //////self.aimName = annotationName;
+    }
+
+    self.traverseJsonOnLoad(imagingPhysicalEntityCollection);
+    self.traverseJsonOnLoad(imagingObservationEntityCollection);
+    self.checkAnnotationShapes(aimjson.markupType);
+    //self.printMap(self.mapLabelAnnotatorConfidence);
+    //self.printMap(self.mapLabelAnnotConfJson);
+    //self.printMap(self.mapLabelCommentJson);
+    return 0;
+  };
+
   this.addUid = function(jsonobj) {
     for (var key in jsonobj) {
       let innerjsonlength = jsonobj[key].length;
@@ -3770,9 +4431,9 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
 
       for (let i = 0; i < tempJson.length; i++) {
         if (
-          tempJson[i].hasOwnProperty("imagingPhysicalCharachteristicCollection")
+          tempJson[i].hasOwnProperty("imagingPhysicalCharacteristicCollection")
         ) {
-          tempSubJson = tempJson[i]["imagingPhysicalCharachteristicCollection"];
+          tempSubJson = tempJson[i]["imagingPhysicalCharacteristicCollection"];
 
           for (let k = 0; k < tempSubJson.length; k++) {
             if (
@@ -3789,8 +4450,8 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
             }
           }
 
-          delete tempJson[i].imagingPhysicalCharachteristicCollection;
-          tempJson[i].imagingPhysicalCharachteristicCollection = {
+          delete tempJson[i].imagingPhysicalCharacteristicCollection;
+          tempJson[i].imagingPhysicalCharacteristicCollection = {
             imagingPhysicalCharacteristic: tempSubJson
           };
         }
@@ -3810,11 +4471,11 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
       for (let i = 0; i < tempJson.length; i++) {
         if (
           tempJson[i].hasOwnProperty(
-            "imagingObservationCharachteristicCollection"
+            "imagingObservationCharacteristicCollection"
           )
         ) {
           tempSubJson =
-            tempJson[i]["imagingObservationCharachteristicCollection"];
+            tempJson[i]["imagingObservationCharacteristicCollection"];
 
           for (let k = 0; k < tempSubJson.length; k++) {
             if (
@@ -3831,8 +4492,8 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
             }
           }
 
-          delete tempJson[i].imagingObservationCharachteristicCollection;
-          tempJson[i].imagingObservationCharachteristicCollection = {
+          delete tempJson[i].imagingObservationCharacteristicCollection;
+          tempJson[i].imagingObservationCharacteristicCollection = {
             ImagingObservationCharacteristic: tempSubJson
           };
         }
@@ -3863,6 +4524,10 @@ export var AimEditor = function(userWindow, varformCheckHandler) {
     }
   };
 
+  this.removeEmptySpace = function(removeFrom) {
+    let retVal = removeFrom.replace(/\s/g, "");
+    return retVal;
+  };
   constructor();
 };
 
