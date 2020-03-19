@@ -1,33 +1,33 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
-import { toast } from "react-toastify";
-import FormButton from "../users/formButton";
-import UserList from "./userList";
-import RequirementForm from "./requirementForm";
-import { saveWorklist } from "../../../services/worklistServices";
-import "../menuStyle.css";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Modal } from 'react-bootstrap';
+import { toast } from 'react-toastify';
+import FormButton from '../users/formButton';
+import UserList from './userList';
+import RequirementForm from './requirementForm';
+import { saveWorklist } from '../../../services/worklistServices';
+import '../menuStyle.css';
 
 const messages = {
-  fillRequiredFields: "Please fill the required fields"
+  fillRequiredFields: 'Please fill the required fields',
 };
 
 class WorklistCreationForm extends React.Component {
   state = {
     page: 0,
     assigneeList: {},
-    name: "",
-    id: "",
-    description: "",
-    dueDate: "",
-    error: "",
-    requirements: []
+    name: '',
+    id: '',
+    description: '',
+    duedate: '',
+    error: '',
+    requirements: {},
   };
 
   goPrevPage = () => {
     if (this.state.page >= 1) {
       this.setState(state => ({
-        page: state.page - 1
+        page: state.page - 1,
       }));
     }
   };
@@ -35,36 +35,51 @@ class WorklistCreationForm extends React.Component {
   handleCancel = () => {
     this.setState({
       assigneeList: {},
-      name: "",
-      id: "",
-      description: "",
-      dueDate: "",
-      error: ""
+      name: '',
+      id: '',
+      description: '',
+      duedate: '',
+      error: '',
     });
   };
   goNextPage = () => {
     if (this.state.page <= 1) {
       this.setState(state => ({
-        page: state.page + 1
+        page: state.page + 1,
       }));
     }
   };
 
   handleSaveWorklist = () => {
+    const promise = [];
     let {
       name,
       id,
       assigneeList,
       description,
-      dueDate,
-      requirements
+      duedate,
+      requirements,
     } = this.state;
     assigneeList = Object.keys(assigneeList);
     if (!name || !id || !assigneeList.length) {
       this.setState({ error: messages.fillRequiredFields });
     } else {
-      description = description ? description : "";
-      saveWorklist(id, name, assigneeList, description, dueDate, requirements)
+      description = description ? description : '';
+
+      const body = {};
+      if (Object.keys(requirements).length > 0) {
+        promise.push(
+          saveWorklist(id, name, assigneeList, description, duedate, [
+            requirements,
+          ])
+        );
+      } else {
+        promise.push(
+          saveWorklist(id, name, assigneeList, description, duedate)
+        );
+      }
+
+      Promise.all(promise)
         .then(() => {
           this.props.onSubmit();
           this.handleCancel();
@@ -73,7 +88,7 @@ class WorklistCreationForm extends React.Component {
         .catch(error => {
           if (
             error.response.data &&
-            error.response.data === "Validation error"
+            error.response.data === 'Validation error'
           ) {
             let errMesage = `${errMesage} - ID "${id}" might already exist`;
             this.setState({ error: errMesage });
@@ -85,7 +100,7 @@ class WorklistCreationForm extends React.Component {
   };
 
   handleFormInput = e => {
-    if (this.state.id && this.state.name) this.setState({ error: "" });
+    if (this.state.id && this.state.name) this.setState({ error: '' });
     const { name, value } = e.target;
     this.setState({ [name]: value });
   };
@@ -97,16 +112,22 @@ class WorklistCreationForm extends React.Component {
     this.setState({ assigneeList });
   };
 
-  getRequirement = requirements => {
-    this.setState({ requirements });
+  handleRequirementFormInput = e => {
+    const { name, value } = e.target;
+    const newRequirement = { ...this.state.requirements };
+    newRequirement[name] = value;
+    if (name === 'numOfAims' && !isNaN(parseInt(value))) {
+      this.setState({ error: null });
+    }
+    this.setState({ requirements: newRequirement });
   };
 
   render = () => {
     const { users, onCancel } = this.props;
     const { page, id, name, error, requirements } = this.state;
-    let button1Text = "Back";
-    let button2Text = "Next";
-    let button3Text = "Cancel";
+    let button1Text = 'Back';
+    let button2Text = 'Next';
+    let button3Text = 'Cancel';
     let button1Func = this.goPrevPage;
     let button2Func = this.goNextPage;
     let button3Func = onCancel;
@@ -114,7 +135,7 @@ class WorklistCreationForm extends React.Component {
     let disableNext = !id || !name;
 
     if (page === 2) {
-      button2Text = "Submit";
+      button2Text = 'Submit';
       const assigneeListArr = Object.keys(this.state.assigneeList);
       button2Func = this.handleSaveWorklist;
       if (assigneeListArr.length === 0) disableSubmit = true;
@@ -123,7 +144,7 @@ class WorklistCreationForm extends React.Component {
     const options = [];
     let index = 0;
     options.push(
-      <option disabled value="default" key="0-default">
+      <option disabled value='default' key='0-default'>
         -- select a user --
       </option>
     );
@@ -143,56 +164,56 @@ class WorklistCreationForm extends React.Component {
     // date = `${year}-${month}-${day}`;
 
     return (
-      <Modal.Dialog dialogClassName="add-worklist__modal">
+      <Modal.Dialog dialogClassName='add-worklist__modal'>
         <Modal.Header>
           <Modal.Title>New worklist</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="add-worklist__mbody">
+        <Modal.Body className='add-worklist__mbody'>
           {!this.state.page && (
-            <form className="add-worklist__modal--form">
-              <h5 className="add-worklist__modal--label">Name*</h5>
+            <form className='add-worklist__modal--form'>
+              <h5 className='add-worklist__modal--label'>Name*</h5>
               <input
                 onMouseDown={e => e.stopPropagation()}
-                className="add-worklist__modal--input"
-                name="name"
-                type="text"
+                className='add-worklist__modal--input'
+                name='name'
+                type='text'
                 onChange={this.handleFormInput}
-                id="form-first-element"
+                id='form-first-element'
                 defaultValue={this.state.name}
               />
-              <h5 className="add-worklist__modal--label">ID*</h5>
+              <h5 className='add-worklist__modal--label'>ID*</h5>
               <input
                 onMouseDown={e => e.stopPropagation()}
-                className="add-worklist__modal--input"
-                name="id"
-                type="text"
+                className='add-worklist__modal--input'
+                name='id'
+                type='text'
                 onChange={this.handleFormInput}
                 defaultValue={this.state.id}
               />
-              <h6 className="form-exp">
+              <h6 className='form-exp'>
                 One word only, no special characters, '_' is OK
               </h6>
-              <h5 className="form-exp add-worklist__modal--label">Due date:</h5>
+              <h5 className='form-exp add-worklist__modal--label'>Due date:</h5>
               <input
-                type="date"
-                name="dueDate"
+                type='date'
+                name='duedate'
                 onChange={this.handleFormInput}
-                defaultValue={this.state.dueDate}
+                defaultValue={this.state.duedate}
               />
-              <h5 className="add-worklist__modal--label">Description</h5>
+              <h5 className='add-worklist__modal--label'>Description</h5>
               <textarea
                 onMouseDown={e => e.stopPropagation()}
-                className="add-worklist__modal--input"
-                name="description"
+                className='add-worklist__modal--input'
+                name='description'
                 onChange={this.handleFormInput}
                 defaultValue={this.state.description}
               />
-              <h5 className="form-exp required">*Required</h5>
+              <h5 className='form-exp required'>*Required</h5>
             </form>
           )}
           {this.state.page === 1 && (
             <>
-              <h5 className="add-worklist__modal--label">
+              <h5 className='add-worklist__modal--label'>
                 Assign worklist to users
               </h5>
               <UserList
@@ -204,19 +225,19 @@ class WorklistCreationForm extends React.Component {
           )}
           {this.state.page === 2 && (
             <>
-              <h5 className="add-worklist__modal--label">
+              <h5 className='add-worklist__modal--label'>
                 Add Requirements to monitor progress
               </h5>
               <RequirementForm
-                onAddRequirement={this.getRequirement}
+                onNewReqInfo={this.handleRequirementFormInput}
                 requirements={requirements}
               />
             </>
           )}
-          {error ? <div className="err-message">{error}</div> : null}
+          {error ? <div className='err-message'>{error}</div> : null}
         </Modal.Body>
-        <Modal.Footer className="modal-footer__buttons">
-          <div className="create-user__modal--buttons">
+        <Modal.Footer className='modal-footer__buttons'>
+          <div className='create-user__modal--buttons'>
             <FormButton
               onClick={button1Func}
               text={button1Text}
@@ -239,7 +260,7 @@ WorklistCreationForm.propTypes = {
   onCancel: PropTypes.func,
   onSubmit: PropTypes.func,
   onChange: PropTypes.func,
-  error: PropTypes.string
+  error: PropTypes.string,
 };
 
 export default WorklistCreationForm;

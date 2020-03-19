@@ -1,30 +1,30 @@
-import React from "react";
-import PropTypes from "prop-types";
-import Table from "react-table";
-import { toast } from "react-toastify";
-import ToolBar from "../common/basicToolBar";
-import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
+import React from 'react';
+import PropTypes from 'prop-types';
+import Table from 'react-table';
+import { toast } from 'react-toastify';
+import ToolBar from '../common/basicToolBar';
+import { FaRegTrashAlt, FaEdit, FaRegEye } from 'react-icons/fa';
 import {
   getWorklistsOfCreator,
   deleteWorklist,
   updateWorklist,
   addWorklistRequirement,
-  deleteWorklistRequirement
-} from "../../../services/worklistServices";
-import { getUsers } from "../../../services/userServices";
-import DeleteAlert from "../common/alertDeletionModal";
-import CreationForm from "./worklistCreationForm";
-import EditField from "../../sideBar/editField";
-import UpdateAssignee from "./updateAssigneeModal";
-import UpdateDueDateModal from "./updateDueDate";
-import UpdateRequirement from "./updateRequirement";
+  deleteWorklistRequirement,
+} from '../../../services/worklistServices';
+import { getUsers } from '../../../services/userServices';
+import DeleteAlert from '../common/alertDeletionModal';
+import CreationForm from './worklistCreationForm';
+import EditField from '../../sideBar/editField';
+import UpdateAssignee from './updateAssigneeModal';
+import UpdateDueDateModal from './updateDueDate';
+import UpdateRequirement from './updateRequirement';
 
 const messages = {
-  deleteSingle: "Delete the worklist? This cannot be undone.",
-  deleteSelected: "Delete selected worklists? This cannot be undone.",
-  fillRequiredFields: "Please fill the required fields",
-  addWorklistError: "An error occured while saving the worklist.",
-  updateWorklistError: "An error occured while updating the worklist."
+  deleteSingle: 'Delete the worklist? This cannot be undone.',
+  deleteSelected: 'Delete selected worklists? This cannot be undone.',
+  fillRequiredFields: 'Please fill the required fields',
+  addWorklistError: 'An error occured while saving the worklist.',
+  updateWorklistError: 'An error occured while updating the worklist.',
 };
 
 class WorkList extends React.Component {
@@ -42,23 +42,23 @@ class WorkList extends React.Component {
     worklistId: null,
     updateAssignee: false,
     updateDueDate: false,
-    duedate: "",
+    duedate: null,
     updateRequirement: false,
     requirements: [],
-    newRequirement: {}
+    newRequirement: {},
   };
 
   componentDidMount = async () => {
     this.getWorkListData();
     const { data: userList } = await getUsers();
     this.setState({ userList });
-    document.addEventListener("mousedown", this.handleClickOutside);
-    document.addEventListener("keydown", this.handleKeyboardEvent);
+    document.addEventListener('mousedown', this.handleClickOutside);
+    document.addEventListener('keydown', this.handleKeyboardEvent);
   };
 
   componentWillUnmount = () => {
-    document.removeEventListener("mousedown", this.handleClickOutside);
-    document.removeEventListener("keydown", this.handleKeyboardEvent);
+    document.removeEventListener('mousedown', this.handleClickOutside);
+    document.removeEventListener('keydown', this.handleKeyboardEvent);
   };
 
   getWorkListData = async () => {
@@ -70,7 +70,7 @@ class WorkList extends React.Component {
     const { name, value } = e.target;
     const newRequirement = { ...this.state.newRequirement };
     newRequirement[name] = value;
-    if (name === "numOfAims" && !isNaN(parseInt(value))) {
+    if (name === 'numOfAims' && !isNaN(parseInt(value))) {
       this.setState({ error: null });
     }
     this.setState({ newRequirement });
@@ -83,13 +83,13 @@ class WorkList extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0
+          selectAll: 0,
         });
       }
     } else {
       newSelected[id] = true;
       await this.setState({
-        selectAll: 2
+        selectAll: 2,
       });
     }
     this.setState({ selected: newSelected });
@@ -105,31 +105,31 @@ class WorkList extends React.Component {
 
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
+      selectAll: this.state.selectAll === 0 ? 1 : 0,
     });
   }
 
   handleCancel = () => {
     this.setState({
       hasAddClicked: false,
-      name: "",
-      id: "",
-      user: "",
-      description: "",
-      error: "",
-      duedate: "",
+      name: null,
+      id: '',
+      user: '',
+      description: null,
+      error: '',
+      duedate: null,
       deleteSingleClicked: false,
       deleteAllClicked: false,
       selected: {},
-      user: "",
+      user: '',
       cellDoubleClicked: false,
-      worklistId: "",
+      worklistId: '',
       updateAssignee: false,
       assigneeMap: {},
       initialAssignees: [],
       updateDueDate: false,
       updateRequirement: false,
-      requirements: []
+      requirements: [],
     });
   };
 
@@ -185,7 +185,7 @@ class WorkList extends React.Component {
   handleSingleDelete = id => {
     this.setState({
       deleteSingleClicked: true,
-      singleDeleteData: id
+      singleDeleteData: id,
     });
   };
 
@@ -193,9 +193,9 @@ class WorkList extends React.Component {
     this.setState({
       cellDoubleClicked: fieldName,
       clickedIndex: index,
-      worklistId: worklistId
+      worklistId: worklistId,
     });
-    fieldName === "name"
+    fieldName === 'name'
       ? this.setState({ name: defaultValue })
       : // fieldName === "description"?
         this.setState({ description: defaultValue });
@@ -208,13 +208,16 @@ class WorkList extends React.Component {
       description,
       // duedate,
       worklistId,
-      cellDoubleClicked
+      cellDoubleClicked,
     } = this.state;
-    const fieldUpdateValidation =
-      (name || description) && worklistId && cellDoubleClicked;
-    if (e.key === "Escape") {
+    const nameNotEmpty = name && name.trim().length > 0;
+    const fieldUpdateValidation = worklistId && cellDoubleClicked;
+    if (e.key === 'Escape') {
       this.handleUpdateField(null, null);
-    } else if (e.key === "Enter" && fieldUpdateValidation) {
+    } else if (e.key === 'Enter' && fieldUpdateValidation) {
+      if (cellDoubleClicked === 'name') {
+        if (nameNotEmpty) this.updateWorklist();
+      }
       this.updateWorklist();
     }
   };
@@ -231,6 +234,7 @@ class WorkList extends React.Component {
 
   getUpdate = e => {
     const { name, value } = e.target;
+    console.log(name, value);
     this.setState({ [name]: value });
   };
 
@@ -238,16 +242,16 @@ class WorkList extends React.Component {
     const { name, description, duedate, worklistId } = this.state;
     const body = name
       ? { name }
-      : description
+      : description === '' || description
       ? { description }
-      : { dueDate: duedate };
+      : { duedate };
     updateWorklist(worklistId, body)
       .then(() => this.getWorkListData())
       .catch(error =>
         toast.error(
-          messages.updateWorklistError + ": " + error.response.data.message,
+          messages.updateWorklistError + ': ' + error.response.data.message,
           {
-            autoClose: false
+            autoClose: false,
           }
         )
       );
@@ -266,7 +270,7 @@ class WorkList extends React.Component {
     this.setState({
       updateAssignee: true,
       assigneeMap,
-      worklistId
+      worklistId,
     });
   };
 
@@ -287,7 +291,7 @@ class WorkList extends React.Component {
     updateWorklist(this.state.worklistId, { assigneeList })
       .then(() => {
         this.getWorkListData();
-        toast.info("Update successful!", { autoClose: true });
+        toast.info('Update successful!', { autoClose: true });
       })
       .catch(error => {
         toast.error(error.response.data.message, { autoClose: false });
@@ -296,12 +300,13 @@ class WorkList extends React.Component {
     this.handleCancel();
   };
 
+
   saveUpdatedRequirements = requirements => {
     updateWorklist(this.state.worklistId, { requirements })
       .then(() => {
         this.getWorkListData();
         this.setState({ updateRequirement: false });
-        toast.info("Update successful!", { autoClose: true });
+        toast.info('Update successful!', { autoClose: true });
       })
       .catch(error => {
         toast.error(error.response.data.message, { autoClose: false });
@@ -315,7 +320,7 @@ class WorkList extends React.Component {
       .then(() => {
         this.getWorkListData();
         this.setState({ updateRequirement: false });
-        toast.info("Delete successful!", { autoClose: true });
+        toast.info('Delete successful!', { autoClose: true });
       })
       .catch(error => {
         toast.error(error.response.data.message, { autoClose: false });
@@ -328,13 +333,13 @@ class WorkList extends React.Component {
     const unselectedLevel = !level || level === `--- Select Level ---`;
     const intAims = parseInt(numOfAims);
     const unSelectedTemplate =
-      !template || template === "--- Select Template ---";
+      !template || template === '--- Select Template ---';
     if (unselectedLevel || unSelectedTemplate || !numOfAims) {
-      this.setState({ error: "Please fill all fields!" });
+      this.setState({ error: 'Please fill all fields!' });
       return;
     } else if (isNaN(parseInt(intAims)) || intAims === 0) {
       this.setState({
-        error: "No of aims should be a non-zero number!"
+        error: 'No of aims should be a non-zero number!',
       });
       return;
     } else {
@@ -343,7 +348,7 @@ class WorkList extends React.Component {
         .then(() => {
           this.getWorkListData();
           this.setState({ updateRequirement: false });
-          toast.info("Update successful!", { autoClose: true });
+          toast.info('Update successful!', { autoClose: true });
         })
         .catch(error => {
           toast.error(error.response.data.message, { autoClose: false });
@@ -355,14 +360,14 @@ class WorkList extends React.Component {
   defineColumns = () => {
     return [
       {
-        id: "checkbox",
-        accessor: "",
+        id: 'checkbox',
+        accessor: '',
         width: 30,
         Cell: ({ original }) => {
           return (
             <input
-              type="checkbox"
-              className="checkbox-cell"
+              type='checkbox'
+              className='checkbox-cell'
               checked={this.state.selected[original.workListID]}
               onChange={() => this.toggleRow(original.workListID)}
             />
@@ -371,8 +376,8 @@ class WorkList extends React.Component {
         Header: x => {
           return (
             <input
-              type="checkbox"
-              className="checkbox-cell"
+              type='checkbox'
+              className='checkbox-cell'
               checked={this.state.selectAll === 1}
               ref={input => {
                 if (input) {
@@ -385,37 +390,37 @@ class WorkList extends React.Component {
         },
         sortable: false,
         minResizeWidth: 20,
-        width: 45
+        width: 45,
       },
 
       {
-        Header: "Name",
-        accessor: "name",
+        Header: 'Name',
+        accessor: 'name',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
           const { cellDoubleClicked, clickedIndex } = this.state;
-          return cellDoubleClicked === "name" &&
+          return cellDoubleClicked === 'name' &&
             clickedIndex === original.index ? (
             <div
               ref={this.setWrapperRef}
-              className="--commentInput menu-clickable wrapped"
+              className='--commentInput menu-clickable wrapped'
             >
               <EditField
-                name="name"
+                name='name'
                 onType={this.getUpdate}
                 default={this.state.name}
               />
             </div>
           ) : (
             <div
-              className="--commentCont menu-clickable wrapped"
+              className='--commentCont menu-clickable wrapped'
               onClick={() =>
                 this.handleUpdateField(
                   original.index,
-                  "name",
+                  'name',
                   original.row.checkbox.workListID,
                   original.row.checkbox.name
                 )
@@ -424,62 +429,64 @@ class WorkList extends React.Component {
               {original.row.checkbox.name}
             </div>
           );
-        }
+        },
       },
       {
-        Header: "Assignees",
+        Header: 'Assignees',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
+          const { assignees, workListID } = original.row.checkbox;
+          const className =
+            assignees.length > 0
+              ? 'wrapped menu-clickable'
+              : 'wrapped click-to-add menu-clickable';
           return (
             <div
               onClick={() => {
-                this.handleUpdateAssignee(
-                  original.row.checkbox.assignees,
-                  original.row.checkbox.workListID
-                );
+                this.handleUpdateAssignee(assignees, workListID);
                 this.setState({
-                  initialAssignees: [...original.row.checkbox.assignees]
+                  initialAssignees: [...assignees],
                 });
               }}
-              className="menu-clickable wrapped"
+              className={className}
             >
-              {original.row.checkbox.assignees.join(",")}
+              {assignees.length > 0 ? assignees.join(', ') : `Add assignees`}
             </div>
           );
-        }
+        },
       },
       {
-        Header: "Due Date",
+        Header: 'Due Date',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
-          const { dueDate, workListID } = original.row.checkbox;
-          const className = dueDate
-            ? "wrapped menu-clickable"
-            : "wrapped click-to-add menu-clickable";
+          const { duedate, workListID } = original.row.checkbox;
+          const className = duedate
+            ? 'wrapped menu-clickable'
+            : 'wrapped click-to-add menu-clickable';
           return (
             <div
               className={`--commentCont ${className}`}
               onClick={async () => {
                 await this.setState({
-                  duedate: dueDate,
-                  worklistId: workListID
+                  duedate: duedate,
+                  worklistId: workListID,
                 });
                 this.handleUpdateDueDate();
               }}
             >
-              {dueDate || "Add due date"}
+              {duedate || 'Add due date'}
             </div>
           );
-        }
+        },
       },
       {
-        Header: "Requirement",
+        Header: 'Requirement',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
@@ -492,8 +499,8 @@ class WorkList extends React.Component {
             return all;
           }, []);
           const className = requirements.length
-            ? "wrapped menu-clickable"
-            : "wrapped click-to-add menu-clickable";
+            ? 'wrapped menu-clickable'
+            : 'wrapped click-to-add menu-clickable';
           return (
             <div
               className={`--commentCont ${className}`}
@@ -501,33 +508,33 @@ class WorkList extends React.Component {
                 this.setState({
                   worklistId: workListID,
                   requirements,
-                  updateRequirement: true
+                  updateRequirement: true,
                 });
               }}
             >
-              {displayReq.join(", ") || "Define requirement"}
+              {displayReq.join(', ') || 'Define requirement'}
             </div>
           );
-        }
+        },
       },
       {
-        Header: "Description",
+        Header: 'Description',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
           let { description } = original.row.checkbox;
-          description = description || "";
+          description = description || '';
           const className = original.row.checkbox.description
-            ? "wrapped menu-clickable"
-            : "wrapped click-to-add menu-clickable";
+            ? 'wrapped menu-clickable'
+            : 'wrapped click-to-add menu-clickable';
           const { cellDoubleClicked, clickedIndex } = this.state;
-          return cellDoubleClicked === "description" &&
+          return cellDoubleClicked === 'description' &&
             clickedIndex === original.index ? (
-            <div ref={this.setWrapperRef} className="--commentInput">
+            <div ref={this.setWrapperRef} className='--commentInput'>
               <EditField
-                name="description"
+                name='description'
                 onType={this.getUpdate}
                 default={this.state.description}
               />
@@ -538,19 +545,19 @@ class WorkList extends React.Component {
               onClick={() =>
                 this.handleUpdateField(
                   original.index,
-                  "description",
+                  'description',
                   original.row.checkbox.workListID,
                   description
                 )
               }
             >
-              {description || "Add description"}
+              {description || 'Add description'}
             </div>
           );
-        }
+        },
       },
       {
-        Header: "",
+        Header: '',
         width: 45,
         minResizeWidth: 20,
         resizable: true,
@@ -561,11 +568,11 @@ class WorkList extends React.Component {
                 this.handleSingleDelete(original.row.checkbox.workListID)
               }
             >
-              <FaRegTrashAlt className="menu-clickable" />
+              <FaRegTrashAlt className='menu-clickable' />
             </div>
           );
-        }
-      }
+        },
+      },
     ];
   };
 
@@ -573,7 +580,7 @@ class WorkList extends React.Component {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
 
     return (
-      <div className="worklist menu-display" id="worklist">
+      <div className='worklist menu-display' id='worklist'>
         <ToolBar
           onDelete={this.handleDeleteAll}
           onAdd={this.handleAddWorklist}
@@ -581,7 +588,7 @@ class WorkList extends React.Component {
         />
         <Table
           NoDataComponent={() => null}
-          className="pro-table"
+          className='pro-table'
           data={this.state.worklists}
           columns={this.defineColumns()}
           pageSizeOptions={[10, 20, 50]}
@@ -627,7 +634,7 @@ class WorkList extends React.Component {
             onCancel={this.handleCancel}
             onSubmit={this.updateWorklist}
             onChange={this.handleFormInput}
-            dueDate={this.state.duedate}
+            duedate={this.state.duedate}
           />
         )}
         {this.state.updateRequirement && (
@@ -649,6 +656,6 @@ class WorkList extends React.Component {
 
 WorkList.propTypes = {
   selection: PropTypes.string,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
 };
 export default WorkList;

@@ -1,7 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import ReactTable from "react-table";
-import { FaCheck, FaTrashAlt } from "react-icons/fa";
 import { getAllTemplates } from "../../../services/templateServices";
 
 // accept only integers for aims field
