@@ -361,73 +361,82 @@ export var AimEditor = function(
       { text: "1. Basilar aneurysm ", value: "Basilar aneurysm " },
 
       {
-        text: "____a. Parent vessel – Basilar artery",
+        text: "1.1. Parent vessel – Basilar artery",
         value: "Parent vessel – Basilar artery"
       },
       {
-        text: "____b. Daughter branches of relevance",
+        text: "1.2. Daughter branches of relevance",
         value: "Daughter branches of relevance"
       },
       {
-        text: "________i. Left Posterior Cerebral Artery (PCA)",
+        text: "1.2.1. Left Posterior Cerebral Artery (PCA)",
         value: "Left Posterior Cerebral Artery (PCA)"
       },
       {
-        text: "________ii. Right Posterior Cerebral Artery (PCA)",
+        text: "1.2.2. Right Posterior Cerebral Artery (PCA)",
         value: "Right Posterior Cerebral Artery (PCA)"
       },
-
+      {
+        text: "----",
+        value: "---"
+      },
       { text: "2. MCA aneurysm", value: "MCA aneurysm" },
       {
-        text: "____a. Parent vessel – Middle cerebral Artery (MCA) M1 branch",
+        text: "2.1. Parent vessel – Middle cerebral Artery (MCA) M1 branch",
         value: "Parent vessel – Middle cerebral Artery (MCA) M1 branch"
       },
       {
-        text: "____b. Daughter branches of relevance",
+        text: "2.2. Daughter branches of relevance",
         value: "Daughter branches of relevance"
       },
       {
-        text: "________i. MCA M2 superior branch",
+        text: "2.2.1. MCA M2 superior branch",
         value: "MCA M2 superior branch"
       },
       {
-        text: "________ii. MCA M2 inferior branch",
+        text: "2.2.2. MCA M2 inferior branch",
         value: "MCA M2 inferior branch"
       },
-
+      {
+        text: "----",
+        value: "---"
+      },
       { text: "3. AComm aneurysm", value: "3. AComm aneurysm" },
       {
-        text: "____a. Parent vessel – Anterior Cerebral Artery (ACA) A1 branch",
+        text: "3.1. Parent vessel – Anterior Cerebral Artery (ACA) A1 branch",
         value: "Parent vessel – Anterior Cerebral Artery (ACA) A1 branch"
       },
       {
-        text: "____b. Daughter branches of relevance",
+        text: "3.2. Daughter branches of relevance",
         value: "Daughter branches of relevance"
       },
       {
-        text: "________i. ACA A2 ipsilateral branch",
+        text: "3.2.1. ACA A2 ipsilateral branch",
         value: "ACA A2 ipsilateral branch"
       },
       {
-        text: "________ii. ACA A2 contralateral branch",
+        text: "3.2.2. ACA A2 contralateral branch",
         value: "ACA A2 contralateral branch"
       },
-
+      {
+        text: "----",
+        value: "---"
+      },
       { text: "4. ICA Terminus aneurysm", value: "4. ICA Terminus aneurysm" },
       {
-        text: "____a. Parent vessel – Internal Carotid Artery (ICA)",
+        text: "4.1. Parent vessel – Internal Carotid Artery (ICA)",
         value: "Parent vessel – Internal Carotid Artery (ICA)"
       },
       {
-        text: "____b. Daughter branches of relevance",
+        text: "4.2. Daughter branches of relevance",
         value: "Daughter branches of relevance"
       },
       {
-        text: "________i. MCA – M1",
+        text: "4.2.1. MCA – M1",
         value: "MCA – M1"
       },
       {
-        text: "________ii. ACA – A1",
+        text: "4.2.2. ACA – A1",
         value: "ACA – A1"
       },
 
@@ -464,7 +473,7 @@ export var AimEditor = function(
     accordion2Div.id = "accordion2";
     accordion2Div.className = " ui accordion";
     let labelAnnotationName = document.createElement("label");
-    labelAnnotationName.textContent = "Annotation Name";
+    labelAnnotationName.textContent = "Annotation";
     self.mainWindowDiv.appendChild(labelAnnotationName);
     self.mainWindowDiv.appendChild(self.templateListDiv);
     self.mainWindowDiv.appendChild(self.shapeDiv);
@@ -486,8 +495,8 @@ export var AimEditor = function(
     templateDiv.appendChild(self.templateSelect);
     var i = 0;
     var templateOption = document.createElement("option");
-    templateOption.value = "Select Name";
-    templateOption.text = "Select Name";
+    templateOption.value = "Select an Item";
+    templateOption.text = "Select an Item";
     self.templateSelect.appendChild(templateOption);
 
     self.annotationNames.forEach(nameobject => {
