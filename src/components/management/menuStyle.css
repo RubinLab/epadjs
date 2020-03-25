@@ -280,6 +280,11 @@
   /* align-items: ; */
 }
 
+.add-worklist__modal.modal-dialog {
+  overflow-x: visible;
+  overflow-y: visible; 
+}
+
 .edit-userRole__modal.modal-dialog,
 .edit-project__modal.modal-dialog,
 .edit-connection__modal.modal-dialog {

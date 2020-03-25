@@ -97,11 +97,8 @@ export function getSummaryAnnotations(projectID) {
     : http.get(apiUrl + "/projects/" + projectID + "/aims?format=summary");
 }
 
-export function deleteAnnotation(aimObj, aimID, projectID) {
-  if (aimObj) {
-    aimID = aimObj.aimID;
-    projectID = aimObj.projectID ? aimObj.projectID : "lite";
-  }
+export function deleteAnnotation(aimObj) {
+  const { aimID, projectID } = aimObj;
   return http.delete(
     apiUrl + "/projects/" + projectID + "/aims/" + aimID + "?deleteDSO=true"
   );
@@ -123,8 +120,8 @@ export function uploadSegmentation(segmentation, projectId = "lite") {
   segData.append("file", segmentation, "blob.dcm");
   const config = {
     headers: {
-      "content-type": "multipart/form-data"
-    }
+      "content-type": "multipart/form-data",
+    },
   };
   return http.post(url, segData, config);
 }
