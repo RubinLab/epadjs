@@ -7,14 +7,14 @@ import ProjectModal from "../annotationsList/selectSerieModal";
 import { downloadProjects } from "../../services/projectServices";
 import {
   downloadSubjects,
-  deleteSubject
+  deleteSubject,
 } from "../../services/subjectServices";
 import { downloadStudies, deleteStudy } from "../../services/studyServices";
 import { deleteAnnotation } from "../../services/annotationServices";
 import {
   downloadSeries,
   getSeries,
-  deleteSeries
+  deleteSeries,
 } from "../../services/seriesServices";
 import {
   startLoading,
@@ -30,7 +30,7 @@ import {
   jumpToAim,
   showAnnotationDock,
   updateSingleSerie,
-  updatePatientOnAimDelete
+  updatePatientOnAimDelete,
 } from "../annotationsList/action";
 import { MAX_PORT } from "../../constants";
 import DownloadSelection from "./annotationDownloadModal";
@@ -70,7 +70,7 @@ class SearchView extends Component {
       // numOfPatientsLoaded: 0,
       // numOfStudiesLoaded: 0,
       // numOfSeriesLoaded: 0,
-      expandLevel: 0
+      expandLevel: 0,
     };
   }
 
@@ -100,7 +100,7 @@ class SearchView extends Component {
       this.setState({
         numOfsubjects: subjects.length,
         subjects,
-        expandLevel
+        expandLevel,
         // numOfPresentStudies,
         // numOfPresentSeries,
         // numOfPatientsLoaded,
@@ -143,7 +143,7 @@ class SearchView extends Component {
     //   numOfSeriesLoaded !== prevProps.expandLoading.numOfSeriesLoaded;
     if (expandLevel !== prevProps.expandLevel) {
       this.setState({
-        expandLevel
+        expandLevel,
       });
       if (expandLevel === 0) {
         this.setState({ expanded: {} });
@@ -618,10 +618,10 @@ class SearchView extends Component {
         if (err.response.status === 503) {
           mode === "lite"
             ? toast.error("There is no aim file to download!", {
-                autoClose: false
+                autoClose: false,
               })
             : toast.error("No files to download!", {
-                autoClose: false
+                autoClose: false,
               });
         }
       });
@@ -648,13 +648,13 @@ class SearchView extends Component {
 
   closeSelectionModal = () => {
     this.setState(state => ({
-      isSerieSelectionOpen: !state.isSerieSelectionOpen
+      isSerieSelectionOpen: !state.isSerieSelectionOpen,
     }));
   };
 
   handleFileUpload = () => {
     this.setState(state => ({
-      showUploadFileModal: !state.showUploadFileModal
+      showUploadFileModal: !state.showUploadFileModal,
     }));
   };
 
@@ -683,6 +683,7 @@ class SearchView extends Component {
   };
 
   handleWorklistClick = () => {
+    if (this.state.showWorklists) this.props.dispatch(clearSelection());
     this.setState(state => ({ showWorklists: !state.showWorklists }));
   };
 
@@ -874,7 +875,7 @@ const mapStateToProps = state => {
     showProjectModal,
     loading,
     uploadedPid,
-    lastEventId
+    lastEventId,
   } = state.annotationsListReducer;
   return {
     selectedProjects,
@@ -887,7 +888,7 @@ const mapStateToProps = state => {
     showProjectModal,
     loading,
     uploadedPid,
-    lastEventId
+    lastEventId,
   };
 };
 export default connect(mapStateToProps)(SearchView);
