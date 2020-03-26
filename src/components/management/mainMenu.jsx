@@ -18,7 +18,7 @@ class MainMenu extends React.Component {
   state = {
     selection: "",
     isModalOpen: false,
-    coordinate: "50%"
+    coordinate: "50%",
   };
 
   componentDidMount = () => {
@@ -128,6 +128,12 @@ class MainMenu extends React.Component {
         <div className="mng-menu__option" onClick={this.handleSelection}>
           Templates
         </div>
+        <div className="mng-menu__option" onClick={this.handleSelection}>
+          Users
+        </div>
+        <div className="mng-menu__option" onClick={this.handleSelection}>
+          Worklists
+        </div>
         {this.props.admin && (
           <div
             className="mng-menu__option"
@@ -139,14 +145,8 @@ class MainMenu extends React.Component {
             Scan Data Folder
           </div>
         )}
-        <div className="mng-menu__option" onClick={this.handleSelection}>
-          Worklists
-        </div>
         {mode !== "lite" && (
           <>
-            <div className="mng-menu__option" onClick={this.handleSelection}>
-              Users
-            </div>
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Projects
             </div>

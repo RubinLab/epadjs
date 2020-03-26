@@ -207,7 +207,7 @@
 
 .new-popup,
 .worklist-popup {
-  z-index: 5;
+  z-index: 15;
   display: flex;
   flex-direction: column;
   width: fit-content;
