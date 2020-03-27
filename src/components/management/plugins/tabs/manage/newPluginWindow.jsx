@@ -39,18 +39,45 @@ class NewPluginWindow extends React.Component {
               <input
                 onMouseDown={e => e.stopPropagation()}
                 className="add-project__modal--input"
-                name="id"
+                name="plugin_id"
                 type="text"
-                value={pluginFormElements.id}
+                value={pluginFormElements.plugin_id}
                 onChange={onChange}
               />
-              <h5 className="add-project__modal--label">Image*</h5>
+              <h5 className="add-project__modal--label">Image repo*</h5>
               <input
                 onMouseDown={e => e.stopPropagation()}
                 className="add-project__modal--input"
-                name="image"
+                name="image_repo"
                 type="text"
-                value={pluginFormElements.image}
+                value={pluginFormElements.image_repo}
+                onChange={onChange}
+              />
+              <h5 className="add-project__modal--label">Image tag*</h5>
+              <input
+                onMouseDown={e => e.stopPropagation()}
+                className="add-project__modal--input"
+                name="image_tag"
+                type="text"
+                value={pluginFormElements.image_tag}
+                onChange={onChange}
+              />
+              <h5 className="add-project__modal--label">Image name</h5>
+              <input
+                onMouseDown={e => e.stopPropagation()}
+                className="add-project__modal--input"
+                name="image_name"
+                type="text"
+                value={pluginFormElements.image_name}
+                onChange={onChange}
+              />
+              <h5 className="add-project__modal--label">Image id</h5>
+              <input
+                onMouseDown={e => e.stopPropagation()}
+                className="add-project__modal--input"
+                name="image_id"
+                type="text"
+                value={pluginFormElements.image_id}
                 onChange={onChange}
               />
               <h5 className="add-project__modal--label">Description</h5>
@@ -67,9 +94,10 @@ class NewPluginWindow extends React.Component {
                 onMouseDown={e => e.stopPropagation()}
                 className="add-project__modal--input"
                 name="enabled"
-                type="text"
+                type="checkbox"
                 value={pluginFormElements.enabled}
                 onChange={onChange}
+                defaultChecked={true}
               />
               <h5 className="add-project__modal--label">Modality</h5>
               <input

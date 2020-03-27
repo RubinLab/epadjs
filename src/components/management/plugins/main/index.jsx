@@ -12,12 +12,15 @@ import { getTemplatesFromDb } from "../../../../services/templateServices";
 import PluginProjectWindow from "../tabs/manage/pluginProjectWindow";
 import PluginTemplateWindow from "../tabs/manage/pluginTemplateWindow";
 import NewPluginWindow from "../tabs/manage/newPluginWindow";
+import ParametersWindow from "../tabs/manage/parametersWindow";
 import {
   getPluginsWithProject,
   updateProjectsForPlugin,
   updateTemplatesForPlugin,
   deletePlugin,
-  savePlugin
+  savePlugin,
+  editPlugin,
+  saveDefaultParameter
 } from "../../../../services/pluginServices";
 import DeleteAlert from "../../common/alertDeletionModal";
 import UploadModal from "../../../searchView/uploadModal";
@@ -34,6 +37,14 @@ class Plugins extends React.Component {
     templateList: [], //using
     selectedProjects: [], //using
     selectedTemplates: [], //using
+    parametersDefault: {}, //using
+    parameterFormElements: {
+      name: "",
+      default_value: "",
+      creator: "",
+      type: "",
+      description: ""
+    }, //using
     tableSelectedData: {}, //using
     manageTabActive: true, //using
     trackTabActive: false, //using
@@ -41,19 +52,25 @@ class Plugins extends React.Component {
     hasAddProjectClicked: false, //using
     hasAddTemplateClicked: false, //using
     newPluginClicked: false, //using
+    editPluginClicked: false, //using
+    parametersClicked: false, //using
     delAll: false,
     delOne: false,
     selectAll: 0, //using
     selected: {}, //uising
+    selectedplugindbidfordefparams: -1, //using
     uploadClicked: false,
     hasEditClicked: false,
     pluginFormElements: {
       //using
       name: "",
-      id: "",
-      image: "",
+      plugin_id: "",
+      image_name: "",
+      image_repo: "",
+      image_tag: "",
+      image_id: "",
       description: "",
-      enabled: "",
+      enabled: true,
       modality: "",
       developer: "",
       documentation: ""
@@ -69,6 +86,7 @@ class Plugins extends React.Component {
     const plugins = pluginList.data;
     projectList = projectList.data;
     this.setState({ plugins, projectList, templateList });
+    console.log("plugin list to check parameters :", pluginList);
   };
 
   getPlugins = () => {
@@ -284,6 +302,7 @@ class Plugins extends React.Component {
   handleAddPluginCancel = () => {
     this.setState({ newPluginClicked: false });
   };
+
   handleAddPluginSave = async () => {
     const pluginform = this.state.pluginFormElements;
     this.setState({ newPluginClicked: false });
@@ -306,6 +325,138 @@ class Plugins extends React.Component {
       alert("error happened while saving plugin");
     }
     //pluginFomElements
+  };
+
+  handleEditPlugin = selectedPluginData => {
+    console.log("handle edit plugin id :", selectedPluginData);
+    let editimage_name = "";
+    let editimage_repo = "";
+    let editimage_tag = "";
+    let editimage_id = "";
+    if (selectedPluginData.original.image_name != null) {
+      editimage_name = selectedPluginData.original.image_name;
+    }
+    if (selectedPluginData.original.image_repo != null) {
+      editimage_repo = selectedPluginData.original.image_repo;
+    }
+    if (selectedPluginData.original.image_tag != null) {
+      editimage_tag = selectedPluginData.original.image_tag;
+    }
+    if (selectedPluginData.original.image_id != null) {
+      editimage_id = selectedPluginData.original.image_id;
+    }
+
+    const editpluginFormElements = {
+      //using
+      dbid: selectedPluginData.original.id,
+      name: selectedPluginData.original.name,
+      plugin_id: selectedPluginData.original.plugin_id,
+      image_name: editimage_name,
+      image_repo: editimage_repo,
+      image_tag: editimage_tag,
+      image_id: editimage_id,
+      description: selectedPluginData.original.description,
+      enabled: selectedPluginData.original.enabled,
+      modality: selectedPluginData.original.modality,
+      developer: selectedPluginData.original.developer,
+      documentation: selectedPluginData.original.documentation
+    };
+    console.log("handle edit pluginFormElements :", editpluginFormElements);
+    this.setState({
+      editPluginClicked: true,
+      pluginFormElements: editpluginFormElements
+    });
+  };
+
+  handleEditPluginCancel = () => {
+    this.setState({ editPluginClicked: false });
+  };
+  handleEditPluginSave = async () => {
+    console.log("edit plugin save clicked");
+    //this.setState({ editPluginClicked: false });
+    const pluginform = this.state.pluginFormElements;
+    const responseEditPlugin = await editPlugin({
+      pluginform
+    });
+    if (responseEditPlugin.status === 200) {
+      console.log("responseEditPlugin", responseEditPlugin);
+      const tempPlugins = this.state.plugins;
+      console.log("tempPlugins[0]", tempPlugins[0]);
+      let arrayIndex = -1;
+      for (let i = 0; i < tempPlugins.length; i++) {
+        if (tempPlugins[i].id === responseEditPlugin.data.dbid) {
+          console.log("found : ", tempPlugins[i]);
+          let obj = {};
+          obj = { ...tempPlugins[i], ...responseEditPlugin.data };
+          tempPlugins[i] = obj;
+          console.log("after : ", tempPlugins[i]);
+        }
+      }
+      this.setState({
+        plugins: tempPlugins,
+        editPluginClicked: false
+      });
+    } else {
+      alert("an arror occured after editing plugin");
+    }
+  };
+
+  handleParametersClicked = parametersData => {
+    console.log("parameters data on prm click : ", parametersData);
+    const tempParametersDefault = parametersData.original.parameters;
+    const plugindbid = parametersData.original.id;
+    console.log("plugin id when clicked params :", plugindbid);
+
+    //
+    this.setState({
+      selectedplugindbidfordefparams: plugindbid,
+      parametersClicked: true,
+      parametersDefault: tempParametersDefault
+    });
+  };
+  handleParameterChange = e => {
+    const parameterElements = { ...this.state.parameterFormElements };
+    parameterElements[e.currentTarget.name] = e.currentTarget.value;
+
+    //console.log("form elements : ", this.state.pluginFormElements);
+    console.log(e.currentTarget.name, ": value : ", e.currentTarget.value);
+    this.setState({ parameterFormElements: parameterElements });
+  };
+  handleEParameterCancel = () => {
+    this.setState({
+      parametersClicked: false,
+      selectedplugindbidfordefparams: -1
+    });
+  };
+
+  handleDefaultParameterSave = async () => {
+    console.log("add parameetr called ");
+    console.log(
+      "parameters form elements : ",
+      this.state.parameterFormElements
+    );
+
+    const parameterform = this.state.parameterFormElements;
+    this.setState({ newPluginClicked: false });
+    const responseSaveParameter = await saveDefaultParameter({
+      parameterform
+    });
+    console.log(
+      " ---->   handleDefaultParameterSave : ",
+      responseSaveParameter.status
+    );
+    if (responseSaveParameter.status === 200) {
+      //edit here
+      // const pluginList = await getPluginsWithProject();
+      // const plugins = pluginList.data;
+      // let projectList = await getProjectsWithPkAsId();
+      // projectList = projectList.data;
+      // let templateList = await getTemplatesFromDb();
+      // templateList = templateList.data;
+      // this.setState({ plugins, projectList, templateList });
+    } else {
+      alert("error happened while saving parameter");
+    }
   };
   /*
   groupByProjects = tools => {
@@ -427,9 +578,17 @@ class Plugins extends React.Component {
 */
   handleAddPluginChange = e => {
     const plElements = { ...this.state.pluginFormElements };
-    plElements[e.currentTarget.name] = e.currentTarget.value;
+    if (e.currentTarget.name != "enabled") {
+      plElements[e.currentTarget.name] = e.currentTarget.value;
+    } else {
+      plElements[e.currentTarget.name] = e.currentTarget.checked;
+    }
+    //console.log("form elements : ", this.state.pluginFormElements);
+    console.log(e.currentTarget.name, ": value : ", e.currentTarget.value);
+    if (e.currentTarget.name === "enabled") {
+      console.log(e.currentTarget.name, ": target : ", e.currentTarget.checked);
+    }
     this.setState({ pluginFormElements: plElements });
-    console.log("form elements : ", this.state.pluginFormElements);
   };
   //cavit
   projectDataToCell = tableData => {
@@ -506,6 +665,8 @@ class Plugins extends React.Component {
             projectDataToCell={this.projectDataToCell}
             handleSelectAll={this.handleSelectAll}
             handleSelectRow={this.handleSelectRow}
+            handleEditPlugin={this.handleEditPlugin}
+            handleParametersClicked={this.handleParametersClicked}
             selectAll={this.state.selectAll}
             selected={this.state.selected}
           />
@@ -560,8 +721,27 @@ class Plugins extends React.Component {
             onCancel={this.handleAddPluginCancel}
             onSave={this.handleAddPluginSave}
             onChange={this.handleAddPluginChange}
-            error={this.handleTAddPluginError}
+            error={this.handleAddPluginError}
             pluginFormElements={this.state.pluginFormElements}
+          />
+        )}
+        {this.state.editPluginClicked && (
+          <NewPluginWindow
+            onCancel={this.handleEditPluginCancel}
+            onSave={this.handleEditPluginSave}
+            onChange={this.handleAddPluginChange}
+            error={this.handleAddPluginError}
+            pluginFormElements={this.state.pluginFormElements}
+          />
+        )}
+        {this.state.parametersClicked && (
+          <ParametersWindow
+            data={this.state.parametersDefault}
+            onCancel={this.handleEParameterCancel}
+            onSave={this.handleDefaultParameterSave}
+            onChange={this.handleParameterChange}
+            error={this.handleParameterError}
+            parameterFormElements={this.state.parameterFormElements}
           />
         )}
       </div>

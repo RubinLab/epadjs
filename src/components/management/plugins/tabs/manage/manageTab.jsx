@@ -47,7 +47,16 @@ class ManageTab extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
-        width: 420
+        width: 420,
+        Cell: data => {
+          const pluginname = data.row.name;
+          const pluginid = data.original.id;
+          return (
+            <div onClick={() => this.props.handleEditPlugin(data)}>
+              {pluginname}
+            </div>
+          );
+        }
       },
       {
         Header: "Image",
@@ -78,7 +87,11 @@ class ManageTab extends React.Component {
         minResizeWidth: 100,
         width: 200,
         Cell: original => {
-          return "add,edit,see";
+          return (
+            <div onClick={() => this.props.handleParametersClicked(original)}>
+              edit
+            </div>
+          );
         },
         style: { whiteSpace: "unset" }
       },
