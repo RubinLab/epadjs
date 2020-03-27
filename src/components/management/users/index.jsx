@@ -7,7 +7,7 @@ import {
   updateUserProjectRole,
   updateUser,
   deleteUser,
-  createUser
+  createUser,
 } from "../../../services/userServices";
 import ToolBar from "../common/basicToolBar";
 import UserRoleEditForm from "./userRoleEdit";
@@ -17,7 +17,7 @@ import CreateUser from "./CreateUserForm";
 
 const messages = {
   deleteSingle: "Delete the user? This cannot be undone.",
-  deleteSelected: "Delete selected users? This cannot be undone."
+  deleteSelected: "Delete selected users? This cannot be undone.",
 };
 
 class Users extends React.Component {
@@ -35,7 +35,7 @@ class Users extends React.Component {
     clickedUserIndex: null,
     showPermissionEdit: false,
     errorMessage: "",
-    hasAddClicked: false
+    hasAddClicked: false,
   };
 
   componentDidMount = () => {
@@ -46,6 +46,7 @@ class Users extends React.Component {
     const { data } = await getUsers();
     let usersProjects = [];
     let hasAdminPermission = false;
+    const filteredProjects = [];
     //check if the signed in user has admin permissions
     const signInName = sessionStorage.getItem("username");
     for (let user of data) {
@@ -54,14 +55,21 @@ class Users extends React.Component {
         usersProjects = user.projects;
       }
     }
-    for (let user of data) {
-      let filteredProjects = [];
-      for (let project of user.projects) {
-        if (usersProjects.includes(project)) {
-          filteredProjects.push(this.props.projectMap[project]);
+    if (sessionStorage.getItem("mode") === "lite") {
+      for (let user of data) {
+        if (user.projects.includes("lite")) {
+          user.projects = ["lite"];
         }
       }
-      user.projects = filteredProjects;
+    } else {
+      for (let user of data) {
+        for (let project of user.projects) {
+          if (usersProjects.includes(project)) {
+            filteredProjects.push(this.props.projectMap[project]);
+          }
+        }
+        user.projects = filteredProjects;
+      }
     }
     this.setState({ data, hasAdminPermission, usersProjects });
   };
@@ -75,7 +83,7 @@ class Users extends React.Component {
     const { projectid } = e.target.dataset;
     if (this.state.roleEdit.length > 0) {
       this.setState(state => ({
-        roleEdit: state.roleEdit.concat([{ [projectid]: { role: value } }])
+        roleEdit: state.roleEdit.concat([{ [projectid]: { role: value } }]),
       }));
     } else {
       this.setState({ roleEdit: [{ [projectid]: { role: value } }] });
@@ -112,7 +120,7 @@ class Users extends React.Component {
 
   updateAdmin = async (username, admin) => {
     updateUser(username, {
-      admin: !admin
+      admin: !admin,
     })
       .then(() => {
         this.getUserData();
@@ -190,7 +198,7 @@ class Users extends React.Component {
 
   displayUserPermissionEdit = index => {
     this.setState(state => ({
-      showPermissionEdit: !state.showPermissionEdit
+      showPermissionEdit: !state.showPermissionEdit,
     }));
     const obj = {};
     this.state.data[index].permissions.forEach(el => {
@@ -211,7 +219,7 @@ class Users extends React.Component {
         CreateUser: "user",
         CreatePAC: "connection",
         CreateAutoPACQuery: "query",
-        CreateProject: "project"
+        CreateProject: "project",
       };
       arr.forEach(el => {
         result.push(displayMap[el]);
@@ -229,13 +237,13 @@ class Users extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0
+          selectAll: 0,
         });
       }
     } else {
       newSelected[username] = true;
       await this.setState({
-        selectAll: 2
+        selectAll: 2,
       });
     }
     this.setState({ selected: newSelected });
@@ -251,7 +259,7 @@ class Users extends React.Component {
 
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
+      selectAll: this.state.selectAll === 0 ? 1 : 0,
     });
   }
 
@@ -267,7 +275,7 @@ class Users extends React.Component {
       hasDeleteAllClicked: false,
       hasDeleteSingleClicked: false,
       errorMessage: "",
-      hasAddClicked: false
+      hasAddClicked: false,
     });
   };
 
@@ -306,6 +314,7 @@ class Users extends React.Component {
   };
 
   defineColumns = () => {
+    const mode = sessionStorage.getItem("mode");
     return [
       {
         id: "checkbox",
@@ -336,7 +345,7 @@ class Users extends React.Component {
           );
         },
         sortable: false,
-        width: 45
+        width: 45,
       },
       {
         Header: "First",
@@ -346,7 +355,7 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 35,
-        className: "mng-user__cell"
+        className: "mng-user__cell",
         // Cell: original => <div data-name="firstname">{firstname}</div>
       },
       {
@@ -357,7 +366,7 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 35,
-        className: "mng-user__cell"
+        className: "mng-user__cell",
         // Cell: original => <div data-name="lastname">{lastname}</div>
       },
       {
@@ -368,7 +377,7 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
-        className: "mng-user__cell"
+        className: "mng-user__cell",
         // Cell: original => <div data-name="email">{email}</div>
       },
       {
@@ -400,7 +409,7 @@ class Users extends React.Component {
               <p className={className}>{text}</p>
             </div>
           );
-        }
+        },
       },
       {
         Header: "Admin",
@@ -421,7 +430,7 @@ class Users extends React.Component {
               {original.row.checkbox.admin ? <FaCheck /> : <FaTimes />}
             </div>
           );
-        }
+        },
       },
 
       {
@@ -447,7 +456,7 @@ class Users extends React.Component {
               <p className={className}>{text}</p>
             </div>
           );
-        }
+        },
       },
       {
         Header: "",
@@ -464,8 +473,8 @@ class Users extends React.Component {
             >
               <FaRegTrashAlt className="menu-clickable" />
             </div>
-          ) : null
-      }
+          ) : null,
+      },
     ];
   };
 
@@ -475,7 +484,7 @@ class Users extends React.Component {
       clickedUserIndex,
       usersProjects,
       showRoleEdit,
-      showPermissionEdit
+      showPermissionEdit,
     } = this.state;
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     return (

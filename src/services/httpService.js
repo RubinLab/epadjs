@@ -8,6 +8,7 @@ axios.defaults.headers.common["Content-Type"] =
 
 axios.interceptors.request.use(
   config => {
+    // initializeKeyCloak();
     const header = auth.getAuthHeader();
     if (header) config.headers.authorization = header;
     return config;
@@ -44,5 +45,5 @@ export default {
   get: axios.get,
   post: axios.post,
   put: axios.put,
-  delete: axios.delete
+  delete: axios.delete,
 };

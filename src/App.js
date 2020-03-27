@@ -290,7 +290,6 @@ class App extends Component {
         sessionStorage.setItem("wadoUrl", wadoUrl);
         sessionStorage.setItem("authMode", authMode);
         this.setState({ mode, apiUrl, wadoUrl, authMode });
-
         const keycloakData = await results[1].json();
         const auth =
           process.env.REACT_APP_AUTH_URL || keycloakData["auth-server-url"];
@@ -304,7 +303,6 @@ class App extends Component {
           process.env.REACT_APP_AUTH_RESOURCE || keycloakData.resource;
         sessionStorage.setItem("auth", auth);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
-
         this.completeAutorization(apiUrl);
       })
       .catch(err => {
@@ -328,6 +326,7 @@ class App extends Component {
       const keycloak = Keycloak(
         JSON.parse(sessionStorage.getItem("keycloakJson"))
       );
+      sessionStorage.setItem("keycloakObject", keycloak);
       getAuthUser = new Promise((resolve, reject) => {
         keycloak
           .init({ onLoad: "login-required" })

@@ -123,13 +123,13 @@ class MainMenu extends React.Component {
         {!this.state.isModalOpen && (
           <div className="mng-menu" style={style}>
             <div className="mng-menu__option" onClick={this.handleSelection}>
+              Users
+            </div>
+            <div className="mng-menu__option" onClick={this.handleSelection}>
               Annotations
             </div>
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Templates
-            </div>
-            <div className="mng-menu__option" onClick={this.handleSelection}>
-              Users
             </div>
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Worklists
