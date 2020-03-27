@@ -44,6 +44,7 @@ class Users extends React.Component {
 
   getUserData = async () => {
     const { data } = await getUsers();
+    const mode = sessionStorage.getItem("mode");
     let usersProjects = [];
     let hasAdminPermission = false;
     const filteredProjects = [];
@@ -52,10 +53,14 @@ class Users extends React.Component {
     for (let user of data) {
       if (user.username === signInName) {
         hasAdminPermission = user.admin;
-        usersProjects = user.projects;
+        if (mode === "lite") {
+          usersProjects = ["lite"];
+        } else {
+          usersProjects = user.projects;
+        }
       }
     }
-    if (sessionStorage.getItem("mode") === "lite") {
+    if (mode === "lite") {
       for (let user of data) {
         if (user.projects.includes("lite")) {
           user.projects = ["lite"];
@@ -143,7 +148,7 @@ class Users extends React.Component {
         updateUserProjectRole(projectid[0], this.state.userToEdit, body)
       );
     }
-    this.handleCancel();
+    // this.handleCancel();
     Promise.all(updates)
       .then(() => {
         this.getUserData();
@@ -513,6 +518,7 @@ class Users extends React.Component {
               projects={usersProjects}
               onCancel={this.handleCancel}
               projectToRole={data[clickedUserIndex].projectToRole}
+              error={this.state.errorMessage}
             />
           )}
           {showPermissionEdit && (
