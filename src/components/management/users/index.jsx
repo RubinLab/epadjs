@@ -5,6 +5,7 @@ import "../menuStyle.css";
 import {
   getUsers,
   updateUserProjectRole,
+  deleteUserProjectRole,
   updateUser,
   deleteUser,
   createUser,
@@ -28,7 +29,7 @@ class Users extends React.Component {
     selectAll: 0,
     selected: {},
     edit: [],
-    roleEdit: [],
+    roleEdit: {},
     permissionEdit: {},
     showRoleEdit: false,
     userToEdit: "",
@@ -64,6 +65,8 @@ class Users extends React.Component {
       for (let user of data) {
         if (user.projects.includes("lite")) {
           user.projects = ["lite"];
+        } else {
+          user.projects = [];
         }
       }
     } else {
@@ -86,13 +89,9 @@ class Users extends React.Component {
   getUserRole = e => {
     const { value } = e.target;
     const { projectid } = e.target.dataset;
-    if (this.state.roleEdit.length > 0) {
-      this.setState(state => ({
-        roleEdit: state.roleEdit.concat([{ [projectid]: { role: value } }]),
-      }));
-    } else {
-      this.setState({ roleEdit: [{ [projectid]: { role: value } }] });
-    }
+    const roleEdit = { ...this.state.roleEdit };
+    roleEdit[projectid] = { role: value };
+    this.setState({ roleEdit });
   };
   getUserPermission = e => {
     const { value, checked } = e.target;
@@ -140,15 +139,17 @@ class Users extends React.Component {
   updateUserRole = () => {
     const updates = [];
     const updatedBy = sessionStorage.getItem("username");
-    for (let item of this.state.roleEdit) {
-      const projectid = Object.keys(item);
-      const role = Object.values(item);
-      const body = { ...role[0], updatedBy };
-      updates.push(
-        updateUserProjectRole(projectid[0], this.state.userToEdit, body)
-      );
+    const { roleEdit } = this.state;
+    for (let item in roleEdit) {
+      if (roleEdit[item].role === "None") {
+        updates.push(deleteUserProjectRole(item, this.state.userToEdit));
+      } else {
+        const body = { ...roleEdit[item], updatedBy };
+        updates.push(
+          updateUserProjectRole(item, this.state.userToEdit, body)
+        );
+      }
     }
-    // this.handleCancel();
     Promise.all(updates)
       .then(() => {
         this.getUserData();
