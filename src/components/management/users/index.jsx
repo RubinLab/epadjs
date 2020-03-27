@@ -213,6 +213,7 @@ class Users extends React.Component {
   };
 
   convertArrToStr = arr => {
+    const mode = sessionStorage.getItem("mode");
     if (arr.length > 0) {
       const result = [];
       const displayMap = {
@@ -222,7 +223,11 @@ class Users extends React.Component {
         CreateProject: "project",
       };
       arr.forEach(el => {
-        result.push(displayMap[el]);
+        if (mode === "lite" && el === "CreateProject") {
+          return;
+        } else {
+          result.push(displayMap[el]);
+        }
       });
       return result.join(", ");
     } else {
