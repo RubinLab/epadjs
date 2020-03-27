@@ -18,7 +18,7 @@ class MainMenu extends React.Component {
   state = {
     selection: "",
     isModalOpen: false,
-    coordinate: "50%"
+    coordinate: "50%",
   };
 
   componentDidMount = () => {
@@ -43,11 +43,9 @@ class MainMenu extends React.Component {
 
   handleSelection = e => {
     const selection = e.target.textContent;
-    // this.setState({ selection});
     this.setState(state => {
       return { isModalOpen: !state.isModalOpen };
     });
-    // this.props.dispatch(managementItemSelected(selection));
     this.setState({ selection });
   };
 
@@ -121,54 +119,73 @@ class MainMenu extends React.Component {
     const style = { left: this.state.coordinate };
 
     return (
-      <div className="mng-menu" style={style}>
-        <div className="mng-menu__option" onClick={this.handleSelection}>
-          Annotations
-        </div>
-        <div className="mng-menu__option" onClick={this.handleSelection}>
-          Templates
-        </div>
-        {this.props.admin && (
-          <div
-            className="mng-menu__option"
-            onClick={() => {
-              scanDataFolder();
-              this.props.closeMenu();
-            }}
-          >
-            Scan Data Folder
-          </div>
-        )}
-        <div className="mng-menu__option" onClick={this.handleSelection}>
-          Worklists
-        </div>
-        {mode !== "lite" && (
-          <>
+      <div>
+        {!this.state.isModalOpen && (
+          <div className="mng-menu" style={style}>
+            <div className="mng-menu__option" onClick={this.handleSelection}>
+              Annotations
+            </div>
+            <div className="mng-menu__option" onClick={this.handleSelection}>
+              Templates
+            </div>
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Users
             </div>
             <div className="mng-menu__option" onClick={this.handleSelection}>
-              Projects
+              Worklists
             </div>
-            {false && (
-              <div className="mng-menu__option" onClick={this.handleSelection}>
-                Tools
+            {this.props.admin && (
+              <div
+                className="mng-menu__option"
+                onClick={() => {
+                  scanDataFolder();
+                  this.props.closeMenu();
+                }}
+              >
+                Scan Data Folder
               </div>
             )}
-            {false && (
-              <div className="mng-menu__option" onClick={this.handleSelection}>
-                Pluginstore
-              </div>
+            {mode !== "lite" && (
+              <>
+                <div
+                  className="mng-menu__option"
+                  onClick={this.handleSelection}
+                >
+                  Projects
+                </div>
+                {false && (
+                  <div
+                    className="mng-menu__option"
+                    onClick={this.handleSelection}
+                  >
+                    Tools
+                  </div>
+                )}
+                {false && (
+                  <div
+                    className="mng-menu__option"
+                    onClick={this.handleSelection}
+                  >
+                    Pluginstore
+                  </div>
+                )}
+                <div
+                  className="mng-menu__option"
+                  onClick={this.handleSelection}
+                >
+                  Connections
+                </div>
+                {false && (
+                  <div
+                    className="mng-menu__option"
+                    onClick={this.handleSelection}
+                  >
+                    Queries
+                  </div>
+                )}
+              </>
             )}
-            <div className="mng-menu__option" onClick={this.handleSelection}>
-              Connections
-            </div>
-            {false && (
-              <div className="mng-menu__option" onClick={this.handleSelection}>
-                Queries
-              </div>
-            )}
-          </>
+          </div>
         )}
         {this.state.isModalOpen && (
           <Modal>

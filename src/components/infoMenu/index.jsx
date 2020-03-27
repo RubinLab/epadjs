@@ -12,7 +12,7 @@ class InfoMenu extends React.Component {
   state = {
     selection: "",
     isModalOpen: false,
-    isAdmin: false
+    isAdmin: false,
   };
 
   componentDidMount = async () => {
@@ -83,7 +83,7 @@ class InfoMenu extends React.Component {
   render() {
     const style = { left: this.state.coordinate };
     return (
-      <>
+      <div>
         {!this.state.isModalOpen && (
           <div className="info-menu" style={style}>
             <div className="info-menu__option" onClick={this.handleSelection}>
@@ -113,7 +113,7 @@ class InfoMenu extends React.Component {
               Help
             </div>
             <div className="info-menu__option" onClick={this.handleSelection}>
-              What's New
+              What"s New
             </div>
             <div className="info-menu__option" onClick={this.handleSelection}>
               Team
@@ -132,7 +132,7 @@ class InfoMenu extends React.Component {
           </div>
         )}
         {this.state.isModalOpen && this.selectDisplay()}
-      </>
+      </div>
     );
   }
 }

@@ -63,7 +63,7 @@
 .mng-menu,
 .info-menu,
 .userProfile-menu {
-  z-index: 5;
+  z-index: 15;
   display: flex;
   flex-direction: column;
   width: fit-content;
@@ -278,6 +278,11 @@
   border: 2px solid gray;
   box-shadow: 1rem 1rem 1rem grey;
   /* align-items: ; */
+}
+
+.add-worklist__modal.modal-dialog {
+  overflow-x: visible;
+  overflow-y: visible; 
 }
 
 .edit-userRole__modal.modal-dialog,

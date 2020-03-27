@@ -1,37 +1,37 @@
-import React, { Component } from 'react';
-import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { ToastContainer } from 'react-toastify';
-import { EventSourcePolyfill } from 'event-source-polyfill';
-import Keycloak from 'keycloak-js';
-import { getUser, createUser, getUserInfo } from './services/userServices';
-import NavBar from './components/navbar';
-import Sidebar from './components/sideBar/sidebar';
-import SearchView from './components/searchView/searchView';
-import DisplayView from './components/display/displayView';
-import AnotateView from './components/anotateView';
-import ProgressView from './components/progressView';
-import FlexView from './components/flexView';
-import NotFound from './components/notFound';
-import LoginForm from './components/loginForm';
-import Logout from './components/logout';
-import ProtectedRoute from './components/common/protectedRoute';
-import Cornerstone from './components/cornerstone/cornerstone';
-import Management from './components/management/mainMenu';
-import InfoMenu from './components/infoMenu';
-import UserMenu from './components/userProfileMenu.jsx';
-import AnnotationList from './components/annotationsList';
+import React, { Component } from "react";
+import { Route, Switch, Redirect, withRouter } from "react-router-dom";
+import { connect } from "react-redux";
+import { ToastContainer } from "react-toastify";
+import { EventSourcePolyfill } from "event-source-polyfill";
+import Keycloak from "keycloak-js";
+import { getUser, createUser, getUserInfo } from "./services/userServices";
+import NavBar from "./components/navbar";
+import Sidebar from "./components/sideBar/sidebar";
+import SearchView from "./components/searchView/searchView";
+import DisplayView from "./components/display/displayView";
+import AnotateView from "./components/anotateView";
+import ProgressView from "./components/progressView";
+import FlexView from "./components/flexView";
+import NotFound from "./components/notFound";
+import LoginForm from "./components/loginForm";
+import Logout from "./components/logout";
+import ProtectedRoute from "./components/common/protectedRoute";
+import Cornerstone from "./components/cornerstone/cornerstone";
+import Management from "./components/management/mainMenu";
+import InfoMenu from "./components/infoMenu";
+import UserMenu from "./components/userProfileMenu.jsx";
+import AnnotationList from "./components/annotationsList";
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
-import auth from './services/authService';
-import MaxViewAlert from './components/annotationsList/maxViewPortAlert';
+import auth from "./services/authService";
+import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import {
   clearAimId,
   getNotificationsData,
-} from './components/annotationsList/action';
-import Worklist from './components/sideBar/sideBarWorklist';
+} from "./components/annotationsList/action";
+import Worklist from "./components/sideBar/sideBarWorklist";
 
-import 'react-toastify/dist/ReactToastify.css';
-import './App.css';
+import "react-toastify/dist/ReactToastify.css";
+import "./App.css";
 
 class App extends Component {
   constructor(props) {
@@ -44,7 +44,7 @@ class App extends Component {
       openInfo: false,
       openUser: false,
       projectMap: {},
-      viewType: 'search',
+      viewType: "search",
       lastEventId: null,
       showLog: false,
       admin: false,
@@ -224,7 +224,7 @@ class App extends Component {
 
   closeMenu = notification => {
     // if (event && event.type === "keydown") {
-    //   if (event.key === 'Escape' || event.keyCode === 27) {
+    //   if (event.key === "Escape" || event.keyCode === 27) {
     //     this.setState({ openMng: false });
     //   }
     // }
@@ -285,25 +285,25 @@ class App extends Component {
         apiUrl = process.env.REACT_APP_API_URL || apiUrl;
         wadoUrl = process.env.REACT_APP_WADO_URL || wadoUrl;
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
-        sessionStorage.setItem('mode', mode);
-        sessionStorage.setItem('apiUrl', apiUrl);
-        sessionStorage.setItem('wadoUrl', wadoUrl);
-        sessionStorage.setItem('authMode', authMode);
+        sessionStorage.setItem("mode", mode);
+        sessionStorage.setItem("apiUrl", apiUrl);
+        sessionStorage.setItem("wadoUrl", wadoUrl);
+        sessionStorage.setItem("authMode", authMode);
         this.setState({ mode, apiUrl, wadoUrl, authMode });
 
         const keycloakData = await results[1].json();
         const auth =
-          process.env.REACT_APP_AUTH_URL || keycloakData['auth-server-url'];
+          process.env.REACT_APP_AUTH_URL || keycloakData["auth-server-url"];
         const keycloakJson = {};
         // check and use environment variables if any
         keycloakJson.realm =
           process.env.REACT_APP_AUTH_REALM || keycloakData.realm;
         keycloakJson.url =
-          process.env.REACT_APP_AUTH_URL || keycloakData['auth-server-url'];
+          process.env.REACT_APP_AUTH_URL || keycloakData["auth-server-url"];
         keycloakJson.clientId =
           process.env.REACT_APP_AUTH_RESOURCE || keycloakData.resource;
-        sessionStorage.setItem('auth', auth);
-        sessionStorage.setItem('keycloakJson', JSON.stringify(keycloakJson));
+        sessionStorage.setItem("auth", auth);
+        sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
 
         this.completeAutorization(apiUrl);
       })
@@ -311,9 +311,9 @@ class App extends Component {
         console.log(err);
       });
     //get notifications from sessionStorage and setState
-    let notifications = sessionStorage.getItem('notifications');
+    let notifications = sessionStorage.getItem("notifications");
     if (!notifications) {
-      sessionStorage.setItem('notifications', JSON.stringify([]));
+      sessionStorage.setItem("notifications", JSON.stringify([]));
       this.setState({ notifications: [] });
     } else {
       notifications = JSON.parse(notifications);
@@ -324,13 +324,13 @@ class App extends Component {
   completeAutorization = apiUrl => {
     let getAuthUser = null;
 
-    if (sessionStorage.getItem('authMode') !== 'external') {
+    if (sessionStorage.getItem("authMode") !== "external") {
       const keycloak = Keycloak(
-        JSON.parse(sessionStorage.getItem('keycloakJson'))
+        JSON.parse(sessionStorage.getItem("keycloakJson"))
       );
       getAuthUser = new Promise((resolve, reject) => {
         keycloak
-          .init({ onLoad: 'login-required' })
+          .init({ onLoad: "login-required" })
           .then(authenticated => {
             keycloak
               .loadUserInfo()
@@ -405,31 +405,31 @@ class App extends Component {
               : {}
           );
           this.eventSource.addEventListener(
-            'message',
+            "message",
             this.getMessageFromEventSrc
           );
         } catch (err) {
-          console.log('Error in user retrieval!', err);
+          console.log("Error in user retrieval!", err);
         }
       })
       .catch(err2 => {
-        console.log('Authentication failed!', err2);
+        console.log("Authentication failed!", err2);
       });
   };
   getMessageFromEventSrc = res => {
-    if (res.data === 'heartbeat') {
+    if (res.data === "heartbeat") {
       return;
     }
     const parsedRes = JSON.parse(res.data);
     const { lastEventId } = res;
     const { params, createdtime, projectID, error } = parsedRes.notification;
     const action = parsedRes.notification.function;
-    const complete = action.startsWith('Upload') || action.startsWith('Delete');
+    const complete = action.startsWith("Upload") || action.startsWith("Delete");
     const message = params;
     if (complete)
       this.props.dispatch(getNotificationsData(projectID, lastEventId));
     let time = new Date(createdtime).toString();
-    const GMTIndex = time.indexOf(' G');
+    const GMTIndex = time.indexOf(" G");
     time = time.substring(0, GMTIndex - 3);
     let notifications = [...this.state.notifications];
     notifications.unshift({
@@ -441,12 +441,12 @@ class App extends Component {
     });
     this.setState({ notifications });
     const stringified = JSON.stringify(notifications);
-    sessionStorage.setItem('notifications', stringified);
+    sessionStorage.setItem("notifications", stringified);
   };
 
   componentWillUnmount = () => {
     this.eventSource.removeEventListener(
-      'message',
+      "message",
       this.getMessageFromEventSrc
     );
   };
@@ -454,21 +454,21 @@ class App extends Component {
   onLogout = e => {
     auth.logout();
     // sessionStorage.removeItem("annotations");
-    sessionStorage.setItem('notifications', JSON.stringify([]));
+    sessionStorage.setItem("notifications", JSON.stringify([]));
     this.setState({
       authenticated: false,
       id: null,
       name: null,
       user: null,
     });
-    if (sessionStorage.getItem('authMode') !== 'external')
+    if (sessionStorage.getItem("authMode") !== "external")
       this.state.keycloak.logout().then(() => {
         this.setState({
           keycloak: null,
         });
         auth.logout();
       });
-    else console.log('No logout in external authentication mode');
+    else console.log("No logout in external authentication mode");
   };
 
   updateNotificationSeen = () => {
@@ -478,7 +478,7 @@ class App extends Component {
     });
     this.setState({ notifications });
     const stringified = JSON.stringify(notifications);
-    sessionStorage.setItem('notifications', stringified);
+    sessionStorage.setItem("notifications", stringified);
   };
 
   switchSearhView = () => {
@@ -499,7 +499,7 @@ class App extends Component {
   getTreeData = (projectID, level, data) => {
     const treeData = { ...this.state.treeData };
     const patientIDs = [];
-    if (level === 'subject') {
+    if (level === "subject") {
       if (!treeData[projectID]) treeData[projectID] = {};
       data.forEach(el => {
         if (!treeData[projectID][el.subjectID])
@@ -513,7 +513,7 @@ class App extends Component {
           }
         }
       }
-    } else if (level === 'studies') {
+    } else if (level === "studies") {
       const studyUIDs = [];
       const patientID = data[0].patientID;
       data.forEach(el => {
@@ -534,7 +534,7 @@ class App extends Component {
           }
         }
       }
-    } else if (level === 'series') {
+    } else if (level === "series") {
       const patientID = data[0].patientID;
       const studyUID = data[0].studyUID;
       const seriesUIDs = [];
@@ -633,11 +633,11 @@ class App extends Component {
             admin={this.state.admin}
           />
         )}
-        {!this.state.authenticated && mode !== 'lite' && (
-          <Route path='/login' component={LoginForm} />
+        {!this.state.authenticated && mode !== "lite" && (
+          <Route path="/login" component={LoginForm} />
         )}
-        {this.state.authenticated && mode !== 'lite' && (
-          <div style={{ display: 'inline', width: '100%', height: '100%' }}>
+        {this.state.authenticated && mode !== "lite" && (
+          <div style={{ display: "inline", width: "100%", height: "100%" }}>
             <Sidebar
               onData={this.getProjectMap}
               type={this.state.viewType}
@@ -646,10 +646,10 @@ class App extends Component {
               pid={this.state.pid}
               clearTreeExpand={this.clearTreeExpand}
             >
-              <Switch className='splitted-mainview'>
-                <Route path='/logout' component={Logout} />
+              <Switch className="splitted-mainview">
+                <Route path="/logout" component={Logout} />
                 <ProtectedRoute
-                  path='/display'
+                  path="/display"
                   render={props => (
                     <DisplayView
                       {...props}
@@ -658,7 +658,7 @@ class App extends Component {
                   )}
                 />
                 <ProtectedRoute
-                  path='/search/:pid?'
+                  path="/search/:pid?"
                   render={props => (
                     <SearchView
                       {...props}
@@ -680,7 +680,7 @@ class App extends Component {
                   )}
                 />
                 <ProtectedRoute
-                  path='/search/:pid?'
+                  path="/search/:pid?"
                   render={props => (
                     <SearchView
                       {...props}
@@ -701,26 +701,26 @@ class App extends Component {
                     />
                   )}
                 />
-                <ProtectedRoute path='/anotate' component={AnotateView} />
+                <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute
-                  path='/progress/:wid?'
+                  path="/progress/:wid?"
                   component={ProgressView}
                 />
-                <ProtectedRoute path='/flex/:pid?' component={FlexView} />
+                <ProtectedRoute path="/flex/:pid?" component={FlexView} />
                 <ProtectedRoute
-                  path='/worklist/:wid?'
+                  path="/worklist/:wid?"
                   render={props => (
                     <Worklist {...props} projectMap={this.state.projectMap} />
                   )}
                 />
                 {/* component={Worklist} /> */}
-                <Route path='/tools' />
-                <Route path='/edit' />
-                <Route path='/not-found' component={NotFound} />
+                <Route path="/tools" />
+                <Route path="/edit" />
+                <Route path="/not-found" component={NotFound} />
                 <ProtectedRoute
-                  from='/'
+                  from="/"
                   exact
-                  to='/search'
+                  to="/search"
                   render={props => (
                     <SearchView
                       {...props}
@@ -742,31 +742,31 @@ class App extends Component {
                   )}
                 />
 
-                <Redirect to='/not-found' />
+                <Redirect to="/not-found" />
               </Switch>
               {/* {this.props.activePort === 0 ? <AnnotationsList /> : null} */}
             </Sidebar>
           </div>
         )}
-        {this.state.authenticated && mode === 'lite' && (
+        {this.state.authenticated && mode === "lite" && (
           <Sidebar
             onData={this.getProjectMap}
             type={this.state.viewType}
             progressUpdated={progressUpdated}
           >
             <Switch>
-              <Route path='/logout' component={Logout} />
-              <ProtectedRoute path='/display' component={DisplayView} />
-              <Route path='/not-found' component={NotFound} />
+              <Route path="/logout" component={Logout} />
+              <ProtectedRoute path="/display" component={DisplayView} />
+              <Route path="/not-found" component={NotFound} />
               <ProtectedRoute
-                path='/worklist/:wid?'
+                path="/worklist/:wid?"
                 render={props => (
                   <Worklist {...props} projectMap={this.state.projectMap} />
                 )}
               />
-              <ProtectedRoute path='/progress/:wid?' component={ProgressView} />
+              <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
-                path='/'
+                path="/"
                 render={props => (
                   <SearchView
                     {...props}
@@ -786,7 +786,7 @@ class App extends Component {
                   />
                 )}
               />
-              <Redirect to='/not-found' />
+              <Redirect to="/not-found" />
             </Switch>
           </Sidebar>
         )}
