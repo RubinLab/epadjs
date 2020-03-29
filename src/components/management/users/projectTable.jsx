@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import Row from "./tableRow";
 
 const projectTable = ({ onSelect, projects, projectToRole, projectMap }) => {
+  const mode = sessionStorage.getItem("mode");
   const rows = [];
   const userRoles = {};
   projectToRole = projectToRole || [];
@@ -27,10 +28,14 @@ const projectTable = ({ onSelect, projects, projectToRole, projectMap }) => {
       <thead>
         <tr>
           <th className="project-table __header --project">Project</th>
-          <th className="project-table __header">Owner</th>
+          {mode !== "lite" && <th className="project-table __header">Owner</th>}
           <th className="project-table __header">Member</th>
-          <th className="project-table __header">Collaborator</th>
-          <th className="project-table __header">StudyOnly</th>
+          {mode !== "lite" && (
+            <>
+              <th className="project-table __header">Collaborator</th>
+              <th className="project-table __header">StudyOnly</th>{" "}
+            </>
+          )}
           <th className="project-table __header">None</th>
         </tr>
       </thead>
@@ -43,7 +48,7 @@ PropTypes.projectTable = {
   onSelect: PropTypes.func,
   projects: PropTypes.Array,
   projectMap: PropTypes.Object,
-  projectToRole: PropTypes.Array
+  projectToRole: PropTypes.Array,
 };
 
 export default projectTable;

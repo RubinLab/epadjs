@@ -282,7 +282,7 @@
 
 .add-worklist__modal.modal-dialog {
   overflow-x: visible;
-  overflow-y: visible; 
+  overflow-y: visible;
 }
 
 .edit-userRole__modal.modal-dialog,
@@ -666,6 +666,7 @@
 
 .edit-userRole__table--col {
   font-weight: 250;
+  padding: 0.3rem;
 }
 
 .centeredCell {
@@ -931,6 +932,7 @@
 }
 .project-table.__header {
   margin: 0.3rem;
+  padding: 0.3rem;
 }
 
 .edit-userRole__modal.project_user {

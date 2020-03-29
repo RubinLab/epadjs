@@ -140,25 +140,29 @@ class Users extends React.Component {
     const updates = [];
     const updatedBy = sessionStorage.getItem("username");
     const { roleEdit } = this.state;
-    for (let item in roleEdit) {
-      if (roleEdit[item].role === "None") {
-        updates.push(deleteUserProjectRole(item, this.state.userToEdit));
-      } else {
-        const body = { ...roleEdit[item], updatedBy };
-        updates.push(
-          updateUserProjectRole(item, this.state.userToEdit, body)
-        );
+    if (Object.keys(roleEdit).length > 0) {
+      for (let item in roleEdit) {
+        if (roleEdit[item].role === "None") {
+          updates.push(deleteUserProjectRole(item, this.state.userToEdit));
+        } else {
+          const body = { ...roleEdit[item], updatedBy };
+          updates.push(
+            updateUserProjectRole(item, this.state.userToEdit, body)
+          );
+        }
       }
+      Promise.all(updates)
+        .then(() => {
+          this.getUserData();
+          this.handleCancel();
+        })
+        .catch(err => {
+          this.setState({ errorMessage: err.response.data.message });
+          console.log(err);
+        });
+    } else {
+      this.setState({ errorMessage: "Please change role before submit!" });
     }
-    Promise.all(updates)
-      .then(() => {
-        this.getUserData();
-        this.handleCancel();
-      })
-      .catch(err => {
-        this.setState({ errorMessage: err.response.data.message });
-        console.log(err);
-      });
   };
 
   handleSingleDelete = () => {
@@ -191,6 +195,7 @@ class Users extends React.Component {
       .then(() => {
         this.getUserData();
         this.handleCancel();
+        this.setState({ selectAll: 0 });
       })
       .catch(err => {
         this.setState({ errorMessage: err.response.data.message });
@@ -295,6 +300,8 @@ class Users extends React.Component {
   };
 
   createUser = () => {
+    const mode = sessionStorage.getItem("mode");
+    let roleEdit = [];
     let body = {};
     const { userToEdit } = this.state;
     if (userToEdit) {
@@ -309,11 +316,26 @@ class Users extends React.Component {
         }
       }
       body = permissions
-        ? { ...body, username: userToEdit, email: userToEdit, permissions }
-        : { ...body, username: userToEdit, email: userToEdit };
+        ? { ...body, username: userToEdit, permissions: permissions }
+        : { ...body, username: userToEdit };
+
+      if (mode === "lite" && Object.keys(this.state.roleEdit).length === 0)
+        roleEdit = [{ role: "Member", project: "lite" }];
+      else {
+        const projectIds = Object.keys(this.state.roleEdit);
+        const roles = Object.values(this.state.roleEdit);
+        projectIds.forEach((el, i) => {
+          roleEdit.push({ role: roles[i].role, project: el });
+        });
+      }
+
+      if (roleEdit.length > 0) {
+        body.projects = roleEdit;
+      }
+
       createUser(body)
         .then(async () => {
-          await this.updateUserRole();
+          // await this.updateUserRole();
           this.getUserData();
           this.handleCancel();
         })
@@ -372,6 +394,17 @@ class Users extends React.Component {
       {
         Header: "Last",
         accessor: "lastname",
+        className: "usersTable-cell",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 35,
+        className: "mng-user__cell",
+        // Cell: original => <div data-name="lastname">{lastname}</div>
+      },
+      {
+        Header: "User Name",
+        accessor: "username",
         className: "usersTable-cell",
         sortable: true,
         resizable: true,
@@ -510,6 +543,7 @@ class Users extends React.Component {
             className="pro-table"
             data={data}
             columns={this.defineColumns()}
+            defaultPageSize={10}
           />
           {showRoleEdit && (
             <UserRoleEditForm
