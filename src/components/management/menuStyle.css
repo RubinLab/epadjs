@@ -342,10 +342,10 @@
   margin-left: 0.5rem;
 }
 
-.userRole-edit__error {
+/* .userRole-edit__error {
   margin-bottom: 0.5rem;
   align-self: flex-start;
-}
+} */
 
 .edit-userRole__modal--buttons {
   display: flex;
