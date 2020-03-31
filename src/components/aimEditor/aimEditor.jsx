@@ -579,18 +579,27 @@ class AimEditor extends Component {
       points,
       imageReferenceUid
     );
-    const { mean, stdDev, min, max } = polygon.meanStdDev;
 
-    const meanId = aim.createMeanCalcEntity({ mean, unit: "[hnsf'U]" });
+    // find out the unit about statistics to write to aim
+    let unit, mean, stdDev, min, max;
+    if (polygon.meanStdDev) {
+      ({ mean, stdDev, min, max } = polygon.meanStdDev);
+      unit = "hu";
+    } else if (polygon.meanStdDevSUV) {
+      ({ mean, stdDev, min, max } = polygon.meanStdDev);
+      unit = "suv";
+    }
+
+    const meanId = aim.createMeanCalcEntity({ mean, unit });
     aim.createImageAnnotationStatement(1, markupId, meanId);
 
-    const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit: "[hnsf'U]" });
+    const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit });
     aim.createImageAnnotationStatement(1, markupId, stdDevId);
 
-    const minId = aim.createMinCalcEntity({ min, unit: "[hnsf'U]" });
+    const minId = aim.createMinCalcEntity({ min, unit });
     aim.createImageAnnotationStatement(1, markupId, minId);
 
-    const maxId = aim.createMaxCalcEntity({ max, unit: "[hnsf'U]" });
+    const maxId = aim.createMaxCalcEntity({ max, unit });
     aim.createImageAnnotationStatement(1, markupId, maxId);
   };
 
@@ -613,9 +622,11 @@ class AimEditor extends Component {
       imageReferenceUid
     );
 
+    console.log("Line", line);
+
     const lengthId = aim.createLengthCalcEntity({
       value: line.length,
-      unit: "mm"
+      unit: line.unit
     });
     aim.createImageAnnotationStatement(1, markupId, lengthId);
   };
@@ -628,18 +639,24 @@ class AimEditor extends Component {
       [start, end],
       imageReferenceUid
     );
+    console.log("Circle", circle);
+
+    let unit;
+    if (circle.unit === "HU") unit = "hu";
+    else if (circle.unit === "SUV") unit = "suv";
+
     const { mean, stdDev, min, max } = circle.cachedStats;
 
-    const meanId = aim.createMeanCalcEntity({ mean, unit: "[hnsf'U]" });
+    const meanId = aim.createMeanCalcEntity({ mean, unit });
     aim.createImageAnnotationStatement(1, markupId, meanId);
 
-    const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit: "[hnsf'U]" });
+    const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit });
     aim.createImageAnnotationStatement(1, markupId, stdDevId);
 
-    const minId = aim.createMinCalcEntity({ min, unit: "[hnsf'U]" });
+    const minId = aim.createMinCalcEntity({ min, unit });
     aim.createImageAnnotationStatement(1, markupId, minId);
 
-    const maxId = aim.createMaxCalcEntity({ max, unit: "[hnsf'U]" });
+    const maxId = aim.createMaxCalcEntity({ max, unit });
     aim.createImageAnnotationStatement(1, markupId, maxId);
 
     // aim.add;
@@ -652,6 +669,8 @@ class AimEditor extends Component {
     imageReferenceUid
   ) => {
     const { longAxis, shortAxis } = this.getAxisOfBidirectional(bidirectional);
+
+    console.log("Bidirectional", bidirectional);
 
     // add longAxis
     const longAxisMarkupId = aim.addMarkupEntity(
