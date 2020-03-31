@@ -202,6 +202,8 @@ class Aim {
 
   createMeanCalcEntity = (value, preLabel) => {
     var { unit, mean } = value;
+    console.log("Unit", unit);
+    const { unit, typeCodeDcm } = this._getAimUnitAndDcmTypeCode(unit);
     var obj = {};
     obj["calculationResultCollection"] = {
       CalculationResult: [this._createCalcResult(unit, "Mean", mean, preLabel)]
@@ -210,7 +212,7 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
-      this._createTypeCode(),
+      typeCodeDcm,
       this._createTypeCode("R-00317", "SRT", "Mean")
     ];
     this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection.CalculationEntity.push(
@@ -221,6 +223,8 @@ class Aim {
 
   createStdDevCalcEntity = (value, preLabel) => {
     var { unit, stdDev } = value;
+    const { unit, typeCodeDcm } = this._getAimUnitAndDcmTypeCode(unit);
+
     var obj = {};
     obj["calculationResultCollection"] = {
       CalculationResult: [
@@ -231,7 +235,7 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
-      this._createTypeCode(),
+      typeCodeDcm,
       this._createTypeCode("R-10047", "SRT", "Standard Deviation")
     ];
     this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
@@ -242,6 +246,7 @@ class Aim {
 
   createMinCalcEntity = (value, preLabel) => {
     var { unit, min } = value;
+    const { unit, typeCodeDcm } = this._getAimUnitAndDcmTypeCode(unit);
     var obj = {};
     obj["calculationResultCollection"] = {
       CalculationResult: [
@@ -252,7 +257,7 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
-      this._createTypeCode(),
+      typeCodeDcm,
       this._createTypeCode("R-404FB", "SRT", "Minimum")
     ];
     this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
@@ -263,6 +268,7 @@ class Aim {
 
   createMaxCalcEntity = (value, preLabel) => {
     var { unit, max } = value;
+    const { unit, typeCodeDcm } = this._getAimUnitAndDcmTypeCode(unit);
     var obj = {};
     obj["calculationResultCollection"] = {
       CalculationResult: [
@@ -273,13 +279,23 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
-      this._createTypeCode(),
+      typeCodeDcm,
       this._createTypeCode("G-A437", "SRT", "Maximum")
     ];
     this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
       "CalculationEntity"
     ].push(obj);
     return uId;
+  };
+
+  _getAimUnitAndDcmTypeCode = unit => {
+    if (unit === "hu")
+      return { unit: "[hnsf'U]", typeCodeDcm: this._createTypeCode() };
+    else if (unit === "suv")
+      return {
+        unit: "{SUVbw}g/ml",
+        typeCodeDcm: this._createTypeCode(126401, "DCM", "SUVbw")
+      };
   };
 
   createVolumeCalcEntity = (value, preLabel) => {
