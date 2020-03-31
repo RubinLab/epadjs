@@ -4377,17 +4377,20 @@ export var AimEditor = function(
 
     if (annotationName.includes("~")) {
       var annotationNameArray = annotationName.split("~");
+      let namewithoutslideno = annotationNameArray[0].split("@");
+
       for (let k = 0; k < self.annotationNames.length; k++) {
-        if (annotationNameArray[0] === self.annotationNames[k].value) {
-          self.aimName = annotationNameArray[0];
+        if (namewithoutslideno[0] === self.annotationNames[k].value) {
+          self.aimName = namewithoutslideno[0];
           $("#S1").dropdown("set selected", [self.annotationNames[k].value]);
           break;
         }
       }
     } else {
       for (let k = 0; k < self.annotationNames.length; k++) {
-        if (annotationName === self.annotationNames[k].value) {
-          self.aimName = annotationName;
+        let namewithoutslideno = annotationName.split("@");
+        if (namewithoutslideno[0] === self.annotationNames[k].value) {
+          self.aimName = namewithoutslideno[0];
           $("#S1").dropdown("set selected", [self.annotationNames[k].value]);
           break;
         }
