@@ -326,32 +326,32 @@ export var AimEditor = function(
     self.templateSelectedIndex = 1;
     self.annotationNames = [
       {
-        text: "Width (AP Working Projection)",
-        value: "Width (AP Working Projection)"
+        text: "Width (Working Projection)",
+        value: "Width (Working Projection)"
       },
       {
-        text: "Height (AP Working Projection)",
-        value: "Height (AP Working Projection)"
+        text: "Height (Working Projection)",
+        value: "Height (Working Projection)"
       },
       {
-        text: "Neck (AP Working Projection)",
-        value: "Neck (AP Working Projection)"
+        text: "Neck (Working Projection)",
+        value: "Neck (Working Projection)"
       },
       {
         text: "--------------------------------------------------------",
         value: "--------------------------------------------------------"
       },
       {
-        text: "Width (Lateral Working Projection)",
-        value: "Width (Lateral Working Projection)"
+        text: "Width (Orthogonal Projection)",
+        value: "Width (Orthogonal Projection)"
       },
       {
-        text: "Height (Lateral Working Projection)",
-        value: "Height (Lateral Working Projection)"
+        text: "Height (Orthogonal Projection)",
+        value: "Height (Orthogonal Projection)"
       },
       {
-        text: "Neck (Lateral Working Projection)",
-        value: "Neck (Lateral Working Projection)"
+        text: "Neck (Orthogonal Projection)",
+        value: "Neck (Orthogonal Projection)"
       },
       {
         text: "--------------------------------------------------------",
@@ -495,8 +495,8 @@ export var AimEditor = function(
     templateDiv.appendChild(self.templateSelect);
     var i = 0;
     var templateOption = document.createElement("option");
-    templateOption.value = "Select an Item";
-    templateOption.text = "Select an Item";
+    templateOption.value = "Select an option";
+    templateOption.text = "Select an option";
     self.templateSelect.appendChild(templateOption);
 
     self.annotationNames.forEach(nameobject => {
