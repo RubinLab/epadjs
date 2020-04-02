@@ -19,7 +19,7 @@ class ProgressView extends React.Component {
 
   getWorkListData = async () => {
     const { data } = await getWorklistProgress(this.props.match.params.wid);
-    data.forEach(el => el.subject_name = this.clearCarets(el.subject_name))
+    data.forEach(el => (el.subject_name = this.clearCarets(el.subject_name)));
     this.setState({ data });
   };
 
@@ -41,13 +41,13 @@ class ProgressView extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0
+          selectAll: 0,
         });
       }
     } else {
       newSelected[username] = true;
       await this.setState({
-        selectAll: 2
+        selectAll: 2,
       });
     }
     this.setState({ selected: newSelected });
@@ -63,7 +63,7 @@ class ProgressView extends React.Component {
 
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
+      selectAll: this.state.selectAll === 0 ? 1 : 0,
     });
   }
 
@@ -76,26 +76,26 @@ class ProgressView extends React.Component {
       {
         Header: userHeader,
         accessor: "assignee",
-        aggregate: vals => _.join(vals, ", "),
+        aggregate: vals => _.join(Array.from(new Set(vals)), ", "),
         Aggregated: row => {
           return (
             <div className="--aggregated">
               <span>{row.value}</span>
             </div>
           );
-        }
+        },
       },
       {
         Header: patientHeader,
         accessor: "subject_name",
-        aggregate: vals => _.join(vals, ", "),
+        aggregate: vals => _.join(Array.from(new Set(vals)), ", "),
         Aggregated: row => {
           return (
             <div className="--aggregated">
               <span>{row.value}</span>
             </div>
           );
-        }
+        },
       },
       {
         Header: "Completion(%)",
@@ -109,8 +109,8 @@ class ProgressView extends React.Component {
               <span>{row.value}%</span>
             </div>
           );
-        }
-      }
+        },
+      },
     ];
 
     if (this.state.view === "User") {
