@@ -97,16 +97,50 @@ class ProgressView extends React.Component {
           );
         },
       },
+      // {
+      //   Header: "Study Description",
+      //   accessor: "study_desc",
+      //   Aggregated: row => {
+      //     return (
+      //       <div className="--aggregated">
+      //         <span>{row.value}</span>
+      //       </div>
+      //     );
+      //   },
+      // },
       {
-        Header: "Completion(%)",
-        accessor: "completeness",
-        width: 150,
-        style: { textAlign: "center" },
-        aggregate: vals => _.round(_.mean(vals)),
+        Header: "Study UID",
+        accessor: "study_uid",
         Aggregated: row => {
           return (
             <div className="--aggregated">
-              <span>{row.value}%</span>
+              <span>{row.value}</span>
+            </div>
+          );
+        },
+      },
+      {
+        Header: "Requirement",
+        accessor: "worklist_requirement_desc",
+        width: 120,
+        Aggregated: row => {
+          return (
+            <div className="--aggregated">
+              <span>{row.value}</span>
+            </div>
+          );
+        },
+      },
+      {
+        Header: "Completion(%)",
+        accessor: "completeness",
+        style: { textAlign: "center" },
+        width: 120,
+        aggregate: vals => _.round(_.mean(vals)),
+        Cell: row => {
+          return (
+            <div className="--aggregated">
+              <span>{row.value}</span>
             </div>
           );
         },
