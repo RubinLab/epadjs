@@ -19,10 +19,20 @@ class ProgressView extends React.Component {
 
   getWorkListData = async () => {
     const { data } = await getWorklistProgress(this.props.match.params.wid);
+    data.forEach(el => el.subject_name = this.clearCarets(el.subject_name))
     this.setState({ data });
   };
 
   componentWillUnmount = () => {};
+
+  clearCarets = string => {
+    if (string) {
+      for (let i = 0; i < string.length; i++) {
+        string = string.replace("^", " ");
+      }
+      return string;
+    }
+  };
 
   toggleRow = async username => {
     let newSelected = Object.assign({}, this.state.selected);
