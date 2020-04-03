@@ -18,7 +18,7 @@ const worklistSelect = ({ list, handleRoute }) => {
       >
         <div className="__inner">
           <span>{worklist.name}</span>
-          <span>{completeness}</span>
+          {/* <span>{completeness}</span> */}
         </div>
         <div className="__dueDate">Due: {worklist.duedate}</div>
       </div>
