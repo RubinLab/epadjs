@@ -395,6 +395,7 @@ class App extends Component {
           }
 
           const EventSource = NativeEventSource || EventSourcePolyfill;
+          global.EventSource =  NativeEventSource || EventSourcePolyfill;
           this.eventSource = new EventSource(
             `${apiUrl}/notifications`,
             result.keycloak.token
