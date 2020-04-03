@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Route, Switch, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
+import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
 import { getUser, createUser, getUserInfo } from "./services/userServices";
 import NavBar from "./components/navbar";
@@ -393,7 +394,7 @@ class App extends Component {
             console.log(err);
           }
 
-          this.eventSource = new EventSource(
+          this.eventSource = new EventSourcePolyfill(
             `${apiUrl}/notifications`,
             result.keycloak.token
               ? {
@@ -403,7 +404,10 @@ class App extends Component {
                 }
               : {}
           );
-          this.eventSource.onmessage = e => this.getMessageFromEventSrc(e);
+          this.eventSource.addEventListener(
+            "message",
+            this.getMessageFromEventSrc
+          );
         } catch (err) {
           console.log("Error in user retrieval!", err);
         }
@@ -413,7 +417,8 @@ class App extends Component {
       });
   };
   getMessageFromEventSrc = res => {
-    if (res.data === "heartbeat") {
+    console.log('event received ', res.data);
+    if (res.data === "comment") {
       return;
     }
     const parsedRes = JSON.parse(res.data);
