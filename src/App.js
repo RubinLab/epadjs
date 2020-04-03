@@ -404,10 +404,7 @@ class App extends Component {
                 }
               : {}
           );
-          this.eventSource.addEventListener(
-            "message",
-            this.getMessageFromEventSrc
-          );
+          this.eventSource.onmessage = e => this.getMessageFromEventSrc(e);
         } catch (err) {
           console.log("Error in user retrieval!", err);
         }
