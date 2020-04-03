@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { Route, Switch, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
-import { NativeEventSource, EventSourcePolyfill } from 'event-source-polyfill';
 import Keycloak from "keycloak-js";
 import { getUser, createUser, getUserInfo } from "./services/userServices";
 import NavBar from "./components/navbar";
@@ -394,8 +393,6 @@ class App extends Component {
             console.log(err);
           }
 
-          const EventSource = NativeEventSource || EventSourcePolyfill;
-          global.EventSource =  NativeEventSource || EventSourcePolyfill;
           this.eventSource = new EventSource(
             `${apiUrl}/notifications`,
             result.keycloak.token
