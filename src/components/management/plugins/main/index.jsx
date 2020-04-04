@@ -20,16 +20,18 @@ import {
   deletePlugin,
   savePlugin,
   editPlugin,
-  saveDefaultParameter
+  saveDefaultParameter,
+  getDefaultParameter,
+  getOnePlugin
 } from "../../../../services/pluginServices";
 import DeleteAlert from "../../common/alertDeletionModal";
 import UploadModal from "../../../searchView/uploadModal";
 import EditTools from "../../templates/projectTable";
-import "../css/plugin.css";
 import PluginNavBar from "./pluginNavBar";
 import ManageTab from "./../tabs/manage/manageTab";
 import TriggerTab from "./../tabs/trigger/triggerTab";
 import { arrayToMap } from "../../../../Utils/aid";
+import "../css/plugin.css";
 class Plugins extends React.Component {
   state = {
     plugins: [], //using
@@ -89,9 +91,9 @@ class Plugins extends React.Component {
     console.log("plugin list to check parameters :", pluginList);
   };
 
-  getPlugins = () => {
-    return this.state.plugins;
-  };
+  // getPlugins = () => {
+  //   return this.state.plugins;
+  // };
 
   handleProjectSelect = (onclickselectedProject, tableData) => {
     let tempSelectedProjects = this.state.selectedProjects;
@@ -454,8 +456,45 @@ class Plugins extends React.Component {
       // let templateList = await getTemplatesFromDb();
       // templateList = templateList.data;
       // this.setState({ plugins, projectList, templateList });
+      this.setState({
+        parametersClicked: false
+      });
     } else {
       alert("error happened while saving parameter");
+    }
+  };
+
+  handleNotifyParentForParemeterSituation = async (plugindbid, operation) => {
+    console.log("in parent updt", plugindbid);
+    console.log("state parameters default", this.state.parametersDefault);
+    const newparams = await getDefaultParameter(plugindbid);
+    console.log("newparams", newparams);
+    const tempPluginUpdated = await getOnePlugin(plugindbid);
+    console.log(
+      "again updated plugin list with new params : ",
+      tempPluginUpdated
+    );
+    switch (operation) {
+      case "addnew":
+        const tempPlugins = this.state.plugins;
+        for (let i = 0; i < tempPlugins.length; i++) {
+          if (tempPlugins[i].id === plugindbid) {
+            let paramsobj = [];
+            paramsobj = [...tempPluginUpdated.data.defaultparameters];
+            console.log(
+              "we are replacing this plugin def params :",
+              tempPlugins[i].parameters
+            );
+            console.log("with this one :", paramsobj);
+            tempPlugins[i].parameters = [...paramsobj];
+          }
+        }
+        this.setState({
+          parametersDefault: newparams.data,
+          plugins: tempPlugins
+          //plugins: tempPluginList.data
+        });
+        break;
     }
   };
   /*
@@ -739,9 +778,11 @@ class Plugins extends React.Component {
             data={this.state.parametersDefault}
             onCancel={this.handleEParameterCancel}
             onSave={this.handleDefaultParameterSave}
-            onChange={this.handleParameterChange}
-            error={this.handleParameterError}
-            parameterFormElements={this.state.parameterFormElements}
+            pluginid={this.state.selectedplugindbidfordefparams}
+            notifyParameterParent={this.handleNotifyParentForParemeterSituation}
+            //onChange={this.handleParameterChange}
+            //error={this.handleParameterError}
+            //parameterFormElements={this.state.parameterFormElements}
           />
         )}
       </div>

@@ -4,6 +4,9 @@ const apiUrl = sessionStorage.getItem("apiUrl");
 export function getPlugins() {
   return http.get(apiUrl + "/plugins");
 }
+export function getOnePlugin(plugindbid) {
+  return http.get(apiUrl + "/plugins/" + plugindbid);
+}
 
 export function getPluginsWithProject() {
   return http.get(apiUrl + "/pluginswithproject");
@@ -40,6 +43,18 @@ export function saveDefaultParameter(parametersform) {
     apiUrl + "/plugins/parameters/default/addnew",
     parametersform
   );
+}
+export function deleteOneDefaultParameter(parameterdbid) {
+  return http.delete(apiUrl + "/plugins/parameters/default/" + parameterdbid);
+}
+export function editDefaultparameter(parametersform) {
+  return http.post(
+    apiUrl + "/plugins/parameters/default/edit/",
+    parametersform
+  );
+}
+export function getDefaultParameter(plugindbid) {
+  return http.get(apiUrl + "/plugins/parameters/default/" + plugindbid);
 }
 
 export function getDockerImages() {
