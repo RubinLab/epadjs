@@ -3,38 +3,43 @@ import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import ReactTable from "react-table";
 import {
-  saveDefaultParameter,
-  getDefaultParameter,
-  deleteOneDefaultParameter,
-  editDefaultparameter,
+  saveProjectParameter,
+  getProjectParameter,
+  deleteOneProjectParameter,
+  editProjectParameter,
 } from "../../../../../services/pluginServices";
 import { FaRegTrashAlt } from "react-icons/fa";
-class ParametersWindow extends React.Component {
+class ParametersForProjectWindow extends React.Component {
   constructor(props) {
     super(props);
     console.log("props ", props);
-    this.state = {
-      defaultParameterList: [],
-      parameterFormElements: {
-        plugindbid: props.pluginid,
-        name: "",
-        default_value: "",
-        creator: "",
-        type: "",
-        description: "",
-      },
-    };
+
     //console.log("modal log templates", props.allTemplates);
   }
 
-  state = { addnew: false, allTemplates: [], editParam: false };
+  state = {
+    defaultParameterList: [],
+    parameterFormElements: {
+      plugindbid: this.props.plugindbid,
+      projectdbid: this.props.projectdbid,
+      name: "",
+      default_value: "",
+      creator: "",
+      type: "",
+      description: "",
+    },
+    addnew: false,
+    allTemplates: [],
+    editParam: false,
+  };
 
   componentWillMount = async () => {
-    const tempDefaultParameterList = await getDefaultParameter(
-      this.state.parameterFormElements.plugindbid
+    const tempDefaultParameterList = await getProjectParameter(
+      this.props.plugindbid,
+      this.props.projectdbid
     );
     console.log("parameter lists", tempDefaultParameterList);
-    this.setState({ defaultParameterList: tempDefaultParameterList });
+    this.setState({ defaultParameterList: tempDefaultParameterList.data });
   };
 
   handleFormElementChange = (e) => {
@@ -53,7 +58,8 @@ class ParametersWindow extends React.Component {
   };
   showAddForm = () => {
     const tempParameterFormElements = {
-      plugindbid: this.props.pluginid,
+      plugindbid: this.props.plugindbid,
+      projectdbid: this.props.projectdbid,
       name: "",
       default_value: "",
       creator: "",
@@ -71,44 +77,47 @@ class ParametersWindow extends React.Component {
   saveParameters = async () => {
     this.setState({ addnew: false });
     console.log(
-      "save paramters after filled : ",
+      "save project paramters after filled : ",
       this.state.parameterFormElements
     );
-    const saveParameterResponse = await saveDefaultParameter(
+    const saveParameterResponse = await saveProjectParameter(
       this.state.parameterFormElements
     );
     if (saveParameterResponse.status === 200) {
-      console.log("parameters saved succesfully");
-      this.props.notifyParameterParent(
-        this.state.parameterFormElements.plugindbid,
-        "addnew"
-      );
+      console.log("plugin project parameters saved succesfully");
+      console.log("inserted data : ", saveParameterResponse.data);
+      const tempDefaultParameterList = this.state.defaultParameterList;
+      tempDefaultParameterList.push(saveParameterResponse.data);
+      this.setState({ defaultParameterList: tempDefaultParameterList });
     } else {
-      alert("an error occourred while saving parameters");
+      alert("an error occourred while saving project parameters");
     }
     //this.props.onSave();
   };
   dock;
   deleteOneParameter = async (parameterdbid) => {
     console.log("delete one called", parameterdbid);
-    const deleteParameterResponse = await deleteOneDefaultParameter(
+    const deleteParameterResponse = await deleteOneProjectParameter(
       parameterdbid
     );
     console.log("delete one parameter response :", deleteParameterResponse);
     if (deleteParameterResponse.status === 200) {
-      console.log("parameter deleted succesfully");
-      this.props.notifyParameterParent(
-        this.state.parameterFormElements.plugindbid,
-        "addnew"
+      let tempDefaultParameterList = this.state.defaultParameterList.filter(
+        (parameter) => {
+          return parameter.id !== parameterdbid;
+        }
       );
+      this.setState({ defaultParameterList: tempDefaultParameterList });
+      console.log("parameter deleted succesfully");
     } else {
-      alert("an error occourred while deleting parameter");
+      alert("an error occourred while deleting project parameter");
     }
   };
   handleShowEditParameterWindow = (rowInfo) => {
     console.log("row click :", rowInfo);
     const tempParameterFormElements = {
-      plugindbid: this.state.parameterFormElements.plugindbid,
+      plugindbid: this.props.plugindbid,
+      projectdbid: this.props.projectdbid,
       paramdbid: rowInfo.original.id,
       name: rowInfo.original.name,
       default_value: rowInfo.original.default_value,
@@ -124,21 +133,32 @@ class ParametersWindow extends React.Component {
   };
   handleEditParameterSave = async () => {
     console.log("edit paramter save clicked");
-    const editParameterResponse = await editDefaultparameter(
+    const editParameterResponse = await editProjectParameter(
       this.state.parameterFormElements
     );
     if (editParameterResponse.status === 200) {
-      console.log("parameters edited succesfully");
-      this.props.notifyParameterParent(
-        this.state.parameterFormElements.plugindbid,
-        "addnew"
+      console.log(
+        "project parameters edited succesfully",
+        JSON.stringify(editParameterResponse.data)
       );
-      // this.props.notifyParameterParent(
-      //   this.state.parameterFormElements.plugindbid,
-      //   "addnew"
-      // );
+      console.log(
+        "default list needs to be like this :",
+        JSON.stringify(this.state.defaultParameterList[1])
+      );
+      const editedData = editParameterResponse.data;
+      const tempDefaultParameterList = this.state.defaultParameterList;
+      for (let i = 0; i < tempDefaultParameterList.length; i++) {
+        const editedData = editParameterResponse.data;
+        if (tempDefaultParameterList[i].id === editedData.paramdbid) {
+          let obj = {};
+          obj = { ...tempDefaultParameterList[i], ...editedData };
+          tempDefaultParameterList[i] = { ...obj };
+          console.log("obj", JSON.stringify(obj));
+        }
+      }
+      this.setState({ defaultParameterList: tempDefaultParameterList });
     } else {
-      alert("an error occourred while editing parameters");
+      alert("an error occourred while editing project parameters");
     }
 
     this.setState({ editParam: false, addnew: false });
@@ -220,22 +240,21 @@ class ParametersWindow extends React.Component {
   };
   render() {
     const { error } = this.props;
-    console.log(this.props.data);
+
     return (
       <div className="tools menu-display" id="template">
         <Modal.Dialog className="create-plugin__modal">
           <Modal.Header>
-            <Modal.Title>Paramaters</Modal.Title>
+            <Modal.Title>Project Paramaters</Modal.Title>
           </Modal.Header>
           <Modal.Body className="create-user__modal--body">
             {!this.state.addnew && (
               <ReactTable
                 className="pro-table"
-                data={this.props.data}
+                data={this.state.defaultParameterList}
                 columns={this.defineParametersTableColumns()}
                 getTdProps={(state, rowInfo, column, instance) => ({
                   onClick: () => {
-                    console.log("column data :", column.Header);
                     if (column.Header != "") {
                       if (typeof rowInfo !== "undefined") {
                         this.handleShowEditParameterWindow(rowInfo);
@@ -249,7 +268,7 @@ class ParametersWindow extends React.Component {
             )}
             {this.state.addnew && (
               <div>
-                <h5>add new parameter</h5>
+                <h5>add new project parameter</h5>
                 <form className="add-project__modal--form">
                   <h5 className="add-project__modal--label">Name*</h5>
                   <input
@@ -361,7 +380,7 @@ class ParametersWindow extends React.Component {
   }
 }
 
-export default ParametersWindow;
+export default ParametersForProjectWindow;
 PropTypes.NewPluginWindow = {
   //onSelect: PropTypes.func,
   onCancel: PropTypes.func,

@@ -6,7 +6,7 @@ import ToolBar from "../../common/basicToolBar";
 import { FaRegTrashAlt } from "react-icons/fa";
 import {
   getProjects,
-  getProjectsWithPkAsId
+  getProjectsWithPkAsId,
 } from "../../../../services/projectServices";
 import { getTemplatesFromDb } from "../../../../services/templateServices";
 import PluginProjectWindow from "../tabs/manage/pluginProjectWindow";
@@ -22,7 +22,7 @@ import {
   editPlugin,
   saveDefaultParameter,
   getDefaultParameter,
-  getOnePlugin
+  getOnePlugin,
 } from "../../../../services/pluginServices";
 import DeleteAlert from "../../common/alertDeletionModal";
 import UploadModal from "../../../searchView/uploadModal";
@@ -45,7 +45,7 @@ class Plugins extends React.Component {
       default_value: "",
       creator: "",
       type: "",
-      description: ""
+      description: "",
     }, //using
     tableSelectedData: {}, //using
     manageTabActive: true, //using
@@ -75,8 +75,8 @@ class Plugins extends React.Component {
       enabled: true,
       modality: "",
       developer: "",
-      documentation: ""
-    }
+      documentation: "",
+    },
   };
 
   componentDidMount = async () => {
@@ -101,7 +101,7 @@ class Plugins extends React.Component {
     if (elementIndex === -1) {
       tempSelectedProjects.push(onclickselectedProject);
     } else {
-      tempSelectedProjects = this.state.selectedProjects.filter(project => {
+      tempSelectedProjects = this.state.selectedProjects.filter((project) => {
         return project !== onclickselectedProject;
       });
     }
@@ -114,7 +114,7 @@ class Plugins extends React.Component {
       hasAddProjectClicked: true,
       selectedProjectsAsMap: tempProjectMap,
       tableSelectedData: tableSelectedData,
-      selectedProjects: projectArray
+      selectedProjects: projectArray,
     });
   };
 
@@ -122,7 +122,7 @@ class Plugins extends React.Component {
     this.setState({
       selectedProjects: [],
       tableSelectedData: {},
-      hasAddProjectClicked: false
+      hasAddProjectClicked: false,
     });
   };
 
@@ -132,21 +132,23 @@ class Plugins extends React.Component {
     const tempoldProjects = this.state.tableSelectedData.original.projects;
     const oldProjects = [];
 
-    tempoldProjects.forEach(project => {
+    tempoldProjects.forEach((project) => {
       oldProjects.push(project.id);
     });
 
     let projectsToRemove = [];
     let projectsToAdd = [];
 
-    projectsToAdd = newProjects.filter(prid => !oldProjects.includes(prid));
-    projectsToRemove = oldProjects.filter(prid => !newProjects.includes(prid));
+    projectsToAdd = newProjects.filter((prid) => !oldProjects.includes(prid));
+    projectsToRemove = oldProjects.filter(
+      (prid) => !newProjects.includes(prid)
+    );
 
     const projectsArrayAsResponse = await updateProjectsForPlugin(
       selectedPluginId,
       {
         projectsToAdd,
-        projectsToRemove
+        projectsToRemove,
       }
     );
 
@@ -160,7 +162,7 @@ class Plugins extends React.Component {
     this.setState({
       hasAddProjectClicked: false,
       plugins: tempPlugins,
-      tableSelectedData: {}
+      tableSelectedData: {},
     });
   };
 
@@ -170,7 +172,7 @@ class Plugins extends React.Component {
       hasAddTemplateClicked: true,
       selectedTemplateAsMap: tempTemplateMap,
       tableSelectedData: tableSelectedData,
-      selectedTemplates: templateArray
+      selectedTemplates: templateArray,
     });
   };
 
@@ -180,23 +182,23 @@ class Plugins extends React.Component {
     const tempoldTemplates = this.state.tableSelectedData.original.templates;
     const oldTemplates = [];
 
-    tempoldTemplates.forEach(template => {
+    tempoldTemplates.forEach((template) => {
       oldTemplates.push(template.id);
     });
     let templatesToRemove = [];
     let templatesToAdd = [];
     templatesToAdd = newTemplates.filter(
-      templateid => !oldTemplates.includes(templateid)
+      (templateid) => !oldTemplates.includes(templateid)
     );
     templatesToRemove = oldTemplates.filter(
-      templateid => !newTemplates.includes(templateid)
+      (templateid) => !newTemplates.includes(templateid)
     );
 
     const templatesArrayAsResponse = await updateTemplatesForPlugin(
       selectedPluginId,
       {
         templatesToAdd,
-        templatesToRemove
+        templatesToRemove,
       }
     );
 
@@ -211,7 +213,7 @@ class Plugins extends React.Component {
     this.setState({
       hasAddTemplateClicked: false,
       plugins: tempPlugins,
-      tableSelectedData: {}
+      tableSelectedData: {},
     });
   };
 
@@ -221,9 +223,11 @@ class Plugins extends React.Component {
     if (elementIndex === -1) {
       tempSelectedTemplates.push(onclickselectedTemplate);
     } else {
-      tempSelectedTemplates = this.state.selectedTemplates.filter(template => {
-        return template !== onclickselectedTemplate;
-      });
+      tempSelectedTemplates = this.state.selectedTemplates.filter(
+        (template) => {
+          return template !== onclickselectedTemplate;
+        }
+      );
     }
 
     this.setState({ selectedTemplates: tempSelectedTemplates });
@@ -233,20 +237,20 @@ class Plugins extends React.Component {
     this.setState({
       selectedTemplates: [],
       tableSelectedData: {},
-      hasAddTemplateClicked: false
+      hasAddTemplateClicked: false,
     });
   };
 
-  handleTabClic = whichtab => {
+  handleTabClic = (whichtab) => {
     this.setState({
       manageTabActive: false,
       trackTabActive: false,
       triggerTabActive: false,
-      [whichtab]: true
+      [whichtab]: true,
     });
   };
 
-  handleDeleteOne = async rowdata => {
+  handleDeleteOne = async (rowdata) => {
     const selectedRowPluginId = rowdata.id;
     const tempPlugins = this.state.plugins;
 
@@ -254,7 +258,7 @@ class Plugins extends React.Component {
     const deletePluginResult = await deletePlugin({ selectedRowPluginId });
 
     console.log("delete plugin result :", deletePluginResult);
-    resultPlugins = tempPlugins.filter(plugin => {
+    resultPlugins = tempPlugins.filter((plugin) => {
       return plugin.id !== selectedRowPluginId;
     });
     this.setState({ plugins: resultPlugins });
@@ -264,7 +268,7 @@ class Plugins extends React.Component {
     const tempPlugins = this.state.plugins;
     const selectedCheckBoxes = this.state.selected;
     let resultPlugins = [];
-    resultPlugins = tempPlugins.filter(plugin => {
+    resultPlugins = tempPlugins.filter((plugin) => {
       return typeof selectedCheckBoxes[plugin.id] === "undefined";
     });
     const pluginIdsToDelete = Object.values(selectedCheckBoxes);
@@ -275,7 +279,7 @@ class Plugins extends React.Component {
   handleSelectAll = () => {
     let newSelected = {};
     if (this.state.selectAll === 0) {
-      this.state.plugins.forEach(plugin => {
+      this.state.plugins.forEach((plugin) => {
         let pluginid = plugin.id;
 
         newSelected[pluginid] = pluginid;
@@ -283,11 +287,11 @@ class Plugins extends React.Component {
     }
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
+      selectAll: this.state.selectAll === 0 ? 1 : 0,
     });
   };
 
-  handleSelectRow = async id => {
+  handleSelectRow = async (id) => {
     console.log(this.state.selected, id);
     let selectedCheckBoxes = this.state.selected;
     console.log(selectedCheckBoxes[id]);
@@ -309,7 +313,7 @@ class Plugins extends React.Component {
     const pluginform = this.state.pluginFormElements;
     this.setState({ newPluginClicked: false });
     const responseSavePlugin = await savePlugin({
-      pluginform
+      pluginform,
     });
     console.log(" ---->   handleAddPluginSave : ", responseSavePlugin.status);
     if (responseSavePlugin.status === 200) {
@@ -329,7 +333,7 @@ class Plugins extends React.Component {
     //pluginFomElements
   };
 
-  handleEditPlugin = selectedPluginData => {
+  handleEditPlugin = (selectedPluginData) => {
     console.log("handle edit plugin id :", selectedPluginData);
     let editimage_name = "";
     let editimage_repo = "";
@@ -361,12 +365,12 @@ class Plugins extends React.Component {
       enabled: selectedPluginData.original.enabled,
       modality: selectedPluginData.original.modality,
       developer: selectedPluginData.original.developer,
-      documentation: selectedPluginData.original.documentation
+      documentation: selectedPluginData.original.documentation,
     };
     console.log("handle edit pluginFormElements :", editpluginFormElements);
     this.setState({
       editPluginClicked: true,
-      pluginFormElements: editpluginFormElements
+      pluginFormElements: editpluginFormElements,
     });
   };
 
@@ -378,7 +382,7 @@ class Plugins extends React.Component {
     //this.setState({ editPluginClicked: false });
     const pluginform = this.state.pluginFormElements;
     const responseEditPlugin = await editPlugin({
-      pluginform
+      pluginform,
     });
     if (responseEditPlugin.status === 200) {
       console.log("responseEditPlugin", responseEditPlugin);
@@ -396,14 +400,14 @@ class Plugins extends React.Component {
       }
       this.setState({
         plugins: tempPlugins,
-        editPluginClicked: false
+        editPluginClicked: false,
       });
     } else {
       alert("an arror occured after editing plugin");
     }
   };
 
-  handleParametersClicked = parametersData => {
+  handleParametersClicked = (parametersData) => {
     console.log("parameters data on prm click : ", parametersData);
     const tempParametersDefault = parametersData.original.parameters;
     const plugindbid = parametersData.original.id;
@@ -413,10 +417,10 @@ class Plugins extends React.Component {
     this.setState({
       selectedplugindbidfordefparams: plugindbid,
       parametersClicked: true,
-      parametersDefault: tempParametersDefault
+      parametersDefault: tempParametersDefault,
     });
   };
-  handleParameterChange = e => {
+  handleParameterChange = (e) => {
     const parameterElements = { ...this.state.parameterFormElements };
     parameterElements[e.currentTarget.name] = e.currentTarget.value;
 
@@ -424,10 +428,10 @@ class Plugins extends React.Component {
     console.log(e.currentTarget.name, ": value : ", e.currentTarget.value);
     this.setState({ parameterFormElements: parameterElements });
   };
-  handleEParameterCancel = () => {
+  handleParameterCancel = () => {
     this.setState({
       parametersClicked: false,
-      selectedplugindbidfordefparams: -1
+      selectedplugindbidfordefparams: -1,
     });
   };
 
@@ -441,7 +445,7 @@ class Plugins extends React.Component {
     const parameterform = this.state.parameterFormElements;
     this.setState({ newPluginClicked: false });
     const responseSaveParameter = await saveDefaultParameter({
-      parameterform
+      parameterform,
     });
     console.log(
       " ---->   handleDefaultParameterSave : ",
@@ -457,7 +461,7 @@ class Plugins extends React.Component {
       // templateList = templateList.data;
       // this.setState({ plugins, projectList, templateList });
       this.setState({
-        parametersClicked: false
+        parametersClicked: false,
       });
     } else {
       alert("error happened while saving parameter");
@@ -491,7 +495,7 @@ class Plugins extends React.Component {
         }
         this.setState({
           parametersDefault: newparams.data,
-          plugins: tempPlugins
+          plugins: tempPlugins,
           //plugins: tempPluginList.data
         });
         break;
@@ -615,7 +619,7 @@ class Plugins extends React.Component {
     this.handleCancel();
   };
 */
-  handleAddPluginChange = e => {
+  handleAddPluginChange = (e) => {
     const plElements = { ...this.state.pluginFormElements };
     if (e.currentTarget.name != "enabled") {
       plElements[e.currentTarget.name] = e.currentTarget.value;
@@ -630,7 +634,7 @@ class Plugins extends React.Component {
     this.setState({ pluginFormElements: plElements });
   };
   //cavit
-  projectDataToCell = tableData => {
+  projectDataToCell = (tableData) => {
     const { projects } = tableData.row;
     const tempProjects = [];
     let projectArray = [];
@@ -653,7 +657,7 @@ class Plugins extends React.Component {
     );
   };
 
-  templateDataToCell = tableData => {
+  templateDataToCell = (tableData) => {
     const { templates } = tableData.row;
     const tempTemplates = [];
     let templateArray = [];
@@ -776,7 +780,7 @@ class Plugins extends React.Component {
         {this.state.parametersClicked && (
           <ParametersWindow
             data={this.state.parametersDefault}
-            onCancel={this.handleEParameterCancel}
+            onCancel={this.handleParameterCancel}
             onSave={this.handleDefaultParameterSave}
             pluginid={this.state.selectedplugindbidfordefparams}
             notifyParameterParent={this.handleNotifyParentForParemeterSituation}

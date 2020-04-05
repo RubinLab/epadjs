@@ -44,8 +44,17 @@ export function saveDefaultParameter(parametersform) {
     parametersform
   );
 }
+export function saveProjectParameter(parametersform) {
+  return http.post(
+    apiUrl + "/plugins/parameters/project/addnew",
+    parametersform
+  );
+}
 export function deleteOneDefaultParameter(parameterdbid) {
   return http.delete(apiUrl + "/plugins/parameters/default/" + parameterdbid);
+}
+export function deleteOneProjectParameter(parameterdbid) {
+  return http.delete(apiUrl + "/plugins/parameters/project/" + parameterdbid);
 }
 export function editDefaultparameter(parametersform) {
   return http.post(
@@ -53,8 +62,20 @@ export function editDefaultparameter(parametersform) {
     parametersform
   );
 }
+export function editProjectParameter(parametersform) {
+  return http.post(
+    apiUrl + "/plugins/parameters/project/edit/",
+    parametersform
+  );
+}
 export function getDefaultParameter(plugindbid) {
   return http.get(apiUrl + "/plugins/parameters/default/" + plugindbid);
+}
+
+export function getProjectParameter(plugindbid, projectdbid) {
+  return http.get(
+    apiUrl + "/plugins/parameters/project/" + plugindbid + "/" + projectdbid
+  );
 }
 
 export function getDockerImages() {

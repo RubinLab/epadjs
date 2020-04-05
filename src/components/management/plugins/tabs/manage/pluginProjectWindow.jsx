@@ -3,17 +3,35 @@ import PropTypes from "prop-types";
 import ReactTable from "react-table";
 import { Modal } from "react-bootstrap";
 import { getProjects } from "../../../../../services/projectServices";
+import ParametersForProjectWindow from "./parametersForProjectWindow";
 class PluginProjectWindow extends React.Component {
   constructor(props) {
     super(props);
     //this.state = { allprojects: props.allProjects };
     //console.log("modal log projects", props.allProjects);
   }
-
+  state = {
+    showparamswindow: false,
+    pluginid: null,
+    projectid: null,
+  };
+  componentWillMount = () => {};
+  handleShowParamatersWindow = (projectid, seldata) => {
+    console.log(" project id :", projectid);
+    console.log(" pluginid", seldata.original.id);
+    this.setState({
+      showparamswindow: true,
+      pluginid: seldata.original.id,
+      projectid: projectid,
+    });
+  };
+  handleParameterCancel = () => {
+    this.setState({ showparamswindow: false });
+  };
   populateRows = () => {
     let rows = [];
 
-    this.props.allProjects.forEach(project => {
+    this.props.allProjects.forEach((project) => {
       rows.push(
         <tr key={project.id} className="edit-userRole__table--row">
           <td>
@@ -30,6 +48,18 @@ class PluginProjectWindow extends React.Component {
             />
           </td>
           <td>{project.name}</td>
+          <td>
+            <div
+              onClick={() => {
+                this.handleShowParamatersWindow(
+                  project.id,
+                  this.props.tableSelectedData
+                );
+              }}
+            >
+              &nbsp; params
+            </div>
+          </td>
         </tr>
       );
     });
@@ -38,41 +68,51 @@ class PluginProjectWindow extends React.Component {
 
   render() {
     return (
-      <Modal.Dialog dialogClassName="create-user__modal">
-        <Modal.Header>
-          <Modal.Title>Projects</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="create-user__modal --body">
-          <table>
-            <thead>
-              <tr>
-                <th className="user-table__header--user">add/remove</th>
-                <th className="user-table__header">project</th>
-              </tr>
-            </thead>
-            <tbody>{this.populateRows()}</tbody>
-          </table>
-        </Modal.Body>
+      <div>
+        <Modal.Dialog dialogClassName="create-user__modal">
+          <Modal.Header>
+            <Modal.Title>Projects</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="create-user__modal --body">
+            <table>
+              <thead>
+                <tr>
+                  <th className="user-table__header--user">add/remove</th>
+                  <th className="user-table__header">project</th>
+                </tr>
+              </thead>
+              <tbody>{this.populateRows()}</tbody>
+            </table>
+          </Modal.Body>
 
-        <Modal.Footer className="create-user__modal--footer">
-          <div className="create-user__modal--buttons">
-            <button
-              variant="primary"
-              className="btn btn-sm btn-outline-light"
-              onClick={this.props.onSave}
-            >
-              Submit
-            </button>
-            <button
-              variant="secondary"
-              className="btn btn-sm btn-outline-light"
-              onClick={this.props.onCancel}
-            >
-              Cancel
-            </button>
-          </div>
-        </Modal.Footer>
-      </Modal.Dialog>
+          <Modal.Footer className="create-user__modal--footer">
+            <div className="create-user__modal--buttons">
+              <button
+                variant="primary"
+                className="btn btn-sm btn-outline-light"
+                onClick={this.props.onSave}
+              >
+                Submit
+              </button>
+              <button
+                variant="secondary"
+                className="btn btn-sm btn-outline-light"
+                onClick={this.props.onCancel}
+              >
+                Cancel
+              </button>
+            </div>
+          </Modal.Footer>
+        </Modal.Dialog>
+        {this.state.showparamswindow && (
+          <ParametersForProjectWindow
+            onCancel={this.handleParameterCancel}
+            onSave={this.handleDefaultParameterSave}
+            plugindbid={this.state.pluginid}
+            projectdbid={this.state.projectid}
+          />
+        )}
+      </div>
     );
   }
 }
@@ -85,5 +125,5 @@ PropTypes.projectTable = {
   onSave: PropTypes.func,
   allprojects: PropTypes.Array,
   tableSelectedData: PropTypes.Array,
-  selectedProjectsAsMap: PropTypes.Array
+  selectedProjectsAsMap: PropTypes.Array,
 };
