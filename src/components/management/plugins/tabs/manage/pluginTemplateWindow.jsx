@@ -1,23 +1,35 @@
 import React from "react";
 import PropTypes from "prop-types";
-import ReactTable from "react-table";
 import { Modal } from "react-bootstrap";
 import { getTemplatesDataFromDb } from "../../../../../services/templateServices";
+import ParametersForTemplateWindow from "./parametersForTemplateWindow";
 class PluginTemplateWindow extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { allTemplates: props.allTemplates };
-    //console.log("modal log templates", props.allTemplates);
   }
 
   state = {
-    allTemplates: []
+    allTemplates: [],
+    showparamswindow: false,
+    pluginid: null,
+    templateid: null,
   };
-
+  handleShowParamatersWindow = (templateid, seldata) => {
+    console.log(" project id :", templateid);
+    console.log(" pluginid", seldata.original.id);
+    this.setState({
+      showparamswindow: true,
+      pluginid: seldata.original.id,
+      templateid: templateid,
+    });
+  };
+  handleParameterCancel = () => {
+    this.setState({ showparamswindow: false });
+  };
   populateRows = () => {
     let rows = [];
 
-    this.props.allTemplates.forEach(template => {
+    this.props.allTemplates.forEach((template) => {
       //console.log("template modal ---->>>>>> ", template);
       rows.push(
         <tr key={template.id} className="edit-userRole__table--row">
@@ -36,6 +48,18 @@ class PluginTemplateWindow extends React.Component {
             />
           </td>
           <td>{template.templateName}</td>
+          <td>
+            <div
+              onClick={() => {
+                this.handleShowParamatersWindow(
+                  template.id,
+                  this.props.tableSelectedData
+                );
+              }}
+            >
+              &nbsp; params
+            </div>
+          </td>
         </tr>
       );
     });
@@ -44,41 +68,51 @@ class PluginTemplateWindow extends React.Component {
 
   render() {
     return (
-      <Modal.Dialog dialogClassName="create-user__modal">
-        <Modal.Header>
-          <Modal.Title>Templates</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="create-user__modal --body">
-          <table>
-            <thead>
-              <tr>
-                <th className="user-table__header--user">add/remove</th>
-                <th className="user-table__header">template</th>
-              </tr>
-            </thead>
-            <tbody>{this.populateRows()}</tbody>
-          </table>
-        </Modal.Body>
+      <div>
+        <Modal.Dialog dialogClassName="create-user__modal">
+          <Modal.Header>
+            <Modal.Title>Templates</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="create-user__modal --body">
+            <table>
+              <thead>
+                <tr>
+                  <th className="user-table__header--user">add/remove</th>
+                  <th className="user-table__header">template</th>
+                </tr>
+              </thead>
+              <tbody>{this.populateRows()}</tbody>
+            </table>
+          </Modal.Body>
 
-        <Modal.Footer className="create-user__modal--footer">
-          <div className="create-user__modal--buttons">
-            <button
-              variant="primary"
-              className="btn btn-sm btn-outline-light"
-              onClick={this.props.onSave}
-            >
-              Submit
-            </button>
-            <button
-              variant="secondary"
-              className="btn btn-sm btn-outline-light"
-              onClick={this.props.onCancel}
-            >
-              Cancel
-            </button>
-          </div>
-        </Modal.Footer>
-      </Modal.Dialog>
+          <Modal.Footer className="create-user__modal--footer">
+            <div className="create-user__modal--buttons">
+              <button
+                variant="primary"
+                className="btn btn-sm btn-outline-light"
+                onClick={this.props.onSave}
+              >
+                Submit
+              </button>
+              <button
+                variant="secondary"
+                className="btn btn-sm btn-outline-light"
+                onClick={this.props.onCancel}
+              >
+                Cancel
+              </button>
+            </div>
+          </Modal.Footer>
+        </Modal.Dialog>
+        {this.state.showparamswindow && (
+          <ParametersForTemplateWindow
+            onCancel={this.handleParameterCancel}
+            onSave={this.handleDefaultParameterSave}
+            plugindbid={this.state.pluginid}
+            templatedbid={this.state.templateid}
+          />
+        )}
+      </div>
     );
   }
 }
@@ -90,5 +124,5 @@ PropTypes.projectTable = {
   onSave: PropTypes.func,
   allTemplates: PropTypes.Array,
   tableSelectedData: PropTypes.Array,
-  selectedTemplateAsMap: PropTypes.Array
+  selectedTemplateAsMap: PropTypes.Array,
 };

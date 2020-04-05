@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import ReactTable from "react-table";
 import { Modal } from "react-bootstrap";
 import { getProjects } from "../../../../../services/projectServices";
 import ParametersForProjectWindow from "./parametersForProjectWindow";
@@ -15,7 +14,7 @@ class PluginProjectWindow extends React.Component {
     pluginid: null,
     projectid: null,
   };
-  componentWillMount = () => {};
+
   handleShowParamatersWindow = (projectid, seldata) => {
     console.log(" project id :", projectid);
     console.log(" pluginid", seldata.original.id);

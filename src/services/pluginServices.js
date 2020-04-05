@@ -50,11 +50,20 @@ export function saveProjectParameter(parametersform) {
     parametersform
   );
 }
+export function saveTemplateParameter(parametersform) {
+  return http.post(
+    apiUrl + "/plugins/parameters/template/addnew",
+    parametersform
+  );
+}
 export function deleteOneDefaultParameter(parameterdbid) {
   return http.delete(apiUrl + "/plugins/parameters/default/" + parameterdbid);
 }
 export function deleteOneProjectParameter(parameterdbid) {
   return http.delete(apiUrl + "/plugins/parameters/project/" + parameterdbid);
+}
+export function deleteOneTemplateParameter(parameterdbid) {
+  return http.delete(apiUrl + "/plugins/parameters/template/" + parameterdbid);
 }
 export function editDefaultparameter(parametersform) {
   return http.post(
@@ -68,6 +77,12 @@ export function editProjectParameter(parametersform) {
     parametersform
   );
 }
+export function editTemplateParameter(parametersform) {
+  return http.post(
+    apiUrl + "/plugins/parameters/template/edit/",
+    parametersform
+  );
+}
 export function getDefaultParameter(plugindbid) {
   return http.get(apiUrl + "/plugins/parameters/default/" + plugindbid);
 }
@@ -75,6 +90,11 @@ export function getDefaultParameter(plugindbid) {
 export function getProjectParameter(plugindbid, projectdbid) {
   return http.get(
     apiUrl + "/plugins/parameters/project/" + plugindbid + "/" + projectdbid
+  );
+}
+export function getTemplateParameter(plugindbid, templatedbid) {
+  return http.get(
+    apiUrl + "/plugins/parameters/template/" + plugindbid + "/" + templatedbid
   );
 }
 
