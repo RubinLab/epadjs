@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
-import { getUser, createUser, getUserInfo } from "./services/userServices";
+import { getUser, getUserInfo } from "./services/userServices";
 import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
 import SearchView from "./components/searchView/searchView";
@@ -244,7 +244,6 @@ class App extends Component {
   };
 
   async componentDidMount() {
-
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),
       fetch(`${process.env.PUBLIC_URL}/keycloak.json`),
@@ -355,19 +354,11 @@ class App extends Component {
           let userData;
           try {
             userData = await getUser(username);
-            this.setState({ admin: userData.data.admin });
+            userData = userData.data;
+            this.setState({ admin: userData.admin });
           } catch (err) {
-            // console.log(err);
-            createUser(username, given_name, family_name, email)
-              .then(async () => {
-                {
-                  console.log(`User ${username} created!`);
-                }
-              })
-              .catch(error => console.log(error));
             console.log(err);
           }
-
           this.eventSource = new EventSourcePolyfill(
             `${apiUrl}/notifications`,
             result.keycloak.token
