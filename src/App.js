@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
-import { getUser, createUser, getUserInfo } from "./services/userServices";
+import { getUser, getUserInfo } from "./services/userServices";
 import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
 import SearchView from "./components/searchView/searchView";
@@ -163,36 +163,6 @@ class App extends Component {
     this.setState({ treeExpand });
   };
 
-  // getNumOfPatientsLoaded = numOfStudies => {
-  //   this.setState(state => ({
-  //     numOfPatientsLoaded: state.numOfPatientsLoaded + 1,
-  //     numOfPresentStudies: state.numOfPresentStudies + numOfStudies
-  //   }));
-  // };
-
-  // getNumOfStudiesLoaded = numOfSeries => {
-  //   this.setState(state => ({
-  //     numOfStudiesLoaded: state.numOfStudiesLoaded + 1,
-  //     numOfPresentSeries: state.numOfPresentSeries + numOfSeries
-  //   }));
-  // };
-
-  // getNumOfSeriesLoaded = () => {
-  //   this.setState(state => ({
-  //     numOfSeriesLoaded: state.numOfSeriesLoaded + 1
-  //   }));
-  // };
-
-  // updateExpandedLevelNums = (level, numOfChild, numOfParent) => {
-  //   if (level === "subject") {
-  //     this.getNumOfPatientsLoaded(numOfChild, numOfParent);
-  //   } else if (level === "study") {
-  //     this.getNumOfStudiesLoaded(numOfChild, numOfParent);
-  //   } else if (level === "series") {
-  //     this.getNumOfSeriesLoaded(numOfChild, numOfParent);
-  //   }
-  // };
-
   getExpandLevel = expandLevel => {
     this.setState({ expandLevel });
   };
@@ -272,6 +242,7 @@ class App extends Component {
   getProjectMap = projectMap => {
     this.setState({ projectMap });
   };
+
   async componentDidMount() {
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),
@@ -290,7 +261,6 @@ class App extends Component {
         sessionStorage.setItem("wadoUrl", wadoUrl);
         sessionStorage.setItem("authMode", authMode);
         this.setState({ mode, apiUrl, wadoUrl, authMode });
-
         const keycloakData = await results[1].json();
         const auth =
           process.env.REACT_APP_AUTH_URL || keycloakData["auth-server-url"];
@@ -304,8 +274,10 @@ class App extends Component {
           process.env.REACT_APP_AUTH_RESOURCE || keycloakData.resource;
         sessionStorage.setItem("auth", auth);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
-
         this.completeAutorization(apiUrl);
+        if (mode === "lite") {
+          this.setState({ projectMap: { lite: "lite" } });
+        }
       })
       .catch(err => {
         console.log(err);
@@ -328,6 +300,7 @@ class App extends Component {
       const keycloak = Keycloak(
         JSON.parse(sessionStorage.getItem("keycloakJson"))
       );
+      sessionStorage.setItem("keycloakObject", keycloak);
       getAuthUser = new Promise((resolve, reject) => {
         keycloak
           .init({ onLoad: "login-required" })
@@ -381,19 +354,11 @@ class App extends Component {
           let userData;
           try {
             userData = await getUser(username);
-            this.setState({ admin: userData.data.admin });
+            userData = userData.data;
+            this.setState({ admin: userData.admin });
           } catch (err) {
-            // console.log(err);
-            createUser(username, given_name, family_name, email)
-              .then(async () => {
-                {
-                  console.log(`User ${username} created!`);
-                }
-              })
-              .catch(error => console.log(error));
             console.log(err);
           }
-
           this.eventSource = new EventSourcePolyfill(
             `${apiUrl}/notifications`,
             result.keycloak.token

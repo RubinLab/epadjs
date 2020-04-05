@@ -44,7 +44,7 @@ import SubjectCreationModal from "./subjectCreationModal.jsx";
 import StudyCreationModal from "./studyCreationModal.jsx";
 import SeriesCreationModal from "./seriesCreationModal.jsx";
 import Worklists from "./addWorklist";
-import AnnotationCreationModal from "./annotationCreationModal.jsx";
+import WarningModal from "../common/warningModal";
 const mode = sessionStorage.getItem("mode");
 
 class SearchView extends Component {
@@ -65,11 +65,7 @@ class SearchView extends Component {
       missingAnns: [],
       expanded: {},
       showNew: false,
-      // numOfPresentStudies: 0,
-      // numOfPresentSeries: 0,
-      // numOfPatientsLoaded: 0,
-      // numOfStudiesLoaded: 0,
-      // numOfSeriesLoaded: 0,
+      newUser: false,
       expandLevel: 0,
     };
   }
@@ -90,22 +86,11 @@ class SearchView extends Component {
         // this.props.getTreeData("subject", subjects);
       }
       const { expandLevel } = this.props;
-      // const {
-      //   numOfPresentStudies,
-      //   numOfPresentSeries,
-      //   numOfPatientsLoaded,
-      //   numOfStudiesLoaded,
-      //   numOfSeriesLoaded
-      // } = expandLoading;
+
       this.setState({
         numOfsubjects: subjects.length,
         subjects,
         expandLevel,
-        // numOfPresentStudies,
-        // numOfPresentSeries,
-        // numOfPatientsLoaded,
-        // numOfStudiesLoaded,
-        // numOfSeriesLoaded
       });
     } catch (err) {}
   };
@@ -123,24 +108,6 @@ class SearchView extends Component {
     if ((samePid || mode === "lite") && prevProps.lastEventId !== lastEventId) {
       this.setState(state => ({ update: state.update + 1 }));
     }
-    // const {
-    //   numOfPresentStudies,
-    //   numOfPresentSeries,
-    //   numOfPatientsLoaded,
-    //   numOfStudiesLoaded,
-    //   numOfSeriesLoaded
-    // } = expandLoading;
-
-    // const studiesUpdated =
-    //   numOfPresentStudies !== prevProps.expandLoading.numOfPresentStudies;
-    // const seriesUpdated =
-    //   numOfPresentSeries !== prevProps.expandLoading.numOfPresentSeries;
-    // const patientsLoaded =
-    //   numOfPatientsLoaded !== prevProps.expandLoading.numOfPatientsLoaded;
-    // const studiesLoaded =
-    //   numOfStudiesLoaded !== prevProps.expandLoading.numOfStudiesLoaded;
-    // const seriesLoaded =
-    //   numOfSeriesLoaded !== prevProps.expandLoading.numOfSeriesLoaded;
     if (expandLevel !== prevProps.expandLevel) {
       this.setState({
         expandLevel,
@@ -149,17 +116,19 @@ class SearchView extends Component {
         this.setState({ expanded: {} });
       }
     }
-    // if (studiesUpdated) this.setState({ numOfPresentStudies });
-    // if (seriesUpdated) this.setState({ numOfPresentSeries });
-    // if (patientsLoaded) this.setState({ numOfPatientsLoaded });
-    // if (studiesLoaded) this.setState({ numOfStudiesLoaded });
-    // if (seriesLoaded) this.setState({ numOfSeriesLoaded });
   };
 
   getData = async () => {
     let data = [];
-    if (this.props.match.params.pid || this.props.pid || mode === "lite") {
-      data = await getSubjects(this.props.match.params.pid);
+    try {
+      if (this.props.match.params.pid || this.props.pid || mode === "lite") {
+        data = await getSubjects(this.props.match.params.pid);
+      }
+    } catch (err) {
+      const { status, statusText } = err.response;
+      if (status === 403 && statusText.toLowerCase() === "forbidden") {
+        this.setState({ newUser: true });
+      }
     }
     return data;
   };
@@ -734,6 +703,10 @@ class SearchView extends Component {
     this.setState({ showAnnotationModal: false });
   };
 
+  handleOKNewUser = () => {
+    this.setState({ newUser: false });
+  };
+
   render = () => {
     let status;
     if (this.state.uploading) {
@@ -755,27 +728,6 @@ class SearchView extends Component {
       (Object.entries(this.props.selectedSeries).length > 0 &&
         this.props.selectedSeries.constructor === Object);
 
-    // const {
-    //   numOfsubjects,
-    //   numOfPresentStudies,
-    //   numOfPatientsLoaded,
-    //   numOfStudiesLoaded,
-    //   numOfPresentSeries,
-    //   numOfSeriesLoaded,
-    //   expandLevel
-    // } = this.state;
-
-    // const patientExpandComplete = numOfsubjects === numOfPatientsLoaded;
-    // const studyExpandComplete = numOfPresentStudies === numOfStudiesLoaded;
-    // const seriesExpandComplete = numOfPresentSeries === numOfSeriesLoaded;
-    // let expanding;
-    // if (expandLevel === 1) {
-    //   expanding = !patientExpandComplete;
-    // } else if (expandLevel === 2) {
-    //   expanding = !studyExpandComplete;
-    // } else if (expandLevel === 3) {
-    //   expanding = !seriesExpandComplete;
-    // }
     const pid = this.props.match.params.pid || this.props.pid || "lite";
     return (
       <>
@@ -855,6 +807,13 @@ class SearchView extends Component {
           <Worklists
             onClose={this.handleWorklistClick}
             updateProgress={this.props.updateProgress}
+          />
+        )}
+        {this.state.newUser && (
+          <WarningModal
+            onOK={this.handleOKNewUser}
+            title={"No Permission"}
+            message={"You don't have permission yet, please contact your admin"}
           />
         )}
         {this.state.newSelected && this.handleNewSelected()}
