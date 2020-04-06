@@ -188,7 +188,7 @@ class SearchView extends Component {
     Promise.all(promiseArr)
       .then(() => {
         //keep the current state
-        for (let serie in this.props.openSeries) {
+        for (let serie of this.props.openSeries) {
           let type = serie.aimID ? "annotation" : "serie";
           this.props.dispatch(
             updatePatient(

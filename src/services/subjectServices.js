@@ -22,7 +22,7 @@ export function downloadSubjects(subject) {
 
 export function deleteSubject(subject) {
   if (mode === "lite") {
-    const url = apiUrl + "/projects/lite/subjects/" + subject.subjectID;
+    const url = apiUrl + "/projects/lite/subjects/" + subject.patientID;
     return http.delete(url);
   }
 }
