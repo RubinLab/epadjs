@@ -8,11 +8,11 @@ const warningModal = props => {
   return (
     <Modal.Dialog dialogClassName="alert-maxView">
       <Modal.Body className="-maxView-container">
-        <div className="-maxView__header--icon">
+        {/* <div className="-maxView__header--icon">
           <FaExclamationTriangle />
-        </div>
+        </div> */}
         <div className="-maxView__header">
-          <div className="-maxView__header__text">{props.title}</div>
+          <div className="-maxView__header__text" style={{color: 'orangered'}} >{props.title}</div>
           <h4 className="-maxView__message--exp">{props.message}</h4>
         </div>
       </Modal.Body>

@@ -47,6 +47,17 @@ import Worklists from "./addWorklist";
 import WarningModal from "../common/warningModal";
 const mode = sessionStorage.getItem("mode");
 
+const messages = {
+  newUser: {
+    title: "No Permission",
+    message: `You don't have permission yet, please contact your admin`,
+  },
+  itemOpen: {
+    title: "Item is open in display",
+    message: `couldn't be deleted. Please close series before deleting`,
+  },
+};
+
 class SearchView extends Component {
   constructor(props) {
     super(props);
@@ -66,6 +77,8 @@ class SearchView extends Component {
       expanded: {},
       showNew: false,
       newUser: false,
+      openItemsDeleted: false,
+      noOfNotDeleted: 0,
       expandLevel: 0,
     };
   }
@@ -215,12 +228,17 @@ class SearchView extends Component {
     }
   };
 
-  deleteSelectionWrapper = async (arr, func) => {
+  deleteSelectionWrapper = async (arr, func, level) => {
     this.handleClickDeleteIcon();
     const promiseArr = [];
     this.setState({ deleting: true });
+    const openItems = [];
     arr.forEach(item => {
-      promiseArr.push(func(item));
+      if (this.checkIfSerieOpen(item[level], level).isOpen) {
+        openItems.push([item]);
+      } else {
+        promiseArr.push(func(item));
+      }
     });
     Promise.all(promiseArr)
       .then(async () => {
@@ -232,6 +250,12 @@ class SearchView extends Component {
         }
         this.props.dispatch(clearSelection());
         this.props.updateProgress();
+        if (openItems.length) {
+          this.setState({
+            openItemsDeleted: true,
+            noOfNotDeleted: openItems.length,
+          });
+        }
       })
       .catch(err => {
         console.log(err);
@@ -246,13 +270,17 @@ class SearchView extends Component {
     const selectedAnnotations = Object.values(this.props.selectedAnnotations);
 
     if (selectedPatients.length > 0) {
-      this.deleteSelectionWrapper(selectedPatients, deleteSubject);
+      this.deleteSelectionWrapper(selectedPatients, deleteSubject, "patientID");
     } else if (selectedStudies.length > 0) {
-      this.deleteSelectionWrapper(selectedStudies, deleteStudy);
+      this.deleteSelectionWrapper(selectedStudies, deleteStudy, "studyUID");
     } else if (selectedSeries.length > 0) {
-      this.deleteSelectionWrapper(selectedSeries, deleteSeries);
+      this.deleteSelectionWrapper(selectedSeries, deleteSeries, "seriesUID");
     } else if (selectedAnnotations.length > 0) {
-      this.deleteSelectionWrapper(selectedAnnotations, deleteAnnotation);
+      this.deleteSelectionWrapper(
+        selectedAnnotations,
+        deleteAnnotation,
+        "seriesUID"
+      );
     }
   };
 
@@ -284,11 +312,11 @@ class SearchView extends Component {
     this.setState({ error, loading: false });
   };
 
-  checkIfSerieOpen = selectedSerie => {
+  checkIfSerieOpen = (selectedUID, UIDlevel) => {
     let isOpen = false;
     let index;
-    this.props.openSeries.forEach((serie, i) => {
-      if (serie.seriesUID === selectedSerie) {
+    this.props.openSeries.forEach((port, i) => {
+      if (port[UIDlevel] === selectedUID) {
         isOpen = true;
         index = i;
       }
@@ -375,7 +403,7 @@ class SearchView extends Component {
     } else if (selectedSeries.length > 0) {
       //check if enough room to display selection
       for (let serie of selectedSeries) {
-        if (!this.checkIfSerieOpen(serie.seriesUID).isOpen) {
+        if (!this.checkIfSerieOpen(serie.seriesUID, "seriesUID").isOpen) {
           notOpenSeries.push(serie);
         }
       }
@@ -388,7 +416,10 @@ class SearchView extends Component {
       } else {
         //if all series already open update active port
         if (notOpenSeries.length === 0) {
-          let index = this.checkIfSerieOpen(selectedSeries[0].seriesUID).index;
+          let index = this.checkIfSerieOpen(
+            selectedSeries[0].seriesUID,
+            "seriesUID"
+          ).index;
           this.props.dispatch(changeActivePort(index));
           this.props.history.push("/display");
           this.props.dispatch(clearSelection());
@@ -430,7 +461,7 @@ class SearchView extends Component {
       groupedObj = this.groupUnderStudy(serieList);
       //check if enough room to display selection
       for (let serie of serieList) {
-        if (!this.checkIfSerieOpen(serie.seriesUID).isOpen) {
+        if (!this.checkIfSerieOpen(serie.seriesUID, "seriesUID").isOpen) {
           notOpenSeries.push(serie);
         }
       }
@@ -442,7 +473,7 @@ class SearchView extends Component {
       } else {
         if (notOpenSeries.length === 0) {
           const serID = serieList[0].seriesUID;
-          let index = this.checkIfSerieOpen(serID).index;
+          let index = this.checkIfSerieOpen(serID, "seriesUID").index;
           this.props.dispatch(changeActivePort(index));
           this.props.dispatch(jumpToAim(serID, serieList[0].aimID, index));
         } else {
@@ -632,7 +663,12 @@ class SearchView extends Component {
   };
 
   handleOK = () => {
-    this.setState({ missingAnns: [] });
+    this.setState({
+      missingAnns: [],
+      newUser: false,
+      openItemsDeleted: false,
+      noOfNotDeleted: 0,
+    });
   };
 
   handleNewClick = () => {
@@ -703,10 +739,6 @@ class SearchView extends Component {
     this.setState({ showAnnotationModal: false });
   };
 
-  handleOKNewUser = () => {
-    this.setState({ newUser: false });
-  };
-
   render = () => {
     let status;
     if (this.state.uploading) {
@@ -729,6 +761,19 @@ class SearchView extends Component {
         this.props.selectedSeries.constructor === Object);
 
     const pid = this.props.match.params.pid || this.props.pid || "lite";
+    const {
+      isSerieSelectionOpen,
+      showUploadFileModal,
+      showDeleteAlert,
+      missingAnns,
+      showNew,
+      showWorklists,
+      newUser,
+      openItemsDeleted,
+      newSelected,
+      noOfNotDeleted,
+    } = this.state;
+    const itemStr = noOfNotDeleted > 1 ? "items" : "item";
     return (
       <>
         <Toolbar
@@ -746,7 +791,7 @@ class SearchView extends Component {
           project={this.props.match.params.pid}
           // expanding={expanding}
         />
-        {this.state.isSerieSelectionOpen && !this.props.loading && (
+        {isSerieSelectionOpen && !this.props.loading && (
           <ProjectModal
             seriesPassed={this.state.seriesList}
             onCancel={this.closeSelectionModal}
@@ -777,46 +822,53 @@ class SearchView extends Component {
           />
         )}
 
-        {this.state.showUploadFileModal && (
+        {showUploadFileModal && (
           <UploadModal
             onCancel={this.handleFileUpload}
             onSubmit={this.updateUploadStatus}
           />
         )}
-        {this.state.showDeleteAlert && (
+        {showDeleteAlert && (
           <DeleteAlert
             onCancel={this.handleClickDeleteIcon}
             onDelete={this.deleteSelection}
           />
         )}
-        {this.state.missingAnns.length > 0 && (
+        {missingAnns.length > 0 && (
           <DownloadWarning
             details={this.state.missingAnns}
             onOK={this.handleOK}
           />
         )}
 
-        {this.state.showNew && (
+        {showNew && (
           <NewMenu
             onSelect={this.handleSelectNewOption}
             onClose={this.handleNewClick}
           />
         )}
 
-        {this.state.showWorklists && (
+        {showWorklists && (
           <Worklists
             onClose={this.handleWorklistClick}
             updateProgress={this.props.updateProgress}
           />
         )}
-        {this.state.newUser && (
+        {newUser && (
           <WarningModal
-            onOK={this.handleOKNewUser}
-            title={"No Permission"}
-            message={"You don't have permission yet, please contact your admin"}
+            onOK={this.handleOK}
+            title={messages.newUser.title}
+            message={messages.newUser.message}
           />
         )}
-        {this.state.newSelected && this.handleNewSelected()}
+        {openItemsDeleted && (
+          <WarningModal
+            onOK={this.handleOK}
+            title={messages.itemOpen.title}
+            message={`${noOfNotDeleted} ${itemStr} ${messages.itemOpen.message}`}
+          />
+        )}
+        {newSelected && this.handleNewSelected()}
       </>
     );
   };
