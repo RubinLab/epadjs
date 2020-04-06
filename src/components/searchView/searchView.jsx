@@ -803,7 +803,7 @@ class SearchView extends Component {
           expandLevel={this.props.expandLevel}
           expanded={this.state.expanded}
           update={this.state.update}
-          handleCloseAll={this.handleCloseAll}
+          handleCloseAll={this.props.handleCloseAll}
           // updateExpandedLevelNums={this.props.updateExpandedLevelNums}
           progressUpdated={this.props.progressUpdated}
           getTreeExpandSingle={this.props.getTreeExpandSingle}

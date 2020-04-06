@@ -177,6 +177,7 @@ class Subjects extends Component {
         id: "searchView-checkbox",
         accessor: "",
         resizable: false,
+        sortable: false,
         width: this.widthUnit,
         Cell: ({ original }) => {
           return (
@@ -196,6 +197,7 @@ class Subjects extends Component {
         width: this.widthUnit * 13,
         id: "searchView-desc",
         resizable: true,
+        sortable: true,
         accessor: "subjectName",
         Cell: ({ original }) => {
           const desc = this.cleanCarets(original.subjectName);
