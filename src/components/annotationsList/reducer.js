@@ -326,9 +326,9 @@ const asyncReducer = (state = initialState, action) => {
         ...state.selectedPatients
       };
 
-      patientsNew[action.patient.subjectID]
-        ? delete patientsNew[action.patient.subjectID]
-        : (patientsNew[action.patient.subjectID] = action.patient);
+      patientsNew[action.patient.patientID]
+        ? delete patientsNew[action.patient.patientID]
+        : (patientsNew[action.patient.patientID] = action.patient);
 
       return { ...state, selectedPatients: patientsNew };
 

@@ -637,7 +637,7 @@ class App extends Component {
                       // expandLoading={expandLoading}
                       // updateExpandedLevelNums={this.updateExpandedLevelNums}
                       onShrink={this.handleShrink}
-                      onCloseAll={this.handleCloseAll}
+                      handleCloseAll={this.handleCloseAll}
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
                       pid={this.state.pid}
@@ -659,7 +659,7 @@ class App extends Component {
                       // expandLoading={expandLoading}
                       // updateExpandedLevelNums={this.updateExpandedLevelNums}
                       onShrink={this.handleShrink}
-                      onCloseAll={this.handleCloseAll}
+                      handleCloseAll={this.handleCloseAll}
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
                       pid={this.state.pid}
@@ -699,7 +699,7 @@ class App extends Component {
                       // expandLoading={expandLoading}
                       // updateExpandedLevelNums={this.updateExpandedLevelNums}
                       onShrink={this.handleShrink}
-                      onCloseAll={this.handleCloseAll}
+                      handleCloseAll={this.handleCloseAll}
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
                       pid={this.state.pid}
@@ -745,7 +745,7 @@ class App extends Component {
                     // expandLoading={expandLoading}
                     // updateExpandedLevelNums={this.updateExpandedLevelNums}
                     onShrink={this.handleShrink}
-                    onCloseAll={this.handleCloseAll}
+                    handleCloseAll={this.handleCloseAll}
                     treeData={this.state.treeData}
                     getTreeData={this.getTreeData}
                   />
