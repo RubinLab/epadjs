@@ -53,11 +53,6 @@ class App extends Component {
       expandLevel: 0,
       maxLevel: 0,
       refTree: {},
-      // numOfPresentStudies: 0,
-      // numOfPresentSeries: 0,
-      // numOfPatientsLoaded: 0,
-      // numOfStudiesLoaded: 0,
-      // numOfSeriesLoaded: 0,
       treeData: {},
       pid: null,
     };
@@ -171,24 +166,6 @@ class App extends Component {
     const { expandLevel } = this.state;
     if (expandLevel > 0) {
       await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
-      // if (expandLevel === 0) {
-      //   this.setState({
-      //     numOfPresentStudies: 0,
-      //     numOfPresentSeries: 0,
-      //     numOfPatientsLoaded: 0,
-      //     numOfStudiesLoaded: 0,
-      //     numOfSeriesLoaded: 0
-      //   });
-      // }
-      // if (expandLevel === 1) {
-      //   this.setState({ numOfPresentStudies: 0, numOfPatientsLoaded: 0 });
-      // }
-      // if (expandLevel === 2) {
-      //   this.setState({ numOfPresentSeries: 0, numOfStudiesLoaded: 0 });
-      // }
-      // if (expandLevel === 3) {
-      //   this.setState({ numOfSeriesLoaded: 0 });
-      // }
     }
   };
 
@@ -453,81 +430,82 @@ class App extends Component {
   handleCloseAll = () => {
     this.setState({
       expandLevel: 0,
-      // numOfPresentStudies: 0,
-      // numOfPresentSeries: 0,
-      // numOfPatientsLoaded: 0,
-      // numOfStudiesLoaded: 0,
-      // numOfSeriesLoaded: 0
     });
   };
 
   getTreeData = (projectID, level, data) => {
-    const treeData = { ...this.state.treeData };
-    const patientIDs = [];
-    if (level === "subject") {
-      if (!treeData[projectID]) treeData[projectID] = {};
-      data.forEach(el => {
-        if (!treeData[projectID][el.subjectID])
-          treeData[projectID][el.subjectID] = { data: el, studies: {} };
-        patientIDs.push(el.subjectID);
-      });
-      if (data.length < Object.keys(treeData[projectID]).length) {
-        for (let patient in treeData[projectID]) {
-          if (!patientIDs.includes(patient)) {
-            delete treeData[patient];
+    try {
+      const treeData = { ...this.state.treeData };
+      const patientIDs = [];
+      if (level === "subject") {
+        if (!treeData[projectID]) treeData[projectID] = {};
+        data.forEach(el => {
+          if (!treeData[projectID][el.subjectID])
+            treeData[projectID][el.subjectID] = { data: el, studies: {} };
+          patientIDs.push(el.subjectID);
+        });
+        if (data.length < Object.keys(treeData[projectID]).length) {
+          for (let patient in treeData[projectID]) {
+            if (!patientIDs.includes(patient)) {
+              delete treeData[patient];
+            }
+          }
+        }
+      } else if (level === "studies") {
+        const studyUIDs = [];
+        const patientID = data[0].patientID;
+        data.forEach(el => {
+          if (!treeData[projectID][el.patientID].studies[el.studyUID]) {
+            treeData[projectID][el.patientID].studies[el.studyUID] = {
+              data: el,
+              series: {},
+            };
+          }
+          studyUIDs.push(el.studyUID);
+        });
+        const studiesObj = treeData[projectID][patientID].studies;
+        const studiesArr = Object.values(studiesObj);
+        if (data.length < studiesArr.length) {
+          for (let study in studiesObj) {
+            if (!studyUIDs.includes(study)) {
+              delete studiesObj[study];
+            }
+          }
+        }
+      } else if (level === "series") {
+        const patientID = data[0].patientID;
+        const studyUID = data[0].studyUID;
+        const seriesUIDs = [];
+        data.forEach(el => {
+          if (
+            !treeData[projectID][el.patientID].studies[el.studyUID].series[
+              el.seriesUID
+            ]
+          ) {
+            treeData[projectID][el.patientID].studies[el.studyUID].series[
+              el.seriesUID
+            ] = {
+              data: el,
+            };
+          }
+          seriesUIDs.push(el.seriesUID);
+        });
+        const seriesObj =
+          treeData[projectID][patientID].studies[studyUID].series;
+        const seriesArr = Object.values(seriesObj);
+        if (data.length < seriesArr.length) {
+          for (let series in seriesObj) {
+            if (!seriesUIDs.includes(series)) {
+              delete seriesObj[series];
+            }
           }
         }
       }
-    } else if (level === "studies") {
-      const studyUIDs = [];
-      const patientID = data[0].patientID;
-      data.forEach(el => {
-        if (!treeData[projectID][el.patientID].studies[el.studyUID]) {
-          treeData[projectID][el.patientID].studies[el.studyUID] = {
-            data: el,
-            series: {},
-          };
-        }
-        studyUIDs.push(el.studyUID);
-      });
-      const studiesObj = treeData[projectID][patientID].studies;
-      const studiesArr = Object.values(studiesObj);
-      if (data.length < studiesArr.length) {
-        for (let study in studiesObj) {
-          if (!studyUIDs.includes(study)) {
-            delete studiesObj[study];
-          }
-        }
-      }
-    } else if (level === "series") {
-      const patientID = data[0].patientID;
-      const studyUID = data[0].studyUID;
-      const seriesUIDs = [];
-      data.forEach(el => {
-        if (
-          !treeData[projectID][el.patientID].studies[el.studyUID].series[
-            el.seriesUID
-          ]
-        ) {
-          treeData[projectID][el.patientID].studies[el.studyUID].series[
-            el.seriesUID
-          ] = {
-            data: el,
-          };
-        }
-        seriesUIDs.push(el.seriesUID);
-      });
-      const seriesObj = treeData[projectID][patientID].studies[studyUID].series;
-      const seriesArr = Object.values(seriesObj);
-      if (data.length < seriesArr.length) {
-        for (let series in seriesObj) {
-          if (!seriesUIDs.includes(series)) {
-            delete seriesObj[series];
-          }
-        }
-      }
+      this.setState({ treeData });
+    } catch (err) {
+      console.log(" --- getTreeData operation ---")
+      console.log(err);
     }
-    this.setState({ treeData });
   };
 
   getPidUpdate = pid => {
@@ -546,13 +524,6 @@ class App extends Component {
       treeExpand,
       expandLevel,
     } = this.state;
-    // const expandLoading = {
-    //   numOfPresentStudies: this.state.numOfPresentStudies,
-    //   numOfPresentSeries: this.state.numOfPresentSeries,
-    //   numOfPatientsLoaded: this.state.numOfPatientsLoaded,
-    //   numOfStudiesLoaded: this.state.numOfStudiesLoaded,
-    //   numOfSeriesLoaded: this.state.numOfSeriesLoaded
-    // };
     let noOfUnseen;
     if (notifications) {
       noOfUnseen = notifications.reduce((all, item) => {
