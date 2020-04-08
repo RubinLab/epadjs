@@ -94,7 +94,7 @@ class Subjects extends Component {
           "subjectID"
         );
         this.props.getTreeData(pid, "subject", data);
-        await this.setState({ data, expanded });
+        this.setState({ data, expanded });
       }
       if (this.props.expandLevel != prevProps.expandLevel) {
         this.props.expandLevel >= 1 && this.state.data.length
@@ -137,14 +137,14 @@ class Subjects extends Component {
   }
   expandCurrentLevel = async () => {
     try {
-    const expansionArr = [];
-    const expanded = {};
-    if (this.state.data)
-      for (let i = 0; i < this.state.data.length; i++) {
-        expanded[i] = this.state.data[i].numberOfStudies ? true : false;
-        // expansionArr[i] = this.state.data[i].subjectID;
-      }
-    this.setState({ expanded });
+      const expansionArr = [];
+      const expanded = {};
+      if (this.state.data)
+        for (let i = 0; i < this.state.data.length; i++) {
+          expanded[i] = this.state.data[i].numberOfStudies ? true : false;
+          // expansionArr[i] = this.state.data[i].subjectID;
+        }
+      this.setState({ expanded });
     } catch (err) {
       console.log(`Couldn't load all subjects data. Please Try again!`);
     }
@@ -189,13 +189,17 @@ class Subjects extends Component {
         resizable: false,
         sortable: false,
         width: this.widthUnit,
-        Cell: ({ original }) => {
+        Cell: row => {
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={this.props.selectedPatients[original.subjectID] || false}
-              onChange={() => this.selectRow(original)}
+              checked={
+                this.props.selectedPatients[row.original.subjectID] || false
+              }
+              onChange={() =>
+                this.selectRow({ ...row.original, index: row.index })
+              }
             />
           );
         },

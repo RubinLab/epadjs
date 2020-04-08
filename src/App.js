@@ -124,6 +124,21 @@ class App extends Component {
     this.setState({ treeExpand });
   };
 
+  closeBeforeDelete = (level, ids) => {
+    return new Promise((resolve, reject) => {
+      try {
+        const treeExpand = { ...this.state.treeExpand };
+        if (level === "patientID") {
+          treeExpand[ids.index] = false;
+        }
+        this.setState({ treeExpand });
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
+    });
+  };
+
   getTreeExpandSingle = async expandObj => {
     const { patient, study, series } = expandObj;
     let treeExpand = { ...this.state.treeExpand };
@@ -440,14 +455,19 @@ class App extends Component {
       if (level === "subject") {
         if (!treeData[projectID]) treeData[projectID] = {};
         data.forEach(el => {
-          if (!treeData[projectID][el.subjectID])
+          if (!treeData[projectID][el.subjectID]) {
             treeData[projectID][el.subjectID] = { data: el, studies: {} };
+          }
           patientIDs.push(el.subjectID);
         });
-        if (data.length < Object.keys(treeData[projectID]).length) {
-          for (let patient in treeData[projectID]) {
-            if (!patientIDs.includes(patient)) {
-              delete treeData[patient];
+        if (this.state.treeData[projectID]) {
+          if (
+            data.length < Object.keys(this.state.treeData[projectID]).length
+          ) {
+            for (let patient in treeData[projectID]) {
+              if (!patientIDs.includes(patient)) {
+                delete treeData[projectID][patient];
+              }
             }
           }
         }
@@ -503,8 +523,7 @@ class App extends Component {
       }
       this.setState({ treeData });
     } catch (err) {
-      console.log(" --- getTreeData operation ---")
-      console.log(err);
+      console.log("getTreeData operation --", err);
     }
   };
 
@@ -605,6 +624,7 @@ class App extends Component {
                       getTreeExpandAll={this.getTreeExpandAll}
                       treeExpand={treeExpand}
                       getExpandLevel={this.getExpandLevel}
+                      closeBeforeDelete={this.closeBeforeDelete}
                       // expandLoading={expandLoading}
                       // updateExpandedLevelNums={this.updateExpandedLevelNums}
                       onShrink={this.handleShrink}
@@ -627,6 +647,7 @@ class App extends Component {
                       getTreeExpandAll={this.getTreeExpandAll}
                       treeExpand={treeExpand}
                       getExpandLevel={this.getExpandLevel}
+                      closeBeforeDelete={this.closeBeforeDelete}
                       // expandLoading={expandLoading}
                       // updateExpandedLevelNums={this.updateExpandedLevelNums}
                       onShrink={this.handleShrink}
@@ -664,6 +685,7 @@ class App extends Component {
                       progressUpdated={progressUpdated}
                       expandLevel={this.state.expandLevel}
                       getTreeExpandSingle={this.getTreeExpandSingle}
+                      closeBeforeDelete={this.closeBeforeDelete}
                       getTreeExpandAll={this.getTreeExpandAll}
                       treeExpand={treeExpand}
                       getExpandLevel={this.getExpandLevel}
@@ -710,6 +732,7 @@ class App extends Component {
                     progressUpdated={progressUpdated}
                     expandLevel={this.state.expandLevel}
                     getTreeExpandSingle={this.getTreeExpandSingle}
+                    closeBeforeDelete={this.closeBeforeDelete}
                     getTreeExpandAll={this.getTreeExpandAll}
                     treeExpand={treeExpand}
                     getExpandLevel={this.getExpandLevel}

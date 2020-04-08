@@ -150,12 +150,13 @@ export const selectPatient = selectedPatientObj => {
     projectID,
     subjectName,
     numberOfAnnotations,
+    index
   } = selectedPatientObj;
   projectID = projectID ? projectID : "lite";
   const patientID = selectedPatientObj.subjectID;
   return {
     type: SELECT_PATIENT,
-    patient: { projectID, patientID, numberOfAnnotations, subjectName },
+    patient: { projectID, patientID, numberOfAnnotations, subjectName, index },
   };
 };
 
