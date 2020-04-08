@@ -120,8 +120,8 @@ export function uploadSegmentation(segmentation, projectId = "lite") {
   segData.append("file", segmentation, "blob.dcm");
   const config = {
     headers: {
-      "content-type": "multipart/form-data",
-    },
+      "content-type": "multipart/form-data"
+    }
   };
   return http.post(url, segData, config);
 }
