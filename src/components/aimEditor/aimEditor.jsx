@@ -159,7 +159,7 @@ class AimEditor extends Component {
     const markupsToSave = this.getNewMarkups();
 
     if (hasSegmentation) {
-      if (!this.checkSegmentationFrames()) return;
+      // if (!this.checkSegmentationFrames()) return;
       // segmentation and markups
       this.createAimSegmentation(answers).then(({ aim, segmentationBlob }) => {
         // also add the markups to aim if there is any
@@ -913,7 +913,6 @@ class AimEditor extends Component {
     // if (mode == "lite") return imageId.split("/").pop();
     // else return imageId.split("objectUID=")[1].split("&")[0];
     return imageId.split("objectUID=")[1];
-
   };
 }
 
