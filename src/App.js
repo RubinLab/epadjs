@@ -300,7 +300,6 @@ class App extends Component {
       const keycloak = Keycloak(
         JSON.parse(sessionStorage.getItem("keycloakJson"))
       );
-      sessionStorage.setItem("keycloakObject", keycloak);
       getAuthUser = new Promise((resolve, reject) => {
         keycloak
           .init({ onLoad: "login-required" })
@@ -336,7 +335,7 @@ class App extends Component {
             user: result.userInfo.preferred_username || result.userInfo.email,
             displayname: result.userInfo.given_name,
           };
-          await auth.login(user, null, result.keycloak.token);
+          await auth.login(user, null, result.keycloak);
           this.setState({
             keycloak: result.keycloak,
             authenticated: result.authenticated,
