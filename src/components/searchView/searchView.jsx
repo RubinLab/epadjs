@@ -559,7 +559,7 @@ class SearchView extends Component {
     } else if (selectedPatients.length > 0) {
       await this.setState({ downloading: true });
       for (let patient of selectedPatients) {
-        fileName = `Patients-${patient.subjectID}`;
+        fileName = `Patients-${patient.patientID}`;
         if (patient.numberOfAnnotations) {
           promiseArr.push(downloadSubjects(patient));
           fileNameArr.push(fileName);

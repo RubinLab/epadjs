@@ -146,7 +146,7 @@ export const displaySingleAim = (
 };
 
 export const selectPatient = selectedPatientObj => {
-  let {
+   let {
     projectID,
     subjectName,
     numberOfAnnotations,

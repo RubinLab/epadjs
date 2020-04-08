@@ -146,7 +146,7 @@ class Series extends Component {
 
   async componentDidUpdate(prevProps) {
     try {
-      const {
+      const { 
         update,
         expansionArr,
         // updateExpandedLevelNums,
