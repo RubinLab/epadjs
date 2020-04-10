@@ -172,7 +172,6 @@ class WorklistCreationForm extends React.Component {
           <Modal.Title>New worklist</Modal.Title>
         </Modal.Header>
         <Modal.Body
-          style={style.mbody}
           className="add-worklist__mbody"
         >
           {!this.state.page && (
