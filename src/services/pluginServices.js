@@ -7,9 +7,17 @@ export function getPlugins() {
 export function getOnePlugin(plugindbid) {
   return http.get(apiUrl + "/plugins/" + plugindbid);
 }
-
 export function getPluginsWithProject() {
   return http.get(apiUrl + "/pluginswithproject");
+}
+
+export function addPluginsToQueue(projectids, templateids, annotationuids) {
+  return http.post(
+    apiUrl + "/plugins/queue/add",
+    projectids,
+    templateids,
+    annotationuids
+  );
 }
 
 export function getTools() {
@@ -28,6 +36,9 @@ export function updateTemplatesForPlugin(pluginid, templateids) {
   return http.put(apiUrl + "/plugins/" + pluginid + "/templates/", templateids);
 }
 
+export function runPluginsQueue(queueObj) {
+  return http.post(apiUrl + "/plugins/queue/run", queueObj);
+}
 export function deletePlugin(pluginid) {
   return http.post(apiUrl + "/plugins", pluginid);
 }
@@ -82,6 +93,10 @@ export function editTemplateParameter(parametersform) {
     apiUrl + "/plugins/parameters/template/edit/",
     parametersform
   );
+}
+
+export function getPluginsQueue() {
+  return http.get(apiUrl + "/plugins/queue/");
 }
 export function getDefaultParameter(plugindbid) {
   return http.get(apiUrl + "/plugins/parameters/default/" + plugindbid);

@@ -5,11 +5,11 @@ import { FaRegTrashAlt } from "react-icons/fa";
 import {
   getDockerImages,
   getAnnotationTemplates,
-  getAnnotationProjects
+  getAnnotationProjects,
+  addPluginsToQueue,
 } from "../../../../../services/pluginServices";
 import TemplateColumn from "./templateColumn";
 import ProjectColumn from "./projectColumn";
-import Annotationcolumn from "./annotationColumn";
 import AnnotationColumn from "./annotationColumn";
 
 class TriggerTab extends React.Component {
@@ -22,7 +22,7 @@ class TriggerTab extends React.Component {
     selectAll: 0,
     templates: [],
     projects: [],
-    annotations: []
+    annotations: [],
   };
 
   componentDidMount = async () => {
@@ -34,9 +34,9 @@ class TriggerTab extends React.Component {
     this.setState({ projects: tempProjects.data });
   };
 
-  handleSelectRow = id => {};
+  handleSelectRow = (id) => {};
   handleSelectAll = () => {};
-  handleDeleteOne = rowdata => {};
+  handleDeleteOne = (rowdata) => {};
   //   defineTriggerTabColumns = () => {
   //     return [
   //       {
@@ -111,7 +111,7 @@ class TriggerTab extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
-        width: 420
+        width: 420,
       },
       {
         Header: "Name",
@@ -119,8 +119,8 @@ class TriggerTab extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
-        width: 420
-      }
+        width: 420,
+      },
       /*{
         Header: "container image",
         accessor: "container_image",
@@ -132,12 +132,23 @@ class TriggerTab extends React.Component {
     ];
   };
 
-  handleProjectOnChange = projectid => {
-    const tempSelProjects = this.state.selectedProjects;
-    tempSelProjects.push(projectid);
+  handleProjectOnChange = (projectid) => {
+    let tempSelProjects = this.state.selectedProjects;
+    // tempSelProjects.push(projectid);
+
+    /////////////////////
+    let elementIndex = tempSelProjects.indexOf(projectid);
+    if (elementIndex === -1) {
+      tempSelProjects.push(projectid);
+    } else {
+      tempSelProjects = this.state.selectedProjects.filter((id) => {
+        console.log("filter projectids", projectid);
+        return id !== projectid;
+      });
+    }
     this.setState({ selectedProjects: tempSelProjects });
   };
-  handleTemplateOnChange = templateid => {
+  handleTemplateOnChange = (templateid) => {
     const tempSelTemplates = this.state.selectedTemplates;
     tempSelTemplates.push(templateid);
     this.setState({ selectedTemplates: tempSelTemplates });
@@ -148,10 +159,26 @@ class TriggerTab extends React.Component {
       this.state.selectedProjects
     );
     console.log(
-      "componant updated -->selecetd projects",
+      "componant updated -->selecetd templates",
       this.state.selectedTemplates
     );
   }
+  handleTriggerPlugin = async () => {
+    // no need this getPluginsProjectsWithParameters, instead write start queue function with selected project, template, aims and logged user
+    console.log("trigger clicked");
+    console.log("selectedTemplates : ", this.state.selectedTemplates);
+    console.log("selectedProjects : ", this.state.selectedProjects);
+    console.log("selectedAnnotations : ", this.state.selectedAnnotations);
+    const projectids = [...this.state.selectedProjects];
+    const templateids = [...this.state.selectedTemplates];
+    const annotationuids = [...this.state.selectedAnnotations];
+    const responseAddPluginsToQueue = await addPluginsToQueue({
+      projectids,
+      templateids,
+      annotationuids,
+    });
+    console.log("responseAddPluginsToQueue : ", responseAddPluginsToQueue);
+  };
   render() {
     // const data = this.state.plImages;
     // const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
@@ -167,7 +194,11 @@ class TriggerTab extends React.Component {
     return (
       <div>
         <div className="create-user__modal--buttons">
-          <button variant="primary" className="btn btn-sm btn-outline-light">
+          <button
+            variant="primary"
+            className="btn btn-sm btn-outline-light"
+            onClick={this.handleTriggerPlugin}
+          >
             Trigger
           </button>
           <button variant="secondary" className="btn btn-sm btn-outline-light">

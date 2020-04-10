@@ -30,6 +30,7 @@ import EditTools from "../../templates/projectTable";
 import PluginNavBar from "./pluginNavBar";
 import ManageTab from "./../tabs/manage/manageTab";
 import TriggerTab from "./../tabs/trigger/triggerTab";
+import TrackTab from "./../tabs/track/trackTab";
 import { arrayToMap } from "../../../../Utils/aid";
 import "../css/plugin.css";
 class Plugins extends React.Component {
@@ -715,6 +716,7 @@ class Plugins extends React.Component {
           />
         )}
         {this.state.triggerTabActive && <TriggerTab />}
+        {this.state.trackTabActive && <TrackTab />}
         {(this.state.delAll || this.state.delOne) && (
           <DeleteAlert
             message={
