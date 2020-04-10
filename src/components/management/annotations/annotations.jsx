@@ -55,6 +55,17 @@ class Annotations extends React.Component {
     }
   };
 
+  componentDidUpdate = async prevProps => {
+    try {
+      const { projectID, refresh, lastEventId } = this.props;
+      if (refresh && lastEventId !== prevProps.lastEventId) {
+        await this.getAnnotationsData(projectID);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   getAnnotationsData = async projectID => {
     const { data: annotations } = await getSummaryAnnotations(projectID);
     if (mode === "lite") {
@@ -510,7 +521,6 @@ class Annotations extends React.Component {
   };
 
   handleSubmitUpload = () => {
-    this.getAnnotationsData();
     this.handleCancel();
   };
 
@@ -580,6 +590,9 @@ const mapsStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
+    uploadedPid: state.annotationsListReducer.uploadedPid, 
+    lastEventId: state.annotationsListReducer.lastEventId, 
+    refresh: state.annotationsListReducer.refresh, 
   };
 };
 
