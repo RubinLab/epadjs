@@ -76,10 +76,10 @@ export const closeSerie = () => {
   };
 };
 
-export const getNotificationsData = (uploadedPid, lastEventId) => {
+export const getNotificationsData = (uploadedPid, lastEventId, refresh) => {
   return {
     type: GET_NOTIFICATIONS,
-    payload: { uploadedPid, lastEventId },
+    payload: { uploadedPid, lastEventId, refresh },
   };
 };
 

@@ -388,13 +388,13 @@ class App extends Component {
       }
       const parsedRes = JSON.parse(res.data);
       const { lastEventId } = res;
-      const { params, createdtime, projectID, error } = parsedRes.notification;
+      const { params, createdtime, projectID, error, refresh } = parsedRes.notification;
       const action = parsedRes.notification.function;
       const complete =
         action.startsWith("Upload") || action.startsWith("Delete");
       const message = params;
       if (complete)
-        this.props.dispatch(getNotificationsData(projectID, lastEventId));
+        this.props.dispatch(getNotificationsData(projectID, lastEventId, refresh));
       let time = new Date(createdtime).toString();
       const GMTIndex = time.indexOf(" G");
       time = time.substring(0, GMTIndex - 3);
