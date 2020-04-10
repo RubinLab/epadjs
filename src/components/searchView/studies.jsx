@@ -131,8 +131,8 @@ class Studies extends Component {
   }
 
   async componentDidUpdate(prevProps) {
-    const { patientIndex, update, treeExpand } = this.props;
     try {
+      const { patientIndex, update, treeExpand } = this.props;
       if (update !== prevProps.update && treeExpand[patientIndex]) {
         const { data: data } = await getStudies(
           this.props.projectId,
