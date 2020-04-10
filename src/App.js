@@ -53,114 +53,132 @@ class App extends Component {
       expandLevel: 0,
       maxLevel: 0,
       refTree: {},
-      // numOfPresentStudies: 0,
-      // numOfPresentSeries: 0,
-      // numOfPatientsLoaded: 0,
-      // numOfStudiesLoaded: 0,
-      // numOfSeriesLoaded: 0,
       treeData: {},
       pid: null,
     };
   }
 
   getTreeExpandAll = (expandObj, expanded, expandLevel) => {
-    const { patient, study, series } = expandObj;
-    let treeExpand = { ...this.state.treeExpand };
-    let refPatients, refStudies, subSeries, subStudies;
-    const patientLevel = patient && !study && !series;
-    const studyLevel = study && !series;
-    const seriesLevel = series;
-    if (patientLevel) {
-      if (expanded) {
-        for (let i = 0; i < patient; i += 1) treeExpand[i] = {};
-        if (expandLevel >= this.state.maxLevel)
-          this.setState({ maxLevel: expandLevel, refTree: treeExpand });
-      }
-      if (!expanded) {
-        for (let i = 0; i < patient; i += 1) {
-          treeExpand[i] = false;
+    try {
+      const { patient, study, series } = expandObj;
+      let treeExpand = { ...this.state.treeExpand };
+      let refPatients, refStudies, subSeries, subStudies;
+      const patientLevel = patient && !study && !series;
+      const studyLevel = study && !series;
+      const seriesLevel = series;
+      if (patientLevel) {
+        if (expanded) {
+          for (let i = 0; i < patient; i += 1) treeExpand[i] = {};
+          if (expandLevel >= this.state.maxLevel)
+            this.setState({ maxLevel: expandLevel, refTree: treeExpand });
+        }
+        if (!expanded) {
+          for (let i = 0; i < patient; i += 1) {
+            treeExpand[i] = false;
+          }
         }
       }
-    }
 
-    if (studyLevel) {
-      refPatients = Object.values(this.state.refTree);
-      for (let i = 0; i < refPatients.length; i += 1) {
-        if (!treeExpand[i]) treeExpand[i] = {};
-      }
-      if (expanded) {
-        for (let i = 0; i < study; i += 1) {
-          treeExpand[patient][i] = {};
+      if (studyLevel) {
+        refPatients = Object.values(this.state.refTree);
+        for (let i = 0; i < refPatients.length; i += 1) {
+          if (!treeExpand[i]) treeExpand[i] = {};
         }
-        if (expandLevel >= this.state.maxLevel)
-          this.setState({ maxLevel: expandLevel, refTree: treeExpand });
-      }
-      if (!expanded) {
-        for (let i = 0; i < study; i += 1) {
-          treeExpand[patient][i] = false;
+        if (expanded) {
+          for (let i = 0; i < study; i += 1) {
+            treeExpand[patient][i] = {};
+          }
+          if (expandLevel >= this.state.maxLevel)
+            this.setState({ maxLevel: expandLevel, refTree: treeExpand });
+        }
+        if (!expanded) {
+          for (let i = 0; i < study; i += 1) {
+            treeExpand[patient][i] = false;
+          }
         }
       }
-    }
 
-    if (seriesLevel) {
-      refPatients = Object.values(this.state.refTree);
-      for (let i = 0; i < refPatients.length; i += 1) {
-        refStudies = Object.values(refPatients[i]);
-        if (!treeExpand[i]) {
-          treeExpand[i] = {};
+      if (seriesLevel) {
+        refPatients = Object.values(this.state.refTree);
+        for (let i = 0; i < refPatients.length; i += 1) {
+          refStudies = Object.values(refPatients[i]);
+          if (!treeExpand[i]) {
+            treeExpand[i] = {};
+          }
+          for (let k = 0; k < refStudies.length; k++) {
+            treeExpand[i][k] = {};
+          }
         }
-        for (let k = 0; k < refStudies.length; k++) {
-          treeExpand[i][k] = {};
+        if (expanded) {
+          for (let i = 0; i < series; i += 1) {
+            treeExpand[patient][study][i] = {};
+          }
+          if (expandLevel >= this.state.maxLevel)
+            this.setState({ maxLevel: expandLevel, refTree: treeExpand });
+        }
+        if (!expanded) {
+          for (let i = 0; i < study; i += 1) {
+            treeExpand[patient][study][i] = false;
+          }
         }
       }
-      if (expanded) {
-        for (let i = 0; i < series; i += 1) {
-          treeExpand[patient][study][i] = {};
-        }
-        if (expandLevel >= this.state.maxLevel)
-          this.setState({ maxLevel: expandLevel, refTree: treeExpand });
-      }
-      if (!expanded) {
-        for (let i = 0; i < study; i += 1) {
-          treeExpand[patient][study][i] = false;
-        }
-      }
+      this.setState({ treeExpand });
+    } catch (err) {
+      console.log(err);
     }
-    this.setState({ treeExpand });
+  };
+
+  closeBeforeDelete = (level, ids) => {
+    return new Promise((resolve, reject) => {
+      try {
+        const treeExpand = { ...this.state.treeExpand };
+        if (level === "patientID") {
+          treeExpand[ids.index] = false;
+        }
+        this.setState({ treeExpand });
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
+    });
   };
 
   getTreeExpandSingle = async expandObj => {
-    const { patient, study, series } = expandObj;
-    let treeExpand = { ...this.state.treeExpand };
-    let index, val;
-    const patientLevel = patient && !study && !series;
-    const studyLevel = study && !series;
-    const seriesLevel = series;
+    try {
+      const { patient, study, series } = expandObj;
+      let treeExpand = { ...this.state.treeExpand };
+      let index, val;
+      const patientLevel = patient && !study && !series;
+      const studyLevel = study && !series;
+      const seriesLevel = series;
 
-    if (patientLevel) {
-      index = Object.keys(patient);
-      index = index[0];
-      val = Object.values(patient);
-      val = val[0];
-      treeExpand[index] = val;
-    }
-    if (studyLevel) {
-      index = Object.keys(study);
-      index = index[0];
+      if (patientLevel) {
+        index = Object.keys(patient);
+        index = index[0];
+        val = Object.values(patient);
+        val = val[0];
+        treeExpand[index] = val;
+      }
+      if (studyLevel) {
+        index = Object.keys(study);
+        index = index[0];
 
-      val = Object.values(study);
-      val = val[0];
-      treeExpand[patient][index] = val;
-    }
-    if (seriesLevel) {
-      index = Object.keys(series);
-      index = index[0];
+        val = Object.values(study);
+        val = val[0];
+        treeExpand[patient][index] = val;
+      }
+      if (seriesLevel) {
+        index = Object.keys(series);
+        index = index[0];
 
-      val = Object.values(series);
-      val = val[0];
-      treeExpand[patient][study][index] = val;
+        val = Object.values(series);
+        val = val[0];
+        treeExpand[patient][study][index] = val;
+      }
+      this.setState({ treeExpand });
+    } catch (err) {
+      console.log(err);
     }
-    this.setState({ treeExpand });
   };
 
   getExpandLevel = expandLevel => {
@@ -171,24 +189,6 @@ class App extends Component {
     const { expandLevel } = this.state;
     if (expandLevel > 0) {
       await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
-      // if (expandLevel === 0) {
-      //   this.setState({
-      //     numOfPresentStudies: 0,
-      //     numOfPresentSeries: 0,
-      //     numOfPatientsLoaded: 0,
-      //     numOfStudiesLoaded: 0,
-      //     numOfSeriesLoaded: 0
-      //   });
-      // }
-      // if (expandLevel === 1) {
-      //   this.setState({ numOfPresentStudies: 0, numOfPatientsLoaded: 0 });
-      // }
-      // if (expandLevel === 2) {
-      //   this.setState({ numOfPresentSeries: 0, numOfStudiesLoaded: 0 });
-      // }
-      // if (expandLevel === 3) {
-      //   this.setState({ numOfSeriesLoaded: 0 });
-      // }
     }
   };
 
@@ -380,32 +380,38 @@ class App extends Component {
         console.log("Authentication failed!", err2);
       });
   };
+
   getMessageFromEventSrc = res => {
-    if (res.data === "heartbeat") {
-      return;
+    try {
+      if (res.data === "heartbeat") {
+        return;
+      }
+      const parsedRes = JSON.parse(res.data);
+      const { lastEventId } = res;
+      const { params, createdtime, projectID, error } = parsedRes.notification;
+      const action = parsedRes.notification.function;
+      const complete =
+        action.startsWith("Upload") || action.startsWith("Delete");
+      const message = params;
+      if (complete)
+        this.props.dispatch(getNotificationsData(projectID, lastEventId));
+      let time = new Date(createdtime).toString();
+      const GMTIndex = time.indexOf(" G");
+      time = time.substring(0, GMTIndex - 3);
+      let notifications = [...this.state.notifications];
+      notifications.unshift({
+        message,
+        time,
+        seen: false,
+        action,
+        error,
+      });
+      this.setState({ notifications });
+      const stringified = JSON.stringify(notifications);
+      sessionStorage.setItem("notifications", stringified);
+    } catch (err) {
+      console.log(err);
     }
-    const parsedRes = JSON.parse(res.data);
-    const { lastEventId } = res;
-    const { params, createdtime, projectID, error } = parsedRes.notification;
-    const action = parsedRes.notification.function;
-    const complete = action.startsWith("Upload") || action.startsWith("Delete");
-    const message = params;
-    if (complete)
-      this.props.dispatch(getNotificationsData(projectID, lastEventId));
-    let time = new Date(createdtime).toString();
-    const GMTIndex = time.indexOf(" G");
-    time = time.substring(0, GMTIndex - 3);
-    let notifications = [...this.state.notifications];
-    notifications.unshift({
-      message,
-      time,
-      seen: false,
-      action,
-      error,
-    });
-    this.setState({ notifications });
-    const stringified = JSON.stringify(notifications);
-    sessionStorage.setItem("notifications", stringified);
   };
 
   componentWillUnmount = () => {
@@ -452,81 +458,86 @@ class App extends Component {
   handleCloseAll = () => {
     this.setState({
       expandLevel: 0,
-      // numOfPresentStudies: 0,
-      // numOfPresentSeries: 0,
-      // numOfPatientsLoaded: 0,
-      // numOfStudiesLoaded: 0,
-      // numOfSeriesLoaded: 0
     });
   };
 
   getTreeData = (projectID, level, data) => {
-    const treeData = { ...this.state.treeData };
-    const patientIDs = [];
-    if (level === "subject") {
-      if (!treeData[projectID]) treeData[projectID] = {};
-      data.forEach(el => {
-        if (!treeData[projectID][el.subjectID])
-          treeData[projectID][el.subjectID] = { data: el, studies: {} };
-        patientIDs.push(el.subjectID);
-      });
-      if (data.length < Object.keys(treeData[projectID]).length) {
-        for (let patient in treeData[projectID]) {
-          if (!patientIDs.includes(patient)) {
-            delete treeData[patient];
+    try {
+      const treeData = { ...this.state.treeData };
+      const patientIDs = [];
+      if (level === "subject") {
+        if (!treeData[projectID]) treeData[projectID] = {};
+        data.forEach(el => {
+          if (!treeData[projectID][el.subjectID]) {
+            treeData[projectID][el.subjectID] = { data: el, studies: {} };
+          }
+          patientIDs.push(el.subjectID);
+        });
+        if (this.state.treeData[projectID]) {
+          if (
+            data.length < Object.keys(this.state.treeData[projectID]).length
+          ) {
+            for (let patient in treeData[projectID]) {
+              if (!patientIDs.includes(patient)) {
+                delete treeData[projectID][patient];
+              }
+            }
+          }
+        }
+      } else if (level === "studies") {
+        const studyUIDs = [];
+        const patientID = data[0].patientID;
+        data.forEach(el => {
+          if (!treeData[projectID][el.patientID].studies[el.studyUID]) {
+            treeData[projectID][el.patientID].studies[el.studyUID] = {
+              data: el,
+              series: {},
+            };
+          }
+          studyUIDs.push(el.studyUID);
+        });
+        const studiesObj = treeData[projectID][patientID].studies;
+        const studiesArr = Object.values(studiesObj);
+        if (data.length < studiesArr.length) {
+          for (let study in studiesObj) {
+            if (!studyUIDs.includes(study)) {
+              delete studiesObj[study];
+            }
+          }
+        }
+      } else if (level === "series") {
+        const patientID = data[0].patientID;
+        const studyUID = data[0].studyUID;
+        const seriesUIDs = [];
+        data.forEach(el => {
+          if (
+            !treeData[projectID][el.patientID].studies[el.studyUID].series[
+              el.seriesUID
+            ]
+          ) {
+            treeData[projectID][el.patientID].studies[el.studyUID].series[
+              el.seriesUID
+            ] = {
+              data: el,
+            };
+          }
+          seriesUIDs.push(el.seriesUID);
+        });
+        const seriesObj =
+          treeData[projectID][patientID].studies[studyUID].series;
+        const seriesArr = Object.values(seriesObj);
+        if (data.length < seriesArr.length) {
+          for (let series in seriesObj) {
+            if (!seriesUIDs.includes(series)) {
+              delete seriesObj[series];
+            }
           }
         }
       }
-    } else if (level === "studies") {
-      const studyUIDs = [];
-      const patientID = data[0].patientID;
-      data.forEach(el => {
-        if (!treeData[projectID][el.patientID].studies[el.studyUID]) {
-          treeData[projectID][el.patientID].studies[el.studyUID] = {
-            data: el,
-            series: {},
-          };
-        }
-        studyUIDs.push(el.studyUID);
-      });
-      const studiesObj = treeData[projectID][patientID].studies;
-      const studiesArr = Object.values(studiesObj);
-      if (data.length < studiesArr.length) {
-        for (let study in studiesObj) {
-          if (!studyUIDs.includes(study)) {
-            delete studiesObj[study];
-          }
-        }
-      }
-    } else if (level === "series") {
-      const patientID = data[0].patientID;
-      const studyUID = data[0].studyUID;
-      const seriesUIDs = [];
-      data.forEach(el => {
-        if (
-          !treeData[projectID][el.patientID].studies[el.studyUID].series[
-            el.seriesUID
-          ]
-        ) {
-          treeData[projectID][el.patientID].studies[el.studyUID].series[
-            el.seriesUID
-          ] = {
-            data: el,
-          };
-        }
-        seriesUIDs.push(el.seriesUID);
-      });
-      const seriesObj = treeData[projectID][patientID].studies[studyUID].series;
-      const seriesArr = Object.values(seriesObj);
-      if (data.length < seriesArr.length) {
-        for (let series in seriesObj) {
-          if (!seriesUIDs.includes(series)) {
-            delete seriesObj[series];
-          }
-        }
-      }
+      this.setState({ treeData });
+    } catch (err) {
+      console.log("getTreeData operation --", err);
     }
-    this.setState({ treeData });
   };
 
   getPidUpdate = pid => {
@@ -545,13 +556,6 @@ class App extends Component {
       treeExpand,
       expandLevel,
     } = this.state;
-    // const expandLoading = {
-    //   numOfPresentStudies: this.state.numOfPresentStudies,
-    //   numOfPresentSeries: this.state.numOfPresentSeries,
-    //   numOfPatientsLoaded: this.state.numOfPatientsLoaded,
-    //   numOfStudiesLoaded: this.state.numOfStudiesLoaded,
-    //   numOfSeriesLoaded: this.state.numOfSeriesLoaded
-    // };
     let noOfUnseen;
     if (notifications) {
       noOfUnseen = notifications.reduce((all, item) => {
@@ -633,6 +637,7 @@ class App extends Component {
                       getTreeExpandAll={this.getTreeExpandAll}
                       treeExpand={treeExpand}
                       getExpandLevel={this.getExpandLevel}
+                      closeBeforeDelete={this.closeBeforeDelete}
                       // expandLoading={expandLoading}
                       // updateExpandedLevelNums={this.updateExpandedLevelNums}
                       onShrink={this.handleShrink}
@@ -655,6 +660,7 @@ class App extends Component {
                       getTreeExpandAll={this.getTreeExpandAll}
                       treeExpand={treeExpand}
                       getExpandLevel={this.getExpandLevel}
+                      closeBeforeDelete={this.closeBeforeDelete}
                       // expandLoading={expandLoading}
                       // updateExpandedLevelNums={this.updateExpandedLevelNums}
                       onShrink={this.handleShrink}
@@ -692,6 +698,7 @@ class App extends Component {
                       progressUpdated={progressUpdated}
                       expandLevel={this.state.expandLevel}
                       getTreeExpandSingle={this.getTreeExpandSingle}
+                      closeBeforeDelete={this.closeBeforeDelete}
                       getTreeExpandAll={this.getTreeExpandAll}
                       treeExpand={treeExpand}
                       getExpandLevel={this.getExpandLevel}
@@ -738,6 +745,7 @@ class App extends Component {
                     progressUpdated={progressUpdated}
                     expandLevel={this.state.expandLevel}
                     getTreeExpandSingle={this.getTreeExpandSingle}
+                    closeBeforeDelete={this.closeBeforeDelete}
                     getTreeExpandAll={this.getTreeExpandAll}
                     treeExpand={treeExpand}
                     getExpandLevel={this.getExpandLevel}

@@ -146,16 +146,17 @@ export const displaySingleAim = (
 };
 
 export const selectPatient = selectedPatientObj => {
-  let {
+   let {
     projectID,
     subjectName,
     numberOfAnnotations,
+    index
   } = selectedPatientObj;
   projectID = projectID ? projectID : "lite";
   const patientID = selectedPatientObj.subjectID;
   return {
     type: SELECT_PATIENT,
-    patient: { projectID, patientID, numberOfAnnotations, subjectName },
+    patient: { projectID, patientID, numberOfAnnotations, subjectName, index },
   };
 };
 

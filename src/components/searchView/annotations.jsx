@@ -51,7 +51,7 @@ class Annotations extends Component {
   }
 
   async componentDidMount() {
-    // try {
+    try {
     const {
       // updateExpandedLevelNums,
       expansionArr,
@@ -77,13 +77,13 @@ class Annotations extends Component {
         draggable: true
       });
     }
-    // } catch (err) {
-    //   console.log("Couldn't load all annotation data. Please Try again!");
-    // }
+    } catch (err) {
+      console.log("Couldn't load all annotation data. Please Try again!");
+    }
   }
 
   async componentDidUpdate(prevProps) {
-    // try {
+    try {
     const {
       progressUpdated,
       update,
@@ -112,9 +112,9 @@ class Annotations extends Component {
     //     updateExpandedLevelNums("series", this.state.data.length, 1);
     //   }
     // }
-    // } catch (err) {
-    //   console.log("Couldn't load all annotation data. Please Try again!");
-    // }
+    } catch (err) {
+      console.log("Couldn't load all annotation data. Please Try again!");
+    }
   }
 
   selectRow = selected => {
