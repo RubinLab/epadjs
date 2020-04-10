@@ -165,13 +165,16 @@ class WorklistCreationForm extends React.Component {
     // month = month < 10 ? `0${month}` : `${month}`;
     // const year = date.getFullYear();
     // date = `${year}-${month}-${day}`;
-
+    
     return (
       <Modal.Dialog dialogClassName="add-worklist__modal">
         <Modal.Header>
           <Modal.Title>New worklist</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="add-worklist__mbody">
+        <Modal.Body
+          style={style.mbody}
+          className="add-worklist__mbody"
+        >
           {!this.state.page && (
             <form className="add-worklist__modal--form">
               <h5 className="add-worklist__modal--label">Name*</h5>

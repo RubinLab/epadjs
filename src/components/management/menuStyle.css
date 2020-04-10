@@ -283,6 +283,7 @@
 .add-worklist__modal.modal-dialog {
   overflow-x: visible;
   overflow-y: visible;
+  max-height: fit-content;
 }
 
 .edit-userRole__modal.modal-dialog,

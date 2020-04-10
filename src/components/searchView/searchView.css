@@ -292,3 +292,12 @@ h5.add-subject__modal--label,
   margin-top: 0.3rem;
   display: flex;
 }
+
+.add-worklist__modal.modal-dialog .modal-content {
+  overflow-y: scroll;
+  max-height: 420px;
+}
+
+.add-worklist__modal.modal-dialog {
+  max-height: fit-content;
+}
