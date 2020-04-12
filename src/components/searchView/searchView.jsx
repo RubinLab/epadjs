@@ -50,11 +50,11 @@ const mode = sessionStorage.getItem("mode");
 const messages = {
   newUser: {
     title: "No Permission",
-    message: `You don't have permission yet, please contact your admin`,
+    message: `You don"t have permission yet, please contact your admin`,
   },
   itemOpen: {
     title: "Item is open in display",
-    message: `couldn't be deleted. Please close series before deleting`,
+    message: `couldn"t be deleted. Please close series before deleting`,
   },
 };
 
@@ -94,7 +94,7 @@ class SearchView extends Component {
       let subjects = Object.values(this.props.treeData);
       if (subjects.length > 0) {
         subjects = subjects.map(el => el.data);
-      } else {
+      } else if (pid) {
         subjects = await this.getData();
         // this.props.getTreeData("subject", subjects);
       }
@@ -113,7 +113,8 @@ class SearchView extends Component {
     const { pid } = this.props.match.params;
     const samePid = mode !== "lite" && uploadedPid === pid;
     let subjects;
-    if (prevProps.match.params.pid !== this.props.match.params.pid) {
+
+    if (prevProps.match.params.pid !== pid) {
       subjects = await this.getData();
       this.setState({ numOfsubjects: subjects.length, subjects });
     }
@@ -134,16 +135,24 @@ class SearchView extends Component {
   getData = async () => {
     let data = [];
     try {
-      if (this.props.match.params.pid || this.props.pid || mode === "lite") {
-        data = await getSubjects(this.props.match.params.pid);
+      const { pid } = this.props.match.params;
+      const isRoutePidNull = pid === "null" || !pid;
+      const isPropsPidNull =
+        this.props.pid === null || this.props.pid === "null";
+      if (pid || this.props.pid || mode === "lite") {
+        if (!isRoutePidNull || !isPropsPidNull) {
+          const projectId = isRoutePidNull ? this.props.pid : pid;
+          const result = await getSubjects(projectId);
+          data = result.data;
+        }
       }
+      return data;
     } catch (err) {
       const { status, statusText } = err.response;
       if (status === 403 && statusText.toLowerCase() === "forbidden") {
         this.setState({ newUser: true });
       }
     }
-    return data;
   };
 
   handleExpand = async () => {
