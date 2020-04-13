@@ -7,7 +7,9 @@ import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
 import {
   getWorklistsOfCreator,
   deleteWorklist,
-  updateWorklist
+  updateWorklist,
+  addWorklistRequirement,
+  deleteWorklistRequirement,
 } from "../../../services/worklistServices";
 import { getUsers } from "../../../services/userServices";
 import DeleteAlert from "../common/alertDeletionModal";
@@ -22,7 +24,7 @@ const messages = {
   deleteSelected: "Delete selected worklists? This cannot be undone.",
   fillRequiredFields: "Please fill the required fields",
   addWorklistError: "An error occured while saving the worklist.",
-  updateWorklistError: "An error occured while updating the worklist."
+  updateWorklistError: "An error occured while updating the worklist.",
 };
 
 class WorkList extends React.Component {
@@ -40,9 +42,10 @@ class WorkList extends React.Component {
     worklistId: null,
     updateAssignee: false,
     updateDueDate: false,
-    duedate: "",
+    duedate: null,
     updateRequirement: false,
-    requirements: []
+    requirements: [],
+    newRequirement: {},
   };
 
   componentDidMount = async () => {
@@ -63,6 +66,18 @@ class WorkList extends React.Component {
     this.setState({ worklists });
   };
 
+  handleRequirementFormInput = e => {
+    const { name, value } = e.target;
+    const newRequirement = { ...this.state.newRequirement };
+    name === "template" && value === "Any"
+    ? (newRequirement[name] = value.toLowerCase())
+    : (newRequirement[name] = value);
+    if (name === "numOfAims" && !isNaN(parseInt(value))) {
+      this.setState({ error: null });
+    }
+    this.setState({ newRequirement });
+  };
+
   toggleRow = async id => {
     let newSelected = Object.assign({}, this.state.selected);
     if (newSelected[id]) {
@@ -70,13 +85,13 @@ class WorkList extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0
+          selectAll: 0,
         });
       }
     } else {
       newSelected[id] = true;
       await this.setState({
-        selectAll: 2
+        selectAll: 2,
       });
     }
     this.setState({ selected: newSelected });
@@ -92,19 +107,19 @@ class WorkList extends React.Component {
 
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
+      selectAll: this.state.selectAll === 0 ? 1 : 0,
     });
   }
 
   handleCancel = () => {
     this.setState({
       hasAddClicked: false,
-      name: "",
+      name: null,
       id: "",
       user: "",
-      description: "",
+      description: null,
       error: "",
-      duedate: "",
+      duedate: null,
       deleteSingleClicked: false,
       deleteAllClicked: false,
       selected: {},
@@ -116,7 +131,7 @@ class WorkList extends React.Component {
       initialAssignees: [],
       updateDueDate: false,
       updateRequirement: false,
-      requirements: []
+      requirements: [],
     });
   };
 
@@ -130,6 +145,7 @@ class WorkList extends React.Component {
       .then(() => {
         this.getWorkListData();
         this.setState({ selectAll: 0 });
+        this.props.updateProgress();
       })
       .catch(error => {
         toast.error(error.response.data.message, { autoClose: false });
@@ -143,6 +159,7 @@ class WorkList extends React.Component {
       .then(() => {
         this.setState({ deleteSingleClicked: false, singleDeleteData: null });
         this.getWorkListData();
+        this.props.updateProgress();
       })
       .catch(err => {
         this.setState({ errorMessage: err.response.data.message });
@@ -164,12 +181,13 @@ class WorkList extends React.Component {
 
   handleSaveWorklist = () => {
     this.getWorkListData();
+    this.props.updateProgress();
   };
 
   handleSingleDelete = id => {
     this.setState({
       deleteSingleClicked: true,
-      singleDeleteData: id
+      singleDeleteData: id,
     });
   };
 
@@ -177,7 +195,7 @@ class WorkList extends React.Component {
     this.setState({
       cellDoubleClicked: fieldName,
       clickedIndex: index,
-      worklistId: worklistId
+      worklistId: worklistId,
     });
     fieldName === "name"
       ? this.setState({ name: defaultValue })
@@ -192,13 +210,16 @@ class WorkList extends React.Component {
       description,
       // duedate,
       worklistId,
-      cellDoubleClicked
+      cellDoubleClicked,
     } = this.state;
-    const fieldUpdateValidation =
-      (name || description) && worklistId && cellDoubleClicked;
+    const nameNotEmpty = name && name.trim().length > 0;
+    const fieldUpdateValidation = worklistId && cellDoubleClicked;
     if (e.key === "Escape") {
       this.handleUpdateField(null, null);
     } else if (e.key === "Enter" && fieldUpdateValidation) {
+      if (cellDoubleClicked === "name") {
+        if (nameNotEmpty) this.updateWorklist();
+      }
       this.updateWorklist();
     }
   };
@@ -215,6 +236,7 @@ class WorkList extends React.Component {
 
   getUpdate = e => {
     const { name, value } = e.target;
+    console.log(name, value);
     this.setState({ [name]: value });
   };
 
@@ -222,16 +244,16 @@ class WorkList extends React.Component {
     const { name, description, duedate, worklistId } = this.state;
     const body = name
       ? { name }
-      : description
+      : description === "" || description
       ? { description }
-      : { dueDate: duedate };
+      : { duedate };
     updateWorklist(worklistId, body)
       .then(() => this.getWorkListData())
       .catch(error =>
         toast.error(
           messages.updateWorklistError + ": " + error.response.data.message,
           {
-            autoClose: false
+            autoClose: false,
           }
         )
       );
@@ -250,7 +272,7 @@ class WorkList extends React.Component {
     this.setState({
       updateAssignee: true,
       assigneeMap,
-      worklistId
+      worklistId,
     });
   };
 
@@ -280,10 +302,12 @@ class WorkList extends React.Component {
     this.handleCancel();
   };
 
+
   saveUpdatedRequirements = requirements => {
     updateWorklist(this.state.worklistId, { requirements })
       .then(() => {
         this.getWorkListData();
+        this.setState({ updateRequirement: false });
         toast.info("Update successful!", { autoClose: true });
       })
       .catch(error => {
@@ -291,6 +315,48 @@ class WorkList extends React.Component {
         this.getWorkListData();
       });
     this.handleCancel();
+  };
+
+  deleteRequirement = requirementId => {
+    deleteWorklistRequirement(this.state.worklistId, requirementId)
+      .then(() => {
+        this.getWorkListData();
+        this.setState({ updateRequirement: false });
+        toast.info("Delete successful!", { autoClose: true });
+      })
+      .catch(error => {
+        toast.error(error.response.data.message, { autoClose: false });
+        this.getWorkListData();
+      });
+  };
+
+  addNewRequirement = () => {
+    const { level, template, numOfAims } = this.state.newRequirement;
+    const unselectedLevel = !level || level === `--- Select Level ---`;
+    const intAims = parseInt(numOfAims);
+    const unSelectedTemplate =
+      !template || template === "--- Select Template ---";
+    if (unselectedLevel || unSelectedTemplate || !numOfAims) {
+      this.setState({ error: "Please fill all fields!" });
+      return;
+    } else if (isNaN(parseInt(intAims)) || intAims === 0) {
+      this.setState({
+        error: "No of aims should be a non-zero number!",
+      });
+      return;
+    } else {
+      this.setState({ error: null });
+      addWorklistRequirement(this.state.worklistId, [this.state.newRequirement])
+        .then(() => {
+          this.getWorkListData();
+          this.setState({ updateRequirement: false });
+          toast.info("Update successful!", { autoClose: true });
+        })
+        .catch(error => {
+          toast.error(error.response.data.message, { autoClose: false });
+          this.getWorkListData();
+        });
+    }
   };
 
   defineColumns = () => {
@@ -326,7 +392,7 @@ class WorkList extends React.Component {
         },
         sortable: false,
         minResizeWidth: 20,
-        width: 45
+        width: 45,
       },
 
       {
@@ -365,7 +431,7 @@ class WorkList extends React.Component {
               {original.row.checkbox.name}
             </div>
           );
-        }
+        },
       },
       {
         Header: "Assignees",
@@ -374,23 +440,25 @@ class WorkList extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
+          const { assignees, workListID } = original.row.checkbox;
+          const className =
+            assignees.length > 0
+              ? "wrapped menu-clickable"
+              : "wrapped click-to-add menu-clickable";
           return (
             <div
               onClick={() => {
-                this.handleUpdateAssignee(
-                  original.row.checkbox.assignees,
-                  original.row.checkbox.workListID
-                );
+                this.handleUpdateAssignee(assignees, workListID);
                 this.setState({
-                  initialAssignees: [...original.row.checkbox.assignees]
+                  initialAssignees: [...assignees],
                 });
               }}
-              className="menu-clickable wrapped"
+              className={className}
             >
-              {original.row.checkbox.assignees.join(",")}
+              {assignees.length > 0 ? assignees.join(", ") : `Add assignees`}
             </div>
           );
-        }
+        },
       },
       {
         Header: "Due Date",
@@ -399,8 +467,8 @@ class WorkList extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
-          const { dueDate, workListID } = original.row.checkbox;
-          const className = dueDate
+          const { duedate, workListID } = original.row.checkbox;
+          const className = duedate
             ? "wrapped menu-clickable"
             : "wrapped click-to-add menu-clickable";
           return (
@@ -408,16 +476,16 @@ class WorkList extends React.Component {
               className={`--commentCont ${className}`}
               onClick={async () => {
                 await this.setState({
-                  duedate: dueDate,
-                  worklistId: workListID
+                  duedate: duedate,
+                  worklistId: workListID,
                 });
                 this.handleUpdateDueDate();
               }}
             >
-              {dueDate || "Add due date"}
+              {duedate || "Add due date"}
             </div>
           );
-        }
+        },
       },
       {
         Header: "Requirement",
@@ -442,14 +510,14 @@ class WorkList extends React.Component {
                 this.setState({
                   worklistId: workListID,
                   requirements,
-                  updateRequirement: true
+                  updateRequirement: true,
                 });
               }}
             >
               {displayReq.join(", ") || "Define requirement"}
             </div>
           );
-        }
+        },
       },
       {
         Header: "Description",
@@ -488,7 +556,7 @@ class WorkList extends React.Component {
               {description || "Add description"}
             </div>
           );
-        }
+        },
       },
       {
         Header: "",
@@ -505,8 +573,8 @@ class WorkList extends React.Component {
               <FaRegTrashAlt className="menu-clickable" />
             </div>
           );
-        }
-      }
+        },
+      },
     ];
   };
 
@@ -525,6 +593,8 @@ class WorkList extends React.Component {
           className="pro-table"
           data={this.state.worklists}
           columns={this.defineColumns()}
+          pageSizeOptions={[10, 20, 50]}
+          defaultPageSize={10}
         />
         {this.state.deleteSingleClicked && (
           <DeleteAlert
@@ -566,7 +636,7 @@ class WorkList extends React.Component {
             onCancel={this.handleCancel}
             onSubmit={this.updateWorklist}
             onChange={this.handleFormInput}
-            dueDate={this.state.duedate}
+            duedate={this.state.duedate}
           />
         )}
         {this.state.updateRequirement && (
@@ -574,7 +644,11 @@ class WorkList extends React.Component {
             requirements={this.state.requirements}
             onCancel={this.handleCancel}
             worklistID={this.state.worklistId}
-            onSubmit={this.saveUpdatedRequirements}
+            onAddNew={this.addNewRequirement}
+            onEdit={this.saveUpdatedRequirements}
+            onDelete={this.deleteRequirement}
+            onNewReqInfo={this.handleRequirementFormInput}
+            error={this.state.error}
           />
         )}
       </div>
@@ -584,6 +658,6 @@ class WorkList extends React.Component {
 
 WorkList.propTypes = {
   selection: PropTypes.string,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
 };
 export default WorkList;

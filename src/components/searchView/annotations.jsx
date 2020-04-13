@@ -51,10 +51,23 @@ class Annotations extends Component {
   }
 
   async componentDidMount() {
+    try {
+    const {
+      // updateExpandedLevelNums,
+      expansionArr,
+      seriesId
+      // expandLoading
+    } = this.props;
+    // const { numOfSeriesLoaded, numOfPressentSeries } = expandLoading;
     const { data } = await getAnnotations(this.series);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
-    if (data.length === 0) {
+    const annsOpened = expansionArr.includes(seriesId);
+    // const alreadyCounted = numOfSeriesLoaded === numOfPresentSeries;
+
+    // if (!annsOpened && !alreadyCounted)
+    //   updateExpandedLevelNums("series", data.length, 1);
+    if (data.length === 0 && this.props.expandLevel !== 3) {
       toast.info("No annotations found", {
         position: "top-right",
         autoClose: 5000,
@@ -64,10 +77,26 @@ class Annotations extends Component {
         draggable: true
       });
     }
+    } catch (err) {
+      console.log("Couldn't load all annotation data. Please Try again!");
+    }
   }
 
   async componentDidUpdate(prevProps) {
-    if (this.props.update !== prevProps.update) {
+    try {
+    const {
+      progressUpdated,
+      update,
+      expandLevel,
+      expansionArr,
+      seriesId
+      // updateExpandedLevelNums
+    } = this.props;
+    const annsOpened = expansionArr.includes(seriesId);
+    if (
+      update !== prevProps.update ||
+      progressUpdated !== prevProps.progressUpdated
+    ) {
       const { data } = await getAnnotations(this.series);
       const expanded = persistExpandView(
         this.state.expanded,
@@ -76,6 +105,15 @@ class Annotations extends Component {
         "aimID"
       );
       this.setState({ data, expanded });
+    }
+
+    // if (expandLevel != prevProps.expandLevel) {
+    //   if (expandLevel === 3 && annsOpened) {
+    //     updateExpandedLevelNums("series", this.state.data.length, 1);
+    //   }
+    // }
+    } catch (err) {
+      console.log("Couldn't load all annotation data. Please Try again!");
     }
   }
 

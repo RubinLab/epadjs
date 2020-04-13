@@ -1,8 +1,8 @@
-import external from '../externalModules.js';
-import BaseTool from './base/BaseTool.js';
-import { getToolState, removeToolState } from '../stateManagement/toolState.js';
-import { state } from '../store/index.js';
-import { eraserCursor } from './cursors/index.js';
+import external from "../externalModules.js";
+import BaseTool from "./base/BaseTool.js";
+import { getToolState, removeToolState } from "../stateManagement/toolState.js";
+import { state } from "../store/index.js";
+import { eraserCursor } from "./cursors/index.js";
 
 /**
  * @public
@@ -15,9 +15,9 @@ import { eraserCursor } from './cursors/index.js';
 export default class EraserTool extends BaseTool {
   constructor(props = {}) {
     const defaultProps = {
-      name: 'Eraser',
-      supportedInteractionTypes: ['Mouse', 'Touch'],
-      svgCursor: eraserCursor,
+      name: "Eraser",
+      supportedInteractionTypes: ["Mouse", "Touch"],
+      svgCursor: eraserCursor
     };
 
     super(props, defaultProps);
@@ -37,11 +37,31 @@ export default class EraserTool extends BaseTool {
         // Modifying in a foreach? Probably not ideal
         toolState.data.forEach(function(data) {
           if (
-            typeof tool.pointNearTool === 'function' &&
+            typeof tool.pointNearTool === "function" &&
             tool.pointNearTool(element, data, coords)
           ) {
-            removeToolState(element, tool.name, data);
-            external.cornerstone.updateImage(element);
+            // var shouldStop = false;
+            // if (data.aimId) {
+            const ancestorEvent = {
+              element,
+              data
+            };
+            const detail = { aimId: data.aimId, ancestorEvent };
+            const evnt = new CustomEvent("markupSelected", {
+              cancelable: true,
+              detail
+            });
+
+            const shouldStop = window.dispatchEvent(evnt);
+            // }
+            if (shouldStop) {
+              try {
+                removeToolState(element, tool.name, data);
+                external.cornerstone.updateImage(element);
+              } catch (error) {
+                console.log("WARN:", error);
+              }
+            } else evt.preventDefault();
           }
         });
       }

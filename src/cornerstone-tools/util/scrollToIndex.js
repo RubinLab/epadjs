@@ -1,9 +1,9 @@
-import EVENTS from '../events.js';
-import external from '../externalModules.js';
-import { getToolState } from '../stateManagement/toolState.js';
-import requestPoolManager from '../requestPool/requestPoolManager.js';
-import loadHandlerManager from '../stateManagement/loadHandlerManager.js';
-import triggerEvent from '../util/triggerEvent.js';
+import EVENTS from "../events.js";
+import external from "../externalModules.js";
+import { getToolState } from "../stateManagement/toolState.js";
+import requestPoolManager from "../requestPool/requestPoolManager.js";
+import loadHandlerManager from "../stateManagement/loadHandlerManager.js";
+import triggerEvent from "../util/triggerEvent.js";
 
 /**
  * Scrolls through the stack to the image index requested.
@@ -15,7 +15,7 @@ import triggerEvent from '../util/triggerEvent.js';
  * @returns {void}
  */
 export default function(element, newImageIdIndex) {
-  const toolData = getToolState(element, 'stack');
+  const toolData = getToolState(element, "stack");
 
   if (!toolData || !toolData.data || !toolData.data.length) {
     return;
@@ -26,7 +26,7 @@ export default function(element, newImageIdIndex) {
   let stackRenderer;
 
   if (toolData.data.length > 1) {
-    const stackRendererData = getToolState(element, 'stackRenderer');
+    const stackRendererData = getToolState(element, "stackRenderer");
 
     if (
       stackRendererData &&
@@ -94,7 +94,7 @@ export default function(element, newImageIdIndex) {
 
   const eventData = {
     newImageIdIndex,
-    direction: newImageIdIndex - stackData.currentImageIdIndex,
+    direction: newImageIdIndex - stackData.currentImageIdIndex
   };
 
   stackData.currentImageIdIndex = newImageIdIndex;

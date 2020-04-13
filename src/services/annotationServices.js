@@ -13,10 +13,10 @@ export function getAnnotations(series, opts = {}) {
       studyId +
       "/series/" +
       seriesId;
-    if (Object.entries(opts).length === 0 && opts.constructor === Object)
+    if (Object.entries(opts).length === 0 && opts.constructor === Object) {
       return http.get(fullUrl + "/aims?count=0&format=summary");
-    else if (opts["json"]) return http.get(fullUrl + "/aims?format=json");
-    return http.get(+"/aims?count=0&format=summary");
+    } else if (opts["json"]) return http.get(fullUrl + "/aims?format=json");
+    return http.get(fullUrl + "/aims?count=0&format=summary");
   } else {
     const { projectId, subjectId, studyId, seriesId } = series;
     const fullUrl =
@@ -37,6 +37,16 @@ export function getAnnotations(series, opts = {}) {
 }
 
 export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
+  console.log(
+    "project",
+    projectId,
+    "sub",
+    subjectId,
+    "st",
+    studyId,
+    "ser",
+    seriesId
+  );
   if (mode === "lite")
     return http.get(
       apiUrl +
@@ -87,29 +97,27 @@ export function getSummaryAnnotations(projectID) {
     : http.get(apiUrl + "/projects/" + projectID + "/aims?format=summary");
 }
 
-export function deleteAnnotation(aimObj, aimID, projectID) {
-  if (aimObj) {
-    aimID = aimObj.aimID;
-    projectID = aimObj.projectID ? projectID : "lite";
-  }
+export function deleteAnnotation(aimObj) {
+  const { aimID, projectID } = aimObj;
   return http.delete(
     apiUrl + "/projects/" + projectID + "/aims/" + aimID + "?deleteDSO=true"
   );
 }
 
-export function uploadAim(aim) {
+export function uploadAim(aim, projectId) {
   let url;
   if (mode === "lite") {
     url = apiUrl + "/projects/lite/aims";
-    return http.post(url, aim);
+  } else {
+    url = apiUrl + "/projects/" + projectId + "/aims";
   }
+  return http.post(url, aim);
 }
 
 export function uploadSegmentation(segmentation, projectId = "lite") {
   const url = apiUrl + "/projects/" + projectId + "/files";
   const segData = new FormData();
   segData.append("file", segmentation, "blob.dcm");
-  console.log("Segmentation Data", segmentation);
   const config = {
     headers: {
       "content-type": "multipart/form-data"

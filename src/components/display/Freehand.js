@@ -1,7 +1,7 @@
 export const freehand = {
   visible: true,
   active: true,
-  invalidated: false,
+  invalidated: true,
   handles: {
     points: [],
     textBox: {},

@@ -207,7 +207,7 @@
 
 .new-popup,
 .worklist-popup {
-  z-index: 5;
+  z-index: 15;
   display: flex;
   flex-direction: column;
   width: fit-content;
@@ -254,7 +254,7 @@
 
 .updateReq__modal.modal-dialog,
 .updateReq__mbody.modal-body {
-  width: 256px;
+  /* width: 256px; */
   max-width: fit-content;
 }
 
@@ -276,4 +276,28 @@ h5.add-subject__modal--label,
 .add-study__modal--select,
 .add-series__modal--select {
   color: black;
+}
+
+.openSeries__modal .modal-content {
+  width: fit-content;
+  margin: auto;
+  top: 5rem;
+}
+
+.openSeries-select .seriesDesc {
+  margin-left: 0.5rem;
+}
+
+.openSeries-select {
+  margin-top: 0.3rem;
+  display: flex;
+}
+
+.add-worklist__modal.modal-dialog .modal-content {
+  overflow-y: scroll;
+  max-height: 420px;
+}
+
+.add-worklist__modal.modal-dialog {
+  max-height: fit-content;
 }

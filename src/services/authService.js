@@ -1,40 +1,31 @@
 "use strict";
 
-import btoa from "btoa-lite";
-import http from "./httpService";
-import { getUser } from "./userServices";
 const apiUrl = sessionStorage.getItem("apiUrl");
 const mode = sessionStorage.getItem("mode");
-// const apiEndpoint = apiUrlV1 + "/session/";
+// we need the keycloak object to be able to use update token
+let keycloak = null;
 
-export async function login(username, password, keyCloakToken) {
-  let basicAuth;
-  let header;
-  // if (isLite) {
-  // await http.post(apiUrlV1, {}, { headers: header });
-  basicAuth = "Bearer " + keyCloakToken;
-  sessionStorage.setItem("token", keyCloakToken);
+function refreshToken(keycloak, minValidity) {
+  return new Promise((resolve, reject) => {
+      keycloak.updateToken(minValidity).success(function (refreshed) {
+        if (refreshed) {
+          console.log('Token was successfully refreshed');
+          } else {
+          console.log('Token is still valid');
+        }
+        resolve()
+      }).error(function () {
+        reject()
+      });
+  });
+}
+
+export async function login(username, password, keycloak) {
+  sessionStorage.setItem("token", keycloak.token);
   sessionStorage.setItem("username", username.user);
   sessionStorage.setItem("displayName", username.user); //TODO: change with fullname
-  // http.post(apiUrlV1, {}, { headers: header });
-  /*********************************** REMOVE IN PROD  **************************/
-  sessionStorage.setItem("header", basicAuth);
-  // } else {
-  //   basicAuth = "Basic " + btoa(username + ":" + password);
-  //   header = {
-  //     Authorization: basicAuth
-  //   };
-  //   const { data: token } = await http.post(
-  //     apiEndpoint,
-  //     {},
-  //     { headers: header }
-  //   );
-  //   sessionStorage.setItem("token", token);
-  //   sessionStorage.setItem("username", username);
-  //   sessionStorage.setItem("displayName", username);
-  //   /*********************************** REMOVE IN PROD  **************************/
-  //   sessionStorage.setItem("header", basicAuth);
-  // }
+  if (keycloak) 
+    this.keycloak = keycloak;
 }
 
 export function logout() {
@@ -50,16 +41,16 @@ export function getCurrentUser() {
   return sessionStorage.getItem("username");
 }
 
-// export function getAuthHeader() {
-//   const token = sessionStorage.getItem("token");
-//   const header = "JSESSIONID=" + token + ",CLIENT_KEY=" + clientKey;
-//   if (token) return header;
-//   return undefined;
-// }
-
-export function getAuthHeader1() {
-  const header = sessionStorage.getItem("header");
-  if (header) return header;
+export async function getAuthHeader() {
+  if (this.keycloak) {
+    try {
+      await refreshToken(this.keycloak, 5);
+      const header = `Bearer ${this.keycloak.token}`;
+      if (header) return header;
+    } catch(err) {
+      this.keycloak.logout();
+    }
+  }
   return undefined;
 }
 
@@ -67,6 +58,5 @@ export default {
   login,
   logout,
   getCurrentUser,
-  // getAuthHeader,
-  getAuthHeader1
+  getAuthHeader
 };

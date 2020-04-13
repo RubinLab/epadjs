@@ -22,7 +22,8 @@ import * as dcmjs from "dcmjs";
 
 import "./aimEditor.css";
 import { throws } from "assert";
-import getNumOfSegs from "../../Utils/Segmentation/getNumOfSegments";
+import { getNumOfSegs } from "../../Utils/Segmentation/helpers";
+import { concat } from "joi-browser";
 const mode = sessionStorage.getItem("mode");
 
 const enumAimType = {
@@ -36,8 +37,11 @@ class AimEditor extends Component {
     super(props);
     this.image = this.getImage();
     this.semanticAnswers = {};
+    if (this.props.aimId) this.updatedAimId = this.props.aimId.aimId;
   }
-
+  state = {
+    buttonGroupShow: false
+  };
   componentDidMount() {
     const element = document.getElementById("questionaire");
     // const { data: templates } = await getTemplates();
@@ -47,47 +51,64 @@ class AimEditor extends Component {
     templatePromise.then(result => {
       this.semanticAnswers = new questionaire.AimEditor(
         element,
-        this.validateForm
+        this.validateForm,
+        this.renderButtons
       );
       this.semanticAnswers.loadTemplates(result.data);
       this.semanticAnswers.createViewerWindow();
       const { aimId } = this.props;
       if (aimId != null && Object.entries(aimId).length) {
-        this.semanticAnswers.loadAimJson(aimId);
+        try {
+          this.semanticAnswers.loadAimJson(aimId);
+        } catch (error) {
+          console.error("Error loading aim to aim editor:", error);
+        }
       }
     });
   }
-
+  //cavit
+  renderButtons = buttonsState => {
+    console.log("rendr buttons state : ", buttonsState);
+    this.setState({ buttonGroupShow: buttonsState });
+  };
+  //cavit end
   validateForm = hasError => {
     if (hasError) console.log("Answer form has error/s!!!");
   };
 
   getImage = () => {
     const { activePort } = this.props;
-    return cornerstone.getImage(
-      cornerstone.getEnabledElements()[activePort]["element"]
-    );
+    if (cornerstone.getEnabledElements().length)
+      return cornerstone.getImage(
+        cornerstone.getEnabledElements()[activePort]["element"]
+      );
+    return "";
   };
 
   render() {
     return (
       <div className="editorForm">
         <div id="questionaire" />
-        <button type="button" onClick={this.save}>
-          Save
-        </button>
-        <button type="button" onClick={this.cancel}>
-          Cancel
-        </button>
+        {this.state.buttonGroupShow && (
+          <div className="AimEditorButtonGroup">
+            <button
+              className="btn btn-sm btn-outline-light AimEditorButton "
+              onClick={this.save}
+            >
+              Save
+            </button>
+            &nbsp;
+            <button
+              className="btn btn-sm btn-outline-light AimEditorButton"
+              onClick={() => this.props.onCancel(true)}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
     );
   }
-
-  cancel = () => {
-    if (this.props.onCancel) {
-      this.props.onCancel();
-    }
-  };
 
   getAccession = () => {
     return this.image.data.string("x00080050") || "";
@@ -95,9 +116,42 @@ class AimEditor extends Component {
 
   save = () => {
     // Logic behind relies on the order of the data in array
+    if (!this.checkAimTemplate()) return;
     const answers = this.semanticAnswers.saveAim();
-    if (this.props.updatedAimId) this.updateAim(answers);
-    else this.createAim(answers);
+
+    // if (this.props.aimI) {
+    //   console.log("props", this.props);
+    //   this.updateAim(answers);
+    // } else this.createAim(answers);
+    this.createAim(answers);
+  };
+
+  checkAimTemplate = () => {
+    if (this.semanticAnswers.templateSelectedIndex === -1) {
+      alert("Please select an Aim template!");
+      return false;
+    }
+    return true;
+  };
+
+  checkSegmentationFrames = () => {
+    // check if it has multiple frames
+    const element = this.getActiveElement();
+    const labelmapIndex = this.getActiveLabelMapIndex();
+    const { getters } = cornerstoneTools.getModule("segmentation");
+    const { labelmaps3D } = getters.labelmaps3D(element);
+    if (!labelmaps3D) {
+      return 0;
+    }
+    const labelmap3D = labelmaps3D[labelmapIndex];
+    const labelmaps2D = labelmap3D.labelmaps2D;
+    if (Object.values(labelmaps2D).length < 2) {
+      alert(
+        "This version of ePAD lite currently doesn't support single slice segmentations. Please make sure you have multiple slice of segmentations! "
+      );
+      return false;
+    }
+    return true;
   };
 
   createAim = async answers => {
@@ -105,18 +159,22 @@ class AimEditor extends Component {
     const markupsToSave = this.getNewMarkups();
 
     if (hasSegmentation) {
+      // if (!this.checkSegmentationFrames()) return;
       // segmentation and markups
       this.createAimSegmentation(answers).then(({ aim, segmentationBlob }) => {
         // also add the markups to aim if there is any
         if (Object.entries(markupsToSave).length !== 0)
           this.createAimMarkups(aim, markupsToSave);
-        console.log("AYIMMM", aim);
         this.saveAim(aim, segmentationBlob);
       });
     } else if (Object.entries(markupsToSave).length !== 0) {
       // markups without segmentation
       const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
-      const aim = new Aim(seedData, enumAimType.imageAnnotation);
+      const aim = new Aim(
+        seedData,
+        enumAimType.imageAnnotation,
+        this.updatedAimId
+      );
       this.createAimMarkups(aim, markupsToSave);
       this.saveAim(aim);
     } else {
@@ -126,18 +184,36 @@ class AimEditor extends Component {
       const image = cornerstone.getImage(element);
       const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
 
-      const aim = new Aim(seedData, enumAimType.imageAnnotation);
+      const aim = new Aim(
+        seedData,
+        enumAimType.imageAnnotation,
+        this.updatedAimId
+      );
       this.saveAim(aim);
     }
   };
 
+  getActiveElement = () => {
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort] || {};
+    return element;
+  };
+
+  getActiveLabelMapIndex = () => {
+    const { getters } = cornerstoneTools.getModule("segmentation");
+    const element = this.getActiveElement();
+    return getters.activeLabelmapIndex(element);
+    // console.log("active lbel map index", getters.activeLabelmapIndex(element));
+    // this.setState({ activeLabelMapIndex: index });
+  };
+
   createAimSegmentation = async answers => {
-    const { activePort, openSeries } = this.props;
-    const { imageAnnotations } = openSeries[activePort];
-    const labelMapIndex = getNumOfSegs(imageAnnotations);
+    const activeLabelMapIndex = this.getActiveLabelMapIndex();
+    // const { imageAnnotations } = openSeries[activePort];
+    // const labelMapIndex = getNumOfSegs(openSeries);
     // console.log("Seg count is", labelMapIndex);
     const { segBlob, imageIdx, segStats } = this.createSegmentation3D(
-      labelMapIndex
+      activeLabelMapIndex
     );
 
     // praper the seed data and create aim
@@ -145,15 +221,17 @@ class AimEditor extends Component {
     const seedData = getAimImageData(image);
     this.addSemanticAnswersToSeedData(seedData, answers);
     this.addUserToSeedData(seedData);
-    const aim = new Aim(seedData, enumAimType.imageAnnotation);
+    const aim = new Aim(
+      seedData,
+      enumAimType.imageAnnotation,
+      this.updatedAimId
+    );
 
     let dataset = await this.getDatasetFromBlob(segBlob, imageIdx);
     // set segmentation series description with the aim name
     dataset.SeriesDescription = answers.name.value;
-    console.log("Dataset series uid after", dataset);
 
     // if update segmentation Uid should be same as the previous one
-    console.log("Dataset series uid", dataset);
 
     // fill the segmentation related aim parts
     const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
@@ -162,7 +240,6 @@ class AimEditor extends Component {
     // create the modified blob
     const segmentationBlob = dcmjs.data.datasetToBlob(dataset);
 
-    console.log("AIM in segmentation", aim);
     return { aim, segmentationBlob };
   };
 
@@ -171,6 +248,9 @@ class AimEditor extends Component {
       values.map(value => {
         const { type, markup, shapeIndex, imageReferenceUid } = value;
         switch (type) {
+          case "point":
+            this.addPointToAim(aim, markup, shapeIndex, imageReferenceUid);
+            break;
           case "line":
             this.addLineToAim(aim, markup, shapeIndex, imageReferenceUid);
             break;
@@ -182,7 +262,8 @@ class AimEditor extends Component {
             break;
           case "bidirectional":
             this.addBidirectionalToAim(
-              aim.markup,
+              aim,
+              markup,
               shapeIndex,
               imageReferenceUid
             );
@@ -228,7 +309,6 @@ class AimEditor extends Component {
   };
 
   saveAim = (aim, segmentationBlob) => {
-    console.log("Aim in SAVE", aim);
     const aimJson = aim.getAim();
     const aimSaved = JSON.parse(aimJson);
     const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
@@ -252,7 +332,7 @@ class AimEditor extends Component {
       comment
     };
 
-    uploadAim(aimSaved)
+    uploadAim(aimSaved, this.props.projectID)
       .then(() => {
         if (segmentationBlob) this.saveSegmentation(segmentationBlob);
         // var objectUrl = URL.createObjectURL(segBlobGlobal);
@@ -277,10 +357,11 @@ class AimEditor extends Component {
             studyUID
           })
         );
-
         this.props.dispatch(updatePatientOnAimSave(aimRefs));
+        this.props.updateProgress();
       })
       .catch(error => console.log(error));
+    this.props.onCancel(false);
   };
 
   getNewMarkups = () => {
@@ -289,16 +370,34 @@ class AimEditor extends Component {
     // check for markups
     var shapeIndex = 1;
     var markupsToSave = {};
-    const updatedAimId = this.props.aimId;
     markedImageIds.map(imageId => {
       const imageReferenceUid = this.parseImgeId(imageId);
       const markUps = toolState[imageId];
       Object.keys(markUps).map(tool => {
         switch (tool) {
           case "FreehandRoi3DTool":
+            const polygons3d = markUps[tool].data;
+            polygons3d.map(polygon => {
+              if (!polygon.aimId || polygon.aimId === this.updatedAimId) {
+                //dont save the same markup to different aims
+                this.storeMarkupsToBeSaved(
+                  imageId,
+                  {
+                    type: "polygon",
+                    markup: polygon,
+                    shapeIndex,
+                    imageReferenceUid
+                  },
+                  markupsToSave
+                );
+                shapeIndex++;
+              }
+            });
+            break;
+          case "FreehandRoi": //Saved Polygons3Ds are rendered as normal
             const polygons = markUps[tool].data;
             polygons.map(polygon => {
-              if (!polygon.aimId || polygon.aimId === updatedAimId) {
+              if (!polygon.aimId || polygon.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
                   imageId,
@@ -319,7 +418,7 @@ class AimEditor extends Component {
             bidirectionals.map(bidirectional => {
               if (
                 !bidirectional.aimId ||
-                bidirectional.aimId === updatedAimId
+                bidirectional.aimId === this.updatedAimId
               ) {
                 //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
@@ -332,15 +431,19 @@ class AimEditor extends Component {
                   },
                   markupsToSave
                 );
-                shapeIndex++;
+                shapeIndex = shapeIndex + 2; //because bidirectional consists of two lines inc the shapeindex by two
               }
             });
             break;
           case "CircleRoi":
             const circles = markUps[tool].data;
             circles.map(circle => {
-              if (!circle.aimId || circle.aimId === updatedAimId) {
-                //dont save the same markup to different aims
+              if (!circle.aimId || circle.aimId === this.updatedAimId) {
+                // //dont save the same markup to different aims
+                // const enElem = cornerstone.getEnabledElements()[0].element;
+
+                // cornerstoneTools.removeToolState(enElem, "CircleRoi", circle);
+
                 this.storeMarkupsToBeSaved(
                   imageId,
                   {
@@ -359,13 +462,33 @@ class AimEditor extends Component {
           case "Length":
             const lines = markUps[tool].data;
             lines.map(line => {
-              if (!line.aimId || line.aimId === updatedAimId) {
+              if (!line.aimId || line.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
                   imageId,
                   {
                     type: "line",
                     markup: line,
+                    shapeIndex,
+                    imageReferenceUid
+                  },
+                  markupsToSave
+                );
+                // this.addLineToAim(aim, line, shapeIndex);
+                shapeIndex++;
+              }
+            });
+            break;
+          case "Probe":
+            const points = markUps[tool].data;
+            points.map(point => {
+              if (!point.aimId || point.aimId === this.updatedAimId) {
+                //dont save the same markup to different aims
+                this.storeMarkupsToBeSaved(
+                  imageId,
+                  {
+                    type: "point",
+                    markup: point,
                     shapeIndex,
                     imageReferenceUid
                   },
@@ -430,7 +553,6 @@ class AimEditor extends Component {
   };
 
   addSegmentationToAim = (aim, segEntityData, segStats) => {
-    console.log("Seg stats are", segStats);
     const segId = aim.createSegmentationEntity(segEntityData);
 
     const { volume, min, max, mean, stdDev } = segStats;
@@ -469,19 +591,38 @@ class AimEditor extends Component {
       points,
       imageReferenceUid
     );
-    const { mean, stdDev, min, max } = polygon.meanStdDev;
 
-    const meanId = aim.createMeanCalcEntity({ mean, unit: "[hnsf'U]" });
+    // find out the unit about statistics to write to aim
+    let unit, mean, stdDev, min, max;
+    if (polygon.meanStdDev) {
+      ({ mean, stdDev, min, max } = polygon.meanStdDev);
+      unit = "hu";
+    } else if (polygon.meanStdDevSUV) {
+      ({ mean, stdDev, min, max } = polygon.meanStdDev);
+      unit = "suv";
+    }
+
+    const meanId = aim.createMeanCalcEntity({ mean, unit });
     aim.createImageAnnotationStatement(1, markupId, meanId);
 
-    const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit: "[hnsf'U]" });
+    const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit });
     aim.createImageAnnotationStatement(1, markupId, stdDevId);
 
-    const minId = aim.createMinCalcEntity({ min, unit: "[hnsf'U]" });
+    const minId = aim.createMinCalcEntity({ min, unit });
     aim.createImageAnnotationStatement(1, markupId, minId);
 
-    const maxId = aim.createMaxCalcEntity({ max, unit: "[hnsf'U]" });
+    const maxId = aim.createMaxCalcEntity({ max, unit });
     aim.createImageAnnotationStatement(1, markupId, maxId);
+  };
+
+  addPointToAim = (aim, point, shapeIndex, imageReferenceUid) => {
+    const { end } = point.handles;
+    aim.addMarkupEntity(
+      "TwoDimensionPoint",
+      shapeIndex,
+      [end],
+      imageReferenceUid
+    );
   };
 
   addLineToAim = (aim, line, shapeIndex, imageReferenceUid) => {
@@ -492,11 +633,12 @@ class AimEditor extends Component {
       [start, end],
       imageReferenceUid
     );
-    const abc = line.length;
+
+    console.log("Line", line);
 
     const lengthId = aim.createLengthCalcEntity({
       value: line.length,
-      unit: "mm"
+      unit: line.unit
     });
     aim.createImageAnnotationStatement(1, markupId, lengthId);
   };
@@ -509,18 +651,24 @@ class AimEditor extends Component {
       [start, end],
       imageReferenceUid
     );
+    console.log("Circle", circle);
+
+    let unit;
+    if (circle.unit === "HU") unit = "hu";
+    else if (circle.unit === "SUV") unit = "suv";
+
     const { mean, stdDev, min, max } = circle.cachedStats;
 
-    const meanId = aim.createMeanCalcEntity({ mean, unit: "[hnsf'U]" });
+    const meanId = aim.createMeanCalcEntity({ mean, unit });
     aim.createImageAnnotationStatement(1, markupId, meanId);
 
-    const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit: "[hnsf'U]" });
+    const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit });
     aim.createImageAnnotationStatement(1, markupId, stdDevId);
 
-    const minId = aim.createMinCalcEntity({ min, unit: "[hnsf'U]" });
+    const minId = aim.createMinCalcEntity({ min, unit });
     aim.createImageAnnotationStatement(1, markupId, minId);
 
-    const maxId = aim.createMaxCalcEntity({ max, unit: "[hnsf'U]" });
+    const maxId = aim.createMaxCalcEntity({ max, unit });
     aim.createImageAnnotationStatement(1, markupId, maxId);
 
     // aim.add;
@@ -531,7 +679,77 @@ class AimEditor extends Component {
     bidirectional,
     shapeIndex,
     imageReferenceUid
-  ) => {};
+  ) => {
+    const { longAxis, shortAxis } = this.getAxisOfBidirectional(bidirectional);
+
+    console.log("Bidirectional", bidirectional);
+
+    // add longAxis
+    const longAxisMarkupId = aim.addMarkupEntity(
+      "TwoDimensionMultiPoint",
+      shapeIndex,
+      [longAxis.start, longAxis.end],
+      imageReferenceUid
+    );
+    const longAxisLengthId = aim.createLongAxisCalcEntity({
+      value: longAxis.length,
+      unit: "mm"
+    });
+    aim.createImageAnnotationStatement(1, longAxisMarkupId, longAxisLengthId);
+
+    // add shortAxis
+    const shortAxisMarkupId = aim.addMarkupEntity(
+      "TwoDimensionMultiPoint",
+      shapeIndex + 1,
+      [shortAxis.start, shortAxis.end],
+      imageReferenceUid
+    );
+    const shortAxisLengthId = aim.createShortAxisCalcEntity({
+      value: shortAxis.length,
+      unit: "mm"
+    });
+    aim.createImageAnnotationStatement(1, shortAxisMarkupId, shortAxisLengthId);
+  };
+
+  getAxisOfBidirectional = bidirectional => {
+    // takes two lines of b.directional and distincs the short and long axis
+    const { element } = cornerstone.getEnabledElements()[this.props.activePort];
+    const { rowPixelSpacing, columnPixelSpacing } = cornerstone.getViewport(
+      element
+    ).displayedArea;
+    const {
+      start,
+      end,
+      perpendicularStart,
+      perpendicularEnd
+    } = bidirectional.handles;
+    const length = Math.hypot(
+      (start.x - end.x) * (columnPixelSpacing || 1),
+      (start.y - end.y) * (rowPixelSpacing || 1)
+    );
+    const perpendicularLength = Math.hypot(
+      (perpendicularStart.x - perpendicularEnd.x) * (columnPixelSpacing || 1),
+      (perpendicularStart.y - perpendicularEnd.y) * (rowPixelSpacing || 1)
+    );
+    if (length > perpendicularLength)
+      return {
+        longAxis: { start, end, length },
+        shortAxis: {
+          start: perpendicularStart,
+          end: perpendicularEnd,
+          length: perpendicularLength
+        }
+      };
+    else
+      return {
+        longAxis: {
+          start: perpendicularStart,
+          end: perpendicularEnd,
+          length: perpendicularLength
+        },
+        shortAxis: { start, end, length }
+      };
+  };
 
   createSegmentation3D = labelmapIndex => {
     // following is to know the image index which has the first segment
@@ -546,19 +764,12 @@ class AimEditor extends Component {
     const imageIds = stackToolState.data[0].imageIds;
     let imagePromises = [];
     for (let i = 0; i < imageIds.length; i++) {
-      if (i == 1)
-        cornerstone
-          .loadImage(imageIds[i])
-          .then(image => console.log("Yuklenen image", image));
       imagePromises.push(cornerstone.loadImage(imageIds[i]));
     }
-
     const { getters, getLabelmapStats } = cornerstoneTools.getModule(
       "segmentation"
     );
-    console.log("Seg module", cornerstoneTools.getModule("segmentation"));
     const { labelmaps3D } = getters.labelmaps3D(element);
-    console.log("Label maps3D", labelmaps3D);
     if (!labelmaps3D) {
       return;
     }
@@ -601,12 +812,7 @@ class AimEditor extends Component {
     Object.keys(cachedImages).forEach(key => {
       images.push(cachedImages[key].image);
     });
-    // console.log("ImageCache", images);
 
-    // Promise.all(imagePromises).then(images => {
-    //   console.log("Images", images);
-
-    // this.cornerstone.imageCache;
     const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
       images,
       labelmap3D,
@@ -704,8 +910,9 @@ class AimEditor extends Component {
   };
 
   parseImgeId = imageId => {
-    if (mode == "lite") return imageId.split("/").pop();
-    else return imageId.split("objectUID=")[1].split("&")[0];
+    // if (mode == "lite") return imageId.split("/").pop();
+    // else return imageId.split("objectUID=")[1].split("&")[0];
+    return imageId.split("objectUID=")[1];
   };
 }
 

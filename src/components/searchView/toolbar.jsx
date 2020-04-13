@@ -12,6 +12,8 @@ import {
 import { FiMinimize2 } from "react-icons/fi";
 import ReactTooltip from "react-tooltip";
 import { BarLoader } from "react-spinners";
+import Spinner from "../common/circleSpinner";
+
 const mode = sessionStorage.getItem("mode");
 
 const toolBar = props => {
@@ -70,7 +72,7 @@ const toolBar = props => {
           </ReactTooltip>
         </div>
         <div
-          onClick={props.onDelete}
+          onClick={props.showDelete ? props.onDelete : null}
           className={
             props.showDelete ? "searchView-toolbar__icon" : "hide-delete"
           }
@@ -94,6 +96,9 @@ const toolBar = props => {
       </div>
       {/* {mode !== "lite" && ( */}
       {/* <div className="searchView-toolbar__group"> */}
+      {/* {props.expanding ? (
+        <Spinner loading={props.expanding} unit="rem" size={2} />
+      ) : ( */}
       <div className="searchView-toolbar__icon" onClick={props.onExpand}>
         <div>
           <FaLevelDownAlt
@@ -102,6 +107,7 @@ const toolBar = props => {
             data-for="forward-icon"
           />
         </div>
+
         <ReactTooltip
           id="forward-icon"
           place="bottom"
@@ -111,7 +117,12 @@ const toolBar = props => {
           <span>Expand to Next Level</span>
         </ReactTooltip>
       </div>
-      <div className="searchView-toolbar__icon" onClick={props.onShrink}>
+      {/* )} */}
+      <div
+        className="searchView-toolbar__icon"
+        // onClick={props.expanding ? null : props.onShrink}
+        onClick={props.onShrink}
+      >
         <div>
           <FaLevelUpAlt
             style={{ fontSize: "1.2rem" }}
@@ -128,7 +139,11 @@ const toolBar = props => {
           <span>Close One Level</span>
         </ReactTooltip>
       </div>
-      <div className="searchView-toolbar__icon" onClick={props.onCloseAll}>
+      <div
+        className="searchView-toolbar__icon"
+        // onClick={props.expanding ? null : props.onCloseAll}
+        onClick={props.onCloseAll}
+      >
         <div>
           <FiMinimize2
             style={{ fontSize: "1.5rem", strokeWidth: "3px" }}
@@ -169,28 +184,28 @@ const toolBar = props => {
               <span>New</span>
             </ReactTooltip>
           </div>
-          <div
-            className="searchView-toolbar__icon worklist-icon"
-            onClick={props.onWorklist}
-          >
-            <div>
-              <FaClipboardList
-                style={{ fontSize: "1.2rem" }}
-                data-tip
-                data-for="worklist-icon"
-              />
-            </div>
-            <ReactTooltip
-              id="worklist-icon"
-              place="bottom"
-              type="info"
-              delayShow={1500}
-            >
-              <span>Add to worklist</span>
-            </ReactTooltip>
-          </div>
         </div>
       )}
+      <div
+        className="searchView-toolbar__icon worklist-icon"
+        onClick={props.onWorklist}
+      >
+        <div>
+          <FaClipboardList
+            style={{ fontSize: "1.2rem" }}
+            data-tip
+            data-for="worklist-icon"
+          />
+        </div>
+        <ReactTooltip
+          id="worklist-icon"
+          place="bottom"
+          type="info"
+          delayShow={1500}
+        >
+          <span>Add to worklist</span>
+        </ReactTooltip>
+      </div>
       {/* <div className="searchView-toolbar__icon">
         <div>
           <TiPencil

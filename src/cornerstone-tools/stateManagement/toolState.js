@@ -1,7 +1,7 @@
-import EVENTS from '../events.js';
-import external from '../externalModules.js';
-import { globalImageIdSpecificToolStateManager } from './imageIdSpecificStateManager.js';
-import triggerEvent from '../util/triggerEvent.js';
+import EVENTS from "../events.js";
+import external from "../externalModules.js";
+import { globalImageIdSpecificToolStateManager } from "./imageIdSpecificStateManager.js";
+import triggerEvent from "../util/triggerEvent.js";
 
 /**
  * Returns the toolstate for a specific element.
@@ -43,7 +43,7 @@ function addToolState(element, toolType, measurementData) {
   const eventData = {
     toolType,
     element,
-    measurementData,
+    measurementData
   };
 
   triggerEvent(element, eventType, eventData);
@@ -78,28 +78,32 @@ function getToolState(element, toolType) {
  * @returns {undefined}
  */
 function removeToolState(element, toolType, data) {
-  const toolStateManager = getElementToolStateManager(element);
-  const toolData = toolStateManager.get(element, toolType);
-  // Find this tool data
-  let indexOfData = -1;
+  try {
+    const toolStateManager = getElementToolStateManager(element);
+    const toolData = toolStateManager.get(element, toolType);
+    // Find this tool data
+    let indexOfData = -1;
 
-  for (let i = 0; i < toolData.data.length; i++) {
-    if (toolData.data[i] === data) {
-      indexOfData = i;
+    for (let i = 0; i < toolData.data.length; i++) {
+      if (toolData.data[i] === data) {
+        indexOfData = i;
+      }
     }
-  }
 
-  if (indexOfData !== -1) {
-    toolData.data.splice(indexOfData, 1);
+    if (indexOfData !== -1) {
+      toolData.data.splice(indexOfData, 1);
 
-    const eventType = EVENTS.MEASUREMENT_REMOVED;
-    const eventData = {
-      toolType,
-      element,
-      measurementData: data,
-    };
+      const eventType = EVENTS.MEASUREMENT_REMOVED;
+      const eventData = {
+        toolType,
+        element,
+        measurementData: data
+      };
 
-    triggerEvent(element, eventType, eventData);
+      triggerEvent(element, eventType, eventData);
+    }
+  } catch (error) {
+    console.log("Error:", error);
   }
 }
 
@@ -144,5 +148,5 @@ export {
   removeToolState,
   clearToolState,
   setElementToolStateManager,
-  getElementToolStateManager,
+  getElementToolStateManager
 };

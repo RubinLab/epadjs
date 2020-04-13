@@ -17,5 +17,5 @@ export const line = {
     textBox: {}
   },
   length: 0,
-  invalidated: false
+  invalidated: true
 };

@@ -9,7 +9,7 @@ import UserRoleEditTable from "./projectTable";
 class CreateUserForm extends React.Component {
   state = {
     page: 0,
-    email: false
+    email: false,
   };
 
   goNextPage = () => {
@@ -48,12 +48,14 @@ class CreateUserForm extends React.Component {
     let button1Func = this.goPrevPage;
     let button2Func = this.goNextPage;
     let button3Func = this.props.onCancel;
+    const mode = sessionStorage.getItem("mode");
 
     if (page === 2) {
       button2Text = "Submit";
       button2Func = this.props.onSubmit;
     }
 
+    const projectToRole = mode === "lite" ? ["lite:Member"] : [];
     return (
       <Modal.Dialog dialogClassName="create-user__modal">
         <Modal.Header>
@@ -81,14 +83,12 @@ class CreateUserForm extends React.Component {
               onSelect={this.props.onSelectRole}
               projectMap={this.props.projectMap}
               projects={this.props.projects}
+              projectToRole={projectToRole}
             />
           )}
-          {this.props.error ||
-            (this.state.error && (
-              <div className="err-message create-user__error">
-                {this.props.error || this.state.error}
-              </div>
-            ))}
+          <div className="err-message">
+            {this.props.error || this.state.error}
+          </div>
         </Modal.Body>
         <Modal.Footer className="create-user__modal--footer">
           <div className="create-user__modal--buttons">
@@ -115,7 +115,7 @@ CreateUserForm.propTypes = {
   onSubmit: PropTypes.func,
   error: PropTypes.string,
   onSelect: PropTypes.func,
-  userPermission: PropTypes.array
+  userPermission: PropTypes.array,
 };
 
 export default CreateUserForm;

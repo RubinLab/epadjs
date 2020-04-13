@@ -1,16 +1,16 @@
-import BaseTool from './BaseTool.js';
-import EVENTS from './../../events.js';
-import external from './../../externalModules.js';
-import isToolActiveForElement from './../../store/isToolActiveForElement.js';
-import { getModule } from './../../store/index.js';
+import BaseTool from "./BaseTool.js";
+import EVENTS from "./../../events.js";
+import external from "./../../externalModules.js";
+import isToolActiveForElement from "./../../store/isToolActiveForElement.js";
+import { getModule } from "./../../store/index.js";
 import {
   getDiffBetweenPixelData,
-  triggerLabelmapModifiedEvent,
-} from '../../util/segmentation';
+  triggerLabelmapModifiedEvent
+} from "../../util/segmentation";
 
 // Const { configuration, getters, setters } = getModule("segmentation");
 
-const segmentationModule = getModule('segmentation');
+const segmentationModule = getModule("segmentation");
 
 /**
  * @abstract
@@ -126,7 +126,7 @@ class BaseBrushTool extends BaseTool {
       labelmap2D,
       labelmap3D,
       currentImageIdIndex,
-      activeLabelmapIndex,
+      activeLabelmapIndex
     } = getters.labelmap2D(element);
 
     const shouldErase =
@@ -137,7 +137,7 @@ class BaseBrushTool extends BaseTool {
       labelmap3D,
       currentImageIdIndex,
       activeLabelmapIndex,
-      shouldErase,
+      shouldErase
     };
 
     if (configuration.storeHistory) {
@@ -145,8 +145,8 @@ class BaseBrushTool extends BaseTool {
 
       this.paintEventData.previousPixelData = previousPixelData;
     }
-    const evnt = new CustomEvent('markupCreated', {
-      detail: 'brush',
+    const evnt = new CustomEvent("markupCreated", {
+      detail: "brush"
     });
 
     window.dispatchEvent(evnt);
@@ -161,7 +161,6 @@ class BaseBrushTool extends BaseTool {
    * @returns {void}
    */
   _endPainting(evt) {
-    console.log(this.paintEventData);
     const { configuration, setters } = segmentationModule;
     const { labelmap2D, currentImageIdIndex } = this.paintEventData;
 
@@ -189,7 +188,7 @@ class BaseBrushTool extends BaseTool {
       const newPixelData = labelmap2D.pixelData;
       const operation = {
         imageIdIndex: currentImageIdIndex,
-        diff: getDiffBetweenPixelData(previousPixelData, newPixelData),
+        diff: getDiffBetweenPixelData(previousPixelData, newPixelData)
       };
 
       setters.pushState(this.element, [operation]);

@@ -31,7 +31,9 @@ import {
   CLEAR_AIMID,
   UPDATE_PATIENT_AIM_SAVE,
   UPDATE_PATIENT_AIM_DELETE,
-  GET_NOTIFICATIONS
+  GET_NOTIFICATIONS,
+  CLEAR_ACTIVE_AIMID,
+  UPDATE_IMAGE_INDEX
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -56,9 +58,13 @@ const initialState = {
 
 const asyncReducer = (state = initialState, action) => {
   switch (action.type) {
+    case UPDATE_IMAGE_INDEX:
+      const updatedOpenSeries = [...state.openSeries];
+      updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
+      return { ...state, openSeries: updatedOpenSeries };
     case GET_NOTIFICATIONS:
-      const { uploadedPid, lastEventId } = action.payload;
-      return { ...state, uploadedPid, lastEventId };
+      const { uploadedPid, lastEventId, refresh } = action.payload;
+      return { ...state, uploadedPid, lastEventId, refresh };
     case UPDATE_PATIENT_AIM_DELETE:
       let patientAimDelete = { ...state.patients };
       let { aimRefs } = action;
@@ -77,6 +83,10 @@ const asyncReducer = (state = initialState, action) => {
       for (let serie of aimIDClearedOPenSeries) {
         serie.aimID = null;
       }
+      return { ...state, openSeries: aimIDClearedOPenSeries };
+    case CLEAR_ACTIVE_AIMID:
+      aimIDClearedOPenSeries = [...state.openSeries];
+      aimIDClearedOPenSeries[state.activePort].aimID = null;
       return { ...state, openSeries: aimIDClearedOPenSeries };
     case UPDATE_IMAGEID:
       const openSeriesToUpdate = [...state.openSeries];
@@ -316,9 +326,9 @@ const asyncReducer = (state = initialState, action) => {
         ...state.selectedPatients
       };
 
-      patientsNew[action.patient.subjectID]
-        ? delete patientsNew[action.patient.subjectID]
-        : (patientsNew[action.patient.subjectID] = action.patient);
+      patientsNew[action.patient.patientID]
+        ? delete patientsNew[action.patient.patientID]
+        : (patientsNew[action.patient.patientID] = action.patient);
 
       return { ...state, selectedPatients: patientsNew };
 

@@ -7,14 +7,14 @@ import "../menuStyle.css";
 
 const updateDueDate = props => {
   let today;
-  if (!props.dueDate) {
+  if (!props.duedate) {
     const date = new Date();
     const year = date.getFullYear();
     const month = date.getMonth();
     const day = date.getDate();
     today = `${year}-${month + 1}-${day}`;
   }
-  const defaultDate = props.dueDate || today;
+  const defaultDate = props.duedate || today;
   return (
     <Modal.Dialog dialogClassName="updateDueDate__modal">
       <Modal.Header>

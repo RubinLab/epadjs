@@ -7,7 +7,7 @@ import ToolBar from "./toolbar";
 import { FaRegEye } from "react-icons/fa";
 import {
   getSummaryAnnotations,
-  deleteAnnotation
+  deleteAnnotation,
 } from "../../../services/annotationServices";
 import { getProjects } from "../../../services/projectServices";
 import matchSorter from "match-sorter";
@@ -21,22 +21,20 @@ import {
   alertViewPortFull,
   addToGrid,
   getSingleSerie,
-  getWholeData
+  getWholeData,
 } from "../../annotationsList/action";
 const mode = sessionStorage.getItem("mode");
 
 const messages = {
   deleteSelected: "Delete selected annotations? This cannot be undone.",
   fillRequiredFields: "Please fill the required fields",
-  dateFormat: "Date format should be M/d/yy."
+  dateFormat: "Date format should be M/d/yy.",
 };
 
 class Annotations extends React.Component {
   state = {
     annotations: [],
     projectList: [],
-    // singleDeleteData: {},
-    // deleteSingleClicked: false,
     hasAddClicked: false,
     deleteAllClicked: false,
     selectAll: 0,
@@ -44,7 +42,7 @@ class Annotations extends React.Component {
     filteredData: null,
     uploadClicked: false,
     downloadClicked: false,
-    projectID: ""
+    projectID: "",
   };
 
   componentDidMount = async () => {
@@ -54,6 +52,17 @@ class Annotations extends React.Component {
       this.setState({ projectList, projectID: projectList[0].id });
     } else {
       this.getAnnotationsData();
+    }
+  };
+
+  componentDidUpdate = async prevProps => {
+    try {
+      const { projectID, refresh, lastEventId } = this.props;
+      if (refresh && lastEventId !== prevProps.lastEventId) {
+        await this.getAnnotationsData(projectID);
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -106,13 +115,13 @@ class Annotations extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0
+          selectAll: 0,
         });
       }
     } else {
       newSelected[id] = projectID;
       await this.setState({
-        selectAll: 2
+        selectAll: 2,
       });
     }
     this.setState({ selected: newSelected });
@@ -128,7 +137,7 @@ class Annotations extends React.Component {
     }
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
+      selectAll: this.state.selectAll === 0 ? 1 : 0,
     });
   }
 
@@ -142,7 +151,7 @@ class Annotations extends React.Component {
       error: "",
       deleteAllClicked: false,
       uploadClicked: false,
-      downloadClicked: false
+      downloadClicked: false,
     });
   };
 
@@ -150,14 +159,14 @@ class Annotations extends React.Component {
     let newSelected = Object.assign({}, this.state.selected);
     const promiseArr = [];
     for (let annotation in newSelected) {
-      promiseArr.push(
-        deleteAnnotation(null, annotation, newSelected[annotation])
-      );
+      const obj = { aimID: annotation, projectID: newSelected[annotation] };
+      promiseArr.push(deleteAnnotation(obj));
     }
     Promise.all(promiseArr)
       .then(() => {
         this.getAnnotationsData(this.state.projectID);
         this.setState({ selectAll: 0, selected: {} });
+        this.props.updateProgress();
       })
       .catch(error => {
         toast.error(error.response.data.message, { autoClose: false });
@@ -188,7 +197,7 @@ class Annotations extends React.Component {
       subject: "",
       template: "",
       createdStart: "",
-      createdEnd: ""
+      createdEnd: "",
     });
   };
 
@@ -204,7 +213,7 @@ class Annotations extends React.Component {
       patientName,
       template,
       createdStart,
-      createdEnd
+      createdEnd,
     } = this.state;
     if (!(name || patientName || template || createdStart || createdEnd)) {
       return;
@@ -388,13 +397,13 @@ class Annotations extends React.Component {
             />
           );
         },
-        resizable: false
+        resizable: false,
       },
       {
         Header: "Name",
         accessor: "name",
         sortable: true,
-        resizable: true
+        resizable: true,
       },
       {
         Header: "Open",
@@ -409,7 +418,7 @@ class Annotations extends React.Component {
               </div>
             </Link>
           );
-        }
+        },
       },
       {
         Header: "Subject",
@@ -420,10 +429,9 @@ class Annotations extends React.Component {
           return (
             <div>{this.clearCarets(original.row.checkbox.patientName)}</div>
           );
-        }
+        },
       },
       {
-        // Header: "Modality / Series / Slice / Series #",
         accessor: "comment",
         sortable: true,
         resizable: true,
@@ -436,20 +444,20 @@ class Annotations extends React.Component {
               <div>Slice / Series #</div>
             </div>
           );
-        }
+        },
       },
       {
         Header: "Template",
         accessor: "template",
         resizable: true,
-        sortable: true
+        sortable: true,
       },
       {
         Header: "User",
         accessor: "userName",
         style: { whiteSpace: "normal" },
         resizable: true,
-        sortable: true
+        sortable: true,
       },
       {
         Header: "Study",
@@ -462,12 +470,11 @@ class Annotations extends React.Component {
         Cell: original => {
           const studyDateArr = original.row.checkbox.studyDate.split(" ");
           return <div>{this.formatDate(studyDateArr[0])}</div>;
-        }
+        },
       },
       {
         Header: "Created",
         sortable: true,
-        // resizable: true,
         accessor: "date",
         filterMethod: (filter, rows) =>
           matchSorter(rows, filter.value, { keys: ["date"] }),
@@ -475,7 +482,7 @@ class Annotations extends React.Component {
         Cell: original => {
           const studyDateArr = original.row.checkbox.date.split(" ");
           return <div>{this.formatDate(studyDateArr[0])}</div>;
-        }
+        },
       },
       {
         Header: () => {
@@ -487,7 +494,6 @@ class Annotations extends React.Component {
           );
         },
         sortable: true,
-        // resizable: true,
         accessor: "date",
         filterMethod: (filter, rows) =>
           matchSorter(rows, filter.value, { keys: ["time"] }),
@@ -495,8 +501,8 @@ class Annotations extends React.Component {
         Cell: original => {
           const studyDateArr = original.row.checkbox.date.split(" ");
           return <div>{studyDateArr[1]}</div>;
-        }
-      }
+        },
+      },
     ];
   };
 
@@ -515,7 +521,6 @@ class Annotations extends React.Component {
   };
 
   handleSubmitUpload = () => {
-    this.getAnnotationsData();
     this.handleCancel();
   };
 
@@ -584,7 +589,10 @@ class Annotations extends React.Component {
 const mapsStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
-    patients: state.annotationsListReducer.patients
+    patients: state.annotationsListReducer.patients,
+    uploadedPid: state.annotationsListReducer.uploadedPid, 
+    lastEventId: state.annotationsListReducer.lastEventId, 
+    refresh: state.annotationsListReducer.refresh, 
   };
 };
 

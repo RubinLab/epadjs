@@ -2,10 +2,9 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf } from "react-icons/fa";
 import ReactTooltip from "react-tooltip";
-import { BrowserRouter, withRouter } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import ReactTable from "react-table";
 import { toast } from "react-toastify";
-import selectTableHOC from "react-table/lib/hoc/selectTable";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import Annotations from "./annotations";
 import { getSeries } from "../../services/seriesServices";
@@ -17,7 +16,7 @@ import {
   clearSelection,
   addToGrid,
   getWholeData,
-  updatePatient
+  updatePatient,
 } from "../annotationsList/action";
 import { MAX_PORT, formatDates } from "../../constants";
 import AlertGridFull from "./alertGridFull";
@@ -57,8 +56,8 @@ function selectSeries(projectId, subjectId, studyId, seriesId) {
       projectId,
       subjectId,
       studyId,
-      seriesId
-    }
+      seriesId,
+    },
   };
 }
 
@@ -73,59 +72,150 @@ class Series extends Component {
       selectAll: false,
       selectType: "checkbox",
       expanded: {},
-      showGridFullWarning: false
+      showGridFullWarning: false,
       // selectedSerie: {}
+      expansionArr: [],
     };
   }
 
   async componentDidMount() {
-    const { data: data } = await getSeries(
-      this.props.projectId,
-      this.props.subjectId,
-      this.props.studyId
-    );
-    this.setState({ data });
-    this.setState({ columns: this.setColumns() });
-    if (data.length === 0) {
-      toast.info("No serie found", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+    try {
+      const {
+        projectId,
+        subjectId,
+        studyId,
+        expansionArr,
+        // updateExpandedLevelNums,
+        expandLevel,
+        treeExpand,
+        patientIndex,
+        studyIndex,
+        expandLoading,
+        treeData,
+      } = this.props;
+      // const { numOfPresentStudies, numOfStudiesLoaded } = expandLoading;
+      // const { data: data } = await getSeries(projectId, subjectId, studyId);
+      let data = Object.values(
+        treeData[projectId][subjectId].studies[studyId].series
+      );
+      if (data.length > 0) {
+        data = data.map(el => el.data);
+      } else {
+        let series = await getSeries(projectId, subjectId, studyId);
+        data = series.data;
+        this.props.getTreeData(projectId, "series", data);
+      }
+      this.setState({ data });
+      this.setState({ columns: this.setColumns() });
+      const seriesOpened = expansionArr.includes(studyId);
+      // const alreadyCounted = numOfPresentStudies === numOfStudiesLoaded;
+      // if (!seriesOpened && expandLevel === 2 && !alreadyCounted) {
+      //   updateExpandedLevelNums("study", data.length, 1);
+      // }
+      if (expandLevel > 2) {
+        this.expandCurrentLevel();
+        const obj = {
+          patient: this.props.patientIndex,
+          study: this.props.studyIndex,
+          series: data.length,
+        };
+        this.props.getTreeExpandAll(obj, true, expandLevel);
+      }
+
+      if (data.length === 0) {
+        toast.info("No serie found", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
+      const expanded = {};
+      const ptExpandKeys = Object.keys(treeExpand[patientIndex][studyIndex]);
+      const ptExpandVal = Object.values(treeExpand[patientIndex][studyIndex]);
+      ptExpandKeys.forEach((el, index) => {
+        expanded[el] = ptExpandVal[index];
       });
+      this.setState({ expanded });
+    } catch (err) {
+      console.log(`Couldn't load all series data. Please Try again!`);
     }
   }
 
   async componentDidUpdate(prevProps) {
-    if (this.props.update !== prevProps.update) {
-      const { data: data } = await getSeries(
-        this.props.projectId,
-        this.props.subjectId,
-        this.props.studyId
-      );
-      const expanded = persistExpandView(
-        this.state.expanded,
-        this.state.data,
-        data,
-        "seriesUID"
-      );
-      this.setState({ data, expanded });
-    }
-    if (this.props.expandLevel != prevProps.expandLevel) {
-      this.props.expandLevel >= 3
-        ? this.expandCurrentLevel()
-        : this.setState({ expanded: {} });
+    try {
+      const { 
+        update,
+        expansionArr,
+        // updateExpandedLevelNums,
+        projectId,
+        subjectId,
+        studyId,
+        treeExpand,
+        patientIndex,
+        studyIndex,
+        expandLevel,
+      } = this.props;
+      const seriesOpened = expansionArr.includes(studyId);
+      if (update !== prevProps.update && treeExpand[patientIndex][studyIndex]) {
+        console.log("in here");
+        console.log(projectId, subjectId, studyId);
+        const { data: data } = await getSeries(projectId, subjectId, studyId);
+        const expanded = persistExpandView(
+          this.state.expanded,
+          this.state.data,
+          data,
+          "seriesUID"
+        );
+        this.setState({ data, expanded });
+        this.props.getTreeData(this.props.projectId, "series", data);
+      }
+      if (this.props.expandLevel != prevProps.expandLevel) {
+        this.props.expandLevel >= 3
+          ? this.expandCurrentLevel()
+          : this.setState({ expanded: {} });
+
+        const expandedToSeries =
+          prevProps.expandLevel < expandLevel && expandLevel === 2;
+        // if (expandedToSeries && seriesOpened) {
+        //   updateExpandedLevelNums("study", this.state.data.length, 1);
+        // }
+        const expandToAnnotations =
+          prevProps.expandLevel < expandLevel && expandLevel === 3;
+        const shrinkedToSeries =
+          prevProps.expandLevel > expandLevel && expandLevel === 2;
+        const obj = {
+          patient: this.props.patientIndex,
+          study: this.props.studyIndex,
+          series: this.state.data.length,
+        };
+        if (shrinkedToSeries) {
+          this.setState({ expansionArr: [] });
+          this.props.getTreeExpandAll(obj, false, this.props.expandLevel);
+        }
+
+        if (expandToAnnotations)
+          this.props.getTreeExpandAll(obj, true, this.props.expandLevel);
+      }
+    } catch (err) {
+      console.log(`Couldn't load all series data. Please Try again!`);
     }
   }
 
   expandCurrentLevel = () => {
-    const expanded = {};
-    for (let i = 0; i < this.state.data.length; i++) {
-      expanded[i] = this.state.data[i].numberOfAnnotations ? true : false;
+    try {
+      const expanded = {};
+      if (this.state.data)
+        for (let i = 0; i < this.state.data.length; i++) {
+          // expanded[i] = this.state.data[i].numberOfAnnotations ? true : false;
+          expanded[i] = this.state.data[i];
+        }
+      this.setState({ expanded });
+    } catch (err) {
+      console.log(`Couldn't load all series data. Please Try again!`);
     }
-    this.setState({ expanded });
   };
 
   selectRow = selected => {
@@ -152,7 +242,7 @@ class Series extends Component {
               onChange={() => this.selectRow(original)}
             />
           );
-        }
+        },
       },
       {
         Header: (
@@ -181,7 +271,7 @@ class Series extends Component {
               </ReactTooltip>
             </>
           );
-        }
+        },
       },
       {
         //annotations
@@ -196,12 +286,12 @@ class Series extends Component {
               </span>
             )}
           </div>
-        )
+        ),
       },
       {
         //subitem
         width: this.widthUnit * 3,
-        Cell: row => <div />
+        Cell: row => <div />,
       },
       {
         Header: (
@@ -220,14 +310,14 @@ class Series extends Component {
               </span>
             )}
           </div>
-        )
+        ),
       },
       {
         Header: "Type",
         width: this.widthUnit * 5,
         Cell: row => (
           <div className="searchView-table__cell">{row.original.examType}</div>
-        )
+        ),
       },
       {
         width: this.widthUnit * 7,
@@ -236,7 +326,7 @@ class Series extends Component {
           <div className="searchView-table__cell">
             {formatDates(row.original.seriesDate)}
           </div>
-        )
+        ),
       },
       {
         width: this.widthUnit * 7,
@@ -245,7 +335,7 @@ class Series extends Component {
           <div className="searchView-table__cell">
             {formatDates(row.original.createdTime)}
           </div>
-        )
+        ),
       },
       {
         Header: "Accession",
@@ -254,7 +344,7 @@ class Series extends Component {
           <div className="searchView-table__cell">
             {row.original.accessionNumber}
           </div>
-        )
+        ),
       },
       {
         Header: "Identifier",
@@ -278,8 +368,8 @@ class Series extends Component {
               <span>{row.original.seriesUID}</span>
             </ReactTooltip>
           </>
-        )
-      }
+        ),
+      },
     ];
     return columns;
   }
@@ -303,7 +393,7 @@ class Series extends Component {
         // it does exist so we will remove it using destructing
         selection = [
           ...selection.slice(0, keyIndex),
-          ...selection.slice(keyIndex + 1)
+          ...selection.slice(keyIndex + 1),
         ];
       } else {
         // it does not exist so add it
@@ -315,20 +405,20 @@ class Series extends Component {
   };
   toggleAll = () => {
     /*
-      'toggleAll' is a tricky concept with any filterable table
+      "toggleAll" is a tricky concept with any filterable table
       do you just select ALL the records that are in your data?
       OR
       do you only select ALL the records that are in the current filtered data?
 
-      The latter makes more sense because 'selection' is a visual thing for the user.
+      The latter makes more sense because "selection" is a visual thing for the user.
       This is especially true if you are going to implement a set of external functions
       that act on the selected information (you would not want to DELETE the wrong thing!).
 
       So, to that end, access to the internals of ReactTable are required to get what is
       currently visible in the table (either on the current page or any other page).
 
-      The HOC provides a method call 'getWrappedInstance' to get a ref to the wrapped
-      ReactTable and then get the internal state and the 'sortedData'.
+      The HOC provides a method call "getWrappedInstance" to get a ref to the wrapped
+      ReactTable and then get the internal state and the "sortedData".
       That can then be iterrated to get all the currently visible records and set
       the selection state.
     */
@@ -337,9 +427,9 @@ class Series extends Component {
     if (selectAll) {
       // we need to get at the internals of ReactTable
       const wrappedInstance = this.selectTable.getWrappedInstance();
-      // the 'sortedData' property contains the currently accessible records based on the filter and sort
+      // the "sortedData" property contains the currently accessible records based on the filter and sort
       const currentRecords = wrappedInstance.getResolvedState().sortedData;
-      // we need to get all the 'real' (original) records out to get at their IDs
+      // we need to get all the "real" (original) records out to get at their IDs
       const nodes = getNodes(currentRecords);
       // we just push all the IDs onto the selection array
       nodes.forEach(item => {
@@ -350,7 +440,7 @@ class Series extends Component {
   };
   isSelected = key => {
     /*
-      Instead of passing our external selection state we provide an 'isSelected'
+      Instead of passing our external selection state we provide an "isSelected"
       callback and detect the selection state ourselves. This allows any implementation
       for selection (either an array, object keys, or even a Javascript Set object).
     */
@@ -363,7 +453,7 @@ class Series extends Component {
     this.setState({
       selectType: this.state.selectType === "radio" ? "checkbox" : "radio",
       selection: [],
-      selectAll: false
+      selectAll: false,
     });
   };
   toggleTree = () => {
@@ -373,9 +463,21 @@ class Series extends Component {
       this.setState({ pivotBy: [], expanded: {} });
     }
   };
-  onExpandedChange = expanded => {
-    this.setState({ expanded });
+
+  onExpandedChange = (newExpanded, index, event) => {
+    const { data } = this.state;
+    this.setState({ expanded: newExpanded });
+    const expansionArr = [...this.state.expansionArr];
+    expansionArr[index] = expansionArr[index] ? false : data[index].seriesUID;
+    this.setState({ expansionArr });
+    const obj = {
+      patient: this.props.patientIndex,
+      study: this.props.studyIndex,
+      series: { [index]: newExpanded[index] },
+    };
+    this.props.getTreeExpandSingle(obj);
   };
+
   handleSelectSeries = row => {
     if (!this.state.series.find(serie => serie.seriesId === row.seriesUID)) {
       this.props.dispatch(
@@ -453,7 +555,7 @@ class Series extends Component {
       logSelection,
       toggleType,
       onExpandedChange,
-      toggleTree
+      toggleTree,
     } = this;
     const { data, columns, selectAll, selectType, expanded } = this.state;
     const extraProps = {
@@ -463,7 +565,7 @@ class Series extends Component {
       toggleSelection,
       selectType,
       onExpandedChange,
-      expanded
+      expanded,
     };
 
     const TheadComponent = props => null;
@@ -490,7 +592,7 @@ class Series extends Component {
                       handleOriginal();
                     }
                     this.dispatchSerieDisplay(rowInfo.original);
-                  }
+                  },
                 };
               }}
               SubComponent={row => {
@@ -504,6 +606,18 @@ class Series extends Component {
                       studyDescription={this.props.studyDescription}
                       seriesDescription={row.original.seriesDescription}
                       update={this.props.update}
+                      // updateExpandedLevelNums={
+                      //   this.props.updateExpandedLevelNums
+                      // }
+                      expandLevel={this.props.expandLevel}
+                      progressUpdated={this.props.progressUpdated}
+                      expansionArr={this.state.expansionArr}
+                      expandLevel={this.props.expandLevel}
+                      // expandLoading={this.props.expandLoading}
+                      treeExpand={this.props.treeExpand}
+                      patientIndex={this.props.patientIndex}
+                      studyIndex={this.props.studyIndex}
+                      seriesIndex={row.index}
                     />
                   </div>
                 );
@@ -525,7 +639,7 @@ const mapStateToProps = state => {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     activePort: state.annotationsListReducer.activePort,
-    selectedSeries: state.annotationsListReducer.selectedSeries
+    selectedSeries: state.annotationsListReducer.selectedSeries,
   };
 };
 

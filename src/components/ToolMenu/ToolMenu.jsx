@@ -47,7 +47,6 @@ import "./ToolMenu.css";
 
 import Switch from "react-switch";
 import ToolMenuItem from "../ToolMenu/ToolMenuItem";
-import getNumOfSegs from "../../Utils/Segmentation/getNumOfSegments";
 
 const mapStateToProps = state => {
   return {
@@ -206,17 +205,17 @@ class ToolMenu extends Component {
         icon: <FaBroom />,
         tool: "Brush3DHUGated"
       },
-      {
-        name: "Freehand Scissors",
-        icon: <FaHandScissors />,
-        tool: "FreehandScissors"
-      },
-      { name: "Circle Scissors", icon: <FaCircle />, tool: "CircleScissors" },
-      {
-        name: "Correction Scissors",
-        icon: <TiScissorsOutline />,
-        tool: "CorrectionScissors"
-      }
+      // {
+      //   name: "Freehand Scissors",
+      //   icon: <FaHandScissors />,
+      //   tool: "FreehandScissors"
+      // },
+      { name: "Circle Scissors", icon: <FaCircle />, tool: "CircleScissors" }
+      // {
+      //   name: "Correction Scissors",
+      //   icon: <TiScissorsOutline />,
+      //   tool: "CorrectionScissors"
+      // }
     ];
   }
 
@@ -238,36 +237,37 @@ class ToolMenu extends Component {
     cornerstoneTools.setToolActive(toolName, {
       mouseButtonMask: [mouseMask]
     });
-    if (toolName === "Brush") this.handleBrushSelected();
+    if (toolName === "Brush3DTool" || toolName === "Brush3DHUGated")
+      this.handleBrushSelected();
   };
 
-  handleBrushSelected = () => {
-    const { openSeries, activePort } = this.props;
-    const { imageAnnotations } = openSeries[activePort];
+  getActiveImage = () => {
+    const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
-    // if there are already image annotations and segmentations change the labelmap accordingly
-    console.log("Image annotations for seg Count", imageAnnotations);
-    if (imageAnnotations !== undefined) {
-      const newLabelMapIndex = getNumOfSegs(imageAnnotations);
-      console.log("New Label Map Index", newLabelMapIndex);
-      console.log(
-        "Segmenatation Module Before",
-        cornerstoneTools.getModule("segmentation")
-      );
-
-      const { setters } = cornerstoneTools.getModule("segmentation");
-      setters.activeLabelmapIndex(element, newLabelMapIndex);
-      console.log(
-        "Segmenatation Module After",
-        cornerstoneTools.getModule("segmentation")
-      );
-    }
+    return cornerstone.getImage(element);
   };
+
+  checkIfCT = () => {
+    const image = this.getActiveImage();
+    const seriesModule =
+      cornerstone.metaData.get("generalSeriesModule", image.imageId) || {};
+    const modality = seriesModule.modality;
+    if (modality === "CT") return true;
+    return false;
+  };
+
+  checkIfMultiframe = () => {
+    const image = this.getActiveImage();
+    if (image.data.string("x00280008")) return true;
+    return false;
+  };
+
+  handleBrushSelected = () => {};
 
   //sets the selected tool active for an enabled elements
   setToolActiveForElement = (toolName, mouseMask = 1) => {
+    console.log("");
     this.disableAllTools();
-    console.log("CStools", cornerstoneTools);
     if (toolName == "Brush3DHUGatedTool") {
       cornerstoneTools.store.modules.brush.setters.activeGate("muscle");
     }
@@ -353,19 +353,37 @@ class ToolMenu extends Component {
   };
 
   handleToolClicked = (index, tool) => {
-    this.disableAllTools();
     if (tool === "Noop") {
+      this.disableAllTools();
       this.setState({ activeTool: "", activeToolIdx: index });
       return;
-    } else if (tool === "Presets") this.showPresets();
-    else if (tool === "Invert") this.invert();
-    else if (tool === "Reset") this.reset();
-    else if (tool === "MetaData") this.toggleMetaData();
-    else {
-      this.setState({ activeTool: tool, activeToolIdx: index }, () => {
-        this.setToolActive(tool);
-      });
+    } else if (tool === "Presets") {
+      this.showPresets();
+      return;
+    } else if (tool === "Invert") {
+      this.invert();
+      return;
+    } else if (tool === "Reset") {
+      this.reset();
+      return;
+    } else if (tool === "MetaData") {
+      this.toggleMetaData();
+      return;
+    } else if (tool === "Brush3DTool") {
+      if (this.checkIfMultiframe()) {
+        alert("Segmentation only works in singleframe images!");
+        return;
+      } //Dont' select the HUGated if the modality is not CT
+    } else if (tool === "Brush3DHUGated") {
+      if (!this.checkIfCT() || this.checkIfMultiframe()) {
+        alert("HU Gated tool only works with singleframe CT images");
+        return;
+      } //Dont' select the HUGated if the modality is not CT
     }
+    this.disableAllTools();
+    this.setState({ activeTool: tool, activeToolIdx: index }, () => {
+      this.setToolActive(tool);
+    });
   };
 
   render() {

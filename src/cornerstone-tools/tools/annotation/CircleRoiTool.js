@@ -1,10 +1,10 @@
-import external from './../../externalModules.js';
-import BaseAnnotationTool from '../base/BaseAnnotationTool.js';
+import external from "./../../externalModules.js";
+import BaseAnnotationTool from "../base/BaseAnnotationTool.js";
 
 // State
-import { getToolState } from './../../stateManagement/toolState.js';
-import toolStyle from './../../stateManagement/toolStyle.js';
-import toolColors from './../../stateManagement/toolColors.js';
+import { getToolState } from "./../../stateManagement/toolState.js";
+import toolStyle from "./../../stateManagement/toolStyle.js";
+import toolColors from "./../../stateManagement/toolColors.js";
 
 // Drawing
 import {
@@ -13,21 +13,21 @@ import {
   setShadow,
   drawCircle,
   drawHandles,
-  drawLinkedTextBox,
-} from './../../drawing/index.js';
+  drawLinkedTextBox
+} from "./../../drawing/index.js";
 
 // Util
-import calculateSUV from './../../util/calculateSUV.js';
-import { calculateEllipseStatistics } from './../../util/ellipse/index.js';
-import getROITextBoxCoords from '../../util/getROITextBoxCoords.js';
-import numbersWithCommas from './../../util/numbersWithCommas.js';
-import throttle from './../../util/throttle.js';
-import { getLogger } from '../../util/logger.js';
-import getPixelSpacing from '../../util/getPixelSpacing';
-import { circleRoiCursor } from '../cursors/index.js';
-import getCircleCoords from '../../util/getCircleCoords';
+import calculateSUV from "./../../util/calculateSUV.js";
+import { calculateEllipseStatistics } from "./../../util/ellipse/index.js";
+import getROITextBoxCoords from "../../util/getROITextBoxCoords.js";
+import numbersWithCommas from "./../../util/numbersWithCommas.js";
+import throttle from "./../../util/throttle.js";
+import { getLogger } from "../../util/logger.js";
+import getPixelSpacing from "../../util/getPixelSpacing";
+import { circleRoiCursor } from "../cursors/index.js";
+import getCircleCoords from "../../util/getCircleCoords";
 
-const logger = getLogger('tools:annotation:CircleRoiTool');
+const logger = getLogger("tools:annotation:CircleRoiTool");
 
 /**
  * @public
@@ -40,9 +40,9 @@ const logger = getLogger('tools:annotation:CircleRoiTool');
 export default class CircleRoiTool extends BaseAnnotationTool {
   constructor(props = {}) {
     const defaultProps = {
-      name: 'CircleRoi',
-      supportedInteractionTypes: ['Mouse', 'Touch'],
-      svgCursor: circleRoiCursor,
+      name: "CircleRoi",
+      supportedInteractionTypes: ["Mouse", "Touch"],
+      svgCursor: circleRoiCursor
     };
 
     super(props, defaultProps);
@@ -72,13 +72,13 @@ export default class CircleRoiTool extends BaseAnnotationTool {
           x: eventData.currentPoints.image.x,
           y: eventData.currentPoints.image.y,
           highlight: true,
-          active: false,
+          active: false
         },
         end: {
           x: eventData.currentPoints.image.x,
           y: eventData.currentPoints.image.y,
           highlight: true,
-          active: true,
+          active: true
         },
         initialRotation: eventData.viewport.rotation,
         textBox: {
@@ -87,9 +87,9 @@ export default class CircleRoiTool extends BaseAnnotationTool {
           movesIndependently: false,
           drawnIndependently: true,
           allowedOutsideImage: true,
-          hasBoundingBox: true,
-        },
-      },
+          hasBoundingBox: true
+        }
+      }
     };
   }
 
@@ -109,7 +109,7 @@ export default class CircleRoiTool extends BaseAnnotationTool {
       return false;
     }
 
-    const distance = interactionType === 'mouse' ? 15 : 25;
+    const distance = interactionType === "mouse" ? 15 : 25;
 
     const startCanvas = external.cornerstone.pixelToCanvas(
       element,
@@ -136,7 +136,7 @@ export default class CircleRoiTool extends BaseAnnotationTool {
 
   updateCachedStats(image, element, data) {
     const seriesModule =
-      external.cornerstone.metaData.get('generalSeriesModule', image.imageId) ||
+      external.cornerstone.metaData.get("generalSeriesModule", image.imageId) ||
       {};
     const modality = seriesModule.modality;
     const pixelSpacing = getPixelSpacing(image);
@@ -170,7 +170,7 @@ export default class CircleRoiTool extends BaseAnnotationTool {
 
     // Meta
     const seriesModule =
-      external.cornerstone.metaData.get('generalSeriesModule', image.imageId) ||
+      external.cornerstone.metaData.get("generalSeriesModule", image.imageId) ||
       {};
 
     // Pixel Spacing
@@ -187,11 +187,14 @@ export default class CircleRoiTool extends BaseAnnotationTool {
         }
 
         // Configure
-        const color = toolColors.getColorIfActive(data);
+        let color;
+        const activeColor = toolColors.getActiveColor(data);
+        if (data.active) color = activeColor;
+        else color = data.color ? data.color : toolColors.getToolColor();
         const handleOptions = {
           color,
           handleRadius,
-          drawHandlesIfActive: drawHandlesOnHover,
+          drawHandlesIfActive: drawHandlesOnHover
         };
 
         setShadow(context, this.configuration);
@@ -216,9 +219,9 @@ export default class CircleRoiTool extends BaseAnnotationTool {
           data.handles.start,
           radius,
           {
-            color,
+            color
           },
-          'pixel'
+          "pixel"
         );
 
         drawHandles(context, eventData, data.handles, handleOptions);
@@ -287,28 +290,28 @@ function _findTextBoxAnchorPoints(startHandle, endHandle) {
     {
       // Top middle point of ellipse
       x: left + width / 2,
-      y: top,
+      y: top
     },
     {
       // Left middle point of ellipse
       x: left,
-      y: top + height / 2,
+      y: top + height / 2
     },
     {
       // Bottom middle point of ellipse
       x: left + width / 2,
-      y: top + height,
+      y: top + height
     },
     {
       // Right middle point of ellipse
       x: left + width,
-      y: top + height / 2,
-    },
+      y: top + height / 2
+    }
   ];
 }
 
 function _getUnit(modality, showHounsfieldUnits) {
-  return modality === 'CT' && showHounsfieldUnits !== false ? 'HU' : '';
+  return modality === "CT" && showHounsfieldUnits !== false ? "HU" : "";
 }
 
 /**
@@ -347,7 +350,7 @@ function _createTextBoxContent(
 
     // If this image has SUV values to display, concatenate them to the text line
     if (hasStandardUptakeValues) {
-      const SUVtext = ' SUV: ';
+      const SUVtext = " SUV: ";
 
       const meanSuvString = `${SUVtext}${numbersWithCommas(
         meanStdDevSUV.mean.toFixed(2)
@@ -361,7 +364,7 @@ function _createTextBoxContent(
       );
 
       while (context.measureText(meanString).width < targetStringLength) {
-        meanString += ' ';
+        meanString += " ";
       }
 
       otherLines.push(`${meanString}${meanSuvString}`);
@@ -378,7 +381,7 @@ function _createTextBoxContent(
         : Math.floor(context.measureText(`${meanString}     `).width);
 
       while (context.measureText(minString).width < targetStringLength) {
-        minString += ' ';
+        minString += " ";
       }
 
       otherLines.push(`${minString}${maxString}`);
@@ -418,46 +421,50 @@ function _formatArea(area, hasPixelSpacing) {
  * @returns {Object} The Stats object
  */
 function _calculateStats(image, element, handles, modality, pixelSpacing) {
-  // Retrieve the bounds of the ellipse in image coordinates
-  const circleCoordinates = getCircleCoords(handles.start, handles.end);
+  try {
+    // Retrieve the bounds of the ellipse in image coordinates
+    const circleCoordinates = getCircleCoords(handles.start, handles.end);
 
-  // Retrieve the array of pixels that the ellipse bounds cover
-  const pixels = external.cornerstone.getPixels(
-    element,
-    circleCoordinates.left,
-    circleCoordinates.top,
-    circleCoordinates.width,
-    circleCoordinates.height
-  );
+    // Retrieve the array of pixels that the ellipse bounds cover
+    const pixels = external.cornerstone.getPixels(
+      element,
+      circleCoordinates.left,
+      circleCoordinates.top,
+      circleCoordinates.width,
+      circleCoordinates.height
+    );
 
-  // Calculate the mean & standard deviation from the pixels and the ellipse details.
-  const ellipseMeanStdDev = calculateEllipseStatistics(
-    pixels,
-    circleCoordinates
-  );
+    // Calculate the mean & standard deviation from the pixels and the ellipse details.
+    const ellipseMeanStdDev = calculateEllipseStatistics(
+      pixels,
+      circleCoordinates
+    );
 
-  let meanStdDevSUV;
+    let meanStdDevSUV;
 
-  if (modality === 'PT') {
-    meanStdDevSUV = {
-      mean: calculateSUV(image, ellipseMeanStdDev.mean, true) || 0,
-      stdDev: calculateSUV(image, ellipseMeanStdDev.stdDev, true) || 0,
+    if (modality === "PT") {
+      meanStdDevSUV = {
+        mean: calculateSUV(image, ellipseMeanStdDev.mean, true) || 0,
+        stdDev: calculateSUV(image, ellipseMeanStdDev.stdDev, true) || 0
+      };
+    }
+
+    const area =
+      Math.PI *
+      ((circleCoordinates.width * (pixelSpacing.colPixelSpacing || 1)) / 2) *
+      ((circleCoordinates.height * (pixelSpacing.rowPixelSpacing || 1)) / 2);
+
+    return {
+      area: area || 0,
+      count: ellipseMeanStdDev.count || 0,
+      mean: ellipseMeanStdDev.mean || 0,
+      variance: ellipseMeanStdDev.variance || 0,
+      stdDev: ellipseMeanStdDev.stdDev || 0,
+      min: ellipseMeanStdDev.min || 0,
+      max: ellipseMeanStdDev.max || 0,
+      meanStdDevSUV
     };
+  } catch (error) {
+    console.log("WARN:", error);
   }
-
-  const area =
-    Math.PI *
-    ((circleCoordinates.width * (pixelSpacing.colPixelSpacing || 1)) / 2) *
-    ((circleCoordinates.height * (pixelSpacing.rowPixelSpacing || 1)) / 2);
-
-  return {
-    area: area || 0,
-    count: ellipseMeanStdDev.count || 0,
-    mean: ellipseMeanStdDev.mean || 0,
-    variance: ellipseMeanStdDev.variance || 0,
-    stdDev: ellipseMeanStdDev.stdDev || 0,
-    min: ellipseMeanStdDev.min || 0,
-    max: ellipseMeanStdDev.max || 0,
-    meanStdDevSUV,
-  };
 }

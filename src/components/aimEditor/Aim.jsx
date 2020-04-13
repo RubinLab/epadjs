@@ -202,6 +202,9 @@ class Aim {
 
   createMeanCalcEntity = (value, preLabel) => {
     var { unit, mean } = value;
+    console.log("Unit", unit);
+    console.log("what is this", this._getAimUnitAndDcmTypeCode(unit));
+    const { unit, typeCodeDcm } = this._getAimUnitAndDcmTypeCode(unit);
     var obj = {};
     obj["calculationResultCollection"] = {
       CalculationResult: [this._createCalcResult(unit, "Mean", mean, preLabel)]
@@ -210,7 +213,7 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
-      this._createTypeCode(),
+      typeCodeDcm,
       this._createTypeCode("R-00317", "SRT", "Mean")
     ];
     this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection.CalculationEntity.push(
@@ -221,6 +224,8 @@ class Aim {
 
   createStdDevCalcEntity = (value, preLabel) => {
     var { unit, stdDev } = value;
+    const { unit, typeCodeDcm } = this._getAimUnitAndDcmTypeCode(unit);
+
     var obj = {};
     obj["calculationResultCollection"] = {
       CalculationResult: [
@@ -231,7 +236,7 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
-      this._createTypeCode(),
+      typeCodeDcm,
       this._createTypeCode("R-10047", "SRT", "Standard Deviation")
     ];
     this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
@@ -242,6 +247,7 @@ class Aim {
 
   createMinCalcEntity = (value, preLabel) => {
     var { unit, min } = value;
+    const { unit, typeCodeDcm } = this._getAimUnitAndDcmTypeCode(unit);
     var obj = {};
     obj["calculationResultCollection"] = {
       CalculationResult: [
@@ -252,7 +258,7 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
-      this._createTypeCode(),
+      typeCodeDcm,
       this._createTypeCode("R-404FB", "SRT", "Minimum")
     ];
     this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
@@ -263,6 +269,7 @@ class Aim {
 
   createMaxCalcEntity = (value, preLabel) => {
     var { unit, max } = value;
+    const { unit, typeCodeDcm } = this._getAimUnitAndDcmTypeCode(unit);
     var obj = {};
     obj["calculationResultCollection"] = {
       CalculationResult: [
@@ -273,13 +280,24 @@ class Aim {
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
-      this._createTypeCode(),
+      typeCodeDcm,
       this._createTypeCode("G-A437", "SRT", "Maximum")
     ];
     this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
       "CalculationEntity"
     ].push(obj);
     return uId;
+  };
+
+  _getAimUnitAndDcmTypeCode = unit => {
+    if (unit === "hu")
+      return { unit: "[hnsf'U]", typeCodeDcm: this._createTypeCode() };
+    else if (unit === "suv")
+      return {
+        unit: "{SUVbw}g/ml",
+        typeCodeDcm: this._createTypeCode(126401, "DCM", "SUVbw")
+      };
+    return { unit, typeCodeDcm: this._createTypeCode() };
   };
 
   createVolumeCalcEntity = (value, preLabel) => {
@@ -359,29 +377,32 @@ class Aim {
     return coordinates;
   };
 
-  addMarkupEntity = (
-    type,
-    shapeIndex,
-    points,
-    imageReferenceUid,
-    frameNumber = 1
-  ) => {
-    //frameNumber should only be sent in multiframes
+  addMarkupEntity = (type, shapeIndex, points, imageReferenceUid) => {
+    const frameNumber = this._getFrameNumber(imageReferenceUid);
+    if (frameNumber > -1)
+      imageReferenceUid = imageReferenceUid.split("&frame=")[0]; //if multiframe strip the frame number from imageUID
+
     var obj = {};
     obj["includeFlag"] = { value: true };
-    obj["shapeIdentifier"] = { value: shapeIndex };
-    obj["referencedFrameNumber"] = { value: frameNumber };
-    obj["xsi:type"] = type;
     obj["twoDimensionSpatialCoordinateCollection"] = {
       TwoDimensionSpatialCoordinate: this._createCoordinateArray(points)
     };
     const uId = generateUid();
+    obj["shapeIdentifier"] = { value: shapeIndex };
     obj["uniqueIdentifier"] = { root: uId };
+    obj["xsi:type"] = type;
     obj["imageReferenceUid"] = { root: imageReferenceUid };
+    obj["referencedFrameNumber"] = { value: frameNumber };
     this.imageAnnotations.ImageAnnotation[0].markupEntityCollection.MarkupEntity.push(
       obj
     );
     return uId;
+  };
+
+  _getFrameNumber = imageReferenceUid => {
+    const frameNumber = imageReferenceUid.split("frame=");
+    if (frameNumber.length > 1) return frameNumber[1];
+    return 1;
   };
 
   /*                                          */
