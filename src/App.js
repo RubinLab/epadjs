@@ -682,7 +682,10 @@ class App extends Component {
                   path="/progress/:wid?"
                   component={ProgressView}
                 />
-                <ProtectedRoute path="/flex/:pid?" component={FlexView} />
+                <ProtectedRoute
+                  path="/flex/:pid?"
+                  render={props => <FlexView {...props} pid={this.state.pid} />}
+                />
                 <ProtectedRoute
                   path="/worklist/:wid?"
                   render={props => (

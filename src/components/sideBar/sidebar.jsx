@@ -223,7 +223,7 @@ class Sidebar extends Component {
                 this.handleRoute("worklist", worklist.workListID);
                 this.setState({ selected: worklist.workListID });
               }}
-              style={{ padding: "1rem" }}
+              style={{ padding: "0.6rem" }}
             >
               {worklist.name}
               {worklist.projectIDs.length ? (
