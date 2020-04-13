@@ -5,6 +5,12 @@ const mode = sessionStorage.getItem("mode");
 export function getProjects() {
   return http.get(apiUrl + "/projects");
 }
+//cavit
+export function getProjectsWithPkAsId() {
+  return http.get(apiUrl + "/projectswithpkasid");
+}
+
+//cavit
 
 export function deleteProject(projectId) {
   return http.delete(apiUrl + "/projects/" + projectId);

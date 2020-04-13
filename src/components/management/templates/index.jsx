@@ -195,6 +195,7 @@ class Templates extends React.Component {
         accessor: "",
         width: 50,
         Cell: ({ original }) => {
+          console.log(original);
           const { templateUID } = original.Template[0];
           return (
             <input
@@ -332,13 +333,15 @@ class Templates extends React.Component {
           onUpload={this.handleUpload}
           onDownload={this.handleDownload}
         />
-        <ReactTable
-          className="pro-table"
-          data={this.state.templates}
-          columns={this.defineColumns()}
-          pageSizeOptions={[10, 20, 50]}
-          defaultPageSize={pageSize}
-        />
+        {this.state.templates.length > 0 && (
+          <ReactTable
+            className="pro-table"
+            data={this.state.templates}
+            columns={this.defineColumns()}
+            pageSizeOptions={[10, 20, 50]}
+            defaultPageSize={pageSize}
+          />
+        )}
         {(this.state.delAll || this.state.delOne) && (
           <DeleteAlert
             message={

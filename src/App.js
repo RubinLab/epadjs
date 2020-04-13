@@ -242,7 +242,6 @@ class App extends Component {
   getProjectMap = projectMap => {
     this.setState({ projectMap });
   };
-
   async componentDidMount() {
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),

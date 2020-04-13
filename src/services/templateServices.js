@@ -6,6 +6,12 @@ const mode = sessionStorage.getItem("mode");
 //   return http.get(apiUrl + "/projects/" + projectId + "/templates/");
 // }
 
+export function getTemplatesFromDb() {
+  return mode === "lite"
+    ? http.get(apiUrl + "/templatesdatafromdb?format=summary")
+    : http.get(apiUrl + "/templatesdatafromdb");
+}
+
 export async function getAllTemplates(projectId = "lite") {
   return http.get(apiUrl + "/projects/" + projectId + "/templates?format=summary");
 }
