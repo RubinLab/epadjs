@@ -1,12 +1,16 @@
 import React from "react";
-import PropTypes from "prop-types";
 import ReactTable from "react-table";
+import { connect } from "react-redux";
 import {
   getPluginsQueue,
   runPluginsQueue,
 } from "../../../../../services/pluginServices";
 import { FaRegTrashAlt } from "react-icons/fa";
 class TrackTab extends React.Component {
+  constructor() {
+    super();
+    this.eventSource = null;
+  }
   state = {
     pluginQueueList: [],
   };
@@ -17,6 +21,17 @@ class TrackTab extends React.Component {
     this.setState({ pluginQueueList: tempPluginQueueList.data });
   };
 
+  componentDidUpdate = async (prevProps) => {
+    console.log("this.props for track tab :", this.props);
+    try {
+      const { refresh, lastEventId } = this.props;
+      //   if (refresh && lastEventId !== prevProps.lastEventId) {
+      //     await this.getTemplatesData();
+      //   }
+    } catch (err) {
+      console.log(err);
+    }
+  };
   deleteOneFromQueue = async (parameterdbid) => {
     // console.log("delete one called", parameterdbid);
     // const deleteParameterResponse = await deleteOneProjectParameter(
@@ -37,16 +52,21 @@ class TrackTab extends React.Component {
   };
   handleRunQueue = async () => {
     const tempPluginQueueList = [...this.state.pluginQueueList];
-
-    for (const eachQueueObj of tempPluginQueueList) {
-      console.log("calling backend queue for obj :", eachQueueObj.id);
-      const responseRunPluginsQueue = await runPluginsQueue(eachQueueObj);
-      if (responseRunPluginsQueue.status === 200) {
-        console.log("eachQueueObj", eachQueueObj);
-      } else {
-        console.log("error happened while running queue");
-      }
+    const responseRunPluginsQueue = await runPluginsQueue("");
+    if (responseRunPluginsQueue.status === 202) {
+      console.log("queue is running");
+    } else {
+      console.log("error happened while running queue");
     }
+    // for (const eachQueueObj of tempPluginQueueList) {
+    //   console.log("calling backend queue for obj :", eachQueueObj.id);
+    //   const responseRunPluginsQueue = await runPluginsQueue(eachQueueObj);
+    //   if (responseRunPluginsQueue.status === 200) {
+    //     console.log("eachQueueObj", eachQueueObj);
+    //   } else {
+    //     console.log("error happened while running queue");
+    //   }
+    // }
   };
 
   definePluginsQueueTableColumns = () => {
@@ -160,10 +180,8 @@ class TrackTab extends React.Component {
     );
   }
 }
-
-export default TrackTab;
-PropTypes.NewPluginWindow = {
-  //onSelect: PropTypes.func,
-  onCancel: PropTypes.func,
-  onSave: PropTypes.func,
+const mapStateToProps = (state) => {
+  const { uploadedPid, lastEventId, refresh } = state.annotationsListReducer;
+  return { refresh, uploadedPid, lastEventId };
 };
+export default connect(mapStateToProps)(TrackTab);
