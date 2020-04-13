@@ -1,16 +1,19 @@
 import React from "react";
 import "../progressView/proView.css";
 
-const worklistSelect = ({ list, handleRoute }) => {
+const worklistSelect = ({ list, handleRoute, selected, type }) => {
   const result = [];
   list.forEach(worklist => {
-    console.log();
-
+    const { workListID } = worklist;
+    const className =
+      selected === workListID && type === "progress"
+        ? "progress-wl __selected"
+        : "progress-wl";
     const completeness =
       worklist.progress >= 0 ? Math.round(worklist.progress) + "%" : null;
     result.push(
       <div
-        className="progress-wl"
+        className={className}
         onClick={() => {
           handleRoute("progress", worklist.workListID);
         }}
