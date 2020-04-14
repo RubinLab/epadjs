@@ -644,9 +644,9 @@ class DisplayView extends Component {
   };
 
   refreshAllViewports = () => {
-    if (cornerstone.getEnabledElements().length) {
-      const enabledElements = cornerstone.getEnabledElements();
-      enabledElements.map(({ element }) => {
+    const elements = cornerstone.getEnabledElements();
+    if (elements) {
+      elements.map(({ element }) => {
         try {
           cornerstone.updateImage(element); //update the image to show newly loaded segmentations}
         } catch (error) {

@@ -26,7 +26,6 @@ export function getSeries(projectId, subjectId, studyId) {
     );
 }
 export function getImageIds(series) {
-  console.log(series);
   if (mode === "lite") {
     return http.get(
       apiUrl +

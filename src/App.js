@@ -26,7 +26,7 @@ import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import {
   clearAimId,
-  getNotificationsData,
+  getNotificationsData
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 
@@ -54,7 +54,7 @@ class App extends Component {
       maxLevel: 0,
       refTree: {},
       treeData: {},
-      pid: null,
+      pid: null
     };
   }
 
@@ -202,7 +202,7 @@ class App extends Component {
       openMng: false,
       openInfo: false,
       openUser: false,
-      openMenu: false,
+      openMenu: false
     });
     if (notification) this.updateNotificationSeen();
   };
@@ -215,7 +215,7 @@ class App extends Component {
     this.setState(state => ({
       openInfo: false,
       openMng: !state.openMng,
-      openUser: false,
+      openUser: false
     }));
   };
 
@@ -223,7 +223,7 @@ class App extends Component {
     this.setState(state => ({
       openInfo: !state.openInfo,
       openMng: false,
-      openUser: false,
+      openUser: false
     }));
   };
 
@@ -231,7 +231,7 @@ class App extends Component {
     this.setState(state => ({
       openInfo: false,
       openMng: false,
-      openUser: !state.openUser,
+      openUser: !state.openUser
     }));
   };
 
@@ -246,7 +246,7 @@ class App extends Component {
   async componentDidMount() {
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),
-      fetch(`${process.env.PUBLIC_URL}/keycloak.json`),
+      fetch(`${process.env.PUBLIC_URL}/keycloak.json`)
     ])
       .then(async results => {
         const configData = await results[0].json();
@@ -321,7 +321,7 @@ class App extends Component {
             resolve({
               userInfo: userInfoResponse.data,
               keycloak: {},
-              authenticated: true,
+              authenticated: true
             });
           })
           .catch(err => reject(err));
@@ -333,20 +333,20 @@ class App extends Component {
         try {
           let user = {
             user: result.userInfo.preferred_username || result.userInfo.email,
-            displayname: result.userInfo.given_name,
+            displayname: result.userInfo.given_name
           };
           await auth.login(user, null, result.keycloak);
           this.setState({
             keycloak: result.keycloak,
             authenticated: result.authenticated,
             id: result.userInfo.sub,
-            user,
+            user
           });
           const {
             email,
             family_name,
             given_name,
-            preferred_username,
+            preferred_username
           } = result.userInfo;
           const username = preferred_username || email;
 
@@ -363,8 +363,8 @@ class App extends Component {
             result.keycloak.token
               ? {
                   headers: {
-                    authorization: `Bearer ${result.keycloak.token}`,
-                  },
+                    authorization: `Bearer ${result.keycloak.token}`
+                  }
                 }
               : {}
           );
@@ -429,12 +429,12 @@ class App extends Component {
       authenticated: false,
       id: null,
       name: null,
-      user: null,
+      user: null
     });
     if (sessionStorage.getItem("authMode") !== "external")
       this.state.keycloak.logout().then(() => {
         this.setState({
-          keycloak: null,
+          keycloak: null
         });
         auth.logout();
       });
@@ -554,7 +554,7 @@ class App extends Component {
       mode,
       progressUpdated,
       treeExpand,
-      expandLevel,
+      expandLevel
     } = this.state;
     let noOfUnseen;
     if (notifications) {
@@ -772,14 +772,14 @@ class App extends Component {
 }
 
 const mapStateToProps = state => {
-  console.log(state.annotationsListReducer);
+  // console.log(state.annotationsListReducer);
   // console.log(state.managementReducer);
   const {
     showGridFullAlert,
     showProjectModal,
     loading,
     activePort,
-    imageID,
+    imageID
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -787,7 +787,7 @@ const mapStateToProps = state => {
     loading,
     activePort,
     imageID,
-    selection: state.managementReducer.selection,
+    selection: state.managementReducer.selection
   };
 };
 export default withRouter(connect(mapStateToProps)(App));
