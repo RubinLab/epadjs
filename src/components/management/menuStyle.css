@@ -32,7 +32,11 @@
   display: inline-block;
   height: 100%;
   margin-left: -0.05em;
-  content: "";
+  content: '';
+}
+
+.custom-modal {
+  background: #3a3f44;
 }
 
 .modal-dialog-div {
@@ -126,7 +130,7 @@
 
 .rnd-window {
   overflow: scroll;
-  background: #333;
+  background: #3a3f44;
   color: #c6c6c6;
   position: relative;
   border: 2px solid #702632;
@@ -134,6 +138,11 @@
   flex-direction: column;
   justify-content: space-between;
   /* overflow: hidden; */
+}
+
+.rnd-window.react-draggable {
+  width: 75%;
+  max-width: 600px;
 }
 
 .wrapped {
@@ -545,7 +554,7 @@
 .projectTable-modal {
   display: flex;
   /* background: #e83e8c; */
-  height: "-webkit-fill-available";
+  height: '-webkit-fill-available';
   max-height: 90%;
 }
 

@@ -6,26 +6,36 @@ import "../searchView/searchView.css";
 import "react-tabs/style/react-tabs.css";
 
 class TagEditor extends React.Component {
-  state = { tagValues: {} };
+  state = { tagValues: {}, error: "" };
   handleTagInput = (e, tagName, tagValue) => {
     let name, value;
     if (e) {
       name = e.target.name;
       value = e.target.value;
-    }
-    if (name || value) {
-      // handle empty name case
+      if (name || value) {
+        if (!value) this.setState({ error: `Please fill the ${name}` });
+        else {
+          this.setState({ error: "" });
+          this.storeTagValuePair(name, value);
+        }
+      }
     } else if (tagName && tagValue) {
-      const tags = { ...this.state.tagValues };
-      tags[tagName] = tagValue;
-      this.setState({ tagValues: tags });
+      this.storeTagValuePair(tagName, tagValue);
     }
   };
   saveTags = () => {
     console.log("save tags clicked");
   };
 
+  storeTagValuePair = (tagName, tagValue) => {
+    const tags = { ...this.state.tagValues };
+    tags[tagName] = tagValue;
+    this.setState({ tagValues: tags });
+  };
+
   render = () => {
+    const { requirements, treeData, seriesIndex, requirementsObj } = this.props;
+    
     return (
       <Tabs>
         <TabList>
@@ -34,21 +44,23 @@ class TagEditor extends React.Component {
         </TabList>
         <TabPanel>
           <ManualEditForm
-            requirements={this.props.requirements}
-            treeData={this.props.treeData}
+            requirements={requirements}
+            treeData={treeData}
             onTagInput={this.handleTagInput}
-            seriesIndex={this.props.seriesIndex}
+            seriesIndex={seriesIndex}
             onSave={this.saveTags}
+            tagValues={this.state.tagValues}
           />
         </TabPanel>
         <TabPanel>
           <CopyFromEpad
-            requirements={this.props.requirements}
-            treeData={this.props.treeData}
+            requirements={requirements}
+            treeData={treeData}
             onTagInput={this.handleTagInput}
-            seriesIndex={this.props.seriesIndex}
+            seriesIndex={seriesIndex}
             onSave={this.saveTags}
-            requirementsObj={this.props.requirementsObj}
+            requirementsObj={requirementsObj}
+            tagValues={this.state.tagValues}
           />
         </TabPanel>
       </Tabs>

@@ -5,16 +5,15 @@ import * as dcmjs from "dcmjs";
 import { FaTimes } from "react-icons/fa";
 import TagRequirements from "./tagRequirementList";
 import TagEditTree from "./tagEditTable";
-import "../searchView/searchView.css";
 import TagEditor from "./tagEditor";
-import TagEditTable from "./tagEditTable";
-import { isEmpty, extractTreeData, extractTableData } from "../../Utils/aid";
+import { isEmpty, extractTableData } from "../../Utils/aid";
 import Modal from "../management/common/customModal";
 import {
   getImageIds,
-  getImageArrayBuffer
+  getImageArrayBuffer,
 } from "../../services/seriesServices";
-import "react-tabs/style/react-tabs.css";
+import "../searchView/searchView.css";
+// import "react-tabs/style/react-tabs.css";
 import "./tagEditor.css";
 
 const style = {
@@ -23,7 +22,8 @@ const style = {
   justifyContent: "center",
   border: "solid 1px #ddd",
   //   width: "fit-content",
-  height: "fit-content"
+  height: "fit-content",
+  
 };
 
 class UploadWizard extends React.Component {
@@ -34,12 +34,19 @@ class UploadWizard extends React.Component {
       y: 100,
       path: null,
       showRequirements: false,
-      requirements: {},
+      requirements: {
+        PatientIDLO: true,
+        PatientNamePN: true,
+        StudyInstanceUIDUI: true,
+        StudyDescriptionLO: true,
+        SeriesInstanceUIDUI: true,
+        SeriesDescriptionLO: true,
+      },
       treeData: null,
       rawData: null,
       showTagEditor: false,
-      tabIndex: 0,
-      seriesIndex: null
+      tabIndex: 2,
+      seriesIndex: null,
     };
   }
 
@@ -48,7 +55,7 @@ class UploadWizard extends React.Component {
       selectedPatients,
       selectedProjects,
       selectedStudies,
-      selectedSeries
+      selectedSeries,
     } = this.props;
     selectedPatients = Object.values(selectedPatients);
     selectedProjects = Object.values(selectedProjects);
@@ -80,8 +87,8 @@ class UploadWizard extends React.Component {
           StudyInstanceUIDUI: true,
           StudyDescriptionLO: true,
           SeriesInstanceUIDUI: true,
-          SeriesDescriptionLO: true
-        }
+          SeriesDescriptionLO: true,
+        },
       });
     } else if (name === "RequireAll" && !checked) {
       await this.setState({ requirements: {} });
@@ -122,7 +129,14 @@ class UploadWizard extends React.Component {
             rawData = buffers.map(buffer => {
               return this.getDataset(buffer.data);
             });
+            console.log(" ---> rawData");
+            console.log(rawData);
             this.setState({ rawData });
+            const treeData = extractTableData(
+              this.state.rawData,
+              this.state.requirements
+            );
+            this.setState({ treeData });
           })
           .catch();
       })
@@ -137,6 +151,8 @@ class UploadWizard extends React.Component {
       const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(
         DicomDict.dict
       );
+      console.log(" ---> dataset");
+      console.log(dataset);
       return dataset;
     } catch (err) {
       console.log("Error in reading dicom dataset", err);
@@ -150,7 +166,7 @@ class UploadWizard extends React.Component {
       <Modal>
         <div className="uploadWizard">
           <div className="uploadWizard-header">
-            <div className="uploadWizard-header__title">ePAD Upload Wizard</div>
+            <div className="uploadWizard-header__title">ePAD Tag Editor</div>
             <div className="menu-clickable" onClick={this.props.onClose}>
               <FaTimes />
             </div>
@@ -209,35 +225,7 @@ const mapStateToProps = state => {
     selectedProjects: state.annotationsListReducer.selectedProjects,
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
-    selectedSeries: state.annotationsListReducer.selectedSeries
+    selectedSeries: state.annotationsListReducer.selectedSeries,
   };
 };
 export default connect(mapStateToProps)(UploadWizard);
-
-// {this.state.showRequirements && (
-//   <TagRequirements
-//     handleInput={this.handleReqSelect}
-//     onClose={this.handleRequirements}
-//     requirements={Object.keys(this.state.requirements)}
-//   />
-// )}
-// {/* {!isEmpty(treeData) && (
-//   <TagEditTree
-//     dataset={treeData}
-//     onEditClick={this.handleTagEditorSelect}
-//   />
-// )} */}
-// {!isEmpty(treeData) && (
-//   <TagEditTable
-//     dataset={treeData}
-//     onEditClick={this.handleTagEditorSelect}
-//   />
-// )}
-// {this.state.showTagEditor && (
-//   <TagEditor
-//     requirements={requirementKeys}
-//     treeData={treeData}
-//     index={index}
-//     // path={this.state.pathToSeries}
-//   />
-// )}

@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import Table from "react-table";
-import { FaCheck, FaEdit } from "react-icons/fa";
+import { FaExclamationTriangle, FaCheck, FaEdit } from "react-icons/fa";
 
 class TagEditTable extends React.Component {
   state = {
-    expanded: {}
+    expanded: {},
   };
 
   render = () => {
@@ -15,37 +15,34 @@ class TagEditTable extends React.Component {
         Header: "Patient",
         id: "tagEditTree-patient",
         resizable: true,
-        accessor: "patientName"
+        accessor: "patientName",
       },
       {
         Header: "Study",
-        resizable: true,
         id: "tagEditTree-study",
-        accessor: "studyDesc"
+        resizable: true,
+        accessor: "studyDesc",
       },
       {
         Header: "Series",
-        resizable: true,
         id: "tagEditTree-series",
-        accessor: "seriesDesc"
+        resizable: true,
+        accessor: "seriesDesc",
       },
       {
         Header: "# of img",
-        resizable: true,
         id: "tagEditTree-imgCount",
         resizable: true,
-        accessor: "imageCount"
+        accessor: "imageCount",
       },
       {
-        Header: "Tag Editor",
+        Header: "Required Tags",
+        id: "tagEditTree-icon",
         resizable: true,
-        id: "tagEditTree-tagEditor",
-        resizable: true,
-        width: 80,
         Cell: row => {
           const { patientID, studyUID, seriesUID } = row.original;
           return (
-            <div>
+            <div className="tagEditTree-icon">
               {row.original.missingTags.length > 0 ? (
                 <div
                   onClick={() =>
@@ -56,19 +53,43 @@ class TagEditTable extends React.Component {
                       seriesUID
                     )
                   }
-                  className="menu-clickable"
                 >
-                  <FaEdit />
+                  <FaExclamationTriangle className="--warnning" />
                 </div>
               ) : (
                 <div>
-                  <FaCheck />
+                  <FaCheck className="--check" />
                 </div>
               )}
             </div>
           );
-        }
-      }
+        },
+      },
+      {
+        Header: "Edit tags",
+        id: "tagEditTree-tagEditor",
+        resizable: true,
+        resizable: true,
+        width: 80,
+        Cell: row => {
+          const { patientID, studyUID, seriesUID } = row.original;
+          return (
+            <div
+              onClick={() =>
+                this.props.onEditClick(
+                  row.index,
+                  patientID,
+                  studyUID,
+                  seriesUID
+                )
+              }
+              className="menu-clickable tagEditTree-tagEditor"
+            >
+              <FaEdit />
+            </div>
+          );
+        },
+      },
     ];
 
     return (

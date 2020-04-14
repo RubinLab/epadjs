@@ -40,3 +40,7 @@
   margin-bottom: 0.8rem;
   align-items: center;
 }
+
+.tagEditForm__el--confirmation {
+  margin-left: 0.5rem;
+}

@@ -12,7 +12,7 @@ const style = {
 
 class ResizeAndDrag extends React.Component {
   state = {
-    // width: "90%",
+    // width: "75%",
     // height: "90%",
     x: 50,
     y: 50

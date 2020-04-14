@@ -322,7 +322,8 @@ h5.add-subject__modal--label,
 }
 
 .tagEditForm__el .--check,
-.tagCopyForm__el .--check {
+.tagCopyForm__el .--check,
+.tagEditTree-icon .--check {
   font-size: 1.5rem;
   color: #45a163;
   margin-left: 0.2rem;
@@ -330,12 +331,24 @@ h5.add-subject__modal--label,
 }
 
 .tagEditForm__el .--warnning,
-.tagCopyForm__el .--warnning {
+.tagCopyForm__el .--warnning,
+.tagEditTree-icon .--warnning {
   font-size: 1.5rem;
-  color: orange;
+  color: #f89406;
   margin-left: 0.2rem;
   text-shadow: 1px 1px 1px #ccc;
 }
+
+.tagEditTree-icon .--warnning, .tagEditTree-icon .--check, .tagEditTree-tagEditor {
+  font-size: 1.2rem;
+}
+
+.tagEditForm__el--confirmation {
+  /* color: #f89406; */
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
 
 .tagEditForm__el .--text,
 .tagCopyForm__el .--text {
@@ -345,6 +358,7 @@ h5.add-subject__modal--label,
   font-weight: normal;
   color: #272b30;
 }
+
 
 .tagEditForm__el .--textFilled,
 .tagCopyForm__el .--textFilled {
