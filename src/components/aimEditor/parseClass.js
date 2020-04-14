@@ -131,7 +131,6 @@ export var AimEditor = function(
   };
 
   this.loadTemplates = function(templateList) {
-    console.log("template list ::: --->", templateList);
     self.arrayTemplatesJsonObjects = templateList;
     if (self.arrayTemplatesJsonObjects.length > 0) {
       for (var i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {

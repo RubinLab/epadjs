@@ -37,16 +37,6 @@ export function getAnnotations(series, opts = {}) {
 }
 
 export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
-  console.log(
-    "project",
-    projectId,
-    "sub",
-    subjectId,
-    "st",
-    studyId,
-    "ser",
-    seriesId
-  );
   if (mode === "lite")
     return http.get(
       apiUrl +

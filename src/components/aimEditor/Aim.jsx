@@ -202,8 +202,6 @@ class Aim {
 
   createMeanCalcEntity = (value, preLabel) => {
     var { unit, mean } = value;
-    console.log("Unit", unit);
-    console.log("what is this", this._getAimUnitAndDcmTypeCode(unit));
     const { unit, typeCodeDcm } = this._getAimUnitAndDcmTypeCode(unit);
     var obj = {};
     obj["calculationResultCollection"] = {
@@ -531,11 +529,9 @@ class Aim {
   };
 
   _getComment = comment => {
-    console.log("Comment value", comment.value.length);
     if (comment.value.length)
       comment.value = this._getProgrammedComment().concat("~~", comment.value);
     else comment.value = this._getProgrammedComment();
-    console.log("comment", comment);
     return comment;
   };
 
