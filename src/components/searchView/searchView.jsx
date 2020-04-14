@@ -233,11 +233,18 @@ class SearchView extends Component {
     const promiseArr = [];
     this.setState({ deleting: true });
     const openItems = [];
+    const deletedItems = [];
     arr.forEach(item => {
       if (this.checkIfSerieOpen(item[level], level).isOpen) {
-        openItems.push([item]);
+        openItems.push(item);
       } else {
-        promiseArr.push(func(item));
+        this.props
+          .closeBeforeDelete(level, item)
+          .then(() => {
+            promiseArr.push(func(item));
+            deletedItems.push(item);
+          })
+          .catch(err => console.log(err));
       }
     });
     Promise.all(promiseArr)
@@ -246,7 +253,7 @@ class SearchView extends Component {
         this.setState({ deleting: false, numOfsubjects: subjects.length });
         this.setState(state => ({ update: state.update + 1 }));
         if (Object.values(this.props.selectedAnnotations).length > 0) {
-          this.updateStoreOnAnnotationDelete(arr);
+          this.updateStoreOnAnnotationDelete(deletedItems);
         }
         this.props.dispatch(clearSelection());
         this.props.updateProgress();
@@ -552,7 +559,7 @@ class SearchView extends Component {
     } else if (selectedPatients.length > 0) {
       await this.setState({ downloading: true });
       for (let patient of selectedPatients) {
-        fileName = `Patients-${patient.subjectID}`;
+        fileName = `Patients-${patient.patientID}`;
         if (patient.numberOfAnnotations) {
           promiseArr.push(downloadSubjects(patient));
           fileNameArr.push(fileName);

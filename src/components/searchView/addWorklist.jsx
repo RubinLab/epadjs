@@ -58,9 +58,9 @@ class WorklistAdd extends React.Component {
     const subjects = Object.values(this.props.selectedPatients);
     const promises = [];
     subjects.forEach((el, index) => {
-      const { projectID, subjectID, subjectName } = el;
+      const { projectID, patientID, subjectName } = el;
       promises.push(
-        addSubjectToWorklist(e.target.id, projectID, subjectID, {
+        addSubjectToWorklist(e.target.id, projectID, patientID, {
           subjectName,
         })
       );

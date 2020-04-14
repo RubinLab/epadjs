@@ -76,10 +76,10 @@ export const closeSerie = () => {
   };
 };
 
-export const getNotificationsData = (uploadedPid, lastEventId) => {
+export const getNotificationsData = (uploadedPid, lastEventId, refresh) => {
   return {
     type: GET_NOTIFICATIONS,
-    payload: { uploadedPid, lastEventId }
+    payload: { uploadedPid, lastEventId, refresh },
   };
 };
 
@@ -146,12 +146,17 @@ export const displaySingleAim = (
 };
 
 export const selectPatient = selectedPatientObj => {
-  let { projectID, subjectName, numberOfAnnotations } = selectedPatientObj;
+   let {
+    projectID,
+    subjectName,
+    numberOfAnnotations,
+    index
+  } = selectedPatientObj;
   projectID = projectID ? projectID : "lite";
   const patientID = selectedPatientObj.subjectID;
   return {
     type: SELECT_PATIENT,
-    patient: { projectID, patientID, numberOfAnnotations, subjectName }
+    patient: { projectID, patientID, numberOfAnnotations, subjectName, index },
   };
 };
 

@@ -10,12 +10,13 @@ export function getSubjects(projectId) {
 }
 
 export function downloadSubjects(subject) {
+  const subjectID = subject.subjectID || subject.patientID;
   const url =
     apiUrl +
     "/projects/" +
     subject.projectID +
     "/subjects/" +
-    subject.subjectID +
+    subjectID +
     "?format=stream&includeAims=true";
   return http.get(url, { responseType: "blob" });
 }

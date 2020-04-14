@@ -63,8 +63,8 @@ const asyncReducer = (state = initialState, action) => {
       updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
       return { ...state, openSeries: updatedOpenSeries };
     case GET_NOTIFICATIONS:
-      const { uploadedPid, lastEventId } = action.payload;
-      return { ...state, uploadedPid, lastEventId };
+      const { uploadedPid, lastEventId, refresh } = action.payload;
+      return { ...state, uploadedPid, lastEventId, refresh };
     case UPDATE_PATIENT_AIM_DELETE:
       let patientAimDelete = { ...state.patients };
       let { aimRefs } = action;
