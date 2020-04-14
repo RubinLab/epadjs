@@ -240,22 +240,24 @@ class DisplayView extends Component {
     const imageUrls = await this.getImages(serie);
     imageUrls.map(url => {
       const baseUrl = wadoUrl + url.lossyImage;
-      if (url.multiFrameImage === true) {
-        for (var i = 0; i < url.numberOfFrames; i++) {
-          let multiFrameUrl = baseUrl + "&frame=" + i;
-          // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
-          cornerstoneImageIds.push(multiFrameUrl);
-          imageIds[multiFrameUrl] = true;
-        }
-      } else {
-        let singleFrameUrl = baseUrl;
-        cornerstoneImageIds.push(singleFrameUrl);
-        cornerstone.loadAndCacheImage(singleFrameUrl);
-        imageIds[singleFrameUrl] = false;
-      }
+      // if (url.multiFrameImage === true) {
+      //   console.log("multiframe", url.multiFrameImage);
+      //   for (var i = 0; i < url.numberOfFrames; i++) {
+      //     let multiFrameUrl = baseUrl + "&frame=" + i;
+      //     // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
+      //     cornerstoneImageIds.push(multiFrameUrl);
+      //     imageIds[multiFrameUrl] = true;
+      //   }
+      // } else {
+      let singleFrameUrl = baseUrl;
+      cornerstoneImageIds.push(singleFrameUrl);
+      cornerstone.loadAndCacheImage(singleFrameUrl);
+      imageIds[singleFrameUrl] = false;
+      // }
     });
 
     this.setState({ imageIds: { ...imageIds } });
+    console.log("State", this.state);
 
     //to jump to the same image after aim save
     let imageIndex;
@@ -644,9 +646,10 @@ class DisplayView extends Component {
   };
 
   refreshAllViewports = () => {
-    if (cornerstone.getEnabledElements().length) {
-      const enabledElements = cornerstone.getEnabledElements();
-      enabledElements.map(({ element }) => {
+    const elements = cornerstone.getEnabledElements();
+    console.log("Elements", elements);
+    if (elements) {
+      elements.map(({ element }) => {
         try {
           cornerstone.updateImage(element); //update the image to show newly loaded segmentations}
         } catch (error) {

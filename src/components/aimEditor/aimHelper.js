@@ -136,6 +136,9 @@ export function getAimImageData(image) {
 
   series.instanceUid = image.data.string("x0020000e") || "";
   series.modality = image.data.string("x00080060") || "";
+  series.number = image.data.string("x00200011") || "";
+  series.description = image.data.string("x0008103e") || "";
+  series.instanceNumber = image.data.string("x00200013") || "";
 
   obj.image.push(getSingleImageData(image));
 

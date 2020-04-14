@@ -118,6 +118,7 @@ class AimEditor extends Component {
     // Logic behind relies on the order of the data in array
     if (!this.checkAimTemplate()) return;
     const answers = this.semanticAnswers.saveAim();
+    console.log("Answers", answers);
 
     // if (this.props.aimI) {
     //   console.log("props", this.props);
@@ -358,7 +359,6 @@ class AimEditor extends Component {
           })
         );
         this.props.dispatch(updatePatientOnAimSave(aimRefs));
-        this.props.updateProgress();
       })
       .catch(error => console.log(error));
     this.props.onCancel(false);

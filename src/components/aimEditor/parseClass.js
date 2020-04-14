@@ -4019,8 +4019,8 @@ export var AimEditor = function(
         var modality = commentArray[0].split("/");
         self.aimType = modality[0];
       } else {
-        document.getElementById("comment").value = comment;
-        self.aimComment = comment;
+        document.getElementById("comment").value = "";
+        self.aimComment = "";
         self.aimType = "";
       }
 

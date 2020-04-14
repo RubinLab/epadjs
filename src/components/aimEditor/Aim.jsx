@@ -506,7 +506,7 @@ class Aim {
     obj["typeCode"] = typeCode;
     obj["dateTime"] = { value: this.getDate() };
     obj["name"] = name;
-    obj["comment"] = comment;
+    obj["comment"] = this._getComment(comment);
     obj["precedentReferencedAnnotationUid"] = { root: "" };
     if (imagingPhysicalEntityCollection)
       obj["imagingPhysicalEntityCollection"] = imagingPhysicalEntityCollection;
@@ -528,6 +528,29 @@ class Aim {
       "imageReferenceEntityCollection"
     ] = this._createImageReferanceEntityCollection();
     return obj;
+  };
+
+  _getComment = comment => {
+    console.log("Comment value", comment.value.length);
+    if (comment.value.length)
+      comment.value = this._getProgrammedComment().concat("~~", comment.value);
+    else comment.value = this._getProgrammedComment();
+    console.log("comment", comment);
+    return comment;
+  };
+
+  _getProgrammedComment = () => {
+    const SEPERATOR = " / ";
+    const { modality, description, instanceNumber, number } = this.temp.series;
+    const comment =
+      modality +
+      SEPERATOR +
+      description +
+      SEPERATOR +
+      instanceNumber +
+      SEPERATOR +
+      number;
+    return comment;
   };
 
   createImageAnnotationStatement = (referenceType, objectId, subjectId) => {
