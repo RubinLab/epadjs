@@ -15,9 +15,10 @@ const tagEditor = ({
   buttonClick,
   tagValues,
   handleTagInput,
+  handleCheckbox,
 }) => {
   return (
-    <>
+    <div className="tagEditor-tabContent">
       <Tabs>
         <TabList>
           <Tab>Manual Edit</Tab>
@@ -31,6 +32,7 @@ const tagEditor = ({
             seriesIndex={seriesIndex}
             tagValues={tagValues}
             seriesArr={seriesArr}
+            handleCheckbox={handleCheckbox}
           />
         </TabPanel>
         <TabPanel>
@@ -42,10 +44,11 @@ const tagEditor = ({
             requirementsObj={requirementsObj}
             tagValues={tagValues}
             seriesArr={seriesArr}
+            handleCheckbox={handleCheckbox}
           />
         </TabPanel>
       </Tabs>
-      <div align="right" className="tagEditForm-btnGroup">
+      <div align="center" className="tagEditForm-btnGroup">
         <TagEditorButton
           name="back"
           onClick={buttonClick}
@@ -66,7 +69,7 @@ const tagEditor = ({
           value="Save Tags"
         />
       </div>
-    </>
+    </div>
   );
 };
 

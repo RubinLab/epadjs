@@ -7,8 +7,8 @@ const manualUpdateForm = ({
   treeData,
   seriesIndex,
   onTagInput,
-  onSave,
   tagValues,
+  handleCheckbox,
 }) => {
   try {
     const { SeriesInstanceUID, missingTags, data } = treeData[seriesIndex];
@@ -27,8 +27,6 @@ const manualUpdateForm = ({
         : tagValues[tag]
         ? tagValues[tag]
         : makeDeIdentifiedValue(null, vr);
-        console.log(value);
-      //missing ? makeDeIdentifiedValue(null, vr) : data[tag];
       if (missing && !tagValues[tag]) onTagInput(null, tag, value);
       fields.push(
         <div key={`${SeriesInstanceUID}-${i}`} className="tagEditForm__el">
@@ -56,7 +54,7 @@ const manualUpdateForm = ({
           <div>
             {patientUpdated && (
               <div className="tagEditForm__el--confirmation" align="left">
-                <input type="checkbox" name="applyPatient" />
+                <input type="checkbox" name="applyPatient" onChange={handleCheckbox}/>
                 <span
                   style={{ marginLeft: "0.3rem" }}
                 >{`Apply patient info to its all series`}</span>
@@ -64,7 +62,7 @@ const manualUpdateForm = ({
             )}
             {studyUpdated && (
               <div className="tagEditForm__el--confirmation" align="left">
-                <input type="checkbox" name="applyStudy" />
+                <input type="checkbox" name="applyStudy" onChange={handleCheckbox} />
                 <span
                   style={{ marginLeft: "0.3rem" }}
                 >{`Apply study info to its all series`}</span>

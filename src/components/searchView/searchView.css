@@ -278,32 +278,7 @@ h5.add-subject__modal--label,
   color: black;
 }
 
-.uploadWizard-modal.react-draggable {
-  width: 50%;
-  background: #3a3f44;
-  max-width: 600px;
-  min-width: 250px;
-}
 
-.uploadWizard {
-  padding: 0.5rem 0.5rem 1.2rem 1.2rem;
-  background: #3a3f44;
-  /* min-width: -webkit-fill-available; */
-  min-width: 50rem;
-  margin: auto;
-  min-height: 30rem;
-  height: fit-content;
-  width: -webkit-fill-available;
-}
-.uploadWizard-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.uploadWizard-header__title {
-  font-size: 1.7rem;
-}
 
 .menu-clickable {
   cursor: pointer;

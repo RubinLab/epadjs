@@ -15,19 +15,19 @@ class TagEditTable extends React.Component {
         Header: "Patient",
         id: "tagEditTree-patient",
         resizable: true,
-        accessor: "patientName",
+        accessor: "PatientName",
       },
       {
         Header: "Study",
         id: "tagEditTree-study",
         resizable: true,
-        accessor: "studyDesc",
+        accessor: "StudyDescription",
       },
       {
         Header: "Series",
         id: "tagEditTree-series",
         resizable: true,
-        accessor: "seriesDesc",
+        accessor: "SeriesDescription",
       },
       {
         Header: "# of img",
