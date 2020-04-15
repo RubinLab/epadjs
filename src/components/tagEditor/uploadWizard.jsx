@@ -23,7 +23,6 @@ const style = {
   border: "solid 1px #ddd",
   //   width: "fit-content",
   height: "fit-content",
-  
 };
 
 class UploadWizard extends React.Component {
@@ -46,20 +45,89 @@ class UploadWizard extends React.Component {
       rawData: null,
       showTagEditor: false,
       tabIndex: 2,
-      seriesIndex: null,
+      seriesIndex: 0,
+      tagValues: {},
+      error: "",
     };
   }
 
+  handleTagInput = (e, tagName, tagValue) => {
+    let name, value;
+    if (e) {
+      name = e.target.name;
+      value = e.target.value;
+      if (name || value) {
+        if (!value) this.setState({ error: `Please fill the ${name}` });
+        else {
+          this.setState({ error: "" });
+          this.storeTagValuePair(name, value);
+        }
+      }
+    } else if (tagName && tagValue) {
+      this.storeTagValuePair(tagName, tagValue);
+    }
+  };
+
+  storeTagValuePair = (tagName, tagValue) => {
+    const tags = { ...this.state.tagValues };
+    tags[tagName] = tagValue;
+    this.setState({ tagValues: tags });
+  };
+
+  handleButtonClick = e => {
+    let confirm;
+    const { name } = e.target;
+    let seriesIndex = this.state.seriesIndex;
+    const seriesArr = Object.keys(this.props.selectedSeries);
+    const newTag = this.checkNewTag();
+    if (name === "back" && seriesIndex > 0) {
+      if (newTag) {
+        confirm = window.confirm("You are going to lose unsaved changes!");
+        if (confirm) {
+          seriesIndex -= 1;
+          this.setState({ seriesIndex, tagValues: {} });
+        } else {
+          return;
+        }
+      } else {
+        seriesIndex -= 1;
+        this.setState({ seriesIndex, tagValues: {} });
+      }
+    } else if (name === "next" && seriesIndex < seriesArr.length - 1) {
+      if (newTag) {
+        confirm = window.confirm("You are going to lose unsaved changes!");
+        if (confirm) {
+          seriesIndex += 1;
+          this.setState({ seriesIndex, tagValues: {} });
+        } else {
+          return;
+        }
+      } else {
+        seriesIndex += 1;
+        this.setState({ seriesIndex, tagValues: {} });
+      }
+    } else if (name === "save") {
+      console.log("save tags clicked");
+    } else {
+      return;
+    }
+  };
+
+  checkNewTag = () => {
+    let result = false;
+    const { tagValues, treeData, seriesIndex } = this.state;
+    for (let tag in tagValues) {
+      if (treeData[seriesIndex][tag] !== tagValues[tag]) {
+        result = true;
+        break;
+      }
+    }
+    return result;
+  };
+
   componentDidMount = () => {
-    let {
-      selectedPatients,
-      selectedProjects,
-      selectedStudies,
-      selectedSeries,
-    } = this.props;
-    selectedPatients = Object.values(selectedPatients);
-    selectedProjects = Object.values(selectedProjects);
-    selectedStudies = Object.values(selectedStudies);
+    let { selectedSeries } = this.props;
+
     selectedSeries = Object.values(selectedSeries);
     if (selectedSeries.length) {
       this.getFirstImgOfSeries(selectedSeries);
@@ -160,7 +228,8 @@ class UploadWizard extends React.Component {
   };
 
   render = () => {
-    const { treeData, requirements, seriesIndex } = this.state;
+    const { treeData, requirements, seriesIndex, tagValues } = this.state;
+    const { selectedSeries } = this.props;
     const requirementKeys = Object.keys(requirements);
     return (
       <Modal>
@@ -210,6 +279,10 @@ class UploadWizard extends React.Component {
                 requirementsObj={requirements}
                 treeData={treeData}
                 seriesIndex={seriesIndex}
+                seriesArr={Object.keys(selectedSeries)}
+                buttonClick={this.handleButtonClick}
+                handleTagInput={this.handleTagInput}
+                tagValues={tagValues}
                 // path={this.state.pathToSeries}
               />
             </TabPanel>
@@ -222,9 +295,6 @@ class UploadWizard extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    selectedProjects: state.annotationsListReducer.selectedProjects,
-    selectedPatients: state.annotationsListReducer.selectedPatients,
-    selectedStudies: state.annotationsListReducer.selectedStudies,
     selectedSeries: state.annotationsListReducer.selectedSeries,
   };
 };

@@ -2,41 +2,22 @@ import React from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import ManualEditForm from "./manualEditForm";
 import CopyFromEpad from "./copyFromEpad";
+import TagEditorButton from "./tagEditorButton";
 import "../searchView/searchView.css";
 import "react-tabs/style/react-tabs.css";
 
-class TagEditor extends React.Component {
-  state = { tagValues: {}, error: "" };
-  handleTagInput = (e, tagName, tagValue) => {
-    let name, value;
-    if (e) {
-      name = e.target.name;
-      value = e.target.value;
-      if (name || value) {
-        if (!value) this.setState({ error: `Please fill the ${name}` });
-        else {
-          this.setState({ error: "" });
-          this.storeTagValuePair(name, value);
-        }
-      }
-    } else if (tagName && tagValue) {
-      this.storeTagValuePair(tagName, tagValue);
-    }
-  };
-  saveTags = () => {
-    console.log("save tags clicked");
-  };
-
-  storeTagValuePair = (tagName, tagValue) => {
-    const tags = { ...this.state.tagValues };
-    tags[tagName] = tagValue;
-    this.setState({ tagValues: tags });
-  };
-
-  render = () => {
-    const { requirements, treeData, seriesIndex, requirementsObj } = this.props;
-    
-    return (
+const tagEditor = ({
+  requirements,
+  treeData,
+  seriesIndex,
+  requirementsObj,
+  seriesArr,
+  buttonClick,
+  tagValues,
+  handleTagInput,
+}) => {
+  return (
+    <>
       <Tabs>
         <TabList>
           <Tab>Manual Edit</Tab>
@@ -46,26 +27,47 @@ class TagEditor extends React.Component {
           <ManualEditForm
             requirements={requirements}
             treeData={treeData}
-            onTagInput={this.handleTagInput}
+            onTagInput={handleTagInput}
             seriesIndex={seriesIndex}
-            onSave={this.saveTags}
-            tagValues={this.state.tagValues}
+            tagValues={tagValues}
+            seriesArr={seriesArr}
           />
         </TabPanel>
         <TabPanel>
           <CopyFromEpad
             requirements={requirements}
             treeData={treeData}
-            onTagInput={this.handleTagInput}
+            onTagInput={handleTagInput}
             seriesIndex={seriesIndex}
-            onSave={this.saveTags}
             requirementsObj={requirementsObj}
-            tagValues={this.state.tagValues}
+            tagValues={tagValues}
+            seriesArr={seriesArr}
           />
         </TabPanel>
       </Tabs>
-    );
-  };
-}
+      <div align="right" className="tagEditForm-btnGroup">
+        <TagEditorButton
+          name="back"
+          onClick={buttonClick}
+          disabled={seriesIndex === 0}
+          value="Previous series"
+        />
+        <TagEditorButton
+          name="next"
+          onClick={buttonClick}
+          disabled={seriesIndex === seriesArr.length - 1}
+          value="Next series"
+        />
 
-export default TagEditor;
+        <TagEditorButton
+          name="save"
+          onClick={buttonClick}
+          disabled={Object.keys(tagValues).length === 0}
+          value="Save Tags"
+        />
+      </div>
+    </>
+  );
+};
+
+export default tagEditor;

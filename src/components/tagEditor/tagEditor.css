@@ -9,7 +9,7 @@
   height: 90%;
 }
 
-.tagEditForm-save {
+.tagEditForm-btn {
   color: #272b30;
   margin: 0.5rem;
   display: block;
@@ -44,3 +44,9 @@
 .tagEditForm__el--confirmation {
   margin-left: 0.5rem;
 }
+
+.tagEditForm-btnGroup {
+  display: flex;
+  justify-content: flex-end
+}
+

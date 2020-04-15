@@ -69,6 +69,15 @@ const newUID = () => {
   return uid;
 };
 
+const clearCarets = string => {
+  if (string) {
+    for (let i = 0; i < string.length; i++) {
+      string = string.replace("^", " ");
+    }
+    return string;
+  }
+};
+
 export const extractTreeData = (datasets, requirements) => {
   const result = {};
   if (datasets) {
@@ -112,14 +121,14 @@ const createSeries = (data, requirements) => {
     SeriesInstanceUID,
     SeriesDescription,
     PatientID,
-    StudyInstanceUID
+    StudyInstanceUID,
   } = data;
   const result = {
-    seriesUID: SeriesInstanceUID,
-    seriesDesc: SeriesDescription,
-    patientID: PatientID,
-    studyUID: StudyInstanceUID,
-    imageCount: 1
+    SeriesInstanceUID,
+    SeriesDescription: clearCarets(SeriesDescription),
+    PatientID,
+    StudyInstanceUID,
+    imageCount: 1,
   };
   const missingTags = checkMissingTags(data, requirements);
   if (missingTags.length > 0) {
@@ -135,20 +144,20 @@ const createStudy = (data, requirements) => {
     StudyDescription,
     SeriesInstanceUID,
     SeriesDescription,
-    PatientID
+    PatientID,
   } = data;
   const result = {
-    studyUID: StudyInstanceUID,
-    studyDesc: StudyDescription,
+    StudyInstanceUID,
+    StudyDescription: clearCarets(StudyDescription),
     series: {
       [SeriesInstanceUID]: {
-        seriesUID: SeriesInstanceUID,
-        seriesDesc: SeriesDescription,
-        patientID: PatientID,
-        studyUID: StudyInstanceUID,
-        imageCount: 1
-      }
-    }
+        SeriesInstanceUID,
+        SeriesDescription: clearCarets(SeriesDescription),
+        PatientID,
+        StudyInstanceUID,
+        imageCount: 1,
+      },
+    },
   };
   const series = result.series[SeriesInstanceUID];
   const missingTags = checkMissingTags(data, requirements);
@@ -166,27 +175,27 @@ const createPatient = (data, requirements) => {
     StudyInstanceUID,
     StudyDescription,
     SeriesInstanceUID,
-    SeriesDescription
+    SeriesDescription,
   } = data;
 
   const result = {
-    patientID: PatientID,
-    patientName: PatientName,
+    PatientID,
+    PatientName: clearCarets(PatientName),
     studies: {
       [StudyInstanceUID]: {
-        studyUID: StudyInstanceUID,
-        studyDesc: StudyDescription,
+        StudyInstanceUID,
+        StudyDescription: clearCarets(StudyDescription),
         series: {
           [SeriesInstanceUID]: {
-            seriesUID: SeriesInstanceUID,
-            seriesDesc: SeriesDescription,
-            patientID: PatientID,
-            studyUID: StudyInstanceUID,
-            imageCount: 1
-          }
-        }
-      }
-    }
+            SeriesInstanceUID,
+            SeriesDescription: clearCarets(SeriesDescription),
+            PatientID,
+            StudyInstanceUID,
+            imageCount: 1,
+          },
+        },
+      },
+    },
   };
   const series = result.studies[StudyInstanceUID].series[SeriesInstanceUID];
   const missingTags = checkMissingTags(data, requirements);
@@ -208,18 +217,18 @@ export const extractTableData = (dataset, requirementsObj) => {
         StudyInstanceUID,
         StudyDescription,
         SeriesInstanceUID,
-        SeriesDescription
+        SeriesDescription,
       } = el;
       const missingTags = checkMissingTags(el, requirementsObj);
       result.push({
-        patientID: PatientID,
-        patientName: PatientName,
-        studyUID: StudyInstanceUID,
-        studyDesc: StudyDescription,
-        seriesUID: SeriesInstanceUID,
-        seriesDesc: SeriesDescription,
+        PatientID,
+        PatientName: clearCarets(PatientName),
+        StudyInstanceUID,
+        StudyDescription: clearCarets(StudyDescription),
+        SeriesInstanceUID,
+        SeriesDescription: clearCarets(SeriesDescription),
         missingTags,
-        data: el
+        data: el,
       });
     });
   }

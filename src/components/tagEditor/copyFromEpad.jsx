@@ -1,12 +1,12 @@
 import React from "react";
 import * as dcmjs from "dcmjs";
-import ManualEditingForm from "./manualEditForm";
+import ManualEditForm from "./manualEditForm";
 import { getAllSubjects } from "../../services/subjectServices";
 import SeriesBrowser from "./seriesBrowser";
 import TagCopy from "./tagCopy";
 import {
   getImageIds,
-  getImageArrayBuffer
+  getImageArrayBuffer,
 } from "../../services/seriesServices";
 import { extractTableData } from "../../Utils/aid";
 import "./tagEditor.css";
@@ -15,7 +15,7 @@ class CopyFromEpad extends React.Component {
   state = {
     showReadTags: false,
     error: null,
-    showSeriesBrowser: true
+    showSeriesBrowser: true,
   };
 
   handleSeriesBrowse = () => {
@@ -36,7 +36,7 @@ class CopyFromEpad extends React.Component {
       this.setState(state => ({
         showReadTags: !state.showReadTags,
         error: null,
-        showSeriesBrowser: !state.showSeriesBrowser
+        showSeriesBrowser: !state.showSeriesBrowser,
       }));
     }
   };
@@ -47,7 +47,7 @@ class CopyFromEpad extends React.Component {
       projectUID: project,
       subjectUID: subject,
       studyUID: study,
-      seriesUID: series
+      seriesUID: series,
     };
     getImageIds(obj)
       .then(res => {
@@ -95,7 +95,7 @@ class CopyFromEpad extends React.Component {
       this.setState({
         subject: null,
         study: null,
-        series: null
+        series: null,
       });
     }
     const { project, subject, study, series } = this.state;
@@ -104,17 +104,26 @@ class CopyFromEpad extends React.Component {
   };
 
   render = () => {
-    const { seriesIndex } = this.props;
+    const {
+      requirements,
+      treeData,
+      handleTagInput,
+      seriesIndex,
+      tagValues,
+      seriesArr,
+    } = this.props;
     const seriesSelected = !isNaN(Number.parseInt(seriesIndex));
     const { showReadTags, showSeriesBrowser } = this.state;
 
     return (
       <div className="copyFromEpad">
-        <ManualEditingForm
-          requirements={this.props.requirements}
-          treeData={this.props.treeData}
-          seriesIndex={this.props.seriesIndex}
-          onTagInput={this.props.onTagInput}
+        <ManualEditForm
+          requirements={requirements}
+          treeData={treeData}
+          seriesIndex={seriesIndex}
+          onTagInput={handleTagInput}
+          tagValues={tagValues}
+          seriesArr={seriesArr}
         />
         {seriesSelected && showSeriesBrowser && (
           <SeriesBrowser

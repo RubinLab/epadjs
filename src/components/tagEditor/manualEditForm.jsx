@@ -11,8 +11,7 @@ const manualUpdateForm = ({
   tagValues,
 }) => {
   try {
-    const { seriesUID, missingTags, data } = treeData[seriesIndex];
-    console.log(missingTags);
+    const { SeriesInstanceUID, missingTags, data } = treeData[seriesIndex];
     const fields = [];
     // const series = treeData[patientID].studies[studyUID].series[seriesUID];
     const patientUpdated = tagValues.PatientID || tagValues.PatientName;
@@ -23,15 +22,16 @@ const manualUpdateForm = ({
       const tag = el.substring(0, el.length - 2);
       const vr = el.substring(el.length - 2);
       const missing = missingTags.includes(tag);
-      const value = data[tag]
-        ? data[tag]
+      const value = treeData[seriesIndex][tag]
+        ? treeData[seriesIndex][tag]
         : tagValues[tag]
         ? tagValues[tag]
         : makeDeIdentifiedValue(null, vr);
+        console.log(value);
       //missing ? makeDeIdentifiedValue(null, vr) : data[tag];
       if (missing && !tagValues[tag]) onTagInput(null, tag, value);
       fields.push(
-        <div key={`${seriesUID}-${i}`} className="tagEditForm__el">
+        <div key={`${SeriesInstanceUID}-${i}`} className="tagEditForm__el">
           <div className="--exp">{`${tag}:`}</div>
           <input
             onMouseDown={e => e.stopPropagation()}
@@ -72,19 +72,6 @@ const manualUpdateForm = ({
             )}
           </div>
         </div>
-        <div align="right"  className="tagEditForm-btnGroup">
-        {/* <input
-          className="tagEditForm-next"
-          onClick={onSave}
-          value="Next series"
-          type="button"
-        />  */}
-        <input
-          className="tagEditForm-save"
-          onClick={onSave}
-          value="Save tags"
-          type="button"
-        /> </div>
       </div>
     );
   } catch (err) {
