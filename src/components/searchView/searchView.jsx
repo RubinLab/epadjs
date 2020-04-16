@@ -615,17 +615,9 @@ class SearchView extends Component {
         }
         this.setState({ error: null, downloading: false });
       })
-      .catch(err => {
+      .catch(err => {    
         this.setState({ downloading: false });
-        if (err.response.status === 503) {
-          mode === "lite"
-            ? toast.error("There is no aim file to download!", {
-                autoClose: false,
-              })
-            : toast.error("No files to download!", {
-                autoClose: false,
-              });
-        }
+        console.log(err)
       });
   };
 
