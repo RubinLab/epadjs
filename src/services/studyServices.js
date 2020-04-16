@@ -63,3 +63,10 @@ export function saveStudy(projectID, subjectID, abbreviation, description) {
     description;
   return http.put(url);
 }
+
+export function uploadFileToStudy(formData, config, study) {
+  let { projectID, subjectID, studyUID } = study;
+  subjectID = subjectID ? subjectID : study.patientID;
+  const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/files`;
+  return http.post(url, formData, config);
+}

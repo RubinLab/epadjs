@@ -2,7 +2,7 @@ import React, { Component } from "react";
 
 const sidebarContent = props => {
   return (
-    <table>
+    <table className="sidebar-content">
       <tbody>{props.children}</tbody>
     </table>
   );

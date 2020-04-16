@@ -40,3 +40,10 @@ export function saveSubject(projectID, subjectAbr, subjectName) {
       subjectName
   );
 }
+
+export function uploadFileToSubject(formData, config, subject) {
+  let { subjectID, projectID } = subject;
+  subjectID = subjectID ? subjectID : subject.patientID;
+  const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/files`;
+  return http.post(url, formData, config);
+}
