@@ -40,3 +40,13 @@ export function saveSubject(projectID, subjectAbr, subjectName) {
       subjectName
   );
 }
+
+export function uploadFile(formData, config, projectID, subject) {
+  if (mode === "lite") {
+    return http.post(`${apiUrl}/projects/lite/subjects/${subject}/files`, formData, config);
+  } else {
+    const url =
+    `${apiUrl}/projects/${projectID}/subjects/${subject}/files`;
+    return http.post(url, formData, config);
+  }
+}

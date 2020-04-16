@@ -78,7 +78,7 @@ export function downloadSeries(series) {
     series.studyUID +
     "/series/" +
     series.seriesUID +
-    "?&format=stream&includeAims=true";
+    "?format=stream&includeAims=true";
   return http.get(url, { responseType: "blob" });
 }
 
@@ -125,4 +125,14 @@ export function saveSeries(
     "?description=" +
     description;
   return http.put(url);
+}
+
+export function uploadFile(formData, config, projectID, subject, study, series) {
+  if (mode === "lite") {
+    return http.post(`${apiUrl}/projects/lite/subjects/${subject}/studies/${study}/series/${series}/files`, formData, config);
+  } else {
+    const url =
+    `${apiUrl}/projects/${projectID}/subjects/${subject}/studies/${study}/series/${series}/files`;
+    return http.post(url, formData, config);
+  }
 }

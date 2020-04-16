@@ -55,15 +55,6 @@ class UploadModal extends React.Component {
       })
       .catch(err => {
         console.log(err);
-        // const fileName = this.state.file.name.substring(0, 50);
-        // toast.error(
-        //   `Error occured while uploading ${fileName}${
-        //     this.state.file.name.length > 50 ? "..." : "!"
-        //   }`,
-        //   {
-        //     autoClose: false
-        //   }
-        // );
         this.props.onSubmit();
       });
     this.props.onCancel();
@@ -215,6 +206,9 @@ UploadModal.propTypes = {
 
 const mapStateToProps = state => {
   return {
+    selectedPatients: state.annotationsListReducer.selectedPatients,
+    selectedStudies: state.annotationsListReducer.selectedStudies,
+    selectedSeries: state.annotationsListReducer.selectedSeries,
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations
   };
 };

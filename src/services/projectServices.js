@@ -63,7 +63,7 @@ export function uploadFile(formData, config, projectID, username) {
     return http.post(apiUrl + "/projects/lite/files", formData, config);
   } else {
     const url =
-      apiUrl + "/projects/" + projectID + "/files?username=" + username;
+      apiUrl + "/projects/" + projectID + "/files";
     return http.post(url, formData, config);
   }
 }

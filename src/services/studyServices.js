@@ -63,3 +63,13 @@ export function saveStudy(projectID, subjectID, abbreviation, description) {
     description;
   return http.put(url);
 }
+
+export function uploadFile(formData, config, projectID, subject, study) {
+  if (mode === "lite") {
+    return http.post(`${apiUrl}/projects/lite/subjects/${subject}/studies/${study}/files`, formData, config);
+  } else {
+    const url =
+    `${apiUrl}/projects/${projectID}/subjects/${subject}/studies/${study}/files`;
+    return http.post(url, formData, config);
+  }
+}

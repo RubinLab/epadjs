@@ -50,11 +50,11 @@ const mode = sessionStorage.getItem("mode");
 const messages = {
   newUser: {
     title: "No Permission",
-    message: `You don"t have permission yet, please contact your admin`,
+    message: `You don't have permission yet, please contact your admin`,
   },
   itemOpen: {
     title: "Item is open in display",
-    message: `couldn"t be deleted. Please close series before deleting`,
+    message: `couldn't be deleted. Please close series before deleting`,
   },
 };
 
@@ -73,7 +73,6 @@ class SearchView extends Component {
       numOfsubjects: 0,
       showDeleteAlert: false,
       update: 0,
-      missingAnns: [],
       expanded: {},
       showNew: false,
       newUser: false,
@@ -172,6 +171,7 @@ class SearchView extends Component {
     // get the patient ID of the maps, and the level they are open
     // get the new array of subjects and iterate over it and form the new expanded object
   };
+  
   updateUploadStatus = async => {
     this.setState(state => {
       return { uploading: !state.uploading, update: state.update + 1 };
@@ -555,7 +555,6 @@ class SearchView extends Component {
     let fileName;
     let promiseArr = [];
     let fileNameArr = [];
-    let missingAnns = [];
     if (selectedProjects.length > 0) {
       await this.setState({ downloading: true });
       for (let project of selectedProjects) {
@@ -569,12 +568,8 @@ class SearchView extends Component {
       await this.setState({ downloading: true });
       for (let patient of selectedPatients) {
         fileName = `Patients-${patient.patientID}`;
-        if (patient.numberOfAnnotations) {
-          promiseArr.push(downloadSubjects(patient));
-          fileNameArr.push(fileName);
-        } else {
-          missingAnns.push(patient.subjectName);
-        }
+        promiseArr.push(downloadSubjects(patient));
+        fileNameArr.push(fileName);
       }
       this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
@@ -582,12 +577,8 @@ class SearchView extends Component {
       await this.setState({ downloading: true });
       for (let study of selectedStudies) {
         fileName = `Studies-${study.studyUID}`;
-        if (study.numberOfAnnotations) {
-          promiseArr.push(downloadStudies(study));
-          fileNameArr.push(fileName);
-        } else {
-          missingAnns.push(study.studyDescription);
-        }
+        promiseArr.push(downloadStudies(study));
+        fileNameArr.push(fileName);
       }
       this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
@@ -595,19 +586,14 @@ class SearchView extends Component {
       await this.setState({ downloading: true });
       for (let serie of selectedSeries) {
         fileName = `Series-${serie.seriesUID}`;
-        if (serie.numberOfAnnotations) {
-          promiseArr.push(downloadSeries(serie));
-          fileNameArr.push(fileName);
-        } else {
-          missingAnns.push(serie.seriesDescription);
-        }
+        promiseArr.push(downloadSeries(serie));
+        fileNameArr.push(fileName);
       }
       this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
     }
-    this.setState({ missingAnns });
   };
 
   getSeriesData = async selected => {
@@ -680,7 +666,6 @@ class SearchView extends Component {
 
   handleOK = () => {
     this.setState({
-      missingAnns: [],
       newUser: false,
       openItemsDeleted: false,
       noOfNotDeleted: 0,
@@ -781,7 +766,6 @@ class SearchView extends Component {
       isSerieSelectionOpen,
       showUploadFileModal,
       showDeleteAlert,
-      missingAnns,
       showNew,
       showWorklists,
       newUser,
@@ -848,12 +832,6 @@ class SearchView extends Component {
           <DeleteAlert
             onCancel={this.handleClickDeleteIcon}
             onDelete={this.deleteSelection}
-          />
-        )}
-        {missingAnns.length > 0 && (
-          <DownloadWarning
-            details={this.state.missingAnns}
-            onOK={this.handleOK}
           />
         )}
 
