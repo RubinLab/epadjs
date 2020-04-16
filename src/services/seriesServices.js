@@ -54,7 +54,7 @@ export function getImageIds(series) {
   }
 }
 
-//  seems like this doesn't belong to here but olny services know details about paths&server side
+//  seems like this doesn"t belong to here but olny services know details about paths&server side
 export function getWadoImagePath(studyUid, seriesUid, imageId) {
   return (
     wadoUrl +
@@ -127,12 +127,9 @@ export function saveSeries(
   return http.put(url);
 }
 
-export function uploadFile(formData, config, projectID, subject, study, series) {
-  if (mode === "lite") {
-    return http.post(`${apiUrl}/projects/lite/subjects/${subject}/studies/${study}/series/${series}/files`, formData, config);
-  } else {
-    const url =
-    `${apiUrl}/projects/${projectID}/subjects/${subject}/studies/${study}/series/${series}/files`;
-    return http.post(url, formData, config);
-  }
+export function uploadFileToSeries(formData, config, series) {
+  let { projectID, subjectID, studyUID, seriesUID } = series;
+  subjectID = subjectID ? subjectID : series.patientID;
+  const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/series/${seriesUID}/files`;
+  return http.post(url, formData, config);
 }

@@ -64,12 +64,9 @@ export function saveStudy(projectID, subjectID, abbreviation, description) {
   return http.put(url);
 }
 
-export function uploadFile(formData, config, projectID, subject, study) {
-  if (mode === "lite") {
-    return http.post(`${apiUrl}/projects/lite/subjects/${subject}/studies/${study}/files`, formData, config);
-  } else {
-    const url =
-    `${apiUrl}/projects/${projectID}/subjects/${subject}/studies/${study}/files`;
-    return http.post(url, formData, config);
-  }
+export function uploadFileToStudy(formData, config, study) {
+  let { projectID, subjectID, studyUID } = study;
+  subjectID = subjectID ? subjectID : study.patientID;
+  const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/files`;
+  return http.post(url, formData, config);
 }

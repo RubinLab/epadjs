@@ -41,12 +41,9 @@ export function saveSubject(projectID, subjectAbr, subjectName) {
   );
 }
 
-export function uploadFile(formData, config, projectID, subject) {
-  if (mode === "lite") {
-    return http.post(`${apiUrl}/projects/lite/subjects/${subject}/files`, formData, config);
-  } else {
-    const url =
-    `${apiUrl}/projects/${projectID}/subjects/${subject}/files`;
-    return http.post(url, formData, config);
-  }
+export function uploadFileToSubject(formData, config, subject) {
+  let { subjectID, projectID } = subject;
+  subjectID = subjectID ? subjectID : subject.patientID;
+  const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/files`;
+  return http.post(url, formData, config);
 }

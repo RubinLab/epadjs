@@ -28,7 +28,6 @@ import {
   clearSelection,
   changeActivePort,
   jumpToAim,
-  showAnnotationDock,
   updateSingleSerie,
   updatePatientOnAimDelete,
 } from "../annotationsList/action";
@@ -171,7 +170,7 @@ class SearchView extends Component {
     // get the patient ID of the maps, and the level they are open
     // get the new array of subjects and iterate over it and form the new expanded object
   };
-  
+
   updateUploadStatus = async => {
     this.setState(state => {
       return { uploading: !state.uploading, update: state.update + 1 };
@@ -197,6 +196,7 @@ class SearchView extends Component {
     Promise.all(promiseArr)
       .then(() => {
         //keep the current state
+        this.props.dispatch(clearSelection());
         for (let serie of this.props.openSeries) {
           let type = serie.aimID ? "annotation" : "serie";
           this.props.dispatch(
