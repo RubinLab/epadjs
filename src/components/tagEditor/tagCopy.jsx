@@ -7,8 +7,9 @@ import {
 import { TiArrowLeftOutline } from "react-icons/ti";
 import { makeDeIdentifiedValue } from "../../Utils/aid";
 import "./tagEditor.css";
+import TagEditorButton from './tagEditorButton'
 
-const manualUpdateForm = ({ requirements, treeData, onTagInput, onSave }) => {
+const manualUpdateForm = ({ requirements, treeData, onTagInput, onClose }) => {
   try {
     const { seriesUID, missingTags, data } = treeData[0];
     const fields = [];
@@ -44,12 +45,18 @@ const manualUpdateForm = ({ requirements, treeData, onTagInput, onSave }) => {
     return (
       <div className="tagCopyForm-wrapper">
         <div className="tagCopyForm">{fields}</div>
-        <input
+        <TagEditorButton
+            name="tagCopy"
+            onClick={onClose}
+            disabled={false}
+            value="Back to Series Browse"
+          />
+        {/* <input
           className="tagCopyForm-save"
           onClick={onSave}
           value="Back to Series Browse"
           type="button"
-        />
+        /> */}
       </div>
     );
   } catch (err) {

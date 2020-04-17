@@ -5,6 +5,7 @@ import { getSubjects } from "../../services/subjectServices";
 import { getStudies } from "../../services/studyServices";
 import { getSeries } from "../../services/seriesServices";
 import { getProjects } from "../../services/projectServices";
+import TagEditorButton from "./tagEditorButton";
 
 class SeriesBrowser extends React.Component {
   state = {
@@ -14,7 +15,7 @@ class SeriesBrowser extends React.Component {
     series: [],
     project: null,
     study: null,
-    subject: null
+    subject: null,
   };
 
   componentDidMount = async () => {
@@ -23,7 +24,7 @@ class SeriesBrowser extends React.Component {
       if (projects.length) {
         this.setState({
           projects,
-          project: projects[0].id
+          project: projects[0].id,
         });
         this.getSubjects();
         this.props.onChange("project", projects[0].id);
@@ -128,7 +129,7 @@ class SeriesBrowser extends React.Component {
           studies: [],
           study: null,
           series: [],
-          seriesUID: null
+          seriesUID: null,
         });
       }
     } catch (error) {
@@ -226,11 +227,17 @@ class SeriesBrowser extends React.Component {
               {this.renderSeries()}
             </select>
           </div>
-          <input
+          {/* <input
             className="seriesBrowser-getTags"
             onClick={this.props.onGetTags}
             value="Get tags"
             type="button"
+          /> */}
+          <TagEditorButton
+            name="getTags"
+            onClick={this.props.onGetTags}
+            disabled={false}
+            value="Get tags"
           />
           {error ? <div className="err-message">{error}</div> : null}
         </div>

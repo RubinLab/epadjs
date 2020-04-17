@@ -10,16 +10,27 @@ import {
 } from "../../services/seriesServices";
 import { extractTableData } from "../../Utils/aid";
 import "./tagEditor.css";
+import TagEditorButton from "./tagEditorButton";
 
 class CopyFromEpad extends React.Component {
   state = {
     showReadTags: false,
     error: null,
     showSeriesBrowser: true,
+    rawData: [],
+    treeData: [],
   };
 
   handleSeriesBrowse = () => {
     this.setState(state => ({ showBrowser: !state.showBrowser }));
+  };
+
+  handleBackToBrowse = () => {
+    this.setState(state => ({
+      showReadTags: !state.showReadTags,
+      error: null,
+      showSeriesBrowser: !state.showSeriesBrowser,
+    }));
   };
 
   handleGetTags = async () => {
@@ -134,7 +145,7 @@ class CopyFromEpad extends React.Component {
         )}
         {showReadTags && (
           <TagCopy
-            onClose={this.handleGetTags}
+            onClose={this.handleBackToBrowse}
             requirements={this.props.requirements}
             treeData={this.state.treeData}
             seriesIndex={this.props.seriesIndex}

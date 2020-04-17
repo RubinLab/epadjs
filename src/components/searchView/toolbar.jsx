@@ -8,7 +8,7 @@ import {
   FaLevelDownAlt,
   FaLevelUpAlt,
   FaClipboardList,
-  FaEdit
+  FaEdit,
 } from "react-icons/fa";
 import { FiMinimize2 } from "react-icons/fi";
 import ReactTooltip from "react-tooltip";
@@ -73,21 +73,7 @@ const toolBar = props => {
           </ReactTooltip>
         </div>
         {/* {!isLite && ( */}
-        <div className="searchView-toolbar__icon" onClick={props.onUploadWizard}>
-          <div style={{ fontSize: "1.2rem" }}>
-            <FaEdit data-tip data-for="editor-icon" />
-          </div>
 
-          <ReactTooltip
-            id="editor-icon"
-            place="right"
-            type="info"
-            delayShow={1000}
-          >
-            <span className="filter-label">Upload with tag editor</span>
-          </ReactTooltip>
-        </div>
-        {/* )} */}
         <div
           onClick={props.showDelete ? props.onDelete : null}
           className={
@@ -135,10 +121,7 @@ const toolBar = props => {
         </ReactTooltip>
       </div>
       {/* )} */}
-      <div
-        className="searchView-toolbar__icon"
-        onClick={props.onShrink}
-      >
+      <div className="searchView-toolbar__icon" onClick={props.onShrink}>
         <div>
           <FaLevelUpAlt
             style={{ fontSize: "1.2rem" }}
@@ -155,10 +138,7 @@ const toolBar = props => {
           <span>Close One Level</span>
         </ReactTooltip>
       </div>
-      <div
-        className="searchView-toolbar__icon"
-        onClick={props.onCloseAll}
-      >
+      <div className="searchView-toolbar__icon" onClick={props.onCloseAll}>
         <div>
           <FiMinimize2
             style={{ fontSize: "1.5rem", strokeWidth: "3px" }}
@@ -177,30 +157,6 @@ const toolBar = props => {
       </div>
       {/* </div>
       )} */}
-      {props.project && mode !== "lite" && (
-        <div className="searchView-toolbar__group">
-          <div
-            className="searchView-toolbar__icon new-icon"
-            onClick={props.onNew}
-          >
-            <div>
-              <FaPlusCircle
-                style={{ fontSize: "1.2rem" }}
-                data-tip
-                data-for="new-icon"
-              />
-            </div>
-            <ReactTooltip
-              id="new-icon"
-              place="bottom"
-              type="info"
-              delayShow={1000}
-            >
-              <span>New</span>
-            </ReactTooltip>
-          </div>
-        </div>
-      )}
       <div
         className="searchView-toolbar__icon worklist-icon"
         onClick={props.onWorklist}
@@ -233,6 +189,47 @@ const toolBar = props => {
       <ReactTooltip id="ann-icon" place="bottom" type="info" delayShow={1000}>
         <span>Add annotation</span>
       </ReactTooltip> */}
+            {props.project && mode !== "lite" && (
+        <div className="searchView-toolbar__group">
+          <div
+            className="searchView-toolbar__icon"
+            onClick={props.onUploadWizard}
+          >
+            <div style={{ fontSize: "1.2rem" }}>
+              <FaEdit data-tip data-for="editor-icon" />
+            </div>
+
+            <ReactTooltip
+              id="editor-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Epad tag editor</span>
+            </ReactTooltip>
+          </div>
+          <div
+            className="searchView-toolbar__icon new-icon"
+            onClick={props.onNew}
+          >
+            <div>
+              <FaPlusCircle
+                style={{ fontSize: "1.2rem" }}
+                data-tip
+                data-for="new-icon"
+              />
+            </div>
+            <ReactTooltip
+              id="new-icon"
+              place="bottom"
+              type="info"
+              delayShow={1000}
+            >
+              <span>New</span>
+            </ReactTooltip>
+          </div>
+        </div>
+      )}
       <div className="spinner-toolbar__container">
         {props.status && (
           <>
