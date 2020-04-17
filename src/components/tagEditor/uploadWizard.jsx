@@ -1,29 +1,29 @@
-import React from "react";
-import { connect } from "react-redux";
-import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { Button } from "react-bootstrap";
-import * as dcmjs from "dcmjs";
-import { FaTimes } from "react-icons/fa";
-import TagRequirements from "./tagRequirementList";
-import TagEditTree from "./tagEditTable";
-import TagEditor from "./tagEditor";
-import { isEmpty, extractTableData } from "../../Utils/aid";
-import Modal from "../management/common/customModal";
+import React from 'react';
+import { connect } from 'react-redux';
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import { Button } from 'react-bootstrap';
+import * as dcmjs from 'dcmjs';
+import { FaTimes } from 'react-icons/fa';
+import TagRequirements from './tagRequirementList';
+import TagEditTree from './tagEditTable';
+import TagEditor from './tagEditor';
+import { isEmpty, extractTableData } from '../../Utils/aid';
+import Modal from '../management/common/customModal';
 import {
   getImageIds,
   getImageArrayBuffer,
-} from "../../services/seriesServices";
-import "../searchView/searchView.css";
+} from '../../services/seriesServices';
+import '../searchView/searchView.css';
 // import "react-tabs/style/react-tabs.css";
-import "./tagEditor.css";
+import './tagEditor.css';
 
 const style = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  border: "solid 1px #ddd",
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: 'solid 1px #ddd',
   //   width: "fit-content",
-  height: "fit-content",
+  height: 'fit-content',
 };
 
 class UploadWizard extends React.Component {
@@ -48,9 +48,9 @@ class UploadWizard extends React.Component {
       tabIndex: 2,
       seriesIndex: 0,
       tagValues: {},
-      error: "",
-      applyPatient: null,
-      applyStudy: null,
+      error: '',
+      applyPatient: false,
+      applyStudy: false,
     };
   }
 
@@ -62,7 +62,7 @@ class UploadWizard extends React.Component {
       if (name || value) {
         if (!value) this.setState({ error: `Please fill the ${name}` });
         else {
-          this.setState({ error: "" });
+          this.setState({ error: '' });
           this.storeTagValuePair(name, value);
         }
       }
@@ -88,9 +88,9 @@ class UploadWizard extends React.Component {
     let seriesIndex = this.state.seriesIndex;
     const seriesArr = Object.keys(this.props.selectedSeries);
     const newTag = this.checkNewTag();
-    if (name === "back" && seriesIndex > 0) {
+    if (name === 'back' && seriesIndex > 0) {
       if (newTag) {
-        confirm = window.confirm("You are going to lose unsaved changes!");
+        confirm = window.confirm('You are going to lose unsaved changes!');
         if (confirm) {
           seriesIndex -= 1;
           this.setState({ seriesIndex, tagValues: {} });
@@ -101,9 +101,9 @@ class UploadWizard extends React.Component {
         seriesIndex -= 1;
         this.setState({ seriesIndex, tagValues: {} });
       }
-    } else if (name === "next" && seriesIndex < seriesArr.length - 1) {
+    } else if (name === 'next' && seriesIndex < seriesArr.length - 1) {
       if (newTag) {
-        confirm = window.confirm("You are going to lose unsaved changes!");
+        confirm = window.confirm('You are going to lose unsaved changes!');
         if (confirm) {
           seriesIndex += 1;
           this.setState({ seriesIndex, tagValues: {} });
@@ -114,8 +114,8 @@ class UploadWizard extends React.Component {
         seriesIndex += 1;
         this.setState({ seriesIndex, tagValues: {} });
       }
-    } else if (name === "save") {
-      console.log("save tags clicked");
+    } else if (name === 'save') {
+      console.log('save tags clicked');
     } else {
       return;
     }
@@ -146,16 +146,16 @@ class UploadWizard extends React.Component {
     this.setState(state => ({ showRequirements: !state.showRequirements }));
   };
 
-  handleTagEditorSelect = (seriesIndex, patientID, studyUID, seriesUID) => {
+  handleTagEditorSelect = seriesIndex => {
+    console.log(seriesIndex);
     this.setState(state => ({ showTagEditor: !state.showTagEditor }));
-    // this.setState({ pathToSeries: { patientID, studyUID, seriesUID } });
     this.setState({ seriesIndex, tabIndex: 2 });
   };
 
   handleReqSelect = async e => {
     const { name, checked } = e.target;
     // const { rawData, requirements } = this.state;
-    if (name === "RequireAll" && checked) {
+    if (name === 'RequireAll' && checked) {
       await this.setState({
         requirements: {
           PatientIDLO: true,
@@ -166,7 +166,7 @@ class UploadWizard extends React.Component {
           SeriesDescriptionLO: true,
         },
       });
-    } else if (name === "RequireAll" && !checked) {
+    } else if (name === 'RequireAll' && !checked) {
       await this.setState({ requirements: {} });
     } else {
       const newRequirements = { ...this.state.requirements };
@@ -227,24 +227,44 @@ class UploadWizard extends React.Component {
       );
       return dataset;
     } catch (err) {
-      console.log("Error in reading dicom dataset", err);
+      console.log('Error in reading dicom dataset', err);
     }
   };
 
   updateTab = e => {
     const { name } = e.target;
+    const tagUpdates = Object.values(this.state.tagValues);
+    // if tag doluysa uyari cikar
+    // applyStudy and patientlari sil
+    if (tagUpdates.length) {
+      const confirm = window.confirm('You are going to lose unsaved changes!');
+      if (!confirm) {
+        return;
+      }
+    }
+
+    this.setState({ tagValues: {}, applyPatient: false, applyStudy: false });
+
     switch (name) {
-      case "requirements":
-        this.setState({ tabIndex: 0 });
+      case 'requirements':
+        this.setState({
+          tabIndex: 0,
+        });
         break;
-      case "series":
-        this.setState({ tabIndex: 1 });
+      case 'series':
+        this.setState({
+          tabIndex: 1,
+        });
         break;
-      case "tagEditor":
-        this.setState({ tabIndex: 2 });
+      case 'tagEditor':
+        this.setState({
+          tabIndex: 2,
+        });
         break;
       default:
-        this.setState({ tabIndex: 2 });
+        this.setState({
+          tabIndex: 2,
+        });
         break;
     }
   };
@@ -320,7 +340,7 @@ class UploadWizard extends React.Component {
               <div className="button-line">
                 <button
                   className={
-                    tabIndex === 0 ? "tabview-btn __selected" : "tabview-btn"
+                    tabIndex === 0 ? 'tabview-btn __selected' : 'tabview-btn'
                   }
                   name="requirements"
                   onClick={this.updateTab}
@@ -332,7 +352,7 @@ class UploadWizard extends React.Component {
               <div className="button-line">
                 <button
                   className={
-                    tabIndex === 1 ? "tabview-btn __selected" : "tabview-btn"
+                    tabIndex === 1 ? 'tabview-btn __selected' : 'tabview-btn'
                   }
                   name="series"
                   onClick={this.updateTab}
@@ -344,7 +364,7 @@ class UploadWizard extends React.Component {
               <div className="button-line">
                 <button
                   className={
-                    tabIndex === 2 ? "tabview-btn __selected" : "tabview-btn"
+                    tabIndex === 2 ? 'tabview-btn __selected' : 'tabview-btn'
                   }
                   name="tagEditor"
                   onClick={this.updateTab}
