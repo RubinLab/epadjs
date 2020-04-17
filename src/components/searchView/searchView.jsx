@@ -44,6 +44,8 @@ import StudyCreationModal from "./studyCreationModal.jsx";
 import SeriesCreationModal from "./seriesCreationModal.jsx";
 import Worklists from "./addWorklist";
 import WarningModal from "../common/warningModal";
+import AnnotationCreationModal from "./annotationCreationModal.jsx";
+import UpLoadWizard from "../tagEditor/uploadWizard";
 const mode = sessionStorage.getItem("mode");
 
 const messages = {
@@ -56,6 +58,7 @@ const messages = {
     message: `couldn't be deleted. Please close series before deleting`,
   },
 };
+
 
 class SearchView extends Component {
   constructor(props) {
@@ -78,6 +81,7 @@ class SearchView extends Component {
       openItemsDeleted: false,
       noOfNotDeleted: 0,
       expandLevel: 0,
+      showUploadWizard: false
     };
   }
 
@@ -732,6 +736,10 @@ class SearchView extends Component {
     this.setState({ showAnnotationModal: false });
   };
 
+  handleUploadWizardClick = () => {
+    this.setState(state => ({ showUploadWizard: !state.showUploadWizard }));
+  };
+
   render = () => {
     let status;
     if (this.state.uploading) {
@@ -778,6 +786,7 @@ class SearchView extends Component {
           onCloseAll={this.props.onCloseAll}
           onNew={this.handleNewClick}
           onWorklist={this.handleWorklistClick}
+          onUploadWizard={this.handleUploadWizardClick}
           status={status}
           showDelete={showDelete}
           project={this.props.match.params.pid}
@@ -854,7 +863,10 @@ class SearchView extends Component {
             message={`${noOfNotDeleted} ${itemStr} ${messages.itemOpen.message}`}
           />
         )}
-        {newSelected && this.handleNewSelected()}
+        {this.state.showUploadWizard && (
+          <UpLoadWizard onClose={this.handleUploadWizardClick} />
+        )}
+        {this.state.newSelected && this.handleNewSelected()}
       </>
     );
   };

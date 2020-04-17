@@ -47,3 +47,6 @@ export function uploadFileToSubject(formData, config, subject) {
   const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/files`;
   return http.post(url, formData, config);
 }
+export function getAllSubjects() {
+  return http.get(apiUrl + "/subjects");
+}

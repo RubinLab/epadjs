@@ -7,7 +7,8 @@ import {
   FaPlusCircle,
   FaLevelDownAlt,
   FaLevelUpAlt,
-  FaClipboardList
+  FaClipboardList,
+  FaEdit
 } from "react-icons/fa";
 import { FiMinimize2 } from "react-icons/fi";
 import ReactTooltip from "react-tooltip";
@@ -32,7 +33,7 @@ const toolBar = props => {
             id="view-icon"
             place="bottom"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span>Open selections</span>
           </ReactTooltip>
@@ -49,7 +50,7 @@ const toolBar = props => {
             id="download-icon"
             place="bottom"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span>Download selections</span>
           </ReactTooltip>
@@ -66,11 +67,27 @@ const toolBar = props => {
             id="upload-icon"
             place="bottom"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span>Upload file</span>
           </ReactTooltip>
         </div>
+        {/* {!isLite && ( */}
+        <div className="searchView-toolbar__icon" onClick={props.onUploadWizard}>
+          <div style={{ fontSize: "1.2rem" }}>
+            <FaEdit data-tip data-for="editor-icon" />
+          </div>
+
+          <ReactTooltip
+            id="editor-icon"
+            place="right"
+            type="info"
+            delayShow={1000}
+          >
+            <span className="filter-label">Upload with tag editor</span>
+          </ReactTooltip>
+        </div>
+        {/* )} */}
         <div
           onClick={props.showDelete ? props.onDelete : null}
           className={
@@ -88,7 +105,7 @@ const toolBar = props => {
             id="delete-icon"
             place="bottom"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span>Delete selection</span>
           </ReactTooltip>
@@ -120,7 +137,6 @@ const toolBar = props => {
       {/* )} */}
       <div
         className="searchView-toolbar__icon"
-        // onClick={props.expanding ? null : props.onShrink}
         onClick={props.onShrink}
       >
         <div>
@@ -141,7 +157,6 @@ const toolBar = props => {
       </div>
       <div
         className="searchView-toolbar__icon"
-        // onClick={props.expanding ? null : props.onCloseAll}
         onClick={props.onCloseAll}
       >
         <div>
@@ -179,7 +194,7 @@ const toolBar = props => {
               id="new-icon"
               place="bottom"
               type="info"
-              delayShow={1500}
+              delayShow={1000}
             >
               <span>New</span>
             </ReactTooltip>
@@ -215,7 +230,7 @@ const toolBar = props => {
           />
         </div>
       </div>
-      <ReactTooltip id="ann-icon" place="bottom" type="info" delayShow={1500}>
+      <ReactTooltip id="ann-icon" place="bottom" type="info" delayShow={1000}>
         <span>Add annotation</span>
       </ReactTooltip> */}
       <div className="spinner-toolbar__container">

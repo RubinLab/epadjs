@@ -66,6 +66,11 @@ export function getWadoImagePath(studyUid, seriesUid, imageId) {
   );
 }
 
+export function getImageArrayBuffer(path) {
+  let url = wadoUrl + path;
+  url = url.replace("wadouri:", "");
+  return http.get(url, { responseType: "arraybuffer" });
+}
 export function downloadSeries(series) {
   const url =
     apiUrl +

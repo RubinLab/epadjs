@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { getAllTemplates } from "../../../services/templateServices";
 
-// accept only integers for aims field
 class RequirementForm extends React.Component {
   state = {
     templates: {},
