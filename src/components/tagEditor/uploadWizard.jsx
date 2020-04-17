@@ -44,7 +44,6 @@ class UploadWizard extends React.Component {
       },
       treeData: null,
       rawData: null,
-      showTagEditor: false,
       tabIndex: 2,
       seriesIndex: 0,
       tagValues: {},
@@ -147,9 +146,13 @@ class UploadWizard extends React.Component {
   };
 
   handleTagEditorSelect = seriesIndex => {
-    console.log(seriesIndex);
-    this.setState(state => ({ showTagEditor: !state.showTagEditor }));
-    this.setState({ seriesIndex, tabIndex: 2 });
+    this.setState({
+      seriesIndex,
+      tabIndex: 2,
+      tagValues: {},
+      applyStudy: false,
+      applyPatient: false,
+    });
   };
 
   handleReqSelect = async e => {
@@ -234,8 +237,6 @@ class UploadWizard extends React.Component {
   updateTab = e => {
     const { name } = e.target;
     const tagUpdates = Object.values(this.state.tagValues);
-    // if tag doluysa uyari cikar
-    // applyStudy and patientlari sil
     if (tagUpdates.length) {
       const confirm = window.confirm('You are going to lose unsaved changes!');
       if (!confirm) {
@@ -288,53 +289,7 @@ class UploadWizard extends React.Component {
               <FaTimes />
             </div>
           </div>
-          {/* <input
-            className="uploadWizard-define"
-            onClick={this.handleRequirements}
-            value="Define Requirements"
-            type="button"
-          /> */}
-          {/* Define Requirements
-          </button> */}
-          {/* <Tabs
-            selectedIndex={this.state.tabIndex}
-            onSelect={tabIndex => this.setState({ tabIndex })}
-          >
-            <TabList>
-              <Tab>Define Requirements</Tab>
-              <Tab>Select Series</Tab>
-              <Tab>Edit Tags</Tab>
-            </TabList>
-            <TabPanel>
-              <TagRequirements
-                handleInput={this.handleReqSelect}
-                onClose={this.handleRequirements}
-                requirements={Object.keys(this.state.requirements)}
-                // requirements={requirements}
-              />
-            </TabPanel>
-            <TabPanel>
-              {!isEmpty(treeData) && (
-                <TagEditTree
-                  dataset={treeData}
-                  onEditClick={this.handleTagEditorSelect}
-                />
-              )}
-            </TabPanel>
-            <TabPanel>
-              <TagEditor
-                requirements={requirementKeys}
-                requirementsObj={requirements}
-                treeData={treeData}
-                seriesIndex={seriesIndex}
-                seriesArr={Object.keys(selectedSeries)}
-                buttonClick={this.handleButtonClick}
-                handleTagInput={this.handleTagInput}
-                tagValues={tagValues}
-                // path={this.state.pathToSeries}
-              />
-            </TabPanel>
-          </Tabs> */}
+
           <div className="tabview">
             <div className="tabview-btnGrp">
               <div className="button-line">
@@ -380,7 +335,6 @@ class UploadWizard extends React.Component {
                   handleInput={this.handleReqSelect}
                   onClose={this.handleRequirements}
                   requirements={Object.keys(this.state.requirements)}
-                  // requirements={requirements}
                 />
               )}
               {tabIndex === 1 && !isEmpty(treeData) && (
@@ -400,7 +354,6 @@ class UploadWizard extends React.Component {
                   handleTagInput={this.handleTagInput}
                   tagValues={tagValues}
                   handleCheckbox={this.handleApplyCheckbox}
-                  // path={this.state.pathToSeries}
                 />
               )}
             </div>
@@ -418,44 +371,3 @@ const mapStateToProps = state => {
 };
 export default connect(mapStateToProps)(UploadWizard);
 
-{
-  /* <Tabs
-selectedIndex={this.state.tabIndex}
-onSelect={tabIndex => this.setState({ tabIndex })}
->
-<TabList>
-  <Tab>Define Requirements</Tab>
-  <Tab>Select Series</Tab>
-  <Tab>Edit Tags</Tab>
-</TabList>
-<TabPanel>
-  <TagRequirements
-    handleInput={this.handleReqSelect}
-    onClose={this.handleRequirements}
-    requirements={Object.keys(this.state.requirements)}
-    // requirements={requirements}
-  />
-</TabPanel>
-<TabPanel>
-  {!isEmpty(treeData) && (
-    <TagEditTree
-      dataset={treeData}
-      onEditClick={this.handleTagEditorSelect}
-    />
-  )}
-</TabPanel>
-<TabPanel>
-  <TagEditor
-    requirements={requirementKeys}
-    requirementsObj={requirements}
-    treeData={treeData}
-    seriesIndex={seriesIndex}
-    seriesArr={Object.keys(selectedSeries)}
-    buttonClick={this.handleButtonClick}
-    handleTagInput={this.handleTagInput}
-    tagValues={tagValues}
-    // path={this.state.pathToSeries}
-  />
-</TabPanel>
-</Tabs> */
-}
