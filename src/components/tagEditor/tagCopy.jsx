@@ -1,13 +1,13 @@
-import React from "react";
+import React from 'react';
 import {
   FaCheck,
   FaExclamationTriangle,
-  FaArrowAltCircleLeft
-} from "react-icons/fa";
-import { TiArrowLeftOutline } from "react-icons/ti";
-import { makeDeIdentifiedValue } from "../../Utils/aid";
-import "./tagEditor.css";
-import TagEditorButton from './tagEditorButton'
+  FaArrowAltCircleLeft,
+} from 'react-icons/fa';
+import { TiArrowLeftOutline } from 'react-icons/ti';
+import { makeDeIdentifiedValue, clearCarets } from '../../Utils/aid';
+import './tagEditor.css';
+import TagEditorButton from './tagEditorButton';
 
 const manualUpdateForm = ({ requirements, treeData, onTagInput, onClose }) => {
   try {
@@ -23,14 +23,15 @@ const manualUpdateForm = ({ requirements, treeData, onTagInput, onClose }) => {
       // if (missing) onTagInput(null, tag, value);
       fields.push(
         <div key={`${seriesUID}-${i}`} className="tagCopyForm__el">
-          <div className="--copy">
-            <FaArrowAltCircleLeft />
-          </div>
+          
+            <div className={!missing ? "--copy" : "--hide" } onClick={() => onTagInput(null, tag, value)}>
+              <FaArrowAltCircleLeft />
+            </div>
           <input
             onMouseDown={e => e.stopPropagation()}
             type="text"
-            className={missing ? "--textFilled" : "--text"}
-            defaultValue={value}
+            className={missing ? '--textFilled' : '--text'}
+            defaultValue={missing ? '' : clearCarets(value)}
             name={tag}
             onChange={onTagInput}
           />
@@ -46,11 +47,11 @@ const manualUpdateForm = ({ requirements, treeData, onTagInput, onClose }) => {
       <div className="tagCopyForm-wrapper">
         <div className="tagCopyForm">{fields}</div>
         <TagEditorButton
-            name="tagCopy"
-            onClick={onClose}
-            disabled={false}
-            value="Back to Series Browse"
-          />
+          name="tagCopy"
+          onClick={onClose}
+          disabled={false}
+          value="Back to Series Browse"
+        />
         {/* <input
           className="tagCopyForm-save"
           onClick={onSave}
@@ -62,7 +63,7 @@ const manualUpdateForm = ({ requirements, treeData, onTagInput, onClose }) => {
   } catch (err) {
     console.log(err);
     return (
-      <div style={{ fontSize: "1.4rem", color: "#5bc0de", textAlign: "left" }}>
+      <div style={{ fontSize: '1.4rem', color: '#5bc0de', textAlign: 'left' }}>
         Select requirements and series to edit tags
       </div>
     );

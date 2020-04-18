@@ -137,3 +137,16 @@ export function uploadFileToSeries(formData, config, series) {
   const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/series/${seriesUID}/files`;
   return http.post(url, formData, config);
 }
+
+export function updateTagsOfSeries(
+  projectID,
+  subjectID,
+  studyUID,
+  seriesUID,
+  applyPatient,
+  applyStudy,
+  body
+) {
+  const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/series/${seriesUID}?editTags=true&applyPatient=${applyPatient}&applyStudy=${applyStudy}`;
+  return http.put(url, body);
+}

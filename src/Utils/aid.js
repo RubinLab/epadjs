@@ -84,7 +84,7 @@ const newUID = () => {
   return uid;
 };
 
-const clearCarets = string => {
+export const clearCarets = string => {
   if (string) {
     for (let i = 0; i < string.length; i++) {
       string = string.replace("^", " ");

@@ -34,8 +34,14 @@
 .tagCopyForm-wrapper .--copy {
   margin-right: 0.5rem;
   font-size: 1.4rem;
+  cursor: pointer;
 }
 
+.tagCopyForm-wrapper .--hide {
+  margin-right: 0.5rem;
+  font-size: 1.4rem;
+  cursor: not-allowed;
+}
 .tagCopyForm__el {
   display: flex;
   margin-bottom: 0.8rem;

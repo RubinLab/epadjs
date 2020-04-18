@@ -118,7 +118,7 @@ class CopyFromEpad extends React.Component {
     const {
       requirements,
       treeData,
-      handleTagInput,
+      onTagInput,
       seriesIndex,
       tagValues,
       seriesArr,
@@ -132,9 +132,10 @@ class CopyFromEpad extends React.Component {
           requirements={requirements}
           treeData={treeData}
           seriesIndex={seriesIndex}
-          onTagInput={handleTagInput}
+          onTagInput={onTagInput}
           tagValues={tagValues}
           seriesArr={seriesArr}
+          // disabled="disabled"
         />
         {seriesSelected && showSeriesBrowser && (
           <SeriesBrowser

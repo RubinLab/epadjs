@@ -363,6 +363,11 @@ h5.add-subject__modal--label,
   color: #272b30;
   width: 25rem;
   font-weight: bolder;
+  font-size: 1.1rem;
+}
+
+.tagCopyForm__el .--textFilled { 
+  background: #999;
 }
 
 .react-tabs__tab-list {
