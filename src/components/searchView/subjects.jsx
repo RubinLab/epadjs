@@ -76,7 +76,7 @@ class Subjects extends Component {
       this.setState({ expanded });
     } catch (err) {
       // console.log(err);
-      console.log(`couldn"t load all subjects data. Please Try again!`);
+      console.log(`couldn't load all subjects data. Please Try again!`);
     }
   }
 
@@ -132,7 +132,7 @@ class Subjects extends Component {
         // this.setState({ data });
       }
     } catch (err) {
-      console.log(`couldn"t load all subjects data. Please Try again!`);
+      console.log(`couldn't load all subjects data. Please Try again!`);
     }
   }
   expandCurrentLevel = async () => {
@@ -146,7 +146,7 @@ class Subjects extends Component {
         }
       this.setState({ expanded });
     } catch (err) {
-      console.log(`Couldn"t load all subjects data. Please Try again!`);
+      console.log(`Couldn't load all subjects data. Please Try again!`);
     }
   };
 

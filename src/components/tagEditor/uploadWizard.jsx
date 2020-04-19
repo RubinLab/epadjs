@@ -12,19 +12,11 @@ import Modal from "../management/common/customModal";
 import {
   getImageIds,
   getImageArrayBuffer,
+  updateTagsOfSeries,
 } from "../../services/seriesServices";
 import "../searchView/searchView.css";
 // import "react-tabs/style/react-tabs.css";
 import "./tagEditor.css";
-
-const style = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  border: "solid 1px #ddd",
-  //   width: "fit-content",
-  height: "fit-content",
-};
 
 class UploadWizard extends React.Component {
   constructor() {
@@ -52,6 +44,10 @@ class UploadWizard extends React.Component {
       applyStudy: false,
     };
   }
+
+  populateErrorMessage = (name, id) => {
+    return `In order to edit the ${name} for only one series you need to change its ${id} or you can apply the name change to all series of the patient`;
+  };
 
   handleTagInput = (e, tagName, tagValue) => {
     let name, value;
@@ -87,12 +83,14 @@ class UploadWizard extends React.Component {
     let seriesIndex = this.state.seriesIndex;
     const seriesArr = Object.keys(this.props.selectedSeries);
     const newTag = this.checkNewTag();
+    const { applyPatient, applyStudy, tagValues } = this.state;
+    const { pid } = this.props;
     if (name === "back" && seriesIndex > 0) {
       if (newTag) {
         confirm = window.confirm("You are going to lose unsaved changes!");
         if (confirm) {
           seriesIndex -= 1;
-          this.setState({ seriesIndex, tagValues: {} });
+          this.setState({ seriesIndex, tagValues: {}, error: "" });
         } else {
           return;
         }
@@ -105,7 +103,7 @@ class UploadWizard extends React.Component {
         confirm = window.confirm("You are going to lose unsaved changes!");
         if (confirm) {
           seriesIndex += 1;
-          this.setState({ seriesIndex, tagValues: {} });
+          this.setState({ seriesIndex, tagValues: {}, error: "" });
         } else {
           return;
         }
@@ -114,9 +112,55 @@ class UploadWizard extends React.Component {
         this.setState({ seriesIndex, tagValues: {} });
       }
     } else if (name === "save") {
-      console.log("save tags clicked");
+      if (this.validateApplyAll()) {
+        const { treeData, seriesIndex } = this.state;
+        const { PatientID, SeriesInstanceUID, StudyInstanceUID } = treeData[
+          seriesIndex
+        ];
+        updateTagsOfSeries(
+          pid,
+          PatientID,
+          StudyInstanceUID,
+          SeriesInstanceUID,
+          applyPatient,
+          applyStudy,
+          tagValues
+        ).then(res => {
+            if (seriesIndex === seriesArr.length - 1) {
+              this.props.onClose();
+            } else {
+              seriesIndex += 1;
+              this.setState({ seriesIndex, tagValues: {}, error: "" });
+            }
+          })
+          .catc(err => console.log(err));
+      }
     } else {
       return;
+    }
+  };
+
+  validateApplyAll = () => {
+    const { tagValues, applyPatient, applyStudy } = this.state;
+    if (tagValues.PatientName && !tagValues.PatientID && !applyPatient) {
+      this.setState({
+        error: this.populateErrorMessage("patient name", "patient ID"),
+      });
+      return false;
+    } else if (
+      tagValues.StudyDescription &&
+      !tagValues.StudyInstanceUID &&
+      !applyStudy
+    ) {
+      this.setState({
+        error: this.populateErrorMessage("study description", "studyUID"),
+      });
+      return false;
+    } else {
+      this.setState({
+        error: "",
+      });
+      return true;
     }
   };
 
@@ -277,6 +321,7 @@ class UploadWizard extends React.Component {
       seriesIndex,
       tagValues,
       tabIndex,
+      error,
     } = this.state;
     const { selectedSeries } = this.props;
     const requirementKeys = Object.keys(requirements);
@@ -354,6 +399,7 @@ class UploadWizard extends React.Component {
                   handleTagInput={this.handleTagInput}
                   tagValues={tagValues}
                   handleCheckbox={this.handleApplyCheckbox}
+                  error={error}
                 />
               )}
             </div>

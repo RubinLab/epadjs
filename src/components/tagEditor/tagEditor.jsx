@@ -16,6 +16,7 @@ const tagEditor = ({
   tagValues,
   handleTagInput,
   handleCheckbox,
+  error,
 }) => {
   return (
     <div className="tagEditor-tabContent">
@@ -48,6 +49,15 @@ const tagEditor = ({
           />
         </TabPanel>
       </Tabs>
+      {error ? (
+        <div
+          className="err-message"
+          align="left"
+          style={{ width: "45rem", margin: "inherit" }}
+        >
+          {error}
+        </div>
+      ) : null}
       <div align="center" className="tagEditForm-btnGroup">
         <TagEditorButton
           name="back"

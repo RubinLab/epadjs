@@ -59,7 +59,6 @@ const messages = {
   },
 };
 
-
 class SearchView extends Component {
   constructor(props) {
     super(props);
@@ -81,7 +80,7 @@ class SearchView extends Component {
       openItemsDeleted: false,
       noOfNotDeleted: 0,
       expandLevel: 0,
-      showUploadWizard: false
+      showUploadWizard: false,
     };
   }
 
@@ -619,9 +618,9 @@ class SearchView extends Component {
         }
         this.setState({ error: null, downloading: false });
       })
-      .catch(err => {    
+      .catch(err => {
         this.setState({ downloading: false });
-        console.log(err)
+        console.log(err);
       });
   };
 
@@ -864,7 +863,10 @@ class SearchView extends Component {
           />
         )}
         {this.state.showUploadWizard && (
-          <UpLoadWizard onClose={this.handleUploadWizardClick} />
+          <UpLoadWizard
+            onClose={this.handleUploadWizardClick}
+            pid={this.props.pid}
+          />
         )}
         {this.state.newSelected && this.handleNewSelected()}
       </>
