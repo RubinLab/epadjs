@@ -45,7 +45,6 @@ class UploadModal extends React.Component {
       ? this.props.projectID
       : this.state.projectID;
     const formData = new FormData();
-
     this.state.files.forEach((file, index) => {
       formData.append(`file${index + 1}`, file);
     });

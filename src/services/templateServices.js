@@ -23,3 +23,7 @@ export function downloadTemplates(tempIDlist, selection) {
 export function deleteTemplate(templateID, projectID) {
   return http.delete(apiUrl + "/templates/" + templateID);
 }
+
+export function getTemplatesUniversal() {
+  return http.get(apiUrl + "/templates?format=summary");
+}

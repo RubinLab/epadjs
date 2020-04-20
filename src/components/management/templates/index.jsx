@@ -4,7 +4,10 @@ import ReactTable from "react-table";
 import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { getAllTemplates } from "../../../services/templateServices";
+import {
+  getAllTemplates,
+  getTemplatesUniversal,
+} from "../../../services/templateServices";
 import { getProjects } from "../../../services/projectServices";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
@@ -63,8 +66,13 @@ class Templates extends React.Component {
     };
   };
   getTemplatesData = async () => {
-    const { data: templates } = await getAllTemplates();
-    this.setState({ templates });
+    if (mode === "lite") {
+      const { data: templates } = await getAllTemplates();
+      this.setState({ templates });
+    } else {
+      const { data: templates } = await getTemplatesUniversal();
+      this.setState({ templates });
+    }
   };
 
   toggleRow = async (id, projectID) => {
@@ -339,6 +347,7 @@ class Templates extends React.Component {
           pageSizeOptions={[10, 20, 50]}
           defaultPageSize={pageSize}
         />
+
         {(this.state.delAll || this.state.delOne) && (
           <DeleteAlert
             message={
