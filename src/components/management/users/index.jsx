@@ -69,16 +69,17 @@ class Users extends React.Component {
           user.projects = [];
         }
       }
-    } else {
-      for (let user of data) {
-        for (let project of user.projects) {
-          if (usersProjects.includes(project)) {
-            filteredProjects.push(this.props.projectMap[project]);
-          }
-        }
-        user.projects = filteredProjects;
-      }
-    }
+    } 
+    // else {
+    //   for (let user of data) {
+    //     for (let project of user.projects) {
+    //       if (usersProjects.includes(project)) {
+    //         filteredProjects.push(this.props.projectMap[project]);
+    //       }
+    //     }
+    //     user.projects = filteredProjects;
+    //   }
+    // }
     this.setState({ data, hasAdminPermission, usersProjects });
   };
 
@@ -389,7 +390,6 @@ class Users extends React.Component {
         minResizeWidth: 20,
         minWidth: 35,
         className: "mng-user__cell",
-        // Cell: original => <div data-name="firstname">{firstname}</div>
       },
       {
         Header: "Last",
@@ -400,7 +400,6 @@ class Users extends React.Component {
         minResizeWidth: 20,
         minWidth: 35,
         className: "mng-user__cell",
-        // Cell: original => <div data-name="lastname">{lastname}</div>
       },
       {
         Header: "User Name",
@@ -411,7 +410,6 @@ class Users extends React.Component {
         minResizeWidth: 20,
         minWidth: 35,
         className: "mng-user__cell",
-        // Cell: original => <div data-name="lastname">{lastname}</div>
       },
       {
         Header: "Email",
@@ -422,7 +420,6 @@ class Users extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         className: "mng-user__cell",
-        // Cell: original => <div data-name="email">{email}</div>
       },
       {
         Header: "Projects",
@@ -550,7 +547,6 @@ class Users extends React.Component {
               onSubmit={this.updateUserRole}
               onSelect={this.getUserRole}
               projectMap={this.props.projectMap}
-              projects={usersProjects}
               onCancel={this.handleCancel}
               projectToRole={data[clickedUserIndex].projectToRole}
               error={this.state.errorMessage}
