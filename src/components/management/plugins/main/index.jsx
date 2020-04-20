@@ -81,6 +81,8 @@ class Plugins extends React.Component {
   };
 
   componentDidMount = async () => {
+    console.log("checking props : ", this.props);
+    console.log("session:", sessionStorage.getItem("username"));
     const pluginList = await getPluginsWithProject();
     let projectList = await getProjectsWithPkAsId();
     let templateList = await getTemplatesFromDb();
