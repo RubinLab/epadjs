@@ -68,7 +68,6 @@ class AimEditor extends Component {
   }
   //cavit
   renderButtons = buttonsState => {
-    console.log("rendr buttons state : ", buttonsState);
     this.setState({ buttonGroupShow: buttonsState });
   };
   //cavit end
@@ -115,14 +114,8 @@ class AimEditor extends Component {
   };
 
   save = () => {
-    // Logic behind relies on the order of the data in array
     if (!this.checkAimTemplate()) return;
     const answers = this.semanticAnswers.saveAim();
-
-    // if (this.props.aimI) {
-    //   console.log("props", this.props);
-    //   this.updateAim(answers);
-    // } else this.createAim(answers);
     this.createAim(answers);
   };
 
@@ -358,7 +351,6 @@ class AimEditor extends Component {
           })
         );
         this.props.dispatch(updatePatientOnAimSave(aimRefs));
-        this.props.updateProgress();
       })
       .catch(error => console.log(error));
     this.props.onCancel(false);
@@ -634,8 +626,6 @@ class AimEditor extends Component {
       imageReferenceUid
     );
 
-    console.log("Line", line);
-
     const lengthId = aim.createLengthCalcEntity({
       value: line.length,
       unit: line.unit
@@ -651,7 +641,6 @@ class AimEditor extends Component {
       [start, end],
       imageReferenceUid
     );
-    console.log("Circle", circle);
 
     let unit;
     if (circle.unit === "HU") unit = "hu";
@@ -681,8 +670,6 @@ class AimEditor extends Component {
     imageReferenceUid
   ) => {
     const { longAxis, shortAxis } = this.getAxisOfBidirectional(bidirectional);
-
-    console.log("Bidirectional", bidirectional);
 
     // add longAxis
     const longAxisMarkupId = aim.addMarkupEntity(

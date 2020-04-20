@@ -202,8 +202,6 @@ class Aim {
 
   createMeanCalcEntity = (value, preLabel) => {
     var { unit, mean } = value;
-    console.log("Unit", unit);
-    console.log("what is this", this._getAimUnitAndDcmTypeCode(unit));
     const { unit, typeCodeDcm } = this._getAimUnitAndDcmTypeCode(unit);
     var obj = {};
     obj["calculationResultCollection"] = {
@@ -506,7 +504,7 @@ class Aim {
     obj["typeCode"] = typeCode;
     obj["dateTime"] = { value: this.getDate() };
     obj["name"] = name;
-    obj["comment"] = comment;
+    obj["comment"] = this._getComment(comment);
     obj["precedentReferencedAnnotationUid"] = { root: "" };
     if (imagingPhysicalEntityCollection)
       obj["imagingPhysicalEntityCollection"] = imagingPhysicalEntityCollection;
@@ -528,6 +526,27 @@ class Aim {
       "imageReferenceEntityCollection"
     ] = this._createImageReferanceEntityCollection();
     return obj;
+  };
+
+  _getComment = comment => {
+    if (comment.value.length)
+      comment.value = this._getProgrammedComment().concat("~~", comment.value);
+    else comment.value = this._getProgrammedComment();
+    return comment;
+  };
+
+  _getProgrammedComment = () => {
+    const SEPERATOR = " / ";
+    const { modality, description, instanceNumber, number } = this.temp.series;
+    const comment =
+      modality +
+      SEPERATOR +
+      description +
+      SEPERATOR +
+      instanceNumber +
+      SEPERATOR +
+      number;
+    return comment;
   };
 
   createImageAnnotationStatement = (referenceType, objectId, subjectId) => {

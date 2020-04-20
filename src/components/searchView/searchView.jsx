@@ -28,7 +28,6 @@ import {
   clearSelection,
   changeActivePort,
   jumpToAim,
-  showAnnotationDock,
   updateSingleSerie,
   updatePatientOnAimDelete,
 } from "../annotationsList/action";
@@ -73,7 +72,6 @@ class SearchView extends Component {
       numOfsubjects: 0,
       showDeleteAlert: false,
       update: 0,
-      missingAnns: [],
       expanded: {},
       showNew: false,
       newUser: false,
@@ -94,7 +92,7 @@ class SearchView extends Component {
       let subjects = Object.values(this.props.treeData);
       if (subjects.length > 0) {
         subjects = subjects.map(el => el.data);
-      } else {
+      } else if (pid) {
         subjects = await this.getData();
         // this.props.getTreeData("subject", subjects);
       }
@@ -113,7 +111,8 @@ class SearchView extends Component {
     const { pid } = this.props.match.params;
     const samePid = mode !== "lite" && uploadedPid === pid;
     let subjects;
-    if (prevProps.match.params.pid !== this.props.match.params.pid) {
+
+    if (prevProps.match.params.pid !== pid) {
       subjects = await this.getData();
       this.setState({ numOfsubjects: subjects.length, subjects });
     }
@@ -134,16 +133,24 @@ class SearchView extends Component {
   getData = async () => {
     let data = [];
     try {
-      if (this.props.match.params.pid || this.props.pid || mode === "lite") {
-        data = await getSubjects(this.props.match.params.pid);
+      const { pid } = this.props.match.params;
+      const isRoutePidNull = pid === "null" || !pid;
+      const isPropsPidNull =
+        this.props.pid === null || this.props.pid === "null";
+      if (pid || this.props.pid || mode === "lite") {
+        if (!isRoutePidNull || !isPropsPidNull) {
+          const projectId = isRoutePidNull ? this.props.pid : pid;
+          const result = await getSubjects(projectId);
+          data = result.data;
+        }
       }
+      return data;
     } catch (err) {
       const { status, statusText } = err.response;
       if (status === 403 && statusText.toLowerCase() === "forbidden") {
         this.setState({ newUser: true });
       }
     }
-    return data;
   };
 
   handleExpand = async () => {
@@ -163,6 +170,7 @@ class SearchView extends Component {
     // get the patient ID of the maps, and the level they are open
     // get the new array of subjects and iterate over it and form the new expanded object
   };
+
   updateUploadStatus = async => {
     this.setState(state => {
       return { uploading: !state.uploading, update: state.update + 1 };
@@ -188,6 +196,7 @@ class SearchView extends Component {
     Promise.all(promiseArr)
       .then(() => {
         //keep the current state
+        this.props.dispatch(clearSelection());
         for (let serie of this.props.openSeries) {
           let type = serie.aimID ? "annotation" : "serie";
           this.props.dispatch(
@@ -546,7 +555,6 @@ class SearchView extends Component {
     let fileName;
     let promiseArr = [];
     let fileNameArr = [];
-    let missingAnns = [];
     if (selectedProjects.length > 0) {
       await this.setState({ downloading: true });
       for (let project of selectedProjects) {
@@ -560,12 +568,8 @@ class SearchView extends Component {
       await this.setState({ downloading: true });
       for (let patient of selectedPatients) {
         fileName = `Patients-${patient.patientID}`;
-        if (patient.numberOfAnnotations) {
-          promiseArr.push(downloadSubjects(patient));
-          fileNameArr.push(fileName);
-        } else {
-          missingAnns.push(patient.subjectName);
-        }
+        promiseArr.push(downloadSubjects(patient));
+        fileNameArr.push(fileName);
       }
       this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
@@ -573,12 +577,8 @@ class SearchView extends Component {
       await this.setState({ downloading: true });
       for (let study of selectedStudies) {
         fileName = `Studies-${study.studyUID}`;
-        if (study.numberOfAnnotations) {
-          promiseArr.push(downloadStudies(study));
-          fileNameArr.push(fileName);
-        } else {
-          missingAnns.push(study.studyDescription);
-        }
+        promiseArr.push(downloadStudies(study));
+        fileNameArr.push(fileName);
       }
       this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
@@ -586,19 +586,14 @@ class SearchView extends Component {
       await this.setState({ downloading: true });
       for (let serie of selectedSeries) {
         fileName = `Series-${serie.seriesUID}`;
-        if (serie.numberOfAnnotations) {
-          promiseArr.push(downloadSeries(serie));
-          fileNameArr.push(fileName);
-        } else {
-          missingAnns.push(serie.seriesDescription);
-        }
+        promiseArr.push(downloadSeries(serie));
+        fileNameArr.push(fileName);
       }
       this.downloadHelper(promiseArr, fileNameArr);
       this.props.dispatch(clearSelection());
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
     }
-    this.setState({ missingAnns });
   };
 
   getSeriesData = async selected => {
@@ -620,17 +615,9 @@ class SearchView extends Component {
         }
         this.setState({ error: null, downloading: false });
       })
-      .catch(err => {
+      .catch(err => {    
         this.setState({ downloading: false });
-        if (err.response.status === 503) {
-          mode === "lite"
-            ? toast.error("There is no aim file to download!", {
-                autoClose: false,
-              })
-            : toast.error("No files to download!", {
-                autoClose: false,
-              });
-        }
+        console.log(err)
       });
   };
 
@@ -671,7 +658,6 @@ class SearchView extends Component {
 
   handleOK = () => {
     this.setState({
-      missingAnns: [],
       newUser: false,
       openItemsDeleted: false,
       noOfNotDeleted: 0,
@@ -772,7 +758,6 @@ class SearchView extends Component {
       isSerieSelectionOpen,
       showUploadFileModal,
       showDeleteAlert,
-      missingAnns,
       showNew,
       showWorklists,
       newUser,
@@ -839,12 +824,6 @@ class SearchView extends Component {
           <DeleteAlert
             onCancel={this.handleClickDeleteIcon}
             onDelete={this.deleteSelection}
-          />
-        )}
-        {missingAnns.length > 0 && (
-          <DownloadWarning
-            details={this.state.missingAnns}
-            onOK={this.handleOK}
           />
         )}
 

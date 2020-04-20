@@ -131,7 +131,6 @@ export var AimEditor = function(
   };
 
   this.loadTemplates = function(templateList) {
-    console.log("template list ::: --->", templateList);
     self.arrayTemplatesJsonObjects = templateList;
     if (self.arrayTemplatesJsonObjects.length > 0) {
       for (var i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {
@@ -4019,8 +4018,8 @@ export var AimEditor = function(
         var modality = commentArray[0].split("/");
         self.aimType = modality[0];
       } else {
-        document.getElementById("comment").value = comment;
-        self.aimComment = comment;
+        document.getElementById("comment").value = "";
+        self.aimComment = "";
         self.aimType = "";
       }
 

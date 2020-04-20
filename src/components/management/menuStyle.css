@@ -941,6 +941,9 @@
 
 .edit-userRole.project_user {
   width: 100%;
+  height: 200px;
+  max-height: fit-content;
+  overflow: auto;
 }
 
 .edit-userPermission {

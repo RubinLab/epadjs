@@ -76,7 +76,7 @@ class Subjects extends Component {
       this.setState({ expanded });
     } catch (err) {
       // console.log(err);
-      console.log(`couldn't load all subjects data. Please Try again!`);
+      console.log(`couldn"t load all subjects data. Please Try again!`);
     }
   }
 
@@ -132,7 +132,7 @@ class Subjects extends Component {
         // this.setState({ data });
       }
     } catch (err) {
-      console.log(`couldn't load all subjects data. Please Try again!`);
+      console.log(`couldn"t load all subjects data. Please Try again!`);
     }
   }
   expandCurrentLevel = async () => {
@@ -146,19 +146,26 @@ class Subjects extends Component {
         }
       this.setState({ expanded });
     } catch (err) {
-      console.log(`Couldn't load all subjects data. Please Try again!`);
+      console.log(`Couldn"t load all subjects data. Please Try again!`);
     }
   };
 
   getData = async () => {
     let data = [];
-    if (this.props.pid || mode === "lite")
-      data = await getSubjects(this.props.pid);
-    data = data.data;
-    for (let subject of data) {
-      subject.children = [];
+    try {
+      const { pid } = this.props;
+      const isPropsPidNull = !pid || pid === "null";
+      if (!isPropsPidNull || mode === "lite") {
+        const result = await getSubjects(pid);
+        data = result.data;
+        for (let subject of data) {
+          subject.children = [];
+        }
+      }
+      return data;
+    } catch (err) {
+      console.log(err);
     }
-    return data;
   };
 
   incColumns = ["subjectName", "numberOfStudies"];
