@@ -53,7 +53,7 @@ export function getImageIds(series) {
   }
 }
 
-//  seems like this doesn"t belong to here but olny services know details about paths&server side
+//  seems like this doesn't belong to here but olny services know details about paths&server side
 export function getWadoImagePath(studyUid, seriesUid, imageId) {
   return (
     wadoUrl +

@@ -132,7 +132,12 @@ class Studies extends Component {
 
   async componentDidUpdate(prevProps) {
     try {
-      const { patientIndex, update, treeExpand } = this.props;
+      const { patientIndex, update, treeExpand, closeAllCounter } = this.props;
+
+      if (closeAllCounter !== prevProps.closeAllCounter) {
+        this.setState({ expanded: {} });
+      }
+      
       if (update !== prevProps.update && treeExpand[patientIndex]) {
         const { data: data } = await getStudies(
           this.props.projectId,
@@ -638,6 +643,7 @@ class Studies extends Component {
                     // expandLoading={this.props.expandLoading}
                     treeData={this.props.treeData}
                     getTreeData={this.props.getTreeData}
+                    closeAllCounter={this.props.closeAllCounter}
                   />
                 </div>
               );
