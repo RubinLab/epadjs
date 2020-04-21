@@ -32,7 +32,7 @@
   display: inline-block;
   height: 100%;
   margin-left: -0.05em;
-  content: "";
+  content: '';
 }
 
 .modal-dialog-div {
@@ -454,6 +454,8 @@
 
 .filter-group {
   flex-wrap: wrap;
+  /* margin-top: 1rem; */
+  justify-content: flex-start;
 }
 
 .filter-group__sec1,
@@ -470,6 +472,7 @@
 }
 .annotation-toolbar__icon {
   width: 3%;
+  margin-left: 0.5rem;
 }
 
 .annotations-toolbar,
@@ -481,15 +484,25 @@
   align-items: center;
   font-size: 1.2rem;
   margin-top: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   /* flex-wrap: wrap; */
+}
+
+.__react_component_tooltip {
+  margin: 0em;
+  padding: 0em;
+}
+.annotations-toolbar {
+  height: 15%;
+  align-items: center;
+  flex-wrap: wrap;
+  align-content: flex-start;
 }
 
 .annotations-toolbar-basic {
   display: flex;
   justify-content: flex-start;
-  align-content: center;
-  align-items: center;
+  margin-left: 1rem;
 }
 
 .flexible-modal {
@@ -556,7 +569,7 @@
 .projectTable-modal {
   display: flex;
   /* background: #e83e8c; */
-  height: "-webkit-fill-available";
+  height: '-webkit-fill-available';
   max-height: 90%;
 }
 

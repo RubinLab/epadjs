@@ -7,7 +7,7 @@ import {
   FaLocationArrow,
   FaRegTrashAlt,
   FaFilter,
-  FaUndo
+  FaUndo,
 } from "react-icons/fa";
 import ReactTooltip from "react-tooltip";
 import "../menuStyle.css";
@@ -22,7 +22,7 @@ const toolBar = props => {
     onType,
     onClear,
     onFilter,
-    onKeyDown
+    onKeyDown,
   } = props;
   const { selected, projects } = props;
 
@@ -51,7 +51,7 @@ const toolBar = props => {
 
   return (
     <div className="annotations-toolbar">
-      <div className="annotations-toolbar-basic">
+      <div className="annotations-toolbar-basic" align="left">
         <>
           <div onClick={onUpload}>
             <FaUpload className="tool-icon" data-tip data-for="upload-icon" />
@@ -82,47 +82,6 @@ const toolBar = props => {
             <span className="filter-label">Download selections</span>
           </ReactTooltip>
         </>
-        {mode !== "lite" && (
-          <>
-            <>
-              <div className="annotation-toolbar__icon">
-                <FaShareSquare
-                  className="tool-icon"
-                  data-tip
-                  data-for="applyParalel-icon"
-                />
-              </div>
-              <ReactTooltip
-                id="applyParalel-icon"
-                place="right"
-                type="info"
-                delayShow={1500}
-              >
-                <span className="filter-label">Apply (parallel)</span>
-              </ReactTooltip>
-            </>
-
-            <>
-              <div onClick={onDelete} className="annotation-toolbar__icon">
-                <FaLocationArrow
-                  className="tool-icon"
-                  onClick={onDelete}
-                  data-tip
-                  data-for="applyAll-icon"
-                />
-              </div>
-              <ReactTooltip
-                id="applyAll-icon"
-                place="right"
-                type="info"
-                delayShow={1500}
-              >
-                <span className="filter-label">Apply (all together)</span>
-              </ReactTooltip>
-            </>
-          </>
-        )}
-
         <>
           <div onClick={onDelete} className="annotation-toolbar__icon">
             <FaRegTrashAlt
@@ -226,7 +185,7 @@ const toolBar = props => {
               </div>
               <ReactTooltip
                 id="filter-icon"
-                place="right"
+                place="left"
                 type="info"
                 delayShow={1500}
               >
@@ -245,7 +204,7 @@ const toolBar = props => {
               </div>
               <ReactTooltip
                 id="undo-icon"
-                place="right"
+                place="left"
                 type="info"
                 delayShow={1500}
               >
@@ -262,6 +221,6 @@ const toolBar = props => {
 toolBar.propTypes = {
   onAdd: PropTypes.func,
   onDelete: PropTypes.func,
-  selected: PropTypes.bool
+  selected: PropTypes.bool,
 };
 export default toolBar;
