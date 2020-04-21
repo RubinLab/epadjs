@@ -146,7 +146,7 @@ class Series extends Component {
 
   async componentDidUpdate(prevProps) {
     try {
-      const { 
+      const {
         update,
         expansionArr,
         // updateExpandedLevelNums,
@@ -157,11 +157,13 @@ class Series extends Component {
         patientIndex,
         studyIndex,
         expandLevel,
+        closeAllCounter,
       } = this.props;
       const seriesOpened = expansionArr.includes(studyId);
+      if (closeAllCounter !== prevProps.closeAllCounter) {
+        this.setState({ expanded: {} });
+      }
       if (update !== prevProps.update && treeExpand[patientIndex][studyIndex]) {
-        console.log("in here");
-        console.log(projectId, subjectId, studyId);
         const { data: data } = await getSeries(projectId, subjectId, studyId);
         const expanded = persistExpandView(
           this.state.expanded,

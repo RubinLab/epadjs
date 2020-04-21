@@ -76,13 +76,19 @@ class Subjects extends Component {
       this.setState({ expanded });
     } catch (err) {
       // console.log(err);
-      console.log(`couldn"t load all subjects data. Please Try again!`);
+      console.log(`couldn't load all subjects data. Please Try again!`);
     }
   }
 
   async componentDidUpdate(prevProps) {
     try {
-      const { uploadedPid, lastEventId, pid, expandLevel } = this.props;
+      const {
+        uploadedPid,
+        lastEventId,
+        pid,
+        expandLevel,
+        closeAllCounter,
+      } = this.props;
 
       let data;
       if (this.props.update !== prevProps.update) {
@@ -96,6 +102,11 @@ class Subjects extends Component {
         this.props.getTreeData(pid, "subject", data);
         this.setState({ data, expanded });
       }
+
+      if (closeAllCounter !== prevProps.closeAllCounter) {
+        this.setState({ expanded: {} });
+      }
+
       if (this.props.expandLevel != prevProps.expandLevel) {
         this.props.expandLevel >= 1 && this.state.data.length
           ? this.expandCurrentLevel()
@@ -132,7 +143,7 @@ class Subjects extends Component {
         // this.setState({ data });
       }
     } catch (err) {
-      console.log(`couldn"t load all subjects data. Please Try again!`);
+      console.log(`couldn't load all subjects data. Please Try again!`);
     }
   }
   expandCurrentLevel = async () => {
@@ -146,7 +157,7 @@ class Subjects extends Component {
         }
       this.setState({ expanded });
     } catch (err) {
-      console.log(`Couldn"t load all subjects data. Please Try again!`);
+      console.log(`Couldn't load all subjects data. Please Try again!`);
     }
   };
 
@@ -554,6 +565,7 @@ class Subjects extends Component {
                     // patientExpandComplete={this.props.patientExpandComplete}
                     treeData={this.props.treeData}
                     getTreeData={this.props.getTreeData}
+                    closeAllCounter={this.props.closeAllCounter}
                     pid={this.props.pid}
                   />
                 </div>

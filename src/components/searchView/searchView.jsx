@@ -775,7 +775,7 @@ class SearchView extends Component {
           onDelete={this.handleClickDeleteIcon}
           onExpand={this.handleExpand}
           onShrink={this.props.onShrink}
-          onCloseAll={this.props.onCloseAll}
+          onCloseAll={this.props.handleCloseAll}
           onNew={this.handleNewClick}
           onWorklist={this.handleWorklistClick}
           status={status}
@@ -805,6 +805,8 @@ class SearchView extends Component {
           // patientExpandComplete={patientExpandComplete}
           treeData={this.props.treeData}
           getTreeData={this.props.getTreeData}
+          closeAllCounter={this.props.closeAllCounter}
+
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection
