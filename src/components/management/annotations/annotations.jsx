@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import ReactTable from "react-table";
 import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
-import { FaRegEye } from "react-icons/fa";
+import { FaRegEye, FaCommentsDollar } from "react-icons/fa";
 import {
   getSummaryAnnotations,
   deleteAnnotation,
@@ -67,31 +67,12 @@ class Annotations extends React.Component {
   };
 
   getAnnotationsData = async projectID => {
-    const { data: annotations } = await getSummaryAnnotations(projectID);
-    if (mode === "lite") {
-      for (let ann of annotations) {
-        ann.date = ann.date + "";
-        ann.studyDate = ann.studyDate + "";
-
-        let year1 = ann.date.substring(0, 4);
-        let month1 = ann.date.substring(4, 6);
-        let day1 = ann.date.substring(6, 8);
-        let hour = ann.date.substring(8, 10);
-        let min = ann.date.substring(10, 12);
-        let sec = ann.date.substring(12);
-        let dateFormat = year1 + "-" + month1 + "-" + day1;
-        let timeFormat = hour + ":" + min + ":" + sec;
-        let date = dateFormat + " " + timeFormat;
-
-        let year2 = ann.studyDate.substring(0, 4);
-        let month2 = ann.studyDate.substring(4, 6);
-        let day2 = ann.studyDate.substring(6, 8);
-        let studyDate = year2 + "-" + month2 + "-" + day2 + " " + "00:00:00";
-        ann.date = date;
-        ann.studyDate = studyDate;
-      }
+    try {
+      const { data: annotations } = await getSummaryAnnotations(projectID);
+      this.setState({ annotations });
+    } catch (err) {
+      console.log(err);
     }
-    this.setState({ annotations });
   };
 
   handleProjectSelect = e => {
@@ -255,9 +236,7 @@ class Annotations extends React.Component {
       const input = new Date(this.state.createdStart);
       for (let ann of arr) {
         const formattedDate = this.convertDateFormat(ann.date, "date");
-        let date = new Date(
-          formattedDate.split(" ")[0] + " 00:00:00"
-        );
+        let date = new Date(formattedDate.split(" ")[0] + " 00:00:00");
         if (date >= input) {
           result.push(ann);
         }
@@ -271,7 +250,9 @@ class Annotations extends React.Component {
     if (this.validateDateFormat(this.state.createdEnd)) {
       const input = new Date(this.state.createdEnd);
       for (let ann of arr) {
-        let date = new Date(this.convertDateFormat(ann.date, "date").split(" ")[0] + " 00:00:00");
+        let date = new Date(
+          this.convertDateFormat(ann.date, "date").split(" ")[0] + " 00:00:00"
+        );
         if (date <= input) {
           result.push(ann);
         }
