@@ -83,7 +83,7 @@ const toolBar = props => {
           </ReactTooltip>
         </>
         <>
-          <div onClick={onDelete} className="annotation-toolbar__icon">
+          <div onClick={onDelete}>
             <FaRegTrashAlt
               className="tool-icon"
               onClick={onDelete}
