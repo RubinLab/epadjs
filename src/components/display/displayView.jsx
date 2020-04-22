@@ -142,6 +142,7 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
+    console.log("Session storage", sessionStorage);
     if (this.props.series.length < 1) return;
     this.getViewports();
     this.getData();

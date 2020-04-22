@@ -5,6 +5,7 @@ import * as cornerstoneMath from "cornerstone-math";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import * as dicomParser from "dicom-parser";
 import Hammer from "hammerjs";
+import { getAuthHeader } from "../../services/authService";
 import { connect } from "react-redux";
 
 import OHIFSegmentationExtension from "../../ohif-segmentation-plugin";
@@ -70,6 +71,15 @@ const Cornerstone = ({ dispatch }) => {
     showSVGCursors: true
   };
 
+  cornerstoneWADOImageLoader.configure({
+    beforeSend: function(xhr) {
+      // Add custom headers here
+      const header = getAuthHeader();
+      if (header && header) {
+        xhr.setRequestHeader(header);
+      }
+    }
+  });
   cornerstoneWADOImageLoader.webWorkerManager.initialize(config);
   //cornerstoneWebImageLoader.external.cornerstone = cornerstone;
   cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
