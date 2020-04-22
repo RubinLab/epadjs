@@ -5,7 +5,7 @@ import * as cornerstoneMath from "cornerstone-math";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import * as dicomParser from "dicom-parser";
 import Hammer from "hammerjs";
-import { getAuthHeader } from "../../services/authService";
+import auth from "../../services/authService";
 import { connect } from "react-redux";
 
 import OHIFSegmentationExtension from "../../ohif-segmentation-plugin";
@@ -65,32 +65,46 @@ const Cornerstone = ({ dispatch }) => {
         initializeCodecsOnStartup: false,
         // codecsPath: codecsUrl,
         usePDFJS: false,
-        strict: false
-      }
+        strict: false,
+      },
     },
-    showSVGCursors: true
+    showSVGCursors: true,
   };
 
-  cornerstoneWADOImageLoader.configure({
-    beforeSend: function(xhr) {
-      // Add custom headers here
-      const header = getAuthHeader();
-      if (header && header) {
-        xhr.setRequestHeader(header);
-      }
-    }
-  });
   cornerstoneWADOImageLoader.webWorkerManager.initialize(config);
   //cornerstoneWebImageLoader.external.cornerstone = cornerstone;
   cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
+  
+
+  cornerstoneWADOImageLoader.configure({
+    beforeSend: function (xhr) {
+      // Add custom headers here
+      auth
+        .getAuthHeader()
+        .then((header) => {
+          console.log("header", header);
+          const token = header.replace("Bearer ");
+          console.log("token", token);
+          if (header && header) {
+            xhr.setRequestHeader("Authorization", header);
+            // xhr.setRequestHeader("authorization", header);
+            // xhr.setRequestHeader('access-token', token);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+  });
+  
   cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
 
   dispatch({
     type: "INIT_CORNER",
     payload: {
       cs: cornerstone,
-      csT: cornerstoneTools
-    }
+      csT: cornerstoneTools,
+    },
   });
   return null;
 };
