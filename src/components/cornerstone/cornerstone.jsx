@@ -75,6 +75,7 @@ const Cornerstone = ({ dispatch }) => {
     beforeSend: function(xhr) {
       // Add custom headers here
       const header = getAuthHeader();
+      console.log("Header", header);
       if (header && header) {
         xhr.setRequestHeader(header);
       }
