@@ -63,6 +63,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
    * @returns {object} measurementData
    */
   createNewMeasurement(eventData) {
+    console.log("Event Data", eventData);
     const freehand3DStore = this._freehand3DStore;
     const goodEventData =
       eventData && eventData.currentPoints && eventData.currentPoints.image;
@@ -140,8 +141,8 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
     preventPropagation(evt);
   }
 
-  _addAndSetVolumeIfNoVolumes() {
-    const enabledElement = getEnabledElement(this.element);
+  _addAndSetVolumeIfNoVolumes(enabledElement) {
+    // const enabledElement = getEnabledElement(this.element);
     const seriesInstanceUid = getSeriesInstanceUidFromEnabledElement(
       enabledElement
     );
@@ -682,10 +683,14 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
    */
   _endDrawing(element, handleNearby) {
     const toolState = getToolState(element, this.name);
+    console.log("Tool state", toolState, this.name);
 
     const config = this.configuration;
+    console.log("config", config);
 
     const data = toolState.data[config.currentTool];
+
+    console.log("Data", data);
 
     const points = data.handles.points;
 

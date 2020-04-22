@@ -88,6 +88,7 @@ function getStructureSet(seriesInstanceUid, structureSetUid = "DEFAULT") {
   check(structureSetUid, "structureSetUid");
 
   const series = getSeries(seriesInstanceUid);
+  console.log("Series", series);
 
   if (!series) {
     return;
@@ -342,11 +343,13 @@ function incrementPolygonCount(
   structureSetUid,
   ROIContourUid
 ) {
+  console.log("3lu", seriesInstanceUid, structureSetUid, ROIContourUid);
   const ROIContour = getROIContour(
     seriesInstanceUid,
     structureSetUid,
     ROIContourUid
   );
+  console.log("ROI Contour", ROIContour);
 
   ROIContour.polygonCount++;
 }

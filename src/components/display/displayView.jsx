@@ -21,6 +21,8 @@ import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
 import CornerstoneViewport from "react-cornerstone-viewport";
 import OHIFSegmentationExtension from "../../ohif-segmentation-plugin";
+import interpolate from "../../ohif-segmentation-plugin/util/freehandInterpolate/interpolate.js";
+import fh from "../../ohif-segmentation-plugin/tools/FreehandRoi3DTool";
 import { freehand } from "./Freehand";
 import { line } from "./Line";
 import { probe } from "./Probe";
@@ -32,6 +34,8 @@ import {
   getNumOfSegs,
   getSegIndexOfAim
 } from "../../Utils/Segmentation/helpers";
+import { roi3d } from "./Roi3d";
+import { intData } from "./intData";
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
@@ -187,7 +191,7 @@ class DisplayView extends Component {
 
   getData() {
     // clear the toolState they will be rendered again on next load
-    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
 
@@ -205,9 +209,9 @@ class DisplayView extends Component {
         prospectiveLabelMapIndex: 0
       });
       // clear the toolState they will be rendered again on next load
-      cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
-        {}
-      );
+      // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+      //   {}
+      // );
       // clear the segmentation data as well
       cornerstoneTools.store.modules.segmentation.state.series = {};
       series.forEach((serie, serieIndex) => {
@@ -223,10 +227,34 @@ class DisplayView extends Component {
             serie
           );
       });
+
+      // // console.log("Element", element);
+      // // const toolState = cornerstoneTools.getToolState(
+      // //   element,
+      // //   "FreehandRoi3DTool"
+      // // );
+      // console.log("Hadiiiiii");
       this.refreshAllViewports();
       // this.props.dispatch(clearActivePortAimID());
     });
   }
+
+  interpolate = () => {
+    console.log("Enabled elements", cornerstone.getEnabledElements());
+    const element = cornerstone.getEnabledElements()[0];
+    cornerstoneTools.store.modules.freehand3D.state.interpolate = true;
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+      roi3d
+    );
+    const tempClass = new fh();
+    console.log("Fh", tempClass);
+    tempClass._addAndSetVolumeIfNoVolumes(element);
+    console.log("Element", element);
+    if (element) interpolate(intData, element.element);
+
+    console.log("CornerstoneTools", cornerstoneTools);
+    this.refreshAllViewports();
+  };
 
   async getImages(serie) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
@@ -873,6 +901,7 @@ class DisplayView extends Component {
       <Redirect to="/search" />
     ) : (
       <React.Fragment>
+        <button onClick={this.interpolate} />
         <RightsideBar
           showAimEditor={this.state.showAimEditor}
           selectedAim={this.state.selectedAim}

@@ -380,6 +380,16 @@ class ToolMenu extends Component {
         return;
       } //Dont' select the HUGated if the modality is not CT
     }
+    console.log(
+      "Cornerstone Tools",
+      cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState()
+    );
+    console.log(
+      "Cornerstone Tools",
+      JSON.stringify(
+        cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState()
+      )
+    );
     this.disableAllTools();
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
       this.setToolActive(tool);

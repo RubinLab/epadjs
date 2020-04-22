@@ -369,6 +369,7 @@ class AimEditor extends Component {
         switch (tool) {
           case "FreehandRoi3DTool":
             const polygons3d = markUps[tool].data;
+            console.log("Polygons", polygons3d);
             polygons3d.map(polygon => {
               if (!polygon.aimId || polygon.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
