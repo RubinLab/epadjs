@@ -62,21 +62,20 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
    * @param {object} eventData
    * @returns {object} measurementData
    */
-  createNewMeasurement(eventData) {
-    console.log("Event Data", eventData);
+  createNewMeasurement(eventData, enabledElement) {
+    console.log("Creating new Measurement", eventData);
     const freehand3DStore = this._freehand3DStore;
-    const goodEventData =
-      eventData && eventData.currentPoints && eventData.currentPoints.image;
+    // const goodEventData =
+    //   eventData && eventData.currentPoints && eventData.currentPoints.image;
 
-    if (!goodEventData) {
-      console.error(
-        `required eventData not supplied to tool ${this.name}'s createNewMeasurement`
-      );
+    // if (!goodEventData) {
+    //   console.error(
+    //     `required eventData not supplied to tool ${this.name}'s createNewMeasurement`
+    //   );
 
-      return;
-    }
-
-    const enabledElement = getEnabledElement(this.element);
+    //   return;
+    // }
+    if (!enabledElement) enabledElement = getEnabledElement(this.element);
     const seriesInstanceUid = getSeriesInstanceUidFromEnabledElement(
       enabledElement
     );
@@ -118,6 +117,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
       referencedROIContour.uid
     );
 
+    console.log("Measurement data 3D", measurementData);
     return measurementData;
   }
 
@@ -131,6 +131,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
    */
   addNewMeasurement(evt, interactionType) {
     const eventData = evt.detail;
+    console.log("Adding new Measurement", eventData);
 
     // Create metadata if it doesn't exist.
     this._addAndSetVolumeIfNoVolumes();
@@ -142,7 +143,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
   }
 
   _addAndSetVolumeIfNoVolumes(enabledElement) {
-    // const enabledElement = getEnabledElement(this.element);
+    if (!enabledElement) enabledElement = getEnabledElement(this.element);
     const seriesInstanceUid = getSeriesInstanceUidFromEnabledElement(
       enabledElement
     );

@@ -1044,6 +1044,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
    * @returns {undefined}
    */
   _startDrawing(evt) {
+    console.log("Event", evt);
     const eventData = evt.detail;
     const measurementData = this.createNewMeasurement(eventData);
     const { element } = eventData;
@@ -1059,6 +1060,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     this._getMouseLocation(eventData);
 
     addToolState(element, this.name, measurementData);
+    console.log("Measurement Data", measurementData);
 
     const toolState = getToolState(element, this.name);
 

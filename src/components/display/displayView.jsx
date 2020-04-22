@@ -240,7 +240,6 @@ class DisplayView extends Component {
   }
 
   interpolate = () => {
-    console.log("Enabled elements", cornerstone.getEnabledElements());
     const element = cornerstone.getEnabledElements()[0];
     cornerstoneTools.store.modules.freehand3D.state.interpolate = true;
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
@@ -248,9 +247,11 @@ class DisplayView extends Component {
     );
     const tempClass = new fh();
     console.log("Fh", tempClass);
+    console.log("Element 55555", element);
     tempClass._addAndSetVolumeIfNoVolumes(element);
+    tempClass.createNewMeasurement({}, element);
     console.log("Element", element);
-    if (element) interpolate(intData, element.element);
+    // if (element) interpolate(intData, element.element);
 
     console.log("CornerstoneTools", cornerstoneTools);
     this.refreshAllViewports();
