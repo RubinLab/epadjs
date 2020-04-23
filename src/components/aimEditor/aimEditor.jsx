@@ -899,7 +899,9 @@ class AimEditor extends Component {
   parseImgeId = imageId => {
     // if (mode == "lite") return imageId.split("/").pop();
     // else return imageId.split("objectUID=")[1].split("&")[0];
-    return imageId.split("objectUID=")[1];
+    if (imageId.includes("objectUID="))
+      return imageId.split("objectUID=")[1];
+    return imageId.split("/").pop();
   };
 }
 
