@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, Table } from "react-bootstrap";
+import { FaTimes } from "react-icons/fa";
 import CustomTable from "./CustomTable";
 
 const projectTable = ({ projectList, onSubmit, onCancel, error }) => {
@@ -11,8 +12,14 @@ const projectTable = ({ projectList, onSubmit, onCancel, error }) => {
 
   return (
     <Modal.Dialog dialogClassName="projectTable-modal">
+      <Modal.Header>
+        <Modal.Title className="projectTable-modal__header">
+          Add template to a project
+        </Modal.Title>
+      </Modal.Header>
       <Modal.Body id="proModal-content">
         <CustomTable data={projectList} />
+        {error && <div>{error}</div>}
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
         {!error && (

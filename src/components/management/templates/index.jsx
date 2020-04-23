@@ -3,19 +3,18 @@ import { connect } from "react-redux";
 import ReactTable from "react-table";
 import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
-import { FaRegTrashAlt } from "react-icons/fa";
+import { FaRegTrashAlt, FaProjectDiagram } from "react-icons/fa";
 import {
   getAllTemplates,
   getTemplatesUniversal,
+  getTemplatesAlll,
+  downloadTemplates,
+  deleteTemplate,
 } from "../../../services/templateServices";
 import { getProjects } from "../../../services/projectServices";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
 import EditTemplates from "./projectTable";
-import {
-  downloadTemplates,
-  deleteTemplate,
-} from "../../../services/templateServices";
 const mode = sessionStorage.getItem("mode");
 
 class Templates extends React.Component {
@@ -31,11 +30,13 @@ class Templates extends React.Component {
     uploadClicked: false,
     hasEditClicked: false,
     templateName: "",
+    templateUID: "",
   };
 
   componentDidMount = async () => {
     if (mode !== "lite") {
       const { data: projectList } = await getProjects();
+      await getTemplatesAlll();
       const temp = [];
       for (let project of projectList) {
         const { id, name } = project;
@@ -124,6 +125,7 @@ class Templates extends React.Component {
       delOne: false,
       templateName: "",
       selectedOne: {},
+      templateUID: ""
     });
   };
 
@@ -196,8 +198,21 @@ class Templates extends React.Component {
       });
   };
 
+  handleProjectClick = templateUID => {
+    this.setState({ hasEditClicked: true, templateUID });
+  };
+
+  addTemplateToProject = (e, projectID) => {
+    const { checked } = e.target;
+    if (!checked) {
+      // delete template from the project
+    } else {
+      // add template to the project
+    }
+  };
+
   defineColumns = () => {
-    return [
+    const columns = [
       {
         id: "checkbox",
         accessor: "",
@@ -280,6 +295,21 @@ class Templates extends React.Component {
         },
       },
     ];
+    const addToproject = {
+      Header: "",
+      width: 30,
+      Cell: original => {
+        const { templateUID } = original.row.checkbox.Template[0];
+        console.log(templateUID);
+        return (
+          <div onClick={() => this.handleProjectClick(templateUID)}>
+            <FaProjectDiagram className="menu-clickable" />
+          </div>
+        );
+      },
+    };
+    if (mode !== "lite") columns.splice(5, 0, addToproject);
+    return columns;
   };
 
   handleClickProjects = () => {

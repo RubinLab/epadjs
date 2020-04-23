@@ -8,10 +8,11 @@ class CustomTable extends Component {
     return [
       {
         Header: "Project",
-        accessor: "name"
+        accessor: "name",
       },
       {
         Header: "Enable",
+        width: 70,
         Cell: original => {
           return (
             <input
@@ -21,21 +22,22 @@ class CustomTable extends Component {
               // data-id={original.row.id}
             />
           );
-        }
+        },
       },
-      {
-        Header: "Default",
-        Cell: original => {
-          return (
-            <input
-              className="projectTable-row__check"
-              type="checkbox"
-              name="default"
-              // data-id={original.row.id}
-            />
-          );
-        }
-      }
+      // {
+      //   Header: "Default",
+      //   width: 50,
+      //   Cell: original => {
+      //     return (
+      //       <input
+      //         className="projectTable-row__check"
+      //         type="checkbox"
+      //         name="default"
+      //         // data-id={original.row.id}
+      //       />
+      //     );
+      //   },
+      // },
     ];
   };
 
@@ -46,6 +48,7 @@ class CustomTable extends Component {
         data={this.props.data}
         columns={this.setColumns()}
         defaultPageSize={this.props.data.length}
+        showPagination={false}
       />
     );
   };

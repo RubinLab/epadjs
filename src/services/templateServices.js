@@ -27,3 +27,7 @@ export function deleteTemplate(templateID, projectID) {
 export function getTemplatesUniversal() {
   return http.get(apiUrl + "/templates?format=summary");
 }
+
+export function getTemplatesAlll() {
+  return http.get(apiUrl + "/templates");
+}
