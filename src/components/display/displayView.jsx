@@ -3,7 +3,7 @@ import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import {
   getImageIds,
-  getWadoImagePath,
+  getWadoRSImagePath,
   getSegmentation
 } from "../../services/seriesServices";
 import { connect } from "react-redux";
@@ -332,7 +332,7 @@ class DisplayView extends Component {
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
           if (value.aimUid === aimID) {
-            const cornerstoneImageId = getWadoImagePath(
+            const cornerstoneImageId = getWadoRSImagePath(
               studyUID,
               seriesUID,
               key
@@ -508,7 +508,7 @@ class DisplayView extends Component {
           );
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
 
-        let imageId = getWadoImagePath(studyUid, seriesUid, key);
+        let imageId = getWadoRSImagePath(studyUid, seriesUid, key);
 
         if (!this.state.imageIds[imageId])
           //image is not multiframe so strip the frame number from the imageId
@@ -847,9 +847,17 @@ class DisplayView extends Component {
     });
     return markupTypes;
   };
+  // this is in aimEditor. should be somewhare common so both can use (the new aimapi library)
+  parseImgeId = imageId => {
+    // if (mode == "lite") return imageId.split("/").pop();
+    // else return imageId.split("objectUID=")[1].split("&")[0];
+    if (imageId.includes("objectUID="))
+      return imageId.split("objectUID=")[1];
+    return imageId.split("/").pop();
+  };
   newImage = event => {
     let { imageId } = event.detail.image;
-    imageId = imageId.split("objectUID=").pop(); //strip from cs imagePath to imageId
+    imageId = this.parseImgeId(imageId); //strip from cs imagePath to imageId
     const { activePort } = this.props;
     const tempData = this.state.data;
     const activeElement = cornerstone.getEnabledElements()[activePort];
