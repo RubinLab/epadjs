@@ -1,4 +1,4 @@
-import { store } from 'cornerstone-tools';
+import { store } from "cornerstone-tools";
 
 const modules = store.modules;
 
@@ -21,6 +21,7 @@ export class Polygon {
     this._polygonUid = polygonUid;
     this._frameNumber = frameNumber;
     this._interpolated = interpolated;
+    console.log("Polygon construction", interpolated);
   }
 
   _deepCopyPoints(points) {
@@ -49,8 +50,15 @@ export class Polygon {
 
     const freehand3DStore = modules.freehand3D;
 
-    const referencedROIContour = freehand3DStore.getters.ROIContour(seriesInstanceUid, structureSetUid, ROIContourUid);
-    const referencedStructureSet = freehand3DStore.getters.structureSet(seriesInstanceUid, structureSetUid);
+    const referencedROIContour = freehand3DStore.getters.ROIContour(
+      seriesInstanceUid,
+      structureSetUid,
+      ROIContourUid
+    );
+    const referencedStructureSet = freehand3DStore.getters.structureSet(
+      seriesInstanceUid,
+      structureSetUid
+    );
 
     const data = {
       uid: this._polygonUid,

@@ -79,6 +79,10 @@ function check(object, name) {
 function getSeries(seriesInstanceUid) {
   check(seriesInstanceUid, "seriesInstanceUid");
 
+  //hack for offline interpolation
+  if (!state.seriesCollection.length) setSeries(seriesInstanceUid);
+  //end hack
+
   return state.seriesCollection.find(series => {
     return series.uid === seriesInstanceUid;
   });
@@ -88,6 +92,7 @@ function getStructureSet(seriesInstanceUid, structureSetUid = "DEFAULT") {
   check(structureSetUid, "structureSetUid");
 
   const series = getSeries(seriesInstanceUid);
+  console.log("seriesInstanceUid & series", seriesInstanceUid, series);
 
   if (!series) {
     return;
@@ -102,9 +107,21 @@ function getROIContour(seriesInstanceUid, structureSetUid, ROIContourUid) {
   check(ROIContourUid, "ROIContourUid");
 
   const structureSet = getStructureSet(seriesInstanceUid, structureSetUid);
+  console.log("Structure set", structureSet);
 
   if (!structureSet) {
     return;
+  }
+
+  // hack for offline interpolation
+  if (!structureSet.ROIContourCollection.length) {
+    const var1 = {
+      uid: "3.c.8.3.3.2.2e86.af7.9.6.22174985b4f9b40e86312d523a66d37a7244a2b",
+      name: "Unnamed Lesion",
+      color: "cornflowerblue",
+      polygonCount: 2
+    };
+    structureSet.ROIContourCollection.push(var1);
   }
 
   return structureSet.ROIContourCollection.find(ROIContour => {

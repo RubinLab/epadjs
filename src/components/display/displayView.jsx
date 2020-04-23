@@ -86,7 +86,7 @@ const tools = [
   {
     name: "FreehandRoi3DTool",
     modeOptions: { mouseButtonMask: 1 },
-    mode: "passive"
+    mode: "enabled"
   },
   { name: "FreehandRoiSculptorTool", modeOptions: { mouseButtonMask: 1 } },
   { name: "Eraser" },
@@ -245,13 +245,14 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       roi3d
     );
-    const tempClass = new fh();
-    console.log("Fh", tempClass);
-    console.log("Element 55555", element);
-    tempClass._addAndSetVolumeIfNoVolumes(element);
-    tempClass.createNewMeasurement({}, element);
-    console.log("Element", element);
-    // if (element) interpolate(intData, element.element);
+    console.log("CornerstoneTools", cornerstoneTools);
+    // const tempClass = new fh();
+    // console.log("Fh", tempClass);
+    // console.log("Element 55555", element);
+    // tempClass._addAndSetVolumeIfNoVolumes(element);
+    // tempClass.createNewMeasurement({}, element);
+    // console.log("Element", element);
+    interpolate(intData, element.element);
 
     console.log("CornerstoneTools", cornerstoneTools);
     this.refreshAllViewports();

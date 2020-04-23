@@ -6,6 +6,7 @@ import {
 import { Polygon } from "../classes/Polygon.js";
 import generateUID from "../generateUID.js";
 import generateInterpolationData from "./generateInterpolationData.js";
+import cornerstoneTools from "../../../cornerstone-tools/index";
 
 const globalToolStateManager = globalImageIdSpecificToolStateManager;
 const dP = 0.2; // Aim for < 0.2mm between interpolated nodes when super-sampling.
@@ -38,6 +39,7 @@ export default function(toolData, element) {
       );
     }
   }
+  console.log("End of interpolation", cornerstoneTools);
 }
 
 /**

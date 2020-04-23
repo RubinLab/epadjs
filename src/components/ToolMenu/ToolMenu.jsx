@@ -163,7 +163,6 @@ class ToolMenu extends Component {
       {
         name: "Poly/Freehand",
         icon: <div className="icon-polygon fontastic-icons" />,
-        tool: "Presets",
         tool: "FreehandRoi3DTool",
         child: (
           <span>
@@ -384,12 +383,12 @@ class ToolMenu extends Component {
       "Cornerstone Tools",
       cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState()
     );
-    console.log(
-      "Cornerstone Tools",
-      JSON.stringify(
-        cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState()
-      )
-    );
+    // console.log(
+    //   "Cornerstone Tools",
+    //   JSON.stringify(
+    //     cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState()
+    //   )
+    // );
     this.disableAllTools();
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
       this.setToolActive(tool);

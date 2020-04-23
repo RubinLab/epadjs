@@ -27,7 +27,7 @@ export const intData = {
   },
   visible: true,
   active: false,
-  invalidated: true,
+  invalidated: false,
   handles: {
     points: [
       {

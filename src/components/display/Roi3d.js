@@ -99,8 +99,7 @@ export const roi3d = {
             variance: 120617.31160640458,
             stdDev: 347.3000311062534
           },
-          area: 3975.9229969765693,
-          interpolated: false
+          area: 3975.9229969765693
         }
       ]
     },
