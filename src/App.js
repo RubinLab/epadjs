@@ -640,6 +640,7 @@ class App extends Component {
                   render={props => (
                     <SearchView
                       {...props}
+                      projectMap={this.state.projectMap}
                       updateProgress={this.updateProgress}
                       progressUpdated={progressUpdated}
                       expandLevel={this.state.expandLevel}
@@ -664,6 +665,7 @@ class App extends Component {
                   render={props => (
                     <SearchView
                       {...props}
+                      projectMap={this.state.projectMap}
                       updateProgress={this.updateProgress}
                       progressUpdated={progressUpdated}
                       expandLevel={this.state.expandLevel}
@@ -709,6 +711,7 @@ class App extends Component {
                   render={props => (
                     <SearchView
                       {...props}
+                      projectMap={this.state.projectMap}
                       updateProgress={this.updateProgress}
                       progressUpdated={progressUpdated}
                       expandLevel={this.state.expandLevel}
@@ -757,6 +760,7 @@ class App extends Component {
                 render={props => (
                   <SearchView
                     {...props}
+                    projectMap={this.state.projectMap}
                     updateProgress={this.updateProgress}
                     progressUpdated={progressUpdated}
                     expandLevel={this.state.expandLevel}
@@ -789,7 +793,7 @@ class App extends Component {
 }
 
 const mapStateToProps = state => {
-  // console.log(state.annotationsListReducer);
+  console.log(state.annotationsListReducer);
   // console.log(state.managementReducer);
   const {
     showGridFullAlert,

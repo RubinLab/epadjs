@@ -4,7 +4,7 @@ import cornerstoneTools from "cornerstone-tools";
 import {
   getImageIds,
   getWadoImagePath,
-  getSegmentation
+  getSegmentation,
 } from "../../services/seriesServices";
 import { connect } from "react-redux";
 import { Redirect } from "react-router";
@@ -15,7 +15,7 @@ import {
   changeActivePort,
   updateImageId,
   clearActivePortAimID,
-  closeSerie
+  closeSerie,
 } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
@@ -30,7 +30,7 @@ import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
 import {
   getNumOfSegs,
-  getSegIndexOfAim
+  getSegIndexOfAim,
 } from "../../Utils/Segmentation/helpers";
 
 const mode = sessionStorage.getItem("mode");
@@ -44,9 +44,9 @@ const tools = [
     configuration: {
       minScale: 0.3,
       maxScale: 25,
-      preventZoomOutsideImage: true
+      preventZoomOutsideImage: true,
     },
-    modeOptions: { mouseButtonMasks: [1, 2] }
+    modeOptions: { mouseButtonMasks: [1, 2] },
   },
   { name: "Probe", modeOptions: { mouseButtonMasks: 1 }, mode: "passive" },
   { name: "Length", modeOptions: { mouseButtonMasks: 1 }, mode: "passive" },
@@ -65,10 +65,10 @@ const tools = [
   {
     name: "CircleRoi",
     configuration: {
-      showMinMax: true
+      showMinMax: true,
     },
     modeOptions: { mouseButtonMask: 1 },
-    mode: "passive"
+    mode: "passive",
   },
   { name: "Angle" },
   { name: "Rotate" },
@@ -76,20 +76,20 @@ const tools = [
   {
     name: "FreehandRoi",
     modeOptions: { mouseButtonMask: [1] },
-    mode: "passive"
+    mode: "passive",
   },
   { name: "FreehandRoiSculptor", modeOptions: { mouseButtonMask: 1 } },
   {
     name: "FreehandRoi3DTool",
     modeOptions: { mouseButtonMask: 1 },
-    mode: "passive"
+    mode: "passive",
   },
   { name: "FreehandRoiSculptorTool", modeOptions: { mouseButtonMask: 1 } },
   { name: "Eraser" },
   {
     name: "Bidirectional",
     modeOptions: { mouseButtonMask: 1 },
-    mode: "passive"
+    mode: "passive",
   },
   { name: "Brush3DTool" },
   { name: "StackScroll", modeOptions: { mouseButtonMask: 1 } },
@@ -100,7 +100,7 @@ const tools = [
   { name: "FreehandScissors", modeOptions: { mouseButtonMask: 1 } },
   { name: "RectangleScissors", modeOptions: { mouseButtonMask: 1 } },
   { name: "CircleScissors", modeOptions: { mouseButtonMask: 1 } },
-  { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } }
+  { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
 ];
 
 Array.prototype.pairs = function(func) {
@@ -119,7 +119,7 @@ const mapStateToProps = state => {
     series: state.annotationsListReducer.openSeries,
     loading: state.annotationsListReducer.loading,
     activePort: state.annotationsListReducer.activePort,
-    aimList: state.annotationsListReducer.aimsList
+    aimList: state.annotationsListReducer.aimsList,
   };
 };
 
@@ -137,7 +137,7 @@ class DisplayView extends Component {
       showAnnDetails: true,
       hasSegmentation: false,
       activeLabelMapIndex: 0,
-      redirect: this.props.series.length < 1 ? true : false
+      redirect: this.props.series.length < 1 ? true : false,
     };
   }
 
@@ -202,7 +202,7 @@ class DisplayView extends Component {
         data: res,
         isLoading: false,
         activeLabelMapIndex: 0,
-        prospectiveLabelMapIndex: 0
+        prospectiveLabelMapIndex: 0,
       });
       // clear the toolState they will be rendered again on next load
       cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
@@ -378,14 +378,14 @@ class DisplayView extends Component {
   createViewport(viewportRef) {
     return {
       type: "CREATE_VIEWPORT",
-      payload: viewportRef
+      payload: viewportRef,
     };
   }
 
   defaultSelectVP(id) {
     return {
       type: "SELECT_VIEWPORT",
-      payload: id
+      payload: id,
     };
   }
 
@@ -420,7 +420,7 @@ class DisplayView extends Component {
       "Probe",
       "Length",
       "CircleRoi",
-      "FreehandRoi3DTool"
+      "FreehandRoi3DTool",
     ];
     if (toolsOfInterest.includes(toolName) || toolType === "Bidirectional") {
       this.setState({ showAimEditor: true });
@@ -613,7 +613,7 @@ class DisplayView extends Component {
       const {
         labelmapBuffer,
         segMetadata,
-        segmentsOnFrame
+        segmentsOnFrame,
       } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
         imageIds,
         arrayBuffer,
@@ -764,7 +764,7 @@ class DisplayView extends Component {
       freehandPoint.highlight = true;
       freehandPoint.active = true;
       freehandPoint.lines = [
-        { x: points[linesIndex].x.value, y: points[linesIndex].y.value }
+        { x: points[linesIndex].x.value, y: points[linesIndex].y.value },
       ];
       freehandPoints.push(freehandPoint);
     });
@@ -895,7 +895,7 @@ class DisplayView extends Component {
                   width: this.state.width,
                   height: this.state.height,
                   padding: "2px",
-                  display: "inline-block"
+                  display: "inline-block",
                 }}
                 onDoubleClick={() => this.hideShow(i)}
               >
@@ -904,7 +904,7 @@ class DisplayView extends Component {
                   style={{
                     width: "100%",
                     height: "100%",
-                    display: "inline-block"
+                    display: "inline-block",
                   }}
                 >
                   <CornerstoneViewport
@@ -917,13 +917,13 @@ class DisplayView extends Component {
                       {
                         target: "element",
                         eventName: "cornerstonetoolsmeasurementcompleted",
-                        handler: this.measurementCompleted
+                        handler: this.measurementCompleted,
                       },
                       {
                         target: "element",
                         eventName: "cornerstonenewimage",
-                        handler: this.newImage
-                      }
+                        handler: this.newImage,
+                      },
                     ]}
                     setViewportActive={() => this.setActive(i)}
                     isStackPrefetchEnabled={true}
