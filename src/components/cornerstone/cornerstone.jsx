@@ -98,13 +98,13 @@ const Cornerstone = ({ dispatch }) => {
 
   cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
 
-  dispatch({
-    type: "INIT_CORNER",
-    payload: {
-      cs: cornerstone,
-      csT: cornerstoneTools
-    }
-  });
+  // dispatch({
+  //   type: "INIT_CORNER",
+  //   payload: {
+  //     cs: cornerstone,
+  //     csT: cornerstoneTools
+  //   }
+  // });
   return null;
 };
 
