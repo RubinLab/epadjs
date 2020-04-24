@@ -45,22 +45,26 @@ class Sidebar extends Component {
   componentDidMount = async () => {
     //get the porjects
     if (mode !== "lite") {
-      const { data: projects } = await getProjects();
-      if (projects.length > 0) {
-        const pid = projects[0].id;
-        this.setState({ projects, pid, selected: pid });
-
-        this.props.history.push(`/search/${pid}`);
-        this.props.getPidUpdate(pid);
-        const projectMap = {};
-        for (let project of projects) {
-          projectMap[project.id] = project.name;
-        }
-        this.props.onData(projectMap);
-      }
+      this.getProjectsData();
     }
     this.getWorklistandProgressData();
   };
+
+  getProjectsData = async () => {
+    const { data: projects } = await getProjects();
+    if (projects.length > 0) {
+      const pid = projects[0].id;
+      this.setState({ projects, pid, selected: pid });
+
+      this.props.history.push(`/search/${pid}`);
+      this.props.getPidUpdate(pid);
+      const projectMap = {};
+      for (let project of projects) {
+        projectMap[project.id] = project.name;
+      }
+      this.props.onData(projectMap);
+    }
+  }
 
   getWorklistandProgressData = async () => {
     const { data: worklistsAssigned } = await getWorklistsOfAssignee(
@@ -98,6 +102,11 @@ class Sidebar extends Component {
   componentDidUpdate = prevProps => {
     if (prevProps.progressUpdated !== this.props.progressUpdated) {
       this.getWorklistandProgressData();
+    }
+    if (prevProps.projectAdded !== this.props.projectAdded) {
+      console.log("here")
+      console.log(prevProps.projectAdded, this.props.projectAdded)
+      this.getProjectsData();
     }
   };
 

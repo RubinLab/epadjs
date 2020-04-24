@@ -56,7 +56,18 @@ class App extends Component {
       treeData: {},
       pid: null,
       closeAll: 0,
+      projectAdded: 0
     };
+  }
+
+  getProjectAdded = () => {
+    this.setState(state => ({
+      projectAdded: state.projectAdded + 1, 
+      refTree: {},
+      treeData: {},
+      expandLevel: 0,
+      treeExpand: {},
+    }))
   }
 
   getTreeExpandAll = (expandObj, expanded, expandLevel) => {
@@ -594,6 +605,7 @@ class App extends Component {
             projectMap={this.state.projectMap}
             updateProgress={this.updateProgress}
             admin={this.state.admin}
+            getProjectAdded={this.getProjectAdded}
           />
         )}
         {this.state.openInfo && (
@@ -623,6 +635,7 @@ class App extends Component {
               getPidUpdate={this.getPidUpdate}
               pid={this.state.pid}
               clearTreeExpand={this.clearTreeExpand}
+              projectAdded={this.state.projectAdded}
             >
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
