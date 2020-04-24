@@ -73,7 +73,7 @@ export function getWadoRSImagePath(studyUid, seriesUid, imageId) {
     studyUid +
     "/series/" +
     seriesUid +
-    "/instances" +
+    "/instances/" +
     imageId
   );
 }
