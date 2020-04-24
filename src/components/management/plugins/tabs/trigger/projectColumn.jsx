@@ -3,8 +3,8 @@ class ProjectColumn extends React.Component {
   populateProjectRows = () => {
     let rows = [];
 
-    this.props.projects.forEach(project => {
-      //console.log("template modal ---->>>>>> ", template);
+    this.props.projects.forEach((project) => {
+      //  console.log("template modal ---->>>>>> ", template);
       rows.push(
         <tr key={project.id} className="edit-userRole__table--row">
           <td>

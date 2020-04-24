@@ -22,7 +22,11 @@ class ParametersForProjectWindow extends React.Component {
     parameterFormElements: {
       plugindbid: this.props.plugindbid,
       projectdbid: this.props.projectdbid,
+      paramid: "",
       name: "",
+      format: "",
+      prefix: "",
+      inputBinding: "",
       default_value: "",
       creator: "",
       type: "",
@@ -60,7 +64,11 @@ class ParametersForProjectWindow extends React.Component {
     const tempParameterFormElements = {
       plugindbid: this.props.plugindbid,
       projectdbid: this.props.projectdbid,
+      paramid: "",
       name: "",
+      format: "",
+      prefix: "",
+      inputBinding: "",
       default_value: "",
       creator: "",
       type: "",
@@ -113,15 +121,19 @@ class ParametersForProjectWindow extends React.Component {
       alert("an error occourred while deleting project parameter");
     }
   };
+
   handleShowEditParameterWindow = (rowInfo) => {
     console.log("row click :", rowInfo);
     const tempParameterFormElements = {
       plugindbid: this.props.plugindbid,
       projectdbid: this.props.projectdbid,
       paramdbid: rowInfo.original.id,
+      paramid: rowInfo.original.paramid,
       name: rowInfo.original.name,
+      format: rowInfo.original.format,
+      prefix: rowInfo.original.prefix,
+      inputBinding: rowInfo.original.inputBinding,
       default_value: rowInfo.original.default_value,
-      creator: rowInfo.original.creator,
       type: rowInfo.original.type,
       description: rowInfo.original.description,
     };
@@ -167,8 +179,17 @@ class ParametersForProjectWindow extends React.Component {
     console.log("edit paramter close clicked");
     this.setState({ editParam: false, addnew: false });
   };
+
   defineParametersTableColumns = () => {
     return [
+      {
+        Header: "id",
+        accessor: "paramid",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 50,
+        width: 70,
+      },
       {
         Header: "Name",
         accessor: "name",
@@ -178,24 +199,8 @@ class ParametersForProjectWindow extends React.Component {
         width: 70,
       },
       {
-        Header: "value",
-        accessor: "default_value",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 50,
-        width: 100,
-      },
-      {
         Header: "format",
         accessor: "format",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 50,
-        width: 100,
-      },
-      {
-        Header: "type",
-        accessor: "type",
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
@@ -211,7 +216,24 @@ class ParametersForProjectWindow extends React.Component {
       },
       {
         Header: "inputbinding",
-        accessor: "inputbinding",
+        accessor: "inputBinding",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 50,
+        width: 100,
+      },
+      {
+        Header: "value",
+        accessor: "default_value",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 50,
+        width: 100,
+      },
+
+      {
+        Header: "type",
+        accessor: "type",
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
@@ -270,6 +292,16 @@ class ParametersForProjectWindow extends React.Component {
               <div>
                 <h5>add new project parameter</h5>
                 <form className="add-project__modal--form">
+                  <h5 className="add-project__modal--label">id*</h5>
+                  <input
+                    onMouseDown={(e) => e.stopPropagation()}
+                    className="add-project__modal--input"
+                    name="paramid"
+                    type="text"
+                    onChange={this.handleFormElementChange}
+                    id="form-first-element"
+                    value={this.state.parameterFormElements.paramid}
+                  />
                   <h5 className="add-project__modal--label">Name*</h5>
                   <input
                     onMouseDown={(e) => e.stopPropagation()}
@@ -279,6 +311,36 @@ class ParametersForProjectWindow extends React.Component {
                     onChange={this.handleFormElementChange}
                     id="form-first-element"
                     value={this.state.parameterFormElements.name}
+                  />
+                  <h5 className="add-project__modal--label">format*</h5>
+                  <input
+                    onMouseDown={(e) => e.stopPropagation()}
+                    className="add-project__modal--input"
+                    name="format"
+                    type="text"
+                    onChange={this.handleFormElementChange}
+                    id="form-first-element"
+                    value={this.state.parameterFormElements.format}
+                  />
+                  <h5 className="add-project__modal--label">prefix*</h5>
+                  <input
+                    onMouseDown={(e) => e.stopPropagation()}
+                    className="add-project__modal--input"
+                    name="prefix"
+                    type="text"
+                    onChange={this.handleFormElementChange}
+                    id="form-first-element"
+                    value={this.state.parameterFormElements.prefix}
+                  />
+                  <h5 className="add-project__modal--label">input binding*</h5>
+                  <input
+                    onMouseDown={(e) => e.stopPropagation()}
+                    className="add-project__modal--input"
+                    name="inputBinding"
+                    type="text"
+                    onChange={this.handleFormElementChange}
+                    id="form-first-element"
+                    value={this.state.parameterFormElements.inputBinding}
                   />
                   <h5 className="add-project__modal--label">Default value*</h5>
                   <input

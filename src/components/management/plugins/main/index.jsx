@@ -8,7 +8,10 @@ import {
   getProjects,
   getProjectsWithPkAsId,
 } from "../../../../services/projectServices";
-import { getTemplatesFromDb } from "../../../../services/templateServices";
+import {
+  getTemplatesFromDb,
+  getTemplatesUniversal,
+} from "../../../../services/templateServices";
 import PluginProjectWindow from "../tabs/manage/pluginProjectWindow";
 import PluginTemplateWindow from "../tabs/manage/pluginTemplateWindow";
 import NewPluginWindow from "../tabs/manage/newPluginWindow";
@@ -42,7 +45,11 @@ class Plugins extends React.Component {
     selectedTemplates: [], //using
     parametersDefault: {}, //using
     parameterFormElements: {
+      paramid: "",
       name: "",
+      format: "",
+      prefix: "",
+      inputBinding: "",
       default_value: "",
       creator: "",
       type: "",
@@ -86,6 +93,8 @@ class Plugins extends React.Component {
     const pluginList = await getPluginsWithProject();
     let projectList = await getProjectsWithPkAsId();
     let templateList = await getTemplatesFromDb();
+    const templateUniversal = await getTemplatesUniversal();
+    console.log("universal templates", templateUniversal);
     templateList = templateList.data;
 
     const plugins = pluginList.data;
