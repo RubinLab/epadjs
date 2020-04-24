@@ -55,6 +55,7 @@ class App extends Component {
       refTree: {},
       treeData: {},
       pid: null,
+      closeAll: 0,
     };
   }
 
@@ -461,9 +462,12 @@ class App extends Component {
   };
 
   handleCloseAll = () => {
-    this.setState({
+    // let { closeAll } = this.state;
+    // closeAll += 1;
+    this.setState((state) => ({
       expandLevel: 0,
-    });
+      closeAll: state.closeAll + 1,
+    }));
   };
 
   getTreeData = (projectID, level, data) => {
@@ -649,6 +653,7 @@ class App extends Component {
                       handleCloseAll={this.handleCloseAll}
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
+                      closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
                     />
                   )}
@@ -672,6 +677,7 @@ class App extends Component {
                       handleCloseAll={this.handleCloseAll}
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
+                      closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
                     />
                   )}
@@ -718,6 +724,7 @@ class App extends Component {
                       handleCloseAll={this.handleCloseAll}
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
+                      closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
                     />
                   )}
@@ -765,6 +772,7 @@ class App extends Component {
                     handleCloseAll={this.handleCloseAll}
                     treeData={this.state.treeData}
                     getTreeData={this.getTreeData}
+                    closeAllCounter={this.state.closeAll}
                   />
                 )}
               />
