@@ -15,7 +15,7 @@ const TreeTable = treeTableHOC(ReactTable);
 class FlexView extends React.Component {
   state = {
     columns: [],
-    order: [5, 0, 1, 2, 7],
+    order: [1, 4, 9, 10, 0, 8],
     dropdownSelected: false,
     expanded: {},
   };
@@ -42,6 +42,9 @@ class FlexView extends React.Component {
       Header: "Exam",
       sortable: false,
       show: true,
+      id: "exam",
+      width: 70,
+      resizable: true,
       Cell: row => {
         return Array.isArray(row.original.examTypes) ? (
           <div>{row.original.examTypes.join(" ,")}</div>
@@ -51,21 +54,43 @@ class FlexView extends React.Component {
       },
     },
     {
-      Header: "Patient",
+      Header: "Patient Name",
       // accessor: "patientName",
       sortable: true,
       show: true,
+      id: "patient",
+      resizable: true,
+      width: 270,
       Cell: row => {
         return <div>{this.clearCarets(row.original.patientName)}</div>;
       },
     },
-    { Header: "PatientID", accessor: "patientID", sortable: true, show: true },
-    { Header: "Sex", accessor: "sex", sortable: true, show: true },
     {
-      Header: "Description",
+      Header: "PatientID",
+      accessor: "patientID",
+      sortable: true,
+      show: true,
+      id: "patientID",
+      width: 270,
+      resizable: true,
+    },
+    {
+      Header: "Sex",
+      accessor: "sex",
+      sortable: true,
+      show: true,
+      id: "sex",
+      width: 50,
+      resizable: true,
+    },
+    {
+      Header: "Study Description",
       // accessor: "seriesDescription" || "studyDescription",
       sortable: true,
       show: true,
+      id: "description",
+      width: 170,
+      resizable: true,
       Cell: row => {
         let desc = row.original.seriesUID
           ? row.original.seriesDescription
@@ -81,14 +106,36 @@ class FlexView extends React.Component {
       accessor: "insertDate",
       sortable: true,
       show: true,
+      id: "insertDate",
+      resizable: true,
+      width: 100,
     },
-    { Header: "Study Date", accessor: "studyDate", sortable: true, show: true },
-    { Header: "Study Time", accessor: "studyTime", sortable: true, show: true },
+    {
+      Header: "Study Date",
+      accessor: "studyDate",
+      sortable: true,
+      show: true,
+      width: 100,
+      id: "studyDate",
+      resizable: true,
+    },
+    {
+      Header: "Study Time",
+      accessor: "studyTime",
+      sortable: true,
+      show: true,
+      width: 100,
+      id: "studyTime",
+      resizable: true,
+    },
     {
       Header: "UID",
       // accessor: "seriesUID" || "studyUID",
       sortable: true,
       show: true,
+      id: "uid",
+      resizable: true,
+      width: 270,
       Cell: row => {
         const UID = row.original.seriesUID
           ? row.original.seriesUID
@@ -102,30 +149,45 @@ class FlexView extends React.Component {
       accessor: "numberOfAnnotations",
       sortable: true,
       show: true,
+      id: "numberOfAnnotations",
+      resizable: true,
+      width: 70,
     },
     {
       Header: "# Of Img",
       accessor: "numberOfImages",
       sortable: true,
       show: true,
+      id: "numberOfImages",
+      resizable: true,
+      width: 70,
     },
     {
       Header: "# Of Series",
       accessor: "numberOfSeries",
       sortable: true,
       show: true,
+      id: "numberOfSeries",
+      resizable: true,
+      width: 70,
     },
     {
       Header: "created Time",
       accessor: "createdTime",
       sortable: true,
       show: true,
+      id: "createdTime",
+      resizable: true,
+      width: 150,
     },
     {
       Header: "birth date",
       accessor: "birthdate",
       sortable: true,
       show: true,
+      id: "birthdate",
+      resizable: true,
+      width: 150,
     },
   ];
 

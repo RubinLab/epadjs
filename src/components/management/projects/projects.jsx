@@ -69,7 +69,6 @@ class Projects extends React.Component {
     const userRoles = [];
     try {
       const { data: users } = await getUsers();
-
       const { data: roles } = await getProjectUsers(id);
       for (let i = 0; i < users.length; i++) {
         for (let k = 0; k < roles.length; k++) {
@@ -78,11 +77,13 @@ class Projects extends React.Component {
             break;
           }
         }
-        if (userRoles.length !== i + 1) {
+        if (userRoles.length < i + 1 && i < users.length) {
           userRoles.push({ name: users[i].username, role: "None" });
         }
       }
-      this.setState({ userRoles });
+      await this.setState({ userRoles });
+      this.setState({hasUserRolesClicked: true});
+
     } catch (err) {
       // this.setState({ error: true });
     }
@@ -215,7 +216,7 @@ class Projects extends React.Component {
     //then => refresh the page
     //catch => push
     for (let project in newSelected) {
-       promises.push(deleteProject(project));
+      promises.push(deleteProject(project));
     }
     Promise.all(promises)
       .then(() => {
@@ -372,18 +373,24 @@ class Projects extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
+          const { loginNames } = original.row;
+          const className =
+            loginNames.length > 0 ? "wrapped" : "wrapped click-to-add";
+          const text =
+            loginNames.length > 0
+              ? loginNames.join(", ")
+              : "Add user to the project";
           return (
             <p
-              className="menu-clickable wrapped"
-              onClick={async () => {
-                await this.handleClickUSerRoles(original.row.checkbox.id);
+              className={className}
+              onClick={() => {
+                this.handleClickUSerRoles(original.row.checkbox.id);
                 this.setState({
-                  hasUserRolesClicked: true,
                   id: original.row.checkbox.id,
                 });
               }}
             >
-              {original.row.loginNames.join(", ")}
+              {text}
             </p>
           );
         },
