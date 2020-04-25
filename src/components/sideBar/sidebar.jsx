@@ -64,7 +64,7 @@ class Sidebar extends Component {
       }
       this.props.onData(projectMap);
     }
-  }
+  };
 
   getWorklistandProgressData = async () => {
     const { data: worklistsAssigned } = await getWorklistsOfAssignee(
@@ -100,13 +100,16 @@ class Sidebar extends Component {
   };
 
   componentDidUpdate = prevProps => {
+    let { pathname } = this.props.location;
     if (prevProps.progressUpdated !== this.props.progressUpdated) {
       this.getWorklistandProgressData();
     }
     if (prevProps.projectAdded !== this.props.projectAdded) {
-      console.log("here")
-      console.log(prevProps.projectAdded, this.props.projectAdded)
       this.getProjectsData();
+    }
+    if (pathname !== prevProps.location.pathname) {
+      pathname = pathname.split("/").pop();
+      this.setState({ selected: pathname });
     }
   };
 
@@ -191,34 +194,45 @@ class Sidebar extends Component {
   };
 
   renderProjects = () => {
-    if (mode === "thick") {
-      const projects = this.state.projects.map(project => {
-        const className =
-          this.state.selected === project.id
+    try {
+      const { projects, selected } = this.state;
+      let { pathname } = this.props.location;
+      pathname = pathname.split("/").pop();
+      // const pid = pathname.pop();
+      if (mode === "thick") {
+        const projectsList = projects.map(project => {
+          const matchProject =
+            selected === project.id || pathname === project.id;
+          const className = matchProject
             ? "sidebar-row __selected"
             : "sidebar-row";
+          return (
+            <tr key={project.id} className={className}>
+              <td>
+                <p
+                  onClick={() => {
+                    this.handleRoute("project", project.id);
+                    this.setState({ selected: project.id });
+                  }}
+                  style={{ padding: "0.6rem" }}
+                >
+                  {project.name}
+                </p>
+              </td>
+            </tr>
+          );
+        });
         return (
-          <tr key={project.id} className={className}>
-            <td>
-              <p
-                onClick={() => {
-                  this.handleRoute("project", project.id);
-                  this.setState({ selected: project.id });
-                }}
-                style={{ padding: "0.6rem" }}
-              >
-                {project.name}
-              </p>
-            </td>
-          </tr>
+          <SidebarContent key="projectContent">{projectsList}</SidebarContent>
         );
-      });
-      return <SidebarContent key="projectContent">{projects}</SidebarContent>;
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
   renderWorklists = () => {
-    const {type, selected } = this.state;
+    const { type, selected } = this.state;
     const worklists = this.state.worklistsAssigned.map(worklist => {
       const className =
         worklist.workListID === selected && type === "worklist"
