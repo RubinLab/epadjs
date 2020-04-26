@@ -598,6 +598,7 @@ class App extends Component {
           onSwitchView={this.switchView}
           viewType={this.state.viewType}
           notificationWarning={noOfUnseen}
+          pid={this.state.pid}
         />
         {this.state.openMng && (
           <Management
@@ -645,6 +646,7 @@ class App extends Component {
                     <DisplayView
                       {...props}
                       updateProgress={this.updateProgress}
+                      pid={this.state.pid}
                     />
                   )}
                 />

@@ -51,18 +51,21 @@ class Sidebar extends Component {
   };
 
   getProjectsData = async () => {
-    const { data: projects } = await getProjects();
-    if (projects.length > 0) {
-      const pid = projects[0].id;
-      this.setState({ projects, pid, selected: pid });
-
-      this.props.history.push(`/search/${pid}`);
-      this.props.getPidUpdate(pid);
-      const projectMap = {};
-      for (let project of projects) {
-        projectMap[project.id] = project.name;
+    try {
+      const { data: projects } = await getProjects();
+      if (projects.length > 0) {
+        const pid = projects[0].id;
+        this.setState({ projects, pid, selected: pid });
+        this.props.history.push(`/search/${pid}`);
+        this.props.getPidUpdate(pid);
+        const projectMap = {};
+        for (let project of projects) {
+          projectMap[project.id] = project.name;
+        }
+        this.props.onData(projectMap);
       }
-      this.props.onData(projectMap);
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -101,6 +104,7 @@ class Sidebar extends Component {
 
   componentDidUpdate = prevProps => {
     let { pathname } = this.props.location;
+    const { pid } = this.props;
     if (prevProps.progressUpdated !== this.props.progressUpdated) {
       this.getWorklistandProgressData();
     }
@@ -110,6 +114,9 @@ class Sidebar extends Component {
     if (pathname !== prevProps.location.pathname) {
       pathname = pathname.split("/").pop();
       this.setState({ selected: pathname });
+    }
+    if (pid !== prevProps.pid) {
+      this.setState({ pid });
     }
   };
 
@@ -212,6 +219,7 @@ class Sidebar extends Component {
                 <p
                   onClick={() => {
                     this.handleRoute("project", project.id);
+                    this.props.getPidUpdate(project.id);
                     this.setState({ selected: project.id });
                   }}
                   style={{ padding: "0.6rem" }}
