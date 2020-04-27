@@ -5,11 +5,13 @@ import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
 import { FaRegTrashAlt, FaProjectDiagram } from "react-icons/fa";
 import {
-  getAllTemplates,
+  getTemplatesOfProjects,
   getTemplatesUniversal,
-  getTemplatesAlll,
+  getAllTemplates,
   downloadTemplates,
   deleteTemplate,
+  deleteProjectsTemplate,
+  addTemplateToProject,
 } from "../../../services/templateServices";
 import { getProjects } from "../../../services/projectServices";
 import DeleteAlert from "../common/alertDeletionModal";
@@ -31,12 +33,13 @@ class Templates extends React.Component {
     hasEditClicked: false,
     templateName: "",
     templateUID: "",
+    tempProjects: [],
+    tempProSelect: {},
   };
 
   componentDidMount = async () => {
     if (mode !== "lite") {
       const { data: projectList } = await getProjects();
-      await getTemplatesAlll();
       const temp = [];
       for (let project of projectList) {
         const { id, name } = project;
@@ -68,7 +71,7 @@ class Templates extends React.Component {
   };
   getTemplatesData = async () => {
     if (mode === "lite") {
-      const { data: templates } = await getAllTemplates();
+      const { data: templates } = await getTemplatesOfProjects();
       this.setState({ templates });
     } else {
       const { data: templates } = await getTemplatesUniversal();
@@ -125,7 +128,9 @@ class Templates extends React.Component {
       delOne: false,
       templateName: "",
       selectedOne: {},
-      templateUID: ""
+      templateUID: "",
+      tempProjects: [],
+      tempProSelect: {},
     });
   };
 
@@ -198,8 +203,39 @@ class Templates extends React.Component {
       });
   };
 
-  handleProjectClick = templateUID => {
-    this.setState({ hasEditClicked: true, templateUID });
+  handleProjectClick = (templateUID, templateName, projects) => {
+    this.setState({
+      hasEditClicked: true,
+      templateUID,
+      templateName,
+      tempProjects: projects,
+    });
+  };
+
+  handleTemplateProjectSelect = e => {
+    const { id, checked } = e.target;
+    const tempProSelect = { ...this.state.tempProSelect };
+    tempProSelect[id] = checked;
+    this.setState({ tempProSelect });
+  };
+
+  handleTemplateProjectSubmit = async () => {
+    try {
+      const promises = [];
+      const { tempProSelect, templateUID } = this.state;
+      const projectIDs = Object.keys(tempProSelect);
+      const values = Object.values(tempProSelect);
+      projectIDs.forEach((id, i) => {
+        values[i]
+          ? promises.push(addTemplateToProject(templateUID, id))
+          : promises.push(deleteProjectsTemplate(templateUID, id));
+      });
+      await Promise.all(promises);
+      this.handleCancel();
+      this.getTemplatesData();
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   addTemplateToProject = (e, projectID) => {
@@ -299,10 +335,14 @@ class Templates extends React.Component {
       Header: "",
       width: 30,
       Cell: original => {
-        const { templateUID } = original.row.checkbox.Template[0];
-        console.log(templateUID);
+        const { templateUID, templateName } = original.row.checkbox.Template[0];
+        const { projects } = original.row.checkbox;
         return (
-          <div onClick={() => this.handleProjectClick(templateUID)}>
+          <div
+            onClick={() =>
+              this.handleProjectClick(templateUID, templateName, projects)
+            }
+          >
             <FaProjectDiagram className="menu-clickable" />
           </div>
         );
@@ -359,9 +399,22 @@ class Templates extends React.Component {
   };
 
   render = () => {
-    const checkboxSelected = Object.values(this.state.selected).length > 0;
-    const data = this.state.templates;
-    const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
+    const {
+      templates,
+      selected,
+      delAll,
+      delOne,
+      projectList,
+      tempProjects,
+      templateName,
+      errorMessage,
+      uploadClicked,
+      hasEditClicked,
+      tempProSelect,
+    } = this.state;
+    const checkboxSelected = Object.values(selected).length > 0;
+    const pageSize =
+      templates.length < 10 ? 10 : templates.length >= 40 ? 50 : 20;
     return (
       <div className="templates menu-display" id="template">
         <ToolBar
@@ -372,35 +425,40 @@ class Templates extends React.Component {
         />
         <ReactTable
           className="pro-table"
-          data={this.state.templates}
+          data={templates}
           columns={this.defineColumns()}
           pageSizeOptions={[10, 20, 50]}
           defaultPageSize={pageSize}
         />
 
-        {(this.state.delAll || this.state.delOne) && (
+        {(delAll || delOne) && (
           <DeleteAlert
             message={
-              this.state.delAll
+              delAll
                 ? this.renderMessages().deleteAll
-                : this.renderMessages(this.state.templateName).deleteOne
+                : this.renderMessages(templateName).deleteOne
             }
             onCancel={this.handleCancel}
-            onDelete={this.state.delAll ? this.deleteAll : this.deleteOne}
-            error={this.state.errorMessage}
+            onDelete={delAll ? this.deleteAll : this.deleteOne}
+            error={errorMessage}
           />
         )}
-        {this.state.uploadClicked && (
+        {uploadClicked && (
           <UploadModal
             onCancel={this.handleCancel}
             onSubmit={this.handleSubmitUpload}
             className="mng-upload"
           />
         )}
-        {this.state.hasEditClicked && (
+        {hasEditClicked && (
           <EditTemplates
-            projectList={this.state.projectList}
+            projectList={projectList}
             onCancel={this.handleCancel}
+            templateProjects={tempProjects}
+            onSubmit={this.handleTemplateProjectSubmit}
+            onSelect={this.handleTemplateProjectSelect}
+            selected={tempProSelect}
+            templateName={templateName}
           />
         )}
       </div>

@@ -1,6 +1,5 @@
 import React from "react";
-import PropTypes from "prop-types";
-import { getAllTemplates } from "../../../services/templateServices";
+import { getTemplatesOfProjects } from "../../../services/templateServices";
 
 // accept only integers for aims field
 class RequirementForm extends React.Component {
@@ -13,7 +12,7 @@ class RequirementForm extends React.Component {
   };
 
   componentDidMount = async () => {
-    const { data } = await getAllTemplates();
+    const { data } = await getTemplatesOfProjects();
     const templates = {};
     console.log(data);
     data.forEach((el, i) => {
