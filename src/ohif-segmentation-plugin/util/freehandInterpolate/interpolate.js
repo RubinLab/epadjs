@@ -54,6 +54,7 @@ export default function(toolData, element) {
  */
 
 function _linearlyInterpolateBetween(indicies, contourPair, ROIContourData) {
+  console.log("Interpolate betweeen", indicies, contourPair, ROIContourData);
   const c1 = _generateClosedContour(
     ROIContourData[contourPair[0]].contours[0].handles.points
   );
@@ -107,6 +108,8 @@ function _linearlyInterpolateContour(
   );
 
   const c1Metadata = ROIContourData[contourPair[0]].contours[0];
+
+  console.log("Linearly interpolate", ROIContourData, sliceIndex);
 
   if (ROIContourData[sliceIndex].contours) {
     _editInterpolatedContour(
@@ -198,6 +201,13 @@ function _addInterpolatedContour(
     null,
     true
   );
+  console.log(
+    "New polygon",
+    points,
+    referencedToolData.seriesInstanceUid,
+    referencedToolData.structureSetUid,
+    referencedToolData.ROIContourUid
+  );
 
   const toolStateManager = globalToolStateManager.saveToolState();
 
@@ -283,6 +293,7 @@ function _editInterpolatedContour(
     null,
     true
   );
+  console.log("updated polygon", oldPolygon.uid);
 
   imageToolState.FreehandRoi3DTool.data[
     toolDataIndex

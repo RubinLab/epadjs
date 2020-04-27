@@ -36,6 +36,9 @@ import {
 } from "../../Utils/Segmentation/helpers";
 import { roi3d } from "./Roi3d";
 import { intData } from "./intData";
+import { generateUid } from "../../Utils/aid";
+
+import getSeriesInstanceUidFromEnabledElement from "../../ohif-segmentation-plugin/util/getSeriesInstanceUidFromEnabledElement";
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
@@ -256,6 +259,72 @@ class DisplayView extends Component {
 
     console.log("CornerstoneTools", cornerstoneTools);
     this.refreshAllViewports();
+  };
+
+  convertFrehandTo3D = () => {
+    cornerstoneTools.store.modules.freehand3D.state.interpolate = true;
+    const element = cornerstone.getEnabledElements()[0];
+    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    let referencedROIContour;
+    let referencedStructureSet;
+    console.log("Current state", currentState);
+    Object.entries(currentState).forEach(([key, value], i) => {
+      if (i === 0) {
+        referencedROIContour = this.getReferencedROIContour();
+        referencedStructureSet = this.getReferencedStructureSet(
+          referencedROIContour
+        );
+        console.log("In if", i, referencedROIContour, referencedStructureSet);
+      } else referencedROIContour.polygonCount++;
+      let commonData = value["FreehandRoi"]["data"][0];
+      let difference = this.getDifferentPart(
+        referencedROIContour,
+        referencedStructureSet
+      );
+      console.log("common data, different data", commonData, difference);
+      let freehand3Ddata = { ...difference, ...commonData };
+      value["FreehandRoi3DTool"] = {};
+      value["FreehandRoi3DTool"]["data"] = [];
+      value["FreehandRoi3DTool"]["data"].push(freehand3Ddata);
+      delete value["FreehandRoi"];
+      interpolate(freehand3Ddata, element.element);
+    });
+    console.log(
+      "Conversion done",
+      cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState()
+    );
+  };
+
+  getReferencedROIContour = () => {
+    const obj = {};
+    obj["uid"] = generateUid();
+    obj["name"] = "Unnamed Lesion";
+    obj["color"] = "cornflowerblue";
+    obj["polygonCount"] = 1;
+    return obj;
+  };
+
+  getDifferentPart = (referencedROIContour, referencedStructureSet) => {
+    const element = cornerstone.getEnabledElements()[0];
+    const obj = {};
+    obj["uid"] = generateUid();
+    obj["seriesInstanceUid"] = getSeriesInstanceUidFromEnabledElement(element);
+    obj["structureSetUid"] = "DEFAULT";
+    obj["ROIContourUid"] = referencedROIContour.uid;
+    obj["referencedROIContour"] = referencedROIContour;
+    obj["referencedStructureSet"] = referencedStructureSet;
+    return obj;
+  };
+
+  getReferencedStructureSet = referencedROIContour => {
+    const obj = {};
+    obj["uid"] = "DEFAULT";
+    obj["name"] = "default";
+    obj["isLocked"] = false;
+    obj["visible"] = true;
+    obj["activeROIContourIndex"] = 0;
+    obj["ROIContourCollection"] = [referencedROIContour];
+    return obj;
   };
 
   async getImages(serie) {
@@ -903,7 +972,7 @@ class DisplayView extends Component {
       <Redirect to="/search" />
     ) : (
       <React.Fragment>
-        <button onClick={this.interpolate} />
+        <button onClick={this.convertFrehandTo3D} />
         <RightsideBar
           showAimEditor={this.state.showAimEditor}
           selectedAim={this.state.selectedAim}

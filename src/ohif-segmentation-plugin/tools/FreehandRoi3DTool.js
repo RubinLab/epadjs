@@ -391,8 +391,10 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
             fillColor = toolColors.getFillColor();
           }
         } else {
-          color = ROIContour.color;
-          fillColor = ROIContour.color;
+          // color = ROIContour.color;
+          // fillColor = ROIContour.color;
+          color = "cornflowerblue";
+          fillColor = "cornflowerblue";
         }
 
         if (isROIActive && data.interpolated) {
@@ -606,7 +608,8 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
       // Define an array to store the rows of text for the textbox
       const textLines = [];
 
-      textLines.push(ROIContour.name);
+      // textLines.push(ROIContour.name);
+      textLines.push("Interpolated Data");
 
       if (structureSet.name === "DEFAULT") {
         textLines.push("Working ROI Collection");
@@ -665,7 +668,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
         textLines.push(areaText);
       }
 
-      textLines.push(`${ROIContour.polygonCount} contours`);
+      // textLines.push(`${ROIContour.polygonCount} contours`);
 
       return textLines;
     }

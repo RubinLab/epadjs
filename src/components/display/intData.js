@@ -1,5 +1,5 @@
 export const intData = {
-  uid: "8.6.2.2.f.7.cc44.ada.6.8.20f82fb2d2ae9ce4a28af10f98f638d2a196cec",
+  uid: "d.8.0.f.4.6.3532.622.a.b.b879136739991054233e97153091a3fd93d158b",
   seriesInstanceUid: "1.2.840.113704.1.111.424.1207241369.23",
   structureSetUid: "DEFAULT",
   ROIContourUid:
@@ -8,7 +8,7 @@ export const intData = {
     uid: "3.c.8.3.3.2.2e86.af7.9.6.22174985b4f9b40e86312d523a66d37a7244a2b",
     name: "Unnamed Lesion",
     color: "cornflowerblue",
-    polygonCount: 2
+    polygonCount: 3
   },
   referencedStructureSet: {
     uid: "DEFAULT",
@@ -21,7 +21,7 @@ export const intData = {
         uid: "3.c.8.3.3.2.2e86.af7.9.6.22174985b4f9b40e86312d523a66d37a7244a2b",
         name: "Unnamed Lesion",
         color: "cornflowerblue",
-        polygonCount: 2
+        polygonCount: 3
       }
     ]
   },
@@ -31,38 +31,31 @@ export const intData = {
   handles: {
     points: [
       {
-        x: 199.1111111111111,
-        y: 207.23809523809527,
+        x: 345.39682539682553,
+        y: 190.98412698412702,
         highlight: true,
         active: true,
-        lines: [{ x: 166.6031746031747, y: 333.2063492063493 }]
+        lines: [{ x: 284.44444444444457, y: 276.31746031746036 }]
       },
       {
-        x: 166.6031746031747,
-        y: 333.2063492063493,
+        x: 284.44444444444457,
+        y: 276.31746031746036,
         highlight: true,
         active: true,
-        lines: [{ x: 369.7777777777778, y: 308.82539682539687 }]
+        lines: [{ x: 154.41269841269855, y: 321.01587301587307 }]
       },
       {
-        x: 369.7777777777778,
-        y: 308.82539682539687,
-        highlight: true,
-        active: true,
-        lines: [{ x: 369.7777777777778, y: 203.17460317460322 }]
-      },
-      {
-        x: 369.7777777777778,
-        y: 203.17460317460322,
+        x: 154.41269841269855,
+        y: 321.01587301587307,
         highlight: true,
         active: true,
         lines: [
           {
-            x: 199.1111111111111,
-            y: 207.23809523809527,
+            x: 345.39682539682553,
+            y: 190.98412698412702,
             highlight: true,
             active: true,
-            lines: [{ x: 166.6031746031747, y: 333.2063492063493 }]
+            lines: [{ x: 284.44444444444457, y: 276.31746031746036 }]
           }
         ]
       }
@@ -74,12 +67,12 @@ export const intData = {
       drawnIndependently: true,
       allowedOutsideImage: true,
       hasBoundingBox: true,
-      x: 369.7777777777778,
+      x: 345.39682539682553,
       y: 268.19047619047626,
       boundingBox: {
-        width: 120.95191955566406,
+        width: 114.27992248535156,
         height: 125,
-        left: 425,
+        left: 419,
         top: 3.500000000000014
       }
     },
@@ -87,17 +80,17 @@ export const intData = {
   },
   canComplete: false,
   polyBoundingBox: {
-    left: 166.6031746031747,
-    top: 203.17460317460322,
-    width: 203.17460317460313,
-    height: 130.03174603174605
+    left: 154.41269841269855,
+    top: 190.98412698412702,
+    width: 190.984126984127,
+    height: 154.41269841269852
   },
   highlight: false,
   meanStdDev: {
-    count: 13748,
-    mean: -164.9714867617108,
-    variance: 96911.90870110638,
-    stdDev: 311.30677586764216
+    count: 11135,
+    mean: -242.95734171531208,
+    variance: 120617.31160640458,
+    stdDev: 347.3000311062534
   },
-  area: 20342.29635928446
+  area: 3975.9229969765693
 };

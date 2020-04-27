@@ -92,7 +92,6 @@ function getStructureSet(seriesInstanceUid, structureSetUid = "DEFAULT") {
   check(structureSetUid, "structureSetUid");
 
   const series = getSeries(seriesInstanceUid);
-  console.log("seriesInstanceUid & series", seriesInstanceUid, series);
 
   if (!series) {
     return;
@@ -113,16 +112,16 @@ function getROIContour(seriesInstanceUid, structureSetUid, ROIContourUid) {
     return;
   }
 
-  // hack for offline interpolation
-  if (!structureSet.ROIContourCollection.length) {
-    const var1 = {
-      uid: "3.c.8.3.3.2.2e86.af7.9.6.22174985b4f9b40e86312d523a66d37a7244a2b",
-      name: "Unnamed Lesion",
-      color: "cornflowerblue",
-      polygonCount: 2
-    };
-    structureSet.ROIContourCollection.push(var1);
-  }
+  // hack for offline interpolationactiveROIContourIndex
+  // if (!structureSet.ROIContourCollection.length) {
+  //   const var1 = {
+  //     uid: "3.c.8.3.3.2.2e86.af7.9.6.22174985b4f9b40e86312d523a66d37a7244a2b",
+  //     name: "Unnamed Lesion",
+  //     color: "cornflowerblue",
+  //     polygonCount: 2
+  //   };
+  //   structureSet.ROIContourCollection.push(var1);
+  // }
 
   return structureSet.ROIContourCollection.find(ROIContour => {
     return ROIContour && ROIContour.uid === ROIContourUid;
@@ -367,7 +366,7 @@ function incrementPolygonCount(
   );
   console.log("ROI Contour", ROIContour);
 
-  ROIContour.polygonCount++;
+  // ROIContour.polygonCount++;
 }
 
 function decrementPolygonCount(

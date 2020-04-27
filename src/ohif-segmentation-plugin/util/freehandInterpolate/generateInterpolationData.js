@@ -200,7 +200,7 @@ function _appendinterpolationList(contourPair, interpolationList) {
 }
 
 function _getList(start, end) {
-  return [...Array(end - start).keys()].map(v => start + v + 1);
+  return [...Array(end - (start + 1)).keys()].map(v => start + v + 1);
 }
 
 /**

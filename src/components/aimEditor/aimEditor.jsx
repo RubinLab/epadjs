@@ -304,6 +304,18 @@ class AimEditor extends Component {
   saveAim = (aim, segmentationBlob) => {
     const aimJson = aim.getAim();
     const aimSaved = JSON.parse(aimJson);
+
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(
+      new Blob([JSON.stringify(aimJson, null, 4)], {
+        type: "application/octet-stream"
+      })
+    );
+    a.setAttribute("download", "data.json");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
     const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
     const { openSeries, activePort } = this.props;
     const { patientID, projectID, seriesUID, studyUID } = openSeries[
