@@ -126,7 +126,7 @@ class Studies extends Component {
         this.setState({ expanded });
       }
     } catch (err) {
-      console.log(`couldn"t load all study data. Please Try again!`);
+      console.log(`couldn't load all study data. Please Try again!`);
     }
   }
 
@@ -185,7 +185,7 @@ class Studies extends Component {
         }
       }
     } catch (err) {
-      console.log(`couldn"t load all study data. Please Try again!`);
+      console.log(`couldn't load all study data. Please Try again!`);
     }
   }
 
@@ -199,7 +199,7 @@ class Studies extends Component {
         }
       this.setState({ expanded });
     } catch (err) {
-      console.log(`couldn"t load all study data. Please Try again!`);
+      console.log(`couldn't load all study data. Please Try again!`);
     }
   };
 

@@ -140,7 +140,7 @@ class Series extends Component {
       });
       this.setState({ expanded });
     } catch (err) {
-      console.log(`Couldn"t load all series data. Please Try again!`);
+      console.log(`Couldn't load all series data. Please Try again!`);
     }
   }
 
@@ -202,7 +202,7 @@ class Series extends Component {
           this.props.getTreeExpandAll(obj, true, this.props.expandLevel);
       }
     } catch (err) {
-      console.log(`Couldn"t load all series data. Please Try again!`);
+      console.log(`Couldn't load all series data. Please Try again!`);
     }
   }
 
@@ -216,7 +216,7 @@ class Series extends Component {
         }
       this.setState({ expanded });
     } catch (err) {
-      console.log(`Couldn"t load all series data. Please Try again!`);
+      console.log(`Couldn't load all series data. Please Try again!`);
     }
   };
 

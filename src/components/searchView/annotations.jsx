@@ -78,7 +78,7 @@ class Annotations extends Component {
         });
       }
     } catch (err) {
-      console.log("Couldn"t load all annotation data. Please Try again!");
+      console.log("Couldn't load all annotation data. Please Try again!");
     }
   }
 
@@ -113,7 +113,7 @@ class Annotations extends Component {
       //   }
       // }
     } catch (err) {
-      console.log("Couldn"t load all annotation data. Please Try again!");
+      console.log("Couldn't load all annotation data. Please Try again!");
     }
   }
 
