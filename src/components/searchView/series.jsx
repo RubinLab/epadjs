@@ -140,7 +140,7 @@ class Series extends Component {
       });
       this.setState({ expanded });
     } catch (err) {
-      console.log(`Couldn't load all series data. Please Try again!`);
+      console.log(`Couldn"t load all series data. Please Try again!`);
     }
   }
 
@@ -202,7 +202,7 @@ class Series extends Component {
           this.props.getTreeExpandAll(obj, true, this.props.expandLevel);
       }
     } catch (err) {
-      console.log(`Couldn't load all series data. Please Try again!`);
+      console.log(`Couldn"t load all series data. Please Try again!`);
     }
   }
 
@@ -216,7 +216,7 @@ class Series extends Component {
         }
       this.setState({ expanded });
     } catch (err) {
-      console.log(`Couldn't load all series data. Please Try again!`);
+      console.log(`Couldn"t load all series data. Please Try again!`);
     }
   };
 
@@ -230,17 +230,22 @@ class Series extends Component {
     this.props.dispatch(selectSerie(selected, this.props.studyDescription));
   };
   setColumns() {
+    const { selectedSeries } = this.props;
     const columns = [
       {
         id: "checkbox",
         accessor: "",
         width: this.widthUnit,
         Cell: ({ original }) => {
+          const { seriesUID, projectID } = original;
+          const selected =
+            selectedSeries[seriesUID] &&
+            selectedSeries[seriesUID].projectID === projectID;
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={this.props.selectedSeries[original.seriesUID] || false}
+              checked={selected}
               onChange={() => this.selectRow(original)}
             />
           );

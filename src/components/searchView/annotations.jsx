@@ -18,7 +18,7 @@ import {
   getWholeData,
   updatePatient,
   jumpToAim,
-  showAnnotationDock
+  showAnnotationDock,
 } from "../annotationsList/action";
 import { persistExpandView } from "../../Utils/aid";
 import "react-table/react-table.css";
@@ -46,74 +46,74 @@ class Annotations extends Component {
       selection: [],
       selectAll: false,
       selectType: "checkbox",
-      expanded: {}
+      expanded: {},
     };
   }
 
   async componentDidMount() {
     try {
-    const {
-      // updateExpandedLevelNums,
-      expansionArr,
-      seriesId
-      // expandLoading
-    } = this.props;
-    // const { numOfSeriesLoaded, numOfPressentSeries } = expandLoading;
-    const { data } = await getAnnotations(this.series);
-    this.setState({ data });
-    this.setState({ columns: this.setColumns() });
-    const annsOpened = expansionArr.includes(seriesId);
-    // const alreadyCounted = numOfSeriesLoaded === numOfPresentSeries;
+      const {
+        // updateExpandedLevelNums,
+        expansionArr,
+        seriesId,
+        // expandLoading
+      } = this.props;
+      // const { numOfSeriesLoaded, numOfPressentSeries } = expandLoading;
+      const { data } = await getAnnotations(this.series);
+      this.setState({ data });
+      this.setState({ columns: this.setColumns() });
+      const annsOpened = expansionArr.includes(seriesId);
+      // const alreadyCounted = numOfSeriesLoaded === numOfPresentSeries;
 
-    // if (!annsOpened && !alreadyCounted)
-    //   updateExpandedLevelNums("series", data.length, 1);
-    if (data.length === 0 && this.props.expandLevel !== 3) {
-      toast.info("No annotations found", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
-      });
-    }
+      // if (!annsOpened && !alreadyCounted)
+      //   updateExpandedLevelNums("series", data.length, 1);
+      if (data.length === 0 && this.props.expandLevel !== 3) {
+        toast.info("No annotations found", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
     } catch (err) {
-      console.log("Couldn't load all annotation data. Please Try again!");
+      console.log("Couldn"t load all annotation data. Please Try again!");
     }
   }
 
   async componentDidUpdate(prevProps) {
     try {
-    const {
-      progressUpdated,
-      update,
-      expandLevel,
-      expansionArr,
-      seriesId
-      // updateExpandedLevelNums
-    } = this.props;
-    const annsOpened = expansionArr.includes(seriesId);
-    if (
-      update !== prevProps.update ||
-      progressUpdated !== prevProps.progressUpdated
-    ) {
-      const { data } = await getAnnotations(this.series);
-      const expanded = persistExpandView(
-        this.state.expanded,
-        this.state.data,
-        data,
-        "aimID"
-      );
-      this.setState({ data, expanded });
-    }
+      const {
+        progressUpdated,
+        update,
+        expandLevel,
+        expansionArr,
+        seriesId,
+        // updateExpandedLevelNums
+      } = this.props;
+      const annsOpened = expansionArr.includes(seriesId);
+      if (
+        update !== prevProps.update ||
+        progressUpdated !== prevProps.progressUpdated
+      ) {
+        const { data } = await getAnnotations(this.series);
+        const expanded = persistExpandView(
+          this.state.expanded,
+          this.state.data,
+          data,
+          "aimID"
+        );
+        this.setState({ data, expanded });
+      }
 
-    // if (expandLevel != prevProps.expandLevel) {
-    //   if (expandLevel === 3 && annsOpened) {
-    //     updateExpandedLevelNums("series", this.state.data.length, 1);
-    //   }
-    // }
+      // if (expandLevel != prevProps.expandLevel) {
+      //   if (expandLevel === 3 && annsOpened) {
+      //     updateExpandedLevelNums("series", this.state.data.length, 1);
+      //   }
+      // }
     } catch (err) {
-      console.log("Couldn't load all annotation data. Please Try again!");
+      console.log("Couldn"t load all annotation data. Please Try again!");
     }
   }
 
@@ -126,21 +126,27 @@ class Annotations extends Component {
   };
 
   setColumns() {
+    const { selectedAnnotations } = this.props;
+
     const columns = [
       {
         id: "checkbox",
         accessor: "",
         width: this.widthUnit,
         Cell: ({ original }) => {
+          const { aimID, projectID } = original;
+          const selected =
+            selectedAnnotations[aimID] &&
+            selectedAnnotations[aimID].projectID === projectID;
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={this.props.selectedAnnotations[original.aimID] || false}
+              checked={selected}
               onChange={() => this.selectRow(original)}
             />
           );
-        }
+        },
       },
       {
         Header: "Annotation Name",
@@ -164,29 +170,29 @@ class Annotations extends Component {
               </ReactTooltip>
             </>
           );
-        }
+        },
       },
       {
         //no of aims
         width: this.widthUnit * 2,
-        Cell: row => <div />
+        Cell: row => <div />,
       },
       {
         //no of sub item
         width: this.widthUnit * 3,
-        Cell: row => <div />
+        Cell: row => <div />,
       },
       {
         //no of sub images
         width: this.widthUnit * 3,
-        Cell: row => <div />
+        Cell: row => <div />,
       },
       {
         Header: "Type",
         width: this.widthUnit * 5,
         Cell: row => (
           <div className="searchView-table__cell">{row.original.template}</div>
-        )
+        ),
       },
       {
         Header: "Created Date",
@@ -197,17 +203,17 @@ class Annotations extends Component {
               {formatDates(row.original.date)}
             </div>
           );
-        }
+        },
       },
       {
         //upload date
         width: this.widthUnit * 7,
-        Cell: row => <div />
+        Cell: row => <div />,
       },
       {
         //uaccession
         width: this.widthUnit * 6,
-        Cell: row => <div />
+        Cell: row => <div />,
       },
       {
         Header: "Identifier",
@@ -230,8 +236,8 @@ class Annotations extends Component {
               </ReactTooltip>
             </>
           );
-        }
-      }
+        },
+      },
     ];
     return columns;
   }
@@ -255,7 +261,7 @@ class Annotations extends Component {
         // it does exist so we will remove it using destructing
         selection = [
           ...selection.slice(0, keyIndex),
-          ...selection.slice(keyIndex + 1)
+          ...selection.slice(keyIndex + 1),
         ];
       } else {
         // it does not exist so add it
@@ -267,20 +273,20 @@ class Annotations extends Component {
   };
   toggleAll = () => {
     /*
-      'toggleAll' is a tricky concept with any filterable table
+      "toggleAll" is a tricky concept with any filterable table
       do you just select ALL the records that are in your data?
       OR
       do you only select ALL the records that are in the current filtered data?
 
-      The latter makes more sense because 'selection' is a visual thing for the user.
+      The latter makes more sense because "selection" is a visual thing for the user.
       This is especially true if you are going to implement a set of external functions
       that act on the selected information (you would not want to DELETE the wrong thing!).
 
       So, to that end, access to the internals of ReactTable are required to get what is
       currently visible in the table (either on the current page or any other page).
 
-      The HOC provides a method call 'getWrappedInstance' to get a ref to the wrapped
-      ReactTable and then get the internal state and the 'sortedData'.
+      The HOC provides a method call "getWrappedInstance" to get a ref to the wrapped
+      ReactTable and then get the internal state and the "sortedData".
       That can then be iterrated to get all the currently visible records and set
       the selection state.
     */
@@ -289,9 +295,9 @@ class Annotations extends Component {
     if (selectAll) {
       // we need to get at the internals of ReactTable
       const wrappedInstance = this.selectTable.getWrappedInstance();
-      // the 'sortedData' property contains the currently accessible records based on the filter and sort
+      // the "sortedData" property contains the currently accessible records based on the filter and sort
       const currentRecords = wrappedInstance.getResolvedState().sortedData;
-      // we need to get all the 'real' (original) records out to get at their IDs
+      // we need to get all the "real" (original) records out to get at their IDs
       const nodes = getNodes(currentRecords);
       // we just push all the IDs onto the selection array
       nodes.forEach(item => {
@@ -302,7 +308,7 @@ class Annotations extends Component {
   };
   isSelected = key => {
     /*
-      Instead of passing our external selection state we provide an 'isSelected'
+      Instead of passing our external selection state we provide an "isSelected"
       callback and detect the selection state ourselves. This allows any implementation
       for selection (either an array, object keys, or even a Javascript Set object).
     */
@@ -315,7 +321,7 @@ class Annotations extends Component {
     this.setState({
       selectType: this.state.selectType === "radio" ? "checkbox" : "radio",
       selection: [],
-      selectAll: false
+      selectAll: false,
     });
   };
   toggleTree = () => {
@@ -391,7 +397,7 @@ class Annotations extends Component {
       logSelection,
       toggleType,
       onExpandedChange,
-      toggleTree
+      toggleTree,
     } = this;
     const { data, columns, selectAll, selectType, expanded } = this.state;
     const extraProps = {
@@ -401,7 +407,7 @@ class Annotations extends Component {
       toggleSelection,
       selectType,
       expanded,
-      onExpandedChange
+      onExpandedChange,
     };
     const TheadComponent = props => null;
     return (
@@ -422,7 +428,7 @@ class Annotations extends Component {
               return {
                 onDoubleClick: (e, handleOriginal) => {
                   this.displayAnnotations(rowInfo.original);
-                }
+                },
               };
             }}
           />
@@ -438,7 +444,7 @@ const mapStateToProps = state => {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     activePort: state.annotationsListReducer.activePort,
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
   };
 };
 

@@ -76,7 +76,7 @@ class Subjects extends Component {
       this.setState({ expanded });
     } catch (err) {
       // console.log(err);
-      console.log(`couldn't load all subjects data. Please Try again!`);
+      console.log(`couldn"t load all subjects data. Please Try again!`);
     }
   }
 
@@ -143,7 +143,7 @@ class Subjects extends Component {
         // this.setState({ data });
       }
     } catch (err) {
-      console.log(`couldn't load all subjects data. Please Try again!`);
+      console.log(`couldn"t load all subjects data. Please Try again!`);
     }
   }
   expandCurrentLevel = async () => {
@@ -157,7 +157,7 @@ class Subjects extends Component {
         }
       this.setState({ expanded });
     } catch (err) {
-      console.log(`Couldn't load all subjects data. Please Try again!`);
+      console.log(`Couldn"t load all subjects data. Please Try again!`);
     }
   };
 
@@ -200,6 +200,7 @@ class Subjects extends Component {
     this.props.dispatch(selectPatient(selected));
   };
   setColumns() {
+    const { selectedPatients } = this.props;
     const columns = [
       {
         id: "searchView-checkbox",
@@ -208,13 +209,15 @@ class Subjects extends Component {
         sortable: false,
         width: this.widthUnit,
         Cell: row => {
+          const { subjectID, projectID } = row.original;
+          const selected =
+            selectedPatients[subjectID] &&
+            selectedPatients[subjectID].projectID === projectID;
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={
-                this.props.selectedPatients[row.original.subjectID] || false
-              }
+              checked={selected}
               onChange={() =>
                 this.selectRow({ ...row.original, index: row.index })
               }

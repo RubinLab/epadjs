@@ -126,7 +126,7 @@ class Studies extends Component {
         this.setState({ expanded });
       }
     } catch (err) {
-      console.log(`couldn't load all study data. Please Try again!`);
+      console.log(`couldn"t load all study data. Please Try again!`);
     }
   }
 
@@ -137,7 +137,7 @@ class Studies extends Component {
       if (closeAllCounter !== prevProps.closeAllCounter) {
         this.setState({ expanded: {} });
       }
-      
+
       if (update !== prevProps.update && treeExpand[patientIndex]) {
         const { data: data } = await getStudies(
           this.props.projectId,
@@ -185,7 +185,7 @@ class Studies extends Component {
         }
       }
     } catch (err) {
-      console.log(`couldn't load all study data. Please Try again!`);
+      console.log(`couldn"t load all study data. Please Try again!`);
     }
   }
 
@@ -199,7 +199,7 @@ class Studies extends Component {
         }
       this.setState({ expanded });
     } catch (err) {
-      console.log(`couldn't load all study data. Please Try again!`);
+      console.log(`couldn"t load all study data. Please Try again!`);
     }
   };
 
@@ -225,17 +225,22 @@ class Studies extends Component {
   }
 
   setColumns() {
+    const { selectedStudies } = this.props;
     const columns = [
       {
         id: "searchView-checkbox",
         accessor: "",
         width: this.widthUnit,
         Cell: ({ original }) => {
+          const { studyUID, projectID } = original;
+          const selected =
+            selectedStudies[studyUID] &&
+            selectedStudies[studyUID].projectID === projectID;
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={this.props.selectedStudies[original.studyUID] || false}
+              checked={selected}
               onChange={() => this.selectRow(original)}
             />
           );
