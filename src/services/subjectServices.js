@@ -22,10 +22,10 @@ export function downloadSubjects(subject) {
 }
 
 export function deleteSubject(subject) {
-  if (mode === "lite") {
-    const url = apiUrl + "/projects/lite/subjects/" + subject.patientID;
-    return http.delete(url);
-  }
+  let { patientID, projectID } = subject;
+  patientID = patientID ? patientID : subject.subjectID;
+  const url = apiUrl + `/projects/${projectID}/subjects/${patientID}`;
+  return http.delete(url);
 }
 
 export function saveSubject(projectID, subjectAbr, subjectName) {

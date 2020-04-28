@@ -804,7 +804,7 @@ class App extends Component {
 }
 
 const mapStateToProps = state => {
-  // console.log(state.annotationsListReducer);
+  console.log(state.annotationsListReducer);
   // console.log(state.managementReducer);
   const {
     showGridFullAlert,
