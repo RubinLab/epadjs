@@ -29,15 +29,9 @@ export function deleteSubject(subject) {
 }
 
 export function saveSubject(projectID, subjectAbr, subjectName) {
-  // http://epad-dev8.stanford.edu:8080/epad/v2/projects/test1id/subjects/test?subjectName=test
+  const body = { name: subjectName };
   return http.put(
-    apiUrl +
-      "/projects/" +
-      projectID +
-      "/subjects/" +
-      subjectAbr +
-      "?subjectName=" +
-      subjectName
+    apiUrl + "/projects/" + projectID + "/subjects/" + subjectAbr, body
   );
 }
 
