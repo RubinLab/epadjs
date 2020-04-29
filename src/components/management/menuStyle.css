@@ -140,6 +140,7 @@
 
 .wrapped {
   white-space: normal;
+  cursor: pointer;
 }
 
 .pro-table {

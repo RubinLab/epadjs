@@ -332,18 +332,24 @@ class Templates extends React.Component {
       },
     ];
     const addToproject = {
-      Header: "",
-      width: 30,
+      Header: "Projects",
       Cell: original => {
         const { templateUID, templateName } = original.row.checkbox.Template[0];
         const { projects } = original.row.checkbox;
+        const className =
+          projects.length > 0 ? "wrapped" : "wrapped click-to-add";
+
+        const text =
+          projects.length > 0
+            ? projects.join(", ")
+            : "Add template to a project";
         return (
           <div
             onClick={() =>
               this.handleProjectClick(templateUID, templateName, projects)
             }
           >
-            <FaProjectDiagram className="menu-clickable" />
+            <p className={className}>{text}</p>
           </div>
         );
       },
