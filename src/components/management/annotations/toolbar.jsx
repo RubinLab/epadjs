@@ -26,7 +26,12 @@ const toolBar = props => {
   } = props;
   const { selected, projects } = props;
 
-  const options = [];
+  const firstOption = (
+    <option key="default" value="all_aims">
+      All Annotations
+    </option>
+  );
+  const options = [firstOption];
   for (let project of projects) {
     options.push(
       <option key={project.id} value={project.id}>

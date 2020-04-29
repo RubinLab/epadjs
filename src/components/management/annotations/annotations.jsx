@@ -8,6 +8,7 @@ import { FaRegEye, FaCommentsDollar } from "react-icons/fa";
 import {
   getSummaryAnnotations,
   deleteAnnotation,
+  getAllAnnotations,
 } from "../../../services/annotationServices";
 import { getProjects } from "../../../services/projectServices";
 import matchSorter from "match-sorter";
@@ -43,12 +44,13 @@ class Annotations extends React.Component {
     uploadClicked: false,
     downloadClicked: false,
     projectID: "",
+    allAims: [],
   };
 
   componentDidMount = async () => {
     if (mode !== "lite") {
       const { data: projectList } = await getProjects();
-      this.getAnnotationsData(projectList[0].id);
+      this.getAnnotationsData();
       this.setState({ projectList, projectID: projectList[0].id });
     } else {
       this.getAnnotationsData();
@@ -68,7 +70,9 @@ class Annotations extends React.Component {
 
   getAnnotationsData = async projectID => {
     try {
-      const { data: annotations } = await getSummaryAnnotations(projectID);
+      const { data: annotations } = projectID
+        ? await getSummaryAnnotations(projectID)
+        : await getAllAnnotations();
       this.setState({ annotations });
     } catch (err) {
       console.log(err);
