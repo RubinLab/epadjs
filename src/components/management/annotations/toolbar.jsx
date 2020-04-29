@@ -26,20 +26,20 @@ const toolBar = props => {
   } = props;
   const { selected, projects } = props;
 
-  const firstOption = (
-    <option key="default" value="all_aims">
-      All Annotations
-    </option>
-  );
-  const options = [firstOption];
-  for (let project of projects) {
+  const options = [];
+  projects.forEach((project, index) => {
     options.push(
-      <option key={project.id} value={project.id}>
+      <option key={project.id} value={project.id} selected={index === 0}>
         {project.name}
       </option>
     );
-  }
-
+  });
+  const firstOption = (
+    <option key="all_aims" value="all_aims">
+      All Annotations
+    </option>
+  );
+  options.push(firstOption);
   let name = React.createRef();
   let subject = React.createRef();
   let template = React.createRef();
@@ -111,7 +111,6 @@ const toolBar = props => {
             className="annotations-projectSelect"
             name="project"
             onChange={onSelect}
-            defaultValue="default"
           >
             {options}
           </select>

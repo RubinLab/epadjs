@@ -50,7 +50,7 @@ class Annotations extends React.Component {
   componentDidMount = async () => {
     if (mode !== "lite") {
       const { data: projectList } = await getProjects();
-      this.getAnnotationsData();
+      this.getAnnotationsData(projectList[0].id);
       this.setState({ projectList, projectID: projectList[0].id });
     } else {
       this.getAnnotationsData();
@@ -82,7 +82,9 @@ class Annotations extends React.Component {
   handleProjectSelect = e => {
     this.setState({ projectID: e.target.value });
     if (mode !== "lite") {
-      this.getAnnotationsData(e.target.value);
+      e.target.value === "all_aims"
+        ? this.getAnnotationsData()
+        : this.getAnnotationsData(e.target.value);
       this.setState({ filteredData: null });
     }
   };
