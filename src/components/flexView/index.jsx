@@ -13,7 +13,8 @@ const TreeTable = treeTableHOC(ReactTable);
 class FlexView extends React.Component {
   state = {
     columns: [],
-    order: [5, 0, 1, 2, 7],
+    // order: [5, 0, 1, 2, 7],
+    order: [18, 19, 20],
     dropdownSelected: false,
     expanded: {},
   };
@@ -228,7 +229,7 @@ class FlexView extends React.Component {
         ) : null}
 
         {this.state.data && (
-          <StudyTable data={data} order={order}/>
+          <StudyTable data={data} order={order} />
 
           // <TreeTable
           //   NoDataComponent={() => null}

@@ -17,27 +17,47 @@ const studyTable = ({ data, order }) => {
   };
 
   const filterString = (filter, row) => {
-    const attrWithCarets = ['studyDescription', 'patientName'];
-    const { id, value } = filter;
-    const valueLowercase = row[id].toLowerCase();
-    const keyLowercaseControlled = attrWithCarets.includes(id)
-      ? reverseCarets(value).toLowerCase()
-      : value.toLowerCase();
+    try {
+      const attrWithCarets = ['studyDescription', 'patientName'];
+      const { id, value } = filter;
+      const valueLowercase = row[id].toLowerCase();
+      const keyLowercaseControlled = attrWithCarets.includes(id)
+        ? reverseCarets(value).toLowerCase()
+        : value.toLowerCase();
 
-    const keyLowercase = value.toLowerCase();
-    return (
-      valueLowercase.startsWith(keyLowercaseControlled) ||
-      valueLowercase.startsWith(keyLowercase)
-    );
+      const keyLowercase = value.toLowerCase();
+      return (
+        valueLowercase.startsWith(keyLowercaseControlled) ||
+        valueLowercase.startsWith(keyLowercase)
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const filterDateAndTime = (filter, row, type) => {
+    try {
+      const formattedKey =
+        type === 'date'
+          ? filter.value.split('-').join('')
+          : filter.value.split(':').join('');
+      return row[filter.id].startsWith(formattedKey);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const filterArray = (filter, row) => {
-    const keyLowercase = filter.value.toLowerCase();
-    const keyUppercase = filter.value.toUpperCase();
-    return (
-      row[filter.id].includes(keyLowercase) ||
-      row[filter.id].includes(keyUppercase)
-    );
+    try {
+      const keyLowercase = filter.value.toLowerCase();
+      const keyUppercase = filter.value.toUpperCase();
+      return (
+        row[filter.id].includes(keyLowercase) ||
+        row[filter.id].includes(keyUppercase)
+      );
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const columns = [
@@ -97,57 +117,88 @@ const studyTable = ({ data, order }) => {
       accessor: 'insertDate',
       sortable: true,
       show: true,
+      filterMethod: (filter, row) => filterDateAndTime(filter, row, 'date'),
+      Cell: row => {
+        return <div>{formatDate(row.original.insertDate)}</div>;
+      },
     },
-    { Header: 'Study Date', accessor: 'studyDate', sortable: true, show: true },
-    { Header: 'Study Time', accessor: 'studyTime', sortable: true, show: true },
     {
-      Header: 'Study UID',
-      accessor: 'seriesUID' || 'studyUID',
+      Header: 'Study Date',
+      accessor: 'studyDate',
       sortable: true,
       show: true,
+      filterMethod: (filter, row) => filterDateAndTime(filter, row, 'date'),
       Cell: row => {
-        const UID = row.original.studyUID
-          ? row.original.studyUID
-          : row.original.seriesUID;
-
-        return <div>{UID}</div>;
+        return <div>{formatDate(row.original.studyDate)}</div>;
       },
+    },
+    {
+      Header: 'Study Time',
+      accessor: 'studyTime',
+      sortable: true,
+      show: true,
+      filterMethod: (filter, row) => filterDateAndTime(filter, row, 'time'),
+      Cell: row => {
+        return <div>{formatTime(row.original.studyTime)}</div>;
+      },
+    },
+    {
+      Header: 'Study UID',
+      accessor: 'studyUID',
+      sortable: true,
+      show: true,
+      filterMethod: (filter, row) => filterString(filter, row),
     },
     {
       Header: '# of Aims',
       accessor: 'numberOfAnnotations',
       sortable: true,
       show: true,
+      filterMethod: (filter, row) => row[filter.id] >= filter.value,
     },
     {
       Header: '# Of Img',
       accessor: 'numberOfImages',
       sortable: true,
       show: true,
+      filterMethod: (filter, row) => row[filter.id] >= filter.value,
     },
     {
       Header: '# Of Series',
       accessor: 'numberOfSeries',
       sortable: true,
       show: true,
+      filterMethod: (filter, row) => row[filter.id] >= filter.value,
     },
     {
       Header: 'created Time',
       accessor: 'createdTime',
       sortable: true,
       show: true,
+      filterMethod: (filter, row) => filterDateAndTime(filter, row, 'date'),
+      Cell: row => {
+        return <div>{formatTime(row.original.createdTime)}</div>;
+      },
     },
     {
       Header: 'birth date',
       accessor: 'birthdate',
       sortable: true,
       show: true,
+      filterMethod: (filter, row) => filterDateAndTime(filter, row, 'date'),
+      Cell: row => {
+        return <div>{formatDate(row.original.birthdate)}</div>;
+      },
     },
     {
       Header: 'First Series Date Acquired',
       accessor: 'firstSeriesDateAcquired',
       sortable: true,
       show: true,
+      filterMethod: (filter, row) => filterDateAndTime(filter, row, 'date'),
+      Cell: row => {
+        return <div>{formatDate(row.original.firstSeriesDateAcquired)}</div>;
+      },
     },
     {
       Header: 'First Series UID',
@@ -182,6 +233,7 @@ const studyTable = ({ data, order }) => {
       accessor: 'studyAccessionNumber',
       sortable: true,
       show: true,
+      filterMethod: (filter, row) => filterString(filter, row),
     },
     {
       Header: 'studyID',
@@ -204,9 +256,7 @@ const studyTable = ({ data, order }) => {
     <ReactTable
       data={data}
       filterable
-      defaultFilterMethod={(filter, row) =>
-        String(row[filter.id]) === filter.value
-      }
+      defaultFilterMethod={(filter, row) => filterString(filter, row)}
       NoDataComponent={() => null}
       className="flexView-table"
       columns={defineColumns()}
