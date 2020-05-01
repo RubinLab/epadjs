@@ -13,7 +13,7 @@ class Aim {
       segmentation: this.temp.segmentation,
       equipment: this.temp.equipment,
       user: this.temp.user,
-      person: this.temp.person
+      person: this.temp.person,
     } = imageData);
     this.xmlns = aimConf.xmlns;
     this["xmlns:rdf"] = aimConf["xmlns:rdf"];
@@ -29,7 +29,7 @@ class Aim {
     this.equipment = this._createEquipment(this.temp.equipment);
     this.person = this._createPerson(this.temp.person);
     this.imageAnnotations = {
-      ImageAnnotation: [this._createImageAnnotations(aimType)]
+      ImageAnnotation: [this._createImageAnnotations(aimType)],
     };
     if (updatedAimId === undefined)
       this.uniqueIdentifier = { root: generateUid() };
@@ -109,8 +109,8 @@ class Aim {
           this._createObject("size", size),
           this._createObject("index", index),
           this._createObject("label", label)
-        )
-      ]
+        ),
+      ],
     };
   };
 
@@ -119,8 +119,11 @@ class Aim {
       dataType: {
         code: "C48870",
         codeSystem: "NCI",
-        "iso:displayName": { "xmlns:iso": "uri:iso.org:21090", value: "Double" }
-      }
+        "iso:displayName": {
+          "xmlns:iso": "uri:iso.org:21090",
+          value: "Double",
+        },
+      },
     };
     return obj;
   };
@@ -147,16 +150,16 @@ class Aim {
     obj["codeSystemName"] = codeSystemName;
     obj["iso:displayName"] = {
       "xmlns:iso": "uri:iso.org:21090",
-      value: displayNameValue
+      value: displayNameValue,
     };
     return obj;
   };
 
-  createLengthCalcEntity = length => {
+  createLengthCalcEntity = (length) => {
     let { unit, value } = length;
     var obj = {};
     obj["calculationResultCollection"] = {
-      CalculationResult: [this._createCalcResult(unit, "LineLength", value)]
+      CalculationResult: [this._createCalcResult(unit, "LineLength", value)],
     };
     obj["description"] = { value: "Length" };
     const uId = generateUid();
@@ -168,11 +171,11 @@ class Aim {
     return uId;
   };
 
-  createLongAxisCalcEntity = longAxis => {
+  createLongAxisCalcEntity = (longAxis) => {
     let { unit, value } = longAxis;
     var obj = {};
     obj["calculationResultCollection"] = {
-      CalculationResult: [this._createCalcResult(unit, "LongAxis", value)]
+      CalculationResult: [this._createCalcResult(unit, "LongAxis", value)],
     };
     obj["description"] = { value: "LongAxis" };
     const uId = generateUid();
@@ -184,11 +187,11 @@ class Aim {
     return uId;
   };
 
-  createShortAxisCalcEntity = shortAxis => {
+  createShortAxisCalcEntity = (shortAxis) => {
     let { unit, value } = shortAxis;
     var obj = {};
     obj["calculationResultCollection"] = {
-      CalculationResult: [this._createCalcResult(unit, "ShortAxis", value)]
+      CalculationResult: [this._createCalcResult(unit, "ShortAxis", value)],
     };
     obj["description"] = { value: "ShortAxis" };
     const uId = generateUid();
@@ -205,14 +208,14 @@ class Aim {
     const { unit, typeCodeDcm } = this._getAimUnitAndDcmTypeCode(unit);
     var obj = {};
     obj["calculationResultCollection"] = {
-      CalculationResult: [this._createCalcResult(unit, "Mean", mean, preLabel)]
+      CalculationResult: [this._createCalcResult(unit, "Mean", mean, preLabel)],
     };
     obj["description"] = { value: "Mean" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
       typeCodeDcm,
-      this._createTypeCode("R-00317", "SRT", "Mean")
+      this._createTypeCode("R-00317", "SRT", "Mean"),
     ];
     this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection.CalculationEntity.push(
       obj
@@ -227,15 +230,15 @@ class Aim {
     var obj = {};
     obj["calculationResultCollection"] = {
       CalculationResult: [
-        this._createCalcResult(unit, "Standard Deviation", stdDev, preLabel)
-      ]
+        this._createCalcResult(unit, "Standard Deviation", stdDev, preLabel),
+      ],
     };
     obj["description"] = { value: "Standard Deviation" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
       typeCodeDcm,
-      this._createTypeCode("R-10047", "SRT", "Standard Deviation")
+      this._createTypeCode("R-10047", "SRT", "Standard Deviation"),
     ];
     this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
       "CalculationEntity"
@@ -249,15 +252,15 @@ class Aim {
     var obj = {};
     obj["calculationResultCollection"] = {
       CalculationResult: [
-        this._createCalcResult(unit, "Minimum", min, preLabel)
-      ]
+        this._createCalcResult(unit, "Minimum", min, preLabel),
+      ],
     };
     obj["description"] = { value: "Minimum" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
       typeCodeDcm,
-      this._createTypeCode("R-404FB", "SRT", "Minimum")
+      this._createTypeCode("R-404FB", "SRT", "Minimum"),
     ];
     this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
       "CalculationEntity"
@@ -271,15 +274,15 @@ class Aim {
     var obj = {};
     obj["calculationResultCollection"] = {
       CalculationResult: [
-        this._createCalcResult(unit, "Maximum", max, preLabel)
-      ]
+        this._createCalcResult(unit, "Maximum", max, preLabel),
+      ],
     };
     obj["description"] = { value: "Maximum" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
       typeCodeDcm,
-      this._createTypeCode("G-A437", "SRT", "Maximum")
+      this._createTypeCode("G-A437", "SRT", "Maximum"),
     ];
     this.imageAnnotations.ImageAnnotation[0].calculationEntityCollection[
       "CalculationEntity"
@@ -287,13 +290,13 @@ class Aim {
     return uId;
   };
 
-  _getAimUnitAndDcmTypeCode = unit => {
+  _getAimUnitAndDcmTypeCode = (unit) => {
     if (unit === "hu")
       return { unit: "[hnsf'U]", typeCodeDcm: this._createTypeCode() };
     else if (unit === "suv")
       return {
         unit: "{SUVbw}g/ml",
-        typeCodeDcm: this._createTypeCode(126401, "DCM", "SUVbw")
+        typeCodeDcm: this._createTypeCode(126401, "DCM", "SUVbw"),
       };
     return { unit, typeCodeDcm: this._createTypeCode() };
   };
@@ -303,8 +306,8 @@ class Aim {
     var obj = {};
     obj["calculationResultCollection"] = {
       CalculationResult: [
-        this._createCalcResult(unit, "Volume", volume, preLabel)
-      ]
+        this._createCalcResult(unit, "Volume", volume, preLabel),
+      ],
     };
     obj["description"] = { value: "Volume" };
     const uId = generateUid();
@@ -349,7 +352,7 @@ class Aim {
     );
   };
 
-  createCalculationEntityCollection = entities => {
+  createCalculationEntityCollection = (entities) => {
     var obj = {};
     obj["calculationEntityCollection"] = { CalculationEntity: entities };
     return obj;
@@ -367,7 +370,7 @@ class Aim {
     return obj;
   };
 
-  _createCoordinateArray = points => {
+  _createCoordinateArray = (points) => {
     var coordinates = [];
     points.forEach((point, index) => {
       coordinates.push(this._createCoordinate(point, index));
@@ -383,7 +386,7 @@ class Aim {
     var obj = {};
     obj["includeFlag"] = { value: true };
     obj["twoDimensionSpatialCoordinateCollection"] = {
-      TwoDimensionSpatialCoordinate: this._createCoordinateArray(points)
+      TwoDimensionSpatialCoordinate: this._createCoordinateArray(points),
     };
     const uId = generateUid();
     obj["shapeIdentifier"] = { value: shapeIndex };
@@ -397,7 +400,8 @@ class Aim {
     return uId;
   };
 
-  _getFrameNumber = imageReferenceUid => {
+  _getFrameNumber = (imageReferenceUid) => {
+    console.log("imageRefernceUid", imageReferenceUid);
     const frameNumber = imageReferenceUid.split("frame=");
     if (frameNumber.length > 1) return frameNumber[1];
     return 1;
@@ -413,7 +417,7 @@ class Aim {
         codeValue,
         codingSchemeDesignator,
         codeMeaning,
-        codingSchemeVersion
+        codingSchemeVersion,
       } = modalities[sopClassUid];
     else {
       const modality = this.temp.series.modality;
@@ -422,7 +426,7 @@ class Aim {
           codeValue,
           codingSchemeDesignator,
           codeMeaning,
-          codingSchemeVersion
+          codingSchemeVersion,
         } = modalities[modality];
       }
     }
@@ -431,7 +435,7 @@ class Aim {
     obj["codeSystemName"] = codingSchemeDesignator || "";
     obj["iso:displayName"] = {
       "xmlns:iso": "uri:iso.org:21090",
-      value: codeMeaning || ""
+      value: codeMeaning || "",
     };
     obj["codeSystemVersion"] = codingSchemeVersion || "";
     return obj;
@@ -440,7 +444,7 @@ class Aim {
   _createImageCollection = () => {
     let obj = {};
     obj["Image"] = [];
-    this.temp.image.forEach(image => {
+    this.temp.image.forEach((image) => {
       let { sopClassUid, sopInstanceUid } = image;
       sopClassUid = { root: sopClassUid };
       sopInstanceUid = { root: sopInstanceUid };
@@ -462,7 +466,7 @@ class Aim {
       accessionNumber,
       startTime,
       instanceUid,
-      startDate
+      startDate,
     } = this.temp.study;
     var obj = {};
     obj["imageSeries"] = this._createImageSeries();
@@ -490,14 +494,14 @@ class Aim {
   //
   //
   //
-  _createImageAnnotations = aimType => {
+  _createImageAnnotations = (aimType) => {
     const {
       name,
       comment,
       typeCode,
       imagingPhysicalEntityCollection,
       imagingObservationEntityCollection,
-      inferenceEntityCollection
+      inferenceEntityCollection,
     } = this.temp.aim;
     var obj = {};
     obj["uniqueIdentifier"] = { root: generateUid() };
@@ -513,7 +517,7 @@ class Aim {
       obj["calculationEntityCollection"] = { CalculationEntity: [] };
       obj["markupEntityCollection"] = { MarkupEntity: [] };
       obj["imageAnnotationStatementCollection"] = {
-        ImageAnnotationStatement: []
+        ImageAnnotationStatement: [],
       };
     }
     if (imagingObservationEntityCollection)
@@ -528,7 +532,7 @@ class Aim {
     return obj;
   };
 
-  _getComment = comment => {
+  _getComment = (comment) => {
     if (comment.value.length)
       comment.value = this._getProgrammedComment().concat("~~", comment.value);
     else comment.value = this._getProgrammedComment();
@@ -592,17 +596,17 @@ class Aim {
   /*    Segmentation Entitiy Realted Functions      */
   /*                                                */
 
-  createSegmentationEntity = segmentation => {
+  createSegmentationEntity = (segmentation) => {
     var obj = {};
     obj["referencedSopInstanceUid"] = {
-      root: segmentation.referencedSopInstanceUid
+      root: segmentation.referencedSopInstanceUid,
     };
     obj["segmentNumber"] = { value: 1 };
     obj["seriesInstanceUid"] = {
-      root: segmentation.seriesInstanceUid
+      root: segmentation.seriesInstanceUid,
     };
     obj["studyInstanceUid"] = {
-      root: segmentation.studyInstanceUid
+      root: segmentation.studyInstanceUid,
     };
     obj["xsi:type"] = "DicomSegmentationEntity";
     obj["sopClassUid"] = { root: "1.2.840.10008.5.1.4.1.1.66.4" };
@@ -620,40 +624,40 @@ class Aim {
   //
   //
   // Person
-  _createPerson = person => {
+  _createPerson = (person) => {
     const { sex, name, patientId, birthDate } = person;
     return {
       sex: { value: sex },
       name: { value: name },
       id: { value: patientId },
-      birthDate: { value: birthDate }
+      birthDate: { value: birthDate },
     };
   };
 
   //
   //
   // Eqipment
-  _createEquipment = equipment => {
+  _createEquipment = (equipment) => {
     const {
       manufacturerName,
       manufacturerModelName,
-      softwareVersion
+      softwareVersion,
     } = equipment;
     return {
       manufacturerName: { value: manufacturerName },
       manufacturerModelName: { value: manufacturerModelName },
-      softwareVersion: { value: softwareVersion }
+      softwareVersion: { value: softwareVersion },
     };
   };
 
   //
   //
   // User
-  _createUser = user => {
+  _createUser = (user) => {
     const { loginName, name } = user;
     return {
       loginName: { value: loginName },
-      name: { value: name }
+      name: { value: name },
     };
   };
 
