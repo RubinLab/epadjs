@@ -55,15 +55,26 @@ export function getImageIds(series) {
 
 //  seems like this doesn't belong to here but olny services know details about paths&server side
 export function getWadoImagePath(studyUid, seriesUid, imageId) {
-  return (
-    wadoUrl +
-    "/?requestType=WADO&studyUID=" +
-    studyUid +
-    "&seriesUID=" +
-    seriesUid +
-    "&objectUID=" +
-    imageId
-  );
+  if (wadoUrl.includes("wadouri"))
+    return (
+      wadoUrl +
+      "/studies/" +
+      studyUid +
+      "/series/" +
+      seriesUid +
+      "/instances/" +
+      imageId
+    );
+  else
+    return (
+      wadoUrl +
+      "/?requestType=WADO&studyUID=" +
+      studyUid +
+      "&seriesUID=" +
+      seriesUid +
+      "&objectUID=" +
+      imageId
+    );
 }
 
 export function downloadSeries(series) {
@@ -83,10 +94,9 @@ export function downloadSeries(series) {
 
 export function getSegmentation(series, imageId) {
   const { studyUID, seriesUID } = series;
-  const url = getWadoImagePath(studyUID, seriesUID, imageId).replace(
-    "wadouri:",
-    ""
-  );
+  const url = getWadoImagePath(studyUID, seriesUID, imageId)
+    .replace("wadouri:", "")
+    .replace("wadors:", "");
   return http.get(url, { responseType: "arraybuffer" });
 }
 
