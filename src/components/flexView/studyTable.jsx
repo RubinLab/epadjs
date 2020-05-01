@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactTable from 'react-table';
+import { FaSortDown, FaSortUp } from 'react-icons/fa';
+import find from 'lodash/find';
+import './flexView.css';
+
 import {
   clearCarets,
   formatTime,
@@ -8,6 +12,9 @@ import {
 } from './helperMethods';
 
 const studyTable = ({ data, order }) => {
+  const [sortedCol, setSortedCol] = useState(null);
+  const [sortOrder, setSortOrder] = useState(null);
+
   const defineColumns = () => {
     const tableColumns = [];
     for (let item of order) {
@@ -33,6 +40,21 @@ const studyTable = ({ data, order }) => {
     } catch (err) {
       console.log(err);
     }
+  };
+
+  const getTheadThProps = (table, row, col) => {
+    console.log(table, row, col);
+    const sortedCol = find(table.sorted, { id: col.id });
+    const boxShadow = sortedCol
+      ? `inset 0px ${sortedCol.desc ? -3 : 3}px 0px 0px orangered`
+      : '';
+    const background = sortedCol ? '#3a3f44' : '';
+    return {
+      style: {
+        boxShadow,
+        background,
+      },
+    };
   };
 
   const filterDateAndTime = (filter, row, type) => {
@@ -67,6 +89,11 @@ const studyTable = ({ data, order }) => {
       sortable: false,
       show: true,
       filterMethod: (filter, row) => filterArray(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'examTypes' ? '#3a3f44' : null,
+        },
+      }),
       Cell: row => {
         return Array.isArray(row.original.examTypes) ? (
           <div>{row.original.examTypes.join(', ')}</div>
@@ -81,6 +108,11 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'patientName' ? '#3a3f44' : null,
+        },
+      }),
       Cell: row => {
         return <div>{clearCarets(row.original.patientName)}</div>;
       },
@@ -91,6 +123,11 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'patientID' ? '#3a3f44' : null,
+        },
+      }),
     },
     {
       Header: 'Sex',
@@ -98,6 +135,11 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'sex' ? '#3a3f44' : null,
+        },
+      }),
     },
     {
       Header: 'Description',
@@ -105,6 +147,11 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'studyDescription' ? '#3a3f44' : null,
+        },
+      }),
       Cell: row => {
         let desc = row.original.studyDescription
           ? row.original.studyDescription
@@ -118,6 +165,11 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterDateAndTime(filter, row, 'date'),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'insertDate' ? '#3a3f44' : null,
+        },
+      }),
       Cell: row => {
         return <div>{formatDate(row.original.insertDate)}</div>;
       },
@@ -128,6 +180,11 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterDateAndTime(filter, row, 'date'),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'studyDate' ? '#3a3f44' : null,
+        },
+      }),
       Cell: row => {
         return <div>{formatDate(row.original.studyDate)}</div>;
       },
@@ -138,6 +195,11 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterDateAndTime(filter, row, 'time'),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'studyTime' ? '#3a3f44' : null,
+        },
+      }),
       Cell: row => {
         return <div>{formatTime(row.original.studyTime)}</div>;
       },
@@ -148,6 +210,11 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'studyUID' ? '#3a3f44' : null,
+        },
+      }),
     },
     {
       Header: '# of Aims',
@@ -155,6 +222,12 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => row[filter.id] >= filter.value,
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor:
+            sortedCol === 'numberOfAnnotations' ? '#3a3f44' : null,
+        },
+      }),
     },
     {
       Header: '# Of Img',
@@ -162,6 +235,11 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => row[filter.id] >= filter.value,
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'numberOfImages' ? '#3a3f44' : null,
+        },
+      }),
     },
     {
       Header: '# Of Series',
@@ -169,6 +247,11 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => row[filter.id] >= filter.value,
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'numberOfSeries' ? '#3a3f44' : null,
+        },
+      }),
     },
     {
       Header: 'created Time',
@@ -176,6 +259,11 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterDateAndTime(filter, row, 'date'),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'createdTime' ? '#3a3f44' : null,
+        },
+      }),
       Cell: row => {
         return <div>{formatTime(row.original.createdTime)}</div>;
       },
@@ -186,6 +274,11 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterDateAndTime(filter, row, 'date'),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'birthdate' ? '#3a3f44' : null,
+        },
+      }),
       Cell: row => {
         return <div>{formatDate(row.original.birthdate)}</div>;
       },
@@ -196,6 +289,12 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterDateAndTime(filter, row, 'date'),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor:
+            sortedCol === 'firstSeriesDateAcquired' ? '#3a3f44' : null,
+        },
+      }),
       Cell: row => {
         return <div>{formatDate(row.original.firstSeriesDateAcquired)}</div>;
       },
@@ -206,6 +305,11 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'firstSeriesUID' ? '#3a3f44' : null,
+        },
+      }),
     },
     {
       Header: 'Physician Name',
@@ -213,6 +317,11 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'physicianName' ? '#3a3f44' : null,
+        },
+      }),
     },
     {
       Header: 'Project ID',
@@ -220,6 +329,11 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'projectID' ? '#3a3f44' : null,
+        },
+      }),
     },
     {
       Header: 'Referring Physician Name',
@@ -227,12 +341,24 @@ const studyTable = ({ data, order }) => {
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor:
+            sortedCol === 'referringPhysicianName' ? '#3a3f44' : null,
+        },
+      }),
     },
     {
-      Header: 'Study Accession Number',
+      Header: `Study Accession Number`,
       accessor: 'studyAccessionNumber',
       sortable: true,
       show: true,
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor:
+            sortedCol === 'studyAccessionNumber' ? '#3a3f44' : null,
+        },
+      }),
       filterMethod: (filter, row) => filterString(filter, row),
     },
     {
@@ -240,31 +366,35 @@ const studyTable = ({ data, order }) => {
       accessor: 'studyID',
       sortable: true,
       show: true,
+      getProps: (state, rowInfo) => ({
+        style: {
+          backgroundColor: sortedCol === 'studyID' ? '#3a3f44' : null,
+        },
+      }),
       filterMethod: (filter, row) => filterString(filter, row),
     },
   ];
 
-  const onSortedChange = () => {
-    const { expanded } = this.state;
-    for (let subject in expanded) {
-      expanded[subject] = false;
-    }
-    this.setState({ expanded });
+  const onSortedChange = (newSorted, column, shiftKey) => {
+    setSortedCol(newSorted[0].id);
+    setSortOrder(newSorted[0].desc);
   };
 
   return (
     <ReactTable
       data={data}
       filterable
+      sortable={true}
       defaultFilterMethod={(filter, row) => filterString(filter, row)}
       NoDataComponent={() => null}
       className="flexView-table"
       columns={defineColumns()}
       showPagination={false}
       pageSize={data.length}
-      onSortedChange={() => {
-        onSortedChange();
+      onSortedChange={newSorted => {
+        onSortedChange(newSorted);
       }}
+      getTheadThProps={getTheadThProps}
     />
   );
 };
