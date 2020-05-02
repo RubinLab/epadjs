@@ -18,7 +18,7 @@ const dropDownMenu = ({ order, onChecked, studyColumns }) => {
           value={index}
           onChange={onChecked}
         />
-        <span className="--text">{item.Header}</span>
+        <span className="--text">{item}</span>
       </div>
     );
     options.push(option);

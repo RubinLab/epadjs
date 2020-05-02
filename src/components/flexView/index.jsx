@@ -13,109 +13,39 @@ const TreeTable = treeTableHOC(ReactTable);
 class FlexView extends React.Component {
   state = {
     columns: [],
-    // order: [5, 0, 1, 2, 7],
-    order: [18, 19, 20],
+    order: [15, 4, 19],
     dropdownSelected: false,
     expanded: {},
   };
 
   studyColumns = [
-    {
-      Header: 'Exam',
-      sortable: false,
-      show: true,
-      Cell: row => {
-        return Array.isArray(row.original.examTypes) ? (
-          <div>{row.original.examTypes.join(' ,')}</div>
-        ) : (
-          <div>{row.original.examType}</div>
-        );
-      },
-    },
-    {
-      Header: 'Patient',
-      // accessor: "patientName",
-      sortable: true,
-      show: true,
-      Cell: row => {
-        return <div>{this.clearCarets(row.original.patientName)}</div>;
-      },
-    },
-    { Header: 'PatientID', accessor: 'patientID', sortable: true, show: true },
-    { Header: 'Sex', accessor: 'sex', sortable: true, show: true },
-    {
-      Header: 'Description',
-      // accessor: "seriesDescription" || "studyDescription",
-      sortable: true,
-      show: true,
-      Cell: row => {
-        let desc = row.original.seriesUID
-          ? row.original.seriesDescription
-          : row.original.studyDescription;
-        if (!desc) {
-          desc = row.original.seriesUID ? 'Unnamed Series' : 'Unnamed Study';
-        }
-        return <div>{desc}</div>;
-      },
-    },
-    {
-      Header: 'Insert Date',
-      accessor: 'insertDate',
-      sortable: true,
-      show: true,
-    },
-    { Header: 'Study Date', accessor: 'studyDate', sortable: true, show: true },
-    { Header: 'Study Time', accessor: 'studyTime', sortable: true, show: true },
-    {
-      Header: 'UID',
-      // accessor: "seriesUID" || "studyUID",
-      sortable: true,
-      show: true,
-      Cell: row => {
-        const UID = row.original.seriesUID
-          ? row.original.seriesUID
-          : row.original.studyUID;
-
-        return <div>{UID}</div>;
-      },
-    },
-    {
-      Header: '# of Aims',
-      accessor: 'numberOfAnnotations',
-      sortable: true,
-      show: true,
-    },
-    {
-      Header: '# Of Img',
-      accessor: 'numberOfImages',
-      sortable: true,
-      show: true,
-    },
-    {
-      Header: '# Of Series',
-      accessor: 'numberOfSeries',
-      sortable: true,
-      show: true,
-    },
-    {
-      Header: 'created Time',
-      accessor: 'createdTime',
-      sortable: true,
-      show: true,
-    },
-    {
-      Header: 'birth date',
-      accessor: 'birthdate',
-      sortable: true,
-      show: true,
-    },
+    'Exam',
+    'Patient Name',
+    'PatientID',
+    'Sex',
+    'Description',
+    'Insert Date',
+    'Study Date',
+    'Study Time',
+    'Study UID',
+    '# of Aims',
+    '# Of Img',
+    '# Of Series',
+    'created Time',
+    'birth date',
+    'First Series Date Acquired',
+    'First Series UID',
+    'Physician Name',
+    'Project ID',
+    'Referring Physician Name',
+    `Study Accession Number`,
+    'studyID',
   ];
 
   mountEvents = () => {
     let headers = Array.prototype.slice.call(
-      document.querySelectorAll('.rt-th')
+      document.querySelectorAll('.rt-th.rt-resizable-header')
     );
-    headers.shift();
     headers.forEach((header, i) => {
       header.setAttribute('draggable', true);
       header.ondrag = e => e.stopPropagation();
