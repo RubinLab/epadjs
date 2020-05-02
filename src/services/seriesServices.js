@@ -77,6 +77,19 @@ export function getWadoImagePath(studyUid, seriesUid, imageId) {
     );
 }
 
+// replace the uri path with rs for now. we should be able to handle both somehow
+export function getWadoRSImagePath(studyUid, seriesUid, imageId) {
+  return (
+    wadoUrl +
+    "/studies/" +
+    studyUid +
+    "/series/" +
+    seriesUid +
+    "/instances/" +
+    imageId
+  );
+}
+
 export function downloadSeries(series) {
   const url =
     apiUrl +
