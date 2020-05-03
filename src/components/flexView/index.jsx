@@ -3,9 +3,11 @@ import ReactTable from 'react-table';
 import treeTableHOC from 'react-table/lib/hoc/treeTable';
 import _ from 'lodash';
 import { Button } from 'react-bootstrap';
+import { getSeries } from '../../services/seriesServices';
 import { getStudies } from '../../services/projectServices';
 import DropDownMenu from './dropdownMenu';
 import StudyTable from './studyTable';
+import SeriesTable from './seriesTable';
 import './flexView.css';
 
 const TreeTable = treeTableHOC(ReactTable);
@@ -16,6 +18,8 @@ class FlexView extends React.Component {
     order: [15, 4, 19],
     dropdownSelected: false,
     expanded: {},
+    seriesTableOpen: false,
+    series: [],
   };
 
   studyColumns = [
@@ -71,6 +75,19 @@ class FlexView extends React.Component {
         this.mountEvents();
       };
     });
+  };
+
+  showSeriesTable = async (projectID, patientID, studyUID) => {
+    try {
+      const { data } = await getSeries(projectID, patientID, studyUID);
+      this.setState({ showSeriesTable: true, series: data });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  closeSeriesTable = () => {
+    this.setState({ showSeriesTable: false, series: [] });
   };
 
   componentDidMount = async () => {
@@ -139,7 +156,13 @@ class FlexView extends React.Component {
     this.setState({ expanded: newExpanded });
   };
   render = () => {
-    const { dropdownSelected, order, data } = this.state;
+    const {
+      dropdownSelected,
+      order,
+      data,
+      series,
+      showSeriesTable,
+    } = this.state;
     return (
       <div className="flexView">
         <Button
@@ -149,45 +172,23 @@ class FlexView extends React.Component {
         >
           Select columns
         </Button>
-        {dropdownSelected ? (
+        {showSeriesTable && (
+          <SeriesTable series={series} onClose={this.closeSeriesTable} />
+        )}
+        {dropdownSelected && (
           <DropDownMenu
             selected={dropdownSelected}
             order={order}
             onChecked={this.toggleColumn}
             studyColumns={this.studyColumns}
           />
-        ) : null}
-
+        )}
         {this.state.data && (
-          <StudyTable data={data} order={order} />
-
-          // <TreeTable
-          //   NoDataComponent={() => null}
-          //   className="flexView-table"
-          //   data={this.state.data}
-          //   columns={this.state.columns}
-          //   showPagination={false}
-          //   pageSize={this.state.data.length}
-          //   expanded={this.state.expanded}
-          //   onExpandedChange={this.handleExpand}
-          //   onSortedChange={() => {
-          //     this.onSortedChange();
-          //   }}
-          //   SubComponent={row => {
-          //     return (
-          //       <div style={{ paddingLeft: 40 }}>
-          //         <Series
-          //           // data={this.state.data}
-          //           order={this.state.order}
-          //           projectId={row.original.projectID}
-          //           subjectId={row.original.patientID}
-          //           studyId={row.original.studyUID}
-          //           studyColumns={this.studyColumns}
-          //         />
-          //       </div>
-          //     );
-          //   }}
-          // />
+          <StudyTable
+            data={data}
+            order={order}
+            showSeriesTable={this.showSeriesTable}
+          />
         )}
       </div>
     );
@@ -195,3 +196,31 @@ class FlexView extends React.Component {
 }
 
 export default FlexView;
+
+// <TreeTable
+//   NoDataComponent={() => null}
+//   className="flexView-table"
+//   data={this.state.data}
+//   columns={this.state.columns}
+//   showPagination={false}
+//   pageSize={this.state.data.length}
+//   expanded={this.state.expanded}
+//   onExpandedChange={this.handleExpand}
+//   onSortedChange={() => {
+//     this.onSortedChange();
+//   }}
+//   SubComponent={row => {
+//     return (
+//       <div style={{ paddingLeft: 40 }}>
+//         <Series
+//           // data={this.state.data}
+//           order={this.state.order}
+//           projectId={row.original.projectID}
+//           subjectId={row.original.patientID}
+//           studyId={row.original.studyUID}
+//           studyColumns={this.studyColumns}
+//         />
+//       </div>
+//     );
+//   }}
+// />

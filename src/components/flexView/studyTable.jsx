@@ -11,7 +11,7 @@ import {
   reverseCarets,
 } from './helperMethods';
 
-const studyTable = ({ data, order }) => {
+const studyTable = ({ data, order, showSeriesTable }) => {
   const [sortedCol, setSortedCol] = useState(null);
   const [sortOrder, setSortOrder] = useState(null);
 
@@ -43,7 +43,6 @@ const studyTable = ({ data, order }) => {
   };
 
   const getTheadThProps = (table, row, col) => {
-    console.log(table, row, col);
     const sortedCol = find(table.sorted, { id: col.id });
     const boxShadow = sortedCol
       ? `inset 0px ${sortedCol.desc ? -3 : 3}px 0px 0px orangered`
@@ -86,6 +85,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'Exam',
       accessor: 'examTypes',
+      id: 'examTypes-id',
+      resizable: true,
       sortable: false,
       show: true,
       filterMethod: (filter, row) => filterArray(filter, row),
@@ -105,6 +106,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'Patient Name',
       accessor: 'patientName',
+      id: 'patientName-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
@@ -120,6 +123,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'PatientID',
       accessor: 'patientID',
+      id: 'patientID-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
@@ -132,6 +137,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'Sex',
       accessor: 'sex',
+      id: 'sex-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
@@ -144,6 +151,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'Description',
       accessor: 'studyDescription',
+      id: 'studyDescription-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
@@ -162,6 +171,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'Insert Date',
       accessor: 'insertDate',
+      id: 'insertDate-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterDateAndTime(filter, row, 'date'),
@@ -177,6 +188,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'Study Date',
       accessor: 'studyDate',
+      id: 'studyDate-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterDateAndTime(filter, row, 'date'),
@@ -192,6 +205,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'Study Time',
       accessor: 'studyTime',
+      id: 'studyTime-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterDateAndTime(filter, row, 'time'),
@@ -207,6 +222,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'Study UID',
       accessor: 'studyUID',
+      id: 'studyUID-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
@@ -219,6 +236,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: '# of Aims',
       accessor: 'numberOfAnnotations',
+      id: 'numberOfAnnotations-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => row[filter.id] >= filter.value,
@@ -232,6 +251,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: '# Of Img',
       accessor: 'numberOfImages',
+      id: 'numberOfImages-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => row[filter.id] >= filter.value,
@@ -244,6 +265,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: '# Of Series',
       accessor: 'numberOfSeries',
+      id: 'numberOfSeries-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => row[filter.id] >= filter.value,
@@ -256,6 +279,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'created Time',
       accessor: 'createdTime',
+      id: 'createdTime-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterDateAndTime(filter, row, 'date'),
@@ -271,6 +296,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'birth date',
       accessor: 'birthdate',
+      id: 'birthdate-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterDateAndTime(filter, row, 'date'),
@@ -286,6 +313,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'First Series Date Acquired',
       accessor: 'firstSeriesDateAcquired',
+      id: 'firstSeriesDateAcquired-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterDateAndTime(filter, row, 'date'),
@@ -302,6 +331,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'First Series UID',
       accessor: 'firstSeriesUID',
+      id: 'firstSeriesUID-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
@@ -314,6 +345,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'Physician Name',
       accessor: 'physicianName',
+      id: 'physicianName-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
@@ -326,6 +359,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'Project ID',
       accessor: 'projectID',
+      id: 'projectID-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
@@ -338,6 +373,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'Referring Physician Name',
       accessor: 'referringPhysicianName',
+      id: 'referringPhysicianName-id',
+      resizable: true,
       sortable: true,
       show: true,
       filterMethod: (filter, row) => filterString(filter, row),
@@ -351,6 +388,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: `Study Accession Number`,
       accessor: 'studyAccessionNumber',
+      id: 'studyAccessionNumber-id',
+      resizable: true,
       sortable: true,
       show: true,
       getProps: (state, rowInfo) => ({
@@ -364,6 +403,8 @@ const studyTable = ({ data, order }) => {
     {
       Header: 'studyID',
       accessor: 'studyID',
+      id: 'studyID-id',
+      resizable: true,
       sortable: true,
       show: true,
       getProps: (state, rowInfo) => ({
@@ -395,6 +436,12 @@ const studyTable = ({ data, order }) => {
         onSortedChange(newSorted);
       }}
       getTheadThProps={getTheadThProps}
+      getTdProps={(state, rowInfo, column) => ({
+        onDoubleClick: e => {
+          const { projectID, patientID, studyUID } = rowInfo.original;
+          showSeriesTable(projectID, patientID, studyUID);
+        },
+      })}
     />
   );
 };
