@@ -42,6 +42,10 @@ export function uploadFileToSubject(formData, config, subject) {
   return http.post(url, formData, config);
 }
 
+export function getAllSubjects() {
+  return http.get(apiUrl + "/subjects");
+}
+
 export function addSubjectToProject(projectID, subjectID) {
   return http.put(`${apiUrl}/projects/${projectID}/subjects/${subjectID}`);
 }

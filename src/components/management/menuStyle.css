@@ -35,6 +35,10 @@
   content: '';
 }
 
+.custom-modal {
+  background: #3a3f44;
+}
+
 .modal-dialog-div {
   cursor: pointer;
   position: relative;
@@ -126,7 +130,7 @@
 
 .rnd-window {
   overflow: scroll;
-  background: #333;
+  background: #3a3f44;
   color: #c6c6c6;
   position: relative;
   border: 2px solid #702632;
@@ -136,6 +140,11 @@
   height: 500px;
   min-width: 800px;
   width: fit-content;
+}
+
+.rnd-window.react-draggable {
+  width: 75%;
+  max-width: 600px;
 }
 
 .wrapped {
@@ -252,6 +261,7 @@
   margin: auto;
   margin-top: 0.5rem;
   max-width: fit-content;
+  margin-top: 0.5rem;
 }
 
 .project-edit__error {
@@ -571,7 +581,7 @@
   display: flex;
   /* background: #e83e8c; */
   height: '-webkit-fill-available';
-  max-height: fit-content;
+  max-height: 90%;
 }
 
 .projectTable-modal .modal-content {
@@ -1027,4 +1037,9 @@
   color: #7a8288;
   margin-top: 1rem;
   margin-left: 1rem;
+}
+
+.tagRequirements_modal .modal-content {
+  width: fit-content;
+  margin: auto;
 }

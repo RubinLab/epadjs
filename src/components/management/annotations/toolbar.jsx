@@ -22,7 +22,8 @@ const toolBar = props => {
     onType,
     onClear,
     onFilter,
-    onKeyDown,
+    onUploadWizard,
+    onKeyDown
   } = props;
   const { selected, projects } = props;
 
@@ -67,7 +68,7 @@ const toolBar = props => {
             id="upload-icon"
             place="right"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span className="filter-label">Upload files</span>
           </ReactTooltip>
@@ -84,11 +85,52 @@ const toolBar = props => {
             id="download-icon"
             place="right"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span className="filter-label">Download selections</span>
           </ReactTooltip>
         </>
+        {mode !== "lite" && (
+          <>
+            <>
+              <div className="annotation-toolbar__icon">
+                <FaShareSquare
+                  className="tool-icon"
+                  data-tip
+                  data-for="applyParalel-icon"
+                />
+              </div>
+              <ReactTooltip
+                id="applyParalel-icon"
+                place="right"
+                type="info"
+                delayShow={1000}
+              >
+                <span className="filter-label">Apply (parallel)</span>
+              </ReactTooltip>
+            </>
+
+            <>
+              <div onClick={onDelete} className="annotation-toolbar__icon">
+                <FaLocationArrow
+                  className="tool-icon"
+                  onClick={onDelete}
+                  data-tip
+                  data-for="applyAll-icon"
+                />
+              </div>
+              <ReactTooltip
+                id="applyAll-icon"
+                place="right"
+                type="info"
+                delayShow={1000}
+              >
+                <span className="filter-label">Apply (all together)</span>
+              </ReactTooltip>
+            </>
+          </>
+        )}
+
         <>
           <div onClick={onDelete}>
             <FaRegTrashAlt
@@ -102,7 +144,7 @@ const toolBar = props => {
             id="trash-icon"
             place="right"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span className="filter-label">Delete selections</span>
           </ReactTooltip>
@@ -194,7 +236,7 @@ const toolBar = props => {
                 id="filter-icon"
                 place="left"
                 type="info"
-                delayShow={1500}
+                delayShow={1000}
               >
                 <span className="filter-label">Filter annotations</span>
               </ReactTooltip>
@@ -213,7 +255,7 @@ const toolBar = props => {
                 id="undo-icon"
                 place="left"
                 type="info"
-                delayShow={1500}
+                delayShow={1000}
               >
                 <span className="filter-label">Clear filter</span>
               </ReactTooltip>

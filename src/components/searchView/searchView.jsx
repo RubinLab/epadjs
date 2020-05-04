@@ -49,6 +49,8 @@ import SeriesCreationModal from "./seriesCreationModal.jsx";
 import Worklists from "./addWorklist";
 import Projects from "./addToProject";
 import WarningModal from "../common/warningModal";
+import AnnotationCreationModal from "./annotationCreationModal.jsx";
+import UpLoadWizard from "../tagEditor/uploadWizard";
 const mode = sessionStorage.getItem("mode");
 
 const messages = {
@@ -83,6 +85,7 @@ class SearchView extends Component {
       openItemsDeleted: false,
       noOfNotDeleted: 0,
       expandLevel: 0,
+      showUploadWizard: false,
       showProjects: false,
     };
   }
@@ -739,6 +742,11 @@ class SearchView extends Component {
     this.setState({ showAnnotationModal: false });
   };
 
+
+  handleUploadWizardClick = () => {
+    this.setState(state => ({ showUploadWizard: !state.showUploadWizard }));
+  };
+  
   handleProjectClick = () => {
     // if (this.state.showProjects) this.props.dispatch(clearSelection());
     console.log("clicked")
@@ -832,6 +840,7 @@ class SearchView extends Component {
           onCloseAll={this.props.handleCloseAll}
           onNew={this.handleNewClick}
           onWorklist={this.handleWorklistClick}
+          onUploadWizard={this.handleUploadWizardClick}
           status={status}
           showDelete={showDelete}
           showAddTo={showAddTo}
@@ -918,7 +927,13 @@ class SearchView extends Component {
             message={`${noOfNotDeleted} ${itemStr} ${messages.itemOpen.message}`}
           />
         )}
-        {newSelected && this.handleNewSelected()}
+        {this.state.showUploadWizard && (
+          <UpLoadWizard
+            onClose={this.handleUploadWizardClick}
+            pid={this.props.pid}
+          />
+        )}
+        {this.state.newSelected && this.handleNewSelected()}
       </>
     );
   };
