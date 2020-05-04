@@ -1,203 +1,57 @@
-import React from "react";
-import ReactTable from "react-table";
-import treeTableHOC from "react-table/lib/hoc/treeTable";
-import _ from "lodash";
-import { toast } from "react-toastify";
-import { Button } from "react-bootstrap";
-import { getStudies } from "../../services/projectServices";
-// import { studyColumns } from "./columns";
-import DropDownMenu from "./dropdownMenu";
-import Series from "./series";
-import "./flexView.css";
+import React from 'react';
+import ReactTable from 'react-table';
+import treeTableHOC from 'react-table/lib/hoc/treeTable';
+import _ from 'lodash';
+import { Button } from 'react-bootstrap';
+import { getSeries } from '../../services/seriesServices';
+import { getStudies } from '../../services/projectServices';
+import DropDownMenu from './dropdownMenu';
+import StudyTable from './studyTable';
+import SeriesTable from './seriesTable';
+import './flexView.css';
 
 const TreeTable = treeTableHOC(ReactTable);
 
 class FlexView extends React.Component {
   state = {
     columns: [],
-    order: [1, 4, 9, 10, 0, 8],
+    order: [15, 4, 19],
     dropdownSelected: false,
     expanded: {},
-  };
-
-  clearCarets = string => {
-    if (string) {
-      for (let i = 0; i < string.length; i++) {
-        string = string.replace("^", " ");
-      }
-      return string;
-    }
-  };
-
-  onSortedChange = () => {
-    const { expanded } = this.state;
-    for (let subject in expanded) {
-      expanded[subject] = false;
-    }
-    this.setState({ expanded });
+    seriesTableOpen: false,
+    series: [],
   };
 
   studyColumns = [
-    {
-      Header: "Exam",
-      sortable: false,
-      show: true,
-      id: "exam",
-      width: 70,
-      resizable: true,
-      Cell: row => {
-        return Array.isArray(row.original.examTypes) ? (
-          <div>{row.original.examTypes.join(" ,")}</div>
-        ) : (
-          <div>{row.original.examType}</div>
-        );
-      },
-    },
-    {
-      Header: "Patient Name",
-      // accessor: "patientName",
-      sortable: true,
-      show: true,
-      id: "patient",
-      resizable: true,
-      width: 270,
-      Cell: row => {
-        return <div>{this.clearCarets(row.original.patientName)}</div>;
-      },
-    },
-    {
-      Header: "PatientID",
-      accessor: "patientID",
-      sortable: true,
-      show: true,
-      id: "patientID",
-      width: 270,
-      resizable: true,
-    },
-    {
-      Header: "Sex",
-      accessor: "sex",
-      sortable: true,
-      show: true,
-      id: "sex",
-      width: 50,
-      resizable: true,
-    },
-    {
-      Header: "Study Description",
-      // accessor: "seriesDescription" || "studyDescription",
-      sortable: true,
-      show: true,
-      id: "description",
-      width: 170,
-      resizable: true,
-      Cell: row => {
-        let desc = row.original.seriesUID
-          ? row.original.seriesDescription
-          : row.original.studyDescription;
-        if (!desc) {
-          desc = row.original.seriesUID ? "Unnamed Series" : "Unnamed Study";
-        }
-        return <div>{desc}</div>;
-      },
-    },
-    {
-      Header: "Insert Date",
-      accessor: "insertDate",
-      sortable: true,
-      show: true,
-      id: "insertDate",
-      resizable: true,
-      width: 100,
-    },
-    {
-      Header: "Study Date",
-      accessor: "studyDate",
-      sortable: true,
-      show: true,
-      width: 100,
-      id: "studyDate",
-      resizable: true,
-    },
-    {
-      Header: "Study Time",
-      accessor: "studyTime",
-      sortable: true,
-      show: true,
-      width: 100,
-      id: "studyTime",
-      resizable: true,
-    },
-    {
-      Header: "UID",
-      // accessor: "seriesUID" || "studyUID",
-      sortable: true,
-      show: true,
-      id: "uid",
-      resizable: true,
-      width: 270,
-      Cell: row => {
-        const UID = row.original.seriesUID
-          ? row.original.seriesUID
-          : row.original.studyUID;
-
-        return <div>{UID}</div>;
-      },
-    },
-    {
-      Header: "# of Aims",
-      accessor: "numberOfAnnotations",
-      sortable: true,
-      show: true,
-      id: "numberOfAnnotations",
-      resizable: true,
-      width: 70,
-    },
-    {
-      Header: "# Of Img",
-      accessor: "numberOfImages",
-      sortable: true,
-      show: true,
-      id: "numberOfImages",
-      resizable: true,
-      width: 70,
-    },
-    {
-      Header: "# Of Series",
-      accessor: "numberOfSeries",
-      sortable: true,
-      show: true,
-      id: "numberOfSeries",
-      resizable: true,
-      width: 70,
-    },
-    {
-      Header: "created Time",
-      accessor: "createdTime",
-      sortable: true,
-      show: true,
-      id: "createdTime",
-      resizable: true,
-      width: 150,
-    },
-    {
-      Header: "birth date",
-      accessor: "birthdate",
-      sortable: true,
-      show: true,
-      id: "birthdate",
-      resizable: true,
-      width: 150,
-    },
+    'Exam',
+    'Patient Name',
+    'PatientID',
+    'Sex',
+    'Description',
+    'Insert Date',
+    'Study Date',
+    'Study Time',
+    'Study UID',
+    '# of Aims',
+    '# Of Img',
+    '# Of Series',
+    'created Time',
+    'birth date',
+    'First Series Date Acquired',
+    'First Series UID',
+    'Physician Name',
+    'Project ID',
+    'Referring Physician Name',
+    `Study Accession Number`,
+    'studyID',
   ];
 
   mountEvents = () => {
     let headers = Array.prototype.slice.call(
-      document.querySelectorAll(".rt-th")
+      document.querySelectorAll('.rt-th.rt-resizable-header')
     );
-    headers.shift();
     headers.forEach((header, i) => {
-      header.setAttribute("draggable", true);
+      header.setAttribute('draggable', true);
       header.ondrag = e => e.stopPropagation();
       header.ondragend = e => e.stopPropagation();
       header.ondragover = e => e.preventDefault();
@@ -207,7 +61,7 @@ class FlexView extends React.Component {
         this.draggedCol = i;
         // Firefox needs this to get draggin workin
         // See https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations
-        e.dataTransfer.setData("text", "fix firefox dragevents");
+        e.dataTransfer.setData('text', 'fix firefox dragevents');
       };
 
       header.ondrop = async e => {
@@ -221,6 +75,19 @@ class FlexView extends React.Component {
         this.mountEvents();
       };
     });
+  };
+
+  showSeriesTable = async (projectID, patientID, studyUID) => {
+    try {
+      const { data } = await getSeries(projectID, patientID, studyUID);
+      this.setState({ showSeriesTable: true, series: data });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  closeSeriesTable = () => {
+    this.setState({ showSeriesTable: false, series: [] });
   };
 
   componentDidMount = async () => {
@@ -289,7 +156,13 @@ class FlexView extends React.Component {
     this.setState({ expanded: newExpanded });
   };
   render = () => {
-    const { dropdownSelected, order } = this.state;
+    const {
+      dropdownSelected,
+      order,
+      data,
+      series,
+      showSeriesTable,
+    } = this.state;
     return (
       <div className="flexView">
         <Button
@@ -297,45 +170,24 @@ class FlexView extends React.Component {
           variant="outline-dark"
           id="flexMenu-button"
         >
-          {" "}
           Select columns
         </Button>
-        {dropdownSelected ? (
+        {showSeriesTable && (
+          <SeriesTable series={series} onClose={this.closeSeriesTable} />
+        )}
+        {dropdownSelected && (
           <DropDownMenu
             selected={dropdownSelected}
             order={order}
             onChecked={this.toggleColumn}
             studyColumns={this.studyColumns}
           />
-        ) : null}
-
+        )}
         {this.state.data && (
-          <TreeTable
-            NoDataComponent={() => null}
-            className="flexView-table"
-            data={this.state.data}
-            columns={this.state.columns}
-            showPagination={false}
-            pageSize={this.state.data.length}
-            expanded={this.state.expanded}
-            onExpandedChange={this.handleExpand}
-            onSortedChange={() => {
-              this.onSortedChange();
-            }}
-            SubComponent={row => {
-              return (
-                <div style={{ paddingLeft: 40 }}>
-                  <Series
-                    // data={this.state.data}
-                    order={this.state.order}
-                    projectId={row.original.projectID}
-                    subjectId={row.original.patientID}
-                    studyId={row.original.studyUID}
-                    studyColumns={this.studyColumns}
-                  />
-                </div>
-              );
-            }}
+          <StudyTable
+            data={data}
+            order={order}
+            showSeriesTable={this.showSeriesTable}
           />
         )}
       </div>
@@ -344,3 +196,31 @@ class FlexView extends React.Component {
 }
 
 export default FlexView;
+
+// <TreeTable
+//   NoDataComponent={() => null}
+//   className="flexView-table"
+//   data={this.state.data}
+//   columns={this.state.columns}
+//   showPagination={false}
+//   pageSize={this.state.data.length}
+//   expanded={this.state.expanded}
+//   onExpandedChange={this.handleExpand}
+//   onSortedChange={() => {
+//     this.onSortedChange();
+//   }}
+//   SubComponent={row => {
+//     return (
+//       <div style={{ paddingLeft: 40 }}>
+//         <Series
+//           // data={this.state.data}
+//           order={this.state.order}
+//           projectId={row.original.projectID}
+//           subjectId={row.original.patientID}
+//           studyId={row.original.studyUID}
+//           studyColumns={this.studyColumns}
+//         />
+//       </div>
+//     );
+//   }}
+// />
