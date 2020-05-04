@@ -132,7 +132,12 @@ class Studies extends Component {
 
   async componentDidUpdate(prevProps) {
     try {
-      const { patientIndex, update, treeExpand } = this.props;
+      const { patientIndex, update, treeExpand, closeAllCounter } = this.props;
+
+      if (closeAllCounter !== prevProps.closeAllCounter) {
+        this.setState({ expanded: {} });
+      }
+
       if (update !== prevProps.update && treeExpand[patientIndex]) {
         const { data: data } = await getStudies(
           this.props.projectId,
@@ -220,17 +225,22 @@ class Studies extends Component {
   }
 
   setColumns() {
+    const { selectedStudies } = this.props;
     const columns = [
       {
         id: "searchView-checkbox",
         accessor: "",
         width: this.widthUnit,
         Cell: ({ original }) => {
+          const { studyUID, projectID } = original;
+          const selected =
+            selectedStudies[studyUID] &&
+            selectedStudies[studyUID].projectID === projectID;
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={this.props.selectedStudies[original.studyUID] || false}
+              checked={selected}
               onChange={() => this.selectRow(original)}
             />
           );
@@ -638,6 +648,7 @@ class Studies extends Component {
                     // expandLoading={this.props.expandLoading}
                     treeData={this.props.treeData}
                     getTreeData={this.props.getTreeData}
+                    closeAllCounter={this.props.closeAllCounter}
                   />
                 </div>
               );

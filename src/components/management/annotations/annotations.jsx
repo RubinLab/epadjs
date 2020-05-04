@@ -4,10 +4,11 @@ import { Link } from "react-router-dom";
 import ReactTable from "react-table";
 import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
-import { FaRegEye } from "react-icons/fa";
+import { FaRegEye, FaCommentsDollar } from "react-icons/fa";
 import {
   getSummaryAnnotations,
   deleteAnnotation,
+  getAllAnnotations,
 } from "../../../services/annotationServices";
 import { getProjects } from "../../../services/projectServices";
 import matchSorter from "match-sorter";
@@ -43,6 +44,7 @@ class Annotations extends React.Component {
     uploadClicked: false,
     downloadClicked: false,
     projectID: "",
+    allAims: [],
   };
 
   componentDidMount = async () => {
@@ -67,37 +69,22 @@ class Annotations extends React.Component {
   };
 
   getAnnotationsData = async projectID => {
-    const { data: annotations } = await getSummaryAnnotations(projectID);
-    if (mode === "lite") {
-      for (let ann of annotations) {
-        ann.date = ann.date + "";
-        ann.studyDate = ann.studyDate + "";
-
-        let year1 = ann.date.substring(0, 4);
-        let month1 = ann.date.substring(4, 6);
-        let day1 = ann.date.substring(6, 8);
-        let hour = ann.date.substring(8, 10);
-        let min = ann.date.substring(10, 12);
-        let sec = ann.date.substring(12);
-        let dateFormat = year1 + "-" + month1 + "-" + day1;
-        let timeFormat = hour + ":" + min + ":" + sec;
-        let date = dateFormat + " " + timeFormat;
-
-        let year2 = ann.studyDate.substring(0, 4);
-        let month2 = ann.studyDate.substring(4, 6);
-        let day2 = ann.studyDate.substring(6, 8);
-        let studyDate = year2 + "-" + month2 + "-" + day2 + " " + "00:00:00";
-        ann.date = date;
-        ann.studyDate = studyDate;
-      }
+    try {
+      const { data: annotations } = projectID
+        ? await getSummaryAnnotations(projectID)
+        : await getAllAnnotations();
+      this.setState({ annotations });
+    } catch (err) {
+      console.log(err);
     }
-    this.setState({ annotations });
   };
 
   handleProjectSelect = e => {
     this.setState({ projectID: e.target.value });
     if (mode !== "lite") {
-      this.getAnnotationsData(e.target.value);
+      e.target.value === "all_aims"
+        ? this.getAnnotationsData()
+        : this.getAnnotationsData(e.target.value);
       this.setState({ filteredData: null });
     }
   };
@@ -254,7 +241,8 @@ class Annotations extends React.Component {
     if (this.validateDateFormat(this.state.createdStart)) {
       const input = new Date(this.state.createdStart);
       for (let ann of arr) {
-        let date = new Date(ann.date.split(" ")[0] + " 00:00:00");
+        const formattedDate = this.convertDateFormat(ann.date, "date");
+        let date = new Date(formattedDate.split(" ")[0] + " 00:00:00");
         if (date >= input) {
           result.push(ann);
         }
@@ -268,7 +256,9 @@ class Annotations extends React.Component {
     if (this.validateDateFormat(this.state.createdEnd)) {
       const input = new Date(this.state.createdEnd);
       for (let ann of arr) {
-        let date = new Date(ann.date.split(" ")[0] + " 00:00:00");
+        let date = new Date(
+          this.convertDateFormat(ann.date, "date").split(" ")[0] + " 00:00:00"
+        );
         if (date <= input) {
           result.push(ann);
         }
@@ -278,11 +268,15 @@ class Annotations extends React.Component {
   };
 
   formatDate = dateString => {
-    const dateArr = dateString.split("-");
-    dateArr[0] = dateArr[0].substring(2);
-    dateArr[1] = dateArr[1][0] === "0" ? dateArr[1][1] : dateArr[1];
-    dateArr[2] = dateArr[2][0] === "0" ? dateArr[2][1] : dateArr[2];
-    return dateArr[1] + "/" + dateArr[2] + "/" + dateArr[0];
+    try {
+      const dateArr = dateString.split("-");
+      dateArr[0] = dateArr[0].substring(2);
+      dateArr[1] = dateArr[1][0] === "0" ? dateArr[1][1] : dateArr[1];
+      dateArr[2] = dateArr[2][0] === "0" ? dateArr[2][1] : dateArr[2];
+      return dateArr[1] + "/" + dateArr[2] + "/" + dateArr[0];
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   clearCarets = string => {
@@ -468,7 +462,10 @@ class Annotations extends React.Component {
           matchSorter(rows, filter.value, { keys: ["date"] }),
         filterAll: true,
         Cell: original => {
-          const studyDateArr = original.row.checkbox.studyDate.split(" ");
+          const studyDateArr = this.convertDateFormat(
+            original.row.checkbox.studyDate,
+            "studyDate"
+          ).split(" ");
           return <div>{this.formatDate(studyDateArr[0])}</div>;
         },
       },
@@ -480,7 +477,10 @@ class Annotations extends React.Component {
           matchSorter(rows, filter.value, { keys: ["date"] }),
         filterAll: true,
         Cell: original => {
-          const studyDateArr = original.row.checkbox.date.split(" ");
+          const studyDateArr = this.convertDateFormat(
+            original.row.checkbox.date,
+            "date"
+          ).split(" ");
           return <div>{this.formatDate(studyDateArr[0])}</div>;
         },
       },
@@ -499,7 +499,10 @@ class Annotations extends React.Component {
           matchSorter(rows, filter.value, { keys: ["time"] }),
         filterAll: true,
         Cell: original => {
-          const studyDateArr = original.row.checkbox.date.split(" ");
+          const studyDateArr = this.convertDateFormat(
+            original.row.checkbox.date,
+            "date"
+          ).split(" ");
           return <div>{studyDateArr[1]}</div>;
         },
       },
@@ -508,6 +511,30 @@ class Annotations extends React.Component {
 
   handleUpload = () => {
     this.setState({ uploadClicked: true });
+  };
+
+  convertDateFormat = (str, attr) => {
+    try {
+      let result = "";
+      const dateArr = [];
+      dateArr.push(str.substring(0, 4));
+      dateArr.push(str.substring(4, 6));
+      dateArr.push(str.substring(6, 8));
+      if (attr === "date") {
+        const timeArr = [];
+        timeArr.push(str.substring(8, 10));
+        timeArr.push(str.substring(10, 12));
+        timeArr.push(str.substring(12));
+        result = dateArr.join("-") + " " + timeArr.join(":");
+      }
+      if (attr === "studyDate") {
+        result = dateArr.join("-") + " 00:00:00";
+      }
+      return result ? result : str;
+    } catch (err) {
+      console.log(err);
+      return str;
+    }
   };
 
   handleDownload = () => {
@@ -590,9 +617,9 @@ const mapsStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
-    uploadedPid: state.annotationsListReducer.uploadedPid, 
-    lastEventId: state.annotationsListReducer.lastEventId, 
-    refresh: state.annotationsListReducer.refresh, 
+    uploadedPid: state.annotationsListReducer.uploadedPid,
+    lastEventId: state.annotationsListReducer.lastEventId,
+    refresh: state.annotationsListReducer.refresh,
   };
 };
 

@@ -2,7 +2,10 @@ import React from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
-import { getProjects, uploadFileToProject } from "../../services/projectServices";
+import {
+  getProjects,
+  uploadFileToProject,
+} from "../../services/projectServices";
 import { uploadFileToSubject } from "../../services/subjectServices";
 import { uploadFileToStudy } from "../../services/studyServices";
 import { uploadFileToSeries } from "../../services/seriesServices";
@@ -24,9 +27,15 @@ class UploadModal extends React.Component {
   };
 
   componentDidMount = async () => {
-    if (mode !== "lite") {
-      const { data: projects } = await getProjects();
-      this.setState({ projects });
+    try {
+      if (mode !== "lite") {
+        const { data: projects } = await getProjects();
+        projects.length > 0
+          ? this.setState({ projects, projectID: projects[0].id })
+          : this.setState({ projects });
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -45,7 +54,6 @@ class UploadModal extends React.Component {
       ? this.props.projectID
       : this.state.projectID;
     const formData = new FormData();
-
     this.state.files.forEach((file, index) => {
       formData.append(`file${index + 1}`, file);
     });

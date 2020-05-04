@@ -13,7 +13,7 @@ const NavBar = ({
   logout,
   onSearchViewClick,
   onSwitchView,
-  notificationWarning
+  notificationWarning, pid
 }) => {
   const style = { paddingBottom: "8px" };
 
@@ -48,7 +48,7 @@ const NavBar = ({
                 onSwitchView("search");
               }}
             >
-              <NavLink className="nav-link" to="/search">
+              <NavLink className="nav-link" to={pid ? `/search/${pid}`: "/search"}>
                 Search
               </NavLink>
             </li>
@@ -90,7 +90,7 @@ const NavBar = ({
                     onSwitchView("flex");
                   }}
                 >
-                  <NavLink className="nav-link" to="/flex">
+                  <NavLink className="nav-link" to={pid ? `/flex/${pid}` : `/flex`}>
                     Flex
                   </NavLink>
                 </li>{" "}

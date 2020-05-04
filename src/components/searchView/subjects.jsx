@@ -82,7 +82,13 @@ class Subjects extends Component {
 
   async componentDidUpdate(prevProps) {
     try {
-      const { uploadedPid, lastEventId, pid, expandLevel } = this.props;
+      const {
+        uploadedPid,
+        lastEventId,
+        pid,
+        expandLevel,
+        closeAllCounter,
+      } = this.props;
 
       let data;
       if (this.props.update !== prevProps.update) {
@@ -96,6 +102,11 @@ class Subjects extends Component {
         this.props.getTreeData(pid, "subject", data);
         this.setState({ data, expanded });
       }
+
+      if (closeAllCounter !== prevProps.closeAllCounter) {
+        this.setState({ expanded: {} });
+      }
+
       if (this.props.expandLevel != prevProps.expandLevel) {
         this.props.expandLevel >= 1 && this.state.data.length
           ? this.expandCurrentLevel()
@@ -189,6 +200,7 @@ class Subjects extends Component {
     this.props.dispatch(selectPatient(selected));
   };
   setColumns() {
+    const { selectedPatients } = this.props;
     const columns = [
       {
         id: "searchView-checkbox",
@@ -197,13 +209,15 @@ class Subjects extends Component {
         sortable: false,
         width: this.widthUnit,
         Cell: row => {
+          const { subjectID, projectID } = row.original;
+          const selected =
+            selectedPatients[subjectID] &&
+            selectedPatients[subjectID].projectID === projectID;
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={
-                this.props.selectedPatients[row.original.subjectID] || false
-              }
+              checked={selected}
               onChange={() =>
                 this.selectRow({ ...row.original, index: row.index })
               }
@@ -554,6 +568,7 @@ class Subjects extends Component {
                     // patientExpandComplete={this.props.patientExpandComplete}
                     treeData={this.props.treeData}
                     getTreeData={this.props.getTreeData}
+                    closeAllCounter={this.props.closeAllCounter}
                     pid={this.props.pid}
                   />
                 </div>

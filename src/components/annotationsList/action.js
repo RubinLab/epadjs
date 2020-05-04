@@ -267,7 +267,7 @@ export const addToGrid = (serie, annotation) => {
     studyUID,
     seriesUID,
     aimID: annotation,
-    imageIndex: 0
+    // imageIndex: 0
   };
   return { type: ADD_TO_GRID, reference };
 };

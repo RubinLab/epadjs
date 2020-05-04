@@ -7,7 +7,7 @@ import {
   FaLocationArrow,
   FaRegTrashAlt,
   FaFilter,
-  FaUndo
+  FaUndo,
 } from "react-icons/fa";
 import ReactTooltip from "react-tooltip";
 import "../menuStyle.css";
@@ -28,14 +28,21 @@ const toolBar = props => {
   const { selected, projects } = props;
 
   const options = [];
-  for (let project of projects) {
+  projects.forEach((project, index) => {
     options.push(
       <option key={project.id} value={project.id}>
         {project.name}
       </option>
     );
+  });
+  if (projects[0]) {
+    const firstOption = (
+      <option key="all_aims" value="all_aims">
+        All Annotations
+      </option>
+    );
+    options.push(firstOption);
   }
-
   let name = React.createRef();
   let subject = React.createRef();
   let template = React.createRef();
@@ -52,7 +59,7 @@ const toolBar = props => {
 
   return (
     <div className="annotations-toolbar">
-      <div className="annotations-toolbar-basic">
+      <div className="annotations-toolbar-basic" align="left">
         <>
           <div onClick={onUpload}>
             <FaUpload className="tool-icon" data-tip data-for="upload-icon" />
@@ -125,7 +132,7 @@ const toolBar = props => {
         )}
 
         <>
-          <div onClick={onDelete} className="annotation-toolbar__icon">
+          <div onClick={onDelete}>
             <FaRegTrashAlt
               className="tool-icon"
               onClick={onDelete}
@@ -147,8 +154,8 @@ const toolBar = props => {
           <select
             className="annotations-projectSelect"
             name="project"
+            defaultValue={projects[0] ? projects[0].name : ""}
             onChange={onSelect}
-            defaultValue="default"
           >
             {options}
           </select>
@@ -227,7 +234,7 @@ const toolBar = props => {
               </div>
               <ReactTooltip
                 id="filter-icon"
-                place="right"
+                place="left"
                 type="info"
                 delayShow={1000}
               >
@@ -246,7 +253,7 @@ const toolBar = props => {
               </div>
               <ReactTooltip
                 id="undo-icon"
-                place="right"
+                place="left"
                 type="info"
                 delayShow={1000}
               >
@@ -263,6 +270,6 @@ const toolBar = props => {
 toolBar.propTypes = {
   onAdd: PropTypes.func,
   onDelete: PropTypes.func,
-  selected: PropTypes.bool
+  selected: PropTypes.bool,
 };
 export default toolBar;

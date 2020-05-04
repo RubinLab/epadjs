@@ -10,7 +10,7 @@ import {
   saveProject,
   updateProject,
   getProjectUsers,
-  editUserRole
+  editUserRole,
 } from "../../../services/projectServices";
 import { getUsers } from "../../../services/userServices";
 import ToolBar from "../common/basicToolBar";
@@ -23,7 +23,7 @@ import SearchView from "../../searchView/searchView";
 
 const messages = {
   deleteSingle: "Delete the project? This cannot be undone.",
-  deleteSelected: "Delete selected projects? This cannot be undone."
+  deleteSelected: "Delete selected projects? This cannot be undone.",
 };
 
 //NICE TO HAVES
@@ -33,7 +33,7 @@ const messages = {
 //TODO change the color of the row if the check box is selected
 /*TODO api will be updated to return permission info 
   in response. UI will be updated accordingly with conditional rendering 
-  to disable the checkbox if user doesn't have any permission to edit that project */
+  to disable the checkbox if user doesn"t have any permission to edit that project */
 //TODO add project names to delete project and user roles editing pop ups
 //TODO Add tool tip for icons/button
 
@@ -57,7 +57,7 @@ class Projects extends React.Component {
     type: "Private",
     defaultTemplate: "",
     userRoles: [],
-    newRoles: {}
+    newRoles: {},
   };
 
   componentDidMount = () => {
@@ -69,7 +69,6 @@ class Projects extends React.Component {
     const userRoles = [];
     try {
       const { data: users } = await getUsers();
-
       const { data: roles } = await getProjectUsers(id);
       for (let i = 0; i < users.length; i++) {
         for (let k = 0; k < roles.length; k++) {
@@ -78,11 +77,13 @@ class Projects extends React.Component {
             break;
           }
         }
-        if (userRoles.length !== i + 1) {
+        if (userRoles.length < i + 1 && i < users.length) {
           userRoles.push({ name: users[i].username, role: "None" });
         }
       }
-      this.setState({ userRoles });
+      await this.setState({ userRoles });
+      this.setState({hasUserRolesClicked: true});
+
     } catch (err) {
       // this.setState({ error: true });
     }
@@ -102,7 +103,7 @@ class Projects extends React.Component {
       name: "",
       description: "",
       id: "",
-      type: "Private"
+      type: "Private",
     });
   };
 
@@ -124,10 +125,11 @@ class Projects extends React.Component {
           if (res.status === 200) {
             this.setState({
               hasAddClicked: false,
-              errorMessage: null
+              errorMessage: null,
             });
             this.clearProjectInfo();
             this.getProjectData();
+            this.props.getProjectAdded();
           }
         })
         .catch(error => {
@@ -144,7 +146,7 @@ class Projects extends React.Component {
         if (res.status === 200) {
           this.setState({
             hasEditClicked: false,
-            errorMessage: null
+            errorMessage: null,
           });
           this.clearProjectInfo();
           this.getProjectData();
@@ -152,7 +154,7 @@ class Projects extends React.Component {
       })
       .catch(error => {
         this.setState({
-          errorMessage: error.response.data.message
+          errorMessage: error.response.data.message,
         });
         this.clearProjectInfo();
       });
@@ -165,13 +167,13 @@ class Projects extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0
+          selectAll: 0,
         });
       }
     } else {
       newSelected[id] = name;
       await this.setState({
-        selectAll: 2
+        selectAll: 2,
       });
     }
     this.setState({ selected: newSelected });
@@ -187,7 +189,7 @@ class Projects extends React.Component {
 
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
+      selectAll: this.state.selectAll === 0 ? 1 : 0,
     });
   }
 
@@ -201,34 +203,34 @@ class Projects extends React.Component {
       hasAddClicked: false,
       hasEditClicked: false,
       hasUserRolesClicked: false,
-      errorMessage: null
+      errorMessage: null,
     });
   };
 
   deleteAllSelected = async () => {
     let newSelected = Object.assign({}, this.state.selected);
     const notDeleted = [];
+    const promises = [];
     //call single delete to an array
     //Call Promise.all to array
     //then => refresh the page
     //catch => push
     for (let project in newSelected) {
-      await deleteProject(project)
-        .then(() => {
-          delete newSelected[project];
-          this.setState({ selected: newSelected });
-        })
-        .catch(err => {
-          notDeleted.push(newSelected[project]);
-          let names = notDeleted.join(", ");
-          this.setState({
-            errorMessage: err.response.data.message + ": " + names
-          });
-        })
-        .finally(() => {
-          this.getProjectData();
-        });
+      promises.push(deleteProject(project));
     }
+    Promise.all(promises)
+      .then(() => {
+        this.setState({ selected: {}, hasDeleteAllClicked: false });
+        this.props.getProjectAdded();
+      })
+      .catch(err => {
+        this.setState({
+          errorMessage: err.response.data.message,
+        });
+      })
+      .finally(() => {
+        this.getProjectData();
+      });
   };
 
   deleteSingleProject = async () => {
@@ -236,6 +238,7 @@ class Projects extends React.Component {
       .then(() => {
         this.setState({ singleDeleteId: "", hasDeleteSingleClicked: false });
         this.getProjectData();
+        this.props.getProjectAdded();
       })
       .catch(err => {
         this.setState({ errorMessage: err.response.data.message });
@@ -319,7 +322,7 @@ class Projects extends React.Component {
         },
         sortable: false,
         minResizeWidth: 20,
-        width: 45
+        width: 45,
       },
       {
         Header: "Name",
@@ -327,7 +330,7 @@ class Projects extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
+        minWidth: 50,
       },
       {
         Header: "Open",
@@ -344,7 +347,7 @@ class Projects extends React.Component {
               <FaRegEye className="menu-clickable" />
             </div>
           </Link>
-        )
+        ),
       },
       {
         Header: "Description",
@@ -352,7 +355,7 @@ class Projects extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
+        minWidth: 50,
       },
       {
         Header: "Type",
@@ -360,7 +363,7 @@ class Projects extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50
+        minWidth: 50,
       },
       {
         Header: "Users",
@@ -370,21 +373,27 @@ class Projects extends React.Component {
         minResizeWidth: 20,
         minWidth: 50,
         Cell: original => {
+          const { loginNames } = original.row;
+          const className =
+            loginNames.length > 0 ? "wrapped" : "wrapped click-to-add";
+          const text =
+            loginNames.length > 0
+              ? loginNames.join(", ")
+              : "Add user to the project";
           return (
             <p
-              className="menu-clickable wrapped"
-              onClick={async () => {
-                await this.handleClickUSerRoles(original.row.checkbox.id);
+              className={className}
+              onClick={() => {
+                this.handleClickUSerRoles(original.row.checkbox.id);
                 this.setState({
-                  hasUserRolesClicked: true,
-                  id: original.row.checkbox.id
+                  id: original.row.checkbox.id,
                 });
               }}
             >
-              {original.row.loginNames.join(", ")}
+              {text}
             </p>
           );
-        }
+        },
       },
       {
         Header: "",
@@ -399,13 +408,13 @@ class Projects extends React.Component {
                 id: original.row.checkbox.id,
                 name: original.row.checkbox.name,
                 description: original.row.checkbox.description,
-                type: original.row.checkbox.type
+                type: original.row.checkbox.type,
               });
             }}
           >
             <FaEdit className="menu-clickable" />
           </div>
-        )
+        ),
       },
       {
         Header: "",
@@ -418,8 +427,8 @@ class Projects extends React.Component {
           >
             <FaRegTrashAlt className="menu-clickable" />
           </div>
-        )
-      }
+        ),
+      },
     ];
   };
 
@@ -436,6 +445,7 @@ class Projects extends React.Component {
           className="pro-table"
           data={this.state.data}
           columns={this.defineColumns()}
+          defaultPageSize={10}
         />
         {this.state.hasDeleteAllClicked && (
           <DeleteAlert
@@ -490,6 +500,6 @@ class Projects extends React.Component {
 
 Projects.propTypes = {
   selection: PropTypes.string,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
 };
 export default Projects;

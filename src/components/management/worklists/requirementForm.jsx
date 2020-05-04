@@ -1,6 +1,5 @@
 import React from "react";
-import PropTypes from "prop-types";
-import { getAllTemplates } from "../../../services/templateServices";
+import { getTemplatesOfProjects } from "../../../services/templateServices";
 
 class RequirementForm extends React.Component {
   state = {
@@ -12,7 +11,7 @@ class RequirementForm extends React.Component {
   };
 
   componentDidMount = async () => {
-    const { data } = await getAllTemplates();
+    const { data } = await getTemplatesOfProjects();
     const templates = {};
     console.log(data);
     data.forEach((el, i) => {

@@ -96,17 +96,18 @@ export function getSegmentation(series, imageId) {
 }
 
 export function deleteSeries(series) {
-  if (mode === "lite") {
-    const url =
-      apiUrl +
-      "/projects/lite/subjects/" +
-      series.patientID +
-      "/studies/" +
-      series.studyUID +
-      "/series/" +
-      series.seriesUID;
-    return http.delete(url);
-  }
+  const { projectID, patientID, studyUID, seriesUID } = series;
+  const url =
+    apiUrl +
+    "/projects/" +
+    projectID +
+    "/subjects/" +
+    patientID +
+    "/studies/" +
+    studyUID +
+    "/series/" +
+    seriesUID;
+  return http.delete(url);
 }
 
 export function saveSeries(

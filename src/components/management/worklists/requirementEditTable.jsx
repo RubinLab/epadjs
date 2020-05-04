@@ -1,8 +1,6 @@
 import React from "react";
-import PropTypes from "prop-types";
 import ReactTable from "react-table";
-import { FaEdit, FaTrashAlt } from "react-icons/fa";
-import { getAllTemplates } from "../../../services/templateServices";
+import { FaTrashAlt } from "react-icons/fa";
 
 // accept only integers for aims field
 class RequirementEditTable extends React.Component {

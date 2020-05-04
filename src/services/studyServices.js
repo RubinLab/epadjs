@@ -4,11 +4,11 @@ const mode = sessionStorage.getItem("mode");
 export function getStudies(projectId, subjectId) {
   if (mode === "lite")
     return http.get(
-      apiUrl + "/projects/lite/subjects/" + subjectId + "/studies"
+      apiUrl + "/projects/lite/subjects/" + subjectId + "/studies?filterDSO=true"
     );
   else
     return http.get(
-      apiUrl + "/projects/" + projectId + "/subjects/" + subjectId + "/studies"
+      apiUrl + "/projects/" + projectId + "/subjects/" + subjectId + "/studies?filterDSO=true"
     );
 }
 
@@ -25,15 +25,16 @@ export function downloadStudies(study) {
   return http.get(url, { responseType: "blob" });
 }
 
-export function deleteStudy(study, projectID = "lite") {
+export function deleteStudy(study) {
+  const { projectID, patientID, studyUID } = study;
   const url =
     apiUrl +
     "/projects/" +
     projectID +
     "/subjects/" +
-    study.patientID +
+    patientID +
     "/studies/" +
-    study.studyUID;
+    studyUID;
   return http.delete(url);
 }
 
@@ -69,4 +70,8 @@ export function uploadFileToStudy(formData, config, study) {
   subjectID = subjectID ? subjectID : study.patientID;
   const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/files`;
   return http.post(url, formData, config);
+}
+
+export function addStudyToProject(projectID, subjectID, studyUID) {
+  return http.put(`${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}`);
 }
