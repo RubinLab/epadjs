@@ -6,6 +6,7 @@ import UserTable from "./userTable";
 
 const userRoleEditingForm = ({ onCancel, onSubmit, onType, error, users }) => {
   // users = users || projects;
+  console.log(users);
   return (
     <Modal.Dialog dialogClassName="edit-userRole__modal">
       <Modal.Header>
@@ -44,7 +45,7 @@ userRoleEditingForm.propTypes = {
   onSubmit: PropTypes.func,
   onType: PropTypes.func,
   error: PropTypes.string,
-  users: PropTypes.string
+  users: PropTypes.string,
 };
 
 export default userRoleEditingForm;

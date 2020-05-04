@@ -25,15 +25,16 @@ export function downloadStudies(study) {
   return http.get(url, { responseType: "blob" });
 }
 
-export function deleteStudy(study, projectID = "lite") {
+export function deleteStudy(study) {
+  const { projectID, patientID, studyUID } = study;
   const url =
     apiUrl +
     "/projects/" +
     projectID +
     "/subjects/" +
-    study.patientID +
+    patientID +
     "/studies/" +
-    study.studyUID;
+    studyUID;
   return http.delete(url);
 }
 

@@ -56,7 +56,18 @@ class App extends Component {
       treeData: {},
       pid: null,
       closeAll: 0,
+      projectAdded: 0
     };
+  }
+
+  getProjectAdded = () => {
+    this.setState(state => ({
+      projectAdded: state.projectAdded + 1, 
+      refTree: {},
+      treeData: {},
+      expandLevel: 0,
+      treeExpand: {},
+    }))
   }
 
   getTreeExpandAll = (expandObj, expanded, expandLevel) => {
@@ -587,6 +598,7 @@ class App extends Component {
           onSwitchView={this.switchView}
           viewType={this.state.viewType}
           notificationWarning={noOfUnseen}
+          pid={this.state.pid}
         />
         {this.state.openMng && (
           <Management
@@ -594,6 +606,7 @@ class App extends Component {
             projectMap={this.state.projectMap}
             updateProgress={this.updateProgress}
             admin={this.state.admin}
+            getProjectAdded={this.getProjectAdded}
           />
         )}
         {this.state.openInfo && (
@@ -623,6 +636,7 @@ class App extends Component {
               getPidUpdate={this.getPidUpdate}
               pid={this.state.pid}
               clearTreeExpand={this.clearTreeExpand}
+              projectAdded={this.state.projectAdded}
             >
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
@@ -632,6 +646,7 @@ class App extends Component {
                     <DisplayView
                       {...props}
                       updateProgress={this.updateProgress}
+                      pid={this.state.pid}
                     />
                   )}
                 />
@@ -789,7 +804,7 @@ class App extends Component {
 }
 
 const mapStateToProps = state => {
-  // console.log(state.annotationsListReducer);
+  console.log(state.annotationsListReducer);
   // console.log(state.managementReducer);
   const {
     showGridFullAlert,
