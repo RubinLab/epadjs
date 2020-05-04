@@ -71,3 +71,7 @@ export function uploadFileToStudy(formData, config, study) {
   const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/files`;
   return http.post(url, formData, config);
 }
+
+export function addStudyToProject(projectID, subjectID, studyUID) {
+  return http.put(`${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}`);
+}

@@ -79,6 +79,10 @@ export function downloadAnnotations(optionObj, aimIDlist, selection) {
   );
 }
 
+export function getAllAnnotations() {
+    return http.get(apiUrl + "/aims?format=summary");
+}
+
 export function getSummaryAnnotations(projectID) {
   return mode === "lite"
     ? http.get(apiUrl + "/projects/lite/aims?format=summary")

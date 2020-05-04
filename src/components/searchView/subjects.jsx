@@ -200,6 +200,7 @@ class Subjects extends Component {
     this.props.dispatch(selectPatient(selected));
   };
   setColumns() {
+    const { selectedPatients } = this.props;
     const columns = [
       {
         id: "searchView-checkbox",
@@ -208,13 +209,15 @@ class Subjects extends Component {
         sortable: false,
         width: this.widthUnit,
         Cell: row => {
+          const { subjectID, projectID } = row.original;
+          const selected =
+            selectedPatients[subjectID] &&
+            selectedPatients[subjectID].projectID === projectID;
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={
-                this.props.selectedPatients[row.original.subjectID] || false
-              }
+              checked={selected}
               onChange={() =>
                 this.selectRow({ ...row.original, index: row.index })
               }

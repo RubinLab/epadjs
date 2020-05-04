@@ -35,14 +35,19 @@ import { MAX_PORT } from "../../constants";
 import DownloadSelection from "./annotationDownloadModal";
 import "./searchView.css";
 import UploadModal from "./uploadModal";
-import { getSubjects } from "../../services/subjectServices";
+import {
+  getSubjects,
+  addSubjectToProject,
+} from "../../services/subjectServices";
+import { addStudyToProject } from "../../services/studyServices";
+
 import DeleteAlert from "./deleteConfirmationModal";
-import DownloadWarning from "./downloadWarningModal";
 import NewMenu from "./newMenu";
 import SubjectCreationModal from "./subjectCreationModal.jsx";
 import StudyCreationModal from "./studyCreationModal.jsx";
 import SeriesCreationModal from "./seriesCreationModal.jsx";
 import Worklists from "./addWorklist";
+import Projects from "./addToProject";
 import WarningModal from "../common/warningModal";
 const mode = sessionStorage.getItem("mode");
 
@@ -78,6 +83,7 @@ class SearchView extends Component {
       openItemsDeleted: false,
       noOfNotDeleted: 0,
       expandLevel: 0,
+      showProjects: false,
     };
   }
 
@@ -615,9 +621,9 @@ class SearchView extends Component {
         }
         this.setState({ error: null, downloading: false });
       })
-      .catch(err => {    
+      .catch(err => {
         this.setState({ downloading: false });
-        console.log(err)
+        console.log(err);
       });
   };
 
@@ -681,7 +687,8 @@ class SearchView extends Component {
   };
 
   handleWorklistClick = () => {
-    if (this.state.showWorklists) this.props.dispatch(clearSelection());
+    // if (this.state.showWorklists) this.props.dispatch(clearSelection());
+    console.log("clicked worklist")
     this.setState(state => ({ showWorklists: !state.showWorklists }));
   };
 
@@ -732,6 +739,41 @@ class SearchView extends Component {
     this.setState({ showAnnotationModal: false });
   };
 
+  handleProjectClick = () => {
+    // if (this.state.showProjects) this.props.dispatch(clearSelection());
+    console.log("clicked")
+    this.setState(state => ({ showProjects: !state.showProjects }));
+
+  };
+
+  verifyObject = object => {
+    return object.constructor === Object;
+  };
+
+  addSelectionToProject = e => {
+    const { id } = e.target;
+    const promises = [];
+    const patients = Object.values(this.props.selectedPatients);
+    const studies = Object.values(this.props.selectedStudies);
+    if (patients.length > 0) {
+      patients.forEach(el => {
+        promises.push(addSubjectToProject(id, el.patientID));
+      });
+    }
+    if (studies.length > 0) {
+      studies.forEach(el => {
+        promises.push(addStudyToProject(id, el.patientID, el.studyUID));
+      });
+    }
+    Promise.all(promises)
+      .then(res => {
+        console.log("Added successful");
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
   render = () => {
     let status;
     if (this.state.uploading) {
@@ -743,15 +785,26 @@ class SearchView extends Component {
     } else {
       status = null;
     }
+
+    const {
+      selectedPatients,
+      selectedStudies,
+      selectedSeries,
+      selectedAnnotations,
+    } = this.props;
+
+    const lengthOfPatients = Object.entries(selectedPatients).length;
+    const lengthOfStudies = Object.entries(selectedStudies).length;
+    const lengthOfSeries = Object.entries(selectedSeries).length;
+    const lengthOfAnns = Object.entries(selectedAnnotations).length;
+
+    const showAddTo =
+      (lengthOfPatients > 0 && this.verifyObject(selectedPatients)) ||
+      (lengthOfStudies > 0 && this.verifyObject(selectedStudies));
     const showDelete =
-      (Object.entries(this.props.selectedAnnotations).length > 0 &&
-        this.props.selectedAnnotations.constructor === Object) ||
-      (Object.entries(this.props.selectedPatients).length > 0 &&
-        this.props.selectedPatients.constructor === Object) ||
-      (Object.entries(this.props.selectedStudies).length > 0 &&
-        this.props.selectedStudies.constructor === Object) ||
-      (Object.entries(this.props.selectedSeries).length > 0 &&
-        this.props.selectedSeries.constructor === Object);
+      showAddTo ||
+      (lengthOfAnns > 0 && this.verifyObject(selectedAnnotations)) ||
+      (lengthOfSeries > 0 && this.verifyObject(selectedSeries));
 
     const pid = this.props.match.params.pid || this.props.pid || "lite";
     const {
@@ -763,6 +816,7 @@ class SearchView extends Component {
       newUser,
       openItemsDeleted,
       newSelected,
+      showProjects,
       noOfNotDeleted,
     } = this.state;
     const itemStr = noOfNotDeleted > 1 ? "items" : "item";
@@ -780,7 +834,9 @@ class SearchView extends Component {
           onWorklist={this.handleWorklistClick}
           status={status}
           showDelete={showDelete}
+          showAddTo={showAddTo}
           project={this.props.match.params.pid}
+          onAddProject={this.handleProjectClick}
           // expanding={expanding}
         />
         {isSerieSelectionOpen && !this.props.loading && (
@@ -806,7 +862,6 @@ class SearchView extends Component {
           treeData={this.props.treeData}
           getTreeData={this.props.getTreeData}
           closeAllCounter={this.props.closeAllCounter}
-
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection
@@ -840,6 +895,13 @@ class SearchView extends Component {
           <Worklists
             onClose={this.handleWorklistClick}
             updateProgress={this.props.updateProgress}
+          />
+        )}
+        {showProjects && (
+          <Projects
+            projectMap={this.props.projectMap}
+            onProjectClose={this.handleProjectClick}
+            onSave={this.addSelectionToProject}
           />
         )}
         {newUser && (

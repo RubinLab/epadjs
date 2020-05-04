@@ -7,12 +7,12 @@ import {
   FaPlusCircle,
   FaLevelDownAlt,
   FaLevelUpAlt,
-  FaClipboardList
+  FaClipboardList,
+  FaProjectDiagram,
 } from "react-icons/fa";
 import { FiMinimize2 } from "react-icons/fi";
 import ReactTooltip from "react-tooltip";
 import { BarLoader } from "react-spinners";
-import Spinner from "../common/circleSpinner";
 
 const mode = sessionStorage.getItem("mode");
 
@@ -187,7 +187,11 @@ const toolBar = props => {
         </div>
       )}
       <div
-        className="searchView-toolbar__icon worklist-icon"
+        className={
+          props.showAddTo
+            ? "searchView-toolbar__icon worklist-icon"
+            : "hide-delete"
+        }
         onClick={props.onWorklist}
       >
         <div>
@@ -206,6 +210,36 @@ const toolBar = props => {
           <span>Add to worklist</span>
         </ReactTooltip>
       </div>
+
+      {mode !== "lite" && (
+        <div
+          className={
+            props.showAddTo
+              ? "searchView-toolbar__icon project-icon"
+              : "hide-delete"
+          }
+          onClick={() => {
+            console.log("toolbar");
+            props.onAddProject();
+          }}
+        >
+          <div>
+            <FaProjectDiagram
+              style={{ fontSize: "1.2rem" }}
+              data-tip
+              data-for="project-icon"
+            />
+          </div>
+          <ReactTooltip
+            id="project-icon"
+            place="bottom"
+            type="info"
+            delayShow={1500}
+          >
+            <span>Add to project</span>
+          </ReactTooltip>
+        </div>
+      )}
       {/* <div className="searchView-toolbar__icon">
         <div>
           <TiPencil
