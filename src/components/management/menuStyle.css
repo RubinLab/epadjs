@@ -988,6 +988,7 @@
   font-size: 0.9rem;
   color: #5bc0de;
   font-style: italic;
+  cursor: pointer;
 }
 
 .user-permission__icon {
