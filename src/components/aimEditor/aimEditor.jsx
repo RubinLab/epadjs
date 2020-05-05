@@ -899,16 +899,8 @@ class AimEditor extends Component {
     };
   };
 
-<<<<<<< HEAD
   parseImgeId = (imageId) => {
     if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
-=======
-  parseImgeId = imageId => {
-    // if (mode == "lite") return imageId.split("/").pop();
-    // else return imageId.split("objectUID=")[1].split("&")[0];
-    if (imageId.includes("objectUID="))
-      return imageId.split("objectUID=")[1];
->>>>>>> f71923d9694982376688e4995e45a31e9225f67c
     return imageId.split("/").pop();
   };
 }

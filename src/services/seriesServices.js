@@ -55,7 +55,7 @@ export function getImageIds(series) {
 
 //  seems like this doesn't belong to here but olny services know details about paths&server side
 export function getWadoImagePath(studyUid, seriesUid, imageId) {
-  if (wadoUrl.includes("wadouri"))
+  if (wadoUrl.includes("wadors"))
     return (
       wadoUrl +
       "/studies/" +
