@@ -817,7 +817,11 @@ class DisplayView extends Component {
   closeAimEditor = (isCancel, message = "") => {
     // if aim editor has been cancelled ask to user
     if (!this.checkUnsavedData(isCancel, message)) return;
-    this.setState({ showAimEditor: false, selectedAim: undefined });
+    this.setState({
+      showAimEditor: false,
+      selectedAim: undefined,
+      hasSegmentation: false,
+    });
     // clear all unsaved markups by calling getData
     this.getData();
     this.refreshAllViewports();
@@ -849,8 +853,6 @@ class DisplayView extends Component {
   };
   // this is in aimEditor. should be somewhare common so both can use (the new aimapi library)
   parseImgeId = (imageId) => {
-    // if (mode == "lite") return imageId.split("/").pop();
-    // else return imageId.split("objectUID=")[1].split("&")[0];
     if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
     return imageId.split("/").pop();
   };
