@@ -142,6 +142,7 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
+    console.log("Session storage", sessionStorage);
     if (this.props.series.length < 1) return;
     this.getViewports();
     this.getData();
@@ -850,9 +851,14 @@ class DisplayView extends Component {
     });
     return markupTypes;
   };
+  // this is in aimEditor. should be somewhare common so both can use (the new aimapi library)
+  parseImgeId = (imageId) => {
+    if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
+    return imageId.split("/").pop();
+  };
   newImage = (event) => {
     let { imageId } = event.detail.image;
-    imageId = imageId.split("objectUID=").pop(); //strip from cs imagePath to imageId
+    imageId = this.parseImgeId(imageId); //strip from cs imagePath to imageId
     const { activePort } = this.props;
     const tempData = this.state.data;
     const activeElement = cornerstone.getEnabledElements()[activePort];

@@ -4,11 +4,11 @@ const mode = sessionStorage.getItem("mode");
 export function getStudies(projectId, subjectId) {
   if (mode === "lite")
     return http.get(
-      apiUrl + "/projects/lite/subjects/" + subjectId + "/studies"
+      apiUrl + "/projects/lite/subjects/" + subjectId + "/studies?filterDSO=true"
     );
   else
     return http.get(
-      apiUrl + "/projects/" + projectId + "/subjects/" + subjectId + "/studies"
+      apiUrl + "/projects/" + projectId + "/subjects/" + subjectId + "/studies?filterDSO=true"
     );
 }
 
