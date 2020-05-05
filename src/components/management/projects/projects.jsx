@@ -12,6 +12,7 @@ import {
   getProjectUsers,
   editUserRole,
 } from "../../../services/projectServices";
+import { getTemplatesUniversal } from "../../../services/templateServices";
 import { getUsers } from "../../../services/userServices";
 import ToolBar from "../common/basicToolBar";
 import DeleteAlert from "../common/alertDeletionModal";
@@ -20,7 +21,7 @@ import ProjectEditingForm from "./projectEditingForm";
 import UserRoleEditingForm from "./userRoleEditingForm";
 import ProtectedRoute from "../../common/protectedRoute";
 import SearchView from "../../searchView/searchView";
-
+import TemplateTable from "./templateTable";
 const messages = {
   deleteSingle: "Delete the project? This cannot be undone.",
   deleteSelected: "Delete selected projects? This cannot be undone.",
@@ -58,11 +59,21 @@ class Projects extends React.Component {
     defaultTemplate: "",
     userRoles: [],
     newRoles: {},
+    templates: [],
+    showTemplate: false,
+    projectIndex: null,
   };
 
   componentDidMount = () => {
     this.getProjectData();
+    this.getTemplateData();
     this.setState({ user: sessionStorage.getItem("username") });
+  };
+
+  getDefaultTemplate = template => {
+    this.setState({
+      defaultTemplate: template,
+    });
   };
 
   handleClickUSerRoles = async id => {
@@ -82,8 +93,7 @@ class Projects extends React.Component {
         }
       }
       await this.setState({ userRoles });
-      this.setState({hasUserRolesClicked: true});
-
+      this.setState({ hasUserRolesClicked: true });
     } catch (err) {
       // this.setState({ error: true });
     }
@@ -98,6 +108,15 @@ class Projects extends React.Component {
     }
   };
 
+  getTemplateData = async () => {
+    try {
+      const { data: templates } = await getTemplatesUniversal();
+      this.setState({ templates });
+    } catch (err) {
+      // this.setState({ error: true });
+    }
+  };
+
   clearProjectInfo = () => {
     this.setState({
       name: "",
@@ -105,6 +124,16 @@ class Projects extends React.Component {
       id: "",
       type: "Private",
     });
+  };
+
+  updateDefaultTemplate = () => {
+    const { id, name, description, type, defaultTemplate } = this.state;
+    updateProject(id, name, description, type, defaultTemplate)
+      .then(res => {
+        this.getProjectData();
+        this.handleCancel();
+      })
+      .catch(err => console.log(err));
   };
 
   saveNewProject = async () => {
@@ -204,6 +233,9 @@ class Projects extends React.Component {
       hasEditClicked: false,
       hasUserRolesClicked: false,
       errorMessage: null,
+      showTemplate: false,
+      projectIndex: null,
+      defaultTemplate: "",
     });
   };
 
@@ -363,7 +395,7 @@ class Projects extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50,
+        minWidth: 20,
       },
       {
         Header: "Users",
@@ -371,15 +403,13 @@ class Projects extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
-        minWidth: 50,
+        minWidth: 30,
         Cell: original => {
           const { loginNames } = original.row;
           const className =
             loginNames.length > 0 ? "wrapped" : "wrapped click-to-add";
           const text =
-            loginNames.length > 0
-              ? loginNames.join(", ")
-              : "Add user to the project";
+            loginNames.length > 0 ? loginNames.join(", ") : "Add user";
           return (
             <p
               className={className}
@@ -392,6 +422,34 @@ class Projects extends React.Component {
             >
               {text}
             </p>
+          );
+        },
+      },
+      {
+        Header: "Template",
+        width: 80,
+        minResizeWidth: 20,
+        resizable: true,
+        Cell: original => {
+          const className = original.row.checkbox.defaultTemplate
+            ? "wrapped"
+            : "wrapped click-to-add";
+          return (
+            <div
+              onClick={e => {
+                this.setState({
+                  showTemplate: true,
+                  id: original.row.checkbox.id,
+                  projectIndex: original.row._index,
+                  name: original.row.checkbox.name,
+                  description: original.row.checkbox.description,
+                  type: original.row.checkbox.type,
+                });
+              }}
+              className={className}
+            >
+              {original.row.checkbox.defaultTemplate || "Add template"}
+            </div>
           );
         },
       },
@@ -434,6 +492,8 @@ class Projects extends React.Component {
 
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
+    const { templates, projectIndex, data, defaultTemplate } = this.state;
+
     return (
       <div className="projects menu-display" id="projects">
         <ToolBar
@@ -492,6 +552,18 @@ class Projects extends React.Component {
         )}
         {this.state.hasOpenClicked && (
           <ProtectedRoute from="/" exact to="/search" component={SearchView} />
+        )}
+        {this.state.showTemplate && (
+          <TemplateTable
+            templateList={templates}
+            onCancel={this.handleCancel}
+            defaultTemplate={
+              data[projectIndex] ? data[projectIndex].defaultTemplate : null
+            }
+            onSelect={this.getDefaultTemplate}
+            selectedTemp={defaultTemplate}
+            onSubmit={this.updateDefaultTemplate}
+          />
         )}
       </div>
     );

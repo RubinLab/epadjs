@@ -70,13 +70,15 @@ class Templates extends React.Component {
     };
   };
   getTemplatesData = async () => {
-    if (mode === "lite") {
-      const { data: templates } = await getTemplatesOfProjects();
-      this.setState({ templates });
-    } else {
-      const { data: templates } = await getTemplatesUniversal();
-      this.setState({ templates });
-    }
+    try {
+      if (mode === "lite") {
+        const { data: templates } = await getTemplatesOfProjects();
+        this.setState({ templates });
+      } else {
+        const { data: templates } = await getTemplatesUniversal();
+        this.setState({ templates });
+      }
+    } catch (err) {}
   };
 
   toggleRow = async (id, projectID) => {

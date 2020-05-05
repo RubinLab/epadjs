@@ -1043,3 +1043,12 @@
   width: fit-content;
   margin: auto;
 }
+
+/* #projects.projects.menu-display {
+  width: 900px
+} */
+
+.templateTable-modal .modal-content {
+  width: fit-content;
+  margin: auto;
+}
