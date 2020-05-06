@@ -691,7 +691,9 @@ class Plugins extends React.Component {
       </div>
     );
   };
-
+  handleEnablePluginClicked = (id) => {
+    alert(id);
+  };
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     const data = this.state.plugins;
@@ -724,6 +726,7 @@ class Plugins extends React.Component {
             handleParametersClicked={this.handleParametersClicked}
             selectAll={this.state.selectAll}
             selected={this.state.selected}
+            handleEnablePluginClicked={this.handleEnablePluginClicked}
           />
         )}
         {this.state.triggerTabActive && <TriggerTab />}

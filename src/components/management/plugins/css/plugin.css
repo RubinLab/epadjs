@@ -30,9 +30,6 @@
   width: 100%;
   height: 800px;
 }
-* {
-  box-sizing: border-box;
-}
 
 /* Create three equal columns that floats next to each other */
 .column {
@@ -47,4 +44,66 @@
   content: "";
   display: table;
   clear: both;
+}
+.triggerTable table,
+th,
+tr,
+td {
+  padding-left: 20px;
+  vertical-align: top;
+}
+.triggerTable table {
+  width: 800px;
+  height: 800px;
+  color: gray;
+}
+.pluginaddqueueselect option {
+  background-color: white;
+  color: black;
+}
+.pluginaddqueueselect {
+}
+.projectcolumn {
+  width: 100%;
+  min-height: 400px;
+  color: black;
+}
+.trseperator {
+  background-color: gray;
+  height: 1px;
+}
+.tdleft {
+  text-align: left;
+}
+.tdright {
+  text-align: right;
+}
+.setparamtable {
+  border: 1px solid gray;
+  width: 100%;
+}
+.paramsInput {
+  background-color: #c6c6c6;
+  color: black;
+}
+.trHeader {
+  padding-top: 20px;
+  color: #c6c6c6;
+  font-size: 12px;
+}
+.tableHeaderRunTimeParams {
+  padding-top: 20px;
+  color: #c6c6c6;
+  font-size: 12px;
+}
+.tableRunTimeParams {
+  color: #c6c6c6;
+  font-size: 12px;
+  padding: 20px;
+}
+.trRunTimeParams {
+  color: #c6c6c6;
+  font-size: 12px;
+  padding-top: 5;
+  padding-bottom: 5px;
 }

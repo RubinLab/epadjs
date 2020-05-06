@@ -1,6 +1,6 @@
 import React from "react";
 import ReactTable from "react-table";
-import { FaRegTrashAlt } from "react-icons/fa";
+import { FaRegTrashAlt, FaCogs, FaWindowClose, FaCheck } from "react-icons/fa";
 import PluginNavBar from "./../../main/pluginNavBar";
 class ManageTab extends React.Component {
   state = {};
@@ -21,13 +21,13 @@ class ManageTab extends React.Component {
             />
           );
         },
-        Header: x => {
+        Header: (x) => {
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
               checked={this.props.selectAll === 1}
-              ref={input => {
+              ref={(input) => {
                 if (input) {
                   input.indeterminate = this.props.selectAll === 2;
                 }
@@ -37,7 +37,7 @@ class ManageTab extends React.Component {
           );
         },
         // sortable: false,
-        resizable: false
+        resizable: false,
         // minResizeWidth: 20
         // maxWidth: 45
       },
@@ -48,7 +48,7 @@ class ManageTab extends React.Component {
         resizable: true,
         minResizeWidth: 100,
         width: 420,
-        Cell: data => {
+        Cell: (data) => {
           const pluginname = data.row.name;
           const pluginid = data.original.id;
           return (
@@ -56,7 +56,7 @@ class ManageTab extends React.Component {
               {pluginname}
             </div>
           );
-        }
+        },
       },
       {
         Header: "Image",
@@ -64,10 +64,12 @@ class ManageTab extends React.Component {
         resizable: true,
         minResizeWidth: 100,
         width: 200,
-        Cell: original => {
-          return "add,edit,see";
+        Cell: (data) => {
+          if (data.original.image_repo !== "")
+            return data.original.image_repo + ":" + data.original.image_tag;
+          else return "-";
         },
-        style: { whiteSpace: "unset" }
+        style: { whiteSpace: "unset" },
       },
       {
         Header: "Config",
@@ -75,10 +77,10 @@ class ManageTab extends React.Component {
         resizable: true,
         minResizeWidth: 100,
         width: 200,
-        Cell: original => {
+        Cell: (original) => {
           return "add,edit,see";
         },
-        style: { whiteSpace: "unset" }
+        style: { whiteSpace: "unset" },
       },
       {
         Header: "Parameters",
@@ -86,14 +88,14 @@ class ManageTab extends React.Component {
         resizable: true,
         minResizeWidth: 100,
         width: 200,
-        Cell: original => {
+        Cell: (original) => {
           return (
             <div onClick={() => this.props.handleParametersClicked(original)}>
-              edit
+              <FaCogs className="menu-clickable" />
             </div>
           );
         },
-        style: { whiteSpace: "unset" }
+        style: { whiteSpace: "unset" },
       },
       {
         Header: "Projects",
@@ -102,34 +104,62 @@ class ManageTab extends React.Component {
         resizable: true,
         minResizeWidth: 100,
         width: 200,
-        Cell: original => {
+        Cell: (original) => {
           return this.props.projectDataToCell(original);
         },
-        style: { whiteSpace: "unset" }
+        style: { whiteSpace: "unset" },
       },
       {
-        Header: "Templates",
-        accessor: "templates",
+        Header: "Description",
+        accessor: "description",
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
         width: 200,
-        Cell: original => {
-          return this.props.templateDataToCell(original);
+        style: { whiteSpace: "unset" },
+      },
+      {
+        Header: "Enabled",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 100,
+        width: 200,
+        Cell: (data) => {
+          if (data.original.enabled) {
+            return (
+              <div
+                onClick={() =>
+                  this.props.handleEnablePluginClicked(data.original.id)
+                }
+              >
+                <FaCheck className="menu-clickable" />
+              </div>
+            );
+          } else {
+            return (
+              <div
+                onClick={() =>
+                  this.props.handleEnablePluginClicked(data.original.id)
+                }
+              >
+                <FaWindowClose className="menu-clickable" />
+              </div>
+            );
+          }
         },
-        style: { whiteSpace: "unset" }
+        style: { whiteSpace: "unset" },
       },
       {
         Header: "",
-        Cell: original => {
+        Cell: (original) => {
           const rowdata = original.row.checkbox;
           return (
             <div onClick={() => this.props.handleDeleteOne(rowdata)}>
               <FaRegTrashAlt className="menu-clickable" />
             </div>
           );
-        }
-      }
+        },
+      },
     ];
   };
   render() {

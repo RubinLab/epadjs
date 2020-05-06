@@ -37,100 +37,6 @@ class TriggerTab extends React.Component {
   handleSelectRow = (id) => {};
   handleSelectAll = () => {};
   handleDeleteOne = (rowdata) => {};
-  //   defineTriggerTabColumns = () => {
-  //     return [
-  //       {
-  //         id: "checkbox",
-  //         accessor: "",
-  //         width: 50,
-  //         Cell: ({ original }) => {
-  //           const { id } = original;
-  //           return (
-  //             <input
-  //               type="checkbox"
-  //               className="checkbox-cell"
-  //               checked={this.state.selected[id]}
-  //               onChange={() => this.handleSelectRow(id)}
-  //             />
-  //           );
-  //         },
-  //         Header: x => {
-  //           return (
-  //             <input
-  //               type="checkbox"
-  //               className="checkbox-cell"
-  //               checked={this.state.selectAll === 1}
-  //               ref={input => {
-  //                 if (input) {
-  //                   input.indeterminate = this.state.selectAll === 2;
-  //                 }
-  //               }}
-  //               onChange={() => this.handleSelectAll()}
-  //             />
-  //           );
-  //         },
-  //         // sortable: false,
-  //         resizable: false
-  //         // minResizeWidth: 20
-  //         // maxWidth: 45
-  //       },
-  //       {
-  //         Header: "Name",
-  //         accessor: "name",
-  //         sortable: true,
-  //         resizable: true,
-  //         minResizeWidth: 100,
-  //         width: 420
-  //       },
-  //       /*{
-  //         Header: "container image",
-  //         accessor: "container_image",
-  //         sortable: true,
-  //         resizable: true,
-  //         minResizeWidth: 100,
-  //         width: 420
-  //       },*/
-  //       {
-  //         Header: "",
-  //         Cell: original => {
-  //           const rowdata = original.row.checkbox;
-  //           return (
-  //             <div onClick={() => this.handleDeleteOne(rowdata)}>
-  //               <FaRegTrashAlt className="menu-clickable" />
-  //             </div>
-  //           );
-  //         }
-  //       }
-  //     ];
-  //   };
-  defineTriggerTabColumns = () => {
-    return [
-      {
-        Header: "Name",
-
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 100,
-        width: 420,
-      },
-      {
-        Header: "Name",
-
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 100,
-        width: 420,
-      },
-      /*{
-        Header: "container image",
-        accessor: "container_image",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 100,
-        width: 420
-      },*/
-    ];
-  };
 
   handleProjectOnChange = (projectid) => {
     let tempSelProjects = this.state.selectedProjects;
@@ -180,20 +86,9 @@ class TriggerTab extends React.Component {
     console.log("responseAddPluginsToQueue : ", responseAddPluginsToQueue);
   };
   render() {
-    // const data = this.state.plImages;
-    // const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
-    // return (
-    //   <ReactTable
-    //     className="pro-table"
-    //     data={data}
-    //     columns={this.defineTriggerTabColumns()}
-    //     pageSizeOptions={[10, 20, 50]}
-    //     defaultPageSize={pageSize}
-    //   />
-    // );
     return (
       <div>
-        <div className="create-user__modal--buttons">
+        {/* <div className="create-user__modal--buttons">
           <button
             variant="primary"
             className="btn btn-sm btn-outline-light"
@@ -204,21 +99,21 @@ class TriggerTab extends React.Component {
           <button variant="secondary" className="btn btn-sm btn-outline-light">
             Clear
           </button>
-        </div>
+        </div> */}
 
         <div className="row">
           <ProjectColumn
             projects={this.state.projects}
             onChange={this.handleProjectOnChange}
           />
-          <TemplateColumn
+          {/* <TemplateColumn
             templates={this.state.templates}
             onChange={this.handleTemplateOnChange}
           />
           <AnnotationColumn
             templates={this.state.annotations}
             onChange={this.handleAnnotationsOnChange}
-          />
+          /> */}
         </div>
       </div>
     );

@@ -11,21 +11,12 @@ export function getPluginsWithProject() {
   return http.get(apiUrl + "/pluginswithproject");
 }
 
-export function addPluginsToQueue(projectids, templateids, annotationuids) {
-  return http.post(
-    apiUrl + "/plugins/queue/add",
-    projectids,
-    templateids,
-    annotationuids
-  );
+export function addPluginsToQueue(queueObj) {
+  return http.post(apiUrl + "/plugins/queue/add", queueObj);
 }
 
 export function getTools() {
   return http.get(apiUrl + "/plugins");
-}
-
-export function deleteTool() {
-  return http.delete(apiUrl + "/plugins");
 }
 
 export function updateProjectsForPlugin(pluginid, projectids) {
@@ -67,6 +58,10 @@ export function saveTemplateParameter(parametersform) {
     parametersform
   );
 }
+// delete section
+export function deleteTool() {
+  return http.delete(apiUrl + "/plugins");
+}
 export function deleteOneDefaultParameter(parameterdbid) {
   return http.delete(apiUrl + "/plugins/parameters/default/" + parameterdbid);
 }
@@ -76,6 +71,10 @@ export function deleteOneProjectParameter(parameterdbid) {
 export function deleteOneTemplateParameter(parameterdbid) {
   return http.delete(apiUrl + "/plugins/parameters/template/" + parameterdbid);
 }
+export function deleteFromPluginQueue(queuedbids) {
+  return http.post(apiUrl + "/plugins/queue/delete", queuedbids);
+}
+// delete section
 export function editDefaultparameter(parametersform) {
   return http.post(
     apiUrl + "/plugins/parameters/default/edit/",
@@ -95,6 +94,9 @@ export function editTemplateParameter(parametersform) {
   );
 }
 
+export function getPluginsForProject(projectid) {
+  return http.get(apiUrl + "/plugins/project/" + projectid);
+}
 export function getPluginsQueue() {
   return http.get(apiUrl + "/plugins/queue/");
 }
