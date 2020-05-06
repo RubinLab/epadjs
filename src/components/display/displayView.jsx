@@ -788,6 +788,7 @@ class DisplayView extends Component {
 
   renderCircle = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(circle));
+    data.invalidated = true; //so it calculates the stats
     data.color = color;
     data.aimId = markup.aimUid;
     data.handles.start.x = markup.coordinates[0].x.value;
