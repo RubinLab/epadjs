@@ -116,7 +116,12 @@ class AimEditor extends Component {
   save = () => {
     if (!this.checkAimTemplate()) return;
     const answers = this.semanticAnswers.saveAim();
-    this.createAim(answers);
+    try {
+      this.createAim(answers);
+    } catch (error) {
+      console.warn("Error:", error);
+      window.alert("Error saving Aim: ", error);
+    }
   };
 
   checkAimTemplate = () => {
