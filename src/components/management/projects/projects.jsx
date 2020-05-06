@@ -1,9 +1,9 @@
-import React from "react";
-import PropTypes from "prop-types";
-import Table from "react-table";
-import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
-import { Link } from "react-router-dom";
-import "../menuStyle.css";
+import React from 'react';
+import PropTypes from 'prop-types';
+import Table from 'react-table';
+import { FaRegTrashAlt, FaEdit, FaRegEye } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import '../menuStyle.css';
 import {
   getProjects,
   deleteProject,
@@ -11,20 +11,20 @@ import {
   updateProject,
   getProjectUsers,
   editUserRole,
-} from "../../../services/projectServices";
-import { getTemplatesUniversal } from "../../../services/templateServices";
-import { getUsers } from "../../../services/userServices";
-import ToolBar from "../common/basicToolBar";
-import DeleteAlert from "../common/alertDeletionModal";
-import ProjectCreationForm from "./projectCreationForm";
-import ProjectEditingForm from "./projectEditingForm";
-import UserRoleEditingForm from "./userRoleEditingForm";
-import ProtectedRoute from "../../common/protectedRoute";
-import SearchView from "../../searchView/searchView";
-import TemplateTable from "./templateTable";
+} from '../../../services/projectServices';
+import { getTemplatesUniversal } from '../../../services/templateServices';
+import { getUsers } from '../../../services/userServices';
+import ToolBar from '../common/basicToolBar';
+import DeleteAlert from '../common/alertDeletionModal';
+import ProjectCreationForm from './projectCreationForm';
+import ProjectEditingForm from './projectEditingForm';
+import UserRoleEditingForm from './userRoleEditingForm';
+import ProtectedRoute from '../../common/protectedRoute';
+import SearchView from '../../searchView/searchView';
+import TemplateTable from './templateTable';
 const messages = {
-  deleteSingle: "Delete the project? This cannot be undone.",
-  deleteSelected: "Delete selected projects? This cannot be undone.",
+  deleteSingle: 'Delete the project? This cannot be undone.',
+  deleteSelected: 'Delete selected projects? This cannot be undone.',
 };
 
 //NICE TO HAVES
@@ -40,23 +40,23 @@ const messages = {
 
 class Projects extends React.Component {
   state = {
-    user: "",
+    user: '',
     data: [],
     selected: {},
     selectAll: 0,
     errorMessage: null,
-    singleDeleteId: "",
+    singleDeleteId: '',
     hasDeleteSingleClicked: false,
     hasDeleteAllClicked: false,
     noSelection: false,
     hasAddClicked: false,
     hasEditClicked: false,
     hasUserRolesClicked: false,
-    id: "",
-    name: "",
-    description: "",
-    type: "Private",
-    defaultTemplate: "",
+    id: '',
+    name: '',
+    description: '',
+    type: 'Private',
+    defaulttemplate: '',
     userRoles: [],
     newRoles: {},
     templates: [],
@@ -67,12 +67,12 @@ class Projects extends React.Component {
   componentDidMount = () => {
     this.getProjectData();
     this.getTemplateData();
-    this.setState({ user: sessionStorage.getItem("username") });
+    this.setState({ user: sessionStorage.getItem('username') });
   };
 
   getDefaultTemplate = template => {
     this.setState({
-      defaultTemplate: template,
+      defaulttemplate: template,
     });
   };
 
@@ -89,7 +89,7 @@ class Projects extends React.Component {
           }
         }
         if (userRoles.length < i + 1 && i < users.length) {
-          userRoles.push({ name: users[i].username, role: "None" });
+          userRoles.push({ name: users[i].username, role: 'None' });
         }
       }
       await this.setState({ userRoles });
@@ -117,18 +117,18 @@ class Projects extends React.Component {
     }
   };
 
-  clearProjectInfo = () => {
-    this.setState({
-      name: "",
-      description: "",
-      id: "",
-      type: "Private",
-    });
-  };
+  // clearProjectInfo = () => {
+  //   this.setState({
+  //     name: '',
+  //     description: '',
+  //     id: '',
+  //     type: 'Private',
+  //   });
+  // };
 
   updateDefaultTemplate = () => {
-    const { id, name, description, type, defaultTemplate } = this.state;
-    updateProject(id, name, description, type, defaultTemplate)
+    const { id, name, description, type, defaulttemplate } = this.state;
+    updateProject(id, name, description, type, defaulttemplate)
       .then(res => {
         this.getProjectData();
         this.handleCancel();
@@ -137,14 +137,14 @@ class Projects extends React.Component {
   };
 
   saveNewProject = async () => {
-    const { name, description, defaultTemplate, id, user, type } = this.state;
+    const { name, description, defaulttemplate, id, user, type } = this.state;
     if (!name || !id) {
-      this.setState({ errorMessage: "Please fill the required fields" });
+      this.setState({ errorMessage: 'Please fill the required fields' });
     } else {
       const postData = saveProject(
         name,
         description,
-        defaultTemplate,
+        defaulttemplate,
         id,
         user,
         type
@@ -156,7 +156,7 @@ class Projects extends React.Component {
               hasAddClicked: false,
               errorMessage: null,
             });
-            this.clearProjectInfo();
+            this.handleCancel();
             this.getProjectData();
             this.props.getProjectAdded();
           }
@@ -168,8 +168,14 @@ class Projects extends React.Component {
   };
 
   editProject = async () => {
-    const { name, description, defaultTemplate, id, type } = this.state;
-    const editData = updateProject(id, name, description, type);
+    const { name, description, defaulttemplate, id, type } = this.state;
+    const editData = updateProject(
+      id,
+      name,
+      description,
+      type,
+      defaulttemplate
+    );
     editData
       .then(res => {
         if (res.status === 200) {
@@ -177,7 +183,7 @@ class Projects extends React.Component {
             hasEditClicked: false,
             errorMessage: null,
           });
-          this.clearProjectInfo();
+          this.handleCancel();
           this.getProjectData();
         }
       })
@@ -185,7 +191,7 @@ class Projects extends React.Component {
         this.setState({
           errorMessage: error.response.data.message,
         });
-        this.clearProjectInfo();
+        this.handleCancel();
       });
   };
 
@@ -225,9 +231,12 @@ class Projects extends React.Component {
   handleCancel = () => {
     this.setState({
       hasDeleteSingleClicked: false,
-      id: "",
+      id: '',
+      name: '',
+      description: '',
+      type: 'Private',
       hasDeleteAllClicked: false,
-      singleDeleteId: "",
+      singleDeleteId: '',
       noSelection: false,
       hasAddClicked: false,
       hasEditClicked: false,
@@ -235,7 +244,7 @@ class Projects extends React.Component {
       errorMessage: null,
       showTemplate: false,
       projectIndex: null,
-      defaultTemplate: "",
+      defaulttemplate: '',
     });
   };
 
@@ -268,7 +277,7 @@ class Projects extends React.Component {
   deleteSingleProject = async () => {
     deleteProject(this.state.singleDeleteId)
       .then(() => {
-        this.setState({ singleDeleteId: "", hasDeleteSingleClicked: false });
+        this.setState({ singleDeleteId: '', hasDeleteSingleClicked: false });
         this.getProjectData();
         this.props.getProjectAdded();
       })
@@ -324,8 +333,8 @@ class Projects extends React.Component {
   defineColumns = () => {
     return [
       {
-        id: "checkbox",
-        accessor: "",
+        id: 'checkbox',
+        accessor: '',
         width: 30,
         Cell: ({ original }) => {
           return (
@@ -357,15 +366,15 @@ class Projects extends React.Component {
         width: 45,
       },
       {
-        Header: "Name",
-        accessor: "name",
+        Header: 'Name',
+        accessor: 'name',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
       },
       {
-        Header: "Open",
+        Header: 'Open',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
@@ -373,7 +382,7 @@ class Projects extends React.Component {
         Cell: original => (
           <Link
             className="open-link"
-            to={"/search/" + original.row.checkbox.id}
+            to={'/search/' + original.row.checkbox.id}
           >
             <div onClick={this.props.onClose}>
               <FaRegEye className="menu-clickable" />
@@ -382,24 +391,24 @@ class Projects extends React.Component {
         ),
       },
       {
-        Header: "Description",
-        accessor: "description",
+        Header: 'Description',
+        accessor: 'description',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
       },
       {
-        Header: "Type",
-        accessor: "type",
+        Header: 'Type',
+        accessor: 'type',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 20,
       },
       {
-        Header: "Users",
-        accessor: "loginNames",
+        Header: 'Users',
+        accessor: 'loginNames',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
@@ -407,9 +416,9 @@ class Projects extends React.Component {
         Cell: original => {
           const { loginNames } = original.row;
           const className =
-            loginNames.length > 0 ? "wrapped" : "wrapped click-to-add";
+            loginNames.length > 0 ? 'wrapped' : 'wrapped click-to-add';
           const text =
-            loginNames.length > 0 ? loginNames.join(", ") : "Add user";
+            loginNames.length > 0 ? loginNames.join(', ') : 'Add user';
           return (
             <p
               className={className}
@@ -426,14 +435,14 @@ class Projects extends React.Component {
         },
       },
       {
-        Header: "Template",
+        Header: 'Template',
         width: 80,
         minResizeWidth: 20,
         resizable: true,
         Cell: original => {
           const className = original.row.checkbox.defaultTemplate
-            ? "wrapped"
-            : "wrapped click-to-add";
+            ? 'wrapped'
+            : 'wrapped click-to-add';
           return (
             <div
               onClick={e => {
@@ -448,13 +457,13 @@ class Projects extends React.Component {
               }}
               className={className}
             >
-              {original.row.checkbox.defaultTemplate || "Add template"}
+              {original.row.checkbox.defaultTemplate || 'Add template'}
             </div>
           );
         },
       },
       {
-        Header: "",
+        Header: '',
         width: 45,
         minResizeWidth: 20,
         resizable: true,
@@ -475,7 +484,7 @@ class Projects extends React.Component {
         ),
       },
       {
-        Header: "",
+        Header: '',
         width: 45,
         minResizeWidth: 20,
         resizable: true,
@@ -492,7 +501,7 @@ class Projects extends React.Component {
 
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
-    const { templates, projectIndex, data, defaultTemplate } = this.state;
+    const { templates, projectIndex, data, defaulttemplate } = this.state;
 
     return (
       <div className="projects menu-display" id="projects">
@@ -529,6 +538,7 @@ class Projects extends React.Component {
             onSubmit={this.saveNewProject}
             error={this.state.errorMessage}
             onCancel={this.handleCancel}
+            templates={templates}
           />
         )}
         {this.state.hasEditClicked && (
@@ -561,7 +571,7 @@ class Projects extends React.Component {
               data[projectIndex] ? data[projectIndex].defaultTemplate : null
             }
             onSelect={this.getDefaultTemplate}
-            selectedTemp={defaultTemplate}
+            selectedTemp={defaulttemplate}
             onSubmit={this.updateDefaultTemplate}
           />
         )}

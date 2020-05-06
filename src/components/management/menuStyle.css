@@ -209,6 +209,11 @@
   width: 100%;
 }
 
+.add-project__modal .modal-header,
+.add-project__modal .modal-footer {
+  padding: 0.5rem
+}
+
 .add-connection__modal--input {
   color: black;
 }
@@ -233,6 +238,9 @@
   text-align: left;
 }
 
+.add-project__modal--label {
+  margin-top: 0.5rem;
+}
 .edit-connection__modal--input,
 .edit-user__modal--input {
   color: black;
