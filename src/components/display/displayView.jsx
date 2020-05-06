@@ -151,14 +151,17 @@ class DisplayView extends Component {
   }
 
   async componentDidUpdate(prevProps) {
+    console.log("In update", prevProps, this.props);
     if (this.props.series.length < 1) return;
     if (
       (prevProps.series !== this.props.series &&
         prevProps.loading === true &&
         this.props.loading === false) ||
       (prevProps.series.length !== this.props.series.length &&
-        this.props.loading === false)
+        this.props.loading === false) ||
+      prevProps.series.aimID !== this.props.series.aimID
     ) {
+      console.log("I ve been updated");
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
@@ -235,6 +238,7 @@ class DisplayView extends Component {
   }
 
   getImageStack = async (serie, index) => {
+    console.log("Serie", JSON.stringify(serie));
     let stack = {};
     let imageIds = {};
     let cornerstoneImageIds = [];
@@ -269,6 +273,7 @@ class DisplayView extends Component {
 
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (serie.aimID) {
+      console.log("I am in");
       imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
     }
 
@@ -339,7 +344,7 @@ class DisplayView extends Component {
             );
             const ret = this.getImageIndexFromImageId(
               cornerstoneImageIds,
-              cornerstoneImageId
+              cornerstoneImageId.split("&frame=")[0]
             );
             return ret;
           }
