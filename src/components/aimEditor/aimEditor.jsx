@@ -116,7 +116,12 @@ class AimEditor extends Component {
   save = () => {
     if (!this.checkAimTemplate()) return;
     const answers = this.semanticAnswers.saveAim();
-    this.createAim(answers);
+    try {
+      this.createAim(answers);
+    } catch (error) {
+      console.warn("Error:", error);
+      window.alert("Error saving Aim: ", error);
+    }
   };
 
   checkAimTemplate = () => {
@@ -150,39 +155,44 @@ class AimEditor extends Component {
   createAim = async (answers) => {
     const { hasSegmentation } = this.props;
     const markupsToSave = this.getNewMarkups();
+    try {
+      if (hasSegmentation) {
+        // if (!this.checkSegmentationFrames()) return;
+        // segmentation and markups
+        this.createAimSegmentation(answers).then(
+          ({ aim, segmentationBlob }) => {
+            // also add the markups to aim if there is any
+            if (Object.entries(markupsToSave).length !== 0)
+              this.createAimMarkups(aim, markupsToSave);
+            this.saveAim(aim, segmentationBlob);
+          }
+        );
+      } else if (Object.entries(markupsToSave).length !== 0) {
+        // markups without segmentation
+        const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
+        const aim = new Aim(
+          seedData,
+          enumAimType.imageAnnotation,
+          this.updatedAimId
+        );
+        this.createAimMarkups(aim, markupsToSave);
+        this.saveAim(aim);
+      } else {
+        //Non markup image annotation
+        const { activePort } = this.props;
+        const { element } = cornerstone.getEnabledElements()[activePort];
+        const image = cornerstone.getImage(element);
+        const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
 
-    if (hasSegmentation) {
-      // if (!this.checkSegmentationFrames()) return;
-      // segmentation and markups
-      this.createAimSegmentation(answers).then(({ aim, segmentationBlob }) => {
-        // also add the markups to aim if there is any
-        if (Object.entries(markupsToSave).length !== 0)
-          this.createAimMarkups(aim, markupsToSave);
-        this.saveAim(aim, segmentationBlob);
-      });
-    } else if (Object.entries(markupsToSave).length !== 0) {
-      // markups without segmentation
-      const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
-      const aim = new Aim(
-        seedData,
-        enumAimType.imageAnnotation,
-        this.updatedAimId
-      );
-      this.createAimMarkups(aim, markupsToSave);
-      this.saveAim(aim);
-    } else {
-      //Non markup image annotation
-      const { activePort } = this.props;
-      const { element } = cornerstone.getEnabledElements()[activePort];
-      const image = cornerstone.getImage(element);
-      const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
-
-      const aim = new Aim(
-        seedData,
-        enumAimType.imageAnnotation,
-        this.updatedAimId
-      );
-      this.saveAim(aim);
+        const aim = new Aim(
+          seedData,
+          enumAimType.imageAnnotation,
+          this.updatedAimId
+        );
+        this.saveAim(aim);
+      }
+    } catch (error) {
+      throw new Error("Error creating aim", error);
     }
   };
 
@@ -201,39 +211,43 @@ class AimEditor extends Component {
   };
 
   createAimSegmentation = async (answers) => {
-    const activeLabelMapIndex = this.getActiveLabelMapIndex();
-    // const { imageAnnotations } = openSeries[activePort];
-    // const labelMapIndex = getNumOfSegs(openSeries);
-    // console.log("Seg count is", labelMapIndex);
-    const { segBlob, imageIdx, segStats } = this.createSegmentation3D(
-      activeLabelMapIndex
-    );
+    try {
+      const activeLabelMapIndex = this.getActiveLabelMapIndex();
+      // const { imageAnnotations } = openSeries[activePort];
+      // const labelMapIndex = getNumOfSegs(openSeries);
+      // console.log("Seg count is", labelMapIndex);
+      const { segBlob, imageIdx, segStats } = this.createSegmentation3D(
+        activeLabelMapIndex
+      );
 
-    // praper the seed data and create aim
-    const image = this.getCornerstoneImagebyIdx(imageIdx);
-    const seedData = getAimImageData(image);
-    this.addSemanticAnswersToSeedData(seedData, answers);
-    this.addUserToSeedData(seedData);
-    const aim = new Aim(
-      seedData,
-      enumAimType.imageAnnotation,
-      this.updatedAimId
-    );
+      // praper the seed data and create aim
+      const image = this.getCornerstoneImagebyIdx(imageIdx);
+      const seedData = getAimImageData(image);
+      this.addSemanticAnswersToSeedData(seedData, answers);
+      this.addUserToSeedData(seedData);
+      const aim = new Aim(
+        seedData,
+        enumAimType.imageAnnotation,
+        this.updatedAimId
+      );
 
-    let dataset = await this.getDatasetFromBlob(segBlob, imageIdx);
-    // set segmentation series description with the aim name
-    dataset.SeriesDescription = answers.name.value;
+      let dataset = await this.getDatasetFromBlob(segBlob, imageIdx);
+      // set segmentation series description with the aim name
+      dataset.SeriesDescription = answers.name.value;
 
-    // if update segmentation Uid should be same as the previous one
+      // if update segmentation Uid should be same as the previous one
 
-    // fill the segmentation related aim parts
-    const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
-    this.addSegmentationToAim(aim, segEntityData, segStats);
+      // fill the segmentation related aim parts
+      const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
+      this.addSegmentationToAim(aim, segEntityData, segStats);
 
-    // create the modified blob
-    const segmentationBlob = dcmjs.data.datasetToBlob(dataset);
+      // create the modified blob
+      const segmentationBlob = dcmjs.data.datasetToBlob(dataset);
 
-    return { aim, segmentationBlob };
+      return { aim, segmentationBlob };
+    } catch (error) {
+      throw new Error("Error creating segmentation", error);
+    }
   };
 
   createAimMarkups = (aim, markupsToSave) => {
@@ -803,11 +817,16 @@ class AimEditor extends Component {
       images.push(cachedImages[key].image);
     });
 
-    const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
-      images,
-      labelmap3D,
-      { rleEncode: false }
-    );
+    let segBlob = {};
+    try {
+      segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
+        images,
+        labelmap3D,
+        { rleEncode: false }
+      );
+    } catch (error) {
+      throw new Error("Error creating segmentation blob:", error);
+    }
 
     return {
       segBlob,

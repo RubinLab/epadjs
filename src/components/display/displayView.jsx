@@ -527,26 +527,54 @@ class DisplayView extends Component {
     const lines = values.filter(this.checkIfLine);
 
     const groupedLines = Object.values(this.groupBy(lines, "aimUid"));
+    console.log("Grouped lines", groupedLines);
     groupedLines.forEach((lines) => {
-      if (lines.length > 1)
-        lines.pairs().forEach((pair) => {
-          if (this.checkIfPerpendicular(pair)) {
-            // there are multiple lines on the same image that belongs to same aim, a potential perpendicular
-            // they are perpendicular, remove them from the values list and render them as perpendicular
-            pair[0].markupType = "Bidirectional";
-            pair[0].calculations = pair[0].calculations.concat(
-              pair[1].calculations
-            );
-            pair[0].coordinates = pair[0].coordinates.concat(
-              pair[1].coordinates
-            );
+      if (lines.length > 1) {
+        // lines.pairs().forEach((pair) => {
+        //   console.log("Pair", pair);
+        //   if (this.checkIfPerpendicular(pair)) {
+        //     // there are multiple lines on the same image that belongs to same aim, a potential perpendicular
+        //     // they are perpendicular, remove them from the values list and render them as perpendicular
+        //     pair[0].markupType = "Bidirectional";
+        //     pair[0].calculations = pair[0].calculations.concat(
+        //       pair[1].calculations
+        //     );
+        //     pair[0].coordinates = pair[0].coordinates.concat(
+        //       pair[1].coordinates
+        //     );
 
-            const index = values.indexOf(pair[1]);
-            if (index > -1) {
-              values.splice(index, 1);
+        //     const index = values.indexOf(pair[1]);
+        //     if (index > -1) {
+        //       values.splice(index, 1);
+        //     }
+        //   }
+        // });
+        console.log("Lines", lines);
+        for (let i = 0; i < lines.length; i++) {
+          for (let j = i + 1; j < lines.length; j++) {
+            // console.log("Line pairs", lines[i], lines[j]);
+            let pair = [lines[i], lines[j]];
+            console.log("Pair", pair);
+            if (this.checkIfPerpendicular(pair)) {
+              console.log("Pair is perpendicular", pair);
+              // there are multiple lines on the same image that belongs to same aim, a potential perpendicular
+              // they are perpendicular, remove them from the values list and render them as perpendicular
+              pair[0].markupType = "Bidirectional";
+              pair[0].calculations = pair[0].calculations.concat(
+                pair[1].calculations
+              );
+              pair[0].coordinates = pair[0].coordinates.concat(
+                pair[1].coordinates
+              );
+
+              const index = values.indexOf(pair[1]);
+              if (index > -1) {
+                values.splice(index, 1);
+              }
             }
           }
-        });
+        }
+      }
     });
   };
 
@@ -788,6 +816,7 @@ class DisplayView extends Component {
 
   renderCircle = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(circle));
+    data.invalidated = true; //so it calculates the stats
     data.color = color;
     data.aimId = markup.aimUid;
     data.handles.start.x = markup.coordinates[0].x.value;
