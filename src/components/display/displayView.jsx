@@ -28,10 +28,6 @@ import { circle } from "./Circle";
 import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
-import {
-  getNumOfSegs,
-  getSegIndexOfAim,
-} from "../../Utils/Segmentation/helpers";
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
@@ -126,6 +122,7 @@ class DisplayView extends Component {
       showAnnDetails: true,
       hasSegmentation: false,
       activeLabelMapIndex: 0,
+      aimLabelMaps: {},
       redirect: this.props.series.length < 1 ? true : false,
     };
   }
@@ -284,15 +281,15 @@ class DisplayView extends Component {
     }
   };
 
-  setActiveLabelMapOfAim = (aimJson) => {
+  setActiveLabelMapOfAim = (aimJson, element) => {
     // Means aim has segmentation alreay, find its segment index and set to edit it
-    const { series } = this.props;
-    const labelMapOfAim = getSegIndexOfAim(series, aimJson);
-    this.setActiveLabelMapIndex(labelMapOfAim);
+    const { aimID } = aimJson;
+    const labelMapOfAim = this.state.aimLabelMaps[aimID];
+    this.setActiveLabelMapIndex(labelMapOfAim, element);
   };
 
   setActiveLabelMapIndex = (index, element) => {
-    const { setters, getters } = cornerstoneTools.getModule("segmentation");
+    const { setters } = cornerstoneTools.getModule("segmentation");
     // const element = this.getActiveElement();
     setters.activeLabelmapIndex(element, index);
   };
@@ -588,7 +585,7 @@ class DisplayView extends Component {
     const pathVariables = { studyUID, seriesUID: seriesInstanceUid.root };
 
     getSegmentation(pathVariables, sopInstanceUid.root).then(({ data }) => {
-      this.renderSegmentation(data, aimIndex, serieIndex);
+      this.renderSegmentation(data, aimId, serieIndex);
     });
   };
 
@@ -596,7 +593,7 @@ class DisplayView extends Component {
     return new Promise((resolve) => setTimeout(resolve, ms));
   };
 
-  renderSegmentation = (arrayBuffer, aimIndex, serieIndex) => {
+  renderSegmentation = (arrayBuffer, aimId, serieIndex) => {
     try {
       const { imageIds } = this.state.data[serieIndex].stack;
 
@@ -619,8 +616,11 @@ class DisplayView extends Component {
         );
 
         const { setters } = cornerstoneTools.getModule("segmentation");
-        const { activeLabelMapIndex } = this.state;
-        this.setState({ activeLabelMapIndex: activeLabelMapIndex + 1 }); //set the index state for next render
+        const { activeLabelMapIndex, aimLabelMaps } = this.state;
+        this.setState({
+          activeLabelMapIndex: activeLabelMapIndex + 1,
+          aimLabelMaps: { ...aimLabelMaps, [aimId]: activeLabelMapIndex },
+        }); //set the index state for next render
 
         setters.labelmap3DByFirstImageId(
           imageIds[0],
@@ -631,12 +631,12 @@ class DisplayView extends Component {
           segmentsOnFrame
         );
 
+        const { element } = cornerstone.getEnabledElements()[serieIndex];
         if (this.state.selectedAim) {
           //if an aim is selected find its label map index, 0 if no segmentation in aim
           //an aim is being edited don't set the label map index because aim's segs should be brushed
-          this.setActiveLabelMapOfAim(this.state.selectedAim);
+          this.setActiveLabelMapOfAim(this.state.selectedAim, element);
         } else {
-          const { element } = cornerstone.getEnabledElements()[serieIndex];
           this.setActiveLabelMapIndex(this.state.activeLabelMapIndex, element);
         }
 
@@ -839,7 +839,12 @@ class DisplayView extends Component {
 
   closeViewport = () => {
     // closes the active viewport
-    if (this.state.showAimEditor && !this.closeAimEditor(true)) return;
+    if (this.state.showAimEditor) {
+      window.alert(
+        "Before closing the viewport you should first close the aim editor!"
+      );
+      return;
+    }
     this.props.dispatch(closeSerie());
   };
 
