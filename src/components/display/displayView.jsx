@@ -103,17 +103,6 @@ const tools = [
   { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
 ];
 
-Array.prototype.pairs = function (func) {
-  const ret = [];
-  for (var i = 0; i < this.length - 1; i++) {
-    for (var j = i; j < this.length - 1; j++) {
-      ret.push([this[i], this[j + 1]]);
-      // func([this[i], this[j + 1]]);
-    }
-  }
-  return ret;
-};
-
 const mapStateToProps = (state) => {
   return {
     series: state.annotationsListReducer.openSeries,
@@ -526,36 +515,12 @@ class DisplayView extends Component {
     const lines = values.filter(this.checkIfLine);
 
     const groupedLines = Object.values(this.groupBy(lines, "aimUid"));
-    console.log("Grouped lines", groupedLines);
     groupedLines.forEach((lines) => {
       if (lines.length > 1) {
-        // lines.pairs().forEach((pair) => {
-        //   console.log("Pair", pair);
-        //   if (this.checkIfPerpendicular(pair)) {
-        //     // there are multiple lines on the same image that belongs to same aim, a potential perpendicular
-        //     // they are perpendicular, remove them from the values list and render them as perpendicular
-        //     pair[0].markupType = "Bidirectional";
-        //     pair[0].calculations = pair[0].calculations.concat(
-        //       pair[1].calculations
-        //     );
-        //     pair[0].coordinates = pair[0].coordinates.concat(
-        //       pair[1].coordinates
-        //     );
-
-        //     const index = values.indexOf(pair[1]);
-        //     if (index > -1) {
-        //       values.splice(index, 1);
-        //     }
-        //   }
-        // });
-        console.log("Lines", lines);
         for (let i = 0; i < lines.length; i++) {
           for (let j = i + 1; j < lines.length; j++) {
-            // console.log("Line pairs", lines[i], lines[j]);
             let pair = [lines[i], lines[j]];
-            console.log("Pair", pair);
             if (this.checkIfPerpendicular(pair)) {
-              console.log("Pair is perpendicular", pair);
               // there are multiple lines on the same image that belongs to same aim, a potential perpendicular
               // they are perpendicular, remove them from the values list and render them as perpendicular
               pair[0].markupType = "Bidirectional";
