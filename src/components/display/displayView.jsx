@@ -224,9 +224,10 @@ class DisplayView extends Component {
 
   getImageStack = async (serie, index) => {
     let stack = {};
-    let imageIds = {};
+    let newImageIds = {};
     let cornerstoneImageIds = [];
     const imageUrls = await this.getImages(serie);
+    console.log("Image urls of serie", imageUrls, serie);
     imageUrls.map((url) => {
       const baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {
@@ -234,17 +235,20 @@ class DisplayView extends Component {
           let multiFrameUrl = baseUrl + "&frame=" + i;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           cornerstoneImageIds.push(multiFrameUrl);
-          imageIds[multiFrameUrl] = true;
+          cornerstone.loadAndCacheImage(multiFrameUrl);
+          newImageIds[multiFrameUrl] = true;
         }
       } else {
         let singleFrameUrl = baseUrl;
         cornerstoneImageIds.push(singleFrameUrl);
         cornerstone.loadAndCacheImage(singleFrameUrl);
-        imageIds[singleFrameUrl] = false;
+        newImageIds[singleFrameUrl] = false;
       }
     });
-
-    this.setState({ imageIds: { ...imageIds } });
+    console.log("Image ids", imageIds);
+    const { imageIds } = this.state;
+    this.setState({ imageIds: { ...imageIds, ...newImageIds } });
+    console.log("This state", this.state);
 
     //to jump to the same image after aim save
     let imageIndex;
@@ -726,7 +730,9 @@ class DisplayView extends Component {
     this.createLinePoints(data, markup.coordinates);
     const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
     this.checkNCreateToolForImage(currentState, imageId, "Length");
+    console.log("Cur state before save", currentState);
     currentState[imageId]["Length"].data.push(data);
+    console.log("Cur state after save", currentState);
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
       currentState
     );
