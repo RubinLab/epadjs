@@ -658,7 +658,11 @@ class DisplayView extends Component {
   };
 
   getColorOfMarkup = (aimUid, seriesUid) => {
-    return this.props.aimList[seriesUid][aimUid].color.button.background;
+    try {
+      return this.props.aimList[seriesUid][aimUid].color.button.background;
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   renderMarkup = (imageId, markup, color, seriesUid, studyUid) => {
