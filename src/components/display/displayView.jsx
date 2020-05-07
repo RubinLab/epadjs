@@ -142,7 +142,6 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
-    console.log("Session storage", sessionStorage);
     if (this.props.series.length < 1) return;
     this.getViewports();
     this.getData();
@@ -302,9 +301,9 @@ class DisplayView extends Component {
     this.setActiveLabelMapIndex(labelMapOfAim);
   };
 
-  setActiveLabelMapIndex = (index) => {
+  setActiveLabelMapIndex = (index, element) => {
     const { setters, getters } = cornerstoneTools.getModule("segmentation");
-    const element = this.getActiveElement();
+    // const element = this.getActiveElement();
     setters.activeLabelmapIndex(element, index);
   };
 
@@ -666,7 +665,10 @@ class DisplayView extends Component {
         //if an aim is selected find its label map index, 0 if no segmentation in aim
         //an aim is being edited don't set the label map index because aim's segs should be brushed
         this.setActiveLabelMapOfAim(this.state.selectedAim);
-      } else this.setActiveLabelMapIndex(this.state.activeLabelMapIndex);
+      } else {
+        const { element } = cornerstone.getEnabledElements()[serieIndex];
+        this.setActiveLabelMapIndex(this.state.activeLabelMapIndex, element);
+      }
 
       this.refreshAllViewports();
     });
@@ -850,6 +852,7 @@ class DisplayView extends Component {
       showAimEditor: false,
       selectedAim: undefined,
       hasSegmentation: false,
+      activeLabelMapIndex: 0,
     });
     // clear all unsaved markups by calling getData
     this.getData();

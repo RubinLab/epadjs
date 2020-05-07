@@ -206,22 +206,20 @@ class AimEditor extends Component {
     const { getters } = cornerstoneTools.getModule("segmentation");
     const element = this.getActiveElement();
     return getters.activeLabelmapIndex(element);
-    // console.log("active lbel map index", getters.activeLabelmapIndex(element));
-    // this.setState({ activeLabelMapIndex: index });
   };
 
   createAimSegmentation = async (answers) => {
     try {
       const activeLabelMapIndex = this.getActiveLabelMapIndex();
-      // const { imageAnnotations } = openSeries[activePort];
-      // const labelMapIndex = getNumOfSegs(openSeries);
-      // console.log("Seg count is", labelMapIndex);
-      const { segBlob, imageIdx, segStats } = this.createSegmentation3D(
-        activeLabelMapIndex
-      );
+
+      const {
+        segBlob,
+        segStats,
+        imageIdx,
+        image,
+      } = await this.createSegmentation3D(activeLabelMapIndex);
 
       // praper the seed data and create aim
-      const image = this.getCornerstoneImagebyIdx(imageIdx);
       const seedData = getAimImageData(image);
       this.addSemanticAnswersToSeedData(seedData, answers);
       this.addUserToSeedData(seedData);
@@ -231,7 +229,7 @@ class AimEditor extends Component {
         this.updatedAimId
       );
 
-      let dataset = await this.getDatasetFromBlob(segBlob, imageIdx);
+      let dataset = await this.getDatasetFromBlob(segBlob);
       // set segmentation series description with the aim name
       dataset.SeriesDescription = answers.name.value;
 
@@ -253,7 +251,6 @@ class AimEditor extends Component {
   createAimMarkups = (aim, markupsToSave) => {
     Object.entries(markupsToSave).forEach(([key, values]) => {
       values.map((value) => {
-        console.log("Value", value);
         const { type, markup, shapeIndex, imageReferenceUid } = value;
         switch (type) {
           case "point":
@@ -285,7 +282,6 @@ class AimEditor extends Component {
     const { activePort } = this.props;
 
     const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    console.log("Toolstate", toolState);
 
     // get the imagesIds for active viewport
     const { element } = cornerstone.getEnabledElements()[activePort];
@@ -298,7 +294,6 @@ class AimEditor extends Component {
       return true;
     });
 
-    console.log("Marked imageIds", markedImageIds);
     return markedImageIds;
   };
 
@@ -755,24 +750,18 @@ class AimEditor extends Component {
       };
   };
 
-  createSegmentation3D = (labelmapIndex) => {
+  createSegmentation3D = async (labelmapIndex) => {
     // following is to know the image index which has the first segment
     let firstSegImageIndex;
 
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
-
-    const globalToolStateManager =
-      cornerstoneTools.globalImageIdSpecificToolStateManager;
-    const toolState = globalToolStateManager.saveToolState();
     const stackToolState = cornerstoneTools.getToolState(element, "stack");
     const imageIds = stackToolState.data[0].imageIds;
     let imagePromises = [];
     for (let i = 0; i < imageIds.length; i++) {
       imagePromises.push(cornerstone.loadImage(imageIds[i]));
     }
-    const { getters, getLabelmapStats } = cornerstoneTools.getModule(
-      "segmentation"
-    );
+    const { getters } = cornerstoneTools.getModule("segmentation");
     const { labelmaps3D } = getters.labelmaps3D(element);
     if (!labelmaps3D) {
       return;
@@ -807,38 +796,28 @@ class AimEditor extends Component {
     // For now we support single segments
 
     let segStats = {};
+
     getters.labelmapStats(element, 1, labelmapIndex).then((stats) => {
       Object.assign(segStats, stats);
     });
 
-    const cachedImages = cornerstone.imageCache.imageCache;
-    let images = [];
-    Object.keys(cachedImages).forEach((key) => {
-      images.push(cachedImages[key].image);
-    });
+    const images = await Promise.all(imagePromises);
 
-    let segBlob = {};
-    try {
-      segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
-        images,
-        labelmap3D,
-        { rleEncode: false }
-      );
-    } catch (error) {
-      throw new Error("Error creating segmentation blob:", error);
-    }
+    const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
+      images,
+      labelmap3D,
+      { rleEncode: false }
+    );
 
     return {
       segBlob,
-      imageIdx: firstSegImageIndex,
       segStats,
+      imageIdx: firstSegImageIndex,
+      image: images[firstSegImageIndex],
     };
-    // });
-
-    // .catch(err => console.log(err));
   };
 
-  getDatasetFromBlob = (segBlob, imageIdx) => {
+  getDatasetFromBlob = (segBlob) => {
     return new Promise((resolve) => {
       let segArrayBuffer;
       var fileReader = new FileReader();
