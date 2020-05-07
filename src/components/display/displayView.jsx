@@ -142,7 +142,6 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
-    console.log("Session storage", sessionStorage);
     if (this.props.series.length < 1) return;
     this.getViewports();
     this.getData();
@@ -299,7 +298,6 @@ class DisplayView extends Component {
     // Means aim has segmentation alreay, find its segment index and set to edit it
     const { series } = this.props;
     const labelMapOfAim = getSegIndexOfAim(series, aimJson);
-    console.log("Setting active label map of aim", labelMapOfAim);
     this.setActiveLabelMapIndex(labelMapOfAim);
   };
 
@@ -630,7 +628,6 @@ class DisplayView extends Component {
   };
 
   renderSegmentation = (arrayBuffer, aimIndex, serieIndex) => {
-    console.log("Seri index", serieIndex);
     const { imageIds } = this.state.data[serieIndex].stack;
 
     var imagePromises = imageIds.map((imageId) => {
@@ -653,9 +650,7 @@ class DisplayView extends Component {
 
       const { setters } = cornerstoneTools.getModule("segmentation");
       const { activeLabelMapIndex } = this.state;
-      console.log("State before", this.state);
       this.setState({ activeLabelMapIndex: activeLabelMapIndex + 1 }); //set the index state for next render
-      console.log("State after", this.state);
 
       setters.labelmap3DByFirstImageId(
         imageIds[0],
@@ -673,7 +668,6 @@ class DisplayView extends Component {
       } else {
         const { element } = cornerstone.getEnabledElements()[serieIndex];
         this.setActiveLabelMapIndex(this.state.activeLabelMapIndex, element);
-        console.log("Active label map setted", this.state.activeLabelMapIndex);
       }
 
       this.refreshAllViewports();
