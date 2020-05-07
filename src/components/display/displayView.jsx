@@ -103,17 +103,6 @@ const tools = [
   { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
 ];
 
-Array.prototype.pairs = function (func) {
-  const ret = [];
-  for (var i = 0; i < this.length - 1; i++) {
-    for (var j = i; j < this.length - 1; j++) {
-      ret.push([this[i], this[j + 1]]);
-      // func([this[i], this[j + 1]]);
-    }
-  }
-  return ret;
-};
-
 const mapStateToProps = (state) => {
   return {
     series: state.annotationsListReducer.openSeries,
@@ -526,36 +515,12 @@ class DisplayView extends Component {
     const lines = values.filter(this.checkIfLine);
 
     const groupedLines = Object.values(this.groupBy(lines, "aimUid"));
-    console.log("Grouped lines", groupedLines);
     groupedLines.forEach((lines) => {
       if (lines.length > 1) {
-        // lines.pairs().forEach((pair) => {
-        //   console.log("Pair", pair);
-        //   if (this.checkIfPerpendicular(pair)) {
-        //     // there are multiple lines on the same image that belongs to same aim, a potential perpendicular
-        //     // they are perpendicular, remove them from the values list and render them as perpendicular
-        //     pair[0].markupType = "Bidirectional";
-        //     pair[0].calculations = pair[0].calculations.concat(
-        //       pair[1].calculations
-        //     );
-        //     pair[0].coordinates = pair[0].coordinates.concat(
-        //       pair[1].coordinates
-        //     );
-
-        //     const index = values.indexOf(pair[1]);
-        //     if (index > -1) {
-        //       values.splice(index, 1);
-        //     }
-        //   }
-        // });
-        console.log("Lines", lines);
         for (let i = 0; i < lines.length; i++) {
           for (let j = i + 1; j < lines.length; j++) {
-            // console.log("Line pairs", lines[i], lines[j]);
             let pair = [lines[i], lines[j]];
-            console.log("Pair", pair);
             if (this.checkIfPerpendicular(pair)) {
-              console.log("Pair is perpendicular", pair);
               // there are multiple lines on the same image that belongs to same aim, a potential perpendicular
               // they are perpendicular, remove them from the values list and render them as perpendicular
               pair[0].markupType = "Bidirectional";
@@ -628,50 +593,54 @@ class DisplayView extends Component {
   };
 
   renderSegmentation = (arrayBuffer, aimIndex, serieIndex) => {
-    const { imageIds } = this.state.data[serieIndex].stack;
+    try {
+      const { imageIds } = this.state.data[serieIndex].stack;
 
-    var imagePromises = imageIds.map((imageId) => {
-      return cornerstone.loadAndCacheImage(imageId);
-    });
+      var imagePromises = imageIds.map((imageId) => {
+        return cornerstone.loadAndCacheImage(imageId);
+      });
 
-    Promise.all(imagePromises).then(() => {
-      // const stackToolState = cornerstoneTools.getToolState(element, "stack");
+      Promise.all(imagePromises).then(() => {
+        // const stackToolState = cornerstoneTools.getToolState(element, "stack");
 
-      // const imageIds = stackToolState.data[0].imageIds;
-      const {
-        labelmapBuffer,
-        segMetadata,
-        segmentsOnFrame,
-      } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
-        imageIds,
-        arrayBuffer,
-        cornerstone.metaData
-      );
+        // const imageIds = stackToolState.data[0].imageIds;
+        const {
+          labelmapBuffer,
+          segMetadata,
+          segmentsOnFrame,
+        } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
+          imageIds,
+          arrayBuffer,
+          cornerstone.metaData
+        );
 
-      const { setters } = cornerstoneTools.getModule("segmentation");
-      const { activeLabelMapIndex } = this.state;
-      this.setState({ activeLabelMapIndex: activeLabelMapIndex + 1 }); //set the index state for next render
+        const { setters } = cornerstoneTools.getModule("segmentation");
+        const { activeLabelMapIndex } = this.state;
+        this.setState({ activeLabelMapIndex: activeLabelMapIndex + 1 }); //set the index state for next render
 
-      setters.labelmap3DByFirstImageId(
-        imageIds[0],
-        labelmapBuffer,
-        activeLabelMapIndex,
-        segMetadata.data,
-        imageIds.length,
-        segmentsOnFrame
-      );
+        setters.labelmap3DByFirstImageId(
+          imageIds[0],
+          labelmapBuffer,
+          activeLabelMapIndex,
+          segMetadata.data,
+          imageIds.length,
+          segmentsOnFrame
+        );
 
-      if (this.state.selectedAim) {
-        //if an aim is selected find its label map index, 0 if no segmentation in aim
-        //an aim is being edited don't set the label map index because aim's segs should be brushed
-        this.setActiveLabelMapOfAim(this.state.selectedAim);
-      } else {
-        const { element } = cornerstone.getEnabledElements()[serieIndex];
-        this.setActiveLabelMapIndex(this.state.activeLabelMapIndex, element);
-      }
+        if (this.state.selectedAim) {
+          //if an aim is selected find its label map index, 0 if no segmentation in aim
+          //an aim is being edited don't set the label map index because aim's segs should be brushed
+          this.setActiveLabelMapOfAim(this.state.selectedAim);
+        } else {
+          const { element } = cornerstone.getEnabledElements()[serieIndex];
+          this.setActiveLabelMapIndex(this.state.activeLabelMapIndex, element);
+        }
 
-      this.refreshAllViewports();
-    });
+        this.refreshAllViewports();
+      });
+    } catch (error) {
+      console.log("Error: ", error);
+    }
   };
 
   refreshAllViewports = () => {
@@ -862,10 +831,8 @@ class DisplayView extends Component {
 
   closeViewport = () => {
     // closes the active viewport
-    if (this.state.showAimEditor) {
-      if (!this.checkUnsavedData(true)) return;
-      this.props.dispatch(closeSerie());
-    } else this.props.dispatch(closeSerie());
+    if (this.state.showAimEditor && !this.closeAimEditor(true)) return;
+    this.props.dispatch(closeSerie());
   };
 
   handleHideAnnotations = () => {
