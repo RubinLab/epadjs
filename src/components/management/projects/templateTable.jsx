@@ -12,6 +12,8 @@ const templateTable = ({
   projectName,
   selectedTemp,
 }) => {
+  console.log(selectedTemp);
+  console.log(defaultTemplate);
   const columns = [
     {
       Header: 'Project',
@@ -25,16 +27,20 @@ const templateTable = ({
       width: 70,
       Cell: ({ original }) => {
         const { templateCodeValue } = original.Template[0];
-        const checked = selectedTemp
-          ? selectedTemp === templateCodeValue
-          : defaultTemplate === templateCodeValue;
+        const selected = selectedTemp !== null;
+        console.log('selected', selected)
+        const saved = defaultTemplate === templateCodeValue;
+        console.log('saved', saved)
+        const checked = selected ? selectedTemp === templateCodeValue : saved;
+        console.log('checked', checked)
+
         return (
           <input
             className="templateTable-row__check"
-            type="radio"
+            type="checkbox"
             name="enable"
             id={original.Template[0].templateUID}
-            onClick={() => onSelect(original.Template[0].templateCodeValue)}
+            onClick={(e) => onSelect(e, original.Template[0].templateCodeValue)}
             defaultChecked={checked}
           />
         );

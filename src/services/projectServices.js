@@ -35,6 +35,8 @@ export function updateProject(
   type,
   defaultTemplate
 ) {
+  // const body = { id, projectName, projectDescription, type, defaultTemplate };
+  // return http.put(apiUrl + "/projects/" + id, body);
   return http.put(
     apiUrl +
       "/projects/" +

@@ -1,7 +1,7 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Modal } from 'react-bootstrap';
-import '../menuStyle.css';
+import React from "react";
+import PropTypes from "prop-types";
+import { Modal } from "react-bootstrap";
+import "../menuStyle.css";
 
 const projectCreationForm = ({
   onCancel,
@@ -16,9 +16,7 @@ const projectCreationForm = ({
     </option>
   );
   const options = [firstOption];
-
   templates.forEach((el, i) => {
-    console.log(el);
     const { templateCodeValue, templateUID } = el.Template[0];
     options.push(
       <option value={templateCodeValue} key={templateUID}>
@@ -51,7 +49,7 @@ const projectCreationForm = ({
             onChange={onType}
           />
           <h6 className="form-exp">
-            One word only, no special characters, '_' is OK
+            One word only, no special characters, "_" is OK
           </h6>
           <h5 className="add-project__modal--label">Description</h5>
           <textarea
