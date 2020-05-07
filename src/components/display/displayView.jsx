@@ -299,12 +299,13 @@ class DisplayView extends Component {
     // Means aim has segmentation alreay, find its segment index and set to edit it
     const { series } = this.props;
     const labelMapOfAim = getSegIndexOfAim(series, aimJson);
+    console.log("Setting active label map of aim", labelMapOfAim);
     this.setActiveLabelMapIndex(labelMapOfAim);
   };
 
-  setActiveLabelMapIndex = (index) => {
+  setActiveLabelMapIndex = (index, element) => {
     const { setters, getters } = cornerstoneTools.getModule("segmentation");
-    const element = this.getActiveElement();
+    // const element = this.getActiveElement();
     setters.activeLabelmapIndex(element, index);
   };
 
@@ -629,6 +630,7 @@ class DisplayView extends Component {
   };
 
   renderSegmentation = (arrayBuffer, aimIndex, serieIndex) => {
+    console.log("Seri index", serieIndex);
     const { imageIds } = this.state.data[serieIndex].stack;
 
     var imagePromises = imageIds.map((imageId) => {
@@ -651,7 +653,9 @@ class DisplayView extends Component {
 
       const { setters } = cornerstoneTools.getModule("segmentation");
       const { activeLabelMapIndex } = this.state;
+      console.log("State before", this.state);
       this.setState({ activeLabelMapIndex: activeLabelMapIndex + 1 }); //set the index state for next render
+      console.log("State after", this.state);
 
       setters.labelmap3DByFirstImageId(
         imageIds[0],
@@ -666,7 +670,11 @@ class DisplayView extends Component {
         //if an aim is selected find its label map index, 0 if no segmentation in aim
         //an aim is being edited don't set the label map index because aim's segs should be brushed
         this.setActiveLabelMapOfAim(this.state.selectedAim);
-      } else this.setActiveLabelMapIndex(this.state.activeLabelMapIndex);
+      } else {
+        const { element } = cornerstone.getEnabledElements()[serieIndex];
+        this.setActiveLabelMapIndex(this.state.activeLabelMapIndex, element);
+        console.log("Active label map setted", this.state.activeLabelMapIndex);
+      }
 
       this.refreshAllViewports();
     });
@@ -850,6 +858,7 @@ class DisplayView extends Component {
       showAimEditor: false,
       selectedAim: undefined,
       hasSegmentation: false,
+      activeLabelMapIndex: 0,
     });
     // clear all unsaved markups by calling getData
     this.getData();
