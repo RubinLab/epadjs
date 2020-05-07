@@ -339,6 +339,9 @@ class DisplayView extends Component {
   };
 
   getImageIndexFromImageId = (cornerstoneImageIds, cornerstoneImageId) => {
+    const { imageIds } = this.state;
+    if (!imageIds[cornerstoneImageId])
+      cornerstoneImageId = cornerstoneImageId.split("&frame")[0];
     for (let [key, value] of Object.entries(cornerstoneImageIds)) {
       if (value == cornerstoneImageId) return key;
     }
@@ -640,7 +643,7 @@ class DisplayView extends Component {
         this.refreshAllViewports();
       });
     } catch (error) {
-      console.log("Error: ", error);
+      console.error(error);
     }
   };
 
@@ -658,7 +661,11 @@ class DisplayView extends Component {
   };
 
   getColorOfMarkup = (aimUid, seriesUid) => {
-    return this.props.aimList[seriesUid][aimUid].color.button.background;
+    try {
+      return this.props.aimList[seriesUid][aimUid].color.button.background;
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   renderMarkup = (imageId, markup, color, seriesUid, studyUid) => {
