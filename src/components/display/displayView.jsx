@@ -628,50 +628,54 @@ class DisplayView extends Component {
   };
 
   renderSegmentation = (arrayBuffer, aimIndex, serieIndex) => {
-    const { imageIds } = this.state.data[serieIndex].stack;
+    try {
+      const { imageIds } = this.state.data[serieIndex].stack;
 
-    var imagePromises = imageIds.map((imageId) => {
-      return cornerstone.loadAndCacheImage(imageId);
-    });
+      var imagePromises = imageIds.map((imageId) => {
+        return cornerstone.loadAndCacheImage(imageId);
+      });
 
-    Promise.all(imagePromises).then(() => {
-      // const stackToolState = cornerstoneTools.getToolState(element, "stack");
+      Promise.all(imagePromises).then(() => {
+        // const stackToolState = cornerstoneTools.getToolState(element, "stack");
 
-      // const imageIds = stackToolState.data[0].imageIds;
-      const {
-        labelmapBuffer,
-        segMetadata,
-        segmentsOnFrame,
-      } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
-        imageIds,
-        arrayBuffer,
-        cornerstone.metaData
-      );
+        // const imageIds = stackToolState.data[0].imageIds;
+        const {
+          labelmapBuffer,
+          segMetadata,
+          segmentsOnFrame,
+        } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
+          imageIds,
+          arrayBuffer,
+          cornerstone.metaData
+        );
 
-      const { setters } = cornerstoneTools.getModule("segmentation");
-      const { activeLabelMapIndex } = this.state;
-      this.setState({ activeLabelMapIndex: activeLabelMapIndex + 1 }); //set the index state for next render
+        const { setters } = cornerstoneTools.getModule("segmentation");
+        const { activeLabelMapIndex } = this.state;
+        this.setState({ activeLabelMapIndex: activeLabelMapIndex + 1 }); //set the index state for next render
 
-      setters.labelmap3DByFirstImageId(
-        imageIds[0],
-        labelmapBuffer,
-        activeLabelMapIndex,
-        segMetadata.data,
-        imageIds.length,
-        segmentsOnFrame
-      );
+        setters.labelmap3DByFirstImageId(
+          imageIds[0],
+          labelmapBuffer,
+          activeLabelMapIndex,
+          segMetadata.data,
+          imageIds.length,
+          segmentsOnFrame
+        );
 
-      if (this.state.selectedAim) {
-        //if an aim is selected find its label map index, 0 if no segmentation in aim
-        //an aim is being edited don't set the label map index because aim's segs should be brushed
-        this.setActiveLabelMapOfAim(this.state.selectedAim);
-      } else {
-        const { element } = cornerstone.getEnabledElements()[serieIndex];
-        this.setActiveLabelMapIndex(this.state.activeLabelMapIndex, element);
-      }
+        if (this.state.selectedAim) {
+          //if an aim is selected find its label map index, 0 if no segmentation in aim
+          //an aim is being edited don't set the label map index because aim's segs should be brushed
+          this.setActiveLabelMapOfAim(this.state.selectedAim);
+        } else {
+          const { element } = cornerstone.getEnabledElements()[serieIndex];
+          this.setActiveLabelMapIndex(this.state.activeLabelMapIndex, element);
+        }
 
-      this.refreshAllViewports();
-    });
+        this.refreshAllViewports();
+      });
+    } catch (error) {
+      console.log("Error: ", error);
+    }
   };
 
   refreshAllViewports = () => {
@@ -862,10 +866,8 @@ class DisplayView extends Component {
 
   closeViewport = () => {
     // closes the active viewport
-    if (this.state.showAimEditor) {
-      if (!this.checkUnsavedData(true)) return;
-      this.props.dispatch(closeSerie());
-    } else this.props.dispatch(closeSerie());
+    if (this.state.showAimEditor && !this.closeAimEditor(true)) return;
+    this.props.dispatch(closeSerie());
   };
 
   handleHideAnnotations = () => {
