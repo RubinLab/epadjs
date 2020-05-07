@@ -259,7 +259,6 @@ class DisplayView extends Component {
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (serie.aimID) {
       imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
-      console.log("Serie, imageIndex", serie.aimID, imageIndex);
     }
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
@@ -319,7 +318,6 @@ class DisplayView extends Component {
     const { series, activePort } = this.props;
     const { studyUID, seriesUID } = series[activePort];
     if (imageAnnotations) {
-      console.log("Image annotations", imageAnnotations);
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
           if (value.aimUid === aimID) {
@@ -328,7 +326,6 @@ class DisplayView extends Component {
               seriesUID,
               key
             );
-            console.log(cornerstoneImageId, cornerstoneImageIds);
             const ret = this.getImageIndexFromImageId(
               cornerstoneImageIds,
               cornerstoneImageId
@@ -345,7 +342,6 @@ class DisplayView extends Component {
     const { imageIds } = this.state;
     if (!imageIds[cornerstoneImageId])
       cornerstoneImageId = cornerstoneImageId.split("&frame")[0];
-    console.log("state", this.state, cornerstoneImageIds, cornerstoneImageId);
     for (let [key, value] of Object.entries(cornerstoneImageIds)) {
       if (value == cornerstoneImageId) return key;
     }
@@ -647,7 +643,7 @@ class DisplayView extends Component {
         this.refreshAllViewports();
       });
     } catch (error) {
-      console.log("Error: ", error);
+      console.error(error);
     }
   };
 
