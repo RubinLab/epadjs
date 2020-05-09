@@ -23,7 +23,8 @@ class TrackTab extends React.Component {
     pluginQueueList: [],
     showParamsNonZero: false,
     tempParamsHtmlnonZero: [],
-    selectedQueueIds: [],
+    selectedQueueIds: {},
+    selectAll: 0,
   };
 
   componentWillMount = async () => {
@@ -63,7 +64,9 @@ class TrackTab extends React.Component {
   };
   handleRunQueue = async () => {
     const tempPluginQueueList = [...this.state.pluginQueueList];
-    const responseRunPluginsQueue = await runPluginsQueue("");
+    const responseRunPluginsQueue = await runPluginsQueue(
+      Object.keys(this.state.selectedQueueIds)
+    );
     if (responseRunPluginsQueue.status === 202) {
       console.log("queue is running");
     } else {
@@ -151,8 +154,88 @@ class TrackTab extends React.Component {
     });
     this.setState({ showParamsNonZero: true });
   };
+
+  toggleSelectAll() {
+    const tempSelectedQueueIds = {};
+    console.log("toggleSelectAll queue list", this.state.pluginQueueList);
+    if (this.state.selectAll === 0) {
+      this.state.pluginQueueList.forEach((queueObj) => {
+        console.log("select all queuee obj id", queueObj.id);
+        tempSelectedQueueIds[queueObj.id] = queueObj;
+      });
+      //this.setState({ selectedQueueIds: tempSelectedQueueIds });
+    }
+    this.setState({
+      selectedQueueIds: tempSelectedQueueIds,
+      selectAll: this.state.selectAll === 0 ? 1 : 0,
+    });
+
+    // let newSelected = {};
+    // if (this.state.selectAll === 0) {
+    //   this.state.templates.forEach((temp) => {
+    //     let tempID = temp.Template[0].templateUID;
+    //     let projectID = temp.projectID ? temp.projectID : "lite";
+    //     newSelected[tempID] = projectID;
+    //   });
+    // }
+    // this.setState({
+    //   selected: newSelected,
+    //   selectAll: this.state.selectAll === 0 ? 1 : 0,
+    // });
+  }
+  toggleRow = (queueObj) => {
+    const { id } = queueObj;
+    const tempSelectedQueueIds = this.state.selectedQueueIds;
+    console.log("previously selected queue ids", tempSelectedQueueIds);
+    console.log("check existence", tempSelectedQueueIds[id]);
+    if (typeof tempSelectedQueueIds[id] === "undefined") {
+      console.log("does not exist so adding ");
+      tempSelectedQueueIds[id] = queueObj;
+    } else {
+      delete tempSelectedQueueIds[id];
+      console.log("found and removing ");
+    }
+    // tempSelectedQueueIds.push(id);
+    this.setState({ selectedQueueIds: tempSelectedQueueIds });
+    console.log("resulting tempSelectedQueueIds ", tempSelectedQueueIds);
+  };
   definePluginsQueueTableColumns = () => {
     return [
+      {
+        id: "checkbox",
+        accessor: "",
+        width: 50,
+        Header: (x) => {
+          return (
+            <input
+              type="checkbox"
+              className="checkbox-cell"
+              checked={this.state.selectAll === 1}
+              ref={(input) => {
+                if (input) {
+                  input.indeterminate = this.state.selectAll === 2;
+                }
+              }}
+              onChange={() => this.toggleSelectAll()}
+            />
+          );
+        },
+        Cell: (data) => {
+          console.log("xx", data);
+          const { id } = data.original;
+          return (
+            <input
+              type="checkbox"
+              className="checkbox-cell"
+              checked={this.state.selectedQueueIds[id]}
+              onChange={() => this.toggleRow(data.original)}
+            />
+          );
+        },
+
+        // sortable: false,
+        resizable: false,
+      },
       {
         Header: "id",
         accessor: "id",
