@@ -8,12 +8,12 @@ import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import {
   uploadAim,
-  uploadSegmentation
+  uploadSegmentation,
 } from "../../services/annotationServices";
 import {
   updateSingleSerie,
   updatePatientOnAimSave,
-  getSingleSerie
+  getSingleSerie,
 } from "../annotationsList/action";
 import { getAimImageData } from "./aimHelper";
 import * as questionaire from "./parseClass.js";
@@ -22,13 +22,12 @@ import { modalities } from "./modality";
 import * as dcmjs from "dcmjs";
 
 import "./aimEditor.css";
-import { throws } from "assert";
-import getNumOfSegs from "../../Utils/Segmentation/getNumOfSegments";
+import getNumOfSegs from "../../utils/Segmentation/getNumOfSegments";
 
 const enumAimType = {
   imageAnnotation: 1,
   seriesAnnotation: 2,
-  studyAnnotation: 3
+  studyAnnotation: 3,
 };
 
 class AimEditor extends Component {
@@ -41,10 +40,10 @@ class AimEditor extends Component {
   componentDidMount() {
     const element = document.getElementById("questionaire");
     // const { data: templates } = await getTemplates();
-    const templatePromise = new Promise(resolve => {
+    const templatePromise = new Promise((resolve) => {
       resolve(getTemplates());
     });
-    templatePromise.then(result => {
+    templatePromise.then((result) => {
       this.semanticAnswers = new questionaire.AimEditor(
         element,
         this.validateForm
@@ -59,7 +58,7 @@ class AimEditor extends Component {
     });
   }
 
-  validateForm = hasError => {
+  validateForm = (hasError) => {
     if (hasError) console.log("Answer form has error/s!!!");
   };
 
@@ -101,7 +100,7 @@ class AimEditor extends Component {
     else this.createAim(answers);
   };
 
-  createAimSegmentation = async answers => {
+  createAimSegmentation = async (answers) => {
     const { activePort, openSeries } = this.props;
     const { imageAnnotations } = openSeries[activePort];
     const labelMapIndex = getNumOfSegs(imageAnnotations);
@@ -138,7 +137,7 @@ class AimEditor extends Component {
 
   createAimMarkups = (aim, markupsToSave) => {
     Object.entries(markupsToSave).forEach(([key, values]) => {
-      values.map(value => {
+      values.map((value) => {
         const { type, markup, shapeIndex, imageReferenceUid } = value;
         switch (type) {
           case "line":
@@ -166,7 +165,7 @@ class AimEditor extends Component {
     const { activePort } = this.props;
 
     const {
-      toolState
+      toolState,
     } = cornerstoneTools.globalImageIdSpecificToolStateManager;
 
     // get the imagesIds for active viewport
@@ -175,7 +174,7 @@ class AimEditor extends Component {
     const imageIds = stackToolState.data[activePort].imageIds;
 
     // check which images has markup
-    const markedImageIds = imageIds.filter(imageId => {
+    const markedImageIds = imageIds.filter((imageId) => {
       if (toolState[imageId] === undefined) return false;
       return true;
     });
@@ -192,7 +191,7 @@ class AimEditor extends Component {
     return seedData;
   };
 
-  createAim = async answers => {
+  createAim = async (answers) => {
     console.log("Data cornerstone tools", cornerstoneTools);
     const { hasSegmentation } = this.props;
     const markupsToSave = this.getNewMarkups();
@@ -236,7 +235,7 @@ class AimEditor extends Component {
       seriesUID,
       studyUID,
       name,
-      comment
+      comment,
     };
 
     uploadAim(aimSaved)
@@ -251,7 +250,7 @@ class AimEditor extends Component {
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
-          draggable: true
+          draggable: true,
         });
         // this.props.dispatch(
         //   getSingleSerie({ patientID, projectID, seriesUID, studyUID })
@@ -267,26 +266,26 @@ class AimEditor extends Component {
 
         // this.props.dispatch(updatePatientOnAimSave(aimRefs));
       })
-      .catch(error => console.log(error));
+      .catch((error) => console.log(error));
   };
 
   getNewMarkups = () => {
     const {
-      toolState
+      toolState,
     } = cornerstoneTools.globalImageIdSpecificToolStateManager;
     const markedImageIds = this.getMarkedImageIds();
     // check for markups
     var shapeIndex = 1;
     var markupsToSave = {};
     const updatedAimId = this.props.aimId;
-    markedImageIds.map(imageId => {
+    markedImageIds.map((imageId) => {
       const imageReferenceUid = this.parseImgeId(imageId);
       const markUps = toolState[imageId];
-      Object.keys(markUps).map(tool => {
+      Object.keys(markUps).map((tool) => {
         switch (tool) {
           case "FreehandRoi3DTool":
             const polygons = markUps[tool].data;
-            polygons.map(polygon => {
+            polygons.map((polygon) => {
               if (!polygon.aimId || polygon.aimId === updatedAimId) {
                 //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
@@ -295,7 +294,7 @@ class AimEditor extends Component {
                     type: "polygon",
                     markup: polygon,
                     shapeIndex,
-                    imageReferenceUid
+                    imageReferenceUid,
                   },
                   markupsToSave
                 );
@@ -305,7 +304,7 @@ class AimEditor extends Component {
             break;
           case "Bidirectional":
             const bidirectionals = markUps[tool].data;
-            bidirectionals.map(bidirectional => {
+            bidirectionals.map((bidirectional) => {
               if (
                 !bidirectional.aimId ||
                 bidirectional.aimId === updatedAimId
@@ -317,7 +316,7 @@ class AimEditor extends Component {
                     type: "bidirectional",
                     markup: bidirectional,
                     shapeIndex,
-                    imageReferenceUid
+                    imageReferenceUid,
                   },
                   markupsToSave
                 );
@@ -327,7 +326,7 @@ class AimEditor extends Component {
             break;
           case "CircleRoi":
             const circles = markUps[tool].data;
-            circles.map(circle => {
+            circles.map((circle) => {
               if (!circle.aimId || circle.aimId === updatedAimId) {
                 //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
@@ -336,7 +335,7 @@ class AimEditor extends Component {
                     type: "circle",
                     markup: circle,
                     shapeIndex,
-                    imageReferenceUid
+                    imageReferenceUid,
                   },
                   markupsToSave
                 );
@@ -347,7 +346,7 @@ class AimEditor extends Component {
             break;
           case "Length":
             const lines = markUps[tool].data;
-            lines.map(line => {
+            lines.map((line) => {
               if (!line.aimId || line.aimId === updatedAimId) {
                 //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
@@ -356,7 +355,7 @@ class AimEditor extends Component {
                     type: "line",
                     markup: line,
                     shapeIndex,
-                    imageReferenceUid
+                    imageReferenceUid,
                   },
                   markupsToSave
                 );
@@ -371,7 +370,7 @@ class AimEditor extends Component {
     return markupsToSave;
   };
 
-  addModalityObjectToSeedData = seedData => {
+  addModalityObjectToSeedData = (seedData) => {
     const modality = modalities[seedData.series.modality];
     seedData.series.modality = { ...modality };
   };
@@ -383,7 +382,7 @@ class AimEditor extends Component {
       imagingPhysicalEntityCollection,
       imagingObservationEntityCollection,
       inferenceEntity,
-      typeCode
+      typeCode,
     } = answers;
     seedData.aim.name = name;
     if (comment) seedData.aim.comment = comment;
@@ -395,7 +394,7 @@ class AimEditor extends Component {
     if (typeCode) seedData.aim.typeCode = typeCode;
   };
 
-  addUserToSeedData = seedData => {
+  addUserToSeedData = (seedData) => {
     let obj = {};
     obj.loginName = sessionStorage.getItem("username");
     obj.name = sessionStorage.getItem("displayName");
@@ -403,13 +402,13 @@ class AimEditor extends Component {
   };
 
   // get the image object by index
-  getCornerstoneImagebyIdx = imageIdx => {
+  getCornerstoneImagebyIdx = (imageIdx) => {
     const imageCache = this.props.cornerstone.default.imageCache.imageCache;
     const imageId = Object.keys(imageCache)[imageIdx];
     return imageCache[imageId].image;
   };
 
-  getCornerstoneImagebyId = imageId => {
+  getCornerstoneImagebyId = (imageId) => {
     return cornerstone.imageCache.imageCache[imageId].image;
   };
 
@@ -484,7 +483,7 @@ class AimEditor extends Component {
 
     const lengthId = aim.createLengthCalcEntity({
       length: line.length,
-      unit: "mm"
+      unit: "mm",
     });
     aim.createImageAnnotationStatement(1, markupId, lengthId);
   };
@@ -521,7 +520,7 @@ class AimEditor extends Component {
     imageReferenceUid
   ) => {};
 
-  createSegmentation3D = labelmapIndex => {
+  createSegmentation3D = (labelmapIndex) => {
     // following is to know the image index which has the first segment
     let firstSegImageIndex;
 
@@ -537,7 +536,7 @@ class AimEditor extends Component {
       if (i == 1)
         cornerstone
           .loadImage(imageIds[i])
-          .then(image => console.log("Yuklenen image", image));
+          .then((image) => console.log("Yuklenen image", image));
       imagePromises.push(cornerstone.loadImage(imageIds[i]));
     }
 
@@ -568,7 +567,7 @@ class AimEditor extends Component {
       if (!firstSegImageIndex) firstSegImageIndex = i;
 
       const segmentsOnLabelmap = labelmaps2D[i].segmentsOnLabelmap;
-      segmentsOnLabelmap.forEach(segmentIndex => {
+      segmentsOnLabelmap.forEach((segmentIndex) => {
         if (segmentIndex !== 0 && !labelmap3D.metadata[segmentIndex]) {
           labelmap3D.metadata[segmentIndex] = this.generateMockMetadata(
             segmentIndex
@@ -580,13 +579,13 @@ class AimEditor extends Component {
     // For now we support single segments
 
     let segStats = {};
-    getters.labelmapStats(element, 1, labelmapIndex).then(stats => {
+    getters.labelmapStats(element, 1, labelmapIndex).then((stats) => {
       Object.assign(segStats, stats);
     });
 
     const cachedImages = cornerstone.imageCache.imageCache;
     let images = [];
-    Object.keys(cachedImages).forEach(key => {
+    Object.keys(cachedImages).forEach((key) => {
       images.push(cachedImages[key].image);
     });
     // console.log("ImageCache", images);
@@ -604,7 +603,7 @@ class AimEditor extends Component {
     return {
       segBlob,
       imageIdx: firstSegImageIndex,
-      segStats
+      segStats,
     };
     // });
 
@@ -612,10 +611,10 @@ class AimEditor extends Component {
   };
 
   getDatasetFromBlob = (segBlob, imageIdx) => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       let segArrayBuffer;
       var fileReader = new FileReader();
-      fileReader.onload = event => {
+      fileReader.onload = (event) => {
         segArrayBuffer = event.target.result;
         const dicomData = dcmjs.data.DicomMessage.readFile(segArrayBuffer);
         const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(
@@ -643,7 +642,7 @@ class AimEditor extends Component {
     return obj;
   };
 
-  saveSegmentation = segmentation => {
+  saveSegmentation = (segmentation) => {
     const { openSeries, activePort } = this.props;
     const { projectID } = openSeries[activePort];
     uploadSegmentation(segmentation, projectID)
@@ -655,28 +654,28 @@ class AimEditor extends Component {
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
-          draggable: true
+          draggable: true,
         });
         return "success";
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error);
         return "error";
       });
   };
 
-  generateMockMetadata = segmentIndex => {
+  generateMockMetadata = (segmentIndex) => {
     // TODO -> Use colors from the cornerstoneTools LUT.
     const RecommendedDisplayCIELabValue = dcmjs.data.Colors.rgb2DICOMLAB([
       1,
       0,
-      0
+      0,
     ]);
     return {
       SegmentedPropertyCategoryCodeSequence: {
         CodeValue: "T-D0050",
         CodingSchemeDesignator: "SRT",
-        CodeMeaning: "Tissue"
+        CodeMeaning: "Tissue",
       },
       SegmentNumber: segmentIndex.toString(),
       SegmentLabel: "Tissue " + segmentIndex.toString(),
@@ -686,21 +685,21 @@ class AimEditor extends Component {
       SegmentedPropertyTypeCodeSequence: {
         CodeValue: "T-D0050",
         CodingSchemeDesignator: "SRT",
-        CodeMeaning: "Tissue"
-      }
+        CodeMeaning: "Tissue",
+      },
     };
   };
 
-  parseImgeId = imageId => {
+  parseImgeId = (imageId) => {
     if (isLite) return imageId.split("/").pop();
     else return imageId.split("objectUID=")[1].split("&")[0];
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
-    activePort: state.annotationsListReducer.activePort
+    activePort: state.annotationsListReducer.activePort,
   };
 };
 
