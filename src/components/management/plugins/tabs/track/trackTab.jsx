@@ -15,6 +15,7 @@ import {
 import {
   getPluginsQueue,
   runPluginsQueue,
+  stopPluginsQueue,
   deleteFromPluginQueue,
 } from "../../../../../services/pluginServices";
 
@@ -34,15 +35,31 @@ class TrackTab extends React.Component {
   };
 
   componentDidUpdate = async (prevProps) => {
-    console.log("this.props for track tab :", this.props);
-    try {
-      const { refresh, lastEventId } = this.props;
-      //   if (refresh && lastEventId !== prevProps.lastEventId) {
-      //     await this.getTemplatesData();
-      //   }
-    } catch (err) {
-      console.log(err);
+    console.log("++++++++++++++++++++++++++++++++++++++++ : update queuee");
+    const prevPluginQueueList = this.state.pluginQueueList;
+    const tempPluginQueueList = await getPluginsQueue();
+    let updated = false;
+    for (let i = 0; i < prevPluginQueueList.length; i++) {
+      if (
+        prevPluginQueueList[i].status !== tempPluginQueueList.data[i].status
+      ) {
+        updated = true;
+        break;
+      }
     }
+    if (updated === true) {
+      updated = false;
+      console.log("track tab queue lists needs to show", tempPluginQueueList);
+      this.setState({ pluginQueueList: tempPluginQueueList.data });
+    }
+    // try {
+    //   const { refresh, lastEventId } = this.props;
+    //   //   if (refresh && lastEventId !== prevProps.lastEventId) {
+    //   //     await this.getTemplatesData();
+    //   //   }
+    // } catch (err) {
+    //   console.log(err);
+    // }
   };
   deleteOneFromQueue = async (queuedbid) => {
     console.log("delete one called", queuedbid);
@@ -82,22 +99,47 @@ class TrackTab extends React.Component {
     //   }
     // }
   };
-  handleStartOne = (dbid) => {
+  handleStartOne = async (dbid) => {
     console.log("start one ");
-  };
-  handleStartMultiple = (dbids) => {
-    console.log("start multiple  ");
+    const queuelist = [];
+    queuelist.push(dbid);
+    const responseRunPluginsQueue = await runPluginsQueue(queuelist);
+    if (responseRunPluginsQueue.status === 202) {
+      console.log("queue is running");
+    } else {
+      console.log("error happened while running queue");
+    }
   };
 
-  handleStopOne = (dbid) => {
-    console.log("stop one ");
+  handleStopOne = async (original) => {
+    console.log("stop one ", original);
+    const queuelist = [];
+    if (original.status !== "running") {
+      alert("plugin process is not running");
+    } else {
+      console.log("stopping plugin");
+      queuelist.push(original.id);
+      const responseStopPluginsQueue = await stopPluginsQueue(queuelist);
+      if (responseStopPluginsQueue.status === 202) {
+        console.log("plugin queue process waiting to be stoped");
+      } else {
+        console.log("error happened while stopping plugin queue");
+      }
+    }
+
+    // const queuelist = [];
+    // queuelist.push(dbid);
+    // const responseRunPluginsQueue = await stopPluginsQueue(queuelist);
+    // if (responseRunPluginsQueue.status === 202) {
+    //   console.log("queue is stopping");
+    // } else {
+    //   console.log("error happened while stopping queue");
+    // }
   };
   handleStopMultiple = (dbids) => {
     console.log("stop multiple ");
   };
-  handleDeleteOne = (dbid) => {
-    console.log("delete one ");
-  };
+
   handleDeleteMultiple = (dbids) => {
     console.log("delete multiple ");
   };
@@ -232,16 +274,17 @@ class TrackTab extends React.Component {
             />
           );
         },
-
-        // sortable: false,
-        resizable: false,
-      },
-      {
-        Header: "id",
-        accessor: "id",
         sortable: true,
         resizable: true,
-        minResizeWidth: 50,
+      },
+      {
+        Header: "container name",
+        Cell: (data) => {
+          const queueId = data.original.id;
+          return <div>epadplugin_{queueId}</div>;
+        },
+        sortable: true,
+        resizable: true,
         width: 70,
       },
       {
@@ -250,6 +293,9 @@ class TrackTab extends React.Component {
           const pluginName = data.original.plugin.name;
           return <div>{pluginName}</div>;
         },
+        sortable: true,
+        resizable: true,
+        width: 50,
       },
       {
         Header: "aims",
@@ -266,6 +312,9 @@ class TrackTab extends React.Component {
           }
           return aimHtmlArray;
         },
+        sortable: true,
+        resizable: true,
+        width: 70,
       },
       {
         Header: "project",
@@ -273,17 +322,18 @@ class TrackTab extends React.Component {
           const projectName = data.original.project.name;
           return <div>{projectName}</div>;
         },
+        sortable: true,
+        resizable: true,
       },
       {
-        Header: "parameter type",
+        Header: "params type",
         accessor: "plugin_parametertype",
         sortable: true,
         resizable: true,
-        minResizeWidth: 50,
-        width: 100,
+        width: 200,
       },
       {
-        Header: "parameters",
+        Header: "runtime params",
         Cell: (data) => {
           const paramsHtml = data.original.runtime_params;
           let resultHtml = "";
@@ -301,13 +351,17 @@ class TrackTab extends React.Component {
           //const rowdata = original.row.checkbox;
           //return { resultHtml };
         },
+        sortable: true,
+        resizable: true,
+
+        width: 100,
       },
       {
         Header: "status",
         accessor: "status",
         sortable: true,
         resizable: true,
-        minResizeWidth: 50,
+
         width: 100,
       },
       // {
@@ -320,23 +374,36 @@ class TrackTab extends React.Component {
       // },
       {
         Header: "starttime",
-        accessor: "starttime",
+        Cell: (data) => {
+          const processStartTime = data.original.starttime;
+
+          return <div>{processStartTime.toLocaleString()}</div>;
+        },
         sortable: true,
         resizable: true,
-        minResizeWidth: 50,
-        width: 100,
+
+        width: 200,
       },
       {
         Header: "endtime",
-        accessor: "endtime",
+        Cell: (data) => {
+          const processEndTime = data.original.endtime;
+          if (processEndTime === "1970-01-01T00:00:01.000Z") {
+            return <div>-</div>;
+          } else {
+            return <div>{processEndTime}</div>;
+          }
+        },
         sortable: true,
         resizable: true,
-        minResizeWidth: 50,
-        width: 100,
+
+        width: 200,
       },
       {
         width: 300,
         Header: "",
+        sortable: true,
+        resizable: true,
         Cell: (data) => {
           //const rowdata = original.row.checkbox;
           return (
@@ -348,7 +415,9 @@ class TrackTab extends React.Component {
                       <button
                         variant="primary"
                         className="btn btn-sm btn-outline-light"
-                        onClick={this.handleStartOne}
+                        onClick={() => {
+                          this.handleStartOne(data.original.id);
+                        }}
                       >
                         <FaPlay className="menu-clickable" />
                       </button>
@@ -357,7 +426,9 @@ class TrackTab extends React.Component {
                       <button
                         variant="primary"
                         className="btn btn-sm btn-outline-light"
-                        onClick={this.handleStopOne}
+                        onClick={() => {
+                          this.handleStopOne(data.original);
+                        }}
                       >
                         <FaStop className="menu-clickable" />
                       </button>

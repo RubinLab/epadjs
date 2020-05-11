@@ -27,8 +27,16 @@ export function updateTemplatesForPlugin(pluginid, templateids) {
   return http.put(apiUrl + "/plugins/" + pluginid + "/templates/", templateids);
 }
 
+export function updateStatusQueueProcess(queueid, tostatus) {
+  return http.put(
+    apiUrl + "/plugins/queue/update/" + queueid + "/status/" + tostatus
+  );
+}
 export function runPluginsQueue(queueObj) {
   return http.post(apiUrl + "/plugins/queue/run", queueObj);
+}
+export function stopPluginsQueue(queueObj) {
+  return http.post(apiUrl + "/plugins/queue/stop", queueObj);
 }
 export function deletePlugin(pluginid) {
   return http.post(apiUrl + "/plugins", pluginid);
