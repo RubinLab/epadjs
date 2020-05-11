@@ -80,7 +80,11 @@ const tools = [
     modeOptions: { mouseButtonMask: 1 },
     mode: "passive",
   },
-  { name: "FreehandRoiSculptorTool", modeOptions: { mouseButtonMask: 1 } },
+  {
+    name: "FreehandRoi3DSculptorTool",
+    modeOptions: { mouseButtonMask: 1 },
+    mode: "passive",
+  },
   { name: "Eraser" },
   {
     name: "Bidirectional",
