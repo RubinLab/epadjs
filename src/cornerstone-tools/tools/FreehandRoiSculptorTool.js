@@ -49,37 +49,45 @@ export default class FreehandRoiSculptorTool extends BaseTool {
   }
 
   renderToolData(evt) {
-    const eventData = evt.detail;
+    try {
+      const eventData = evt.detail;
 
-    if (this.configuration.currentTool === null) {
-      return false;
-    }
+      if (this.configuration.currentTool === null) {
+        return false;
+      }
 
-    const element = eventData.element;
-    const config = this.configuration;
+      const element = eventData.element;
+      const config = this.configuration;
 
-    const toolState = getToolState(element, this.referencedToolName);
-    if (!toolState || toolState.data) {
-      return false;
-    }
-    // const data = toolState.data[config.currentTool];
+      const toolState = getToolState(element, this.referencedToolName);
+      const data = toolState.data[config.currentTool];
 
-    if (this._active) {
-      const context = eventData.canvasContext.canvas.getContext("2d");
-      const options = {
-        color: this.configuration.dragColor,
-        fill: null,
-        handleRadius: this._toolSizeCanvas,
-      };
+      if (!data) {
+        return false;
+      }
 
-      drawHandles(
-        context,
-        eventData,
-        this.configuration.mouseLocation.handles,
-        options
-      );
-    } else if (this.configuration.showCursorOnHover && !this._recentTouchEnd) {
-      this._renderHoverCursor(evt);
+      if (this._active) {
+        const context = eventData.canvasContext.canvas.getContext("2d");
+        const options = {
+          color: this.configuration.dragColor,
+          fill: null,
+          handleRadius: this._toolSizeCanvas,
+        };
+
+        drawHandles(
+          context,
+          eventData,
+          this.configuration.mouseLocation.handles,
+          options
+        );
+      } else if (
+        this.configuration.showCursorOnHover &&
+        !this._recentTouchEnd
+      ) {
+        this._renderHoverCursor(evt);
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -110,7 +118,6 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    * @returns {boolean}
    */
   preMouseDownCallback(evt) {
-    console.log("Pre mouse down");
     if (!this.options.mouseButtonMask.includes(evt.detail.buttons)) {
       return;
     }
@@ -131,15 +138,11 @@ export default class FreehandRoiSculptorTool extends BaseTool {
     const config = this.configuration;
 
     if (!this._active) {
-      console.log("I am not active", this.active);
       return;
     }
 
     const eventData = evt.detail;
-    // const toolState = getToolState(eventData.element, this.referencedToolName);
-    const toolState = getToolState(eventData.element, "FreehandRoi3DTool");
-    console.log("Tool state", toolState);
-    console.log("Referenced tool name", this.referencedToolName);
+    const toolState = getToolState(eventData.element, this.referencedToolName);
 
     if (!toolState) {
       return;
@@ -328,7 +331,6 @@ export default class FreehandRoiSculptorTool extends BaseTool {
     );
 
     if (closestToolIndex === undefined) {
-      console.log("There is no closest tool");
       return;
     }
 
