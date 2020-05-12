@@ -525,7 +525,7 @@ class DisplayView extends Component {
         for (let i = 0; i < lines.length; i++) {
           for (let j = i + 1; j < lines.length; j++) {
             let pair = [lines[i], lines[j]];
-            if (this.checkIfPerpendicular(pair)) {
+            if (this.checkIfPerpendicular(pair) && this.intersects(pair)) {
               // there are multiple lines on the same image that belongs to same aim, a potential perpendicular
               // they are perpendicular, remove them from the values list and render them as perpendicular
               pair[0].markupType = "Bidirectional";
@@ -556,17 +556,46 @@ class DisplayView extends Component {
       lines[1]["coordinates"][0],
       lines[1]["coordinates"][1]
     );
-    if (Math.round((slope1 * slope2 * 100) / 100) == -1) return true;
+
+    if (
+      (slope1 === "infinity" && slope2 === 0) ||
+      (slope1 === 0 && slope2 === "infinity")
+    )
+      return true;
+    else if (Math.round((slope1 * slope2 * 100) / 100) == -1) return true;
     return false;
   };
 
   getSlopeOfLine = (p1, p2) => {
-    return (p1.x.value - p2.x.value) / (p1.y.value - p2.y.value);
+    if (p2.x.value - p1.x.value === 0) return "infinity";
+    return (p1.y.value - p2.y.value) / (p1.x.value - p2.x.value);
   };
 
   checkIfLine = (markup) => {
     if (markup) {
       return markup.markupType === "TwoDimensionMultiPoint";
+    }
+  };
+
+  // returns true iff the line from (a,b)->(c,d) intersects with (p,q)->(r,s)
+  intersects = (lines) => {
+    const a = lines[0]["coordinates"][0].x.value;
+    const b = lines[0]["coordinates"][0].y.value;
+    const c = lines[0]["coordinates"][1].x.value;
+    const d = lines[0]["coordinates"][1].y.value;
+    const p = lines[1]["coordinates"][0].x.value;
+    const q = lines[1]["coordinates"][0].y.value;
+    const r = lines[1]["coordinates"][1].x.value;
+    const s = lines[1]["coordinates"][1].y.value;
+    var det, gamma, lambda;
+
+    det = (c - a) * (s - q) - (r - p) * (d - b);
+    if (det === 0) {
+      return false;
+    } else {
+      lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+      gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+      return 0 < lambda && lambda < 1 && 0 < gamma && gamma < 1;
     }
   };
 
