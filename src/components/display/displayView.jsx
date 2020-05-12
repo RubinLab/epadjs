@@ -518,13 +518,20 @@ class DisplayView extends Component {
     // If so, merges two lines on line1, cnahges the markup type from line to perpendicular
     // And deletes the second line not to be reRendered as line agai
     const lines = values.filter(this.checkIfLine);
+    console.log("Lines", lines);
 
     const groupedLines = Object.values(this.groupBy(lines, "aimUid"));
+    console.log("Grouped lines", groupedLines);
     groupedLines.forEach((lines) => {
       if (lines.length > 1) {
         for (let i = 0; i < lines.length; i++) {
           for (let j = i + 1; j < lines.length; j++) {
             let pair = [lines[i], lines[j]];
+            console.log(
+              "Pair, is perpendicular",
+              pair,
+              this.checkIfPerpendicular(pair)
+            );
             if (this.checkIfPerpendicular(pair)) {
               // there are multiple lines on the same image that belongs to same aim, a potential perpendicular
               // they are perpendicular, remove them from the values list and render them as perpendicular
@@ -556,12 +563,20 @@ class DisplayView extends Component {
       lines[1]["coordinates"][0],
       lines[1]["coordinates"][1]
     );
-    if (Math.round((slope1 * slope2 * 100) / 100) == -1) return true;
+    console.log("Slopes:", slope1, slope2);
+
+    if (
+      (slope1 === "infinity" && slope2 === 0) ||
+      (slope1 === 0 && slope2 === "infinity")
+    )
+      return true;
+    else if (Math.round((slope1 * slope2 * 100) / 100) == -1) return true;
     return false;
   };
 
   getSlopeOfLine = (p1, p2) => {
-    return (p1.x.value - p2.x.value) / (p1.y.value - p2.y.value);
+    if (p2.x.value - p1.x.value === 0) return "infinity";
+    return (p1.y.value - p2.y.value) / (p1.x.value - p2.x.value);
   };
 
   checkIfLine = (markup) => {
