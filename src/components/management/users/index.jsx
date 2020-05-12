@@ -5,9 +5,10 @@ import "../menuStyle.css";
 import {
   getUsers,
   updateUserProjectRole,
+  deleteUserProjectRole,
   updateUser,
   deleteUser,
-  createUser
+  createUser,
 } from "../../../services/userServices";
 import ToolBar from "../common/basicToolBar";
 import UserRoleEditForm from "./userRoleEdit";
@@ -17,7 +18,7 @@ import CreateUser from "./CreateUserForm";
 
 const messages = {
   deleteSingle: "Delete the user? This cannot be undone.",
-  deleteSelected: "Delete selected users? This cannot be undone."
+  deleteSelected: "Delete selected users? This cannot be undone.",
 };
 
 class Users extends React.Component {
@@ -28,14 +29,14 @@ class Users extends React.Component {
     selectAll: 0,
     selected: {},
     edit: [],
-    roleEdit: [],
+    roleEdit: {},
     permissionEdit: {},
     showRoleEdit: false,
     userToEdit: "",
     clickedUserIndex: null,
     showPermissionEdit: false,
     errorMessage: "",
-    hasAddClicked: false
+    hasAddClicked: false,
   };
 
   componentDidMount = () => {
@@ -44,25 +45,41 @@ class Users extends React.Component {
 
   getUserData = async () => {
     const { data } = await getUsers();
+    const mode = sessionStorage.getItem("mode");
     let usersProjects = [];
     let hasAdminPermission = false;
+    const filteredProjects = [];
     //check if the signed in user has admin permissions
     const signInName = sessionStorage.getItem("username");
     for (let user of data) {
       if (user.username === signInName) {
         hasAdminPermission = user.admin;
-        usersProjects = user.projects;
-      }
-    }
-    for (let user of data) {
-      let filteredProjects = [];
-      for (let project of user.projects) {
-        if (usersProjects.includes(project)) {
-          filteredProjects.push(this.props.projectMap[project]);
+        if (mode === "lite") {
+          usersProjects = ["lite"];
+        } else {
+          usersProjects = user.projects;
         }
       }
-      user.projects = filteredProjects;
     }
+    if (mode === "lite") {
+      for (let user of data) {
+        if (user.projects.includes("lite")) {
+          user.projects = ["lite"];
+        } else {
+          user.projects = [];
+        }
+      }
+    } 
+    // else {
+    //   for (let user of data) {
+    //     for (let project of user.projects) {
+    //       if (usersProjects.includes(project)) {
+    //         filteredProjects.push(this.props.projectMap[project]);
+    //       }
+    //     }
+    //     user.projects = filteredProjects;
+    //   }
+    // }
     this.setState({ data, hasAdminPermission, usersProjects });
   };
 
@@ -73,13 +90,9 @@ class Users extends React.Component {
   getUserRole = e => {
     const { value } = e.target;
     const { projectid } = e.target.dataset;
-    if (this.state.roleEdit.length > 0) {
-      this.setState(state => ({
-        roleEdit: state.roleEdit.concat([{ [projectid]: { role: value } }])
-      }));
-    } else {
-      this.setState({ roleEdit: [{ [projectid]: { role: value } }] });
-    }
+    const roleEdit = { ...this.state.roleEdit };
+    roleEdit[projectid] = { role: value };
+    this.setState({ roleEdit });
   };
   getUserPermission = e => {
     const { value, checked } = e.target;
@@ -112,7 +125,7 @@ class Users extends React.Component {
 
   updateAdmin = async (username, admin) => {
     updateUser(username, {
-      admin: !admin
+      admin: !admin,
     })
       .then(() => {
         this.getUserData();
@@ -127,24 +140,30 @@ class Users extends React.Component {
   updateUserRole = () => {
     const updates = [];
     const updatedBy = sessionStorage.getItem("username");
-    for (let item of this.state.roleEdit) {
-      const projectid = Object.keys(item);
-      const role = Object.values(item);
-      const body = { ...role[0], updatedBy };
-      updates.push(
-        updateUserProjectRole(projectid[0], this.state.userToEdit, body)
-      );
+    const { roleEdit } = this.state;
+    if (Object.keys(roleEdit).length > 0) {
+      for (let item in roleEdit) {
+        if (roleEdit[item].role === "None") {
+          updates.push(deleteUserProjectRole(item, this.state.userToEdit));
+        } else {
+          const body = { ...roleEdit[item], updatedBy };
+          updates.push(
+            updateUserProjectRole(item, this.state.userToEdit, body)
+          );
+        }
+      }
+      Promise.all(updates)
+        .then(() => {
+          this.getUserData();
+          this.handleCancel();
+        })
+        .catch(err => {
+          this.setState({ errorMessage: err.response.data.message });
+          console.log(err);
+        });
+    } else {
+      this.setState({ errorMessage: "Please change role before submit!" });
     }
-    this.handleCancel();
-    Promise.all(updates)
-      .then(() => {
-        this.getUserData();
-        this.handleCancel();
-      })
-      .catch(err => {
-        this.setState({ errorMessage: err.response.data.message });
-        console.log(err);
-      });
   };
 
   handleSingleDelete = () => {
@@ -177,6 +196,7 @@ class Users extends React.Component {
       .then(() => {
         this.getUserData();
         this.handleCancel();
+        this.setState({ selectAll: 0 });
       })
       .catch(err => {
         this.setState({ errorMessage: err.response.data.message });
@@ -190,7 +210,7 @@ class Users extends React.Component {
 
   displayUserPermissionEdit = index => {
     this.setState(state => ({
-      showPermissionEdit: !state.showPermissionEdit
+      showPermissionEdit: !state.showPermissionEdit,
     }));
     const obj = {};
     this.state.data[index].permissions.forEach(el => {
@@ -205,16 +225,21 @@ class Users extends React.Component {
   };
 
   convertArrToStr = arr => {
+    const mode = sessionStorage.getItem("mode");
     if (arr.length > 0) {
       const result = [];
       const displayMap = {
         CreateUser: "user",
         CreatePAC: "connection",
         CreateAutoPACQuery: "query",
-        CreateProject: "project"
+        CreateProject: "project",
       };
       arr.forEach(el => {
-        result.push(displayMap[el]);
+        if (mode === "lite" && el === "CreateProject") {
+          return;
+        } else {
+          result.push(displayMap[el]);
+        }
       });
       return result.join(", ");
     } else {
@@ -229,13 +254,13 @@ class Users extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0
+          selectAll: 0,
         });
       }
     } else {
       newSelected[username] = true;
       await this.setState({
-        selectAll: 2
+        selectAll: 2,
       });
     }
     this.setState({ selected: newSelected });
@@ -251,7 +276,7 @@ class Users extends React.Component {
 
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
+      selectAll: this.state.selectAll === 0 ? 1 : 0,
     });
   }
 
@@ -267,7 +292,7 @@ class Users extends React.Component {
       hasDeleteAllClicked: false,
       hasDeleteSingleClicked: false,
       errorMessage: "",
-      hasAddClicked: false
+      hasAddClicked: false,
     });
   };
 
@@ -276,6 +301,8 @@ class Users extends React.Component {
   };
 
   createUser = () => {
+    const mode = sessionStorage.getItem("mode");
+    let roleEdit = [];
     let body = {};
     const { userToEdit } = this.state;
     if (userToEdit) {
@@ -290,11 +317,26 @@ class Users extends React.Component {
         }
       }
       body = permissions
-        ? { ...body, username: userToEdit, email: userToEdit, permissions }
-        : { ...body, username: userToEdit, email: userToEdit };
+        ? { ...body, username: userToEdit, permissions: permissions }
+        : { ...body, username: userToEdit };
+
+      if (mode === "lite" && Object.keys(this.state.roleEdit).length === 0)
+        roleEdit = [{ role: "Member", project: "lite" }];
+      else {
+        const projectIds = Object.keys(this.state.roleEdit);
+        const roles = Object.values(this.state.roleEdit);
+        projectIds.forEach((el, i) => {
+          roleEdit.push({ role: roles[i].role, project: el });
+        });
+      }
+
+      if (roleEdit.length > 0) {
+        body.projects = roleEdit;
+      }
+
       createUser(body)
         .then(async () => {
-          await this.updateUserRole();
+          // await this.updateUserRole();
           this.getUserData();
           this.handleCancel();
         })
@@ -306,6 +348,7 @@ class Users extends React.Component {
   };
 
   defineColumns = () => {
+    const mode = sessionStorage.getItem("mode");
     return [
       {
         id: "checkbox",
@@ -336,7 +379,7 @@ class Users extends React.Component {
           );
         },
         sortable: false,
-        width: 45
+        width: 45,
       },
       {
         Header: "First",
@@ -346,8 +389,7 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 35,
-        className: "mng-user__cell"
-        // Cell: original => <div data-name="firstname">{firstname}</div>
+        className: "mng-user__cell",
       },
       {
         Header: "Last",
@@ -357,8 +399,17 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 35,
-        className: "mng-user__cell"
-        // Cell: original => <div data-name="lastname">{lastname}</div>
+        className: "mng-user__cell",
+      },
+      {
+        Header: "User Name",
+        accessor: "username",
+        className: "usersTable-cell",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 20,
+        minWidth: 35,
+        className: "mng-user__cell",
       },
       {
         Header: "Email",
@@ -368,8 +419,7 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
-        className: "mng-user__cell"
-        // Cell: original => <div data-name="email">{email}</div>
+        className: "mng-user__cell",
       },
       {
         Header: "Projects",
@@ -400,7 +450,7 @@ class Users extends React.Component {
               <p className={className}>{text}</p>
             </div>
           );
-        }
+        },
       },
       {
         Header: "Admin",
@@ -421,7 +471,7 @@ class Users extends React.Component {
               {original.row.checkbox.admin ? <FaCheck /> : <FaTimes />}
             </div>
           );
-        }
+        },
       },
 
       {
@@ -447,7 +497,7 @@ class Users extends React.Component {
               <p className={className}>{text}</p>
             </div>
           );
-        }
+        },
       },
       {
         Header: "",
@@ -464,8 +514,8 @@ class Users extends React.Component {
             >
               <FaRegTrashAlt className="menu-clickable" />
             </div>
-          ) : null
-      }
+          ) : null,
+      },
     ];
   };
 
@@ -475,7 +525,7 @@ class Users extends React.Component {
       clickedUserIndex,
       usersProjects,
       showRoleEdit,
-      showPermissionEdit
+      showPermissionEdit,
     } = this.state;
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     return (
@@ -490,15 +540,16 @@ class Users extends React.Component {
             className="pro-table"
             data={data}
             columns={this.defineColumns()}
+            defaultPageSize={10}
           />
           {showRoleEdit && (
             <UserRoleEditForm
               onSubmit={this.updateUserRole}
               onSelect={this.getUserRole}
               projectMap={this.props.projectMap}
-              projects={usersProjects}
               onCancel={this.handleCancel}
               projectToRole={data[clickedUserIndex].projectToRole}
+              error={this.state.errorMessage}
             />
           )}
           {showPermissionEdit && (

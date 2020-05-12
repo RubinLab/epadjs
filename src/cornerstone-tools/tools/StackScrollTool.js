@@ -1,8 +1,8 @@
-import BaseTool from './base/BaseTool.js';
-import scroll from '../util/scroll.js';
-import { getToolState } from '../stateManagement/toolState.js';
-import { setToolOptions, getToolOptions } from '../toolOptions.js';
-import { stackScrollCursor } from './cursors/index.js';
+import BaseTool from "./base/BaseTool.js";
+import scroll from "../util/scroll.js";
+import { getToolState } from "../stateManagement/toolState.js";
+import { setToolOptions, getToolOptions } from "../toolOptions.js";
+import { stackScrollCursor } from "./cursors/index.js";
 
 /**
  * @public
@@ -15,13 +15,13 @@ import { stackScrollCursor } from './cursors/index.js';
 export default class StackScrollTool extends BaseTool {
   constructor(props = {}) {
     const defaultProps = {
-      name: 'StackScroll',
-      supportedInteractionTypes: ['Mouse', 'Touch'],
+      name: "StackScroll",
+      supportedInteractionTypes: ["Mouse", "Touch"],
       configuration: {
         loop: false,
-        allowSkipping: true,
+        allowSkipping: true
       },
-      svgCursor: stackScrollCursor,
+      svgCursor: stackScrollCursor
     };
 
     super(props, defaultProps);
@@ -31,6 +31,7 @@ export default class StackScrollTool extends BaseTool {
   }
 
   _dragCallback(evt) {
+    console.log("Stack scroll", evt);
     const eventData = evt.detail;
     const { element, deltaPoints } = eventData;
     const { loop, allowSkipping } = this.configuration;
@@ -64,7 +65,7 @@ export default class StackScrollTool extends BaseTool {
   }
 
   _getPixelPerImage(element) {
-    const toolData = getToolState(element, 'stack');
+    const toolData = getToolState(element, "stack");
 
     if (!toolData || !toolData.data || !toolData.data.length) {
       return;

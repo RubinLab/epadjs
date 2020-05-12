@@ -2,9 +2,11 @@ import React from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
-import { ToastContainer, toast } from "react-toastify";
-import { getProjects, uploadFile } from "../../services/projectServices";
-import { getCurrentUser } from "../../services/authService";
+import { getProjects, uploadFileToProject } from "../../services/projectServices";
+import { uploadFileToSubject } from "../../services/subjectServices";
+import { uploadFileToStudy } from "../../services/studyServices";
+import { uploadFileToSeries } from "../../services/seriesServices";
+
 const mode = sessionStorage.getItem("mode");
 
 class UploadModal extends React.Component {
@@ -13,7 +15,7 @@ class UploadModal extends React.Component {
     osirix: false,
     projects: [],
     files: [],
-    projectID: ""
+    projectID: "",
   };
 
   onSelect = e => {
@@ -33,37 +35,48 @@ class UploadModal extends React.Component {
   };
 
   onUpload = () => {
+    let { selectedPatients, selectedStudies, selectedSeries } = this.props;
+    selectedPatients = Object.values(selectedPatients);
+    selectedStudies = Object.values(selectedStudies);
+    selectedSeries = Object.values(selectedSeries);
+
+    const promises = [];
     const projectID = this.props.projectID
       ? this.props.projectID
       : this.state.projectID;
-    const userName = getCurrentUser();
     const formData = new FormData();
-
     this.state.files.forEach((file, index) => {
       formData.append(`file${index + 1}`, file);
     });
     const config = {
       headers: {
-        "content-type": "multipart/form-data"
-      }
+        "content-type": "multipart/form-data",
+      },
     };
 
     this.props.onSubmit();
-    uploadFile(formData, config, projectID, userName)
+    if (selectedPatients.length > 0) {
+      selectedPatients.forEach(el =>
+        promises.push(uploadFileToSubject(formData, config, el))
+      );
+    } else if (selectedStudies.length > 0) {
+      selectedStudies.forEach(el =>
+        promises.push(uploadFileToStudy(formData, config, el))
+      );
+    } else if (selectedSeries.length > 0) {
+      selectedSeries.forEach(el =>
+        promises.push(uploadFileToSeries(formData, config, el))
+      );
+    } else {
+      promises.push(uploadFileToProject(formData, config, projectID));
+    }
+
+    Promise.all(promises)
       .then(() => {
         this.props.onSubmit();
       })
       .catch(err => {
         console.log(err);
-        // const fileName = this.state.file.name.substring(0, 50);
-        // toast.error(
-        //   `Error occured while uploading ${fileName}${
-        //     this.state.file.name.length > 50 ? "..." : "!"
-        //   }`,
-        //   {
-        //     autoClose: false
-        //   }
-        // );
         this.props.onSubmit();
       });
     this.props.onCancel();
@@ -210,12 +223,14 @@ class UploadModal extends React.Component {
 }
 
 UploadModal.propTypes = {
-  onCancel: PropTypes.func
+  onCancel: PropTypes.func,
 };
 
 const mapStateToProps = state => {
   return {
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+    selectedPatients: state.annotationsListReducer.selectedPatients,
+    selectedStudies: state.annotationsListReducer.selectedStudies,
+    selectedSeries: state.annotationsListReducer.selectedSeries,
   };
 };
 

@@ -39,19 +39,31 @@ class Subjects extends Component {
       expandedIDs: {},
       numOfStudies: 0,
       data: [],
-      expansionArr: []
+      expansionArr: [],
     };
   }
 
   async componentDidMount() {
     try {
       const pid = mode === "lite" ? "lite" : this.props.pid;
-      let data = Object.values(this.props.treeData);
+      let data = [];
+      if (this.props.treeData[pid]) {
+        data = Object.values(this.props.treeData[pid]);
+      }
       if (data.length > 0) {
         data = data.map(el => el.data);
+        data.sort(function(a, b) {
+          if (a.subjectName < b.subjectName) {
+            return -1;
+          }
+          if (a.subjectName > b.subjectName) {
+            return 1;
+          }
+          return 0;
+        });
       } else {
         data = await this.getData();
-        this.props.getTreeData("subject", data);
+        this.props.getTreeData(pid, "subject", data);
       }
       const expanded = {};
       this.setState({ data });
@@ -63,13 +75,20 @@ class Subjects extends Component {
       });
       this.setState({ expanded });
     } catch (err) {
-      console.log("Couldn't load all subjects data. Please Try again!");
+      // console.log(err);
+      console.log(`couldn't load all subjects data. Please Try again!`);
     }
   }
 
   async componentDidUpdate(prevProps) {
     try {
-      const { uploadedPid, lastEventId, pid, expandLevel } = this.props;
+      const {
+        uploadedPid,
+        lastEventId,
+        pid,
+        expandLevel,
+        closeAllCounter,
+      } = this.props;
 
       let data;
       if (this.props.update !== prevProps.update) {
@@ -80,9 +99,14 @@ class Subjects extends Component {
           data,
           "subjectID"
         );
-        this.props.getTreeData("subject", data);
-        await this.setState({ data, expanded });
+        this.props.getTreeData(pid, "subject", data);
+        this.setState({ data, expanded });
       }
+
+      if (closeAllCounter !== prevProps.closeAllCounter) {
+        this.setState({ expanded: {} });
+      }
+
       if (this.props.expandLevel != prevProps.expandLevel) {
         this.props.expandLevel >= 1 && this.state.data.length
           ? this.expandCurrentLevel()
@@ -114,33 +138,45 @@ class Subjects extends Component {
       if (this.props.pid !== prevProps.pid) {
         if (!data) {
           data = await this.getData();
+          this.props.getTreeData(pid, "subject", data);
         }
-        this.setState({ data });
+        // this.setState({ data });
       }
     } catch (err) {
-      console.log("Couldn't load all subjects data. Please Try again!");
+      console.log(`couldn't load all subjects data. Please Try again!`);
     }
   }
   expandCurrentLevel = async () => {
     try {
       const expansionArr = [];
       const expanded = {};
-      for (let i = 0; i < this.state.data.length; i++) {
-        expanded[i] = this.state.data[i].numberOfStudies ? true : false;
-        // expansionArr[i] = this.state.data[i].subjectID;
-      }
+      if (this.state.data)
+        for (let i = 0; i < this.state.data.length; i++) {
+          expanded[i] = this.state.data[i].numberOfStudies ? true : false;
+          // expansionArr[i] = this.state.data[i].subjectID;
+        }
       this.setState({ expanded });
     } catch (err) {
-      console.log("Couldn't load all subjects data. Please Try again!");
+      console.log(`Couldn't load all subjects data. Please Try again!`);
     }
   };
 
   getData = async () => {
-    const { data } = await getSubjects(this.props.pid);
-    for (let subject of data) {
-      subject.children = [];
+    let data = [];
+    try {
+      const { pid } = this.props;
+      const isPropsPidNull = !pid || pid === "null";
+      if (!isPropsPidNull || mode === "lite") {
+        const result = await getSubjects(pid);
+        data = result.data;
+        for (let subject of data) {
+          subject.children = [];
+        }
+      }
+      return data;
+    } catch (err) {
+      console.log(err);
     }
-    return data;
   };
 
   incColumns = ["subjectName", "numberOfStudies"];
@@ -152,7 +188,7 @@ class Subjects extends Component {
         columns.push({
           accessor: key,
           Header: key,
-          style: { whiteSpace: "normal" }
+          style: { whiteSpace: "normal" },
         });
       }
     }
@@ -169,17 +205,22 @@ class Subjects extends Component {
         id: "searchView-checkbox",
         accessor: "",
         resizable: false,
+        sortable: false,
         width: this.widthUnit,
-        Cell: ({ original }) => {
+        Cell: row => {
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={this.props.selectedPatients[original.subjectID] || false}
-              onChange={() => this.selectRow(original)}
+              checked={
+                this.props.selectedPatients[row.original.subjectID] || false
+              }
+              onChange={() =>
+                this.selectRow({ ...row.original, index: row.index })
+              }
             />
           );
-        }
+        },
       },
       {
         Header: (
@@ -188,6 +229,7 @@ class Subjects extends Component {
         width: this.widthUnit * 13,
         id: "searchView-desc",
         resizable: true,
+        sortable: true,
         accessor: "subjectName",
         Cell: ({ original }) => {
           const desc = this.cleanCarets(original.subjectName);
@@ -202,7 +244,7 @@ class Subjects extends Component {
               </ReactTooltip>
             </>
           );
-        }
+        },
       },
       {
         Header: (
@@ -224,7 +266,7 @@ class Subjects extends Component {
               </span>
             )}
           </div>
-        )
+        ),
       },
       {
         Header: (
@@ -246,7 +288,7 @@ class Subjects extends Component {
               </span>
             )}
           </div>
-        )
+        ),
       },
       {
         Header: (
@@ -259,7 +301,7 @@ class Subjects extends Component {
         id: "searchView-img",
         resizable: false,
         // minResizeWidth: this.widthUnit * 3,
-        Cell: row => <div />
+        Cell: row => <div />,
       },
       {
         Header: <div className="search-header__col">Type</div>,
@@ -267,7 +309,11 @@ class Subjects extends Component {
         id: "searchView-type",
         resizable: false,
         // minResizeWidth: this.widthUnit * 5,
-        Cell: row => <div />
+        Cell: row => (
+          <div style={{ textAlign: "center" }}>
+            {row.original.examTypes.join("/")}
+          </div>
+        ),
       },
       {
         Header: <div className="search-header__col">Creation date</div>,
@@ -275,7 +321,7 @@ class Subjects extends Component {
         id: "searchView-crDate",
         resizable: false,
         // minResizeWidth: this.widthUnit * 10,
-        Cell: row => <div />
+        Cell: row => <div />,
       },
       {
         Header: <div className="search-header__col">Upload date</div>,
@@ -283,7 +329,7 @@ class Subjects extends Component {
         id: "searchView-upldDate",
         resizable: false,
         // minResizeWidth: this.widthUnit * 10,
-        Cell: row => <div />
+        Cell: row => <div />,
       },
       {
         Header: <div className="search-header__col">Accession</div>,
@@ -291,7 +337,7 @@ class Subjects extends Component {
         id: "searchView-access",
         resizable: false,
         // minResizeWidth: this.widthUnit * 4,
-        Cell: row => <div />
+        Cell: row => <div />,
       },
       {
         Header: <div className="search-header__col">Idenditifier</div>,
@@ -317,8 +363,8 @@ class Subjects extends Component {
               </ReactTooltip>
             </>
           );
-        }
-      }
+        },
+      },
     ];
     return columns;
   }
@@ -340,7 +386,7 @@ class Subjects extends Component {
       const _id = chance.guid();
       return {
         _id,
-        ...item
+        ...item,
       };
     });
     return data;
@@ -365,7 +411,7 @@ class Subjects extends Component {
         // it does exist so we will remove it using destructing
         selection = [
           ...selection.slice(0, keyIndex),
-          ...selection.slice(keyIndex + 1)
+          ...selection.slice(keyIndex + 1),
         ];
       } else {
         // it does not exist so add it
@@ -377,20 +423,20 @@ class Subjects extends Component {
   };
   toggleAll = () => {
     /*
-      'toggleAll' is a tricky concept with any filterable table
+      "toggleAll" is a tricky concept with any filterable table
       do you just select ALL the records that are in your data?
       OR
       do you only select ALL the records that are in the current filtered data?
 
-      The latter makes more sense because 'selection' is a visual thing for the user.
+      The latter makes more sense because "selection" is a visual thing for the user.
       This is especially true if you are going to implement a set of external functions
       that act on the selected information (you would not want to DELETE the wrong thing!).
 
       So, to that end, access to the internals of ReactTable are required to get what is
       currently visible in the table (either on the current page or any other page).
 
-      The HOC provides a method call 'getWrappedInstance' to get a ref to the wrapped
-      ReactTable and then get the internal state and the 'sortedData'.
+      The HOC provides a method call "getWrappedInstance" to get a ref to the wrapped
+      ReactTable and then get the internal state and the "sortedData".
       That can then be iterrated to get all the currently visible records and set
       the selection state.
     */
@@ -399,9 +445,9 @@ class Subjects extends Component {
     if (selectAll) {
       // we need to get at the internals of ReactTable
       const wrappedInstance = this.selectTable.getWrappedInstance();
-      // the 'sortedData' property contains the currently accessible records based on the filter and sort
+      // the "sortedData" property contains the currently accessible records based on the filter and sort
       const currentRecords = wrappedInstance.getResolvedState().sortedData;
-      // we need to get all the 'real' (original) records out to get at their IDs
+      // we need to get all the "real" (original) records out to get at their IDs
       const nodes = getNodes(currentRecords);
       // we just push all the IDs onto the selection array
       nodes.forEach(item => {
@@ -412,7 +458,7 @@ class Subjects extends Component {
   };
   isSelected = key => {
     /*
-      Instead of passing our external selection state we provide an 'isSelected'
+      Instead of passing our external selection state we provide an "isSelected"
       callback and detect the selection state ourselves. This allows any implementation
       for selection (either an array, object keys, or even a Javascript Set object).
     */
@@ -425,7 +471,7 @@ class Subjects extends Component {
     this.setState({
       selectType: this.state.selectType === "radio" ? "checkbox" : "radio",
       selection: [],
-      selectAll: false
+      selectAll: false,
     });
   };
   toggleTree = () => {
@@ -463,7 +509,7 @@ class Subjects extends Component {
       logSelection,
       toggleType,
       onExpandedChange,
-      toggleTree
+      toggleTree,
     } = this;
     const {
       data,
@@ -471,7 +517,7 @@ class Subjects extends Component {
       selectAll,
       selectType,
       pivotBy,
-      expanded
+      expanded,
     } = this.state;
     const extraProps = {
       selectAll,
@@ -481,7 +527,7 @@ class Subjects extends Component {
       selectType,
       pivotBy,
       expanded,
-      onExpandedChange
+      onExpandedChange,
     };
 
     const TheadComponent = props => null;
@@ -508,17 +554,19 @@ class Subjects extends Component {
                     subjectId={row.original.displaySubjectID}
                     update={this.props.update}
                     expandLevel={this.props.expandLevel}
-                    updateExpandedLevelNums={this.props.updateExpandedLevelNums}
+                    // updateExpandedLevelNums={this.props.updateExpandedLevelNums}
                     progressUpdated={this.props.progressUpdated}
                     expansionArr={this.state.expansionArr}
                     getTreeExpandSingle={this.props.getTreeExpandSingle}
                     getTreeExpandAll={this.props.getTreeExpandAll}
                     treeExpand={this.props.treeExpand}
                     patientIndex={row.index}
-                    expandLoading={this.props.expandLoading}
-                    patientExpandComplete={this.props.patientExpandComplete}
+                    // expandLoading={this.props.expandLoading}
+                    // patientExpandComplete={this.props.patientExpandComplete}
                     treeData={this.props.treeData}
                     getTreeData={this.props.getTreeData}
+                    closeAllCounter={this.props.closeAllCounter}
+                    pid={this.props.pid}
                   />
                 </div>
               );
@@ -532,7 +580,7 @@ class Subjects extends Component {
 
 const mapStateToProps = state => {
   return {
-    selectedPatients: state.annotationsListReducer.selectedPatients
+    selectedPatients: state.annotationsListReducer.selectedPatients,
   };
 };
 export default connect(mapStateToProps)(Subjects);

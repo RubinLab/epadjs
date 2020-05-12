@@ -63,8 +63,7 @@ export const clearAimId = () => {
 export const updateImageIndex = imageIndex => {
   return { type: UPDATE_IMAGE_INDEX, imageIndex };
 };
-export const updateImageId = event => {
-  const imageID = event.detail.image.imageId.split("/").pop();
+export const updateImageId = imageID => {
   return {
     type: UPDATE_IMAGEID,
     imageID
@@ -77,10 +76,10 @@ export const closeSerie = () => {
   };
 };
 
-export const getNotificationsData = (uploadedPid, lastEventId) => {
+export const getNotificationsData = (uploadedPid, lastEventId, refresh) => {
   return {
     type: GET_NOTIFICATIONS,
-    payload: { uploadedPid, lastEventId }
+    payload: { uploadedPid, lastEventId, refresh },
   };
 };
 
@@ -147,17 +146,17 @@ export const displaySingleAim = (
 };
 
 export const selectPatient = selectedPatientObj => {
-  let {
+   let {
     projectID,
-    subjectID,
     subjectName,
-    numberOfAnnotations
+    numberOfAnnotations,
+    index
   } = selectedPatientObj;
   projectID = projectID ? projectID : "lite";
-
+  const patientID = selectedPatientObj.subjectID;
   return {
     type: SELECT_PATIENT,
-    patient: { projectID, subjectID, numberOfAnnotations, subjectName }
+    patient: { projectID, patientID, numberOfAnnotations, subjectName, index },
   };
 };
 
@@ -619,10 +618,11 @@ const getSingleSerieData = (serie, annotation) => {
     projectID = projectID ? projectID : "lite";
     patientID = patientID ? patientID : serie.subjectID;
     const promises = [];
+
     promises.push(
       getAnnotationsJSON(projectID, patientID, studyUID, seriesUID)
     );
-    promises.push(getStudyAims(patientID, studyUID));
+    promises.push(getStudyAims(patientID, studyUID, projectID));
     Promise.all(promises)
       .then(async result => {
         serieAims = result[0].data;

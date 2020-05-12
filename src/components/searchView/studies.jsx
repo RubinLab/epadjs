@@ -22,7 +22,7 @@ import {
   addToGrid,
   getWholeData,
   alertViewPortFull,
-  updatePatient
+  updatePatient,
   // showAnnotationDock
 } from "../annotationsList/action";
 import { persistExpandView } from "../../Utils/aid";
@@ -68,7 +68,7 @@ class Studies extends Component {
       selectedStudy: {},
       isSerieSelectionOpen: false,
       childExpanded: {},
-      expansionArr: []
+      expansionArr: [],
     };
   }
 
@@ -81,30 +81,28 @@ class Studies extends Component {
         expandLevel,
         treeExpand,
         patientIndex,
-        expandLoading,
-        patientExpandComplete,
-        treeData
+        treeData,
       } = this.props;
-      let data = Object.values(treeData[subjectId].studies);
+      let data = Object.values(treeData[projectId][subjectId].studies);
       if (data.length > 0) {
         data = data.map(el => el.data);
       } else {
         let studies = await getStudies(projectId, subjectId);
         data = studies.data;
-        this.props.getTreeData("studies", data);
+        this.props.getTreeData(projectId, "studies", data);
       }
       this.setState({ data });
       this.setState({ columns: this.setColumns() });
       const studyOpened = expansionArr.includes(subjectId);
       // const alreadyCounted = expandLoading.numOfPresentStudies > 0;
-      if (!studyOpened && expandLevel === 1 && !patientExpandComplete) {
-        this.props.updateExpandedLevelNums("subject", data.length, 1);
-      }
+      // if (!studyOpened && expandLevel === 1 && !patientExpandComplete) {
+      //   this.props.updateExpandedLevelNums("subject", data.length, 1);
+      // }
       if (expandLevel > 1) {
         this.expandCurrentLevel();
         const obj = {
           patient: this.props.patientIndex,
-          study: data.length
+          study: data.length,
         };
         this.props.getTreeExpandAll(obj, true, expandLevel);
       }
@@ -115,7 +113,7 @@ class Studies extends Component {
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
-          draggable: true
+          draggable: true,
         });
       }
       const expanded = {};
@@ -128,13 +126,19 @@ class Studies extends Component {
         this.setState({ expanded });
       }
     } catch (err) {
-      console.log("Couldn't load all study data. Please Try again!");
+      console.log(`couldn't load all study data. Please Try again!`);
     }
   }
 
   async componentDidUpdate(prevProps) {
     try {
-      if (this.props.update !== prevProps.update) {
+      const { patientIndex, update, treeExpand, closeAllCounter } = this.props;
+
+      if (closeAllCounter !== prevProps.closeAllCounter) {
+        this.setState({ expanded: {} });
+      }
+      
+      if (update !== prevProps.update && treeExpand[patientIndex]) {
         const { data: data } = await getStudies(
           this.props.projectId,
           this.props.subjectId
@@ -146,7 +150,7 @@ class Studies extends Component {
           "studyUID"
         );
         await this.setState({ data, expanded });
-        this.props.getTreeData("studies", data);
+        this.props.getTreeData(this.props.projectId, "studies", data);
       }
       const { expansionArr, expandLevel, subjectId } = this.props;
       const studyOpened = expansionArr.includes(subjectId);
@@ -157,20 +161,20 @@ class Studies extends Component {
 
         const expandedToStudies =
           prevProps.expandLevel < expandLevel && expandLevel === 1;
-        if (expandedToStudies && studyOpened) {
-          this.props.updateExpandedLevelNums(
-            "subject",
-            this.state.data.length,
-            1
-          );
-        }
+        // if (expandedToStudies && studyOpened) {
+        //   this.props.updateExpandedLevelNums(
+        //     "subject",
+        //     this.state.data.length,
+        //     1
+        //   );
+        // }
         const shrinkedToStudy =
           prevProps.expandLevel > expandLevel && expandLevel === 1;
         const expandToSeries =
           prevProps.expandLevel < expandLevel && expandLevel === 2;
         const obj = {
           patient: this.props.patientIndex,
-          study: this.state.data.length
+          study: this.state.data.length,
         };
         if (shrinkedToStudy) {
           this.setState({ expansionArr: [] });
@@ -181,7 +185,7 @@ class Studies extends Component {
         }
       }
     } catch (err) {
-      console.log("Couldn't load all study data. Please Try again!");
+      console.log(`couldn't load all study data. Please Try again!`);
     }
   }
 
@@ -189,12 +193,13 @@ class Studies extends Component {
     try {
       const expansionArr = [];
       const expanded = {};
-      for (let i = 0; i < this.state.data.length; i++) {
-        expanded[i] = this.state.data[i].numberOfSeries ? true : false;
-      }
+      if (this.state.data)
+        for (let i = 0; i < this.state.data.length; i++) {
+          expanded[i] = this.state.data[i].numberOfSeries ? true : false;
+        }
       this.setState({ expanded });
     } catch (err) {
-      console.log("Couldn't load all study data. Please Try again!");
+      console.log(`couldn't load all study data. Please Try again!`);
     }
   };
 
@@ -234,7 +239,7 @@ class Studies extends Component {
               onChange={() => this.selectRow(original)}
             />
           );
-        }
+        },
       },
       {
         width: this.widthUnit * 12,
@@ -258,7 +263,7 @@ class Studies extends Component {
               </ReactTooltip>
             </>
           );
-        }
+        },
       },
       {
         width: this.widthUnit * 2,
@@ -274,7 +279,7 @@ class Studies extends Component {
               )}
             </span>
           </div>
-        )
+        ),
       },
       {
         width: this.widthUnit * 3,
@@ -288,7 +293,7 @@ class Studies extends Component {
               </span>
             )}
           </div>
-        )
+        ),
       },
       {
         width: this.widthUnit * 3,
@@ -302,7 +307,7 @@ class Studies extends Component {
               </span>
             )}
           </div>
-        )
+        ),
       },
       {
         //Header: "Type",
@@ -311,7 +316,7 @@ class Studies extends Component {
           <div className="searchView-table__cell">
             {row.original.examTypes.join("/")}
           </div>
-        )
+        ),
       },
       {
         //Header: "Study/Created Date",
@@ -320,7 +325,7 @@ class Studies extends Component {
           <div className="searchView-table__cell">
             {formatDates(row.original.insertDate)}
           </div>
-        )
+        ),
       },
       {
         //Header: "Uploaded",
@@ -329,7 +334,7 @@ class Studies extends Component {
           <div className="searchView-table__cell">
             {formatDates(row.original.createdTime)}
           </div>
-        )
+        ),
       },
       {
         //Header: "Accession",
@@ -353,7 +358,7 @@ class Studies extends Component {
               <span>{row.original.studyAccessionNumber}</span>
             </ReactTooltip>
           </>
-        )
+        ),
       },
       {
         //Header: "Identifier",
@@ -373,8 +378,8 @@ class Studies extends Component {
               <span>{row.original.studyUID}</span>
             </ReactTooltip>
           </>
-        )
-      }
+        ),
+      },
     ];
     return columns;
   }
@@ -398,7 +403,7 @@ class Studies extends Component {
         // it does exist so we will remove it using destructing
         selection = [
           ...selection.slice(0, keyIndex),
-          ...selection.slice(keyIndex + 1)
+          ...selection.slice(keyIndex + 1),
         ];
       } else {
         // it does not exist so add it
@@ -410,20 +415,20 @@ class Studies extends Component {
   };
   toggleAll = () => {
     /*
-      'toggleAll' is a tricky concept with any filterable table
+      "toggleAll" is a tricky concept with any filterable table
       do you just select ALL the records that are in your data?
       OR
       do you only select ALL the records that are in the current filtered data?
 
-      The latter makes more sense because 'selection' is a visual thing for the user.
+      The latter makes more sense because "selection" is a visual thing for the user.
       This is especially true if you are going to implement a set of external functions
       that act on the selected information (you would not want to DELETE the wrong thing!).
 
       So, to that end, access to the internals of ReactTable are required to get what is
       currently visible in the table (either on the current page or any other page).
 
-      The HOC provides a method call 'getWrappedInstance' to get a ref to the wrapped
-      ReactTable and then get the internal state and the 'sortedData'.
+      The HOC provides a method call "getWrappedInstance" to get a ref to the wrapped
+      ReactTable and then get the internal state and the "sortedData".
       That can then be iterrated to get all the currently visible records and set
       the selection state.
     */
@@ -432,9 +437,9 @@ class Studies extends Component {
     if (selectAll) {
       // we need to get at the internals of ReactTable
       const wrappedInstance = this.selectTable.getWrappedInstance();
-      // the 'sortedData' property contains the currently accessible records based on the filter and sort
+      // the "sortedData" property contains the currently accessible records based on the filter and sort
       const currentRecords = wrappedInstance.getResolvedState().sortedData;
-      // we need to get all the 'real' (original) records out to get at their IDs
+      // we need to get all the "real" (original) records out to get at their IDs
       const nodes = getNodes(currentRecords);
       // we just push all the IDs onto the selection array
       nodes.forEach(item => {
@@ -445,7 +450,7 @@ class Studies extends Component {
   };
   isSelected = key => {
     /*
-      Instead of passing our external selection state we provide an 'isSelected'
+      Instead of passing our external selection state we provide an "isSelected"
       callback and detect the selection state ourselves. This allows any implementation
       for selection (either an array, object keys, or even a Javascript Set object).
     */
@@ -458,7 +463,7 @@ class Studies extends Component {
     this.setState({
       selectType: this.state.selectType === "radio" ? "checkbox" : "radio",
       selection: [],
-      selectAll: true
+      selectAll: true,
     });
   };
   // toggleTree = () => {
@@ -527,7 +532,7 @@ class Studies extends Component {
         await this.setState({
           isSerieSelectionOpen: true,
           selectedStudy: [seriesArr],
-          studyName: selected.studyDescription
+          studyName: selected.studyDescription,
         });
       } else {
         //if there is enough room
@@ -559,7 +564,7 @@ class Studies extends Component {
 
   closeSelectionModal = () => {
     this.setState(state => ({
-      isSerieSelectionOpen: !state.isSerieSelectionOpen
+      isSerieSelectionOpen: !state.isSerieSelectionOpen,
     }));
   };
 
@@ -571,7 +576,7 @@ class Studies extends Component {
     this.setState({ expansionArr });
     const obj = {
       patient: this.props.patientIndex,
-      study: { [index]: newExpanded[index] }
+      study: { [index]: newExpanded[index] },
     };
     this.props.getTreeExpandSingle(obj);
   };
@@ -584,7 +589,7 @@ class Studies extends Component {
       logSelection,
       toggleType,
       onExpandedChange,
-      toggleTree
+      toggleTree,
     } = this;
     const { data, columns, selectAll, selectType } = this.state;
     const extraProps = {
@@ -594,7 +599,7 @@ class Studies extends Component {
       toggleSelection,
       selectType,
       // expanded,
-      onExpandedChange
+      onExpandedChange,
     };
     const TheadComponent = props => null;
     return (
@@ -614,7 +619,7 @@ class Studies extends Component {
             getTdProps={(state, rowInfo, column) => ({
               onDoubleClick: e => {
                 this.displaySeries(rowInfo.original);
-              }
+              },
             })}
             expanded={this.state.expanded}
             SubComponent={row => {
@@ -627,7 +632,7 @@ class Studies extends Component {
                     studyDescription={row.original.studyDescription}
                     update={this.props.update}
                     expandLevel={this.props.expandLevel}
-                    updateExpandedLevelNums={this.props.updateExpandedLevelNums}
+                    // updateExpandedLevelNums={this.props.updateExpandedLevelNums}
                     progressUpdated={this.props.progressUpdated}
                     expansionArr={this.state.expansionArr}
                     getTreeExpandSingle={this.props.getTreeExpandSingle}
@@ -635,9 +640,10 @@ class Studies extends Component {
                     treeExpand={this.props.treeExpand}
                     patientIndex={this.props.patientIndex}
                     studyIndex={row.index}
-                    expandLoading={this.props.expandLoading}
+                    // expandLoading={this.props.expandLoading}
                     treeData={this.props.treeData}
                     getTreeData={this.props.getTreeData}
+                    closeAllCounter={this.props.closeAllCounter}
                   />
                 </div>
               );
@@ -662,7 +668,7 @@ const mapStateToProps = state => {
     patients: state.annotationsListReducer.patients,
     loading: state.annotationsListReducer.loading,
     selectedStudies: state.annotationsListReducer.selectedStudies,
-    showProjectModal: state.annotationsListReducer.showProjectModal
+    showProjectModal: state.annotationsListReducer.showProjectModal,
   };
 };
 export default withRouter(connect(mapStateToProps)(Studies));

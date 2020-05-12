@@ -1,13 +1,26 @@
 import React from "react";
 import Table from "react-table";
 import { Link } from "react-router-dom";
+import { connect } from "react-redux";
 import { FaRegTrashAlt, FaRegEye } from "react-icons/fa";
 import {
   getStudiesOfWorklist,
   deleteStudyFromWorklist
 } from "../../services/worklistServices";
-import { getProject } from "../../services/projectServices";
+import { getSeries } from "../../services/seriesServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
+import SeriesPopup from "./seriesPopup";
+import { MAX_PORT } from "../../constants";
+import {
+  addToGrid,
+  getSingleSerie,
+  getWholeData,
+  alertViewPortFull,
+  updatePatient,
+  clearSelection,
+  changeActivePort
+} from "../annotationsList/action";
+const mode = sessionStorage.getItem("mode");
 
 const messages = {
   deleteSingle: "Remove study from the worklist? This cannot be undone.",
@@ -23,7 +36,11 @@ class WorkList extends React.Component {
     // commentClicked: false,
     clickedIndex: null,
     selectAll: 0,
-    selected: {}
+    selected: {},
+    showSeries: false,
+    series: [],
+    selectedSeries: {},
+    error: null
   };
 
   componentDidMount = async () => {
@@ -41,11 +58,10 @@ class WorkList extends React.Component {
       sessionStorage.getItem("username"),
       this.props.match.params.wid
     );
-
-    for (let worklist of worklists) {
-      const { data: projectDetails } = await getProject(worklist.projectID);
-      worklist.projectName = projectDetails.name;
-    }
+    // for (let worklist of worklists) {
+    //   const { data: projectDetails } = await getProject(worklist.projectID);
+    //   worklist.projectName = projectDetails.name;
+    // }
     this.setState({ worklists });
   };
 
@@ -134,48 +150,33 @@ class WorkList extends React.Component {
     });
   }
 
+  handleOpenClick = async study => {
+    const { projectID, subjectID, studyUID } = study;
+    const { data: series } = await getSeries(projectID, subjectID, studyUID);
+    this.setState(state => ({
+      showSeries: !state.showSeries,
+      series
+    }));
+  };
+
+  handleCancelOpenSeries = () => {
+    this.setState(state => ({
+      showSeries: !state.showSeries,
+      series: [],
+      error: null
+    }));
+  };
+
   defineColumns = () => {
     return [
-      // {
-      //   id: "checkbox",
-      //   accessor: "",
-      //   width: 40,
-      //   Cell: ({ original }) => {
-      //     console.log(original);
-      //     return (
-      //       <input
-      //         type="checkbox"
-      //         className="checkbox-cell"
-      //         checked={this.state.selected[original.studyUID]}
-      //         onChange={() => this.toggleRow(original.studyUID)}
-      //       />
-      //     );
-      //   },
-      //   Header: x => {
-      //     return (
-      //       <input
-      //         type="checkbox"
-      //         className="checkbox-cell"
-      //         checked={this.state.selectAll === 1}
-      //         ref={input => {
-      //           if (input) {
-      //             input.indeterminate = this.state.selectAll === 2;
-      //           }
-      //         }}
-      //         onChange={() => this.toggleSelectAll()}
-      //       />
-      //     );
-      //   }
-      // },
-
       {
         id: "open",
         Header: "Open",
         width: 50,
         resizable: true,
-        Cell: original => {
+        Cell: row => {
           return (
-            <div onClick={this.props.onClose}>
+            <div onClick={() => this.handleOpenClick(row.original)}>
               <FaRegEye className="menu-clickable" />
             </div>
           );
@@ -215,6 +216,7 @@ class WorkList extends React.Component {
         accessor: "projectName",
         sortable: true,
         resizable: true,
+        show: mode === "thick",
         Cell: original => {
           let projectName = this.clearCarets(
             original.row._original.projectName
@@ -260,8 +262,89 @@ class WorkList extends React.Component {
     ];
   };
 
+  selectSeries = series => {
+    const { selectedSeries } = this.state;
+    selectedSeries[series.seriesUID]
+      ? delete selectedSeries[series.seriesUID]
+      : (selectedSeries[series.seriesUID] = series);
+    this.setState({ selectedSeries });
+  };
+
+  checkIfSerieOpen = selectedSerie => {
+    let isOpen = false;
+    let index;
+    this.props.openSeries.forEach((serie, i) => {
+      if (serie.seriesUID === selectedSerie) {
+        isOpen = true;
+        index = i;
+      }
+    });
+    return { isOpen, index };
+  };
+
+  viewSelection = async () => {
+    const notOpenSeries = [];
+    const selectedSeries = Object.values(this.state.selectedSeries);
+    if (selectedSeries.length > 0) {
+      //check if enough room to display selection
+      for (let serie of selectedSeries) {
+        if (!this.checkIfSerieOpen(serie.seriesUID).isOpen) {
+          notOpenSeries.push(serie);
+        }
+      }
+      //if all ports are full
+      if (
+        notOpenSeries.length > 0 &&
+        this.props.openSeries.length === MAX_PORT
+      ) {
+        this.props.dispatch(alertViewPortFull());
+      } else {
+        //if all series already open update active port
+        if (notOpenSeries.length === 0) {
+          let index = this.checkIfSerieOpen(selectedSeries[0].seriesUID).index;
+          this.props.dispatch(changeActivePort(index));
+          this.props.history.push("/display");
+          this.props.dispatch(clearSelection());
+        } else {
+          if (selectedSeries.length + this.props.openSeries.length > MAX_PORT) {
+            // alert user about the num of open series a the moment and told only max_port is allowed
+            const openPorts = this.props.openSeries.length;
+            this.setState({
+              error: `Already ${openPorts} viewers open. You can open ${MAX_PORT} at a time`
+            });
+          } else {
+            //else get data for each serie for display
+            selectedSeries.forEach(serie => {
+              this.props.dispatch(addToGrid(serie));
+              this.props.dispatch(getSingleSerie(serie));
+            });
+            for (let series of selectedSeries) {
+              if (!this.props.patients[series.patientID]) {
+                await this.props.dispatch(getWholeData(series));
+              } else {
+                this.props.dispatch(
+                  updatePatient(
+                    "serie",
+                    true,
+                    series.patientID,
+                    series.studyUID,
+                    series.seriesUID
+                  )
+                );
+              }
+            }
+            this.props.history.push("/display");
+            this.props.dispatch(clearSelection());
+          }
+        }
+      }
+    }
+  };
+
   render = () => {
     const selected = this.state.selectAll < 2;
+    const openSeriesUIDs = this.props.openSeries.map(el => el.seriesUID);
+
     return (
       <div className="worklist-page">
         <Table
@@ -280,9 +363,25 @@ class WorkList extends React.Component {
             error={this.state.errorMessage}
           />
         )}
+        {this.state.showSeries && (
+          <SeriesPopup
+            series={this.state.series}
+            open={this.viewSelection}
+            cancel={this.handleCancelOpenSeries}
+            selectSeries={this.selectSeries}
+            error={this.state.error}
+            openSeries={openSeriesUIDs}
+          />
+        )}
       </div>
     );
   };
 }
 
-export default WorkList;
+const mapStateToProps = state => {
+  return {
+    openSeries: state.annotationsListReducer.openSeries,
+    patients: state.annotationsListReducer.patients
+  };
+};
+export default connect(mapStateToProps)(WorkList);

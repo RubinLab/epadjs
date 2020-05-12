@@ -7,8 +7,10 @@ axios.defaults.headers.common["Content-Type"] =
   "application/json, multipart/form-data";
 
 axios.interceptors.request.use(
-  config => {
-    config.headers.authorization = auth.getAuthHeader1();
+  async config => {
+    // initializeKeyCloak();
+    const header = await auth.getAuthHeader();
+    if (header) config.headers.authorization = header;
     return config;
   },
   error => Promise.reject(error)
@@ -43,5 +45,5 @@ export default {
   get: axios.get,
   post: axios.post,
   put: axios.put,
-  delete: axios.delete
+  delete: axios.delete,
 };

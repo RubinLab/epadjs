@@ -68,17 +68,15 @@ export function getAnnotations2() {
 }
 
 export function downloadAnnotations(optionObj, aimIDlist, selection) {
-  if (mode === "lite") {
-    return http.post(
-      apiUrl +
-        "/projects/lite/aims/download?summary=" +
-        optionObj.summary +
-        "&aim=" +
-        optionObj.aim,
-      aimIDlist,
-      { responseType: "blob" }
-    );
-  }
+  return http.post(
+    apiUrl +
+      "/projects/lite/aims/download?summary=" +
+      optionObj.summary +
+      "&aim=" +
+      optionObj.aim,
+    aimIDlist,
+    { responseType: "blob" }
+  );
 }
 
 export function getSummaryAnnotations(projectID) {
@@ -87,22 +85,21 @@ export function getSummaryAnnotations(projectID) {
     : http.get(apiUrl + "/projects/" + projectID + "/aims?format=summary");
 }
 
-export function deleteAnnotation(aimObj, aimID, projectID) {
-  if (aimObj) {
-    aimID = aimObj.aimID;
-    projectID = aimObj.projectID ? projectID : "lite";
-  }
+export function deleteAnnotation(aimObj) {
+  const { aimID, projectID } = aimObj;
   return http.delete(
     apiUrl + "/projects/" + projectID + "/aims/" + aimID + "?deleteDSO=true"
   );
 }
 
-export function uploadAim(aim) {
+export function uploadAim(aim, projectId) {
   let url;
   if (mode === "lite") {
     url = apiUrl + "/projects/lite/aims";
-    return http.post(url, aim);
+  } else {
+    url = apiUrl + "/projects/" + projectId + "/aims";
   }
+  return http.post(url, aim);
 }
 
 export function uploadSegmentation(segmentation, projectId = "lite") {
@@ -111,8 +108,8 @@ export function uploadSegmentation(segmentation, projectId = "lite") {
   segData.append("file", segmentation, "blob.dcm");
   const config = {
     headers: {
-      "content-type": "multipart/form-data"
-    }
+      "content-type": "multipart/form-data",
+    },
   };
   return http.post(url, segData, config);
 }

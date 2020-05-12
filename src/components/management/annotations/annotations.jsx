@@ -4,10 +4,10 @@ import { Link } from "react-router-dom";
 import ReactTable from "react-table";
 import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
-import { FaRegEye } from "react-icons/fa";
+import { FaRegEye, FaCommentsDollar } from "react-icons/fa";
 import {
   getSummaryAnnotations,
-  deleteAnnotation
+  deleteAnnotation,
 } from "../../../services/annotationServices";
 import { getProjects } from "../../../services/projectServices";
 import matchSorter from "match-sorter";
@@ -21,22 +21,20 @@ import {
   alertViewPortFull,
   addToGrid,
   getSingleSerie,
-  getWholeData
+  getWholeData,
 } from "../../annotationsList/action";
 const mode = sessionStorage.getItem("mode");
 
 const messages = {
   deleteSelected: "Delete selected annotations? This cannot be undone.",
   fillRequiredFields: "Please fill the required fields",
-  dateFormat: "Date format should be M/d/yy."
+  dateFormat: "Date format should be M/d/yy.",
 };
 
 class Annotations extends React.Component {
   state = {
     annotations: [],
     projectList: [],
-    // singleDeleteData: {},
-    // deleteSingleClicked: false,
     hasAddClicked: false,
     deleteAllClicked: false,
     selectAll: 0,
@@ -44,7 +42,7 @@ class Annotations extends React.Component {
     filteredData: null,
     uploadClicked: false,
     downloadClicked: false,
-    projectID: ""
+    projectID: "",
   };
 
   componentDidMount = async () => {
@@ -57,32 +55,24 @@ class Annotations extends React.Component {
     }
   };
 
-  getAnnotationsData = async projectID => {
-    const { data: annotations } = await getSummaryAnnotations(projectID);
-    if (mode === "lite") {
-      for (let ann of annotations) {
-        ann.date = ann.date + "";
-        ann.studyDate = ann.studyDate + "";
-
-        let year1 = ann.date.substring(0, 4);
-        let month1 = ann.date.substring(4, 6);
-        let day1 = ann.date.substring(6, 8);
-        let hour = ann.date.substring(8, 10);
-        let min = ann.date.substring(10, 12);
-        let sec = ann.date.substring(12);
-        let dateFormat = year1 + "-" + month1 + "-" + day1;
-        let timeFormat = hour + ":" + min + ":" + sec;
-        let date = dateFormat + " " + timeFormat;
-
-        let year2 = ann.studyDate.substring(0, 4);
-        let month2 = ann.studyDate.substring(4, 6);
-        let day2 = ann.studyDate.substring(6, 8);
-        let studyDate = year2 + "-" + month2 + "-" + day2 + " " + "00:00:00";
-        ann.date = date;
-        ann.studyDate = studyDate;
+  componentDidUpdate = async prevProps => {
+    try {
+      const { projectID, refresh, lastEventId } = this.props;
+      if (refresh && lastEventId !== prevProps.lastEventId) {
+        await this.getAnnotationsData(projectID);
       }
+    } catch (err) {
+      console.log(err);
     }
-    this.setState({ annotations });
+  };
+
+  getAnnotationsData = async projectID => {
+    try {
+      const { data: annotations } = await getSummaryAnnotations(projectID);
+      this.setState({ annotations });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   handleProjectSelect = e => {
@@ -106,13 +96,13 @@ class Annotations extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0
+          selectAll: 0,
         });
       }
     } else {
       newSelected[id] = projectID;
       await this.setState({
-        selectAll: 2
+        selectAll: 2,
       });
     }
     this.setState({ selected: newSelected });
@@ -128,7 +118,7 @@ class Annotations extends React.Component {
     }
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
+      selectAll: this.state.selectAll === 0 ? 1 : 0,
     });
   }
 
@@ -142,7 +132,7 @@ class Annotations extends React.Component {
       error: "",
       deleteAllClicked: false,
       uploadClicked: false,
-      downloadClicked: false
+      downloadClicked: false,
     });
   };
 
@@ -150,9 +140,8 @@ class Annotations extends React.Component {
     let newSelected = Object.assign({}, this.state.selected);
     const promiseArr = [];
     for (let annotation in newSelected) {
-      promiseArr.push(
-        deleteAnnotation(null, annotation, newSelected[annotation])
-      );
+      const obj = { aimID: annotation, projectID: newSelected[annotation] };
+      promiseArr.push(deleteAnnotation(obj));
     }
     Promise.all(promiseArr)
       .then(() => {
@@ -189,7 +178,7 @@ class Annotations extends React.Component {
       subject: "",
       template: "",
       createdStart: "",
-      createdEnd: ""
+      createdEnd: "",
     });
   };
 
@@ -205,7 +194,7 @@ class Annotations extends React.Component {
       patientName,
       template,
       createdStart,
-      createdEnd
+      createdEnd,
     } = this.state;
     if (!(name || patientName || template || createdStart || createdEnd)) {
       return;
@@ -246,7 +235,8 @@ class Annotations extends React.Component {
     if (this.validateDateFormat(this.state.createdStart)) {
       const input = new Date(this.state.createdStart);
       for (let ann of arr) {
-        let date = new Date(ann.date.split(" ")[0] + " 00:00:00");
+        const formattedDate = this.convertDateFormat(ann.date, "date");
+        let date = new Date(formattedDate.split(" ")[0] + " 00:00:00");
         if (date >= input) {
           result.push(ann);
         }
@@ -260,7 +250,9 @@ class Annotations extends React.Component {
     if (this.validateDateFormat(this.state.createdEnd)) {
       const input = new Date(this.state.createdEnd);
       for (let ann of arr) {
-        let date = new Date(ann.date.split(" ")[0] + " 00:00:00");
+        let date = new Date(
+          this.convertDateFormat(ann.date, "date").split(" ")[0] + " 00:00:00"
+        );
         if (date <= input) {
           result.push(ann);
         }
@@ -270,11 +262,15 @@ class Annotations extends React.Component {
   };
 
   formatDate = dateString => {
-    const dateArr = dateString.split("-");
-    dateArr[0] = dateArr[0].substring(2);
-    dateArr[1] = dateArr[1][0] === "0" ? dateArr[1][1] : dateArr[1];
-    dateArr[2] = dateArr[2][0] === "0" ? dateArr[2][1] : dateArr[2];
-    return dateArr[1] + "/" + dateArr[2] + "/" + dateArr[0];
+    try {
+      const dateArr = dateString.split("-");
+      dateArr[0] = dateArr[0].substring(2);
+      dateArr[1] = dateArr[1][0] === "0" ? dateArr[1][1] : dateArr[1];
+      dateArr[2] = dateArr[2][0] === "0" ? dateArr[2][1] : dateArr[2];
+      return dateArr[1] + "/" + dateArr[2] + "/" + dateArr[0];
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   clearCarets = string => {
@@ -389,13 +385,13 @@ class Annotations extends React.Component {
             />
           );
         },
-        resizable: false
+        resizable: false,
       },
       {
         Header: "Name",
         accessor: "name",
         sortable: true,
-        resizable: true
+        resizable: true,
       },
       {
         Header: "Open",
@@ -410,7 +406,7 @@ class Annotations extends React.Component {
               </div>
             </Link>
           );
-        }
+        },
       },
       {
         Header: "Subject",
@@ -421,10 +417,9 @@ class Annotations extends React.Component {
           return (
             <div>{this.clearCarets(original.row.checkbox.patientName)}</div>
           );
-        }
+        },
       },
       {
-        // Header: "Modality / Series / Slice / Series #",
         accessor: "comment",
         sortable: true,
         resizable: true,
@@ -437,20 +432,20 @@ class Annotations extends React.Component {
               <div>Slice / Series #</div>
             </div>
           );
-        }
+        },
       },
       {
         Header: "Template",
         accessor: "template",
         resizable: true,
-        sortable: true
+        sortable: true,
       },
       {
         Header: "User",
         accessor: "userName",
         style: { whiteSpace: "normal" },
         resizable: true,
-        sortable: true
+        sortable: true,
       },
       {
         Header: "Study",
@@ -461,22 +456,27 @@ class Annotations extends React.Component {
           matchSorter(rows, filter.value, { keys: ["date"] }),
         filterAll: true,
         Cell: original => {
-          const studyDateArr = original.row.checkbox.studyDate.split(" ");
+          const studyDateArr = this.convertDateFormat(
+            original.row.checkbox.studyDate,
+            "studyDate"
+          ).split(" ");
           return <div>{this.formatDate(studyDateArr[0])}</div>;
-        }
+        },
       },
       {
         Header: "Created",
         sortable: true,
-        // resizable: true,
         accessor: "date",
         filterMethod: (filter, rows) =>
           matchSorter(rows, filter.value, { keys: ["date"] }),
         filterAll: true,
         Cell: original => {
-          const studyDateArr = original.row.checkbox.date.split(" ");
+          const studyDateArr = this.convertDateFormat(
+            original.row.checkbox.date,
+            "date"
+          ).split(" ");
           return <div>{this.formatDate(studyDateArr[0])}</div>;
-        }
+        },
       },
       {
         Header: () => {
@@ -488,21 +488,47 @@ class Annotations extends React.Component {
           );
         },
         sortable: true,
-        // resizable: true,
         accessor: "date",
         filterMethod: (filter, rows) =>
           matchSorter(rows, filter.value, { keys: ["time"] }),
         filterAll: true,
         Cell: original => {
-          const studyDateArr = original.row.checkbox.date.split(" ");
+          const studyDateArr = this.convertDateFormat(
+            original.row.checkbox.date,
+            "date"
+          ).split(" ");
           return <div>{studyDateArr[1]}</div>;
-        }
-      }
+        },
+      },
     ];
   };
 
   handleUpload = () => {
     this.setState({ uploadClicked: true });
+  };
+
+  convertDateFormat = (str, attr) => {
+    try {
+      let result = "";
+      const dateArr = [];
+      dateArr.push(str.substring(0, 4));
+      dateArr.push(str.substring(4, 6));
+      dateArr.push(str.substring(6, 8));
+      if (attr === "date") {
+        const timeArr = [];
+        timeArr.push(str.substring(8, 10));
+        timeArr.push(str.substring(10, 12));
+        timeArr.push(str.substring(12));
+        result = dateArr.join("-") + " " + timeArr.join(":");
+      }
+      if (attr === "studyDate") {
+        result = dateArr.join("-") + " 00:00:00";
+      }
+      return result ? result : str;
+    } catch (err) {
+      console.log(err);
+      return str;
+    }
   };
 
   handleDownload = () => {
@@ -516,7 +542,6 @@ class Annotations extends React.Component {
   };
 
   handleSubmitUpload = () => {
-    this.getAnnotationsData();
     this.handleCancel();
   };
 
@@ -585,7 +610,10 @@ class Annotations extends React.Component {
 const mapsStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
-    patients: state.annotationsListReducer.patients
+    patients: state.annotationsListReducer.patients,
+    uploadedPid: state.annotationsListReducer.uploadedPid,
+    lastEventId: state.annotationsListReducer.lastEventId,
+    refresh: state.annotationsListReducer.refresh,
   };
 };
 

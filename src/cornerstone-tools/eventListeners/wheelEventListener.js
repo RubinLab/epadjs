@@ -3,10 +3,10 @@
  * native `wheel` event
  */
 
-import EVENTS from '../events.js';
-import external from '../externalModules.js';
-import triggerEvent from '../util/triggerEvent.js';
-import normalizeWheel from './internals/normalizeWheel.js';
+import EVENTS from "../events.js";
+import external from "../externalModules.js";
+import triggerEvent from "../util/triggerEvent.js";
+import normalizeWheel from "./internals/normalizeWheel.js";
 
 /**
  *
@@ -54,7 +54,7 @@ function wheelEventHandler(evt) {
     pageX,
     pageY,
     imageX: startingCoords.x,
-    imageY: startingCoords.y,
+    imageY: startingCoords.y
   };
 
   triggerEvent(element, EVENTS.MOUSE_WHEEL, mouseWheelData);
@@ -70,7 +70,7 @@ function wheelEventHandler(evt) {
  */
 function enable(element) {
   disable(element);
-  element.addEventListener('wheel', wheelEventHandler, { passive: false });
+  element.addEventListener("wheel", wheelEventHandler, { passive: false });
 }
 
 /**
@@ -82,10 +82,10 @@ function enable(element) {
  * @returns {undefined}
  */
 function disable(element) {
-  element.removeEventListener('wheel', wheelEventHandler, { passive: false });
+  element.removeEventListener("wheel", wheelEventHandler, { passive: false });
 }
 
 export default {
   enable,
-  disable,
+  disable
 };

@@ -10,19 +10,20 @@ export function getSubjects(projectId) {
 }
 
 export function downloadSubjects(subject) {
+  const subjectID = subject.subjectID || subject.patientID;
   const url =
     apiUrl +
     "/projects/" +
     subject.projectID +
     "/subjects/" +
-    subject.subjectID +
+    subjectID +
     "?format=stream&includeAims=true";
   return http.get(url, { responseType: "blob" });
 }
 
 export function deleteSubject(subject) {
   if (mode === "lite") {
-    const url = apiUrl + "/projects/lite/subjects/" + subject.subjectID;
+    const url = apiUrl + "/projects/lite/subjects/" + subject.patientID;
     return http.delete(url);
   }
 }
@@ -38,4 +39,11 @@ export function saveSubject(projectID, subjectAbr, subjectName) {
       "?subjectName=" +
       subjectName
   );
+}
+
+export function uploadFileToSubject(formData, config, subject) {
+  let { subjectID, projectID } = subject;
+  subjectID = subjectID ? subjectID : subject.patientID;
+  const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/files`;
+  return http.post(url, formData, config);
 }

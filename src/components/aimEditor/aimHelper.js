@@ -1,6 +1,10 @@
 export function getImageIdAnnotations(aims) {
   let imageIdSpecificMarkups = {};
-  aims.forEach(aim => parseAim(aim, imageIdSpecificMarkups));
+  try {
+    aims.forEach(aim => parseAim(aim, imageIdSpecificMarkups));
+  } catch (err) {
+    console.log('Preparing ImageIdAnnotations' , err)
+  }
   return imageIdSpecificMarkups;
 }
 
@@ -31,9 +35,17 @@ function parseAim(aim, imageIdSpecificMarkups) {
 }
 
 function getMarkup(markupEntity, aim) {
-  const imageId = markupEntity["imageReferenceUid"]["root"];
+  let imageId = markupEntity["imageReferenceUid"]["root"];
+  const frameNumber = markupEntity["referencedFrameNumber"]? markupEntity["referencedFrameNumber"]["value"] : 1;
+  // if (frameNumber > -1) imageId = imageId + "&frame=" + frameNumber; //if multiframe reconstruct the imageId
+  imageId = imageId + "&frame=" + frameNumber;
   const markupUid = markupEntity["uniqueIdentifier"]["root"];
-  const calculations = getCalculationEntitiesOfMarkUp(aim, markupUid);
+  let calculations = [];
+  try {
+    calculations = getCalculationEntitiesOfMarkUp(aim, markupUid);
+  } catch (error) {
+    console.log("Can not get calculations", error);
+  }
   const aimUid = aim.ImageAnnotationCollection["uniqueIdentifier"]["root"];
   return {
     imageId,
@@ -52,7 +64,12 @@ function getMarkup(markupEntity, aim) {
 function getSegmentation(segmentationEntity, aim) {
   const imageId = segmentationEntity["referencedSopInstanceUid"]["root"];
   const markupUid = segmentationEntity["uniqueIdentifier"]["root"];
-  const calculations = getCalculationEntitiesOfMarkUp(aim, markupUid);
+  let calculations = [];
+  try {
+    calculations = getCalculationEntitiesOfMarkUp(aim, markupUid);
+  } catch (error) {
+    console.log("Can not get calculations", error);
+  }
   const aimUid = aim.ImageAnnotationCollection["uniqueIdentifier"]["root"];
   return {
     imageId,
@@ -128,6 +145,9 @@ export function getAimImageData(image) {
 
   series.instanceUid = image.data.string("x0020000e") || "";
   series.modality = image.data.string("x00080060") || "";
+  series.number = image.data.string("x00200011") || "";
+  series.description = image.data.string("x0008103e") || "";
+  series.instanceNumber = image.data.string("x00200013") || "";
 
   obj.image.push(getSingleImageData(image));
 

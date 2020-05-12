@@ -58,12 +58,13 @@ export function downloadProjects(projectID) {
   );
 }
 
-export function uploadFile(formData, config, projectID, username) {
+export function uploadFileToProject(formData, config, projectID) {
+  
   if (mode === "lite") {
     return http.post(apiUrl + "/projects/lite/files", formData, config);
   } else {
     const url =
-      apiUrl + "/projects/" + projectID + "/files?username=" + username;
+      apiUrl + "/projects/" + projectID + "/files";
     return http.post(url, formData, config);
   }
 }
