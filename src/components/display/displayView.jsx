@@ -532,7 +532,7 @@ class DisplayView extends Component {
               pair,
               this.checkIfPerpendicular(pair)
             );
-            if (this.checkIfPerpendicular(pair)) {
+            if (this.checkIfPerpendicular(pair) && this.intersects(pair)) {
               // there are multiple lines on the same image that belongs to same aim, a potential perpendicular
               // they are perpendicular, remove them from the values list and render them as perpendicular
               pair[0].markupType = "Bidirectional";
@@ -582,6 +582,28 @@ class DisplayView extends Component {
   checkIfLine = (markup) => {
     if (markup) {
       return markup.markupType === "TwoDimensionMultiPoint";
+    }
+  };
+
+  // returns true iff the line from (a,b)->(c,d) intersects with (p,q)->(r,s)
+  intersects = (lines) => {
+    const a = lines[0]["coordinates"][0].x.value;
+    const b = lines[0]["coordinates"][0].y.value;
+    const c = lines[0]["coordinates"][1].x.value;
+    const d = lines[0]["coordinates"][1].y.value;
+    const p = lines[1]["coordinates"][0].x.value;
+    const q = lines[1]["coordinates"][0].y.value;
+    const r = lines[1]["coordinates"][1].x.value;
+    const s = lines[1]["coordinates"][1].y.value;
+    var det, gamma, lambda;
+
+    det = (c - a) * (s - q) - (r - p) * (d - b);
+    if (det === 0) {
+      return false;
+    } else {
+      lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+      gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+      return 0 < lambda && lambda < 1 && 0 < gamma && gamma < 1;
     }
   };
 
