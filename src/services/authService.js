@@ -10,15 +10,15 @@ function refreshToken(keycloak, minValidity) {
   return new Promise((resolve, reject) => {
     keycloak
       .updateToken(minValidity)
-      .success(function(refreshed) {
+      .success(function (refreshed) {
         if (refreshed) {
-          console.log("Token was successfully refreshed");
+          // console.log("Token was successfully refreshed");
         } else {
-          console.log("Token is still valid");
+          // console.log("Token is still valid");
         }
         resolve();
       })
-      .error(function() {
+      .error(function () {
         reject();
       });
   });
@@ -53,9 +53,9 @@ export async function getAuthHeader() {
       const header = `Bearer ${this.keycloak.token}`;
       if (header) {
         cornerstoneWADOImageLoader.configure({
-          beforeSend: function(xhr) {
+          beforeSend: function (xhr) {
             xhr.setRequestHeader("Authorization", header);
-          }
+          },
         });
         return header;
       }
@@ -70,5 +70,5 @@ export default {
   login,
   logout,
   getCurrentUser,
-  getAuthHeader
+  getAuthHeader,
 };

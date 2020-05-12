@@ -180,7 +180,12 @@ class ToolMenu extends Component {
         ),
       },
       {
-        name: "Sculpt",
+        name: "Sculpt 2D",
+        icon: <FaScrewdriver />,
+        tool: "FreehandRoiSculptor",
+      },
+      {
+        name: "Sculpt 3D",
         icon: <FaScrewdriver />,
         tool: "FreehandRoi3DSculptorTool",
       },
