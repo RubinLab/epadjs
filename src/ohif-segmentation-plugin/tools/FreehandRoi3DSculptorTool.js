@@ -63,6 +63,7 @@ export default class FreehandRoi3DSculptorTool extends FreehandRoiSculptorTool {
    * @param {Object} evt - The event.
    */
   _activeEnd(evt) {
+    console.log("In active end");
     const eventData = evt.detail;
     const element = eventData.element;
     const config = this.configuration;
@@ -81,8 +82,10 @@ export default class FreehandRoi3DSculptorTool extends FreehandRoiSculptorTool {
     const toolData = getToolState(element, this.referencedToolName);
     const data = toolData.data[config.currentTool];
 
-    if (modules.freehand3D.getters.interpolate) {
-      interpolate(data);
+    console.log("Interpolate state", modules.freehand3D);
+
+    if (modules.freehand3D.state.interpolate) {
+      interpolate(data, element);
     }
 
     // Update the image
