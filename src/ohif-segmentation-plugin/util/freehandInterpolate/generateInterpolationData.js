@@ -21,22 +21,12 @@ export default function (toolData, element) {
   const extent = _getExtentOfRegion(ROIContourData);
   const sliceEdited = _getSlicePositionOfToolData(ROIContourData, toolData.uid);
 
-  // console.log(
-  //   "In generateInterpolation",
-  //   ROIContourUid,
-  //   imageIds,
-  //   ROIContourData,
-  //   extent,
-  //   sliceEdited
-  // );
-
   const interpolationList = [];
 
   // Check if contours between the extent can be interpolated.
   for (let i = extent[0] + 1; i <= extent[1] - 1; i++) {
     if (_sliceNeedsInterpolating(ROIContourData, i)) {
       const contourPair = _getBoundingPair(i, extent, ROIContourData);
-      // console.log("Contours and i", i, contourPair);
 
       if (
         contourPair &&
@@ -44,7 +34,6 @@ export default function (toolData, element) {
       ) {
         _appendinterpolationList(contourPair, interpolationList);
       }
-      // console.log("InterpolationList", interpolationList);
     }
   }
 
@@ -224,12 +213,6 @@ function _getList(start, end) {
  */
 
 function _getBoundingPair(sliceIndex, extent, ROIContourData) {
-  // console.log(
-  //   "get bounding pair: sliceIndex, extent, ROIContourData",
-  //   sliceIndex,
-  //   extent,
-  //   ROIContourData
-  // );
   let contourPair = [];
   let canInterpolate = true;
 
