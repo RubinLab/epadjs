@@ -7,13 +7,7 @@ import { getTemplatesDataFromDb } from "../../../../../services/templateServices
 class NewPluginWindow extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { allTemplates: props.allTemplates };
-    //console.log("modal log templates", props.allTemplates);
   }
-
-  state = {
-    allTemplates: []
-  };
 
   render() {
     const { onChange, error, pluginFormElements } = this.props;
@@ -27,7 +21,7 @@ class NewPluginWindow extends React.Component {
             <form className="add-project__modal--form">
               <h5 className="add-project__modal--label">Name*</h5>
               <input
-                onMouseDown={e => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
                 className="add-project__modal--input"
                 name="name"
                 type="text"
@@ -37,7 +31,7 @@ class NewPluginWindow extends React.Component {
               />
               <h5 className="add-project__modal--label">ID*</h5>
               <input
-                onMouseDown={e => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
                 className="add-project__modal--input"
                 name="plugin_id"
                 type="text"
@@ -46,7 +40,7 @@ class NewPluginWindow extends React.Component {
               />
               <h5 className="add-project__modal--label">Image repo*</h5>
               <input
-                onMouseDown={e => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
                 className="add-project__modal--input"
                 name="image_repo"
                 type="text"
@@ -55,7 +49,7 @@ class NewPluginWindow extends React.Component {
               />
               <h5 className="add-project__modal--label">Image tag*</h5>
               <input
-                onMouseDown={e => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
                 className="add-project__modal--input"
                 name="image_tag"
                 type="text"
@@ -64,7 +58,7 @@ class NewPluginWindow extends React.Component {
               />
               <h5 className="add-project__modal--label">Image name</h5>
               <input
-                onMouseDown={e => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
                 className="add-project__modal--input"
                 name="image_name"
                 type="text"
@@ -73,7 +67,7 @@ class NewPluginWindow extends React.Component {
               />
               <h5 className="add-project__modal--label">Image id</h5>
               <input
-                onMouseDown={e => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
                 className="add-project__modal--input"
                 name="image_id"
                 type="text"
@@ -82,7 +76,7 @@ class NewPluginWindow extends React.Component {
               />
               <h5 className="add-project__modal--label">Description</h5>
               <input
-                onMouseDown={e => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
                 className="add-project__modal--input"
                 name="description"
                 type="text"
@@ -91,7 +85,7 @@ class NewPluginWindow extends React.Component {
               />
               <h5 className="add-project__modal--label">Enabled</h5>
               <input
-                onMouseDown={e => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
                 className="add-project__modal--input"
                 name="enabled"
                 type="checkbox"
@@ -101,7 +95,7 @@ class NewPluginWindow extends React.Component {
               />
               <h5 className="add-project__modal--label">Modality</h5>
               <input
-                onMouseDown={e => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
                 className="add-project__modal--input"
                 name="modality"
                 type="text"
@@ -110,7 +104,7 @@ class NewPluginWindow extends React.Component {
               />
               <h5 className="add-project__modal--label">Developer</h5>
               <input
-                onMouseDown={e => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
                 className="add-project__modal--input"
                 name="developer"
                 type="text"
@@ -119,7 +113,7 @@ class NewPluginWindow extends React.Component {
               />
               <h5 className="add-project__modal--label">Documentation</h5>
               <input
-                onMouseDown={e => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
                 className="add-project__modal--input"
                 name="documentation"
                 type="text"
@@ -160,5 +154,5 @@ export default NewPluginWindow;
 PropTypes.NewPluginWindow = {
   //onSelect: PropTypes.func,
   onCancel: PropTypes.func,
-  onSave: PropTypes.func
+  onSave: PropTypes.func,
 };

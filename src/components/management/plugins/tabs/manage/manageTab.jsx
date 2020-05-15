@@ -9,7 +9,7 @@ class ManageTab extends React.Component {
       {
         id: "checkbox",
         accessor: "",
-        width: 50,
+        width: 20,
         Cell: ({ original }) => {
           const { id } = original;
           return (
@@ -38,7 +38,7 @@ class ManageTab extends React.Component {
         },
         // sortable: false,
         resizable: false,
-        // minResizeWidth: 20
+        minResizeWidth: 20,
         // maxWidth: 45
       },
       {
@@ -46,8 +46,8 @@ class ManageTab extends React.Component {
         accessor: "name",
         sortable: true,
         resizable: true,
-        minResizeWidth: 100,
-        width: 420,
+        minResizeWidth: 200,
+        width: 200,
         Cell: (data) => {
           const pluginname = data.row.name;
           const pluginid = data.original.id;
@@ -62,7 +62,7 @@ class ManageTab extends React.Component {
         Header: "Image",
         sortable: true,
         resizable: true,
-        minResizeWidth: 100,
+        minResizeWidth: 200,
         width: 200,
         Cell: (data) => {
           if (data.original.image_repo !== "")
@@ -71,23 +71,23 @@ class ManageTab extends React.Component {
         },
         style: { whiteSpace: "unset" },
       },
-      {
-        Header: "Config",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 100,
-        width: 200,
-        Cell: (original) => {
-          return "add,edit,see";
-        },
-        style: { whiteSpace: "unset" },
-      },
+      // {
+      //   Header: "Config",
+      //   sortable: true,
+      //   resizable: true,
+      //   minResizeWidth: 100,
+      //   width: 200,
+      //   Cell: (original) => {
+      //     return "add,edit,see";
+      //   },
+      //   style: { whiteSpace: "unset" },
+      // },
       {
         Header: "Parameters",
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
-        width: 200,
+        width: 100,
         Cell: (original) => {
           return (
             <div onClick={() => this.props.handleParametersClicked(original)}>
@@ -102,7 +102,7 @@ class ManageTab extends React.Component {
         accessor: "projects",
         sortable: true,
         resizable: true,
-        minResizeWidth: 100,
+        minResizeWidth: 200,
         width: 200,
         Cell: (original) => {
           return this.props.projectDataToCell(original);
@@ -123,7 +123,7 @@ class ManageTab extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
-        width: 200,
+        width: 100,
         Cell: (data) => {
           if (data.original.enabled) {
             return (

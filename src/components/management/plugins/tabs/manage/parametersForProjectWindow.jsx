@@ -260,6 +260,86 @@ class ParametersForProjectWindow extends React.Component {
       },
     ];
   };
+  handleonMouseDown = (e) => {
+    e.stopPropagation();
+
+    console.log("The link was clicked.");
+  };
+  prepareDropDownHtmlForParameterIds = () => {
+    let options = [];
+    options.push(
+      <option key="select" name="select" value="select">
+        select
+      </option>
+    );
+    options.push(
+      <option key="aims" name="aims" value="aims">
+        aims
+      </option>
+    );
+    options.push(
+      <option key="dicoms" name="dicoms" value="dicoms">
+        dicoms
+      </option>
+    );
+    options.push(
+      <option key="paramaters" name="parameters" value="parameters">
+        parameters
+      </option>
+    );
+
+    return options;
+  };
+  prepareDropDownHtmlForParameterFormat = () => {
+    let options = [];
+    options.push(
+      <option key="select" name="select" value="select">
+        select
+      </option>
+    );
+    options.push(
+      <option key="InputFolder" name="InputFolder" value="InputFolder">
+        InputFolder
+      </option>
+    );
+    options.push(
+      <option key="InputFile" name="InputFile" value="InputFile">
+        InputFile
+      </option>
+    );
+    options.push(
+      <option key="OutputFolder" name="OutputFolder" value="OutputFolder">
+        OutputFolder
+      </option>
+    );
+    options.push(
+      <option key="Parameters" name="Parameters" value="Parameters">
+        parameters
+      </option>
+    );
+
+    return options;
+  };
+  prepareDropDownHtmlForParameterType = () => {
+    let options = [];
+    options.push(
+      <option key="select" name="select" value="select">
+        select
+      </option>
+    );
+    options.push(
+      <option key="ParamaterValue" name="Parameter" value="Value">
+        Parameter Value
+      </option>
+    );
+    options.push(
+      <option key="Parameters" name="Parameter" value="NameValue">
+        Parameter Name/Value
+      </option>
+    );
+
+    return options;
+  };
   render() {
     const { error } = this.props;
 
@@ -293,15 +373,16 @@ class ParametersForProjectWindow extends React.Component {
                 <h5>add new project parameter</h5>
                 <form className="add-project__modal--form">
                   <h5 className="add-project__modal--label">id*</h5>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="add-project__modal--input"
+                  <select
+                    className="pluginaddqueueselect"
+                    id="paramid"
                     name="paramid"
-                    type="text"
                     onChange={this.handleFormElementChange}
-                    id="form-first-element"
+                    onMouseDown={this.handleonMouseDown}
                     value={this.state.parameterFormElements.paramid}
-                  />
+                  >
+                    {this.prepareDropDownHtmlForParameterIds()}
+                  </select>
                   <h5 className="add-project__modal--label">Name*</h5>
                   <input
                     onMouseDown={(e) => e.stopPropagation()}
@@ -313,15 +394,16 @@ class ParametersForProjectWindow extends React.Component {
                     value={this.state.parameterFormElements.name}
                   />
                   <h5 className="add-project__modal--label">format*</h5>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="add-project__modal--input"
+                  <select
+                    className="pluginaddqueueselect"
+                    id="format"
                     name="format"
-                    type="text"
                     onChange={this.handleFormElementChange}
-                    id="form-first-element"
+                    onMouseDown={this.handleonMouseDown}
                     value={this.state.parameterFormElements.format}
-                  />
+                  >
+                    {this.prepareDropDownHtmlForParameterFormat()}
+                  </select>
                   <h5 className="add-project__modal--label">prefix*</h5>
                   <input
                     onMouseDown={(e) => e.stopPropagation()}
@@ -352,14 +434,16 @@ class ParametersForProjectWindow extends React.Component {
                     onChange={this.handleFormElementChange}
                   />
                   <h5 className="add-project__modal--label">Type*</h5>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="add-project__modal--input"
+                  <select
+                    className="pluginaddqueueselect"
+                    id="type"
                     name="type"
-                    type="text"
-                    value={this.state.parameterFormElements.type}
                     onChange={this.handleFormElementChange}
-                  />
+                    onMouseDown={this.handleonMouseDown}
+                    value={this.state.parameterFormElements.type}
+                  >
+                    {this.prepareDropDownHtmlForParameterType()}
+                  </select>
                   <h5 className="add-project__modal--label">Description*</h5>
                   <input
                     onMouseDown={(e) => e.stopPropagation()}

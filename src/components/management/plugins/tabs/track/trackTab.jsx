@@ -247,6 +247,7 @@ class TrackTab extends React.Component {
         id: "checkbox",
         accessor: "",
         width: 50,
+        minResizeWidth: 20,
         Header: (x) => {
           return (
             <input
@@ -279,26 +280,30 @@ class TrackTab extends React.Component {
       },
       {
         Header: "container name",
+        width: 70,
+        minResizeWidth: 20,
         Cell: (data) => {
           const queueId = data.original.id;
           return <div>epadplugin_{queueId}</div>;
         },
         sortable: true,
         resizable: true,
-        width: 70,
       },
       {
         Header: "plugin",
+        width: 50,
+        minResizeWidth: 20,
         Cell: (data) => {
           const pluginName = data.original.plugin.name;
           return <div>{pluginName}</div>;
         },
         sortable: true,
         resizable: true,
-        width: 50,
       },
       {
         Header: "aims",
+        width: 70,
+        minResizeWidth: 20,
         Cell: (data) => {
           const aims = data.original.aim_uid;
           console.log("data", data);
@@ -314,10 +319,11 @@ class TrackTab extends React.Component {
         },
         sortable: true,
         resizable: true,
-        width: 70,
       },
       {
         Header: "project",
+        width: 70,
+        minResizeWidth: 20,
         Cell: (data) => {
           const projectName = data.original.project.name;
           return <div>{projectName}</div>;
@@ -331,9 +337,12 @@ class TrackTab extends React.Component {
         sortable: true,
         resizable: true,
         width: 200,
+        minResizeWidth: 20,
       },
       {
         Header: "runtime params",
+        width: 100,
+        minResizeWidth: 20,
         Cell: (data) => {
           const paramsHtml = data.original.runtime_params;
           let resultHtml = "";
@@ -353,16 +362,14 @@ class TrackTab extends React.Component {
         },
         sortable: true,
         resizable: true,
-
-        width: 100,
       },
       {
         Header: "status",
         accessor: "status",
         sortable: true,
         resizable: true,
-
         width: 100,
+        minResizeWidth: 20,
       },
       // {
       //   Header: "runtime paramters",
@@ -374,6 +381,8 @@ class TrackTab extends React.Component {
       // },
       {
         Header: "starttime",
+        width: 200,
+        minResizeWidth: 20,
         Cell: (data) => {
           const processStartTime = data.original.starttime;
 
@@ -381,11 +390,11 @@ class TrackTab extends React.Component {
         },
         sortable: true,
         resizable: true,
-
-        width: 200,
       },
       {
         Header: "endtime",
+        width: 200,
+        minResizeWidth: 20,
         Cell: (data) => {
           const processEndTime = data.original.endtime;
           if (processEndTime === "1970-01-01T00:00:01.000Z") {
@@ -396,11 +405,10 @@ class TrackTab extends React.Component {
         },
         sortable: true,
         resizable: true,
-
-        width: 200,
       },
       {
         width: 300,
+        minResizeWidth: 20,
         Header: "",
         sortable: true,
         resizable: true,
