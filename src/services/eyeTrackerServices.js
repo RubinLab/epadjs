@@ -8,3 +8,6 @@ export function startEyeTrackerLog() {
 export function stopEyeTrackerLog(log) {
   return http.post(eyeTrackerUrl + "/stop", log);
 }
+export function setCapture(shouldLog) {
+  return http.post(eyeTrackerUrl + "/capture", shouldLog);
+}

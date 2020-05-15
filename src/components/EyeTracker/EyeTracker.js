@@ -12,6 +12,7 @@ import { getAllSeriesofProject } from "../../services/seriesServices";
 import {
   startEyeTrackerLog,
   stopEyeTrackerLog,
+  setCapture,
 } from "../../services/eyeTrackerServices";
 
 class EyeTracker extends Component {
@@ -35,7 +36,7 @@ class EyeTracker extends Component {
     }
   }
 
-  checkIfLoading = () => {
+  isLoading = () => {
     const { loading } = this.state;
     if (loading) {
       window.alert(
@@ -47,7 +48,7 @@ class EyeTracker extends Component {
   };
 
   loadNextSeries = () => {
-    this.checkIfLoading();
+    if (!this.isLoading()) return;
     const { series, currentSeriesIdx } = this.state;
     if (series.length > currentSeriesIdx + 1) {
       this.props.dispatch(closeSerie());
@@ -67,6 +68,7 @@ class EyeTracker extends Component {
   };
 
   loadPreviousSeries = () => {
+    if (!this.isLoading()) return;
     const { series, currentSeriesIdx } = this.state;
     if (currentSeriesIdx) {
       this.props.dispatch(closeSerie());
@@ -112,12 +114,23 @@ class EyeTracker extends Component {
   };
 
   startLogging = () => {
+    setCapture({ shouldLog: true });
     startEyeTrackerLog().then(() => {
       this.setState({ logging: true });
       window.addEventListener("eyeTrackerShouldLog", this.captureLog);
       document.onkeypress = this.keyPress;
       this.captureLog({ detail: "loggingStarted" });
     });
+  };
+
+  stopLogging = () => {
+    setCapture({ shouldLog: false });
+    this.captureLog({ detail: "loggingStopped" });
+    this.setState({ logging: false });
+    const log = JSON.stringify(this.logs);
+    window.removeEventListener("eyeTrackerShouldLog", this.captureLog);
+
+    stopEyeTrackerLog(log);
   };
 
   captureLog = (event) => {
@@ -186,15 +199,6 @@ class EyeTracker extends Component {
       translationX: x,
       translationY: y,
     };
-  };
-
-  stopLogging = () => {
-    this.captureLog({ detail: "loggingStopped" });
-    this.setState({ logging: false });
-    const log = JSON.stringify(this.logs);
-    window.removeEventListener("eyeTrackerShouldLog", this.captureLog);
-
-    stopEyeTrackerLog(log);
   };
 
   downloadLog = () => {
