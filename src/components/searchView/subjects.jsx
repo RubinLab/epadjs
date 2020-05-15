@@ -222,8 +222,6 @@ class Subjects extends Component {
           const selected =
             selectedPatients[subjectID] &&
             selectedPatients[subjectID].projectID === projectID;
-          // console.log("patient selected");
-          // console.log(selected);
           return (
             <input
               type="checkbox"

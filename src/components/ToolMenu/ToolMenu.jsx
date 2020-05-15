@@ -20,7 +20,7 @@ import {
   FaAngleRight,
   FaHandScissors,
   FaCut,
-  FaCircle
+  FaCircle,
 } from "react-icons/fa";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { MdLoop, MdPanTool } from "react-icons/md";
@@ -28,7 +28,7 @@ import {
   TiDeleteOutline,
   TiPencil,
   TiScissorsOutline,
-  TiEject
+  TiEject,
 } from "react-icons/ti";
 import { MdWbIridescent } from "react-icons/md";
 import AnnotationList from "../annotationsList";
@@ -37,7 +37,7 @@ import CustomModal from "../management/common/resizeAndDrag";
 import {
   showAnnotationWindow,
   showAnnotationDock,
-  getWholeData
+  getWholeData,
 } from "../annotationsList/action";
 import Spinner from "../common/circleSpinner";
 import "../../font-icons/styles.css";
@@ -53,7 +53,7 @@ const mapStateToProps = state => {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     patientLoading: state.annotationsListReducer.patientLoading,
-    activePort: state.annotationsListReducer.activePort
+    activePort: state.annotationsListReducer.activePort,
   };
 };
 
@@ -65,8 +65,8 @@ const tools = [
     configuration: {
       minScale: 0.3,
       maxScale: 25,
-      preventZoomOutsideImage: true
-    }
+      preventZoomOutsideImage: true,
+    },
   },
   { name: "Probe" },
   { name: "Length" },
@@ -74,27 +74,27 @@ const tools = [
   {
     name: "FreehandRoi",
     configuration: {
-      showMinMax: true
-    }
+      showMinMax: true,
+    },
   },
   {
     name: "RectangleRoi",
     configuration: {
-      showMinMax: true
-    }
+      showMinMax: true,
+    },
   },
   {
     name: "CircleRoi",
     configuration: {
-      showMinMax: true
-    }
+      showMinMax: true,
+    },
   },
   { name: "Angle" },
   { name: "Rotate" },
   { name: "WwwcRegion" },
   { name: "Probe" },
   { name: "Bidirectional" },
-  { name: "Eraser" }
+  { name: "Eraser" },
 
   // { name: "FreehandRoi3D" },
   // { name: "FreehandRoi3DSculptor" },
@@ -104,7 +104,7 @@ const tools = [
 ];
 
 class ToolMenu extends Component {
-  //Tools are initialized in viewport.jsx since they are activated on elements. I don't really like this logic, we shall think of a better way.
+  //Tools are initialized in viewport.jsx since they are activated on elements. I don"t really like this logic, we shall think of a better way.
 
   constructor(props) {
     super(props);
@@ -118,12 +118,12 @@ class ToolMenu extends Component {
       playing: false,
       customBrush: {
         min: -1000,
-        max: 3000
+        max: 3000,
       },
       rangeDisabled: true,
       interpolate: false,
       activeTool: "",
-      activeToolIdx: 0
+      activeToolIdx: 0,
     };
 
     this.imagingTools = [
@@ -136,29 +136,29 @@ class ToolMenu extends Component {
       { name: "Pan", icon: <MdPanTool />, tool: "Pan" },
       { name: "SeriesData", icon: <FaListAlt />, tool: "MetaData" },
       { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate" },
-      { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" }
+      { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
     ];
 
     this.markupTools = [
       {
         name: "Point",
         icon: <div className="icon-point fontastic-icons" />,
-        tool: "Probe"
+        tool: "Probe",
       },
       {
         name: "Line",
         icon: <FaRulerHorizontal />,
-        tool: "Length"
+        tool: "Length",
       },
       {
         name: "Circle",
         icon: <div className="icon-circle fontastic-icons" />,
-        tool: "CircleRoi"
+        tool: "CircleRoi",
       },
       {
         name: "Perpendicular",
         icon: <div className="icon-perpendicular fontastic-icons" />,
-        tool: "Bidirectional"
+        tool: "Bidirectional",
       },
       {
         name: "Poly/Freehand",
@@ -184,33 +184,33 @@ class ToolMenu extends Component {
               id="material-switch"
             />
           </span>
-        )
+        ),
       },
       {
         name: "Sculpt",
         icon: <FaScrewdriver />,
-        tool: "FreehandRoi3DSculptorTool"
+        tool: "FreehandRoi3DSculptorTool",
       },
-      { name: "Eraser", icon: <FaEraser />, tool: "Eraser" }
+      { name: "Eraser", icon: <FaEraser />, tool: "Eraser" },
     ];
 
     this.segmentationTools = [
       {
         name: "Brush",
         icon: <div className="icon-brush" />,
-        tool: "Brush3DTool"
+        tool: "Brush3DTool",
       },
       {
         name: "Brush HU Gated",
         icon: <FaBroom />,
-        tool: "Brush3DHUGated"
+        tool: "Brush3DHUGated",
       },
       // {
       //   name: "Freehand Scissors",
       //   icon: <FaHandScissors />,
       //   tool: "FreehandScissors"
       // },
-      { name: "Circle Scissors", icon: <FaCircle />, tool: "CircleScissors" }
+      { name: "Circle Scissors", icon: <FaCircle />, tool: "CircleScissors" },
       // {
       //   name: "Correction Scissors",
       //   icon: <TiScissorsOutline />,
@@ -235,7 +235,7 @@ class ToolMenu extends Component {
   //sets the selected tool active for all of the enabled elements
   setToolActive = (toolName, mouseMask = 1) => {
     cornerstoneTools.setToolActive(toolName, {
-      mouseButtonMask: [mouseMask]
+      mouseButtonMask: [mouseMask],
     });
     if (toolName === "Brush3DTool" || toolName === "Brush3DHUGated")
       this.handleBrushSelected();
@@ -275,7 +275,7 @@ class ToolMenu extends Component {
       cornerstone.getEnabledElements()[this.props.activePort]["element"],
       toolName,
       {
-        mouseButtonMask: mouseMask
+        mouseButtonMask: mouseMask,
       }
     );
     this.setState({ showDrawing: false });
@@ -283,28 +283,31 @@ class ToolMenu extends Component {
 
   handlePatientClick = async () => {
     // const showStatus = this.state.showAnnotationList;
+    // try {
+    //   const { openSeries, patients } = this.props;
+    //   for (let port of openSeries) {
+    //     const { patientID, seriesUID, studyUID, aimID } = port;
 
-    const { openSeries, patients } = this.props;
-    for (let port of openSeries) {
-      const { patientID, seriesUID, studyUID, aimID } = port;
+    //     const serie = patients[patientID].studies[studyUID].series[seriesUID];
+    //     if (!patients[port.patientID]) {
+    //       await this.props.dispatch(getWholeData(port, null, aimID));
+    //     } else {
+    //       if (serie.isDisplayed === false) {
+    //         serie.isDisplayed = true;
+    //         for (let ann in serie.annotations) {
+    //           serie.annotations[ann].isDisplayed = true;
+    //         }
+    //       }
+    //     }
+    //   }
 
-      const serie = patients[patientID].studies[studyUID].series[seriesUID];
-      if (!patients[port.patientID]) {
-        await this.props.dispatch(getWholeData(port, null, aimID));
-      } else {
-        if (serie.isDisplayed === false) {
-          serie.isDisplayed = true;
-          for (let ann in serie.annotations) {
-            serie.annotations[ann].isDisplayed = true;
-          }
-        }
-      }
-    }
-
-    await this.setState(state => ({
-      showAnnotationList: !state.showAnnotationList
-    }));
-    this.props.dispatch(showAnnotationWindow());
+    //   await this.setState(state => ({
+    //     showAnnotationList: !state.showAnnotationList,
+    //   }));
+    //   this.props.dispatch(showAnnotationWindow());
+    // } catch (err) {
+    //   console.log(err);
+    // }
   };
 
   invert() {
@@ -373,12 +376,12 @@ class ToolMenu extends Component {
       if (this.checkIfMultiframe()) {
         alert("Segmentation only works in singleframe images!");
         return;
-      } //Dont' select the HUGated if the modality is not CT
+      } //Dont" select the HUGated if the modality is not CT
     } else if (tool === "Brush3DHUGated") {
       if (!this.checkIfCT() || this.checkIfMultiframe()) {
         alert("HU Gated tool only works with singleframe CT images");
         return;
-      } //Dont' select the HUGated if the modality is not CT
+      } //Dont" select the HUGated if the modality is not CT
     }
     this.disableAllTools();
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {

@@ -33,7 +33,7 @@ import {
   UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
   CLEAR_ACTIVE_AIMID,
-  UPDATE_IMAGE_INDEX
+  UPDATE_IMAGE_INDEX,
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -53,443 +53,453 @@ const initialState = {
   patientLoading: false,
   patientLoadingError: null,
   uploadedPid: null,
-  lastEventId: null
+  lastEventId: null,
 };
 
 const asyncReducer = (state = initialState, action) => {
-  switch (action.type) {
-    case UPDATE_IMAGE_INDEX:
-      const updatedOpenSeries = [...state.openSeries];
-      updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
-      return { ...state, openSeries: updatedOpenSeries };
-    case GET_NOTIFICATIONS:
-      const { uploadedPid, lastEventId, refresh } = action.payload;
-      return { ...state, uploadedPid, lastEventId, refresh };
-    case UPDATE_PATIENT_AIM_DELETE:
-      let patientAimDelete = { ...state.patients };
-      let { aimRefs } = action;
-      delete patientAimDelete[aimRefs.subjectID].studies[aimRefs.studyUID]
-        .series[aimRefs.seriesUID].annotations[aimRefs.aimID];
-      return { ...state, patient: patientAimDelete };
-    case UPDATE_PATIENT_AIM_SAVE:
-      let patientAimSave = { ...state.patients };
-      aimRefs = action.aimRefs;
-      patientAimSave[aimRefs.patientID].studies[aimRefs.studyUID].series[
-        aimRefs.seriesUID
-      ].annotations[aimRefs.aimID] = { ...aimRefs };
-      return { ...state, patient: patientAimSave };
-    case CLEAR_AIMID:
-      let aimIDClearedOPenSeries = [...state.openSeries];
-      for (let serie of aimIDClearedOPenSeries) {
-        serie.aimID = null;
-      }
-      return { ...state, openSeries: aimIDClearedOPenSeries };
-    case CLEAR_ACTIVE_AIMID:
-      aimIDClearedOPenSeries = [...state.openSeries];
-      aimIDClearedOPenSeries[state.activePort].aimID = null;
-      return { ...state, openSeries: aimIDClearedOPenSeries };
-    case UPDATE_IMAGEID:
-      const openSeriesToUpdate = [...state.openSeries];
-      openSeriesToUpdate[state.activePort].imageID = action.imageID;
-      return { ...state, openSeries: openSeriesToUpdate };
-    case CLOSE_SERIE:
-      let delSeriesUID = state.openSeries[state.activePort].seriesUID;
-      let delStudyUID = state.openSeries[state.activePort].studyUID;
-      let delPatientID = state.openSeries[state.activePort].patientID;
-      const delAims = { ...state.aimsList };
-      delete delAims[delSeriesUID];
-      let delGrid = state.openSeries.slice(0, state.activePort);
-      delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
-      let shouldPatientExist = false;
-      for (let item of delGrid) {
-        if (item.patientID === delPatientID) {
-          shouldPatientExist = true;
-          break;
-        }
-      }
-      const delPatients = { ...state.patients };
-      if (shouldPatientExist) {
-        delPatients[delPatientID].studies[delStudyUID].series[
-          delSeriesUID
-        ].isDisplayed = false;
-      } else {
-        delete delPatients[delPatientID];
-      }
-      let delActivePort;
-      if (delGrid.length === 0) {
-        delActivePort = null;
-      } else {
-        delActivePort = delGrid.length - 1;
-      }
-      return {
-        ...state,
-        openSeries: delGrid,
-        aimsList: delAims,
-        patients: delPatients,
-        activePort: delActivePort
-      };
-    case LOAD_ANNOTATIONS:
-      return Object.assign({}, state, {
-        loading: true,
-
-        error: false
-      });
-
-    case LOAD_ANNOTATIONS_SUCCESS:
-      return { ...state, loading: false };
-
-    case VIEWPORT_FULL:
-      const viewPortStatus = !state.showGridFullAlert;
-
-      return { ...state, showGridFullAlert: viewPortStatus };
-
-    case OPEN_PROJECT_MODAL:
-      const projectModalStatus = !state.showProjectModal;
-
-      return { ...state, showProjectModal: projectModalStatus };
-
-    case LOAD_SERIE_SUCCESS:
-      let imageAddedSeries = [...state.openSeries];
-      let annCalc = Object.keys(action.payload.imageData);
-      if (annCalc.length > 0) {
-        for (let i = 0; i < imageAddedSeries.length; i++) {
-          if (imageAddedSeries[i].seriesUID === action.payload.serID) {
-            imageAddedSeries[i].imageAnnotations = action.payload.imageData;
-          }
-        }
-      }
-      for (let serie of imageAddedSeries) {
-        if (serie.seriesUID !== action.payload.serID) {
+  try {
+    switch (action.type) {
+      case UPDATE_IMAGE_INDEX:
+        const updatedOpenSeries = [...state.openSeries];
+        updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
+        return { ...state, openSeries: updatedOpenSeries };
+      case GET_NOTIFICATIONS:
+        const { uploadedPid, lastEventId, refresh } = action.payload;
+        return { ...state, uploadedPid, lastEventId, refresh };
+      case UPDATE_PATIENT_AIM_DELETE:
+        let patientAimDelete = { ...state.patients };
+        let { aimRefs } = action;
+        delete patientAimDelete[aimRefs.subjectID].studies[aimRefs.studyUID]
+          .series[aimRefs.seriesUID].annotations[aimRefs.aimID];
+        return { ...state, patient: patientAimDelete };
+      case UPDATE_PATIENT_AIM_SAVE:
+        let patientAimSave = { ...state.patients };
+        aimRefs = action.aimRefs;
+        patientAimSave[aimRefs.patientID].studies[aimRefs.studyUID].series[
+          aimRefs.seriesUID
+        ].annotations[aimRefs.aimID] = { ...aimRefs };
+        return { ...state, patient: patientAimSave };
+      case CLEAR_AIMID:
+        let aimIDClearedOPenSeries = [...state.openSeries];
+        for (let serie of aimIDClearedOPenSeries) {
           serie.aimID = null;
         }
-      }
-      const result = Object.assign({}, state, {
-        loading: false,
-        error: false,
-        aimsList: {
-          ...state.aimsList,
-          [action.payload.ref.seriesUID]: action.payload.aimsData
-        },
-        openSeries: imageAddedSeries
-      });
-      return result;
+        return { ...state, openSeries: aimIDClearedOPenSeries };
+      case CLEAR_ACTIVE_AIMID:
+        aimIDClearedOPenSeries = [...state.openSeries];
+        aimIDClearedOPenSeries[state.activePort].aimID = null;
+        return { ...state, openSeries: aimIDClearedOPenSeries };
+      case UPDATE_IMAGEID:
+        const openSeriesToUpdate = [...state.openSeries];
+        openSeriesToUpdate[state.activePort].imageID = action.imageID;
+        return { ...state, openSeries: openSeriesToUpdate };
+      case CLOSE_SERIE:
+        let delSeriesUID = state.openSeries[state.activePort].seriesUID;
+        let delStudyUID = state.openSeries[state.activePort].studyUID;
+        let delPatientID = state.openSeries[state.activePort].patientID;
+        const delAims = { ...state.aimsList };
+        delete delAims[delSeriesUID];
+        let delGrid = state.openSeries.slice(0, state.activePort);
+        delGrid = delGrid.concat(state.openSeries.slice(state.activePort + 1));
+        let shouldPatientExist = false;
+        for (let item of delGrid) {
+          if (item.patientID === delPatientID) {
+            shouldPatientExist = true;
+            break;
+          }
+        }
+        const delPatients = { ...state.patients };
+        if (shouldPatientExist) {
+          delPatients[delPatientID].studies[delStudyUID].series[
+            delSeriesUID
+          ].isDisplayed = false;
+        } else {
+          delete delPatients[delPatientID];
+        }
+        let delActivePort;
+        if (delGrid.length === 0) {
+          delActivePort = null;
+        } else {
+          delActivePort = delGrid.length - 1;
+        }
+        return {
+          ...state,
+          openSeries: delGrid,
+          aimsList: delAims,
+          patients: delPatients,
+          activePort: delActivePort,
+        };
+      case LOAD_ANNOTATIONS:
+        return Object.assign({}, state, {
+          loading: true,
 
-    case LOAD_ANNOTATIONS_ERROR:
-      return Object.assign({}, state, {
-        loading: false,
-        error: action.error
-      });
-    case UPDATE_ANNOTATION_DISPLAY:
-      let { patient, study, serie, annotation, isDisplayed } = action.payload;
-      return Object.assign({}, state, {
-        aimsList: {
-          ...state.aimsList,
+          error: false,
+        });
 
-          [serie]: {
-            ...state.aimsList[serie],
+      case LOAD_ANNOTATIONS_SUCCESS:
+        return { ...state, loading: false };
 
-            [annotation]: {
-              ...state.aimsList[serie][annotation],
+      case VIEWPORT_FULL:
+        const viewPortStatus = !state.showGridFullAlert;
 
-              isDisplayed
+        return { ...state, showGridFullAlert: viewPortStatus };
+
+      case OPEN_PROJECT_MODAL:
+        const projectModalStatus = !state.showProjectModal;
+
+        return { ...state, showProjectModal: projectModalStatus };
+
+      case LOAD_SERIE_SUCCESS:
+        let imageAddedSeries = [...state.openSeries];
+        let annCalc = Object.keys(action.payload.imageData);
+        if (annCalc.length > 0) {
+          for (let i = 0; i < imageAddedSeries.length; i++) {
+            if (imageAddedSeries[i].seriesUID === action.payload.serID) {
+              imageAddedSeries[i].imageAnnotations = action.payload.imageData;
             }
           }
         }
-      });
-
-    case CHANGE_ACTIVE_PORT:
-      //get openseries iterate over the
-      const changedPortSeries = [...state.openSeries];
-      for (let i = 0; i < changedPortSeries.length; i++) {
-        if (i !== action.portIndex) {
-          changedPortSeries[i].aimID = null;
+        for (let serie of imageAddedSeries) {
+          if (serie.seriesUID !== action.payload.serID) {
+            serie.aimID = null;
+          }
         }
-      }
-      return Object.assign({}, state, {
-        activePort: action.portIndex,
-        openSeries: changedPortSeries
-      });
+        const result = Object.assign({}, state, {
+          loading: false,
+          error: false,
+          aimsList: {
+            ...state.aimsList,
+            [action.payload.ref.seriesUID]: action.payload.aimsData,
+          },
+          openSeries: imageAddedSeries,
+        });
+        return result;
 
-    case TOGGLE_ALL_ANNOTATIONS:
-      //update openSeries
-      let { seriesUID, displayStatus } = action.payload;
-      let toggleAnns = Object.assign({}, state.aimsList);
-      for (let ann in toggleAnns[seriesUID]) {
-        toggleAnns[seriesUID][ann].isDisplayed = displayStatus;
-      }
-      return Object.assign({}, state, {
-        aimsList: toggleAnns
-      });
-    case TOGGLE_ALL_LABELS:
-      const toggledLabelSerie = { ...state.aimsList };
-      const anns = toggledLabelSerie[action.payload.serieID];
-      for (let ann in anns) {
-        anns[ann].showLabel = action.payload.checked;
-      }
-      return Object.assign({}, state, { aimsList: toggledLabelSerie });
+      case LOAD_ANNOTATIONS_ERROR:
+        return Object.assign({}, state, {
+          loading: false,
+          error: action.error,
+        });
+      case UPDATE_ANNOTATION_DISPLAY:
+        let { patient, study, serie, annotation, isDisplayed } = action.payload;
+        return Object.assign({}, state, {
+          aimsList: {
+            ...state.aimsList,
 
-    case TOGGLE_LABEL:
-      const singleLabelToggled = { ...state.aimsList };
-      const allAnns = singleLabelToggled[action.payload.serieID];
-      for (let ann in allAnns) {
-        if (ann === action.payload.aimID) {
-          const currentStatus = allAnns[ann].showLabel;
-          allAnns[ann].showLabel = !currentStatus;
+            [serie]: {
+              ...state.aimsList[serie],
+
+              [annotation]: {
+                ...state.aimsList[serie][annotation],
+
+                isDisplayed,
+              },
+            },
+          },
+        });
+
+      case CHANGE_ACTIVE_PORT:
+        //get openseries iterate over the
+        const changedPortSeries = [...state.openSeries];
+        for (let i = 0; i < changedPortSeries.length; i++) {
+          if (i !== action.portIndex) {
+            changedPortSeries[i].aimID = null;
+          }
         }
-      }
-      return Object.assign({}, state, { aimsList: singleLabelToggled });
-    case CLEAR_GRID:
-      const clearedPatients = {};
-      let selectionObj = [];
-      if (Object.keys(state.selectedStudies).length > 0) {
-        selectionObj = { ...state.selectedStudies };
-      } else if (Object.keys(state.selectedSeries).length > 0) {
-        selectionObj = { ...state.selectedSeries };
-      } else {
-        selectionObj = { ...state.selectedAnnotations };
-      }
-      //keep the patient if already there
-      for (let item in selectionObj) {
-        if (state.patients[item.patientID]) {
-          clearedPatients[item.patientID] = {
-            ...state.patients[item.patientID]
-          };
+        return Object.assign({}, state, {
+          activePort: action.portIndex,
+          openSeries: changedPortSeries,
+        });
+
+      case TOGGLE_ALL_ANNOTATIONS:
+        //update openSeries
+        let { seriesUID, displayStatus } = action.payload;
+        let toggleAnns = Object.assign({}, state.aimsList);
+        for (let ann in toggleAnns[seriesUID]) {
+          toggleAnns[seriesUID][ann].isDisplayed = displayStatus;
         }
-      }
-      //update the state as not displayed
-      for (let patient in clearedPatients) {
-        for (let study in clearedPatients[patient]) {
-          for (let serie in clearedPatients[patient].studies[study]) {
-            serie.isDisplayed = false;
-            for (let ann in clearedPatients[patient].studies[study].series[
-              serie
-            ]) {
-              ann.isDisplayed = false;
+        return Object.assign({}, state, {
+          aimsList: toggleAnns,
+        });
+      case TOGGLE_ALL_LABELS:
+        const toggledLabelSerie = { ...state.aimsList };
+        const anns = toggledLabelSerie[action.payload.serieID];
+        for (let ann in anns) {
+          anns[ann].showLabel = action.payload.checked;
+        }
+        return Object.assign({}, state, { aimsList: toggledLabelSerie });
+
+      case TOGGLE_LABEL:
+        const singleLabelToggled = { ...state.aimsList };
+        const allAnns = singleLabelToggled[action.payload.serieID];
+        for (let ann in allAnns) {
+          if (ann === action.payload.aimID) {
+            const currentStatus = allAnns[ann].showLabel;
+            allAnns[ann].showLabel = !currentStatus;
+          }
+        }
+        return Object.assign({}, state, { aimsList: singleLabelToggled });
+      case CLEAR_GRID:
+        const clearedPatients = {};
+        let selectionObj = [];
+        if (Object.keys(state.selectedStudies).length > 0) {
+          selectionObj = { ...state.selectedStudies };
+        } else if (Object.keys(state.selectedSeries).length > 0) {
+          selectionObj = { ...state.selectedSeries };
+        } else {
+          selectionObj = { ...state.selectedAnnotations };
+        }
+        //keep the patient if already there
+        for (let item in selectionObj) {
+          if (state.patients[item.patientID]) {
+            clearedPatients[item.patientID] = {
+              ...state.patients[item.patientID],
+            };
+          }
+        }
+        //update the state as not displayed
+        for (let patient in clearedPatients) {
+          for (let study in clearedPatients[patient]) {
+            for (let serie in clearedPatients[patient].studies[study]) {
+              serie.isDisplayed = false;
+              for (let ann in clearedPatients[patient].studies[study].series[
+                serie
+              ]) {
+                ann.isDisplayed = false;
+              }
             }
           }
         }
-      }
 
-      return {
-        ...state,
+        return {
+          ...state,
 
-        patients: clearedPatients,
+          patients: clearedPatients,
 
-        openSeries: [],
+          openSeries: [],
 
-        aimsList: {},
+          aimsList: {},
 
-        activePort: 0
-      };
+          activePort: 0,
+        };
 
-    case CLEAR_SELECTION:
-      let selectionState = { ...state };
+      case CLEAR_SELECTION:
+        let selectionState = { ...state };
 
-      if (action.selectionType === "annotation") {
-        selectionState.selectedSeries = {};
-        selectionState.selectedStudies = {};
-        selectionState.selectedPatients = {};
-      } else if (action.selectionType === "serie") {
-        selectionState.selectedAnnotations = {};
-        selectionState.selectedStudies = {};
-        selectionState.selectedPatients = {};
-      } else if (action.selectionType === "study") {
-        selectionState.selectedAnnotations = {};
-        selectionState.selectedSeries = {};
-        selectionState.selectedPatients = {};
-      } else if (action.selectionType === "patient") {
-        selectionState.selectedAnnotations = {};
-        selectionState.selectedSeries = {};
-        selectionState.selectedStudies = {};
-      } else {
-        selectionState.selectedAnnotations = {};
-        selectionState.selectedSeries = {};
-        selectionState.selectedStudies = {};
-        selectionState.selectedPatients = {};
-      }
-      return selectionState;
+        if (action.selectionType === "annotation") {
+          selectionState.selectedSeries = {};
+          selectionState.selectedStudies = {};
+          selectionState.selectedPatients = {};
+        } else if (action.selectionType === "serie") {
+          selectionState.selectedAnnotations = {};
+          selectionState.selectedStudies = {};
+          selectionState.selectedPatients = {};
+        } else if (action.selectionType === "study") {
+          selectionState.selectedAnnotations = {};
+          selectionState.selectedSeries = {};
+          selectionState.selectedPatients = {};
+        } else if (action.selectionType === "patient") {
+          selectionState.selectedAnnotations = {};
+          selectionState.selectedSeries = {};
+          selectionState.selectedStudies = {};
+        } else {
+          selectionState.selectedAnnotations = {};
+          selectionState.selectedSeries = {};
+          selectionState.selectedStudies = {};
+          selectionState.selectedPatients = {};
+        }
+        return selectionState;
 
-    case SELECT_PATIENT:
-      let patientsNew = {
-        ...state.selectedPatients
-      };
+      case SELECT_PATIENT:
+        let patientsNew = {
+          ...state.selectedPatients,
+        };
 
-      patientsNew[action.patient.patientID]
-        ? delete patientsNew[action.patient.patientID]
-        : (patientsNew[action.patient.patientID] = action.patient);
+        patientsNew[action.patient.patientID]
+          ? delete patientsNew[action.patient.patientID]
+          : (patientsNew[action.patient.patientID] = action.patient);
 
-      return { ...state, selectedPatients: patientsNew };
+        return { ...state, selectedPatients: patientsNew };
 
-    case SELECT_STUDY:
-      let newStudies = {
-        ...state.selectedStudies
-      };
+      case SELECT_STUDY:
+        let newStudies = {
+          ...state.selectedStudies,
+        };
 
-      newStudies[action.study.studyUID]
-        ? delete newStudies[action.study.studyUID]
-        : (newStudies[action.study.studyUID] = action.study);
+        newStudies[action.study.studyUID]
+          ? delete newStudies[action.study.studyUID]
+          : (newStudies[action.study.studyUID] = action.study);
 
-      return { ...state, selectedStudies: newStudies };
-    case LOAD_COMPLETED:
-      return { ...state, loading: false };
+        return { ...state, selectedStudies: newStudies };
+      case LOAD_COMPLETED:
+        return { ...state, loading: false };
 
-    case SELECT_SERIE:
-      let newSeries = {
-        ...state.selectedSeries
-      };
+      case SELECT_SERIE:
+        let newSeries = {
+          ...state.selectedSeries,
+        };
 
-      newSeries[action.serie.seriesUID]
-        ? delete newSeries[action.serie.seriesUID]
-        : (newSeries[action.serie.seriesUID] = action.serie);
+        newSeries[action.serie.seriesUID]
+          ? delete newSeries[action.serie.seriesUID]
+          : (newSeries[action.serie.seriesUID] = action.serie);
 
-      // state.selectedStudies.concat([action.study]);
+        // state.selectedStudies.concat([action.study]);
 
-      return { ...state, selectedSeries: newSeries };
+        return { ...state, selectedSeries: newSeries };
 
-    case SELECT_ANNOTATION:
-      let newAnnotations = {
-        ...state.selectedAnnotations
-      };
+      case SELECT_ANNOTATION:
+        let newAnnotations = {
+          ...state.selectedAnnotations,
+        };
 
-      newAnnotations[action.annotation.aimID]
-        ? delete newAnnotations[action.annotation.aimID]
-        : (newAnnotations[action.annotation.aimID] = action.annotation);
+        newAnnotations[action.annotation.aimID]
+          ? delete newAnnotations[action.annotation.aimID]
+          : (newAnnotations[action.annotation.aimID] = action.annotation);
 
-      return { ...state, selectedAnnotations: newAnnotations };
-    case LOAD_PATIENT:
-      return { ...state, patientLoading: true };
-    case LOAD_PATIENT_ERROR:
-      return {
-        ...state,
-        patientLoadingError: action.err,
-        patientLoading: false
-      };
-    case LOAD_PATIENT_SUCCESS:
-      let addedNewPatient = { ...state.patients };
+        return { ...state, selectedAnnotations: newAnnotations };
+      case LOAD_PATIENT:
+        return { ...state, patientLoading: true };
+      case LOAD_PATIENT_ERROR:
+        return {
+          ...state,
+          patientLoadingError: action.err,
+          patientLoading: false,
+        };
+      case LOAD_PATIENT_SUCCESS:
+        let addedNewPatient = { ...state.patients };
 
-      addedNewPatient[action.patient.patientID] = action.patient;
-      return {
-        ...state,
-        patients: addedNewPatient,
-        patientLoading: false,
-        patientLoadingError: false
-      };
-    case DISPLAY_SINGLE_AIM:
-      let aimPatient = { ...state.patients[action.payload.patientID] };
+        addedNewPatient[action.patient.patientID] = action.patient;
+        return {
+          ...state,
+          patients: addedNewPatient,
+          patientLoading: false,
+          patientLoadingError: false,
+        };
+      case DISPLAY_SINGLE_AIM:
+        let aimPatient = { ...state.patients[action.payload.patientID] };
 
-      let aimOpenSeries = [...state.openSeries];
+        let aimOpenSeries = [...state.openSeries];
 
-      let aimAimsList = { ...state.aimsList[action.payload.seriesUID] };
+        let aimAimsList = { ...state.aimsList[action.payload.seriesUID] };
 
-      //update patient data
+        //update patient data
 
-      for (let stItem in aimPatient.studies) {
-        if (stItem === action.payload.studyUID) {
-          for (let srItem in aimPatient.studies[stItem].series) {
-            if (srItem === action.payload.seriesUID) {
-              for (let annItem in aimPatient.studies[stItem].series[srItem]
-                .annotations) {
-                if (annItem === action.payload.aimID) {
-                  aimPatient.studies[stItem].series[srItem].annotations[
-                    annItem
-                  ].isDisplayed = true;
-                } else {
-                  aimPatient.studies[stItem].series[srItem].annotations[
-                    annItem
-                  ].isDisplayed = false;
+        for (let stItem in aimPatient.studies) {
+          if (stItem === action.payload.studyUID) {
+            for (let srItem in aimPatient.studies[stItem].series) {
+              if (srItem === action.payload.seriesUID) {
+                for (let annItem in aimPatient.studies[stItem].series[srItem]
+                  .annotations) {
+                  if (annItem === action.payload.aimID) {
+                    aimPatient.studies[stItem].series[srItem].annotations[
+                      annItem
+                    ].isDisplayed = true;
+                  } else {
+                    aimPatient.studies[stItem].series[srItem].annotations[
+                      annItem
+                    ].isDisplayed = false;
+                  }
                 }
               }
             }
           }
         }
-      }
 
-      //update aimsList data
+        //update aimsList data
 
-      let allAims = Object.keys(
-        aimPatient.studies[action.payload.studyUID].series[
-          action.payload.seriesUID
-        ].annotations
-      );
+        let allAims = Object.keys(
+          aimPatient.studies[action.payload.studyUID].series[
+            action.payload.seriesUID
+          ].annotations
+        );
 
-      allAims.forEach(ann => {
-        if (ann === action.payload.aimID) {
-          aimAimsList[ann].isDisplayed = true;
+        allAims.forEach(ann => {
+          if (ann === action.payload.aimID) {
+            aimAimsList[ann].isDisplayed = true;
 
-          aimAimsList[ann].showLabel = true;
-        } else {
-          aimAimsList[ann].isDisplayed = false;
+            aimAimsList[ann].showLabel = true;
+          } else {
+            aimAimsList[ann].isDisplayed = false;
 
-          aimAimsList[ann].showLabel = false;
-        }
-      });
+            aimAimsList[ann].showLabel = false;
+          }
+        });
 
-      //update Openseries data
-      aimOpenSeries[action.payload.index].aimID = action.payload.aimID;
+        //update Openseries data
+        aimOpenSeries[action.payload.index].aimID = action.payload.aimID;
 
-      return {
-        ...state,
+        return {
+          ...state,
 
-        aimsList: {
-          ...state.aimsList,
+          aimsList: {
+            ...state.aimsList,
 
-          [action.payload.seriesUID]: aimAimsList
-        },
+            [action.payload.seriesUID]: aimAimsList,
+          },
 
-        patients: { ...state.patients, [action.payload.patientID]: aimPatient },
+          patients: {
+            ...state.patients,
+            [action.payload.patientID]: aimPatient,
+          },
 
-        openSeries: aimOpenSeries
-      };
-    case ADD_TO_GRID:
-      let newOpenSeries = state.openSeries.concat(action.reference);
-      return {
-        ...state,
-        openSeries: newOpenSeries,
-        activePort: newOpenSeries.length - 1
-      };
-    case UPDATE_PATIENT:
-      let updatedPt = { ...state.patients[action.payload.patient] };
-      if (action.payload.type === "study") {
-        let selectedSt = updatedPt.studies[action.payload.study];
-        for (let serie in selectedSt.series) {
-          selectedSt.series[serie].isDisplayed = action.payload.status;
-        }
-      } else if (
-        action.payload.type === "serie" ||
-        action.payload.type === "annotation"
-      ) {
-        let selectedSr =
-          updatedPt.studies[action.payload.study].series[action.payload.serie];
-        selectedSr.isDisplayed = action.payload.status;
-        for (let ann in selectedSr.annotations) {
-          selectedSr.annotations[ann].isDisplayed = action.payload.status;
-        }
-      }
-      let updatedPtPatients = { ...state.patients };
-      updatedPtPatients[action.payload.patient] = updatedPt;
-      return { ...state, patients: updatedPtPatients };
-    case JUMP_TO_AIM:
-      let { aimID, index } = action.payload;
-      let serUID = action.payload.seriesUID;
-      let updatedGrid = [...state.openSeries];
-      updatedGrid[index].aimID = aimID;
-
-      // return { ...state, openSeries: updatedGrid, aimsList: {...state.aimsList} };
-      return Object.assign({}, state, {
-        openSeries: updatedGrid,
-        aimsList: {
-          ...state.aimsList,
-          [serUID]: {
-            ...state.aimsList[serUID],
-            [aimID]: {
-              ...state.aimsList[serUID][aimID],
-              isDisplayed: true
-            }
+          openSeries: aimOpenSeries,
+        };
+      case ADD_TO_GRID:
+        let newOpenSeries = state.openSeries.concat(action.reference);
+        return {
+          ...state,
+          openSeries: newOpenSeries,
+          activePort: newOpenSeries.length - 1,
+        };
+      case UPDATE_PATIENT:
+        let updatedPt = { ...state.patients[action.payload.patient] };
+        if (action.payload.type === "study") {
+          let selectedSt = updatedPt.studies[action.payload.study];
+          for (let serie in selectedSt.series) {
+            selectedSt.series[serie].isDisplayed = action.payload.status;
+          }
+        } else if (
+          action.payload.type === "serie" ||
+          action.payload.type === "annotation"
+        ) {
+          let selectedSr =
+            updatedPt.studies[action.payload.study].series[
+              action.payload.serie
+            ];
+          selectedSr.isDisplayed = action.payload.status;
+          for (let ann in selectedSr.annotations) {
+            selectedSr.annotations[ann].isDisplayed = action.payload.status;
           }
         }
-      });
-    default:
-      return state;
+        let updatedPtPatients = { ...state.patients };
+        updatedPtPatients[action.payload.patient] = updatedPt;
+        return { ...state, patients: updatedPtPatients };
+      case JUMP_TO_AIM:
+        let { aimID, index } = action.payload;
+        let serUID = action.payload.seriesUID;
+        let updatedGrid = [...state.openSeries];
+        updatedGrid[index].aimID = aimID;
+
+        // return { ...state, openSeries: updatedGrid, aimsList: {...state.aimsList} };
+        return Object.assign({}, state, {
+          openSeries: updatedGrid,
+          aimsList: {
+            ...state.aimsList,
+            [serUID]: {
+              ...state.aimsList[serUID],
+              [aimID]: {
+                ...state.aimsList[serUID][aimID],
+                isDisplayed: true,
+              },
+            },
+          },
+        });
+      default:
+        return state;
+    }
+  } catch (err) {
+    console.log(err);
+    return state;
   }
 };
 
