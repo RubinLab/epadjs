@@ -158,6 +158,10 @@ class Aim {
   createLengthCalcEntity = (length) => {
     let { unit, value } = length;
     var obj = {};
+    obj["calculationResultCollection"] = {
+      CalculationResult: [this._createCalcResult(unit, "LineLength", value)],
+    };
+    obj["description"] = { value: "Length" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [this._createTypeCode("G-D7FE", "SRT", "Length")];
@@ -174,6 +178,10 @@ class Aim {
   createLongAxisCalcEntity = (longAxis) => {
     let { unit, value } = longAxis;
     var obj = {};
+    obj["calculationResultCollection"] = {
+      CalculationResult: [this._createCalcResult(unit, "LongAxis", value)],
+    };
+    obj["description"] = { value: "LongAxis" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [this._createTypeCode("G-A185", "SRT", "LongAxis")];
@@ -190,6 +198,10 @@ class Aim {
   createShortAxisCalcEntity = (shortAxis) => {
     let { unit, value } = shortAxis;
     var obj = {};
+    obj["calculationResultCollection"] = {
+      CalculationResult: [this._createCalcResult(unit, "ShortAxis", value)],
+    };
+    obj["description"] = { value: "ShortAxis" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [this._createTypeCode("G-A186", "SRT", "ShortAxis")];
@@ -207,6 +219,10 @@ class Aim {
     var { unit, mean } = value;
     const { unit, typeCodeDcm } = this._getAimUnitAndDcmTypeCode(unit);
     var obj = {};
+    obj["calculationResultCollection"] = {
+      CalculationResult: [this._createCalcResult(unit, "Mean", mean, preLabel)],
+    };
+    obj["description"] = { value: "Mean" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
@@ -228,6 +244,12 @@ class Aim {
     const { unit, typeCodeDcm } = this._getAimUnitAndDcmTypeCode(unit);
 
     var obj = {};
+    obj["calculationResultCollection"] = {
+      CalculationResult: [
+        this._createCalcResult(unit, "Standard Deviation", stdDev, preLabel),
+      ],
+    };
+    obj["description"] = { value: "Standard Deviation" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
@@ -250,6 +272,12 @@ class Aim {
     var { unit, min } = value;
     const { unit, typeCodeDcm } = this._getAimUnitAndDcmTypeCode(unit);
     var obj = {};
+    obj["calculationResultCollection"] = {
+      CalculationResult: [
+        this._createCalcResult(unit, "Minimum", min, preLabel),
+      ],
+    };
+    obj["description"] = { value: "Minimum" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
@@ -272,6 +300,12 @@ class Aim {
     var { unit, max } = value;
     const { unit, typeCodeDcm } = this._getAimUnitAndDcmTypeCode(unit);
     var obj = {};
+    obj["calculationResultCollection"] = {
+      CalculationResult: [
+        this._createCalcResult(unit, "Maximum", max, preLabel),
+      ],
+    };
+    obj["description"] = { value: "Maximum" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [
@@ -304,6 +338,12 @@ class Aim {
   createVolumeCalcEntity = (value, preLabel) => {
     var { unit, volume } = value;
     var obj = {};
+    obj["calculationResultCollection"] = {
+      CalculationResult: [
+        this._createCalcResult(unit, "Volume", volume, preLabel),
+      ],
+    };
+    obj["description"] = { value: "Volume" };
     const uId = generateUid();
     obj["uniqueIdentifier"] = { root: uId };
     obj["typeCode"] = [this._createTypeCode("RID28668", "Radlex", "Volume")];
@@ -384,6 +424,10 @@ class Aim {
       imageReferenceUid = imageReferenceUid.split("&frame=")[0]; //if multiframe strip the frame number from imageUID
 
     var obj = {};
+    obj["includeFlag"] = { value: true };
+    obj["twoDimensionSpatialCoordinateCollection"] = {
+      TwoDimensionSpatialCoordinate: this._createCoordinateArray(points),
+    };
     const uId = generateUid();
     obj["xsi:type"] = type;
     this.imageAnnotations.ImageAnnotation[0].markupEntityCollection.MarkupEntity.push(
@@ -658,6 +702,7 @@ class Aim {
     return {
       name: { value: name },
       loginName: { value: loginName },
+      name: { value: name },
     };
   };
 

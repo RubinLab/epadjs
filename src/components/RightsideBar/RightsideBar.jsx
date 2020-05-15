@@ -17,7 +17,7 @@ class Rightsidebar extends Component {
       width: "300px",
       marginRight: "300px",
       buttonDisplay: "block",
-      open: true
+      open: true,
     };
   }
 
@@ -28,13 +28,13 @@ class Rightsidebar extends Component {
       this.setState({
         width: "0",
         marginRight: "0",
-        open: false
+        open: false,
       });
     } else {
       this.setState({
         width: "300px",
         marginRight: "300px",
-        open: true
+        open: true,
       });
     }
   };
@@ -89,19 +89,12 @@ class Rightsidebar extends Component {
           <Collapsible trigger={"Annotations"} transitionTime={100}>
             <AnnotationList />
           </Collapsible>
-          <Collapsible trigger={"Message Center"} transitionTime={100}>
-            <p>
-              This is the collapsible message content. Messages will be shown
-              here.
-            </p>
-            <p>No New Message!</p>
-          </Collapsible>
         </div>
         <div
           className={this.state.open ? "mainView" : "mainView-closed"}
           style={{
             marginRight: this.state.marginRight,
-            height: "calc(100% - 50px)"
+            height: "calc(100% - 50px)",
           }}
         >
           {this.props.children}
@@ -111,11 +104,11 @@ class Rightsidebar extends Component {
   }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const { activePort, openSeries } = state.annotationsListReducer;
   return {
     activePort,
-    openSeries
+    openSeries,
   };
 };
 export default withRouter(connect(mapStateToProps)(Rightsidebar));

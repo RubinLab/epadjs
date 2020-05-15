@@ -48,7 +48,7 @@ import "./ToolMenu.css";
 import Switch from "react-switch";
 import ToolMenuItem from "../ToolMenu/ToolMenuItem";
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
@@ -70,15 +70,8 @@ const tools = [
   },
   { name: "Probe" },
   { name: "Length" },
-  { name: "EllipticalRoi" },
   {
     name: "FreehandRoi",
-    configuration: {
-      showMinMax: true,
-    },
-  },
-  {
-    name: "RectangleRoi",
     configuration: {
       showMinMax: true,
     },
@@ -127,14 +120,14 @@ class ToolMenu extends Component {
     };
 
     this.imagingTools = [
-      { name: "No Op", icon: <FaLocationArrow /> },
+      { name: "No Op", icon: <FaLocationArrow />, tool: "Noop" },
       { name: "Levels", icon: <FiSun />, tool: "Wwwc" },
       { name: "Presets", icon: <FiSunset />, tool: "Presets" },
       { name: "Zoom", icon: <FiZoomIn />, tool: "Zoom" },
       { name: "Invert", icon: <FaAdjust />, tool: "Invert" },
       { name: "Reset", icon: <MdLoop />, tool: "Reset" },
       { name: "Pan", icon: <MdPanTool />, tool: "Pan" },
-      { name: "SeriesData", icon: <FaListAlt />, tool: "MetaData" },
+      // { name: "SeriesData", icon: <FaListAlt />, tool: "MetaData" },
       { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate" },
       { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
     ];
@@ -185,9 +178,15 @@ class ToolMenu extends Component {
             />
           </span>
         ),
+
       },
       {
-        name: "Sculpt",
+        name: "Sculpt 2D",
+        icon: <FaScrewdriver />,
+        tool: "FreehandRoiSculptor",
+      },
+      {
+        name: "Sculpt 3D",
         icon: <FaScrewdriver />,
         tool: "FreehandRoi3DSculptorTool",
       },
@@ -222,7 +221,7 @@ class ToolMenu extends Component {
   //TODO: instead of disabling all tools we can just disable the active tool
   disableAllTools = () => {
     this.setState({ activeToolIdx: 0 });
-    Array.from(this.tools).forEach(tool => {
+    Array.from(this.tools).forEach((tool) => {
       const apiTool = cornerstoneTools[`${tool.name}Tool`];
       if (apiTool) {
         cornerstoneTools.setToolPassive(tool.name);
@@ -265,20 +264,33 @@ class ToolMenu extends Component {
   handleBrushSelected = () => {};
 
   //sets the selected tool active for an enabled elements
-  setToolActiveForElement = (toolName, mouseMask = 1) => {
-    console.log("");
-    this.disableAllTools();
-    if (toolName == "Brush3DHUGatedTool") {
-      cornerstoneTools.store.modules.brush.setters.activeGate("muscle");
-    }
-    cornerstoneTools.setToolActiveForElement(
-      cornerstone.getEnabledElements()[this.props.activePort]["element"],
-      toolName,
-      {
-        mouseButtonMask: mouseMask,
-      }
-    );
-    this.setState({ showDrawing: false });
+
+  // setToolActiveForElement = (toolName, mouseMask = 1) => {
+  //   this.disableAllTools();
+  //   if (toolName == "Brush3DHUGatedTool") {
+  //     cornerstoneTools.store.modules.brush.setters.activeGate("muscle");
+  //   }
+  //   cornerstoneTools.setToolActiveForElement(
+  //     cornerstone.getEnabledElements()[this.props.activePort]["element"],
+  //     toolName,
+  //     {
+  //       mouseButtonMask: mouseMask,
+  //     }
+  //   );
+  //   this.setState({ showDrawing: false });
+  // };
+
+  setToolActiveForElement = (toolName, mouseMask = [1]) => {
+    const enabledElements = cornerstone.getEnabledElements();
+
+    enabledElements.forEach((element) => {
+      cornerstoneTools.setToolActiveForElement(element, toolName, {
+        mouseButtonMask: [mouseMask],
+      });
+    });
+
+    if (toolName === "Brush3DTool" || toolName === "Brush3DHUGated")
+      this.handleBrushSelected();
   };
 
   handlePatientClick = async () => {
@@ -346,7 +358,7 @@ class ToolMenu extends Component {
     this.setState({ showPresets: !this.state.showPresets });
   };
 
-  setInterpolation = checked => {
+  setInterpolation = (checked) => {
     this.setState({ interpolate: checked });
     cornerstoneTools.store.modules.freehand3D.state.interpolate = this.state.interpolate;
   };
@@ -355,8 +367,15 @@ class ToolMenu extends Component {
     this.setState({ showBrushMenu: false });
   };
 
+  setCursor = (cursorStyle) => {
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    element.style.cursor = cursorStyle;
+  };
+
   handleToolClicked = (index, tool) => {
     if (tool === "Noop") {
+      this.setCursor("default");
       this.disableAllTools();
       this.setState({ activeTool: "", activeToolIdx: index });
       return;
@@ -383,7 +402,7 @@ class ToolMenu extends Component {
         return;
       } //Dont" select the HUGated if the modality is not CT
     }
-    this.disableAllTools();
+    // this.disableAllTools();
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
       this.setToolActive(tool);
     });

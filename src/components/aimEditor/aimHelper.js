@@ -36,7 +36,7 @@ function parseAim(aim, imageIdSpecificMarkups) {
 
 function getMarkup(markupEntity, aim) {
   let imageId = markupEntity["imageReferenceUid"]["root"];
-  const frameNumber = markupEntity["referencedFrameNumber"]["value"];
+  const frameNumber = markupEntity["referencedFrameNumber"]? markupEntity["referencedFrameNumber"]["value"] : 1;
   // if (frameNumber > -1) imageId = imageId + "&frame=" + frameNumber; //if multiframe reconstruct the imageId
   imageId = imageId + "&frame=" + frameNumber;
   const markupUid = markupEntity["uniqueIdentifier"]["root"];
