@@ -90,6 +90,7 @@ class Annotations extends Component {
         expandLevel,
         expansionArr,
         seriesId,
+        selectedAnnotations
         // updateExpandedLevelNums
       } = this.props;
       const annsOpened = expansionArr.includes(seriesId);
@@ -105,6 +106,12 @@ class Annotations extends Component {
           "aimID"
         );
         this.setState({ data, expanded });
+      }
+
+      const newSelectedAnnArr = Object.keys(selectedAnnotations);
+      const oldSelectedAnnArr = Object.keys(prevProps.selectedAnnotations);
+      if (newSelectedAnnArr.length !== oldSelectedAnnArr.length) {
+        this.setState({ columns: this.setColumns() });
       }
 
       // if (expandLevel != prevProps.expandLevel) {

@@ -132,7 +132,7 @@ class Studies extends Component {
 
   async componentDidUpdate(prevProps) {
     try {
-      const { patientIndex, update, treeExpand, closeAllCounter } = this.props;
+      const { patientIndex, update, treeExpand, closeAllCounter, selectedStudies } = this.props;
 
       if (closeAllCounter !== prevProps.closeAllCounter) {
         this.setState({ expanded: {} });
@@ -183,6 +183,11 @@ class Studies extends Component {
         if (expandToSeries) {
           this.props.getTreeExpandAll(obj, true, expandLevel);
         }
+      }
+      const newSelectedStArr = Object.keys(selectedStudies);
+      const oldSelectedStArr = Object.keys(prevProps.selectedStudies);
+      if (newSelectedStArr.length !== oldSelectedStArr.length) {
+        this.setState({ columns: this.setColumns() });
       }
     } catch (err) {
       console.log(`couldn't load all study data. Please Try again!`);

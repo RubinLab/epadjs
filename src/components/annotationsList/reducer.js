@@ -287,38 +287,26 @@ const asyncReducer = (state = initialState, action) => {
 
       if (action.selectionType === "annotation") {
         selectionState.selectedSeries = {};
-
         selectionState.selectedStudies = {};
-
         selectionState.selectedPatients = {};
       } else if (action.selectionType === "serie") {
         selectionState.selectedAnnotations = {};
-
         selectionState.selectedStudies = {};
-
         selectionState.selectedPatients = {};
       } else if (action.selectionType === "study") {
         selectionState.selectedAnnotations = {};
-
         selectionState.selectedSeries = {};
-
         selectionState.selectedPatients = {};
       } else if (action.selectionType === "patient") {
         selectionState.selectedAnnotations = {};
-
         selectionState.selectedSeries = {};
-
         selectionState.selectedStudies = {};
       } else {
         selectionState.selectedAnnotations = {};
-
         selectionState.selectedSeries = {};
-
         selectionState.selectedStudies = {};
-
         selectionState.selectedPatients = {};
       }
-
       return selectionState;
 
     case SELECT_PATIENT:

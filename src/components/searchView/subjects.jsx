@@ -88,6 +88,7 @@ class Subjects extends Component {
         pid,
         expandLevel,
         closeAllCounter,
+        selectedPatients,
       } = this.props;
 
       let data;
@@ -141,6 +142,13 @@ class Subjects extends Component {
           this.props.getTreeData(pid, "subject", data);
         }
         // this.setState({ data });
+      }
+
+      const newSelectedPtArr = Object.keys(selectedPatients);
+      const oldSelectedPtArr = Object.keys(prevProps.selectedPatients);
+
+      if (newSelectedPtArr.length !== oldSelectedPtArr.length) {
+        this.setState({ columns: this.setColumns() });
       }
     } catch (err) {
       console.log(`couldn't load all subjects data. Please Try again!`);
@@ -209,10 +217,13 @@ class Subjects extends Component {
         sortable: false,
         width: this.widthUnit,
         Cell: row => {
-          const { subjectID, projectID } = row.original;
+          let { subjectID, projectID } = row.original;
+          subjectID = subjectID ? subjectID : row.original.patientID;
           const selected =
             selectedPatients[subjectID] &&
             selectedPatients[subjectID].projectID === projectID;
+          // console.log("patient selected");
+          // console.log(selected);
           return (
             <input
               type="checkbox"

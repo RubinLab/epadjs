@@ -158,6 +158,7 @@ class Series extends Component {
         studyIndex,
         expandLevel,
         closeAllCounter,
+        selectedSeries,
       } = this.props;
       const seriesOpened = expansionArr.includes(studyId);
       if (closeAllCounter !== prevProps.closeAllCounter) {
@@ -200,6 +201,12 @@ class Series extends Component {
 
         if (expandToAnnotations)
           this.props.getTreeExpandAll(obj, true, this.props.expandLevel);
+      }
+
+      const newSelectedSrArr = Object.keys(selectedSeries);
+      const oldSelectedSrArr = Object.keys(prevProps.selectedSeries);
+      if (newSelectedSrArr.length !== oldSelectedSrArr.length) {
+        this.setState({ columns: this.setColumns() });
       }
     } catch (err) {
       console.log(`Couldn't load all series data. Please Try again!`);
