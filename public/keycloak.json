@@ -1,6 +1,6 @@
 {
   "realm": "ePad",
-  "auth-server-url": "http://ch4.local:8899/auth",
+  "auth-server-url": "http://localhost:8899/auth",
   "ssl-required": "external",
   "resource": "epad-auth",
   "public-client": true,
