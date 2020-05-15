@@ -1,6 +1,4 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
-import Draggable from "react-draggable";
+import React from "react";
 
 class NewMenu extends React.Component {
   setWrapperRef = node => {
@@ -9,10 +7,12 @@ class NewMenu extends React.Component {
 
   componentDidMount() {
     document.addEventListener("mousedown", this.handleClickOutside);
+    document.addEventListener("keydown", this.handleClickOutside);
   }
-
+  
   componentWillUnmount() {
     document.removeEventListener("mousedown", this.handleClickOutside);
+    document.removeEventListener("keydown", this.handleClickOutside);
   }
 
   handleClickOutside = event => {

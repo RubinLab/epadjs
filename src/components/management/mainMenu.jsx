@@ -71,6 +71,7 @@ class MainMenu extends React.Component {
           <Projects
             selection={this.state.selection}
             onClose={this.handleCloseModal}
+            getProjectAdded={this.props.getProjectAdded}
           />
         );
       case "Worklists":

@@ -88,6 +88,7 @@ class Subjects extends Component {
         pid,
         expandLevel,
         closeAllCounter,
+        selectedPatients,
       } = this.props;
 
       let data;
@@ -141,6 +142,13 @@ class Subjects extends Component {
           this.props.getTreeData(pid, "subject", data);
         }
         // this.setState({ data });
+      }
+
+      const newSelectedPtArr = Object.keys(selectedPatients);
+      const oldSelectedPtArr = Object.keys(prevProps.selectedPatients);
+
+      if (newSelectedPtArr.length !== oldSelectedPtArr.length) {
+        this.setState({ columns: this.setColumns() });
       }
     } catch (err) {
       console.log(`couldn't load all subjects data. Please Try again!`);
@@ -200,6 +208,7 @@ class Subjects extends Component {
     this.props.dispatch(selectPatient(selected));
   };
   setColumns() {
+    const { selectedPatients } = this.props;
     const columns = [
       {
         id: "searchView-checkbox",
@@ -208,13 +217,16 @@ class Subjects extends Component {
         sortable: false,
         width: this.widthUnit,
         Cell: row => {
+          let { subjectID, projectID } = row.original;
+          subjectID = subjectID ? subjectID : row.original.patientID;
+          const selected =
+            selectedPatients[subjectID] &&
+            selectedPatients[subjectID].projectID === projectID;
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={
-                this.props.selectedPatients[row.original.subjectID] || false
-              }
+              checked={selected}
               onChange={() =>
                 this.selectRow({ ...row.original, index: row.index })
               }
