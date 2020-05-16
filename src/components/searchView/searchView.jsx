@@ -196,11 +196,11 @@ class SearchView extends Component {
     // pass it to getwholedata
     const promiseArr = [];
     for (let patient in patients) {
-      promiseArr.push(
-        this.props.dispatch(
-          getWholeData(this.props.openSeries[patients[patient]])
-        )
-      );
+      // promiseArr.push(
+        // this.props.dispatch(
+          // getWholeData(this.props.openSeries[patients[patient]])
+        // )
+      // );
     }
     Promise.all(promiseArr)
       .then(() => {
@@ -208,15 +208,15 @@ class SearchView extends Component {
         this.props.dispatch(clearSelection());
         for (let serie of this.props.openSeries) {
           let type = serie.aimID ? "annotation" : "serie";
-          this.props.dispatch(
-            updatePatient(
-              type,
-              true,
-              serie.patientID,
-              serie.studyUID,
-              serie.seriesUID
-            )
-          );
+          // this.props.dispatch(
+          //   updatePatient(
+          //     type,
+          //     true,
+          //     serie.patientID,
+          //     serie.studyUID,
+          //     serie.seriesUID
+          //   )
+          // );
         }
       })
       .catch(err => {
@@ -406,17 +406,17 @@ class SearchView extends Component {
           for (let study in studiesObj) {
             for (let serie of studiesObj[study]) {
               if (!this.props.patients[serie.patientID]) {
-                await this.props.dispatch(getWholeData(serie));
+                // await this.props.dispatch(getWholeData(serie));
               } else {
-                this.props.dispatch(
-                  updatePatient(
-                    "serie",
-                    true,
-                    serie.patientID,
-                    serie.studyUID,
-                    serie.seriesUID
-                  )
-                );
+                // this.props.dispatch(
+                //   updatePatient(
+                //     "serie",
+                //     true,
+                //     serie.patientID,
+                //     serie.studyUID,
+                //     serie.seriesUID
+                //   )
+                // );
               }
             }
           }
@@ -462,17 +462,17 @@ class SearchView extends Component {
             });
             for (let series of selectedSeries) {
               if (!this.props.patients[series.patientID]) {
-                await this.props.dispatch(getWholeData(series));
+                // await this.props.dispatch(getWholeData(series));
               } else {
-                this.props.dispatch(
-                  updatePatient(
-                    "serie",
-                    true,
-                    series.patientID,
-                    series.studyUID,
-                    series.seriesUID
-                  )
-                );
+                // this.props.dispatch(
+                //   updatePatient(
+                //     "serie",
+                //     true,
+                //     series.patientID,
+                //     series.studyUID,
+                //     series.seriesUID
+                //   )
+                // );
               }
             }
             this.props.history.push("/display");
@@ -513,18 +513,18 @@ class SearchView extends Component {
             });
             for (let ann of selectedAnnotations) {
               if (!this.props.patients[ann.subjectID]) {
-                await this.props.dispatch(getWholeData(null, null, ann));
+                // await this.props.dispatch(getWholeData(null, null, ann));
               } else {
-                this.props.dispatch(
-                  updatePatient(
-                    "annotation",
-                    true,
-                    ann.subjectID,
-                    ann.studyUID,
-                    ann.seriesUID,
-                    ann.aimID
-                  )
-                );
+                // this.props.dispatch(
+                //   updatePatient(
+                //     "annotation",
+                //     true,
+                //     ann.subjectID,
+                //     ann.studyUID,
+                //     ann.seriesUID,
+                //     ann.aimID
+                //   )
+                // );
               }
             }
             this.props.history.push("/display");

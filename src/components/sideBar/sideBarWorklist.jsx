@@ -320,17 +320,17 @@ class WorkList extends React.Component {
             });
             for (let series of selectedSeries) {
               if (!this.props.patients[series.patientID]) {
-                await this.props.dispatch(getWholeData(series));
+                // await this.props.dispatch(getWholeData(series));
               } else {
-                this.props.dispatch(
-                  updatePatient(
-                    "serie",
-                    true,
-                    series.patientID,
-                    series.studyUID,
-                    series.seriesUID
-                  )
-                );
+                // this.props.dispatch(
+                //   updatePatient(
+                //     "serie",
+                //     true,
+                //     series.patientID,
+                //     series.studyUID,
+                //     series.seriesUID
+                //   )
+                // );
               }
             }
             this.props.history.push("/display");

@@ -340,7 +340,7 @@ class Annotations extends React.Component {
         this.props.dispatch(getSingleSerie(selected.original, aimID));
         //if grid is NOT full check if patient data exists
         if (!this.props.patients[patientID]) {
-          this.props.dispatch(getWholeData(null, null, selected.original));
+          // this.props.dispatch(getWholeData(null, null, selected.original));
         }
         // else {
         //     this.props.dispatch(

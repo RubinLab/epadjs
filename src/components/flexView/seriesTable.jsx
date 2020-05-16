@@ -47,10 +47,10 @@ const seriesTable = props => {
       .then(() => {})
       .catch(err => console.log(err));
     if (!props.patients[selected.patientID]) {
-      props.dispatch(getWholeData(selected));
+      // props.dispatch(getWholeData(selected));
     } else {
       props.dispatch(
-        updatePatient('serie', true, patientID, studyUID, selected.seriesUID)
+        // updatePatient('serie', true, patientID, studyUID, selected.seriesUID)
       );
     }
   };

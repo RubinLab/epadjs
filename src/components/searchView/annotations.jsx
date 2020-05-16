@@ -377,18 +377,18 @@ class Annotations extends Component {
           .catch(err => console.log(err));
         //if grid is NOT full check if patient data exists
         if (!this.props.patients[patientID]) {
-          this.props.dispatch(getWholeData(null, null, selected));
+          // this.props.dispatch(getWholeData(null, null, selected));
         } else {
-          this.props.dispatch(
-            updatePatient(
-              "annotation",
-              true,
-              patientID,
-              studyUID,
-              seriesUID,
-              aimID
-            )
-          );
+          // this.props.dispatch(
+          //   updatePatient(
+          //     "annotation",
+          //     true,
+          //     patientID,
+          //     studyUID,
+          //     seriesUID,
+          //     aimID
+          //   )
+          // );
         }
       }
     }
