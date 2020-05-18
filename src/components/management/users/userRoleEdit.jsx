@@ -10,7 +10,6 @@ const userRoleEdit = ({
   error,
   onSelect,
   projectToRole,
-  projectMap
 }) => {
   return (
     <Modal.Dialog dialogClassName="edit-userRole__modal project_user">
@@ -21,7 +20,6 @@ const userRoleEdit = ({
         <ProjectTable
           onSelect={onSelect}
           projectToRole={projectToRole}
-          projectMap={projectMap}
         />
       </Modal.Body>
       <Modal.Footer className="edit-userRole__modal--footer">

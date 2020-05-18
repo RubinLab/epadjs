@@ -12,6 +12,7 @@ import {
   getWorklistsOfCreator,
   getWorklistProgress,
 } from "../../services/worklistServices";
+import { getProjectMap } from "../annotationsList/action";
 // import { getPacs } from "../../services/pacsServices";
 import "./w2.css";
 // import { throws } from "assert";
@@ -60,9 +61,14 @@ class Sidebar extends Component {
         this.props.getPidUpdate(pid);
         const projectMap = {};
         for (let project of projects) {
-          projectMap[project.id] = project.name;
+          let { name, defaultTemplate } = project;
+          defaultTemplate = defaultTemplate === "null" ? null : defaultTemplate;
+          projectMap[project.id] = {
+            projectName: name,
+            defaultTemplate,
+          };
         }
-        this.props.onData(projectMap);
+        this.props.dispatch(getProjectMap(projectMap));
       }
     } catch (err) {
       console.log(err);

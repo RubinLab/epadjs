@@ -70,16 +70,6 @@ class Users extends React.Component {
         }
       }
     } 
-    // else {
-    //   for (let user of data) {
-    //     for (let project of user.projects) {
-    //       if (usersProjects.includes(project)) {
-    //         filteredProjects.push(this.props.projectMap[project]);
-    //       }
-    //     }
-    //     user.projects = filteredProjects;
-    //   }
-    // }
     this.setState({ data, hasAdminPermission, usersProjects });
   };
 
@@ -546,7 +536,6 @@ class Users extends React.Component {
             <UserRoleEditForm
               onSubmit={this.updateUserRole}
               onSelect={this.getUserRole}
-              projectMap={this.props.projectMap}
               onCancel={this.handleCancel}
               projectToRole={data[clickedUserIndex].projectToRole}
               error={this.state.errorMessage}
@@ -582,7 +571,6 @@ class Users extends React.Component {
               onSelectRole={this.getUserRole}
               onSelectPermission={this.getUserPermission}
               onSubmit={this.createUser}
-              projectMap={this.props.projectMap}
               projects={usersProjects}
               error={this.state.errorMessage}
               getUserName={this.getUserName}

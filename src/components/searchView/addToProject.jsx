@@ -38,7 +38,7 @@ const projectAdd = ({ projectMap, onSave, onProjectClose }) => {
         id={projectIDs[i]}
         key={`${projectIDs[i]} - ${i}`}
       >
-        {el}
+        {el.projectName}
       </div>
     );
   });
@@ -59,6 +59,7 @@ const mapStateToProps = state => {
   return {
     patients: state.annotationsListReducer.selectedPatients,
     studies: state.annotationsListReducer.selectedStudies,
+    projectMap: state.annotationsListReducer.projectMap,
   };
 };
 export default connect(mapStateToProps)(projectAdd);

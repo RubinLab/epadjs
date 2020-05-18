@@ -908,7 +908,6 @@ class SearchView extends Component {
         )}
         {showProjects && (
           <Projects
-            projectMap={this.props.projectMap}
             onProjectClose={this.handleProjectClick}
             onSave={this.addSelectionToProject}
           />
