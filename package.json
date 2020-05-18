@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@redhat-cloud-services/keycloak-js": "0.0.3",
     "axios": "^0.18.1",
     "btoa-lite": "^1.0.0",
     "chance": "^1.0.16",
@@ -21,7 +22,6 @@
     "joi-browser": "^13.4.0",
     "jquery": "^3.4.1",
     "js-file-download": "^0.4.5",
-    "keycloak-js": "4.0.0-beta.2",
     "lodash": "^4.17.15",
     "lodash.debounce": "^4.0.8",
     "loglevelnext": "^3.0.1",

@@ -3,7 +3,7 @@ import { Route, Switch, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { EventSourcePolyfill } from "event-source-polyfill";
-import Keycloak from "keycloak-js";
+import Keycloak from "@redhat-cloud-services/keycloak-js";
 import { getUser, getUserInfo } from "./services/userServices";
 import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
@@ -305,15 +305,15 @@ class App extends Component {
       getAuthUser = new Promise((resolve, reject) => {
         keycloak
           .init({ onLoad: "login-required" })
-          .then((authenticated) => {
+          .success((authenticated) => {
             keycloak
               .loadUserInfo()
-              .then((userInfo) => {
+              .success((userInfo) => {
                 resolve({ userInfo, keycloak, authenticated });
               })
-              .catch((err) => reject(err));
+              .error((err) => reject(err));
           })
-          .catch((err) => reject(err));
+          .error((err) => reject(err));
       });
     } else {
       // authMode is external ask backend for user
