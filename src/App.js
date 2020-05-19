@@ -304,7 +304,10 @@ class App extends Component {
       );
       getAuthUser = new Promise((resolve, reject) => {
         keycloak
-          .init({ onLoad: "login-required" })
+          .init({ 
+            onLoad: 'check-sso',
+            silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html' 
+          })
           .success((authenticated) => {
             keycloak
               .loadUserInfo()
