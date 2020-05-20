@@ -19,7 +19,7 @@ import {
 } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
-import CornerstoneViewport from "reactCornerstoneViewport";
+import CornerstoneViewport from "react-cornerstone-viewport";
 import OHIFSegmentationExtension from "../../ohif-segmentation-plugin";
 import { freehand } from "./Freehand";
 import { line } from "./Line";
@@ -28,7 +28,9 @@ import { circle } from "./Circle";
 import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
-import { isEyeTracker } from "../../config.json";
+// import { isEyeTracker } from "../../config.json";
+
+const isEyeTracker = true;
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
@@ -140,10 +142,10 @@ class DisplayView extends Component {
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
     cornerstoneTools.setToolActive("Wwwc", {
-      mouseButtonMask: 1
+      mouseButtonMask: 1,
     });
     cornerstoneTools.setToolActive("Zoom", {
-      mouseButtonMask: 2
+      mouseButtonMask: 2,
     });
   }
 

@@ -1,6 +1,6 @@
 import aimConf from "./aimConf";
 import { modalities } from "./modality";
-import { generateUid } from "../../utils/aid";
+import { generateUid } from "../../Utils/aid";
 
 class Aim {
   constructor(imageData, aimType, updatedAimId) {
