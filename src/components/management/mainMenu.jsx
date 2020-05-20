@@ -41,19 +41,24 @@ class MainMenu extends React.Component {
     window.removeEventListener("resize", this.updateDimensions);
   };
 
-  handleSelection = e => {
+  handleSelection = (e) => {
     const selection = e.target.textContent;
-    this.setState(state => {
+    this.setState((state) => {
       return { isModalOpen: !state.isModalOpen };
     });
     this.setState({ selection });
   };
 
-  handleCloseModal = e => {
-    this.setState(state => {
+  handleCloseModal = (e) => {
+    this.setState((state) => {
       return { isModalOpen: !state.isModalOpen };
     });
     this.props.closeMenu();
+  };
+
+  getActivePortProject = () => {
+    const { series, activePort } = this.props;
+    console.log("Series", series);
   };
 
   selectDisplay = () => {
@@ -118,6 +123,7 @@ class MainMenu extends React.Component {
 
   render() {
     const style = { left: this.state.coordinate };
+    console.log("Props", this.props);
 
     return (
       <div>
@@ -139,7 +145,9 @@ class MainMenu extends React.Component {
               <div
                 className="mng-menu__option"
                 onClick={() => {
-                  scanDataFolder();
+                  console.log("Props", this.props.location);
+                  const activeProject = this.getActivePortProject();
+                  scanDataFolder(activeProject);
                   this.props.closeMenu();
                 }}
               >
@@ -202,4 +210,11 @@ class MainMenu extends React.Component {
   }
 }
 
-export default connect()(MainMenu);
+const mapStateToProps = (state) => {
+  return {
+    series: state.annotationsListReducer.openSeries,
+    activePort: state.annotationsListReducer.activePort,
+  };
+};
+
+export default connect(mapStateToProps)(MainMenu);
