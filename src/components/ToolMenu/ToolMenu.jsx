@@ -47,20 +47,12 @@ import "./ToolMenu.css";
 
 import Switch from "react-switch";
 import ToolMenuItem from "../ToolMenu/ToolMenuItem";
-<<<<<<< HEAD
-import getNumOfSegs from "../../utils/Segmentation/getNumOfSegments";
-=======
->>>>>>> master
 
 const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     patientLoading: state.annotationsListReducer.patientLoading,
-<<<<<<< HEAD
-    listOpen: state.annotationsListReducer.listOpen,
-=======
->>>>>>> master
     activePort: state.annotationsListReducer.activePort,
   };
 };
@@ -83,15 +75,6 @@ const tools = [
     configuration: {
       showMinMax: true,
     },
-<<<<<<< HEAD
-  },
-  {
-    name: "RectangleRoi",
-    configuration: {
-      showMinMax: true,
-    },
-=======
->>>>>>> master
   },
   {
     name: "CircleRoi",
@@ -132,13 +115,8 @@ class ToolMenu extends Component {
       },
       rangeDisabled: true,
       interpolate: false,
-<<<<<<< HEAD
       activeTool: "Wwwc",
       activeToolIdx: 1,
-=======
-      activeTool: "",
-      activeToolIdx: 0,
->>>>>>> master
     };
 
     this.imagingTools = [
@@ -200,14 +178,11 @@ class ToolMenu extends Component {
             />
           </span>
         ),
-<<<<<<< HEAD
-=======
       },
       {
         name: "Sculpt 2D",
         icon: <FaScrewdriver />,
         tool: "FreehandRoiSculptor",
->>>>>>> master
       },
       {
         name: "Sculpt 3D",
@@ -227,14 +202,6 @@ class ToolMenu extends Component {
         name: "Brush HU Gated",
         icon: <FaBroom />,
         tool: "Brush3DHUGated",
-<<<<<<< HEAD
-      },
-      {
-        name: "Freehand Scissors",
-        icon: <FaHandScissors />,
-        tool: "FreehandScissors",
-=======
->>>>>>> master
       },
       // {
       //   name: "Freehand Scissors",
@@ -242,19 +209,11 @@ class ToolMenu extends Component {
       //   tool: "FreehandScissors"
       // },
       { name: "Circle Scissors", icon: <FaCircle />, tool: "CircleScissors" },
-<<<<<<< HEAD
-      {
-        name: "Correction Scissors",
-        icon: <TiScissorsOutline />,
-        tool: "CorrectionScissors",
-      },
-=======
       // {
       //   name: "Correction Scissors",
       //   icon: <TiScissorsOutline />,
       //   tool: "CorrectionScissors"
       // }
->>>>>>> master
     ];
   }
 
@@ -304,22 +263,6 @@ class ToolMenu extends Component {
   handleBrushSelected = () => {};
 
   //sets the selected tool active for an enabled elements
-<<<<<<< HEAD
-  setToolActiveForElement = (toolName, mouseMask = 1) => {
-    this.disableAllTools();
-    console.log("CStools", cornerstoneTools);
-    if (toolName == "Brush3DHUGatedTool") {
-      cornerstoneTools.store.modules.brush.setters.activeGate("muscle");
-    }
-    cornerstoneTools.setToolActiveForElement(
-      cornerstone.getEnabledElements()[this.props.activePort]["element"],
-      toolName,
-      {
-        mouseButtonMask: mouseMask,
-      }
-    );
-    this.setState({ showDrawing: false });
-=======
   // setToolActiveForElement = (toolName, mouseMask = 1) => {
   //   this.disableAllTools();
   //   if (toolName == "Brush3DHUGatedTool") {
@@ -346,7 +289,6 @@ class ToolMenu extends Component {
 
     if (toolName === "Brush3DTool" || toolName === "Brush3DHUGated")
       this.handleBrushSelected();
->>>>>>> master
   };
 
   handlePatientClick = async () => {
