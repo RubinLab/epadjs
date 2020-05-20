@@ -559,12 +559,12 @@ class Studies extends Component {
 
         //if patient doesnot exist get patient
         if (!patientExists) {
-          // this.props.dispatch(getWholeData(null, selected));
+          this.props.dispatch(getWholeData(null, selected));
         } else {
           //check if study exist
-          // this.props.dispatch(
-          //   updatePatient("study", true, patientID, studyUID)
-          // );
+          this.props.dispatch(
+            updatePatient("study", true, patientID, studyUID)
+          );
         }
         this.props.history.push("/display");
       }

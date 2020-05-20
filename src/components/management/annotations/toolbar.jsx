@@ -90,47 +90,6 @@ const toolBar = props => {
             <span className="filter-label">Download selections</span>
           </ReactTooltip>
         </>
-        {mode !== "lite" && (
-          <>
-            <>
-              <div className="annotation-toolbar__icon">
-                <FaShareSquare
-                  className="tool-icon"
-                  data-tip
-                  data-for="applyParalel-icon"
-                />
-              </div>
-              <ReactTooltip
-                id="applyParalel-icon"
-                place="right"
-                type="info"
-                delayShow={1000}
-              >
-                <span className="filter-label">Apply (parallel)</span>
-              </ReactTooltip>
-            </>
-
-            <>
-              <div onClick={onDelete} className="annotation-toolbar__icon">
-                <FaLocationArrow
-                  className="tool-icon"
-                  onClick={onDelete}
-                  data-tip
-                  data-for="applyAll-icon"
-                />
-              </div>
-              <ReactTooltip
-                id="applyAll-icon"
-                place="right"
-                type="info"
-                delayShow={1000}
-              >
-                <span className="filter-label">Apply (all together)</span>
-              </ReactTooltip>
-            </>
-          </>
-        )}
-
         <>
           <div onClick={onDelete}>
             <FaRegTrashAlt

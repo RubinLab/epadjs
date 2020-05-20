@@ -544,17 +544,17 @@ class Series extends Component {
           .catch(err => console.log(err));
         //if grid is NOT full check if patient data exists
         if (!this.props.patients[selected.patientID]) {
-          // this.props.dispatch(getWholeData(selected));
+          this.props.dispatch(getWholeData(selected));
         } else {
-          // this.props.dispatch(
-          //   updatePatient(
-          //     "serie",
-          //     true,
-          //     patientID,
-          //     studyUID,
-          //     selected.seriesUID
-          //   )
-          // );
+          this.props.dispatch(
+            updatePatient(
+              "serie",
+              true,
+              patientID,
+              studyUID,
+              selected.seriesUID
+            )
+          );
         }
       }
     }
