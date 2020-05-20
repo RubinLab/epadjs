@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import cornerstoneTools from "cornerstone-tools";
 import InputRange from "react-input-range";
 import Draggable from "react-draggable";
+import "./SmartBrushMenu.css";
 
 const brushModule = cornerstoneTools.store.modules.segmentation;
 const inputRange = { top: "5em" };
@@ -27,13 +28,13 @@ class SmartBrushMenu extends Component {
 
   applyCustomBrushValues = values => {
     const { min, max } = values;
-    brushModule.customGateRange(min, max);
+    brushModule.setters.customGateRange(min, max);
   };
 
   render() {
     return (
       <Draggable>
-        <div className="segmentation-menu">
+        <div className="smb-pop-up">
           <div className="buttonLabel">
             <span>Preset Brushes</span>
           </div>

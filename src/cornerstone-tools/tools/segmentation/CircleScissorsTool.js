@@ -1,16 +1,16 @@
-import { BaseTool } from '../base';
+import { BaseTool } from "../base";
 import {
   fillInsideCircle,
   fillOutsideCircle,
   eraseOutsideCircle,
-  eraseInsideCircle,
-} from './strategies';
+  eraseInsideCircle
+} from "./strategies";
 import {
   segCircleFillInsideCursor,
   segCircleFillOutsideCursor,
   segCircleEraseOutsideCursor,
-  segCircleEraseInsideCursor,
-} from '../cursors';
+  segCircleEraseInsideCursor
+} from "../cursors";
 
 /**
  * @public
@@ -23,23 +23,23 @@ export default class CircleScissorsTool extends BaseTool {
   /** @inheritdoc */
   constructor(props = {}) {
     const defaultProps = {
-      name: 'CircleScissors',
+      name: "CircleScissors",
       strategies: {
         FILL_INSIDE: fillInsideCircle,
         FILL_OUTSIDE: fillOutsideCircle,
         ERASE_OUTSIDE: eraseOutsideCircle,
-        ERASE_INSIDE: eraseInsideCircle,
+        ERASE_INSIDE: eraseInsideCircle
       },
       cursors: {
         FILL_INSIDE: segCircleFillInsideCursor,
         FILL_OUTSIDE: segCircleFillOutsideCursor,
         ERASE_OUTSIDE: segCircleEraseOutsideCursor,
-        ERASE_INSIDE: segCircleEraseInsideCursor,
+        ERASE_INSIDE: segCircleEraseInsideCursor
       },
-      defaultStrategy: 'FILL_INSIDE',
-      supportedInteractionTypes: ['Mouse', 'Touch'],
-      svgCursor: segCircleFillInsideCursor,
-      mixins: ['circleSegmentationMixin'],
+      defaultStrategy: "ERASE_INSIDE",
+      supportedInteractionTypes: ["Mouse", "Touch"],
+      svgCursor: segCircleEraseInsideCursor,
+      mixins: ["circleSegmentationMixin"]
     };
 
     super(props, defaultProps);

@@ -1,5 +1,5 @@
 import http from "./httpService";
-import { isLite, apiUrl } from "../config.json";
+const apiUrl = sessionStorage.getItem("apiUrl");
 
 export function getWorklistsOfCreator() {
   return http.get(apiUrl + "/worklists");
@@ -19,7 +19,7 @@ export function saveWorklist(
   name,
   assignees,
   description,
-  dueDate,
+  duedate,
   requirements
 ) {
   return http.post(apiUrl + "/worklists", {
@@ -27,13 +27,23 @@ export function saveWorklist(
     name,
     assignees,
     description,
-    dueDate,
+    duedate,
     requirements
   });
 }
 
 export function updateWorklistAssignee(user, id, body) {
   return http.put(apiUrl + "/worklists/" + id + "/users/" + user, body);
+}
+
+export function addWorklistRequirement(worklist, body) {
+  return http.post(apiUrl + "/worklists/" + worklist + "/requirements", body);
+}
+
+export function deleteWorklistRequirement(worklist, requirement) {
+  return http.delete(
+    apiUrl + "/worklists/" + worklist + "/requirements/" + requirement
+  );
 }
 
 export function updateWorklist(id, body) {

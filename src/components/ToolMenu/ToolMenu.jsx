@@ -47,14 +47,20 @@ import "./ToolMenu.css";
 
 import Switch from "react-switch";
 import ToolMenuItem from "../ToolMenu/ToolMenuItem";
+<<<<<<< HEAD
 import getNumOfSegs from "../../utils/Segmentation/getNumOfSegments";
+=======
+>>>>>>> master
 
 const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     patientLoading: state.annotationsListReducer.patientLoading,
+<<<<<<< HEAD
     listOpen: state.annotationsListReducer.listOpen,
+=======
+>>>>>>> master
     activePort: state.annotationsListReducer.activePort,
   };
 };
@@ -72,18 +78,20 @@ const tools = [
   },
   { name: "Probe" },
   { name: "Length" },
-  { name: "EllipticalRoi" },
   {
     name: "FreehandRoi",
     configuration: {
       showMinMax: true,
     },
+<<<<<<< HEAD
   },
   {
     name: "RectangleRoi",
     configuration: {
       showMinMax: true,
     },
+=======
+>>>>>>> master
   },
   {
     name: "CircleRoi",
@@ -124,19 +132,24 @@ class ToolMenu extends Component {
       },
       rangeDisabled: true,
       interpolate: false,
+<<<<<<< HEAD
       activeTool: "Wwwc",
       activeToolIdx: 1,
+=======
+      activeTool: "",
+      activeToolIdx: 0,
+>>>>>>> master
     };
 
     this.imagingTools = [
-      { name: "No Op", icon: <FaLocationArrow /> },
+      { name: "No Op", icon: <FaLocationArrow />, tool: "Noop" },
       { name: "Levels", icon: <FiSun />, tool: "Wwwc" },
       { name: "Presets", icon: <FiSunset />, tool: "Presets" },
       { name: "Zoom", icon: <FiZoomIn />, tool: "Zoom" },
       { name: "Invert", icon: <FaAdjust />, tool: "Invert" },
       { name: "Reset", icon: <MdLoop />, tool: "Reset" },
       { name: "Pan", icon: <MdPanTool />, tool: "Pan" },
-      { name: "SeriesData", icon: <FaListAlt />, tool: "MetaData" },
+      // { name: "SeriesData", icon: <FaListAlt />, tool: "MetaData" },
       { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate" },
       { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
     ];
@@ -187,9 +200,17 @@ class ToolMenu extends Component {
             />
           </span>
         ),
+<<<<<<< HEAD
+=======
       },
       {
-        name: "Sculpt",
+        name: "Sculpt 2D",
+        icon: <FaScrewdriver />,
+        tool: "FreehandRoiSculptor",
+>>>>>>> master
+      },
+      {
+        name: "Sculpt 3D",
         icon: <FaScrewdriver />,
         tool: "FreehandRoi3DSculptorTool",
       },
@@ -206,18 +227,34 @@ class ToolMenu extends Component {
         name: "Brush HU Gated",
         icon: <FaBroom />,
         tool: "Brush3DHUGated",
+<<<<<<< HEAD
       },
       {
         name: "Freehand Scissors",
         icon: <FaHandScissors />,
         tool: "FreehandScissors",
+=======
+>>>>>>> master
       },
+      // {
+      //   name: "Freehand Scissors",
+      //   icon: <FaHandScissors />,
+      //   tool: "FreehandScissors"
+      // },
       { name: "Circle Scissors", icon: <FaCircle />, tool: "CircleScissors" },
+<<<<<<< HEAD
       {
         name: "Correction Scissors",
         icon: <TiScissorsOutline />,
         tool: "CorrectionScissors",
       },
+=======
+      // {
+      //   name: "Correction Scissors",
+      //   icon: <TiScissorsOutline />,
+      //   tool: "CorrectionScissors"
+      // }
+>>>>>>> master
     ];
   }
 
@@ -239,33 +276,35 @@ class ToolMenu extends Component {
     cornerstoneTools.setToolActive(toolName, {
       mouseButtonMask: [mouseMask],
     });
-    if (toolName === "Brush") this.handleBrushSelected();
+    if (toolName === "Brush3DTool" || toolName === "Brush3DHUGated")
+      this.handleBrushSelected();
   };
 
-  handleBrushSelected = () => {
-    const { openSeries, activePort } = this.props;
-    const { imageAnnotations } = openSeries[activePort];
+  getActiveImage = () => {
+    const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
-    // if there are already image annotations and segmentations change the labelmap accordingly
-    console.log("Image annotations for seg Count", imageAnnotations);
-    if (imageAnnotations !== undefined) {
-      const newLabelMapIndex = getNumOfSegs(imageAnnotations);
-      console.log("New Label Map Index", newLabelMapIndex);
-      console.log(
-        "Segmenatation Module Before",
-        cornerstoneTools.getModule("segmentation")
-      );
-
-      const { setters } = cornerstoneTools.getModule("segmentation");
-      setters.activeLabelmapIndex(element, newLabelMapIndex);
-      console.log(
-        "Segmenatation Module After",
-        cornerstoneTools.getModule("segmentation")
-      );
-    }
+    return cornerstone.getImage(element);
   };
+
+  checkIfCT = () => {
+    const image = this.getActiveImage();
+    const seriesModule =
+      cornerstone.metaData.get("generalSeriesModule", image.imageId) || {};
+    const modality = seriesModule.modality;
+    if (modality === "CT") return true;
+    return false;
+  };
+
+  checkIfMultiframe = () => {
+    const image = this.getActiveImage();
+    if (image.data.string("x00280008")) return true;
+    return false;
+  };
+
+  handleBrushSelected = () => {};
 
   //sets the selected tool active for an enabled elements
+<<<<<<< HEAD
   setToolActiveForElement = (toolName, mouseMask = 1) => {
     this.disableAllTools();
     console.log("CStools", cornerstoneTools);
@@ -280,6 +319,34 @@ class ToolMenu extends Component {
       }
     );
     this.setState({ showDrawing: false });
+=======
+  // setToolActiveForElement = (toolName, mouseMask = 1) => {
+  //   this.disableAllTools();
+  //   if (toolName == "Brush3DHUGatedTool") {
+  //     cornerstoneTools.store.modules.brush.setters.activeGate("muscle");
+  //   }
+  //   cornerstoneTools.setToolActiveForElement(
+  //     cornerstone.getEnabledElements()[this.props.activePort]["element"],
+  //     toolName,
+  //     {
+  //       mouseButtonMask: mouseMask,
+  //     }
+  //   );
+  //   this.setState({ showDrawing: false });
+  // };
+
+  setToolActiveForElement = (toolName, mouseMask = [1]) => {
+    const enabledElements = cornerstone.getEnabledElements();
+
+    enabledElements.forEach((element) => {
+      cornerstoneTools.setToolActiveForElement(element, toolName, {
+        mouseButtonMask: [mouseMask],
+      });
+    });
+
+    if (toolName === "Brush3DTool" || toolName === "Brush3DHUGated")
+      this.handleBrushSelected();
+>>>>>>> master
   };
 
   handlePatientClick = async () => {
@@ -353,20 +420,45 @@ class ToolMenu extends Component {
     this.setState({ showBrushMenu: false });
   };
 
+  setCursor = (cursorStyle) => {
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    element.style.cursor = cursorStyle;
+  };
+
   handleToolClicked = (index, tool) => {
-    this.disableAllTools();
     if (tool === "Noop") {
+      this.setCursor("default");
+      this.disableAllTools();
       this.setState({ activeTool: "", activeToolIdx: index });
       return;
-    } else if (tool === "Presets") this.showPresets();
-    else if (tool === "Invert") this.invert();
-    else if (tool === "Reset") this.reset();
-    else if (tool === "MetaData") this.toggleMetaData();
-    else {
-      this.setState({ activeTool: tool, activeToolIdx: index }, () => {
-        this.setToolActive(tool);
-      });
+    } else if (tool === "Presets") {
+      this.showPresets();
+      return;
+    } else if (tool === "Invert") {
+      this.invert();
+      return;
+    } else if (tool === "Reset") {
+      this.reset();
+      return;
+    } else if (tool === "MetaData") {
+      this.toggleMetaData();
+      return;
+    } else if (tool === "Brush3DTool") {
+      if (this.checkIfMultiframe()) {
+        alert("Segmentation only works in singleframe images!");
+        return;
+      } //Dont' select the HUGated if the modality is not CT
+    } else if (tool === "Brush3DHUGated") {
+      if (!this.checkIfCT() || this.checkIfMultiframe()) {
+        alert("HU Gated tool only works with singleframe CT images");
+        return;
+      } //Dont' select the HUGated if the modality is not CT
     }
+    // this.disableAllTools();
+    this.setState({ activeTool: tool, activeToolIdx: index }, () => {
+      this.setToolActive(tool);
+    });
   };
 
   render() {

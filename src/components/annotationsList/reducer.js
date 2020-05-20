@@ -30,7 +30,10 @@ import {
   UPDATE_IMAGEID,
   CLEAR_AIMID,
   UPDATE_PATIENT_AIM_SAVE,
-  UPDATE_PATIENT_AIM_DELETE
+  UPDATE_PATIENT_AIM_DELETE,
+  GET_NOTIFICATIONS,
+  CLEAR_ACTIVE_AIMID,
+  UPDATE_IMAGE_INDEX
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -40,7 +43,6 @@ const initialState = {
   loading: false,
   error: false,
   patients: {},
-  listOpen: false,
   showGridFullAlert: false,
   showProjectModal: false,
   selectedProjects: {},
@@ -49,11 +51,20 @@ const initialState = {
   selectedSeries: {},
   selectedAnnotations: {},
   patientLoading: false,
-  patientLoadingError: null
+  patientLoadingError: null,
+  uploadedPid: null,
+  lastEventId: null
 };
 
 const asyncReducer = (state = initialState, action) => {
   switch (action.type) {
+    case UPDATE_IMAGE_INDEX:
+      const updatedOpenSeries = [...state.openSeries];
+      updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
+      return { ...state, openSeries: updatedOpenSeries };
+    case GET_NOTIFICATIONS:
+      const { uploadedPid, lastEventId, refresh } = action.payload;
+      return { ...state, uploadedPid, lastEventId, refresh };
     case UPDATE_PATIENT_AIM_DELETE:
       let patientAimDelete = { ...state.patients };
       let { aimRefs } = action;
@@ -72,6 +83,10 @@ const asyncReducer = (state = initialState, action) => {
       for (let serie of aimIDClearedOPenSeries) {
         serie.aimID = null;
       }
+      return { ...state, openSeries: aimIDClearedOPenSeries };
+    case CLEAR_ACTIVE_AIMID:
+      aimIDClearedOPenSeries = [...state.openSeries];
+      aimIDClearedOPenSeries[state.activePort].aimID = null;
       return { ...state, openSeries: aimIDClearedOPenSeries };
     case UPDATE_IMAGEID:
       const openSeriesToUpdate = [...state.openSeries];
@@ -134,7 +149,6 @@ const asyncReducer = (state = initialState, action) => {
       return { ...state, showProjectModal: projectModalStatus };
 
     case LOAD_SERIE_SUCCESS:
-      let indexNum = state.openSeries.length - 1;
       let imageAddedSeries = [...state.openSeries];
       let annCalc = Object.keys(action.payload.imageData);
       if (annCalc.length > 0) {
@@ -152,7 +166,6 @@ const asyncReducer = (state = initialState, action) => {
       const result = Object.assign({}, state, {
         loading: false,
         error: false,
-        activePort: indexNum,
         aimsList: {
           ...state.aimsList,
           [action.payload.ref.seriesUID]: action.payload.aimsData
@@ -196,9 +209,7 @@ const asyncReducer = (state = initialState, action) => {
         activePort: action.portIndex,
         openSeries: changedPortSeries
       });
-    case SHOW_ANNOTATION_WINDOW:
-      const showStatus = state.listOpen;
-      return Object.assign({}, state, { listOpen: !showStatus });
+
     case TOGGLE_ALL_ANNOTATIONS:
       //update openSeries
       let { seriesUID, displayStatus } = action.payload;
@@ -315,9 +326,9 @@ const asyncReducer = (state = initialState, action) => {
         ...state.selectedPatients
       };
 
-      patientsNew[action.patient.subjectID]
-        ? delete patientsNew[action.patient.subjectID]
-        : (patientsNew[action.patient.subjectID] = action.patient);
+      patientsNew[action.patient.patientID]
+        ? delete patientsNew[action.patient.patientID]
+        : (patientsNew[action.patient.patientID] = action.patient);
 
       return { ...state, selectedPatients: patientsNew };
 

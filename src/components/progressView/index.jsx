@@ -19,10 +19,20 @@ class ProgressView extends React.Component {
 
   getWorkListData = async () => {
     const { data } = await getWorklistProgress(this.props.match.params.wid);
+    data.forEach(el => (el.subject_name = this.clearCarets(el.subject_name)));
     this.setState({ data });
   };
 
   componentWillUnmount = () => {};
+
+  clearCarets = string => {
+    if (string) {
+      for (let i = 0; i < string.length; i++) {
+        string = string.replace("^", " ");
+      }
+      return string;
+    }
+  };
 
   toggleRow = async username => {
     let newSelected = Object.assign({}, this.state.selected);
@@ -31,13 +41,13 @@ class ProgressView extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0
+          selectAll: 0,
         });
       }
     } else {
       newSelected[username] = true;
       await this.setState({
-        selectAll: 2
+        selectAll: 2,
       });
     }
     this.setState({ selected: newSelected });
@@ -53,7 +63,7 @@ class ProgressView extends React.Component {
 
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
+      selectAll: this.state.selectAll === 0 ? 1 : 0,
     });
   }
 
@@ -66,41 +76,75 @@ class ProgressView extends React.Component {
       {
         Header: userHeader,
         accessor: "assignee",
-        aggregate: vals => _.join(vals, ", "),
+        aggregate: vals => _.join(Array.from(new Set(vals)), ", "),
         Aggregated: row => {
           return (
             <div className="--aggregated">
               <span>{row.value}</span>
             </div>
           );
-        }
+        },
       },
       {
         Header: patientHeader,
         accessor: "subject_name",
-        aggregate: vals => _.join(vals, ", "),
+        aggregate: vals => _.join(Array.from(new Set(vals)), ", "),
         Aggregated: row => {
           return (
             <div className="--aggregated">
               <span>{row.value}</span>
             </div>
           );
-        }
+        },
+      },
+      // {
+      //   Header: "Study Description",
+      //   accessor: "study_desc",
+      //   Aggregated: row => {
+      //     return (
+      //       <div className="--aggregated">
+      //         <span>{row.value}</span>
+      //       </div>
+      //     );
+      //   },
+      // },
+      {
+        Header: "Study UID",
+        accessor: "study_uid",
+        Aggregated: row => {
+          return (
+            <div className="--aggregated">
+              <span>{row.value}</span>
+            </div>
+          );
+        },
+      },
+      {
+        Header: "Requirement",
+        accessor: "worklist_requirement_desc",
+        width: 120,
+        Aggregated: row => {
+          return (
+            <div className="--aggregated">
+              <span>{row.value}</span>
+            </div>
+          );
+        },
       },
       {
         Header: "Completion(%)",
         accessor: "completeness",
-        width: 150,
         style: { textAlign: "center" },
+        width: 120,
         aggregate: vals => _.round(_.mean(vals)),
-        Aggregated: row => {
+        Cell: row => {
           return (
             <div className="--aggregated">
-              <span>{row.value}%</span>
+              <span>{row.value}</span>
             </div>
           );
-        }
-      }
+        },
+      },
     ];
 
     if (this.state.view === "User") {

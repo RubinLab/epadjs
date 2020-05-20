@@ -1,8 +1,10 @@
 import http from "./httpService";
-import { isLite, apiUrl, wadoUrl } from "../config.json";
+const apiUrl = sessionStorage.getItem("apiUrl");
+const mode = sessionStorage.getItem("mode");
+const wadoUrl = sessionStorage.getItem("wadoUrl");
 
 export function getSeries(projectId, subjectId, studyId) {
-  if (isLite)
+  if (mode === "lite")
     return http.get(
       apiUrl +
         "/projects/lite/subjects/" +
@@ -27,55 +29,68 @@ export function getAllSeriesofProject(projectID) {
   return http.get(apiUrl + "/projects/" + projectID + "/series");
 }
 export function getImageIds(series) {
-  if (isLite)
+  if (mode === "lite") {
     return http.get(
       apiUrl +
         "/projects/lite/subjects/" +
-        series.subjectUID +
+        series.patientID +
         "/studies/" +
         series.studyUID +
         "/series/" +
         series.seriesUID +
         "/images"
     );
-  else
+  } else {
     return http.get(
       apiUrl +
         "/projects/" +
-        series.projectUID +
+        series.projectID +
         "/subjects/" +
-        series.subjectUID +
+        series.patientID +
         "/studies/" +
         series.studyUID +
         "/series/" +
         series.seriesUID +
         "/images"
     );
+  }
 }
 
 //  seems like this doesn't belong to here but olny services know details about paths&server side
-export function getWadoImagePath(series, imageId) {
-  if (isLite) {
+export function getWadoImagePath(studyUid, seriesUid, imageId) {
+  if (wadoUrl.includes("wadors"))
     return (
       wadoUrl +
       "/studies/" +
-      series.studyUID +
+      studyUid +
       "/series/" +
-      series.seriesUID +
+      seriesUid +
       "/instances/" +
       imageId
     );
-  } else
+  else
     return (
       wadoUrl +
-      "?requestType=WADO&studyUID=" +
-      series.studyUID +
+      "/?requestType=WADO&studyUID=" +
+      studyUid +
       "&seriesUID=" +
-      series.seriesUID +
+      seriesUid +
       "&objectUID=" +
-      imageId +
-      "&contentType=application%2Fdicom"
+      imageId
     );
+}
+
+// replace the uri path with rs for now. we should be able to handle both somehow
+export function getWadoRSImagePath(studyUid, seriesUid, imageId) {
+  return (
+    wadoUrl +
+    "/studies/" +
+    studyUid +
+    "/series/" +
+    seriesUid +
+    "/instances/" +
+    imageId
+  );
 }
 
 export function downloadSeries(series) {
@@ -89,18 +104,20 @@ export function downloadSeries(series) {
     series.studyUID +
     "/series/" +
     series.seriesUID +
-    "?&format=stream&includeAims=true";
+    "?format=stream&includeAims=true";
   return http.get(url, { responseType: "blob" });
 }
 
 export function getSegmentation(series, imageId) {
-  const url = getWadoImagePath(series, imageId).replace("wadouri:", "");
-  console.log("URL is", url);
+  const { studyUID, seriesUID } = series;
+  const url = getWadoImagePath(studyUID, seriesUID, imageId)
+    .replace("wadouri:", "")
+    .replace("wadors:", "");
   return http.get(url, { responseType: "arraybuffer" });
 }
 
 export function deleteSeries(series) {
-  if (isLite) {
+  if (mode === "lite") {
     const url =
       apiUrl +
       "/projects/lite/subjects/" +
@@ -137,4 +154,10 @@ export function saveSeries(
 
 export function getSeriesOfProject() {
   return http.get(apiUrl + "/projects/lite/series?filterDSO=true");
+}
+export function uploadFileToSeries(formData, config, series) {
+  let { projectID, subjectID, studyUID, seriesUID } = series;
+  subjectID = subjectID ? subjectID : series.patientID;
+  const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/series/${seriesUID}/files`;
+  return http.post(url, formData, config);
 }

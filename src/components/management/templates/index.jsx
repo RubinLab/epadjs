@@ -1,20 +1,22 @@
 import React from "react";
-import PropTypes from "prop-types";
+import { connect } from "react-redux";
 import ReactTable from "react-table";
 import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { getAllTemplates } from "../../../services/templateServices";
+import {
+  getAllTemplates,
+  getTemplatesUniversal,
+} from "../../../services/templateServices";
 import { getProjects } from "../../../services/projectServices";
-import { isLite } from "../../../config.json";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
 import EditTemplates from "./projectTable";
-import CustomTable from "./CustomTable";
 import {
   downloadTemplates,
-  deleteTemplate
+  deleteTemplate,
 } from "../../../services/templateServices";
+const mode = sessionStorage.getItem("mode");
 
 class Templates extends React.Component {
   state = {
@@ -28,11 +30,11 @@ class Templates extends React.Component {
     selectedOne: {},
     uploadClicked: false,
     hasEditClicked: false,
-    templateName: ""
+    templateName: "",
   };
 
   componentDidMount = async () => {
-    if (!isLite) {
+    if (mode !== "lite") {
       const { data: projectList } = await getProjects();
       const temp = [];
       for (let project of projectList) {
@@ -46,16 +48,31 @@ class Templates extends React.Component {
     }
   };
 
+  componentDidUpdate = async prevProps => {
+    try {
+      const { refresh, lastEventId } = this.props;
+      if (refresh && lastEventId !== prevProps.lastEventId) {
+        await this.getTemplatesData();
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   renderMessages = input => {
     return {
       deleteAll: "Delete selected templates? This cannot be undone.",
-      deleteOne: `Delete template ${input}? This cannot be undone.`
+      deleteOne: `Delete template ${input}? This cannot be undone.`,
     };
   };
   getTemplatesData = async () => {
-    const { data: templates } = await getAllTemplates();
-    console.log(templates);
-    this.setState({ templates });
+    if (mode === "lite") {
+      const { data: templates } = await getAllTemplates();
+      this.setState({ templates });
+    } else {
+      const { data: templates } = await getTemplatesUniversal();
+      this.setState({ templates });
+    }
   };
 
   toggleRow = async (id, projectID) => {
@@ -66,13 +83,13 @@ class Templates extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0
+          selectAll: 0,
         });
       }
     } else {
       newSelected[id] = projectID;
       await this.setState({
-        selectAll: 2
+        selectAll: 2,
       });
     }
     this.setState({ selected: newSelected });
@@ -89,7 +106,7 @@ class Templates extends React.Component {
     }
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
+      selectAll: this.state.selectAll === 0 ? 1 : 0,
     });
   }
 
@@ -106,7 +123,7 @@ class Templates extends React.Component {
       hasEditClicked: false,
       delOne: false,
       templateName: "",
-      selectedOne: {}
+      selectedOne: {},
     });
   };
 
@@ -152,7 +169,7 @@ class Templates extends React.Component {
     this.setState({
       delOne: true,
       templateName,
-      selectedOne: { [templateUID]: projectID }
+      selectedOne: { [templateUID]: projectID },
     });
   };
 
@@ -170,7 +187,7 @@ class Templates extends React.Component {
           selectAll,
           selected: newSelected,
           selectedOne: {},
-          delOne: false
+          delOne: false,
         });
       })
       .catch(error => {
@@ -212,48 +229,47 @@ class Templates extends React.Component {
           );
         },
         // sortable: false,
-        resizable: false
-        // minResizeWidth: 20
-        // maxWidth: 45
+        resizable: false,
       },
       {
         Header: "Container",
         accessor: "containerName",
         sortable: true,
         resizable: true,
-        minResizeWidth: 100,
-        width: 420
       },
+      {
+        Header: "Template Name",
+        sortable: true,
+        resizable: true,
+        Cell: original => {
+          return <div>{original.row.checkbox.Template[0].templateName}</div>;
+          // return <span>type</span>;
+        },
+      },
+      {
+        Header: "Template Code",
+        sortable: true,
+        resizable: true,
+        Cell: original => {
+          return (
+            <div>{original.row.checkbox.Template[0].templateCodeValue}</div>
+          );
+          // return <span>type</span>;
+        },
+      },
+
       {
         Header: "Type",
         sortable: true,
         resizable: true,
-        minResizeWidth: 20,
-        // resizable: false,
-        width: 180,
-
         Cell: original => {
           return <div>{original.row.checkbox.Template[0].type}</div>;
           // return <span>type</span>;
-        }
+        },
       },
-      {
-        Header: "Template",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 100,
-        width: 420,
-        Cell: original => {
-          return <div>{original.row.checkbox.Template[0].templateName}</div>;
-          // return <span>type</span>;
-        }
-      },
-
       {
         Header: "",
-        // width: 45,
-        // minResizeWidth: 20,
-        // resizable: false,
+        width: 30,
         Cell: original => {
           const template = original.row.checkbox;
           return (
@@ -261,14 +277,14 @@ class Templates extends React.Component {
               <FaRegTrashAlt className="menu-clickable" />
             </div>
           );
-        }
-      }
+        },
+      },
     ];
   };
 
   handleClickProjects = () => {
     this.setState({
-      hasEditClicked: true
+      hasEditClicked: true,
     });
   };
   handleUpload = () => {
@@ -305,7 +321,6 @@ class Templates extends React.Component {
   };
 
   handleSubmitUpload = () => {
-    this.getTemplatesData();
     this.handleCancel();
   };
 
@@ -332,6 +347,7 @@ class Templates extends React.Component {
           pageSizeOptions={[10, 20, 50]}
           defaultPageSize={pageSize}
         />
+
         {(this.state.delAll || this.state.delOne) && (
           <DeleteAlert
             message={
@@ -362,36 +378,8 @@ class Templates extends React.Component {
   };
 }
 
-export default Templates;
-
-/*
-const projects = {
-      Header: "Projects",
-      // width: 50,
-      // minResizeWidth: 20,
-      // resizable: true,
-      // sortable: true,
-      Cell: original => {
-        const templates = original.row.checkbox.projectTemplates;
-        let projects = "";
-        if (templates.length === 1 && templates[0].projectID === "all") {
-          projects = "All";
-        } else {
-          let projectsArr = [];
-          for (let project of templates) {
-            projectsArr.push(this.state.projectList[project.projectID]);
-          }
-          projects = projectsArr.join(", ");
-        }
-        return (
-          <a
-            role="button"
-            tabIndex="0"
-            className="menu-clickable"
-            onClick={this.handleClickProjects}
-          >
-            {projects}
-          </a>
-        );
-      }
-    }; */
+const mapStateToProps = state => {
+  const { uploadedPid, lastEventId, refresh } = state.annotationsListReducer;
+  return { refresh, uploadedPid, lastEventId };
+};
+export default connect(mapStateToProps)(Templates);

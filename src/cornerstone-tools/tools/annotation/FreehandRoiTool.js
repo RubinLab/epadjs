@@ -1,42 +1,42 @@
-import EVENTS from './../../events.js';
-import external from './../../externalModules.js';
-import BaseAnnotationTool from './../base/BaseAnnotationTool.js';
+import EVENTS from "./../../events.js";
+import external from "./../../externalModules.js";
+import BaseAnnotationTool from "./../base/BaseAnnotationTool.js";
 // State
 import {
   addToolState,
   getToolState,
-  removeToolState,
-} from './../../stateManagement/toolState.js';
-import toolStyle from './../../stateManagement/toolStyle.js';
-import toolColors from './../../stateManagement/toolColors.js';
-import { state } from '../../store/index.js';
-import triggerEvent from '../../util/triggerEvent.js';
+  removeToolState
+} from "./../../stateManagement/toolState.js";
+import toolStyle from "./../../stateManagement/toolStyle.js";
+import toolColors from "./../../stateManagement/toolColors.js";
+import { state } from "../../store/index.js";
+import triggerEvent from "../../util/triggerEvent.js";
 // Manipulators
-import { moveHandleNearImagePoint } from '../../util/findAndMoveHelpers.js';
+import { moveHandleNearImagePoint } from "../../util/findAndMoveHelpers.js";
 // Implementation Logic
-import pointInsideBoundingBox from '../../util/pointInsideBoundingBox.js';
-import calculateSUV from '../../util/calculateSUV.js';
-import numbersWithCommas from '../../util/numbersWithCommas.js';
+import pointInsideBoundingBox from "../../util/pointInsideBoundingBox.js";
+import calculateSUV from "../../util/calculateSUV.js";
+import numbersWithCommas from "../../util/numbersWithCommas.js";
 
 // Drawing
-import { getNewContext, draw, drawJoinedLines } from '../../drawing/index.js';
-import drawLinkedTextBox from '../../drawing/drawLinkedTextBox.js';
-import drawHandles from '../../drawing/drawHandles.js';
-import { clipToBox } from '../../util/clip.js';
-import { hideToolCursor, setToolCursor } from '../../store/setToolCursor.js';
-import { freehandRoiCursor } from '../cursors/index.js';
-import freehandUtils from '../../util/freehand/index.js';
-import { getLogger } from '../../util/logger.js';
-import throttle from '../../util/throttle';
+import { getNewContext, draw, drawJoinedLines } from "../../drawing/index.js";
+import drawLinkedTextBox from "../../drawing/drawLinkedTextBox.js";
+import drawHandles from "../../drawing/drawHandles.js";
+import { clipToBox } from "../../util/clip.js";
+import { hideToolCursor, setToolCursor } from "../../store/setToolCursor.js";
+import { freehandRoiCursor } from "../cursors/index.js";
+import freehandUtils from "../../util/freehand/index.js";
+import { getLogger } from "../../util/logger.js";
+import throttle from "../../util/throttle";
 
-const logger = getLogger('tools:annotation:FreehandRoiTool');
+const logger = getLogger("tools:annotation:FreehandRoiTool");
 
 const {
   insertOrDelete,
   freehandArea,
   calculateFreehandStatistics,
   freehandIntersect,
-  FreehandHandleData,
+  FreehandHandleData
 } = freehandUtils;
 
 /**
@@ -50,10 +50,10 @@ const {
 export default class FreehandRoiTool extends BaseAnnotationTool {
   constructor(props = {}) {
     const defaultProps = {
-      name: 'FreehandRoi',
-      supportedInteractionTypes: ['Mouse', 'Touch'],
+      name: "FreehandRoi",
+      supportedInteractionTypes: ["Mouse", "Touch"],
       configuration: defaultFreehandConfiguration(),
-      svgCursor: freehandRoiCursor,
+      svgCursor: freehandRoiCursor
     };
 
     super(props, defaultProps);
@@ -105,8 +105,8 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       invalidated: true,
       color: undefined,
       handles: {
-        points: [],
-      },
+        points: []
+      }
     };
 
     measurementData.handles.textBox = {
@@ -115,7 +115,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       movesIndependently: false,
       drawnIndependently: true,
       allowedOutsideImage: true,
-      hasBoundingBox: true,
+      hasBoundingBox: true
     };
 
     return measurementData;
@@ -231,106 +231,108 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
    * @returns {void}  void
    */
   updateCachedStats(image, element, data) {
-    // Define variables for the area and mean/standard deviation
-    let meanStdDev, meanStdDevSUV;
+    try {
+      // Define variables for the area and mean/standard deviation
+      let meanStdDev, meanStdDevSUV;
 
-    const seriesModule = external.cornerstone.metaData.get(
-      'generalSeriesModule',
-      image.imageId
-    );
-    const modality = seriesModule ? seriesModule.modality : null;
-
-    const points = data.handles.points;
-    // If the data has been invalidated, and the tool is not currently active,
-    // We need to calculate it again.
-
-    // Retrieve the bounds of the ROI in image coordinates
-    const bounds = {
-      left: points[0].x,
-      right: points[0].x,
-      bottom: points[0].y,
-      top: points[0].x,
-    };
-
-    for (let i = 0; i < points.length; i++) {
-      bounds.left = Math.min(bounds.left, points[i].x);
-      bounds.right = Math.max(bounds.right, points[i].x);
-      bounds.bottom = Math.min(bounds.bottom, points[i].y);
-      bounds.top = Math.max(bounds.top, points[i].y);
-    }
-
-    const polyBoundingBox = {
-      left: bounds.left,
-      top: bounds.bottom,
-      width: Math.abs(bounds.right - bounds.left),
-      height: Math.abs(bounds.top - bounds.bottom),
-    };
-
-    // Store the bounding box information for the text box
-    data.polyBoundingBox = polyBoundingBox;
-
-    // First, make sure this is not a color image, since no mean / standard
-    // Deviation will be calculated for color images.
-    if (!image.color) {
-      // Retrieve the array of pixels that the ROI bounds cover
-      const pixels = external.cornerstone.getPixels(
-        element,
-        polyBoundingBox.left,
-        polyBoundingBox.top,
-        polyBoundingBox.width,
-        polyBoundingBox.height
+      const seriesModule = external.cornerstone.metaData.get(
+        "generalSeriesModule",
+        image.imageId
       );
+      const modality = seriesModule ? seriesModule.modality : null;
 
-      // Calculate the mean & standard deviation from the pixels and the object shape
-      meanStdDev = calculateFreehandStatistics.call(
-        this,
-        pixels,
-        polyBoundingBox,
-        data.handles.points
-      );
+      const points = data.handles.points;
+      // If the data has been invalidated, and the tool is not currently active,
+      // We need to calculate it again.
 
-      if (modality === 'PT') {
-        // If the image is from a PET scan, use the DICOM tags to
-        // Calculate the SUV from the mean and standard deviation.
+      // Retrieve the bounds of the ROI in image coordinates
+      const bounds = {
+        left: points[0].x,
+        right: points[0].x,
+        bottom: points[0].y,
+        top: points[0].x
+      };
 
-        // Note that because we are using modality pixel values from getPixels, and
-        // The calculateSUV routine also rescales to modality pixel values, we are first
-        // Returning the values to storedPixel values before calcuating SUV with them.
-        // TODO: Clean this up? Should we add an option to not scale in calculateSUV?
-        meanStdDevSUV = {
-          mean: calculateSUV(
-            image,
-            (meanStdDev.mean - image.intercept) / image.slope
-          ),
-          stdDev: calculateSUV(
-            image,
-            (meanStdDev.stdDev - image.intercept) / image.slope
-          ),
-        };
+      for (let i = 0; i < points.length; i++) {
+        bounds.left = Math.min(bounds.left, points[i].x);
+        bounds.right = Math.max(bounds.right, points[i].x);
+        bounds.bottom = Math.min(bounds.bottom, points[i].y);
+        bounds.top = Math.max(bounds.top, points[i].y);
       }
 
-      // If the mean and standard deviation values are sane, store them for later retrieval
-      if (meanStdDev && !isNaN(meanStdDev.mean)) {
-        data.meanStdDev = meanStdDev;
-        data.meanStdDevSUV = meanStdDevSUV;
+      const polyBoundingBox = {
+        left: bounds.left,
+        top: bounds.bottom,
+        width: Math.abs(bounds.right - bounds.left),
+        height: Math.abs(bounds.top - bounds.bottom)
+      };
+
+      // Store the bounding box information for the text box
+      data.polyBoundingBox = polyBoundingBox;
+
+      // First, make sure this is not a color image, since no mean / standard
+      // Deviation will be calculated for color images.
+      if (!image.color) {
+        // Retrieve the array of pixels that the ROI bounds cover
+        const pixels = external.cornerstone.getPixels(
+          element,
+          polyBoundingBox.left,
+          polyBoundingBox.top,
+          polyBoundingBox.width,
+          polyBoundingBox.height
+        );
+
+        // Calculate the mean & standard deviation from the pixels and the object shape
+        meanStdDev = calculateFreehandStatistics.call(
+          this,
+          pixels,
+          polyBoundingBox,
+          data.handles.points
+        );
+
+        if (modality === "PT") {
+          // If the image is from a PET scan, use the DICOM tags to
+          // Calculate the SUV from the mean and standard deviation.
+
+          // Note that because we are using modality pixel values from getPixels, and
+          // The calculateSUV routine also rescales to modality pixel values, we are first
+          // Returning the values to storedPixel values before calcuating SUV with them.
+          // TODO: Clean this up? Should we add an option to not scale in calculateSUV?
+          meanStdDevSUV = {
+            mean: calculateSUV(
+              image,
+              (meanStdDev.mean - image.intercept) / image.slope
+            ),
+            stdDev: calculateSUV(
+              image,
+              (meanStdDev.stdDev - image.intercept) / image.slope
+            )
+          };
+        }
+
+        // If the mean and standard deviation values are sane, store them for later retrieval
+        if (meanStdDev && !isNaN(meanStdDev.mean)) {
+          data.meanStdDev = meanStdDev;
+          data.meanStdDevSUV = meanStdDevSUV;
+        }
       }
-    }
 
-    // Retrieve the pixel spacing values, and if they are not
-    // Real non-zero values, set them to 1
-    const columnPixelSpacing = image.columnPixelSpacing || 1;
-    const rowPixelSpacing = image.rowPixelSpacing || 1;
-    const scaling = columnPixelSpacing * rowPixelSpacing;
+      // Retrieve the pixel spacing values, and if they are not
+      // Real non-zero values, set them to 1
+      const columnPixelSpacing = image.columnPixelSpacing || 1;
+      const rowPixelSpacing = image.rowPixelSpacing || 1;
+      const scaling = columnPixelSpacing * rowPixelSpacing;
 
-    const area = freehandArea(data.handles.points, scaling);
+      const area = freehandArea(data.handles.points, scaling);
 
-    // If the area value is sane, store it for later retrieval
-    if (!isNaN(area)) {
-      data.area = area;
-    }
+      // If the area value is sane, store it for later retrieval
+      if (!isNaN(area)) {
+        data.area = area;
+      }
 
-    // Set the invalidated flag to false so that this data won't automatically be recalculated
-    data.invalidated = false;
+      // Set the invalidated flag to false so that this data won't automatically be recalculated
+      data.invalidated = false;
+    } catch (error) {}
   }
 
   /**
@@ -352,7 +354,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     const { image, element } = eventData;
     const config = this.configuration;
     const seriesModule = external.cornerstone.metaData.get(
-      'generalSeriesModule',
+      "generalSeriesModule",
       image.imageId
     );
     const modality = seriesModule ? seriesModule.modality : null;
@@ -369,7 +371,8 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       }
 
       draw(context, context => {
-        let color = toolColors.getColorIfActive(data);
+        const activeColor = toolColors.getActiveColor(data);
+        let color = data.active ? activeColor : data.color;
         let fillColor;
 
         if (data.active) {
@@ -395,7 +398,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
               lines.push(config.mouseLocation.handles.start);
             }
             drawJoinedLines(context, element, data.handles.points[j], lines, {
-              color,
+              color
             });
           }
         }
@@ -404,7 +407,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
 
         const options = {
           color,
-          fill: fillColor,
+          fill: fillColor
         };
 
         if (config.alwaysShowHandles || (data.active && data.polyBoundingBox)) {
@@ -484,10 +487,10 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       // If the mean and standard deviation values are present, display them
       if (meanStdDev && meanStdDev.mean !== undefined) {
         // If the modality is CT, add HU to denote Hounsfield Units
-        let moSuffix = '';
+        let moSuffix = "";
 
-        if (modality === 'CT') {
-          moSuffix = 'HU';
+        if (modality === "CT") {
+          moSuffix = "HU";
         }
         data.unit = moSuffix;
 
@@ -502,7 +505,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
 
         // If this image has SUV values to display, concatenate them to the text line
         if (meanStdDevSUV && meanStdDevSUV.mean !== undefined) {
-          const SUVtext = ' SUV: ';
+          const SUVtext = " SUV: ";
 
           meanText +=
             SUVtext + numbersWithCommas(meanStdDevSUV.mean.toFixed(2));
@@ -569,42 +572,55 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     return false;
   }
 
-  handleSelectedCallback(evt, toolData, handle, interactionType = 'mouse') {
-    const { element } = evt.detail;
-    const toolState = getToolState(element, this.name);
-
-    if (handle.hasBoundingBox) {
-      // Use default move handler.
-      moveHandleNearImagePoint(evt, this, toolData, handle, interactionType);
-
-      return;
-    }
-
-    const config = this.configuration;
-
-    config.dragOrigin = {
-      x: handle.x,
-      y: handle.y,
+  handleSelectedCallback(evt, toolData, handle, interactionType = "mouse") {
+    const ancestorEvent = {
+      element: evt.detail.element,
+      data: toolData
     };
+    const detail = { aimId: toolData.aimId, ancestorEvent };
+    const evnt = new CustomEvent("markupSelected", {
+      cancelable: true,
+      detail
+    });
+    const shouldContinue = window.dispatchEvent(evnt);
+    if (shouldContinue) {
+      // //////
+      const { element } = evt.detail;
+      const toolState = getToolState(element, this.name);
 
-    // Iterating over handles of all toolData instances to find the indices of the selected handle
-    for (let toolIndex = 0; toolIndex < toolState.data.length; toolIndex++) {
-      const points = toolState.data[toolIndex].handles.points;
+      if (handle.hasBoundingBox) {
+        // Use default move handler.
+        moveHandleNearImagePoint(evt, this, toolData, handle, interactionType);
 
-      for (let p = 0; p < points.length; p++) {
-        if (points[p] === handle) {
-          config.currentHandle = p;
-          config.currentTool = toolIndex;
+        return;
+      }
+
+      const config = this.configuration;
+
+      config.dragOrigin = {
+        x: handle.x,
+        y: handle.y
+      };
+
+      // Iterating over handles of all toolData instances to find the indices of the selected handle
+      for (let toolIndex = 0; toolIndex < toolState.data.length; toolIndex++) {
+        const points = toolState.data[toolIndex].handles.points;
+
+        for (let p = 0; p < points.length; p++) {
+          if (points[p] === handle) {
+            config.currentHandle = p;
+            config.currentTool = toolIndex;
+          }
         }
       }
-    }
 
-    this._modifying = true;
+      this._modifying = true;
 
-    this._activateModify(element);
+      this._activateModify(element);
 
-    // Interupt eventDispatchers
-    preventPropagation(evt);
+      // Interupt eventDispatchers
+      preventPropagation(evt);
+    } else evt.preventDefault();
   }
 
   /**
@@ -1035,9 +1051,9 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     let interactionType;
 
     if (evt.type === EVENTS.MOUSE_DOWN_ACTIVATE) {
-      interactionType = 'Mouse';
+      interactionType = "Mouse";
     } else if (evt.type === EVENTS.TOUCH_START_ACTIVE) {
-      interactionType = 'Touch';
+      interactionType = "Touch";
     }
     this._activateDraw(element, interactionType);
     this._getMouseLocation(eventData);
@@ -1221,7 +1237,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       if (handleNearby !== undefined) {
         return {
           handleNearby,
-          toolIndex,
+          toolIndex
         };
       }
     }
@@ -1384,9 +1400,9 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
 
     let completeHandleRadius;
 
-    if (this._drawingInteractionType === 'Mouse') {
+    if (this._drawingInteractionType === "Mouse") {
       completeHandleRadius = this.configuration.completeHandleRadius;
-    } else if (this._drawingInteractionType === 'Touch') {
+    } else if (this._drawingInteractionType === "Touch") {
       completeHandleRadius = this.configuration.completeHandleRadiusTouch;
     }
 
@@ -1394,7 +1410,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       element,
       p1Canvas,
       p2Canvas,
-      '<',
+      "<",
       completeHandleRadius
     );
   }
@@ -1410,7 +1426,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
    *                              allowed canvas spacing.
    */
   _isDistanceSmallerThanSpacing(element, p1, p2) {
-    return this._compareDistanceToSpacing(element, p1, p2, '<');
+    return this._compareDistanceToSpacing(element, p1, p2, "<");
   }
 
   /**
@@ -1424,7 +1440,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
    *                              allowed canvas spacing.
    */
   _isDistanceLargerThanSpacing(element, p1, p2) {
-    return this._compareDistanceToSpacing(element, p1, p2, '>');
+    return this._compareDistanceToSpacing(element, p1, p2, ">");
   }
 
   /**
@@ -1443,10 +1459,10 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     element,
     p1,
     p2,
-    comparison = '>',
+    comparison = ">",
     spacing = this.configuration.spacing
   ) {
-    if (comparison === '>') {
+    if (comparison === ">") {
       return external.cornerstoneMath.point.distance(p1, p2) > spacing;
     }
 
@@ -1462,7 +1478,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
    * @modifies {element}
    * @returns {undefined}
    */
-  _activateDraw(element, interactionType = 'Mouse') {
+  _activateDraw(element, interactionType = "Mouse") {
     this._drawing = true;
     this._drawingInteractionType = interactionType;
 
@@ -1628,7 +1644,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     const eventData = {
       toolName: this.name,
       element,
-      measurementData,
+      measurementData
     };
 
     triggerEvent(element, eventType, eventData);
@@ -1639,7 +1655,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     const eventData = {
       toolName: this.name,
       element,
-      measurementData,
+      measurementData
     };
 
     triggerEvent(element, eventType, eventData);
@@ -1654,9 +1670,9 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
   }
 
   set spacing(value) {
-    if (typeof value !== 'number') {
+    if (typeof value !== "number") {
       throw new Error(
-        'Attempting to set freehand spacing to a value other than a number.'
+        "Attempting to set freehand spacing to a value other than a number."
       );
     }
 
@@ -1669,9 +1685,9 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
   }
 
   set activeHandleRadius(value) {
-    if (typeof value !== 'number') {
+    if (typeof value !== "number") {
       throw new Error(
-        'Attempting to set freehand activeHandleRadius to a value other than a number.'
+        "Attempting to set freehand activeHandleRadius to a value other than a number."
       );
     }
 
@@ -1684,9 +1700,9 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
   }
 
   set completeHandleRadius(value) {
-    if (typeof value !== 'number') {
+    if (typeof value !== "number") {
       throw new Error(
-        'Attempting to set freehand completeHandleRadius to a value other than a number.'
+        "Attempting to set freehand completeHandleRadius to a value other than a number."
       );
     }
 
@@ -1699,9 +1715,9 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
   }
 
   set alwaysShowHandles(value) {
-    if (typeof value !== 'boolean') {
+    if (typeof value !== "boolean") {
       throw new Error(
-        'Attempting to set freehand alwaysShowHandles to a value other than a boolean.'
+        "Attempting to set freehand alwaysShowHandles to a value other than a boolean."
       );
     }
 
@@ -1803,18 +1819,18 @@ function defaultFreehandConfiguration() {
       handles: {
         start: {
           highlight: true,
-          active: true,
-        },
-      },
+          active: true
+        }
+      }
     },
     spacing: 1,
     activeHandleRadius: 3,
     completeHandleRadius: 6,
     completeHandleRadiusTouch: 28,
     alwaysShowHandles: false,
-    invalidColor: 'crimson',
+    invalidColor: "crimson",
     currentHandle: 0,
-    currentTool: -1,
+    currentTool: -1
   };
 }
 

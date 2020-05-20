@@ -30,7 +30,6 @@ export default class Brush3DTool extends BrushTool {
       currentImageIdIndex,
       activeLabelmapIndex
     } = brushModule.getters.labelmap2D(element);
-    console.log(labelmap3D, currentImageIdIndex, activeLabelmapIndex);
 
     const shouldErase =
       this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;

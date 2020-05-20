@@ -12,7 +12,9 @@ import {
 import { FiMinimize2 } from "react-icons/fi";
 import ReactTooltip from "react-tooltip";
 import { BarLoader } from "react-spinners";
-import { isLite } from "../../config";
+import Spinner from "../common/circleSpinner";
+
+const mode = sessionStorage.getItem("mode");
 
 const toolBar = props => {
   return (
@@ -70,7 +72,7 @@ const toolBar = props => {
           </ReactTooltip>
         </div>
         <div
-          onClick={props.onDelete}
+          onClick={props.showDelete ? props.onDelete : null}
           className={
             props.showDelete ? "searchView-toolbar__icon" : "hide-delete"
           }
@@ -92,62 +94,75 @@ const toolBar = props => {
           </ReactTooltip>
         </div>
       </div>
-      {!isLite && (
-        <div className="searchView-toolbar__group">
-          <div className="searchView-toolbar__icon" onClick={props.onExpand}>
-            <div>
-              <FaLevelDownAlt
-                style={{ fontSize: "1.2rem" }}
-                data-tip
-                data-for="forward-icon"
-              />
-            </div>
-            <ReactTooltip
-              id="forward-icon"
-              place="bottom"
-              type="info"
-              delayShow={1500}
-            >
-              <span>Expand to Next Level</span>
-            </ReactTooltip>
-          </div>
-          <div className="searchView-toolbar__icon" onClick={props.onShrink}>
-            <div>
-              <FaLevelUpAlt
-                style={{ fontSize: "1.2rem" }}
-                data-tip
-                data-for="back-icon"
-              />
-            </div>
-            <ReactTooltip
-              id="back-icon"
-              place="bottom"
-              type="info"
-              delayShow={1500}
-            >
-              <span>Close One Level</span>
-            </ReactTooltip>
-          </div>
-          <div className="searchView-toolbar__icon" onClick={props.onCloseAll}>
-            <div>
-              <FiMinimize2
-                style={{ fontSize: "1.5rem", strokeWidth: "3px" }}
-                data-tip
-                data-for="minimize-icon"
-              />
-            </div>
-            <ReactTooltip
-              id="minimize-icon"
-              place="bottom"
-              type="info"
-              delayShow={1500}
-            >
-              <span>Close All Levels</span>
-            </ReactTooltip>
-          </div>
+      {/* {mode !== "lite" && ( */}
+      {/* <div className="searchView-toolbar__group"> */}
+      {/* {props.expanding ? (
+        <Spinner loading={props.expanding} unit="rem" size={2} />
+      ) : ( */}
+      <div className="searchView-toolbar__icon" onClick={props.onExpand}>
+        <div>
+          <FaLevelDownAlt
+            style={{ fontSize: "1.2rem" }}
+            data-tip
+            data-for="forward-icon"
+          />
         </div>
-      )}
-      {props.project && !isLite && (
+
+        <ReactTooltip
+          id="forward-icon"
+          place="bottom"
+          type="info"
+          delayShow={1500}
+        >
+          <span>Expand to Next Level</span>
+        </ReactTooltip>
+      </div>
+      {/* )} */}
+      <div
+        className="searchView-toolbar__icon"
+        // onClick={props.expanding ? null : props.onShrink}
+        onClick={props.onShrink}
+      >
+        <div>
+          <FaLevelUpAlt
+            style={{ fontSize: "1.2rem" }}
+            data-tip
+            data-for="back-icon"
+          />
+        </div>
+        <ReactTooltip
+          id="back-icon"
+          place="bottom"
+          type="info"
+          delayShow={1500}
+        >
+          <span>Close One Level</span>
+        </ReactTooltip>
+      </div>
+      <div
+        className="searchView-toolbar__icon"
+        // onClick={props.expanding ? null : props.onCloseAll}
+        onClick={props.onCloseAll}
+      >
+        <div>
+          <FiMinimize2
+            style={{ fontSize: "1.5rem", strokeWidth: "3px" }}
+            data-tip
+            data-for="minimize-icon"
+          />
+        </div>
+        <ReactTooltip
+          id="minimize-icon"
+          place="bottom"
+          type="info"
+          delayShow={1500}
+        >
+          <span>Close All Levels</span>
+        </ReactTooltip>
+      </div>
+      {/* </div>
+      )} */}
+      {props.project && mode !== "lite" && (
         <div className="searchView-toolbar__group">
           <div
             className="searchView-toolbar__icon new-icon"
@@ -169,28 +184,28 @@ const toolBar = props => {
               <span>New</span>
             </ReactTooltip>
           </div>
-          <div
-            className="searchView-toolbar__icon worklist-icon"
-            onClick={props.onWorklist}
-          >
-            <div>
-              <FaClipboardList
-                style={{ fontSize: "1.2rem" }}
-                data-tip
-                data-for="worklist-icon"
-              />
-            </div>
-            <ReactTooltip
-              id="worklist-icon"
-              place="bottom"
-              type="info"
-              delayShow={1500}
-            >
-              <span>Add to worklist</span>
-            </ReactTooltip>
-          </div>
         </div>
       )}
+      <div
+        className="searchView-toolbar__icon worklist-icon"
+        onClick={props.onWorklist}
+      >
+        <div>
+          <FaClipboardList
+            style={{ fontSize: "1.2rem" }}
+            data-tip
+            data-for="worklist-icon"
+          />
+        </div>
+        <ReactTooltip
+          id="worklist-icon"
+          place="bottom"
+          type="info"
+          delayShow={1500}
+        >
+          <span>Add to worklist</span>
+        </ReactTooltip>
+      </div>
       {/* <div className="searchView-toolbar__icon">
         <div>
           <TiPencil

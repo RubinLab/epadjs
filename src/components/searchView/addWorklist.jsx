@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import {
   getWorklistsOfCreator,
   addStudyToWorklist,
-  addSubjectToWorklist
+  addSubjectToWorklist,
 } from "../../services/worklistServices";
 
 class WorklistAdd extends React.Component {
@@ -38,18 +38,18 @@ class WorklistAdd extends React.Component {
         patientID,
         studyUID,
         patientName,
-        studyDescription
+        studyDescription,
       } = el;
       promises.push(
         addStudyToWorklist(e.target.id, projectID, patientID, studyUID, {
           studyDesc: studyDescription,
-          subjectName: patientName
+          subjectName: patientName,
         })
       );
     });
     Promise.all(promises)
       .then(() => {
-        console.log("yeap");
+        this.props.updateProgress();
       })
       .catch(err => console.log(err));
   };
@@ -58,24 +58,28 @@ class WorklistAdd extends React.Component {
     const subjects = Object.values(this.props.selectedPatients);
     const promises = [];
     subjects.forEach((el, index) => {
-      const { projectID, subjectID, subjectName } = el;
+      const { projectID, patientID, subjectName } = el;
       promises.push(
-        addSubjectToWorklist(e.target.id, projectID, subjectID, {
-          subjectName
+        addSubjectToWorklist(e.target.id, projectID, patientID, {
+          subjectName,
         })
       );
     });
 
     Promise.all(promises)
-      .then(() => {})
+      .then(() => {
+        this.props.updateProgress();
+      })
       .catch(err => console.log(err));
   };
 
   onSelect = e => {
     if (Object.values(this.props.selectedStudies).length > 0) {
       this.addStudyToWorklist(e);
+      this.props.onClose();
     } else if (Object.values(this.props.selectedPatients).length > 0) {
       this.addSubjectToWorklist(e);
+      this.props.onClose();
     }
   };
   render() {
@@ -102,7 +106,7 @@ class WorklistAdd extends React.Component {
       <div ref={this.setWrapperRef}>
         <div
           className="worklist-popup"
-          style={{ left: rect.right - 10, top: rect.bottom + 10 }}
+          style={{ left: rect.right - 5, top: rect.bottom - 5 }}
         >
           {worklists}
         </div>
@@ -115,7 +119,7 @@ const mapStateToProps = state => {
   return {
     selectedProjects: state.annotationsListReducer.selectedProjects,
     selectedPatients: state.annotationsListReducer.selectedPatients,
-    selectedStudies: state.annotationsListReducer.selectedStudies
+    selectedStudies: state.annotationsListReducer.selectedStudies,
   };
 };
 export default connect(mapStateToProps)(WorklistAdd);

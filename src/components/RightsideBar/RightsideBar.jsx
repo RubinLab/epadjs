@@ -18,7 +18,7 @@ class Rightsidebar extends Component {
       width: "300px",
       marginRight: "300px",
       buttonDisplay: "block",
-      open: true
+      open: true,
     };
   }
 
@@ -29,18 +29,20 @@ class Rightsidebar extends Component {
       this.setState({
         width: "0",
         marginRight: "0",
-        open: false
+        open: false,
       });
     } else {
       this.setState({
         width: "300px",
         marginRight: "300px",
-        open: true
+        open: true,
       });
     }
   };
 
   render() {
+    const { activePort, openSeries } = this.props;
+    const { projectID } = openSeries[activePort];
     return (
       <React.Fragment>
         {!this.state.open && (
@@ -74,8 +76,12 @@ class Rightsidebar extends Component {
               <div className="AimEditor-Wrapper">
                 <AimEditor
                   aimId={this.props.selectedAim}
+                  onCancel={this.props.onCancel}
                   // onCancel={this.closeAimEditor}
+                  updateProgress={this.props.updateProgress}
+                  projectID={projectID}
                   hasSegmentation={this.props.hasSegmentation}
+                  activeLabelMapIndex={this.props.activeLabelMapIndex}
                 />
               </div>
             </Collapsible>
@@ -91,7 +97,7 @@ class Rightsidebar extends Component {
           className={this.state.open ? "mainView" : "mainView-closed"}
           style={{
             marginRight: this.state.marginRight,
-            height: "calc(100% - 50px)"
+            height: "calc(100% - 50px)",
           }}
         >
           {this.props.children}
@@ -101,10 +107,11 @@ class Rightsidebar extends Component {
   }
 }
 
-const mapStateToProps = state => {
-  const { activePort } = state.annotationsListReducer;
+const mapStateToProps = (state) => {
+  const { activePort, openSeries } = state.annotationsListReducer;
   return {
-    activePort
+    activePort,
+    openSeries,
   };
 };
 export default withRouter(connect(mapStateToProps)(Rightsidebar));

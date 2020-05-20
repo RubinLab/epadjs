@@ -32,7 +32,8 @@ class AnnnotationDownloadModal extends React.Component {
         this.props.onSubmit();
       })
       .catch(err => {
-        if (err.response.status === 503) {
+        console.log(err);
+        if (err.response && err.response.status === 503) {
           toast.error("Select a download format!", { autoClose: false });
         }
       });

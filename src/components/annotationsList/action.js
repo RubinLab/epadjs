@@ -32,6 +32,9 @@ import {
   CLEAR_AIMID,
   UPDATE_PATIENT_AIM_SAVE,
   UPDATE_PATIENT_AIM_DELETE,
+  GET_NOTIFICATIONS,
+  CLEAR_ACTIVE_AIMID,
+  UPDATE_IMAGE_INDEX,
   colors,
   commonLabels
 } from "./types";
@@ -47,14 +50,20 @@ export const clearGrid = item => {
   return { type: CLEAR_GRID };
 };
 
+export const clearActivePortAimID = () => {
+  return { type: CLEAR_ACTIVE_AIMID };
+};
+
 export const clearAimId = () => {
   return {
     type: CLEAR_AIMID
   };
 };
 
-export const updateImageId = event => {
-  const imageID = event.detail.image.imageId.split("/").pop();
+export const updateImageIndex = imageIndex => {
+  return { type: UPDATE_IMAGE_INDEX, imageIndex };
+};
+export const updateImageId = imageID => {
   return {
     type: UPDATE_IMAGEID,
     imageID
@@ -64,6 +73,13 @@ export const updateImageId = event => {
 export const closeSerie = () => {
   return {
     type: CLOSE_SERIE
+  };
+};
+
+export const getNotificationsData = (uploadedPid, lastEventId, refresh) => {
+  return {
+    type: GET_NOTIFICATIONS,
+    payload: { uploadedPid, lastEventId, refresh },
   };
 };
 
@@ -130,17 +146,17 @@ export const displaySingleAim = (
 };
 
 export const selectPatient = selectedPatientObj => {
-  let {
+   let {
     projectID,
-    subjectID,
     subjectName,
-    numberOfAnnotations
+    numberOfAnnotations,
+    index
   } = selectedPatientObj;
   projectID = projectID ? projectID : "lite";
-
+  const patientID = selectedPatientObj.subjectID;
   return {
     type: SELECT_PATIENT,
-    patient: { projectID, subjectID, numberOfAnnotations, subjectName }
+    patient: { projectID, patientID, numberOfAnnotations, subjectName, index },
   };
 };
 
@@ -250,7 +266,8 @@ export const addToGrid = (serie, annotation) => {
     patientID,
     studyUID,
     seriesUID,
-    aimID: annotation
+    aimID: annotation,
+    imageIndex: 0
   };
   return { type: ADD_TO_GRID, reference };
 };
@@ -570,9 +587,7 @@ export const updateSingleSerie = (serie, annotation) => {
       numberOfAnnotations,
       aimID: annotation
     };
-    const { aimsData, imageData } = await dispatch(
-      getSingleSerieData(serie, annotation)
-    );
+    const { aimsData, imageData } = await getSingleSerieData(serie, annotation);
     await dispatch(
       singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation)
     );
@@ -603,10 +618,11 @@ const getSingleSerieData = (serie, annotation) => {
     projectID = projectID ? projectID : "lite";
     patientID = patientID ? patientID : serie.subjectID;
     const promises = [];
+
     promises.push(
       getAnnotationsJSON(projectID, patientID, studyUID, seriesUID)
     );
-    promises.push(getStudyAims(patientID, studyUID));
+    promises.push(getStudyAims(patientID, studyUID, projectID));
     Promise.all(promises)
       .then(async result => {
         serieAims = result[0].data;

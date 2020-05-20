@@ -7,24 +7,15 @@ export const circle = {
       x: "",
       y: "",
       highlight: true,
-      active: false
+      active: false,
     },
     end: {
       x: "",
       y: "",
       highlight: true,
-      active: false
+      active: false,
     },
     initialRotation: 0,
-    textBox: {}
+    textBox: {},
   },
-  cachedStats: {
-    area: 0,
-    count: 0,
-    mean: 0,
-    variance: 0,
-    stdDev: 0,
-    min: 0,
-    max: 0
-  }
 };

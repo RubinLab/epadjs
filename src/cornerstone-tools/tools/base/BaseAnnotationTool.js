@@ -1,13 +1,13 @@
-import BaseTool from './BaseTool.js';
-import { getToolState } from './../../stateManagement/toolState.js';
-import handleActivator from './../../manipulators/handleActivator.js';
+import BaseTool from "./BaseTool.js";
+import { getToolState } from "./../../stateManagement/toolState.js";
+import handleActivator from "./../../manipulators/handleActivator.js";
 import {
   moveHandleNearImagePoint,
-  moveAnnotation,
-} from './../../util/findAndMoveHelpers.js';
-import { getLogger } from '../../util/logger';
+  moveAnnotation
+} from "./../../util/findAndMoveHelpers.js";
+import { getLogger } from "../../util/logger";
 
-const logger = getLogger('baseAnnotationTool');
+const logger = getLogger("baseAnnotationTool");
 
 /**
  * @memberof Tools.Base
@@ -50,7 +50,7 @@ class BaseAnnotationTool extends BaseTool {
    * @returns {boolean} If the point is near the tool
    */
   // eslint-disable-next-line no-unused-vars
-  pointNearTool(element, data, coords, interactionType = 'mouse') {
+  pointNearTool(element, data, coords, interactionType = "mouse") {
     throw new Error(`Method pointNearTool not implemented for ${this.name}.`);
   }
 
@@ -116,9 +116,9 @@ class BaseAnnotationTool extends BaseTool {
       // Tool data's 'active' does not match coordinates
       // TODO: can't we just do an if/else and save on a pointNearTool check?
       const nearToolAndNotMarkedActive =
-        this.pointNearTool(element, data, coords, 'mouse') && !data.active;
+        this.pointNearTool(element, data, coords, "mouse") && !data.active;
       const notNearToolAndMarkedActive =
-        !this.pointNearTool(element, data, coords, 'mouse') && data.active;
+        !this.pointNearTool(element, data, coords, "mouse") && data.active;
 
       if (nearToolAndNotMarkedActive || notNearToolAndMarkedActive) {
         data.active = !data.active;
@@ -140,8 +140,20 @@ class BaseAnnotationTool extends BaseTool {
    * @param  {String} interactionType -
    * @returns {void}
    */
-  handleSelectedCallback(evt, toolData, handle, interactionType = 'mouse') {
-    moveHandleNearImagePoint(evt, this, toolData, handle, interactionType);
+  handleSelectedCallback(evt, toolData, handle, interactionType = "mouse") {
+    const ancestorEvent = {
+      element: evt.target,
+      data: toolData
+    };
+    const detail = { aimId: toolData.aimId, ancestorEvent };
+    const evnt = new CustomEvent("markupSelected", {
+      cancelable: true,
+      detail
+    });
+    const shouldContinue = window.dispatchEvent(evnt);
+    if (shouldContinue)
+      moveHandleNearImagePoint(evt, this, toolData, handle, interactionType);
+    else evt.preventDefault();
   }
 
   /**
@@ -155,8 +167,19 @@ class BaseAnnotationTool extends BaseTool {
    * @param  {string} [interactionType=mouse]
    * @returns {void}
    */
-  toolSelectedCallback(evt, annotation, interactionType = 'mouse') {
-    moveAnnotation(evt, this, annotation, interactionType);
+  toolSelectedCallback(evt, annotation, interactionType = "mouse") {
+    const ancestorEvent = {
+      element: evt.target,
+      data: annotation
+    };
+    const detail = { aimId: annotation.aimId, ancestorEvent };
+    const evnt = new CustomEvent("markupSelected", {
+      cancelable: true,
+      detail
+    });
+    const shouldContinue = window.dispatchEvent(evnt);
+    if (shouldContinue) moveAnnotation(evt, this, annotation, interactionType);
+    else evt.preventDefault();
   }
 
   /**

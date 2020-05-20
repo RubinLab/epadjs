@@ -17,7 +17,7 @@ class FlexView extends React.Component {
     columns: [],
     order: [5, 0, 1, 2, 7],
     dropdownSelected: false,
-    expanded: {}
+    expanded: {},
   };
 
   clearCarets = string => {
@@ -48,7 +48,7 @@ class FlexView extends React.Component {
         ) : (
           <div>{row.original.examType}</div>
         );
-      }
+      },
     },
     {
       Header: "Patient",
@@ -57,7 +57,7 @@ class FlexView extends React.Component {
       show: true,
       Cell: row => {
         return <div>{this.clearCarets(row.original.patientName)}</div>;
-      }
+      },
     },
     { Header: "PatientID", accessor: "patientID", sortable: true, show: true },
     { Header: "Sex", accessor: "sex", sortable: true, show: true },
@@ -74,13 +74,13 @@ class FlexView extends React.Component {
           desc = row.original.seriesUID ? "Unnamed Series" : "Unnamed Study";
         }
         return <div>{desc}</div>;
-      }
+      },
     },
     {
       Header: "Insert Date",
       accessor: "insertDate",
       sortable: true,
-      show: true
+      show: true,
     },
     { Header: "Study Date", accessor: "studyDate", sortable: true, show: true },
     { Header: "Study Time", accessor: "studyTime", sortable: true, show: true },
@@ -95,38 +95,38 @@ class FlexView extends React.Component {
           : row.original.studyUID;
 
         return <div>{UID}</div>;
-      }
+      },
     },
     {
       Header: "# of Aims",
       accessor: "numberOfAnnotations",
       sortable: true,
-      show: true
+      show: true,
     },
     {
       Header: "# Of Img",
       accessor: "numberOfImages",
       sortable: true,
-      show: true
+      show: true,
     },
     {
       Header: "# Of Series",
       accessor: "numberOfSeries",
       sortable: true,
-      show: true
+      show: true,
     },
     {
       Header: "created Time",
       accessor: "createdTime",
       sortable: true,
-      show: true
+      show: true,
     },
     {
       Header: "birth date",
       accessor: "birthdate",
       sortable: true,
-      show: true
-    }
+      show: true,
+    },
   ];
 
   mountEvents = () => {
@@ -162,19 +162,29 @@ class FlexView extends React.Component {
   };
 
   componentDidMount = async () => {
-    await this.getData();
-    await this.defineColumns();
-    this.mountEvents();
+    try {
+      if (this.props.pid) {
+        await this.getData(this.props.pid);
+        await this.defineColumns();
+        this.mountEvents();
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   componentDidUpdate = async prevProps => {
-    if (prevProps.match.params.pid !== this.props.match.params.pid) {
-      await this.getData();
-      await this.defineColumns();
+    try {
+      if (prevProps.match.params.pid !== this.props.match.params.pid) {
+        await this.getData(this.props.match.params.pid);
+        await this.defineColumns();
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
-  getData = async () => {
-    const { data: studies } = await getStudies(this.props.match.params.pid);
+  getData = async pid => {
+    const { data: studies } = await getStudies(pid);
     this.setState({ data: studies });
   };
 
@@ -236,33 +246,36 @@ class FlexView extends React.Component {
             studyColumns={this.studyColumns}
           />
         ) : null}
-        <TreeTable
-          NoDataComponent={() => null}
-          className="flexView-table"
-          data={this.state.data}
-          columns={this.state.columns}
-          showPagination={false}
-          pageSize={this.state.columns.length}
-          expanded={this.state.expanded}
-          onExpandedChange={this.handleExpand}
-          onSortedChange={() => {
-            this.onSortedChange();
-          }}
-          SubComponent={row => {
-            return (
-              <div style={{ paddingLeft: 40 }}>
-                <Series
-                  // data={this.state.data}
-                  order={this.state.order}
-                  projectId={row.original.projectID}
-                  subjectId={row.original.patientID}
-                  studyId={row.original.studyUID}
-                  studyColumns={this.studyColumns}
-                />
-              </div>
-            );
-          }}
-        />
+
+        {this.state.data && (
+          <TreeTable
+            NoDataComponent={() => null}
+            className="flexView-table"
+            data={this.state.data}
+            columns={this.state.columns}
+            showPagination={false}
+            pageSize={this.state.data.length}
+            expanded={this.state.expanded}
+            onExpandedChange={this.handleExpand}
+            onSortedChange={() => {
+              this.onSortedChange();
+            }}
+            SubComponent={row => {
+              return (
+                <div style={{ paddingLeft: 40 }}>
+                  <Series
+                    // data={this.state.data}
+                    order={this.state.order}
+                    projectId={row.original.projectID}
+                    subjectId={row.original.patientID}
+                    studyId={row.original.studyUID}
+                    studyColumns={this.studyColumns}
+                  />
+                </div>
+              );
+            }}
+          />
+        )}
       </div>
     );
   };

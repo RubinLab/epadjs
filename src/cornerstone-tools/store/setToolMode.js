@@ -666,7 +666,6 @@ function _getNormalizedOptions(options) {
   options.mouseButtonMask = options.mouseButtonMask.filter(
     o => typeof o === "number" && o !== 0
   );
-
   return options;
 }
 

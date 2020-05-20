@@ -20,6 +20,7 @@ import {
   jumpToAim,
   showAnnotationDock
 } from "../annotationsList/action";
+import { persistExpandView } from "../../Utils/aid";
 import "react-table/react-table.css";
 
 // const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -50,10 +51,23 @@ class Annotations extends Component {
   }
 
   async componentDidMount() {
+    try {
+    const {
+      // updateExpandedLevelNums,
+      expansionArr,
+      seriesId
+      // expandLoading
+    } = this.props;
+    // const { numOfSeriesLoaded, numOfPressentSeries } = expandLoading;
     const { data } = await getAnnotations(this.series);
     this.setState({ data });
     this.setState({ columns: this.setColumns() });
-    if (data.length === 0) {
+    const annsOpened = expansionArr.includes(seriesId);
+    // const alreadyCounted = numOfSeriesLoaded === numOfPresentSeries;
+
+    // if (!annsOpened && !alreadyCounted)
+    //   updateExpandedLevelNums("series", data.length, 1);
+    if (data.length === 0 && this.props.expandLevel !== 3) {
       toast.info("No annotations found", {
         position: "top-right",
         autoClose: 5000,
@@ -63,12 +77,43 @@ class Annotations extends Component {
         draggable: true
       });
     }
+    } catch (err) {
+      console.log("Couldn't load all annotation data. Please Try again!");
+    }
   }
 
   async componentDidUpdate(prevProps) {
-    if (this.props.update !== prevProps.update) {
+    try {
+    const {
+      progressUpdated,
+      update,
+      expandLevel,
+      expansionArr,
+      seriesId
+      // updateExpandedLevelNums
+    } = this.props;
+    const annsOpened = expansionArr.includes(seriesId);
+    if (
+      update !== prevProps.update ||
+      progressUpdated !== prevProps.progressUpdated
+    ) {
       const { data } = await getAnnotations(this.series);
-      this.setState({ data });
+      const expanded = persistExpandView(
+        this.state.expanded,
+        this.state.data,
+        data,
+        "aimID"
+      );
+      this.setState({ data, expanded });
+    }
+
+    // if (expandLevel != prevProps.expandLevel) {
+    //   if (expandLevel === 3 && annsOpened) {
+    //     updateExpandedLevelNums("series", this.state.data.length, 1);
+    //   }
+    // }
+    } catch (err) {
+      console.log("Couldn't load all annotation data. Please Try again!");
     }
   }
 
@@ -105,7 +150,7 @@ class Annotations extends Component {
           let id = "aimName-tool" + row.original.aimID;
           return (
             <>
-              <div data-tip data-for={id}>
+              <div data-tip data-for={id} style={{ whiteSpace: "pre-wrap" }}>
                 {desc}
               </div>
               <ReactTooltip
