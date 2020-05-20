@@ -56,11 +56,6 @@ class MainMenu extends React.Component {
     this.props.closeMenu();
   };
 
-  getActivePortProject = () => {
-    const { series, activePort } = this.props;
-    console.log("Series", series);
-  };
-
   selectDisplay = () => {
     switch (this.state.selection) {
       case "Users":
@@ -123,7 +118,6 @@ class MainMenu extends React.Component {
 
   render() {
     const style = { left: this.state.coordinate };
-    console.log("Props", this.props);
 
     return (
       <div>
@@ -145,9 +139,7 @@ class MainMenu extends React.Component {
               <div
                 className="mng-menu__option"
                 onClick={() => {
-                  console.log("Props", this.props.location);
-                  const activeProject = this.getActivePortProject();
-                  scanDataFolder(activeProject);
+                  scanDataFolder();
                   this.props.closeMenu();
                 }}
               >
@@ -210,11 +202,4 @@ class MainMenu extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    series: state.annotationsListReducer.openSeries,
-    activePort: state.annotationsListReducer.activePort,
-  };
-};
-
-export default connect(mapStateToProps)(MainMenu);
+export default connect()(MainMenu);
