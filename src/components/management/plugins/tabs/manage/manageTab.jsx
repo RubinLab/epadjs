@@ -59,6 +59,19 @@ class ManageTab extends React.Component {
         },
       },
       {
+        Header: "Aim Required",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 200,
+        width: 200,
+        Cell: (data) => {
+          if (data.original.processmultipleaims === null) return "not required";
+          else if (data.original.processmultipleaims === 0) return "one";
+          else return "multiple";
+        },
+        style: { whiteSpace: "unset" },
+      },
+      {
         Header: "Image",
         sortable: true,
         resizable: true,
@@ -71,17 +84,6 @@ class ManageTab extends React.Component {
         },
         style: { whiteSpace: "unset" },
       },
-      // {
-      //   Header: "Config",
-      //   sortable: true,
-      //   resizable: true,
-      //   minResizeWidth: 100,
-      //   width: 200,
-      //   Cell: (original) => {
-      //     return "add,edit,see";
-      //   },
-      //   style: { whiteSpace: "unset" },
-      // },
       {
         Header: "Parameters",
         sortable: true,

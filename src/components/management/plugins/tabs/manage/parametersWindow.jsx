@@ -254,6 +254,11 @@ class ParametersWindow extends React.Component {
       </option>
     );
     options.push(
+      <option key="output" name="output" value="output">
+        output
+      </option>
+    );
+    options.push(
       <option key="aims" name="aims" value="aims">
         aims
       </option>
@@ -334,7 +339,7 @@ class ParametersWindow extends React.Component {
             {!this.state.addnew && (
               <ReactTable
                 className="pro-table"
-                data={this.props.data}
+                data={this.state.defaultParameterList.data}
                 columns={this.defineParametersTableColumns()}
                 getTdProps={(state, rowInfo, column, instance) => ({
                   onClick: () => {

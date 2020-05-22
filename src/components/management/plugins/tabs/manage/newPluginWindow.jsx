@@ -8,7 +8,26 @@ class NewPluginWindow extends React.Component {
   constructor(props) {
     super(props);
   }
+  prepareDropDownHtmlForPluginAimRequired = () => {
+    let options = [];
 
+    options.push(
+      <option key="-1" name="AimRequired" value="">
+        No Aim Required
+      </option>
+    );
+    options.push(
+      <option key="0" name="AimRequired" value="0">
+        One Aim
+      </option>
+    );
+    options.push(
+      <option key="1" name="AimRequired" value="1">
+        Multiple Aims
+      </option>
+    );
+    return options;
+  };
   render() {
     const { onChange, error, pluginFormElements } = this.props;
     return (
@@ -93,7 +112,18 @@ class NewPluginWindow extends React.Component {
                 onChange={onChange}
                 defaultChecked={true}
               />
-              <h5 className="add-project__modal--label">Modality</h5>
+              <h5 className="add-project__modal--label">Annotation required</h5>
+              <select
+                className="pluginaddqueueselect"
+                id="processmultipleaims"
+                name="processmultipleaims"
+                onChange={onChange}
+                onMouseDown={this.handleonMouseDown}
+                value={pluginFormElements.processmultipleaims}
+              >
+                {this.prepareDropDownHtmlForPluginAimRequired()}
+              </select>
+              {/* <h5 className="add-project__modal--label">Modality</h5>
               <input
                 onMouseDown={(e) => e.stopPropagation()}
                 className="add-project__modal--input"
@@ -119,7 +149,7 @@ class NewPluginWindow extends React.Component {
                 type="text"
                 value={pluginFormElements.documentation}
                 onChange={onChange}
-              />
+              /> */}
 
               <h5 className="form-exp required">*Required</h5>
               {error && <div className="err-message">{error}</div>}

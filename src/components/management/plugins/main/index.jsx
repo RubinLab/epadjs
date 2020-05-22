@@ -84,6 +84,7 @@ class Plugins extends React.Component {
       modality: "",
       developer: "",
       documentation: "",
+      processmultipleaims: "",
     },
   };
 
@@ -351,6 +352,7 @@ class Plugins extends React.Component {
     let editimage_repo = "";
     let editimage_tag = "";
     let editimage_id = "";
+    let edit_processmultipleaims = "";
     if (selectedPluginData.original.image_name != null) {
       editimage_name = selectedPluginData.original.image_name;
     }
@@ -362,6 +364,10 @@ class Plugins extends React.Component {
     }
     if (selectedPluginData.original.image_id != null) {
       editimage_id = selectedPluginData.original.image_id;
+    }
+    if (selectedPluginData.original.processmultipleaims != null) {
+      edit_processmultipleaims =
+        selectedPluginData.original.processmultipleaims;
     }
 
     const editpluginFormElements = {
@@ -378,6 +384,7 @@ class Plugins extends React.Component {
       modality: selectedPluginData.original.modality,
       developer: selectedPluginData.original.developer,
       documentation: selectedPluginData.original.documentation,
+      processmultipleaims: edit_processmultipleaims,
     };
     console.log("handle edit pluginFormElements :", editpluginFormElements);
     this.setState({
@@ -421,6 +428,10 @@ class Plugins extends React.Component {
 
   handleParametersClicked = (parametersData) => {
     console.log("parameters data on prm click : ", parametersData);
+    console.log(
+      "parameters data on prm click temp: ",
+      parametersData.original.parameters
+    );
     const tempParametersDefault = parametersData.original.parameters;
     const plugindbid = parametersData.original.id;
     console.log("plugin id when clicked params :", plugindbid);
@@ -513,124 +524,7 @@ class Plugins extends React.Component {
         break;
     }
   };
-  /*
-  groupByProjects = tools => {
-    //console.log("--->tools ", tools);
-    // const projects = {};
-    return tools.reduce((all, item, index) => {
-      if (item.projectId !== "all") {
-        all[item.pluginId]
-          ? all[item.pluginId].push(item.projectName)
-          : (all[item.pluginId] = [item.projectName]);
-      }
-      return all;
-    }, {});
-  };
-  renderMessages = input => {
-    return {
-      deleteAll: "Delete selected tools? This cannot be undone.",
-      deleteOne: `Delete template ${input}? This cannot be undone.`
-    };
-  };
-  getToolsData = async () => {
-    //cavit
-    const { data: tools } = await getPluginsWithProject();
-    //cavit
-    // cavit commented const { data: tools } = await getTools();
-    console.log("tools --->", tools);
-    const toolsByProjects = this.groupByProjects(tools);
-    this.setState({ tools, toolsByProjects });
-  };
 
-
-
-
-
-
-
-  deleteAll = async () => {
-    let newSelected = Object.assign({}, this.state.selected);
-    const promiseArr = [];
-    for (let template in newSelected) {
-      promiseArr.push(deleteTool());
-    }
-    Promise.all(promiseArr)
-      .then(() => {
-        this.getToolsData();
-        this.setState({ selectAll: 0, selected: {} });
-      })
-      .catch(error => {
-        toast.error(error.response.data.message, { autoClose: false });
-        this.getToolsData();
-      });
-    this.handleCancel();
-  };
-
-
-
-  handleFormInput = e => {
-    const { name, value } = e.target;
-    this.setState({ [name]: value });
-  };
-
-  handleEdit = e => {
-    this.setState({ hasEditClicked: true });
-  };
-
-
-
-  deleteOne = () => {
-    const template = Object.keys(this.state.selectedOne);
-    deleteTool(template)
-      .then(() => {
-        const newSelected = { ...this.state.selected };
-        if (newSelected[template]) {
-          delete newSelected[template];
-        }
-        const selectAll = Object.keys(newSelected).length > 0 ? 2 : 0;
-        this.getToolsData();
-        this.setState({
-          selectAll,
-          selected: newSelected,
-          selectedOne: {},
-          delOne: false
-        });
-      })
-      .catch(error => {
-        toast.error(error.response.data.message, { autoClose: false });
-        this.getToolsData();
-      });
-  };
-
-  handleClickProjects = () => {
-    this.setState({
-      hasEditClicked: true
-    });
-  };
-  handleUpload = () => {
-    this.setState({ uploadClicked: true });
-  };
-
-  triggerBrowserDownload = (blob, fileName) => {
-    const url = window.URL.createObjectURL(new Blob([blob]));
-    const link = document.createElement("a");
-    document.body.appendChild(link);
-    link.style = "display: none";
-    link.href = url;
-    link.download = `${fileName}.zip`;
-    link.click();
-    window.URL.revokeObjectURL(url);
-  };
-
-  handleSubmitUpload = () => {
-    this.getToolsData();
-    this.handleCancel();
-  };
-
-  handleSubmitDownload = () => {
-    this.handleCancel();
-  };
-*/
   handleAddPluginChange = (e) => {
     const plElements = { ...this.state.pluginFormElements };
     if (e.currentTarget.name != "enabled") {
@@ -638,11 +532,18 @@ class Plugins extends React.Component {
     } else {
       plElements[e.currentTarget.name] = e.currentTarget.checked;
     }
+    if (e.currentTarget.name === "processmultipleaims") {
+      console.log(e.currentTarget.name, ": target : ", e.currentTarget.checked);
+      if (e.currentTarget.value === "-1") {
+        plElements[e.currentTarget.name] = null;
+      }
+    }
     //console.log("form elements : ", this.state.pluginFormElements);
     console.log(e.currentTarget.name, ": value : ", e.currentTarget.value);
-    if (e.currentTarget.name === "enabled") {
-      console.log(e.currentTarget.name, ": target : ", e.currentTarget.checked);
-    }
+    // if (e.currentTarget.name === "enabled") {
+    //   console.log(e.currentTarget.name, ": target : ", e.currentTarget.checked);
+    // }
+    console.log("processmultiple aims plElements on change ", plElements);
     this.setState({ pluginFormElements: plElements });
   };
   //cavit
