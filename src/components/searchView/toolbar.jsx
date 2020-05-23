@@ -190,7 +190,6 @@ const toolBar = props => {
               : "hide-delete"
           }
           onClick={() => {
-            console.log("toolbar");
             props.onAddProject();
           }}
         >

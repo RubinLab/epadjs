@@ -9,7 +9,11 @@ import {
   downloadSubjects,
   deleteSubject,
 } from "../../services/subjectServices";
-import { downloadStudies, deleteStudy } from "../../services/studyServices";
+import {
+  downloadStudies,
+  deleteStudy,
+  getStudies,
+} from "../../services/studyServices";
 import { deleteAnnotation } from "../../services/annotationServices";
 import {
   downloadSeries,
@@ -51,6 +55,7 @@ import Projects from "./addToProject";
 import WarningModal from "../common/warningModal";
 import AnnotationCreationModal from "./annotationCreationModal.jsx";
 import UpLoadWizard from "../tagEditor/uploadWizard";
+import { FaLessThan } from "react-icons/fa";
 const mode = sessionStorage.getItem("mode");
 
 const messages = {
@@ -691,7 +696,7 @@ class SearchView extends Component {
 
   handleWorklistClick = () => {
     // if (this.state.showWorklists) this.props.dispatch(clearSelection());
-    console.log("clicked worklist")
+    console.log("clicked worklist");
     this.setState(state => ({ showWorklists: !state.showWorklists }));
   };
 
@@ -742,44 +747,66 @@ class SearchView extends Component {
     this.setState({ showAnnotationModal: false });
   };
 
-
   handleUploadWizardClick = () => {
     this.setState(state => ({ showUploadWizard: !state.showUploadWizard }));
   };
-  
-  handleProjectClick = () => {
-    // if (this.state.showProjects) this.props.dispatch(clearSelection());
-    console.log("clicked")
-    this.setState(state => ({ showProjects: !state.showProjects }));
 
+  handleProjectClick = () => {
+    this.setState(state => ({ showProjects: !state.showProjects }));
   };
 
   verifyObject = object => {
     return object.constructor === Object;
   };
 
-  addSelectionToProject = e => {
-    const { id } = e.target;
-    const promises = [];
-    const patients = Object.values(this.props.selectedPatients);
-    const studies = Object.values(this.props.selectedStudies);
-    if (patients.length > 0) {
-      patients.forEach(el => {
-        promises.push(addSubjectToProject(id, el.patientID));
-      });
+  addSelectionToProject = async e => {
+    try {
+      const { id } = e.target;
+      const { treeData } = this.props;
+      let promises = [];
+      let patientIDs = new Set();
+      const patients = Object.values(this.props.selectedPatients);
+      const studies = Object.values(this.props.selectedStudies);
+      if (patients.length > 0) {
+        patients.forEach(el => {
+          promises.push(addSubjectToProject(id, el.patientID));
+        });
+      }
+      if (studies.length > 0) {
+        studies.forEach(el => {
+          promises.push(addStudyToProject(id, el.patientID, el.studyUID));
+          if (!treeData[id][el.patientID]) {
+            patientIDs.add(el.patientID);
+          }
+        });
+      }
+      await Promise.all(promises);
+      console.log("Sucessfully copied!");
+      promises = [];
+
+      if (treeData[id])
+        if (patients.length > 0) {
+          const { data } = await getSubjects(id);
+          this.props.getTreeData(id, "subject", data);
+        }
+
+      if (studies.length > 0) {
+        if (patientIDs.size > 0) {
+          const { data } = await getSubjects(id);
+          this.props.getTreeData(id, "subject", data);
+        }
+        studies.forEach(el => {
+          promises.push(getStudies(id, el.patientID));
+        });
+        let studiesResult = await Promise.all(promises);
+        studiesResult = studiesResult;
+        studiesResult.forEach(el =>
+          this.props.getTreeData(id, "studies", el.data)
+        );
+      }
+    } catch (err) {
+      console.log(err);
     }
-    if (studies.length > 0) {
-      studies.forEach(el => {
-        promises.push(addStudyToProject(id, el.patientID, el.studyUID));
-      });
-    }
-    Promise.all(promises)
-      .then(res => {
-        console.log("Added successful");
-      })
-      .catch(err => {
-        console.log(err);
-      });
   };
 
   render = () => {

@@ -92,7 +92,9 @@ class Subjects extends Component {
       } = this.props;
 
       let data;
+
       if (this.props.update !== prevProps.update) {
+        console.log("in here update changed", this.props.pid);
         data = await this.getData();
         const expanded = persistExpandView(
           this.state.expanded,
