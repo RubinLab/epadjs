@@ -27,14 +27,14 @@ class EyeTracker extends Component {
     };
   }
   componentDidMount() {
-    // if (this.props.series.length) {
-    getAllSeriesofProject("lite").then(({ data }) => {
-      this.setState({ series: data });
-      const currentSeries = this.getCurrentSeries();
-      const currentSeriesIdx = this.findIndexOfSeries(currentSeries);
-      this.setState({ currentSeriesIdx, loading: false });
-    });
-    // }
+    if (this.props.series.length) {
+      getAllSeriesofProject("lite").then(({ data }) => {
+        this.setState({ series: data });
+        const currentSeries = this.getCurrentSeries();
+        const currentSeriesIdx = this.findIndexOfSeries(currentSeries);
+        this.setState({ currentSeriesIdx, loading: false });
+      });
+    }
   }
 
   isLoading = () => {
