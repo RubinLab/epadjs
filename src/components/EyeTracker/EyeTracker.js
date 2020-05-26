@@ -4,6 +4,7 @@ import * as cornerstone from "cornerstone-core";
 import { toast } from "react-toastify";
 import "./EyeTracker.css";
 import {
+  changeActivePort,
   closeSerie,
   getSingleSerie,
   addToGrid,
@@ -26,14 +27,14 @@ class EyeTracker extends Component {
     };
   }
   componentDidMount() {
-    if (this.props.series.length) {
-      getAllSeriesofProject("lite").then(({ data }) => {
-        this.setState({ series: data });
-        const currentSeries = this.getCurrentSeries();
-        const currentSeriesIdx = this.findIndexOfSeries(currentSeries);
-        this.setState({ currentSeriesIdx, loading: false });
-      });
-    }
+    // if (this.props.series.length) {
+    getAllSeriesofProject("lite").then(({ data }) => {
+      this.setState({ series: data });
+      const currentSeries = this.getCurrentSeries();
+      const currentSeriesIdx = this.findIndexOfSeries(currentSeries);
+      this.setState({ currentSeriesIdx, loading: false });
+    });
+    // }
   }
 
   isLoading = () => {
@@ -51,9 +52,10 @@ class EyeTracker extends Component {
     if (!this.isLoading()) return;
     const { series, currentSeriesIdx } = this.state;
     if (series.length > currentSeriesIdx + 1) {
-      this.props.dispatch(closeSerie());
       this.props.dispatch(addToGrid(series[currentSeriesIdx + 1]));
       this.props.dispatch(getSingleSerie(series[currentSeriesIdx + 1]));
+      this.props.dispatch(changeActivePort(0));
+      this.props.dispatch(closeSerie());
       this.setState({ currentSeriesIdx: currentSeriesIdx + 1 });
     } else {
       toast.error("No More Series / Images to Display", {
@@ -70,10 +72,11 @@ class EyeTracker extends Component {
   loadPreviousSeries = () => {
     if (!this.isLoading()) return;
     const { series, currentSeriesIdx } = this.state;
-    if (currentSeriesIdx) {
-      this.props.dispatch(closeSerie());
+    if (currentSeriesIdx >= 1) {
       this.props.dispatch(addToGrid(series[currentSeriesIdx - 1]));
       this.props.dispatch(getSingleSerie(series[currentSeriesIdx - 1]));
+      this.props.dispatch(changeActivePort(0));
+      this.props.dispatch(closeSerie());
       this.setState({ currentSeriesIdx: currentSeriesIdx - 1 });
     } else {
       toast.error("No More Series / Images to Display", {
@@ -226,8 +229,9 @@ class EyeTracker extends Component {
   // returns the displayed series Id
   getCurrentSeries = () => {
     const { imageId } = this.getImageData();
-    if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
-    return imageId.split("/").pop();
+    return imageId.split("seriesUID=")[1].split("&objectUID=")[0];
+    // if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
+    // return imageId.split("/").pop();
   };
 
   findIndexOfSeries = (seriesId) => {
