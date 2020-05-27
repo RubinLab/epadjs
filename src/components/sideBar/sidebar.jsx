@@ -53,8 +53,27 @@ class Sidebar extends Component {
 
   getProjectsData = async () => {
     try {
-      const { data: projects } = await getProjects();
+      let { data: projects } = await getProjects();
       if (projects.length > 0) {
+        // get the project all and unassigned
+        // push them to the end of the projects
+        let allIndex;
+        let nonassignedIndex;
+        let all = [];
+        let nonassigned = [];
+        projects.forEach((el, i) => {
+          if (el.id === "all") allIndex = i;
+          if (el.id === "nonassigned") nonassignedIndex = i;
+        });
+
+        if (allIndex !== undefined) all = projects.splice(allIndex, 1);
+
+        nonassignedIndex !== undefined && nonassignedIndex > allIndex
+          ? (nonassigned = projects.splice(nonassignedIndex - 1, 1))
+          : (nonassigned = projects.splice(nonassignedIndex + 1, 1));
+
+        projects = projects.concat(all, nonassigned);
+
         const pid = projects[0].id;
         this.setState({ projects, pid, selected: pid });
         this.props.history.push(`/search/${pid}`);

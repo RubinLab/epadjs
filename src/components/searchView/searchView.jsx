@@ -790,6 +790,7 @@ class SearchView extends Component {
           this.props.getTreeData(id, "subject", data);
         }
 
+      this.setState({ showProjects: false });
       if (studies.length > 0) {
         if (patientIDs.size > 0) {
           const { data } = await getSubjects(id);
@@ -804,6 +805,7 @@ class SearchView extends Component {
           this.props.getTreeData(id, "studies", el.data)
         );
       }
+      this.props.dispatch(clearSelection());
     } catch (err) {
       console.log(err);
     }
