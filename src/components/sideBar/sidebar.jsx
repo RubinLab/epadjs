@@ -12,7 +12,7 @@ import {
   getWorklistsOfCreator,
   getWorklistProgress,
 } from "../../services/worklistServices";
-import { getProjectMap } from "../annotationsList/action";
+import { getProjectMap, clearSelection } from "../annotationsList/action";
 // import { getPacs } from "../../services/pacsServices";
 import "./w2.css";
 // import { throws } from "assert";
@@ -168,6 +168,7 @@ class Sidebar extends Component {
     const isThick = mode === "thick";
     this.setState({ type });
     this.setState({ selected: null });
+    this.props.dispatch(clearSelection());
     if (type !== "progress") {
       this.collapseAll();
     }
