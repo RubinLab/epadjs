@@ -25,7 +25,7 @@ export function downloadStudies(study) {
   return http.get(url, { responseType: "blob" });
 }
 
-export function deleteStudy(study) {
+export function deleteStudy(study, delSys ) {
   const { projectID, patientID, studyUID } = study;
   const url =
     apiUrl +
@@ -34,7 +34,7 @@ export function deleteStudy(study) {
     "/subjects/" +
     patientID +
     "/studies/" +
-    studyUID;
+    studyUID + delSys;
   return http.delete(url);
 }
 
