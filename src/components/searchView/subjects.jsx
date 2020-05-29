@@ -147,6 +147,33 @@ class Subjects extends Component {
         // this.setState({ data });
       }
 
+      const patients = Object.values(this.props.selectedPatients).length;
+      const studies = Object.values(this.props.selectedStudies).length;
+      const series = Object.values(this.props.selectedSeries).length;
+      const annotations = Object.values(this.props.selectedAnnotations).length;
+
+      const oldPatients = Object.values(prevProps.selectedPatients).length;
+      const oldStudies = Object.values(prevProps.selectedStudies).length;
+      const oldSeries = Object.values(prevProps.selectedSeries).length;
+      const oldAnnotations = Object.values(prevProps.selectedAnnotations)
+        .length;
+
+      const wasPatientSelected = patients === 0 && oldPatients > 0;
+      const switchedToStudies =
+        studies === 1 && oldStudies === 0 && wasPatientSelected;
+      const switchedToSeries =
+        series === 1 && oldSeries === 0 && wasPatientSelected;
+      const switchedToAnnotations =
+        annotations === 1 && oldAnnotations === 0 && wasPatientSelected;
+      console.log(
+        "switchedToStudies || switchedToSeries || switchedToAnnotations"
+      );
+      console.log(
+        switchedToStudies || switchedToSeries || switchedToAnnotations
+      );
+      if (switchedToStudies || switchedToSeries || switchedToAnnotations) {
+        this.setState({ columns: this.setColumns() });
+      }
     } catch (err) {
       console.log(`couldn't load all subjects data. Please Try again!`);
     }
@@ -593,6 +620,9 @@ class Subjects extends Component {
 const mapStateToProps = state => {
   return {
     selectedPatients: state.annotationsListReducer.selectedPatients,
+    selectedStudies: state.annotationsListReducer.selectedStudies,
+    selectedSeries: state.annotationsListReducer.selectedSeries,
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
   };
 };
 export default connect(mapStateToProps)(Subjects);

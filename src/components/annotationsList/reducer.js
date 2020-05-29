@@ -287,7 +287,6 @@ const asyncReducer = (state = initialState, action) => {
 
       case CLEAR_SELECTION:
         let selectionState = { ...state };
-
         if (action.selectionType === "annotation") {
           selectionState.selectedSeries = {};
           selectionState.selectedStudies = {};
