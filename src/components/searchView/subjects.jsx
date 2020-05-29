@@ -95,7 +95,6 @@ class Subjects extends Component {
       let data;
 
       if (this.props.update !== prevProps.update) {
-        console.log("in here update changed", this.props.pid);
         data = await this.getData();
         const expanded = persistExpandView(
           this.state.expanded,
@@ -165,12 +164,6 @@ class Subjects extends Component {
         series === 1 && oldSeries === 0 && wasPatientSelected;
       const switchedToAnnotations =
         annotations === 1 && oldAnnotations === 0 && wasPatientSelected;
-      console.log(
-        "switchedToStudies || switchedToSeries || switchedToAnnotations"
-      );
-      console.log(
-        switchedToStudies || switchedToSeries || switchedToAnnotations
-      );
       if (switchedToStudies || switchedToSeries || switchedToAnnotations) {
         this.setState({ columns: this.setColumns() });
       }
