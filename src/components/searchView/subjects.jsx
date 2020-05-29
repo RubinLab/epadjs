@@ -40,6 +40,7 @@ class Subjects extends Component {
       numOfStudies: 0,
       data: [],
       expansionArr: [],
+      selected: {},
     };
   }
 
@@ -146,12 +147,6 @@ class Subjects extends Component {
         // this.setState({ data });
       }
 
-      const newSelectedPtArr = Object.keys(selectedPatients);
-      const oldSelectedPtArr = Object.keys(prevProps.selectedPatients);
-
-      if (newSelectedPtArr.length !== oldSelectedPtArr.length) {
-        this.setState({ columns: this.setColumns() });
-      }
     } catch (err) {
       console.log(`couldn't load all subjects data. Please Try again!`);
     }
@@ -205,9 +200,14 @@ class Subjects extends Component {
     return columns;
   }
 
-  selectRow = selected => {
+  selectRow = selectedRow => {
     this.props.dispatch(clearSelection("patient"));
-    this.props.dispatch(selectPatient(selected));
+    let { selected } = this.state;
+    selected[selectedRow.subjectID] = selected[selectedRow.subjectID]
+      ? false
+      : true;
+    this.setState({ selected });
+    this.props.dispatch(selectPatient(selectedRow));
   };
   setColumns() {
     const { selectedPatients } = this.props;
@@ -221,14 +221,12 @@ class Subjects extends Component {
         Cell: row => {
           let { subjectID, projectID } = row.original;
           subjectID = subjectID ? subjectID : row.original.patientID;
-          const selected =
-            selectedPatients[subjectID] &&
-            selectedPatients[subjectID].projectID === projectID;
+          const selected = this.state.selected[subjectID];
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={selected}
+              value={selected}
               onChange={() =>
                 this.selectRow({ ...row.original, index: row.index })
               }
