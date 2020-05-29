@@ -316,7 +316,25 @@ class Plugins extends React.Component {
     this.setState({ selected: selectedCheckBoxes });
   };
   handleAddPlugin = () => {
-    this.setState({ newPluginClicked: true });
+    const temppluginFormElements = {
+      //using
+      name: "",
+      plugin_id: "",
+      image_name: "",
+      image_repo: "",
+      image_tag: "",
+      image_id: "",
+      description: "",
+      enabled: true,
+      modality: "",
+      developer: "",
+      documentation: "",
+      processmultipleaims: "",
+    };
+    this.setState({
+      newPluginClicked: true,
+      pluginFormElements: temppluginFormElements,
+    });
   };
   handleAddPluginCancel = () => {
     this.setState({ newPluginClicked: false });

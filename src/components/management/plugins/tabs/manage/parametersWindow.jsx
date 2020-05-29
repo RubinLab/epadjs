@@ -9,6 +9,7 @@ import {
   editDefaultparameter,
 } from "../../../../../services/pluginServices";
 import { FaRegTrashAlt } from "react-icons/fa";
+import "../../css/plugin.css";
 class ParametersWindow extends React.Component {
   constructor(props) {
     super(props);
@@ -31,7 +32,7 @@ class ParametersWindow extends React.Component {
     //console.log("modal log templates", props.allTemplates);
   }
 
-  state = { addnew: false, allTemplates: [], editParam: false };
+  state = { addnew: false, allTemplates: [], editParam: false, update: false };
 
   componentWillMount = async () => {
     const tempDefaultParameterList = await getDefaultParameter(
@@ -39,6 +40,19 @@ class ParametersWindow extends React.Component {
     );
     console.log("parameter lists", tempDefaultParameterList);
     this.setState({ defaultParameterList: tempDefaultParameterList });
+  };
+
+  componentDidUpdate = async () => {
+    if (this.state.update === true) {
+      const tempDefaultParameterList = await getDefaultParameter(
+        this.state.parameterFormElements.plugindbid
+      );
+      console.log("parameter lists", tempDefaultParameterList);
+      this.setState({
+        defaultParameterList: tempDefaultParameterList,
+        update: false,
+      });
+    }
   };
 
   handleFormElementChange = (e) => {
@@ -91,6 +105,7 @@ class ParametersWindow extends React.Component {
         this.state.parameterFormElements.plugindbid,
         "addnew"
       );
+      this.setState({ update: true });
     } else {
       alert("an error occourred while saving parameters");
     }
@@ -109,6 +124,7 @@ class ParametersWindow extends React.Component {
         this.state.parameterFormElements.plugindbid,
         "addnew"
       );
+      this.setState({ update: true });
     } else {
       alert("an error occourred while deleting parameter");
     }
@@ -149,6 +165,7 @@ class ParametersWindow extends React.Component {
       //   this.state.parameterFormElements.plugindbid,
       //   "addnew"
       // );
+      this.setState({ update: true });
     } else {
       alert("an error occourred while editing parameters");
     }

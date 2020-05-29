@@ -556,7 +556,7 @@ class ProjectColumn extends React.Component {
         // maxWidth: 45
       },
       {
-        Header: "container patient name",
+        Header: "patient name",
         accessor: "patientName",
         sortable: true,
         resizable: true,

@@ -61,7 +61,12 @@ td {
   background-color: white;
   color: black;
 }
+.input_enabled {
+  text-align: left;
+  size: 10px;
+}
 .pluginaddqueueselect {
+  color: black;
 }
 .projectcolumn {
   width: 100%;
@@ -106,4 +111,15 @@ td {
   font-size: 12px;
   padding-top: 5;
   padding-bottom: 5px;
+}
+
+.t1 {
+  width: 100%;
+}
+.t1 tr {
+  text-align: left;
+}
+.t1 td {
+  padding: 5px;
+  color: black;
 }
