@@ -150,10 +150,9 @@ export function saveSeries(
     "/studies/" +
     studyID +
     "/series/" +
-    abbreviation +
-    "?description=" +
-    description;
-  return http.put(url);
+    abbreviation;
+
+  return http.put(url, { description });
 }
 
 export function uploadFileToSeries(formData, config, series) {

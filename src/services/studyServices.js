@@ -51,18 +51,16 @@ export function getStudyAims(subjectID, studyUID, projectID = "lite") {
   );
 }
 
-export function saveStudy(projectID, subjectID, abbreviation, description) {
+export function saveStudy(projectID, subjectID, studyUid, studyDesc) {
   const url =
     apiUrl +
     "/projects/" +
     projectID +
     "/subjects/" +
     subjectID +
-    "/studies/" +
-    abbreviation +
-    "?description=" +
-    description;
-  return http.put(url);
+    "/studies";
+    const body = {studyUid, studyDesc };
+  return http.post(url, body);
 }
 
 export function uploadFileToStudy(formData, config, study) {
