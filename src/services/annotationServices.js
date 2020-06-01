@@ -68,17 +68,19 @@ export function getAnnotations2() {
 }
 
 export function downloadAnnotations(optionObj, aimIDlist, selection) {
-  if (mode === "lite") {
-    return http.post(
-      apiUrl +
-        "/projects/lite/aims/download?summary=" +
-        optionObj.summary +
-        "&aim=" +
-        optionObj.aim,
-      aimIDlist,
-      { responseType: "blob" }
-    );
-  }
+  return http.post(
+    apiUrl +
+      "/projects/lite/aims/download?summary=" +
+      optionObj.summary +
+      "&aim=" +
+      optionObj.aim,
+    aimIDlist,
+    { responseType: "blob" }
+  );
+}
+
+export function getAllAnnotations() {
+  return http.get(apiUrl + "/aims?format=summary");
 }
 
 export function getSummaryAnnotations(projectID) {
@@ -87,10 +89,17 @@ export function getSummaryAnnotations(projectID) {
     : http.get(apiUrl + "/projects/" + projectID + "/aims?format=summary");
 }
 
-export function deleteAnnotation(aimObj) {
+export function deleteAnnotation(aimObj, delSys) {
+  const query = delSys ? `&${delSys.substring(1)}` : "";
   const { aimID, projectID } = aimObj;
   return http.delete(
-    apiUrl + "/projects/" + projectID + "/aims/" + aimID + "?deleteDSO=true"
+    apiUrl +
+      "/projects/" +
+      projectID +
+      "/aims/" +
+      aimID +
+      "?deleteDSO=true" +
+      query
   );
 }
 
@@ -110,8 +119,8 @@ export function uploadSegmentation(segmentation, projectId = "lite") {
   segData.append("file", segmentation, "blob.dcm");
   const config = {
     headers: {
-      "content-type": "multipart/form-data"
-    }
+      "content-type": "multipart/form-data",
+    },
   };
   return http.post(url, segData, config);
 }

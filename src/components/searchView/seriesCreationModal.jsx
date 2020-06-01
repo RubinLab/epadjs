@@ -19,14 +19,14 @@ class SeriesCreationForm extends React.Component {
   };
 
   handleSubmit = () => {
-    const { description, abbreviation, subjectID, studyID } = this.state;
-    if (!description || !abbreviation || !subjectID || !studyID) {
+    const { description, abbreviation, subjectID, study } = this.state;
+    if (!description || !abbreviation || !subjectID || !study) {
       this.setState({ error: "Please fill the required fields!" });
     } else {
       saveSeries(
         this.props.project,
         subjectID,
-        studyID,
+        study,
         abbreviation,
         description
       )
@@ -50,8 +50,8 @@ class SeriesCreationForm extends React.Component {
     try {
       const { data: studies } = await getStudies(this.props.project, subjectID);
       // studies = result.data.ResultSet.Result;
-      const studyID = studies.length > 0 ? studies[0].studyUID : null;
-      this.setState({ studies, studyID });
+      const study = studies.length > 0 ? studies[0].studyUID : null;
+      this.setState({ studies, study });
     } catch (error) {
       let { message } = error.response.data;
       message = message ? message : error;
@@ -64,6 +64,7 @@ class SeriesCreationForm extends React.Component {
     if (e.target.name === "subjectID") {
       this.getStudies(e.target.value);
     }
+    
   };
 
   handleCancel = () => {
@@ -123,7 +124,7 @@ class SeriesCreationForm extends React.Component {
         </Modal.Header>
         <Modal.Body className="add-series__mbody">
           <form className="add-series__modal--form">
-            <h5 className="add-series__modal--label">Abbreviation*</h5>
+            <h5 className="add-series__modal--label">SeriesUID / Abbreviation*</h5>
             <input
               onMouseDown={e => e.stopPropagation()}
               className="add-series__modal--input"

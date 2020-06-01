@@ -1,6 +1,6 @@
 import {
   globalImageIdSpecificToolStateManager,
-  store
+  store,
 } from "cornerstone-tools";
 
 import { Polygon } from "../classes/Polygon.js";
@@ -17,16 +17,10 @@ const modules = store.modules;
  * @param  {object} toolData The tool data of the freehand3D contour.
  * @return {null}
  */
-export default function(toolData, element) {
-  console.log("In interpolate", toolData, element);
+export default function (toolData, element) {
   const { ROIContourData, interpolationList } = generateInterpolationData(
     toolData,
     element
-  );
-  console.log(
-    "Roi contour data and interpolation list",
-    ROIContourData,
-    interpolationList
   );
 
   for (let i = 0; i < interpolationList.length; i++) {
@@ -62,7 +56,7 @@ function _linearlyInterpolateBetween(indicies, contourPair, ROIContourData) {
   const { c1Interp, c2Interp } = _generateInterpolationContourPair(c1, c2);
 
   // Using the newly constructed contours, interpolate each ROI.
-  indicies.forEach(function(index) {
+  indicies.forEach(function (index) {
     _linearlyInterpolateContour(
       c1Interp,
       c2Interp,
@@ -182,7 +176,7 @@ function _addInterpolatedContour(
   for (let i = 0; i < interpolated2DContour.x.length; i++) {
     points.push({
       x: interpolated2DContour.x[i],
-      y: interpolated2DContour.y[i]
+      y: interpolated2DContour.y[i],
     });
   }
 
@@ -267,7 +261,7 @@ function _editInterpolatedContour(
   for (let i = 0; i < interpolated2DContour.x.length; i++) {
     points.push({
       x: interpolated2DContour.x[i],
-      y: interpolated2DContour.y[i]
+      y: interpolated2DContour.y[i],
     });
   }
 
@@ -304,7 +298,7 @@ function _editInterpolatedContour(
 function _generateInterpolatedOpenContour(c1ir, c2ir, zInterp, c1HasMoreNodes) {
   const cInterp = {
     x: [],
-    y: []
+    y: [],
   };
 
   const indicies = c1HasMoreNodes ? c1ir.I : c2ir.I;
@@ -331,12 +325,12 @@ function _reduceContoursToOriginNodes(c1i, c2i) {
   const c1Interp = {
     x: [],
     y: [],
-    I: []
+    I: [],
   };
   const c2Interp = {
     x: [],
     y: [],
-    I: []
+    I: [],
   };
 
   for (let i = 0; i < c1i.x.length; i++) {
@@ -353,7 +347,7 @@ function _reduceContoursToOriginNodes(c1i, c2i) {
 
   return {
     c1Interp,
-    c2Interp
+    c2Interp,
   };
 }
 
@@ -370,7 +364,7 @@ function _shiftSuperSampledContourInPlace(c1i, c2i) {
 
   let optimal = {
     startingNode: 0,
-    totalSquaredXYLengths: Infinity
+    totalSquaredXYLengths: Infinity,
   };
 
   for (let startingNode = 0; startingNode < c1iLength; startingNode++) {
@@ -429,7 +423,7 @@ function _getSuperSampledContour(c, nodesPerSegment) {
   const ci = {
     x: [],
     y: [],
-    I: []
+    I: [],
   };
 
   // Length - 1, produces 'open' polygon.
@@ -468,7 +462,7 @@ function _getNodesPerSegment(perimInterp, perimInd) {
   const idx = [];
 
   for (let i = 0; i < perimInterp.length; ++i) idx[i] = i;
-  idx.sort(function(a, b) {
+  idx.sort(function (a, b) {
     return perimInterp[a] < perimInterp[b]
       ? -1
       : perimInterp[a] > perimInterp[b];
@@ -480,7 +474,7 @@ function _getNodesPerSegment(perimInterp, perimInd) {
     perimIndSorted.push(perimInd[idx[i]]);
   }
 
-  const indiciesOfOriginNodes = perimIndSorted.reduce(function(
+  const indiciesOfOriginNodes = perimIndSorted.reduce(function (
     arr,
     elementValue,
     i
@@ -592,7 +586,7 @@ function _normalisedCumulativePerimeter(cumPerim) {
 function _generateClosedContour(points) {
   const c = {
     x: [],
-    y: []
+    y: [],
   };
 
   // NOTE: For z positions we only need the relative difference for interpolation, thus use frame index as Z.

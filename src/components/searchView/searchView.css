@@ -206,23 +206,28 @@
 }
 
 .new-popup,
-.worklist-popup {
+.worklist-popup,
+.projects-popup {
   z-index: 15;
   display: flex;
   flex-direction: column;
   width: fit-content;
-  min-width: 7rem;
+  min-width: 10rem;
   position: absolute;
   background-color: #3a3f44;
   color: #c3c5c9;
   outline-color: black;
-  border: 1px solid #861737;
+  border: 1.5px solid #861737;
+  border-radius: 5px;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   padding: 0.3rem;
+  max-height: 20rem;
+  overflow: auto;
 }
 
 .new-popup__option,
-.worklist__option {
+.worklist__option,
+.project__option {
   width: 100%;
   padding: 0.3rem;
   cursor: pointer;
@@ -232,7 +237,8 @@
 }
 
 .new-popup__option:hover,
-.worklist__option:hover {
+.worklist__option:hover,
+.project__option:hover {
   color: whitesmoke;
   background: #70142e;
 }
@@ -300,4 +306,146 @@ h5.add-subject__modal--label,
 
 .add-worklist__modal.modal-dialog {
   max-height: fit-content;
+}
+
+
+.menu-clickable {
+  cursor: pointer;
+}
+
+.tagEditForm__el,
+.tagCopyForm__el {
+  display: flex;
+  margin-bottom: 0.8rem;
+  align-items: center;
+}
+
+.tagEditForm__el .--exp {
+  width: 10rem;
+  text-align: left;
+}
+
+.tagEditForm__el .--check,
+.tagCopyForm__el .--check,
+.tagEditTree-icon .--check {
+  font-size: 1.5rem;
+  color: #45a163;
+  margin-left: 0.2rem;
+  text-shadow: 1px 1px 1px #ccc;
+}
+
+.tagEditForm__el .--warnning,
+.tagCopyForm__el .--warnning,
+.tagEditTree-icon .--warnning {
+  font-size: 1.5rem;
+  color: #f89406;
+  margin-left: 0.2rem;
+  text-shadow: 1px 1px 1px #ccc;
+}
+
+.tagEditTree-icon .--warnning, .tagEditTree-icon .--check, .tagEditTree-tagEditor {
+  font-size: 1.2rem;
+}
+
+.tagEditForm__el--confirmation {
+  /* color: #f89406; */
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+
+.tagEditForm__el .--text,
+.tagCopyForm__el .--text {
+  margin-right: 0.2rem;
+  width: 25rem;
+  padding: 0.2rem;
+  font-weight: normal;
+  color: #272b30;
+}
+
+
+.tagEditForm__el .--textFilled,
+.tagCopyForm__el .--textFilled {
+  color: #272b30;
+  width: 25rem;
+  font-weight: bolder;
+  font-size: 1.1rem;
+}
+
+.tagCopyForm__el .--textFilled { 
+  background: #999;
+}
+
+.react-tabs__tab-list {
+  display: flex;
+}
+
+.tagEditForm__el .--refresh {
+  color: #272b30;
+}
+
+.tagRequirements {
+  width: 13rem;
+  min-width: fit-content;
+  height: fit-content;
+}
+
+.tagRequirements .__header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.tagRequirements .__list {
+  margin-left: 0.2rem;
+  text-align: left;
+  padding: 0.1rem;
+}
+.tagRequirements .__option {
+  display: flex;
+}
+
+.tagRequirements .__select {
+  margin-right: 0.2rem;
+}
+
+.copyFromEpad {
+  display: flex;
+  float: left;
+}
+
+.seriesBrowser {
+  display: inline-flex;
+  flex-direction: column;
+  /* margin-left: 2rem; */
+  /* border-left: solid 0.5px; */
+  /* padding-left: 1rem; */
+}
+.seriesBrowser--group {
+  display: inline-flex;
+  margin-bottom: 0.5rem;
+}
+.seriesBrowser--select {
+  display: inline-flex;
+  /* margin-bottom: 0.5rem; */
+  width: fit-content;
+  min-width: 15rem;
+  color: #272b30;
+  overflow-wrap: break-word;
+}
+.seriesBrowser--label {
+  min-width: 5rem;
+  text-align: left;
+}
+
+.tagRequirements_modal .modal-content {
+  background: #861737;
+  color: white;
+}
+
+.tagRequirements_modal .modal-title {
+  color: white;
+}
+
+.seriesBrowser-wrapper {
+  margin-left: 2rem;
 }

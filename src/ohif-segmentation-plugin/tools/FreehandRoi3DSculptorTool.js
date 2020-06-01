@@ -2,7 +2,7 @@ import {
   FreehandRoiSculptorTool,
   toolColors,
   store,
-  getToolState
+  getToolState,
 } from "cornerstone-tools";
 import cornerstoneTools from "cornerstone-tools";
 import { updateImage } from "cornerstone-core";
@@ -13,7 +13,7 @@ const { modules, state } = store;
 export default class FreehandRoi3DSculptorTool extends FreehandRoiSculptorTool {
   constructor(configuration = {}) {
     const defaultConfig = {
-      configuration: getDefaultFreehandSculpterMouseToolConfiguration()
+      configuration: getDefaultFreehandSculpterMouseToolConfiguration(),
     };
     const initialConfiguration = Object.assign(defaultConfig, configuration);
 
@@ -81,11 +81,8 @@ export default class FreehandRoi3DSculptorTool extends FreehandRoiSculptorTool {
     const toolData = getToolState(element, this.referencedToolName);
     const data = toolData.data[config.currentTool];
 
-    console.log("In active End", cornerstoneTools);
-    console.log("Now data", data);
-
-    if (modules.freehand3D.getters.interpolate) {
-      interpolate(data);
+    if (modules.freehand3D.state.interpolate) {
+      interpolate(data, element);
     }
 
     // Update the image
@@ -122,9 +119,9 @@ function getDefaultFreehandSculpterMouseToolConfiguration() {
       handles: {
         start: {
           highlight: true,
-          active: true
-        }
-      }
+          active: true,
+        },
+      },
     },
     minSpacing: 1,
     currentTool: null,
@@ -143,7 +140,7 @@ function getDefaultFreehandSculpterMouseToolConfiguration() {
     showCursorOnHover: true,
     limitRadiusOutsideRegion: true,
     hoverCursorFadeAlpha: 0.5,
-    hoverCursorFadeDistance: 1.2
+    hoverCursorFadeDistance: 1.2,
   };
 }
 

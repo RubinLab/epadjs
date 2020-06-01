@@ -7,12 +7,13 @@ import {
   FaPlusCircle,
   FaLevelDownAlt,
   FaLevelUpAlt,
-  FaClipboardList
+  FaClipboardList,
+  FaEdit,
+  FaProjectDiagram,
 } from "react-icons/fa";
 import { FiMinimize2 } from "react-icons/fi";
 import ReactTooltip from "react-tooltip";
 import { BarLoader } from "react-spinners";
-import Spinner from "../common/circleSpinner";
 
 const mode = sessionStorage.getItem("mode");
 
@@ -32,7 +33,7 @@ const toolBar = props => {
             id="view-icon"
             place="bottom"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span>Open selections</span>
           </ReactTooltip>
@@ -49,7 +50,7 @@ const toolBar = props => {
             id="download-icon"
             place="bottom"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span>Download selections</span>
           </ReactTooltip>
@@ -66,11 +67,13 @@ const toolBar = props => {
             id="upload-icon"
             place="bottom"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span>Upload file</span>
           </ReactTooltip>
         </div>
+        {/* {!isLite && ( */}
+
         <div
           onClick={props.showDelete ? props.onDelete : null}
           className={
@@ -88,7 +91,7 @@ const toolBar = props => {
             id="delete-icon"
             place="bottom"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span>Delete selection</span>
           </ReactTooltip>
@@ -118,11 +121,7 @@ const toolBar = props => {
         </ReactTooltip>
       </div>
       {/* )} */}
-      <div
-        className="searchView-toolbar__icon"
-        // onClick={props.expanding ? null : props.onShrink}
-        onClick={props.onShrink}
-      >
+      <div className="searchView-toolbar__icon" onClick={props.onShrink}>
         <div>
           <FaLevelUpAlt
             style={{ fontSize: "1.2rem" }}
@@ -139,11 +138,7 @@ const toolBar = props => {
           <span>Close One Level</span>
         </ReactTooltip>
       </div>
-      <div
-        className="searchView-toolbar__icon"
-        // onClick={props.expanding ? null : props.onCloseAll}
-        onClick={props.onCloseAll}
-      >
+      <div className="searchView-toolbar__icon" onClick={props.onCloseAll}>
         <div>
           <FiMinimize2
             style={{ fontSize: "1.5rem", strokeWidth: "3px" }}
@@ -162,32 +157,12 @@ const toolBar = props => {
       </div>
       {/* </div>
       )} */}
-      {props.project && mode !== "lite" && (
-        <div className="searchView-toolbar__group">
-          <div
-            className="searchView-toolbar__icon new-icon"
-            onClick={props.onNew}
-          >
-            <div>
-              <FaPlusCircle
-                style={{ fontSize: "1.2rem" }}
-                data-tip
-                data-for="new-icon"
-              />
-            </div>
-            <ReactTooltip
-              id="new-icon"
-              place="bottom"
-              type="info"
-              delayShow={1500}
-            >
-              <span>New</span>
-            </ReactTooltip>
-          </div>
-        </div>
-      )}
       <div
-        className="searchView-toolbar__icon worklist-icon"
+        className={
+          props.showAddTo
+            ? "searchView-toolbar__icon worklist-icon"
+            : "hide-delete"
+        }
         onClick={props.onWorklist}
       >
         <div>
@@ -206,6 +181,35 @@ const toolBar = props => {
           <span>Add to worklist</span>
         </ReactTooltip>
       </div>
+
+      {mode !== "lite" && (
+        <div
+          className={
+            props.showAddTo
+              ? "searchView-toolbar__icon project-icon"
+              : "hide-delete"
+          }
+          onClick={() => {
+            props.onAddProject();
+          }}
+        >
+          <div>
+            <FaProjectDiagram
+              style={{ fontSize: "1.2rem" }}
+              data-tip
+              data-for="project-icon"
+            />
+          </div>
+          <ReactTooltip
+            id="project-icon"
+            place="bottom"
+            type="info"
+            delayShow={1500}
+          >
+            <span>Add to project</span>
+          </ReactTooltip>
+        </div>
+      )}
       {/* <div className="searchView-toolbar__icon">
         <div>
           <TiPencil
@@ -215,9 +219,50 @@ const toolBar = props => {
           />
         </div>
       </div>
-      <ReactTooltip id="ann-icon" place="bottom" type="info" delayShow={1500}>
+      <ReactTooltip id="ann-icon" place="bottom" type="info" delayShow={1000}>
         <span>Add annotation</span>
       </ReactTooltip> */}
+            {props.project && mode !== "lite" && (
+        <div className="searchView-toolbar__group">
+          <div
+            className="searchView-toolbar__icon"
+            onClick={props.onUploadWizard}
+          >
+            <div style={{ fontSize: "1.2rem" }}>
+              <FaEdit data-tip data-for="editor-icon" />
+            </div>
+
+            <ReactTooltip
+              id="editor-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Epad tag editor</span>
+            </ReactTooltip>
+          </div>
+          <div
+            className="searchView-toolbar__icon new-icon"
+            onClick={props.onNew}
+          >
+            <div>
+              <FaPlusCircle
+                style={{ fontSize: "1.2rem" }}
+                data-tip
+                data-for="new-icon"
+              />
+            </div>
+            <ReactTooltip
+              id="new-icon"
+              place="bottom"
+              type="info"
+              delayShow={1000}
+            >
+              <span>New</span>
+            </ReactTooltip>
+          </div>
+        </div>
+      )}
       <div className="spinner-toolbar__container">
         {props.status && (
           <>

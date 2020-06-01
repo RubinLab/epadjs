@@ -30,11 +30,19 @@ export function saveProject(
     defaultTemplate,
     projectId,
     userName,
-    type
+    type,
   });
 }
 
-export function updateProject(id, projectName, projectDescription, type) {
+export function updateProject(
+  id,
+  projectName,
+  projectDescription,
+  type,
+  defaultTemplate
+) {
+  // const body = { id, projectName, projectDescription, type, defaultTemplate };
+  // return http.put(apiUrl + "/projects/" + id, body);
   return http.put(
     apiUrl +
       "/projects/" +
@@ -44,7 +52,15 @@ export function updateProject(id, projectName, projectDescription, type) {
       "&description=" +
       projectDescription +
       "&type=" +
-      type
+      type +
+      "&defaulttemplate=" +
+      defaultTemplate
+  );
+}
+
+export function updateTemplate(id, defaultTemplate) {
+  return http.put(
+    apiUrl + "/projects/" + id + "?defaultTemplate=" + defaultTemplate
   );
 }
 
@@ -65,12 +81,10 @@ export function downloadProjects(projectID) {
 }
 
 export function uploadFileToProject(formData, config, projectID) {
-  
   if (mode === "lite") {
     return http.post(apiUrl + "/projects/lite/files", formData, config);
   } else {
-    const url =
-      apiUrl + "/projects/" + projectID + "/files";
+    const url = apiUrl + "/projects/" + projectID + "/files";
     return http.post(url, formData, config);
   }
 }

@@ -29,6 +29,7 @@ import {
   getNotificationsData,
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
+import ErrorBoundary from "./ErrorBoundary";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -43,7 +44,6 @@ class App extends Component {
       authenticated: false,
       openInfo: false,
       openUser: false,
-      projectMap: {},
       viewType: "search",
       lastEventId: null,
       showLog: false,
@@ -56,8 +56,19 @@ class App extends Component {
       treeData: {},
       pid: null,
       closeAll: 0,
+      projectAdded: 0,
     };
   }
+
+  getProjectAdded = () => {
+    this.setState((state) => ({
+      projectAdded: state.projectAdded + 1,
+      refTree: {},
+      treeData: {},
+      expandLevel: 0,
+      treeExpand: {},
+    }));
+  };
 
   getTreeExpandAll = (expandObj, expanded, expandLevel) => {
     try {
@@ -240,9 +251,6 @@ class App extends Component {
     this.setState((state) => ({ progressUpdated: state.progressUpdated + 1 }));
   };
 
-  getProjectMap = (projectMap) => {
-    this.setState({ projectMap });
-  };
   async componentDidMount() {
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),
@@ -275,9 +283,6 @@ class App extends Component {
         sessionStorage.setItem("auth", auth);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
         this.completeAutorization(apiUrl);
-        if (mode === "lite") {
-          this.setState({ projectMap: { lite: "lite" } });
-        }
       })
       .catch((err) => {
         console.log(err);
@@ -573,7 +578,7 @@ class App extends Component {
       }, 0);
     }
     return (
-      <React.Fragment>
+      <ErrorBoundary>
         <Cornerstone />
         <ToastContainer />
         <NavBar
@@ -586,13 +591,14 @@ class App extends Component {
           onSwitchView={this.switchView}
           viewType={this.state.viewType}
           notificationWarning={noOfUnseen}
+          pid={this.state.pid}
         />
         {this.state.openMng && (
           <Management
             closeMenu={this.closeMenu}
-            projectMap={this.state.projectMap}
             updateProgress={this.updateProgress}
             admin={this.state.admin}
+            getProjectAdded={this.getProjectAdded}
           />
         )}
         {this.state.openInfo && (
@@ -616,12 +622,12 @@ class App extends Component {
         {this.state.authenticated && mode !== "lite" && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
             <Sidebar
-              onData={this.getProjectMap}
               type={this.state.viewType}
               progressUpdated={progressUpdated}
               getPidUpdate={this.getPidUpdate}
               pid={this.state.pid}
               clearTreeExpand={this.clearTreeExpand}
+              projectAdded={this.state.projectAdded}
             >
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
@@ -631,6 +637,7 @@ class App extends Component {
                     <DisplayView
                       {...props}
                       updateProgress={this.updateProgress}
+                      pid={this.state.pid}
                     />
                   )}
                 />
@@ -693,12 +700,7 @@ class App extends Component {
                     <FlexView {...props} pid={this.state.pid} />
                   )}
                 />
-                <ProtectedRoute
-                  path="/worklist/:wid?"
-                  render={(props) => (
-                    <Worklist {...props} projectMap={this.state.projectMap} />
-                  )}
-                />
+                <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 {/* component={Worklist} /> */}
                 <Route path="/tools" />
                 <Route path="/edit" />
@@ -737,21 +739,12 @@ class App extends Component {
           </div>
         )}
         {this.state.authenticated && mode === "lite" && (
-          <Sidebar
-            onData={this.getProjectMap}
-            type={this.state.viewType}
-            progressUpdated={progressUpdated}
-          >
+          <Sidebar type={this.state.viewType} progressUpdated={progressUpdated}>
             <Switch>
               <Route path="/logout" component={Logout} />
               <ProtectedRoute path="/display" component={DisplayView} />
               <Route path="/not-found" component={NotFound} />
-              <ProtectedRoute
-                path="/worklist/:wid?"
-                render={(props) => (
-                  <Worklist {...props} projectMap={this.state.projectMap} />
-                )}
-              />
+              <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
                 path="/"
@@ -784,13 +777,13 @@ class App extends Component {
         {/* {this.props.selection && (
           <ManagementItemModal selection={this.props.selection} />
         )} */}
-      </React.Fragment>
+      </ErrorBoundary>
     );
   }
 }
 
 const mapStateToProps = (state) => {
-  // console.log(state.annotationsListReducer);
+  console.log(state.annotationsListReducer);
   // console.log(state.managementReducer);
   const {
     showGridFullAlert,

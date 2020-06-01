@@ -293,6 +293,7 @@ class WorkList extends React.Component {
     updateWorklist(this.state.worklistId, { assigneeList })
       .then(() => {
         this.getWorkListData();
+        this.props.updateProgress();
         toast.info("Update successful!", { autoClose: true });
       })
       .catch(error => {
