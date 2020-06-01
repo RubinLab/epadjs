@@ -34,7 +34,7 @@ class TrackTab extends React.Component {
     this.setState({ pluginQueueList: tempPluginQueueList.data });
   };
 
-  componentDidUpdate = async (prevProps) => {
+  componentDidUpdate = async () => {
     console.log("++++++++++++++++++++++++++++++++++++++++ : update queuee");
     const prevPluginQueueList = this.state.pluginQueueList;
     const tempPluginQueueList = await getPluginsQueue();
@@ -120,8 +120,8 @@ class TrackTab extends React.Component {
       console.log("stopping plugin");
       queuelist.push(original.id);
       const responseStopPluginsQueue = await stopPluginsQueue(queuelist);
-      if (responseStopPluginsQueue.status === 202) {
-        console.log("plugin queue process waiting to be stoped");
+      if (responseStopPluginsQueue.status === 200) {
+        console.log("stopping plugin queue process");
       } else {
         console.log("error happened while stopping plugin queue");
       }
@@ -136,8 +136,17 @@ class TrackTab extends React.Component {
     //   console.log("error happened while stopping queue");
     // }
   };
-  handleStopMultiple = (dbids) => {
+  handleStopMultiple = async () => {
     console.log("stop multiple ");
+    const tempSelectedQueueIds = this.state.selectedQueueIds;
+    const responseStopPluginsQueue = await stopPluginsQueue(
+      tempSelectedQueueIds
+    );
+    if (responseStopPluginsQueue.status === 200) {
+      console.log("stopping plugin queue process");
+    } else {
+      console.log("error happened while stopping plugin queue");
+    }
   };
 
   handleDeleteMultiple = (dbids) => {
