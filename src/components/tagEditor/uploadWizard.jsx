@@ -131,11 +131,12 @@ class UploadWizard extends React.Component {
 
           if (seriesIndex === seriesArr.length - 1) {
             this.props.onClose();
-            this.props.dispatch(clearSelection())
+            this.props.dispatch(clearSelection());
           } else {
             seriesIndex += 1;
             this.setState({ seriesIndex, tagValues: {}, error: "" });
           }
+          this.props.updateTreeView();
         }
       } else {
         return;

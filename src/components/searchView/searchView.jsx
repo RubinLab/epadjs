@@ -744,6 +744,12 @@ class SearchView extends Component {
     this.setState(state => ({ showWorklists: !state.showWorklists }));
   };
 
+  updateTreeView = () => {
+    this.setState(state => ({
+      update: state.update + 1,
+    }));
+  };
+
   handleNewSelected = () => {
     switch (this.state.newSelected) {
       case "subject":
@@ -1013,6 +1019,7 @@ class SearchView extends Component {
           <UpLoadWizard
             onClose={this.handleUploadWizardClick}
             pid={this.props.pid}
+            updateTreeView={this.updateTreeView}
           />
         )}
         {this.state.newSelected && this.handleNewSelected()}
