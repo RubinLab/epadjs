@@ -17,6 +17,7 @@ import {
 import "../searchView/searchView.css";
 // import "react-tabs/style/react-tabs.css";
 import "./tagEditor.css";
+import { clearSelection } from "../annotationsList/action";
 
 class UploadWizard extends React.Component {
   constructor() {
@@ -77,66 +78,71 @@ class UploadWizard extends React.Component {
     this.setState({ tagValues: tags });
   };
 
-  handleButtonClick = e => {
-    let confirm;
-    const { name } = e.target;
-    let seriesIndex = this.state.seriesIndex;
-    const seriesArr = Object.keys(this.props.selectedSeries);
-    const newTag = this.checkNewTag();
-    const { applyPatient, applyStudy, tagValues } = this.state;
-    const { pid } = this.props;
-    if (name === "back" && seriesIndex > 0) {
-      if (newTag) {
-        confirm = window.confirm("You are going to lose unsaved changes!");
-        if (confirm) {
+  handleButtonClick = async e => {
+    try {
+      let confirm;
+      const { name } = e.target;
+      let seriesIndex = this.state.seriesIndex;
+      const seriesArr = Object.keys(this.props.selectedSeries);
+      const newTag = this.checkNewTag();
+      const { applyPatient, applyStudy, tagValues } = this.state;
+      const { pid } = this.props;
+      if (name === "back" && seriesIndex > 0) {
+        if (newTag) {
+          confirm = window.confirm("You are going to lose unsaved changes!");
+          if (confirm) {
+            seriesIndex -= 1;
+            this.setState({ seriesIndex, tagValues: {}, error: "" });
+          } else {
+            return;
+          }
+        } else {
           seriesIndex -= 1;
-          this.setState({ seriesIndex, tagValues: {}, error: "" });
-        } else {
-          return;
+          this.setState({ seriesIndex, tagValues: {} });
         }
-      } else {
-        seriesIndex -= 1;
-        this.setState({ seriesIndex, tagValues: {} });
-      }
-    } else if (name === "next" && seriesIndex < seriesArr.length - 1) {
-      if (newTag) {
-        confirm = window.confirm("You are going to lose unsaved changes!");
-        if (confirm) {
+      } else if (name === "next" && seriesIndex < seriesArr.length - 1) {
+        if (newTag) {
+          confirm = window.confirm("You are going to lose unsaved changes!");
+          if (confirm) {
+            seriesIndex += 1;
+            this.setState({ seriesIndex, tagValues: {}, error: "" });
+          } else {
+            return;
+          }
+        } else {
           seriesIndex += 1;
-          this.setState({ seriesIndex, tagValues: {}, error: "" });
-        } else {
-          return;
+          this.setState({ seriesIndex, tagValues: {} });
+        }
+      } else if (name === "save") {
+        if (this.validateApplyAll()) {
+          const { treeData, seriesIndex } = this.state;
+          const { PatientID, SeriesInstanceUID, StudyInstanceUID } = treeData[
+            seriesIndex
+          ];
+          await updateTagsOfSeries(
+            pid,
+            PatientID,
+            StudyInstanceUID,
+            SeriesInstanceUID,
+            applyPatient,
+            applyStudy,
+            tagValues
+          );
+
+          if (seriesIndex === seriesArr.length - 1) {
+            this.props.onClose();
+            this.props.dispatch(clearSelection());
+          } else {
+            seriesIndex += 1;
+            this.setState({ seriesIndex, tagValues: {}, error: "" });
+          }
+          this.props.updateTreeView();
         }
       } else {
-        seriesIndex += 1;
-        this.setState({ seriesIndex, tagValues: {} });
+        return;
       }
-    } else if (name === "save") {
-      if (this.validateApplyAll()) {
-        const { treeData, seriesIndex } = this.state;
-        const { PatientID, SeriesInstanceUID, StudyInstanceUID } = treeData[
-          seriesIndex
-        ];
-        updateTagsOfSeries(
-          pid,
-          PatientID,
-          StudyInstanceUID,
-          SeriesInstanceUID,
-          applyPatient,
-          applyStudy,
-          tagValues
-        ).then(res => {
-            if (seriesIndex === seriesArr.length - 1) {
-              this.props.onClose();
-            } else {
-              seriesIndex += 1;
-              this.setState({ seriesIndex, tagValues: {}, error: "" });
-            }
-          })
-          .catc(err => console.log(err));
-      }
-    } else {
-      return;
+    } catch (err) {
+      console.log(err);
     }
   };
 

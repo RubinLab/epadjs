@@ -12,6 +12,7 @@ import {
   getWorklistsOfCreator,
   getWorklistProgress,
 } from "../../services/worklistServices";
+import { getProjectMap, clearSelection } from "../annotationsList/action";
 // import { getPacs } from "../../services/pacsServices";
 import "./w2.css";
 // import { throws } from "assert";
@@ -52,17 +53,41 @@ class Sidebar extends Component {
 
   getProjectsData = async () => {
     try {
-      const { data: projects } = await getProjects();
+      let { data: projects } = await getProjects();
       if (projects.length > 0) {
+        // get the project all and unassigned
+        // push them to the end of the projects
+        let allIndex;
+        let nonassignedIndex;
+        let all = [];
+        let nonassigned = [];
+        projects.forEach((el, i) => {
+          if (el.id === "all") allIndex = i;
+          if (el.id === "nonassigned") nonassignedIndex = i;
+        });
+
+        if (allIndex !== undefined) all = projects.splice(allIndex, 1);
+
+        nonassignedIndex !== undefined && nonassignedIndex > allIndex
+          ? (nonassigned = projects.splice(nonassignedIndex - 1, 1))
+          : (nonassigned = projects.splice(nonassignedIndex + 1, 1));
+
+        projects = projects.concat(all, nonassigned);
+
         const pid = projects[0].id;
         this.setState({ projects, pid, selected: pid });
         this.props.history.push(`/search/${pid}`);
         this.props.getPidUpdate(pid);
         const projectMap = {};
         for (let project of projects) {
-          projectMap[project.id] = project.name;
+          let { name, defaultTemplate } = project;
+          defaultTemplate = defaultTemplate === "null" ? null : defaultTemplate;
+          projectMap[project.id] = {
+            projectName: name,
+            defaultTemplate,
+          };
         }
-        this.props.onData(projectMap);
+        this.props.dispatch(getProjectMap(projectMap));
       }
     } catch (err) {
       console.log(err);
@@ -143,6 +168,7 @@ class Sidebar extends Component {
     const isThick = mode === "thick";
     this.setState({ type });
     this.setState({ selected: null });
+    this.props.dispatch(clearSelection());
     if (type !== "progress") {
       this.collapseAll();
     }

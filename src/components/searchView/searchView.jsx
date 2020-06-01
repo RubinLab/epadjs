@@ -9,7 +9,11 @@ import {
   downloadSubjects,
   deleteSubject,
 } from "../../services/subjectServices";
-import { downloadStudies, deleteStudy } from "../../services/studyServices";
+import {
+  downloadStudies,
+  deleteStudy,
+  getStudies,
+} from "../../services/studyServices";
 import { deleteAnnotation } from "../../services/annotationServices";
 import {
   downloadSeries,
@@ -51,6 +55,7 @@ import Projects from "./addToProject";
 import WarningModal from "../common/warningModal";
 import AnnotationCreationModal from "./annotationCreationModal.jsx";
 import UpLoadWizard from "../tagEditor/uploadWizard";
+import { FaLessThan } from "react-icons/fa";
 const mode = sessionStorage.getItem("mode");
 
 const messages = {
@@ -61,6 +66,14 @@ const messages = {
   itemOpen: {
     title: "Item is open in display",
     message: `couldn't be deleted. Please close series before deleting`,
+  },
+  deleteFmSys: {
+    title: `Deleting from System`,
+    message: `Deleting from All or Unassigned will remove the items from the system permanently. Do you want to delete the selected items?`,
+  },
+  delete: {
+    title: `Deleting items`,
+    message: `Delete selected items? This cannot be undone.`,
   },
 };
 
@@ -137,6 +150,31 @@ class SearchView extends Component {
         this.setState({ expanded: {} });
       }
     }
+  };
+
+  checkForAllAndUnassigned = () => {
+    const { pid } = this.props;
+    const checkFromUrl = pid === "all" || pid === "nonassigned";
+    let selection = [];
+    let checkFromProjectID = false;
+    const patients = Object.values(this.props.selectedPatients);
+    const studies = Object.values(this.props.selectedStudies);
+    const series = Object.values(this.props.selectedSeries);
+    const annotations = Object.values(this.props.selectedAnnotations);
+    selection =
+      patients.length > 0
+        ? patients
+        : studies.length > 0
+        ? studies
+        : series.length > 0
+        ? series
+        : annotations;
+    selection.forEach((el, i) => {
+      if (el.projectID === "all" || el.projectID === "nonassigned") {
+        checkFromProjectID = true;
+      }
+    });
+    return checkFromProjectID || checkFromUrl;
   };
 
   getData = async () => {
@@ -246,7 +284,7 @@ class SearchView extends Component {
     }
   };
 
-  deleteSelectionWrapper = async (arr, func, level) => {
+  deleteSelectionWrapper = async (arr, func, level, delSys) => {
     this.handleClickDeleteIcon();
     const promiseArr = [];
     this.setState({ deleting: true });
@@ -259,7 +297,7 @@ class SearchView extends Component {
         this.props
           .closeBeforeDelete(level, item)
           .then(() => {
-            promiseArr.push(func(item));
+            promiseArr.push(func(item, delSys));
             deletedItems.push(item);
           })
           .catch(err => console.log(err));
@@ -289,22 +327,26 @@ class SearchView extends Component {
   };
 
   deleteSelection = () => {
-    const selectedPatients = Object.values(this.props.selectedPatients);
-    const selectedStudies = Object.values(this.props.selectedStudies);
-    const selectedSeries = Object.values(this.props.selectedSeries);
-    const selectedAnnotations = Object.values(this.props.selectedAnnotations);
+    const patients = Object.values(this.props.selectedPatients);
+    const studies = Object.values(this.props.selectedStudies);
+    const series = Object.values(this.props.selectedSeries);
+    const annotations = Object.values(this.props.selectedAnnotations);
+    const { showDeleteFromSysAlert } = this.state;
 
-    if (selectedPatients.length > 0) {
-      this.deleteSelectionWrapper(selectedPatients, deleteSubject, "patientID");
-    } else if (selectedStudies.length > 0) {
-      this.deleteSelectionWrapper(selectedStudies, deleteStudy, "studyUID");
-    } else if (selectedSeries.length > 0) {
-      this.deleteSelectionWrapper(selectedSeries, deleteSeries, "seriesUID");
-    } else if (selectedAnnotations.length > 0) {
+    const delSys = showDeleteFromSysAlert ? "?all=true" : "";
+
+    if (patients.length > 0) {
+      this.deleteSelectionWrapper(patients, deleteSubject, "patientID", delSys);
+    } else if (studies.length > 0) {
+      this.deleteSelectionWrapper(studies, deleteStudy, "studyUID", delSys);
+    } else if (series.length > 0) {
+      this.deleteSelectionWrapper(series, deleteSeries, "seriesUID", delSys);
+    } else if (annotations.length > 0) {
       this.deleteSelectionWrapper(
-        selectedAnnotations,
+        annotations,
         deleteAnnotation,
-        "seriesUID"
+        "seriesUID",
+        delSys
       );
     }
   };
@@ -662,7 +704,14 @@ class SearchView extends Component {
   };
 
   handleClickDeleteIcon = () => {
-    this.setState(state => ({ showDeleteAlert: !state.showDeleteAlert }));
+    const { showDeleteFromSysAlert } = this.state;
+    if (this.checkForAllAndUnassigned() || showDeleteFromSysAlert) {
+      this.setState(state => ({
+        showDeleteFromSysAlert: !state.showDeleteFromSysAlert,
+      }));
+    } else {
+      this.setState(state => ({ showDeleteAlert: !state.showDeleteAlert }));
+    }
   };
 
   handleOK = () => {
@@ -691,8 +740,14 @@ class SearchView extends Component {
 
   handleWorklistClick = () => {
     // if (this.state.showWorklists) this.props.dispatch(clearSelection());
-    console.log("clicked worklist")
+    console.log("clicked worklist");
     this.setState(state => ({ showWorklists: !state.showWorklists }));
+  };
+
+  updateTreeView = () => {
+    this.setState(state => ({
+      update: state.update + 1,
+    }));
   };
 
   handleNewSelected = () => {
@@ -742,44 +797,68 @@ class SearchView extends Component {
     this.setState({ showAnnotationModal: false });
   };
 
-
   handleUploadWizardClick = () => {
     this.setState(state => ({ showUploadWizard: !state.showUploadWizard }));
   };
-  
-  handleProjectClick = () => {
-    // if (this.state.showProjects) this.props.dispatch(clearSelection());
-    console.log("clicked")
-    this.setState(state => ({ showProjects: !state.showProjects }));
 
+  handleProjectClick = () => {
+    this.setState(state => ({ showProjects: !state.showProjects }));
   };
 
   verifyObject = object => {
     return object.constructor === Object;
   };
 
-  addSelectionToProject = e => {
-    const { id } = e.target;
-    const promises = [];
-    const patients = Object.values(this.props.selectedPatients);
-    const studies = Object.values(this.props.selectedStudies);
-    if (patients.length > 0) {
-      patients.forEach(el => {
-        promises.push(addSubjectToProject(id, el.patientID));
-      });
+  addSelectionToProject = async e => {
+    try {
+      const { id } = e.target;
+      const { treeData } = this.props;
+      let promises = [];
+      let patientIDs = new Set();
+      const patients = Object.values(this.props.selectedPatients);
+      const studies = Object.values(this.props.selectedStudies);
+      if (patients.length > 0) {
+        patients.forEach(el => {
+          promises.push(addSubjectToProject(id, el.patientID));
+        });
+      }
+      if (studies.length > 0) {
+        studies.forEach(el => {
+          promises.push(addStudyToProject(id, el.patientID, el.studyUID));
+          if (!treeData[id][el.patientID]) {
+            patientIDs.add(el.patientID);
+          }
+        });
+      }
+      await Promise.all(promises);
+      console.log("Sucessfully copied!");
+      promises = [];
+
+      if (treeData[id])
+        if (patients.length > 0) {
+          const { data } = await getSubjects(id);
+          this.props.getTreeData(id, "subject", data);
+        }
+
+      this.setState({ showProjects: false });
+      if (studies.length > 0) {
+        if (patientIDs.size > 0) {
+          const { data } = await getSubjects(id);
+          this.props.getTreeData(id, "subject", data);
+        }
+        studies.forEach(el => {
+          promises.push(getStudies(id, el.patientID));
+        });
+        let studiesResult = await Promise.all(promises);
+        studiesResult = studiesResult;
+        studiesResult.forEach(el =>
+          this.props.getTreeData(id, "studies", el.data)
+        );
+      }
+      this.props.dispatch(clearSelection());
+    } catch (err) {
+      console.log(err);
     }
-    if (studies.length > 0) {
-      studies.forEach(el => {
-        promises.push(addStudyToProject(id, el.patientID, el.studyUID));
-      });
-    }
-    Promise.all(promises)
-      .then(res => {
-        console.log("Added successful");
-      })
-      .catch(err => {
-        console.log(err);
-      });
   };
 
   render = () => {
@@ -826,6 +905,7 @@ class SearchView extends Component {
       newSelected,
       showProjects,
       noOfNotDeleted,
+      showDeleteFromSysAlert,
     } = this.state;
     const itemStr = noOfNotDeleted > 1 ? "items" : "item";
     return (
@@ -890,9 +970,18 @@ class SearchView extends Component {
           <DeleteAlert
             onCancel={this.handleClickDeleteIcon}
             onDelete={this.deleteSelection}
+            title={messages.delete.title}
+            message={messages.delete.message}
           />
         )}
-
+        {showDeleteFromSysAlert && (
+          <DeleteAlert
+            onCancel={this.handleClickDeleteIcon}
+            onDelete={this.deleteSelection}
+            title={messages.deleteFmSys.title}
+            message={messages.deleteFmSys.message}
+          />
+        )}
         {showNew && (
           <NewMenu
             onSelect={this.handleSelectNewOption}
@@ -908,7 +997,6 @@ class SearchView extends Component {
         )}
         {showProjects && (
           <Projects
-            projectMap={this.props.projectMap}
             onProjectClose={this.handleProjectClick}
             onSave={this.addSelectionToProject}
           />
@@ -931,6 +1019,7 @@ class SearchView extends Component {
           <UpLoadWizard
             onClose={this.handleUploadWizardClick}
             pid={this.props.pid}
+            updateTreeView={this.updateTreeView}
           />
         )}
         {this.state.newSelected && this.handleNewSelected()}

@@ -34,6 +34,7 @@ import {
   GET_NOTIFICATIONS,
   CLEAR_ACTIVE_AIMID,
   UPDATE_IMAGE_INDEX,
+  GET_PROJECT_MAP,
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -54,6 +55,7 @@ const initialState = {
   patientLoadingError: null,
   uploadedPid: null,
   lastEventId: null,
+  projectMap: {},
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -285,7 +287,6 @@ const asyncReducer = (state = initialState, action) => {
 
       case CLEAR_SELECTION:
         let selectionState = { ...state };
-
         if (action.selectionType === "annotation") {
           selectionState.selectedSeries = {};
           selectionState.selectedStudies = {};
@@ -445,7 +446,12 @@ const asyncReducer = (state = initialState, action) => {
           openSeries: aimOpenSeries,
         };
       case ADD_TO_GRID:
-        let newOpenSeries = state.openSeries.concat(action.reference);
+        const seriesInfo = { ...action.reference };
+        seriesInfo.projectName =
+          state.projectMap[seriesInfo.projectID].projectName;
+        seriesInfo.defaultTemplate =
+          state.projectMap[seriesInfo.projectID].defaultTemplate;
+        let newOpenSeries = state.openSeries.concat(seriesInfo);
         return {
           ...state,
           openSeries: newOpenSeries,
@@ -494,6 +500,8 @@ const asyncReducer = (state = initialState, action) => {
             },
           },
         });
+      case GET_PROJECT_MAP:
+        return { ...state, projectMap: action.projectMap };
       default:
         return state;
     }

@@ -63,7 +63,6 @@ class MainMenu extends React.Component {
           <Users
             selection={this.state.selection}
             onClose={this.handleCloseModal}
-            projectMap={this.props.projectMap}
           />
         );
       case "Projects":

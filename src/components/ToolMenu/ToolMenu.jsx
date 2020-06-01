@@ -454,7 +454,7 @@ class ToolMenu extends Component {
               </span>
             </div>
           </div>
-          <div
+          {/* <div
             tabIndex="12"
             className="toolbarSectionButton"
             onClick={this.handlePatientClick}
@@ -475,7 +475,7 @@ class ToolMenu extends Component {
                 </div>
               </>
             )}
-          </div>
+          </div> */}
         </Collapsible>
         <Collapsible trigger={"Markup Tools"} transitionTime={100}>
           {this.markupTools.map((markupTool, i) => {

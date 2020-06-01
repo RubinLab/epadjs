@@ -25,7 +25,7 @@ export function downloadStudies(study) {
   return http.get(url, { responseType: "blob" });
 }
 
-export function deleteStudy(study) {
+export function deleteStudy(study, delSys ) {
   const { projectID, patientID, studyUID } = study;
   const url =
     apiUrl +
@@ -34,7 +34,7 @@ export function deleteStudy(study) {
     "/subjects/" +
     patientID +
     "/studies/" +
-    studyUID;
+    studyUID + delSys;
   return http.delete(url);
 }
 
@@ -51,18 +51,16 @@ export function getStudyAims(subjectID, studyUID, projectID = "lite") {
   );
 }
 
-export function saveStudy(projectID, subjectID, abbreviation, description) {
+export function saveStudy(projectID, subjectID, studyUid, studyDesc) {
   const url =
     apiUrl +
     "/projects/" +
     projectID +
     "/subjects/" +
     subjectID +
-    "/studies/" +
-    abbreviation +
-    "?description=" +
-    description;
-  return http.put(url);
+    "/studies";
+    const body = {studyUid, studyDesc };
+  return http.post(url, body);
 }
 
 export function uploadFileToStudy(formData, config, study) {

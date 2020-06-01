@@ -40,6 +40,7 @@ class Subjects extends Component {
       numOfStudies: 0,
       data: [],
       expansionArr: [],
+      selected: {},
     };
   }
 
@@ -92,6 +93,7 @@ class Subjects extends Component {
       } = this.props;
 
       let data;
+
       if (this.props.update !== prevProps.update) {
         data = await this.getData();
         const expanded = persistExpandView(
@@ -144,10 +146,30 @@ class Subjects extends Component {
         // this.setState({ data });
       }
 
-      const newSelectedPtArr = Object.keys(selectedPatients);
-      const oldSelectedPtArr = Object.keys(prevProps.selectedPatients);
+      const patients = Object.values(this.props.selectedPatients).length;
+      const studies = Object.values(this.props.selectedStudies).length;
+      const series = Object.values(this.props.selectedSeries).length;
+      const annotations = Object.values(this.props.selectedAnnotations).length;
 
-      if (newSelectedPtArr.length !== oldSelectedPtArr.length) {
+      const oldPatients = Object.values(prevProps.selectedPatients).length;
+      const oldStudies = Object.values(prevProps.selectedStudies).length;
+      const oldSeries = Object.values(prevProps.selectedSeries).length;
+      const oldAnnotations = Object.values(prevProps.selectedAnnotations)
+        .length;
+
+      const wasPatientSelected = patients === 0 && oldPatients > 0;
+      const switchedToStudies =
+        studies === 1 && oldStudies === 0 && wasPatientSelected;
+      const switchedToSeries =
+        series === 1 && oldSeries === 0 && wasPatientSelected;
+      const switchedToAnnotations =
+        annotations === 1 && oldAnnotations === 0 && wasPatientSelected;
+      if (
+        switchedToStudies ||
+        switchedToSeries ||
+        switchedToAnnotations ||
+        wasPatientSelected
+      ) {
         this.setState({ columns: this.setColumns() });
       }
     } catch (err) {
@@ -203,9 +225,14 @@ class Subjects extends Component {
     return columns;
   }
 
-  selectRow = selected => {
+  selectRow = selectedRow => {
     this.props.dispatch(clearSelection("patient"));
-    this.props.dispatch(selectPatient(selected));
+    let { selected } = this.state;
+    selected[selectedRow.subjectID] = selected[selectedRow.subjectID]
+      ? false
+      : true;
+    this.setState({ selected });
+    this.props.dispatch(selectPatient(selectedRow));
   };
   setColumns() {
     const { selectedPatients } = this.props;
@@ -219,14 +246,12 @@ class Subjects extends Component {
         Cell: row => {
           let { subjectID, projectID } = row.original;
           subjectID = subjectID ? subjectID : row.original.patientID;
-          const selected =
-            selectedPatients[subjectID] &&
-            selectedPatients[subjectID].projectID === projectID;
+          const selected = this.state.selected[subjectID];
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={selected}
+              value={selected}
               onChange={() =>
                 this.selectRow({ ...row.original, index: row.index })
               }
@@ -593,6 +618,9 @@ class Subjects extends Component {
 const mapStateToProps = state => {
   return {
     selectedPatients: state.annotationsListReducer.selectedPatients,
+    selectedStudies: state.annotationsListReducer.selectedStudies,
+    selectedSeries: state.annotationsListReducer.selectedSeries,
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
   };
 };
 export default connect(mapStateToProps)(Subjects);

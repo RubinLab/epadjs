@@ -21,10 +21,10 @@ export function downloadSubjects(subject) {
   return http.get(url, { responseType: "blob" });
 }
 
-export function deleteSubject(subject) {
+export function deleteSubject(subject, delSys) {
   let { patientID, projectID } = subject;
   patientID = patientID ? patientID : subject.subjectID;
-  const url = apiUrl + `/projects/${projectID}/subjects/${patientID}`;
+  const url = apiUrl + `/projects/${projectID}/subjects/${patientID}${delSys}`;
   return http.delete(url);
 }
 

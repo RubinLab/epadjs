@@ -29,7 +29,19 @@ class UploadModal extends React.Component {
   componentDidMount = async () => {
     try {
       if (mode !== "lite") {
-        const { data: projects } = await getProjects();
+        let { data: projects } = await getProjects();
+        for (let i = 0; i < projects.length; i++) {
+          if (projects[i].id === "all") {
+            projects.splice(i, 1);
+            i = i - 1;
+            continue;
+          }
+          if (projects[i].id === "nonassigned") {
+            projects.splice(i, 1);
+            i = i - 1;
+            continue;
+          }
+        }
         projects.length > 0
           ? this.setState({ projects, projectID: projects[0].id })
           : this.setState({ projects });
@@ -144,14 +156,11 @@ class UploadModal extends React.Component {
       </div>
     );
   };
-  render = () => {
-    let disabled = this.state.files.length === 0;
-    let className = "alert-upload";
-    className = this.props.className
-      ? `${className} ${this.props.className}`
-      : className;
+
+  renderProjectDropdown = () => {
     const options = [];
-    for (let pr of this.state.projects) {
+    const { projects } = this.state;
+    for (let pr of projects) {
       options.push(
         <option key={pr.id} value={pr.id}>
           {pr.name}
@@ -159,61 +168,89 @@ class UploadModal extends React.Component {
       );
     }
     return (
+      <div className="upload-select__container">
+        <span>Projects: </span>
+        <select className="upload-select" onChange={e => this.selectProject(e)}>
+          {options}
+        </select>
+      </div>
+    );
+  };
+
+  renderUploadFileButton = () => {
+    return (
+      <div className="upload-file">
+        <span className="tiffForm-label__select">Select file: </span>
+        <input
+          type="file"
+          className="upload-display"
+          multiple={true}
+          // name="tiff"
+          onChange={this.onSelectFile}
+        />
+      </div>
+    );
+  };
+  renderThickModalFields = () => {
+    return this.state.projects.length ? (
+      <div className="uploadDetails-container">
+        <h6 className="upload-note">
+          *Please note that if you upload a project that you downloaded from
+          ePad, the project will not be recreated.
+        </h6>
+        <div className="upload-options">
+          <div className="upload-option">
+            <input
+              type="checkbox"
+              className="upload-select"
+              name="tiff"
+              onClick={this.onSelect}
+            />
+            <span className="upload-text">Import Tiff files</span>
+          </div>
+          {this.state.tiff && this.renderTiffForm()}
+          <div className="upload-option">
+            <input
+              type="checkbox"
+              className="upload-select"
+              name="osirix"
+              onClick={this.onSelect}
+            />
+            <span className="upload-text">Import from Osirix</span>
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div> Please create a project before uploading! </div>
+    );
+  };
+
+  render = () => {
+    let disabled = this.state.files.length === 0;
+    let className = "alert-upload";
+    className = this.props.className
+      ? `${className} ${this.props.className}`
+      : className;
+    const { projects } = this.state;
+    return (
       <Modal.Dialog dialogClassName={className}>
         <Modal.Header>
           <Modal.Title className="upload__header">Upload</Modal.Title>
         </Modal.Header>
         <Modal.Body className="upload-container">
-          {mode !== "lite" && (
-            <div className="upload-select__container">
-              <span>Projects: </span>
-              <select
-                className="upload-select"
-                onChange={e => this.selectProject(e)}
-              >
-                {options}
-              </select>
-            </div>
-          )}
-          <div className="upload-file">
-            <span className="tiffForm-label__select">Select file: </span>
-            <input
-              type="file"
-              className="upload-display"
-              multiple={true}
-              // name="tiff"
-              onChange={this.onSelectFile}
-            />
-          </div>
-          {mode !== "lite" && (
-            <div className="uploadDetails-container">
-              <h6 className="upload-note">
-                *Please note that if you upload a project that you downloaded
-                from ePad, the project will not be recreated.
-              </h6>
-              <div className="upload-options">
-                <div className="upload-option">
-                  <input
-                    type="checkbox"
-                    className="upload-select"
-                    name="tiff"
-                    onClick={this.onSelect}
-                  />
-                  <span className="upload-text">Import Tiff files</span>
-                </div>
-                {this.state.tiff && this.renderTiffForm()}
-                <div className="upload-option">
-                  <input
-                    type="checkbox"
-                    className="upload-select"
-                    name="osirix"
-                    onClick={this.onSelect}
-                  />
-                  <span className="upload-text">Import from Osirix</span>
-                </div>
+          {mode === "lite" && this.renderUploadFileButton()}
+          {mode !== "lite" &&
+            (projects.length > 0 ? (
+              <>
+                {this.renderProjectDropdown()}
+                {this.renderUploadFileButton()}
+                {this.renderThickModalFields()}
+              </>
+            ) : (
+              <div style={{ color: "orangered", fontSize: "1.4rem" }}>
+                Please create a project before uploading!
               </div>
-            </div>
-          )}
+            ))}
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
           {disabled ? (

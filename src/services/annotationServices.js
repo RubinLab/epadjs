@@ -80,7 +80,7 @@ export function downloadAnnotations(optionObj, aimIDlist, selection) {
 }
 
 export function getAllAnnotations() {
-    return http.get(apiUrl + "/aims?format=summary");
+  return http.get(apiUrl + "/aims?format=summary");
 }
 
 export function getSummaryAnnotations(projectID) {
@@ -89,10 +89,17 @@ export function getSummaryAnnotations(projectID) {
     : http.get(apiUrl + "/projects/" + projectID + "/aims?format=summary");
 }
 
-export function deleteAnnotation(aimObj) {
+export function deleteAnnotation(aimObj, delSys) {
+  const query = delSys ? `&${delSys.substring(1)}` : "";
   const { aimID, projectID } = aimObj;
   return http.delete(
-    apiUrl + "/projects/" + projectID + "/aims/" + aimID + "?deleteDSO=true"
+    apiUrl +
+      "/projects/" +
+      projectID +
+      "/aims/" +
+      aimID +
+      "?deleteDSO=true" +
+      query
   );
 }
 

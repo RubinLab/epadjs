@@ -118,7 +118,7 @@ export function getSegmentation(series, imageId) {
   return http.get(url, { responseType: "arraybuffer" });
 }
 
-export function deleteSeries(series) {
+export function deleteSeries(series, delSys) {
   const { projectID, patientID, studyUID, seriesUID } = series;
   const url =
     apiUrl +
@@ -129,7 +129,8 @@ export function deleteSeries(series) {
     "/studies/" +
     studyUID +
     "/series/" +
-    seriesUID;
+    seriesUID +
+    delSys;
   return http.delete(url);
 }
 
@@ -149,10 +150,9 @@ export function saveSeries(
     "/studies/" +
     studyID +
     "/series/" +
-    abbreviation +
-    "?description=" +
-    description;
-  return http.put(url);
+    abbreviation;
+
+  return http.put(url, { description });
 }
 
 export function uploadFileToSeries(formData, config, series) {
