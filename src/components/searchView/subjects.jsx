@@ -164,7 +164,12 @@ class Subjects extends Component {
         series === 1 && oldSeries === 0 && wasPatientSelected;
       const switchedToAnnotations =
         annotations === 1 && oldAnnotations === 0 && wasPatientSelected;
-      if (switchedToStudies || switchedToSeries || switchedToAnnotations) {
+      if (
+        switchedToStudies ||
+        switchedToSeries ||
+        switchedToAnnotations ||
+        wasPatientSelected
+      ) {
         this.setState({ columns: this.setColumns() });
       }
     } catch (err) {
