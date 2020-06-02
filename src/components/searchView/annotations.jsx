@@ -56,6 +56,8 @@ class Annotations extends Component {
         // updateExpandedLevelNums,
         expansionArr,
         seriesId,
+        seriesIndex,
+        closeExpand,
         // expandLoading
       } = this.props;
       // const { numOfSeriesLoaded, numOfPressentSeries } = expandLoading;
@@ -68,7 +70,7 @@ class Annotations extends Component {
       // if (!annsOpened && !alreadyCounted)
       //   updateExpandedLevelNums("series", data.length, 1);
       if (data.length === 0 && this.props.expandLevel !== 3) {
-        toast.info("No annotations found", {
+        toast.info(`No annotations found ${seriesIndex}`, {
           position: "top-right",
           autoClose: 5000,
           hideProgressBar: false,
@@ -76,6 +78,7 @@ class Annotations extends Component {
           pauseOnHover: true,
           draggable: true,
         });
+        closeExpand(seriesIndex);
       }
     } catch (err) {
       console.log("Couldn't load all annotation data. Please Try again!");
@@ -90,7 +93,7 @@ class Annotations extends Component {
         expandLevel,
         expansionArr,
         seriesId,
-        selectedAnnotations
+        selectedAnnotations,
         // updateExpandedLevelNums
       } = this.props;
       const annsOpened = expansionArr.includes(seriesId);
@@ -145,14 +148,14 @@ class Annotations extends Component {
           </div>
         ),
         style: {
-          cursor: 'pointer',
+          cursor: "pointer",
           fontSize: 10,
-          padding: '0',
-          textAlign: 'center',
-          userSelect: 'none',
-          color: '#fafafa',
+          padding: "0",
+          textAlign: "center",
+          userSelect: "none",
+          color: "#fafafa",
           padding: "7px 5px",
-          verticalAlign: "middle"
+          verticalAlign: "middle",
         },
       },
       {
@@ -177,7 +180,7 @@ class Annotations extends Component {
       {
         Header: "Annotation Name",
         width: this.widthUnit * 10,
-        className:"searchView-row__desc",
+        className: "searchView-row__desc",
         Cell: row => {
           let desc = row.original.name || "Unnamed annotation";
           let id = "aimName-tool" + row.original.aimID;
@@ -438,7 +441,7 @@ class Annotations extends Component {
     };
     const TheadComponent = props => null;
     return (
-      <div style={{ paddingLeft: "35px" }}>
+      <div style={{ paddingLeft: "20px" }}>
         {this.state.data ? (
           <TreeTable
             NoDataComponent={() => null}

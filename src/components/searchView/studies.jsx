@@ -82,6 +82,7 @@ class Studies extends Component {
         treeExpand,
         patientIndex,
         treeData,
+        closeExpand
       } = this.props;
       let data = Object.values(treeData[projectId][subjectId].studies);
       if (data.length > 0) {
@@ -115,6 +116,7 @@ class Studies extends Component {
           pauseOnHover: true,
           draggable: true,
         });
+        closeExpand(patientIndex)
       }
       const expanded = {};
       if (treeExpand[patientIndex]) {
@@ -611,6 +613,17 @@ class Studies extends Component {
     this.props.getTreeExpandSingle(obj);
   };
 
+  closeExpansionFromSub = index => {
+    const expanded = { ...this.state.expanded };
+    expanded[index] = false;
+    this.setState({ expanded });
+    const obj = {
+      patient: this.props.patientIndex,
+      study: { [index]: false },
+    };
+    this.props.getTreeExpandSingle(obj);
+  };
+
   render() {
     const {
       toggleSelection,
@@ -671,6 +684,7 @@ class Studies extends Component {
                     patientIndex={this.props.patientIndex}
                     studyIndex={row.index}
                     // expandLoading={this.props.expandLoading}
+                    closeExpand={this.closeExpansionFromSub}
                     treeData={this.props.treeData}
                     getTreeData={this.props.getTreeData}
                     closeAllCounter={this.props.closeAllCounter}

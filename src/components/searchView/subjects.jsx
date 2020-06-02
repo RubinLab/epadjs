@@ -548,6 +548,15 @@ class Subjects extends Component {
     this.props.getTreeExpandSingle(obj);
   };
 
+  closeExpansionFromSub = index => {
+    const expanded = { ...this.state.expanded };
+    expanded[index] = false;
+    this.setState({ expanded });
+    const obj = { patient: { [index]: false } };
+
+    this.props.getTreeExpandSingle(obj);
+  };
+
   onSortedChange = () => {
     const { expanded } = this.state;
     for (let subject in expanded) {
@@ -617,6 +626,7 @@ class Subjects extends Component {
                     getTreeExpandAll={this.props.getTreeExpandAll}
                     treeExpand={this.props.treeExpand}
                     patientIndex={row.index}
+                    closeExpand={this.closeExpansionFromSub}
                     // expandLoading={this.props.expandLoading}
                     // patientExpandComplete={this.props.patientExpandComplete}
                     treeData={this.props.treeData}

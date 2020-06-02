@@ -92,6 +92,7 @@ class Series extends Component {
         studyIndex,
         expandLoading,
         treeData,
+        closeExpand,
       } = this.props;
       // const { numOfPresentStudies, numOfStudiesLoaded } = expandLoading;
       // const { data: data } = await getSeries(projectId, subjectId, studyId);
@@ -123,7 +124,7 @@ class Series extends Component {
       }
 
       if (data.length === 0) {
-        toast.info("No serie found", {
+        toast.info("No series found", {
           position: "top-right",
           autoClose: 5000,
           hideProgressBar: false,
@@ -131,6 +132,7 @@ class Series extends Component {
           pauseOnHover: true,
           draggable: true,
         });
+        closeExpand(studyIndex);
       }
       const expanded = {};
       const ptExpandKeys = Object.keys(treeExpand[patientIndex][studyIndex]);
@@ -248,14 +250,14 @@ class Series extends Component {
           </div>
         ),
         style: {
-          cursor: 'pointer',
+          cursor: "pointer",
           fontSize: 10,
-          padding: '0',
-          textAlign: 'center',
-          userSelect: 'none',
-          color: '#fafafa',
+          padding: "0",
+          textAlign: "center",
+          userSelect: "none",
+          color: "#fafafa",
           padding: "7px 5px",
-          verticalAlign: "middle"
+          verticalAlign: "middle",
         },
       },
       {
@@ -285,7 +287,7 @@ class Series extends Component {
           </div>
         ),
         width: this.widthUnit * 11,
-        className:"searchView-row__desc",
+        className: "searchView-row__desc",
         Cell: row => {
           let desc = row.original.seriesDescription || "Unnamed Serie";
           let id = "desc" + row.original.seriesUID;
@@ -581,6 +583,18 @@ class Series extends Component {
     this.props.dispatch(clearSelection());
   };
 
+  closeExpansionFromSub = index => {
+    const expanded = { ...this.state.expanded };
+    expanded[index] = false;
+    this.setState({ expanded });
+    const obj = {
+      patient: this.props.patientIndex,
+      study: this.props.studyIndex,
+      series: { [index]: false },
+    };
+    this.props.getTreeExpandSingle(obj);
+  };
+
   render() {
     const {
       toggleSelection,
@@ -647,6 +661,7 @@ class Series extends Component {
                       progressUpdated={this.props.progressUpdated}
                       expansionArr={this.state.expansionArr}
                       expandLevel={this.props.expandLevel}
+                      closeExpand={this.closeExpansionFromSub}
                       // expandLoading={this.props.expandLoading}
                       treeExpand={this.props.treeExpand}
                       patientIndex={this.props.patientIndex}
