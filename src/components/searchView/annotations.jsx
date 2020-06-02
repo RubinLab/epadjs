@@ -137,6 +137,25 @@ class Annotations extends Component {
 
     const columns = [
       {
+        expander: true,
+        width: 35,
+        Expander: ({ isExpanded, ...rest }) => (
+          <div>
+            {isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
+          </div>
+        ),
+        style: {
+          cursor: 'pointer',
+          fontSize: 10,
+          padding: '0',
+          textAlign: 'center',
+          userSelect: 'none',
+          color: '#fafafa',
+          padding: "7px 5px",
+          verticalAlign: "middle"
+        },
+      },
+      {
         id: "checkbox",
         accessor: "",
         width: this.widthUnit,
