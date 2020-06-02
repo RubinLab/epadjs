@@ -23,7 +23,7 @@ import {
   addToGrid,
   getSingleSerie,
   getWholeData,
-  updatePatient
+  updatePatient,
 } from "../../annotationsList/action";
 import WarningModal from "../../common/warningModal";
 const mode = sessionStorage.getItem("mode");
@@ -35,7 +35,8 @@ const messages = {
   title: "Item is open in display",
   itemOpen: {
     title: "Series is open in display",
-    openSeries: "couldn't be deleted because the series is open. Please close it before deleting",
+    openSeries:
+      "couldn't be deleted because the series is open. Please close it before deleting",
   },
 };
 
@@ -59,10 +60,24 @@ class Annotations extends React.Component {
   componentDidMount = async () => {
     if (mode !== "lite") {
       const { data: projectList } = await getProjects();
-      this.getAnnotationsData(projectList[0].id);
-      this.setState({ projectList, projectID: projectList[0].id });
-    } else {
+      for (let i = 0; i < projectList.length; i++) {
+        if (projectList[i].id === "all") {
+          projectList.splice(i, 1);
+          i = i - 1;
+          continue;
+        }
+        if (projectList[i].id === "nonassigned") {
+          projectList.splice(i, 1);
+          i = i - 1;
+          continue;
+        }
+      }
+
       this.getAnnotationsData();
+
+      projectList.length > 0
+        ? this.setState({ projectList, projectID: projectList[0].id })
+        : this.setState({ projectList });
     }
   };
 
@@ -391,19 +406,18 @@ class Annotations extends React.Component {
         //if grid is NOT full check if patient data exists
         if (!this.props.patients[patientID]) {
           this.props.dispatch(getWholeData(null, null, selected.original));
+        } else {
+          this.props.dispatch(
+            updatePatient(
+              "annotation",
+              true,
+              patientID,
+              studyUID,
+              seriesUID,
+              aimID
+            )
+          );
         }
-        else {
-            this.props.dispatch(
-              updatePatient(
-                "annotation",
-                true,
-                patientID,
-                studyUID,
-                seriesUID,
-                aimID
-              )
-            );
-          }
       }
     }
   };

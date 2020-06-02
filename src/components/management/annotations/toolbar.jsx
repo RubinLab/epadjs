@@ -41,7 +41,7 @@ const toolBar = props => {
         All Annotations
       </option>
     );
-    options.push(firstOption);
+   options.splice(0, 0, firstOption);
   }
   let name = React.createRef();
   let subject = React.createRef();
