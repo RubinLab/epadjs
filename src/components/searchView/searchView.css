@@ -449,3 +449,9 @@ h5.add-subject__modal--label,
 .seriesBrowser-wrapper {
   margin-left: 2rem;
 }
+
+.searchView-row__desc:hover {
+  color: #fafafa;
+  cursor: pointer;
+  text-decoration: underline;
+}

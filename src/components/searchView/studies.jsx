@@ -272,6 +272,7 @@ class Studies extends Component {
       },
       {
         width: this.widthUnit * 12,
+        className:"searchView-row__desc",
         Cell: row => {
           let desc = this.cleanCarets(row.original.studyDescription);
           desc = desc || "Unnamed Study";

@@ -285,6 +285,7 @@ class Series extends Component {
           </div>
         ),
         width: this.widthUnit * 11,
+        className:"searchView-row__desc",
         Cell: row => {
           let desc = row.original.seriesDescription || "Unnamed Serie";
           let id = "desc" + row.original.seriesUID;

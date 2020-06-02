@@ -177,6 +177,7 @@ class Annotations extends Component {
       {
         Header: "Annotation Name",
         width: this.widthUnit * 10,
+        className:"searchView-row__desc",
         Cell: row => {
           let desc = row.original.name || "Unnamed annotation";
           let id = "aimName-tool" + row.original.aimID;
