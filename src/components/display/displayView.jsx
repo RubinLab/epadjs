@@ -284,6 +284,11 @@ class DisplayView extends Component {
       "Conversion done",
       cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState()
     );
+    cornerstoneTools.setToolActive("FreehandRoi3DTool", {
+      mouseButtonMask: [1],
+    });
+    this.setState({ showAimEditor: true });
+    window.alert("Interpolation done successfully!");
   };
 
   getReferencedROIContour = () => {
@@ -1030,7 +1035,7 @@ class DisplayView extends Component {
       <Redirect to="/search" />
     ) : (
       <React.Fragment>
-        <button onClick={this.convertFrehandTo3D} />
+        <button name="Interpolate" onClick={this.convertFrehandTo3D} />
         <RightsideBar
           showAimEditor={this.state.showAimEditor}
           selectedAim={this.state.selectedAim}
