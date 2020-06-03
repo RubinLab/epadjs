@@ -8,6 +8,7 @@ import { FaRegEye, FaCommentsDollar } from "react-icons/fa";
 import {
   getSummaryAnnotations,
   deleteAnnotation,
+  getAllAnnotations,
 } from "../../../services/annotationServices";
 import { getProjects } from "../../../services/projectServices";
 import matchSorter from "match-sorter";
@@ -22,13 +23,20 @@ import {
   addToGrid,
   getSingleSerie,
   getWholeData,
+  updatePatient
 } from "../../annotationsList/action";
+import WarningModal from "../../common/warningModal";
 const mode = sessionStorage.getItem("mode");
 
 const messages = {
   deleteSelected: "Delete selected annotations? This cannot be undone.",
   fillRequiredFields: "Please fill the required fields",
   dateFormat: "Date format should be M/d/yy.",
+  title: "Item is open in display",
+  itemOpen: {
+    title: "Series is open in display",
+    openSeries: "couldn't be deleted because the series is open. Please close it before deleting",
+  },
 };
 
 class Annotations extends React.Component {
@@ -43,6 +51,9 @@ class Annotations extends React.Component {
     uploadClicked: false,
     downloadClicked: false,
     projectID: "",
+    allAims: [],
+    seriesAlreadyOpen: false,
+    selectedSeries: {},
   };
 
   componentDidMount = async () => {
@@ -68,7 +79,9 @@ class Annotations extends React.Component {
 
   getAnnotationsData = async projectID => {
     try {
-      const { data: annotations } = await getSummaryAnnotations(projectID);
+      const { data: annotations } = projectID
+        ? await getSummaryAnnotations(projectID)
+        : await getAllAnnotations();
       this.setState({ annotations });
     } catch (err) {
       console.log(err);
@@ -78,7 +91,9 @@ class Annotations extends React.Component {
   handleProjectSelect = e => {
     this.setState({ projectID: e.target.value });
     if (mode !== "lite") {
-      this.getAnnotationsData(e.target.value);
+      e.target.value === "all_aims"
+        ? this.getAnnotationsData()
+        : this.getAnnotationsData(e.target.value);
       this.setState({ filteredData: null });
     }
   };
@@ -88,11 +103,13 @@ class Annotations extends React.Component {
     this.setState({ [name]: value });
   };
 
-  toggleRow = async (id, projectID) => {
+  toggleRow = async (id, projectID, seriesUID) => {
     projectID = projectID ? projectID : "lite";
     let newSelected = Object.assign({}, this.state.selected);
+    let newSelectedSeries = Object.assign({}, this.state.selectedSeries);
     if (newSelected[id]) {
       delete newSelected[id];
+      delete newSelectedSeries[id];
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
@@ -101,11 +118,12 @@ class Annotations extends React.Component {
       }
     } else {
       newSelected[id] = projectID;
+      newSelectedSeries[id] = seriesUID;
       await this.setState({
         selectAll: 2,
       });
     }
-    this.setState({ selected: newSelected });
+    this.setState({ selected: newSelected, selectedSeries: newSelectedSeries });
   };
 
   toggleSelectAll() {
@@ -136,18 +154,50 @@ class Annotations extends React.Component {
     });
   };
 
+  closeWarningModal = () => {
+    this.setState({ seriesAlreadyOpen: 0 });
+  };
+
   deleteAllSelected = async () => {
+    const notDeleted = [];
     let newSelected = Object.assign({}, this.state.selected);
+    let newSelectedSeries = Object.assign({}, this.state.selectedSeries);
+
+    const { selectedSeries } = this.state;
     const promiseArr = [];
     for (let annotation in newSelected) {
-      const obj = { aimID: annotation, projectID: newSelected[annotation] };
-      promiseArr.push(deleteAnnotation(obj));
+      const obj = {
+        seriesUID: selectedSeries[annotation],
+        projectID: newSelected[annotation],
+      };
+      if (!this.checkIfSerieOpen(obj, this.props.openSeries).isOpen) {
+        const obj = { aimID: annotation, projectID: newSelected[annotation] };
+        promiseArr.push(deleteAnnotation(obj));
+      } else {
+        notDeleted.push(annotation);
+      }
     }
+
     Promise.all(promiseArr)
       .then(() => {
         this.getAnnotationsData(this.state.projectID);
-        this.setState({ selectAll: 0, selected: {} });
         this.props.updateProgress();
+        if (notDeleted.length === 0) {
+          this.setState({ selectAll: 0, selected: {}, selectedSeries: {} });
+        } else {
+          this.setState({ seriesAlreadyOpen: notDeleted.length });
+          for (let ann in newSelected) {
+            if (!notDeleted.includes(ann)) {
+              delete newSelected[ann];
+              delete newSelectedSeries[ann];
+            }
+          }
+          this.setState({
+            selectAll: 2,
+            selected: newSelected,
+            selectedSeries: newSelectedSeries,
+          });
+        }
       })
       .catch(error => {
         toast.error(error.response.data.message, { autoClose: false });
@@ -299,11 +349,12 @@ class Annotations extends React.Component {
     return isValid;
   };
 
-  checkIfSerieOpen = selectedSerie => {
+  checkIfSerieOpen = (obj, openSeries) => {
     let isOpen = false;
     let index;
-    this.props.openSeries.forEach((serie, i) => {
-      if (serie.seriesUID === selectedSerie) {
+    const { seriesUID, projectID } = obj;
+    openSeries.forEach((serie, i) => {
+      if (serie.seriesUID === seriesUID && projectID === serie.projectID) {
         isOpen = true;
         index = i;
       }
@@ -322,8 +373,13 @@ class Annotations extends React.Component {
     //check if there is enough space in the grid
     let isGridFull = openSeries.length === MAX_PORT;
     //check if the serie is already open
-    if (this.checkIfSerieOpen(seriesUID).isOpen) {
-      const { index } = this.checkIfSerieOpen(seriesUID);
+    if (
+      this.checkIfSerieOpen(selected.original, this.props.openSeries).isOpen
+    ) {
+      const { index } = this.checkIfSerieOpen(
+        selected.original,
+        this.props.openSeries
+      );
       this.props.dispatch(changeActivePort(index));
       this.props.dispatch(jumpToAim(seriesUID, aimID, index));
     } else {
@@ -336,18 +392,18 @@ class Annotations extends React.Component {
         if (!this.props.patients[patientID]) {
           this.props.dispatch(getWholeData(null, null, selected.original));
         }
-        // else {
-        //     this.props.dispatch(
-        //       updatePatient(
-        //         "annotation",
-        //         true,
-        //         patientID,
-        //         studyUID,
-        //         seriesUID,
-        //         aimID
-        //       )
-        //     );
-        //   }
+        else {
+            this.props.dispatch(
+              updatePatient(
+                "annotation",
+                true,
+                patientID,
+                studyUID,
+                seriesUID,
+                aimID
+              )
+            );
+          }
       }
     }
   };
@@ -365,7 +421,11 @@ class Annotations extends React.Component {
               className="checkbox-cell"
               checked={this.state.selected[original.aimID]}
               onChange={() =>
-                this.toggleRow(original.aimID, original.projectID)
+                this.toggleRow(
+                  original.aimID,
+                  original.projectID,
+                  original.seriesUID
+                )
               }
             />
           );
@@ -546,7 +606,7 @@ class Annotations extends React.Component {
   };
 
   handleSubmitDownload = () => {
-    this.setState({ selected: {}, selectAll: 0 });
+    this.setState({ selected: {}, selectAll: 0, selectedSeries: {} });
     this.handleCancel();
   };
 
@@ -554,6 +614,8 @@ class Annotations extends React.Component {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     const data = this.state.filteredData || this.state.annotations;
     const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
+    const { seriesAlreadyOpen } = this.state;
+    const text = seriesAlreadyOpen > 1 ? "annotations" : "annotation";
     return (
       <div className="annotations menu-display" id="annotation">
         <ToolBar
@@ -600,6 +662,13 @@ class Annotations extends React.Component {
             updateStatus={() => console.log("update status")}
             selected={this.state.selected}
             className="mng-download"
+          />
+        )}
+        {seriesAlreadyOpen > 0 && (
+          <WarningModal
+            onOK={this.closeWarningModal}
+            title={messages.itemOpen.title}
+            message={`${seriesAlreadyOpen} ${text} ${messages.itemOpen.openSeries}`}
           />
         )}
       </div>

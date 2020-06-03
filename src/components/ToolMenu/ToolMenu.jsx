@@ -98,7 +98,7 @@ const tools = [
 ];
 
 class ToolMenu extends Component {
-  //Tools are initialized in viewport.jsx since they are activated on elements. I don't really like this logic, we shall think of a better way.
+  //Tools are initialized in viewport.jsx since they are activated on elements. I don"t really like this logic, we shall think of a better way.
 
   constructor(props) {
     super(props);
@@ -179,6 +179,7 @@ class ToolMenu extends Component {
             />
           </span>
         ),
+
       },
       {
         name: "Sculpt 2D",
@@ -264,6 +265,7 @@ class ToolMenu extends Component {
   handleBrushSelected = () => {};
 
   //sets the selected tool active for an enabled elements
+
   // setToolActiveForElement = (toolName, mouseMask = 1) => {
   //   this.disableAllTools();
   //   if (toolName == "Brush3DHUGatedTool") {
@@ -294,28 +296,31 @@ class ToolMenu extends Component {
 
   handlePatientClick = async () => {
     // const showStatus = this.state.showAnnotationList;
+    // try {
+    //   const { openSeries, patients } = this.props;
+    //   for (let port of openSeries) {
+    //     const { patientID, seriesUID, studyUID, aimID } = port;
 
-    const { openSeries, patients } = this.props;
-    for (let port of openSeries) {
-      const { patientID, seriesUID, studyUID, aimID } = port;
+    //     const serie = patients[patientID].studies[studyUID].series[seriesUID];
+    //     if (!patients[port.patientID]) {
+    //       await this.props.dispatch(getWholeData(port, null, aimID));
+    //     } else {
+    //       if (serie.isDisplayed === false) {
+    //         serie.isDisplayed = true;
+    //         for (let ann in serie.annotations) {
+    //           serie.annotations[ann].isDisplayed = true;
+    //         }
+    //       }
+    //     }
+    //   }
 
-      const serie = patients[patientID].studies[studyUID].series[seriesUID];
-      if (!patients[port.patientID]) {
-        await this.props.dispatch(getWholeData(port, null, aimID));
-      } else {
-        if (serie.isDisplayed === false) {
-          serie.isDisplayed = true;
-          for (let ann in serie.annotations) {
-            serie.annotations[ann].isDisplayed = true;
-          }
-        }
-      }
-    }
-
-    await this.setState((state) => ({
-      showAnnotationList: !state.showAnnotationList,
-    }));
-    this.props.dispatch(showAnnotationWindow());
+    //   await this.setState(state => ({
+    //     showAnnotationList: !state.showAnnotationList,
+    //   }));
+    //   this.props.dispatch(showAnnotationWindow());
+    // } catch (err) {
+    //   console.log(err);
+    // }
   };
 
   invert() {
@@ -391,12 +396,12 @@ class ToolMenu extends Component {
       if (this.checkIfMultiframe()) {
         alert("Segmentation only works in singleframe images!");
         return;
-      } //Dont' select the HUGated if the modality is not CT
+      } //Dont" select the HUGated if the modality is not CT
     } else if (tool === "Brush3DHUGated") {
       if (!this.checkIfCT() || this.checkIfMultiframe()) {
         alert("HU Gated tool only works with singleframe CT images");
         return;
-      } //Dont' select the HUGated if the modality is not CT
+      } //Dont" select the HUGated if the modality is not CT
     }
     // this.disableAllTools();
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
@@ -450,7 +455,7 @@ class ToolMenu extends Component {
               </span>
             </div>
           </div>
-          <div
+          {/* <div
             tabIndex="12"
             className="toolbarSectionButton"
             onClick={this.handlePatientClick}
@@ -471,7 +476,7 @@ class ToolMenu extends Component {
                 </div>
               </>
             )}
-          </div>
+          </div> */}
         </Collapsible>
         <Collapsible trigger={"Markup Tools"} transitionTime={100}>
           {this.markupTools.map((markupTool, i) => {

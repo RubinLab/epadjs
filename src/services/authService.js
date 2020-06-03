@@ -25,7 +25,6 @@ function refreshToken(keycloak, minValidity) {
 }
 
 export async function login(username, password, keycloak) {
-  sessionStorage.setItem("token", keycloak.token);
   sessionStorage.setItem("username", username.user);
   sessionStorage.setItem("displayName", username.user); //TODO: change with fullname
   if (keycloak) {
@@ -34,7 +33,6 @@ export async function login(username, password, keycloak) {
 }
 
 export function logout() {
-  sessionStorage.removeItem("token");
   sessionStorage.removeItem("username");
   sessionStorage.removeItem("displayName");
   if (mode === "lite") {

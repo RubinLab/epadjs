@@ -6,7 +6,7 @@ const mode = sessionStorage.getItem("mode");
 //   return http.get(apiUrl + "/projects/" + projectId + "/templates/");
 // }
 
-export async function getAllTemplates(projectId = "lite") {
+export async function getTemplatesOfProjects(projectId = "lite") {
   return http.get(apiUrl + "/projects/" + projectId + "/templates?format=summary");
 }
 
@@ -20,10 +20,22 @@ export function downloadTemplates(tempIDlist, selection) {
     });
 }
 
-export function deleteTemplate(templateID, projectID) {
+export function deleteTemplate(templateID) {
   return http.delete(apiUrl + "/templates/" + templateID);
 }
 
 export function getTemplatesUniversal() {
   return http.get(apiUrl + "/templates?format=summary");
+}
+
+export function getAllTemplates() {
+  return http.get(apiUrl + "/templates");
+}
+
+export function deleteProjectsTemplate(templateID, projectID) {
+  return http.delete(`${apiUrl}/projects/${projectID}/templates/${templateID}`);
+}
+
+export function addTemplateToProject(templateID, projectID) {
+  return http.put(`${apiUrl}/projects/${projectID}/templates/${templateID}`);
 }

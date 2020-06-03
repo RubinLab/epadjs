@@ -1,4 +1,5 @@
 import React from "react";
+import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import Row from "./tableRow";
 
@@ -15,7 +16,7 @@ const projectTable = ({ onSelect, projectToRole, projectMap }) => {
   for (let project in projectMap) {
     rows.push(
       <Row
-        name={projectMap[project]}
+        name={projectMap[project].projectName}
         key={project}
         role={userRoles[project] || "None"}
         onSelect={onSelect}
@@ -51,4 +52,9 @@ PropTypes.projectTable = {
   projectToRole: PropTypes.Array,
 };
 
-export default projectTable;
+const mapStateToProps = state => {
+  return { projectMap: state.annotationsListReducer.projectMap };
+};
+export default connect(mapStateToProps)(projectTable);
+
+// export default projectTable;

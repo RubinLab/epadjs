@@ -53,7 +53,7 @@ export function getImageIds(series) {
   }
 }
 
-//  seems like this doesn't belong to here but olny services know details about paths&server side
+//  seems like this doesn"t belong to here but olny services know details about paths&server side
 export function getWadoImagePath(studyUid, seriesUid, imageId) {
   if (wadoUrl.includes("wadors"))
     return (
@@ -90,6 +90,11 @@ export function getWadoRSImagePath(studyUid, seriesUid, imageId) {
   );
 }
 
+export function getImageArrayBuffer(path) {
+  let url = wadoUrl + path;
+  url = url.replace("wadouri:", "");
+  return http.get(url, { responseType: "arraybuffer" });
+}
 export function downloadSeries(series) {
   const url =
     apiUrl +
@@ -113,18 +118,20 @@ export function getSegmentation(series, imageId) {
   return http.get(url, { responseType: "arraybuffer" });
 }
 
-export function deleteSeries(series) {
-  if (mode === "lite") {
-    const url =
-      apiUrl +
-      "/projects/lite/subjects/" +
-      series.patientID +
-      "/studies/" +
-      series.studyUID +
-      "/series/" +
-      series.seriesUID;
-    return http.delete(url);
-  }
+export function deleteSeries(series, delSys) {
+  const { projectID, patientID, studyUID, seriesUID } = series;
+  const url =
+    apiUrl +
+    "/projects/" +
+    projectID +
+    "/subjects/" +
+    patientID +
+    "/studies/" +
+    studyUID +
+    "/series/" +
+    seriesUID +
+    delSys;
+  return http.delete(url);
 }
 
 export function saveSeries(
@@ -143,10 +150,9 @@ export function saveSeries(
     "/studies/" +
     studyID +
     "/series/" +
-    abbreviation +
-    "?description=" +
-    description;
-  return http.put(url);
+    abbreviation;
+
+  return http.put(url, { description });
 }
 
 export function uploadFileToSeries(formData, config, series) {
@@ -154,4 +160,17 @@ export function uploadFileToSeries(formData, config, series) {
   subjectID = subjectID ? subjectID : series.patientID;
   const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/series/${seriesUID}/files`;
   return http.post(url, formData, config);
+}
+
+export function updateTagsOfSeries(
+  projectID,
+  subjectID,
+  studyUID,
+  seriesUID,
+  applyPatient,
+  applyStudy,
+  body
+) {
+  const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/series/${seriesUID}?editTags=true&applyPatient=${applyPatient}&applyStudy=${applyStudy}`;
+  return http.put(url, body);
 }

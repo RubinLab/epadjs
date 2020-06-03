@@ -81,7 +81,6 @@ class CreateUserForm extends React.Component {
           {this.state.page === 2 && (
             <UserRoleEditTable
               onSelect={this.props.onSelectRole}
-              projectMap={this.props.projectMap}
               projects={this.props.projects}
               projectToRole={projectToRole}
             />

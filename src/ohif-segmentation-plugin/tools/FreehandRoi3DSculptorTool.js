@@ -81,8 +81,8 @@ export default class FreehandRoi3DSculptorTool extends FreehandRoiSculptorTool {
     const toolData = getToolState(element, this.referencedToolName);
     const data = toolData.data[config.currentTool];
 
-    if (modules.freehand3D.getters.interpolate) {
-      interpolate(data);
+    if (modules.freehand3D.state.interpolate) {
+      interpolate(data, element);
     }
 
     // Update the image

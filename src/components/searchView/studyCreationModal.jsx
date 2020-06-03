@@ -88,7 +88,7 @@ class StudyCreationForm extends React.Component {
         </Modal.Header>
         <Modal.Body className="add-study__mbody">
           <form className="add-study__modal--form">
-            <h5 className="add-study__modal--label">Abbreviation*</h5>
+            <h5 className="add-study__modal--label">StudyUID / Abbreviation*</h5>
             <input
               onMouseDown={e => e.stopPropagation()}
               className="add-study__modal--input"
