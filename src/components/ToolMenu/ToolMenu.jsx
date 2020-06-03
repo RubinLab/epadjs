@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import MetaData from "../MetaData/MetaData";
 import SmartBrushMenu from "../SmartBrushMenu/SmartBrushMenu";
+import BrushSizeSelector from "./BrushSizeSelector";
 import { WindowLevel } from "../WindowLevel/WindowLevel";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
@@ -620,6 +621,12 @@ class ToolMenu extends Component {
               />
             );
           })}
+          {this.state.activeTool === "Brush3DTool" ||
+          this.state.activeTool === "Brush3DHUGated" ? (
+            <BrushSizeSelector />
+          ) : (
+            ""
+          )}
           {/* <div
                         id="brush"
                         tabIndex="8"
