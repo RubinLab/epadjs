@@ -177,7 +177,6 @@ class ToolMenu extends Component {
             />
           </span>
         ),
-
       },
       {
         name: "Sculpt 2D",
@@ -298,7 +297,6 @@ class ToolMenu extends Component {
     //   const { openSeries, patients } = this.props;
     //   for (let port of openSeries) {
     //     const { patientID, seriesUID, studyUID, aimID } = port;
-
     //     const serie = patients[patientID].studies[studyUID].series[seriesUID];
     //     if (!patients[port.patientID]) {
     //       await this.props.dispatch(getWholeData(port, null, aimID));
@@ -311,7 +309,6 @@ class ToolMenu extends Component {
     //       }
     //     }
     //   }
-
     //   await this.setState(state => ({
     //     showAnnotationList: !state.showAnnotationList,
     //   }));
@@ -401,21 +398,7 @@ class ToolMenu extends Component {
         return;
       } //Dont" select the HUGated if the modality is not CT
     }
-<<<<<<< HEAD
-    console.log(
-      "Cornerstone Tools",
-      cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState()
-    );
-    // console.log(
-    //   "Cornerstone Tools",
-    //   JSON.stringify(
-    //     cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState()
-    //   )
-    // );
-    this.disableAllTools();
-=======
     // this.disableAllTools();
->>>>>>> develop
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
       this.setToolActive(tool);
     });

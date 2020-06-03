@@ -209,18 +209,8 @@ class AimEditor extends Component {
   };
 
   createAimSegmentation = async (answers) => {
-<<<<<<< HEAD
-    const activeLabelMapIndex = this.getActiveLabelMapIndex();
-    // const { imageAnnotations } = openSeries[activePort];
-    // const labelMapIndex = getNumOfSegs(openSeries);
-    // console.log("Seg count is", labelMapIndex);
-    const { segBlob, imageIdx, segStats } = this.createSegmentation3D(
-      activeLabelMapIndex
-    );
-=======
     try {
       const activeLabelMapIndex = this.getActiveLabelMapIndex();
->>>>>>> develop
 
       const {
         segBlob,
@@ -396,10 +386,6 @@ class AimEditor extends Component {
         switch (tool) {
           case "FreehandRoi3DTool":
             const polygons3d = markUps[tool].data;
-<<<<<<< HEAD
-            console.log("Polygons", polygons3d);
-=======
->>>>>>> develop
             polygons3d.map((polygon) => {
               if (!polygon.aimId || polygon.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
@@ -769,11 +755,7 @@ class AimEditor extends Component {
       };
   };
 
-<<<<<<< HEAD
-  createSegmentation3D = (labelmapIndex) => {
-=======
   createSegmentation3D = async (labelmapIndex) => {
->>>>>>> develop
     // following is to know the image index which has the first segment
     let firstSegImageIndex;
 
@@ -819,23 +801,11 @@ class AimEditor extends Component {
     // For now we support single segments
 
     let segStats = {};
-<<<<<<< HEAD
-=======
-
->>>>>>> develop
     getters.labelmapStats(element, 1, labelmapIndex).then((stats) => {
       Object.assign(segStats, stats);
     });
 
-<<<<<<< HEAD
-    const cachedImages = cornerstone.imageCache.imageCache;
-    let images = [];
-    Object.keys(cachedImages).forEach((key) => {
-      images.push(cachedImages[key].image);
-    });
-=======
     const images = await Promise.all(imagePromises);
->>>>>>> develop
 
     const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
       images,
@@ -847,19 +817,11 @@ class AimEditor extends Component {
       segBlob,
       segStats,
       imageIdx: firstSegImageIndex,
-<<<<<<< HEAD
-      segStats,
-=======
       image: images[firstSegImageIndex],
->>>>>>> develop
     };
   };
 
-<<<<<<< HEAD
-  getDatasetFromBlob = (segBlob, imageIdx) => {
-=======
   getDatasetFromBlob = (segBlob) => {
->>>>>>> develop
     return new Promise((resolve) => {
       let segArrayBuffer;
       var fileReader = new FileReader();
@@ -940,14 +902,8 @@ class AimEditor extends Component {
   };
 
   parseImgeId = (imageId) => {
-<<<<<<< HEAD
-    // if (mode == "lite") return imageId.split("/").pop();
-    // else return imageId.split("objectUID=")[1].split("&")[0];
-    return imageId.split("objectUID=")[1];
-=======
     if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
     return imageId.split("/").pop();
->>>>>>> develop
   };
 }
 

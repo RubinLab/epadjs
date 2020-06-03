@@ -77,13 +77,10 @@ export function downloadAnnotations(optionObj, aimIDlist, selection) {
     aimIDlist,
     { responseType: "blob" }
   );
-<<<<<<< HEAD
-=======
 }
 
 export function getAllAnnotations() {
-    return http.get(apiUrl + "/aims?format=summary");
->>>>>>> develop
+  return http.get(apiUrl + "/aims?format=summary");
 }
 
 export function getSummaryAnnotations(projectID) {
