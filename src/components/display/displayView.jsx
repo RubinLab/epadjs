@@ -30,18 +30,12 @@ import { circle } from "./Circle";
 import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
-<<<<<<< HEAD
-import {
-  getNumOfSegs,
-  getSegIndexOfAim
-} from "../../Utils/Segmentation/helpers";
+
 import { roi3d } from "./Roi3d";
 import { intData } from "./intData";
 import { generateUid } from "../../Utils/aid";
 
 import getSeriesInstanceUidFromEnabledElement from "../../ohif-segmentation-plugin/util/getSeriesInstanceUidFromEnabledElement";
-=======
->>>>>>> develop
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
@@ -92,16 +86,12 @@ const tools = [
   {
     name: "FreehandRoi3DTool",
     modeOptions: { mouseButtonMask: 1 },
-<<<<<<< HEAD
-    mode: "enabled"
-=======
     mode: "passive",
   },
   {
     name: "FreehandRoi3DSculptorTool",
     modeOptions: { mouseButtonMask: 1 },
     mode: "passive",
->>>>>>> develop
   },
   { name: "Eraser" },
   {
@@ -317,7 +307,7 @@ class DisplayView extends Component {
     return obj;
   };
 
-  getReferencedStructureSet = referencedROIContour => {
+  getReferencedStructureSet = (referencedROIContour) => {
     const obj = {};
     obj["uid"] = "DEFAULT";
     obj["name"] = "default";

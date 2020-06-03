@@ -702,10 +702,7 @@ class Aim {
     return {
       name: { value: name },
       loginName: { value: loginName },
-<<<<<<< HEAD
-=======
       name: { value: name },
->>>>>>> develop
     };
   };
 
