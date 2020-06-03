@@ -4,6 +4,7 @@ import Draggable from "react-draggable";
 // import { studyColumns } from "./columns";
 
 const dropDownMenu = ({ order, onChecked, studyColumns }) => {
+  console.log(studyColumns)
   const button = document.getElementById("flexMenu-button");
   const { x, y } = button.getBoundingClientRect();
 
@@ -17,7 +18,7 @@ const dropDownMenu = ({ order, onChecked, studyColumns }) => {
           value={index}
           onChange={onChecked}
         />
-        <span className="--text">{item.Header}</span>
+        <span className="--text">{item}</span>
       </div>
     );
     options.push(option);

@@ -1,6 +1,6 @@
 import {
   globalImageIdSpecificToolStateManager,
-  getToolState
+  getToolState,
 } from "cornerstone-tools";
 
 const globalToolStateManager = globalImageIdSpecificToolStateManager;
@@ -14,21 +14,12 @@ const globalToolStateManager = globalImageIdSpecificToolStateManager;
  * @return {object} An object containing the ROIContourData and the
  * interpolationList.
  */
-export default function(toolData, element) {
+export default function (toolData, element) {
   const ROIContourUid = toolData.ROIContourUid;
   const imageIds = _getImageIdsOfActiveSeries(element);
   const ROIContourData = _getROIContourData(imageIds, ROIContourUid);
   const extent = _getExtentOfRegion(ROIContourData);
   const sliceEdited = _getSlicePositionOfToolData(ROIContourData, toolData.uid);
-
-  // console.log(
-  //   "In generateInterpolation",
-  //   ROIContourUid,
-  //   imageIds,
-  //   ROIContourData,
-  //   extent,
-  //   sliceEdited
-  // );
 
   const interpolationList = [];
 
@@ -36,7 +27,6 @@ export default function(toolData, element) {
   for (let i = extent[0] + 1; i <= extent[1] - 1; i++) {
     if (_sliceNeedsInterpolating(ROIContourData, i)) {
       const contourPair = _getBoundingPair(i, extent, ROIContourData);
-      // console.log("Contours and i", i, contourPair);
 
       if (
         contourPair &&
@@ -44,13 +34,12 @@ export default function(toolData, element) {
       ) {
         _appendinterpolationList(contourPair, interpolationList);
       }
-      // console.log("InterpolationList", interpolationList);
     }
   }
 
   return {
     ROIContourData,
-    interpolationList
+    interpolationList,
   };
 }
 
@@ -109,15 +98,17 @@ function _getROIContourData(imageIds, ROIContourUid) {
 
     if (!imageToolState || !imageToolState.FreehandRoi3DTool) {
       ROIContourData.push({
-        imageId
+        imageId,
       });
     } else {
-      const contours = imageToolState.FreehandRoi3DTool.data.filter(contour => {
-        return contour.ROIContourUid === ROIContourUid;
-      });
+      const contours = imageToolState.FreehandRoi3DTool.data.filter(
+        (contour) => {
+          return contour.ROIContourUid === ROIContourUid;
+        }
+      );
 
       const contoursOnSlice = {
-        imageId
+        imageId,
       };
 
       if (contours.length) {
@@ -194,13 +185,21 @@ function _appendinterpolationList(contourPair, interpolationList) {
   if (!interpolationList[contourPair[0]]) {
     interpolationList[contourPair[0]] = {
       pair: contourPair,
-      list: _getList(contourPair[0], contourPair[1])
+      list: _getList(contourPair[0], contourPair[1]),
     };
   }
 }
 
+// function _getList(start, end) {
+//   return [...Array(end - start).keys()].map(v => start + v + 1);
+// }
+
 function _getList(start, end) {
+<<<<<<< HEAD
   return [...Array(end - (start + 1)).keys()].map(v => start + v + 1);
+=======
+  return [...Array(end - (start + 1)).keys()].map((v) => start + v + 1);
+>>>>>>> develop
 }
 
 /**
@@ -218,12 +217,6 @@ function _getList(start, end) {
  */
 
 function _getBoundingPair(sliceIndex, extent, ROIContourData) {
-  // console.log(
-  //   "get bounding pair: sliceIndex, extent, ROIContourData",
-  //   sliceIndex,
-  //   extent,
-  //   ROIContourData
-  // );
   let contourPair = [];
   let canInterpolate = true;
 

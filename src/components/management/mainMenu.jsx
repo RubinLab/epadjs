@@ -41,16 +41,16 @@ class MainMenu extends React.Component {
     window.removeEventListener("resize", this.updateDimensions);
   };
 
-  handleSelection = e => {
+  handleSelection = (e) => {
     const selection = e.target.textContent;
-    this.setState(state => {
+    this.setState((state) => {
       return { isModalOpen: !state.isModalOpen };
     });
     this.setState({ selection });
   };
 
-  handleCloseModal = e => {
-    this.setState(state => {
+  handleCloseModal = (e) => {
+    this.setState((state) => {
       return { isModalOpen: !state.isModalOpen };
     });
     this.props.closeMenu();
@@ -71,6 +71,7 @@ class MainMenu extends React.Component {
           <Projects
             selection={this.state.selection}
             onClose={this.handleCloseModal}
+            getProjectAdded={this.props.getProjectAdded}
           />
         );
       case "Worklists":

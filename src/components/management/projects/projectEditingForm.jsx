@@ -1,7 +1,7 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Modal } from 'react-bootstrap';
-import '../menuStyle.css';
+import React from "react";
+import PropTypes from "prop-types";
+import { Modal } from "react-bootstrap";
+import "../menuStyle.css";
 
 const projectEditingForm = ({
   onCancel,
@@ -9,8 +9,26 @@ const projectEditingForm = ({
   onType,
   error,
   name,
-  desc
+  desc,
+  type,
+  defaultTemplate,
+  templates,
 }) => {
+  console.log(type);
+  const firstOption = (
+    <option value={null} key="selectOpt">
+      none
+    </option>
+  );
+  const options = [firstOption];
+  templates.forEach((el, i) => {
+    const { templateCodeValue, templateUID } = el.Template[0];
+    options.push(
+      <option value={templateCodeValue} key={templateUID}>
+        {templateCodeValue}
+      </option>
+    );
+  });
   return (
     <Modal.Dialog dialogClassName="edit-project__modal">
       <Modal.Header>
@@ -36,12 +54,21 @@ const projectEditingForm = ({
             onChange={onType}
             placeholder={desc}
           />
+          <h5 className="add-project__modal--label">Default Template</h5>
+          <select
+            name="defaulttemplate"
+            className="add-project__modal--select"
+            onChange={onType}
+            defaultValue={defaultTemplate}
+          >
+            {options}
+          </select>
           <h5 className="edit-project__modal--label">Type</h5>
           <select
             name="type"
             className="edit-project__modal--select"
             onChange={onType}
-            defaultValue="Private"
+            defaultValue={type}
           >
             <option value="Private">Private</option>
             <option value="Public">Public</option>
@@ -69,7 +96,9 @@ projectEditingForm.propTypes = {
   onType: PropTypes.func,
   error: PropTypes.string,
   name: PropTypes.string,
-  desc: PropTypes.string
+  desc: PropTypes.string,
+  type: PropTypes.string,
+  defaulttemplate: PropTypes.string,
 };
 
 export default projectEditingForm;

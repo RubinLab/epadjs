@@ -146,7 +146,7 @@ class Series extends Component {
 
   async componentDidUpdate(prevProps) {
     try {
-      const { 
+      const {
         update,
         expansionArr,
         // updateExpandedLevelNums,
@@ -157,11 +157,14 @@ class Series extends Component {
         patientIndex,
         studyIndex,
         expandLevel,
+        closeAllCounter,
+        selectedSeries,
       } = this.props;
       const seriesOpened = expansionArr.includes(studyId);
+      if (closeAllCounter !== prevProps.closeAllCounter) {
+        this.setState({ expanded: {} });
+      }
       if (update !== prevProps.update && treeExpand[patientIndex][studyIndex]) {
-        console.log("in here");
-        console.log(projectId, subjectId, studyId);
         const { data: data } = await getSeries(projectId, subjectId, studyId);
         const expanded = persistExpandView(
           this.state.expanded,
@@ -199,6 +202,12 @@ class Series extends Component {
         if (expandToAnnotations)
           this.props.getTreeExpandAll(obj, true, this.props.expandLevel);
       }
+
+      const newSelectedSrArr = Object.keys(selectedSeries);
+      const oldSelectedSrArr = Object.keys(prevProps.selectedSeries);
+      if (newSelectedSrArr.length !== oldSelectedSrArr.length) {
+        this.setState({ columns: this.setColumns() });
+      }
     } catch (err) {
       console.log(`Couldn't load all series data. Please Try again!`);
     }
@@ -228,17 +237,22 @@ class Series extends Component {
     this.props.dispatch(selectSerie(selected, this.props.studyDescription));
   };
   setColumns() {
+    const { selectedSeries } = this.props;
     const columns = [
       {
         id: "checkbox",
         accessor: "",
         width: this.widthUnit,
         Cell: ({ original }) => {
+          const { seriesUID, projectID } = original;
+          const selected =
+            selectedSeries[seriesUID] &&
+            selectedSeries[seriesUID].projectID === projectID;
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={this.props.selectedSeries[original.seriesUID] || false}
+              checked={selected}
               onChange={() => this.selectRow(original)}
             />
           );

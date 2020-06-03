@@ -10,7 +10,7 @@ import { FaArrowAltCircleLeft } from "react-icons/fa";
 import {
   getWorklistsOfAssignee,
   getWorklistsOfCreator,
-  getWorklistProgress
+  getWorklistProgress,
 } from "../../services/worklistServices";
 // import { getPacs } from "../../services/pacsServices";
 import "./w2.css";
@@ -36,17 +36,26 @@ class Sidebar extends Component {
       open: mode === "thick",
       index: 0,
       pid: null,
-      progressView: [false, false]
+      progressView: [false, false],
+      selected: null,
+      type: "",
     };
   }
 
   componentDidMount = async () => {
     //get the porjects
     if (mode !== "lite") {
+      this.getProjectsData();
+    }
+    this.getWorklistandProgressData();
+  };
+
+  getProjectsData = async () => {
+    try {
       const { data: projects } = await getProjects();
       if (projects.length > 0) {
         const pid = projects[0].id;
-        this.setState({ projects, pid });
+        this.setState({ projects, pid, selected: pid });
         this.props.history.push(`/search/${pid}`);
         this.props.getPidUpdate(pid);
         const projectMap = {};
@@ -55,8 +64,9 @@ class Sidebar extends Component {
         }
         this.props.onData(projectMap);
       }
+    } catch (err) {
+      console.log(err);
     }
-    this.getWorklistandProgressData();
   };
 
   getWorklistandProgressData = async () => {
@@ -93,8 +103,20 @@ class Sidebar extends Component {
   };
 
   componentDidUpdate = prevProps => {
+    let { pathname } = this.props.location;
+    const { pid } = this.props;
     if (prevProps.progressUpdated !== this.props.progressUpdated) {
       this.getWorklistandProgressData();
+    }
+    if (prevProps.projectAdded !== this.props.projectAdded) {
+      this.getProjectsData();
+    }
+    if (pathname !== prevProps.location.pathname) {
+      pathname = pathname.split("/").pop();
+      this.setState({ selected: pathname });
+    }
+    if (pid !== prevProps.pid) {
+      this.setState({ pid });
     }
   };
 
@@ -103,7 +125,7 @@ class Sidebar extends Component {
       width: "0",
       marginLeft: "0",
       buttonDisplay: "block",
-      open: false
+      open: false,
     });
   };
 
@@ -112,13 +134,15 @@ class Sidebar extends Component {
       width: "200px",
       marginLeft: "200px",
       buttonDisplay: "none",
-      open: true
+      open: true,
     });
   };
 
   handleRoute = (type, id) => {
     let index;
     const isThick = mode === "thick";
+    this.setState({ type });
+    this.setState({ selected: null });
     if (type !== "progress") {
       this.collapseAll();
     }
@@ -138,6 +162,7 @@ class Sidebar extends Component {
       this.props.history.push(`/progress/${id}`);
       index = isThick ? 2 : 1;
       this.setState({ index });
+      this.setState({ selected: id });
     }
   };
 
@@ -163,49 +188,73 @@ class Sidebar extends Component {
         <div onClick={this.collapseAll} key="worklist">
           Worklist
         </div>,
-        <div key="progress">Progress</div>
+        <div key="progress">Progress</div>,
       ];
     } else {
       return [
         <div onClick={this.collapseAll} key="worklist">
           Worklist
         </div>,
-        <div key="progress">Progress</div>
+        <div key="progress">Progress</div>,
       ];
     }
   };
 
   renderProjects = () => {
-    if (mode === "thick") {
-      const projects = this.state.projects.map(project => (
-        <tr key={project.id} className="sidebar-row">
-          <td>
-            <p
-              onClick={() => {
-                this.handleRoute("project", project.id);
-              }}
-            >
-              {project.name}
-            </p>
-          </td>
-        </tr>
-      ));
-      return <SidebarContent key="projectContent">{projects}</SidebarContent>;
+    try {
+      const { projects, selected } = this.state;
+      let { pathname } = this.props.location;
+      pathname = pathname.split("/").pop();
+      // const pid = pathname.pop();
+      if (mode === "thick") {
+        const projectsList = projects.map(project => {
+          const matchProject =
+            selected === project.id || pathname === project.id;
+          const className = matchProject
+            ? "sidebar-row __selected"
+            : "sidebar-row";
+          return (
+            <tr key={project.id} className={className}>
+              <td>
+                <p
+                  onClick={() => {
+                    this.handleRoute("project", project.id);
+                    this.props.getPidUpdate(project.id);
+                    this.setState({ selected: project.id });
+                  }}
+                  style={{ padding: "0.6rem" }}
+                >
+                  {project.name}
+                </p>
+              </td>
+            </tr>
+          );
+        });
+        return (
+          <SidebarContent key="projectContent">{projectsList}</SidebarContent>
+        );
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
   renderWorklists = () => {
+    const { type, selected } = this.state;
     const worklists = this.state.worklistsAssigned.map(worklist => {
-      const className = worklist.projectIDs.length
-        ? "sidebar-row __bold"
-        : "sidebar-row";
+      const className =
+        worklist.workListID === selected && type === "worklist"
+          ? "sidebar-row __selected"
+          : "sidebar-row";
       return (
         <tr key={worklist.workListID} className={className}>
           <td>
             <p
               onClick={() => {
                 this.handleRoute("worklist", worklist.workListID);
+                this.setState({ selected: worklist.workListID });
               }}
+              style={{ padding: "0.6rem" }}
             >
               {worklist.name}
               {worklist.projectIDs.length ? (
@@ -222,7 +271,7 @@ class Sidebar extends Component {
   };
 
   renderProgress = () => {
-    const { progressView } = this.state;
+    const { progressView, selected, type } = this.state;
     return (
       <div>
         <Collapsible
@@ -234,6 +283,8 @@ class Sidebar extends Component {
           <WorklistSelect
             list={this.state.worklistsCreated}
             handleRoute={this.handleRoute}
+            selected={selected}
+            type={type}
           />
         </Collapsible>
         <Collapsible
@@ -245,6 +296,8 @@ class Sidebar extends Component {
           <WorklistSelect
             list={this.state.worklistsAssigned}
             handleRoute={this.handleRoute}
+            selected={selected}
+            type={type}
           />
         </Collapsible>
       </div>
@@ -257,7 +310,7 @@ class Sidebar extends Component {
         <Tabs className="theme-default" settings={{ index: this.state.index }}>
           <Nav>{this.renderNav()}</Nav>
           <Content>
-            <div>{this.renderProjects()}</div>
+            <div className="testtable">{this.renderProjects()}</div>
             <div>{this.renderWorklists()}</div>
             <div>{this.renderProgress()}</div>
           </Content>
@@ -297,7 +350,7 @@ class Sidebar extends Component {
           className={this.state.open ? "mainView" : "mainView-closed"}
           style={{
             marginLeft: this.state.marginLeft,
-            height: "calc(100% - 50px)"
+            height: "calc(100% - 50px)",
           }}
         >
           <button
@@ -318,7 +371,7 @@ class Sidebar extends Component {
 const mapStateToProps = state => {
   const { activePort } = state.annotationsListReducer;
   return {
-    activePort
+    activePort,
   };
 };
 export default withRouter(connect(mapStateToProps)(Sidebar));

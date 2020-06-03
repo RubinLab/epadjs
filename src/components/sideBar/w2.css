@@ -289,3 +289,23 @@ body {
   color: black;
   z-index: 1;
 }
+
+.sidebar-row.__selected {
+  background: #d9d9d9;
+  /* color: white; */
+  font-weight: 400;
+  font-size: 1.4rem;
+}
+
+.sidebar-content {
+  width: 100%;
+}
+
+.sidebar-row {
+  padding: 1rem;
+}
+
+.progress-wl.__selected {
+  padding: 0.3rem;
+  background: #e6e6e6;
+}

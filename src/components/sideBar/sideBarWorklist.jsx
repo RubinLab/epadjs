@@ -58,10 +58,6 @@ class WorkList extends React.Component {
       sessionStorage.getItem("username"),
       this.props.match.params.wid
     );
-
-    console.log(" ---- in page ");
-    console.log(worklists);
-    console.log(this.props);
     // for (let worklist of worklists) {
     //   const { data: projectDetails } = await getProject(worklist.projectID);
     //   worklist.projectName = projectDetails.name;

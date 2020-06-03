@@ -1,22 +1,25 @@
-import external from './../../../externalModules.js';
-import EVENTS from './../../../events.js';
-import { moveNewHandle } from './../../../manipulators/index.js';
-import anyHandlesOutsideImage from './../../../manipulators/anyHandlesOutsideImage.js';
+import external from "./../../../externalModules.js";
+import EVENTS from "./../../../events.js";
+import { moveNewHandle } from "./../../../manipulators/index.js";
+import anyHandlesOutsideImage from "./../../../manipulators/anyHandlesOutsideImage.js";
 import {
   addToolState,
   removeToolState,
-} from './../../../stateManagement/toolState.js';
-import triggerEvent from '../../../util/triggerEvent.js';
-import getActiveTool from '../../../util/getActiveTool';
-import BaseAnnotationTool from '../../base/BaseAnnotationTool';
-import updatePerpendicularLineHandles from './utils/updatePerpendicularLineHandles.js';
+} from "./../../../stateManagement/toolState.js";
+import triggerEvent from "../../../util/triggerEvent.js";
+import getActiveTool from "../../../util/getActiveTool";
+import BaseAnnotationTool from "../../base/BaseAnnotationTool";
+import updatePerpendicularLineHandles from "./utils/updatePerpendicularLineHandles.js";
 
-export default function(evt, interactionType) {
+export default function (evt, interactionType) {
   const eventData = evt.detail;
   const { element, image, buttons } = eventData;
   const config = this.configuration;
 
   if (checkPixelSpacing(image)) {
+    window.alert(
+      "Due to lack of image information this tool can't be used with this image!"
+    );
     return;
   }
 
@@ -88,9 +91,9 @@ export default function(evt, interactionType) {
   );
 }
 
-const checkPixelSpacing = image => {
+const checkPixelSpacing = (image) => {
   const imagePlane = external.cornerstone.metaData.get(
-    'imagePlaneModule',
+    "imagePlaneModule",
     image.imageId
   );
   let rowPixelSpacing = image.rowPixelSpacing;

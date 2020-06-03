@@ -7,7 +7,7 @@ import {
   FaLocationArrow,
   FaRegTrashAlt,
   FaFilter,
-  FaUndo
+  FaUndo,
 } from "react-icons/fa";
 import ReactTooltip from "react-tooltip";
 import "../menuStyle.css";
@@ -22,19 +22,27 @@ const toolBar = props => {
     onType,
     onClear,
     onFilter,
+    onUploadWizard,
     onKeyDown
   } = props;
   const { selected, projects } = props;
 
   const options = [];
-  for (let project of projects) {
+  projects.forEach((project, index) => {
     options.push(
       <option key={project.id} value={project.id}>
         {project.name}
       </option>
     );
+  });
+  if (projects[0]) {
+    const firstOption = (
+      <option key="all_aims" value="all_aims">
+        All Annotations
+      </option>
+    );
+    options.push(firstOption);
   }
-
   let name = React.createRef();
   let subject = React.createRef();
   let template = React.createRef();
@@ -51,7 +59,7 @@ const toolBar = props => {
 
   return (
     <div className="annotations-toolbar">
-      <div className="annotations-toolbar-basic">
+      <div className="annotations-toolbar-basic" align="left">
         <>
           <div onClick={onUpload}>
             <FaUpload className="tool-icon" data-tip data-for="upload-icon" />
@@ -60,7 +68,7 @@ const toolBar = props => {
             id="upload-icon"
             place="right"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span className="filter-label">Upload files</span>
           </ReactTooltip>
@@ -77,7 +85,7 @@ const toolBar = props => {
             id="download-icon"
             place="right"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span className="filter-label">Download selections</span>
           </ReactTooltip>
@@ -96,7 +104,7 @@ const toolBar = props => {
                 id="applyParalel-icon"
                 place="right"
                 type="info"
-                delayShow={1500}
+                delayShow={1000}
               >
                 <span className="filter-label">Apply (parallel)</span>
               </ReactTooltip>
@@ -115,7 +123,7 @@ const toolBar = props => {
                 id="applyAll-icon"
                 place="right"
                 type="info"
-                delayShow={1500}
+                delayShow={1000}
               >
                 <span className="filter-label">Apply (all together)</span>
               </ReactTooltip>
@@ -124,7 +132,7 @@ const toolBar = props => {
         )}
 
         <>
-          <div onClick={onDelete} className="annotation-toolbar__icon">
+          <div onClick={onDelete}>
             <FaRegTrashAlt
               className="tool-icon"
               onClick={onDelete}
@@ -136,7 +144,7 @@ const toolBar = props => {
             id="trash-icon"
             place="right"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span className="filter-label">Delete selections</span>
           </ReactTooltip>
@@ -146,8 +154,8 @@ const toolBar = props => {
           <select
             className="annotations-projectSelect"
             name="project"
+            defaultValue={projects[0] ? projects[0].name : ""}
             onChange={onSelect}
-            defaultValue="default"
           >
             {options}
           </select>
@@ -226,9 +234,9 @@ const toolBar = props => {
               </div>
               <ReactTooltip
                 id="filter-icon"
-                place="right"
+                place="left"
                 type="info"
-                delayShow={1500}
+                delayShow={1000}
               >
                 <span className="filter-label">Filter annotations</span>
               </ReactTooltip>
@@ -245,9 +253,9 @@ const toolBar = props => {
               </div>
               <ReactTooltip
                 id="undo-icon"
-                place="right"
+                place="left"
                 type="info"
-                delayShow={1500}
+                delayShow={1000}
               >
                 <span className="filter-label">Clear filter</span>
               </ReactTooltip>
@@ -262,6 +270,6 @@ const toolBar = props => {
 toolBar.propTypes = {
   onAdd: PropTypes.func,
   onDelete: PropTypes.func,
-  selected: PropTypes.bool
+  selected: PropTypes.bool,
 };
 export default toolBar;

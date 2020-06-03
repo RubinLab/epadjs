@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import Row from "./tableRow";
 
-const projectTable = ({ onSelect, projects, projectToRole, projectMap }) => {
+const projectTable = ({ onSelect, projectToRole, projectMap }) => {
   const mode = sessionStorage.getItem("mode");
   const rows = [];
   const userRoles = {};
@@ -12,7 +12,7 @@ const projectTable = ({ onSelect, projects, projectToRole, projectMap }) => {
     userRoles[roleArr[0]] = roleArr[1];
   }
 
-  projects.forEach(project => {
+  for (let project in projectMap) {
     rows.push(
       <Row
         name={projectMap[project]}
@@ -22,7 +22,7 @@ const projectTable = ({ onSelect, projects, projectToRole, projectMap }) => {
         projectId={project}
       />
     );
-  });
+  }
   return (
     <table className="project-table">
       <thead>
@@ -33,7 +33,7 @@ const projectTable = ({ onSelect, projects, projectToRole, projectMap }) => {
           {mode !== "lite" && (
             <>
               <th className="project-table __header">Collaborator</th>
-              <th className="project-table __header">StudyOnly</th>{" "}
+              <th className="project-table __header">StudyOnly</th>
             </>
           )}
           <th className="project-table __header">None</th>
