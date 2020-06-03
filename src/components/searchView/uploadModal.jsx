@@ -28,6 +28,7 @@ class UploadModal extends React.Component {
 
   componentDidMount = async () => {
     try {
+      const { pid } = this.props;
       if (mode !== "lite") {
         let { data: projects } = await getProjects();
         for (let i = 0; i < projects.length; i++) {
@@ -43,7 +44,7 @@ class UploadModal extends React.Component {
           }
         }
         projects.length > 0
-          ? this.setState({ projects, projectID: projects[0].id })
+          ? this.setState({ projects, projectID: pid })
           : this.setState({ projects });
       }
     } catch (err) {
@@ -160,6 +161,7 @@ class UploadModal extends React.Component {
   renderProjectDropdown = () => {
     const options = [];
     const { projects } = this.state;
+    const { projectID } = this.state;
     for (let pr of projects) {
       options.push(
         <option key={pr.id} value={pr.id}>
@@ -170,7 +172,11 @@ class UploadModal extends React.Component {
     return (
       <div className="upload-select__container">
         <span>Projects: </span>
-        <select className="upload-select" onChange={e => this.selectProject(e)}>
+        <select
+          className="upload-select"
+          onChange={e => this.selectProject(e)}
+          value={projectID}
+        >
           {options}
         </select>
       </div>

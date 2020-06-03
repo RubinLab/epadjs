@@ -70,7 +70,7 @@ class Annotations extends Component {
       // if (!annsOpened && !alreadyCounted)
       //   updateExpandedLevelNums("series", data.length, 1);
       if (data.length === 0 && this.props.expandLevel !== 3) {
-        toast.info(`No annotations found ${seriesIndex}`, {
+        toast.info(`No annotations found`, {
           position: "top-right",
           autoClose: 5000,
           hideProgressBar: false,

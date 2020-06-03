@@ -70,6 +70,8 @@ class App extends Component {
     }));
   };
 
+  
+
   getTreeExpandAll = (expandObj, expanded, expandLevel) => {
     try {
       const { patient, study, series } = expandObj;

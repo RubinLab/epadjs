@@ -964,6 +964,7 @@ class SearchView extends Component {
           <UploadModal
             onCancel={this.handleFileUpload}
             onSubmit={this.updateUploadStatus}
+            pid={this.props.pid}
           />
         )}
         {showDeleteAlert && (
