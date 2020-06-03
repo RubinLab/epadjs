@@ -601,6 +601,7 @@ class App extends Component {
             updateProgress={this.updateProgress}
             admin={this.state.admin}
             getProjectAdded={this.getProjectAdded}
+            pid={this.state.pid}
           />
         )}
         {this.state.openInfo && (

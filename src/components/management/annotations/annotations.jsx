@@ -73,11 +73,15 @@ class Annotations extends React.Component {
         }
       }
 
-      this.getAnnotationsData();
-
-      projectList.length > 0
-        ? this.setState({ projectList, projectID: projectList[0].id })
-        : this.setState({ projectList });
+      const { pid } = this.props;
+      if (projectList.length > 0) {
+        const projectID = pid || projectList[0].id;
+        this.setState({ projectList, projectID });
+        this.getAnnotationsData(projectID);
+      } else {
+        this.setState({ projectList });
+        this.getAnnotationsData();
+      }
     }
   };
 
@@ -628,7 +632,7 @@ class Annotations extends React.Component {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     const data = this.state.filteredData || this.state.annotations;
     const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
-    const { seriesAlreadyOpen } = this.state;
+    const { seriesAlreadyOpen, projectID } = this.state;
     const text = seriesAlreadyOpen > 1 ? "annotations" : "annotation";
     return (
       <div className="annotations menu-display" id="annotation">
@@ -644,6 +648,7 @@ class Annotations extends React.Component {
           onUpload={this.handleUpload}
           onDownload={this.handleDownload}
           onKeyDown={this.handleKeyDown}
+          pid={projectID}
         />
         <ReactTable
           NoDataComponent={() => null}

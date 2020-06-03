@@ -87,6 +87,7 @@ class MainMenu extends React.Component {
             selection={this.state.selection}
             onClose={this.handleCloseModal}
             updateProgress={this.props.updateProgress}
+            pid={this.props.pid}
           />
         );
       case "Templates":
