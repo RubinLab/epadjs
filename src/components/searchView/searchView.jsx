@@ -349,6 +349,7 @@ class SearchView extends Component {
         delSys
       );
     }
+    if (showDeleteFromSysAlert) this.props.clearTreeData();
   };
 
   updateStoreOnAnnotationDelete = arr => {
@@ -759,6 +760,7 @@ class SearchView extends Component {
             project={this.props.match.params.pid}
             onSubmit={this.updateUploadStatus}
             onResolve={this.updateStatus}
+            updateTreeDataOnSave={this.props.updateTreeDataOnSave}
           />
         );
       case "study":
@@ -769,6 +771,7 @@ class SearchView extends Component {
             project={this.props.match.params.pid}
             onSubmit={this.updateUploadStatus}
             onResolve={this.updateStatus}
+            updateTreeDataOnSave={this.props.updateTreeDataOnSave}
           />
         );
       case "series":
@@ -779,6 +782,7 @@ class SearchView extends Component {
             subjects={this.state.subjects}
             onSubmit={this.updateUploadStatus}
             onResolve={this.updateStatus}
+            updateTreeDataOnSave={this.props.updateTreeDataOnSave}
           />
         );
       // case "annotation":
@@ -965,6 +969,7 @@ class SearchView extends Component {
             onCancel={this.handleFileUpload}
             onSubmit={this.updateUploadStatus}
             pid={this.props.pid}
+            clearTreeData={this.props.clearTreeData}
           />
         )}
         {showDeleteAlert && (

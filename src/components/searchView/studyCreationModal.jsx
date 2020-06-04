@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { saveStudy } from "../../services/studyServices";
 
 const messages = {
-  fillRequredFields: "Please fill the required fields!"
+  fillRequredFields: "Please fill the required fields!",
 };
 class StudyCreationForm extends React.Component {
   state = {
@@ -13,7 +13,7 @@ class StudyCreationForm extends React.Component {
     error: "",
     study: "",
     subjects: [],
-    subjectID: ""
+    subjectID: "",
   };
 
   componentDidMount = () => {
@@ -26,9 +26,15 @@ class StudyCreationForm extends React.Component {
     } else {
       saveStudy(this.props.project, subjectID, abbreviation, description)
         .then(() => {
+          const obj = {
+            projectID: this.props.project,
+            patientID: subjectID,
+            studyUID: abbreviation,
+          };
           this.props.onSubmit();
           this.props.onCancel();
           this.props.onResolve();
+          this.props.updateTreeDataOnSave(obj, "study");
           toast.success("Study successfully saved!");
         })
         .catch(error => {
@@ -88,7 +94,9 @@ class StudyCreationForm extends React.Component {
         </Modal.Header>
         <Modal.Body className="add-study__mbody">
           <form className="add-study__modal--form">
-            <h5 className="add-study__modal--label">StudyUID / Abbreviation*</h5>
+            <h5 className="add-study__modal--label">
+              StudyUID / Abbreviation*
+            </h5>
             <input
               onMouseDown={e => e.stopPropagation()}
               className="add-study__modal--input"
@@ -98,7 +106,7 @@ class StudyCreationForm extends React.Component {
               id="form-first-element"
             />
             <h6 className="form-exp">
-              One word only, no special characters, '_' is OK
+              One word only, no special characters, "_" is OK
             </h6>
             <h5 className="add-study__modal--label">Description*</h5>
             <textarea

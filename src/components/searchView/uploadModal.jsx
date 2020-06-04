@@ -96,6 +96,7 @@ class UploadModal extends React.Component {
     Promise.all(promises)
       .then(() => {
         this.props.onSubmit();
+        this.props.clearTreeData();
       })
       .catch(err => {
         console.log(err);

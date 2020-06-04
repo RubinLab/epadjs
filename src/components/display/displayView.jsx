@@ -935,7 +935,7 @@ class DisplayView extends Component {
           hasSegmentation={this.state.hasSegmentation}
           activeLabelMapIndex={this.state.activeLabelMapIndex}
           updateProgress={this.props.updateProgress}
-          updateTreeDataOnAimSave={this.props.updateTreeDataOnAimSave}
+          updateTreeDataOnSave={this.props.updateTreeDataOnSave}
         >
           {!this.state.isLoading &&
             Object.entries(this.props.series).length &&

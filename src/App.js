@@ -571,34 +571,71 @@ class App extends Component {
     this.setState({ treeData });
   };
 
-  updateTreeDataOnAimSave = async () => {
-    const { openSeries, activePort } = this.props;
+  findNonExisting = (arr, uid, level) => {
+    const result = arr.filter(el => el[level] === uid);
+    return result[0];
+  };
+
+  updateTreeDataOnSave = async (refs, newLevel) => {
     const treeData = { ...this.state.treeData };
-    const { projectID, patientID, studyUID, seriesUID } = openSeries[
-      activePort
-    ];
+    const { projectID, patientID, studyUID, seriesUID } = refs;
+    const isPatient = projectID && patientID;
+    const isStudy = projectID && patientID && studyUID;
+    const isSeries = projectID && patientID && studyUID && seriesUID;
 
-    if (treeData[projectID][patientID]) {
-      const promises = [];
-      promises.push(getSubject(projectID, patientID));
-      if (treeData[projectID][patientID].studies[studyUID])
-        promises.push(getStudy(projectID, patientID, studyUID));
-      if (treeData[projectID][patientID].studies[studyUID].series[seriesUID])
-        promises.push(
-          getSingleSeries(projectID, patientID, studyUID, seriesUID)
+    if (newLevel) {
+      if (newLevel === "study" && isStudy) {
+        const { data: studies } = await getStudies(
+          projectID,
+          patientID,
+          studyUID
         );
-
-      const result = await Promise.all(promises);
-      treeData[projectID][patientID].data = result[0].data;
-
-      if (treeData[projectID][patientID].studies[studyUID]) {
-        treeData[projectID][patientID].studies[studyUID].data = result[1].data;
+        let study = this.findNonExisting(studies, studyUID, "studyUID");
+        study = { data: study, series: {} };
+        treeData[projectID][patientID].studies[studyUID] = study;
       }
-
-      if (treeData[projectID][patientID].studies[studyUID].series[seriesUID]) {
+      if (newLevel === "series" && isSeries) {
+        const { data: seriesArr } = await getSeries(
+          projectID,
+          patientID,
+          studyUID
+        );
+        let series = this.findNonExisting(seriesArr, seriesUID, "seriesUID");
+        series = { data: series };
         treeData[projectID][patientID].studies[studyUID].series[
           seriesUID
-        ].data = result[2].data[0];
+        ] = series;
+      }
+    } else {
+      if (isPatient && treeData[projectID][patientID]) {
+        const promises = [];
+        promises.push(getSubject(projectID, patientID));
+        if (isStudy && treeData[projectID][patientID].studies[studyUID])
+          promises.push(getStudy(projectID, patientID, studyUID));
+        if (
+          isSeries &&
+          treeData[projectID][patientID].studies[studyUID].series[seriesUID]
+        )
+          promises.push(
+            getSingleSeries(projectID, patientID, studyUID, seriesUID)
+          );
+
+        const result = await Promise.all(promises);
+        treeData[projectID][patientID].data = result[0].data;
+
+        if (isStudy && treeData[projectID][patientID].studies[studyUID]) {
+          treeData[projectID][patientID].studies[studyUID].data =
+            result[1].data;
+        }
+
+        if (
+          isSeries &&
+          treeData[projectID][patientID].studies[studyUID].series[seriesUID]
+        ) {
+          treeData[projectID][patientID].studies[studyUID].series[
+            seriesUID
+          ].data = result[2].data[0];
+        }
       }
     }
     this.setState({ treeData });
@@ -681,7 +718,7 @@ class App extends Component {
                       {...props}
                       updateProgress={this.updateProgress}
                       pid={this.state.pid}
-                      updateTreeDataOnAimSave={this.updateTreeDataOnAimSave}
+                      updateTreeDataOnSave={this.updateTreeDataOnSave}
                     />
                   )}
                 />
@@ -705,6 +742,7 @@ class App extends Component {
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
                       clearTreeData={this.clearTreeData}
+                      updateTreeDataOnSave={this.updateTreeDataOnSave}
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
                     />
@@ -730,11 +768,12 @@ class App extends Component {
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
                       clearTreeData={this.clearTreeData}
+                      updateTreeDataOnSave={this.updateTreeDataOnSave}
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
                     />
                   )}
-                /> 
+                />
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute
                   path="/progress/:wid?"
@@ -771,6 +810,7 @@ class App extends Component {
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
                       clearTreeData={this.clearTreeData}
+                      updateTreeDataOnSave={this.updateTreeDataOnSave}
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
                     />
