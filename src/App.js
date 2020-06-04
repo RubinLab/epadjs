@@ -30,6 +30,9 @@ import {
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
+import { getSubjects, getSubject } from "./services/subjectServices";
+import { getStudies, getStudy } from "./services/studyServices";
+import { getSeries, getSingleSeries } from "./services/seriesServices";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -69,8 +72,6 @@ class App extends Component {
       treeExpand: {},
     }));
   };
-
-  
 
   getTreeExpandAll = (expandObj, expanded, expandLevel) => {
     try {
@@ -564,6 +565,45 @@ class App extends Component {
     this.setState({ treeExpand: {}, expandLevel: 0 });
   };
 
+  clearTreeData = () => {
+    const { pid } = this.state;
+    const treeData = { [pid]: { ...this.state.treeData[pid] } };
+    this.setState({ treeData });
+  };
+
+  updateTreeDataOnAimSave = async () => {
+    const { openSeries, activePort } = this.props;
+    const treeData = { ...this.state.treeData };
+    const { projectID, patientID, studyUID, seriesUID } = openSeries[
+      activePort
+    ];
+
+    if (treeData[projectID][patientID]) {
+      const promises = [];
+      promises.push(getSubject(projectID, patientID));
+      if (treeData[projectID][patientID].studies[studyUID])
+        promises.push(getStudy(projectID, patientID, studyUID));
+      if (treeData[projectID][patientID].studies[studyUID].series[seriesUID])
+        promises.push(
+          getSingleSeries(projectID, patientID, studyUID, seriesUID)
+        );
+
+      const result = await Promise.all(promises);
+      treeData[projectID][patientID].data = result[0].data;
+
+      if (treeData[projectID][patientID].studies[studyUID]) {
+        treeData[projectID][patientID].studies[studyUID].data = result[1].data;
+      }
+
+      if (treeData[projectID][patientID].studies[studyUID].series[seriesUID]) {
+        treeData[projectID][patientID].studies[studyUID].series[
+          seriesUID
+        ].data = result[2].data[0];
+      }
+    }
+    this.setState({ treeData });
+  };
+
   render() {
     const {
       notifications,
@@ -641,6 +681,7 @@ class App extends Component {
                       {...props}
                       updateProgress={this.updateProgress}
                       pid={this.state.pid}
+                      updateTreeDataOnAimSave={this.updateTreeDataOnAimSave}
                     />
                   )}
                 />
@@ -663,6 +704,7 @@ class App extends Component {
                       handleCloseAll={this.handleCloseAll}
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
+                      clearTreeData={this.clearTreeData}
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
                     />
@@ -687,11 +729,12 @@ class App extends Component {
                       handleCloseAll={this.handleCloseAll}
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
+                      clearTreeData={this.clearTreeData}
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
                     />
                   )}
-                />
+                /> 
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute
                   path="/progress/:wid?"
@@ -727,6 +770,7 @@ class App extends Component {
                       handleCloseAll={this.handleCloseAll}
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
+                      clearTreeData={this.clearTreeData}
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
                     />
@@ -792,6 +836,7 @@ const mapStateToProps = state => {
     loading,
     activePort,
     imageID,
+    openSeries,
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -799,6 +844,7 @@ const mapStateToProps = state => {
     loading,
     activePort,
     imageID,
+    openSeries,
     selection: state.managementReducer.selection,
   };
 };

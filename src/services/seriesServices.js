@@ -174,3 +174,17 @@ export function updateTagsOfSeries(
   const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/series/${seriesUID}?editTags=true&applyPatient=${applyPatient}&applyStudy=${applyStudy}`;
   return http.put(url, body);
 }
+
+export function getSingleSeries(projectId, subjectId, studyUID, seriesUID) {
+  return http.get(
+    apiUrl +
+      "/projects/" +
+      projectId +
+      "/subjects/" +
+      subjectId +
+      "/studies/" +
+      studyUID +
+      "/series/" +
+      seriesUID
+  );
+}

@@ -987,6 +987,9 @@ class SearchView extends Component {
           <NewMenu
             onSelect={this.handleSelectNewOption}
             onClose={this.handleNewClick}
+            selectedPatients={selectedPatients}
+            selectedStudies={selectedStudies}
+            selectedSeries={selectedSeries}
           />
         )}
 

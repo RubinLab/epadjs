@@ -78,6 +78,7 @@ class Rightsidebar extends Component {
                   aimId={this.props.selectedAim}
                   onCancel={this.props.onCancel}
                   // onCancel={this.closeAimEditor}
+                  updateTreeDataOnAimSave={this.props.updateTreeDataOnAimSave}
                   updateProgress={this.props.updateProgress}
                   projectID={projectID}
                   hasSegmentation={this.props.hasSegmentation}

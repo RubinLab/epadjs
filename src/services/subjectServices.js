@@ -49,3 +49,7 @@ export function getAllSubjects() {
 export function addSubjectToProject(projectID, subjectID) {
   return http.put(`${apiUrl}/projects/${projectID}/subjects/${subjectID}`);
 }
+
+export function getSubject(projectID, subjectID) {
+  return http.get(`${apiUrl}/projects/${projectID}/subjects/${subjectID}`);
+}

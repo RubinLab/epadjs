@@ -363,6 +363,7 @@ class AimEditor extends Component {
           })
         );
         this.props.dispatch(updatePatientOnAimSave(aimRefs));
+        this.props.updateTreeDataOnAimSave();
       })
       .catch((error) => console.log(error));
     this.props.onCancel(false);
