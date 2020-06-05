@@ -238,6 +238,25 @@ class Subjects extends Component {
     const { selectedPatients } = this.props;
     const columns = [
       {
+        expander: true,
+        width: 35,
+        Expander: ({ isExpanded, ...rest }) => (
+          <div>
+            {isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
+          </div>
+        ),
+        style: {
+          cursor: "pointer",
+          fontSize: 10,
+          padding: "0",
+          textAlign: "center",
+          userSelect: "none",
+          color: "#fafafa",
+          padding: "7px 5px",
+          verticalAlign: "middle"
+        },
+      },
+      {
         id: "searchView-checkbox",
         accessor: "",
         resizable: false,
@@ -529,6 +548,15 @@ class Subjects extends Component {
     this.props.getTreeExpandSingle(obj);
   };
 
+  closeExpansionFromSub = index => {
+    const expanded = { ...this.state.expanded };
+    expanded[index] = false;
+    this.setState({ expanded });
+    const obj = { patient: { [index]: false } };
+
+    this.props.getTreeExpandSingle(obj);
+  };
+
   onSortedChange = () => {
     const { expanded } = this.state;
     for (let subject in expanded) {
@@ -598,6 +626,7 @@ class Subjects extends Component {
                     getTreeExpandAll={this.props.getTreeExpandAll}
                     treeExpand={this.props.treeExpand}
                     patientIndex={row.index}
+                    closeExpand={this.closeExpansionFromSub}
                     // expandLoading={this.props.expandLoading}
                     // patientExpandComplete={this.props.patientExpandComplete}
                     treeData={this.props.treeData}

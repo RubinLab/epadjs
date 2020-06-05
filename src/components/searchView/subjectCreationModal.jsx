@@ -49,7 +49,7 @@ class SubjectCreationForm extends React.Component {
               onChange={this.handleInput}
               id="form-first-element"
             />
-            <h5 className="add-subject__modal--label">Abbreviation*</h5>
+            <h5 className="add-subject__modal--label">SubjectID / Abbreviation*</h5>
             <input
               onMouseDown={e => e.stopPropagation()}
               className="add-subject__modal--input"

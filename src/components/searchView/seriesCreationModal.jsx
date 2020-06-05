@@ -31,9 +31,16 @@ class SeriesCreationForm extends React.Component {
         description
       )
         .then(() => {
+          const obj = {
+            projectID: this.props.project,
+            patientID: subjectID,
+            studyUID: study,
+            seriesUID: abbreviation
+          };
           this.props.onSubmit();
           this.props.onCancel();
           this.props.onResolve();
+          this.props.updateTreeDataOnSave(obj, 'series');
           toast.success("Series successfully saved!");
         })
         .catch(error => {

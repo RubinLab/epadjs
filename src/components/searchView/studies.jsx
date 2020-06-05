@@ -82,6 +82,7 @@ class Studies extends Component {
         treeExpand,
         patientIndex,
         treeData,
+        closeExpand
       } = this.props;
       let data = Object.values(treeData[projectId][subjectId].studies);
       if (data.length > 0) {
@@ -115,6 +116,7 @@ class Studies extends Component {
           pauseOnHover: true,
           draggable: true,
         });
+        closeExpand(patientIndex)
       }
       const expanded = {};
       if (treeExpand[patientIndex]) {
@@ -233,6 +235,25 @@ class Studies extends Component {
     const { selectedStudies } = this.props;
     const columns = [
       {
+        expander: true,
+        width: 35,
+        Expander: ({ isExpanded, ...rest }) => (
+          <div>
+            {isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
+          </div>
+        ),
+        style: {
+          cursor: 'pointer',
+          fontSize: 10,
+          padding: '0',
+          textAlign: 'center',
+          userSelect: 'none',
+          color: '#fafafa',
+          padding: "7px 5px",
+          verticalAlign: "middle"
+        },
+      },
+      {
         id: "searchView-checkbox",
         accessor: "",
         width: this.widthUnit,
@@ -253,6 +274,7 @@ class Studies extends Component {
       },
       {
         width: this.widthUnit * 12,
+        className:"searchView-row__desc",
         Cell: row => {
           let desc = this.cleanCarets(row.original.studyDescription);
           desc = desc || "Unnamed Study";
@@ -591,6 +613,17 @@ class Studies extends Component {
     this.props.getTreeExpandSingle(obj);
   };
 
+  closeExpansionFromSub = index => {
+    const expanded = { ...this.state.expanded };
+    expanded[index] = false;
+    this.setState({ expanded });
+    const obj = {
+      patient: this.props.patientIndex,
+      study: { [index]: false },
+    };
+    this.props.getTreeExpandSingle(obj);
+  };
+
   render() {
     const {
       toggleSelection,
@@ -651,6 +684,7 @@ class Studies extends Component {
                     patientIndex={this.props.patientIndex}
                     studyIndex={row.index}
                     // expandLoading={this.props.expandLoading}
+                    closeExpand={this.closeExpansionFromSub}
                     treeData={this.props.treeData}
                     getTreeData={this.props.getTreeData}
                     closeAllCounter={this.props.closeAllCounter}

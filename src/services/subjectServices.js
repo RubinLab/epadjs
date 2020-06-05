@@ -9,16 +9,15 @@ export function getSubjects(projectId) {
   } else return http.get(apiUrl + "/projects/" + projectId + "/subjects");
 }
 
-export function downloadSubjects(subject) {
-  const subjectID = subject.subjectID || subject.patientID;
+export function downloadSubjects(projectID, body) {
+  console.log(body);
   const url =
     apiUrl +
     "/projects/" +
-    subject.projectID +
-    "/subjects/" +
-    subjectID +
+    projectID +
+    "/subjects/download" +
     "?format=stream&includeAims=true";
-  return http.get(url, { responseType: "blob" });
+  return http.post(url, body, { responseType: "blob" });
 }
 
 export function deleteSubject(subject, delSys) {
@@ -31,7 +30,8 @@ export function deleteSubject(subject, delSys) {
 export function saveSubject(projectID, subjectAbr, subjectName) {
   const body = { name: subjectName };
   return http.put(
-    apiUrl + "/projects/" + projectID + "/subjects/" + subjectAbr, body
+    apiUrl + "/projects/" + projectID + "/subjects/" + subjectAbr,
+    body
   );
 }
 
@@ -48,4 +48,8 @@ export function getAllSubjects() {
 
 export function addSubjectToProject(projectID, subjectID) {
   return http.put(`${apiUrl}/projects/${projectID}/subjects/${subjectID}`);
+}
+
+export function getSubject(projectID, subjectID) {
+  return http.get(`${apiUrl}/projects/${projectID}/subjects/${subjectID}`);
 }

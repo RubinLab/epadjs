@@ -95,19 +95,14 @@ export function getImageArrayBuffer(path) {
   url = url.replace("wadouri:", "");
   return http.get(url, { responseType: "arraybuffer" });
 }
-export function downloadSeries(series) {
+export function downloadSeries(projectID, body) {
   const url =
     apiUrl +
     "/projects/" +
-    series.projectID +
-    "/subjects/" +
-    series.patientID +
-    "/studies/" +
-    series.studyUID +
-    "/series/" +
-    series.seriesUID +
+    projectID +
+    "/series/download" +
     "?format=stream&includeAims=true";
-  return http.get(url, { responseType: "blob" });
+  return http.post(url, body, { responseType: "blob" });
 }
 
 export function getSegmentation(series, imageId) {
@@ -173,4 +168,18 @@ export function updateTagsOfSeries(
 ) {
   const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/series/${seriesUID}?editTags=true&applyPatient=${applyPatient}&applyStudy=${applyStudy}`;
   return http.put(url, body);
+}
+
+export function getSingleSeries(projectId, subjectId, studyUID, seriesUID) {
+  return http.get(
+    apiUrl +
+      "/projects/" +
+      projectId +
+      "/subjects/" +
+      subjectId +
+      "/studies/" +
+      studyUID +
+      "/series/" +
+      seriesUID
+  );
 }
