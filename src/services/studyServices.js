@@ -20,17 +20,15 @@ export function getStudies(projectId, subjectId) {
     );
 }
 
-export function downloadStudies(study) {
+export function downloadStudies(projectID, body) {
+  console.log(body);
   const url =
     apiUrl +
     "/projects/" +
-    study.projectID +
-    "/subjects/" +
-    study.patientID +
-    "/studies/" +
-    study.studyUID +
+    projectID +
+    "/studies/download" +
     "?format=stream&includeAims=true";
-  return http.get(url, { responseType: "blob" });
+  return http.post(url, body, { responseType: "blob" });
 }
 
 export function deleteStudy(study, delSys) {

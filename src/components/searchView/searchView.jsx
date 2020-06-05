@@ -604,47 +604,69 @@ class SearchView extends Component {
     const selectedStudies = Object.values(this.props.selectedStudies);
     const selectedSeries = Object.values(this.props.selectedSeries);
     const selectedAnnotations = Object.values(this.props.selectedAnnotations);
-    let fileName;
-    let promiseArr = [];
-    let fileNameArr = [];
-    if (selectedProjects.length > 0) {
+    const selected =
+      selectedProjects.length ||
+      selectedPatients.length ||
+      selectedStudies.length ||
+      selectedSeries.length ||
+      selectedAnnotations.length;
+    if (selected) {
+      const { pid } = this.props;
+      let bodyArr = [];
+      let fileName = "downloaded_items";
+      let promise;
       await this.setState({ downloading: true });
-      for (let project of selectedProjects) {
-        fileName = `Project-${project.projectID}`;
-        promiseArr.push(downloadProjects(project));
-        fileNameArr.push(fileName);
+      if (selectedProjects.length > 0) {
+        // for (let project of selectedProjects) {
+        //   fileName = `Project-${project.projectID}`;
+        //   promiseArr.push(downloadProjects(project));
+        //   fileNameArr.push(fileName);
+        // }
+        // this.downloadHelper(promiseArr, fileNameArr);
+        // this.props.dispatch(clearSelection());
+      } else if (selectedPatients.length > 0) {
+        bodyArr = selectedPatients.map(el => el.patientID);
+        promise = downloadSubjects(pid, bodyArr);
+        fileName = "Downloaded_subjects";
+      } else if (selectedStudies.length > 0) {
+        bodyArr = selectedStudies.map(el => {
+          return { study: el.studyUID, subject: el.patientID };
+        });
+        promise = downloadStudies(pid, bodyArr);
+        fileName = "Downloaded_studies";
+      } else if (selectedSeries.length > 0) {
+        bodyArr = selectedSeries.map(el => {
+          return {
+            series: el.seriesUID,
+            study: el.studyUID,
+            subject: el.patientID,
+          };
+        });
+        promise = downloadSeries(pid, bodyArr);
+        fileName = "Downloaded_series";
+      } else if (selectedAnnotations.length > 0) {
+        this.setState({ showAnnotationModal: true });
       }
-      this.downloadHelper(promiseArr, fileNameArr);
+      promise
+        .then(result => {
+          let blob = new Blob([result.data], { type: "application/zip" });
+          this.triggerBrowserDownload(blob, fileName);
+          this.setState({ error: null, downloading: false });
+        })
+        .catch(err => {
+          this.setState({ downloading: false });
+          console.log(err);
+        });
       this.props.dispatch(clearSelection());
-    } else if (selectedPatients.length > 0) {
-      await this.setState({ downloading: true });
-      for (let patient of selectedPatients) {
-        fileName = `Patients-${patient.patientID}`;
-        promiseArr.push(downloadSubjects(patient));
-        fileNameArr.push(fileName);
-      }
-      this.downloadHelper(promiseArr, fileNameArr);
-      this.props.dispatch(clearSelection());
-    } else if (selectedStudies.length > 0) {
-      await this.setState({ downloading: true });
-      for (let study of selectedStudies) {
-        fileName = `Studies-${study.studyUID}`;
-        promiseArr.push(downloadStudies(study));
-        fileNameArr.push(fileName);
-      }
-      this.downloadHelper(promiseArr, fileNameArr);
-      this.props.dispatch(clearSelection());
-    } else if (selectedSeries.length > 0) {
-      await this.setState({ downloading: true });
-      for (let serie of selectedSeries) {
-        fileName = `Series-${serie.seriesUID}`;
-        promiseArr.push(downloadSeries(serie));
-        fileNameArr.push(fileName);
-      }
-      this.downloadHelper(promiseArr, fileNameArr);
-      this.props.dispatch(clearSelection());
-    } else if (selectedAnnotations.length > 0) {
-      this.setState({ showAnnotationModal: true });
+    } else {
+      toast.info("Nothing selected to download", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
   };
 
@@ -656,21 +678,6 @@ class SearchView extends Component {
     } catch (err) {
       this.props.dispatch(annotationsLoadingError(err));
     }
-  };
-
-  downloadHelper = (promiseArr, nameArr) => {
-    Promise.all(promiseArr)
-      .then(result => {
-        for (let i = 0; i < result.length; i++) {
-          let blob = new Blob([result[i].data], { type: "application/zip" });
-          this.triggerBrowserDownload(blob, nameArr[i]);
-        }
-        this.setState({ error: null, downloading: false });
-      })
-      .catch(err => {
-        this.setState({ downloading: false });
-        console.log(err);
-      });
   };
 
   handleDownloadCancel = () => {

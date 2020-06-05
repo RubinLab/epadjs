@@ -95,19 +95,14 @@ export function getImageArrayBuffer(path) {
   url = url.replace("wadouri:", "");
   return http.get(url, { responseType: "arraybuffer" });
 }
-export function downloadSeries(series) {
+export function downloadSeries(projectID, body) {
   const url =
     apiUrl +
     "/projects/" +
-    series.projectID +
-    "/subjects/" +
-    series.patientID +
-    "/studies/" +
-    series.studyUID +
-    "/series/" +
-    series.seriesUID +
+    projectID +
+    "/series/download" +
     "?format=stream&includeAims=true";
-  return http.get(url, { responseType: "blob" });
+  return http.post(url, body, { responseType: "blob" });
 }
 
 export function getSegmentation(series, imageId) {
