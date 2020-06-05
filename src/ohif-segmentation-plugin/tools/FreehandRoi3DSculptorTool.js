@@ -31,28 +31,33 @@ export default class FreehandRoi3DSculptorTool extends FreehandRoiSculptorTool {
    * @param {Object} eventData - Data object associated with the event.
    */
   _selectFreehandTool(eventData) {
+    console.log("Event data", eventData);
     const config = this.configuration;
     const element = eventData.element;
     const closestToolIndex = this._getClosestFreehandToolOnElement(
       element,
       eventData
     );
+    console.log("Tool index", closestToolIndex);
 
     if (closestToolIndex === undefined) {
       return;
     }
 
     const toolState = getToolState(element, this.referencedToolName);
+    console.log("Toolstate", toolState);
 
     const toolData = toolState.data[closestToolIndex];
+    console.log("Tool data", toolData);
 
     const isLocked = toolData.referencedStructureSet.isLocked;
+    console.log("Is locked", isLocked);
 
     if (isLocked) {
       return;
     }
 
-    config.hoverColor = toolData.referencedROIContour.color;
+    // config.hoverColor = toolData.referencedROIContour.color;
 
     config.currentTool = closestToolIndex;
   }

@@ -197,6 +197,7 @@ function _addInterpolatedContour(
   );
   console.log(
     "New polygon",
+    polygon,
     points,
     referencedToolData.seriesInstanceUid,
     referencedToolData.structureSetUid,
