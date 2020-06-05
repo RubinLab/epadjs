@@ -73,7 +73,9 @@ export function downloadAnnotations(optionObj, aimIDlist, selection) {
       "/projects/lite/aims/download?summary=" +
       optionObj.summary +
       "&aim=" +
-      optionObj.aim,
+      optionObj.aim +
+      "&seg=" +
+      optionObj.seg,
     aimIDlist,
     { responseType: "blob" }
   );

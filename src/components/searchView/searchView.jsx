@@ -608,8 +608,7 @@ class SearchView extends Component {
       selectedProjects.length ||
       selectedPatients.length ||
       selectedStudies.length ||
-      selectedSeries.length ||
-      selectedAnnotations.length;
+      selectedSeries.length;
     if (selected) {
       const { pid } = this.props;
       let bodyArr = [];
@@ -644,9 +643,8 @@ class SearchView extends Component {
         });
         promise = downloadSeries(pid, bodyArr);
         fileName = "Downloaded_series";
-      } else if (selectedAnnotations.length > 0) {
-        this.setState({ showAnnotationModal: true });
       }
+
       promise
         .then(result => {
           let blob = new Blob([result.data], { type: "application/zip" });
@@ -658,6 +656,8 @@ class SearchView extends Component {
           console.log(err);
         });
       this.props.dispatch(clearSelection());
+    } else if (selectedAnnotations.length > 0) {
+      this.setState({ showAnnotationModal: true });
     } else {
       toast.info("Nothing selected to download", {
         position: "top-right",
