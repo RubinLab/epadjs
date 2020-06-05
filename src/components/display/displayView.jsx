@@ -86,7 +86,7 @@ const tools = [
   {
     name: "FreehandRoi3DTool",
     modeOptions: { mouseButtonMask: 1 },
-    mode: "passive",
+    mode: "active",
   },
   {
     name: "FreehandRoi3DSculptorTool",
@@ -136,6 +136,7 @@ class DisplayView extends Component {
       activeLabelMapIndex: 0,
       aimLabelMaps: {},
       redirect: this.props.series.length < 1 ? true : false,
+      interpolated: false,
     };
   }
 
@@ -185,7 +186,7 @@ class DisplayView extends Component {
 
   getData() {
     // clear the toolState they will be rendered again on next load
-    // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
 
@@ -203,9 +204,9 @@ class DisplayView extends Component {
         prospectiveLabelMapIndex: 0,
       });
       // clear the toolState they will be rendered again on next load
-      // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
-      //   {}
-      // );
+      cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+        {}
+      );
       // clear the segmentation data as well
       cornerstoneTools.store.modules.segmentation.state.series = {};
       series.forEach((serie, serieIndex) => {
@@ -222,12 +223,6 @@ class DisplayView extends Component {
           );
       });
 
-      // // console.log("Element", element);
-      // // const toolState = cornerstoneTools.getToolState(
-      // //   element,
-      // //   "FreehandRoi3DTool"
-      // // );
-      // console.log("Hadiiiiii");
       this.refreshAllViewports();
       // this.props.dispatch(clearActivePortAimID());
     });
@@ -240,12 +235,7 @@ class DisplayView extends Component {
       roi3d
     );
     console.log("CornerstoneTools", cornerstoneTools);
-    // const tempClass = new fh();
-    // console.log("Fh", tempClass);
-    // console.log("Element 55555", element);
-    // tempClass._addAndSetVolumeIfNoVolumes(element);
-    // tempClass.createNewMeasurement({}, element);
-    // console.log("Element", element);
+
     interpolate(intData, element.element);
 
     console.log("CornerstoneTools", cornerstoneTools);
@@ -287,7 +277,9 @@ class DisplayView extends Component {
     cornerstoneTools.setToolActive("FreehandRoi3DTool", {
       mouseButtonMask: [1],
     });
-    this.setState({ showAimEditor: true });
+    cornerstoneTools.setToolPassive("FreehandRoi3DTool");
+    this.setState({ showAimEditor: true, interpolated: true });
+
     window.alert("Interpolation done successfully!");
   };
 
@@ -1035,7 +1027,12 @@ class DisplayView extends Component {
       <Redirect to="/search" />
     ) : (
       <React.Fragment>
-        <button name="Interpolate" onClick={this.convertFrehandTo3D} />
+        <button
+          onClick={this.convertFrehandTo3D}
+          disabled={this.state.interpolated}
+        >
+          Interpolate
+        </button>
         <RightsideBar
           showAimEditor={this.state.showAimEditor}
           selectedAim={this.state.selectedAim}
