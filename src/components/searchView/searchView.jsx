@@ -759,6 +759,7 @@ class SearchView extends Component {
   };
 
   handleNewSelected = () => {
+    const { selectedPatients, selectedStudies } = this.props;
     switch (this.state.newSelected) {
       case "subject":
         return (
@@ -779,6 +780,7 @@ class SearchView extends Component {
             onSubmit={this.updateUploadStatus}
             onResolve={this.updateStatus}
             updateTreeDataOnSave={this.props.updateTreeDataOnSave}
+            selectedPatients={Object.values(selectedPatients)}
           />
         );
       case "series":
@@ -790,6 +792,8 @@ class SearchView extends Component {
             onSubmit={this.updateUploadStatus}
             onResolve={this.updateStatus}
             updateTreeDataOnSave={this.props.updateTreeDataOnSave}
+            selectedPatients={Object.values(selectedPatients)}
+            selectedStudies={Object.values(selectedStudies)}
           />
         );
       // case "annotation":

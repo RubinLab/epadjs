@@ -28,6 +28,7 @@ class UploadModal extends React.Component {
 
   componentDidMount = async () => {
     try {
+      console.log("here too!!!")
       const { pid } = this.props;
       if (mode !== "lite") {
         let { data: projects } = await getProjects();
