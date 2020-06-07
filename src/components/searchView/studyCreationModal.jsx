@@ -17,7 +17,13 @@ class StudyCreationForm extends React.Component {
   };
 
   componentDidMount = () => {
-    this.setState({ subjectID: this.props.subjects[0].subjectID });
+    const { selectedPatients } = this.props;
+    if (selectedPatients.length) {
+      this.setState({ subjectID: selectedPatients[0].patientID });
+
+    } else {
+      this.setState({ subjectID: this.props.subjects[0].subjectID });
+    }
   };
   handleSubmit = () => {
     const { description, abbreviation, subjectID } = this.state;
@@ -120,6 +126,7 @@ class StudyCreationForm extends React.Component {
             <select
               name="subjectID"
               className="add-study__modal--select"
+              value={this.state.subjectID}
               onChange={this.handleInput}
             >
               {this.renderPatients()}

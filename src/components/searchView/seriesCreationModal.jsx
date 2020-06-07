@@ -10,12 +10,26 @@ class SeriesCreationForm extends React.Component {
     abbreviation: "",
     error: "",
     subjects: [],
-    studies: []
+    studies: [],
   };
 
   componentDidMount = async () => {
-    this.getStudies();
-    this.setState({ subjectID: this.props.subjects[0].subjectID });
+    const { selectedPatients, selectedStudies } = this.props;
+    if (selectedPatients.length) {
+      this.setState({ subjectID: selectedPatients[0].patientID });
+      this.getStudies(selectedPatients[0].patientID);
+    } else if (selectedStudies.length) {
+      this.setState({
+        subjectID: selectedStudies[0].patientID,
+        study: selectedStudies[0].studyUID,
+      });
+      this.getStudies(
+        selectedStudies[0].patientID,
+        selectedStudies[0].studyUID
+      );
+    } else {
+      this.setState({ subjectID: this.props.subjects[0].subjectID });
+    }
   };
 
   handleSubmit = () => {
@@ -35,12 +49,12 @@ class SeriesCreationForm extends React.Component {
             projectID: this.props.project,
             patientID: subjectID,
             studyUID: study,
-            seriesUID: abbreviation
+            seriesUID: abbreviation,
           };
           this.props.onSubmit();
           this.props.onCancel();
           this.props.onResolve();
-          this.props.updateTreeDataOnSave(obj, 'series');
+          this.props.updateTreeDataOnSave(obj, "series");
           toast.success("Series successfully saved!");
         })
         .catch(error => {
@@ -51,13 +65,17 @@ class SeriesCreationForm extends React.Component {
     }
   };
 
-  getStudies = async selectedSubjectID => {
+  getStudies = async (selectedSubjectID, stuid) => {
     let studies = [];
     const subjectID = selectedSubjectID || this.props.subjects[0].subjectID;
     try {
       const { data: studies } = await getStudies(this.props.project, subjectID);
       // studies = result.data.ResultSet.Result;
-      const study = studies.length > 0 ? studies[0].studyUID : null;
+      const study = stuid
+        ? stuid
+        : studies.length > 0
+        ? studies[0].studyUID
+        : null;
       this.setState({ studies, study });
     } catch (error) {
       let { message } = error.response.data;
@@ -71,7 +89,6 @@ class SeriesCreationForm extends React.Component {
     if (e.target.name === "subjectID") {
       this.getStudies(e.target.value);
     }
-    
   };
 
   handleCancel = () => {
@@ -80,7 +97,7 @@ class SeriesCreationForm extends React.Component {
       patient: "",
       abbreviation: "",
       study: "",
-      error: ""
+      error: "",
     });
     this.props.onCancel();
   };
@@ -131,7 +148,9 @@ class SeriesCreationForm extends React.Component {
         </Modal.Header>
         <Modal.Body className="add-series__mbody">
           <form className="add-series__modal--form">
-            <h5 className="add-series__modal--label">SeriesUID / Abbreviation*</h5>
+            <h5 className="add-series__modal--label">
+              SeriesUID / Abbreviation*
+            </h5>
             <input
               onMouseDown={e => e.stopPropagation()}
               className="add-series__modal--input"
@@ -141,7 +160,7 @@ class SeriesCreationForm extends React.Component {
               id="form-first-element"
             />
             <h6 className="form-exp">
-              One word only, no special characters, '_' is OK
+              One word only, no special characters, "_" is OK
             </h6>
             <h5 className="add-series__modal--label">Description*</h5>
             <textarea
@@ -155,6 +174,7 @@ class SeriesCreationForm extends React.Component {
             <select
               name="subjectID"
               className="add-series__modal--select"
+              value={this.state.subjectID}
               onChange={this.handleInput}
             >
               {this.renderPatients()}
@@ -163,6 +183,7 @@ class SeriesCreationForm extends React.Component {
             <select
               name="study"
               className="add-series__modal--select"
+              value={this.state.study}
               onChange={this.handleInput}
             >
               {this.renderStudies()}

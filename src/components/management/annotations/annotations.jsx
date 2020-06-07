@@ -621,6 +621,8 @@ class Annotations extends React.Component {
 
   handleSubmitUpload = () => {
     this.handleCancel();
+    this.getAnnotationsData(this.props.pid);
+
   };
 
   handleSubmitDownload = () => {
@@ -672,6 +674,8 @@ class Annotations extends React.Component {
             onSubmit={this.handleSubmitUpload}
             className="mng-upload"
             projectID={this.state.projectID}
+            pid={this.props.pid}
+            clearTreeData={this.props.clearTreeData}
           />
         )}
         {this.state.downloadClicked && (
