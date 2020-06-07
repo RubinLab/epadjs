@@ -19,7 +19,6 @@ class SeriesCreationForm extends React.Component {
       this.setState({ subjectID: selectedPatients[0].patientID });
       this.getStudies(selectedPatients[0].patientID);
     } else if (selectedStudies.length) {
-      console.log(" here !!!");
       this.setState({
         subjectID: selectedStudies[0].patientID,
         study: selectedStudies[0].studyUID,
