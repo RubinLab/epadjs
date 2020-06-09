@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "axios": "^0.18.1",
-    "btoa-lite": "^1.0.0",
     "chance": "^1.1.6",
     "cornerstone-core": "^2.3.0",
     "cornerstone-math": "^0.1.8",
