@@ -1,29 +1,29 @@
-import React, { useState } from 'react';
-import { connect } from 'react-redux';
+import React, { useState } from "react";
+import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
-import Draggable from 'react-draggable';
-import { FaRegCheckSquare } from 'react-icons/fa';
-import { MAX_PORT } from '../../constants';
+import Draggable from "react-draggable";
+import { FaRegCheckSquare } from "react-icons/fa";
+import { MAX_PORT } from "../../constants";
 import {
   addToGrid,
   getSingleSerie,
   getWholeData,
   updatePatient,
   clearSelection,
-} from '../annotationsList/action';
+} from "../annotationsList/action";
 // connect to store
 // is seriesUID in the openSeries checkbox clicked
-const seriesTable = props => {
+const SeriesTable = (props) => {
   const { series, onClose, openSeries } = props;
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   //   const [allSelected, setAllSelected] = useState(false);
   const [selectedSeries, setAllSelectedSeries] = useState({});
-  const openSeriesUID = openSeries.map(el => el.seriesUID);
+  const openSeriesUID = openSeries.map((el) => el.seriesUID);
   const disabledSeries = [];
-  const button = document.getElementById('flexMenu-button');
+  const button = document.getElementById("flexMenu-button");
   const { x, y } = button.getBoundingClientRect();
 
-  const onAllChecked = e => {
+  const onAllChecked = (e) => {
     const { checked } = e.target;
     if (openSeries.length + series.length - disabledSeries.length > MAX_PORT) {
       setError(
@@ -38,19 +38,19 @@ const seriesTable = props => {
     }
   };
 
-  const dispatchSerieDisplay = selected => {
+  const dispatchSerieDisplay = (selected) => {
     console.log(selected);
     const { patientID, studyUID } = selected;
     props.dispatch(addToGrid(selected));
     props
       .dispatch(getSingleSerie(selected))
       .then(() => {})
-      .catch(err => console.log(err));
+      .catch((err) => console.log(err));
     if (!props.patients[selected.patientID]) {
       props.dispatch(getWholeData(selected));
     } else {
       props.dispatch(
-        updatePatient('serie', true, patientID, studyUID, selected.seriesUID)
+        updatePatient("serie", true, patientID, studyUID, selected.seriesUID)
       );
     }
   };
@@ -93,17 +93,33 @@ const seriesTable = props => {
         checked={allChecked}
       />
     </th>,
-    <th className="series-table __header --cell" key="desc-header">Series Description</th>,
-    <th className="series-table __header --cell" key="aims-header" id="seriesAim">
+    <th className="series-table __header --cell" key="desc-header">
+      Series Description
+    </th>,
+    <th
+      className="series-table __header --cell"
+      key="aims-header"
+      id="seriesAim"
+    >
       # of aims
     </th>,
-    <th className="series-table __header --cell" key="imgs-header" id="seriesImg">
+    <th
+      className="series-table __header --cell"
+      key="imgs-header"
+      id="seriesImg"
+    >
       # of img
     </th>,
-    <th className="series-table __header --cell" key="dexamesc-header" id="seriesType">
+    <th
+      className="series-table __header --cell"
+      key="dexamesc-header"
+      id="seriesType"
+    >
       Exam
     </th>,
-    <th className="series-table __header --cell" key="uid-header">Series UID</th>,
+    <th className="series-table __header --cell" key="uid-header">
+      Series UID
+    </th>,
   ];
   const rows = [];
   series.forEach((item, index) => {
@@ -114,7 +130,7 @@ const seriesTable = props => {
       examType,
       seriesUID,
     } = item;
-    const desc = seriesDescription ? seriesDescription : 'Unnamed series';
+    const desc = seriesDescription ? seriesDescription : "Unnamed series";
     let disabled = false;
     if (openSeriesUID.includes(seriesUID)) {
       disabled = true;
@@ -124,21 +140,31 @@ const seriesTable = props => {
       <tr className="series-table __tbody --row" key={seriesUID}>
         <td className="series-table __tbody --cell" key="check-cell">
           {disabled ? (
-            <FaRegCheckSquare style={{ fontSize: '1.1rem' }} />
+            <FaRegCheckSquare style={{ fontSize: "1.1rem" }} />
           ) : (
             <input
               type="checkbox"
               value="all"
-              onChange={e => onSingleSelect(e, index)}
+              onChange={(e) => onSingleSelect(e, index)}
               checked={selectedSeries[index]}
             />
           )}
         </td>
-        <td className="series-table __tbody --cell" key="desc-cell">{desc}</td>
-        <td className="series-table __tbody --cell" key="aims-cell">{numberOfAnnotations}</td>
-        <td className="series-table __tbody --cell" key="imgs-cell">{numberOfImages}</td>
-        <td className="series-table __tbody --cell" key="dexamesc-cell">{examType}</td>
-        <td className="series-table __tbody --cell" key="uid-cell">{seriesUID}</td>
+        <td className="series-table __tbody --cell" key="desc-cell">
+          {desc}
+        </td>
+        <td className="series-table __tbody --cell" key="aims-cell">
+          {numberOfAnnotations}
+        </td>
+        <td className="series-table __tbody --cell" key="imgs-cell">
+          {numberOfImages}
+        </td>
+        <td className="series-table __tbody --cell" key="dexamesc-cell">
+          {examType}
+        </td>
+        <td className="series-table __tbody --cell" key="uid-cell">
+          {seriesUID}
+        </td>
       </tr>
     );
     rows.push(row);
@@ -170,12 +196,11 @@ const seriesTable = props => {
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
-
   };
 };
 
-export default withRouter(connect(mapStateToProps)(seriesTable));
+export default withRouter(connect(mapStateToProps)(SeriesTable));
