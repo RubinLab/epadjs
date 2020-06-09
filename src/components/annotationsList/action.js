@@ -643,11 +643,10 @@ const getSingleSerieData = (serie, annotation) => {
 };
 
 export const getWholeData = (serie, study, annotation) => {
-  console.log("serie, study, annotation", serie, study, annotation);
-  return async (dispatch, getState) => {
+  return async (dispatch, serie, study, annotation, getState) => {
     dispatch(loadPatient());
-    let { projectID, patientID, patientName, studyUID } = serie;
-    // serie || study || annotation;
+    let { projectID, patientID, patientName, studyUID } =
+      serie || study || annotation;
     projectID = projectID ? projectID : "lite";
 
     if (annotation) patientID = annotation.subjectID;
