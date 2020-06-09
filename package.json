@@ -10,7 +10,6 @@
     "cornerstone-wado-image-loader": "^3.1.2",
     "date-fns": "^2.14.0",
     "dcmjs": "^0.12.4",
-    "debug": "^4.1.1",
     "dicom-parser": "^1.8.5",
     "event-source-polyfill": "^1.0.15",
     "fast-deep-equal": "^2.0.1",
