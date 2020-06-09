@@ -39,7 +39,6 @@ const SeriesTable = (props) => {
   };
 
   const dispatchSerieDisplay = (selected) => {
-    console.log(selected);
     const { patientID, studyUID } = selected;
     props.dispatch(addToGrid(selected));
     props
@@ -47,7 +46,8 @@ const SeriesTable = (props) => {
       .then(() => {})
       .catch((err) => console.log(err));
     if (!props.patients[selected.patientID]) {
-      props.dispatch(getWholeData(selected));
+      // props.dispatch(getWholeData(selected));
+      getWholeData(selected);
     } else {
       props.dispatch(
         updatePatient("serie", true, patientID, studyUID, selected.seriesUID)

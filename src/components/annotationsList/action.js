@@ -488,6 +488,7 @@ const getRequiredFields = (arr, type, selectedID) => {
 };
 
 const getStudiesData = async (dataObj, projectID, patientID, selectedID) => {
+  console.log("project id, patient id", projectID, patientID);
   try {
     const { data: studies } = await getStudies(projectID, patientID);
     //create an empty object to be "studies" property in the data
@@ -642,8 +643,15 @@ const getSingleSerieData = (serie, annotation) => {
   });
 };
 
-export const getWholeData = (serie, study, annotation) => {
-  return async (dispatch, serie, study, annotation, getState) => {
+export function getWholeData(serie, study, annotation) {
+  console.log(
+    "1 serie, study, annotation, arguments",
+    serie,
+    study,
+    annotation
+  );
+  return async (dispatch, getState) => {
+    console.log("2 serie, study, annotation", serie, study, annotation);
     dispatch(loadPatient());
     let { projectID, patientID, patientName, studyUID } =
       serie || study || annotation;
@@ -709,7 +717,7 @@ export const getWholeData = (serie, study, annotation) => {
     // return summaryData;
     dispatch(loadPatientSuccess(summaryData));
   };
-};
+}
 
 // gets one patient and all the studys->series->annotations under it
 // export const getAnnotationListData = (serie, study, annotation) => {
