@@ -16,7 +16,6 @@
     "hammerjs": "^2.0.8",
     "joi-browser": "^13.4.0",
     "jquery": "^3.5.1",
-    "js-file-download": "^0.4.12",
     "keycloak-js": "4.0.0-beta.2",
     "lodash": "^4.17.15",
     "lodash.debounce": "^4.0.8",
