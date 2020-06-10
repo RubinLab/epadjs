@@ -23,7 +23,7 @@
     "moment": "^2.26.0",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
-    "react-bootstrap": "^0.32.4",
+    "react-bootstrap": "^1.0.1",
     "react-bootstrap-sweetalert": "^4.4.1",
     "react-collapsible": "^2.8.0",
     "react-contexify": "^4.1.1",

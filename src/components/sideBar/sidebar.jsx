@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { FiZoomIn } from "react-icons/fi";
-import { Tabs, Nav, Content } from "react-tiny-tabs";
+// import { Tabs, Nav, Content } from "react-tiny-tabs";
 import WorklistSelect from "./worklistSelect";
 import { getProjects } from "../../services/projectServices";
 import Collapsible from "react-collapsible";
@@ -18,6 +18,8 @@ import "./w2.css";
 // import { throws } from "assert";
 import SidebarContent from "./sidebarContent";
 const mode = sessionStorage.getItem("mode");
+import Tabs from "react-bootstrap/Tabs";
+import Tab from "react-bootstrap/Tab";
 
 class Sidebar extends Component {
   constructor(props) {
