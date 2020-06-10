@@ -38,167 +38,168 @@ class NewPluginWindow extends React.Component {
           </Modal.Header>
           <Modal.Body className="create-user__modal--body">
             <table className="t1">
-              <tr>
-                <td>
-                  <h5 className="add-project__modal--label">Name*</h5>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="add-project__modal--input"
-                    name="name"
-                    type="text"
-                    onChange={onChange}
-                    id="form-first-element"
-                    value={pluginFormElements.name}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <h5 className="add-project__modal--label">ID*</h5>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="add-project__modal--input"
-                    name="plugin_id"
-                    type="text"
-                    value={pluginFormElements.plugin_id}
-                    onChange={onChange}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <h5 className="add-project__modal--label">Image repo*</h5>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="add-project__modal--input"
-                    name="image_repo"
-                    type="text"
-                    value={pluginFormElements.image_repo}
-                    onChange={onChange}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <h5 className="add-project__modal--label">Image tag*</h5>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="add-project__modal--input"
-                    name="image_tag"
-                    type="text"
-                    value={pluginFormElements.image_tag}
-                    onChange={onChange}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <h5 className="add-project__modal--label">Image name</h5>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="add-project__modal--input"
-                    name="image_name"
-                    type="text"
-                    value={pluginFormElements.image_name}
-                    onChange={onChange}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <h5 className="add-project__modal--label">Image id</h5>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="add-project__modal--input"
-                    name="image_id"
-                    type="text"
-                    value={pluginFormElements.image_id}
-                    onChange={onChange}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <h5 className="add-project__modal--label">Description</h5>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="add-project__modal--input"
-                    name="description"
-                    type="text"
-                    value={pluginFormElements.description}
-                    onChange={onChange}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <h5 className="add-project__modal--label">Enabled</h5>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="input_enabled"
-                    name="enabled"
-                    type="checkbox"
-                    value={pluginFormElements.enabled}
-                    onChange={onChange}
-                    defaultChecked={true}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <h5 className="add-project__modal--label">
-                    Annotation required
-                  </h5>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <select
-                    className="pluginaddqueueselect"
-                    id="processmultipleaims"
-                    name="processmultipleaims"
-                    onChange={onChange}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    value={pluginFormElements.processmultipleaims}
-                  >
-                    {this.prepareDropDownHtmlForPluginAimRequired()}
-                  </select>
-                </td>
-              </tr>
+              <tbody>
+                <tr>
+                  <td>
+                    <h5 className="add-project__modal--label">Name*</h5>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <input
+                      onMouseDown={(e) => e.stopPropagation()}
+                      className="add-project__modal--input"
+                      name="name"
+                      type="text"
+                      onChange={onChange}
+                      id="form-first-element"
+                      value={pluginFormElements.name}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <h5 className="add-project__modal--label">ID*</h5>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <input
+                      onMouseDown={(e) => e.stopPropagation()}
+                      className="add-project__modal--input"
+                      name="plugin_id"
+                      type="text"
+                      value={pluginFormElements.plugin_id}
+                      onChange={onChange}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <h5 className="add-project__modal--label">Image repo*</h5>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <input
+                      onMouseDown={(e) => e.stopPropagation()}
+                      className="add-project__modal--input"
+                      name="image_repo"
+                      type="text"
+                      value={pluginFormElements.image_repo}
+                      onChange={onChange}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <h5 className="add-project__modal--label">Image tag*</h5>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <input
+                      onMouseDown={(e) => e.stopPropagation()}
+                      className="add-project__modal--input"
+                      name="image_tag"
+                      type="text"
+                      value={pluginFormElements.image_tag}
+                      onChange={onChange}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <h5 className="add-project__modal--label">Image name</h5>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <input
+                      onMouseDown={(e) => e.stopPropagation()}
+                      className="add-project__modal--input"
+                      name="image_name"
+                      type="text"
+                      value={pluginFormElements.image_name}
+                      onChange={onChange}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <h5 className="add-project__modal--label">Image id</h5>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <input
+                      onMouseDown={(e) => e.stopPropagation()}
+                      className="add-project__modal--input"
+                      name="image_id"
+                      type="text"
+                      value={pluginFormElements.image_id}
+                      onChange={onChange}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <h5 className="add-project__modal--label">Description</h5>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <input
+                      onMouseDown={(e) => e.stopPropagation()}
+                      className="add-project__modal--input"
+                      name="description"
+                      type="text"
+                      value={pluginFormElements.description}
+                      onChange={onChange}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <h5 className="add-project__modal--label">Enabled</h5>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <input
+                      onMouseDown={(e) => e.stopPropagation()}
+                      className="input_enabled"
+                      name="enabled"
+                      type="checkbox"
+                      value={pluginFormElements.enabled}
+                      onChange={onChange}
+                      defaultChecked={true}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <h5 className="add-project__modal--label">
+                      Annotation required
+                    </h5>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <select
+                      className="pluginaddqueueselect"
+                      id="processmultipleaims"
+                      name="processmultipleaims"
+                      onChange={onChange}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      value={pluginFormElements.processmultipleaims}
+                    >
+                      {this.prepareDropDownHtmlForPluginAimRequired()}
+                    </select>
+                  </td>
+                </tr>
 
-              {/* <h5 className="add-project__modal--label">Modality</h5>
+                {/* <h5 className="add-project__modal--label">Modality</h5>
               <input
                 onMouseDown={(e) => e.stopPropagation()}
                 className="add-project__modal--input"
@@ -226,12 +227,13 @@ class NewPluginWindow extends React.Component {
                 onChange={onChange}
               /> */}
 
-              <tr>
-                <td>
-                  <h5 className="form-exp required">*Required</h5>
-                  {error && <div className="err-message">{error}</div>}
-                </td>
-              </tr>
+                <tr>
+                  <td>
+                    <h5 className="form-exp required">*Required</h5>
+                    {error && <div className="err-message">{error}</div>}
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </Modal.Body>
 

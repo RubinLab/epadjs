@@ -123,3 +123,14 @@ td {
   padding: 5px;
   color: black;
 }
+
+.topButtons {
+  text-align: left;
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+.cursorHand {
+  cursor: pointer;
+  margin-left: 10px;
+}

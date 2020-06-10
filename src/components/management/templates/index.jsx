@@ -214,7 +214,7 @@ class Templates extends React.Component {
     });
   };
 
-  handleTemplateProjectSelect = e => {
+  handleTemplateProjectSelect = (e) => {
     const { id, checked } = e.target;
     const tempProSelect = { ...this.state.tempProSelect };
     tempProSelect[id] = checked;
@@ -336,7 +336,7 @@ class Templates extends React.Component {
     ];
     const addToproject = {
       Header: "Projects",
-      Cell: original => {
+      Cell: (original) => {
         const { templateUID, templateName } = original.row.checkbox.Template[0];
         const { projects } = original.row.checkbox;
         const className =

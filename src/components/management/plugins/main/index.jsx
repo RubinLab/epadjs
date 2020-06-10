@@ -619,11 +619,11 @@ class Plugins extends React.Component {
     const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
     return (
       <div className="tools menu-display" id="template">
-        <ToolBar
+        {/* <ToolBar
           onAdd={this.handleAddPlugin}
           onDelete={this.handleDeleteAll}
           selected={checkboxSelected}
-        />
+        /> */}
         <PluginNavBar
           handleTabClic={this.handleTabClic}
           trackTabActive={this.state.trackTabActive}
@@ -636,6 +636,8 @@ class Plugins extends React.Component {
             data={this.state.plugins}
             pageSizeOptions={[10, 20, 50]}
             defaultPageSize={pageSize}
+            onAdd={this.handleAddPlugin}
+            onDelete={this.handleDeleteAll}
             handleDeleteOne={this.handleDeleteOne}
             templateDataToCell={this.templateDataToCell}
             projectDataToCell={this.projectDataToCell}

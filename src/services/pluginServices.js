@@ -32,6 +32,12 @@ export function updateStatusQueueProcess(queueid, tostatus) {
     apiUrl + "/plugins/queue/update/" + queueid + "/status/" + tostatus
   );
 }
+
+export function downloadPluginResult(queueObj) {
+  return http.post(apiUrl + "/plugins/download/queue/result", queueObj, {
+    responseType: "blob",
+  });
+}
 export function runPluginsQueue(queueObj) {
   return http.post(apiUrl + "/plugins/queue/run", queueObj);
 }

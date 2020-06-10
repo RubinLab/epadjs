@@ -20,21 +20,7 @@ class PluginNavBar extends React.Component {
               manage
             </a>
           </li>
-          <li className="pluginform nav-item">
-            <a
-              href="#"
-              className={
-                this.props.trackTabActive === true
-                  ? "pluginform nav-link active"
-                  : "pluginform nav-link"
-              }
-              onClick={() => {
-                this.props.handleTabClic("trackTabActive");
-              }}
-            >
-              track
-            </a>
-          </li>
+
           <li className="pluginform nav-item">
             <a
               href="#"
@@ -47,7 +33,22 @@ class PluginNavBar extends React.Component {
                 this.props.handleTabClic("triggerTabActive");
               }}
             >
-              trigger
+              add process
+            </a>
+          </li>
+          <li className="pluginform nav-item">
+            <a
+              href="#"
+              className={
+                this.props.trackTabActive === true
+                  ? "pluginform nav-link active"
+                  : "pluginform nav-link"
+              }
+              onClick={() => {
+                this.props.handleTabClic("trackTabActive");
+              }}
+            >
+              track process
             </a>
           </li>
         </ul>

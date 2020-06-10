@@ -1,7 +1,16 @@
-import React from "react";
+import React, { Fragment } from "react";
 import ReactTable from "react-table";
-import { FaRegTrashAlt, FaCogs, FaWindowClose, FaCheck } from "react-icons/fa";
+import {
+  FaRegTrashAlt,
+  FaCogs,
+  FaWindowClose,
+  FaCheck,
+  FaPlusCircle,
+} from "react-icons/fa";
 import PluginNavBar from "./../../main/pluginNavBar";
+
+import "./../../css/plugin.css";
+
 class ManageTab extends React.Component {
   state = {};
   defineManageTabColumns = () => {
@@ -166,13 +175,38 @@ class ManageTab extends React.Component {
   };
   render() {
     return (
-      <ReactTable
-        className="pro-table"
-        data={this.props.data}
-        columns={this.defineManageTabColumns()}
-        pageSizeOptions={[10, 20, 50]}
-        defaultPageSize={this.props.defaultPageSize}
-      />
+      <Fragment>
+        <div className="topButtons">
+          <FaPlusCircle
+            data-tip="New Plugin"
+            data-for="plus-icon"
+            onClick={this.props.onAdd}
+            className="cursorHand"
+          />
+          <FaRegTrashAlt
+            data-tip="New Plugin"
+            data-for="plus-icon"
+            onClick={this.props.onDelete}
+            className="cursorHand"
+          />
+          {/* <button
+            variant="primary"
+            className="btn btn-sm btn-outline-light"
+            onClick={this.props.onAdd}
+          >
+            add new
+          </button> */}
+        </div>
+        <div>
+          <ReactTable
+            className="pro-table"
+            data={this.props.data}
+            columns={this.defineManageTabColumns()}
+            pageSizeOptions={[10, 20, 50]}
+            defaultPageSize={this.props.defaultPageSize}
+          />
+        </div>
+      </Fragment>
     );
   }
 }

@@ -17,8 +17,9 @@ import {
   runPluginsQueue,
   stopPluginsQueue,
   deleteFromPluginQueue,
+  downloadPluginResult,
 } from "../../../../../services/pluginServices";
-
+import "./../../css/plugin.css";
 class TrackTab extends React.Component {
   state = {
     pluginQueueList: [],
@@ -62,21 +63,27 @@ class TrackTab extends React.Component {
     // }
   };
   deleteOneFromQueue = async (queuedbid) => {
-    console.log("delete one called", queuedbid);
-    const idsToDelete = [];
-    idsToDelete.push(queuedbid);
+    console.log("delete one process called", queuedbid);
+    let idsToDelete = [];
+    if (Array.isArray(queuedbid)) {
+      idsToDelete = [...queuedbid];
+    } else {
+      idsToDelete.push(queuedbid);
+    }
+    console.log("deleting process check ids ,idsToDelete", idsToDelete);
     const responseDeleteOneFromQueue = await deleteFromPluginQueue(idsToDelete);
-    console.log("delete one parameter response :", responseDeleteOneFromQueue);
+    console.log("delete one process response :", responseDeleteOneFromQueue);
     if (responseDeleteOneFromQueue.status === 200) {
       let tempPluginQueueList = this.state.pluginQueueList.filter(
         (queueObj) => {
-          return queueObj.id !== queuedbid;
+          //return queueObj.id !== queuedbid;
+          return !idsToDelete.includes(queueObj.id);
         }
       );
       this.setState({ pluginQueueList: tempPluginQueueList });
-      console.log("parameter deleted succesfully");
+      console.log("plugin process deleted succesfully");
     } else {
-      alert("an error occourred while deleting project parameter");
+      alert("an error occourred while deleting plugin process");
     }
   };
   handleRunQueue = async () => {
@@ -111,20 +118,22 @@ class TrackTab extends React.Component {
     }
   };
 
-  handleStopOne = async (original) => {
-    console.log("stop one ", original);
-    const queuelist = [];
-    if (original.status !== "running") {
-      alert("plugin process is not running");
+  handleStopOne = async (ids) => {
+    console.log("stop one ", ids);
+    let queuelist = [];
+
+    console.log("stopping plugin");
+    //queuelist.push(ids);
+    if (Array.isArray(ids)) {
+      queuelist = [...ids];
     } else {
-      console.log("stopping plugin");
-      queuelist.push(original.id);
-      const responseStopPluginsQueue = await stopPluginsQueue(queuelist);
-      if (responseStopPluginsQueue.status === 200) {
-        console.log("stopping plugin queue process");
-      } else {
-        console.log("error happened while stopping plugin queue");
-      }
+      queuelist.push(ids);
+    }
+    const responseStopPluginsQueue = await stopPluginsQueue(queuelist);
+    if (responseStopPluginsQueue.status === 200) {
+      console.log("stopping plugin queue process");
+    } else {
+      console.log("error happened while stopping plugin queue");
     }
 
     // const queuelist = [];
@@ -137,24 +146,53 @@ class TrackTab extends React.Component {
     // }
   };
   handleStopMultiple = async () => {
-    console.log("stop multiple ");
-    const tempSelectedQueueIds = this.state.selectedQueueIds;
-    const responseStopPluginsQueue = await stopPluginsQueue(
-      tempSelectedQueueIds
+    let tempselectedQueueIds = [];
+    tempselectedQueueIds = [...Object.keys(this.state.selectedQueueIds)];
+    const tempIntselectedQueueIds = tempselectedQueueIds.map((id) => {
+      return parseInt(id);
+    });
+
+    console.log("handle stop multiple :", tempIntselectedQueueIds);
+    this.handleStopOne(tempIntselectedQueueIds);
+  };
+
+  handleDeleteMultiple = () => {
+    let tempselectedQueueIds = [];
+    tempselectedQueueIds = [...Object.keys(this.state.selectedQueueIds)];
+    const tempIntselectedQueueIds = tempselectedQueueIds.map((id) => {
+      return parseInt(id);
+    });
+
+    console.log("handle delete multiple :", tempIntselectedQueueIds);
+    this.deleteOneFromQueue(tempIntselectedQueueIds);
+  };
+
+  handleDownloadresult = async (queueObject) => {
+    console.log("download results", queueObject);
+    const responsedownloadPluginResult = await downloadPluginResult(
+      queueObject
     );
-    if (responseStopPluginsQueue.status === 200) {
-      console.log("stopping plugin queue process");
+    if (responsedownloadPluginResult.status === 200) {
+      const url = window.URL.createObjectURL(
+        new Blob([responsedownloadPluginResult.data], {
+          type: "application/zip",
+        })
+      );
+      const link = document.createElement("a");
+      document.body.appendChild(link);
+      link.style = "display: none";
+      link.href = url;
+      link.download = "output.zip";
+      link.click();
+      window.URL.revokeObjectURL(url);
+      console.log(
+        "downloadPluginResult data",
+        responsedownloadPluginResult.data
+      );
+      console.log("downloadPluginResult success", responsedownloadPluginResult);
     } else {
-      console.log("error happened while stopping plugin queue");
+      console.log("error happened while downloadPluginResult");
     }
-  };
-
-  handleDeleteMultiple = (dbids) => {
-    console.log("delete multiple ");
-  };
-
-  handleDownloadresult = (dbids) => {
-    console.log("download results");
   };
 
   showRuntimeParamsForNonZero = (data) => {
@@ -255,7 +293,7 @@ class TrackTab extends React.Component {
       {
         id: "checkbox",
         accessor: "",
-        width: 50,
+        width: 30,
         minResizeWidth: 20,
         Header: (x) => {
           return (
@@ -273,7 +311,6 @@ class TrackTab extends React.Component {
           );
         },
         Cell: (data) => {
-          console.log("xx", data);
           const { id } = data.original;
           return (
             <input
@@ -315,7 +352,6 @@ class TrackTab extends React.Component {
         minResizeWidth: 20,
         Cell: (data) => {
           const aims = data.original.aim_uid;
-          console.log("data", data);
           const aimHtmlArray = [];
           //const rowdata = original.row.checkbox;
           let cnt = 0;
@@ -393,9 +429,22 @@ class TrackTab extends React.Component {
         width: 200,
         minResizeWidth: 20,
         Cell: (data) => {
-          const processStartTime = data.original.starttime;
-
-          return <div>{processStartTime.toLocaleString()}</div>;
+          const processStartTime = new Date(data.original.starttime);
+          if (processStartTime.getFullYear() === 1970) {
+            return <div>-</div>;
+          } else {
+            return (
+              <div>
+                {processStartTime.toDateString() +
+                  " - " +
+                  processStartTime.getHours() +
+                  ":" +
+                  processStartTime.getMinutes() +
+                  ":" +
+                  processStartTime.getSeconds()}
+              </div>
+            );
+          }
         },
         sortable: true,
         resizable: true,
@@ -405,11 +454,22 @@ class TrackTab extends React.Component {
         width: 200,
         minResizeWidth: 20,
         Cell: (data) => {
-          const processEndTime = data.original.endtime;
-          if (processEndTime === "1970-01-01T00:00:01.000Z") {
+          const processEndTime = new Date(data.original.endtime);
+          if (processEndTime.getFullYear() === 1970) {
             return <div>-</div>;
           } else {
-            return <div>{processEndTime}</div>;
+            return (
+              <div>
+                {" "}
+                {processEndTime.toDateString() +
+                  " - " +
+                  processEndTime.getHours() +
+                  ":" +
+                  processEndTime.getMinutes() +
+                  ":" +
+                  processEndTime.getSeconds()}
+              </div>
+            );
           }
         },
         sortable: true,
@@ -444,7 +504,7 @@ class TrackTab extends React.Component {
                         variant="primary"
                         className="btn btn-sm btn-outline-light"
                         onClick={() => {
-                          this.handleStopOne(data.original);
+                          this.handleStopOne(data.original.id);
                         }}
                       >
                         <FaStop className="menu-clickable" />
@@ -455,7 +515,9 @@ class TrackTab extends React.Component {
                         <button
                           variant="primary"
                           className="btn btn-sm btn-outline-light"
-                          onClick={this.handleDownloadresult}
+                          onClick={() => {
+                            this.handleDownloadresult(data.original);
+                          }}
                         >
                           <FaDownload className="menu-clickable" />
                         </button>
@@ -483,24 +545,24 @@ class TrackTab extends React.Component {
     return (
       <div>
         <div className="tools menu-display" id="template">
-          <div className="create-user__modal--buttons">
+          <div className="topButtons">
             <button
               variant="primary"
-              className="btn btn-sm btn-outline-light"
+              className="btn btn-sm btn-outline-light cursorHand"
               onClick={this.handleRunQueue}
             >
               <FaPlay className="menu-clickable" />
             </button>
             <button
               variant="primary"
-              className="btn btn-sm btn-outline-light"
+              className="btn btn-sm btn-outline-light cursorHand"
               onClick={this.handleStopMultiple}
             >
               <FaStop className="menu-clickable" />
             </button>
             <button
               variant="primary"
-              className="btn btn-sm btn-outline-light"
+              className="btn btn-sm btn-outline-light cursorHand"
               onClick={this.handleDeleteMultiple}
             >
               <FaTrash className="menu-clickable" />
