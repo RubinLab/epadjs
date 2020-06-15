@@ -71,6 +71,7 @@ class Plugins extends React.Component {
     selectedplugindbidfordefparams: -1, //using
     uploadClicked: false,
     hasEditClicked: false,
+    errorMessage: null, //using
     pluginFormElements: {
       //using
       name: "",
@@ -264,17 +265,52 @@ class Plugins extends React.Component {
   };
 
   handleDeleteOne = async (rowdata) => {
-    const selectedRowPluginId = rowdata.id;
+    console.log("data type to delete : ", Array.isArray(rowdata));
+    let selectedRowPluginId = [];
+    if (Array.isArray(rowdata)) {
+      selectedRowPluginId = [...rowdata];
+    } else {
+      selectedRowPluginId.push(rowdata.id);
+    }
+    //  const selectedRowPluginId = rowdata.id;
     const tempPlugins = this.state.plugins;
 
     let resultPlugins = [];
     const deletePluginResult = await deletePlugin({ selectedRowPluginId });
 
-    console.log("delete plugin result :", deletePluginResult);
-    resultPlugins = tempPlugins.filter((plugin) => {
-      return plugin.id !== selectedRowPluginId;
-    });
-    this.setState({ plugins: resultPlugins });
+    if (!Array.isArray(deletePluginResult.data)) {
+      console.log("delete plugin result :", deletePluginResult);
+      resultPlugins = tempPlugins.filter((plugin) => {
+        return !selectedRowPluginId.includes(plugin.id);
+      });
+      this.setState({ plugins: resultPlugins });
+    } else {
+      if (deletePluginResult.data.length > 0) {
+        console.log("delete plugin result :", deletePluginResult);
+        resultPlugins = tempPlugins.filter((plugin) => {
+          // return plugin.id !== selectedRowPluginId;
+          return !deletePluginResult.data.includes(plugin.id);
+        });
+        this.setState({ plugins: resultPlugins });
+        toast.info("plugin has process in queue. please delete them first", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      } else {
+        toast.info("plugin has process in queue. please delete them first", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
+    }
   };
 
   handleDeleteAll = async () => {
@@ -285,8 +321,10 @@ class Plugins extends React.Component {
       return typeof selectedCheckBoxes[plugin.id] === "undefined";
     });
     const pluginIdsToDelete = Object.values(selectedCheckBoxes);
-    const deletePluginResult = await deletePlugin({ pluginIdsToDelete });
-    this.setState({ plugins: resultPlugins });
+    console.log("multi plugin delete : ", pluginIdsToDelete);
+    this.handleDeleteOne(pluginIdsToDelete);
+    //const deletePluginResult = await deletePlugin({ pluginIdsToDelete });
+    //this.setState({ plugins: resultPlugins });
   };
 
   handleSelectAll = () => {
@@ -337,12 +375,22 @@ class Plugins extends React.Component {
     });
   };
   handleAddPluginCancel = () => {
-    this.setState({ newPluginClicked: false });
+    this.setState({ newPluginClicked: false, errorMessage: null });
   };
 
   handleAddPluginSave = async () => {
     const pluginform = this.state.pluginFormElements;
-    this.setState({ newPluginClicked: false });
+    if (
+      !pluginform.name ||
+      !pluginform.plugin_id ||
+      !pluginform.image_repo ||
+      !pluginform.image_tag
+    ) {
+      this.setState({ errorMessage: "please fill required boxes" });
+      return;
+    }
+    this.setState({ newPluginClicked: false, errorMessage: null });
+
     const responseSavePlugin = await savePlugin({
       pluginform,
     });
@@ -412,12 +460,21 @@ class Plugins extends React.Component {
   };
 
   handleEditPluginCancel = () => {
-    this.setState({ editPluginClicked: false });
+    this.setState({ editPluginClicked: false, errorMessage: null });
   };
   handleEditPluginSave = async () => {
     console.log("edit plugin save clicked");
     //this.setState({ editPluginClicked: false });
     const pluginform = this.state.pluginFormElements;
+    if (
+      !pluginform.name ||
+      !pluginform.plugin_id ||
+      !pluginform.image_repo ||
+      !pluginform.image_tag
+    ) {
+      this.setState({ errorMessage: "please fill required boxes" });
+      return;
+    }
     const responseEditPlugin = await editPlugin({
       pluginform,
     });
@@ -438,6 +495,7 @@ class Plugins extends React.Component {
       this.setState({
         plugins: tempPlugins,
         editPluginClicked: false,
+        errorMessage: null,
       });
     } else {
       alert("an arror occured after editing plugin");
@@ -701,7 +759,7 @@ class Plugins extends React.Component {
             onCancel={this.handleAddPluginCancel}
             onSave={this.handleAddPluginSave}
             onChange={this.handleAddPluginChange}
-            error={this.handleAddPluginError}
+            error={this.state.errorMessage}
             pluginFormElements={this.state.pluginFormElements}
           />
         )}
@@ -710,7 +768,7 @@ class Plugins extends React.Component {
             onCancel={this.handleEditPluginCancel}
             onSave={this.handleEditPluginSave}
             onChange={this.handleAddPluginChange}
-            error={this.handleAddPluginError}
+            error={this.state.errorMessage}
             pluginFormElements={this.state.pluginFormElements}
           />
         )}

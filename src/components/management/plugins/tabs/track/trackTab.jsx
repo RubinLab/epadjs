@@ -2,6 +2,7 @@ import React from "react";
 import ReactTable from "react-table";
 import { connect } from "react-redux";
 import { Modal } from "react-bootstrap";
+import { toast } from "react-toastify";
 import {
   FaRegEye,
   FaCommentsDollar,
@@ -74,14 +75,19 @@ class TrackTab extends React.Component {
     const responseDeleteOneFromQueue = await deleteFromPluginQueue(idsToDelete);
     console.log("delete one process response :", responseDeleteOneFromQueue);
     if (responseDeleteOneFromQueue.status === 200) {
-      let tempPluginQueueList = this.state.pluginQueueList.filter(
-        (queueObj) => {
-          //return queueObj.id !== queuedbid;
-          return !idsToDelete.includes(queueObj.id);
-        }
-      );
-      this.setState({ pluginQueueList: tempPluginQueueList });
-      console.log("plugin process deleted succesfully");
+      console.log("is deleted :", responseDeleteOneFromQueue.data.length);
+      if (responseDeleteOneFromQueue.data.length > 0) {
+        const deletedIds = [...responseDeleteOneFromQueue.data];
+        console.log("new ids to delete :", deletedIds);
+        let tempPluginQueueList = this.state.pluginQueueList.filter(
+          (queueObj) => {
+            //return queueObj.id !== queuedbid;
+            return !deletedIds.includes(queueObj.id);
+          }
+        );
+        this.setState({ pluginQueueList: tempPluginQueueList });
+        console.log("plugin process deleted succesfully");
+      }
     } else {
       alert("an error occourred while deleting plugin process");
     }

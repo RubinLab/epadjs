@@ -6,7 +6,9 @@ import { getProjects } from "../../../../../services/projectServices";
 import { FaCogs, FaExpeditedssl } from "react-icons/fa";
 import RunTimeParamWindow from "./runtimeParamWindow";
 import { addPluginsToQueue } from "../../../../../services/pluginServices";
+import { toast } from "react-toastify";
 import "../../css/plugin.css";
+
 class ProjectColumn extends React.Component {
   state = {
     selectedProjectText: "select",
@@ -111,6 +113,7 @@ class ProjectColumn extends React.Component {
       } else {
         this.setState({
           parameterDropDownSelected: false,
+          selectedProjectId: "select",
         });
       }
       this.setState({ projectDropDownUpdate: false });
@@ -457,7 +460,32 @@ class ProjectColumn extends React.Component {
     if (send === true) {
       send = false;
       const resultAddQueue = await addPluginsToQueue(tempQueueObject);
-      if (resultAddQueue.status !== 200) {
+
+      if (resultAddQueue.status === 200) {
+        toast.info("plugin process saved", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        this.setState({
+          selectedProjectText: "select",
+          selectedProjectName: "",
+          selectedProjectId: "select",
+
+          selectedPluinText: "select",
+          selectedPluginDbId: -1,
+          projectDropDownUpdate: true,
+          projectDropDownSelected: false,
+          pluginDropDownSelected: false,
+          selectedProjectId: "select",
+          selectedProjectDbId: -1,
+          selectedProjectName: "",
+          parameterDropDownSelected: false,
+          selectedParameterTypeId: "select",
+        });
       }
     }
     ////////////
@@ -652,12 +680,6 @@ class ProjectColumn extends React.Component {
                       onClick={this.handleAddSelectedAnnotations}
                     >
                       add selected
-                    </button>
-                    <button
-                      variant="secondary"
-                      className="btn btn-sm btn-outline-light"
-                    >
-                      Clear
                     </button>
                   </div>
                 )}
