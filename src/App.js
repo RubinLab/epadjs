@@ -301,6 +301,7 @@ class App extends Component {
     }
   }
 
+
   completeAutorization = apiUrl => {
     let getAuthUser = null;
 

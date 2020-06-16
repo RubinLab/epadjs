@@ -5,6 +5,10 @@ import { FiZoomIn } from "react-icons/fi";
 import { Tabs, Nav, Content } from "react-tiny-tabs";
 import WorklistSelect from "./worklistSelect";
 import { getProjects } from "../../services/projectServices";
+import {
+  getTemplatesUniversal,
+  getAllTemplates,
+} from "../../services/templateServices";
 import Collapsible from "react-collapsible";
 import { FaArrowAltCircleLeft } from "react-icons/fa";
 import {
@@ -44,18 +48,13 @@ class Sidebar extends Component {
   }
 
   componentDidMount = async () => {
-    //get the porjects
-    // if (mode !== "lite") {
     this.getProjectsData();
-    // }
     this.getWorklistandProgressData();
   };
 
   getProjectsData = async () => {
     try {
       let { data: projects } = await getProjects();
-      console.log("Projects", projects);
-      console.log("Props", this.props);
       if (projects.length > 0) {
         // get the project all and unassigned
         // push them to the end of the projects
@@ -80,6 +79,8 @@ class Sidebar extends Component {
         this.setState({ projects, pid, selected: pid });
         this.props.history.push(`/search/${pid}`);
         this.props.getPidUpdate(pid);
+        const prTempMap = await this.getTemplatesProjectMap();
+        const templates = await this.getTemplatesJSON();
         const projectMap = {};
         for (let project of projects) {
           let { name, defaultTemplate } = project;
@@ -87,12 +88,47 @@ class Sidebar extends Component {
           projectMap[project.id] = {
             projectName: name,
             defaultTemplate,
+            templates: prTempMap[project.id] || [],
           };
         }
-        this.props.dispatch(getProjectMap(projectMap));
+        this.props.dispatch(getProjectMap(projectMap, templates));
       }
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  getTemplatesJSON = async () => {
+    const tempMap = {};
+    try {
+      const { data: templatesJSONs } = await getAllTemplates();
+      for (let temp of templatesJSONs) {
+        const { codeValue } = temp.TemplateContainer.Template[0];
+        tempMap[codeValue] = temp;
+      }
+      return tempMap;
+    } catch (err) {
+      console.log("getting template JSONs", err);
+      return tempMap;
+    }
+  };
+
+  getTemplatesProjectMap = async () => {
+    const prTempMap = {};
+    try {
+      const { data: templates } = await getTemplatesUniversal();
+      for (let template of templates) {
+        const tempCode = template.Template[0].templateCodeValue;
+        for (let project of template.projects) {
+          prTempMap[project]
+            ? prTempMap[project].push(tempCode)
+            : (prTempMap[project] = [tempCode]);
+        }
+      }
+      return prTempMap;
+    } catch (err) {
+      console.log("getting templates for projects", err);
+      return prTempMap;
     }
   };
 
@@ -108,12 +144,12 @@ class Sidebar extends Component {
   getProgressTotal = (list, attribute) => {
     const promises = [];
     const result = [...list];
-    list.forEach((wl) => {
+    list.forEach(wl => {
       promises.push(getWorklistProgress(wl.workListID));
     });
     Promise.all(promises)
-      .then((data) => {
-        const progressArr = data.map((el) => {
+      .then(data => {
+        const progressArr = data.map(el => {
           return el.data;
         });
         let total;
@@ -126,10 +162,10 @@ class Sidebar extends Component {
         });
         this.setState({ [attribute]: result });
       })
-      .catch((err) => console.log(err));
+      .catch(err => console.log(err));
   };
 
-  componentDidUpdate = (prevProps) => {
+  componentDidUpdate = prevProps => {
     let { pathname } = this.props.location;
     const { pid } = this.props;
     if (prevProps.progressUpdated !== this.props.progressUpdated) {
@@ -235,7 +271,7 @@ class Sidebar extends Component {
       pathname = pathname.split("/").pop();
       // const pid = pathname.pop();
       if (mode === "thick") {
-        const projectsList = projects.map((project) => {
+        const projectsList = projects.map(project => {
           const matchProject =
             selected === project.id || pathname === project.id;
           const className = matchProject
@@ -269,7 +305,7 @@ class Sidebar extends Component {
 
   renderWorklists = () => {
     const { type, selected } = this.state;
-    const worklists = this.state.worklistsAssigned.map((worklist) => {
+    const worklists = this.state.worklistsAssigned.map(worklist => {
       const className =
         worklist.workListID === selected && type === "worklist"
           ? "sidebar-row __selected"
@@ -396,7 +432,7 @@ class Sidebar extends Component {
   };
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   const { activePort } = state.annotationsListReducer;
   return {
     activePort,
