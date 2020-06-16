@@ -164,6 +164,10 @@
   justify-content: space-between;
 }
 
+.--selected {
+  border: 4px ridge #f5f757 !important;
+}
+
 .annotation__name--text {
   padding: 0.5rem;
   display: inline-flex;

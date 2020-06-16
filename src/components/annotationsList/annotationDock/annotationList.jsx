@@ -190,6 +190,7 @@ class AnnotationsList extends React.Component {
           jumpToAim={this.handleJumToAim}
           serie={seriesUID}
           label={calculations[aim.id]}
+          openSeriesAimID={openSeries[activePort].aimID}
         />
       );
     });
