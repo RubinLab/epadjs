@@ -197,7 +197,7 @@ class AnnotationsList extends React.Component {
       <React.Fragment>
         <div className="annotationList-container">
           <div className="label-toggle">
-            <div className="label-toggle__text">Show Labels</div>
+            <div className="label-toggle__text">Show All Labels</div>
             <Switch
               onChange={this.handleToggleAllLabels}
               checked={this.state.labelDisplayAll}
@@ -214,7 +214,7 @@ class AnnotationsList extends React.Component {
             />
           </div>
           <div className="label-toggle">
-            <div className="label-toggle__text">Show Annotations</div>
+            <div className="label-toggle__text">Show All Annotations</div>
             <Switch
               onChange={this.handleToggleAllAnnotations}
               checked={this.state.annsDisplayAll}
