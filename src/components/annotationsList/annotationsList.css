@@ -388,3 +388,26 @@ svg {
   cursor: pointer;
   width: 1.5rem;
 }
+
+.annotationsLink {
+  /* margin: 0.5rem 1.5rem; */
+  padding: 0.5rem 1.5rem;
+  height: 2.6rem;
+  font-size: 1rem;
+  width: 95%;
+  margin: 0.8rem auto;
+  background: #272b30;
+  width: 80%;
+  border-radius: 6px;
+  text-align: center;
+  /* padding: 0.2rem; */
+}
+
+.annotationsLink:hover {
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-align: center;
+  border: 1px solid #861737;
+}

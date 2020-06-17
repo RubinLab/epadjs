@@ -59,14 +59,6 @@ const annotation = props => {
         </div>
         <div
           className="annotation-icon"
-          onClick={props.jumpToAim}
-          data-id={props.id}
-          data-serie={props.serie}
-        >
-          <FaReply className="clickable-icon" />
-        </div>
-        <div
-          className="annotation-icon"
           onClick={props.onClick}
           data-id={props.id}
           id={props.id}
