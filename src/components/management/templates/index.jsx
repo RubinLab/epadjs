@@ -455,6 +455,7 @@ class Templates extends React.Component {
           <UploadModal
             onCancel={this.handleCancel}
             onSubmit={this.handleSubmitUpload}
+            pid={this.props.pid}
             className="mng-upload"
           />
         )}

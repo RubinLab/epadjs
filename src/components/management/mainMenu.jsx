@@ -41,16 +41,16 @@ class MainMenu extends React.Component {
     window.removeEventListener("resize", this.updateDimensions);
   };
 
-  handleSelection = (e) => {
+  handleSelection = e => {
     const selection = e.target.textContent;
-    this.setState((state) => {
+    this.setState(state => {
       return { isModalOpen: !state.isModalOpen };
     });
     this.setState({ selection });
   };
 
-  handleCloseModal = (e) => {
-    this.setState((state) => {
+  handleCloseModal = e => {
+    this.setState(state => {
       return { isModalOpen: !state.isModalOpen };
     });
     this.props.closeMenu();
@@ -95,6 +95,7 @@ class MainMenu extends React.Component {
           <Templates
             selection={this.state.selection}
             onClose={this.handleCloseModal}
+            pid={this.props.pid}
           />
         );
       case "Tools":
@@ -118,7 +119,6 @@ class MainMenu extends React.Component {
 
   render() {
     const style = { left: this.state.coordinate };
-
     return (
       <div>
         {!this.state.isModalOpen && (
@@ -129,7 +129,10 @@ class MainMenu extends React.Component {
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Annotations
             </div>
-            <div className="mng-menu__option" onClick={this.handleSelection}>
+            <div
+              className="mng-menu__option"
+              onClick={this.handleSelection}
+            >
               Templates
             </div>
             <div className="mng-menu__option" onClick={this.handleSelection}>
