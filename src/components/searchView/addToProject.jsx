@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { connect } from "react-redux";
 
-const projectAdd = ({ projectMap, onSave, onProjectClose }) => {
+const ProjectAdd = ({ projectMap, onSave, onProjectClose }) => {
   const projectNames = Object.values(projectMap);
   const projectIDs = Object.keys(projectMap);
   let wrapperRef = useRef(null);
@@ -10,7 +10,7 @@ const projectAdd = ({ projectMap, onSave, onProjectClose }) => {
     "searchView-toolbar__icon project-icon"
   );
 
-  const handleClickOutside = event => {
+  const handleClickOutside = (event) => {
     const { id } = event.target;
 
     if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -55,11 +55,11 @@ const projectAdd = ({ projectMap, onSave, onProjectClose }) => {
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     patients: state.annotationsListReducer.selectedPatients,
     studies: state.annotationsListReducer.selectedStudies,
     projectMap: state.annotationsListReducer.projectMap,
   };
 };
-export default connect(mapStateToProps)(projectAdd);
+export default connect(mapStateToProps)(ProjectAdd);

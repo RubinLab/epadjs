@@ -1,14 +1,14 @@
-import React from 'react';
-import ReactTable from 'react-table';
-import treeTableHOC from 'react-table/lib/hoc/treeTable';
-import _ from 'lodash';
-import { Button } from 'react-bootstrap';
-import { getSeries } from '../../services/seriesServices';
-import { getStudies } from '../../services/projectServices';
-import DropDownMenu from './dropdownMenu';
-import StudyTable from './studyTable';
-import SeriesTable from './seriesTable';
-import './flexView.css';
+import React from "react";
+import ReactTable from "react-table";
+import treeTableHOC from "react-table/lib/hoc/treeTable";
+import _ from "lodash";
+import { Button } from "react-bootstrap";
+import { getSeries } from "../../services/seriesServices";
+import { getStudies } from "../../services/projectServices";
+import DropDownMenu from "./dropdownMenu";
+import StudyTable from "./StudyTable";
+import SeriesTable from "./SeriesTable";
+import "./flexView.css";
 
 const TreeTable = treeTableHOC(ReactTable);
 
@@ -23,48 +23,48 @@ class FlexView extends React.Component {
   };
 
   studyColumns = [
-    'Exam',
-    'Patient Name',
-    'PatientID',
-    'Sex',
-    'Description',
-    'Insert Date',
-    'Study Date',
-    'Study Time',
-    'Study UID',
-    '# of Aims',
-    '# Of Img',
-    '# Of Series',
-    'created Time',
-    'birth date',
-    'First Series Date Acquired',
-    'First Series UID',
-    'Physician Name',
-    'Project ID',
-    'Referring Physician Name',
+    "Exam",
+    "Patient Name",
+    "PatientID",
+    "Sex",
+    "Description",
+    "Insert Date",
+    "Study Date",
+    "Study Time",
+    "Study UID",
+    "# of Aims",
+    "# Of Img",
+    "# Of Series",
+    "created Time",
+    "birth date",
+    "First Series Date Acquired",
+    "First Series UID",
+    "Physician Name",
+    "Project ID",
+    "Referring Physician Name",
     `Study Accession Number`,
-    'studyID',
+    "studyID",
   ];
 
   mountEvents = () => {
     let headers = Array.prototype.slice.call(
-      document.querySelectorAll('.rt-th.rt-resizable-header')
+      document.querySelectorAll(".rt-th.rt-resizable-header")
     );
     headers.forEach((header, i) => {
-      header.setAttribute('draggable', true);
-      header.ondrag = e => e.stopPropagation();
-      header.ondragend = e => e.stopPropagation();
-      header.ondragover = e => e.preventDefault();
+      header.setAttribute("draggable", true);
+      header.ondrag = (e) => e.stopPropagation();
+      header.ondragend = (e) => e.stopPropagation();
+      header.ondragover = (e) => e.preventDefault();
 
-      header.ondragstart = e => {
+      header.ondragstart = (e) => {
         e.stopPropagation();
         this.draggedCol = i;
         // Firefox needs this to get draggin workin
         // See https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations
-        e.dataTransfer.setData('text', 'fix firefox dragevents');
+        e.dataTransfer.setData("text", "fix firefox dragevents");
       };
 
-      header.ondrop = async e => {
+      header.ondrop = async (e) => {
         e.preventDefault();
         // Remove item from array and stick it in a new position.
 
@@ -102,7 +102,7 @@ class FlexView extends React.Component {
     }
   };
 
-  componentDidUpdate = async prevProps => {
+  componentDidUpdate = async (prevProps) => {
     try {
       if (prevProps.match.params.pid !== this.props.match.params.pid) {
         await this.getData(this.props.match.params.pid);
@@ -112,7 +112,7 @@ class FlexView extends React.Component {
       console.log(err);
     }
   };
-  getData = async pid => {
+  getData = async (pid) => {
     const { data: studies } = await getStudies(pid);
     this.setState({ data: studies });
   };
@@ -128,15 +128,15 @@ class FlexView extends React.Component {
     this.setState({ columns: tableColumns });
   };
 
-  selectDropdown = e => {
+  selectDropdown = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    this.setState(state => ({ dropdownSelected: !state.dropdownSelected }));
+    this.setState((state) => ({ dropdownSelected: !state.dropdownSelected }));
   };
 
-  toggleColumn = async e => {
+  toggleColumn = async (e) => {
     const index = this.state.order.findIndex(
-      i => i === parseInt(e.target.value)
+      (i) => i === parseInt(e.target.value)
     );
     let newOrder;
     if (index >= 0) {
