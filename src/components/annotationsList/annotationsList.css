@@ -389,25 +389,66 @@ svg {
   width: 1.5rem;
 }
 
-.annotationsLink {
-  /* margin: 0.5rem 1.5rem; */
-  padding: 0.5rem 1.5rem;
-  height: 2.6rem;
-  font-size: 1rem;
-  width: 95%;
-  margin: 0.8rem auto;
-  background: #272b30;
-  width: 80%;
-  border-radius: 6px;
-  text-align: center;
-  /* padding: 0.2rem; */
+.annsLink-table {
+  width: fit-content;
+  margin: 10px auto;
+  table-layout: auto;
+  width: 85%;
+  /* table-layout: fixed; */
 }
 
-.annotationsLink:hover {
+.annsLink-table,
+.annsLink-table.__tbody.--cell,
+.annsLink-table.__header.--cell {
+  border-collapse: collapse;
+}
+
+.annsLink-table.__header.--cell {
+  font-size: 1.2rem;
+}
+
+.annsLink-table.__tbody.--cell,
+.annsLink-table.__header.--cell,
+.annsLink-table.__tbody.--cell2 {
+  padding: 5px;
+  height: 2.8rem;
+}
+
+.annsLink-table.__tbody.--cell2 {
+  text-align: center;
+}
+
+.annsLink-table.__tbody.--cell {
+  border-right: 1px solid #272b30;
+}
+
+#annsHeader {
+  text-align: left;
+  padding-left: 1rem;
+  border-right: 1px solid #272b30;
+}
+
+.annsLink-table.__tbody.--cell {
+  text-align: left;
+  padding-left: 1rem;
+}
+
+.annsLink-table.__header:first-child {
+  text-align: center;
+}
+
+.annsLink-table.__tbody.--cell:hover {
   color: white;
   font-size: 1.1rem;
   cursor: pointer;
   text-decoration: underline;
-  text-align: center;
-  border: 1px solid #861737;
+}
+
+.annsLink-table.__tbody.--row,
+.annsLink-table.__header{
+  border-bottom: 1px solid #272b30;
+}
+
+.annsLink-table.__tbody.--row:last-of-type {
+  border-bottom: none;
 }
