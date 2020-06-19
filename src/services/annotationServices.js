@@ -67,10 +67,12 @@ export function getAnnotations2() {
   return http.get(apiUrl + "/projects/lite/aims");
 }
 
-export function downloadAnnotations(optionObj, aimIDlist, selection) {
+export function downloadAnnotations(optionObj, aimIDlist, projectID) {
+  console.log(optionObj, aimIDlist, projectID);
+  projectID = projectID || "lite";
   return http.post(
     apiUrl +
-      "/projects/lite/aims/download?summary=" +
+      "/projects/" + projectID + "/aims/download?summary=" +
       optionObj.summary +
       "&aim=" +
       optionObj.aim +

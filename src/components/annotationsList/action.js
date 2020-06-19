@@ -48,8 +48,8 @@ import {
 } from "../../services/annotationServices";
 import { getImageIdAnnotations } from "../aimEditor/aimHelper.js";
 
-export const getProjectMap = (projectMap) => {
-  return { type: GET_PROJECT_MAP, projectMap };
+export const getProjectMap = (projectMap, templates) => {
+  return { type: GET_PROJECT_MAP, projectMap, templates };
 };
 
 export const clearGrid = (item) => {
