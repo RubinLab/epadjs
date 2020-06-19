@@ -96,6 +96,7 @@ export function getImageArrayBuffer(path) {
   return http.get(url, { responseType: "arraybuffer" });
 }
 export function downloadSeries(projectID, body) {
+  projectID = projectID || "lite";
   const url =
     apiUrl +
     "/projects/" +
@@ -152,6 +153,7 @@ export function saveSeries(
 
 export function uploadFileToSeries(formData, config, series) {
   let { projectID, subjectID, studyUID, seriesUID } = series;
+  projectID = projectID || "lite";
   subjectID = subjectID ? subjectID : series.patientID;
   const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/series/${seriesUID}/files`;
   return http.post(url, formData, config);

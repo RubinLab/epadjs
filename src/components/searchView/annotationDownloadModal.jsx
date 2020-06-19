@@ -17,14 +17,14 @@ class AnnnotationDownloadModal extends React.Component {
 
   onDownload = () => {
     const optionObj = this.state;
-
+    const { pid } = this.props;
     const annsToDownload =
       Object.keys(this.props.selectedAnnotations).length > 0
         ? this.props.selectedAnnotations
         : this.props.selected;
     const aimList = Object.keys(annsToDownload);
     this.props.updateStatus();
-    downloadAnnotations(optionObj, aimList)
+    downloadAnnotations(optionObj, aimList, pid)
       .then(result => {
         let blob = new Blob([result.data], { type: "application/zip" });
         this.triggerBrowserDownload(blob, "Annotations");

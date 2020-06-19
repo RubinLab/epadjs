@@ -72,7 +72,6 @@ class Annotations extends React.Component {
           continue;
         }
       }
-
       const { pid } = this.props;
       if (projectList.length > 0) {
         const projectID = pid || projectList[0].id;
@@ -82,6 +81,8 @@ class Annotations extends React.Component {
         this.setState({ projectList });
         this.getAnnotationsData();
       }
+    } else {
+      this.getAnnotationsData();
     }
   };
 

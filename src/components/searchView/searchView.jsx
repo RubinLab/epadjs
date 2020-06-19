@@ -972,6 +972,7 @@ class SearchView extends Component {
             onCancel={this.handleDownloadCancel}
             updateStatus={this.updateDownloadStatus}
             onSubmit={this.handleSubmitDownload}
+            pid={this.props.pid}
           />
         )}
 

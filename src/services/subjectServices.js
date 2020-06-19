@@ -10,11 +10,11 @@ export function getSubjects(projectId) {
 }
 
 export function downloadSubjects(projectID, body) {
-  console.log(body);
+  const pid = projectID || "lite";
   const url =
     apiUrl +
     "/projects/" +
-    projectID +
+    pid +
     "/subjects/download" +
     "?format=stream&includeAims=true";
   return http.post(url, body, { responseType: "blob" });
@@ -38,6 +38,7 @@ export function saveSubject(projectID, subjectAbr, subjectName) {
 export function uploadFileToSubject(formData, config, subject) {
   let { subjectID, projectID } = subject;
   subjectID = subjectID ? subjectID : subject.patientID;
+  projectID = projectID || "lite";
   const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/files`;
   return http.post(url, formData, config);
 }
