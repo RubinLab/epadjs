@@ -17,9 +17,10 @@ import { getProjectMap, clearSelection } from "../annotationsList/action";
 import "./w2.css";
 // import { throws } from "assert";
 import SidebarContent from "./sidebarContent";
-const mode = sessionStorage.getItem("mode");
 import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
+
+const mode = sessionStorage.getItem("mode");
 
 class Sidebar extends Component {
   constructor(props) {
@@ -337,23 +338,39 @@ class Sidebar extends Component {
   renderContent = () => {
     if (mode === "thick") {
       return (
-        <Tabs className="theme-default" settings={{ index: this.state.index }}>
-          <Nav>{this.renderNav()}</Nav>
-          <Content>
-            <div className="testtable">{this.renderProjects()}</div>
+        <Tabs
+          id="controlled-tab-example"
+          activeKey={this.state.activeTab}
+          onSelect={(activeTab) => this.setState({ activeTab })}
+        >
+          <Tab eventKey="projects" title="Pro">
+            {this.renderProjects()}
+          </Tab>
+          <Tab eventKey="worklists" title="Wo">
             <div>{this.renderWorklists()}</div>
-            <div>{this.renderProgress()}</div>
-          </Content>
+          </Tab>
+
+          <Tab eventKey="Progres" title="Prog">
+            {this.renderProgress()}
+          </Tab>
         </Tabs>
+        // <Tabs className="theme-default" settings={{ index: this.state.index }}>
+        //   <Nav>{this.renderNav()}</Nav>
+        //   <Content>
+        //     <div className="testtable">{this.renderProjects()}</div>
+        //     <div>{this.renderWorklists()}</div>
+        //     <div>{this.renderProgress()}</div>
+        //   </Content>
+        // </Tabs>
       );
     } else {
       return (
         <Tabs className="theme-default" settings={{ index: this.state.index }}>
-          <Nav>{this.renderNav()}</Nav>
-          <Content>
-            <div>{this.renderWorklists()}</div>
-            <div>{this.renderProgress()}</div>
-          </Content>
+          {/* <Nav>{this.renderNav()}</Nav> */}
+          {/* <Content> */}
+          <div>{this.renderWorklists()}</div>
+          <div>{this.renderProgress()}</div>
+          {/* </Content> */}
         </Tabs>
       );
     }
