@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { FiZoomIn } from "react-icons/fi";
-import { Tabs, Nav, Content } from "react-tiny-tabs";
+// import { Tabs, Nav, Content } from "react-tiny-tabs";
 import WorklistSelect from "./worklistSelect";
 import { getProjects } from "../../services/projectServices";
 import {
@@ -21,6 +21,9 @@ import { getProjectMap, clearSelection } from "../annotationsList/action";
 import "./w2.css";
 // import { throws } from "assert";
 import SidebarContent from "./sidebarContent";
+import Tabs from "react-bootstrap/Tabs";
+import Tab from "react-bootstrap/Tab";
+
 const mode = sessionStorage.getItem("mode");
 
 class Sidebar extends Component {
@@ -94,7 +97,7 @@ class Sidebar extends Component {
         this.props.dispatch(getProjectMap(projectMap, templates));
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -162,7 +165,7 @@ class Sidebar extends Component {
         });
         this.setState({ [attribute]: result });
       })
-      .catch(err => console.log(err));
+      .catch((err) => console.error(err));
   };
 
   componentDidUpdate = prevProps => {
@@ -299,7 +302,7 @@ class Sidebar extends Component {
         );
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -369,28 +372,55 @@ class Sidebar extends Component {
   };
 
   renderContent = () => {
-    if (mode === "thick") {
-      return (
-        <Tabs className="theme-default" settings={{ index: this.state.index }}>
-          <Nav>{this.renderNav()}</Nav>
-          <Content>
-            <div className="testtable">{this.renderProjects()}</div>
+    // if (mode === "thick") {
+    return (
+      <Tabs
+        id="controlled-tab-example"
+        activeKey={this.state.activeTab}
+        onSelect={(activeTab) => this.setState({ activeTab })}
+      >
+        <Tab eventKey="projects" title="Projects">
+          <div></div>
+          {this.renderProjects()}
+        </Tab>
+        {mode === "thick" ? (
+          <Tab eventKey="worklists" title="Worklists">
             <div>{this.renderWorklists()}</div>
-            <div>{this.renderProgress()}</div>
-          </Content>
-        </Tabs>
-      );
-    } else {
-      return (
-        <Tabs className="theme-default" settings={{ index: this.state.index }}>
-          <Nav>{this.renderNav()}</Nav>
-          <Content>
-            <div>{this.renderWorklists()}</div>
-            <div>{this.renderProgress()}</div>
-          </Content>
-        </Tabs>
-      );
-    }
+          </Tab>
+        ) : (
+          ""
+        )}
+
+        <Tab eventKey="Progres" title="Progress">
+          {this.renderProgress()}
+        </Tab>
+      </Tabs>
+      // <Tabs className="theme-default" settings={{ index: this.state.index }}>
+      //   <Nav>{this.renderNav()}</Nav>
+      //   <Content>
+      //     <div className="testtable">{this.renderProjects()}</div>
+      //     <div>{this.renderWorklists()}</div>
+      //     <div>{this.renderProgress()}</div>
+      //   </Content>
+      // </Tabs>
+    );
+    // } else {
+    //   return (
+    //     <Tabs
+    //       id="controlled-tab-example"
+    //       activeKey={this.state.activeTab}
+    //       onSelect={(activeTab) => this.setState({ activeTab })}
+    //     >
+    //       <Tab eventKey="worklists" title="Worklists">
+    //         <div>{this.renderWorklists()}</div>
+    //       </Tab>
+
+    //       <Tab eventKey="Progres" title="Prog">
+    //         {this.renderProgress()}
+    //       </Tab>
+    //     </Tabs>
+    //   );
+    // }
   };
   render = () => {
     const { progressView } = this.state;

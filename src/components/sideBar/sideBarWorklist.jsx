@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import { FaRegTrashAlt, FaRegEye } from "react-icons/fa";
 import {
   getStudiesOfWorklist,
-  deleteStudyFromWorklist
+  deleteStudyFromWorklist,
 } from "../../services/worklistServices";
 import { getSeries } from "../../services/seriesServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
@@ -18,14 +18,14 @@ import {
   alertViewPortFull,
   updatePatient,
   clearSelection,
-  changeActivePort
+  changeActivePort,
 } from "../annotationsList/action";
 const mode = sessionStorage.getItem("mode");
 
 const messages = {
   deleteSingle: "Remove study from the worklist? This cannot be undone.",
   deleteSelected:
-    "Delete selected studies from the worklist? This cannot be undone."
+    "Delete selected studies from the worklist? This cannot be undone.",
 };
 
 class WorkList extends React.Component {
@@ -40,14 +40,14 @@ class WorkList extends React.Component {
     showSeries: false,
     series: [],
     selectedSeries: {},
-    error: null
+    error: null,
   };
 
   componentDidMount = async () => {
     this.getWorkListData();
   };
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     if (prevProps.match.params.wid !== this.props.match.params.wid) {
       this.getWorkListData();
     }
@@ -69,7 +69,7 @@ class WorkList extends React.Component {
     this.setState({
       hasAddClicked: false,
       error: "",
-      deleteSingleClicked: false
+      deleteSingleClicked: false,
     });
   };
 
@@ -78,7 +78,7 @@ class WorkList extends React.Component {
       worklist,
       projectID,
       subjectID,
-      studyUID
+      studyUID,
     } = this.state.singleDeleteData;
     const body = [{ projectID, subjectID, studyUID }];
     deleteStudyFromWorklist(worklist, body)
@@ -86,12 +86,12 @@ class WorkList extends React.Component {
         this.setState({ deleteSingleClicked: false, singleDeleteData: {} });
         this.getWorkListData();
       })
-      .catch(err => {
+      .catch((err) => {
         this.setState({ errorMessage: err.response.data.message });
       });
   };
 
-  clearCarets = string => {
+  clearCarets = (string) => {
     if (string) {
       for (let i = 0; i < string.length; i++) {
         string = string.replace("^", " ");
@@ -103,7 +103,7 @@ class WorkList extends React.Component {
   handleSingleDelete = (worklist, projectID, subjectID, studyUID) => {
     this.setState({
       deleteSingleClicked: true,
-      singleDeleteData: { worklist, projectID, subjectID, studyUID }
+      singleDeleteData: { worklist, projectID, subjectID, studyUID },
     });
   };
 
@@ -118,13 +118,13 @@ class WorkList extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0
+          selectAll: 0,
         });
       }
     } else {
       newSelected[study] = { worklist, project, subject, study };
       await this.setState({
-        selectAll: 2
+        selectAll: 2,
       });
     }
     this.setState({ selected: newSelected });
@@ -133,37 +133,37 @@ class WorkList extends React.Component {
   toggleSelectAll() {
     let newSelected = {};
     if (this.state.selectAll === 0) {
-      this.state.worklists.forEach(worklist => {
+      this.state.worklists.forEach((worklist) => {
         const { workListID, projectID, subjectID, studyUID } = worklist;
         newSelected[worklist.studyUID] = {
           workListID,
           projectID,
           subjectID,
-          studyUID
+          studyUID,
         };
       });
     }
 
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0
+      selectAll: this.state.selectAll === 0 ? 1 : 0,
     });
   }
 
-  handleOpenClick = async study => {
+  handleOpenClick = async (study) => {
     const { projectID, subjectID, studyUID } = study;
     const { data: series } = await getSeries(projectID, subjectID, studyUID);
-    this.setState(state => ({
+    this.setState((state) => ({
       showSeries: !state.showSeries,
-      series
+      series,
     }));
   };
 
   handleCancelOpenSeries = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       showSeries: !state.showSeries,
       series: [],
-      error: null
+      error: null,
     }));
   };
 
@@ -174,26 +174,26 @@ class WorkList extends React.Component {
         Header: "Open",
         width: 50,
         resizable: true,
-        Cell: row => {
+        Cell: (row) => {
           return (
             <div onClick={() => this.handleOpenClick(row.original)}>
               <FaRegEye className="menu-clickable" />
             </div>
           );
-        }
+        },
       },
       {
         id: "desc",
         Header: "Study Description",
         sortable: true,
         resizable: true,
-        Cell: original => {
+        Cell: (original) => {
           let studyDesc = this.clearCarets(
             original.row._original.studyDescription
           );
           studyDesc = studyDesc ? studyDesc : "Unnamed Study";
           return <div>{studyDesc}</div>;
-        }
+        },
       },
 
       {
@@ -202,13 +202,13 @@ class WorkList extends React.Component {
         sortable: true,
         resizable: true,
 
-        Cell: original => {
+        Cell: (original) => {
           let subjectName = this.clearCarets(
             original.row._original.subjectName
           );
           subjectName = subjectName ? subjectName : "Unnamed Subject";
           return <div>{subjectName}</div>;
-        }
+        },
       },
       {
         id: "pr_name",
@@ -217,34 +217,34 @@ class WorkList extends React.Component {
         sortable: true,
         resizable: true,
         show: mode === "thick",
-        Cell: original => {
+        Cell: (original) => {
           let projectName = this.clearCarets(
             original.row._original.projectName
           );
           projectName = projectName ? projectName : "Unnamed Subject";
           return <div>{original.row._original.projectName}</div>;
-        }
+        },
       },
       {
         id: "due",
         Header: "Due Date",
         sortable: true,
         resizable: true,
-        accessor: "worklistDuedate"
+        accessor: "worklistDuedate",
       },
       {
         id: "studyUID",
         Header: "StudyUID",
         sortable: true,
         resizable: true,
-        accessor: "studyUID"
+        accessor: "studyUID",
       },
       {
         id: "delete",
         Header: "",
         width: 45,
         resizable: true,
-        Cell: original => (
+        Cell: (original) => (
           <div
             onClick={() =>
               this.handleSingleDelete(
@@ -257,12 +257,12 @@ class WorkList extends React.Component {
           >
             <FaRegTrashAlt className="menu-clickable" />
           </div>
-        )
-      }
+        ),
+      },
     ];
   };
 
-  selectSeries = series => {
+  selectSeries = (series) => {
     const { selectedSeries } = this.state;
     selectedSeries[series.seriesUID]
       ? delete selectedSeries[series.seriesUID]
@@ -270,7 +270,7 @@ class WorkList extends React.Component {
     this.setState({ selectedSeries });
   };
 
-  checkIfSerieOpen = selectedSerie => {
+  checkIfSerieOpen = (selectedSerie) => {
     let isOpen = false;
     let index;
     this.props.openSeries.forEach((serie, i) => {
@@ -310,17 +310,18 @@ class WorkList extends React.Component {
             // alert user about the num of open series a the moment and told only max_port is allowed
             const openPorts = this.props.openSeries.length;
             this.setState({
-              error: `Already ${openPorts} viewers open. You can open ${MAX_PORT} at a time`
+              error: `Already ${openPorts} viewers open. You can open ${MAX_PORT} at a time`,
             });
           } else {
             //else get data for each serie for display
-            selectedSeries.forEach(serie => {
+            selectedSeries.forEach((serie) => {
               this.props.dispatch(addToGrid(serie));
               this.props.dispatch(getSingleSerie(serie));
             });
             for (let series of selectedSeries) {
               if (!this.props.patients[series.patientID]) {
-                await this.props.dispatch(getWholeData(series));
+                // await this.props.dispatch(getWholeData(series));
+                getWholeData(series);
               } else {
                 this.props.dispatch(
                   updatePatient(
@@ -343,7 +344,7 @@ class WorkList extends React.Component {
 
   render = () => {
     const selected = this.state.selectAll < 2;
-    const openSeriesUIDs = this.props.openSeries.map(el => el.seriesUID);
+    const openSeriesUIDs = this.props.openSeries.map((el) => el.seriesUID);
 
     return (
       <div className="worklist-page">
@@ -378,10 +379,10 @@ class WorkList extends React.Component {
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
-    patients: state.annotationsListReducer.patients
+    patients: state.annotationsListReducer.patients,
   };
 };
 export default connect(mapStateToProps)(WorkList);
