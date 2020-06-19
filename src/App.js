@@ -33,7 +33,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import { getSubjects, getSubject } from "./services/subjectServices";
 import { getStudies, getStudy } from "./services/studyServices";
 import { getSeries, getSingleSeries } from "./services/seriesServices";
-// import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
