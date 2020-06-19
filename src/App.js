@@ -5,7 +5,7 @@ import { ToastContainer } from "react-toastify";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
 import { getUser, getUserInfo } from "./services/userServices";
-import NavBar from "./components/navbar";
+import NavBar from "./components/Navbar";
 import Sidebar from "./components/sideBar/sidebar";
 import SearchView from "./components/searchView/searchView";
 import DisplayView from "./components/display/displayView";
