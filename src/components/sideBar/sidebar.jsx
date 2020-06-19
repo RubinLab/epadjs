@@ -57,8 +57,6 @@ class Sidebar extends Component {
   getProjectsData = async () => {
     try {
       let { data: projects } = await getProjects();
-      console.log("Projects", projects);
-      console.log("Props", this.props);
       if (projects.length > 0) {
         // get the project all and unassigned
         // push them to the end of the projects
@@ -95,7 +93,7 @@ class Sidebar extends Component {
         this.props.dispatch(getProjectMap(projectMap));
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -129,7 +127,7 @@ class Sidebar extends Component {
         });
         this.setState({ [attribute]: result });
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.error(err));
   };
 
   componentDidUpdate = (prevProps) => {
@@ -266,7 +264,7 @@ class Sidebar extends Component {
         );
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -336,44 +334,55 @@ class Sidebar extends Component {
   };
 
   renderContent = () => {
-    if (mode === "thick") {
-      return (
-        <Tabs
-          id="controlled-tab-example"
-          activeKey={this.state.activeTab}
-          onSelect={(activeTab) => this.setState({ activeTab })}
-        >
-          <Tab eventKey="projects" title="Pro">
-            {this.renderProjects()}
-          </Tab>
-          <Tab eventKey="worklists" title="Wo">
+    // if (mode === "thick") {
+    return (
+      <Tabs
+        id="controlled-tab-example"
+        activeKey={this.state.activeTab}
+        onSelect={(activeTab) => this.setState({ activeTab })}
+      >
+        <Tab eventKey="projects" title="Projects">
+          <div></div>
+          {this.renderProjects()}
+        </Tab>
+        {mode === "thick" ? (
+          <Tab eventKey="worklists" title="Worklists">
             <div>{this.renderWorklists()}</div>
           </Tab>
+        ) : (
+          ""
+        )}
 
-          <Tab eventKey="Progres" title="Prog">
-            {this.renderProgress()}
-          </Tab>
-        </Tabs>
-        // <Tabs className="theme-default" settings={{ index: this.state.index }}>
-        //   <Nav>{this.renderNav()}</Nav>
-        //   <Content>
-        //     <div className="testtable">{this.renderProjects()}</div>
-        //     <div>{this.renderWorklists()}</div>
-        //     <div>{this.renderProgress()}</div>
-        //   </Content>
-        // </Tabs>
-      );
-    } else {
-      return (
-        <Tabs className="theme-default" settings={{ index: this.state.index }}>
-          {/* <Nav>{this.renderNav()}</Nav> */}
-          {/* <Content> */}
-          <div>{this.renderWorklists()}</div>
-          <div>{this.renderProgress()}</div>
-          {/* </Content> */}
-        </Tabs>
-      );
-    }
+        <Tab eventKey="Progres" title="Progress">
+          {this.renderProgress()}
+        </Tab>
+      </Tabs>
+      // <Tabs className="theme-default" settings={{ index: this.state.index }}>
+      //   <Nav>{this.renderNav()}</Nav>
+      //   <Content>
+      //     <div className="testtable">{this.renderProjects()}</div>
+      //     <div>{this.renderWorklists()}</div>
+      //     <div>{this.renderProgress()}</div>
+      //   </Content>
+      // </Tabs>
+    );
+    // } else {
+    //   return (
+    //     <Tabs
+    //       id="controlled-tab-example"
+    //       activeKey={this.state.activeTab}
+    //       onSelect={(activeTab) => this.setState({ activeTab })}
+    //     >
+    //       <Tab eventKey="worklists" title="Worklists">
+    //         <div>{this.renderWorklists()}</div>
+    //       </Tab>
+
+    //       <Tab eventKey="Progres" title="Prog">
+    //         {this.renderProgress()}
+    //       </Tab>
+    //     </Tabs>
+    //   );
+    // }
   };
   render = () => {
     const { progressView } = this.state;
