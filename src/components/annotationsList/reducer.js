@@ -56,6 +56,7 @@ const initialState = {
   uploadedPid: null,
   lastEventId: null,
   projectMap: {},
+  templates: {},
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -501,7 +502,11 @@ const asyncReducer = (state = initialState, action) => {
           },
         });
       case GET_PROJECT_MAP:
-        return { ...state, projectMap: action.projectMap };
+        return {
+          ...state,
+          projectMap: action.projectMap,
+          templates: action.templates,
+        };
       default:
         return state;
     }

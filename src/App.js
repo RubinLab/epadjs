@@ -301,7 +301,7 @@ class App extends Component {
     }
   }
 
-  completeAutorization = (apiUrl) => {
+  completeAutorization = apiUrl => {
     let getAuthUser = null;
 
     if (sessionStorage.getItem("authMode") !== "external") {

@@ -21,7 +21,7 @@ export function getStudies(projectId, subjectId) {
 }
 
 export function downloadStudies(projectID, body) {
-  console.log(body);
+  projectID = projectID || "lite"
   const url =
     apiUrl +
     "/projects/" +
@@ -68,6 +68,7 @@ export function saveStudy(projectID, subjectID, studyUid, studyDesc) {
 export function uploadFileToStudy(formData, config, study) {
   let { projectID, subjectID, studyUID } = study;
   subjectID = subjectID ? subjectID : study.patientID;
+  projectID = projectID || "lite";
   const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/files`;
   return http.post(url, formData, config);
 }

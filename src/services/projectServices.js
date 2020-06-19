@@ -69,8 +69,9 @@ export function editUserRole(id, user, role) {
 }
 
 export function downloadProjects(projectID) {
+  const pid = mode === "lite" ? "lite" : projectID
   return http.get(
-    apiUrl + "/projects/" + projectID + "?format=stream&includeAims=true"
+    apiUrl + "/projects/" + pid + "?format=stream&includeAims=true"
   );
 }
 
