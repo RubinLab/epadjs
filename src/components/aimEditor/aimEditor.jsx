@@ -54,7 +54,14 @@ class AimEditor extends Component {
         this.validateForm,
         this.renderButtons
       );
-      this.semanticAnswers.loadTemplates(result.data);
+      let { templates, openSeries, activePort } = this.props;
+      const templateJsons = Object.values(templates);
+      const { defaultTemplate } = openSeries[activePort];
+      console.log("temp, def", templates, defaultTemplate);
+      this.semanticAnswers.loadTemplates({
+        default: defaultTemplate,
+        all: templateJsons,
+      });
       this.semanticAnswers.createViewerWindow();
       const { aimId } = this.props;
       if (aimId != null && Object.entries(aimId).length) {
@@ -905,9 +912,11 @@ class AimEditor extends Component {
 }
 
 const mapStateToProps = (state) => {
+  console.log("State", state);
   return {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
+    templates: state.annotationsListReducer.templates,
   };
 };
 
