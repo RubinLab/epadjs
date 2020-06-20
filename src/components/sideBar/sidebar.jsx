@@ -111,7 +111,7 @@ class Sidebar extends Component {
       }
       return tempMap;
     } catch (err) {
-      console.log("getting template JSONs", err);
+      console.error("getting template JSONs", err);
       return tempMap;
     }
   };
@@ -130,7 +130,7 @@ class Sidebar extends Component {
       }
       return prTempMap;
     } catch (err) {
-      console.log("getting templates for projects", err);
+      console.error("getting templates for projects", err);
       return prTempMap;
     }
   };
@@ -147,12 +147,12 @@ class Sidebar extends Component {
   getProgressTotal = (list, attribute) => {
     const promises = [];
     const result = [...list];
-    list.forEach(wl => {
+    list.forEach((wl) => {
       promises.push(getWorklistProgress(wl.workListID));
     });
     Promise.all(promises)
-      .then(data => {
-        const progressArr = data.map(el => {
+      .then((data) => {
+        const progressArr = data.map((el) => {
           return el.data;
         });
         let total;
@@ -168,7 +168,7 @@ class Sidebar extends Component {
       .catch((err) => console.error(err));
   };
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     let { pathname } = this.props.location;
     const { pid } = this.props;
     if (prevProps.progressUpdated !== this.props.progressUpdated) {
@@ -274,7 +274,7 @@ class Sidebar extends Component {
       pathname = pathname.split("/").pop();
       // const pid = pathname.pop();
       if (mode === "thick") {
-        const projectsList = projects.map(project => {
+        const projectsList = projects.map((project) => {
           const matchProject =
             selected === project.id || pathname === project.id;
           const className = matchProject
@@ -308,7 +308,7 @@ class Sidebar extends Component {
 
   renderWorklists = () => {
     const { type, selected } = this.state;
-    const worklists = this.state.worklistsAssigned.map(worklist => {
+    const worklists = this.state.worklistsAssigned.map((worklist) => {
       const className =
         worklist.workListID === selected && type === "worklist"
           ? "sidebar-row __selected"
@@ -345,7 +345,8 @@ class Sidebar extends Component {
           trigger="Created by me"
           onOpen={() => this.handleCollapse(0, true)}
           onClose={() => this.handleCollapse(0, false)}
-          open={progressView[0]}
+          transitionTime={100}
+          // open={progressView[0]}
         >
           <WorklistSelect
             list={this.state.worklistsCreated}
@@ -358,7 +359,8 @@ class Sidebar extends Component {
           trigger="Assigned to me"
           onOpen={() => this.handleCollapse(1, true)}
           onClose={() => this.handleCollapse(1, false)}
-          open={progressView[1]}
+          transitionTime={100}
+          // open={progressView[1]}
         >
           <WorklistSelect
             list={this.state.worklistsAssigned}
@@ -377,21 +379,21 @@ class Sidebar extends Component {
       <Tabs
         id="controlled-tab-example"
         activeKey={this.state.activeTab}
-        onSelect={(activeTab) => this.setState({ activeTab })}
+        onSelect={(index) => this.setState({ index })}
       >
-        <Tab eventKey="projects" title="Projects">
-          <div></div>
-          {this.renderProjects()}
-        </Tab>
         {mode === "thick" ? (
-          <Tab eventKey="worklists" title="Worklists">
-            <div>{this.renderWorklists()}</div>
+          <Tab eventKey="0" title="Projects">
+            <div></div>
+            {this.renderProjects()}
           </Tab>
         ) : (
           ""
         )}
+        <Tab eventKey="1" title="Worklists">
+          <div>{this.renderWorklists()}</div>
+        </Tab>
 
-        <Tab eventKey="Progres" title="Progress">
+        <Tab eventKey="2" title="Progress">
           {this.renderProgress()}
         </Tab>
       </Tabs>
@@ -462,7 +464,7 @@ class Sidebar extends Component {
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const { activePort } = state.annotationsListReducer;
   return {
     activePort,
