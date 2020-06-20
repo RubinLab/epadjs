@@ -76,7 +76,7 @@ export var AimEditor = function(
   });
 
   this.templateShapeArray = []; //each array element is a json object {"shape":'Point', "domid" : '2.25.33554445511225454'});
-
+  this.defaultTemplate = null;
   function constructor() {
     if (self.arrayTemplates === "undefined") self.arrayTemplates = [];
   }
@@ -131,7 +131,11 @@ export var AimEditor = function(
   };
 
   this.loadTemplates = function(templateList) {
-    self.arrayTemplatesJsonObjects = templateList;
+    const defaultTemplateJson = templateList.default;
+    const defaultTempCodeVal = defaultTemplateJson.TemplateContainer.Template[0][
+            "codeValue"
+          ];
+    self.arrayTemplatesJsonObjects = templateList.all;
     if (self.arrayTemplatesJsonObjects.length > 0) {
       for (var i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {
         var object = {};
@@ -141,6 +145,11 @@ export var AimEditor = function(
           ];
         object.arrayIndex = i;
         self.mapTemplateCodeValueByIndex.set(object.codeValue, i);
+        if (templateList.default !== null){
+          if (defaultTempCodeVal === object.codeValue){
+            self.defaultTemplate = i;
+          }
+        }
       }
     }
   };
@@ -242,10 +251,15 @@ export var AimEditor = function(
         self.renderButtonhandler(false);
       }
     };
+    if (self.defaultTemplate !== null){
+      self.templateSelect.selectedIndex = self.defaultTemplate;
+      self.templateSelect.onchange();
+    }
     $('select[class^="ui dropdown"]').dropdown();
     document.getElementById("tlist").children[0].style.width = "100%";
     self.templateSelect.style.width = "100%";
     templateDiv.style.width = "100%";
+   
   };
 
   this.extractTemplate = function(json) {
