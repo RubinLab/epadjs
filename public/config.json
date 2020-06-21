@@ -1,5 +1,5 @@
 {
-  "mode": "thick",
+  "mode": "lite",
   "apiUrl": "http://localhost:8080",
   "apiUrlV1": "http://localhost:8080/epad",
   "wadoUrl": "wadouri:http://localhost:8080/wado",

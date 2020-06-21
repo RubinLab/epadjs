@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { FiZoomIn } from "react-icons/fi";
-import { Tabs, Nav, Content } from "react-tiny-tabs";
+// import { Tabs, Nav, Content } from "react-tiny-tabs";
 import WorklistSelect from "./worklistSelect";
 import { getProjects } from "../../services/projectServices";
 import {
@@ -21,6 +21,9 @@ import { getProjectMap, clearSelection } from "../annotationsList/action";
 import "./w2.css";
 // import { throws } from "assert";
 import SidebarContent from "./sidebarContent";
+import Tabs from "react-bootstrap/Tabs";
+import Tab from "react-bootstrap/Tab";
+
 const mode = sessionStorage.getItem("mode");
 
 class Sidebar extends Component {
@@ -94,7 +97,7 @@ class Sidebar extends Component {
         this.props.dispatch(getProjectMap(projectMap, templates));
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -108,7 +111,7 @@ class Sidebar extends Component {
       }
       return tempMap;
     } catch (err) {
-      console.log("getting template JSONs", err);
+      console.error("getting template JSONs", err);
       return tempMap;
     }
   };
@@ -127,7 +130,7 @@ class Sidebar extends Component {
       }
       return prTempMap;
     } catch (err) {
-      console.log("getting templates for projects", err);
+      console.error("getting templates for projects", err);
       return prTempMap;
     }
   };
@@ -144,12 +147,12 @@ class Sidebar extends Component {
   getProgressTotal = (list, attribute) => {
     const promises = [];
     const result = [...list];
-    list.forEach(wl => {
+    list.forEach((wl) => {
       promises.push(getWorklistProgress(wl.workListID));
     });
     Promise.all(promises)
-      .then(data => {
-        const progressArr = data.map(el => {
+      .then((data) => {
+        const progressArr = data.map((el) => {
           return el.data;
         });
         let total;
@@ -162,10 +165,10 @@ class Sidebar extends Component {
         });
         this.setState({ [attribute]: result });
       })
-      .catch(err => console.log(err));
+      .catch((err) => console.error(err));
   };
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     let { pathname } = this.props.location;
     const { pid } = this.props;
     if (prevProps.progressUpdated !== this.props.progressUpdated) {
@@ -271,7 +274,7 @@ class Sidebar extends Component {
       pathname = pathname.split("/").pop();
       // const pid = pathname.pop();
       if (mode === "thick") {
-        const projectsList = projects.map(project => {
+        const projectsList = projects.map((project) => {
           const matchProject =
             selected === project.id || pathname === project.id;
           const className = matchProject
@@ -299,13 +302,13 @@ class Sidebar extends Component {
         );
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
   renderWorklists = () => {
     const { type, selected } = this.state;
-    const worklists = this.state.worklistsAssigned.map(worklist => {
+    const worklists = this.state.worklistsAssigned.map((worklist) => {
       const className =
         worklist.workListID === selected && type === "worklist"
           ? "sidebar-row __selected"
@@ -342,7 +345,8 @@ class Sidebar extends Component {
           trigger="Created by me"
           onOpen={() => this.handleCollapse(0, true)}
           onClose={() => this.handleCollapse(0, false)}
-          open={progressView[0]}
+          transitionTime={100}
+          // open={progressView[0]}
         >
           <WorklistSelect
             list={this.state.worklistsCreated}
@@ -355,7 +359,8 @@ class Sidebar extends Component {
           trigger="Assigned to me"
           onOpen={() => this.handleCollapse(1, true)}
           onClose={() => this.handleCollapse(1, false)}
-          open={progressView[1]}
+          transitionTime={100}
+          // open={progressView[1]}
         >
           <WorklistSelect
             list={this.state.worklistsAssigned}
@@ -369,28 +374,55 @@ class Sidebar extends Component {
   };
 
   renderContent = () => {
-    if (mode === "thick") {
-      return (
-        <Tabs className="theme-default" settings={{ index: this.state.index }}>
-          <Nav>{this.renderNav()}</Nav>
-          <Content>
-            <div className="testtable">{this.renderProjects()}</div>
-            <div>{this.renderWorklists()}</div>
-            <div>{this.renderProgress()}</div>
-          </Content>
-        </Tabs>
-      );
-    } else {
-      return (
-        <Tabs className="theme-default" settings={{ index: this.state.index }}>
-          <Nav>{this.renderNav()}</Nav>
-          <Content>
-            <div>{this.renderWorklists()}</div>
-            <div>{this.renderProgress()}</div>
-          </Content>
-        </Tabs>
-      );
-    }
+    // if (mode === "thick") {
+    return (
+      <Tabs
+        id="controlled-tab-example"
+        activeKey={this.state.activeTab}
+        onSelect={(index) => this.setState({ index })}
+      >
+        {mode === "thick" ? (
+          <Tab eventKey="0" title="Projects">
+            <div></div>
+            {this.renderProjects()}
+          </Tab>
+        ) : (
+          ""
+        )}
+        <Tab eventKey="1" title="Worklists">
+          <div>{this.renderWorklists()}</div>
+        </Tab>
+
+        <Tab eventKey="2" title="Progress">
+          {this.renderProgress()}
+        </Tab>
+      </Tabs>
+      // <Tabs className="theme-default" settings={{ index: this.state.index }}>
+      //   <Nav>{this.renderNav()}</Nav>
+      //   <Content>
+      //     <div className="testtable">{this.renderProjects()}</div>
+      //     <div>{this.renderWorklists()}</div>
+      //     <div>{this.renderProgress()}</div>
+      //   </Content>
+      // </Tabs>
+    );
+    // } else {
+    //   return (
+    //     <Tabs
+    //       id="controlled-tab-example"
+    //       activeKey={this.state.activeTab}
+    //       onSelect={(activeTab) => this.setState({ activeTab })}
+    //     >
+    //       <Tab eventKey="worklists" title="Worklists">
+    //         <div>{this.renderWorklists()}</div>
+    //       </Tab>
+
+    //       <Tab eventKey="Progres" title="Prog">
+    //         {this.renderProgress()}
+    //       </Tab>
+    //     </Tabs>
+    //   );
+    // }
   };
   render = () => {
     const { progressView } = this.state;
@@ -432,7 +464,7 @@ class Sidebar extends Component {
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const { activePort } = state.annotationsListReducer;
   return {
     activePort,
