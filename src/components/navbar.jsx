@@ -16,7 +16,7 @@ const NavBar = ({
   notificationWarning, pid
 }) => {
   const style = { paddingBottom: "8px" };
-
+  
   // handleClick = () => {
   //   openMenu();
   // };

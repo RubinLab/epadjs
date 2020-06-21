@@ -189,6 +189,7 @@ class Projects extends React.Component {
           });
           this.handleCancel();
           this.getProjectData();
+          this.props.getProjectAdded();
         }
       })
       .catch(error => {
