@@ -25,7 +25,7 @@ import {
   updatePatient,
   // showAnnotationDock
 } from "../annotationsList/action";
-import { persistExpandView } from "../../Utils/aid";
+import { persistExpandView, styleEightDigitDate} from "../../Utils/aid";
 
 //import "react-table/react-table.css";
 
@@ -361,7 +361,7 @@ class Studies extends Component {
         width: this.widthUnit * 7,
         Cell: (row) => (
           <div className="searchView-table__cell">
-            {formatDates(row.original.insertDate)}
+            {styleEightDigitDate(row.original.insertDate)}
           </div>
         ),
       },
@@ -370,7 +370,7 @@ class Studies extends Component {
         width: this.widthUnit * 7,
         Cell: (row) => (
           <div className="searchView-table__cell">
-            {formatDates(row.original.createdTime)}
+            {styleEightDigitDate(row.original.createdTime)}
           </div>
         ),
       },
