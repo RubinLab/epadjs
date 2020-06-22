@@ -104,7 +104,7 @@ class SearchView extends Component {
   }
 
   updateDownloadStatus = () => {
-    this.setState((state) => ({ downloading: !state.downloading }));
+    this.setState(state => ({ downloading: !state.downloading }));
   };
 
   componentDidMount = async () => {
@@ -113,7 +113,7 @@ class SearchView extends Component {
       if (mode === "thick" && !pid) this.props.history.push(`/search/${pid}`);
       let subjects = Object.values(this.props.treeData);
       if (subjects.length > 0) {
-        subjects = subjects.map((el) => el.data);
+        subjects = subjects.map(el => el.data);
       } else if (pid) {
         subjects = await this.getData();
         // this.props.getTreeData("subject", subjects);
@@ -128,7 +128,7 @@ class SearchView extends Component {
     } catch (err) {}
   };
 
-  componentDidUpdate = async (prevProps) => {
+  componentDidUpdate = async prevProps => {
     const { uploadedPid, lastEventId, expandLevel } = this.props;
     const { pid } = this.props.match.params;
     const samePid = mode !== "lite" && uploadedPid === pid;
@@ -140,7 +140,7 @@ class SearchView extends Component {
     }
 
     if ((samePid || mode === "lite") && prevProps.lastEventId !== lastEventId) {
-      this.setState((state) => ({ update: state.update + 1 }));
+      this.setState(state => ({ update: state.update + 1 }));
     }
     if (expandLevel !== prevProps.expandLevel) {
       this.setState({
@@ -212,14 +212,14 @@ class SearchView extends Component {
     this.setState({ expanded });
   };
 
-  keepExpandedPatientsInOrder = (newSubjects) => {
+  keepExpandedPatientsInOrder = newSubjects => {
     this.updateUploadStatus();
     // get the patient ID of the maps, and the level they are open
     // get the new array of subjects and iterate over it and form the new expanded object
   };
 
-  updateUploadStatus = (async) => {
-    this.setState((state) => {
+  updateUploadStatus = async => {
+    this.setState(state => {
       return { uploading: !state.uploading, update: state.update + 1 };
     });
     this.updateSubjectCount();
@@ -258,7 +258,7 @@ class SearchView extends Component {
           );
         }
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err);
       });
   };
@@ -291,7 +291,7 @@ class SearchView extends Component {
     this.setState({ deleting: true });
     const openItems = [];
     const deletedItems = [];
-    arr.forEach((item) => {
+    arr.forEach(item => {
       if (this.checkIfSerieOpen(item[level], level).isOpen) {
         openItems.push(item);
       } else {
@@ -301,14 +301,14 @@ class SearchView extends Component {
             promiseArr.push(func(item, delSys));
             deletedItems.push(item);
           })
-          .catch((err) => console.log(err));
+          .catch(err => console.log(err));
       }
     });
     Promise.all(promiseArr)
       .then(async () => {
         const subjects = await this.getData();
         this.setState({ deleting: false, numOfsubjects: subjects.length });
-        this.setState((state) => ({ update: state.update + 1 }));
+        this.setState(state => ({ update: state.update + 1 }));
         if (Object.values(this.props.selectedAnnotations).length > 0) {
           this.updateStoreOnAnnotationDelete(deletedItems);
         }
@@ -321,9 +321,9 @@ class SearchView extends Component {
           });
         }
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err);
-        this.setState((state) => ({ update: state.update + 1 }));
+        this.setState(state => ({ update: state.update + 1 }));
       });
   };
 
@@ -353,7 +353,7 @@ class SearchView extends Component {
     if (showDeleteFromSysAlert) this.props.clearTreeData();
   };
 
-  updateStoreOnAnnotationDelete = (arr) => {
+  updateStoreOnAnnotationDelete = arr => {
     const seriesToUpdate = {};
     const patientsToUpdate = [];
     const openSeriesUIDs = this.props.openSeries.reduce((all, item, index) => {
@@ -366,18 +366,18 @@ class SearchView extends Component {
         patientsToUpdate.push(el);
       }
     });
-    Object.values(seriesToUpdate).forEach((el) => {
+    Object.values(seriesToUpdate).forEach(el => {
       const subjectID = this.props.openSeries[el].patientID;
       this.props.dispatch(
         updateSingleSerie({ ...this.props.openSeries[el], subjectID })
       );
     });
-    patientsToUpdate.forEach((el) => {
+    patientsToUpdate.forEach(el => {
       this.props.dispatch(updatePatientOnAimDelete(el));
     });
   };
 
-  updateError = (error) => {
+  updateError = error => {
     this.setState({ error, loading: false });
   };
 
@@ -501,7 +501,7 @@ class SearchView extends Component {
             // this.props.history.push("/display");
           } else {
             //else get data for each serie for display
-            selectedSeries.forEach((serie) => {
+            selectedSeries.forEach(serie => {
               this.props.dispatch(addToGrid(serie));
               this.props.dispatch(getSingleSerie(serie));
             });
@@ -553,7 +553,7 @@ class SearchView extends Component {
             this.setState({ isSerieSelectionOpen: true });
             //else get data for each serie for display
           } else {
-            serieList.forEach((serie) => {
+            serieList.forEach(serie => {
               this.props.dispatch(addToGrid(serie, serie.aimID));
               this.props.dispatch(getSingleSerie(serie, serie.aimID));
             });
@@ -582,7 +582,7 @@ class SearchView extends Component {
     }
   };
 
-  groupUnderStudy = (objArr) => {
+  groupUnderStudy = objArr => {
     let groupedObj = {};
     for (let serie of objArr) {
       if (groupedObj[serie.studyUID]) {
@@ -594,7 +594,7 @@ class SearchView extends Component {
     return groupedObj;
   };
 
-  groupUnderSerie = (objArr) => {
+  groupUnderSerie = objArr => {
     let groupedObj = {};
     for (let ann of objArr) {
       groupedObj[ann.seriesUID] = ann;
@@ -628,17 +628,17 @@ class SearchView extends Component {
         // this.downloadHelper(promiseArr, fileNameArr);
         // this.props.dispatch(clearSelection());
       } else if (selectedPatients.length > 0) {
-        bodyArr = selectedPatients.map((el) => el.patientID);
+        bodyArr = selectedPatients.map(el => el.patientID);
         promise = downloadSubjects(pid, bodyArr);
         fileName = "Downloaded_subjects";
       } else if (selectedStudies.length > 0) {
-        bodyArr = selectedStudies.map((el) => {
+        bodyArr = selectedStudies.map(el => {
           return { study: el.studyUID, subject: el.patientID };
         });
         promise = downloadStudies(pid, bodyArr);
         fileName = "Downloaded_studies";
       } else if (selectedSeries.length > 0) {
-        bodyArr = selectedSeries.map((el) => {
+        bodyArr = selectedSeries.map(el => {
           return {
             series: el.seriesUID,
             study: el.studyUID,
@@ -650,12 +650,12 @@ class SearchView extends Component {
       }
 
       promise
-        .then((result) => {
+        .then(result => {
           let blob = new Blob([result.data], { type: "application/zip" });
           this.triggerBrowserDownload(blob, fileName);
           this.setState({ error: null, downloading: false });
         })
-        .catch((err) => {
+        .catch(err => {
           this.setState({ downloading: false });
           console.log(err);
         });
@@ -674,7 +674,7 @@ class SearchView extends Component {
     }
   };
 
-  getSeriesData = async (selected) => {
+  getSeriesData = async selected => {
     const { projectID, patientID, studyUID } = selected;
     try {
       const { data: series } = await getSeries(projectID, patientID, studyUID);
@@ -704,13 +704,13 @@ class SearchView extends Component {
   };
 
   closeSelectionModal = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       isSerieSelectionOpen: !state.isSerieSelectionOpen,
     }));
   };
 
   handleFileUpload = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       showUploadFileModal: !state.showUploadFileModal,
     }));
   };
@@ -718,11 +718,11 @@ class SearchView extends Component {
   handleClickDeleteIcon = () => {
     const { showDeleteFromSysAlert } = this.state;
     if (this.checkForAllAndUnassigned() || showDeleteFromSysAlert) {
-      this.setState((state) => ({
+      this.setState(state => ({
         showDeleteFromSysAlert: !state.showDeleteFromSysAlert,
       }));
     } else {
-      this.setState((state) => ({ showDeleteAlert: !state.showDeleteAlert }));
+      this.setState(state => ({ showDeleteAlert: !state.showDeleteAlert }));
     }
   };
 
@@ -735,10 +735,10 @@ class SearchView extends Component {
   };
 
   handleNewClick = () => {
-    this.setState((state) => ({ showNew: !state.showNew }));
+    this.setState(state => ({ showNew: !state.showNew }));
   };
 
-  handleSelectNewOption = (e) => {
+  handleSelectNewOption = e => {
     this.setState({ newSelected: e.target.dataset.opt, showNew: false });
   };
 
@@ -753,11 +753,11 @@ class SearchView extends Component {
   handleWorklistClick = () => {
     // if (this.state.showWorklists) this.props.dispatch(clearSelection());
     console.log("clicked worklist");
-    this.setState((state) => ({ showWorklists: !state.showWorklists }));
+    this.setState(state => ({ showWorklists: !state.showWorklists }));
   };
 
   updateTreeView = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       update: state.update + 1,
     }));
   };
@@ -817,18 +817,18 @@ class SearchView extends Component {
   };
 
   handleUploadWizardClick = () => {
-    this.setState((state) => ({ showUploadWizard: !state.showUploadWizard }));
+    this.setState(state => ({ showUploadWizard: !state.showUploadWizard }));
   };
 
   handleProjectClick = () => {
-    this.setState((state) => ({ showProjects: !state.showProjects }));
+    this.setState(state => ({ showProjects: !state.showProjects }));
   };
 
-  verifyObject = (object) => {
+  verifyObject = object => {
     return object.constructor === Object;
   };
 
-  addSelectionToProject = async (e) => {
+  addSelectionToProject = async e => {
     try {
       const { id } = e.target;
       const { treeData } = this.props;
@@ -837,12 +837,12 @@ class SearchView extends Component {
       const patients = Object.values(this.props.selectedPatients);
       const studies = Object.values(this.props.selectedStudies);
       if (patients.length > 0) {
-        patients.forEach((el) => {
+        patients.forEach(el => {
           promises.push(addSubjectToProject(id, el.patientID));
         });
       }
       if (studies.length > 0) {
-        studies.forEach((el) => {
+        studies.forEach(el => {
           promises.push(addStudyToProject(id, el.patientID, el.studyUID));
           if (!treeData[id][el.patientID]) {
             patientIDs.add(el.patientID);
@@ -865,12 +865,12 @@ class SearchView extends Component {
           const { data } = await getSubjects(id);
           this.props.getTreeData(id, "subject", data);
         }
-        studies.forEach((el) => {
+        studies.forEach(el => {
           promises.push(getStudies(id, el.patientID));
         });
         let studiesResult = await Promise.all(promises);
         studiesResult = studiesResult;
-        studiesResult.forEach((el) =>
+        studiesResult.forEach(el =>
           this.props.getTreeData(id, "studies", el.data)
         );
       }
@@ -912,7 +912,8 @@ class SearchView extends Component {
       (lengthOfAnns > 0 && this.verifyObject(selectedAnnotations)) ||
       (lengthOfSeries > 0 && this.verifyObject(selectedSeries));
 
-    const pid = this.props.match.params.pid || this.props.pid || "lite";
+    
+    const pid = this.props.match.params.pid || this.props.pid;
     const {
       isSerieSelectionOpen,
       showUploadFileModal,
@@ -1053,7 +1054,7 @@ class SearchView extends Component {
   };
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   const {
     selectedProjects,
     selectedPatients,
