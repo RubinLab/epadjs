@@ -9,7 +9,7 @@ import "react-table/react-table.css";
 import Studies from "./studies";
 import { getSubjects } from "../../services/subjectServices";
 import { selectPatient, clearSelection } from "../annotationsList/action";
-import { persistExpandView } from "../../Utils/aid";
+import { persistExpandView, styleEightDigitDate } from "../../Utils/aid";
 const mode = sessionStorage.getItem("mode");
 
 // const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -253,7 +253,7 @@ class Subjects extends Component {
           userSelect: "none",
           color: "#fafafa",
           padding: "7px 5px",
-          verticalAlign: "middle"
+          verticalAlign: "middle",
         },
       },
       {
@@ -377,7 +377,11 @@ class Subjects extends Component {
         id: "searchView-crDate",
         resizable: false,
         // minResizeWidth: this.widthUnit * 10,
-        Cell: row => <div />,
+        Cell: ({ original }) => (
+          <div style={{ textAlign: "center" }}>
+            {styleEightDigitDate(original.insertDate)}
+          </div>
+        ),
       },
       {
         Header: <div className="search-header__col">Upload date</div>,
