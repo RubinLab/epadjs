@@ -218,7 +218,7 @@ class SearchView extends Component {
     // get the new array of subjects and iterate over it and form the new expanded object
   };
 
-  updateUploadStatus = async => {
+  updateUploadStatus = () => {
     this.setState(state => {
       return { uploading: !state.uploading, update: state.update + 1 };
     });
@@ -911,8 +911,6 @@ class SearchView extends Component {
       showAddTo ||
       (lengthOfAnns > 0 && this.verifyObject(selectedAnnotations)) ||
       (lengthOfSeries > 0 && this.verifyObject(selectedSeries));
-
-    
     const pid = this.props.match.params.pid || this.props.pid;
     const {
       isSerieSelectionOpen,

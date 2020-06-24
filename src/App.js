@@ -64,7 +64,7 @@ class App extends Component {
   }
 
   getProjectAdded = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       projectAdded: state.projectAdded + 1,
       refTree: {},
       treeData: {},
@@ -158,7 +158,7 @@ class App extends Component {
     });
   };
 
-  getTreeExpandSingle = async (expandObj) => {
+  getTreeExpandSingle = async expandObj => {
     try {
       const { patient, study, series } = expandObj;
       let treeExpand = { ...this.state.treeExpand };
@@ -196,18 +196,18 @@ class App extends Component {
     }
   };
 
-  getExpandLevel = (expandLevel) => {
+  getExpandLevel = expandLevel => {
     this.setState({ expandLevel });
   };
 
   handleShrink = async () => {
     const { expandLevel } = this.state;
     if (expandLevel > 0) {
-      await this.setState((state) => ({ expandLevel: state.expandLevel - 1 }));
+      await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
     }
   };
 
-  closeMenu = (notification) => {
+  closeMenu = notification => {
     // if (event && event.type === "keydown") {
     //   if (event.key === "Escape" || event.keyCode === 27) {
     //     this.setState({ openMng: false });
@@ -222,12 +222,12 @@ class App extends Component {
     if (notification) this.updateNotificationSeen();
   };
 
-  switchView = (viewType) => {
+  switchView = viewType => {
     this.setState({ viewType });
   };
 
   handleMngMenu = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       openInfo: false,
       openMng: !state.openMng,
       openUser: false,
@@ -235,7 +235,7 @@ class App extends Component {
   };
 
   handleInfoMenu = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       openInfo: !state.openInfo,
       openMng: false,
       openUser: false,
@@ -243,7 +243,7 @@ class App extends Component {
   };
 
   handleUserProfileMenu = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       openInfo: false,
       openMng: false,
       openUser: !state.openUser,
@@ -251,7 +251,7 @@ class App extends Component {
   };
 
   updateProgress = () => {
-    this.setState((state) => ({ progressUpdated: state.progressUpdated + 1 }));
+    this.setState(state => ({ progressUpdated: state.progressUpdated + 1 }));
   };
 
   async componentDidMount() {
@@ -259,7 +259,7 @@ class App extends Component {
       fetch(`${process.env.PUBLIC_URL}/config.json`),
       fetch(`${process.env.PUBLIC_URL}/keycloak.json`),
     ])
-      .then(async (results) => {
+      .then(async results => {
         const configData = await results[0].json();
         let { mode, apiUrl, wadoUrl, authMode } = configData;
         // check and use environment variables if any
@@ -287,7 +287,7 @@ class App extends Component {
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
         this.completeAutorization(apiUrl);
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err);
       });
     //get notifications from sessionStorage and setState
@@ -311,33 +311,33 @@ class App extends Component {
       getAuthUser = new Promise((resolve, reject) => {
         keycloak
           .init({ onLoad: "login-required" })
-          .then((authenticated) => {
+          .then(authenticated => {
             keycloak
               .loadUserInfo()
-              .then((userInfo) => {
+              .then(userInfo => {
                 resolve({ userInfo, keycloak, authenticated });
               })
-              .catch((err) => reject(err));
+              .catch(err => reject(err));
           })
-          .catch((err) => reject(err));
+          .catch(err => reject(err));
       });
     } else {
       // authMode is external ask backend for user
       getAuthUser = new Promise((resolve, reject) => {
         getUserInfo()
-          .then((userInfoResponse) => {
+          .then(userInfoResponse => {
             resolve({
               userInfo: userInfoResponse.data,
               keycloak: {},
               authenticated: true,
             });
           })
-          .catch((err) => reject(err));
+          .catch(err => reject(err));
       });
     }
 
     getAuthUser
-      .then(async (result) => {
+      .then(async result => {
         try {
           let user = {
             user: result.userInfo.preferred_username || result.userInfo.email,
@@ -384,12 +384,12 @@ class App extends Component {
           console.log("Error in user retrieval!", err);
         }
       })
-      .catch((err2) => {
+      .catch(err2 => {
         console.log("Authentication failed!", err2);
       });
   };
 
-  getMessageFromEventSrc = (res) => {
+  getMessageFromEventSrc = res => {
     try {
       if (res.data === "heartbeat") {
         return;
@@ -435,7 +435,7 @@ class App extends Component {
     );
   };
 
-  onLogout = (e) => {
+  onLogout = e => {
     auth.logout();
     // sessionStorage.removeItem("annotations");
     sessionStorage.setItem("notifications", JSON.stringify([]));
@@ -457,7 +457,7 @@ class App extends Component {
 
   updateNotificationSeen = () => {
     const notifications = [...this.state.notifications];
-    notifications.forEach((notification) => {
+    notifications.forEach(notification => {
       notification.seen = true;
     });
     this.setState({ notifications });
@@ -472,7 +472,7 @@ class App extends Component {
   handleCloseAll = () => {
     // let { closeAll } = this.state;
     // closeAll += 1;
-    this.setState((state) => ({
+    this.setState(state => ({
       expandLevel: 0,
       closeAll: state.closeAll + 1,
     }));
@@ -484,7 +484,7 @@ class App extends Component {
       const patientIDs = [];
       if (level === "subject") {
         if (!treeData[projectID]) treeData[projectID] = {};
-        data.forEach((el) => {
+        data.forEach(el => {
           if (!treeData[projectID][el.subjectID]) {
             treeData[projectID][el.subjectID] = { data: el, studies: {} };
           }
@@ -504,7 +504,7 @@ class App extends Component {
       } else if (level === "studies") {
         const studyUIDs = [];
         const patientID = data[0].patientID;
-        data.forEach((el) => {
+        data.forEach(el => {
           if (!treeData[projectID][el.patientID].studies[el.studyUID]) {
             treeData[projectID][el.patientID].studies[el.studyUID] = {
               data: el,
@@ -526,7 +526,7 @@ class App extends Component {
         const patientID = data[0].patientID;
         const studyUID = data[0].studyUID;
         const seriesUIDs = [];
-        data.forEach((el) => {
+        data.forEach(el => {
           if (
             !treeData[projectID][el.patientID].studies[el.studyUID].series[
               el.seriesUID
@@ -557,7 +557,7 @@ class App extends Component {
     }
   };
 
-  getPidUpdate = (pid) => {
+  getPidUpdate = pid => {
     this.setState({ pid });
   };
 
@@ -572,78 +572,82 @@ class App extends Component {
   };
 
   findNonExisting = (arr, uid, level) => {
-    const result = arr.filter((el) => el[level] === uid);
+    const result = arr.filter(el => el[level] === uid);
     return result[0];
   };
 
   updateTreeDataOnSave = async (refs, newLevel) => {
-    const treeData = { ...this.state.treeData };
-    const { projectID, patientID, studyUID, seriesUID } = refs;
-    const isPatient = projectID && patientID;
-    const isStudy = projectID && patientID && studyUID;
-    const isSeries = projectID && patientID && studyUID && seriesUID;
-    const patient = treeData[projectID][patientID];
-    const shouldUpdateStudy =
-      patient && Object.values(patient.studies).length > 0;
-    const shouldUpdateSeries =
-      shouldUpdateStudy &&
-      Object.values(patient.studies[studyUID].series).length > 0;
-    if (newLevel) {
-      if (newLevel === "study" && isStudy && shouldUpdateStudy) {
-        const { data: studies } = await getStudies(
-          projectID,
-          patientID,
-          studyUID
-        );
-        let study = this.findNonExisting(studies, studyUID, "studyUID");
-        study = { data: study, series: {} };
-        treeData[projectID][patientID].studies[studyUID] = study;
-      }
-      if (newLevel === "series" && isSeries && shouldUpdateSeries) {
-        const { data: seriesArr } = await getSeries(
-          projectID,
-          patientID,
-          studyUID
-        );
-        let series = this.findNonExisting(seriesArr, seriesUID, "seriesUID");
-        series = { data: series };
-        treeData[projectID][patientID].studies[studyUID].series[
-          seriesUID
-        ] = series;
-      }
-    } else {
-      if (isPatient && treeData[projectID][patientID]) {
-        const promises = [];
-        promises.push(getSubject(projectID, patientID));
-        if (isStudy && treeData[projectID][patientID].studies[studyUID])
-          promises.push(getStudy(projectID, patientID, studyUID));
-        if (
-          isSeries &&
-          treeData[projectID][patientID].studies[studyUID].series[seriesUID]
-        )
-          promises.push(
-            getSingleSeries(projectID, patientID, studyUID, seriesUID)
+    try {
+      const treeData = { ...this.state.treeData };
+      const { projectID, patientID, studyUID, seriesUID } = refs;
+      const isPatient = projectID && patientID;
+      const isStudy = projectID && patientID && studyUID;
+      const isSeries = projectID && patientID && studyUID && seriesUID;
+      const patient = treeData[projectID][patientID];
+      const shouldUpdateStudy =
+        patient && Object.values(patient.studies).length > 0;
+      const shouldUpdateSeries =
+        shouldUpdateStudy &&
+        Object.values(patient.studies[studyUID].series).length > 0;
+      if (newLevel) {
+        if (newLevel === "study" && isStudy && shouldUpdateStudy) {
+          const { data: studies } = await getStudies(
+            projectID,
+            patientID,
+            studyUID
           );
-
-        const result = await Promise.all(promises);
-        treeData[projectID][patientID].data = result[0].data;
-
-        if (isStudy && treeData[projectID][patientID].studies[studyUID]) {
-          treeData[projectID][patientID].studies[studyUID].data =
-            result[1].data;
+          let study = this.findNonExisting(studies, studyUID, "studyUID");
+          study = { data: study, series: {} };
+          treeData[projectID][patientID].studies[studyUID] = study;
         }
-
-        if (
-          isSeries &&
-          treeData[projectID][patientID].studies[studyUID].series[seriesUID]
-        ) {
+        if (newLevel === "series" && isSeries && shouldUpdateSeries) {
+          const { data: seriesArr } = await getSeries(
+            projectID,
+            patientID,
+            studyUID
+          );
+          let series = this.findNonExisting(seriesArr, seriesUID, "seriesUID");
+          series = { data: series };
           treeData[projectID][patientID].studies[studyUID].series[
             seriesUID
-          ].data = result[2].data[0];
+          ] = series;
+        }
+      } else {
+        if (isPatient && treeData[projectID][patientID]) {
+          const promises = [];
+          promises.push(getSubject(projectID, patientID));
+          if (isStudy && treeData[projectID][patientID].studies[studyUID])
+            promises.push(getStudy(projectID, patientID, studyUID));
+          if (
+            isSeries &&
+            treeData[projectID][patientID].studies[studyUID].series[seriesUID]
+          )
+            promises.push(
+              getSingleSeries(projectID, patientID, studyUID, seriesUID)
+            );
+
+          const result = await Promise.all(promises);
+          treeData[projectID][patientID].data = result[0].data;
+
+          if (isStudy && treeData[projectID][patientID].studies[studyUID]) {
+            treeData[projectID][patientID].studies[studyUID].data =
+              result[1].data;
+          }
+
+          if (
+            isSeries &&
+            treeData[projectID][patientID].studies[studyUID].series[seriesUID]
+          ) {
+            treeData[projectID][patientID].studies[studyUID].series[
+              seriesUID
+            ].data = result[2].data[0];
+          }
         }
       }
+      this.setState({ treeData });
+    } catch (err) {
+      console.log(err);
     }
-    this.setState({ treeData });
   };
 
   render() {
@@ -718,7 +722,7 @@ class App extends Component {
                 <Route path="/logout" component={Logout} />
                 <ProtectedRoute
                   path="/display"
-                  render={(props) => (
+                  render={props => (
                     <DisplayView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -729,7 +733,7 @@ class App extends Component {
                 />
                 <ProtectedRoute
                   path="/search/:pid?"
-                  render={(props) => (
+                  render={props => (
                     <SearchView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -755,7 +759,7 @@ class App extends Component {
                 />
                 <ProtectedRoute
                   path="/search/:pid?"
-                  render={(props) => (
+                  render={props => (
                     <SearchView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -786,9 +790,7 @@ class App extends Component {
                 />
                 <ProtectedRoute
                   path="/flex/:pid?"
-                  render={(props) => (
-                    <FlexView {...props} pid={this.state.pid} />
-                  )}
+                  render={props => <FlexView {...props} pid={this.state.pid} />}
                 />
                 <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 {/* component={Worklist} /> */}
@@ -799,7 +801,7 @@ class App extends Component {
                   from="/"
                   exact
                   to="/search"
-                  render={(props) => (
+                  render={props => (
                     <SearchView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -847,7 +849,7 @@ class App extends Component {
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
                 path="/"
-                render={(props) => (
+                render={props => (
                   <SearchView
                     {...props}
                     updateProgress={this.updateProgress}
@@ -881,8 +883,9 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   // console.log(state.managementReducer);
+  // console.log(state.annotationsListReducer);
   const {
     showGridFullAlert,
     showProjectModal,

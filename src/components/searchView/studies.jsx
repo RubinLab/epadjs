@@ -408,7 +408,7 @@ class Studies extends Component {
             </div>{" "}
             <ReactTooltip
               id={row.original.studyUID}
-              place="right"
+              place="top"
               type="info"
               delayShow={500}
               clickable={true}
