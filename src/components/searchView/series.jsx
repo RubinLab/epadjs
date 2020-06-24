@@ -396,7 +396,7 @@ class Series extends Component {
             </div>{" "}
             <ReactTooltip
               id={row.original.seriesUID}
-              place="right"
+              place="top"
               type="info"
               delayShow={500}
               clickable={true}
