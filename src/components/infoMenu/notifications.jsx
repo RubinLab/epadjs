@@ -1,7 +1,5 @@
 import React from "react";
 import { Modal } from "react-bootstrap";
-import Draggable from "react-draggable";
-import { FaTimes } from "react-icons/fa";
 import ListItem from "./common/listItem";
 
 class Notifications extends React.Component {
