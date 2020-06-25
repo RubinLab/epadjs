@@ -16,10 +16,11 @@ class ManualEditForm extends React.Component {
   };
 
   componentDidUpdate = prevProps => {
-    const { tagValues, treeData } = this.props;
+    const { tagValues, treeData, seriesIndex } = this.props;
     const treeDataChanged = !_.isEqual(treeData, prevProps.treeData);
     const tagValuesChanged = !_.isEqual(tagValues, prevProps.tagValues);
-    if (tagValuesChanged || treeDataChanged) {
+    const seriesChanged = seriesIndex !== prevProps.seriesIndex;
+    if (tagValuesChanged || treeDataChanged || seriesChanged) {
       this.renderFields();
     }
   };
