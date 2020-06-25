@@ -942,6 +942,7 @@ class SearchView extends Component {
           status={status}
           showDelete={showDelete}
           showAddTo={showAddTo}
+          showTagEditor={lengthOfSeries > 0}
           project={this.props.match.params.pid}
           onAddProject={this.handleProjectClick}
           // expanding={expanding}
