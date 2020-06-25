@@ -30,21 +30,21 @@
   font-size: 14px;
 }
 
-.mainView {
+/* .mainView {
   height: 100%;
   flex: 1;
   transition: margin-right 0.4s;
   width: calc(100% - 300px);
   padding: 10px;
-}
+} */
 
-.mainView-closed {
+/* .mainView-closed {
   width: 100%;
   padding: 10px;
   transition: margin-right 0.4s;
   padding-right: 40px;
   padding-top: 10px;
-}
+} */
 
 .Collapsible__contentInner {
   padding: 10px;

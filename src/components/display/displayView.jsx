@@ -28,6 +28,14 @@ import { circle } from "./Circle";
 import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
+import {
+  FaTimes,
+  FaPen,
+  FaExpandAlt,
+  FaCompressAlt,
+  FaExpandArrowsAlt,
+} from "react-icons/fa";
+import Form from "react-bootstrap/Form";
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
@@ -117,7 +125,7 @@ class DisplayView extends Component {
     super(props);
     this.state = {
       width: "100%",
-      height: "calc(100% - 60px)",
+      height: "100%",
       hiding: false,
       data: [],
       isLoading: true,
@@ -353,14 +361,14 @@ class DisplayView extends Component {
     let numSeries = this.props.series.length;
     let numCols = numSeries % 3;
     if (numSeries > 3) {
-      this.setState({ height: "calc((100% - 60px)/2)" });
+      this.setState({ height: "calc((100% / 2)" });
       this.setState({ width: "33%" });
       return;
     }
     if (numCols === 1) {
       this.setState({ width: "100%" });
     } else if (numCols === 2) this.setState({ width: "50%" });
-    else this.setState({ width: "33%", height: "calc(100% - 60px)" });
+    else this.setState({ width: "33%", height: "100%" });
   };
 
   createRefs() {
@@ -394,7 +402,7 @@ class DisplayView extends Component {
       for (var i = 0; i < elements.length; i++) {
         if (i != current) elements[i].style.display = "none";
       }
-      this.setState({ height: "calc(100% - 60px)", width: "100%" });
+      this.setState({ height: "100%", width: "100%" });
     } else {
       this.getViewports();
       for (var i = 0; i < elements.length; i++) {
@@ -921,8 +929,14 @@ class DisplayView extends Component {
   onAnnotate = () => {
     this.setState({ showAimEditor: true });
   };
+  handleClose = (i) => {
+    const p1 = new Promise(this.setActive(i));
+    p1.then(this.closeViewport());
+  };
 
   render() {
+    console.log("Data", this.props);
+    const { series } = this.props;
     if (this.state.redirect) return <Redirect to="/search" />;
     return !Object.entries(this.props.series).length ? (
       <Redirect to="/search" />
@@ -950,41 +964,81 @@ class DisplayView extends Component {
                 style={{
                   width: this.state.width,
                   height: this.state.height,
-                  padding: "2px",
                   display: "inline-block",
                 }}
-                onDoubleClick={() => this.hideShow(i)}
+                // onClick={() => this.setActive(i)}
               >
-                <MenuProvider
-                  id="menu_id"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "inline-block",
-                  }}
-                >
-                  <CornerstoneViewport
-                    key={i}
-                    imageIds={data.stack.imageIds}
-                    imageIdIndex={data.stack.currentImageIdIndex}
-                    viewportIndex={i}
-                    tools={tools}
-                    eventListeners={[
-                      {
-                        target: "element",
-                        eventName: "cornerstonetoolsmeasurementcompleted",
-                        handler: this.measurementCompleted,
-                      },
-                      {
-                        target: "element",
-                        eventName: "cornerstonenewimage",
-                        handler: this.newImage,
-                      },
-                    ]}
-                    setViewportActive={() => this.setActive(i)}
-                    isStackPrefetchEnabled={true}
-                  />
-                </MenuProvider>
+                <div className={"row"}>
+                  <div className={"column left"}>
+                    <span
+                      className={"dot"}
+                      style={{ background: "#ED594A" }}
+                      onClick={() => this.handleClose(i)}
+                    >
+                      <FaTimes />
+                    </span>
+                    <span
+                      className={"dot"}
+                      style={{ background: "#5AC05A" }}
+                      onClick={() => this.hideShow(i)}
+                    >
+                      <FaExpandArrowsAlt />
+                    </span>
+                  </div>
+                  <div className={"column middle"}>
+                    <label>{series[i].seriesUID}</label>
+                  </div>
+                  <div className={"column middle-right"}>
+                    <Form inline>
+                      <Form.Group>
+                        <Form.Label htmlFor="imageNum">{"Slice# "}</Form.Label>
+                        <Form.Control
+                          type="number"
+                          min="1"
+                          id="imageNum"
+                          style={{
+                            width: "60px",
+                            height: "10px",
+                            opacity: 1,
+                          }}
+                        />
+                      </Form.Group>
+                    </Form>
+                  </div>
+                  <div className={"column right"}>
+                    <span
+                      className={"dot"}
+                      style={{ background: "#FDD800", float: "right" }}
+                      onClick={() => {
+                        this.setState({ showAimEditor: true });
+                      }}
+                    >
+                      <FaPen />
+                    </span>
+                  </div>
+                </div>
+                <CornerstoneViewport
+                  key={i}
+                  imageIds={data.stack.imageIds}
+                  imageIdIndex={data.stack.currentImageIdIndex}
+                  viewportIndex={i}
+                  tools={tools}
+                  eventListeners={[
+                    {
+                      target: "element",
+                      eventName: "cornerstonetoolsmeasurementcompleted",
+                      handler: this.measurementCompleted,
+                    },
+                    {
+                      target: "element",
+                      eventName: "cornerstonenewimage",
+                      handler: this.newImage,
+                    },
+                  ]}
+                  setViewportActive={() => this.setActive(i)}
+                  isStackPrefetchEnabled={true}
+                  style={{ height: "calc(100% - 26px)" }}
+                />
               </div>
             ))}
           <ContextMenu
