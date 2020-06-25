@@ -42,7 +42,8 @@ class ManualEditForm extends React.Component {
           const tag = el.substring(0, el.length - 2);
           const vr = el.substring(el.length - 2);
           const missing = missingTags.includes(tag);
-          const value = tagValues[tag]
+          const tagKeys = Object.keys(tagValues);
+          const value = tagKeys.includes(tag)
             ? tagValues[tag]
             : treeData[seriesIndex][tag]
             ? treeData[seriesIndex][tag]
@@ -54,7 +55,9 @@ class ManualEditForm extends React.Component {
               <input
                 onMouseDown={e => e.stopPropagation()}
                 type="text"
-                className={missing || tagValues[tag] ? "--textFilled" : "--text"}
+                className={
+                  missing || tagValues[tag] ? "--textFilled" : "--text"
+                }
                 value={value}
                 name={tag}
                 onChange={e => onTagInput(e)}

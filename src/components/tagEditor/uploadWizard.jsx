@@ -1,7 +1,5 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { Button } from "react-bootstrap";
 import * as dcmjs from "dcmjs";
 import { FaTimes } from "react-icons/fa";
 import TagRequirements from "./tagRequirementList";
@@ -56,8 +54,10 @@ class UploadWizard extends React.Component {
       name = e.target.name;
       value = e.target.value;
       if (name || value) {
-        if (!value) this.setState({ error: `Please fill the ${name}` });
-        else {
+        if (!value) {
+          this.setState({ error: `Please fill the ${name}` });
+          this.storeTagValuePair(name, value);
+        } else {
           this.setState({ error: "" });
           this.storeTagValuePair(name, value);
         }
