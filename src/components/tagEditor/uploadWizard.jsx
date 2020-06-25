@@ -129,6 +129,7 @@ class UploadWizard extends React.Component {
             tagValues
           );
 
+          this.props.onSave();
           if (seriesIndex === seriesArr.length - 1) {
             this.props.onClose();
             this.props.dispatch(clearSelection());

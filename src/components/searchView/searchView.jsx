@@ -100,6 +100,7 @@ class SearchView extends Component {
       expandLevel: 0,
       showUploadWizard: false,
       showProjects: false,
+      editingTags: false,
     };
   }
 
@@ -149,6 +150,9 @@ class SearchView extends Component {
       if (expandLevel === 0) {
         this.setState({ expanded: {} });
       }
+    }
+    if (lastEventId !== prevProps.lastEventId && this.state.editingTags) {
+      this.handleEditingTags();
     }
   };
 
@@ -283,6 +287,11 @@ class SearchView extends Component {
         });
       }
     }
+  };
+
+  handleEditingTags = () => {
+    const { editingTags } = this.state;
+    this.setState({ editingTags: !editingTags });
   };
 
   deleteSelectionWrapper = async (arr, func, level, delSys) => {
@@ -888,6 +897,8 @@ class SearchView extends Component {
       status = "Downloading…";
     } else if (this.state.deleting) {
       status = "Deleting…";
+    } else if (this.state.editingTags) {
+      status = "Editing tags…";
     } else {
       status = null;
     }
@@ -1045,6 +1056,7 @@ class SearchView extends Component {
             onClose={this.handleUploadWizardClick}
             pid={this.props.pid}
             updateTreeView={this.updateTreeView}
+            onSave={this.handleEditingTags}
           />
         )}
         {this.state.newSelected && this.handleNewSelected()}
