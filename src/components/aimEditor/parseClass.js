@@ -8,7 +8,8 @@ import "./semantic/semantic.js";
 export var AimEditor = function (
   userWindow,
   varformCheckHandler,
-  varRenderButtonHandler
+  varRenderButtonHandler,
+
 ) {
   //this.mapObjCodeValueParent = new Map();
   //this.mapHtmlObjects = new Map(); not used
@@ -74,7 +75,7 @@ export var AimEditor = function (
   this.mapShapesSchemaToTemplate.set("TwoDimensionCircle", {
     formshape: "Cirle",
   });
-
+  this.anyClosedShapeTypes = ["Circle" , "Polyline"] ;
   this.templateShapeArray = []; //each array element is a json object {"shape":'Point', "domid" : '2.25.33554445511225454'});
   this.defaultTemplate = null;
   function constructor() {
@@ -134,9 +135,9 @@ export var AimEditor = function (
     console.log("templatelist", templateList);
     let defaultTempCodeVal = "";
     if (templateList.default) {
-      const defaultTemplateJson = templateList.default;
-      defaultTempCodeVal =
-        defaultTemplateJson.TemplateContainer.Template[0]["codeValue"];
+      defaultTempCodeVal = templateList.default;
+      // defaultTempCodeVal =
+      //   defaultTemplateJson.TemplateContainer.Template[0]["codeValue"];
     }
     self.arrayTemplatesJsonObjects = templateList.all;
     if (self.arrayTemplatesJsonObjects.length > 0) {
@@ -149,8 +150,10 @@ export var AimEditor = function (
         object.arrayIndex = i;
         self.mapTemplateCodeValueByIndex.set(object.codeValue, i);
         if (templateList.default !== null) {
+          console.log("default not null:", templateList.default);
+
           if (defaultTempCodeVal === object.codeValue) {
-            self.defaultTemplate = i;
+            self.defaultTemplate = i+1;
           }
         }
       }
@@ -623,6 +626,7 @@ export var AimEditor = function (
     mapTagArray,
     parentTagTypeFromJson
   ) {
+    console.log("geo shape compo on load called");
     var GeometricShape = [];
     let Obj = {
       type: "GeometricShape",
@@ -3708,13 +3712,29 @@ export var AimEditor = function (
 
   this.checkAnnotationShapes = function (prmtrShapeArray) {
     //self.templateShapeArray.push({"shape":object.GeometricShape, "domid" : object.id});
+    //console.log("beeeeeeeeeee");
+    let anyShapeFlag = false;
+    let anyClosedShapeFlag = false;
     let prmtrShapeArrayLength = prmtrShapeArray.length;
+    let templateShapeArrayLength = self.templateShapeArray.length;
+    
+    console.log("prmtrShapeArray : ",prmtrShapeArray);
     for (let k = 0; k < prmtrShapeArrayLength; k++) {
       // this.mapShapesSchemaToTemplate.set("TwoDimensionMultiPoint", [{"formshape" : 'Line'}, {"formshape" : 'Perpendicular'}]);
-      let jsonShapeObj = this.mapShapesSchemaToTemplate.get(prmtrShapeArray[k]);
+      let jsonShapeObj = self.mapShapesSchemaToTemplate.get(prmtrShapeArray[k]);
       if (Array.isArray(jsonShapeObj)) {
-        let templateShapeArrayLength = self.templateShapeArray.length;
+       
         for (let t = 0; t < templateShapeArrayLength; t++) {
+          console.log("shape ",self.templateShapeArray.shape);
+          if (self.templateShapeArray[t].shape === "AnyShape"){
+            anyShapeFlag = true;
+            console.log("on load aim any Shape is true here ");
+            
+          }
+          if (self.templateShapeArray[t].shape === "AnyClosedShape" ){
+            anyClosedShapeFlag = true;
+            console.log("on load aim any closed Shape is true here ");
+          }
           for (let j = 0; j < jsonShapeObj.length; j++) {
             if (
               self.templateShapeArray[t].shape === jsonShapeObj[j].formshape
@@ -3726,13 +3746,36 @@ export var AimEditor = function (
           }
         }
       } else {
-        let templateShapeArrayLength = self.templateShapeArray.length;
+        //let templateShapeArrayLength = self.templateShapeArray.length;
         for (let t = 0; t < templateShapeArrayLength; t++) {
+          if (self.templateShapeArray[t].shape === "AnyShape"){
+            anyShapeFlag = true;
+            console.log("on load aim any Shape is true here ");
+            
+          }
+          if (self.templateShapeArray[t].shape === "AnyClosedShape" ){
+            anyClosedShapeFlag = true;
+            console.log("on load aim any closed Shape is true here ");
+          }
           if (self.templateShapeArray[t].shape === jsonShapeObj.formshape) {
             document.getElementById(
               self.templateShapeArray[t].domid
             ).className = "green check circle outline icon";
           }
+        }
+      }
+      if (anyShapeFlag === true){
+        for (let cnt = 0 ; cnt< templateShapeArrayLength ; cnt++){
+         document.getElementById(
+              self.templateShapeArray[cnt].domid
+            ).className = "green check circle outline icon";
+        }
+      }
+      if (anyClosedShapeFlag === true){
+        for (let cnt = 0 ; cnt< templateShapeArrayLength ; cnt++){
+         document.getElementById(
+              self.templateShapeArray[cnt].domid
+            ).className = "green check circle outline icon";
         }
       }
     }
@@ -4009,8 +4052,94 @@ export var AimEditor = function (
 
    }
    */
+  this.checkShapes = function (shapes){
+    // shapes rectified Mate needs to adjust the paramters before passing this  test = { circle : {count : 5, validate:""} , line:  {count : 5, validate:""}  };
+    // use the the model above not the model in the below line 
+    // shapes needs to be in format shapes = {Circle : "" , Line : "ok"} , value : {"" , "ok"} will be used to make sure that each option is checked
+    /* schema chape list 
+    	<xs:enumeration value="Point"/>
+			<xs:enumeration value="Circle"/>
+			<xs:enumeration value="Polyline"/>
+			<xs:enumeration value="Ellipse"/>
+			<xs:enumeration value="MultiPoint"/>
+			<xs:enumeration value="3DPolygon"/>
+			<xs:enumeration value="3DPolyline"/>
+			<xs:enumeration value="3DMultiPoint"/>
+			<xs:enumeration value="3DPoint"/>
+			<xs:enumeration value="3DEllipse"/>
+			<xs:enumeration value="3DEllipsoid"/>
+			<xs:enumeration value="Line"/>
+			<xs:enumeration value="AnyShape"/>
+			<xs:enumeration value="AnyClosedShape"/>
+      
+    const newShapes = {Circle, Polyline, Line, Perpendicular};
+    */ 
+    /*
+     self.templateShapeArray.push({
+      shape: object.GeometricShape,
+      domid: object.id,
+    });
+     */
+
+    /* impoertant note if there are multiple geometric shape component exist in a template 
+      or relation will be applied 
+    */
+    
+    const templateShapeLength = self.templateShapeArray.length;
+    let anyShapeFlag = false;
+    let anyClosedShapeFlag = false;
+    const localShapes = {...shapes};
+    const tempateShapeKeys = [];
+    for (let cnt = 0 ; cnt < templateShapeLength ; cnt ++){
+      tempateShapeKeys.push(self.templateShapeArray[cnt].shape);
+      if (typeof localShapes[self.templateShapeArray[cnt].shape] !== "undefined") {
+        localShapes[self.templateShapeArray[cnt].shape].validate = "ok";
+              document.getElementById(
+                self.templateShapeArray[cnt].domid
+              ).className = "green check circle outline icon";
+      }
+      if (self.templateShapeArray[cnt].shape === "AnyShape" ){
+        anyShapeFlag = true;
+      }
+      if (self.templateShapeArray[cnt].shape === "AnyClosedShape" ){
+        anyClosedShapeFlag = true;
+      }
+
+    }
+    if (anyShapeFlag === true){
+
+         for (let cnt = 0 ; cnt < templateShapeLength ; cnt ++){
+            document.getElementById(
+                self.templateShapeArray[cnt].domid
+              ).className = "green check circle outline icon";
+        }
+    }
+    if (anyClosedShapeFlag === true){
+      const shapeKeys = Object.keys(localShapes);
+      const arryDiffernce = shapeKeys.filter(eachShape => !self.anyClosedShapeTypes.includes(eachShape));
+      if (arryDiffernce.length === 0){
+         for (let cnt = 0 ; cnt < templateShapeLength ; cnt ++){
+                document.getElementById(
+                    self.templateShapeArray[cnt].domid
+                  ).className = "green check circle outline icon";   
+        }
+      }
+    }
+ 
+
+
+  } 
   this.loadAimJson = function (aimjson) {
     //var ImageAnnotation = aimjson.imageAnnotations.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
+
+
+    //test
+    // example test case const test = { circle : {count : 5, validate:""} , line:  {count : 5, validate:""}  };
+    // console.log("show  test ", test);
+    // console.log(test.hasOwnProperty('o'));
+    // test['circle'].validate = 'ok';
+    // console.log('new test', test);
+    //test
 
     var templateIndex = self.mapTemplateCodeValueByIndex.get(
       aimjson.typeCode[0].code
@@ -4056,6 +4185,7 @@ export var AimEditor = function (
 
       self.traverseJsonOnLoad(imagingPhysicalEntityCollection);
       self.traverseJsonOnLoad(imagingObservationEntityCollection);
+      console.log("markup type : ", aimjson.markupType);
       self.checkAnnotationShapes(aimjson.markupType);
       //self.printMap(self.mapLabelAnnotatorConfidence);
       //self.printMap(self.mapLabelAnnotConfJson);
