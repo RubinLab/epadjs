@@ -142,7 +142,8 @@ class SeriesCreationForm extends React.Component {
 
   render = () => {
     return (
-      <Modal.Dialog dialogClassName="add-series__modal">
+      // <Modal.Dialog dialogClassName="add-series__modal">
+      <Modal.Dialog id="modal-fix">
         <Modal.Header>
           <Modal.Title>Create a New Series</Modal.Title>
         </Modal.Header>

@@ -21,7 +21,8 @@ class About extends React.Component {
       ? this.state.data.description
       : "beta";
     return (
-      <Modal.Dialog dialogClassName="info-about__modal">
+      // <Modal.Dialog dialogClassName="info-about__modal">
+      <Modal.Dialog id="modal-fix">
         <Modal.Header>
           <Modal.Title>About ePAD {mode === "lite" ? "Lite" : ""}</Modal.Title>
         </Modal.Header>

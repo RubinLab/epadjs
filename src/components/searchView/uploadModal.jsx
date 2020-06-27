@@ -240,7 +240,8 @@ class UploadModal extends React.Component {
       : className;
     const { projects } = this.state;
     return (
-      <Modal.Dialog dialogClassName={className}>
+      // <Modal.Dialog dialogClassName={className}>
+      <Modal.Dialog id="modal-fix">
         <Modal.Header>
           <Modal.Title className="upload__header">Upload</Modal.Title>
         </Modal.Header>

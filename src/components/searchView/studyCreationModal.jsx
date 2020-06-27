@@ -94,7 +94,8 @@ class StudyCreationForm extends React.Component {
 
   render = () => {
     return (
-      <Modal.Dialog dialogClassName="add-study__modal">
+      // <Modal.Dialog dialogClassName="add-study__modal">
+      <Modal.Dialog id="modal-fix">
         <Modal.Header>
           <Modal.Title>Create a New Study</Modal.Title>
         </Modal.Header>

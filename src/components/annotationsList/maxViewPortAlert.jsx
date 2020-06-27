@@ -11,7 +11,8 @@ const message = {
 };
 const alertMaxViewPort = props => {
   return (
-    <Modal.Dialog dialogClassName="alert-maxView">
+    // <Modal.Dialog dialogClassName="alert-maxView">
+    <Modal.Dialog id="modal-fix">
       <Modal.Body className="-maxView-container">
         <div className="-maxView__header--icon">
           <FaExclamationTriangle />
