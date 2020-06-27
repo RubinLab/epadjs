@@ -21,7 +21,6 @@ import ProjectEditingForm from "./projectEditingForm";
 import UserRoleEditingForm from "./userRoleEditingForm";
 import ProtectedRoute from "../../common/protectedRoute";
 import SearchView from "../../searchView/searchView";
-import TemplateTable from "./templateTable";
 const messages = {
   deleteSingle: "Delete the project? This cannot be undone.",
   deleteSelected: "Delete selected projects? This cannot be undone.",
@@ -60,7 +59,6 @@ class Projects extends React.Component {
     userRoles: [],
     newRoles: {},
     templates: [],
-    showTemplate: false,
     projectIndex: null,
   };
 
@@ -247,7 +245,6 @@ class Projects extends React.Component {
       hasEditClicked: false,
       hasUserRolesClicked: false,
       errorMessage: null,
-      showTemplate: false,
       projectIndex: null,
       defaulttemplate: null,
     });
@@ -563,18 +560,6 @@ class Projects extends React.Component {
         )}
         {this.state.hasOpenClicked && (
           <ProtectedRoute from="/" exact to="/search" component={SearchView} />
-        )}
-        {this.state.showTemplate && (
-          <TemplateTable
-            templateList={templates}
-            onCancel={this.handleCancel}
-            defaultTemplate={
-              data[projectIndex] ? data[projectIndex].defaultTemplate : null
-            }
-            onSelect={this.getDefaultTemplate}
-            selectedTemp={defaulttemplate}
-            onSubmit={this.updateDefaultTemplate}
-          />
         )}
       </div>
     );

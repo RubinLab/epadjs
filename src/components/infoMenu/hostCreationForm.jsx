@@ -4,7 +4,8 @@ import { Modal } from "react-bootstrap";
 const hostCreationForm = ({ onCancel, onSubmit, onType, error }) => {
   console.log(error);
   return (
-    <Modal.Dialog dialogClassName="add-host__modal">
+    // <Modal.Dialog dialogClassName="add-host__modal">
+    <Modal.Dialog id="modal-fix">
       <Modal.Header>
         <Modal.Title>Create a New Host</Modal.Title>
       </Modal.Header>

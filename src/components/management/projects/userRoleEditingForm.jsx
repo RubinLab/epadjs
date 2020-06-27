@@ -4,11 +4,17 @@ import { Modal } from "react-bootstrap";
 import "../menuStyle.css";
 import UserTable from "./userTable";
 
+const style = { minWidth: "fit-content", left: "10%" };
 const userRoleEditingForm = ({ onCancel, onSubmit, onType, error, users }) => {
   // users = users || projects;
   console.log(users);
   return (
-    <Modal.Dialog dialogClassName="edit-userRole__modal">
+    // <Modal.Dialog dialogClassName="edit-userRole__modal">
+    <Modal.Dialog
+      id="modal-fix"
+      className="in-modal edit-userrole"
+      style={style}
+    >
       <Modal.Header>
         <Modal.Title>Modify User Roles</Modal.Title>
       </Modal.Header>

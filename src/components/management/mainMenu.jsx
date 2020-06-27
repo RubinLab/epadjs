@@ -105,13 +105,13 @@ class MainMenu extends React.Component {
             onClose={this.handleCloseModal}
           />
         );
-      case "Connections":
-        return (
-          <Connections
-            selection={this.state.selection}
-            onClose={this.handleCloseModal}
-          />
-        );
+      // case "Connections":
+      //   return (
+      //     <Connections
+      //       selection={this.state.selection}
+      //       onClose={this.handleCloseModal}
+      //     />
+      //   );
       default:
         return <div />;
     }
@@ -173,12 +173,12 @@ class MainMenu extends React.Component {
                     Pluginstore
                   </div>
                 )}
-                <div
+                {/* <div
                   className="mng-menu__option"
                   onClick={this.handleSelection}
                 >
                   Connections
-                </div>
+                </div> */}
                 {false && (
                   <div
                     className="mng-menu__option"

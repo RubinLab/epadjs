@@ -30,7 +30,8 @@ const projectEditingForm = ({
     );
   });
   return (
-    <Modal.Dialog dialogClassName="edit-project__modal">
+    // <Modal.Dialog dialogClassName="edit-project__modal">
+    <Modal.Dialog id="modal-fix" className="in-modal edit-project">
       <Modal.Header>
         <Modal.Title>Edit Project</Modal.Title>
       </Modal.Header>
