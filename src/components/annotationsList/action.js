@@ -269,7 +269,6 @@ export const addToGrid = (serie, annotation) => {
     seriesUID,
     projectID,
     patientName,
-    seriesDescription,
   } = serie;
   projectID = projectID ? projectID : "lite";
   if (annotation)
@@ -280,7 +279,6 @@ export const addToGrid = (serie, annotation) => {
     studyUID,
     seriesUID,
     patientName,
-    seriesDescription,
     aimID: annotation,
     // imageIndex: 0
   };
