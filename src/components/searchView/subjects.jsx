@@ -400,7 +400,7 @@ class Subjects extends Component {
         Cell: row => <div />,
       },
       {
-        Header: <div className="search-header__col">Idenditifier</div>,
+        Header: <div className="search-header__col">Identifier</div>,
         width: this.widthUnit * 10,
         // minResizeWidth: this.widthUnit * 12,
         id: "searchView-UID",
