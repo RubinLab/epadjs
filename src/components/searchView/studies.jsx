@@ -307,7 +307,6 @@ class Studies extends Component {
         width: this.widthUnit * 2,
         Cell: (row) => (
           <div className="searchView-table__cell">
-            <span className="badge badge-secondary">
               {row.original.numberOfAnnotations === 0 ? (
                 ""
               ) : (
@@ -315,7 +314,6 @@ class Studies extends Component {
                   {row.original.numberOfAnnotations}
                 </span>
               )}
-            </span>
           </div>
         ),
       },
