@@ -228,10 +228,26 @@ class DisplayView extends Component {
 
   async getImages(serie) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
+    console.log("urls", urls);
     return urls;
   }
 
+  prepUrl = (url) => {
+    return `wadors:http://localhost:8090/pacs/studies/${url.studyUID}/series/${url.seriesUID}/instances/${url.imageUID}`;
+  };
+
+  getImageFrameURI = (metadataURI, metadata) => {
+    // Use the BulkDataURI if present int the metadata
+    // if (metadata["7FE00010"] && metadata["7FE00010"].BulkDataURI) {
+    //   console.log("donuyom", metadata["7FE00010"].BulkDataURI);
+    //   return metadata["7FE00010"].BulkDataURI;
+    // }
+
+    // fall back to using frame #1
+    return metadataURI + "/frames/1";
+  };
   getImageStack = async (serie, index) => {
+    console.log("In image stack");
     let stack = {};
     let newImageIds = {};
     let cornerstoneImageIds = [];
@@ -252,6 +268,26 @@ class DisplayView extends Component {
         cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
       }
+      // } else {
+      //   let singleFrameUrl = baseUrl;
+      //   console.log("Single frame url", singleFrameUrl);
+      //   cornerstoneImageIds.push(singleFrameUrl);
+      //   imageIds[singleFrameUrl] = false;
+      //   const { data } = await getMetadata(singleFrameUrl);
+      //   console.log("Metadata", data);
+      //   const metadata = data[0];
+      //   const imageFrameURI = this.getImageFrameURI(
+      //     singleFrameUrl + "/metadata",
+      //     metadata
+      //   );
+      //   const imageId = "wadors:" + imageFrameURI;
+
+      //   cornerstoneWADOImageLoader.wadors.metaDataManager.add(
+      //     imageId,
+      //     metadata
+      //   );
+      //   cornerstone.loadAndCacheImage(imageId);
+      // }
     });
     const { imageIds } = this.state;
     this.setState({ imageIds: { ...imageIds, ...newImageIds } });
