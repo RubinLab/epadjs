@@ -29,6 +29,7 @@ class SeriesCreationForm extends React.Component {
       );
     } else {
       this.setState({ subjectID: this.props.subjects[0].subjectID });
+      this.getStudies(this.props.subjects[0].patientID);
     }
   };
 
