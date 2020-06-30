@@ -33,10 +33,6 @@ class MainMenu extends React.Component {
     // this.setState({ width: window.innerWidth, height: window.innerHeight });
   };
 
-  componentWillMount = () => {
-    this.updateDimensions();
-  };
-
   componentWillUnmount = () => {
     window.removeEventListener("resize", this.updateDimensions);
   };
