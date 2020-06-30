@@ -286,6 +286,7 @@ class App extends Component {
         sessionStorage.setItem("auth", auth);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
         this.completeAutorization(apiUrl);
+        if (mode === "lite") this.setState({ pid: "lite" });
       })
       .catch(err => {
         console.log(err);
@@ -299,6 +300,7 @@ class App extends Component {
       notifications = JSON.parse(notifications);
       this.setState({ notifications });
     }
+   
   }
 
   completeAutorization = apiUrl => {
@@ -860,6 +862,7 @@ class App extends Component {
                     getTreeExpandAll={this.getTreeExpandAll}
                     treeExpand={treeExpand}
                     getExpandLevel={this.getExpandLevel}
+                    pid={this.state.pid}
                     // expandLoading={expandLoading}
                     // updateExpandedLevelNums={this.updateExpandedLevelNums}
                     onShrink={this.handleShrink}
