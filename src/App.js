@@ -300,7 +300,6 @@ class App extends Component {
       notifications = JSON.parse(notifications);
       this.setState({ notifications });
     }
-   
   }
 
   completeAutorization = apiUrl => {
@@ -567,9 +566,48 @@ class App extends Component {
     this.setState({ treeExpand: {}, expandLevel: 0 });
   };
 
+  sortItemArray = (index, arr, attribute, returnVal) => {
+    console.log("index, arr, attribute, returnVal");
+    console.log(index, arr, attribute, returnVal);
+    arr.sort(function(a, b) {
+      if (a.data[attribute] < b.data[attribute]) {
+        return -1;
+      }
+      if (a.data[attribute] > b.data[attribute]) {
+        return 1;
+      }
+      return 0;
+    });
+    return arr[index].data[returnVal];
+  };
+
   clearTreeData = () => {
-    const { pid } = this.state;
-    const treeData = { [pid]: { ...this.state.treeData[pid] } };
+    const { pid, treeExpand } = this.state;
+    const patients = { ...this.state.treeData[pid] };
+    const patientsArr = Object.values(patients);
+    for (let patientIndex in treeExpand) {
+      // if the index is kept as false it means that 
+      // level opened and then closed so we need to clear data
+      const patientID = this.sortItemArray(
+        patientIndex,
+        patientsArr,
+        "subjectName",
+        "subjectID"
+      );
+      if (!treeExpand[patientIndex]) {
+        // find subject id and empty studies
+        patients[patientID].studies = {};
+      } else {
+        for (let studyIndex in treeExpand[patientIndex]) {
+          if (!treeExpand[patientIndex][studyIndex]) {
+            const studies = Object.values(patients[patientID].studies);
+            const { studyUID } = studies[studyIndex].data;
+            patients[patientID].studies[studyUID].series = {};
+          }
+        }
+      }
+    }
+    const treeData = { [pid]: patients };
     this.setState({ treeData });
   };
 
