@@ -11,8 +11,8 @@ export function scanDataFolder() {
       );
       return;
     }
-    projectId = pathName.split("/search/");
-    if (projectId[1] === "all") {
+    projectId = pathName.split("/search/")[1];
+    if (projectId === "all" || projectId === "nonassigned") {
       alert("A project must be selected to put the data under!");
       return;
     }
