@@ -66,20 +66,25 @@ class Subjects extends Component {
         data = await this.getData();
         this.props.getTreeData(pid, "subject", data);
       }
-      const expanded = {};
       this.setState({ data });
       this.setState({ columns: this.setColumns() });
-      const ptExpandKeys = Object.keys(this.props.treeExpand);
-      const ptExpandVal = Object.values(this.props.treeExpand);
-      ptExpandKeys.forEach((el, index) => {
-        expanded[el] = ptExpandVal[index];
-      });
-      this.setState({ expanded });
+      this.updateExpanded();
     } catch (err) {
       // console.log(err);
       console.log(`couldn't load all subjects data. Please Try again!`);
     }
   }
+
+  updateExpanded = () => {
+    const expanded = {};
+    const ptExpandKeys = Object.keys(this.props.treeExpand);
+    const ptExpandVal = Object.values(this.props.treeExpand);
+    ptExpandKeys.forEach((el, index) => {
+      expanded[el] = ptExpandVal[index];
+    });
+    this.setState({ expanded });
+    return expanded;
+  };
 
   async componentDidUpdate(prevProps) {
     try {
@@ -94,16 +99,24 @@ class Subjects extends Component {
 
       let data;
 
+      const newExpanded = Object.keys(this.props.treeExpand);
+      const oldExpanded = Object.keys(prevProps.treeExpand);
+      const shouldCollapse = newExpanded.length === 0 && oldExpanded.length > 0;
+      if (shouldCollapse) this.setState({ expanded: {}, expansionArr: [] });
+
       if (this.props.update !== prevProps.update) {
         data = await this.getData();
-        const expanded = persistExpandView(
-          this.state.expanded,
-          this.state.data,
-          data,
-          "subjectID"
-        );
+        const expanded = shouldCollapse
+          ? {}
+          : persistExpandView(
+              this.state.expanded,
+              this.state.data,
+              data,
+              "subjectID"
+            );
         this.props.getTreeData(pid, "subject", data);
         this.setState({ data, expanded });
+        if (shouldCollapse) this.setState({ expansionArr: [] });
       }
 
       if (closeAllCounter !== prevProps.closeAllCounter) {
