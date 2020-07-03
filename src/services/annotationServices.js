@@ -120,6 +120,28 @@ export function uploadAim(aim, projectId, isUpdate = false, updatedAimId) {
   else return http.post(url, aim);
 }
 
+// Following method uses file backend to handle big aim sizes.
+// But it has a significant delay so rerendering markups does not work correctly
+// after saving the annotations!!!
+
+// export function uploadAim(aim, projectId, isUpdate = false, updatedAimId) {
+//   let url;
+//   if (mode === "lite") {
+//     url = apiUrl + "/projects/lite/aimfiles";
+//   } else {
+//     url = apiUrl + "/projects/" + projectId + "/aimfiles";
+//   }
+//   const aimData = new FormData();
+//   aimData.append("file", aim, "aim.json");
+//   const config = {
+//     headers: {
+//       "content-type": "multipart/form-data",
+//     },
+//   };
+//   if (isUpdate) return http.put(url + `/${updatedAimId}`, aimData, config);
+//   else return http.post(url, aimData, config);
+// }
+
 export function uploadSegmentation(segmentation, projectId = "lite") {
   const url = apiUrl + "/projects/" + projectId + "/files";
   const segData = new FormData();

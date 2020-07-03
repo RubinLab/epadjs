@@ -322,6 +322,14 @@ class AimEditor extends Component {
   saveAim = (aim, segmentationBlob) => {
     const aimJson = aim.getAim();
     const aimSaved = JSON.parse(aimJson);
+
+    // If file upload service will be used instead of aim save service reagrding
+    // the aim size purposes then aim blob should be sent with the following code
+
+    // const aimBlob = new Blob([aimJson], {
+    //   type: "application/octet-stream",
+    // });
+
     const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
     const { openSeries, activePort } = this.props;
     const { patientID, projectID, seriesUID, studyUID } = openSeries[
