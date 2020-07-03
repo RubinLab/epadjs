@@ -109,34 +109,38 @@ export function deleteAnnotation(aimObj, delSys) {
   );
 }
 
-// export function uploadAim(aim, projectId, isUpdate = false, updatedAimId) {
-//   let url;
-//   if (mode === "lite") {
-//     url = apiUrl + "/projects/lite/aims";
-//   } else {
-//     url = apiUrl + "/projects/" + projectId + "/aims";
-//   }
-//   if (isUpdate) return http.put(url + `/${updatedAimId}`, aim);
-//   else return http.post(url, aim);
-// }
-
 export function uploadAim(aim, projectId, isUpdate = false, updatedAimId) {
   let url;
   if (mode === "lite") {
-    url = apiUrl + "/projects/lite/aimfiles";
+    url = apiUrl + "/projects/lite/aims";
   } else {
-    url = apiUrl + "/projects/" + projectId + "/aimfiles";
+    url = apiUrl + "/projects/" + projectId + "/aims";
   }
-  const aimData = new FormData();
-  aimData.append("file", aim, "aim.json");
-  const config = {
-    headers: {
-      "content-type": "multipart/form-data",
-    },
-  };
-  if (isUpdate) return http.put(url + `/${updatedAimId}`, aimData, config);
-  else return http.post(url, aimData, config);
+  if (isUpdate) return http.put(url + `/${updatedAimId}`, aim);
+  else return http.post(url, aim);
 }
+
+// Following method uses file backend to handle big aim sizes.
+// But it has a significant delay so rerendering markups does not work correctly
+// after saving the annotations!!!
+
+// export function uploadAim(aim, projectId, isUpdate = false, updatedAimId) {
+//   let url;
+//   if (mode === "lite") {
+//     url = apiUrl + "/projects/lite/aimfiles";
+//   } else {
+//     url = apiUrl + "/projects/" + projectId + "/aimfiles";
+//   }
+//   const aimData = new FormData();
+//   aimData.append("file", aim, "aim.json");
+//   const config = {
+//     headers: {
+//       "content-type": "multipart/form-data",
+//     },
+//   };
+//   if (isUpdate) return http.put(url + `/${updatedAimId}`, aimData, config);
+//   else return http.post(url, aimData, config);
+// }
 
 export function uploadSegmentation(segmentation, projectId = "lite") {
   const url = apiUrl + "/projects/" + projectId + "/files";
