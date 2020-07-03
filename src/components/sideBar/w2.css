@@ -312,7 +312,8 @@ body {
   padding: 0.5em 0.8rem;
   font-weight: 400;
   font-size: 1.2rem;
-  color: #ffffff
+  color: #ffffff; 
+  margin: 0.2rem;
 }
 
 .sidebar-content {

@@ -44,8 +44,9 @@ class UploadWizard extends React.Component {
     };
   }
 
-  populateErrorMessage = (name, id) => {
-    return `In order to edit the ${name} for only one series you need to change its ${id} or you can apply the name change to all series of the patient`;
+  populateErrorMessage = (name) => {
+    // const patientRelated = name.startsWith("patient");
+    return `In order to edit the ${name} you need to apply the change to the study as well or change the study UID`;
   };
 
   handleTagInput = (e, tagName, tagValue) => {
@@ -149,9 +150,12 @@ class UploadWizard extends React.Component {
 
   validateApplyAll = () => {
     const { tagValues, applyPatient, applyStudy } = this.state;
-    if (tagValues.PatientName && !tagValues.PatientID && !applyPatient) {
+    const patientUpdated = tagValues.PatientName || tagValues.PatientID;
+    const studyUIDUpdated = tagValues.StudyInstanceUID;
+    const studyCompleted = studyUIDUpdated || applyStudy;
+    if (patientUpdated && !studyCompleted) {
       this.setState({
-        error: this.populateErrorMessage("patient name", "patient ID"),
+        error: this.populateErrorMessage("patient info", "patient ID"),
       });
       return false;
     } else if (

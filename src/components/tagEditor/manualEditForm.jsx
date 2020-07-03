@@ -100,7 +100,7 @@ class ManualEditForm extends React.Component {
                 >{`Apply patient info to its all series`}</span>
               </div>
             )}
-            {studyUpdated && (
+            {(studyUpdated || patientUpdated) && (
               <div className="tagEditForm__el--confirmation" align="left">
                 <input
                   type="checkbox"
