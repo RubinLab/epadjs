@@ -314,7 +314,7 @@ class Series extends Component {
         width: this.widthUnit * 2,
         Cell: (row) => (
           <div className="searchView-table__cell">
-            {row.original.numberOfAnnotations === "" ? (
+            {row.original.numberOfAnnotations === 0 ? (
               ""
             ) : (
               <span className="badge badge-secondary">

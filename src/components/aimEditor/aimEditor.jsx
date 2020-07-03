@@ -37,11 +37,17 @@ class AimEditor extends Component {
     super(props);
     this.image = this.getImage();
     this.semanticAnswers = {};
-    if (this.props.aimId) this.updatedAimId = this.props.aimId.aimId;
+    this.state = {
+      buttonGroupShow: false,
+      isUpdate: false,
+    };
+    //if aim is being updated set the aimId and isUpdate flag
+    if (this.props.aimId) {
+      this.updatedAimId = this.props.aimId.aimId;
+      this.state.isUpdate = true;
+    }
   }
-  state = {
-    buttonGroupShow: false,
-  };
+
   componentDidMount() {
     const element = document.getElementById("questionaire");
     // const { data: templates } = await getTemplates();
@@ -316,6 +322,14 @@ class AimEditor extends Component {
   saveAim = (aim, segmentationBlob) => {
     const aimJson = aim.getAim();
     const aimSaved = JSON.parse(aimJson);
+
+    // If file upload service will be used instead of aim save service reagrding
+    // the aim size purposes then aim blob should be sent with the following code
+
+    // const aimBlob = new Blob([aimJson], {
+    //   type: "application/octet-stream",
+    // });
+
     const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
     const { openSeries, activePort } = this.props;
     const { patientID, projectID, seriesUID, studyUID } = openSeries[
@@ -337,7 +351,12 @@ class AimEditor extends Component {
       comment,
     };
 
-    uploadAim(aimSaved, this.props.projectID)
+    uploadAim(
+      aimSaved,
+      this.props.projectID,
+      this.state.isUpdate,
+      this.updatedAimId
+    )
       .then(() => {
         if (segmentationBlob) this.saveSegmentation(segmentationBlob);
         // var objectUrl = URL.createObjectURL(segBlobGlobal);
@@ -365,7 +384,12 @@ class AimEditor extends Component {
         this.props.dispatch(updatePatientOnAimSave(aimRefs));
         this.props.updateTreeDataOnSave(aimRefs);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        alert(
+          "Annotation could not be saved! More information about the error can be found in the logs."
+        );
+        console.log(error);
+      });
     this.props.onCancel(false);
   };
 

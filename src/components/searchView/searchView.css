@@ -296,7 +296,6 @@ h5.add-subject__modal--label,
 
 .openSeries-select {
   margin-top: 0.3rem;
-  display: flex;
 }
 
 .add-worklist__modal.modal-dialog .modal-content {
@@ -454,4 +453,46 @@ h5.add-subject__modal--label,
   color: #fafafa;
   cursor: pointer;
   text-decoration: underline;
+}
+
+#modal-fix {
+  position: absolute;
+  top: 20%;
+  left: 30%;
+  border: 2px solid grey;
+  box-shadow: 1rem 1rem 1rem grey;
+  z-index: 100;
+}
+
+.notifications {
+  min-width: 30rem;
+}
+
+#modal-fix.modal-dialog.in-modal {
+  top: 5%;
+  margin: 0px;
+  padding: 0px;
+}
+
+#modal-fix.modal-dialog.in-modal.edit-project {
+  width: 25rem;
+}
+
+#modal-fix.modal-dialog.in-modal.big-table {
+  left: 20%;
+}
+
+.updateAssignee__mbody.modal-body {
+  height: 20rem;
+  overflow: auto;
+}
+
+#modal-fix.modal-dialog.in-modal.mini-modal {
+  left: 0;
+  width: -webkit-fill-available;
+  color: orangered;
+}
+
+#modal-fix.modal-minwidth {
+  width: 25rem;
 }

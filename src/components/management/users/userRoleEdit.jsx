@@ -12,7 +12,8 @@ const userRoleEdit = ({
   projectToRole,
 }) => {
   return (
-    <Modal.Dialog dialogClassName="edit-userRole__modal project_user">
+    // <Modal.Dialog dialogClassName="edit-userRole__modal project_user">
+    <Modal.Dialog id="modal-fix" className="in-modal big-table">
       <Modal.Header>
         <Modal.Title>Modify User Roles</Modal.Title>
       </Modal.Header>

@@ -6,7 +6,8 @@ class Notifications extends React.Component {
   render = () => {
     const { onOK, list, title } = this.props;
     return (
-      <Modal.Dialog dialogClassName="response__modal">
+      // <Modal.Dialog dialogClassName="response__modal">
+      <Modal.Dialog id="modal-fix" className="notifications">
         <Modal.Header>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
