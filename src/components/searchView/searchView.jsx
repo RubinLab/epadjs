@@ -329,6 +329,7 @@ class SearchView extends Component {
             noOfNotDeleted: openItems.length,
           });
         }
+        this.props.clearTreeData()
       })
       .catch(err => {
         console.log(err);

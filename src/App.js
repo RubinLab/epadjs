@@ -300,7 +300,6 @@ class App extends Component {
       notifications = JSON.parse(notifications);
       this.setState({ notifications });
     }
-   
   }
 
   completeAutorization = apiUrl => {
@@ -422,6 +421,12 @@ class App extends Component {
         action,
         error,
       });
+      const tagEdited = action.startsWith("Tag");
+      const uploaded = action.startsWith("Upload");
+      if (tagEdited || uploaded) {
+        console.log("collapsing");
+        this.setState({ treeExpand: {} });
+      }
       this.setState({ notifications });
       const stringified = JSON.stringify(notifications);
       sessionStorage.setItem("notifications", stringified);
@@ -567,10 +572,66 @@ class App extends Component {
     this.setState({ treeExpand: {}, expandLevel: 0 });
   };
 
+  sortLevelArr = (arr, attribute) => {
+    return arr.sort(function(a, b) {
+      if (a.data[attribute] < b.data[attribute]) {
+        return -1;
+      }
+      if (a.data[attribute] > b.data[attribute]) {
+        return 1;
+      }
+      return 0;
+    });
+  };
+
+  getPatientIDfromSortedArray = (index, arr, attribute, returnVal) => {
+    const sortedArr = this.sortLevelArr(arr, attribute);
+    return sortedArr[index].data[returnVal];
+  };
+
+  getIndexOfPatient = (arr, patientID) => {
+    let index;
+    arr.forEach((el, i) => {
+      if (el.data.subjectID === patientID) {
+        index = i;
+      }
+    });
+    return index;
+  };
+
   clearTreeData = () => {
-    const { pid } = this.state;
-    const treeData = { [pid]: { ...this.state.treeData[pid] } };
-    this.setState({ treeData });
+    try {
+      const { pid, treeExpand } = this.state;
+      const patients = { ...this.state.treeData[pid] };
+      const patientsArr = Object.values(patients);
+
+      for (let patientIndex in treeExpand) {
+        // if the index is kept as false it means that
+        // level opened and then closed so we need to clear data
+        const patientID = this.getPatientIDfromSortedArray(
+          patientIndex,
+          patientsArr,
+          "subjectName",
+          "subjectID"
+        );
+        if (!treeExpand[patientIndex]) {
+          // find subject id and empty studies
+          patients[patientID].studies = {};
+        } else {
+          for (let studyIndex in treeExpand[patientIndex]) {
+            if (!treeExpand[patientIndex][studyIndex]) {
+              const studies = Object.values(patients[patientID].studies);
+              const { studyUID } = studies[studyIndex].data;
+              patients[patientID].studies[studyUID].series = {};
+            }
+          }
+        }
+      }
+      const treeData = { [pid]: patients };
+      this.setState({ treeData });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   findNonExisting = (arr, uid, level) => {

@@ -25,12 +25,12 @@ import {
   updatePatient,
   // showAnnotationDock
 } from "../annotationsList/action";
-import { persistExpandView, styleEightDigitDate} from "../../Utils/aid";
+import { persistExpandView, styleEightDigitDate } from "../../Utils/aid";
 
 //import "react-table/react-table.css";
 
 function getNodes(data, node = []) {
-  data.forEach((item) => {
+  data.forEach(item => {
     if (item.hasOwnProperty("_subRows") && item._subRows) {
       node = getNodes(item._subRows, node);
     } else {
@@ -40,7 +40,7 @@ function getNodes(data, node = []) {
   return node;
 }
 
-const progressDisplay = (status) => {
+const progressDisplay = status => {
   if (status === "STUDY_STATUS_COMPLETED") {
     return <FaBatteryFull className="progress-done" />;
   } else if (status === "STUDY_STATUS_NOT_STARTED") {
@@ -86,7 +86,7 @@ class Studies extends Component {
       } = this.props;
       let data = Object.values(treeData[projectId][subjectId].studies);
       if (data.length > 0) {
-        data = data.map((el) => el.data);
+        data = data.map(el => el.data);
       } else {
         let studies = await getStudies(projectId, subjectId);
         data = studies.data;
@@ -142,8 +142,9 @@ class Studies extends Component {
         selectedStudies,
       } = this.props;
 
+
       if (closeAllCounter !== prevProps.closeAllCounter) {
-        this.setState({ expanded: {} });
+        this.setState({ expanded: {}, expansionArr: [] });
       }
 
       if (update !== prevProps.update && treeExpand[patientIndex]) {
@@ -192,6 +193,12 @@ class Studies extends Component {
           this.props.getTreeExpandAll(obj, true, expandLevel);
         }
       }
+
+      const expanded = Object.keys(this.props.treeExpand);
+      const oldExpanded = Object.keys(prevProps.treeExpand);
+      const shouldCollapse = expanded.length === 0 && oldExpanded > 0;
+      if (shouldCollapse) this.setState({ expanded: {} });
+
       const newSelectedStArr = Object.keys(selectedStudies);
       const oldSelectedStArr = Object.keys(prevProps.selectedStudies);
       if (newSelectedStArr.length !== oldSelectedStArr.length) {
@@ -212,11 +219,12 @@ class Studies extends Component {
         }
       this.setState({ expanded });
     } catch (err) {
+      console.log(err)
       console.log(`couldn't load all study data. Please Try again!`);
     }
   };
 
-  selectRow = (selected) => {
+  selectRow = selected => {
     // const { studyUID, numberOfSeries, patientID, projectID } = selected;
     // const studyObj = { studyUID, numberOfSeries, patientID, projectID };
     // const newState = { ...this.state.selectedStudy };
@@ -281,7 +289,7 @@ class Studies extends Component {
       {
         width: this.widthUnit * 12,
         className: "searchView-row__desc",
-        Cell: (row) => {
+        Cell: row => {
           let desc = this.cleanCarets(row.original.studyDescription);
           desc = desc || "Unnamed Study";
           const id = "desc" + row.original.studyUID;
@@ -305,21 +313,21 @@ class Studies extends Component {
       },
       {
         width: this.widthUnit * 2,
-        Cell: (row) => (
+        Cell: row => (
           <div className="searchView-table__cell">
-              {row.original.numberOfAnnotations === 0 ? (
-                ""
-              ) : (
-                <span className="badge badge-secondary">
-                  {row.original.numberOfAnnotations}
-                </span>
-              )}
+            {row.original.numberOfAnnotations === 0 ? (
+              ""
+            ) : (
+              <span className="badge badge-secondary">
+                {row.original.numberOfAnnotations}
+              </span>
+            )}
           </div>
         ),
       },
       {
         width: this.widthUnit * 3,
-        Cell: (row) => (
+        Cell: row => (
           <div className="searchView-table__cell">
             {row.original.numberOfSeries === "" ? (
               ""
@@ -333,7 +341,7 @@ class Studies extends Component {
       },
       {
         width: this.widthUnit * 3,
-        Cell: (row) => (
+        Cell: row => (
           <div className="searchView-table__cell">
             {row.original.numberOfImages === "" ? (
               ""
@@ -348,7 +356,7 @@ class Studies extends Component {
       {
         //Header: "Type",
         width: this.widthUnit * 5,
-        Cell: (row) => (
+        Cell: row => (
           <div className="searchView-table__cell">
             {row.original.examTypes.join("/")}
           </div>
@@ -357,7 +365,7 @@ class Studies extends Component {
       {
         //Header: "Study/Created Date",
         width: this.widthUnit * 7,
-        Cell: (row) => (
+        Cell: row => (
           <div className="searchView-table__cell">
             {styleEightDigitDate(row.original.insertDate)}
           </div>
@@ -366,7 +374,7 @@ class Studies extends Component {
       {
         //Header: "Uploaded",
         width: this.widthUnit * 7,
-        Cell: (row) => (
+        Cell: row => (
           <div className="searchView-table__cell">
             {styleEightDigitDate(row.original.createdTime)}
           </div>
@@ -375,7 +383,7 @@ class Studies extends Component {
       {
         //Header: "Accession",
         width: this.widthUnit * 6,
-        Cell: (row) => (
+        Cell: row => (
           <>
             <div
               className="searchView-table__cell"
@@ -399,7 +407,7 @@ class Studies extends Component {
       {
         //Header: "Identifier",
         width: this.widthUnit * 10,
-        Cell: (row) => (
+        Cell: row => (
           <>
             <div data-tip data-for={row.original.studyUID}>
               {row.original.studyUID}
@@ -478,13 +486,13 @@ class Studies extends Component {
       // we need to get all the "real" (original) records out to get at their IDs
       const nodes = getNodes(currentRecords);
       // we just push all the IDs onto the selection array
-      nodes.forEach((item) => {
+      nodes.forEach(item => {
         selection.push(item._id);
       });
     }
     this.setState({ selectAll, selection });
   };
-  isSelected = (key) => {
+  isSelected = key => {
     /*
       Instead of passing our external selection state we provide an "isSelected"
       callback and detect the selection state ourselves. This allows any implementation
@@ -514,7 +522,7 @@ class Studies extends Component {
   //   this.setState({ expanded: newExpanded });
   // };
 
-  excludeOpenSeries = (allSeriesArr) => {
+  excludeOpenSeries = allSeriesArr => {
     const result = [];
     //get all series number in an array
     const idArr = this.props.openSeries.reduce((all, item, index) => {
@@ -522,7 +530,7 @@ class Studies extends Component {
       return all;
     }, []);
     //if array doesnot include that serie number
-    allSeriesArr.forEach((serie) => {
+    allSeriesArr.forEach(serie => {
       if (!idArr.includes(serie.seriesUID)) {
         //push that serie in the result arr
         result.push(serie);
@@ -531,7 +539,7 @@ class Studies extends Component {
     return result;
   };
 
-  getSeriesData = async (selected) => {
+  getSeriesData = async selected => {
     this.props.dispatch(startLoading());
     const { projectID, patientID, studyUID } = selected;
     try {
@@ -543,7 +551,7 @@ class Studies extends Component {
     }
   };
 
-  displaySeries = async (selected) => {
+  displaySeries = async selected => {
     if (this.props.openSeries.length === MAX_PORT) {
       this.props.dispatch(alertViewPortFull());
     } else {
@@ -581,7 +589,7 @@ class Studies extends Component {
         //getsingleSerie
         Promise.all(promiseArr)
           .then(() => {})
-          .catch((err) => console.log(err));
+          .catch(err => console.log(err));
 
         //if patient doesnot exist get patient
         if (!patientExists) {
@@ -600,7 +608,7 @@ class Studies extends Component {
   };
 
   closeSelectionModal = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       isSerieSelectionOpen: !state.isSerieSelectionOpen,
     }));
   };
@@ -618,7 +626,7 @@ class Studies extends Component {
     this.props.getTreeExpandSingle(obj);
   };
 
-  closeExpansionFromSub = (index) => {
+  closeExpansionFromSub = index => {
     const expanded = { ...this.state.expanded };
     expanded[index] = false;
     this.setState({ expanded });
@@ -649,7 +657,7 @@ class Studies extends Component {
       // expanded,
       onExpandedChange,
     };
-    const TheadComponent = (props) => null;
+    const TheadComponent = props => null;
     return (
       <div>
         {this.state.data ? (
@@ -658,19 +666,19 @@ class Studies extends Component {
             data={this.state.data}
             columns={this.state.columns}
             pageSize={this.state.data.length}
-            ref={(r) => (this.selectTable = r)}
+            ref={r => (this.selectTable = r)}
             className="-striped -highlight"
             // freezWhenExpanded={false}
             showPagination={false}
             TheadComponent={TheadComponent}
             {...extraProps}
             getTdProps={(state, rowInfo, column) => ({
-              onDoubleClick: (e) => {
+              onDoubleClick: e => {
                 this.displaySeries(rowInfo.original);
               },
             })}
             expanded={this.state.expanded}
-            SubComponent={(row) => {
+            SubComponent={row => {
               return (
                 <div style={{ paddingLeft: "20px" }}>
                   <Series
@@ -711,7 +719,7 @@ class Studies extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
