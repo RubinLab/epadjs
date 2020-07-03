@@ -187,6 +187,7 @@ class SeriesBrowser extends React.Component {
               name="project"
               className="seriesBrowser--select"
               onChange={this.handleInput}
+              onMouseDown={e => e.stopPropagation()}
             >
               {this.renderProjects()}
             </select>
@@ -197,6 +198,7 @@ class SeriesBrowser extends React.Component {
               name="subject"
               className="seriesBrowser--select"
               onChange={this.handleInput}
+              onMouseDown={e => e.stopPropagation()}
             >
               {this.renderPatients()}
             </select>
@@ -207,6 +209,7 @@ class SeriesBrowser extends React.Component {
               name="study"
               className="seriesBrowser--select"
               onChange={this.handleInput}
+              onMouseDown={e => e.stopPropagation()}
             >
               {this.renderStudies()}
             </select>
@@ -217,6 +220,7 @@ class SeriesBrowser extends React.Component {
               name="series"
               className="seriesBrowser--select"
               onChange={this.handleInput}
+              onMouseDown={e => e.stopPropagation()}
             >
               {this.renderSeries()}
             </select>

@@ -1,7 +1,5 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { Button } from "react-bootstrap";
 import * as dcmjs from "dcmjs";
 import { FaTimes } from "react-icons/fa";
 import TagRequirements from "./tagRequirementList";
@@ -46,8 +44,9 @@ class UploadWizard extends React.Component {
     };
   }
 
-  populateErrorMessage = (name, id) => {
-    return `In order to edit the ${name} for only one series you need to change its ${id} or you can apply the name change to all series of the patient`;
+  populateErrorMessage = (name) => {
+    // const patientRelated = name.startsWith("patient");
+    return `In order to edit the ${name} you need to apply the change to the study as well or change the study UID`;
   };
 
   handleTagInput = (e, tagName, tagValue) => {
@@ -56,8 +55,10 @@ class UploadWizard extends React.Component {
       name = e.target.name;
       value = e.target.value;
       if (name || value) {
-        if (!value) this.setState({ error: `Please fill the ${name}` });
-        else {
+        if (!value) {
+          this.setState({ error: `Please fill the ${name}` });
+          this.storeTagValuePair(name, value);
+        } else {
           this.setState({ error: "" });
           this.storeTagValuePair(name, value);
         }
@@ -129,6 +130,7 @@ class UploadWizard extends React.Component {
             tagValues
           );
 
+          this.props.onSave();
           if (seriesIndex === seriesArr.length - 1) {
             this.props.onClose();
             this.props.dispatch(clearSelection());
@@ -148,9 +150,12 @@ class UploadWizard extends React.Component {
 
   validateApplyAll = () => {
     const { tagValues, applyPatient, applyStudy } = this.state;
-    if (tagValues.PatientName && !tagValues.PatientID && !applyPatient) {
+    const patientUpdated = tagValues.PatientName || tagValues.PatientID;
+    const studyUIDUpdated = tagValues.StudyInstanceUID;
+    const studyCompleted = studyUIDUpdated || applyStudy;
+    if (patientUpdated && !studyCompleted) {
       this.setState({
-        error: this.populateErrorMessage("patient name", "patient ID"),
+        error: this.populateErrorMessage("patient info", "patient ID"),
       });
       return false;
     } else if (

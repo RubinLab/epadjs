@@ -370,8 +370,9 @@ h5.add-subject__modal--label,
   font-size: 1.1rem;
 }
 
-.tagCopyForm__el .--textFilled {
-  background: #999;
+.tagCopyForm__el.--retrieved input {
+  background: bottom;
+  color: gainsboro;
 }
 
 .react-tabs__tab-list {

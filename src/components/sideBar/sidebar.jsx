@@ -147,12 +147,12 @@ class Sidebar extends Component {
   getProgressTotal = (list, attribute) => {
     const promises = [];
     const result = [...list];
-    list.forEach((wl) => {
+    list.forEach(wl => {
       promises.push(getWorklistProgress(wl.workListID));
     });
     Promise.all(promises)
-      .then((data) => {
-        const progressArr = data.map((el) => {
+      .then(data => {
+        const progressArr = data.map(el => {
           return el.data;
         });
         let total;
@@ -165,12 +165,12 @@ class Sidebar extends Component {
         });
         this.setState({ [attribute]: result });
       })
-      .catch((err) => console.error(err));
+      .catch(err => console.error(err));
   };
 
-  componentDidUpdate = (prevProps) => {
+  componentDidUpdate = prevProps => {
     let { pathname } = this.props.location;
-    const { pid } = this.props;
+    const { pid, lastEventId } = this.props;
     if (prevProps.progressUpdated !== this.props.progressUpdated) {
       this.getWorklistandProgressData();
     }
@@ -183,6 +183,11 @@ class Sidebar extends Component {
     }
     if (pid !== prevProps.pid) {
       this.setState({ pid });
+    }
+
+    if (lastEventId !== prevProps.lastEventId) {
+      this.getProjectsData();
+      this.getWorklistandProgressData();
     }
   };
 
@@ -274,7 +279,7 @@ class Sidebar extends Component {
       pathname = pathname.split("/").pop();
       // const pid = pathname.pop();
       if (mode === "thick") {
-        const projectsList = projects.map((project) => {
+        const projectsList = projects.map(project => {
           const matchProject =
             selected === project.id || pathname === project.id;
           const className = matchProject
@@ -289,9 +294,10 @@ class Sidebar extends Component {
                     this.props.getPidUpdate(project.id);
                     this.setState({ selected: project.id });
                   }}
-                  style={{ padding: "0.6rem" }}
+                  // style={{ padding: "0.6rem" }}
                 >
                   {project.name}
+                  <span id="subjectCount" className="badge badge-secondary">{project.numberOfSubjects}</span>
                 </p>
               </td>
             </tr>
@@ -308,7 +314,7 @@ class Sidebar extends Component {
 
   renderWorklists = () => {
     const { type, selected } = this.state;
-    const worklists = this.state.worklistsAssigned.map((worklist) => {
+    const worklists = this.state.worklistsAssigned.map(worklist => {
       const className =
         worklist.workListID === selected && type === "worklist"
           ? "sidebar-row __selected"
@@ -379,7 +385,7 @@ class Sidebar extends Component {
       <Tabs
         id="controlled-tab-example"
         activeKey={this.state.activeTab}
-        onSelect={(index) => this.setState({ index })}
+        onSelect={index => this.setState({ index })}
       >
         {mode === "thick" ? (
           <Tab eventKey="0" title="Projects">
@@ -464,10 +470,11 @@ class Sidebar extends Component {
   };
 }
 
-const mapStateToProps = (state) => {
-  const { activePort } = state.annotationsListReducer;
+const mapStateToProps = state => {
+  const { activePort, lastEventId } = state.annotationsListReducer;
   return {
     activePort,
+    lastEventId
   };
 };
 export default withRouter(connect(mapStateToProps)(Sidebar));
