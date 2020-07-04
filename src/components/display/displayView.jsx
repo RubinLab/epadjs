@@ -16,6 +16,7 @@ import {
   updateImageId,
   clearActivePortAimID,
   closeSerie,
+  jumpToAim,
 } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
@@ -28,6 +29,7 @@ import { circle } from "./Circle";
 import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
+import * as aimForm from "../aimEditor/parseClass.js";
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
@@ -408,6 +410,10 @@ class DisplayView extends Component {
 
   // TODO: Can this be done without checking the tools of interest?
   measurementCompleted = (event, action) => {
+    const dummyAimForm = new aimForm.AimEditor();
+    console.log("Aim form ", dummyAimForm.checkShapes);
+    // dummyAimForm.checkShapes();
+    console.log("Measurement completed", event);
     const { toolName, toolType } = event.detail;
 
     const toolsOfInterest = [
@@ -423,13 +429,26 @@ class DisplayView extends Component {
     }
   };
 
+  measurementAdded = (event, action) => {
+    console.log("Measurement added", event);
+  };
+
+  measurementRemoved = (event, action) => {
+    console.log("Measurement removed", event);
+  };
+
+  getAnnotations = () => {};
+
+  passShapes2AE = () => {};
+
   handleMarkupSelected = (event) => {
     const { aimList, series, activePort } = this.props;
+    const { seriesUID } = series[activePort];
     const { aimId, ancestorEvent } = event.detail;
     const { element, data } = ancestorEvent;
 
-    if (aimList[series[activePort].seriesUID][aimId]) {
-      const aimJson = aimList[series[activePort].seriesUID][aimId].json;
+    if (aimList[seriesUID][aimId]) {
+      const aimJson = aimList[seriesUID][aimId].json;
       const markupTypes = this.getMarkupTypesForAim(aimId);
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimId;
@@ -455,6 +474,8 @@ class DisplayView extends Component {
           return;
         }
       }
+      // this.props.dispatch(ozge's new method here)
+      this.props.dispatch(jumpToAim(seriesUID, aimId, activePort));
       this.setState({ showAimEditor: true, selectedAim: aimJson });
     }
   };
@@ -508,7 +529,7 @@ class DisplayView extends Component {
           imageId = imageId.split("&frame=")[0];
 
         this.renderMarkup(imageId, value, color);
-        if (aimUid === serie.aimID) this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
+        // if (aimUid === serie.aimID) this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
       });
     });
   };
@@ -864,6 +885,8 @@ class DisplayView extends Component {
       hasSegmentation: false,
       activeLabelMapIndex: 0,
     });
+    this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
+    console.log("dispatched and new states", this.props);
     // clear all unsaved markups by calling getData
     this.getData();
     this.refreshAllViewports();
@@ -974,6 +997,16 @@ class DisplayView extends Component {
                         target: "element",
                         eventName: "cornerstonetoolsmeasurementcompleted",
                         handler: this.measurementCompleted,
+                      },
+                      {
+                        target: "element",
+                        eventName: "cornerstonetoolsmeasurementmodified",
+                        handler: this.measurementAdded,
+                      },
+                      {
+                        target: "element",
+                        eventName: "cornerstonetoolsmeasurementremoved",
+                        handler: this.measurementRemoved,
                       },
                       {
                         target: "element",

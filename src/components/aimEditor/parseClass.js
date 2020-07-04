@@ -8,8 +8,7 @@ import "./semantic/semantic.js";
 export var AimEditor = function (
   userWindow,
   varformCheckHandler,
-  varRenderButtonHandler,
-
+  varRenderButtonHandler
 ) {
   //this.mapObjCodeValueParent = new Map();
   //this.mapHtmlObjects = new Map(); not used
@@ -75,7 +74,7 @@ export var AimEditor = function (
   this.mapShapesSchemaToTemplate.set("TwoDimensionCircle", {
     formshape: "Cirle",
   });
-  this.anyClosedShapeTypes = ["Circle" , "Polyline"] ;
+  this.anyClosedShapeTypes = ["Circle", "Polyline"];
   this.templateShapeArray = []; //each array element is a json object {"shape":'Point', "domid" : '2.25.33554445511225454'});
   this.defaultTemplate = null;
   function constructor() {
@@ -153,7 +152,7 @@ export var AimEditor = function (
           console.log("default not null:", templateList.default);
 
           if (defaultTempCodeVal === object.codeValue) {
-            self.defaultTemplate = i+1;
+            self.defaultTemplate = i + 1;
           }
         }
       }
@@ -3717,21 +3716,19 @@ export var AimEditor = function (
     let anyClosedShapeFlag = false;
     let prmtrShapeArrayLength = prmtrShapeArray.length;
     let templateShapeArrayLength = self.templateShapeArray.length;
-    
-    console.log("prmtrShapeArray : ",prmtrShapeArray);
+
+    console.log("prmtrShapeArray : ", prmtrShapeArray);
     for (let k = 0; k < prmtrShapeArrayLength; k++) {
       // this.mapShapesSchemaToTemplate.set("TwoDimensionMultiPoint", [{"formshape" : 'Line'}, {"formshape" : 'Perpendicular'}]);
       let jsonShapeObj = self.mapShapesSchemaToTemplate.get(prmtrShapeArray[k]);
       if (Array.isArray(jsonShapeObj)) {
-       
         for (let t = 0; t < templateShapeArrayLength; t++) {
-          console.log("shape ",self.templateShapeArray.shape);
-          if (self.templateShapeArray[t].shape === "AnyShape"){
+          console.log("shape ", self.templateShapeArray.shape);
+          if (self.templateShapeArray[t].shape === "AnyShape") {
             anyShapeFlag = true;
             console.log("on load aim any Shape is true here ");
-            
           }
-          if (self.templateShapeArray[t].shape === "AnyClosedShape" ){
+          if (self.templateShapeArray[t].shape === "AnyClosedShape") {
             anyClosedShapeFlag = true;
             console.log("on load aim any closed Shape is true here ");
           }
@@ -3748,12 +3745,11 @@ export var AimEditor = function (
       } else {
         //let templateShapeArrayLength = self.templateShapeArray.length;
         for (let t = 0; t < templateShapeArrayLength; t++) {
-          if (self.templateShapeArray[t].shape === "AnyShape"){
+          if (self.templateShapeArray[t].shape === "AnyShape") {
             anyShapeFlag = true;
             console.log("on load aim any Shape is true here ");
-            
           }
-          if (self.templateShapeArray[t].shape === "AnyClosedShape" ){
+          if (self.templateShapeArray[t].shape === "AnyClosedShape") {
             anyClosedShapeFlag = true;
             console.log("on load aim any closed Shape is true here ");
           }
@@ -3764,18 +3760,18 @@ export var AimEditor = function (
           }
         }
       }
-      if (anyShapeFlag === true){
-        for (let cnt = 0 ; cnt< templateShapeArrayLength ; cnt++){
-         document.getElementById(
-              self.templateShapeArray[cnt].domid
-            ).className = "green check circle outline icon";
+      if (anyShapeFlag === true) {
+        for (let cnt = 0; cnt < templateShapeArrayLength; cnt++) {
+          document.getElementById(
+            self.templateShapeArray[cnt].domid
+          ).className = "green check circle outline icon";
         }
       }
-      if (anyClosedShapeFlag === true){
-        for (let cnt = 0 ; cnt< templateShapeArrayLength ; cnt++){
-         document.getElementById(
-              self.templateShapeArray[cnt].domid
-            ).className = "green check circle outline icon";
+      if (anyClosedShapeFlag === true) {
+        for (let cnt = 0; cnt < templateShapeArrayLength; cnt++) {
+          document.getElementById(
+            self.templateShapeArray[cnt].domid
+          ).className = "green check circle outline icon";
         }
       }
     }
@@ -4052,9 +4048,10 @@ export var AimEditor = function (
 
    }
    */
-  this.checkShapes = function (shapes){
+  this.checkShapes = function (shapes) {
+    console.log("In chechk shapes");
     // shapes rectified Mate needs to adjust the paramters before passing this  test = { circle : {count : 5, validate:""} , line:  {count : 5, validate:""}  };
-    // use the the model above not the model in the below line 
+    // use the the model above not the model in the below line
     // shapes needs to be in format shapes = {Circle : "" , Line : "ok"} , value : {"" , "ok"} will be used to make sure that each option is checked
     /* schema chape list 
     	<xs:enumeration value="Point"/>
@@ -4073,7 +4070,8 @@ export var AimEditor = function (
 			<xs:enumeration value="AnyClosedShape"/>
       
     const newShapes = {Circle, Polyline, Line, Perpendicular};
-    */ 
+    */
+
     /*
      self.templateShapeArray.push({
       shape: object.GeometricShape,
@@ -4084,54 +4082,50 @@ export var AimEditor = function (
     /* impoertant note if there are multiple geometric shape component exist in a template 
       or relation will be applied 
     */
-    
+
     const templateShapeLength = self.templateShapeArray.length;
     let anyShapeFlag = false;
     let anyClosedShapeFlag = false;
-    const localShapes = {...shapes};
+    const localShapes = { ...shapes };
     const tempateShapeKeys = [];
-    for (let cnt = 0 ; cnt < templateShapeLength ; cnt ++){
+    for (let cnt = 0; cnt < templateShapeLength; cnt++) {
       tempateShapeKeys.push(self.templateShapeArray[cnt].shape);
-      if (typeof localShapes[self.templateShapeArray[cnt].shape] !== "undefined") {
+      if (
+        typeof localShapes[self.templateShapeArray[cnt].shape] !== "undefined"
+      ) {
         localShapes[self.templateShapeArray[cnt].shape].validate = "ok";
-              document.getElementById(
-                self.templateShapeArray[cnt].domid
-              ).className = "green check circle outline icon";
+        document.getElementById(self.templateShapeArray[cnt].domid).className =
+          "green check circle outline icon";
       }
-      if (self.templateShapeArray[cnt].shape === "AnyShape" ){
+      if (self.templateShapeArray[cnt].shape === "AnyShape") {
         anyShapeFlag = true;
       }
-      if (self.templateShapeArray[cnt].shape === "AnyClosedShape" ){
+      if (self.templateShapeArray[cnt].shape === "AnyClosedShape") {
         anyClosedShapeFlag = true;
       }
-
     }
-    if (anyShapeFlag === true){
-
-         for (let cnt = 0 ; cnt < templateShapeLength ; cnt ++){
-            document.getElementById(
-                self.templateShapeArray[cnt].domid
-              ).className = "green check circle outline icon";
-        }
+    if (anyShapeFlag === true) {
+      for (let cnt = 0; cnt < templateShapeLength; cnt++) {
+        document.getElementById(self.templateShapeArray[cnt].domid).className =
+          "green check circle outline icon";
+      }
     }
-    if (anyClosedShapeFlag === true){
+    if (anyClosedShapeFlag === true) {
       const shapeKeys = Object.keys(localShapes);
-      const arryDiffernce = shapeKeys.filter(eachShape => !self.anyClosedShapeTypes.includes(eachShape));
-      if (arryDiffernce.length === 0){
-         for (let cnt = 0 ; cnt < templateShapeLength ; cnt ++){
-                document.getElementById(
-                    self.templateShapeArray[cnt].domid
-                  ).className = "green check circle outline icon";   
+      const arryDiffernce = shapeKeys.filter(
+        (eachShape) => !self.anyClosedShapeTypes.includes(eachShape)
+      );
+      if (arryDiffernce.length === 0) {
+        for (let cnt = 0; cnt < templateShapeLength; cnt++) {
+          document.getElementById(
+            self.templateShapeArray[cnt].domid
+          ).className = "green check circle outline icon";
         }
       }
     }
- 
-
-
-  } 
+  };
   this.loadAimJson = function (aimjson) {
     //var ImageAnnotation = aimjson.imageAnnotations.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
-
 
     //test
     // example test case const test = { circle : {count : 5, validate:""} , line:  {count : 5, validate:""}  };

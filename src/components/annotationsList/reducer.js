@@ -89,9 +89,9 @@ const asyncReducer = (state = initialState, action) => {
         }
         return { ...state, openSeries: aimIDClearedOPenSeries };
       case CLEAR_ACTIVE_AIMID:
-        aimIDClearedOPenSeries = [...state.openSeries];
-        aimIDClearedOPenSeries[state.activePort].aimID = null;
-        return { ...state, openSeries: aimIDClearedOPenSeries };
+        let clearedAimIdOpenSeries = [...state.openSeries];
+        clearedAimIdOpenSeries[state.activePort].aimID = null;
+        return { ...state, openSeries: clearedAimIdOpenSeries };
       case UPDATE_IMAGEID:
         const openSeriesToUpdate = [...state.openSeries];
         openSeriesToUpdate[state.activePort].imageID = action.imageID;
