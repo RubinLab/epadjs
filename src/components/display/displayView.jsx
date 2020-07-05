@@ -124,6 +124,7 @@ class DisplayView extends Component {
       data: [],
       isLoading: true,
       selectedAim: undefined,
+      dirty: false,
       refs: props.refs,
       showAnnDetails: true,
       hasSegmentation: false,
@@ -408,12 +409,65 @@ class DisplayView extends Component {
     );
   };
 
+  checkShapes = () => {
+    const { series, activePort } = this.props;
+    const aimId = series[activePort].aimID || undefined;
+    const shapes = this.getMarkups(aimId);
+    const dummyAimForm = new aimForm.AimEditor();
+    dummyAimForm.checkShapes(shapes);
+  };
+
+  getMarkups = (aimOfInterest) => {
+    const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    var markupsToReturn = {};
+    Object.keys(toolState).forEach((key) => {
+      const markUps = toolState[key];
+      Object.keys(markUps).map((tool) => {
+        switch (tool) {
+          case "FreehandRoi3DTool":
+          case "FreehandRoi":
+            const polygons3d = markUps[tool].data;
+            polygons3d.map((polygon) => {
+              if (!polygon.aimId || polygon.aimId === aimOfInterest)
+                markupsToReturn["Polygon"] = { validate: "" };
+            });
+            break;
+          case "Bidirectional":
+            const bidirectionals = markUps[tool].data;
+            bidirectionals.map((bidirectional) => {
+              if (!bidirectional.aimId || bidirectional.aimId === aimOfInterest)
+                markupsToReturn["Perpendicular"] = { validate: "" };
+            });
+            break;
+          case "CircleRoi":
+            const circles = markUps[tool].data;
+            circles.map((circle) => {
+              if (!circle.aimId || circle.aimId === aimOfInterest)
+                markupsToReturn["Circle"] = { validate: "" };
+            });
+            break;
+          case "Length":
+            const lines = markUps[tool].data;
+            lines.map((line) => {
+              if (!line.aimId || line.aimId === aimOfInterest)
+                markupsToReturn["Line"] = { validate: "" };
+            });
+            break;
+          case "Probe":
+            const points = markUps[tool].data;
+            points.map((point) => {
+              if (!point.aimId || point.aimId === aimOfInterest)
+                markupsToReturn["Point"] = { validate: "" };
+            });
+            break;
+        }
+      });
+    });
+    return markupsToReturn;
+  };
+
   // TODO: Can this be done without checking the tools of interest?
   measurementCompleted = (event, action) => {
-    const dummyAimForm = new aimForm.AimEditor();
-    console.log("Aim form ", dummyAimForm.checkShapes);
-    // dummyAimForm.checkShapes();
-    console.log("Measurement completed", event);
     const { toolName, toolType } = event.detail;
 
     const toolsOfInterest = [
@@ -427,19 +481,22 @@ class DisplayView extends Component {
       if (toolName === "FreehandRoi3DTool")
         this.setState({ hideShowDisabled: true });
     }
-  };
-
-  measurementAdded = (event, action) => {
-    console.log("Measurement added", event);
+    this.handleDirtyFlag();
+    this.checkShapes();
   };
 
   measurementRemoved = (event, action) => {
-    console.log("Measurement removed", event);
+    this.handleDirtyFlag();
+    this.checkShapes();
   };
 
-  getAnnotations = () => {};
+  measuremementModified = (event, action) => {
+    this.handleDirtyFlag();
+  };
 
-  passShapes2AE = () => {};
+  handleDirtyFlag = () => {
+    if (!this.state.dirty) this.setState({ dirty: true });
+  };
 
   handleMarkupSelected = (event) => {
     const { aimList, series, activePort } = this.props;
@@ -474,8 +531,11 @@ class DisplayView extends Component {
           return;
         }
       }
-      // this.props.dispatch(ozge's new method here)
+
+      //The following dispatched is a wrongly named method. It's dispatched to set the selected
+      //AimId in the store!!!!!
       this.props.dispatch(jumpToAim(seriesUID, aimId, activePort));
+
       this.setState({ showAimEditor: true, selectedAim: aimJson });
     }
   };
@@ -878,7 +938,7 @@ class DisplayView extends Component {
 
   closeAimEditor = (isCancel, message = "") => {
     // if aim editor has been cancelled ask to user
-    if (!this.checkUnsavedData(isCancel, message)) return;
+    if (this.state.dirty && !this.checkUnsavedData(isCancel, message)) return;
     this.setState({
       showAimEditor: false,
       selectedAim: undefined,
@@ -886,8 +946,6 @@ class DisplayView extends Component {
       activeLabelMapIndex: 0,
     });
     this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
-    console.log("dispatched and new states", this.props);
-    // clear all unsaved markups by calling getData
     this.getData();
     this.refreshAllViewports();
     return 1;
@@ -1001,7 +1059,7 @@ class DisplayView extends Component {
                       {
                         target: "element",
                         eventName: "cornerstonetoolsmeasurementmodified",
-                        handler: this.measurementAdded,
+                        handler: this.measuremementModified,
                       },
                       {
                         target: "element",

@@ -57,7 +57,6 @@ class AimEditor extends Component {
       let { templates, openSeries, activePort } = this.props;
       const templateJsons = Object.values(templates);
       const { defaultTemplate } = openSeries[activePort];
-      console.log("temp, def", templates, defaultTemplate);
       this.semanticAnswers.loadTemplates({
         default: defaultTemplate,
         all: templateJsons,
@@ -79,7 +78,7 @@ class AimEditor extends Component {
   };
   //cavit end
   validateForm = (hasError) => {
-    if (hasError) console.log("Answer form has error/s!!!");
+    if (hasError) console.error("Answer form has error/s!!!");
   };
 
   getImage = () => {
@@ -372,7 +371,7 @@ class AimEditor extends Component {
         this.props.dispatch(updatePatientOnAimSave(aimRefs));
         this.props.updateTreeDataOnSave(aimRefs);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.error(error));
     this.props.onCancel(false);
   };
 
@@ -874,7 +873,7 @@ class AimEditor extends Component {
         return "success";
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
         return "error";
       });
   };
@@ -912,7 +911,6 @@ class AimEditor extends Component {
 }
 
 const mapStateToProps = (state) => {
-  console.log("State", state);
   return {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
