@@ -344,10 +344,29 @@ class ProjectColumn extends React.Component {
       if (this.state.selectedAims.hasOwnProperty(aimID)) {
         this.setState({ showParamWindow: true, aimIdForParams: aimID });
       } else {
-        alert("click on the correct row's param or select the annotation");
+        toast.warn(
+          "click on the correct row's param or select the annotation",
+          {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          }
+        );
+        //  alert("click on the correct row's param or select the annotation");
       }
     } else {
-      alert("select an annotation");
+      toast.warn("select an annotation to continue", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      //  alert("select an annotation");
     }
   };
 
@@ -405,11 +424,27 @@ class ProjectColumn extends React.Component {
           this.state.selectedParameterTypeId === "runtime" &&
           Object.keys(this.state.runtimeParams).length === 0
         ) {
-          alert("set runtime parameters !");
+          toast.warn("set runtime parameters", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+          //  alert("set runtime parameters !");
         } else {
           console.log("save queue object and send to the queue");
           send = true;
-          alert("plugin saved  for case null !");
+          toast.info("plugin process added to the queue, switch to track tab", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+          // lert("plugin saved  for case null !");
         }
 
         break;
@@ -422,18 +457,56 @@ class ProjectColumn extends React.Component {
               if (value.hasOwnProperty("pluginparamters")) {
                 console.log("plugin saved to the queue for 0 case and runtime");
                 send = true;
-                alert("plugin saved to the queue");
+                toast.info(
+                  "plugin process added to the queue, switch to track tab",
+                  {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                  }
+                );
+                //  alert("plugin saved to the queue");
               } else {
-                alert("set params for all aims");
+                toast.warn("set parameters for all aims", {
+                  position: "top-right",
+                  autoClose: 5000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                });
+                //  alert("set params for all aims");
                 return;
               }
             }
           } else {
             send = true;
-            alert("plugin saved to the queue for 0 ");
+            toast.info(
+              "plugin process added to the queue, switch to track tab",
+              {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+              }
+            );
+            //  alert("plugin saved to the queue for 0 ");
           }
         } else {
-          alert("Please select an annotation");
+          toast.warn("select an annotation", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+          //  alert("Please select an annotation");
         }
         // code block
         break;
@@ -442,15 +515,42 @@ class ProjectColumn extends React.Component {
           this.state.selectedParameterTypeId === "runtime" &&
           Object.keys(this.state.runtimeParams).length === 0
         ) {
-          alert("set runtime parameters !");
+          toast.warn("set runtime params", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+          //  alert("set runtime parameters !");
         } else {
           if (Object.keys(this.state.selectedAims).length !== 0) {
             console.log("save queue object and send to the queue");
             send = true;
-            alert("plugin saved for case 1!");
+            toast.info(
+              "plugin process added to the queue, switch to track tab",
+              {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+              }
+            );
+            //  alert("plugin saved for case 1!");
           } else {
             console.log("select an aim");
-            alert("please select an aim");
+            toast.warn("select an aim", {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+            });
+            //  alert("please select an aim");
           }
         }
         break;
@@ -462,14 +562,14 @@ class ProjectColumn extends React.Component {
       const resultAddQueue = await addPluginsToQueue(tempQueueObject);
 
       if (resultAddQueue.status === 200) {
-        toast.info("plugin process saved", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        // toast.info("plugin process saved", {
+        //   position: "top-right",
+        //   autoClose: 5000,
+        //   hideProgressBar: false,
+        //   closeOnClick: true,
+        //   pauseOnHover: true,
+        //   draggable: true,
+        // });
         this.setState({
           selectedProjectText: "select",
           selectedProjectName: "",

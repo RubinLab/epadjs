@@ -134,3 +134,8 @@ td {
   cursor: pointer;
   margin-left: 10px;
 }
+.text_clickable {
+  color: #5bc0de;
+  font-style: italic;
+  cursor: pointer;
+}

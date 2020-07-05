@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import ReactTable from "react-table";
+import { toast } from "react-toastify";
 import {
   saveTemplateParameter,
   getTemplateParameter,
@@ -85,20 +86,28 @@ class ParametersForTemplateWindow extends React.Component {
   saveParameters = async () => {
     this.setState({ addnew: false });
     console.log(
-      "save project paramters after filled : ",
+      "save template paramters after filled : ",
       this.state.parameterFormElements
     );
     const saveParameterResponse = await saveTemplateParameter(
       this.state.parameterFormElements
     );
     if (saveParameterResponse.status === 200) {
-      console.log("plugin project parameters saved succesfully");
+      console.log("plugin template parameters saved succesfully");
       console.log("inserted data : ", saveParameterResponse.data);
       const tempDefaultParameterList = this.state.defaultParameterList;
       tempDefaultParameterList.push(saveParameterResponse.data);
       this.setState({ defaultParameterList: tempDefaultParameterList });
     } else {
-      alert("an error occourred while saving project parameters");
+      toast.error("error happened while saving template parameter", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      //alert("an error occourred while saving template parameters");
     }
     //this.props.onSave();
   };
@@ -118,7 +127,15 @@ class ParametersForTemplateWindow extends React.Component {
       this.setState({ defaultParameterList: tempDefaultParameterList });
       console.log("parameter deleted succesfully");
     } else {
-      alert("an error occourred while deleting project parameter");
+      toast.error("error happened while deleting template parameter", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      // alert("an error occourred while deleting template parameter");
     }
   };
 
@@ -150,7 +167,7 @@ class ParametersForTemplateWindow extends React.Component {
     );
     if (editParameterResponse.status === 200) {
       console.log(
-        "project parameters edited succesfully",
+        "template parameters edited succesfully",
         JSON.stringify(editParameterResponse.data)
       );
       console.log(
@@ -170,7 +187,15 @@ class ParametersForTemplateWindow extends React.Component {
       }
       this.setState({ defaultParameterList: tempDefaultParameterList });
     } else {
-      alert("an error occourred while editing project parameters");
+      toast.error("error happened while editing template parameter", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      //  alert("an error occourred while editing template parameters");
     }
 
     this.setState({ editParam: false, addnew: false });

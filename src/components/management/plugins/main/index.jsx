@@ -12,6 +12,7 @@ import {
   getTemplatesFromDb,
   getTemplatesUniversal,
 } from "../../../../services/templateServices";
+import { getUser } from "../../../../services/userServices";
 import PluginProjectWindow from "../tabs/manage/pluginProjectWindow";
 import PluginTemplateWindow from "../tabs/manage/pluginTemplateWindow";
 import NewPluginWindow from "../tabs/manage/newPluginWindow";
@@ -87,22 +88,28 @@ class Plugins extends React.Component {
       documentation: "",
       processmultipleaims: "",
     },
+    isAdmin: false,
   };
 
   componentDidMount = async () => {
     console.log("checking props : ", this.props);
-    console.log("session:", sessionStorage.getItem("username"));
+
     const pluginList = await getPluginsWithProject();
     let projectList = await getProjectsWithPkAsId();
     let templateList = await getTemplatesFromDb();
+    let user = await getUser(sessionStorage.getItem("username"));
+    user = user.data;
     const templateUniversal = await getTemplatesUniversal();
     console.log("universal templates", templateUniversal);
     templateList = templateList.data;
 
     const plugins = pluginList.data;
     projectList = projectList.data;
-    this.setState({ plugins, projectList, templateList });
-    console.log("plugin list to check parameters :", pluginList);
+    console.log("session:", sessionStorage.getItem("username"));
+    console.log("session owner is admin:", user.admin);
+    this.setState({ plugins, projectList, templateList, isAdmin: user.admin });
+
+    console.log("plugin list to check is admin :", this.state.isAdmin);
   };
 
   // getPlugins = () => {
@@ -123,13 +130,24 @@ class Plugins extends React.Component {
   };
 
   addProject = (projectArray, tableSelectedData) => {
-    const tempProjectMap = arrayToMap(projectArray);
-    this.setState({
-      hasAddProjectClicked: true,
-      selectedProjectsAsMap: tempProjectMap,
-      tableSelectedData: tableSelectedData,
-      selectedProjects: projectArray,
-    });
+    if (this.state.isAdmin === true) {
+      const tempProjectMap = arrayToMap(projectArray);
+      this.setState({
+        hasAddProjectClicked: true,
+        selectedProjectsAsMap: tempProjectMap,
+        tableSelectedData: tableSelectedData,
+        selectedProjects: projectArray,
+      });
+    } else {
+      toast.info("user has no right to add project. Admin required", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
   };
 
   handleAddProjectCancel = () => {
@@ -265,51 +283,62 @@ class Plugins extends React.Component {
   };
 
   handleDeleteOne = async (rowdata) => {
-    console.log("data type to delete : ", Array.isArray(rowdata));
-    let selectedRowPluginId = [];
-    if (Array.isArray(rowdata)) {
-      selectedRowPluginId = [...rowdata];
-    } else {
-      selectedRowPluginId.push(rowdata.id);
-    }
-    //  const selectedRowPluginId = rowdata.id;
-    const tempPlugins = this.state.plugins;
+    if (this.state.isAdmin === true) {
+      console.log("data type to delete : ", Array.isArray(rowdata));
+      let selectedRowPluginId = [];
+      if (Array.isArray(rowdata)) {
+        selectedRowPluginId = [...rowdata];
+      } else {
+        selectedRowPluginId.push(rowdata.id);
+      }
+      //  const selectedRowPluginId = rowdata.id;
+      const tempPlugins = this.state.plugins;
 
-    let resultPlugins = [];
-    const deletePluginResult = await deletePlugin({ selectedRowPluginId });
+      let resultPlugins = [];
+      const deletePluginResult = await deletePlugin({ selectedRowPluginId });
 
-    if (!Array.isArray(deletePluginResult.data)) {
-      console.log("delete plugin result :", deletePluginResult);
-      resultPlugins = tempPlugins.filter((plugin) => {
-        return !selectedRowPluginId.includes(plugin.id);
-      });
-      this.setState({ plugins: resultPlugins });
-    } else {
-      if (deletePluginResult.data.length > 0) {
+      if (!Array.isArray(deletePluginResult.data)) {
         console.log("delete plugin result :", deletePluginResult);
         resultPlugins = tempPlugins.filter((plugin) => {
-          // return plugin.id !== selectedRowPluginId;
-          return !deletePluginResult.data.includes(plugin.id);
+          return !selectedRowPluginId.includes(plugin.id);
         });
         this.setState({ plugins: resultPlugins });
-        toast.info("plugin has process in queue. please delete them first", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
       } else {
-        toast.info("plugin has process in queue. please delete them first", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        if (deletePluginResult.data.length > 0) {
+          console.log("delete plugin result :", deletePluginResult);
+          resultPlugins = tempPlugins.filter((plugin) => {
+            // return plugin.id !== selectedRowPluginId;
+            return !deletePluginResult.data.includes(plugin.id);
+          });
+          this.setState({ plugins: resultPlugins });
+          toast.info("plugin has process in queue. please delete them first", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        } else {
+          toast.info("plugin has process in queue. please delete them first", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+        }
       }
+    } else {
+      toast.info("user has no right to delete plugin. Admin required", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
   };
 
@@ -354,25 +383,36 @@ class Plugins extends React.Component {
     this.setState({ selected: selectedCheckBoxes });
   };
   handleAddPlugin = () => {
-    const temppluginFormElements = {
-      //using
-      name: "",
-      plugin_id: "",
-      image_name: "",
-      image_repo: "",
-      image_tag: "",
-      image_id: "",
-      description: "",
-      enabled: true,
-      modality: "",
-      developer: "",
-      documentation: "",
-      processmultipleaims: "",
-    };
-    this.setState({
-      newPluginClicked: true,
-      pluginFormElements: temppluginFormElements,
-    });
+    if (this.state.isAdmin === true) {
+      const temppluginFormElements = {
+        //using
+        name: "",
+        plugin_id: "",
+        image_name: "",
+        image_repo: "",
+        image_tag: "",
+        image_id: "",
+        description: "",
+        enabled: true,
+        modality: "",
+        developer: "",
+        documentation: "",
+        processmultipleaims: "",
+      };
+      this.setState({
+        newPluginClicked: true,
+        pluginFormElements: temppluginFormElements,
+      });
+    } else {
+      toast.info("user has no right to add plugin. Admin required", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
   };
   handleAddPluginCancel = () => {
     this.setState({ newPluginClicked: false, errorMessage: null });
@@ -407,56 +447,75 @@ class Plugins extends React.Component {
 
       this.setState({ plugins, projectList, templateList });
     } else {
-      alert("error happened while saving plugin");
+      toast.error("error happened while saving plugin", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      //  alert("error happened while saving plugin");
     }
     //pluginFomElements
   };
 
   handleEditPlugin = (selectedPluginData) => {
-    console.log("handle edit plugin id :", selectedPluginData);
-    let editimage_name = "";
-    let editimage_repo = "";
-    let editimage_tag = "";
-    let editimage_id = "";
-    let edit_processmultipleaims = "";
-    if (selectedPluginData.original.image_name != null) {
-      editimage_name = selectedPluginData.original.image_name;
-    }
-    if (selectedPluginData.original.image_repo != null) {
-      editimage_repo = selectedPluginData.original.image_repo;
-    }
-    if (selectedPluginData.original.image_tag != null) {
-      editimage_tag = selectedPluginData.original.image_tag;
-    }
-    if (selectedPluginData.original.image_id != null) {
-      editimage_id = selectedPluginData.original.image_id;
-    }
-    if (selectedPluginData.original.processmultipleaims != null) {
-      edit_processmultipleaims =
-        selectedPluginData.original.processmultipleaims;
-    }
+    if (this.state.isAdmin === true) {
+      console.log("handle edit plugin id :", selectedPluginData);
+      let editimage_name = "";
+      let editimage_repo = "";
+      let editimage_tag = "";
+      let editimage_id = "";
+      let edit_processmultipleaims = "";
+      if (selectedPluginData.original.image_name != null) {
+        editimage_name = selectedPluginData.original.image_name;
+      }
+      if (selectedPluginData.original.image_repo != null) {
+        editimage_repo = selectedPluginData.original.image_repo;
+      }
+      if (selectedPluginData.original.image_tag != null) {
+        editimage_tag = selectedPluginData.original.image_tag;
+      }
+      if (selectedPluginData.original.image_id != null) {
+        editimage_id = selectedPluginData.original.image_id;
+      }
+      if (selectedPluginData.original.processmultipleaims != null) {
+        edit_processmultipleaims =
+          selectedPluginData.original.processmultipleaims;
+      }
 
-    const editpluginFormElements = {
-      //using
-      dbid: selectedPluginData.original.id,
-      name: selectedPluginData.original.name,
-      plugin_id: selectedPluginData.original.plugin_id,
-      image_name: editimage_name,
-      image_repo: editimage_repo,
-      image_tag: editimage_tag,
-      image_id: editimage_id,
-      description: selectedPluginData.original.description,
-      enabled: selectedPluginData.original.enabled,
-      modality: selectedPluginData.original.modality,
-      developer: selectedPluginData.original.developer,
-      documentation: selectedPluginData.original.documentation,
-      processmultipleaims: edit_processmultipleaims,
-    };
-    console.log("handle edit pluginFormElements :", editpluginFormElements);
-    this.setState({
-      editPluginClicked: true,
-      pluginFormElements: editpluginFormElements,
-    });
+      const editpluginFormElements = {
+        //using
+        dbid: selectedPluginData.original.id,
+        name: selectedPluginData.original.name,
+        plugin_id: selectedPluginData.original.plugin_id,
+        image_name: editimage_name,
+        image_repo: editimage_repo,
+        image_tag: editimage_tag,
+        image_id: editimage_id,
+        description: selectedPluginData.original.description,
+        enabled: selectedPluginData.original.enabled,
+        modality: selectedPluginData.original.modality,
+        developer: selectedPluginData.original.developer,
+        documentation: selectedPluginData.original.documentation,
+        processmultipleaims: edit_processmultipleaims,
+      };
+      console.log("handle edit pluginFormElements :", editpluginFormElements);
+      this.setState({
+        editPluginClicked: true,
+        pluginFormElements: editpluginFormElements,
+      });
+    } else {
+      toast.info("user has no right to edit plugin. Admin required", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
   };
 
   handleEditPluginCancel = () => {
@@ -498,26 +557,48 @@ class Plugins extends React.Component {
         errorMessage: null,
       });
     } else {
-      alert("an arror occured after editing plugin");
+      toast.error("error happened while editing plugi", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      //  alert("an arror occured after editing plugin");
     }
   };
 
   handleParametersClicked = (parametersData) => {
-    console.log("parameters data on prm click : ", parametersData);
-    console.log(
-      "parameters data on prm click temp: ",
-      parametersData.original.parameters
-    );
-    const tempParametersDefault = parametersData.original.parameters;
-    const plugindbid = parametersData.original.id;
-    console.log("plugin id when clicked params :", plugindbid);
+    if (this.state.isAdmin === true) {
+      console.log("parameters data on prm click : ", parametersData);
+      console.log(
+        "parameters data on prm click temp: ",
+        parametersData.original.parameters
+      );
+      const tempParametersDefault = parametersData.original.parameters;
+      const plugindbid = parametersData.original.id;
+      console.log("plugin id when clicked params :", plugindbid);
 
-    //
-    this.setState({
-      selectedplugindbidfordefparams: plugindbid,
-      parametersClicked: true,
-      parametersDefault: tempParametersDefault,
-    });
+      //
+      this.setState({
+        selectedplugindbidfordefparams: plugindbid,
+        parametersClicked: true,
+        parametersDefault: tempParametersDefault,
+      });
+    } else {
+      toast.info(
+        "user has no right to edit plugin parameters. Admin required",
+        {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        }
+      );
+    }
   };
   handleParameterChange = (e) => {
     const parameterElements = { ...this.state.parameterFormElements };
@@ -563,7 +644,15 @@ class Plugins extends React.Component {
         parametersClicked: false,
       });
     } else {
-      alert("error happened while saving parameter");
+      toast.error("error happened while saving parameter", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      //  alert("error happened while saving parameter");
     }
   };
 
@@ -669,7 +758,7 @@ class Plugins extends React.Component {
     );
   };
   handleEnablePluginClicked = (id) => {
-    alert(id);
+    //  alert(id);
   };
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
@@ -734,7 +823,7 @@ class Plugins extends React.Component {
             onCancel={this.handleCancel}
           />
         )}
-        {this.state.hasAddProjectClicked && (
+        {this.state.hasAddProjectClicked && this.state.isAdmin && (
           <PluginProjectWindow
             onChange={this.handleProjectSelect}
             onCancel={this.handleAddProjectCancel}

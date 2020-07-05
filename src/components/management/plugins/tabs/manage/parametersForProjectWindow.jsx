@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import ReactTable from "react-table";
+import { toast } from "react-toastify";
 import {
   saveProjectParameter,
   getProjectParameter,
@@ -98,7 +99,15 @@ class ParametersForProjectWindow extends React.Component {
       tempDefaultParameterList.push(saveParameterResponse.data);
       this.setState({ defaultParameterList: tempDefaultParameterList });
     } else {
-      alert("an error occourred while saving project parameters");
+      toast.error("error happened while saving project parameters", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      //  alert("an error occourred while saving project parameters");
     }
     //this.props.onSave();
   };
@@ -118,7 +127,15 @@ class ParametersForProjectWindow extends React.Component {
       this.setState({ defaultParameterList: tempDefaultParameterList });
       console.log("parameter deleted succesfully");
     } else {
-      alert("an error occourred while deleting project parameter");
+      toast.error("error happened while deleting project parameter", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      //  alert("an error occourred while deleting project parameter");
     }
   };
 
@@ -170,7 +187,15 @@ class ParametersForProjectWindow extends React.Component {
       }
       this.setState({ defaultParameterList: tempDefaultParameterList });
     } else {
-      alert("an error occourred while editing project parameters");
+      toast.error("error happened while editing project parameter", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      //  alert("an error occourred while editing project parameters");
     }
 
     this.setState({ editParam: false, addnew: false });

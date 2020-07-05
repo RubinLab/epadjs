@@ -8,7 +8,7 @@ import {
   FaPlusCircle,
 } from "react-icons/fa";
 import PluginNavBar from "./../../main/pluginNavBar";
-
+import "../../../menuStyle.css";
 import "./../../css/plugin.css";
 
 class ManageTab extends React.Component {
@@ -61,7 +61,10 @@ class ManageTab extends React.Component {
           const pluginname = data.row.name;
           const pluginid = data.original.id;
           return (
-            <div onClick={() => this.props.handleEditPlugin(data)}>
+            <div
+              className="text_clickable"
+              onClick={() => this.props.handleEditPlugin(data)}
+            >
               {pluginname}
             </div>
           );

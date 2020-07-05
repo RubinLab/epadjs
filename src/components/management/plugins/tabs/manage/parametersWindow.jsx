@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import ReactTable from "react-table";
+import { toast } from "react-toastify";
 import {
   saveDefaultParameter,
   getDefaultParameter,
@@ -107,7 +108,15 @@ class ParametersWindow extends React.Component {
       );
       this.setState({ update: true });
     } else {
-      alert("an error occourred while saving parameters");
+      toast.error("error happened while saving parameter", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      //  alert("an error occourred while saving parameters");
     }
     //this.props.onSave();
   };
@@ -126,7 +135,15 @@ class ParametersWindow extends React.Component {
       );
       this.setState({ update: true });
     } else {
-      alert("an error occourred while deleting parameter");
+      toast.error("error happened while deleting parameter", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      //  alert("an error occourred while deleting parameter");
     }
   };
 
@@ -167,7 +184,15 @@ class ParametersWindow extends React.Component {
       // );
       this.setState({ update: true });
     } else {
-      alert("an error occourred while editing parameters");
+      toast.error("error happened while editing parameter", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      //  alert("an error occourred while editing parameters");
     }
 
     this.setState({ editParam: false, addnew: false });
@@ -331,13 +356,17 @@ class ParametersWindow extends React.Component {
       </option>
     );
     options.push(
-      <option key="ParamaterValue" name="Parameter" value="Value">
-        Parameter Value
+      //  <option key="ParamaterValue" name="Parameter" value="Value">
+      //  text : Parameter Value -> Directory
+      <option key="ParamaterValue" name="Parameter" value="Directory">
+        Directory
       </option>
     );
     options.push(
-      <option key="Parameters" name="Parameter" value="NameValue">
-        Parameter Name/Value
+      //
+      //  text : Parameter Name/Value -> File
+      <option key="Parameters" name="Parameter" value="File">
+        File
       </option>
     );
 
@@ -387,7 +416,7 @@ class ParametersWindow extends React.Component {
                   >
                     {this.prepareDropDownHtmlForParameterIds()}
                   </select>
-                  <h5 className="add-project__modal--label">Name*</h5>
+                  <h5 className="add-project__modal--label">Name</h5>
                   <input
                     onMouseDown={(e) => e.stopPropagation()}
                     className="add-project__modal--input"
@@ -408,7 +437,7 @@ class ParametersWindow extends React.Component {
                   >
                     {this.prepareDropDownHtmlForParameterFormat()}
                   </select>
-                  <h5 className="add-project__modal--label">prefix*</h5>
+                  <h5 className="add-project__modal--label">prefix</h5>
                   <input
                     onMouseDown={(e) => e.stopPropagation()}
                     className="add-project__modal--input"
@@ -418,7 +447,7 @@ class ParametersWindow extends React.Component {
                     id="form-first-element"
                     value={this.state.parameterFormElements.prefix}
                   />
-                  <h5 className="add-project__modal--label">input binding*</h5>
+                  <h5 className="add-project__modal--label">input binding</h5>
                   <input
                     onMouseDown={(e) => e.stopPropagation()}
                     className="add-project__modal--input"
@@ -428,7 +457,7 @@ class ParametersWindow extends React.Component {
                     id="form-first-element"
                     value={this.state.parameterFormElements.inputBinding}
                   />
-                  <h5 className="add-project__modal--label">Default value*</h5>
+                  <h5 className="add-project__modal--label">Default value</h5>
                   <input
                     onMouseDown={(e) => e.stopPropagation()}
                     className="add-project__modal--input"
@@ -437,7 +466,7 @@ class ParametersWindow extends React.Component {
                     value={this.state.parameterFormElements.default_value}
                     onChange={this.handleFormElementChange}
                   />
-                  <h5 className="add-project__modal--label">Type*</h5>
+                  <h5 className="add-project__modal--label">Type</h5>
                   <select
                     className="pluginaddqueueselect"
                     id="type"
@@ -448,7 +477,7 @@ class ParametersWindow extends React.Component {
                   >
                     {this.prepareDropDownHtmlForParameterType()}
                   </select>
-                  <h5 className="add-project__modal--label">Description*</h5>
+                  <h5 className="add-project__modal--label">Description</h5>
                   <input
                     onMouseDown={(e) => e.stopPropagation()}
                     className="add-project__modal--input"

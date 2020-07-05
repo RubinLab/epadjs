@@ -89,7 +89,15 @@ class TrackTab extends React.Component {
         console.log("plugin process deleted succesfully");
       }
     } else {
-      alert("an error occourred while deleting plugin process");
+      toast.error("error happened while deleting plugin process", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      //  alert("an error occourred while deleting plugin process");
     }
   };
   handleRunQueue = async () => {
