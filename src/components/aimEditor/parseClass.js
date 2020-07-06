@@ -8,7 +8,8 @@ import "./semantic/semantic.js";
 export var AimEditor = function (
   userWindow,
   varformCheckHandler,
-  varRenderButtonHandler
+  varRenderButtonHandler,
+  aimName
 ) {
   //this.mapObjCodeValueParent = new Map();
   //this.mapHtmlObjects = new Map(); not used
@@ -45,7 +46,7 @@ export var AimEditor = function (
   this.divHolderForButtons = null;
   this.aimComment = "";
   this.aimType = "";
-  this.aimName = "";
+  this.aimName = aimName;
   this.aimTypeCode = "";
   this.templateSelectedIndex = -1;
   var domelements = [];
@@ -225,8 +226,9 @@ export var AimEditor = function (
     self.userWindow.appendChild(self.mainWindowDiv);
 
     self.templateSelect.onchange = function () {
-      self.aimComment = "";
-      self.aimName = "";
+      // Mete thinks name and comment should be preserved on Template change
+      // self.aimComment = "";
+      // self.aimName = "";
       self.aimType = "";
       self.aimTypeCode = "";
       self.templateSelectedIndex = this.value;
@@ -298,6 +300,8 @@ export var AimEditor = function (
     //labelAnnotationNameInput.style.fontWeight = "1000";
     labelAnnotationNameInput.style.lineHeight = "14px";
     labelAnnotationNameInput.style.width = "100%";
+    // Line below added by Mete to give default names
+    labelAnnotationNameInput.value = this.aimName;
 
     labelAnnotationNameInput.onkeyup = function () {
       self.aimName = this.value;
@@ -4049,7 +4053,6 @@ export var AimEditor = function (
    }
    */
   this.checkShapes = function (shapes) {
-    console.log("In chechk shapes");
     // shapes rectified Mate needs to adjust the paramters before passing this  test = { circle : {count : 5, validate:""} , line:  {count : 5, validate:""}  };
     // use the the model above not the model in the below line
     // shapes needs to be in format shapes = {Circle : "" , Line : "ok"} , value : {"" , "ok"} will be used to make sure that each option is checked

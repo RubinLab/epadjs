@@ -44,34 +44,44 @@ class AimEditor extends Component {
   };
   componentDidMount() {
     const element = document.getElementById("questionaire");
-    // const { data: templates } = await getTemplates();
-    const templatePromise = new Promise((resolve) => {
-      resolve(getTemplates());
+
+    let { templates, openSeries, activePort } = this.props;
+    const templateJsons = Object.values(templates);
+    const { defaultTemplate, imageAnnotations } = openSeries[activePort];
+
+    this.semanticAnswers = new questionaire.AimEditor(
+      element,
+      this.validateForm,
+      this.renderButtons,
+      this.getDefaultLesionName()
+    );
+
+    this.semanticAnswers.loadTemplates({
+      default: defaultTemplate,
+      all: templateJsons,
     });
-    templatePromise.then((result) => {
-      this.semanticAnswers = new questionaire.AimEditor(
-        element,
-        this.validateForm,
-        this.renderButtons
-      );
-      let { templates, openSeries, activePort } = this.props;
-      const templateJsons = Object.values(templates);
-      const { defaultTemplate } = openSeries[activePort];
-      this.semanticAnswers.loadTemplates({
-        default: defaultTemplate,
-        all: templateJsons,
-      });
-      this.semanticAnswers.createViewerWindow();
-      const { aimId } = this.props;
-      if (aimId != null && Object.entries(aimId).length) {
-        try {
-          this.semanticAnswers.loadAimJson(aimId);
-        } catch (error) {
-          console.error("Error loading aim to aim editor:", error);
-        }
+    this.semanticAnswers.createViewerWindow();
+    const { aimId } = this.props;
+    if (aimId != null && Object.entries(aimId).length) {
+      try {
+        this.semanticAnswers.loadAimJson(aimId);
+      } catch (error) {
+        console.error("Error loading aim to aim editor:", error);
       }
-    });
+    }
   }
+
+  // returns the next default lesion name according to the # of lesions in the series
+  getDefaultLesionName = () => {
+    const { openSeries, activePort } = this.props;
+    const { imageAnnotations } = openSeries[activePort];
+    let totalNumShapes = 0;
+    Object.values(imageAnnotations).map((shapesOnImage) => {
+      totalNumShapes += shapesOnImage.length;
+    });
+    return `Lesion${totalNumShapes}`;
+  };
+
   //cavit
   renderButtons = (buttonsState) => {
     this.setState({ buttonGroupShow: buttonsState });
