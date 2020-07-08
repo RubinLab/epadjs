@@ -6,8 +6,8 @@ import { Button } from "react-bootstrap";
 import { getSeries } from "../../services/seriesServices";
 import { getStudies } from "../../services/projectServices";
 import DropDownMenu from "./dropdownMenu";
-import StudyTable from "./studyTable";
-import SeriesTable from "./seriesTable";
+import StudyTable from "./StudyTable";
+import SeriesTable from "./SeriesTable";
 import "./flexView.css";
 
 const TreeTable = treeTableHOC(ReactTable);
