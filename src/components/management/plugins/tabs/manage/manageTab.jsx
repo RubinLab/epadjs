@@ -7,7 +7,6 @@ import {
   FaCheck,
   FaPlusCircle,
 } from "react-icons/fa";
-import PluginNavBar from "./../../main/pluginNavBar";
 import "../../../menuStyle.css";
 import "./../../css/plugin.css";
 
@@ -192,13 +191,6 @@ class ManageTab extends React.Component {
             onClick={this.props.onDelete}
             className="cursorHand"
           />
-          {/* <button
-            variant="primary"
-            className="btn btn-sm btn-outline-light"
-            onClick={this.props.onAdd}
-          >
-            add new
-          </button> */}
         </div>
         <div>
           <ReactTable

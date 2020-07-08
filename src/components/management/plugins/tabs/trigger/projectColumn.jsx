@@ -3,7 +3,7 @@ import ReactTable from "react-table";
 import { getPluginsForProject } from "../../../../../services/pluginServices";
 import { getSummaryAnnotations } from "../../../../../services/annotationServices";
 import { getProjects } from "../../../../../services/projectServices";
-import { FaCogs, FaExpeditedssl } from "react-icons/fa";
+import { FaCogs } from "react-icons/fa";
 import RunTimeParamWindow from "./runtimeParamWindow";
 import { addPluginsToQueue } from "../../../../../services/pluginServices";
 import { toast } from "react-toastify";
@@ -49,7 +49,6 @@ class ProjectColumn extends React.Component {
     selectedParameterTypeId: "select",
 
     optionsHtml: "",
-    //projectList: props.projects,
     projectDropDownUpdate: false,
     pluginDropDownUpdate: false,
     parameterTypeDropDownUpdate: false,
@@ -65,24 +64,6 @@ class ProjectColumn extends React.Component {
     aimIdForParams: "",
   };
 
-  // populateProjectRows = () => {
-  //   let rows = [];
-
-  //   this.props.projects.forEach((project) => {
-  //     console.log("projects  ---->>>>>> ", project);
-
-  //           <input
-  //             type="checkbox"
-  //             value={project.id}
-  //             name={project.id}
-  //             onChange={() => {
-  //               this.props.onChange(project.id);
-  //             }}
-  //           />
-
-  //   });
-  //   return rows;
-  // };
   componentDidMount = async () => {
     console.log("component will mount");
     const { data } = await getProjects();
@@ -163,9 +144,6 @@ class ProjectColumn extends React.Component {
         }
       }
     }
-    //const aims = await getSummaryAnnotations(17);
-    //console.log("aims ", aims);
-    //this.props.onChange(e.target.value);
   };
   handleChangeProject = (e) => {
     console.log("change project caled");
@@ -385,20 +363,7 @@ class ProjectColumn extends React.Component {
     tempQueueObject.runtimeParams = { ...this.state.runtimeParams };
     tempQueueObject.parameterType = this.state.selectedParameterTypeId;
     tempQueueObject.aims = { ...this.state.selectedAims };
-    // queueObject: {
-    //   queueId: -1,
-    //   projectDbId: -1,
-    //   projectId: "",
-    //   projectName: "",
-    //   pluginDbId: -1,
-    //   pluginId: "",
-    //   pluginName: "",
-    //   pluginType: "", //local or pluginstore
-    //   processMultipleAims: null, // -1 : -> null -> no aim ; 0 -> only one aim ; 1-> multiple aim
-    //   runtimeParams: {},
-    //   parameterType: "",
-    //   aims: {},
-    // },
+
     console.log("------------------------add selected annotations");
     console.log("selected projectId ", this.state.selectedProjectId);
     console.log("selected projectDbId ", this.state.selectedProjectDbId);
@@ -562,14 +527,6 @@ class ProjectColumn extends React.Component {
       const resultAddQueue = await addPluginsToQueue(tempQueueObject);
 
       if (resultAddQueue.status === 200) {
-        // toast.info("plugin process saved", {
-        //   position: "top-right",
-        //   autoClose: 5000,
-        //   hideProgressBar: false,
-        //   closeOnClick: true,
-        //   pauseOnHover: true,
-        //   draggable: true,
-        // });
         this.setState({
           selectedProjectText: "select",
           selectedProjectName: "",
@@ -588,7 +545,6 @@ class ProjectColumn extends React.Component {
         });
       }
     }
-    ////////////
   };
 
   handleSelectOneAnnotation = (original) => {

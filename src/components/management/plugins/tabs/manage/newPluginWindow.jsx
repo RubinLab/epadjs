@@ -1,8 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import ReactTable from "react-table";
 import { Modal } from "react-bootstrap";
-import { getTemplatesDataFromDb } from "../../../../../services/templateServices";
 import "../../css/plugin.css";
 class NewPluginWindow extends React.Component {
   constructor(props) {
@@ -198,35 +196,6 @@ class NewPluginWindow extends React.Component {
                     </select>
                   </td>
                 </tr>
-
-                {/* <h5 className="add-project__modal--label">Modality</h5>
-              <input
-                onMouseDown={(e) => e.stopPropagation()}
-                className="add-project__modal--input"
-                name="modality"
-                type="text"
-                value={pluginFormElements.modality}
-                onChange={onChange}
-              />
-              <h5 className="add-project__modal--label">Developer</h5>
-              <input
-                onMouseDown={(e) => e.stopPropagation()}
-                className="add-project__modal--input"
-                name="developer"
-                type="text"
-                value={pluginFormElements.developer}
-                onChange={onChange}
-              />
-              <h5 className="add-project__modal--label">Documentation</h5>
-              <input
-                onMouseDown={(e) => e.stopPropagation()}
-                className="add-project__modal--input"
-                name="documentation"
-                type="text"
-                value={pluginFormElements.documentation}
-                onChange={onChange}
-              /> */}
-
                 <tr>
                   <td>
                     <h5 className="form-exp required">*Required</h5>

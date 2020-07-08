@@ -1,13 +1,6 @@
 import React from "react";
-import PropTypes from "prop-types";
-import ReactTable from "react-table";
 import { toast } from "react-toastify";
-import ToolBar from "../../common/basicToolBar";
-import { FaRegTrashAlt } from "react-icons/fa";
-import {
-  getProjects,
-  getProjectsWithPkAsId,
-} from "../../../../services/projectServices";
+import { getProjectsWithPkAsId } from "../../../../services/projectServices";
 import {
   getTemplatesFromDb,
   getTemplatesUniversal,
@@ -111,10 +104,6 @@ class Plugins extends React.Component {
 
     console.log("plugin list to check is admin :", this.state.isAdmin);
   };
-
-  // getPlugins = () => {
-  //   return this.state.plugins;
-  // };
 
   handleProjectSelect = (onclickselectedProject, tableData) => {
     let tempSelectedProjects = this.state.selectedProjects;

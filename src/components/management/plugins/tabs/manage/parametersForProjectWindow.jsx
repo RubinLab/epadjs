@@ -14,8 +14,6 @@ class ParametersForProjectWindow extends React.Component {
   constructor(props) {
     super(props);
     console.log("props ", props);
-
-    //console.log("modal log templates", props.allTemplates);
   }
 
   state = {

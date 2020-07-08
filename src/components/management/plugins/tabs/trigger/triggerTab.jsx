@@ -1,36 +1,37 @@
 import React from "react";
-import ReactTable from "react-table";
-import { FaRegTrashAlt } from "react-icons/fa";
 
 import {
   getDockerImages,
-  getAnnotationTemplates,
-  getAnnotationProjects,
+  //  getAnnotationTemplates,
+  //  getUniqueProjectsIfAnnotationExist,
+  //  getProjects,
   addPluginsToQueue,
 } from "../../../../../services/pluginServices";
-import TemplateColumn from "./templateColumn";
+import { getProjects } from "../../../../../services/projectServices";
+//  import TemplateColumn from "./templateColumn";
 import ProjectColumn from "./projectColumn";
-import AnnotationColumn from "./annotationColumn";
+//  import AnnotationColumn from "./annotationColumn";
 
 class TriggerTab extends React.Component {
   state = {
     plImages: {},
     plContainers: {},
-    selectedTemplates: [],
+    //  selectedTemplates: [],
     selectedProjects: [],
     selectedAnnotations: [],
     selectAll: 0,
-    templates: [],
+    //  templates: [],
     projects: [],
     annotations: [],
   };
 
   componentDidMount = async () => {
-    //const tempPlImages = await getDockerImages();
-    //this.setState({ plImages: tempPlImages });
-    const tempTemplates = await getAnnotationTemplates();
-    const tempProjects = await getAnnotationProjects();
-    this.setState({ templates: tempTemplates.data });
+    //  const tempPlImages = await getDockerImages();
+    //  this.setState({ plImages: tempPlImages });
+    //  const tempTemplates = await getAnnotationTemplates();
+    //  const tempProjects = await getUniqueProjectsIfAnnotationExist();
+    const tempProjects = await getProjects();
+    //  this.setState({ templates: tempTemplates.data });
     this.setState({ projects: tempProjects.data });
   };
 
@@ -55,28 +56,29 @@ class TriggerTab extends React.Component {
     this.setState({ selectedProjects: tempSelProjects });
   };
   handleTemplateOnChange = (templateid) => {
-    const tempSelTemplates = this.state.selectedTemplates;
-    tempSelTemplates.push(templateid);
-    this.setState({ selectedTemplates: tempSelTemplates });
+    // const tempSelTemplates = this.state.selectedTemplates;
+    // tempSelTemplates.push(templateid);
+    // this.setState({ selectedTemplates: tempSelTemplates });
   };
   componentDidUpdate() {
     console.log(
       "componant updated -->selecetd projects",
       this.state.selectedProjects
     );
-    console.log(
-      "componant updated -->selecetd templates",
-      this.state.selectedTemplates
-    );
+    // console.log(
+    //   "componant updated -->selecetd templates",
+    //   this.state.selectedTemplates
+    // );
   }
   handleTriggerPlugin = async () => {
     // no need this getPluginsProjectsWithParameters, instead write start queue function with selected project, template, aims and logged user
     console.log("trigger clicked");
-    console.log("selectedTemplates : ", this.state.selectedTemplates);
+
     console.log("selectedProjects : ", this.state.selectedProjects);
     console.log("selectedAnnotations : ", this.state.selectedAnnotations);
     const projectids = [...this.state.selectedProjects];
-    const templateids = [...this.state.selectedTemplates];
+    //  const templateids = [...this.state.selectedTemplates];
+    const templateids = [];
     const annotationuids = [...this.state.selectedAnnotations];
     const responseAddPluginsToQueue = await addPluginsToQueue({
       projectids,

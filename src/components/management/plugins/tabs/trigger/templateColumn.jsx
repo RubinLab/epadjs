@@ -4,8 +4,7 @@ class TemplateColumn extends React.Component {
   populateTemplateRows = () => {
     let rows = [];
 
-    this.props.templates.forEach(template => {
-      //console.log("template modal ---->>>>>> ", template);
+    this.props.templates.forEach((template) => {
       rows.push(
         <tr key={template.id} className="edit-userRole__table--row">
           <td>

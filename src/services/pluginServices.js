@@ -153,10 +153,10 @@ export function getTemplateParameter(plugindbid, templatedbid) {
 }
 
 //pluhin trigger section
-export function getAnnotationTemplates() {
-  return http.get(apiUrl + "/pluginsannotationstemplates"); // /plugins/annotation/templates
-}
-export function getAnnotationProjects() {
-  return http.get(apiUrl + "/pluginsannotationsprojects"); // /plugins/annotation/projects
-}
+// export function getAnnotationTemplates() {
+//   return http.get(apiUrl + "/pluginsannotationstemplates"); // /plugins/annotation/templates
+// }
+// export function getUniqueProjectsIfAnnotationExist() {
+//   return http.get(apiUrl + "/pluginsannotationsprojects"); // /plugins/annotation/projects
+// }
 //plugin trigger section ends

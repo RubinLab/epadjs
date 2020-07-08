@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
-import { getTemplatesDataFromDb } from "../../../../../services/templateServices";
 import ParametersForTemplateWindow from "./parametersForTemplateWindow";
 class PluginTemplateWindow extends React.Component {
   constructor(props) {
@@ -30,7 +29,6 @@ class PluginTemplateWindow extends React.Component {
     let rows = [];
 
     this.props.allTemplates.forEach((template) => {
-      //console.log("template modal ---->>>>>> ", template);
       rows.push(
         <tr key={template.id} className="edit-userRole__table--row">
           <td>

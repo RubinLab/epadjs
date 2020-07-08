@@ -3,15 +3,7 @@ import ReactTable from "react-table";
 import { connect } from "react-redux";
 import { Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
-import {
-  FaRegEye,
-  FaCommentsDollar,
-  FaPlay,
-  FaStop,
-  FaDownload,
-  FaEye,
-  FaTrash,
-} from "react-icons/fa";
+import { FaPlay, FaStop, FaDownload, FaEye, FaTrash } from "react-icons/fa";
 
 import {
   getPluginsQueue,
@@ -37,7 +29,6 @@ class TrackTab extends React.Component {
   };
 
   componentDidUpdate = async () => {
-    console.log("++++++++++++++++++++++++++++++++++++++++ : update queuee");
     const prevPluginQueueList = this.state.pluginQueueList;
     const tempPluginQueueList = await getPluginsQueue();
     let updated = false;
@@ -54,14 +45,6 @@ class TrackTab extends React.Component {
       console.log("track tab queue lists needs to show", tempPluginQueueList);
       this.setState({ pluginQueueList: tempPluginQueueList.data });
     }
-    // try {
-    //   const { refresh, lastEventId } = this.props;
-    //   //   if (refresh && lastEventId !== prevProps.lastEventId) {
-    //   //     await this.getTemplatesData();
-    //   //   }
-    // } catch (err) {
-    //   console.log(err);
-    // }
   };
   deleteOneFromQueue = async (queuedbid) => {
     console.log("delete one process called", queuedbid);
@@ -81,7 +64,6 @@ class TrackTab extends React.Component {
         console.log("new ids to delete :", deletedIds);
         let tempPluginQueueList = this.state.pluginQueueList.filter(
           (queueObj) => {
-            //return queueObj.id !== queuedbid;
             return !deletedIds.includes(queueObj.id);
           }
         );
@@ -110,15 +92,6 @@ class TrackTab extends React.Component {
     } else {
       console.log("error happened while running queue");
     }
-    // for (const eachQueueObj of tempPluginQueueList) {
-    //   console.log("calling backend queue for obj :", eachQueueObj.id);
-    //   const responseRunPluginsQueue = await runPluginsQueue(eachQueueObj);
-    //   if (responseRunPluginsQueue.status === 200) {
-    //     console.log("eachQueueObj", eachQueueObj);
-    //   } else {
-    //     console.log("error happened while running queue");
-    //   }
-    // }
   };
   handleStartOne = async (dbid) => {
     console.log("start one ");
@@ -149,15 +122,6 @@ class TrackTab extends React.Component {
     } else {
       console.log("error happened while stopping plugin queue");
     }
-
-    // const queuelist = [];
-    // queuelist.push(dbid);
-    // const responseRunPluginsQueue = await stopPluginsQueue(queuelist);
-    // if (responseRunPluginsQueue.status === 202) {
-    //   console.log("queue is stopping");
-    // } else {
-    //   console.log("error happened while stopping queue");
-    // }
   };
   handleStopMultiple = async () => {
     let tempselectedQueueIds = [];
@@ -266,25 +230,11 @@ class TrackTab extends React.Component {
         console.log("select all queuee obj id", queueObj.id);
         tempSelectedQueueIds[queueObj.id] = queueObj;
       });
-      //this.setState({ selectedQueueIds: tempSelectedQueueIds });
     }
     this.setState({
       selectedQueueIds: tempSelectedQueueIds,
       selectAll: this.state.selectAll === 0 ? 1 : 0,
     });
-
-    // let newSelected = {};
-    // if (this.state.selectAll === 0) {
-    //   this.state.templates.forEach((temp) => {
-    //     let tempID = temp.Template[0].templateUID;
-    //     let projectID = temp.projectID ? temp.projectID : "lite";
-    //     newSelected[tempID] = projectID;
-    //   });
-    // }
-    // this.setState({
-    //   selected: newSelected,
-    //   selectAll: this.state.selectAll === 0 ? 1 : 0,
-    // });
   }
   toggleRow = (queueObj) => {
     const { id } = queueObj;
@@ -298,7 +248,6 @@ class TrackTab extends React.Component {
       delete tempSelectedQueueIds[id];
       console.log("found and removing ");
     }
-    // tempSelectedQueueIds.push(id);
     this.setState({ selectedQueueIds: tempSelectedQueueIds });
     console.log("resulting tempSelectedQueueIds ", tempSelectedQueueIds);
   };
@@ -367,7 +316,6 @@ class TrackTab extends React.Component {
         Cell: (data) => {
           const aims = data.original.aim_uid;
           const aimHtmlArray = [];
-          //const rowdata = original.row.checkbox;
           let cnt = 0;
           for (let [key, value] of Object.entries(aims)) {
             console.log(`${key}: ${value}`);
@@ -416,8 +364,6 @@ class TrackTab extends React.Component {
           }
 
           console.log("paramters : ", data.original.runtime_params);
-          //const rowdata = original.row.checkbox;
-          //return { resultHtml };
         },
         sortable: true,
         resizable: true,
@@ -430,14 +376,6 @@ class TrackTab extends React.Component {
         width: 100,
         minResizeWidth: 20,
       },
-      // {
-      //   Header: "runtime paramters",
-      //   accessor: "runtime_params",
-      //   sortable: true,
-      //   resizable: true,
-      //   minResizeWidth: 50,
-      //   width: 100,
-      // },
       {
         Header: "starttime",
         width: 200,
@@ -496,7 +434,6 @@ class TrackTab extends React.Component {
         sortable: true,
         resizable: true,
         Cell: (data) => {
-          //const rowdata = original.row.checkbox;
           return (
             <div className="plugintracktoolbar">
               <table>
@@ -587,15 +524,6 @@ class TrackTab extends React.Component {
             className="pro-table"
             data={this.state.pluginQueueList}
             columns={this.definePluginsQueueTableColumns()}
-            //   getTdProps={(state, rowInfo, column, instance) => ({
-            //     onClick: () => {
-            //       if (column.Header != "") {
-            //         if (typeof rowInfo !== "undefined") {
-            //           this.handleShowEditParameterWindow(rowInfo);
-            //         }
-            //       }
-            //     },
-            //   })}
             pageSizeOptions={[10, 20, 50]}
             defaultPageSize={10}
           />

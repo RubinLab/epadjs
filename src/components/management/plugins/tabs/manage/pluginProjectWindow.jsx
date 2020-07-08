@@ -1,13 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
-import { getProjects } from "../../../../../services/projectServices";
 import ParametersForProjectWindow from "./parametersForProjectWindow";
 class PluginProjectWindow extends React.Component {
   constructor(props) {
     super(props);
-    //this.state = { allprojects: props.allProjects };
-    //console.log("modal log projects", props.allProjects);
   }
   state = {
     showparamswindow: false,
