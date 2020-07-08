@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import Draggable from "react-draggable";
 import { toast } from "react-toastify";
 import { getTemplates } from "../../services/templateServices";
 import cornerstone from "cornerstone-core";
@@ -21,10 +20,6 @@ import { modalities } from "./modality";
 import * as dcmjs from "dcmjs";
 
 import "./aimEditor.css";
-import { throws } from "assert";
-import { getNumOfSegs } from "../../Utils/Segmentation/helpers";
-import { concat } from "joi-browser";
-const mode = sessionStorage.getItem("mode");
 
 const enumAimType = {
   imageAnnotation: 1,
