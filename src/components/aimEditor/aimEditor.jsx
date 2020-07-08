@@ -13,10 +13,8 @@ import {
   updatePatientOnAimSave,
   getSingleSerie,
 } from "../annotationsList/action";
-import { getAimImageData } from "./aimHelper";
+import { Aim, getAimImageData, modalities } from "aimapi";
 import * as questionaire from "./parseClass.js";
-import Aim from "./Aim";
-import { modalities } from "./modality";
 import * as dcmjs from "dcmjs";
 
 import "./aimEditor.css";
@@ -156,45 +154,43 @@ class AimEditor extends Component {
   createAim = async (answers) => {
     const { hasSegmentation } = this.props;
     const markupsToSave = this.getNewMarkups();
-    try {
-      if (hasSegmentation) {
-        // if (!this.checkSegmentationFrames()) return;
-        // segmentation and markups
-        this.createAimSegmentation(answers).then(
-          ({ aim, segmentationBlob }) => {
-            // also add the markups to aim if there is any
-            if (Object.entries(markupsToSave).length !== 0)
-              this.createAimMarkups(aim, markupsToSave);
-            this.saveAim(aim, segmentationBlob);
-          }
-        );
-      } else if (Object.entries(markupsToSave).length !== 0) {
-        // markups without segmentation
-        const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
-        const aim = new Aim(
-          seedData,
-          enumAimType.imageAnnotation,
-          this.updatedAimId
-        );
-        this.createAimMarkups(aim, markupsToSave);
-        this.saveAim(aim);
-      } else {
-        //Non markup image annotation
-        const { activePort } = this.props;
-        const { element } = cornerstone.getEnabledElements()[activePort];
-        const image = cornerstone.getImage(element);
-        const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
+    // try {
+    if (hasSegmentation) {
+      // if (!this.checkSegmentationFrames()) return;
+      // segmentation and markups
+      this.createAimSegmentation(answers).then(({ aim, segmentationBlob }) => {
+        // also add the markups to aim if there is any
+        if (Object.entries(markupsToSave).length !== 0)
+          this.createAimMarkups(aim, markupsToSave);
+        this.saveAim(aim, segmentationBlob);
+      });
+    } else if (Object.entries(markupsToSave).length !== 0) {
+      // markups without segmentation
+      const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
+      const aim = new Aim(
+        seedData,
+        enumAimType.imageAnnotation,
+        this.updatedAimId
+      );
+      this.createAimMarkups(aim, markupsToSave);
+      this.saveAim(aim);
+    } else {
+      //Non markup image annotation
+      const { activePort } = this.props;
+      const { element } = cornerstone.getEnabledElements()[activePort];
+      const image = cornerstone.getImage(element);
+      const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
 
-        const aim = new Aim(
-          seedData,
-          enumAimType.imageAnnotation,
-          this.updatedAimId
-        );
-        this.saveAim(aim);
-      }
-    } catch (error) {
-      throw new Error("Error creating aim", error);
+      const aim = new Aim(
+        seedData,
+        enumAimType.imageAnnotation,
+        this.updatedAimId
+      );
+      this.saveAim(aim);
     }
+    // } catch (error) {
+    //   throw new Error("Error creating aim", error);
+    // }
   };
 
   getActiveElement = () => {
@@ -300,6 +296,7 @@ class AimEditor extends Component {
   };
 
   getAimSeedDataFromMarkup = (markupsToSave, answers) => {
+    console.log("markupst to save", markupsToSave);
     const cornerStoneImageId = Object.keys(markupsToSave)[0];
     const image = this.getCornerstoneImagebyId(cornerStoneImageId);
     const seedData = getAimImageData(image);
@@ -396,9 +393,9 @@ class AimEditor extends Component {
     var shapeIndex = 1;
     var markupsToSave = {};
     markedCSImageIds.map((CSImageId) => {
+      const markUps = toolState[CSImageId];
       const imageUid = this.getstripCsImageId(CSImageId);
       const { imageId, frameNum } = this.parseImageUid(imageUid);
-      const markUps = toolState[imageId];
       Object.keys(markUps).map((tool) => {
         switch (tool) {
           case "FreehandRoi3DTool":
@@ -407,7 +404,7 @@ class AimEditor extends Component {
               if (!polygon.aimId || polygon.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
-                  imageId,
+                  CSImageId,
                   {
                     type: "polygon",
                     markup: polygon,
@@ -427,7 +424,7 @@ class AimEditor extends Component {
               if (!polygon.aimId || polygon.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
-                  imageId,
+                  CSImageId,
                   {
                     type: "polygon",
                     markup: polygon,
@@ -450,7 +447,7 @@ class AimEditor extends Component {
               ) {
                 //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
-                  imageId,
+                  CSImageId,
                   {
                     type: "bidirectional",
                     markup: bidirectional,
@@ -470,7 +467,7 @@ class AimEditor extends Component {
               if (!circle.aimId || circle.aimId === this.updatedAimId) {
                 // //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
-                  imageId,
+                  CSImageId,
                   {
                     type: "circle",
                     markup: circle,
@@ -490,7 +487,7 @@ class AimEditor extends Component {
               if (!line.aimId || line.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
-                  imageId,
+                  CSImageId,
                   {
                     type: "line",
                     markup: line,
@@ -510,7 +507,7 @@ class AimEditor extends Component {
               if (!point.aimId || point.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
                 this.storeMarkupsToBeSaved(
-                  imageId,
+                  CSImageId,
                   {
                     type: "point",
                     markup: point,
@@ -563,12 +560,14 @@ class AimEditor extends Component {
 
   // get the image object by index
   getCornerstoneImagebyIdx = (imageIdx) => {
+    console.log("imgae ind, cs", imageIdx, cornerstone.imageCache);
     const { imageCache } = cornerstone.imageCache;
     const imageId = Object.keys(imageCache)[imageIdx];
     return imageCache[imageId].image;
   };
 
   getCornerstoneImagebyId = (imageId) => {
+    console.log("imgae ind, cs", imageId, cornerstone.imageCache);
     return cornerstone.imageCache.imageCache[imageId].image;
   };
 
