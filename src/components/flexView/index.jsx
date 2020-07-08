@@ -6,8 +6,8 @@ import { Button } from "react-bootstrap";
 import { getSeries } from "../../services/seriesServices";
 import { getStudies } from "../../services/projectServices";
 import DropDownMenu from "./dropdownMenu";
-import StudyTable from "./studyTable";
-import SeriesTable from "./seriesTable";
+import StudyTable from "./StudyTable";
+import SeriesTable from "./SeriesTable";
 import "./flexView.css";
 
 const TreeTable = treeTableHOC(ReactTable);
@@ -15,7 +15,7 @@ const TreeTable = treeTableHOC(ReactTable);
 class FlexView extends React.Component {
   state = {
     columns: [],
-    order: [15, 4, 19],
+    order: [1, 4, 0, 10, 11, 6],
     dropdownSelected: false,
     expanded: {},
     seriesTableOpen: false,
@@ -167,7 +167,7 @@ class FlexView extends React.Component {
       <div className="flexView">
         <Button
           onClick={this.selectDropdown}
-          variant="outline-dark"
+          variant="secondary"
           id="flexMenu-button"
         >
           Select columns

@@ -92,7 +92,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterArray(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "examTypes" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "examTypes-id" ? "#3a3f44" : null,
         },
       }),
       Cell: (row) => {
@@ -113,7 +113,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterString(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "patientName" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "patientName-id" ? "#3a3f44" : null,
         },
       }),
       Cell: (row) => {
@@ -130,7 +130,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterString(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "patientID" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "patientID-id" ? "#3a3f44" : null,
         },
       }),
     },
@@ -144,7 +144,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterString(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "sex" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "sex-id" ? "#3a3f44" : null,
         },
       }),
     },
@@ -158,7 +158,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterString(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "studyDescription" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "studyDescription-id" ? "#3a3f44" : null,
         },
       }),
       Cell: (row) => {
@@ -178,7 +178,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterDateAndTime(filter, row, "date"),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "insertDate" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "insertDate-id" ? "#3a3f44" : null,
         },
       }),
       Cell: (row) => {
@@ -195,7 +195,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterDateAndTime(filter, row, "date"),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "studyDate" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "studyDate-id" ? "#3a3f44" : null,
         },
       }),
       Cell: (row) => {
@@ -212,7 +212,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterDateAndTime(filter, row, "time"),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "studyTime" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "studyTime-id" ? "#3a3f44" : null,
         },
       }),
       Cell: (row) => {
@@ -229,7 +229,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterString(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "studyUID" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "studyUID-id" ? "#3a3f44" : null,
         },
       }),
     },
@@ -244,7 +244,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor:
-            sortedCol === "numberOfAnnotations" ? "#3a3f44" : null,
+            sortedCol === "numberOfAnnotations-id" ? "#3a3f44" : null,
         },
       }),
     },
@@ -258,7 +258,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => row[filter.id] >= filter.value,
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "numberOfImages" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "numberOfImages-id" ? "#3a3f44" : null,
         },
       }),
     },
@@ -272,7 +272,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => row[filter.id] >= filter.value,
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "numberOfSeries" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "numberOfSeries-id" ? "#3a3f44" : null,
         },
       }),
     },
@@ -286,7 +286,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterDateAndTime(filter, row, "date"),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "createdTime" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "createdTime-id" ? "#3a3f44" : null,
         },
       }),
       Cell: (row) => {
@@ -303,7 +303,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterDateAndTime(filter, row, "date"),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "birthdate" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "birthdate-id" ? "#3a3f44" : null,
         },
       }),
       Cell: (row) => {
@@ -321,7 +321,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor:
-            sortedCol === "firstSeriesDateAcquired" ? "#3a3f44" : null,
+            sortedCol === "firstSeriesDateAcquired-id" ? "#3a3f44" : null,
         },
       }),
       Cell: (row) => {
@@ -338,7 +338,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterString(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "firstSeriesUID" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "firstSeriesUID-id" ? "#3a3f44" : null,
         },
       }),
     },
@@ -352,7 +352,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterString(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "physicianName" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "physicianName-id" ? "#3a3f44" : null,
         },
       }),
     },
@@ -366,7 +366,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterString(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "projectID" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "projectID-id" ? "#3a3f44" : null,
         },
       }),
     },
@@ -381,7 +381,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor:
-            sortedCol === "referringPhysicianName" ? "#3a3f44" : null,
+            sortedCol === "referringPhysicianName-id" ? "#3a3f44" : null,
         },
       }),
     },
@@ -395,7 +395,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor:
-            sortedCol === "studyAccessionNumber" ? "#3a3f44" : null,
+            sortedCol === "studyAccessionNumber-id" ? "#3a3f44" : null,
         },
       }),
       filterMethod: (filter, row) => filterString(filter, row),
@@ -409,7 +409,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       show: true,
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "studyID" ? "#3a3f44" : null,
+          backgroundColor: sortedCol === "studyID-id" ? "#3a3f44" : null,
         },
       }),
       filterMethod: (filter, row) => filterString(filter, row),
