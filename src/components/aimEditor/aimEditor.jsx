@@ -257,26 +257,27 @@ class AimEditor extends Component {
   createAimMarkups = (aim, markupsToSave) => {
     Object.entries(markupsToSave).forEach(([key, values]) => {
       values.map((value) => {
-        const { type, markup, shapeIndex, imageReferenceUid } = value;
+        const { type, markup, shapeIndex, imageId, frameNum } = value;
         switch (type) {
           case "point":
-            this.addPointToAim(aim, markup, shapeIndex, imageReferenceUid);
+            this.addPointToAim(aim, markup, shapeIndex, imageId, frameNum);
             break;
           case "line":
-            this.addLineToAim(aim, markup, shapeIndex, imageReferenceUid);
+            this.addLineToAim(aim, markup, shapeIndex, imageId, frameNum);
             break;
           case "circle":
-            this.addCircleToAim(aim, markup, shapeIndex, imageReferenceUid);
+            this.addCircleToAim(aim, markup, shapeIndex, imageId, frameNum);
             break;
           case "polygon":
-            this.addPolygonToAim(aim, markup, shapeIndex, imageReferenceUid);
+            this.addPolygonToAim(aim, markup, shapeIndex, imageId, frameNum);
             break;
           case "bidirectional":
             this.addBidirectionalToAim(
               aim,
               markup,
               shapeIndex,
-              imageReferenceUid
+              imageId,
+              frameNum
             );
         }
       });
@@ -395,12 +396,13 @@ class AimEditor extends Component {
 
   getNewMarkups = () => {
     const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    const markedImageIds = this.getMarkedImageIds();
+    const markedCSImageIds = this.getMarkedImageIds();
     // check for markups
     var shapeIndex = 1;
     var markupsToSave = {};
-    markedImageIds.map((imageId) => {
-      const imageReferenceUid = this.parseImgeId(imageId);
+    markedCSImageIds.map((CSImageId) => {
+      const imageUid = this.getstripCsImageId(CSImageId);
+      const { imageId, frameNum } = this.parseImageUid(imageUid);
       const markUps = toolState[imageId];
       Object.keys(markUps).map((tool) => {
         switch (tool) {
@@ -415,7 +417,8 @@ class AimEditor extends Component {
                     type: "polygon",
                     markup: polygon,
                     shapeIndex,
-                    imageReferenceUid,
+                    imageId,
+                    frameNum,
                   },
                   markupsToSave
                 );
@@ -434,7 +437,8 @@ class AimEditor extends Component {
                     type: "polygon",
                     markup: polygon,
                     shapeIndex,
-                    imageReferenceUid,
+                    imageId,
+                    frameNum,
                   },
                   markupsToSave
                 );
@@ -456,7 +460,8 @@ class AimEditor extends Component {
                     type: "bidirectional",
                     markup: bidirectional,
                     shapeIndex,
-                    imageReferenceUid,
+                    imageId,
+                    frameNum,
                   },
                   markupsToSave
                 );
@@ -469,21 +474,17 @@ class AimEditor extends Component {
             circles.map((circle) => {
               if (!circle.aimId || circle.aimId === this.updatedAimId) {
                 // //dont save the same markup to different aims
-                // const enElem = cornerstone.getEnabledElements()[0].element;
-
-                // cornerstoneTools.removeToolState(enElem, "CircleRoi", circle);
-
                 this.storeMarkupsToBeSaved(
                   imageId,
                   {
                     type: "circle",
                     markup: circle,
                     shapeIndex,
-                    imageReferenceUid,
+                    imageId,
+                    frameNum,
                   },
                   markupsToSave
                 );
-                // this.addCircleToAim(aim, circle, shapeIndex, imageReferenceUid);
                 shapeIndex++;
               }
             });
@@ -499,11 +500,11 @@ class AimEditor extends Component {
                     type: "line",
                     markup: line,
                     shapeIndex,
-                    imageReferenceUid,
+                    imageId,
+                    frameNum,
                   },
                   markupsToSave
                 );
-                // this.addLineToAim(aim, line, shapeIndex);
                 shapeIndex++;
               }
             });
@@ -519,11 +520,11 @@ class AimEditor extends Component {
                     type: "point",
                     markup: point,
                     shapeIndex,
-                    imageReferenceUid,
+                    imageId,
+                    frameNum,
                   },
                   markupsToSave
                 );
-                // this.addLineToAim(aim, line, shapeIndex);
                 shapeIndex++;
               }
             });
@@ -607,18 +608,31 @@ class AimEditor extends Component {
     }
 
     if (volume) {
-      const volumeId = aim.createMaxCalcEntity({ volume, unit: "mm3" });
+      const volumeId = aim.createVolumeCalcEntity({
+        value: volume,
+        unit: "mm3",
+      });
       aim.createImageAnnotationStatement(2, segId, volumeId);
     }
   };
 
-  addPolygonToAim = (aim, polygon, shapeIndex, imageReferenceUid) => {
+  parseImageUid = (imageUid) => {
+    if (imageUid.includes("frame=")) {
+      const obj = {};
+      [obj.imageId, obj.frameNum] = imageUid.split("&frame=");
+      return obj;
+    }
+    return { imageId: imageUid, frameNum: 1 }; //default frame number is always 1
+  };
+
+  addPolygonToAim = (aim, polygon, shapeIndex, imageId, frameNum) => {
     const { points } = polygon.handles;
     const markupId = aim.addMarkupEntity(
       "TwoDimensionPolyline",
       shapeIndex,
       points,
-      imageReferenceUid
+      imageId,
+      frameNum
     );
 
     // find out the unit about statistics to write to aim
@@ -644,23 +658,25 @@ class AimEditor extends Component {
     aim.createImageAnnotationStatement(1, markupId, maxId);
   };
 
-  addPointToAim = (aim, point, shapeIndex, imageReferenceUid) => {
+  addPointToAim = (aim, point, shapeIndex, imageId, frameNum) => {
     const { end } = point.handles;
     aim.addMarkupEntity(
       "TwoDimensionPoint",
       shapeIndex,
       [end],
-      imageReferenceUid
+      imageId,
+      frameNum
     );
   };
 
-  addLineToAim = (aim, line, shapeIndex, imageReferenceUid) => {
+  addLineToAim = (aim, line, shapeIndex, imageId, frameNum) => {
     const { start, end } = line.handles;
     const markupId = aim.addMarkupEntity(
       "TwoDimensionMultiPoint",
       shapeIndex,
       [start, end],
-      imageReferenceUid
+      imageId,
+      frameNum
     );
 
     const lengthId = aim.createLengthCalcEntity({
@@ -670,13 +686,14 @@ class AimEditor extends Component {
     aim.createImageAnnotationStatement(1, markupId, lengthId);
   };
 
-  addCircleToAim = (aim, circle, shapeIndex, imageReferenceUid) => {
+  addCircleToAim = (aim, circle, shapeIndex, imageId, frameNum) => {
     const { start, end } = circle.handles;
     const markupId = aim.addMarkupEntity(
       "TwoDimensionCircle",
       shapeIndex,
       [start, end],
-      imageReferenceUid
+      imageId,
+      frameNum
     );
 
     let unit;
@@ -704,7 +721,8 @@ class AimEditor extends Component {
     aim,
     bidirectional,
     shapeIndex,
-    imageReferenceUid
+    imageId,
+    frameNum
   ) => {
     const { longAxis, shortAxis } = this.getAxisOfBidirectional(bidirectional);
 
@@ -713,7 +731,8 @@ class AimEditor extends Component {
       "TwoDimensionMultiPoint",
       shapeIndex,
       [longAxis.start, longAxis.end],
-      imageReferenceUid
+      imageId,
+      frameNum
     );
     const longAxisLengthId = aim.createLongAxisCalcEntity({
       value: longAxis.length,
@@ -726,7 +745,8 @@ class AimEditor extends Component {
       "TwoDimensionMultiPoint",
       shapeIndex + 1,
       [shortAxis.start, shortAxis.end],
-      imageReferenceUid
+      imageId,
+      frameNum
     );
     const shortAxisLengthId = aim.createShortAxisCalcEntity({
       value: shortAxis.length,
@@ -922,7 +942,7 @@ class AimEditor extends Component {
     };
   };
 
-  parseImgeId = (imageId) => {
+  getstripCsImageId = (imageId) => {
     if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
     return imageId.split("/").pop();
   };
