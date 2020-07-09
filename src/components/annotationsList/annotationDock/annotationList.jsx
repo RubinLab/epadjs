@@ -11,14 +11,13 @@ import {
   jumpToAim,
 } from "../action";
 
-
 class AnnotationsList extends React.Component {
   state = {
     labelDisplayAll: false,
     annsDisplayAll: true,
   };
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     const series = Object.keys(this.props.aimsList);
     if (
       (this.props.activePort !== prevProps.activePort && !this.props.loading) ||
@@ -44,7 +43,7 @@ class AnnotationsList extends React.Component {
     }
   };
 
-  handleDisplayClick = e => {
+  handleDisplayClick = (e) => {
     const { seriesUID, patientID, studyUID } = this.props.openSeries[
       this.props.activePort
     ];
@@ -76,13 +75,14 @@ class AnnotationsList extends React.Component {
     this.props.dispatch(toggleAllAnnotations(seriesUID, checked));
   };
 
-  handleToggleSingleLabel = e => {
+  handleToggleSingleLabel = (e) => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
   };
 
-  handleJumToAim = e => {
+  handleJumToAim = (e) => {
     const { id, serie } = e.target.dataset;
+    console.log("Jump to aim", id, serie);
     this.props.dispatch(jumpToAim(serie, id, this.props.activePort));
   };
 
@@ -234,14 +234,17 @@ class AnnotationsList extends React.Component {
             />
           </div>
           <div style={{ maxHeight, overflow: "scroll" }}>{annList}</div>
-          <AnnotationsLink imageAims={imageAims} jumpToAim={this.handleJumToAim}/>
+          <AnnotationsLink
+            imageAims={imageAims}
+            jumpToAim={this.handleJumToAim}
+          />
         </div>
       </React.Fragment>
     );
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,

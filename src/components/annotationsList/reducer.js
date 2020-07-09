@@ -416,7 +416,7 @@ const asyncReducer = (state = initialState, action) => {
           ].annotations
         );
 
-        allAims.forEach(ann => {
+        allAims.forEach((ann) => {
           if (ann === action.payload.aimID) {
             aimAimsList[ann].isDisplayed = true;
 

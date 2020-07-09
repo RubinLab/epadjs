@@ -112,7 +112,7 @@ const tools = [
   { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
 ];
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     series: state.annotationsListReducer.openSeries,
     loading: state.annotationsListReducer.loading,
@@ -143,8 +143,9 @@ class DisplayView extends Component {
   componentDidMount() {
     const { pid } = this.props;
     if (this.props.series.length < 1) {
-      if (pid) this.props.history.push(`/search/${pid}`);
-      else return;
+      // if (pid) this.props.history.push(`/search/${pid}`);
+      // else return;
+      return;
     }
     this.getViewports();
     this.getData();
@@ -152,11 +153,19 @@ class DisplayView extends Component {
     window.addEventListener("markupCreated", this.handleMarkupCreated);
   }
 
-  async componentDidUpdate(prevProps) {
-    const { pid } = this.props;
+  async componentDidUpdate(prevProps, prevState) {
+    const { pid, series, activePort } = this.props;
+    const { series: prevSeries, activePort: prevActivePort } = prevProps;
+    const activeSeries = series[activePort];
+    const prevActiveSeries = prevSeries[prevActivePort];
+
+    console.log("in did update props", this.props, prevProps);
+    console.log("in did update state", this.state, prevState);
+
     if (this.props.series.length < 1) {
-      if (pid) this.props.history.push(`/search/${pid}`);
-      else return;
+      // if (pid) this.props.history.push(`/search/${pid}`);
+      // else return;
+      return;
     }
     if (
       (prevProps.series !== this.props.series &&
@@ -168,6 +177,13 @@ class DisplayView extends Component {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
+    } else if (activeSeries.aimID !== prevActiveSeries.aimID) {
+      console.log(
+        "jumping from ",
+        prevActiveSeries.aimID,
+        "to ",
+        activeSeries.aimID
+      );
     }
   }
 
@@ -188,8 +204,8 @@ class DisplayView extends Component {
   //   }
   // };
 
-  sleep = ms => {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  sleep = (ms) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   };
 
   getData() {
@@ -204,7 +220,7 @@ class DisplayView extends Component {
       const promise = this.getImageStack(series[i], i);
       promises.push(promise);
     }
-    Promise.all(promises).then(res => {
+    Promise.all(promises).then((res) => {
       this.setState({
         data: res,
         isLoading: false,
@@ -261,7 +277,7 @@ class DisplayView extends Component {
     let newImageIds = {};
     let cornerstoneImageIds = [];
     const imageUrls = await this.getImages(serie);
-    imageUrls.map(url => {
+    imageUrls.map((url) => {
       const baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
@@ -317,11 +333,11 @@ class DisplayView extends Component {
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
-    // stack.mu
+    console.log("state", this.state);
     return { stack };
   };
 
-  openAimEditor = serie => {
+  openAimEditor = (serie) => {
     const { aimList } = this.props;
     const { aimID, seriesUID } = serie;
     if (Object.entries(aimList).length !== 0) {
@@ -357,13 +373,13 @@ class DisplayView extends Component {
     return element;
   };
 
-  hasSegmentation = aimJson => {
+  hasSegmentation = (aimJson) => {
     const { markupType } = aimJson;
     if (Array.isArray(markupType) && markupType.length)
       return markupType.some(this.isDicomSegEntity);
   };
 
-  isDicomSegEntity = markupType => {
+  isDicomSegEntity = (markupType) => {
     return markupType === "DicomSegmentationEntity";
   };
 
@@ -436,7 +452,7 @@ class DisplayView extends Component {
     };
   }
 
-  hideShow = current => {
+  hideShow = (current) => {
     if (this.state.hideShowDisabled) {
       // this.setState({ hideShowDisabled: false });
       return;
@@ -476,7 +492,7 @@ class DisplayView extends Component {
     }
   };
 
-  handleMarkupSelected = event => {
+  handleMarkupSelected = (event) => {
     const { aimList, series, activePort } = this.props;
     const { aimId, ancestorEvent } = event.detail;
     const { element, data } = ancestorEvent;
@@ -516,7 +532,7 @@ class DisplayView extends Component {
     return `You are trying to edit Aim named: ${destinationAim}. All unsaved changes in Aim named: ${currentAim} will be lost!!!`;
   };
 
-  handleMarkupCreated = event => {
+  handleMarkupCreated = (event) => {
     const { detail } = event;
     const { hasSegmentation } = this.state;
 
@@ -526,7 +542,7 @@ class DisplayView extends Component {
     this.setState({ showAimEditor: true, selectedAim: undefined });
   };
 
-  setActive = i => {
+  setActive = (i) => {
     if (this.props.activePort !== i) {
       if (this.state.showAimEditor) {
         if (!this.closeAimEditor(true)) {
@@ -542,7 +558,7 @@ class DisplayView extends Component {
   parseAims = (aimList, seriesUid, studyUid, serieIndex, serie) => {
     Object.entries(aimList).forEach(([key, values], aimIndex) => {
       this.linesToPerpendicular(values); //change the perendicular lines to bidirectional to render by CS
-      values.forEach(value => {
+      values.forEach((value) => {
         const { markupType, aimUid } = value;
         if (markupType === "DicomSegmentationEntity")
           this.getSegmentationData(
@@ -566,14 +582,14 @@ class DisplayView extends Component {
     });
   };
 
-  linesToPerpendicular = values => {
+  linesToPerpendicular = (values) => {
     // Takes two lines on the same image, checks if they belong to same Aima and if they are perpendicular.
     // If so, merges two lines on line1, cnahges the markup type from line to perpendicular
     // And deletes the second line not to be reRendered as line agai
     const lines = values.filter(this.checkIfLine);
 
     const groupedLines = Object.values(this.groupBy(lines, "aimUid"));
-    groupedLines.forEach(lines => {
+    groupedLines.forEach((lines) => {
       if (lines.length > 1) {
         for (let i = 0; i < lines.length; i++) {
           for (let j = i + 1; j < lines.length; j++) {
@@ -600,7 +616,7 @@ class DisplayView extends Component {
     });
   };
 
-  checkIfPerpendicular = lines => {
+  checkIfPerpendicular = (lines) => {
     const slope1 = this.getSlopeOfLine(
       lines[0]["coordinates"][0],
       lines[0]["coordinates"][1]
@@ -624,14 +640,14 @@ class DisplayView extends Component {
     return (p1.y.value - p2.y.value) / (p1.x.value - p2.x.value);
   };
 
-  checkIfLine = markup => {
+  checkIfLine = (markup) => {
     if (markup) {
       return markup.markupType === "TwoDimensionMultiPoint";
     }
   };
 
   // returns true iff the line from (a,b)->(c,d) intersects with (p,q)->(r,s)
-  intersects = lines => {
+  intersects = (lines) => {
     const a = lines[0]["coordinates"][0].x.value;
     const b = lines[0]["coordinates"][0].y.value;
     const c = lines[0]["coordinates"][1].x.value;
@@ -653,7 +669,7 @@ class DisplayView extends Component {
   };
 
   groupBy = (xs, key) => {
-    return xs.reduce(function(rv, x) {
+    return xs.reduce(function (rv, x) {
       (rv[x[key]] = rv[x[key]] || []).push(x);
       return rv;
     }, {});
@@ -675,15 +691,15 @@ class DisplayView extends Component {
     });
   };
 
-  sleep = ms => {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  sleep = (ms) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   };
 
   renderSegmentation = (arrayBuffer, aimId, serieIndex) => {
     try {
       const { imageIds } = this.state.data[serieIndex].stack;
 
-      var imagePromises = imageIds.map(imageId => {
+      var imagePromises = imageIds.map((imageId) => {
         return cornerstone.loadAndCacheImage(imageId);
       });
 
@@ -938,23 +954,23 @@ class DisplayView extends Component {
     this.setState({ showAnnDetails: false });
   };
 
-  getMarkupTypesForAim = aimUid => {
+  getMarkupTypesForAim = (aimUid) => {
     let markupTypes = [];
     const imageAnnotations = this.props.series[this.props.activePort]
       .imageAnnotations;
     Object.entries(imageAnnotations).forEach(([key, values]) => {
-      values.forEach(value => {
+      values.forEach((value) => {
         if (value.aimUid === aimUid) markupTypes.push(value.markupType);
       });
     });
     return markupTypes;
   };
   // this is in aimEditor. should be somewhare common so both can use (the new aimapi library)
-  parseImgeId = imageId => {
+  parseImgeId = (imageId) => {
     if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
     return imageId.split("/").pop();
   };
-  newImage = event => {
+  newImage = (event) => {
     let { imageId } = event.detail.image;
     imageId = this.parseImgeId(imageId); //strip from cs imagePath to imageId
     const { activePort } = this.props;
