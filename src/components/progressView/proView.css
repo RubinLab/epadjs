@@ -20,6 +20,10 @@
   cursor: pointer;
 }
 
+.progress-wl.__selected {
+  color: #3a3f44;
+}
+
 .progress-wl .__inner {
   display: flex;
   justify-content: space-between;
