@@ -40,6 +40,7 @@ import ToolMenu from "../ToolMenu/ToolMenu";
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
+const scrollToIndex = cornerstoneTools.importInternal("util/scrollToIndex");
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 }, mode: "active" },
@@ -143,9 +144,8 @@ class DisplayView extends Component {
   componentDidMount() {
     const { pid } = this.props;
     if (this.props.series.length < 1) {
-      // if (pid) this.props.history.push(`/search/${pid}`);
-      // else return;
-      return;
+      if (pid) this.props.history.push(`/search/${pid}`);
+      else return;
     }
     this.getViewports();
     this.getData();
@@ -156,15 +156,12 @@ class DisplayView extends Component {
   async componentDidUpdate(prevProps, prevState) {
     const { pid, series, activePort } = this.props;
     const { series: prevSeries, activePort: prevActivePort } = prevProps;
-    const activeSeries = series[activePort];
-    const prevActiveSeries = prevSeries[prevActivePort];
-
-    console.log("in did update props", this.props, prevProps);
-    console.log("in did update state", this.state, prevState);
+    const activeSerie = series[activePort];
+    const prevActiveSerie = prevSeries[prevActivePort];
 
     if (this.props.series.length < 1) {
-      // if (pid) this.props.history.push(`/search/${pid}`);
-      // else return;
+      if (pid) this.props.history.push(`/search/${pid}`);
+      else return;
       return;
     }
     if (
@@ -177,13 +174,8 @@ class DisplayView extends Component {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
-    } else if (activeSeries.aimID !== prevActiveSeries.aimID) {
-      console.log(
-        "jumping from ",
-        prevActiveSeries.aimID,
-        "to ",
-        activeSeries.aimID
-      );
+    } else if (activeSerie.aimID !== prevActiveSerie.aimID) {
+      this.jumpToAimImage(activeSerie, activePort);
     }
   }
 
@@ -191,22 +183,6 @@ class DisplayView extends Component {
     window.removeEventListener("markupSelected", this.handleMarkupSelected);
     window.removeEventListener("markupCreated", this.handleMarkupCreated);
   }
-
-  // componentDidUpdate = async prevProps => {
-  //   if (
-  //     (this.props.loading !== prevProps.loading && !this.props.loading) ||
-  //     this.props.series !== prevProps.series
-  //   ) {
-  //     await this.setState({ isLoading: true });
-
-  //     this.getViewports();
-  //     this.getData();
-  //   }
-  // };
-
-  sleep = (ms) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  };
 
   getData() {
     // clear the toolState they will be rendered again on next load
@@ -253,7 +229,6 @@ class DisplayView extends Component {
 
   async getImages(serie) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
-    console.log("urls", urls);
     return urls;
   }
 
@@ -272,7 +247,6 @@ class DisplayView extends Component {
     return metadataURI + "/frames/1";
   };
   getImageStack = async (serie, index) => {
-    console.log("In image stack");
     let stack = {};
     let newImageIds = {};
     let cornerstoneImageIds = [];
@@ -333,7 +307,6 @@ class DisplayView extends Component {
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
-    console.log("state", this.state);
     return { stack };
   };
 
@@ -995,8 +968,26 @@ class DisplayView extends Component {
     p1.then(this.closeViewport());
   };
 
+  jumpToAimImage = (activeSerie, activePort) => {
+    const { imageIds } = this.state.data[activePort].stack;
+    const imageIndex = this.getImageIndex(activeSerie, imageIds);
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    scrollToIndex(element, parseInt(imageIndex, 10));
+  };
+
+  jumpToImage = (imageIndex) => {
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    scrollToIndex(element, imageIndex);
+  };
+
+  handleJumpChange = (event) => {
+    let imageIndex = parseInt(event.target.value) - 1;
+    console.log("new value", imageIndex);
+    this.jumpToImage(imageIndex);
+  };
+
   render() {
-    console.log("Data", this.props);
     const { series } = this.props;
     if (this.state.redirect) return <Redirect to="/search" />;
     return !Object.entries(this.props.series).length ? (
@@ -1058,6 +1049,8 @@ class DisplayView extends Component {
                           type="number"
                           min="1"
                           id="imageNum"
+                          value={data.stack.currentImageIdIndex + 1}
+                          onChange={this.handleJumpChange}
                           style={{
                             width: "60px",
                             height: "10px",

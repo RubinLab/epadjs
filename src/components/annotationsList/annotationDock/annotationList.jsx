@@ -82,7 +82,6 @@ class AnnotationsList extends React.Component {
 
   handleJumToAim = (e) => {
     const { id, serie } = e.target.dataset;
-    console.log("Jump to aim", id, serie);
     this.props.dispatch(jumpToAim(serie, id, this.props.activePort));
   };
 
