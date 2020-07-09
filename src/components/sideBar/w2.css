@@ -31,6 +31,10 @@
   margin-left: 50px;
 }
 
+#leftSidebar {
+  overflow: hidden;
+}
+
 .mainView {
   height: 100%;
   flex: 1;
@@ -305,13 +309,13 @@ body {
 .sidebar-row p {
   padding: 0.2em 0.8rem;
   cursor: pointer;
+  margin: 0.2rem;
 }
 
 .sidebar-row.__selected {
   background: #861737;
   padding: 0.5em 0.8rem;
-  font-weight: 400;
-  font-size: 1.2rem;
+  font-weight: 600;
   color: #ffffff; 
   margin: 0.2rem;
 }
