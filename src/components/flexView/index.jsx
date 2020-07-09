@@ -35,15 +35,12 @@ class FlexView extends React.Component {
     "# of Aims",
     "# Of Img",
     "# Of Series",
-    "created Time",
-    "birth date",
-    "First Series Date Acquired",
-    "First Series UID",
-    "Physician Name",
+    "Created Time",
+    "Birth Date",
     "Project ID",
     "Referring Physician Name",
     `Study Accession Number`,
-    "studyID",
+    "Study ID",
   ];
 
   mountEvents = () => {

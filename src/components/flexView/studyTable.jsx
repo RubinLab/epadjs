@@ -277,7 +277,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       }),
     },
     {
-      Header: "created Time",
+      Header: "Created Time",
       accessor: "createdTime",
       id: "createdTime-id",
       resizable: true,
@@ -294,7 +294,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       },
     },
     {
-      Header: "birth date",
+      Header: "Birth date",
       accessor: "birthdate",
       id: "birthdate-id",
       resizable: true,
@@ -310,52 +310,52 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
         return <div>{formatDate(row.original.birthdate)}</div>;
       },
     },
-    {
-      Header: "First Series Date Acquired",
-      accessor: "firstSeriesDateAcquired",
-      id: "firstSeriesDateAcquired-id",
-      resizable: true,
-      sortable: true,
-      show: true,
-      filterMethod: (filter, row) => filterDateAndTime(filter, row, "date"),
-      getProps: (state, rowInfo) => ({
-        style: {
-          backgroundColor:
-            sortedCol === "firstSeriesDateAcquired-id" ? "#3a3f44" : null,
-        },
-      }),
-      Cell: (row) => {
-        return <div>{formatDate(row.original.firstSeriesDateAcquired)}</div>;
-      },
-    },
-    {
-      Header: "First Series UID",
-      accessor: "firstSeriesUID",
-      id: "firstSeriesUID-id",
-      resizable: true,
-      sortable: true,
-      show: true,
-      filterMethod: (filter, row) => filterString(filter, row),
-      getProps: (state, rowInfo) => ({
-        style: {
-          backgroundColor: sortedCol === "firstSeriesUID-id" ? "#3a3f44" : null,
-        },
-      }),
-    },
-    {
-      Header: "Physician Name",
-      accessor: "physicianName",
-      id: "physicianName-id",
-      resizable: true,
-      sortable: true,
-      show: true,
-      filterMethod: (filter, row) => filterString(filter, row),
-      getProps: (state, rowInfo) => ({
-        style: {
-          backgroundColor: sortedCol === "physicianName-id" ? "#3a3f44" : null,
-        },
-      }),
-    },
+    // {
+    //   Header: "First Series Date Acquired",
+    //   accessor: "firstSeriesDateAcquired",
+    //   id: "firstSeriesDateAcquired-id",
+    //   resizable: true,
+    //   sortable: true,
+    //   show: true,
+    //   filterMethod: (filter, row) => filterDateAndTime(filter, row, "date"),
+    //   getProps: (state, rowInfo) => ({
+    //     style: {
+    //       backgroundColor:
+    //         sortedCol === "firstSeriesDateAcquired-id" ? "#3a3f44" : null,
+    //     },
+    //   }),
+    //   Cell: (row) => {
+    //     return <div>{formatDate(row.original.firstSeriesDateAcquired)}</div>;
+    //   },
+    // },
+    // {
+    //   Header: "First Series UID",
+    //   accessor: "firstSeriesUID",
+    //   id: "firstSeriesUID-id",
+    //   resizable: true,
+    //   sortable: true,
+    //   show: true,
+    //   filterMethod: (filter, row) => filterString(filter, row),
+    //   getProps: (state, rowInfo) => ({
+    //     style: {
+    //       backgroundColor: sortedCol === "firstSeriesUID-id" ? "#3a3f44" : null,
+    //     },
+    //   }),
+    // },
+    // {
+    //   Header: "Physician Name",
+    //   accessor: "physicianName",
+    //   id: "physicianName-id",
+    //   resizable: true,
+    //   sortable: true,
+    //   show: true,
+    //   filterMethod: (filter, row) => filterString(filter, row),
+    //   getProps: (state, rowInfo) => ({
+    //     style: {
+    //       backgroundColor: sortedCol === "physicianName-id" ? "#3a3f44" : null,
+    //     },
+    //   }),
+    // },
     {
       Header: "Project ID",
       accessor: "projectID",
@@ -401,7 +401,7 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterString(filter, row),
     },
     {
-      Header: "studyID",
+      Header: "Study ID",
       accessor: "studyID",
       id: "studyID-id",
       resizable: true,
