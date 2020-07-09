@@ -1,0 +1,141 @@
+.pluginnavbar {
+  width: 100%;
+  background-color: rgb(65, 65, 65);
+}
+.pluginform.nav-item {
+  color: gray;
+  font-family: Arial;
+  text-align: center;
+}
+.pluginform.nav-link {
+  color: gray;
+}
+.pluginform.nav-link:active {
+  background-color: #7c7c7c;
+  color: black;
+  font-family: Arial;
+  text-align: center;
+}
+.pluginform.nav-link:visited {
+  background-color: rgb(65, 65, 65);
+  font-family: Arial;
+  text-align: center;
+}
+.pluginform.nav-link:hover {
+  background-color: #7c7c7c;
+  font-family: Arial;
+  text-align: center;
+}
+.create-plugin__modal {
+  width: 100%;
+  height: 800px;
+}
+
+/* Create three equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 33.33%;
+  padding: 10px;
+  height: 300px; /* Should be removed. Only for demonstration */
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.triggerTable table,
+th,
+tr,
+td {
+  padding-left: 20px;
+  vertical-align: top;
+}
+.triggerTable table {
+  width: 800px;
+  height: 800px;
+  color: gray;
+}
+.pluginaddqueueselect option {
+  background-color: white;
+  color: black;
+}
+.input_enabled {
+  text-align: left;
+  size: 10px;
+}
+.pluginaddqueueselect {
+  color: black;
+}
+.projectcolumn {
+  width: 100%;
+  min-height: 400px;
+  color: black;
+}
+.trseperator {
+  background-color: gray;
+  height: 1px;
+}
+.tdleft {
+  text-align: left;
+}
+.tdright {
+  text-align: right;
+}
+.setparamtable {
+  border: 1px solid gray;
+  width: 100%;
+}
+.paramsInput {
+  background-color: #c6c6c6;
+  color: black;
+}
+.trHeader {
+  padding-top: 20px;
+  color: #c6c6c6;
+  font-size: 12px;
+}
+.tableHeaderRunTimeParams {
+  padding-top: 20px;
+  color: #c6c6c6;
+  font-size: 12px;
+}
+.tableRunTimeParams {
+  color: #c6c6c6;
+  font-size: 12px;
+  padding: 20px;
+}
+.trRunTimeParams {
+  color: #c6c6c6;
+  font-size: 12px;
+  padding-top: 5;
+  padding-bottom: 5px;
+}
+
+.t1 {
+  width: 100%;
+}
+.t1 tr {
+  text-align: left;
+}
+.t1 td {
+  padding: 5px;
+  color: black;
+}
+
+.topButtons {
+  text-align: left;
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+.cursorHand {
+  cursor: pointer;
+  margin-left: 10px;
+}
+.text_clickable {
+  color: #5bc0de;
+  font-style: italic;
+  cursor: pointer;
+}

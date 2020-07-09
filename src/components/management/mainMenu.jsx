@@ -6,7 +6,7 @@ import Projects from "./projects/projects";
 import WorkLists from "./worklists/workLists";
 import Annotations from "./annotations/annotations";
 import Templates from "./templates";
-import Tools from "./tools";
+import Plugins from "./plugins/main";
 import Connections from "./connections";
 import "./menuStyle.css";
 import Header from "./common/managementHeader";
@@ -94,9 +94,9 @@ class MainMenu extends React.Component {
             pid={this.props.pid}
           />
         );
-      case "Tools":
+      case "Plugins":
         return (
-          <Tools
+          <Plugins
             selection={this.state.selection}
             onClose={this.handleCloseModal}
           />
@@ -131,6 +131,14 @@ class MainMenu extends React.Component {
             >
               Templates
             </div>
+            <div className="mng-menu__option" onClick={this.handleSelection}>
+              Plugins
+            </div>
+            {false && (
+              <div className="mng-menu__option" onClick={this.handleSelection}>
+                Pluginstore
+              </div>
+            )}
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Worklists
             </div>

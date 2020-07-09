@@ -2,6 +2,6 @@
   "mode": "thick",
   "apiUrl": "http://localhost:8080",
   "apiUrlV1": "http://localhost:8080/epad",
-  "wadoUrl": "wadouri:http://localhost:8080/wado",
+  "wadoUrl": "wadouri:http://localhost:8090/pacs",
   "clientKey": "Swa9Ci6Hr7n8eb6JqlEZpaujC7ZQq1fM"
 }
