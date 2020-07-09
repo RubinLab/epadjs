@@ -76,10 +76,12 @@ class AimEditor extends Component {
   getDefaultLesionName = () => {
     const { openSeries, activePort } = this.props;
     const { imageAnnotations } = openSeries[activePort];
-    let totalNumShapes = 0;
-    Object.values(imageAnnotations).map((shapesOnImage) => {
-      totalNumShapes += shapesOnImage.length;
-    });
+    let totalNumShapes = 1;
+    if (imageAnnotations) {
+      Object.values(imageAnnotations).map((shapesOnImage) => {
+        totalNumShapes += shapesOnImage.length;
+      });
+    }
     return `Lesion${totalNumShapes}`;
   };
 
