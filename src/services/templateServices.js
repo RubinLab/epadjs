@@ -5,9 +5,15 @@ const mode = sessionStorage.getItem("mode");
 // export async function getTemplates(projectId) {
 //   return http.get(apiUrl + "/projects/" + projectId + "/templates/");
 // }
-
+export function getTemplatesFromDb() {
+  return mode === "lite"
+    ? http.get(apiUrl + "/templatesdatafromdb?format=summary")
+    : http.get(apiUrl + "/templatesdatafromdb");
+}
 export async function getTemplatesOfProjects(projectId = "lite") {
-  return http.get(apiUrl + "/projects/" + projectId + "/templates?format=summary");
+  return http.get(
+    apiUrl + "/projects/" + projectId + "/templates?format=summary"
+  );
 }
 
 export async function getTemplates(projectId = "lite") {
@@ -15,9 +21,9 @@ export async function getTemplates(projectId = "lite") {
 }
 
 export function downloadTemplates(tempIDlist, selection) {
-    return http.post(apiUrl + "/templates/download", tempIDlist, {
-      responseType: "blob"
-    });
+  return http.post(apiUrl + "/templates/download", tempIDlist, {
+    responseType: "blob",
+  });
 }
 
 export function deleteTemplate(templateID) {

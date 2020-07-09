@@ -37,6 +37,15 @@ export function persistExpandView(expanded, data, newData, id) {
   });
   return expandMap;
 }
+
+export function arrayToMap(arrayObj) {
+  const tempmap = new Map();
+  arrayObj.forEach((temp) => {
+    tempmap.set(temp, temp);
+  });
+  return tempmap;
+}
+
 export function isEmpty(obj) {
   for (let key in obj) {
     if (obj.hasOwnProperty(key)) return false;
@@ -45,7 +54,7 @@ export function isEmpty(obj) {
 }
 
 // from http://stackoverflow.com/questions/1349404/generate-a-string-of-5-random-characters-in-javascript
-const makeRandomString = length => {
+const makeRandomString = (length) => {
   var text = "";
   var possible =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -95,7 +104,7 @@ const newUID = () => {
   return uid;
 };
 
-export const clearCarets = string => {
+export const clearCarets = (string) => {
   if (string) {
     for (let i = 0; i < string.length; i++) {
       string = string.replace("^", " ");
@@ -107,7 +116,7 @@ export const clearCarets = string => {
 export const extractTreeData = (datasets, requirements) => {
   const result = {};
   if (datasets) {
-    datasets.forEach(data => {
+    datasets.forEach((data) => {
       const { PatientID, StudyInstanceUID, SeriesInstanceUID } = data;
       const patient = result[PatientID];
       if (patient) {
@@ -236,7 +245,7 @@ export const extractTableData = (dataset, requirementsObj) => {
   const result = [];
   const isDataArray = Array.isArray(dataset);
   if (isDataArray) {
-    dataset.forEach(el => {
+    dataset.forEach((el) => {
       const {
         PatientID,
         PatientName,
@@ -264,7 +273,7 @@ export const extractTableData = (dataset, requirementsObj) => {
 const checkMissingTags = (dataset, requirementsObj) => {
   const missingTags = [];
   const requirements = Object.keys(requirementsObj);
-  requirements.forEach(req => {
+  requirements.forEach((req) => {
     const tag = req.substring(0, req.length - 2);
     if (!dataset[tag]) {
       missingTags.push(tag);
