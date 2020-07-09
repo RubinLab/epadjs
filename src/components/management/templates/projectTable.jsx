@@ -43,7 +43,8 @@ const projectTable = ({
   ];
 
   return (
-    <Modal.Dialog dialogClassName="projectTable-modal">
+    // <Modal.Dialog dialogClassName="projectTable-modal">
+    <Modal.Dialog id="modal-fix" className="in-modal">
       <Modal.Header>
         <Modal.Title className="projectTable-modal__header">
           Add {templateName} to a project

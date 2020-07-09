@@ -9,16 +9,15 @@ export function getSubjects(projectId) {
   } else return http.get(apiUrl + "/projects/" + projectId + "/subjects");
 }
 
-export function downloadSubjects(subject) {
-  const subjectID = subject.subjectID || subject.patientID;
+export function downloadSubjects(projectID, body) {
+  const pid = projectID || "lite";
   const url =
     apiUrl +
     "/projects/" +
-    subject.projectID +
-    "/subjects/" +
-    subjectID +
+    pid +
+    "/subjects/download" +
     "?format=stream&includeAims=true";
-  return http.get(url, { responseType: "blob" });
+  return http.post(url, body, { responseType: "blob" });
 }
 
 export function deleteSubject(subject, delSys) {
@@ -31,13 +30,15 @@ export function deleteSubject(subject, delSys) {
 export function saveSubject(projectID, subjectAbr, subjectName) {
   const body = { name: subjectName };
   return http.put(
-    apiUrl + "/projects/" + projectID + "/subjects/" + subjectAbr, body
+    apiUrl + "/projects/" + projectID + "/subjects/" + subjectAbr,
+    body
   );
 }
 
 export function uploadFileToSubject(formData, config, subject) {
   let { subjectID, projectID } = subject;
   subjectID = subjectID ? subjectID : subject.patientID;
+  projectID = projectID || "lite";
   const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/files`;
   return http.post(url, formData, config);
 }
@@ -48,4 +49,8 @@ export function getAllSubjects() {
 
 export function addSubjectToProject(projectID, subjectID) {
   return http.put(`${apiUrl}/projects/${projectID}/subjects/${subjectID}`);
+}
+
+export function getSubject(projectID, subjectID) {
+  return http.get(`${apiUrl}/projects/${projectID}/subjects/${subjectID}`);
 }

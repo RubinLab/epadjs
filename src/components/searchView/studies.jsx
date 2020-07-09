@@ -25,7 +25,7 @@ import {
   updatePatient,
   // showAnnotationDock
 } from "../annotationsList/action";
-import { persistExpandView } from "../../Utils/aid";
+import { persistExpandView, styleEightDigitDate } from "../../Utils/aid";
 
 //import "react-table/react-table.css";
 
@@ -82,6 +82,7 @@ class Studies extends Component {
         treeExpand,
         patientIndex,
         treeData,
+        closeExpand,
       } = this.props;
       let data = Object.values(treeData[projectId][subjectId].studies);
       if (data.length > 0) {
@@ -115,6 +116,7 @@ class Studies extends Component {
           pauseOnHover: true,
           draggable: true,
         });
+        closeExpand(patientIndex);
       }
       const expanded = {};
       if (treeExpand[patientIndex]) {
@@ -132,10 +134,17 @@ class Studies extends Component {
 
   async componentDidUpdate(prevProps) {
     try {
-      const { patientIndex, update, treeExpand, closeAllCounter, selectedStudies } = this.props;
+      const {
+        patientIndex,
+        update,
+        treeExpand,
+        closeAllCounter,
+        selectedStudies,
+      } = this.props;
+
 
       if (closeAllCounter !== prevProps.closeAllCounter) {
-        this.setState({ expanded: {} });
+        this.setState({ expanded: {}, expansionArr: [] });
       }
 
       if (update !== prevProps.update && treeExpand[patientIndex]) {
@@ -184,6 +193,12 @@ class Studies extends Component {
           this.props.getTreeExpandAll(obj, true, expandLevel);
         }
       }
+
+      const expanded = Object.keys(this.props.treeExpand);
+      const oldExpanded = Object.keys(prevProps.treeExpand);
+      const shouldCollapse = expanded.length === 0 && oldExpanded > 0;
+      if (shouldCollapse) this.setState({ expanded: {} });
+
       const newSelectedStArr = Object.keys(selectedStudies);
       const oldSelectedStArr = Object.keys(prevProps.selectedStudies);
       if (newSelectedStArr.length !== oldSelectedStArr.length) {
@@ -204,6 +219,7 @@ class Studies extends Component {
         }
       this.setState({ expanded });
     } catch (err) {
+      console.log(err)
       console.log(`couldn't load all study data. Please Try again!`);
     }
   };
@@ -233,6 +249,25 @@ class Studies extends Component {
     const { selectedStudies } = this.props;
     const columns = [
       {
+        expander: true,
+        width: 35,
+        Expander: ({ isExpanded, ...rest }) => (
+          <div>
+            {isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
+          </div>
+        ),
+        style: {
+          cursor: "pointer",
+          fontSize: 10,
+          padding: "0",
+          textAlign: "center",
+          userSelect: "none",
+          color: "#fafafa",
+          padding: "7px 5px",
+          verticalAlign: "middle",
+        },
+      },
+      {
         id: "searchView-checkbox",
         accessor: "",
         width: this.widthUnit,
@@ -253,6 +288,7 @@ class Studies extends Component {
       },
       {
         width: this.widthUnit * 12,
+        className: "searchView-row__desc",
         Cell: row => {
           let desc = this.cleanCarets(row.original.studyDescription);
           desc = desc || "Unnamed Study";
@@ -279,15 +315,13 @@ class Studies extends Component {
         width: this.widthUnit * 2,
         Cell: row => (
           <div className="searchView-table__cell">
-            <span className="badge badge-secondary">
-              {row.original.numberOfAnnotations === 0 ? (
-                ""
-              ) : (
-                <span className="badge badge-secondary">
-                  {row.original.numberOfAnnotations}
-                </span>
-              )}
-            </span>
+            {row.original.numberOfAnnotations === 0 ? (
+              ""
+            ) : (
+              <span className="badge badge-secondary">
+                {row.original.numberOfAnnotations}
+              </span>
+            )}
           </div>
         ),
       },
@@ -333,7 +367,7 @@ class Studies extends Component {
         width: this.widthUnit * 7,
         Cell: row => (
           <div className="searchView-table__cell">
-            {formatDates(row.original.insertDate)}
+            {styleEightDigitDate(row.original.insertDate)}
           </div>
         ),
       },
@@ -342,7 +376,7 @@ class Studies extends Component {
         width: this.widthUnit * 7,
         Cell: row => (
           <div className="searchView-table__cell">
-            {formatDates(row.original.createdTime)}
+            {styleEightDigitDate(row.original.createdTime)}
           </div>
         ),
       },
@@ -380,7 +414,7 @@ class Studies extends Component {
             </div>{" "}
             <ReactTooltip
               id={row.original.studyUID}
-              place="right"
+              place="top"
               type="info"
               delayShow={500}
               clickable={true}
@@ -559,7 +593,8 @@ class Studies extends Component {
 
         //if patient doesnot exist get patient
         if (!patientExists) {
-          this.props.dispatch(getWholeData(null, selected));
+          // this.props.dispatch(getWholeData(null, selected));
+          getWholeData(null, selected);
         } else {
           //check if study exist
           this.props.dispatch(
@@ -587,6 +622,17 @@ class Studies extends Component {
     const obj = {
       patient: this.props.patientIndex,
       study: { [index]: newExpanded[index] },
+    };
+    this.props.getTreeExpandSingle(obj);
+  };
+
+  closeExpansionFromSub = index => {
+    const expanded = { ...this.state.expanded };
+    expanded[index] = false;
+    this.setState({ expanded });
+    const obj = {
+      patient: this.props.patientIndex,
+      study: { [index]: false },
     };
     this.props.getTreeExpandSingle(obj);
   };
@@ -651,6 +697,7 @@ class Studies extends Component {
                     patientIndex={this.props.patientIndex}
                     studyIndex={row.index}
                     // expandLoading={this.props.expandLoading}
+                    closeExpand={this.closeExpansionFromSub}
                     treeData={this.props.treeData}
                     getTreeData={this.props.getTreeData}
                     closeAllCounter={this.props.closeAllCounter}

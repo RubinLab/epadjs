@@ -56,10 +56,12 @@ const initialState = {
   uploadedPid: null,
   lastEventId: null,
   projectMap: {},
+  templates: {},
 };
 
 const asyncReducer = (state = initialState, action) => {
   try {
+    let aimIDClearedOPenSeries = [];
     switch (action.type) {
       case UPDATE_IMAGE_INDEX:
         const updatedOpenSeries = [...state.openSeries];
@@ -82,7 +84,7 @@ const asyncReducer = (state = initialState, action) => {
         ].annotations[aimRefs.aimID] = { ...aimRefs };
         return { ...state, patient: patientAimSave };
       case CLEAR_AIMID:
-        let aimIDClearedOPenSeries = [...state.openSeries];
+        aimIDClearedOPenSeries = [...state.openSeries];
         for (let serie of aimIDClearedOPenSeries) {
           serie.aimID = null;
         }
@@ -501,7 +503,11 @@ const asyncReducer = (state = initialState, action) => {
           },
         });
       case GET_PROJECT_MAP:
-        return { ...state, projectMap: action.projectMap };
+        return {
+          ...state,
+          projectMap: action.projectMap,
+          templates: action.templates,
+        };
       default:
         return state;
     }

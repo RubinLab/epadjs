@@ -1,13 +1,7 @@
 import React from "react";
-import { Modal } from "react-bootstrap";
 
 const tagRequirements = ({ onClose, requirements, handleInput }) => {
   return (
-    //   <Modal.Dialog dialogClassName="tagRequirements_modal">
-    //     <Modal.Header>
-    //       <Modal.Title>Define Required Fields</Modal.Title>
-    //     </Modal.Header>
-    //     <Modal.Body>
     <div className="tagRequirements">
       <ul className="__list">
         <div className="__option">
@@ -82,13 +76,6 @@ const tagRequirements = ({ onClose, requirements, handleInput }) => {
         </div>
       </ul>
     </div>
-    //   </Modal.Body>
-    //   <Modal.Footer className="modal-footer__buttons">
-    //     <button variant="secondary" onClick={onClose}>
-    //       OK
-    //     </button>
-    //   </Modal.Footer>
-    // </Modal.Dialog>
   );
 };
 

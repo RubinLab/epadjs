@@ -67,13 +67,19 @@ export function getAnnotations2() {
   return http.get(apiUrl + "/projects/lite/aims");
 }
 
-export function downloadAnnotations(optionObj, aimIDlist, selection) {
+export function downloadAnnotations(optionObj, aimIDlist, projectID) {
+  console.log(optionObj, aimIDlist, projectID);
+  projectID = projectID || "lite";
   return http.post(
     apiUrl +
-      "/projects/lite/aims/download?summary=" +
+      "/projects/" +
+      projectID +
+      "/aims/download?summary=" +
       optionObj.summary +
       "&aim=" +
-      optionObj.aim,
+      optionObj.aim +
+      "&seg=" +
+      optionObj.seg,
     aimIDlist,
     { responseType: "blob" }
   );
@@ -103,15 +109,38 @@ export function deleteAnnotation(aimObj, delSys) {
   );
 }
 
-export function uploadAim(aim, projectId) {
+export function uploadAim(aim, projectId, isUpdate = false, updatedAimId) {
   let url;
   if (mode === "lite") {
     url = apiUrl + "/projects/lite/aims";
   } else {
     url = apiUrl + "/projects/" + projectId + "/aims";
   }
-  return http.post(url, aim);
+  if (isUpdate) return http.put(url + `/${updatedAimId}`, aim);
+  else return http.post(url, aim);
 }
+
+// Following method uses file backend to handle big aim sizes.
+// But it has a significant delay so rerendering markups does not work correctly
+// after saving the annotations!!!
+
+// export function uploadAim(aim, projectId, isUpdate = false, updatedAimId) {
+//   let url;
+//   if (mode === "lite") {
+//     url = apiUrl + "/projects/lite/aimfiles";
+//   } else {
+//     url = apiUrl + "/projects/" + projectId + "/aimfiles";
+//   }
+//   const aimData = new FormData();
+//   aimData.append("file", aim, "aim.json");
+//   const config = {
+//     headers: {
+//       "content-type": "multipart/form-data",
+//     },
+//   };
+//   if (isUpdate) return http.put(url + `/${updatedAimId}`, aimData, config);
+//   else return http.post(url, aimData, config);
+// }
 
 export function uploadSegmentation(segmentation, projectId = "lite") {
   const url = apiUrl + "/projects/" + projectId + "/files";

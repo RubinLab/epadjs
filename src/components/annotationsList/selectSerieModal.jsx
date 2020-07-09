@@ -186,7 +186,8 @@ class selectSerieModal extends React.Component {
   render = () => {
     const list = this.renderSelection();
     return (
-      <Modal.Dialog dialogClassName="alert-selectSerie">
+      // <Modal.Dialog dialogClassName="alert-selectSerie">
+      <Modal.Dialog id="modal-fix">
         <Modal.Header>
           <Modal.Title className="selectSerie__header">
             {message.title}

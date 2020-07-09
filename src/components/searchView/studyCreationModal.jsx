@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { saveStudy } from "../../services/studyServices";
 
 const messages = {
-  fillRequredFields: "Please fill the required fields!"
+  fillRequredFields: "Please fill the required fields!",
 };
 class StudyCreationForm extends React.Component {
   state = {
@@ -13,11 +13,17 @@ class StudyCreationForm extends React.Component {
     error: "",
     study: "",
     subjects: [],
-    subjectID: ""
+    subjectID: "",
   };
 
   componentDidMount = () => {
-    this.setState({ subjectID: this.props.subjects[0].subjectID });
+    const { selectedPatients } = this.props;
+    if (selectedPatients.length) {
+      this.setState({ subjectID: selectedPatients[0].patientID });
+
+    } else {
+      this.setState({ subjectID: this.props.subjects[0].subjectID });
+    }
   };
   handleSubmit = () => {
     const { description, abbreviation, subjectID } = this.state;
@@ -26,15 +32,21 @@ class StudyCreationForm extends React.Component {
     } else {
       saveStudy(this.props.project, subjectID, abbreviation, description)
         .then(() => {
+          const obj = {
+            projectID: this.props.project,
+            patientID: subjectID,
+            studyUID: abbreviation,
+          };
           this.props.onSubmit();
           this.props.onCancel();
           this.props.onResolve();
+          this.props.updateTreeDataOnSave(obj, "study");
           toast.success("Study successfully saved!");
         })
         .catch(error => {
           toast.error(error.response.data.message, { autoClose: false });
           this.props.onResolve();
-          this.props.onSubmit();
+          this.props.onCancel();
         });
     }
   };
@@ -82,13 +94,16 @@ class StudyCreationForm extends React.Component {
 
   render = () => {
     return (
-      <Modal.Dialog dialogClassName="add-study__modal">
+      // <Modal.Dialog dialogClassName="add-study__modal">
+      <Modal.Dialog id="modal-fix">
         <Modal.Header>
           <Modal.Title>Create a New Study</Modal.Title>
         </Modal.Header>
         <Modal.Body className="add-study__mbody">
           <form className="add-study__modal--form">
-            <h5 className="add-study__modal--label">StudyUID / Abbreviation*</h5>
+            <h5 className="add-study__modal--label">
+              StudyUID / Abbreviation*
+            </h5>
             <input
               onMouseDown={e => e.stopPropagation()}
               className="add-study__modal--input"
@@ -98,7 +113,7 @@ class StudyCreationForm extends React.Component {
               id="form-first-element"
             />
             <h6 className="form-exp">
-              One word only, no special characters, '_' is OK
+              One word only, no special characters, "_" is OK
             </h6>
             <h5 className="add-study__modal--label">Description*</h5>
             <textarea
@@ -112,6 +127,7 @@ class StudyCreationForm extends React.Component {
             <select
               name="subjectID"
               className="add-study__modal--select"
+              value={this.state.subjectID}
               onChange={this.handleInput}
             >
               {this.renderPatients()}

@@ -163,7 +163,7 @@ const toolBar = props => {
             ? "searchView-toolbar__icon worklist-icon"
             : "hide-delete"
         }
-        onClick={props.onWorklist}
+        onClick={props.showAddTo ? props.onWorklist : null}
       >
         <div>
           <FaClipboardList
@@ -189,9 +189,7 @@ const toolBar = props => {
               ? "searchView-toolbar__icon project-icon"
               : "hide-delete"
           }
-          onClick={() => {
-            props.onAddProject();
-          }}
+          onClick={props.showAddTo ? props.onAddProject : null}
         >
           <div>
             <FaProjectDiagram
@@ -222,11 +220,13 @@ const toolBar = props => {
       <ReactTooltip id="ann-icon" place="bottom" type="info" delayShow={1000}>
         <span>Add annotation</span>
       </ReactTooltip> */}
-            {props.project && mode !== "lite" && (
+      {props.project && mode !== "lite" && (
         <div className="searchView-toolbar__group">
           <div
-            className="searchView-toolbar__icon"
-            onClick={props.onUploadWizard}
+            className={
+              props.showTagEditor ? "searchView-toolbar__icon" : "hide-delete"
+            }
+            onClick={props.showTagEditor ? props.onUploadWizard : null}
           >
             <div style={{ fontSize: "1.2rem" }}>
               <FaEdit data-tip data-for="editor-icon" />

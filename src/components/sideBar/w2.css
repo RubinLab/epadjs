@@ -13,7 +13,7 @@
 .sidenav a {
   padding-left: 8px;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 10px;
   color: #aaa;
   display: block;
   transition: 0.3s;
@@ -49,10 +49,12 @@
   .sidenav {
     padding-top: 20px;
   }
+
   .sidenav a {
-    font-size: 14px;
+    font-size: x-small;
   }
 }
+
 body {
   font-family: Helvetica, Arial, Verdana;
 }
@@ -63,34 +65,43 @@ body {
   line-height: 21px;
   color: #999;
 }
+
 .tabs-container .wrapper {
   overflow: hidden;
   /* contain the panel to the size of the nav */
 }
+
 .tabs-container .wrapper.content-wrap {
   display: table;
 }
+
 .tabs-container .wrapper.content-wrap .tab-nav {
   white-space: nowrap;
 }
+
 .tabs-container .wrapper.content-wrap .tab-nav .tab-nav-item {
   display: inline-table;
 }
-.tabs-container .wrapper.content-wrap > .tab-panel {
+
+.tabs-container .wrapper.content-wrap>.tab-panel {
   display: table-caption;
   caption-side: bottom;
 }
+
 .tabs-container .wrapper.bottom-nav .tab-nav {
   caption-side: bottom;
 }
+
 .tabs-container .wrapper.bottom-nav .tab-panel {
   caption-side: top;
 }
+
 .tabs-container .tab-nav {
   position: relative;
   top: 1px;
   z-index: 1;
 }
+
 .tabs-container .tab-nav-item {
   display: inline-block;
   box-sizing: border-box;
@@ -99,6 +110,7 @@ body {
   border-left-color: transparent;
   padding: 3px 3px;
 }
+
 .tabs-container .tab-nav-item.active {
   border-radius: 5px 5px 0 0;
   background: #3a3f44;
@@ -106,31 +118,38 @@ body {
   border-bottom: 1px solid transparent;
   color: #333;
 }
+
 .tabs-container .tab-panel {
   position: relative;
   border-top: 1px solid #bbb;
   z-index: 0;
 }
+
 .tabs-container .bottom-nav .tab-nav-item.active {
   border-radius: 0 0 5px 5px;
   border-top: 1px solid transparent;
   border-bottom: 1px solid #bbb;
 }
+
 .tabs-container .bottom-nav .tab-panel {
   border-top: none;
   border-bottom: 1px solid #bbb;
 }
+
 .tabs-container .bottom-nav .tab-nav {
   top: -1px;
 }
+
 .tabs-container .tab-panel-item {
   display: none;
   overflow: hidden;
   padding: 10px;
 }
+
 .tabs-container .tab-panel-item.active {
   display: block;
 }
+
 .tabs-container.fade .tab-panel-item {
   -webkit-transition: all 0.25s ease-out;
   -moz-transition: all 0.25s ease-out;
@@ -140,22 +159,27 @@ body {
   display: block;
   position: absolute;
 }
+
 .tabs-container.fade.fadeOut .tab-panel-item.active {
   position: relative;
   opacity: 0;
 }
+
 .tabs-container.fade.fadeIn .tab-panel-item.active {
   position: relative;
   opacity: 1;
 }
+
 .tabs-container .img-left {
   float: left;
   padding: 0 12px 0px 0;
 }
+
 .tabs-container p {
   margin-top: 0;
   font-size: 13px;
 }
+
 .tabs-container .tab-icon {
   width: 20px;
   height: 15px;
@@ -165,57 +189,52 @@ body {
 }
 
 /* Theme folder */
-.tabs-container.theme-folder > .wrapper > .tab-nav .tab-nav-item {
+.tabs-container.theme-folder>.wrapper>.tab-nav .tab-nav-item {
   background: none;
   color: black;
   opacity: 0.5;
 }
-.tabs-container.theme-folder > .wrapper > .tab-nav .tab-nav-item.active {
+
+.tabs-container.theme-folder>.wrapper>.tab-nav .tab-nav-item.active {
   opacity: 1;
   border: none;
   background-color: #aaa;
   border-radius: 5px 5px 0 0;
 }
-.tabs-container.theme-folder
-  > .wrapper
-  > .tab-nav
-  .tab-nav-item.active
-  .tab-icon {
+
+.tabs-container.theme-folder>.wrapper>.tab-nav .tab-nav-item.active .tab-icon {
   display: inline-block;
 }
-.tabs-container.theme-folder > .wrapper > .tab-nav .tab-nav-item .tab-icon {
+
+.tabs-container.theme-folder>.wrapper>.tab-nav .tab-nav-item .tab-icon {
   display: none;
 }
 
-.tabs-container.theme-folder > .wrapper > .tab-panel {
+.tabs-container.theme-folder>.wrapper>.tab-panel {
   color: black;
   border: none;
   background: none;
 }
-.tabs-container.theme-folder > .wrapper > .tab-panel .tab-panel-item.active {
+
+.tabs-container.theme-folder>.wrapper>.tab-panel .tab-panel-item.active {
   background: #aaa;
   border-radius: 0 0 5px 5px;
 }
 
-.tabs-container.theme-folder > .wrapper.bottom-nav > .tab-nav {
+.tabs-container.theme-folder>.wrapper.bottom-nav>.tab-nav {
   top: 0;
 }
-.tabs-container.theme-folder
-  > .wrapper.bottom-nav
-  > .tab-nav
-  .tab-nav-item.active {
+
+.tabs-container.theme-folder>.wrapper.bottom-nav>.tab-nav .tab-nav-item.active {
   border-radius: 0 0 5px 5px;
 }
 
-.tabs-container.theme-folder
-  > .wrapper.bottom-nav
-  > .tab-panel
-  .tab-panel-item.active {
+.tabs-container.theme-folder>.wrapper.bottom-nav>.tab-panel .tab-panel-item.active {
   border-radius: 5px 5px 0 0;
 }
 
 /* Theme box */
-.tabs-container.theme-box > .wrapper > .tab-nav .tab-nav-item {
+.tabs-container.theme-box>.wrapper>.tab-nav .tab-nav-item {
   border: 1px solid #bbb;
   border-bottom: none;
   border-left-color: transparent;
@@ -225,44 +244,37 @@ body {
   position: relative;
   top: 1px;
 }
-.tabs-container.theme-box > .wrapper > .tab-nav .tab-nav-item.active {
+
+.tabs-container.theme-box>.wrapper>.tab-nav .tab-nav-item.active {
   background-color: #ffffff;
   color: #333;
   border-bottom: 1px solid white;
   border-top: 3px solid red;
   border-left-color: #bbb;
 }
-.tabs-container.theme-box > .wrapper > .tab-nav .tab-nav-item:first-child {
+
+.tabs-container.theme-box>.wrapper>.tab-nav .tab-nav-item:first-child {
   border-left: 1px solid #bbb;
 }
 
-.tabs-container.theme-box > .wrapper > .tab-panel {
+.tabs-container.theme-box>.wrapper>.tab-panel {
   background: #ffffff;
   border: 1px solid #bbb;
   border-top: none;
 }
 
 /* Theme two rows */
-.tabs-container.two-rows > .wrapper > .tab-nav .tab-nav-item {
+.tabs-container.two-rows>.wrapper>.tab-nav .tab-nav-item {
   line-height: 15px;
 }
-.tabs-container.two-rows > .wrapper > .tab-nav .tab-nav-item sub {
+
+.tabs-container.two-rows>.wrapper>.tab-nav .tab-nav-item sub {
   display: block;
   font-size: 75%;
 }
 
 .ReactTable.__table .rt-thead.-header .rt-th {
   text-align: left;
-}
-
-.sidebar-row p {
-  padding: 0.3em;
-  cursor: pointer;
-}
-
-.sidebar-row.__bold {
-  font-weight: bold;
-  font-size: 1.5rem;
 }
 
 .badge.badge-secondary.worklist {
@@ -290,22 +302,30 @@ body {
   z-index: 1;
 }
 
+.sidebar-row p {
+  padding: 0.2em 0.8rem;
+  cursor: pointer;
+}
+
 .sidebar-row.__selected {
-  background: #d9d9d9;
-  /* color: white; */
+  background: #861737;
+  padding: 0.5em 0.8rem;
   font-weight: 400;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
+  color: #ffffff; 
+  margin: 0.2rem;
 }
 
 .sidebar-content {
   width: 100%;
 }
 
-.sidebar-row {
-  padding: 1rem;
-}
 
 .progress-wl.__selected {
   padding: 0.3rem;
   background: #e6e6e6;
+}
+
+#subjectCount{
+  margin-left: 0.7rem;
 }

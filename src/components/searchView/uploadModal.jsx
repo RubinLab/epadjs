@@ -28,6 +28,7 @@ class UploadModal extends React.Component {
 
   componentDidMount = async () => {
     try {
+      const { pid } = this.props;
       if (mode !== "lite") {
         let { data: projects } = await getProjects();
         for (let i = 0; i < projects.length; i++) {
@@ -43,7 +44,7 @@ class UploadModal extends React.Component {
           }
         }
         projects.length > 0
-          ? this.setState({ projects, projectID: projects[0].id })
+          ? this.setState({ projects, projectID: pid })
           : this.setState({ projects });
       }
     } catch (err) {
@@ -95,6 +96,7 @@ class UploadModal extends React.Component {
     Promise.all(promises)
       .then(() => {
         this.props.onSubmit();
+        this.props.clearTreeData();
       })
       .catch(err => {
         console.log(err);
@@ -160,6 +162,7 @@ class UploadModal extends React.Component {
   renderProjectDropdown = () => {
     const options = [];
     const { projects } = this.state;
+    const { projectID } = this.state;
     for (let pr of projects) {
       options.push(
         <option key={pr.id} value={pr.id}>
@@ -170,7 +173,11 @@ class UploadModal extends React.Component {
     return (
       <div className="upload-select__container">
         <span>Projects: </span>
-        <select className="upload-select" onChange={e => this.selectProject(e)}>
+        <select
+          className="upload-select"
+          onChange={e => this.selectProject(e)}
+          value={projectID}
+        >
           {options}
         </select>
       </div>
@@ -198,27 +205,6 @@ class UploadModal extends React.Component {
           *Please note that if you upload a project that you downloaded from
           ePad, the project will not be recreated.
         </h6>
-        <div className="upload-options">
-          <div className="upload-option">
-            <input
-              type="checkbox"
-              className="upload-select"
-              name="tiff"
-              onClick={this.onSelect}
-            />
-            <span className="upload-text">Import Tiff files</span>
-          </div>
-          {this.state.tiff && this.renderTiffForm()}
-          <div className="upload-option">
-            <input
-              type="checkbox"
-              className="upload-select"
-              name="osirix"
-              onClick={this.onSelect}
-            />
-            <span className="upload-text">Import from Osirix</span>
-          </div>
-        </div>
       </div>
     ) : (
       <div> Please create a project before uploading! </div>
@@ -233,7 +219,8 @@ class UploadModal extends React.Component {
       : className;
     const { projects } = this.state;
     return (
-      <Modal.Dialog dialogClassName={className}>
+      // <Modal.Dialog dialogClassName={className}>
+      <Modal.Dialog id="modal-fix">
         <Modal.Header>
           <Modal.Title className="upload__header">Upload</Modal.Title>
         </Modal.Header>

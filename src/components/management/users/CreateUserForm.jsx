@@ -57,7 +57,8 @@ class CreateUserForm extends React.Component {
 
     const projectToRole = mode === "lite" ? ["lite:Member"] : [];
     return (
-      <Modal.Dialog dialogClassName="create-user__modal">
+      // <Modal.Dialog dialogClassName="create-user__modal">
+      <Modal.Dialog id="modal-fix" className="in-modal create-user">
         <Modal.Header>
           <Modal.Title>Create User</Modal.Title>
         </Modal.Header>

@@ -23,7 +23,7 @@ const toolBar = props => {
     onClear,
     onFilter,
     onUploadWizard,
-    onKeyDown
+    onKeyDown, pid
   } = props;
   const { selected, projects } = props;
 
@@ -41,7 +41,7 @@ const toolBar = props => {
         All Annotations
       </option>
     );
-    options.push(firstOption);
+   options.splice(0, 0, firstOption);
   }
   let name = React.createRef();
   let subject = React.createRef();
@@ -113,7 +113,7 @@ const toolBar = props => {
           <select
             className="annotations-projectSelect"
             name="project"
-            defaultValue={projects[0] ? projects[0].name : ""}
+            value={pid ? pid : ""}
             onChange={onSelect}
           >
             {options}

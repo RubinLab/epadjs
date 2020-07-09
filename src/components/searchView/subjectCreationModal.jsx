@@ -20,7 +20,7 @@ class SubjectCreationForm extends React.Component {
         .catch(error => {
           toast.error(error.response.data.message, { autoClose: false });
           this.props.onResolve();
-          this.props.onSubmit();
+          this.props.onCancel();
         });
     }
   };
@@ -34,7 +34,8 @@ class SubjectCreationForm extends React.Component {
   };
   render = () => {
     return (
-      <Modal.Dialog dialogClassName="add-subject__modal">
+      // <Modal.Dialog dialogClassName="add-subject__modal">
+      <Modal.Dialog id="modal-fix">
         <Modal.Header>
           <Modal.Title>Create a New Patient</Modal.Title>
         </Modal.Header>
@@ -49,7 +50,7 @@ class SubjectCreationForm extends React.Component {
               onChange={this.handleInput}
               id="form-first-element"
             />
-            <h5 className="add-subject__modal--label">Abbreviation*</h5>
+            <h5 className="add-subject__modal--label">SubjectID / Abbreviation*</h5>
             <input
               onMouseDown={e => e.stopPropagation()}
               className="add-subject__modal--input"

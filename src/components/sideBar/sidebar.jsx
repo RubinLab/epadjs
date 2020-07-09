@@ -2,9 +2,13 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { FiZoomIn } from "react-icons/fi";
-import { Tabs, Nav, Content } from "react-tiny-tabs";
+// import { Tabs, Nav, Content } from "react-tiny-tabs";
 import WorklistSelect from "./worklistSelect";
 import { getProjects } from "../../services/projectServices";
+import {
+  getTemplatesUniversal,
+  getAllTemplates,
+} from "../../services/templateServices";
 import Collapsible from "react-collapsible";
 import { FaArrowAltCircleLeft } from "react-icons/fa";
 import {
@@ -17,6 +21,9 @@ import { getProjectMap, clearSelection } from "../annotationsList/action";
 import "./w2.css";
 // import { throws } from "assert";
 import SidebarContent from "./sidebarContent";
+import Tabs from "react-bootstrap/Tabs";
+import Tab from "react-bootstrap/Tab";
+
 const mode = sessionStorage.getItem("mode");
 
 class Sidebar extends Component {
@@ -44,10 +51,7 @@ class Sidebar extends Component {
   }
 
   componentDidMount = async () => {
-    //get the porjects
-    if (mode !== "lite") {
-      this.getProjectsData();
-    }
+    this.getProjectsData();
     this.getWorklistandProgressData();
   };
 
@@ -78,6 +82,8 @@ class Sidebar extends Component {
         this.setState({ projects, pid, selected: pid });
         this.props.history.push(`/search/${pid}`);
         this.props.getPidUpdate(pid);
+        const prTempMap = await this.getTemplatesProjectMap();
+        const templates = await this.getTemplatesJSON();
         const projectMap = {};
         for (let project of projects) {
           let { name, defaultTemplate } = project;
@@ -85,12 +91,47 @@ class Sidebar extends Component {
           projectMap[project.id] = {
             projectName: name,
             defaultTemplate,
+            templates: prTempMap[project.id] || [],
           };
         }
-        this.props.dispatch(getProjectMap(projectMap));
+        this.props.dispatch(getProjectMap(projectMap, templates));
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
+    }
+  };
+
+  getTemplatesJSON = async () => {
+    const tempMap = {};
+    try {
+      const { data: templatesJSONs } = await getAllTemplates();
+      for (let temp of templatesJSONs) {
+        const { codeValue } = temp.TemplateContainer.Template[0];
+        tempMap[codeValue] = temp;
+      }
+      return tempMap;
+    } catch (err) {
+      console.error("getting template JSONs", err);
+      return tempMap;
+    }
+  };
+
+  getTemplatesProjectMap = async () => {
+    const prTempMap = {};
+    try {
+      const { data: templates } = await getTemplatesUniversal();
+      for (let template of templates) {
+        const tempCode = template.Template[0].templateCodeValue;
+        for (let project of template.projects) {
+          prTempMap[project]
+            ? prTempMap[project].push(tempCode)
+            : (prTempMap[project] = [tempCode]);
+        }
+      }
+      return prTempMap;
+    } catch (err) {
+      console.error("getting templates for projects", err);
+      return prTempMap;
     }
   };
 
@@ -124,12 +165,12 @@ class Sidebar extends Component {
         });
         this.setState({ [attribute]: result });
       })
-      .catch(err => console.log(err));
+      .catch(err => console.error(err));
   };
 
   componentDidUpdate = prevProps => {
     let { pathname } = this.props.location;
-    const { pid } = this.props;
+    const { pid, lastEventId } = this.props;
     if (prevProps.progressUpdated !== this.props.progressUpdated) {
       this.getWorklistandProgressData();
     }
@@ -142,6 +183,11 @@ class Sidebar extends Component {
     }
     if (pid !== prevProps.pid) {
       this.setState({ pid });
+    }
+
+    if (lastEventId !== prevProps.lastEventId) {
+      this.getProjectsData();
+      this.getWorklistandProgressData();
     }
   };
 
@@ -248,9 +294,10 @@ class Sidebar extends Component {
                     this.props.getPidUpdate(project.id);
                     this.setState({ selected: project.id });
                   }}
-                  style={{ padding: "0.6rem" }}
+                  // style={{ padding: "0.6rem" }}
                 >
                   {project.name}
+                  <span id="subjectCount" className="badge badge-secondary">{project.numberOfSubjects}</span>
                 </p>
               </td>
             </tr>
@@ -261,7 +308,7 @@ class Sidebar extends Component {
         );
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -304,7 +351,8 @@ class Sidebar extends Component {
           trigger="Created by me"
           onOpen={() => this.handleCollapse(0, true)}
           onClose={() => this.handleCollapse(0, false)}
-          open={progressView[0]}
+          transitionTime={100}
+          // open={progressView[0]}
         >
           <WorklistSelect
             list={this.state.worklistsCreated}
@@ -317,7 +365,8 @@ class Sidebar extends Component {
           trigger="Assigned to me"
           onOpen={() => this.handleCollapse(1, true)}
           onClose={() => this.handleCollapse(1, false)}
-          open={progressView[1]}
+          transitionTime={100}
+          // open={progressView[1]}
         >
           <WorklistSelect
             list={this.state.worklistsAssigned}
@@ -331,28 +380,55 @@ class Sidebar extends Component {
   };
 
   renderContent = () => {
-    if (mode === "thick") {
-      return (
-        <Tabs className="theme-default" settings={{ index: this.state.index }}>
-          <Nav>{this.renderNav()}</Nav>
-          <Content>
-            <div className="testtable">{this.renderProjects()}</div>
-            <div>{this.renderWorklists()}</div>
-            <div>{this.renderProgress()}</div>
-          </Content>
-        </Tabs>
-      );
-    } else {
-      return (
-        <Tabs className="theme-default" settings={{ index: this.state.index }}>
-          <Nav>{this.renderNav()}</Nav>
-          <Content>
-            <div>{this.renderWorklists()}</div>
-            <div>{this.renderProgress()}</div>
-          </Content>
-        </Tabs>
-      );
-    }
+    // if (mode === "thick") {
+    return (
+      <Tabs
+        id="controlled-tab-example"
+        activeKey={this.state.activeTab}
+        onSelect={index => this.setState({ index })}
+      >
+        {mode === "thick" ? (
+          <Tab eventKey="0" title="Projects">
+            <div></div>
+            {this.renderProjects()}
+          </Tab>
+        ) : (
+          ""
+        )}
+        <Tab eventKey="1" title="Worklists">
+          <div>{this.renderWorklists()}</div>
+        </Tab>
+
+        <Tab eventKey="2" title="Progress">
+          {this.renderProgress()}
+        </Tab>
+      </Tabs>
+      // <Tabs className="theme-default" settings={{ index: this.state.index }}>
+      //   <Nav>{this.renderNav()}</Nav>
+      //   <Content>
+      //     <div className="testtable">{this.renderProjects()}</div>
+      //     <div>{this.renderWorklists()}</div>
+      //     <div>{this.renderProgress()}</div>
+      //   </Content>
+      // </Tabs>
+    );
+    // } else {
+    //   return (
+    //     <Tabs
+    //       id="controlled-tab-example"
+    //       activeKey={this.state.activeTab}
+    //       onSelect={(activeTab) => this.setState({ activeTab })}
+    //     >
+    //       <Tab eventKey="worklists" title="Worklists">
+    //         <div>{this.renderWorklists()}</div>
+    //       </Tab>
+
+    //       <Tab eventKey="Progres" title="Prog">
+    //         {this.renderProgress()}
+    //       </Tab>
+    //     </Tabs>
+    //   );
+    // }
   };
   render = () => {
     const { progressView } = this.state;
@@ -395,9 +471,10 @@ class Sidebar extends Component {
 }
 
 const mapStateToProps = state => {
-  const { activePort } = state.annotationsListReducer;
+  const { activePort, lastEventId } = state.annotationsListReducer;
   return {
     activePort,
+    lastEventId
   };
 };
 export default withRouter(connect(mapStateToProps)(Sidebar));

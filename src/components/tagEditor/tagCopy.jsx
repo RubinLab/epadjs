@@ -11,7 +11,7 @@ import TagEditorButton from './tagEditorButton';
 
 const manualUpdateForm = ({ requirements, treeData, onTagInput, onClose }) => {
   try {
-    const { seriesUID, missingTags, data } = treeData[0];
+    const { SeriesInstanceUID, missingTags, data } = treeData[0];
     const fields = [];
     // const series = treeData[patientID].studies[studyUID].series[seriesUID];
 
@@ -22,18 +22,24 @@ const manualUpdateForm = ({ requirements, treeData, onTagInput, onClose }) => {
       const value = missing ? makeDeIdentifiedValue(null, vr) : data[tag];
       // if (missing) onTagInput(null, tag, value);
       fields.push(
-        <div key={`${seriesUID}-${i}`} className="tagCopyForm__el">
-          
-            <div className={!missing ? "--copy" : "--hide" } onClick={() => onTagInput(null, tag, value)}>
-              <FaArrowAltCircleLeft />
-            </div>
+        <div
+          key={`${SeriesInstanceUID}-${i}`}
+          className="tagCopyForm__el --retrieved"
+        >
+          <div
+            className={!missing ? '--copy' : '--hide'}
+            onClick={!missing ? () => onTagInput(null, tag, value) : null}
+          >
+            <FaArrowAltCircleLeft />
+          </div>
           <input
             onMouseDown={e => e.stopPropagation()}
             type="text"
-            className={missing ? '--textFilled' : '--text'}
+            className="--text"
             defaultValue={missing ? '' : clearCarets(value)}
             name={tag}
             onChange={onTagInput}
+            disabled
           />
           {missing ? (
             <FaExclamationTriangle className="--warnning" />

@@ -33,24 +33,20 @@ class MainMenu extends React.Component {
     // this.setState({ width: window.innerWidth, height: window.innerHeight });
   };
 
-  componentWillMount = () => {
-    this.updateDimensions();
-  };
-
   componentWillUnmount = () => {
     window.removeEventListener("resize", this.updateDimensions);
   };
 
-  handleSelection = (e) => {
+  handleSelection = e => {
     const selection = e.target.textContent;
-    this.setState((state) => {
+    this.setState(state => {
       return { isModalOpen: !state.isModalOpen };
     });
     this.setState({ selection });
   };
 
-  handleCloseModal = (e) => {
-    this.setState((state) => {
+  handleCloseModal = e => {
+    this.setState(state => {
       return { isModalOpen: !state.isModalOpen };
     });
     this.props.closeMenu();
@@ -87,6 +83,7 @@ class MainMenu extends React.Component {
             selection={this.state.selection}
             onClose={this.handleCloseModal}
             updateProgress={this.props.updateProgress}
+            pid={this.props.pid}
           />
         );
       case "Templates":
@@ -94,6 +91,7 @@ class MainMenu extends React.Component {
           <Templates
             selection={this.state.selection}
             onClose={this.handleCloseModal}
+            pid={this.props.pid}
           />
         );
       case "Plugins":
@@ -103,13 +101,13 @@ class MainMenu extends React.Component {
             onClose={this.handleCloseModal}
           />
         );
-      case "Connections":
-        return (
-          <Connections
-            selection={this.state.selection}
-            onClose={this.handleCloseModal}
-          />
-        );
+      // case "Connections":
+      //   return (
+      //     <Connections
+      //       selection={this.state.selection}
+      //       onClose={this.handleCloseModal}
+      //     />
+      //   );
       default:
         return <div />;
     }
@@ -117,7 +115,6 @@ class MainMenu extends React.Component {
 
   render() {
     const style = { left: this.state.coordinate };
-
     return (
       <div>
         {!this.state.isModalOpen && (
@@ -128,7 +125,10 @@ class MainMenu extends React.Component {
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Annotations
             </div>
-            <div className="mng-menu__option" onClick={this.handleSelection}>
+            <div
+              className="mng-menu__option"
+              onClick={this.handleSelection}
+            >
               Templates
             </div>
             <div className="mng-menu__option" onClick={this.handleSelection}>
@@ -177,12 +177,12 @@ class MainMenu extends React.Component {
                     Pluginstore
                   </div>
                 )}
-                <div
+                {/* <div
                   className="mng-menu__option"
                   onClick={this.handleSelection}
                 >
                   Connections
-                </div>
+                </div> */}
                 {false && (
                   <div
                     className="mng-menu__option"

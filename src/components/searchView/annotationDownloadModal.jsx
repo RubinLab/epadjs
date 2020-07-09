@@ -8,7 +8,7 @@ import { clearSelection } from "../annotationsList/action";
 const support = false;
 
 class AnnnotationDownloadModal extends React.Component {
-  state = { summary: false, aim: false };
+  state = { summary: false, aim: false, seg: false };
 
   onSelect = e => {
     const { name, checked } = e.target;
@@ -17,14 +17,14 @@ class AnnnotationDownloadModal extends React.Component {
 
   onDownload = () => {
     const optionObj = this.state;
-
+    const { pid } = this.props;
     const annsToDownload =
       Object.keys(this.props.selectedAnnotations).length > 0
         ? this.props.selectedAnnotations
-        : this.props.selected;
+        : this.props.selected; 
     const aimList = Object.keys(annsToDownload);
     this.props.updateStatus();
-    downloadAnnotations(optionObj, aimList)
+    downloadAnnotations(optionObj, aimList, pid)
       .then(result => {
         let blob = new Blob([result.data], { type: "application/zip" });
         this.triggerBrowserDownload(blob, "Annotations");
@@ -54,12 +54,14 @@ class AnnnotationDownloadModal extends React.Component {
 
   render = () => {
     let className = "alert-annDownload";
+    const { aim, summary, seg } = this.state;
     className = this.props.className
       ? `${className} ${this.props.className}`
       : className;
-    let disabled = !this.state.summary && !this.state.aim;
+    let disabled = !summary && !aim && !seg;
     return (
-      <Modal.Dialog dialogClassName={className}>
+      // <Modal.Dialog dialogClassName={className}>
+      <Modal.Dialog id="modal-fix" className="modal-minwidth">
         <Modal.Header>
           <Modal.Title className="annDownload__header">
             Select Download Format
@@ -84,6 +86,15 @@ class AnnnotationDownloadModal extends React.Component {
             />
             <span className="annDownload-text">AIM Document</span>
           </div>
+          <div className="annDownload-option">
+            <input
+              type="checkbox"
+              className="annDownload-select"
+              name="seg"
+              onClick={this.onSelect}
+            />
+            <span className="annDownload-text">DICOM segmentation object</span>
+          </div>
           {support && (
             <>
               <div className="annDownload-option">
@@ -94,17 +105,6 @@ class AnnnotationDownloadModal extends React.Component {
                   onClick={this.onSelect}
                 />
                 <span className="annDownload-text">DICOM image</span>
-              </div>
-              <div className="annDownload-option">
-                <input
-                  type="checkbox"
-                  className="annDownload-select"
-                  name="dcm-obj"
-                  onClick={this.onSelect}
-                />
-                <span className="annDownload-text">
-                  DICOM segmentation object
-                </span>
               </div>
               <div className="annDownload-option">
                 <input
@@ -147,7 +147,7 @@ AnnnotationDownloadModal.propTypes = {};
 
 const mapStateToProps = state => {
   return {
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
   };
 };
 

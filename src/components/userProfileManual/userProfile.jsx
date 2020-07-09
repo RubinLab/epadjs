@@ -73,7 +73,8 @@ class UserProfile extends React.Component {
   };
   render = () => {
     return (
-      <Modal.Dialog dialogClassName="user-profile__modal">
+      // <Modal.Dialog dialogClassName="user-profile__modal">
+      <Modal.Dialog id="modal-fix">
         <Modal.Header>
           <Modal.Title>User Profile</Modal.Title>
         </Modal.Header>
