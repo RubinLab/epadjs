@@ -485,7 +485,10 @@ const asyncReducer = (state = initialState, action) => {
       case JUMP_TO_AIM:
         let { aimID, index } = action.payload;
         let serUID = action.payload.seriesUID;
-        let updatedGrid = [...state.openSeries];
+        let updatedGrid = [];
+        state.openSeries.map((serie) => {
+          updatedGrid.push({ ...serie });
+        });
         updatedGrid[index].aimID = aimID;
 
         // return { ...state, openSeries: updatedGrid, aimsList: {...state.aimsList} };
