@@ -9,7 +9,8 @@ export var AimEditor = function (
   userWindow,
   varformCheckHandler,
   varRenderButtonHandler,
-  aimName
+  aimName,
+  setAimDirty
 ) {
   //this.mapObjCodeValueParent = new Map();
   //this.mapHtmlObjects = new Map(); not used
@@ -17,6 +18,7 @@ export var AimEditor = function (
   // this.mapAllowedTermCollectionByCodeValue = new Map(); not used
 
   var self = this;
+  this.handlerSetAimDirty = setAimDirty;
   this.fontcolor = "#c9cdd4";
   this.fontsize = "13px";
   this.fontweight = "1500";
@@ -937,6 +939,7 @@ export var AimEditor = function (
     var preselected = "";
     $("#" + selectDiv.id).dropdown({
       onChange: function (val, text) {
+        this.handlerSetAimDirty(); // added to set dirtflag
         if (text[0] == "<") {
           var words = text.split("<label>");
           var words = words[1].split("</label>");
@@ -1320,6 +1323,7 @@ export var AimEditor = function (
     selectid++;
     quantileSelect.id = subOrderLabel;
     quantileSelect.addEventListener("change", function () {
+      this.handlerSetAimDirty(); // added to set dirtflag
       var i = 0;
       var scaleArraysize = object.length;
       for (i = 0; i < scaleArraysize; i++) {
@@ -1376,6 +1380,7 @@ export var AimEditor = function (
     selectid++;
     quantileSelect.id = "Select" + parent.name;
     quantileSelect.addEventListener("change", function () {
+      this.handlerSetAimDirty(); // added to set dirtflag
       var i = 0;
       var scaleArraysize = object.length;
       for (i = 0; i < scaleArraysize; i++) {
@@ -1475,6 +1480,7 @@ export var AimEditor = function (
       subEObject.valueLabel = quantileSelect.options[0].value;
 
       quantileSelect.addEventListener("change", function () {
+        this.handlerSetAimDirty(); // added to set dirtflag
         var i = 0;
         var scaleArraysize = object.length;
         console.log("quatile on select : ", object);
@@ -1523,6 +1529,7 @@ export var AimEditor = function (
     selectid++;
     intervalSelect.id = "Select" + parent.name;
     intervalSelect.addEventListener("change", function () {
+      this.handlerSetAimDirty(); // added to set dirtflag
       var i = 0;
       var scaleArraysize = object.length;
       for (i = 0; i < scaleArraysize; i++) {
@@ -1565,6 +1572,7 @@ export var AimEditor = function (
     selectid++;
     quantileSelect.id = "Select" + parent.name;
     quantileSelect.addEventListener("change", function () {
+      this.handlerSetAimDirty(); // added to set dirtflag
       var i = 0;
       var scaleArraysize = object.length;
       for (i = 0; i < scaleArraysize; i++) {
@@ -1625,6 +1633,7 @@ export var AimEditor = function (
     div.appendChild(label);
 
     radioInput.onclick = function () {
+      this.handlerSetAimDirty(); // added to set dirtflag
       var getAllowTGroup = prObject;
       var getAllowTGroupSize = getAllowTGroup.AllowedTerm.length;
       var i = 0;
@@ -1717,6 +1726,7 @@ export var AimEditor = function (
     div.appendChild(label);
 
     radioInput.onclick = function () {
+      this.handlerSetAimDirty(); // added to set dirtflag
       prObject.select = "1";
       var getAllowTGroup = validTermObj.primitiveObjATSparent;
       var getAllowTGroupSize = getAllowTGroup.AllowedTerm.length;
@@ -1819,6 +1829,7 @@ export var AimEditor = function (
     labelHolder.appendChild(label);
 
     optionInput.addEventListener("click", function () {
+      this.handlerSetAimDirty(); // added to set dirtflag
       console.log("next id", allowedTermObj.nextId);
       console.log("clicked situation", this.selected);
       var checkmarkObj = self.mapCardinalitiesToCheckId.get(prObject.id);
@@ -1929,6 +1940,7 @@ export var AimEditor = function (
     labelHolder.appendChild(label);
 
     optionInput.addEventListener("click", function () {
+      this.handlerSetAimDirty(); // added to set dirtflag
       var checkmarkObj = self.mapCardinalitiesToCheckId.get(vtPrObject.id);
       checkmarkObj.ok = "true";
 
@@ -1995,6 +2007,7 @@ export var AimEditor = function (
     let nextIdExist = false;
     let nomoreQuestionExist = false;
     checkbox.onclick = function () {
+      this.handlerSetAimDirty(); // added to set dirtflag
       console.log("check box parent :", prObject);
       allowedTermObj.changeOnSelect("1", self.AfterClick);
 
@@ -2110,6 +2123,7 @@ export var AimEditor = function (
     };
 
     checkbox.onclick = function () {
+      this.handlerSetAimDirty(); // added to set dirtflag
       validTermObj.changeOnSelect("1", self.AfterClick);
 
       var checkmarkObj = self.mapCardinalitiesToCheckId.get(vtPrObject.id);
@@ -2188,6 +2202,7 @@ export var AimEditor = function (
           annotConfInput.value = 0;
 
           annotConfInput.onchange = function () {
+            this.handlerSetAimDirty(); // added to set dirtflag
             annotConfShowValueInput.value = this.value;
             objectToCheckAnnConf.selectac = this.value / 100;
           };
