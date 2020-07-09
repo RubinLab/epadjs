@@ -481,20 +481,20 @@ class DisplayView extends Component {
       if (toolName === "FreehandRoi3DTool")
         this.setState({ hideShowDisabled: true });
     }
-    this.handleDirtyFlag();
+    this.setDirtyFlag();
     this.checkShapes();
   };
 
   measurementRemoved = (event, action) => {
-    this.handleDirtyFlag();
+    this.setDirtyFlag();
     this.checkShapes();
   };
 
   measuremementModified = (event, action) => {
-    this.handleDirtyFlag();
+    this.setDirtyFlag();
   };
 
-  handleDirtyFlag = () => {
+  setDirtyFlag = () => {
     if (!this.state.dirty) this.setState({ dirty: true });
   };
 
@@ -1017,6 +1017,7 @@ class DisplayView extends Component {
           activeLabelMapIndex={this.state.activeLabelMapIndex}
           updateProgress={this.props.updateProgress}
           updateTreeDataOnSave={this.props.updateTreeDataOnSave}
+          setAimDirty={this.setDirtyFlag}
         >
           {!this.state.isLoading &&
             Object.entries(this.props.series).length &&

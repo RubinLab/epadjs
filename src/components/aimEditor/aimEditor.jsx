@@ -45,7 +45,7 @@ class AimEditor extends Component {
   componentDidMount() {
     const element = document.getElementById("questionaire");
 
-    let { templates, openSeries, activePort } = this.props;
+    let { templates, openSeries, activePort, setAimDirty } = this.props;
     const templateJsons = Object.values(templates);
     const { defaultTemplate, imageAnnotations } = openSeries[activePort];
 
@@ -53,7 +53,8 @@ class AimEditor extends Component {
       element,
       this.validateForm,
       this.renderButtons,
-      this.getDefaultLesionName()
+      this.getDefaultLesionName(),
+      setAimDirty
     );
 
     this.semanticAnswers.loadTemplates({
