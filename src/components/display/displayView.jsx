@@ -36,6 +36,7 @@ import {
   FaExpandArrowsAlt,
 } from "react-icons/fa";
 import Form from "react-bootstrap/Form";
+import ToolMenu from "../ToolMenu/ToolMenu";
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
@@ -987,6 +988,7 @@ class DisplayView extends Component {
           updateProgress={this.props.updateProgress}
           updateTreeDataOnSave={this.props.updateTreeDataOnSave}
         >
+          <ToolMenu />
           {!this.state.isLoading &&
             Object.entries(this.props.series).length &&
             this.state.data.map((data, i) => (
