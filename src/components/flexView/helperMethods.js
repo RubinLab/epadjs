@@ -8,8 +8,8 @@ export const clearCarets = string => {
     for (let i = 0; i < string.length; i++) {
       string = string.replace('^', ' ');
     }
-    return string;
   }
+  return string;
 };
 
 export const reverseCarets = string => {
@@ -17,8 +17,8 @@ export const reverseCarets = string => {
     for (let i = 0; i < string.length; i++) {
       string = string.replace(' ', '^');
     }
-    return string;
   }
+  return string;
 };
 
 const validateDateTime = (str, length) => {
