@@ -257,7 +257,7 @@ class Annotations extends Component {
               </div>
               <ReactTooltip
                 id={id}
-                place="right"
+                place="top"
                 type="info"
                 delayShow={500}
                 clickable={true}

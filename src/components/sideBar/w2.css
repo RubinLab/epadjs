@@ -277,16 +277,6 @@ body {
   text-align: left;
 }
 
-.sidebar-row p {
-  padding: 0.3em;
-  cursor: pointer;
-}
-
-.sidebar-row.__bold {
-  font-weight: bold;
-  font-size: 1.5rem;
-}
-
 .badge.badge-secondary.worklist {
   margin-left: 0.5rem;
 }
@@ -312,22 +302,30 @@ body {
   z-index: 1;
 }
 
+.sidebar-row p {
+  padding: 0.2em 0.8rem;
+  cursor: pointer;
+}
+
 .sidebar-row.__selected {
-  background: #d9d9d9;
-  /* color: white; */
+  background: #861737;
+  padding: 0.5em 0.8rem;
   font-weight: 400;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
+  color: #ffffff; 
+  margin: 0.2rem;
 }
 
 .sidebar-content {
   width: 100%;
 }
 
-.sidebar-row {
-  padding: 1rem;
-}
 
 .progress-wl.__selected {
   padding: 0.3rem;
   background: #e6e6e6;
+}
+
+#subjectCount{
+  margin-left: 0.7rem;
 }

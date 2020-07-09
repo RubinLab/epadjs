@@ -25,7 +25,8 @@ const projectCreationForm = ({
     );
   });
   return (
-    <Modal.Dialog dialogClassName="add-project__modal">
+    // <Modal.Dialog dialogClassName="add-project__modal">
+    <Modal.Dialog id="modal-fix" className="in-modal">
       <Modal.Header>
         <Modal.Title>New Project</Modal.Title>
       </Modal.Header>

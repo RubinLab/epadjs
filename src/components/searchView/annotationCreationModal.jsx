@@ -3,7 +3,8 @@ import { Modal } from "react-bootstrap";
 
 const annotationCreationForm = ({ onCancel, onSubmit, onType, error }) => {
   return (
-    <Modal.Dialog dialogClassName="add-annotation__modal">
+    // <Modal.Dialog dialogClassName="add-annotation__modal">
+    <Modal.Dialog id="modal-fix">
       <Modal.Header>
         <Modal.Title>New annotation</Modal.Title>
       </Modal.Header>

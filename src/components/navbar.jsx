@@ -13,9 +13,9 @@ const NavBar = ({
   logout,
   onSearchViewClick,
   onSwitchView,
-  notificationWarning, pid
+  notificationWarning,
+  pid,
 }) => {
-  const style = { paddingBottom: "8px" };
 
   // handleClick = () => {
   //   openMenu();
@@ -48,7 +48,10 @@ const NavBar = ({
                 onSwitchView("search");
               }}
             >
-              <NavLink className="nav-link" to={pid ? `/search/${pid}`: "/search"}>
+              <NavLink
+                className="nav-link"
+                to={pid ? `/search/${pid}` : "/search"}
+              >
                 Search
               </NavLink>
             </li>
@@ -90,7 +93,10 @@ const NavBar = ({
                     onSwitchView("flex");
                   }}
                 >
-                  <NavLink className="nav-link" to={pid ? `/flex/${pid}` : `/flex`}>
+                  <NavLink
+                    className="nav-link"
+                    to={pid ? `/flex/${pid}` : `/flex`}
+                  >
                     Flex
                   </NavLink>
                 </li>{" "}
@@ -111,7 +117,6 @@ const NavBar = ({
                   <div
                     className="nav-link mng-icon"
                     data-name="mng"
-                    style={{ ...style, cursor: "pointer" }}
                     onClick={e => {
                       openGearMenu(e);
                     }}
@@ -123,7 +128,6 @@ const NavBar = ({
                   <div
                     className="nav-link info-icon"
                     data-name="info"
-                    style={{ ...style, cursor: "pointer" }}
                     onClick={e => {
                       openInfoMenu(e);
                     }}
@@ -144,10 +148,6 @@ const NavBar = ({
                     onClick={e => {
                       openUser(e);
                     }}
-                    // onMouseEnter={openUser}
-                    style={
-                      mode === "lite" ? style : { ...style, cursor: "pointer" }
-                    }
                   >
                     {user.displayname}
                   </div>
@@ -168,7 +168,7 @@ const NavBar = ({
 
 const mapStateToProps = state => {
   return {
-    loading: state.annotationsListReducer.loading
+    loading: state.annotationsListReducer.loading,
   };
 };
 export default connect(mapStateToProps)(NavBar);

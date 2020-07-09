@@ -205,27 +205,6 @@ class UploadModal extends React.Component {
           *Please note that if you upload a project that you downloaded from
           ePad, the project will not be recreated.
         </h6>
-        <div className="upload-options">
-          <div className="upload-option">
-            <input
-              type="checkbox"
-              className="upload-select"
-              name="tiff"
-              onClick={this.onSelect}
-            />
-            <span className="upload-text">Import Tiff files</span>
-          </div>
-          {this.state.tiff && this.renderTiffForm()}
-          <div className="upload-option">
-            <input
-              type="checkbox"
-              className="upload-select"
-              name="osirix"
-              onClick={this.onSelect}
-            />
-            <span className="upload-text">Import from Osirix</span>
-          </div>
-        </div>
       </div>
     ) : (
       <div> Please create a project before uploading! </div>
@@ -240,7 +219,8 @@ class UploadModal extends React.Component {
       : className;
     const { projects } = this.state;
     return (
-      <Modal.Dialog dialogClassName={className}>
+      // <Modal.Dialog dialogClassName={className}>
+      <Modal.Dialog id="modal-fix">
         <Modal.Header>
           <Modal.Title className="upload__header">Upload</Modal.Title>
         </Modal.Header>

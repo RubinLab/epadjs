@@ -9,7 +9,7 @@ import "react-table/react-table.css";
 import Studies from "./studies";
 import { getSubjects } from "../../services/subjectServices";
 import { selectPatient, clearSelection } from "../annotationsList/action";
-import { persistExpandView } from "../../Utils/aid";
+import { persistExpandView, styleEightDigitDate } from "../../Utils/aid";
 const mode = sessionStorage.getItem("mode");
 
 // const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -66,20 +66,25 @@ class Subjects extends Component {
         data = await this.getData();
         this.props.getTreeData(pid, "subject", data);
       }
-      const expanded = {};
       this.setState({ data });
       this.setState({ columns: this.setColumns() });
-      const ptExpandKeys = Object.keys(this.props.treeExpand);
-      const ptExpandVal = Object.values(this.props.treeExpand);
-      ptExpandKeys.forEach((el, index) => {
-        expanded[el] = ptExpandVal[index];
-      });
-      this.setState({ expanded });
+      this.updateExpanded();
     } catch (err) {
       // console.log(err);
       console.log(`couldn't load all subjects data. Please Try again!`);
     }
   }
+
+  updateExpanded = () => {
+    const expanded = {};
+    const ptExpandKeys = Object.keys(this.props.treeExpand);
+    const ptExpandVal = Object.values(this.props.treeExpand);
+    ptExpandKeys.forEach((el, index) => {
+      expanded[el] = ptExpandVal[index];
+    });
+    this.setState({ expanded });
+    return expanded;
+  };
 
   async componentDidUpdate(prevProps) {
     try {
@@ -94,16 +99,24 @@ class Subjects extends Component {
 
       let data;
 
+      const newExpanded = Object.keys(this.props.treeExpand);
+      const oldExpanded = Object.keys(prevProps.treeExpand);
+      const shouldCollapse = newExpanded.length === 0 && oldExpanded.length > 0;
+      if (shouldCollapse) this.setState({ expanded: {}, expansionArr: [] });
+
       if (this.props.update !== prevProps.update) {
         data = await this.getData();
-        const expanded = persistExpandView(
-          this.state.expanded,
-          this.state.data,
-          data,
-          "subjectID"
-        );
+        const expanded = shouldCollapse
+          ? {}
+          : persistExpandView(
+              this.state.expanded,
+              this.state.data,
+              data,
+              "subjectID"
+            );
         this.props.getTreeData(pid, "subject", data);
         this.setState({ data, expanded });
+        if (shouldCollapse) this.setState({ expansionArr: [] });
       }
 
       if (closeAllCounter !== prevProps.closeAllCounter) {
@@ -253,7 +266,7 @@ class Subjects extends Component {
           userSelect: "none",
           color: "#fafafa",
           padding: "7px 5px",
-          verticalAlign: "middle"
+          verticalAlign: "middle",
         },
       },
       {
@@ -377,7 +390,11 @@ class Subjects extends Component {
         id: "searchView-crDate",
         resizable: false,
         // minResizeWidth: this.widthUnit * 10,
-        Cell: row => <div />,
+        Cell: ({ original }) => (
+          <div style={{ textAlign: "center" }}>
+            {styleEightDigitDate(original.insertDate)}
+          </div>
+        ),
       },
       {
         Header: <div className="search-header__col">Upload date</div>,
@@ -396,7 +413,7 @@ class Subjects extends Component {
         Cell: row => <div />,
       },
       {
-        Header: <div className="search-header__col">Idenditifier</div>,
+        Header: <div className="search-header__col">Identifier</div>,
         width: this.widthUnit * 10,
         // minResizeWidth: this.widthUnit * 12,
         id: "searchView-UID",
@@ -410,7 +427,7 @@ class Subjects extends Component {
               </div>
               <ReactTooltip
                 id={id}
-                place="right"
+                place="top"
                 type="info"
                 delayShow={500}
                 clickable={true}

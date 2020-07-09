@@ -1,5 +1,4 @@
 import React from "react";
-import { Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { getSubjects } from "../../services/subjectServices";
 import { getStudies } from "../../services/studyServices";
@@ -179,11 +178,6 @@ class SeriesBrowser extends React.Component {
   render = () => {
     const { error } = this.props;
     return (
-      // <Modal.Dialog dialogClassName="tagRequirements_modal">
-      //   <Modal.Header>
-      //     <Modal.Title>Browse Series</Modal.Title>
-      //   </Modal.Header>
-      //   <Modal.Body>
       <div className="seriesBrowser-wrapper">
         <h5 style={{ textAlign: "left" }}>Browse series </h5>
         <div className="seriesBrowser">
@@ -193,6 +187,7 @@ class SeriesBrowser extends React.Component {
               name="project"
               className="seriesBrowser--select"
               onChange={this.handleInput}
+              onMouseDown={e => e.stopPropagation()}
             >
               {this.renderProjects()}
             </select>
@@ -203,6 +198,7 @@ class SeriesBrowser extends React.Component {
               name="subject"
               className="seriesBrowser--select"
               onChange={this.handleInput}
+              onMouseDown={e => e.stopPropagation()}
             >
               {this.renderPatients()}
             </select>
@@ -213,6 +209,7 @@ class SeriesBrowser extends React.Component {
               name="study"
               className="seriesBrowser--select"
               onChange={this.handleInput}
+              onMouseDown={e => e.stopPropagation()}
             >
               {this.renderStudies()}
             </select>
@@ -223,16 +220,11 @@ class SeriesBrowser extends React.Component {
               name="series"
               className="seriesBrowser--select"
               onChange={this.handleInput}
+              onMouseDown={e => e.stopPropagation()}
             >
               {this.renderSeries()}
             </select>
           </div>
-          {/* <input
-            className="seriesBrowser-getTags"
-            onClick={this.props.onGetTags}
-            value="Get tags"
-            type="button"
-          /> */}
           <TagEditorButton
             name="getTags"
             onClick={this.props.onGetTags}
@@ -242,13 +234,6 @@ class SeriesBrowser extends React.Component {
           {error ? <div className="err-message">{error}</div> : null}
         </div>
       </div>
-      //   </Modal.Body>
-      //   <Modal.Footer className="modal-footer__buttons">
-      //     <button variant="secondary" onClick={this.props.onClose}>
-      //       OK
-      //     </button>
-      //   </Modal.Footer>
-      // </Modal.Dialog>
     );
   };
 }
