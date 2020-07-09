@@ -178,6 +178,7 @@ class FlexView extends React.Component {
             order={order}
             onChecked={this.toggleColumn}
             studyColumns={this.studyColumns}
+            onClose={this.selectDropdown}
           />
         )}
         {this.state.data && (
