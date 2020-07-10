@@ -971,19 +971,27 @@ class DisplayView extends Component {
   jumpToAimImage = (activeSerie, activePort) => {
     const { imageIds } = this.state.data[activePort].stack;
     const imageIndex = this.getImageIndex(activeSerie, imageIds);
-    const { element } = cornerstone.getEnabledElements()[activePort];
-    scrollToIndex(element, parseInt(imageIndex, 10));
+    this.jumpToImage(imageIndex);
   };
 
   jumpToImage = (imageIndex) => {
     const { activePort } = this.props;
-    const { element } = cornerstone.getEnabledElements()[activePort];
-    scrollToIndex(element, imageIndex);
+    const newData = [...this.state.data];
+    newData[activePort].stack.currentImageIdIndex = parseInt(imageIndex, 10);
+    this.setState({ data: newData });
   };
 
+  // jumpToImage = (imageIndex) => {
+  //   const { activePort } = this.props;
+  //   const { element } = cornerstone.getEnabledElements()[activePort];
+  //   scrollToIndex(element, imageIndex);
+  // };
+
   handleJumpChange = (event) => {
-    let imageIndex = parseInt(event.target.value) - 1;
-    console.log("new value", imageIndex);
+    let imageIndex = event.target.value - 1;
+    const images = this.state.data[this.props.activePort].stack.imageIds;
+    // check if there is such an image
+    if (isNaN(imageIndex) || !images[imageIndex]) return;
     this.jumpToImage(imageIndex);
   };
 
