@@ -35,6 +35,7 @@ import {
   CLEAR_ACTIVE_AIMID,
   UPDATE_IMAGE_INDEX,
   GET_PROJECT_MAP,
+  GET_TEMPLATES,
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -213,13 +214,10 @@ const asyncReducer = (state = initialState, action) => {
         return Object.assign({}, state, {
           aimsList: {
             ...state.aimsList,
-
             [serie]: {
               ...state.aimsList[serie],
-
               [annotation]: {
                 ...state.aimsList[serie][annotation],
-
                 isDisplayed,
               },
             },
@@ -514,8 +512,9 @@ const asyncReducer = (state = initialState, action) => {
         return {
           ...state,
           projectMap: action.projectMap,
-          templates: action.templates,
         };
+      case GET_TEMPLATES:
+        return { ...state, templates: action.templates };
       default:
         return state;
     }

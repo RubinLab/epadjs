@@ -16,7 +16,7 @@ import {
   getWorklistsOfCreator,
   getWorklistProgress,
 } from "../../services/worklistServices";
-import { getProjectMap, clearSelection } from "../annotationsList/action";
+import { getProjectMap, clearSelection, getTemplates } from "../annotationsList/action";
 // import { getPacs } from "../../services/pacsServices";
 import "./w2.css";
 // import { throws } from "assert";
@@ -100,7 +100,6 @@ class Sidebar extends Component {
         this.props.history.push(`/search/${pid}`);
         this.props.getPidUpdate(pid);
         const prTempMap = await this.getTemplatesProjectMap();
-        const templates = await this.getTemplatesJSON();
         const projectMap = {};
         for (let project of projects) {
           let { name, defaultTemplate } = project;
@@ -111,25 +110,11 @@ class Sidebar extends Component {
             templates: prTempMap[project.id] || [],
           };
         }
-        this.props.dispatch(getProjectMap(projectMap, templates));
+        this.props.dispatch(getProjectMap(projectMap));
+        this.props.dispatch(getTemplates());
       }
     } catch (err) {
       console.error(err);
-    }
-  };
-
-  getTemplatesJSON = async () => {
-    const tempMap = {};
-    try {
-      const { data: templatesJSONs } = await getAllTemplates();
-      for (let temp of templatesJSONs) {
-        const { codeValue } = temp.TemplateContainer.Template[0];
-        tempMap[codeValue] = temp;
-      }
-      return tempMap;
-    } catch (err) {
-      console.error("getting template JSONs", err);
-      return tempMap;
     }
   };
 

@@ -43,6 +43,8 @@ export const GET_NOTIFICATIONS = "epadjs/annotationList/GET_NOTIFICATIONS";
 export const CLEAR_ACTIVE_AIMID = "epadjs/annotationList/CLEAR_ACTIVE_AIMID";
 export const UPDATE_IMAGE_INDEX = "epadjs/annotationList/UPDATE_IMAGE_INDEX ";
 export const GET_PROJECT_MAP = "epadjs/annotationList/GET_PROJECT_MAP";
+export const GET_TEMPLATES = "epadjs/annotationList/GET_TEMPLATES";
+
 
 export const commonLabels = {
   button: { background: "#c0c0c0", color: "black" },
