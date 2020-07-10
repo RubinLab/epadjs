@@ -151,7 +151,30 @@ class DisplayView extends Component {
     this.getData();
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
+    window.addEventListener("toggleAnnotations", this.toggleAnnotations);
   }
+
+  toggleAnnotations = (event) => {
+    console.log("event", event.detail);
+    const { aimID, isVisible } = event.detail;
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    console.log("segmentation", cornerstoneTools.store.modules.segmentation);
+    Object.values(toolState).forEach((imageState) => {
+      console.log("Image state", imageState);
+      Object.values(imageState).forEach((tools) => {
+        Object.values(tools).forEach((tool) => {
+          tool.forEach((shape) => {
+            console.log("shape", shape);
+            if (aimID && shape.aimId === aimID) shape.visible = isVisible;
+            else if (!aimID) shape.visible = isVisible;
+          });
+        });
+      });
+    });
+    cornerstone.updateImage(element);
+  };
 
   async componentDidUpdate(prevProps, prevState) {
     const { pid, series, activePort } = this.props;
@@ -176,8 +199,60 @@ class DisplayView extends Component {
       this.getData();
     } else if (activeSerie.aimID !== prevActiveSerie.aimID) {
       this.jumpToAimImage(activeSerie, activePort);
+    } else {
+      console.log(prevProps, this.props);
+      console.log("cs", cornerstoneTools);
     }
   }
+
+  // getMarkups = (aimOfInterest) => {
+  //   const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+  //   var markupsToReturn = {};
+  //   Object.keys(toolState).forEach((key) => {
+  //     const markUps = toolState[key];
+  //     Object.keys(markUps).map((tool) => {
+  //       switch (tool) {
+  //         case "FreehandRoi3DTool":
+  //         case "FreehandRoi":
+  //           const polygons3d = markUps[tool].data;
+  //           polygons3d.map((polygon) => {
+  //             if (!polygon.aimId || polygon.aimId === aimOfInterest)
+  //               markupsToReturn["Polygon"] = { validate: "" };
+  //           });
+  //           break;
+  //         case "Bidirectional":
+  //           const bidirectionals = markUps[tool].data;
+  //           bidirectionals.map((bidirectional) => {
+  //             if (!bidirectional.aimId || bidirectional.aimId === aimOfInterest)
+  //               markupsToReturn["Perpendicular"] = { validate: "" };
+  //           });
+  //           break;
+  //         case "CircleRoi":
+  //           const circles = markUps[tool].data;
+  //           circles.map((circle) => {
+  //             if (!circle.aimId || circle.aimId === aimOfInterest)
+  //               markupsToReturn["Circle"] = { validate: "" };
+  //           });
+  //           break;
+  //         case "Length":
+  //           const lines = markUps[tool].data;
+  //           lines.map((line) => {
+  //             if (!line.aimId || line.aimId === aimOfInterest)
+  //               markupsToReturn["Line"] = { validate: "" };
+  //           });
+  //           break;
+  //         case "Probe":
+  //           const points = markUps[tool].data;
+  //           points.map((point) => {
+  //             if (!point.aimId || point.aimId === aimOfInterest)
+  //               markupsToReturn["Point"] = { validate: "" };
+  //           });
+  //           break;
+  //       }
+  //     });
+  //   });
+  //   return markupsToReturn;
+  // };
 
   componentWillUnmount() {
     window.removeEventListener("markupSelected", this.handleMarkupSelected);
@@ -186,7 +261,7 @@ class DisplayView extends Component {
 
   getData() {
     // clear the toolState they will be rendered again on next load
-    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
 
@@ -204,9 +279,9 @@ class DisplayView extends Component {
         prospectiveLabelMapIndex: 0,
       });
       // clear the toolState they will be rendered again on next load
-      cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
-        {}
-      );
+      // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+      //   {}
+      // );
       // clear the segmentation data as well
       cornerstoneTools.store.modules.segmentation.state.series = {};
       series.forEach((serie, serieIndex) => {

@@ -48,6 +48,7 @@ class AnnotationsList extends React.Component {
       this.props.activePort
     ];
     const aimID = e.target.id;
+    console.log("I have breen clicked for aimID", aimID);
     if (aimID) {
       const currentDisplayStatus = this.props.aimsList[seriesUID][aimID]
         .isDisplayed;
@@ -59,6 +60,11 @@ class AnnotationsList extends React.Component {
           aimID,
           !currentDisplayStatus
         )
+      );
+      window.dispatchEvent(
+        new CustomEvent("toggleAnnotations", {
+          detail: { aimID, isVisible: !currentDisplayStatus },
+        })
       );
     }
   };
@@ -73,6 +79,9 @@ class AnnotationsList extends React.Component {
     this.setState({ annsDisplayAll: checked });
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleAllAnnotations(seriesUID, checked));
+    window.dispatchEvent(
+      new CustomEvent("toggleAnnotations", { detail: { isVisible: checked } })
+    );
   };
 
   handleToggleSingleLabel = (e) => {
