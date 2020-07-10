@@ -35,6 +35,7 @@ import {
   CLEAR_ACTIVE_AIMID,
   UPDATE_IMAGE_INDEX,
   GET_PROJECT_MAP,
+  SET_SEG_LABEL_MAP_INDEX,
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -57,6 +58,7 @@ const initialState = {
   lastEventId: null,
   projectMap: {},
   templates: {},
+  aimSegLabelMaps: {},
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -511,6 +513,14 @@ const asyncReducer = (state = initialState, action) => {
           projectMap: action.projectMap,
           templates: action.templates,
         };
+      case SET_SEG_LABEL_MAP_INDEX: {
+        const { aimID, labelMapIndex } = action.payload;
+        console.log(aimID, labelMapIndex);
+        return {
+          ...state,
+          aimSegLabelMaps: { ...state.aimSegLabelMaps, [aimID]: labelMapIndex },
+        };
+      }
       default:
         return state;
     }

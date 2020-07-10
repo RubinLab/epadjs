@@ -36,6 +36,7 @@ import {
   CLEAR_ACTIVE_AIMID,
   UPDATE_IMAGE_INDEX,
   GET_PROJECT_MAP,
+  SET_SEG_LABEL_MAP_INDEX,
   colors,
   commonLabels,
 } from "./types";
@@ -716,6 +717,14 @@ export function getWholeData(serie, study, annotation) {
     }
   };
 }
+
+export const setSegLabelMapIndex = (aimID, labelMapIndex) => {
+  console.log("Action came", aimID, labelMapIndex);
+  return {
+    type: SET_SEG_LABEL_MAP_INDEX,
+    payload: { aimID, labelMapIndex },
+  };
+};
 
 // gets one patient and all the studys->series->annotations under it
 // export const getAnnotationListData = (serie, study, annotation) => {

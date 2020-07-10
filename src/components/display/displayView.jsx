@@ -16,6 +16,7 @@ import {
   updateImageId,
   clearActivePortAimID,
   closeSerie,
+  setSegLabelMapIndex,
 } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
@@ -119,6 +120,7 @@ const mapStateToProps = (state) => {
     loading: state.annotationsListReducer.loading,
     activePort: state.annotationsListReducer.activePort,
     aimList: state.annotationsListReducer.aimsList,
+    aimSegLabelMaps: state.annotationsListReducer.aimSegLabelMaps,
   };
 };
 
@@ -789,6 +791,12 @@ class DisplayView extends Component {
         } else {
           this.setActiveLabelMapIndex(this.state.activeLabelMapIndex, element);
         }
+        console.log(
+          "dipsatching, aimId, activeLabelMapIndex",
+          aimId,
+          activeLabelMapIndex
+        );
+        this.props.dispatch(setSegLabelMapIndex(aimId, activeLabelMapIndex));
 
         this.refreshAllViewports();
       });
