@@ -117,13 +117,13 @@ class EyeTracker extends Component {
   };
 
   startLogging = () => {
-    // setCapture({ shouldLog: true });
-    // startEyeTrackerLog().then(() => {
-    this.setState({ logging: true });
-    window.addEventListener("eyeTrackerShouldLog", this.captureLog);
-    document.onkeypress = this.keyPress;
-    //   this.captureLog({ detail: "loggingStarted" });
-    // });
+    setCapture({ shouldLog: true });
+    startEyeTrackerLog().then(() => {
+      this.setState({ logging: true });
+      window.addEventListener("eyeTrackerShouldLog", this.captureLog);
+      document.onkeypress = this.keyPress;
+      this.captureLog({ detail: "loggingStarted" });
+    });
     this.captureLog({ detail: "loggingStarted" });
   };
 
@@ -135,7 +135,7 @@ class EyeTracker extends Component {
     window.removeEventListener("eyeTrackerShouldLog", this.captureLog);
     console.log("Logs", log);
 
-    // stopEyeTrackerLog(log);
+    stopEyeTrackerLog(log);
   };
 
   captureLog = (event) => {
