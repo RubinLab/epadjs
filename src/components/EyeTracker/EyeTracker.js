@@ -133,7 +133,6 @@ class EyeTracker extends Component {
     this.setState({ logging: false });
     const log = JSON.stringify(this.logs);
     window.removeEventListener("eyeTrackerShouldLog", this.captureLog);
-    console.log("Logs", log);
 
     stopEyeTrackerLog(log);
   };
