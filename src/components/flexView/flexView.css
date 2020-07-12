@@ -2,14 +2,15 @@
   position: absolute;
   z-index: 1;
   background: #3a3f44;
-  padding: 1rem;
   border: 2px solid #861837;
+}
 
+.flexView .__dropdown .--options {
+  padding: 0.5rem 1rem;
 }
 
 .flexView .__dropdown .--option .--text {
   margin-left: 0.3rem;
-
 }
 
 .ReactTable.flexView-table .rt-th {
@@ -28,7 +29,6 @@
   margin: 10px auto;
   table-layout: auto;
   /* table-layout: fixed; */
-
 }
 
 .series-table,
@@ -65,10 +65,19 @@
   padding: 0.5rem;
   color: #3a3f44;
   border-radius: 2px;
-  font-size: 1rem
+  font-size: 1rem;
 }
 
 .series-table.__error {
   color: orangered;
   font-size: 1.2rem;
+}
+
+.flexCol-close {
+  color: white;
+  width: fit-content;
+  padding: 0.3rem;
+  cursor: pointer;
+  float: right;
+  font-size: 1.1rem;
 }

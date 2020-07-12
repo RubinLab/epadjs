@@ -45,10 +45,7 @@
   display: table;
   clear: both;
 }
-.triggerTable table,
-th,
-tr,
-td {
+.triggerTable table th tr td {
   padding-left: 20px;
   vertical-align: top;
 }
@@ -113,13 +110,13 @@ td {
   padding-bottom: 5px;
 }
 
-.t1 {
+.NewPluginTable {
   width: 100%;
 }
-.t1 tr {
+.NewPluginTable tr {
   text-align: left;
 }
-.t1 td {
+.NewPluginTable td {
   padding: 5px;
   color: black;
 }

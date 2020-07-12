@@ -16,7 +16,7 @@ import {
   getWorklistsOfCreator,
   getWorklistProgress,
 } from "../../services/worklistServices";
-import { getProjectMap, clearSelection } from "../annotationsList/action";
+import { getProjectMap, clearSelection, getTemplates } from "../annotationsList/action";
 // import { getPacs } from "../../services/pacsServices";
 import "./w2.css";
 // import { throws } from "assert";
@@ -47,12 +47,29 @@ class Sidebar extends Component {
       progressView: [false, false],
       selected: null,
       type: "",
+      height: 200,
     };
   }
 
   componentDidMount = async () => {
+    this.setTabHeight();
     this.getProjectsData();
     this.getWorklistandProgressData();
+    window.addEventListener("resize", this.setTabHeight);
+  };
+
+  setTabHeight = () => {
+    const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
+    const closebtn = document.getElementsByClassName("closebtn __leftBar")[0]
+      .clientHeight;
+    const navTabs = document.getElementsByClassName("nav-tabs")[0].clientHeight;
+    const windowInner = window.innerHeight;
+    const height = windowInner - navTabs - closebtn - navbar - 10;
+    this.setState({ height });
+  };
+
+  componentWillUnmount = () => {
+    window.removeEventListener("resize", this.setTabHeight);
   };
 
   getProjectsData = async () => {
@@ -83,7 +100,6 @@ class Sidebar extends Component {
         this.props.history.push(`/search/${pid}`);
         this.props.getPidUpdate(pid);
         const prTempMap = await this.getTemplatesProjectMap();
-        const templates = await this.getTemplatesJSON();
         const projectMap = {};
         for (let project of projects) {
           let { name, defaultTemplate } = project;
@@ -94,25 +110,11 @@ class Sidebar extends Component {
             templates: prTempMap[project.id] || [],
           };
         }
-        this.props.dispatch(getProjectMap(projectMap, templates));
+        this.props.dispatch(getProjectMap(projectMap));
+        this.props.dispatch(getTemplates());
       }
     } catch (err) {
       console.error(err);
-    }
-  };
-
-  getTemplatesJSON = async () => {
-    const tempMap = {};
-    try {
-      const { data: templatesJSONs } = await getAllTemplates();
-      for (let temp of templatesJSONs) {
-        const { codeValue } = temp.TemplateContainer.Template[0];
-        tempMap[codeValue] = temp;
-      }
-      return tempMap;
-    } catch (err) {
-      console.error("getting template JSONs", err);
-      return tempMap;
     }
   };
 
@@ -297,7 +299,9 @@ class Sidebar extends Component {
                   // style={{ padding: "0.6rem" }}
                 >
                   {project.name}
-                  <span id="subjectCount" className="badge badge-secondary">{project.numberOfSubjects}</span>
+                  <span id="subjectCount" className="badge badge-secondary">
+                    {project.numberOfSubjects}
+                  </span>
                 </p>
               </td>
             </tr>
@@ -381,25 +385,34 @@ class Sidebar extends Component {
 
   renderContent = () => {
     // if (mode === "thick") {
+    const { height } = this.state;
     return (
       <Tabs
-        id="controlled-tab-example"
+        id="controlled-tab-leftSidebar"
         activeKey={this.state.activeTab}
         onSelect={index => this.setState({ index })}
       >
         {mode === "thick" ? (
-          <Tab eventKey="0" title="Projects">
+          <Tab
+            eventKey="0"
+            title="Projects"
+            style={{ height, overflow: "auto" }}
+          >
             <div></div>
             {this.renderProjects()}
           </Tab>
         ) : (
           ""
         )}
-        <Tab eventKey="1" title="Worklists">
+        <Tab
+          eventKey="1"
+          title="Worklists"
+          style={{ height, overflow: "auto" }}
+        >
           <div>{this.renderWorklists()}</div>
         </Tab>
 
-        <Tab eventKey="2" title="Progress">
+        <Tab eventKey="2" title="Progress" style={{ height, overflow: "auto" }}>
           {this.renderProgress()}
         </Tab>
       </Tabs>
@@ -435,7 +448,7 @@ class Sidebar extends Component {
     return (
       <React.Fragment>
         <div
-          id="mySidebar"
+          id="leftSidebar"
           className="sidenav"
           style={{ width: this.state.width }}
         >
@@ -474,7 +487,7 @@ const mapStateToProps = state => {
   const { activePort, lastEventId } = state.annotationsListReducer;
   return {
     activePort,
-    lastEventId
+    lastEventId,
   };
 };
 export default withRouter(connect(mapStateToProps)(Sidebar));

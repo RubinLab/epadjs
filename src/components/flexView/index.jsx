@@ -15,7 +15,7 @@ const TreeTable = treeTableHOC(ReactTable);
 class FlexView extends React.Component {
   state = {
     columns: [],
-    order: [15, 4, 19],
+    order: [1, 4, 0, 10, 11, 6],
     dropdownSelected: false,
     expanded: {},
     seriesTableOpen: false,
@@ -35,15 +35,12 @@ class FlexView extends React.Component {
     "# of Aims",
     "# Of Img",
     "# Of Series",
-    "created Time",
-    "birth date",
-    "First Series Date Acquired",
-    "First Series UID",
-    "Physician Name",
+    "Created Time",
+    "Birth Date",
     "Project ID",
     "Referring Physician Name",
     `Study Accession Number`,
-    "studyID",
+    "Study ID",
   ];
 
   mountEvents = () => {
@@ -167,7 +164,7 @@ class FlexView extends React.Component {
       <div className="flexView">
         <Button
           onClick={this.selectDropdown}
-          variant="outline-dark"
+          variant="secondary"
           id="flexMenu-button"
         >
           Select columns
@@ -181,6 +178,7 @@ class FlexView extends React.Component {
             order={order}
             onChecked={this.toggleColumn}
             studyColumns={this.studyColumns}
+            onClose={this.selectDropdown}
           />
         )}
         {this.state.data && (

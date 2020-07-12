@@ -37,6 +37,7 @@ import {
   UPDATE_IMAGE_INDEX,
   GET_PROJECT_MAP,
   SET_SEG_LABEL_MAP_INDEX,
+  GET_TEMPLATES,
   colors,
   commonLabels,
 } from "./types";
@@ -47,10 +48,27 @@ import {
   getAnnotations,
   getAnnotationsJSON,
 } from "../../services/annotationServices";
+import { getAllTemplates } from "../../services/templateServices";
 import { getImageIdAnnotations } from "aimapi";
 
-export const getProjectMap = (projectMap, templates) => {
-  return { type: GET_PROJECT_MAP, projectMap, templates };
+export const getProjectMap = (projectMap) => {
+  return { type: GET_PROJECT_MAP, projectMap };
+};
+
+export const getTemplates = () => {
+  return async (dispatch, getState) => {
+    try {
+      const templates = {};
+      const { data: templatesJSONs } = await getAllTemplates();
+      for (let temp of templatesJSONs) {
+        const { codeValue } = temp.TemplateContainer.Template[0];
+        templates[codeValue] = temp;
+      }
+      dispatch({ type: GET_TEMPLATES, templates });
+    } catch (err) {
+      console.error("getting template JSONs", err);
+    }
+  };
 };
 
 export const clearGrid = (item) => {

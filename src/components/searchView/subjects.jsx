@@ -10,6 +10,8 @@ import Studies from "./studies";
 import { getSubjects } from "../../services/subjectServices";
 import { selectPatient, clearSelection } from "../annotationsList/action";
 import { persistExpandView, styleEightDigitDate } from "../../Utils/aid";
+import { formatDate } from "../flexView/helperMethods";
+
 const mode = sessionStorage.getItem("mode");
 
 // const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -325,6 +327,7 @@ class Subjects extends Component {
         width: this.widthUnit * 2,
         id: "searchView-aims",
         resizable: false,
+        sortable: false,
         Cell: row => (
           <div className="searchView-table__cell">
             {row.original.numberOfAnnotations === 0 ? (
@@ -347,6 +350,7 @@ class Subjects extends Component {
         width: this.widthUnit * 3,
         id: "searchView-sub",
         resizable: false,
+        sortable: false,
         Cell: row => (
           <div className="searchView-table__cell">
             {row.original.numberOfStudies === 0 ? (
@@ -369,6 +373,7 @@ class Subjects extends Component {
         width: this.widthUnit * 3,
         id: "searchView-img",
         resizable: false,
+        sortable: false,
         // minResizeWidth: this.widthUnit * 3,
         Cell: row => <div />,
       },
@@ -377,6 +382,7 @@ class Subjects extends Component {
         width: this.widthUnit * 5,
         id: "searchView-type",
         resizable: false,
+        sortable: false,
         // minResizeWidth: this.widthUnit * 5,
         Cell: row => (
           <div style={{ textAlign: "center" }}>
@@ -389,20 +395,23 @@ class Subjects extends Component {
         width: this.widthUnit * 7,
         id: "searchView-crDate",
         resizable: false,
+        sortable: false,
         // minResizeWidth: this.widthUnit * 10,
-        Cell: ({ original }) => (
-          <div style={{ textAlign: "center" }}>
-            {styleEightDigitDate(original.insertDate)}
-          </div>
-        ),
+        Cell: row => <div />,
       },
       {
         Header: <div className="search-header__col">Upload date</div>,
         width: this.widthUnit * 7,
         id: "searchView-upldDate",
         resizable: false,
+        sortable: true,
+        accessor: "insertDate",
         // minResizeWidth: this.widthUnit * 10,
-        Cell: row => <div />,
+        Cell: ({ original }) => (
+          <div style={{ textAlign: "center" }}>
+            {formatDate(original.insertDate)}
+          </div>
+        ),
       },
       {
         Header: <div className="search-header__col">Accession</div>,
@@ -418,6 +427,7 @@ class Subjects extends Component {
         // minResizeWidth: this.widthUnit * 12,
         id: "searchView-UID",
         resizable: false,
+        sortable: false,
         Cell: ({ original }) => {
           const id = "id-tool" + original.subjectID;
           return (

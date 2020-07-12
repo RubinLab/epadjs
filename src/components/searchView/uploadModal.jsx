@@ -9,6 +9,7 @@ import {
 import { uploadFileToSubject } from "../../services/subjectServices";
 import { uploadFileToStudy } from "../../services/studyServices";
 import { uploadFileToSeries } from "../../services/seriesServices";
+import { getTemplates } from "../annotationsList/action"
 
 const mode = sessionStorage.getItem("mode");
 
@@ -97,6 +98,7 @@ class UploadModal extends React.Component {
       .then(() => {
         this.props.onSubmit();
         this.props.clearTreeData();
+        this.props.dispatch(getTemplates());
       })
       .catch(err => {
         console.log(err);

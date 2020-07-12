@@ -45,6 +45,7 @@ export const UPDATE_IMAGE_INDEX = "epadjs/annotationList/UPDATE_IMAGE_INDEX ";
 export const GET_PROJECT_MAP = "epadjs/annotationList/GET_PROJECT_MAP";
 export const SET_SEG_LABEL_MAP_INDEX =
   "epadjs/annotationList/SET_SEG_LABEL_MAP_INDEX";
+export const GET_TEMPLATES = "epadjs/annotationList/GET_TEMPLATES";
 
 export const commonLabels = {
   button: { background: "#c0c0c0", color: "black" },
