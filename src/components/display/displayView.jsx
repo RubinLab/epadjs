@@ -242,7 +242,7 @@ class DisplayView extends Component {
     return segAims;
   };
 
-  async componentDidUpdate(prevProps, prevState) {
+  async componentDidUpdate(prevProps) {
     const { pid, series, activePort } = this.props;
     const { series: prevSeries, activePort: prevActivePort } = prevProps;
     const activeSerie = series[activePort];
@@ -263,9 +263,13 @@ class DisplayView extends Component {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
-    } else if (activeSerie.aimID !== prevActiveSerie.aimID) {
-      this.jumpToAimImage(activeSerie, activePort);
     }
+    // } else if (
+    //   !this.props.loading &&
+    //   activeSerie.aimID !== prevActiveSerie.aimID
+    // ) {
+    //   this.jumpToAimImage(activeSerie, activePort);
+    // }
   }
 
   // getMarkups = (aimOfInterest) => {
@@ -567,11 +571,15 @@ class DisplayView extends Component {
   }
 
   hideShow = (current) => {
+    if (this.props.activePort !== i) {
+      this.setActive(i);
+      return;
+    }
     if (this.state.hideShowDisabled) {
       // this.setState({ hideShowDisabled: false });
       return;
     }
-    const element = cornerstone.getEnabledElements()[this.state.activePort];
+    // const element = cornerstone.getEnabledElements()[practivePort];
     const elements = document.getElementsByClassName("viewportContainer");
     if (this.state.hiding === false) {
       for (var i = 0; i < elements.length; i++) {
@@ -1104,6 +1112,7 @@ class DisplayView extends Component {
     // set the state to preserve the imageId
     this.setState({ data: tempData });
     // dispatch to write the newImageId to store
+    console.log("dispatching with image id", imageId);
     this.props.dispatch(updateImageId(imageId));
   };
 
@@ -1111,14 +1120,21 @@ class DisplayView extends Component {
     this.setState({ showAimEditor: true });
   };
   handleClose = (i) => {
-    const p1 = new Promise(this.setActive(i));
-    p1.then(this.closeViewport());
+    if (this.props.activePort !== i) {
+      this.setActive(i);
+      return;
+    }
+    this.closeViewport();
   };
 
   jumpToAimImage = (activeSerie, activePort) => {
-    const { imageIds } = this.state.data[activePort].stack;
-    const imageIndex = this.getImageIndex(activeSerie, imageIds);
-    this.jumpToImage(imageIndex);
+    try {
+      const { imageIds } = this.state.data[activePort].stack;
+      const imageIndex = this.getImageIndex(activeSerie, imageIds);
+      this.jumpToImage(imageIndex);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   jumpToImage = (imageIndex) => {
@@ -1134,7 +1150,11 @@ class DisplayView extends Component {
   //   scrollToIndex(element, imageIndex);
   // };
 
-  handleJumpChange = (event) => {
+  handleJumpChange = (i, event) => {
+    if (this.props.activePort !== i) {
+      this.setActive(i);
+      return;
+    }
     let imageIndex = event.target.value - 1;
     const images = this.state.data[this.props.activePort].stack.imageIds;
     // check if there is such an image
@@ -1174,7 +1194,7 @@ class DisplayView extends Component {
                   height: this.state.height,
                   display: "inline-block",
                 }}
-                // onClick={() => this.setActive(i)}
+                onClick={() => this.setActive(i)}
               >
                 <div className={"row"}>
                   <div className={"column left"}>
@@ -1194,17 +1214,17 @@ class DisplayView extends Component {
                     </span>
                   </div>
                   <div className={"column middle"}>
-                    <label>{series[i].seriesUID}</label>
+                    {/* <label>{series[i].seriesUID}</label> */}
                   </div>
                   <div className={"column middle-right"}>
                     <Form inline>
                       <Form.Group>
-                        <Form.Label htmlFor="imageNum">{"Slice# "}</Form.Label>
+                        <Form.Label htmlFor="imageNum">{"Slice # "}</Form.Label>
                         <Form.Control
                           type="number"
                           min="1"
                           value={data.stack.currentImageIdIndex + 1}
-                          onChange={this.handleJumpChange}
+                          onChange={(event) => this.handleJumpChange(i, event)}
                           style={{
                             width: "60px",
                             height: "10px",
@@ -1250,10 +1270,10 @@ class DisplayView extends Component {
                 />
               </div>
             ))}
-          <ContextMenu
+          {/* <ContextMenu
             onAnnotate={this.onAnnotate}
             closeViewport={this.closeViewport}
-          />
+          /> */}
         </RightsideBar>
       </React.Fragment>
     );

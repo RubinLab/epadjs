@@ -344,12 +344,7 @@ class AimEditor extends Component {
       comment,
     };
 
-    uploadAim(
-      aimSaved,
-      this.props.projectID,
-      this.state.isUpdate,
-      this.updatedAimId
-    )
+    uploadAim(aimSaved, projectID, this.state.isUpdate, this.updatedAimId)
       .then(() => {
         if (segmentationBlob) this.saveSegmentation(segmentationBlob);
         // var objectUrl = URL.createObjectURL(segBlobGlobal);

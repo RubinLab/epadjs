@@ -127,6 +127,7 @@ class AnnotationsList extends React.Component {
   };
 
   render = () => {
+    console.log("props", this.props);
     const { openSeries, activePort, aimsList } = this.props;
     const { imageID } = openSeries[activePort];
     const maxHeight = window.innerHeight * 0.6;
