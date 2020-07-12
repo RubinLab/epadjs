@@ -16,7 +16,11 @@ import {
   getWorklistsOfCreator,
   getWorklistProgress,
 } from "../../services/worklistServices";
-import { getProjectMap, clearSelection, getTemplates } from "../annotationsList/action";
+import {
+  getProjectMap,
+  clearSelection,
+  getTemplates,
+} from "../annotationsList/action";
 // import { getPacs } from "../../services/pacsServices";
 import "./w2.css";
 // import { throws } from "assert";
@@ -167,7 +171,7 @@ class Sidebar extends Component {
         });
         this.setState({ [attribute]: result });
       })
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
   };
 
   componentDidUpdate = (prevProps) => {
@@ -390,17 +394,8 @@ class Sidebar extends Component {
       <Tabs
         id="controlled-tab-leftSidebar"
         activeKey={this.state.activeTab}
-        onSelect={index => this.setState({ index })}
+        onSelect={(index) => this.setState({ index })}
       >
-<<<<<<< HEAD
-        <Tab eventKey="projects" title="Projects">
-          <div></div>
-          {this.renderProjects()}
-        </Tab>
-        {mode === "thick" && (
-          <Tab eventKey="worklists" title="Worklists">
-            <div>{this.renderWorklists()}</div>
-=======
         {mode === "thick" ? (
           <Tab
             eventKey="0"
@@ -409,12 +404,10 @@ class Sidebar extends Component {
           >
             <div></div>
             {this.renderProjects()}
->>>>>>> develop
           </Tab>
+        ) : (
+          ""
         )}
-<<<<<<< HEAD
-        <Tab eventKey="Progres" title="Progress">
-=======
         <Tab
           eventKey="1"
           title="Worklists"
@@ -424,7 +417,6 @@ class Sidebar extends Component {
         </Tab>
 
         <Tab eventKey="2" title="Progress" style={{ height, overflow: "auto" }}>
->>>>>>> develop
           {this.renderProgress()}
         </Tab>
       </Tabs>
@@ -495,13 +487,8 @@ class Sidebar extends Component {
   };
 }
 
-<<<<<<< HEAD
 const mapStateToProps = (state) => {
-  const { activePort } = state.annotationsListReducer;
-=======
-const mapStateToProps = state => {
   const { activePort, lastEventId } = state.annotationsListReducer;
->>>>>>> develop
   return {
     activePort,
     lastEventId,
