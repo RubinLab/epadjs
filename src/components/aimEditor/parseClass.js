@@ -166,7 +166,7 @@ export var AimEditor = function (
     //var x = document.createElement("INPUT");
     //x.setAttribute("type", "file");
     //x.addEventListener('change', self.readx, false);
-
+    self.renderButtonhandler(true);
     self.mainWindowDiv = document.createElement("div");
 
     // below section needs to be uncommented for testing purpose
@@ -255,10 +255,11 @@ export var AimEditor = function (
       if (self.templateSelectedIndex > -1) {
         self.jsonTemplateCopy = self.arrayTemplatesJsonObjects[this.value];
         self.extractTemplate(self.jsonTemplateCopy);
-        self.renderButtonhandler(true);
-      } else {
-        self.renderButtonhandler(false);
+        //self.renderButtonhandler(true);
       }
+      // else {
+      //   self.renderButtonhandler(true);
+      // }
     };
     if (self.defaultTemplate !== null) {
       self.templateSelect.selectedIndex = self.defaultTemplate;
@@ -362,96 +363,98 @@ export var AimEditor = function (
         component = json.TemplateContainer.Template[0].Component[i];
       else component = json.TemplateContainer.Template[0].Component;
 
-      var cmplabel = component.label;
+      if (!component.hasOwnProperty("Label")) {
+        var cmplabel = component.label;
 
-      var ComponentDivId = cmplabel.replace(
-        /[`~!@#$%^&*()_|+\-=?;:'",.<>/ /\{\}\[\]\\\/]/gi,
-        ""
-      );
-
-      var componentDivLabel = document.createTextNode(cmplabel);
-      var componentDiv = document.createElement("div");
-      componentDiv.className = " accordion mylbl";
-      componentDiv.disabled = "true";
-
-      var headerDiv = document.createElement("div");
-      headerDiv.style.color = self.fontcolor; //editing
-      headerDiv.style.fontWeight = self.fontweight; //editing
-      headerDiv.style.fontFamily = self.fontfamily;
-      headerDiv.style.fontSize = self.fontsize; //editing
-
-      headerDiv.className = "title active";
-      headerDiv.id = a;
-
-      var headerArrowIcon = document.createElement("i");
-      headerArrowIcon.className = "dropdown icon";
-
-      var headerCheckIcon = document.createElement("i");
-      headerCheckIcon.className = "red check circle outline icon";
-      //  headerCheckIcon.id = (component.id).replace(/[.*+?^${}()|[\]\\]/g, '');
-      headerCheckIcon.id = component.id;
-      document.getElementById("accordion1").appendChild(componentDiv);
-
-      var incontentDiv = document.createElement("div");
-      incontentDiv.className = "content active";
-      incontentDiv.id = ComponentDivId;
-
-      componentDiv.appendChild(headerDiv);
-      //icon cav
-      headerDiv.appendChild(headerCheckIcon);
-      headerDiv.appendChild(headerArrowIcon);
-      headerDiv.appendChild(componentDivLabel);
-      self.checkIfCommentRequired(component, componentDiv);
-      componentDiv.appendChild(incontentDiv);
-
-      //end -----------------------------------------------------
-
-      if (component.hasOwnProperty("GeometricShape")) {
-        self.GeometricShape(
-          component,
-          component,
-          incontentDiv,
-          this.maptag,
-          "component"
+        var ComponentDivId = cmplabel.replace(
+          /[`~!@#$%^&*()_|+\-=?;:'",.<>/ /\{\}\[\]\\\/]/gi,
+          ""
         );
-      }
-      var components = [];
 
-      let compObj = {
-        type: "component",
-        id: component.id,
-        label: component.label,
-        itemNumber: component.itemNumber,
-        subTag: [],
-      };
+        var componentDivLabel = document.createTextNode(cmplabel);
+        var componentDiv = document.createElement("div");
+        componentDiv.className = " accordion mylbl";
+        componentDiv.disabled = "true";
 
-      components.push({
-        component: compObj,
-      });
+        var headerDiv = document.createElement("div");
+        headerDiv.style.color = self.fontcolor; //editing
+        headerDiv.style.fontWeight = self.fontweight; //editing
+        headerDiv.style.fontFamily = self.fontfamily;
+        headerDiv.style.fontSize = self.fontsize; //editing
 
-      var keyorder = Object.keys(component);
-      var fix = -1;
-      for (var z = 0; z < keyorder.length; z++) {
-        if (keyorder[z] == "AllowedTerm") {
-          fix = z;
-          break;
-        }
-      }
+        headerDiv.className = "title active";
+        headerDiv.id = a;
 
-      keyorder[fix] = keyorder[0];
-      keyorder[0] = "AllowedTerm";
+        var headerArrowIcon = document.createElement("i");
+        headerArrowIcon.className = "dropdown icon";
 
-      var counter = 0;
+        var headerCheckIcon = document.createElement("i");
+        headerCheckIcon.className = "red check circle outline icon";
+        //  headerCheckIcon.id = (component.id).replace(/[.*+?^${}()|[\]\\]/g, '');
+        headerCheckIcon.id = component.id;
+        document.getElementById("accordion1").appendChild(componentDiv);
 
-      for (counter; counter < keyorder.length; counter++) {
-        if (typeof component[keyorder[counter]] == "object") {
-          self[keyorder[counter]](
+        var incontentDiv = document.createElement("div");
+        incontentDiv.className = "content active";
+        incontentDiv.id = ComponentDivId;
+
+        componentDiv.appendChild(headerDiv);
+        //icon cav
+        headerDiv.appendChild(headerCheckIcon);
+        headerDiv.appendChild(headerArrowIcon);
+        headerDiv.appendChild(componentDivLabel);
+        self.checkIfCommentRequired(component, componentDiv);
+        componentDiv.appendChild(incontentDiv);
+
+        //end -----------------------------------------------------
+
+        if (component.hasOwnProperty("GeometricShape")) {
+          self.GeometricShape(
             component,
-            component[keyorder[counter]],
+            component,
             incontentDiv,
-            compObj.subTag,
-            "Component"
+            this.maptag,
+            "component"
           );
+        }
+        var components = [];
+
+        let compObj = {
+          type: "component",
+          id: component.id,
+          label: component.label,
+          itemNumber: component.itemNumber,
+          subTag: [],
+        };
+
+        components.push({
+          component: compObj,
+        });
+
+        var keyorder = Object.keys(component);
+        var fix = -1;
+        for (var z = 0; z < keyorder.length; z++) {
+          if (keyorder[z] == "AllowedTerm") {
+            fix = z;
+            break;
+          }
+        }
+
+        keyorder[fix] = keyorder[0];
+        keyorder[0] = "AllowedTerm";
+
+        var counter = 0;
+
+        for (counter; counter < keyorder.length; counter++) {
+          if (typeof component[keyorder[counter]] == "object") {
+            self[keyorder[counter]](
+              component,
+              component[keyorder[counter]],
+              incontentDiv,
+              compObj.subTag,
+              "Component"
+            );
+          }
         }
       }
     }
