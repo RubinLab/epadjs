@@ -263,13 +263,12 @@ class DisplayView extends Component {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
+    } else if (
+      !this.props.loading &&
+      activeSerie.aimID !== prevActiveSerie.aimID
+    ) {
+      this.jumpToAimImage(activeSerie, activePort);
     }
-    // } else if (
-    //   !this.props.loading &&
-    //   activeSerie.aimID !== prevActiveSerie.aimID
-    // ) {
-    //   this.jumpToAimImage(activeSerie, activePort);
-    // }
   }
 
   // getMarkups = (aimOfInterest) => {
