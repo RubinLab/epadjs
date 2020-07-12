@@ -43,7 +43,7 @@ function addToolState(element, toolType, measurementData) {
   const eventData = {
     toolType,
     element,
-    measurementData
+    measurementData,
   };
 
   triggerEvent(element, eventType, eventData);
@@ -97,7 +97,7 @@ function removeToolState(element, toolType, data) {
       const eventData = {
         toolType,
         element,
-        measurementData: data
+        measurementData: data,
       };
 
       triggerEvent(element, eventType, eventData);
@@ -148,5 +148,5 @@ export {
   removeToolState,
   clearToolState,
   setElementToolStateManager,
-  getElementToolStateManager
+  getElementToolStateManager,
 };

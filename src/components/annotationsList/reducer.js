@@ -35,6 +35,7 @@ import {
   CLEAR_ACTIVE_AIMID,
   UPDATE_IMAGE_INDEX,
   GET_PROJECT_MAP,
+  SET_SEG_LABEL_MAP_INDEX,
   GET_TEMPLATES,
 } from "./types";
 import { MdSatellite } from "react-icons/md";
@@ -58,6 +59,7 @@ const initialState = {
   lastEventId: null,
   projectMap: {},
   templates: {},
+  aimSegLabelMaps: {},
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -65,7 +67,7 @@ const asyncReducer = (state = initialState, action) => {
     let aimIDClearedOPenSeries = [];
     switch (action.type) {
       case UPDATE_IMAGE_INDEX:
-        const updatedOpenSeries = state.openSeries.map(serie => {
+        const updatedOpenSeries = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
@@ -91,7 +93,7 @@ const asyncReducer = (state = initialState, action) => {
         ].annotations[aimRefs.aimID] = { ...aimRefs };
         return { ...state, patient: patientAimSave };
       case CLEAR_AIMID:
-        aimIDClearedOPenSeries = state.openSeries.map(serie => {
+        aimIDClearedOPenSeries = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
@@ -103,7 +105,7 @@ const asyncReducer = (state = initialState, action) => {
         }
         return { ...state, openSeries: aimIDClearedOPenSeries };
       case CLEAR_ACTIVE_AIMID:
-        aimIDClearedOPenSeries = state.openSeries.map(serie => {
+        aimIDClearedOPenSeries = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
@@ -113,7 +115,7 @@ const asyncReducer = (state = initialState, action) => {
         aimIDClearedOPenSeries[state.activePort].aimID = null;
         return { ...state, openSeries: aimIDClearedOPenSeries };
       case UPDATE_IMAGEID:
-        const openSeriesToUpdate = state.openSeries.map(serie => {
+        const openSeriesToUpdate = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
@@ -173,7 +175,7 @@ const asyncReducer = (state = initialState, action) => {
         const projectModalStatus = !state.showProjectModal;
         return { ...state, showProjectModal: projectModalStatus };
       case LOAD_SERIE_SUCCESS:
-        let imageAddedSeries = state.openSeries.map(serie => {
+        let imageAddedSeries = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
@@ -226,7 +228,7 @@ const asyncReducer = (state = initialState, action) => {
 
       case CHANGE_ACTIVE_PORT:
         //get openseries iterate over the
-        const changedPortSeries = state.openSeries.map(serie => {
+        const changedPortSeries = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
@@ -390,7 +392,7 @@ const asyncReducer = (state = initialState, action) => {
         };
       case DISPLAY_SINGLE_AIM:
         let aimPatient = { ...state.patients[action.payload.patientID] };
-        let aimOpenSeries = state.openSeries.map(serie => {
+        let aimOpenSeries = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
@@ -425,7 +427,7 @@ const asyncReducer = (state = initialState, action) => {
             action.payload.seriesUID
           ].annotations
         );
-        allAims.forEach(ann => {
+        allAims.forEach((ann) => {
           if (ann === action.payload.aimID) {
             aimAimsList[ann].isDisplayed = true;
             aimAimsList[ann].showLabel = true;
@@ -486,7 +488,7 @@ const asyncReducer = (state = initialState, action) => {
       case JUMP_TO_AIM:
         let { aimID, index } = action.payload;
         let serUID = action.payload.seriesUID;
-        let updatedGrid = state.openSeries.map(serie => {
+        let updatedGrid = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
@@ -513,6 +515,13 @@ const asyncReducer = (state = initialState, action) => {
           ...state,
           projectMap: action.projectMap,
         };
+      case SET_SEG_LABEL_MAP_INDEX: {
+        const { aimID, labelMapIndex } = action.payload;
+        return {
+          ...state,
+          aimSegLabelMaps: { ...state.aimSegLabelMaps, [aimID]: labelMapIndex },
+        };
+      }
       case GET_TEMPLATES:
         return { ...state, templates: action.templates };
       default:

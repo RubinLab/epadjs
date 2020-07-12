@@ -39,8 +39,8 @@
   height: 100%;
   flex: 1;
   transition: margin-left 0.4s;
-  width: calc(100% - 200px);
-  padding: 10px;
+  /* width: calc(100% - 200px); */
+  padding: 1px;
   /* display: flex; */
 }
 
