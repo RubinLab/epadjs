@@ -719,7 +719,6 @@ export function getWholeData(serie, study, annotation) {
 }
 
 export const setSegLabelMapIndex = (aimID, labelMapIndex) => {
-  console.log("Action came", aimID, labelMapIndex);
   return {
     type: SET_SEG_LABEL_MAP_INDEX,
     payload: { aimID, labelMapIndex },

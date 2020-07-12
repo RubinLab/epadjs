@@ -515,7 +515,6 @@ const asyncReducer = (state = initialState, action) => {
         };
       case SET_SEG_LABEL_MAP_INDEX: {
         const { aimID, labelMapIndex } = action.payload;
-        console.log(aimID, labelMapIndex);
         return {
           ...state,
           aimSegLabelMaps: { ...state.aimSegLabelMaps, [aimID]: labelMapIndex },

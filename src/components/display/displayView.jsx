@@ -157,25 +157,89 @@ class DisplayView extends Component {
   }
 
   toggleAnnotations = (event) => {
-    console.log("event", event.detail);
     const { aimID, isVisible } = event.detail;
     const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
+
+    this.setVisibilityOfSegmentations(aimID, element, isVisible);
+    this.setVisibilityOfShapes(isVisible, aimID);
+
+    cornerstone.updateImage(element);
+  };
+
+  // Traverse all shapes and set visibility, if aimID is passed only sets aim's shapes
+  setVisibilityOfShapes = (visibility, aimID) => {
+    const { series, activePort } = this.props;
+    const { seriesUID } = series[activePort];
+    const shapesOfSerie = this.getShapesOfSerie(seriesUID);
+    shapesOfSerie.forEach((shape) => {
+      if (aimID && shape.aimId === aimID) shape.visible = visibility;
+      else if (!aimID) {
+        shape.visible = visibility;
+      }
+    });
+  };
+
+  getShapesOfSerie = (seriesUID) => {
+    const { aimList } = this.props;
+    const seriesAims = aimList[seriesUID];
     const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    console.log("segmentation", cornerstoneTools.store.modules.segmentation);
+    const shapes = [];
     Object.values(toolState).forEach((imageState) => {
-      console.log("Image state", imageState);
       Object.values(imageState).forEach((tools) => {
         Object.values(tools).forEach((tool) => {
           tool.forEach((shape) => {
-            console.log("shape", shape);
-            if (aimID && shape.aimId === aimID) shape.visible = isVisible;
-            else if (!aimID) shape.visible = isVisible;
+            if (
+              typeof shape.aimId === "undefined" ||
+              typeof seriesAims[shape.aimId] !== "undefined"
+            )
+              shapes.push(shape);
           });
         });
       });
     });
-    cornerstone.updateImage(element);
+    return shapes;
+  };
+
+  setVisibilityOfSegmentations = (aimID, element, setVisibilityTo) => {
+    const { series, activePort, aimSegLabelMaps } = this.props;
+    console.log("aimID, aimSegLabelMaps", aimID, aimSegLabelMaps);
+    const { seriesUID } = series[activePort];
+    const { setters, getters } = cornerstoneTools.getModule("segmentation");
+    if (aimID) {
+      const labelMapIndex = aimSegLabelMaps[aimID];
+      setters.toggleSegmentVisibility(element, 1, labelMapIndex);
+      const visibility = getters.isSegmentVisible(element, 1, labelMapIndex);
+      if (visibility === setVisibilityTo) return;
+    } else {
+      const seriesLabelMapIndexes = this.getLabelMapsOfSerie(seriesUID);
+      seriesLabelMapIndexes.forEach((labelMapIndex) => {
+        const visibility = getters.isSegmentVisible(element, 1, labelMapIndex);
+        if (visibility === setVisibilityTo) return;
+        setters.toggleSegmentVisibility(element, 1, labelMapIndex);
+      });
+    }
+  };
+
+  getLabelMapsOfSerie = (seriesUID) => {
+    const segAims = this.getSegmentationAimsOfSerie(seriesUID);
+    const { aimSegLabelMaps } = this.props;
+    return segAims.map((aimId) => {
+      if (typeof aimSegLabelMaps[aimId] !== "undefined")
+        return aimSegLabelMaps[aimId];
+    });
+  };
+
+  getSegmentationAimsOfSerie = (seriesUID) => {
+    const { aimList } = this.props;
+    const seriesAims = aimList[seriesUID];
+    const segAims = [];
+    Object.entries(seriesAims).forEach(([key, value]) => {
+      if (value.json.segmentationEntityCollection) {
+        segAims.push(key);
+      }
+    });
+    return segAims;
   };
 
   async componentDidUpdate(prevProps, prevState) {
@@ -201,9 +265,6 @@ class DisplayView extends Component {
       this.getData();
     } else if (activeSerie.aimID !== prevActiveSerie.aimID) {
       this.jumpToAimImage(activeSerie, activePort);
-    } else {
-      console.log(prevProps, this.props);
-      console.log("cs", cornerstoneTools);
     }
   }
 
@@ -259,11 +320,14 @@ class DisplayView extends Component {
   componentWillUnmount() {
     window.removeEventListener("markupSelected", this.handleMarkupSelected);
     window.removeEventListener("markupCreated", this.handleMarkupCreated);
+    window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
   }
 
   getData() {
     // clear the toolState they will be rendered again on next load
-    // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
 
@@ -281,9 +345,9 @@ class DisplayView extends Component {
         prospectiveLabelMapIndex: 0,
       });
       // clear the toolState they will be rendered again on next load
-      // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
-      //   {}
-      // );
+      cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+        {}
+      );
       // clear the segmentation data as well
       cornerstoneTools.store.modules.segmentation.state.series = {};
       series.forEach((serie, serieIndex) => {
@@ -1139,7 +1203,6 @@ class DisplayView extends Component {
                         <Form.Control
                           type="number"
                           min="1"
-                          id="imageNum"
                           value={data.stack.currentImageIdIndex + 1}
                           onChange={this.handleJumpChange}
                           style={{
