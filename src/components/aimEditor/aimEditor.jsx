@@ -69,8 +69,17 @@ class AimEditor extends Component {
         console.error("Error loading aim to aim editor:", error);
       }
     }
+    window.addEventListener("checkShapes", this.checkShapes);
   }
 
+  componentWillMount() {
+    window.removeEventListener("checkShapes", this.checkShapes);
+  }
+
+  checkShapes = (event) => {
+    const shapes = event.detail;
+    this.semanticAnswers.checkShapes(shapes);
+  };
   // returns the next default lesion name according to the # of lesions in the series
   getDefaultLesionName = () => {
     const { openSeries, activePort } = this.props;
@@ -315,7 +324,6 @@ class AimEditor extends Component {
   };
 
   getAimSeedDataFromMarkup = (markupsToSave, answers) => {
-    console.log("markupst to save", markupsToSave);
     const cornerStoneImageId = Object.keys(markupsToSave)[0];
     const image = this.getCornerstoneImagebyId(cornerStoneImageId);
     const seedData = getAimImageData(image);
@@ -395,7 +403,7 @@ class AimEditor extends Component {
         alert(
           "Annotation could not be saved! More information about the error can be found in the logs."
         );
-        console.log(error);
+        console.error(error);
       });
     this.props.onCancel(false);
   };
@@ -574,14 +582,12 @@ class AimEditor extends Component {
 
   // get the image object by index
   getCornerstoneImagebyIdx = (imageIdx) => {
-    console.log("imgae ind, cs", imageIdx, cornerstone.imageCache);
     const { imageCache } = cornerstone.imageCache;
     const imageId = Object.keys(imageCache)[imageIdx];
     return imageCache[imageId].image;
   };
 
   getCornerstoneImagebyId = (imageId) => {
-    console.log("imgae ind, cs", imageId, cornerstone.imageCache);
     return cornerstone.imageCache.imageCache[imageId].image;
   };
 
