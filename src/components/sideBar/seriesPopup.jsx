@@ -40,7 +40,8 @@ const sidebarPopup = ({
     );
   });
   return (
-    <Modal.Dialog dialogClassName="openSeries__modal">
+    // <Modal.Dialog dialogClassName="openSeries__modal">
+    <Modal.Dialog id="modal-fix" className="modal-minwidth">
       <Modal.Body className="openSeries__mbody">{list}</Modal.Body>
       {error && (
         <div className="err-message __field" style={errorStyle}>

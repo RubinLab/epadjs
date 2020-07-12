@@ -164,6 +164,10 @@
   justify-content: space-between;
 }
 
+.--selected {
+  border: 4px ridge #f5f757 !important;
+}
+
 .annotation__name--text {
   padding: 0.5rem;
   display: inline-flex;
@@ -383,4 +387,68 @@ svg {
 .-dock__close {
   cursor: pointer;
   width: 1.5rem;
+}
+
+.annsLink-table {
+  width: fit-content;
+  margin: 10px auto;
+  table-layout: auto;
+  width: 85%;
+  /* table-layout: fixed; */
+}
+
+.annsLink-table,
+.annsLink-table.__tbody.--cell,
+.annsLink-table.__header.--cell {
+  border-collapse: collapse;
+}
+
+.annsLink-table.__header.--cell {
+  font-size: 1.2rem;
+}
+
+.annsLink-table.__tbody.--cell,
+.annsLink-table.__header.--cell,
+.annsLink-table.__tbody.--cell2 {
+  padding: 5px;
+  height: 2.8rem;
+}
+
+.annsLink-table.__tbody.--cell2 {
+  text-align: center;
+}
+
+.annsLink-table.__tbody.--cell {
+  border-right: 1px solid #272b30;
+}
+
+#annsHeader {
+  text-align: left;
+  padding-left: 1rem;
+  border-right: 1px solid #272b30;
+}
+
+.annsLink-table.__tbody.--cell {
+  text-align: left;
+  padding-left: 1rem;
+}
+
+.annsLink-table.__header:first-child {
+  text-align: center;
+}
+
+.annsLink-table.__tbody.--cell:hover {
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.annsLink-table.__tbody.--row,
+.annsLink-table.__header{
+  border-bottom: 1px solid #272b30;
+}
+
+.annsLink-table.__tbody.--row:last-of-type {
+  border-bottom: none;
 }

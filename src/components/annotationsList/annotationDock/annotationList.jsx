@@ -1,24 +1,23 @@
 import React from "react";
 import { connect } from "react-redux";
-import Toggle from "react-toggle";
 import Switch from "react-switch";
-
 import Annotation from "./annotation";
+import AnnotationsLink from "./annotationsLink";
 import {
   updateAnnotationDisplay,
   toggleAllLabels,
   toggleSingleLabel,
   toggleAllAnnotations,
-  jumpToAim
+  jumpToAim,
 } from "../action";
 
 class AnnotationsList extends React.Component {
   state = {
     labelDisplayAll: false,
-    annsDisplayAll: true
+    annsDisplayAll: true,
   };
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     const series = Object.keys(this.props.aimsList);
     if (
       (this.props.activePort !== prevProps.activePort && !this.props.loading) ||
@@ -44,7 +43,7 @@ class AnnotationsList extends React.Component {
     }
   };
 
-  handleDisplayClick = e => {
+  handleDisplayClick = (e) => {
     const { seriesUID, patientID, studyUID } = this.props.openSeries[
       this.props.activePort
     ];
@@ -61,6 +60,11 @@ class AnnotationsList extends React.Component {
           !currentDisplayStatus
         )
       );
+      window.dispatchEvent(
+        new CustomEvent("toggleAnnotations", {
+          detail: { aimID, isVisible: !currentDisplayStatus },
+        })
+      );
     }
   };
 
@@ -71,17 +75,20 @@ class AnnotationsList extends React.Component {
   };
 
   handleToggleAllAnnotations = (checked, e, id) => {
-    this.setState({ annsDisplayAll: checked });
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleAllAnnotations(seriesUID, checked));
+    window.dispatchEvent(
+      new CustomEvent("toggleAnnotations", { detail: { isVisible: checked } })
+    );
+    this.setState({ annsDisplayAll: checked });
   };
 
-  handleToggleSingleLabel = e => {
+  handleToggleSingleLabel = (e) => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
   };
 
-  handleJumToAim = e => {
+  handleJumToAim = (e) => {
     const { id, serie } = e.target.dataset;
     this.props.dispatch(jumpToAim(serie, id, this.props.activePort));
   };
@@ -103,14 +110,14 @@ class AnnotationsList extends React.Component {
         if (calculations[aim.aimUid]) {
           calculations[aim.aimUid][aim.markupUid] = {
             calculations: [...aim.calculations],
-            markupType: aim.markupType
+            markupType: aim.markupType,
           };
           // calculations[aim.markupUid].push({ markupType: aim.markupType });
         } else {
           calculations[aim.aimUid] = {};
           calculations[aim.aimUid][aim.markupUid] = {
             calculations: [...aim.calculations],
-            markupType: aim.markupType
+            markupType: aim.markupType,
           };
           // calculations[aim.markupUid].push({ markupType: aim.markupType });
         }
@@ -120,6 +127,7 @@ class AnnotationsList extends React.Component {
   };
 
   render = () => {
+    console.log("props", this.props);
     const { openSeries, activePort, aimsList } = this.props;
     const { imageID } = openSeries[activePort];
     const maxHeight = window.innerHeight * 0.6;
@@ -143,7 +151,7 @@ class AnnotationsList extends React.Component {
       if (singleFrameAnnotations && multiFrameAnnotations)
         imageAnnotations = [
           ...singleFrameAnnotations,
-          ...multiFrameAnnotations
+          ...multiFrameAnnotations,
         ];
       else if (singleFrameAnnotations)
         imageAnnotations = singleFrameAnnotations;
@@ -172,6 +180,7 @@ class AnnotationsList extends React.Component {
 
     // let annotations = [];
     let annList = [];
+    const imageAims = { ...annotations };
     annotations = Object.values(annotations);
     annotations.forEach((aim, index) => {
       aim = aim[0];
@@ -190,14 +199,16 @@ class AnnotationsList extends React.Component {
           jumpToAim={this.handleJumToAim}
           serie={seriesUID}
           label={calculations[aim.id]}
+          openSeriesAimID={openSeries[activePort].aimID}
         />
       );
     });
+
     return (
       <React.Fragment>
         <div className="annotationList-container">
           <div className="label-toggle">
-            <div className="label-toggle__text">Show Labels</div>
+            <div className="label-toggle__text">Show All Labels</div>
             <Switch
               onChange={this.handleToggleAllLabels}
               checked={this.state.labelDisplayAll}
@@ -214,7 +225,7 @@ class AnnotationsList extends React.Component {
             />
           </div>
           <div className="label-toggle">
-            <div className="label-toggle__text">Show Annotations</div>
+            <div className="label-toggle__text">Show All Annotations</div>
             <Switch
               onChange={this.handleToggleAllAnnotations}
               checked={this.state.annsDisplayAll}
@@ -231,19 +242,23 @@ class AnnotationsList extends React.Component {
             />
           </div>
           <div style={{ maxHeight, overflow: "scroll" }}>{annList}</div>
+          <AnnotationsLink
+            imageAims={imageAims}
+            jumpToAim={this.handleJumToAim}
+          />
         </div>
       </React.Fragment>
     );
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
     aimsList: state.annotationsListReducer.aimsList,
     imageID: state.annotationsListReducer.imageID,
-    loading: state.annotationsListReducer.loading
+    loading: state.annotationsListReducer.loading,
   };
 };
 export default connect(mapStateToProps)(AnnotationsList);

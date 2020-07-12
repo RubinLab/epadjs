@@ -286,6 +286,7 @@ class App extends Component {
         sessionStorage.setItem("auth", auth);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
         this.completeAutorization(apiUrl);
+        if (mode === "lite") this.setState({ pid: "lite" });
       })
       .catch((err) => {
         console.log(err);
@@ -301,7 +302,7 @@ class App extends Component {
     }
   }
 
-  completeAutorization = apiUrl => {
+  completeAutorization = (apiUrl) => {
     let getAuthUser = null;
 
     if (sessionStorage.getItem("authMode") !== "external") {
@@ -420,6 +421,12 @@ class App extends Component {
         action,
         error,
       });
+      const tagEdited = action.startsWith("Tag");
+      const uploaded = action.startsWith("Upload");
+      if (tagEdited || uploaded) {
+        console.log("collapsing");
+        this.setState({ treeExpand: {} });
+      }
       this.setState({ notifications });
       const stringified = JSON.stringify(notifications);
       sessionStorage.setItem("notifications", stringified);
@@ -565,85 +572,145 @@ class App extends Component {
     this.setState({ treeExpand: {}, expandLevel: 0 });
   };
 
+  sortLevelArr = (arr, attribute) => {
+    return arr.sort(function(a, b) {
+      if (a.data[attribute] < b.data[attribute]) {
+        return -1;
+      }
+      if (a.data[attribute] > b.data[attribute]) {
+        return 1;
+      }
+      return 0;
+    });
+  };
+
+  getPatientIDfromSortedArray = (index, arr, attribute, returnVal) => {
+    const sortedArr = this.sortLevelArr(arr, attribute);
+    return sortedArr[index].data[returnVal];
+  };
+
+  getIndexOfPatient = (arr, patientID) => {
+    let index;
+    arr.forEach((el, i) => {
+      if (el.data.subjectID === patientID) {
+        index = i;
+      }
+    });
+    return index;
+  };
+
   clearTreeData = () => {
-    const { pid } = this.state;
-    const treeData = { [pid]: { ...this.state.treeData[pid] } };
-    this.setState({ treeData });
+    try {
+      const { pid, treeExpand } = this.state;
+      const patients = { ...this.state.treeData[pid] };
+      const patientsArr = Object.values(patients);
+
+      for (let patientIndex in treeExpand) {
+        // if the index is kept as false it means that
+        // level opened and then closed so we need to clear data
+        const patientID = this.getPatientIDfromSortedArray(
+          patientIndex,
+          patientsArr,
+          "subjectName",
+          "subjectID"
+        );
+        if (!treeExpand[patientIndex]) {
+          // find subject id and empty studies
+          patients[patientID].studies = {};
+        } else {
+          for (let studyIndex in treeExpand[patientIndex]) {
+            if (!treeExpand[patientIndex][studyIndex]) {
+              const studies = Object.values(patients[patientID].studies);
+              const { studyUID } = studies[studyIndex].data;
+              patients[patientID].studies[studyUID].series = {};
+            }
+          }
+        }
+      }
+      const treeData = { [pid]: patients };
+      this.setState({ treeData });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   findNonExisting = (arr, uid, level) => {
-    const result = arr.filter((el) => el[level] === uid);
+    const result = arr.filter(el => el[level] === uid);
     return result[0];
   };
 
   updateTreeDataOnSave = async (refs, newLevel) => {
-    const treeData = { ...this.state.treeData };
-    const { projectID, patientID, studyUID, seriesUID } = refs;
-    const isPatient = projectID && patientID;
-    const isStudy = projectID && patientID && studyUID;
-    const isSeries = projectID && patientID && studyUID && seriesUID;
-    const patient = treeData[projectID][patientID];
-    const shouldUpdateStudy =
-      patient && Object.values(patient.studies).length > 0;
-    const shouldUpdateSeries =
-      shouldUpdateStudy &&
-      Object.values(patient.studies[studyUID].series).length > 0;
-    if (newLevel) {
-      if (newLevel === "study" && isStudy && shouldUpdateStudy) {
-        const { data: studies } = await getStudies(
-          projectID,
-          patientID,
-          studyUID
-        );
-        let study = this.findNonExisting(studies, studyUID, "studyUID");
-        study = { data: study, series: {} };
-        treeData[projectID][patientID].studies[studyUID] = study;
-      }
-      if (newLevel === "series" && isSeries && shouldUpdateSeries) {
-        const { data: seriesArr } = await getSeries(
-          projectID,
-          patientID,
-          studyUID
-        );
-        let series = this.findNonExisting(seriesArr, seriesUID, "seriesUID");
-        series = { data: series };
-        treeData[projectID][patientID].studies[studyUID].series[
-          seriesUID
-        ] = series;
-      }
-    } else {
-      if (isPatient && treeData[projectID][patientID]) {
-        const promises = [];
-        promises.push(getSubject(projectID, patientID));
-        if (isStudy && treeData[projectID][patientID].studies[studyUID])
-          promises.push(getStudy(projectID, patientID, studyUID));
-        if (
-          isSeries &&
-          treeData[projectID][patientID].studies[studyUID].series[seriesUID]
-        )
-          promises.push(
-            getSingleSeries(projectID, patientID, studyUID, seriesUID)
+    try {
+      const treeData = { ...this.state.treeData };
+      const { projectID, patientID, studyUID, seriesUID } = refs;
+      const isPatient = projectID && patientID;
+      const isStudy = projectID && patientID && studyUID;
+      const isSeries = projectID && patientID && studyUID && seriesUID;
+      const patient = treeData[projectID][patientID];
+      const shouldUpdateStudy =
+        patient && Object.values(patient.studies).length > 0;
+      const shouldUpdateSeries =
+        shouldUpdateStudy &&
+        Object.values(patient.studies[studyUID].series).length > 0;
+      if (newLevel) {
+        if (newLevel === "study" && isStudy && shouldUpdateStudy) {
+          const { data: studies } = await getStudies(
+            projectID,
+            patientID,
+            studyUID
           );
-
-        const result = await Promise.all(promises);
-        treeData[projectID][patientID].data = result[0].data;
-
-        if (isStudy && treeData[projectID][patientID].studies[studyUID]) {
-          treeData[projectID][patientID].studies[studyUID].data =
-            result[1].data;
+          let study = this.findNonExisting(studies, studyUID, "studyUID");
+          study = { data: study, series: {} };
+          treeData[projectID][patientID].studies[studyUID] = study;
         }
-
-        if (
-          isSeries &&
-          treeData[projectID][patientID].studies[studyUID].series[seriesUID]
-        ) {
+        if (newLevel === "series" && isSeries && shouldUpdateSeries) {
+          const { data: seriesArr } = await getSeries(
+            projectID,
+            patientID,
+            studyUID
+          );
+          let series = this.findNonExisting(seriesArr, seriesUID, "seriesUID");
+          series = { data: series };
           treeData[projectID][patientID].studies[studyUID].series[
             seriesUID
-          ].data = result[2].data[0];
+          ] = series;
+        }
+      } else {
+        if (isPatient && treeData[projectID][patientID]) {
+          const promises = [];
+          promises.push(getSubject(projectID, patientID));
+          if (isStudy && treeData[projectID][patientID].studies[studyUID])
+            promises.push(getStudy(projectID, patientID, studyUID));
+          if (
+            isSeries &&
+            treeData[projectID][patientID].studies[studyUID].series[seriesUID]
+          )
+            promises.push(
+              getSingleSeries(projectID, patientID, studyUID, seriesUID)
+            );
+
+          const result = await Promise.all(promises);
+          treeData[projectID][patientID].data = result[0].data;
+
+          if (isStudy && treeData[projectID][patientID].studies[studyUID]) {
+            treeData[projectID][patientID].studies[studyUID].data =
+              result[1].data;
+          }
+
+          if (
+            isSeries &&
+            treeData[projectID][patientID].studies[studyUID].series[seriesUID]
+          ) {
+            treeData[projectID][patientID].studies[studyUID].series[
+              seriesUID
+            ].data = result[2].data[0];
+          }
         }
       }
+      this.setState({ treeData });
+    } catch (err) {
+      console.log(err);
     }
-    this.setState({ treeData });
   };
 
   render() {
@@ -858,6 +925,7 @@ class App extends Component {
                     getTreeExpandAll={this.getTreeExpandAll}
                     treeExpand={treeExpand}
                     getExpandLevel={this.getExpandLevel}
+                    pid={this.state.pid}
                     // expandLoading={expandLoading}
                     // updateExpandedLevelNums={this.updateExpandedLevelNums}
                     onShrink={this.handleShrink}
@@ -881,8 +949,10 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
+
+const mapStateToProps = state => {
   // console.log(state.managementReducer);
+  // console.log(state.annotationsListReducer);
   const {
     showGridFullAlert,
     showProjectModal,

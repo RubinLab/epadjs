@@ -17,6 +17,7 @@ import {
   clearActivePortAimID,
   closeSerie,
   jumpToAim,
+  setSegLabelMapIndex,
 } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
@@ -30,9 +31,19 @@ import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
 import * as aimForm from "../aimEditor/parseClass.js";
+import {
+  FaTimes,
+  FaPen,
+  FaExpandAlt,
+  FaCompressAlt,
+  FaExpandArrowsAlt,
+} from "react-icons/fa";
+import Form from "react-bootstrap/Form";
+import ToolMenu from "../ToolMenu/ToolMenu";
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
+const scrollToIndex = cornerstoneTools.importInternal("util/scrollToIndex");
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 }, mode: "active" },
@@ -111,6 +122,7 @@ const mapStateToProps = (state) => {
     loading: state.annotationsListReducer.loading,
     activePort: state.annotationsListReducer.activePort,
     aimList: state.annotationsListReducer.aimsList,
+    aimSegLabelMaps: state.annotationsListReducer.aimSegLabelMaps,
   };
 };
 
@@ -119,7 +131,7 @@ class DisplayView extends Component {
     super(props);
     this.state = {
       width: "100%",
-      height: "calc(100% - 60px)",
+      height: "100%",
       hiding: false,
       data: [],
       isLoading: true,
@@ -135,15 +147,115 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
-    if (this.props.series.length < 1) return;
+    const { pid } = this.props;
+    if (this.props.series.length < 1) {
+      if (pid) this.props.history.push(`/search/${pid}`);
+      else return;
+    }
     this.getViewports();
     this.getData();
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
+    window.addEventListener("toggleAnnotations", this.toggleAnnotations);
   }
 
+  toggleAnnotations = (event) => {
+    const { aimID, isVisible } = event.detail;
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort];
+
+    this.setVisibilityOfSegmentations(aimID, element, isVisible);
+    this.setVisibilityOfShapes(isVisible, aimID);
+
+    cornerstone.updateImage(element);
+  };
+
+  // Traverse all shapes and set visibility, if aimID is passed only sets aim's shapes
+  setVisibilityOfShapes = (visibility, aimID) => {
+    const { series, activePort } = this.props;
+    const { seriesUID } = series[activePort];
+    const shapesOfSerie = this.getShapesOfSerie(seriesUID);
+    shapesOfSerie.forEach((shape) => {
+      if (aimID && shape.aimId === aimID) shape.visible = visibility;
+      else if (!aimID) {
+        shape.visible = visibility;
+      }
+    });
+  };
+
+  getShapesOfSerie = (seriesUID) => {
+    const { aimList } = this.props;
+    const seriesAims = aimList[seriesUID];
+    const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const shapes = [];
+    Object.values(toolState).forEach((imageState) => {
+      Object.values(imageState).forEach((tools) => {
+        Object.values(tools).forEach((tool) => {
+          tool.forEach((shape) => {
+            if (
+              typeof shape.aimId === "undefined" ||
+              typeof seriesAims[shape.aimId] !== "undefined"
+            )
+              shapes.push(shape);
+          });
+        });
+      });
+    });
+    return shapes;
+  };
+
+  setVisibilityOfSegmentations = (aimID, element, setVisibilityTo) => {
+    const { series, activePort, aimSegLabelMaps } = this.props;
+    console.log("aimID, aimSegLabelMaps", aimID, aimSegLabelMaps);
+    const { seriesUID } = series[activePort];
+    const { setters, getters } = cornerstoneTools.getModule("segmentation");
+    if (aimID) {
+      const labelMapIndex = aimSegLabelMaps[aimID];
+      setters.toggleSegmentVisibility(element, 1, labelMapIndex);
+      const visibility = getters.isSegmentVisible(element, 1, labelMapIndex);
+      if (visibility === setVisibilityTo) return;
+    } else {
+      const seriesLabelMapIndexes = this.getLabelMapsOfSerie(seriesUID);
+      seriesLabelMapIndexes.forEach((labelMapIndex) => {
+        const visibility = getters.isSegmentVisible(element, 1, labelMapIndex);
+        if (visibility === setVisibilityTo) return;
+        setters.toggleSegmentVisibility(element, 1, labelMapIndex);
+      });
+    }
+  };
+
+  getLabelMapsOfSerie = (seriesUID) => {
+    const segAims = this.getSegmentationAimsOfSerie(seriesUID);
+    const { aimSegLabelMaps } = this.props;
+    return segAims.map((aimId) => {
+      if (typeof aimSegLabelMaps[aimId] !== "undefined")
+        return aimSegLabelMaps[aimId];
+    });
+  };
+
+  getSegmentationAimsOfSerie = (seriesUID) => {
+    const { aimList } = this.props;
+    const seriesAims = aimList[seriesUID];
+    const segAims = [];
+    Object.entries(seriesAims).forEach(([key, value]) => {
+      if (value.json.segmentationEntityCollection) {
+        segAims.push(key);
+      }
+    });
+    return segAims;
+  };
+
   async componentDidUpdate(prevProps) {
-    if (this.props.series.length < 1) return;
+    const { pid, series, activePort } = this.props;
+    const { series: prevSeries, activePort: prevActivePort } = prevProps;
+    const activeSerie = series[activePort];
+    const prevActiveSerie = prevSeries[prevActivePort];
+
+    if (this.props.series.length < 1) {
+      if (pid) this.props.history.push(`/search/${pid}`);
+      else return;
+      return;
+    }
     if (
       (prevProps.series !== this.props.series &&
         prevProps.loading === true &&
@@ -154,32 +266,73 @@ class DisplayView extends Component {
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
+    } else if (
+      !this.props.loading &&
+      activeSerie.aimID !== prevActiveSerie.aimID
+    ) {
+      this.jumpToAimImage(activeSerie, activePort);
     }
   }
+
+  // getMarkups = (aimOfInterest) => {
+  //   const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+  //   var markupsToReturn = {};
+  //   Object.keys(toolState).forEach((key) => {
+  //     const markUps = toolState[key];
+  //     Object.keys(markUps).map((tool) => {
+  //       switch (tool) {
+  //         case "FreehandRoi3DTool":
+  //         case "FreehandRoi":
+  //           const polygons3d = markUps[tool].data;
+  //           polygons3d.map((polygon) => {
+  //             if (!polygon.aimId || polygon.aimId === aimOfInterest)
+  //               markupsToReturn["Polygon"] = { validate: "" };
+  //           });
+  //           break;
+  //         case "Bidirectional":
+  //           const bidirectionals = markUps[tool].data;
+  //           bidirectionals.map((bidirectional) => {
+  //             if (!bidirectional.aimId || bidirectional.aimId === aimOfInterest)
+  //               markupsToReturn["Perpendicular"] = { validate: "" };
+  //           });
+  //           break;
+  //         case "CircleRoi":
+  //           const circles = markUps[tool].data;
+  //           circles.map((circle) => {
+  //             if (!circle.aimId || circle.aimId === aimOfInterest)
+  //               markupsToReturn["Circle"] = { validate: "" };
+  //           });
+  //           break;
+  //         case "Length":
+  //           const lines = markUps[tool].data;
+  //           lines.map((line) => {
+  //             if (!line.aimId || line.aimId === aimOfInterest)
+  //               markupsToReturn["Line"] = { validate: "" };
+  //           });
+  //           break;
+  //         case "Probe":
+  //           const points = markUps[tool].data;
+  //           points.map((point) => {
+  //             if (!point.aimId || point.aimId === aimOfInterest)
+  //               markupsToReturn["Point"] = { validate: "" };
+  //           });
+  //           break;
+  //       }
+  //     });
+  //   });
+  //   return markupsToReturn;
+  // };
 
   componentWillUnmount() {
     window.removeEventListener("markupSelected", this.handleMarkupSelected);
     window.removeEventListener("markupCreated", this.handleMarkupCreated);
+    window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
   }
-
-  // componentDidUpdate = async prevProps => {
-  //   if (
-  //     (this.props.loading !== prevProps.loading && !this.props.loading) ||
-  //     this.props.series !== prevProps.series
-  //   ) {
-  //     await this.setState({ isLoading: true });
-
-  //     this.getViewports();
-  //     this.getData();
-  //   }
-  // };
-
-  sleep = (ms) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  };
 
   getData() {
     // clear the toolState they will be rendered again on next load
+    const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
@@ -226,6 +379,20 @@ class DisplayView extends Component {
     return urls;
   }
 
+  prepUrl = (url) => {
+    return `wadors:http://localhost:8090/pacs/studies/${url.studyUID}/series/${url.seriesUID}/instances/${url.imageUID}`;
+  };
+
+  getImageFrameURI = (metadataURI, metadata) => {
+    // Use the BulkDataURI if present int the metadata
+    // if (metadata["7FE00010"] && metadata["7FE00010"].BulkDataURI) {
+    //   console.log("donuyom", metadata["7FE00010"].BulkDataURI);
+    //   return metadata["7FE00010"].BulkDataURI;
+    // }
+
+    // fall back to using frame #1
+    return metadataURI + "/frames/1";
+  };
   getImageStack = async (serie, index) => {
     let stack = {};
     let newImageIds = {};
@@ -247,6 +414,26 @@ class DisplayView extends Component {
         cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
       }
+      // } else {
+      //   let singleFrameUrl = baseUrl;
+      //   console.log("Single frame url", singleFrameUrl);
+      //   cornerstoneImageIds.push(singleFrameUrl);
+      //   imageIds[singleFrameUrl] = false;
+      //   const { data } = await getMetadata(singleFrameUrl);
+      //   console.log("Metadata", data);
+      //   const metadata = data[0];
+      //   const imageFrameURI = this.getImageFrameURI(
+      //     singleFrameUrl + "/metadata",
+      //     metadata
+      //   );
+      //   const imageId = "wadors:" + imageFrameURI;
+
+      //   cornerstoneWADOImageLoader.wadors.metaDataManager.add(
+      //     imageId,
+      //     metadata
+      //   );
+      //   cornerstone.loadAndCacheImage(imageId);
+      // }
     });
     const { imageIds } = this.state;
     this.setState({ imageIds: { ...imageIds, ...newImageIds } });
@@ -267,7 +454,6 @@ class DisplayView extends Component {
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
-    // stack.mu
     return { stack };
   };
 
@@ -356,14 +542,14 @@ class DisplayView extends Component {
     let numSeries = this.props.series.length;
     let numCols = numSeries % 3;
     if (numSeries > 3) {
-      this.setState({ height: "calc((100% - 60px)/2)" });
+      this.setState({ height: "calc((100% / 2)" });
       this.setState({ width: "33%" });
       return;
     }
     if (numCols === 1) {
       this.setState({ width: "100%" });
     } else if (numCols === 2) this.setState({ width: "50%" });
-    else this.setState({ width: "33%", height: "calc(100% - 60px)" });
+    else this.setState({ width: "33%", height: "100%" });
   };
 
   createRefs() {
@@ -387,17 +573,21 @@ class DisplayView extends Component {
   }
 
   hideShow = (current) => {
+    if (this.props.activePort !== i) {
+      this.setActive(i);
+      return;
+    }
     if (this.state.hideShowDisabled) {
       // this.setState({ hideShowDisabled: false });
       return;
     }
-    const element = cornerstone.getEnabledElements()[this.state.activePort];
+    // const element = cornerstone.getEnabledElements()[practivePort];
     const elements = document.getElementsByClassName("viewportContainer");
     if (this.state.hiding === false) {
       for (var i = 0; i < elements.length; i++) {
         if (i != current) elements[i].style.display = "none";
       }
-      this.setState({ height: "calc(100% - 60px)", width: "100%" });
+      this.setState({ height: "100%", width: "100%" });
     } else {
       this.getViewports();
       for (var i = 0; i < elements.length; i++) {
@@ -753,6 +943,12 @@ class DisplayView extends Component {
         } else {
           this.setActiveLabelMapIndex(this.state.activeLabelMapIndex, element);
         }
+        console.log(
+          "dipsatching, aimId, activeLabelMapIndex",
+          aimId,
+          activeLabelMapIndex
+        );
+        this.props.dispatch(setSegLabelMapIndex(aimId, activeLabelMapIndex));
 
         this.refreshAllViewports();
       });
@@ -996,14 +1192,58 @@ class DisplayView extends Component {
     // set the state to preserve the imageId
     this.setState({ data: tempData });
     // dispatch to write the newImageId to store
+    console.log("dispatching with image id", imageId);
     this.props.dispatch(updateImageId(imageId));
   };
 
   onAnnotate = () => {
     this.setState({ showAimEditor: true });
   };
+  handleClose = (i) => {
+    if (this.props.activePort !== i) {
+      this.setActive(i);
+      return;
+    }
+    this.closeViewport();
+  };
+
+  jumpToAimImage = (activeSerie, activePort) => {
+    try {
+      const { imageIds } = this.state.data[activePort].stack;
+      const imageIndex = this.getImageIndex(activeSerie, imageIds);
+      this.jumpToImage(imageIndex);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  jumpToImage = (imageIndex) => {
+    const { activePort } = this.props;
+    const newData = [...this.state.data];
+    newData[activePort].stack.currentImageIdIndex = parseInt(imageIndex, 10);
+    this.setState({ data: newData });
+  };
+
+  // jumpToImage = (imageIndex) => {
+  //   const { activePort } = this.props;
+  //   const { element } = cornerstone.getEnabledElements()[activePort];
+  //   scrollToIndex(element, imageIndex);
+  // };
+
+  handleJumpChange = (i, event) => {
+    if (this.props.activePort !== i) {
+      this.setActive(i);
+      return;
+    }
+    let imageIndex = event.target.value - 1;
+    const images = this.state.data[this.props.activePort].stack.imageIds;
+    // check if there is such an image
+    if (isNaN(imageIndex) || !images[imageIndex]) return;
+    this.jumpToImage(imageIndex);
+  };
 
   render() {
+    const { series } = this.props;
     if (this.state.redirect) return <Redirect to="/search" />;
     return !Object.entries(this.props.series).length ? (
       <Redirect to="/search" />
@@ -1019,6 +1259,7 @@ class DisplayView extends Component {
           updateTreeDataOnSave={this.props.updateTreeDataOnSave}
           setAimDirty={this.setDirtyFlag}
         >
+          <ToolMenu />
           {!this.state.isLoading &&
             Object.entries(this.props.series).length &&
             this.state.data.map((data, i) => (
@@ -1032,57 +1273,98 @@ class DisplayView extends Component {
                 style={{
                   width: this.state.width,
                   height: this.state.height,
-                  padding: "2px",
                   display: "inline-block",
                 }}
-                onDoubleClick={() => this.hideShow(i)}
+                onClick={() => this.setActive(i)}
               >
-                <MenuProvider
-                  id="menu_id"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "inline-block",
-                  }}
-                >
-                  <CornerstoneViewport
-                    key={i}
-                    imageIds={data.stack.imageIds}
-                    imageIdIndex={data.stack.currentImageIdIndex}
-                    viewportIndex={i}
-                    tools={tools}
-                    eventListeners={[
-                      {
-                        target: "element",
-                        eventName: "cornerstonetoolsmeasurementcompleted",
-                        handler: this.measurementCompleted,
-                      },
-                      {
-                        target: "element",
-                        eventName: "cornerstonetoolsmeasurementmodified",
-                        handler: this.measuremementModified,
-                      },
-                      {
-                        target: "element",
-                        eventName: "cornerstonetoolsmeasurementremoved",
-                        handler: this.measurementRemoved,
-                      },
-                      {
-                        target: "element",
-                        eventName: "cornerstonenewimage",
-                        handler: this.newImage,
-                      },
-                    ]}
-                    setViewportActive={() => this.setActive(i)}
-                    isStackPrefetchEnabled={true}
-                  />
-                </MenuProvider>
+                <div className={"row"}>
+                  <div className={"column left"}>
+                    <span
+                      className={"dot"}
+                      style={{ background: "#ED594A" }}
+                      onClick={() => this.handleClose(i)}
+                    >
+                      <FaTimes />
+                    </span>
+                    <span
+                      className={"dot"}
+                      style={{ background: "#5AC05A" }}
+                      onClick={() => this.hideShow(i)}
+                    >
+                      <FaExpandArrowsAlt />
+                    </span>
+                  </div>
+                  <div className={"column middle"}>
+                    {/* <label>{series[i].seriesUID}</label> */}
+                  </div>
+                  <div className={"column middle-right"}>
+                    <Form inline>
+                      <Form.Group>
+                        <Form.Label htmlFor="imageNum">{"Slice # "}</Form.Label>
+                        <Form.Control
+                          type="number"
+                          min="1"
+                          value={data.stack.currentImageIdIndex + 1}
+                          onChange={(event) => this.handleJumpChange(i, event)}
+                          style={{
+                            width: "60px",
+                            height: "10px",
+                            opacity: 1,
+                          }}
+                        />
+                      </Form.Group>
+                    </Form>
+                  </div>
+                  <div className={"column right"}>
+                    <span
+                      className={"dot"}
+                      style={{ background: "#FDD800", float: "right" }}
+                      onClick={() => {
+                        this.setState({ showAimEditor: true });
+                      }}
+                    >
+                      <FaPen />
+                    </span>
+                  </div>
+                </div>
+                <CornerstoneViewport
+                  key={i}
+                  imageIds={data.stack.imageIds}
+                  imageIdIndex={data.stack.currentImageIdIndex}
+                  viewportIndex={i}
+                  tools={tools}
+                  eventListeners={[
+                    {
+                      target: "element",
+                      eventName: "cornerstonetoolsmeasurementcompleted",
+                      handler: this.measurementCompleted,
+                    },
+                    {
+                      target: "element",
+                      eventName: "cornerstonetoolsmeasurementmodified",
+                      handler: this.measuremementModified,
+                    },
+                    {
+                      target: "element",
+                      eventName: "cornerstonetoolsmeasurementremoved",
+                      handler: this.measurementRemoved,
+                    },
+                    {
+                      target: "element",
+                      eventName: "cornerstonenewimage",
+                      handler: this.newImage,
+                    },
+                  ]}
+                  setViewportActive={() => this.setActive(i)}
+                  isStackPrefetchEnabled={true}
+                  style={{ height: "calc(100% - 26px)" }}
+                />
               </div>
             ))}
-          <ContextMenu
+          {/* <ContextMenu
             onAnnotate={this.onAnnotate}
             closeViewport={this.closeViewport}
-          />
+          /> */}
         </RightsideBar>
       </React.Fragment>
     );

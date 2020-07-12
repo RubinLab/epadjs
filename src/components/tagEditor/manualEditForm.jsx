@@ -16,10 +16,11 @@ class ManualEditForm extends React.Component {
   };
 
   componentDidUpdate = prevProps => {
-    const { tagValues, treeData } = this.props;
+    const { tagValues, treeData, seriesIndex } = this.props;
     const treeDataChanged = !_.isEqual(treeData, prevProps.treeData);
     const tagValuesChanged = !_.isEqual(tagValues, prevProps.tagValues);
-    if (tagValuesChanged || treeDataChanged) {
+    const seriesChanged = seriesIndex !== prevProps.seriesIndex;
+    if (tagValuesChanged || treeDataChanged || seriesChanged) {
       this.renderFields();
     }
   };
@@ -42,7 +43,8 @@ class ManualEditForm extends React.Component {
           const tag = el.substring(0, el.length - 2);
           const vr = el.substring(el.length - 2);
           const missing = missingTags.includes(tag);
-          const value = tagValues[tag]
+          const tagKeys = Object.keys(tagValues);
+          const value = tagKeys.includes(tag)
             ? tagValues[tag]
             : treeData[seriesIndex][tag]
             ? treeData[seriesIndex][tag]
@@ -54,7 +56,9 @@ class ManualEditForm extends React.Component {
               <input
                 onMouseDown={e => e.stopPropagation()}
                 type="text"
-                className={missing || tagValues[tag] ? "--textFilled" : "--text"}
+                className={
+                  missing || tagValues[tag] ? "--textFilled" : "--text"
+                }
                 value={value}
                 name={tag}
                 onChange={e => onTagInput(e)}
@@ -96,7 +100,7 @@ class ManualEditForm extends React.Component {
                 >{`Apply patient info to its all series`}</span>
               </div>
             )}
-            {studyUpdated && (
+            {(studyUpdated || patientUpdated) && (
               <div className="tagEditForm__el--confirmation" align="left">
                 <input
                   type="checkbox"

@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
-import ToolMenu from "../ToolMenu/ToolMenu";
 import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
 import Collapsible from "react-collapsible";
 import AnnotationList from "../annotationsList/annotationDock/annotationList";
@@ -40,8 +39,8 @@ class Rightsidebar extends Component {
   };
 
   render() {
-    const { activePort, openSeries } = this.props;
-    const { projectID } = openSeries[activePort];
+    // const { activePort, openSeries } = this.props;
+    // const { projectID } = openSeries[activePort];
     return (
       <React.Fragment>
         {!this.state.open && (
@@ -63,9 +62,9 @@ class Rightsidebar extends Component {
               </button>
             </div>
           )}
-          <Collapsible trigger={"Tools"} transitionTime={100}>
+          {/* <Collapsible trigger={"Tools"} transitionTime={100}>
             <ToolMenu />
-          </Collapsible>
+          </Collapsible> */}
           {this.props.showAimEditor && (
             <Collapsible
               trigger={"Aim Editor"}
@@ -80,7 +79,7 @@ class Rightsidebar extends Component {
                   // onCancel={this.closeAimEditor}
                   updateTreeDataOnSave={this.props.updateTreeDataOnSave}
                   updateProgress={this.props.updateProgress}
-                  projectID={projectID}
+                  // projectID={projectID}
                   hasSegmentation={this.props.hasSegmentation}
                   activeLabelMapIndex={this.props.activeLabelMapIndex}
                   setAimDirty={this.props.setAimDirty}
@@ -96,7 +95,7 @@ class Rightsidebar extends Component {
           className={this.state.open ? "mainView" : "mainView-closed"}
           style={{
             marginRight: this.state.marginRight,
-            height: "calc(100% - 50px)",
+            height: "calc(100% - 5px)",
           }}
         >
           {this.props.children}

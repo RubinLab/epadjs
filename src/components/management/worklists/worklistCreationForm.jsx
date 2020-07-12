@@ -167,7 +167,8 @@ class WorklistCreationForm extends React.Component {
     // date = `${year}-${month}-${day}`;
     
     return (
-      <Modal.Dialog dialogClassName="add-worklist__modal">
+      // <Modal.Dialog dialogClassName="add-worklist__modal">
+      <Modal.Dialog id="modal-fix" className="in-modal">
         <Modal.Header>
           <Modal.Title>New worklist</Modal.Title>
         </Modal.Header>

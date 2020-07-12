@@ -21,7 +21,7 @@ class AnnnotationDownloadModal extends React.Component {
     const annsToDownload =
       Object.keys(this.props.selectedAnnotations).length > 0
         ? this.props.selectedAnnotations
-        : this.props.selected;
+        : this.props.selected; 
     const aimList = Object.keys(annsToDownload);
     this.props.updateStatus();
     downloadAnnotations(optionObj, aimList, pid)
@@ -60,7 +60,8 @@ class AnnnotationDownloadModal extends React.Component {
       : className;
     let disabled = !summary && !aim && !seg;
     return (
-      <Modal.Dialog dialogClassName={className}>
+      // <Modal.Dialog dialogClassName={className}>
+      <Modal.Dialog id="modal-fix" className="modal-minwidth">
         <Modal.Header>
           <Modal.Title className="annDownload__header">
             Select Download Format

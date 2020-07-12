@@ -179,7 +179,6 @@ class ToolMenu extends Component {
             />
           </span>
         ),
-
       },
       {
         name: "Sculpt 2D",
@@ -300,7 +299,6 @@ class ToolMenu extends Component {
     //   const { openSeries, patients } = this.props;
     //   for (let port of openSeries) {
     //     const { patientID, seriesUID, studyUID, aimID } = port;
-
     //     const serie = patients[patientID].studies[studyUID].series[seriesUID];
     //     if (!patients[port.patientID]) {
     //       await this.props.dispatch(getWholeData(port, null, aimID));
@@ -313,7 +311,6 @@ class ToolMenu extends Component {
     //       }
     //     }
     //   }
-
     //   await this.setState(state => ({
     //     showAnnotationList: !state.showAnnotationList,
     //   }));
@@ -412,22 +409,22 @@ class ToolMenu extends Component {
   render() {
     return (
       <div className="toolbar">
-        <Collapsible trigger={"Imaging Tools"} transitionTime={100}>
-          {this.imagingTools.map((imagingTool, i) => {
-            return (
-              <ToolMenuItem
-                key={imagingTool.name}
-                name={imagingTool.name}
-                icon={imagingTool.icon}
-                index={i}
-                isActive={this.state.activeToolIdx === i}
-                onClick={() => this.handleToolClicked(i, imagingTool.tool)}
-              />
-            );
-          })}
+        {/* <Collapsible trigger={"Imaging Tools"} transitionTime={100}> */}
+        {this.imagingTools.map((imagingTool, i) => {
+          return (
+            <ToolMenuItem
+              key={imagingTool.name}
+              name={imagingTool.name}
+              icon={imagingTool.icon}
+              index={i}
+              isActive={this.state.activeToolIdx === i}
+              onClick={() => this.handleToolClicked(i, imagingTool.tool)}
+            />
+          );
+        })}
 
-          <MetaData />
-          {/*<div
+        <MetaData />
+        {/*<div
           id="angle"
           tabIndex="7"
           className="toolbarSectionButton"
@@ -438,24 +435,24 @@ class ToolMenu extends Component {
             <span>Angle</span>
           </div>
         </div>*/}
-          <div
-            id="drawing"
-            tabIndex="11"
-            className="toolbarSectionButton"
-            onClick={this.handleClip}
-          >
-            <div className="toolContainer">
-              {(!this.state.playing && <FaPlayCircle />) ||
-                (this.state.playing && <FaStopCircle />)}
-            </div>
-            <div className="buttonLabel">
-              <span>
-                {(!this.state.playing && "Play") ||
-                  (this.state.playing && "Stop")}
-              </span>
-            </div>
+        <div
+          id="drawing"
+          tabIndex="11"
+          className="toolbarSectionButton"
+          onClick={this.handleClip}
+        >
+          <div className="toolContainer">
+            {(!this.state.playing && <FaPlayCircle />) ||
+              (this.state.playing && <FaStopCircle />)}
           </div>
-          {/* <div
+          <div className="buttonLabel">
+            <span>
+              {(!this.state.playing && "Play") ||
+                (this.state.playing && "Stop")}
+            </span>
+          </div>
+        </div>
+        {/* <div
             tabIndex="12"
             className="toolbarSectionButton"
             onClick={this.handlePatientClick}
@@ -477,23 +474,23 @@ class ToolMenu extends Component {
               </>
             )}
           </div> */}
-        </Collapsible>
-        <Collapsible trigger={"Markup Tools"} transitionTime={100}>
-          {this.markupTools.map((markupTool, i) => {
-            i = i + this.imagingTools.length;
-            return (
-              <ToolMenuItem
-                key={markupTool.name}
-                name={markupTool.name}
-                icon={markupTool.icon}
-                index={i}
-                isActive={this.state.activeToolIdx === i}
-                onClick={() => this.handleToolClicked(i, markupTool.tool)}
-                children={markupTool.child}
-              />
-            );
-          })}
-          {/* <div
+        {/* </Collapsible> */}
+        {/* <Collapsible trigger={"Markup Tools"} transitionTime={100}> */}
+        {this.markupTools.map((markupTool, i) => {
+          i = i + this.imagingTools.length;
+          return (
+            <ToolMenuItem
+              key={markupTool.name}
+              name={markupTool.name}
+              icon={markupTool.icon}
+              index={i}
+              isActive={this.state.activeToolIdx === i}
+              onClick={() => this.handleToolClicked(i, markupTool.tool)}
+              children={markupTool.child}
+            />
+          );
+        })}
+        {/* <div
                         id="point"
                         tabIndex="1"
                         className="drawingSectionButton"
@@ -606,28 +603,28 @@ class ToolMenu extends Component {
                             <span>Perpendicular</span>
                         </div>
                     </div> */}
-        </Collapsible>
-        <Collapsible trigger={"Segmentation Tools"} transitionTime={100}>
-          {this.segmentationTools.map((segmentationTool, i) => {
-            i = i + this.imagingTools.length + this.markupTools.length;
-            return (
-              <ToolMenuItem
-                key={segmentationTool.name}
-                name={segmentationTool.name}
-                icon={segmentationTool.icon}
-                index={i}
-                isActive={this.state.activeToolIdx === i}
-                onClick={() => this.handleToolClicked(i, segmentationTool.tool)}
-              />
-            );
-          })}
-          {this.state.activeTool === "Brush3DTool" ||
-          this.state.activeTool === "Brush3DHUGated" ? (
-            <BrushSizeSelector />
-          ) : (
-            ""
-          )}
-          {/* <div
+        {/* </Collapsible> */}
+        {/* <Collapsible trigger={"Segmentation Tools"} transitionTime={100}> */}
+        {this.segmentationTools.map((segmentationTool, i) => {
+          i = i + this.imagingTools.length + this.markupTools.length;
+          return (
+            <ToolMenuItem
+              key={segmentationTool.name}
+              name={segmentationTool.name}
+              icon={segmentationTool.icon}
+              index={i}
+              isActive={this.state.activeToolIdx === i}
+              onClick={() => this.handleToolClicked(i, segmentationTool.tool)}
+            />
+          );
+        })}
+        {this.state.activeTool === "Brush3DTool" ||
+        this.state.activeTool === "Brush3DHUGated" ? (
+          <BrushSizeSelector />
+        ) : (
+          ""
+        )}
+        {/* <div
                         id="brush"
                         tabIndex="8"
                         className="drawingSectionButton"
@@ -656,7 +653,7 @@ class ToolMenu extends Component {
                             </span>
                         </div>
                     </div> */}
-          {/* <div
+        {/* <div
                 id="brush"
                 tabIndex="10"
                 className="drawingSectionButton"
@@ -669,7 +666,7 @@ class ToolMenu extends Component {
                   <span>Brush Auto Gated</span>
                 </div>
               </div> */}
-          {/* <div
+        {/* <div
                         id="freehandScisssors"
                         tabIndex="9"
                         className="drawingSectionButton"
@@ -721,7 +718,7 @@ class ToolMenu extends Component {
                             <span>Eraser</span>
                         </div>
                     </div> */}
-        </Collapsible>
+        {/* </Collapsible> */}
         {this.state.activeTool === "Brush3DHUGated" && <SmartBrushMenu />}
 
         {this.state.showPresets && (

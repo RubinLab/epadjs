@@ -6,7 +6,8 @@ const mode = sessionStorage.getItem("mode");
 
 const team = props => {
   return (
-    <Modal.Dialog dialogClassName="info-team__modal">
+    // <Modal.Dialog dialogClassName="info-team__modal">
+    <Modal.Dialog id="modal-fix">
       <Modal.Header>
         <Modal.Title>ePAD Team</Modal.Title>
       </Modal.Header>

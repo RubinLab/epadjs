@@ -6,7 +6,8 @@ const message = "Maximum number of series has been reached.";
 
 const alertGridFull = ({ onOK }) => {
   return (
-    <Modal.Dialog dialogClassName="alert-gridFull">
+    // <Modal.Dialog dialogClassName="alert-gridFull">
+    <Modal.Dialog id="modal-fix">
       <Modal.Body>
         <p className="-gridFull__message">{message}</p>
       </Modal.Body>

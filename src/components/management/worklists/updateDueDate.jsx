@@ -16,7 +16,8 @@ const updateDueDate = props => {
   }
   const defaultDate = props.duedate || today;
   return (
-    <Modal.Dialog dialogClassName="updateDueDate__modal">
+    // <Modal.Dialog dialogClassName="updateDueDate__modal">
+    <Modal.Dialog id="modal-fix">
       <Modal.Header>
         <Modal.Title>Update Due Date</Modal.Title>
       </Modal.Header>

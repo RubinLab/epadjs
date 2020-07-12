@@ -4,7 +4,8 @@ import { Modal } from "react-bootstrap";
 
 const alertDeletionModal = ({ title, message, onCancel, onDelete, error }) => {
   return (
-    <Modal.Dialog dialogClassName="alert-delete__modal">
+    // <Modal.Dialog dialogClassName="alert-delete__modal">
+    <Modal.Dialog id="modal-fix">
       <Modal.Body>
         <div className="-maxView__header">
           <div
