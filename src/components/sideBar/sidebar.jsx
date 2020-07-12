@@ -16,7 +16,11 @@ import {
   getWorklistsOfCreator,
   getWorklistProgress,
 } from "../../services/worklistServices";
-import { getProjectMap, clearSelection, getTemplates } from "../annotationsList/action";
+import {
+  getProjectMap,
+  clearSelection,
+  getTemplates,
+} from "../annotationsList/action";
 // import { getPacs } from "../../services/pacsServices";
 import "./w2.css";
 // import { throws } from "assert";
@@ -149,12 +153,12 @@ class Sidebar extends Component {
   getProgressTotal = (list, attribute) => {
     const promises = [];
     const result = [...list];
-    list.forEach(wl => {
+    list.forEach((wl) => {
       promises.push(getWorklistProgress(wl.workListID));
     });
     Promise.all(promises)
-      .then(data => {
-        const progressArr = data.map(el => {
+      .then((data) => {
+        const progressArr = data.map((el) => {
           return el.data;
         });
         let total;
@@ -167,10 +171,10 @@ class Sidebar extends Component {
         });
         this.setState({ [attribute]: result });
       })
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
   };
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     let { pathname } = this.props.location;
     const { pid, lastEventId } = this.props;
     if (prevProps.progressUpdated !== this.props.progressUpdated) {
@@ -281,7 +285,7 @@ class Sidebar extends Component {
       pathname = pathname.split("/").pop();
       // const pid = pathname.pop();
       if (mode === "thick") {
-        const projectsList = projects.map(project => {
+        const projectsList = projects.map((project) => {
           const matchProject =
             selected === project.id || pathname === project.id;
           const className = matchProject
@@ -318,7 +322,7 @@ class Sidebar extends Component {
 
   renderWorklists = () => {
     const { type, selected } = this.state;
-    const worklists = this.state.worklistsAssigned.map(worklist => {
+    const worklists = this.state.worklistsAssigned.map((worklist) => {
       const className =
         worklist.workListID === selected && type === "worklist"
           ? "sidebar-row __selected"
@@ -390,7 +394,7 @@ class Sidebar extends Component {
       <Tabs
         id="controlled-tab-leftSidebar"
         activeKey={this.state.activeTab}
-        onSelect={index => this.setState({ index })}
+        onSelect={(index) => this.setState({ index })}
       >
         {mode === "thick" ? (
           <Tab
@@ -483,7 +487,7 @@ class Sidebar extends Component {
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const { activePort, lastEventId } = state.annotationsListReducer;
   return {
     activePort,

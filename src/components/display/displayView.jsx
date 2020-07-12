@@ -16,6 +16,7 @@ import {
   updateImageId,
   clearActivePortAimID,
   closeSerie,
+  jumpToAim,
   setSegLabelMapIndex,
 } from "../annotationsList/action";
 import ContextMenu from "./contextMenu";
@@ -29,6 +30,7 @@ import { circle } from "./Circle";
 import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
+import * as aimForm from "../aimEditor/parseClass.js";
 import {
   FaTimes,
   FaPen,
@@ -134,6 +136,7 @@ class DisplayView extends Component {
       data: [],
       isLoading: true,
       selectedAim: undefined,
+      dirty: false,
       refs: props.refs,
       showAnnDetails: true,
       hasSegmentation: false,
@@ -596,6 +599,63 @@ class DisplayView extends Component {
     );
   };
 
+  checkShapes = () => {
+    const { series, activePort } = this.props;
+    const aimId = series[activePort].aimID || undefined;
+    const shapes = this.getMarkups(aimId);
+    const dummyAimForm = new aimForm.AimEditor();
+    dummyAimForm.checkShapes(shapes);
+  };
+
+  getMarkups = (aimOfInterest) => {
+    const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    var markupsToReturn = {};
+    Object.keys(toolState).forEach((key) => {
+      const markUps = toolState[key];
+      Object.keys(markUps).map((tool) => {
+        switch (tool) {
+          case "FreehandRoi3DTool":
+          case "FreehandRoi":
+            const polygons3d = markUps[tool].data;
+            polygons3d.map((polygon) => {
+              if (!polygon.aimId || polygon.aimId === aimOfInterest)
+                markupsToReturn["Polygon"] = { validate: "" };
+            });
+            break;
+          case "Bidirectional":
+            const bidirectionals = markUps[tool].data;
+            bidirectionals.map((bidirectional) => {
+              if (!bidirectional.aimId || bidirectional.aimId === aimOfInterest)
+                markupsToReturn["Perpendicular"] = { validate: "" };
+            });
+            break;
+          case "CircleRoi":
+            const circles = markUps[tool].data;
+            circles.map((circle) => {
+              if (!circle.aimId || circle.aimId === aimOfInterest)
+                markupsToReturn["Circle"] = { validate: "" };
+            });
+            break;
+          case "Length":
+            const lines = markUps[tool].data;
+            lines.map((line) => {
+              if (!line.aimId || line.aimId === aimOfInterest)
+                markupsToReturn["Line"] = { validate: "" };
+            });
+            break;
+          case "Probe":
+            const points = markUps[tool].data;
+            points.map((point) => {
+              if (!point.aimId || point.aimId === aimOfInterest)
+                markupsToReturn["Point"] = { validate: "" };
+            });
+            break;
+        }
+      });
+    });
+    return markupsToReturn;
+  };
+
   // TODO: Can this be done without checking the tools of interest?
   measurementCompleted = (event, action) => {
     const { toolName, toolType } = event.detail;
@@ -611,15 +671,31 @@ class DisplayView extends Component {
       if (toolName === "FreehandRoi3DTool")
         this.setState({ hideShowDisabled: true });
     }
+    this.setDirtyFlag();
+    this.checkShapes();
+  };
+
+  measurementRemoved = (event, action) => {
+    this.setDirtyFlag();
+    this.checkShapes();
+  };
+
+  measuremementModified = (event, action) => {
+    this.setDirtyFlag();
+  };
+
+  setDirtyFlag = () => {
+    if (!this.state.dirty) this.setState({ dirty: true });
   };
 
   handleMarkupSelected = (event) => {
     const { aimList, series, activePort } = this.props;
+    const { seriesUID } = series[activePort];
     const { aimId, ancestorEvent } = event.detail;
     const { element, data } = ancestorEvent;
 
-    if (aimList[series[activePort].seriesUID][aimId]) {
-      const aimJson = aimList[series[activePort].seriesUID][aimId].json;
+    if (aimList[seriesUID][aimId]) {
+      const aimJson = aimList[seriesUID][aimId].json;
       const markupTypes = this.getMarkupTypesForAim(aimId);
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimId;
@@ -645,6 +721,11 @@ class DisplayView extends Component {
           return;
         }
       }
+
+      //The following dispatched is a wrongly named method. It's dispatched to set the selected
+      //AimId in the store!!!!!
+      this.props.dispatch(jumpToAim(seriesUID, aimId, activePort));
+
       this.setState({ showAimEditor: true, selectedAim: aimJson });
     }
   };
@@ -698,7 +779,7 @@ class DisplayView extends Component {
           imageId = imageId.split("&frame=")[0];
 
         this.renderMarkup(imageId, value, color);
-        if (aimUid === serie.aimID) this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
+        // if (aimUid === serie.aimID) this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
       });
     });
   };
@@ -1053,14 +1134,14 @@ class DisplayView extends Component {
 
   closeAimEditor = (isCancel, message = "") => {
     // if aim editor has been cancelled ask to user
-    if (!this.checkUnsavedData(isCancel, message)) return;
+    if (this.state.dirty && !this.checkUnsavedData(isCancel, message)) return;
     this.setState({
       showAimEditor: false,
       selectedAim: undefined,
       hasSegmentation: false,
       activeLabelMapIndex: 0,
     });
-    // clear all unsaved markups by calling getData
+    this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
     this.getData();
     this.refreshAllViewports();
     return 1;
@@ -1176,6 +1257,7 @@ class DisplayView extends Component {
           activeLabelMapIndex={this.state.activeLabelMapIndex}
           updateProgress={this.props.updateProgress}
           updateTreeDataOnSave={this.props.updateTreeDataOnSave}
+          setAimDirty={this.setDirtyFlag}
         >
           <ToolMenu />
           {!this.state.isLoading &&
@@ -1256,6 +1338,16 @@ class DisplayView extends Component {
                       target: "element",
                       eventName: "cornerstonetoolsmeasurementcompleted",
                       handler: this.measurementCompleted,
+                    },
+                    {
+                      target: "element",
+                      eventName: "cornerstonetoolsmeasurementmodified",
+                      handler: this.measuremementModified,
+                    },
+                    {
+                      target: "element",
+                      eventName: "cornerstonetoolsmeasurementremoved",
+                      handler: this.measurementRemoved,
                     },
                     {
                       target: "element",

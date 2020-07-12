@@ -82,6 +82,7 @@ class Rightsidebar extends Component {
                   // projectID={projectID}
                   hasSegmentation={this.props.hasSegmentation}
                   activeLabelMapIndex={this.props.activeLabelMapIndex}
+                  setAimDirty={this.props.setAimDirty}
                 />
               </div>
             </Collapsible>

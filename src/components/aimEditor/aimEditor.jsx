@@ -43,35 +43,54 @@ class AimEditor extends Component {
 
   componentDidMount() {
     const element = document.getElementById("questionaire");
-    // const { data: templates } = await getTemplates();
-    const templatePromise = new Promise((resolve) => {
-      resolve(getTemplates());
+
+    let { templates, openSeries, activePort, setAimDirty } = this.props;
+    const templateJsons = Object.values(templates);
+    const { defaultTemplate, imageAnnotations } = openSeries[activePort];
+
+    this.semanticAnswers = new questionaire.AimEditor(
+      element,
+      this.validateForm,
+      this.renderButtons,
+      this.getDefaultLesionName(),
+      setAimDirty
+    );
+
+    this.semanticAnswers.loadTemplates({
+      default: defaultTemplate,
+      all: templateJsons,
     });
-    templatePromise.then((result) => {
-      this.semanticAnswers = new questionaire.AimEditor(
-        element,
-        this.validateForm,
-        this.renderButtons
-      );
-      this.semanticAnswers.loadTemplates(result.data);
-      this.semanticAnswers.createViewerWindow();
-      const { aimId } = this.props;
-      if (aimId != null && Object.entries(aimId).length) {
-        try {
-          this.semanticAnswers.loadAimJson(aimId);
-        } catch (error) {
-          console.error("Error loading aim to aim editor:", error);
-        }
+    this.semanticAnswers.createViewerWindow();
+    const { aimId } = this.props;
+    if (aimId != null && Object.entries(aimId).length) {
+      try {
+        this.semanticAnswers.loadAimJson(aimId);
+      } catch (error) {
+        console.error("Error loading aim to aim editor:", error);
       }
-    });
+    }
   }
+
+  // returns the next default lesion name according to the # of lesions in the series
+  getDefaultLesionName = () => {
+    const { openSeries, activePort } = this.props;
+    const { imageAnnotations } = openSeries[activePort];
+    let totalNumShapes = 1;
+    if (imageAnnotations) {
+      Object.values(imageAnnotations).map((shapesOnImage) => {
+        totalNumShapes += shapesOnImage.length;
+      });
+    }
+    return `Lesion${totalNumShapes}`;
+  };
+
   //cavit
   renderButtons = (buttonsState) => {
     this.setState({ buttonGroupShow: buttonsState });
   };
   //cavit end
   validateForm = (hasError) => {
-    if (hasError) console.log("Answer form has error/s!!!");
+    if (hasError) console.error("Answer form has error/s!!!");
   };
 
   getImage = () => {
@@ -900,7 +919,7 @@ class AimEditor extends Component {
         return "success";
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
         return "error";
       });
   };
@@ -941,6 +960,7 @@ const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
+    templates: state.annotationsListReducer.templates,
   };
 };
 
