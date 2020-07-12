@@ -22,7 +22,6 @@ import {
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
 import CornerstoneViewport from "react-cornerstone-viewport";
-import OHIFSegmentationExtension from "../../ohif-segmentation-plugin";
 import { freehand } from "./Freehand";
 import { line } from "./Line";
 import { probe } from "./Probe";
@@ -30,20 +29,12 @@ import { circle } from "./Circle";
 import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
-import * as aimForm from "../aimEditor/parseClass.js";
-import {
-  FaTimes,
-  FaPen,
-  FaExpandAlt,
-  FaCompressAlt,
-  FaExpandArrowsAlt,
-} from "react-icons/fa";
+import { FaTimes, FaPen, FaExpandArrowsAlt } from "react-icons/fa";
 import Form from "react-bootstrap/Form";
 import ToolMenu from "../ToolMenu/ToolMenu";
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
-const scrollToIndex = cornerstoneTools.importInternal("util/scrollToIndex");
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 }, mode: "active" },
@@ -599,12 +590,10 @@ class DisplayView extends Component {
     );
   };
 
-  checkShapes = () => {
+  getShapes = () => {
     const { series, activePort } = this.props;
     const aimId = series[activePort].aimID || undefined;
-    const shapes = this.getMarkups(aimId);
-    const dummyAimForm = new aimForm.AimEditor();
-    dummyAimForm.checkShapes(shapes);
+    return this.getMarkups(aimId);
   };
 
   getMarkups = (aimOfInterest) => {
@@ -671,17 +660,26 @@ class DisplayView extends Component {
       if (toolName === "FreehandRoi3DTool")
         this.setState({ hideShowDisabled: true });
     }
+    this.handleShapes();
     this.setDirtyFlag();
-    this.checkShapes();
   };
 
   measurementRemoved = (event, action) => {
+    this.handleShapes();
     this.setDirtyFlag();
-    this.checkShapes();
   };
 
   measuremementModified = (event, action) => {
     this.setDirtyFlag();
+  };
+
+  handleShapes = () => {
+    const shapes = this.getShapes();
+    window.dispatchEvent(
+      new CustomEvent("checkShapes", {
+        detail: shapes,
+      })
+    );
   };
 
   setDirtyFlag = () => {
@@ -1223,12 +1221,6 @@ class DisplayView extends Component {
     newData[activePort].stack.currentImageIdIndex = parseInt(imageIndex, 10);
     this.setState({ data: newData });
   };
-
-  // jumpToImage = (imageIndex) => {
-  //   const { activePort } = this.props;
-  //   const { element } = cornerstone.getEnabledElements()[activePort];
-  //   scrollToIndex(element, imageIndex);
-  // };
 
   handleJumpChange = (i, event) => {
     if (this.props.activePort !== i) {
