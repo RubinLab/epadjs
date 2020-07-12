@@ -18,6 +18,8 @@ export var AimEditor = function (
   // this.mapAllowedTermCollectionByCodeValue = new Map(); not used
 
   var self = this;
+  var domelements = [];
+  var selectid = 0;
   this.handlerSetAimDirty = setAimDirty;
   this.fontcolor = "#c9cdd4";
   this.fontsize = "13px";
@@ -51,10 +53,8 @@ export var AimEditor = function (
   this.aimName = aimName;
   this.aimTypeCode = "";
   this.templateSelectedIndex = -1;
-  var domelements = [];
+  this.runtimeUserShapes = {};
   this.geoshapeidCounter = 0;
-
-  var selectid = 0;
   this.mathOperators = new Map();
   this.mathOperators.set("Equal", "=");
   this.mathOperators.set("NotEqual", "!=");
@@ -461,6 +461,11 @@ export var AimEditor = function (
     //self.addButtons(self.mainButtonsDiv);
     $('select[class^="ui dropdown"]').dropdown();
     $(".ui.accordion").accordion();
+    console.log(
+      "rxtract template self.runtimeUserShapes",
+      self.runtimeUserShapes
+    );
+    self.checkShapes({});
     self.formCheckHandler(self.checkFormSaveReady());
   };
 
@@ -4100,13 +4105,32 @@ export var AimEditor = function (
     /* impoertant note if there are multiple geometric shape component exist in a template 
       or relation will be applied 
     */
-
-    const templateShapeLength = self.templateShapeArray.length;
+    console.log("mete shapes :", shapes);
+    console.log("mete shapes is Array:", Array.isArray(shapes));
+    let templateShapeLength = self.templateShapeArray.length;
     let anyShapeFlag = false;
     let anyClosedShapeFlag = false;
-    const localShapes = { ...shapes };
+    let localShapes = {};
+    let shapeKeys = Object.keys(shapes);
+    console.log("shapeKeys.length", shapeKeys.length);
+    if (shapeKeys.length === 0) {
+      localShapes = JSON.parse(JSON.stringify(self.runtimeUserShapes));
+      console.log("if  self.runtimeUserShapes", self.runtimeUserShapes);
+      console.log("if  localShapes", localShapes);
+    } else {
+      console.log("else shapeKeys.length", shapeKeys.length);
+      console.log("else shapes", shapes);
+
+      self.runtimeUserShapes = JSON.parse(JSON.stringify(shapes));
+      localShapes = JSON.parse(JSON.stringify(shapes));
+      console.log("else self.runtimeUserShapes", self.runtimeUserShapes);
+    }
+
     const tempateShapeKeys = [];
+    console.log("main localShapes", localShapes);
+    console.log("main templateShapeLength", templateShapeLength);
     for (let cnt = 0; cnt < templateShapeLength; cnt++) {
+      console.log("in loop", self.templateShapeArray[cnt].shape);
       tempateShapeKeys.push(self.templateShapeArray[cnt].shape);
       if (
         typeof localShapes[self.templateShapeArray[cnt].shape] !== "undefined"
@@ -4129,7 +4153,7 @@ export var AimEditor = function (
       }
     }
     if (anyClosedShapeFlag === true) {
-      const shapeKeys = Object.keys(localShapes);
+      //  const shapeKeys = Object.keys(localShapes);
       const arryDiffernce = shapeKeys.filter(
         (eachShape) => !self.anyClosedShapeTypes.includes(eachShape)
       );
