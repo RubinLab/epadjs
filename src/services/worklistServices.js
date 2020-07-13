@@ -62,7 +62,7 @@ export function addStudyToWorklist(
   studyUID,
   body
 ) {
-  return http.post(
+  return http.put(
     apiUrl +
       "/worklists/" +
       worklistId +
@@ -77,7 +77,7 @@ export function addStudyToWorklist(
 }
 
 export function addSubjectToWorklist(worklistId, projectID, patientID, body) {
-  return http.post(
+  return http.put(
     apiUrl +
       "/worklists/" +
       worklistId +
