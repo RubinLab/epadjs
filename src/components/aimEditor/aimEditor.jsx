@@ -43,6 +43,7 @@ class AimEditor extends Component {
 
   componentDidMount() {
     const element = document.getElementById("questionaire");
+    console.log("Props from aim editor", this.props);
 
     let { templates, openSeries, activePort, setAimDirty } = this.props;
     const templateJsons = Object.values(templates);

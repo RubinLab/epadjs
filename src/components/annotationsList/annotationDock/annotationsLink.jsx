@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import "../annotationsList.css";
 
-const annotationsLink = props => {
+const annotationsLink = (props) => {
   const { openSeries, activePort, aimsList } = props;
   const { seriesUID } = openSeries[activePort];
   let list = [];
@@ -36,7 +36,7 @@ const annotationsLink = props => {
             <td
               data-id={aim.id}
               data-serie={seriesUID}
-              onClick={props.jumpToAim}
+              onClick={(e) => props.jumpToAim(slideNo, seriesUID)}
               className="annsLink-table __tbody --cell"
             >
               {aim.name}
@@ -62,7 +62,7 @@ const annotationsLink = props => {
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,

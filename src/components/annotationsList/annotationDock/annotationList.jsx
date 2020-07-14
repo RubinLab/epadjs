@@ -88,9 +88,15 @@ class AnnotationsList extends React.Component {
     this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
   };
 
-  handleJumToAim = (e) => {
-    const { id, serie } = e.target.dataset;
-    this.props.dispatch(jumpToAim(serie, id, this.props.activePort));
+  handleJumpToAim = (slideNo, seriesUID) => {
+    const { activePort } = this.props;
+
+    window.dispatchEvent(
+      new CustomEvent("jumpToAimImage", { detail: { slideNo, activePort } })
+    );
+    // const { id, serie } = e.target.dataset;
+    // console.log("Id, serie", id, serie);
+    // this.props.dispatch(jumpToAim(serie, id, this.props.activePort));
   };
 
   getLabelArray = () => {
@@ -127,7 +133,6 @@ class AnnotationsList extends React.Component {
   };
 
   render = () => {
-    console.log("props", this.props);
     const { openSeries, activePort, aimsList } = this.props;
     const { imageID } = openSeries[activePort];
     const maxHeight = window.innerHeight * 0.6;
@@ -196,14 +201,13 @@ class AnnotationsList extends React.Component {
           user={aim.user}
           showLabel={aim.showLabel}
           onSingleToggle={this.handleToggleSingleLabel}
-          jumpToAim={this.handleJumToAim}
+          // jumpToAim={this.handleJumToAim}
           serie={seriesUID}
           label={calculations[aim.id]}
           openSeriesAimID={openSeries[activePort].aimID}
         />
       );
     });
-
     return (
       <React.Fragment>
         <div className="annotationList-container">
@@ -244,7 +248,7 @@ class AnnotationsList extends React.Component {
           <div style={{ maxHeight, overflow: "scroll" }}>{annList}</div>
           <AnnotationsLink
             imageAims={imageAims}
-            jumpToAim={this.handleJumToAim}
+            jumpToAim={this.handleJumpToAim}
           />
         </div>
       </React.Fragment>

@@ -148,6 +148,49 @@ class DisplayView extends Component {
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
+    window.addEventListener("jumpToAimImage", this.jumpToAimImage);
+  }
+
+  async componentDidUpdate(prevProps) {
+    const { pid, series, activePort, aimList } = this.props;
+    const {
+      series: prevSeries,
+      activePort: prevActivePort,
+      aimList: prevAimList,
+    } = prevProps;
+    const activeSerie = series[activePort];
+    const prevActiveSerie = prevSeries[prevActivePort];
+
+    if (this.props.series.length < 1) {
+      if (pid) this.props.history.push(`/search/${pid}`);
+      else return;
+      return;
+    }
+    if (
+      (prevProps.series !== this.props.series &&
+        prevProps.loading === true &&
+        this.props.loading === false) ||
+      (prevProps.series.length !== this.props.series.length &&
+        this.props.loading === false)
+    ) {
+      await this.setState({ isLoading: true });
+      this.getViewports();
+      this.getData();
+    }
+    // This is to handle late loading of aimsList from store but it also calls getData
+    // each time visibility of aims change
+    else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
+      console.log("Aim lists are not equal", aimList, prevAimList);
+      // this.getData();
+      this.renderAims();
+    }
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("markupSelected", this.handleMarkupSelected);
+    window.removeEventListener("markupCreated", this.handleMarkupCreated);
+    window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
+    window.removeEventListener("jumpToAimImage", this.jumpToAimImage);
   }
 
   toggleAnnotations = (event) => {
@@ -236,35 +279,6 @@ class DisplayView extends Component {
     return segAims;
   };
 
-  async componentDidUpdate(prevProps) {
-    const { pid, series, activePort } = this.props;
-    const { series: prevSeries, activePort: prevActivePort } = prevProps;
-    const activeSerie = series[activePort];
-    const prevActiveSerie = prevSeries[prevActivePort];
-
-    if (this.props.series.length < 1) {
-      if (pid) this.props.history.push(`/search/${pid}`);
-      else return;
-      return;
-    }
-    if (
-      (prevProps.series !== this.props.series &&
-        prevProps.loading === true &&
-        this.props.loading === false) ||
-      (prevProps.series.length !== this.props.series.length &&
-        this.props.loading === false)
-    ) {
-      await this.setState({ isLoading: true });
-      this.getViewports();
-      this.getData();
-    } else if (
-      !this.props.loading &&
-      activeSerie.aimID !== prevActiveSerie.aimID
-    ) {
-      this.jumpToAimImage(activeSerie, activePort);
-    }
-  }
-
   // getMarkups = (aimOfInterest) => {
   //   const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
   //   var markupsToReturn = {};
@@ -314,13 +328,8 @@ class DisplayView extends Component {
   //   return markupsToReturn;
   // };
 
-  componentWillUnmount() {
-    window.removeEventListener("markupSelected", this.handleMarkupSelected);
-    window.removeEventListener("markupCreated", this.handleMarkupCreated);
-    window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
-  }
-
   getData() {
+    console.log("Getting data", this.props);
     // clear the toolState they will be rendered again on next load
     const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
 
@@ -341,29 +350,40 @@ class DisplayView extends Component {
         activeLabelMapIndex: 0,
         prospectiveLabelMapIndex: 0,
       });
-      // clear the toolState they will be rendered again on next load
-      cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
-        {}
-      );
-      // clear the segmentation data as well
-      cornerstoneTools.store.modules.segmentation.state.series = {};
-      series.forEach((serie, serieIndex) => {
-        if (serie.aimID) {
-          this.openAimEditor(serie);
-        }
-        if (serie.imageAnnotations)
-          this.parseAims(
-            serie.imageAnnotations,
-            serie.seriesUID,
-            serie.studyUID,
-            serieIndex,
-            serie
-          );
-      });
+
+      this.renderAims();
+
       this.refreshAllViewports();
       // this.props.dispatch(clearActivePortAimID());
     });
   }
+
+  renderAims = (notShowAimEditor = false) => {
+    const { series } = this.props;
+    this.setState({
+      activeLabelMapIndex: 0,
+      prospectiveLabelMapIndex: 0,
+    });
+    // clear the toolState they will be rendered again on next load
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    // clear the segmentation data as well
+    cornerstoneTools.store.modules.segmentation.state.series = {};
+    series.forEach((serie, serieIndex) => {
+      console.log("seri iamge annotations", serie);
+      if (serie.aimID && !notShowAimEditor) {
+        console.log("sernin aimID si mi var", serie);
+        this.openAimEditor(serie);
+      }
+      if (serie.imageAnnotations)
+        this.parseAims(
+          serie.imageAnnotations,
+          serie.seriesUID,
+          serie.studyUID,
+          serieIndex,
+          serie
+        );
+    });
+  };
 
   async getImages(serie) {
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
@@ -495,9 +515,7 @@ class DisplayView extends Component {
   };
 
   getImageIndex = (serie, cornerstoneImageIds) => {
-    let { aimID, imageAnnotations } = serie;
-    const { series, activePort } = this.props;
-    const { studyUID, seriesUID } = series[activePort];
+    let { aimID, imageAnnotations, studyUID, seriesUID } = serie;
     if (imageAnnotations) {
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
@@ -760,7 +778,15 @@ class DisplayView extends Component {
       this.linesToPerpendicular(values); //change the perendicular lines to bidirectional to render by CS
       values.forEach((value) => {
         const { markupType, aimUid } = value;
-        if (markupType === "DicomSegmentationEntity")
+        if (markupType === "DicomSegmentationEntity") {
+          console.log(
+            "getting segmentation of series, study, aim, aimIndex, serieIndex",
+            seriesUid,
+            studyUid,
+            aimUid,
+            aimIndex,
+            serieIndex
+          );
           this.getSegmentationData(
             seriesUid,
             studyUid,
@@ -768,6 +794,7 @@ class DisplayView extends Component {
             aimIndex,
             serieIndex
           );
+        }
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
 
         let imageId = getWadoImagePath(studyUid, seriesUid, key);
@@ -777,6 +804,7 @@ class DisplayView extends Component {
           imageId = imageId.split("&frame=")[0];
 
         this.renderMarkup(imageId, value, color);
+        this.refreshAllViewports();
         // if (aimUid === serie.aimID) this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
       });
     });
@@ -932,6 +960,12 @@ class DisplayView extends Component {
           imageIds.length,
           segmentsOnFrame
         );
+        console.log(
+          "I have rendered ",
+          aimId,
+          "with labelMapIndex :",
+          activeLabelMapIndex
+        );
 
         const { element } = cornerstone.getEnabledElements()[serieIndex];
         if (this.state.selectedAim) {
@@ -1035,6 +1069,7 @@ class DisplayView extends Component {
   };
 
   renderLine = (imageId, markup, color) => {
+    console.log("Im rendering for image", imageId);
     const data = JSON.parse(JSON.stringify(line));
     data.color = color;
     data.aimId = markup.aimUid;
@@ -1140,8 +1175,8 @@ class DisplayView extends Component {
       activeLabelMapIndex: 0,
     });
     this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
-    this.getData();
-    this.refreshAllViewports();
+    this.renderAims(true);
+    // this.refreshAllViewports();
     return 1;
   };
 
@@ -1190,7 +1225,6 @@ class DisplayView extends Component {
     // set the state to preserve the imageId
     this.setState({ data: tempData });
     // dispatch to write the newImageId to store
-    console.log("dispatching with image id", imageId);
     this.props.dispatch(updateImageId(imageId));
   };
 
@@ -1205,20 +1239,22 @@ class DisplayView extends Component {
     this.closeViewport();
   };
 
-  jumpToAimImage = (activeSerie, activePort) => {
-    try {
-      const { imageIds } = this.state.data[activePort].stack;
-      const imageIndex = this.getImageIndex(activeSerie, imageIds);
-      this.jumpToImage(imageIndex);
-    } catch (error) {
-      console.error(error);
-    }
+  // Triggered by event from right bar to jump to the image of aim
+  jumpToAimImage = (event) => {
+    const { slideNo, activePort } = event.detail;
+    const imageIndex = slideNo - 1;
+    console.log("Slide no", slideNo);
+    this.jumpToImage(imageIndex, activePort);
   };
 
-  jumpToImage = (imageIndex) => {
-    const { activePort } = this.props;
+  // Don't take the activePort Index from props because store updates late so
+  // activePort may be null while the event is triggered
+  jumpToImage = (imageIndex, activePortIndex) => {
     const newData = [...this.state.data];
-    newData[activePort].stack.currentImageIdIndex = parseInt(imageIndex, 10);
+    newData[activePortIndex].stack.currentImageIdIndex = parseInt(
+      imageIndex,
+      10
+    );
     this.setState({ data: newData });
   };
 
@@ -1231,7 +1267,7 @@ class DisplayView extends Component {
     const images = this.state.data[this.props.activePort].stack.imageIds;
     // check if there is such an image
     if (isNaN(imageIndex) || !images[imageIndex]) return;
-    this.jumpToImage(imageIndex);
+    this.jumpToImage(imageIndex, i);
   };
 
   render() {
