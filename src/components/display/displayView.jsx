@@ -173,6 +173,13 @@ class DisplayView extends Component {
       (prevProps.series.length !== this.props.series.length &&
         this.props.loading === false)
     ) {
+      console.log(
+        "In update",
+        prevProps.series,
+        prevProps.loading,
+        this.props.series,
+        this.props.loading
+      );
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
@@ -191,6 +198,7 @@ class DisplayView extends Component {
     window.removeEventListener("markupCreated", this.handleMarkupCreated);
     window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
     window.removeEventListener("jumpToAimImage", this.jumpToAimImage);
+    console.log("Unmounting");
   }
 
   toggleAnnotations = (event) => {
@@ -240,7 +248,11 @@ class DisplayView extends Component {
 
   setVisibilityOfSegmentations = (aimID, element, setVisibilityTo) => {
     const { series, activePort, aimSegLabelMaps } = this.props;
-    console.log("aimID, aimSegLabelMaps", aimID, aimSegLabelMaps);
+    console.log(
+      "Setting visibility of segmentation aimID, aimSegLabelMaps",
+      aimID,
+      aimSegLabelMaps
+    );
     const { seriesUID } = series[activePort];
     const { setters, getters } = cornerstoneTools.getModule("segmentation");
     if (aimID) {
@@ -347,8 +359,8 @@ class DisplayView extends Component {
       this.setState({
         data: res,
         isLoading: false,
-        activeLabelMapIndex: 0,
-        prospectiveLabelMapIndex: 0,
+        // activeLabelMapIndex: 0,
+        // prospectiveLabelMapIndex: 0,
       });
 
       this.renderAims();
@@ -371,7 +383,6 @@ class DisplayView extends Component {
     series.forEach((serie, serieIndex) => {
       console.log("seri iamge annotations", serie);
       if (serie.aimID && !notShowAimEditor) {
-        console.log("sernin aimID si mi var", serie);
         this.openAimEditor(serie);
       }
       if (serie.imageAnnotations)
@@ -779,15 +790,7 @@ class DisplayView extends Component {
       values.forEach((value) => {
         const { markupType, aimUid } = value;
         if (markupType === "DicomSegmentationEntity") {
-          console.log(
-            "getting segmentation of series, study, aim, aimIndex, serieIndex",
-            seriesUid,
-            studyUid,
-            aimUid,
-            aimIndex,
-            serieIndex
-          );
-          this.getSegmentationData(
+          this.handleSegmentations(
             seriesUid,
             studyUid,
             aimUid,
@@ -795,6 +798,7 @@ class DisplayView extends Component {
             serieIndex
           );
         }
+
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
 
         let imageId = getWadoImagePath(studyUid, seriesUid, key);
@@ -808,6 +812,44 @@ class DisplayView extends Component {
         // if (aimUid === serie.aimID) this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
       });
     });
+  };
+
+  handleSegmentations = async (
+    seriesUid,
+    studyUid,
+    aimUid,
+    aimIndex,
+    serieIndex
+  ) => {
+    console.log(
+      "Checking segmentation before renderind segmentation: ",
+      aimUid,
+      "state is",
+      this.state.aimLabelMaps
+    );
+    const { aimLabelMaps, activeLabelMapIndex } = this.state;
+    if (aimLabelMaps[aimUid]) {
+      console.log(
+        "I'm returning because ",
+        aimUid,
+        "is already rendering with ",
+        aimLabelMaps[aimUid]
+      );
+      return; // This seg has already been loaded
+    }
+    this.setState({
+      activeLabelMapIndex: activeLabelMapIndex + 1,
+      aimLabelMaps: { ...aimLabelMaps, [aimUid]: activeLabelMapIndex },
+    }); //set the index state for next render
+
+    this.getSegmentationData(
+      seriesUid,
+      studyUid,
+      aimUid,
+      aimIndex,
+      serieIndex,
+      activeLabelMapIndex
+    );
   };
 
   linesToPerpendicular = (values) => {
@@ -903,7 +945,14 @@ class DisplayView extends Component {
     }, {});
   };
 
-  getSegmentationData = (seriesUID, studyUID, aimId, aimIndex, serieIndex) => {
+  getSegmentationData = (
+    seriesUID,
+    studyUID,
+    aimId,
+    aimIndex,
+    serieIndex,
+    activeLabelMapIndex
+  ) => {
     const { aimList } = this.props;
 
     const segmentationEntity =
@@ -915,7 +964,7 @@ class DisplayView extends Component {
     const pathVariables = { studyUID, seriesUID: seriesInstanceUid.root };
 
     getSegmentation(pathVariables, sopInstanceUid.root).then(({ data }) => {
-      this.renderSegmentation(data, aimId, serieIndex);
+      this.renderSegmentation(data, aimId, serieIndex, activeLabelMapIndex);
     });
   };
 
@@ -923,7 +972,12 @@ class DisplayView extends Component {
     return new Promise((resolve) => setTimeout(resolve, ms));
   };
 
-  renderSegmentation = (arrayBuffer, aimId, serieIndex) => {
+  renderSegmentation = (
+    arrayBuffer,
+    aimId,
+    serieIndex,
+    activeLabelMapIndex
+  ) => {
     try {
       const { imageIds } = this.state.data[serieIndex].stack;
 
@@ -933,7 +987,6 @@ class DisplayView extends Component {
 
       Promise.all(imagePromises).then(() => {
         // const stackToolState = cornerstoneTools.getToolState(element, "stack");
-
         // const imageIds = stackToolState.data[0].imageIds;
         const {
           labelmapBuffer,
@@ -946,11 +999,6 @@ class DisplayView extends Component {
         );
 
         const { setters } = cornerstoneTools.getModule("segmentation");
-        const { activeLabelMapIndex, aimLabelMaps } = this.state;
-        this.setState({
-          activeLabelMapIndex: activeLabelMapIndex + 1,
-          aimLabelMaps: { ...aimLabelMaps, [aimId]: activeLabelMapIndex },
-        }); //set the index state for next render
 
         setters.labelmap3DByFirstImageId(
           imageIds[0],
@@ -973,7 +1021,10 @@ class DisplayView extends Component {
           //an aim is being edited don't set the label map index because aim's segs should be brushed
           this.setActiveLabelMapOfAim(this.state.selectedAim, element);
         } else {
-          this.setActiveLabelMapIndex(this.state.activeLabelMapIndex, element);
+          this.setActiveLabelMapIndex(
+            this.state.activeLabelMapIndex + 1,
+            element
+          );
         }
         console.log(
           "dipsatching, aimId, activeLabelMapIndex",
@@ -1069,7 +1120,6 @@ class DisplayView extends Component {
   };
 
   renderLine = (imageId, markup, color) => {
-    console.log("Im rendering for image", imageId);
     const data = JSON.parse(JSON.stringify(line));
     data.color = color;
     data.aimId = markup.aimUid;
@@ -1243,7 +1293,6 @@ class DisplayView extends Component {
   jumpToAimImage = (event) => {
     const { slideNo, activePort } = event.detail;
     const imageIndex = slideNo - 1;
-    console.log("Slide no", slideNo);
     this.jumpToImage(imageIndex, activePort);
   };
 
