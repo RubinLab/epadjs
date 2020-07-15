@@ -10,6 +10,7 @@ import "../menuStyle.css";
 
 const messages = {
   fillRequiredFields: "Please fill the required fields",
+  missingReqField: "Please fill all the fileds",
 };
 
 class WorklistCreationForm extends React.Component {
@@ -99,6 +100,25 @@ class WorklistCreationForm extends React.Component {
     }
   };
 
+  validateRequirements = reqs => {
+    const { level, template, numOfAims } = reqs
+      ? reqs
+      : this.state.requirements;
+    const validLevel = level && level !== "--- Select Level ---";
+    const validTemplate = template && template !== "--- Select Template ---";
+    const validNumOfAims =
+      numOfAims && !isNaN(parseInt(numOfAims)) && parseInt(numOfAims);
+    const unselectedLevel =
+      level === undefined || level.includes("Select Level");
+    const unselectedTemplate =
+      template === undefined || template.includes("Select Template");
+    const unselectedAims = numOfAims === undefined || numOfAims === "";
+    const noneSelected =
+      unselectedLevel && unselectedTemplate && unselectedAims;
+    const allSelected = validLevel && validTemplate && validNumOfAims;
+    return noneSelected || allSelected;
+  };
+
   handleFormInput = e => {
     if (this.state.id && this.state.name) this.setState({ error: "" });
     const { name, value } = e.target;
@@ -123,6 +143,10 @@ class WorklistCreationForm extends React.Component {
       this.setState({ error: null });
     }
     this.setState({ requirements: newRequirement });
+
+    this.validateRequirements(newRequirement)
+      ? this.setState({ error: "" })
+      : this.setState({ error: messages.missingReqField });
   };
 
   render = () => {
@@ -141,7 +165,9 @@ class WorklistCreationForm extends React.Component {
       button2Text = "Submit";
       const assigneeListArr = Object.keys(this.state.assigneeList);
       button2Func = this.handleSaveWorklist;
-      if (assigneeListArr.length === 0) disableSubmit = true;
+      if (assigneeListArr.length === 0 || !this.validateRequirements()) {
+        disableSubmit = true;
+      }
     }
 
     const options = [];
@@ -165,16 +191,14 @@ class WorklistCreationForm extends React.Component {
     // month = month < 10 ? `0${month}` : `${month}`;
     // const year = date.getFullYear();
     // date = `${year}-${month}-${day}`;
-    
+
     return (
       // <Modal.Dialog dialogClassName="add-worklist__modal">
       <Modal.Dialog id="modal-fix" className="in-modal">
         <Modal.Header>
           <Modal.Title>New worklist</Modal.Title>
         </Modal.Header>
-        <Modal.Body
-          className="add-worklist__mbody"
-        >
+        <Modal.Body className="add-worklist__mbody">
           {!this.state.page && (
             <form className="add-worklist__modal--form">
               <h5 className="add-worklist__modal--label">Name*</h5>
