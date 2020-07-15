@@ -10,7 +10,7 @@ import "../menuStyle.css";
 
 const messages = {
   fillRequiredFields: "Please fill the required fields",
-  missingReqField: "Please fill all the fileds",
+  missingReqField: "Please fill or clear all requirement fields before submit",
 };
 
 class WorklistCreationForm extends React.Component {
@@ -66,9 +66,15 @@ class WorklistCreationForm extends React.Component {
       this.setState({ error: messages.fillRequiredFields });
     } else {
       description = description ? description : "";
-
+      const { level, template, numOfAims } = requirements;
+      const unselectedLevel =
+        level === undefined || level.includes("Select Level");
+      const unselectedTemplate =
+        template === undefined || template.includes("Select Template");
+      const unselectedAims = numOfAims === undefined || numOfAims === "";
+      const hasReqCleared = unselectedAims && unselectedTemplate && unselectedLevel;
       const body = {};
-      if (Object.keys(requirements).length > 0) {
+      if (Object.keys(requirements).length > 0 && !hasReqCleared) {
         promise.push(
           saveWorklist(id, name, assigneeList, description, duedate, [
             requirements,

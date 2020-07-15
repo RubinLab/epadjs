@@ -1,5 +1,5 @@
 import React from "react";
-import { getTemplatesOfProjects } from "../../../services/templateServices";
+import { getTemplatesUniversal } from "../../../services/templateServices";
 
 class RequirementForm extends React.Component {
   state = {
@@ -7,17 +7,21 @@ class RequirementForm extends React.Component {
     error: null,
     level: null,
     numOfAims: null,
-    template: null
+    template: null,
   };
 
   componentDidMount = async () => {
-    const { data } = await getTemplatesOfProjects();
-    const templates = {};
-    console.log(data);
-    data.forEach((el, i) => {
-      templates[el.Template[0].templateUID] = el.Template[0].templateCodeValue;
-    });
-    this.setState({ templates });
+    try {
+      const { data } = await getTemplatesUniversal();
+      const templates = {};
+      data.forEach((el, i) => {
+        templates[el.Template[0].templateUID] =
+          el.Template[0].templateCodeValue;
+      });
+      this.setState({ templates });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   renderOptions = (arr, field) => {
