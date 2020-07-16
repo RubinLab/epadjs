@@ -27,12 +27,17 @@ import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import {
   clearAimId,
   getNotificationsData,
+  getSingleSerie,
+  addToGrid,
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
 import { getSubjects, getSubject } from "./services/subjectServices";
 import { getStudies, getStudy } from "./services/studyServices";
 import { getSeries, getSingleSeries } from "./services/seriesServices";
+
+import { decrypt, decryptAndAdd } from "./services/decryptUrlService";
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -345,6 +350,18 @@ class App extends Component {
             displayname: result.userInfo.given_name,
           };
           await auth.login(user, null, result.keycloak);
+
+          // TEACHING FILES RELATED //
+          const { search } = this.props.location;
+          let args;
+          if (search && (args = search.split("?arg=")[1])) {
+            console.log("ARGS:", args);
+            const { patientID, studyUID, projectID } = await decrypt(args);
+            console.log("Result", patientID, studyUID);
+            this.props.dispatch(addToGrid({ patientID, studyUID }));
+            this.props.dispatch(getSingleSerie({ patientID, studyUID }));
+          }
+
           this.setState({
             keycloak: result.keycloak,
             authenticated: result.authenticated,
@@ -573,7 +590,7 @@ class App extends Component {
   };
 
   sortLevelArr = (arr, attribute) => {
-    return arr.sort(function(a, b) {
+    return arr.sort(function (a, b) {
       if (a.data[attribute] < b.data[attribute]) {
         return -1;
       }
@@ -635,7 +652,7 @@ class App extends Component {
   };
 
   findNonExisting = (arr, uid, level) => {
-    const result = arr.filter(el => el[level] === uid);
+    const result = arr.filter((el) => el[level] === uid);
     return result[0];
   };
 
@@ -714,6 +731,7 @@ class App extends Component {
   };
 
   render() {
+    console.log("APP props", this.props);
     const {
       notifications,
       mode,
@@ -949,8 +967,7 @@ class App extends Component {
   }
 }
 
-
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   // console.log(state.managementReducer);
   // console.log(state.annotationsListReducer);
   const {
