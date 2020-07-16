@@ -171,6 +171,7 @@ class Projects extends React.Component {
 
   editProject = async () => {
     const { name, description, defaulttemplate, id, type } = this.state;
+
     const editData = updateProject(
       id,
       name,
@@ -468,6 +469,7 @@ class Projects extends React.Component {
                   description: original.row.checkbox.description,
                   type: original.row.checkbox.type,
                   projectIndex: original.index,
+                  defaulttemplate: original.row.checkbox.defaultTemplate,
                 });
               }}
             >
