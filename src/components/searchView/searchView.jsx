@@ -957,6 +957,7 @@ class SearchView extends Component {
           showTagEditor={lengthOfSeries > 0}
           project={this.props.match.params.pid}
           onAddProject={this.handleProjectClick}
+          admin={this.props.admin}
           // expanding={expanding}
         />
         {isSerieSelectionOpen && !this.props.loading && (

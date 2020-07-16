@@ -8,6 +8,7 @@ const permissionTable = ({ userPermission, onSelect }) => {
     "CreatePAC",
     "CreateAutoPACQuery",
     "CreateProject",
+    "CreateWorklist"
   ];
   const rows = [];
   userPermission = userPermission || [];
