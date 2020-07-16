@@ -291,6 +291,7 @@ class App extends Component {
         sessionStorage.setItem("auth", auth);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
         this.completeAutorization(apiUrl);
+
         if (mode === "lite") this.setState({ pid: "lite" });
       })
       .catch((err) => {
