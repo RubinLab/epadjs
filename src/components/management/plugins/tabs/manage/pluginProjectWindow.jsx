@@ -64,8 +64,8 @@ class PluginProjectWindow extends React.Component {
 
   render() {
     return (
-      <div>
-        <Modal.Dialog dialogClassName="create-user__modal">
+      <div className="plugin_project_container">
+        <Modal.Dialog dialogClassName="pluginproject_modal">
           <Modal.Header>
             <Modal.Title>Projects</Modal.Title>
           </Modal.Header>

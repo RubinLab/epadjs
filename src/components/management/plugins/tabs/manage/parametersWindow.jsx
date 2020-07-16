@@ -376,12 +376,12 @@ class ParametersWindow extends React.Component {
     const { error } = this.props;
     console.log(this.props.data);
     return (
-      <div className="tools menu-display" id="template">
-        <Modal.Dialog className="create-plugin__modal">
-          <Modal.Header>
-            <Modal.Title>Paramaters</Modal.Title>
-          </Modal.Header>
-          <Modal.Body className="create-user__modal--body">
+      <div className="parameter_window_container" id="plugin_paramwindow">
+        <div className="parameter_window_modal">
+          <div className="parameter_window_header">
+            <div className="title">Paramaters</div>
+          </div>
+          <div className="parameter_window_modal_body">
             {!this.state.addnew && (
               <ReactTable
                 className="pro-table"
@@ -404,8 +404,8 @@ class ParametersWindow extends React.Component {
             {this.state.addnew && (
               <div>
                 <h5>add new parameter</h5>
-                <form className="add-project__modal--form">
-                  <h5 className="add-project__modal--label">id*</h5>
+                <form className="parameter_window_modal_form">
+                  <h5 className="parameter_window_modal_label">id*</h5>
                   <select
                     className="pluginaddqueueselect"
                     id="paramid"
@@ -416,7 +416,7 @@ class ParametersWindow extends React.Component {
                   >
                     {this.prepareDropDownHtmlForParameterIds()}
                   </select>
-                  <h5 className="add-project__modal--label">Name</h5>
+                  <h5 className="parameter_window_modal_label">Name</h5>
                   <input
                     onMouseDown={(e) => e.stopPropagation()}
                     className="add-project__modal--input"
@@ -426,7 +426,7 @@ class ParametersWindow extends React.Component {
                     id="form-first-element"
                     value={this.state.parameterFormElements.name}
                   />
-                  <h5 className="add-project__modal--label">format*</h5>
+                  <h5 className="parameter_window_modal_label">format*</h5>
                   <select
                     className="pluginaddqueueselect"
                     id="format"
@@ -437,7 +437,7 @@ class ParametersWindow extends React.Component {
                   >
                     {this.prepareDropDownHtmlForParameterFormat()}
                   </select>
-                  <h5 className="add-project__modal--label">prefix</h5>
+                  <h5 className="parameter_window_modal_label">prefix</h5>
                   <input
                     onMouseDown={(e) => e.stopPropagation()}
                     className="add-project__modal--input"
@@ -447,7 +447,9 @@ class ParametersWindow extends React.Component {
                     id="form-first-element"
                     value={this.state.parameterFormElements.prefix}
                   />
-                  <h5 className="add-project__modal--label">input binding</h5>
+                  <h5 className="parameter_window_modal_label">
+                    input binding
+                  </h5>
                   <input
                     onMouseDown={(e) => e.stopPropagation()}
                     className="add-project__modal--input"
@@ -457,7 +459,9 @@ class ParametersWindow extends React.Component {
                     id="form-first-element"
                     value={this.state.parameterFormElements.inputBinding}
                   />
-                  <h5 className="add-project__modal--label">Default value</h5>
+                  <h5 className="parameter_window_modal_label">
+                    Default value
+                  </h5>
                   <input
                     onMouseDown={(e) => e.stopPropagation()}
                     className="add-project__modal--input"
@@ -466,7 +470,7 @@ class ParametersWindow extends React.Component {
                     value={this.state.parameterFormElements.default_value}
                     onChange={this.handleFormElementChange}
                   />
-                  <h5 className="add-project__modal--label">Type</h5>
+                  <h5 className="parameter_window_modal_label">Type</h5>
                   <select
                     className="pluginaddqueueselect"
                     id="type"
@@ -477,7 +481,7 @@ class ParametersWindow extends React.Component {
                   >
                     {this.prepareDropDownHtmlForParameterType()}
                   </select>
-                  <h5 className="add-project__modal--label">Description</h5>
+                  <h5 className="parameter_window_modal_label">Description</h5>
                   <input
                     onMouseDown={(e) => e.stopPropagation()}
                     className="add-project__modal--input"
@@ -492,9 +496,9 @@ class ParametersWindow extends React.Component {
                 </form>
               </div>
             )}
-          </Modal.Body>
+          </div>
           {this.state.addnew && !this.state.editParam && (
-            <Modal.Footer className="create-user__modal--footer">
+            <div className="parameter_window_modal_footer">
               <div className="create-user__modal--buttons">
                 <button
                   variant="primary"
@@ -511,10 +515,10 @@ class ParametersWindow extends React.Component {
                   Close
                 </button>
               </div>
-            </Modal.Footer>
+            </div>
           )}
           {this.state.editParam && (
-            <Modal.Footer className="create-user__modal--footer">
+            <div className="parameter_window_modal_footer">
               <div className="create-user__modal--buttons">
                 <button
                   variant="primary"
@@ -531,10 +535,10 @@ class ParametersWindow extends React.Component {
                   Close
                 </button>
               </div>
-            </Modal.Footer>
+            </div>
           )}
           {!this.state.addnew && (
-            <Modal.Footer className="create-user__modal--footer">
+            <div className="parameter_window_modal_footer">
               <div className="create-user__modal--buttons">
                 <button
                   variant="primary"
@@ -551,9 +555,9 @@ class ParametersWindow extends React.Component {
                   Close
                 </button>
               </div>
-            </Modal.Footer>
+            </div>
           )}
-        </Modal.Dialog>
+        </div>
       </div>
     );
   }

@@ -136,3 +136,60 @@
   font-style: italic;
   cursor: pointer;
 }
+.plugin_project_container,
+.parameter_window_container,
+.create_plugin_container {
+  position: fixed;
+  top: 5px;
+  width: 100%;
+  bottom: 10%;
+}
+.create_plugin_modal {
+  width: 100%;
+}
+.parameter_window_modal {
+  width: 100%;
+}
+.create_plugin_modal_body,
+.parameter_window_modal_body {
+  width: 80%;
+  background-color: #2d3440;
+  margin: auto;
+}
+.create_plugin_modal_footer,
+.parameter_window_modal_footer {
+  width: 80%;
+  height: 50px;
+  background-color: #2d3440;
+  margin: auto;
+  border-top: #20272e;
+  border-top-style: solid;
+  border-width: 2px;
+  vertical-align: middle;
+  text-align: right;
+  padding-right: 5%;
+  padding-top: 10px;
+}
+
+.create_plugin_header,
+.parameter_window_header {
+  width: 80%;
+  height: 40px;
+  background-color: #2d3440;
+  margin: auto;
+  border-bottom: #20272e;
+  border-bottom-style: solid;
+  border-width: 2px;
+  vertical-align: middle;
+  text-align: center;
+}
+.pluginmain_container {
+  margin-top: 10px;
+  width: 95%;
+  height: 95%;
+}
+.plugin_manage_table {
+  width: 100%;
+  height: 80%;
+  margin: auto;
+}

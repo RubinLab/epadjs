@@ -16,11 +16,12 @@ export var AimEditor = function (
   //this.mapHtmlObjects = new Map(); not used
   //this.mapHtmlSelectObjectsKeyValue = new Map(); not used
   // this.mapAllowedTermCollectionByCodeValue = new Map(); not used
-
+  console.log("new aimeditor -----");
   var self = this;
   var domelements = [];
   var selectid = 0;
   this.handlerSetAimDirty = setAimDirty;
+  this.activateDirtyCheck = false;
   this.fontcolor = "#c9cdd4";
   this.fontsize = "13px";
   this.fontweight = "1500";
@@ -134,7 +135,7 @@ export var AimEditor = function (
   };
 
   this.loadTemplates = function (templateList) {
-    console.log("templatelist", templateList);
+    console.log("load templates called : templatelist", templateList);
     let defaultTempCodeVal = "";
     if (templateList.default) {
       defaultTempCodeVal = templateList.default;
@@ -166,6 +167,7 @@ export var AimEditor = function (
     //var x = document.createElement("INPUT");
     //x.setAttribute("type", "file");
     //x.addEventListener('change', self.readx, false);
+    console.log("create viewer -------");
     self.renderButtonhandler(true);
     self.mainWindowDiv = document.createElement("div");
 
@@ -226,7 +228,7 @@ export var AimEditor = function (
 
     self.templateListDiv.appendChild(self.templateSelect);
     self.userWindow.appendChild(self.mainWindowDiv);
-
+    self.templateShapeArray = [];
     self.templateSelect.onchange = function () {
       // Mete thinks name and comment should be preserved on Template change
       // self.aimComment = "";
@@ -252,9 +254,11 @@ export var AimEditor = function (
       self.mapLabelSubComment = new Map();
       self.mapLabelCommentJson = new Map();
       self.mapLabelUid = new Map();
+      self.templateShapeArray = [];
       if (self.templateSelectedIndex > -1) {
         self.jsonTemplateCopy = self.arrayTemplatesJsonObjects[this.value];
         self.extractTemplate(self.jsonTemplateCopy);
+
         //self.renderButtonhandler(true);
       }
       // else {
@@ -307,6 +311,9 @@ export var AimEditor = function (
     labelAnnotationNameInput.value = this.aimName;
 
     labelAnnotationNameInput.onkeyup = function () {
+      if (self.activateDirtyCheck) {
+        self.handlerSetAimDirty(); // added to set dirtflag
+      }
       self.aimName = this.value;
     };
 
@@ -336,6 +343,9 @@ export var AimEditor = function (
     commentDiv.appendChild(textareaDomObject);
 
     textareaDomObject.onkeyup = function () {
+      if (self.activateDirtyCheck) {
+        self.handlerSetAimDirty(); // added to set dirtflag
+      }
       self.aimComment = this.value;
     };
 
@@ -465,11 +475,14 @@ export var AimEditor = function (
     $('select[class^="ui dropdown"]').dropdown();
     $(".ui.accordion").accordion();
     console.log(
-      "rxtract template self.runtimeUserShapes",
+      "extract template self.runtimeUserShapes",
       self.runtimeUserShapes
     );
+    console.log("*** checkshape called from extract template");
     self.checkShapes({});
     self.formCheckHandler(self.checkFormSaveReady());
+    console.log("extrating template is done ---> go back to loadaim");
+    //  self.activateDirtyCheck = true;
   };
 
   this.QuestionType = function (
@@ -947,7 +960,9 @@ export var AimEditor = function (
     var preselected = "";
     $("#" + selectDiv.id).dropdown({
       onChange: function (val, text) {
-        self.handlerSetAimDirty(); // added to set dirtflag
+        if (self.activateDirtyCheck) {
+          self.handlerSetAimDirty(); // added to set dirtflag
+        }
         if (text[0] == "<") {
           var words = text.split("<label>");
           var words = words[1].split("</label>");
@@ -1331,7 +1346,9 @@ export var AimEditor = function (
     selectid++;
     quantileSelect.id = subOrderLabel;
     quantileSelect.addEventListener("change", function () {
-      self.handlerSetAimDirty(); // added to set dirtflag
+      if (self.activateDirtyCheck) {
+        self.handlerSetAimDirty(); // added to set dirtflag
+      }
       var i = 0;
       var scaleArraysize = object.length;
       for (i = 0; i < scaleArraysize; i++) {
@@ -1388,7 +1405,9 @@ export var AimEditor = function (
     selectid++;
     quantileSelect.id = "Select" + parent.name;
     quantileSelect.addEventListener("change", function () {
-      self.handlerSetAimDirty(); // added to set dirtflag
+      if (self.activateDirtyCheck) {
+        self.handlerSetAimDirty(); // added to set dirtflag
+      }
       var i = 0;
       var scaleArraysize = object.length;
       for (i = 0; i < scaleArraysize; i++) {
@@ -1488,7 +1507,9 @@ export var AimEditor = function (
       subEObject.valueLabel = quantileSelect.options[0].value;
 
       quantileSelect.addEventListener("change", function () {
-        self.handlerSetAimDirty(); // added to set dirtflag
+        if (self.activateDirtyCheck) {
+          self.handlerSetAimDirty(); // added to set dirtflag
+        }
         var i = 0;
         var scaleArraysize = object.length;
         console.log("quatile on select : ", object);
@@ -1537,7 +1558,9 @@ export var AimEditor = function (
     selectid++;
     intervalSelect.id = "Select" + parent.name;
     intervalSelect.addEventListener("change", function () {
-      self.handlerSetAimDirty(); // added to set dirtflag
+      if (self.activateDirtyCheck) {
+        self.handlerSetAimDirty(); // added to set dirtflag
+      }
       var i = 0;
       var scaleArraysize = object.length;
       for (i = 0; i < scaleArraysize; i++) {
@@ -1580,7 +1603,9 @@ export var AimEditor = function (
     selectid++;
     quantileSelect.id = "Select" + parent.name;
     quantileSelect.addEventListener("change", function () {
-      self.handlerSetAimDirty(); // added to set dirtflag
+      if (self.activateDirtyCheck) {
+        self.handlerSetAimDirty(); // added to set dirtflag
+      }
       var i = 0;
       var scaleArraysize = object.length;
       for (i = 0; i < scaleArraysize; i++) {
@@ -1641,7 +1666,9 @@ export var AimEditor = function (
     div.appendChild(label);
 
     radioInput.onclick = function () {
-      self.handlerSetAimDirty(); // added to set dirtflag
+      if (self.activateDirtyCheck) {
+        self.handlerSetAimDirty(); // added to set dirtflag
+      }
       var getAllowTGroup = prObject;
       var getAllowTGroupSize = getAllowTGroup.AllowedTerm.length;
       var i = 0;
@@ -1734,7 +1761,9 @@ export var AimEditor = function (
     div.appendChild(label);
 
     radioInput.onclick = function () {
-      self.handlerSetAimDirty(); // added to set dirtflag
+      if (self.activateDirtyCheck) {
+        self.handlerSetAimDirty(); // added to set dirtflag
+      }
       prObject.select = "1";
       var getAllowTGroup = validTermObj.primitiveObjATSparent;
       var getAllowTGroupSize = getAllowTGroup.AllowedTerm.length;
@@ -1837,7 +1866,9 @@ export var AimEditor = function (
     labelHolder.appendChild(label);
 
     optionInput.addEventListener("click", function () {
-      self.handlerSetAimDirty(); // added to set dirtflag
+      if (self.activateDirtyCheck) {
+        self.handlerSetAimDirty(); // added to set dirtflag
+      }
       console.log("next id", allowedTermObj.nextId);
       console.log("clicked situation", this.selected);
       var checkmarkObj = self.mapCardinalitiesToCheckId.get(prObject.id);
@@ -1948,7 +1979,9 @@ export var AimEditor = function (
     labelHolder.appendChild(label);
 
     optionInput.addEventListener("click", function () {
-      self.handlerSetAimDirty(); // added to set dirtflag
+      if (self.activateDirtyCheck) {
+        self.handlerSetAimDirty(); // added to set dirtflag
+      }
       var checkmarkObj = self.mapCardinalitiesToCheckId.get(vtPrObject.id);
       checkmarkObj.ok = "true";
 
@@ -2015,7 +2048,9 @@ export var AimEditor = function (
     let nextIdExist = false;
     let nomoreQuestionExist = false;
     checkbox.onclick = function () {
-      self.handlerSetAimDirty(); // added to set dirtflag
+      if (self.activateDirtyCheck) {
+        self.handlerSetAimDirty(); // added to set dirtflag
+      }
       console.log("check box parent :", prObject);
       allowedTermObj.changeOnSelect("1", self.AfterClick);
 
@@ -2131,7 +2166,9 @@ export var AimEditor = function (
     };
 
     checkbox.onclick = function () {
-      self.handlerSetAimDirty(); // added to set dirtflag
+      if (self.activateDirtyCheck) {
+        self.handlerSetAimDirty(); // added to set dirtflag
+      }
       validTermObj.changeOnSelect("1", self.AfterClick);
 
       var checkmarkObj = self.mapCardinalitiesToCheckId.get(vtPrObject.id);
@@ -2210,7 +2247,9 @@ export var AimEditor = function (
           annotConfInput.value = 0;
 
           annotConfInput.onchange = function () {
-            self.handlerSetAimDirty(); // added to set dirtflag
+            if (self.activateDirtyCheck) {
+              self.handlerSetAimDirty(); // added to set dirtflag
+            }
             annotConfShowValueInput.value = this.value;
             objectToCheckAnnConf.selectac = this.value / 100;
           };
@@ -3785,20 +3824,21 @@ export var AimEditor = function (
               self.templateShapeArray[t].domid
             ).className = "green check circle outline icon";
           }
-        }
-      }
-      if (anyShapeFlag === true) {
-        for (let cnt = 0; cnt < templateShapeArrayLength; cnt++) {
-          document.getElementById(
-            self.templateShapeArray[cnt].domid
-          ).className = "green check circle outline icon";
-        }
-      }
-      if (anyClosedShapeFlag === true) {
-        for (let cnt = 0; cnt < templateShapeArrayLength; cnt++) {
-          document.getElementById(
-            self.templateShapeArray[cnt].domid
-          ).className = "green check circle outline icon";
+
+          if (anyShapeFlag === true) {
+            for (let cnt = 0; cnt < templateShapeArrayLength; cnt++) {
+              document.getElementById(
+                self.templateShapeArray[cnt].domid
+              ).className = "green check circle outline icon";
+            }
+          }
+          if (anyClosedShapeFlag === true) {
+            for (let cnt = 0; cnt < templateShapeArrayLength; cnt++) {
+              document.getElementById(
+                self.templateShapeArray[cnt].domid
+              ).className = "green check circle outline icon";
+            }
+          }
         }
       }
     }
@@ -3831,6 +3871,9 @@ export var AimEditor = function (
         textaDomObject.style.width = "100%";
         textaDomObject.id = "comment" + object.label;
         textaDomObject.onkeyup = function () {
+          if (self.activateDirtyCheck) {
+            self.handlerSetAimDirty(); // added to set dirtflag
+          }
           object.commentSelect = this.value;
         };
         req.appendChild(label);
@@ -4076,6 +4119,9 @@ export var AimEditor = function (
    }
    */
   this.checkShapes = function (shapes) {
+    console.log(
+      "------------------------------------------------- check shape called"
+    );
     // shapes rectified Mate needs to adjust the paramters before passing this  test = { circle : {count : 5, validate:""} , line:  {count : 5, validate:""}  };
     // use the the model above not the model in the below line
     // shapes needs to be in format shapes = {Circle : "" , Line : "ok"} , value : {"" , "ok"} will be used to make sure that each option is checked
@@ -4110,6 +4156,7 @@ export var AimEditor = function (
     */
     console.log("mete shapes :", shapes);
     console.log("mete shapes is Array:", Array.isArray(shapes));
+    console.log("intro templateShapeArray", self.templateShapeArray);
     let templateShapeLength = self.templateShapeArray.length;
     let anyShapeFlag = false;
     let anyClosedShapeFlag = false;
@@ -4128,43 +4175,54 @@ export var AimEditor = function (
       localShapes = JSON.parse(JSON.stringify(shapes));
       console.log("else self.runtimeUserShapes", self.runtimeUserShapes);
     }
-
-    const tempateShapeKeys = [];
-    console.log("main localShapes", localShapes);
-    console.log("main templateShapeLength", templateShapeLength);
-    for (let cnt = 0; cnt < templateShapeLength; cnt++) {
-      console.log("in loop", self.templateShapeArray[cnt].shape);
-      tempateShapeKeys.push(self.templateShapeArray[cnt].shape);
-      if (
-        typeof localShapes[self.templateShapeArray[cnt].shape] !== "undefined"
-      ) {
-        localShapes[self.templateShapeArray[cnt].shape].validate = "ok";
-        document.getElementById(self.templateShapeArray[cnt].domid).className =
-          "green check circle outline icon";
-      }
-      if (self.templateShapeArray[cnt].shape === "AnyShape") {
-        anyShapeFlag = true;
-      }
-      if (self.templateShapeArray[cnt].shape === "AnyClosedShape") {
-        anyClosedShapeFlag = true;
-      }
-    }
-    if (anyShapeFlag === true) {
+    if (templateShapeLength > 0) {
+      const tempateShapeKeys = [];
+      console.log("main localShapes", localShapes);
+      console.log("main templateShapeLength", templateShapeLength);
       for (let cnt = 0; cnt < templateShapeLength; cnt++) {
-        document.getElementById(self.templateShapeArray[cnt].domid).className =
-          "green check circle outline icon";
-      }
-    }
-    if (anyClosedShapeFlag === true) {
-      //  const shapeKeys = Object.keys(localShapes);
-      const arryDiffernce = shapeKeys.filter(
-        (eachShape) => !self.anyClosedShapeTypes.includes(eachShape)
-      );
-      if (arryDiffernce.length === 0) {
-        for (let cnt = 0; cnt < templateShapeLength; cnt++) {
+        console.log("in loop", self.templateShapeArray[cnt].shape);
+        tempateShapeKeys.push(self.templateShapeArray[cnt].shape);
+        if (
+          typeof localShapes[self.templateShapeArray[cnt].shape] !== "undefined"
+        ) {
+          console.log("before dom lcoalshapes:", localShapes);
+          console.log(
+            "before dom templateShapeArray:",
+            self.templateShapeArray
+          );
+          //  localShapes[self.templateShapeArray[cnt].shape].validate = "ok";
           document.getElementById(
             self.templateShapeArray[cnt].domid
           ).className = "green check circle outline icon";
+        }
+        if (self.templateShapeArray[cnt].shape === "AnyShape") {
+          anyShapeFlag = true;
+        }
+        if (self.templateShapeArray[cnt].shape === "AnyClosedShape") {
+          anyClosedShapeFlag = true;
+        }
+
+        if (anyShapeFlag === true) {
+          for (let cnt = 0; cnt < templateShapeLength; cnt++) {
+            document.getElementById(
+              self.templateShapeArray[cnt].domid
+            ).className = "green check circle outline icon";
+          }
+          anyShapeFlag = false;
+        }
+        if (anyClosedShapeFlag === true) {
+          //  const shapeKeys = Object.keys(localShapes);
+          const arryDiffernce = shapeKeys.filter(
+            (eachShape) => !self.anyClosedShapeTypes.includes(eachShape)
+          );
+          if (arryDiffernce.length === 0) {
+            for (let cnt = 0; cnt < templateShapeLength; cnt++) {
+              document.getElementById(
+                self.templateShapeArray[cnt].domid
+              ).className = "green check circle outline icon";
+            }
+          }
+          anyClosedShapeFlag = false;
         }
       }
     }
@@ -4179,11 +4237,12 @@ export var AimEditor = function (
     // test['circle'].validate = 'ok';
     // console.log('new test', test);
     //test
-
+    self.activateDirtyCheck = false;
     var templateIndex = self.mapTemplateCodeValueByIndex.get(
       aimjson.typeCode[0].code
     );
     if (typeof templateIndex === "undefined") {
+      //  self.activateDirtyCheck = true;
       return 1;
     } else {
       self.templateSelect.selectedIndex = templateIndex + 1;
@@ -4229,6 +4288,8 @@ export var AimEditor = function (
       //self.printMap(self.mapLabelAnnotatorConfidence);
       //self.printMap(self.mapLabelAnnotConfJson);
       //self.printMap(self.mapLabelCommentJson);
+      self.activateDirtyCheck = true;
+      console.log("load aim activated set dirty flag check");
       return 0;
     }
   };

@@ -754,7 +754,7 @@ class Plugins extends React.Component {
     const data = this.state.plugins;
     const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
     return (
-      <div className="tools menu-display" id="template">
+      <div className="pluginmain" id="pluginmain">
         {/* <ToolBar
           onAdd={this.handleAddPlugin}
           onDelete={this.handleDeleteAll}
