@@ -817,6 +817,7 @@ class App extends Component {
                       updateTreeDataOnSave={this.updateTreeDataOnSave}
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
+                      admin={this.state.admin}
                     />
                   )}
                 />
@@ -843,6 +844,7 @@ class App extends Component {
                       updateTreeDataOnSave={this.updateTreeDataOnSave}
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
+                      admin={this.state.admin}
                     />
                   )}
                 />
@@ -887,6 +889,7 @@ class App extends Component {
                       updateTreeDataOnSave={this.updateTreeDataOnSave}
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
+                      admin={this.state.admin}
                     />
                   )}
                 />
@@ -933,6 +936,7 @@ class App extends Component {
                     treeData={this.state.treeData}
                     getTreeData={this.getTreeData}
                     closeAllCounter={this.state.closeAll}
+                    admin={this.state.admin}
                   />
                 )}
               />
