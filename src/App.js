@@ -139,7 +139,7 @@ class App extends Component {
       }
       this.setState({ treeExpand });
     } catch (err) {
-      console.log(err);
+      console.err(err);
     }
   };
 
@@ -192,7 +192,7 @@ class App extends Component {
       }
       this.setState({ treeExpand });
     } catch (err) {
-      console.log(err);
+      console.err(err);
     }
   };
 
@@ -289,7 +289,7 @@ class App extends Component {
         if (mode === "lite") this.setState({ pid: "lite" });
       })
       .catch((err) => {
-        console.log(err);
+        console.err(err);
       });
     //get notifications from sessionStorage and setState
     let notifications = sessionStorage.getItem("notifications");
@@ -365,7 +365,7 @@ class App extends Component {
             userData = userData.data;
             this.setState({ admin: userData.admin });
           } catch (err) {
-            console.log(err);
+            console.err(err);
           }
           this.eventSource = new EventSourcePolyfill(
             `${apiUrl}/notifications`,
@@ -424,14 +424,13 @@ class App extends Component {
       const tagEdited = action.startsWith("Tag");
       const uploaded = action.startsWith("Upload");
       if (tagEdited || uploaded) {
-        console.log("collapsing");
         this.setState({ treeExpand: {} });
       }
       this.setState({ notifications });
       const stringified = JSON.stringify(notifications);
       sessionStorage.setItem("notifications", stringified);
     } catch (err) {
-      console.log(err);
+      console.err(err);
     }
   };
 
@@ -630,7 +629,7 @@ class App extends Component {
       const treeData = { [pid]: patients };
       this.setState({ treeData });
     } catch (err) {
-      console.log(err);
+      console.err(err);
     }
   };
 
@@ -709,7 +708,7 @@ class App extends Component {
       }
       this.setState({ treeData });
     } catch (err) {
-      console.log(err);
+      console.err(err);
     }
   };
 

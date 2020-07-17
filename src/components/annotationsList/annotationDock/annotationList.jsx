@@ -17,33 +17,39 @@ class AnnotationsList extends React.Component {
     annsDisplayAll: true,
   };
 
-  componentDidUpdate = (prevProps) => {
-    const series = Object.keys(this.props.aimsList);
-    if (
-      (this.props.activePort !== prevProps.activePort && !this.props.loading) ||
-      (!this.props.loading &&
-        prevProps.loading &&
-        series.length === this.props.openSeries.length)
-    ) {
-      const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
-      let annotations = Object.values(this.props.aimsList[seriesUID]);
-      let labelDisplayAll = false;
-      let annsDisplayAll = false;
-      for (let ann of annotations) {
-        if (ann.isDisplayed) {
-          annsDisplayAll = true;
+  componentDidUpdate = prevProps => {
+    try {
+      const series = Object.keys(this.props.aimsList);
+      if (
+        (this.props.activePort !== prevProps.activePort &&
+          !this.props.loading) ||
+        (!this.props.loading &&
+          prevProps.loading &&
+          series.length === this.props.openSeries.length)
+      ) {
+        const seriesUID = this.props.openSeries[this.props.activePort]
+          .seriesUID;
+        let annotations = Object.values(this.props.aimsList[seriesUID]);
+        let labelDisplayAll = false;
+        let annsDisplayAll = false;
+        for (let ann of annotations) {
+          if (ann.isDisplayed) {
+            annsDisplayAll = true;
+          }
         }
-      }
-      for (let ann of annotations) {
-        if (ann.showLabel) {
-          labelDisplayAll = true;
+        for (let ann of annotations) {
+          if (ann.showLabel) {
+            labelDisplayAll = true;
+          }
         }
+        this.setState({ labelDisplayAll, annsDisplayAll });
       }
-      this.setState({ labelDisplayAll, annsDisplayAll });
+    } catch (err) {
+      console.log(err);
     }
   };
 
-  handleDisplayClick = (e) => {
+  handleDisplayClick = e => {
     const { seriesUID, patientID, studyUID } = this.props.openSeries[
       this.props.activePort
     ];
@@ -83,7 +89,7 @@ class AnnotationsList extends React.Component {
     this.setState({ annsDisplayAll: checked });
   };
 
-  handleToggleSingleLabel = (e) => {
+  handleToggleSingleLabel = e => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
   };
@@ -256,7 +262,7 @@ class AnnotationsList extends React.Component {
   };
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
