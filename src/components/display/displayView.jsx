@@ -367,11 +367,19 @@ class DisplayView extends Component {
       this.renderAims();
 
       this.refreshAllViewports();
+      this.shouldOpenAimEditor();
       // this.props.dispatch(clearActivePortAimID());
     });
   }
 
-  renderAims = (notShowAimEditor = false) => {
+  shouldOpenAimEditor = (notShowAimEditor = false) => {
+    const { series } = this.props;
+    series.forEach((serie) => {
+      if (serie.aimID && !notShowAimEditor) this.openAimEditor(serie);
+    });
+  };
+
+  renderAims = () => {
     const { series } = this.props;
     this.setState({
       activeLabelMapIndex: 0,
@@ -382,10 +390,10 @@ class DisplayView extends Component {
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
     series.forEach((serie, serieIndex) => {
-      console.log("seri iamge annotations", serie);
-      if (serie.aimID && !notShowAimEditor) {
-        this.openAimEditor(serie);
-      }
+      // console.log("seri iamge annotations", serie);
+      // if (serie.aimID && !notShowAimEditor) {
+      //   this.openAimEditor(serie);
+      // }
       if (serie.imageAnnotations)
         this.parseAims(
           serie.imageAnnotations,
@@ -480,7 +488,7 @@ class DisplayView extends Component {
     return { stack };
   };
 
-  openAimEditor = (serie) => {
+  openAimEditor = async (serie) => {
     const { aimList } = this.props;
     const { aimID, seriesUID } = serie;
     if (Object.entries(aimList).length !== 0) {
@@ -489,27 +497,32 @@ class DisplayView extends Component {
       const markupTypes = this.getMarkupTypesForAim(aimID);
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimID;
-      if (this.hasSegmentation(aimJson))
-        this.setState({ hasSegmentation: true });
+      if (this.hasSegmentation(aimJson)) {
+        await this.setState({ hasSegmentation: true });
+        this.setSerieActiveLabelMap();
+      }
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
         this.setState({ showAimEditor: false });
       this.setState({ showAimEditor: true, selectedAim: aimJson });
     }
   };
 
-  setActiveLabelMapOfAim = (aimJson, element) => {
-    // Means aim has segmentation alreay, find its segment index and set to edit it
-    const { aimID } = aimJson;
-    const labelMapOfAim = this.state.aimLabelMaps[aimID];
-    this.setActiveLabelMapIndex(labelMapOfAim, element);
-  };
+  // setActiveLabelMapOfAim = (aimJson, element) => {
+  //   // Means aim has segmentation alreay, find its segment index and set to edit it
+  //   const { aimID } = aimJson;
+  //   const labelMapOfAim = this.state.aimLabelMaps[aimID];
+  //   this.setActiveLabelMapIndex(labelMapOfAim, element);
+  // };
 
-  setActiveLabelMapIndex = (index, element) => {
+  setActiveLabelMapIndex = (index) => {
+    // console.log("Parameter element", element);
+    // console.log("Element", cornerstone.getEnabledElements());
     const { setters } = cornerstoneTools.getModule("segmentation");
-    // const element = this.getActiveElement();
+    const element = this.getActiveElement();
     setters.activeLabelmapIndex(element, index);
   };
 
+  // If called w/o parameter returns the activeElement, else returns the indexed element
   getActiveElement = (index) => {
     let activePort;
     if (typeof index !== "undefined") activePort = index;
@@ -731,7 +744,14 @@ class DisplayView extends Component {
       aimJson["aimId"] = aimId;
 
       // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
-      if (this.hasSegmentation(aimJson)) this.setActiveLabelMapOfAim(aimJson);
+      if (this.hasSegmentation(aimJson)) {
+        const { labelMaps } = this.state.seriesLabelMaps[activePort];
+        const labelMapIndexOfAim = labelMaps[aimId];
+        this.setActiveLabelMapIndex(
+          labelMapIndexOfAim,
+          this.getActiveElement()
+        );
+      }
 
       // check if is already editing an aim
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
@@ -771,6 +791,7 @@ class DisplayView extends Component {
     if (!hasSegmentation && detail === "brush") {
       this.setState({ hasSegmentation: true });
     }
+    this.setDirtyFlag();
     this.setState({ showAimEditor: true, selectedAim: undefined });
   };
 
@@ -788,9 +809,9 @@ class DisplayView extends Component {
     this.setSerieActiveLabelMap();
   };
 
-  parseAims = (aimList, seriesUid, studyUid, serieIndex, serie) => {
+  parseAims = (aimList, seriesUid, studyUid, serieIndex) => {
     const seriesSegmentations = [];
-    Object.entries(aimList).forEach(([key, values], aimIndex) => {
+    Object.entries(aimList).forEach(([key, values]) => {
       this.linesToPerpendicular(values); //change the perendicular lines to bidirectional to render by CS
       values.forEach((value) => {
         const { markupType, aimUid } = value;
@@ -822,6 +843,7 @@ class DisplayView extends Component {
   handleSegmentations = (seriesSegmentations) => {
     console.log("Series segmentations", seriesSegmentations);
     let segLabelMaps = {};
+    let activeLabelMapIndex;
     seriesSegmentations.forEach(
       ({ seriesUid, studyUid, aimUid, serieIndex }, i) => {
         this.getSegmentationData(seriesUid, studyUid, aimUid, serieIndex);
@@ -829,8 +851,16 @@ class DisplayView extends Component {
       }
     );
     const { seriesLabelMaps } = this.state;
-    const activeLabelMapIndex = seriesSegmentations.length;
     const { serieIndex } = seriesSegmentations[0];
+
+    // If an aim is selected and it has segmentatio set the activeLabelMap of serie as selected
+    // aim's labelMap. Else set it as the next available labelMap to brush new segs
+
+    const { aimID } = this.props.series[serieIndex];
+    if (aimID && typeof segLabelMaps[aimID] !== "undefined")
+      activeLabelMapIndex = segLabelMaps[aimID];
+    else activeLabelMapIndex = seriesSegmentations.length;
+
     this.setState({
       seriesLabelMaps: {
         ...seriesLabelMaps,
@@ -863,11 +893,27 @@ class DisplayView extends Component {
   };
 
   setSerieActiveLabelMap = () => {
-    const element = this.getActiveElement();
-    console.log("Element", element);
-    const { activePort } = this.props;
-    const { activeLabelMapIndex } = this.state.seriesLabelMaps[activePort];
-    this.setActiveLabelMapIndex(activeLabelMapIndex, element);
+    const { series, activePort } = this.props;
+    let newLabelMapIndex;
+    const { aimID } = series[activePort];
+    // If an aim is selected set its label map for editing
+    if (aimID) {
+      console.log("State buradaaa", this.state);
+      const { labelMaps } = this.state.seriesLabelMaps[activePort];
+      newLabelMapIndex = labelMaps[aimID];
+    } else
+      newLabelMapIndex = this.state.seriesLabelMaps[activePort]
+        .activeLabelMapIndex;
+
+    const { imageIds } = this.state.data[activePort].stack;
+
+    var imagePromises = imageIds.map((imageId) => {
+      return cornerstone.loadAndCacheImage(imageId);
+    });
+
+    Promise.all(imagePromises).then(() => {
+      this.setActiveLabelMapIndex(newLabelMapIndex, this.getActiveElement());
+    });
   };
 
   linesToPerpendicular = (values) => {
@@ -977,10 +1023,6 @@ class DisplayView extends Component {
     getSegmentation(pathVariables, sopInstanceUid.root).then(({ data }) => {
       this.renderSegmentation(data, aimId, serieIndex);
     });
-  };
-
-  sleep = (ms) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   };
 
   renderSegmentation = (arrayBuffer, aimId, serieIndex) => {
@@ -1236,10 +1278,10 @@ class DisplayView extends Component {
       showAimEditor: false,
       selectedAim: undefined,
       hasSegmentation: false,
-      activeLabelMapIndex: 0,
+      // activeLabelMapIndex: 0,
     });
     this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
-    this.renderAims(true);
+    this.renderAims();
     // this.refreshAllViewports();
     return 1;
   };
