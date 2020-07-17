@@ -133,6 +133,7 @@ class DisplayView extends Component {
       hasSegmentation: false,
       activeLabelMapIndex: 0,
       aimLabelMaps: {},
+      seriesLabelMaps: {},
       redirect: this.props.series.length < 1 ? true : false,
     };
   }
@@ -509,8 +510,10 @@ class DisplayView extends Component {
     setters.activeLabelmapIndex(element, index);
   };
 
-  getActiveElement = () => {
-    const { activePort } = this.props;
+  getActiveElement = (index) => {
+    let activePort;
+    if (typeof index !== "undefined") activePort = index;
+    else ({ activePort } = this.props);
     const { element } = cornerstone.getEnabledElements()[activePort] || {};
     return element;
   };
@@ -782,23 +785,23 @@ class DisplayView extends Component {
       this.setState({ activePort: i });
       this.props.dispatch(changeActivePort(i));
     }
+    this.setSerieActiveLabelMap();
   };
 
   parseAims = (aimList, seriesUid, studyUid, serieIndex, serie) => {
+    const seriesSegmentations = [];
     Object.entries(aimList).forEach(([key, values], aimIndex) => {
       this.linesToPerpendicular(values); //change the perendicular lines to bidirectional to render by CS
       values.forEach((value) => {
         const { markupType, aimUid } = value;
         if (markupType === "DicomSegmentationEntity") {
-          this.handleSegmentations(
+          seriesSegmentations.push({
             seriesUid,
             studyUid,
             aimUid,
-            aimIndex,
-            serieIndex
-          );
+            serieIndex,
+          });
         }
-
         const color = this.getColorOfMarkup(value.aimUid, seriesUid);
 
         let imageId = getWadoImagePath(studyUid, seriesUid, key);
@@ -812,44 +815,59 @@ class DisplayView extends Component {
         // if (aimUid === serie.aimID) this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
       });
     });
+    if (seriesSegmentations.length)
+      this.handleSegmentations(seriesSegmentations);
   };
 
-  handleSegmentations = async (
-    seriesUid,
-    studyUid,
-    aimUid,
-    aimIndex,
-    serieIndex
-  ) => {
-    console.log(
-      "Checking segmentation before renderind segmentation: ",
-      aimUid,
-      "state is",
-      this.state.aimLabelMaps
+  handleSegmentations = (seriesSegmentations) => {
+    console.log("Series segmentations", seriesSegmentations);
+    let segLabelMaps = {};
+    seriesSegmentations.forEach(
+      ({ seriesUid, studyUid, aimUid, serieIndex }, i) => {
+        this.getSegmentationData(seriesUid, studyUid, aimUid, serieIndex);
+        segLabelMaps[aimUid] = i;
+      }
     );
-    const { aimLabelMaps, activeLabelMapIndex } = this.state;
-    if (aimLabelMaps[aimUid]) {
-      console.log(
-        "I'm returning because ",
-        aimUid,
-        "is already rendering with ",
-        aimLabelMaps[aimUid]
-      );
-      return; // This seg has already been loaded
-    }
+    const { seriesLabelMaps } = this.state;
+    const activeLabelMapIndex = seriesSegmentations.length;
+    const { serieIndex } = seriesSegmentations[0];
     this.setState({
-      activeLabelMapIndex: activeLabelMapIndex + 1,
-      aimLabelMaps: { ...aimLabelMaps, [aimUid]: activeLabelMapIndex },
-    }); //set the index state for next render
+      seriesLabelMaps: {
+        ...seriesLabelMaps,
+        [serieIndex]: { labelMaps: { ...segLabelMaps }, activeLabelMapIndex },
+      },
+    });
 
-    this.getSegmentationData(
-      seriesUid,
-      studyUid,
-      aimUid,
-      aimIndex,
-      serieIndex,
-      activeLabelMapIndex
-    );
+    console.log("State after seting", this.state);
+    // console.log(
+    //   "Checking segmentation before renderind segmentation: ",
+    //   aimUid,
+    //   "state is",
+    //   this.state.aimLabelMaps
+    // );
+    // const { aimLabelMaps, activeLabelMapIndex } = this.state;
+    // if (typeof aimLabelMaps[aimUid] !== "undefined") {
+    //   // console.log(
+    //   //   "I'm returning because ",
+    //   //   aimUid,
+    //   //   "is already rendering with ",
+    //   //   aimLabelMaps[aimUid]
+    //   // );
+    //   return; // This seg has already been loaded
+    // }
+    // console.log("I'm rendering ", aimUid, "with ", activeLabelMapIndex);
+    // await this.setState({
+    //   activeLabelMapIndex: activeLabelMapIndex + 1,
+    //   aimLabelMaps: { ...aimLabelMaps, [aimUid]: activeLabelMapIndex },
+    // }); //set the index state for next render
+  };
+
+  setSerieActiveLabelMap = () => {
+    const element = this.getActiveElement();
+    console.log("Element", element);
+    const { activePort } = this.props;
+    const { activeLabelMapIndex } = this.state.seriesLabelMaps[activePort];
+    this.setActiveLabelMapIndex(activeLabelMapIndex, element);
   };
 
   linesToPerpendicular = (values) => {
@@ -945,14 +963,7 @@ class DisplayView extends Component {
     }, {});
   };
 
-  getSegmentationData = (
-    seriesUID,
-    studyUID,
-    aimId,
-    aimIndex,
-    serieIndex,
-    activeLabelMapIndex
-  ) => {
+  getSegmentationData = (seriesUID, studyUID, aimId, serieIndex) => {
     const { aimList } = this.props;
 
     const segmentationEntity =
@@ -964,7 +975,7 @@ class DisplayView extends Component {
     const pathVariables = { studyUID, seriesUID: seriesInstanceUid.root };
 
     getSegmentation(pathVariables, sopInstanceUid.root).then(({ data }) => {
-      this.renderSegmentation(data, aimId, serieIndex, activeLabelMapIndex);
+      this.renderSegmentation(data, aimId, serieIndex);
     });
   };
 
@@ -972,12 +983,9 @@ class DisplayView extends Component {
     return new Promise((resolve) => setTimeout(resolve, ms));
   };
 
-  renderSegmentation = (
-    arrayBuffer,
-    aimId,
-    serieIndex,
-    activeLabelMapIndex
-  ) => {
+  renderSegmentation = (arrayBuffer, aimId, serieIndex) => {
+    const { labelMaps } = this.state.seriesLabelMaps[serieIndex];
+    const labelMapIndex = labelMaps[aimId];
     try {
       const { imageIds } = this.state.data[serieIndex].stack;
 
@@ -998,12 +1006,12 @@ class DisplayView extends Component {
           cornerstone.metaData
         );
 
-        const { setters } = cornerstoneTools.getModule("segmentation");
+        const { setters, getters } = cornerstoneTools.getModule("segmentation");
 
         setters.labelmap3DByFirstImageId(
           imageIds[0],
           labelmapBuffer,
-          activeLabelMapIndex,
+          labelMapIndex,
           segMetadata.data,
           imageIds.length,
           segmentsOnFrame
@@ -1012,26 +1020,32 @@ class DisplayView extends Component {
           "I have rendered ",
           aimId,
           "with labelMapIndex :",
-          activeLabelMapIndex
+          labelMapIndex
         );
 
         const { element } = cornerstone.getEnabledElements()[serieIndex];
-        if (this.state.selectedAim) {
-          //if an aim is selected find its label map index, 0 if no segmentation in aim
-          //an aim is being edited don't set the label map index because aim's segs should be brushed
-          this.setActiveLabelMapOfAim(this.state.selectedAim, element);
-        } else {
-          this.setActiveLabelMapIndex(
-            this.state.activeLabelMapIndex + 1,
-            element
-          );
-        }
+        // if (this.state.selectedAim) {
+        //   //if an aim is selected find its label map index, 0 if no segmentation in aim
+        //   //an aim is being edited don't set the label map index because aim's segs should be brushed
+        //   this.setActiveLabelMapOfAim(this.state.selectedAim, element);
+        // } else {
+        //   this.setActiveLabelMapIndex(
+        //     this.state.activeLabelMapIndex + 1,
+        //     element
+        //   );
+        // }
         console.log(
           "dipsatching, aimId, activeLabelMapIndex",
           aimId,
-          activeLabelMapIndex
+          labelMapIndex
         );
-        this.props.dispatch(setSegLabelMapIndex(aimId, activeLabelMapIndex));
+
+        console.log(
+          "New activeLabelMap Index is ",
+          getters.activeLabelmapIndex(element)
+        );
+
+        this.props.dispatch(setSegLabelMapIndex(aimId, labelMapIndex));
 
         this.refreshAllViewports();
       });
