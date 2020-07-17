@@ -101,7 +101,9 @@ class Sidebar extends Component {
 
         const pid = projects[0].id;
         this.setState({ projects, pid, selected: pid });
-        this.props.history.push(`/search/${pid}`);
+        if (this.props.openSeries.length === 0) {
+          this.props.history.push(`/search/${pid}`);
+        }
         this.props.getPidUpdate(pid);
         const prTempMap = await this.getTemplatesProjectMap();
         const projectMap = {};
@@ -488,10 +490,11 @@ class Sidebar extends Component {
 }
 
 const mapStateToProps = (state) => {
-  const { activePort, lastEventId } = state.annotationsListReducer;
+  const { activePort, lastEventId, openSeries } = state.annotationsListReducer;
   return {
     activePort,
     lastEventId,
+    openSeries
   };
 };
 export default withRouter(connect(mapStateToProps)(Sidebar));
