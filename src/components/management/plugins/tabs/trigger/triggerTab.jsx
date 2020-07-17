@@ -11,6 +11,7 @@ import { getProjects } from "../../../../../services/projectServices";
 //  import TemplateColumn from "./templateColumn";
 import ProjectColumn from "./projectColumn";
 //  import AnnotationColumn from "./annotationColumn";
+import "../../css/plugin.css";
 
 class TriggerTab extends React.Component {
   state = {
@@ -89,7 +90,7 @@ class TriggerTab extends React.Component {
   };
   render() {
     return (
-      <div>
+      <div className="plugin_trigger_container">
         {/* <div className="create-user__modal--buttons">
           <button
             variant="primary"
@@ -103,7 +104,7 @@ class TriggerTab extends React.Component {
           </button>
         </div> */}
 
-        <div className="row">
+        <div className="plugin_trigger_project_column_container">
           <ProjectColumn
             projects={this.state.projects}
             onChange={this.handleProjectOnChange}

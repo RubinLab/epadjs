@@ -376,12 +376,15 @@ class ParametersWindow extends React.Component {
     const { error } = this.props;
     console.log(this.props.data);
     return (
-      <div className="parameter_window_container" id="plugin_paramwindow">
-        <div className="parameter_window_modal">
-          <div className="parameter_window_header">
+      <div
+        className="plugin_parameter_window_container"
+        id="plugin_paramwindow"
+      >
+        <div className="plugin_parameter_window_modal">
+          <div className="plugin_parameter_window_header">
             <div className="title">Paramaters</div>
           </div>
-          <div className="parameter_window_modal_body">
+          <div className="plugin_parameter_window_modal_body">
             {!this.state.addnew && (
               <ReactTable
                 className="pro-table"
@@ -402,10 +405,10 @@ class ParametersWindow extends React.Component {
               />
             )}
             {this.state.addnew && (
-              <div>
+              <div className="plugin_parameter_window_modal_addnew">
                 <h5>add new parameter</h5>
-                <form className="parameter_window_modal_form">
-                  <h5 className="parameter_window_modal_label">id*</h5>
+                <form className="plugin_parameter_window_modal_form">
+                  <h5 className="plugin_parameter_window_modal_label">id*</h5>
                   <select
                     className="pluginaddqueueselect"
                     id="paramid"
@@ -498,7 +501,7 @@ class ParametersWindow extends React.Component {
             )}
           </div>
           {this.state.addnew && !this.state.editParam && (
-            <div className="parameter_window_modal_footer">
+            <div className="plugin_parameter_window_modal_footer">
               <div className="create-user__modal--buttons">
                 <button
                   variant="primary"
@@ -518,7 +521,7 @@ class ParametersWindow extends React.Component {
             </div>
           )}
           {this.state.editParam && (
-            <div className="parameter_window_modal_footer">
+            <div className="plugin_parameter_window_modal_footer">
               <div className="create-user__modal--buttons">
                 <button
                   variant="primary"
@@ -538,7 +541,7 @@ class ParametersWindow extends React.Component {
             </div>
           )}
           {!this.state.addnew && (
-            <div className="parameter_window_modal_footer">
+            <div className="plugin_parameter_window_modal_footer">
               <div className="create-user__modal--buttons">
                 <button
                   variant="primary"

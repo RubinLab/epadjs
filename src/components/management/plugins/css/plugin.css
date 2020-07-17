@@ -40,20 +40,12 @@
 }
 
 /* Clear floats after the columns */
-.row:after {
+.plugin_trigger_project_column_container_row:after {
   content: "";
   display: table;
   clear: both;
 }
-.triggerTable table th tr td {
-  padding-left: 20px;
-  vertical-align: top;
-}
-.triggerTable table {
-  width: 800px;
-  height: 800px;
-  color: gray;
-}
+
 .pluginaddqueueselect option {
   background-color: white;
   color: black;
@@ -136,28 +128,39 @@
   font-style: italic;
   cursor: pointer;
 }
-.plugin_project_container,
-.parameter_window_container,
+
+/* cretae plugin */
+/* manage section new pluguin*/
 .create_plugin_container {
-  position: fixed;
+  position: absolute;
   top: 5px;
   width: 100%;
   bottom: 10%;
 }
 .create_plugin_modal {
-  width: 100%;
+  width: 50%;
+  margin: auto;
 }
-.parameter_window_modal {
-  width: 100%;
+.create_plugin_header {
+  width: 80%;
+  height: 40px;
+  background-color: #2d3440;
+  margin: auto;
+  border-bottom: #20272e;
+  border-bottom-style: solid;
+  border-width: 2px;
+  vertical-align: middle;
+  text-align: center;
 }
-.create_plugin_modal_body,
-.parameter_window_modal_body {
+.create_plugin_modal_body {
   width: 80%;
   background-color: #2d3440;
   margin: auto;
+  text-align: left;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
-.create_plugin_modal_footer,
-.parameter_window_modal_footer {
+.create_plugin_modal_footer {
   width: 80%;
   height: 50px;
   background-color: #2d3440;
@@ -170,9 +173,81 @@
   padding-right: 5%;
   padding-top: 10px;
 }
+.create_plugin_table {
+  width: 90%;
+  margin: auto;
+}
+.create_plugin_table tr {
+  height: 25px;
+}
+/* cretae plugin end*/
 
-.create_plugin_header,
-.parameter_window_header {
+/* plugin_project */
+/* manage section project column*/
+.plugin_project_container {
+  position: absolute;
+  top: 10%;
+  width: 100%;
+  bottom: 10%;
+  margin: auto;
+}
+.plugin_project_modal {
+  width: 25%;
+  margin: auto;
+}
+.plugin_project_modal_header {
+  width: 25%;
+  height: 40px;
+  background-color: #2d3440;
+  margin: auto;
+  border-bottom: #20272e;
+  border-bottom-style: solid;
+  border-width: 2px;
+  text-align: center;
+}
+.plugin_project_modal_body {
+  width: 25%;
+  background-color: #2d3440;
+  margin: auto;
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.plugin_project_modal_footer {
+  width: 25%;
+  height: 50px;
+  background-color: #2d3440;
+  margin: auto;
+  border-top: #20272e;
+  border-top-style: solid;
+  border-width: 2px;
+  vertical-align: middle;
+  text-align: right;
+  padding-right: 10px;
+  padding-top: 10px;
+}
+.plugin_project_table {
+  width: 100%;
+  margin: auto;
+}
+
+/* plugin_project end */
+
+/*  plugin paramter window*/
+.plugin_parameter_window_container {
+  position: absolute;
+  top: 5px;
+  width: 100%;
+  bottom: 10%;
+}
+
+.plugin_parameter_window_modal {
+  width: 100%;
+}
+
+.plugin_parameter_window_header {
   width: 80%;
   height: 40px;
   background-color: #2d3440;
@@ -183,6 +258,169 @@
   vertical-align: middle;
   text-align: center;
 }
+
+.plugin_parameter_window_modal_body {
+  width: 80%;
+  background-color: #2d3440;
+  margin: auto;
+}
+
+.plugin_parameter_window_modal_footer {
+  width: 80%;
+  height: 50px;
+  background-color: #2d3440;
+  margin: auto;
+  border-top: #20272e;
+  border-top-style: solid;
+  border-width: 2px;
+  vertical-align: middle;
+  text-align: right;
+  padding-right: 5%;
+  padding-top: 10px;
+}
+.plugin_parameter_window_modal_addnew {
+  width: 40%;
+  margin: auto;
+  text-align: left;
+}
+/* plugin parameter window end*/
+
+/*  plugin project paramter window*/
+.plugin_project_parameter_window_container {
+  position: absolute;
+  top: 5px;
+  width: 100%;
+  bottom: 10%;
+}
+
+.plugin_project_parameter_window_modal {
+  width: 100%;
+}
+
+.plugin_project_parameter_window_header {
+  width: 80%;
+  height: 40px;
+  background-color: #2d3440;
+  margin: auto;
+  border-bottom: #20272e;
+  border-bottom-style: solid;
+  border-width: 2px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.plugin_project_parameter_window_body {
+  width: 80%;
+  background-color: #2d3440;
+  margin: auto;
+}
+
+.plugin_project_parameter_window_footer {
+  width: 80%;
+  height: 50px;
+  background-color: #2d3440;
+  margin: auto;
+  border-top: #20272e;
+  border-top-style: solid;
+  border-width: 2px;
+  vertical-align: middle;
+  text-align: right;
+  padding-right: 5%;
+  padding-top: 10px;
+}
+.plugin_project_parameter_window_newparameter {
+  width: 40%;
+  margin: auto;
+}
+/* plugin project parameter window end*/
+
+/*  plugin trigger  window*/
+.plugin_trigger_container {
+  position: relative;
+  top: 5px;
+  min-width: 800px;
+  min-height: 500px;
+  width: 100%;
+  height: 100%;
+}
+
+.plugin_trigger_project_column_container {
+  position: absolute;
+  top: 5px;
+  margin: auto;
+  width: 100%;
+  height: 100%;
+}
+
+.plugin_trigger_project_column_inner_container {
+  top: 5px;
+  width: 100%;
+  height: 100%;
+  bottom: 10%;
+}
+
+.plugin_trigger_table tr td {
+  padding-left: 20px;
+  vertical-align: top;
+}
+.plugin_trigger_table table {
+  width: 800px;
+  height: 800px;
+  color: gray;
+}
+/* plugin trigger pr column window end*/
+
+/* plugin_runtime_params */
+.plugin_runtime_params_window_container {
+  position: absolute;
+  top: 10%;
+  width: 100%;
+  bottom: 10%;
+  margin: auto;
+}
+.plugin_runtime_params_modal {
+  width: 80%;
+  margin: auto;
+}
+.plugin_runtime_params_header {
+  width: 80%;
+  height: 40px;
+  background-color: #2d3440;
+  margin: auto;
+  border-bottom: #20272e;
+  border-bottom-style: solid;
+  border-width: 2px;
+  text-align: center;
+}
+.plugin_runtime_params_modal_body {
+  width: 80%;
+  background-color: #2d3440;
+  margin: auto;
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.plugin_runtime_params_modal_footer {
+  width: 80%;
+  height: 50px;
+  background-color: #2d3440;
+  margin: auto;
+  border-top: #20272e;
+  border-top-style: solid;
+  border-width: 2px;
+  vertical-align: middle;
+  text-align: right;
+  padding-right: 10px;
+  padding-top: 10px;
+}
+.plugin_runtime_params_table {
+  width: 100%;
+  margin: auto;
+}
+
+/* plugin_runtime_params end */
 .pluginmain_container {
   margin-top: 10px;
   width: 95%;

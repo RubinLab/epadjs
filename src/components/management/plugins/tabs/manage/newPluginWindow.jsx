@@ -35,7 +35,7 @@ class NewPluginWindow extends React.Component {
             <div className="create_plugin_header">New Plugin</div>
           </div>
           <div className="create_plugin_modal_body">
-            <table className="NewPluginTable">
+            <table className="create_plugin_table">
               <tbody>
                 <tr>
                   <td>
