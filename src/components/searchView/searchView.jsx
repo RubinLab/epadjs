@@ -511,7 +511,7 @@ class SearchView extends Component {
             // this.props.history.push("/display");
           } else {
             //else get data for each serie for display
-            selectedSeries.forEach(serie => {
+            notOpenSeries.forEach(serie => {
               this.props.dispatch(addToGrid(serie));
               this.props.dispatch(getSingleSerie(serie));
             });
