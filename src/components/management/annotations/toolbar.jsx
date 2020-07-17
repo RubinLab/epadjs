@@ -114,6 +114,7 @@ const toolBar = props => {
             className="annotations-projectSelect"
             name="project"
             value={pid ? pid : ""}
+            onMouseDown={e => e.stopPropagation()}
             onChange={onSelect}
           >
             {options}
