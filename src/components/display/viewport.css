@@ -85,6 +85,7 @@
     height: 26px;
     margin-right: 0 !important;
     margin-left: 0 !important;
+    display: flex;
 }
 
 /* Create three unequal columns that floats next to each other */
@@ -112,9 +113,9 @@
     float: right;
 }
 
-label {
+/* label {
     margin: 0em;
-}
+} */
 
 /* Three dots */
 .dot {
@@ -130,21 +131,29 @@ label {
     margin-left: 5px;
 }
 
+.slice-number {
+    margin: -8px;
+}
 /* Style the input field */
-input[type=text] {
+/* input[type=text] { */
+.slice-field.form-control{
     width: 100%;
     border-radius: 3px;
     border: none;
     background-color: white;
-    margin-top: -8px;
     height: 25px;
     color: #666;
-    padding: 5px;
+    padding: 7px;
+    margin-left: 3px;
 }
 
 /* Page content */
 .content {
     padding: 2px;
     /* line-height: 0; */
+}
 
+.column.left {
+    padding-top: 2px;
+    
 }

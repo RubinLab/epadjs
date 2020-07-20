@@ -1324,12 +1324,13 @@ class DisplayView extends Component {
                   </div>
                   <div className={"column middle-right"}>
                     <Form inline>
-                      <Form.Group>
-                        <Form.Label htmlFor="imageNum">{"Slice # "}</Form.Label>
+                      <Form.Group className="slice-number">
+                        <Form.Label htmlFor="imageNum" className="slice-label">{"Slice # "}</Form.Label>
                         <Form.Control
                           type="number"
                           min="1"
                           value={data.stack.currentImageIdIndex + 1}
+                          className={"slice-field"}
                           onChange={(event) => this.handleJumpChange(i, event)}
                           style={{
                             width: "60px",
