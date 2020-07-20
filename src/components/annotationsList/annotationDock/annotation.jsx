@@ -5,11 +5,12 @@ import {
   FaReply,
   FaCaretDown,
   FaCaretUp,
+  FaEdit,
 } from "react-icons/fa";
 import AimEntityData from "./aimEntityData";
 import CalculationLabel from "./calculationLabel";
 
-const annotation = props => {
+const annotation = (props) => {
   //conditional borderstyling
   let buttonStyle = { ...props.style.button };
   let labelStyle = { ...props.style.label };
@@ -56,6 +57,12 @@ const annotation = props => {
           onClick={props.onSingleToggle}
         >
           {props.name}
+        </div>
+        <div
+          className="annotation-icon"
+          onClick={() => props.onEdit(props.id, props.serie)}
+        >
+          <FaEdit className="clickable-icon" />
         </div>
         <div
           className="annotation-icon"
