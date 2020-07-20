@@ -155,6 +155,7 @@ class DisplayView extends Component {
 
   editAimHandler = (event) => {
     const { aimID, seriesUID } = event.detail;
+    console.log("Will open aim editor for", aimID, seriesUID);
     this.openAimEditor(aimID, seriesUID);
   };
 
@@ -495,7 +496,7 @@ class DisplayView extends Component {
       aimJson["aimId"] = aimID;
       if (this.hasSegmentation(aimJson)) {
         this.setState({ hasSegmentation: true });
-        this.setSerieActiveLabelMap();
+        this.setSerieActiveLabelMap(aimID);
       }
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
         this.setState({ showAimEditor: false });
@@ -791,7 +792,7 @@ class DisplayView extends Component {
     this.setState({ showAimEditor: true, selectedAim: undefined });
   };
 
-  setActive = (i) => {
+  setActive = async (i) => {
     if (this.props.activePort !== i) {
       if (this.state.showAimEditor) {
         if (!this.closeAimEditor(true)) {
@@ -800,9 +801,9 @@ class DisplayView extends Component {
         }
       }
       this.setState({ activePort: i });
-      this.props.dispatch(changeActivePort(i));
+      await this.props.dispatch(changeActivePort(i));
+      this.setSerieActiveLabelMap();
     }
-    this.setSerieActiveLabelMap();
   };
 
   parseAims = (aimList, seriesUid, studyUid, serieIndex) => {
@@ -887,7 +888,8 @@ class DisplayView extends Component {
     // }); //set the index state for next render
   };
 
-  setSerieActiveLabelMap = () => {
+  setSerieActiveLabelMap = (aimId) => {
+    console.log("Aim id", aimId);
     const { series, activePort } = this.props;
     const { imageIds } = this.state.data[activePort].stack;
 
@@ -896,12 +898,18 @@ class DisplayView extends Component {
     });
     Promise.all(imagePromises).then(() => {
       let newLabelMapIndex;
-      const { aimID } = series[activePort];
+      if (!aimId) {
+        const { aimID } = series[activePort];
+        aimId = aimID;
+      }
+      console.log("Aim ID var mi ", series[activePort]);
+      console.log("State", this.state);
       // If an aim is selected set its label map for editing
-      if (aimID) {
+      if (aimId) {
         console.log("State buradaaa", this.state);
         const { labelMaps } = this.state.seriesLabelMaps[activePort];
-        newLabelMapIndex = labelMaps[aimID];
+        newLabelMapIndex = labelMaps[aimId];
+        console.log("aim ", aimId, "lmi", newLabelMapIndex);
       } else if (
         this.state.seriesLabelMaps &&
         this.state.seriesLabelMaps[activePort]
@@ -910,6 +918,7 @@ class DisplayView extends Component {
           .activeLabelMapIndex;
       else newLabelMapIndex = 0;
 
+      console.log("Setting elements activeLabeMap with", newLabelMapIndex);
       this.setActiveLabelMapIndex(newLabelMapIndex, this.getActiveElement());
     });
   };
