@@ -4230,6 +4230,7 @@ export var AimEditor = function (
       const tempateShapeKeys = [];
       console.log("main localShapes", localShapes);
       console.log("main templateShapeLength", templateShapeLength);
+      let geoTemplateConditionDom = null;
       for (let cnt = 0; cnt < templateShapeLength; cnt++) {
         console.log("in loop", self.templateShapeArray[cnt].shape);
         tempateShapeKeys.push(self.templateShapeArray[cnt].shape);
@@ -4242,9 +4243,14 @@ export var AimEditor = function (
             self.templateShapeArray
           );
           //  localShapes[self.templateShapeArray[cnt].shape].validate = "ok";
-          document.getElementById(
+          geoTemplateConditionDom = document.getElementById(
             self.templateShapeArray[cnt].domid
-          ).className = "green check circle outline icon";
+          );
+          if (geoTemplateConditionDom !== null) {
+            document.getElementById(
+              self.templateShapeArray[cnt].domid
+            ).className = "green check circle outline icon";
+          }
         }
         if (self.templateShapeArray[cnt].shape === "AnyShape") {
           anyShapeFlag = true;
