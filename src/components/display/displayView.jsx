@@ -1285,7 +1285,8 @@ class DisplayView extends Component {
       showAimEditor: false,
       selectedAim: undefined,
       hasSegmentation: false,
-      // activeLabelMapIndex: 0,
+      activeLabelMapIndex: 0,
+      dirty: false,
     });
     this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
     this.renderAims(true);

@@ -45,9 +45,13 @@ class AimEditor extends Component {
     const element = document.getElementById("questionaire");
     console.log("Props from aim editor", this.props);
 
-    let { templates, openSeries, activePort, setAimDirty } = this.props;
-    const templateJsons = Object.values(templates);
-    const { defaultTemplate, imageAnnotations } = openSeries[activePort];
+    let {
+      templates: allTemplates,
+      openSeries,
+      activePort,
+      setAimDirty,
+    } = this.props;
+    const { projectID } = openSeries[activePort];
 
     this.semanticAnswers = new questionaire.AimEditor(
       element,
@@ -57,9 +61,19 @@ class AimEditor extends Component {
       setAimDirty
     );
 
+    const { projectMap } = this.props;
+
+    const { defaultTemplate, templates } = projectMap[projectID];
+    const projectTemplates = Object.keys(allTemplates)
+      .filter((key) => templates.includes(key))
+      .reduce((arr, key) => {
+        arr.push(allTemplates[key]);
+        return arr;
+      }, []);
+
     this.semanticAnswers.loadTemplates({
       default: defaultTemplate,
-      all: templateJsons,
+      all: projectTemplates,
     });
     this.semanticAnswers.createViewerWindow();
     const { aimId } = this.props;
@@ -971,6 +985,7 @@ const mapStateToProps = (state) => {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
     templates: state.annotationsListReducer.templates,
+    projectMap: state.annotationsListReducer.projectMap,
   };
 };
 
