@@ -902,9 +902,13 @@ class DisplayView extends Component {
         console.log("State buradaaa", this.state);
         const { labelMaps } = this.state.seriesLabelMaps[activePort];
         newLabelMapIndex = labelMaps[aimID];
-      } else
+      } else if (
+        this.state.seriesLabelMaps &&
+        this.state.seriesLabelMaps[activePort]
+      )
         newLabelMapIndex = this.state.seriesLabelMaps[activePort]
           .activeLabelMapIndex;
+      else newLabelMapIndex = 0;
 
       this.setActiveLabelMapIndex(newLabelMapIndex, this.getActiveElement());
     });

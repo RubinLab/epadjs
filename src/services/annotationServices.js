@@ -142,10 +142,10 @@ export function uploadAim(aim, projectId, isUpdate = false, updatedAimId) {
 //   else return http.post(url, aimData, config);
 // }
 
-export function uploadSegmentation(segmentation, projectId = "lite") {
+export function uploadSegmentation(segmentation, segName, projectId = "lite") {
   const url = apiUrl + "/projects/" + projectId + "/files";
   const segData = new FormData();
-  segData.append("file", segmentation, "blob.dcm");
+  segData.append("file", segmentation, `${segName}.dcm`);
   const config = {
     headers: {
       "content-type": "multipart/form-data",
@@ -153,3 +153,15 @@ export function uploadSegmentation(segmentation, projectId = "lite") {
   };
   return http.post(url, segData, config);
 }
+
+// export function uploadSegmentation(segmentation, projectId = "lite") {
+//   const url = apiUrl + "/projects/" + projectId + "/files";
+//   const segData = new FormData();
+//   segData.append("file", segmentation, "blob.dcm");
+//   const config = {
+//     headers: {
+//       "content-type": "multipart/form-data",
+//     },
+//   };
+//   return http.post(url, segData, config);
+// }
