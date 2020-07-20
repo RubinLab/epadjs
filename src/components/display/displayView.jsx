@@ -370,8 +370,8 @@ class DisplayView extends Component {
 
   shouldOpenAimEditor = (notShowAimEditor = false) => {
     const { series } = this.props;
-    series.forEach((serie) => {
-      if (serie.aimID && !notShowAimEditor) this.openAimEditor(serie);
+    series.forEach(({ aimID, seriesUID }) => {
+      if (aimID && !notShowAimEditor) this.openAimEditor(aimID, seriesUID);
     });
   };
 
@@ -487,6 +487,7 @@ class DisplayView extends Component {
   openAimEditor = (aimID, seriesUID) => {
     const { aimList } = this.props;
     if (Object.entries(aimList).length !== 0) {
+      console.log("Aim list", aimList, seriesUID, aimID);
       const aimJson = aimList[seriesUID][aimID].json;
       aimJson.aimID = aimID;
       const markupTypes = this.getMarkupTypesForAim(aimID);
@@ -888,24 +889,23 @@ class DisplayView extends Component {
 
   setSerieActiveLabelMap = () => {
     const { series, activePort } = this.props;
-    let newLabelMapIndex;
-    const { aimID } = series[activePort];
-    // If an aim is selected set its label map for editing
-    if (aimID) {
-      console.log("State buradaaa", this.state);
-      const { labelMaps } = this.state.seriesLabelMaps[activePort];
-      newLabelMapIndex = labelMaps[aimID];
-    } else
-      newLabelMapIndex = this.state.seriesLabelMaps[activePort]
-        .activeLabelMapIndex;
-
     const { imageIds } = this.state.data[activePort].stack;
 
     var imagePromises = imageIds.map((imageId) => {
       return cornerstone.loadAndCacheImage(imageId);
     });
-
     Promise.all(imagePromises).then(() => {
+      let newLabelMapIndex;
+      const { aimID } = series[activePort];
+      // If an aim is selected set its label map for editing
+      if (aimID) {
+        console.log("State buradaaa", this.state);
+        const { labelMaps } = this.state.seriesLabelMaps[activePort];
+        newLabelMapIndex = labelMaps[aimID];
+      } else
+        newLabelMapIndex = this.state.seriesLabelMaps[activePort]
+          .activeLabelMapIndex;
+
       this.setActiveLabelMapIndex(newLabelMapIndex, this.getActiveElement());
     });
   };
