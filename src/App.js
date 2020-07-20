@@ -424,12 +424,13 @@ class App extends Component {
       });
       const tagEdited = action.startsWith("Tag");
       const uploaded = action.startsWith("Upload");
-      const deleted = action.startsWith("Deleted");
       if (tagEdited || uploaded) {
         const { pid } = this.state;
         this.setState({ treeExpand: {}, treeData: {} });
         this.setState({ pid });
-        this.props.history.push(`/search/${pid}`);
+        if (this.props.openSeries.length === 0) {
+          this.props.history.push(`/search/${pid}`);
+        }
       }
       this.setState({ notifications });
       const stringified = JSON.stringify(notifications);
