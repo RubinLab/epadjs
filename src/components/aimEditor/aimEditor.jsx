@@ -100,7 +100,7 @@ class AimEditor extends Component {
   };
   //cavit end
   validateForm = (hasError) => {
-    if (hasError) console.error("Answer form has error/s!!!");
+    //if (hasError) console.error("Answer form has error/s!!!");
   };
 
   getImage = () => {

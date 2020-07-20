@@ -20,6 +20,7 @@ export var AimEditor = function (
   var self = this;
   var domelements = [];
   var selectid = 0;
+  this.loadingAimFlag = false;
   this.handlerSetAimDirty = setAimDirty;
   this.activateDirtyCheck = false;
   this.fontcolor = "#c9cdd4";
@@ -193,7 +194,7 @@ export var AimEditor = function (
     accordion2Div.className = " ui accordion";
 
     self.mainWindowDiv.appendChild(self.templateListDiv);
-    self.mainWindowDiv.appendChild(self.shapeDiv);
+    //self.mainWindowDiv.appendChild(self.shapeDiv);
     self.mainWindowDiv.appendChild(self.accordion1Div);
     //self.mainWindowDiv.appendChild(accordion2Div);
 
@@ -248,7 +249,7 @@ export var AimEditor = function (
       //self.mapHtmlObjects = new Map(); not used
       //self.mapHtmlSelectObjectsKeyValue = new Map(); not used
       //self.mapAllowedTermCollectionByCodeValue = new Map(); not used
-      //self.mapTemplateCodeValueByIndex = new Map();
+      self.mapTemplateCodeValueByIndex = new Map();
       self.mapLabelAnnotatorConfidence = new Map();
       self.mapLabelAnnotConfJson = new Map();
       self.mapLabelSubComment = new Map();
@@ -256,7 +257,10 @@ export var AimEditor = function (
       self.mapLabelUid = new Map();
       self.templateShapeArray = [];
       if (self.templateSelectedIndex > -1) {
-        self.jsonTemplateCopy = self.arrayTemplatesJsonObjects[this.value];
+        self.jsonTemplateCopy = {
+          ...self.arrayTemplatesJsonObjects[this.value],
+        };
+        console.log("extract template called : ", self.jsonTemplateCopy);
         self.extractTemplate(self.jsonTemplateCopy);
 
         //self.renderButtonhandler(true);
@@ -265,10 +269,10 @@ export var AimEditor = function (
       //   self.renderButtonhandler(true);
       // }
     };
-    if (self.defaultTemplate !== null) {
-      self.templateSelect.selectedIndex = self.defaultTemplate;
-      self.templateSelect.onchange();
-    }
+    // if (self.defaultTemplate !== null) {
+    //   self.templateSelect.selectedIndex = self.defaultTemplate;
+    //   self.templateSelect.onchange();
+    // }
     $('select[class^="ui dropdown"]').dropdown();
     document.getElementById("tlist").children[0].style.width = "100%";
     self.templateSelect.style.width = "100%";
@@ -825,6 +829,7 @@ export var AimEditor = function (
         primitiveObj: subEObject,
         parentObj: parent,
         changeOnSelect: function (newValue, callback) {
+          console.log("allowed term on change called", newValue);
           this.select = newValue;
           this.primitiveObj.select = newValue;
         },
@@ -1666,6 +1671,7 @@ export var AimEditor = function (
     div.appendChild(label);
 
     radioInput.onclick = function () {
+      console.log("radio input onclick: ");
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
       }
@@ -1839,7 +1845,8 @@ export var AimEditor = function (
     //drop down select and add input box object
 
     //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
-
+    //  console.log("allowed term objects parent :", prObject);
+    //  console.log("allowed term objects :", allowedTermObj);
     var div = document.createElement("div");
     div.style.marginLeft = "20px";
     div.className = className;
@@ -1869,21 +1876,46 @@ export var AimEditor = function (
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
       }
-      console.log("next id", allowedTermObj.nextId);
-      console.log("clicked situation", this.selected);
+      console.log("option input click called : ");
+      console.log("option input click called next id", allowedTermObj.nextId);
+      console.log("option input click called clicked situation", this.selected);
       var checkmarkObj = self.mapCardinalitiesToCheckId.get(prObject.id);
       checkmarkObj.ok = "true";
+      console.log(
+        "option input click called clicked checkmarkObj before",
+        checkmarkObj
+      );
+      console.log(
+        "option input click called primitive",
+        allowedTermObj.getPrimitive()
+      );
+      console.log("self.loadingAimFlag", self.loadingAimFlag);
 
-      if (allowedTermObj.getPrimitive().select == "1") {
-        allowedTermObj.getPrimitive().select = "0";
-        allowedTermObj.changeOnSelect("0", self.AfterClick(allowedTermObj));
-        checkmarkObj.actualSelected--;
+      // console.log(
+      //   "DropLocation : ",
+      //   document.getElementById("DropLocation").innerHTML
+      // );
+      if (self.loadingAimFlag === false) {
+        if (allowedTermObj.getPrimitive().select === "1") {
+          allowedTermObj.getPrimitive().select = "0";
+          allowedTermObj.changeOnSelect("0", self.AfterClick(allowedTermObj));
+
+          checkmarkObj.actualSelected--;
+        } else {
+          allowedTermObj.getPrimitive().select = "1";
+          allowedTermObj.changeOnSelect("1", self.AfterClick(allowedTermObj));
+          checkmarkObj.actualSelected++;
+        }
       } else {
         allowedTermObj.getPrimitive().select = "1";
         allowedTermObj.changeOnSelect("1", self.AfterClick(allowedTermObj));
         checkmarkObj.actualSelected++;
       }
-
+      console.log(
+        "option input click called clicked checkmarkObj after",
+        checkmarkObj
+      );
+      console.log("mapCardinalitiesToCheckId", self.mapCardinalitiesToCheckId);
       self.mapCardinalitiesToCheckId.set(prObject.id, checkmarkObj);
       if (
         checkmarkObj.actualSelected >= checkmarkObj.min &&
@@ -2210,7 +2242,7 @@ export var AimEditor = function (
     }
   };
   this.checkAnnotatorConfidence = function (prentDiv, objectToCheckAnnConf) {
-    console.log("checking annotator confidence for : ", objectToCheckAnnConf);
+    //  console.log("checking annotator confidence for : ", objectToCheckAnnConf);
     let isMouseButtondown = false;
     if (typeof objectToCheckAnnConf.annotatorConfidence != "undefined") {
       // Assign value to the property here
@@ -3654,7 +3686,6 @@ export var AimEditor = function (
         } else {
           delete eachInnerJson["allowedterms"];
         }
-      } else {
       }
       // console.log("################ before adding to final json  eachInnerJson:"+JSON.stringify(eachInnerJson));
       // console.log("################ before adding to final json  finaljson:"+JSON.stringify(finaljson));
@@ -3971,7 +4002,7 @@ export var AimEditor = function (
           //for allowed terms and valid terms
           let ValidtermCode = "";
           label = self.removeEmptySpace(jsonObj.label.value);
-
+          console.log("load aim label key typeCode:", label);
           if (Array.isArray(value[0])) {
             ValidtermCode = value[0][1].code;
 
@@ -4010,7 +4041,8 @@ export var AimEditor = function (
                     splittedLabelMergeRest + splittedLabel[k];
                 }
               }
-
+              console.log("multi drop down :", splittedLabelMergeRest.trim());
+              console.log("multi drop down subdivs:", subDivs[0]);
               $(subDivs[0]).addClass("disabled");
               $(subDivs[0]).dropdown("set selected", [
                 splittedLabelMergeRest.trim(),
@@ -4237,26 +4269,38 @@ export var AimEditor = function (
     // test['circle'].validate = 'ok';
     // console.log('new test', test);
     //test
+    let aimjsonCopy = { ...aimjson };
+    self.loadingAimFlag = true;
+    console.log(
+      "load  aim  called: ..................aim passed :",
+      aimjsonCopy
+    );
     self.activateDirtyCheck = false;
     var templateIndex = self.mapTemplateCodeValueByIndex.get(
-      aimjson.typeCode[0].code
+      aimjsonCopy.typeCode[0].code
     );
     if (typeof templateIndex === "undefined") {
       //  self.activateDirtyCheck = true;
+      console.log(
+        "load  aim  called undefined section: .................. undefined"
+      );
       return 1;
     } else {
+      console.log(
+        "load  aim  called not undefined section: .................. not undefined"
+      );
       self.templateSelect.selectedIndex = templateIndex + 1;
       let evObj = document.createEvent("Events");
       evObj.initEvent("change", true, true);
       self.templateSelect.dispatchEvent(evObj);
       var imagingObservationEntityCollection =
-        aimjson.imagingObservationEntityCollection;
+        aimjsonCopy.imagingObservationEntityCollection;
       var imagingPhysicalEntityCollection =
-        aimjson.imagingPhysicalEntityCollection;
+        aimjsonCopy.imagingPhysicalEntityCollection;
       //console.log("xxxx_"+JSON.stringify(imagingObservationEntityCollection))
-      var comment = aimjson.comment.value;
-      var annotationName = aimjson.name.value;
-      self.aimTypeCode = aimjson.typeCode;
+      var comment = aimjsonCopy.comment.value;
+      var annotationName = aimjsonCopy.name.value;
+      self.aimTypeCode = aimjsonCopy.typeCode;
       // console.log("comment" + comment);
       // console.log("comment" + annotationName);
       if (comment.includes("~")) {
@@ -4280,16 +4324,19 @@ export var AimEditor = function (
         document.getElementById("annotationName").value = annotationName;
         self.aimName = annotationName;
       }
-
+      console.log("loading aim ", self.loadingAimFlag);
       self.traverseJsonOnLoad(imagingPhysicalEntityCollection);
+      console.log("loading aim ", self.loadingAimFlag);
       self.traverseJsonOnLoad(imagingObservationEntityCollection);
-      console.log("markup type : ", aimjson.markupType);
-      self.checkAnnotationShapes(aimjson.markupType);
+      console.log("loading aim ", self.loadingAimFlag);
+      console.log("markup type : ", aimjsonCopy.markupType);
+      self.checkAnnotationShapes(aimjsonCopy.markupType);
       //self.printMap(self.mapLabelAnnotatorConfidence);
       //self.printMap(self.mapLabelAnnotConfJson);
       //self.printMap(self.mapLabelCommentJson);
-      self.activateDirtyCheck = true;
+      //self.activateDirtyCheck = true;
       console.log("load aim activated set dirty flag check");
+      self.loadingAimFlag = false;
       return 0;
     }
   };
