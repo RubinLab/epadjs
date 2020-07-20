@@ -77,6 +77,7 @@ class AimEditor extends Component {
     });
     this.semanticAnswers.createViewerWindow();
     const { aimId } = this.props;
+    console.log("Aim id in cdm", aimId);
     if (aimId != null && Object.entries(aimId).length) {
       try {
         this.semanticAnswers.loadAimJson(aimId);
@@ -87,9 +88,19 @@ class AimEditor extends Component {
     window.addEventListener("checkShapes", this.checkShapes);
   }
 
-  componentWillMount() {
+  componentWillUnmount() {
     window.removeEventListener("checkShapes", this.checkShapes);
   }
+
+  loadAim = (event) => {
+    console.log("event", event);
+    const { aimID } = event.detail;
+    try {
+      this.semanticAnswers.loadAimJson(aimID);
+    } catch (error) {
+      console.error("Error loading aim to aim editor:", error);
+    }
+  };
 
   checkShapes = (event) => {
     const shapes = event.detail;

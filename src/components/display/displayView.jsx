@@ -155,8 +155,45 @@ class DisplayView extends Component {
 
   editAimHandler = (event) => {
     const { aimID, seriesUID } = event.detail;
+    const { aimList, activePort } = this.props;
+
     console.log("Will open aim editor for", aimID, seriesUID);
-    this.openAimEditor(aimID, seriesUID);
+
+    if (aimList[seriesUID][aimID]) {
+      const aimJson = aimList[seriesUID][aimID].json;
+      const markupTypes = this.getMarkupTypesForAim(aimID);
+      aimJson["markupType"] = [...markupTypes];
+      aimJson["aimId"] = aimID;
+
+      // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
+      if (this.hasSegmentation(aimJson)) {
+        const { labelMaps } = this.state.seriesLabelMaps[activePort];
+        const labelMapIndexOfAim = labelMaps[aimID];
+        this.setActiveLabelMapIndex(
+          labelMapIndexOfAim,
+          this.getActiveElement()
+        );
+      }
+
+      // check if is already editing an aim
+      if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
+        let message = "";
+        if (this.state.selectedAim) {
+          message = this.prepWarningMessage(
+            this.state.selectedAim.name.value,
+            aimJson.name.value
+          );
+        }
+      }
+
+      //The following dispatched is a wrongly named method. It's dispatched to set the selected
+      //AimId in the store!!!!!
+      console.log("Selected aim josn", aimJson);
+
+      this.setState({ showAimEditor: true, selectedAim: aimJson });
+    }
+    this.setSerieActiveLabelMap(aimID);
+    // this.openAimEditor(aimID, seriesUID);
   };
 
   async componentDidUpdate(prevProps) {
@@ -496,7 +533,7 @@ class DisplayView extends Component {
       aimJson["aimId"] = aimID;
       if (this.hasSegmentation(aimJson)) {
         this.setState({ hasSegmentation: true });
-        this.setSerieActiveLabelMap(aimID);
+        // this.setSerieActiveLabelMap(aimID);
       }
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
         this.setState({ showAimEditor: false });
@@ -829,98 +866,11 @@ class DisplayView extends Component {
           imageId = imageId.split("&frame=")[0];
 
         this.renderMarkup(imageId, value, color);
-        this.refreshAllViewports();
       });
     });
+    this.refreshAllViewports();
     if (seriesSegmentations.length)
       this.handleSegmentations(seriesSegmentations);
-  };
-
-  handleSegmentations = (seriesSegmentations) => {
-    console.log("Series segmentations", seriesSegmentations);
-    let segLabelMaps = {};
-    let activeLabelMapIndex;
-    seriesSegmentations.forEach(
-      ({ seriesUid, studyUid, aimUid, serieIndex }, i) => {
-        this.getSegmentationData(seriesUid, studyUid, aimUid, serieIndex);
-        segLabelMaps[aimUid] = i;
-      }
-    );
-    const { seriesLabelMaps } = this.state;
-    const { serieIndex } = seriesSegmentations[0];
-
-    // If an aim is selected and it has segmentatio set the activeLabelMap of serie as selected
-    // aim's labelMap. Else set it as the next available labelMap to brush new segs
-
-    const { aimID } = this.props.series[serieIndex];
-    if (aimID && typeof segLabelMaps[aimID] !== "undefined")
-      activeLabelMapIndex = segLabelMaps[aimID];
-    else activeLabelMapIndex = seriesSegmentations.length;
-
-    this.setState({
-      seriesLabelMaps: {
-        ...seriesLabelMaps,
-        [serieIndex]: { labelMaps: { ...segLabelMaps }, activeLabelMapIndex },
-      },
-    });
-
-    console.log("State after seting", this.state);
-    // console.log(
-    //   "Checking segmentation before renderind segmentation: ",
-    //   aimUid,
-    //   "state is",
-    //   this.state.aimLabelMaps
-    // );
-    // const { aimLabelMaps, activeLabelMapIndex } = this.state;
-    // if (typeof aimLabelMaps[aimUid] !== "undefined") {
-    //   // console.log(
-    //   //   "I'm returning because ",
-    //   //   aimUid,
-    //   //   "is already rendering with ",
-    //   //   aimLabelMaps[aimUid]
-    //   // );
-    //   return; // This seg has already been loaded
-    // }
-    // console.log("I'm rendering ", aimUid, "with ", activeLabelMapIndex);
-    // await this.setState({
-    //   activeLabelMapIndex: activeLabelMapIndex + 1,
-    //   aimLabelMaps: { ...aimLabelMaps, [aimUid]: activeLabelMapIndex },
-    // }); //set the index state for next render
-  };
-
-  setSerieActiveLabelMap = (aimId) => {
-    console.log("Aim id", aimId);
-    const { series, activePort } = this.props;
-    const { imageIds } = this.state.data[activePort].stack;
-
-    var imagePromises = imageIds.map((imageId) => {
-      return cornerstone.loadAndCacheImage(imageId);
-    });
-    Promise.all(imagePromises).then(() => {
-      let newLabelMapIndex;
-      if (!aimId) {
-        const { aimID } = series[activePort];
-        aimId = aimID;
-      }
-      console.log("Aim ID var mi ", series[activePort]);
-      console.log("State", this.state);
-      // If an aim is selected set its label map for editing
-      if (aimId) {
-        console.log("State buradaaa", this.state);
-        const { labelMaps } = this.state.seriesLabelMaps[activePort];
-        newLabelMapIndex = labelMaps[aimId];
-        console.log("aim ", aimId, "lmi", newLabelMapIndex);
-      } else if (
-        this.state.seriesLabelMaps &&
-        this.state.seriesLabelMaps[activePort]
-      )
-        newLabelMapIndex = this.state.seriesLabelMaps[activePort]
-          .activeLabelMapIndex;
-      else newLabelMapIndex = 0;
-
-      console.log("Setting elements activeLabeMap with", newLabelMapIndex);
-      this.setActiveLabelMapIndex(newLabelMapIndex, this.getActiveElement());
-    });
   };
 
   linesToPerpendicular = (values) => {
@@ -1016,7 +966,117 @@ class DisplayView extends Component {
     }, {});
   };
 
-  getSegmentationData = (seriesUID, studyUID, aimId, serieIndex) => {
+  handleSegmentations = (seriesSegmentations) => {
+    console.log("Series segmentations", seriesSegmentations);
+    let segLabelMaps = {};
+    let activeLabelMapIndex;
+    const { serieIndex } = seriesSegmentations[0];
+
+    const { imageIds } = this.state.data[serieIndex].stack;
+
+    var imagePromises = imageIds.map((imageId) => {
+      return cornerstone.loadAndCacheImage(imageId);
+    });
+
+    Promise.all(imagePromises).then(async () => {
+      seriesSegmentations.forEach(
+        ({ seriesUid, studyUid, aimUid, serieIndex }, i) => {
+          this.getSegmentationData(seriesUid, studyUid, aimUid, serieIndex, i);
+          segLabelMaps[aimUid] = i;
+        }
+      );
+      const { aimID } = this.props.series[serieIndex];
+      const { seriesLabelMaps } = this.state;
+      // If an aim is selected and it has segmentatio set the activeLabelMap of serie as selected
+      // aim's labelMap. Else set it as the next available labelMap to brush new segs
+
+      console.log("aim id var mi", aimID, segLabelMaps);
+      if (aimID && typeof segLabelMaps[aimID] !== "undefined")
+        activeLabelMapIndex = segLabelMaps[aimID];
+      else {
+        activeLabelMapIndex = seriesSegmentations.length;
+        console.log(
+          "setting activeLabelMap as length ",
+          seriesSegmentations.length,
+          seriesSegmentations
+        );
+      }
+
+      await this.setState({
+        seriesLabelMaps: {
+          ...seriesLabelMaps,
+          [serieIndex]: { labelMaps: { ...segLabelMaps }, activeLabelMapIndex },
+        },
+      });
+      this.setSerieActiveLabelMap(aimID);
+    });
+
+    console.log("State after seting", this.state);
+    // console.log(
+    //   "Checking segmentation before renderind segmentation: ",
+    //   aimUid,
+    //   "state is",
+    //   this.state.aimLabelMaps
+    // );
+    // const { aimLabelMaps, activeLabelMapIndex } = this.state;
+    // if (typeof aimLabelMaps[aimUid] !== "undefined") {
+    //   // console.log(
+    //   //   "I'm returning because ",
+    //   //   aimUid,
+    //   //   "is already rendering with ",
+    //   //   aimLabelMaps[aimUid]
+    //   // );
+    //   return; // This seg has already been loaded
+    // }
+    // console.log("I'm rendering ", aimUid, "with ", activeLabelMapIndex);
+    // await this.setState({
+    //   activeLabelMapIndex: activeLabelMapIndex + 1,
+    //   aimLabelMaps: { ...aimLabelMaps, [aimUid]: activeLabelMapIndex },
+    // }); //set the index state for next render
+  };
+
+  setSerieActiveLabelMap = (aimId) => {
+    console.log("Aim id", aimId);
+    const { series, activePort } = this.props;
+    const { imageIds } = this.state.data[activePort].stack;
+
+    var imagePromises = imageIds.map((imageId) => {
+      return cornerstone.loadAndCacheImage(imageId);
+    });
+    Promise.all(imagePromises).then(() => {
+      let newLabelMapIndex;
+      if (!aimId) {
+        const { aimID } = series[activePort];
+        aimId = aimID;
+      }
+      console.log("Aim ID var mi ", series[activePort]);
+      console.log("State", this.state);
+      // If an aim is selected set its label map for editing
+      if (aimId) {
+        console.log("State buradaaa", this.state);
+        const { labelMaps } = this.state.seriesLabelMaps[activePort];
+        newLabelMapIndex = labelMaps[aimId];
+        console.log("aim ", aimId, "lmi", newLabelMapIndex);
+      } else if (
+        this.state.seriesLabelMaps &&
+        this.state.seriesLabelMaps[activePort]
+      )
+        newLabelMapIndex = this.state.seriesLabelMaps[activePort]
+          .activeLabelMapIndex;
+      else newLabelMapIndex = 0;
+
+      console.log("Setting elements activeLabeMap with", newLabelMapIndex);
+      this.setActiveLabelMapIndex(newLabelMapIndex, this.getActiveElement());
+    });
+  };
+
+  getSegmentationData = (
+    seriesUID,
+    studyUID,
+    aimId,
+    serieIndex,
+    labelMapIndex
+  ) => {
     const { aimList } = this.props;
 
     const segmentationEntity =
@@ -1028,76 +1088,78 @@ class DisplayView extends Component {
     const pathVariables = { studyUID, seriesUID: seriesInstanceUid.root };
 
     getSegmentation(pathVariables, sopInstanceUid.root).then(({ data }) => {
-      this.renderSegmentation(data, aimId, serieIndex);
+      this.renderSegmentation(data, aimId, serieIndex, labelMapIndex);
     });
   };
 
-  renderSegmentation = (arrayBuffer, aimId, serieIndex) => {
-    const { labelMaps } = this.state.seriesLabelMaps[serieIndex];
-    const labelMapIndex = labelMaps[aimId];
+  renderSegmentation = (arrayBuffer, aimId, serieIndex, labelMapIndex) => {
+    // const { labelMaps } = this.state.seriesLabelMaps[serieIndex];
+    // const labelMapIndex = labelMaps[aimId];
+    const { imageIds } = this.state.data[serieIndex].stack;
     try {
-      const { imageIds } = this.state.data[serieIndex].stack;
+      // var imagePromises = imageIds.map((imageId) => {
+      //   return cornerstone.loadAndCacheImage(imageId);
+      // });
 
-      var imagePromises = imageIds.map((imageId) => {
-        return cornerstone.loadAndCacheImage(imageId);
-      });
+      // Promise.all(imagePromises).then(() => {
+      // const stackToolState = cornerstoneTools.getToolState(element, "stack");
+      // const imageIds = stackToolState.data[0].imageIds;
+      const {
+        labelmapBuffer,
+        segMetadata,
+        segmentsOnFrame,
+      } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
+        imageIds,
+        arrayBuffer,
+        cornerstone.metaData
+      );
 
-      Promise.all(imagePromises).then(() => {
-        // const stackToolState = cornerstoneTools.getToolState(element, "stack");
-        // const imageIds = stackToolState.data[0].imageIds;
-        const {
-          labelmapBuffer,
-          segMetadata,
-          segmentsOnFrame,
-        } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
-          imageIds,
-          arrayBuffer,
-          cornerstone.metaData
-        );
+      const { setters, getters } = cornerstoneTools.getModule("segmentation");
 
-        const { setters, getters } = cornerstoneTools.getModule("segmentation");
+      setters.labelmap3DByFirstImageId(
+        imageIds[0],
+        labelmapBuffer,
+        labelMapIndex,
+        segMetadata.data,
+        imageIds.length,
+        segmentsOnFrame
+      );
+      // console.log(
+      //   "I have rendered ",
+      //   aimId,
+      //   "with labelMapIndex :",
+      //   activeLabelMapIndex
+      // );
 
-        setters.labelmap3DByFirstImageId(
-          imageIds[0],
-          labelmapBuffer,
-          labelMapIndex,
-          segMetadata.data,
-          imageIds.length,
-          segmentsOnFrame
-        );
-        // console.log(
-        //   "I have rendered ",
-        //   aimId,
-        //   "with labelMapIndex :",
-        //   activeLabelMapIndex
-        // );
+      const { element } = cornerstone.getEnabledElements()[serieIndex];
+      cornerstone.updateImage(element);
+      // const length = Object.entries(labelMaps).length;
+      // setters.activeLabelmapIndex(element, length);
+      // if (this.state.selectedAim) {
+      //   //if an aim is selected find its label map index, 0 if no segmentation in aim
+      //   //an aim is being edited don't set the label map index because aim's segs should be brushed
+      //   this.setActiveLabelMapOfAim(this.state.selectedAim, element);
+      // } else {
+      //   this.setActiveLabelMapIndex(
+      //     this.state.activeLabelMapIndex + 1,
+      //     element
+      //   );
+      // }
+      console.log(
+        "dipsatching, aimId, activeLabelMapIndex",
+        aimId,
+        labelMapIndex
+      );
 
-        const { element } = cornerstone.getEnabledElements()[serieIndex];
-        // if (this.state.selectedAim) {
-        //   //if an aim is selected find its label map index, 0 if no segmentation in aim
-        //   //an aim is being edited don't set the label map index because aim's segs should be brushed
-        //   this.setActiveLabelMapOfAim(this.state.selectedAim, element);
-        // } else {
-        //   this.setActiveLabelMapIndex(
-        //     this.state.activeLabelMapIndex + 1,
-        //     element
-        //   );
-        // }
-        console.log(
-          "dipsatching, aimId, activeLabelMapIndex",
-          aimId,
-          labelMapIndex
-        );
+      // console.log(
+      //   "New activeLabelMap Index is ",
+      //   getters.activeLabelmapIndex(element)
+      // );
 
-        console.log(
-          "New activeLabelMap Index is ",
-          getters.activeLabelmapIndex(element)
-        );
+      this.props.dispatch(setSegLabelMapIndex(aimId, labelMapIndex));
 
-        this.props.dispatch(setSegLabelMapIndex(aimId, labelMapIndex));
-
-        this.refreshAllViewports();
-      });
+      // this.refreshAllViewports();
+      // });
     } catch (error) {
       console.error(error);
     }
