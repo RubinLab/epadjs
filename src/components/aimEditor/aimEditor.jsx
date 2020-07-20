@@ -77,6 +77,7 @@ class AimEditor extends Component {
     });
     this.semanticAnswers.createViewerWindow();
     const { aimId } = this.props;
+    console.log("Aim id in cdm", aimId);
     if (aimId != null && Object.entries(aimId).length) {
       try {
         this.semanticAnswers.loadAimJson(aimId);
@@ -87,9 +88,19 @@ class AimEditor extends Component {
     window.addEventListener("checkShapes", this.checkShapes);
   }
 
-  componentWillMount() {
+  componentWillUnmount() {
     window.removeEventListener("checkShapes", this.checkShapes);
   }
+
+  loadAim = (event) => {
+    console.log("event", event);
+    const { aimID } = event.detail;
+    try {
+      this.semanticAnswers.loadAimJson(aimID);
+    } catch (error) {
+      console.error("Error loading aim to aim editor:", error);
+    }
+  };
 
   checkShapes = (event) => {
     const shapes = event.detail;
@@ -201,12 +212,14 @@ class AimEditor extends Component {
     if (hasSegmentation) {
       // if (!this.checkSegmentationFrames()) return;
       // segmentation and markups
-      this.createAimSegmentation(answers).then(({ aim, segmentationBlob }) => {
-        // also add the markups to aim if there is any
-        if (Object.entries(markupsToSave).length !== 0)
-          this.createAimMarkups(aim, markupsToSave);
-        this.saveAim(aim, segmentationBlob);
-      });
+      this.createAimSegmentation(answers).then(
+        ({ aim, segmentationBlob, segId }) => {
+          // also add the markups to aim if there is any
+          if (Object.entries(markupsToSave).length !== 0)
+            this.createAimMarkups(aim, markupsToSave);
+          this.saveAim(aim, segmentationBlob, segId);
+        }
+      );
     } else if (Object.entries(markupsToSave).length !== 0) {
       // markups without segmentation
       const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
@@ -277,12 +290,12 @@ class AimEditor extends Component {
 
       // fill the segmentation related aim parts
       const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
-      this.addSegmentationToAim(aim, segEntityData, segStats);
+      const segId = this.addSegmentationToAim(aim, segEntityData, segStats);
 
       // create the modified blob
       const segmentationBlob = dcmjs.data.datasetToBlob(dataset);
 
-      return { aim, segmentationBlob };
+      return { aim, segmentationBlob, segId };
     } catch (error) {
       throw new Error("Error creating segmentation", error);
     }
@@ -354,7 +367,7 @@ class AimEditor extends Component {
     return seedData;
   };
 
-  saveAim = (aim, segmentationBlob) => {
+  saveAim = (aim, segmentationBlob, segId) => {
     const aimJson = aim.getAim();
     const aimSaved = JSON.parse(aimJson);
 
@@ -388,7 +401,7 @@ class AimEditor extends Component {
 
     uploadAim(aimSaved, projectID, this.state.isUpdate, this.updatedAimId)
       .then(() => {
-        if (segmentationBlob) this.saveSegmentation(segmentationBlob);
+        if (segmentationBlob) this.saveSegmentation(segmentationBlob, segId);
         // var objectUrl = URL.createObjectURL(segBlobGlobal);
         // window.open(objectUrl);
 
@@ -643,6 +656,7 @@ class AimEditor extends Component {
       });
       aim.createImageAnnotationStatement(2, segId, volumeId);
     }
+    return segId.root;
   };
 
   parseImageUid = (imageUid) => {
@@ -923,10 +937,10 @@ class AimEditor extends Component {
     return obj;
   };
 
-  saveSegmentation = (segmentation) => {
+  saveSegmentation = (segmentation, segId) => {
     const { openSeries, activePort } = this.props;
     const { projectID } = openSeries[activePort];
-    uploadSegmentation(segmentation, projectID)
+    uploadSegmentation(segmentation, segId, projectID)
       .then(() => {
         // this.props.onCancel();
         toast.success("Segmentation succesfully saved.", {
