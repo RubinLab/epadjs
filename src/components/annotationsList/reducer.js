@@ -60,6 +60,7 @@ const initialState = {
   projectMap: {},
   templates: {},
   aimSegLabelMaps: {},
+  notificationAction: "",
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -78,8 +79,8 @@ const asyncReducer = (state = initialState, action) => {
         updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
         return { ...state, openSeries: updatedOpenSeries };
       case GET_NOTIFICATIONS:
-        const { uploadedPid, lastEventId, refresh } = action.payload;
-        return { ...state, uploadedPid, lastEventId, refresh };
+        const { uploadedPid, lastEventId, refresh, notificationAction } = action.payload;
+        return { ...state, uploadedPid, lastEventId, refresh, notificationAction };
       case UPDATE_PATIENT_AIM_DELETE:
         let patientAimDelete = { ...state.patients };
          ({ aimRefs } = action);

@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
+import _ from "lodash";
 import { getUser, getUserInfo } from "./services/userServices";
 import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
@@ -408,7 +409,7 @@ class App extends Component {
       const message = params;
       if (refresh)
         this.props.dispatch(
-          getNotificationsData(projectID, lastEventId, refresh)
+          getNotificationsData(projectID, lastEventId, refresh, action)
         );
       let time = new Date(createdtime).toString();
       const GMTIndex = time.indexOf(" G");
@@ -423,9 +424,12 @@ class App extends Component {
       });
       const tagEdited = action.startsWith("Tag");
       const uploaded = action.startsWith("Upload");
+      const deleted = action.startsWith("Deleted");
       if (tagEdited || uploaded) {
-        // console.log(this.state.treeExpand);
+        const { pid } = this.state;
         this.setState({ treeExpand: {}, treeData: {} });
+        this.setState({ pid });
+        this.props.history.push(`/search/${pid}`);
       }
       this.setState({ notifications });
       const stringified = JSON.stringify(notifications);
@@ -434,15 +438,6 @@ class App extends Component {
       console.error(err);
     }
   };
-
-  //cloneTreeExpandwithID"s
-  cloneThreeExpandIDs = () => {
-    const { pid } = this.state;
-    const treeExpand = { ...this.state.treeExpand };
-    return { pid, treeExpand };
-  };
-
-  //emptyTreeData
 
   componentWillUnmount = () => {
     this.eventSource.removeEventListener(
