@@ -1371,7 +1371,7 @@ class DisplayView extends Component {
 
   render() {
     const { series } = this.props;
-    if (this.state.redirect) return <Redirect to="/search" />;
+    // if (this.state.redirect) return <Redirect to="/search" />;
     return !Object.entries(this.props.series).length ? (
       <Redirect to="/search" />
     ) : (

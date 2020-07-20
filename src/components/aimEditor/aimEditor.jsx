@@ -397,8 +397,8 @@ class AimEditor extends Component {
             studyUID,
           })
         );
-        this.props.dispatch(updatePatientOnAimSave(aimRefs));
-        this.props.updateTreeDataOnSave(aimRefs);
+        // this.props.dispatch(updatePatientOnAimSave(aimRefs));
+        // this.props.updateTreeDataOnSave(aimRefs);
       })
       .catch((error) => {
         alert(
