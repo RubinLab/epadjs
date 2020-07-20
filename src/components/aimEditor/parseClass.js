@@ -77,7 +77,10 @@ export var AimEditor = function (
     formshape: "Point",
   });
   this.mapShapesSchemaToTemplate.set("TwoDimensionCircle", {
-    formshape: "Cirle",
+    formshape: "Circle",
+  });
+  this.mapShapesSchemaToTemplate.set("Bidirectional", {
+    formshape: "Perpendicular",
   });
   this.anyClosedShapeTypes = ["Circle", "Polyline"];
   this.templateShapeArray = []; //each array element is a json object {"shape":'Point', "domid" : '2.25.33554445511225454'});
@@ -3808,19 +3811,23 @@ export var AimEditor = function (
 
   this.checkAnnotationShapes = function (prmtrShapeArray) {
     //self.templateShapeArray.push({"shape":object.GeometricShape, "domid" : object.id});
-    //console.log("beeeeeeeeeee");
+
     let anyShapeFlag = false;
     let anyClosedShapeFlag = false;
     let prmtrShapeArrayLength = prmtrShapeArray.length;
     let templateShapeArrayLength = self.templateShapeArray.length;
 
-    console.log("prmtrShapeArray : ", prmtrShapeArray);
+    console.log(" checkAnnotationShapes prmtrShapeArray : ", prmtrShapeArray);
     for (let k = 0; k < prmtrShapeArrayLength; k++) {
       // this.mapShapesSchemaToTemplate.set("TwoDimensionMultiPoint", [{"formshape" : 'Line'}, {"formshape" : 'Perpendicular'}]);
       let jsonShapeObj = self.mapShapesSchemaToTemplate.get(prmtrShapeArray[k]);
+      console.log("jsonShapeObj", jsonShapeObj);
       if (Array.isArray(jsonShapeObj)) {
         for (let t = 0; t < templateShapeArrayLength; t++) {
-          console.log("shape ", self.templateShapeArray.shape);
+          console.log(
+            "shape in template formation",
+            self.templateShapeArray.shape
+          );
           if (self.templateShapeArray[t].shape === "AnyShape") {
             anyShapeFlag = true;
             console.log("on load aim any Shape is true here ");
@@ -3840,6 +3847,7 @@ export var AimEditor = function (
           }
         }
       } else {
+        console.log("-------- not an array ");
         //let templateShapeArrayLength = self.templateShapeArray.length;
         for (let t = 0; t < templateShapeArrayLength; t++) {
           if (self.templateShapeArray[t].shape === "AnyShape") {
@@ -3850,26 +3858,37 @@ export var AimEditor = function (
             anyClosedShapeFlag = true;
             console.log("on load aim any closed Shape is true here ");
           }
+          console.log(
+            self.templateShapeArray[t].shape +
+              ": shape equal ? " +
+              jsonShapeObj.formshape
+          );
           if (self.templateShapeArray[t].shape === jsonShapeObj.formshape) {
+            console.log(
+              self.templateShapeArray[t].shape +
+                ": shape equal ? " +
+                jsonShapeObj.formshape
+            );
             document.getElementById(
               self.templateShapeArray[t].domid
             ).className = "green check circle outline icon";
           }
-
-          if (anyShapeFlag === true) {
-            for (let cnt = 0; cnt < templateShapeArrayLength; cnt++) {
-              document.getElementById(
-                self.templateShapeArray[cnt].domid
-              ).className = "green check circle outline icon";
-            }
+        }
+        if (anyShapeFlag === true) {
+          for (let cnt = 0; cnt < templateShapeArrayLength; cnt++) {
+            document.getElementById(
+              self.templateShapeArray[cnt].domid
+            ).className = "green check circle outline icon";
           }
-          if (anyClosedShapeFlag === true) {
-            for (let cnt = 0; cnt < templateShapeArrayLength; cnt++) {
-              document.getElementById(
-                self.templateShapeArray[cnt].domid
-              ).className = "green check circle outline icon";
-            }
+          anyShapeFlag = false;
+        }
+        if (anyClosedShapeFlag === true) {
+          for (let cnt = 0; cnt < templateShapeArrayLength; cnt++) {
+            document.getElementById(
+              self.templateShapeArray[cnt].domid
+            ).className = "green check circle outline icon";
           }
+          anyClosedShapeFlag = false;
         }
       }
     }
