@@ -111,7 +111,9 @@ class SearchView extends Component {
   componentDidMount = async () => {
     try {
       const { pid } = this.props;
-      if (mode === "thick" && !pid) this.props.history.push(`/search/${pid}`);
+      if (mode === "thick" && !pid) {
+        this.props.history.push(`/search/${pid}`);
+      }
       let subjects = Object.values(this.props.treeData);
       if (subjects.length > 0) {
         subjects = subjects.map(el => el.data);
@@ -329,7 +331,7 @@ class SearchView extends Component {
             noOfNotDeleted: openItems.length,
           });
         }
-        this.props.clearTreeData()
+        this.props.clearTreeData();
       })
       .catch(err => {
         console.log(err);
