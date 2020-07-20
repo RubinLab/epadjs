@@ -8,7 +8,6 @@ import {
   toggleAllLabels,
   toggleSingleLabel,
   toggleAllAnnotations,
-  jumpToAim,
 } from "../action";
 
 class AnnotationsList extends React.Component {
@@ -18,28 +17,34 @@ class AnnotationsList extends React.Component {
   };
 
   componentDidUpdate = (prevProps) => {
-    const series = Object.keys(this.props.aimsList);
-    if (
-      (this.props.activePort !== prevProps.activePort && !this.props.loading) ||
-      (!this.props.loading &&
-        prevProps.loading &&
-        series.length === this.props.openSeries.length)
-    ) {
-      const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
-      let annotations = Object.values(this.props.aimsList[seriesUID]);
-      let labelDisplayAll = false;
-      let annsDisplayAll = false;
-      for (let ann of annotations) {
-        if (ann.isDisplayed) {
-          annsDisplayAll = true;
+    try {
+      const series = Object.keys(this.props.aimsList);
+      if (
+        (this.props.activePort !== prevProps.activePort &&
+          !this.props.loading) ||
+        (!this.props.loading &&
+          prevProps.loading &&
+          series.length === this.props.openSeries.length)
+      ) {
+        const seriesUID = this.props.openSeries[this.props.activePort]
+          .seriesUID;
+        let annotations = Object.values(this.props.aimsList[seriesUID]);
+        let labelDisplayAll = false;
+        let annsDisplayAll = false;
+        for (let ann of annotations) {
+          if (ann.isDisplayed) {
+            annsDisplayAll = true;
+          }
         }
-      }
-      for (let ann of annotations) {
-        if (ann.showLabel) {
-          labelDisplayAll = true;
+        for (let ann of annotations) {
+          if (ann.showLabel) {
+            labelDisplayAll = true;
+          }
         }
+        this.setState({ labelDisplayAll, annsDisplayAll });
       }
-      this.setState({ labelDisplayAll, annsDisplayAll });
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -88,15 +93,18 @@ class AnnotationsList extends React.Component {
     this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
   };
 
-  handleJumpToAim = (slideNo, seriesUID) => {
+  handleJumpToAim = (slideNo) => {
     const { activePort } = this.props;
 
     window.dispatchEvent(
       new CustomEvent("jumpToAimImage", { detail: { slideNo, activePort } })
     );
-    // const { id, serie } = e.target.dataset;
-    // console.log("Id, serie", id, serie);
-    // this.props.dispatch(jumpToAim(serie, id, this.props.activePort));
+  };
+
+  handleEdit = (aimID, seriesUID) => {
+    window.dispatchEvent(
+      new CustomEvent("editAim", { detail: { aimID, seriesUID } })
+    );
   };
 
   getLabelArray = () => {
@@ -201,7 +209,7 @@ class AnnotationsList extends React.Component {
           user={aim.user}
           showLabel={aim.showLabel}
           onSingleToggle={this.handleToggleSingleLabel}
-          // jumpToAim={this.handleJumToAim}
+          onEdit={this.handleEdit}
           serie={seriesUID}
           label={calculations[aim.id]}
           openSeriesAimID={openSeries[activePort].aimID}

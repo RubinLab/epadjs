@@ -142,7 +142,8 @@ class Series extends Component {
       });
       this.setState({ expanded });
     } catch (err) {
-      console.log(`Couldn't load all series data. Please Try again!`);
+      // console.log(`Couldn't load all series data. Please Try again!`);
+      console.error(err);
     }
   }
 
@@ -211,7 +212,8 @@ class Series extends Component {
         this.setState({ columns: this.setColumns() });
       }
     } catch (err) {
-      console.log(`Couldn't load all series data. Please Try again!`);
+      // console.log(`Couldn't load all series data. Please Try again!`);
+      console.error(err);
     }
   }
 
@@ -225,7 +227,8 @@ class Series extends Component {
         }
       this.setState({ expanded });
     } catch (err) {
-      console.log(`Couldn't load all series data. Please Try again!`);
+      // console.log(`Couldn't load all series data. Please Try again!`);
+      console.error(err);
     }
   };
 

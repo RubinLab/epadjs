@@ -56,10 +56,15 @@ class Sidebar extends Component {
   }
 
   componentDidMount = async () => {
-    this.setTabHeight();
-    this.getProjectsData();
-    this.getWorklistandProgressData();
-    window.addEventListener("resize", this.setTabHeight);
+    try {
+      this.setTabHeight();
+      const projects = await this.getProjectsData();
+      this.setStateProjectData(projects, true);
+      this.getWorklistandProgressData();
+      window.addEventListener("resize", this.setTabHeight);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   setTabHeight = () => {
@@ -99,10 +104,12 @@ class Sidebar extends Component {
 
         projects = projects.concat(all, nonassigned);
 
-        const pid = projects[0].id;
-        this.setState({ projects, pid, selected: pid });
-        this.props.history.push(`/search/${pid}`);
-        this.props.getPidUpdate(pid);
+        // const pid = projects[0].id;
+        // this.setState({ projects, pid, selected: pid });
+        // if (this.props.openSeries.length === 0) {
+        //   this.props.history.push(`/search/${pid}`);
+        // }
+        // this.props.getPidUpdate(pid);
         const prTempMap = await this.getTemplatesProjectMap();
         const projectMap = {};
         for (let project of projects) {
@@ -116,9 +123,20 @@ class Sidebar extends Component {
         }
         this.props.dispatch(getProjectMap(projectMap));
         this.props.dispatch(getTemplates());
+        return projects;
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  setStateProjectData = (projects, setPid) => {
+    this.setState({ projects });
+    if (this.props.openSeries.length === 0 && setPid) {
+      const pid = projects[0].id;
+      this.setState({pid, selected: pid })
+      this.props.history.push(`/search/${pid}`);
+      this.props.getPidUpdate(pid);
     }
   };
 
@@ -153,12 +171,12 @@ class Sidebar extends Component {
   getProgressTotal = (list, attribute) => {
     const promises = [];
     const result = [...list];
-    list.forEach((wl) => {
+    list.forEach(wl => {
       promises.push(getWorklistProgress(wl.workListID));
     });
     Promise.all(promises)
-      .then((data) => {
-        const progressArr = data.map((el) => {
+      .then(data => {
+        const progressArr = data.map(el => {
           return el.data;
         });
         let total;
@@ -171,29 +189,39 @@ class Sidebar extends Component {
         });
         this.setState({ [attribute]: result });
       })
-      .catch((err) => console.error(err));
+      .catch(err => console.error(err));
   };
 
-  componentDidUpdate = (prevProps) => {
-    let { pathname } = this.props.location;
-    const { pid, lastEventId } = this.props;
-    if (prevProps.progressUpdated !== this.props.progressUpdated) {
-      this.getWorklistandProgressData();
-    }
-    if (prevProps.projectAdded !== this.props.projectAdded) {
-      this.getProjectsData();
-    }
-    if (pathname !== prevProps.location.pathname) {
-      pathname = pathname.split("/").pop();
-      this.setState({ selected: pathname });
-    }
-    if (pid !== prevProps.pid) {
-      this.setState({ pid });
-    }
+  componentDidUpdate = async prevProps => {
+    try {
+      let { pathname } = this.props.location;
+      const { pid, lastEventId, refresh, notificationAction } = this.props;
+      const tagEdited = notificationAction.startsWith("Tag");
+      const uploaded = notificationAction.startsWith("Upload");
+      const notSideBarUpdate = tagEdited || uploaded;
+      let projects;
+      if (prevProps.progressUpdated !== this.props.progressUpdated) {
+        this.getWorklistandProgressData();
+      }
+      if (prevProps.projectAdded !== this.props.projectAdded) {
+        projects = await this.getProjectsData();
+        this.setStateProjectData(projects);
+      }
+      if (pathname !== prevProps.location.pathname) {
+        pathname = pathname.split("/").pop();
+        this.setState({ selected: pathname });
+      }
+      if (pid !== prevProps.pid) {
+        this.setState({ pid });
+      }
 
-    if (lastEventId !== prevProps.lastEventId) {
-      this.getProjectsData();
-      this.getWorklistandProgressData();
+      if (lastEventId !== prevProps.lastEventId && refresh && !notSideBarUpdate) {
+        console.log("still here")
+        projects = await this.getProjectsData();
+        this.setStateProjectData(projects);
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -285,7 +313,7 @@ class Sidebar extends Component {
       pathname = pathname.split("/").pop();
       // const pid = pathname.pop();
       if (mode === "thick") {
-        const projectsList = projects.map((project) => {
+        const projectsList = projects.map(project => {
           const matchProject =
             selected === project.id || pathname === project.id;
           const className = matchProject
@@ -322,7 +350,7 @@ class Sidebar extends Component {
 
   renderWorklists = () => {
     const { type, selected } = this.state;
-    const worklists = this.state.worklistsAssigned.map((worklist) => {
+    const worklists = this.state.worklistsAssigned.map(worklist => {
       const className =
         worklist.workListID === selected && type === "worklist"
           ? "sidebar-row __selected"
@@ -394,7 +422,7 @@ class Sidebar extends Component {
       <Tabs
         id="controlled-tab-leftSidebar"
         activeKey={this.state.activeTab}
-        onSelect={(index) => this.setState({ index })}
+        onSelect={index => this.setState({ index })}
       >
         {mode === "thick" ? (
           <Tab
@@ -487,11 +515,20 @@ class Sidebar extends Component {
   };
 }
 
-const mapStateToProps = (state) => {
-  const { activePort, lastEventId } = state.annotationsListReducer;
+const mapStateToProps = state => {
+  const {
+    activePort,
+    lastEventId,
+    openSeries,
+    notificationAction,
+    refresh,
+  } = state.annotationsListReducer;
   return {
     activePort,
     lastEventId,
+    openSeries,
+    notificationAction,
+    refresh,
   };
 };
 export default withRouter(connect(mapStateToProps)(Sidebar));

@@ -150,7 +150,13 @@ class DisplayView extends Component {
     window.addEventListener("markupCreated", this.handleMarkupCreated);
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
+    window.addEventListener("editAim", this.editAimHandler);
   }
+
+  editAimHandler = (event) => {
+    const { aimID, seriesUID } = event.detail;
+    this.openAimEditor(aimID, seriesUID);
+  };
 
   async componentDidUpdate(prevProps) {
     const { pid, series, activePort, aimList } = this.props;
@@ -188,8 +194,7 @@ class DisplayView extends Component {
     // This is to handle late loading of aimsList from store but it also calls getData
     // each time visibility of aims change
     else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
-      console.log("Aim lists are not equal", aimList, prevAimList);
-      // this.getData();
+      // console.log("Aim lists are not equal", aimList, prevAimList);
       this.renderAims();
     }
   }
@@ -199,7 +204,7 @@ class DisplayView extends Component {
     window.removeEventListener("markupCreated", this.handleMarkupCreated);
     window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
     window.removeEventListener("jumpToAimImage", this.jumpToAimImage);
-    console.log("Unmounting");
+    window.removeEventListener("editAim", this.editAimHandler);
   }
 
   toggleAnnotations = (event) => {
@@ -249,11 +254,6 @@ class DisplayView extends Component {
 
   setVisibilityOfSegmentations = (aimID, element, setVisibilityTo) => {
     const { series, activePort, aimSegLabelMaps } = this.props;
-    console.log(
-      "Setting visibility of segmentation aimID, aimSegLabelMaps",
-      aimID,
-      aimSegLabelMaps
-    );
     const { seriesUID } = series[activePort];
     const { setters, getters } = cornerstoneTools.getModule("segmentation");
     if (aimID) {
@@ -342,10 +342,7 @@ class DisplayView extends Component {
   // };
 
   getData() {
-    console.log("Getting data", this.props);
     // clear the toolState they will be rendered again on next load
-    const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
@@ -368,7 +365,6 @@ class DisplayView extends Component {
 
       this.refreshAllViewports();
       this.shouldOpenAimEditor();
-      // this.props.dispatch(clearActivePortAimID());
     });
   }
 
@@ -379,7 +375,7 @@ class DisplayView extends Component {
     });
   };
 
-  renderAims = () => {
+  renderAims = (notShowAimEditor = false) => {
     const { series } = this.props;
     this.setState({
       activeLabelMapIndex: 0,
@@ -390,10 +386,10 @@ class DisplayView extends Component {
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
     series.forEach((serie, serieIndex) => {
-      // console.log("seri iamge annotations", serie);
-      // if (serie.aimID && !notShowAimEditor) {
-      //   this.openAimEditor(serie);
-      // }
+      if (serie.aimID && !notShowAimEditor) {
+        const { aimID, seriesUID } = serie;
+        this.openAimEditor(aimID, seriesUID);
+      }
       if (serie.imageAnnotations)
         this.parseAims(
           serie.imageAnnotations,
@@ -488,9 +484,8 @@ class DisplayView extends Component {
     return { stack };
   };
 
-  openAimEditor = async (serie) => {
+  openAimEditor = (aimID, seriesUID) => {
     const { aimList } = this.props;
-    const { aimID, seriesUID } = serie;
     if (Object.entries(aimList).length !== 0) {
       const aimJson = aimList[seriesUID][aimID].json;
       aimJson.aimID = aimID;
@@ -498,7 +493,7 @@ class DisplayView extends Component {
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimID;
       if (this.hasSegmentation(aimJson)) {
-        await this.setState({ hasSegmentation: true });
+        this.setState({ hasSegmentation: true });
         this.setSerieActiveLabelMap();
       }
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
@@ -827,13 +822,12 @@ class DisplayView extends Component {
 
         let imageId = getWadoImagePath(studyUid, seriesUid, key);
 
-        if (!this.state.imageIds[imageId])
+        if (this.state.imageIds && !this.state.imageIds[imageId])
           //image is not multiframe so strip the frame number from the imageId
           imageId = imageId.split("&frame=")[0];
 
         this.renderMarkup(imageId, value, color);
         this.refreshAllViewports();
-        // if (aimUid === serie.aimID) this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
       });
     });
     if (seriesSegmentations.length)
@@ -1058,12 +1052,12 @@ class DisplayView extends Component {
           imageIds.length,
           segmentsOnFrame
         );
-        console.log(
-          "I have rendered ",
-          aimId,
-          "with labelMapIndex :",
-          labelMapIndex
-        );
+        // console.log(
+        //   "I have rendered ",
+        //   aimId,
+        //   "with labelMapIndex :",
+        //   activeLabelMapIndex
+        // );
 
         const { element } = cornerstone.getEnabledElements()[serieIndex];
         // if (this.state.selectedAim) {
@@ -1103,7 +1097,7 @@ class DisplayView extends Component {
         try {
           cornerstone.updateImage(element); //update the image to show newly loaded segmentations}
         } catch (error) {
-          console.warn("Error:", error);
+          console.error("Error:", error);
         }
       });
     }
@@ -1281,7 +1275,7 @@ class DisplayView extends Component {
       // activeLabelMapIndex: 0,
     });
     this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
-    this.renderAims();
+    this.renderAims(true);
     // this.refreshAllViewports();
     return 1;
   };

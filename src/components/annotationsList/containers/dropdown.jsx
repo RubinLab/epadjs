@@ -22,6 +22,7 @@ const dropDownMenu = ({ display, selectedStudy, changeStudy }) => {
           className="annList-dropdown"
           value={selectedStudy}
           onChange={changeStudy}
+          onMouseDown={e => e.stopPropagation()}
         >
           {optionsArr}
         </select>

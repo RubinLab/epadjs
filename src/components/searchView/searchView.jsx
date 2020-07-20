@@ -111,7 +111,9 @@ class SearchView extends Component {
   componentDidMount = async () => {
     try {
       const { pid } = this.props;
-      if (mode === "thick" && !pid) this.props.history.push(`/search/${pid}`);
+      if (mode === "thick" && !pid) {
+        this.props.history.push(`/search/${pid}`);
+      }
       let subjects = Object.values(this.props.treeData);
       if (subjects.length > 0) {
         subjects = subjects.map(el => el.data);
@@ -329,7 +331,7 @@ class SearchView extends Component {
             noOfNotDeleted: openItems.length,
           });
         }
-        this.props.clearTreeData()
+        this.props.clearTreeData();
       })
       .catch(err => {
         console.log(err);
@@ -511,7 +513,7 @@ class SearchView extends Component {
             // this.props.history.push("/display");
           } else {
             //else get data for each serie for display
-            selectedSeries.forEach(serie => {
+            notOpenSeries.forEach(serie => {
               this.props.dispatch(addToGrid(serie));
               this.props.dispatch(getSingleSerie(serie));
             });
@@ -957,6 +959,7 @@ class SearchView extends Component {
           showTagEditor={lengthOfSeries > 0}
           project={this.props.match.params.pid}
           onAddProject={this.handleProjectClick}
+          admin={this.props.admin}
           // expanding={expanding}
         />
         {isSerieSelectionOpen && !this.props.loading && (
