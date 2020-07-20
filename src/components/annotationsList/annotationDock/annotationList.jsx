@@ -8,7 +8,6 @@ import {
   toggleAllLabels,
   toggleSingleLabel,
   toggleAllAnnotations,
-  jumpToAim,
 } from "../action";
 
 class AnnotationsList extends React.Component {
@@ -17,7 +16,7 @@ class AnnotationsList extends React.Component {
     annsDisplayAll: true,
   };
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     try {
       const series = Object.keys(this.props.aimsList);
       if (
@@ -49,7 +48,7 @@ class AnnotationsList extends React.Component {
     }
   };
 
-  handleDisplayClick = e => {
+  handleDisplayClick = (e) => {
     const { seriesUID, patientID, studyUID } = this.props.openSeries[
       this.props.activePort
     ];
@@ -89,20 +88,23 @@ class AnnotationsList extends React.Component {
     this.setState({ annsDisplayAll: checked });
   };
 
-  handleToggleSingleLabel = e => {
+  handleToggleSingleLabel = (e) => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
   };
 
-  handleJumpToAim = (slideNo, seriesUID) => {
+  handleJumpToAim = (slideNo) => {
     const { activePort } = this.props;
 
     window.dispatchEvent(
       new CustomEvent("jumpToAimImage", { detail: { slideNo, activePort } })
     );
-    // const { id, serie } = e.target.dataset;
-    // console.log("Id, serie", id, serie);
-    // this.props.dispatch(jumpToAim(serie, id, this.props.activePort));
+  };
+
+  handleEdit = (aimID, seriesUID) => {
+    window.dispatchEvent(
+      new CustomEvent("editAim", { detail: { aimID, seriesUID } })
+    );
   };
 
   getLabelArray = () => {
@@ -207,7 +209,7 @@ class AnnotationsList extends React.Component {
           user={aim.user}
           showLabel={aim.showLabel}
           onSingleToggle={this.handleToggleSingleLabel}
-          // jumpToAim={this.handleJumToAim}
+          onEdit={this.handleEdit}
           serie={seriesUID}
           label={calculations[aim.id]}
           openSeriesAimID={openSeries[activePort].aimID}
@@ -262,7 +264,7 @@ class AnnotationsList extends React.Component {
   };
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
