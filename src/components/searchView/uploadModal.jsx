@@ -96,13 +96,16 @@ class UploadModal extends React.Component {
 
     Promise.all(promises)
       .then(() => {
-        this.props.onSubmit();
+        // this.props.onSubmit();
+        this.props.onResolve();
         this.props.clearTreeData();
         this.props.dispatch(getTemplates());
       })
       .catch(err => {
         console.log(err);
-        this.props.onSubmit();
+        // this.props.onSubmit();
+        this.props.onResolve();
+
       });
     this.props.onCancel();
     this.setState({ projectID: "" });
