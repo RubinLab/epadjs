@@ -240,6 +240,7 @@ class Templates extends React.Component {
       await Promise.all(promises);
       this.handleCancel();
       this.getTemplatesData();
+      this.props.getProjectAdded();
     } catch (err) {
       console.log(err);
     }

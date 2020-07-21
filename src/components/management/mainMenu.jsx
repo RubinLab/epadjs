@@ -92,6 +92,7 @@ class MainMenu extends React.Component {
             selection={this.state.selection}
             onClose={this.handleCloseModal}
             pid={this.props.pid}
+            getProjectAdded={this.props.getProjectAdded}
           />
         );
       case "Plugins":
