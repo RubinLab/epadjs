@@ -109,12 +109,12 @@ class ToolMenu extends Component {
       showDrawing: false,
       showBrushMenu: false,
       showPresets: false,
-      selectedWindowLevel: "",
       playing: false,
       customBrush: {
         min: -1000,
         max: 3000,
       },
+      showBrushSize: false,
       rangeDisabled: true,
       interpolate: false,
       activeTool: "",
@@ -391,11 +391,13 @@ class ToolMenu extends Component {
       this.toggleMetaData();
       return;
     } else if (tool === "Brush3DTool") {
+      this.setState({ showBrushSize: true });
       if (this.checkIfMultiframe()) {
         alert("Segmentation only works in singleframe images!");
         return;
       } //Dont" select the HUGated if the modality is not CT
     } else if (tool === "Brush3DHUGated") {
+      this.setState({ showBrushSize: true });
       if (!this.checkIfCT() || this.checkIfMultiframe()) {
         alert("HU Gated tool only works with singleframe CT images");
         return;
@@ -407,9 +409,8 @@ class ToolMenu extends Component {
     });
   };
 
-  handleWlClose = (selectedWindowLevel) => {
-    this.setState({ selectedWindowLevel });
-    this.showPresets();
+  closeBrushSize = () => {
+    this.setState({ showBrushSize: false });
   };
 
   render() {
@@ -624,12 +625,6 @@ class ToolMenu extends Component {
             />
           );
         })}
-        {this.state.activeTool === "Brush3DTool" ||
-        this.state.activeTool === "Brush3DHUGated" ? (
-          <BrushSizeSelector />
-        ) : (
-          ""
-        )}
         {/* <div
                         id="brush"
                         tabIndex="8"
@@ -725,13 +720,14 @@ class ToolMenu extends Component {
                         </div>
                     </div> */}
         {/* </Collapsible> */}
+        {this.state.showBrushSize && (
+          <BrushSizeSelector onClose={this.closeBrushSize} />
+        )}
         {this.state.activeTool === "Brush3DHUGated" && <SmartBrushMenu />}
-
         {this.state.showPresets && (
           <WindowLevel
             activePort={this.props.activePort}
-            onClose={this.handleWlClose}
-            selectedPreset={this.state.selectedWindowLevel}
+            onClose={this.showPresets}
           />
         )}
       </div>

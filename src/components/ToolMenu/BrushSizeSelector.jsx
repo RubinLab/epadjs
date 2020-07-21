@@ -1,16 +1,15 @@
 import React, { Component } from "react";
 import cornerstoneTools from "cornerstone-tools";
 import InputRange from "react-input-range";
-import { relative } from "joi-browser";
-// import "./SmartBrushMenu.css";
+import "./BrushSizeSelector.css";
 
 const brushModule = cornerstoneTools.store.modules.segmentation;
 
-const spanStyle = {
-  position: "relative",
-  "margin-bottom": "1em",
-  display: "inline-block",
-};
+// const spanStyle = {
+//   position: "relative",
+//   "margin-bottom": "1em",
+//   display: "inline-block",
+// };
 
 class BrushSizeSelector extends Component {
   constructor(props) {
@@ -27,8 +26,8 @@ class BrushSizeSelector extends Component {
 
   render() {
     return (
-      <div className="range-container">
-        <span style={spanStyle}>Brush Size</span>
+      <div className="brush-size-selector">
+        <span>Brush Size</span>
         <InputRange
           //   style={inputRange}
           //   disabled={this.state.rangeDisabled}
@@ -39,6 +38,9 @@ class BrushSizeSelector extends Component {
           onChange={(value) => this.setState({ size: value })}
           onChangeComplete={(value) => this.applyBrushSize(value)}
         />
+        <div className="close-brush" onClick={this.props.onClose}>
+          <a>X</a>
+        </div>
       </div>
     );
   }
