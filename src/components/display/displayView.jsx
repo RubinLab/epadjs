@@ -166,12 +166,20 @@ class DisplayView extends Component {
       aimJson["aimId"] = aimID;
 
       // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
+      const { labelMaps, activeLabelMapIndex } = this.state.seriesLabelMaps[
+        activePort
+      ];
+      const element = this.getActiveElement();
       if (this.hasSegmentation(aimJson)) {
-        const { labelMaps } = this.state.seriesLabelMaps[activePort];
+        console.log("Aim json has segmentations", aimJson);
         const labelMapIndexOfAim = labelMaps[aimID];
-        this.setActiveLabelMapIndex(
-          labelMapIndexOfAim,
-          this.getActiveElement()
+        this.setActiveLabelMapIndex(labelMapIndexOfAim, element);
+      } else {
+        this.setActiveLabelMapIndex(activeLabelMapIndex, element);
+        console.log(
+          "Aim json has not segmentation so settin to ",
+          aimJson,
+          activeLabelMapIndex
         );
       }
 
@@ -1038,6 +1046,8 @@ class DisplayView extends Component {
   setSerieActiveLabelMap = (aimId) => {
     console.log("Aim id", aimId);
     const { series, activePort } = this.props;
+    const { seriesLabelMaps } = this.state;
+    if (!seriesLabelMaps[activePort]) return; //The default activeLabelMap will be 0 automatically
     const { imageIds } = this.state.data[activePort].stack;
 
     var imagePromises = imageIds.map((imageId) => {
@@ -1051,19 +1061,21 @@ class DisplayView extends Component {
       }
       console.log("Aim ID var mi ", series[activePort]);
       console.log("State", this.state);
-      // If an aim is selected set its label map for editing
-      if (aimId) {
-        console.log("State buradaaa", this.state);
-        const { labelMaps } = this.state.seriesLabelMaps[activePort];
+
+      const { labelMaps, activeLabelMapIndex } = seriesLabelMaps[activePort];
+      if (aimId && typeof labelMaps[aimId] !== "undefined")
         newLabelMapIndex = labelMaps[aimId];
-        console.log("aim ", aimId, "lmi", newLabelMapIndex);
-      } else if (
-        this.state.seriesLabelMaps &&
-        this.state.seriesLabelMaps[activePort]
-      )
-        newLabelMapIndex = this.state.seriesLabelMaps[activePort]
-          .activeLabelMapIndex;
-      else newLabelMapIndex = 0;
+      else newLabelMapIndex = activeLabelMapIndex;
+
+      // // If an aim is selected set its label map for editing
+      // if (seriesLabelMaps && seriesLabelMaps[activePort])
+      //   newLabelMapIndex = seriesLabelMaps[activePort].activeLabelMapIndex;
+      // else if (aimId && typeof labelMaps[aimId] !== "undefined") {
+      //   console.log("State buradaaa", this.state);
+      //   const { labelMaps } = seriesLabelMaps[activePort];
+      //   newLabelMapIndex = labelMaps[aimId];
+      //   console.log("aim ", aimId, "lmi", newLabelMapIndex);
+      // } else newLabelMapIndex = 0;
 
       console.log("Setting elements activeLabeMap with", newLabelMapIndex);
       this.setActiveLabelMapIndex(newLabelMapIndex, this.getActiveElement());
@@ -1497,17 +1509,20 @@ class DisplayView extends Component {
                       <FaExpandArrowsAlt />
                     </span>
                   </div>
-                  <div className={"column middle"}>
-                    {/* <label>{series[i].seriesUID}</label> */}
-                  </div>
+                  {/* <div className={"column middle"}>
+                    <label>{series[i].seriesUID}</label>
+                  </div> */}
                   <div className={"column middle-right"}>
-                    <Form inline>
-                      <Form.Group>
-                        <Form.Label htmlFor="imageNum">{"Slice # "}</Form.Label>
+                    <Form inline className="slice-form">
+                      <Form.Group className="slice-number">
+                        <Form.Label htmlFor="imageNum" className="slice-label">
+                          {"Slice # "}
+                        </Form.Label>
                         <Form.Control
                           type="number"
                           min="1"
                           value={data.stack.currentImageIdIndex + 1}
+                          className={"slice-field"}
                           onChange={(event) => this.handleJumpChange(i, event)}
                           style={{
                             width: "60px",
