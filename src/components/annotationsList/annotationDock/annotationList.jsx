@@ -12,7 +12,7 @@ import {
 
 class AnnotationsList extends React.Component {
   state = {
-    labelDisplayAll: false,
+    labelDisplayAll: true,
     annsDisplayAll: true,
   };
 
@@ -29,8 +29,8 @@ class AnnotationsList extends React.Component {
         const seriesUID = this.props.openSeries[this.props.activePort]
           .seriesUID;
         let annotations = Object.values(this.props.aimsList[seriesUID]);
-        let labelDisplayAll = false;
-        let annsDisplayAll = false;
+        let labelDisplayAll = true;
+        let annsDisplayAll = true;
         for (let ann of annotations) {
           if (ann.isDisplayed) {
             annsDisplayAll = true;
