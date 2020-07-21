@@ -1319,11 +1319,11 @@ class DisplayView extends Component {
                       <FaExpandArrowsAlt />
                     </span>
                   </div>
-                  <div className={"column middle"}>
-                    {/* <label>{series[i].seriesUID}</label> */}
-                  </div>
+                  {/* <div className={"column middle"}>
+                    <label>{series[i].seriesUID}</label>
+                  </div> */}
                   <div className={"column middle-right"}>
-                    <Form inline>
+                    <Form inline className="slice-form">
                       <Form.Group className="slice-number">
                         <Form.Label htmlFor="imageNum" className="slice-label">{"Slice # "}</Form.Label>
                         <Form.Control
