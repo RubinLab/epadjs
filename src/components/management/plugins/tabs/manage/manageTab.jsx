@@ -177,7 +177,7 @@ class ManageTab extends React.Component {
   };
   render() {
     return (
-      <Fragment>
+      <div>
         <div className="topButtons">
           <FaPlusCircle
             data-tip="New Plugin"
@@ -192,7 +192,7 @@ class ManageTab extends React.Component {
             className="cursorHand"
           />
         </div>
-        <div>
+        <div className="plugin_manage_table">
           <ReactTable
             className="pro-table"
             data={this.props.data}
@@ -201,7 +201,7 @@ class ManageTab extends React.Component {
             defaultPageSize={this.props.defaultPageSize}
           />
         </div>
-      </Fragment>
+      </div>
     );
   }
 }

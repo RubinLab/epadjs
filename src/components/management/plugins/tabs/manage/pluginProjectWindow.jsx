@@ -64,24 +64,25 @@ class PluginProjectWindow extends React.Component {
 
   render() {
     return (
-      <div>
-        <Modal.Dialog dialogClassName="create-user__modal">
-          <Modal.Header>
-            <Modal.Title>Projects</Modal.Title>
-          </Modal.Header>
-          <Modal.Body className="create-user__modal --body">
-            <table>
+      <div className="plugin_project_container">
+        <div dialogClassName="plugin_project_modal">
+          <div className="plugin_project_modal_header">
+            <div className="plugin_project_modal_title">Projects</div>
+          </div>
+          <div className="plugin_project_modal_body">
+            <table className="plugin_project_table">
               <thead>
                 <tr>
-                  <th className="user-table__header--user">add/remove</th>
+                  <th className="user-table__header">add/remove</th>
                   <th className="user-table__header">project</th>
+                  <th className="user-table__header"></th>
                 </tr>
               </thead>
               <tbody>{this.populateRows()}</tbody>
             </table>
-          </Modal.Body>
+          </div>
 
-          <Modal.Footer className="create-user__modal--footer">
+          <div className="plugin_project_modal_footer">
             <div className="create-user__modal--buttons">
               <button
                 variant="primary"
@@ -98,8 +99,8 @@ class PluginProjectWindow extends React.Component {
                 Cancel
               </button>
             </div>
-          </Modal.Footer>
-        </Modal.Dialog>
+          </div>
+        </div>
         {this.state.showparamswindow && (
           <ParametersForProjectWindow
             onCancel={this.handleParameterCancel}

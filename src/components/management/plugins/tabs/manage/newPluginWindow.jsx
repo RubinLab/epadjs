@@ -29,13 +29,13 @@ class NewPluginWindow extends React.Component {
   render() {
     const { onChange, error, pluginFormElements } = this.props;
     return (
-      <div className="tools menu-display" id="template">
-        <Modal.Dialog className="create-plugin__modal">
-          <Modal.Header>
-            <Modal.Title>New Plugin</Modal.Title>
-          </Modal.Header>
-          <Modal.Body className="create-user__modal--body">
-            <table className="NewPluginTable">
+      <div className="create_plugin_container" id="newplugin">
+        <div className="create_plugin_modal">
+          <div className="create_plugin_header">
+            <div className="create_plugin_header">New Plugin</div>
+          </div>
+          <div className="create_plugin_modal_body">
+            <table className="create_plugin_table">
               <tbody>
                 <tr>
                   <td>
@@ -204,9 +204,9 @@ class NewPluginWindow extends React.Component {
                 </tr>
               </tbody>
             </table>
-          </Modal.Body>
+          </div>
 
-          <Modal.Footer className="create-user__modal--footer">
+          <div className="create_plugin_modal_footer">
             <div className="create-user__modal--buttons">
               <button
                 variant="primary"
@@ -223,8 +223,8 @@ class NewPluginWindow extends React.Component {
                 Cancel
               </button>
             </div>
-          </Modal.Footer>
-        </Modal.Dialog>
+          </div>
+        </div>
       </div>
     );
   }
