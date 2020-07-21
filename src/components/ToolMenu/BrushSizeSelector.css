@@ -1,18 +1,23 @@
-.smb-pop-up {
+.brush-size-selector {
     position: absolute;
     background-color: #3a3f44;
-    padding: 10px 20px;
+    padding: 5px 10px;
     outline: solid;
     outline-width: 1px;
     background-color: #3a3f44;
     outline-color: black;
-    width: 270px;
+    width: 370px;
+    height: 50px;
+    top: 120px;
     right: 500px;
-    top: 171px;
     z-index: 1000;
 }
 
-.close-smart-brush-menu {
+.brush-size-selector span {
+    font-size: x-small;
+}
+
+.close-brush {
     position: absolute;
     top: 2px;
     right: 5px;
@@ -31,9 +36,4 @@ hr {
 h5 {
     font-size: 2em;
     margin-bottom: 0em;
-}
-
-a {
-    color: red;
-    text-align: right !important;
 }

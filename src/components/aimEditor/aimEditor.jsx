@@ -405,14 +405,14 @@ class AimEditor extends Component {
         // var objectUrl = URL.createObjectURL(segBlobGlobal);
         // window.open(objectUrl);
 
-        toast.success("Aim succesfully saved.", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        // toast.success("Aim succesfully saved.", {
+        //   position: "top-right",
+        //   autoClose: 5000,
+        //   hideProgressBar: false,
+        //   closeOnClick: true,
+        //   pauseOnHover: true,
+        //   draggable: true,
+        // });
         this.props.dispatch(
           getSingleSerie({ patientID, projectID, seriesUID, studyUID })
         );
@@ -428,9 +428,9 @@ class AimEditor extends Component {
         this.props.updateTreeDataOnSave(aimRefs);
       })
       .catch((error) => {
-        // alert(
-        //   "Annotation could not be saved! More information about the error can be found in the logs."
-        // );
+        alert(
+          "Annotation could not be saved! More information about the error can be found in the logs."
+        );
         console.error(error);
       });
     this.props.onCancel(false);
@@ -943,14 +943,14 @@ class AimEditor extends Component {
     uploadSegmentation(segmentation, segId, projectID)
       .then(() => {
         // this.props.onCancel();
-        toast.success("Segmentation succesfully saved.", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        // toast.success("Segmentation succesfully saved.", {
+        //   position: "top-right",
+        //   autoClose: 5000,
+        //   hideProgressBar: false,
+        //   closeOnClick: true,
+        //   pauseOnHover: true,
+        //   draggable: true,
+        // });
         return "success";
       })
       .catch((error) => {

@@ -114,6 +114,8 @@ class ToolMenu extends Component {
         min: -1000,
         max: 3000,
       },
+      showBrushSize: false,
+      showSmartBrush: false,
       rangeDisabled: true,
       interpolate: false,
       activeTool: "",
@@ -394,16 +396,26 @@ class ToolMenu extends Component {
         alert("Segmentation only works in singleframe images!");
         return;
       } //Dont" select the HUGated if the modality is not CT
+      this.setState({ showBrushSize: true });
     } else if (tool === "Brush3DHUGated") {
       if (!this.checkIfCT() || this.checkIfMultiframe()) {
         alert("HU Gated tool only works with singleframe CT images");
         return;
       } //Dont" select the HUGated if the modality is not CT
+      this.setState({ showBrushSize: true, showSmartBrush: true });
     }
     // this.disableAllTools();
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
       this.setToolActive(tool);
     });
+  };
+
+  closeBrushSize = () => {
+    this.setState({ showBrushSize: false });
+  };
+
+  closeSmartBrushMenu = () => {
+    this.setState({ showSmartBrush: false });
   };
 
   render() {
@@ -618,12 +630,6 @@ class ToolMenu extends Component {
             />
           );
         })}
-        {this.state.activeTool === "Brush3DTool" ||
-        this.state.activeTool === "Brush3DHUGated" ? (
-          <BrushSizeSelector />
-        ) : (
-          ""
-        )}
         {/* <div
                         id="brush"
                         tabIndex="8"
@@ -719,8 +725,15 @@ class ToolMenu extends Component {
                         </div>
                     </div> */}
         {/* </Collapsible> */}
-        {this.state.activeTool === "Brush3DHUGated" && <SmartBrushMenu />}
-
+        {(this.state.activeTool === "Brush3DTool" ||
+          this.state.activeTool === "Brush3DHUGated") &&
+          this.state.showBrushSize && (
+            <BrushSizeSelector onClose={this.closeBrushSize} />
+          )}
+        {this.state.activeTool === "Brush3DHUGated" &&
+          this.state.showSmartBrush && (
+            <SmartBrushMenu onClose={this.closeSmartBrushMenu} />
+          )}
         {this.state.showPresets && (
           <WindowLevel
             activePort={this.props.activePort}
