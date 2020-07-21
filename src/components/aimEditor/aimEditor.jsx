@@ -428,9 +428,9 @@ class AimEditor extends Component {
         this.props.updateTreeDataOnSave(aimRefs);
       })
       .catch((error) => {
-        alert(
-          "Annotation could not be saved! More information about the error can be found in the logs."
-        );
+        // alert(
+        //   "Annotation could not be saved! More information about the error can be found in the logs."
+        // );
         console.error(error);
       });
     this.props.onCancel(false);
