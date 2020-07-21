@@ -87,7 +87,7 @@ class Rightsidebar extends Component {
               </div>
             </Collapsible>
           )}
-          <Collapsible trigger={"Annotations"} transitionTime={100}>
+          <Collapsible trigger={"Annotations"} open={true} transitionTime={100}>
             <AnnotationList />
           </Collapsible>
         </div>
