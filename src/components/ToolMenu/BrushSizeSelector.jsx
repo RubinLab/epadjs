@@ -39,7 +39,7 @@ class BrushSizeSelector extends Component {
           onChangeComplete={(value) => this.applyBrushSize(value)}
         />
         <div className="close-brush" onClick={this.props.onClose}>
-          <a>X</a>
+          <a href="#">X</a>
         </div>
       </div>
     );
