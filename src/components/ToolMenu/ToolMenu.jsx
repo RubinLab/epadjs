@@ -109,6 +109,7 @@ class ToolMenu extends Component {
       showDrawing: false,
       showBrushMenu: false,
       showPresets: false,
+      selectedWindowLevel: "",
       playing: false,
       customBrush: {
         min: -1000,
@@ -404,6 +405,11 @@ class ToolMenu extends Component {
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
       this.setToolActive(tool);
     });
+  };
+
+  handleWlClose = (selectedWindowLevel) => {
+    this.setState({ selectedWindowLevel });
+    this.showPresets();
   };
 
   render() {
@@ -724,7 +730,8 @@ class ToolMenu extends Component {
         {this.state.showPresets && (
           <WindowLevel
             activePort={this.props.activePort}
-            onClose={this.showPresets}
+            onClose={this.handleWlClose}
+            selectedPreset={this.state.selectedWindowLevel}
           />
         )}
       </div>
