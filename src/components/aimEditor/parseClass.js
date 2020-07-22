@@ -16,7 +16,6 @@ export var AimEditor = function (
   //this.mapHtmlObjects = new Map(); not used
   //this.mapHtmlSelectObjectsKeyValue = new Map(); not used
   // this.mapAllowedTermCollectionByCodeValue = new Map(); not used
-  console.log("new aimeditor -----");
   var self = this;
   var domelements = [];
   var selectid = 0;
@@ -85,8 +84,15 @@ export var AimEditor = function (
   this.anyClosedShapeTypes = ["Circle", "Polyline"];
   this.templateShapeArray = []; //each array element is a json object {"shape":'Point', "domid" : '2.25.33554445511225454'});
   this.defaultTemplate = null;
+
+  // shortcut keys variables to relate allowed terms and html elements
+  this.mapShortCutKeys = new Map();
+  this.mapcodeValueShortCutKeys = new Map();
+  //  example usage in template "keyShortCut" :"ctrlKeyshiftKey+U"
+
   function constructor() {
     if (self.arrayTemplates === "undefined") self.arrayTemplates = [];
+    document.addEventListener("keydown", self.aimshortCutKeyEvent, false);
   }
 
   this.arrayDifference = function (base, compareto) {
@@ -127,8 +133,9 @@ export var AimEditor = function (
     if (self.mapShortCutKeys.get(keyvalue)) {
       // console.log("in" + keyvalue);
       // console.log(self.mapShortCutKeys.get(keyvalue));
-
-      document.getElementById(self.mapShortCutKeys.get(keyvalue)).click();
+      if (self.mapShortCutKeys.get(keyvalue) !== null) {
+        document.getElementById(self.mapShortCutKeys.get(keyvalue)).click();
+      }
     }
   };
 
@@ -854,6 +861,18 @@ export var AimEditor = function (
       //   allowedTermObj.codeValue,
       //   unionPrntAlwtermObj
       // ); not used
+
+      if (subEObject.hasOwnProperty("keyShortCut")) {
+        self.mapShortCutKeys.set(
+          subEObject.keyShortCut,
+          self.removeEmptySpace(parent.label) + "-" + subEObject.codeValue
+        );
+        self.mapcodeValueShortCutKeys.set(
+          self.removeEmptySpace(parent.label) + "-" + subEObject.codeValue,
+          subEObject.keyShortCut
+        );
+      }
+
       AllowedTerm.push({
         AllowedTerm: allowedTermObj,
       });
@@ -1663,6 +1682,10 @@ export var AimEditor = function (
     div.className = className;
     var label = document.createElement("label");
     label.textContent = lbl;
+    if (self.mapcodeValueShortCutKeys.get(id)) {
+      label.textContent =
+        label.textContent + " (" + self.mapcodeValueShortCutKeys.get(id) + ") ";
+    }
     var radioInput = document.createElement("input");
     radioInput.type = "radio";
     radioInput.className = "radio checkbox";
@@ -2068,6 +2091,10 @@ export var AimEditor = function (
     div.className = className;
     var label = document.createElement("label");
     label.textContent = lbl;
+    if (self.mapcodeValueShortCutKeys.get(id)) {
+      label.textContent =
+        label.textContent + " (" + self.mapcodeValueShortCutKeys.get(id) + ") ";
+    }
     var checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.className = "checkbox";
