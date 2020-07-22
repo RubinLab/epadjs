@@ -78,7 +78,10 @@ const tools = [
     modeOptions: { mouseButtonMask: [1] },
     mode: "passive",
   },
-  { name: "FreehandRoiSculptor", modeOptions: { mouseButtonMask: 1 } },
+  {
+    name: "FreehandRoiSculptor",
+    modeOptions: { mouseButtonMask: 1 },
+  },
   {
     name: "FreehandRoi3DTool",
     modeOptions: { mouseButtonMask: 1 },
@@ -166,22 +169,18 @@ class DisplayView extends Component {
       aimJson["aimId"] = aimID;
 
       // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
-      const { labelMaps, activeLabelMapIndex } = this.state.seriesLabelMaps[
-        activePort
-      ];
+
       const element = this.getActiveElement();
       if (this.hasSegmentation(aimJson)) {
         console.log("Aim json has segmentations", aimJson);
+        const { labelMaps } = this.state.seriesLabelMaps[activePort];
         const labelMapIndexOfAim = labelMaps[aimID];
         this.setActiveLabelMapIndex(labelMapIndexOfAim, element);
-      } else {
-        this.setActiveLabelMapIndex(activeLabelMapIndex, element);
-        console.log(
-          "Aim json has not segmentation so settin to ",
-          aimJson,
-          activeLabelMapIndex
-        );
       }
+      // } else {
+      //   this.setActiveLabelMapIndex(0, element);
+      //   console.log("Aim json has not segmentation so settin to ", aimJson, 0);
+      // }
 
       // check if is already editing an aim
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
@@ -200,7 +199,7 @@ class DisplayView extends Component {
 
       this.setState({ showAimEditor: true, selectedAim: aimJson });
     }
-    this.setSerieActiveLabelMap(aimID);
+    // this.setSerieActiveLabelMap(aimID);
     // this.openAimEditor(aimID, seriesUID);
   };
 
@@ -392,26 +391,32 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
+    try {
+      const { series } = this.props;
+      var promises = [];
+      for (let i = 0; i < series.length; i++) {
+        const promise = this.getImageStack(series[i], i);
+        promises.push(promise);
+      }
+      Promise.all(promises).then((res) => {
+        this.setState(
+          {
+            data: res,
+            isLoading: false,
+            // activeLabelMapIndex: 0,
+            // prospectiveLabelMapIndex: 0,
+          },
+          () => {
+            this.renderAims();
 
-    const { series } = this.props;
-    var promises = [];
-    for (let i = 0; i < series.length; i++) {
-      const promise = this.getImageStack(series[i], i);
-      promises.push(promise);
-    }
-    Promise.all(promises).then((res) => {
-      this.setState({
-        data: res,
-        isLoading: false,
-        // activeLabelMapIndex: 0,
-        // prospectiveLabelMapIndex: 0,
+            this.refreshAllViewports();
+            this.shouldOpenAimEditor();
+          }
+        );
       });
-
-      this.renderAims();
-
-      this.refreshAllViewports();
-      this.shouldOpenAimEditor();
-    });
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   shouldOpenAimEditor = (notShowAimEditor = false) => {
@@ -980,6 +985,8 @@ class DisplayView extends Component {
     let activeLabelMapIndex;
     const { serieIndex } = seriesSegmentations[0];
 
+    console.log("State at this point", this.state.data);
+
     const { imageIds } = this.state.data[serieIndex].stack;
 
     var imagePromises = imageIds.map((imageId) => {
@@ -1047,7 +1054,11 @@ class DisplayView extends Component {
     console.log("Aim id", aimId);
     const { series, activePort } = this.props;
     const { seriesLabelMaps } = this.state;
-    if (!seriesLabelMaps[activePort]) return; //The default activeLabelMap will be 0 automatically
+    console.log("Active port", activePort);
+    if (!seriesLabelMaps[activePort]) {
+      console.log("i am returning ", seriesLabelMaps[activePort]);
+      return;
+    } //The default activeLabelMap will be 0 automatically
     const { imageIds } = this.state.data[activePort].stack;
 
     var imagePromises = imageIds.map((imageId) => {
@@ -1359,7 +1370,6 @@ class DisplayView extends Component {
       showAimEditor: false,
       selectedAim: undefined,
       hasSegmentation: false,
-      activeLabelMapIndex: 0,
       dirty: false,
     });
     this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
