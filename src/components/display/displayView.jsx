@@ -987,67 +987,58 @@ class DisplayView extends Component {
 
     console.log("State at this point", this.state.data);
 
-    const { imageIds } = this.state.data[serieIndex].stack;
+    try {
+      const { imageIds } = this.state.data[serieIndex].stack;
 
-    var imagePromises = imageIds.map((imageId) => {
-      return cornerstone.loadAndCacheImage(imageId);
-    });
-
-    Promise.all(imagePromises).then(async () => {
-      seriesSegmentations.forEach(
-        ({ seriesUid, studyUid, aimUid, serieIndex }, i) => {
-          this.getSegmentationData(seriesUid, studyUid, aimUid, serieIndex, i);
-          segLabelMaps[aimUid] = i;
-        }
-      );
-      const { aimID } = this.props.series[serieIndex];
-      const { seriesLabelMaps } = this.state;
-      // If an aim is selected and it has segmentatio set the activeLabelMap of serie as selected
-      // aim's labelMap. Else set it as the next available labelMap to brush new segs
-
-      console.log("aim id var mi", aimID, segLabelMaps);
-      if (aimID && typeof segLabelMaps[aimID] !== "undefined")
-        activeLabelMapIndex = segLabelMaps[aimID];
-      else {
-        activeLabelMapIndex = seriesSegmentations.length;
-        console.log(
-          "setting activeLabelMap as length ",
-          seriesSegmentations.length,
-          seriesSegmentations
-        );
-      }
-
-      await this.setState({
-        seriesLabelMaps: {
-          ...seriesLabelMaps,
-          [serieIndex]: { labelMaps: { ...segLabelMaps }, activeLabelMapIndex },
-        },
+      var imagePromises = imageIds.map((imageId) => {
+        return cornerstone.loadAndCacheImage(imageId);
       });
-      this.setSerieActiveLabelMap(aimID);
-    });
 
+      Promise.all(imagePromises).then(async () => {
+        seriesSegmentations.forEach(
+          ({ seriesUid, studyUid, aimUid, serieIndex }, i) => {
+            this.getSegmentationData(
+              seriesUid,
+              studyUid,
+              aimUid,
+              serieIndex,
+              i
+            );
+            segLabelMaps[aimUid] = i;
+          }
+        );
+        const { aimID } = this.props.series[serieIndex];
+        const { seriesLabelMaps } = this.state;
+        // If an aim is selected and it has segmentatio set the activeLabelMap of serie as selected
+        // aim's labelMap. Else set it as the next available labelMap to brush new segs
+
+        console.log("aim id var mi", aimID, segLabelMaps);
+        if (aimID && typeof segLabelMaps[aimID] !== "undefined")
+          activeLabelMapIndex = segLabelMaps[aimID];
+        else {
+          activeLabelMapIndex = seriesSegmentations.length;
+          console.log(
+            "setting activeLabelMap as length ",
+            seriesSegmentations.length,
+            seriesSegmentations
+          );
+        }
+
+        await this.setState({
+          seriesLabelMaps: {
+            ...seriesLabelMaps,
+            [serieIndex]: {
+              labelMaps: { ...segLabelMaps },
+              activeLabelMapIndex,
+            },
+          },
+        });
+        this.setSerieActiveLabelMap(aimID);
+      });
+    } catch (error) {
+      console.error(error);
+    }
     console.log("State after seting", this.state);
-    // console.log(
-    //   "Checking segmentation before renderind segmentation: ",
-    //   aimUid,
-    //   "state is",
-    //   this.state.aimLabelMaps
-    // );
-    // const { aimLabelMaps, activeLabelMapIndex } = this.state;
-    // if (typeof aimLabelMaps[aimUid] !== "undefined") {
-    //   // console.log(
-    //   //   "I'm returning because ",
-    //   //   aimUid,
-    //   //   "is already rendering with ",
-    //   //   aimLabelMaps[aimUid]
-    //   // );
-    //   return; // This seg has already been loaded
-    // }
-    // console.log("I'm rendering ", aimUid, "with ", activeLabelMapIndex);
-    // await this.setState({
-    //   activeLabelMapIndex: activeLabelMapIndex + 1,
-    //   aimLabelMaps: { ...aimLabelMaps, [aimUid]: activeLabelMapIndex },
-    // }); //set the index state for next render
   };
 
   setSerieActiveLabelMap = (aimId) => {
