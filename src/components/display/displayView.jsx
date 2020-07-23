@@ -849,7 +849,9 @@ class DisplayView extends Component {
       }
       this.setState({ activePort: i });
       await this.props.dispatch(changeActivePort(i));
-      // await this.props.dispatch
+      const { imageIds, currentImageIdIndex } = this.state.data[i].stack;
+      const imageId = this.parseImgeId(imageIds[currentImageIdIndex]);
+      await this.props.dispatch(updateImageId(imageId));
       this.setSerieActiveLabelMap();
     }
   };
