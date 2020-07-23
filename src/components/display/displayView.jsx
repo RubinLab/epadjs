@@ -403,12 +403,9 @@ class DisplayView extends Component {
           {
             data: res,
             isLoading: false,
-            // activeLabelMapIndex: 0,
-            // prospectiveLabelMapIndex: 0,
           },
           () => {
             this.renderAims();
-
             this.refreshAllViewports();
             this.shouldOpenAimEditor();
           }
@@ -852,6 +849,7 @@ class DisplayView extends Component {
       }
       this.setState({ activePort: i });
       await this.props.dispatch(changeActivePort(i));
+      // await this.props.dispatch
       this.setSerieActiveLabelMap();
     }
   };
@@ -881,7 +879,7 @@ class DisplayView extends Component {
         this.renderMarkup(imageId, value, color);
       });
     });
-    this.refreshAllViewports();
+    // this.refreshAllViewports();
     if (seriesSegmentations.length)
       this.handleSegmentations(seriesSegmentations);
   };
@@ -1365,13 +1363,13 @@ class DisplayView extends Component {
     });
     this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
     this.renderAims(true);
-    // this.refreshAllViewports();
     return 1;
   };
 
   closeViewport = () => {
+    const { showAimEditor, dirty } = this.state;
     // closes the active viewport
-    if (this.state.showAimEditor) {
+    if (showAimEditor && dirty) {
       window.alert(
         "Before closing the viewport you should first close the aim editor!"
       );
@@ -1404,13 +1402,14 @@ class DisplayView extends Component {
     let { imageId } = event.detail.image;
     imageId = this.parseImgeId(imageId); //strip from cs imagePath to imageId
     const { activePort } = this.props;
-    const tempData = this.state.data;
+    const tempData = [...this.state.data];
     const activeElement = cornerstone.getEnabledElements()[activePort];
     const { data } = cornerstoneTools.getToolState(
       activeElement.element,
       "stack"
     );
     tempData[activePort].stack = data[0];
+    Object.assign(tempData[activePort].stack, data[0]);
     // set the state to preserve the imageId
     this.setState({ data: tempData });
     // dispatch to write the newImageId to store
