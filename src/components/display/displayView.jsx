@@ -403,12 +403,9 @@ class DisplayView extends Component {
           {
             data: res,
             isLoading: false,
-            // activeLabelMapIndex: 0,
-            // prospectiveLabelMapIndex: 0,
           },
           () => {
             this.renderAims();
-
             this.refreshAllViewports();
             this.shouldOpenAimEditor();
           }
@@ -656,8 +653,8 @@ class DisplayView extends Component {
   }
 
   hideShow = (current) => {
-    if (this.props.activePort !== i) {
-      this.setActive(i);
+    if (this.props.activePort !== current) {
+      this.setActive(current);
       return;
     }
     if (this.state.hideShowDisabled) {
@@ -749,8 +746,8 @@ class DisplayView extends Component {
     ];
     if (toolsOfInterest.includes(toolName) || toolType === "Bidirectional") {
       this.setState({ showAimEditor: true });
-      if (toolName === "FreehandRoi3DTool")
-        this.setState({ hideShowDisabled: true });
+      // if (toolName === "FreehandRoi3DTool")
+      //   this.setState({ hideShowDisabled: true });
     }
     this.handleShapes();
     this.setDirtyFlag();
@@ -852,6 +849,9 @@ class DisplayView extends Component {
       }
       this.setState({ activePort: i });
       await this.props.dispatch(changeActivePort(i));
+      const { imageIds, currentImageIdIndex } = this.state.data[i].stack;
+      const imageId = this.parseImgeId(imageIds[currentImageIdIndex]);
+      await this.props.dispatch(updateImageId(imageId));
       this.setSerieActiveLabelMap();
     }
   };
@@ -881,7 +881,7 @@ class DisplayView extends Component {
         this.renderMarkup(imageId, value, color);
       });
     });
-    this.refreshAllViewports();
+    // this.refreshAllViewports();
     if (seriesSegmentations.length)
       this.handleSegmentations(seriesSegmentations);
   };
@@ -987,67 +987,58 @@ class DisplayView extends Component {
 
     console.log("State at this point", this.state.data);
 
-    const { imageIds } = this.state.data[serieIndex].stack;
+    try {
+      const { imageIds } = this.state.data[serieIndex].stack;
 
-    var imagePromises = imageIds.map((imageId) => {
-      return cornerstone.loadAndCacheImage(imageId);
-    });
-
-    Promise.all(imagePromises).then(async () => {
-      seriesSegmentations.forEach(
-        ({ seriesUid, studyUid, aimUid, serieIndex }, i) => {
-          this.getSegmentationData(seriesUid, studyUid, aimUid, serieIndex, i);
-          segLabelMaps[aimUid] = i;
-        }
-      );
-      const { aimID } = this.props.series[serieIndex];
-      const { seriesLabelMaps } = this.state;
-      // If an aim is selected and it has segmentatio set the activeLabelMap of serie as selected
-      // aim's labelMap. Else set it as the next available labelMap to brush new segs
-
-      console.log("aim id var mi", aimID, segLabelMaps);
-      if (aimID && typeof segLabelMaps[aimID] !== "undefined")
-        activeLabelMapIndex = segLabelMaps[aimID];
-      else {
-        activeLabelMapIndex = seriesSegmentations.length;
-        console.log(
-          "setting activeLabelMap as length ",
-          seriesSegmentations.length,
-          seriesSegmentations
-        );
-      }
-
-      await this.setState({
-        seriesLabelMaps: {
-          ...seriesLabelMaps,
-          [serieIndex]: { labelMaps: { ...segLabelMaps }, activeLabelMapIndex },
-        },
+      var imagePromises = imageIds.map((imageId) => {
+        return cornerstone.loadAndCacheImage(imageId);
       });
-      this.setSerieActiveLabelMap(aimID);
-    });
 
+      Promise.all(imagePromises).then(async () => {
+        seriesSegmentations.forEach(
+          ({ seriesUid, studyUid, aimUid, serieIndex }, i) => {
+            this.getSegmentationData(
+              seriesUid,
+              studyUid,
+              aimUid,
+              serieIndex,
+              i
+            );
+            segLabelMaps[aimUid] = i;
+          }
+        );
+        const { aimID } = this.props.series[serieIndex];
+        const { seriesLabelMaps } = this.state;
+        // If an aim is selected and it has segmentatio set the activeLabelMap of serie as selected
+        // aim's labelMap. Else set it as the next available labelMap to brush new segs
+
+        console.log("aim id var mi", aimID, segLabelMaps);
+        if (aimID && typeof segLabelMaps[aimID] !== "undefined")
+          activeLabelMapIndex = segLabelMaps[aimID];
+        else {
+          activeLabelMapIndex = seriesSegmentations.length;
+          console.log(
+            "setting activeLabelMap as length ",
+            seriesSegmentations.length,
+            seriesSegmentations
+          );
+        }
+
+        await this.setState({
+          seriesLabelMaps: {
+            ...seriesLabelMaps,
+            [serieIndex]: {
+              labelMaps: { ...segLabelMaps },
+              activeLabelMapIndex,
+            },
+          },
+        });
+        this.setSerieActiveLabelMap(aimID);
+      });
+    } catch (error) {
+      console.error(error);
+    }
     console.log("State after seting", this.state);
-    // console.log(
-    //   "Checking segmentation before renderind segmentation: ",
-    //   aimUid,
-    //   "state is",
-    //   this.state.aimLabelMaps
-    // );
-    // const { aimLabelMaps, activeLabelMapIndex } = this.state;
-    // if (typeof aimLabelMaps[aimUid] !== "undefined") {
-    //   // console.log(
-    //   //   "I'm returning because ",
-    //   //   aimUid,
-    //   //   "is already rendering with ",
-    //   //   aimLabelMaps[aimUid]
-    //   // );
-    //   return; // This seg has already been loaded
-    // }
-    // console.log("I'm rendering ", aimUid, "with ", activeLabelMapIndex);
-    // await this.setState({
-    //   activeLabelMapIndex: activeLabelMapIndex + 1,
-    //   aimLabelMaps: { ...aimLabelMaps, [aimUid]: activeLabelMapIndex },
-    // }); //set the index state for next render
   };
 
   setSerieActiveLabelMap = (aimId) => {
@@ -1374,13 +1365,13 @@ class DisplayView extends Component {
     });
     this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
     this.renderAims(true);
-    // this.refreshAllViewports();
     return 1;
   };
 
   closeViewport = () => {
+    const { showAimEditor, dirty } = this.state;
     // closes the active viewport
-    if (this.state.showAimEditor) {
+    if (showAimEditor && dirty) {
       window.alert(
         "Before closing the viewport you should first close the aim editor!"
       );
@@ -1413,13 +1404,14 @@ class DisplayView extends Component {
     let { imageId } = event.detail.image;
     imageId = this.parseImgeId(imageId); //strip from cs imagePath to imageId
     const { activePort } = this.props;
-    const tempData = this.state.data;
+    const tempData = [...this.state.data];
     const activeElement = cornerstone.getEnabledElements()[activePort];
     const { data } = cornerstoneTools.getToolState(
       activeElement.element,
       "stack"
     );
     tempData[activePort].stack = data[0];
+    Object.assign(tempData[activePort].stack, data[0]);
     // set the state to preserve the imageId
     this.setState({ data: tempData });
     // dispatch to write the newImageId to store
