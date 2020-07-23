@@ -32,6 +32,7 @@ class AimEditor extends Component {
     this.semanticAnswers = {};
     this.state = {
       buttonGroupShow: false,
+      saveButtonIsActive: false,
       isUpdate: false,
     };
     //if aim is being updated set the aimId and isUpdate flag
@@ -125,7 +126,16 @@ class AimEditor extends Component {
   };
   //cavit end
   validateForm = (hasError) => {
-    //if (hasError) console.error("Answer form has error/s!!!");
+    if (hasError > 0) {
+      console.error("Answer form has error/s!!!");
+      this.setState({
+        saveButtonIsActive: false,
+      });
+    } else {
+      this.setState({
+        saveButtonIsActive: true,
+      });
+    }
   };
 
   getImage = () => {
@@ -144,7 +154,7 @@ class AimEditor extends Component {
         {this.state.buttonGroupShow && (
           <div className="AimEditorButtonGroup">
             <button
-              className="btn btn-sm btn-outline-light AimEditorButton "
+              className="btn btn-sm btn-outline-light AimEditorButton"
               onClick={this.save}
             >
               Save
@@ -168,6 +178,12 @@ class AimEditor extends Component {
 
   save = () => {
     if (!this.checkAimTemplate()) return;
+    if (!this.state.saveButtonIsActive) {
+      window.alert(
+        "Please fill required answers or use required geometric shape"
+      );
+      return;
+    }
     const answers = this.semanticAnswers.saveAim();
     try {
       this.createAim(answers);
