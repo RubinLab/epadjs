@@ -653,8 +653,8 @@ class DisplayView extends Component {
   }
 
   hideShow = (current) => {
-    if (this.props.activePort !== i) {
-      this.setActive(i);
+    if (this.props.activePort !== current) {
+      this.setActive(current);
       return;
     }
     if (this.state.hideShowDisabled) {
@@ -746,8 +746,8 @@ class DisplayView extends Component {
     ];
     if (toolsOfInterest.includes(toolName) || toolType === "Bidirectional") {
       this.setState({ showAimEditor: true });
-      if (toolName === "FreehandRoi3DTool")
-        this.setState({ hideShowDisabled: true });
+      // if (toolName === "FreehandRoi3DTool")
+      //   this.setState({ hideShowDisabled: true });
     }
     this.handleShapes();
     this.setDirtyFlag();
