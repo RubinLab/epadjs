@@ -107,6 +107,7 @@ const tools = [
   { name: "ZoomTouchPinch" },
   { name: "StackScrollMouseWheel", mode: "active" },
   { name: "StackScrollMultiTouch" },
+  { name: "SphericalBrush", modeOptions: { mouseButtonMask: 1 } },
   { name: "CircleScissors", modeOptions: { mouseButtonMask: 1 } },
   // { name: "FreehandScissors", modeOptions: { mouseButtonMask: 1 } },
   // { name: "RectangleScissors", modeOptions: { mouseButtonMask: 1 } },
@@ -741,6 +742,7 @@ class DisplayView extends Component {
 
   // TODO: Can this be done without checking the tools of interest?
   measurementCompleted = (event, action) => {
+    console.log("Measurement completed", event);
     const { toolName, toolType } = event.detail;
 
     const toolsOfInterest = [
@@ -834,6 +836,7 @@ class DisplayView extends Component {
   };
 
   handleMarkupCreated = (event) => {
+    console.log("Event", event);
     const { detail } = event;
     const { hasSegmentation } = this.state;
 

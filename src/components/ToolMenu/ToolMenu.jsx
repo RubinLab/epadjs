@@ -22,8 +22,10 @@ import {
   FaHandScissors,
   FaCut,
   FaCircle,
+  FaHandPointer,
 } from "react-icons/fa";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
+import { IoMdEgg } from "react-icons/io";
 import { MdLoop, MdPanTool } from "react-icons/md";
 import {
   TiDeleteOutline,
@@ -94,6 +96,7 @@ const tools = [
   { name: "FreehandRoi3D" },
   { name: "FreehandRoi3DSculptor" },
   { name: "Brush3D" },
+  { name: "SphericalBrush" },
   { name: "Brush3DHUGated" },
   // { name: "Brush3DAutoGated" }
 ];
@@ -124,7 +127,7 @@ class ToolMenu extends Component {
     };
 
     this.imagingTools = [
-      { name: "No Op", icon: <FaLocationArrow />, tool: "Noop" },
+      { name: "Select", icon: <FaHandPointer />, tool: "Noop" },
       { name: "Levels", icon: <FiSun />, tool: "Wwwc" },
       { name: "Presets", icon: <FiSunset />, tool: "Presets" },
       { name: "Zoom", icon: <FiZoomIn />, tool: "Zoom" },
@@ -162,26 +165,64 @@ class ToolMenu extends Component {
         icon: <div className="icon-polygon fontastic-icons" />,
         tool: "Presets",
         tool: "FreehandRoi3D",
-        child: (
-          <span>
-            Interpolation{" "}
-            <Switch
-              onChange={this.setInterpolation}
-              checked={this.state.interpolate}
-              onColor="#86d3ff"
-              onHandleColor="#2693e6"
-              handleDiameter={10}
-              uncheckedIcon={false}
-              checkedIcon={false}
-              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
-              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-              height={5}
-              width={20}
-              className="react-switch"
-              id="material-switch"
-            />
-          </span>
+        // child: (
+        //   <span>
+        //     Interpolation{" "}
+        //     <Switch
+        //       onChange={this.setInterpolation}
+        //       checked={this.state.interpolate}
+        //       onColor="#86d3ff"
+        //       onHandleColor="#2693e6"
+        //       handleDiameter={10}
+        //       uncheckedIcon={false}
+        //       checkedIcon={false}
+        //       boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+        //       activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+        //       height={5}
+        //       width={20}
+        //       className="react-switch"
+        //       id="material-switch"
+        //     />
+        //   </span>
+        // ),
+      },
+      {
+        name: "Interpolation",
+        icon: (
+          <Switch
+            onChange={this.setInterpolation}
+            checked={this.state.interpolate}
+            onColor="#86d3ff"
+            onHandleColor="#2693e6"
+            handleDiameter={10}
+            uncheckedIcon={
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "70%",
+                  fontSize: 11,
+                  color: "#861737",
+                  paddingRight: 2,
+                }}
+              >
+                Off
+              </div>
+            }
+            checkedIcon={
+              <svg viewBox="0 0 10 10" height="70%" width="70%">
+                <circle r={3} cx={5} cy={5} />
+              </svg>
+            }
+            boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+            activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+            // height={15}
+            // width={20}
+            className="react-switch"
+          />
         ),
+        tool: "FreehandRoi3D",
       },
       {
         name: "Sculpt 2D",
@@ -206,6 +247,11 @@ class ToolMenu extends Component {
         name: "Brush HU Gated",
         icon: <FaBroom />,
         tool: "Brush3DHUGated",
+      },
+      {
+        name: "Spherical Brush",
+        icon: <IoMdEgg />,
+        tool: "SphericalBrush",
       },
       // {
       //   name: "Freehand Scissors",
@@ -275,7 +321,10 @@ class ToolMenu extends Component {
     } else if (tool === "MetaData") {
       this.toggleMetaData();
       return;
-    } else if (tool === "Brush3D") {
+    } else if (index == 14) {
+      this.setInterpolation(!this.state.interpolate);
+      // this should not return to set polygon tool active
+    } else if (tool === "Brush3D" || tool === "SphericalBrush") {
       if (this.checkIfMultiframe()) {
         alert("Segmentation only works in singleframe images!");
         return;
@@ -427,7 +476,11 @@ class ToolMenu extends Component {
               name={markupTool.name}
               icon={markupTool.icon}
               index={i}
-              isActive={this.state.activeToolIdx === i}
+              isActive={
+                this.state.activeToolIdx === i ||
+                (this.state.activeToolIdx === 13 && i == 14) ||
+                (this.state.activeToolIdx === 14 && i == 13)
+              }
               onClick={() => this.handleToolClicked(i, markupTool.tool)}
               children={markupTool.child}
             />
@@ -657,6 +710,7 @@ class ToolMenu extends Component {
                     </div> */}
         {/* </Collapsible> */}
         {(this.state.activeTool === "Brush3D" ||
+          this.state.activeTool === "SphericalBrush" ||
           this.state.activeTool === "Brush3DHUGated") &&
           this.state.showBrushSize && (
             <BrushSizeSelector onClose={this.closeBrushSize} />
