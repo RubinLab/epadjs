@@ -1,18 +1,18 @@
-import external from './../../externalModules.js';
-import BaseBrushTool from './../base/BaseBrushTool.js';
-import { getModule } from './../../store/index.js';
+import external from "./../../externalModules.js";
+import BaseBrushTool from "./../base/BaseBrushTool.js";
+import { getModule } from "./../../store/index.js";
 import {
   drawBrushPixels,
   getCircle,
   triggerLabelmapModifiedEvent,
-} from './../../util/segmentation';
-import { getToolState } from '../../stateManagement/toolState.js';
-import { getLogger } from '../../util/logger.js';
-import { getDiffBetweenPixelData } from '../../util/segmentation';
+} from "./../../util/segmentation";
+import { getToolState } from "../../stateManagement/toolState.js";
+import { getLogger } from "../../util/logger.js";
+import { getDiffBetweenPixelData } from "../../util/segmentation";
 
-const logger = getLogger('tools:SphericalBrushTool');
+const logger = getLogger("tools:SphericalBrushTool");
 
-const segmentationModule = getModule('segmentation');
+const segmentationModule = getModule("segmentation");
 
 /**
  * @public
@@ -24,10 +24,10 @@ const segmentationModule = getModule('segmentation');
 export default class SphericalBrushTool extends BaseBrushTool {
   constructor(props = {}) {
     const defaultProps = {
-      name: 'SphericalBrush',
-      supportedInteractionTypes: ['Mouse', 'Touch'],
+      name: "SphericalBrush",
+      supportedInteractionTypes: ["Mouse", "Touch"],
       configuration: { alwaysEraseOnClick: false },
-      mixins: ['renderBrushMixin'],
+      mixins: ["renderBrushMixin"],
     };
 
     super(props, defaultProps);
@@ -55,7 +55,7 @@ export default class SphericalBrushTool extends BaseBrushTool {
       image.columnPixelSpacing
     );
 
-    const stackState = getToolState(element, 'stack');
+    const stackState = getToolState(element, "stack");
     const stackData = stackState.data[0];
     const { imageIds } = stackData;
 
@@ -70,7 +70,7 @@ export default class SphericalBrushTool extends BaseBrushTool {
       this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;
 
     const imagePlaneOfCurrentImage = cornerstone.metaData.get(
-      'imagePlaneModule',
+      "imagePlaneModule",
       image.imageId
     );
 
@@ -128,6 +128,10 @@ export default class SphericalBrushTool extends BaseBrushTool {
 
       this.paintEventData.previousPixeldataForImagesInRange = previousPixeldataForImagesInRange;
     }
+    let evnt = new CustomEvent("markupCreated", {
+      detail: "brush",
+    });
+    window.dispatchEvent(evnt);
   }
 
   /**
@@ -259,7 +263,7 @@ export default class SphericalBrushTool extends BaseBrushTool {
    */
   _getRadiusOnImage(imageId, ippOfCurrentImage, radiusInMM, pixelSpacing) {
     const imagePlane = external.cornerstone.metaData.get(
-      'imagePlaneModule',
+      "imagePlaneModule",
       imageId
     );
 

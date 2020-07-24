@@ -37,7 +37,7 @@ const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
 
 const tools = [
-  { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 }, mode: "active" },
+  { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 } },
   { name: "Pan", modeOptions: { mouseButtonMasks: 1 } },
   {
     name: "Zoom",
@@ -75,6 +75,9 @@ const tools = [
   { name: "WwwcRegion" },
   {
     name: "FreehandRoi",
+    configuration: {
+      showMinMax: true,
+    },
     modeOptions: { mouseButtonMask: [1] },
     mode: "passive",
   },
@@ -82,32 +85,34 @@ const tools = [
     name: "FreehandRoiSculptor",
     modeOptions: { mouseButtonMask: 1 },
   },
-  {
-    name: "FreehandRoi3DTool",
-    modeOptions: { mouseButtonMask: 1 },
-    mode: "passive",
-  },
-  {
-    name: "FreehandRoi3DSculptorTool",
-    modeOptions: { mouseButtonMask: 1 },
-    mode: "passive",
-  },
+  // {
+  //   name: "FreehandRoi3DTool",
+  //   modeOptions: { mouseButtonMask: 1 },
+  //   mode: "passive",
+  // },
+  // {
+  //   name: "FreehandRoi3DSculptorTool",
+  //   modeOptions: { mouseButtonMask: 1 },
+  //   mode: "passive",
+  // },
   { name: "Eraser" },
   {
     name: "Bidirectional",
     modeOptions: { mouseButtonMask: 1 },
     mode: "passive",
   },
-  { name: "Brush3DTool" },
+  // { name: "Brush3DTool" },
   { name: "StackScroll", modeOptions: { mouseButtonMask: 1 } },
   { name: "PanMultiTouch" },
   { name: "ZoomTouchPinch" },
   { name: "StackScrollMouseWheel", mode: "active" },
   { name: "StackScrollMultiTouch" },
-  { name: "FreehandScissors", modeOptions: { mouseButtonMask: 1 } },
-  { name: "RectangleScissors", modeOptions: { mouseButtonMask: 1 } },
+  { name: "SphericalBrush", modeOptions: { mouseButtonMask: 1 } },
   { name: "CircleScissors", modeOptions: { mouseButtonMask: 1 } },
-  { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
+  // { name: "FreehandScissors", modeOptions: { mouseButtonMask: 1 } },
+  // { name: "RectangleScissors", modeOptions: { mouseButtonMask: 1 } },
+
+  // { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
 ];
 
 const mapStateToProps = (state) => {
@@ -447,6 +452,7 @@ class DisplayView extends Component {
           serie
         );
     });
+    this.refreshAllViewports();
   };
 
   async getImages(serie) {
@@ -736,6 +742,7 @@ class DisplayView extends Component {
 
   // TODO: Can this be done without checking the tools of interest?
   measurementCompleted = (event, action) => {
+    console.log("Measurement completed", event);
     const { toolName, toolType } = event.detail;
 
     const toolsOfInterest = [
@@ -829,6 +836,7 @@ class DisplayView extends Component {
   };
 
   handleMarkupCreated = (event) => {
+    console.log("Event", event);
     const { detail } = event;
     const { hasSegmentation } = this.state;
 

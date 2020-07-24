@@ -22,8 +22,10 @@ import {
   FaHandScissors,
   FaCut,
   FaCircle,
+  FaHandPointer,
 } from "react-icons/fa";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
+import { IoMdEgg } from "react-icons/io";
 import { MdLoop, MdPanTool } from "react-icons/md";
 import {
   TiDeleteOutline,
@@ -77,6 +79,7 @@ const tools = [
       showMinMax: true,
     },
   },
+  { name: "FreehandRoiSculptor" },
   {
     name: "CircleRoi",
     configuration: {
@@ -90,10 +93,11 @@ const tools = [
   { name: "Bidirectional" },
   { name: "Eraser" },
 
-  // { name: "FreehandRoi3D" },
-  // { name: "FreehandRoi3DSculptor" },
-  // { name: "Brush3D" },
-  // { name: "Brush3DHUGated" },
+  { name: "FreehandRoi3D" },
+  { name: "FreehandRoi3DSculptor" },
+  { name: "Brush3D" },
+  { name: "SphericalBrush" },
+  { name: "Brush3DHUGated" },
   // { name: "Brush3DAutoGated" }
 ];
 
@@ -123,7 +127,7 @@ class ToolMenu extends Component {
     };
 
     this.imagingTools = [
-      { name: "No Op", icon: <FaLocationArrow />, tool: "Noop" },
+      { name: "Select", icon: <FaHandPointer />, tool: "Noop" },
       { name: "Levels", icon: <FiSun />, tool: "Wwwc" },
       { name: "Presets", icon: <FiSunset />, tool: "Presets" },
       { name: "Zoom", icon: <FiZoomIn />, tool: "Zoom" },
@@ -160,27 +164,65 @@ class ToolMenu extends Component {
         name: "Poly/Freehand",
         icon: <div className="icon-polygon fontastic-icons" />,
         tool: "Presets",
-        tool: "FreehandRoi3DTool",
-        child: (
-          <span>
-            Interpolation{" "}
-            <Switch
-              onChange={this.setInterpolation}
-              checked={this.state.interpolate}
-              onColor="#86d3ff"
-              onHandleColor="#2693e6"
-              handleDiameter={10}
-              uncheckedIcon={false}
-              checkedIcon={false}
-              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
-              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-              height={5}
-              width={20}
-              className="react-switch"
-              id="material-switch"
-            />
-          </span>
+        tool: "FreehandRoi3D",
+        // child: (
+        //   <span>
+        //     Interpolation{" "}
+        //     <Switch
+        //       onChange={this.setInterpolation}
+        //       checked={this.state.interpolate}
+        //       onColor="#86d3ff"
+        //       onHandleColor="#2693e6"
+        //       handleDiameter={10}
+        //       uncheckedIcon={false}
+        //       checkedIcon={false}
+        //       boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+        //       activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+        //       height={5}
+        //       width={20}
+        //       className="react-switch"
+        //       id="material-switch"
+        //     />
+        //   </span>
+        // ),
+      },
+      {
+        name: "Interpolation",
+        icon: (
+          <Switch
+            onChange={this.setInterpolation}
+            checked={this.state.interpolate}
+            onColor="#86d3ff"
+            onHandleColor="#2693e6"
+            handleDiameter={10}
+            uncheckedIcon={
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "70%",
+                  fontSize: 11,
+                  color: "#861737",
+                  paddingRight: 2,
+                }}
+              >
+                Off
+              </div>
+            }
+            checkedIcon={
+              <svg viewBox="0 0 10 10" height="70%" width="70%">
+                <circle r={3} cx={5} cy={5} />
+              </svg>
+            }
+            boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+            activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+            // height={15}
+            // width={20}
+            className="react-switch"
+          />
         ),
+        tool: "FreehandRoi3D",
       },
       {
         name: "Sculpt 2D",
@@ -190,7 +232,7 @@ class ToolMenu extends Component {
       {
         name: "Sculpt 3D",
         icon: <FaScrewdriver />,
-        tool: "FreehandRoi3DSculptorTool",
+        tool: "FreehandRoi3DSculptor",
       },
       { name: "Eraser", icon: <FaEraser />, tool: "Eraser" },
     ];
@@ -199,12 +241,17 @@ class ToolMenu extends Component {
       {
         name: "Brush",
         icon: <div className="icon-brush" />,
-        tool: "Brush3DTool",
+        tool: "Brush3D",
       },
       {
         name: "Brush HU Gated",
         icon: <FaBroom />,
         tool: "Brush3DHUGated",
+      },
+      {
+        name: "Spherical Brush",
+        icon: <IoMdEgg />,
+        tool: "SphericalBrush",
       },
       // {
       //   name: "Freehand Scissors",
@@ -222,14 +269,29 @@ class ToolMenu extends Component {
 
   //TODO: instead of disabling all tools we can just disable the active tool
   disableAllTools = () => {
+    console.log("Cornserstone tools", cornerstoneTools);
     this.setState({ activeToolIdx: 0 });
     Array.from(this.tools).forEach((tool) => {
-      const apiTool = cornerstoneTools[`${tool.name}Tool`];
-      if (apiTool) {
-        cornerstoneTools.setToolPassive(tool.name);
-      } else {
-        throw new Error(`Tool not found: ${tool.name}Tool`);
-      }
+      this.setToolStateForAllElements(tool.name, "passive");
+      // const apiTool = cornerstoneTools[`${tool.name}Tool`];
+      // if (apiTool) {
+      //   cornerstoneTools.setToolPassive(tool.name);
+      // } else {
+      //   throw new Error(`Tool not found: ${tool.name}Tool`);
+      // }
+    });
+  };
+
+  setToolStateForAllElements = (toolName, state, mouseMask = 1) => {
+    const enabledElements = cornerstone.getEnabledElements();
+
+    enabledElements.forEach(({ element }) => {
+      if (state === "passive")
+        cornerstoneTools.setToolPassiveForElement(element, toolName);
+      else
+        cornerstoneTools.setToolActiveForElement(element, toolName, {
+          mouseButtonMask: mouseMask,
+        });
     });
   };
 
@@ -238,8 +300,47 @@ class ToolMenu extends Component {
     cornerstoneTools.setToolActive(toolName, {
       mouseButtonMask: [mouseMask],
     });
-    if (toolName === "Brush3DTool" || toolName === "Brush3DHUGated")
-      this.handleBrushSelected();
+  };
+
+  handleToolClicked = (index, tool) => {
+    console.log("Tool", tool);
+    if (tool === "Noop") {
+      this.disableAllTools();
+      this.setCursor("default");
+      this.setState({ activeTool: "", activeToolIdx: index });
+      return;
+    } else if (tool === "Presets") {
+      this.showPresets();
+      return;
+    } else if (tool === "Invert") {
+      this.invert();
+      return;
+    } else if (tool === "Reset") {
+      this.reset();
+      return;
+    } else if (tool === "MetaData") {
+      this.toggleMetaData();
+      return;
+    } else if (index == 14) {
+      this.setInterpolation(!this.state.interpolate);
+      // this should not return to set polygon tool active
+    } else if (tool === "Brush3D" || tool === "SphericalBrush") {
+      if (this.checkIfMultiframe()) {
+        alert("Segmentation only works in singleframe images!");
+        return;
+      } //Dont" select the HUGated if the modality is not CT
+      this.setState({ showBrushSize: true });
+    } else if (tool === "Brush3DHUGated") {
+      if (!this.checkIfCT() || this.checkIfMultiframe()) {
+        alert("HU Gated tool only works with singleframe CT images");
+        return;
+      } //Dont" select the HUGated if the modality is not CT
+      this.setState({ showBrushSize: true, showSmartBrush: true });
+    }
+    this.disableAllTools();
+    this.setState({ activeTool: tool, activeToolIdx: index }, () => {
+      this.setToolStateForAllElements(tool, "active");
+    });
   };
 
   getActiveImage = () => {
@@ -261,65 +362,6 @@ class ToolMenu extends Component {
     const image = this.getActiveImage();
     if (image.data.string("x00280008")) return true;
     return false;
-  };
-
-  handleBrushSelected = () => {};
-
-  //sets the selected tool active for an enabled elements
-
-  // setToolActiveForElement = (toolName, mouseMask = 1) => {
-  //   this.disableAllTools();
-  //   if (toolName == "Brush3DHUGatedTool") {
-  //     cornerstoneTools.store.modules.brush.setters.activeGate("muscle");
-  //   }
-  //   cornerstoneTools.setToolActiveForElement(
-  //     cornerstone.getEnabledElements()[this.props.activePort]["element"],
-  //     toolName,
-  //     {
-  //       mouseButtonMask: mouseMask,
-  //     }
-  //   );
-  //   this.setState({ showDrawing: false });
-  // };
-
-  setToolActiveForElement = (toolName, mouseMask = [1]) => {
-    const enabledElements = cornerstone.getEnabledElements();
-
-    enabledElements.forEach((element) => {
-      cornerstoneTools.setToolActiveForElement(element, toolName, {
-        mouseButtonMask: [mouseMask],
-      });
-    });
-
-    if (toolName === "Brush3DTool" || toolName === "Brush3DHUGated")
-      this.handleBrushSelected();
-  };
-
-  handlePatientClick = async () => {
-    // const showStatus = this.state.showAnnotationList;
-    // try {
-    //   const { openSeries, patients } = this.props;
-    //   for (let port of openSeries) {
-    //     const { patientID, seriesUID, studyUID, aimID } = port;
-    //     const serie = patients[patientID].studies[studyUID].series[seriesUID];
-    //     if (!patients[port.patientID]) {
-    //       await this.props.dispatch(getWholeData(port, null, aimID));
-    //     } else {
-    //       if (serie.isDisplayed === false) {
-    //         serie.isDisplayed = true;
-    //         for (let ann in serie.annotations) {
-    //           serie.annotations[ann].isDisplayed = true;
-    //         }
-    //       }
-    //     }
-    //   }
-    //   await this.setState(state => ({
-    //     showAnnotationList: !state.showAnnotationList,
-    //   }));
-    //   this.props.dispatch(showAnnotationWindow());
-    // } catch (err) {
-    //   console.log(err);
-    // }
   };
 
   invert() {
@@ -373,43 +415,6 @@ class ToolMenu extends Component {
     element.style.cursor = cursorStyle;
   };
 
-  handleToolClicked = (index, tool) => {
-    if (tool === "Noop") {
-      this.setCursor("default");
-      this.disableAllTools();
-      this.setState({ activeTool: "", activeToolIdx: index });
-      return;
-    } else if (tool === "Presets") {
-      this.showPresets();
-      return;
-    } else if (tool === "Invert") {
-      this.invert();
-      return;
-    } else if (tool === "Reset") {
-      this.reset();
-      return;
-    } else if (tool === "MetaData") {
-      this.toggleMetaData();
-      return;
-    } else if (tool === "Brush3DTool") {
-      if (this.checkIfMultiframe()) {
-        alert("Segmentation only works in singleframe images!");
-        return;
-      } //Dont" select the HUGated if the modality is not CT
-      this.setState({ showBrushSize: true });
-    } else if (tool === "Brush3DHUGated") {
-      if (!this.checkIfCT() || this.checkIfMultiframe()) {
-        alert("HU Gated tool only works with singleframe CT images");
-        return;
-      } //Dont" select the HUGated if the modality is not CT
-      this.setState({ showBrushSize: true, showSmartBrush: true });
-    }
-    // this.disableAllTools();
-    this.setState({ activeTool: tool, activeToolIdx: index }, () => {
-      this.setToolActive(tool);
-    });
-  };
-
   closeBrushSize = () => {
     this.setState({ showBrushSize: false });
   };
@@ -421,7 +426,6 @@ class ToolMenu extends Component {
   render() {
     return (
       <div className="toolbar">
-        {/* <Collapsible trigger={"Imaging Tools"} transitionTime={100}> */}
         {this.imagingTools.map((imagingTool, i) => {
           return (
             <ToolMenuItem
@@ -464,30 +468,6 @@ class ToolMenu extends Component {
             </span>
           </div>
         </div>
-        {/* <div
-            tabIndex="12"
-            className="toolbarSectionButton"
-            onClick={this.handlePatientClick}
-          >
-            {this.props.patientLoading ? (
-              <Spinner
-                loading={this.props.patientLoading}
-                unit="rem"
-                size={3}
-              />
-            ) : (
-              <>
-                <div className="toolContainer patient-icon">
-                  <FaRegFolderOpen />
-                </div>
-                <div className="buttonLabel">
-                  <span>Patient</span>
-                </div>
-              </>
-            )}
-          </div> */}
-        {/* </Collapsible> */}
-        {/* <Collapsible trigger={"Markup Tools"} transitionTime={100}> */}
         {this.markupTools.map((markupTool, i) => {
           i = i + this.imagingTools.length;
           return (
@@ -496,7 +476,11 @@ class ToolMenu extends Component {
               name={markupTool.name}
               icon={markupTool.icon}
               index={i}
-              isActive={this.state.activeToolIdx === i}
+              isActive={
+                this.state.activeToolIdx === i ||
+                (this.state.activeToolIdx === 13 && i == 14) ||
+                (this.state.activeToolIdx === 14 && i == 13)
+              }
               onClick={() => this.handleToolClicked(i, markupTool.tool)}
               children={markupTool.child}
             />
@@ -725,7 +709,8 @@ class ToolMenu extends Component {
                         </div>
                     </div> */}
         {/* </Collapsible> */}
-        {(this.state.activeTool === "Brush3DTool" ||
+        {(this.state.activeTool === "Brush3D" ||
+          this.state.activeTool === "SphericalBrush" ||
           this.state.activeTool === "Brush3DHUGated") &&
           this.state.showBrushSize && (
             <BrushSizeSelector onClose={this.closeBrushSize} />
