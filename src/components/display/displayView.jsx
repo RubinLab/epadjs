@@ -745,16 +745,9 @@ class DisplayView extends Component {
     console.log("Measurement completed", event);
     const { toolName, toolType } = event.detail;
 
-    const toolsOfInterest = [
-      "Probe",
-      "Length",
-      "CircleRoi",
-      "FreehandRoi3DTool",
-    ];
+    const toolsOfInterest = ["Probe", "Length", "CircleRoi", "FreehandRoi3D"];
     if (toolsOfInterest.includes(toolName) || toolType === "Bidirectional") {
       this.setState({ showAimEditor: true });
-      // if (toolName === "FreehandRoi3DTool")
-      //   this.setState({ hideShowDisabled: true });
     }
     this.handleShapes();
     this.setDirtyFlag();
@@ -806,6 +799,7 @@ class DisplayView extends Component {
 
       // check if is already editing an aim
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
+        console.log("Eski aim, yeni aim", this.state.selectedAim, aimJson);
         let message = "";
         if (this.state.selectedAim) {
           message = this.prepWarningMessage(
