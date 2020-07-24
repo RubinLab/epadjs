@@ -16,7 +16,6 @@ const NavBar = ({
   notificationWarning,
   pid,
 }) => {
-
   // handleClick = () => {
   //   openMenu();
   // };
@@ -77,7 +76,7 @@ const NavBar = ({
                     Progress
                   </NavLink>
                 </li> */}
-                <li className="nav-item">
+                {/* <li className="nav-item">
                   <NavLink className="nav-link" to="/tools">
                     Tools
                   </NavLink>
@@ -86,7 +85,7 @@ const NavBar = ({
                   <NavLink className="nav-link" to="/edit">
                     Edit
                   </NavLink>
-                </li>{" "}
+                </li>{" "} */}
                 <li
                   className="nav-item"
                   onClick={() => {
@@ -117,7 +116,7 @@ const NavBar = ({
                   <div
                     className="nav-link mng-icon"
                     data-name="mng"
-                    onClick={e => {
+                    onClick={(e) => {
                       openGearMenu(e);
                     }}
                   >
@@ -128,7 +127,7 @@ const NavBar = ({
                   <div
                     className="nav-link info-icon"
                     data-name="info"
-                    onClick={e => {
+                    onClick={(e) => {
                       openInfoMenu(e);
                     }}
                   >
@@ -145,7 +144,7 @@ const NavBar = ({
                   <div
                     className="nav-link user-profile"
                     data-name="user"
-                    onClick={e => {
+                    onClick={(e) => {
                       openUser(e);
                     }}
                   >
@@ -166,7 +165,7 @@ const NavBar = ({
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     loading: state.annotationsListReducer.loading,
   };
