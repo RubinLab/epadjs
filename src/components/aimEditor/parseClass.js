@@ -163,11 +163,13 @@ export var AimEditor = function (
           ];
         object.arrayIndex = i;
         self.mapTemplateCodeValueByIndex.set(object.codeValue, i);
-        if (templateList.default !== null) {
-          console.log("default not null:", templateList.default);
+        if (self.loadingAimFlag === false) {
+          if (templateList.default !== null) {
+            console.log("default not null:", templateList.default);
 
-          if (defaultTempCodeVal === object.codeValue) {
-            self.defaultTemplate = i + 1;
+            if (defaultTempCodeVal === object.codeValue) {
+              self.defaultTemplate = i + 1;
+            }
           }
         }
       }
@@ -259,13 +261,14 @@ export var AimEditor = function (
       //self.mapHtmlObjects = new Map(); not used
       //self.mapHtmlSelectObjectsKeyValue = new Map(); not used
       //self.mapAllowedTermCollectionByCodeValue = new Map(); not used
-      self.mapTemplateCodeValueByIndex = new Map();
+      // self.mapTemplateCodeValueByIndex = new Map();
       self.mapLabelAnnotatorConfidence = new Map();
       self.mapLabelAnnotConfJson = new Map();
       self.mapLabelSubComment = new Map();
       self.mapLabelCommentJson = new Map();
       self.mapLabelUid = new Map();
       self.templateShapeArray = [];
+
       if (self.templateSelectedIndex > -1) {
         self.jsonTemplateCopy = {
           ...self.arrayTemplatesJsonObjects[this.value],
@@ -279,10 +282,13 @@ export var AimEditor = function (
       //   self.renderButtonhandler(true);
       // }
     };
-    // if (self.defaultTemplate !== null) {
-    //   self.templateSelect.selectedIndex = self.defaultTemplate;
-    //   self.templateSelect.onchange();
-    // }
+    console.log("self.loadingAimFlag", self.loadingAimFlag);
+
+    if (self.defaultTemplate !== null) {
+      self.templateSelect.selectedIndex = self.defaultTemplate;
+      self.templateSelect.onchange();
+    }
+
     $('select[class^="ui dropdown"]').dropdown();
     document.getElementById("tlist").children[0].style.width = "100%";
     self.templateSelect.style.width = "100%";
@@ -4307,11 +4313,14 @@ export var AimEditor = function (
       if (templateShapeLength > 0) {
         let arryDiffernce = "";
         //const tempateShapeKeys = [];
-        console.log("main localShapes", localShapes);
+        console.log("main user shapes", localShapes);
         console.log("main templateShapeLength", templateShapeLength);
         let geoTemplateConditionDom = null;
         for (let cnt = 0; cnt < templateShapeLength; cnt++) {
-          console.log("in loop", self.templateShapeArray[cnt].shape);
+          console.log(
+            "in loop templateShapeLength",
+            self.templateShapeArray[cnt].shape
+          );
           //tempateShapeKeys.push(self.templateShapeArray[cnt].shape);
           //**
           // if (localShapes.hasOwnProperty(self.templateShapeArray[cnt].shape)) {
@@ -4342,6 +4351,7 @@ export var AimEditor = function (
           arryDiffernce = Object.keys(localShapes).filter(
             (eachShape) => eachShape !== self.templateShapeArray[cnt].shape
           );
+          console.log("first array difference : ", arryDiffernce);
           geoTemplateConditionDom = document.getElementById(
             self.templateShapeArray[cnt].domid
           );
@@ -4352,10 +4362,52 @@ export var AimEditor = function (
               ).className = "green check circle outline icon";
             }
           } else {
-            if (geoTemplateConditionDom !== null) {
-              document.getElementById(
-                self.templateShapeArray[cnt].domid
-              ).className = "red check circle outline icon";
+            let perpPos = -1;
+            let linePos = -1;
+            if (self.templateShapeArray[cnt].shape === "Line") {
+              perpPos = arryDiffernce.indexOf("Perpendicular");
+              if (perpPos > -1) arryDiffernce.splice(perpPos, 1);
+            }
+            if (self.templateShapeArray[cnt].shape === "Perpendicular") {
+              linePos = arryDiffernce.indexOf("Line");
+              if (linePos > -1) arryDiffernce.splice(linePos, 1);
+            }
+
+            // console.log("arryDiffernce : ", arryDiffernce);
+            // if (
+            //   localShapes.hasOwnProperty("Line") ||
+            //   localShapes.hasOwnProperty("Perpendicular")
+            // ) {
+            //   perpPos = arryDiffernce.indexOf("Perpendicular");
+            //   linePos = arryDiffernce.indexOf("Line");
+            //   if (perpPos > -1 || linePos > -1) {
+            //     if (geoTemplateConditionDom !== null) {
+            //       document.getElementById(
+            //         self.templateShapeArray[cnt].domid
+            //       ).className = "green check circle outline icon";
+            //     }
+            //     if (perpPos > -1) {
+            //       arryDiffernce.splice(perpPos, 1);
+            //     }
+            //     if (linePos > -1) {
+            //       linePos = arryDiffernce.indexOf("Line");
+            //       arryDiffernce.splice(linePos, 1);
+            //     }
+            //   }
+            // }
+            console.log("@@@@@@@@@@array difference ", arryDiffernce);
+            if (arryDiffernce.length > 0) {
+              if (geoTemplateConditionDom !== null) {
+                document.getElementById(
+                  self.templateShapeArray[cnt].domid
+                ).className = "red check circle outline icon";
+              }
+            } else {
+              if (geoTemplateConditionDom !== null) {
+                document.getElementById(
+                  self.templateShapeArray[cnt].domid
+                ).className = "green check circle outline icon";
+              }
             }
           }
           // **
@@ -4409,7 +4461,7 @@ export var AimEditor = function (
     // test['circle'].validate = 'ok';
     // console.log('new test', test);
     //test
-    let aimjsonCopy = { ...aimjson };
+    let aimjsonCopy = aimjson;
     self.loadingAimFlag = true;
     console.log(
       "load  aim  called: ..................aim passed :",
@@ -4418,6 +4470,10 @@ export var AimEditor = function (
     self.activateDirtyCheck = false;
     var templateIndex = self.mapTemplateCodeValueByIndex.get(
       aimjsonCopy.typeCode[0].code
+    );
+    console.log(
+      "this template index need to be selected ",
+      self.mapTemplateCodeValueByIndex
     );
     if (typeof templateIndex === "undefined") {
       //  self.activateDirtyCheck = true;
