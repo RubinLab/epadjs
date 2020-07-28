@@ -3,7 +3,7 @@
 import $ from "jquery/dist/jquery.js";
 import "./semantic/semantic.css";
 import "./semantic/semantic.js";
-
+import DOMPurify from "dompurify";
 //export next variable for react
 export var AimEditor = function (
   userWindow,
@@ -334,7 +334,7 @@ export var AimEditor = function (
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
       }
-      self.aimName = this.value;
+      self.aimName = DOMPurify.sanitize(this.value);
     };
 
     labelAnnotationNameInput.setAttribute("type", "text");
@@ -366,7 +366,7 @@ export var AimEditor = function (
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
       }
-      self.aimComment = this.value;
+      self.aimComment = DOMPurify.sanitize(this.value);
     };
 
     self.aimTypeCode = [
@@ -1976,9 +1976,6 @@ export var AimEditor = function (
 
       self.formCheckHandler(self.checkFormSaveReady());
     });
-    optionInput.onchange = function () {
-      alert("drop changed");
-    };
 
     this.getelementHtml = function () {
       return optionInput;
@@ -2302,8 +2299,9 @@ export var AimEditor = function (
             if (self.activateDirtyCheck) {
               self.handlerSetAimDirty(); // added to set dirtflag
             }
-            annotConfShowValueInput.value = this.value;
-            objectToCheckAnnConf.selectac = this.value / 100;
+            annotConfShowValueInput.value = DOMPurify.sanitize(this.value);
+            objectToCheckAnnConf.selectac =
+              DOMPurify.sanitize(this.value) / 100;
           };
           annotConfInput.onmousedown = function (event) {
             isMouseButtondown = true;
@@ -2313,8 +2311,10 @@ export var AimEditor = function (
           };
           annotConfInput.onmousemove = function (event) {
             if (isMouseButtondown) {
-              annotConfShowValueInput.value = this.value;
-              objectToCheckAnnConf.selectac = this.value / 100;
+              annotConfShowValueInput.value = DOMPurify.sanitize(this.value);
+              objectToCheckAnnConf.selectac = DOMPurify.sanitize(
+                this.value / 100
+              );
               console.log(event.clientX);
             }
           };
@@ -3984,7 +3984,7 @@ export var AimEditor = function (
           if (self.activateDirtyCheck) {
             self.handlerSetAimDirty(); // added to set dirtflag
           }
-          object.commentSelect = this.value;
+          object.commentSelect = DOMPurify.sanitize(this.value);
         };
         req.appendChild(label);
         req.appendChild(textaDomObject);
