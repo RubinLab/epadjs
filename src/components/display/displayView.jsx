@@ -742,7 +742,7 @@ class DisplayView extends Component {
 
   // TODO: Can this be done without checking the tools of interest?
   measurementCompleted = (event, action) => {
-    console.log("Measurement completed", event);
+    // console.log("Measurement completed", event);
     const { toolName, toolType } = event.detail;
 
     const toolsOfInterest = [
@@ -753,8 +753,6 @@ class DisplayView extends Component {
     ];
     if (toolsOfInterest.includes(toolName) || toolType === "Bidirectional") {
       this.setState({ showAimEditor: true });
-      // if (toolName === "FreehandRoi3DTool")
-      //   this.setState({ hideShowDisabled: true });
     }
     this.handleShapes();
     this.setDirtyFlag();
@@ -766,6 +764,7 @@ class DisplayView extends Component {
   };
 
   measuremementModified = (event, action) => {
+    // console.log("Modified", event);
     this.setDirtyFlag();
   };
 
@@ -806,6 +805,7 @@ class DisplayView extends Component {
 
       // check if is already editing an aim
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
+        console.log("Eski aim, yeni aim", this.state.selectedAim, aimJson);
         let message = "";
         if (this.state.selectedAim) {
           message = this.prepWarningMessage(
