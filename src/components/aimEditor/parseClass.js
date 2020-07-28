@@ -1875,6 +1875,11 @@ export var AimEditor = function (
     allowedTermObj
   ) {
     //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
+    console.log("-----*********--------prObject", prObject.label);
+    console.log("-----*********--------id", id);
+    console.log("-----*********--------name", name);
+    console.log("-----*********--------lbl", lbl);
+    console.log("-----*********--------allowedTermObj", allowedTermObj);
 
     var div = document.createElement("div");
     div.style.marginLeft = "20px";
@@ -1900,11 +1905,11 @@ export var AimEditor = function (
     optionInput.appendChild(square);
     optionInput.appendChild(labelHolder);
     labelHolder.appendChild(label);
-    optionInput.addEventListener("onmouseup", function () {
-      alert("mouse up");
-    });
+
     optionInput.addEventListener("click", function () {
-      let dropDownItemsArray = $("#selectLocation").dropdown("get value");
+      let dropDownItemsArray = $("#select" + prObject.label).dropdown(
+        "get value"
+      );
 
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
