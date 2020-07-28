@@ -256,7 +256,7 @@ export var AimEditor = function (
       //uncomment below line for testing
       //self.mainButtonsDiv.innerHTML = "";
 
-      self.mapCardinalitiesToCheckId = new Map();
+      //  self.mapCardinalitiesToCheckId = new Map();
       self.mapStatusAllowedTermBlocks = new Map();
       //self.mapHtmlObjects = new Map(); not used
       //self.mapHtmlSelectObjectsKeyValue = new Map(); not used
@@ -1874,11 +1874,8 @@ export var AimEditor = function (
     lbl,
     allowedTermObj
   ) {
-    //drop down select and add input box object
-
     //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
-    //  console.log("allowed term objects parent :", prObject);
-    //  console.log("allowed term objects :", allowedTermObj);
+
     var div = document.createElement("div");
     div.style.marginLeft = "20px";
     div.className = className;
@@ -1903,50 +1900,29 @@ export var AimEditor = function (
     optionInput.appendChild(square);
     optionInput.appendChild(labelHolder);
     labelHolder.appendChild(label);
-
+    optionInput.addEventListener("onmouseup", function () {
+      alert("mouse up");
+    });
     optionInput.addEventListener("click", function () {
+      let dropDownItemsArray = $("#selectLocation").dropdown("get value");
+
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
       }
-      console.log("option input click called : ");
-      console.log("option input click called next id", allowedTermObj.nextId);
-      console.log("option input click called clicked situation", this.selected);
+
       var checkmarkObj = self.mapCardinalitiesToCheckId.get(prObject.id);
       checkmarkObj.ok = "true";
-      console.log(
-        "option input click called clicked checkmarkObj before",
-        checkmarkObj
-      );
-      console.log(
-        "option input click called primitive",
-        allowedTermObj.getPrimitive()
-      );
-      console.log("self.loadingAimFlag", self.loadingAimFlag);
 
-      // console.log(
-      //   "DropLocation : ",
-      //   document.getElementById("DropLocation").innerHTML
-      // );
-      if (self.loadingAimFlag === false) {
-        if (allowedTermObj.getPrimitive().select === "1") {
-          allowedTermObj.getPrimitive().select = "0";
-          allowedTermObj.changeOnSelect("0", self.AfterClick(allowedTermObj));
-
-          checkmarkObj.actualSelected--;
-        } else {
-          allowedTermObj.getPrimitive().select = "1";
-          allowedTermObj.changeOnSelect("1", self.AfterClick(allowedTermObj));
-          checkmarkObj.actualSelected++;
-        }
+      if (dropDownItemsArray.indexOf(lbl) === -1) {
+        allowedTermObj.getPrimitive().select = "0";
+        allowedTermObj.changeOnSelect("0", self.AfterClick(allowedTermObj));
+        --checkmarkObj.actualSelected;
       } else {
         allowedTermObj.getPrimitive().select = "1";
         allowedTermObj.changeOnSelect("1", self.AfterClick(allowedTermObj));
         checkmarkObj.actualSelected++;
       }
-      console.log(
-        "option input click called clicked checkmarkObj after",
-        checkmarkObj
-      );
+
       console.log("mapCardinalitiesToCheckId", self.mapCardinalitiesToCheckId);
       self.mapCardinalitiesToCheckId.set(prObject.id, checkmarkObj);
       if (
@@ -1995,6 +1971,9 @@ export var AimEditor = function (
 
       self.formCheckHandler(self.checkFormSaveReady());
     });
+    optionInput.onchange = function () {
+      alert("drop changed");
+    };
 
     this.getelementHtml = function () {
       return optionInput;
