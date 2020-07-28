@@ -742,10 +742,15 @@ class DisplayView extends Component {
 
   // TODO: Can this be done without checking the tools of interest?
   measurementCompleted = (event, action) => {
-    console.log("Measurement completed", event);
+    // console.log("Measurement completed", event);
     const { toolName, toolType } = event.detail;
 
-    const toolsOfInterest = ["Probe", "Length", "CircleRoi", "FreehandRoi3D"];
+    const toolsOfInterest = [
+      "Probe",
+      "Length",
+      "CircleRoi",
+      "FreehandRoi3DTool",
+    ];
     if (toolsOfInterest.includes(toolName) || toolType === "Bidirectional") {
       this.setState({ showAimEditor: true });
     }
@@ -759,6 +764,7 @@ class DisplayView extends Component {
   };
 
   measuremementModified = (event, action) => {
+    // console.log("Modified", event);
     this.setDirtyFlag();
   };
 

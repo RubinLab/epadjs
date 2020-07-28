@@ -26,7 +26,7 @@ const defaultConfig = {
   brush3dToolName: "Brush3D",
   brush3DHUGatedToolName: "Brush3DHUGated",
   brush3DAutoGatedTool: "Brush3DAutoGated",
-  freehandRoi3DTool: "FreehandRoi3D",
+  freehandRoi3DTool: "FreehandRoi3DTool",
   freehandRoi3DSculptorTool: "FreehandRoi3DSculptor",
   gates: [
     {

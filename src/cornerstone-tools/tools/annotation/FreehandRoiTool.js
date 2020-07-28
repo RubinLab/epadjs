@@ -1640,7 +1640,6 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
    * @returns {void}
    */
   fireModifiedEvent(element, measurementData) {
-    console.log("Modified", measurementData);
     const eventType = EVENTS.MEASUREMENT_MODIFIED;
     const eventData = {
       toolName: this.name,

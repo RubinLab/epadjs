@@ -47,6 +47,7 @@ import "../../font-icons/styles.css";
 import "react-input-range/lib/css/index.css";
 import Collapsible from "react-collapsible";
 import "./ToolMenu.css";
+import { Form, FormCheck } from "react-bootstrap";
 
 import Switch from "react-switch";
 import ToolMenuItem from "../ToolMenu/ToolMenuItem";
@@ -93,7 +94,7 @@ const tools = [
   { name: "Bidirectional" },
   { name: "Eraser" },
 
-  { name: "FreehandRoi3D" },
+  { name: "FreehandRoi3DTool" },
   { name: "FreehandRoi3DSculptor" },
   { name: "Brush3D" },
   { name: "SphericalBrush" },
@@ -163,8 +164,7 @@ class ToolMenu extends Component {
       {
         name: "Poly/Freehand",
         icon: <div className="icon-polygon fontastic-icons" />,
-        tool: "Presets",
-        tool: "FreehandRoi3D",
+        tool: "FreehandRoi3DTool",
         // child: (
         //   <span>
         //     Interpolation{" "}
@@ -222,7 +222,7 @@ class ToolMenu extends Component {
             className="react-switch"
           />
         ),
-        tool: "FreehandRoi3D",
+        tool: "FreehandRoi3DTool",
       },
       {
         name: "Sculpt 2D",
@@ -321,8 +321,8 @@ class ToolMenu extends Component {
     } else if (tool === "MetaData") {
       this.toggleMetaData();
       return;
-    } else if (index == 14) {
-      this.setInterpolation(!this.state.interpolate);
+      // } else if (index === 14) {
+      //   this.setInterpolation(!this.state.interpolate);
       // this should not return to set polygon tool active
     } else if (tool === "Brush3D" || tool === "SphericalBrush") {
       if (this.checkIfMultiframe()) {
@@ -401,8 +401,13 @@ class ToolMenu extends Component {
   };
 
   setInterpolation = (checked) => {
+    console.log("Settin interpolation", checked);
     this.setState({ interpolate: checked });
-    cornerstoneTools.store.modules.freehand3D.state.interpolate = this.state.interpolate;
+    cornerstoneTools.store.modules.freehand3D.state.interpolate = checked;
+    console.log(
+      "state after ",
+      cornerstoneTools.store.modules.freehand3D.state
+    );
   };
 
   closeBrushMenu = () => {
