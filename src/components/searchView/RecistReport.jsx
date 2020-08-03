@@ -36,3 +36,13 @@ const RecistReport = () => {
 };
 
 export default RecistReport;
+
+// export function renderTable(
+//   serverUrl,
+//   id,
+//   patId,
+//   projectId,
+//   report,
+//   template,
+//   data
+// ) 
