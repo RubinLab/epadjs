@@ -155,13 +155,15 @@ class DisplayView extends Component {
     }
     this.getViewports();
     this.getData();
-    this.setSubComponentHeights();
+    if (this.props.series.length > 0) {
+      this.setSubComponentHeights();
+      window.addEventListener("resize", this.setSubComponentHeights);
+    }
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
     window.addEventListener("editAim", this.editAimHandler);
-    window.addEventListener("resize", this.setSubComponentHeights);
   }
 
   setSubComponentHeights = () => {
