@@ -9,7 +9,7 @@ import {
 import { uploadFileToSubject } from "../../services/subjectServices";
 import { uploadFileToStudy } from "../../services/studyServices";
 import { uploadFileToSeries } from "../../services/seriesServices";
-import { getTemplates } from "../annotationsList/action"
+import { getTemplates } from "../annotationsList/action";
 
 const mode = sessionStorage.getItem("mode");
 
@@ -58,7 +58,14 @@ class UploadModal extends React.Component {
   };
 
   onUpload = () => {
-    let { selectedPatients, selectedStudies, selectedSeries } = this.props;
+    let {
+      selectedPatients,
+      selectedStudies,
+      selectedSeries,
+      clearTreeData,
+      onResolve,
+      onCancel,
+    } = this.props;
     selectedPatients = Object.values(selectedPatients);
     selectedStudies = Object.values(selectedStudies);
     selectedSeries = Object.values(selectedSeries);
@@ -97,17 +104,16 @@ class UploadModal extends React.Component {
     Promise.all(promises)
       .then(() => {
         // this.props.onSubmit();
-        this.props.onResolve();
-        this.props.clearTreeData();
+        if (onResolve) onResolve();
+        if (clearTreeData) clearTreeData();
         this.props.dispatch(getTemplates());
       })
       .catch(err => {
         console.log(err);
         // this.props.onSubmit();
-        this.props.onResolve();
-
+        if (onResolve) onResolve();
       });
-    this.props.onCancel();
+    onCancel();
     this.setState({ projectID: "" });
   };
 
@@ -261,7 +267,14 @@ class UploadModal extends React.Component {
 }
 
 UploadModal.propTypes = {
-  onCancel: PropTypes.func,
+  onCancel: PropTypes.func.isRequired,
+  clearTreeData: PropTypes.func,
+  onResolve: PropTypes.func,
+  onSubmit: PropTypes.func,
+  pid: PropTypes.string,
+  selectedPatients: PropTypes.object,
+  selectedSeries: PropTypes.object,
+  selectedStudies: PropTypes.object,
 };
 
 const mapStateToProps = state => {
