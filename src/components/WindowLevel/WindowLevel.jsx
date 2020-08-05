@@ -7,25 +7,29 @@ export class WindowLevel extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      name: props.selectedPreset,
       level: "",
-      window: ""
+      window: "",
     };
   }
-  setPreset = preset => {
+  setPreset = (preset) => {
+    const { name, level, window } = preset;
+    if (this.state.name === name) return;
     const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
     const vp = cornerstone.getViewport(element);
     vp.voi.windowCenter = preset.level;
     vp.voi.windowWidth = preset.window;
     cornerstone.setViewport(element, vp);
-    this.setState({ level: preset.level, window: preset.window });
+    this.setState({ name, level, window });
+    this.props.onClose(name);
   };
-  handleWindowChange = e => {
+  handleWindowChange = (e) => {
     e.persist();
     console.log("E is", e.target.value);
     this.setState({ window: e.target.value });
   };
-  handleLevelChange = e => {
+  handleLevelChange = (e) => {
     e.persist();
     console.log("E is", e);
     this.setState({ level: e.target.value });
@@ -62,10 +66,10 @@ export class WindowLevel extends Component {
       {
         name: "CT Rad. Bone (L:1638, W:3276)",
         level: 1638,
-        window: 3276
+        window: 3276,
       },
       { name: "CT Liver (L:98, W:150)", level: 98, window: 150 },
-      { name: "Mammo (L:2400, W:1300)", level: 2400, window: 1300 }
+      { name: "Mammo (L:2400, W:1300)", level: 2400, window: 1300 },
       // {
       //   name: `Custom: ${String(winLevel)}`,
       //   level: this.state.level,
@@ -74,7 +78,7 @@ export class WindowLevel extends Component {
     ];
     return (
       <div className="pop-up">
-        <a href="#" onClick={this.props.onClose}>
+        <a href="#" onClick={() => this.props.onClose(this.state.name)}>
           Close <FaTimes />
         </a>
         <h5>
@@ -88,7 +92,8 @@ export class WindowLevel extends Component {
                 type="radio"
                 name="presets"
                 value={i}
-                onClick={() => this.setPreset(preset)}
+                onChange={() => this.setPreset(preset)}
+                checked={this.state.name === preset.name}
               />
               {" " + preset.name}
 

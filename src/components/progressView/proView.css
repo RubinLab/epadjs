@@ -12,11 +12,16 @@
 .progressView .rt-resizable-header:last-child {
   text-align: center;
 }
+
 .progress-wl {
   /* background: red; */
-  border-bottom: 1px solid rgba(34, 36, 38, 0.15);
+  border-bottom: 1px solid #861737;
   font-size: 1.2rem;
   cursor: pointer;
+}
+
+.progress-wl.__selected {
+  color: #3a3f44;
 }
 
 .progress-wl .__inner {

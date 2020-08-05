@@ -12,12 +12,16 @@
 }
 
 .viewportContainer {
-    border: 1px solid #272b30;
     text-decoration-color: azure !important;
+    border: 2px solid #3a3f44;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
 }
 
 .viewportContainer.selected {
-    border: 1px solid #861737;
+    border: 2px solid #861737;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
     /* border: 1px solid #3c5d80; */
 }
 
@@ -28,7 +32,7 @@
 }
 
 .ViewportOverlay {
-    color: #8b8a8a !important;
+    color: #d3d1d1 !important;
 }
 
 .displayView-main {
@@ -61,4 +65,105 @@
     min-width: 195px;
     padding-right: 1rem;
     padding-top: 1rem;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* The browser window */
+.containerIn {
+    border: 2px solid #3a3f44;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+/* Container for columns and the top "toolbar" */
+.row {
+    padding: 2px;
+    background: #3a3f44;
+    height: 26px;
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    display: inline-flex;
+    justify-content: space-between;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+/* Create three unequal columns that floats next to each other */
+.column {
+    float: left;
+}
+
+.left {
+    width: 15%;
+}
+
+/* .column.middle {
+    width: 65%;
+    text-align: center;
+    margin: 0em;
+} */
+
+.column.middle-right {
+    width: 65%;
+    float: left;
+}
+
+.column.right {
+    width: 15%;
+    float: right;
+    padding-top: 2px;
+}
+
+/* label {
+    margin: 0em;
+} */
+
+/* Three dots */
+.dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    font-size: 8px;
+    line-height: 12px;
+    text-align: center;
+    color: #000;
+    display: inline-block;
+    margin-top: 3px;
+    margin-left: 5px;
+}
+
+.slice-number {
+    margin: -8px;
+}
+/* Style the input field */
+/* input[type=text] { */
+.slice-field.form-control{
+    width: 100%;
+    border-radius: 3px;
+    border: none;
+    background-color: white;
+    height: 25px;
+    color: #666;
+    padding: 7px;
+    margin-left: 3px;
+}
+
+/* Page content */
+.content {
+    padding: 2px;
+    /* line-height: 0; */
+}
+
+.column.left {
+    padding: 2px 10px 10px 10px;
+    width: 20%;
+    display: inline-flex;
+    float: left;
+}
+
+.slice-form.form-inline {
+    justify-content: flex-end;
 }

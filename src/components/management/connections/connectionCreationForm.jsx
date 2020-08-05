@@ -5,7 +5,8 @@ import "../menuStyle.css";
 
 const connectionCreationForm = ({ onCancel, onSubmit, onType, error }) => {
   return (
-    <Modal.Dialog dialogClassName="add-connection__modal">
+    // <Modal.Dialog dialogClassName="add-connection__modal">
+    <Modal.Dialog id="modal-fix">
       <Modal.Header>
         <Modal.Title>New Project</Modal.Title>
       </Modal.Header>

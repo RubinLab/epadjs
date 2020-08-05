@@ -11,7 +11,7 @@ const buttonStyle = {
   marginBottom: "0.5rem",
   background: "rgb(241, 241, 241)",
   color: "#272b30",
-  fontSize: "1.1rem"
+  fontSize: "1.1rem",
 };
 class UpdateRequirement extends React.Component {
   state = { requirements: this.props.requirements, page: 0 };
@@ -53,7 +53,8 @@ class UpdateRequirement extends React.Component {
     const changeStarted = page === 1 || page === 2;
     const secondButton = changeStarted ? "Back" : "Cancel";
     return (
-      <Modal.Dialog dialogClassName="updateReq__modal">
+      // <Modal.Dialog dialogClassName="updateReq__modal">
+      <Modal.Dialog id="modal-fix" className="in-modal">
         <Modal.Header>
           <Modal.Title>Update Requirements</Modal.Title>
         </Modal.Header>
@@ -123,7 +124,7 @@ UpdateRequirement.propTypes = {
   onCancel: PropTypes.func,
   onSubmit: PropTypes.func,
   onChange: PropTypes.func,
-  error: PropTypes.string
+  error: PropTypes.string,
 };
 
 export default UpdateRequirement;

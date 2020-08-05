@@ -9,7 +9,9 @@ import "react-table/react-table.css";
 import Studies from "./studies";
 import { getSubjects } from "../../services/subjectServices";
 import { selectPatient, clearSelection } from "../annotationsList/action";
-import { persistExpandView } from "../../Utils/aid";
+import { persistExpandView, styleEightDigitDate } from "../../Utils/aid";
+import { formatDate } from "../flexView/helperMethods";
+
 const mode = sessionStorage.getItem("mode");
 
 // const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
@@ -40,6 +42,7 @@ class Subjects extends Component {
       numOfStudies: 0,
       data: [],
       expansionArr: [],
+      selected: {},
     };
   }
 
@@ -65,20 +68,25 @@ class Subjects extends Component {
         data = await this.getData();
         this.props.getTreeData(pid, "subject", data);
       }
-      const expanded = {};
       this.setState({ data });
       this.setState({ columns: this.setColumns() });
-      const ptExpandKeys = Object.keys(this.props.treeExpand);
-      const ptExpandVal = Object.values(this.props.treeExpand);
-      ptExpandKeys.forEach((el, index) => {
-        expanded[el] = ptExpandVal[index];
-      });
-      this.setState({ expanded });
+      this.updateExpanded();
     } catch (err) {
       // console.log(err);
       console.log(`couldn't load all subjects data. Please Try again!`);
     }
   }
+
+  updateExpanded = () => {
+    const expanded = {};
+    const ptExpandKeys = Object.keys(this.props.treeExpand);
+    const ptExpandVal = Object.values(this.props.treeExpand);
+    ptExpandKeys.forEach((el, index) => {
+      expanded[el] = ptExpandVal[index];
+    });
+    this.setState({ expanded });
+    return expanded;
+  };
 
   async componentDidUpdate(prevProps) {
     try {
@@ -88,19 +96,29 @@ class Subjects extends Component {
         pid,
         expandLevel,
         closeAllCounter,
+        selectedPatients,
       } = this.props;
 
       let data;
+
+      const newExpanded = Object.keys(this.props.treeExpand);
+      const oldExpanded = Object.keys(prevProps.treeExpand);
+      const shouldCollapse = newExpanded.length === 0 && oldExpanded.length > 0;
+      if (shouldCollapse) this.setState({ expanded: {}, expansionArr: [] });
+
       if (this.props.update !== prevProps.update) {
         data = await this.getData();
-        const expanded = persistExpandView(
-          this.state.expanded,
-          this.state.data,
-          data,
-          "subjectID"
-        );
+        const expanded = shouldCollapse
+          ? {}
+          : persistExpandView(
+              this.state.expanded,
+              this.state.data,
+              data,
+              "subjectID"
+            );
         this.props.getTreeData(pid, "subject", data);
         this.setState({ data, expanded });
+        if (shouldCollapse) this.setState({ expansionArr: [] });
       }
 
       if (closeAllCounter !== prevProps.closeAllCounter) {
@@ -141,6 +159,33 @@ class Subjects extends Component {
           this.props.getTreeData(pid, "subject", data);
         }
         // this.setState({ data });
+      }
+
+      const patients = Object.values(this.props.selectedPatients).length;
+      const studies = Object.values(this.props.selectedStudies).length;
+      const series = Object.values(this.props.selectedSeries).length;
+      const annotations = Object.values(this.props.selectedAnnotations).length;
+
+      const oldPatients = Object.values(prevProps.selectedPatients).length;
+      const oldStudies = Object.values(prevProps.selectedStudies).length;
+      const oldSeries = Object.values(prevProps.selectedSeries).length;
+      const oldAnnotations = Object.values(prevProps.selectedAnnotations)
+        .length;
+
+      const wasPatientSelected = patients === 0 && oldPatients > 0;
+      const switchedToStudies =
+        studies === 1 && oldStudies === 0 && wasPatientSelected;
+      const switchedToSeries =
+        series === 1 && oldSeries === 0 && wasPatientSelected;
+      const switchedToAnnotations =
+        annotations === 1 && oldAnnotations === 0 && wasPatientSelected;
+      if (
+        switchedToStudies ||
+        switchedToSeries ||
+        switchedToAnnotations ||
+        wasPatientSelected
+      ) {
+        this.setState({ columns: this.setColumns() });
       }
     } catch (err) {
       console.log(`couldn't load all subjects data. Please Try again!`);
@@ -195,12 +240,37 @@ class Subjects extends Component {
     return columns;
   }
 
-  selectRow = selected => {
+  selectRow = selectedRow => {
     this.props.dispatch(clearSelection("patient"));
-    this.props.dispatch(selectPatient(selected));
+    let { selected } = this.state;
+    selected[selectedRow.subjectID] = selected[selectedRow.subjectID]
+      ? false
+      : true;
+    this.setState({ selected });
+    this.props.dispatch(selectPatient(selectedRow));
   };
   setColumns() {
+    const { selectedPatients } = this.props;
     const columns = [
+      {
+        expander: true,
+        width: 35,
+        Expander: ({ isExpanded, ...rest }) => (
+          <div>
+            {isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
+          </div>
+        ),
+        style: {
+          cursor: "pointer",
+          fontSize: 10,
+          padding: "0",
+          textAlign: "center",
+          userSelect: "none",
+          color: "#fafafa",
+          padding: "7px 5px",
+          verticalAlign: "middle",
+        },
+      },
       {
         id: "searchView-checkbox",
         accessor: "",
@@ -208,13 +278,14 @@ class Subjects extends Component {
         sortable: false,
         width: this.widthUnit,
         Cell: row => {
+          let { subjectID, projectID } = row.original;
+          subjectID = subjectID ? subjectID : row.original.patientID;
+          const selected = this.state.selected[subjectID];
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
-              checked={
-                this.props.selectedPatients[row.original.subjectID] || false
-              }
+              value={selected}
               onChange={() =>
                 this.selectRow({ ...row.original, index: row.index })
               }
@@ -256,6 +327,7 @@ class Subjects extends Component {
         width: this.widthUnit * 2,
         id: "searchView-aims",
         resizable: false,
+        sortable: false,
         Cell: row => (
           <div className="searchView-table__cell">
             {row.original.numberOfAnnotations === 0 ? (
@@ -278,6 +350,7 @@ class Subjects extends Component {
         width: this.widthUnit * 3,
         id: "searchView-sub",
         resizable: false,
+        sortable: false,
         Cell: row => (
           <div className="searchView-table__cell">
             {row.original.numberOfStudies === 0 ? (
@@ -300,6 +373,7 @@ class Subjects extends Component {
         width: this.widthUnit * 3,
         id: "searchView-img",
         resizable: false,
+        sortable: false,
         // minResizeWidth: this.widthUnit * 3,
         Cell: row => <div />,
       },
@@ -308,6 +382,7 @@ class Subjects extends Component {
         width: this.widthUnit * 5,
         id: "searchView-type",
         resizable: false,
+        sortable: false,
         // minResizeWidth: this.widthUnit * 5,
         Cell: row => (
           <div style={{ textAlign: "center" }}>
@@ -320,6 +395,7 @@ class Subjects extends Component {
         width: this.widthUnit * 7,
         id: "searchView-crDate",
         resizable: false,
+        sortable: false,
         // minResizeWidth: this.widthUnit * 10,
         Cell: row => <div />,
       },
@@ -328,8 +404,14 @@ class Subjects extends Component {
         width: this.widthUnit * 7,
         id: "searchView-upldDate",
         resizable: false,
+        sortable: true,
+        accessor: "insertDate",
         // minResizeWidth: this.widthUnit * 10,
-        Cell: row => <div />,
+        Cell: ({ original }) => (
+          <div style={{ textAlign: "center" }}>
+            {formatDate(original.insertDate)}
+          </div>
+        ),
       },
       {
         Header: <div className="search-header__col">Accession</div>,
@@ -340,11 +422,12 @@ class Subjects extends Component {
         Cell: row => <div />,
       },
       {
-        Header: <div className="search-header__col">Idenditifier</div>,
+        Header: <div className="search-header__col">Identifier</div>,
         width: this.widthUnit * 10,
         // minResizeWidth: this.widthUnit * 12,
         id: "searchView-UID",
         resizable: false,
+        sortable: false,
         Cell: ({ original }) => {
           const id = "id-tool" + original.subjectID;
           return (
@@ -354,7 +437,7 @@ class Subjects extends Component {
               </div>
               <ReactTooltip
                 id={id}
-                place="right"
+                place="top"
                 type="info"
                 delayShow={500}
                 clickable={true}
@@ -492,6 +575,15 @@ class Subjects extends Component {
     this.props.getTreeExpandSingle(obj);
   };
 
+  closeExpansionFromSub = index => {
+    const expanded = { ...this.state.expanded };
+    expanded[index] = false;
+    this.setState({ expanded });
+    const obj = { patient: { [index]: false } };
+
+    this.props.getTreeExpandSingle(obj);
+  };
+
   onSortedChange = () => {
     const { expanded } = this.state;
     for (let subject in expanded) {
@@ -561,6 +653,7 @@ class Subjects extends Component {
                     getTreeExpandAll={this.props.getTreeExpandAll}
                     treeExpand={this.props.treeExpand}
                     patientIndex={row.index}
+                    closeExpand={this.closeExpansionFromSub}
                     // expandLoading={this.props.expandLoading}
                     // patientExpandComplete={this.props.patientExpandComplete}
                     treeData={this.props.treeData}
@@ -581,6 +674,9 @@ class Subjects extends Component {
 const mapStateToProps = state => {
   return {
     selectedPatients: state.annotationsListReducer.selectedPatients,
+    selectedStudies: state.annotationsListReducer.selectedStudies,
+    selectedSeries: state.annotationsListReducer.selectedSeries,
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
   };
 };
 export default connect(mapStateToProps)(Subjects);

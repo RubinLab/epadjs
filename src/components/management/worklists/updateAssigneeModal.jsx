@@ -29,7 +29,8 @@ class UpdateAssignee extends React.Component {
 
   render = () => {
     return (
-      <Modal.Dialog dialogClassName="updateAssignee__modal">
+      // <Modal.Dialog dialogClassName="updateAssignee__modal">
+      <Modal.Dialog id="modal-fix" className="in-modal">
         <Modal.Header>
           <Modal.Title>Update Assignees</Modal.Title>
         </Modal.Header>

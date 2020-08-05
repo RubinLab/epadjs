@@ -1,10 +1,10 @@
-import getElement from './getElement';
-import { getToolState } from '../../../stateManagement/toolState.js';
-import state from './state';
+import getElement from "./getElement";
+import { getToolState } from "../../../stateManagement/toolState.js";
+import state from "./state";
 
-import { getLogger } from '../../../util/logger';
+import { getLogger } from "../../../util/logger";
 
-const logger = getLogger('store:modules:segmentationModule:segmentVisibility');
+const logger = getLogger("store:modules:segmentationModule:segmentVisibility");
 
 /**
  * Returns if a segment is visible.
@@ -31,7 +31,7 @@ function isSegmentVisible(
     return;
   }
 
-  const stackState = getToolState(element, 'stack');
+  const stackState = getToolState(element, "stack");
   const stackData = stackState.data[0];
   const firstImageId = stackData.imageIds[0];
 
@@ -85,7 +85,7 @@ function toggleSegmentVisibility(
     return;
   }
 
-  const stackState = getToolState(element, 'stack');
+  const stackState = getToolState(element, "stack");
   const stackData = stackState.data[0];
   const firstImageId = stackData.imageIds[0];
 

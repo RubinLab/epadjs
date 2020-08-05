@@ -2,9 +2,13 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import { FiZoomIn } from "react-icons/fi";
-import { Tabs, Nav, Content } from "react-tiny-tabs";
+// import { Tabs, Nav, Content } from "react-tiny-tabs";
 import WorklistSelect from "./worklistSelect";
 import { getProjects } from "../../services/projectServices";
+import {
+  getTemplatesUniversal,
+  getAllTemplates,
+} from "../../services/templateServices";
 import Collapsible from "react-collapsible";
 import { FaArrowAltCircleLeft } from "react-icons/fa";
 import {
@@ -12,10 +16,18 @@ import {
   getWorklistsOfCreator,
   getWorklistProgress,
 } from "../../services/worklistServices";
+import {
+  getProjectMap,
+  clearSelection,
+  getTemplates,
+} from "../annotationsList/action";
 // import { getPacs } from "../../services/pacsServices";
 import "./w2.css";
 // import { throws } from "assert";
 import SidebarContent from "./sidebarContent";
+import Tabs from "react-bootstrap/Tabs";
+import Tab from "react-bootstrap/Tab";
+
 const mode = sessionStorage.getItem("mode");
 
 class Sidebar extends Component {
@@ -39,27 +51,112 @@ class Sidebar extends Component {
       progressView: [false, false],
       selected: null,
       type: "",
+      height: 200,
     };
   }
 
   componentDidMount = async () => {
-    //get the porjects
-    if (mode !== "lite") {
-      const { data: projects } = await getProjects();
-      if (projects.length > 0) {
-        const pid = projects[0].id;
-        this.setState({ projects, pid, selected: pid });
+    try {
+      this.setTabHeight();
+      const projects = await this.getProjectsData();
+      this.setStateProjectData(projects, true);
+      this.getWorklistandProgressData();
+      window.addEventListener("resize", this.setTabHeight);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-        this.props.history.push(`/search/${pid}`);
-        this.props.getPidUpdate(pid);
+  setTabHeight = () => {
+    const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
+    const closebtn = document.getElementsByClassName("closebtn __leftBar")[0]
+      .clientHeight;
+    const navTabs = document.getElementsByClassName("nav-tabs")[0].clientHeight;
+    const windowInner = window.innerHeight;
+    const height = windowInner - navTabs - closebtn - navbar - 10;
+    this.setState({ height });
+  };
+
+  componentWillUnmount = () => {
+    window.removeEventListener("resize", this.setTabHeight);
+  };
+
+  getProjectsData = async () => {
+    try {
+      let { data: projects } = await getProjects();
+      if (projects.length > 0) {
+        // get the project all and unassigned
+        // push them to the end of the projects
+        let allIndex;
+        let nonassignedIndex;
+        let all = [];
+        let nonassigned = [];
+        projects.forEach((el, i) => {
+          if (el.id === "all") allIndex = i;
+          if (el.id === "nonassigned") nonassignedIndex = i;
+        });
+
+        if (allIndex !== undefined) all = projects.splice(allIndex, 1);
+
+        nonassignedIndex !== undefined && nonassignedIndex > allIndex
+          ? (nonassigned = projects.splice(nonassignedIndex - 1, 1))
+          : (nonassigned = projects.splice(nonassignedIndex + 1, 1));
+
+        projects = projects.concat(all, nonassigned);
+
+        // const pid = projects[0].id;
+        // this.setState({ projects, pid, selected: pid });
+        // if (this.props.openSeries.length === 0) {
+        //   this.props.history.push(`/search/${pid}`);
+        // }
+        // this.props.getPidUpdate(pid);
+        const prTempMap = await this.getTemplatesProjectMap();
         const projectMap = {};
         for (let project of projects) {
-          projectMap[project.id] = project.name;
+          let { name, defaultTemplate } = project;
+          defaultTemplate = defaultTemplate === "null" ? null : defaultTemplate;
+          projectMap[project.id] = {
+            projectName: name,
+            defaultTemplate,
+            templates: prTempMap[project.id] || [],
+          };
         }
-        this.props.onData(projectMap);
+        this.props.dispatch(getProjectMap(projectMap));
+        this.props.dispatch(getTemplates());
+        return projects;
       }
+    } catch (err) {
+      console.error(err);
     }
-    this.getWorklistandProgressData();
+  };
+
+  setStateProjectData = (projects, setPid) => {
+    this.setState({ projects });
+    if (this.props.openSeries.length === 0 && setPid) {
+      const pid = projects[0].id;
+      this.setState({pid, selected: pid })
+      this.props.history.push(`/search/${pid}`);
+      this.props.getPidUpdate(pid);
+    }
+  };
+
+  getTemplatesProjectMap = async () => {
+    const prTempMap = {};
+    try {
+      const { data: templates } = await getTemplatesUniversal();
+      for (let template of templates) {
+        const tempCode = template.Template[0].templateCodeValue;
+        for (let project of template.projects) {
+          prTempMap[project]
+            ? prTempMap[project].push(tempCode)
+            : (prTempMap[project] = [tempCode]);
+        }
+      }
+      return prTempMap;
+    } catch (err) {
+      console.error("getting templates for projects", err);
+      return prTempMap;
+    }
   };
 
   getWorklistandProgressData = async () => {
@@ -92,12 +189,39 @@ class Sidebar extends Component {
         });
         this.setState({ [attribute]: result });
       })
-      .catch(err => console.log(err));
+      .catch(err => console.error(err));
   };
 
-  componentDidUpdate = prevProps => {
-    if (prevProps.progressUpdated !== this.props.progressUpdated) {
-      this.getWorklistandProgressData();
+  componentDidUpdate = async prevProps => {
+    try {
+      let { pathname } = this.props.location;
+      const { pid, lastEventId, refresh, notificationAction } = this.props;
+      const tagEdited = notificationAction.startsWith("Tag");
+      const uploaded = notificationAction.startsWith("Upload");
+      const notSideBarUpdate = tagEdited || uploaded;
+      let projects;
+      if (prevProps.progressUpdated !== this.props.progressUpdated) {
+        this.getWorklistandProgressData();
+      }
+      if (prevProps.projectAdded !== this.props.projectAdded) {
+        projects = await this.getProjectsData();
+        this.setStateProjectData(projects);
+      }
+      if (pathname !== prevProps.location.pathname) {
+        pathname = pathname.split("/").pop();
+        this.setState({ selected: pathname });
+      }
+      if (pid !== prevProps.pid) {
+        this.setState({ pid });
+      }
+
+      if (lastEventId !== prevProps.lastEventId && refresh && !notSideBarUpdate) {
+        console.log("still here")
+        projects = await this.getProjectsData();
+        this.setStateProjectData(projects);
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -124,6 +248,7 @@ class Sidebar extends Component {
     const isThick = mode === "thick";
     this.setState({ type });
     this.setState({ selected: null });
+    this.props.dispatch(clearSelection());
     if (type !== "progress") {
       this.collapseAll();
     }
@@ -182,34 +307,49 @@ class Sidebar extends Component {
   };
 
   renderProjects = () => {
-    if (mode === "thick") {
-      const projects = this.state.projects.map(project => {
-        const className =
-          this.state.selected === project.id
+    try {
+      const { projects, selected } = this.state;
+      let { pathname } = this.props.location;
+      pathname = pathname.split("/").pop();
+      // const pid = pathname.pop();
+      if (mode === "thick") {
+        const projectsList = projects.map(project => {
+          const matchProject =
+            selected === project.id || pathname === project.id;
+          const className = matchProject
             ? "sidebar-row __selected"
             : "sidebar-row";
+          return (
+            <tr key={project.id} className={className}>
+              <td>
+                <p
+                  onClick={() => {
+                    this.handleRoute("project", project.id);
+                    this.props.getPidUpdate(project.id);
+                    this.setState({ selected: project.id });
+                  }}
+                  // style={{ padding: "0.6rem" }}
+                >
+                  {project.name}
+                  <span id="subjectCount" className="badge badge-secondary">
+                    {project.numberOfSubjects}
+                  </span>
+                </p>
+              </td>
+            </tr>
+          );
+        });
         return (
-          <tr key={project.id} className={className}>
-            <td>
-              <p
-                onClick={() => {
-                  this.handleRoute("project", project.id);
-                  this.setState({ selected: project.id });
-                }}
-                style={{ padding: "0.6rem" }}
-              >
-                {project.name}
-              </p>
-            </td>
-          </tr>
+          <SidebarContent key="projectContent">{projectsList}</SidebarContent>
         );
-      });
-      return <SidebarContent key="projectContent">{projects}</SidebarContent>;
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
   renderWorklists = () => {
-    const {type, selected } = this.state;
+    const { type, selected } = this.state;
     const worklists = this.state.worklistsAssigned.map(worklist => {
       const className =
         worklist.workListID === selected && type === "worklist"
@@ -247,7 +387,8 @@ class Sidebar extends Component {
           trigger="Created by me"
           onOpen={() => this.handleCollapse(0, true)}
           onClose={() => this.handleCollapse(0, false)}
-          open={progressView[0]}
+          transitionTime={100}
+          // open={progressView[0]}
         >
           <WorklistSelect
             list={this.state.worklistsCreated}
@@ -260,7 +401,8 @@ class Sidebar extends Component {
           trigger="Assigned to me"
           onOpen={() => this.handleCollapse(1, true)}
           onClose={() => this.handleCollapse(1, false)}
-          open={progressView[1]}
+          transitionTime={100}
+          // open={progressView[1]}
         >
           <WorklistSelect
             list={this.state.worklistsAssigned}
@@ -274,35 +416,71 @@ class Sidebar extends Component {
   };
 
   renderContent = () => {
-    if (mode === "thick") {
-      return (
-        <Tabs className="theme-default" settings={{ index: this.state.index }}>
-          <Nav>{this.renderNav()}</Nav>
-          <Content>
-            <div className="testtable">{this.renderProjects()}</div>
-            <div>{this.renderWorklists()}</div>
-            <div>{this.renderProgress()}</div>
-          </Content>
-        </Tabs>
-      );
-    } else {
-      return (
-        <Tabs className="theme-default" settings={{ index: this.state.index }}>
-          <Nav>{this.renderNav()}</Nav>
-          <Content>
-            <div>{this.renderWorklists()}</div>
-            <div>{this.renderProgress()}</div>
-          </Content>
-        </Tabs>
-      );
-    }
+    // if (mode === "thick") {
+    const { height } = this.state;
+    return (
+      <Tabs
+        id="controlled-tab-leftSidebar"
+        activeKey={this.state.activeTab}
+        onSelect={index => this.setState({ index })}
+      >
+        {mode === "thick" ? (
+          <Tab
+            eventKey="0"
+            title="Projects"
+            style={{ height, overflow: "auto" }}
+          >
+            <div></div>
+            {this.renderProjects()}
+          </Tab>
+        ) : (
+          ""
+        )}
+        <Tab
+          eventKey="1"
+          title="Worklists"
+          style={{ height, overflow: "auto" }}
+        >
+          <div>{this.renderWorklists()}</div>
+        </Tab>
+
+        <Tab eventKey="2" title="Progress" style={{ height, overflow: "auto" }}>
+          {this.renderProgress()}
+        </Tab>
+      </Tabs>
+      // <Tabs className="theme-default" settings={{ index: this.state.index }}>
+      //   <Nav>{this.renderNav()}</Nav>
+      //   <Content>
+      //     <div className="testtable">{this.renderProjects()}</div>
+      //     <div>{this.renderWorklists()}</div>
+      //     <div>{this.renderProgress()}</div>
+      //   </Content>
+      // </Tabs>
+    );
+    // } else {
+    //   return (
+    //     <Tabs
+    //       id="controlled-tab-example"
+    //       activeKey={this.state.activeTab}
+    //       onSelect={(activeTab) => this.setState({ activeTab })}
+    //     >
+    //       <Tab eventKey="worklists" title="Worklists">
+    //         <div>{this.renderWorklists()}</div>
+    //       </Tab>
+
+    //       <Tab eventKey="Progres" title="Prog">
+    //         {this.renderProgress()}
+    //       </Tab>
+    //     </Tabs>
+    //   );
+    // }
   };
   render = () => {
     const { progressView } = this.state;
     return (
       <React.Fragment>
         <div
-          id="mySidebar"
+          id="leftSidebar"
           className="sidenav"
           style={{ width: this.state.width }}
         >
@@ -338,9 +516,19 @@ class Sidebar extends Component {
 }
 
 const mapStateToProps = state => {
-  const { activePort } = state.annotationsListReducer;
+  const {
+    activePort,
+    lastEventId,
+    openSeries,
+    notificationAction,
+    refresh,
+  } = state.annotationsListReducer;
   return {
     activePort,
+    lastEventId,
+    openSeries,
+    notificationAction,
+    refresh,
   };
 };
 export default withRouter(connect(mapStateToProps)(Sidebar));

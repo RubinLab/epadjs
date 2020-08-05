@@ -34,8 +34,8 @@ class CornerstoneViewport extends Component {
           toolClass: PropTypes.func, // Custom (ToolClass)
           props: PropTypes.Object, // Props to Pass to `addTool`
           mode: PropTypes.string, // Initial mode, if one other than default
-          modeOptions: PropTypes.Object // { mouseButtonMask: [int] }
-        })
+          modeOptions: PropTypes.Object, // { mouseButtonMask: [int] }
+        }),
       ])
     ),
     // Optional
@@ -50,7 +50,7 @@ class CornerstoneViewport extends Component {
     setViewportActive: PropTypes.func, // Called when viewport should be set to active?
     viewportOverlayComponent: PropTypes.oneOfType([
       PropTypes.string,
-      PropTypes.func
+      PropTypes.func,
     ]),
     // Cornerstone Events
     onElementEnabled: PropTypes.func, // Escape hatch
@@ -58,7 +58,7 @@ class CornerstoneViewport extends Component {
       PropTypes.shape({
         target: PropTypes.oneOf(["element", "cornerstone"]).isRequired,
         eventName: PropTypes.string.isRequired,
-        handler: PropTypes.func.isRequired
+        handler: PropTypes.func.isRequired,
       })
     ),
     startLoadHandler: PropTypes.func,
@@ -66,13 +66,13 @@ class CornerstoneViewport extends Component {
     loadIndicatorDelay: PropTypes.number,
     loadingIndicatorComponent: PropTypes.oneOfType([
       PropTypes.element,
-      PropTypes.func
+      PropTypes.func,
     ]),
     resizeThrottleMs: PropTypes.number, // 0 to disable
     //
     style: PropTypes.object,
     className: PropTypes.string,
-    isOverlayVisible: PropTypes.bool
+    isOverlayVisible: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -88,7 +88,7 @@ class CornerstoneViewport extends Component {
     loadIndicatorDelay: 45,
     loadingIndicatorComponent: LoadingIndicator,
     resizeThrottleMs: 200,
-    tools: []
+    tools: [],
   };
 
   constructor(props) {
@@ -114,7 +114,7 @@ class CornerstoneViewport extends Component {
       // Orientation Markers
       rotationDegrees: undefined,
       isFlippedVertically: undefined,
-      isFlippedHorizontally: undefined
+      isFlippedHorizontally: undefined,
     };
 
     // TODO: Deep Copy? How does that work w/ handlers?
@@ -132,7 +132,7 @@ class CornerstoneViewport extends Component {
       isStackPrefetchEnabled,
       cornerstoneOptions,
       imageIds,
-      resizeThrottleMs
+      resizeThrottleMs,
     } = this.props;
     const { imageIdIndex } = this.state;
     const imageId = imageIds[imageIdIndex];
@@ -157,11 +157,11 @@ class CornerstoneViewport extends Component {
       cornerstoneTools.addStackStateManager(this.element, [
         "stack",
         "playClip",
-        "referenceLines"
+        "referenceLines",
       ]);
       cornerstoneTools.addToolState(this.element, "stack", {
         imageIds: [...imageIds],
-        currentImageIdIndex: imageIdIndex
+        currentImageIdIndex: imageIdIndex,
       });
 
       // Load first image in stack
@@ -194,12 +194,12 @@ class CornerstoneViewport extends Component {
     const {
       imageIds: stack,
       imageIdIndex: imageIndex,
-      isStackPrefetchEnabled
+      isStackPrefetchEnabled,
     } = this.props;
     const {
       imageIds: prevStack,
       imageIdIndex: prevImageIndex,
-      isStackPrefetchEnabled: prevIsStackPrefetchEnabled
+      isStackPrefetchEnabled: prevIsStackPrefetchEnabled,
     } = prevProps;
     const hasStackChanged = !areStringArraysEqual(prevStack, stack);
     const hasImageIndexChanged = imageIndex !== prevImageIndex;
@@ -210,7 +210,7 @@ class CornerstoneViewport extends Component {
       cornerstoneTools.clearToolState(this.element, "stack");
       cornerstoneTools.addToolState(this.element, "stack", {
         imageIds: [...stack],
-        currentImageIdIndex: imageIndex
+        currentImageIdIndex: imageIndex,
       });
 
       // New stack; reset counter
@@ -258,7 +258,7 @@ class CornerstoneViewport extends Component {
     const {
       frameRate: prevFrameRate,
       isPlaying: prevIsPlaying,
-      isOverlayVisible: prevIsOverlayVisible
+      isOverlayVisible: prevIsOverlayVisible,
     } = prevProps;
     const validFrameRate = Math.max(frameRate, 1);
     const shouldStart = isPlaying !== prevIsPlaying && isPlaying;
@@ -332,7 +332,7 @@ class CornerstoneViewport extends Component {
       scale,
       windowWidth,
       windowCenter,
-      isOverlayVisible
+      isOverlayVisible,
     } = this.state;
     const imageId = imageIds[imageIdIndex];
     return (
@@ -363,7 +363,7 @@ class CornerstoneViewport extends Component {
       imageIdIndex,
       rotationDegrees,
       isFlippedVertically,
-      isFlippedHorizontally
+      isFlippedHorizontally,
     } = this.state;
     const imageId = imageIds[imageIdIndex];
 
@@ -504,7 +504,7 @@ class CornerstoneViewport extends Component {
    * @returns {undefined}
    */
   _handleOnElementEnabledEvent = () => {
-    const handler = evt => {
+    const handler = (evt) => {
       const elementThatWasEnabled = evt.detail.element;
       if (elementThatWasEnabled === this.element) {
         // Pass Event
@@ -549,7 +549,7 @@ class CornerstoneViewport extends Component {
 
     // We use this to "flip" `isLoading` to true, if our startLoading request
     // takes longer than our "loadIndicatorDelay"
-    const startLoadHandler = element => {
+    const startLoadHandler = (element) => {
       clearTimeout(this.loadHandlerTimeout);
 
       // Call user defined loadHandler
@@ -560,7 +560,7 @@ class CornerstoneViewport extends Component {
       // We're taking too long. Indicate that we're "Loading".
       this.loadHandlerTimeout = setTimeout(() => {
         this.setState({
-          isLoading: true
+          isLoading: true,
         });
       }, this.props.loadIndicatorDelay);
     };
@@ -575,7 +575,7 @@ class CornerstoneViewport extends Component {
 
       if (this.state.isLoading) {
         this.setState({
-          isLoading: false
+          isLoading: false,
         });
       }
     };
@@ -585,7 +585,7 @@ class CornerstoneViewport extends Component {
   }
 
   // TODO: May need to throttle?
-  onImageRendered = event => {
+  onImageRendered = (event) => {
     const viewport = event.detail.viewport;
 
     this.setState({
@@ -594,18 +594,18 @@ class CornerstoneViewport extends Component {
       windowWidth: viewport.voi.windowWidth,
       rotationDegrees: viewport.rotation,
       isFlippedVertically: viewport.vflip,
-      isFlippedHorizontally: viewport.hflip
+      isFlippedHorizontally: viewport.hflip,
     });
   };
 
-  onNewImage = event => {
+  onNewImage = (event) => {
     const newImageId = event.detail.image.imageId;
     const newImageIdIndex = this.props.imageIds.indexOf(newImageId);
 
     // TODO: Should we grab and set some imageId specific metadata here?
     // Could prevent cornerstone dependencies in child components.
     this.setState({
-      imageIdIndex: newImageIdIndex
+      imageIdIndex: newImageIdIndex,
     });
   };
 
@@ -613,17 +613,17 @@ class CornerstoneViewport extends Component {
     // TODO: This is not necessarily true :thinking:
     // We need better cache reporting a layer up
     this.setState({
-      numImagesLoaded: this.state.numImagesLoaded + 1
+      numImagesLoaded: this.state.numImagesLoaded + 1,
     });
   };
 
-  onImageProgress = e => {
+  onImageProgress = (e) => {
     this.setState({
-      imageProgress: e.detail.percentComplete
+      imageProgress: e.detail.percentComplete,
     });
   };
 
-  imageSliderOnInputCallback = value => {
+  imageSliderOnInputCallback = (value) => {
     this.setViewportActive();
 
     scrollToIndex(this.element, value);
@@ -660,9 +660,9 @@ class CornerstoneViewport extends Component {
         />
         <div
           className="viewport-element"
-          onContextMenu={e => e.preventDefault()}
-          onMouseDown={e => e.preventDefault()}
-          ref={input => {
+          onContextMenu={(e) => e.preventDefault()}
+          onMouseDown={(e) => e.preventDefault()}
+          ref={(input) => {
             this.element = input;
           }}
         >
@@ -699,9 +699,9 @@ function _trySetActiveTool(element, activeToolName) {
   }
 
   const validTools = cornerstoneTools.store.state.tools.filter(
-    tool => tool.element === element
+    (tool) => tool.element === element
   );
-  const validToolNames = validTools.map(tool => tool.name);
+  const validToolNames = validTools.map((tool) => tool.name);
 
   if (!validToolNames.includes(activeToolName)) {
     console.warn(
@@ -712,7 +712,7 @@ function _trySetActiveTool(element, activeToolName) {
   }
 
   cornerstoneTools.setToolActiveForElement(element, activeToolName, {
-    mouseButtonMask: 1
+    mouseButtonMask: 1,
   });
 }
 
@@ -723,7 +723,7 @@ function _enableStackPrefetching(element, clear = false) {
   cornerstoneTools.stackPrefetch.setConfiguration({
     maxImagesToPrefetch: Infinity,
     preserveExistingPool: false,
-    maxSimultaneousRequests: 6
+    maxSimultaneousRequests: 6,
   });
 
   if (clear) {
@@ -779,7 +779,7 @@ const TOOL_MODE_FUNCTIONS = {
   active: cornerstoneTools.setToolActiveForElement,
   passive: cornerstoneTools.setToolPassiveForElement,
   enabled: cornerstoneTools.setToolEnabledForElement,
-  disabled: cornerstoneTools.setToolDisabledForElement
+  disabled: cornerstoneTools.setToolDisabledForElement,
 };
 
 export default CornerstoneViewport;

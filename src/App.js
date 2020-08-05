@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
+import _ from "lodash";
 import { getUser, getUserInfo } from "./services/userServices";
 import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
@@ -30,7 +31,10 @@ import {
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
-
+import { getSubjects, getSubject } from "./services/subjectServices";
+import { getStudies, getStudy } from "./services/studyServices";
+import { getSeries, getSingleSeries } from "./services/seriesServices";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
@@ -44,7 +48,6 @@ class App extends Component {
       authenticated: false,
       openInfo: false,
       openUser: false,
-      projectMap: {},
       viewType: "search",
       lastEventId: null,
       showLog: false,
@@ -57,8 +60,19 @@ class App extends Component {
       treeData: {},
       pid: null,
       closeAll: 0,
+      projectAdded: 0,
     };
   }
+
+  getProjectAdded = () => {
+    this.setState(state => ({
+      projectAdded: state.projectAdded + 1,
+      refTree: {},
+      treeData: {},
+      expandLevel: 0,
+      treeExpand: {},
+    }));
+  };
 
   getTreeExpandAll = (expandObj, expanded, expandLevel) => {
     try {
@@ -126,7 +140,7 @@ class App extends Component {
       }
       this.setState({ treeExpand });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -145,7 +159,7 @@ class App extends Component {
     });
   };
 
-  getTreeExpandSingle = async (expandObj) => {
+  getTreeExpandSingle = async expandObj => {
     try {
       const { patient, study, series } = expandObj;
       let treeExpand = { ...this.state.treeExpand };
@@ -179,22 +193,22 @@ class App extends Component {
       }
       this.setState({ treeExpand });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
-  getExpandLevel = (expandLevel) => {
+  getExpandLevel = expandLevel => {
     this.setState({ expandLevel });
   };
 
   handleShrink = async () => {
     const { expandLevel } = this.state;
     if (expandLevel > 0) {
-      await this.setState((state) => ({ expandLevel: state.expandLevel - 1 }));
+      await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
     }
   };
 
-  closeMenu = (notification) => {
+  closeMenu = notification => {
     // if (event && event.type === "keydown") {
     //   if (event.key === "Escape" || event.keyCode === 27) {
     //     this.setState({ openMng: false });
@@ -209,12 +223,12 @@ class App extends Component {
     if (notification) this.updateNotificationSeen();
   };
 
-  switchView = (viewType) => {
+  switchView = viewType => {
     this.setState({ viewType });
   };
 
   handleMngMenu = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       openInfo: false,
       openMng: !state.openMng,
       openUser: false,
@@ -222,7 +236,7 @@ class App extends Component {
   };
 
   handleInfoMenu = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       openInfo: !state.openInfo,
       openMng: false,
       openUser: false,
@@ -230,7 +244,7 @@ class App extends Component {
   };
 
   handleUserProfileMenu = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       openInfo: false,
       openMng: false,
       openUser: !state.openUser,
@@ -238,11 +252,7 @@ class App extends Component {
   };
 
   updateProgress = () => {
-    this.setState((state) => ({ progressUpdated: state.progressUpdated + 1 }));
-  };
-
-  getProjectMap = (projectMap) => {
-    this.setState({ projectMap });
+    this.setState(state => ({ progressUpdated: state.progressUpdated + 1 }));
   };
 
   async componentDidMount() {
@@ -250,7 +260,7 @@ class App extends Component {
       fetch(`${process.env.PUBLIC_URL}/config.json`),
       fetch(`${process.env.PUBLIC_URL}/keycloak.json`),
     ])
-      .then(async (results) => {
+      .then(async results => {
         const configData = await results[0].json();
         let { mode, apiUrl, wadoUrl, authMode } = configData;
         // check and use environment variables if any
@@ -277,12 +287,10 @@ class App extends Component {
         sessionStorage.setItem("auth", auth);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
         this.completeAutorization(apiUrl);
-        if (mode === "lite") {
-          this.setState({ projectMap: { lite: "lite" } });
-        }
+        if (mode === "lite") this.setState({ pid: "lite" });
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(err => {
+        console.error(err);
       });
     //get notifications from sessionStorage and setState
     let notifications = sessionStorage.getItem("notifications");
@@ -295,7 +303,7 @@ class App extends Component {
     }
   }
 
-  completeAutorization = (apiUrl) => {
+  completeAutorization = apiUrl => {
     let getAuthUser = null;
 
     if (sessionStorage.getItem("authMode") !== "external") {
@@ -305,33 +313,33 @@ class App extends Component {
       getAuthUser = new Promise((resolve, reject) => {
         keycloak
           .init({ onLoad: "login-required" })
-          .then((authenticated) => {
+          .then(authenticated => {
             keycloak
               .loadUserInfo()
-              .then((userInfo) => {
+              .then(userInfo => {
                 resolve({ userInfo, keycloak, authenticated });
               })
-              .catch((err) => reject(err));
+              .catch(err => reject(err));
           })
-          .catch((err) => reject(err));
+          .catch(err => reject(err));
       });
     } else {
       // authMode is external ask backend for user
       getAuthUser = new Promise((resolve, reject) => {
         getUserInfo()
-          .then((userInfoResponse) => {
+          .then(userInfoResponse => {
             resolve({
               userInfo: userInfoResponse.data,
               keycloak: {},
               authenticated: true,
             });
           })
-          .catch((err) => reject(err));
+          .catch(err => reject(err));
       });
     }
 
     getAuthUser
-      .then(async (result) => {
+      .then(async result => {
         try {
           let user = {
             user: result.userInfo.preferred_username || result.userInfo.email,
@@ -358,7 +366,7 @@ class App extends Component {
             userData = userData.data;
             this.setState({ admin: userData.admin });
           } catch (err) {
-            console.log(err);
+            console.error(err);
           }
           this.eventSource = new EventSourcePolyfill(
             `${apiUrl}/notifications`,
@@ -378,12 +386,12 @@ class App extends Component {
           console.log("Error in user retrieval!", err);
         }
       })
-      .catch((err2) => {
+      .catch(err2 => {
         console.log("Authentication failed!", err2);
       });
   };
 
-  getMessageFromEventSrc = (res) => {
+  getMessageFromEventSrc = res => {
     try {
       if (res.data === "heartbeat") {
         return;
@@ -401,7 +409,7 @@ class App extends Component {
       const message = params;
       if (refresh)
         this.props.dispatch(
-          getNotificationsData(projectID, lastEventId, refresh)
+          getNotificationsData(projectID, lastEventId, refresh, action)
         );
       let time = new Date(createdtime).toString();
       const GMTIndex = time.indexOf(" G");
@@ -414,11 +422,21 @@ class App extends Component {
         action,
         error,
       });
+      const tagEdited = action.startsWith("Tag");
+      const uploaded = action.startsWith("Upload");
+      if (tagEdited || uploaded) {
+        const { pid } = this.state;
+        this.setState({ treeData: {} });
+        this.setState({ pid });
+        if (this.props.openSeries.length === 0) {
+          this.props.history.push(`/search/${pid}`);
+        }
+      }
       this.setState({ notifications });
       const stringified = JSON.stringify(notifications);
       sessionStorage.setItem("notifications", stringified);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -429,7 +447,7 @@ class App extends Component {
     );
   };
 
-  onLogout = (e) => {
+  onLogout = e => {
     auth.logout();
     // sessionStorage.removeItem("annotations");
     sessionStorage.setItem("notifications", JSON.stringify([]));
@@ -451,7 +469,7 @@ class App extends Component {
 
   updateNotificationSeen = () => {
     const notifications = [...this.state.notifications];
-    notifications.forEach((notification) => {
+    notifications.forEach(notification => {
       notification.seen = true;
     });
     this.setState({ notifications });
@@ -466,7 +484,7 @@ class App extends Component {
   handleCloseAll = () => {
     // let { closeAll } = this.state;
     // closeAll += 1;
-    this.setState((state) => ({
+    this.setState(state => ({
       expandLevel: 0,
       closeAll: state.closeAll + 1,
     }));
@@ -478,7 +496,7 @@ class App extends Component {
       const patientIDs = [];
       if (level === "subject") {
         if (!treeData[projectID]) treeData[projectID] = {};
-        data.forEach((el) => {
+        data.forEach(el => {
           if (!treeData[projectID][el.subjectID]) {
             treeData[projectID][el.subjectID] = { data: el, studies: {} };
           }
@@ -498,7 +516,7 @@ class App extends Component {
       } else if (level === "studies") {
         const studyUIDs = [];
         const patientID = data[0].patientID;
-        data.forEach((el) => {
+        data.forEach(el => {
           if (!treeData[projectID][el.patientID].studies[el.studyUID]) {
             treeData[projectID][el.patientID].studies[el.studyUID] = {
               data: el,
@@ -520,7 +538,7 @@ class App extends Component {
         const patientID = data[0].patientID;
         const studyUID = data[0].studyUID;
         const seriesUIDs = [];
-        data.forEach((el) => {
+        data.forEach(el => {
           if (
             !treeData[projectID][el.patientID].studies[el.studyUID].series[
               el.seriesUID
@@ -547,16 +565,158 @@ class App extends Component {
       }
       this.setState({ treeData });
     } catch (err) {
-      console.log("getTreeData operation --", err);
+      console.error(err);
     }
   };
 
-  getPidUpdate = (pid) => {
+  getPidUpdate = pid => {
     this.setState({ pid });
   };
 
   clearTreeExpand = () => {
     this.setState({ treeExpand: {}, expandLevel: 0 });
+  };
+
+  sortLevelArr = (arr, attribute) => {
+    return arr.sort(function(a, b) {
+      if (a.data[attribute] < b.data[attribute]) {
+        return -1;
+      }
+      if (a.data[attribute] > b.data[attribute]) {
+        return 1;
+      }
+      return 0;
+    });
+  };
+
+  getPatientIDfromSortedArray = (index, arr, attribute, returnVal) => {
+    const sortedArr = this.sortLevelArr(arr, attribute);
+    return sortedArr[index].data[returnVal];
+  };
+
+  getIndexOfPatient = (arr, patientID) => {
+    let index;
+    arr.forEach((el, i) => {
+      if (el.data.subjectID === patientID) {
+        index = i;
+      }
+    });
+    return index;
+  };
+
+  clearTreeData = () => {
+    try {
+      const { pid, treeExpand } = this.state;
+      const patients = { ...this.state.treeData[pid] };
+      const patientsArr = Object.values(patients);
+
+      for (let patientIndex in treeExpand) {
+        // if the index is kept as false it means that
+        // level opened and then closed so we need to clear data
+        const patientID = this.getPatientIDfromSortedArray(
+          patientIndex,
+          patientsArr,
+          "subjectName",
+          "subjectID"
+        );
+        if (!treeExpand[patientIndex]) {
+          // find subject id and empty studies
+          patients[patientID].studies = {};
+        } else {
+          for (let studyIndex in treeExpand[patientIndex]) {
+            if (!treeExpand[patientIndex][studyIndex]) {
+              const studies = Object.values(patients[patientID].studies);
+              const { studyUID } = studies[studyIndex].data;
+              patients[patientID].studies[studyUID].series = {};
+            }
+          }
+        }
+      }
+      const treeData = { [pid]: patients };
+      this.setState({ treeData });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  findNonExisting = (arr, uid, level) => {
+    const result = arr.filter(el => el[level] === uid);
+    return result[0];
+  };
+
+  updateTreeDataOnSave = async (refs, newLevel) => {
+    try {
+      this.setState({ treeData: {} });
+      // const treeData = { ...this.state.treeData };
+      // const { projectID, patientID, studyUID, seriesUID } = refs;
+      // const isPatient = projectID && patientID;
+      // const isStudy = projectID && patientID && studyUID;
+      // const isSeries = projectID && patientID && studyUID && seriesUID;
+      // const patient = treeData[projectID][patientID];
+      // const shouldUpdateStudy =
+      //   patient && Object.values(patient.studies).length > 0;
+      // const shouldUpdateSeries =
+      //   shouldUpdateStudy &&
+      //   Object.values(patient.studies[studyUID].series).length > 0;
+      // if (newLevel) {
+      //   if (newLevel === "study" && isStudy && shouldUpdateStudy) {
+      //     const { data: studies } = await getStudies(
+      //       projectID,
+      //       patientID,
+      //       studyUID
+      //     );
+      //     let study = this.findNonExisting(studies, studyUID, "studyUID");
+      //     study = { data: study, series: {} };
+      //     treeData[projectID][patientID].studies[studyUID] = study;
+      //   }
+      //   if (newLevel === "series" && isSeries && shouldUpdateSeries) {
+      //     const { data: seriesArr } = await getSeries(
+      //       projectID,
+      //       patientID,
+      //       studyUID
+      //     );
+      //     let series = this.findNonExisting(seriesArr, seriesUID, "seriesUID");
+      //     series = { data: series };
+      //     treeData[projectID][patientID].studies[studyUID].series[
+      //       seriesUID
+      //     ] = series;
+      //   }
+      // } else {
+      //   if (isPatient && treeData[projectID][patientID]) {
+      //     const promises = [];
+      //     promises.push(getSubject(projectID, patientID));
+      //     if (isStudy && treeData[projectID][patientID].studies[studyUID])
+      //       promises.push(getStudy(projectID, patientID, studyUID));
+      //     if (
+      //       isSeries &&
+      //       treeData[projectID][patientID].studies[studyUID].series[seriesUID]
+      //     )
+      //       promises.push(
+      //         getSingleSeries(projectID, patientID, studyUID, seriesUID)
+      //       );
+
+      //     const result = await Promise.all(promises);
+      //     treeData[projectID][patientID].data = result[0].data;
+
+      //     if (isStudy && treeData[projectID][patientID].studies[studyUID]) {
+      //       treeData[projectID][patientID].studies[studyUID].data =
+      //         result[1].data;
+      //     }
+
+      //     if (
+      //       isSeries &&
+      //       treeData[projectID][patientID].studies[studyUID].series[seriesUID]
+      //     ) {
+      //       treeData[projectID][patientID].studies[studyUID].series[
+      //         seriesUID
+      //       ].data = result[2].data[0];
+      //     }
+      //   }
+      // }
+      // this.setState({ treeData });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   render() {
@@ -588,13 +748,15 @@ class App extends Component {
           onSwitchView={this.switchView}
           viewType={this.state.viewType}
           notificationWarning={noOfUnseen}
+          pid={this.state.pid}
         />
         {this.state.openMng && (
           <Management
             closeMenu={this.closeMenu}
-            projectMap={this.state.projectMap}
             updateProgress={this.updateProgress}
             admin={this.state.admin}
+            getProjectAdded={this.getProjectAdded}
+            pid={this.state.pid}
           />
         )}
         {this.state.openInfo && (
@@ -618,27 +780,29 @@ class App extends Component {
         {this.state.authenticated && mode !== "lite" && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
             <Sidebar
-              onData={this.getProjectMap}
               type={this.state.viewType}
               progressUpdated={progressUpdated}
               getPidUpdate={this.getPidUpdate}
               pid={this.state.pid}
               clearTreeExpand={this.clearTreeExpand}
+              projectAdded={this.state.projectAdded}
             >
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
                 <ProtectedRoute
                   path="/display"
-                  render={(props) => (
+                  render={props => (
                     <DisplayView
                       {...props}
                       updateProgress={this.updateProgress}
+                      pid={this.state.pid}
+                      updateTreeDataOnSave={this.updateTreeDataOnSave}
                     />
                   )}
                 />
                 <ProtectedRoute
                   path="/search/:pid?"
-                  render={(props) => (
+                  render={props => (
                     <SearchView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -655,14 +819,17 @@ class App extends Component {
                       handleCloseAll={this.handleCloseAll}
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
+                      clearTreeData={this.clearTreeData}
+                      updateTreeDataOnSave={this.updateTreeDataOnSave}
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
+                      admin={this.state.admin}
                     />
                   )}
                 />
                 <ProtectedRoute
                   path="/search/:pid?"
-                  render={(props) => (
+                  render={props => (
                     <SearchView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -679,8 +846,11 @@ class App extends Component {
                       handleCloseAll={this.handleCloseAll}
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
+                      clearTreeData={this.clearTreeData}
+                      updateTreeDataOnSave={this.updateTreeDataOnSave}
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
+                      admin={this.state.admin}
                     />
                   )}
                 />
@@ -691,16 +861,9 @@ class App extends Component {
                 />
                 <ProtectedRoute
                   path="/flex/:pid?"
-                  render={(props) => (
-                    <FlexView {...props} pid={this.state.pid} />
-                  )}
+                  render={props => <FlexView {...props} pid={this.state.pid} />}
                 />
-                <ProtectedRoute
-                  path="/worklist/:wid?"
-                  render={(props) => (
-                    <Worklist {...props} projectMap={this.state.projectMap} />
-                  )}
-                />
+                <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 {/* component={Worklist} /> */}
                 <Route path="/tools" />
                 <Route path="/edit" />
@@ -709,7 +872,7 @@ class App extends Component {
                   from="/"
                   exact
                   to="/search"
-                  render={(props) => (
+                  render={props => (
                     <SearchView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -726,8 +889,11 @@ class App extends Component {
                       handleCloseAll={this.handleCloseAll}
                       treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
+                      clearTreeData={this.clearTreeData}
+                      updateTreeDataOnSave={this.updateTreeDataOnSave}
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
+                      admin={this.state.admin}
                     />
                   )}
                 />
@@ -740,24 +906,22 @@ class App extends Component {
         )}
         {this.state.authenticated && mode === "lite" && (
           <Sidebar
-            onData={this.getProjectMap}
             type={this.state.viewType}
             progressUpdated={progressUpdated}
+            getPidUpdate={this.getPidUpdate}
+            pid={this.state.pid}
+            clearTreeExpand={this.clearTreeExpand}
+            projectAdded={this.state.projectAdded}
           >
             <Switch>
               <Route path="/logout" component={Logout} />
               <ProtectedRoute path="/display" component={DisplayView} />
               <Route path="/not-found" component={NotFound} />
-              <ProtectedRoute
-                path="/worklist/:wid?"
-                render={(props) => (
-                  <Worklist {...props} projectMap={this.state.projectMap} />
-                )}
-              />
+              <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
                 path="/"
-                render={(props) => (
+                render={props => (
                   <SearchView
                     {...props}
                     updateProgress={this.updateProgress}
@@ -768,6 +932,7 @@ class App extends Component {
                     getTreeExpandAll={this.getTreeExpandAll}
                     treeExpand={treeExpand}
                     getExpandLevel={this.getExpandLevel}
+                    pid={this.state.pid}
                     // expandLoading={expandLoading}
                     // updateExpandedLevelNums={this.updateExpandedLevelNums}
                     onShrink={this.handleShrink}
@@ -775,6 +940,7 @@ class App extends Component {
                     treeData={this.state.treeData}
                     getTreeData={this.getTreeData}
                     closeAllCounter={this.state.closeAll}
+                    admin={this.state.admin}
                   />
                 )}
               />
@@ -791,15 +957,16 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  // console.log(state.annotationsListReducer);
+const mapStateToProps = state => {
   // console.log(state.managementReducer);
+  // console.log(state.annotationsListReducer);
   const {
     showGridFullAlert,
     showProjectModal,
     loading,
     activePort,
     imageID,
+    openSeries,
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -807,6 +974,7 @@ const mapStateToProps = (state) => {
     loading,
     activePort,
     imageID,
+    openSeries,
     selection: state.managementReducer.selection,
   };
 };

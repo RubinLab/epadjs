@@ -11,7 +11,8 @@ const connectionEditingForm = ({
   connectionToEdit
 }) => {
   return (
-    <Modal.Dialog dialogClassName="edit-connection__modal">
+    // <Modal.Dialog dialogClassName="edit-connection__modal">
+    <Modal.Dialog id="modal-fix">
       <Modal.Header>
         <Modal.Title>Edit Connection</Modal.Title>
       </Modal.Header>
