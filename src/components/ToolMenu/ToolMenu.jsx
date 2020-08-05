@@ -47,10 +47,8 @@ import "../../font-icons/styles.css";
 import "react-input-range/lib/css/index.css";
 import Collapsible from "react-collapsible";
 import "./ToolMenu.css";
-import { Form, FormCheck } from "react-bootstrap";
-
-import Switch from "react-switch";
 import ToolMenuItem from "../ToolMenu/ToolMenuItem";
+import Interpolation from "./Interpolation";
 
 const mapStateToProps = (state) => {
   return {
@@ -122,7 +120,7 @@ class ToolMenu extends Component {
       showBrushSize: false,
       showSmartBrush: false,
       rangeDisabled: true,
-      interpolate: false,
+      showInterpolation: false,
       activeTool: "",
       activeToolIdx: 0,
     };
@@ -185,44 +183,6 @@ class ToolMenu extends Component {
         //     />
         //   </span>
         // ),
-      },
-      {
-        name: "Interpolation",
-        icon: (
-          <Switch
-            onChange={this.setInterpolation}
-            checked={this.state.interpolate}
-            onColor="#86d3ff"
-            onHandleColor="#2693e6"
-            handleDiameter={10}
-            uncheckedIcon={
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "70%",
-                  fontSize: 11,
-                  color: "#861737",
-                  paddingRight: 2,
-                }}
-              >
-                Off
-              </div>
-            }
-            checkedIcon={
-              <svg viewBox="0 0 10 10" height="70%" width="70%">
-                <circle r={3} cx={5} cy={5} />
-              </svg>
-            }
-            boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
-            activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-            // height={15}
-            // width={20}
-            className="react-switch"
-          />
-        ),
-        tool: "FreehandRoi3DTool",
       },
       {
         name: "Sculpt 2D",
@@ -336,6 +296,8 @@ class ToolMenu extends Component {
         return;
       } //Dont" select the HUGated if the modality is not CT
       this.setState({ showBrushSize: true, showSmartBrush: true });
+    } else if (tool === "FreehandRoi3DTool") {
+      this.setState({ showInterpolation: true });
     }
     this.disableAllTools();
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
@@ -384,10 +346,6 @@ class ToolMenu extends Component {
     // this.state.activeElement.style.display = "block";
   };
 
-  anotate = () => {
-    this.setState({ showDrawing: !this.state.showDrawing });
-  };
-
   handleClip = () => {
     const element = cornerstone.getEnabledElements()[this.props.activePort]
       .element;
@@ -398,20 +356,6 @@ class ToolMenu extends Component {
 
   showPresets = () => {
     this.setState({ showPresets: !this.state.showPresets });
-  };
-
-  setInterpolation = (checked) => {
-    console.log("Settin interpolation", checked);
-    this.setState({ interpolate: checked });
-    cornerstoneTools.store.modules.freehand3D.state.interpolate = checked;
-    console.log(
-      "state after ",
-      cornerstoneTools.store.modules.freehand3D.state
-    );
-  };
-
-  closeBrushMenu = () => {
-    this.setState({ showBrushMenu: false });
   };
 
   setCursor = (cursorStyle) => {
@@ -426,6 +370,10 @@ class ToolMenu extends Component {
 
   closeSmartBrushMenu = () => {
     this.setState({ showSmartBrush: false });
+  };
+
+  showInterpolation = () => {
+    this.setState({ showInterpolation: false });
   };
 
   render() {
@@ -481,11 +429,7 @@ class ToolMenu extends Component {
               name={markupTool.name}
               icon={markupTool.icon}
               index={i}
-              isActive={
-                this.state.activeToolIdx === i ||
-                (this.state.activeToolIdx === 13 && i == 14) ||
-                (this.state.activeToolIdx === 14 && i == 13)
-              }
+              isActive={this.state.activeToolIdx === i}
               onClick={() => this.handleToolClicked(i, markupTool.tool)}
               children={markupTool.child}
             />
@@ -730,6 +674,10 @@ class ToolMenu extends Component {
             onClose={this.showPresets}
           />
         )}
+        {this.state.activeTool === "FreehandRoi3DTool" &&
+          this.state.showInterpolation && (
+            <Interpolation onClose={this.showInterpolation} />
+          )}
       </div>
     );
   }
