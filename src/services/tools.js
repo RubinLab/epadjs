@@ -1,10 +1,1 @@
-import http from "./httpService";
-const apiUrl = sessionStorage.getItem("apiUrl");
 
-export async function getTools() {
-  return http.get(apiUrl + "/plugins?format=json");
-}
-
-export async function deleteTool() {
-  return http.delete(apiUrl + "/plugins?format=json");
-}

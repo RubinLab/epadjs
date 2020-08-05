@@ -5,6 +5,12 @@ const mode = sessionStorage.getItem("mode");
 export function getProjects() {
   return http.get(apiUrl + "/projects");
 }
+//cavit
+export function getProjectsWithPkAsId() {
+  return http.get(apiUrl + "/projectswithpkasid");
+}
+
+//cavit
 
 export function deleteProject(projectId) {
   return http.delete(apiUrl + "/projects/" + projectId);
@@ -24,11 +30,19 @@ export function saveProject(
     defaultTemplate,
     projectId,
     userName,
-    type
+    type,
   });
 }
 
-export function updateProject(id, projectName, projectDescription, type) {
+export function updateProject(
+  id,
+  projectName,
+  projectDescription,
+  type,
+  defaultTemplate
+) {
+  // const body = { id, projectName, projectDescription, type, defaultTemplate };
+  // return http.put(apiUrl + "/projects/" + id, body);
   return http.put(
     apiUrl +
       "/projects/" +
@@ -38,7 +52,15 @@ export function updateProject(id, projectName, projectDescription, type) {
       "&description=" +
       projectDescription +
       "&type=" +
-      type
+      type +
+      "&defaulttemplate=" +
+      defaultTemplate
+  );
+}
+
+export function updateTemplate(id, defaultTemplate) {
+  return http.put(
+    apiUrl + "/projects/" + id + "?defaultTemplate=" + defaultTemplate
   );
 }
 
@@ -53,18 +75,17 @@ export function editUserRole(id, user, role) {
 }
 
 export function downloadProjects(projectID) {
+  const pid = mode === "lite" ? "lite" : projectID
   return http.get(
-    apiUrl + "/projects/" + projectID + "?format=stream&includeAims=true"
+    apiUrl + "/projects/" + pid + "?format=stream&includeAims=true"
   );
 }
 
 export function uploadFileToProject(formData, config, projectID) {
-  
   if (mode === "lite") {
     return http.post(apiUrl + "/projects/lite/files", formData, config);
   } else {
-    const url =
-      apiUrl + "/projects/" + projectID + "/files";
+    const url = apiUrl + "/projects/" + projectID + "/files";
     return http.post(url, formData, config);
   }
 }

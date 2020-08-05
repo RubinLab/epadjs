@@ -1,25 +1,27 @@
 import React from "react";
-import PropTypes from "prop-types";
-import { getAllTemplates } from "../../../services/templateServices";
+import { getTemplatesUniversal } from "../../../services/templateServices";
 
-// accept only integers for aims field
 class RequirementForm extends React.Component {
   state = {
     templates: {},
     error: null,
     level: null,
     numOfAims: null,
-    template: null
+    template: null,
   };
 
   componentDidMount = async () => {
-    const { data } = await getAllTemplates();
-    const templates = {};
-    console.log(data);
-    data.forEach((el, i) => {
-      templates[el.Template[0].templateUID] = el.Template[0].templateCodeValue;
-    });
-    this.setState({ templates });
+    try {
+      const { data } = await getTemplatesUniversal();
+      const templates = {};
+      data.forEach((el, i) => {
+        templates[el.Template[0].templateUID] =
+          el.Template[0].templateCodeValue;
+      });
+      this.setState({ templates });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   renderOptions = (arr, field) => {

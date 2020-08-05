@@ -35,6 +35,10 @@
   content: '';
 }
 
+.custom-modal {
+  background: #3a3f44;
+}
+
 .modal-dialog-div {
   cursor: pointer;
   position: relative;
@@ -104,6 +108,7 @@
   height: 3%;
   width: 100%;
   min-height: 32px;
+  margin-top: 0.3rem;
   /* background: rgb(85, 85, 85); */
 }
 
@@ -126,7 +131,7 @@
 
 .rnd-window {
   overflow: scroll;
-  background: #333;
+  background: #3a3f44;
   color: #c6c6c6;
   position: relative;
   border: 2px solid #702632;
@@ -138,8 +143,14 @@
   width: fit-content;
 }
 
+.rnd-window.react-draggable {
+  width: 75%;
+  max-width: 600px;
+}
+
 .wrapped {
   white-space: normal;
+  cursor: pointer;
 }
 
 .pro-table {
@@ -199,6 +210,11 @@
   width: 100%;
 }
 
+.add-project__modal .modal-header,
+.add-project__modal .modal-footer {
+  padding: 0.5rem;
+}
+
 .add-connection__modal--input {
   color: black;
 }
@@ -223,6 +239,9 @@
   text-align: left;
 }
 
+.add-project__modal--label {
+  margin-top: 0.5rem;
+}
 .edit-connection__modal--input,
 .edit-user__modal--input {
   color: black;
@@ -251,6 +270,7 @@
   margin: auto;
   margin-top: 0.5rem;
   max-width: fit-content;
+  margin-top: 0.5rem;
 }
 
 .project-edit__error {
@@ -573,14 +593,12 @@
   max-height: 90%;
 }
 
-/* .rnd-window {
-  display: flex;
+.projectTable-modal .modal-content {
+  width: auto;
+  min-width: 300px;
+  max-width: '-webkit-fill-available';
 }
 
-.modal {
-  display: flex;
-}
-*/
 #proModal-content {
   display: flex;
 }
@@ -622,7 +640,9 @@
 .pro-edit_table {
   width: 100%;
   overflow: scroll;
-  height: 100%;
+  max-height: 25rem;
+  height: fit-content;
+  /* text-align: left; */
 }
 
 .pagination-bottom .-pagination {
@@ -797,6 +817,7 @@
   margin: 0.5rem 1rem 1rem 1rem;
   border-radius: 8px;
   cursor: pointer;
+  color: #aaaaaa;
 }
 
 .info-about__button:hover,
@@ -949,9 +970,6 @@
   padding: 0.3rem;
 }
 
-.edit-userRole__modal.project_user {
-}
-
 .edit-userRole.project_user {
   width: 100%;
   height: 200px;
@@ -978,6 +996,11 @@
   width: fit-content;
 }
 
+.create-user__modal.--body.modal-body {
+  max-height: 20rem;
+  overflow: auto;
+}
+
 .edit-userPermission.__row.--label,
 .edit-permission__modal--button,
 .user-create__button {
@@ -988,6 +1011,7 @@
   font-size: 0.9rem;
   color: #5bc0de;
   font-style: italic;
+  cursor: pointer;
 }
 
 .user-permission__icon {
@@ -1025,4 +1049,18 @@
   color: #7a8288;
   margin-top: 1rem;
   margin-left: 1rem;
+}
+
+.tagRequirements_modal .modal-content {
+  width: fit-content;
+  margin: auto;
+}
+
+/* #projects.projects.menu-display {
+  width: 900px
+} */
+
+.templateTable-modal .modal-content {
+  width: fit-content;
+  margin: auto;
 }

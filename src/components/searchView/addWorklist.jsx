@@ -17,10 +17,14 @@ class WorklistAdd extends React.Component {
     const { data: worklists } = await getWorklistsOfCreator();
     this.setState({ worklists });
     document.addEventListener("mousedown", this.handleClickOutside);
+    document.addEventListener('keydown', this.handleClickOutside);
   };
 
+
+  
   componentWillUnmount() {
     document.removeEventListener("mousedown", this.handleClickOutside);
+    document.removeEventListener('keydown', this.handleClickOutside);
   }
 
   handleClickOutside = event => {

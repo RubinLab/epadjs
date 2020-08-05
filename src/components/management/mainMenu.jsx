@@ -6,7 +6,7 @@ import Projects from "./projects/projects";
 import WorkLists from "./worklists/workLists";
 import Annotations from "./annotations/annotations";
 import Templates from "./templates";
-import Tools from "./tools";
+import Plugins from "./plugins/main";
 import Connections from "./connections";
 import "./menuStyle.css";
 import Header from "./common/managementHeader";
@@ -31,10 +31,6 @@ class MainMenu extends React.Component {
     const coordinate = icon.getBoundingClientRect().left;
     this.setState({ coordinate });
     // this.setState({ width: window.innerWidth, height: window.innerHeight });
-  };
-
-  componentWillMount = () => {
-    this.updateDimensions();
   };
 
   componentWillUnmount = () => {
@@ -63,7 +59,6 @@ class MainMenu extends React.Component {
           <Users
             selection={this.state.selection}
             onClose={this.handleCloseModal}
-            projectMap={this.props.projectMap}
           />
         );
       case "Projects":
@@ -71,6 +66,7 @@ class MainMenu extends React.Component {
           <Projects
             selection={this.state.selection}
             onClose={this.handleCloseModal}
+            getProjectAdded={this.props.getProjectAdded}
           />
         );
       case "Worklists":
@@ -87,6 +83,7 @@ class MainMenu extends React.Component {
             selection={this.state.selection}
             onClose={this.handleCloseModal}
             updateProgress={this.props.updateProgress}
+            pid={this.props.pid}
           />
         );
       case "Templates":
@@ -94,22 +91,24 @@ class MainMenu extends React.Component {
           <Templates
             selection={this.state.selection}
             onClose={this.handleCloseModal}
+            pid={this.props.pid}
+            getProjectAdded={this.props.getProjectAdded}
           />
         );
-      case "Tools":
+      case "Plugins":
         return (
-          <Tools
+          <Plugins
             selection={this.state.selection}
             onClose={this.handleCloseModal}
           />
         );
-      case "Connections":
-        return (
-          <Connections
-            selection={this.state.selection}
-            onClose={this.handleCloseModal}
-          />
-        );
+      // case "Connections":
+      //   return (
+      //     <Connections
+      //       selection={this.state.selection}
+      //       onClose={this.handleCloseModal}
+      //     />
+      //   );
       default:
         return <div />;
     }
@@ -117,7 +116,6 @@ class MainMenu extends React.Component {
 
   render() {
     const style = { left: this.state.coordinate };
-
     return (
       <div>
         {!this.state.isModalOpen && (
@@ -128,9 +126,20 @@ class MainMenu extends React.Component {
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Annotations
             </div>
-            <div className="mng-menu__option" onClick={this.handleSelection}>
+            <div
+              className="mng-menu__option"
+              onClick={this.handleSelection}
+            >
               Templates
             </div>
+            <div className="mng-menu__option" onClick={this.handleSelection}>
+              Plugins
+            </div>
+            {false && (
+              <div className="mng-menu__option" onClick={this.handleSelection}>
+                Pluginstore
+              </div>
+            )}
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Worklists
             </div>
@@ -169,12 +178,12 @@ class MainMenu extends React.Component {
                     Pluginstore
                   </div>
                 )}
-                <div
+                {/* <div
                   className="mng-menu__option"
                   onClick={this.handleSelection}
                 >
                   Connections
-                </div>
+                </div> */}
                 {false && (
                   <div
                     className="mng-menu__option"

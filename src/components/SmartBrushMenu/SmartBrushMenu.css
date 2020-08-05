@@ -7,9 +7,16 @@
     background-color: #3a3f44;
     outline-color: black;
     width: 270px;
-    right: 20px;
-    top: 250px;
+    right: 500px;
+    top: 171px;
     z-index: 1000;
+}
+
+.close-smart-brush-menu {
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    color: white;
 }
 
 label {

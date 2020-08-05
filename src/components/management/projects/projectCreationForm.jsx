@@ -3,9 +3,30 @@ import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import "../menuStyle.css";
 
-const projectCreationForm = ({ onCancel, onSubmit, onType, error }) => {
+const projectCreationForm = ({
+  onCancel,
+  onSubmit,
+  onType,
+  error,
+  templates,
+}) => {
+  const firstOption = (
+    <option value={null} key="selectOpt">
+      --Select template--
+    </option>
+  );
+  const options = [firstOption];
+  templates.forEach((el, i) => {
+    const { templateCodeValue, templateUID } = el.Template[0];
+    options.push(
+      <option value={templateCodeValue} key={templateUID}>
+        {templateCodeValue}
+      </option>
+    );
+  });
   return (
-    <Modal.Dialog dialogClassName="add-project__modal">
+    // <Modal.Dialog dialogClassName="add-project__modal">
+    <Modal.Dialog id="modal-fix" className="in-modal">
       <Modal.Header>
         <Modal.Title>New Project</Modal.Title>
       </Modal.Header>
@@ -29,7 +50,7 @@ const projectCreationForm = ({ onCancel, onSubmit, onType, error }) => {
             onChange={onType}
           />
           <h6 className="form-exp">
-            One word only, no special characters, '_' is OK
+            One word only, no special characters, "_" is OK
           </h6>
           <h5 className="add-project__modal--label">Description</h5>
           <textarea
@@ -38,6 +59,14 @@ const projectCreationForm = ({ onCancel, onSubmit, onType, error }) => {
             name="description"
             onChange={onType}
           />
+          <h5 className="add-project__modal--label">Default Template</h5>
+          <select
+            name="defaulttemplate"
+            className="add-project__modal--select"
+            onChange={onType}
+          >
+            {options}
+          </select>
           <h5 className="add-project__modal--label">Type</h5>
           <select
             name="type"
@@ -68,7 +97,7 @@ projectCreationForm.propTypes = {
   onCancel: PropTypes.func,
   onSubmit: PropTypes.func,
   onType: PropTypes.func,
-  error: PropTypes.string
+  error: PropTypes.string,
 };
 
 export default projectCreationForm;

@@ -9,41 +9,48 @@ export function getSubjects(projectId) {
   } else return http.get(apiUrl + "/projects/" + projectId + "/subjects");
 }
 
-export function downloadSubjects(subject) {
-  const subjectID = subject.subjectID || subject.patientID;
+export function downloadSubjects(projectID, body) {
+  const pid = projectID || "lite";
   const url =
     apiUrl +
     "/projects/" +
-    subject.projectID +
-    "/subjects/" +
-    subjectID +
+    pid +
+    "/subjects/download" +
     "?format=stream&includeAims=true";
-  return http.get(url, { responseType: "blob" });
+  return http.post(url, body, { responseType: "blob" });
 }
 
-export function deleteSubject(subject) {
-  if (mode === "lite") {
-    const url = apiUrl + "/projects/lite/subjects/" + subject.patientID;
-    return http.delete(url);
-  }
+export function deleteSubject(subject, delSys) {
+  let { patientID, projectID } = subject;
+  patientID = patientID ? patientID : subject.subjectID;
+  const url = apiUrl + `/projects/${projectID}/subjects/${patientID}${delSys}`;
+  return http.delete(url);
 }
 
 export function saveSubject(projectID, subjectAbr, subjectName) {
-  // http://epad-dev8.stanford.edu:8080/epad/v2/projects/test1id/subjects/test?subjectName=test
+  const body = { name: subjectName };
   return http.put(
-    apiUrl +
-      "/projects/" +
-      projectID +
-      "/subjects/" +
-      subjectAbr +
-      "?subjectName=" +
-      subjectName
+    apiUrl + "/projects/" + projectID + "/subjects/" + subjectAbr,
+    body
   );
 }
 
 export function uploadFileToSubject(formData, config, subject) {
   let { subjectID, projectID } = subject;
   subjectID = subjectID ? subjectID : subject.patientID;
+  projectID = projectID || "lite";
   const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/files`;
   return http.post(url, formData, config);
+}
+
+export function getAllSubjects() {
+  return http.get(apiUrl + "/subjects");
+}
+
+export function addSubjectToProject(projectID, subjectID) {
+  return http.put(`${apiUrl}/projects/${projectID}/subjects/${subjectID}`);
+}
+
+export function getSubject(projectID, subjectID) {
+  return http.get(`${apiUrl}/projects/${projectID}/subjects/${subjectID}`);
 }

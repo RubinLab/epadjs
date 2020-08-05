@@ -4,8 +4,9 @@ import { Modal } from "react-bootstrap";
 
 const assigneeDeletionWarning = props => {
   return (
-    <Modal.Dialog dialogClassName="updateAssignee__modal">
-      <Modal.Body className="updateAssignee__mbody">
+    // <Modal.Dialog dialogClassName="updateAssignee__modal">
+    <Modal.Dialog id="modal-fix" className="in-modal mini-modal"> 
+      <Modal.Body>
         <div>
           <p>Worklist is going to removed from the following assignee(s)!</p>
           <p>This can not be undone!</p>

@@ -9,7 +9,11 @@ import {
   downloadSubjects,
   deleteSubject,
 } from "../../services/subjectServices";
-import { downloadStudies, deleteStudy } from "../../services/studyServices";
+import {
+  downloadStudies,
+  deleteStudy,
+  getStudies,
+} from "../../services/studyServices";
 import { deleteAnnotation } from "../../services/annotationServices";
 import {
   downloadSeries,
@@ -35,15 +39,23 @@ import { MAX_PORT } from "../../constants";
 import DownloadSelection from "./annotationDownloadModal";
 import "./searchView.css";
 import UploadModal from "./uploadModal";
-import { getSubjects } from "../../services/subjectServices";
+import {
+  getSubjects,
+  addSubjectToProject,
+} from "../../services/subjectServices";
+import { addStudyToProject } from "../../services/studyServices";
+
 import DeleteAlert from "./deleteConfirmationModal";
-import DownloadWarning from "./downloadWarningModal";
 import NewMenu from "./newMenu";
 import SubjectCreationModal from "./subjectCreationModal.jsx";
 import StudyCreationModal from "./studyCreationModal.jsx";
 import SeriesCreationModal from "./seriesCreationModal.jsx";
 import Worklists from "./addWorklist";
+import Projects from "./addToProject";
 import WarningModal from "../common/warningModal";
+import AnnotationCreationModal from "./annotationCreationModal.jsx";
+import UpLoadWizard from "../tagEditor/uploadWizard";
+import { FaLessThan } from "react-icons/fa";
 const mode = sessionStorage.getItem("mode");
 
 const messages = {
@@ -54,6 +66,14 @@ const messages = {
   itemOpen: {
     title: "Item is open in display",
     message: `couldn't be deleted. Please close series before deleting`,
+  },
+  deleteFmSys: {
+    title: `Deleting from System`,
+    message: `Deleting from All or Unassigned will remove the items from the system permanently. Do you want to delete the selected items?`,
+  },
+  delete: {
+    title: `Deleting items`,
+    message: `Delete selected items? This cannot be undone.`,
   },
 };
 
@@ -78,6 +98,9 @@ class SearchView extends Component {
       openItemsDeleted: false,
       noOfNotDeleted: 0,
       expandLevel: 0,
+      showUploadWizard: false,
+      showProjects: false,
+      editingTags: false,
     };
   }
 
@@ -88,7 +111,9 @@ class SearchView extends Component {
   componentDidMount = async () => {
     try {
       const { pid } = this.props;
-      if (mode === "thick" && !pid) this.props.history.push(`/search/${pid}`);
+      if (mode === "thick" && !pid) {
+        this.props.history.push(`/search/${pid}`);
+      }
       let subjects = Object.values(this.props.treeData);
       if (subjects.length > 0) {
         subjects = subjects.map(el => el.data);
@@ -128,6 +153,34 @@ class SearchView extends Component {
         this.setState({ expanded: {} });
       }
     }
+    if (lastEventId !== prevProps.lastEventId && this.state.editingTags) {
+      this.handleEditingTags();
+    }
+  };
+
+  checkForAllAndUnassigned = () => {
+    const { pid } = this.props;
+    const checkFromUrl = pid === "all" || pid === "nonassigned";
+    let selection = [];
+    let checkFromProjectID = false;
+    const patients = Object.values(this.props.selectedPatients);
+    const studies = Object.values(this.props.selectedStudies);
+    const series = Object.values(this.props.selectedSeries);
+    const annotations = Object.values(this.props.selectedAnnotations);
+    selection =
+      patients.length > 0
+        ? patients
+        : studies.length > 0
+        ? studies
+        : series.length > 0
+        ? series
+        : annotations;
+    selection.forEach((el, i) => {
+      if (el.projectID === "all" || el.projectID === "nonassigned") {
+        checkFromProjectID = true;
+      }
+    });
+    return checkFromProjectID || checkFromUrl;
   };
 
   getData = async () => {
@@ -165,16 +218,12 @@ class SearchView extends Component {
     this.setState({ expanded });
   };
 
-  keepExpandedPatientsInOrder = newSubjects => {
-    this.updateUploadStatus();
-    // get the patient ID of the maps, and the level they are open
-    // get the new array of subjects and iterate over it and form the new expanded object
-  };
 
-  updateUploadStatus = async => {
-    this.setState(state => {
-      return { uploading: !state.uploading, update: state.update + 1 };
-    });
+  updateUploadStatus = () => {
+    this.setState(state => ({ update: state.update + 1 }));
+    this.state.uploading
+      ? this.setState({ uploading: false })
+      : this.setState({ uploading: true });
     this.updateSubjectCount();
     // update patients after upload
     // filter the patients from openSeries with the first index they appear
@@ -187,11 +236,12 @@ class SearchView extends Component {
     // pass it to getwholedata
     const promiseArr = [];
     for (let patient in patients) {
-      promiseArr.push(
-        this.props.dispatch(
-          getWholeData(this.props.openSeries[patients[patient]])
-        )
-      );
+      // promiseArr.push(
+      //   this.props.dispatch(
+      //     getWholeData(this.props.openSeries[patients[patient]])
+      //   )
+      // );
+      promiseArr.push(getWholeData(this.props.openSeries[patients[patient]]));
     }
     Promise.all(promiseArr)
       .then(() => {
@@ -237,7 +287,12 @@ class SearchView extends Component {
     }
   };
 
-  deleteSelectionWrapper = async (arr, func, level) => {
+  handleEditingTags = () => {
+    const { editingTags } = this.state;
+    this.setState({ editingTags: !editingTags });
+  };
+
+  deleteSelectionWrapper = async (arr, func, level, delSys) => {
     this.handleClickDeleteIcon();
     const promiseArr = [];
     this.setState({ deleting: true });
@@ -250,7 +305,7 @@ class SearchView extends Component {
         this.props
           .closeBeforeDelete(level, item)
           .then(() => {
-            promiseArr.push(func(item));
+            promiseArr.push(func(item, delSys));
             deletedItems.push(item);
           })
           .catch(err => console.log(err));
@@ -272,6 +327,7 @@ class SearchView extends Component {
             noOfNotDeleted: openItems.length,
           });
         }
+        this.props.clearTreeData();
       })
       .catch(err => {
         console.log(err);
@@ -280,24 +336,29 @@ class SearchView extends Component {
   };
 
   deleteSelection = () => {
-    const selectedPatients = Object.values(this.props.selectedPatients);
-    const selectedStudies = Object.values(this.props.selectedStudies);
-    const selectedSeries = Object.values(this.props.selectedSeries);
-    const selectedAnnotations = Object.values(this.props.selectedAnnotations);
+    const patients = Object.values(this.props.selectedPatients);
+    const studies = Object.values(this.props.selectedStudies);
+    const series = Object.values(this.props.selectedSeries);
+    const annotations = Object.values(this.props.selectedAnnotations);
+    const { showDeleteFromSysAlert } = this.state;
 
-    if (selectedPatients.length > 0) {
-      this.deleteSelectionWrapper(selectedPatients, deleteSubject, "patientID");
-    } else if (selectedStudies.length > 0) {
-      this.deleteSelectionWrapper(selectedStudies, deleteStudy, "studyUID");
-    } else if (selectedSeries.length > 0) {
-      this.deleteSelectionWrapper(selectedSeries, deleteSeries, "seriesUID");
-    } else if (selectedAnnotations.length > 0) {
+    const delSys = showDeleteFromSysAlert ? "?all=true" : "";
+
+    if (patients.length > 0) {
+      this.deleteSelectionWrapper(patients, deleteSubject, "patientID", delSys);
+    } else if (studies.length > 0) {
+      this.deleteSelectionWrapper(studies, deleteStudy, "studyUID", delSys);
+    } else if (series.length > 0) {
+      this.deleteSelectionWrapper(series, deleteSeries, "seriesUID", delSys);
+    } else if (annotations.length > 0) {
       this.deleteSelectionWrapper(
-        selectedAnnotations,
+        annotations,
         deleteAnnotation,
-        "seriesUID"
+        "seriesUID",
+        delSys
       );
     }
+    if (showDeleteFromSysAlert) this.props.clearTreeData();
   };
 
   updateStoreOnAnnotationDelete = arr => {
@@ -397,7 +458,8 @@ class SearchView extends Component {
           for (let study in studiesObj) {
             for (let serie of studiesObj[study]) {
               if (!this.props.patients[serie.patientID]) {
-                await this.props.dispatch(getWholeData(serie));
+                // await this.props.dispatch(getWholeData(serie));
+                getWholeData(serie);
               } else {
                 this.props.dispatch(
                   updatePatient(
@@ -447,13 +509,14 @@ class SearchView extends Component {
             // this.props.history.push("/display");
           } else {
             //else get data for each serie for display
-            selectedSeries.forEach(serie => {
+            notOpenSeries.forEach(serie => {
               this.props.dispatch(addToGrid(serie));
               this.props.dispatch(getSingleSerie(serie));
             });
             for (let series of selectedSeries) {
               if (!this.props.patients[series.patientID]) {
-                await this.props.dispatch(getWholeData(series));
+                // await this.props.dispatch(getWholeData(series));
+                getWholeData(series);
               } else {
                 this.props.dispatch(
                   updatePatient(
@@ -504,7 +567,8 @@ class SearchView extends Component {
             });
             for (let ann of selectedAnnotations) {
               if (!this.props.patients[ann.subjectID]) {
-                await this.props.dispatch(getWholeData(null, null, ann));
+                // await this.props.dispatch(getWholeData(null, null, ann));
+                getWholeData(null, null, ann);
               } else {
                 this.props.dispatch(
                   updatePatient(
@@ -552,47 +616,69 @@ class SearchView extends Component {
     const selectedStudies = Object.values(this.props.selectedStudies);
     const selectedSeries = Object.values(this.props.selectedSeries);
     const selectedAnnotations = Object.values(this.props.selectedAnnotations);
-    let fileName;
-    let promiseArr = [];
-    let fileNameArr = [];
-    if (selectedProjects.length > 0) {
+    const selected =
+      selectedProjects.length ||
+      selectedPatients.length ||
+      selectedStudies.length ||
+      selectedSeries.length;
+    if (selected) {
+      const { pid } = this.props;
+      let bodyArr = [];
+      let fileName = "downloaded_items";
+      let promise;
       await this.setState({ downloading: true });
-      for (let project of selectedProjects) {
-        fileName = `Project-${project.projectID}`;
-        promiseArr.push(downloadProjects(project));
-        fileNameArr.push(fileName);
+      if (selectedProjects.length > 0) {
+        // for (let project of selectedProjects) {
+        //   fileName = `Project-${project.projectID}`;
+        //   promiseArr.push(downloadProjects(project));
+        //   fileNameArr.push(fileName);
+        // }
+        // this.downloadHelper(promiseArr, fileNameArr);
+        // this.props.dispatch(clearSelection());
+      } else if (selectedPatients.length > 0) {
+        bodyArr = selectedPatients.map(el => el.patientID);
+        promise = downloadSubjects(pid, bodyArr);
+        fileName = "Downloaded_subjects";
+      } else if (selectedStudies.length > 0) {
+        bodyArr = selectedStudies.map(el => {
+          return { study: el.studyUID, subject: el.patientID };
+        });
+        promise = downloadStudies(pid, bodyArr);
+        fileName = "Downloaded_studies";
+      } else if (selectedSeries.length > 0) {
+        bodyArr = selectedSeries.map(el => {
+          return {
+            series: el.seriesUID,
+            study: el.studyUID,
+            subject: el.patientID,
+          };
+        });
+        promise = downloadSeries(pid, bodyArr);
+        fileName = "Downloaded_series";
       }
-      this.downloadHelper(promiseArr, fileNameArr);
-      this.props.dispatch(clearSelection());
-    } else if (selectedPatients.length > 0) {
-      await this.setState({ downloading: true });
-      for (let patient of selectedPatients) {
-        fileName = `Patients-${patient.patientID}`;
-        promiseArr.push(downloadSubjects(patient));
-        fileNameArr.push(fileName);
-      }
-      this.downloadHelper(promiseArr, fileNameArr);
-      this.props.dispatch(clearSelection());
-    } else if (selectedStudies.length > 0) {
-      await this.setState({ downloading: true });
-      for (let study of selectedStudies) {
-        fileName = `Studies-${study.studyUID}`;
-        promiseArr.push(downloadStudies(study));
-        fileNameArr.push(fileName);
-      }
-      this.downloadHelper(promiseArr, fileNameArr);
-      this.props.dispatch(clearSelection());
-    } else if (selectedSeries.length > 0) {
-      await this.setState({ downloading: true });
-      for (let serie of selectedSeries) {
-        fileName = `Series-${serie.seriesUID}`;
-        promiseArr.push(downloadSeries(serie));
-        fileNameArr.push(fileName);
-      }
-      this.downloadHelper(promiseArr, fileNameArr);
+
+      promise
+        .then(result => {
+          let blob = new Blob([result.data], { type: "application/zip" });
+          this.triggerBrowserDownload(blob, fileName);
+          this.setState({ error: null, downloading: false });
+        })
+        .catch(err => {
+          this.setState({ downloading: false });
+          console.log(err);
+        });
       this.props.dispatch(clearSelection());
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
+    } else {
+      toast.info("Nothing selected to download", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
   };
 
@@ -604,21 +690,6 @@ class SearchView extends Component {
     } catch (err) {
       this.props.dispatch(annotationsLoadingError(err));
     }
-  };
-
-  downloadHelper = (promiseArr, nameArr) => {
-    Promise.all(promiseArr)
-      .then(result => {
-        for (let i = 0; i < result.length; i++) {
-          let blob = new Blob([result[i].data], { type: "application/zip" });
-          this.triggerBrowserDownload(blob, nameArr[i]);
-        }
-        this.setState({ error: null, downloading: false });
-      })
-      .catch(err => {    
-        this.setState({ downloading: false });
-        console.log(err)
-      });
   };
 
   handleDownloadCancel = () => {
@@ -653,7 +724,14 @@ class SearchView extends Component {
   };
 
   handleClickDeleteIcon = () => {
-    this.setState(state => ({ showDeleteAlert: !state.showDeleteAlert }));
+    const { showDeleteFromSysAlert } = this.state;
+    if (this.checkForAllAndUnassigned() || showDeleteFromSysAlert) {
+      this.setState(state => ({
+        showDeleteFromSysAlert: !state.showDeleteFromSysAlert,
+      }));
+    } else {
+      this.setState(state => ({ showDeleteAlert: !state.showDeleteAlert }));
+    }
   };
 
   handleOK = () => {
@@ -681,11 +759,19 @@ class SearchView extends Component {
   };
 
   handleWorklistClick = () => {
-    if (this.state.showWorklists) this.props.dispatch(clearSelection());
+    // if (this.state.showWorklists) this.props.dispatch(clearSelection());
+    console.log("clicked worklist");
     this.setState(state => ({ showWorklists: !state.showWorklists }));
   };
 
+  updateTreeView = () => {
+    this.setState(state => ({
+      update: state.update + 1,
+    }));
+  };
+
   handleNewSelected = () => {
+    const { selectedPatients, selectedStudies } = this.props;
     switch (this.state.newSelected) {
       case "subject":
         return (
@@ -694,6 +780,7 @@ class SearchView extends Component {
             project={this.props.match.params.pid}
             onSubmit={this.updateUploadStatus}
             onResolve={this.updateStatus}
+            updateTreeDataOnSave={this.props.updateTreeDataOnSave}
           />
         );
       case "study":
@@ -704,6 +791,8 @@ class SearchView extends Component {
             project={this.props.match.params.pid}
             onSubmit={this.updateUploadStatus}
             onResolve={this.updateStatus}
+            updateTreeDataOnSave={this.props.updateTreeDataOnSave}
+            selectedPatients={Object.values(selectedPatients)}
           />
         );
       case "series":
@@ -714,6 +803,9 @@ class SearchView extends Component {
             subjects={this.state.subjects}
             onSubmit={this.updateUploadStatus}
             onResolve={this.updateStatus}
+            updateTreeDataOnSave={this.props.updateTreeDataOnSave}
+            selectedPatients={Object.values(selectedPatients)}
+            selectedStudies={Object.values(selectedStudies)}
           />
         );
       // case "annotation":
@@ -732,6 +824,70 @@ class SearchView extends Component {
     this.setState({ showAnnotationModal: false });
   };
 
+  handleUploadWizardClick = () => {
+    this.setState(state => ({ showUploadWizard: !state.showUploadWizard }));
+  };
+
+  handleProjectClick = () => {
+    this.setState(state => ({ showProjects: !state.showProjects }));
+  };
+
+  verifyObject = object => {
+    return object.constructor === Object;
+  };
+
+  addSelectionToProject = async e => {
+    try {
+      const { id } = e.target;
+      const { treeData } = this.props;
+      let promises = [];
+      let patientIDs = new Set();
+      const patients = Object.values(this.props.selectedPatients);
+      const studies = Object.values(this.props.selectedStudies);
+      if (patients.length > 0) {
+        patients.forEach(el => {
+          promises.push(addSubjectToProject(id, el.patientID));
+        });
+      }
+      if (studies.length > 0) {
+        studies.forEach(el => {
+          promises.push(addStudyToProject(id, el.patientID, el.studyUID));
+          if (!treeData[id][el.patientID]) {
+            patientIDs.add(el.patientID);
+          }
+        });
+      }
+      await Promise.all(promises);
+      console.log("Sucessfully copied!");
+      promises = [];
+
+      if (treeData[id])
+        if (patients.length > 0) {
+          const { data } = await getSubjects(id);
+          this.props.getTreeData(id, "subject", data);
+        }
+
+      this.setState({ showProjects: false });
+      if (studies.length > 0) {
+        if (patientIDs.size > 0) {
+          const { data } = await getSubjects(id);
+          this.props.getTreeData(id, "subject", data);
+        }
+        studies.forEach(el => {
+          promises.push(getStudies(id, el.patientID));
+        });
+        let studiesResult = await Promise.all(promises);
+        studiesResult = studiesResult;
+        studiesResult.forEach(el =>
+          this.props.getTreeData(id, "studies", el.data)
+        );
+      }
+      this.props.dispatch(clearSelection());
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   render = () => {
     let status;
     if (this.state.uploading) {
@@ -740,20 +896,32 @@ class SearchView extends Component {
       status = "Downloading…";
     } else if (this.state.deleting) {
       status = "Deleting…";
+    } else if (this.state.editingTags) {
+      status = "Editing tags…";
     } else {
       status = null;
     }
-    const showDelete =
-      (Object.entries(this.props.selectedAnnotations).length > 0 &&
-        this.props.selectedAnnotations.constructor === Object) ||
-      (Object.entries(this.props.selectedPatients).length > 0 &&
-        this.props.selectedPatients.constructor === Object) ||
-      (Object.entries(this.props.selectedStudies).length > 0 &&
-        this.props.selectedStudies.constructor === Object) ||
-      (Object.entries(this.props.selectedSeries).length > 0 &&
-        this.props.selectedSeries.constructor === Object);
 
-    const pid = this.props.match.params.pid || this.props.pid || "lite";
+    const {
+      selectedPatients,
+      selectedStudies,
+      selectedSeries,
+      selectedAnnotations,
+    } = this.props;
+
+    const lengthOfPatients = Object.entries(selectedPatients).length;
+    const lengthOfStudies = Object.entries(selectedStudies).length;
+    const lengthOfSeries = Object.entries(selectedSeries).length;
+    const lengthOfAnns = Object.entries(selectedAnnotations).length;
+
+    const showAddTo =
+      (lengthOfPatients > 0 && this.verifyObject(selectedPatients)) ||
+      (lengthOfStudies > 0 && this.verifyObject(selectedStudies));
+    const showDelete =
+      showAddTo ||
+      (lengthOfAnns > 0 && this.verifyObject(selectedAnnotations)) ||
+      (lengthOfSeries > 0 && this.verifyObject(selectedSeries));
+    const pid = this.props.match.params.pid || this.props.pid;
     const {
       isSerieSelectionOpen,
       showUploadFileModal,
@@ -763,7 +931,9 @@ class SearchView extends Component {
       newUser,
       openItemsDeleted,
       newSelected,
+      showProjects,
       noOfNotDeleted,
+      showDeleteFromSysAlert,
     } = this.state;
     const itemStr = noOfNotDeleted > 1 ? "items" : "item";
     return (
@@ -778,9 +948,14 @@ class SearchView extends Component {
           onCloseAll={this.props.handleCloseAll}
           onNew={this.handleNewClick}
           onWorklist={this.handleWorklistClick}
+          onUploadWizard={this.handleUploadWizardClick}
           status={status}
           showDelete={showDelete}
+          showAddTo={showAddTo}
+          showTagEditor={lengthOfSeries > 0}
           project={this.props.match.params.pid}
+          onAddProject={this.handleProjectClick}
+          admin={this.props.admin}
           // expanding={expanding}
         />
         {isSerieSelectionOpen && !this.props.loading && (
@@ -806,13 +981,13 @@ class SearchView extends Component {
           treeData={this.props.treeData}
           getTreeData={this.props.getTreeData}
           closeAllCounter={this.props.closeAllCounter}
-
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection
             onCancel={this.handleDownloadCancel}
             updateStatus={this.updateDownloadStatus}
             onSubmit={this.handleSubmitDownload}
+            pid={this.props.pid}
           />
         )}
 
@@ -820,19 +995,34 @@ class SearchView extends Component {
           <UploadModal
             onCancel={this.handleFileUpload}
             onSubmit={this.updateUploadStatus}
+            pid={this.props.pid}
+            clearTreeData={this.props.clearTreeData}
+            onResolve={this.updateStatus}
           />
         )}
         {showDeleteAlert && (
           <DeleteAlert
             onCancel={this.handleClickDeleteIcon}
             onDelete={this.deleteSelection}
+            title={messages.delete.title}
+            message={messages.delete.message}
           />
         )}
-
+        {showDeleteFromSysAlert && (
+          <DeleteAlert
+            onCancel={this.handleClickDeleteIcon}
+            onDelete={this.deleteSelection}
+            title={messages.deleteFmSys.title}
+            message={messages.deleteFmSys.message}
+          />
+        )}
         {showNew && (
           <NewMenu
             onSelect={this.handleSelectNewOption}
             onClose={this.handleNewClick}
+            selectedPatients={selectedPatients}
+            selectedStudies={selectedStudies}
+            selectedSeries={selectedSeries}
           />
         )}
 
@@ -840,6 +1030,12 @@ class SearchView extends Component {
           <Worklists
             onClose={this.handleWorklistClick}
             updateProgress={this.props.updateProgress}
+          />
+        )}
+        {showProjects && (
+          <Projects
+            onProjectClose={this.handleProjectClick}
+            onSave={this.addSelectionToProject}
           />
         )}
         {newUser && (
@@ -856,7 +1052,15 @@ class SearchView extends Component {
             message={`${noOfNotDeleted} ${itemStr} ${messages.itemOpen.message}`}
           />
         )}
-        {newSelected && this.handleNewSelected()}
+        {this.state.showUploadWizard && (
+          <UpLoadWizard
+            onClose={this.handleUploadWizardClick}
+            pid={this.props.pid}
+            updateTreeView={this.updateTreeView}
+            onSave={this.handleEditingTags}
+          />
+        )}
+        {this.state.newSelected && this.handleNewSelected()}
       </>
     );
   };

@@ -113,7 +113,7 @@ class InfoMenu extends React.Component {
               Help
             </div>
             <div className="info-menu__option" onClick={this.handleSelection}>
-              What"s New
+              What's New
             </div>
             <div className="info-menu__option" onClick={this.handleSelection}>
               Team

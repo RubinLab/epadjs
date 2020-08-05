@@ -14,7 +14,7 @@ import triggerEvent from "../util/triggerEvent.js";
  * @param  {type} newImageIdIndex The target image index.
  * @returns {void}
  */
-export default function(element, newImageIdIndex) {
+export default function (element, newImageIdIndex) {
   const toolData = getToolState(element, "stack");
 
   if (!toolData || !toolData.data || !toolData.data.length) {
@@ -84,9 +84,10 @@ export default function(element, newImageIdIndex) {
     }
   }
 
-  if (newImageIdIndex === stackData.currentImageIdIndex) {
-    return;
-  }
+  // METE:commented out because it prevents scrolling to image
+  // if (newImageIdIndex === stackData.currentImageIdIndex) {
+  //  return;
+  // }
 
   if (startLoadingHandler) {
     startLoadingHandler(element);
@@ -94,7 +95,7 @@ export default function(element, newImageIdIndex) {
 
   const eventData = {
     newImageIdIndex,
-    direction: newImageIdIndex - stackData.currentImageIdIndex
+    direction: newImageIdIndex - stackData.currentImageIdIndex,
   };
 
   stackData.currentImageIdIndex = newImageIdIndex;

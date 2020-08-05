@@ -13,7 +13,8 @@ const userPermissionEdit = ({
 }) => {
   // users = users || projects;
   return (
-    <Modal.Dialog dialogClassName="edit-permission__modal">
+    // <Modal.Dialog dialogClassName="edit-permission__modal">
+    <Modal.Dialog id="modal-fix">
       <Modal.Header>
         <Modal.Title>Modify User Permissions</Modal.Title>
       </Modal.Header>

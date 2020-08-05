@@ -81,9 +81,6 @@ const Cornerstone = ({ dispatch }) => {
       auth
         .getAuthHeader()
         .then(header => {
-          console.log("header", header);
-          const token = header.replace("Bearer ");
-          console.log("token", token);
           if (header && header) {
             xhr.setRequestHeader("Authorization", header);
             // xhr.setRequestHeader("authorization", header);

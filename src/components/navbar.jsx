@@ -13,10 +13,9 @@ const NavBar = ({
   logout,
   onSearchViewClick,
   onSwitchView,
-  notificationWarning
+  notificationWarning,
+  pid,
 }) => {
-  const style = { paddingBottom: "8px" };
-
   // handleClick = () => {
   //   openMenu();
   // };
@@ -48,7 +47,10 @@ const NavBar = ({
                 onSwitchView("search");
               }}
             >
-              <NavLink className="nav-link" to="/search">
+              <NavLink
+                className="nav-link"
+                to={pid ? `/search/${pid}` : "/search"}
+              >
                 Search
               </NavLink>
             </li>
@@ -74,7 +76,7 @@ const NavBar = ({
                     Progress
                   </NavLink>
                 </li> */}
-                <li className="nav-item">
+                {/* <li className="nav-item">
                   <NavLink className="nav-link" to="/tools">
                     Tools
                   </NavLink>
@@ -83,14 +85,17 @@ const NavBar = ({
                   <NavLink className="nav-link" to="/edit">
                     Edit
                   </NavLink>
-                </li>{" "}
+                </li>{" "} */}
                 <li
                   className="nav-item"
                   onClick={() => {
                     onSwitchView("flex");
                   }}
                 >
-                  <NavLink className="nav-link" to="/flex">
+                  <NavLink
+                    className="nav-link"
+                    to={pid ? `/flex/${pid}` : `/flex`}
+                  >
                     Flex
                   </NavLink>
                 </li>{" "}
@@ -111,8 +116,7 @@ const NavBar = ({
                   <div
                     className="nav-link mng-icon"
                     data-name="mng"
-                    style={{ ...style, cursor: "pointer" }}
-                    onClick={e => {
+                    onClick={(e) => {
                       openGearMenu(e);
                     }}
                   >
@@ -123,8 +127,7 @@ const NavBar = ({
                   <div
                     className="nav-link info-icon"
                     data-name="info"
-                    style={{ ...style, cursor: "pointer" }}
-                    onClick={e => {
+                    onClick={(e) => {
                       openInfoMenu(e);
                     }}
                   >
@@ -141,13 +144,9 @@ const NavBar = ({
                   <div
                     className="nav-link user-profile"
                     data-name="user"
-                    onClick={e => {
+                    onClick={(e) => {
                       openUser(e);
                     }}
-                    // onMouseEnter={openUser}
-                    style={
-                      mode === "lite" ? style : { ...style, cursor: "pointer" }
-                    }
                   >
                     {user.displayname}
                   </div>
@@ -166,9 +165,9 @@ const NavBar = ({
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
-    loading: state.annotationsListReducer.loading
+    loading: state.annotationsListReducer.loading,
   };
 };
 export default connect(mapStateToProps)(NavBar);

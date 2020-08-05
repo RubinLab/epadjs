@@ -22,19 +22,27 @@ const toolBar = props => {
     onType,
     onClear,
     onFilter,
-    onKeyDown,
+    onUploadWizard,
+    onKeyDown, pid
   } = props;
   const { selected, projects } = props;
 
   const options = [];
-  for (let project of projects) {
+  projects.forEach((project, index) => {
     options.push(
       <option key={project.id} value={project.id}>
         {project.name}
       </option>
     );
+  });
+  if (projects[0]) {
+    const firstOption = (
+      <option key="all_aims" value="all_aims">
+        All Annotations
+      </option>
+    );
+   options.splice(0, 0, firstOption);
   }
-
   let name = React.createRef();
   let subject = React.createRef();
   let template = React.createRef();
@@ -60,7 +68,7 @@ const toolBar = props => {
             id="upload-icon"
             place="right"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span className="filter-label">Upload files</span>
           </ReactTooltip>
@@ -77,7 +85,7 @@ const toolBar = props => {
             id="download-icon"
             place="right"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span className="filter-label">Download selections</span>
           </ReactTooltip>
@@ -95,7 +103,7 @@ const toolBar = props => {
             id="trash-icon"
             place="right"
             type="info"
-            delayShow={1500}
+            delayShow={1000}
           >
             <span className="filter-label">Delete selections</span>
           </ReactTooltip>
@@ -105,8 +113,9 @@ const toolBar = props => {
           <select
             className="annotations-projectSelect"
             name="project"
+            value={pid ? pid : ""}
+            onMouseDown={e => e.stopPropagation()}
             onChange={onSelect}
-            defaultValue="default"
           >
             {options}
           </select>
@@ -187,7 +196,7 @@ const toolBar = props => {
                 id="filter-icon"
                 place="left"
                 type="info"
-                delayShow={1500}
+                delayShow={1000}
               >
                 <span className="filter-label">Filter annotations</span>
               </ReactTooltip>
@@ -206,7 +215,7 @@ const toolBar = props => {
                 id="undo-icon"
                 place="left"
                 type="info"
-                delayShow={1500}
+                delayShow={1000}
               >
                 <span className="filter-label">Clear filter</span>
               </ReactTooltip>

@@ -2,8 +2,11 @@
   position: absolute;
   z-index: 1;
   background: #3a3f44;
-  padding: 1rem;
-  border: 1px solid gray;
+  border: 2px solid #861837;
+}
+
+.flexView .__dropdown .--options {
+  padding: 0.5rem 1rem;
 }
 
 .flexView .__dropdown .--option .--text {
@@ -19,4 +22,62 @@
 
 .flexView-table__sub {
   background: #3a3f44;
+}
+
+.series-table {
+  width: fit-content;
+  margin: 10px auto;
+  table-layout: auto;
+  /* table-layout: fixed; */
+}
+
+.series-table,
+.series-table.__tbody.--cell,
+.series-table.__header.--cell {
+  border-collapse: collapse;
+}
+
+.series-table.__header.--cell {
+  font-size: 1.2rem;
+}
+
+.series-table.__tbody.--cell,
+.series-table.__header.--cell {
+  padding: 5px;
+  border: 1px solid #272b30;
+  text-align: center;
+}
+
+.series-table.__header:first-child {
+  width: 30px;
+}
+
+.series-table.__buttonGroup {
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+  margin: 0.5rem;
+}
+
+.series-table.__button {
+  margin: 0.5rem;
+  width: fit-content;
+  padding: 0.5rem;
+  color: #3a3f44;
+  border-radius: 2px;
+  font-size: 1rem;
+}
+
+.series-table.__error {
+  color: orangered;
+  font-size: 1.2rem;
+}
+
+.flexCol-close {
+  color: white;
+  width: fit-content;
+  padding: 0.3rem;
+  cursor: pointer;
+  float: right;
+  font-size: 1.1rem;
 }
