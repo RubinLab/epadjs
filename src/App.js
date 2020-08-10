@@ -21,6 +21,7 @@ import Cornerstone from './components/cornerstone/cornerstone';
 import Management from './components/management/mainMenu';
 import InfoMenu from './components/infoMenu';
 import UserMenu from './components/userProfileMenu.jsx';
+import WarningModal from './components/common/warningModal';
 import AnnotationList from './components/annotationsList';
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from './services/authService';
@@ -28,16 +29,28 @@ import MaxViewAlert from './components/annotationsList/maxViewPortAlert';
 import {
   clearAimId,
   getNotificationsData,
+  clearSelection,
 } from './components/annotationsList/action';
 import Worklist from './components/sideBar/sideBarWorklist';
 import ErrorBoundary from './ErrorBoundary';
-import RecistReport from './components/searchView/RecistReport.jsx';
+import Report from './components/searchView/Report.jsx';
 import { getSubjects, getSubject } from './services/subjectServices';
 import { getStudies, getStudy } from './services/studyServices';
 import { getSeries, getSingleSeries } from './services/seriesServices';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
+
+const messages = {
+  noPatient: {
+    title: 'No Patient Selected',
+    message: 'Select a patient to get a report!',
+  },
+  multiplePatient: {
+    title: 'Multiple Patients Selected',
+    message: 'Select only one patient to get the report!',
+  },
+};
 
 class App extends Component {
   constructor(props) {
@@ -63,6 +76,9 @@ class App extends Component {
       closeAll: 0,
       projectAdded: 0,
       showRecist: false,
+      showWarning: false,
+      title: '',
+      message: '',
     };
   }
 
@@ -76,9 +92,42 @@ class App extends Component {
     }));
   };
 
+  closeWarning = () => {
+    this.setState({
+      showWarning: false,
+      title: "",
+      message: "",
+    });
+  }
+
   handleRecist = () => {
-    console.log(" .... handleRecist")
-    this.setState(state => ({ showRecist: !state.showRecist }));
+    const { pid, showRecist } = this.state;
+    const patients = Object.values(this.props.selectedPatients);
+    if (showRecist) {
+      this.setState({ showRecist: false, template: null, report: null });
+      this.props.history.push(`/search/${pid}`);
+      this.props.dispatch(clearSelection());
+    } else {
+      if (patients.length === 0) {
+        this.setState({
+          showWarning: true,
+          title: messages.noPatient.title,
+          message: messages.noPatient.message,
+        });
+      } else if (patients.length > 1) {
+        this.setState({
+          showWarning: true,
+          title: messages.multiplePatient.title,
+          message: messages.multiplePatient.message,
+        });
+      } else {
+        this.setState({
+          showRecist: true,
+          template: null,
+          report: 'RECIST',
+        });
+      }
+    }
   };
 
   getTreeExpandAll = (expandObj, expanded, expandLevel) => {
@@ -734,6 +783,9 @@ class App extends Component {
       treeExpand,
       expandLevel,
       showRecist,
+      showWarning,
+      title,
+      message,
     } = this.state;
     let noOfUnseen;
     if (notifications) {
@@ -758,7 +810,6 @@ class App extends Component {
           viewType={this.state.viewType}
           notificationWarning={noOfUnseen}
           pid={this.state.pid}
-          
         />
         {this.state.openMng && (
           <Management
@@ -784,7 +835,14 @@ class App extends Component {
             admin={this.state.admin}
           />
         )}
-        {showRecist && <RecistReport />}
+        {showWarning && (
+          <WarningModal
+            onOK={this.closeWarning}
+            title={title}
+            message={message}
+          />
+        )}
+        {showRecist && <Report onClose={this.handleRecist} />}
         {!this.state.authenticated && mode !== 'lite' && (
           <Route path="/login" component={LoginForm} />
         )}
@@ -978,6 +1036,7 @@ const mapStateToProps = state => {
     activePort,
     imageID,
     openSeries,
+    selectedPatients,
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -986,6 +1045,7 @@ const mapStateToProps = state => {
     activePort,
     imageID,
     openSeries,
+    selectedPatients,
     selection: state.managementReducer.selection,
   };
 };

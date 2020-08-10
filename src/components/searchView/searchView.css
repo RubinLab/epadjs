@@ -496,3 +496,7 @@ h5.add-subject__modal--label,
 #modal-fix.modal-minwidth {
   width: 25rem;
 }
+
+#report {
+  width: 20rem;
+}

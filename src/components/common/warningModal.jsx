@@ -30,7 +30,7 @@ const warningModal = props => {
 };
 
 warningModal.propTypes = {
-  onOK: PropTypes.func,
+  onOK: PropTypes.func.isRequired,
   title: PropTypes.string,
   message: PropTypes.string
 

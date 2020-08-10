@@ -1,8 +1,12 @@
-// import $ from 'jquery/dist/jquery.js';
 import $ from 'jquery';
 import jQuery from 'jquery';
-import self from 'jquery';
-import fields from 'jquery';
+// import 'jquery-ui/ui/widgets/dialog';
+import http from '../../services/httpService';
+
+Number.prototype.times = function(fn) {
+  for (var r = [], i = 0; i < this; i++) r.push(fn(i));
+  return r;
+};
 
 var linkColor = '#ccf';
 var errorColor = 'rgb(207, 72, 88)';
@@ -30,7 +34,6 @@ let k;
 let sums;
 
 function addRow(data, text, rowData, appendText, numofHeaderCols, hideCols) {
-  console.log(rowData);
   return $('<tr/>').append(
     (rowData.length + numofHeaderCols).times(function(c) {
       if (c == 0)
@@ -82,7 +85,6 @@ function wordExport(patient) {
   exportDiv.find('th').removeAttr('style');
 
   html = exportDiv.html();
-  console.log(html);
   var date = new Date();
   var options = {
     weekday: 'short',
@@ -316,6 +318,8 @@ function filterForMeasurementTemplateShape(
 }
 
 function calcSums(filteredTable, timepoints, numofHeaderCols) {
+  console.log(' 0000000 ====> filteredTable, timepoints, numofHeaderCols');
+  console.log(filteredTable, timepoints, numofHeaderCols);
   sums = [];
   if (filteredTable[0] != null) {
     for (k = 0; k < filteredTable[0].length - numofHeaderCols; k++) {
@@ -695,20 +699,33 @@ function responseCatsTable(data, numofHeaderCols, hideCols) {
     .css('background-color', '#666666');
 }
 
-function openAllAimsOfLesion(row,patientID,projectID){
-  for (j=0;j<row.length;j++)
-      window.loadSpecific(projectID,patientID,row[j].studyUID,row[j].seriesUID,row[j].aimUID);                  
+function openAllAimsOfLesion(row, patientID, projectID) {
+  for (j = 0; j < row.length; j++)
+    window.loadSpecific(
+      projectID,
+      patientID,
+      row[j].studyUID,
+      row[j].seriesUID,
+      row[j].aimUID
+    );
 }
 
-function createLinkUrl(server,studyUID,seriesUID,aimUID,patientID,projectID){
+function createLinkUrl(
+  server,
+  studyUID,
+  seriesUID,
+  aimUID,
+  patientID,
+  projectID
+) {
   ////    url=serverUrl+'?projectID='+projectID+'&patientID='+patientID+'&studyUID='+studyUID+'&seriesUID='+seriesUID+'&aimID='+aimUID;
   //    text='projectID='+projectID+'&patientID='+patientID+'&studyUID='+studyUID+'&seriesUID='+seriesUID+'&aimID='+aimUID;
   //    var encrypted=CryptoJS.AES.encrypt(text, "bb33647e-140e-11e7-93ae-92361f002671")
   //    enc="?enc="+encodeURIComponent(encrypted.toString());
   //    url=serverUrl+enc;
   //    return url;
-    return "#";
-  }
+  return '#';
+}
 
 function checkAndColor(
   data,
@@ -875,51 +892,123 @@ function checkAndColor(
       .css('border-bottom-width', 'thick');
 }
 
-function checkAndColorNonTarget(data,patientID,projectID,recisttable,numofHeaderCols){
-  for (i=0;i<data.ntUIDs.length;i++){
-    var aNameTag = $('<a>',{href:"#"});
-      aNameTag.click({projectID:projectID,patientID:patientID,row:data.ntUIDs[i]}, function(event) {openAllAimsOfLesion(event.data.row,event.data.patientID,event.data.projectID);});
-      let txt=recisttable.find('#nc'+i+'0').text();
-      aNameTag.text(txt);// Populate the text with what's already there
-      aNameTag.css("color", linkColor);
-      aNameTag.css("text-decoration", "none");
-  //                aNameTag.attr('target', '_blank');
-      recisttable.find('#nc'+i+'0').text('').append(aNameTag);
-      for (j=0;j<data.ntUIDs[i].length;j++){
-          //put link
-          if (data.ntUIDs[i][j] != null){
-            if( data.ntTable[i][j+numofHeaderCols].toLowerCase().indexOf('progressive')!=-1 ){
-              recisttable.find('#nc'+i+(j+numofHeaderCols)).text('PrL');
-              recisttable.find('#nc'+i+(j+numofHeaderCols)).css('background-color', prlColor);
-            } else if(data.ntTable[i][j+numofHeaderCols].toLowerCase().indexOf('resolved')!=-1 ){
-              recisttable.find('#nc'+i+(j+numofHeaderCols)).text('RL');
-              recisttable.find('#nc'+i+(j+numofHeaderCols)).css('background-color', rlColor);
-            } else if( data.ntTable[i][j+numofHeaderCols].toLowerCase().indexOf('new') !=-1){
-              recisttable.find('#nc'+i+(j+numofHeaderCols)).text('NL');
-              recisttable.find('#nc'+i+(j+numofHeaderCols)).css('background-color', nlColor);
-            } else if( data.ntTable[i][j+numofHeaderCols].toLowerCase().indexOf('reappeared') !=-1){
-              recisttable.find('#nc'+i+(j+numofHeaderCols)).text('RaL');
-              recisttable.find('#nc'+i+(j+numofHeaderCols)).css('background-color', nlColor);
-            } else {
-              recisttable.find('#nc'+i+(j+numofHeaderCols)).text('PL');
-              recisttable.find('#nc'+i+(j+numofHeaderCols)).css('background-color', plColor);
-              }
-
-              var aTag = $('<a>', {href: createLinkUrl(serverUrl,data.ntUIDs[i][j].studyUID,data.ntUIDs[i][j].seriesUID,data.ntUIDs[i][j].aimUID,patientID,projectID) });
-              aTag.click({projectID:projectID,patientID:patientID,studyUID:data.ntUIDs[i][j].studyUID,seriesUID:data.ntUIDs[i][j].seriesUID,aimUID:data.ntUIDs[i][j].aimUID}, function(event) {window.loadSpecific(event.data.projectID,event.data.patientID,event.data.studyUID,event.data.seriesUID,event.data.aimUID);});
-              aTag.text(recisttable.find('#nc'+i+(j+numofHeaderCols)).text());// Populate the text with what's already there
-              aTag.css("color", linkColor);
-              aTag.css("text-decoration", "none");
-//                aTag.attr('target', '_blank');
-              recisttable.find('#nc'+i+(j+numofHeaderCols)).text('').append(aTag);
-          }
-          
-          
+function checkAndColorNonTarget(
+  data,
+  patientID,
+  projectID,
+  recisttable,
+  numofHeaderCols
+) {
+  for (i = 0; i < data.ntUIDs.length; i++) {
+    var aNameTag = $('<a>', { href: '#' });
+    aNameTag.click(
+      { projectID: projectID, patientID: patientID, row: data.ntUIDs[i] },
+      function(event) {
+        openAllAimsOfLesion(
+          event.data.row,
+          event.data.patientID,
+          event.data.projectID
+        );
       }
-      for(k=0; k<data.studyDates.length+numofHeaderCols; k++)
-        recisttable.find('#c'+(data.tUIDs.length-1)+(k)).css('border-bottom-width', 'thick');
+    );
+    let txt = recisttable.find('#nc' + i + '0').text();
+    aNameTag.text(txt); // Populate the text with what's already there
+    aNameTag.css('color', linkColor);
+    aNameTag.css('text-decoration', 'none');
+    //                aNameTag.attr('target', '_blank');
+    recisttable
+      .find('#nc' + i + '0')
+      .text('')
+      .append(aNameTag);
+    for (j = 0; j < data.ntUIDs[i].length; j++) {
+      //put link
+      if (data.ntUIDs[i][j] != null) {
+        if (
+          data.ntTable[i][j + numofHeaderCols]
+            .toLowerCase()
+            .indexOf('progressive') != -1
+        ) {
+          recisttable.find('#nc' + i + (j + numofHeaderCols)).text('PrL');
+          recisttable
+            .find('#nc' + i + (j + numofHeaderCols))
+            .css('background-color', prlColor);
+        } else if (
+          data.ntTable[i][j + numofHeaderCols]
+            .toLowerCase()
+            .indexOf('resolved') != -1
+        ) {
+          recisttable.find('#nc' + i + (j + numofHeaderCols)).text('RL');
+          recisttable
+            .find('#nc' + i + (j + numofHeaderCols))
+            .css('background-color', rlColor);
+        } else if (
+          data.ntTable[i][j + numofHeaderCols].toLowerCase().indexOf('new') !=
+          -1
+        ) {
+          recisttable.find('#nc' + i + (j + numofHeaderCols)).text('NL');
+          recisttable
+            .find('#nc' + i + (j + numofHeaderCols))
+            .css('background-color', nlColor);
+        } else if (
+          data.ntTable[i][j + numofHeaderCols]
+            .toLowerCase()
+            .indexOf('reappeared') != -1
+        ) {
+          recisttable.find('#nc' + i + (j + numofHeaderCols)).text('RaL');
+          recisttable
+            .find('#nc' + i + (j + numofHeaderCols))
+            .css('background-color', nlColor);
+        } else {
+          recisttable.find('#nc' + i + (j + numofHeaderCols)).text('PL');
+          recisttable
+            .find('#nc' + i + (j + numofHeaderCols))
+            .css('background-color', plColor);
+        }
+
+        var aTag = $('<a>', {
+          href: createLinkUrl(
+            serverUrl,
+            data.ntUIDs[i][j].studyUID,
+            data.ntUIDs[i][j].seriesUID,
+            data.ntUIDs[i][j].aimUID,
+            patientID,
+            projectID
+          ),
+        });
+        aTag.click(
+          {
+            projectID: projectID,
+            patientID: patientID,
+            studyUID: data.ntUIDs[i][j].studyUID,
+            seriesUID: data.ntUIDs[i][j].seriesUID,
+            aimUID: data.ntUIDs[i][j].aimUID,
+          },
+          function(event) {
+            window.loadSpecific(
+              event.data.projectID,
+              event.data.patientID,
+              event.data.studyUID,
+              event.data.seriesUID,
+              event.data.aimUID
+            );
+          }
+        );
+        aTag.text(recisttable.find('#nc' + i + (j + numofHeaderCols)).text()); // Populate the text with what's already there
+        aTag.css('color', linkColor);
+        aTag.css('text-decoration', 'none');
+        //                aTag.attr('target', '_blank');
+        recisttable
+          .find('#nc' + i + (j + numofHeaderCols))
+          .text('')
+          .append(aTag);
+      }
+    }
+    for (k = 0; k < data.studyDates.length + numofHeaderCols; k++)
+      recisttable
+        .find('#c' + (data.tUIDs.length - 1) + k)
+        .css('border-bottom-width', 'thick');
   }
-} 
+}
 
 function fillInTables(
   data,
@@ -964,6 +1053,7 @@ function fillInTables(
   table.append(
     makeTable(data, filteredTable, modality, numofHeaderCols, hideCols)
   );
+
   if (data.ntTable != null) {
     table.append(MakeTableNonTarget(data, numofHeaderCols, hideCols));
   }
@@ -975,9 +1065,8 @@ function fillInTables(
   recisttable.find('#tables').empty();
   recisttable
     .find('#tables')
-    .attr('class', 'w3-responsive')
+    // .attr('class', 'w3-responsive')
     .append(table);
-  //
   recisttable.find('th').css('border-left', 'solid 2px ' + textColor);
   recisttable.find('td').css('border-left', 'solid 2px ' + textColor);
   checkAndColor(data, patId, projectId, recisttable, numofHeaderCols);
@@ -993,46 +1082,47 @@ function fillInTables(
   recisttable.find('th').css('color', 'white');
   recisttable.find('tr').css('line-height', 0.5);
   recisttable.find('.header').css('line-height', 0.2);
-
+  return recisttable;
   ////    remove for whole page without dialog. uncomment these
-  recisttable.dialog('open');
+  // recisttable.dialog('open');
 }
 
-function filterAndFillInTables(
-  data,
-  table,
-  patId,
-  projectId,
-  recisttable,
-  numofHeaderCols,
-  hideCols
-) {
-  var filter = recisttable.find('#filter');
-  var templateFilter = recisttable.find('#templateFilter');
-  var shapesFilter = recisttable.find('#shapesFilter');
-  let filteredTable = filterForMeasurementTemplateShape(
-    data,
-    table,
-    filter.val(),
-    data.tUIDs,
-    templateFilter.val(),
-    shapesFilter.val(),
-    numofHeaderCols
-  );
-  let shrinkedData;
-  shrinkedData = shrinkTable(filteredTable, data, numofHeaderCols);
-  //filter change should calculate everything
-  shrinkedData = makeCalcs(shrinkedData, numofHeaderCols);
-  fillInTables(
-    shrinkedData,
-    shrinkedData.tTable,
-    patId,
-    projectId,
-    recisttable,
-    numofHeaderCols,
-    hideCols
-  );
-}
+// function filterAndFillInTables(
+//   data,
+//   table,
+//   patId,
+//   projectId,
+//   recisttable,
+//   numofHeaderCols,
+//   hideCols
+// ) {
+//   var filter = recisttable.find('#filter');
+//   var templateFilter = recisttable.find('#templateFilter');
+//   var shapesFilter = recisttable.find('#shapesFilter');
+//   let filteredTable = filterForMeasurementTemplateShape(
+//     data,
+//     table,
+//     filter.val(),
+//     data.tUIDs,
+//     templateFilter.val(),
+//     shapesFilter.val(),
+//     numofHeaderCols
+//   );
+//   let shrinkedData;
+//   shrinkedData = shrinkTable(filteredTable, data, numofHeaderCols);
+//   //filter change should calculate everything
+//   shrinkedData = makeCalcs(shrinkedData, numofHeaderCols);
+//   recisttable = fillInTables(
+//     shrinkedData,
+//     shrinkedData.tTable,
+//     patId,
+//     projectId,
+//     recisttable,
+//     numofHeaderCols,
+//     hideCols
+//   );
+//   return recisttable;
+// }
 
 function makeCalcs(shrinkedData, numofHeaderCols) {
   shrinkedData.tSums = calcSums(
@@ -1057,20 +1147,13 @@ function makeCalcs(shrinkedData, numofHeaderCols) {
   return shrinkedData;
 }
 
-function prettyShape(value){
-	if (value.toLowerCase().includes("multipoint"))
-		return "Line";
-	if (value.toLowerCase().includes("polyline"))
-		return "Polygon";
-	if (value.toLowerCase().includes("spline"))
-		return "Spline";
-	if (value.toLowerCase().includes("circle"))
-		return "Circle";
-	if (value.toLowerCase().includes("point"))
-		return "Point";
-	if (value.toLowerCase().includes("ellipse"))
-		return "Perpendicular";
-	
+function prettyShape(value) {
+  if (value.toLowerCase().includes('multipoint')) return 'Line';
+  if (value.toLowerCase().includes('polyline')) return 'Polygon';
+  if (value.toLowerCase().includes('spline')) return 'Spline';
+  if (value.toLowerCase().includes('circle')) return 'Circle';
+  if (value.toLowerCase().includes('point')) return 'Point';
+  if (value.toLowerCase().includes('ellipse')) return 'Perpendicular';
 }
 
 function fillFilterSelect(
@@ -1161,7 +1244,7 @@ function fillFilterSelect(
   if (shrinkedData.tSums == null) {
     shrinkedData = makeCalcs(shrinkedData, numofHeaderCols);
   }
-  fillInTables(
+  recisttable = fillInTables(
     shrinkedData,
     shrinkedData.tTable,
     patId,
@@ -1176,112 +1259,57 @@ function fillFilterSelect(
     shapesFilter.hide();
   }
 
-  filter.change(function() {
-    filterAndFillInTables(
-      data,
-      data.tTable,
-      patId,
-      projectId,
-      recisttable,
-      numofHeaderCols,
-      hideCols
-    );
-  });
+  // filter.change(function() {
+  //   recisttable = filterAndFillInTables(
+  //     data,
+  //     data.tTable,
+  //     patId,
+  //     projectId,
+  //     recisttable,
+  //     numofHeaderCols,
+  //     hideCols
+  //   );
+  // });
 
-  templateFilter.change(function() {
-    filterAndFillInTables(
-      data,
-      data.tTable,
-      patId,
-      projectId,
-      recisttable,
-      numofHeaderCols,
-      hideCols
-    );
-  });
+  // templateFilter.change(function() {
+  //   recisttable = filterAndFillInTables(
+  //     data,
+  //     data.tTable,
+  //     patId,
+  //     projectId,
+  //     recisttable,
+  //     numofHeaderCols,
+  //     hideCols
+  //   );
+  // });
 
-  shapesFilter.change(function() {
-    filterAndFillInTables(
-      data,
-      data.tTable,
-      patId,
-      projectId,
-      recisttable,
-      numofHeaderCols,
-      hideCols
-    );
-  });
+  // shapesFilter.change(function() {
+  //   recisttable = filterAndFillInTables(
+  //     data,
+  //     data.tTable,
+  //     patId,
+  //     projectId,
+  //     recisttable,
+  //     numofHeaderCols,
+  //     hideCols
+  //   );
+  // });
+  return recisttable;
 }
 
-function getReport(
-  serverUrl,
-  patId,
-  projectId,
-  recisttable,
-  filter,
-  numofHeaderCols,
-  hidecols,
-  loadFilter
-) {
-  //  recisttable.find('#patient').text('Patient '+patId).css('color','#4489c4');
-
-  //     var data=JSON.parse(reportDataJson);
-  //     fillFilterSelect(data,data.tTable,patId,projectId);
-
-  $.ajax({
-    type: 'GET',
-    url:
-      serverUrl +
-      'v2/projects/' +
-      projectId +
-      '/subjects/' +
-      patId +
-      '/aims/?' +
-      filter,
-    dataType: 'json',
-    data: null,
-    xhrFields: {
-      withCredentials: true,
-    },
-    cache: false,
-    error: function(jqXHR, textStatus, errorThrown) {
-      alert(
-        JSON.stringify(jqXHR) +
-          ' status:' +
-          textStatus +
-          ' error:' +
-          errorThrown
-      );
-    },
-    success: function(data) {
-      fillFilterSelect(
-        data,
-        data.tTable,
-        patId,
-        projectId,
-        recisttable,
-        numofHeaderCols,
-        hidecols,
-        loadFilter
-      );
-    },
-  });
-}
-
-export function renderTable(
-  serverUrl,
+export async function renderTable(
   id,
   patId,
   projectId,
   report,
-  template,
-  data
+  data,
+  numofHeaderCols,
+  hidecols,
+  loadFilter
 ) {
   //check the existing ids and create a unique id for this recist table
-  console.log('this is called!!!');
   // var id = 'recisttbl';
   var recisttable = null;
-  console.log('id passed', id);
   i = 0;
   while ((recisttable = document.getElementById('recisttbl' + i)) !== null) {
     i++;
@@ -1293,40 +1321,13 @@ export function renderTable(
   recisttable.html(
     '<div id="' +
       id +
+      //  'class="recistingTest"' +
       '" title="' +
       report +
       '"  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:80%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="filter"><option>Choose to filter</option></select>&nbsp;<button class="w3-btn w3-tiny w3-round-large recistWhitetext" id="exportBtn">Export</button></h6></div><div id="docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>'
   );
   var reportText = report;
-  const table = $(`#${id}`);
-  console.log('recisttable', recisttable);
-  console.log('table', table);
-
   if (reportText === 'RECIST') reportText = 'Tumor Burden';
-  recisttable.dialog({
-    autoOpen: false,
-    width: 'auto',
-    minWidth: 300,
-    maxHeight: 800,
-    resizable: true,
-    title: 'Patient ' + patId + ' ' + reportText + ' Report',
-    beforeClose: function myCloseDialog() {
-      recisttable.remove();
-    },
-  });
-  recisttable.dialogExtend({
-    closable: true, // enable/disable close button
-    maximizable: true, // enable/disable maximize button
-    minimizable: true, // enable/disable minimize button
-    minimizeLocation: 'right', // sets alignment of minimized dialogues
-    icons: {
-      // jQuery UI icon class
-      close: 'ui-icon-close',
-      maximize: 'ui-icon-plus',
-      minimize: 'ui-icon-minus',
-      restore: 'ui-bullet',
-    },
-  });
 
   recisttable
     .find('#baseline')
@@ -1344,46 +1345,18 @@ export function renderTable(
   recisttable.find('#resolved').css('background-color', resolvedColor);
   recisttable.find('#nontarget').css('background-color', nontargetColor);
   recisttable.find('#error').css('background-color', errorColor);
-  let filter = '';
-  let loadFilter = '';
-  let numofHeaderCols;
-  let hideCols;
-  if (report === 'RECIST') {
-    filter = 'report=RECIST';
-    numofHeaderCols = 3;
-    hideCols = [1];
-  } else if (report === 'ADLA') {
-    filter = 'report=Longitudinal&shapes=line';
-    loadFilter = 'shapes=line&metric=standard deviation';
-    numofHeaderCols = 2;
-    hideCols = [];
-  } else {
-    filter = 'report=Longitudinal';
-    if (report != 'Longitudinal') loadFilter = 'metric=' + report;
-    if (template != null) filter += '&templatecode=' + template;
-    numofHeaderCols = 2;
-    hideCols = [];
-  }
-  // getReport(
-  //   serverUrl,
-  //   patId,
-  //   projectId,
-  //   recisttable,
-  //   filter,
-  //   numofHeaderCols,
-  //   hideCols,
-  //   loadFilter
-  // );
-  fillFilterSelect(
+
+  recisttable = fillFilterSelect(
     data,
     data.tTable,
     patId,
     projectId,
     recisttable,
     numofHeaderCols,
-    hideCols,
+    hidecols,
     loadFilter
   );
+
   $('.ui-dialog-titlebar').css('background', '#4d4d4d');
   $('.ui-dialog-titlebar').css('padding', 0);
   $('.ui-dialog-titlebar').css('text-overflow', 'none');
@@ -1391,9 +1364,7 @@ export function renderTable(
   $('.ui-dialog-content').css('padding', 0);
   $('.ui-widget-header').css('border', 0);
   $('.ui-widget-header').removeClass('ui-corner-all');
+
   recisttable.find('td').css('text-align', 'center');
-  window.exportBtn.onclick = function() {
-    wordExport(patId);
-  };
-  //    recisttable.find('#patientHeader').height('30px').css('font-size','110%');
+  return recisttable.html();
 }
