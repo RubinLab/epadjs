@@ -79,13 +79,12 @@ const NavBar = ({
                 </li> */}
                 <li
                   className="nav-item"
+                  id="navbarReports"
                   onClick={() => {
                     onRecist();
                   }}
                 >
-                  <NavLink className="nav-link" to="/tools">
-                    Tools
-                  </NavLink>
+                    Reports
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" to="/edit">

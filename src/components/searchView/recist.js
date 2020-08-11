@@ -1,7 +1,6 @@
 import $ from 'jquery';
 import jQuery from 'jquery';
-// import 'jquery-ui/ui/widgets/dialog';
-import http from '../../services/httpService';
+
 
 Number.prototype.times = function(fn) {
   for (var r = [], i = 0; i < this; i++) r.push(fn(i));
@@ -483,6 +482,7 @@ function makeTable(data, filteredTable, modality, numofHeaderCols, hideCols) {
       if (c == 0)
         return $('<th/>')
           .text('Lesion Name')
+          .addClass('report-table__header')
           .attr('rowspan', 3)
           .css('vertical-align', 'middle')
           .css('border-bottom', 'solid 1px #4d4d4d')
@@ -490,6 +490,7 @@ function makeTable(data, filteredTable, modality, numofHeaderCols, hideCols) {
       if (hideCols.indexOf(c) != -1) return '';
       if (c == numofHeaderCols - 1)
         return $('<th/>')
+          .addClass('report-table__header')
           .text('Location')
           .attr('rowspan', 3)
           .css('vertical-align', 'middle')
@@ -552,7 +553,7 @@ function makeTable(data, filteredTable, modality, numofHeaderCols, hideCols) {
     );
   };
 
-  return $('<tbody/>')
+  return $('<tbody/>').addClass("report-table__body")
     .append($('<tr/>').append(timepointheader))
     .append($('<tr/>').append(header))
     .append(
@@ -1080,8 +1081,8 @@ function fillInTables(
     );
   }
   recisttable.find('th').css('color', 'white');
-  recisttable.find('tr').css('line-height', 0.5);
-  recisttable.find('.header').css('line-height', 0.2);
+  // recisttable.find('tr').css('line-height', 0.5);
+  // recisttable.find('.header').css('line-height', 0.2);
   return recisttable;
   ////    remove for whole page without dialog. uncomment these
   // recisttable.dialog('open');
@@ -1305,7 +1306,8 @@ export async function renderTable(
   data,
   numofHeaderCols,
   hidecols,
-  loadFilter
+  loadFilter,
+  onClose
 ) {
   //check the existing ids and create a unique id for this recist table
   // var id = 'recisttbl';
@@ -1324,8 +1326,10 @@ export async function renderTable(
       //  'class="recistingTest"' +
       '" title="' +
       report +
-      '"  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:80%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="filter"><option>Choose to filter</option></select>&nbsp;<button class="w3-btn w3-tiny w3-round-large recistWhitetext" id="exportBtn">Export</button></h6></div><div id="docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>'
-  );
+      // '"  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:100%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="filter"><option>Choose to filter</option></select>&nbsp;<button class="w3-btn w3-tiny w3-round-large recistWhitetext" id="exportBtn">Export</button></h6></div><div id="docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>'
+      '"  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:100%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="filter"><option>Choose to filter</option></select>&nbsp;<button class="w3-btn w3-tiny w3-round-large recistWhitetext" id="exportBtn">Export</button><button class="w3-btn w3-round-large recistWhitetext" id="closeBtn">&#215</button></h6></div><div id="docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>'
+
+      );
   var reportText = report;
   if (reportText === 'RECIST') reportText = 'Tumor Burden';
 

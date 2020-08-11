@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import ReactHtmlParser from 'react-html-parser';
 import Draggable from 'react-draggable';
-import Modal from 'react-bootstrap/Modal';
+import { FaTimes } from 'react-icons/fa';
 import { renderTable } from './recist';
 import { getReport } from '../../services/annotationServices';
 
+const style = { overflow: 'scroll' };
 const Report = props => {
-  const [data, setData] = useState({});
   const [node, setNode] = useState(null);
 
   const getTableArguments = () => {
@@ -50,6 +50,10 @@ const Report = props => {
     };
   };
 
+  const onClose = () => {
+    props.onClose();
+  }
+
   const getReportTable = async data => {
     try {
       const {
@@ -70,7 +74,8 @@ const Report = props => {
           data,
           numofHeaderCols,
           hideCols,
-          loadFilter
+          loadFilter,
+          onClose
         );
         reportTable = ReactHtmlParser(reportTable);
         setNode(reportTable);
@@ -80,12 +85,10 @@ const Report = props => {
     }
   };
   useEffect(() => {
-    // console.log(reportNode)
     const { projectID, patientID, filter } = getTableArguments();
     async function fetchData() {
       try {
         const result = await getReport(projectID, patientID, filter);
-        setData(result.data);
         getReportTable(result.data);
       } catch (err) {
         console.error(err);
@@ -94,12 +97,18 @@ const Report = props => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const closeBtn = document.getElementById('closeBtn');
+    if (closeBtn) closeBtn.addEventListener('click', onClose);
+    return () => {
+      if (closeBtn) closeBtn.removeEventListener('click', onClose);
+    };
+  }, [onClose]);
+
   return (
-    // <Draggable>
-    // <Modal>
+    <Draggable>
       <div id="report">{node}</div>
-    // </Modal>
-    // </Draggable>
+    </Draggable>
   );
 };
 

@@ -95,10 +95,10 @@ class App extends Component {
   closeWarning = () => {
     this.setState({
       showWarning: false,
-      title: "",
-      message: "",
+      title: '',
+      message: '',
     });
-  }
+  };
 
   handleRecist = () => {
     const { pid, showRecist } = this.state;
@@ -842,7 +842,9 @@ class App extends Component {
             message={message}
           />
         )}
-        {showRecist && <Report onClose={this.handleRecist} />}
+        {showRecist && (
+          <Report onClose={this.handleRecist} onClose={this.handleRecist} />
+        )}
         {!this.state.authenticated && mode !== 'lite' && (
           <Route path="/login" component={LoginForm} />
         )}

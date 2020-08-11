@@ -498,5 +498,17 @@ h5.add-subject__modal--label,
 }
 
 #report {
-  width: 20rem;
+  overflow: auto;
+  /* max-width: fit-content; */
+  /* min-width: 500px; */
+  position: absolute;
+  z-index: 15;
+  left: 15%;
+  top: 15%;
+  background-color: rgb(102, 102, 102);
+}
+
+#closeBtn {
+  font-size: medium;
+  margin-left: 0.3rem;
 }
