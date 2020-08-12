@@ -10,7 +10,7 @@ const NavBar = ({
   openGearMenu,
   openInfoMenu,
   openUser,
-  onRecist,
+  onReports,
   logout,
   onSearchViewClick,
   onSwitchView,
@@ -81,7 +81,7 @@ const NavBar = ({
                   className="nav-item"
                   id="navbarReports"
                   onClick={() => {
-                    onRecist();
+                    onReports();
                   }}
                 >
                     Reports

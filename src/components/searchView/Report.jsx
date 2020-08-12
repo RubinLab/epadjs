@@ -14,7 +14,7 @@ const Report = props => {
     const patients = Object.values(props.selectedPatients);
     const { projectID, patientID } = patients[0];
     // const report = props.report;
-    const report = 'RECIST';
+    const report = props.report;
     const template = report === 'RECIST' ? null : props.template;
     const id = 'recisttbl';
     // const report = "RECIST";

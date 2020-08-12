@@ -22,6 +22,7 @@ import Management from './components/management/mainMenu';
 import InfoMenu from './components/infoMenu';
 import UserMenu from './components/userProfileMenu.jsx';
 import WarningModal from './components/common/warningModal';
+import SelectModalMenu from './components/common/SelectModalMenu';
 import AnnotationList from './components/annotationsList';
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from './services/authService';
@@ -52,6 +53,12 @@ const messages = {
   },
 };
 
+const reportsList = [
+  { name: 'ADLA' },
+  { name: 'Longitudinal' },
+  { name: 'RECIST' },
+  { name: 'Waterfall' },
+];
 class App extends Component {
   constructor(props) {
     super(props);
@@ -75,8 +82,9 @@ class App extends Component {
       pid: null,
       closeAll: 0,
       projectAdded: 0,
-      showRecist: false,
+      showReport: false,
       showWarning: false,
+      showReportsMenu: false,
       title: '',
       message: '',
     };
@@ -100,33 +108,36 @@ class App extends Component {
     });
   };
 
-  handleRecist = () => {
-    const { pid, showRecist } = this.state;
+  handleReportsClick = () => {
+    this.setState(state => ({ showReportsMenu: !state.showReportsMenu }));
+  };
+
+  closeReportModal = () => {
+    this.setState({ showReport: false, template: null, report: null });
+    this.props.dispatch(clearSelection());
+  };
+
+  handleReportSelect = e => {
     const patients = Object.values(this.props.selectedPatients);
-    if (showRecist) {
-      this.setState({ showRecist: false, template: null, report: null });
-      this.props.history.push(`/search/${pid}`);
-      this.props.dispatch(clearSelection());
+    this.handleReportsClick();
+    if (patients.length === 0) {
+      this.setState({
+        showWarning: true,
+        title: messages.noPatient.title,
+        message: messages.noPatient.message,
+      });
+    } else if (patients.length > 1) {
+      this.setState({
+        showWarning: true,
+        title: messages.multiplePatient.title,
+        message: messages.multiplePatient.message,
+      });
     } else {
-      if (patients.length === 0) {
-        this.setState({
-          showWarning: true,
-          title: messages.noPatient.title,
-          message: messages.noPatient.message,
-        });
-      } else if (patients.length > 1) {
-        this.setState({
-          showWarning: true,
-          title: messages.multiplePatient.title,
-          message: messages.multiplePatient.message,
-        });
-      } else {
-        this.setState({
-          showRecist: true,
-          template: null,
-          report: 'RECIST',
-        });
-      }
+      this.setState({
+        showReport: true,
+        template: null,
+        report: e.target.dataset.opt,
+      });
     }
   };
 
@@ -781,11 +792,12 @@ class App extends Component {
       mode,
       progressUpdated,
       treeExpand,
-      expandLevel,
-      showRecist,
+      showReportsMenu,
+      showReport,
       showWarning,
       title,
       message,
+      report
     } = this.state;
     let noOfUnseen;
     if (notifications) {
@@ -803,7 +815,7 @@ class App extends Component {
           openGearMenu={this.handleMngMenu}
           openInfoMenu={this.handleInfoMenu}
           openUser={this.handleUserProfileMenu}
-          onRecist={this.handleRecist}
+          onReports={this.handleReportsClick}
           logout={this.onLogout}
           onSearchViewClick={this.switchSearhView}
           onSwitchView={this.switchView}
@@ -811,6 +823,12 @@ class App extends Component {
           notificationWarning={noOfUnseen}
           pid={this.state.pid}
         />
+        {showReportsMenu && (
+          <SelectModalMenu
+            list={reportsList}
+            onClick={this.handleReportSelect}
+          />
+        )}
         {this.state.openMng && (
           <Management
             closeMenu={this.closeMenu}
@@ -842,9 +860,7 @@ class App extends Component {
             message={message}
           />
         )}
-        {showRecist && (
-          <Report onClose={this.handleRecist} onClose={this.handleRecist} />
-        )}
+        {showReport && <Report onClose={this.closeReportModal} report={report} />}
         {!this.state.authenticated && mode !== 'lite' && (
           <Route path="/login" component={LoginForm} />
         )}

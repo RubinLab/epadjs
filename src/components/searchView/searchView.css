@@ -206,6 +206,7 @@
 }
 
 .new-popup,
+.selectModalMenu,
 .worklist-popup,
 .projects-popup {
   z-index: 15;
@@ -227,7 +228,8 @@
 
 .new-popup__option,
 .worklist__option,
-.project__option {
+.project__option,
+.selectModalMenu__option {
   width: 100%;
   padding: 0.3rem;
   cursor: pointer;
@@ -238,7 +240,8 @@
 
 .new-popup__option:hover,
 .worklist__option:hover,
-.project__option:hover {
+.project__option:hover,
+.selectModalMenu__option:hover {
   color: whitesmoke;
   background: #70142e;
 }
