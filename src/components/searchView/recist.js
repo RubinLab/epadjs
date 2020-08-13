@@ -1,7 +1,6 @@
 import $ from 'jquery';
 import jQuery from 'jquery';
 
-
 Number.prototype.times = function(fn) {
   for (var r = [], i = 0; i < this; i++) r.push(fn(i));
   return r;
@@ -317,8 +316,8 @@ function filterForMeasurementTemplateShape(
 }
 
 function calcSums(filteredTable, timepoints, numofHeaderCols) {
-  console.log(' 0000000 ====> filteredTable, timepoints, numofHeaderCols');
-  console.log(filteredTable, timepoints, numofHeaderCols);
+  // console.log(' 0000000 ====> filteredTable, timepoints, numofHeaderCols');
+  // console.log(filteredTable, timepoints, numofHeaderCols);
   sums = [];
   if (filteredTable[0] != null) {
     for (k = 0; k < filteredTable[0].length - numofHeaderCols; k++) {
@@ -553,7 +552,8 @@ function makeTable(data, filteredTable, modality, numofHeaderCols, hideCols) {
     );
   };
 
-  return $('<tbody/>').addClass("report-table__body")
+  return $('<tbody/>')
+    .addClass('report-table__body')
     .append($('<tr/>').append(timepointheader))
     .append($('<tr/>').append(header))
     .append(
@@ -1088,42 +1088,43 @@ function fillInTables(
   // recisttable.dialog('open');
 }
 
-// function filterAndFillInTables(
-//   data,
-//   table,
-//   patId,
-//   projectId,
-//   recisttable,
-//   numofHeaderCols,
-//   hideCols
-// ) {
-//   var filter = recisttable.find('#filter');
-//   var templateFilter = recisttable.find('#templateFilter');
-//   var shapesFilter = recisttable.find('#shapesFilter');
-//   let filteredTable = filterForMeasurementTemplateShape(
-//     data,
-//     table,
-//     filter.val(),
-//     data.tUIDs,
-//     templateFilter.val(),
-//     shapesFilter.val(),
-//     numofHeaderCols
-//   );
-//   let shrinkedData;
-//   shrinkedData = shrinkTable(filteredTable, data, numofHeaderCols);
-//   //filter change should calculate everything
-//   shrinkedData = makeCalcs(shrinkedData, numofHeaderCols);
-//   recisttable = fillInTables(
-//     shrinkedData,
-//     shrinkedData.tTable,
-//     patId,
-//     projectId,
-//     recisttable,
-//     numofHeaderCols,
-//     hideCols
-//   );
-//   return recisttable;
-// }
+function filterAndFillInTables(
+  data,
+  table,
+  patId,
+  projectId,
+  recisttable,
+  numofHeaderCols,
+  hideCols
+) {
+  console.log(" --->>> Should see this");
+  var filter = recisttable.find('#filter');
+  var templateFilter = recisttable.find('#templateFilter');
+  var shapesFilter = recisttable.find('#shapesFilter');
+  let filteredTable = filterForMeasurementTemplateShape(
+    data,
+    table,
+    filter.val(),
+    data.tUIDs,
+    templateFilter.val(),
+    shapesFilter.val(),
+    numofHeaderCols
+  );
+  let shrinkedData;
+  shrinkedData = shrinkTable(filteredTable, data, numofHeaderCols);
+  //filter change should calculate everything
+  shrinkedData = makeCalcs(shrinkedData, numofHeaderCols);
+  recisttable = fillInTables(
+    shrinkedData,
+    shrinkedData.tTable,
+    patId,
+    projectId,
+    recisttable,
+    numofHeaderCols,
+    hideCols
+  );
+  return recisttable;
+}
 
 function makeCalcs(shrinkedData, numofHeaderCols) {
   shrinkedData.tSums = calcSums(
@@ -1260,6 +1261,16 @@ function fillFilterSelect(
     shapesFilter.hide();
   }
 
+  recisttable = filterAndFillInTables(
+    data,
+    data.tTable,
+    patId,
+    projectId,
+    recisttable,
+    numofHeaderCols,
+    hideCols
+  );
+
   // filter.change(function() {
   //   recisttable = filterAndFillInTables(
   //     data,
@@ -1328,8 +1339,7 @@ export async function renderTable(
       report +
       // '"  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:100%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="filter"><option>Choose to filter</option></select>&nbsp;<button class="w3-btn w3-tiny w3-round-large recistWhitetext" id="exportBtn">Export</button></h6></div><div id="docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>'
       '"  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:100%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="filter"><option>Choose to filter</option></select>&nbsp;<button class="w3-btn w3-tiny w3-round-large recistWhitetext" id="exportBtn">Export</button><button class="w3-btn w3-round-large recistWhitetext" id="closeBtn">&#215</button></h6></div><div id="docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>'
-
-      );
+  );
   var reportText = report;
   if (reportText === 'RECIST') reportText = 'Tumor Burden';
 

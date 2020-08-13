@@ -5,16 +5,24 @@ import Draggable from 'react-draggable';
 import { FaTimes } from 'react-icons/fa';
 import { renderTable } from './recist';
 import { getReport } from '../../services/annotationServices';
+import { setMetadata } from '../../cornerstone-tools/store/modules/segmentationModule/metadata';
 
 const style = { overflow: 'scroll' };
 const Report = props => {
   const [node, setNode] = useState(null);
+  const [data, setData] = useState([])
+
+  // create filter default values
+  // add event handler with change set state
+
+  // in recist set default values in filter method
+  // and if all three are not default or changed flag is true
 
   const getTableArguments = () => {
     const patients = Object.values(props.selectedPatients);
     const { projectID, patientID } = patients[0];
     // const report = props.report;
-    const report = props.report;
+    const { report } = props;
     const template = report === 'RECIST' ? null : props.template;
     const id = 'recisttbl';
     // const report = "RECIST";
@@ -52,7 +60,7 @@ const Report = props => {
 
   const onClose = () => {
     props.onClose();
-  }
+  };
 
   const getReportTable = async data => {
     try {
@@ -84,12 +92,14 @@ const Report = props => {
       console.error(err);
     }
   };
+
   useEffect(() => {
     const { projectID, patientID, filter } = getTableArguments();
     async function fetchData() {
       try {
         const result = await getReport(projectID, patientID, filter);
         getReportTable(result.data);
+        setData(result.data);
       } catch (err) {
         console.error(err);
       }
@@ -97,13 +107,32 @@ const Report = props => {
     fetchData();
   }, []);
 
+  const handleFilterSelect = e => {
+    getReportTable(data);
+  };
+
   useEffect(() => {
     const closeBtn = document.getElementById('closeBtn');
+    const shapesFilter = document.getElementById('shapesFilter');
+    const templateFilter = document.getElementById('templateFilter');
+    const filter = document.getElementById('filter');
+
     if (closeBtn) closeBtn.addEventListener('click', onClose);
+    if (shapesFilter)
+      shapesFilter.addEventListener('change', handleFilterSelect);
+    if (templateFilter)
+      templateFilter.addEventListener('change', handleFilterSelect);
+    if (filter) filter.addEventListener('change', handleFilterSelect);
+
     return () => {
       if (closeBtn) closeBtn.removeEventListener('click', onClose);
+      if (shapesFilter)
+        shapesFilter.removeEventListener('change', handleFilterSelect);
+      if (templateFilter)
+        templateFilter.removeEventListener('change', handleFilterSelect);
+      if (filter) filter.removeEventListener('change', handleFilterSelect);
     };
-  }, [onClose]);
+  }, [onClose, handleFilterSelect]);
 
   return (
     <Draggable>

@@ -119,6 +119,7 @@ class App extends Component {
 
   handleReportSelect = e => {
     const patients = Object.values(this.props.selectedPatients);
+    
     this.handleReportsClick();
     if (patients.length === 0) {
       this.setState({
