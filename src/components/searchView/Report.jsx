@@ -10,7 +10,7 @@ import { setMetadata } from '../../cornerstone-tools/store/modules/segmentationM
 const style = { overflow: 'scroll' };
 const Report = props => {
   const [node, setNode] = useState(null);
-  const [data, setData] = useState([])
+  const [data, setData] = useState([]);
 
   // create filter default values
   // add event handler with change set state
@@ -111,6 +111,10 @@ const Report = props => {
     getReportTable(data);
   };
 
+  const stopProp = e => {
+    e.stopPropagation();
+  };
+
   useEffect(() => {
     const closeBtn = document.getElementById('closeBtn');
     const shapesFilter = document.getElementById('shapesFilter');
@@ -118,21 +122,35 @@ const Report = props => {
     const filter = document.getElementById('filter');
 
     if (closeBtn) closeBtn.addEventListener('click', onClose);
-    if (shapesFilter)
+    if (shapesFilter) {
       shapesFilter.addEventListener('change', handleFilterSelect);
-    if (templateFilter)
+      shapesFilter.addEventListener('mousedown', stopProp);
+    }
+    if (templateFilter) {
       templateFilter.addEventListener('change', handleFilterSelect);
-    if (filter) filter.addEventListener('change', handleFilterSelect);
+      templateFilter.addEventListener('mousedown', stopProp);
+    }
+    if (filter) {
+      filter.addEventListener('change', handleFilterSelect);
+      filter.addEventListener('mousedown', stopProp);
+    }
 
     return () => {
       if (closeBtn) closeBtn.removeEventListener('click', onClose);
-      if (shapesFilter)
+      if (shapesFilter) {
         shapesFilter.removeEventListener('change', handleFilterSelect);
-      if (templateFilter)
+        shapesFilter.removeEventListener('mousedown', stopProp);
+      }
+      if (templateFilter) {
         templateFilter.removeEventListener('change', handleFilterSelect);
-      if (filter) filter.removeEventListener('change', handleFilterSelect);
+        templateFilter.removeEventListener('mousedown', stopProp);
+      }
+      if (filter) {
+        filter.removeEventListener('change', handleFilterSelect);
+        filter.removeEventListener('mousedown', stopProp);
+      }
     };
-  }, [onClose, handleFilterSelect]);
+  }, [onClose, handleFilterSelect, stopProp]);
 
   return (
     <Draggable>

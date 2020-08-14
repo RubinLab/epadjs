@@ -1097,17 +1097,23 @@ function filterAndFillInTables(
   numofHeaderCols,
   hideCols
 ) {
-  console.log(" --->>> Should see this");
-  var filter = recisttable.find('#filter');
-  var templateFilter = recisttable.find('#templateFilter');
-  var shapesFilter = recisttable.find('#shapesFilter');
+  let filterVal = 'length';
+  let templateFilterVal = 'All';
+  let shapesFilterVal = 'All';
+  const filter = document.getElementById('filter');
+  const templateFilter = document.getElementById('templateFilter');
+  const shapesFilter = document.getElementById('shapesFilter');
+  if (filter) filterVal = filter.value;
+  if (templateFilter) templateFilterVal = templateFilter.value;
+  if (shapesFilter) shapesFilterVal = shapesFilter.value;
+
   let filteredTable = filterForMeasurementTemplateShape(
     data,
     table,
-    filter.val(),
+    filterVal,
     data.tUIDs,
-    templateFilter.val(),
-    shapesFilter.val(),
+    templateFilterVal,
+    shapesFilterVal,
     numofHeaderCols
   );
   let shrinkedData;
