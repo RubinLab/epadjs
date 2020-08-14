@@ -4,6 +4,7 @@ import ReactHtmlParser from 'react-html-parser';
 import Draggable from 'react-draggable';
 import { FaTimes } from 'react-icons/fa';
 import { renderTable } from './recist';
+import { drawWaterfall } from './waterfall';
 import { getReport } from '../../services/annotationServices';
 import { setMetadata } from '../../cornerstone-tools/store/modules/segmentationModule/metadata';
 
@@ -39,7 +40,7 @@ const Report = props => {
       loadFilter = 'shapes=line&metric=standard deviation';
       numofHeaderCols = 2;
       hideCols = [];
-    } else {
+    } else if (report === 'Longitudinal') {
       filter = 'report=Longitudinal';
       if (report != 'Longitudinal') loadFilter = 'metric=' + report;
       if (template != null) filter += '&templatecode=' + template;
@@ -95,11 +96,15 @@ const Report = props => {
 
   useEffect(() => {
     const { projectID, patientID, filter } = getTableArguments();
+    console.log(props.report)
     async function fetchData() {
       try {
-        const result = await getReport(projectID, patientID, filter);
-        getReportTable(result.data);
-        setData(result.data);
+        if (props.report === 'Waterfall') {
+        } else {
+          const result = await getReport(projectID, patientID, filter);
+          getReportTable(result.data);
+          setData(result.data);
+        }
       } catch (err) {
         console.error(err);
       }
