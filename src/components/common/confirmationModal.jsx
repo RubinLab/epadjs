@@ -2,7 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 
-const warningModal = props => {
+
+const confirmationModal = props => {
   return (
     // <Modal.Dialog dialogClassName="alert-maxView">
     <Modal.Dialog id="modal-fix">
@@ -18,20 +19,28 @@ const warningModal = props => {
       <Modal.Footer className="modal-footer__buttons">
         <button
           variant="secondary"
-          onClick={props.onOK}
+          onClick={props.onSubmit}
         >
-          OK
+          {props.button || "Submit"}
+        </button>
+        <button
+          variant="secondary"
+          onClick={props.onCancel}
+        >
+          Cancel
         </button>
       </Modal.Footer>
     </Modal.Dialog>
   );
 };
 
-warningModal.propTypes = {
-  onOK: PropTypes.func.isRequired,
+confirmationModal.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
   title: PropTypes.string,
-  message: PropTypes.string
+  message: PropTypes.string,
+  button: PropTypes.string
 
 };
 
-export default warningModal;
+export default confirmationModal;

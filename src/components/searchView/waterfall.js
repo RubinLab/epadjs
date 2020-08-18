@@ -1,9 +1,9 @@
 import jQuery from 'jquery';
 import $ from 'jquery';
-import highcharts from 'highcharts';
+import Highcharts from 'highcharts';
 
 let i;
-function getWaterfallForAllInProject(projectID, type, waterfallDiv, metric) {
+ function getWaterfallForAllInProject(projectID, type, waterfallDiv, metric) {
   var waterfallUrl =
     'http://' +
     window.location.host +
@@ -57,6 +57,7 @@ function roundDouble(val) {
 }
 
 export function drawWaterfall(data, metric) {
+  console.log(Highcharts);
   var processed_json = new Array();
   for (i = 0; i < data.series.length; i++) {
     /* if (data.series[i].responseCategory=="SD"){
@@ -78,7 +79,8 @@ export function drawWaterfall(data, metric) {
   }
 
   // draw chart
-  $('#waterfallContainer').highcharts({
+  // $('#waterfallContainer').highcharts({
+  Highcharts.chart('report', {
     chart: {
       type: 'column',
     },
@@ -140,7 +142,7 @@ export function drawWaterfall(data, metric) {
   });
 }
 
-function createPopup() {
+export function createPopup() {
   var waterfallDiv = document.getElementById('waterfallContainer');
   if (waterfallDiv != null) waterfallDiv.remove();
 

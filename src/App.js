@@ -22,6 +22,7 @@ import Management from './components/management/mainMenu';
 import InfoMenu from './components/infoMenu';
 import UserMenu from './components/userProfileMenu.jsx';
 import WarningModal from './components/common/warningModal';
+import ConfirmationModal from './components/common/confirmationModal';
 import SelectModalMenu from './components/common/SelectModalMenu';
 import AnnotationList from './components/annotationsList';
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
@@ -31,6 +32,7 @@ import {
   clearAimId,
   getNotificationsData,
   clearSelection,
+  selectProject,
 } from './components/annotationsList/action';
 import Worklist from './components/sideBar/sideBarWorklist';
 import ErrorBoundary from './ErrorBoundary';
@@ -41,6 +43,7 @@ import { getSeries, getSingleSeries } from './services/seriesServices';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
+import RightsideBar from './components/RightsideBar/RightsideBar';
 
 const messages = {
   noPatient: {
@@ -50,6 +53,10 @@ const messages = {
   multiplePatient: {
     title: 'Multiple Patients Selected',
     message: 'Select only one patient to get the report!',
+  },
+  projectWaterfall: {
+    title: 'Project Selected',
+    message: 'Waterfall report will be created for project ',
   },
 };
 
@@ -84,9 +91,11 @@ class App extends Component {
       projectAdded: 0,
       showReport: false,
       showWarning: false,
+      showConfirmation: false,
       showReportsMenu: false,
       title: '',
       message: '',
+      reportType: '',
     };
   }
 
@@ -102,6 +111,7 @@ class App extends Component {
 
   closeWarning = () => {
     this.setState({
+      showConfirmation: false,
       showWarning: false,
       title: '',
       message: '',
@@ -118,15 +128,27 @@ class App extends Component {
   };
 
   handleReportSelect = e => {
-    const patients = Object.values(this.props.selectedPatients);
-    
+    const { projectMap, selectedPatients } = this.props;
+    const patients = Object.values(selectedPatients);
+    const reportType = e.target.dataset.opt;
+    console.log(reportType);
     this.handleReportsClick();
     if (patients.length === 0) {
-      this.setState({
-        showWarning: true,
-        title: messages.noPatient.title,
-        message: messages.noPatient.message,
-      });
+      if (reportType === 'Waterfall') {
+        this.setState({
+          showConfirmation: true,
+          title: messages.projectWaterfall.title,
+          message:
+            messages.projectWaterfall.message +
+            projectMap[this.state.pid].projectName,
+        });
+      } else {
+        this.setState({
+          showWarning: true,
+          title: messages.noPatient.title,
+          message: messages.noPatient.message,
+        });
+      }
     } else if (patients.length > 1) {
       this.setState({
         showWarning: true,
@@ -137,9 +159,19 @@ class App extends Component {
       this.setState({
         showReport: true,
         template: null,
-        report: e.target.dataset.opt,
+        reportType,
       });
     }
+  };
+
+  displayWaterfall = () => {
+    this.props.dispatch(selectProject(this.state.pid));
+    this.setState({
+      showReport: true,
+      template: null,
+      reportType: 'Waterfall',
+      showConfirmation: false
+    });
   };
 
   getTreeExpandAll = (expandObj, expanded, expandLevel) => {
@@ -796,9 +828,11 @@ class App extends Component {
       showReportsMenu,
       showReport,
       showWarning,
+      showConfirmation,
       title,
       message,
-      report
+      reportType,
+      pid,
     } = this.state;
     let noOfUnseen;
     if (notifications) {
@@ -861,7 +895,18 @@ class App extends Component {
             message={message}
           />
         )}
-        {showReport && <Report onClose={this.closeReportModal} report={report} />}
+        {showConfirmation && (
+          <ConfirmationModal
+            title={title}
+            button={'Get Report'}
+            message={message}
+            onSubmit={this.displayWaterfall}
+            onCancel={this.closeWarning}
+          />
+        )}
+        {showReport && (
+          <Report onClose={this.closeReportModal} report={reportType} />
+        )}
         {!this.state.authenticated && mode !== 'lite' && (
           <Route path="/login" component={LoginForm} />
         )}
@@ -1056,6 +1101,7 @@ const mapStateToProps = state => {
     imageID,
     openSeries,
     selectedPatients,
+    projectMap,
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -1065,6 +1111,7 @@ const mapStateToProps = state => {
     imageID,
     openSeries,
     selectedPatients,
+    projectMap,
     selection: state.managementReducer.selection,
   };
 };

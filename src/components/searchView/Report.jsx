@@ -2,28 +2,51 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import ReactHtmlParser from 'react-html-parser';
 import Draggable from 'react-draggable';
-import { FaTimes } from 'react-icons/fa';
 import { renderTable } from './recist';
 import { drawWaterfall } from './waterfall';
 import { getReport } from '../../services/annotationServices';
-import { setMetadata } from '../../cornerstone-tools/store/modules/segmentationModule/metadata';
+import { getWaterfallReport } from '../../services/reportServices';
+const dummyData = {
+  series: [{ name: '7', project: 'RECIST', y: -0.19390825546299983 }],
+};
 
-const style = { overflow: 'scroll' };
+const style = { width: 'auto', minWidth: 300, maxHeight: 800, height: 'auto' };
 const Report = props => {
   const [node, setNode] = useState(null);
   const [data, setData] = useState([]);
+  const [type, setType] = useState('BASELINE');
+  const [metric, setMetric] = useState('RECIST');
 
-  // create filter default values
-  // add event handler with change set state
+  const filterSelectedPatients = () => {
+    const patients = Object.values(props.selectedPatients);
+    const obj = patients.reduce((all, item, index) => {
+      const { projectID, patientID } = item;
+      if (all[projectID]) all[projectID].push(patientID);
+      else all[projectID] = [patientID];
+      return all;
+    }, {});
+    return obj;
+  };
 
-  // in recist set default values in filter method
-  // and if all three are not default or changed flag is true
+  const constructPairs = object => {
+    const result = [];
+    for (let pr in object) {
+      for (let patient of object[pr]) {
+        result.push({ subjectID: patient, projectID: pr });
+      }
+    }
+  };
 
   const getTableArguments = () => {
-    const patients = Object.values(props.selectedPatients);
-    const { projectID, patientID } = patients[0];
-    // const report = props.report;
     const { report } = props;
+    let patients;
+    let projectID;
+    let patientID;
+    // console.log(report);
+    if (report !== 'Waterfall') {
+      patients = Object.values(props.selectedPatients);
+      ({ projectID, patientID } = patients[0]);
+    }
     const template = report === 'RECIST' ? null : props.template;
     const id = 'recisttbl';
     // const report = "RECIST";
@@ -31,6 +54,7 @@ const Report = props => {
     let loadFilter = '';
     let numofHeaderCols = null;
     let hideCols;
+    let selectedProject;
     if (report === 'RECIST') {
       filter = 'report=RECIST';
       numofHeaderCols = 3;
@@ -46,7 +70,10 @@ const Report = props => {
       if (template != null) filter += '&templatecode=' + template;
       numofHeaderCols = 2;
       hideCols = [];
+    } else {
+      selectedProject = props.selectedProject;
     }
+
     return {
       id,
       projectID,
@@ -56,6 +83,7 @@ const Report = props => {
       numofHeaderCols,
       hideCols,
       report,
+      selectedProject,
     };
   };
 
@@ -73,19 +101,25 @@ const Report = props => {
         numofHeaderCols,
         hideCols,
         report,
+        selectedProject,
       } = getTableArguments();
+      let reportTable;
       if (Object.keys(data).length > 0) {
-        let reportTable = await renderTable(
-          id,
-          patientID,
-          projectID,
-          report,
-          data,
-          numofHeaderCols,
-          hideCols,
-          loadFilter,
-          onClose
-        );
+        if (props.report !== 'Waterfall') {
+          reportTable = await renderTable(
+            id,
+            patientID,
+            projectID,
+            report,
+            data,
+            numofHeaderCols,
+            hideCols,
+            loadFilter,
+            onClose
+          );
+        } else {
+          drawWaterfall(dummyData);
+        }
         reportTable = ReactHtmlParser(reportTable);
         setNode(reportTable);
       }
@@ -95,16 +129,54 @@ const Report = props => {
   };
 
   useEffect(() => {
-    const { projectID, patientID, filter } = getTableArguments();
-    console.log(props.report)
+    const {
+      projectID,
+      patientID,
+      filter,
+      selectedProject,
+    } = getTableArguments();
+    // console.log(props.report);
+    let result;
     async function fetchData() {
       try {
         if (props.report === 'Waterfall') {
+          if (selectedProject) {
+            result = await getWaterfallReport(
+              selectedProject,
+              null,
+              null,
+              type,
+              metric
+            );
+          } else {
+            const filteredObj = filterSelectedPatients();
+            const projects = Object.keys(filteredObj);
+            if (projects.length === 1) {
+              const pid = projects[0];
+              const subjectUIDs = Object.values(filteredObj);
+              result = await getWaterfallReport(
+                pid,
+                subjectUIDs,
+                null,
+                type,
+                metric
+              );
+            } else {
+              const pairs = constructPairs(filteredObj);
+              result = await getWaterfallReport(
+                null,
+                null,
+                pairs,
+                type,
+                metric
+              );
+            }
+          }
         } else {
-          const result = await getReport(projectID, patientID, filter);
-          getReportTable(result.data);
-          setData(result.data);
+          result = await getReport(projectID, patientID, filter);
         }
+        getReportTable(result.data);
+        setData(result.data);
       } catch (err) {
         console.error(err);
       }
@@ -159,7 +231,9 @@ const Report = props => {
 
   return (
     <Draggable>
-      <div id="report">{node}</div>
+      <div id="report" style={props.report === 'Waterfall' ? style : {}}>
+        {node}
+      </div>
     </Draggable>
   );
 };
@@ -167,6 +241,7 @@ const Report = props => {
 const mapStateToProps = state => {
   return {
     selectedPatients: state.annotationsListReducer.selectedPatients,
+    selectedProject: state.annotationsListReducer.selectedProject,
   };
 };
 
