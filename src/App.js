@@ -131,7 +131,6 @@ class App extends Component {
     const { projectMap, selectedPatients } = this.props;
     const patients = Object.values(selectedPatients);
     const reportType = e.target.dataset.opt;
-    console.log(reportType);
     this.handleReportsClick();
     if (patients.length === 0) {
       if (reportType === 'Waterfall') {
@@ -149,7 +148,7 @@ class App extends Component {
           message: messages.noPatient.message,
         });
       }
-    } else if (patients.length > 1) {
+    } else if (patients.length > 1 && reportType !== 'Waterfall') {
       this.setState({
         showWarning: true,
         title: messages.multiplePatient.title,
