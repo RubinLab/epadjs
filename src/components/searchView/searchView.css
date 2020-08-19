@@ -509,9 +509,16 @@ h5.add-subject__modal--label,
   left: 15%;
   top: 15%;
   background-color: rgb(102, 102, 102);
+  border: 2.5px solid #861737;
+  border-radius: 10px;
 }
 
 #closeBtn {
   font-size: medium;
   margin-left: 0.3rem;
+}
+
+.waterfall-header {
+  display: flex;
+  justify-content: space-between;
 }

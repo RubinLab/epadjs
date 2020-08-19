@@ -4,6 +4,7 @@ import ReactHtmlParser from 'react-html-parser';
 import Draggable from 'react-draggable';
 import { renderTable } from './recist';
 import { drawWaterfall } from './waterfall';
+import { FaTimes } from 'react-icons/fa';
 import { getReport } from '../../services/annotationServices';
 import { getWaterfallReport } from '../../services/reportServices';
 const dummyData = {
@@ -14,8 +15,6 @@ const style = { width: 'auto', minWidth: 300, maxHeight: 800, height: 'auto' };
 const Report = props => {
   const [node, setNode] = useState(null);
   const [data, setData] = useState([]);
-  const [type, setType] = useState('BASELINE');
-  const [metric, setMetric] = useState('RECIST');
 
   const filterSelectedPatients = () => {
     const patients = Object.values(props.selectedPatients);
@@ -42,14 +41,12 @@ const Report = props => {
     let patients;
     let projectID;
     let patientID;
-    // console.log(report);
     if (report !== 'Waterfall') {
       patients = Object.values(props.selectedPatients);
       ({ projectID, patientID } = patients[0]);
     }
     const template = report === 'RECIST' ? null : props.template;
     const id = 'recisttbl';
-    // const report = "RECIST";
     let filter = '';
     let loadFilter = '';
     let numofHeaderCols = null;
@@ -117,15 +114,56 @@ const Report = props => {
             loadFilter,
             onClose
           );
-        } else {
-          drawWaterfall(dummyData);
         }
+        if (props.report === 'Waterfall') reportTable = await drawWaterfall(data);
         reportTable = ReactHtmlParser(reportTable);
         setNode(reportTable);
       }
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const selectMetric = async e => {
+    const { selectedProject } = getTableArguments();
+    const metric = e.target.value;
+    const validMetric =
+      metric === 'ADLA' || metric === 'RECIST' || metric === 'intensitystddev';
+    const type = 'BASELINE';
+    let result;
+    let reportTable;
+    if (validMetric) {
+      if (selectedProject) {
+        result = await getWaterfallReport(
+          selectedProject,
+          null,
+          null,
+          type,
+          metric
+        );
+      } else {
+        const filteredObj = filterSelectedPatients();
+        const projects = Object.keys(filteredObj);
+        if (projects.length === 1) {
+          const pid = projects[0];
+          const subjectUIDs = Object.values(filteredObj);
+          result = await getWaterfallReport(
+            pid,
+            subjectUIDs,
+            null,
+            type,
+            metric
+          );
+        } else {
+          const pairs = constructPairs(filteredObj);
+          result = await getWaterfallReport(null, null, pairs, type, metric);
+        }
+      }
+      getReportTable(dummyData);
+    } else {
+      getReportTable({ series: [] });
+    }
+    // getReportTable(result.data, metric);
   };
 
   useEffect(() => {
@@ -135,48 +173,14 @@ const Report = props => {
       filter,
       selectedProject,
     } = getTableArguments();
-    // console.log(props.report);
     let result;
     async function fetchData() {
       try {
-        if (props.report === 'Waterfall') {
-          if (selectedProject) {
-            result = await getWaterfallReport(
-              selectedProject,
-              null,
-              null,
-              type,
-              metric
-            );
-          } else {
-            const filteredObj = filterSelectedPatients();
-            const projects = Object.keys(filteredObj);
-            if (projects.length === 1) {
-              const pid = projects[0];
-              const subjectUIDs = Object.values(filteredObj);
-              result = await getWaterfallReport(
-                pid,
-                subjectUIDs,
-                null,
-                type,
-                metric
-              );
-            } else {
-              const pairs = constructPairs(filteredObj);
-              result = await getWaterfallReport(
-                null,
-                null,
-                pairs,
-                type,
-                metric
-              );
-            }
-          }
-        } else {
+        if (props.report !== 'Waterfall') {
           result = await getReport(projectID, patientID, filter);
+          getReportTable(result.data);
+          setData(result.data);
         }
-        getReportTable(result.data);
-        setData(result.data);
       } catch (err) {
         console.error(err);
       }
@@ -232,6 +236,30 @@ const Report = props => {
   return (
     <Draggable>
       <div id="report" style={props.report === 'Waterfall' ? style : {}}>
+        {props.report === 'Waterfall' && (
+          <>
+            <div className="waterfall-header">
+              <select id="filter" onChange={selectMetric}>
+                <option>Choose to filter</option>
+                <option>RECIST</option>
+                <option>ADLA</option>
+                <option>intensitystddev</option>
+              </select>
+              <button
+                className="w3-btn w3-round-large recistWhitetext"
+                id="closeBtn"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <div
+              id="waterfallContainer"
+              style={{ width: '100%', minWidth: '300px' }}
+              title="WATERFALL"
+            ></div>
+          </>
+        )}
+
         {node}
       </div>
     </Draggable>
