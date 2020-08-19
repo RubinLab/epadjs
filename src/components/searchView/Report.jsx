@@ -149,7 +149,7 @@ const Report = props => {
           const subjectUIDs = Object.values(filteredObj);
           result = await getWaterfallReport(
             pid,
-            subjectUIDs,
+            subjectUIDs[0],
             null,
             type,
             metric
@@ -159,7 +159,7 @@ const Report = props => {
           result = await getWaterfallReport(null, null, pairs, type, metric);
         }
       }
-      getReportTable(dummyData);
+      getReportTable(result.data);
     } else {
       getReportTable({ series: [] });
     }
