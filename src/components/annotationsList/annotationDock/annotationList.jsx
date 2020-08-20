@@ -44,7 +44,7 @@ class AnnotationsList extends React.Component {
         this.setState({ labelDisplayAll, annsDisplayAll });
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
