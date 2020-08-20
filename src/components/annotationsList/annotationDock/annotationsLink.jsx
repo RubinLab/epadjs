@@ -28,9 +28,14 @@ const annotationsLink = (props) => {
 
     list = seriesAims.map((aim, i) => {
       if (!props.imageAims[aim.id]) {
+        console.log("Aim json", aim.json);
+        let slideNo;
         let { comment } = aim.json;
-        comment = Object.values(comment);
-        const slideNo = comment.length > 0 ? comment[0].split("/")[2] : "";
+        if (comment) {
+          comment = Object.values(comment);
+          console.log("Comment", comment);
+          slideNo = comment.length > 0 ? comment[0].split("/")[2] : "";
+        }
         return (
           <tr key={aim.id} className="annsLink-table __tbody --row">
             <td

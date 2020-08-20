@@ -94,6 +94,12 @@ class AnnotationsList extends React.Component {
   };
 
   handleJumpToAim = (slideNo) => {
+    if (!slideNo) {
+      alert(
+        "Missing SLICE_NUMBER in programmed comment of aim. Can't scroll to slice!"
+      );
+      return;
+    }
     const { activePort } = this.props;
 
     window.dispatchEvent(
