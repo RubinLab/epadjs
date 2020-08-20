@@ -4435,7 +4435,7 @@ export var AimEditor = function (
     }
     self.formCheckHandler(self.checkFormSaveReady());
   };
-  this.loadAimJson = function (aimjson) {
+  this.loadAimJson = function (aimjson, isRecist) {
     //var ImageAnnotation = aimjson.imageAnnotations.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
 
     //test
@@ -4519,7 +4519,9 @@ export var AimEditor = function (
       //self.activateDirtyCheck = true;
       console.log("load aim activated set dirty flag check");
       self.loadingAimFlag = false;
-      self.disableRecistSections();
+      if (isRecist) {
+        self.disableRecistSections();
+      }
       return 0;
     }
   };
