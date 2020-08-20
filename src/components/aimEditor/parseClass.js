@@ -4445,6 +4445,7 @@ export var AimEditor = function (
     // test['circle'].validate = 'ok';
     // console.log('new test', test);
     //test
+
     let aimjsonCopy = aimjson;
     self.loadingAimFlag = true;
     console.log(
@@ -4473,6 +4474,7 @@ export var AimEditor = function (
       let evObj = document.createEvent("Events");
       evObj.initEvent("change", true, true);
       self.templateSelect.dispatchEvent(evObj);
+
       var imagingObservationEntityCollection =
         aimjsonCopy.imagingObservationEntityCollection;
       var imagingPhysicalEntityCollection =
@@ -4517,8 +4519,120 @@ export var AimEditor = function (
       //self.activateDirtyCheck = true;
       console.log("load aim activated set dirty flag check");
       self.loadingAimFlag = false;
+      self.disableRecistSections();
       return 0;
     }
+  };
+
+  this.disableRecistSections = function () {
+    // disable for recist
+    //alert(document.getElementById("DropLocation").childNodes[0].className);
+    alert(document.getElementById("annotationName").parentElement.className);
+    // document.getElementById("allowedTermType").click = function(event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   event.stopPropagation();
+    // }mousedown Type-S72 S71
+    // document.getElementById("Type-S71").disabled = true;
+    // document.getElementById("Type-S72").disabled = true;
+    // document.getElementById("Type-S73").disabled = true;
+    // document.getElementById("Type-S74").disabled = true;
+    alert(document.getElementById("allowedTermType").childNodes.length);
+    let recistAllChildNodes = document.getElementById("allowedTermType")
+      .childNodes;
+    for (let cntRdios = 0; cntRdios < recistAllChildNodes.length; cntRdios++) {
+      recistAllChildNodes[cntRdios].childNodes[0].disabled = true;
+    }
+    // document.getElementById(
+    //   "allowedTermType"
+    // ).parentElement.onclick = function (event) {
+    //   //event.preventDefault();
+    //   event.stopPropagation();
+    // };
+
+    // $(document.getElementById("allowedTermType").parentElement).on(
+    //   "click",
+    //   function (event) {
+    //     // do something special here
+
+    //     // then cancel event bubbling
+
+    //     event.preventDefault();
+    //     event.stopPropagation();
+    //   }
+    // );
+    // $("#Type-S71").on("click", function (event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   return false;
+    //   event.preventDefault();
+    //   event.stopPropagation();
+    // });
+    // $("#Type-S72").on("click", function (event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   return false;
+    //   event.preventDefault();
+    //   event.stopPropagation();
+    // });
+    // $("#Type-S73").on("click", function (event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   return false;
+    //   event.preventDefault();
+    //   event.stopPropagation();
+    // });
+    // $("#Type-S74").on("click", function (event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   return false;
+    //   event.preventDefault();
+    //   event.stopPropagation();
+    // });
+    // $("#allowedTermType").on("change", function (event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   return false;
+    //   event.preventDefault();
+    //   event.stopPropagation();
+    // });
+    // $("#allowedTermType").mousedown(function (event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   return false;
+    //   event.preventDefault();
+    //   event.stopPropagation();
+    // });
+    // $("#allowedTermType").mouseup(function (event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   return false;
+    //   event.preventDefault();
+    //   event.stopPropagation();
+    // });
+    let parentDivElementForLocation = document.getElementById("annotationName")
+      .parentElement;
+    let parentDivElementForLocationClass =
+      parentDivElementForLocation.className;
+    let parentDivElementForLocationClassDisabled =
+      parentDivElementForLocationClass + " disabled";
+    parentDivElementForLocation.className = parentDivElementForLocationClassDisabled;
+
+    let subDivElementForLocation = document.getElementById("DropLocation")
+      .childNodes[0];
+    let subDivElementForLocationClass = subDivElementForLocation.className;
+    let subDivElementForLocationClassDisabled =
+      subDivElementForLocationClass + " disabled";
+    subDivElementForLocation.className = subDivElementForLocationClassDisabled;
+    // end disable for recist
   };
 
   this.addUid = function (jsonobj) {
