@@ -736,7 +736,7 @@ function checkAndColor(
   numofHeaderCols
 ) {
   for (i = 0; i < data.tUIDs.length; i++) {
-    var aNameTag = $('<a>', { href: '#' });
+    var aNameTag = $('<a>', { href: '#', id: 'a' + i + '0' });
     aNameTag.click(
       { projectID: projectID, patientID: patientID, row: data.tUIDs[i] },
       function(event) {
@@ -748,6 +748,7 @@ function checkAndColor(
       }
     );
     let txt = recisttable.find('#c' + i + '0').text();
+    
     aNameTag.text(txt); // Populate the text with what's already there
     aNameTag.css('color', linkColor);
     aNameTag.css('text-decoration', 'none');
@@ -770,6 +771,7 @@ function checkAndColor(
       //put link
       if (data.tUIDs[i][j] != null) {
         var aTag = $('<a>', {
+          id: 'a' + i + (j + 1),
           href: createLinkUrl(
             serverUrl,
             data.tUIDs[i][j].studyUID,

@@ -1,20 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import ReactHtmlParser from 'react-html-parser';
 import Draggable from 'react-draggable';
 import { renderTable } from './recist';
 import { drawWaterfall } from './waterfall';
 import { FaTimes } from 'react-icons/fa';
 import { getReport } from '../../services/annotationServices';
+import ConfirmationModal from '../common/confirmationModal';
+import { MAX_PORT } from '../../constants';
+
 import { getWaterfallReport } from '../../services/reportServices';
-const dummyData = {
-  series: [{ name: '7', project: 'RECIST', y: -0.19390825546299983 }],
+import { checkIfSeriesOpen } from '../../Utils/aid';
+import {
+  changeActivePort,
+  clearGrid,
+  clearSelection,
+  jumpToAim,
+  addToGrid,
+  getSingleSerie,
+} from '../annotationsList/action';
+
+const messages = {
+  title: "Can't open all series",
+  message: `Maximum ${MAX_PORT} series can be opened. Please close already opened series first.`,
 };
 
 const style = { width: 'auto', minWidth: 300, maxHeight: 800, height: 'auto' };
 const Report = props => {
   const [node, setNode] = useState(null);
   const [data, setData] = useState([]);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [selectedCol, setSelectedCol] = useState(null);
 
   const filterSelectedPatients = () => {
     const patients = Object.values(props.selectedPatients);
@@ -115,7 +133,8 @@ const Report = props => {
             onClose
           );
         }
-        if (props.report === 'Waterfall') reportTable = await drawWaterfall(data);
+        if (props.report === 'Waterfall')
+          reportTable = await drawWaterfall(data);
         reportTable = ReactHtmlParser(reportTable);
         setNode(reportTable);
       }
@@ -233,36 +252,136 @@ const Report = props => {
     };
   }, [onClose, handleFilterSelect, stopProp]);
 
-  return (
-    <Draggable>
-      <div id="report" style={props.report === 'Waterfall' ? style : {}}>
-        {props.report === 'Waterfall' && (
-          <>
-            <div className="waterfall-header">
-              <select id="filter" onChange={selectMetric}>
-                <option>Choose to filter</option>
-                <option>RECIST</option>
-                <option>ADLA</option>
-                <option>intensitystddev</option>
-              </select>
-              <button
-                className="w3-btn w3-round-large recistWhitetext"
-                id="closeBtn"
-              >
-                <FaTimes />
-              </button>
-            </div>
-            <div
-              id="waterfallContainer"
-              style={{ width: '100%', minWidth: '300px' }}
-              title="WATERFALL"
-            ></div>
-          </>
-        )}
+  const captureClick = e => {
+    const { nodeName, id } = e.target;
+    if (nodeName === 'A' && id.startsWith('a')) {
+      const row = parseInt(id[1]);
+      const col = parseInt(id[2]) - 1;
+      setSelectedRow(row);
+      setSelectedCol(col);
+      handleLesionClick(row, col);
+    }
+  };
 
-        {node}
-      </div>
-    </Draggable>
+  const openAims = (seriesToOpen, projectID, patientID) => {
+    const array =
+      projectID && patientID
+        ? seriesToOpen.map(el => ({ ...el, projectID, patientID }))
+        : seriesToOpen;
+
+    array.forEach(series => {
+      props.dispatch(addToGrid(series, series.aimID || series.aimUID));
+      props.dispatch(getSingleSerie(series, series.aimID || series.aimUID));
+    });
+    props.history.push('/display');
+  };
+
+  const handleLesionClick = (row, col) => {
+    // check if the col is 0 (one aim only)
+    const { openSeries } = props;
+    const notOpenSeries = [];
+    const { projectID, patientID, subjectName } = Object.values(
+      props.selectedPatients
+    )[0];
+
+    if (col !== -1) {
+      const { seriesUID, aimUID, studyUID } = data.tUIDs[row][col];
+      // if not zero check if it is already open
+      const { isOpen, index } = checkIfSeriesOpen(
+        openSeries,
+        seriesUID,
+        'seriesUID'
+      );
+      // if open jump to the displate change active port
+      if (isOpen) {
+        props.dispatch(changeActivePort(index));
+        props.dispatch(jumpToAim(seriesUID, aimUID, index));
+        props.history.push('/display');
+      } else {
+        // if not open check if the grid is full
+        // if so give confirmation (clear display view and cancel buttons)
+        if (openSeries.length === MAX_PORT) {
+          setShowConfirmModal(true);
+        } else {
+          //if not open the series
+          openAims([data.tUIDs[row][col]], projectID, patientID);
+        }
+      }
+      // if the column is 0 (all aims for the lesion)
+    } else {
+      // check if open series has any of the selected series
+      // if so copy the input array and delete the item from the copied input array
+      data.tUIDs[row].forEach((el, index) => {
+        if (!checkIfSeriesOpen(openSeries, el.seriesUID, 'seriesUID').isOpen) {
+          notOpenSeries.push(el);
+        }
+      });
+      // check if already open series and array in hand if have more than 6 series
+      if (notOpenSeries.length + openSeries.length > MAX_PORT) {
+        // if so give confirmation (clear display view and cancel buttons)
+        setShowConfirmModal(true);
+      } else {
+        openAims(notOpenSeries, projectID, patientID);
+      }
+    }
+  };
+
+  const clearGridAndOpenAllSeries = () => {
+    const { projectID, patientID } = Object.values(props.selectedPatients)[0];
+    props.dispatch(clearGrid());
+    const seriesToOpen =
+      selectedCol >= 0
+        ? [data.tUIDs[selectedRow][selectedCol]]
+        : data.tUIDs[selectedRow];
+    openAims(seriesToOpen, projectID, patientID);
+    setShowConfirmModal(false);
+  };
+
+  return (
+    <>
+      <Draggable>
+        <div
+          id="report"
+          style={props.report === 'Waterfall' ? style : {}}
+          onClick={captureClick}
+        >
+          {props.report === 'Waterfall' && (
+            <>
+              <div className="waterfall-header">
+                <select id="filter" onChange={selectMetric}>
+                  <option>Choose to filter</option>
+                  <option>RECIST</option>
+                  <option>ADLA</option>
+                  <option>intensitystddev</option>
+                </select>
+                <button
+                  className="w3-btn w3-round-large recistWhitetext"
+                  id="closeBtn"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+              <div
+                id="waterfallContainer"
+                style={{ width: '100%', minWidth: '300px' }}
+                title="WATERFALL"
+              ></div>
+            </>
+          )}
+
+          {node}
+        </div>
+      </Draggable>
+      {showConfirmModal && (
+        <ConfirmationModal
+          title={messages.title}
+          button={'Close Other Series'}
+          message={messages.message}
+          onSubmit={clearGridAndOpenAllSeries}
+          onCancel={() => setShowConfirmModal(false)}
+        />
+      )}
+    </>
   );
 };
 
@@ -270,7 +389,8 @@ const mapStateToProps = state => {
   return {
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedProject: state.annotationsListReducer.selectedProject,
+    openSeries: state.annotationsListReducer.openSeries,
   };
 };
 
-export default connect(mapStateToProps)(Report);
+export default withRouter(connect(mapStateToProps)(Report));
