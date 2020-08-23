@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import ReactHtmlParser from 'react-html-parser';
 import Draggable from 'react-draggable';
-import { renderTable } from './recist';
+import { renderTable, wordExport } from './recist';
 import { drawWaterfall } from './waterfall';
 import { FaTimes } from 'react-icons/fa';
 import { getReport } from '../../services/annotationServices';
@@ -11,7 +11,7 @@ import ConfirmationModal from '../common/confirmationModal';
 import { MAX_PORT } from '../../constants';
 
 import { getWaterfallReport } from '../../services/reportServices';
-import { checkIfSeriesOpen } from '../../Utils/aid';
+import { checkIfSeriesOpen, clearCarets } from '../../Utils/aid';
 import {
   changeActivePort,
   clearGrid,
@@ -215,13 +215,21 @@ const Report = props => {
     e.stopPropagation();
   };
 
+  const downloadReport = () => {
+    let { subjectName } = Object.values(props.selectedPatients)[0];
+    subjectName = clearCarets(subjectName);
+    wordExport(subjectName)
+  }
+
   useEffect(() => {
     const closeBtn = document.getElementById('closeBtn');
     const shapesFilter = document.getElementById('shapesFilter');
     const templateFilter = document.getElementById('templateFilter');
     const filter = document.getElementById('filter');
+    const exportBtn = document.getElementById('exportBtn');
 
     if (closeBtn) closeBtn.addEventListener('click', onClose);
+    if (exportBtn) exportBtn.addEventListener('click', downloadReport);
     if (shapesFilter) {
       shapesFilter.addEventListener('change', handleFilterSelect);
       shapesFilter.addEventListener('mousedown', stopProp);
@@ -237,6 +245,8 @@ const Report = props => {
 
     return () => {
       if (closeBtn) closeBtn.removeEventListener('click', onClose);
+      if (exportBtn) exportBtn.removeEventListener('click', downloadReport);
+
       if (shapesFilter) {
         shapesFilter.removeEventListener('change', handleFilterSelect);
         shapesFilter.removeEventListener('mousedown', stopProp);

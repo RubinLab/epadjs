@@ -58,7 +58,7 @@ function roundDouble(val) {
   return val;
 }
 
-function wordExport(patient) {
+export function wordExport(patient) {
   if (!window.Blob) {
     alert('Your legacy browser does not support this action.');
     return;
