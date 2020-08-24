@@ -768,7 +768,7 @@ export var AimEditor = function (
     mainSelectDiv.id = "Drop" + maindiv;
 
     var selectDiv = document.createElement("select");
-    selectDiv.className = "ui fluid multiple dropdown";
+    selectDiv.className = "ui fluid search multiple dropdown";
     //selectDiv.multiple=true;
     selectDiv.id = "select" + maindiv;
 
