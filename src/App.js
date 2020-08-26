@@ -29,6 +29,7 @@ import {
   getNotificationsData,
   getSingleSerie,
   addToGrid,
+  getWholeData,
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
@@ -65,6 +66,7 @@ class App extends Component {
       pid: null,
       closeAll: 0,
       projectAdded: 0,
+      redirect: false,
     };
   }
 
@@ -352,17 +354,6 @@ class App extends Component {
           };
           await auth.login(user, null, result.keycloak);
 
-          // TEACHING FILES RELATED //
-          const { search } = this.props.location;
-          let args;
-          if (search && (args = search.split("?arg=")[1])) {
-            console.log("ARGS:", args);
-            const { patientID, studyUID, projectID } = await decrypt(args);
-            console.log("Result", patientID, studyUID);
-            this.props.dispatch(addToGrid({ patientID, studyUID }));
-            this.props.dispatch(getSingleSerie({ patientID, studyUID }));
-          }
-
           this.setState({
             keycloak: result.keycloak,
             authenticated: result.authenticated,
@@ -399,6 +390,26 @@ class App extends Component {
             "message",
             this.getMessageFromEventSrc
           );
+          // TEACHING FILES RELATED //
+          const { search } = this.props.location;
+          let args;
+          if (search && (args = search.split("?arg=")[1])) {
+            console.log("ARGS:", args);
+            // const result = await decrypt(args);
+            const result = await decryptAndAdd(args);
+            const { patientID, studyUID, projectID } = result.data;
+            console.log("Result", result.data, patientID, studyUID);
+            const packData = {
+              projectID,
+              patientID,
+              patientName: "patientName",
+              studyUID,
+            };
+            this.props.dispatch(addToGrid(packData));
+            this.props.dispatch(getSingleSerie(packData));
+            getWholeData(packData);
+            this.props.history.push("/display");
+          }
         } catch (err) {
           console.log("Error in user retrieval!", err);
         }
@@ -731,8 +742,32 @@ class App extends Component {
     }
   };
 
+  // TEACHING FILES RELATED //
+  doTeaching = async () => {
+    // TEACHING FILES RELATED //
+    const { search } = this.props.location;
+    let args;
+    if (search && (args = search.split("?arg=")[1])) {
+      console.log("ARGS:", args);
+      // const result = await decrypt(args);
+      const result = await decryptAndAdd(args);
+      const { patientID, studyUID, projectID } = result.data;
+      console.log("Result", result.data, patientID, studyUID);
+      const packData = {
+        projectID,
+        patientID,
+        patientName: "patientName",
+        studyUID,
+      };
+      this.props.dispatch(addToGrid(packData));
+      this.props.dispatch(getSingleSerie(packData));
+      getWholeData(packData);
+      this.props.history.push("/display");
+    }
+  };
+
   render() {
-    console.log("APP props", this.props);
+    // this.doTeaching();
     const {
       notifications,
       mode,

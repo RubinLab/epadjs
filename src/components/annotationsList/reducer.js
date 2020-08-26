@@ -454,9 +454,9 @@ const asyncReducer = (state = initialState, action) => {
       case ADD_TO_GRID:
         const seriesInfo = { ...action.reference };
         seriesInfo.projectName =
-          state.projectMap[seriesInfo.projectID].projectName;
+          state.projectMap[seriesInfo.projectID]?.projectName;
         seriesInfo.defaultTemplate =
-          state.projectMap[seriesInfo.projectID].defaultTemplate;
+          state.projectMap[seriesInfo.projectID]?.defaultTemplate;
         let newOpenSeries = state.openSeries.concat(seriesInfo);
         return {
           ...state,
