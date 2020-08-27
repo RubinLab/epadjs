@@ -96,6 +96,7 @@ class App extends Component {
       title: '',
       message: '',
       reportType: '',
+      reportsCompArr: [],
     };
   }
 
@@ -122,8 +123,16 @@ class App extends Component {
     this.setState(state => ({ showReportsMenu: !state.showReportsMenu }));
   };
 
-  closeReportModal = () => {
-    this.setState({ showReport: false, template: null, report: null });
+  closeReportModal = index => {
+    const arr = [...this.state.reportsCompArr];
+    arr[index] = null;
+    this.setState({
+      showReport: false,
+      template: null,
+      report: null,
+      reportsCompArr: arr,
+    });
+
     this.props.dispatch(clearSelection());
   };
 
@@ -155,13 +164,29 @@ class App extends Component {
         message: messages.multiplePatient.message,
       });
     } else {
+      const reportsCompArr = [...this.state.reportsCompArr];
+      const index = reportsCompArr.length;
+      reportsCompArr.push(
+        <Report
+          onClose={this.closeReportModal}
+          report={reportType}
+          index={index}
+          patient={patients[0]}
+          key={`report${index}`}
+        />
+      );
       this.setState({
         showReport: true,
         template: null,
         reportType,
+        reportsCompArr,
       });
     }
   };
+
+  handleWaterFallSelect = (name) => {
+
+  }
 
   displayWaterfall = () => {
     this.props.dispatch(selectProject(this.state.pid));
@@ -169,7 +194,7 @@ class App extends Component {
       showReport: true,
       template: null,
       reportType: 'Waterfall',
-      showConfirmation: false
+      showConfirmation: false,
     });
   };
 
@@ -903,9 +928,7 @@ class App extends Component {
             onCancel={this.closeWarning}
           />
         )}
-        {showReport && (
-          <Report onClose={this.closeReportModal} report={reportType} />
-        )}
+        {this.state.reportsCompArr}
         {!this.state.authenticated && mode !== 'lite' && (
           <Route path="/login" component={LoginForm} />
         )}

@@ -38,6 +38,8 @@ import {
   GET_PROJECT_MAP,
   SET_SEG_LABEL_MAP_INDEX,
   GET_TEMPLATES,
+  // SELECT_REPORT,
+  // CLOSE_REPORT,
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -62,6 +64,7 @@ const initialState = {
   templates: {},
   aimSegLabelMaps: {},
   notificationAction: "",
+  reports: [],
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -77,7 +80,7 @@ const asyncReducer = (state = initialState, action) => {
           }
           return newSerie;
         });
-        
+
         updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
         return { ...state, openSeries: updatedOpenSeries };
       case GET_NOTIFICATIONS:
@@ -119,7 +122,7 @@ const asyncReducer = (state = initialState, action) => {
         for (let serie of aimIDClearedOPenSeries) {
           serie.aimID = null;
         }
-        
+
         return { ...state, openSeries: aimIDClearedOPenSeries };
       case CLEAR_ACTIVE_AIMID:
         aimIDClearedOPenSeries = state.openSeries.map(serie => {
@@ -130,7 +133,7 @@ const asyncReducer = (state = initialState, action) => {
           return newSerie;
         });
         aimIDClearedOPenSeries[state.activePort].aimID = null;
-        
+
         return { ...state, openSeries: aimIDClearedOPenSeries };
       case UPDATE_IMAGEID:
         const openSeriesToUpdate = state.openSeries.map(serie => {
@@ -141,7 +144,7 @@ const asyncReducer = (state = initialState, action) => {
           return newSerie;
         });
         openSeriesToUpdate[state.activePort].imageID = action.imageID;
-        
+
         return { ...state, openSeries: openSeriesToUpdate };
       case CLOSE_SERIE:
         let delSeriesUID = state.openSeries[state.activePort].seriesUID;
@@ -172,7 +175,7 @@ const asyncReducer = (state = initialState, action) => {
         } else {
           delActivePort = delGrid.length - 1;
         }
-        
+
         return {
           ...state,
           openSeries: delGrid,
@@ -215,7 +218,7 @@ const asyncReducer = (state = initialState, action) => {
             serie.aimID = null;
           }
         }
-        
+
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
@@ -261,7 +264,7 @@ const asyncReducer = (state = initialState, action) => {
             changedPortSeries[i].aimID = null;
           }
         }
-        
+
         return Object.assign({}, state, {
           activePort: action.portIndex,
           openSeries: changedPortSeries,
@@ -326,7 +329,7 @@ const asyncReducer = (state = initialState, action) => {
             }
           }
         }
-        
+
         return {
           ...state,
           patients: clearedPatients,
@@ -465,7 +468,7 @@ const asyncReducer = (state = initialState, action) => {
         });
         //update Openseries data
         aimOpenSeries[action.payload.index].aimID = action.payload.aimID;
-        
+
         return {
           ...state,
           aimsList: {
@@ -485,7 +488,7 @@ const asyncReducer = (state = initialState, action) => {
         seriesInfo.defaultTemplate =
           state.projectMap[seriesInfo.projectID].defaultTemplate;
         let newOpenSeries = state.openSeries.concat(seriesInfo);
-        
+
         return {
           ...state,
           openSeries: newOpenSeries,
@@ -525,7 +528,7 @@ const asyncReducer = (state = initialState, action) => {
           return newSerie;
         });
         updatedGrid[index].aimID = aimID;
-        
+
         // return { ...state, openSeries: updatedGrid, aimsList: {...state.aimsList} };
         return Object.assign({}, state, {
           openSeries: updatedGrid,
@@ -540,6 +543,20 @@ const asyncReducer = (state = initialState, action) => {
             },
           },
         });
+
+      // case SELECT_REPORT:
+      //   const updatedReports = [...state.reports];
+      //   const { reportType, patientObj } = action.payload;
+      //   updatedReports.push({
+      //     patientID: action.payload.patientObj.patientID,
+      //     reportType,
+      //     patientObj
+      //   });
+      //   return { ...state, reports: updatedReports };
+      // case CLOSE_REPORT:
+      //   const reportsAfterDelete = [...state.reports];
+      //   reportsAfterDelete[action.index] = null;
+      //   return { ...state, reports: reportsAfterDelete };
       case GET_PROJECT_MAP:
         return {
           ...state,

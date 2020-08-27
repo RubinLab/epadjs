@@ -18,8 +18,8 @@ export function drawWaterfall(data, metric) {
 	                } */
     console.log(data.series[i].name + ' ' + roundDouble(data.series[i].y));
     if (
-      roundDouble(data.series[i].y) < 999.0 &&
-      roundDouble(data.series[i].y) != 0.0
+      roundDouble(data.series[i].y) < 999.0
+      // roundDouble(data.series[i].y) != 0.0
     ) {
       data.series[i].y = roundDouble(data.series[i].y);
       processed_json.push(data.series[i]);
@@ -61,18 +61,13 @@ export function drawWaterfall(data, metric) {
       },
       series: {
         cursor: 'pointer',
-        // point: {
-        //   events: {
-        //     click: function() {
-        //       renderTable(
-        //         'http://' + window.location.host + '/epad/',
-        //         this.name,
-        //         this.project,
-        //         metric
-        //       );
-        //     },
-        //   },
-        // },
+        point: {
+          events: {
+            click: function() {
+            console.log("this.y, this.name", this.y, this.name)
+            },
+          },
+        },
       },
     },
     // function renderTable(serverUrl,patId,projectId, report, template){

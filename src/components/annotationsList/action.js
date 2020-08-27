@@ -39,6 +39,8 @@ import {
   GET_PROJECT_MAP,
   SET_SEG_LABEL_MAP_INDEX,
   GET_TEMPLATES,
+  // SELECT_REPORT,
+  // CLOSE_REPORT,
   colors,
   commonLabels,
 } from "./types";
@@ -55,6 +57,14 @@ import { getImageIdAnnotations } from "aimapi";
 export const getProjectMap = projectMap => {
   return { type: GET_PROJECT_MAP, projectMap };
 };
+
+// export const selectReport = (reportType, patientObj ) => {
+//   return {type: SELECT_REPORT, payload: {reportType, patientObj} }
+// }
+
+// export const closeReport = (index) => {
+//   return {type: CLOSE_REPORT, index }
+// }
 
 export const getTemplates = () => {
   return async (dispatch, getState) => {

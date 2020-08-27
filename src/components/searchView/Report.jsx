@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import ReactHtmlParser from 'react-html-parser';
 import Draggable from 'react-draggable';
+import { Rnd } from 'react-rnd';
 import { renderTable, wordExport } from './recist';
 import { drawWaterfall } from './waterfall';
 import { FaTimes } from 'react-icons/fa';
@@ -56,12 +57,10 @@ const Report = props => {
 
   const getTableArguments = () => {
     const { report } = props;
-    let patients;
     let projectID;
     let patientID;
     if (report !== 'Waterfall') {
-      patients = Object.values(props.selectedPatients);
-      ({ projectID, patientID } = patients[0]);
+      ({ projectID, patientID } = props.patient);
     }
     const template = report === 'RECIST' ? null : props.template;
     const id = 'recisttbl';
@@ -102,8 +101,9 @@ const Report = props => {
     };
   };
 
-  const onClose = () => {
-    props.onClose();
+  const onClose = e => {
+    const index = parseInt(e.target.dataset.index);
+    props.onClose(index);
   };
 
   const getReportTable = async data => {
@@ -121,6 +121,20 @@ const Report = props => {
       let reportTable;
       if (Object.keys(data).length > 0) {
         if (props.report !== 'Waterfall') {
+          console.log(report);
+          console.log(
+            ' id,patientID,projectID, report,  numofHeaderCols, hideCols, loadFilter'
+          );
+          console.log(
+            id,
+            patientID,
+            projectID,
+            report,
+            numofHeaderCols,
+            hideCols,
+            loadFilter
+          );
+          console.log(data);
           reportTable = await renderTable(
             id,
             patientID,
@@ -130,6 +144,7 @@ const Report = props => {
             numofHeaderCols,
             hideCols,
             loadFilter,
+            props.index,
             onClose
           );
         }
@@ -212,23 +227,27 @@ const Report = props => {
   };
 
   const stopProp = e => {
+    console.log('here');
     e.stopPropagation();
   };
 
   const downloadReport = () => {
-    let { subjectName } = Object.values(props.selectedPatients)[0];
+    let { subjectName } = props.patient;
     subjectName = clearCarets(subjectName);
-    wordExport(subjectName)
-  }
+    wordExport(subjectName);
+  };
 
   useEffect(() => {
-    const closeBtn = document.getElementById('closeBtn');
+    // const closeBtn = document.getElementById('closeBtn');
     const shapesFilter = document.getElementById('shapesFilter');
     const templateFilter = document.getElementById('templateFilter');
     const filter = document.getElementById('filter');
     const exportBtn = document.getElementById('exportBtn');
 
-    if (closeBtn) closeBtn.addEventListener('click', onClose);
+    // if (closeBtn) {
+    //   closeBtn.addEventListener('click', onClose);
+    //   closeBtn.addEventListener('mousedown', stopProp);
+    // }
     if (exportBtn) exportBtn.addEventListener('click', downloadReport);
     if (shapesFilter) {
       shapesFilter.addEventListener('change', handleFilterSelect);
@@ -244,7 +263,10 @@ const Report = props => {
     }
 
     return () => {
-      if (closeBtn) closeBtn.removeEventListener('click', onClose);
+      // if (closeBtn) {
+      //   closeBtn.removeEventListener('click', onClose);
+      //   closeBtn.removeEventListener('mousedown', stopProp);
+      // }
       if (exportBtn) exportBtn.removeEventListener('click', downloadReport);
 
       if (shapesFilter) {
@@ -290,10 +312,7 @@ const Report = props => {
     // check if the col is 0 (one aim only)
     const { openSeries } = props;
     const notOpenSeries = [];
-    const { projectID, patientID, subjectName } = Object.values(
-      props.selectedPatients
-    )[0];
-
+    const { projectID, patientID, subjectName } = props.patient;
     if (col !== -1) {
       const { seriesUID, aimUID, studyUID } = data.tUIDs[row][col];
       // if not zero check if it is already open
@@ -337,7 +356,7 @@ const Report = props => {
   };
 
   const clearGridAndOpenAllSeries = () => {
-    const { projectID, patientID } = Object.values(props.selectedPatients)[0];
+    const { projectID, patientID } = props.patient;
     props.dispatch(clearGrid());
     const seriesToOpen =
       selectedCol >= 0
@@ -347,14 +366,33 @@ const Report = props => {
     setShowConfirmModal(false);
   };
 
+  console.log('before return index', props.index);
   return (
     <>
-      <Draggable>
+      {/* <Draggable> */}
+      <Rnd
+        default={{
+          x: 0,
+          y: 0,
+          // width: 605,
+          // height: 200,
+        }}
+        // minWidth={300}
+        // minHeight={190}
+        // bounds="window"
+        enableUserSelectHack={false}
+      >
         <div
           id="report"
           style={props.report === 'Waterfall' ? style : {}}
           onClick={captureClick}
         >
+          <div data-index={props.index}>
+            <button>Export</button>
+            <button data-index={props.index} onClick={onClose}>
+              {'x'}
+            </button>
+          </div>
           {props.report === 'Waterfall' && (
             <>
               <div className="waterfall-header">
@@ -381,7 +419,8 @@ const Report = props => {
 
           {node}
         </div>
-      </Draggable>
+      </Rnd>
+      {/* </Draggable> */}
       {showConfirmModal && (
         <ConfirmationModal
           title={messages.title}
