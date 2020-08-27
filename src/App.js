@@ -30,6 +30,10 @@ import {
   getSingleSerie,
   addToGrid,
   getWholeData,
+  startLoading,
+  alertViewPortFull,
+  annotationsLoadingError,
+  loadCompleted,
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
@@ -38,6 +42,7 @@ import { getStudies, getStudy } from "./services/studyServices";
 import { getSeries, getSingleSeries } from "./services/seriesServices";
 
 import { decrypt, decryptAndAdd } from "./services/decryptUrlService";
+import { MAX_PORT } from "./constants";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
@@ -398,17 +403,18 @@ class App extends Component {
             // const result = await decrypt(args);
             const result = await decryptAndAdd(args);
             const { patientID, studyUID, projectID } = result.data;
-            console.log("Result", result.data, patientID, studyUID);
-            const packData = {
+            // console.log("Result", result.data, patientID, studyUID);
+            const packedData = {
               projectID,
               patientID,
               patientName: "patientName",
               studyUID,
             };
-            this.props.dispatch(addToGrid(packData));
-            this.props.dispatch(getSingleSerie(packData));
-            getWholeData(packData);
-            this.props.history.push("/display");
+            // this.props.dispatch(addToGrid(packData));
+            // this.props.dispatch(getSingleSerie(packData));
+            // getWholeData(packData);
+            // this.props.history.push("/display");
+            this.displaySeries(packedData);
           }
         } catch (err) {
           console.log("Error in user retrieval!", err);
@@ -417,6 +423,68 @@ class App extends Component {
       .catch((err2) => {
         console.log("Authentication failed!", err2);
       });
+  };
+
+  getSeriesData = async (selected) => {
+    this.props.dispatch(startLoading());
+    const { projectID, patientID, studyUID } = selected;
+    try {
+      const { data: series } = await getSeries(projectID, patientID, studyUID);
+      this.props.dispatch(loadCompleted());
+      return series;
+    } catch (err) {
+      this.props.dispatch(annotationsLoadingError(err));
+    }
+  };
+
+  displaySeries = async (selected) => {
+    if (this.props.openSeries.length === MAX_PORT) {
+      this.props.dispatch(alertViewPortFull());
+    } else {
+      const { patientID, studyUID } = selected;
+      let seriesArr;
+
+      seriesArr = await this.getSeriesData(selected);
+
+      if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
+        //if there is not bring the modal
+        // await this.setState({
+        //   isSerieSelectionOpen: true,
+        //   selectedStudy: [seriesArr],
+        //   studyName: selected.studyDescription,
+        // });
+      } else {
+        //if there is enough room
+        //add serie to the grid
+        const promiseArr = [];
+        for (let serie of seriesArr) {
+          this.props.dispatch(addToGrid(serie));
+          promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
+        }
+        this.props.history.push("/display");
+        //getsingleSerie
+        for (let serie of seriesArr) {
+          this.props.dispatch(addToGrid(serie));
+          promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
+        }
+        //getsingleSerie
+        Promise.all(promiseArr)
+          .then(() => {})
+          .catch((err) => console.log(err));
+
+        //if patient doesnot exist get patient
+        // if (!patientExists) {
+        //   // this.props.dispatch(getWholeData(null, selected));
+        //   getWholeData(null, selected);
+        // } else {
+        //   //check if study exist
+        //   this.props.dispatch(
+        //     updatePatient("study", true, patientID, studyUID)
+        //   );
+        // }
+      }
+      // this.props.dispatch(clearSelection());
+    }
   };
 
   getMessageFromEventSrc = (res) => {
@@ -767,7 +835,6 @@ class App extends Component {
   };
 
   render() {
-    // this.doTeaching();
     const {
       notifications,
       mode,
