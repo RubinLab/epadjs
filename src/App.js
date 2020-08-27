@@ -438,6 +438,7 @@ class App extends Component {
   };
 
   displaySeries = async (selected) => {
+    console.log("In display series");
     if (this.props.openSeries.length === MAX_PORT) {
       this.props.dispatch(alertViewPortFull());
     } else {
@@ -445,8 +446,16 @@ class App extends Component {
       let seriesArr;
 
       seriesArr = await this.getSeriesData(selected);
+      console.log("before reduce", seriesArr);
+
+      //get extraction of the series (extract unopen series)
+      if (seriesArr.length > 0) seriesArr = this.excludeOpenSeries(seriesArr);
+      console.log("Reduced array", seriesArr);
 
       if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
+        alert(
+          "There are more than 6 series!, this situation is not handled at the moment"
+        );
         //if there is not bring the modal
         // await this.setState({
         //   isSerieSelectionOpen: true,
@@ -461,15 +470,10 @@ class App extends Component {
           this.props.dispatch(addToGrid(serie));
           promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
         }
-        this.props.history.push("/display");
-        //getsingleSerie
-        for (let serie of seriesArr) {
-          this.props.dispatch(addToGrid(serie));
-          promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
-        }
-        //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => {})
+          .then(() => {
+            this.props.history.push("/display");
+          })
           .catch((err) => console.log(err));
 
         //if patient doesnot exist get patient
@@ -485,6 +489,23 @@ class App extends Component {
       }
       // this.props.dispatch(clearSelection());
     }
+  };
+
+  excludeOpenSeries = (allSeriesArr) => {
+    const result = [];
+    //get all series number in an array
+    const idArr = this.props.openSeries.reduce((all, item, index) => {
+      all.push(item.seriesUID);
+      return all;
+    }, []);
+    //if array doesnot include that serie number
+    allSeriesArr.forEach((serie) => {
+      if (!idArr.includes(serie.seriesUID)) {
+        //push that serie in the result arr
+        result.push(serie);
+      }
+    });
+    return result;
   };
 
   getMessageFromEventSrc = (res) => {
