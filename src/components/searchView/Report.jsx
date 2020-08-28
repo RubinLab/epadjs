@@ -106,6 +106,10 @@ const Report = props => {
     props.onClose(index);
   };
 
+  const waterfallSelect = name => {
+    props.waterfallSelect(name);
+  };
+
   const getReportTable = async data => {
     try {
       const {
@@ -149,7 +153,7 @@ const Report = props => {
           );
         }
         if (props.report === 'Waterfall')
-          reportTable = await drawWaterfall(data);
+          reportTable = await drawWaterfall(data, waterfallSelect);
         reportTable = ReactHtmlParser(reportTable);
         setNode(reportTable);
       }
@@ -161,6 +165,7 @@ const Report = props => {
   const selectMetric = async e => {
     const { selectedProject } = getTableArguments();
     const metric = e.target.value;
+    props.handleMetric(metric);
     const validMetric =
       metric === 'ADLA' || metric === 'RECIST' || metric === 'intensitystddev';
     const type = 'BASELINE';
@@ -238,17 +243,10 @@ const Report = props => {
   };
 
   useEffect(() => {
-    // const closeBtn = document.getElementById('closeBtn');
     const shapesFilter = document.getElementById('shapesFilter');
     const templateFilter = document.getElementById('templateFilter');
     const filter = document.getElementById('filter');
-    const exportBtn = document.getElementById('exportBtn');
 
-    // if (closeBtn) {
-    //   closeBtn.addEventListener('click', onClose);
-    //   closeBtn.addEventListener('mousedown', stopProp);
-    // }
-    if (exportBtn) exportBtn.addEventListener('click', downloadReport);
     if (shapesFilter) {
       shapesFilter.addEventListener('change', handleFilterSelect);
       shapesFilter.addEventListener('mousedown', stopProp);
@@ -263,12 +261,6 @@ const Report = props => {
     }
 
     return () => {
-      // if (closeBtn) {
-      //   closeBtn.removeEventListener('click', onClose);
-      //   closeBtn.removeEventListener('mousedown', stopProp);
-      // }
-      if (exportBtn) exportBtn.removeEventListener('click', downloadReport);
-
       if (shapesFilter) {
         shapesFilter.removeEventListener('change', handleFilterSelect);
         shapesFilter.removeEventListener('mousedown', stopProp);
@@ -366,6 +358,11 @@ const Report = props => {
     setShowConfirmModal(false);
   };
 
+  const header =
+    props.report !== 'Waterfall'
+      ? `${props.report} - ${clearCarets(props.patient.subjectName)}`
+      : '';
+
   console.log('before return index', props.index);
   return (
     <>
@@ -388,10 +385,15 @@ const Report = props => {
           onClick={captureClick}
         >
           <div data-index={props.index}>
-            <button>Export</button>
-            <button data-index={props.index} onClick={onClose}>
-              {'x'}
-            </button>
+            <div className="report-header">
+              <div className="report-header__title">{header}</div>
+              <div className="report-header__btngrp">
+                <button onClick={downloadReport}>Export</button>
+                <button data-index={props.index} onClick={onClose}>
+                  {'x'}
+                </button>
+              </div>
+            </div>
           </div>
           {props.report === 'Waterfall' && (
             <>

@@ -6,7 +6,7 @@ function roundDouble(val) {
   return val;
 }
 
-export function drawWaterfall(data, metric) {
+export function drawWaterfall(data, waterfallSelect) {
   let i;
   var processed_json = new Array();
   for (i = 0; i < data.series.length; i++) {
@@ -64,7 +64,7 @@ export function drawWaterfall(data, metric) {
         point: {
           events: {
             click: function() {
-            console.log("this.y, this.name", this.y, this.name)
+            waterfallSelect(this.name)
             },
           },
         },

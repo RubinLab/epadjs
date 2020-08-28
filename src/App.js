@@ -97,6 +97,7 @@ class App extends Component {
       message: '',
       reportType: '',
       reportsCompArr: [],
+      metric: null,
     };
   }
 
@@ -173,6 +174,8 @@ class App extends Component {
           index={index}
           patient={patients[0]}
           key={`report${index}`}
+          waterfallSelect={this.handleWaterFallSelect}
+          handleMetric={this.getMetric}
         />
       );
       this.setState({
@@ -184,9 +187,31 @@ class App extends Component {
     }
   };
 
-  handleWaterFallSelect = (name) => {
+  getMetric = metric => {
+    this.setState({ metric });
+  };
+  handleWaterFallSelect = name => {
+    // find the patient selected
+    const patient = this.props.selectedPatients[name];
 
-  }
+    console.log(patient);
+    const reportsCompArr = [...this.state.reportsCompArr];
+    const index = reportsCompArr.length;
+    reportsCompArr.push(
+      <Report
+        onClose={this.closeReportModal}
+        report={this.state.metric}
+        index={index}
+        patient={patient}
+        key={`report${index}`}
+        waterfallSelect={this.handleWaterFallSelect}
+        handleMetric={this.getMetric}
+      />
+    );
+    this.setState({
+      reportsCompArr,
+    });
+  };
 
   displayWaterfall = () => {
     this.props.dispatch(selectProject(this.state.pid));

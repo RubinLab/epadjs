@@ -526,3 +526,15 @@ h5.add-subject__modal--label,
 .react-draggable {
   z-index: 100;
 }
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  background: #3a3f44;
+  padding: 0.5rem;
+}
+
+.report-header__title {
+  color: white;
+  font-size: 1.2rem;
+}
