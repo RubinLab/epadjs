@@ -84,20 +84,20 @@ class RunTimeParamWindow extends React.Component {
   };
   render() {
     return (
-      <div className="tools menu-display" id="template">
-        <Modal.Dialog className="create-plugin__modal">
-          <Modal.Header>
-            <Modal.Title className="tableHeaderRunTimeParams">
+      <div className="plugin_runtime_params_window_container" id="template">
+        <div className="plugin_runtime_params_modal">
+          <div className="plugin_runtime_params_header">
+            <div className="tableHeaderRunTimeParams">
               Set Parameters For Runtime
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body className="create-user__modal--body">
+            </div>
+          </div>
+          <div className="plugin_runtime_params_modal_body">
             <table className="tableRunTimeParams">
               <tbody>{this.showParams()}</tbody>
             </table>
-          </Modal.Body>
+          </div>
 
-          <Modal.Footer className="create-user__modal--footer">
+          <div className="plugin_runtime_params_modal_footer">
             <div className="create-user__modal--buttons">
               <button
                 variant="primary"
@@ -114,8 +114,8 @@ class RunTimeParamWindow extends React.Component {
                 Cancel
               </button>
             </div>
-          </Modal.Footer>
-        </Modal.Dialog>
+          </div>
+        </div>
       </div>
     );
   }

@@ -4,6 +4,7 @@ import ReactTooltip from "react-tooltip";
 import { FaTimes } from "react-icons/fa";
 
 const managementHeader = ({ selection, onClose }) => {
+  selection = selection === "Worklists" ? "Worklists Created by Me" : selection;
   return (
     <div className="mng-header">
       <div className="mng-header__title">{selection}</div>

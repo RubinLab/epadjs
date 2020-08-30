@@ -1,0 +1,43 @@
+.interpolate-selector {
+    position: absolute;
+    background-color: #3a3f44;
+    padding: 2px;
+    outline: solid;
+    outline-width: 1px;
+    background-color: #3a3f44;
+    outline-color: black;
+    width: 86px;
+    height: 55px;
+    top: 95px;
+    left: 770px;
+    z-index: 1000;
+}
+
+label {
+    font-weight: 400;
+}
+
+.interpolate-button {
+    float: right;
+}
+
+.interpolate-unchecked {
+    display: "flex";
+    justify-content: "center";
+    align-items: "center";
+    height: "100%";
+    font-size: 11;
+    color: #861737;
+    padding-right: 2;
+}
+
+
+hr {
+    margin-top: 1em;
+    margin-bottom: 0em;
+}
+
+h5 {
+    font-size: 2em;
+    margin-bottom: 0em;
+}

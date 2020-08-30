@@ -223,6 +223,7 @@ class Users extends React.Component {
         CreatePAC: "connection",
         CreateAutoPACQuery: "query",
         CreateProject: "project",
+        CreateWorklist: "worklist",
       };
       arr.forEach(el => {
         if (mode === "lite" && el === "CreateProject") {

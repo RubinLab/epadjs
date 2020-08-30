@@ -14,19 +14,19 @@ class SmartBrushMenu extends Component {
     this.state = {
       customBrush: {
         min: -1000,
-        max: 3000
+        max: 3000,
       },
-      rangeDisabled: true
+      rangeDisabled: true,
     };
   }
 
-  handleBrushChange = gateName => {
+  handleBrushChange = (gateName) => {
     if (gateName === "custom") this.setState({ rangeDisabled: false });
     else this.setState({ rangeDisabled: true });
     brushModule.setters.activeGate(gateName);
   };
 
-  applyCustomBrushValues = values => {
+  applyCustomBrushValues = (values) => {
     const { min, max } = values;
     brushModule.setters.customGateRange(min, max);
   };
@@ -35,6 +35,9 @@ class SmartBrushMenu extends Component {
     return (
       <Draggable>
         <div className="smb-pop-up">
+          <div className="close-smart-brush-menu" onClick={this.props.onClose}>
+            <a href="#">X</a>
+          </div>
           <div className="buttonLabel">
             <span>Preset Brushes</span>
           </div>
@@ -76,8 +79,10 @@ class SmartBrushMenu extends Component {
                       minValue={-1000}
                       // formatLabel={value => `${value} HU`}
                       value={this.state.customBrush}
-                      onChange={value => this.setState({ customBrush: value })}
-                      onChangeComplete={value =>
+                      onChange={(value) =>
+                        this.setState({ customBrush: value })
+                      }
+                      onChangeComplete={(value) =>
                         this.applyCustomBrushValues(value)
                       }
                     />

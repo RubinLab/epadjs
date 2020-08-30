@@ -367,12 +367,17 @@ class ParametersForProjectWindow extends React.Component {
     const { error } = this.props;
 
     return (
-      <div className="tools menu-display" id="template">
-        <Modal.Dialog className="create-plugin__modal">
-          <Modal.Header>
-            <Modal.Title>Project Paramaters</Modal.Title>
-          </Modal.Header>
-          <Modal.Body className="create-user__modal--body">
+      <div
+        className="plugin_project_parameter_window_container"
+        id="pluginprojectparams"
+      >
+        <div className="plugin_project_parameter_window_modal">
+          <div className="plugin_project_parameter_window_header">
+            <div className="plugin_project_parameter_window_title">
+              Project Paramaters
+            </div>
+          </div>
+          <div className="plugin_project_parameter_window_body">
             {!this.state.addnew && (
               <ReactTable
                 className="pro-table"
@@ -392,8 +397,8 @@ class ParametersForProjectWindow extends React.Component {
               />
             )}
             {this.state.addnew && (
-              <div>
-                <h5>add new project parameter</h5>
+              <div className="plugin_project_parameter_window_newparameter">
+                <h5>add new parameter</h5>
                 <form className="add-project__modal--form">
                   <h5 className="add-project__modal--label">id*</h5>
                   <select
@@ -482,9 +487,9 @@ class ParametersForProjectWindow extends React.Component {
                 </form>
               </div>
             )}
-          </Modal.Body>
+          </div>
           {this.state.addnew && !this.state.editParam && (
-            <Modal.Footer className="create-user__modal--footer">
+            <div className="plugin_project_parameter_window_footer">
               <div className="create-user__modal--buttons">
                 <button
                   variant="primary"
@@ -501,10 +506,10 @@ class ParametersForProjectWindow extends React.Component {
                   Close
                 </button>
               </div>
-            </Modal.Footer>
+            </div>
           )}
           {this.state.editParam && (
-            <Modal.Footer className="create-user__modal--footer">
+            <div className="plugin_project_parameter_window_footer">
               <div className="create-user__modal--buttons">
                 <button
                   variant="primary"
@@ -521,10 +526,10 @@ class ParametersForProjectWindow extends React.Component {
                   Close
                 </button>
               </div>
-            </Modal.Footer>
+            </div>
           )}
           {!this.state.addnew && (
-            <Modal.Footer className="create-user__modal--footer">
+            <div className="plugin_project_parameter_window_footer">
               <div className="create-user__modal--buttons">
                 <button
                   variant="primary"
@@ -541,9 +546,9 @@ class ParametersForProjectWindow extends React.Component {
                   Close
                 </button>
               </div>
-            </Modal.Footer>
+            </div>
           )}
-        </Modal.Dialog>
+        </div>
       </div>
     );
   }

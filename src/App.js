@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
+import _ from "lodash";
 import { getUser, getUserInfo } from "./services/userServices";
 import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
@@ -151,7 +152,7 @@ class App extends Component {
       }
       this.setState({ treeExpand });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -204,7 +205,7 @@ class App extends Component {
       }
       this.setState({ treeExpand });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -302,7 +303,7 @@ class App extends Component {
         if (mode === "lite") this.setState({ pid: "lite" });
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err);
       });
     //get notifications from sessionStorage and setState
     let notifications = sessionStorage.getItem("notifications");
@@ -379,7 +380,7 @@ class App extends Component {
             userData = userData.data;
             this.setState({ admin: userData.admin });
           } catch (err) {
-            console.log(err);
+            console.error(err);
           }
           this.eventSource = new EventSourcePolyfill(
             `${apiUrl}/notifications`,
@@ -526,7 +527,7 @@ class App extends Component {
       const message = params;
       if (refresh)
         this.props.dispatch(
-          getNotificationsData(projectID, lastEventId, refresh)
+          getNotificationsData(projectID, lastEventId, refresh, action)
         );
       let time = new Date(createdtime).toString();
       const GMTIndex = time.indexOf(" G");
@@ -542,14 +543,18 @@ class App extends Component {
       const tagEdited = action.startsWith("Tag");
       const uploaded = action.startsWith("Upload");
       if (tagEdited || uploaded) {
-        console.log("collapsing");
-        this.setState({ treeExpand: {} });
+        const { pid } = this.state;
+        this.setState({ treeData: {} });
+        this.setState({ pid });
+        if (this.props.openSeries.length === 0) {
+          this.props.history.push(`/search/${pid}`);
+        }
       }
       this.setState({ notifications });
       const stringified = JSON.stringify(notifications);
       sessionStorage.setItem("notifications", stringified);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -678,7 +683,7 @@ class App extends Component {
       }
       this.setState({ treeData });
     } catch (err) {
-      console.log("getTreeData operation --", err);
+      console.error(err);
     }
   };
 
@@ -748,7 +753,7 @@ class App extends Component {
       const treeData = { [pid]: patients };
       this.setState({ treeData });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -759,75 +764,76 @@ class App extends Component {
 
   updateTreeDataOnSave = async (refs, newLevel) => {
     try {
-      const treeData = { ...this.state.treeData };
-      const { projectID, patientID, studyUID, seriesUID } = refs;
-      const isPatient = projectID && patientID;
-      const isStudy = projectID && patientID && studyUID;
-      const isSeries = projectID && patientID && studyUID && seriesUID;
-      const patient = treeData[projectID][patientID];
-      const shouldUpdateStudy =
-        patient && Object.values(patient.studies).length > 0;
-      const shouldUpdateSeries =
-        shouldUpdateStudy &&
-        Object.values(patient.studies[studyUID].series).length > 0;
-      if (newLevel) {
-        if (newLevel === "study" && isStudy && shouldUpdateStudy) {
-          const { data: studies } = await getStudies(
-            projectID,
-            patientID,
-            studyUID
-          );
-          let study = this.findNonExisting(studies, studyUID, "studyUID");
-          study = { data: study, series: {} };
-          treeData[projectID][patientID].studies[studyUID] = study;
-        }
-        if (newLevel === "series" && isSeries && shouldUpdateSeries) {
-          const { data: seriesArr } = await getSeries(
-            projectID,
-            patientID,
-            studyUID
-          );
-          let series = this.findNonExisting(seriesArr, seriesUID, "seriesUID");
-          series = { data: series };
-          treeData[projectID][patientID].studies[studyUID].series[
-            seriesUID
-          ] = series;
-        }
-      } else {
-        if (isPatient && treeData[projectID][patientID]) {
-          const promises = [];
-          promises.push(getSubject(projectID, patientID));
-          if (isStudy && treeData[projectID][patientID].studies[studyUID])
-            promises.push(getStudy(projectID, patientID, studyUID));
-          if (
-            isSeries &&
-            treeData[projectID][patientID].studies[studyUID].series[seriesUID]
-          )
-            promises.push(
-              getSingleSeries(projectID, patientID, studyUID, seriesUID)
-            );
+      this.setState({ treeData: {} });
+      // const treeData = { ...this.state.treeData };
+      // const { projectID, patientID, studyUID, seriesUID } = refs;
+      // const isPatient = projectID && patientID;
+      // const isStudy = projectID && patientID && studyUID;
+      // const isSeries = projectID && patientID && studyUID && seriesUID;
+      // const patient = treeData[projectID][patientID];
+      // const shouldUpdateStudy =
+      //   patient && Object.values(patient.studies).length > 0;
+      // const shouldUpdateSeries =
+      //   shouldUpdateStudy &&
+      //   Object.values(patient.studies[studyUID].series).length > 0;
+      // if (newLevel) {
+      //   if (newLevel === "study" && isStudy && shouldUpdateStudy) {
+      //     const { data: studies } = await getStudies(
+      //       projectID,
+      //       patientID,
+      //       studyUID
+      //     );
+      //     let study = this.findNonExisting(studies, studyUID, "studyUID");
+      //     study = { data: study, series: {} };
+      //     treeData[projectID][patientID].studies[studyUID] = study;
+      //   }
+      //   if (newLevel === "series" && isSeries && shouldUpdateSeries) {
+      //     const { data: seriesArr } = await getSeries(
+      //       projectID,
+      //       patientID,
+      //       studyUID
+      //     );
+      //     let series = this.findNonExisting(seriesArr, seriesUID, "seriesUID");
+      //     series = { data: series };
+      //     treeData[projectID][patientID].studies[studyUID].series[
+      //       seriesUID
+      //     ] = series;
+      //   }
+      // } else {
+      //   if (isPatient && treeData[projectID][patientID]) {
+      //     const promises = [];
+      //     promises.push(getSubject(projectID, patientID));
+      //     if (isStudy && treeData[projectID][patientID].studies[studyUID])
+      //       promises.push(getStudy(projectID, patientID, studyUID));
+      //     if (
+      //       isSeries &&
+      //       treeData[projectID][patientID].studies[studyUID].series[seriesUID]
+      //     )
+      //       promises.push(
+      //         getSingleSeries(projectID, patientID, studyUID, seriesUID)
+      //       );
 
-          const result = await Promise.all(promises);
-          treeData[projectID][patientID].data = result[0].data;
+      //     const result = await Promise.all(promises);
+      //     treeData[projectID][patientID].data = result[0].data;
 
-          if (isStudy && treeData[projectID][patientID].studies[studyUID]) {
-            treeData[projectID][patientID].studies[studyUID].data =
-              result[1].data;
-          }
+      //     if (isStudy && treeData[projectID][patientID].studies[studyUID]) {
+      //       treeData[projectID][patientID].studies[studyUID].data =
+      //         result[1].data;
+      //     }
 
-          if (
-            isSeries &&
-            treeData[projectID][patientID].studies[studyUID].series[seriesUID]
-          ) {
-            treeData[projectID][patientID].studies[studyUID].series[
-              seriesUID
-            ].data = result[2].data[0];
-          }
-        }
-      }
-      this.setState({ treeData });
+      //     if (
+      //       isSeries &&
+      //       treeData[projectID][patientID].studies[studyUID].series[seriesUID]
+      //     ) {
+      //       treeData[projectID][patientID].studies[studyUID].series[
+      //         seriesUID
+      //       ].data = result[2].data[0];
+      //     }
+      //   }
+      // }
+      // this.setState({ treeData });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -959,6 +965,7 @@ class App extends Component {
                       updateTreeDataOnSave={this.updateTreeDataOnSave}
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
+                      admin={this.state.admin}
                     />
                   )}
                 />
@@ -985,6 +992,7 @@ class App extends Component {
                       updateTreeDataOnSave={this.updateTreeDataOnSave}
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
+                      admin={this.state.admin}
                     />
                   )}
                 />
@@ -1029,6 +1037,7 @@ class App extends Component {
                       updateTreeDataOnSave={this.updateTreeDataOnSave}
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
+                      admin={this.state.admin}
                     />
                   )}
                 />
@@ -1075,6 +1084,7 @@ class App extends Component {
                     treeData={this.state.treeData}
                     getTreeData={this.getTreeData}
                     closeAllCounter={this.state.closeAll}
+                    admin={this.state.admin}
                   />
                 )}
               />

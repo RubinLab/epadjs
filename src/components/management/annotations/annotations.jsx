@@ -26,6 +26,8 @@ import {
   updatePatient,
 } from "../../annotationsList/action";
 import WarningModal from "../../common/warningModal";
+import "../menuStyle.css"
+
 const mode = sessionStorage.getItem("mode");
 
 const messages = {

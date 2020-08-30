@@ -60,11 +60,13 @@ const initialState = {
   projectMap: {},
   templates: {},
   aimSegLabelMaps: {},
+  notificationAction: "",
 };
 
 const asyncReducer = (state = initialState, action) => {
   try {
     let aimIDClearedOPenSeries = [];
+    let aimRefs = {};
     switch (action.type) {
       case UPDATE_IMAGE_INDEX:
         const updatedOpenSeries = state.openSeries.map((serie) => {
@@ -77,16 +79,17 @@ const asyncReducer = (state = initialState, action) => {
         updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
         return { ...state, openSeries: updatedOpenSeries };
       case GET_NOTIFICATIONS:
-        const { uploadedPid, lastEventId, refresh } = action.payload;
-        return { ...state, uploadedPid, lastEventId, refresh };
+        const { uploadedPid, lastEventId, refresh, notificationAction } = action.payload;
+        return { ...state, uploadedPid, lastEventId, refresh, notificationAction };
       case UPDATE_PATIENT_AIM_DELETE:
         let patientAimDelete = { ...state.patients };
-        let { aimRefs } = action;
+         ({ aimRefs } = action);
         delete patientAimDelete[aimRefs.subjectID].studies[aimRefs.studyUID]
           .series[aimRefs.seriesUID].annotations[aimRefs.aimID];
         return { ...state, patient: patientAimDelete };
       case UPDATE_PATIENT_AIM_SAVE:
         let patientAimSave = { ...state.patients };
+        ({ aimRefs } = action);
         aimRefs = action.aimRefs;
         patientAimSave[aimRefs.patientID].studies[aimRefs.studyUID].series[
           aimRefs.seriesUID

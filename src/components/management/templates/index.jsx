@@ -17,7 +17,7 @@ import { getProjects } from "../../../services/projectServices";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
 import EditTemplates from "./projectTable";
-import { getTemplates } from "../../annotationsList/action"
+import { getTemplates } from "../../annotationsList/action";
 
 const mode = sessionStorage.getItem("mode");
 
@@ -149,7 +149,6 @@ class Templates extends React.Component {
         this.getTemplatesData();
         this.setState({ selectAll: 0, selected: {} });
         this.props.dispatch(getTemplates());
-
       })
       .catch((error) => {
         toast.error(error.response.data.message, { autoClose: false });
@@ -240,6 +239,7 @@ class Templates extends React.Component {
       await Promise.all(promises);
       this.handleCancel();
       this.getTemplatesData();
+      this.props.getProjectAdded();
     } catch (err) {
       console.log(err);
     }
@@ -343,7 +343,9 @@ class Templates extends React.Component {
       Header: "Projects",
       Cell: (original) => {
         const { templateUID, templateName } = original.row.checkbox.Template[0];
-        const { projects } = original.row.checkbox;
+        const projects = original.row.checkbox.projects
+          ? original.row.checkbox.projects
+          : [];
         const className =
           projects.length > 0 ? "wrapped" : "wrapped click-to-add";
 

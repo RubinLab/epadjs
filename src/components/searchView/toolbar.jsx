@@ -18,6 +18,8 @@ import { BarLoader } from "react-spinners";
 const mode = sessionStorage.getItem("mode");
 
 const toolBar = props => {
+  const { project } = props;
+  const noUpload = project === "all" || project === "nonassigned";
   return (
     <div className="searchView-toolbar">
       <div className="searchView-toolbar__group">
@@ -55,7 +57,10 @@ const toolBar = props => {
             <span>Download selections</span>
           </ReactTooltip>
         </div>
-        <div className="searchView-toolbar__icon" onClick={props.onUpload}>
+        <div
+          className={noUpload ? "hide-delete" : "searchView-toolbar__icon"}
+          onClick={noUpload ? null : props.onUpload}
+        >
           <div>
             <FaUpload
               style={{ fontSize: "1.2rem" }}
@@ -222,25 +227,27 @@ const toolBar = props => {
       </ReactTooltip> */}
       {props.project && mode !== "lite" && (
         <div className="searchView-toolbar__group">
-          <div
-            className={
-              props.showTagEditor ? "searchView-toolbar__icon" : "hide-delete"
-            }
-            onClick={props.showTagEditor ? props.onUploadWizard : null}
-          >
-            <div style={{ fontSize: "1.2rem" }}>
-              <FaEdit data-tip data-for="editor-icon" />
-            </div>
-
-            <ReactTooltip
-              id="editor-icon"
-              place="right"
-              type="info"
-              delayShow={1000}
+          {props.admin && (
+            <div
+              className={
+                props.showTagEditor ? "searchView-toolbar__icon" : "hide-delete"
+              }
+              onClick={props.showTagEditor ? props.onUploadWizard : null}
             >
-              <span className="filter-label">Epad tag editor</span>
-            </ReactTooltip>
-          </div>
+              <div style={{ fontSize: "1.2rem" }}>
+                <FaEdit data-tip data-for="editor-icon" />
+              </div>
+
+              <ReactTooltip
+                id="editor-icon"
+                place="right"
+                type="info"
+                delayShow={1000}
+              >
+                <span className="filter-label">Epad tag editor</span>
+              </ReactTooltip>
+            </div>
+          )}
           <div
             className="searchView-toolbar__icon new-icon"
             onClick={props.onNew}

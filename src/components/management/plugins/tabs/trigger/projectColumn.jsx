@@ -673,9 +673,9 @@ class ProjectColumn extends React.Component {
   };
   render() {
     return (
-      <div className="projectcolumn">
+      <div className="plugin_trigger_project_column_inner_container ">
         <h2></h2>
-        <table className="triggerTable">
+        <table className="plugin_trigger_table">
           <tbody>
             <tr className="trHeader">
               <td>projects</td>

@@ -101,10 +101,10 @@ export const closeSerie = () => {
   };
 };
 
-export const getNotificationsData = (uploadedPid, lastEventId, refresh) => {
+export const getNotificationsData = (uploadedPid, lastEventId, refresh, notificationAction) => {
   return {
     type: GET_NOTIFICATIONS,
-    payload: { uploadedPid, lastEventId, refresh },
+    payload: { uploadedPid, lastEventId, refresh, notificationAction },
   };
 };
 
@@ -448,7 +448,7 @@ const getAimListFields = (aims, ann) => {
         // json1: aim,
         json: aimFields,
         isDisplayed: displayStatus,
-        showLabel: false,
+        showLabel: true,
         cornerStoneTools: [],
         color,
         type,

@@ -13,7 +13,6 @@ const projectTable = ({
   selected = {},
   templateName,
 }) => {
-  console.log(selected);
   const columns = [
     {
       Header: "Project",
