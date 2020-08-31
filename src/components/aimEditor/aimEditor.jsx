@@ -55,12 +55,16 @@ class AimEditor extends Component {
     } = this.props;
     const { projectID } = openSeries[activePort];
 
+    const lastSavedAim = sessionStorage.getItem("lastSavedAim");
+    console.log("Last Saved Aim", lastSavedAim);
+
     this.semanticAnswers = new questionaire.AimEditor(
       element,
       this.validateForm,
       this.renderButtons,
       this.getDefaultLesionName(),
-      setAimDirty
+      setAimDirty,
+      lastSavedAim
     );
 
     const { projectMap } = this.props;
@@ -453,9 +457,13 @@ class AimEditor extends Component {
       name,
       comment,
     };
+    console.log("Aim saved", aimJson);
 
     uploadAim(aimSaved, projectID, this.state.isUpdate, this.updatedAimId)
       .then(() => {
+        // Write the aim to session storage for further autoFill
+        sessionStorage.setItem("lastSavedAim", JSON.stringify(aimSaved));
+
         if (segmentationBlob) this.saveSegmentation(segmentationBlob, segId);
         // var objectUrl = URL.createObjectURL(segBlobGlobal);
         // window.open(objectUrl);
