@@ -16,7 +16,7 @@ import {
 import { Aim, getAimImageData, modalities } from "aimapi";
 import * as questionaire from "./parseClass.js";
 import * as dcmjs from "dcmjs";
-
+import Switch from "react-switch";
 import "./aimEditor.css";
 
 const enumAimType = {
@@ -34,6 +34,7 @@ class AimEditor extends Component {
       buttonGroupShow: false,
       saveButtonIsActive: false,
       isUpdate: false,
+      autoFill: false,
     };
     //if aim is being updated set the aimId and isUpdate flag
     if (this.props.aimId) {
@@ -147,9 +148,47 @@ class AimEditor extends Component {
     return "";
   };
 
+  setAutoFill = (checked) => {
+    this.setState({ autoFill: checked });
+  };
+
   render() {
     return (
       <div className="editorForm">
+        AutoFill :
+        <Switch
+          onChange={this.setAutoFill}
+          checked={this.state.autoFill}
+          onColor="#86d3ff"
+          onHandleColor="#2693e6"
+          handleDiameter={10}
+          uncheckedIcon={
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
+                fontSize: 11,
+                color: "#861737",
+                paddingRight: 2,
+              }}
+            >
+              Off
+            </div>
+          }
+          checkedIcon={
+            <svg viewBox="0 0 10 10" height="100%" width="100%">
+              <circle r={3} cx={5} cy={5} />
+            </svg>
+          }
+          boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+          activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+          // height={15}
+          // width={20}
+          className="react-switch"
+        />
+        <br />
         <div id="questionaire" />
         {this.state.buttonGroupShow && (
           <div className="AimEditorButtonGroup">
