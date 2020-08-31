@@ -10,7 +10,8 @@ export var AimEditor = function (
   varformCheckHandler,
   varRenderButtonHandler,
   aimName,
-  setAimDirty
+  setAimDirty,
+  lastSavedAim
 ) {
   //this.mapObjCodeValueParent = new Map();
   //this.mapHtmlObjects = new Map(); not used
@@ -84,6 +85,7 @@ export var AimEditor = function (
   this.anyClosedShapeTypes = ["Circle", "Polyline", "Polygon"]; // what is polyline ?
   this.templateShapeArray = []; //each array element is a json object {"shape":'Point', "domid" : '2.25.33554445511225454'});
   this.defaultTemplate = null;
+  this.aimForAutoFill = lastSavedAim;
 
   // shortcut keys variables to relate allowed terms and html elements
   this.mapShortCutKeys = new Map();
@@ -275,6 +277,21 @@ export var AimEditor = function (
         };
         console.log("extract template called : ", self.jsonTemplateCopy);
         self.extractTemplate(self.jsonTemplateCopy);
+
+        // Auto fill aim editor form if previous aim passed to constructor
+
+        if (
+          self.aimForAutoFill !== null &&
+          typeof self.aimForAutoFill !== "undefined"
+        ) {
+          if (
+            self.aimForAutoFill.typeCode[0].code ===
+            self.jsonTemplateCopy.TemplateContainer.Template[0]["codeValue"]
+          ) {
+            self.loadAimJson(self.aimForAutoFill, null);
+          }
+        }
+        // Auto fill aim editor form if previous aim passed to constructor  end
 
         //self.renderButtonhandler(true);
       }
