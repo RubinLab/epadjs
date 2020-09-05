@@ -1056,7 +1056,6 @@ function fillInTables(
   table.append(
     makeTable(data, filteredTable, modality, numofHeaderCols, hideCols)
   );
-
   if (data.ntTable != null) {
     table.append(MakeTableNonTarget(data, numofHeaderCols, hideCols));
   }
@@ -1210,9 +1209,6 @@ function fillFilterSelect(
   });
   if (filter.is(':empty')) {
     let filteredTable = table;
-    filter.hide();
-    templateFilter.hide();
-    shapesFilter.hide();
     //this should be recist and shoudn't need calculations
     shrinkedData = data;
   } else {
@@ -1254,30 +1250,31 @@ function fillFilterSelect(
   if (shrinkedData.tSums == null) {
     shrinkedData = makeCalcs(shrinkedData, numofHeaderCols);
   }
-  recisttable = fillInTables(
-    shrinkedData,
-    shrinkedData.tTable,
-    patId,
-    projectId,
-    recisttable,
-    numofHeaderCols,
-    hideCols
-  );
-  if (loadFilter) {
+  
+  if (loadFilter || filter.is(':empty')) {
+    recisttable = fillInTables(
+      shrinkedData,
+      shrinkedData.tTable,
+      patId,
+      projectId,
+      recisttable,
+      numofHeaderCols,
+      hideCols
+    );
     filter.hide();
     templateFilter.hide();
     shapesFilter.hide();
+  } else {
+    recisttable = filterAndFillInTables(
+      data,
+      data.tTable,
+      patId,
+      projectId,
+      recisttable,
+      numofHeaderCols,
+      hideCols
+    );
   }
-
-  recisttable = filterAndFillInTables(
-    data,
-    data.tTable,
-    patId,
-    projectId,
-    recisttable,
-    numofHeaderCols,
-    hideCols
-  );
 
   // filter.change(function() {
   //   recisttable = filterAndFillInTables(
