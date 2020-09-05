@@ -208,6 +208,7 @@ class App extends Component {
         handleMetric={this.getMetric}
       />
     );
+    console.log('opened', reportsCompArr);
     this.setState({
       reportsCompArr,
     });

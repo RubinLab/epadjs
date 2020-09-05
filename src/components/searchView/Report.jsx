@@ -56,14 +56,14 @@ const Report = props => {
   };
 
   const getTableArguments = () => {
-    const { report } = props;
+    const { report, index } = props;
     let projectID;
     let patientID;
     if (report !== 'Waterfall') {
       ({ projectID, patientID } = props.patient);
     }
     const template = report === 'RECIST' ? null : props.template;
-    const id = 'recisttbl';
+    const id = 'recisttbl'+index;
     let filter = '';
     let loadFilter = '';
     let numofHeaderCols = null;
@@ -237,9 +237,10 @@ const Report = props => {
   };
 
   const downloadReport = () => {
+    let { index } = props;
     let { subjectName } = props.patient;
     subjectName = clearCarets(subjectName);
-    wordExport(subjectName);
+    wordExport(subjectName, 'recisttbl'+index);
   };
 
   useEffect(() => {
