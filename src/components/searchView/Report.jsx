@@ -110,7 +110,7 @@ const Report = props => {
     props.waterfallSelect(name);
   };
 
-  const getReportTable = async data => {
+  const getReportTable = async (data, refreshFilter) => {
     try {
       const {
         id,
@@ -149,7 +149,8 @@ const Report = props => {
             hideCols,
             loadFilter,
             props.index,
-            onClose
+            // onClose, //js code doesn't know anything about this
+            refreshFilter
           );
         }
         if (props.report === 'Waterfall')
@@ -228,7 +229,7 @@ const Report = props => {
   }, []);
 
   const handleFilterSelect = e => {
-    getReportTable(data);
+    getReportTable(data, true);
   };
 
   const stopProp = e => {
@@ -244,9 +245,10 @@ const Report = props => {
   };
 
   useEffect(() => {
-    const shapesFilter = document.getElementById('shapesFilter');
-    const templateFilter = document.getElementById('templateFilter');
-    const filter = document.getElementById('filter');
+    const { id } = getTableArguments();
+    const shapesFilter = document.getElementById(id+'shapesFilter');
+    const templateFilter = document.getElementById(id+'templateFilter');
+    const filter = document.getElementById(id+'filter');
 
     if (shapesFilter) {
       shapesFilter.addEventListener('change', handleFilterSelect);

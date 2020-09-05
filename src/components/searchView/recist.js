@@ -1094,6 +1094,7 @@ function fillInTables(
 }
 
 function filterAndFillInTables(
+  id,
   data,
   table,
   patId,
@@ -1105,13 +1106,12 @@ function filterAndFillInTables(
   let filterVal = 'length';
   let templateFilterVal = 'All';
   let shapesFilterVal = 'All';
-  const filter = document.getElementById('filter');
-  const templateFilter = document.getElementById('templateFilter');
-  const shapesFilter = document.getElementById('shapesFilter');
-  if (filter) filterVal = filter.value;
-  if (templateFilter) templateFilterVal = templateFilter.value;
-  if (shapesFilter) shapesFilterVal = shapesFilter.value;
-
+  const filter = recisttable.find('#'+id+'filter');
+  const templateFilter = recisttable.find('#'+id+'templateFilter');
+  const shapesFilter = recisttable.find('#'+id+'shapesFilter');
+  if (filter) filterVal = filter.val();
+  if (templateFilter) templateFilterVal = templateFilter.val();
+  if (shapesFilter) shapesFilterVal = shapesFilter.val();
   let filteredTable = filterForMeasurementTemplateShape(
     data,
     table,
@@ -1170,6 +1170,7 @@ function prettyShape(value) {
 }
 
 function fillFilterSelect(
+  id,
   data,
   table,
   patId,
@@ -1177,27 +1178,28 @@ function fillFilterSelect(
   recisttable,
   numofHeaderCols,
   hideCols,
-  loadFilter
+  loadFilter,
+  refreshFilter
 ) {
-  let shrinkedData;
-  var filter = recisttable.find('#filter');
-  //uncomment for whole page
-  //    var $filter = $("#filter");
+  let filteredTable = table;
+  let shrinkedData = data;
+  // get the selected if already added
+  var selectedFilter = $('#'+id+'filter');
+  var selectedTemplateFilter = $('#'+id+'templateFilter');
+  var selectedShapeFilter = $('#'+id+'shapeFilter');
+  // empty and fill in filters
+  var filter = recisttable.find('#'+id+'filter');
   filter.empty();
   $.each(findMeasurements(table), function(index, value) {
     filter.append('<option>' + value + '</option>');
   });
-  var templateFilter = recisttable.find('#templateFilter');
-  //uncomment for whole page
-  //    var $filter = $("#filter");
+  var templateFilter = recisttable.find('#'+id+'templateFilter');
   templateFilter.empty();
   templateFilter.append('<option>All</option>');
   $.each(findTemplates(data.tUIDs), function(index, value) {
     templateFilter.append('<option>' + value + '</option>');
   });
-  var shapesFilter = recisttable.find('#shapesFilter');
-  //uncomment for whole page
-  //    var $filter = $("#filter");
+  var shapesFilter = recisttable.find('#'+id+'shapesFilter');
   shapesFilter.empty();
   shapesFilter.append('<option>All</option>');
   $.each(findShapes(data.tUIDs), function(index, value) {
@@ -1211,11 +1213,8 @@ function fillFilterSelect(
         '</option>'
     );
   });
-  if (filter.is(':empty')) {
-    let filteredTable = table;
-    //this should be recist and shoudn't need calculations
-    shrinkedData = data;
-  } else {
+
+  if (!filter.is(':empty')) {
     if (loadFilter) {
       let filters = loadFilter.split('&');
       filters.forEach(function(item) {
@@ -1234,13 +1233,14 @@ function fillFilterSelect(
         }
       });
     } else {
-      filter.selectedIndex = 0;
-      templateFilter.selectedIndex = 0;
-      shapesFilter.selectedIndex = 0;
+      if (selectedFilter && selectedFilter.val()) filter.val(selectedFilter.val());
+      else filter.selectedIndex = 0;
+      if (selectedTemplateFilter && selectedTemplateFilter.val()) templateFilter.val(selectedTemplateFilter.val());
+      else templateFilter.selectedIndex = 0;
+      if (selectedShapeFilter && selectedShapeFilter.val()) shapesFilter.val(selectedShapeFilter.val());
+      else shapesFilter.selectedIndex = 0;
     }
-    //why patid and projectid not processed
-    //        filteredTable=filterForMeasurement(data,table,filter.val(),patId,projectId);
-    let filteredTable = filterForMeasurementTemplateShape(
+    filteredTable = filterForMeasurementTemplateShape(
       data,
       table,
       filter.val(),
@@ -1251,11 +1251,18 @@ function fillFilterSelect(
     );
     shrinkedData = shrinkTable(filteredTable, data, numofHeaderCols);
   }
+  
   if (shrinkedData.tSums == null) {
     shrinkedData = makeCalcs(shrinkedData, numofHeaderCols);
   }
   
   if (loadFilter || filter.is(':empty')) {
+    filter.hide();
+    templateFilter.hide();
+    shapesFilter.hide();
+  } 
+  console.log('ref', refreshFilter, !refreshFilter, data, shrinkedData);
+  if (!refreshFilter) {
     recisttable = fillInTables(
       shrinkedData,
       shrinkedData.tTable,
@@ -1265,11 +1272,9 @@ function fillFilterSelect(
       numofHeaderCols,
       hideCols
     );
-    filter.hide();
-    templateFilter.hide();
-    shapesFilter.hide();
   } else {
     recisttable = filterAndFillInTables(
+      id,
       data,
       data.tTable,
       patId,
@@ -1328,6 +1333,7 @@ export async function renderTable(
   hidecols,
   loadFilter,
   index,
+  refreshFilter
 ) {
   //check the existing ids and create a unique id for this recist table
   // var id = 'recisttbl';
@@ -1343,7 +1349,7 @@ export async function renderTable(
       report +
       // '"  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:100%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="filter"><option>Choose to filter</option></select>&nbsp;<button class="w3-btn w3-tiny w3-round-large recistWhitetext" id="exportBtn">Export</button></h6></div><div id="docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>'
       // `  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:100%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="filter"><option>Choose to filter</option></select>&nbsp;<button class="w3-btn w3-tiny w3-round-large recistWhitetext" id="exportBtn">Export</button><button class="w3-btn w3-round-large recistWhitetext" data-index=${index} id="closeBtn">&#215</button></h6></div><div id="docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>`
-      `  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:100%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="filter"><option>Choose to filter</option></select>&nbsp;</h6></div><div id="`+id+`docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>`
+      `  style="background-color:#4d4d4d;overflow-y:auto;overflow-x:auto;"><h6 style="font-size:100%;text-align:right;padding:0;border:0;margin:0;color:white;background-color:#666666;"><select id="`+id+`shapesFilter"><option>Choose to filter</option></select>&nbsp;<select id="`+id+`templateFilter"><option>Choose to filter</option></select>&nbsp;<select id="`+id+`filter"><option>Choose to filter</option></select>&nbsp;</h6></div><div id="`+id+`docx"><div id= "tables" class="WordSection1"></div></div><h6 style="font-size:80%;text-align:left;padding:0;border:0;margin:0;color:white;background-color:#666666;"><button id="baseline" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Baseline</button>&nbsp;<button id="followup" class="w3-btn w3-tiny w3-round-large recistWhitetext" style="border:1px solid #9a9797">Followup</button>&nbsp;<button id="new" class="w3-btn w3-tiny w3-round-large recistWhitetext">New/Reappeared/Progressive</button>&nbsp;<button id="resolved" class="w3-btn w3-tiny w3-round-large recistWhitetext">Resolved</button>&nbsp;<button id="nontarget" class="w3-btn w3-tiny w3-round-large recistWhitetext">Present Lesion</button>&nbsp;<button id="error" class="w3-btn w3-tiny w3-round-large recistWhitetext">Error</button></h6></div>`
   );
   var reportText = report;
   if (reportText === 'RECIST') reportText = 'Tumor Burden';
@@ -1366,6 +1372,7 @@ export async function renderTable(
   recisttable.find('#error').css('background-color', errorColor);
 
   recisttable = fillFilterSelect(
+    id,
     data,
     data.tTable,
     patId,
@@ -1373,7 +1380,8 @@ export async function renderTable(
     recisttable,
     numofHeaderCols,
     hidecols,
-    loadFilter
+    loadFilter,
+    refreshFilter
   );
 
   $('.ui-dialog-titlebar').css('background', '#4d4d4d');
