@@ -30,6 +30,8 @@ let i;
 let j;
 let k;
 let sums;
+var rowHeight = '15px';
+var thRowHeight = '7px';
 
 function addRow(data, text, rowData, appendText, numofHeaderCols, hideCols) {
   return $('<tr/>').append(
@@ -50,7 +52,7 @@ function addRow(data, text, rowData, appendText, numofHeaderCols, hideCols) {
             .css('text-align', 'center');
       }
     })
-  );
+  ).css('line-height', rowHeight);
 }
 
 function roundDouble(val) {
@@ -549,17 +551,18 @@ function makeTable(data, filteredTable, modality, numofHeaderCols, hideCols) {
             .text(filteredTable[r][c])
             .css('text-align', 'left');
       })
-    );
+    ).css('line-height', rowHeight);
   };
 
   return $('<tbody/>')
     .addClass('report-table__body')
-    .append($('<tr/>').append(timepointheader))
-    .append($('<tr/>').append(header))
+    .append($('<tr/>').append(timepointheader).css('line-height', thRowHeight))
+    .append($('<tr/>').append(header).css('line-height', thRowHeight))
     .append(
       $('<tr/>')
         .append(modalityheader)
         .css('border-bottom', 'solid 1px #4d4d4d')
+        .css('line-height', thRowHeight)
     )
     .append(filteredTable.length.times(row))
     .append(
@@ -637,15 +640,16 @@ function MakeTableNonTarget(data, numofHeaderCols, hideCols) {
             .text(data.ntTable[r][c])
             .css('text-align', 'left');
       })
-    );
+    ).css('line-height', rowHeight);
   };
 
   return $('<tbody/>')
-    .append($('<tr/>').append(bigheader))
+    .append($('<tr/>').append(bigheader).css('line-height', rowHeight))
     .append(
       $('<tr/>')
         .append(header)
         .attr('class', 'header')
+        .css('line-height', rowHeight)
     )
     .append(data.ntTable.length.times(row))
     .attr('border', 1)
@@ -680,7 +684,7 @@ function addResponseCatRow(
       }
       return col;
     })
-  );
+  ).css('line-height', rowHeight);
 }
 
 function responseCatsTable(data, numofHeaderCols, hideCols) {
@@ -1385,6 +1389,5 @@ export async function renderTable(
   $('.ui-widget-header').css('border', 0);
   $('.ui-widget-header').removeClass('ui-corner-all');
 
-  recisttable.find('td').css('text-align', 'center');
   return recisttable.html();
 }
