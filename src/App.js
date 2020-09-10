@@ -174,7 +174,7 @@ class App extends Component {
           index={index}
           patient={patients[0]}
           key={`report${index}`}
-          waterfallSelect={this.handleWaterFallSelect}
+          waterfallClickOn={this.handleWaterFallClickOnBar}
           handleMetric={this.getMetric}
         />
       );
@@ -190,11 +190,9 @@ class App extends Component {
   getMetric = metric => {
     this.setState({ metric });
   };
-  handleWaterFallSelect = name => {
+  handleWaterFallClickOnBar = name => {
     // find the patient selected
     const patient = this.props.selectedPatients[name];
-
-    console.log(patient);
     const reportsCompArr = [...this.state.reportsCompArr];
     const index = reportsCompArr.length;
     reportsCompArr.push(
@@ -204,11 +202,10 @@ class App extends Component {
         index={index}
         patient={patient}
         key={`report${index}`}
-        waterfallSelect={this.handleWaterFallSelect}
+        waterfallClickOn={this.handleWaterFallClickOnBar}
         handleMetric={this.getMetric}
       />
     );
-    console.log('opened', reportsCompArr);
     this.setState({
       reportsCompArr,
     });

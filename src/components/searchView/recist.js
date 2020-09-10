@@ -1261,7 +1261,7 @@ function fillFilterSelect(
     templateFilter.hide();
     shapesFilter.hide();
   } 
-  console.log('ref', refreshFilter, !refreshFilter, data, shrinkedData);
+  // console.log('ref', refreshFilter, !refreshFilter, data, shrinkedData);
   if (!refreshFilter) {
     recisttable = fillInTables(
       shrinkedData,

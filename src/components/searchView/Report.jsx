@@ -34,17 +34,11 @@ const Report = props => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [selectedCol, setSelectedCol] = useState(null);
+  const [filteredPatients, setFilteredPatients] = useState({});
 
-  const filterSelectedPatients = () => {
-    const patients = Object.values(props.selectedPatients);
-    const obj = patients.reduce((all, item, index) => {
-      const { projectID, patientID } = item;
-      if (all[projectID]) all[projectID].push(patientID);
-      else all[projectID] = [patientID];
-      return all;
-    }, {});
-    return obj;
-  };
+  // const filterSelectedPatients = () => {
+
+  // };
 
   const constructPairs = object => {
     const result = [];
@@ -63,7 +57,7 @@ const Report = props => {
       ({ projectID, patientID } = props.patient);
     }
     const template = report === 'RECIST' ? null : props.template;
-    const id = 'recisttbl'+index;
+    const id = 'recisttbl' + index;
     let filter = '';
     let loadFilter = '';
     let numofHeaderCols = null;
@@ -106,8 +100,8 @@ const Report = props => {
     props.onClose(index);
   };
 
-  const waterfallSelect = name => {
-    props.waterfallSelect(name);
+  const waterfallClickOn = name => {
+    props.waterfallClickOn(name);
   };
 
   const getReportTable = async (data, refreshFilter) => {
@@ -124,21 +118,7 @@ const Report = props => {
       } = getTableArguments();
       let reportTable;
       if (Object.keys(data).length > 0) {
-        if (props.report !== 'Waterfall') {
-          console.log(report);
-          console.log(
-            ' id,patientID,projectID, report,  numofHeaderCols, hideCols, loadFilter'
-          );
-          console.log(
-            id,
-            patientID,
-            projectID,
-            report,
-            numofHeaderCols,
-            hideCols,
-            loadFilter
-          );
-          console.log(data);
+        if (props.report !== 'Waterfall') {       
           reportTable = await renderTable(
             id,
             patientID,
@@ -154,7 +134,7 @@ const Report = props => {
           );
         }
         if (props.report === 'Waterfall')
-          reportTable = await drawWaterfall(data, waterfallSelect);
+          reportTable = await drawWaterfall(data, waterfallClickOn);
         reportTable = ReactHtmlParser(reportTable);
         setNode(reportTable);
       }
@@ -182,11 +162,11 @@ const Report = props => {
           metric
         );
       } else {
-        const filteredObj = filterSelectedPatients();
-        const projects = Object.keys(filteredObj);
+        // const filteredObj = filterSelectedPatients();
+        const projects = Object.keys(filteredPatients);
         if (projects.length === 1) {
           const pid = projects[0];
-          const subjectUIDs = Object.values(filteredObj);
+          const subjectUIDs = Object.values(filteredPatients);
           result = await getWaterfallReport(
             pid,
             subjectUIDs[0],
@@ -195,7 +175,7 @@ const Report = props => {
             metric
           );
         } else {
-          const pairs = constructPairs(filteredObj);
+          const pairs = constructPairs(filteredPatients);
           result = await getWaterfallReport(null, null, pairs, type, metric);
         }
       }
@@ -228,12 +208,22 @@ const Report = props => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const patients = Object.values(props.selectedPatients);
+    const obj = patients.reduce((all, item, index) => {
+      const { projectID, patientID } = item;
+      if (all[projectID]) all[projectID].push(patientID);
+      else all[projectID] = [patientID];
+      return all;
+    }, {});
+    setFilteredPatients(obj);
+  }, []);
+
   const handleFilterSelect = e => {
     getReportTable(data, true);
   };
 
   const stopProp = e => {
-    console.log('here');
     e.stopPropagation();
   };
 
@@ -241,14 +231,14 @@ const Report = props => {
     let { index } = props;
     let { subjectName } = props.patient;
     subjectName = clearCarets(subjectName);
-    wordExport(subjectName, 'recisttbl'+index);
+    wordExport(subjectName, 'recisttbl' + index);
   };
 
   useEffect(() => {
     const { id } = getTableArguments();
-    const shapesFilter = document.getElementById(id+'shapesFilter');
-    const templateFilter = document.getElementById(id+'templateFilter');
-    const filter = document.getElementById(id+'filter');
+    const shapesFilter = document.getElementById(id + 'shapesFilter');
+    const templateFilter = document.getElementById(id + 'templateFilter');
+    const filter = document.getElementById(id + 'filter');
 
     if (shapesFilter) {
       shapesFilter.addEventListener('change', handleFilterSelect);
@@ -365,15 +355,13 @@ const Report = props => {
     props.report !== 'Waterfall'
       ? `${props.report} - ${clearCarets(props.patient.subjectName)}`
       : '';
-
-  console.log('before return index', props.index);
   return (
     <>
       {/* <Draggable> */}
       <Rnd
         default={{
-          x: 0,
-          y: 0,
+          x: 50,
+          y: 50,
           // width: 605,
           // height: 200,
         }}
