@@ -521,6 +521,8 @@ h5.add-subject__modal--label,
 .waterfall-header {
   display: flex;
   justify-content: space-between;
+  min-height: 1.5rem;
+  height: 2.5rem;
 }
 
 .react-draggable {
@@ -530,7 +532,7 @@ h5.add-subject__modal--label,
 .report-header {
   display: flex;
   justify-content: space-between;
-  background: #3a3f44;
+  background:rgb(77, 77, 77);
   padding: 0.5rem;
 }
 

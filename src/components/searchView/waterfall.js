@@ -1,4 +1,6 @@
 import Highcharts from 'highcharts';
+global.Highcharts = require('highcharts');
+require('highcharts/modules/exporting')(global.Highcharts);
 
 //rounds the val to 2 digit precision if double
 function roundDouble(val) {
@@ -29,6 +31,20 @@ export function drawWaterfall(data, waterfallSelect) {
   }
 
   Highcharts.chart('waterfallContainer', {
+    exporting: {
+      chartOptions: {
+        // specific options for the exported image
+        plotOptions: {
+          series: {
+            dataLabels: {
+              enabled: true,
+            },
+          },
+        },
+      },
+      fallbackToExportServer: false,
+    },
+
     chart: {
       type: 'column',
     },
@@ -64,7 +80,7 @@ export function drawWaterfall(data, waterfallSelect) {
         point: {
           events: {
             click: function() {
-            waterfallSelect(this.name)
+              waterfallSelect(this.name);
             },
           },
         },

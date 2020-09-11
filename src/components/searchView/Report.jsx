@@ -118,7 +118,7 @@ const Report = props => {
       } = getTableArguments();
       let reportTable;
       if (Object.keys(data).length > 0) {
-        if (props.report !== 'Waterfall') {       
+        if (props.report !== 'Waterfall') {
           reportTable = await renderTable(
             id,
             patientID,
@@ -379,7 +379,9 @@ const Report = props => {
             <div className="report-header">
               <div className="report-header__title">{header}</div>
               <div className="report-header__btngrp">
-                <button onClick={downloadReport}>Export</button>
+                {props.report !== 'Waterfall' && (
+                  <button onClick={downloadReport}>Export</button>
+                )}
                 <button data-index={props.index} onClick={onClose}>
                   {'x'}
                 </button>
@@ -395,12 +397,6 @@ const Report = props => {
                   <option>ADLA</option>
                   <option>intensitystddev</option>
                 </select>
-                <button
-                  className="w3-btn w3-round-large recistWhitetext"
-                  id="closeBtn"
-                >
-                  <FaTimes />
-                </button>
               </div>
               <div
                 id="waterfallContainer"
