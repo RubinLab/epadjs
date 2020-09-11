@@ -3,20 +3,20 @@
 import $ from "jquery/dist/jquery.js";
 import "./semantic/semantic.css";
 import "./semantic/semantic.js";
-
+import DOMPurify from "dompurify";
 //export next variable for react
 export var AimEditor = function (
   userWindow,
   varformCheckHandler,
   varRenderButtonHandler,
   aimName,
-  setAimDirty
+  setAimDirty,
+  lastSavedAim
 ) {
   //this.mapObjCodeValueParent = new Map();
   //this.mapHtmlObjects = new Map(); not used
   //this.mapHtmlSelectObjectsKeyValue = new Map(); not used
   // this.mapAllowedTermCollectionByCodeValue = new Map(); not used
-  console.log("new aimeditor -----");
   var self = this;
   var domelements = [];
   var selectid = 0;
@@ -82,11 +82,19 @@ export var AimEditor = function (
   this.mapShapesSchemaToTemplate.set("Bidirectional", {
     formshape: "Perpendicular",
   });
-  this.anyClosedShapeTypes = ["Circle", "Polyline"];
+  this.anyClosedShapeTypes = ["Circle", "Polyline", "Polygon"]; // what is polyline ?
   this.templateShapeArray = []; //each array element is a json object {"shape":'Point', "domid" : '2.25.33554445511225454'});
   this.defaultTemplate = null;
+  this.aimForAutoFill = lastSavedAim;
+
+  // shortcut keys variables to relate allowed terms and html elements
+  this.mapShortCutKeys = new Map();
+  this.mapcodeValueShortCutKeys = new Map();
+  //  example usage in template "keyShortCut" :"ctrlKeyshiftKey+U"
+
   function constructor() {
     if (self.arrayTemplates === "undefined") self.arrayTemplates = [];
+    document.addEventListener("keydown", self.aimshortCutKeyEvent, false);
   }
 
   this.arrayDifference = function (base, compareto) {
@@ -127,8 +135,9 @@ export var AimEditor = function (
     if (self.mapShortCutKeys.get(keyvalue)) {
       // console.log("in" + keyvalue);
       // console.log(self.mapShortCutKeys.get(keyvalue));
-
-      document.getElementById(self.mapShortCutKeys.get(keyvalue)).click();
+      if (self.mapShortCutKeys.get(keyvalue) !== null) {
+        document.getElementById(self.mapShortCutKeys.get(keyvalue)).click();
+      }
     }
   };
 
@@ -156,11 +165,13 @@ export var AimEditor = function (
           ];
         object.arrayIndex = i;
         self.mapTemplateCodeValueByIndex.set(object.codeValue, i);
-        if (templateList.default !== null) {
-          console.log("default not null:", templateList.default);
+        if (self.loadingAimFlag === false) {
+          if (templateList.default !== null) {
+            console.log("default not null:", templateList.default);
 
-          if (defaultTempCodeVal === object.codeValue) {
-            self.defaultTemplate = i + 1;
+            if (defaultTempCodeVal === object.codeValue) {
+              self.defaultTemplate = i + 1;
+            }
           }
         }
       }
@@ -247,18 +258,19 @@ export var AimEditor = function (
       //uncomment below line for testing
       //self.mainButtonsDiv.innerHTML = "";
 
-      self.mapCardinalitiesToCheckId = new Map();
+      //  self.mapCardinalitiesToCheckId = new Map();
       self.mapStatusAllowedTermBlocks = new Map();
       //self.mapHtmlObjects = new Map(); not used
       //self.mapHtmlSelectObjectsKeyValue = new Map(); not used
       //self.mapAllowedTermCollectionByCodeValue = new Map(); not used
-      self.mapTemplateCodeValueByIndex = new Map();
+      // self.mapTemplateCodeValueByIndex = new Map();
       self.mapLabelAnnotatorConfidence = new Map();
       self.mapLabelAnnotConfJson = new Map();
       self.mapLabelSubComment = new Map();
       self.mapLabelCommentJson = new Map();
       self.mapLabelUid = new Map();
       self.templateShapeArray = [];
+
       if (self.templateSelectedIndex > -1) {
         self.jsonTemplateCopy = {
           ...self.arrayTemplatesJsonObjects[this.value],
@@ -266,16 +278,34 @@ export var AimEditor = function (
         console.log("extract template called : ", self.jsonTemplateCopy);
         self.extractTemplate(self.jsonTemplateCopy);
 
+        // Auto fill aim editor form if previous aim passed to constructor
+
+        if (
+          self.aimForAutoFill !== null &&
+          typeof self.aimForAutoFill !== "undefined"
+        ) {
+          if (
+            self.aimForAutoFill.typeCode[0].code ===
+            self.jsonTemplateCopy.TemplateContainer.Template[0]["codeValue"]
+          ) {
+            self.loadAimJson(self.aimForAutoFill, null);
+          }
+        }
+        // Auto fill aim editor form if previous aim passed to constructor  end
+
         //self.renderButtonhandler(true);
       }
       // else {
       //   self.renderButtonhandler(true);
       // }
     };
-    // if (self.defaultTemplate !== null) {
-    //   self.templateSelect.selectedIndex = self.defaultTemplate;
-    //   self.templateSelect.onchange();
-    // }
+    console.log("self.loadingAimFlag", self.loadingAimFlag);
+
+    if (self.defaultTemplate !== null) {
+      self.templateSelect.selectedIndex = self.defaultTemplate;
+      self.templateSelect.onchange();
+    }
+
     $('select[class^="ui dropdown"]').dropdown();
     document.getElementById("tlist").children[0].style.width = "100%";
     self.templateSelect.style.width = "100%";
@@ -321,7 +351,7 @@ export var AimEditor = function (
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
       }
-      self.aimName = this.value;
+      self.aimName = DOMPurify.sanitize(this.value);
     };
 
     labelAnnotationNameInput.setAttribute("type", "text");
@@ -353,7 +383,7 @@ export var AimEditor = function (
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
       }
-      self.aimComment = this.value;
+      self.aimComment = DOMPurify.sanitize(this.value);
     };
 
     self.aimTypeCode = [
@@ -486,7 +516,7 @@ export var AimEditor = function (
       self.runtimeUserShapes
     );
     console.log("*** checkshape called from extract template");
-    self.checkShapes({});
+    self.checkShapes(self.runtimeUserShapes);
     self.formCheckHandler(self.checkFormSaveReady());
     console.log("extrating template is done ---> go back to loadaim");
     //  self.activateDirtyCheck = true;
@@ -755,7 +785,7 @@ export var AimEditor = function (
     mainSelectDiv.id = "Drop" + maindiv;
 
     var selectDiv = document.createElement("select");
-    selectDiv.className = "ui fluid multiple dropdown";
+    selectDiv.className = "ui fluid search multiple dropdown";
     //selectDiv.multiple=true;
     selectDiv.id = "select" + maindiv;
 
@@ -854,6 +884,18 @@ export var AimEditor = function (
       //   allowedTermObj.codeValue,
       //   unionPrntAlwtermObj
       // ); not used
+
+      if (subEObject.hasOwnProperty("keyShortCut")) {
+        self.mapShortCutKeys.set(
+          subEObject.keyShortCut,
+          self.removeEmptySpace(parent.label) + "-" + subEObject.codeValue
+        );
+        self.mapcodeValueShortCutKeys.set(
+          self.removeEmptySpace(parent.label) + "-" + subEObject.codeValue,
+          subEObject.keyShortCut
+        );
+      }
+
       AllowedTerm.push({
         AllowedTerm: allowedTermObj,
       });
@@ -1663,6 +1705,10 @@ export var AimEditor = function (
     div.className = className;
     var label = document.createElement("label");
     label.textContent = lbl;
+    if (self.mapcodeValueShortCutKeys.get(id)) {
+      label.textContent =
+        label.textContent + " (" + self.mapcodeValueShortCutKeys.get(id) + ") ";
+    }
     var radioInput = document.createElement("input");
     radioInput.type = "radio";
     radioInput.className = "radio checkbox";
@@ -1845,11 +1891,13 @@ export var AimEditor = function (
     lbl,
     allowedTermObj
   ) {
-    //drop down select and add input box object
-
     //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
-    //  console.log("allowed term objects parent :", prObject);
-    //  console.log("allowed term objects :", allowedTermObj);
+    console.log("-----*********--------prObject", prObject.label);
+    console.log("-----*********--------id", id);
+    console.log("-----*********--------name", name);
+    console.log("-----*********--------lbl", lbl);
+    console.log("-----*********--------allowedTermObj", allowedTermObj);
+
     var div = document.createElement("div");
     div.style.marginLeft = "20px";
     div.className = className;
@@ -1876,48 +1924,27 @@ export var AimEditor = function (
     labelHolder.appendChild(label);
 
     optionInput.addEventListener("click", function () {
+      let dropDownItemsArray = $("#select" + prObject.label).dropdown(
+        "get value"
+      );
+
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
       }
-      console.log("option input click called : ");
-      console.log("option input click called next id", allowedTermObj.nextId);
-      console.log("option input click called clicked situation", this.selected);
+
       var checkmarkObj = self.mapCardinalitiesToCheckId.get(prObject.id);
       checkmarkObj.ok = "true";
-      console.log(
-        "option input click called clicked checkmarkObj before",
-        checkmarkObj
-      );
-      console.log(
-        "option input click called primitive",
-        allowedTermObj.getPrimitive()
-      );
-      console.log("self.loadingAimFlag", self.loadingAimFlag);
 
-      // console.log(
-      //   "DropLocation : ",
-      //   document.getElementById("DropLocation").innerHTML
-      // );
-      if (self.loadingAimFlag === false) {
-        if (allowedTermObj.getPrimitive().select === "1") {
-          allowedTermObj.getPrimitive().select = "0";
-          allowedTermObj.changeOnSelect("0", self.AfterClick(allowedTermObj));
-
-          checkmarkObj.actualSelected--;
-        } else {
-          allowedTermObj.getPrimitive().select = "1";
-          allowedTermObj.changeOnSelect("1", self.AfterClick(allowedTermObj));
-          checkmarkObj.actualSelected++;
-        }
+      if (dropDownItemsArray.indexOf(lbl) === -1) {
+        allowedTermObj.getPrimitive().select = "0";
+        allowedTermObj.changeOnSelect("0", self.AfterClick(allowedTermObj));
+        --checkmarkObj.actualSelected;
       } else {
         allowedTermObj.getPrimitive().select = "1";
         allowedTermObj.changeOnSelect("1", self.AfterClick(allowedTermObj));
         checkmarkObj.actualSelected++;
       }
-      console.log(
-        "option input click called clicked checkmarkObj after",
-        checkmarkObj
-      );
+
       console.log("mapCardinalitiesToCheckId", self.mapCardinalitiesToCheckId);
       self.mapCardinalitiesToCheckId.set(prObject.id, checkmarkObj);
       if (
@@ -2068,6 +2095,10 @@ export var AimEditor = function (
     div.className = className;
     var label = document.createElement("label");
     label.textContent = lbl;
+    if (self.mapcodeValueShortCutKeys.get(id)) {
+      label.textContent =
+        label.textContent + " (" + self.mapcodeValueShortCutKeys.get(id) + ") ";
+    }
     var checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.className = "checkbox";
@@ -2285,8 +2316,9 @@ export var AimEditor = function (
             if (self.activateDirtyCheck) {
               self.handlerSetAimDirty(); // added to set dirtflag
             }
-            annotConfShowValueInput.value = this.value;
-            objectToCheckAnnConf.selectac = this.value / 100;
+            annotConfShowValueInput.value = DOMPurify.sanitize(this.value);
+            objectToCheckAnnConf.selectac =
+              DOMPurify.sanitize(this.value) / 100;
           };
           annotConfInput.onmousedown = function (event) {
             isMouseButtondown = true;
@@ -2296,8 +2328,10 @@ export var AimEditor = function (
           };
           annotConfInput.onmousemove = function (event) {
             if (isMouseButtondown) {
-              annotConfShowValueInput.value = this.value;
-              objectToCheckAnnConf.selectac = this.value / 100;
+              annotConfShowValueInput.value = DOMPurify.sanitize(this.value);
+              objectToCheckAnnConf.selectac = DOMPurify.sanitize(
+                this.value / 100
+              );
               console.log(event.clientX);
             }
           };
@@ -3816,11 +3850,37 @@ export var AimEditor = function (
     let anyClosedShapeFlag = false;
     let prmtrShapeArrayLength = prmtrShapeArray.length;
     let templateShapeArrayLength = self.templateShapeArray.length;
-
+    console.log("here checking the shape on aim load");
     console.log(" checkAnnotationShapes prmtrShapeArray : ", prmtrShapeArray);
+    // cavit now
+    //  {
+    //   Line: {
+    //     validate: ""
+    //   },
+    //   Circle: {
+    //     validate: ""
+    //   }
+    // }
+    //  self.runtimeUserShapes
     for (let k = 0; k < prmtrShapeArrayLength; k++) {
       // this.mapShapesSchemaToTemplate.set("TwoDimensionMultiPoint", [{"formshape" : 'Line'}, {"formshape" : 'Perpendicular'}]);
       let jsonShapeObj = self.mapShapesSchemaToTemplate.get(prmtrShapeArray[k]);
+      if (Array.isArray(jsonShapeObj)) {
+        for (let n = 0; n < jsonShapeObj.length; n++) {
+          //  Object.assign(obj, { jsonShapeObj[n].formshape : "value3"});
+          self.runtimeUserShapes[jsonShapeObj[n].formshape] = { validate: "" };
+        }
+        console.log(
+          "self.runtimeUserShapes on load aim: ",
+          self.runtimeUserShapes
+        );
+      } else {
+        self.runtimeUserShapes[jsonShapeObj.formshape] = { validate: "" };
+        console.log(
+          "self.runtimeUserShapes on load aim: ",
+          self.runtimeUserShapes
+        );
+      }
       console.log("jsonShapeObj", jsonShapeObj);
       if (Array.isArray(jsonShapeObj)) {
         for (let t = 0; t < templateShapeArrayLength; t++) {
@@ -3844,6 +3904,22 @@ export var AimEditor = function (
                 self.templateShapeArray[t].domid
               ).className = "green check circle outline icon";
             }
+          }
+          if (anyShapeFlag === true) {
+            for (let cnt = 0; cnt < templateShapeArrayLength; cnt++) {
+              document.getElementById(
+                self.templateShapeArray[cnt].domid
+              ).className = "green check circle outline icon";
+            }
+            anyShapeFlag = false;
+          }
+          if (anyClosedShapeFlag === true) {
+            for (let cnt = 0; cnt < templateShapeArrayLength; cnt++) {
+              document.getElementById(
+                self.templateShapeArray[cnt].domid
+              ).className = "green check circle outline icon";
+            }
+            anyClosedShapeFlag = false;
           }
         }
       } else {
@@ -3893,6 +3969,7 @@ export var AimEditor = function (
       }
     }
     //document.getElementById( object.id).className = "green check circle outline icon";
+    self.formCheckHandler(self.checkFormSaveReady());
   };
 
   this.setAim = function (aimValue) {
@@ -3924,7 +4001,7 @@ export var AimEditor = function (
           if (self.activateDirtyCheck) {
             self.handlerSetAimDirty(); // added to set dirtflag
           }
-          object.commentSelect = this.value;
+          object.commentSelect = DOMPurify.sanitize(this.value);
         };
         req.appendChild(label);
         req.appendChild(textaDomObject);
@@ -4170,13 +4247,21 @@ export var AimEditor = function (
    }
    */
   this.checkShapes = function (shapes) {
-    console.log(
-      "------------------------------------------------- check shape called"
-    );
-    // shapes rectified Mate needs to adjust the paramters before passing this  test = { circle : {count : 5, validate:""} , line:  {count : 5, validate:""}  };
-    // use the the model above not the model in the below line
-    // shapes needs to be in format shapes = {Circle : "" , Line : "ok"} , value : {"" , "ok"} will be used to make sure that each option is checked
-    /* schema chape list 
+    //if (self.loadingAimFlag === false) {
+    let shapeKeys = Object.keys(shapes);
+    //alert(shapeKeys);
+    let shapeKeysLength = 0;
+    let runtimeUserShapesAll = Object.keys(self.runtimeUserShapes);
+    //alert(runtimeUserShapesAll);
+    let runtimeUserShapesAllLength = 0;
+    if (shapeKeys.length > 0 || runtimeUserShapesAll.length > 0) {
+      console.log(
+        "------------------------------------------------- check shape called"
+      );
+      // shapes rectified Mate needs to adjust the paramters before passing this  test = { circle : {count : 5, validate:""} , line:  {count : 5, validate:""}  };
+      // use the the model above not the model in the below line
+      // shapes needs to be in format shapes = {Circle : "" , Line : "ok"} , value : {"" , "ok"} will be used to make sure that each option is checked
+      /* schema chape list 
     	<xs:enumeration value="Point"/>
 			<xs:enumeration value="Circle"/>
 			<xs:enumeration value="Polyline"/>
@@ -4195,96 +4280,179 @@ export var AimEditor = function (
     const newShapes = {Circle, Polyline, Line, Perpendicular};
     */
 
-    /*
+      /*
      self.templateShapeArray.push({
       shape: object.GeometricShape,
       domid: object.id,
     });
      */
 
-    /* impoertant note if there are multiple geometric shape component exist in a template 
+      /* impoertant note if there are multiple geometric shape component exist in a template 
       or relation will be applied 
     */
-    console.log("mete shapes :", shapes);
-    console.log("mete shapes is Array:", Array.isArray(shapes));
-    console.log("intro templateShapeArray", self.templateShapeArray);
-    let templateShapeLength = self.templateShapeArray.length;
-    let anyShapeFlag = false;
-    let anyClosedShapeFlag = false;
-    let localShapes = {};
-    let shapeKeys = Object.keys(shapes);
-    console.log("shapeKeys.length", shapeKeys.length);
-    if (shapeKeys.length === 0) {
-      localShapes = JSON.parse(JSON.stringify(self.runtimeUserShapes));
-      console.log("if  self.runtimeUserShapes", self.runtimeUserShapes);
-      console.log("if  localShapes", localShapes);
-    } else {
-      console.log("else shapeKeys.length", shapeKeys.length);
-      console.log("else shapes", shapes);
+      console.log("mete shapes :", shapes);
+      console.log("mete shapes is Array:", Array.isArray(shapes));
+      console.log("intro templateShapeArray", self.templateShapeArray);
+      let templateShapeLength = self.templateShapeArray.length;
+      let anyShapeFlag = false;
+      let anyClosedShapeFlag = false;
+      let localShapes = {};
 
-      self.runtimeUserShapes = JSON.parse(JSON.stringify(shapes));
-      localShapes = JSON.parse(JSON.stringify(shapes));
-      console.log("else self.runtimeUserShapes", self.runtimeUserShapes);
-    }
-    if (templateShapeLength > 0) {
-      const tempateShapeKeys = [];
-      console.log("main localShapes", localShapes);
-      console.log("main templateShapeLength", templateShapeLength);
-      let geoTemplateConditionDom = null;
-      for (let cnt = 0; cnt < templateShapeLength; cnt++) {
-        console.log("in loop", self.templateShapeArray[cnt].shape);
-        tempateShapeKeys.push(self.templateShapeArray[cnt].shape);
-        if (
-          typeof localShapes[self.templateShapeArray[cnt].shape] !== "undefined"
-        ) {
-          console.log("before dom lcoalshapes:", localShapes);
+      console.log("shapeKeys.length", shapeKeys.length);
+      if (shapeKeys.length === 0) {
+        localShapes = JSON.parse(JSON.stringify(self.runtimeUserShapes));
+        console.log("if  self.runtimeUserShapes", self.runtimeUserShapes);
+        console.log("if  localShapes", localShapes);
+      } else {
+        console.log("else shapeKeys.length", shapeKeys.length);
+        console.log("else shapes", shapes);
+
+        self.runtimeUserShapes = JSON.parse(JSON.stringify(shapes));
+        localShapes = JSON.parse(JSON.stringify(shapes));
+        console.log("else self.runtimeUserShapes", self.runtimeUserShapes);
+      }
+      if (templateShapeLength > 0) {
+        let arryDiffernce = "";
+        //const tempateShapeKeys = [];
+        console.log("main user shapes", localShapes);
+        console.log("main templateShapeLength", templateShapeLength);
+        let geoTemplateConditionDom = null;
+        for (let cnt = 0; cnt < templateShapeLength; cnt++) {
           console.log(
-            "before dom templateShapeArray:",
-            self.templateShapeArray
+            "in loop templateShapeLength",
+            self.templateShapeArray[cnt].shape
           );
-          //  localShapes[self.templateShapeArray[cnt].shape].validate = "ok";
+          //tempateShapeKeys.push(self.templateShapeArray[cnt].shape);
+          //**
+          // if (localShapes.hasOwnProperty(self.templateShapeArray[cnt].shape)) {
+          //   console.log("before dom lcoalshapes:", localShapes);
+          //   console.log(
+          //     "before dom templateShapeArray:",
+          //     self.templateShapeArray
+          //   );
+          //   //  localShapes[self.templateShapeArray[cnt].shape].validate = "ok";
+          //   geoTemplateConditionDom = document.getElementById(
+          //     self.templateShapeArray[cnt].domid
+          //   );
+          //   if (geoTemplateConditionDom !== null) {
+          //     document.getElementById(
+          //       self.templateShapeArray[cnt].domid
+          //     ).className = "green check circle outline icon";
+          //   }
+          // } else {
+          //   geoTemplateConditionDom = document.getElementById(
+          //     self.templateShapeArray[cnt].domid
+          //   );
+          //   if (geoTemplateConditionDom !== null) {
+          //     document.getElementById(
+          //       self.templateShapeArray[cnt].domid
+          //     ).className = "red check circle outline icon";
+          //   }
+          // }
+          arryDiffernce = Object.keys(localShapes).filter(
+            (eachShape) => eachShape !== self.templateShapeArray[cnt].shape
+          );
+          console.log("first array difference : ", arryDiffernce);
           geoTemplateConditionDom = document.getElementById(
             self.templateShapeArray[cnt].domid
           );
-          if (geoTemplateConditionDom !== null) {
-            document.getElementById(
-              self.templateShapeArray[cnt].domid
-            ).className = "green check circle outline icon";
-          }
-        }
-        if (self.templateShapeArray[cnt].shape === "AnyShape") {
-          anyShapeFlag = true;
-        }
-        if (self.templateShapeArray[cnt].shape === "AnyClosedShape") {
-          anyClosedShapeFlag = true;
-        }
-
-        if (anyShapeFlag === true) {
-          for (let cnt = 0; cnt < templateShapeLength; cnt++) {
-            document.getElementById(
-              self.templateShapeArray[cnt].domid
-            ).className = "green check circle outline icon";
-          }
-          anyShapeFlag = false;
-        }
-        if (anyClosedShapeFlag === true) {
-          //  const shapeKeys = Object.keys(localShapes);
-          const arryDiffernce = shapeKeys.filter(
-            (eachShape) => !self.anyClosedShapeTypes.includes(eachShape)
-          );
           if (arryDiffernce.length === 0) {
+            if (geoTemplateConditionDom !== null) {
+              document.getElementById(
+                self.templateShapeArray[cnt].domid
+              ).className = "green check circle outline icon";
+            }
+          } else {
+            let perpPos = -1;
+            let linePos = -1;
+            if (self.templateShapeArray[cnt].shape === "Line") {
+              perpPos = arryDiffernce.indexOf("Perpendicular");
+              if (perpPos > -1) arryDiffernce.splice(perpPos, 1);
+            }
+            if (self.templateShapeArray[cnt].shape === "Perpendicular") {
+              linePos = arryDiffernce.indexOf("Line");
+              if (linePos > -1) arryDiffernce.splice(linePos, 1);
+            }
+
+            // console.log("arryDiffernce : ", arryDiffernce);
+            // if (
+            //   localShapes.hasOwnProperty("Line") ||
+            //   localShapes.hasOwnProperty("Perpendicular")
+            // ) {
+            //   perpPos = arryDiffernce.indexOf("Perpendicular");
+            //   linePos = arryDiffernce.indexOf("Line");
+            //   if (perpPos > -1 || linePos > -1) {
+            //     if (geoTemplateConditionDom !== null) {
+            //       document.getElementById(
+            //         self.templateShapeArray[cnt].domid
+            //       ).className = "green check circle outline icon";
+            //     }
+            //     if (perpPos > -1) {
+            //       arryDiffernce.splice(perpPos, 1);
+            //     }
+            //     if (linePos > -1) {
+            //       linePos = arryDiffernce.indexOf("Line");
+            //       arryDiffernce.splice(linePos, 1);
+            //     }
+            //   }
+            // }
+            console.log("@@@@@@@@@@array difference ", arryDiffernce);
+            if (arryDiffernce.length > 0) {
+              if (geoTemplateConditionDom !== null) {
+                document.getElementById(
+                  self.templateShapeArray[cnt].domid
+                ).className = "red check circle outline icon";
+              }
+            } else {
+              if (geoTemplateConditionDom !== null) {
+                document.getElementById(
+                  self.templateShapeArray[cnt].domid
+                ).className = "green check circle outline icon";
+              }
+            }
+          }
+          // **
+          if (self.templateShapeArray[cnt].shape === "AnyShape") {
+            anyShapeFlag = true;
+          }
+          if (self.templateShapeArray[cnt].shape === "AnyClosedShape") {
+            anyClosedShapeFlag = true;
+          }
+
+          if (anyShapeFlag === true) {
             for (let cnt = 0; cnt < templateShapeLength; cnt++) {
               document.getElementById(
                 self.templateShapeArray[cnt].domid
               ).className = "green check circle outline icon";
             }
+            anyShapeFlag = false;
           }
-          anyClosedShapeFlag = false;
+          if (anyClosedShapeFlag === true) {
+            //  const shapeKeys = Object.keys(localShapes);
+            arryDiffernce = Object.keys(localShapes).filter(
+              (eachShape) => !self.anyClosedShapeTypes.includes(eachShape)
+            );
+            if (arryDiffernce.length === 0) {
+              for (let cnt = 0; cnt < templateShapeLength; cnt++) {
+                document.getElementById(
+                  self.templateShapeArray[cnt].domid
+                ).className = "green check circle outline icon";
+              }
+            } else {
+              for (let cnt = 0; cnt < templateShapeLength; cnt++) {
+                document.getElementById(
+                  self.templateShapeArray[cnt].domid
+                ).className = "red check circle outline icon";
+              }
+            }
+            anyClosedShapeFlag = false;
+          }
         }
       }
     }
+    self.formCheckHandler(self.checkFormSaveReady());
   };
-  this.loadAimJson = function (aimjson) {
+  this.loadAimJson = function (aimjson, isRecist) {
     //var ImageAnnotation = aimjson.imageAnnotations.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
 
     //test
@@ -4294,7 +4462,8 @@ export var AimEditor = function (
     // test['circle'].validate = 'ok';
     // console.log('new test', test);
     //test
-    let aimjsonCopy = { ...aimjson };
+
+    let aimjsonCopy = aimjson;
     self.loadingAimFlag = true;
     console.log(
       "load  aim  called: ..................aim passed :",
@@ -4303,6 +4472,10 @@ export var AimEditor = function (
     self.activateDirtyCheck = false;
     var templateIndex = self.mapTemplateCodeValueByIndex.get(
       aimjsonCopy.typeCode[0].code
+    );
+    console.log(
+      "this template index need to be selected ",
+      self.mapTemplateCodeValueByIndex
     );
     if (typeof templateIndex === "undefined") {
       //  self.activateDirtyCheck = true;
@@ -4318,6 +4491,7 @@ export var AimEditor = function (
       let evObj = document.createEvent("Events");
       evObj.initEvent("change", true, true);
       self.templateSelect.dispatchEvent(evObj);
+
       var imagingObservationEntityCollection =
         aimjsonCopy.imagingObservationEntityCollection;
       var imagingPhysicalEntityCollection =
@@ -4362,8 +4536,122 @@ export var AimEditor = function (
       //self.activateDirtyCheck = true;
       console.log("load aim activated set dirty flag check");
       self.loadingAimFlag = false;
+      if (isRecist) {
+        self.disableRecistSections();
+      }
       return 0;
     }
+  };
+
+  this.disableRecistSections = function () {
+    // disable for recist
+    //alert(document.getElementById("DropLocation").childNodes[0].className);
+    alert(document.getElementById("annotationName").parentElement.className);
+    // document.getElementById("allowedTermType").click = function(event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   event.stopPropagation();
+    // }mousedown Type-S72 S71
+    // document.getElementById("Type-S71").disabled = true;
+    // document.getElementById("Type-S72").disabled = true;
+    // document.getElementById("Type-S73").disabled = true;
+    // document.getElementById("Type-S74").disabled = true;
+    alert(document.getElementById("allowedTermType").childNodes.length);
+    let recistAllChildNodes = document.getElementById("allowedTermType")
+      .childNodes;
+    for (let cntRdios = 0; cntRdios < recistAllChildNodes.length; cntRdios++) {
+      recistAllChildNodes[cntRdios].childNodes[0].disabled = true;
+    }
+    // document.getElementById(
+    //   "allowedTermType"
+    // ).parentElement.onclick = function (event) {
+    //   //event.preventDefault();
+    //   event.stopPropagation();
+    // };
+
+    // $(document.getElementById("allowedTermType").parentElement).on(
+    //   "click",
+    //   function (event) {
+    //     // do something special here
+
+    //     // then cancel event bubbling
+
+    //     event.preventDefault();
+    //     event.stopPropagation();
+    //   }
+    // );
+    // $("#Type-S71").on("click", function (event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   return false;
+    //   event.preventDefault();
+    //   event.stopPropagation();
+    // });
+    // $("#Type-S72").on("click", function (event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   return false;
+    //   event.preventDefault();
+    //   event.stopPropagation();
+    // });
+    // $("#Type-S73").on("click", function (event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   return false;
+    //   event.preventDefault();
+    //   event.stopPropagation();
+    // });
+    // $("#Type-S74").on("click", function (event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   return false;
+    //   event.preventDefault();
+    //   event.stopPropagation();
+    // });
+    // $("#allowedTermType").on("change", function (event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   return false;
+    //   event.preventDefault();
+    //   event.stopPropagation();
+    // });
+    // $("#allowedTermType").mousedown(function (event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   return false;
+    //   event.preventDefault();
+    //   event.stopPropagation();
+    // });
+    // $("#allowedTermType").mouseup(function (event) {
+    //   // do something special here
+
+    //   // then cancel event bubbling
+    //   return false;
+    //   event.preventDefault();
+    //   event.stopPropagation();
+    // });
+    let parentDivElementForLocation = document.getElementById("annotationName")
+      .parentElement;
+    let parentDivElementForLocationClass =
+      parentDivElementForLocation.className;
+    let parentDivElementForLocationClassDisabled =
+      parentDivElementForLocationClass + " disabled";
+    parentDivElementForLocation.className = parentDivElementForLocationClassDisabled;
+
+    let subDivElementForLocation = document.getElementById("DropLocation")
+      .childNodes[0];
+    let subDivElementForLocationClass = subDivElementForLocation.className;
+    let subDivElementForLocationClassDisabled =
+      subDivElementForLocationClass + " disabled";
+    subDivElementForLocation.className = subDivElementForLocationClassDisabled;
+    // end disable for recist
   };
 
   this.addUid = function (jsonobj) {

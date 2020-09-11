@@ -121,7 +121,7 @@ const NavBar = ({
                   <div
                     className="nav-link mng-icon"
                     data-name="mng"
-                    onClick={e => {
+                    onClick={(e) => {
                       openGearMenu(e);
                     }}
                   >
@@ -132,7 +132,7 @@ const NavBar = ({
                   <div
                     className="nav-link info-icon"
                     data-name="info"
-                    onClick={e => {
+                    onClick={(e) => {
                       openInfoMenu(e);
                     }}
                   >
@@ -149,7 +149,7 @@ const NavBar = ({
                   <div
                     className="nav-link user-profile"
                     data-name="user"
-                    onClick={e => {
+                    onClick={(e) => {
                       openUser(e);
                     }}
                   >
@@ -170,7 +170,7 @@ const NavBar = ({
   );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     loading: state.annotationsListReducer.loading,
   };

@@ -23,11 +23,11 @@ const defaultConfig = {
   strayRemoveRange: [0, 99],
   interpolate: false,
   showFreehandStats: true,
-  brush3dToolName: "Brush3DTool",
+  brush3dToolName: "Brush3D",
   brush3DHUGatedToolName: "Brush3DHUGated",
   brush3DAutoGatedTool: "Brush3DAutoGated",
   freehandRoi3DTool: "FreehandRoi3DTool",
-  freehandRoi3DSculptorTool: "FreehandRoi3DSculptorTool",
+  freehandRoi3DSculptorTool: "FreehandRoi3DSculptor",
   gates: [
     {
       // https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4309522/
