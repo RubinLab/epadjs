@@ -1,15 +1,16 @@
-import React from "react";
-import { Link, NavLink } from "react-router-dom";
-import { FaCogs, FaInfoCircle, FaBell } from "react-icons/fa";
-import logo from "../images/logo.png";
-import { connect } from "react-redux";
-const mode = sessionStorage.getItem("mode");
+import React from 'react';
+import { Link, NavLink } from 'react-router-dom';
+import { FaCogs, FaInfoCircle, FaBell } from 'react-icons/fa';
+import logo from '../images/logo.png';
+import { connect } from 'react-redux';
+const mode = sessionStorage.getItem('mode');
 
 const NavBar = ({
   user,
   openGearMenu,
   openInfoMenu,
   openUser,
+  onReports,
   logout,
   onSearchViewClick,
   onSwitchView,
@@ -23,8 +24,8 @@ const NavBar = ({
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
         <Link className="navbar-brand-right nounderline pr-3 " to="#">
-          <img src={logo} alt={"logo"} width="25px" />
-          {mode === "lite" && "eLite"} {mode !== "lite" && "ePAD"}
+          <img src={logo} alt={'logo'} width="25px" />
+          {mode === 'lite' && 'eLite'} {mode !== 'lite' && 'ePAD'}
         </Link>
         <button
           className="navbar-toggler"
@@ -44,12 +45,12 @@ const NavBar = ({
               className="nav-item"
               onClick={() => {
                 onSearchViewClick();
-                onSwitchView("search");
+                onSwitchView('search');
               }}
             >
               <NavLink
                 className="nav-link"
-                to={pid ? `/search/${pid}` : "/search"}
+                to={pid ? `/search/${pid}` : '/search'}
               >
                 Search
               </NavLink>
@@ -59,7 +60,7 @@ const NavBar = ({
                 Display
               </NavLink>
             </li>
-            {mode !== "lite" && (
+            {mode !== 'lite' && (
               <React.Fragment>
                 {/* <li className="nav-item">
                   <NavLink className="nav-link" to="/anotate">
@@ -76,20 +77,24 @@ const NavBar = ({
                     Progress
                   </NavLink>
                 </li> */}
-                {/* <li className="nav-item">
-                  <NavLink className="nav-link" to="/tools">
-                    Tools
-                  </NavLink>
+                <li
+                  className="nav-item"
+                  id="navbarReports"
+                  onClick={() => {
+                    onReports();
+                  }}
+                >
+                    Reports
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" to="/edit">
                     Edit
                   </NavLink>
-                </li>{" "} */}
+                </li>{' '}
                 <li
                   className="nav-item"
                   onClick={() => {
-                    onSwitchView("flex");
+                    onSwitchView('flex');
                   }}
                 >
                   <NavLink
@@ -98,7 +103,7 @@ const NavBar = ({
                   >
                     Flex
                   </NavLink>
-                </li>{" "}
+                </li>{' '}
               </React.Fragment>
             )}
           </ul>
@@ -120,7 +125,7 @@ const NavBar = ({
                       openGearMenu(e);
                     }}
                   >
-                    <FaCogs style={{ fontSize: "1.5rem" }} data-name="mng" />
+                    <FaCogs style={{ fontSize: '1.5rem' }} data-name="mng" />
                   </div>
                 </li>
                 <li className="nav-item pull-right" data-name="info">
@@ -132,7 +137,7 @@ const NavBar = ({
                     }}
                   >
                     <FaInfoCircle
-                      style={{ fontSize: "1.5rem", position: "relative" }}
+                      style={{ fontSize: '1.5rem', position: 'relative' }}
                       data-name="info"
                     />
                     {notificationWarning ? (
