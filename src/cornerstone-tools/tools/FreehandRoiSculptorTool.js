@@ -150,12 +150,33 @@ export default class FreehandRoiSculptorTool extends BaseTool {
 
     const points = toolState.data[config.currentTool].handles.points;
 
-    // Set the mouseLocation handle
-    this._getMouseLocation(eventData);
-    this._sculpt(eventData, points);
+    /**
+     *To open aim editor fire markuoSelected Event
+     */
+    const currentToolData = toolState.data[config.currentTool];
+    console.log("Data bu mu", currentToolData);
+    const ancestorEvent = {
+      element: eventData.element,
+      data: currentToolData,
+    };
+    const detail = { aimId: currentToolData.aimId, ancestorEvent };
+    const evnt = new CustomEvent("markupSelected", {
+      cancelable: true,
+      detail,
+    });
+    const shouldContinue = window.dispatchEvent(evnt);
+    if (shouldContinue) {
+      /**
+       * End aim editor related part
+       */
 
-    // Update the image
-    external.cornerstone.updateImage(eventData.element);
+      // Set the mouseLocation handle
+      this._getMouseLocation(eventData);
+      this._sculpt(eventData, points);
+
+      // Update the image
+      external.cornerstone.updateImage(eventData.element);
+    } else evt.preventDefault();
   }
 
   /**
@@ -325,6 +346,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
   _selectFreehandTool(eventData) {
     const config = this.configuration;
     const element = eventData.element;
+
     const closestToolIndex = this._getClosestFreehandToolOnElement(
       element,
       eventData

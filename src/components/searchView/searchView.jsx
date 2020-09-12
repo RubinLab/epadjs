@@ -218,16 +218,12 @@ class SearchView extends Component {
     this.setState({ expanded });
   };
 
-  keepExpandedPatientsInOrder = newSubjects => {
-    this.updateUploadStatus();
-    // get the patient ID of the maps, and the level they are open
-    // get the new array of subjects and iterate over it and form the new expanded object
-  };
 
   updateUploadStatus = () => {
-    this.setState(state => {
-      return { uploading: !state.uploading, update: state.update + 1 };
-    });
+    this.setState(state => ({ update: state.update + 1 }));
+    this.state.uploading
+      ? this.setState({ uploading: false })
+      : this.setState({ uploading: true });
     this.updateSubjectCount();
     // update patients after upload
     // filter the patients from openSeries with the first index they appear
@@ -1001,6 +997,7 @@ class SearchView extends Component {
             onSubmit={this.updateUploadStatus}
             pid={this.props.pid}
             clearTreeData={this.props.clearTreeData}
+            onResolve={this.updateStatus}
           />
         )}
         {showDeleteAlert && (

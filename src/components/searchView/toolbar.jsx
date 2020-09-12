@@ -18,6 +18,8 @@ import { BarLoader } from "react-spinners";
 const mode = sessionStorage.getItem("mode");
 
 const toolBar = props => {
+  const { project } = props;
+  const noUpload = project === "all" || project === "nonassigned";
   return (
     <div className="searchView-toolbar">
       <div className="searchView-toolbar__group">
@@ -55,7 +57,10 @@ const toolBar = props => {
             <span>Download selections</span>
           </ReactTooltip>
         </div>
-        <div className="searchView-toolbar__icon" onClick={props.onUpload}>
+        <div
+          className={noUpload ? "hide-delete" : "searchView-toolbar__icon"}
+          onClick={noUpload ? null : props.onUpload}
+        >
           <div>
             <FaUpload
               style={{ fontSize: "1.2rem" }}

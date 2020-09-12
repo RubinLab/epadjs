@@ -18,6 +18,7 @@ const modules = store.modules;
  * @return {null}
  */
 export default function (toolData, element) {
+  console.log("In interpolate");
   const { ROIContourData, interpolationList } = generateInterpolationData(
     toolData,
     element

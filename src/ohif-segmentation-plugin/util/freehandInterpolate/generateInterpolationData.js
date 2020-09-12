@@ -15,27 +15,46 @@ const globalToolStateManager = globalImageIdSpecificToolStateManager;
  * interpolationList.
  */
 export default function (toolData, element) {
+  console.log("Tooldata, uid", toolData, element);
   const ROIContourUid = toolData.ROIContourUid;
   const imageIds = _getImageIdsOfActiveSeries(element);
   const ROIContourData = _getROIContourData(imageIds, ROIContourUid);
   const extent = _getExtentOfRegion(ROIContourData);
   const sliceEdited = _getSlicePositionOfToolData(ROIContourData, toolData.uid);
 
+  console.log(
+    "ROIContourData, extent, sliceEdited",
+    ROIContourData,
+    extent,
+    sliceEdited
+  );
   const interpolationList = [];
 
   // Check if contours between the extent can be interpolated.
   for (let i = extent[0] + 1; i <= extent[1] - 1; i++) {
     if (_sliceNeedsInterpolating(ROIContourData, i)) {
       const contourPair = _getBoundingPair(i, extent, ROIContourData);
+      console.log("Contour pair", contourPair);
 
       if (
         contourPair &&
         (contourPair[0] === sliceEdited || contourPair[1] === sliceEdited)
       ) {
+        console.log(
+          "contourPair, interpolationList",
+          contourPair,
+          interpolationList
+        );
         _appendinterpolationList(contourPair, interpolationList);
       }
     }
   }
+
+  console.log(
+    "ROIContourData interpolationList",
+    ROIContourData,
+    interpolationList
+  );
 
   return {
     ROIContourData,
