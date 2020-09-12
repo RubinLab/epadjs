@@ -2,21 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import ReactHtmlParser from 'react-html-parser';
-import Draggable from 'react-draggable';
 import { Rnd } from 'react-rnd';
 import { renderTable, wordExport } from './recist';
 import { drawWaterfall } from './waterfall';
-import { FaTimes } from 'react-icons/fa';
-import { getReport } from '../../services/annotationServices';
 import ConfirmationModal from '../common/confirmationModal';
 import { MAX_PORT } from '../../constants';
 
-import { getWaterfallReport } from '../../services/reportServices';
+import { getWaterfallReport, getReport } from '../../services/reportServices';
 import { checkIfSeriesOpen, clearCarets } from '../../Utils/aid';
 import {
   changeActivePort,
   clearGrid,
-  clearSelection,
   jumpToAim,
   addToGrid,
   getSingleSerie,
@@ -35,10 +31,6 @@ const Report = props => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [selectedCol, setSelectedCol] = useState(null);
   const [filteredPatients, setFilteredPatients] = useState({});
-
-  // const filterSelectedPatients = () => {
-
-  // };
 
   const constructPairs = object => {
     const result = [];
@@ -113,8 +105,7 @@ const Report = props => {
         loadFilter,
         numofHeaderCols,
         hideCols,
-        report,
-        selectedProject,
+        report
       } = getTableArguments();
       let reportTable;
       if (Object.keys(data).length > 0) {
@@ -129,7 +120,6 @@ const Report = props => {
             hideCols,
             loadFilter,
             props.index,
-            // onClose, //js code doesn't know anything about this
             refreshFilter
           );
         }
@@ -151,7 +141,6 @@ const Report = props => {
       metric === 'ADLA' || metric === 'RECIST' || metric === 'intensitystddev';
     const type = 'BASELINE';
     let result;
-    let reportTable;
     if (validMetric) {
       if (selectedProject) {
         result = await getWaterfallReport(
@@ -162,7 +151,6 @@ const Report = props => {
           metric
         );
       } else {
-        // const filteredObj = filterSelectedPatients();
         const projects = Object.keys(filteredPatients);
         if (projects.length === 1) {
           const pid = projects[0];
@@ -183,7 +171,6 @@ const Report = props => {
     } else {
       getReportTable({ series: [] });
     }
-    // getReportTable(result.data, metric);
   };
 
   useEffect(() => {
@@ -357,17 +344,11 @@ const Report = props => {
       : '';
   return (
     <>
-      {/* <Draggable> */}
       <Rnd
         default={{
           x: 50,
           y: 50,
-          // width: 605,
-          // height: 200,
         }}
-        // minWidth={300}
-        // minHeight={190}
-        // bounds="window"
         enableUserSelectHack={false}
       >
         <div
@@ -409,7 +390,6 @@ const Report = props => {
           {node}
         </div>
       </Rnd>
-      {/* </Draggable> */}
       {showConfirmModal && (
         <ConfirmationModal
           title={messages.title}

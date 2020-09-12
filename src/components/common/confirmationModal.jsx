@@ -5,12 +5,8 @@ import { Modal } from "react-bootstrap";
 
 const confirmationModal = props => {
   return (
-    // <Modal.Dialog dialogClassName="alert-maxView">
     <Modal.Dialog id="modal-fix">
       <Modal.Body className="-maxView-container">
-        {/* <div className="-maxView__header--icon">
-          <FaExclamationTriangle />
-        </div> */}
         <div className="-maxView__header">
           <div className="-maxView__header__text" style={{color: 'orangered'}} >{props.title}</div>
           <h4 className="-maxView__message--exp">{props.message}</h4>

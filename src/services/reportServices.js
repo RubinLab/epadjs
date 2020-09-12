@@ -17,3 +17,15 @@ export function getWaterfallReport(
     : { projectID };
   return http.post(url, body);
 }
+
+export function getReport(projectId, patId, filter) {
+  const url =
+    apiUrl +
+    "/projects/" +
+    projectId +
+    "/subjects/" +
+    patId +
+    "/aims?" +
+    filter;
+    return http.get(url);
+}

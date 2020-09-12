@@ -89,7 +89,6 @@ class App extends Component {
       pid: null,
       closeAll: 0,
       projectAdded: 0,
-      showReport: false,
       showWarning: false,
       showConfirmation: false,
       showReportsMenu: false,
@@ -128,7 +127,6 @@ class App extends Component {
     const arr = [...this.state.reportsCompArr];
     arr[index] = null;
     this.setState({
-      showReport: false,
       template: null,
       report: null,
       reportsCompArr: arr,
@@ -179,7 +177,6 @@ class App extends Component {
         />
       );
       this.setState({
-        showReport: true,
         template: null,
         reportType,
         reportsCompArr,
@@ -214,7 +211,6 @@ class App extends Component {
   displayWaterfall = () => {
     this.props.dispatch(selectProject(this.state.pid));
     this.setState({
-      showReport: true,
       template: null,
       reportType: 'Waterfall',
       showConfirmation: false,
@@ -873,13 +869,10 @@ class App extends Component {
       progressUpdated,
       treeExpand,
       showReportsMenu,
-      showReport,
       showWarning,
       showConfirmation,
       title,
       message,
-      reportType,
-      pid,
     } = this.state;
     let noOfUnseen;
     if (notifications) {

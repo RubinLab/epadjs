@@ -154,18 +154,6 @@ export function uploadSegmentation(segmentation, segName, projectId = "lite") {
   return http.post(url, segData, config);
 }
 
-export function getReport(projectId, patId, filter) {
-  const url =
-    apiUrl +
-    "/projects/" +
-    projectId +
-    "/subjects/" +
-    patId +
-    "/aims?" +
-    filter;
-    return http.get(url);
-
-}
 
 // export function uploadSegmentation(segmentation, projectId = "lite") {
 //   const url = apiUrl + "/projects/" + projectId + "/files";

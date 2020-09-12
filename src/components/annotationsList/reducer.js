@@ -38,8 +38,6 @@ import {
   GET_PROJECT_MAP,
   SET_SEG_LABEL_MAP_INDEX,
   GET_TEMPLATES,
-  // SELECT_REPORT,
-  // CLOSE_REPORT,
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -543,20 +541,6 @@ const asyncReducer = (state = initialState, action) => {
             },
           },
         });
-
-      // case SELECT_REPORT:
-      //   const updatedReports = [...state.reports];
-      //   const { reportType, patientObj } = action.payload;
-      //   updatedReports.push({
-      //     patientID: action.payload.patientObj.patientID,
-      //     reportType,
-      //     patientObj
-      //   });
-      //   return { ...state, reports: updatedReports };
-      // case CLOSE_REPORT:
-      //   const reportsAfterDelete = [...state.reports];
-      //   reportsAfterDelete[action.index] = null;
-      //   return { ...state, reports: reportsAfterDelete };
       case GET_PROJECT_MAP:
         return {
           ...state,

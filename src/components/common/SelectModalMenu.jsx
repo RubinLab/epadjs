@@ -46,23 +46,3 @@ const SelectModalMenu = ({ list, onClick }) => {
 };
 
 export default SelectModalMenu;
-
-// setWrapperRef = node => {
-//   this.wrapperRef = node;
-// };
-
-// componentDidMount() {
-//   document.addEventListener("mousedown", this.handleClickOutside);
-//   document.addEventListener("keydown", this.handleClickOutside);
-// }
-
-// componentWillUnmount() {
-//   document.removeEventListener("mousedown", this.handleClickOutside);
-//   document.removeEventListener("keydown", this.handleClickOutside);
-// }
-
-// handleClickOutside = event => {
-//   if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
-//     this.props.onClose();
-//   }
-// };

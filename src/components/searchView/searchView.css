@@ -502,9 +502,6 @@ h5.add-subject__modal--label,
 
 #report {
   overflow: auto;
-  /* max-width: fit-content; */
-  /* min-width: 500px; */
-  /* position: absolute; */
   z-index: 25;
   left: 15%;
   top: 15%;
