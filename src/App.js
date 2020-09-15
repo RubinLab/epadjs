@@ -132,7 +132,14 @@ class App extends Component {
       reportsCompArr: arr,
     });
 
-    this.props.dispatch(clearSelection());
+    // if there isn't any report open clear selection
+    let nullCount = 0;
+    arr.forEach(el => {
+      if (el === null) {
+        nullCount++;
+      }
+    });
+    if (nullCount === arr.length) this.props.dispatch(clearSelection());
   };
 
   handleReportSelect = e => {
