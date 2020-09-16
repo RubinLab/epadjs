@@ -200,8 +200,7 @@ class App extends Component {
     const { selectedProject, selectedPatients } = this.props;
     let patient;
     if (selectProject) {
-      patient = await getSubject(selectedProject, name);
-      patient = patient.data;
+      ({ data: patient } = await getSubject(selectedProject, name));
     } else {
       patient = this.props.selectedPatients[name];
     }
