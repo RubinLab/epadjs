@@ -194,9 +194,18 @@ class App extends Component {
   getMetric = metric => {
     this.setState({ metric });
   };
-  handleWaterFallClickOnBar = name => {
+  handleWaterFallClickOnBar = async name => {
     // find the patient selected
-    const patient = this.props.selectedPatients[name];
+    // if project selected get patient details with call
+    const { selectedProject, selectedPatients } = this.props;
+    let patient;
+    if (selectProject) {
+      patient = await getSubject(selectedProject, name);
+      patient = patient.data;
+    } else {
+      patient = this.props.selectedPatients[name];
+    }
+
     const reportsCompArr = [...this.state.reportsCompArr];
     const index = reportsCompArr.length;
     reportsCompArr.push(
@@ -217,10 +226,25 @@ class App extends Component {
 
   displayWaterfall = () => {
     this.props.dispatch(selectProject(this.state.pid));
+    const reportsCompArr = [...this.state.reportsCompArr];
+    const index = reportsCompArr.length;
+    reportsCompArr.push(
+      <Report
+        onClose={this.closeReportModal}
+        report={'Waterfall'}
+        index={index}
+        // patient={patients[0]}
+        key={`report${index}`}
+        waterfallClickOn={this.handleWaterFallClickOnBar}
+        handleMetric={this.getMetric}
+      />
+    );
+
     this.setState({
       template: null,
       reportType: 'Waterfall',
       showConfirmation: false,
+      reportsCompArr,
     });
   };
 
@@ -1145,6 +1169,7 @@ const mapStateToProps = state => {
     activePort,
     imageID,
     openSeries,
+    selectedProject,
     selectedPatients,
     projectMap,
   } = state.annotationsListReducer;
@@ -1155,6 +1180,7 @@ const mapStateToProps = state => {
     activePort,
     imageID,
     openSeries,
+    selectedProject,
     selectedPatients,
     projectMap,
     selection: state.managementReducer.selection,
