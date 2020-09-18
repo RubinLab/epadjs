@@ -85,9 +85,9 @@ export default function (element, newImageIdIndex) {
   }
 
   // METE:commented out because it prevents scrolling to image
-  // if (newImageIdIndex === stackData.currentImageIdIndex) {
-  //  return;
-  // }
+  if (newImageIdIndex === stackData.currentImageIdIndex) {
+    return;
+  }
 
   if (startLoadingHandler) {
     startLoadingHandler(element);

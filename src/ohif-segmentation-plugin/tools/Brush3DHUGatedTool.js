@@ -43,6 +43,13 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
   _paint(evt) {
     const eventData = evt.detail;
     const { element, image } = eventData;
+
+    // ********************* Mete MRI modificationn **************************** //
+    const pixelData = image.getPixelData();
+    // const min = Math.min.apply(Math, pixelData);
+    const max = this._getMax(pixelData);
+    console.log("Min & max", max);
+
     const { rows, columns } = image;
     const { x, y } = eventData.currentPoints.image;
 
@@ -62,7 +69,7 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       labelmap3D,
       currentImageIdIndex,
       activeLabelmapIndex,
-      shouldErase
+      shouldErase,
     } = this.paintEventData;
 
     // Draw / Erase the active color.
@@ -75,11 +82,23 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
     );
 
     cornerstone.triggerEvent(element, EVENTS.LABELMAP_MODIFIED, {
-      activeLabelmapIndex
+      activeLabelmapIndex,
     });
 
     cornerstone.updateImage(evt.detail.element);
   }
+
+  // ********************* Mete MRI modificationn **************************** //
+  _getMax(arr) {
+    let len = arr.length;
+    let max = -Infinity;
+
+    while (len--) {
+      max = arr[len] > max ? arr[len] : max;
+    }
+    return max;
+  }
+  // *********************** End Mete MRI modification ************************* //
 
   /**
    * _gateCircle - Given an image and a brush circle, gate the circle between
@@ -322,7 +341,7 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       if (data[i][j] === 1) {
         const result = floodFill({
           getter: getter,
-          seed: [i, j]
+          seed: [i, j],
         });
 
         const flooded = result.flooded;
@@ -361,7 +380,7 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       if (data[i][j] === 1) {
         const result = floodFill({
           getter: getter,
-          seed: [i, j]
+          seed: [i, j],
         });
 
         const flooded = result.flooded;
@@ -374,7 +393,7 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       } else if (data[i][j] === 2) {
         const result = floodFill({
           getter: getter,
-          seed: [i, j]
+          seed: [i, j],
         });
 
         const flooded = result.flooded;

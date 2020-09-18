@@ -291,10 +291,10 @@ class ToolMenu extends Component {
       } //Dont" select the HUGated if the modality is not CT
       this.setState({ showBrushSize: true });
     } else if (tool === "Brush3DHUGated") {
-      if (!this.checkIfCT() || this.checkIfMultiframe()) {
-        alert("HU Gated tool only works with singleframe CT images");
-        return;
-      } //Dont" select the HUGated if the modality is not CT
+      // if (!this.checkIfCT() || this.checkIfMultiframe()) {
+      //   alert("HU Gated tool only works with singleframe CT images");
+      //   return;
+      // } //Dont" select the HUGated if the modality is not CT
       this.setState({ showBrushSize: true, showSmartBrush: true });
     } else if (tool === "FreehandRoi3DTool") {
       this.setState({ showInterpolation: true });

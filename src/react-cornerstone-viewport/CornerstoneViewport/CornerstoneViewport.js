@@ -205,6 +205,9 @@ class CornerstoneViewport extends Component {
     const hasImageIndexChanged = imageIndex !== prevImageIndex;
     let updatedState = {};
 
+    // console.log("updated ", imageIndex);
+    // console.log("updated ", hasStackChanged);
+
     if (hasStackChanged) {
       // update stack toolstate
       cornerstoneTools.clearToolState(this.element, "stack");
@@ -229,6 +232,7 @@ class CornerstoneViewport extends Component {
         // What if user kills component before `displayImage`?
       }
     } else if (!hasStackChanged && hasImageIndexChanged) {
+      console.log("Scrolling to index ", imageIndex);
       scrollToIndex(this.element, imageIndex);
     }
 
