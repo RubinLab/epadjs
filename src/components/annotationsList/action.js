@@ -47,6 +47,7 @@ import { getStudies, getStudyAims } from "../../services/studyServices";
 import {
   getAnnotations,
   getAnnotationsJSON,
+  getSubjectsAnnotations,
 } from "../../services/annotationServices";
 import { getAllTemplates } from "../../services/templateServices";
 import { getImageIdAnnotations } from "aimapi";
@@ -617,7 +618,7 @@ export const getSingleSerie = (serie, annotation) => {
         singleSerieLoaded(reference, aimsData, seriesUID, imageData, annotation)
       );
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
   };
 };
