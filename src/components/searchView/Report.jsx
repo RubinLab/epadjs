@@ -47,6 +47,7 @@ const Report = props => {
     let patientID;
     if (report !== 'Waterfall') {
       ({ projectID, patientID } = props.patient);
+      patientID = patientID ? patientID : props.patient.subjectID;
     }
     const template = report === 'RECIST' ? null : props.template;
     const id = 'recisttbl' + index;
@@ -73,7 +74,6 @@ const Report = props => {
     } else {
       selectedProject = props.selectedProject;
     }
-
     return {
       id,
       projectID,
@@ -87,6 +87,7 @@ const Report = props => {
     };
   };
 
+  
   const onClose = e => {
     const index = parseInt(e.target.dataset.index);
     props.onClose(index);
