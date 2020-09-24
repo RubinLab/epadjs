@@ -44,6 +44,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import RightsideBar from './components/RightsideBar/RightsideBar';
+import MinimizedReport from './components/searchView/MinimizedReport';
 
 const messages = {
   noPatient: {
@@ -96,6 +97,8 @@ class App extends Component {
       message: '',
       reportType: '',
       reportsCompArr: [],
+      minReportsArr: [],
+      hiddenReports: {},
       metric: null,
     };
   }
@@ -123,6 +126,14 @@ class App extends Component {
     this.setState(state => ({ showReportsMenu: !state.showReportsMenu }));
   };
 
+  countCurrentReports = arr => {
+    let nullCount = 0;
+    arr.forEach(el => {
+      if (el === null) nullCount++;
+    });
+    return nullCount;
+  };
+
   closeReportModal = index => {
     const arr = [...this.state.reportsCompArr];
     arr[index] = null;
@@ -133,13 +144,63 @@ class App extends Component {
     });
 
     // if there isn't any report open clear selection
-    let nullCount = 0;
-    arr.forEach(el => {
-      if (el === null) {
-        nullCount++;
-      }
-    });
+    const nullCount = this.countCurrentReports(arr);
     if (nullCount === arr.length) this.props.dispatch(clearSelection());
+  };
+
+  handleCloseMinimize = (index, reportIndex) => {
+    const hiddenReports = { ...this.state.hiddenReports };
+    const minReportsArr = [...this.state.minReportsArr];
+
+    minReportsArr[index] = null;
+    delete hiddenReports[reportIndex];
+
+    this.setState({
+      hiddenReports,
+      minReportsArr,
+    });
+
+    this.closeReportModal(reportIndex);
+  };
+
+  handleMaximizeReport = e => {
+    let { index, reportindex } = e.target.dataset;
+    index = parseInt(index);
+    reportindex = parseInt(reportindex);
+    const hiddenReports = { ...this.state.hiddenReports };
+    const reportsCompArr = [...this.state.reportsCompArr];
+    const minReportsArr = [...this.state.minReportsArr];
+
+    minReportsArr[index] = null;
+    reportsCompArr[reportindex] = hiddenReports[reportindex];
+    delete hiddenReports[reportindex];
+    this.setState({
+      hiddenReports,
+      minReportsArr,
+      reportsCompArr,
+    });
+  };
+
+  handleMinimizeReport = (index, title) => {
+    const hiddenReports = { ...this.state.hiddenReports };
+    hiddenReports[index] = this.state.reportsCompArr[index];
+    const reportsCompArr = [...this.state.reportsCompArr];
+    const minReportsArr = [...this.state.minReportsArr];
+    const minIndex = minReportsArr.length;
+    const component = (
+      <MinimizedReport
+        index={minIndex}
+        reportIndex={index}
+        header={title}
+        onClose={this.handleCloseMinimize}
+        onExpand={this.handleMaximizeReport}
+        key={minIndex + 'min'}
+        count={Object.values(hiddenReports).length}
+      />
+    );
+    reportsCompArr[index] = null;
+    minReportsArr.push(component);
+    this.setState({ minReportsArr, reportsCompArr, hiddenReports });
   };
 
   handleReportSelect = e => {
@@ -181,6 +242,7 @@ class App extends Component {
           key={`report${index}`}
           waterfallClickOn={this.handleWaterFallClickOnBar}
           handleMetric={this.getMetric}
+          onMinimize={this.handleMinimizeReport}
         />
       );
       this.setState({
@@ -216,6 +278,7 @@ class App extends Component {
         key={`report${index}`}
         waterfallClickOn={this.handleWaterFallClickOnBar}
         handleMetric={this.getMetric}
+        onMinimize={this.handleMinimizeReport}
       />
     );
     this.setState({
@@ -236,6 +299,7 @@ class App extends Component {
         key={`report${index}`}
         waterfallClickOn={this.handleWaterFallClickOnBar}
         handleMetric={this.getMetric}
+        onMinimize={this.handleMinimizeReport}
       />
     );
 
@@ -975,6 +1039,7 @@ class App extends Component {
           />
         )}
         {this.state.reportsCompArr}
+        {this.state.minReportsArr}
         {!this.state.authenticated && mode !== 'lite' && (
           <Route path="/login" component={LoginForm} />
         )}

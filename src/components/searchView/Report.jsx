@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import ReactHtmlParser from 'react-html-parser';
 import { Rnd } from 'react-rnd';
+import { FaTimes } from 'react-icons/fa';
 import { renderTable, wordExport } from './recist';
 import { drawWaterfall } from './waterfall';
 import ConfirmationModal from '../common/confirmationModal';
@@ -87,7 +88,6 @@ const Report = props => {
     };
   };
 
-  
   const onClose = e => {
     const index = parseInt(e.target.dataset.index);
     props.onClose(index);
@@ -106,7 +106,7 @@ const Report = props => {
         loadFilter,
         numofHeaderCols,
         hideCols,
-        report
+        report,
       } = getTableArguments();
       let reportTable;
       if (Object.keys(data).length > 0) {
@@ -362,10 +362,26 @@ const Report = props => {
               <div className="report-header__title">{header}</div>
               <div className="report-header__btngrp">
                 {props.report !== 'Waterfall' && (
-                  <button onClick={downloadReport}>Export</button>
+                  <button
+                    className="report-header__btn --exp"
+                    onClick={downloadReport}
+                  >
+                    Export
+                  </button>
                 )}
-                <button data-index={props.index} onClick={onClose}>
-                  {'x'}
+                <button
+                  className="report-header__btn"
+                  data-index={props.index}
+                  onClick={() => props.onMinimize(props.index, header)}
+                >
+                {String.fromCharCode('0xFF3F')}
+                </button>
+                <button
+                  className="report-header__btn --close"
+                  data-index={props.index}
+                  onClick={onClose}
+                >
+                  {String.fromCharCode('0x2A09')}
                 </button>
               </div>
             </div>
