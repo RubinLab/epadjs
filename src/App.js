@@ -37,6 +37,7 @@ import {
 import Worklist from './components/sideBar/sideBarWorklist';
 import ErrorBoundary from './ErrorBoundary';
 import Report from './components/searchView/Report.jsx';
+import { getSubjects, getSubject } from './services/subjectServices';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
