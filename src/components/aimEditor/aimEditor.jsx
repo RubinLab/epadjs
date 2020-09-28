@@ -57,15 +57,25 @@ class AimEditor extends Component {
 
     const lastSavedAim = sessionStorage.getItem("lastSavedAim");
     console.log("Last Saved Aim", lastSavedAim);
+    console.log("State of autoFill", this.state.autoFill);
 
-    this.semanticAnswers = new questionaire.AimEditor(
-      element,
-      this.validateForm,
-      this.renderButtons,
-      this.getDefaultLesionName(),
-      setAimDirty,
-      lastSavedAim
-    );
+    if (this.state.autoFill)
+      this.semanticAnswers = new questionaire.AimEditor(
+        element,
+        this.validateForm,
+        this.renderButtons,
+        this.getDefaultLesionName(),
+        setAimDirty,
+        lastSavedAim
+      );
+    else
+      this.semanticAnswers = new questionaire.AimEditor(
+        element,
+        this.validateForm,
+        this.renderButtons,
+        this.getDefaultLesionName(),
+        setAimDirty
+      );
 
     const { projectMap } = this.props;
 
@@ -85,6 +95,7 @@ class AimEditor extends Component {
     const { aimId } = this.props;
     console.log("Aim id in cdm", aimId);
     if (aimId != null && Object.entries(aimId).length) {
+      console.log("Aim load in aim editor", aimId);
       try {
         this.semanticAnswers.loadAimJson(aimId);
       } catch (error) {
