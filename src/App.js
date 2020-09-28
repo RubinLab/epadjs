@@ -24,7 +24,6 @@ import UserMenu from './components/userProfileMenu.jsx';
 import WarningModal from './components/common/warningModal';
 import ConfirmationModal from './components/common/confirmationModal';
 import SelectModalMenu from './components/common/SelectModalMenu';
-import AnnotationList from './components/annotationsList';
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from './services/authService';
 import MaxViewAlert from './components/annotationsList/maxViewPortAlert';
@@ -33,17 +32,14 @@ import {
   getNotificationsData,
   clearSelection,
   selectProject,
+  getTemplates,
 } from './components/annotationsList/action';
 import Worklist from './components/sideBar/sideBarWorklist';
 import ErrorBoundary from './ErrorBoundary';
 import Report from './components/searchView/Report.jsx';
-import { getSubjects, getSubject } from './services/subjectServices';
-import { getStudies, getStudy } from './services/studyServices';
-import { getSeries, getSingleSeries } from './services/seriesServices';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
-import RightsideBar from './components/RightsideBar/RightsideBar';
 
 const messages = {
   noPatient: {
@@ -475,6 +471,13 @@ class App extends Component {
       this.setState({ notifications });
     }
   }
+
+  componentDidUpdate = prevProps => {
+    const uploaded = this.props.notificationAction.startsWith('Upload');
+    if (prevProps.lastEventId !== this.props.lastEventId && uploaded) {
+      this.props.dispatch(getTemplates());
+    }
+  };
 
   completeAutorization = apiUrl => {
     let getAuthUser = null;
@@ -1171,6 +1174,8 @@ const mapStateToProps = state => {
     selectedProject,
     selectedPatients,
     projectMap,
+    lastEventId,
+    notificationAction,
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -1182,6 +1187,8 @@ const mapStateToProps = state => {
     selectedProject,
     selectedPatients,
     projectMap,
+    lastEventId,
+    notificationAction,
     selection: state.managementReducer.selection,
   };
 };
