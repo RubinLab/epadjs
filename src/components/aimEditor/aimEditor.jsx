@@ -58,6 +58,7 @@ class AimEditor extends Component {
     const lastSavedAim = sessionStorage.getItem("lastSavedAim");
     console.log("Last Saved Aim", lastSavedAim);
     console.log("State of autoFill", this.state.autoFill);
+    this.getAutoFillParts(lastSavedAim);
 
     if (this.state.autoFill)
       this.semanticAnswers = new questionaire.AimEditor(
@@ -66,7 +67,7 @@ class AimEditor extends Component {
         this.renderButtons,
         this.getDefaultLesionName(),
         setAimDirty,
-        lastSavedAim
+        this.getAutoFillParts(lastSavedAim) // becasue there is the whole aim json in the session storage, pass only necessary parts to autofill
       );
     else
       this.semanticAnswers = new questionaire.AimEditor(
@@ -108,6 +109,32 @@ class AimEditor extends Component {
   componentWillUnmount() {
     window.removeEventListener("checkShapes", this.checkShapes);
   }
+
+  getAutoFillParts = (lastSavedAim) => {
+    const { ImageAnnotationCollection } = JSON.parse(lastSavedAim);
+    const imageAnnotation =
+      ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
+    console.log("Last saved aim", imageAnnotation);
+    const obj = {};
+    obj["comment"] = Object.assign({}, imageAnnotation.comment);
+    obj["imagingObservationEntityCollection"] = Object.assign(
+      {},
+      imageAnnotation.imagingObservationEntityCollection
+    );
+    obj["imagingPhysicalEntityCollection"] = Object.assign(
+      {},
+      imageAnnotation.imagingPhysicalEntityCollection
+    );
+    obj["inferenceEntityCollection"] = Object.assign(
+      {},
+      imageAnnotation.imagingPhysicalEntityCollection
+    );
+    // shall we pass markupType too?
+    obj["name"] = Object.assign({}, imageAnnotation.name);
+    // shall we pass segmentation entity collection?
+    obj["typeCode"] = [...imageAnnotation.typeCode];
+    console.log("New object", obj);
+  };
 
   loadAim = (event) => {
     console.log("event", event);
