@@ -1,14 +1,14 @@
+import React, { useRef, useEffect } from 'react';
 import Highcharts from 'highcharts';
-global.Highcharts = require('highcharts');
-require('highcharts/modules/exporting')(global.Highcharts);
+import HighchartsReact from 'highcharts-react-official';
 
-//rounds the val to 2 digit precision if double
-function roundDouble(val) {
-  if (!isNaN(val)) return Math.round(val * 100) / 100;
-  return val;
-}
+const WaterfallReact = ({ data, waterfallSelect, width }) => {
+  const chartComp = useRef(null);
+  const roundDouble = val => {
+    if (!isNaN(val)) return Math.round(val * 100) / 100;
+    return val;
+  };
 
-export function drawWaterfall(data, waterfallSelect) {
   let i;
   var processed_json = new Array();
   for (i = 0; i < data.series.length; i++) {
@@ -30,7 +30,7 @@ export function drawWaterfall(data, waterfallSelect) {
     }
   }
 
-  Highcharts.chart('waterfallContainer', {
+  const options = {
     exporting: {
       chartOptions: {
         // specific options for the exported image
@@ -98,5 +98,22 @@ export function drawWaterfall(data, waterfallSelect) {
         data: processed_json,
       },
     ],
+  };
+
+  useEffect(() => {
+    const container = chartComp.current.container.current;
+    container.style.width = width + 'px';
+    chartComp.current.chart.reflow();
   });
-}
+
+  return (
+    <HighchartsReact
+      highcharts={Highcharts}
+      options={options}
+      containerProps={{ id: 'chartContainer' }}
+      ref={chartComp}
+    />
+  );
+};
+
+export default WaterfallReact;

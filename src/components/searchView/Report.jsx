@@ -3,9 +3,10 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import ReactHtmlParser from 'react-html-parser';
 import { Rnd } from 'react-rnd';
+import useResizeAware from 'react-resize-aware';
 import { renderTable, wordExport } from './recist';
-import { drawWaterfall } from './waterfall';
 import ConfirmationModal from '../common/confirmationModal';
+import WaterfallReact from './WaterfallReact';
 import { MAX_PORT } from '../../constants';
 
 import { getWaterfallReport, getReport } from '../../services/reportServices';
@@ -23,8 +24,14 @@ const messages = {
   message: `Maximum ${MAX_PORT} series can be opened. Please close already opened series first.`,
 };
 
-const style = { width: 'auto', minWidth: 300, maxHeight: 800, height: 'auto' };
+const style = {
+  width: 'auto',
+  minWidth: 300,
+  maxHeight: 800,
+  height: 'auto',
+};
 const Report = props => {
+  const [resizeListener, sizes] = useResizeAware();
   const [node, setNode] = useState(null);
   const [data, setData] = useState([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -87,7 +94,6 @@ const Report = props => {
     };
   };
 
-  
   const onClose = e => {
     const index = parseInt(e.target.dataset.index);
     props.onClose(index);
@@ -106,7 +112,7 @@ const Report = props => {
         loadFilter,
         numofHeaderCols,
         hideCols,
-        report
+        report,
       } = getTableArguments();
       let reportTable;
       if (Object.keys(data).length > 0) {
@@ -124,8 +130,6 @@ const Report = props => {
             refreshFilter
           );
         }
-        if (props.report === 'Waterfall')
-          reportTable = await drawWaterfall(data, waterfallClickOn);
         reportTable = ReactHtmlParser(reportTable);
         setNode(reportTable);
       }
@@ -168,9 +172,9 @@ const Report = props => {
           result = await getWaterfallReport(null, null, pairs, type, metric);
         }
       }
-      getReportTable(result.data);
+      setData(result.data);
     } else {
-      getReportTable({ series: [] });
+      setData({ series: [] });
     }
   };
 
@@ -221,6 +225,9 @@ const Report = props => {
     subjectName = clearCarets(subjectName);
     wordExport(subjectName, 'recisttbl' + index);
   };
+
+  useEffect(() => {
+  }, [sizes.width, sizes.height]);
 
   useEffect(() => {
     const { id } = getTableArguments();
@@ -343,6 +350,7 @@ const Report = props => {
     props.report !== 'Waterfall'
       ? `${props.report} - ${clearCarets(props.patient.subjectName)}`
       : '';
+
   return (
     <>
       <Rnd
@@ -362,10 +370,26 @@ const Report = props => {
               <div className="report-header__title">{header}</div>
               <div className="report-header__btngrp">
                 {props.report !== 'Waterfall' && (
-                  <button onClick={downloadReport}>Export</button>
+                  <button
+                    className="report-header__btn --exp"
+                    onClick={downloadReport}
+                  >
+                    Export
+                  </button>
                 )}
-                <button data-index={props.index} onClick={onClose}>
-                  {'x'}
+                <button
+                  className="report-header__btn"
+                  data-index={props.index}
+                  onClick={() => props.onMinimize(props.index, header)}
+                >
+                  {String.fromCharCode('0xFF3F')}
+                </button>
+                <button
+                  className="report-header__btn --close"
+                  data-index={props.index}
+                  onClick={onClose}
+                >
+                  {String.fromCharCode('0x2A09')}
                 </button>
               </div>
             </div>
@@ -380,11 +404,16 @@ const Report = props => {
                   <option>intensitystddev</option>
                 </select>
               </div>
-              <div
-                id="waterfallContainer"
-                style={{ width: '100%', minWidth: '300px' }}
-                title="WATERFALL"
-              ></div>
+              {data.series && data.series.length >= 0 && (
+                <div style={{ position: 'relative', background: '#FFFFFF' }}>
+                  {resizeListener}
+                  <WaterfallReact
+                    data={data}
+                    waterfallSelect={waterfallClickOn}
+                    width={sizes.width}
+                  />
+                </div>
+              )}
             </>
           )}
 
