@@ -640,6 +640,20 @@ export const updateSingleSerie = (serie, annotation) => {
   };
 };
 
+const extractSerieAims = (arr, seriesID) => {
+  let serieAims = [];
+  arr.forEach(aim => {
+    const serieUID =
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy
+        .imageSeries.instanceUid.root;
+    if (serieUID === seriesID) {
+      serieAims.push(aim);
+    }
+  });
+  return serieAims;
+};
+
 const extractStudyAims = arr => {
   let studyAims = [];
   arr.forEach(aim => {
@@ -663,15 +677,13 @@ const getSingleSerieData = (serie, annotation) => {
     let { studyUID, seriesUID, projectID, patientID } = serie;
     projectID = projectID ? projectID : "lite";
     patientID = patientID ? patientID : serie.subjectID;
-    const promises = [];
-    promises.push(
-      getAnnotationsJSON(projectID, patientID, studyUID, seriesUID)
-    );
-    promises.push(getStudyAims(patientID, studyUID, projectID));
-    Promise.all(promises)
+    
+    getStudyAims(patientID, studyUID, projectID)
       .then(async result => {
-        serieAims = result[0].data;
-        studyAims = extractStudyAims(result[1].data);
+        const aims = result.data.docs.map(doc => {return doc.aim;});
+        serieAims = extractSerieAims(aims,seriesUID);
+        studyAims = extractStudyAims(aims);
+
         aimsData = serieAims.concat(studyAims);
         imageData = getImageIdAnnotations(serieAims);
         aimsData = getAimListFields(aimsData, annotation);
