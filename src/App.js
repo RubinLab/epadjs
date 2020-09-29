@@ -37,6 +37,7 @@ import {
 import Worklist from './components/sideBar/sideBarWorklist';
 import ErrorBoundary from './ErrorBoundary';
 import Report from './components/searchView/Report.jsx';
+import { getSubjects, getSubject } from './services/subjectServices';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
@@ -1119,7 +1120,17 @@ class App extends Component {
           >
             <Switch>
               <Route path="/logout" component={Logout} />
-              <ProtectedRoute path="/display" component={DisplayView} />
+              <ProtectedRoute
+                  path="/display"
+                  render={props => (
+                    <DisplayView
+                      {...props}
+                      updateProgress={this.updateProgress}
+                      pid={this.state.pid}
+                      updateTreeDataOnSave={this.updateTreeDataOnSave}
+                    />
+                  )}
+                />
               <Route path="/not-found" component={NotFound} />
               <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
