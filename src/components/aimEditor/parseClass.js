@@ -3500,7 +3500,14 @@ export var AimEditor = function (
 
     let tempTypecode = jsonInner.typeCode;
     jsonInner.typeCode = [];
-    jsonInner.typeCode.push(tempTypecode);
+    if (Array.isArray(tempTypecode)) {
+      for (let tmptypecnt = 0; tmptypecnt < tempTypecode.length; tmptypecnt++) {
+        jsonInner.typeCode.push(tempTypecode[tmptypecnt]);
+      }
+    } else {
+      jsonInner.typeCode.push(tempTypecode);
+    }
+    // jsonInner.typeCode.push(tempTypecode);
     console.log("**********************************************");
     console.log("**********************************************");
     console.log("**********************************************");
@@ -3550,7 +3557,7 @@ export var AimEditor = function (
         };
         console.log("json valid term before push", jsonValidTerm);
         if (Array.isArray(jsonInner.typeCode)) {
-          jsonInner.typeCode[0].push(jsonValidTerm);
+          jsonInner.typeCode.push(jsonValidTerm);
         } else {
           jsonInner.typeCode.push(jsonValidTerm);
         }
@@ -3820,7 +3827,7 @@ export var AimEditor = function (
     }
     self.addUid(finaljson);
     finaljson = self.replaceTagNamingHierarchy(finaljson);
-    console.log("============= final" + JSON.stringify(finaljson));
+    console.log("Json sent to react to save  : ", JSON.stringify(finaljson));
 
     return finaljson;
   };
