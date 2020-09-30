@@ -14,6 +14,7 @@ import {
   getSingleSerie,
 } from "../annotationsList/action";
 import { Aim, getAimImageData, modalities } from "aimapi";
+import { prepAimForParseClass } from "./ParseClassHelpers";
 import * as questionaire from "./parseClass.js";
 import * as dcmjs from "dcmjs";
 import Switch from "react-switch";
@@ -45,8 +46,6 @@ class AimEditor extends Component {
 
   componentDidMount() {
     const element = document.getElementById("questionaire");
-    console.log("Props from aim editor", this.props);
-
     let {
       templates: allTemplates,
       openSeries,
@@ -56,9 +55,7 @@ class AimEditor extends Component {
     const { projectID } = openSeries[activePort];
 
     const lastSavedAim = sessionStorage.getItem("lastSavedAim");
-    console.log("Last Saved Aim", lastSavedAim);
-    console.log("State of autoFill", this.state.autoFill);
-    this.getAutoFillParts(lastSavedAim);
+    prepAimForParseClass(JSON.parse(lastSavedAim));
 
     if (this.state.autoFill)
       this.semanticAnswers = new questionaire.AimEditor(
@@ -67,7 +64,7 @@ class AimEditor extends Component {
         this.renderButtons,
         this.getDefaultLesionName(),
         setAimDirty,
-        this.getAutoFillParts(lastSavedAim) // becasue there is the whole aim json in the session storage, pass only necessary parts to autofill
+        prepAimForParseClass(JSON.parse(lastSavedAim)) // becasue there is the whole aim json in the session storage, pass only necessary parts to autofill
       );
     else
       this.semanticAnswers = new questionaire.AimEditor(
