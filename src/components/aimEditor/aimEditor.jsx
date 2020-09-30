@@ -13,6 +13,7 @@ import {
   updatePatientOnAimSave,
   getSingleSerie,
 } from "../annotationsList/action";
+import RecistTable from "./RecistTable";
 import { Aim, getAimImageData, modalities } from "aimapi";
 import * as questionaire from "./parseClass.js";
 import * as dcmjs from "dcmjs";
@@ -148,20 +149,33 @@ class AimEditor extends Component {
   };
 
   render() {
+    console.log("Show recist", this.state.showRecist);
     return (
-      <div className="editorForm">
+      <div className="editor-form">
+        <div
+          className="base-line-selection"
+          onClick={() => this.setState({ showRecist: true })}
+        >
+          Select Baseline
+        </div>
+        {this.state.showRecist && (
+          <RecistTable
+            semanticAnswers={this.semanticAnswers}
+            onClose={() => this.setState({ showRecist: false })}
+          />
+        )}
         <div id="questionaire" />
         {this.state.buttonGroupShow && (
-          <div className="AimEditorButtonGroup">
+          <div className="aim-editor-button-group">
             <button
-              className="btn btn-sm btn-outline-light AimEditorButton"
+              className="btn btn-sm btn-outline-light aim-editor-button"
               onClick={this.save}
             >
               Save
             </button>
             &nbsp;
             <button
-              className="btn btn-sm btn-outline-light AimEditorButton"
+              className="btn btn-sm btn-outline-light aim-editor-button"
               onClick={() => this.props.onCancel(true)}
             >
               Cancel
