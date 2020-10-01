@@ -179,6 +179,11 @@ export var AimEditor = function (
     }
   };
 
+  this.triggerAutoFillAim = function (lastSavedAim) {
+    self.aimForAutoFill = lastSavedAim;
+    self.loadAimJson(self.aimForAutoFill, null);
+  };
+
   this.createViewerWindow = function () {
     //var x = document.createElement("INPUT");
     //x.setAttribute("type", "file");
@@ -4550,7 +4555,7 @@ export var AimEditor = function (
       console.log("loading aim ", self.loadingAimFlag);
       console.log("markup type : ", aimjsonCopy.markupType);
 
-      if (typeof isRecist === "undefined") {
+      if (typeof isRecist === "undefined" || isRecist === null) {
         self.checkAnnotationShapes(aimjsonCopy.markupType);
       }
       //self.printMap(self.mapLabelAnnotatorConfidence);
