@@ -4529,13 +4529,24 @@ export var AimEditor = function (
       self.traverseJsonOnLoad(imagingObservationEntityCollection);
       console.log("loading aim ", self.loadingAimFlag);
       console.log("markup type : ", aimjsonCopy.markupType);
-      self.checkAnnotationShapes(aimjsonCopy.markupType);
+      console.log("+++++++++++++");
+      console.log("+++++++++++++");
+      console.log("+++++++++++++");
+      console.log("+++++++++++++");
+      console.log("+++++++++++++");
+      console.log("+++++++++++++");
+      console.log("+++++++++++++");
+      console.log("isrecist : ", isRecist);
+      if (typeof isRecist !== "undefined") {
+        self.checkAnnotationShapes(aimjsonCopy.markupType);
+      }
       //self.printMap(self.mapLabelAnnotatorConfidence);
       //self.printMap(self.mapLabelAnnotConfJson);
       //self.printMap(self.mapLabelCommentJson);
       //self.activateDirtyCheck = true;
       console.log("load aim activated set dirty flag check");
       self.loadingAimFlag = false;
+
       if (isRecist) {
         self.disableRecistSections();
       }
