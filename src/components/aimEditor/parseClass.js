@@ -86,6 +86,7 @@ export var AimEditor = function (
   this.templateShapeArray = []; //each array element is a json object {"shape":'Point', "domid" : '2.25.33554445511225454'});
   this.defaultTemplate = null;
   this.aimForAutoFill = lastSavedAim;
+  this.isRecistFlag = false;
 
   // shortcut keys variables to relate allowed terms and html elements
   this.mapShortCutKeys = new Map();
@@ -4094,60 +4095,69 @@ export var AimEditor = function (
             console.log("each char quantf object :", eachCharactQuantfObj);
           }
         }
+
         if (key === "typeCode") {
-          //for allowed terms and valid terms
-          let ValidtermCode = "";
-          label = self.removeEmptySpace(jsonObj.label.value);
-          console.log("load aim label key typeCode:", label);
-          if (Array.isArray(value[0])) {
-            ValidtermCode = value[0][1].code;
+          if (
+            (self.isRecistFlag === true &&
+              (jsonObj.label.value === "Type" ||
+                jsonObj.label.value === "Location")) ||
+            self.isRecistFlag === false
+          ) {
+            //for allowed terms and valid terms
 
-            var docElement = document.getElementById(
-              label + "-" + ValidtermCode + value[0][0].code
-            );
-          } else {
-            var docElement = document.getElementById(
-              label + "-" + value[0].code
-            );
-          }
+            let ValidtermCode = "";
+            label = self.removeEmptySpace(jsonObj.label.value);
+            console.log("load aim label key typeCode:", label);
+            if (Array.isArray(value[0])) {
+              ValidtermCode = value[0][1].code;
 
-          if (docElement != null) {
-            var parentDiv = docElement.parentNode;
-
-            if (typeof parentDiv[0] != "undefined") {
-              var crop = parentDiv[0].name;
-
-              crop = crop.replace(
-                /[`~!@#$%^&*()_|+\-=?;:'",.<>/ /\{\}\[\]\\\/]/gi,
-                ""
+              var docElement = document.getElementById(
+                label + "-" + ValidtermCode + value[0][0].code
               );
-
-              var prDiv = document.getElementById("Drop" + crop);
-              var subDivs = prDiv.getElementsByTagName("div");
-
-              var splittedLabel = docElement.label.split("-");
-
-              let splittedLabelMergeRest = "";
-              for (let k = 1; k < splittedLabel.length; k++) {
-                if (k !== splittedLabel.length - 1) {
-                  splittedLabelMergeRest =
-                    splittedLabelMergeRest + splittedLabel[k] + "-";
-                } else {
-                  splittedLabelMergeRest =
-                    splittedLabelMergeRest + splittedLabel[k];
-                }
-              }
-              console.log("multi drop down :", splittedLabelMergeRest.trim());
-              console.log("multi drop down subdivs:", subDivs[0]);
-              $(subDivs[0]).addClass("disabled");
-              $(subDivs[0]).dropdown("set selected", [
-                splittedLabelMergeRest.trim(),
-              ]);
-              $(subDivs[0]).removeClass("disabled");
             } else {
-              if (docElement.checked != true) {
-                docElement.click();
-                //docElement.checked = true;
+              var docElement = document.getElementById(
+                label + "-" + value[0].code
+              );
+            }
+
+            if (docElement != null) {
+              var parentDiv = docElement.parentNode;
+
+              if (typeof parentDiv[0] != "undefined") {
+                var crop = parentDiv[0].name;
+
+                crop = crop.replace(
+                  /[`~!@#$%^&*()_|+\-=?;:'",.<>/ /\{\}\[\]\\\/]/gi,
+                  ""
+                );
+
+                var prDiv = document.getElementById("Drop" + crop);
+                var subDivs = prDiv.getElementsByTagName("div");
+
+                var splittedLabel = docElement.label.split("-");
+
+                let splittedLabelMergeRest = "";
+                for (let k = 1; k < splittedLabel.length; k++) {
+                  if (k !== splittedLabel.length - 1) {
+                    splittedLabelMergeRest =
+                      splittedLabelMergeRest + splittedLabel[k] + "-";
+                  } else {
+                    splittedLabelMergeRest =
+                      splittedLabelMergeRest + splittedLabel[k];
+                  }
+                }
+                console.log("multi drop down :", splittedLabelMergeRest.trim());
+                console.log("multi drop down subdivs:", subDivs[0]);
+                $(subDivs[0]).addClass("disabled");
+                $(subDivs[0]).dropdown("set selected", [
+                  splittedLabelMergeRest.trim(),
+                ]);
+                $(subDivs[0]).removeClass("disabled");
+              } else {
+                if (docElement.checked != true) {
+                  docElement.click();
+                  //docElement.checked = true;
+                }
               }
             }
           }
@@ -4462,9 +4472,19 @@ export var AimEditor = function (
     // test['circle'].validate = 'ok';
     // console.log('new test', test);
     //test
-
+    console.log("+++++++++++++");
+    console.log("+++++++++++++");
+    console.log("+++++++++++++");
+    console.log("+++++++++++++");
+    console.log("+++++++++++++");
+    console.log("+++++++++++++");
+    console.log("+++++++++++++");
+    console.log("isrecist : ", isRecist);
     let aimjsonCopy = aimjson;
     self.loadingAimFlag = true;
+    if (typeof isRecist !== "undefined") {
+      self.isRecistFlag = true;
+    }
     console.log(
       "load  aim  called: ..................aim passed :",
       aimjsonCopy
@@ -4529,15 +4549,8 @@ export var AimEditor = function (
       self.traverseJsonOnLoad(imagingObservationEntityCollection);
       console.log("loading aim ", self.loadingAimFlag);
       console.log("markup type : ", aimjsonCopy.markupType);
-      console.log("+++++++++++++");
-      console.log("+++++++++++++");
-      console.log("+++++++++++++");
-      console.log("+++++++++++++");
-      console.log("+++++++++++++");
-      console.log("+++++++++++++");
-      console.log("+++++++++++++");
-      console.log("isrecist : ", isRecist);
-      if (typeof isRecist !== "undefined") {
+
+      if (typeof isRecist === "undefined") {
         self.checkAnnotationShapes(aimjsonCopy.markupType);
       }
       //self.printMap(self.mapLabelAnnotatorConfidence);
@@ -4550,6 +4563,7 @@ export var AimEditor = function (
       if (isRecist) {
         self.disableRecistSections();
       }
+      self.isRecistFlag = false;
       return 0;
     }
   };
@@ -4557,7 +4571,7 @@ export var AimEditor = function (
   this.disableRecistSections = function () {
     // disable for recist
     //alert(document.getElementById("DropLocation").childNodes[0].className);
-    alert(document.getElementById("annotationName").parentElement.className);
+    //alert(document.getElementById("annotationName").parentElement.className);
     // document.getElementById("allowedTermType").click = function(event) {
     //   // do something special here
 
