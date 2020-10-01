@@ -15,9 +15,10 @@ import {
 } from "../annotationsList/action";
 import RecistTable from "./RecistTable";
 import { Aim, getAimImageData, modalities } from "aimapi";
+import { prepAimForParseClass } from "./ParseClassHelpers";
 import * as questionaire from "./parseClass.js";
 import * as dcmjs from "dcmjs";
-
+import Switch from "react-switch";
 import "./aimEditor.css";
 
 const enumAimType = {
@@ -35,6 +36,7 @@ class AimEditor extends Component {
       buttonGroupShow: false,
       saveButtonIsActive: false,
       isUpdate: false,
+      autoFill: false,
     };
     //if aim is being updated set the aimId and isUpdate flag
     if (this.props.aimId) {
@@ -45,8 +47,6 @@ class AimEditor extends Component {
 
   componentDidMount() {
     const element = document.getElementById("questionaire");
-    console.log("Props from aim editor", this.props);
-
     let {
       templates: allTemplates,
       openSeries,
@@ -55,13 +55,26 @@ class AimEditor extends Component {
     } = this.props;
     const { projectID } = openSeries[activePort];
 
-    this.semanticAnswers = new questionaire.AimEditor(
-      element,
-      this.validateForm,
-      this.renderButtons,
-      this.getDefaultLesionName(),
-      setAimDirty
-    );
+    const lastSavedAim = sessionStorage.getItem("lastSavedAim");
+    // prepAimForParseClass(JSON.parse(lastSavedAim));
+
+    if (this.state.autoFill)
+      this.semanticAnswers = new questionaire.AimEditor(
+        element,
+        this.validateForm,
+        this.renderButtons,
+        this.getDefaultLesionName(),
+        setAimDirty,
+        prepAimForParseClass(JSON.parse(lastSavedAim)) // becasue there is the whole aim json in the session storage, pass only necessary parts to autofill
+      );
+    else
+      this.semanticAnswers = new questionaire.AimEditor(
+        element,
+        this.validateForm,
+        this.renderButtons,
+        this.getDefaultLesionName(),
+        setAimDirty
+      );
 
     const { projectMap } = this.props;
 
@@ -81,6 +94,7 @@ class AimEditor extends Component {
     const { aimId } = this.props;
     console.log("Aim id in cdm", aimId);
     if (aimId != null && Object.entries(aimId).length) {
+      console.log("Aim load in aim editor", aimId);
       try {
         this.semanticAnswers.loadAimJson(aimId);
       } catch (error) {
@@ -93,6 +107,32 @@ class AimEditor extends Component {
   componentWillUnmount() {
     window.removeEventListener("checkShapes", this.checkShapes);
   }
+
+  getAutoFillParts = (lastSavedAim) => {
+    const { ImageAnnotationCollection } = JSON.parse(lastSavedAim);
+    const imageAnnotation =
+      ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
+    console.log("Last saved aim", imageAnnotation);
+    const obj = {};
+    obj["comment"] = Object.assign({}, imageAnnotation.comment);
+    obj["imagingObservationEntityCollection"] = Object.assign(
+      {},
+      imageAnnotation.imagingObservationEntityCollection
+    );
+    obj["imagingPhysicalEntityCollection"] = Object.assign(
+      {},
+      imageAnnotation.imagingPhysicalEntityCollection
+    );
+    obj["inferenceEntityCollection"] = Object.assign(
+      {},
+      imageAnnotation.imagingPhysicalEntityCollection
+    );
+    // shall we pass markupType too?
+    obj["name"] = Object.assign({}, imageAnnotation.name);
+    // shall we pass segmentation entity collection?
+    obj["typeCode"] = [...imageAnnotation.typeCode];
+    console.log("New object", obj);
+  };
 
   loadAim = (event) => {
     console.log("event", event);
@@ -148,10 +188,47 @@ class AimEditor extends Component {
     return "";
   };
 
+  setAutoFill = (checked) => {
+    this.setState({ autoFill: checked });
+  };
+
   render() {
     console.log("Show recist", this.state.showRecist);
     return (
       <div className="editor-form">
+        AutoFill :
+        <Switch
+          onChange={this.setAutoFill}
+          checked={this.state.autoFill}
+          onColor="#86d3ff"
+          onHandleColor="#2693e6"
+          handleDiameter={10}
+          uncheckedIcon={
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
+                fontSize: 11,
+                color: "#861737",
+                paddingRight: 2,
+              }}
+            >
+              Off
+            </div>
+          }
+          checkedIcon={
+            <svg viewBox="0 0 10 10" height="100%" width="100%">
+              <circle r={3} cx={5} cy={5} />
+            </svg>
+          }
+          boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+          activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+          // height={15}
+          // width={20}
+          className="react-switch"
+        />
         <div
           className="base-line-selection"
           onClick={() => this.setState({ showRecist: true })}
@@ -164,6 +241,7 @@ class AimEditor extends Component {
             onClose={() => this.setState({ showRecist: false })}
           />
         )}
+        <br />
         <div id="questionaire" />
         {this.state.buttonGroupShow && (
           <div className="aim-editor-button-group">
@@ -428,9 +506,13 @@ class AimEditor extends Component {
       name,
       comment,
     };
+    console.log("Aim saved", aimJson);
 
     uploadAim(aimSaved, projectID, this.state.isUpdate, this.updatedAimId)
       .then(() => {
+        // Write the aim to session storage for further autoFill
+        sessionStorage.setItem("lastSavedAim", JSON.stringify(aimSaved));
+
         if (segmentationBlob) this.saveSegmentation(segmentationBlob, segId);
         // var objectUrl = URL.createObjectURL(segBlobGlobal);
         // window.open(objectUrl);

@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Draggable from "react-draggable";
 import { getAimsOfSubject } from "../../services/subjectServices";
+import { prepAimForParseClass } from "./ParseClassHelpers";
 import "./RecistTable.css";
 
 class RecistTable extends Component {
@@ -29,7 +30,11 @@ class RecistTable extends Component {
   };
 
   handleSelect = () => {
+    const { semanticAnswers } = this.props;
     const aim = this.state.aimJson;
+    const parseClassAim = prepAimForParseClass(aim);
+    semanticAnswers.loadAimJson(parseClassAim);
+    this.props.onClose();
   };
 
   render() {
@@ -81,7 +86,7 @@ class RecistTable extends Component {
                     </div>
                   ))}
               </div>
-              <div class="Cell">
+              <div className="Cell">
                 {nonTargets &&
                   nonTargets.map((nonTarget, index) => (
                     <div
@@ -100,7 +105,7 @@ class RecistTable extends Component {
                   ))}
               </div>
             </div>
-            <div class="Row">
+            <div className="Row">
               <div>
                 <button className="brush-presets" onClick={this.handleSelect}>
                   Select

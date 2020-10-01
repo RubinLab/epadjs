@@ -279,7 +279,7 @@ export var AimEditor = function (
         self.extractTemplate(self.jsonTemplateCopy);
 
         // Auto fill aim editor form if previous aim passed to constructor
-
+        console.log("self autoFill", self.aimForAutoFill);
         if (
           self.aimForAutoFill !== null &&
           typeof self.aimForAutoFill !== "undefined"
