@@ -2040,6 +2040,14 @@ export var AimEditor = function (
     vtPrObject
   ) {
     //drop down multiple selectable list
+    let vtCounterChecker = 0;
+    console.log("@@@@@@@@@@@@@@@@@@@@@@@@ ");
+    console.log("@@@@@@@@@@@@@@@@@@@@@@@@ ");
+    console.log("@@@@@@@@@@@@@@@@@@@@@@@@ ");
+    console.log("@@@@@@@@@@@@@@@@@@@@@@@@ ");
+    console.log("@@@@@@@@@@@@@@@@@@@@@@@@ ");
+    console.log("@@@@@@@@@@@@@@@@@@@@@@@@ ");
+    console.log("valid term parent :", allowedTermObj.parentObj.label);
     let labelForUniqueness = self.removeEmptySpace(
       validTermObj.primitiveObjATSparent.label
     );
@@ -2070,26 +2078,45 @@ export var AimEditor = function (
     labelHolder.appendChild(label);
 
     optionInput.addEventListener("click", function () {
+      let dropDownItemsArray = $(
+        "#select" + allowedTermObj.parentObj.label
+      ).dropdown("get value");
+
+      vtCounterChecker = 0;
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
       }
       var checkmarkObj = self.mapCardinalitiesToCheckId.get(vtPrObject.id);
       checkmarkObj.ok = "true";
-
-      if (validTermObj.getPrimitive().select == "1") {
-        prObject.select = "0";
+      console.log("!!!!!!!!!!!!!!!");
+      console.log("!!!!!!!!!!!!!!!");
+      console.log("!!!!!!!!!!!!!!!");
+      console.log("!!!!!!!!!!!!!!!");
+      console.log("!!!!!!!!!!!!!!!");
+      console.log("dropDownItemsArray", dropDownItemsArray);
+      if (dropDownItemsArray.indexOf(lbl) === -1) {
+        // prObject.select = "0";
         //allowedTermObj.getPrimitive().select ='0';
         validTermObj.getPrimitive().select = "0";
         //allowedTermObj.changeOnSelect('0',self.AfterClick(allowedTermObj));
         checkmarkObj.actualSelected--;
       } else {
-        prObject.select = "1";
+        // prObject.select = "1";
         //allowedTermObj.getPrimitive().select ='1';
         validTermObj.getPrimitive().select = "1";
         //allowedTermObj.changeOnSelect('1',self.AfterClick(allowedTermObj));
         checkmarkObj.actualSelected++;
       }
-
+      for (let vtCnt = 0; vtCnt < prObject.ValidTerm.length; vtCnt++) {
+        if (prObject.ValidTerm[vtCnt].select === "1") {
+          vtCounterChecker++;
+        }
+      }
+      if (vtCounterChecker > 0) {
+        prObject.select = "1";
+      } else {
+        prObject.select = "0";
+      }
       self.mapCardinalitiesToCheckId.set(vtPrObject.id, checkmarkObj);
       if (
         checkmarkObj.actualSelected >= checkmarkObj.min &&
@@ -2101,6 +2128,13 @@ export var AimEditor = function (
         document.getElementById(vtPrObject.id).className =
           "red check circle outline icon";
       self.formCheckHandler(self.checkFormSaveReady());
+      console.log("@@@@@@@@@@@@@@@@@@@@@@@@ ");
+      console.log("@@@@@@@@@@@@@@@@@@@@@@@@ ");
+      console.log("@@@@@@@@@@@@@@@@@@@@@@@@ ");
+      console.log("@@@@@@@@@@@@@@@@@@@@@@@@ ");
+      console.log("@@@@@@@@@@@@@@@@@@@@@@@@ ");
+      console.log("@@@@@@@@@@@@@@@@@@@@@@@@ ");
+      console.log("valid term parent : after clicked ", prObject);
     });
 
     this.getelementHtml = function () {
@@ -4146,58 +4180,60 @@ export var AimEditor = function (
               console.log("value[0][1].code", value[0].code);
               ValidtermCode = value[0].code;
               for (let i = 1; i < value.length; i++) {
-                var docElement = document.getElementById(
+                const docElement = document.getElementById(
                   label + "-" + value[i].code + ValidtermCode
                 );
-                console.log(docElement);
+                console.log("doc element : ", docElement);
+                self.syntheticSelectMultiDropDown(docElement);
               }
             } else {
-              var docElement = document.getElementById(
+              const docElement = document.getElementById(
                 label + "-" + value[0].code
               );
+              self.syntheticSelectMultiDropDown(docElement);
             }
           }
 
-          if (docElement != null) {
-            var parentDiv = docElement.parentNode;
+          // if (docElement != null) {
+          //   var parentDiv = docElement.parentNode;
 
-            if (typeof parentDiv[0] != "undefined") {
-              var crop = parentDiv[0].name;
+          //   if (typeof parentDiv[0] != "undefined") {
+          //     var crop = parentDiv[0].name;
 
-              crop = crop.replace(
-                /[`~!@#$%^&*()_|+\-=?;:'",.<>/ /\{\}\[\]\\\/]/gi,
-                ""
-              );
+          //     crop = crop.replace(
+          //       /[`~!@#$%^&*()_|+\-=?;:'",.<>/ /\{\}\[\]\\\/]/gi,
+          //       ""
+          //     );
 
-              var prDiv = document.getElementById("Drop" + crop);
-              var subDivs = prDiv.getElementsByTagName("div");
+          //     var prDiv = document.getElementById("Drop" + crop);
+          //     var subDivs = prDiv.getElementsByTagName("div");
 
-              var splittedLabel = docElement.label.split("-");
+          //     var splittedLabel = docElement.label.split("-");
 
-              let splittedLabelMergeRest = "";
-              for (let k = 1; k < splittedLabel.length; k++) {
-                if (k !== splittedLabel.length - 1) {
-                  splittedLabelMergeRest =
-                    splittedLabelMergeRest + splittedLabel[k] + "-";
-                } else {
-                  splittedLabelMergeRest =
-                    splittedLabelMergeRest + splittedLabel[k];
-                }
-              }
-              console.log("multi drop down :", splittedLabelMergeRest.trim());
-              console.log("multi drop down subdivs:", subDivs[0]);
-              $(subDivs[0]).addClass("disabled");
-              $(subDivs[0]).dropdown("set selected", [
-                splittedLabelMergeRest.trim(),
-              ]);
-              $(subDivs[0]).removeClass("disabled");
-            } else {
-              if (docElement.checked != true) {
-                docElement.click();
-                //docElement.checked = true;
-              }
-            }
-          }
+          //     let splittedLabelMergeRest = "";
+          //     for (let k = 1; k < splittedLabel.length; k++) {
+          //       if (k !== splittedLabel.length - 1) {
+          //         splittedLabelMergeRest =
+          //           splittedLabelMergeRest + splittedLabel[k] + "-";
+          //       } else {
+          //         splittedLabelMergeRest =
+          //           splittedLabelMergeRest + splittedLabel[k];
+          //       }
+          //     }
+          //     console.log("multi drop down :", splittedLabelMergeRest.trim());
+          //     console.log("multi drop down subdivs:", subDivs[0]);
+          //     $(subDivs[0]).addClass("disabled");
+          //     $(subDivs[0]).dropdown("set selected", [
+          //       splittedLabelMergeRest.trim(),
+          //     ]);
+          //     $(subDivs[0]).removeClass("disabled");
+          //   } else {
+          //     if (docElement.checked != true) {
+          //       docElement.click();
+          //       //docElement.checked = true;
+          //     }
+          //   }
+          // }
         }
 
         if (key === "annotatorConfidence") {
@@ -4260,6 +4296,40 @@ export var AimEditor = function (
     }
   };
 
+  this.syntheticSelectMultiDropDown = function (docElement) {
+    var parentDiv = docElement.parentNode;
+
+    if (typeof parentDiv[0] != "undefined") {
+      var crop = parentDiv[0].name;
+
+      crop = crop.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>/ /\{\}\[\]\\\/]/gi, "");
+
+      var prDiv = document.getElementById("Drop" + crop);
+      var subDivs = prDiv.getElementsByTagName("div");
+
+      var splittedLabel = docElement.label.split("-");
+
+      let splittedLabelMergeRest = "";
+      for (let k = 1; k < splittedLabel.length; k++) {
+        if (k !== splittedLabel.length - 1) {
+          splittedLabelMergeRest =
+            splittedLabelMergeRest + splittedLabel[k] + "-";
+        } else {
+          splittedLabelMergeRest = splittedLabelMergeRest + splittedLabel[k];
+        }
+      }
+      console.log("multi drop down :", splittedLabelMergeRest.trim());
+      console.log("multi drop down subdivs:", subDivs[0]);
+      $(subDivs[0]).addClass("disabled");
+      $(subDivs[0]).dropdown("set selected", [splittedLabelMergeRest.trim()]);
+      $(subDivs[0]).removeClass("disabled");
+    } else {
+      if (docElement.checked != true) {
+        docElement.click();
+        //docElement.checked = true;
+      }
+    }
+  };
   /*switched to partial parsing follow with other loadAimJson
 
       this.loadAimJson = function (aimjson) {
