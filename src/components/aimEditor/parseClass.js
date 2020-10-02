@@ -4135,16 +4135,27 @@ export var AimEditor = function (
           let ValidtermCode = "";
           label = self.removeEmptySpace(jsonObj.label.value);
           console.log("load aim label key typeCode:", label);
-          if (Array.isArray(value[0])) {
-            ValidtermCode = value[0][1].code;
-
-            var docElement = document.getElementById(
-              label + "-" + ValidtermCode + value[0][0].code
-            );
-          } else {
-            var docElement = document.getElementById(
-              label + "-" + value[0].code
-            );
+          if (Array.isArray(value)) {
+            if (value.length > 1) {
+              console.log("###############");
+              console.log("###############");
+              console.log("###############");
+              console.log("###############");
+              console.log("###############");
+              console.log("###############");
+              console.log("value[0][1].code", value[0].code);
+              ValidtermCode = value[0].code;
+              for (let i = 1; i < value.length; i++) {
+                var docElement = document.getElementById(
+                  label + "-" + value[i].code + ValidtermCode
+                );
+                console.log(docElement);
+              }
+            } else {
+              var docElement = document.getElementById(
+                label + "-" + value[0].code
+              );
+            }
           }
 
           if (docElement != null) {
