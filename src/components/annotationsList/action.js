@@ -680,9 +680,8 @@ const getSingleSerieData = (serie, annotation) => {
     
     getStudyAims(patientID, studyUID, projectID)
       .then(async result => {
-        const aims = result.data.docs.map(doc => {return doc.aim;});
-        serieAims = extractSerieAims(aims,seriesUID);
-        studyAims = extractStudyAims(aims);
+        serieAims = extractSerieAims(result.data,seriesUID);
+        studyAims = extractStudyAims(result.data);
 
         aimsData = serieAims.concat(studyAims);
         imageData = getImageIdAnnotations(serieAims);
