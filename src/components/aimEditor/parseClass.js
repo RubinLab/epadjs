@@ -93,10 +93,18 @@ export var AimEditor = function (
   this.mapcodeValueShortCutKeys = new Map();
   //  example usage in template "keyShortCut" :"ctrlKeyshiftKey+U"
 
+  this.templateType = "";
+
   function constructor() {
     if (self.arrayTemplates === "undefined") self.arrayTemplates = [];
     document.addEventListener("keydown", self.aimshortCutKeyEvent, false);
   }
+
+  this.getSelectedTemplateType = function () {
+    // return type : string
+    // values can be : "Study", "Series", "Image"
+    return self.templateType;
+  };
 
   this.arrayDifference = function (base, compareto) {
     let differences = [];
@@ -238,9 +246,24 @@ export var AimEditor = function (
 
     for (i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {
       var templateOption = document.createElement("option");
+      let tempTemplateType = "";
+      if (
+        self.arrayTemplatesJsonObjects[
+          i
+        ].TemplateContainer.Template[0].hasOwnProperty("templateType")
+      ) {
+        tempTemplateType =
+          self.arrayTemplatesJsonObjects[i].TemplateContainer.Template[0]
+            .templateType;
+      } else {
+        tempTemplateType = "Image";
+      }
       templateOption.value = i;
       templateOption.text =
-        self.arrayTemplatesJsonObjects[i].TemplateContainer.Template[0].name;
+        self.arrayTemplatesJsonObjects[i].TemplateContainer.Template[0].name +
+        "-" +
+        tempTemplateType +
+        " Template ";
       //templateOption.innerHTML = this.arrayTemplatesJsonObjects[i].key;
       self.templateSelect.appendChild(templateOption);
     }
@@ -282,6 +305,17 @@ export var AimEditor = function (
           ...self.arrayTemplatesJsonObjects[this.value],
         };
         console.log("extract template called : ", self.jsonTemplateCopy);
+        if (
+          self.jsonTemplateCopy.TemplateContainer.Template[0].hasOwnProperty(
+            "templateType"
+          )
+        ) {
+          self.templateType =
+            self.jsonTemplateCopy.TemplateContainer.Template[0].templateType;
+        } else {
+          self.templateType = "Image";
+        }
+
         self.extractTemplate(self.jsonTemplateCopy);
 
         // Auto fill aim editor form if previous aim passed to constructor
@@ -1898,11 +1932,6 @@ export var AimEditor = function (
     allowedTermObj
   ) {
     //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
-    console.log("-----*********--------prObject", prObject.label);
-    console.log("-----*********--------id", id);
-    console.log("-----*********--------name", name);
-    console.log("-----*********--------lbl", lbl);
-    console.log("-----*********--------allowedTermObj", allowedTermObj);
 
     var div = document.createElement("div");
     div.style.marginLeft = "20px";
@@ -4305,9 +4334,7 @@ export var AimEditor = function (
       /* impoertant note if there are multiple geometric shape component exist in a template 
       or relation will be applied 
     */
-      console.log("mete shapes :", shapes);
-      console.log("mete shapes is Array:", Array.isArray(shapes));
-      console.log("intro templateShapeArray", self.templateShapeArray);
+
       let templateShapeLength = self.templateShapeArray.length;
       let anyShapeFlag = false;
       let anyClosedShapeFlag = false;
@@ -4316,12 +4343,7 @@ export var AimEditor = function (
       console.log("shapeKeys.length", shapeKeys.length);
       if (shapeKeys.length === 0) {
         localShapes = JSON.parse(JSON.stringify(self.runtimeUserShapes));
-        console.log("if  self.runtimeUserShapes", self.runtimeUserShapes);
-        console.log("if  localShapes", localShapes);
       } else {
-        console.log("else shapeKeys.length", shapeKeys.length);
-        console.log("else shapes", shapes);
-
         self.runtimeUserShapes = JSON.parse(JSON.stringify(shapes));
         localShapes = JSON.parse(JSON.stringify(shapes));
         console.log("else self.runtimeUserShapes", self.runtimeUserShapes);
@@ -4329,14 +4351,9 @@ export var AimEditor = function (
       if (templateShapeLength > 0) {
         let arryDiffernce = "";
         //const tempateShapeKeys = [];
-        console.log("main user shapes", localShapes);
-        console.log("main templateShapeLength", templateShapeLength);
+
         let geoTemplateConditionDom = null;
         for (let cnt = 0; cnt < templateShapeLength; cnt++) {
-          console.log(
-            "in loop templateShapeLength",
-            self.templateShapeArray[cnt].shape
-          );
           //tempateShapeKeys.push(self.templateShapeArray[cnt].shape);
           //**
           // if (localShapes.hasOwnProperty(self.templateShapeArray[cnt].shape)) {
@@ -4367,7 +4384,7 @@ export var AimEditor = function (
           arryDiffernce = Object.keys(localShapes).filter(
             (eachShape) => eachShape !== self.templateShapeArray[cnt].shape
           );
-          console.log("first array difference : ", arryDiffernce);
+
           geoTemplateConditionDom = document.getElementById(
             self.templateShapeArray[cnt].domid
           );

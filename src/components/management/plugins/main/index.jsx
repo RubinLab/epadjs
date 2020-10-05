@@ -490,7 +490,7 @@ class Plugins extends React.Component {
         documentation: selectedPluginData.original.documentation,
         processmultipleaims: edit_processmultipleaims,
       };
-      console.log("handle edit pluginFormElements :", editpluginFormElements);
+
       this.setState({
         editPluginClicked: true,
         pluginFormElements: editpluginFormElements,
