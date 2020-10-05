@@ -56,9 +56,8 @@ class AimEditor extends Component {
     const { projectID } = openSeries[activePort];
 
     const lastSavedAim = sessionStorage.getItem("lastSavedAim");
-    // prepAimForParseClass(JSON.parse(lastSavedAim));
 
-    if (this.state.autoFill)
+    if (this.state.autoFill && Object.keys(lastSavedAim).length)
       this.semanticAnswers = new questionaire.AimEditor(
         element,
         this.validateForm,
@@ -190,6 +189,14 @@ class AimEditor extends Component {
 
   setAutoFill = (checked) => {
     this.setState({ autoFill: checked });
+    if (checked) {
+      const lastSavedAim = sessionStorage.getItem("lastSavedAim");
+      console.log("Last saved aim", JSON.parse(lastSavedAim));
+      if (lastSavedAim && Object.keys(lastSavedAim).length) {
+        const aimForParseClass = prepAimForParseClass(JSON.parse(lastSavedAim));
+        this.semanticAnswers.triggerAutoFillAim(aimForParseClass);
+      }
+    }
   };
 
   render() {

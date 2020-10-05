@@ -33,7 +33,7 @@ class RecistTable extends Component {
     const { semanticAnswers } = this.props;
     const aim = this.state.aimJson;
     const parseClassAim = prepAimForParseClass(aim);
-    semanticAnswers.loadAimJson(parseClassAim);
+    semanticAnswers.loadAimJson(parseClassAim, true);
     this.props.onClose();
   };
 
