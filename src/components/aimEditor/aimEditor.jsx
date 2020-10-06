@@ -15,7 +15,7 @@ import {
 } from "../annotationsList/action";
 import RecistTable from "./RecistTable";
 import { Aim, getAimImageData, modalities } from "aimapi";
-import { prepAimForParseClass } from "./ParseClassHelpers";
+import { prepAimForParseClass, getMarkups } from "./Helpers";
 import * as questionaire from "./parseClass.js";
 import * as dcmjs from "dcmjs";
 import Switch from "react-switch";
@@ -91,9 +91,7 @@ class AimEditor extends Component {
     });
     this.semanticAnswers.createViewerWindow();
     const { aimId } = this.props;
-    console.log("Aim id in cdm", aimId);
     if (aimId != null && Object.entries(aimId).length) {
-      console.log("Aim load in aim editor", aimId);
       try {
         this.semanticAnswers.loadAimJson(aimId);
       } catch (error) {
@@ -107,34 +105,7 @@ class AimEditor extends Component {
     window.removeEventListener("checkShapes", this.checkShapes);
   }
 
-  getAutoFillParts = (lastSavedAim) => {
-    const { ImageAnnotationCollection } = JSON.parse(lastSavedAim);
-    const imageAnnotation =
-      ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
-    console.log("Last saved aim", imageAnnotation);
-    const obj = {};
-    obj["comment"] = Object.assign({}, imageAnnotation.comment);
-    obj["imagingObservationEntityCollection"] = Object.assign(
-      {},
-      imageAnnotation.imagingObservationEntityCollection
-    );
-    obj["imagingPhysicalEntityCollection"] = Object.assign(
-      {},
-      imageAnnotation.imagingPhysicalEntityCollection
-    );
-    obj["inferenceEntityCollection"] = Object.assign(
-      {},
-      imageAnnotation.imagingPhysicalEntityCollection
-    );
-    // shall we pass markupType too?
-    obj["name"] = Object.assign({}, imageAnnotation.name);
-    // shall we pass segmentation entity collection?
-    obj["typeCode"] = [...imageAnnotation.typeCode];
-    console.log("New object", obj);
-  };
-
   loadAim = (event) => {
-    console.log("event", event);
     const { aimID } = event.detail;
     try {
       this.semanticAnswers.loadAimJson(aimID);
@@ -191,7 +162,6 @@ class AimEditor extends Component {
     this.setState({ autoFill: checked });
     if (checked) {
       const lastSavedAim = sessionStorage.getItem("lastSavedAim");
-      console.log("Last saved aim", JSON.parse(lastSavedAim));
       if (lastSavedAim && Object.keys(lastSavedAim).length) {
         const aimForParseClass = prepAimForParseClass(JSON.parse(lastSavedAim));
         this.semanticAnswers.triggerAutoFillAim(aimForParseClass);
@@ -200,7 +170,6 @@ class AimEditor extends Component {
   };
 
   render() {
-    console.log("Show recist", this.state.showRecist);
     return (
       <div className="editor-form">
         AutoFill :
@@ -275,8 +244,26 @@ class AimEditor extends Component {
     return this.image.data.string("x00080050") || "";
   };
 
+  checkMarkupsForTemplate = () => {
+    const templateType = this.semanticAnswers.getSelectedTemplateType();
+    // if (templateType === "Study" || templateType === "Series") {
+    const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    const shapes = getMarkups(toolState);
+    if (shapes && Object.keys(shapes).length) {
+      const answer = window.confirm(
+        `No markups can be saved with template type: ${templateType}! All previously unsaved markups will be lost! Do you want to continue?`
+      );
+      if (!answer) return 0;
+      this.props.onCancel(false);
+    }
+    // }
+    return 1;
+  };
+
   save = () => {
-    if (!this.checkAimTemplate()) return;
+    // Check if the template selected and if the selected template type is compatible to have markups
+    if (!this.checkAimTemplate() || !this.checkMarkupsForTemplate()) return;
+
     if (!this.state.saveButtonIsActive) {
       window.alert(
         "Please fill required answers or use required geometric shape"
@@ -513,7 +500,6 @@ class AimEditor extends Component {
       name,
       comment,
     };
-    console.log("Aim saved", aimJson);
 
     uploadAim(aimSaved, projectID, this.state.isUpdate, this.updatedAimId)
       .then(() => {

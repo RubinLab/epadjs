@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import Draggable from "react-draggable";
 import { getAimsOfSubject } from "../../services/subjectServices";
-import { prepAimForParseClass } from "./ParseClassHelpers";
+import { prepAimForParseClass } from "./Helpers";
 import "./RecistTable.css";
 
 class RecistTable extends Component {
