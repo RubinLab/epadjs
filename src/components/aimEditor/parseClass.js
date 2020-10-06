@@ -86,16 +86,25 @@ export var AimEditor = function (
   this.templateShapeArray = []; //each array element is a json object {"shape":'Point', "domid" : '2.25.33554445511225454'});
   this.defaultTemplate = null;
   this.aimForAutoFill = lastSavedAim;
+  this.isRecistFlag = false;
 
   // shortcut keys variables to relate allowed terms and html elements
   this.mapShortCutKeys = new Map();
   this.mapcodeValueShortCutKeys = new Map();
   //  example usage in template "keyShortCut" :"ctrlKeyshiftKey+U"
 
+  this.templateType = "";
+
   function constructor() {
     if (self.arrayTemplates === "undefined") self.arrayTemplates = [];
     document.addEventListener("keydown", self.aimshortCutKeyEvent, false);
   }
+
+  this.getSelectedTemplateType = function () {
+    // return type : string
+    // values can be : "Study", "Series", "Image"
+    return self.templateType;
+  };
 
   this.arrayDifference = function (base, compareto) {
     let differences = [];
@@ -178,6 +187,11 @@ export var AimEditor = function (
     }
   };
 
+  this.triggerAutoFillAim = function (lastSavedAim) {
+    self.aimForAutoFill = lastSavedAim;
+    self.loadAimJson(self.aimForAutoFill, null);
+  };
+
   this.createViewerWindow = function () {
     //var x = document.createElement("INPUT");
     //x.setAttribute("type", "file");
@@ -232,9 +246,24 @@ export var AimEditor = function (
 
     for (i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {
       var templateOption = document.createElement("option");
+      let tempTemplateType = "";
+      if (
+        self.arrayTemplatesJsonObjects[
+          i
+        ].TemplateContainer.Template[0].hasOwnProperty("templateType")
+      ) {
+        tempTemplateType =
+          self.arrayTemplatesJsonObjects[i].TemplateContainer.Template[0]
+            .templateType;
+      } else {
+        tempTemplateType = "Image";
+      }
       templateOption.value = i;
       templateOption.text =
-        self.arrayTemplatesJsonObjects[i].TemplateContainer.Template[0].name;
+        self.arrayTemplatesJsonObjects[i].TemplateContainer.Template[0].name +
+        "-" +
+        tempTemplateType +
+        " Template ";
       //templateOption.innerHTML = this.arrayTemplatesJsonObjects[i].key;
       self.templateSelect.appendChild(templateOption);
     }
@@ -276,10 +305,21 @@ export var AimEditor = function (
           ...self.arrayTemplatesJsonObjects[this.value],
         };
         console.log("extract template called : ", self.jsonTemplateCopy);
+        if (
+          self.jsonTemplateCopy.TemplateContainer.Template[0].hasOwnProperty(
+            "templateType"
+          )
+        ) {
+          self.templateType =
+            self.jsonTemplateCopy.TemplateContainer.Template[0].templateType;
+        } else {
+          self.templateType = "Image";
+        }
+
         self.extractTemplate(self.jsonTemplateCopy);
 
         // Auto fill aim editor form if previous aim passed to constructor
-
+        console.log("self autoFill", self.aimForAutoFill);
         if (
           self.aimForAutoFill !== null &&
           typeof self.aimForAutoFill !== "undefined"
@@ -1892,11 +1932,6 @@ export var AimEditor = function (
     allowedTermObj
   ) {
     //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
-    console.log("-----*********--------prObject", prObject.label);
-    console.log("-----*********--------id", id);
-    console.log("-----*********--------name", name);
-    console.log("-----*********--------lbl", lbl);
-    console.log("-----*********--------allowedTermObj", allowedTermObj);
 
     var div = document.createElement("div");
     div.style.marginLeft = "20px";
@@ -4094,60 +4129,69 @@ export var AimEditor = function (
             console.log("each char quantf object :", eachCharactQuantfObj);
           }
         }
+
         if (key === "typeCode") {
-          //for allowed terms and valid terms
-          let ValidtermCode = "";
-          label = self.removeEmptySpace(jsonObj.label.value);
-          console.log("load aim label key typeCode:", label);
-          if (Array.isArray(value[0])) {
-            ValidtermCode = value[0][1].code;
+          if (
+            (self.isRecistFlag === true &&
+              (jsonObj.label.value === "Type" ||
+                jsonObj.label.value === "Location")) ||
+            self.isRecistFlag === false
+          ) {
+            //for allowed terms and valid terms
 
-            var docElement = document.getElementById(
-              label + "-" + ValidtermCode + value[0][0].code
-            );
-          } else {
-            var docElement = document.getElementById(
-              label + "-" + value[0].code
-            );
-          }
+            let ValidtermCode = "";
+            label = self.removeEmptySpace(jsonObj.label.value);
+            console.log("load aim label key typeCode:", label);
+            if (Array.isArray(value[0])) {
+              ValidtermCode = value[0][1].code;
 
-          if (docElement != null) {
-            var parentDiv = docElement.parentNode;
-
-            if (typeof parentDiv[0] != "undefined") {
-              var crop = parentDiv[0].name;
-
-              crop = crop.replace(
-                /[`~!@#$%^&*()_|+\-=?;:'",.<>/ /\{\}\[\]\\\/]/gi,
-                ""
+              var docElement = document.getElementById(
+                label + "-" + ValidtermCode + value[0][0].code
               );
-
-              var prDiv = document.getElementById("Drop" + crop);
-              var subDivs = prDiv.getElementsByTagName("div");
-
-              var splittedLabel = docElement.label.split("-");
-
-              let splittedLabelMergeRest = "";
-              for (let k = 1; k < splittedLabel.length; k++) {
-                if (k !== splittedLabel.length - 1) {
-                  splittedLabelMergeRest =
-                    splittedLabelMergeRest + splittedLabel[k] + "-";
-                } else {
-                  splittedLabelMergeRest =
-                    splittedLabelMergeRest + splittedLabel[k];
-                }
-              }
-              console.log("multi drop down :", splittedLabelMergeRest.trim());
-              console.log("multi drop down subdivs:", subDivs[0]);
-              $(subDivs[0]).addClass("disabled");
-              $(subDivs[0]).dropdown("set selected", [
-                splittedLabelMergeRest.trim(),
-              ]);
-              $(subDivs[0]).removeClass("disabled");
             } else {
-              if (docElement.checked != true) {
-                docElement.click();
-                //docElement.checked = true;
+              var docElement = document.getElementById(
+                label + "-" + value[0].code
+              );
+            }
+
+            if (docElement != null) {
+              var parentDiv = docElement.parentNode;
+
+              if (typeof parentDiv[0] != "undefined") {
+                var crop = parentDiv[0].name;
+
+                crop = crop.replace(
+                  /[`~!@#$%^&*()_|+\-=?;:'",.<>/ /\{\}\[\]\\\/]/gi,
+                  ""
+                );
+
+                var prDiv = document.getElementById("Drop" + crop);
+                var subDivs = prDiv.getElementsByTagName("div");
+
+                var splittedLabel = docElement.label.split("-");
+
+                let splittedLabelMergeRest = "";
+                for (let k = 1; k < splittedLabel.length; k++) {
+                  if (k !== splittedLabel.length - 1) {
+                    splittedLabelMergeRest =
+                      splittedLabelMergeRest + splittedLabel[k] + "-";
+                  } else {
+                    splittedLabelMergeRest =
+                      splittedLabelMergeRest + splittedLabel[k];
+                  }
+                }
+                console.log("multi drop down :", splittedLabelMergeRest.trim());
+                console.log("multi drop down subdivs:", subDivs[0]);
+                $(subDivs[0]).addClass("disabled");
+                $(subDivs[0]).dropdown("set selected", [
+                  splittedLabelMergeRest.trim(),
+                ]);
+                $(subDivs[0]).removeClass("disabled");
+              } else {
+                if (docElement.checked != true) {
+                  docElement.click();
+                  //docElement.checked = true;
+                }
               }
             }
           }
@@ -4290,9 +4334,7 @@ export var AimEditor = function (
       /* impoertant note if there are multiple geometric shape component exist in a template 
       or relation will be applied 
     */
-      console.log("mete shapes :", shapes);
-      console.log("mete shapes is Array:", Array.isArray(shapes));
-      console.log("intro templateShapeArray", self.templateShapeArray);
+
       let templateShapeLength = self.templateShapeArray.length;
       let anyShapeFlag = false;
       let anyClosedShapeFlag = false;
@@ -4301,12 +4343,7 @@ export var AimEditor = function (
       console.log("shapeKeys.length", shapeKeys.length);
       if (shapeKeys.length === 0) {
         localShapes = JSON.parse(JSON.stringify(self.runtimeUserShapes));
-        console.log("if  self.runtimeUserShapes", self.runtimeUserShapes);
-        console.log("if  localShapes", localShapes);
       } else {
-        console.log("else shapeKeys.length", shapeKeys.length);
-        console.log("else shapes", shapes);
-
         self.runtimeUserShapes = JSON.parse(JSON.stringify(shapes));
         localShapes = JSON.parse(JSON.stringify(shapes));
         console.log("else self.runtimeUserShapes", self.runtimeUserShapes);
@@ -4314,14 +4351,9 @@ export var AimEditor = function (
       if (templateShapeLength > 0) {
         let arryDiffernce = "";
         //const tempateShapeKeys = [];
-        console.log("main user shapes", localShapes);
-        console.log("main templateShapeLength", templateShapeLength);
+
         let geoTemplateConditionDom = null;
         for (let cnt = 0; cnt < templateShapeLength; cnt++) {
-          console.log(
-            "in loop templateShapeLength",
-            self.templateShapeArray[cnt].shape
-          );
           //tempateShapeKeys.push(self.templateShapeArray[cnt].shape);
           //**
           // if (localShapes.hasOwnProperty(self.templateShapeArray[cnt].shape)) {
@@ -4352,7 +4384,7 @@ export var AimEditor = function (
           arryDiffernce = Object.keys(localShapes).filter(
             (eachShape) => eachShape !== self.templateShapeArray[cnt].shape
           );
-          console.log("first array difference : ", arryDiffernce);
+
           geoTemplateConditionDom = document.getElementById(
             self.templateShapeArray[cnt].domid
           );
@@ -4462,9 +4494,19 @@ export var AimEditor = function (
     // test['circle'].validate = 'ok';
     // console.log('new test', test);
     //test
-
+    console.log("+++++++++++++");
+    console.log("+++++++++++++");
+    console.log("+++++++++++++");
+    console.log("+++++++++++++");
+    console.log("+++++++++++++");
+    console.log("+++++++++++++");
+    console.log("+++++++++++++");
+    console.log("isrecist : ", isRecist);
     let aimjsonCopy = aimjson;
     self.loadingAimFlag = true;
+    if (typeof isRecist !== "undefined") {
+      self.isRecistFlag = true;
+    }
     console.log(
       "load  aim  called: ..................aim passed :",
       aimjsonCopy
@@ -4529,16 +4571,21 @@ export var AimEditor = function (
       self.traverseJsonOnLoad(imagingObservationEntityCollection);
       console.log("loading aim ", self.loadingAimFlag);
       console.log("markup type : ", aimjsonCopy.markupType);
-      self.checkAnnotationShapes(aimjsonCopy.markupType);
+
+      if (typeof isRecist === "undefined" || isRecist === null) {
+        self.checkAnnotationShapes(aimjsonCopy.markupType);
+      }
       //self.printMap(self.mapLabelAnnotatorConfidence);
       //self.printMap(self.mapLabelAnnotConfJson);
       //self.printMap(self.mapLabelCommentJson);
       //self.activateDirtyCheck = true;
       console.log("load aim activated set dirty flag check");
       self.loadingAimFlag = false;
+
       if (isRecist) {
         self.disableRecistSections();
       }
+      self.isRecistFlag = false;
       return 0;
     }
   };
@@ -4546,7 +4593,7 @@ export var AimEditor = function (
   this.disableRecistSections = function () {
     // disable for recist
     //alert(document.getElementById("DropLocation").childNodes[0].className);
-    alert(document.getElementById("annotationName").parentElement.className);
+    //alert(document.getElementById("annotationName").parentElement.className);
     // document.getElementById("allowedTermType").click = function(event) {
     //   // do something special here
 

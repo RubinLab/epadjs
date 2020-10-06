@@ -3,7 +3,15 @@ import ReactTable from "react-table";
 import { connect } from "react-redux";
 import { Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
-import { FaPlay, FaStop, FaDownload, FaEye, FaTrash } from "react-icons/fa";
+import {
+  FaPlay,
+  FaStop,
+  FaDownload,
+  FaEye,
+  FaTrash,
+  FaEnvelopeOpenText,
+  FaWindowClose,
+} from "react-icons/fa";
 
 import {
   getPluginsQueue,
@@ -11,21 +19,37 @@ import {
   stopPluginsQueue,
   deleteFromPluginQueue,
   downloadPluginResult,
+  getContainerLog,
+  stopContainerLog,
 } from "../../../../../services/pluginServices";
 import "./../../css/plugin.css";
+import "../../../menuStyle.css";
+// import axios from "axios";
+import Draggable from "react-draggable";
+// import cancelXhrAdapter from "axios-cancel";
+// import { Cancellation } from "axios-cancel/cancel";
 class TrackTab extends React.Component {
   state = {
+    ocancel: "",
+    runungLogId: 0,
+    showContainerLog: false,
+    containerLogData: "",
     pluginQueueList: [],
     showParamsNonZero: false,
     tempParamsHtmlnonZero: [],
     selectedQueueIds: {},
     selectAll: 0,
+    containerLoggingIntervalHandle: "",
   };
 
   componentWillMount = async () => {
     const tempPluginQueueList = await getPluginsQueue();
     console.log("track tab queue lists needs to show", tempPluginQueueList);
-    this.setState({ pluginQueueList: tempPluginQueueList.data });
+    // const canc = new Cancellation();
+    this.setState({
+      pluginQueueList: tempPluginQueueList.data,
+      // cancellation: canc,
+    });
   };
 
   componentDidUpdate = async () => {
@@ -171,6 +195,148 @@ class TrackTab extends React.Component {
     } else {
       console.log("error happened while downloadPluginResult");
     }
+  };
+
+  // handleGetContainerLog = async (dataOriginal) => {
+  //   const _this = this;
+  //   if (this.state.runungLogId === 0) {
+  //     console.log("data original ", dataOriginal);
+
+  //     //  const containerLoggingIntervalHolder = null;
+
+  //     const containerid = dataOriginal.id;
+
+  //     console.log("get logs called :", containerid);
+  //     // let containerlog = await getContainerLog(containerid);
+  //     // if (this.state.showContainerLog == true) {
+  //     const CancelToken = axios.CancelToken;
+  //     const source = CancelToken.source();
+  //     this.setState({
+  //       runungLogId: containerid,
+  //       showContainerLog: true,
+  //       source: source,
+  //     });
+  //     try {
+  //       let rea = await axios({
+  //         url: "http://c02s30xdg8wl.local:8080/" + "container/",
+  //         data: dataOriginal,
+  //         method: "POST",
+  //         //cancelToken: source.token,
+  //         // adapter: cancelXhrAdapter,
+  //         // cancellation: this.state.cancellation,
+  //         cancelToken: new CancelToken(function executor(c) {
+  //           // An executor function receives a cancel function as a parameter
+  //           _this.setState({ ocancel: c });
+  //           // cancel = c;
+  //         }),
+  //         onDownloadProgress: (progressEvent) => {
+  //           const dataChunk = progressEvent.currentTarget.response;
+
+  //           console.log(dataChunk);
+  //           this.setState({
+  //             containerLogData: dataChunk,
+  //           });
+  //           // dataChunk contains the data that have been obtained so far (the whole data so far)..
+  //           // So here we do whatever we want with this partial data..
+  //           // In my case I'm storing that on a redux store that is used to
+  //           // render a table, so now, table rows are rendered as soon as
+  //           // they are obtained from the endpoint.
+  //         },
+  //       });
+  //     } catch (err) {
+  //       console.log("mu mu mu :", err);
+  //     }
+
+  //     // }
+
+  //     // console.log(" container log returned value ", containerlog);
+
+  //     // const containerLoggingIntervalHolder = setInterval(
+  //     //   async function (o) {
+  //     //     // method to be executed;
+
+  //     //     let status = 202;
+  //     //     console.log("continer id = ", containerid);
+  //     //     containerlog = await getContainerLog(dataOriginal);
+  //     //     console.log("logaaaaa : ", containerlog);
+  //     //     console.log("container status :", containerlog.status);
+  //     //     status = containerlog.status;
+  //     //     o.setState({
+  //     //       containerLogData: containerlog.data,
+  //     //     });
+
+  //     //     console.log("stream return : ", o.state.containerLogData);
+  //     //   },
+  //     //   5000,
+  //     //   _this
+  //     // );
+  //     // this.setState({
+  //     //   containerLoggingIntervalHandle: containerLoggingIntervalHolder,
+  //     //   showContainerLog: true,
+  //     // });
+  //   }
+  // };
+
+  handleGetContainerLog = async (dataOriginal) => {
+    if (this.state.showContainerLog === true) {
+      clearInterval(this.state.containerLoggingIntervalHandle);
+    }
+    //  const containerLoggingIntervalHolder = null;
+    const containerid = dataOriginal.id;
+    let _this = this;
+    try {
+      let containerlog = await getContainerLog(dataOriginal);
+      console.log("err stream", containerlog);
+      if (containerlog.data != 404) {
+        this.setState({
+          showContainerLog: true,
+          containerLogData: containerlog.data,
+        });
+
+        const containerLoggingIntervalHolder = setInterval(
+          async function (innerThis) {
+            console.log("continer id = ", containerid);
+            containerlog = await getContainerLog(dataOriginal);
+            innerThis.setState({
+              containerLogData: containerlog.data,
+            });
+          },
+          5000,
+          _this
+        );
+        this.setState({
+          containerLoggingIntervalHandle: containerLoggingIntervalHolder,
+        });
+      } else {
+        alert("Please start plugin first");
+      }
+    } catch (err) {
+      alert(err);
+    }
+  };
+  handleDetachLog = async (dataOriginal) => {
+    console.log("data original ", dataOriginal);
+
+    //  const containerLoggingIntervalHolder = null;
+    this.setState({
+      showContainerLog: true,
+    });
+    const containerid = dataOriginal.id;
+    console.log("f ned ", containerid);
+    let _this = this;
+
+    console.log("get logs called :", containerid);
+    let containerlog = await stopContainerLog(dataOriginal);
+    // if (this.state.showContainerLog == true) {
+  };
+  handlerStopContainerLogging = () => {
+    // this.state.ocancel();
+    this.setState({
+      showContainerLog: false,
+      containerLogData: "",
+      runungLogId: 0,
+    });
+    clearInterval(this.state.containerLoggingIntervalHandle);
   };
 
   showRuntimeParamsForNonZero = (data) => {
@@ -382,7 +548,7 @@ class TrackTab extends React.Component {
         minResizeWidth: 20,
         Cell: (data) => {
           const processStartTime = new Date(data.original.starttime);
-          if (processStartTime.getFullYear() === 1970) {
+          if (processStartTime.getFullYear() <= 1970) {
             return <div>-</div>;
           } else {
             return (
@@ -407,7 +573,7 @@ class TrackTab extends React.Component {
         minResizeWidth: 20,
         Cell: (data) => {
           const processEndTime = new Date(data.original.endtime);
-          if (processEndTime.getFullYear() === 1970) {
+          if (processEndTime.getFullYear() <= 1970) {
             return <div>-</div>;
           } else {
             return (
@@ -444,6 +610,17 @@ class TrackTab extends React.Component {
                         variant="primary"
                         className="btn btn-sm btn-outline-light"
                         onClick={() => {
+                          this.handleGetContainerLog(data.original);
+                        }}
+                      >
+                        <FaEnvelopeOpenText className="menu-clickable" />
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        variant="primary"
+                        className="btn btn-sm btn-outline-light"
+                        onClick={() => {
                           this.handleStartOne(data.original.id);
                         }}
                       >
@@ -475,12 +652,16 @@ class TrackTab extends React.Component {
                       </div>
                     </td>
                     <td>
-                      <div
-                        onClick={() =>
-                          this.deleteOneFromQueue(data.original.id)
-                        }
-                      >
-                        <FaTrash className="menu-clickable" />
+                      <div>
+                        <button
+                          variant="primary"
+                          className="btn btn-sm btn-outline-light"
+                          onClick={() =>
+                            this.deleteOneFromQueue(data.original.id)
+                          }
+                        >
+                          <FaTrash className="menu-clickable" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -491,6 +672,11 @@ class TrackTab extends React.Component {
         },
       },
     ];
+  };
+
+  pluginWindowClickHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
   render() {
     return (
@@ -556,6 +742,39 @@ class TrackTab extends React.Component {
               </Modal.Dialog>
             </div>
           </div>
+        )}
+
+        {this.state.showContainerLog && (
+          <Draggable
+            onClick={this.pluginWindowClickHandler}
+            onMouseDown={this.pluginWindowClickHandler}
+            onMouseMove={this.pluginWindowClickHandler}
+          >
+            <div
+              className="pluginlogpopup"
+              id="pluginlogpopup"
+              onClick={this.pluginWindowClickHandler}
+              onMouseDown={this.pluginWindowClickHandler}
+              onMouseMove={this.pluginWindowClickHandler}
+            >
+              <div className="pluginCloseButtonHeader">
+                <FaWindowClose
+                  className="pluginCloseButton"
+                  onClick={() => {
+                    this.handlerStopContainerLogging();
+                  }}
+                />
+              </div>
+              <div>
+                <textarea
+                  className="pluginLogTextArea"
+                  value={this.state.containerLogData}
+                  rows={15}
+                  cols={150}
+                ></textarea>
+              </div>
+            </div>
+          </Draggable>
         )}
       </div>
     );
