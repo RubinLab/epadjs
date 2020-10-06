@@ -33,6 +33,7 @@ import { FaTimes, FaPen, FaExpandArrowsAlt } from "react-icons/fa";
 import Form from "react-bootstrap/Form";
 import ToolMenu from "../ToolMenu/ToolMenu";
 import { getMarkups } from "../aimEditor/Helpers";
+import { isThisSecond } from "date-fns/esm";
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
@@ -158,7 +159,7 @@ class DisplayView extends Component {
     this.getData();
     if (this.props.series.length > 0) {
       this.setSubComponentHeights();
-      window.addEventListener("resize", this.setSubComponentHeights);
+      window.addEventListener("resize", (e) => this.setSubComponentHeights(e));
     }
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
@@ -167,14 +168,15 @@ class DisplayView extends Component {
     window.addEventListener("editAim", this.editAimHandler);
   }
 
-  setSubComponentHeights = () => {
+  setSubComponentHeights = (e) => {
+    if (e && e.detail) var { isMaximize } = e.detail;
     const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
     let toolbarHeight = document.getElementsByClassName("toolbar")[0]
       .clientHeight;
     const windowInner = window.innerHeight;
     const containerHeight = windowInner - toolbarHeight - navbar - 10;
     this.setState({ containerHeight });
-    this.getViewports(containerHeight);
+    if (!isMaximize) this.getViewports(containerHeight);
   };
 
   editAimHandler = (event) => {
@@ -671,25 +673,26 @@ class DisplayView extends Component {
       this.setActive(current);
       return;
     }
-    if (this.state.hideShowDisabled) {
-      // this.setState({ hideShowDisabled: false });
-      return;
-    }
     // const element = cornerstone.getEnabledElements()[practivePort];
     const elements = document.getElementsByClassName("viewportContainer");
     if (this.state.hiding === false) {
       for (var i = 0; i < elements.length; i++) {
         if (i != current) elements[i].style.display = "none";
       }
-      this.setState({ height: "100%", width: "100%" });
+      this.setState({ height: this.state.containerHeight, width: "100%" });
     } else {
       this.getViewports();
       for (var i = 0; i < elements.length; i++) {
         elements[i].style.display = "inline-block";
       }
     }
-    this.setState({ hiding: !this.state.hiding }, () =>
-      window.dispatchEvent(new Event("resize"))
+    this.setState(
+      { hiding: !this.state.hiding },
+      () =>
+        window.dispatchEvent(
+          new CustomEvent("resize", { detail: { isMaximize: true } })
+        ) //for cornerstone to fit the image
+      // window.dispatchEvent(new Event("resizeViewport"))}
     );
   };
 
