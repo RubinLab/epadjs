@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 const aimEntityData = ({ aimData, id }) => {
   let observationEnt = aimData.imagingObservationEntityCollection
@@ -12,14 +12,16 @@ const aimEntityData = ({ aimData, id }) => {
     dataArr = Array.isArray(observationEnt)
       ? dataArr.concat(observationEnt)
       : dataArr.concat([observationEnt]);
-    let chracteristic =
-      observationEnt.imagingObservationCharacteristicCollection;
-    if (chracteristic) {
-      dataArr = Array.isArray(chracteristic.ImagingObservationCharacteristic)
-        ? dataArr.concat(chracteristic.ImagingObservationCharacteristic)
-        : dataArr.concat([chracteristic.ImagingObservationCharacteristic]);
+    let characteristic =
+      observationEnt[0].imagingObservationCharacteristicCollection;
+
+    if (characteristic) {
+      dataArr = Array.isArray(characteristic.ImagingObservationCharacteristic)
+        ? dataArr.concat(characteristic.ImagingObservationCharacteristic)
+        : dataArr.concat([characteristic.ImagingObservationCharacteristic]);
     }
   }
+
   if (physicalEnt) {
     dataArr = Array.isArray(physicalEnt)
       ? dataArr.concat(physicalEnt)
@@ -29,10 +31,10 @@ const aimEntityData = ({ aimData, id }) => {
   const listArr = [];
   dataArr.forEach((comment, i) => {
     listArr.push(
-      <li className="aimEntity-item" key={id + "ind-" + i}>
+      <li className="aimEntity-item" key={id + 'ind-' + i}>
         <span className="aimEntity-question">{comment.label.value}:</span>
         <span className="aimEntity-answer">
-          {comment.typeCode[0]["iso:displayName"].value}
+          {comment.typeCode[0]['iso:displayName'].value}
         </span>
       </li>
     );
