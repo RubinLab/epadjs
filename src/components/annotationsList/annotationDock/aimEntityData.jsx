@@ -12,14 +12,40 @@ const aimEntityData = ({ aimData, id }) => {
     dataArr = Array.isArray(observationEnt)
       ? dataArr.concat(observationEnt)
       : dataArr.concat([observationEnt]);
-    let characteristic =
-      observationEnt[0].imagingObservationCharacteristicCollection;
 
-    if (characteristic) {
-      dataArr = Array.isArray(characteristic.ImagingObservationCharacteristic)
-        ? dataArr.concat(characteristic.ImagingObservationCharacteristic)
-        : dataArr.concat([characteristic.ImagingObservationCharacteristic]);
-    }
+    observationEnt.forEach(el => {
+      const characteristicCol = el.imagingObservationCharacteristicCollection;
+      if (
+        characteristicCol &&
+        characteristicCol.ImagingObservationCharacteristic
+      ) {
+        const characteristics = Array.isArray(
+          characteristicCol.ImagingObservationCharacteristic
+        )
+          ? characteristicCol.ImagingObservationCharacteristic
+          : [characteristicCol.ImagingObservationCharacteristic];
+
+        characteristics.forEach(chr => {
+          dataArr.push(chr);
+
+          if (
+            chr.characteristicQuantificationCollection &&
+            chr.characteristicQuantificationCollection
+              .CharacteristicQuantification
+          ) {
+            const quanCol = chr.characteristicQuantificationCollection;
+            const quantification = Array.isArray(
+              quanCol.CharacteristicQuantification
+            )
+              ? quanCol.CharacteristicQuantification
+              : [quanCol.CharacteristicQuantification];
+            quantification.forEach(qt => {
+              dataArr.push(qt);
+            });
+          }
+        });
+      }
+    });
   }
 
   if (physicalEnt) {
@@ -30,12 +56,15 @@ const aimEntityData = ({ aimData, id }) => {
 
   const listArr = [];
   dataArr.forEach((comment, i) => {
+    const value = comment.typeCode
+      ? comment.typeCode[0]['iso:displayName'].value
+      : comment['xsi:type'] && comment['xsi:type'] === 'Scale'
+      ? comment.valueLabel.value
+      : '';
     listArr.push(
       <li className="aimEntity-item" key={id + 'ind-' + i}>
         <span className="aimEntity-question">{comment.label.value}:</span>
-        <span className="aimEntity-answer">
-          {comment.typeCode[0]['iso:displayName'].value}
-        </span>
+        <span className="aimEntity-answer">{value}</span>
       </li>
     );
   });
