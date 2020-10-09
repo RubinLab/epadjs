@@ -8,7 +8,6 @@ import { renderTable, wordExport } from './recist';
 import ConfirmationModal from '../common/confirmationModal';
 import WaterfallReact from './WaterfallReact';
 import { MAX_PORT } from '../../constants';
-
 import { getWaterfallReport, getReport } from '../../services/reportServices';
 import { checkIfSeriesOpen, clearCarets } from '../../Utils/aid';
 import {
@@ -17,6 +16,7 @@ import {
   jumpToAim,
   addToGrid,
   getSingleSerie,
+  updateImageId,
 } from '../annotationsList/action';
 
 const messages = {
@@ -38,6 +38,7 @@ const Report = props => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [selectedCol, setSelectedCol] = useState(null);
   const [filteredPatients, setFilteredPatients] = useState({});
+  const [selectedSeries, setSelectedSeries] = useState([]);
 
   const constructPairs = object => {
     const result = [];
@@ -226,8 +227,44 @@ const Report = props => {
     wordExport(subjectName, 'recisttbl' + index);
   };
 
+  useEffect(() => {}, [sizes.width, sizes.height]);
+
+  const updateImageIDs = async () => {
+    const { openSeries } = props;
+    const indexMap = {};
+    selectedSeries.forEach(el => {
+      const { isOpen, index } = checkIfSeriesOpen(
+        openSeries,
+        el.seriesUID,
+        'seriesUID'
+      );
+      if (isOpen) indexMap[el.seriesUID] = index;
+    });
+
+    if (Object.values(indexMap).length === selectedSeries.length) {
+      let count = 0;
+      openSeries.forEach((el, i) => {
+        if (
+          (indexMap[el.seriesUID] || indexMap[el.seriesUID] === 0) &&
+          el.imageAnnotations
+        ) {
+          count += 1;
+        }
+      });
+      if (count === selectedSeries.length) {
+        for (let aim of selectedSeries) {
+          console.log(aim);
+          const { seriesUID, aimUID } = aim;
+          props.dispatch(jumpToAim(seriesUID, aimUID, indexMap[seriesUID]));
+        }
+        window.dispatchEvent(new Event('aimsOpenedFromReport'));
+      }
+    }
+  };
+
   useEffect(() => {
-  }, [sizes.width, sizes.height]);
+    updateImageIDs();
+  }, [Object.keys(props.aimsList).length]);
 
   useEffect(() => {
     const { id } = getTableArguments();
@@ -275,16 +312,22 @@ const Report = props => {
     }
   };
 
-  const openAims = (seriesToOpen, projectID, patientID) => {
+  const openAims = async (
+    seriesToOpen,
+    projectID,
+    patientID,
+    selectedSeries
+  ) => {
+    setSelectedSeries(selectedSeries);
     const array =
       projectID && patientID
         ? seriesToOpen.map(el => ({ ...el, projectID, patientID }))
         : seriesToOpen;
 
-    array.forEach(series => {
+    for (let series of array) {
       props.dispatch(addToGrid(series, series.aimID || series.aimUID));
       props.dispatch(getSingleSerie(series, series.aimID || series.aimUID));
-    });
+    }
     props.history.push('/display');
   };
 
@@ -313,7 +356,9 @@ const Report = props => {
           setShowConfirmModal(true);
         } else {
           //if not open the series
-          openAims([data.tUIDs[row][col]], projectID, patientID);
+          openAims([data.tUIDs[row][col]], projectID, patientID, [
+            data.tUIDs[row][col],
+          ]);
         }
       }
       // if the column is 0 (all aims for the lesion)
@@ -330,7 +375,7 @@ const Report = props => {
         // if so give confirmation (clear display view and cancel buttons)
         setShowConfirmModal(true);
       } else {
-        openAims(notOpenSeries, projectID, patientID);
+        openAims(notOpenSeries, projectID, patientID, data.tUIDs[row]);
       }
     }
   };
@@ -342,7 +387,7 @@ const Report = props => {
       selectedCol >= 0
         ? [data.tUIDs[selectedRow][selectedCol]]
         : data.tUIDs[selectedRow];
-    openAims(seriesToOpen, projectID, patientID);
+    openAims(seriesToOpen, projectID, patientID, seriesToOpen);
     setShowConfirmModal(false);
   };
 
@@ -438,6 +483,7 @@ const mapStateToProps = state => {
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedProject: state.annotationsListReducer.selectedProject,
     openSeries: state.annotationsListReducer.openSeries,
+    aimsList: state.annotationsListReducer.aimsList,
   };
 };
 

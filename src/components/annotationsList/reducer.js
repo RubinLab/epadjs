@@ -563,7 +563,7 @@ const asyncReducer = (state = initialState, action) => {
         return state;
     }
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return state;
   }
 };

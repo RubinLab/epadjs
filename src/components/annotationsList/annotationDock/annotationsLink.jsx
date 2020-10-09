@@ -29,8 +29,8 @@ const annotationsLink = (props) => {
     list = seriesAims.map((aim, i) => {
       if (!props.imageAims[aim.id]) {
         let slideNo;
-        let { comment } = aim.json;
-        if (comment) {
+        if (aim.json && aim.json.comment) {
+          let { comment } = aim.json;
           comment = Object.values(comment);
           slideNo = comment.length > 0 ? comment[0].split("/")[2] : "";
         }
