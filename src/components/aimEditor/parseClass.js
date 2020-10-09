@@ -787,11 +787,16 @@ export var AimEditor = function (
     //iconcav
     var iconI = document.createElement("i");
     iconI.id = parent.id;
-    if (parent.minCardinality <= "0") {
-      iconI.className = "green check circle outline icon";
+    console.log("checking cardinalities for : ", lblTxt);
+    console.log("cardinality -> min : ", parent.minCardinality);
+
+    if (parseInt(parent.minCardinality) <= 0) {
+      document.getElementById(iconI.id).className =
+        "green check circle outline icon";
       var varOk = "true";
     } else {
-      iconI.className = "red check circle outline icon";
+      document.getElementById(iconI.id).className =
+        "red check circle outline icon";
       var varOk = "false";
     }
 
@@ -1975,10 +1980,10 @@ export var AimEditor = function (
       )
         document.getElementById(prObject.id).className =
           "green check circle outline icon";
-      else
+      else {
         document.getElementById(prObject.id).className =
           "red check circle outline icon";
-
+      }
       //disable enable component seection
       if (allowedTermObj.nextId != "0" && this.selected == true) {
         console.log("next id catched", allowedTermObj.nextId);
@@ -2090,9 +2095,10 @@ export var AimEditor = function (
       )
         document.getElementById(vtPrObject.id).className =
           "green check circle outline icon";
-      else
+      else {
         document.getElementById(vtPrObject.id).className =
           "red check circle outline icon";
+      }
       self.formCheckHandler(self.checkFormSaveReady());
     });
 
@@ -2282,10 +2288,10 @@ export var AimEditor = function (
       )
         document.getElementById(vtPrObject.id).className =
           "green check circle outline icon";
-      else
+      else {
         document.getElementById(vtPrObject.id).className =
           "red check circle outline icon";
-
+      }
       self.formCheckHandler(self.checkFormSaveReady());
     };
   };
@@ -3740,7 +3746,6 @@ export var AimEditor = function (
 
   this.turnAllRedtoGreencheck = function () {
     var objs = document.getElementsByTagName("i");
-
     for (var i = 0; i < objs.length; i++) {
       if (objs[i].className == "red check circle outline icon")
         objs[i].className = "green check circle outline icon";
@@ -4159,6 +4164,7 @@ export var AimEditor = function (
    }
    */
   this.checkShapes = function (shapes) {
+    console.log("check shapes called");
     //if (self.loadingAimFlag === false) {
     let shapeKeys = Object.keys(shapes);
     //alert(shapeKeys);
