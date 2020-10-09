@@ -611,13 +611,13 @@ class SearchView extends Component {
   };
 
   downloadSelection = async () => {
-    const selectedProjects = Object.values(this.props.selectedProjects);
+    // const selectedProjects = Object.values(this.props.selectedProjects);
     const selectedPatients = Object.values(this.props.selectedPatients);
     const selectedStudies = Object.values(this.props.selectedStudies);
     const selectedSeries = Object.values(this.props.selectedSeries);
     const selectedAnnotations = Object.values(this.props.selectedAnnotations);
     const selected =
-      selectedProjects.length ||
+      // selectedProjects.length ||
       selectedPatients.length ||
       selectedStudies.length ||
       selectedSeries.length;
@@ -627,7 +627,7 @@ class SearchView extends Component {
       let fileName = "downloaded_items";
       let promise;
       await this.setState({ downloading: true });
-      if (selectedProjects.length > 0) {
+      // if (selectedProjects.length > 0) {
         // for (let project of selectedProjects) {
         //   fileName = `Project-${project.projectID}`;
         //   promiseArr.push(downloadProjects(project));
@@ -635,7 +635,8 @@ class SearchView extends Component {
         // }
         // this.downloadHelper(promiseArr, fileNameArr);
         // this.props.dispatch(clearSelection());
-      } else if (selectedPatients.length > 0) {
+      // } else 
+      if (selectedPatients.length > 0) {
         bodyArr = selectedPatients.map(el => el.patientID);
         promise = downloadSubjects(pid, bodyArr);
         fileName = "Downloaded_subjects";
@@ -1068,7 +1069,7 @@ class SearchView extends Component {
 
 const mapStateToProps = state => {
   const {
-    selectedProjects,
+    selectedProject,
     selectedPatients,
     selectedStudies,
     selectedSeries,
@@ -1081,7 +1082,7 @@ const mapStateToProps = state => {
     lastEventId,
   } = state.annotationsListReducer;
   return {
-    selectedProjects,
+    selectedProject,
     selectedPatients,
     selectedStudies,
     selectedSeries,
