@@ -292,7 +292,7 @@ const Report = props => {
       });
       props.history.push('/display');
     } catch (err) {
-      console.errorr(err);
+      console.error(err);
     }
   };
 
@@ -346,7 +346,7 @@ const Report = props => {
         }
       }
     } catch (err) {
-      console.errorr(err);
+      console.error(err);
     }
   };
 
