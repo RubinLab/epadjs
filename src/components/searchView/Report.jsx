@@ -37,6 +37,7 @@ const Report = props => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [selectedCol, setSelectedCol] = useState(null);
+  const [isNonTarget, setIsNonTarget] = useState(false);
   const [filteredPatients, setFilteredPatients] = useState({});
 
   const constructPairs = object => {
@@ -226,8 +227,7 @@ const Report = props => {
     wordExport(subjectName, 'recisttbl' + index);
   };
 
-  useEffect(() => {
-  }, [sizes.width, sizes.height]);
+  useEffect(() => {}, [sizes.width, sizes.height]);
 
   useEffect(() => {
     const { id } = getTableArguments();
@@ -266,82 +266,98 @@ const Report = props => {
 
   const captureClick = e => {
     const { nodeName, id } = e.target;
-    if (nodeName === 'A' && id.startsWith('a')) {
-      const row = parseInt(id[1]);
-      const col = parseInt(id[2]) - 1;
+    setIsNonTarget(id.startsWith('nc'));
+    if (nodeName === 'A' && (id.startsWith('a') || id.startsWith('nc'))) {
+      const row = id.startsWith('a') ? parseInt(id[1]) : parseInt(id[2]);
+      const col = id.startsWith('a')
+        ? parseInt(id[2]) - 1
+        : parseInt(id[3]) - 1;
       setSelectedRow(row);
       setSelectedCol(col);
-      handleLesionClick(row, col);
+      const nontarget = id.startsWith('nc');
+      handleLesionClick(row, col, nontarget);
     }
   };
 
   const openAims = (seriesToOpen, projectID, patientID) => {
-    const array =
-      projectID && patientID
-        ? seriesToOpen.map(el => ({ ...el, projectID, patientID }))
-        : seriesToOpen;
+    try {
+      const array =
+        projectID && patientID
+          ? seriesToOpen.map(el => ({ ...el, projectID, patientID }))
+          : seriesToOpen;
 
-    array.forEach(series => {
-      props.dispatch(addToGrid(series, series.aimID || series.aimUID));
-      props.dispatch(getSingleSerie(series, series.aimID || series.aimUID));
-    });
-    props.history.push('/display');
+      array.forEach(series => {
+        props.dispatch(addToGrid(series, series.aimID || series.aimUID));
+        props.dispatch(getSingleSerie(series, series.aimID || series.aimUID));
+      });
+      props.history.push('/display');
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleLesionClick = (row, col) => {
-    // check if the col is 0 (one aim only)
-    const { openSeries } = props;
-    const notOpenSeries = [];
-    const { projectID, patientID, subjectName } = props.patient;
-    if (col !== -1) {
-      const { seriesUID, aimUID, studyUID } = data.tUIDs[row][col];
-      // if not zero check if it is already open
-      const { isOpen, index } = checkIfSeriesOpen(
-        openSeries,
-        seriesUID,
-        'seriesUID'
-      );
-      // if open jump to the displate change active port
-      if (isOpen) {
-        props.dispatch(changeActivePort(index));
-        props.dispatch(jumpToAim(seriesUID, aimUID, index));
-        props.history.push('/display');
+  const handleLesionClick = (row, col, nontarget) => {
+    try {
+      const uidData = nontarget ? data.ntUIDs : data.tUIDs;
+      const { openSeries } = props;
+      const notOpenSeries = [];
+      const { projectID, patientID, subjectName } = props.patient;
+      // check if the col is 0 (one aim only)
+      if (col !== -1) {
+        const { seriesUID, aimUID, studyUID } = uidData[row][col];
+        // if not zero check if it is already open
+        const { isOpen, index } = checkIfSeriesOpen(
+          openSeries,
+          seriesUID,
+          'seriesUID'
+        );
+        // if open jump to the displate change active port
+        if (isOpen) {
+          props.dispatch(changeActivePort(index));
+          props.dispatch(jumpToAim(seriesUID, aimUID, index));
+          props.history.push('/display');
+        } else {
+          // if not open check if the grid is full
+          // if so give confirmation (clear display view and cancel buttons)
+          if (openSeries.length === MAX_PORT) {
+            setShowConfirmModal(true);
+          } else {
+            //if not open the series
+            openAims([uidData[row][col]], projectID, patientID);
+          }
+        }
+        // if the column is 0 (all aims for the lesion)
       } else {
-        // if not open check if the grid is full
-        // if so give confirmation (clear display view and cancel buttons)
-        if (openSeries.length === MAX_PORT) {
+        // check if open series has any of the selected series
+        // if so copy the input array and delete the item from the copied input array
+        uidData[row].forEach((el, index) => {
+          if (
+            !checkIfSeriesOpen(openSeries, el.seriesUID, 'seriesUID').isOpen
+          ) {
+            notOpenSeries.push(el);
+          }
+        });
+        // check if already open series and array in hand if have more than 6 series
+        if (notOpenSeries.length + openSeries.length > MAX_PORT) {
+          // if so give confirmation (clear display view and cancel buttons)
           setShowConfirmModal(true);
         } else {
-          //if not open the series
-          openAims([data.tUIDs[row][col]], projectID, patientID);
+          openAims(notOpenSeries, projectID, patientID);
         }
       }
-      // if the column is 0 (all aims for the lesion)
-    } else {
-      // check if open series has any of the selected series
-      // if so copy the input array and delete the item from the copied input array
-      data.tUIDs[row].forEach((el, index) => {
-        if (!checkIfSeriesOpen(openSeries, el.seriesUID, 'seriesUID').isOpen) {
-          notOpenSeries.push(el);
-        }
-      });
-      // check if already open series and array in hand if have more than 6 series
-      if (notOpenSeries.length + openSeries.length > MAX_PORT) {
-        // if so give confirmation (clear display view and cancel buttons)
-        setShowConfirmModal(true);
-      } else {
-        openAims(notOpenSeries, projectID, patientID);
-      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
   const clearGridAndOpenAllSeries = () => {
+    const uidData = isNonTarget ? data.ntUIDs : data.tUIDs;
     const { projectID, patientID } = props.patient;
     props.dispatch(clearGrid());
     const seriesToOpen =
       selectedCol >= 0
-        ? [data.tUIDs[selectedRow][selectedCol]]
-        : data.tUIDs[selectedRow];
+        ? [uidData[selectedRow][selectedCol]]
+        : uidData[selectedRow];
     openAims(seriesToOpen, projectID, patientID);
     setShowConfirmModal(false);
   };
