@@ -491,13 +491,13 @@ class DisplayView extends Component {
           let multiFrameUrl = baseUrl + "&frame=" + i;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           cornerstoneImageIds.push(multiFrameUrl);
-          cornerstone.loadAndCacheImage(multiFrameUrl);
+          // cornerstone.loadAndCacheImage(multiFrameUrl);
           newImageIds[multiFrameUrl] = true;
         }
       } else {
         let singleFrameUrl = baseUrl;
         cornerstoneImageIds.push(singleFrameUrl);
-        cornerstone.loadAndCacheImage(singleFrameUrl);
+        // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
       }
       // } else {
@@ -995,7 +995,6 @@ class DisplayView extends Component {
     } catch (error) {
       console.error(error);
     }
-    console.log("State after seting", this.state);
   };
 
   setSerieActiveLabelMap = (aimId) => {
@@ -1398,6 +1397,10 @@ class DisplayView extends Component {
       10
     );
     this.setState({ data: newData });
+    console.log(
+      "Request pool",
+      cornerstoneTools.requestPoolManager.getRequestPool()
+    );
   };
 
   handleJumpChange = (i, event) => {

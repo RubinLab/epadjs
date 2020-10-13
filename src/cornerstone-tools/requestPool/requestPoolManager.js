@@ -1,5 +1,5 @@
-import external from '../externalModules.js';
-import { getMaxSimultaneousRequests } from '../util/getMaxSimultaneousRequests.js';
+import external from "../externalModules.js";
+import { getMaxSimultaneousRequests } from "../util/getMaxSimultaneousRequests.js";
 
 const requestPool = {
   interaction: [],
@@ -33,7 +33,7 @@ function addRequest(
 ) {
   if (!requestPool.hasOwnProperty(type)) {
     throw new Error(
-      'Request type must be one of interaction, thumbnail, or prefetch'
+      "Request type must be one of interaction, thumbnail, or prefetch"
     );
   }
 
@@ -57,10 +57,10 @@ function addRequest(
 
   if (imageLoadObject) {
     imageLoadObject.promise.then(
-      function(image) {
+      function (image) {
         doneCallback(image);
       },
-      function(error) {
+      function (error) {
         failCallback(error);
       }
     );
@@ -84,7 +84,7 @@ function clearRequestStack(type) {
   // Console.log('clearRequestStack');
   if (!requestPool.hasOwnProperty(type)) {
     throw new Error(
-      'Request type must be one of interaction, thumbnail, or prefetch'
+      "Request type must be one of interaction, thumbnail, or prefetch"
     );
   }
 
@@ -96,7 +96,7 @@ function startAgain() {
     return;
   }
 
-  setTimeout(function() {
+  setTimeout(function () {
     startGrabbing();
   }, grabDelay);
 }
@@ -120,14 +120,14 @@ function sendRequest(requestDetails) {
     // If we do, remove from list (when resolved, as we could have
     // Pending prefetch requests) and stop processing this iteration
     imageLoadObject.promise.then(
-      function(image) {
+      function (image) {
         numRequests[type]--;
         // Console.log(numRequests);
 
-        doneCallback(image);
+        // doneCallback(image);
         startAgain();
       },
-      function(error) {
+      function (error) {
         numRequests[type]--;
         // Console.log(numRequests);
         failCallback(error);
@@ -139,11 +139,11 @@ function sendRequest(requestDetails) {
   }
 
   function requestTypeToLoadPriority(requestDetails) {
-    if (requestDetails.type === 'prefetch') {
+    if (requestDetails.type === "prefetch") {
       return -5;
-    } else if (requestDetails.type === 'interactive') {
+    } else if (requestDetails.type === "interactive") {
       return 0;
-    } else if (requestDetails.type === 'thumbnail') {
+    } else if (requestDetails.type === "thumbnail") {
       return 5;
     }
   }
@@ -166,13 +166,13 @@ function sendRequest(requestDetails) {
 
   // Load and cache the image
   loader.then(
-    function(image) {
+    function (image) {
       numRequests[type]--;
       // Console.log(numRequests);
       doneCallback(image);
       startAgain();
     },
-    function(error) {
+    function (error) {
       numRequests[type]--;
       // Console.log(numRequests);
       failCallback(error);

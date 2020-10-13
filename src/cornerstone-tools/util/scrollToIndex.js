@@ -85,9 +85,9 @@ export default function (element, newImageIdIndex) {
   }
 
   // METE:commented out because it prevents scrolling to image
-  // if (newImageIdIndex === stackData.currentImageIdIndex) {
-  //  return;
-  // }
+  if (newImageIdIndex === stackData.currentImageIdIndex) {
+    return;
+  }
 
   if (startLoadingHandler) {
     startLoadingHandler(element);
@@ -118,15 +118,28 @@ export default function (element, newImageIdIndex) {
   // Convert the preventCache value in stack data to a boolean
   const preventCache = Boolean(stackData.preventCache);
 
-  let imagePromise;
+  // METE::Instead of sending an independdent request for each scroll, we add the new imageId to the top of the requestPool
+  requestPoolManager.addRequest(
+    element,
+    newImageId,
+    "interaction",
+    preventCache,
+    doneCallback,
+    failCallback,
+    true
+  );
 
-  if (preventCache) {
-    imagePromise = cornerstone.loadImage(newImageId);
-  } else {
-    imagePromise = cornerstone.loadAndCacheImage(newImageId);
-  }
+  // METE::Followinf is commented out because we use the requestPool now
+  // let imagePromise;
 
-  imagePromise.then(doneCallback, failCallback);
+  // if (preventCache) {
+  //   imagePromise = cornerstone.loadImage(newImageId, { priority: 5 });
+  // } else {
+  //   console.log("no prevent cache");
+  //   imagePromise = cornerstone.loadAndCacheImage(newImageId, { priority: 5 });
+  // }
+
+  // imagePromise.then(doneCallback, failCallback);
   // Make sure we kick off any changed download request pools
   requestPoolManager.startGrabbing();
 

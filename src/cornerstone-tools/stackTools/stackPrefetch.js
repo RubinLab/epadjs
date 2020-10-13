@@ -1,16 +1,16 @@
-import external from './../externalModules.js';
-import requestPoolManager from '../requestPool/requestPoolManager.js';
-import loadHandlerManager from '../stateManagement/loadHandlerManager.js';
-import { addToolState, getToolState } from '../stateManagement/toolState.js';
-import { setMaxSimultaneousRequests } from '../util/getMaxSimultaneousRequests.js';
-import { getLogger } from '../util/logger.js';
-import triggerEvent from '../util/triggerEvent';
-import EVENTS from '../events.js';
+import external from "./../externalModules.js";
+import requestPoolManager from "../requestPool/requestPoolManager.js";
+import loadHandlerManager from "../stateManagement/loadHandlerManager.js";
+import { addToolState, getToolState } from "../stateManagement/toolState.js";
+import { setMaxSimultaneousRequests } from "../util/getMaxSimultaneousRequests.js";
+import { getLogger } from "../util/logger.js";
+import triggerEvent from "../util/triggerEvent";
+import EVENTS from "../events.js";
 
-const logger = getLogger('stackTools:stackPrefetch');
+const logger = getLogger("stackTools:stackPrefetch");
 
-const toolType = 'stackPrefetch';
-const requestType = 'prefetch';
+const toolType = "stackPrefetch";
+const requestType = "prefetch";
 
 let configuration = {
   maxImagesToPrefetch: Infinity,
@@ -40,11 +40,11 @@ function range(lowEnd, highEnd) {
   return arr;
 }
 
-const max = function(arr) {
+const max = function (arr) {
   return Math.max.apply(null, arr);
 };
 
-const min = function(arr) {
+const min = function (arr) {
   return Math.min.apply(null, arr);
 };
 
@@ -54,7 +54,7 @@ function nearestIndex(arr, x) {
   const l = [];
   const h = [];
 
-  arr.forEach(function(v) {
+  arr.forEach(function (v) {
     if (v < x) {
       l.push(v);
     } else if (v > x) {
@@ -70,7 +70,7 @@ function nearestIndex(arr, x) {
 
 function prefetch(element) {
   // Check to make sure stack data exists
-  const stackData = getToolState(element, 'stack');
+  const stackData = getToolState(element, "stack");
 
   if (!stackData || !stackData.data || !stackData.data.length) {
     return;
@@ -116,7 +116,7 @@ function prefetch(element) {
   stackPrefetchData.data[0].indicesToRequest.sort((a, b) => a - b);
   const indicesToRequestCopy = stackPrefetch.indicesToRequest.slice();
 
-  indicesToRequestCopy.forEach(function(imageIdIndex) {
+  indicesToRequestCopy.forEach(function (imageIdIndex) {
     const imageId = stack.imageIds[imageIdIndex];
 
     if (!imageId) {
@@ -154,7 +154,7 @@ function prefetch(element) {
   const preventCache = false;
 
   function doneCallback(image) {
-    logger.log('prefetch done: %s', image.imageId);
+    logger.log("prefetch done: %s", image.imageId);
     const imageIdIndex = stack.imageIds.indexOf(image.imageId);
 
     removeFromList(imageIdIndex);
@@ -188,9 +188,9 @@ function prefetch(element) {
   );
 
   function failCallback(error) {
-    logger.log('prefetch errored: %o', error);
+    logger.log("prefetch errored: %o", error);
     if (errorLoadingHandler) {
-      errorLoadingHandler(element, imageId, error, 'stackPrefetch');
+      errorLoadingHandler(element, imageId, error, "stackPrefetch");
     }
   }
 
@@ -250,7 +250,7 @@ function prefetch(element) {
 }
 
 function getPromiseRemovedHandler(element) {
-  return function(e) {
+  return function (e) {
     const eventData = e.detail;
 
     // When an imagePromise has been pushed out of the cache, re-add its index
@@ -260,7 +260,7 @@ function getPromiseRemovedHandler(element) {
 
     try {
       // It will throw an exception in some cases (eg: thumbnails)
-      stackData = getToolState(element, 'stack');
+      stackData = getToolState(element, "stack");
     } catch (error) {
       return;
     }
@@ -296,7 +296,7 @@ function onImageUpdated(e) {
   // Start prefetching again (after a delay)
   // When the user has scrolled to a new image
   clearTimeout(resetPrefetchTimeout);
-  resetPrefetchTimeout = setTimeout(function() {
+  resetPrefetchTimeout = setTimeout(function () {
     const element = e.target;
 
     // If playClip is enabled and the user loads a different series in the viewport
@@ -316,7 +316,7 @@ function enable(element) {
   stackPrefetchDataArray.data = [];
 
   // First check that there is stack data available
-  const stackData = getToolState(element, 'stack');
+  const stackData = getToolState(element, "stack");
 
   if (!stackData || !stackData.data || !stackData.data.length) {
     return;
@@ -327,7 +327,7 @@ function enable(element) {
   // Check if we are allowed to cache images in this stack
   if (stack.preventCache === true) {
     logger.warn(
-      'A stack that should not be cached was given the stackPrefetch'
+      "A stack that should not be cached was given the stackPrefetch"
     );
 
     return;

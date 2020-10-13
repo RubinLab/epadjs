@@ -53,6 +53,12 @@ const Cornerstone = ({ dispatch }) => {
 
   cornerstoneTools.store.state.touchProximity = 40;
 
+  cornerstoneTools.stackPrefetch.setConfiguration({
+    maxImagesToPrefetch: Infinity,
+    preserveExistingPool: false,
+    maxSimultaneousRequests: 4,
+  });
+
   const config = {
     globalToolSyncEnabled: true,
     maxWebWorkers: navigator.hardwareConcurrency || 1,
@@ -65,10 +71,10 @@ const Cornerstone = ({ dispatch }) => {
         initializeCodecsOnStartup: false,
         // codecsPath: codecsUrl,
         usePDFJS: false,
-        strict: false
-      }
+        strict: false,
+      },
     },
-    showSVGCursors: true
+    showSVGCursors: true,
   };
 
   cornerstoneWADOImageLoader.webWorkerManager.initialize(config);
@@ -76,21 +82,21 @@ const Cornerstone = ({ dispatch }) => {
   cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
 
   cornerstoneWADOImageLoader.configure({
-    beforeSend: function(xhr) {
+    beforeSend: function (xhr) {
       // Add custom headers here
       auth
         .getAuthHeader()
-        .then(header => {
+        .then((header) => {
           if (header && header) {
             xhr.setRequestHeader("Authorization", header);
             // xhr.setRequestHeader("authorization", header);
             // xhr.setRequestHeader('access-token', token);
           }
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(err);
         });
-    }
+    },
   });
 
   cornerstoneWADOImageLoader.external.dicomParser = dicomParser;

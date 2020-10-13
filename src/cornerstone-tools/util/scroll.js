@@ -14,7 +14,7 @@ import external from "./../externalModules.js";
  * @param  {type} [allowSkipping = true]  Whether frames can be skipped.
  * @returns {void}
  */
-export default function(element, images, loop = false, allowSkipping = true) {
+export default function (element, images, loop = false, allowSkipping = true) {
   const toolData = getToolState(element, "stack");
 
   if (!toolData || !toolData.data || !toolData.data.length) {
@@ -41,7 +41,7 @@ export default function(element, images, loop = false, allowSkipping = true) {
     scrollToIndex(element, newImageIdIndex);
   } else {
     const pendingEvent = {
-      index: newImageIdIndex
+      index: newImageIdIndex,
     };
 
     stackData.pending.push(pendingEvent);
@@ -72,7 +72,7 @@ function scrollWithoutSkipping(stackData, pendingEvent, element) {
       return;
     }
 
-    const newImageHandler = function(event) {
+    const newImageHandler = function (event) {
       const index = stackData.imageIds.indexOf(event.detail.image.imageId);
 
       if (index === pendingEvent.index) {
