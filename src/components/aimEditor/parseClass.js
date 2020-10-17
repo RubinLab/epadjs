@@ -4165,35 +4165,42 @@ export var AimEditor = function (
           }
         }
         if (key === "typeCode") {
-          //for allowed terms and valid terms
-          let ValidtermCode = "";
-          label = self.removeEmptySpace(jsonObj.label.value);
-          console.log("load aim label key typeCode:", label);
-          if (Array.isArray(value)) {
-            if (value.length > 1) {
-              console.log("###############");
-              console.log("###############");
-              console.log("###############");
-              console.log("###############");
-              console.log("###############");
-              console.log("###############");
-              console.log("value[0][1].code", value[0].code);
-              ValidtermCode = value[0].code;
-              for (let i = 1; i < value.length; i++) {
+          if (
+            !(
+              self.isRecistFlag === true &&
+              (jsonObj.label.value === "Type" ||
+                jsonObj.label.value === "Location")
+            )
+          ) {
+            //for allowed terms and valid terms
+            let ValidtermCode = "";
+            label = self.removeEmptySpace(jsonObj.label.value);
+            console.log("load aim label key typeCode:", label);
+            if (Array.isArray(value)) {
+              if (value.length > 1) {
+                console.log("###############");
+                console.log("###############");
+                console.log("###############");
+                console.log("###############");
+                console.log("###############");
+                console.log("###############");
+                console.log("value[0][1].code", value[0].code);
+                ValidtermCode = value[0].code;
+                for (let i = 1; i < value.length; i++) {
+                  const docElement = document.getElementById(
+                    label + "-" + value[i].code + ValidtermCode
+                  );
+                  console.log("doc element : ", docElement);
+                  self.syntheticSelectMultiDropDown(docElement);
+                }
+              } else {
                 const docElement = document.getElementById(
-                  label + "-" + value[i].code + ValidtermCode
+                  label + "-" + value[0].code
                 );
-                console.log("doc element : ", docElement);
                 self.syntheticSelectMultiDropDown(docElement);
               }
-            } else {
-              const docElement = document.getElementById(
-                label + "-" + value[0].code
-              );
-              self.syntheticSelectMultiDropDown(docElement);
             }
           }
-
           // if (docElement != null) {
           //   var parentDiv = docElement.parentNode;
 
