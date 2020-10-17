@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 const aimEntityData = ({ aimData, id }) => {
   let observationEnt = aimData.imagingObservationEntityCollection
@@ -12,14 +12,42 @@ const aimEntityData = ({ aimData, id }) => {
     dataArr = Array.isArray(observationEnt)
       ? dataArr.concat(observationEnt)
       : dataArr.concat([observationEnt]);
-    let chracteristic =
-      observationEnt.imagingObservationCharacteristicCollection;
-    if (chracteristic) {
-      dataArr = Array.isArray(chracteristic.ImagingObservationCharacteristic)
-        ? dataArr.concat(chracteristic.ImagingObservationCharacteristic)
-        : dataArr.concat([chracteristic.ImagingObservationCharacteristic]);
-    }
+
+    observationEnt.forEach(el => {
+      const characteristicCol = el.imagingObservationCharacteristicCollection;
+      if (
+        characteristicCol &&
+        characteristicCol.ImagingObservationCharacteristic
+      ) {
+        const characteristics = Array.isArray(
+          characteristicCol.ImagingObservationCharacteristic
+        )
+          ? characteristicCol.ImagingObservationCharacteristic
+          : [characteristicCol.ImagingObservationCharacteristic];
+
+        characteristics.forEach(chr => {
+          dataArr.push(chr);
+
+          if (
+            chr.characteristicQuantificationCollection &&
+            chr.characteristicQuantificationCollection
+              .CharacteristicQuantification
+          ) {
+            const quanCol = chr.characteristicQuantificationCollection;
+            const quantification = Array.isArray(
+              quanCol.CharacteristicQuantification
+            )
+              ? quanCol.CharacteristicQuantification
+              : [quanCol.CharacteristicQuantification];
+            quantification.forEach(qt => {
+              dataArr.push(qt);
+            });
+          }
+        });
+      }
+    });
   }
+
   if (physicalEnt) {
     dataArr = Array.isArray(physicalEnt)
       ? dataArr.concat(physicalEnt)
@@ -28,12 +56,15 @@ const aimEntityData = ({ aimData, id }) => {
 
   const listArr = [];
   dataArr.forEach((comment, i) => {
+    const value = comment.typeCode
+      ? comment.typeCode[0]['iso:displayName'].value
+      : comment['xsi:type'] && comment['xsi:type'] === 'Scale'
+      ? comment.valueLabel.value
+      : '';
     listArr.push(
-      <li className="aimEntity-item" key={id + "ind-" + i}>
+      <li className="aimEntity-item" key={id + 'ind-' + i}>
         <span className="aimEntity-question">{comment.label.value}:</span>
-        <span className="aimEntity-answer">
-          {comment.typeCode[0]["iso:displayName"].value}
-        </span>
+        <span className="aimEntity-answer">{value}</span>
       </li>
     );
   });
