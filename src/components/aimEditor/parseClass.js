@@ -791,12 +791,10 @@ export var AimEditor = function (
     console.log("cardinality -> min : ", parent.minCardinality);
 
     if (parseInt(parent.minCardinality) <= 0) {
-      document.getElementById(iconI.id).className =
-        "green check circle outline icon";
+      iconI.className = "green check circle outline icon";
       var varOk = "true";
     } else {
-      document.getElementById(iconI.id).className =
-        "red check circle outline icon";
+      iconI.className = "red check circle outline icon";
       var varOk = "false";
     }
 
