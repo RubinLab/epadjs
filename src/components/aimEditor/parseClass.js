@@ -787,16 +787,11 @@ export var AimEditor = function (
     //iconcav
     var iconI = document.createElement("i");
     iconI.id = parent.id;
-    console.log("checking cardinalities for : ", lblTxt);
-    console.log("cardinality -> min : ", parent.minCardinality);
-
-    if (parseInt(parent.minCardinality) <= 0) {
-      iconI.className = "green check circle outline icon";
-      var varOk = "true";
-    } else {
-      iconI.className = "red check circle outline icon";
-      var varOk = "false";
-    }
+    iconI.className = "";
+    // console.log("checking cardinalities for : ", lblTxt);
+    // console.log("cardinality -> min : ", parent.minCardinality);
+    // console.log("parent : ", parent);
+    // console.log("parent id: ", parent.id);
 
     parentDiv.appendChild(uiAccordionDiv);
 
@@ -812,7 +807,15 @@ export var AimEditor = function (
     titleDiv.appendChild(lblTxt);
     uiAccordionDiv.appendChild(contentDiv);
     uiAccordionDiv.style.marginLeft = "0px";
-
+    if (parseInt(parent.minCardinality) <= 0) {
+      document.getElementById(iconI.id).className =
+        "green check circle outline icon";
+      var varOk = "true";
+    } else {
+      document.getElementById(iconI.id).className =
+        "red check circle outline icon";
+      var varOk = "false";
+    }
     var mainSelectDiv = document.createElement("div");
     mainSelectDiv.className = "ui container";
     mainSelectDiv.id = "Drop" + maindiv;
