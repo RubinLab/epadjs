@@ -229,6 +229,7 @@ class CornerstoneViewport extends Component {
         // What if user kills component before `displayImage`?
       }
     } else if (!hasStackChanged && hasImageIndexChanged) {
+      console.log("will scroll", imageIndex);
       scrollToIndex(this.element, imageIndex);
     }
 

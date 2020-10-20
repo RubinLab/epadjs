@@ -168,6 +168,61 @@ class DisplayView extends Component {
     window.addEventListener("editAim", this.editAimHandler);
   }
 
+  async componentDidUpdate(prevProps, prevState) {
+    const { pid, series, activePort, aimList } = this.props;
+    const {
+      series: prevSeries,
+      activePort: prevActivePort,
+      aimList: prevAimList,
+    } = prevProps;
+    const activeSerie = series[activePort];
+    const prevActiveSerie = prevSeries[prevActivePort];
+
+    if (this.props.series.length < 1) {
+      if (pid) this.props.history.push(`/search/${pid}`);
+      else return;
+      return;
+    }
+    if (
+      (prevProps.series !== this.props.series &&
+        prevProps.loading === true &&
+        this.props.loading === false) ||
+      (prevProps.series.length !== this.props.series.length &&
+        this.props.loading === false)
+    ) {
+      await this.setState({ isLoading: true });
+      this.getViewports();
+      this.getData();
+    }
+    // This is to handle late loading of aimsList from store but it also calls getData
+    // each time visibility of aims change
+    else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
+      this.renderAims();
+    }
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("markupSelected", this.handleMarkupSelected);
+    window.removeEventListener("markupCreated", this.handleMarkupCreated);
+    window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
+    window.removeEventListener("jumpToAimImage", this.jumpToAimImage);
+    window.removeEventListener("editAim", this.editAimHandler);
+    window.removeEventListener("resize", this.setSubComponentHeights);
+  }
+
+  jumpToAims = () =>{
+    const {series} = this.props;
+    const newData = [...this.state.data];
+    series.forEach((serie, i) => {
+      if(this.state.data[i] && this.state.data[i].stack){
+        const {imageIds} = this.state.data[i].stack;
+        const imageIndex = this.getImageIndex(serie, imageIds);
+        newData[i].stack.currentImageIdIndex = imageIndex;
+      }
+    })
+    this.setState({data:newData});
+  }
+
   setSubComponentHeights = (e) => {
     if (e && e.detail) var { isMaximize } = e.detail;
     const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
@@ -221,48 +276,6 @@ class DisplayView extends Component {
     // this.setSerieActiveLabelMap(aimID);
     // this.openAimEditor(aimID, seriesUID);
   };
-
-  async componentDidUpdate(prevProps) {
-    const { pid, series, activePort, aimList } = this.props;
-    const {
-      series: prevSeries,
-      activePort: prevActivePort,
-      aimList: prevAimList,
-    } = prevProps;
-    const activeSerie = series[activePort];
-    const prevActiveSerie = prevSeries[prevActivePort];
-
-    if (this.props.series.length < 1) {
-      if (pid) this.props.history.push(`/search/${pid}`);
-      else return;
-      return;
-    }
-    if (
-      (prevProps.series !== this.props.series &&
-        prevProps.loading === true &&
-        this.props.loading === false) ||
-      (prevProps.series.length !== this.props.series.length &&
-        this.props.loading === false)
-    ) {
-      await this.setState({ isLoading: true });
-      this.getViewports();
-      this.getData();
-    }
-    // This is to handle late loading of aimsList from store but it also calls getData
-    // each time visibility of aims change
-    else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
-      this.renderAims();
-    }
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("markupSelected", this.handleMarkupSelected);
-    window.removeEventListener("markupCreated", this.handleMarkupCreated);
-    window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
-    window.removeEventListener("jumpToAimImage", this.jumpToAimImage);
-    window.removeEventListener("editAim", this.editAimHandler);
-    window.removeEventListener("resize", this.setSubComponentHeights);
-  }
 
   toggleAnnotations = (event) => {
     const { aimID, isVisible } = event.detail;
@@ -349,55 +362,6 @@ class DisplayView extends Component {
     return segAims;
   };
 
-  // getMarkups = (aimOfInterest) => {
-  //   const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-  //   var markupsToReturn = {};
-  //   Object.keys(toolState).forEach((key) => {
-  //     const markUps = toolState[key];
-  //     Object.keys(markUps).map((tool) => {
-  //       switch (tool) {
-  //         case "FreehandRoi3DTool":
-  //         case "FreehandRoi":
-  //           const polygons3d = markUps[tool].data;
-  //           polygons3d.map((polygon) => {
-  //             if (!polygon.aimId || polygon.aimId === aimOfInterest)
-  //               markupsToReturn["Polygon"] = { validate: "" };
-  //           });
-  //           break;
-  //         case "Bidirectional":
-  //           const bidirectionals = markUps[tool].data;
-  //           bidirectionals.map((bidirectional) => {
-  //             if (!bidirectional.aimId || bidirectional.aimId === aimOfInterest)
-  //               markupsToReturn["Perpendicular"] = { validate: "" };
-  //           });
-  //           break;
-  //         case "CircleRoi":
-  //           const circles = markUps[tool].data;
-  //           circles.map((circle) => {
-  //             if (!circle.aimId || circle.aimId === aimOfInterest)
-  //               markupsToReturn["Circle"] = { validate: "" };
-  //           });
-  //           break;
-  //         case "Length":
-  //           const lines = markUps[tool].data;
-  //           lines.map((line) => {
-  //             if (!line.aimId || line.aimId === aimOfInterest)
-  //               markupsToReturn["Line"] = { validate: "" };
-  //           });
-  //           break;
-  //         case "Probe":
-  //           const points = markUps[tool].data;
-  //           points.map((point) => {
-  //             if (!point.aimId || point.aimId === aimOfInterest)
-  //               markupsToReturn["Point"] = { validate: "" };
-  //           });
-  //           break;
-  //       }
-  //     });
-  //   });
-  //   return markupsToReturn;
-  // };
-
   getData() {
     // clear the toolState they will be rendered again on next load
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
@@ -411,12 +375,14 @@ class DisplayView extends Component {
         promises.push(promise);
       }
       Promise.all(promises).then((res) => {
+        
         this.setState(
           {
             data: res,
             isLoading: false,
           },
           () => {
+            this.jumpToAims();
             this.renderAims();
             this.refreshAllViewports();
             this.shouldOpenAimEditor();
@@ -493,13 +459,13 @@ class DisplayView extends Component {
           let multiFrameUrl = baseUrl + "&frame=" + i;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           cornerstoneImageIds.push(multiFrameUrl);
-          cornerstone.loadAndCacheImage(multiFrameUrl);
+          // cornerstone.loadAndCacheImage(multiFrameUrl);
           newImageIds[multiFrameUrl] = true;
         }
       } else {
         let singleFrameUrl = baseUrl;
         cornerstoneImageIds.push(singleFrameUrl);
-        cornerstone.loadAndCacheImage(singleFrameUrl);
+        // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
       }
       // } else {
@@ -536,8 +502,9 @@ class DisplayView extends Component {
     else imageIndex = 0;
 
     // if serie is being open from the annotation jump to that image and load the aim editor
-    if (serie.aimID) {
+    if (serie.aimID) {      
       imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+      
     }
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
@@ -998,14 +965,12 @@ class DisplayView extends Component {
     } catch (error) {
       console.error(error);
     }
-    console.log("State after seting", this.state);
   };
 
   setSerieActiveLabelMap = (aimId) => {
     const { series, activePort } = this.props;
     const { seriesLabelMaps } = this.state;
     if (!seriesLabelMaps[activePort]) {
-      console.log("i am returning ", seriesLabelMaps[activePort]);
       return;
     } //The default activeLabelMap will be 0 automatically
     const { imageIds } = this.state.data[activePort].stack;
@@ -1035,7 +1000,6 @@ class DisplayView extends Component {
       //   console.log("aim ", aimId, "lmi", newLabelMapIndex);
       // } else newLabelMapIndex = 0;
 
-      console.log("Setting elements activeLabeMap with", newLabelMapIndex);
       this.setActiveLabelMapIndex(newLabelMapIndex, this.getActiveElement());
     });
   };
@@ -1115,11 +1079,7 @@ class DisplayView extends Component {
       //     element
       //   );
       // }
-      console.log(
-        "dipsatching, aimId, activeLabelMapIndex",
-        aimId,
-        labelMapIndex
-      );
+     
 
       // console.log(
       //   "New activeLabelMap Index is ",
@@ -1372,6 +1332,7 @@ class DisplayView extends Component {
     this.setState({ data: tempData });
     // dispatch to write the newImageId to store
     this.props.dispatch(updateImageId(imageId));
+    
   };
 
   onAnnotate = () => {
@@ -1479,7 +1440,7 @@ class DisplayView extends Component {
                         <Form.Control
                           type="number"
                           min="1"
-                          value={data.stack.currentImageIdIndex + 1}
+                          value={parseInt(data.stack.currentImageIdIndex) + 1}
                           className={"slice-field"}
                           onChange={(event) => this.handleJumpChange(i, event)}
                           style={{
@@ -1506,7 +1467,7 @@ class DisplayView extends Component {
                 <CornerstoneViewport
                   key={i}
                   imageIds={data.stack.imageIds}
-                  imageIdIndex={data.stack.currentImageIdIndex}
+                  imageIdIndex={parseInt(data.stack.currentImageIdIndex)}
                   viewportIndex={i}
                   tools={tools}
                   eventListeners={[
