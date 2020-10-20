@@ -246,17 +246,17 @@ class AimEditor extends Component {
 
   checkMarkupsForTemplate = () => {
     const templateType = this.semanticAnswers.getSelectedTemplateType();
-    // if (templateType === "Study" || templateType === "Series") {
-    const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    const shapes = getMarkups(toolState);
-    if (shapes && Object.keys(shapes).length) {
-      const answer = window.confirm(
-        `No markups can be saved with template type: ${templateType}! All previously unsaved markups will be lost! Do you want to continue?`
-      );
-      if (!answer) return 0;
-      this.props.onCancel(false);
+    if (templateType === "Study" || templateType === "Series") {
+      const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+      const shapes = getMarkups(toolState);
+      if (shapes && Object.keys(shapes).length) {
+        const answer = window.confirm(
+          `No markups can be saved with template type: ${templateType}! All previously unsaved markups will be lost! Do you want to continue?`
+        );
+        if (!answer) return 0;
+        this.props.onCancel(false);
+      }
     }
-    // }
     return 1;
   };
 

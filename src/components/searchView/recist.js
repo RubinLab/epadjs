@@ -907,7 +907,7 @@ function checkAndColorNonTarget(
   numofHeaderCols
 ) {
   for (i = 0; i < data.ntUIDs.length; i++) {
-    var aNameTag = $('<a>', { href: '#' });
+    var aNameTag = $('<a>', { href: '#', id: 'nc' + i + '0' });
     aNameTag.click(
       { projectID: projectID, patientID: patientID, row: data.ntUIDs[i] },
       function(event) {
@@ -973,6 +973,7 @@ function checkAndColorNonTarget(
         }
 
         var aTag = $('<a>', {
+          id: 'nc' + i + (j + 1),
           href: createLinkUrl(
             serverUrl,
             data.ntUIDs[i][j].studyUID,
