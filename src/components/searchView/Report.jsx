@@ -8,7 +8,6 @@ import { renderTable, wordExport } from './recist';
 import ConfirmationModal from '../common/confirmationModal';
 import WaterfallReact from './WaterfallReact';
 import { MAX_PORT } from '../../constants';
-
 import { getWaterfallReport, getReport } from '../../services/reportServices';
 import { checkIfSeriesOpen, clearCarets } from '../../Utils/aid';
 import {
@@ -17,6 +16,7 @@ import {
   jumpToAim,
   addToGrid,
   getSingleSerie,
+  updateImageId,
 } from '../annotationsList/action';
 
 const messages = {
@@ -39,6 +39,7 @@ const Report = props => {
   const [selectedCol, setSelectedCol] = useState(null);
   const [isNonTarget, setIsNonTarget] = useState(false);
   const [filteredPatients, setFilteredPatients] = useState({});
+  const [selectedSeries, setSelectedSeries] = useState([]);
 
   const constructPairs = object => {
     const result = [];
@@ -229,6 +230,43 @@ const Report = props => {
 
   useEffect(() => {}, [sizes.width, sizes.height]);
 
+  const updateImageIDs = async () => {
+    const { openSeries } = props;
+    const indexMap = {};
+    selectedSeries.forEach(el => {
+      const { isOpen, index } = checkIfSeriesOpen(
+        openSeries,
+        el.seriesUID,
+        'seriesUID'
+      );
+      if (isOpen) indexMap[el.seriesUID] = index;
+    });
+
+    if (Object.values(indexMap).length === selectedSeries.length) {
+      let count = 0;
+      openSeries.forEach((el, i) => {
+        if (
+          (indexMap[el.seriesUID] || indexMap[el.seriesUID] === 0) &&
+          el.imageAnnotations
+        ) {
+          count += 1;
+        }
+      });
+      if (count === selectedSeries.length) {
+        for (let aim of selectedSeries) {
+          console.log(aim);
+          const { seriesUID, aimUID } = aim;
+          props.dispatch(jumpToAim(seriesUID, aimUID, indexMap[seriesUID]));
+        }
+        window.dispatchEvent(new Event('aimsOpenedFromReport'));
+      }
+    }
+  };
+
+  useEffect(() => {
+    updateImageIDs();
+  }, [Object.keys(props.aimsList).length]);
+
   useEffect(() => {
     const { id } = getTableArguments();
     const shapesFilter = document.getElementById(id + 'shapesFilter');
@@ -279,22 +317,48 @@ const Report = props => {
     }
   };
 
-  const openAims = (seriesToOpen, projectID, patientID) => {
+  const openAims = async (
+    seriesToOpen,
+    projectID,
+    patientID,
+    selectedSeries
+  ) => {
     try {
+      setSelectedSeries(selectedSeries);
       const array =
         projectID && patientID
           ? seriesToOpen.map(el => ({ ...el, projectID, patientID }))
           : seriesToOpen;
 
-      array.forEach(series => {
+      for (let series of array) {
         props.dispatch(addToGrid(series, series.aimID || series.aimUID));
         props.dispatch(getSingleSerie(series, series.aimID || series.aimUID));
-      });
+      }
       props.history.push('/display');
-    } catch (err) {
+    }
+    catch (err) {
       console.error(err);
     }
-  };
+  }
+
+  // Sotred because of merge conflict to be deleted later!!!
+  
+  // const openAims = (seriesToOpen, projectID, patientID) => {
+  //   try {
+  //     const array =
+  //       projectID && patientID
+  //         ? seriesToOpen.map(el => ({ ...el, projectID, patientID }))
+  //         : seriesToOpen;
+
+  //     array.forEach(series => {
+  //       props.dispatch(addToGrid(series, series.aimID || series.aimUID));
+  //       props.dispatch(getSingleSerie(series, series.aimID || series.aimUID));
+  //     });
+  //     props.history.push('/display');
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
 
   const handleLesionClick = (row, col, nontarget) => {
     try {
@@ -342,6 +406,29 @@ const Report = props => {
           // if so give confirmation (clear display view and cancel buttons)
           setShowConfirmModal(true);
         } else {
+          // commented out after merge conflict to be deleted later
+          
+    //       //if not open the series
+    //       openAims([data.tUIDs[row][col]], projectID, patientID, [
+    //         data.tUIDs[row][col],
+    //       ]);
+    //     }
+    //   }
+    //   // if the column is 0 (all aims for the lesion)
+    // } else {
+    //   // check if open series has any of the selected series
+    //   // if so copy the input array and delete the item from the copied input array
+    //   data.tUIDs[row].forEach((el, index) => {
+    //     if (!checkIfSeriesOpen(openSeries, el.seriesUID, 'seriesUID').isOpen) {
+    //       notOpenSeries.push(el);
+    //     }
+    //   });
+    //   // check if already open series and array in hand if have more than 6 series
+    //   if (notOpenSeries.length + openSeries.length > MAX_PORT) {
+    //     // if so give confirmation (clear display view and cancel buttons)
+    //     setShowConfirmModal(true);
+    //   } else {
+    //     openAims(notOpenSeries, projectID, patientID, data.tUIDs[row]);
           openAims(notOpenSeries, projectID, patientID);
         }
       }
@@ -454,6 +541,7 @@ const mapStateToProps = state => {
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedProject: state.annotationsListReducer.selectedProject,
     openSeries: state.annotationsListReducer.openSeries,
+    aimsList: state.annotationsListReducer.aimsList,
   };
 };
 

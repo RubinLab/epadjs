@@ -825,7 +825,15 @@ export var AimEditor = function (
     titleDiv.appendChild(lblTxt);
     uiAccordionDiv.appendChild(contentDiv);
     uiAccordionDiv.style.marginLeft = "0px";
-
+    if (parseInt(parent.minCardinality) <= 0) {
+      document.getElementById(iconI.id).className =
+        "green check circle outline icon";
+      var varOk = "true";
+    } else {
+      document.getElementById(iconI.id).className =
+        "red check circle outline icon";
+      var varOk = "false";
+    }
     var mainSelectDiv = document.createElement("div");
     mainSelectDiv.className = "ui container";
     mainSelectDiv.id = "Drop" + maindiv;
