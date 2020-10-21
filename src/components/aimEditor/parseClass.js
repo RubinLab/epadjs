@@ -18,7 +18,7 @@ export var AimEditor = function (
   //this.mapHtmlSelectObjectsKeyValue = new Map(); not used
   // this.mapAllowedTermCollectionByCodeValue = new Map(); not used
   var self = this;
-  var domelements = [];
+  //var domelements = [];
   var selectid = 0;
   this.loadingAimFlag = false;
   this.handlerSetAimDirty = setAimDirty;
@@ -788,10 +788,28 @@ export var AimEditor = function (
     var iconI = document.createElement("i");
     iconI.id = parent.id;
     iconI.className = "";
-    // console.log("checking cardinalities for : ", lblTxt);
-    // console.log("cardinality -> min : ", parent.minCardinality);
-    // console.log("parent : ", parent);
-    // console.log("parent id: ", parent.id);
+    console.log("checking cardinalities for : ", lblTxt);
+    console.log("cardinality -> min : ", parent.minCardinality);
+    console.log("ae parent : -> obj : ", parent);
+
+    if (parseInt(parent.minCardinality) <= 0) {
+      try {
+        document.getElementById(iconI.id).className =
+          "green check circle outline icon";
+      } catch (e) {
+        iconI.className = "green check circle outline icon";
+      }
+      var varOk = "true";
+    } else {
+      try {
+        document.getElementById(iconI.id).className =
+          "red check circle outline icon";
+      } catch (e) {
+        iconI.className = "red check circle outline icon";
+      }
+
+      var varOk = "false";
+    }
 
     parentDiv.appendChild(uiAccordionDiv);
 
@@ -825,13 +843,13 @@ export var AimEditor = function (
     //selectDiv.multiple=true;
     selectDiv.id = "select" + maindiv;
 
-    domelements[maindiv] = new Array(6);
-    domelements[maindiv]["id"] = maindiv;
-    domelements[maindiv]["label"] = parent.label;
-    domelements[maindiv]["min"] = parent.minCardinality;
-    domelements[maindiv]["max"] = parent.maxCardinality;
-    domelements[maindiv]["selectedCnt"] = 0;
-    domelements[maindiv]["selectVerification"] = false;
+    // domelements[maindiv] = new Array(6);
+    // domelements[maindiv]["id"] = maindiv;
+    // domelements[maindiv]["label"] = parent.label;
+    // domelements[maindiv]["min"] = parent.minCardinality;
+    // domelements[maindiv]["max"] = parent.maxCardinality;
+    // domelements[maindiv]["selectedCnt"] = 0;
+    // domelements[maindiv]["selectVerification"] = false;
 
     let compObj = {
       id: parent.id,
@@ -1011,7 +1029,7 @@ export var AimEditor = function (
         }
       }
 
-      var el = domelements[domelements.length - 1];
+      // var el = domelements[domelements.length - 1];
       for (var key in subEObject) {
         if (typeof subEObject[key] == "object") {
           if (key == "ValidTerm") {
@@ -1803,8 +1821,8 @@ export var AimEditor = function (
             statusCheckAllowTermObject.endid
           );
       }
-
-      if (allowedTermObj.getPrimitive().noMoreQuestions == true) {
+      console.log("allowedTermObj.getPrimitive(): ", allowedTermObj);
+      if (allowedTermObj.getPrimitive().noMoreQuestions == "true") {
         console.log("nomore question situation : === true");
         self.DisableTillNext(prObject.id, "tillend", self.callDisable);
       }
@@ -1952,9 +1970,9 @@ export var AimEditor = function (
     labelHolder.appendChild(label);
 
     optionInput.addEventListener("click", function () {
-      let dropDownItemsArray = $("#select" + prObject.label).dropdown(
-        "get value"
-      );
+      let dropDownItemsArray = $(
+        "#select" + self.removeEmptySpace(prObject.label)
+      ).dropdown("get value");
 
       if (self.activateDirtyCheck) {
         self.handlerSetAimDirty(); // added to set dirtflag
@@ -2009,7 +2027,7 @@ export var AimEditor = function (
           );
       }
 
-      if (allowedTermObj.getPrimitive().noMoreQuestions == true) {
+      if (allowedTermObj.getPrimitive().noMoreQuestions == "true") {
         if (this.checked == true) {
           console.log("nomore question situation : === true");
           self.DisableTillNext(prObject.id, "tillend", self.callDisable);
@@ -2209,7 +2227,7 @@ export var AimEditor = function (
           );
       }
 
-      if (allowedTermObj.getPrimitive().noMoreQuestions == true) {
+      if (allowedTermObj.getPrimitive().noMoreQuestions == "true") {
         if (this.checked == true) {
           console.log("nomore question situation : === true");
           self.DisableTillNext(prObject.id, "tillend", self.callDisable);
@@ -2297,13 +2315,13 @@ export var AimEditor = function (
     };
   };
 
-  this.checkValidationTosave = function () {
-    for (var property1 in domelements) {
-      if (domelements[property1]["selectVerification"] == true)
-        console.log("true");
-      else console.log("false");
-    }
-  };
+  // this.checkValidationTosave = function () {
+  //   for (var property1 in domelements) {
+  //     if (domelements[property1]["selectVerification"] == true)
+  //       console.log("true");
+  //     else console.log("false");
+  //   }
+  // };
   this.checkAnnotatorConfidence = function (prentDiv, objectToCheckAnnConf) {
     //  console.log("checking annotator confidence for : ", objectToCheckAnnConf);
     let isMouseButtondown = false;
@@ -2448,7 +2466,9 @@ export var AimEditor = function (
   };
   this.callDisable = function () {
     for (var [key, value] of self.mapStatusAllowedTermBlocks) {
-      //console.log("mapStatusAllowedTermBlocks" + key + ' = ' + JSON.stringify(value));
+      console.log(
+        "mapStatusAllowedTermBlocks" + key + " = " + JSON.stringify(value)
+      );
     }
   };
 
