@@ -44,9 +44,16 @@ class UploadModal extends React.Component {
             continue;
           }
         }
-        projects.length > 0
-          ? this.setState({ projects, projectID: pid })
-          : this.setState({ projects });
+
+        const nonSelectablePid = pid === "nonassigned" || pid === "all";
+        const projectID =
+          nonSelectablePid && projects.length > 0
+            ? projects[0].id
+            : !nonSelectablePid
+            ? pid
+            : "";
+        this.setState({ projects, projectID })
+       
       }
     } catch (err) {
       console.log(err);
