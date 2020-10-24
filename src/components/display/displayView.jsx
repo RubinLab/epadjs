@@ -366,6 +366,8 @@ class DisplayView extends Component {
   getData() {
     // clear the toolState they will be rendered again on next load
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    console.log("hadi bakalim", cornerstoneTools.store.modules.freehand3D.state);
+    cornerstoneTools.store.modules.freehand3D.state.seriesCollection = [];
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
     try {
