@@ -211,10 +211,11 @@ class DisplayView extends Component {
   }
 
   jumpToAims = () =>{
+    console.log("In jump to aims", this.state.data, this);
     const {series} = this.props;
     const newData = [...this.state.data];
     series.forEach((serie, i) => {
-      if(this.state.data[i] && this.state.data[i].stack){
+      if(serie.aimId && this.state.data[i] && this.state.data[i].stack){
         const {imageIds} = this.state.data[i].stack;
         const imageIndex = this.getImageIndex(serie, imageIds);
         newData[i].stack.currentImageIdIndex = imageIndex;
@@ -498,17 +499,20 @@ class DisplayView extends Component {
       this.state.data[index] &&
       this.state.data[index].stack.currentImageIdIndex
     )
-      imageIndex = this.state.data[index].stack.currentImageIdIndex;
+      {imageIndex = this.state.data[index].stack.currentImageIdIndex;
+      console.log("image index is", imageIndex);}
     else imageIndex = 0;
 
     // if serie is being open from the annotation jump to that image and load the aim editor
     if (serie.aimID) {      
       imageIndex = this.getImageIndex(serie, cornerstoneImageIds);
+      console.log("serie has aimID", imageIndex);
       
     }
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
+    console.log("returning stack", stack);
     return { stack };
   };
 
