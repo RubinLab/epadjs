@@ -307,9 +307,55 @@ class AimEditor extends Component {
     return true;
   };
 
+  fixAimType = (aim, templateType) => {
+    if (
+      templateType === "Study" &&
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .imageReferenceEntityCollection
+    ) {
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.instanceUid.root =
+        "";
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.modality = {
+        code: "99EPADM0",
+        codeSystemName: "99EPAD",
+        "iso:displayName": {
+          "xmlns:iso": "uri:iso.org:21090",
+          value: "NA",
+        },
+      };
+    }
+    if (
+      (templateType === "Study" || templateType === "Series") &&
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .imageReferenceEntityCollection
+    ) {
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.imageCollection.Image[0].sopClassUid.root =
+        "";
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.imageCollection.Image[0].sopInstanceUid.root =
+        "";
+      // remove instance number from comment
+      if (
+        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+          .comment
+      ) {
+        const commentParts = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value.split(
+          "/"
+        );
+        if (commentParts.length > 3) {
+          commentParts[2] = " ";
+          aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value = commentParts.join(
+            "/"
+          );
+        }
+      }
+    }
+    return aim;
+  };
+
   createAim = async (answers) => {
     const { hasSegmentation } = this.props;
     const markupsToSave = this.getNewMarkups();
+    const templateType = this.semanticAnswers.getSelectedTemplateType();
     // try {
     if (hasSegmentation) {
       // if (!this.checkSegmentationFrames()) return;
@@ -319,7 +365,7 @@ class AimEditor extends Component {
           // also add the markups to aim if there is any
           if (Object.entries(markupsToSave).length !== 0)
             this.createAimMarkups(aim, markupsToSave);
-          this.saveAim(aim, segmentationBlob, segId);
+          this.saveAim(aim, templateType, segmentationBlob, segId);
         }
       );
     } else if (Object.entries(markupsToSave).length !== 0) {
@@ -331,7 +377,7 @@ class AimEditor extends Component {
         this.updatedAimId
       );
       this.createAimMarkups(aim, markupsToSave);
-      this.saveAim(aim);
+      this.saveAim(aim, templateType);
     } else {
       //Non markup image annotation
       const { activePort } = this.props;
@@ -344,7 +390,7 @@ class AimEditor extends Component {
         enumAimType.imageAnnotation,
         this.updatedAimId
       );
-      this.saveAim(aim);
+      this.saveAim(aim, templateType);
     }
     // } catch (error) {
     //   throw new Error("Error creating aim", error);
@@ -469,9 +515,9 @@ class AimEditor extends Component {
     return seedData;
   };
 
-  saveAim = (aim, segmentationBlob, segId) => {
+  saveAim = (aim, templateType, segmentationBlob, segId) => {
     const aimJson = aim.getAim();
-    const aimSaved = JSON.parse(aimJson);
+    let aimSaved = JSON.parse(aimJson);
 
     // If file upload service will be used instead of aim save service reagrding
     // the aim size purposes then aim blob should be sent with the following code
@@ -479,7 +525,7 @@ class AimEditor extends Component {
     // const aimBlob = new Blob([aimJson], {
     //   type: "application/octet-stream",
     // });
-
+    aimSaved = this.fixAimType(aimSaved, templateType);
     const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
     const { openSeries, activePort } = this.props;
     const { patientID, projectID, seriesUID, studyUID } = openSeries[
