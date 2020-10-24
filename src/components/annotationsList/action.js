@@ -640,39 +640,31 @@ export const updateSingleSerie = (serie, annotation) => {
   };
 };
 
-const extractSerieAims = (arr, seriesID) => {
-  let serieAims = [];
-  arr.forEach(aim => {
-    const serieUID =
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-        .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy
-        .imageSeries.instanceUid.root;
-    if (serieUID === seriesID) {
-      serieAims.push(aim);
-    }
-  });
-  return serieAims;
-};
-
-const extractStudyAims = arr => {
+const extractNonMarkupAims = (arr, seriesID) => {
   let studyAims = [];
+  let serieAims = [];
+  let imageAims = {};
   arr.forEach(aim => {
-    const serieUID =
+    const series =
       aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
         .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy
-        .imageSeries.instanceUid.root;
+        .imageSeries;
+    const serieUID = series.instanceUid.root;
     if (!serieUID) {
       studyAims.push(aim);
+    } else if (serieUID === seriesID) {
+      serieAims.push(aim);
+      if ((!aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].markupEntityCollection || aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].markupEntityCollection.MarkupEntity.length===0) && (!aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].segmentationEntityCollection || aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].segmentationEntityCollection.SegmentationEntity.length===0)) {
+        imageAims[series.imageCollection.Image[0].sopInstanceUid.root]=[];
+      }
     }
   });
-  return studyAims;
+  return {studyAims, serieAims, imageAims};
 };
 
 const getSingleSerieData = (serie, annotation) => {
   return new Promise((resolve, reject) => {
     let aimsData;
-    let serieAims = [];
-    let studyAims = [];
     let imageData;
     let { studyUID, seriesUID, projectID, patientID } = serie;
     projectID = projectID ? projectID : "lite";
@@ -680,11 +672,11 @@ const getSingleSerieData = (serie, annotation) => {
     
     getStudyAims(patientID, studyUID, projectID)
       .then(async result => {
-        serieAims = extractSerieAims(result.data,seriesUID);
-        studyAims = extractStudyAims(result.data);
-
+        const {studyAims, serieAims, imageAims} = extractNonMarkupAims(result.data,seriesUID);
+        
         aimsData = serieAims.concat(studyAims);
-        imageData = getImageIdAnnotations(serieAims);
+        // TODO should make sure not to overwrite if the imageid has markup entities
+        imageData = {...getImageIdAnnotations(serieAims),...imageAims};
         aimsData = getAimListFields(aimsData, annotation);
         resolve({ aimsData, imageData });
       })
