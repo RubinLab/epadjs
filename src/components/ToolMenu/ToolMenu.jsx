@@ -377,6 +377,11 @@ class ToolMenu extends Component {
   };
 
   render() {
+    const {activeTool} = this.state;
+    if(activeTool !== undefined && activeTool !== "")
+      this.setToolStateForAllElements(activeTool, "active");
+    console.log("toolbar state", this.state);
+    console.log("cornerstone tools", cornerstoneTools);
     return (
       <div className="toolbar">
         {this.imagingTools.map((imagingTool, i) => {
