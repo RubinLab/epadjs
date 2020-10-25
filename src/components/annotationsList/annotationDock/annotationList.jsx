@@ -16,7 +16,7 @@ class AnnotationsList extends React.Component {
     annsDisplayAll: true,
   };
 
-  componentDidUpdate = (prevProps) => {
+  componentDidUpdate = prevProps => {
     try {
       const series = Object.keys(this.props.aimsList);
       if (
@@ -48,7 +48,7 @@ class AnnotationsList extends React.Component {
     }
   };
 
-  handleDisplayClick = (e) => {
+  handleDisplayClick = e => {
     const { seriesUID, patientID, studyUID } = this.props.openSeries[
       this.props.activePort
     ];
@@ -88,12 +88,12 @@ class AnnotationsList extends React.Component {
     this.setState({ annsDisplayAll: checked });
   };
 
-  handleToggleSingleLabel = (e) => {
+  handleToggleSingleLabel = e => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
   };
 
-  handleJumpToAim = (slideNo) => {
+  handleJumpToAim = slideNo => {
     if (!slideNo) {
       alert(
         "Missing SLICE_NUMBER in programmed comment of aim. Can't scroll to slice!"
@@ -161,12 +161,15 @@ class AnnotationsList extends React.Component {
           : (annotations[id] = [aims[aim]]);
       }
     }
+
     if (openSeries[activePort].imageAnnotations) {
       let imageAnnotations;
       const singleFrameAnnotations =
         openSeries[activePort].imageAnnotations[imageID];
       const multiFrameAnnotations =
         openSeries[activePort].imageAnnotations[imageID + "&frame=1"];
+      const noMarkupAnnotations =
+        openSeries[activePort].imageAnnotations[imageID + "-img"];
       if (singleFrameAnnotations && multiFrameAnnotations)
         imageAnnotations = [
           ...singleFrameAnnotations,
@@ -175,6 +178,12 @@ class AnnotationsList extends React.Component {
       else if (singleFrameAnnotations)
         imageAnnotations = singleFrameAnnotations;
       else if (multiFrameAnnotations) imageAnnotations = multiFrameAnnotations;
+
+      if (noMarkupAnnotations) {
+        imageAnnotations = imageAnnotations
+          ? [...imageAnnotations, ...noMarkupAnnotations]
+          : noMarkupAnnotations;
+      }
       if (imageAnnotations) {
         for (let aim of imageAnnotations) {
           let { aimUid } = aim;
@@ -270,7 +279,7 @@ class AnnotationsList extends React.Component {
   };
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
