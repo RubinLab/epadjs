@@ -229,7 +229,6 @@ class ToolMenu extends Component {
 
   //TODO: instead of disabling all tools we can just disable the active tool
   disableAllTools = () => {
-    console.log("Cornserstone tools", cornerstoneTools);
     this.setState({ activeToolIdx: 0 });
     Array.from(this.tools).forEach((tool) => {
       this.setToolStateForAllElements(tool.name, "passive");
@@ -263,7 +262,6 @@ class ToolMenu extends Component {
   };
 
   handleToolClicked = (index, tool) => {
-    console.log("Tool", tool);
     if (tool === "Noop") {
       this.disableAllTools();
       this.setCursor("default");
