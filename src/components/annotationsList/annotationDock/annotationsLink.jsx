@@ -15,15 +15,15 @@ const annotationsLink = (props) => {
         key="anns-header"
         id="annsHeader"
       >
-        Description
+        Other aims in series
       </th>,
-      <th
-        className="annsLink-table __header --cell"
-        key="slide-header"
-        id="annsImgSlide"
-      >
-        Slice#
-      </th>,
+      // <th
+      //   className="annsLink-table __header --cell"
+      //   key="slide-header"
+      //   id="annsImgSlide"
+      // >
+      //   Slice#
+      // </th>,
     ];
 
     list = seriesAims.map((aim, i) => {
@@ -44,7 +44,7 @@ const annotationsLink = (props) => {
             >
               {aim.name}
             </td>
-            <td className="annsLink-table __tbody --cell2">{slideNo}</td>
+            {/* <td className="annsLink-table __tbody --cell2">{slideNo}</td> */}
           </tr>
         );
       }
