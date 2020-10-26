@@ -8,7 +8,7 @@ import {
   getNewContext,
   draw,
   setShadow,
-  drawLine
+  drawLine,
 } from "./../../drawing/index.js";
 import drawLinkedTextBox from "./../../drawing/drawLinkedTextBox.js";
 import drawHandles from "./../../drawing/drawHandles.js";
@@ -32,7 +32,7 @@ export default class LengthTool extends BaseAnnotationTool {
     const defaultProps = {
       name: "Length",
       supportedInteractionTypes: ["Mouse", "Touch"],
-      svgCursor: lengthCursor
+      svgCursor: lengthCursor,
     };
 
     super(props, defaultProps);
@@ -64,13 +64,13 @@ export default class LengthTool extends BaseAnnotationTool {
           x,
           y,
           highlight: true,
-          active: false
+          active: false,
         },
         end: {
           x,
           y,
           highlight: true,
-          active: true
+          active: true,
         },
         textBox: {
           active: false,
@@ -78,9 +78,9 @@ export default class LengthTool extends BaseAnnotationTool {
           movesIndependently: false,
           drawnIndependently: true,
           allowedOutsideImage: true,
-          hasBoundingBox: true
-        }
-      }
+          hasBoundingBox: true,
+        },
+      },
     };
   }
 
@@ -155,7 +155,7 @@ export default class LengthTool extends BaseAnnotationTool {
         continue;
       }
 
-      draw(context, context => {
+      draw(context, (context) => {
         // Configurable shadow
         setShadow(context, this.configuration);
 
@@ -166,21 +166,21 @@ export default class LengthTool extends BaseAnnotationTool {
 
         // Draw the measurement line
         drawLine(context, element, data.handles.start, data.handles.end, {
-          color
+          color,
         });
 
         // Draw the handles
         const handleOptions = {
           color,
           handleRadius,
-          drawHandlesIfActive: drawHandlesOnHover
+          drawHandlesIfActive: drawHandlesOnHover,
         };
 
         drawHandles(context, eventData, data.handles, handleOptions);
 
         if (!data.handles.textBox.hasMoved) {
           const coords = {
-            x: Math.max(data.handles.start.x, data.handles.end.x)
+            x: Math.max(data.handles.start.x, data.handles.end.x),
           };
 
           // Depending on which handle has the largest x-value,
@@ -241,7 +241,7 @@ export default class LengthTool extends BaseAnnotationTool {
     function textBoxAnchorPoints(handles) {
       const midpoint = {
         x: (handles.start.x + handles.end.x) / 2,
-        y: (handles.start.y + handles.end.y) / 2
+        y: (handles.start.y + handles.end.y) / 2,
       };
 
       return [handles.start, midpoint, handles.end];
