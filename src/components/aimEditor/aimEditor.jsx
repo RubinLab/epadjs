@@ -248,6 +248,8 @@ class AimEditor extends Component {
     const templateType = this.semanticAnswers.getSelectedTemplateType();
     if (templateType === "Study" || templateType === "Series") {
       const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+      if(!toolState || toolState === "undefined")
+        return
       const shapes = getMarkups(toolState);
       if (shapes && Object.keys(shapes).length) {
         const answer = window.confirm(

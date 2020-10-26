@@ -8,7 +8,7 @@ const aimEntityData = ({ aimData, id }) => {
     ? aimData.imagingPhysicalEntityCollection.ImagingPhysicalEntity
     : null;
   let dataArr = [];
-  if (observationEnt) {
+  if (observationEnt.length) {
     dataArr = Array.isArray(observationEnt)
       ? dataArr.concat(observationEnt)
       : dataArr.concat([observationEnt]);
@@ -56,6 +56,7 @@ const aimEntityData = ({ aimData, id }) => {
 
   const listArr = [];
   dataArr.forEach((comment, i) => {
+    console.log("comment", comment);
     const value = comment.typeCode
       ? comment.typeCode[0]['iso:displayName'].value
       : comment['xsi:type'] && comment['xsi:type'] === 'Scale'
