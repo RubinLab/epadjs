@@ -17,6 +17,7 @@ import { lengthCursor } from "../cursors/index.js";
 import { getLogger } from "../../util/logger.js";
 import getPixelSpacing from "../../util/getPixelSpacing";
 import throttle from "../../util/throttle";
+import { state } from "../../store/index.js";
 
 const logger = getLogger("tools:annotation:LengthTool");
 
@@ -92,7 +93,7 @@ export default class LengthTool extends BaseAnnotationTool {
    * @param {*} coords
    * @returns {Boolean}
    */
-  pointNearTool(element, data, coords) {
+  pointNearTool(element, data, coords, interactionType = "mouse") {
     const hasStartAndEndHandles =
       data && data.handles && data.handles.start && data.handles.end;
     const validParameters = hasStartAndEndHandles;
@@ -109,9 +110,12 @@ export default class LengthTool extends BaseAnnotationTool {
       return false;
     }
 
+    const distanceThreshold =
+      interactionType === "mouse" ? state.clickProximity : state.touchProximity;
+
     return (
       lineSegDistance(element, data.handles.start, data.handles.end, coords) <
-      25
+      distanceThreshold
     );
   }
 
