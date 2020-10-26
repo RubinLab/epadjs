@@ -8,7 +8,7 @@ const aimEntityData = ({ aimData, id }) => {
     ? aimData.imagingPhysicalEntityCollection.ImagingPhysicalEntity
     : null;
   let dataArr = [];
-  if (observationEnt.length) {
+  if (observationEnt && observationEnt.length) {
     dataArr = Array.isArray(observationEnt)
       ? dataArr.concat(observationEnt)
       : dataArr.concat([observationEnt]);
@@ -56,12 +56,17 @@ const aimEntityData = ({ aimData, id }) => {
 
   const listArr = [];
   dataArr.forEach((comment, i) => {
-    console.log("comment", comment);
-    const value = comment.typeCode
-      ? comment.typeCode[0]['iso:displayName'].value
-      : comment['xsi:type'] && comment['xsi:type'] === 'Scale'
-      ? comment.valueLabel.value
-      : '';
+    const value =
+      comment.typeCode && Array.isArray(comment.typeCode)
+        ? comment.typeCode[0]['iso:displayName'].value
+        : comment.typeCode &&
+          comment.typeCode.constructor === Object &&
+          comment.typeCode['iso:displayName']
+        ? comment.typeCode['iso:displayName'].value
+        : comment['xsi:type'] && comment['xsi:type'] === 'Scale'
+        ? comment.valueLabel.value
+        : '';
+
     listArr.push(
       <li className="aimEntity-item" key={id + 'ind-' + i}>
         <span className="aimEntity-question">{comment.label.value}:</span>
