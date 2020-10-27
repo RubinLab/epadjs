@@ -12,8 +12,7 @@ class RecistTable extends Component {
 
   componentDidMount = async () => {
     const { projectId, subjectId } = this.props;
-    const { data } = await getAimsOfSubject("lite", "7");
-    console.log(data);
+    const { data } = await getAimsOfSubject(projectId, subjectId);
     const targets = [];
     const nonTargets = [];
     Object.entries(data).forEach(([key, value]) => {
@@ -38,7 +37,6 @@ class RecistTable extends Component {
   };
 
   render() {
-    console.log("state", this.state);
     const { loading, targets, nonTargets } = this.state;
     if (loading)
       return (
@@ -106,10 +104,16 @@ class RecistTable extends Component {
               </div>
             </div>
             <div className="Row">
-              <div>
+              <div className="Cell">
                 <button className="brush-presets" onClick={this.handleSelect}>
                   Select
                 </button>
+              </div>
+              <div className="Cell">
+                <button className="brush-presets" onClick={this.props.onClose}>
+                  Cancel
+                </button>
+              
               </div>
             </div>
           </div>
