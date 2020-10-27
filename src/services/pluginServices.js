@@ -151,15 +151,15 @@ export function getTemplateParameter(plugindbid, templatedbid) {
       "/templateparameters"
   );
 }
-export function getContainerLog(containerobj) {
-  return http.post(apiUrl + "/container/", containerobj, {
+export function getContainerLog(containerid) {
+  return http.get(apiUrl + "/container/" + containerid, {
     responseType: "stream",
   });
 }
-
-export function stopContainerLog(containerobj) {
-  return http.post(apiUrl + "/container/stop/", containerobj);
-}
+//not used remove if everything works correctly
+// export function stopContainerLog(containerobj) {
+//   return http.post(apiUrl + "/container/stop/", containerobj);
+// }
 //plugin trigger section
 // export function getAnnotationTemplates() {
 //   return http.get(apiUrl + "/pluginsannotationstemplates"); // /plugins/annotation/templates
