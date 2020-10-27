@@ -93,20 +93,6 @@ class AnnotationsList extends React.Component {
     this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
   };
 
-  handleJumpToAim = slideNo => {
-    if (!slideNo) {
-      alert(
-        "Missing SLICE_NUMBER in programmed comment of aim. Can't scroll to slice!"
-      );
-      return;
-    }
-    const { activePort } = this.props;
-
-    window.dispatchEvent(
-      new CustomEvent("jumpToAimImage", { detail: { slideNo, activePort } })
-    );
-  };
-
   handleEdit = (aimID, seriesUID) => {
     window.dispatchEvent(
       new CustomEvent("editAim", { detail: { aimID, seriesUID } })
@@ -271,7 +257,6 @@ class AnnotationsList extends React.Component {
           <div style={{ maxHeight, overflow: "scroll" }}>{annList}</div>
           <AnnotationsLink
             imageAims={imageAims}
-            jumpToAim={this.handleJumpToAim}
           />
         </div>
       </React.Fragment>

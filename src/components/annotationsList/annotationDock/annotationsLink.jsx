@@ -2,11 +2,20 @@ import React from "react";
 import { connect } from "react-redux";
 import "../annotationsList.css";
 
+const handleJumpToAim = aimId => {  
+    window.dispatchEvent(
+      new CustomEvent("jumpToAimImage", { detail: aimId })
+    );
+  };
+
 const annotationsLink = (props) => {
   const { openSeries, activePort, aimsList } = props;
   const { seriesUID } = openSeries[activePort];
   let list = [];
   let header = [];
+
+  
+
   if (aimsList[seriesUID]) {
     const seriesAims = Object.values(aimsList[seriesUID]);
     header = [
@@ -28,18 +37,12 @@ const annotationsLink = (props) => {
 
     list = seriesAims.map((aim, i) => {
       if (!props.imageAims[aim.id]) {
-        let slideNo;
-        if (aim.json && aim.json.comment) {
-          let { comment } = aim.json;
-          comment = Object.values(comment);
-          slideNo = comment.length > 0 ? comment[0].split("/")[2] : "";
-        }
         return (
           <tr key={aim.id} className="annsLink-table __tbody --row">
             <td
               data-id={aim.id}
               data-serie={seriesUID}
-              onClick={(e) => props.jumpToAim(slideNo, seriesUID)}
+              onClick={(e) => handleJumpToAim(aim.id)}
               className="annsLink-table __tbody --cell"
             >
               {aim.name}
