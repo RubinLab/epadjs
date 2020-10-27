@@ -236,7 +236,6 @@ class DisplayView extends Component {
   }
 
   jumpToAims = () =>{
-    console.log("In jump to aims", this.state.data, this);
     const {series} = this.props;
     const newData = [...this.state.data];
     series.forEach((serie, i) => {
@@ -395,7 +394,6 @@ class DisplayView extends Component {
   getData() {
     // clear the toolState they will be rendered again on next load
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
-    console.log("hadi bakalim", cornerstoneTools.store.modules.freehand3D.state);
     cornerstoneTools.store.modules.freehand3D.state.seriesCollection = [];
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
@@ -529,8 +527,7 @@ class DisplayView extends Component {
       this.state.data[index] &&
       this.state.data[index].stack.currentImageIdIndex
     )
-      {imageIndex = this.state.data[index].stack.currentImageIdIndex;
-      console.log("image index is", imageIndex);}
+      imageIndex = this.state.data[index].stack.currentImageIdIndex;      
     else imageIndex = 0;
 
     // if serie is being open from the annotation jump to that image and load the aim editor
@@ -540,7 +537,7 @@ class DisplayView extends Component {
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
-    console.log("returning stack", stack);
+    
     return { stack };
   };
 
@@ -596,8 +593,12 @@ class DisplayView extends Component {
     return markupType === "DicomSegmentationEntity";
   };
 
-  getImageIndex = (serie, cornerstoneImageIds) => {
-    let { aimID, imageAnnotations, studyUID, seriesUID } = serie;
+  
+  // Returns the image index of the aim of the serie or the passed aim if aimID is passed 
+  getImageIndex = (serie, cornerstoneImageIds, aimID="") => {
+    if(aimID === "")
+      aimID = serie.aimID; 
+    const { imageAnnotations, studyUID, seriesUID } = serie;
     if (imageAnnotations) {
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
@@ -1133,7 +1134,7 @@ class DisplayView extends Component {
         try {
           cornerstone.updateImage(element); //update the image to show newly loaded segmentations}
         } catch (error) {
-          console.error("Error:", error);
+          // console.error("Error:", error);
         }
       });
     }
@@ -1378,8 +1379,9 @@ class DisplayView extends Component {
 
   // Triggered by event from right bar to jump to the image of aim
   jumpToAimImage = event => {
-    const { slideNo, activePort } = event.detail;
-    const imageIndex = slideNo - 1;
+    const {series, activePort} = this.props;
+    const aimId = event.detail;
+    const imageIndex = this.getImageIndex(series[activePort], this.state.data[activePort].stack.imageIds, aimId);
     this.jumpToImage(imageIndex, activePort);
   };
 
