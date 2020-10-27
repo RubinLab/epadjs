@@ -170,6 +170,8 @@ class AimEditor extends Component {
   };
 
   render() {
+    const { openSeries, activePort } = this.props;
+    const { patientID, projectID} = openSeries[activePort];
     return (
       <div className="editor-form">
         AutoFill :
@@ -213,6 +215,8 @@ class AimEditor extends Component {
         </div>
         {this.state.showRecist && (
           <RecistTable
+            subjectId={patientID}
+            projectId={projectID}
             semanticAnswers={this.semanticAnswers}
             onClose={() => this.setState({ showRecist: false })}
           />
