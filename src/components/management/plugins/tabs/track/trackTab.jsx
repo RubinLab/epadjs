@@ -287,7 +287,7 @@ class TrackTab extends React.Component {
     try {
       let containerlog = await getContainerLog(containerid);
       console.log("err stream", containerlog);
-      if (containerlog.data != 404) {
+      if (containerlog.data != '404') {
         this.setState({
           showContainerLog: true,
           containerLogData: containerlog.data,
