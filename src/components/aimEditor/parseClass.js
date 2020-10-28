@@ -3907,7 +3907,7 @@ export var AimEditor = function (
 
   this.checkIfCommentRequired = function (object, parentDiv) {
     if (object.hasOwnProperty("requireComment")) {
-      if (object.requireComment == true) {
+      if (object.requireComment === "true") {
         let annoCommentDomid = object.label.replace(
           /[`~!@# $%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,
           ""
@@ -4473,7 +4473,7 @@ export var AimEditor = function (
     // document.getElementById("Type-S72").disabled = true;
     // document.getElementById("Type-S73").disabled = true;
     // document.getElementById("Type-S74").disabled = true;
-    alert(document.getElementById("allowedTermType").childNodes.length);
+    // alert(document.getElementById("allowedTermType").childNodes.length);
     let recistAllChildNodes = document.getElementById("allowedTermType")
       .childNodes;
     for (let cntRdios = 0; cntRdios < recistAllChildNodes.length; cntRdios++) {
