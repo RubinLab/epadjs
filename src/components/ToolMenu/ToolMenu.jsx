@@ -376,7 +376,7 @@ class ToolMenu extends Component {
 
   render() {
     const {activeTool} = this.state;
-    if(activeTool !== undefined && activeTool !== "")
+    if(activeTool !== undefined && activeTool !== "" && activeTool !== "FreehandRoiSculptor")
       this.setToolStateForAllElements(activeTool, "active");
     return (
       <div className="toolbar">

@@ -154,7 +154,6 @@ export default class FreehandRoiSculptorTool extends BaseTool {
      *To open aim editor fire markuoSelected Event
      */
     const currentToolData = toolState.data[config.currentTool];
-    console.log("Data bu mu", currentToolData);
     const ancestorEvent = {
       element: eventData.element,
       data: currentToolData,
