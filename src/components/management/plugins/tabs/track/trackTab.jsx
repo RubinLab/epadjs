@@ -20,7 +20,7 @@ import {
   deleteFromPluginQueue,
   downloadPluginResult,
   getContainerLog,
-  stopContainerLog,
+  // stopContainerLog,
 } from "../../../../../services/pluginServices";
 import "./../../css/plugin.css";
 import "../../../menuStyle.css";
@@ -285,9 +285,9 @@ class TrackTab extends React.Component {
     const containerid = dataOriginal.id;
     let _this = this;
     try {
-      let containerlog = await getContainerLog(dataOriginal);
+      let containerlog = await getContainerLog(containerid);
       console.log("err stream", containerlog);
-      if (containerlog.data != 404) {
+      if (containerlog.data != '404') {
         this.setState({
           showContainerLog: true,
           containerLogData: containerlog.data,
@@ -296,7 +296,7 @@ class TrackTab extends React.Component {
         const containerLoggingIntervalHolder = setInterval(
           async function (innerThis) {
             console.log("continer id = ", containerid);
-            containerlog = await getContainerLog(dataOriginal);
+            containerlog = await getContainerLog(containerid);
             innerThis.setState({
               containerLogData: containerlog.data,
             });
@@ -314,21 +314,21 @@ class TrackTab extends React.Component {
       alert(err);
     }
   };
-  handleDetachLog = async (dataOriginal) => {
-    console.log("data original ", dataOriginal);
+  // handleDetachLog = async (dataOriginal) => {
+  //   console.log("data original ", dataOriginal);
 
-    //  const containerLoggingIntervalHolder = null;
-    this.setState({
-      showContainerLog: true,
-    });
-    const containerid = dataOriginal.id;
-    console.log("f ned ", containerid);
-    let _this = this;
+  //   //  const containerLoggingIntervalHolder = null;
+  //   this.setState({
+  //     showContainerLog: true,
+  //   });
+  //   const containerid = dataOriginal.id;
+  //   console.log("f ned ", containerid);
+  //   let _this = this;
 
-    console.log("get logs called :", containerid);
-    let containerlog = await stopContainerLog(dataOriginal);
-    // if (this.state.showContainerLog == true) {
-  };
+  //   console.log("get logs called :", containerid);
+  //   let containerlog = await stopContainerLog(dataOriginal);
+  //   // if (this.state.showContainerLog == true) {
+  // };
   handlerStopContainerLogging = () => {
     // this.state.ocancel();
     this.setState({
