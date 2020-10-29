@@ -22,7 +22,7 @@ import {
   FaHandScissors,
   FaCut,
   FaCircle,
-  FaHandPointer,
+  FaMousePointer,
 } from "react-icons/fa";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
@@ -126,7 +126,7 @@ class ToolMenu extends Component {
     };
 
     this.imagingTools = [
-      { name: "Select", icon: <FaHandPointer />, tool: "Noop" },
+      { name: "Select", icon: <FaMousePointer />, tool: "Noop" },
       { name: "Levels", icon: <FiSun />, tool: "Wwwc" },
       { name: "Presets", icon: <FiSunset />, tool: "Presets" },
       { name: "Zoom", icon: <FiZoomIn />, tool: "Zoom" },
@@ -229,7 +229,6 @@ class ToolMenu extends Component {
 
   //TODO: instead of disabling all tools we can just disable the active tool
   disableAllTools = () => {
-    console.log("Cornserstone tools", cornerstoneTools);
     this.setState({ activeToolIdx: 0 });
     Array.from(this.tools).forEach((tool) => {
       this.setToolStateForAllElements(tool.name, "passive");
@@ -263,7 +262,6 @@ class ToolMenu extends Component {
   };
 
   handleToolClicked = (index, tool) => {
-    console.log("Tool", tool);
     if (tool === "Noop") {
       this.disableAllTools();
       this.setCursor("default");
@@ -377,6 +375,9 @@ class ToolMenu extends Component {
   };
 
   render() {
+    const {activeTool} = this.state;
+    if(activeTool !== undefined && activeTool !== "" && activeTool !== "FreehandRoiSculptor")
+      this.setToolStateForAllElements(activeTool, "active");
     return (
       <div className="toolbar">
         {this.imagingTools.map((imagingTool, i) => {

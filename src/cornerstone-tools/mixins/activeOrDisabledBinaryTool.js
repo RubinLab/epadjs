@@ -1,7 +1,7 @@
 import {
   setToolDisabledForElement,
   setToolActiveForElement,
-} from '../store/setToolMode.js';
+} from "../store/setToolMode.js";
 
 /**
  * If one attempts to change mode to 'passive', redirect the tool to 'disabled'.

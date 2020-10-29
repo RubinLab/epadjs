@@ -6,11 +6,11 @@ const mode = sessionStorage.getItem("mode");
 // we need the keycloak object to be able to use update token
 let keycloak = null;
 
-function refreshToken(keycloak, minValidity) {
+export function refreshToken(keycloak, minValidity) {
   return new Promise((resolve, reject) => {
     keycloak
       .updateToken(minValidity)
-      .success(function (refreshed) {
+      .success(function(refreshed) {
         if (refreshed) {
           // console.log("Token was successfully refreshed");
         } else {
@@ -18,7 +18,7 @@ function refreshToken(keycloak, minValidity) {
         }
         resolve();
       })
-      .error(function () {
+      .error(function() {
         reject();
       });
   });
@@ -51,7 +51,7 @@ export async function getAuthHeader() {
       const header = `Bearer ${this.keycloak.token}`;
       if (header) {
         cornerstoneWADOImageLoader.configure({
-          beforeSend: function (xhr) {
+          beforeSend: function(xhr) {
             xhr.setRequestHeader("Authorization", header);
           },
         });
@@ -69,4 +69,5 @@ export default {
   logout,
   getCurrentUser,
   getAuthHeader,
+  refreshToken,
 };

@@ -154,6 +154,7 @@ export function uploadSegmentation(segmentation, segName, projectId = "lite") {
   return http.post(url, segData, config);
 }
 
+
 // export function uploadSegmentation(segmentation, projectId = "lite") {
 //   const url = apiUrl + "/projects/" + projectId + "/files";
 //   const segData = new FormData();

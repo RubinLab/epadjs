@@ -1,11 +1,23 @@
-.editorForm {
+.editor-formForm {
   z-index: 1000;
 }
-.AimEditorButtonGroup {
+
+.aim-editor-button-group {
   padding-top: 35px;
   padding-left: 20px;
 }
-.AimEditorButton {
+
+.aim-editor-button {
   width: 100px;
   margin-right: 10px;
+}
+
+.base-line-selection {
+  float: right;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.base-line-selection:hover {
+  color: white;
 }

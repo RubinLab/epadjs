@@ -1,8 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
-import { FaExclamationTriangle } from "react-icons/fa";
-
 
 const warningModal = props => {
   return (
@@ -13,15 +11,17 @@ const warningModal = props => {
           <FaExclamationTriangle />
         </div> */}
         <div className="-maxView__header">
-          <div className="-maxView__header__text" style={{color: 'orangered'}} >{props.title}</div>
+          <div
+            className="-maxView__header__text"
+            style={{ color: "orangered" }}
+          >
+            {props.title}
+          </div>
           <h4 className="-maxView__message--exp">{props.message}</h4>
         </div>
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
-        <button
-          variant="secondary"
-          onClick={props.onOK}
-        >
+        <button variant="secondary" onClick={props.onOK}>
           OK
         </button>
       </Modal.Footer>
@@ -30,10 +30,9 @@ const warningModal = props => {
 };
 
 warningModal.propTypes = {
-  onOK: PropTypes.func,
+  onOK: PropTypes.func.isRequired,
   title: PropTypes.string,
   message: PropTypes.string
-
 };
 
 export default warningModal;
