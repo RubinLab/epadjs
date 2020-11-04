@@ -23,7 +23,9 @@ const toolBar = props => {
     onClear,
     onFilter,
     onUploadWizard,
-    onKeyDown, pid
+    onKeyDown,
+    pid,
+    isAllAims,
   } = props;
   const { selected, projects } = props;
 
@@ -41,7 +43,7 @@ const toolBar = props => {
         All Annotations
       </option>
     );
-   options.splice(0, 0, firstOption);
+    options.splice(0, 0, firstOption);
   }
   let name = React.createRef();
   let subject = React.createRef();
@@ -93,7 +95,7 @@ const toolBar = props => {
         <>
           <div onClick={onDelete}>
             <FaRegTrashAlt
-              className="tool-icon"
+              className={isAllAims ? "hide-delete" : "tool-icon"}
               onClick={onDelete}
               data-tip
               data-for="trash-icon"
