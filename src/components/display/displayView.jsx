@@ -765,9 +765,8 @@ class DisplayView extends Component {
           this.getActiveElement()
         );
       }
-
-      // check if is already editing an aim
-      if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
+// check if is already editing an aim
+      if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {        
         let message = "";
         if (this.state.selectedAim) {
           message = this.prepWarningMessage(
