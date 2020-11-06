@@ -172,14 +172,13 @@ class DisplayView extends Component {
   };
 
   componentDidMount() {
-    const { pid } = this.props;
-    if (this.props.series.length < 1) {
-      if (pid) this.props.history.push(`/search/${pid}`);
-      else return;
+    const { series, onSwitchView } = this.props;
+    if (series.length < 1) {
+      onSwitchView('search');
     }
     this.getViewports();
     this.getData();
-    if (this.props.series.length > 0) {
+    if (series.length > 0) {
       this.setSubComponentHeights();
       window.addEventListener("resize", e => this.setSubComponentHeights(e));
     }
@@ -188,8 +187,10 @@ class DisplayView extends Component {
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
     window.addEventListener("editAim", this.editAimHandler);
-    const tokenRefresh = setInterval(this.checkTokenExpire, 500);
-    this.setState({ tokenRefresh });
+    if (series && series.length > 0) {
+      const tokenRefresh = setInterval(this.checkTokenExpire, 500);
+      this.setState({ tokenRefresh })
+    };
   }
 
   async componentDidUpdate(prevProps, prevState) {
@@ -232,7 +233,7 @@ class DisplayView extends Component {
     window.removeEventListener("jumpToAimImage", this.jumpToAimImage);
     window.removeEventListener("editAim", this.editAimHandler);
     window.removeEventListener("resize", this.setSubComponentHeights);
-    if (this.state.tokenRefresh) clearInterval(this.state.tokenRefresh);
+    clearInterval(this.state.tokenRefresh)
   }
 
   jumpToAims = () =>{
