@@ -459,7 +459,16 @@ class App extends Component {
   };
 
   switchView = viewType => {
+    const { pid } = this.state;
     this.setState({ viewType });
+    if (viewType === 'search') {
+      pid
+        ? this.props.history.push(`/search/${pid}`)
+        : this.props.history.push(`/search`);
+    } else if (viewType === 'display') {
+      this.props.history.push(`/display`);
+    }
+
   };
 
   handleMngMenu = () => {
@@ -996,6 +1005,7 @@ class App extends Component {
           viewType={this.state.viewType}
           notificationWarning={noOfUnseen}
           pid={this.state.pid}
+          path={this.props.location.pathname}
         />
         {showReportsMenu && (
           <SelectModalMenu
@@ -1069,6 +1079,7 @@ class App extends Component {
                       pid={this.state.pid}
                       updateTreeDataOnSave={this.updateTreeDataOnSave}
                       keycloak={this.state.keycloak}
+                      onSwitchView={this.switchView}
                     />
                   )}
                 />
@@ -1196,6 +1207,7 @@ class App extends Component {
                     pid={this.state.pid}
                     updateTreeDataOnSave={this.updateTreeDataOnSave}
                     keycloak={this.state.keycloak}
+                    onSwitchView={this.switchView}
                   />
                 )}
               />

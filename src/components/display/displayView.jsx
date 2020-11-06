@@ -172,11 +172,9 @@ class DisplayView extends Component {
   };
 
   componentDidMount() {
-    const { series } = this.props;
-    const { pid } = this.props;
+    const { series, onSwitchView } = this.props;
     if (series.length < 1) {
-      if (pid) this.props.history.push(`/search/${pid}`);
-      else return;
+      onSwitchView('search');
     }
     this.getViewports();
     this.getData();

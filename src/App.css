@@ -9329,3 +9329,18 @@ div.nav-link.user-profile {
   background: #1c1e20;
   color: white;
 }
+
+#navbarli.nav-link.activeNav {
+  color: white;
+}
+
+#navbarli.nav-link.activeNav:focus,
+#navbarli.nav-link.activeNav:hover {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+#navbarli {
+  padding: 12px 6px;
+  cursor: pointer;
+  /* border: 1px solid rgba(0, 0, 0, 0.6); */
+}
