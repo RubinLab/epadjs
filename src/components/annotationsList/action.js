@@ -403,7 +403,6 @@ const getAimListFields = (aims, ann) => {
     if (!Array.isArray(aims)) aims = [aims];
     const result = {};
     aims.forEach((aim, index) => {
-      console.log("aim", aim);
       const studyRef =
         aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
           .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy;
@@ -418,16 +417,16 @@ const getAimListFields = (aims, ann) => {
 
       const markupColor =
         aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-          ?.markupEntityCollection?.MarkupEntity[0]?.lineColor.value; //if aim has markup colors make the first markup's color aim's color
+          ?.markupEntityCollection?.MarkupEntity[0]?.lineColor; //if aim has markup colors make the first markup's color aim's color
       let color;
 
       if (imgAimUID) {
         if (markupColor) {
           color = {
-            button: { background: "#markupColor", color: "black" },
+            button: { background: markupColor, color: "black" },
             label: { background: "#aaaaaa", color: "white" },
           };
-        } else color = imgAimUID ? { ...colors[index] } : commonLabels;
+        } else color = colors[index];
       } else color = commonLabels;
 
       let type = imgAimUID
