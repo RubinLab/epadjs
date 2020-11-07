@@ -462,19 +462,20 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
           }
 
           const text = textBoxText.call(this, data);
-
-          drawLinkedTextBox(
-            context,
-            element,
-            data.handles.textBox,
-            text,
-            data.handles.points,
-            textBoxAnchorPoints,
-            color,
-            lineWidth,
-            0,
-            true
-          );
+          if (state.showCalculations) {
+            drawLinkedTextBox(
+              context,
+              element,
+              data.handles.textBox,
+              text,
+              data.handles.points,
+              textBoxAnchorPoints,
+              color,
+              lineWidth,
+              0,
+              true
+            );
+          }
         }
       });
     }
