@@ -9,11 +9,14 @@ import {
   toggleSingleLabel,
   toggleAllAnnotations,
 } from "../action";
+import cornerstone from "cornerstone-core";
+import { state } from 'cornerstone-tools/store/index.js';
 
 class AnnotationsList extends React.Component {
   state = {
     labelDisplayAll: true,
     annsDisplayAll: true,
+    showCalculations: true
   };
 
   componentDidUpdate = prevProps => {
@@ -71,6 +74,26 @@ class AnnotationsList extends React.Component {
         })
       );
     }
+  };
+
+  refreshAllViewports = () => {
+    const elements = cornerstone.getEnabledElements();
+    if (elements) {
+      elements.map(({ element }) => {
+        try {
+          cornerstone.updateImage(element);
+        } catch (error) {
+          // console.error("Error:", error);
+        }
+      });
+    }
+  };
+
+  handleCalculations = (checked) => {
+    this.setState({ showCalculations: checked }, ()=>{
+      state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
+      this.refreshAllViewports();
+    });
   };
 
   handleToggleAllLabels = (checked, e, id) => {
@@ -220,6 +243,23 @@ class AnnotationsList extends React.Component {
     return (
       <React.Fragment>
         <div className="annotationList-container">
+          <div className="label-toggle">
+            <div className="label-toggle__text">Show Calculations</div>
+            <Switch
+              onChange={this.handleCalculations}
+              checked={this.state.showCalculations}
+              onColor="#86d3ff"
+              onHandleColor="#1986d9"
+              handleDiameter={22}
+              uncheckedIcon={false}
+              checkedIcon={false}
+              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+              height={15}
+              width={36}
+              className="react-switch"
+            />
+          </div>
           <div className="label-toggle">
             <div className="label-toggle__text">Show All Labels</div>
             <Switch

@@ -13,7 +13,7 @@ import {
   setShadow,
   drawCircle,
   drawHandles,
-  drawLinkedTextBox
+  drawLinkedTextBox,
 } from "./../../drawing/index.js";
 
 // Util
@@ -26,6 +26,7 @@ import { getLogger } from "../../util/logger.js";
 import getPixelSpacing from "../../util/getPixelSpacing";
 import { circleRoiCursor } from "../cursors/index.js";
 import getCircleCoords from "../../util/getCircleCoords";
+import { state } from "../../store/index.js";
 
 const logger = getLogger("tools:annotation:CircleRoiTool");
 
@@ -42,7 +43,7 @@ export default class CircleRoiTool extends BaseAnnotationTool {
     const defaultProps = {
       name: "CircleRoi",
       supportedInteractionTypes: ["Mouse", "Touch"],
-      svgCursor: circleRoiCursor
+      svgCursor: circleRoiCursor,
     };
 
     super(props, defaultProps);
@@ -72,13 +73,13 @@ export default class CircleRoiTool extends BaseAnnotationTool {
           x: eventData.currentPoints.image.x,
           y: eventData.currentPoints.image.y,
           highlight: true,
-          active: false
+          active: false,
         },
         end: {
           x: eventData.currentPoints.image.x,
           y: eventData.currentPoints.image.y,
           highlight: true,
-          active: true
+          active: true,
         },
         initialRotation: eventData.viewport.rotation,
         textBox: {
@@ -87,9 +88,9 @@ export default class CircleRoiTool extends BaseAnnotationTool {
           movesIndependently: false,
           drawnIndependently: true,
           allowedOutsideImage: true,
-          hasBoundingBox: true
-        }
-      }
+          hasBoundingBox: true,
+        },
+      },
     };
   }
 
@@ -177,7 +178,7 @@ export default class CircleRoiTool extends BaseAnnotationTool {
     const modality = seriesModule.modality;
     const hasPixelSpacing = rowPixelSpacing && colPixelSpacing;
 
-    draw(newContext, context => {
+    draw(newContext, (context) => {
       // If we have tool data for this element, iterate over each set and draw it
       for (let i = 0; i < toolData.data.length; i++) {
         const data = toolData.data[i];
@@ -194,7 +195,7 @@ export default class CircleRoiTool extends BaseAnnotationTool {
         const handleOptions = {
           color,
           handleRadius,
-          drawHandlesIfActive: drawHandlesOnHover
+          drawHandlesIfActive: drawHandlesOnHover,
         };
 
         setShadow(context, this.configuration);
@@ -219,7 +220,7 @@ export default class CircleRoiTool extends BaseAnnotationTool {
           data.handles.start,
           radius,
           {
-            color
+            color,
           },
           "pixel"
         );
@@ -245,7 +246,7 @@ export default class CircleRoiTool extends BaseAnnotationTool {
           Object.assign(data.handles.textBox, defaultCoords);
         }
 
-        const textBoxAnchorPoints = handles =>
+        const textBoxAnchorPoints = (handles) =>
           _findTextBoxAnchorPoints(handles.start, handles.end);
 
         const textBoxContent = _createTextBoxContent(
@@ -259,18 +260,19 @@ export default class CircleRoiTool extends BaseAnnotationTool {
 
         data.unit = _getUnit(modality, this.configuration.showHounsfieldUnits);
 
-        drawLinkedTextBox(
-          context,
-          element,
-          data.handles.textBox,
-          textBoxContent,
-          data.handles,
-          textBoxAnchorPoints,
-          color,
-          lineWidth,
-          10,
-          true
-        );
+        if (state.showCalculations)
+          drawLinkedTextBox(
+            context,
+            element,
+            data.handles.textBox,
+            textBoxContent,
+            data.handles,
+            textBoxAnchorPoints,
+            color,
+            lineWidth,
+            10,
+            true
+          );
       }
     });
   }
@@ -290,23 +292,23 @@ function _findTextBoxAnchorPoints(startHandle, endHandle) {
     {
       // Top middle point of ellipse
       x: left + width / 2,
-      y: top
+      y: top,
     },
     {
       // Left middle point of ellipse
       x: left,
-      y: top + height / 2
+      y: top + height / 2,
     },
     {
       // Bottom middle point of ellipse
       x: left + width / 2,
-      y: top + height
+      y: top + height,
     },
     {
       // Right middle point of ellipse
       x: left + width,
-      y: top + height / 2
-    }
+      y: top + height / 2,
+    },
   ];
 }
 
@@ -389,7 +391,7 @@ function _createTextBoxContent(
   }
 
   textLines.push(_formatArea(area, hasPixelSpacing));
-  otherLines.forEach(x => textLines.push(x));
+  otherLines.forEach((x) => textLines.push(x));
 
   return textLines;
 }
@@ -445,7 +447,7 @@ function _calculateStats(image, element, handles, modality, pixelSpacing) {
     if (modality === "PT") {
       meanStdDevSUV = {
         mean: calculateSUV(image, ellipseMeanStdDev.mean, true) || 0,
-        stdDev: calculateSUV(image, ellipseMeanStdDev.stdDev, true) || 0
+        stdDev: calculateSUV(image, ellipseMeanStdDev.stdDev, true) || 0,
       };
     }
 
@@ -462,7 +464,7 @@ function _calculateStats(image, element, handles, modality, pixelSpacing) {
       stdDev: ellipseMeanStdDev.stdDev || 0,
       min: ellipseMeanStdDev.min || 0,
       max: ellipseMeanStdDev.max || 0,
-      meanStdDevSUV
+      meanStdDevSUV,
     };
   } catch (error) {
     console.log("WARN:", error);

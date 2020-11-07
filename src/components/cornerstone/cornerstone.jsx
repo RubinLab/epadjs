@@ -52,6 +52,7 @@ const Cornerstone = ({ dispatch }) => {
   cornerstoneTools.toolColors.setActiveColor("rgb(255, 255, 0)");
 
   cornerstoneTools.store.state.touchProximity = 40;
+  cornerstoneTools.store.state.showCalculations = true;
 
   const config = {
     globalToolSyncEnabled: true,

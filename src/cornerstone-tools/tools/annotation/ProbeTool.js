@@ -14,6 +14,7 @@ import calculateSUV from "../../util/calculateSUV.js";
 import { probeCursor } from "../cursors/index.js";
 import { getLogger } from "../../util/logger.js";
 import throttle from "../../util/throttle";
+import { state } from "../../store/index.js";
 
 const logger = getLogger("tools:annotation:ProbeTool");
 
@@ -30,7 +31,7 @@ export default class ProbeTool extends BaseAnnotationTool {
     const defaultProps = {
       name: "Probe",
       supportedInteractionTypes: ["Mouse", "Touch"],
-      svgCursor: probeCursor
+      svgCursor: probeCursor,
     };
 
     super(props, defaultProps);
@@ -60,9 +61,9 @@ export default class ProbeTool extends BaseAnnotationTool {
           x: eventData.currentPoints.image.x,
           y: eventData.currentPoints.image.y,
           highlight: true,
-          active: true
-        }
-      }
+          active: true,
+        },
+      },
     };
   }
 
@@ -147,7 +148,7 @@ export default class ProbeTool extends BaseAnnotationTool {
         continue;
       }
 
-      draw(context, context => {
+      draw(context, (context) => {
         let color;
         const activeColor = toolColors.getActiveColor(data);
         if (data.active) color = activeColor;
@@ -156,7 +157,7 @@ export default class ProbeTool extends BaseAnnotationTool {
         // Draw the handles
         drawHandles(context, eventData, data.handles, {
           handleRadius,
-          color
+          color,
         });
 
         // Update textbox stats
@@ -189,21 +190,23 @@ export default class ProbeTool extends BaseAnnotationTool {
           const coords = {
             // Translate the x/y away from the cursor
             x: data.handles.end.x + 3,
-            y: data.handles.end.y - 3
+            y: data.handles.end.y - 3,
           };
           const textCoords = external.cornerstone.pixelToCanvas(
             eventData.element,
             coords
           );
 
-          drawTextBox(
-            context,
-            str,
-            textCoords.x,
-            textCoords.y + fontHeight + 5,
-            color
-          );
-          drawTextBox(context, text, textCoords.x, textCoords.y, color);
+          if (state.showCalculations) {
+            drawTextBox(
+              context,
+              str,
+              textCoords.x,
+              textCoords.y + fontHeight + 5,
+              color
+            );
+            drawTextBox(context, text, textCoords.x, textCoords.y, color);
+          }
         }
       });
     }

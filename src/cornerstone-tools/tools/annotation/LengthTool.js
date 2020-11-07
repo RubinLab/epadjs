@@ -214,18 +214,19 @@ export default class LengthTool extends BaseAnnotationTool {
 
         const text = textBoxText(data, rowPixelSpacing, colPixelSpacing);
 
-        drawLinkedTextBox(
-          context,
-          element,
-          data.handles.textBox,
-          text,
-          data.handles,
-          textBoxAnchorPoints,
-          color,
-          lineWidth,
-          xOffset,
-          true
-        );
+        if (state.showCalculations)
+          drawLinkedTextBox(
+            context,
+            element,
+            data.handles.textBox,
+            text,
+            data.handles,
+            textBoxAnchorPoints,
+            color,
+            lineWidth,
+            xOffset,
+            true
+          );
       });
     }
 
