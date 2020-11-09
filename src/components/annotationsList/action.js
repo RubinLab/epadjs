@@ -52,7 +52,7 @@ import {
 import { getAllTemplates } from "../../services/templateServices";
 import { getImageIdAnnotations } from "aimapi";
 
-export const getProjectMap = projectMap => {
+export const getProjectMap = (projectMap) => {
   return { type: GET_PROJECT_MAP, projectMap };
 };
 
@@ -72,7 +72,7 @@ export const getTemplates = () => {
   };
 };
 
-export const clearGrid = item => {
+export const clearGrid = (item) => {
   return { type: CLEAR_GRID };
 };
 
@@ -86,10 +86,10 @@ export const clearAimId = () => {
   };
 };
 
-export const updateImageIndex = imageIndex => {
+export const updateImageIndex = (imageIndex) => {
   return { type: UPDATE_IMAGE_INDEX, imageIndex };
 };
-export const updateImageId = imageID => {
+export const updateImageId = (imageID) => {
   return {
     type: UPDATE_IMAGEID,
     imageID,
@@ -128,15 +128,15 @@ export const updatePatient = (
   };
 };
 
-export const updatePatientOnAimSave = aimRefs => {
+export const updatePatientOnAimSave = (aimRefs) => {
   return { type: UPDATE_PATIENT_AIM_SAVE, aimRefs };
 };
 
-export const updatePatientOnAimDelete = aimRefs => {
+export const updatePatientOnAimDelete = (aimRefs) => {
   return { type: UPDATE_PATIENT_AIM_DELETE, aimRefs };
 };
 
-export const clearSelection = selectionType => {
+export const clearSelection = (selectionType) => {
   return { type: CLEAR_SELECTION, selectionType };
 };
 
@@ -149,11 +149,11 @@ export const startLoading = () => {
 export const loadPatient = () => {
   return { type: LOAD_PATIENT };
 };
-export const loadPatientError = err => {
+export const loadPatientError = (err) => {
   return { type: LOAD_PATIENT_ERROR, err };
 };
 
-export const loadPatientSuccess = patient => {
+export const loadPatientSuccess = (patient) => {
   return { type: LOAD_PATIENT_SUCCESS, patient };
 };
 export const jumpToAim = (seriesUID, aimID, index) => {
@@ -176,7 +176,7 @@ export const displaySingleAim = (
   };
 };
 
-export const selectPatient = selectedPatientObj => {
+export const selectPatient = (selectedPatientObj) => {
   let {
     projectID,
     subjectName,
@@ -191,14 +191,14 @@ export const selectPatient = selectedPatientObj => {
   };
 };
 
-export const selectProject = projectID => {
+export const selectProject = (projectID) => {
   return {
     type: SELECT_PROJECT,
     projectID,
   };
 };
 
-export const selectStudy = selectedStudyObj => {
+export const selectStudy = (selectedStudyObj) => {
   let {
     studyUID,
     patientID,
@@ -338,7 +338,7 @@ const annotationsLoaded = () => {
   };
 };
 
-export const annotationsLoadingError = error => {
+export const annotationsLoadingError = (error) => {
   return {
     type: LOAD_ANNOTATIONS_ERROR,
   };
@@ -384,7 +384,7 @@ export const toggleSingleLabel = (serieID, aimID) => {
   };
 };
 
-export const changeActivePort = portIndex => {
+export const changeActivePort = (portIndex) => {
   return {
     type: CHANGE_ACTIVE_PORT,
     portIndex,
@@ -415,7 +415,20 @@ const getAimListFields = (aims, ann) => {
         index = index % colors.length;
       }
 
-      const color = imgAimUID ? { ...colors[index] } : commonLabels;
+      const markupColor =
+        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+          ?.markupEntityCollection?.MarkupEntity[0]?.lineColor?.value; //if aim has markup colors make the first markup's color aim's color
+      let color;
+
+      if (imgAimUID) {
+        if (markupColor) {
+          color = {
+            button: { background: "#aaaaaa", color: "black" },
+            label: { background: markupColor, color: "white" },
+          };
+        } else color = colors[index];
+      } else color = commonLabels;
+
       let type = imgAimUID
         ? "image"
         : serieAimUID && !imgAimUID
@@ -469,14 +482,14 @@ const getAimListFields = (aims, ann) => {
     });
     return result;
   } catch (err) {
-    console.log("Error in parsing aim attributes", err);
+    console.error("Error in parsing aim attributes", err);
   }
 };
 
 const getRequiredFields = (arr, type, selectedID) => {
   let result = {};
   if (arr) {
-    arr.forEach(element => {
+    arr.forEach((element) => {
       let obj;
       if (type === "study") {
         const { studyUID, studyDescription } = element;
@@ -642,7 +655,7 @@ export const updateSingleSerie = (serie, annotation) => {
 
 const extractSerieAims = (arr, seriesID) => {
   let serieAims = [];
-  arr.forEach(aim => {
+  arr.forEach((aim) => {
     const serieUID =
       aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
         .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy
@@ -654,9 +667,9 @@ const extractSerieAims = (arr, seriesID) => {
   return serieAims;
 };
 
-const extractStudyAims = arr => {
+const extractStudyAims = (arr) => {
   let studyAims = [];
-  arr.forEach(aim => {
+  arr.forEach((aim) => {
     const serieUID =
       aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
         .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy
@@ -672,7 +685,7 @@ const extractNonMarkupAims = (arr, seriesID) => {
   let studyAims = [];
   let serieAims = [];
   let imageAims = {};
-  arr.forEach(aim => {
+  arr.forEach((aim) => {
     const series =
       aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
         .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy
@@ -701,7 +714,7 @@ const extractNonMarkupAims = (arr, seriesID) => {
   return { studyAims, serieAims, imageAims };
 };
 
-const alterImageID = imageAimsObj => {
+const alterImageID = (imageAimsObj) => {
   const imageIDs = Object.keys(imageAimsObj);
   const aims = Object.values(imageAimsObj);
   const result = {};
@@ -721,7 +734,7 @@ const getSingleSerieData = (serie, annotation) => {
     patientID = patientID ? patientID : serie.subjectID;
 
     getStudyAims(patientID, studyUID, projectID)
-      .then(async result => {
+      .then(async (result) => {
         const { studyAims, serieAims, imageAims } = extractNonMarkupAims(
           result.data,
           seriesUID
@@ -735,7 +748,7 @@ const getSingleSerieData = (serie, annotation) => {
         aimsData = getAimListFields(aimsData, annotation);
         resolve({ aimsData, imageData });
       })
-      .catch(err => reject("Error while getting annotation data", err));
+      .catch((err) => reject("Error while getting annotation data", err));
   });
 };
 
@@ -808,7 +821,7 @@ export function getWholeData(serie, study, annotation) {
       // return summaryData;
       dispatch(loadPatientSuccess(summaryData));
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 }
