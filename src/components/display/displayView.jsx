@@ -32,7 +32,7 @@ import * as dcmjs from "dcmjs";
 import { FaTimes, FaPen, FaExpandArrowsAlt } from "react-icons/fa";
 import Form from "react-bootstrap/Form";
 import ToolMenu from "../ToolMenu/ToolMenu";
-import { getMarkups } from "../aimEditor/Helpers";
+import { getMarkups, setMarkupsOfAimActive} from "../aimEditor/Helpers";
 import { refreshToken } from "../../services/authService";
 import { isThisSecond } from "date-fns/esm";
 import { FiMessageSquare } from "react-icons/fi";
@@ -543,6 +543,7 @@ class DisplayView extends Component {
   };
 
   openAimEditor = (aimID, seriesUID) => {
+    
     const { aimList } = this.props;
     if (Object.entries(aimList).length !== 0) {
       const aimJson = aimList[seriesUID][aimID].json;
@@ -557,6 +558,8 @@ class DisplayView extends Component {
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
         this.setState({ showAimEditor: false });
       this.setState({ showAimEditor: true, selectedAim: aimJson });
+      setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
+      this.refreshAllViewports();
     }
   };
 
@@ -751,6 +754,9 @@ class DisplayView extends Component {
     const { aimId, ancestorEvent } = event.detail;
     const { element, data } = ancestorEvent;
 
+    setMarkupsOfAimActive(aimId);//set the selected markups color to yellow
+    this.refreshAllViewports();
+  
     if (aimList[seriesUID][aimId]) {
       const aimJson = aimList[seriesUID][aimId].json;
       const markupTypes = this.getMarkupTypesForAim(aimId);
