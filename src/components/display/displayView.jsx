@@ -1180,7 +1180,7 @@ class DisplayView extends Component {
 
   renderBidirectional = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(bidirectional));
-    data.color = color;
+    data.color = markup.color? markup.color:color;
     data.aimId = markup.aimUid;
     data.invalidated = true;
     this.createBidirectionalPoints(data, markup.coordinates);
@@ -1208,7 +1208,7 @@ class DisplayView extends Component {
 
   renderLine = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(line));
-    data.color = color;
+    data.color = markup.color? markup.color:color;
     data.aimId = markup.aimUid;
     data.invalidated = true;
     this.createLinePoints(data, markup.coordinates);
@@ -1229,7 +1229,7 @@ class DisplayView extends Component {
 
   renderPolygon = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(freehand));
-    data.color = color;
+    data.color = markup.color? markup.color:color;
     data.aimId = markup.aimUid;
     data.invalidated = true;
     this.createPolygonPoints(data, markup.coordinates);
@@ -1261,7 +1261,7 @@ class DisplayView extends Component {
 
   renderPoint = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(probe));
-    data.color = color;
+    data.color = markup.color? markup.color:color;
     data.aimId = markup.aimUid;
     data.handles.end.x = markup.coordinates[0].x.value;
     data.handles.end.y = markup.coordinates[0].y.value;
@@ -1276,7 +1276,7 @@ class DisplayView extends Component {
   renderCircle = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(circle));
     data.invalidated = true; //so it calculates the stats
-    data.color = color;
+    data.color = markup.color? markup.color:color;
     data.aimId = markup.aimUid;
     data.handles.start.x = markup.coordinates[0].x.value;
     data.handles.start.y = markup.coordinates[0].y.value;

@@ -417,14 +417,14 @@ const getAimListFields = (aims, ann) => {
 
       const markupColor =
         aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-          ?.markupEntityCollection?.MarkupEntity[0]?.lineColor; //if aim has markup colors make the first markup's color aim's color
+          ?.markupEntityCollection?.MarkupEntity[0]?.lineColor?.value; //if aim has markup colors make the first markup's color aim's color
       let color;
 
       if (imgAimUID) {
         if (markupColor) {
           color = {
-            button: { background: markupColor, color: "black" },
-            label: { background: "#aaaaaa", color: "white" },
+            button: { background: "#aaaaaa", color: "black" },
+            label: { background: markupColor, color: "white" },
           };
         } else color = colors[index];
       } else color = commonLabels;
@@ -482,7 +482,7 @@ const getAimListFields = (aims, ann) => {
     });
     return result;
   } catch (err) {
-    console.log("Error in parsing aim attributes", err);
+    console.error("Error in parsing aim attributes", err);
   }
 };
 
@@ -821,7 +821,7 @@ export function getWholeData(serie, study, annotation) {
       // return summaryData;
       dispatch(loadPatientSuccess(summaryData));
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 }
