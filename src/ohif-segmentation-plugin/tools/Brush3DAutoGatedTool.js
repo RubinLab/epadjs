@@ -37,7 +37,7 @@ export default class Brush3DAutoGatedTool extends Brush3DHUGatedTool {
    * @returns {null}
    */
   _setCustomGate(evt) {
-    \const eventData = evt.detail;
+    const eventData = evt.detail;
     const image = eventData.image;
     const { rows, columns } = image;
     const { x, y } = eventData.currentPoints.image;

@@ -295,6 +295,7 @@ class ToolMenu extends Component {
       this.setState({ showBrushSize: true });
     } else if (tool === "Brush3DHUGated") {
       if (this.checkIfMultiframe()) {alert("Auto Gated tool only works with singleframe images");}
+      // TODO emel: isn't it bug prone. although it is not going to work, we are setting the state
       this.setState({ showBrushSize: true, isHuGated:true, showSmartBrush: true });
     } else if (tool === "Brush3DAutoGated") {
       console.log("sanirim");
@@ -303,6 +304,7 @@ class ToolMenu extends Component {
         alert("Auto Gated tool only works with singleframe images");
         // return;
       } //Dont" select the HUGated if the modality is not CT
+      // TODO emel: isn't it bug prone. although it is not going to work, we are setting the state
       this.setState({ showBrushSize: true, isHuGated:false, showSmartBrush: true });
     } else if (tool === "FreehandRoi3DTool") {
       this.setState({ showInterpolation: true });
