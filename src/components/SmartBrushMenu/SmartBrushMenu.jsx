@@ -69,6 +69,7 @@ class SmartBrushMenu extends Component {
 
   render() {
     const maxApplyToImageNum = this.getLastImageIndexOfSeries();
+    const {isHuGated} = this.props;
     return (
       <Draggable>
         <div className="smb-pop-up">
@@ -76,7 +77,7 @@ class SmartBrushMenu extends Component {
             <a href="#">X</a>
           </div>
           <div className="buttonLabel">
-            <span>Preset Brushes</span>
+            <span>Brush Menu</span>
           </div>
           <div>
             <span>Apply to whole image </span>
@@ -117,7 +118,8 @@ class SmartBrushMenu extends Component {
                       disabled={this.state.intervalDisabled}
                />
           </div>
-          <div className="brush-presets">
+          {isHuGated && (
+            <div className="brush-presets">
             {brushModule.state.gates.map((gate, i) => (
               <div key={i}>
                 <input
@@ -167,6 +169,7 @@ class SmartBrushMenu extends Component {
               </div>
             ))}
           </div>
+          )}          
         </div>
       </Draggable>
     );

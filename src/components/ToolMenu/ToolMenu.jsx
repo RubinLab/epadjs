@@ -294,12 +294,16 @@ class ToolMenu extends Component {
       } //Dont" select the HUGated if the modality is not CT
       this.setState({ showBrushSize: true });
     } else if (tool === "Brush3DHUGated") {
+      if (this.checkIfMultiframe()) {alert("Auto Gated tool only works with singleframe images");}
+      this.setState({ showBrushSize: true, isHuGated:true, showSmartBrush: true });
+    } else if (tool === "Brush3DAutoGated") {
+      console.log("sanirim");
       if (this.checkIfMultiframe()) {
         // if (!this.checkIfCT() || this.checkIfMultiframe()) {
-        alert("HU Gated tool only works with singleframe images");
+        alert("Auto Gated tool only works with singleframe images");
         // return;
       } //Dont" select the HUGated if the modality is not CT
-      this.setState({ showBrushSize: true, showSmartBrush: true });
+      this.setState({ showBrushSize: true, isHuGated:false, showSmartBrush: true });
     } else if (tool === "FreehandRoi3DTool") {
       this.setState({ showInterpolation: true });
     }
@@ -664,13 +668,14 @@ class ToolMenu extends Component {
         {/* </Collapsible> */}
         {(this.state.activeTool === "Brush3D" ||
           this.state.activeTool === "SphericalBrush" ||
-          this.state.activeTool === "Brush3DHUGated") &&
+          this.state.activeTool === "Brush3DHUGated" || 
+          this.state.activeTool === "Brush3DAutoGated") &&
           this.state.showBrushSize && (
             <BrushSizeSelector onClose={this.closeBrushSize} />
           )}
-        {this.state.activeTool === "Brush3DHUGated" &&
+        {(this.state.activeTool === "Brush3DHUGated" || this.state.activeTool === "Brush3DAutoGated") &&
           this.state.showSmartBrush && (
-            <SmartBrushMenu activePort={this.props.activePort} onClose={this.closeSmartBrushMenu} />
+            <SmartBrushMenu activePort={this.props.activePort} onClose={this.closeSmartBrushMenu} isHuGated={this.state.isHuGated}/>
           )}
         {this.state.showPresets && (
           <WindowLevel
