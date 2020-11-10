@@ -50,12 +50,19 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
    * @param  {Object} evt The data object associated with the event.
    * @returns {void}
    */
-  _paint(evt) {
-    const testImage = cornerstone.imageCache.cachedImages[1].image;
-    const eventData = evt.detail;
-    const { element, image } = eventData;
-    const { rows, columns } = image;
-    const { x, y } = eventData.currentPoints.image;
+  _paint(evt, imageIndex, _element) {
+    let element, image, rows, columns, x, y;
+    if (imageIndex && element) {
+      image = cornerstone.imageCache.cachedImages[imageIndex].image;
+      element = _element;
+      x = 1;
+      y = 1;
+    } else {
+      const eventData = evt.detail;
+      ({ element, image } = eventData);
+      ({ x, y } = eventData.currentPoints.image);
+    }
+    ({ rows, columns } = image);
 
     if (x < 0 || x > columns || y < 0 || y > rows) {
       return;
@@ -64,8 +71,10 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
     console.log("cornerstone", cornerstone);
     console.log("image", image);
 
-    // const radius = brushModule.configuration.radius;
-    const radius = columns >= rows ? columns * 2 : radius * 2;
+    let radius;
+    if (brushModule.configuration.applyToImage)
+      radius = columns >= rows ? columns * 2 : radius * 2;
+    else radius = brushModule.configuration.radius;
 
     const pointerArray = this._gateCircle(
       image,

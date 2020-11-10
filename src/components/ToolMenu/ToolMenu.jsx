@@ -672,7 +672,7 @@ class ToolMenu extends Component {
           )}
         {this.state.activeTool === "Brush3DHUGated" &&
           this.state.showSmartBrush && (
-            <SmartBrushMenu onClose={this.closeSmartBrushMenu} />
+            <SmartBrushMenu activePort={this.props.activePort} onClose={this.closeSmartBrushMenu} />
           )}
         {this.state.showPresets && (
           <WindowLevel
