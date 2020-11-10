@@ -68,7 +68,6 @@ class SmartBrushMenu extends Component {
   }
 
   render() {
-    console.log("config", brushModule.configuration);
     const maxApplyToImageNum = this.getLastImageIndexOfSeries();
     return (
       <Draggable>

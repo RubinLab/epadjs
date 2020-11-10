@@ -27,9 +27,7 @@ export default class Brush3DTool extends BrushTool {
     const { minInterval, maxInterval } = brushModule.configuration;
 
     if (minInterval && maxInterval) {
-      console.log("min max", minInterval, maxInterval);
       for (let i = minInterval - 1; i < maxInterval; i++) {
-        console.log("i", i);
         const {
           labelmap2D,
           labelmap3D,

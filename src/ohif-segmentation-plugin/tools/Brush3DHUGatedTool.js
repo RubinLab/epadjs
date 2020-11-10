@@ -51,7 +51,6 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
    * @returns {void}
    */
   _paint(evt, imageIndex, _element) {
-    console.log("image index", imageIndex);
     let element, image, rows, columns, x, y;
     if (imageIndex && _element) {
       image = cornerstone.imageCache.cachedImages[imageIndex].image;
@@ -68,9 +67,6 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
     if (x < 0 || x > columns || y < 0 || y > rows) {
       return;
     }
-
-    console.log("cornerstone", cornerstone);
-    console.log("image", image);
 
     let radius;
     if (brushModule.configuration.applyToImage)
@@ -91,7 +87,6 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       shouldErase,
     } = this.paintEventData;
 
-    console.log("labelmap2d", labelmap2D, labelmap3D);
     // Draw / Erase the active color.
     drawBrushPixels(
       pointerArray,
