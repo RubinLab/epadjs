@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import InputRange from "react-input-range";
 import Draggable from "react-draggable";
@@ -31,7 +32,44 @@ class SmartBrushMenu extends Component {
     brushModule.setters.customGateRange(min, max);
   };
 
+  clearIntervalConfiguration = () => {
+    const {minInterval, maxInterval} = brushModule.configuration;
+    if(minInterval)
+      delete brushModule.configuration.minInterval;
+    if(maxInterval)
+      delete brushModule.configuration.maxInterval;
+  }
+
+  handleApplyToImageChange = (e) => {    
+    var checked = e.target.checked;
+    brushModule.configuration.applyToImage = checked;
+    this.clearIntervalConfiguration();
+    this.setState({intervalDisabled:checked, minInterval:"", maxInterval:""})
+  }
+
+  handleApplyToMinChange = (evt) => {
+    const min = evt.target.value;
+    this.setState({minInterval:min});
+    brushModule.configuration.applyToImage = true;
+    brushModule.configuration.minInterval = parseInt(min);
+  }
+
+  handleApplyToMaxChange = (evt) => {
+    const max = evt.target.value;
+    this.setState({maxInterval:max});
+    brushModule.configuration.applyToImage = true;
+    brushModule.configuration.maxInterval = parseInt(max);
+  }
+
+  getLastImageIndexOfSeries = () => {
+    const { element } = cornerstone.getEnabledElements()[this.props.activePort];
+    const stackToolState = cornerstoneTools.getToolState(element, "stack");
+    return stackToolState.data[0].imageIds.length;
+  }
+
   render() {
+    const maxApplyToImageNum = this.getLastImageIndexOfSeries();
+    const {isHuGated} = this.props;
     return (
       <Draggable>
         <div className="smb-pop-up">
@@ -39,9 +77,49 @@ class SmartBrushMenu extends Component {
             <a href="#">X</a>
           </div>
           <div className="buttonLabel">
-            <span>Preset Brushes</span>
+            <span>Brush Menu</span>
           </div>
-          <div className="brush-presets">
+          <div>
+            <span>Apply to whole image </span>
+            <input 
+              type="checkbox" 
+              name="applyToImage" 
+              onChange={this.handleApplyToImageChange}
+              disabled={this.state.applyToImageDisabled}
+            />
+          </div>
+          <div>
+            <span>Apply images </span>
+              <input type="number"
+                     min="1"
+                     max={maxApplyToImageNum-1}
+                     value={this.state.minInterval}
+                     className={"slice-field"}
+                     onChange={this.handleApplyToMinChange} 
+                     style={{
+                      width: "50px",
+                      height: "20px",
+                      opacity: 1,
+                      }}
+                      disabled={this.state.intervalDisabled}
+               />
+              <span> to </span>
+              <input type="number"
+                     min="2"
+                     max={maxApplyToImageNum}
+                     value={this.state.maxInterval}
+                     className={"slice-field"}
+                     onChange={this.handleApplyToMaxChange} 
+                     style={{
+                      width: "50px",
+                      height: "20px",
+                      opacity: 1,
+                      }}
+                      disabled={this.state.intervalDisabled}
+               />
+          </div>
+          {isHuGated && (
+            <div className="brush-presets">
             {brushModule.state.gates.map((gate, i) => (
               <div key={i}>
                 <input
@@ -91,6 +169,7 @@ class SmartBrushMenu extends Component {
               </div>
             ))}
           </div>
+          )}          
         </div>
       </Draggable>
     );

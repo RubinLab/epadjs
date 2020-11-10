@@ -97,7 +97,7 @@ const tools = [
   { name: "Brush3D" },
   { name: "SphericalBrush" },
   { name: "Brush3DHUGated" },
-  // { name: "Brush3DAutoGated" }
+  { name: "Brush3DAutoGated" },
 ];
 
 class ToolMenu extends Component {
@@ -204,9 +204,14 @@ class ToolMenu extends Component {
         tool: "Brush3D",
       },
       {
-        name: "Brush HU Gated",
+        name: "Brush Gated",
         icon: <FaBroom />,
         tool: "Brush3DHUGated",
+      },
+      {
+        name: "Brush Auto Gated",
+        icon: <FaBroom />,
+        tool: "Brush3DAutoGated",
       },
       {
         name: "Spherical Brush",
@@ -289,11 +294,18 @@ class ToolMenu extends Component {
       } //Dont" select the HUGated if the modality is not CT
       this.setState({ showBrushSize: true });
     } else if (tool === "Brush3DHUGated") {
-      if (!this.checkIfCT() || this.checkIfMultiframe()) {
-        alert("HU Gated tool only works with singleframe CT images");
-        return;
+      if (this.checkIfMultiframe()) {alert("Auto Gated tool only works with singleframe images");}
+      // TODO emel: isn't it bug prone. although it is not going to work, we are setting the state
+      this.setState({ showBrushSize: true, isHuGated:true, showSmartBrush: true });
+    } else if (tool === "Brush3DAutoGated") {
+      console.log("sanirim");
+      if (this.checkIfMultiframe()) {
+        // if (!this.checkIfCT() || this.checkIfMultiframe()) {
+        alert("Auto Gated tool only works with singleframe images");
+        // return;
       } //Dont" select the HUGated if the modality is not CT
-      this.setState({ showBrushSize: true, showSmartBrush: true });
+      // TODO emel: isn't it bug prone. although it is not going to work, we are setting the state
+      this.setState({ showBrushSize: true, isHuGated:false, showSmartBrush: true });
     } else if (tool === "FreehandRoi3DTool") {
       this.setState({ showInterpolation: true });
     }
@@ -309,14 +321,14 @@ class ToolMenu extends Component {
     return cornerstone.getImage(element);
   };
 
-  checkIfCT = () => {
-    const image = this.getActiveImage();
-    const seriesModule =
-      cornerstone.metaData.get("generalSeriesModule", image.imageId) || {};
-    const modality = seriesModule.modality;
-    if (modality === "CT") return true;
-    return false;
-  };
+  // checkIfCT = () => {
+  //   const image = this.getActiveImage();
+  //   const seriesModule =
+  //     cornerstone.metaData.get("generalSeriesModule", image.imageId) || {};
+  //   const modality = seriesModule.modality;
+  //   if (modality === "CT") return true;
+  //   return false;
+  // };
 
   checkIfMultiframe = () => {
     const image = this.getActiveImage();
@@ -661,13 +673,14 @@ class ToolMenu extends Component {
         {/* </Collapsible> */}
         {(this.state.activeTool === "Brush3D" ||
           this.state.activeTool === "SphericalBrush" ||
-          this.state.activeTool === "Brush3DHUGated") &&
+          this.state.activeTool === "Brush3DHUGated" || 
+          this.state.activeTool === "Brush3DAutoGated") &&
           this.state.showBrushSize && (
             <BrushSizeSelector onClose={this.closeBrushSize} />
           )}
-        {this.state.activeTool === "Brush3DHUGated" &&
+        {(this.state.activeTool === "Brush3DHUGated" || this.state.activeTool === "Brush3DAutoGated") &&
           this.state.showSmartBrush && (
-            <SmartBrushMenu onClose={this.closeSmartBrushMenu} />
+            <SmartBrushMenu activePort={this.props.activePort} onClose={this.closeSmartBrushMenu} isHuGated={this.state.isHuGated}/>
           )}
         {this.state.showPresets && (
           <WindowLevel
