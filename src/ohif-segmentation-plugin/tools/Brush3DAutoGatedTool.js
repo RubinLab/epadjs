@@ -37,8 +37,7 @@ export default class Brush3DAutoGatedTool extends Brush3DHUGatedTool {
    * @returns {null}
    */
   _setCustomGate(evt) {
-    console.log("modality", this.modality);
-    const eventData = evt.detail;
+    \const eventData = evt.detail;
     const image = eventData.image;
     const { rows, columns } = image;
     const { x, y } = eventData.currentPoints.image;
@@ -65,7 +64,6 @@ export default class Brush3DAutoGatedTool extends Brush3DHUGatedTool {
         hi = pixelValue;
       }
     }
-    console.log("lo, hi", lo, hi);
     if (this.modality === "CT") {
       lo = lo * rescaleSlope + rescaleIntercept;
       hi = hi * rescaleSlope + rescaleIntercept;
