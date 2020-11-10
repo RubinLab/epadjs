@@ -31,6 +31,11 @@ class SmartBrushMenu extends Component {
     brushModule.setters.customGateRange(min, max);
   };
 
+  handleApplyToImageChange = (e) => {    
+    var checked = e.target.checked;
+    brushModule.configuration.applyToImage = checked;
+  }
+
   render() {
     return (
       <Draggable>
@@ -41,6 +46,7 @@ class SmartBrushMenu extends Component {
           <div className="buttonLabel">
             <span>Preset Brushes</span>
           </div>
+          <div><span>Apply to whole image</span><input type="checkbox" name="applyToImage" onChange={this.handleApplyToImageChange}/></div>
           <div className="brush-presets">
             {brushModule.state.gates.map((gate, i) => (
               <div key={i}>
