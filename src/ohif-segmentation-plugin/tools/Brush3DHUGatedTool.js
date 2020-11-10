@@ -51,6 +51,7 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
    * @returns {void}
    */
   _paint(evt) {
+    const testImage = cornerstone.imageCache.cachedImages[1].image;
     const eventData = evt.detail;
     const { element, image } = eventData;
     const { rows, columns } = image;
@@ -60,12 +61,17 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       return;
     }
 
-    const radius = brushModule.configuration.radius;
+    console.log("cornerstone", cornerstone);
+    console.log("image", image);
+
+    // const radius = brushModule.configuration.radius;
+    const radius = columns >= rows ? columns * 2 : radius * 2;
 
     const pointerArray = this._gateCircle(
       image,
       getCircle(radius, rows, columns, x, y)
     );
+    // console.log("pointer array", pointerArray);
 
     const {
       labelmap2D,
@@ -75,6 +81,7 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       shouldErase,
     } = this.paintEventData;
 
+    console.log("labelmap2d", labelmap2D, labelmap3D);
     // Draw / Erase the active color.
     drawBrushPixels(
       pointerArray,

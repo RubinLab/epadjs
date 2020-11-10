@@ -92,22 +92,22 @@ export default class Brush3DAutoGatedTool extends Brush3DHUGatedTool {
 
     const gatedCircleArray = [];
 
-    console.log("Image pixel data", imagePixelData);
-    console.log("Circle", circle);
+    // console.log("Image pixel data", imagePixelData);
+    // console.log("Circle", circle);
 
     for (let i = 0; i < circle.length; i++) {
       let pixelValue = imagePixelData[circle[i][0] + circle[i][1] * rows];
-      console.log("Pixel value", pixelValue);
+      // console.log("Pixel value", pixelValue);
 
       if (this.modality === "CT")
         pixelValue = pixelValue * rescaleSlope + rescaleIntercept;
 
-      console.log(
-        "pixel value, gatevalues[0], gateValues[1]",
-        pixelValue,
-        gateValues[0],
-        gateValues[1]
-      );
+      // // console.log(
+      //   "pixel value, gatevalues[0], gateValues[1]",
+      //   pixelValue,
+      //   gateValues[0],
+      //   gateValues[1]
+      // );
       if (pixelValue >= gateValues[0] && pixelValue <= gateValues[1]) {
         gatedCircleArray.push(circle[i]);
       }

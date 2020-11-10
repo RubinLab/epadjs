@@ -28,8 +28,8 @@ export default class Brush3DTool extends BrushTool {
       labelmap2D,
       labelmap3D,
       currentImageIdIndex,
-      activeLabelmapIndex
-    } = brushModule.getters.labelmap2D(element);
+      activeLabelmapIndex,
+    } = brushModule.getters.labelmap2D(element, 1);
 
     const shouldErase =
       this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;
@@ -39,7 +39,7 @@ export default class Brush3DTool extends BrushTool {
       labelmap3D,
       currentImageIdIndex,
       activeLabelmapIndex,
-      shouldErase
+      shouldErase,
     };
 
     // if (configuration.storeHistory) {
@@ -72,7 +72,7 @@ export default class Brush3DTool extends BrushTool {
 
     // Dispatch event to open the Aim Editor
     let evnt = new CustomEvent("markupCreated", {
-      detail: "brush"
+      detail: "brush",
     });
     window.dispatchEvent(evnt);
   }
