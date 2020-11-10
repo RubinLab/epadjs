@@ -71,7 +71,7 @@ export default class Brush3DTool extends BrushTool {
 
         // Metadata assigned, start drawing.
         if (eventData.currentPoints) {
-          this._paint(evt);
+          this._paint(evt, i, element);
         }
       }
     } else {

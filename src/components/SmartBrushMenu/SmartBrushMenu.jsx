@@ -50,14 +50,14 @@ class SmartBrushMenu extends Component {
   handleApplyToMinChange = (evt) => {
     const min = evt.target.value;
     this.setState({minInterval:min});
-    brushModule.configuration.applyToImage = false;
+    brushModule.configuration.applyToImage = true;
     brushModule.configuration.minInterval = parseInt(min);
   }
 
   handleApplyToMaxChange = (evt) => {
     const max = evt.target.value;
     this.setState({maxInterval:max});
-    brushModule.configuration.applyToImage = false;
+    brushModule.configuration.applyToImage = true;
     brushModule.configuration.maxInterval = parseInt(max);
   }
 

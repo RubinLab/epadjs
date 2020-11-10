@@ -51,8 +51,9 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
    * @returns {void}
    */
   _paint(evt, imageIndex, _element) {
+    console.log("image index", imageIndex);
     let element, image, rows, columns, x, y;
-    if (imageIndex && element) {
+    if (imageIndex && _element) {
       image = cornerstone.imageCache.cachedImages[imageIndex].image;
       element = _element;
       x = 1;
