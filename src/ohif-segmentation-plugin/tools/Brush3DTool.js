@@ -24,48 +24,100 @@ export default class Brush3DTool extends BrushTool {
     const eventData = evt.detail;
     const element = eventData.element;
 
-    const {
-      labelmap2D,
-      labelmap3D,
-      currentImageIdIndex,
-      activeLabelmapIndex,
-    } = brushModule.getters.labelmap2D(element);
+    const { minInterval, maxInterval } = brushModule.configuration;
 
-    const shouldErase =
-      this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;
+    if (minInterval && maxInterval) {
+      console.log("min max", minInterval, maxInterval);
+      for (let i = minInterval - 1; i < maxInterval; i++) {
+        console.log("i", i);
+        const {
+          labelmap2D,
+          labelmap3D,
+          currentImageIdIndex,
+          activeLabelmapIndex,
+        } = brushModule.getters.labelmap2D(element, i);
 
-    this.paintEventData = {
-      labelmap2D,
-      labelmap3D,
-      currentImageIdIndex,
-      activeLabelmapIndex,
-      shouldErase,
-    };
+        const shouldErase =
+          this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;
 
-    // if (configuration.storeHistory) {
-    if (1) {
-      const previousPixelData = labelmap2D.pixelData.slice();
+        this.paintEventData = {
+          labelmap2D,
+          labelmap3D,
+          currentImageIdIndex,
+          activeLabelmapIndex,
+          shouldErase,
+        };
 
-      this.paintEventData.previousPixelData = previousPixelData;
-    }
+        // if (configuration.storeHistory) {
+        if (1) {
+          const previousPixelData = labelmap2D.pixelData.slice();
 
-    const segmentIndex = labelmap3D.activeSegmentIndex;
-    let metadata = labelmap3D.metadata[segmentIndex];
+          this.paintEventData.previousPixelData = previousPixelData;
+        }
 
-    if (!metadata) {
-      metadata = generateBrushMetadata("Unnamed Segment");
+        const segmentIndex = labelmap3D.activeSegmentIndex;
+        let metadata = labelmap3D.metadata[segmentIndex];
 
-      brushModule.setters.metadata(
-        element,
+        if (!metadata) {
+          metadata = generateBrushMetadata("Unnamed Segment");
+
+          brushModule.setters.metadata(
+            element,
+            activeLabelmapIndex,
+            segmentIndex,
+            metadata
+          );
+        }
+
+        // Metadata assigned, start drawing.
+        if (eventData.currentPoints) {
+          this._paint(evt);
+        }
+      }
+    } else {
+      const {
+        labelmap2D,
+        labelmap3D,
+        currentImageIdIndex,
         activeLabelmapIndex,
-        segmentIndex,
-        metadata
-      );
-    }
+      } = brushModule.getters.labelmap2D(element);
 
-    // Metadata assigned, start drawing.
-    if (eventData.currentPoints) {
-      this._paint(evt);
+      const shouldErase =
+        this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;
+
+      this.paintEventData = {
+        labelmap2D,
+        labelmap3D,
+        currentImageIdIndex,
+        activeLabelmapIndex,
+        shouldErase,
+      };
+
+      // if (configuration.storeHistory) {
+      if (1) {
+        const previousPixelData = labelmap2D.pixelData.slice();
+
+        this.paintEventData.previousPixelData = previousPixelData;
+      }
+
+      const segmentIndex = labelmap3D.activeSegmentIndex;
+      let metadata = labelmap3D.metadata[segmentIndex];
+
+      if (!metadata) {
+        metadata = generateBrushMetadata("Unnamed Segment");
+
+        brushModule.setters.metadata(
+          element,
+          activeLabelmapIndex,
+          segmentIndex,
+          metadata
+        );
+      }
+
+      // Metadata assigned, start drawing.
+      if (eventData.currentPoints) {
+        this._paint(evt);
+      }
     }
     this._drawing = true;
     this._startListeningForMouseUp(element);
