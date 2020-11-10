@@ -1,0 +1,107 @@
+.recist-pop-up {
+    display: table;
+    position: absolute;
+    padding: 10px 20px;
+    outline: solid;
+    outline-width: 2px;
+    background-color: #3a3f44;
+    outline-color: white;
+    width: 95%;
+    height: auto;
+    right: 3px;
+    top: 150px;
+    z-index: 20000;
+}
+
+.row {
+    display: table-row;
+}
+
+.close-recist-menu a:link {
+    display: table-row;
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    color: black;
+}
+
+.target {
+    cursor: pointer;
+}
+
+.target:hover {
+    background-color: white;
+}
+
+.target-selected {
+    background-color: #861737;
+}
+
+.non-target {
+    cursor: pointer;
+}
+
+.non-target:hover {
+    background-color: white;
+}
+
+.non-target-selected {
+    background-color: #861737;
+}
+
+.lesion-header {
+    float: center;
+}
+
+.target-column {
+    display: table-cell;
+    width: 100%;
+    float: left;
+}
+
+.non-target-column {
+    display: table-cell;
+    width: 100%;
+    float: right;
+}
+
+.Table {
+    display: table;
+    position: absolute;
+    padding: 10px 20px;
+    outline: solid;
+    outline-width: 2px;
+    background-color: #3a3f44;
+    outline-color: white;
+    width: 95%;
+    height: auto;
+    right: 3px;
+    top: 150px;
+    z-index: 20000;
+}
+
+.Title {
+    display: table-caption;
+    text-align: center;
+    font-weight: bold;
+    font-size: larger;
+    background-color: #3a3f44;
+}
+
+.Heading {
+    display: table-row;
+    font-weight: bold;
+    text-align: center;
+}
+
+.Row {
+    display: table-row;
+}
+
+.Cell {
+    display: table-cell;
+    border: solid;
+    border-width: thin;
+    padding-left: 5px;
+    padding-right: 5px;
+}

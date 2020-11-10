@@ -151,8 +151,16 @@ export function getTemplateParameter(plugindbid, templatedbid) {
       "/templateparameters"
   );
 }
-
-//pluhin trigger section
+export function getContainerLog(containerid) {
+  return http.get(apiUrl + "/container/" + containerid, {
+    responseType: "stream",
+  });
+}
+//not used remove if everything works correctly
+// export function stopContainerLog(containerobj) {
+//   return http.post(apiUrl + "/container/stop/", containerobj);
+// }
+//plugin trigger section
 // export function getAnnotationTemplates() {
 //   return http.get(apiUrl + "/pluginsannotationstemplates"); // /plugins/annotation/templates
 // }

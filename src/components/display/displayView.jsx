@@ -32,6 +32,11 @@ import * as dcmjs from "dcmjs";
 import { FaTimes, FaPen, FaExpandArrowsAlt } from "react-icons/fa";
 import Form from "react-bootstrap/Form";
 import ToolMenu from "../ToolMenu/ToolMenu";
+import { getMarkups, setMarkupsOfAimActive} from "../aimEditor/Helpers";
+import { refreshToken } from "../../services/authService";
+import { isThisSecond } from "date-fns/esm";
+import { FiMessageSquare } from "react-icons/fi";
+import { errorMonitor } from "events";
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
@@ -145,86 +150,51 @@ class DisplayView extends Component {
       seriesLabelMaps: {},
       redirect: this.props.series.length < 1 ? true : false,
       containerHeight: 0,
+      tokenRefresh: null,
     };
   }
 
+  checkTokenExpire = async () => {
+    if (this.props.keycloak.isTokenExpired(5)) {
+      window.alert("Are you still there?");
+      await this.updateToken(this.props.keycloak, 5);
+    }
+  };
+
+  updateToken = async () => {
+    try {
+      clearInterval(this.state.tokenRefresh);
+      await refreshToken(this.props.keycloak, 5);
+      const tokenRefresh = setInterval(this.checkTokenExpire, 500);
+      this.setState({ tokenRefresh });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   componentDidMount() {
-    const { pid } = this.props;
-    if (this.props.series.length < 1) {
-      if (pid) this.props.history.push(`/search/${pid}`);
-      else return;
+    const { series, onSwitchView } = this.props;
+    if (series.length < 1) {
+      onSwitchView('search');
     }
     this.getViewports();
     this.getData();
-    if (this.props.series.length > 0) {
+    if (series.length > 0) {
       this.setSubComponentHeights();
-      window.addEventListener("resize", this.setSubComponentHeights);
+      window.addEventListener("resize", e => this.setSubComponentHeights(e));
     }
     window.addEventListener("markupSelected", this.handleMarkupSelected);
     window.addEventListener("markupCreated", this.handleMarkupCreated);
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
     window.addEventListener("editAim", this.editAimHandler);
+    if (series && series.length > 0) {
+      const tokenRefresh = setInterval(this.checkTokenExpire, 500);
+      this.setState({ tokenRefresh })
+    };
   }
 
-  setSubComponentHeights = () => {
-    const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
-    let toolbarHeight = document.getElementsByClassName("toolbar")[0]
-      .clientHeight;
-    const windowInner = window.innerHeight;
-    const containerHeight = windowInner - toolbarHeight - navbar - 10;
-    this.setState({ containerHeight });
-    this.getViewports(containerHeight);
-  };
-
-  editAimHandler = (event) => {
-    const { aimID, seriesUID } = event.detail;
-    const { aimList, activePort } = this.props;
-
-    console.log("Will open aim editor for", aimID, seriesUID);
-
-    if (aimList[seriesUID][aimID]) {
-      const aimJson = aimList[seriesUID][aimID].json;
-      const markupTypes = this.getMarkupTypesForAim(aimID);
-      aimJson["markupType"] = [...markupTypes];
-      aimJson["aimId"] = aimID;
-
-      // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
-
-      const element = this.getActiveElement();
-      if (this.hasSegmentation(aimJson)) {
-        console.log("Aim json has segmentations", aimJson);
-        const { labelMaps } = this.state.seriesLabelMaps[activePort];
-        const labelMapIndexOfAim = labelMaps[aimID];
-        this.setActiveLabelMapIndex(labelMapIndexOfAim, element);
-      }
-      // } else {
-      //   this.setActiveLabelMapIndex(0, element);
-      //   console.log("Aim json has not segmentation so settin to ", aimJson, 0);
-      // }
-
-      // check if is already editing an aim
-      if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
-        let message = "";
-        if (this.state.selectedAim) {
-          message = this.prepWarningMessage(
-            this.state.selectedAim.name.value,
-            aimJson.name.value
-          );
-        }
-      }
-
-      //The following dispatched is a wrongly named method. It's dispatched to set the selected
-      //AimId in the store!!!!!
-      console.log("Selected aim josn", aimJson);
-
-      this.setState({ showAimEditor: true, selectedAim: aimJson });
-    }
-    // this.setSerieActiveLabelMap(aimID);
-    // this.openAimEditor(aimID, seriesUID);
-  };
-
-  async componentDidUpdate(prevProps) {
+  async componentDidUpdate(prevProps, prevState) {
     const { pid, series, activePort, aimList } = this.props;
     const {
       series: prevSeries,
@@ -246,13 +216,6 @@ class DisplayView extends Component {
       (prevProps.series.length !== this.props.series.length &&
         this.props.loading === false)
     ) {
-      console.log(
-        "In update",
-        prevProps.series,
-        prevProps.loading,
-        this.props.series,
-        this.props.loading
-      );
       await this.setState({ isLoading: true });
       this.getViewports();
       this.getData();
@@ -260,7 +223,6 @@ class DisplayView extends Component {
     // This is to handle late loading of aimsList from store but it also calls getData
     // each time visibility of aims change
     else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
-      // console.log("Aim lists are not equal", aimList, prevAimList);
       this.renderAims();
     }
   }
@@ -272,9 +234,81 @@ class DisplayView extends Component {
     window.removeEventListener("jumpToAimImage", this.jumpToAimImage);
     window.removeEventListener("editAim", this.editAimHandler);
     window.removeEventListener("resize", this.setSubComponentHeights);
+    clearInterval(this.state.tokenRefresh)
   }
 
-  toggleAnnotations = (event) => {
+  jumpToAims = () =>{
+    const {series} = this.props;
+    const newData = [...this.state.data];
+    series.forEach((serie, i) => {
+      if(serie.aimId && this.state.data[i] && this.state.data[i].stack){
+        const {imageIds} = this.state.data[i].stack;
+        const imageIndex = this.getImageIndex(serie, imageIds);
+        newData[i].stack.currentImageIdIndex = imageIndex;
+      }
+    });
+    this.setState({ data: newData });
+  };
+
+  setSubComponentHeights = e => {
+    try {
+      if (e && e.detail) var { isMaximize } = e.detail;
+      const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
+      let toolbarHeight = document.getElementsByClassName("toolbar")[0]
+        .clientHeight;
+      const windowInner = window.innerHeight;
+      const containerHeight = windowInner - toolbarHeight - navbar - 10;
+      this.setState({ containerHeight });
+      if (!isMaximize) this.getViewports(containerHeight);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  editAimHandler = (event) => {
+    const { aimID, seriesUID } = event.detail;
+    const { aimList, activePort } = this.props;
+
+    if (aimList[seriesUID][aimID]) {
+      const aimJson = aimList[seriesUID][aimID].json;
+      const markupTypes = this.getMarkupTypesForAim(aimID);
+      aimJson["markupType"] = [...markupTypes];
+      aimJson["aimId"] = aimID;
+
+      // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
+
+      const element = this.getActiveElement();
+      if (this.hasSegmentation(aimJson)) {
+        const { labelMaps } = this.state.seriesLabelMaps[activePort];
+        const labelMapIndexOfAim = labelMaps[aimID];
+        this.setActiveLabelMapIndex(labelMapIndexOfAim, element);
+      }
+      // } else {
+      //   this.setActiveLabelMapIndex(0, element);
+      //   console.log("Aim json has not segmentation so settin to ", aimJson, 0);
+      // }
+
+      // check if is already editing an aim
+      if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
+        let message = "";
+        if (this.state.selectedAim) {
+          message = this.prepWarningMessage(
+            this.state.selectedAim.name.value,
+            aimJson.name.value
+          );
+        }
+      }
+
+      //The following dispatched is a wrongly named method. it's dispatched to set the selected
+      //AimId in the store!!!!!
+
+      this.setState({ showAimEditor: true, selectedAim: aimJson });
+    }
+    // this.setSerieActiveLabelMap(aimID);
+    // this.openAimEditor(aimID, seriesUID);
+  };
+
+  toggleAnnotations = event => {
     const { aimID, isVisible } = event.detail;
     const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
@@ -359,58 +393,10 @@ class DisplayView extends Component {
     return segAims;
   };
 
-  // getMarkups = (aimOfInterest) => {
-  //   const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-  //   var markupsToReturn = {};
-  //   Object.keys(toolState).forEach((key) => {
-  //     const markUps = toolState[key];
-  //     Object.keys(markUps).map((tool) => {
-  //       switch (tool) {
-  //         case "FreehandRoi3DTool":
-  //         case "FreehandRoi":
-  //           const polygons3d = markUps[tool].data;
-  //           polygons3d.map((polygon) => {
-  //             if (!polygon.aimId || polygon.aimId === aimOfInterest)
-  //               markupsToReturn["Polygon"] = { validate: "" };
-  //           });
-  //           break;
-  //         case "Bidirectional":
-  //           const bidirectionals = markUps[tool].data;
-  //           bidirectionals.map((bidirectional) => {
-  //             if (!bidirectional.aimId || bidirectional.aimId === aimOfInterest)
-  //               markupsToReturn["Perpendicular"] = { validate: "" };
-  //           });
-  //           break;
-  //         case "CircleRoi":
-  //           const circles = markUps[tool].data;
-  //           circles.map((circle) => {
-  //             if (!circle.aimId || circle.aimId === aimOfInterest)
-  //               markupsToReturn["Circle"] = { validate: "" };
-  //           });
-  //           break;
-  //         case "Length":
-  //           const lines = markUps[tool].data;
-  //           lines.map((line) => {
-  //             if (!line.aimId || line.aimId === aimOfInterest)
-  //               markupsToReturn["Line"] = { validate: "" };
-  //           });
-  //           break;
-  //         case "Probe":
-  //           const points = markUps[tool].data;
-  //           points.map((point) => {
-  //             if (!point.aimId || point.aimId === aimOfInterest)
-  //               markupsToReturn["Point"] = { validate: "" };
-  //           });
-  //           break;
-  //       }
-  //     });
-  //   });
-  //   return markupsToReturn;
-  // };
-
   getData() {
     // clear the toolState they will be rendered again on next load
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    cornerstoneTools.store.modules.freehand3D.state.seriesCollection = [];
     // clear the segmentation data as well
     cornerstoneTools.store.modules.segmentation.state.series = {};
     try {
@@ -427,6 +413,7 @@ class DisplayView extends Component {
             isLoading: false,
           },
           () => {
+            this.jumpToAims();
             this.renderAims();
             this.refreshAllViewports();
             this.shouldOpenAimEditor();
@@ -503,13 +490,13 @@ class DisplayView extends Component {
           let multiFrameUrl = baseUrl + "&frame=" + i;
           // mode !== "lite" ? baseUrl + "/frames/" + i : baseUrl;
           cornerstoneImageIds.push(multiFrameUrl);
-          cornerstone.loadAndCacheImage(multiFrameUrl);
+          // cornerstone.loadAndCacheImage(multiFrameUrl);
           newImageIds[multiFrameUrl] = true;
         }
       } else {
         let singleFrameUrl = baseUrl;
         cornerstoneImageIds.push(singleFrameUrl);
-        cornerstone.loadAndCacheImage(singleFrameUrl);
+        // cornerstone.loadAndCacheImage(singleFrameUrl);
         newImageIds[singleFrameUrl] = false;
       }
       // } else {
@@ -542,7 +529,7 @@ class DisplayView extends Component {
       this.state.data[index] &&
       this.state.data[index].stack.currentImageIdIndex
     )
-      imageIndex = this.state.data[index].stack.currentImageIdIndex;
+      imageIndex = this.state.data[index].stack.currentImageIdIndex;      
     else imageIndex = 0;
 
     // if serie is being open from the annotation jump to that image and load the aim editor
@@ -552,13 +539,14 @@ class DisplayView extends Component {
 
     stack.currentImageIdIndex = parseInt(imageIndex, 10);
     stack.imageIds = [...cornerstoneImageIds];
+    
     return { stack };
   };
 
   openAimEditor = (aimID, seriesUID) => {
+    
     const { aimList } = this.props;
     if (Object.entries(aimList).length !== 0) {
-      console.log("Aim list", aimList, seriesUID, aimID);
       const aimJson = aimList[seriesUID][aimID].json;
       aimJson.aimID = aimID;
       const markupTypes = this.getMarkupTypesForAim(aimID);
@@ -571,6 +559,8 @@ class DisplayView extends Component {
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
         this.setState({ showAimEditor: false });
       this.setState({ showAimEditor: true, selectedAim: aimJson });
+      setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
+      this.refreshAllViewports();
     }
   };
 
@@ -608,8 +598,12 @@ class DisplayView extends Component {
     return markupType === "DicomSegmentationEntity";
   };
 
-  getImageIndex = (serie, cornerstoneImageIds) => {
-    let { aimID, imageAnnotations, studyUID, seriesUID } = serie;
+  
+  // Returns the image index of the aim of the serie or the passed aim if aimID is passed 
+  getImageIndex = (serie, cornerstoneImageIds, aimID="") => {
+    if(aimID === "")
+      aimID = serie.aimID; 
+    const { imageAnnotations, studyUID, seriesUID } = serie;
     if (imageAnnotations) {
       for (let [key, values] of Object.entries(imageAnnotations)) {
         for (let value of values) {
@@ -684,81 +678,34 @@ class DisplayView extends Component {
       this.setActive(current);
       return;
     }
-    if (this.state.hideShowDisabled) {
-      // this.setState({ hideShowDisabled: false });
-      return;
-    }
     // const element = cornerstone.getEnabledElements()[practivePort];
     const elements = document.getElementsByClassName("viewportContainer");
     if (this.state.hiding === false) {
       for (var i = 0; i < elements.length; i++) {
         if (i != current) elements[i].style.display = "none";
       }
-      this.setState({ height: "100%", width: "100%" });
+      this.setState({ height: this.state.containerHeight, width: "100%" });
     } else {
       this.getViewports();
       for (var i = 0; i < elements.length; i++) {
         elements[i].style.display = "inline-block";
       }
     }
-    this.setState({ hiding: !this.state.hiding }, () =>
-      window.dispatchEvent(new Event("resize"))
+    this.setState(
+      { hiding: !this.state.hiding },
+      () =>
+        window.dispatchEvent(
+          new CustomEvent("resize", { detail: { isMaximize: true } })
+        ) //for cornerstone to fit the image
+      // window.dispatchEvent(new Event("resizeViewport"))}
     );
   };
 
   getShapes = () => {
     const { series, activePort } = this.props;
     const aimId = series[activePort].aimID || undefined;
-    return this.getMarkups(aimId);
-  };
-
-  getMarkups = (aimOfInterest) => {
     const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    var markupsToReturn = {};
-    Object.keys(toolState).forEach((key) => {
-      const markUps = toolState[key];
-      Object.keys(markUps).map((tool) => {
-        switch (tool) {
-          case "FreehandRoi3DTool":
-          case "FreehandRoi":
-            const polygons3d = markUps[tool].data;
-            polygons3d.map((polygon) => {
-              if (!polygon.aimId || polygon.aimId === aimOfInterest)
-                markupsToReturn["Polygon"] = { validate: "" };
-            });
-            break;
-          case "Bidirectional":
-            const bidirectionals = markUps[tool].data;
-            bidirectionals.map((bidirectional) => {
-              if (!bidirectional.aimId || bidirectional.aimId === aimOfInterest)
-                markupsToReturn["Perpendicular"] = { validate: "" };
-            });
-            break;
-          case "CircleRoi":
-            const circles = markUps[tool].data;
-            circles.map((circle) => {
-              if (!circle.aimId || circle.aimId === aimOfInterest)
-                markupsToReturn["Circle"] = { validate: "" };
-            });
-            break;
-          case "Length":
-            const lines = markUps[tool].data;
-            lines.map((line) => {
-              if (!line.aimId || line.aimId === aimOfInterest)
-                markupsToReturn["Line"] = { validate: "" };
-            });
-            break;
-          case "Probe":
-            const points = markUps[tool].data;
-            points.map((point) => {
-              if (!point.aimId || point.aimId === aimOfInterest)
-                markupsToReturn["Point"] = { validate: "" };
-            });
-            break;
-        }
-      });
-    });
-    return markupsToReturn;
+    return getMarkups(toolState, aimId);
   };
 
   // TODO: Can this be done without checking the tools of interest?
@@ -808,6 +755,9 @@ class DisplayView extends Component {
     const { aimId, ancestorEvent } = event.detail;
     const { element, data } = ancestorEvent;
 
+    setMarkupsOfAimActive(aimId);//set the selected markups color to yellow
+    this.refreshAllViewports();
+  
     if (aimList[seriesUID][aimId]) {
       const aimJson = aimList[seriesUID][aimId].json;
       const markupTypes = this.getMarkupTypesForAim(aimId);
@@ -823,10 +773,8 @@ class DisplayView extends Component {
           this.getActiveElement()
         );
       }
-
-      // check if is already editing an aim
-      if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
-        console.log("Eski aim, yeni aim", this.state.selectedAim, aimJson);
+// check if is already editing an aim
+      if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {        
         let message = "";
         if (this.state.selectedAim) {
           message = this.prepWarningMessage(
@@ -844,7 +792,7 @@ class DisplayView extends Component {
         }
       }
 
-      //The following dispatched is a wrongly named method. It's dispatched to set the selected
+      //The following dispatched is a wrongly named method. it's dispatched to set the selected
       //AimId in the store!!!!!
       this.props.dispatch(jumpToAim(seriesUID, aimId, activePort));
 
@@ -856,8 +804,7 @@ class DisplayView extends Component {
     return `You are trying to edit Aim named: ${destinationAim}. All unsaved changes in Aim named: ${currentAim} will be lost!!!`;
   };
 
-  handleMarkupCreated = (event) => {
-    console.log("Event", event);
+  handleMarkupCreated = event => {
     const { detail } = event;
     const { hasSegmentation } = this.state;
 
@@ -1008,13 +955,10 @@ class DisplayView extends Component {
     }, {});
   };
 
-  handleSegmentations = (seriesSegmentations) => {
-    console.log("Series segmentations", seriesSegmentations);
+  handleSegmentations = seriesSegmentations => {
     let segLabelMaps = {};
     let activeLabelMapIndex;
     const { serieIndex } = seriesSegmentations[0];
-
-    console.log("State at this point", this.state.data);
 
     try {
       const { imageIds } = this.state.data[serieIndex].stack;
@@ -1041,16 +985,10 @@ class DisplayView extends Component {
         // If an aim is selected and it has segmentatio set the activeLabelMap of serie as selected
         // aim's labelMap. Else set it as the next available labelMap to brush new segs
 
-        console.log("aim id var mi", aimID, segLabelMaps);
         if (aimID && typeof segLabelMaps[aimID] !== "undefined")
           activeLabelMapIndex = segLabelMaps[aimID];
         else {
           activeLabelMapIndex = seriesSegmentations.length;
-          console.log(
-            "setting activeLabelMap as length ",
-            seriesSegmentations.length,
-            seriesSegmentations
-          );
         }
 
         await this.setState({
@@ -1067,16 +1005,12 @@ class DisplayView extends Component {
     } catch (error) {
       console.error(error);
     }
-    console.log("State after seting", this.state);
   };
 
-  setSerieActiveLabelMap = (aimId) => {
-    console.log("Aim id", aimId);
+  setSerieActiveLabelMap = aimId => {
     const { series, activePort } = this.props;
     const { seriesLabelMaps } = this.state;
-    console.log("Active port", activePort);
     if (!seriesLabelMaps[activePort]) {
-      console.log("i am returning ", seriesLabelMaps[activePort]);
       return;
     } //The default activeLabelMap will be 0 automatically
     const { imageIds } = this.state.data[activePort].stack;
@@ -1090,8 +1024,6 @@ class DisplayView extends Component {
         const { aimID } = series[activePort];
         aimId = aimID;
       }
-      console.log("Aim ID var mi ", series[activePort]);
-      console.log("State", this.state);
 
       const { labelMaps, activeLabelMapIndex } = seriesLabelMaps[activePort];
       if (aimId && typeof labelMaps[aimId] !== "undefined")
@@ -1108,7 +1040,6 @@ class DisplayView extends Component {
       //   console.log("aim ", aimId, "lmi", newLabelMapIndex);
       // } else newLabelMapIndex = 0;
 
-      console.log("Setting elements activeLabeMap with", newLabelMapIndex);
       this.setActiveLabelMapIndex(newLabelMapIndex, this.getActiveElement());
     });
   };
@@ -1188,11 +1119,6 @@ class DisplayView extends Component {
       //     element
       //   );
       // }
-      console.log(
-        "dipsatching, aimId, activeLabelMapIndex",
-        aimId,
-        labelMapIndex
-      );
 
       // console.log(
       //   "New activeLabelMap Index is ",
@@ -1215,7 +1141,7 @@ class DisplayView extends Component {
         try {
           cornerstone.updateImage(element); //update the image to show newly loaded segmentations}
         } catch (error) {
-          console.error("Error:", error);
+          // console.error("Error:", error);
         }
       });
     }
@@ -1261,7 +1187,7 @@ class DisplayView extends Component {
 
   renderBidirectional = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(bidirectional));
-    data.color = color;
+    data.color = markup.color? markup.color:color;
     data.aimId = markup.aimUid;
     data.invalidated = true;
     this.createBidirectionalPoints(data, markup.coordinates);
@@ -1289,7 +1215,7 @@ class DisplayView extends Component {
 
   renderLine = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(line));
-    data.color = color;
+    data.color = markup.color? markup.color:color;
     data.aimId = markup.aimUid;
     data.invalidated = true;
     this.createLinePoints(data, markup.coordinates);
@@ -1310,7 +1236,7 @@ class DisplayView extends Component {
 
   renderPolygon = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(freehand));
-    data.color = color;
+    data.color = markup.color? markup.color:color;
     data.aimId = markup.aimUid;
     data.invalidated = true;
     this.createPolygonPoints(data, markup.coordinates);
@@ -1342,7 +1268,7 @@ class DisplayView extends Component {
 
   renderPoint = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(probe));
-    data.color = color;
+    data.color = markup.color? markup.color:color;
     data.aimId = markup.aimUid;
     data.handles.end.x = markup.coordinates[0].x.value;
     data.handles.end.y = markup.coordinates[0].y.value;
@@ -1357,7 +1283,7 @@ class DisplayView extends Component {
   renderCircle = (imageId, markup, color) => {
     const data = JSON.parse(JSON.stringify(circle));
     data.invalidated = true; //so it calculates the stats
-    data.color = color;
+    data.color = markup.color? markup.color:color;
     data.aimId = markup.aimUid;
     data.handles.start.x = markup.coordinates[0].x.value;
     data.handles.start.y = markup.coordinates[0].y.value;
@@ -1459,9 +1385,10 @@ class DisplayView extends Component {
   };
 
   // Triggered by event from right bar to jump to the image of aim
-  jumpToAimImage = (event) => {
-    const { slideNo, activePort } = event.detail;
-    const imageIndex = slideNo - 1;
+  jumpToAimImage = event => {
+    const {series, activePort} = this.props;
+    const aimId = event.detail;
+    const imageIndex = this.getImageIndex(series[activePort], this.state.data[activePort].stack.imageIds, aimId);
     this.jumpToImage(imageIndex, activePort);
   };
 
@@ -1552,7 +1479,7 @@ class DisplayView extends Component {
                         <Form.Control
                           type="number"
                           min="1"
-                          value={data.stack.currentImageIdIndex + 1}
+                          value={parseInt(data.stack.currentImageIdIndex) + 1}
                           className={"slice-field"}
                           onChange={(event) => this.handleJumpChange(i, event)}
                           style={{
@@ -1579,7 +1506,7 @@ class DisplayView extends Component {
                 <CornerstoneViewport
                   key={i}
                   imageIds={data.stack.imageIds}
-                  imageIdIndex={data.stack.currentImageIdIndex}
+                  imageIdIndex={parseInt(data.stack.currentImageIdIndex)}
                   viewportIndex={i}
                   tools={tools}
                   eventListeners={[

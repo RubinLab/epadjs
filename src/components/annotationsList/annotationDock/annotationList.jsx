@@ -9,14 +9,17 @@ import {
   toggleSingleLabel,
   toggleAllAnnotations,
 } from "../action";
+import cornerstone from "cornerstone-core";
+import { state } from 'cornerstone-tools/store/index.js';
 
 class AnnotationsList extends React.Component {
   state = {
     labelDisplayAll: true,
     annsDisplayAll: true,
+    showCalculations: true
   };
 
-  componentDidUpdate = (prevProps) => {
+  componentDidUpdate = prevProps => {
     try {
       const series = Object.keys(this.props.aimsList);
       if (
@@ -48,7 +51,7 @@ class AnnotationsList extends React.Component {
     }
   };
 
-  handleDisplayClick = (e) => {
+  handleDisplayClick = e => {
     const { seriesUID, patientID, studyUID } = this.props.openSeries[
       this.props.activePort
     ];
@@ -73,6 +76,26 @@ class AnnotationsList extends React.Component {
     }
   };
 
+  refreshAllViewports = () => {
+    const elements = cornerstone.getEnabledElements();
+    if (elements) {
+      elements.map(({ element }) => {
+        try {
+          cornerstone.updateImage(element);
+        } catch (error) {
+          // console.error("Error:", error);
+        }
+      });
+    }
+  };
+
+  handleCalculations = (checked) => {
+    this.setState({ showCalculations: checked }, ()=>{
+      state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
+      this.refreshAllViewports();
+    });
+  };
+
   handleToggleAllLabels = (checked, e, id) => {
     this.setState({ labelDisplayAll: checked });
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
@@ -88,23 +111,9 @@ class AnnotationsList extends React.Component {
     this.setState({ annsDisplayAll: checked });
   };
 
-  handleToggleSingleLabel = (e) => {
+  handleToggleSingleLabel = e => {
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
     this.props.dispatch(toggleSingleLabel(seriesUID, e.target.dataset.id));
-  };
-
-  handleJumpToAim = (slideNo) => {
-    if (!slideNo) {
-      alert(
-        "Missing SLICE_NUMBER in programmed comment of aim. Can't scroll to slice!"
-      );
-      return;
-    }
-    const { activePort } = this.props;
-
-    window.dispatchEvent(
-      new CustomEvent("jumpToAimImage", { detail: { slideNo, activePort } })
-    );
   };
 
   handleEdit = (aimID, seriesUID) => {
@@ -161,12 +170,15 @@ class AnnotationsList extends React.Component {
           : (annotations[id] = [aims[aim]]);
       }
     }
+
     if (openSeries[activePort].imageAnnotations) {
       let imageAnnotations;
       const singleFrameAnnotations =
         openSeries[activePort].imageAnnotations[imageID];
       const multiFrameAnnotations =
         openSeries[activePort].imageAnnotations[imageID + "&frame=1"];
+      const noMarkupAnnotations =
+        openSeries[activePort].imageAnnotations[imageID + "-img"];
       if (singleFrameAnnotations && multiFrameAnnotations)
         imageAnnotations = [
           ...singleFrameAnnotations,
@@ -175,6 +187,12 @@ class AnnotationsList extends React.Component {
       else if (singleFrameAnnotations)
         imageAnnotations = singleFrameAnnotations;
       else if (multiFrameAnnotations) imageAnnotations = multiFrameAnnotations;
+
+      if (noMarkupAnnotations) {
+        imageAnnotations = imageAnnotations
+          ? [...imageAnnotations, ...noMarkupAnnotations]
+          : noMarkupAnnotations;
+      }
       if (imageAnnotations) {
         for (let aim of imageAnnotations) {
           let { aimUid } = aim;
@@ -226,6 +244,23 @@ class AnnotationsList extends React.Component {
       <React.Fragment>
         <div className="annotationList-container">
           <div className="label-toggle">
+            <div className="label-toggle__text">Show Calculations</div>
+            <Switch
+              onChange={this.handleCalculations}
+              checked={this.state.showCalculations}
+              onColor="#86d3ff"
+              onHandleColor="#1986d9"
+              handleDiameter={22}
+              uncheckedIcon={false}
+              checkedIcon={false}
+              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+              height={15}
+              width={36}
+              className="react-switch"
+            />
+          </div>
+          <div className="label-toggle">
             <div className="label-toggle__text">Show All Labels</div>
             <Switch
               onChange={this.handleToggleAllLabels}
@@ -262,7 +297,6 @@ class AnnotationsList extends React.Component {
           <div style={{ maxHeight, overflow: "scroll" }}>{annList}</div>
           <AnnotationsLink
             imageAims={imageAims}
-            jumpToAim={this.handleJumpToAim}
           />
         </div>
       </React.Fragment>
@@ -270,7 +304,7 @@ class AnnotationsList extends React.Component {
   };
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,

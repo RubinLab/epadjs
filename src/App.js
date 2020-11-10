@@ -24,7 +24,6 @@ import UserMenu from './components/userProfileMenu.jsx';
 import WarningModal from './components/common/warningModal';
 import ConfirmationModal from './components/common/confirmationModal';
 import SelectModalMenu from './components/common/SelectModalMenu';
-import AnnotationList from './components/annotationsList';
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from './services/authService';
 import MaxViewAlert from './components/annotationsList/maxViewPortAlert';
@@ -33,17 +32,17 @@ import {
   getNotificationsData,
   clearSelection,
   selectProject,
+  getTemplates,
 } from './components/annotationsList/action';
 import Worklist from './components/sideBar/sideBarWorklist';
 import ErrorBoundary from './ErrorBoundary';
 import Report from './components/searchView/Report.jsx';
 import { getSubjects, getSubject } from './services/subjectServices';
-import { getStudies, getStudy } from './services/studyServices';
-import { getSeries, getSingleSeries } from './services/seriesServices';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import RightsideBar from './components/RightsideBar/RightsideBar';
+import MinimizedReport from './components/searchView/MinimizedReport';
 
 const messages = {
   noPatient: {
@@ -96,6 +95,8 @@ class App extends Component {
       message: '',
       reportType: '',
       reportsCompArr: [],
+      minReportsArr: [],
+      hiddenReports: {},
       metric: null,
     };
   }
@@ -123,6 +124,14 @@ class App extends Component {
     this.setState(state => ({ showReportsMenu: !state.showReportsMenu }));
   };
 
+  countCurrentReports = arr => {
+    let nullCount = 0;
+    arr.forEach(el => {
+      if (el === null) nullCount++;
+    });
+    return nullCount;
+  };
+
   closeReportModal = index => {
     const arr = [...this.state.reportsCompArr];
     arr[index] = null;
@@ -133,13 +142,63 @@ class App extends Component {
     });
 
     // if there isn't any report open clear selection
-    let nullCount = 0;
-    arr.forEach(el => {
-      if (el === null) {
-        nullCount++;
-      }
-    });
+    const nullCount = this.countCurrentReports(arr);
     if (nullCount === arr.length) this.props.dispatch(clearSelection());
+  };
+
+  handleCloseMinimize = (index, reportIndex) => {
+    const hiddenReports = { ...this.state.hiddenReports };
+    const minReportsArr = [...this.state.minReportsArr];
+
+    minReportsArr[index] = null;
+    delete hiddenReports[reportIndex];
+
+    this.setState({
+      hiddenReports,
+      minReportsArr,
+    });
+
+    this.closeReportModal(reportIndex);
+  };
+
+  handleMaximizeReport = e => {
+    let { index, reportindex } = e.target.dataset;
+    index = parseInt(index);
+    reportindex = parseInt(reportindex);
+    const hiddenReports = { ...this.state.hiddenReports };
+    const reportsCompArr = [...this.state.reportsCompArr];
+    const minReportsArr = [...this.state.minReportsArr];
+
+    minReportsArr[index] = null;
+    reportsCompArr[reportindex] = hiddenReports[reportindex];
+    delete hiddenReports[reportindex];
+    this.setState({
+      hiddenReports,
+      minReportsArr,
+      reportsCompArr,
+    });
+  };
+
+  handleMinimizeReport = (index, title) => {
+    const hiddenReports = { ...this.state.hiddenReports };
+    hiddenReports[index] = this.state.reportsCompArr[index];
+    const reportsCompArr = [...this.state.reportsCompArr];
+    const minReportsArr = [...this.state.minReportsArr];
+    const minIndex = minReportsArr.length;
+    const component = (
+      <MinimizedReport
+        index={minIndex}
+        reportIndex={index}
+        header={title}
+        onClose={this.handleCloseMinimize}
+        onExpand={this.handleMaximizeReport}
+        key={minIndex + 'min'}
+        count={Object.values(hiddenReports).length}
+      />
+    );
+    reportsCompArr[index] = null;
+    minReportsArr.push(component);
+    this.setState({ minReportsArr, reportsCompArr, hiddenReports });
   };
 
   handleReportSelect = e => {
@@ -181,6 +240,7 @@ class App extends Component {
           key={`report${index}`}
           waterfallClickOn={this.handleWaterFallClickOnBar}
           handleMetric={this.getMetric}
+          onMinimize={this.handleMinimizeReport}
         />
       );
       this.setState({
@@ -216,6 +276,7 @@ class App extends Component {
         key={`report${index}`}
         waterfallClickOn={this.handleWaterFallClickOnBar}
         handleMetric={this.getMetric}
+        onMinimize={this.handleMinimizeReport}
       />
     );
     this.setState({
@@ -236,6 +297,7 @@ class App extends Component {
         key={`report${index}`}
         waterfallClickOn={this.handleWaterFallClickOnBar}
         handleMetric={this.getMetric}
+        onMinimize={this.handleMinimizeReport}
       />
     );
 
@@ -397,7 +459,16 @@ class App extends Component {
   };
 
   switchView = viewType => {
+    const { pid } = this.state;
     this.setState({ viewType });
+    if (viewType === 'search') {
+      pid
+        ? this.props.history.push(`/search/${pid}`)
+        : this.props.history.push(`/search`);
+    } else if (viewType === 'display') {
+      this.props.history.push(`/display`);
+    }
+
   };
 
   handleMngMenu = () => {
@@ -475,6 +546,13 @@ class App extends Component {
       this.setState({ notifications });
     }
   }
+
+  componentDidUpdate = prevProps => {
+    const uploaded = this.props.notificationAction.startsWith('Upload');
+    if (prevProps.lastEventId !== this.props.lastEventId && uploaded) {
+      this.props.dispatch(getTemplates());
+    }
+  };
 
   completeAutorization = apiUrl => {
     let getAuthUser = null;
@@ -927,6 +1005,7 @@ class App extends Component {
           viewType={this.state.viewType}
           notificationWarning={noOfUnseen}
           pid={this.state.pid}
+          path={this.props.location.pathname}
         />
         {showReportsMenu && (
           <SelectModalMenu
@@ -975,6 +1054,7 @@ class App extends Component {
           />
         )}
         {this.state.reportsCompArr}
+        {this.state.minReportsArr}
         {!this.state.authenticated && mode !== 'lite' && (
           <Route path="/login" component={LoginForm} />
         )}
@@ -998,6 +1078,8 @@ class App extends Component {
                       updateProgress={this.updateProgress}
                       pid={this.state.pid}
                       updateTreeDataOnSave={this.updateTreeDataOnSave}
+                      keycloak={this.state.keycloak}
+                      onSwitchView={this.switchView}
                     />
                   )}
                 />
@@ -1116,7 +1198,19 @@ class App extends Component {
           >
             <Switch>
               <Route path="/logout" component={Logout} />
-              <ProtectedRoute path="/display" component={DisplayView} />
+              <ProtectedRoute
+                path="/display"
+                render={props => (
+                  <DisplayView
+                    {...props}
+                    updateProgress={this.updateProgress}
+                    pid={this.state.pid}
+                    updateTreeDataOnSave={this.updateTreeDataOnSave}
+                    keycloak={this.state.keycloak}
+                    onSwitchView={this.switchView}
+                  />
+                )}
+              />
               <Route path="/not-found" component={NotFound} />
               <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
@@ -1171,6 +1265,8 @@ const mapStateToProps = state => {
     selectedProject,
     selectedPatients,
     projectMap,
+    lastEventId,
+    notificationAction,
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -1182,6 +1278,8 @@ const mapStateToProps = state => {
     selectedProject,
     selectedPatients,
     projectMap,
+    lastEventId,
+    notificationAction,
     selection: state.managementReducer.selection,
   };
 };

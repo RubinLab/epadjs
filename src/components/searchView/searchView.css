@@ -529,11 +529,53 @@ h5.add-subject__modal--label,
 .report-header {
   display: flex;
   justify-content: space-between;
-  background:rgb(77, 77, 77);
+  background: rgb(77, 77, 77);
   padding: 0.5rem;
 }
 
+.minreport-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: #861737;
+  border-radius: 10px;
+  border: 0.5px solid white;
+}
+
 .report-header__title {
-  color: white;
+  font-size: 1.4rem;
+  color: rgb(204, 204, 255);
+
+}
+
+.minreport-header__title {
   font-size: 1.2rem;
+  color: white;
+  border-radius: 7px;
+}
+
+.minreport-header__title {
+  margin-right: 1rem;
+}
+.minreport-header {
+  border-radius: 7px;
+}
+
+.report-header__btn,
+.minreport-header__btn {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 0px 4px;
+  margin-left: 6px;
+  border-radius: 5px;
+}
+
+.report-header__btn.--exp,
+.report-header__btn.--exp {
+  font-weight: 400;
+}
+
+.report-header__btn.--close,
+.report-header__btn.--close {
+  padding: 0px 6px;
 }

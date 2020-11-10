@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import ReactTable from "react-table";
 import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
-import { FaRegEye, FaCommentsDollar } from "react-icons/fa";
+import { FaRegEye, FaEyeSlash, FaCommentsDollar } from "react-icons/fa";
 import {
   getSummaryAnnotations,
   deleteAnnotation,
@@ -26,7 +26,7 @@ import {
   updatePatient,
 } from "../../annotationsList/action";
 import WarningModal from "../../common/warningModal";
-import "../menuStyle.css"
+import "../menuStyle.css";
 
 const mode = sessionStorage.getItem("mode");
 
@@ -113,9 +113,13 @@ class Annotations extends React.Component {
   handleProjectSelect = e => {
     this.setState({ projectID: e.target.value });
     if (mode !== "lite") {
-      e.target.value === "all_aims"
-        ? this.getAnnotationsData()
-        : this.getAnnotationsData(e.target.value);
+      if (e.target.value === "all_aims") {
+        this.getAnnotationsData();
+        this.setState({ isAllAims: true });
+      } else {
+        this.getAnnotationsData(e.target.value);
+        this.setState({ isAllAims: false });
+      }
       this.setState({ filteredData: null });
     }
   };
@@ -231,7 +235,7 @@ class Annotations extends React.Component {
   handleDeleteAll = () => {
     const selectedArr = Object.values(this.state.selected);
     const notSelected = selectedArr.includes(false) || selectedArr.length === 0;
-    if (notSelected) {
+    if (notSelected || this.state.isAllAims) {
       return;
     } else {
       this.setState({ deleteAllClicked: true });
@@ -251,6 +255,7 @@ class Annotations extends React.Component {
       template: "",
       createdStart: "",
       createdEnd: "",
+      isAllAims: false,
     });
   };
 
@@ -482,16 +487,20 @@ class Annotations extends React.Component {
         style: { display: "flex", justifyContent: "center" },
         Cell: original => {
           return (
-            <Link className="open-link" to={"/display"}>
-              <div
-                onClick={() => {
-                  this.openAnnotation(original);
-                  this.props.onClose();
-                }}
-              >
-                <FaRegEye className="menu-clickable" />
-              </div>
-            </Link>
+            this.state.isAllAims ? (
+              <FaEyeSlash />
+            ) : (
+              <Link className="open-link" to={"/display"}>
+                <div
+                  onClick={() => {
+                    this.openAnnotation(original);
+                    this.props.onClose();
+                  }}
+                >
+                  <FaRegEye className="menu-clickable" />
+                </div>
+              </Link>
+            )
           );
         },
       },
@@ -659,6 +668,7 @@ class Annotations extends React.Component {
           onDownload={this.handleDownload}
           onKeyDown={this.handleKeyDown}
           pid={projectID}
+          isAllAims={this.state.isAllAims}
         />
         <ReactTable
           NoDataComponent={() => null}

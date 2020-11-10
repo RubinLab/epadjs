@@ -54,3 +54,9 @@ export function addSubjectToProject(projectID, subjectID) {
 export function getSubject(projectID, subjectID) {
   return http.get(`${apiUrl}/projects/${projectID}/subjects/${subjectID}`);
 }
+
+export function getAimsOfSubject(projectID, subjectID) {
+  return http.get(
+    `${apiUrl}/projects/${projectID}/subjects/${subjectID}/aims?longitudinal_ref=true`
+  );
+}

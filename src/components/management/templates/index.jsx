@@ -261,7 +261,6 @@ class Templates extends React.Component {
         accessor: "",
         width: 50,
         Cell: ({ original }) => {
-          console.log(original);
           const { templateUID } = original.Template[0];
           return (
             <input

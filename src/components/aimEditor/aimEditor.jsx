@@ -13,10 +13,12 @@ import {
   updatePatientOnAimSave,
   getSingleSerie,
 } from "../annotationsList/action";
+import RecistTable from "./RecistTable";
 import { Aim, getAimImageData, modalities } from "aimapi";
+import { prepAimForParseClass, getMarkups } from "./Helpers";
 import * as questionaire from "./parseClass.js";
 import * as dcmjs from "dcmjs";
-
+import Switch from "react-switch";
 import "./aimEditor.css";
 
 const enumAimType = {
@@ -34,6 +36,7 @@ class AimEditor extends Component {
       buttonGroupShow: false,
       saveButtonIsActive: false,
       isUpdate: false,
+      autoFill: false,
     };
     //if aim is being updated set the aimId and isUpdate flag
     if (this.props.aimId) {
@@ -44,8 +47,6 @@ class AimEditor extends Component {
 
   componentDidMount() {
     const element = document.getElementById("questionaire");
-    console.log("Props from aim editor", this.props);
-
     let {
       templates: allTemplates,
       openSeries,
@@ -54,13 +55,25 @@ class AimEditor extends Component {
     } = this.props;
     const { projectID } = openSeries[activePort];
 
-    this.semanticAnswers = new questionaire.AimEditor(
-      element,
-      this.validateForm,
-      this.renderButtons,
-      this.getDefaultLesionName(),
-      setAimDirty
-    );
+    const lastSavedAim = sessionStorage.getItem("lastSavedAim");
+
+    if (this.state.autoFill && Object.keys(lastSavedAim).length)
+      this.semanticAnswers = new questionaire.AimEditor(
+        element,
+        this.validateForm,
+        this.renderButtons,
+        this.getDefaultLesionName(),
+        setAimDirty,
+        prepAimForParseClass(JSON.parse(lastSavedAim)) // becasue there is the whole aim json in the session storage, pass only necessary parts to autofill
+      );
+    else
+      this.semanticAnswers = new questionaire.AimEditor(
+        element,
+        this.validateForm,
+        this.renderButtons,
+        this.getDefaultLesionName(),
+        setAimDirty
+      );
 
     const { projectMap } = this.props;
 
@@ -78,7 +91,6 @@ class AimEditor extends Component {
     });
     this.semanticAnswers.createViewerWindow();
     const { aimId } = this.props;
-    console.log("Aim id in cdm", aimId);
     if (aimId != null && Object.entries(aimId).length) {
       try {
         this.semanticAnswers.loadAimJson(aimId);
@@ -94,7 +106,6 @@ class AimEditor extends Component {
   }
 
   loadAim = (event) => {
-    console.log("event", event);
     const { aimID } = event.detail;
     try {
       this.semanticAnswers.loadAimJson(aimID);
@@ -147,21 +158,82 @@ class AimEditor extends Component {
     return "";
   };
 
+  setAutoFill = (checked) => {
+    this.setState({ autoFill: checked });
+    if (checked) {
+      const lastSavedAim = sessionStorage.getItem("lastSavedAim");
+      if (lastSavedAim && Object.keys(lastSavedAim).length) {
+        const aimForParseClass = prepAimForParseClass(JSON.parse(lastSavedAim));
+        this.semanticAnswers.triggerAutoFillAim(aimForParseClass);
+      }
+    }
+  };
+
   render() {
+    const { openSeries, activePort } = this.props;
+    const { patientID, projectID} = openSeries[activePort];
     return (
-      <div className="editorForm">
+      <div className="editor-form">
+        AutoFill :
+        <Switch
+          onChange={this.setAutoFill}
+          checked={this.state.autoFill}
+          onColor="#86d3ff"
+          onHandleColor="#2693e6"
+          handleDiameter={10}
+          uncheckedIcon={
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
+                fontSize: 11,
+                color: "#861737",
+                paddingRight: 2,
+              }}
+            >
+              Off
+            </div>
+          }
+          checkedIcon={
+            <svg viewBox="0 0 10 10" height="100%" width="100%">
+              <circle r={3} cx={5} cy={5} />
+            </svg>
+          }
+          boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+          activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+          // height={15}
+          // width={20}
+          className="react-switch"
+        />
+        <div
+          className="base-line-selection"
+          onClick={() => this.setState({ showRecist: true })}
+        >
+          Select Baseline
+        </div>
+        {this.state.showRecist && (
+          <RecistTable
+            subjectId={patientID}
+            projectId={projectID}
+            semanticAnswers={this.semanticAnswers}
+            onClose={() => this.setState({ showRecist: false })}
+          />
+        )}
+        <br />
         <div id="questionaire" />
         {this.state.buttonGroupShow && (
-          <div className="AimEditorButtonGroup">
+          <div className="aim-editor-button-group">
             <button
-              className="btn btn-sm btn-outline-light AimEditorButton"
+              className="btn btn-sm btn-outline-light aim-editor-button"
               onClick={this.save}
             >
               Save
             </button>
             &nbsp;
             <button
-              className="btn btn-sm btn-outline-light AimEditorButton"
+              className="btn btn-sm btn-outline-light aim-editor-button"
               onClick={() => this.props.onCancel(true)}
             >
               Cancel
@@ -176,8 +248,28 @@ class AimEditor extends Component {
     return this.image.data.string("x00080050") || "";
   };
 
+  checkMarkupsForTemplate = () => {
+    const templateType = this.semanticAnswers.getSelectedTemplateType();
+    if (templateType === "Study" || templateType === "Series") {
+      const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+      if(!toolState || toolState === "undefined")
+        return
+      const shapes = getMarkups(toolState);
+      if (shapes && Object.keys(shapes).length) {
+        const answer = window.confirm(
+          `No markups can be saved with template type: ${templateType}! All previously unsaved markups will be lost! Do you want to continue?`
+        );
+        if (!answer) return 0;
+        this.props.onCancel(false);
+      }
+    }
+    return 1;
+  };
+
   save = () => {
-    if (!this.checkAimTemplate()) return;
+    // Check if the template selected and if the selected template type is compatible to have markups
+    if (!this.checkAimTemplate() || !this.checkMarkupsForTemplate()) return;
+
     if (!this.state.saveButtonIsActive) {
       window.alert(
         "Please fill required answers or use required geometric shape"
@@ -221,9 +313,55 @@ class AimEditor extends Component {
     return true;
   };
 
+  fixAimType = (aim, templateType) => {
+    if (
+      templateType === "Study" &&
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .imageReferenceEntityCollection
+    ) {
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.instanceUid.root =
+        "";
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.modality = {
+        code: "99EPADM0",
+        codeSystemName: "99EPAD",
+        "iso:displayName": {
+          "xmlns:iso": "uri:iso.org:21090",
+          value: "NA",
+        },
+      };
+    }
+    if (
+      (templateType === "Study" || templateType === "Series") &&
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .imageReferenceEntityCollection
+    ) {
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.imageCollection.Image[0].sopClassUid.root =
+        "";
+      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.imageCollection.Image[0].sopInstanceUid.root =
+        "";
+      // remove instance number from comment
+      if (
+        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+          .comment
+      ) {
+        const commentParts = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value.split(
+          "/"
+        );
+        if (commentParts.length > 3) {
+          commentParts[2] = " ";
+          aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value = commentParts.join(
+            "/"
+          );
+        }
+      }
+    }
+    return aim;
+  };
+
   createAim = async (answers) => {
     const { hasSegmentation } = this.props;
     const markupsToSave = this.getNewMarkups();
+    const templateType = this.semanticAnswers.getSelectedTemplateType();
     // try {
     if (hasSegmentation) {
       // if (!this.checkSegmentationFrames()) return;
@@ -233,7 +371,7 @@ class AimEditor extends Component {
           // also add the markups to aim if there is any
           if (Object.entries(markupsToSave).length !== 0)
             this.createAimMarkups(aim, markupsToSave);
-          this.saveAim(aim, segmentationBlob, segId);
+          this.saveAim(aim, templateType, segmentationBlob, segId);
         }
       );
     } else if (Object.entries(markupsToSave).length !== 0) {
@@ -245,7 +383,7 @@ class AimEditor extends Component {
         this.updatedAimId
       );
       this.createAimMarkups(aim, markupsToSave);
-      this.saveAim(aim);
+      this.saveAim(aim, templateType);
     } else {
       //Non markup image annotation
       const { activePort } = this.props;
@@ -258,7 +396,7 @@ class AimEditor extends Component {
         enumAimType.imageAnnotation,
         this.updatedAimId
       );
-      this.saveAim(aim);
+      this.saveAim(aim, templateType);
     }
     // } catch (error) {
     //   throw new Error("Error creating aim", error);
@@ -383,9 +521,9 @@ class AimEditor extends Component {
     return seedData;
   };
 
-  saveAim = (aim, segmentationBlob, segId) => {
+  saveAim = (aim, templateType, segmentationBlob, segId) => {
     const aimJson = aim.getAim();
-    const aimSaved = JSON.parse(aimJson);
+    let aimSaved = JSON.parse(aimJson);
 
     // If file upload service will be used instead of aim save service reagrding
     // the aim size purposes then aim blob should be sent with the following code
@@ -393,7 +531,7 @@ class AimEditor extends Component {
     // const aimBlob = new Blob([aimJson], {
     //   type: "application/octet-stream",
     // });
-
+    aimSaved = this.fixAimType(aimSaved, templateType);
     const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
     const { openSeries, activePort } = this.props;
     const { patientID, projectID, seriesUID, studyUID } = openSeries[
@@ -417,6 +555,9 @@ class AimEditor extends Component {
 
     uploadAim(aimSaved, projectID, this.state.isUpdate, this.updatedAimId)
       .then(() => {
+        // Write the aim to session storage for further autoFill
+        sessionStorage.setItem("lastSavedAim", JSON.stringify(aimSaved));
+
         if (segmentationBlob) this.saveSegmentation(segmentationBlob, segId);
         // var objectUrl = URL.createObjectURL(segBlobGlobal);
         // window.open(objectUrl);

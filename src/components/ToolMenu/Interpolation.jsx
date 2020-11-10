@@ -13,13 +13,8 @@ class Interpolation extends Component {
   }
 
   setInterpolation = (checked) => {
-    console.log("Settin interpolation", checked);
     this.setState({ interpolation: checked });
     cornerstoneTools.store.modules.freehand3D.setters.toggleInterpolate();
-    console.log(
-      "state after ",
-      cornerstoneTools.store.modules.freehand3D.state
-    );
   };
 
   render() {

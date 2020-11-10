@@ -3,11 +3,11 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import ReactHtmlParser from 'react-html-parser';
 import { Rnd } from 'react-rnd';
+import useResizeAware from 'react-resize-aware';
 import { renderTable, wordExport } from './recist';
-import { drawWaterfall } from './waterfall';
 import ConfirmationModal from '../common/confirmationModal';
+import WaterfallReact from './WaterfallReact';
 import { MAX_PORT } from '../../constants';
-
 import { getWaterfallReport, getReport } from '../../services/reportServices';
 import { checkIfSeriesOpen, clearCarets } from '../../Utils/aid';
 import {
@@ -16,6 +16,7 @@ import {
   jumpToAim,
   addToGrid,
   getSingleSerie,
+  updateImageId,
 } from '../annotationsList/action';
 
 const messages = {
@@ -23,14 +24,22 @@ const messages = {
   message: `Maximum ${MAX_PORT} series can be opened. Please close already opened series first.`,
 };
 
-const style = { width: 'auto', minWidth: 300, maxHeight: 800, height: 'auto' };
+const style = {
+  width: 'auto',
+  minWidth: 300,
+  maxHeight: 800,
+  height: 'auto',
+};
 const Report = props => {
+  const [resizeListener, sizes] = useResizeAware();
   const [node, setNode] = useState(null);
   const [data, setData] = useState([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [selectedCol, setSelectedCol] = useState(null);
+  const [isNonTarget, setIsNonTarget] = useState(false);
   const [filteredPatients, setFilteredPatients] = useState({});
+  const [selectedSeries, setSelectedSeries] = useState([]);
 
   const constructPairs = object => {
     const result = [];
@@ -87,7 +96,6 @@ const Report = props => {
     };
   };
 
-  
   const onClose = e => {
     const index = parseInt(e.target.dataset.index);
     props.onClose(index);
@@ -106,7 +114,7 @@ const Report = props => {
         loadFilter,
         numofHeaderCols,
         hideCols,
-        report
+        report,
       } = getTableArguments();
       let reportTable;
       if (Object.keys(data).length > 0) {
@@ -124,8 +132,6 @@ const Report = props => {
             refreshFilter
           );
         }
-        if (props.report === 'Waterfall')
-          reportTable = await drawWaterfall(data, waterfallClickOn);
         reportTable = ReactHtmlParser(reportTable);
         setNode(reportTable);
       }
@@ -168,9 +174,9 @@ const Report = props => {
           result = await getWaterfallReport(null, null, pairs, type, metric);
         }
       }
-      getReportTable(result.data);
+      setData(result.data);
     } else {
-      getReportTable({ series: [] });
+      setData({ series: [] });
     }
   };
 
@@ -222,6 +228,45 @@ const Report = props => {
     wordExport(subjectName, 'recisttbl' + index);
   };
 
+  useEffect(() => {}, [sizes.width, sizes.height]);
+
+  const updateImageIDs = async () => {
+    const { openSeries } = props;
+    const indexMap = {};
+    selectedSeries.forEach(el => {
+      const { isOpen, index } = checkIfSeriesOpen(
+        openSeries,
+        el.seriesUID,
+        'seriesUID'
+      );
+      if (isOpen) indexMap[el.seriesUID] = index;
+    });
+
+    if (Object.values(indexMap).length === selectedSeries.length) {
+      let count = 0;
+      openSeries.forEach((el, i) => {
+        if (
+          (indexMap[el.seriesUID] || indexMap[el.seriesUID] === 0) &&
+          el.imageAnnotations
+        ) {
+          count += 1;
+        }
+      });
+      if (count === selectedSeries.length) {
+        for (let aim of selectedSeries) {
+          console.log(aim);
+          const { seriesUID, aimUID } = aim;
+          props.dispatch(jumpToAim(seriesUID, aimUID, indexMap[seriesUID]));
+        }
+        window.dispatchEvent(new Event('aimsOpenedFromReport'));
+      }
+    }
+  };
+
+  useEffect(() => {
+    updateImageIDs();
+  }, [Object.keys(props.aimsList).length]);
+
   useEffect(() => {
     const { id } = getTableArguments();
     const shapesFilter = document.getElementById(id + 'shapesFilter');
@@ -259,82 +304,147 @@ const Report = props => {
 
   const captureClick = e => {
     const { nodeName, id } = e.target;
-    if (nodeName === 'A' && id.startsWith('a')) {
-      const row = parseInt(id[1]);
-      const col = parseInt(id[2]) - 1;
+    setIsNonTarget(id.startsWith('nc'));
+    if (nodeName === 'A' && (id.startsWith('a') || id.startsWith('nc'))) {
+      const row = id.startsWith('a') ? parseInt(id[1]) : parseInt(id[2]);
+      const col = id.startsWith('a')
+        ? parseInt(id[2]) - 1
+        : parseInt(id[3]) - 1;
       setSelectedRow(row);
       setSelectedCol(col);
-      handleLesionClick(row, col);
+      const nontarget = id.startsWith('nc');
+      handleLesionClick(row, col, nontarget);
     }
   };
 
-  const openAims = (seriesToOpen, projectID, patientID) => {
-    const array =
-      projectID && patientID
-        ? seriesToOpen.map(el => ({ ...el, projectID, patientID }))
-        : seriesToOpen;
+  const openAims = async (
+    seriesToOpen,
+    projectID,
+    patientID,
+    selectedSeries
+  ) => {
+    try {
+      setSelectedSeries(selectedSeries);
+      const array =
+        projectID && patientID
+          ? seriesToOpen.map(el => ({ ...el, projectID, patientID }))
+          : seriesToOpen;
 
-    array.forEach(series => {
-      props.dispatch(addToGrid(series, series.aimID || series.aimUID));
-      props.dispatch(getSingleSerie(series, series.aimID || series.aimUID));
-    });
-    props.history.push('/display');
-  };
+      for (let series of array) {
+        props.dispatch(addToGrid(series, series.aimID || series.aimUID));
+        props.dispatch(getSingleSerie(series, series.aimID || series.aimUID));
+      }
+      props.history.push('/display');
+    }
+    catch (err) {
+      console.error(err);
+    }
+  }
 
-  const handleLesionClick = (row, col) => {
-    // check if the col is 0 (one aim only)
-    const { openSeries } = props;
-    const notOpenSeries = [];
-    const { projectID, patientID, subjectName } = props.patient;
-    if (col !== -1) {
-      const { seriesUID, aimUID, studyUID } = data.tUIDs[row][col];
-      // if not zero check if it is already open
-      const { isOpen, index } = checkIfSeriesOpen(
-        openSeries,
-        seriesUID,
-        'seriesUID'
-      );
-      // if open jump to the displate change active port
-      if (isOpen) {
-        props.dispatch(changeActivePort(index));
-        props.dispatch(jumpToAim(seriesUID, aimUID, index));
-        props.history.push('/display');
+  // Sotred because of merge conflict to be deleted later!!!
+  
+  // const openAims = (seriesToOpen, projectID, patientID) => {
+  //   try {
+  //     const array =
+  //       projectID && patientID
+  //         ? seriesToOpen.map(el => ({ ...el, projectID, patientID }))
+  //         : seriesToOpen;
+
+  //     array.forEach(series => {
+  //       props.dispatch(addToGrid(series, series.aimID || series.aimUID));
+  //       props.dispatch(getSingleSerie(series, series.aimID || series.aimUID));
+  //     });
+  //     props.history.push('/display');
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
+
+  const handleLesionClick = (row, col, nontarget) => {
+    try {
+      const uidData = nontarget ? data.ntUIDs : data.tUIDs;
+      const { openSeries } = props;
+      const notOpenSeries = [];
+      const { projectID, patientID, subjectName } = props.patient;
+      // check if the col is 0 (one aim only)
+      if (col !== -1) {
+        const { seriesUID, aimUID, studyUID } = uidData[row][col];
+        // if not zero check if it is already open
+        const { isOpen, index } = checkIfSeriesOpen(
+          openSeries,
+          seriesUID,
+          'seriesUID'
+        );
+        // if open jump to the displate change active port
+        if (isOpen) {
+          props.dispatch(changeActivePort(index));
+          props.dispatch(jumpToAim(seriesUID, aimUID, index));
+          props.history.push('/display');
+        } else {
+          // if not open check if the grid is full
+          // if so give confirmation (clear display view and cancel buttons)
+          if (openSeries.length === MAX_PORT) {
+            setShowConfirmModal(true);
+          } else {
+            //if not open the series
+            openAims([uidData[row][col]], projectID, patientID);
+          }
+        }
+        // if the column is 0 (all aims for the lesion)
       } else {
-        // if not open check if the grid is full
-        // if so give confirmation (clear display view and cancel buttons)
-        if (openSeries.length === MAX_PORT) {
+        // check if open series has any of the selected series
+        // if so copy the input array and delete the item from the copied input array
+        uidData[row].forEach((el, index) => {
+          if (
+            !checkIfSeriesOpen(openSeries, el.seriesUID, 'seriesUID').isOpen
+          ) {
+            notOpenSeries.push(el);
+          }
+        });
+        // check if already open series and array in hand if have more than 6 series
+        if (notOpenSeries.length + openSeries.length > MAX_PORT) {
+          // if so give confirmation (clear display view and cancel buttons)
           setShowConfirmModal(true);
         } else {
-          //if not open the series
-          openAims([data.tUIDs[row][col]], projectID, patientID);
+          // commented out after merge conflict to be deleted later
+          
+    //       //if not open the series
+    //       openAims([data.tUIDs[row][col]], projectID, patientID, [
+    //         data.tUIDs[row][col],
+    //       ]);
+    //     }
+    //   }
+    //   // if the column is 0 (all aims for the lesion)
+    // } else {
+    //   // check if open series has any of the selected series
+    //   // if so copy the input array and delete the item from the copied input array
+    //   data.tUIDs[row].forEach((el, index) => {
+    //     if (!checkIfSeriesOpen(openSeries, el.seriesUID, 'seriesUID').isOpen) {
+    //       notOpenSeries.push(el);
+    //     }
+    //   });
+    //   // check if already open series and array in hand if have more than 6 series
+    //   if (notOpenSeries.length + openSeries.length > MAX_PORT) {
+    //     // if so give confirmation (clear display view and cancel buttons)
+    //     setShowConfirmModal(true);
+    //   } else {
+    //     openAims(notOpenSeries, projectID, patientID, data.tUIDs[row]);
+          openAims(notOpenSeries, projectID, patientID);
         }
       }
-      // if the column is 0 (all aims for the lesion)
-    } else {
-      // check if open series has any of the selected series
-      // if so copy the input array and delete the item from the copied input array
-      data.tUIDs[row].forEach((el, index) => {
-        if (!checkIfSeriesOpen(openSeries, el.seriesUID, 'seriesUID').isOpen) {
-          notOpenSeries.push(el);
-        }
-      });
-      // check if already open series and array in hand if have more than 6 series
-      if (notOpenSeries.length + openSeries.length > MAX_PORT) {
-        // if so give confirmation (clear display view and cancel buttons)
-        setShowConfirmModal(true);
-      } else {
-        openAims(notOpenSeries, projectID, patientID);
-      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
   const clearGridAndOpenAllSeries = () => {
+    const uidData = isNonTarget ? data.ntUIDs : data.tUIDs;
     const { projectID, patientID } = props.patient;
     props.dispatch(clearGrid());
     const seriesToOpen =
       selectedCol >= 0
-        ? [data.tUIDs[selectedRow][selectedCol]]
-        : data.tUIDs[selectedRow];
+        ? [uidData[selectedRow][selectedCol]]
+        : uidData[selectedRow];
     openAims(seriesToOpen, projectID, patientID);
     setShowConfirmModal(false);
   };
@@ -343,6 +453,7 @@ const Report = props => {
     props.report !== 'Waterfall'
       ? `${props.report} - ${clearCarets(props.patient.subjectName)}`
       : '';
+
   return (
     <>
       <Rnd
@@ -362,10 +473,26 @@ const Report = props => {
               <div className="report-header__title">{header}</div>
               <div className="report-header__btngrp">
                 {props.report !== 'Waterfall' && (
-                  <button onClick={downloadReport}>Export</button>
+                  <button
+                    className="report-header__btn --exp"
+                    onClick={downloadReport}
+                  >
+                    Export
+                  </button>
                 )}
-                <button data-index={props.index} onClick={onClose}>
-                  {'x'}
+                <button
+                  className="report-header__btn"
+                  data-index={props.index}
+                  onClick={() => props.onMinimize(props.index, header)}
+                >
+                  {String.fromCharCode('0xFF3F')}
+                </button>
+                <button
+                  className="report-header__btn --close"
+                  data-index={props.index}
+                  onClick={onClose}
+                >
+                  {String.fromCharCode('0x2A09')}
                 </button>
               </div>
             </div>
@@ -380,11 +507,16 @@ const Report = props => {
                   <option>intensitystddev</option>
                 </select>
               </div>
-              <div
-                id="waterfallContainer"
-                style={{ width: '100%', minWidth: '300px' }}
-                title="WATERFALL"
-              ></div>
+              {data.series && data.series.length >= 0 && (
+                <div style={{ position: 'relative', background: '#FFFFFF' }}>
+                  {resizeListener}
+                  <WaterfallReact
+                    data={data}
+                    waterfallSelect={waterfallClickOn}
+                    width={sizes.width}
+                  />
+                </div>
+              )}
             </>
           )}
 
@@ -409,6 +541,7 @@ const mapStateToProps = state => {
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedProject: state.annotationsListReducer.selectedProject,
     openSeries: state.annotationsListReducer.openSeries,
+    aimsList: state.annotationsListReducer.aimsList,
   };
 };
 
