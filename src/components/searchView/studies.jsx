@@ -84,7 +84,8 @@ class Studies extends Component {
         treeData,
         closeExpand,
       } = this.props;
-      let data = Object.values(treeData[projectId][subjectId].studies);
+      let data = [];
+      if (treeData[projectId] && treeData[projectId][subjectId]) data = Object.values(treeData[projectId][subjectId].studies);
       if (data.length > 0) {
         data = data.map(el => el.data);
       } else {
@@ -128,6 +129,7 @@ class Studies extends Component {
         this.setState({ expanded });
       }
     } catch (err) {
+      console.error(err);
       console.log(`couldn't load all study data. Please Try again!`);
     }
   }
@@ -141,7 +143,6 @@ class Studies extends Component {
         closeAllCounter,
         selectedStudies,
       } = this.props;
-
 
       if (closeAllCounter !== prevProps.closeAllCounter) {
         this.setState({ expanded: {}, expansionArr: [] });
@@ -204,8 +205,16 @@ class Studies extends Component {
       if (newSelectedStArr.length !== oldSelectedStArr.length) {
         this.setState({ columns: this.setColumns() });
       }
+
+      if (this.props.treeData !== prevProps.treeData) {
+        const { projectId, subjectId } = this.props;
+        let studies = await getStudies(projectId, subjectId);
+        const { data } = studies;
+        this.setState({ data });
+      }
     } catch (err) {
       console.log(`couldn't load all study data. Please Try again!`);
+      console.error(err);
     }
   }
 
@@ -219,8 +228,8 @@ class Studies extends Component {
         }
       this.setState({ expanded });
     } catch (err) {
-      console.log(err)
       console.log(`couldn't load all study data. Please Try again!`);
+      console.error(err);
     }
   };
 
@@ -589,7 +598,7 @@ class Studies extends Component {
         //getsingleSerie
         Promise.all(promiseArr)
           .then(() => {})
-          .catch(err => console.log(err));
+          .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
         if (!patientExists) {

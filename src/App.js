@@ -468,7 +468,6 @@ class App extends Component {
     } else if (viewType === 'display') {
       this.props.history.push(`/display`);
     }
-
   };
 
   handleMngMenu = () => {
@@ -855,12 +854,15 @@ class App extends Component {
     return index;
   };
 
+  clearAllTreeData = () => {
+    this.setState({ treeData: {}});
+  };
+
   clearTreeData = () => {
     try {
       const { pid, treeExpand } = this.state;
       const patients = { ...this.state.treeData[pid] };
       const patientsArr = Object.values(patients);
-
       for (let patientIndex in treeExpand) {
         // if the index is kept as false it means that
         // level opened and then closed so we need to clear data
@@ -1020,6 +1022,7 @@ class App extends Component {
             admin={this.state.admin}
             getProjectAdded={this.getProjectAdded}
             pid={this.state.pid}
+            clearAllTreeData={this.clearAllTreeData}
           />
         )}
         {this.state.openInfo && (
