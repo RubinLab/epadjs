@@ -95,7 +95,7 @@ class Annotations extends React.Component {
         await this.getAnnotationsData(projectID);
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -106,7 +106,7 @@ class Annotations extends React.Component {
         : await getAllAnnotations();
       this.setState({ annotations });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -196,9 +196,9 @@ class Annotations extends React.Component {
         notDeleted[annotation] = newSelected[annotation];
         delete newSelected[annotation];
       } else {
-        toBeDeleted[projectID] = toBeDeleted[projectID]
-          ? toBeDeleted[projectID].push(annotation)
-          : [annotation];
+        toBeDeleted[projectID]
+        ? toBeDeleted[projectID].push(annotation)
+        : toBeDeleted[projectID] = [annotation];
       }
     }
     const projects = Object.keys(toBeDeleted);
@@ -348,7 +348,7 @@ class Annotations extends React.Component {
       dateArr[2] = dateArr[2][0] === "0" ? dateArr[2][1] : dateArr[2];
       return dateArr[1] + "/" + dateArr[2] + "/" + dateArr[0];
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -622,7 +622,7 @@ class Annotations extends React.Component {
       }
       return result ? result : str;
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return str;
     }
   };
