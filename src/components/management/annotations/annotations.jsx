@@ -9,6 +9,7 @@ import {
   getSummaryAnnotations,
   deleteAnnotation,
   getAllAnnotations,
+  deleteAllAnnotations,
 } from "../../../services/annotationServices";
 import { getProjects } from "../../../services/projectServices";
 import matchSorter from "match-sorter";
@@ -55,8 +56,7 @@ class Annotations extends React.Component {
     downloadClicked: false,
     projectID: "",
     allAims: [],
-    seriesAlreadyOpen: false,
-    selectedSeries: {},
+    seriesAlreadyOpen: {},
   };
 
   componentDidMount = async () => {
@@ -95,7 +95,7 @@ class Annotations extends React.Component {
         await this.getAnnotationsData(projectID);
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -106,7 +106,7 @@ class Annotations extends React.Component {
         : await getAllAnnotations();
       this.setState({ annotations });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -132,10 +132,8 @@ class Annotations extends React.Component {
   toggleRow = async (id, projectID, seriesUID) => {
     projectID = projectID ? projectID : "lite";
     let newSelected = Object.assign({}, this.state.selected);
-    let newSelectedSeries = Object.assign({}, this.state.selectedSeries);
     if (newSelected[id]) {
       delete newSelected[id];
-      delete newSelectedSeries[id];
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
@@ -143,21 +141,21 @@ class Annotations extends React.Component {
         });
       }
     } else {
-      newSelected[id] = projectID;
-      newSelectedSeries[id] = seriesUID;
+      newSelected[id] = { projectID, seriesUID };
       await this.setState({
         selectAll: 2,
       });
     }
-    this.setState({ selected: newSelected, selectedSeries: newSelectedSeries });
+    this.setState({ selected: newSelected });
   };
 
   toggleSelectAll() {
     let newSelected = {};
     if (this.state.selectAll === 0) {
       this.state.annotations.forEach(annotation => {
-        let projectID = annotation.projectID ? annotation.projectID : "lite";
-        newSelected[annotation.aimID] = projectID;
+        const projectID = annotation.projectID ? annotation.projectID : "lite";
+        const { seriesUID } = annotation;
+        newSelected[annotation.aimID] = { projectID, seriesUID };
       });
     }
     this.setState({
@@ -185,48 +183,52 @@ class Annotations extends React.Component {
   };
 
   deleteAllSelected = async () => {
-    const notDeleted = [];
+    const notDeleted = {};
     let newSelected = Object.assign({}, this.state.selected);
-    let newSelectedSeries = Object.assign({}, this.state.selectedSeries);
-
-    const { selectedSeries } = this.state;
+    const toBeDeleted = {};
     const promiseArr = [];
     for (let annotation in newSelected) {
-      const obj = {
-        seriesUID: selectedSeries[annotation],
-        projectID: newSelected[annotation],
-      };
-      if (!this.checkIfSerieOpen(obj, this.props.openSeries).isOpen) {
-        const obj = { aimID: annotation, projectID: newSelected[annotation] };
-        promiseArr.push(deleteAnnotation(obj));
+      const { projectID } = newSelected[annotation];
+      if (
+        this.checkIfSerieOpen(newSelected[annotation], this.props.openSeries)
+          .isOpen
+      ) {
+        notDeleted[annotation] = newSelected[annotation];
+        delete newSelected[annotation];
       } else {
-        notDeleted.push(annotation);
+        toBeDeleted[projectID]
+        ? toBeDeleted[projectID].push(annotation)
+        : toBeDeleted[projectID] = [annotation];
       }
     }
+    const projects = Object.keys(toBeDeleted);
+    const aims = Object.values(toBeDeleted);
+
+    projects.forEach((pid, i) => {
+      promiseArr.push(deleteAllAnnotations(pid, aims[i]));
+    });
 
     Promise.all(promiseArr)
       .then(() => {
         this.getAnnotationsData(this.state.projectID);
         this.props.updateProgress();
-        if (notDeleted.length === 0) {
-          this.setState({ selectAll: 0, selected: {}, selectedSeries: {} });
-        } else {
-          this.setState({ seriesAlreadyOpen: notDeleted.length });
-          for (let ann in newSelected) {
-            if (!notDeleted.includes(ann)) {
-              delete newSelected[ann];
-              delete newSelectedSeries[ann];
-            }
-          }
-          this.setState({
-            selectAll: 2,
-            selected: newSelected,
-            selectedSeries: newSelectedSeries,
-          });
-        }
+        const keys = Object.keys(notDeleted);
+        this.props.clearAllTreeData();
+        keys.length === 0
+          ? this.setState({ selectAll: 0, selected: {} })
+          : this.setState({
+              seriesAlreadyOpen: keys.length,
+              selected: notDeleted,
+              selectAll: 2,
+            });
       })
       .catch(error => {
-        toast.error(error.response.data.message, { autoClose: false });
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        )
+          toast.error(error.response.data.message, { autoClose: false });
         this.getAnnotationsData();
       });
     this.handleCancel();
@@ -346,7 +348,7 @@ class Annotations extends React.Component {
       dateArr[2] = dateArr[2][0] === "0" ? dateArr[2][1] : dateArr[2];
       return dateArr[1] + "/" + dateArr[2] + "/" + dateArr[0];
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -486,21 +488,19 @@ class Annotations extends React.Component {
         resizable: false,
         style: { display: "flex", justifyContent: "center" },
         Cell: original => {
-          return (
-            this.state.isAllAims ? (
-              <FaEyeSlash />
-            ) : (
-              <Link className="open-link" to={"/display"}>
-                <div
-                  onClick={() => {
-                    this.openAnnotation(original);
-                    this.props.onClose();
-                  }}
-                >
-                  <FaRegEye className="menu-clickable" />
-                </div>
-              </Link>
-            )
+          return this.state.isAllAims ? (
+            <FaEyeSlash />
+          ) : (
+            <Link className="open-link" to={"/display"}>
+              <div
+                onClick={() => {
+                  this.openAnnotation(original);
+                  this.props.onClose();
+                }}
+              >
+                <FaRegEye className="menu-clickable" />
+              </div>
+            </Link>
           );
         },
       },
@@ -622,7 +622,7 @@ class Annotations extends React.Component {
       }
       return result ? result : str;
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return str;
     }
   };
@@ -643,7 +643,7 @@ class Annotations extends React.Component {
   };
 
   handleSubmitDownload = () => {
-    this.setState({ selected: {}, selectAll: 0, selectedSeries: {} });
+    this.setState({ selected: {}, selectAll: 0 });
     this.handleCancel();
   };
 

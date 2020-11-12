@@ -109,6 +109,13 @@ export function deleteAnnotation(aimObj, delSys) {
   );
 }
 
+export function deleteAllAnnotations(projectID, aimList) {
+  return http.post(
+    apiUrl + "/projects/" + projectID + "/aims/delete?all=true",
+    aimList
+  );
+}
+
 export function uploadAim(aim, projectId, isUpdate = false, updatedAimId) {
   let url;
   if (mode === "lite") {
@@ -153,7 +160,6 @@ export function uploadSegmentation(segmentation, segName, projectId = "lite") {
   };
   return http.post(url, segData, config);
 }
-
 
 // export function uploadSegmentation(segmentation, projectId = "lite") {
 //   const url = apiUrl + "/projects/" + projectId + "/files";

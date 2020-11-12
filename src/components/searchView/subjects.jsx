@@ -72,8 +72,8 @@ class Subjects extends Component {
       this.setState({ columns: this.setColumns() });
       this.updateExpanded();
     } catch (err) {
-      // console.log(err);
       console.log(`couldn't load all subjects data. Please Try again!`);
+      console.error(err);
     }
   }
 
@@ -161,6 +161,11 @@ class Subjects extends Component {
         // this.setState({ data });
       }
 
+      if (this.props.treeData !== prevProps.treeData) {
+        data = await this.getData();
+        this.setState({ data });
+      }
+
       const patients = Object.values(this.props.selectedPatients).length;
       const studies = Object.values(this.props.selectedStudies).length;
       const series = Object.values(this.props.selectedSeries).length;
@@ -189,6 +194,7 @@ class Subjects extends Component {
       }
     } catch (err) {
       console.log(`couldn't load all subjects data. Please Try again!`);
+      console.error(err);
     }
   }
   expandCurrentLevel = async () => {
@@ -203,6 +209,7 @@ class Subjects extends Component {
       this.setState({ expanded });
     } catch (err) {
       console.log(`Couldn't load all subjects data. Please Try again!`);
+      console.error(err);
     }
   };
 
@@ -461,19 +468,19 @@ class Subjects extends Component {
     return string;
   }
 
-  getData(projects) {
-    const data = projects.map(item => {
-      // using chancejs to generate guid
-      // shortid is probably better but seems to have performance issues
-      // on codesandbox.io
-      const _id = chance.guid();
-      return {
-        _id,
-        ...item,
-      };
-    });
-    return data;
-  }
+  // getData(projects) {
+  //   const data = projects.map(item => {
+  //     // using chancejs to generate guid
+  //     // shortid is probably better but seems to have performance issues
+  //     // on codesandbox.io
+  //     const _id = chance.guid();
+  //     return {
+  //       _id,
+  //       ...item,
+  //     };
+  //   });
+  //   return data;
+  // }
 
   toggleSelection = (key, shift, row) => {
     /*
