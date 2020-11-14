@@ -16,9 +16,9 @@ class RecistTable extends Component {
     const targets = [];
     const nonTargets = [];
     Object.entries(data).forEach(([key, value]) => {
-      if (value?.type.toLowerCase().includes("target"))
+      if (value?.type?.toLowerCase().includes("target"))
         targets.push({ name: key, json: value.aim });
-      else if (value?.type.toLowerCase().includes("non-target"))
+      else if (value?.type?.toLowerCase().includes("non-target"))
         nonTargets.push({ name: key, json: value.aim });
     });
     this.setState({ loading: false, targets, nonTargets });
