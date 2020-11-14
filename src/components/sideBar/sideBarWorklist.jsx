@@ -47,7 +47,7 @@ class WorkList extends React.Component {
     this.getWorkListData();
   };
 
-  componentDidUpdate = (prevProps) => {
+  componentDidUpdate = prevProps => {
     if (prevProps.match.params.wid !== this.props.match.params.wid) {
       this.getWorkListData();
     }
@@ -86,12 +86,12 @@ class WorkList extends React.Component {
         this.setState({ deleteSingleClicked: false, singleDeleteData: {} });
         this.getWorkListData();
       })
-      .catch((err) => {
+      .catch(err => {
         this.setState({ errorMessage: err.response.data.message });
       });
   };
 
-  clearCarets = (string) => {
+  clearCarets = string => {
     if (string) {
       for (let i = 0; i < string.length; i++) {
         string = string.replace("^", " ");
@@ -133,7 +133,7 @@ class WorkList extends React.Component {
   toggleSelectAll() {
     let newSelected = {};
     if (this.state.selectAll === 0) {
-      this.state.worklists.forEach((worklist) => {
+      this.state.worklists.forEach(worklist => {
         const { workListID, projectID, subjectID, studyUID } = worklist;
         newSelected[worklist.studyUID] = {
           workListID,
@@ -150,17 +150,17 @@ class WorkList extends React.Component {
     });
   }
 
-  handleOpenClick = async (study) => {
+  handleOpenClick = async study => {
     const { projectID, subjectID, studyUID } = study;
     const { data: series } = await getSeries(projectID, subjectID, studyUID);
-    this.setState((state) => ({
+    this.setState(state => ({
       showSeries: !state.showSeries,
       series,
     }));
   };
 
   handleCancelOpenSeries = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       showSeries: !state.showSeries,
       series: [],
       error: null,
@@ -174,7 +174,7 @@ class WorkList extends React.Component {
         Header: "Open",
         width: 50,
         resizable: true,
-        Cell: (row) => {
+        Cell: row => {
           return (
             <div onClick={() => this.handleOpenClick(row.original)}>
               <FaRegEye className="menu-clickable" />
@@ -187,7 +187,7 @@ class WorkList extends React.Component {
         Header: "Study Description",
         sortable: true,
         resizable: true,
-        Cell: (original) => {
+        Cell: original => {
           let studyDesc = this.clearCarets(
             original.row._original.studyDescription
           );
@@ -202,7 +202,7 @@ class WorkList extends React.Component {
         sortable: true,
         resizable: true,
 
-        Cell: (original) => {
+        Cell: original => {
           let subjectName = this.clearCarets(
             original.row._original.subjectName
           );
@@ -217,13 +217,19 @@ class WorkList extends React.Component {
         sortable: true,
         resizable: true,
         show: mode === "thick",
-        Cell: (original) => {
-          let projectName = this.clearCarets(
-            original.row._original.projectName
-          );
-          projectName = projectName ? projectName : "Unnamed Subject";
-          return <div>{original.row._original.projectName}</div>;
+        Cell: original => {
+          let { projectName } = this.props.projectMap[
+            original.row._original.projectID
+          ];
+          return <div>{projectName}</div>;
         },
+      },
+      {
+        id: "study_date",
+        Header: "Study Date",
+        sortable: true,
+        resizable: true,
+        accessor: "studyDate",
       },
       {
         id: "due",
@@ -244,7 +250,7 @@ class WorkList extends React.Component {
         Header: "",
         width: 45,
         resizable: true,
-        Cell: (original) => (
+        Cell: original => (
           <div
             onClick={() =>
               this.handleSingleDelete(
@@ -262,7 +268,7 @@ class WorkList extends React.Component {
     ];
   };
 
-  selectSeries = (series) => {
+  selectSeries = series => {
     const { selectedSeries } = this.state;
     selectedSeries[series.seriesUID]
       ? delete selectedSeries[series.seriesUID]
@@ -270,7 +276,7 @@ class WorkList extends React.Component {
     this.setState({ selectedSeries });
   };
 
-  checkIfSerieOpen = (selectedSerie) => {
+  checkIfSerieOpen = selectedSerie => {
     let isOpen = false;
     let index;
     this.props.openSeries.forEach((serie, i) => {
@@ -314,7 +320,7 @@ class WorkList extends React.Component {
             });
           } else {
             //else get data for each serie for display
-            selectedSeries.forEach((serie) => {
+            selectedSeries.forEach(serie => {
               this.props.dispatch(addToGrid(serie));
               this.props.dispatch(getSingleSerie(serie));
             });
@@ -344,7 +350,7 @@ class WorkList extends React.Component {
 
   render = () => {
     const selected = this.state.selectAll < 2;
-    const openSeriesUIDs = this.props.openSeries.map((el) => el.seriesUID);
+    const openSeriesUIDs = this.props.openSeries.map(el => el.seriesUID);
 
     return (
       <div className="worklist-page">
@@ -379,10 +385,11 @@ class WorkList extends React.Component {
   };
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
+    projectMap: state.annotationsListReducer.projectMap,
   };
 };
 export default connect(mapStateToProps)(WorkList);

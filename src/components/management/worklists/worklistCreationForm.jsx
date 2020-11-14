@@ -10,7 +10,9 @@ import "../menuStyle.css";
 
 const messages = {
   fillRequiredFields: "Please fill the required fields",
-  missingReqField: "Please fill or clear all requirement fields before submit",
+  missingReqField:
+    "Please fill or clear all worklist's requirement fields before submit",
+  noSpace: "No space in worklist ID!",
 };
 
 class WorklistCreationForm extends React.Component {
@@ -72,7 +74,8 @@ class WorklistCreationForm extends React.Component {
       const unselectedTemplate =
         template === undefined || template.includes("Select Template");
       const unselectedAims = numOfAims === undefined || numOfAims === "";
-      const hasReqCleared = unselectedAims && unselectedTemplate && unselectedLevel;
+      const hasReqCleared =
+        unselectedAims && unselectedTemplate && unselectedLevel;
       const body = {};
       if (Object.keys(requirements).length > 0 && !hasReqCleared) {
         promise.push(
@@ -126,9 +129,23 @@ class WorklistCreationForm extends React.Component {
   };
 
   handleFormInput = e => {
-    if (this.state.id && this.state.name) this.setState({ error: "" });
+    const isName = e.target.name === "name";
+    const isID = e.target.name === "id";
+    const properID = isID && !e.target.value.trim().includes(" ");
+
+    if (isID && e.target.value.trim().includes(" ")) {
+      this.setState({ error: messages.noSpace });
+    }
+    if (properID) {
+      if (this.state.error === messages.noSpace) this.setState({ error: "" });
+    }
+    if ((isName || isID) && properID) {
+      if (this.state.error === messages.fillRequiredFields) {
+        this.setState({ error: "" });
+      }
+    }
     const { name, value } = e.target;
-    this.setState({ [name]: value });
+    this.setState({ [name]: value.trim() });
   };
 
   selectUser = e => {
@@ -165,7 +182,7 @@ class WorklistCreationForm extends React.Component {
     let button2Func = this.goNextPage;
     let button3Func = onCancel;
     let disableSubmit = false;
-    let disableNext = !id || !name;
+    let disableNext = !id || !name || id.includes(" ");
 
     if (page === 2) {
       button2Text = "Submit";
