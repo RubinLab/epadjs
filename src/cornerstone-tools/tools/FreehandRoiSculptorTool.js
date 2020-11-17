@@ -119,7 +119,6 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    * @returns {boolean}
    */
   preMouseDownCallback(evt) {
-    console.log("pre mouse down");
     if (!this.options.mouseButtonMask.includes(evt.detail.buttons)) {
       return;
     }
@@ -150,8 +149,6 @@ export default class FreehandRoiSculptorTool extends BaseTool {
       return;
     }
 
-    // console.log("tool state", toolState);
-    // console.log("config current tool", config);
     const points = toolState.data[config.currentTool].handles.points;
 
     /**
@@ -378,7 +375,6 @@ export default class FreehandRoiSculptorTool extends BaseTool {
       detail,
     });
     const shouldContinue = window.dispatchEvent(evnt);
-    console.log("should continue", shouldContinue);
     if (shouldContinue) {
       /**
        * End aim editor related part
@@ -426,7 +422,6 @@ export default class FreehandRoiSculptorTool extends BaseTool {
     const config = this.configuration;
     const element = eventData.element;
 
-    console.log("current tool", config);
     if (config.currentTool === null) {
       this._selectFreehandTool(eventData);
 
