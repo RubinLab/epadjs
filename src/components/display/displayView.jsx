@@ -37,6 +37,7 @@ import { refreshToken } from "../../services/authService";
 import { isThisSecond } from "date-fns/esm";
 import { FiMessageSquare } from "react-icons/fi";
 import { errorMonitor } from "events";
+import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
@@ -1319,9 +1320,21 @@ class DisplayView extends Component {
       dirty: false,
     });
     this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
+    this.clearSculptState();
     this.renderAims(true);
     return 1;
   };
+
+  clearSculptState = () => {
+    const {tools} =cornerstoneTools.store.state;
+    for(let i=0; i<tools.length; i++){
+      if(tools[i].name === "FreehandRoiSculptor"){
+        tools[i]._deselectAllTools();
+        return;
+      }
+    }
+    
+  }
 
   closeViewport = () => {
     const { showAimEditor, dirty } = this.state;

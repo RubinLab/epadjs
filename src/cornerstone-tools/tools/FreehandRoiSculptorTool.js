@@ -149,8 +149,6 @@ export default class FreehandRoiSculptorTool extends BaseTool {
       return;
     }
 
-    // console.log("tool state", toolState);
-    // console.log("config current tool", config);
     const points = toolState.data[config.currentTool].handles.points;
 
     /**

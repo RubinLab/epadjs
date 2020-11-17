@@ -75,7 +75,6 @@ export function setMarkupsOfAimActive(aimOfInterest) {
         case "CircleRoi":
           const circles = markUps[tool].data;
           circles.map((circle) => {
-            console.log("circle", circle);
             if (!circle.aimId || circle.aimId === aimOfInterest)
               circle["color"] = activeColor;
           });
