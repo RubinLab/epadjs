@@ -71,14 +71,15 @@ class SmartBrushMenu extends Component {
     const maxApplyToImageNum = this.getLastImageIndexOfSeries();
     const {isHuGated} = this.props;
     return (
-      <Draggable>
+      <Draggable handle="#handle">
         <div className="smb-pop-up">
           <div className="close-smart-brush-menu" onClick={this.props.onClose}>
             <a href="#">X</a>
           </div>
-          <div className="buttonLabel">
+          <div id="handle" className="buttonLabel">
             <span>Brush Menu</span>
           </div>
+          <hr/>
           <div>
             <span>Apply to whole image </span>
             <input 
