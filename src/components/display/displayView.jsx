@@ -1328,10 +1328,13 @@ class DisplayView extends Component {
   clearSculptState = () => {
     const {tools} =cornerstoneTools.store.state;
     console.log("tools", tools);
-    // for(let i=0; i<tools.length; i++){
-    //   if(tools[i].)
-    // }
-    tools[15]._deselectAllTools();
+    for(let i=0; i<tools.length; i++){
+      if(tools[i].name === "FreehandRoiSculptor"){
+        tools[i]._deselectAllTools();
+        return;
+      }
+    }
+    
   }
 
   closeViewport = () => {
