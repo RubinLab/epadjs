@@ -5,35 +5,56 @@ import "./WindowLevel.css";
 
 export class WindowLevel extends Component {
   constructor(props) {
-    super(props);
+    super(props);    
     this.state = {
-      name: props.selectedPreset,
-      level: "",
-      window: "",
+      name: props.selectedPreset      
     };
   }
-  setPreset = (preset) => {
+
+  componentDidMount(){
+    const voi = this.getCurrentWL()?.voi;
+    this.setState({level: voi.windowCenter,
+      window: voi.windowWidth});
+  }
+
+  getCurrentWL = () => {
+    const { activePort } = this.props;
+    if (cornerstone.getEnabledElements()){
+      const { element } = cornerstone.getEnabledElements()[activePort];
+      return cornerstone.getViewport(element);
+    }
+    return undefined;
+  }
+
+  applyWL = (preset) => {
     const { name, level, window } = preset;
     if (this.state.name === name) return;
     const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
-    const vp = cornerstone.getViewport(element);
+    const vp = this.getCurrentWL(element);
     vp.voi.windowCenter = preset.level;
     vp.voi.windowWidth = preset.window;
     cornerstone.setViewport(element, vp);
     this.setState({ name, level, window });
     this.props.onClose(name);
   };
+
   handleWindowChange = (e) => {
     e.persist();
-    console.log("E is", e.target.value);
     this.setState({ window: e.target.value });
   };
+
   handleLevelChange = (e) => {
     e.persist();
-    console.log("E is", e);
     this.setState({ level: e.target.value });
   };
+
+  checkPreset = (preset) =>{
+    const voi = this.getCurrentWL()?.voi;
+    if(voi?.windowCenter === preset.level && voi?.windowWidth === preset.window) return true;
+    return false;
+  }
+
 
   render() {
     const winLevel = (
@@ -57,7 +78,6 @@ export class WindowLevel extends Component {
         />
       </div>
     );
-    // console.log(winLevel);
     const presets = [
       { name: "CT Abdomen (L:40, W:350)", level: 40, window: 350 },
       { name: "CT Bone (L:300, W:1500)", level: 300, window: 1500 },
@@ -92,8 +112,8 @@ export class WindowLevel extends Component {
                 type="radio"
                 name="presets"
                 value={i}
-                onChange={() => this.setPreset(preset)}
-                checked={this.state.name === preset.name}
+                onChange={() => this.applyWL(preset)}
+                checked={this.checkPreset(preset)}
               />
               {" " + preset.name}
 
