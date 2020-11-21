@@ -813,7 +813,7 @@ class AimEditor extends Component {
       });
       aim.createImageAnnotationStatement(2, segId, volumeId);
     }
-    return segId.root;
+    return segEntityData.sopInstanceUid;
   };
 
   parseImageUid = (imageUid) => {
