@@ -8,13 +8,25 @@ class Interpolation extends Component {
     super(props);
 
     this.state = {
-      interpolation: false,
+      interpolate: false,
     };
   }
 
+  componentDidMount(){
+    const {interpolate} = cornerstoneTools.store.modules.freehand3D.state;
+    console.log("interpolation is", interpolate);
+    if(interpolate !== undefined)
+      this.setState({interpolate});
+  }
+
   setInterpolation = (checked) => {
-    this.setState({ interpolation: checked });
-    cornerstoneTools.store.modules.freehand3D.setters.toggleInterpolate();
+    this.setState({ interpolate: checked });
+    if(checked){
+      console.log(cornerstoneTools.store.modules.freehand3D);
+     cornerstoneTools.store.modules.freehand3D.state.interpolate = true;
+    console.log(cornerstoneTools.store.modules.freehand3D);}
+    else 
+      cornerstoneTools.store.modules.freehand3D.state.interpolate = false;
   };
 
   render() {
@@ -32,7 +44,7 @@ class Interpolation extends Component {
         </span>{" "}
         <Switch
           onChange={this.setInterpolation}
-          checked={this.state.interpolation}
+          checked={this.state.interpolate}
           onColor="#86d3ff"
           onHandleColor="#2693e6"
           handleDiameter={10}

@@ -395,11 +395,7 @@ class DisplayView extends Component {
   };
 
   getData() {
-    // clear the toolState they will be rendered again on next load
-    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
-    cornerstoneTools.store.modules.freehand3D.state.seriesCollection = [];
-    // clear the segmentation data as well
-    cornerstoneTools.store.modules.segmentation.state.series = {};
+    this.clearAllMarkups();//we are already clearing in it renderAims do we need to here? 
     try {
       const { series } = this.props;
       var promises = [];
@@ -433,16 +429,23 @@ class DisplayView extends Component {
     });
   };
 
+  clearAllMarkups = () => {
+    // clear the toolState they will be rendered again on next load
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    cornerstoneTools.store.modules.freehand3D.state.seriesCollection = [];
+    // clear the segmentation data as well
+    cornerstoneTools.store.modules.segmentation.state.series = {};
+  }
+
   renderAims = (notShowAimEditor = false) => {
     const { series } = this.props;
     this.setState({
       activeLabelMapIndex: 0,
       prospectiveLabelMapIndex: 0,
     });
-    // clear the toolState they will be rendered again on next load
-    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
-    // clear the segmentation data as well
-    cornerstoneTools.store.modules.segmentation.state.series = {};
+    // markups will be rendered so clear all previously renders
+    this.clearAllMarkups();
+
     series.forEach((serie, serieIndex) => {
       if (serie.aimID && !notShowAimEditor) {
         const { aimID, seriesUID } = serie;
