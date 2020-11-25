@@ -106,11 +106,20 @@ class AimEditor extends Component {
 
   componentDidUpdate() {
     const { isSegUploaded } = this.props;
-    console.log("cDU", isSegUploaded, this.state);
     const { uploadingSegId } = this.state;
     if (isSegUploaded[uploadingSegId]) {
       this.setState({ showModal: false });
       this.uploadCompleted();
+      toast.success("Segmentation succesfully saved.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      this.props.dispatch(segUploadRemove(uploadingSegId));
+      this.setState({ uploadingSegId: "" });
     }
   }
 
@@ -571,24 +580,8 @@ class AimEditor extends Component {
         // Write the aim to session storage for further autoFill
         sessionStorage.setItem("lastSavedAim", JSON.stringify(aimSaved));
 
-        if (segmentationBlob) this.saveSegmentation(segmentationBlob, segId).then(() => {
-          console.log("Returned from save segmentation");
-          // this.uploadCompleted(aimRefs);
-        });
-        else {
-          // var objectUrl = URL.createObjectURL(segBlobGlobal);
-          // window.open(objectUrl);
-
-          // toast.success("Aim succesfully saved.", {
-          //   position: "top-right",
-          //   autoClose: 5000,
-          //   hideProgressBar: false,
-          //   closeOnClick: true,
-          //   pauseOnHover: true,
-          //   draggable: true,
-          // });
-          this.uploadCompleted(aimRefs)
-        }
+        if (segmentationBlob) this.saveSegmentation(segmentationBlob, segId);
+        else this.uploadCompleted(aimRefs)
       })
       .catch((error) => {
         alert(
@@ -596,7 +589,6 @@ class AimEditor extends Component {
         );
         console.error(error);
       });
-    // this.props.onCancel(false);
   };
 
   getNewMarkups = () => {
@@ -1106,25 +1098,8 @@ class AimEditor extends Component {
     const promise = new Promise((resolve, reject) => {
       uploadSegmentation(segmentation, segId, projectID)
         .then(() => {
-          console.log("Seg id uploading", segId);
           this.props.dispatch(segUploadStarted(segId));
           this.setState({ uploadingSegId: segId, showModal: true });
-          console.log("Sstate", this.state);
-
-          // this.props.onCancel();
-          // const notifications = sessionStorage.getItem("notifications");
-          // console.log("notifications", notifications);
-          // console.log("Type of notifications", typeof notifications);
-          // console.log("Last Notification", JSON.parse(notifications));
-
-          toast.success("Segmentation succesfully saved.", {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          });
           resolve("success");
         })
         .catch((error) => {
@@ -1187,7 +1162,7 @@ class AimEditor extends Component {
     );
     this.props.dispatch(updatePatientOnAimSave(aimRefs));
     this.props.updateTreeDataOnSave(aimRefs);
-    this.props.onCancel(false);
+    this.props.onCancel(false); //close the aim editor
   };
 
   getstripCsImageId = (imageId) => {

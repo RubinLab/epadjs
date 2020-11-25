@@ -901,13 +901,10 @@ class App extends Component {
   };
 
   checkIfSegUpload = (params) => {
-    console.log("Params", params);
     const { isSegUploaded } = this.props;
-    console.log("Isseguploaded", isSegUploaded);
     const segsUploaded = Object.keys(isSegUploaded);
     for (let i = 0; i < segsUploaded.length; i++) {
       if (params.includes(segsUploaded[i])) {
-        console.log("dispatching upload complete", params);
         return this.props.dispatch(segUploadCompleted(segsUploaded[i]));
       }
     }

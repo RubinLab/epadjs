@@ -565,7 +565,6 @@ const asyncReducer = (state = initialState, action) => {
         return { ...state, templates: action.templates };
       case SEG_UPLOAD_STARTED: {
         let segUid = action.payload;
-        console.log("In reducer, action", segUid, action);
         return Object.assign({}, state, {
           isSegUploaded: { ...state.isSegUploaded, [segUid]: false },
         });
@@ -577,7 +576,7 @@ const asyncReducer = (state = initialState, action) => {
         });
       }
       case SEG_UPLOAD_REMOVE: {
-        let { segUid } = action.payload;
+        let segUid = action.payload;
         const { [segUid]: value, ...theRest } = state.isSegUploaded;
         return Object.assign({}, state, {
           isSegUploaded: { ...theRest },
