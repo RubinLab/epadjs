@@ -33,43 +33,47 @@ class SmartBrushMenu extends Component {
   };
 
   clearIntervalConfiguration = () => {
-    const {minInterval, maxInterval} = brushModule.configuration;
-    if(minInterval)
+    const { minInterval, maxInterval } = brushModule.configuration;
+    if (minInterval)
       delete brushModule.configuration.minInterval;
-    if(maxInterval)
+    if (maxInterval)
       delete brushModule.configuration.maxInterval;
   }
 
-  handleApplyToImageChange = (e) => {    
+  handleApplyToImageChange = (e) => {
     var checked = e.target.checked;
     brushModule.configuration.applyToImage = checked;
     this.clearIntervalConfiguration();
-    this.setState({intervalDisabled:checked, minInterval:"", maxInterval:""})
+    this.setState({ intervalDisabled: checked, minInterval: "", maxInterval: "" })
   }
 
   handleApplyToMinChange = (evt) => {
     const min = evt.target.value;
-    this.setState({minInterval:min});
+    this.setState({ minInterval: min });
     brushModule.configuration.applyToImage = true;
     brushModule.configuration.minInterval = parseInt(min);
   }
 
   handleApplyToMaxChange = (evt) => {
     const max = evt.target.value;
-    this.setState({maxInterval:max});
+    this.setState({ maxInterval: max });
     brushModule.configuration.applyToImage = true;
     brushModule.configuration.maxInterval = parseInt(max);
   }
 
   getLastImageIndexOfSeries = () => {
-    const { element } = cornerstone.getEnabledElements()[this.props.activePort];
-    const stackToolState = cornerstoneTools.getToolState(element, "stack");
-    return stackToolState.data[0].imageIds.length;
+    const elements = cornerstone.getEnabledElements();
+    if (elements.length) {
+      const { element } = elements[this.props.activePort];
+      const stackToolState = cornerstoneTools.getToolState(element, "stack");
+      return stackToolState.data[0].imageIds.length;
+    }
+    else return 1;
   }
 
   render() {
     const maxApplyToImageNum = this.getLastImageIndexOfSeries();
-    const {isHuGated} = this.props;
+    const { isHuGated } = this.props;
     return (
       <Draggable handle="#handle">
         <div className="smb-pop-up">
@@ -79,68 +83,68 @@ class SmartBrushMenu extends Component {
           <div id="handle" className="buttonLabel">
             <span>Brush Menu</span>
           </div>
-          <hr/>
+          <hr />
           <div>
             <span>Apply to whole image </span>
-            <input 
-              type="checkbox" 
-              name="applyToImage" 
+            <input
+              type="checkbox"
+              name="applyToImage"
               onChange={this.handleApplyToImageChange}
               disabled={this.state.applyToImageDisabled}
             />
           </div>
           <div>
             <span>Apply images </span>
-              <input type="number"
-                     min="1"
-                     max={maxApplyToImageNum-1}
-                     value={this.state.minInterval}
-                     className={"slice-field"}
-                     onChange={this.handleApplyToMinChange} 
-                     style={{
-                      width: "50px",
-                      height: "20px",
-                      opacity: 1,
-                      }}
-                      disabled={this.state.intervalDisabled}
-               />
-              <span> to </span>
-              <input type="number"
-                     min="2"
-                     max={maxApplyToImageNum}
-                     value={this.state.maxInterval}
-                     className={"slice-field"}
-                     onChange={this.handleApplyToMaxChange} 
-                     style={{
-                      width: "50px",
-                      height: "20px",
-                      opacity: 1,
-                      }}
-                      disabled={this.state.intervalDisabled}
-               />
+            <input type="number"
+              min="1"
+              max={maxApplyToImageNum - 1}
+              value={this.state.minInterval}
+              className={"slice-field"}
+              onChange={this.handleApplyToMinChange}
+              style={{
+                width: "50px",
+                height: "20px",
+                opacity: 1,
+              }}
+              disabled={this.state.intervalDisabled}
+            />
+            <span> to </span>
+            <input type="number"
+              min="2"
+              max={maxApplyToImageNum}
+              value={this.state.maxInterval}
+              className={"slice-field"}
+              onChange={this.handleApplyToMaxChange}
+              style={{
+                width: "50px",
+                height: "20px",
+                opacity: 1,
+              }}
+              disabled={this.state.intervalDisabled}
+            />
           </div>
           {isHuGated && (
             <div className="brush-presets">
-            {brushModule.state.gates.map((gate, i) => (
-              <div key={i}>
-                <input
-                  type="radio"
-                  name="brushPresets"
-                  value={gate.name}
-                  onChange={() => this.handleBrushChange(gate.name)}
-                  defaultChecked={
-                    gate.name === brushModule.getters.activeGate()
-                  }
-                />
-                {gate.name !== "custom" &&
-                  " " +
+              {brushModule.state.gates.map((gate, i) => (
+                <div key={i}>
+                  <input
+                    type="radio"
+                    name="brushPresets"
+                    value={gate.name}
+                    onChange={() => this.handleBrushChange(gate.name)}
+                    defaultChecked={
+                      gate.name === brushModule.getters.activeGate()
+                    }
+                  />
+                  {gate.name !== "custom" &&
+                    " " +
                     gate.displayName +
                     " [" +
                     gate.range.toString() +
                     "]" +
                     " HU"}
-                {gate.name === "custom" &&
-                  " " +
+                  {gate.name === "custom" &&
+                    " " +
                     gate.displayName +
                     " [" +
                     this.state.customBrush.min +
@@ -148,29 +152,29 @@ class SmartBrushMenu extends Component {
                     this.state.customBrush.max +
                     "]" +
                     " HU"}
-                {gate.name === "custom" && (
-                  <div className="range-container">
-                    <InputRange
-                      style={inputRange}
-                      disabled={this.state.rangeDisabled}
-                      step={1}
-                      maxValue={3000}
-                      minValue={-1000}
-                      // formatLabel={value => `${value} HU`}
-                      value={this.state.customBrush}
-                      onChange={(value) =>
-                        this.setState({ customBrush: value })
-                      }
-                      onChangeComplete={(value) =>
-                        this.applyCustomBrushValues(value)
-                      }
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-          )}          
+                  {gate.name === "custom" && (
+                    <div className="range-container">
+                      <InputRange
+                        style={inputRange}
+                        disabled={this.state.rangeDisabled}
+                        step={1}
+                        maxValue={3000}
+                        minValue={-1000}
+                        // formatLabel={value => `${value} HU`}
+                        value={this.state.customBrush}
+                        onChange={(value) =>
+                          this.setState({ customBrush: value })
+                        }
+                        onChangeComplete={(value) =>
+                          this.applyCustomBrushValues(value)
+                        }
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </Draggable>
     );
