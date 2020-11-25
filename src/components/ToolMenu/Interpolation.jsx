@@ -14,19 +14,13 @@ class Interpolation extends Component {
 
   componentDidMount(){
     const {interpolate} = cornerstoneTools.store.modules.freehand3D.state;
-    console.log("interpolation is", interpolate);
     if(interpolate !== undefined)
       this.setState({interpolate});
   }
 
   setInterpolation = (checked) => {
     this.setState({ interpolate: checked });
-    if(checked){
-      console.log(cornerstoneTools.store.modules.freehand3D);
-     cornerstoneTools.store.modules.freehand3D.state.interpolate = true;
-    console.log(cornerstoneTools.store.modules.freehand3D);}
-    else 
-      cornerstoneTools.store.modules.freehand3D.state.interpolate = false;
+    cornerstoneTools.store.modules.freehand3D.state.interpolate = checked;
   };
 
   render() {

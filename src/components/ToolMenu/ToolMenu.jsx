@@ -298,7 +298,6 @@ class ToolMenu extends Component {
       // TODO emel: isn't it bug prone. although it is not going to work, we are setting the state
       this.setState({ showBrushSize: true, isHuGated:true, showSmartBrush: true });
     } else if (tool === "Brush3DAutoGated") {
-      console.log("sanirim");
       if (this.checkIfMultiframe()) {
         // if (!this.checkIfCT() || this.checkIfMultiframe()) {
         alert("Auto Gated tool only works with singleframe images");
