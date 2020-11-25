@@ -12,6 +12,8 @@ import {
   updateSingleSerie,
   updatePatientOnAimSave,
   getSingleSerie,
+  segUploadStarted,
+  segUploadRemove
 } from "../annotationsList/action";
 import RecistTable from "./RecistTable";
 import { Aim, getAimImageData, modalities } from "aimapi";
@@ -19,6 +21,7 @@ import { prepAimForParseClass, getMarkups } from "./Helpers";
 import * as questionaire from "./parseClass.js";
 import * as dcmjs from "dcmjs";
 import Switch from "react-switch";
+import { Modal } from "react-bootstrap";
 import "./aimEditor.css";
 
 const enumAimType = {
@@ -101,6 +104,16 @@ class AimEditor extends Component {
     window.addEventListener("checkShapes", this.checkShapes);
   }
 
+  componentDidUpdate() {
+    const { isSegUploaded } = this.props;
+    console.log("cDU", isSegUploaded, this.state);
+    const { uploadingSegId } = this.state;
+    if (isSegUploaded[uploadingSegId]) {
+      this.setState({ showModal: false });
+      this.uploadCompleted();
+    }
+  }
+
   componentWillUnmount() {
     window.removeEventListener("checkShapes", this.checkShapes);
   }
@@ -171,7 +184,7 @@ class AimEditor extends Component {
 
   render() {
     const { openSeries, activePort } = this.props;
-    const { patientID, projectID} = openSeries[activePort];
+    const { patientID, projectID } = openSeries[activePort];
     return (
       <div className="editor-form">
         AutoFill :
@@ -252,7 +265,7 @@ class AimEditor extends Component {
     const templateType = this.semanticAnswers.getSelectedTemplateType();
     if (templateType === "Study" || templateType === "Series") {
       const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-      if(!toolState || toolState === "undefined")
+      if (!toolState || toolState === "undefined")
         return
       const shapes = getMarkups(toolState);
       if (shapes && Object.keys(shapes).length) {
@@ -558,31 +571,24 @@ class AimEditor extends Component {
         // Write the aim to session storage for further autoFill
         sessionStorage.setItem("lastSavedAim", JSON.stringify(aimSaved));
 
-        if (segmentationBlob) this.saveSegmentation(segmentationBlob, segId);
-        // var objectUrl = URL.createObjectURL(segBlobGlobal);
-        // window.open(objectUrl);
+        if (segmentationBlob) this.saveSegmentation(segmentationBlob, segId).then(() => {
+          console.log("Returned from save segmentation");
+          // this.uploadCompleted(aimRefs);
+        });
+        else {
+          // var objectUrl = URL.createObjectURL(segBlobGlobal);
+          // window.open(objectUrl);
 
-        // toast.success("Aim succesfully saved.", {
-        //   position: "top-right",
-        //   autoClose: 5000,
-        //   hideProgressBar: false,
-        //   closeOnClick: true,
-        //   pauseOnHover: true,
-        //   draggable: true,
-        // });
-        this.props.dispatch(
-          getSingleSerie({ patientID, projectID, seriesUID, studyUID })
-        );
-        this.props.dispatch(
-          updateSingleSerie({
-            subjectID: patientID,
-            projectID,
-            seriesUID,
-            studyUID,
-          })
-        );
-        this.props.dispatch(updatePatientOnAimSave(aimRefs));
-        this.props.updateTreeDataOnSave(aimRefs);
+          // toast.success("Aim succesfully saved.", {
+          //   position: "top-right",
+          //   autoClose: 5000,
+          //   hideProgressBar: false,
+          //   closeOnClick: true,
+          //   pauseOnHover: true,
+          //   draggable: true,
+          // });
+          this.uploadCompleted(aimRefs)
+        }
       })
       .catch((error) => {
         alert(
@@ -590,7 +596,7 @@ class AimEditor extends Component {
         );
         console.error(error);
       });
-    this.props.onCancel(false);
+    // this.props.onCancel(false);
   };
 
   getNewMarkups = () => {
@@ -1097,23 +1103,36 @@ class AimEditor extends Component {
   saveSegmentation = (segmentation, segId) => {
     const { openSeries, activePort } = this.props;
     const { projectID } = openSeries[activePort];
-    uploadSegmentation(segmentation, segId, projectID)
-      .then(() => {
-        // this.props.onCancel();
-        // toast.success("Segmentation succesfully saved.", {
-        //   position: "top-right",
-        //   autoClose: 5000,
-        //   hideProgressBar: false,
-        //   closeOnClick: true,
-        //   pauseOnHover: true,
-        //   draggable: true,
-        // });
-        return "success";
-      })
-      .catch((error) => {
-        console.error(error);
-        return "error";
-      });
+    const promise = new Promise((resolve, reject) => {
+      uploadSegmentation(segmentation, segId, projectID)
+        .then(() => {
+          console.log("Seg id uploading", segId);
+          this.props.dispatch(segUploadStarted(segId));
+          this.setState({ uploadingSegId: segId, showModal: true });
+          console.log("Sstate", this.state);
+
+          // this.props.onCancel();
+          // const notifications = sessionStorage.getItem("notifications");
+          // console.log("notifications", notifications);
+          // console.log("Type of notifications", typeof notifications);
+          // console.log("Last Notification", JSON.parse(notifications));
+
+          toast.success("Segmentation succesfully saved.", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+          resolve("success");
+        })
+        .catch((error) => {
+          console.error(error);
+          reject("error");
+        });
+    });
+    return promise;
   };
 
   generateMockMetadata = (segmentIndex) => {
@@ -1142,6 +1161,35 @@ class AimEditor extends Component {
     };
   };
 
+  uploadCompleted = (aimRefs) => {
+    const { openSeries, activePort } = this.props;
+    const { patientID, projectID, seriesUID, studyUID } = openSeries[
+      activePort
+    ];
+    toast.success("Aim succesfully saved.", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+    this.props.dispatch(
+      getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+    );
+    this.props.dispatch(
+      updateSingleSerie({
+        subjectID: patientID,
+        projectID,
+        seriesUID,
+        studyUID,
+      })
+    );
+    this.props.dispatch(updatePatientOnAimSave(aimRefs));
+    this.props.updateTreeDataOnSave(aimRefs);
+    this.props.onCancel(false);
+  };
+
   getstripCsImageId = (imageId) => {
     if (imageId.includes("objectUID=")) return imageId.split("objectUID=")[1];
     return imageId.split("/").pop();
@@ -1154,6 +1202,7 @@ const mapStateToProps = (state) => {
     activePort: state.annotationsListReducer.activePort,
     templates: state.annotationsListReducer.templates,
     projectMap: state.annotationsListReducer.projectMap,
+    isSegUploaded: state.annotationsListReducer.isSegUploaded,
   };
 };
 
