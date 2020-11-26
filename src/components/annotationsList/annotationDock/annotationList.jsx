@@ -90,7 +90,7 @@ class AnnotationsList extends React.Component {
   };
 
   handleCalculations = (checked) => {
-    this.setState({ showCalculations: checked }, ()=>{
+    this.setState({ showCalculations: checked }, () => {
       state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
       this.refreshAllViewports();
     });
@@ -123,34 +123,38 @@ class AnnotationsList extends React.Component {
   };
 
   getLabelArray = () => {
-    const { openSeries, activePort } = this.props;
-    const { imageID } = this.props.openSeries[this.props.activePort];
-    let imageAnnotations;
-    if (this.props.openSeries[this.props.activePort].imageAnnotations) {
-      imageAnnotations = this.props.openSeries[this.props.activePort]
-        .imageAnnotations[imageID];
-      if (!imageAnnotations)
-        imageAnnotations =
-          openSeries[activePort].imageAnnotations[imageID + "&frame=1"];
-    }
     const calculations = {};
-    if (imageAnnotations) {
-      for (let aim of imageAnnotations) {
-        if (calculations[aim.aimUid]) {
-          calculations[aim.aimUid][aim.markupUid] = {
-            calculations: [...aim.calculations],
-            markupType: aim.markupType,
-          };
-          // calculations[aim.markupUid].push({ markupType: aim.markupType });
-        } else {
-          calculations[aim.aimUid] = {};
-          calculations[aim.aimUid][aim.markupUid] = {
-            calculations: [...aim.calculations],
-            markupType: aim.markupType,
-          };
-          // calculations[aim.markupUid].push({ markupType: aim.markupType });
+    try {
+      const { openSeries, activePort } = this.props;
+      const { imageID } = this.props.openSeries[this.props.activePort];
+      let imageAnnotations;
+      if (this.props.openSeries[this.props.activePort].imageAnnotations) {
+        imageAnnotations = this.props.openSeries[this.props.activePort]
+          .imageAnnotations[imageID];
+        if (!imageAnnotations)
+          imageAnnotations =
+            openSeries[activePort].imageAnnotations[imageID + "&frame=1"];
+      }
+      if (imageAnnotations) {
+        for (let aim of imageAnnotations) {
+          if (calculations[aim.aimUid]) {
+            calculations[aim.aimUid][aim.markupUid] = {
+              calculations: [...aim.calculations],
+              markupType: aim.markupType,
+            };
+            // calculations[aim.markupUid].push({ markupType: aim.markupType });
+          } else {
+            calculations[aim.aimUid] = {};
+            calculations[aim.aimUid][aim.markupUid] = {
+              calculations: [...aim.calculations],
+              markupType: aim.markupType,
+            };
+            // calculations[aim.markupUid].push({ markupType: aim.markupType });
+          }
         }
       }
+    } catch (error) {
+      console.error(error);
     }
     return calculations;
   };

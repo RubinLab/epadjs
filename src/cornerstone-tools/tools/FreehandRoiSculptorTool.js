@@ -958,7 +958,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
       }
     }
 
-    setToolCursor(this.element, this.svgCursor);
+    // setToolCursor(this.element, this.svgCursor);
 
     external.cornerstone.updateImage(this.element);
   }

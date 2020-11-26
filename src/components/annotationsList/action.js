@@ -38,6 +38,9 @@ import {
   GET_PROJECT_MAP,
   SET_SEG_LABEL_MAP_INDEX,
   GET_TEMPLATES,
+  SEG_UPLOAD_STARTED,
+  SEG_UPLOAD_COMPLETED,
+  SEG_UPLOAD_REMOVE,
   colors,
   commonLabels
 } from "./types";
@@ -833,6 +836,18 @@ export const setSegLabelMapIndex = (aimID, labelMapIndex) => {
     type: SET_SEG_LABEL_MAP_INDEX,
     payload: { aimID, labelMapIndex }
   };
+};
+
+export const segUploadStarted = (segUid) => {
+  return { type: SEG_UPLOAD_STARTED, payload: segUid };
+};
+
+export const segUploadCompleted = (segUid) => {
+  return { type: SEG_UPLOAD_COMPLETED, payload: segUid };
+};
+
+export const segUploadRemove = (segUid) => {
+  return { type: SEG_UPLOAD_REMOVE, payload: segUid };
 };
 
 // gets one patient and all the studys->series->annotations under it
