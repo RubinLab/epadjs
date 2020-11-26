@@ -235,6 +235,7 @@ class ToolMenu extends Component {
   //TODO: instead of disabling all tools we can just disable the active tool
   disableAllTools = () => {
     this.setState({ activeToolIdx: 0 });
+    this.setCursor("default");
     Array.from(this.tools).forEach((tool) => {
       this.setToolStateForAllElements(tool.name, "passive");
       // const apiTool = cornerstoneTools[`${tool.name}Tool`];
@@ -269,7 +270,6 @@ class ToolMenu extends Component {
   handleToolClicked = (index, tool) => {
     if (tool === "Noop") {
       this.disableAllTools();
-      this.setCursor("default");
       this.setState({ activeTool: "", activeToolIdx: index });
       return;
     } else if (tool === "Presets") {
@@ -294,9 +294,9 @@ class ToolMenu extends Component {
       } //Dont" select the HUGated if the modality is not CT
       this.setState({ showBrushSize: true });
     } else if (tool === "Brush3DHUGated") {
-      if (this.checkIfMultiframe()) {alert("Auto Gated tool only works with singleframe images");}
+      if (this.checkIfMultiframe()) { alert("Auto Gated tool only works with singleframe images"); }
       // TODO emel: isn't it bug prone. although it is not going to work, we are setting the state
-      this.setState({ showBrushSize: true, isHuGated:true, showSmartBrush: true });
+      this.setState({ showBrushSize: true, isHuGated: true, showSmartBrush: true });
     } else if (tool === "Brush3DAutoGated") {
       if (this.checkIfMultiframe()) {
         // if (!this.checkIfCT() || this.checkIfMultiframe()) {
@@ -304,7 +304,7 @@ class ToolMenu extends Component {
         // return;
       } //Dont" select the HUGated if the modality is not CT
       // TODO emel: isn't it bug prone. although it is not going to work, we are setting the state
-      this.setState({ showBrushSize: true, isHuGated:false, showSmartBrush: true });
+      this.setState({ showBrushSize: true, isHuGated: false, showSmartBrush: true });
     } else if (tool === "FreehandRoi3DTool") {
       this.setState({ showInterpolation: true });
     }
@@ -386,8 +386,8 @@ class ToolMenu extends Component {
   };
 
   render() {
-    const {activeTool} = this.state;
-    if(activeTool !== undefined && activeTool !== "" && activeTool !== "FreehandRoiSculptor")
+    const { activeTool } = this.state;
+    if (activeTool !== undefined && activeTool !== "" && activeTool !== "FreehandRoiSculptor")
       this.setToolStateForAllElements(activeTool, "active");
     return (
       <div className="toolbar">
@@ -672,14 +672,14 @@ class ToolMenu extends Component {
         {/* </Collapsible> */}
         {(this.state.activeTool === "Brush3D" ||
           this.state.activeTool === "SphericalBrush" ||
-          this.state.activeTool === "Brush3DHUGated" || 
+          this.state.activeTool === "Brush3DHUGated" ||
           this.state.activeTool === "Brush3DAutoGated") &&
           this.state.showBrushSize && (
             <BrushSizeSelector onClose={this.closeBrushSize} />
           )}
         {(this.state.activeTool === "Brush3DHUGated" || this.state.activeTool === "Brush3DAutoGated") &&
           this.state.showSmartBrush && (
-            <SmartBrushMenu activePort={this.props.activePort} onClose={this.closeSmartBrushMenu} isHuGated={this.state.isHuGated}/>
+            <SmartBrushMenu activePort={this.props.activePort} onClose={this.closeSmartBrushMenu} isHuGated={this.state.isHuGated} />
           )}
         {this.state.showPresets && (
           <WindowLevel
