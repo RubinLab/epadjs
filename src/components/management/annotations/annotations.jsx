@@ -403,8 +403,8 @@ class Annotations extends React.Component {
       // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
       //check if there is enough space in the grid
       let isGridFull = openSeries.length === MAX_PORT;
-      //check if the serie is already open
-
+      
+      //check if it's a study aim
       if (!seriesUID) {
         const { data } = await getStudy(projectID, patientID, studyUID);
         toast.error(
@@ -412,8 +412,9 @@ class Annotations extends React.Component {
             this.props.projectMap[projectID].projectName
           }", patient "${this.clearCarets(patientName)}", study "${data.studyDescription}"`,
           { autoClose: false }
-        );
-      } else {
+          );
+        } else {
+          //check if the serie is already open
         if (
           this.checkIfSerieOpen(selected.original, this.props.openSeries).isOpen
         ) {
