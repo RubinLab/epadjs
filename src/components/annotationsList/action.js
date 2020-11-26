@@ -687,7 +687,7 @@ const extractStudyAims = arr => {
 const extractNonMarkupAims = (arr, seriesID) => {
   let studyAims = [];
   let serieAims = [];
-  let imageAims = {};
+  // let imageAims = {};
   arr.forEach(aim => {
     const series =
       aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
@@ -708,13 +708,13 @@ const extractNonMarkupAims = (arr, seriesID) => {
           aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
             .segmentationEntityCollection.SegmentationEntity.length === 0)
       ) {
-        imageAims[series.imageCollection.Image[0].sopInstanceUid.root] = [
-          { aimUid: aim.ImageAnnotationCollection.uniqueIdentifier.root }
-        ];
+        // imageAims[series.imageCollection.Image[0].sopInstanceUid.root] = [
+        //   { aimUid: aim.ImageAnnotationCollection.uniqueIdentifier.root }
+        // ];
       }
     }
   });
-  return { studyAims, serieAims, imageAims };
+  return { studyAims, serieAims };
 };
 
 const alterImageID = imageAimsObj => {
@@ -738,18 +738,14 @@ const getSingleSerieData = (serie, annotation) => {
 
     getStudyAims(patientID, studyUID, projectID)
       .then(async result => {
-        const { studyAims, serieAims, imageAims } = extractNonMarkupAims(
+        const { studyAims, serieAims } = extractNonMarkupAims(
           result.data,
           seriesUID
         );
-        const imgAimsAlteredIDs = alterImageID(imageAims);
         aimsData = serieAims.concat(studyAims);
         imageData = {
           ...getImageIdAnnotations(serieAims),
-          ...imgAimsAlteredIDs
         };
-        // console.log(" ++++++ imageData from aimapi + ", getImageIdAnnotations(serieAims))
-        // console.log(" ++++++ emels extract function", imageAims)
         aimsData = getAimListFields(aimsData, annotation);
         resolve({ aimsData, imageData });
       })
