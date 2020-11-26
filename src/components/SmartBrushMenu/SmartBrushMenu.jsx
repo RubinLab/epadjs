@@ -21,6 +21,16 @@ class SmartBrushMenu extends Component {
     };
   }
 
+  componentDidMount() {
+    if (!this.checkIfCT()) {
+      const { minPixelValue, maxPixelValue } = this.getMinMaxPixelValues();
+      const customBrush = { min: minPixelValue, max: maxPixelValue };
+      this.setState({ customBrush });
+      brushModule.setters.activeGate("custom");
+      brushModule.setters.customGateRange(minPixelValue, maxPixelValue);
+    }
+  }
+
   handleBrushChange = (gateName) => {
     if (gateName === "custom") this.setState({ rangeDisabled: false });
     else this.setState({ rangeDisabled: true });
@@ -71,9 +81,40 @@ class SmartBrushMenu extends Component {
     else return 1;
   }
 
+  getActiveImage = () => {
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    return cornerstone.getImage(element);
+  };
+
+  checkIfCT = () => {
+    try {
+      const image = this.getActiveImage();
+      const seriesModule =
+        cornerstone.metaData.get("generalSeriesModule", image.imageId) || {};
+      const modality = seriesModule.modality;
+      if (modality === "CT") return true;
+      return false;
+    } catch (error) {
+    }
+  };
+
+  getMinMaxPixelValues = () => {
+    const { minPixelValue, maxPixelValue } = this.getActiveImage();
+    return { minPixelValue, maxPixelValue };
+
+  }
+
   render() {
     const maxApplyToImageNum = this.getLastImageIndexOfSeries();
     const { isHuGated } = this.props;
+    const isCT = this.checkIfCT();
+    let minValue = 0, maxValue = 255;
+    if (isCT !== undefined && !isCT) {
+      const { minPixelValue, maxPixelValue } = this.getMinMaxPixelValues();
+      minValue = minPixelValue; maxValue = maxPixelValue;
+    }
+    else { minValue = -1000; maxValue = 3000 }
     return (
       <Draggable handle="#handle">
         <div className="smb-pop-up">
@@ -123,7 +164,7 @@ class SmartBrushMenu extends Component {
               disabled={this.state.intervalDisabled}
             />
           </div>
-          {isHuGated && (
+          {isHuGated && isCT && (
             <div className="brush-presets">
               {brushModule.state.gates.map((gate, i) => (
                 <div key={i}>
@@ -173,6 +214,24 @@ class SmartBrushMenu extends Component {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+          {isHuGated && !isCT && (
+            <div className="range-container">
+              <InputRange
+                style={inputRange}
+                step={1}
+                maxValue={maxValue}
+                minValue={minValue}
+
+                value={this.state.customBrush}
+                onChange={(value) =>
+                  this.setState({ customBrush: value })
+                }
+                onChangeComplete={(value) =>
+                  this.applyCustomBrushValues(value)
+                }
+              />
             </div>
           )}
         </div>
