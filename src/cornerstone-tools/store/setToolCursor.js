@@ -1,4 +1,4 @@
-import { state, modules } from './index.js';
+import { state, modules } from "./index.js";
 
 export { setToolCursor, resetToolCursor, hideToolCursor };
 
@@ -30,7 +30,7 @@ function setToolCursor(element, svgCursor) {
 }
 
 function resetToolCursor(element) {
-  _clearStateAndSetCursor(element, 'initial');
+  _clearStateAndSetCursor(element, "initial");
 }
 
 function hideToolCursor(element) {
@@ -38,7 +38,7 @@ function hideToolCursor(element) {
     return;
   }
 
-  _clearStateAndSetCursor(element, 'none');
+  _clearStateAndSetCursor(element, "none");
 }
 
 function _clearStateAndSetCursor(element, cursorSeting) {

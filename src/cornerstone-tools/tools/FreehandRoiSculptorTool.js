@@ -9,6 +9,7 @@ import getToolForElement from "../store/getToolForElement.js";
 import BaseTool from "./base/BaseTool.js";
 import { hideToolCursor, setToolCursor } from "../store/setToolCursor.js";
 import { freehandRoiSculptorCursor } from "./cursors/index.js";
+import triggerEvent from "../util/triggerEvent.js";
 
 import freehandUtils from "../util/freehand/index.js";
 
@@ -355,8 +356,33 @@ export default class FreehandRoiSculptorTool extends BaseTool {
       return;
     }
 
-    config.currentTool = closestToolIndex;
-    hideToolCursor(element);
+    /**
+     *To open aim editor fire markuoSelected Event
+     */
+    const toolState = getToolState(element, this.referencedToolName);
+    if (!toolState) {
+      return;
+    }
+
+    const candidateToolData = toolState.data[closestToolIndex];
+    const ancestorEvent = {
+      element: eventData.element,
+      data: candidateToolData,
+    };
+    const detail = { aimId: candidateToolData.aimId, ancestorEvent };
+    const evnt = new CustomEvent("markupSelected", {
+      cancelable: true,
+      detail,
+    });
+    const shouldContinue = window.dispatchEvent(evnt);
+    if (shouldContinue) {
+      /**
+       * End aim editor related part
+       */
+
+      config.currentTool = closestToolIndex;
+      hideToolCursor(element);
+    }
   }
 
   /**
@@ -451,6 +477,25 @@ export default class FreehandRoiSculptorTool extends BaseTool {
       // Combine these into a single handle.
       this._consolidateHandles();
     }
+    this.fireModifiedEvent(eventData.element);
+  }
+
+  // added by Mete to fire modified
+  /**
+   * Fire MEASUREMENT_MODIFIED event on provided element
+   * @param {any} element which freehand data has been modified
+   * @param {any} measurementData the measurment data
+   * @returns {void}
+   */
+  fireModifiedEvent(element, measurementData) {
+    const eventType = EVENTS.MEASUREMENT_MODIFIED;
+    const eventData = {
+      toolName: this.name,
+      element,
+      measurementData,
+    };
+
+    triggerEvent(element, eventType, eventData);
   }
 
   /**
@@ -913,7 +958,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
       }
     }
 
-    setToolCursor(this.element, this.svgCursor);
+    // setToolCursor(this.element, this.svgCursor);
 
     external.cornerstone.updateImage(this.element);
   }

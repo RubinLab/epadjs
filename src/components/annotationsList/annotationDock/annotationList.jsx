@@ -9,11 +9,14 @@ import {
   toggleSingleLabel,
   toggleAllAnnotations,
 } from "../action";
+import cornerstone from "cornerstone-core";
+import { state } from 'cornerstone-tools/store/index.js';
 
 class AnnotationsList extends React.Component {
   state = {
     labelDisplayAll: true,
     annsDisplayAll: true,
+    showCalculations: true
   };
 
   componentDidUpdate = prevProps => {
@@ -73,6 +76,26 @@ class AnnotationsList extends React.Component {
     }
   };
 
+  refreshAllViewports = () => {
+    const elements = cornerstone.getEnabledElements();
+    if (elements) {
+      elements.map(({ element }) => {
+        try {
+          cornerstone.updateImage(element);
+        } catch (error) {
+          // console.error("Error:", error);
+        }
+      });
+    }
+  };
+
+  handleCalculations = (checked) => {
+    this.setState({ showCalculations: checked }, () => {
+      state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
+      this.refreshAllViewports();
+    });
+  };
+
   handleToggleAllLabels = (checked, e, id) => {
     this.setState({ labelDisplayAll: checked });
     const seriesUID = this.props.openSeries[this.props.activePort].seriesUID;
@@ -100,34 +123,38 @@ class AnnotationsList extends React.Component {
   };
 
   getLabelArray = () => {
-    const { openSeries, activePort } = this.props;
-    const { imageID } = this.props.openSeries[this.props.activePort];
-    let imageAnnotations;
-    if (this.props.openSeries[this.props.activePort].imageAnnotations) {
-      imageAnnotations = this.props.openSeries[this.props.activePort]
-        .imageAnnotations[imageID];
-      if (!imageAnnotations)
-        imageAnnotations =
-          openSeries[activePort].imageAnnotations[imageID + "&frame=1"];
-    }
     const calculations = {};
-    if (imageAnnotations) {
-      for (let aim of imageAnnotations) {
-        if (calculations[aim.aimUid]) {
-          calculations[aim.aimUid][aim.markupUid] = {
-            calculations: [...aim.calculations],
-            markupType: aim.markupType,
-          };
-          // calculations[aim.markupUid].push({ markupType: aim.markupType });
-        } else {
-          calculations[aim.aimUid] = {};
-          calculations[aim.aimUid][aim.markupUid] = {
-            calculations: [...aim.calculations],
-            markupType: aim.markupType,
-          };
-          // calculations[aim.markupUid].push({ markupType: aim.markupType });
+    try {
+      const { openSeries, activePort } = this.props;
+      const { imageID } = this.props.openSeries[this.props.activePort];
+      let imageAnnotations;
+      if (this.props.openSeries[this.props.activePort].imageAnnotations) {
+        imageAnnotations = this.props.openSeries[this.props.activePort]
+          .imageAnnotations[imageID];
+        if (!imageAnnotations)
+          imageAnnotations =
+            openSeries[activePort].imageAnnotations[imageID + "&frame=1"];
+      }
+      if (imageAnnotations) {
+        for (let aim of imageAnnotations) {
+          if (calculations[aim.aimUid]) {
+            calculations[aim.aimUid][aim.markupUid] = {
+              calculations: [...aim.calculations],
+              markupType: aim.markupType,
+            };
+            // calculations[aim.markupUid].push({ markupType: aim.markupType });
+          } else {
+            calculations[aim.aimUid] = {};
+            calculations[aim.aimUid][aim.markupUid] = {
+              calculations: [...aim.calculations],
+              markupType: aim.markupType,
+            };
+            // calculations[aim.markupUid].push({ markupType: aim.markupType });
+          }
         }
       }
+    } catch (error) {
+      console.error(error);
     }
     return calculations;
   };
@@ -220,6 +247,23 @@ class AnnotationsList extends React.Component {
     return (
       <React.Fragment>
         <div className="annotationList-container">
+          <div className="label-toggle">
+            <div className="label-toggle__text">Show Calculations</div>
+            <Switch
+              onChange={this.handleCalculations}
+              checked={this.state.showCalculations}
+              onColor="#86d3ff"
+              onHandleColor="#1986d9"
+              handleDiameter={22}
+              uncheckedIcon={false}
+              checkedIcon={false}
+              boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+              activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+              height={15}
+              width={36}
+              className="react-switch"
+            />
+          </div>
           <div className="label-toggle">
             <div className="label-toggle__text">Show All Labels</div>
             <Switch

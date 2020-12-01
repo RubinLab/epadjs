@@ -1,9 +1,7 @@
-import cornerstoneTools from "cornerstone-tools";
+import { getCircle, store } from "cornerstone-tools";
 import Brush3DHUGatedTool from "./Brush3DHUGatedTool.js";
 
-import { getCircle } from "cornerstone-tools";
-
-const brushModule = cornerstoneTools.store.modules.brush;
+const brushModule = store.modules.segmentation;
 
 export default class Brush3DAutoGatedTool extends Brush3DHUGatedTool {
   constructor(configuration = {}) {
@@ -13,6 +11,7 @@ export default class Brush3DAutoGatedTool extends Brush3DHUGatedTool {
     super(initialConfiguration);
 
     this.initialConfiguration = initialConfiguration;
+    this.modality = "";
   }
 
   /**
@@ -23,6 +22,7 @@ export default class Brush3DAutoGatedTool extends Brush3DHUGatedTool {
    * @param {Object} evt - The event.
    */
   preMouseDownCallback(evt) {
+    this.modality = this._getModality(evt);
     this._setCustomGate(evt);
     this._startPainting(evt);
 
@@ -41,7 +41,7 @@ export default class Brush3DAutoGatedTool extends Brush3DHUGatedTool {
     const image = eventData.image;
     const { rows, columns } = image;
     const { x, y } = eventData.currentPoints.image;
-    const radius = brushModule.state.radius;
+    const radius = brushModule.configuration.radius;
     const imagePixelData = image.getPixelData();
     const rescaleSlope = image.slope || 1;
     const rescaleIntercept = image.intercept || 0;
@@ -64,10 +64,10 @@ export default class Brush3DAutoGatedTool extends Brush3DHUGatedTool {
         hi = pixelValue;
       }
     }
-
-    lo = lo * rescaleSlope + rescaleIntercept;
-    hi = hi * rescaleSlope + rescaleIntercept;
-
+    if (this.modality === "CT") {
+      lo = lo * rescaleSlope + rescaleIntercept;
+      hi = hi * rescaleSlope + rescaleIntercept;
+    }
     this.gate = [lo, hi];
   }
 
@@ -82,7 +82,7 @@ export default class Brush3DAutoGatedTool extends Brush3DHUGatedTool {
    * @returns {Number[][]}  An array containing the gated/cleaned pixels to fill.
    */
   _gateCircle(image, circle) {
-    const rows = image.image;
+    const rows = image.rows;
     const imagePixelData = image.getPixelData();
     const gateValues = this.gate;
     const rescaleSlope = image.slope || 1;
@@ -90,11 +90,22 @@ export default class Brush3DAutoGatedTool extends Brush3DHUGatedTool {
 
     const gatedCircleArray = [];
 
+    // console.log("Image pixel data", imagePixelData);
+    // console.log("Circle", circle);
+
     for (let i = 0; i < circle.length; i++) {
       let pixelValue = imagePixelData[circle[i][0] + circle[i][1] * rows];
+      // console.log("Pixel value", pixelValue);
 
-      pixelValue = pixelValue * rescaleSlope + rescaleIntercept;
+      if (this.modality === "CT")
+        pixelValue = pixelValue * rescaleSlope + rescaleIntercept;
 
+      // // console.log(
+      //   "pixel value, gatevalues[0], gateValues[1]",
+      //   pixelValue,
+      //   gateValues[0],
+      //   gateValues[1]
+      // );
       if (pixelValue >= gateValues[0] && pixelValue <= gateValues[1]) {
         gatedCircleArray.push(circle[i]);
       }

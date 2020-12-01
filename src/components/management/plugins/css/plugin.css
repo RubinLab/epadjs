@@ -241,6 +241,7 @@
   top: 5px;
   width: 100%;
   bottom: 10%;
+  top: 40px;
 }
 
 .plugin_parameter_window_modal {
@@ -447,6 +448,7 @@
   min-width: 500px;
   min-height: 400px;
 }
+
 .pluginLogTextArea {
   border: none;
   background-color: #2d3440;

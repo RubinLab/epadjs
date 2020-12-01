@@ -12,7 +12,6 @@ import {
   FaEnvelopeOpenText,
   FaWindowClose,
 } from "react-icons/fa";
-
 import {
   getPluginsQueue,
   runPluginsQueue,
@@ -20,14 +19,12 @@ import {
   deleteFromPluginQueue,
   downloadPluginResult,
   getContainerLog,
-  // stopContainerLog,
 } from "../../../../../services/pluginServices";
+import Draggable from "react-draggable";
 import "./../../css/plugin.css";
 import "../../../menuStyle.css";
-// import axios from "axios";
-import Draggable from "react-draggable";
-// import cancelXhrAdapter from "axios-cancel";
-// import { Cancellation } from "axios-cancel/cancel";
+
+
 class TrackTab extends React.Component {
   state = {
     ocancel: "",
@@ -197,85 +194,7 @@ class TrackTab extends React.Component {
     }
   };
 
-  // handleGetContainerLog = async (dataOriginal) => {
-  //   const _this = this;
-  //   if (this.state.runungLogId === 0) {
-  //     console.log("data original ", dataOriginal);
 
-  //     //  const containerLoggingIntervalHolder = null;
-
-  //     const containerid = dataOriginal.id;
-
-  //     console.log("get logs called :", containerid);
-  //     // let containerlog = await getContainerLog(containerid);
-  //     // if (this.state.showContainerLog == true) {
-  //     const CancelToken = axios.CancelToken;
-  //     const source = CancelToken.source();
-  //     this.setState({
-  //       runungLogId: containerid,
-  //       showContainerLog: true,
-  //       source: source,
-  //     });
-  //     try {
-  //       let rea = await axios({
-  //         url: "http://c02s30xdg8wl.local:8080/" + "container/",
-  //         data: dataOriginal,
-  //         method: "POST",
-  //         //cancelToken: source.token,
-  //         // adapter: cancelXhrAdapter,
-  //         // cancellation: this.state.cancellation,
-  //         cancelToken: new CancelToken(function executor(c) {
-  //           // An executor function receives a cancel function as a parameter
-  //           _this.setState({ ocancel: c });
-  //           // cancel = c;
-  //         }),
-  //         onDownloadProgress: (progressEvent) => {
-  //           const dataChunk = progressEvent.currentTarget.response;
-
-  //           console.log(dataChunk);
-  //           this.setState({
-  //             containerLogData: dataChunk,
-  //           });
-  //           // dataChunk contains the data that have been obtained so far (the whole data so far)..
-  //           // So here we do whatever we want with this partial data..
-  //           // In my case I'm storing that on a redux store that is used to
-  //           // render a table, so now, table rows are rendered as soon as
-  //           // they are obtained from the endpoint.
-  //         },
-  //       });
-  //     } catch (err) {
-  //       console.log("mu mu mu :", err);
-  //     }
-
-  //     // }
-
-  //     // console.log(" container log returned value ", containerlog);
-
-  //     // const containerLoggingIntervalHolder = setInterval(
-  //     //   async function (o) {
-  //     //     // method to be executed;
-
-  //     //     let status = 202;
-  //     //     console.log("continer id = ", containerid);
-  //     //     containerlog = await getContainerLog(dataOriginal);
-  //     //     console.log("logaaaaa : ", containerlog);
-  //     //     console.log("container status :", containerlog.status);
-  //     //     status = containerlog.status;
-  //     //     o.setState({
-  //     //       containerLogData: containerlog.data,
-  //     //     });
-
-  //     //     console.log("stream return : ", o.state.containerLogData);
-  //     //   },
-  //     //   5000,
-  //     //   _this
-  //     // );
-  //     // this.setState({
-  //     //   containerLoggingIntervalHandle: containerLoggingIntervalHolder,
-  //     //   showContainerLog: true,
-  //     // });
-  //   }
-  // };
 
   handleGetContainerLog = async (dataOriginal) => {
     if (this.state.showContainerLog === true) {
@@ -311,24 +230,13 @@ class TrackTab extends React.Component {
         alert("Please start plugin first");
       }
     } catch (err) {
-      alert(err);
+      console.log('eror:', err);
+      alert("no log found for the container");
+      return true;
+      // 
     }
   };
-  // handleDetachLog = async (dataOriginal) => {
-  //   console.log("data original ", dataOriginal);
 
-  //   //  const containerLoggingIntervalHolder = null;
-  //   this.setState({
-  //     showContainerLog: true,
-  //   });
-  //   const containerid = dataOriginal.id;
-  //   console.log("f ned ", containerid);
-  //   let _this = this;
-
-  //   console.log("get logs called :", containerid);
-  //   let containerlog = await stopContainerLog(dataOriginal);
-  //   // if (this.state.showContainerLog == true) {
-  // };
   handlerStopContainerLogging = () => {
     // this.state.ocancel();
     this.setState({

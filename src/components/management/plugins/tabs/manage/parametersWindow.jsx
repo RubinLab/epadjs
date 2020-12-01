@@ -10,7 +10,9 @@ import {
   editDefaultparameter,
 } from "../../../../../services/pluginServices";
 import { FaRegTrashAlt } from "react-icons/fa";
+import Popup from "../../common/Popup.jsx";
 import "../../css/plugin.css";
+
 class ParametersWindow extends React.Component {
   constructor(props) {
     super(props);
@@ -56,7 +58,7 @@ class ParametersWindow extends React.Component {
     }
   };
 
-  handleFormElementChange = (e) => {
+  handleFormElementChange = e => {
     const plElements = { ...this.state.parameterFormElements };
     if (e.currentTarget.name != "enabled") {
       plElements[e.currentTarget.name] = e.currentTarget.value;
@@ -121,7 +123,7 @@ class ParametersWindow extends React.Component {
     //this.props.onSave();
   };
   dock;
-  deleteOneParameter = async (parameterdbid) => {
+  deleteOneParameter = async parameterdbid => {
     console.log("delete one called", parameterdbid);
     const deleteParameterResponse = await deleteOneDefaultParameter(
       parameterdbid
@@ -147,7 +149,7 @@ class ParametersWindow extends React.Component {
     }
   };
 
-  handleShowEditParameterWindow = (rowInfo) => {
+  handleShowEditParameterWindow = rowInfo => {
     console.log("row click :", rowInfo);
     const tempParameterFormElements = {
       plugindbid: this.state.parameterFormElements.plugindbid,
@@ -272,7 +274,7 @@ class ParametersWindow extends React.Component {
       },
       {
         Header: "",
-        Cell: (data) => {
+        Cell: data => {
           //const rowdata = original.row.checkbox;
           return (
             <div onClick={() => this.deleteOneParameter(data.original.id)}>
@@ -283,7 +285,7 @@ class ParametersWindow extends React.Component {
       },
     ];
   };
-  handleonMouseDown = (e) => {
+  handleonMouseDown = e => {
     e.stopPropagation();
 
     console.log("The link was clicked.");
@@ -380,187 +382,191 @@ class ParametersWindow extends React.Component {
         className="plugin_parameter_window_container"
         id="plugin_paramwindow"
       >
-        <div className="plugin_parameter_window_modal">
-          <div className="plugin_parameter_window_header">
-            <div className="title">Paramaters</div>
-          </div>
-          <div className="plugin_parameter_window_modal_body">
-            {!this.state.addnew && (
-              <ReactTable
-                className="pro-table"
-                data={this.state.defaultParameterList.data}
-                columns={this.defineParametersTableColumns()}
-                getTdProps={(state, rowInfo, column, instance) => ({
-                  onClick: () => {
-                    console.log("column data :", column.Header);
-                    if (column.Header != "") {
-                      if (typeof rowInfo !== "undefined") {
-                        this.handleShowEditParameterWindow(rowInfo);
+        <Popup>
+          <div className="plugin_parameter_window_modal">
+            <div className="plugin_parameter_window_header">
+              <div className="title">Paramaters</div>
+            </div>
+            <div className="plugin_parameter_window_modal_body">
+              {!this.state.addnew && (
+                <ReactTable
+                  className="pro-table"
+                  data={this.state.defaultParameterList.data}
+                  columns={this.defineParametersTableColumns()}
+                  getTdProps={(state, rowInfo, column, instance) => ({
+                    onClick: () => {
+                      console.log("column data :", column.Header);
+                      if (column.Header != "") {
+                        if (typeof rowInfo !== "undefined") {
+                          this.handleShowEditParameterWindow(rowInfo);
+                        }
                       }
-                    }
-                  },
-                })}
-                pageSizeOptions={[10, 20, 50]}
-                defaultPageSize={10}
-              />
-            )}
-            {this.state.addnew && (
-              <div className="plugin_parameter_window_modal_addnew">
-                <h5>add new parameter</h5>
-                <form className="plugin_parameter_window_modal_form">
-                  <h5 className="plugin_parameter_window_modal_label">id*</h5>
-                  <select
-                    className="pluginaddqueueselect"
-                    id="paramid"
-                    name="paramid"
-                    onChange={this.handleFormElementChange}
-                    onMouseDown={this.handleonMouseDown}
-                    value={this.state.parameterFormElements.paramid}
-                  >
-                    {this.prepareDropDownHtmlForParameterIds()}
-                  </select>
-                  <h5 className="parameter_window_modal_label">Name</h5>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="add-project__modal--input"
-                    name="name"
-                    type="text"
-                    onChange={this.handleFormElementChange}
-                    id="form-first-element"
-                    value={this.state.parameterFormElements.name}
-                  />
-                  <h5 className="parameter_window_modal_label">format*</h5>
-                  <select
-                    className="pluginaddqueueselect"
-                    id="format"
-                    name="format"
-                    onChange={this.handleFormElementChange}
-                    onMouseDown={this.handleonMouseDown}
-                    value={this.state.parameterFormElements.format}
-                  >
-                    {this.prepareDropDownHtmlForParameterFormat()}
-                  </select>
-                  <h5 className="parameter_window_modal_label">prefix</h5>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="add-project__modal--input"
-                    name="prefix"
-                    type="text"
-                    onChange={this.handleFormElementChange}
-                    id="form-first-element"
-                    value={this.state.parameterFormElements.prefix}
-                  />
-                  <h5 className="parameter_window_modal_label">
-                    input binding
-                  </h5>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="add-project__modal--input"
-                    name="inputBinding"
-                    type="text"
-                    onChange={this.handleFormElementChange}
-                    id="form-first-element"
-                    value={this.state.parameterFormElements.inputBinding}
-                  />
-                  <h5 className="parameter_window_modal_label">
-                    Default value
-                  </h5>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="add-project__modal--input"
-                    name="default_value"
-                    type="text"
-                    value={this.state.parameterFormElements.default_value}
-                    onChange={this.handleFormElementChange}
-                  />
-                  <h5 className="parameter_window_modal_label">Type</h5>
-                  <select
-                    className="pluginaddqueueselect"
-                    id="type"
-                    name="type"
-                    onChange={this.handleFormElementChange}
-                    onMouseDown={this.handleonMouseDown}
-                    value={this.state.parameterFormElements.type}
-                  >
-                    {this.prepareDropDownHtmlForParameterType()}
-                  </select>
-                  <h5 className="parameter_window_modal_label">Description</h5>
-                  <input
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="add-project__modal--input"
-                    name="description"
-                    type="text"
-                    value={this.state.parameterFormElements.description}
-                    onChange={this.handleFormElementChange}
-                  />
+                    },
+                  })}
+                  pageSizeOptions={[5, 10, 20, 50]}
+                  defaultPageSize={5}
+                />
+              )}
+              {this.state.addnew && (
+                <div className="plugin_parameter_window_modal_addnew">
+                  <h5>add new parameter</h5>
+                  <form className="plugin_parameter_window_modal_form">
+                    <h5 className="plugin_parameter_window_modal_label">id*</h5>
+                    <select
+                      className="pluginaddqueueselect"
+                      id="paramid"
+                      name="paramid"
+                      onChange={this.handleFormElementChange}
+                      onMouseDown={this.handleonMouseDown}
+                      value={this.state.parameterFormElements.paramid}
+                    >
+                      {this.prepareDropDownHtmlForParameterIds()}
+                    </select>
+                    <h5 className="parameter_window_modal_label">Name</h5>
+                    <input
+                      onMouseDown={e => e.stopPropagation()}
+                      className="add-project__modal--input"
+                      name="name"
+                      type="text"
+                      onChange={this.handleFormElementChange}
+                      id="form-first-element"
+                      value={this.state.parameterFormElements.name}
+                    />
+                    <h5 className="parameter_window_modal_label">format*</h5>
+                    <select
+                      className="pluginaddqueueselect"
+                      id="format"
+                      name="format"
+                      onChange={this.handleFormElementChange}
+                      onMouseDown={this.handleonMouseDown}
+                      value={this.state.parameterFormElements.format}
+                    >
+                      {this.prepareDropDownHtmlForParameterFormat()}
+                    </select>
+                    <h5 className="parameter_window_modal_label">prefix</h5>
+                    <input
+                      onMouseDown={e => e.stopPropagation()}
+                      className="add-project__modal--input"
+                      name="prefix"
+                      type="text"
+                      onChange={this.handleFormElementChange}
+                      id="form-first-element"
+                      value={this.state.parameterFormElements.prefix}
+                    />
+                    <h5 className="parameter_window_modal_label">
+                      input binding
+                    </h5>
+                    <input
+                      onMouseDown={e => e.stopPropagation()}
+                      className="add-project__modal--input"
+                      name="inputBinding"
+                      type="text"
+                      onChange={this.handleFormElementChange}
+                      id="form-first-element"
+                      value={this.state.parameterFormElements.inputBinding}
+                    />
+                    <h5 className="parameter_window_modal_label">
+                      Default value
+                    </h5>
+                    <input
+                      onMouseDown={e => e.stopPropagation()}
+                      className="add-project__modal--input"
+                      name="default_value"
+                      type="text"
+                      value={this.state.parameterFormElements.default_value}
+                      onChange={this.handleFormElementChange}
+                    />
+                    <h5 className="parameter_window_modal_label">Type</h5>
+                    <select
+                      className="pluginaddqueueselect"
+                      id="type"
+                      name="type"
+                      onChange={this.handleFormElementChange}
+                      onMouseDown={this.handleonMouseDown}
+                      value={this.state.parameterFormElements.type}
+                    >
+                      {this.prepareDropDownHtmlForParameterType()}
+                    </select>
+                    <h5 className="parameter_window_modal_label">
+                      Description
+                    </h5>
+                    <input
+                      onMouseDown={e => e.stopPropagation()}
+                      className="add-project__modal--input"
+                      name="description"
+                      type="text"
+                      value={this.state.parameterFormElements.description}
+                      onChange={this.handleFormElementChange}
+                    />
 
-                  <h5 className="form-exp required">*Required</h5>
-                  {error && <div className="err-message">{error}</div>}
-                </form>
+                    <h5 className="form-exp required">*Required</h5>
+                    {error && <div className="err-message">{error}</div>}
+                  </form>
+                </div>
+              )}
+            </div>
+            {this.state.addnew && !this.state.editParam && (
+              <div className="plugin_parameter_window_modal_footer">
+                <div className="create-user__modal--buttons">
+                  <button
+                    variant="primary"
+                    className="btn btn-sm btn-outline-light"
+                    onClick={this.saveParameters}
+                  >
+                    save
+                  </button>
+                  <button
+                    variant="secondary"
+                    className="btn btn-sm btn-outline-light"
+                    onClick={this.closeAddForm}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
+            {this.state.editParam && (
+              <div className="plugin_parameter_window_modal_footer">
+                <div className="create-user__modal--buttons">
+                  <button
+                    variant="primary"
+                    className="btn btn-sm btn-outline-light"
+                    onClick={this.handleEditParameterSave}
+                  >
+                    save
+                  </button>
+                  <button
+                    variant="secondary"
+                    className="btn btn-sm btn-outline-light"
+                    onClick={this.handleCloseEditForm}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
+            {!this.state.addnew && (
+              <div className="plugin_parameter_window_modal_footer">
+                <div className="create-user__modal--buttons">
+                  <button
+                    variant="primary"
+                    className="btn btn-sm btn-outline-light"
+                    onClick={this.showAddForm}
+                  >
+                    add parameter
+                  </button>
+                  <button
+                    variant="secondary"
+                    className="btn btn-sm btn-outline-light"
+                    onClick={this.props.onCancel}
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             )}
           </div>
-          {this.state.addnew && !this.state.editParam && (
-            <div className="plugin_parameter_window_modal_footer">
-              <div className="create-user__modal--buttons">
-                <button
-                  variant="primary"
-                  className="btn btn-sm btn-outline-light"
-                  onClick={this.saveParameters}
-                >
-                  save
-                </button>
-                <button
-                  variant="secondary"
-                  className="btn btn-sm btn-outline-light"
-                  onClick={this.closeAddForm}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          )}
-          {this.state.editParam && (
-            <div className="plugin_parameter_window_modal_footer">
-              <div className="create-user__modal--buttons">
-                <button
-                  variant="primary"
-                  className="btn btn-sm btn-outline-light"
-                  onClick={this.handleEditParameterSave}
-                >
-                  save
-                </button>
-                <button
-                  variant="secondary"
-                  className="btn btn-sm btn-outline-light"
-                  onClick={this.handleCloseEditForm}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          )}
-          {!this.state.addnew && (
-            <div className="plugin_parameter_window_modal_footer">
-              <div className="create-user__modal--buttons">
-                <button
-                  variant="primary"
-                  className="btn btn-sm btn-outline-light"
-                  onClick={this.showAddForm}
-                >
-                  add parameter
-                </button>
-                <button
-                  variant="secondary"
-                  className="btn btn-sm btn-outline-light"
-                  onClick={this.props.onCancel}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        </Popup>
       </div>
     );
   }

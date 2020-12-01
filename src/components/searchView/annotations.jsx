@@ -26,7 +26,7 @@ import "react-table/react-table.css";
 // const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
 const TreeTable = treeTableHOC(ReactTable);
 function getNodes(data, node = []) {
-  data.forEach((item) => {
+  data.forEach(item => {
     if (item.hasOwnProperty("_subRows") && item._subRows) {
       node = getNodes(item._subRows, node);
     } else {
@@ -127,7 +127,7 @@ class Annotations extends Component {
     }
   }
 
-  selectRow = (selected) => {
+  selectRow = selected => {
     const { studyDescription, seriesDescription } = this.props;
     this.props.dispatch(clearSelection("annotation"));
     this.props.dispatch(
@@ -136,6 +136,7 @@ class Annotations extends Component {
   };
 
   setColumns() {
+    const username = sessionStorage.getItem("username");
     const { selectedAnnotations } = this.props;
 
     const columns = [
@@ -181,9 +182,11 @@ class Annotations extends Component {
         Header: "Annotation Name",
         width: this.widthUnit * 10,
         className: "searchView-row__desc",
-        Cell: (row) => {
-          let desc = row.original.name || "Unnamed annotation";
-          let id = "aimName-tool" + row.original.aimID;
+        Cell: row => {
+          const { name, aimID, userName } = row.original;
+          let desc = name || "Unnamed annotation";
+          desc = username === userName ? desc : `${desc} (${userName})`;
+          let id = "aimName-tool" + aimID;
           return (
             <>
               <div data-tip data-for={id} style={{ whiteSpace: "pre-wrap" }}>
@@ -205,29 +208,29 @@ class Annotations extends Component {
       {
         //no of aims
         width: this.widthUnit * 2,
-        Cell: (row) => <div />,
+        Cell: row => <div />,
       },
       {
         //no of sub item
         width: this.widthUnit * 3,
-        Cell: (row) => <div />,
+        Cell: row => <div />,
       },
       {
         //no of sub images
         width: this.widthUnit * 3,
-        Cell: (row) => <div />,
+        Cell: row => <div />,
       },
       {
         Header: "Type",
         width: this.widthUnit * 5,
-        Cell: (row) => (
+        Cell: row => (
           <div className="searchView-table__cell">{row.original.template}</div>
         ),
       },
       {
         Header: "Created Date",
         width: this.widthUnit * 7,
-        Cell: (row) => {
+        Cell: row => {
           return (
             <div className="searchView-table__cell">
               {formatDates(row.original.date)}
@@ -238,17 +241,17 @@ class Annotations extends Component {
       {
         //upload date
         width: this.widthUnit * 7,
-        Cell: (row) => <div />,
+        Cell: row => <div />,
       },
       {
         //uaccession
         width: this.widthUnit * 6,
-        Cell: (row) => <div />,
+        Cell: row => <div />,
       },
       {
         Header: "Identifier",
         width: this.widthUnit * 10,
-        Cell: (row) => {
+        Cell: row => {
           let id = "aimid-tool" + row.original.aimID;
           return (
             <>
@@ -330,13 +333,13 @@ class Annotations extends Component {
       // we need to get all the "real" (original) records out to get at their IDs
       const nodes = getNodes(currentRecords);
       // we just push all the IDs onto the selection array
-      nodes.forEach((item) => {
+      nodes.forEach(item => {
         selection.push(item._id);
       });
     }
     this.setState({ selectAll, selection });
   };
-  isSelected = (key) => {
+  isSelected = key => {
     /*
       Instead of passing our external selection state we provide an "isSelected"
       callback and detect the selection state ourselves. This allows any implementation
@@ -361,11 +364,11 @@ class Annotations extends Component {
       this.setState({ pivotBy: [], expanded: {} });
     }
   };
-  onExpandedChange = (expanded) => {
+  onExpandedChange = expanded => {
     this.setState({ expanded });
   };
 
-  checkIfSerieOpen = (selectedSerie) => {
+  checkIfSerieOpen = selectedSerie => {
     let isOpen = false;
     let index;
     this.props.openSeries.forEach((serie, i) => {
@@ -377,7 +380,7 @@ class Annotations extends Component {
     return { isOpen, index };
   };
 
-  displayAnnotations = (selected) => {
+  displayAnnotations = selected => {
     const { projectID, studyUID, seriesUID, aimID } = selected;
     const patientID = selected.subjectID;
     const { openSeries } = this.props;
@@ -397,7 +400,7 @@ class Annotations extends Component {
         this.props
           .dispatch(getSingleSerie(selected, aimID))
           .then(() => {})
-          .catch((err) => console.log(err));
+          .catch(err => console.log(err));
         //if grid is NOT full check if patient data exists
         if (!this.props.patients[patientID]) {
           // this.props.dispatch(getWholeData(null, null, selected));
@@ -440,7 +443,7 @@ class Annotations extends Component {
       expanded,
       onExpandedChange,
     };
-    const TheadComponent = (props) => null;
+    const TheadComponent = props => null;
     return (
       <div style={{ paddingLeft: "20px" }}>
         {this.state.data ? (
@@ -449,7 +452,7 @@ class Annotations extends Component {
             data={this.state.data}
             columns={this.state.columns}
             pageSize={this.state.data.length}
-            ref={(r) => (this.selectTable = r)}
+            ref={r => (this.selectTable = r)}
             className="-striped -highlight"
             freezWhenExpanded={false}
             showPagination={false}
@@ -469,7 +472,7 @@ class Annotations extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     series: state.searchViewReducer.series,
     openSeries: state.annotationsListReducer.openSeries,

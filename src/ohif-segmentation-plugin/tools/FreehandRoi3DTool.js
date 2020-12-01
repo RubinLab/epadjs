@@ -3,7 +3,7 @@ import {
   updateImage,
   pixelToCanvas,
   getEnabledElement,
-  getPixels
+  getPixels,
 } from "cornerstone-core";
 import { point } from "cornerstone-math";
 import {
@@ -13,8 +13,9 @@ import {
   store,
   toolStyle,
   toolColors,
-  EVENTS
+  EVENTS,
 } from "cornerstone-tools";
+import { state } from "cornerstone-tools/store/index.js";
 
 import generateUID from "../util/generateUID.js";
 import interpolate from "../util/freehandInterpolate/interpolate.js";
@@ -24,7 +25,7 @@ import getSeriesInstanceUidFromEnabledElement from "../util/getSeriesInstanceUid
 const {
   insertOrDelete,
   freehandArea,
-  calculateFreehandStatistics
+  calculateFreehandStatistics,
 } = importInternal("util/freehandUtils");
 const draw = importInternal("drawing/draw");
 const drawJoinedLines = importInternal("drawing/drawJoinedLines");
@@ -42,7 +43,7 @@ const calculateSUV = importInternal("util/calculateSUV");
 export default class FreehandRoi3DTool extends FreehandRoiTool {
   constructor(configuration = {}) {
     const defaultConfig = {
-      configuration: defaultFreehandConfiguration()
+      configuration: defaultFreehandConfiguration(),
     };
     const initialConfiguration = Object.assign(defaultConfig, configuration);
 
@@ -98,8 +99,8 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
       active: true,
       invalidated: true,
       handles: {
-        points: []
-      }
+        points: [],
+      },
     };
 
     measurementData.handles.textBox = {
@@ -108,7 +109,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
       movesIndependently: false,
       drawnIndependently: true,
       allowedOutsideImage: true,
-      hasBoundingBox: true
+      hasBoundingBox: true,
     };
 
     freehand3DStore.setters.incrementPolygonCount(
@@ -291,7 +292,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
 
     config.dragOrigin = {
       x: handle.x,
-      y: handle.y
+      y: handle.y,
     };
 
     // Have to do this to get tool index.
@@ -374,7 +375,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
         ) ===
         freehand3DStore.getters.activeROIContourIndex(data.seriesInstanceUid);
 
-      draw(context, context => {
+      draw(context, (context) => {
         let color = toolColors.getColorIfActive(data);
         let fillColor;
 
@@ -422,7 +423,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
 
         const options = {
           color,
-          fill: fillColor
+          fill: fillColor,
         };
 
         if (isROIActive && data.interpolated) {
@@ -476,7 +477,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
             left: points[0].x,
             right: points[0].x,
             bottom: points[0].y,
-            top: points[0].x
+            top: points[0].x,
           };
 
           for (let i = 0; i < points.length; i++) {
@@ -490,7 +491,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
             left: bounds.left,
             top: bounds.bottom,
             width: Math.abs(bounds.right - bounds.left),
-            height: Math.abs(bounds.top - bounds.bottom)
+            height: Math.abs(bounds.top - bounds.bottom),
           };
 
           // Store the bounding box information for the text box
@@ -532,7 +533,7 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
                 stdDev: calculateSUV(
                   image,
                   (meanStdDev.stdDev - image.intercept) / image.slope
-                )
+                ),
               };
             }
 
@@ -579,19 +580,20 @@ export default class FreehandRoi3DTool extends FreehandRoiTool {
           }
 
           const text = textBoxText.call(this, data);
-
-          drawLinkedTextBox(
-            context,
-            element,
-            data.handles.textBox,
-            text,
-            points,
-            textBoxAnchorPoints,
-            color,
-            lineWidth,
-            0,
-            true
-          );
+          if (state.showCalculations) {
+            drawLinkedTextBox(
+              context,
+              element,
+              data.handles.textBox,
+              text,
+              points,
+              textBoxAnchorPoints,
+              color,
+              lineWidth,
+              0,
+              true
+            );
+          }
         }
       });
     }
@@ -784,9 +786,9 @@ function defaultFreehandConfiguration() {
       handles: {
         start: {
           highlight: true,
-          active: true
-        }
-      }
+          active: true,
+        },
+      },
     },
     spacing: 1,
     interpolatedHandleRadius: 0.5,
@@ -797,7 +799,7 @@ function defaultFreehandConfiguration() {
     alwaysShowHandles: false,
     invalidColor: "crimson",
     currentHandle: 0,
-    currentTool: -1
+    currentTool: -1,
   };
 }
 
