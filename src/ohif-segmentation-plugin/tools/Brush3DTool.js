@@ -1,5 +1,6 @@
 import { BrushTool, store } from "cornerstone-tools";
 import generateBrushMetadata from "../util/generateBrushMetadata.js";
+import cornerstoneTools from "cornerstone-tools";
 
 const brushModule = store.modules.segmentation;
 
@@ -34,6 +35,8 @@ export default class Brush3DTool extends BrushTool {
           currentImageIdIndex,
           activeLabelmapIndex,
         } = brushModule.getters.labelmap2D(element, i);
+        labelmap2D.segmentsOnLabelmap = [0, 1];
+        console.log("labelmap2D", labelmap2D);
 
         const shouldErase =
           this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;
@@ -79,6 +82,7 @@ export default class Brush3DTool extends BrushTool {
         currentImageIdIndex,
         activeLabelmapIndex,
       } = brushModule.getters.labelmap2D(element);
+      console.log("labelmap2D", labelmap2D);
 
       const shouldErase =
         this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;
@@ -119,6 +123,7 @@ export default class Brush3DTool extends BrushTool {
     }
     this._drawing = true;
     this._startListeningForMouseUp(element);
+    console.log("cornerstone tools", cornerstoneTools);
 
     // Dispatch event to open the Aim Editor
     let evnt = new CustomEvent("markupCreated", {
