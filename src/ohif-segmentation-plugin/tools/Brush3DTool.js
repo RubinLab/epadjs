@@ -34,6 +34,7 @@ export default class Brush3DTool extends BrushTool {
           currentImageIdIndex,
           activeLabelmapIndex,
         } = brushModule.getters.labelmap2D(element, i);
+        labelmap2D.segmentsOnLabelmap = [0, 1]; //Mete:Change this to dynamic
 
         const shouldErase =
           this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;

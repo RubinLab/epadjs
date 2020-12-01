@@ -1327,6 +1327,7 @@ class DisplayView extends Component {
     });
     this.props.dispatch(clearActivePortAimID()); //this data is rendered so clear the aim Id in props
     this.clearSculptState();
+    this.clearSmartBrushState();
     this.renderAims(true);
     return 1;
   };
@@ -1339,7 +1340,13 @@ class DisplayView extends Component {
         return;
       }
     }
+  }
 
+  clearSmartBrushState = () => {
+    const brushModule = cornerstoneTools.store.modules.segmentation;
+    delete brushModule.configuration.applyToImage;
+    delete brushModule.configuration.maxInterval;
+    delete brushModule.configuration.minInterval;
   }
 
   closeViewport = () => {
