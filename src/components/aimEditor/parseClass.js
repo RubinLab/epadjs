@@ -163,7 +163,10 @@ export var AimEditor = function (
       // defaultTempCodeVal =
       //   defaultTemplateJson.TemplateContainer.Template[0]["codeValue"];
     }
-    self.arrayTemplatesJsonObjects = templateList.all;
+    // self.arrayTemplatesJsonObjects = templateList.all;
+    self.arrayTemplatesJsonObjects = JSON.parse(
+      JSON.stringify(templateList.all)
+    );
     if (self.arrayTemplatesJsonObjects.length > 0) {
       for (var i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {
         var object = {};
