@@ -1,9 +1,9 @@
 import React from "react";
 import Table from "react-table";
-import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import { FaRegTrashAlt, FaRegEye } from "react-icons/fa";
 import Badge from "react-bootstrap/Badge";
+import ReactTooltip from "react-tooltip";
 import { AiOutlinePlusCircle, AiOutlineStop } from "react-icons/ai";
 import {
   GrDocumentMissing,
@@ -27,6 +27,7 @@ import {
   clearSelection,
   changeActivePort
 } from "../annotationsList/action";
+
 const mode = sessionStorage.getItem("mode");
 
 const messages = {
@@ -194,19 +195,25 @@ class WorkList extends React.Component {
         width: 25,
         resizable: false,
         Cell: original => {
-          const variant =
-            original.row._original.progressType === "AUTO"
-              ? "secondary"
-              : "info";
-          const text =
-            original.row._original.progressType === "AUTO" ? (
-              <AiOutlinePlusCircle />
-            ) : (
-              <AiOutlineStop />
-            );
+          const isAuto = original.row._original.progressType === "AUTO";
+          const variant = isAuto ? "secondary" : "info";
+          const text = isAuto ? <AiOutlinePlusCircle /> : <AiOutlineStop />;
+          const tooltipText = isAuto
+            ? "Progreess by annotations"
+            : "Proggress by done";
           return (
             <div>
-              <Badge variant={variant}>{text}</Badge>
+              <Badge data-tip data-for={`progressType-badge${original.index}`} variant={variant}>
+                {text}
+              </Badge>
+              <ReactTooltip
+                id={`progressType-badge${original.index}`}
+                place="right"
+                type="light"
+                delayShow={1000}
+              >
+                <span>{tooltipText}</span>
+              </ReactTooltip>
             </div>
           );
         }
@@ -217,23 +224,35 @@ class WorkList extends React.Component {
         resizable: false,
         Cell: original => {
           const { completeness } = original.row._original;
-          const variant =
-            completeness === 0
-              ? "danger"
-              : completeness === 100
-              ? "success"
-              : "warning";
-          const text =
-            completeness === 0 ? (
-              <GrDocumentMissing />
-            ) : completeness === 100 ? (
-              <GrDocumentVerified />
-            ) : (
-              <GrDocumentPerformance />
-            );
+          let variant;
+          let text;
+          let tooltipText;
+          if (completeness === 0) {
+            variant = "danger";
+            text = <GrDocumentMissing />;
+            tooltipText = "Not started";
+          } else if (completeness === 100) {
+            variant = "success";
+            text = <GrDocumentVerified />;
+            tooltipText = "Completed";
+          } else {
+            variant = "warning";
+            text = <GrDocumentPerformance />;
+            tooltipText = "In progress";
+          }
           return (
             <div>
-              <Badge variant={variant}>{text}</Badge>
+              <Badge data-tip data-for={`progress-badge${original.index}`} variant={variant}>
+                {text}
+              </Badge>
+              <ReactTooltip
+                id={`progress-badge${original.index}`}
+                place="right"
+                type="light"
+                delayShow={1000}
+              >
+                <span>{tooltipText}</span>
+              </ReactTooltip>
             </div>
           );
         }
