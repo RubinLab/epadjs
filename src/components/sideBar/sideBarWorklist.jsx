@@ -3,6 +3,7 @@ import Table from "react-table";
 import { connect } from "react-redux";
 import { FaRegTrashAlt, FaRegEye } from "react-icons/fa";
 import Badge from "react-bootstrap/Badge";
+import Button from "react-bootstrap/Button";
 import ReactTooltip from "react-tooltip";
 import { AiOutlinePlusCircle, AiOutlineStop } from "react-icons/ai";
 import {
@@ -203,7 +204,11 @@ class WorkList extends React.Component {
             : "Proggress by done";
           return (
             <div>
-              <Badge data-tip data-for={`progressType-badge${original.index}`} variant={variant}>
+              <Badge
+                data-tip
+                data-for={`progressType-badge${original.index}`}
+                variant={variant}
+              >
                 {text}
               </Badge>
               <ReactTooltip
@@ -242,7 +247,11 @@ class WorkList extends React.Component {
           }
           return (
             <div>
-              <Badge data-tip data-for={`progress-badge${original.index}`} variant={variant}>
+              <Badge
+                data-tip
+                data-for={`progress-badge${original.index}`}
+                variant={variant}
+              >
                 {text}
               </Badge>
               <ReactTooltip
@@ -321,12 +330,88 @@ class WorkList extends React.Component {
         accessor: "studyUID"
       },
       {
+        width: 30,
+        Cell: original => {
+          return (
+            <div>
+              <Button
+                variant="success"
+                data-tip
+                data-for={`progress-verified-button${original.index}`}
+                style={{ padding: "0.2rem", fontSize: "1.3rem" }}
+              >
+                <GrDocumentVerified />
+              </Button>
+              <ReactTooltip
+                id={`progress-verified-button${original.index}`}
+                place="left"
+                type="light"
+                delayShow={1000}
+              >
+                <span>Completed</span>
+              </ReactTooltip>
+            </div>
+          );
+        }
+      },
+      {
+        width: 30,
+        Cell: original => {
+          return (
+            <div>
+              <Button
+                variant="warning"
+                data-tip
+                data-for={`progress-inprogress-button${original.index}`}
+                style={{ padding: "0.2rem", fontSize: "1.3rem" }}
+              >
+                <GrDocumentPerformance />
+                <ReactTooltip
+                  id={`progress-inprogress-button${original.index}`}
+                  place="left"
+                  type="light"
+                  delayShow={1000}
+                >
+                  <span>Started</span>
+                </ReactTooltip>
+              </Button>
+            </div>
+          );
+        }
+      },
+      {
+        width: 30,
+        Cell: original => {
+          return (
+            <div>
+              <Button
+                variant="danger"
+                data-tip
+                data-for={`progress-undone-button${original.index}`}
+                style={{ padding: "0.2rem", fontSize: "1.3rem" }}
+              >
+                <GrDocumentMissing />
+                <ReactTooltip
+                  id={`progress-undone-button${original.index}`}
+                  place="left"
+                  type="light"
+                  delayShow={1000}
+                >
+                  <span>Undone</span>
+                </ReactTooltip>
+              </Button>
+            </div>
+          );
+        }
+      },
+      {
         id: "delete",
         Header: "",
         width: 45,
         resizable: true,
         Cell: original => (
           <div
+            style={{ padding: "0.2rem", fontSize: "1.3rem" }}
             onClick={() =>
               this.handleSingleDelete(
                 original.row._original.workListID,
