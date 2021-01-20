@@ -3,9 +3,16 @@ import Table from "react-table";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import { FaRegTrashAlt, FaRegEye } from "react-icons/fa";
+import Badge from "react-bootstrap/Badge";
+import { AiOutlinePlusCircle, AiOutlineStop } from "react-icons/ai";
+import {
+  GrDocumentMissing,
+  GrDocumentVerified,
+  GrDocumentPerformance
+} from "react-icons/gr";
 import {
   getStudiesOfWorklist,
-  deleteStudyFromWorklist,
+  deleteStudyFromWorklist
 } from "../../services/worklistServices";
 import { getSeries } from "../../services/seriesServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
@@ -18,14 +25,14 @@ import {
   alertViewPortFull,
   updatePatient,
   clearSelection,
-  changeActivePort,
+  changeActivePort
 } from "../annotationsList/action";
 const mode = sessionStorage.getItem("mode");
 
 const messages = {
   deleteSingle: "Remove study from the worklist? This cannot be undone.",
   deleteSelected:
-    "Delete selected studies from the worklist? This cannot be undone.",
+    "Delete selected studies from the worklist? This cannot be undone."
 };
 
 class WorkList extends React.Component {
@@ -40,7 +47,7 @@ class WorkList extends React.Component {
     showSeries: false,
     series: [],
     selectedSeries: {},
-    error: null,
+    error: null
   };
 
   componentDidMount = async () => {
@@ -69,7 +76,7 @@ class WorkList extends React.Component {
     this.setState({
       hasAddClicked: false,
       error: "",
-      deleteSingleClicked: false,
+      deleteSingleClicked: false
     });
   };
 
@@ -78,7 +85,7 @@ class WorkList extends React.Component {
       worklist,
       projectID,
       subjectID,
-      studyUID,
+      studyUID
     } = this.state.singleDeleteData;
     const body = [{ projectID, subjectID, studyUID }];
     deleteStudyFromWorklist(worklist, body)
@@ -103,7 +110,7 @@ class WorkList extends React.Component {
   handleSingleDelete = (worklist, projectID, subjectID, studyUID) => {
     this.setState({
       deleteSingleClicked: true,
-      singleDeleteData: { worklist, projectID, subjectID, studyUID },
+      singleDeleteData: { worklist, projectID, subjectID, studyUID }
     });
   };
 
@@ -118,13 +125,13 @@ class WorkList extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0,
+          selectAll: 0
         });
       }
     } else {
       newSelected[study] = { worklist, project, subject, study };
       await this.setState({
-        selectAll: 2,
+        selectAll: 2
       });
     }
     this.setState({ selected: newSelected });
@@ -139,14 +146,14 @@ class WorkList extends React.Component {
           workListID,
           projectID,
           subjectID,
-          studyUID,
+          studyUID
         };
       });
     }
 
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0,
+      selectAll: this.state.selectAll === 0 ? 1 : 0
     });
   }
 
@@ -155,7 +162,7 @@ class WorkList extends React.Component {
     const { data: series } = await getSeries(projectID, subjectID, studyUID);
     this.setState(state => ({
       showSeries: !state.showSeries,
-      series,
+      series
     }));
   };
 
@@ -163,7 +170,7 @@ class WorkList extends React.Component {
     this.setState(state => ({
       showSeries: !state.showSeries,
       series: [],
-      error: null,
+      error: null
     }));
   };
 
@@ -180,7 +187,56 @@ class WorkList extends React.Component {
               <FaRegEye className="menu-clickable" />
             </div>
           );
-        },
+        }
+      },
+      {
+        // Header: "%",
+        width: 25,
+        resizable: false,
+        Cell: original => {
+          const variant =
+            original.row._original.progressType === "AUTO"
+              ? "secondary"
+              : "info";
+          const text =
+            original.row._original.progressType === "AUTO" ? (
+              <AiOutlinePlusCircle />
+            ) : (
+              <AiOutlineStop />
+            );
+          return (
+            <div>
+              <Badge variant={variant}>{text}</Badge>
+            </div>
+          );
+        }
+      },
+      {
+        // Header: "%",
+        width: 25,
+        resizable: false,
+        Cell: original => {
+          const { completeness } = original.row._original;
+          const variant =
+            completeness === 0
+              ? "danger"
+              : completeness === 100
+              ? "success"
+              : "warning";
+          const text =
+            completeness === 0 ? (
+              <GrDocumentMissing />
+            ) : completeness === 100 ? (
+              <GrDocumentVerified />
+            ) : (
+              <GrDocumentPerformance />
+            );
+          return (
+            <div>
+              <Badge variant={variant}>{text}</Badge>
+            </div>
+          );
+        }
       },
       {
         id: "desc",
@@ -193,7 +249,7 @@ class WorkList extends React.Component {
           );
           studyDesc = studyDesc ? studyDesc : "Unnamed Study";
           return <div>{studyDesc}</div>;
-        },
+        }
       },
 
       {
@@ -208,7 +264,7 @@ class WorkList extends React.Component {
           );
           subjectName = subjectName ? subjectName : "Unnamed Subject";
           return <div>{subjectName}</div>;
-        },
+        }
       },
       {
         id: "pr_name",
@@ -222,28 +278,28 @@ class WorkList extends React.Component {
             original.row._original.projectID
           ];
           return <div>{projectName}</div>;
-        },
+        }
       },
       {
         id: "study_date",
         Header: "Study Date",
         sortable: true,
         resizable: true,
-        accessor: "studyDate",
+        accessor: "studyDate"
       },
       {
         id: "due",
         Header: "Due Date",
         sortable: true,
         resizable: true,
-        accessor: "worklistDuedate",
+        accessor: "worklistDuedate"
       },
       {
         id: "studyUID",
         Header: "StudyUID",
         sortable: true,
         resizable: true,
-        accessor: "studyUID",
+        accessor: "studyUID"
       },
       {
         id: "delete",
@@ -263,8 +319,8 @@ class WorkList extends React.Component {
           >
             <FaRegTrashAlt className="menu-clickable" />
           </div>
-        ),
-      },
+        )
+      }
     ];
   };
 
@@ -316,7 +372,7 @@ class WorkList extends React.Component {
             // alert user about the num of open series a the moment and told only max_port is allowed
             const openPorts = this.props.openSeries.length;
             this.setState({
-              error: `Already ${openPorts} viewers open. You can open ${MAX_PORT} at a time`,
+              error: `Already ${openPorts} viewers open. You can open ${MAX_PORT} at a time`
             });
           } else {
             //else get data for each serie for display
@@ -389,7 +445,7 @@ const mapStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
-    projectMap: state.annotationsListReducer.projectMap,
+    projectMap: state.annotationsListReducer.projectMap
   };
 };
 export default connect(mapStateToProps)(WorkList);
