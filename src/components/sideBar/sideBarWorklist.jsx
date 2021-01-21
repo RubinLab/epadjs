@@ -1,19 +1,22 @@
 import React from "react";
 import Table from "react-table";
 import { connect } from "react-redux";
-import { FaRegTrashAlt, FaRegEye } from "react-icons/fa";
+import { FaRegEye } from "react-icons/fa";
 import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
 import ReactTooltip from "react-tooltip";
-import { AiOutlinePlusCircle, AiOutlineStop } from "react-icons/ai";
 import {
   GrDocumentMissing,
   GrDocumentVerified,
-  GrDocumentPerformance
+  GrDocumentPerformance,
+  GrTrash,
+  GrCalculator,
+  GrManual
 } from "react-icons/gr";
 import {
   getStudiesOfWorklist,
-  deleteStudyFromWorklist
+  deleteStudyFromWorklist,
+  updateWorklistProgressManually
 } from "../../services/worklistServices";
 import { getSeries } from "../../services/seriesServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
@@ -176,6 +179,24 @@ class WorkList extends React.Component {
     }));
   };
 
+  handleClickProgresButton = (
+    workListID,
+    projectID,
+    subjectID,
+    studyUID,
+    status
+  ) => {
+    updateWorklistProgressManually(
+      workListID.trim(),
+      projectID,
+      subjectID,
+      studyUID,
+      status
+    )
+      .then(() => this.getWorkListData())
+      .catch(err => console.error(err));
+  };
+
   defineColumns = () => {
     return [
       {
@@ -197,8 +218,8 @@ class WorkList extends React.Component {
         resizable: false,
         Cell: original => {
           const isAuto = original.row._original.progressType === "AUTO";
-          const variant = isAuto ? "secondary" : "info";
-          const text = isAuto ? <AiOutlinePlusCircle /> : <AiOutlineStop />;
+          const variant = isAuto ? "info" : "light";
+          const text = isAuto ? <GrCalculator /> : <GrManual />;
           const tooltipText = isAuto
             ? "Progreess by annotations"
             : "Proggress by done";
@@ -332,6 +353,13 @@ class WorkList extends React.Component {
       {
         width: 30,
         Cell: original => {
+          const {
+            workListID,
+            projectID,
+            subjectID,
+            studyUID
+          } = original.row._original;
+
           return (
             <div>
               <Button
@@ -339,6 +367,15 @@ class WorkList extends React.Component {
                 data-tip
                 data-for={`progress-verified-button${original.index}`}
                 style={{ padding: "0.2rem", fontSize: "1.3rem" }}
+                onClick={() =>
+                  this.handleClickProgresButton(
+                    workListID,
+                    projectID,
+                    subjectID,
+                    studyUID,
+                    3
+                  )
+                }
               >
                 <GrDocumentVerified />
               </Button>
@@ -348,7 +385,7 @@ class WorkList extends React.Component {
                 type="light"
                 delayShow={1000}
               >
-                <span>Completed</span>
+                <span>Done</span>
               </ReactTooltip>
             </div>
           );
@@ -357,6 +394,12 @@ class WorkList extends React.Component {
       {
         width: 30,
         Cell: original => {
+          const {
+            workListID,
+            projectID,
+            subjectID,
+            studyUID
+          } = original.row._original;
           return (
             <div>
               <Button
@@ -364,6 +407,15 @@ class WorkList extends React.Component {
                 data-tip
                 data-for={`progress-inprogress-button${original.index}`}
                 style={{ padding: "0.2rem", fontSize: "1.3rem" }}
+                onClick={() =>
+                  this.handleClickProgresButton(
+                    workListID,
+                    projectID,
+                    subjectID,
+                    studyUID,
+                    2
+                  )
+                }
               >
                 <GrDocumentPerformance />
                 <ReactTooltip
@@ -372,7 +424,7 @@ class WorkList extends React.Component {
                   type="light"
                   delayShow={1000}
                 >
-                  <span>Started</span>
+                  <span>In progress</span>
                 </ReactTooltip>
               </Button>
             </div>
@@ -382,6 +434,12 @@ class WorkList extends React.Component {
       {
         width: 30,
         Cell: original => {
+          const {
+            workListID,
+            projectID,
+            subjectID,
+            studyUID
+          } = original.row._original;
           return (
             <div>
               <Button
@@ -389,6 +447,15 @@ class WorkList extends React.Component {
                 data-tip
                 data-for={`progress-undone-button${original.index}`}
                 style={{ padding: "0.2rem", fontSize: "1.3rem" }}
+                onClick={() =>
+                  this.handleClickProgresButton(
+                    workListID,
+                    projectID,
+                    subjectID,
+                    studyUID,
+                    1
+                  )
+                }
               >
                 <GrDocumentMissing />
                 <ReactTooltip
@@ -397,7 +464,7 @@ class WorkList extends React.Component {
                   type="light"
                   delayShow={1000}
                 >
-                  <span>Undone</span>
+                  <span>Not started</span>
                 </ReactTooltip>
               </Button>
             </div>
@@ -405,26 +472,66 @@ class WorkList extends React.Component {
         }
       },
       {
-        id: "delete",
-        Header: "",
-        width: 45,
-        resizable: true,
-        Cell: original => (
-          <div
-            style={{ padding: "0.2rem", fontSize: "1.3rem" }}
-            onClick={() =>
-              this.handleSingleDelete(
-                original.row._original.workListID,
-                original.row._original.projectID,
-                original.row._original.subjectID,
-                original.row._original.studyUID
-              )
-            }
-          >
-            <FaRegTrashAlt className="menu-clickable" />
-          </div>
-        )
+        width: 30,
+        Cell: original => {
+          const {
+            workListID,
+            projectID,
+            subjectID,
+            studyUID
+          } = original.row._original;
+          return (
+            <div>
+              <Button
+                variant="info"
+                data-tip
+                data-for={`progress-undone-button${original.index}`}
+                style={{ padding: "0.2rem", fontSize: "1.3rem" }}
+                onClick={() =>
+                  this.handleClickProgresButton(
+                    workListID,
+                    projectID,
+                    subjectID,
+                    studyUID,
+                    0
+                  )
+                }
+              >
+                <GrTrash />
+                <ReactTooltip
+                  id={`progress-undone-button${original.index}`}
+                  place="left"
+                  type="light"
+                  delayShow={1000}
+                >
+                  <span>Use auto calculation instead</span>
+                </ReactTooltip>
+              </Button>
+            </div>
+          );
+        }
       }
+      // {
+      //   id: "delete",
+      //   Header: "",
+      //   width: 45,
+      //   resizable: true,
+      //   Cell: original => (
+      //     <div
+      //       style={{ padding: "0.2rem", fontSize: "1.3rem" }}
+      //       onClick={() =>
+      //         this.handleSingleDelete(
+      //           original.row._original.workListID,
+      //           original.row._original.projectID,
+      //           original.row._original.subjectID,
+      //           original.row._original.studyUID
+      //         )
+      //       }
+      //     >
+      //       <FaRegTrashAlt className="menu-clickable" />
+      //     </div>
+      //   )
+      // }
     ];
   };
 
