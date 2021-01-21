@@ -290,6 +290,7 @@ class WorkList extends React.Component {
       {
         id: "desc",
         Header: "Study Description",
+        width: 320,
         sortable: true,
         resizable: true,
         Cell: original => {
@@ -304,6 +305,7 @@ class WorkList extends React.Component {
       {
         id: "sb_name",
         Header: "Subject Name",
+        width: 220,
         sortable: true,
         resizable: true,
 
@@ -318,6 +320,7 @@ class WorkList extends React.Component {
       {
         id: "pr_name",
         Header: "Project Name",
+        width: 220,
         accessor: "projectName",
         sortable: true,
         resizable: true,
@@ -331,6 +334,7 @@ class WorkList extends React.Component {
       },
       {
         id: "study_date",
+        width: 90,
         Header: "Study Date",
         sortable: true,
         resizable: true,
@@ -338,6 +342,7 @@ class WorkList extends React.Component {
       },
       {
         id: "due",
+        width: 90,
         Header: "Due Date",
         sortable: true,
         resizable: true,
@@ -351,7 +356,7 @@ class WorkList extends React.Component {
         accessor: "studyUID"
       },
       {
-        width: 30,
+        width: 40,
         Cell: original => {
           const {
             workListID,
@@ -392,7 +397,7 @@ class WorkList extends React.Component {
         }
       },
       {
-        width: 30,
+        width: 40,
         Cell: original => {
           const {
             workListID,
@@ -432,7 +437,7 @@ class WorkList extends React.Component {
         }
       },
       {
-        width: 30,
+        width: 40,
         Cell: original => {
           const {
             workListID,
@@ -478,12 +483,13 @@ class WorkList extends React.Component {
             workListID,
             projectID,
             subjectID,
-            studyUID
+            studyUID, progressType
           } = original.row._original;
           return (
             <div>
               <Button
-                variant="info"
+                disabled={progressType === 'AUTO'}
+                variant={progressType === 'AUTO'? "secondary" : "info"}
                 data-tip
                 data-for={`progress-undone-button${original.index}`}
                 style={{ padding: "0.2rem", fontSize: "1.3rem" }}

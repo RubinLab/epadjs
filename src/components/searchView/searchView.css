@@ -582,3 +582,7 @@ h5.add-subject__modal--label,
 .worklist-page .rt-table .rt-tbody .rt-tr-group .rt-tr {
   align-items: center;
 }
+
+.worklist-page {
+  margin-right: 10px;
+}
