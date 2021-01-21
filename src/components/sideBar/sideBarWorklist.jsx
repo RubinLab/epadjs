@@ -221,8 +221,8 @@ class WorkList extends React.Component {
           const variant = isAuto ? "info" : "light";
           const text = isAuto ? <GrCalculator /> : <GrManual />;
           const tooltipText = isAuto
-            ? "Progreess by annotations"
-            : "Proggress by done";
+            ? "Progress by annotations"
+            : "Progress manually";
           return (
             <div>
               <Badge
@@ -248,6 +248,9 @@ class WorkList extends React.Component {
         // Header: "%",
         width: 25,
         resizable: false,
+        sortable: true,
+        accessor: "completeness",
+        sortMethod: (a, b) => a - b,
         Cell: original => {
           const { completeness } = original.row._original;
           let variant;
@@ -450,7 +453,7 @@ class WorkList extends React.Component {
               <Button
                 variant="danger"
                 data-tip
-                data-for={`progress-undone-button${original.index}`}
+                data-for={`progress-notStarted-button${original.index}`}
                 style={{ padding: "0.2rem", fontSize: "1.3rem" }}
                 onClick={() =>
                   this.handleClickProgresButton(
@@ -464,7 +467,7 @@ class WorkList extends React.Component {
               >
                 <GrDocumentMissing />
                 <ReactTooltip
-                  id={`progress-undone-button${original.index}`}
+                  id={`progress-notStarted-button${original.index}`}
                   place="left"
                   type="light"
                   delayShow={1000}
@@ -483,15 +486,16 @@ class WorkList extends React.Component {
             workListID,
             projectID,
             subjectID,
-            studyUID, progressType
+            studyUID,
+            progressType
           } = original.row._original;
           return (
             <div>
               <Button
-                disabled={progressType === 'AUTO'}
-                variant={progressType === 'AUTO'? "secondary" : "info"}
+                disabled={progressType === "AUTO"}
+                variant={progressType === "AUTO" ? "secondary" : "info"}
                 data-tip
-                data-for={`progress-undone-button${original.index}`}
+                data-for={`progress-auto-button${original.index}`}
                 style={{ padding: "0.2rem", fontSize: "1.3rem" }}
                 onClick={() =>
                   this.handleClickProgresButton(
@@ -505,7 +509,7 @@ class WorkList extends React.Component {
               >
                 <GrTrash />
                 <ReactTooltip
-                  id={`progress-undone-button${original.index}`}
+                  id={`progress-auto-button${original.index}`}
                   place="left"
                   type="light"
                   delayShow={1000}
