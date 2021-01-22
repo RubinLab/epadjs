@@ -293,7 +293,7 @@ class WorkList extends React.Component {
       {
         id: "desc",
         Header: "Study Description",
-        width: 320,
+        width: 240,
         sortable: true,
         resizable: true,
         Cell: original => {
@@ -308,7 +308,7 @@ class WorkList extends React.Component {
       {
         id: "sb_name",
         Header: "Subject Name",
-        width: 220,
+        width: 160,
         sortable: true,
         resizable: true,
 
@@ -323,7 +323,7 @@ class WorkList extends React.Component {
       {
         id: "pr_name",
         Header: "Project Name",
-        width: 220,
+        width: 200,
         accessor: "projectName",
         sortable: true,
         resizable: true,
@@ -353,13 +353,14 @@ class WorkList extends React.Component {
       },
       {
         id: "studyUID",
+        width: 200,
         Header: "StudyUID",
         sortable: true,
         resizable: true,
         accessor: "studyUID"
       },
       {
-        width: 40,
+        width: 30,
         Cell: original => {
           const {
             workListID,
@@ -374,7 +375,7 @@ class WorkList extends React.Component {
                 variant="success"
                 data-tip
                 data-for={`progress-verified-button${original.index}`}
-                style={{ padding: "0.2rem", fontSize: "1.3rem" }}
+                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem"}}
                 onClick={() =>
                   this.handleClickProgresButton(
                     workListID,
@@ -400,7 +401,7 @@ class WorkList extends React.Component {
         }
       },
       {
-        width: 40,
+        width: 30,
         Cell: original => {
           const {
             workListID,
@@ -414,7 +415,7 @@ class WorkList extends React.Component {
                 variant="warning"
                 data-tip
                 data-for={`progress-inprogress-button${original.index}`}
-                style={{ padding: "0.2rem", fontSize: "1.3rem" }}
+                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem"}}
                 onClick={() =>
                   this.handleClickProgresButton(
                     workListID,
@@ -440,7 +441,7 @@ class WorkList extends React.Component {
         }
       },
       {
-        width: 40,
+        width: 30,
         Cell: original => {
           const {
             workListID,
@@ -454,7 +455,7 @@ class WorkList extends React.Component {
                 variant="danger"
                 data-tip
                 data-for={`progress-notStarted-button${original.index}`}
-                style={{ padding: "0.2rem", fontSize: "1.3rem" }}
+                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem"}}
                 onClick={() =>
                   this.handleClickProgresButton(
                     workListID,
@@ -496,7 +497,7 @@ class WorkList extends React.Component {
                 variant={progressType === "AUTO" ? "secondary" : "info"}
                 data-tip
                 data-for={`progress-auto-button${original.index}`}
-                style={{ padding: "0.2rem", fontSize: "1.3rem" }}
+                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem"}}
                 onClick={() =>
                   this.handleClickProgresButton(
                     workListID,
