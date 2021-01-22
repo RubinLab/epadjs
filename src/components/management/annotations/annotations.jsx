@@ -101,8 +101,8 @@ class Annotations extends React.Component {
   };
 
   getAnnotationsData = async projectID => {
-    try {
-      const { data: annotations } = projectID
+    try {  
+      const { data: {rows: annotations } } = projectID
         ? await getSummaryAnnotations(projectID)
         : await getAllAnnotations();
       this.setState({ annotations });
