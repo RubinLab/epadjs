@@ -1,7 +1,12 @@
 import React from "react";
 import ReactTable from "react-table";
 import _ from "lodash";
-// import { users } from "./userLevelData";
+import Badge from "react-bootstrap/Badge";
+import ReactTooltip from "react-tooltip";
+import {
+  GrCalculator,
+  GrManual
+} from "react-icons/gr";
 import { getWorklistProgress } from "../../services/worklistServices";
 import "./proView.css";
 
@@ -130,6 +135,38 @@ class ProgressView extends React.Component {
             </div>
           );
         },
+      },
+      {
+        // Header: "%",
+        width: 25,
+        resizable: false,
+        Cell: original => {
+          const isAuto = original.row._original.type === "AUTO";
+          const variant = isAuto ? "info" : "light";
+          const text = isAuto ? <GrCalculator /> : <GrManual />;
+          const tooltipText = isAuto
+            ? "Progress by annotations"
+            : "Progress manually";
+          return (
+            <div>
+              <Badge
+                data-tip
+                data-for={`progressType-badge${original.index}`}
+                variant={variant}
+              >
+                {text}
+              </Badge>
+              <ReactTooltip
+                id={`progressType-badge${original.index}`}
+                place="left"
+                type="light"
+                delayShow={1000}
+              >
+                <span>{tooltipText}</span>
+              </ReactTooltip>
+            </div>
+          );
+        }
       },
       {
         Header: "Completion(%)",

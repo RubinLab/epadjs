@@ -1,11 +1,22 @@
 import React from "react";
 import Table from "react-table";
-import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { FaRegTrashAlt, FaRegEye } from "react-icons/fa";
+import { FaRegEye } from "react-icons/fa";
+import Badge from "react-bootstrap/Badge";
+import Button from "react-bootstrap/Button";
+import ReactTooltip from "react-tooltip";
+import {
+  GrDocumentMissing,
+  GrDocumentVerified,
+  GrDocumentPerformance,
+  GrTrash,
+  GrCalculator,
+  GrManual
+} from "react-icons/gr";
 import {
   getStudiesOfWorklist,
   deleteStudyFromWorklist,
+  updateWorklistProgressManually
 } from "../../services/worklistServices";
 import { getSeries } from "../../services/seriesServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
@@ -18,14 +29,15 @@ import {
   alertViewPortFull,
   updatePatient,
   clearSelection,
-  changeActivePort,
+  changeActivePort
 } from "../annotationsList/action";
+
 const mode = sessionStorage.getItem("mode");
 
 const messages = {
   deleteSingle: "Remove study from the worklist? This cannot be undone.",
   deleteSelected:
-    "Delete selected studies from the worklist? This cannot be undone.",
+    "Delete selected studies from the worklist? This cannot be undone."
 };
 
 class WorkList extends React.Component {
@@ -40,7 +52,7 @@ class WorkList extends React.Component {
     showSeries: false,
     series: [],
     selectedSeries: {},
-    error: null,
+    error: null
   };
 
   componentDidMount = async () => {
@@ -69,7 +81,7 @@ class WorkList extends React.Component {
     this.setState({
       hasAddClicked: false,
       error: "",
-      deleteSingleClicked: false,
+      deleteSingleClicked: false
     });
   };
 
@@ -78,7 +90,7 @@ class WorkList extends React.Component {
       worklist,
       projectID,
       subjectID,
-      studyUID,
+      studyUID
     } = this.state.singleDeleteData;
     const body = [{ projectID, subjectID, studyUID }];
     deleteStudyFromWorklist(worklist, body)
@@ -103,7 +115,7 @@ class WorkList extends React.Component {
   handleSingleDelete = (worklist, projectID, subjectID, studyUID) => {
     this.setState({
       deleteSingleClicked: true,
-      singleDeleteData: { worklist, projectID, subjectID, studyUID },
+      singleDeleteData: { worklist, projectID, subjectID, studyUID }
     });
   };
 
@@ -118,13 +130,13 @@ class WorkList extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0,
+          selectAll: 0
         });
       }
     } else {
       newSelected[study] = { worklist, project, subject, study };
       await this.setState({
-        selectAll: 2,
+        selectAll: 2
       });
     }
     this.setState({ selected: newSelected });
@@ -139,14 +151,14 @@ class WorkList extends React.Component {
           workListID,
           projectID,
           subjectID,
-          studyUID,
+          studyUID
         };
       });
     }
 
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0,
+      selectAll: this.state.selectAll === 0 ? 1 : 0
     });
   }
 
@@ -155,7 +167,7 @@ class WorkList extends React.Component {
     const { data: series } = await getSeries(projectID, subjectID, studyUID);
     this.setState(state => ({
       showSeries: !state.showSeries,
-      series,
+      series
     }));
   };
 
@@ -163,8 +175,26 @@ class WorkList extends React.Component {
     this.setState(state => ({
       showSeries: !state.showSeries,
       series: [],
-      error: null,
+      error: null
     }));
+  };
+
+  handleClickProgresButton = (
+    workListID,
+    projectID,
+    subjectID,
+    studyUID,
+    status
+  ) => {
+    updateWorklistProgressManually(
+      workListID,
+      projectID,
+      subjectID,
+      studyUID,
+      status
+    )
+      .then(() => this.getWorkListData())
+      .catch(err => console.error(err));
   };
 
   defineColumns = () => {
@@ -180,11 +210,90 @@ class WorkList extends React.Component {
               <FaRegEye className="menu-clickable" />
             </div>
           );
-        },
+        }
+      },
+      {
+        // Header: "%",
+        width: 25,
+        resizable: false,
+        Cell: original => {
+          const isAuto = original.row._original.progressType === "AUTO";
+          const variant = isAuto ? "info" : "light";
+          const text = isAuto ? <GrCalculator /> : <GrManual />;
+          const tooltipText = isAuto
+            ? "Progress by annotations"
+            : "Progress manually";
+          return (
+            <div>
+              <Badge
+                data-tip
+                data-for={`progressType-badge${original.index}`}
+                variant={variant}
+              >
+                {text}
+              </Badge>
+              <ReactTooltip
+                id={`progressType-badge${original.index}`}
+                place="right"
+                type="light"
+                delayShow={1000}
+              >
+                <span>{tooltipText}</span>
+              </ReactTooltip>
+            </div>
+          );
+        }
+      },
+      {
+        // Header: "%",
+        width: 25,
+        resizable: false,
+        sortable: true,
+        accessor: "completeness",
+        sortMethod: (a, b) => a - b,
+        Cell: original => {
+          const { completeness } = original.row._original;
+          let variant;
+          let text;
+          let tooltipText;
+          if (completeness === 0) {
+            variant = "danger";
+            text = <GrDocumentMissing />;
+            tooltipText = "Not started";
+          } else if (completeness === 100) {
+            variant = "success";
+            text = <GrDocumentVerified />;
+            tooltipText = "Completed";
+          } else {
+            variant = "warning";
+            text = <GrDocumentPerformance />;
+            tooltipText = "In progress";
+          }
+          return (
+            <div>
+              <Badge
+                data-tip
+                data-for={`progress-badge${original.index}`}
+                variant={variant}
+              >
+                {text}
+              </Badge>
+              <ReactTooltip
+                id={`progress-badge${original.index}`}
+                place="right"
+                type="light"
+                delayShow={1000}
+              >
+                <span>{tooltipText}</span>
+              </ReactTooltip>
+            </div>
+          );
+        }
       },
       {
         id: "desc",
         Header: "Study Description",
+        width: 240,
         sortable: true,
         resizable: true,
         Cell: original => {
@@ -193,12 +302,13 @@ class WorkList extends React.Component {
           );
           studyDesc = studyDesc ? studyDesc : "Unnamed Study";
           return <div>{studyDesc}</div>;
-        },
+        }
       },
 
       {
         id: "sb_name",
         Header: "Subject Name",
+        width: 160,
         sortable: true,
         resizable: true,
 
@@ -208,11 +318,12 @@ class WorkList extends React.Component {
           );
           subjectName = subjectName ? subjectName : "Unnamed Subject";
           return <div>{subjectName}</div>;
-        },
+        }
       },
       {
         id: "pr_name",
         Header: "Project Name",
+        width: 200,
         accessor: "projectName",
         sortable: true,
         resizable: true,
@@ -222,49 +333,195 @@ class WorkList extends React.Component {
             original.row._original.projectID
           ];
           return <div>{projectName}</div>;
-        },
+        }
       },
       {
         id: "study_date",
+        width: 90,
         Header: "Study Date",
         sortable: true,
         resizable: true,
-        accessor: "studyDate",
+        accessor: "studyDate"
       },
       {
         id: "due",
+        width: 90,
         Header: "Due Date",
         sortable: true,
         resizable: true,
-        accessor: "worklistDuedate",
+        accessor: "worklistDuedate"
       },
       {
         id: "studyUID",
+        width: 200,
         Header: "StudyUID",
         sortable: true,
         resizable: true,
-        accessor: "studyUID",
+        accessor: "studyUID"
       },
       {
-        id: "delete",
-        Header: "",
-        width: 45,
-        resizable: true,
-        Cell: original => (
-          <div
-            onClick={() =>
-              this.handleSingleDelete(
-                original.row._original.workListID,
-                original.row._original.projectID,
-                original.row._original.subjectID,
-                original.row._original.studyUID
-              )
-            }
-          >
-            <FaRegTrashAlt className="menu-clickable" />
-          </div>
-        ),
+        width: 30,
+        Cell: original => {
+          const {
+            workListID,
+            projectID,
+            subjectID,
+            studyUID
+          } = original.row._original;
+
+          return (
+            <div>
+              <Button
+                variant="success"
+                data-tip
+                data-for={`progress-verified-button${original.index}`}
+                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem"}}
+                onClick={() =>
+                  this.handleClickProgresButton(
+                    workListID,
+                    projectID,
+                    subjectID,
+                    studyUID,
+                    3
+                  )
+                }
+              >
+                <GrDocumentVerified />
+              </Button>
+              <ReactTooltip
+                id={`progress-verified-button${original.index}`}
+                place="left"
+                type="light"
+                delayShow={1000}
+              >
+                <span>Done</span>
+              </ReactTooltip>
+            </div>
+          );
+        }
       },
+      {
+        width: 30,
+        Cell: original => {
+          const {
+            workListID,
+            projectID,
+            subjectID,
+            studyUID
+          } = original.row._original;
+          return (
+            <div>
+              <Button
+                variant="warning"
+                data-tip
+                data-for={`progress-inprogress-button${original.index}`}
+                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem"}}
+                onClick={() =>
+                  this.handleClickProgresButton(
+                    workListID,
+                    projectID,
+                    subjectID,
+                    studyUID,
+                    2
+                  )
+                }
+              >
+                <GrDocumentPerformance />
+                <ReactTooltip
+                  id={`progress-inprogress-button${original.index}`}
+                  place="left"
+                  type="light"
+                  delayShow={1000}
+                >
+                  <span>In progress</span>
+                </ReactTooltip>
+              </Button>
+            </div>
+          );
+        }
+      },
+      {
+        width: 30,
+        Cell: original => {
+          const {
+            workListID,
+            projectID,
+            subjectID,
+            studyUID
+          } = original.row._original;
+          return (
+            <div>
+              <Button
+                variant="danger"
+                data-tip
+                data-for={`progress-notStarted-button${original.index}`}
+                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem"}}
+                onClick={() =>
+                  this.handleClickProgresButton(
+                    workListID,
+                    projectID,
+                    subjectID,
+                    studyUID,
+                    1
+                  )
+                }
+              >
+                <GrDocumentMissing />
+                <ReactTooltip
+                  id={`progress-notStarted-button${original.index}`}
+                  place="left"
+                  type="light"
+                  delayShow={1000}
+                >
+                  <span>Not started</span>
+                </ReactTooltip>
+              </Button>
+            </div>
+          );
+        }
+      },
+      {
+        width: 30,
+        Cell: original => {
+          const {
+            workListID,
+            projectID,
+            subjectID,
+            studyUID,
+            progressType
+          } = original.row._original;
+          return (
+            <div>
+              <Button
+                disabled={progressType === "AUTO"}
+                variant={progressType === "AUTO" ? "secondary" : "info"}
+                data-tip
+                data-for={`progress-auto-button${original.index}`}
+                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem"}}
+                onClick={() =>
+                  this.handleClickProgresButton(
+                    workListID,
+                    projectID,
+                    subjectID,
+                    studyUID,
+                    0
+                  )
+                }
+              >
+                <GrTrash />
+                <ReactTooltip
+                  id={`progress-auto-button${original.index}`}
+                  place="left"
+                  type="light"
+                  delayShow={1000}
+                >
+                  <span>Use auto calculation instead</span>
+                </ReactTooltip>
+              </Button>
+            </div>
+          );
+        }
+      }
     ];
   };
 
@@ -316,7 +573,7 @@ class WorkList extends React.Component {
             // alert user about the num of open series a the moment and told only max_port is allowed
             const openPorts = this.props.openSeries.length;
             this.setState({
-              error: `Already ${openPorts} viewers open. You can open ${MAX_PORT} at a time`,
+              error: `Already ${openPorts} viewers open. You can open ${MAX_PORT} at a time`
             });
           } else {
             //else get data for each serie for display
@@ -389,7 +646,7 @@ const mapStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
-    projectMap: state.annotationsListReducer.projectMap,
+    projectMap: state.annotationsListReducer.projectMap
   };
 };
 export default connect(mapStateToProps)(WorkList);
