@@ -24,6 +24,7 @@ import UserMenu from "./components/userProfileMenu.jsx";
 import WarningModal from "./components/common/warningModal";
 import ConfirmationModal from "./components/common/confirmationModal";
 import SelectModalMenu from "./components/common/SelectModalMenu";
+import AnnotationSearch from "./components/annotationSearch";
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
@@ -33,7 +34,7 @@ import {
   clearSelection,
   selectProject,
   getTemplates,
-  segUploadCompleted,
+  segUploadCompleted
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
@@ -48,23 +49,23 @@ import MinimizedReport from "./components/searchView/MinimizedReport";
 const messages = {
   noPatient: {
     title: "No Patient Selected",
-    message: "Select a patient to get a report!",
+    message: "Select a patient to get a report!"
   },
   multiplePatient: {
     title: "Multiple Patients Selected",
-    message: "Select only one patient to get the report!",
+    message: "Select only one patient to get the report!"
   },
   projectWaterfall: {
     title: "Project Selected",
-    message: "Waterfall report will be created for project ",
-  },
+    message: "Waterfall report will be created for project "
+  }
 };
 
 const reportsList = [
   { name: "ADLA" },
   { name: "Longitudinal" },
   { name: "RECIST" },
-  { name: "Waterfall" },
+  { name: "Waterfall" }
 ];
 class App extends Component {
   constructor(props) {
@@ -98,17 +99,17 @@ class App extends Component {
       reportsCompArr: [],
       minReportsArr: [],
       hiddenReports: {},
-      metric: null,
+      metric: null
     };
   }
 
   getProjectAdded = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       projectAdded: state.projectAdded + 1,
       refTree: {},
       treeData: {},
       expandLevel: 0,
-      treeExpand: {},
+      treeExpand: {}
     }));
   };
 
@@ -117,29 +118,29 @@ class App extends Component {
       showConfirmation: false,
       showWarning: false,
       title: "",
-      message: "",
+      message: ""
     });
   };
 
   handleReportsClick = () => {
-    this.setState((state) => ({ showReportsMenu: !state.showReportsMenu }));
+    this.setState(state => ({ showReportsMenu: !state.showReportsMenu }));
   };
 
-  countCurrentReports = (arr) => {
+  countCurrentReports = arr => {
     let nullCount = 0;
-    arr.forEach((el) => {
+    arr.forEach(el => {
       if (el === null) nullCount++;
     });
     return nullCount;
   };
 
-  closeReportModal = (index) => {
+  closeReportModal = index => {
     const arr = [...this.state.reportsCompArr];
     arr[index] = null;
     this.setState({
       template: null,
       report: null,
-      reportsCompArr: arr,
+      reportsCompArr: arr
     });
 
     // if there isn't any report open clear selection
@@ -156,13 +157,13 @@ class App extends Component {
 
     this.setState({
       hiddenReports,
-      minReportsArr,
+      minReportsArr
     });
 
     this.closeReportModal(reportIndex);
   };
 
-  handleMaximizeReport = (e) => {
+  handleMaximizeReport = e => {
     let { index, reportindex } = e.target.dataset;
     index = parseInt(index);
     reportindex = parseInt(reportindex);
@@ -176,7 +177,7 @@ class App extends Component {
     this.setState({
       hiddenReports,
       minReportsArr,
-      reportsCompArr,
+      reportsCompArr
     });
   };
 
@@ -202,7 +203,7 @@ class App extends Component {
     this.setState({ minReportsArr, reportsCompArr, hiddenReports });
   };
 
-  handleReportSelect = (e) => {
+  handleReportSelect = e => {
     const { projectMap, selectedPatients } = this.props;
     const patients = Object.values(selectedPatients);
     const reportType = e.target.dataset.opt;
@@ -214,20 +215,20 @@ class App extends Component {
           title: messages.projectWaterfall.title,
           message:
             messages.projectWaterfall.message +
-            projectMap[this.state.pid].projectName,
+            projectMap[this.state.pid].projectName
         });
       } else {
         this.setState({
           showWarning: true,
           title: messages.noPatient.title,
-          message: messages.noPatient.message,
+          message: messages.noPatient.message
         });
       }
     } else if (patients.length > 1 && reportType !== "Waterfall") {
       this.setState({
         showWarning: true,
         title: messages.multiplePatient.title,
-        message: messages.multiplePatient.message,
+        message: messages.multiplePatient.message
       });
     } else {
       const reportsCompArr = [...this.state.reportsCompArr];
@@ -247,15 +248,15 @@ class App extends Component {
       this.setState({
         template: null,
         reportType,
-        reportsCompArr,
+        reportsCompArr
       });
     }
   };
 
-  getMetric = (metric) => {
+  getMetric = metric => {
     this.setState({ metric });
   };
-  handleWaterFallClickOnBar = async (name) => {
+  handleWaterFallClickOnBar = async name => {
     // find the patient selected
     // if project selected get patient details with call
     const { selectedProject, selectedPatients } = this.props;
@@ -281,7 +282,7 @@ class App extends Component {
       />
     );
     this.setState({
-      reportsCompArr,
+      reportsCompArr
     });
   };
 
@@ -306,7 +307,7 @@ class App extends Component {
       template: null,
       reportType: "Waterfall",
       showConfirmation: false,
-      reportsCompArr,
+      reportsCompArr
     });
   };
 
@@ -395,7 +396,7 @@ class App extends Component {
     });
   };
 
-  getTreeExpandSingle = async (expandObj) => {
+  getTreeExpandSingle = async expandObj => {
     try {
       const { patient, study, series } = expandObj;
       let treeExpand = { ...this.state.treeExpand };
@@ -433,18 +434,18 @@ class App extends Component {
     }
   };
 
-  getExpandLevel = (expandLevel) => {
+  getExpandLevel = expandLevel => {
     this.setState({ expandLevel });
   };
 
   handleShrink = async () => {
     const { expandLevel } = this.state;
     if (expandLevel > 0) {
-      await this.setState((state) => ({ expandLevel: state.expandLevel - 1 }));
+      await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
     }
   };
 
-  closeMenu = (notification) => {
+  closeMenu = notification => {
     // if (event && event.type === "keydown") {
     //   if (event.key === "Escape" || event.keyCode === 27) {
     //     this.setState({ openMng: false });
@@ -454,12 +455,12 @@ class App extends Component {
       openMng: false,
       openInfo: false,
       openUser: false,
-      openMenu: false,
+      openMenu: false
     });
     if (notification) this.updateNotificationSeen();
   };
 
-  switchView = (viewType) => {
+  switchView = viewType => {
     const { pid } = this.state;
     this.setState({ viewType });
     if (viewType === "search") {
@@ -468,43 +469,45 @@ class App extends Component {
         : this.props.history.push(`/search`);
     } else if (viewType === "display") {
       this.props.history.push(`/display`);
+    } else if (viewType === "annotations") {
+      this.props.history.push(`/annotations`);
     }
   };
 
   handleMngMenu = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       openInfo: false,
       openMng: !state.openMng,
-      openUser: false,
+      openUser: false
     }));
   };
 
   handleInfoMenu = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       openInfo: !state.openInfo,
       openMng: false,
-      openUser: false,
+      openUser: false
     }));
   };
 
   handleUserProfileMenu = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       openInfo: false,
       openMng: false,
-      openUser: !state.openUser,
+      openUser: !state.openUser
     }));
   };
 
   updateProgress = () => {
-    this.setState((state) => ({ progressUpdated: state.progressUpdated + 1 }));
+    this.setState(state => ({ progressUpdated: state.progressUpdated + 1 }));
   };
 
   async componentDidMount() {
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),
-      fetch(`${process.env.PUBLIC_URL}/keycloak.json`),
+      fetch(`${process.env.PUBLIC_URL}/keycloak.json`)
     ])
-      .then(async (results) => {
+      .then(async results => {
         const configData = await results[0].json();
         let { mode, apiUrl, wadoUrl, authMode } = configData;
         // check and use environment variables if any
@@ -533,7 +536,7 @@ class App extends Component {
         this.completeAutorization(apiUrl);
         if (mode === "lite") this.setState({ pid: "lite" });
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(err);
       });
     //get notifications from sessionStorage and setState
@@ -547,14 +550,14 @@ class App extends Component {
     }
   }
 
-  componentDidUpdate = (prevProps) => {
+  componentDidUpdate = prevProps => {
     const uploaded = this.props.notificationAction.startsWith("Upload");
     if (prevProps.lastEventId !== this.props.lastEventId && uploaded) {
       this.props.dispatch(getTemplates());
     }
   };
 
-  completeAutorization = (apiUrl) => {
+  completeAutorization = apiUrl => {
     let getAuthUser = null;
 
     if (sessionStorage.getItem("authMode") !== "external") {
@@ -564,50 +567,50 @@ class App extends Component {
       getAuthUser = new Promise((resolve, reject) => {
         keycloak
           .init({ onLoad: "login-required" })
-          .then((authenticated) => {
+          .then(authenticated => {
             keycloak
               .loadUserInfo()
-              .then((userInfo) => {
+              .then(userInfo => {
                 resolve({ userInfo, keycloak, authenticated });
               })
-              .catch((err) => reject(err));
+              .catch(err => reject(err));
           })
-          .catch((err) => reject(err));
+          .catch(err => reject(err));
       });
     } else {
       // authMode is external ask backend for user
       getAuthUser = new Promise((resolve, reject) => {
         getUserInfo()
-          .then((userInfoResponse) => {
+          .then(userInfoResponse => {
             resolve({
               userInfo: userInfoResponse.data,
               keycloak: {},
-              authenticated: true,
+              authenticated: true
             });
           })
-          .catch((err) => reject(err));
+          .catch(err => reject(err));
       });
     }
 
     getAuthUser
-      .then(async (result) => {
+      .then(async result => {
         try {
           let user = {
             user: result.userInfo.preferred_username || result.userInfo.email,
-            displayname: result.userInfo.given_name,
+            displayname: result.userInfo.given_name
           };
           await auth.login(user, null, result.keycloak);
           this.setState({
             keycloak: result.keycloak,
             authenticated: result.authenticated,
             id: result.userInfo.sub,
-            user,
+            user
           });
           const {
             email,
             family_name,
             given_name,
-            preferred_username,
+            preferred_username
           } = result.userInfo;
           const username = preferred_username || email;
 
@@ -624,8 +627,8 @@ class App extends Component {
             result.keycloak.token
               ? {
                   headers: {
-                    authorization: `Bearer ${result.keycloak.token}`,
-                  },
+                    authorization: `Bearer ${result.keycloak.token}`
+                  }
                 }
               : {}
           );
@@ -637,12 +640,12 @@ class App extends Component {
           console.log("Error in user retrieval!", err);
         }
       })
-      .catch((err2) => {
+      .catch(err2 => {
         console.log("Authentication failed!", err2);
       });
   };
 
-  getMessageFromEventSrc = (res) => {
+  getMessageFromEventSrc = res => {
     try {
       if (res.data === "heartbeat") {
         return;
@@ -654,7 +657,7 @@ class App extends Component {
         createdtime,
         projectID,
         error,
-        refresh,
+        refresh
       } = parsedRes.notification;
       const action = parsedRes.notification.function;
       const message = params;
@@ -673,7 +676,7 @@ class App extends Component {
         time,
         seen: false,
         action,
-        error,
+        error
       });
       const tagEdited = action.startsWith("Tag");
       const uploaded = action.startsWith("Upload");
@@ -700,7 +703,7 @@ class App extends Component {
     );
   };
 
-  onLogout = (e) => {
+  onLogout = e => {
     auth.logout();
     // sessionStorage.removeItem("annotations");
     sessionStorage.setItem("notifications", JSON.stringify([]));
@@ -708,12 +711,12 @@ class App extends Component {
       authenticated: false,
       id: null,
       name: null,
-      user: null,
+      user: null
     });
     if (sessionStorage.getItem("authMode") !== "external")
       this.state.keycloak.logout().then(() => {
         this.setState({
-          keycloak: null,
+          keycloak: null
         });
         auth.logout();
       });
@@ -722,7 +725,7 @@ class App extends Component {
 
   updateNotificationSeen = () => {
     const notifications = [...this.state.notifications];
-    notifications.forEach((notification) => {
+    notifications.forEach(notification => {
       notification.seen = true;
     });
     this.setState({ notifications });
@@ -737,9 +740,9 @@ class App extends Component {
   handleCloseAll = () => {
     // let { closeAll } = this.state;
     // closeAll += 1;
-    this.setState((state) => ({
+    this.setState(state => ({
       expandLevel: 0,
-      closeAll: state.closeAll + 1,
+      closeAll: state.closeAll + 1
     }));
   };
 
@@ -749,7 +752,7 @@ class App extends Component {
       const patientIDs = [];
       if (level === "subject") {
         if (!treeData[projectID]) treeData[projectID] = {};
-        data.forEach((el) => {
+        data.forEach(el => {
           if (!treeData[projectID][el.subjectID]) {
             treeData[projectID][el.subjectID] = { data: el, studies: {} };
           }
@@ -769,11 +772,11 @@ class App extends Component {
       } else if (level === "studies") {
         const studyUIDs = [];
         const patientID = data[0].patientID;
-        data.forEach((el) => {
+        data.forEach(el => {
           if (!treeData[projectID][el.patientID].studies[el.studyUID]) {
             treeData[projectID][el.patientID].studies[el.studyUID] = {
               data: el,
-              series: {},
+              series: {}
             };
           }
           studyUIDs.push(el.studyUID);
@@ -791,7 +794,7 @@ class App extends Component {
         const patientID = data[0].patientID;
         const studyUID = data[0].studyUID;
         const seriesUIDs = [];
-        data.forEach((el) => {
+        data.forEach(el => {
           if (
             !treeData[projectID][el.patientID].studies[el.studyUID].series[
               el.seriesUID
@@ -800,7 +803,7 @@ class App extends Component {
             treeData[projectID][el.patientID].studies[el.studyUID].series[
               el.seriesUID
             ] = {
-              data: el,
+              data: el
             };
           }
           seriesUIDs.push(el.seriesUID);
@@ -822,7 +825,7 @@ class App extends Component {
     }
   };
 
-  getPidUpdate = (pid) => {
+  getPidUpdate = pid => {
     this.setState({ pid });
   };
 
@@ -831,7 +834,7 @@ class App extends Component {
   };
 
   sortLevelArr = (arr, attribute) => {
-    return arr.sort(function (a, b) {
+    return arr.sort(function(a, b) {
       if (a.data[attribute] < b.data[attribute]) {
         return -1;
       }
@@ -896,11 +899,11 @@ class App extends Component {
   };
 
   findNonExisting = (arr, uid, level) => {
-    const result = arr.filter((el) => el[level] === uid);
+    const result = arr.filter(el => el[level] === uid);
     return result[0];
   };
 
-  checkIfSegUpload = (params) => {
+  checkIfSegUpload = params => {
     const { isSegUploaded } = this.props;
     const segsUploaded = Object.keys(isSegUploaded);
     for (let i = 0; i < segsUploaded.length; i++) {
@@ -995,7 +998,7 @@ class App extends Component {
       showWarning,
       showConfirmation,
       title,
-      message,
+      message
     } = this.state;
     let noOfUnseen;
     if (notifications) {
@@ -1088,7 +1091,7 @@ class App extends Component {
                 <Route path="/logout" component={Logout} />
                 <ProtectedRoute
                   path="/display"
-                  render={(props) => (
+                  render={props => (
                     <DisplayView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -1101,7 +1104,7 @@ class App extends Component {
                 />
                 <ProtectedRoute
                   path="/search/:pid?"
-                  render={(props) => (
+                  render={props => (
                     <SearchView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -1128,7 +1131,7 @@ class App extends Component {
                 />
                 <ProtectedRoute
                   path="/search/:pid?"
-                  render={(props) => (
+                  render={props => (
                     <SearchView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -1160,8 +1163,12 @@ class App extends Component {
                 />
                 <ProtectedRoute
                   path="/flex/:pid?"
-                  render={(props) => (
-                    <FlexView {...props} pid={this.state.pid} />
+                  render={props => <FlexView {...props} pid={this.state.pid} />}
+                />
+                <ProtectedRoute
+                  path="/annotations"
+                  render={props => (
+                    <AnnotationSearch {...props} pid={this.state.pid} />
                   )}
                 />
                 <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
@@ -1173,7 +1180,7 @@ class App extends Component {
                   from="/"
                   exact
                   to="/search"
-                  render={(props) => (
+                  render={props => (
                     <SearchView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -1218,7 +1225,7 @@ class App extends Component {
               <Route path="/logout" component={Logout} />
               <ProtectedRoute
                 path="/display"
-                render={(props) => (
+                render={props => (
                   <DisplayView
                     {...props}
                     updateProgress={this.updateProgress}
@@ -1234,7 +1241,7 @@ class App extends Component {
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
                 path="/"
-                render={(props) => (
+                render={props => (
                   <SearchView
                     {...props}
                     updateProgress={this.updateProgress}
@@ -1270,7 +1277,7 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   // console.log(state.managementReducer);
   // console.log(state.annotationsListReducer);
   const {
@@ -1285,7 +1292,7 @@ const mapStateToProps = (state) => {
     projectMap,
     lastEventId,
     notificationAction,
-    isSegUploaded,
+    isSegUploaded
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -1300,7 +1307,7 @@ const mapStateToProps = (state) => {
     lastEventId,
     notificationAction,
     isSegUploaded,
-    selection: state.managementReducer.selection,
+    selection: state.managementReducer.selection
   };
 };
 export default withRouter(connect(mapStateToProps)(App));

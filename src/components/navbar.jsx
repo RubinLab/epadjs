@@ -16,6 +16,7 @@ const NavBar = ({
   onSwitchView,
   notificationWarning,
   pid,
+  onAnnotations,
   viewType,
   path
 }) => {
@@ -45,7 +46,9 @@ const NavBar = ({
           <ul className="navbar-nav mr-auto">
             <li
               id="navbarli"
-              className={path.includes("search")  ? "nav-link activeNav" : "nav-link"}
+              className={
+                path.includes('search') ? 'nav-link activeNav' : 'nav-link'
+              }
               onClick={() => {
                 onSearchViewClick();
                 onSwitchView('search');
@@ -55,7 +58,9 @@ const NavBar = ({
             </li>
             <li
               id="navbarli"
-              className={path.includes("display") ? "nav-link activeNav" : "nav-link"}
+              className={
+                path.includes('display') ? 'nav-link activeNav' : 'nav-link'
+              }
               onClick={() => {
                 onSwitchView('display');
               }}
@@ -93,6 +98,17 @@ const NavBar = ({
                     Edit
                   </NavLink>
                 </li>{' '} */}
+                <li
+                  id="navbarli"
+                  className={
+                    path.includes('annotations') ? 'nav-link activeNav' : 'nav-link'
+                  }
+                  onClick={() => {
+                    onSwitchView('annotations')
+                  }}
+                >
+                  Annotations
+                </li>
                 <li
                   className="nav-item"
                   onClick={() => {
@@ -174,7 +190,7 @@ const NavBar = ({
 
 const mapStateToProps = state => {
   return {
-    loading: state.annotationsListReducer.loading,
+    loading: state.annotationsListReducer.loading
   };
 };
 export default connect(mapStateToProps)(NavBar);
