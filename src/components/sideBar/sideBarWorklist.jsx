@@ -187,7 +187,7 @@ class WorkList extends React.Component {
     status
   ) => {
     updateWorklistProgressManually(
-      workListID.trim(),
+      workListID,
       projectID,
       subjectID,
       studyUID,
@@ -522,27 +522,6 @@ class WorkList extends React.Component {
           );
         }
       }
-      // {
-      //   id: "delete",
-      //   Header: "",
-      //   width: 45,
-      //   resizable: true,
-      //   Cell: original => (
-      //     <div
-      //       style={{ padding: "0.2rem", fontSize: "1.3rem" }}
-      //       onClick={() =>
-      //         this.handleSingleDelete(
-      //           original.row._original.workListID,
-      //           original.row._original.projectID,
-      //           original.row._original.subjectID,
-      //           original.row._original.studyUID
-      //         )
-      //       }
-      //     >
-      //       <FaRegTrashAlt className="menu-clickable" />
-      //     </div>
-      //   )
-      // }
     ];
   };
 
