@@ -1,9 +1,8 @@
 .annotationSearch-line {
   display: inline-flex;
-  /* align-items: baseline; */
   justify-content: space-between;
   width: 'inherit';
-  padding: 5px 10px;
+  padding: 0px 5px;
 }
 
 .annotationSearch-container {
@@ -12,10 +11,14 @@
 
 .annotationSearch-btn {
   height: 36px;
-  margin: 0rem 0.3rem;
+  margin-right: 0.5rem;
 }
 
 .annotationSearch-select {
   padding: 0.375rem 2rem 0.375rem 0.75rem;
-  margin: 0rem 0.3rem;
+  margin-right: 0.5rem;
+}
+
+.annotationSearch-text {
+  margin-right: 0.5rem;
 }

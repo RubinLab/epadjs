@@ -23,7 +23,8 @@ const AnnotationSearch = () => {
         <SearchLine
           onPlus={increaseCount}
           onMinus={decreaseCount}
-          count={i + 1}
+          index={i + 1}
+          count={searchData.length}
         />
       ))}
     </div>
