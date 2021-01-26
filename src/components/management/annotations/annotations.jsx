@@ -218,7 +218,7 @@ class Annotations extends React.Component {
         const keys = Object.keys(notDeleted);
         this.props.clearAllTreeData();
         keys.length === 0
-          ? this.setState({ selectAll: 0, selected: {} })
+          ? this.setState({ selectAll: 0, selected: {}, filteredData: [] })
           : this.setState({
               seriesAlreadyOpen: keys.length,
               selected: notDeleted,
