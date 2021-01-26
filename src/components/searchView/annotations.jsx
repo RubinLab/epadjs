@@ -62,7 +62,8 @@ class Annotations extends Component {
       } = this.props;
       // const { numOfSeriesLoaded, numOfPressentSeries } = expandLoading;
       // ml assuming summar
-      const { data : { rows: data }} = await getAnnotations(this.series);
+      const { data: { rows: data } } = await getAnnotations(this.series);
+      console.log("data", data);
       this.setState({ data });
       this.setState({ columns: this.setColumns() });
       const annsOpened = expansionArr.includes(seriesId);
@@ -70,7 +71,7 @@ class Annotations extends Component {
 
       // if (!annsOpened && !alreadyCounted)
       //   updateExpandedLevelNums("series", data.length, 1);
-      if (data.length === 0 && this.props.expandLevel !== 3) {
+      if (data?.length === 0 && this.props.expandLevel !== 3) {
         toast.info(`No annotations found`, {
           position: "top-right",
           autoClose: 5000,
@@ -82,7 +83,7 @@ class Annotations extends Component {
         closeExpand(seriesIndex);
       }
     } catch (err) {
-      console.log("Couldn't load all annotation data. Please Try again!");
+      console.log("Couldn't load all annotation data. Please Try again!", err);
     }
   }
 
@@ -400,7 +401,7 @@ class Annotations extends Component {
         this.props.dispatch(addToGrid(selected, aimID));
         this.props
           .dispatch(getSingleSerie(selected, aimID))
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.log(err));
         //if grid is NOT full check if patient data exists
         if (!this.props.patients[patientID]) {
