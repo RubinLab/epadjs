@@ -122,6 +122,10 @@ class AnnotationsList extends React.Component {
     );
   };
 
+  handleDelete = (aim) => {
+    console.log("In delete", aim);
+  }
+
   getLabelArray = () => {
     const calculations = {};
     try {
@@ -238,6 +242,7 @@ class AnnotationsList extends React.Component {
           showLabel={aim.showLabel}
           onSingleToggle={this.handleToggleSingleLabel}
           onEdit={this.handleEdit}
+          onDelete={() => this.handleDelete(aim)}
           serie={seriesUID}
           label={calculations[aim.id]}
           openSeriesAimID={openSeries[activePort].aimID}
