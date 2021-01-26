@@ -8,14 +8,15 @@ const SearchFieldsLine = ({ count, index, onFormInput, onPlus, onMinus }) => {
     <div
       class="annotationSearch-line"
       style={{
-        marginBottom: '0rem 1rem',
+        marginBottom: '0rem 0.5rem',
         justifyContent: 'space-between'
       }}
     >
-      <div style={{ width: '140px', height: '35.9px', marginRight: '0.5rem' }}>
+      <div style={{ width: '170px', height: '35.9px', marginRight: '0.5rem' }}>
         {index > 1 ? (
           <select
             class="custom-select custom-select-lg mb-3 annotationSearch-select"
+            style={{padding: '0.15rem', height: 'fit-content', fontSize: '1.2rem'}}
           >
             <option>AND</option>
             <option>OR</option>
@@ -26,7 +27,9 @@ const SearchFieldsLine = ({ count, index, onFormInput, onPlus, onMinus }) => {
       </div>
       <select
         class="custom-select custom-select-lg mb-3 annotationSearch-select"
-        style={{ width: '32%' }}
+        // style={{ width: '32%' }}
+        style={{padding: '0.15rem', height: 'fit-content', fontSize: '1.2rem', width: '32%'}}
+
       >
         <option>Modality</option>
         <option>Diagnosis</option>
@@ -34,18 +37,23 @@ const SearchFieldsLine = ({ count, index, onFormInput, onPlus, onMinus }) => {
       </select>
       <select
         class="custom-select custom-select-lg mb-3 annotationSearch-select"
-        style={{ width: '20%' }}
+        // style={{ width: '20%' }}
+        style={{padding: '0.15rem', height: 'fit-content', fontSize: '1.2rem', width: '20%'}}
+
       >
         <option>equals</option>
         <option>contains</option>
       </select>
       <div
         class="input-group input-group-lg"
+        style={{padding: '0.15rem', height: 'fit-content', fontSize: '1.2rem'}}
+
       >
         <input
           type="text"
           class="form-control annotationSearch-text"
           aria-label="Large"
+          style={{padding: '0.15rem', height: 'fit-content', fontSize: '1.2rem'}}
         />
       </div>
       <button
@@ -54,6 +62,8 @@ const SearchFieldsLine = ({ count, index, onFormInput, onPlus, onMinus }) => {
         onClick={onPlus}
         disabled={index < count}
         style={{ width: '5%' }}
+        style={{padding: '0.3rem 0.5rem', height: 'fit-content', fontSize: '1rem', marginTop: '0.1rem'}}
+
       >
         <FaPlus />
       </button>
@@ -63,6 +73,8 @@ const SearchFieldsLine = ({ count, index, onFormInput, onPlus, onMinus }) => {
         onClick={() => onMinus(count)}
         disabled={index === 1}
         style={{ width: '5%' }}
+        style={{padding: '0.3rem 0.5rem', height: 'fit-content', fontSize: '1rem'}}
+
       >
         <FaMinus />
       </button>

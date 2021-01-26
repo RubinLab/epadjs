@@ -17,6 +17,7 @@
 .annotationSearch-select {
   padding: 0.375rem 2rem 0.375rem 0.75rem;
   margin-right: 0.5rem;
+  height: fit-content;
 }
 
 .annotationSearch-text {
