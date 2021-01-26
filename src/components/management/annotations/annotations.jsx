@@ -152,8 +152,10 @@ class Annotations extends React.Component {
 
   toggleSelectAll() {
     let newSelected = {};
+    const {filteredData, annotations} = this.state;
+    const selectedAims = filteredData?.length ? filteredData : annotations;
     if (this.state.selectAll === 0) {
-      this.state.annotations.forEach(annotation => {
+      selectedAims.forEach(annotation => {
         const projectID = annotation.projectID ? annotation.projectID : "lite";
         const { seriesUID } = annotation;
         newSelected[annotation.aimID] = { projectID, seriesUID };
@@ -216,7 +218,7 @@ class Annotations extends React.Component {
         const keys = Object.keys(notDeleted);
         this.props.clearAllTreeData();
         keys.length === 0
-          ? this.setState({ selectAll: 0, selected: {} })
+          ? this.setState({ selectAll: 0, selected: {}, filteredData: [] })
           : this.setState({
               seriesAlreadyOpen: keys.length,
               selected: notDeleted,
