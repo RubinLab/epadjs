@@ -63,7 +63,6 @@ class Annotations extends Component {
       // const { numOfSeriesLoaded, numOfPressentSeries } = expandLoading;
       // ml assuming summar
       const { data: { rows: data } } = await getAnnotations(this.series);
-      console.log("data", data);
       this.setState({ data });
       this.setState({ columns: this.setColumns() });
       const annsOpened = expansionArr.includes(seriesId);
@@ -71,7 +70,7 @@ class Annotations extends Component {
 
       // if (!annsOpened && !alreadyCounted)
       //   updateExpandedLevelNums("series", data.length, 1);
-      if (data?.length === 0 && this.props.expandLevel !== 3) {
+      if (data.length === 0 && this.props.expandLevel !== 3) {
         toast.info(`No annotations found`, {
           position: "top-right",
           autoClose: 5000,
@@ -83,7 +82,7 @@ class Annotations extends Component {
         closeExpand(seriesIndex);
       }
     } catch (err) {
-      console.log("Couldn't load all annotation data. Please Try again!", err);
+      console.log("Couldn't load all annotation data. Please Try again!");
     }
   }
 
