@@ -739,7 +739,7 @@ const getSingleSerieData = (serie, annotation) => {
     getStudyAims(patientID, studyUID, projectID)
       .then(async result => {
         const { studyAims, serieAims } = extractNonMarkupAims(
-          result.data,
+          result.data.rows,
           seriesUID
         );
         aimsData = serieAims.concat(studyAims);

@@ -51,7 +51,7 @@ export function updateWorklist(id, body) {
 }
 
 export function getStudiesOfWorklist(user, id) {
-  return http.get(apiUrl + "/worklists/" + id + "/users/" + user + "/subjects");
+  return http.get(apiUrl + "/worklists/" + id + "/users/" + user + "/studies");
   // "/subjects/?annotationCount=true"
 }
 
@@ -96,3 +96,14 @@ export function deleteStudyFromWorklist(worklist, data) {
 export function getWorklistProgress(worklist) {
   return http.get(apiUrl + "/worklists/" + worklist + "/progress");
 }
+
+export function updateWorklistProgressManually(
+  worklist,
+  project,
+  subject,
+  study,
+  annotationStatus
+) {
+  return http.put(
+    apiUrl + "/worklists/" + worklist + "/projects/" + project + "/subjects/" + subject + "/studies/" + study + `?annotationStatus=` + annotationStatus);
+  }

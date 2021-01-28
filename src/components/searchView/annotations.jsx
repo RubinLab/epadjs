@@ -61,7 +61,8 @@ class Annotations extends Component {
         // expandLoading
       } = this.props;
       // const { numOfSeriesLoaded, numOfPressentSeries } = expandLoading;
-      const { data } = await getAnnotations(this.series);
+      // ml assuming summar
+      const { data : { rows: data }} = await getAnnotations(this.series);
       this.setState({ data });
       this.setState({ columns: this.setColumns() });
       const annsOpened = expansionArr.includes(seriesId);
@@ -101,7 +102,7 @@ class Annotations extends Component {
         update !== prevProps.update ||
         progressUpdated !== prevProps.progressUpdated
       ) {
-        const { data } = await getAnnotations(this.series);
+        const { data: { rows: data } } = await getAnnotations(this.series);
         const expanded = persistExpandView(
           this.state.expanded,
           this.state.data,
