@@ -57,7 +57,8 @@ class Annotations extends React.Component {
     downloadClicked: false,
     projectID: "",
     allAims: [],
-    seriesAlreadyOpen: {}
+    seriesAlreadyOpen: {},
+    projectDownload: false
   };
 
   componentDidMount = async () => {
@@ -101,8 +102,10 @@ class Annotations extends React.Component {
   };
 
   getAnnotationsData = async projectID => {
-    try {  
-      const { data: {rows: annotations } } = projectID
+    try {
+      const {
+        data: { rows: annotations }
+      } = projectID
         ? await getSummaryAnnotations(projectID)
         : await getAllAnnotations();
       this.setState({ annotations });
@@ -152,7 +155,7 @@ class Annotations extends React.Component {
 
   toggleSelectAll() {
     let newSelected = {};
-    const {filteredData, annotations} = this.state;
+    const { filteredData, annotations } = this.state;
     const selectedAims = filteredData?.length ? filteredData : annotations;
     if (this.state.selectAll === 0) {
       selectedAims.forEach(annotation => {
@@ -396,7 +399,13 @@ class Annotations extends React.Component {
 
   openAnnotation = async selected => {
     try {
-      const { studyUID, seriesUID, aimID, patientName, name } = selected.original;
+      const {
+        studyUID,
+        seriesUID,
+        aimID,
+        patientName,
+        name
+      } = selected.original;
       const patientID = selected.original.subjectID;
       const projectID = selected.original.projectID
         ? selected.original.projectID
@@ -405,18 +414,20 @@ class Annotations extends React.Component {
       // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
       //check if there is enough space in the grid
       let isGridFull = openSeries.length === MAX_PORT;
-      
-      //check if it's a study aim
+
+      //check if it"s a study aim
       if (!seriesUID) {
         const { data } = await getStudy(projectID, patientID, studyUID);
         toast.error(
           `${name} is a study level annotation. Please go to Search view, and open a series from project "${
             this.props.projectMap[projectID].projectName
-          }", patient "${this.clearCarets(patientName)}", study "${data.studyDescription}"`,
+          }", patient "${this.clearCarets(patientName)}", study "${
+            data.studyDescription
+          }"`,
           { autoClose: false }
-          );
-        } else {
-          //check if the serie is already open
+        );
+      } else {
+        //check if the serie is already open
         if (
           this.checkIfSerieOpen(selected.original, this.props.openSeries).isOpen
         ) {
@@ -646,10 +657,13 @@ class Annotations extends React.Component {
     }
   };
 
-  handleDownload = () => {
+  handleDownload = projectDownload => {
     const selectedArr = Object.values(this.state.selected);
     const notSelected = selectedArr.includes(false) || selectedArr.length === 0;
-    if (notSelected) {
+
+    if (projectDownload) {
+      this.setState({ projectDownload: true, downloadClicked: true  });
+    } else if (notSelected) {
       return;
     } else {
       this.setState({ downloadClicked: true });
@@ -722,6 +736,8 @@ class Annotations extends React.Component {
             updateStatus={() => console.log("update status")}
             selected={this.state.selected}
             className="mng-download"
+            projectID={this.state.projectID}
+            projectDownload={this.state.projectDownload}
           />
         )}
         {seriesAlreadyOpen > 0 && (
