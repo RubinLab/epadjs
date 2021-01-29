@@ -62,7 +62,7 @@ class Annotations extends Component {
       } = this.props;
       // const { numOfSeriesLoaded, numOfPressentSeries } = expandLoading;
       // ml assuming summar
-      const { data : { rows: data }} = await getAnnotations(this.series);
+      const { data: { rows: data } } = await getAnnotations(this.series);
       this.setState({ data });
       this.setState({ columns: this.setColumns() });
       const annsOpened = expansionArr.includes(seriesId);
@@ -400,7 +400,7 @@ class Annotations extends Component {
         this.props.dispatch(addToGrid(selected, aimID));
         this.props
           .dispatch(getSingleSerie(selected, aimID))
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.log(err));
         //if grid is NOT full check if patient data exists
         if (!this.props.patients[patientID]) {

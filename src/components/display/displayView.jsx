@@ -1073,7 +1073,26 @@ class DisplayView extends Component {
     });
   };
 
+  clearFrameNumber = (arrayBuffer) => {
+    const dicomData = dcmjs.data.DicomMessage.readFile(arrayBuffer);
+    const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(
+      dicomData.dict
+    );
+
+    const sourceImageSequence = dataset?.SharedFunctionalGroupsSequence?.DerivationImageSequence?.SourceImageSequence;
+    if (sourceImageSequence) {
+      sourceImageSequence.forEach(sourceImage => {
+        delete sourceImage.ReferencesFrameNumber;
+      })
+    }
+  }
+
   renderSegmentation = (arrayBuffer, aimId, serieIndex, labelMapIndex) => {
+
+    this.clearFrameNumber(arrayBuffer);
+
+
+
     // const { labelMaps } = this.state.seriesLabelMaps[serieIndex];
     // const labelMapIndex = labelMaps[aimId];
     const { imageIds } = this.state.data[serieIndex].stack;
