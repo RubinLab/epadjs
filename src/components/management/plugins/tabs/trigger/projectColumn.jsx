@@ -79,6 +79,10 @@ class ProjectColumn extends React.Component {
           this.state.selectedProjectId
         );
         console.log("plugins for projects ", dataplugin.projectplugin);
+        //test
+        const cav = await getSummaryAnnotations(this.state.selectedProjectId);
+        console.log("et annotations :", cav);
+        // test
         const { data: dataAnnotation } = await getSummaryAnnotations(
           this.state.selectedProjectId
         );
@@ -86,7 +90,7 @@ class ProjectColumn extends React.Component {
 
         this.setState({
           pluginList: dataplugin.projectplugin,
-          annotationList: dataAnnotation,
+          annotationList: dataAnnotation.rows,
           projectDropDownUpdate: false,
           parameterDropDownSelected: false,
           selectedParameterTypeId: "select",
@@ -157,7 +161,7 @@ class ProjectColumn extends React.Component {
         if (targetSelectObjValue !== "select") {
           isSelected = true;
         }
-        console.log("project clicked setting the state for sleted project");
+        console.log("project clicked setting the state for selected project");
         this.setState({
           selectedProjectText: e.target.value,
           selectedProjectName: e.target.name,
@@ -237,11 +241,13 @@ class ProjectColumn extends React.Component {
       "plugin clicked setting the state for sleted plugin",
       targetSelectObjValue
     );
+    console.log("verify situation :", e.target.value);
+
     this.setState({
       selectedParameterTypeText: e.target.value,
       selectedParameterTypeId: targetSelectObjValue,
 
-      parameterDropDownSelected: isSelected,
+      parameterDropDownSelected: targetSelectObjValue,
       parameterDropDownUpdate: true,
     });
   };
@@ -249,6 +255,7 @@ class ProjectColumn extends React.Component {
   prepareDropDownHtmlForProjects = () => {
     const list = this.state.projectList;
     let options = [];
+    console.log("error here check:", list);
     for (let i = 0; i < list.length; i++) {
       options.push(
         <option key={list[i].id} value={list[i].id}>
@@ -349,6 +356,7 @@ class ProjectColumn extends React.Component {
   };
 
   handleAddSelectedAnnotations = async () => {
+    console.log("verify 2 handleAddSelectedAnnotations");
     let send = false;
     const tempQueueObject = { ...this.state.queueObject };
     tempQueueObject.projectDbId = this.state.selectedProjectDbId;
