@@ -9,7 +9,6 @@ import {
   toggleSingleLabel,
   toggleAllAnnotations,
   updateSingleSerie,
-  updatePatientOnAimSave,
   getSingleSerie,
   aimDelete
 } from "../action";
@@ -128,6 +127,10 @@ class AnnotationsList extends React.Component {
   };
 
   handleDelete = (aim, openSerie) => {
+    const answer = window.confirm(
+      `Are you sure you want to delete aim named: ${aim.json.name.value} ? This operation can NOT be undone!`
+    );
+    if (!answer) return 0;
     const { name, comment } = aim.json;
     const { projectID, patientID, studyUID, seriesUID } = openSerie;
     const aimRefs = {
@@ -152,9 +155,7 @@ class AnnotationsList extends React.Component {
       this.props.dispatch(
         getSingleSerie({ patientID, projectID, seriesUID, studyUID })
       );
-
     })
-    // this.props.onDelete();
   }
 
   getLabelArray = () => {
