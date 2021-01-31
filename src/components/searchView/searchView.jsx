@@ -351,7 +351,6 @@ class SearchView extends Component {
     } else if (series.length > 0) {
       this.deleteSelectionWrapper(series, deleteSeries, "seriesUID", delSys);
     } else if (annotations.length > 0) {
-      console.log("delSys", delSys);
       this.deleteSelectionWrapper(
         annotations,
         deleteAnnotation,
@@ -762,7 +761,6 @@ class SearchView extends Component {
 
   handleWorklistClick = () => {
     // if (this.state.showWorklists) this.props.dispatch(clearSelection());
-    console.log("clicked worklist");
     this.setState(state => ({ showWorklists: !state.showWorklists }));
   };
 
