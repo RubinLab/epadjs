@@ -58,7 +58,15 @@ class Annotations extends React.Component {
     projectID: "",
     allAims: [],
     seriesAlreadyOpen: {},
-    projectDownload: false
+    projectDownload: false,
+    total: 0,
+    bookmark: "",
+    pages: null,
+    defaultPageSize: 10,
+    pageSize: 10,
+    page: 0,
+    tableLoading: false,
+    data: []
   };
 
   componentDidMount = async () => {
@@ -101,14 +109,49 @@ class Annotations extends React.Component {
     }
   };
 
-  getAnnotationsData = async projectID => {
+  populateDisplayRows = (list, pageSize, page) => {
+    let data = [];
+    const size = pageSize || this.state.pageSize;
+    const p = page >= 0 ? page : this.state.page;
+    const startIndex = size * p;
+    const endIndex = size * (p + 1);
+    if (list) {
+      list.forEach((el, i) => {
+        if (i >= startIndex && i < endIndex) data.push(el);
+      });
+    }
+    return data;
+  };
+
+  getAnnotationsData = async (projectID, bookmarkPassed, pageSize) => {
     try {
       const {
-        data: { rows: annotations }
+        data: { rows, total_rows, bookmark }
       } = projectID
-        ? await getSummaryAnnotations(projectID)
+        ? await getSummaryAnnotations(projectID, bookmarkPassed)
         : await getAllAnnotations();
-      this.setState({ annotations });
+
+      if (bookmarkPassed) {
+        const pages = Math.ceil(total_rows / pageSize);
+        const combinedRows = this.state.annotations.concat(rows);
+        this.setState({
+          annotations: combinedRows,
+          total: total_rows,
+          bookmark,
+          pages
+        });
+        return combinedRows;
+      } else {
+        const pages = Math.ceil(total_rows / this.state.defaultPageSize);
+        const data = this.populateDisplayRows(rows);
+        this.setState({
+          annotations: rows,
+          total: total_rows,
+          bookmark,
+          pages,
+          data
+        });
+      }
     } catch (err) {
       console.error(err);
     }
@@ -662,7 +705,7 @@ class Annotations extends React.Component {
     const notSelected = selectedArr.includes(false) || selectedArr.length === 0;
 
     if (projectDownload) {
-      this.setState({ projectDownload: true, downloadClicked: true  });
+      this.setState({ projectDownload: true, downloadClicked: true });
     } else if (notSelected) {
       return;
     } else {
@@ -680,11 +723,47 @@ class Annotations extends React.Component {
     this.handleCancel();
   };
 
+  fetchData = async atributes => {
+    try {
+      const { projectID, bookmark, annotations, total } = this.state;
+      const { page, pageSize } = atributes;
+      this.setState({ page, pageSize });
+      const pageNum = page + 1;
+      if (
+        total > annotations.length &&
+        pageSize * pageNum > annotations.length
+      ) {
+        this.setState({ tableLoading: true, page, pageSize });
+        const rows = await this.getAnnotationsData(
+          projectID,
+          bookmark,
+          pageSize
+        );
+        this.setState({ tableLoading: false });
+        const data = this.populateDisplayRows(rows, pageSize, page);
+        this.setState({ data });
+      } else {
+        const data = this.populateDisplayRows(annotations, pageSize, page);
+        this.setState({ data });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
-    const data = this.state.filteredData || this.state.annotations;
-    const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
-    const { seriesAlreadyOpen, projectID } = this.state;
+    // const data = this.state.filteredData || this.state.annotations;
+    // const pageSize =
+    //   this.state.total < 10 ? 12 : this.state.total >= 42 ? 52 : 22;
+    const {
+      seriesAlreadyOpen,
+      projectID,
+      defaultPageSize,
+      pages,
+      tableLoading,
+      filteredData
+    } = this.state;
     const text = seriesAlreadyOpen > 1 ? "annotations" : "annotation";
     return (
       <div className="annotations menu-display" id="annotation">
@@ -706,10 +785,24 @@ class Annotations extends React.Component {
         <ReactTable
           NoDataComponent={() => null}
           className="pro-table"
-          data={this.state.filteredData || this.state.annotations}
+          style={{ maxHeight: "40rem" }}
+          manual
+          data={this.state.filteredData || this.state.data}
           columns={this.defineColumns()}
-          pageSizeOptions={[10, 20, 50]}
-          defaultPageSize={pageSize}
+          loading={tableLoading}
+          pages={pages}
+          pageSizeOptions={[10, 20, 50, 100]}
+          defaultPageSize={defaultPageSize}
+          onFetchData={atributes => {
+            this.fetchData(atributes);
+          }}
+          showPageJump={false}
+          onPageSizeChange={size => {
+            console.log(size);
+            if (filteredData && filteredData.length > 0)
+              this.setState({ pages: Math.ceil(filteredData.length / size) });
+            else this.setState({ pages: Math.ceil(this.state.total / size) });
+          }}
         />
         {this.state.deleteAllClicked && (
           <DeleteAlert
