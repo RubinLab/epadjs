@@ -778,9 +778,6 @@ class Annotations extends React.Component {
 
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
-    // const data = this.state.filteredData || this.state.annotations;
-    // const pageSize =
-    //   this.state.total < 10 ? 12 : this.state.total >= 42 ? 52 : 22;
     const {
       seriesAlreadyOpen,
       projectID,
