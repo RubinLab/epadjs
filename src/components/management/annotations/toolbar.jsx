@@ -3,12 +3,11 @@ import PropTypes from "prop-types";
 import {
   FaDownload,
   FaUpload,
-  FaShareSquare,
-  FaLocationArrow,
   FaRegTrashAlt,
   FaFilter,
-  FaUndo,
+  FaUndo
 } from "react-icons/fa";
+import { HiOutlineFolderDownload } from "react-icons/hi";
 import ReactTooltip from "react-tooltip";
 import "../menuStyle.css";
 const mode = sessionStorage.getItem("mode");
@@ -23,9 +22,10 @@ const toolBar = props => {
     onClear,
     onFilter,
     onUploadWizard,
+    onProjectDownload,
     onKeyDown,
     pid,
-    isAllAims,
+    isAllAims
   } = props;
   const { selected, projects } = props;
 
@@ -90,6 +90,24 @@ const toolBar = props => {
             delayShow={1000}
           >
             <span className="filter-label">Download selections</span>
+          </ReactTooltip>
+        </>
+        <>
+          <div onClick={onProjectDownload}>
+            <HiOutlineFolderDownload
+              className="tool-icon"
+              data-tip
+              data-for="downloadProject-icon"
+              style={{ fontSize: "1.7rem" }}
+            />
+          </div>
+          <ReactTooltip
+            id="downloadProject-icon"
+            place="right"
+            type="info"
+            delayShow={1000}
+          >
+            <span className="filter-label">Download project"s all aims</span>
           </ReactTooltip>
         </>
         <>
@@ -233,5 +251,16 @@ toolBar.propTypes = {
   onAdd: PropTypes.func,
   onDelete: PropTypes.func,
   selected: PropTypes.bool,
+  projects: PropTypes.array,
+  onSelect: PropTypes.func,
+  onClear: PropTypes.func,
+  onType: PropTypes.func,
+  onFilter: PropTypes.func,
+  onUpload: PropTypes.func,
+  onDownload: PropTypes.func,
+  onProjectDownload: PropTypes.func,
+  onKeyDown: PropTypes.func,
+  pid: PropTypes.string,
+  isAllAims: PropTypes.bool,
 };
 export default toolBar;
