@@ -7,6 +7,7 @@ import ToolBar from "./toolbar";
 import { FaRegEye, FaEyeSlash, FaCommentsDollar } from "react-icons/fa";
 import {
   getSummaryAnnotations,
+  downloadProjectAnnotation,
   deleteAnnotation,
   getAllAnnotations,
   deleteAllAnnotations
@@ -40,8 +41,10 @@ const messages = {
   itemOpen: {
     title: "Series is open in display",
     openSeries:
-      "couldn't be deleted because the series is open. Please close it before deleting"
-  }
+      "could not be deleted because the series is open. Please close it before deleting"
+  },
+  downloadProject:
+    "Preparing project for download. The link to the files will be sent with a notification after completion!"
 };
 
 class Annotations extends React.Component {
@@ -58,7 +61,6 @@ class Annotations extends React.Component {
     projectID: "",
     allAims: [],
     seriesAlreadyOpen: {},
-    projectDownload: false,
     total: 0,
     bookmark: "",
     pages: null,
@@ -67,6 +69,33 @@ class Annotations extends React.Component {
     page: 0,
     tableLoading: false,
     data: []
+  };
+
+  downloadProjectAim = () => {
+    const pid = this.state.projectID || this.props.pid;
+    downloadProjectAnnotation(pid)
+      .then(result => {
+        if (result.data.type === "application/octet-stream") {
+          let blob = new Blob([result.data], { type: "application/zip" });
+          this.triggerBrowserDownload(blob, `Project ${pid}`);
+        } else
+          toast.success(messages.downloadProject, {
+            autoClose: false,
+            position: "bottom-left"
+          });
+      })
+      .catch(err => console.error(err));
+  };
+
+  triggerBrowserDownload = (blob, fileName) => {
+    const url = window.URL.createObjectURL(new Blob([blob]));
+    const link = document.createElement("a");
+    document.body.appendChild(link);
+    link.style = "display: none";
+    link.href = url;
+    link.download = `${fileName}.zip`;
+    link.click();
+    window.URL.revokeObjectURL(url);
   };
 
   componentDidMount = async () => {
@@ -699,13 +728,10 @@ class Annotations extends React.Component {
     }
   };
 
-  handleDownload = projectDownload => {
+  handleDownload = () => {
     const selectedArr = Object.values(this.state.selected);
     const notSelected = selectedArr.includes(false) || selectedArr.length === 0;
-
-    if (projectDownload) {
-      this.setState({ projectDownload: true, downloadClicked: true });
-    } else if (notSelected) {
+    if (notSelected) {
       return;
     } else {
       this.setState({ downloadClicked: true });
@@ -779,6 +805,7 @@ class Annotations extends React.Component {
           onFilter={this.filterTableData}
           onUpload={this.handleUpload}
           onDownload={this.handleDownload}
+          onProjectDownload={this.downloadProjectAim}
           onKeyDown={this.handleKeyDown}
           pid={projectID}
           isAllAims={this.state.isAllAims}
@@ -830,7 +857,6 @@ class Annotations extends React.Component {
             selected={this.state.selected}
             className="mng-download"
             projectID={this.state.projectID}
-            projectDownload={this.state.projectDownload}
           />
         )}
         {seriesAlreadyOpen > 0 && (

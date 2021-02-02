@@ -22,6 +22,7 @@ const toolBar = props => {
     onClear,
     onFilter,
     onUploadWizard,
+    onProjectDownload,
     onKeyDown,
     pid,
     isAllAims
@@ -92,7 +93,7 @@ const toolBar = props => {
           </ReactTooltip>
         </>
         <>
-          <div onClick={onDownload}>
+          <div onClick={onProjectDownload}>
             <HiOutlineFolderDownload
               className="tool-icon"
               data-tip
@@ -249,6 +250,17 @@ const toolBar = props => {
 toolBar.propTypes = {
   onAdd: PropTypes.func,
   onDelete: PropTypes.func,
-  selected: PropTypes.bool
+  selected: PropTypes.bool,
+  projects: PropTypes.array,
+  onSelect: PropTypes.func,
+  onClear: PropTypes.func,
+  onType: PropTypes.func,
+  onFilter: PropTypes.func,
+  onUpload: PropTypes.func,
+  onDownload: PropTypes.func,
+  onProjectDownload: PropTypes.func,
+  onKeyDown: PropTypes.func,
+  pid: PropTypes.string,
+  isAllAims: PropTypes.bool,
 };
 export default toolBar;

@@ -18,14 +18,11 @@ class AnnnotationDownloadModal extends React.Component {
   onDownload = () => {
     const optionObj = this.state;
     const { pid, projectID } = this.props;
-    let aimList;
-    if (!this.props.projectDownload) {
-      const annsToDownload =
-        Object.keys(this.props.selectedAnnotations).length > 0
-          ? this.props.selectedAnnotations
-          : this.props.selected;
-      aimList = Object.keys(annsToDownload);
-    }
+    const annsToDownload =
+      Object.keys(this.props.selectedAnnotations).length > 0
+        ? this.props.selectedAnnotations
+        : this.props.selected;
+    const aimList = Object.keys(annsToDownload);
     this.props.updateStatus();
     downloadAnnotations(optionObj, aimList, projectID || pid)
       .then(result => {

@@ -68,13 +68,14 @@ export function getAnnotations2() {
 }
 
 export function downloadAnnotations(optionObj, aimIDlist, projectID) {
-  console.log(optionObj, aimIDlist, projectID);
   projectID = projectID || "lite";
   const { summary, aim, seg } = optionObj;
   const url = `${apiUrl}/projects/${projectID}/aims/download?summary=${summary}&aim=${aim}&seg=${seg}`;
-  return aimIDlist
-    ? http.post(url, aimIDlist, { responseType: "blob" })
-    : http.post(url, { responseType: "blob" });
+  return http.post(url, aimIDlist, { responseType: "blob" });
+}
+
+export function downloadProjectAnnotation(pid) {
+  return http.get(`${apiUrl}/projects/${pid}/aims?format=stream`, { responseType: "blob" });
 }
 
 export function getAllAnnotations() {
@@ -84,7 +85,9 @@ export function getAllAnnotations() {
 export function getSummaryAnnotations(projectID, bookmark) {
   const pid = projectID || "lite";
   return bookmark
-    ? http.get(`${apiUrl}/projects/${pid}/aims?format=summary&bookmark=${bookmark}`)
+    ? http.get(
+        `${apiUrl}/projects/${pid}/aims?format=summary&bookmark=${bookmark}`
+      )
     : http.get(`${apiUrl}/projects/${pid}/aims?format=summary`);
 }
 
