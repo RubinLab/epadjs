@@ -130,8 +130,9 @@ class Annotations extends React.Component {
   componentDidUpdate = prevProps => {
     try {
       const { projectID, refresh, lastEventId } = this.props;
+      let pid = this.state.projectID || projectID;
       if (refresh && lastEventId !== prevProps.lastEventId) {
-        this.getAnnotationsData(projectID);
+        this.getAnnotationsData(pid);
       }
     } catch (err) {
       console.error(err);
@@ -701,7 +702,6 @@ class Annotations extends React.Component {
   };
 
   handleUpload = () => {
-    debugger;
     this.setState({ uploadClicked: true });
   };
 
@@ -741,7 +741,7 @@ class Annotations extends React.Component {
 
   handleSubmitUpload = () => {
     this.handleCancel();
-    this.getAnnotationsData(this.props.pid);
+    this.getAnnotationsData(this.state.projectID);
   };
 
   handleSubmitDownload = () => {
@@ -788,7 +788,7 @@ class Annotations extends React.Component {
       filteredData,
       pageSize,
       page,
-      data,
+      data
     } = this.state;
     const rowsToDisplay = filteredData.length > 0 ? filteredData : data;
     const text = seriesAlreadyOpen > 1 ? "annotations" : "annotation";
@@ -842,7 +842,7 @@ class Annotations extends React.Component {
         {this.state.uploadClicked && (
           <UploadModal
             onCancel={this.handleCancel}
-            onResolve={this.handleSubmitUpload}   
+            onResolve={this.handleSubmitUpload}
             className="mng-upload"
             projectID={this.state.projectID}
             pid={this.props.pid}

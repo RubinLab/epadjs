@@ -70,7 +70,8 @@ class UploadModal extends React.Component {
       selectedSeries,
       clearTreeData,
       onResolve,
-      onCancel
+      onCancel,
+      onSubmit
     } = this.props;
     selectedPatients = Object.values(selectedPatients);
     selectedStudies = Object.values(selectedStudies);
@@ -90,7 +91,7 @@ class UploadModal extends React.Component {
       }
     };
 
-    if (this.props.onSubmit) this.props.onSubmit();
+    if (onSubmit) onSubmit();
     if (selectedPatients.length > 0) {
       selectedPatients.forEach(el =>
         promises.push(uploadFileToSubject(formData, config, el))
@@ -109,9 +110,9 @@ class UploadModal extends React.Component {
 
     Promise.all(promises)
       .then(() => {
-        if (onResolve) onResolve();
         if (clearTreeData) clearTreeData();
         this.props.dispatch(getTemplates());
+        if (onResolve) onResolve();
       })
       .catch(err => {
         console.error(err);
@@ -135,35 +136,19 @@ class UploadModal extends React.Component {
         </h6>
         <div className="tiffForm-item">
           <span className="tiffForm-label">Subject ID*</span>
-          <input
-            className="tiff-text"
-            name="subjectID"
-            type="text"
-          />
+          <input className="tiff-text" name="subjectID" type="text" />
         </div>
         <div className="tiffForm-item">
           <span className="tiffForm-label">Subject Name* </span>
-          <input
-            className="tiff-text"
-            name="subjectName"
-            type="text"
-          />
+          <input className="tiff-text" name="subjectName" type="text" />
         </div>
         <div className="tiffForm-item">
           <span className="tiffForm-label">Subject Description* </span>
-          <input
-            className="tiff-text"
-            name="subjectDesc"
-            type="text"
-          />
+          <input className="tiff-text" name="subjectDesc" type="text" />
         </div>
         <div className="tiffForm-item">
           <span className="tiffForm-label">Series Description* </span>
-          <input
-            className="tiff-text"
-            name="serieDesc"
-            type="text"
-          />
+          <input className="tiff-text" name="serieDesc" type="text" />
         </div>
         <h6 className="upload-required">*Required</h6>
       </div>
