@@ -321,19 +321,13 @@ const Report = props => {
     }
   };
 
-  const openAims = async (
-    seriesToOpen,
-    projectID,
-    patientID,
-    selectedSeries
-  ) => {
+  const openAims = (seriesToOpen, projectID, patientID) => {
     try {
-      setSelectedSeries(selectedSeries);
+      setSelectedSeries(seriesToOpen);
       const array =
         projectID && patientID
           ? seriesToOpen.map(el => ({ ...el, projectID, patientID }))
           : seriesToOpen;
-
       for (let series of array) {
         props.dispatch(addToGrid(series, series.aimID || series.aimUID));
         props.dispatch(getSingleSerie(series, series.aimID || series.aimUID));
@@ -343,25 +337,6 @@ const Report = props => {
       console.error(err);
     }
   };
-
-  // Sotred because of merge conflict to be deleted later!!!
-
-  // const openAims = (seriesToOpen, projectID, patientID) => {
-  //   try {
-  //     const array =
-  //       projectID && patientID
-  //         ? seriesToOpen.map(el => ({ ...el, projectID, patientID }))
-  //         : seriesToOpen;
-
-  //     array.forEach(series => {
-  //       props.dispatch(addToGrid(series, series.aimID || series.aimUID));
-  //       props.dispatch(getSingleSerie(series, series.aimID || series.aimUID));
-  //     });
-  //     props.history.push("/display");
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
 
   const handleLesionClick = (row, col, nontarget) => {
     try {
