@@ -384,29 +384,6 @@ const Report = props => {
           // if so give confirmation (clear display view and cancel buttons)
           setShowConfirmModal(true);
         } else {
-          // commented out after merge conflict to be deleted later
-
-          //       //if not open the series
-          //       openAims([data.tUIDs[row][col]], projectID, patientID, [
-          //         data.tUIDs[row][col],
-          //       ]);
-          //     }
-          //   }
-          //   // if the column is 0 (all aims for the lesion)
-          // } else {
-          //   // check if open series has any of the selected series
-          //   // if so copy the input array and delete the item from the copied input array
-          //   data.tUIDs[row].forEach((el, index) => {
-          //     if (!checkIfSeriesOpen(openSeries, el.seriesUID, "seriesUID").isOpen) {
-          //       notOpenSeries.push(el);
-          //     }
-          //   });
-          //   // check if already open series and array in hand if have more than 6 series
-          //   if (notOpenSeries.length + openSeries.length > MAX_PORT) {
-          //     // if so give confirmation (clear display view and cancel buttons)
-          //     setShowConfirmModal(true);
-          //   } else {
-          //     openAims(notOpenSeries, projectID, patientID, data.tUIDs[row]);
           openAims(notOpenSeries, projectID, patientID);
         }
       }
