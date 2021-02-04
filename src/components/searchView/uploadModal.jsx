@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import {
   getProjects,
-  uploadFileToProject,
+  uploadFileToProject
 } from "../../services/projectServices";
 import { uploadFileToSubject } from "../../services/subjectServices";
 import { uploadFileToStudy } from "../../services/studyServices";
@@ -19,7 +19,7 @@ class UploadModal extends React.Component {
     osirix: false,
     projects: [],
     files: [],
-    projectID: "",
+    projectID: ""
   };
 
   onSelect = e => {
@@ -52,11 +52,10 @@ class UploadModal extends React.Component {
             : !nonSelectablePid
             ? pid
             : "";
-        this.setState({ projects, projectID })
-       
+        this.setState({ projects, projectID });
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -72,6 +71,7 @@ class UploadModal extends React.Component {
       clearTreeData,
       onResolve,
       onCancel,
+      onSubmit
     } = this.props;
     selectedPatients = Object.values(selectedPatients);
     selectedStudies = Object.values(selectedStudies);
@@ -87,11 +87,11 @@ class UploadModal extends React.Component {
     });
     const config = {
       headers: {
-        "content-type": "multipart/form-data",
-      },
+        "content-type": "multipart/form-data"
+      }
     };
 
-    this.props.onSubmit();
+    if (onSubmit) onSubmit();
     if (selectedPatients.length > 0) {
       selectedPatients.forEach(el =>
         promises.push(uploadFileToSubject(formData, config, el))
@@ -110,14 +110,12 @@ class UploadModal extends React.Component {
 
     Promise.all(promises)
       .then(() => {
-        // this.props.onSubmit();
-        if (onResolve) onResolve();
         if (clearTreeData) clearTreeData();
         this.props.dispatch(getTemplates());
+        if (onResolve) onResolve();
       })
       .catch(err => {
-        console.log(err);
-        // this.props.onSubmit();
+        console.error(err);
         if (onResolve) onResolve();
       });
     onCancel();
@@ -138,39 +136,19 @@ class UploadModal extends React.Component {
         </h6>
         <div className="tiffForm-item">
           <span className="tiffForm-label">Subject ID*</span>
-          <input
-            className="tiff-text"
-            name="subjectID"
-            type="text"
-            // onSelectFile={onType}
-          />
+          <input className="tiff-text" name="subjectID" type="text" />
         </div>
         <div className="tiffForm-item">
           <span className="tiffForm-label">Subject Name* </span>
-          <input
-            className="tiff-text"
-            name="subjectName"
-            type="text"
-            // onSelectFile={onType}
-          />
+          <input className="tiff-text" name="subjectName" type="text" />
         </div>
         <div className="tiffForm-item">
           <span className="tiffForm-label">Subject Description* </span>
-          <input
-            className="tiff-text"
-            name="subjectDesc"
-            type="text"
-            // onSelectFile={onType}
-          />
+          <input className="tiff-text" name="subjectDesc" type="text" />
         </div>
         <div className="tiffForm-item">
           <span className="tiffForm-label">Series Description* </span>
-          <input
-            className="tiff-text"
-            name="serieDesc"
-            type="text"
-            // onSelectFile={onType}
-          />
+          <input className="tiff-text" name="serieDesc" type="text" />
         </div>
         <h6 className="upload-required">*Required</h6>
       </div>
@@ -237,7 +215,6 @@ class UploadModal extends React.Component {
       : className;
     const { projects } = this.state;
     return (
-      // <Modal.Dialog dialogClassName={className}>
       <Modal.Dialog id="modal-fix">
         <Modal.Header>
           <Modal.Title className="upload__header">Upload</Modal.Title>
@@ -258,14 +235,9 @@ class UploadModal extends React.Component {
             ))}
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
-          {disabled ? (
-            <button onClick={this.onUpload} disabled>
-              Submit
-            </button>
-          ) : (
-            <button onClick={this.onUpload}>Submit</button>
-          )}
-
+          <button onClick={this.onUpload} disabled={disabled}>
+            Submit
+          </button>
           <button onClick={this.props.onCancel}>Cancel</button>
         </Modal.Footer>
       </Modal.Dialog>
@@ -281,14 +253,14 @@ UploadModal.propTypes = {
   pid: PropTypes.string,
   selectedPatients: PropTypes.object,
   selectedSeries: PropTypes.object,
-  selectedStudies: PropTypes.object,
+  selectedStudies: PropTypes.object
 };
 
 const mapStateToProps = state => {
   return {
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
-    selectedSeries: state.annotationsListReducer.selectedSeries,
+    selectedSeries: state.annotationsListReducer.selectedSeries
   };
 };
 

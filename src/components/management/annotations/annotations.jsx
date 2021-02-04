@@ -55,7 +55,7 @@ class Annotations extends React.Component {
     deleteAllClicked: false,
     selectAll: 0,
     selected: {},
-    filteredData: null,
+    filteredData: [],
     uploadClicked: false,
     downloadClicked: false,
     projectID: "",
@@ -130,8 +130,9 @@ class Annotations extends React.Component {
   componentDidUpdate = prevProps => {
     try {
       const { projectID, refresh, lastEventId } = this.props;
+      let pid = this.state.projectID || projectID;
       if (refresh && lastEventId !== prevProps.lastEventId) {
-        this.getAnnotationsData(projectID);
+        this.getAnnotationsData(pid);
       }
     } catch (err) {
       console.error(err);
@@ -196,7 +197,7 @@ class Annotations extends React.Component {
       this.getAnnotationsData(e.target.value);
       this.setState({ isAllAims: false });
     }
-    this.setState({ filteredData: null });
+    this.setState({ filteredData: [] });
   };
 
   handleFilterInput = e => {
@@ -328,7 +329,7 @@ class Annotations extends React.Component {
 
   handleClearFilter = () => {
     this.setState({
-      filteredData: null,
+      filteredData: [],
       name: "",
       subject: "",
       template: "",
@@ -740,7 +741,7 @@ class Annotations extends React.Component {
 
   handleSubmitUpload = () => {
     this.handleCancel();
-    this.getAnnotationsData(this.props.pid);
+    this.getAnnotationsData(this.state.projectID);
   };
 
   handleSubmitDownload = () => {
@@ -786,8 +787,10 @@ class Annotations extends React.Component {
       tableLoading,
       filteredData,
       pageSize,
-      page
+      page,
+      data
     } = this.state;
+    const rowsToDisplay = filteredData.length > 0 ? filteredData : data;
     const text = seriesAlreadyOpen > 1 ? "annotations" : "annotation";
     return (
       <div className="annotations menu-display" id="annotation">
@@ -812,7 +815,7 @@ class Annotations extends React.Component {
           className="pro-table"
           style={{ maxHeight: "40rem" }}
           manual
-          data={this.state.filteredData || this.state.data}
+          data={rowsToDisplay}
           columns={this.defineColumns()}
           loading={tableLoading}
           pages={pages}
@@ -839,7 +842,7 @@ class Annotations extends React.Component {
         {this.state.uploadClicked && (
           <UploadModal
             onCancel={this.handleCancel}
-            onSubmit={this.handleSubmitUpload}
+            onResolve={this.handleSubmitUpload}
             className="mng-upload"
             projectID={this.state.projectID}
             pid={this.props.pid}
