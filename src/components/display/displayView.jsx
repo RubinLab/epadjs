@@ -1088,10 +1088,7 @@ class DisplayView extends Component {
   }
 
   renderSegmentation = (arrayBuffer, aimId, serieIndex, labelMapIndex) => {
-
     this.clearFrameNumber(arrayBuffer);
-
-
 
     // const { labelMaps } = this.state.seriesLabelMaps[serieIndex];
     // const labelMapIndex = labelMaps[aimId];
