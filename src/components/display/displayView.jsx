@@ -1088,11 +1088,7 @@ class DisplayView extends Component {
   }
 
   renderSegmentation = (arrayBuffer, aimId, serieIndex, labelMapIndex) => {
-    // console.log("arrayBuffer", arrayBuffer);
-
     this.clearFrameNumber(arrayBuffer);
-
-
 
     // const { labelMaps } = this.state.seriesLabelMaps[serieIndex];
     // const labelMapIndex = labelMaps[aimId];
@@ -1114,8 +1110,6 @@ class DisplayView extends Component {
         arrayBuffer,
         cornerstone.metaData
       );
-
-      console.log("labelmapBuffer", labelmapBuffer);
 
       const { setters, getters } = cornerstoneTools.getModule("segmentation");
 
