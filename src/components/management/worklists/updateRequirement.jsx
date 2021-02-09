@@ -7,10 +7,8 @@ import RequirementEdit from "./requirementEditTable";
 import "../menuStyle.css";
 
 const buttonStyle = {
-  width: "-webkit-fill-available",
-  marginBottom: "0.5rem",
-  background: "rgb(241, 241, 241)",
-  color: "#272b30",
+  width: "80%",
+  margin: "0.5rem",
   fontSize: "1.1rem",
 };
 class UpdateRequirement extends React.Component {
@@ -62,18 +60,20 @@ class UpdateRequirement extends React.Component {
           {page === 0 && (
             <>
               <Button
-                variant="dark"
+                variant="light"
                 name="addNew"
                 style={buttonStyle}
                 onClick={this.changePage}
+                className="updateReq__btn"
               >
                 Add New Requirement
               </Button>
               <Button
-                variant="dark"
+                variant="light"
                 name="edit"
                 style={buttonStyle}
                 onClick={this.changePage}
+                className="updateReq__btn"
               >
                 Delete Requirement
               </Button>
