@@ -73,6 +73,7 @@ class Annotations extends React.Component {
 
   downloadProjectAim = () => {
     const pid = this.state.projectID || this.props.pid;
+    if (pid === "all_aims") return;
     downloadProjectAnnotation(pid)
       .then(result => {
         if (result.data.type === "application/octet-stream") {

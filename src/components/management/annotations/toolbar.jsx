@@ -1,16 +1,16 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 import {
   FaDownload,
   FaUpload,
   FaRegTrashAlt,
   FaFilter,
   FaUndo
-} from "react-icons/fa";
-import { HiOutlineFolderDownload } from "react-icons/hi";
-import ReactTooltip from "react-tooltip";
-import "../menuStyle.css";
-const mode = sessionStorage.getItem("mode");
+} from 'react-icons/fa';
+import { HiOutlineFolderDownload } from 'react-icons/hi';
+import ReactTooltip from 'react-tooltip';
+import '../menuStyle.css';
+const mode = sessionStorage.getItem('mode');
 
 const toolBar = props => {
   const {
@@ -52,11 +52,11 @@ const toolBar = props => {
   let createdEnd = React.createRef();
 
   function clearFilters() {
-    name.current.value = "";
-    subject.current.value = "";
-    template.current.value = "";
-    createdStart.current.value = "";
-    createdEnd.current.value = "";
+    name.current.value = '';
+    subject.current.value = '';
+    template.current.value = '';
+    createdStart.current.value = '';
+    createdEnd.current.value = '';
   }
 
   return (
@@ -95,10 +95,10 @@ const toolBar = props => {
         <>
           <div onClick={onProjectDownload}>
             <HiOutlineFolderDownload
-              className="tool-icon"
+              className={pid === 'all_aims' ? 'hide-delete' : 'tool-icon'}
               data-tip
               data-for="downloadProject-icon"
-              style={{ fontSize: "1.7rem" }}
+              style={{ fontSize: '1.7rem' }}
             />
           </div>
           <ReactTooltip
@@ -113,7 +113,7 @@ const toolBar = props => {
         <>
           <div onClick={onDelete}>
             <FaRegTrashAlt
-              className={isAllAims ? "hide-delete" : "tool-icon"}
+              className={isAllAims ? 'hide-delete' : 'tool-icon'}
               onClick={onDelete}
               data-tip
               data-for="trash-icon"
@@ -129,11 +129,11 @@ const toolBar = props => {
           </ReactTooltip>
         </>
 
-        {mode !== "lite" && (
+        {mode !== 'lite' && (
           <select
             className="annotations-projectSelect"
             name="project"
-            value={pid ? pid : ""}
+            value={pid ? pid : ''}
             onMouseDown={e => e.stopPropagation()}
             onChange={onSelect}
           >
@@ -192,7 +192,7 @@ const toolBar = props => {
               ref={createdStart}
               onKeyDown={onKeyDown}
             />
-            <span className="filter-space">{" - "}</span>
+            <span className="filter-space">{' - '}</span>
             <input
               onMouseDown={e => e.stopPropagation()}
               onChange={onType}
@@ -261,6 +261,6 @@ toolBar.propTypes = {
   onProjectDownload: PropTypes.func,
   onKeyDown: PropTypes.func,
   pid: PropTypes.string,
-  isAllAims: PropTypes.bool,
+  isAllAims: PropTypes.bool
 };
 export default toolBar;
