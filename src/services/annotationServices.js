@@ -105,9 +105,10 @@ export function deleteAnnotation(aimObj, delSys) {
   );
 }
 
-export function deleteAllAnnotations(projectID, aimList) {
+export function deleteAnnotationsList(projectID, aimList) {
   return http.post(
-    apiUrl + "/projects/" + projectID + "/aims/delete?all=true",
+    // apiUrl + "/projects/" + projectID + "/aims/delete?all=true"
+    apiUrl + "/projects/" + projectID + "/aims/delete",
     aimList
   );
 }

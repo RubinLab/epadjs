@@ -10,7 +10,7 @@ import {
   downloadProjectAnnotation,
   deleteAnnotation,
   getAllAnnotations,
-  deleteAllAnnotations
+  deleteAnnotationsList
 } from "../../../services/annotationServices";
 import { getProjects } from "../../../services/projectServices";
 import matchSorter from "match-sorter";
@@ -283,7 +283,7 @@ class Annotations extends React.Component {
     const aims = Object.values(toBeDeleted);
 
     projects.forEach((pid, i) => {
-      promiseArr.push(deleteAllAnnotations(pid, aims[i]));
+      promiseArr.push(deleteAnnotationsList(pid, aims[i]));
     });
 
     Promise.all(promiseArr)
