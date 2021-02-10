@@ -107,7 +107,7 @@ const toolBar = props => {
             type="info"
             delayShow={1000}
           >
-            <span className="filter-label">Download project"s all aims</span>
+            <span className="filter-label">Download all annotations of the project</span>
           </ReactTooltip>
         </>
         <>
