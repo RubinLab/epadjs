@@ -141,6 +141,7 @@ class Annotations extends React.Component {
 
   populateDisplayRows = (list, pageSize, page) => {
     let data = [];
+
     const size = pageSize || this.state.pageSize;
     const p = page >= 0 ? page : this.state.page;
     const startIndex = size * p;
@@ -307,7 +308,7 @@ class Annotations extends React.Component {
           error.response.data.message
         )
           toast.error(error.response.data.message, { autoClose: false });
-        this.getAnnotationsData();
+        this.getAnnotationsData(this.state.projectID);
       });
     this.handleCancel();
   };
@@ -535,7 +536,7 @@ class Annotations extends React.Component {
         }
       }
     } catch (err) {
-      console.err(err);
+      console.error(err);
     }
   };
 
