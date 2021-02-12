@@ -18,7 +18,12 @@ import {
   closeSerie,
   jumpToAim,
   setSegLabelMapIndex,
+  updateSingleSerie,
+  getSingleSerie,
+  aimDelete,
+  clearAimId,
 } from "../annotationsList/action";
+import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
 import CornerstoneViewport from "react-cornerstone-viewport";
@@ -550,6 +555,7 @@ class DisplayView extends Component {
   };
 
   openAimEditor = (aimID, seriesUID) => {
+    console.trace();
 
     const { aimList } = this.props;
     if (Object.entries(aimList).length !== 0) {
@@ -732,13 +738,79 @@ class DisplayView extends Component {
     this.setDirtyFlag();
   };
 
-  measurementRemoved = (event, action) => {
+  getActiveSerie = () => {
+    const { series, activePort } = this.props;
+    return series[activePort];
+  }
+
+  measurementRemoved = (event) => {
+    const serie = this.getActiveSerie();
+    const { aimId } = event.detail.measurementData;
+    if (this.isLastShapeInAim(aimId)) {
+      const shouldDeleteAim = window.confirm("This is the last markup in Aim. Would yo like to delete the Aim file as well?");
+      if (shouldDeleteAim) {
+        this.deleteAim(aimId, serie);
+        this.setState({
+          showAimEditor: false,
+          selectedAim: undefined,
+          hasSegmentation: false,
+          dirty: false,
+        });
+      }
+      return;
+    }
     this.handleShapes();
     this.setDirtyFlag();
   };
 
+  deleteAim = (aimId, serie) => {
+    const aimJson = this.getAimJson(aimId, serie);
+    const { name, comment } = aimJson;
+    const { projectID, patientID, studyUID, seriesUID } = serie;
+    const aimRefs = {
+      aimID: aimId,
+      patientID,
+      projectID,
+      seriesUID,
+      studyUID,
+      name,
+      comment,
+    };
+    deleteAnnotation({ aimID: aimId, projectID }).then(() => {
+      this.props.dispatch(clearAimId());
+      this.props.dispatch(aimDelete({ aimRefs }))
+      this.props.dispatch(
+        updateSingleSerie({
+          subjectID: patientID,
+          projectID,
+          seriesUID,
+          studyUID,
+        })
+      );
+      this.props.dispatch(
+        getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+      );
+    })
+  }
+
+  getAimJson = (aimId, serie) => {
+    const { seriesUID } = serie;
+    const { aimList } = this.props;
+    return aimList[seriesUID][aimId].json;
+  }
+
+  // returns true if delted shape is the last shape in aim
+  isLastShapeInAim = (aimId) => {
+    const { series, activePort } = this.props;
+    const { seriesUID } = series[activePort];
+    const shapesOfSerie = this.getShapesOfSerie(seriesUID);
+    if (shapesOfSerie) {
+      return shapesOfSerie.find(shape => shape.aimId === aimId) ? false : true;
+    }
+    return true;
+  };
+
   measuremementModified = (event, action) => {
-    // console.log("Modified", event);
     this.setDirtyFlag();
   };
 
@@ -759,6 +831,11 @@ class DisplayView extends Component {
     const { aimList, series, activePort } = this.props;
     const { seriesUID } = series[activePort];
     const { aimId, ancestorEvent } = event.detail;
+    console.log("will print", aimList);
+    if (!aimList[seriesUID][aimId]) {
+      console.log("I am returning");
+      return;
+    } //Eraser might have already delete the aim}
     const { element, data } = ancestorEvent;
 
     setMarkupsOfAimActive(aimId);//set the selected markups color to yellow
