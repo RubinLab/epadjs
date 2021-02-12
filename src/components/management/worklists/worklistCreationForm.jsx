@@ -11,8 +11,9 @@ import "../menuStyle.css";
 const messages = {
   fillRequiredFields: "Please fill the required fields",
   missingReqField:
-    "Please fill or clear all worklist's requirement fields before submit",
-  noSpace: "No space in worklist ID!",
+    // "Please fill or clear all worklist"s requirement fields before submit",
+    "Please fill all worklist's requirement fields before submit",
+  noSpace: "No space in worklist ID!"
 };
 
 class WorklistCreationForm extends React.Component {
@@ -24,14 +25,20 @@ class WorklistCreationForm extends React.Component {
     description: "",
     duedate: "",
     error: "",
-    requirements: {},
+    requirements: {}
   };
 
   goPrevPage = () => {
-    if (this.state.page >= 1) {
+    const { page } = this.state;
+    if (page >= 1) {
       this.setState(state => ({
-        page: state.page - 1,
+        page: state.page - 1
       }));
+      if (page === 1) {
+        this.setState({ assigneeList: {} });
+      } else if (page === 2) {
+        this.setState({ requirements: {} });
+      }
     }
   };
 
@@ -42,13 +49,13 @@ class WorklistCreationForm extends React.Component {
       id: "",
       description: "",
       duedate: "",
-      error: "",
+      error: ""
     });
   };
   goNextPage = () => {
     if (this.state.page <= 1) {
       this.setState(state => ({
-        page: state.page + 1,
+        page: state.page + 1
       }));
     }
   };
@@ -61,7 +68,7 @@ class WorklistCreationForm extends React.Component {
       assigneeList,
       description,
       duedate,
-      requirements,
+      requirements
     } = this.state;
     assigneeList = Object.keys(assigneeList);
     if (!name || !id || !assigneeList.length) {
@@ -80,7 +87,7 @@ class WorklistCreationForm extends React.Component {
       if (Object.keys(requirements).length > 0 && !hasReqCleared) {
         promise.push(
           saveWorklist(id, name, assigneeList, description, duedate, [
-            requirements,
+            requirements
           ])
         );
       } else {
@@ -125,7 +132,9 @@ class WorklistCreationForm extends React.Component {
     const noneSelected =
       unselectedLevel && unselectedTemplate && unselectedAims;
     const allSelected = validLevel && validTemplate && validNumOfAims;
-    return noneSelected || allSelected;
+    // return noneSelected || allSelected;
+    return allSelected;
+
   };
 
   handleFormInput = e => {
@@ -313,7 +322,7 @@ WorklistCreationForm.propTypes = {
   onCancel: PropTypes.func,
   onSubmit: PropTypes.func,
   onChange: PropTypes.func,
-  error: PropTypes.string,
+  error: PropTypes.string
 };
 
 export default WorklistCreationForm;
