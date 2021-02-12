@@ -194,8 +194,6 @@ class AimEditor extends Component {
   selectBaseline = async (aim) => {
     const trackingUId = this.getTrackingUId(aim);
     await this.setState({ trackingUId });
-    console.log("trackingUid", trackingUId);
-    console.log("state is", this.state);
   }
 
   getTrackingUId = (aim) => {
@@ -396,7 +394,6 @@ class AimEditor extends Component {
     const { hasSegmentation } = this.props;
     const markupsToSave = this.getNewMarkups();
     const templateType = this.semanticAnswers.getSelectedTemplateType();
-    console.log("In create aim", this.state.trackingUId);
     // try {
     if (hasSegmentation) {
       // if (!this.checkSegmentationFrames()) return;
@@ -426,7 +423,6 @@ class AimEditor extends Component {
       const { element } = cornerstone.getEnabledElements()[activePort];
       const image = cornerstone.getImage(element);
       const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
-      console.log("state tracking", this.state.trackingUId);
       const aim = new Aim(
         seedData,
         enumAimType.imageAnnotation,
