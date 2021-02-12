@@ -195,6 +195,7 @@ class DisplayView extends Component {
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
     window.addEventListener("editAim", this.editAimHandler);
+    window.addEventListener("deleteAim", this.deleteAimHandler);
     if (series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
@@ -240,6 +241,7 @@ class DisplayView extends Component {
     window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
     window.removeEventListener("jumpToAimImage", this.jumpToAimImage);
     window.removeEventListener("editAim", this.editAimHandler);
+    window.removeEventListener("deleteAim", this.deleteAimHandler);
     window.removeEventListener("resize", this.setSubComponentHeights);
     clearInterval(this.state.tokenRefresh)
   }
@@ -271,6 +273,26 @@ class DisplayView extends Component {
       console.error(err);
     }
   };
+
+  deleteAimHandler = (event) => {
+    const { showAimEditor, selectedAim, dirty } = this.state;
+    const { aim, openSerie } = event.detail;
+    console.log(event);
+    if (showAimEditor) {
+      console.log(aim, selectedAim);
+      if (aim.id === selectedAim.aimId) //if aim to be deleted is being edited
+        this.closeAimEditor(false);
+      else if (dirty) {
+        alert("You should first close the aim editor before deleting another aim!");
+        return;
+      }
+    }
+    const answer = window.confirm(
+      `Are you sure you want to delete aim named: ${aim.json.name.value}? This operation can NOT be undone!`
+    );
+    if (!answer) return 0;
+    this.deleteAim(aim.id, openSerie);
+  }
 
   editAimHandler = (event) => {
     const { aimID, seriesUID } = event.detail;
@@ -750,12 +772,13 @@ class DisplayView extends Component {
       const shouldDeleteAim = window.confirm("This is the last markup in Aim. Would yo like to delete the Aim file as well?");
       if (shouldDeleteAim) {
         this.deleteAim(aimId, serie);
-        this.setState({
-          showAimEditor: false,
-          selectedAim: undefined,
-          hasSegmentation: false,
-          dirty: false,
-        });
+        this.closeAimEditor(false);
+        // this.setState({
+        //   showAimEditor: false,
+        //   selectedAim: undefined,
+        //   hasSegmentation: false,
+        //   dirty: false,
+        // });
       }
       return;
     }
