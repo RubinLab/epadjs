@@ -14,6 +14,8 @@ import SelectionItem from "./containers/selectionItem";
 import { FaRegCheckSquare } from "react-icons/fa";
 import { getSeries } from "../../services/seriesServices";
 import { MAX_PORT } from "../../constants";
+import "./annotationsList.css"
+
 
 const message = {
   title: "Not enough ports to open series"
@@ -193,7 +195,7 @@ class selectSerieModal extends React.Component {
             {message.title}
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="selectSerie-container">
+        <Modal.Body className="selectSerie-container" style={{ textAlign: "start" }}>
           <div>Maximum 6 series can be viewed at a time.</div>
           <button
             size="lg"

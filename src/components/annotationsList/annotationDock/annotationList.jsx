@@ -8,7 +8,11 @@ import {
   toggleAllLabels,
   toggleSingleLabel,
   toggleAllAnnotations,
+  updateSingleSerie,
+  getSingleSerie,
+  aimDelete
 } from "../action";
+import { deleteAnnotation } from "../../../services/annotationServices";
 import cornerstone from "cornerstone-core";
 import { state } from 'cornerstone-tools/store/index.js';
 
@@ -122,6 +126,38 @@ class AnnotationsList extends React.Component {
     );
   };
 
+  handleDelete = (aim, openSerie) => {
+    const answer = window.confirm(
+      `Are you sure you want to delete aim named: ${aim.json.name.value} ? This operation can NOT be undone!`
+    );
+    if (!answer) return 0;
+    const { name, comment } = aim.json;
+    const { projectID, patientID, studyUID, seriesUID } = openSerie;
+    const aimRefs = {
+      aimID: aim.id,
+      patientID,
+      projectID,
+      seriesUID,
+      studyUID,
+      name,
+      comment,
+    };
+    deleteAnnotation({ aimID: aim.id, projectID }).then(() => {
+      this.props.dispatch(aimDelete({ aimRefs }))
+      this.props.dispatch(
+        updateSingleSerie({
+          subjectID: patientID,
+          projectID,
+          seriesUID,
+          studyUID,
+        })
+      );
+      this.props.dispatch(
+        getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+      );
+    })
+  }
+
   getLabelArray = () => {
     const calculations = {};
     try {
@@ -224,25 +260,28 @@ class AnnotationsList extends React.Component {
     const imageAims = { ...annotations };
     annotations = Object.values(annotations);
     annotations.forEach((aim, index) => {
-      aim = aim[0];
-      annList.push(
-        <Annotation
-          name={aim.name}
-          style={aim.color}
-          aim={aim.json}
-          id={aim.id}
-          key={aim.id}
-          displayed={aim.isDisplayed}
-          onClick={this.handleDisplayClick}
-          user={aim.user}
-          showLabel={aim.showLabel}
-          onSingleToggle={this.handleToggleSingleLabel}
-          onEdit={this.handleEdit}
-          serie={seriesUID}
-          label={calculations[aim.id]}
-          openSeriesAimID={openSeries[activePort].aimID}
-        />
-      );
+      if (aim[0]) {
+        aim = aim[0];
+        annList.push(
+          <Annotation
+            name={aim.name}
+            style={aim.color}
+            aim={aim.json}
+            id={aim.id}
+            key={aim.id}
+            displayed={aim.isDisplayed}
+            onClick={this.handleDisplayClick}
+            user={aim.user}
+            showLabel={aim.showLabel}
+            onSingleToggle={this.handleToggleSingleLabel}
+            onEdit={this.handleEdit}
+            onDelete={() => this.handleDelete(aim, openSeries[activePort])}
+            serie={seriesUID}
+            label={calculations[aim.id]}
+            openSeriesAimID={openSeries[activePort].aimID}
+          />
+        );
+      }
     });
     return (
       <React.Fragment>

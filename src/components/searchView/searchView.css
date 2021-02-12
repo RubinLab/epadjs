@@ -265,6 +265,13 @@
 .updateReq__mbody.modal-body {
   /* width: 256px; */
   max-width: fit-content;
+  min-width: 100%;
+}
+
+#worklist #modal-fix {
+  overflow: auto;
+  min-width: 30rem;
+  max-width: inherit;
 }
 
 h5.add-subject__modal--label,

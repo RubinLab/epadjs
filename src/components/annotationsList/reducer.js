@@ -41,6 +41,7 @@ import {
   SEG_UPLOAD_STARTED,
   SEG_UPLOAD_COMPLETED,
   SEG_UPLOAD_REMOVE,
+  AIM_DELETE,
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -581,6 +582,30 @@ const asyncReducer = (state = initialState, action) => {
         return Object.assign({}, state, {
           isSegUploaded: { ...theRest },
         });
+      }
+      case AIM_DELETE: {
+        const { aimRefs } = action.payload;
+        const { seriesUID } = aimRefs;
+        let serieToUpdateIndex;
+        const newOpenSeries = [...state.openSeries];
+        const serieToUpdate = newOpenSeries.find((serie, index) => {
+          if (serie.seriesUID === seriesUID) {
+            serieToUpdateIndex = index;
+            return serie.seriesUID;
+          }
+          return undefined;
+        });
+        const updatedSerie = { ...serieToUpdate };
+        const { imageAnnotations } = updatedSerie;
+        Object.entries(imageAnnotations).forEach(([key, value]) => {
+          let i = value.length;
+          while (i--) {
+            const ann = value[i];
+            if (ann.aimUid === aimRefs.aimID) value.splice(i, 1);
+          }
+        });
+        newOpenSeries[serieToUpdateIndex] = updatedSerie;
+        return { ...state, openSeries: [...newOpenSeries] };
       }
       default:
         return state;
