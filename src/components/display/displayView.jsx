@@ -750,6 +750,12 @@ class DisplayView extends Component {
       const shouldDeleteAim = window.confirm("This is the last markup in Aim. Would yo like to delete the Aim file as well?");
       if (shouldDeleteAim) {
         this.deleteAim(aimId, serie);
+        this.setState({
+          showAimEditor: false,
+          selectedAim: undefined,
+          hasSegmentation: false,
+          dirty: false,
+        });
       }
       return;
     }
