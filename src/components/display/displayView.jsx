@@ -277,9 +277,7 @@ class DisplayView extends Component {
   deleteAimHandler = (event) => {
     const { showAimEditor, selectedAim, dirty } = this.state;
     const { aim, openSerie } = event.detail;
-    console.log(event);
     if (showAimEditor) {
-      console.log(aim, selectedAim);
       if (aim.id === selectedAim.aimId) //if aim to be deleted is being edited
         this.closeAimEditor(false);
       else if (dirty) {
@@ -854,9 +852,7 @@ class DisplayView extends Component {
     const { aimList, series, activePort } = this.props;
     const { seriesUID } = series[activePort];
     const { aimId, ancestorEvent } = event.detail;
-    console.log("will print", aimList);
     if (!aimList[seriesUID][aimId]) {
-      console.log("I am returning");
       return;
     } //Eraser might have already delete the aim}
     const { element, data } = ancestorEvent;

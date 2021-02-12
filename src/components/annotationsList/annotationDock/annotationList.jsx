@@ -130,35 +130,6 @@ class AnnotationsList extends React.Component {
     window.dispatchEvent(
       new CustomEvent("deleteAim", { detail: { aim, openSerie } })
     );
-    // const answer = window.confirm(
-    //   `Are you sure you want to delete aim named: ${aim.json.name.value} ? This operation can NOT be undone!`
-    // );
-    // if (!answer) return 0;
-    // const { name, comment } = aim.json;
-    // const { projectID, patientID, studyUID, seriesUID } = openSerie;
-    // const aimRefs = {
-    //   aimID: aim.id,
-    //   patientID,
-    //   projectID,
-    //   seriesUID,
-    //   studyUID,
-    //   name,
-    //   comment,
-    // };
-    // deleteAnnotation({ aimID: aim.id, projectID }).then(() => {
-    //   this.props.dispatch(aimDelete({ aimRefs }))
-    //   this.props.dispatch(
-    //     updateSingleSerie({
-    //       subjectID: patientID,
-    //       projectID,
-    //       seriesUID,
-    //       studyUID,
-    //     })
-    //   );
-    //   this.props.dispatch(
-    //     getSingleSerie({ patientID, projectID, seriesUID, studyUID })
-    //   );
-    // })
   }
 
   getLabelArray = () => {
