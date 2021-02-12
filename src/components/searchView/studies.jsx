@@ -8,7 +8,7 @@ import treeTableHOC from "react-table/lib/hoc/treeTable";
 import { toast } from "react-toastify";
 import { getStudies } from "../../services/studyServices";
 import { getSeries } from "../../services/seriesServices";
-import ProjectModal from "../annotationsList/selectSerieModal";
+import SelectSeriesModal from "../annotationsList/selectSerieModal";
 import { MAX_PORT, widthUnit, formatDates } from "../../constants";
 import Series from "./series";
 import ReactTooltip from "react-tooltip";
@@ -717,7 +717,7 @@ class Studies extends Component {
           />
         ) : null}
         {this.state.isSerieSelectionOpen && (
-          <ProjectModal
+          <SelectSeriesModal
             seriesPassed={this.state.selectedStudy}
             onCancel={this.closeSelectionModal}
             studyName={this.state.studyName}

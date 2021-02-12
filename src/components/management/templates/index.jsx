@@ -7,7 +7,6 @@ import { FaRegTrashAlt, FaProjectDiagram } from "react-icons/fa";
 import {
   getTemplatesOfProjects,
   getTemplatesUniversal,
-  getAllTemplates,
   downloadTemplates,
   deleteTemplate,
   deleteProjectsTemplate,
@@ -345,13 +344,14 @@ class Templates extends React.Component {
         const projects = original.row.checkbox.projects
           ? original.row.checkbox.projects
           : [];
+        const { projectMap } = this.props;
         const className =
           projects.length > 0 ? "wrapped" : "wrapped click-to-add";
-
         const text =
-          projects.length > 0
-            ? projects.join(", ")
-            : "Add template to a project";
+          projects.length > 0 ? projects.reduce((all, item, i) => {
+            const comma = projects.length - 1 > i ? ", " : "";
+            return `${all}${projectMap[item] ? projectMap[item].projectName : item}${comma}`;
+        }, "") : "Add template to a project";
         return (
           <div
             onClick={() =>
@@ -483,7 +483,7 @@ class Templates extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  const { uploadedPid, lastEventId, refresh } = state.annotationsListReducer;
-  return { refresh, uploadedPid, lastEventId };
+  const { uploadedPid, lastEventId, refresh, projectMap } = state.annotationsListReducer;
+  return { refresh, uploadedPid, lastEventId, projectMap };
 };
 export default connect(mapStateToProps)(Templates);

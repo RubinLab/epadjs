@@ -8,9 +8,8 @@ import { FaRegEye, FaEyeSlash, FaCommentsDollar } from "react-icons/fa";
 import {
   getSummaryAnnotations,
   downloadProjectAnnotation,
-  deleteAnnotation,
   getAllAnnotations,
-  deleteAllAnnotations
+  deleteAnnotationsList
 } from "../../../services/annotationServices";
 import { getProjects } from "../../../services/projectServices";
 import matchSorter from "match-sorter";
@@ -25,11 +24,16 @@ import {
   addToGrid,
   getSingleSerie,
   getWholeData,
-  updatePatient
+  updatePatient,
+  startLoading,
+  loadCompleted,
+  annotationsLoadingError
 } from "../../annotationsList/action";
 import WarningModal from "../../common/warningModal";
 import "../menuStyle.css";
-import { getStudy } from "../../../services/studyServices";
+import { getSeries } from "../../../services/seriesServices";
+import SelectSeriesModal from "../../annotationsList/selectSerieModal";
+
 
 const mode = sessionStorage.getItem("mode");
 
@@ -68,11 +72,15 @@ class Annotations extends React.Component {
     pageSize: 10,
     page: 0,
     tableLoading: false,
-    data: []
+    data: [],
+    isSerieSelectionOpen: false,
+    selectedStudy: [],
+    studyName: ''
   };
 
   downloadProjectAim = () => {
     const pid = this.state.projectID || this.props.pid;
+    if (pid === "all_aims") return;
     downloadProjectAnnotation(pid)
       .then(result => {
         if (result.data.type === "application/octet-stream") {
@@ -141,6 +149,7 @@ class Annotations extends React.Component {
 
   populateDisplayRows = (list, pageSize, page) => {
     let data = [];
+
     const size = pageSize || this.state.pageSize;
     const p = page >= 0 ? page : this.state.page;
     const startIndex = size * p;
@@ -283,7 +292,7 @@ class Annotations extends React.Component {
     const aims = Object.values(toBeDeleted);
 
     projects.forEach((pid, i) => {
-      promiseArr.push(deleteAllAnnotations(pid, aims[i]));
+      promiseArr.push(deleteAnnotationsList(pid, aims[i]));
     });
 
     Promise.all(promiseArr)
@@ -307,7 +316,7 @@ class Annotations extends React.Component {
           error.response.data.message
         )
           toast.error(error.response.data.message, { autoClose: false });
-        this.getAnnotationsData();
+        this.getAnnotationsData(this.state.projectID);
       });
     this.handleCancel();
   };
@@ -486,19 +495,6 @@ class Annotations extends React.Component {
       // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
       //check if there is enough space in the grid
       let isGridFull = openSeries.length === MAX_PORT;
-
-      //check if it"s a study aim
-      if (!seriesUID) {
-        const { data } = await getStudy(projectID, patientID, studyUID);
-        toast.error(
-          `${name} is a study level annotation. Please go to Search view, and open a series from project "${
-            this.props.projectMap[projectID].projectName
-          }", patient "${this.clearCarets(patientName)}", study "${
-            data.studyDescription
-          }"`,
-          { autoClose: false }
-        );
-      } else {
         //check if the serie is already open
         if (
           this.checkIfSerieOpen(selected.original, this.props.openSeries).isOpen
@@ -533,9 +529,8 @@ class Annotations extends React.Component {
             }
           }
         }
-      }
     } catch (err) {
-      console.err(err);
+      console.error(err);
     }
   };
 
@@ -589,15 +584,20 @@ class Annotations extends React.Component {
         sortable: false,
         resizable: false,
         style: { display: "flex", justifyContent: "center" },
-        Cell: original => {
+        Cell: data => {
+
           return this.state.isAllAims ? (
             <FaEyeSlash />
           ) : (
             <Link className="open-link" to={"/display"}>
               <div
                 onClick={() => {
-                  this.openAnnotation(original);
-                  this.props.onClose();
+                  if (data.original.seriesUID === "noseries" || !data.original.seriesUID) {
+                    this.displaySeries(data.original);
+                  } else {
+                    this.openAnnotation(data);
+                    this.props.onClose();
+                  }
                 }}
               >
                 <FaRegEye className="menu-clickable" />
@@ -777,6 +777,95 @@ class Annotations extends React.Component {
     }
   };
 
+  getSeriesData = async selected => {
+    this.props.dispatch(startLoading());
+    const { projectID, patientID, studyUID } = selected;
+    try {
+      const { data: series } = await getSeries(projectID, patientID, studyUID);
+      this.props.dispatch(loadCompleted());
+      return series;
+    } catch (err) {
+      this.props.dispatch(annotationsLoadingError(err));
+    }
+  };
+
+  excludeOpenSeries = allSeriesArr => {
+    const result = [];
+    //get all series number in an array
+    const idArr = this.props.openSeries.reduce((all, item, index) => {
+      all.push(item.seriesUID);
+      return all;
+    }, []);
+    //if array doesnot include that serie number
+    allSeriesArr.forEach(serie => {
+      if (!idArr.includes(serie.seriesUID)) {
+        //push that serie in the result arr
+        result.push(serie);
+      }
+    });
+    return result;
+  };
+
+  displaySeries = async selected => {
+    if (this.props.openSeries.length === MAX_PORT) {
+      this.props.dispatch(alertViewPortFull());
+    } else {
+      const { subjectID: patientID, studyUID } = selected;
+      let seriesArr;
+      //check if the patient is there (create a patient exist flag)
+      const patientExists = this.props.patients[patientID];
+      //if there is patient iterate over the series object of the study (form an array of series)
+      if (patientExists) {
+        seriesArr = Object.values(
+          this.props.patients[patientID].studies[studyUID].series
+        );
+        //if there is not a patient get series data of the study and (form an array of series)
+      } else {
+        seriesArr = await this.getSeriesData(selected);
+      }
+      //get extraction of the series (extract unopen series)
+      if (seriesArr.length > 0) seriesArr = this.excludeOpenSeries(seriesArr);
+      //check if there is enough room
+      if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
+        //if there is not bring the modal
+        await this.setState({
+          isSerieSelectionOpen: true,
+          selectedStudy: [seriesArr],
+          studyName: selected.studyDescription,
+        });
+      } else {
+        //if there is enough room
+        //add serie to the grid
+        const promiseArr = [];
+        for (let serie of seriesArr) {
+          this.props.dispatch(addToGrid(serie));
+          promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
+        }
+        //getsingleSerie
+        Promise.all(promiseArr)
+          .then(() => {})
+          .catch(err => console.error(err));
+
+        //if patient doesnot exist get patient
+        if (!patientExists) {
+          // this.props.dispatch(getWholeData(null, selected));
+          getWholeData(null, selected);
+        } else {
+          //check if study exist
+          this.props.dispatch(
+            updatePatient("study", true, patientID, studyUID)
+          );
+        }
+      }
+    }
+  };
+
+  closeSelectionModal = () => {
+    this.setState(state => ({
+      isSerieSelectionOpen: !state.isSerieSelectionOpen,
+    }));
+  };
+
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     const {
@@ -864,6 +953,13 @@ class Annotations extends React.Component {
             onOK={this.closeWarningModal}
             title={messages.itemOpen.title}
             message={`${seriesAlreadyOpen} ${text} ${messages.itemOpen.openSeries}`}
+          />
+        )}
+        {this.state.isSerieSelectionOpen && (
+          <SelectSeriesModal
+            seriesPassed={this.state.selectedStudy}
+            onCancel={this.closeSelectionModal}
+            studyName={this.state.studyName}
           />
         )}
       </div>
