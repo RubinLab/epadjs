@@ -191,6 +191,15 @@ class AimEditor extends Component {
     }
   };
 
+  selectBaseline = async (aim) => {
+    const trackingUId = this.getTrackingUId(aim);
+    await this.setState({ trackingUId });
+  }
+
+  getTrackingUId = (aim) => {
+    return aim.ImageAnnotationCollection?.imageAnnotations?.ImageAnnotation[0]?.trackingUniqueIdentifier.root;
+  }
+
   render() {
     const { openSeries, activePort } = this.props;
     const { patientID, projectID } = openSeries[activePort];
@@ -240,6 +249,7 @@ class AimEditor extends Component {
             subjectId={patientID}
             projectId={projectID}
             semanticAnswers={this.semanticAnswers}
+            onSelect={this.selectBaseline}
             onClose={() => this.setState({ showRecist: false })}
           />
         )}
@@ -402,7 +412,8 @@ class AimEditor extends Component {
       const aim = new Aim(
         seedData,
         enumAimType.imageAnnotation,
-        this.updatedAimId
+        this.updatedAimId,
+        this.state.trackingUId
       );
       this.createAimMarkups(aim, markupsToSave);
       this.saveAim(aim, templateType);
@@ -412,11 +423,11 @@ class AimEditor extends Component {
       const { element } = cornerstone.getEnabledElements()[activePort];
       const image = cornerstone.getImage(element);
       const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
-
       const aim = new Aim(
         seedData,
         enumAimType.imageAnnotation,
-        this.updatedAimId
+        this.updatedAimId,
+        this.state.trackingUId
       );
       this.saveAim(aim, templateType);
     }
@@ -455,7 +466,8 @@ class AimEditor extends Component {
       const aim = new Aim(
         seedData,
         enumAimType.imageAnnotation,
-        this.updatedAimId
+        this.updatedAimId,
+        this.state.trackingUId
       );
 
       let dataset = await this.getDatasetFromBlob(segBlob);
