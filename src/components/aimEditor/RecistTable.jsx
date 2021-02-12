@@ -33,6 +33,7 @@ class RecistTable extends Component {
     const aim = this.state.aimJson;
     const parseClassAim = prepAimForParseClass(aim);
     semanticAnswers.loadAimJson(parseClassAim, true);
+    this.props.onSelect(aim);
     this.props.onClose();
   };
 
@@ -113,7 +114,7 @@ class RecistTable extends Component {
                 <button className="brush-presets" onClick={this.props.onClose}>
                   Cancel
                 </button>
-              
+
               </div>
             </div>
           </div>
