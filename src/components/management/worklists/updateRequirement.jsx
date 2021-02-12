@@ -14,7 +14,12 @@ const buttonStyle = {
   fontSize: "1.1rem",
 };
 class UpdateRequirement extends React.Component {
-  state = { requirements: this.props.requirements, page: 0 };
+  state = { requirements: [], page: 0 };
+
+  componentDidMount = () => {
+    const requirements = _.cloneDeep(this.props.requirements);
+    this.setState({ requirements }); 
+  }
 
   addRequirement = newReq => {
     this.setState({ requirements: newReq });
@@ -48,7 +53,7 @@ class UpdateRequirement extends React.Component {
   };
 
   render = () => {
-    const { page } = this.state;
+    const { page, requirements } = this.state;
     const { error } = this.props;
     const changeStarted = page === 1 || page === 2;
     const secondButton = changeStarted ? "Back" : "Cancel";
@@ -74,6 +79,7 @@ class UpdateRequirement extends React.Component {
                 name="edit"
                 style={buttonStyle}
                 onClick={this.changePage}
+                disabled={requirements.length < 2}
               >
                 Delete Requirement
               </Button>
@@ -82,7 +88,7 @@ class UpdateRequirement extends React.Component {
           {page === 1 && (
             <>
               <RequirementForm
-                requirements={this.state.requirements}
+                requirements={requirements}
                 onNewReqInfo={this.props.onNewReqInfo}
               />
               {error && <div className="err-message __field">{error}</div>}
@@ -90,7 +96,7 @@ class UpdateRequirement extends React.Component {
           )}
           {page === 2 && (
             <RequirementEdit
-              requirements={this.state.requirements}
+              requirements={requirements}
               onDelete={this.props.onDelete}
             />
           )}
@@ -122,9 +128,14 @@ class UpdateRequirement extends React.Component {
 
 UpdateRequirement.propTypes = {
   onCancel: PropTypes.func,
-  onSubmit: PropTypes.func,
-  onChange: PropTypes.func,
   error: PropTypes.string,
+  onAddNew: PropTypes.func,
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func,
+  onNewReqInfo: PropTypes.func,
+  requirements: PropTypes.array,
+  worklistID: PropTypes.string,
+
 };
 
 export default UpdateRequirement;
