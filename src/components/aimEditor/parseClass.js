@@ -167,6 +167,7 @@ export var AimEditor = function (
       JSON.stringify(templateList.all)
     );
 
+
     if (self.arrayTemplatesJsonObjects.length > 0) {
       for (var i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {
         var object = {};
