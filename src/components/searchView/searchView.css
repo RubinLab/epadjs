@@ -265,6 +265,13 @@
 .updateReq__mbody.modal-body {
   /* width: 256px; */
   max-width: fit-content;
+  min-width: 100%;
+}
+
+#worklist #modal-fix {
+  overflow: auto;
+  min-width: 30rem;
+  max-width: inherit;
 }
 
 h5.add-subject__modal--label,
@@ -545,7 +552,6 @@ h5.add-subject__modal--label,
 .report-header__title {
   font-size: 1.4rem;
   color: rgb(204, 204, 255);
-
 }
 
 .minreport-header__title {
@@ -578,4 +584,12 @@ h5.add-subject__modal--label,
 .report-header__btn.--close,
 .report-header__btn.--close {
   padding: 0px 6px;
+}
+
+.worklist-page .rt-table .rt-tbody .rt-tr-group .rt-tr {
+  align-items: center;
+}
+
+.worklist-page {
+  margin-right: 10px;
 }

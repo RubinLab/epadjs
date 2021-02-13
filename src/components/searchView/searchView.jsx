@@ -128,7 +128,7 @@ class SearchView extends Component {
         subjects,
         expandLevel,
       });
-    } catch (err) {}
+    } catch (err) { }
   };
 
   componentDidUpdate = async prevProps => {
@@ -171,10 +171,10 @@ class SearchView extends Component {
       patients.length > 0
         ? patients
         : studies.length > 0
-        ? studies
-        : series.length > 0
-        ? series
-        : annotations;
+          ? studies
+          : series.length > 0
+            ? series
+            : annotations;
     selection.forEach((el, i) => {
       if (el.projectID === "all" || el.projectID === "nonassigned") {
         checkFromProjectID = true;
@@ -628,13 +628,13 @@ class SearchView extends Component {
       let promise;
       await this.setState({ downloading: true });
       // if (selectedProjects.length > 0) {
-        // for (let project of selectedProjects) {
-        //   fileName = `Project-${project.projectID}`;
-        //   promiseArr.push(downloadProjects(project));
-        //   fileNameArr.push(fileName);
-        // }
-        // this.downloadHelper(promiseArr, fileNameArr);
-        // this.props.dispatch(clearSelection());
+      // for (let project of selectedProjects) {
+      //   fileName = `Project-${project.projectID}`;
+      //   promiseArr.push(downloadProjects(project));
+      //   fileNameArr.push(fileName);
+      // }
+      // this.downloadHelper(promiseArr, fileNameArr);
+      // this.props.dispatch(clearSelection());
       // } else 
       if (selectedPatients.length > 0) {
         bodyArr = selectedPatients.map(el => el.patientID);
@@ -761,7 +761,6 @@ class SearchView extends Component {
 
   handleWorklistClick = () => {
     // if (this.state.showWorklists) this.props.dispatch(clearSelection());
-    console.log("clicked worklist");
     this.setState(state => ({ showWorklists: !state.showWorklists }));
   };
 
@@ -957,7 +956,7 @@ class SearchView extends Component {
           project={this.props.match.params.pid}
           onAddProject={this.handleProjectClick}
           admin={this.props.admin}
-          // expanding={expanding}
+        // expanding={expanding}
         />
         {isSerieSelectionOpen && !this.props.loading && (
           <ProjectModal

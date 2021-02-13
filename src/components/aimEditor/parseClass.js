@@ -163,10 +163,11 @@ export var AimEditor = function (
       // defaultTempCodeVal =
       //   defaultTemplateJson.TemplateContainer.Template[0]["codeValue"];
     }
-    // self.arrayTemplatesJsonObjects = templateList.all;
     self.arrayTemplatesJsonObjects = JSON.parse(
       JSON.stringify(templateList.all)
     );
+
+
     if (self.arrayTemplatesJsonObjects.length > 0) {
       for (var i = 0; i < self.arrayTemplatesJsonObjects.length; i++) {
         var object = {};
@@ -791,9 +792,9 @@ export var AimEditor = function (
     var iconI = document.createElement("i");
     iconI.id = parent.id;
     iconI.className = "";
-    console.log("checking cardinalities for : ", lblTxt);
-    console.log("cardinality -> min : ", parent.minCardinality);
-    console.log("ae parent : -> obj : ", parent);
+    // console.log("checking cardinalities for : ", lblTxt);
+    // console.log("cardinality -> min : ", parent.minCardinality);
+    // console.log("ae parent : -> obj : ", parent);
 
     if (parseInt(parent.minCardinality) <= 0) {
       try {
@@ -1433,7 +1434,7 @@ export var AimEditor = function (
           );
         }
       }
-      console.log("scale checking object", parent);
+      // console.log("scale checking object", parent);
     }
     self.checkAnnotatorConfidence(parentDiv, parent);
   };
@@ -1502,7 +1503,7 @@ export var AimEditor = function (
     mapTagArray,
     parentTagTypeFromJson
   ) {
-    console.log("numerical parent :", "Select" + parent.name);
+    // console.log("numerical parent :", "Select" + parent.name);
     var arrayLength = -1;
     var quantileDiv = document.createElement("div");
     quantileDiv.className = "mylbl";
@@ -1587,7 +1588,7 @@ export var AimEditor = function (
           self[key](subEObject, subEObject[key], parentDiv, mapTagArray, null);
         }
       }
-      console.log("each quantile ", subEObject);
+      // console.log("each quantile ", subEObject);
       var quantileDiv = document.createElement("div");
       quantileDiv.className = "mylbl";
       var quantileSelect = document.createElement("select");
@@ -1618,7 +1619,7 @@ export var AimEditor = function (
         }
         var i = 0;
         var scaleArraysize = object.length;
-        console.log("quatile on select : ", object);
+        // console.log("quatile on select : ", object);
         object.selectedBin = this.selectedIndex + 1;
         object.select = 1;
         object.valueLabel = this.options[this.selectedIndex].value;
@@ -1824,9 +1825,9 @@ export var AimEditor = function (
             statusCheckAllowTermObject.endid
           );
       }
-      console.log("allowedTermObj.getPrimitive(): ", allowedTermObj);
+      // console.log("allowedTermObj.getPrimitive(): ", allowedTermObj);
       if (allowedTermObj.getPrimitive().noMoreQuestions == "true") {
-        console.log("nomore question situation : === true");
+        // console.log("nomore question situation : === true");
         self.DisableTillNext(prObject.id, "tillend", self.callDisable);
       }
 
@@ -1994,7 +1995,7 @@ export var AimEditor = function (
         checkmarkObj.actualSelected++;
       }
 
-      console.log("mapCardinalitiesToCheckId", self.mapCardinalitiesToCheckId);
+      // console.log("mapCardinalitiesToCheckId", self.mapCardinalitiesToCheckId);
       self.mapCardinalitiesToCheckId.set(prObject.id, checkmarkObj);
       if (
         checkmarkObj.actualSelected >= checkmarkObj.min &&
@@ -2008,7 +2009,7 @@ export var AimEditor = function (
       }
       //disable enable component seection
       if (allowedTermObj.nextId != "0" && this.selected == true) {
-        console.log("next id catched", allowedTermObj.nextId);
+        // console.log("next id catched", allowedTermObj.nextId);
         self.DisableTillNext(
           prObject.id,
           allowedTermObj.nextId,
@@ -2032,10 +2033,10 @@ export var AimEditor = function (
 
       if (allowedTermObj.getPrimitive().noMoreQuestions == "true") {
         if (this.checked == true) {
-          console.log("nomore question situation : === true");
+          // console.log("nomore question situation : === true");
           self.DisableTillNext(prObject.id, "tillend", self.callDisable);
         } else {
-          console.log("nomore question situation : === true");
+          // console.log("nomore question situation : === true");
           self.EnableTillNext(prObject.id, "tillend");
         }
       }
@@ -2208,7 +2209,7 @@ export var AimEditor = function (
 
       //disable enable component seection
       if (allowedTermObj.nextId != "0" && checkbox.checked == true) {
-        console.log("next id catched", allowedTermObj.nextId);
+        // console.log("next id catched", allowedTermObj.nextId);
         self.DisableTillNext(
           prObject.id,
           allowedTermObj.nextId,
@@ -2232,10 +2233,10 @@ export var AimEditor = function (
 
       if (allowedTermObj.getPrimitive().noMoreQuestions == "true") {
         if (this.checked == true) {
-          console.log("nomore question situation : === true");
+          // console.log("nomore question situation : === true");
           self.DisableTillNext(prObject.id, "tillend", self.callDisable);
         } else {
-          console.log("nomore question situation : === true");
+          // console.log("nomore question situation : === true");
           self.EnableTillNext(prObject.id, "tillend");
         }
       }
@@ -2417,7 +2418,7 @@ export var AimEditor = function (
 
   var disabledefined = [];
   this.DisableTillNext = function (actualid, nextid, call) {
-    console.log("disable next called", nextid);
+    // console.log("disable next called", nextid);
     let nextControl = 0;
     for (var [key, value] of self.mapCardinalitiesToCheckId) {
       if (key == actualid) {
@@ -2434,7 +2435,7 @@ export var AimEditor = function (
           document.getElementById(key).className =
             "blue check circle outline icon";
           let ely = document.getElementById(key).parentNode;
-          console.log("disabling", ely.parentnode);
+          // console.log("disabling", ely.parentnode);
           //$(ely.parentNode).dropdown({action: 'hide'});
           $(ely.parentNode).hide();
         } else nextControl = 0;
@@ -2460,7 +2461,7 @@ export var AimEditor = function (
           document.getElementById(key).className =
             "green check circle outline icon";
           let ely = document.getElementById(key).parentNode;
-          console.log("enabling", ely.parentNode);
+          // console.log("enabling", ely.parentNode);
           $(ely.parentNode).show();
         } else nextControl = 0;
       }
@@ -2469,9 +2470,9 @@ export var AimEditor = function (
   };
   this.callDisable = function () {
     for (var [key, value] of self.mapStatusAllowedTermBlocks) {
-      console.log(
-        "mapStatusAllowedTermBlocks" + key + " = " + JSON.stringify(value)
-      );
+      // console.log(
+      //   "mapStatusAllowedTermBlocks" + key + " = " + JSON.stringify(value)
+      // );
     }
   };
 
@@ -2568,7 +2569,7 @@ export var AimEditor = function (
     } else {
       arraySize = 1;
     }
-    console.log("numerical parent object", parentObject);
+    // console.log("numerical parent object", parentObject);
     let anotconf = 0.0;
     if (typeof parentObject.value.selectac !== "undefined") {
       anotconf = parentObject.value.selectac;
@@ -2608,7 +2609,7 @@ export var AimEditor = function (
         type: "Numerical",
         value: instanceObject,
       };
-      console.log("numerical instance object", instanceObject);
+      // console.log("numerical instance object", instanceObject);
       if (i == 0) {
         defaultSelectedValueLabel = instanceObject.valueLabel;
         defaultSelectedOperator = instanceObject.operator;
@@ -2745,7 +2746,7 @@ export var AimEditor = function (
     } else {
       arraySize = 1;
     }
-    console.log("numerical parent object", parentObject);
+    // console.log("numerical parent object", parentObject);
     let anotconf = 0.0;
     if (typeof parentObject.value.selectac !== "undefined") {
       anotconf = parentObject.value.selectac;
@@ -2782,7 +2783,7 @@ export var AimEditor = function (
         type: "Numerical",
         value: instanceObject,
       };
-      console.log("numerical instance object", instanceObject);
+      // console.log("numerical instance object", instanceObject);
       if (i == 0) {
         defaultSelectedValueLabel = instanceObject.valueLabel;
         defaultSelectedBins = parseInt(instanceObject.bins);
@@ -2839,7 +2840,7 @@ export var AimEditor = function (
     if (typeof parentObject.value.selectac !== "undefined") {
       anotconf = parentObject.value.selectac;
     }
-    console.log("anotconf".anotconf);
+    // console.log("anotconf".anotconf);
     let jsonCharacteristicQuantification = {
       "xsi:type": "Numerical",
       operator: "",
@@ -2871,7 +2872,7 @@ export var AimEditor = function (
         type: "Numerical",
         value: instanceObject,
       };
-      console.log("numerical instance object", instanceObject);
+      // console.log("numerical instance object", instanceObject);
       if (i == 0) {
         defaultSelectedValue = parseFloat(instanceObject.value);
         defaultSelectedValueLabel = instanceObject.valueLabel;
@@ -3414,12 +3415,12 @@ export var AimEditor = function (
     let tempTypecode = jsonInner.typeCode;
     jsonInner.typeCode = [];
     jsonInner.typeCode.push(tempTypecode);
-    console.log("**********************************************");
-    console.log("**********************************************");
-    console.log("**********************************************");
-    console.log("**********************************************");
-    console.log("valid term saving section code checkk");
-    console.log("temptype code :--->", tempTypecode);
+    // console.log("**********************************************");
+    // console.log("**********************************************");
+    // console.log("**********************************************");
+    // console.log("**********************************************");
+    // console.log("valid term saving section code checkk");
+    // console.log("temptype code :--->", tempTypecode);
 
     for (i = 0; i < arraySize; i++) {
       if (arrayCheck == true) {
@@ -3433,7 +3434,7 @@ export var AimEditor = function (
         value: instanceObject,
       };
       if (i == 0 && arraySize == 1) {
-        console.log("valid term instance object", instanceObject);
+        // console.log("valid term instance object", instanceObject);
         defaultCodeValue = instanceObject.codeValue;
         defaultCodingSchemeDesignator = instanceObject.codingSchemeDesignator;
         defaultCodingSchemeVersion = instanceObject.codingSchemeVersion;
@@ -3441,7 +3442,7 @@ export var AimEditor = function (
       } else {
         if (instanceObject.hasOwnProperty("select")) {
           if (instanceObject.select == "1") {
-            console.log("valid term instance object selecetd", instanceObject);
+            // console.log("valid term instance object selecetd", instanceObject);
             defaultCodeValue = instanceObject.codeValue;
             defaultCodingSchemeDesignator =
               instanceObject.codingSchemeDesignator;
@@ -3461,7 +3462,7 @@ export var AimEditor = function (
             "xmlns:iso": "uri:iso.org:21090",
           },
         };
-        console.log("json valid term before push", jsonValidTerm);
+        // console.log("json valid term before push", jsonValidTerm);
         if (Array.isArray(jsonInner.typeCode)) {
           jsonInner.typeCode[0].push(jsonValidTerm);
         } else {
@@ -3733,9 +3734,9 @@ export var AimEditor = function (
     }
     self.addUid(finaljson);
     finaljson = self.replaceTagNamingHierarchy(finaljson);
-    console.log(
-      "save aim sending to react from aim editor : " + JSON.stringify(finaljson)
-    );
+    // console.log(
+    //   "save aim sending to react from aim editor : " + JSON.stringify(finaljson)
+    // );
 
     return finaljson;
   };
@@ -3822,11 +3823,11 @@ export var AimEditor = function (
         for (let t = 0; t < templateShapeArrayLength; t++) {
           if (self.templateShapeArray[t].shape === "AnyShape") {
             anyShapeFlag = true;
-            console.log("on load aim any Shape is true here ");
+            // console.log("on load aim any Shape is true here ");
           }
           if (self.templateShapeArray[t].shape === "AnyClosedShape") {
             anyClosedShapeFlag = true;
-            console.log("on load aim any closed Shape is true here ");
+            // console.log("on load aim any closed Shape is true here ");
           }
           for (let j = 0; j < jsonShapeObj.length; j++) {
             if (
@@ -3855,28 +3856,28 @@ export var AimEditor = function (
           }
         }
       } else {
-        console.log("-------- not an array ");
+        // console.log("-------- not an array ");
         //let templateShapeArrayLength = self.templateShapeArray.length;
         for (let t = 0; t < templateShapeArrayLength; t++) {
           if (self.templateShapeArray[t].shape === "AnyShape") {
             anyShapeFlag = true;
-            console.log("on load aim any Shape is true here ");
+            // console.log("on load aim any Shape is true here ");
           }
           if (self.templateShapeArray[t].shape === "AnyClosedShape") {
             anyClosedShapeFlag = true;
-            console.log("on load aim any closed Shape is true here ");
+            // console.log("on load aim any closed Shape is true here ");
           }
-          console.log(
-            self.templateShapeArray[t].shape +
-              ": shape equal ? " +
-              jsonShapeObj.formshape
-          );
+          // console.log(
+          //   self.templateShapeArray[t].shape +
+          //     ": shape equal ? " +
+          //     jsonShapeObj.formshape
+          // );
           if (self.templateShapeArray[t].shape === jsonShapeObj.formshape) {
-            console.log(
-              self.templateShapeArray[t].shape +
-                ": shape equal ? " +
-                jsonShapeObj.formshape
-            );
+            // console.log(
+            //   self.templateShapeArray[t].shape +
+            //     ": shape equal ? " +
+            //     jsonShapeObj.formshape
+            // );
             document.getElementById(
               self.templateShapeArray[t].domid
             ).className = "green check circle outline icon";
@@ -3954,7 +3955,7 @@ export var AimEditor = function (
           let arrayIndex = -1;
           let arraySize = -1;
 
-          console.log("CharacteristicQuantification", value);
+          // console.log("CharacteristicQuantification", value);
           if (Array.isArray(CharQuantArray)) {
             arrayCheck = true;
             arraySize = CharQuantArray.length;
@@ -3968,11 +3969,11 @@ export var AimEditor = function (
             } else {
               eachCharactQuantfObj = CharQuantArray;
             }
-            console.log("eachCharactQuantfObj", eachCharactQuantfObj);
-            console.log(
-              "eachCharactQuantfObj",
-              eachCharactQuantfObj["xsi:type"]
-            );
+            // console.log("eachCharactQuantfObj", eachCharactQuantfObj);
+            // console.log(
+            //   "eachCharactQuantfObj",
+            //   eachCharactQuantfObj["xsi:type"]
+            // );
             let chartQuantfType = eachCharactQuantfObj["xsi:type"];
             switch (chartQuantfType) {
               case "Scale":
@@ -3983,7 +3984,7 @@ export var AimEditor = function (
                 ]);
                 break;
               case "NonQuantifiable":
-                console.log("NonQuantifiable", eachCharactQuantfObj);
+                // console.log("NonQuantifiable", eachCharactQuantfObj);
                 $(
                   "#Select" + eachCharactQuantfObj.label.value
                 ).dropdown("set selected", [
@@ -3991,7 +3992,7 @@ export var AimEditor = function (
                 ]);
                 break;
               case "Numerical":
-                console.log("Numerical", eachCharactQuantfObj);
+                // console.log("Numerical", eachCharactQuantfObj);
                 $(
                   "#Select" + eachCharactQuantfObj.label.value
                 ).dropdown("set selected", [
@@ -4003,7 +4004,7 @@ export var AimEditor = function (
                 ]);
                 break;
               case "Quantile":
-                console.log("Quantile", eachCharactQuantfObj);
+                // console.log("Quantile", eachCharactQuantfObj);
                 $(
                   "#Select" + eachCharactQuantfObj.label.value
                 ).dropdown("set selected", [
@@ -4012,7 +4013,7 @@ export var AimEditor = function (
 
                 break;
               case "Interval":
-                console.log("Interval", eachCharactQuantfObj);
+                // console.log("Interval", eachCharactQuantfObj);
                 $(
                   "#Select" + eachCharactQuantfObj.label.value
                 ).dropdown("set selected", [
@@ -4023,7 +4024,7 @@ export var AimEditor = function (
               // code block
             }
 
-            console.log("each char quantf object :", eachCharactQuantfObj);
+            // console.log("each char quantf object :", eachCharactQuantfObj);
           }
         }
 
@@ -4188,7 +4189,7 @@ export var AimEditor = function (
    }
    */
   this.checkShapes = function (shapes) {
-    console.log("check shapes called");
+    // console.log("check shapes called");
     //if (self.loadingAimFlag === false) {
     let shapeKeys = Object.keys(shapes);
     //alert(shapeKeys);

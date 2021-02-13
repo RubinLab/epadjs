@@ -8,7 +8,11 @@ import {
   toggleAllLabels,
   toggleSingleLabel,
   toggleAllAnnotations,
+  updateSingleSerie,
+  getSingleSerie,
+  aimDelete
 } from "../action";
+import { deleteAnnotation } from "../../../services/annotationServices";
 import cornerstone from "cornerstone-core";
 import { state } from 'cornerstone-tools/store/index.js';
 
@@ -122,6 +126,12 @@ class AnnotationsList extends React.Component {
     );
   };
 
+  handleDelete = (aim, openSerie) => {
+    window.dispatchEvent(
+      new CustomEvent("deleteAim", { detail: { aim, openSerie } })
+    );
+  }
+
   getLabelArray = () => {
     const calculations = {};
     try {
@@ -224,25 +234,28 @@ class AnnotationsList extends React.Component {
     const imageAims = { ...annotations };
     annotations = Object.values(annotations);
     annotations.forEach((aim, index) => {
-      aim = aim[0];
-      annList.push(
-        <Annotation
-          name={aim.name}
-          style={aim.color}
-          aim={aim.json}
-          id={aim.id}
-          key={aim.id}
-          displayed={aim.isDisplayed}
-          onClick={this.handleDisplayClick}
-          user={aim.user}
-          showLabel={aim.showLabel}
-          onSingleToggle={this.handleToggleSingleLabel}
-          onEdit={this.handleEdit}
-          serie={seriesUID}
-          label={calculations[aim.id]}
-          openSeriesAimID={openSeries[activePort].aimID}
-        />
-      );
+      if (aim[0]) {
+        aim = aim[0];
+        annList.push(
+          <Annotation
+            name={aim.name}
+            style={aim.color}
+            aim={aim.json}
+            id={aim.id}
+            key={aim.id}
+            displayed={aim.isDisplayed}
+            onClick={this.handleDisplayClick}
+            user={aim.user}
+            showLabel={aim.showLabel}
+            onSingleToggle={this.handleToggleSingleLabel}
+            onEdit={this.handleEdit}
+            onDelete={() => this.handleDelete(aim, openSeries[activePort])}
+            serie={seriesUID}
+            label={calculations[aim.id]}
+            openSeriesAimID={openSeries[activePort].aimID}
+          />
+        );
+      }
     });
     return (
       <React.Fragment>

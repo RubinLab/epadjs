@@ -20,7 +20,7 @@ class Rightsidebar extends Component {
     };
   }
 
-  async componentDidMount() {}
+  async componentDidMount() { }
 
   handleToggle = () => {
     if (this.state.open) {
@@ -88,7 +88,7 @@ class Rightsidebar extends Component {
             </Collapsible>
           )}
           <Collapsible trigger={"Annotations"} transitionTime={100} open={true}>
-            <AnnotationList />
+            <AnnotationList updateTreeDataOnSave={this.props.updateTreeDataOnSave} onDelete={this.props.onCancel} />
           </Collapsible>
         </div>
         <div

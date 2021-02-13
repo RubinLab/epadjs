@@ -18,7 +18,12 @@ import {
   closeSerie,
   jumpToAim,
   setSegLabelMapIndex,
+  updateSingleSerie,
+  getSingleSerie,
+  aimDelete,
+  clearAimId,
 } from "../annotationsList/action";
+import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
 import CornerstoneViewport from "react-cornerstone-viewport";
@@ -190,6 +195,7 @@ class DisplayView extends Component {
     window.addEventListener("toggleAnnotations", this.toggleAnnotations);
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
     window.addEventListener("editAim", this.editAimHandler);
+    window.addEventListener("deleteAim", this.deleteAimHandler);
     if (series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
@@ -235,6 +241,7 @@ class DisplayView extends Component {
     window.removeEventListener("toggleAnnotations", this.toggleAnnotations);
     window.removeEventListener("jumpToAimImage", this.jumpToAimImage);
     window.removeEventListener("editAim", this.editAimHandler);
+    window.removeEventListener("deleteAim", this.deleteAimHandler);
     window.removeEventListener("resize", this.setSubComponentHeights);
     clearInterval(this.state.tokenRefresh)
   }
@@ -266,6 +273,24 @@ class DisplayView extends Component {
       console.error(err);
     }
   };
+
+  deleteAimHandler = (event) => {
+    const { showAimEditor, selectedAim, dirty } = this.state;
+    const { aim, openSerie } = event.detail;
+    if (showAimEditor) {
+      if (aim.id === selectedAim.aimId) //if aim to be deleted is being edited
+        this.closeAimEditor(false);
+      else if (dirty) {
+        alert("You should first close the aim editor before deleting another aim!");
+        return;
+      }
+    }
+    const answer = window.confirm(
+      `Are you sure you want to delete aim named: ${aim.json.name.value}? This operation can NOT be undone!`
+    );
+    if (!answer) return 0;
+    this.deleteAim(aim.id, openSerie);
+  }
 
   editAimHandler = (event) => {
     const { aimID, seriesUID } = event.detail;
@@ -550,6 +575,7 @@ class DisplayView extends Component {
   };
 
   openAimEditor = (aimID, seriesUID) => {
+    console.trace();
 
     const { aimList } = this.props;
     if (Object.entries(aimList).length !== 0) {
@@ -732,13 +758,80 @@ class DisplayView extends Component {
     this.setDirtyFlag();
   };
 
-  measurementRemoved = (event, action) => {
+  getActiveSerie = () => {
+    const { series, activePort } = this.props;
+    return series[activePort];
+  }
+
+  measurementRemoved = (event) => {
+    const serie = this.getActiveSerie();
+    const { aimId } = event.detail.measurementData;
+    if (this.isLastShapeInAim(aimId)) {
+      const shouldDeleteAim = window.confirm("This is the last markup in Aim. Would yo like to delete the Aim file as well?");
+      if (shouldDeleteAim) {
+        this.deleteAim(aimId, serie);
+        this.closeAimEditor(false);
+        // this.setState({
+        //   showAimEditor: false,
+        //   selectedAim: undefined,
+        //   hasSegmentation: false,
+        //   dirty: false,
+        // });
+      }
+      return;
+    }
     this.handleShapes();
     this.setDirtyFlag();
   };
 
+  deleteAim = (aimId, serie) => {
+    const aimJson = this.getAimJson(aimId, serie);
+    const { name, comment } = aimJson;
+    const { projectID, patientID, studyUID, seriesUID } = serie;
+    const aimRefs = {
+      aimID: aimId,
+      patientID,
+      projectID,
+      seriesUID,
+      studyUID,
+      name,
+      comment,
+    };
+    deleteAnnotation({ aimID: aimId, projectID }).then(() => {
+      this.props.dispatch(clearAimId());
+      this.props.dispatch(aimDelete({ aimRefs }))
+      this.props.dispatch(
+        updateSingleSerie({
+          subjectID: patientID,
+          projectID,
+          seriesUID,
+          studyUID,
+        })
+      );
+      this.props.dispatch(
+        getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+      );
+    })
+  }
+
+  getAimJson = (aimId, serie) => {
+    const { seriesUID } = serie;
+    const { aimList } = this.props;
+    return aimList[seriesUID][aimId].json;
+  }
+
+  // returns true if delted shape is the last shape in aim
+  isLastShapeInAim = (aimId) => {
+    const { series, activePort } = this.props;
+    const { seriesUID } = series[activePort];
+    const shapesOfSerie = this.getShapesOfSerie(seriesUID);
+    if (shapesOfSerie) {
+      return shapesOfSerie.find(shape => shape.aimId === aimId) ? false : true;
+    }
+    return true;
+  };
+
   measuremementModified = (event, action) => {
-    // console.log("Modified", event);
     this.setDirtyFlag();
   };
 
@@ -759,6 +852,9 @@ class DisplayView extends Component {
     const { aimList, series, activePort } = this.props;
     const { seriesUID } = series[activePort];
     const { aimId, ancestorEvent } = event.detail;
+    if (!aimList[seriesUID][aimId]) {
+      return;
+    } //Eraser might have already delete the aim}
     const { element, data } = ancestorEvent;
 
     setMarkupsOfAimActive(aimId);//set the selected markups color to yellow
@@ -1073,7 +1169,23 @@ class DisplayView extends Component {
     });
   };
 
+  clearFrameNumber = (arrayBuffer) => {
+    const dicomData = dcmjs.data.DicomMessage.readFile(arrayBuffer);
+    const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(
+      dicomData.dict
+    );
+
+    const sourceImageSequence = dataset?.SharedFunctionalGroupsSequence?.DerivationImageSequence?.SourceImageSequence;
+    if (sourceImageSequence) {
+      sourceImageSequence.forEach(sourceImage => {
+        delete sourceImage.ReferencesFrameNumber;
+      })
+    }
+  }
+
   renderSegmentation = (arrayBuffer, aimId, serieIndex, labelMapIndex) => {
+    this.clearFrameNumber(arrayBuffer);
+
     // const { labelMaps } = this.state.seriesLabelMaps[serieIndex];
     // const labelMapIndex = labelMaps[aimId];
     const { imageIds } = this.state.data[serieIndex].stack;

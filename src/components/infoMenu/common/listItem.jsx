@@ -29,7 +29,15 @@ const responseList = ({ item }) => {
       </div>
       <div className="response-item__wrap">
         <div className="response-item__msg">{action}</div>
-        <div className="response-item__msg">{message}</div>
+        <div className="response-item__msg">
+          {action && action.includes("Download ready") ? (
+            <a href={message} target="_self" className="info-about__link">
+              Click here to download files!
+            </a>
+          ) : (
+            message
+          )}
+        </div>
         <div className="response-item__time">{time}</div>
       </div>
     </li>
