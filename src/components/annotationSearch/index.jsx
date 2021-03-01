@@ -4,13 +4,29 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Popover from 'react-bootstrap/Popover';
 import { FaSearch } from 'react-icons/fa';
 import './annotationSearch.css';
-import { ConsoleWriter } from "istanbul-lib-report";
-import { set } from "date-fns/esm";
+import { ConsoleWriter } from 'istanbul-lib-report';
+import { set } from 'date-fns/esm';
 
-const paranthesis = ['(', ')'];
-const conditions = ['AND', 'OR'];
-const type = ['Modality', 'Diagnosis', 'Anatomic Entity'];
-const criteria = ['Equals', 'Contains'];
+const lists = {
+  organize: ['AND', 'OR', '(', ')'],
+  // conditions: ['AND', 'OR'],
+  type: ['Modality', 'Diagnosis', 'Anatomic Entity'],
+  criteria: ['Equals', 'Contains']
+};
+
+const title = {
+  type: 'STEP 1: ',
+  criteria: 'STEP 2: ',
+  term: 'STEP 3: ',
+  organize: 'STEP 4: '
+};
+
+const explanation = {
+  organize: 'Group and/or organize your query',
+  type: 'Select a field from annotation',
+  criteria: 'Select a criteria',
+  term: 'Type the key word that you want to look for above'
+};
 
 const styles = {
   buttonStyles: {
@@ -22,165 +38,47 @@ const styles = {
 };
 
 const AnnotationSearch = () => {
-  const [entryMap, setEntryMap] = useState({
-    paranthesis: '',
-    conditions: '',
-    type: '',
-    criteria: '',
-    term: ''
-  });
   const [query, setQuery] = useState('');
-  const [openinigParanthesis, setOpeningParanthesis] = useState(false);
-  const [closingParanthesis, setClosingParanthesis] = useState(false);
-  const [status, setStatus] = useState('');
-  const [lastConstantIndex, setLastConstantIndex] = useState(0);
 
-  const deleteQueryItem = () => {
-    // form array out of he string by spliting by space
-    // if change is in he fixed terms (contains/and/equal/paranthesis) delete it completely and show menu and/or give error to be fixed
-    // else continue
+  const renderButton = (el, i) => {
+    return (
+      <button
+        className={`btn btn-secondary`}
+        style={styles.buttonStyles}
+        key={`${el}-${i}`}
+        name={el}
+        onClick={() => {
+          setQuery(`${query} ${el}`);
+        }}
+        type="button"
+      >
+        {el}
+      </button>
+    );
   };
 
-  const addQueryItem = () => {};
-
-  const controlQueryEntry = query => {};
-
-  const validateQuery = () => {};
-
-  const handleKeydown = e => {
-    console.log('handle keydown evente');
-    console.log(e);
+  const renderContentItem = name => {
+    return (
+      <>
+        <div  className="annotaionSearch-title">{`${title[name]} ${explanation[name]}`}</div>
+        <div>
+          {lists[name]?.map((el, i) => {
+            return renderButton(el, i);
+          })}
+        </div>
+      </>
+    );
   };
 
-  const handleClick = e => {
-    console.log('hhandleClick event');
-    console.log(e);
-    if (query.length === 0) {
-      if (!entryMap.type) {
-        setStatus('type');
-      }
-    } else {
-    }
-  };
-
-  const handleQueryTerm = e => {
-    // get the index of the cursor if it is longer than the
-    // existing query add it as new term
-    // if it is inside the query don't put anything in between fixed terms
-    // don't accept anything other than or/and and paranthesis before the contains
-
-    const { name, value, selectionStart } = e.target;
-    console.log('query', query, query.length);
-    console.log('selectionStart', selectionStart);
-    console.log('lastConstantIndex', lastConstantIndex);
-    let newTermEntry;
-    const oldQueryLengh = query.length;
-    if (selectionStart > lastConstantIndex) {
-      newTermEntry = value.slice(lastConstantIndex);
-      setEntryMap({ ...entryMap, [name]: newTermEntry });
-    }
-    setQuery(value);
-    setStatus('type');
-
-    // don't let user to add something between fixed terms
-    // get the length of the sring
-    // if string is shorter call delete
-    // if longer call add
-  };
-
-  const handleParameterSelection = (key, value) => {
-    const newQuery = `${query} ${value}`;  
-    setQuery(newQuery);
-    setEntryMap({ ...entryMap, [key]: value });
-    if (status === 'type') {
-      setStatus('criteria');
-    } else if (status === 'criteria') {
-      setStatus('term');
-    }
-    setLastConstantIndex(newQuery.length);  
-  };
-
-  const renderPopupContent = () => {
-    switch (status) {
-      case 'paranthesis':
-        return [...paranthesis, ...type].map((el, i) => {
-          return (
-            <button
-              className={`btn btn-secondary`}
-              style={styles.buttonStyles}
-              key={`${el}-${i}`}
-              type="button"
-              onClick={() => handleParameterSelection('paranthesis', el)}
-            >
-              {el}
-            </button>
-          );
-        });
-      case 'condition':
-        return conditions.map((el, i) => {
-          return (
-            <button
-              className={`btn btn-secondary`}
-              style={styles.buttonStyles}
-              key={`${el}-${i}`}
-              type="button"
-              onClick={() => handleParameterSelection('conditions', el)}
-            >
-              {el}
-            </button>
-          );
-        });
-      case 'type':
-        return type.map((el, i) => {
-          return (
-            <button
-              className={`btn btn-secondary`}
-              style={styles.buttonStyles}
-              key={`${el}-${i}`}
-              name={el}
-              onClick={() => {
-                handleParameterSelection('type', el);
-              }}
-              type="button"
-            >
-              {el}
-            </button>
-          );
-        });
-      case 'criteria':
-        return criteria.map((el, i) => {
-          return (
-            <button
-              className={`btn btn-secondary`}
-              style={styles.buttonStyles}
-              key={`${el}-${i}`}
-              type="button"
-              onClick={() => handleParameterSelection('criteria', el)}
-            >
-              {el}
-            </button>
-          );
-        });
-      case 'term':
-        return (
-        //   <input
-        //     type="text"
-        //     className="form-control annotationSearch-text"
-        //     aria-label="Large"
-        //     name="term"
-        //     onChange={handleQueryTerm}
-        //     style={{
-        //       padding: '0.15rem',
-        //       height: 'fit-content',
-        //       fontSize: '1.2rem'
-        //     }}
-        //   />
-        <div>enter tthe tterm you want to searrch above!</div>
-        );
-      default:
-        setStatus('');
-        return;
-    }
+  const renderContent = () => {
+    return (
+      <div className="annotationSearch-wrapper">
+        <div className="annotationSearch-cont__item">{renderContentItem('type')}</div>
+        <div className="annotationSearch-cont__item">{renderContentItem('criteria')}</div>
+        <div className="annotationSearch-cont__item">{renderContentItem('term')}</div>
+        <div className="annotationSearch-cont__item">{renderContentItem('organize')}</div>
+      </div>
+    );
   };
 
   return (
@@ -207,9 +105,7 @@ const AnnotationSearch = () => {
             className="form-control annotationSearch-text"
             aria-label="Large"
             name="term"
-            onChange={handleQueryTerm}
-            onKeyDown={handleKeydown}
-            onClick={handleClick}
+            onChange={e => setQuery(e.target.value)}
             style={{
               padding: '0.15rem',
               height: 'fit-content',
@@ -242,7 +138,7 @@ const AnnotationSearch = () => {
           margin: '2rem'
         }}
       >
-        {status && renderPopupContent()}
+        {renderContent()}
       </div>
     </div>
   );
