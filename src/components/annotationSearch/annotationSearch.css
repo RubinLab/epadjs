@@ -23,3 +23,12 @@
 .annotationSearch-text {
   margin-right: 0.5rem;
 }
+
+.annotaionSearch-title {
+  font-size: 1.2rem;
+  color: aliceblue;
+}
+
+.annotationSearch-cont__item {
+  margin-bottom: 1.5rem;
+}
