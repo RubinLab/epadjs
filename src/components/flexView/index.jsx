@@ -1,6 +1,6 @@
 import React from "react";
-import ReactTable from "react-table";
-import treeTableHOC from "react-table/lib/hoc/treeTable";
+import ReactTable from "react-table-v6";
+import treeTableHOC from "react-table-v6/lib/hoc/treeTable";
 import _ from "lodash";
 import { Button } from "react-bootstrap";
 import { getSeries } from "../../services/seriesServices";

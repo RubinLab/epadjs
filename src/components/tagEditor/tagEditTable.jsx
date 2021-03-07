@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Table from "react-table";
+import Table from "react-table-v6";
 import { FaExclamationTriangle, FaCheck, FaEdit } from "react-icons/fa";
 
 class TagEditTable extends React.Component {

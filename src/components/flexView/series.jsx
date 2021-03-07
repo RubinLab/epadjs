@@ -1,5 +1,5 @@
 import React from "react";
-import ReactTable from "react-table";
+import ReactTable from "react-table-v6";
 import { getSeries } from "../../services/seriesServices";
 import _ from "lodash";
 // import { studyColumns } from "./columns";
