@@ -11,22 +11,27 @@ import { clearCarets } from '../../Utils/aid.js';
 
 const mode = sessionStorage.getItem('mode');
 
-// const IndeterminateCheckbox = React.forwardRef(
-//   ({ indeterminate, ...rest }, ref) => {
-//     const defaultRef = React.useRef();
-//     const resolvedRef = ref || defaultRef;
+const IndeterminateCheckbox = React.forwardRef(
+  ({ indeterminate, ...rest }, ref) => {
+    const defaultRef = React.useRef();
+    const resolvedRef = ref || defaultRef;
 
-//     React.useEffect(() => {
-//       resolvedRef.current.indeterminate = indeterminate;
-//     }, [resolvedRef, indeterminate]);
+    React.useEffect(() => {
+      resolvedRef.current.indeterminate = indeterminate;
+    }, [resolvedRef, indeterminate]);
 
-//     return (
-//       <>
-//         <input type="checkbox" ref={resolvedRef} {...rest} />
-//       </>
-//     );
-//   }
-// );
+    return (
+      <>
+        <input
+          type="checkbox"
+          ref={resolvedRef}
+          {...rest}
+          // onChange={(e) => console.log(' clicked', e)}
+        />
+      </>
+    );
+  }
+);
 
 function Subjects(props) {
   const widthUnit = 20;
@@ -54,22 +59,7 @@ function Subjects(props) {
       {
         // Build our expander column
         id: 'expander', // Make sure it has an ID
-        // Header: ({ getToggleAllRowsExpandedProps, isAllRowsExpanded }) => (
-        //   <span {...getToggleAllRowsExpandedProps()}>
-        //     {isAllRowsExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
-        //   </span>
-        // ),
         width: 35,
-        // style: {
-        //   cursor: 'pointer',
-        //   fontSize: 10,
-        //   padding: '0',
-        //   textAlign: 'center',
-        //   userSelect: 'none',
-        //   color: '#fafafa',
-        //   padding: '7px 5px',
-        //   verticalAlign: 'middle'
-        // },
         Cell: ({ row }) => {
           // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
           // to build the toggle for expanding a row
@@ -90,7 +80,6 @@ function Subjects(props) {
                   color: '#fafafa',
                   padding: '7px 5px',
                   verticalAlign: 'middle',
-                  background: 'red',
                   width: `50px`
                 }
               })}
@@ -272,7 +261,31 @@ function Subjects(props) {
       columns,
       data
     },
-    useExpanded // Use the useExpanded plugin hook
+    useExpanded, // Use the useExpanded plugin hook
+    useRowSelect,
+    hooks => {
+      hooks.visibleColumns.push(columns => [
+        // Let's make a column for selection
+        {
+          id: 'selection',
+          // The header can use the table's getToggleAllRowsSelectedProps method
+          // to render a checkbox
+          // Header: ({ getToggleAllPageRowsSelectedProps }) => (
+          //   <div>
+          //     <IndeterminateCheckbox {...getToggleAllPageRowsSelectedProps()} />
+          //   </div>
+          // ),
+          // The cell can use the individual row's getToggleRowSelectedProps method
+          // to the render a checkbox
+          Cell: ({ row }) => (
+            <div>
+              <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+            </div>
+          )
+        },
+        ...columns
+      ]);
+    }
   );
 
   return (
