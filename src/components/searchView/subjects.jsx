@@ -36,21 +36,40 @@ const IndeterminateCheckbox = React.forwardRef(
 function Subjects(props) {
   const widthUnit = 20;
   const [data, setData] = useState([]);
-  let [loading, setLoading] = useState(true);
+  let [loading, setLoading] = useState(false);
   // let [color, setColor] = useState('#ffffff');
 
+  const getDataFromStorage = () => {
+    const treeData = JSON.parse(localStorage.getItem('treeData'));
+    return treeData[props.pid]
+      ? Object.values(treeData[props.pid]).map(el => el.data)
+      : [];
+  };
+
   useEffect(() => {
-    setLoading(true);
-    if (props.pid && props.pid !== 'null') {
-      getSubjects(props.pid)
-        .then(res => {
-          setData(res.data);
-          setLoading(false);
-        })
-        .catch(err => {
-          console.log('error in effect');
-          console.error(err);
-        });
+    const { pid, getTreeData } = props;
+    // const treeData = JSON.parse(localStorage.getItem('treeData'));
+    const dataFromStorage = getDataFromStorage();
+
+    // check if there is data in treedata
+    // if there is use it if not get it and post data back to app
+
+    if (pid && pid !== 'null') {
+      if (dataFromStorage.length > 0) {
+        setData(dataFromStorage);
+      } else {
+        setLoading(true);
+        getSubjects(pid)
+          .then(res => {
+            setData(res.data);
+            setLoading(false);
+            getTreeData(pid, 'subject', res.data);
+          })
+          .catch(err => {
+            console.log('error in effect');
+            console.error(err);
+          });
+      }
     }
   }, []);
 
