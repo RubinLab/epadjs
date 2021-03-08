@@ -123,6 +123,7 @@ class ToolMenu extends Component {
       showInterpolation: false,
       activeTool: "",
       activeToolIdx: 0,
+      fuse: false
     };
 
     this.imagingTools = [
@@ -136,6 +137,8 @@ class ToolMenu extends Component {
       // { name: "SeriesData", icon: <FaListAlt />, tool: "MetaData" },
       { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate" },
       { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
+      { name: "Color", icon: <FaListAlt />, tool: "colorLut" },
+      { name: "Fusion", icon: <FaListAlt />, tool: "fuse" },
     ];
 
     this.markupTools = [
@@ -307,6 +310,12 @@ class ToolMenu extends Component {
       this.setState({ showBrushSize: true, isHuGated: false, showSmartBrush: true });
     } else if (tool === "FreehandRoi3DTool") {
       this.setState({ showInterpolation: true });
+    } else if (tool === "colorLut") {
+      this.applyColorLUT();
+      return;
+    } else if (tool === "fuse") {
+      this.handleFuse();
+      return;
     }
     this.disableAllTools();
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
@@ -384,6 +393,56 @@ class ToolMenu extends Component {
   showInterpolation = () => {
     this.setState({ showInterpolation: false });
   };
+
+  applyColorLUT = () => {
+    const { element } = cornerstone.getEnabledElements()[
+      this.props.activePort
+    ];
+    const viewport = cornerstone.getViewport(element);
+    const colormap = cornerstone.colors.getColormap("hotIron");
+
+    viewport.colormap = colormap;
+    cornerstone.setViewport(element, viewport);
+    cornerstone.updateImage(element, true);
+  }
+
+  handleFuse = () => {
+    // console.log("nebked elements", cornerstone.getEnabledElements());
+    // const { fuse } = this.state;
+    // console.log("fuse state", fuse);
+    const options = {
+      name: 'PET',
+      opacity: 0.7,
+      // viewport: {
+      //   colormap: 'hotIron',
+      //   // voi: {
+      //   //   windowWidth: 30,
+      //   //   windowCenter: 16
+      //   // }
+      // }
+    }
+    const { activePort } = this.props;
+    const petElement = cornerstone.getEnabledElements()[0].element;
+    const petImage = cornerstone.getImage(petElement);
+    const yaw = cornerstone.getEnabledElements()[1];
+    console.log("yaw", yaw);
+    const ctElement = cornerstone.getEnabledElements()[1].element;
+    const ctImage = cornerstone.getImage(ctElement);
+
+    let layerId;
+
+    layerId = cornerstone.addLayer(ctElement, ctImage);
+    layerId = cornerstone.addLayer(ctElement, petImage, options);
+    console.log("layer iD", layerId);
+    console.log("layers after", cornerstone.getLayers(ctElement));
+    console.log("Element after fuse", ctElement);
+    // delete yaw.image;
+    // }
+    // else
+    //   cornerstone.removeLayer(element, fuse);
+    cornerstone.updateImage(ctElement);
+    // this.setState({ fuse: layerId });
+  }
 
   render() {
     const { activeTool } = this.state;

@@ -200,6 +200,9 @@ class DisplayView extends Component {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
     };
+    // const element = document.getElementById("petViewport");
+    // console.log("element is", cornerstone);
+    // cornerstone.enable(element);
   }
 
   async componentDidUpdate(prevProps, prevState) {
@@ -668,7 +671,7 @@ class DisplayView extends Component {
   };
 
   getViewports = (containerHeight) => {
-    let numSeries = this.props.series.length;
+    let numSeries = this.props.series.length + 1;
     let numCols = numSeries % 3;
     containerHeight = containerHeight
       ? containerHeight
