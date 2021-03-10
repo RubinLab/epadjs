@@ -1,71 +1,39 @@
-/* Button used to open the contact form - fixed at the bottom of the page */
-.open-button {
-  background-color: #4d4d4d;
-  color: white;
-  padding: 16px 20px;
-  border: none;
-  cursor: pointer;
-  position: fixed;
-  bottom: 23px;
-  right: 28px;
-  width: 280px;
-}
-
-/* The popup form - hidden by default */
-.form-popup {
-  display: none;
-  position: fixed;
-  margin-top: 3px;
-  margin-left: 270px;
-  border: 1px solid rgba(0, 0, 0, 0.6);
-  max-width: 300px;
-  padding: 100px;
+.smb-pop-up {
+  position: absolute;
   background-color: #3a3f44;
-  z-index: 9;
+  padding: 10px 20px;
+  outline: solid;
+  outline-width: 1px;
+  background-color: #3a3f44;
+  outline-color: black;
+  width: 270px;
+  right: 500px;
+  top: 171px;
+  z-index: 1000;
 }
 
-/* Add styles to the form container */
-.form-container {
-  max-width: 300px;
-  padding: 100px;
-  background-color: white;
-}
-
-/* Full-width input fields */
-.form-container input[type="text"],
-.form-container input[type="password"] {
-  width: 100%;
-  padding: 15px;
-  margin: 5px 0 22px 0;
-  border: none;
-  background: #f1f1f1;
-}
-
-/* When the inputs get focus, do something */
-.form-container input[type="text"]:focus,
-.form-container input[type="password"]:focus {
-  background-color: #ddd;
-  outline: none;
-}
-
-/* Set a style for the submit/login button */
-.form-container .btn {
-  background-color: #4caf50;
+.close-smart-brush-menu {
+  position: absolute;
+  top: 2px;
+  right: 5px;
   color: white;
-  padding: 16px 20px;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  margin-bottom: 10px;
 }
 
-/* Add a red background color to the cancel button */
-.form-container .cancel {
-  background-color: red;
+label {
+  font-weight: 400;
 }
 
-/* Add some hover effects to buttons */
-.form-container .btn:hover,
-.open-button:hover {
-  opacity: 1;
+hr {
+  margin-top: 1em;
+  margin-bottom: 0em;
+}
+
+h5 {
+  font-size: 2em;
+  margin-bottom: 0em;
+}
+
+a {
+  color: red;
+  text-align: right !important;
 }
