@@ -25,11 +25,7 @@ const IndeterminateCheckbox = React.forwardRef(
 
     return (
       <>
-        <input
-          type="checkbox"
-          ref={resolvedRef}
-          {...rest}
-        />
+        <input type="checkbox" ref={resolvedRef} {...rest} />
       </>
     );
   }
@@ -117,26 +113,31 @@ function Table({ columns, data, fetchData, pageCount }) {
               })}
             </tbody>
           </table>
-          <div className="pagination">
-            <button onClick={() => previousPage()} disabled={!canPreviousPage}>
-              {'<'}
-            </button>
-            <select
-              value={pageSize}
-              onChange={e => {
-                setPageSize(Number(e.target.value));
-              }}
-            >
-              {[200].map(pageSize => (
-                <option key={pageSize} value={pageSize}>
-                  {pageSize}
-                </option>
-              ))}
-            </select>
-            <button onClick={() => nextPage()} disabled={!canNextPage}>
-              {'>'}
-            </button>
-          </div>
+          {pageCount > 1 && (
+            <div className="pagination">
+              <button
+                onClick={() => previousPage()}
+                disabled={!canPreviousPage}
+              >
+                {'<'}
+              </button>
+              <select
+                value={pageSize}
+                onChange={e => {
+                  setPageSize(Number(e.target.value));
+                }}
+              >
+                {[200].map(pageSize => (
+                  <option key={pageSize} value={pageSize}>
+                    {pageSize}
+                  </option>
+                ))}
+              </select>
+              <button onClick={() => nextPage()} disabled={!canNextPage}>
+                {'>'}
+              </button>
+            </div>
+          )}
         </>
       )}
     </>
