@@ -32,7 +32,7 @@ const IndeterminateCheckbox = React.forwardRef(
 );
 const defaultPageSize = 200;
 
-function Table({ columns, data, fetchData, pageCount }) {
+function Table({ columns, data, fetchData, pageCount, loading }) {
   const {
     getTableProps,
     getTableBodyProps,
@@ -111,6 +111,20 @@ function Table({ columns, data, fetchData, pageCount }) {
                   </tr>
                 );
               })}
+              {pageCount > 1 && (
+                <tr>
+                  {loading ? (
+                    // Use our custom loading state to show a loading indicator
+                    <td colSpan="10000">Loading...</td>
+                  ) : (
+                    <td colSpan="10000">
+                      Showing {defaultPageSize * pageIndex}-
+                      {defaultPageSize * (pageIndex + 1)} of ~
+                      {pageCount * pageSize} results
+                    </td>
+                  )}
+                </tr>
+              )}
             </tbody>
           </table>
           {pageCount > 1 && (
