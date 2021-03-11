@@ -1,5 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useTable, useExpanded, useRowSelect } from 'react-table';
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+  useTable,
+  useExpanded,
+  useRowSelect,
+  usePagination
+} from 'react-table';
 import { connect } from 'react-redux';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
@@ -8,8 +13,6 @@ import Studies from './studies';
 import { getSubjects } from '../../services/subjectServices';
 import { formatDate } from '../flexView/helperMethods';
 import { clearCarets } from '../../Utils/aid.js';
-
-const mode = sessionStorage.getItem('mode');
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
@@ -26,52 +29,127 @@ const IndeterminateCheckbox = React.forwardRef(
           type="checkbox"
           ref={resolvedRef}
           {...rest}
-          // onChange={(e) => console.log(' clicked', e)}
         />
       </>
     );
   }
 );
+const defaultPageSize = 200;
+
+function Table({ columns, data, fetchData, pageCount }) {
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+    page,
+    canPreviousPage,
+    canNextPage,
+    pageOptions,
+    gotoPage,
+    nextPage,
+    previousPage,
+    setPageSize,
+    state: { expanded, pageIndex, pageSize }
+  } = useTable(
+    {
+      columns,
+      data,
+      initialState: { pageIndex: 0, pageSize: defaultPageSize }, // Pass our hoisted table state
+      manualPagination: true, // Tell the usePagination
+      // hook that we'll handle our own data fetching
+      // This means we'll also have to provide our own
+      // pageCount.
+      pageCount
+    },
+    useExpanded, // Use the useExpanded plugin hook
+    usePagination,
+    useRowSelect,
+    hooks => {
+      hooks.visibleColumns.push(columns => [
+        // Let's make a column for selection
+        {
+          id: 'selection',
+          Cell: ({ row }) => (
+            <div>
+              <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+            </div>
+          )
+        },
+        ...columns
+      ]);
+    }
+  );
+
+  useEffect(() => {
+    fetchData({ pageIndex, pageSize });
+  }, [fetchData, pageIndex, pageSize]);
+
+  return (
+    <>
+      {data.length > 0 && (
+        <>
+          <table {...getTableProps()}>
+            <thead>
+              {headerGroups.map(headerGroup => (
+                <tr {...headerGroup.getHeaderGroupProps()}>
+                  {headerGroup.headers.map(column => (
+                    <th {...column.getHeaderProps()}>
+                      {column.render('Header')}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody {...getTableBodyProps()}>
+              {rows.map((row, i) => {
+                prepareRow(row);
+                return (
+                  <tr {...row.getRowProps()}>
+                    {row.cells.map(cell => {
+                      return (
+                        <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <div className="pagination">
+            <button onClick={() => previousPage()} disabled={!canPreviousPage}>
+              {'<'}
+            </button>
+            <select
+              value={pageSize}
+              onChange={e => {
+                setPageSize(Number(e.target.value));
+              }}
+            >
+              {[200].map(pageSize => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize}
+                </option>
+              ))}
+            </select>
+            <button onClick={() => nextPage()} disabled={!canNextPage}>
+              {'>'}
+            </button>
+          </div>
+        </>
+      )}
+    </>
+  );
+}
 
 function Subjects(props) {
   const widthUnit = 20;
+
   const [data, setData] = useState([]);
   let [loading, setLoading] = useState(false);
+  const [pageCount, setPageCount] = useState(0);
   // let [color, setColor] = useState('#ffffff');
-
-  const getDataFromStorage = () => {
-    const treeData = JSON.parse(localStorage.getItem('treeData'));
-    return treeData[props.pid]
-      ? Object.values(treeData[props.pid]).map(el => el.data)
-      : [];
-  };
-
-  useEffect(() => {
-    const { pid, getTreeData } = props;
-    // const treeData = JSON.parse(localStorage.getItem('treeData'));
-    const dataFromStorage = getDataFromStorage();
-
-    // check if there is data in treedata
-    // if there is use it if not get it and post data back to app
-
-    if (pid && pid !== 'null') {
-      if (dataFromStorage.length > 0) {
-        setData(dataFromStorage);
-      } else {
-        setLoading(true);
-        getSubjects(pid)
-          .then(res => {
-            setData(res.data);
-            setLoading(false);
-            getTreeData(pid, 'subject', res.data);
-          })
-          .catch(err => {
-            console.log('error in effect');
-            console.error(err);
-          });
-      }
-    }
-  }, []);
 
   const columns = React.useMemo(
     () => [
@@ -82,7 +160,6 @@ function Subjects(props) {
         Cell: ({ row }) => {
           // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
           // to build the toggle for expanding a row
-          // console.log('row in expand', row);
           return (
             <span
               {...row.getToggleRowExpandedProps({
@@ -268,44 +345,61 @@ function Subjects(props) {
     ],
     []
   );
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    state: { expanded }
-  } = useTable(
-    {
-      columns,
-      data
-    },
-    useExpanded, // Use the useExpanded plugin hook
-    useRowSelect,
-    hooks => {
-      hooks.visibleColumns.push(columns => [
-        // Let's make a column for selection
-        {
-          id: 'selection',
-          // The header can use the table's getToggleAllRowsSelectedProps method
-          // to render a checkbox
-          // Header: ({ getToggleAllPageRowsSelectedProps }) => (
-          //   <div>
-          //     <IndeterminateCheckbox {...getToggleAllPageRowsSelectedProps()} />
-          //   </div>
-          // ),
-          // The cell can use the individual row's getToggleRowSelectedProps method
-          // to the render a checkbox
-          Cell: ({ row }) => (
-            <div>
-              <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-            </div>
-          )
-        },
-        ...columns
-      ]);
+
+  const fetchData = useCallback(({ pageIndex, pageSize }) => {
+    const pageData = getDataFromStorage(pageSize, pageIndex);
+    setData(pageData);
+  }, []);
+
+  const preparePageData = (rawData, pageSize, pageIndex) => {
+    setPageCount(Math.ceil(rawData.length / pageSize));
+    const startIndex = pageSize * pageIndex;
+    const endIndex = pageSize * (pageIndex + 1);
+    const pageData = [];
+    rawData.forEach((el, i) => {
+      if (i >= startIndex && i < endIndex) {
+        el.data ? pageData.push(el.data) : pageData.push(el);
+      }
+    });
+    return pageData;
+  };
+
+  const getDataFromStorage = (pageSize, pageIndex) => {
+    const treeData = JSON.parse(localStorage.getItem('treeData'));
+    const subjectsArray = treeData[props.pid]
+      ? Object.values(treeData[props.pid])
+      : [];
+    if (subjectsArray.length > 0) {
+      return preparePageData(subjectsArray, pageSize, pageIndex);
+    } else return [];
+  };
+
+  useEffect(() => {
+    const { pid, getTreeData } = props;
+    // const treeData = JSON.parse(localStorage.getItem('treeData'));
+    const dataFromStorage = getDataFromStorage(defaultPageSize, 0);
+    // check if there is data in treedata
+    // if there is use it if not get it and post data back to app
+    let data = [];
+    if (pid && pid !== 'null') {
+      if (dataFromStorage?.length > 0) {
+        data = dataFromStorage;
+        setData(data);
+      } else {
+        setLoading(true);
+        getSubjects(pid)
+          .then(res => {
+            setLoading(false);
+            data = preparePageData(res.data, defaultPageSize, 0);
+            getTreeData(pid, 'subject', res.data);
+            setData(data);
+          })
+          .catch(err => {
+            console.error(err);
+          });
+      }
     }
-  );
+  }, []);
 
   return (
     <>
@@ -314,35 +408,12 @@ function Subjects(props) {
           <PropagateLoader color={'#7A8288'} loading={loading} margin={8} />
         </div>
       )}
-      {data.length > 0 && (
-        <table {...getTableProps()}>
-          <thead>
-            {headerGroups.map(headerGroup => (
-              <tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map(column => (
-                  <th {...column.getHeaderProps()}>
-                    {column.render('Header')}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody {...getTableBodyProps()}>
-            {rows.map((row, i) => {
-              prepareRow(row);
-              return (
-                <tr {...row.getRowProps()}>
-                  {row.cells.map(cell => {
-                    return (
-                      <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
+      <Table
+        columns={columns}
+        data={data}
+        pageCount={pageCount}
+        fetchData={fetchData}
+      />
     </>
   );
 }
