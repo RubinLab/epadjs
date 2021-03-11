@@ -3,7 +3,8 @@ import {
   useTable,
   useExpanded,
   useRowSelect,
-  usePagination
+  usePagination,
+  useFilters
 } from 'react-table';
 import { connect } from 'react-redux';
 import ReactTooltip from 'react-tooltip';
@@ -82,6 +83,18 @@ function Table({ columns, data, fetchData, pageCount, loading }) {
     fetchData({ pageIndex, pageSize });
   }, [fetchData, pageIndex, pageSize]);
 
+  const jumpToHeader = () => {
+    // const header = document.getElementById('subjects-header-id');
+    const header = document.getElementById('epad-logo');
+    const bodyRect = document.body.getBoundingClientRect();
+    var headerRect = header.getBoundingClientRect();
+    const offsetTop = headerRect.top - bodyRect.top;
+    const offsetLeft = headerRect.left - bodyRect.left;
+
+    console.log('top, left -->', offsetTop, offsetLeft);
+    // window.scrollTo(left, top);
+  };
+
   return (
     <>
       {data.length > 0 && (
@@ -89,7 +102,10 @@ function Table({ columns, data, fetchData, pageCount, loading }) {
           <table {...getTableProps()}>
             <thead>
               {headerGroups.map(headerGroup => (
-                <tr {...headerGroup.getHeaderGroupProps()}>
+                <tr
+                  id="subjects-header-id"
+                  {...headerGroup.getHeaderGroupProps()}
+                >
                   {headerGroup.headers.map(column => (
                     <th {...column.getHeaderProps()}>
                       {column.render('Header')}
@@ -130,7 +146,10 @@ function Table({ columns, data, fetchData, pageCount, loading }) {
           {pageCount > 1 && (
             <div className="pagination">
               <button
-                onClick={() => previousPage()}
+                onClick={() => {
+                  jumpToHeader();
+                  previousPage();
+                }}
                 disabled={!canPreviousPage}
               >
                 {'<'}
@@ -147,7 +166,13 @@ function Table({ columns, data, fetchData, pageCount, loading }) {
                   </option>
                 ))}
               </select>
-              <button onClick={() => nextPage()} disabled={!canNextPage}>
+              <button
+                onClick={() => {
+                  jumpToHeader();
+                  nextPage();
+                }}
+                disabled={!canNextPage}
+              >
                 {'>'}
               </button>
             </div>
