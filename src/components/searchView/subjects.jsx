@@ -3,8 +3,7 @@ import {
   useTable,
   useExpanded,
   useRowSelect,
-  usePagination,
-  useFilters
+  usePagination
 } from 'react-table';
 import { connect } from 'react-redux';
 import ReactTooltip from 'react-tooltip';
@@ -33,7 +32,14 @@ const IndeterminateCheckbox = React.forwardRef(
 );
 const defaultPageSize = 200;
 
-function Table({ columns, data, fetchData, pageCount, loading }) {
+function Table({
+  columns,
+  data,
+  fetchData,
+  pageCount,
+  loading,
+  filterSubjects
+}) {
   const {
     getTableProps,
     getTableBodyProps,
@@ -99,6 +105,11 @@ function Table({ columns, data, fetchData, pageCount, loading }) {
     <>
       {data.length > 0 && (
         <>
+          <label>
+            {' '}
+            Search subject:
+            <input type="text" onChange={(e) => filterSubjects(e, pageSize, pageIndex)} />
+          </label>
           <table {...getTableProps()}>
             <thead>
               {headerGroups.map(headerGroup => (
@@ -187,6 +198,7 @@ function Subjects(props) {
   const widthUnit = 20;
 
   const [data, setData] = useState([]);
+  const [searchKey, setSearchKey] = useState('');
   let [loading, setLoading] = useState(false);
   const [pageCount, setPageCount] = useState(0);
   // let [color, setColor] = useState('#ffffff');
@@ -387,14 +399,23 @@ function Subjects(props) {
   );
 
   const fetchData = useCallback(({ pageIndex, pageSize }) => {
-    const pageData = getDataFromStorage(pageSize, pageIndex);
-    setData(pageData);
+    if (searchKey) {
+      filterSubjects(searchKey, pageSize, pageIndex);
+    } else {
+      const pageData = getDataFromStorage(pageSize, pageIndex);
+      setData(pageData);
+    }
   }, []);
 
   const preparePageData = (rawData, pageSize, pageIndex) => {
     setPageCount(Math.ceil(rawData.length / pageSize));
     const startIndex = pageSize * pageIndex;
     const endIndex = pageSize * (pageIndex + 1);
+    console.log('pageSize * pageIndex')
+    console.log(pageSize, pageIndex);
+
+    console.log('startIndex, endIndex');
+    console.log(startIndex, endIndex);
     const pageData = [];
     rawData.forEach((el, i) => {
       if (i >= startIndex && i < endIndex) {
@@ -410,8 +431,36 @@ function Subjects(props) {
       ? Object.values(treeData[props.pid])
       : [];
     if (subjectsArray.length > 0) {
-      return preparePageData(subjectsArray, pageSize, pageIndex);
+      if (pageSize && pageIndex >= 0)
+        return preparePageData(subjectsArray, pageSize, pageIndex);
+      else return subjectsArray;
     } else return [];
+  };
+
+  const filterSubjects = (e, pageSize, pageIndex) => {
+    const searchKey = e.target.value.trim().toLowerCase();
+    setSearchKey(searchKey);
+    setFilteredData(searchKey, pageSize, pageIndex);
+  };
+
+  const setFilteredData = (searchKey, pageSize, pageIndex) => {
+    const filteredData = filterSubjectsInTreeeData(searchKey);
+    console.log('filteredData', filteredData);
+    const pageData = preparePageData(filteredData, pageSize, pageIndex);
+    console.log('pageData', pageData);
+    setData(pageData);
+    setPageCount(Math.ceil(pageData.length / defaultPageSize));
+  };
+
+  const filterSubjectsInTreeeData = searchKey => {
+    const subjectsArr = getDataFromStorage();
+    const result = subjectsArr.reduce((all, item, i) => {
+      const name = clearCarets(item.data.subjectName).toLowerCase();
+      if (name.includes(searchKey)) all.push(item.data);
+      return all;
+    }, []);
+    console.log('result', result);
+    return result;
   };
 
   useEffect(() => {
@@ -453,6 +502,7 @@ function Subjects(props) {
         data={data}
         pageCount={pageCount}
         fetchData={fetchData}
+        filterSubjects={filterSubjects}
       />
     </>
   );
