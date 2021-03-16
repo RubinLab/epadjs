@@ -10,6 +10,7 @@ import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 // import "react-table-v6/react-table.css";
 import { getStudies } from '../../services/studyServices';
+import Series from './Series';
 import { formatDate } from '../flexView/helperMethods';
 import { clearCarets, styleEightDigitDate } from '../../Utils/aid.js';
 
@@ -30,7 +31,7 @@ const IndeterminateCheckbox = React.forwardRef(
   }
 );
 
-function Table({ columns, data }) {
+function Table({ columns, data, getTreeData }) {
   const {
     getTableProps,
     getTableBodyProps,
@@ -79,7 +80,14 @@ function Table({ columns, data }) {
                     );
                   })}
                 </tr>
-                {row.isExpanded && <div>here series!!!!</div>}
+                {row.isExpanded && (
+                  <Series
+                    pid={row.original.projectID}
+                    subjectID={row.original.patientID}
+                    studyUID={row.original.studyUID}
+                    getTreeData={getTreeData}
+                  />
+                )}
               </>
             );
           })}
@@ -288,7 +296,7 @@ function Studies(props) {
           <PropagateLoader color={'#7A8288'} loading={loading} margin={8} />
         </tr>
       )}
-      <Table columns={columns} data={data} />
+      <Table columns={columns} data={data} getTreeData={props.getTreeData} />
     </>
   );
 }

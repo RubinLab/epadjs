@@ -701,6 +701,7 @@ class App extends Component {
       'message',
       this.getMessageFromEventSrc
     );
+    localStorage.setItem('treeData', JSON.stringify({}))
   };
 
   onLogout = e => {
