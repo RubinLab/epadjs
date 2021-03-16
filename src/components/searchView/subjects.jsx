@@ -6,13 +6,14 @@ import {
   usePagination
 } from 'react-table';
 import { connect } from 'react-redux';
+import Studies from './Studies';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 // import "react-table-v6/react-table.css";
-import Studies from './studies';
 import { getSubjects } from '../../services/subjectServices';
 import { formatDate } from '../flexView/helperMethods';
 import { clearCarets } from '../../Utils/aid.js';
+import propTypes from 'react-table-v6/lib/propTypes';
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
@@ -38,7 +39,8 @@ function Table({
   fetchData,
   pageCount,
   loading,
-  filterSubjects
+  filterSubjects,
+  getTreeData
 }) {
   const {
     getTableProps,
@@ -108,17 +110,21 @@ function Table({
           <label>
             {' '}
             Search subject:
-            <input type="text" onChange={(e) => filterSubjects(e, pageSize, pageIndex)} />
+            <input
+              type="text"
+              onChange={e => filterSubjects(e, pageSize, pageIndex)}
+            />
           </label>
           <table {...getTableProps()}>
             <thead>
-              {headerGroups.map(headerGroup => (
+              {headerGroups.map((headerGroup, k) => (
                 <tr
                   id="subjects-header-id"
+                  key={`subjects-header-id ${k}`}
                   {...headerGroup.getHeaderGroupProps()}
                 >
-                  {headerGroup.headers.map(column => (
-                    <th {...column.getHeaderProps()}>
+                  {headerGroup.headers.map((column, z) => (
+                    <th {...column.getHeaderProps()} key={`header-col-${z}`}>
                       {column.render('Header')}
                     </th>
                   ))}
@@ -129,13 +135,25 @@ function Table({
               {rows.map((row, i) => {
                 prepareRow(row);
                 return (
-                  <tr {...row.getRowProps()}>
-                    {row.cells.map(cell => {
-                      return (
-                        <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                      );
-                    })}
-                  </tr>
+                  <React.Fragment key={`row-fragment-${i}`}>
+                    <tr {...row.getRowProps()} key={`subject-row ${i}`}>
+                      {row.cells.map((cell, z) => {
+                        return (
+                          <td {...cell.getCellProps()} key={`row-col-${z}`}>
+                            {cell.render('Cell')}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                    {row.isExpanded && (
+                      <Studies
+                        pid={row.original.projectID}
+                        subjectID={row.original.subjectID}
+                        getTreeData={getTreeData}
+                      />
+                      // <div>here !!!</div>
+                    )}
+                  </React.Fragment>
                 );
               })}
               {pageCount > 1 && (
@@ -171,8 +189,8 @@ function Table({
                   setPageSize(Number(e.target.value));
                 }}
               >
-                {[200].map(pageSize => (
-                  <option key={pageSize} value={pageSize}>
+                {[200].map((pageSize, i) => (
+                  <option key={`${pageSize}-${i}`} value={pageSize}>
                     {pageSize}
                   </option>
                 ))}
@@ -235,7 +253,8 @@ function Subjects(props) {
               {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
             </span>
           );
-        }
+        },
+        SubCell: () => null
       },
       {
         Header: (
@@ -251,15 +270,16 @@ function Subjects(props) {
           const id = 'desc-tool' + row.original.subjectID;
           return (
             <>
-              <div data-tip data-for={id} style={{ whiteSpace: 'pre-wrap' }}>
+              <span data-tip data-for={id} style={{ whiteSpace: 'pre-wrap' }}>
                 {desc}
-              </div>
+              </span>
               <ReactTooltip id={id} place="right" type="info" delayShow={500}>
                 <span>{desc}</span>
               </ReactTooltip>
             </>
           );
-        }
+        },
+        SubCell: cellProps => <>{cellProps.value} 🎉</>
       },
       {
         Header: (
@@ -411,7 +431,7 @@ function Subjects(props) {
     setPageCount(Math.ceil(rawData.length / pageSize));
     const startIndex = pageSize * pageIndex;
     const endIndex = pageSize * (pageIndex + 1);
-    console.log('pageSize * pageIndex')
+    console.log('pageSize * pageIndex');
     console.log(pageSize, pageIndex);
 
     console.log('startIndex, endIndex');
@@ -503,6 +523,7 @@ function Subjects(props) {
         pageCount={pageCount}
         fetchData={fetchData}
         filterSubjects={filterSubjects}
+        getTreeData={props.getTreeData}
       />
     </>
   );
