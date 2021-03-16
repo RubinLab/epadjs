@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 // import "react-table-v6/react-table.css";
+import Annotations from './Annotations';
 import { getSeries } from '../../services/seriesServices';
 import { MAX_PORT, formatDates } from '../../constants';
 
@@ -80,7 +81,7 @@ function Table({ columns, data }) {
                     );
                   })}
                 </tr>
-                {row.isExpanded && <div>here annotations!!!!</div>}
+                {row.isExpanded && <Annotations series={row.original}/>}
               </>
             );
           })}
