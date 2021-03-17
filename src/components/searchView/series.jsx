@@ -29,7 +29,6 @@ const IndeterminateCheckbox = React.forwardRef(
     const handleSelect = e => {
       const { selectRow, data } = rest;
       setChecked(e.target.checked);
-      console.log('data', data);
       selectRow(data);
     };
 
@@ -47,7 +46,7 @@ const IndeterminateCheckbox = React.forwardRef(
   }
 );
 
-function Table({ columns, data, selectRow }) {
+function Table({ columns, data, selectRow, studyDescription }) {
   const {
     getTableProps,
     getTableBodyProps,
@@ -100,7 +99,7 @@ function Table({ columns, data, selectRow }) {
                     );
                   })}
                 </tr>
-                {row.isExpanded && <Annotations series={row.original} />}
+                {row.isExpanded && <Annotations series={row.original} studyDescription={studyDescription}/>}
               </>
             );
           })}
@@ -302,7 +301,12 @@ function Series(props) {
           <PropagateLoader color={'#7A8288'} loading={loading} margin={8} />
         </tr>
       )}
-      <Table columns={columns} data={data} selectRow={selectRow} />
+      <Table
+        columns={columns}
+        data={data}
+        selectRow={selectRow}
+        studyDescription={props.studyDescription}
+      />
     </>
   );
 }

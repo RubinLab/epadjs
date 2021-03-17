@@ -11,25 +11,39 @@ import PropagateLoader from 'react-spinners/PropagateLoader';
 // import "react-table-v6/react-table.css";
 import { getAnnotations } from '../../services/annotationServices';
 import { formatDates } from '../../constants';
+import { clearSelection, selectAnnotation } from '../annotationsList/action';
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
     const defaultRef = React.useRef();
     const resolvedRef = ref || defaultRef;
+    const [checked, setChecked] = useState(false);
 
     React.useEffect(() => {
       resolvedRef.current.indeterminate = indeterminate;
     }, [resolvedRef, indeterminate]);
 
+    const handleSelect = e => {
+      const { selectRow, data } = rest;
+      setChecked(e.target.checked);
+      selectRow(data);
+    };
+
     return (
       <>
-        <input type="checkbox" ref={resolvedRef} {...rest} />
+        <input
+          type="checkbox"
+          ref={resolvedRef}
+          {...rest}
+          onChange={handleSelect}
+          checked={checked}
+        />
       </>
     );
   }
 );
 
-function Table({ columns, data }) {
+function Table({ columns, data, selectRow }) {
   const {
     getTableProps,
     getTableBodyProps,
@@ -51,7 +65,11 @@ function Table({ columns, data }) {
           id: 'series-selection',
           Cell: ({ row }) => (
             <div style={{ paddingLeft: '36px' }}>
-              <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+              <IndeterminateCheckbox
+                {...row.getToggleRowSelectedProps()}
+                data={row.original}
+                selectRow={selectRow}
+              />
             </div>
           )
         },
@@ -91,7 +109,7 @@ function Annotations(props) {
   const widthUnit = 20;
   const [data, setData] = useState([]);
   let [loading, setLoading] = useState(false);
-  const username = sessionStorage.getItem("username");
+  const username = sessionStorage.getItem('username');
 
   const columns = React.useMemo(
     () => [
@@ -206,9 +224,15 @@ function Annotations(props) {
     []
   );
 
+  const selectRow = data => {
+    props.dispatch(clearSelection('annotation'));
+    const { seriesDescripion } = props.series;
+    const { studyDescription } = props;
+    props.dispatch(selectAnnotation(data, studyDescription, seriesDescripion));
+  };
+
   useEffect(() => {
     const { series } = props;
-
     const projectId = series.projectID;
     const subjectId = series.patientID;
     const studyId = series.studyUID;
@@ -232,7 +256,7 @@ function Annotations(props) {
           <PropagateLoader color={'#7A8288'} loading={loading} margin={8} />
         </tr>
       )}
-      <Table columns={columns} data={data} />
+      <Table columns={columns} data={data} selectRow={selectRow} />
     </>
   );
 }

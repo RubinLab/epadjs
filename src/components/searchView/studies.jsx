@@ -107,6 +107,7 @@ function Table({ columns, data, getTreeData, selectRow }) {
                     subjectID={row.original.patientID}
                     studyUID={row.original.studyUID}
                     getTreeData={getTreeData}
+                    studyDescription={row.original.studyDescription}
                   />
                 )}
               </>
@@ -327,6 +328,7 @@ function Studies(props) {
         data={data}
         getTreeData={props.getTreeData}
         selectRow={selectRow}
+
       />
     </>
   );
