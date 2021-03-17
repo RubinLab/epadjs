@@ -12,6 +12,7 @@ import PropagateLoader from 'react-spinners/PropagateLoader';
 import Annotations from './Annotations';
 import { getSeries } from '../../services/seriesServices';
 import { MAX_PORT, formatDates } from '../../constants';
+import { selectSerie, clearSelection } from '../annotationsList/action';
 
 import { clearCarets, styleEightDigitDate } from '../../Utils/aid.js';
 
@@ -19,20 +20,34 @@ const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
     const defaultRef = React.useRef();
     const resolvedRef = ref || defaultRef;
+    const [checked, setChecked] = useState(false);
 
     React.useEffect(() => {
       resolvedRef.current.indeterminate = indeterminate;
     }, [resolvedRef, indeterminate]);
 
+    const handleSelect = e => {
+      const { selectRow, data } = rest;
+      setChecked(e.target.checked);
+      console.log('data', data);
+      selectRow(data);
+    };
+
     return (
       <>
-        <input type="checkbox" ref={resolvedRef} {...rest} />
+        <input
+          type="checkbox"
+          ref={resolvedRef}
+          {...rest}
+          onChange={handleSelect}
+          checked={checked}
+        />
       </>
     );
   }
 );
 
-function Table({ columns, data }) {
+function Table({ columns, data, selectRow }) {
   const {
     getTableProps,
     getTableBodyProps,
@@ -54,7 +69,11 @@ function Table({ columns, data }) {
           id: 'series-selection',
           Cell: ({ row }) => (
             <div style={{ paddingLeft: '24px' }}>
-              <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+              <IndeterminateCheckbox
+                {...row.getToggleRowSelectedProps()}
+                data={row.original}
+                selectRow={selectRow}
+              />
             </div>
           )
         },
@@ -81,7 +100,7 @@ function Table({ columns, data }) {
                     );
                   })}
                 </tr>
-                {row.isExpanded && <Annotations series={row.original}/>}
+                {row.isExpanded && <Annotations series={row.original} />}
               </>
             );
           })}
@@ -161,7 +180,7 @@ function Series(props) {
       {
         //subitem
         width: widthUnit * 3,
-        id: "series-subitem",
+        id: 'series-subitem',
         Cell: () => <div />
       },
       {
@@ -239,10 +258,6 @@ function Series(props) {
     const treeData = JSON.parse(localStorage.getItem('treeData'));
     const project = treeData[projectID];
     const patient = project && project[subjectID] ? project[subjectID] : null;
-    console.log('patient', patient);
-    console.log('studyUID', studyUID);
-    console.log('subjectID', subjectID);
-
     const study =
       patient && patient.studies[studyUID] ? patient.studies[studyUID] : null;
     const seriesArray = study
@@ -250,6 +265,11 @@ function Series(props) {
       : [];
 
     return seriesArray;
+  };
+
+  const selectRow = data => {
+    props.dispatch(clearSelection('serie'));
+    props.dispatch(selectSerie(data));
   };
 
   useEffect(() => {
@@ -282,7 +302,7 @@ function Series(props) {
           <PropagateLoader color={'#7A8288'} loading={loading} margin={8} />
         </tr>
       )}
-      <Table columns={columns} data={data} />
+      <Table columns={columns} data={data} selectRow={selectRow} />
     </>
   );
 }
