@@ -13,25 +13,42 @@ import { getStudies } from '../../services/studyServices';
 import Series from './Series';
 import { formatDate } from '../flexView/helperMethods';
 import { clearCarets, styleEightDigitDate } from '../../Utils/aid.js';
+import { selectStudy, clearSelection } from '../annotationsList/action';
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
     const defaultRef = React.useRef();
     const resolvedRef = ref || defaultRef;
+    const [checked, setChecked] = useState(false);
 
     React.useEffect(() => {
       resolvedRef.current.indeterminate = indeterminate;
     }, [resolvedRef, indeterminate]);
 
+    // React.useEffect(() => {}, [selectedSttudiesLength]);
+
+    const handleSelect = e => {
+      const { selectRow, data } = rest;
+      setChecked(e.target.checked);
+      console.log('data', data);
+      selectRow(data);
+    };
+
     return (
       <>
-        <input type="checkbox" ref={resolvedRef} {...rest} />
+        <input
+          type="checkbox"
+          ref={resolvedRef}
+          {...rest}
+          onChange={handleSelect}
+          checked={checked}
+        />
       </>
     );
   }
 );
 
-function Table({ columns, data, getTreeData }) {
+function Table({ columns, data, getTreeData, selectRow }) {
   const {
     getTableProps,
     getTableBodyProps,
@@ -53,7 +70,11 @@ function Table({ columns, data, getTreeData }) {
           id: 'studies-selection',
           Cell: ({ row }) => (
             <div style={{ paddingLeft: '12px' }}>
-              <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+              <IndeterminateCheckbox
+                {...row.getToggleRowSelectedProps()}
+                data={row.original}
+                selectRow={selectRow}
+              />
             </div>
           )
         },
@@ -289,6 +310,11 @@ function Studies(props) {
     }
   }, []);
 
+  const selectRow = (data, checked) => {
+    props.dispatch(clearSelection('study'));
+    props.dispatch(selectStudy(data));
+  };
+
   return (
     <>
       {loading && (
@@ -296,7 +322,12 @@ function Studies(props) {
           <PropagateLoader color={'#7A8288'} loading={loading} margin={8} />
         </tr>
       )}
-      <Table columns={columns} data={data} getTreeData={props.getTreeData} />
+      <Table
+        columns={columns}
+        data={data}
+        getTreeData={props.getTreeData}
+        selectRow={selectRow}
+      />
     </>
   );
 }
