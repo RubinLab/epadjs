@@ -6,27 +6,41 @@ import {
   usePagination
 } from 'react-table';
 import { connect } from 'react-redux';
-import Studies from './Studies';
+import propTypes from 'react-table-v6/lib/propTypes';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
+import Studies from './Studies';
+import { selectPatient, clearSelection } from '../annotationsList/action';
 // import "react-table-v6/react-table.css";
 import { getSubjects } from '../../services/subjectServices';
 import { formatDate } from '../flexView/helperMethods';
 import { clearCarets } from '../../Utils/aid.js';
-import propTypes from 'react-table-v6/lib/propTypes';
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
     const defaultRef = React.useRef();
     const resolvedRef = ref || defaultRef;
+    const [checked, setChecked] = useState(false);
 
     React.useEffect(() => {
       resolvedRef.current.indeterminate = indeterminate;
     }, [resolvedRef, indeterminate]);
 
+    const handleSelect = e => {
+      const { selectRow, data } = rest;
+      setChecked(e.target.checked);
+      selectRow(data);
+    };
+
     return (
       <>
-        <input type="checkbox" ref={resolvedRef} {...rest} />
+        <input
+          type="checkbox"
+          ref={resolvedRef}
+          {...rest}
+          onChange={handleSelect}
+          checked={checked}
+        />
       </>
     );
   }
@@ -40,6 +54,7 @@ function Table({
   pageCount,
   loading,
   filterSubjects,
+  selectRow,
   getTreeData
 }) {
   const {
@@ -78,7 +93,11 @@ function Table({
           id: 'selection',
           Cell: ({ row }) => (
             <div>
-              <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+              <IndeterminateCheckbox
+                {...row.getToggleRowSelectedProps()}
+                data={row.original}
+                selectRow={selectRow}
+              />
             </div>
           )
         },
@@ -418,6 +437,11 @@ function Subjects(props) {
     []
   );
 
+  const selectRow = (data, checked) => {
+    props.dispatch(clearSelection('patient'));
+    props.dispatch(selectPatient(data));
+  };
+
   const fetchData = useCallback(({ pageIndex, pageSize }) => {
     if (searchKey) {
       filterSubjects(searchKey, pageSize, pageIndex);
@@ -431,11 +455,6 @@ function Subjects(props) {
     setPageCount(Math.ceil(rawData.length / pageSize));
     const startIndex = pageSize * pageIndex;
     const endIndex = pageSize * (pageIndex + 1);
-    console.log('pageSize * pageIndex');
-    console.log(pageSize, pageIndex);
-
-    console.log('startIndex, endIndex');
-    console.log(startIndex, endIndex);
     const pageData = [];
     rawData.forEach((el, i) => {
       if (i >= startIndex && i < endIndex) {
@@ -465,9 +484,7 @@ function Subjects(props) {
 
   const setFilteredData = (searchKey, pageSize, pageIndex) => {
     const filteredData = filterSubjectsInTreeeData(searchKey);
-    console.log('filteredData', filteredData);
     const pageData = preparePageData(filteredData, pageSize, pageIndex);
-    console.log('pageData', pageData);
     setData(pageData);
     setPageCount(Math.ceil(pageData.length / defaultPageSize));
   };
@@ -479,7 +496,6 @@ function Subjects(props) {
       if (name.includes(searchKey)) all.push(item.data);
       return all;
     }, []);
-    console.log('result', result);
     return result;
   };
 
@@ -524,6 +540,7 @@ function Subjects(props) {
         fetchData={fetchData}
         filterSubjects={filterSubjects}
         getTreeData={props.getTreeData}
+        selectRow={selectRow}
       />
     </>
   );

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
-import Subjects from "./subjects";
+import Subjects from "./Subjects";
 import Toolbar from "./toolbar";
 import ProjectModal from "../annotationsList/selectSerieModal";
 import { downloadProjects } from "../../services/projectServices";
@@ -193,11 +193,11 @@ class SearchView extends Component {
       if (pid || this.props.pid || mode === "lite") {
         if (!isRoutePidNull || !isPropsPidNull) {
           const projectId = isRoutePidNull ? this.props.pid : pid;
-          const result = await getSubjects(projectId);
-          data = result.data;
+          // const result = await getSubjects(projectId);
+          // data = result.data;
         }
       }
-      return data;
+      return [];
     } catch (err) {
       const { status, statusText } = err.response;
       if (status === 403 && statusText.toLowerCase() === "forbidden") {
