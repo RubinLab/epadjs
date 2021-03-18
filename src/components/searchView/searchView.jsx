@@ -1,25 +1,25 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
-import { toast } from "react-toastify";
-import Subjects from "./Subjects";
-import Toolbar from "./toolbar";
-import ProjectModal from "../annotationsList/selectSerieModal";
-import { downloadProjects } from "../../services/projectServices";
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { toast } from 'react-toastify';
+import Subjects from './Subjects';
+import Toolbar from './toolbar';
+import ProjectModal from '../annotationsList/selectSerieModal';
+import { downloadProjects } from '../../services/projectServices';
 import {
   downloadSubjects,
-  deleteSubject,
-} from "../../services/subjectServices";
+  deleteSubject
+} from '../../services/subjectServices';
 import {
   downloadStudies,
   deleteStudy,
-  getStudies,
-} from "../../services/studyServices";
-import { deleteAnnotation } from "../../services/annotationServices";
+  getStudies
+} from '../../services/studyServices';
+import { deleteAnnotation } from '../../services/annotationServices';
 import {
   downloadSeries,
   getSeries,
-  deleteSeries,
-} from "../../services/seriesServices";
+  deleteSeries
+} from '../../services/seriesServices';
 import {
   startLoading,
   loadCompleted,
@@ -33,48 +33,48 @@ import {
   changeActivePort,
   jumpToAim,
   updateSingleSerie,
-  updatePatientOnAimDelete,
-} from "../annotationsList/action";
-import { MAX_PORT } from "../../constants";
-import DownloadSelection from "./annotationDownloadModal";
-import "./searchView.css";
-import UploadModal from "./uploadModal";
+  updatePatientOnAimDelete
+} from '../annotationsList/action';
+import { MAX_PORT } from '../../constants';
+import DownloadSelection from './annotationDownloadModal';
+import './searchView.css';
+import UploadModal from './uploadModal';
 import {
   getSubjects,
-  addSubjectToProject,
-} from "../../services/subjectServices";
-import { addStudyToProject } from "../../services/studyServices";
+  addSubjectToProject
+} from '../../services/subjectServices';
+import { addStudyToProject } from '../../services/studyServices';
 
-import DeleteAlert from "./deleteConfirmationModal";
-import NewMenu from "./newMenu";
-import SubjectCreationModal from "./subjectCreationModal.jsx";
-import StudyCreationModal from "./studyCreationModal.jsx";
-import SeriesCreationModal from "./seriesCreationModal.jsx";
-import Worklists from "./addWorklist";
-import Projects from "./addToProject";
-import WarningModal from "../common/warningModal";
-import AnnotationCreationModal from "./annotationCreationModal.jsx";
-import UpLoadWizard from "../tagEditor/uploadWizard";
-import { FaLessThan } from "react-icons/fa";
-const mode = sessionStorage.getItem("mode");
+import DeleteAlert from './deleteConfirmationModal';
+import NewMenu from './newMenu';
+import SubjectCreationModal from './subjectCreationModal.jsx';
+import StudyCreationModal from './studyCreationModal.jsx';
+import SeriesCreationModal from './seriesCreationModal.jsx';
+import Worklists from './addWorklist';
+import Projects from './addToProject';
+import WarningModal from '../common/warningModal';
+import AnnotationCreationModal from './annotationCreationModal.jsx';
+import UpLoadWizard from '../tagEditor/uploadWizard';
+import { FaLessThan } from 'react-icons/fa';
+const mode = sessionStorage.getItem('mode');
 
 const messages = {
   newUser: {
-    title: "No Permission",
-    message: `You don't have permission yet, please contact your admin`,
+    title: 'No Permission',
+    message: `You don't have permission yet, please contact your admin`
   },
   itemOpen: {
-    title: "Item is open in display",
-    message: `couldn't be deleted. Please close series before deleting`,
+    title: 'Item is open in display',
+    message: `couldn't be deleted. Please close series before deleting`
   },
   deleteFmSys: {
     title: `Deleting from System`,
-    message: `Deleting from All or Unassigned will remove the items from the system permanently. Do you want to delete the selected items?`,
+    message: `Deleting from All or Unassigned will remove the items from the system permanently. Do you want to delete the selected items?`
   },
   delete: {
     title: `Deleting items`,
-    message: `Delete selected items? This cannot be undone.`,
-  },
+    message: `Delete selected items? This cannot be undone.`
+  }
 };
 
 class SearchView extends Component {
@@ -100,7 +100,7 @@ class SearchView extends Component {
       expandLevel: 0,
       showUploadWizard: false,
       showProjects: false,
-      editingTags: false,
+      editingTags: false
     };
   }
 
@@ -111,7 +111,7 @@ class SearchView extends Component {
   componentDidMount = async () => {
     try {
       const { pid } = this.props;
-      if (mode === "thick" && !pid) {
+      if (mode === 'thick' && !pid) {
         this.props.history.push(`/search/${pid}`);
       }
       let subjects = Object.values(this.props.treeData);
@@ -126,15 +126,15 @@ class SearchView extends Component {
       this.setState({
         numOfsubjects: subjects.length,
         subjects,
-        expandLevel,
+        expandLevel
       });
-    } catch (err) { }
+    } catch (err) {}
   };
 
   componentDidUpdate = async prevProps => {
     const { uploadedPid, lastEventId, expandLevel } = this.props;
     const { pid } = this.props.match.params;
-    const samePid = mode !== "lite" && uploadedPid === pid;
+    const samePid = mode !== 'lite' && uploadedPid === pid;
     let subjects;
 
     if (prevProps.match.params.pid !== pid) {
@@ -142,12 +142,12 @@ class SearchView extends Component {
       this.setState({ numOfsubjects: subjects.length, subjects });
     }
 
-    if ((samePid || mode === "lite") && prevProps.lastEventId !== lastEventId) {
+    if ((samePid || mode === 'lite') && prevProps.lastEventId !== lastEventId) {
       this.setState(state => ({ update: state.update + 1 }));
     }
     if (expandLevel !== prevProps.expandLevel) {
       this.setState({
-        expandLevel,
+        expandLevel
       });
       if (expandLevel === 0) {
         this.setState({ expanded: {} });
@@ -160,7 +160,7 @@ class SearchView extends Component {
 
   checkForAllAndUnassigned = () => {
     const { pid } = this.props;
-    const checkFromUrl = pid === "all" || pid === "nonassigned";
+    const checkFromUrl = pid === 'all' || pid === 'nonassigned';
     let selection = [];
     let checkFromProjectID = false;
     const patients = Object.values(this.props.selectedPatients);
@@ -171,12 +171,12 @@ class SearchView extends Component {
       patients.length > 0
         ? patients
         : studies.length > 0
-          ? studies
-          : series.length > 0
-            ? series
-            : annotations;
+        ? studies
+        : series.length > 0
+        ? series
+        : annotations;
     selection.forEach((el, i) => {
-      if (el.projectID === "all" || el.projectID === "nonassigned") {
+      if (el.projectID === 'all' || el.projectID === 'nonassigned') {
         checkFromProjectID = true;
       }
     });
@@ -187,10 +187,10 @@ class SearchView extends Component {
     let data = [];
     try {
       const { pid } = this.props.match.params;
-      const isRoutePidNull = pid === "null" || !pid;
+      const isRoutePidNull = pid === 'null' || !pid;
       const isPropsPidNull =
-        this.props.pid === null || this.props.pid === "null";
-      if (pid || this.props.pid || mode === "lite") {
+        this.props.pid === null || this.props.pid === 'null';
+      if (pid || this.props.pid || mode === 'lite') {
         if (!isRoutePidNull || !isPropsPidNull) {
           const projectId = isRoutePidNull ? this.props.pid : pid;
           // const result = await getSubjects(projectId);
@@ -200,7 +200,7 @@ class SearchView extends Component {
       return [];
     } catch (err) {
       const { status, statusText } = err.response;
-      if (status === 403 && statusText.toLowerCase() === "forbidden") {
+      if (status === 403 && statusText.toLowerCase() === 'forbidden') {
         this.setState({ newUser: true });
       }
     }
@@ -217,7 +217,6 @@ class SearchView extends Component {
     }
     this.setState({ expanded });
   };
-
 
   updateUploadStatus = () => {
     this.setState(state => ({ update: state.update + 1 }));
@@ -248,7 +247,7 @@ class SearchView extends Component {
         //keep the current state
         this.props.dispatch(clearSelection());
         for (let serie of this.props.openSeries) {
-          let type = serie.aimID ? "annotation" : "serie";
+          let type = serie.aimID ? 'annotation' : 'serie';
           this.props.dispatch(
             updatePatient(
               type,
@@ -324,7 +323,7 @@ class SearchView extends Component {
         if (openItems.length) {
           this.setState({
             openItemsDeleted: true,
-            noOfNotDeleted: openItems.length,
+            noOfNotDeleted: openItems.length
           });
         }
         this.props.clearTreeData();
@@ -342,19 +341,19 @@ class SearchView extends Component {
     const annotations = Object.values(this.props.selectedAnnotations);
     const { showDeleteFromSysAlert } = this.state;
 
-    const delSys = showDeleteFromSysAlert ? "?all=true" : "";
+    const delSys = showDeleteFromSysAlert ? '?all=true' : '';
 
     if (patients.length > 0) {
-      this.deleteSelectionWrapper(patients, deleteSubject, "patientID", delSys);
+      this.deleteSelectionWrapper(patients, deleteSubject, 'patientID', delSys);
     } else if (studies.length > 0) {
-      this.deleteSelectionWrapper(studies, deleteStudy, "studyUID", delSys);
+      this.deleteSelectionWrapper(studies, deleteStudy, 'studyUID', delSys);
     } else if (series.length > 0) {
-      this.deleteSelectionWrapper(series, deleteSeries, "seriesUID", delSys);
+      this.deleteSelectionWrapper(series, deleteSeries, 'seriesUID', delSys);
     } else if (annotations.length > 0) {
       this.deleteSelectionWrapper(
         annotations,
         deleteAnnotation,
-        "seriesUID",
+        'seriesUID',
         delSys
       );
     }
@@ -463,7 +462,7 @@ class SearchView extends Component {
               } else {
                 this.props.dispatch(
                   updatePatient(
-                    "serie",
+                    'serie',
                     true,
                     serie.patientID,
                     serie.studyUID,
@@ -473,7 +472,7 @@ class SearchView extends Component {
               }
             }
           }
-          this.props.history.push("/display");
+          this.props.history.push('/display');
           this.props.dispatch(clearSelection());
         }
       }
@@ -481,7 +480,7 @@ class SearchView extends Component {
     } else if (selectedSeries.length > 0) {
       //check if enough room to display selection
       for (let serie of selectedSeries) {
-        if (!this.checkIfSerieOpen(serie.seriesUID, "seriesUID").isOpen) {
+        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen) {
           notOpenSeries.push(serie);
         }
       }
@@ -496,10 +495,10 @@ class SearchView extends Component {
         if (notOpenSeries.length === 0) {
           let index = this.checkIfSerieOpen(
             selectedSeries[0].seriesUID,
-            "seriesUID"
+            'seriesUID'
           ).index;
           this.props.dispatch(changeActivePort(index));
-          this.props.history.push("/display");
+          this.props.history.push('/display');
           this.props.dispatch(clearSelection());
         } else {
           if (selectedSeries.length + this.props.openSeries.length > MAX_PORT) {
@@ -520,7 +519,7 @@ class SearchView extends Component {
               } else {
                 this.props.dispatch(
                   updatePatient(
-                    "serie",
+                    'serie',
                     true,
                     series.patientID,
                     series.studyUID,
@@ -529,7 +528,7 @@ class SearchView extends Component {
                 );
               }
             }
-            this.props.history.push("/display");
+            this.props.history.push('/display');
             this.props.dispatch(clearSelection());
           }
         }
@@ -540,7 +539,7 @@ class SearchView extends Component {
       groupedObj = this.groupUnderStudy(serieList);
       //check if enough room to display selection
       for (let serie of serieList) {
-        if (!this.checkIfSerieOpen(serie.seriesUID, "seriesUID").isOpen) {
+        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen) {
           notOpenSeries.push(serie);
         }
       }
@@ -552,7 +551,7 @@ class SearchView extends Component {
       } else {
         if (notOpenSeries.length === 0) {
           const serID = serieList[0].seriesUID;
-          let index = this.checkIfSerieOpen(serID, "seriesUID").index;
+          let index = this.checkIfSerieOpen(serID, 'seriesUID').index;
           this.props.dispatch(changeActivePort(index));
           this.props.dispatch(jumpToAim(serID, serieList[0].aimID, index));
         } else {
@@ -572,7 +571,7 @@ class SearchView extends Component {
               } else {
                 this.props.dispatch(
                   updatePatient(
-                    "annotation",
+                    'annotation',
                     true,
                     ann.subjectID,
                     ann.studyUID,
@@ -582,7 +581,7 @@ class SearchView extends Component {
                 );
               }
             }
-            this.props.history.push("/display");
+            this.props.history.push('/display');
             this.props.dispatch(clearSelection());
           }
         }
@@ -624,7 +623,7 @@ class SearchView extends Component {
     if (selected) {
       const { pid } = this.props;
       let bodyArr = [];
-      let fileName = "downloaded_items";
+      let fileName = 'downloaded_items';
       let promise;
       await this.setState({ downloading: true });
       // if (selectedProjects.length > 0) {
@@ -635,32 +634,32 @@ class SearchView extends Component {
       // }
       // this.downloadHelper(promiseArr, fileNameArr);
       // this.props.dispatch(clearSelection());
-      // } else 
+      // } else
       if (selectedPatients.length > 0) {
         bodyArr = selectedPatients.map(el => el.patientID);
         promise = downloadSubjects(pid, bodyArr);
-        fileName = "Downloaded_subjects";
+        fileName = 'Downloaded_subjects';
       } else if (selectedStudies.length > 0) {
         bodyArr = selectedStudies.map(el => {
           return { study: el.studyUID, subject: el.patientID };
         });
         promise = downloadStudies(pid, bodyArr);
-        fileName = "Downloaded_studies";
+        fileName = 'Downloaded_studies';
       } else if (selectedSeries.length > 0) {
         bodyArr = selectedSeries.map(el => {
           return {
             series: el.seriesUID,
             study: el.studyUID,
-            subject: el.patientID,
+            subject: el.patientID
           };
         });
         promise = downloadSeries(pid, bodyArr);
-        fileName = "Downloaded_series";
+        fileName = 'Downloaded_series';
       }
 
       promise
         .then(result => {
-          let blob = new Blob([result.data], { type: "application/zip" });
+          let blob = new Blob([result.data], { type: 'application/zip' });
           this.triggerBrowserDownload(blob, fileName);
           this.setState({ error: null, downloading: false });
         })
@@ -672,13 +671,13 @@ class SearchView extends Component {
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
     } else {
-      toast.info("Nothing selected to download", {
-        position: "top-right",
+      toast.info('Nothing selected to download', {
+        position: 'top-right',
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
-        draggable: true,
+        draggable: true
       });
     }
   };
@@ -703,9 +702,9 @@ class SearchView extends Component {
 
   triggerBrowserDownload = (blob, fileName) => {
     const url = window.URL.createObjectURL(new Blob([blob]));
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     document.body.appendChild(link);
-    link.style = "display: none";
+    link.style = 'display: none';
     link.href = url;
     link.download = `${fileName}.zip`;
     link.click();
@@ -714,13 +713,13 @@ class SearchView extends Component {
 
   closeSelectionModal = () => {
     this.setState(state => ({
-      isSerieSelectionOpen: !state.isSerieSelectionOpen,
+      isSerieSelectionOpen: !state.isSerieSelectionOpen
     }));
   };
 
   handleFileUpload = () => {
     this.setState(state => ({
-      showUploadFileModal: !state.showUploadFileModal,
+      showUploadFileModal: !state.showUploadFileModal
     }));
   };
 
@@ -728,7 +727,7 @@ class SearchView extends Component {
     const { showDeleteFromSysAlert } = this.state;
     if (this.checkForAllAndUnassigned() || showDeleteFromSysAlert) {
       this.setState(state => ({
-        showDeleteFromSysAlert: !state.showDeleteFromSysAlert,
+        showDeleteFromSysAlert: !state.showDeleteFromSysAlert
       }));
     } else {
       this.setState(state => ({ showDeleteAlert: !state.showDeleteAlert }));
@@ -739,7 +738,7 @@ class SearchView extends Component {
     this.setState({
       newUser: false,
       openItemsDeleted: false,
-      noOfNotDeleted: 0,
+      noOfNotDeleted: 0
     });
   };
 
@@ -752,7 +751,7 @@ class SearchView extends Component {
   };
 
   handleNewModalCancel = () => {
-    this.setState({ newSelected: "" });
+    this.setState({ newSelected: '' });
   };
 
   updateStatus = () => {
@@ -766,14 +765,14 @@ class SearchView extends Component {
 
   updateTreeView = () => {
     this.setState(state => ({
-      update: state.update + 1,
+      update: state.update + 1
     }));
   };
 
   handleNewSelected = () => {
     const { selectedPatients, selectedStudies } = this.props;
     switch (this.state.newSelected) {
-      case "subject":
+      case 'subject':
         return (
           <SubjectCreationModal
             onCancel={this.handleNewModalCancel}
@@ -783,7 +782,7 @@ class SearchView extends Component {
             updateTreeDataOnSave={this.props.updateTreeDataOnSave}
           />
         );
-      case "study":
+      case 'study':
         return (
           <StudyCreationModal
             onCancel={this.handleNewModalCancel}
@@ -795,7 +794,7 @@ class SearchView extends Component {
             selectedPatients={Object.values(selectedPatients)}
           />
         );
-      case "series":
+      case 'series':
         return (
           <SeriesCreationModal
             onCancel={this.handleNewModalCancel}
@@ -858,20 +857,20 @@ class SearchView extends Component {
         });
       }
       await Promise.all(promises);
-      console.log("Sucessfully copied!");
+      console.log('Sucessfully copied!');
       promises = [];
 
       if (treeData[id])
         if (patients.length > 0) {
           const { data } = await getSubjects(id);
-          this.props.getTreeData(id, "subject", data);
+          this.props.getTreeData(id, 'subject', data);
         }
 
       this.setState({ showProjects: false });
       if (studies.length > 0) {
         if (patientIDs.size > 0) {
           const { data } = await getSubjects(id);
-          this.props.getTreeData(id, "subject", data);
+          this.props.getTreeData(id, 'subject', data);
         }
         studies.forEach(el => {
           promises.push(getStudies(id, el.patientID));
@@ -879,7 +878,7 @@ class SearchView extends Component {
         let studiesResult = await Promise.all(promises);
         studiesResult = studiesResult;
         studiesResult.forEach(el =>
-          this.props.getTreeData(id, "studies", el.data)
+          this.props.getTreeData(id, 'studies', el.data)
         );
       }
       this.props.dispatch(clearSelection());
@@ -891,13 +890,13 @@ class SearchView extends Component {
   render = () => {
     let status;
     if (this.state.uploading) {
-      status = "Uploading…";
+      status = 'Uploading…';
     } else if (this.state.downloading) {
-      status = "Downloading…";
+      status = 'Downloading…';
     } else if (this.state.deleting) {
-      status = "Deleting…";
+      status = 'Deleting…';
     } else if (this.state.editingTags) {
-      status = "Editing tags…";
+      status = 'Editing tags…';
     } else {
       status = null;
     }
@@ -906,13 +905,16 @@ class SearchView extends Component {
       selectedPatients,
       selectedStudies,
       selectedSeries,
-      selectedAnnotations,
+      selectedAnnotations
     } = this.props;
 
     const lengthOfPatients = Object.entries(selectedPatients).length;
     const lengthOfStudies = Object.entries(selectedStudies).length;
     const lengthOfSeries = Object.entries(selectedSeries).length;
     const lengthOfAnns = Object.entries(selectedAnnotations).length;
+
+    const hideEyeIcon =
+      lengthOfStudies === 0 && lengthOfSeries === 0 && lengthOfAnns === 0;
 
     const showAddTo =
       (lengthOfPatients > 0 && this.verifyObject(selectedPatients)) ||
@@ -933,9 +935,9 @@ class SearchView extends Component {
       newSelected,
       showProjects,
       noOfNotDeleted,
-      showDeleteFromSysAlert,
+      showDeleteFromSysAlert
     } = this.state;
-    const itemStr = noOfNotDeleted > 1 ? "items" : "item";
+    const itemStr = noOfNotDeleted > 1 ? 'items' : 'item';
     return (
       <>
         <Toolbar
@@ -956,7 +958,8 @@ class SearchView extends Component {
           project={this.props.match.params.pid}
           onAddProject={this.handleProjectClick}
           admin={this.props.admin}
-        // expanding={expanding}
+          hideEyeIcon={hideEyeIcon}
+          // expanding={expanding}
         />
         {isSerieSelectionOpen && !this.props.loading && (
           <ProjectModal
@@ -1078,7 +1081,7 @@ const mapStateToProps = state => {
     showProjectModal,
     loading,
     uploadedPid,
-    lastEventId,
+    lastEventId
   } = state.annotationsListReducer;
   return {
     selectedProject,
@@ -1091,7 +1094,7 @@ const mapStateToProps = state => {
     showProjectModal,
     loading,
     uploadedPid,
-    lastEventId,
+    lastEventId
   };
 };
 export default connect(mapStateToProps)(SearchView);
