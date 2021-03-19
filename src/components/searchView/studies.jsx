@@ -6,31 +6,44 @@ import {
   usePagination
 } from 'react-table';
 import { connect } from 'react-redux';
+import { withRouter } from "react-router-dom";
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 // import "react-table-v6/react-table.css";
 import { getStudies } from '../../services/studyServices';
 import Series from './Series';
 import { formatDate } from '../flexView/helperMethods';
+import { getSeries } from "../../services/seriesServices";
 import { clearCarets, styleEightDigitDate } from '../../Utils/aid.js';
-import { selectStudy, clearSelection } from '../annotationsList/action';
+import { MAX_PORT, widthUnit, formatDates } from '../../constants';
+
+import {
+  getSingleSerie,
+  selectStudy,
+  clearSelection,
+  startLoading,
+  loadCompleted,
+  annotationsLoadingError,
+  addToGrid,
+  getWholeData,
+  alertViewPortFull,
+  updatePatient
+} from '../annotationsList/action';
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
     const defaultRef = React.useRef();
     const resolvedRef = ref || defaultRef;
     const [checked, setChecked] = useState(false);
+    const [status, setStatus] = useState(false);
 
     React.useEffect(() => {
       resolvedRef.current.indeterminate = indeterminate;
     }, [resolvedRef, indeterminate]);
 
-    // React.useEffect(() => {}, [selectedSttudiesLength]);
-
     const handleSelect = e => {
       const { selectRow, data } = rest;
       setChecked(e.target.checked);
-      console.log('data', data);
       selectRow(data);
     };
 
@@ -125,6 +138,92 @@ function Studies(props) {
   const [data, setData] = useState([]);
   let [loading, setLoading] = useState(false);
 
+  const excludeOpenSeries = allSeriesArr => {
+    const result = [];
+    //get all series number in an array
+    const idArr = props.openSeries.reduce((all, item, index) => {
+      all.push(item.seriesUID);
+      return all;
+    }, []);
+    //if array doesnot include that serie number
+    allSeriesArr.forEach(serie => {
+      if (!idArr.includes(serie.seriesUID)) {
+        //push that serie in the result arr
+        result.push(serie);
+      }
+    });
+    return result;
+  };
+
+  const getSeriesData = async selected => {
+    console.log('getseries data selected', selected);
+    props.dispatch(startLoading());
+    const { projectID, patientID, studyUID } = selected;
+    try {
+      const { data: series } = await getSeries(projectID, patientID, studyUID);
+      props.dispatch(loadCompleted());
+      return series;
+    } catch (err) {
+      props.dispatch(annotationsLoadingError(err));
+    }
+  };
+
+  const displaySeries = async selected => {
+    if (props.openSeries.length === MAX_PORT) {
+      props.dispatch(alertViewPortFull());
+    } else {
+      const { patientID, studyUID } = selected;
+      console.log('patientID, studyUID', patientID, studyUID);
+      let seriesArr = [];
+      //check if the patient is there (create a patient exist flag)
+      const patientExists = props.patients[patientID];
+      //if there is patient iterate over the series object of the study (form an array of series)
+      console.log('patientExists', patientExists);
+      if (patientExists) {
+        seriesArr = Object.values(
+          props.patients[patientID].studies[studyUID].series
+        );
+        //if there is not a patient get series data of the study and (form an array of series)
+      } else {
+        seriesArr = await getSeriesData(selected);
+      }
+      //get extraction of the series (extract unopen series)
+      if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
+      //check if there is enough room
+      if (seriesArr.length + props.openSeries.length > MAX_PORT) {
+        //if there is not bring the modal
+        await setState({
+          isSerieSelectionOpen: true,
+          selectedStudy: [seriesArr],
+          studyName: selected.studyDescription
+        });
+      } else {
+        //if there is enough room
+        //add serie to the grid
+        const promiseArr = [];
+        for (let serie of seriesArr) {
+          props.dispatch(addToGrid(serie));
+          promiseArr.push(props.dispatch(getSingleSerie(serie)));
+        }
+        //getsingleSerie
+        Promise.all(promiseArr)
+          .then(() => {})
+          .catch(err => console.error(err));
+
+        //if patient doesnot exist get patient
+        if (!patientExists) {
+          // props.dispatch(getWholeData(null, selected));
+          getWholeData(null, selected);
+        } else {
+          //check if study exist
+          props.dispatch(updatePatient('study', true, patientID, studyUID));
+        }
+        props.history.push('/display');
+      }
+      props.dispatch(clearSelection());
+    }
+  };
+
   const columns = React.useMemo(
     () => [
       {
@@ -161,14 +260,18 @@ function Studies(props) {
         id: 'study-desc',
         // resizable: true,
         // sortable: true,
-        className: 'searchView-row__desc',
         Cell: ({ row }) => {
           let desc = clearCarets(row.original.studyDescription);
           desc = desc || 'Unnamed Study';
           const id = 'desc' + row.original.studyUID;
           return (
             <>
-              <span data-tip data-for={id} style={{ whiteSpace: 'pre-wrap' }}>
+              <span
+                data-tip
+                data-for={id}
+                className="searchView-row__desc"
+                onDoubleClick={() => displaySeries(row.original)}
+              >
                 {desc}
               </span>
               <ReactTooltip
@@ -328,7 +431,6 @@ function Studies(props) {
         data={data}
         getTreeData={props.getTreeData}
         selectRow={selectRow}
-
       />
     </>
   );
@@ -339,8 +441,10 @@ const mapStateToProps = state => {
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
     selectedSeries: state.annotationsListReducer.selectedSeries,
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+    openSeries: state.annotationsListReducer.openSeries,
+    patients: state.annotationsListReducer.patients
   };
 };
 
-export default connect(mapStateToProps)(Studies);
+export default withRouter(connect(mapStateToProps)(Studies));
