@@ -6,14 +6,23 @@ import {
   usePagination
 } from 'react-table';
 import { connect } from 'react-redux';
+import { withRouter } from "react-router-dom";
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 // import "react-table-v6/react-table.css";
+import { MAX_PORT, formatDates } from '../../constants';
 import Annotations from './Annotations';
 import { getSeries } from '../../services/seriesServices';
-import { MAX_PORT, formatDates } from '../../constants';
-import { selectSerie, clearSelection } from '../annotationsList/action';
-
+import {
+  alertViewPortFull,
+  getSingleSerie,
+  changeActivePort,
+  selectSerie,
+  clearSelection,
+  addToGrid,
+  getWholeData,
+  updatePatient
+} from '../annotationsList/action';
 import { clearCarets, styleEightDigitDate } from '../../Utils/aid.js';
 
 const IndeterminateCheckbox = React.forwardRef(
@@ -99,7 +108,12 @@ function Table({ columns, data, selectRow, studyDescription }) {
                     );
                   })}
                 </tr>
-                {row.isExpanded && <Annotations series={row.original} studyDescription={studyDescription}/>}
+                {row.isExpanded && (
+                  <Annotations
+                    series={row.original}
+                    studyDescription={studyDescription}
+                  />
+                )}
               </>
             );
           })}
@@ -113,6 +127,59 @@ function Series(props) {
   const widthUnit = 20;
   const [data, setData] = useState([]);
   let [loading, setLoading] = useState(false);
+
+  const dispatchSerieDisplay = selected => {
+    const openSeries = Object.values(props.openSeries);
+    const { patientID, studyUID } = selected;
+    let isSerieOpen = false;
+
+    //check if there is enough space in the grid
+    let isGridFull = openSeries.length === MAX_PORT;
+    //check if the serie is already open
+
+    if (openSeries.length > 0) {
+      for (let i = 0; i < openSeries.length; i++) {
+        if (openSeries[i].seriesUID === selected.seriesUID) {
+          isSerieOpen = true;
+          props.dispatch(changeActivePort(i));
+          break;
+        }
+        // }
+      }
+    }
+
+    //serie is not already open;
+    if (!isSerieOpen) {
+      //if the grid is full show warning
+      if (isGridFull) {
+        // setState({ showGridFullWarning: true });
+        props.dispatch(alertViewPortFull());
+      } else {
+        props.dispatch(addToGrid(selected));
+        props
+          .dispatch(getSingleSerie(selected))
+          .then(() => {})
+          .catch(err => console.log(err));
+        //if grid is NOT full check if patient data exists
+        if (!props.patients[selected.patientID]) {
+          // props.dispatch(getWholeData(selected));
+          getWholeData(selected);
+        } else {
+          props.dispatch(
+            updatePatient(
+              'serie',
+              true,
+              patientID,
+              studyUID,
+              selected.seriesUID
+            )
+          );
+        }
+        props.history.push('/display');
+      }
+    }
+    props.dispatch(clearSelection());
+  };
 
   const columns = React.useMemo(
     () => [
@@ -150,13 +217,17 @@ function Series(props) {
         id: 'study-desc',
         // resizable: true,
         // sortable: true,
-        className: 'searchView-row__desc',
         Cell: ({ row }) => {
           let desc = row.original.seriesDescription || 'Unnamed Series';
           let id = 'desc' + row.original.seriesUID;
           return (
             <>
-              <span data-tip data-for={id} style={{ whiteSpace: 'pre-wrap' }}>
+              <span
+                data-tip
+                data-for={id}
+                className="searchView-row__desc"
+                onDoubleClick={() => dispatchSerieDisplay(row.original)}
+              >
                 {desc}
               </span>
               <ReactTooltip
@@ -316,8 +387,10 @@ const mapStateToProps = state => {
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
     selectedSeries: state.annotationsListReducer.selectedSeries,
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+    openSeries: state.annotationsListReducer.openSeries,
+    patients: state.annotationsListReducer.patients
   };
 };
 
-export default connect(mapStateToProps)(Series);
+export default withRouter(connect(mapStateToProps)(Series));
