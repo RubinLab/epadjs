@@ -61,13 +61,14 @@ const IndeterminateCheckbox = React.forwardRef(
   }
 );
 
-function Table({ columns, data, getTreeData, selectRow }) {
+function Table({ columns, data, getTreeData, selectRow, expandLevel }) {
   const {
     getTableProps,
     getTableBodyProps,
     headerGroups,
     rows,
     prepareRow,
+    toggleAllRowsExpanded,
     state: { expanded }
   } = useTable(
     {
@@ -96,6 +97,11 @@ function Table({ columns, data, getTreeData, selectRow }) {
     }
   );
 
+  useEffect(() => {
+    if (expandLevel >= 2) toggleAllRowsExpanded(true);
+    if (expandLevel < 2) toggleAllRowsExpanded(false);
+  }, [expandLevel]);
+
   return (
     <>
       {data.length > 0 && (
@@ -121,6 +127,7 @@ function Table({ columns, data, getTreeData, selectRow }) {
                     studyUID={row.original.studyUID}
                     getTreeData={getTreeData}
                     studyDescription={row.original.studyDescription}
+                    expandLevel={expandLevel}
                   />
                 )}
               </>
@@ -429,6 +436,7 @@ function Studies(props) {
         data={data}
         getTreeData={props.getTreeData}
         selectRow={selectRow}
+        expandLevel={props.expandLevel}
       />
     </>
   );

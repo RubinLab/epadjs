@@ -303,7 +303,6 @@ function Annotations(props) {
 
   useEffect(() => {
     const { parentSeries } = props;
-    console.log('series', parentSeries);
     const projectId = parentSeries.projectID;
     const subjectId = parentSeries.patientID;
     const studyId = parentSeries.studyUID;

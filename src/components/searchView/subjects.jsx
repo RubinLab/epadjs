@@ -55,7 +55,8 @@ function Table({
   loading,
   filterSubjects,
   selectRow,
-  getTreeData
+  getTreeData,
+  expandLevel
 }) {
   const {
     getTableProps,
@@ -71,12 +72,16 @@ function Table({
     nextPage,
     previousPage,
     setPageSize,
+    toggleAllRowsExpanded,
     state: { expanded, pageIndex, pageSize }
   } = useTable(
     {
       columns,
       data,
-      initialState: { pageIndex: 0, pageSize: defaultPageSize }, // Pass our hoisted table state
+      initialState: {
+        pageIndex: 0,
+        pageSize: defaultPageSize
+      }, // Pass our hoisted table state
       manualPagination: true, // Tell the usePagination
       // hook that we'll handle our own data fetching
       // This means we'll also have to provide our own
@@ -86,6 +91,7 @@ function Table({
     useExpanded, // Use the useExpanded plugin hook
     usePagination,
     useRowSelect,
+
     hooks => {
       hooks.visibleColumns.push(columns => [
         // Let's make a column for selection
@@ -107,8 +113,9 @@ function Table({
   );
 
   useEffect(() => {
-    fetchData({ pageIndex, pageSize });
-  }, [fetchData, pageIndex, pageSize]);
+    if (expandLevel >= 1) toggleAllRowsExpanded(true);
+    if (expandLevel === 0) toggleAllRowsExpanded(false);
+  }, [expandLevel]);
 
   const jumpToHeader = () => {
     // const header = document.getElementById('subjects-header-id');
@@ -169,8 +176,8 @@ function Table({
                         pid={row.original.projectID}
                         subjectID={row.original.subjectID}
                         getTreeData={getTreeData}
+                        expandLevel={expandLevel}
                       />
-                      // <div>here !!!</div>
                     )}
                   </React.Fragment>
                 );
@@ -541,6 +548,7 @@ function Subjects(props) {
         filterSubjects={filterSubjects}
         getTreeData={props.getTreeData}
         selectRow={selectRow}
+        expandLevel={props.expandLevel}
       />
     </>
   );
