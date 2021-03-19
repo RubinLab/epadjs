@@ -6,13 +6,23 @@ import {
   usePagination
 } from 'react-table';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 // import "react-table-v6/react-table.css";
 import { getAnnotations } from '../../services/annotationServices';
-import { formatDates } from '../../constants';
-import { clearSelection, selectAnnotation } from '../annotationsList/action';
-
+import { MAX_PORT, formatDates } from '../../constants';
+import {
+  alertViewPortFull,
+  getSingleSerie,
+  clearSelection,
+  selectAnnotation,
+  changeActivePort,
+  addToGrid,
+  getWholeData,
+  updatePatient,
+  jumpToAim
+} from '../annotationsList/action';
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
     const defaultRef = React.useRef();
@@ -111,6 +121,61 @@ function Annotations(props) {
   let [loading, setLoading] = useState(false);
   const username = sessionStorage.getItem('username');
 
+  const checkIfSerieOpen = selectedSerie => {
+    let isOpen = false;
+    let index;
+    props.openSeries.forEach((serie, i) => {
+      if (serie.seriesUID === selectedSerie) {
+        isOpen = true;
+        index = i;
+      }
+    });
+    return { isOpen, index };
+  };
+
+  const displayAnnotations = selected => {
+    const { projectID, studyUID, seriesUID, aimID } = selected;
+    const patientID = selected.subjectID;
+    const { openSeries } = props;
+    // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
+    //check if there is enough space in the grid
+    let isGridFull = openSeries.length === MAX_PORT;
+    //check if the serie is already open
+    if (checkIfSerieOpen(seriesUID).isOpen) {
+      const { index } = checkIfSerieOpen(seriesUID);
+      props.dispatch(changeActivePort(index));
+      props.dispatch(jumpToAim(seriesUID, aimID, index));
+    } else {
+      if (isGridFull) {
+        props.dispatch(alertViewPortFull());
+      } else {
+        props.dispatch(addToGrid(selected, aimID));
+        props
+          .dispatch(getSingleSerie(selected, aimID))
+          .then(() => {})
+          .catch(err => console.log(err));
+        //if grid is NOT full check if patient data exists
+        if (!props.patients[patientID]) {
+          // props.dispatch(getWholeData(null, null, selected));
+          getWholeData(null, null, selected);
+        } else {
+          props.dispatch(
+            updatePatient(
+              'annotation',
+              true,
+              patientID,
+              studyUID,
+              seriesUID,
+              aimID
+            )
+          );
+        }
+      }
+    }
+    props.dispatch(clearSelection());
+    props.history.push('/display');
+  };
+
   const columns = React.useMemo(
     () => [
       {
@@ -124,7 +189,7 @@ function Annotations(props) {
         id: 'study-desc',
         // resizable: true,
         // sortable: true,
-        className: 'searchView-row__desc',
+        // className: 'searchView-row__desc',
         Cell: ({ row }) => {
           const { name, aimID, userName } = row.original;
           let desc = name || 'Unnamed annotation';
@@ -132,7 +197,12 @@ function Annotations(props) {
           let id = 'aimName-tool' + aimID;
           return (
             <>
-              <div data-tip data-for={id} style={{ whiteSpace: 'pre-wrap' }}>
+              <div
+                data-tip
+                data-for={id}
+                className="searchView-row__desc"
+                onDoubleClick={() => displayAnnotations(row.original)}
+              >
                 {desc}
               </div>
               <ReactTooltip
@@ -232,11 +302,12 @@ function Annotations(props) {
   };
 
   useEffect(() => {
-    const { series } = props;
-    const projectId = series.projectID;
-    const subjectId = series.patientID;
-    const studyId = series.studyUID;
-    const seriesId = series.seriesUID;
+    const { parentSeries } = props;
+    console.log('series', parentSeries);
+    const projectId = parentSeries.projectID;
+    const subjectId = parentSeries.patientID;
+    const studyId = parentSeries.studyUID;
+    const seriesId = parentSeries.seriesUID;
 
     setLoading(true);
     getAnnotations({ projectId, subjectId, studyId, seriesId })
@@ -263,11 +334,12 @@ function Annotations(props) {
 
 const mapStateToProps = state => {
   return {
-    selectedPatients: state.annotationsListReducer.selectedPatients,
-    selectedStudies: state.annotationsListReducer.selectedStudies,
-    selectedSeries: state.annotationsListReducer.selectedSeries,
+    series: state.searchViewReducer.series,
+    openSeries: state.annotationsListReducer.openSeries,
+    patients: state.annotationsListReducer.patients,
+    activePort: state.annotationsListReducer.activePort,
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations
   };
 };
 
-export default connect(mapStateToProps)(Annotations);
+export default withRouter(connect(mapStateToProps)(Annotations));
