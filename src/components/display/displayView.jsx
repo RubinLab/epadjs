@@ -27,11 +27,6 @@ import { deleteAnnotation } from "../../services/annotationServices";
 import ContextMenu from "./contextMenu";
 import { MenuProvider } from "react-contexify";
 import CornerstoneViewport from "react-cornerstone-viewport";
-import { freehand } from "./Freehand";
-import { line } from "./Line";
-import { probe } from "./Probe";
-import { circle } from "./Circle";
-import { bidirectional } from "./Bidirectional";
 import RightsideBar from "../RightsideBar/RightsideBar";
 import * as dcmjs from "dcmjs";
 import { FaTimes, FaPen, FaExpandArrowsAlt } from "react-icons/fa";
@@ -43,6 +38,8 @@ import { isThisSecond } from "date-fns/esm";
 import { FiMessageSquare } from "react-icons/fi";
 import { errorMonitor } from "events";
 import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
+
+import { createTool } from "aimapi";
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
@@ -1275,26 +1272,13 @@ class DisplayView extends Component {
   };
 
   renderMarkup = (imageId, markup, color, seriesUid, studyUid) => {
-    const type = markup.markupType;
-    switch (type) {
-      case "TwoDimensionPolyline":
-        this.renderPolygon(imageId, markup, color, seriesUid, studyUid);
-        break;
-      case "TwoDimensionMultiPoint":
-        this.renderLine(imageId, markup, color, seriesUid, studyUid);
-        break;
-      case "TwoDimensionCircle":
-        this.renderCircle(imageId, markup, color, seriesUid, studyUid);
-        break;
-      case "TwoDimensionPoint":
-        this.renderPoint(imageId, markup, color, seriesUid, studyUid);
-        break;
-      case "Bidirectional":
-        this.renderBidirectional(imageId, markup, color, seriesUid, studyUid);
-        break;
-      default:
-        return;
-    }
+    const {type, data} = createTool(markup, color); // can also pass invalidated
+    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
+    this.checkNCreateToolForImage(currentState, imageId, type);
+    currentState[imageId][type].data.push(data);
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+      currentState
+    );
   };
 
   checkNCreateToolForImage = (toolState, imageId, tool) => {
@@ -1302,118 +1286,6 @@ class DisplayView extends Component {
       toolState[imageId] = { [tool]: { data: [] } };
     else if (!toolState[imageId].hasOwnProperty(tool))
       toolState[imageId] = { ...toolState[imageId], [tool]: { data: [] } };
-  };
-
-  renderBidirectional = (imageId, markup, color) => {
-    const data = JSON.parse(JSON.stringify(bidirectional));
-    data.color = markup.color ? markup.color : color;
-    data.aimId = markup.aimUid;
-    data.invalidated = true;
-    this.createBidirectionalPoints(data, markup.coordinates);
-    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    this.checkNCreateToolForImage(currentState, imageId, "Bidirectional");
-    currentState[imageId]["Bidirectional"].data.push(data);
-    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
-      currentState
-    );
-  };
-
-  createBidirectionalPoints = (data, points) => {
-    data.handles.start.x = points[0].x.value;
-    data.handles.start.y = points[0].y.value;
-    data.handles.end.x = points[1].x.value;
-    data.handles.end.y = points[1].y.value;
-    data.handles.perpendicularStart.x = points[2].x.value;
-    data.handles.perpendicularStart.y = points[2].y.value;
-    data.handles.perpendicularEnd.x = points[3].x.value;
-    data.handles.perpendicularEnd.y = points[3].y.value;
-    // need to set the text box coordinates for this too
-    data.handles.textBox.x = points[0].x.value;
-    data.handles.textBox.y = points[0].y.value;
-  };
-
-  renderLine = (imageId, markup, color) => {
-    const data = JSON.parse(JSON.stringify(line));
-    data.color = markup.color ? markup.color : color;
-    data.aimId = markup.aimUid;
-    data.invalidated = true;
-    this.createLinePoints(data, markup.coordinates);
-    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    this.checkNCreateToolForImage(currentState, imageId, "Length");
-    currentState[imageId]["Length"].data.push(data);
-    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
-      currentState
-    );
-  };
-
-  createLinePoints = (data, points) => {
-    data.handles.start.x = points[0].x.value;
-    data.handles.start.y = points[0].y.value;
-    data.handles.end.x = points[1].x.value;
-    data.handles.end.y = points[1].y.value;
-  };
-
-  renderPolygon = (imageId, markup, color) => {
-    const data = JSON.parse(JSON.stringify(freehand));
-    data.color = markup.color ? markup.color : color;
-    data.aimId = markup.aimUid;
-    data.invalidated = true;
-    this.createPolygonPoints(data, markup.coordinates);
-    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    this.checkNCreateToolForImage(currentState, imageId, "FreehandRoi");
-    currentState[imageId]["FreehandRoi"].data.push(data);
-    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
-      currentState
-    );
-  };
-
-  createPolygonPoints = (data, points) => {
-    const freehandPoints = [];
-    const modulo = points.length;
-    points.forEach((point, index) => {
-      const linesIndex = (index + 1) % modulo;
-      const freehandPoint = {};
-      freehandPoint.x = point.x.value;
-      freehandPoint.y = point.y.value;
-      freehandPoint.highlight = true;
-      freehandPoint.active = true;
-      freehandPoint.lines = [
-        { x: points[linesIndex].x.value, y: points[linesIndex].y.value },
-      ];
-      freehandPoints.push(freehandPoint);
-    });
-    data.handles.points = [...freehandPoints];
-  };
-
-  renderPoint = (imageId, markup, color) => {
-    const data = JSON.parse(JSON.stringify(probe));
-    data.color = markup.color ? markup.color : color;
-    data.aimId = markup.aimUid;
-    data.handles.end.x = markup.coordinates[0].x.value;
-    data.handles.end.y = markup.coordinates[0].y.value;
-    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    this.checkNCreateToolForImage(currentState, imageId, "Probe");
-    currentState[imageId]["Probe"].data.push(data);
-    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
-      currentState
-    );
-  };
-
-  renderCircle = (imageId, markup, color) => {
-    const data = JSON.parse(JSON.stringify(circle));
-    data.invalidated = true; //so it calculates the stats
-    data.color = markup.color ? markup.color : color;
-    data.aimId = markup.aimUid;
-    data.handles.start.x = markup.coordinates[0].x.value;
-    data.handles.start.y = markup.coordinates[0].y.value;
-    data.handles.end.x = markup.coordinates[1].x.value;
-    data.handles.end.y = markup.coordinates[1].y.value;
-    const currentState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();
-    this.checkNCreateToolForImage(currentState, imageId, "CircleRoi");
-    currentState[imageId]["CircleRoi"].data.push(data);
-    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
-      currentState
-    );
   };
 
   checkUnsavedData = (isCancel, message = "") => {
