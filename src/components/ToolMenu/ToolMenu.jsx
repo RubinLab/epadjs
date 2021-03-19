@@ -404,45 +404,88 @@ class ToolMenu extends Component {
     viewport.colormap = colormap;
     cornerstone.setViewport(element, viewport);
     cornerstone.updateImage(element, true);
-  }
+  };
 
   handleFuse = () => {
-    // console.log("nebked elements", cornerstone.getEnabledElements());
-    // const { fuse } = this.state;
-    // console.log("fuse state", fuse);
+    const { fuse } = this.state;
+    const petElement = cornerstone.getEnabledElements()[0].element;
+    const ctElement = cornerstone.getEnabledElements()[1].element;
     const options = {
       name: 'PET',
       opacity: 0.7,
-      // viewport: {
-      //   colormap: 'hotIron',
-      //   // voi: {
-      //   //   windowWidth: 30,
-      //   //   windowCenter: 16
-      //   // }
-      // }
+      viewport: {
+        colormap: 'hotIron',
+        // voi: {
+        //   windowWidth: 30,
+        //   windowCenter: 16
+        // }
+      }
     }
-    const { activePort } = this.props;
+    if (!fuse) {
+      console.log("adding");
+      window.addEventListener("newImage", this.newImage);
+
+      this.fuse(petElement, ctElement, options);
+      this.setState({ fuse: true });
+      this.addSynchronizer();
+    }
+    else {
+      window.removeEventListener("newImage", this.newImage);
+      this.unfuse(ctElement);
+      this.setState({ fuse: false });
+    }
+  }
+
+
+  newImage = () => {
     const petElement = cornerstone.getEnabledElements()[0].element;
-    const petImage = cornerstone.getImage(petElement);
-    const yaw = cornerstone.getEnabledElements()[1];
-    console.log("yaw", yaw);
     const ctElement = cornerstone.getEnabledElements()[1].element;
+    const options = {
+      name: 'PET',
+      opacity: 0.7,
+      viewport: {
+        colormap: 'hotIron',
+        // voi: {
+        //   windowWidth: 30,
+        //   windowCenter: 16
+        // }
+      }
+    }
+    this.fuse(petElement, ctElement, options);
+  };
+
+  fuse = (petElement, ctElement, options) => {
+    const petImage = cornerstone.getImage(petElement);
     const ctImage = cornerstone.getImage(ctElement);
 
-    let layerId;
-
-    layerId = cornerstone.addLayer(ctElement, ctImage);
-    layerId = cornerstone.addLayer(ctElement, petImage, options);
-    console.log("layer iD", layerId);
-    console.log("layers after", cornerstone.getLayers(ctElement));
-    console.log("Element after fuse", ctElement);
-    // delete yaw.image;
-    // }
-    // else
-    //   cornerstone.removeLayer(element, fuse);
+    cornerstone.addLayer(ctElement, ctImage);
+    const layerId = cornerstone.addLayer(ctElement, petImage, options);
     cornerstone.updateImage(ctElement);
-    // this.setState({ fuse: layerId });
-  }
+    cornerstone.setActiveLayer(ctElement, layerId);
+
+  };
+
+  unfuse = (ctElement) => {
+    // delete the top two layers (base on there can only be two layers)
+    const layers = cornerstone.getLayers(ctElement);
+    if (layers) {
+      cornerstone.removeLayer(ctElement, layers.pop().layerId);
+      cornerstone.removeLayer(ctElement, layers.pop().layerId);
+      cornerstone.updateImage(ctElement);
+    }
+  };
+
+  addSynchronizer = () => {
+    const synchronizer = new cornerstoneTools.Synchronizer(
+      'cornerstoneimagerendered',
+      cornerstoneTools.stackImagePositionSynchronizer
+    );
+
+    cornerstone.getEnabledElements().forEach(({ element }) => {
+      synchronizer.add(element);
+    });
+    synchronizer.enabled = true;
+  };
 
   render() {
     const { activeTool } = this.state;

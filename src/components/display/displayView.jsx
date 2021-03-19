@@ -671,7 +671,7 @@ class DisplayView extends Component {
   };
 
   getViewports = (containerHeight) => {
-    let numSeries = this.props.series.length + 1;
+    let numSeries = this.props.series.length;
     let numCols = numSeries % 3;
     containerHeight = containerHeight
       ? containerHeight
@@ -1513,9 +1513,12 @@ class DisplayView extends Component {
     tempData[activePort].stack = data[0];
     Object.assign(tempData[activePort].stack, data[0]);
     // set the state to preserve the imageId
-    this.setState({ data: tempData });
-    // dispatch to write the newImageId to store
-    this.props.dispatch(updateImageId(imageId));
+    // this.setState({ data: tempData });
+    // // dispatch to write the newImageId to store
+    // this.props.dispatch(updateImageId(imageId));
+    window.dispatchEvent(
+      new CustomEvent("newImage")
+    );
   };
 
   onAnnotate = () => {
