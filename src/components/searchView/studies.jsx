@@ -173,12 +173,10 @@ function Studies(props) {
       props.dispatch(alertViewPortFull());
     } else {
       const { patientID, studyUID } = selected;
-      console.log('patientID, studyUID', patientID, studyUID);
       let seriesArr = [];
       //check if the patient is there (create a patient exist flag)
       const patientExists = props.patients[patientID];
       //if there is patient iterate over the series object of the study (form an array of series)
-      console.log('patientExists', patientExists);
       if (patientExists) {
         seriesArr = Object.values(
           props.patients[patientID].studies[studyUID].series
