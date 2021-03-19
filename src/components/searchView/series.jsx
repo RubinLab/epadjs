@@ -6,7 +6,7 @@ import {
   usePagination
 } from 'react-table';
 import { connect } from 'react-redux';
-import { withRouter } from "react-router-dom";
+import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 // import "react-table-v6/react-table.css";
@@ -110,7 +110,7 @@ function Table({ columns, data, selectRow, studyDescription }) {
                 </tr>
                 {row.isExpanded && (
                   <Annotations
-                    series={row.original}
+                    parentSeries={row.original}
                     studyDescription={studyDescription}
                   />
                 )}
