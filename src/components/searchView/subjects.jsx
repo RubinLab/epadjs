@@ -56,7 +56,9 @@ function Table({
   filterSubjects,
   selectRow,
   getTreeData,
-  expandLevel
+  expandLevel,
+  getTreeExpandAll,
+  treeExpand
 }) {
   const {
     getTableProps,
@@ -113,9 +115,19 @@ function Table({
   );
 
   useEffect(() => {
-    if (expandLevel >= 1) toggleAllRowsExpanded(true);
-    if (expandLevel === 0) toggleAllRowsExpanded(false);
+    if (expandLevel === 1) {
+      toggleAllRowsExpanded(true);
+      getTreeExpandAll({ patient: data.length }, true, expandLevel);
+    }
+    if (expandLevel === 0) {
+      toggleAllRowsExpanded(false);
+      getTreeExpandAll({ patient: data.length }, false, expandLevel);
+    }
   }, [expandLevel]);
+
+  useEffect(() => {
+    // check treeData
+  });
 
   const jumpToHeader = () => {
     // const header = document.getElementById('subjects-header-id');
@@ -160,6 +172,7 @@ function Table({
             <tbody {...getTableBodyProps()}>
               {rows.map((row, i) => {
                 prepareRow(row);
+                const expandRow = row.isExpanded || treeExpand[row.index];
                 return (
                   <React.Fragment key={`row-fragment-${i}`}>
                     <tr {...row.getRowProps()} key={`subject-row ${i}`}>
@@ -171,12 +184,15 @@ function Table({
                         );
                       })}
                     </tr>
-                    {row.isExpanded && (
+                    {expandRow && (
                       <Studies
                         pid={row.original.projectID}
                         subjectID={row.original.subjectID}
                         getTreeData={getTreeData}
                         expandLevel={expandLevel}
+                        patientIndex={row.index}
+                        getTreeExpandAll={getTreeExpandAll}
+                        treeExpand={treeExpand}
                       />
                     )}
                   </React.Fragment>
@@ -549,6 +565,8 @@ function Subjects(props) {
         getTreeData={props.getTreeData}
         selectRow={selectRow}
         expandLevel={props.expandLevel}
+        getTreeExpandAll={props.getTreeExpandAll}
+        treeExpand={props.treeExpand}
       />
     </>
   );

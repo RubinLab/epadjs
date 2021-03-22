@@ -102,7 +102,12 @@ function Table({ columns, data, selectRow }) {
                 >
                   {row.cells.map(cell => {
                     return (
-                      <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                      <td
+                        style={{ background: 'red' }}
+                        {...cell.getCellProps()}
+                      >
+                        {cell.render('Cell')}
+                      </td>
                     );
                   })}
                 </tr>

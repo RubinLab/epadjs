@@ -55,7 +55,17 @@ const IndeterminateCheckbox = React.forwardRef(
   }
 );
 
-function Table({ columns, data, selectRow, studyDescription, expandLevel }) {
+function Table({
+  columns,
+  data,
+  selectRow,
+  studyDescription,
+  expandLevel,
+  patientIndex,
+  getTreeExpandAll,
+  treeExpand,
+  studyIndex
+}) {
   const {
     getTableProps,
     getTableBodyProps,
@@ -92,8 +102,20 @@ function Table({ columns, data, selectRow, studyDescription, expandLevel }) {
   );
 
   useEffect(() => {
-    if (expandLevel >= 3) toggleAllRowsExpanded(true);
-    if (expandLevel < 3) toggleAllRowsExpanded(false);
+    const obj = {
+      patient: patientIndex,
+      study: studyIndex,
+      series: data.length
+    };
+
+    if (expandLevel === 3 ) {
+      toggleAllRowsExpanded(true);
+      getTreeExpandAll(obj, true, expandLevel);
+    }
+    if (expandLevel === 2) {
+      toggleAllRowsExpanded(false);
+      getTreeExpandAll(obj, false, expandLevel);
+    }
   }, [expandLevel]);
 
   return (
@@ -102,6 +124,8 @@ function Table({ columns, data, selectRow, studyDescription, expandLevel }) {
         <>
           {rows.map((row, i) => {
             prepareRow(row);
+            const rowExpanded =
+              row.isExpanded || treeExpand[patientIndex][studyIndex][row.index] || expandLevel === 4;
             return (
               <>
                 <tr
@@ -114,10 +138,11 @@ function Table({ columns, data, selectRow, studyDescription, expandLevel }) {
                     );
                   })}
                 </tr>
-                {row.isExpanded && (
+                {rowExpanded && (
                   <Annotations
                     parentSeries={row.original}
                     studyDescription={studyDescription}
+                    expandLevel={expandLevel}
                   />
                 )}
               </>
@@ -165,7 +190,7 @@ function Series(props) {
         props
           .dispatch(getSingleSerie(selected))
           .then(() => {})
-          .catch(err => console.log(err));
+          .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
         if (!props.patients[selected.patientID]) {
           // props.dispatch(getWholeData(selected));
@@ -384,7 +409,10 @@ function Series(props) {
         selectRow={selectRow}
         studyDescription={props.studyDescription}
         expandLevel={props.expandLevel}
-
+        patientIndex={props.patientIndex}
+        getTreeExpandAll={props.getTreeExpandAll}
+        treeExpand={props.treeExpand}
+        studyIndex={props.studyIndex}
       />
     </>
   );

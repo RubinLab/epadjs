@@ -6,14 +6,14 @@ import {
   usePagination
 } from 'react-table';
 import { connect } from 'react-redux';
-import { withRouter } from "react-router-dom";
+import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 // import "react-table-v6/react-table.css";
 import { getStudies } from '../../services/studyServices';
 import Series from './Series';
 import { formatDate } from '../flexView/helperMethods';
-import { getSeries } from "../../services/seriesServices";
+import { getSeries } from '../../services/seriesServices';
 import { clearCarets, styleEightDigitDate } from '../../Utils/aid.js';
 import { MAX_PORT, widthUnit, formatDates } from '../../constants';
 
@@ -61,7 +61,16 @@ const IndeterminateCheckbox = React.forwardRef(
   }
 );
 
-function Table({ columns, data, getTreeData, selectRow, expandLevel }) {
+function Table({
+  columns,
+  data,
+  getTreeData,
+  selectRow,
+  expandLevel,
+  patientIndex,
+  getTreeExpandAll,
+  treeExpand
+}) {
   const {
     getTableProps,
     getTableBodyProps,
@@ -98,8 +107,15 @@ function Table({ columns, data, getTreeData, selectRow, expandLevel }) {
   );
 
   useEffect(() => {
-    if (expandLevel >= 2) toggleAllRowsExpanded(true);
-    if (expandLevel < 2) toggleAllRowsExpanded(false);
+    const obj = { patient: patientIndex, study: data.length };
+    if (expandLevel === 2) {
+      toggleAllRowsExpanded(true);
+      getTreeExpandAll(obj, true, expandLevel);
+    }
+    if (expandLevel === 1) {
+      toggleAllRowsExpanded(false);
+      getTreeExpandAll(obj, false, expandLevel);
+    }
   }, [expandLevel]);
 
   return (
@@ -108,6 +124,8 @@ function Table({ columns, data, getTreeData, selectRow, expandLevel }) {
         <>
           {rows.map((row, i) => {
             prepareRow(row);
+            const expandRow =
+              row.isExpanded || treeExpand[patientIndex][row.index];
             return (
               <>
                 <tr
@@ -120,7 +138,7 @@ function Table({ columns, data, getTreeData, selectRow, expandLevel }) {
                     );
                   })}
                 </tr>
-                {row.isExpanded && (
+                {expandRow && (
                   <Series
                     pid={row.original.projectID}
                     subjectID={row.original.patientID}
@@ -128,6 +146,10 @@ function Table({ columns, data, getTreeData, selectRow, expandLevel }) {
                     getTreeData={getTreeData}
                     studyDescription={row.original.studyDescription}
                     expandLevel={expandLevel}
+                    patientIndex={row.index}
+                    getTreeExpandAll={getTreeExpandAll}
+                    treeExpand={treeExpand}
+                    studyIndex={row.index}
                   />
                 )}
               </>
@@ -163,7 +185,6 @@ function Studies(props) {
   };
 
   const getSeriesData = async selected => {
-    console.log('getseries data selected', selected);
     props.dispatch(startLoading());
     const { projectID, patientID, studyUID } = selected;
     try {
@@ -437,6 +458,9 @@ function Studies(props) {
         getTreeData={props.getTreeData}
         selectRow={selectRow}
         expandLevel={props.expandLevel}
+        patientIndex={props.patientIndex}
+        getTreeExpandAll={props.getTreeExpandAll}
+        treeExpand={props.treeExpand}
       />
     </>
   );

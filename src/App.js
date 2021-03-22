@@ -316,9 +316,10 @@ class App extends Component {
       const { patient, study, series } = expandObj;
       let treeExpand = { ...this.state.treeExpand };
       let refPatients, refStudies, subSeries, subStudies;
-      const patientLevel = patient && !study && !series;
-      const studyLevel = study && !series;
-      const seriesLevel = series;
+      const patientLevel = study === undefined && series === undefined;
+      const studyLevel = series === undefined && study !== undefined;
+      const seriesLevel =
+        patient !== undefined && study !== undefined && series !== undefined;
       if (patientLevel) {
         if (expanded) {
           for (let i = 0; i < patient; i += 1) treeExpand[i] = {};
@@ -701,7 +702,7 @@ class App extends Component {
       'message',
       this.getMessageFromEventSrc
     );
-    localStorage.setItem('treeData', JSON.stringify({}))
+    localStorage.setItem('treeData', JSON.stringify({}));
   };
 
   onLogout = e => {
@@ -761,9 +762,7 @@ class App extends Component {
           patientIDs.push(el.subjectID);
         });
         if (treeData[projectID]) {
-          if (
-            data.length < Object.keys(treeData[projectID]).length
-          ) {
+          if (data.length < Object.keys(treeData[projectID]).length) {
             for (let patient in treeData[projectID]) {
               if (!patientIDs.includes(patient)) {
                 delete treeData[projectID][patient];
@@ -899,7 +898,6 @@ class App extends Component {
       treeData[pid] = patients;
       // this.setState({ treeData });
       localStorage.setItem('treeData', JSON.stringify(treeData));
-
     } catch (err) {
       console.error(err);
     }
