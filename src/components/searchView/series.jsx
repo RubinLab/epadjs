@@ -63,6 +63,7 @@ function Table({
   expandLevel,
   patientIndex,
   getTreeExpandAll,
+  getTreeExpandSingle,
   treeExpand,
   studyIndex
 }) {
@@ -108,7 +109,7 @@ function Table({
       series: data.length
     };
 
-    if (expandLevel === 3 ) {
+    if (expandLevel === 3) {
       toggleAllRowsExpanded(true);
       getTreeExpandAll(obj, true, expandLevel);
     }
@@ -124,8 +125,12 @@ function Table({
         <>
           {rows.map((row, i) => {
             prepareRow(row);
+            const isExpandedFromToolbar =
+              treeExpand[patientIndex] && treeExpand[patientIndex][studyIndex]
+                ? treeExpand[patientIndex][studyIndex][row.index]
+                : false;
             const rowExpanded =
-              row.isExpanded || treeExpand[patientIndex][studyIndex][row.index] || expandLevel === 4;
+              row.isExpanded || isExpandedFromToolbar || expandLevel === 4;
             return (
               <>
                 <tr
@@ -218,7 +223,7 @@ function Series(props) {
         // Build our expander column
         id: 'series-expander', // Make sure it has an ID
         width: 35,
-        Cell: ({ row }) => {
+        Cell: ({ row, toggleRowExpanded }) => {
           // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
           // to build the toggle for expanding a row
           return (
@@ -234,6 +239,16 @@ function Series(props) {
                   verticalAlign: 'middle'
                 }
               })}
+              onClick={() => {
+                const expandStatus = row.isExpanded ? false : true;
+                const obj = {
+                  patient: props.patientIndex,
+                  study: props.studyIndex,
+                  series: { [row.index]: expandStatus ? {} : false }
+                };
+                toggleRowExpanded(row.id, expandStatus);
+                props.getTreeExpandSingle(obj);
+              }}
             >
               {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
             </span>
@@ -413,6 +428,7 @@ function Series(props) {
         getTreeExpandAll={props.getTreeExpandAll}
         treeExpand={props.treeExpand}
         studyIndex={props.studyIndex}
+        getTreeExpandSingle={props.getTreeExpandSingle}
       />
     </>
   );

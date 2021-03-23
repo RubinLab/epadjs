@@ -69,6 +69,7 @@ function Table({
   expandLevel,
   patientIndex,
   getTreeExpandAll,
+  getTreeExpandSingle,
   treeExpand
 }) {
   const {
@@ -124,8 +125,10 @@ function Table({
         <>
           {rows.map((row, i) => {
             prepareRow(row);
-            const expandRow =
-              row.isExpanded || treeExpand[patientIndex][row.index];
+            const isExpandedFromToolbar = treeExpand[patientIndex]
+              ? treeExpand[patientIndex][row.index]
+              : false;
+            const expandRow = row.isExpanded || isExpandedFromToolbar;
             return (
               <>
                 <tr
@@ -150,6 +153,8 @@ function Table({
                     getTreeExpandAll={getTreeExpandAll}
                     treeExpand={treeExpand}
                     studyIndex={row.index}
+                    getTreeExpandSingle={getTreeExpandSingle}
+
                   />
                 )}
               </>
@@ -256,7 +261,7 @@ function Studies(props) {
         // Build our expander column
         id: 'studies-expander', // Make sure it has an ID
         width: 35,
-        Cell: ({ row }) => {
+        Cell: ({ row, toggleRowExpanded }) => {
           // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
           // to build the toggle for expanding a row
           return (
@@ -272,6 +277,15 @@ function Studies(props) {
                   verticalAlign: 'middle'
                 }
               })}
+              onClick={() => {
+                const expandStatus = row.isExpanded ? false : true;
+                const obj = {
+                  patient: props.patientIndex,
+                  study: { [row.index]: expandStatus ? {} : false }
+                };
+                toggleRowExpanded(row.id, expandStatus);
+                props.getTreeExpandSingle(obj);
+              }}
             >
               {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
             </span>
@@ -461,6 +475,7 @@ function Studies(props) {
         patientIndex={props.patientIndex}
         getTreeExpandAll={props.getTreeExpandAll}
         treeExpand={props.treeExpand}
+        getTreeExpandSingle={props.getTreeExpandSingle}
       />
     </>
   );

@@ -58,6 +58,7 @@ function Table({
   getTreeData,
   expandLevel,
   getTreeExpandAll,
+  getTreeExpandSingle,
   treeExpand
 }) {
   const {
@@ -193,6 +194,7 @@ function Table({
                         patientIndex={row.index}
                         getTreeExpandAll={getTreeExpandAll}
                         treeExpand={treeExpand}
+                        getTreeExpandSingle={getTreeExpandSingle}
                       />
                     )}
                   </React.Fragment>
@@ -269,7 +271,7 @@ function Subjects(props) {
         // Build our expander column
         id: 'expander', // Make sure it has an ID
         width: 35,
-        Cell: ({ row }) => {
+        Cell: ({ row, toggleRowExpanded }) => {
           // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
           // to build the toggle for expanding a row
           return (
@@ -291,6 +293,14 @@ function Subjects(props) {
                   width: `50px`
                 }
               })}
+              onClick={() => {
+                const expandStatus = row.isExpanded ? false : true;
+                const obj = {
+                  patient: { [row.index]: expandStatus ? {} : false }
+                };
+                toggleRowExpanded(row.id, expandStatus);
+                props.getTreeExpandSingle(obj);
+              }}
             >
               {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
             </span>
@@ -522,6 +532,19 @@ function Subjects(props) {
     return result;
   };
 
+  const sortSubjectName = list => {
+    let result = list.sort(function(a, b) {
+      if (a.subjectName < b.subjectName) {
+        return -1;
+      }
+      if (a.subjectName > b.subjectName) {
+        return 1;
+      }
+      return 0;
+    });
+    return result;
+  };
+
   useEffect(() => {
     const { pid, getTreeData } = props;
     // const treeData = JSON.parse(localStorage.getItem('treeData'));
@@ -531,7 +554,7 @@ function Subjects(props) {
     let data = [];
     if (pid && pid !== 'null') {
       if (dataFromStorage?.length > 0) {
-        data = dataFromStorage;
+        data = sortSubjectName(dataFromStorage);
         setData(data);
       } else {
         setLoading(true);
@@ -566,6 +589,7 @@ function Subjects(props) {
         selectRow={selectRow}
         expandLevel={props.expandLevel}
         getTreeExpandAll={props.getTreeExpandAll}
+        getTreeExpandSingle={props.getTreeExpandSingle}
         treeExpand={props.treeExpand}
       />
     </>
