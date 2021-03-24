@@ -67,25 +67,26 @@ function Table({ columns, data, selectRow }) {
       data
     },
     useExpanded, // Use the useExpanded plugin hook
-    useRowSelect,
-    hooks => {
-      hooks.visibleColumns.push(columns => [
-        // Let's make a column for selection
-        {
-          id: 'series-selection',
-          Cell: ({ row }) => (
-            <div style={{ paddingLeft: '36px' }}>
-              <IndeterminateCheckbox
-                {...row.getToggleRowSelectedProps()}
-                data={row.original}
-                selectRow={selectRow}
-              />
-            </div>
-          )
-        },
-        ...columns
-      ]);
-    }
+    useRowSelect
+    // hooks => {
+    //   hooks.visibleColumns.push(columns => {
+    //     const cols = [...columns];
+    //     const checkbox = {
+    //       id: 'annotation-selection',
+    //       Cell: ({ row }) => (
+    //         <div style={{ paddingRight: '3px', paddingLeft: '21px' }} className="annotation-selection">
+    //           <IndeterminateCheckbox
+    //             {...row.getToggleRowSelectedProps()}
+    //             data={row.original}
+    //             selectRow={selectRow}
+    //           />
+    //         </div>
+    //       )
+    //     };
+    //     cols.splice(0, 0, checkbox);
+    //     return cols;
+    //   });
+    // }
   );
 
   return (
@@ -94,6 +95,8 @@ function Table({ columns, data, selectRow }) {
         <>
           {rows.map((row, i) => {
             prepareRow(row);
+            const style = { height: '2.2rem', background: '#3a3f43 ' };
+            // style.background = i % 2 === 0 ? '#363623' : '#272719';
             return (
               <>
                 <tr
@@ -102,10 +105,7 @@ function Table({ columns, data, selectRow }) {
                 >
                   {row.cells.map(cell => {
                     return (
-                      <td
-                        style={{ background: 'red' }}
-                        {...cell.getCellProps()}
-                      >
+                      <td style={style} {...cell.getCellProps()}>
                         {cell.render('Cell')}
                       </td>
                     );
@@ -181,13 +181,36 @@ function Annotations(props) {
     props.history.push('/display');
   };
 
+  const selectRow = data => {
+    props.dispatch(clearSelection('annotation'));
+    const { seriesDescripion } = props.series;
+    const { studyDescription } = props;
+    props.dispatch(selectAnnotation(data, studyDescription, seriesDescripion));
+  };
+
+  const handleSelect = (e, data) => {
+    console.log(' ---> e, data');
+    console.log(e, data);
+    selectRow(data);
+  };
+
   const columns = React.useMemo(
     () => [
       {
         // Build our expander column
         id: 'series-expander', // Make sure it has an ID
-        width: 35,
-        Cell: row => <div />
+        Cell: ({ row }) => (
+          <div style={{ paddingLeft: '30px' }} className="tree-combinedCell">
+            <input
+              type="checkbox"
+              // ref={resolvedRef}
+              // {...rest}
+              // onMouseDown={handleOnMouseDown}
+              onChange={e => handleSelect(e, row.original)}
+              // checked={checked}
+            />
+          </div>
+        )
       },
       {
         width: widthUnit * 10,
@@ -207,6 +230,7 @@ function Annotations(props) {
                 data-for={id}
                 className="searchView-row__desc"
                 onDoubleClick={() => displayAnnotations(row.original)}
+                style={{ paddingLeft: '30px' }}
               >
                 {desc}
               </div>
@@ -298,13 +322,6 @@ function Annotations(props) {
     ],
     []
   );
-
-  const selectRow = data => {
-    props.dispatch(clearSelection('annotation'));
-    const { seriesDescripion } = props.series;
-    const { studyDescription } = props;
-    props.dispatch(selectAnnotation(data, studyDescription, seriesDescripion));
-  };
 
   useEffect(() => {
     const { parentSeries } = props;

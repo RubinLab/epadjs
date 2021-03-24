@@ -70,6 +70,7 @@ function Table({
   patientIndex,
   getTreeExpandAll,
   getTreeExpandSingle,
+  // validateTreeRowSelection,
   treeExpand
 }) {
   const {
@@ -86,25 +87,27 @@ function Table({
       data
     },
     useExpanded, // Use the useExpanded plugin hook
-    useRowSelect,
-    hooks => {
-      hooks.visibleColumns.push(columns => [
-        // Let's make a column for selection
-        {
-          id: 'studies-selection',
-          Cell: ({ row }) => (
-            <div style={{ paddingLeft: '12px' }}>
-              <IndeterminateCheckbox
-                {...row.getToggleRowSelectedProps()}
-                data={row.original}
-                selectRow={selectRow}
-              />
-            </div>
-          )
-        },
-        ...columns
-      ]);
-    }
+    useRowSelect
+    // hooks => {
+    //   hooks.visibleColumns.push(columns => {
+    //     const cols = [...columns];
+    //     const checkbox = {
+    //       id: 'study-selection',
+    //       Cell: ({ row }) => (
+    //         <div style={{ paddingRight: '3px', paddingLeft: '7px'}} className="study-selection">
+    //           {/* <div> */}
+    //           <IndeterminateCheckbox
+    //             {...row.getToggleRowSelectedProps()}
+    //             data={row.original}
+    //             selectRow={selectRow}
+    //           />
+    //         </div>
+    //       )
+    //     };
+    //     cols.splice(0, 0, checkbox);
+    //     return cols;
+    //   });
+    // }
   );
 
   useEffect(() => {
@@ -129,12 +132,13 @@ function Table({
               ? treeExpand[patientIndex][row.index]
               : false;
             const expandRow = row.isExpanded || isExpandedFromToolbar;
+            console.log('row', row);
+            const style = { height: '2.5rem', background: '#272b30' };
+            // style.background = i % 2 === 0 ? '#18293a' : '#111c28';
+            // if (i%2 === 0) style.background = '#32353b'
             return (
               <>
-                <tr
-                  {...row.getRowProps()}
-                  // style={{ position: 'relative', left: '60px', zIndex: '1' }}
-                >
+                <tr {...row.getRowProps()} key={`study-row ${i}`} style={style}>
                   {row.cells.map(cell => {
                     return (
                       <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
@@ -154,7 +158,7 @@ function Table({
                     treeExpand={treeExpand}
                     studyIndex={row.index}
                     getTreeExpandSingle={getTreeExpandSingle}
-
+                    // validateTreeRowSelection={validateTreeRowSelection}
                   />
                 )}
               </>
@@ -257,6 +261,7 @@ function Studies(props) {
 
   const columns = React.useMemo(
     () => [
+      // { id: 'space', Cell: () => <span style={{ paddingLeft: '10px' }}></span> },
       {
         // Build our expander column
         id: 'studies-expander', // Make sure it has an ID
@@ -264,31 +269,45 @@ function Studies(props) {
         Cell: ({ row, toggleRowExpanded }) => {
           // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
           // to build the toggle for expanding a row
+          const style = { display: 'flex', width: 'fit-content', paddingLeft: '10px'  };
+
           return (
-            <span
-              {...row.getToggleRowExpandedProps({
-                style: {
-                  cursor: 'pointer',
-                  fontSize: 10,
-                  textAlign: 'center',
-                  userSelect: 'none',
-                  color: '#fafafa',
-                  padding: '7px 5px',
-                  verticalAlign: 'middle'
-                }
-              })}
-              onClick={() => {
-                const expandStatus = row.isExpanded ? false : true;
-                const obj = {
-                  patient: props.patientIndex,
-                  study: { [row.index]: expandStatus ? {} : false }
-                };
-                toggleRowExpanded(row.id, expandStatus);
-                props.getTreeExpandSingle(obj);
-              }}
-            >
-              {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
-            </span>
+            <div style={style} className="tree-combinedCell">
+              <input
+                type="checkbox"
+                style={{ marginRight: '5px'}}
+                // ref={resolvedRef}
+                // {...rest}
+                // onMouseDown={handleOnMouseDown}
+                // onChange={handleSelect}
+                // checked={checked}
+              />
+              <span
+                {...row.getToggleRowExpandedProps({
+                  style: {
+                    cursor: 'pointer',
+                    fontSize: 10,
+                    textAlign: 'center',
+                    userSelect: 'none',
+                    color: '#fafafa',
+
+                    // padding: '7px 5px',
+                    verticalAlign: 'middle'
+                  }
+                })}
+                onClick={() => {
+                  const expandStatus = row.isExpanded ? false : true;
+                  const obj = {
+                    patient: props.patientIndex,
+                    study: { [row.index]: expandStatus ? {} : false }
+                  };
+                  toggleRowExpanded(row.id, expandStatus);
+                  props.getTreeExpandSingle(obj);
+                }}
+              >
+                {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
+              </span>
+            </div>
           );
         }
       },
@@ -310,6 +329,7 @@ function Studies(props) {
                 data-tip
                 data-for={id}
                 className="searchView-row__desc"
+                style={{ paddingLeft: '10px' }}
                 onDoubleClick={() => displaySeries(row.original)}
               >
                 {desc}
@@ -329,11 +349,33 @@ function Studies(props) {
       },
       {
         width: widthUnit * 2,
-        accessor: 'numberOfAnnotations'
+        id: 'numberOfAnnotations',
+        Cell: ({ row }) => (
+          <div className="searchView-table__cell">
+            {row.original.numberOfAnnotations === 0 ? (
+              ''
+            ) : (
+              <span className="badge badge-secondary">
+                {row.original.numberOfAnnotations}
+              </span>
+            )}
+          </div>
+        )
       },
       {
         width: widthUnit * 3,
-        accessor: 'numberOfSeries'
+        id: 'numberOfSeries',
+        Cell: ({ row }) => (
+          <div className="searchView-table__cell">
+            {row.original.numberOfSeries === 0 ? (
+              ''
+            ) : (
+              <span className="badge badge-secondary">
+                {row.original.numberOfSeries}
+              </span>
+            )}
+          </div>
+        )
       },
       {
         width: widthUnit * 3,
@@ -476,6 +518,7 @@ function Studies(props) {
         getTreeExpandAll={props.getTreeExpandAll}
         treeExpand={props.treeExpand}
         getTreeExpandSingle={props.getTreeExpandSingle}
+        // validateTreeRowSelection={props.validateTreeRowSelection}
       />
     </>
   );

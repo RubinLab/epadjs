@@ -15,6 +15,8 @@ import { selectPatient, clearSelection } from '../annotationsList/action';
 import { getSubjects } from '../../services/subjectServices';
 import { formatDate } from '../flexView/helperMethods';
 import { clearCarets } from '../../Utils/aid.js';
+import { ConsoleWriter } from 'istanbul-lib-report';
+import './searchView.css';
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
@@ -25,6 +27,10 @@ const IndeterminateCheckbox = React.forwardRef(
     React.useEffect(() => {
       resolvedRef.current.indeterminate = indeterminate;
     }, [resolvedRef, indeterminate]);
+
+    const handleOnMouseDown = () => {
+      rest.validateSubjectSelect();
+    };
 
     const handleSelect = e => {
       const { selectRow, data } = rest;
@@ -38,6 +44,7 @@ const IndeterminateCheckbox = React.forwardRef(
           type="checkbox"
           ref={resolvedRef}
           {...rest}
+          // onMouseDown={handleOnMouseDown}
           onChange={handleSelect}
           checked={checked}
         />
@@ -59,6 +66,7 @@ function Table({
   expandLevel,
   getTreeExpandAll,
   getTreeExpandSingle,
+  validateSubjectSelect,
   treeExpand
 }) {
   const {
@@ -93,26 +101,30 @@ function Table({
     },
     useExpanded, // Use the useExpanded plugin hook
     usePagination,
-    useRowSelect,
+    useRowSelect
 
-    hooks => {
-      hooks.visibleColumns.push(columns => [
-        // Let's make a column for selection
-        {
-          id: 'selection',
-          Cell: ({ row }) => (
-            <div>
-              <IndeterminateCheckbox
-                {...row.getToggleRowSelectedProps()}
-                data={row.original}
-                selectRow={selectRow}
-              />
-            </div>
-          )
-        },
-        ...columns
-      ]);
-    }
+    // hooks => {
+    //   hooks.visibleColumns.push(columns => {
+    //     const cols = [...columns];
+    //     const checkbox = {
+    //       id: 'selection',
+    //       Cell: ({ row }) => {
+    //         return (
+    //           <div style={{ paddingRight: '5px' }}>
+    //             <IndeterminateCheckbox
+    //               {...row.getToggleRowSelectedProps()}
+    //               data={row.original}
+    //               selectRow={selectRow}
+    //               validateSubjectSelect={validateSubjectSelect}
+    //             />
+    //           </div>
+    //         );
+    //       }
+    //     };
+    //     cols.splice(0, 0, checkbox);
+    //     return cols;
+    //   });
+    // }
   );
 
   useEffect(() => {
@@ -154,7 +166,10 @@ function Table({
               onChange={e => filterSubjects(e, pageSize, pageIndex)}
             />
           </label>
-          <table {...getTableProps()}>
+          <table
+            {...getTableProps()}
+            style={{ width: '-webkit-fill-available' }}
+          >
             <thead>
               {headerGroups.map((headerGroup, k) => (
                 <tr
@@ -174,9 +189,16 @@ function Table({
               {rows.map((row, i) => {
                 prepareRow(row);
                 const expandRow = row.isExpanded || treeExpand[row.index];
+                const style = { height: '2.5rem', background: '#1e2125' };
+                // if (i%2 === 0) style.background = '#32353b';
                 return (
                   <React.Fragment key={`row-fragment-${i}`}>
-                    <tr {...row.getRowProps()} key={`subject-row ${i}`}>
+                    <tr
+                      {...row.getRowProps()}
+                      style={style}
+                      key={`subject-row ${i}`}
+                      // className={`new-table--row${i%2}`}
+                    >
                       {row.cells.map((cell, z) => {
                         return (
                           <td {...cell.getCellProps()} key={`row-col-${z}`}>
@@ -195,6 +217,7 @@ function Table({
                         getTreeExpandAll={getTreeExpandAll}
                         treeExpand={treeExpand}
                         getTreeExpandSingle={getTreeExpandSingle}
+                        // validateTreeRowSelection={validateTreeRowSelection}
                       />
                     )}
                   </React.Fragment>
@@ -263,10 +286,35 @@ function Subjects(props) {
   const [searchKey, setSearchKey] = useState('');
   let [loading, setLoading] = useState(false);
   const [pageCount, setPageCount] = useState(0);
+  const [selectedLevel, setSelectedLevel] = useState(false);
   // let [color, setColor] = useState('#ffffff');
+
+  useEffect(() => {
+    const {
+      selectedPatients,
+      selectedStudies,
+      selectedSeries,
+      selectedAnnotations
+    } = props;
+    const studies = Object.values(selectedStudies);
+    const series = Object.values(selectedSeries);
+    const annotations = Object.values(selectedAnnotations);
+    const patients = Object.values(selectedPatients);
+
+    if (studies.length) {
+      setSelectedLevel('studies');
+    } else if (series.length) {
+      setSelectedLevel('series');
+    } else if (annotations.length) {
+      setSelectedLevel('annotationss');
+    } else if (patients.length) {
+      setSelectedLevel('');
+    }
+  }, [props.selectedStudies, props.selectedSeries, props.selectedAnnotations]);
 
   const columns = React.useMemo(
     () => [
+      // { id: 'space', Cell: () => <span style={{ paddingLeft: '1px' }}></span> },
       {
         // Build our expander column
         id: 'expander', // Make sure it has an ID
@@ -274,36 +322,45 @@ function Subjects(props) {
         Cell: ({ row, toggleRowExpanded }) => {
           // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
           // to build the toggle for expanding a row
+          const style = { display: 'flex', width: 'fit-content' };
           return (
-            <span
-              {...row.getToggleRowExpandedProps({
-                style: {
-                  // We can even use the row.depth property
-                  // and paddingLeft to indicate the depth
-                  // of the row
-                  paddingLeft: `${row.depth * 2}rem`,
-                  cursor: 'pointer',
-                  fontSize: 10,
-                  padding: '0',
-                  textAlign: 'center',
-                  userSelect: 'none',
-                  color: '#fafafa',
-                  padding: '7px 5px',
-                  verticalAlign: 'middle',
-                  width: `50px`
-                }
-              })}
-              onClick={() => {
-                const expandStatus = row.isExpanded ? false : true;
-                const obj = {
-                  patient: { [row.index]: expandStatus ? {} : false }
-                };
-                toggleRowExpanded(row.id, expandStatus);
-                props.getTreeExpandSingle(obj);
-              }}
-            >
-              {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
-            </span>
+            <div className="tree-combinedCell" style={style}>
+              <input
+                type="checkbox"
+                style={{ marginRight: '5px'}}
+                // ref={resolvedRef}
+                // {...rest}
+                // onMouseDown={handleOnMouseDown}
+                // onChange={handleSelect}
+                // checked={checked}
+              />
+              <span
+                {...row.getToggleRowExpandedProps({
+                  style: {
+                    // We can even use the row.depth property
+                    // and paddingLeft to indicate the depth
+                    // of the row
+                    cursor: 'pointer',
+                    fontSize: 10,
+                    padding: '0',
+                    textAlign: 'center',
+                    userSelect: 'none',
+                    color: '#fafafa',
+                    verticalAlign: 'middle'
+                  }
+                })}
+                onClick={() => {
+                  const expandStatus = row.isExpanded ? false : true;
+                  const obj = {
+                    patient: { [row.index]: expandStatus ? {} : false }
+                  };
+                  toggleRowExpanded(row.id, expandStatus);
+                  props.getTreeExpandSingle(obj);
+                }}
+              >
+                {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
+              </span>
+            </div>
           );
         },
         SubCell: () => null
@@ -317,7 +374,7 @@ function Subjects(props) {
         resizable: true,
         sortable: true,
         accessor: 'subjectName',
-        Cell: ({ row }) => {
+        Cell: ({ row, rows }) => {
           const desc = clearCarets(row.original.subjectName);
           const id = 'desc-tool' + row.original.subjectID;
           return (
@@ -470,9 +527,19 @@ function Subjects(props) {
     []
   );
 
+
+  const validateSubjectSelect = () => {
+    if (selectedLevel) {
+      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a subject!`;
+      window.alert(message);
+    }
+  };
+
   const selectRow = (data, checked) => {
+    // if (!props.validateTreeRowSelection('subject')) {
     props.dispatch(clearSelection('patient'));
     props.dispatch(selectPatient(data));
+    // }
   };
 
   const fetchData = useCallback(({ pageIndex, pageSize }) => {
@@ -591,6 +658,8 @@ function Subjects(props) {
         getTreeExpandAll={props.getTreeExpandAll}
         getTreeExpandSingle={props.getTreeExpandSingle}
         treeExpand={props.treeExpand}
+        validateSubjectSelect={validateSubjectSelect}
+        // validateTreeRowSelection={props.validateTreeRowSelection}
       />
     </>
   );
