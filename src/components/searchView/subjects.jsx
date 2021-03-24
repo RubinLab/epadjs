@@ -138,9 +138,10 @@ function Table({
     }
   }, [expandLevel]);
 
-  useEffect(() => {
-    // check treeData
-  });
+  React.useEffect(() => {
+    fetchData({ pageIndex, pageSize })
+  }, [fetchData, pageIndex, pageSize])
+
 
   const jumpToHeader = () => {
     // const header = document.getElementById('subjects-header-id');
@@ -327,7 +328,7 @@ function Subjects(props) {
             <div className="tree-combinedCell" style={style}>
               <input
                 type="checkbox"
-                style={{ marginRight: '5px'}}
+                style={{ marginRight: '5px' }}
                 // ref={resolvedRef}
                 // {...rest}
                 // onMouseDown={handleOnMouseDown}
@@ -527,7 +528,6 @@ function Subjects(props) {
     []
   );
 
-
   const validateSubjectSelect = () => {
     if (selectedLevel) {
       const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a subject!`;
@@ -543,6 +543,7 @@ function Subjects(props) {
   };
 
   const fetchData = useCallback(({ pageIndex, pageSize }) => {
+    console.log('in fetch data', pageIndex, pageSize);
     if (searchKey) {
       filterSubjects(searchKey, pageSize, pageIndex);
     } else {
