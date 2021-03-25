@@ -15,43 +15,8 @@ import { selectPatient, clearSelection } from '../annotationsList/action';
 import { getSubjects } from '../../services/subjectServices';
 import { formatDate } from '../flexView/helperMethods';
 import { clearCarets } from '../../Utils/aid.js';
-import { ConsoleWriter } from 'istanbul-lib-report';
 import './searchView.css';
 
-const IndeterminateCheckbox = React.forwardRef(
-  ({ indeterminate, ...rest }, ref) => {
-    const defaultRef = React.useRef();
-    const resolvedRef = ref || defaultRef;
-    const [checked, setChecked] = useState(false);
-
-    React.useEffect(() => {
-      resolvedRef.current.indeterminate = indeterminate;
-    }, [resolvedRef, indeterminate]);
-
-    const handleOnMouseDown = () => {
-      rest.validateSubjectSelect();
-    };
-
-    const handleSelect = e => {
-      const { selectRow, data } = rest;
-      setChecked(e.target.checked);
-      selectRow(data);
-    };
-
-    return (
-      <>
-        <input
-          type="checkbox"
-          ref={resolvedRef}
-          {...rest}
-          // onMouseDown={handleOnMouseDown}
-          onChange={handleSelect}
-          checked={checked}
-        />
-      </>
-    );
-  }
-);
 const defaultPageSize = 200;
 
 function Table({
@@ -61,12 +26,10 @@ function Table({
   pageCount,
   loading,
   filterSubjects,
-  selectRow,
   getTreeData,
   expandLevel,
   getTreeExpandAll,
   getTreeExpandSingle,
-  validateSubjectSelect,
   treeExpand
 }) {
   const {
@@ -101,30 +64,7 @@ function Table({
     },
     useExpanded, // Use the useExpanded plugin hook
     usePagination,
-    useRowSelect
 
-    // hooks => {
-    //   hooks.visibleColumns.push(columns => {
-    //     const cols = [...columns];
-    //     const checkbox = {
-    //       id: 'selection',
-    //       Cell: ({ row }) => {
-    //         return (
-    //           <div style={{ paddingRight: '5px' }}>
-    //             <IndeterminateCheckbox
-    //               {...row.getToggleRowSelectedProps()}
-    //               data={row.original}
-    //               selectRow={selectRow}
-    //               validateSubjectSelect={validateSubjectSelect}
-    //             />
-    //           </div>
-    //         );
-    //       }
-    //     };
-    //     cols.splice(0, 0, checkbox);
-    //     return cols;
-    //   });
-    // }
   );
 
   useEffect(() => {
@@ -139,9 +79,8 @@ function Table({
   }, [expandLevel]);
 
   React.useEffect(() => {
-    fetchData({ pageIndex, pageSize })
-  }, [fetchData, pageIndex, pageSize])
-
+    fetchData({ pageIndex, pageSize });
+  }, [fetchData, pageIndex, pageSize]);
 
   const jumpToHeader = () => {
     // const header = document.getElementById('subjects-header-id');
@@ -287,8 +226,8 @@ function Subjects(props) {
   const [searchKey, setSearchKey] = useState('');
   let [loading, setLoading] = useState(false);
   const [pageCount, setPageCount] = useState(0);
+  const [checked, setChecked] = useState({});
   const [selectedLevel, setSelectedLevel] = useState(false);
-  // let [color, setColor] = useState('#ffffff');
 
   useEffect(() => {
     const {
@@ -300,18 +239,24 @@ function Subjects(props) {
     const studies = Object.values(selectedStudies);
     const series = Object.values(selectedSeries);
     const annotations = Object.values(selectedAnnotations);
-    const patients = Object.values(selectedPatients);
 
-    if (studies.length) {
-      setSelectedLevel('studies');
-    } else if (series.length) {
-      setSelectedLevel('series');
-    } else if (annotations.length) {
-      setSelectedLevel('annotationss');
-    } else if (patients.length) {
-      setSelectedLevel('');
-    }
+    if (studies.length) setSelectedLevel('studies');
+    else if (series.length) setSelectedLevel('series');
+    else if (annotations.length) setSelectedLevel('annotations');
+    else setSelectedLevel('');
   }, [props.selectedStudies, props.selectedSeries, props.selectedAnnotations]);
+
+  const selectRow = (e, row) => {
+    if (validateSubjectSelect()) {
+    } else {
+      if (checked[row.index]) setChecked({ ...checked, [row.index]: false });
+      else {
+        setChecked({ ...checked, [row.index]: true });
+        props.dispatch(clearSelection('patient'));
+        props.dispatch(selectPatient(row.original));
+      }
+    }
+  };
 
   const columns = React.useMemo(
     () => [
@@ -329,11 +274,10 @@ function Subjects(props) {
               <input
                 type="checkbox"
                 style={{ marginRight: '5px' }}
-                // ref={resolvedRef}
-                // {...rest}
-                // onMouseDown={handleOnMouseDown}
-                // onChange={handleSelect}
-                // checked={checked}
+                onClick={e => {
+                  selectRow(e, row);
+                }}
+                checked={!selectedLevel && checked[row.index]}
               />
               <span
                 {...row.getToggleRowExpandedProps({
@@ -525,25 +469,19 @@ function Subjects(props) {
         }
       }
     ],
-    []
+    [selectedLevel]
   );
 
   const validateSubjectSelect = () => {
     if (selectedLevel) {
       const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a subject!`;
       window.alert(message);
+      return true;
     }
-  };
-
-  const selectRow = (data, checked) => {
-    // if (!props.validateTreeRowSelection('subject')) {
-    props.dispatch(clearSelection('patient'));
-    props.dispatch(selectPatient(data));
-    // }
+    return false;
   };
 
   const fetchData = useCallback(({ pageIndex, pageSize }) => {
-    console.log('in fetch data', pageIndex, pageSize);
     if (searchKey) {
       filterSubjects(searchKey, pageSize, pageIndex);
     } else {
@@ -654,13 +592,10 @@ function Subjects(props) {
         fetchData={fetchData}
         filterSubjects={filterSubjects}
         getTreeData={props.getTreeData}
-        selectRow={selectRow}
         expandLevel={props.expandLevel}
         getTreeExpandAll={props.getTreeExpandAll}
         getTreeExpandSingle={props.getTreeExpandSingle}
         treeExpand={props.treeExpand}
-        validateSubjectSelect={validateSubjectSelect}
-        // validateTreeRowSelection={props.validateTreeRowSelection}
       />
     </>
   );
