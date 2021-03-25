@@ -5,6 +5,7 @@ import {
   useRowSelect,
   usePagination
 } from 'react-table';
+import { toast } from 'react-toastify';
 import { connect } from 'react-redux';
 import propTypes from 'react-table-v6/lib/propTypes';
 import ReactTooltip from 'react-tooltip';
@@ -63,8 +64,7 @@ function Table({
       pageCount
     },
     useExpanded, // Use the useExpanded plugin hook
-    usePagination,
-
+    usePagination
   );
 
   useEffect(() => {
@@ -226,7 +226,7 @@ function Subjects(props) {
   const [searchKey, setSearchKey] = useState('');
   let [loading, setLoading] = useState(false);
   const [pageCount, setPageCount] = useState(0);
-  const [checked, setChecked] = useState({});
+  const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
 
   useEffect(() => {
@@ -246,17 +246,11 @@ function Subjects(props) {
     else setSelectedLevel('');
   }, [props.selectedStudies, props.selectedSeries, props.selectedAnnotations]);
 
-  const selectRow = (e, row) => {
-    if (validateSubjectSelect()) {
-    } else {
-      if (checked[row.index]) setChecked({ ...checked, [row.index]: false });
-      else {
-        setChecked({ ...checked, [row.index]: true });
-        props.dispatch(clearSelection('patient'));
-        props.dispatch(selectPatient(row.original));
-      }
-    }
-  };
+  // const selectRow = (e, row) => {
+  //   console.log('clickecd');
+  //   props.dispatch(clearSelection('patient'));
+  //   props.dispatch(selectPatient(row.original));
+  // };
 
   const columns = React.useMemo(
     () => [
@@ -271,14 +265,17 @@ function Subjects(props) {
           const style = { display: 'flex', width: 'fit-content' };
           return (
             <div className="tree-combinedCell" style={style}>
-              <input
-                type="checkbox"
-                style={{ marginRight: '5px' }}
-                onClick={e => {
-                  selectRow(e, row);
-                }}
-                checked={!selectedLevel && checked[row.index]}
-              />
+              <div onMouseEnter={validateSubjectSelect}>
+                <input
+                  type="checkbox"
+                  style={{ marginRight: '5px' }}
+                  disabled={selectedLevel}
+                  onClick={() => {
+                    props.dispatch(clearSelection('patient'));
+                    props.dispatch(selectPatient(row.original));
+                  }}
+                />
+              </div>
               <span
                 {...row.getToggleRowExpandedProps({
                   style: {
@@ -469,16 +466,15 @@ function Subjects(props) {
         }
       }
     ],
-    [selectedLevel]
+    [selectedLevel, warningSeen]
   );
 
   const validateSubjectSelect = () => {
-    if (selectedLevel) {
+    if (selectedLevel && !warningSeen) {
       const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a subject!`;
       window.alert(message);
-      return true;
+      setWarningSeen(true);
     }
-    return false;
   };
 
   const fetchData = useCallback(({ pageIndex, pageSize }) => {

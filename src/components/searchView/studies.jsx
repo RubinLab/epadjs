@@ -30,47 +30,14 @@ import {
   updatePatient
 } from '../annotationsList/action';
 
-const IndeterminateCheckbox = React.forwardRef(
-  ({ indeterminate, ...rest }, ref) => {
-    const defaultRef = React.useRef();
-    const resolvedRef = ref || defaultRef;
-    const [checked, setChecked] = useState(false);
-    const [status, setStatus] = useState(false);
-
-    React.useEffect(() => {
-      resolvedRef.current.indeterminate = indeterminate;
-    }, [resolvedRef, indeterminate]);
-
-    const handleSelect = e => {
-      const { selectRow, data } = rest;
-      setChecked(e.target.checked);
-      selectRow(data);
-    };
-
-    return (
-      <>
-        <input
-          type="checkbox"
-          ref={resolvedRef}
-          {...rest}
-          onChange={handleSelect}
-          checked={checked}
-        />
-      </>
-    );
-  }
-);
-
 function Table({
   columns,
   data,
   getTreeData,
-  selectRow,
   expandLevel,
   patientIndex,
   getTreeExpandAll,
   getTreeExpandSingle,
-  // validateTreeRowSelection,
   treeExpand
 }) {
   const {
@@ -86,28 +53,7 @@ function Table({
       columns,
       data
     },
-    useExpanded, // Use the useExpanded plugin hook
-    useRowSelect
-    // hooks => {
-    //   hooks.visibleColumns.push(columns => {
-    //     const cols = [...columns];
-    //     const checkbox = {
-    //       id: 'study-selection',
-    //       Cell: ({ row }) => (
-    //         <div style={{ paddingRight: '3px', paddingLeft: '7px'}} className="study-selection">
-    //           {/* <div> */}
-    //           <IndeterminateCheckbox
-    //             {...row.getToggleRowSelectedProps()}
-    //             data={row.original}
-    //             selectRow={selectRow}
-    //           />
-    //         </div>
-    //       )
-    //     };
-    //     cols.splice(0, 0, checkbox);
-    //     return cols;
-    //   });
-    // }
+    useExpanded // Use the useExpanded plugin hook
   );
 
   useEffect(() => {
@@ -132,7 +78,6 @@ function Table({
               ? treeExpand[patientIndex][row.index]
               : false;
             const expandRow = row.isExpanded || isExpandedFromToolbar;
-            console.log('row', row);
             const style = { height: '2.5rem', background: '#272b30' };
             // style.background = i % 2 === 0 ? '#18293a' : '#111c28';
             // if (i%2 === 0) style.background = '#32353b'
@@ -158,7 +103,6 @@ function Table({
                     treeExpand={treeExpand}
                     studyIndex={row.index}
                     getTreeExpandSingle={getTreeExpandSingle}
-                    // validateTreeRowSelection={validateTreeRowSelection}
                   />
                 )}
               </>
@@ -175,6 +119,28 @@ function Studies(props) {
 
   const [data, setData] = useState([]);
   let [loading, setLoading] = useState(false);
+  const [warningSeen, setWarningSeen] = useState(false);
+  const [selectedLevel, setSelectedLevel] = useState(false);
+
+  useEffect(() => {
+    const { selectedPatients, selectedSeries, selectedAnnotations } = props;
+    const patients = Object.values(selectedPatients);
+    const series = Object.values(selectedSeries);
+    const annotations = Object.values(selectedAnnotations);
+
+    if (patients.length) setSelectedLevel('patients');
+    else if (series.length) setSelectedLevel('series');
+    else if (annotations.length) setSelectedLevel('annotations');
+    else setSelectedLevel('');
+  }, [props.selectedStudies, props.selectedSeries, props.selectedAnnotations]);
+
+  const validateStudySelect = () => {
+    if (selectedLevel && !warningSeen) {
+      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a study!`;
+      window.alert(message);
+      setWarningSeen(true);
+    }
+  };
 
   const excludeOpenSeries = allSeriesArr => {
     const result = [];
@@ -269,19 +235,25 @@ function Studies(props) {
         Cell: ({ row, toggleRowExpanded }) => {
           // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
           // to build the toggle for expanding a row
-          const style = { display: 'flex', width: 'fit-content', paddingLeft: '10px'  };
+          const style = {
+            display: 'flex',
+            width: 'fit-content',
+            paddingLeft: '10px'
+          };
 
           return (
             <div style={style} className="tree-combinedCell">
-              <input
-                type="checkbox"
-                style={{ marginRight: '5px'}}
-                // ref={resolvedRef}
-                // {...rest}
-                // onMouseDown={handleOnMouseDown}
-                // onChange={handleSelect}
-                // checked={checked}
-              />
+              <div onMouseEnter={validateStudySelect}>
+                <input
+                  type="checkbox"
+                  style={{ marginRight: '5px' }}
+                  disabled={selectedLevel}
+                  onClick={() => {
+                    props.dispatch(clearSelection('study'));
+                    props.dispatch(selectStudy(row.original));
+                  }}
+                />
+              </div>
               <span
                 {...row.getToggleRowExpandedProps({
                   style: {
@@ -458,7 +430,7 @@ function Studies(props) {
         )
       }
     ],
-    []
+    [selectedLevel, warningSeen]
   );
 
   const getDataFromStorage = (projectID, subjectID) => {
@@ -496,11 +468,6 @@ function Studies(props) {
     }
   }, []);
 
-  const selectRow = (data, checked) => {
-    props.dispatch(clearSelection('study'));
-    props.dispatch(selectStudy(data));
-  };
-
   return (
     <>
       {loading && (
@@ -512,13 +479,11 @@ function Studies(props) {
         columns={columns}
         data={data}
         getTreeData={props.getTreeData}
-        selectRow={selectRow}
         expandLevel={props.expandLevel}
         patientIndex={props.patientIndex}
         getTreeExpandAll={props.getTreeExpandAll}
         treeExpand={props.treeExpand}
         getTreeExpandSingle={props.getTreeExpandSingle}
-        // validateTreeRowSelection={props.validateTreeRowSelection}
       />
     </>
   );

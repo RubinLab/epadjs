@@ -23,37 +23,8 @@ import {
   updatePatient,
   jumpToAim
 } from '../annotationsList/action';
-const IndeterminateCheckbox = React.forwardRef(
-  ({ indeterminate, ...rest }, ref) => {
-    const defaultRef = React.useRef();
-    const resolvedRef = ref || defaultRef;
-    const [checked, setChecked] = useState(false);
 
-    React.useEffect(() => {
-      resolvedRef.current.indeterminate = indeterminate;
-    }, [resolvedRef, indeterminate]);
-
-    const handleSelect = e => {
-      const { selectRow, data } = rest;
-      setChecked(e.target.checked);
-      selectRow(data);
-    };
-
-    return (
-      <>
-        <input
-          type="checkbox"
-          ref={resolvedRef}
-          {...rest}
-          onChange={handleSelect}
-          checked={checked}
-        />
-      </>
-    );
-  }
-);
-
-function Table({ columns, data, selectRow }) {
+function Table({ columns, data }) {
   const {
     getTableProps,
     getTableBodyProps,
@@ -66,27 +37,7 @@ function Table({ columns, data, selectRow }) {
       columns,
       data
     },
-    useExpanded, // Use the useExpanded plugin hook
-    useRowSelect
-    // hooks => {
-    //   hooks.visibleColumns.push(columns => {
-    //     const cols = [...columns];
-    //     const checkbox = {
-    //       id: 'annotation-selection',
-    //       Cell: ({ row }) => (
-    //         <div style={{ paddingRight: '3px', paddingLeft: '21px' }} className="annotation-selection">
-    //           <IndeterminateCheckbox
-    //             {...row.getToggleRowSelectedProps()}
-    //             data={row.original}
-    //             selectRow={selectRow}
-    //           />
-    //         </div>
-    //       )
-    //     };
-    //     cols.splice(0, 0, checkbox);
-    //     return cols;
-    //   });
-    // }
+    useExpanded // Use the useExpanded plugin hook
   );
 
   return (
@@ -125,6 +76,20 @@ function Annotations(props) {
   const [data, setData] = useState([]);
   let [loading, setLoading] = useState(false);
   const username = sessionStorage.getItem('username');
+  const [warningSeen, setWarningSeen] = useState(false);
+  const [selectedLevel, setSelectedLevel] = useState(false);
+
+  useEffect(() => {
+    const { selectedPatients, selectedStudies, selectedSeries } = props;
+    const patients = Object.values(selectedPatients);
+    const studies = Object.values(selectedStudies);
+    const series = Object.values(selectedSeries);
+
+    if (patients.length) setSelectedLevel('patients');
+    else if (studies.length) setSelectedLevel('studies');
+    else if (series.length) setSelectedLevel('series');
+    else setSelectedLevel('');
+  }, [props.selectedStudies, props.selectedPatients, props.selectedSeries]);
 
   const checkIfSerieOpen = selectedSerie => {
     let isOpen = false;
@@ -181,17 +146,19 @@ function Annotations(props) {
     props.history.push('/display');
   };
 
-  const selectRow = data => {
+  const selectRow = (e, data) => {
     props.dispatch(clearSelection('annotation'));
     const { seriesDescripion } = props.series;
     const { studyDescription } = props;
     props.dispatch(selectAnnotation(data, studyDescription, seriesDescripion));
   };
 
-  const handleSelect = (e, data) => {
-    console.log(' ---> e, data');
-    console.log(e, data);
-    selectRow(data);
+  const validateAnnotationSelect = () => {
+    if (selectedLevel && !warningSeen) {
+      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select an annotation!`;
+      window.alert(message);
+      setWarningSeen(true);
+    }
   };
 
   const columns = React.useMemo(
@@ -201,14 +168,14 @@ function Annotations(props) {
         id: 'series-expander', // Make sure it has an ID
         Cell: ({ row }) => (
           <div style={{ paddingLeft: '30px' }} className="tree-combinedCell">
-            <input
-              type="checkbox"
-              // ref={resolvedRef}
-              // {...rest}
-              // onMouseDown={handleOnMouseDown}
-              onChange={e => handleSelect(e, row.original)}
-              // checked={checked}
-            />
+            <div onMouseEnter={validateAnnotationSelect}>
+              <input
+                type="checkbox"
+                onClick={e => selectRow(e, row.original)}
+                disabled={selectedLevel}
+                style={{ marginRight: '5px' }}
+              />
+            </div>
           </div>
         )
       },
@@ -320,7 +287,7 @@ function Annotations(props) {
         }
       }
     ],
-    []
+    [selectedLevel, warningSeen]
   );
 
   useEffect(() => {
@@ -359,7 +326,10 @@ const mapStateToProps = state => {
     openSeries: state.annotationsListReducer.openSeries,
     patients: state.annotationsListReducer.patients,
     activePort: state.annotationsListReducer.activePort,
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+    selectedPatients: state.annotationsListReducer.selectedPatients,
+    selectedStudies: state.annotationsListReducer.selectedStudies,
+    selectedSeries: state.annotationsListReducer.selectedSeries,
   };
 };
 

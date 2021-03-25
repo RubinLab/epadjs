@@ -25,46 +25,14 @@ import {
 } from '../annotationsList/action';
 import { clearCarets, styleEightDigitDate } from '../../Utils/aid.js';
 
-const IndeterminateCheckbox = React.forwardRef(
-  ({ indeterminate, ...rest }, ref) => {
-    const defaultRef = React.useRef();
-    const resolvedRef = ref || defaultRef;
-    const [checked, setChecked] = useState(false);
-
-    React.useEffect(() => {
-      resolvedRef.current.indeterminate = indeterminate;
-    }, [resolvedRef, indeterminate]);
-
-    const handleSelect = e => {
-      const { selectRow, data } = rest;
-      setChecked(e.target.checked);
-      selectRow(data);
-    };
-
-    return (
-      <>
-        <input
-          type="checkbox"
-          ref={resolvedRef}
-          {...rest}
-          onChange={handleSelect}
-          checked={checked}
-        />
-      </>
-    );
-  }
-);
-
 function Table({
   columns,
   data,
-  selectRow,
   studyDescription,
   expandLevel,
   patientIndex,
   getTreeExpandAll,
   getTreeExpandSingle,
-  // validateTreeRowSelection,
   treeExpand,
   studyIndex
 }) {
@@ -81,27 +49,7 @@ function Table({
       columns,
       data
     },
-    useExpanded, // Use the useExpanded plugin hook
-    useRowSelect
-    // hooks => {
-    //   hooks.visibleColumns.push(columns => {
-    //     const cols = [...columns];
-    //     const checkbox = {
-    //       id: 'series-selection',
-    //       Cell: ({ row }) => (
-    //         <div style={{ paddingRight: '3px', paddingLeft: '14px' }} className="series-selection">
-    //           <IndeterminateCheckbox
-    //             {...row.getToggleRowSelectedProps()}
-    //             data={row.original}
-    //             selectRow={selectRow}
-    //           />
-    //         </div>
-    //       )
-    //     };
-    //     cols.splice(0, 0, checkbox);
-    //     return cols;
-    //   });
-    // }
+    useExpanded // Use the useExpanded plugin hook
   );
 
   useEffect(() => {
@@ -149,7 +97,6 @@ function Table({
                     parentSeries={row.original}
                     studyDescription={studyDescription}
                     expandLevel={expandLevel}
-                    // validateTreeRowSelection={validateTreeRowSelection}
                   />
                 )}
               </>
@@ -164,7 +111,33 @@ function Table({
 function Series(props) {
   const widthUnit = 20;
   const [data, setData] = useState([]);
-  let [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [warningSeen, setWarningSeen] = useState(false);
+  const [selectedLevel, setSelectedLevel] = useState(false);
+
+  useEffect(() => {
+    const { selectedPatients, selectedStudies, selectedAnnotations } = props;
+    const patients = Object.values(selectedPatients);
+    const studies = Object.values(selectedStudies);
+    const annotations = Object.values(selectedAnnotations);
+
+    if (patients.length) setSelectedLevel('patients');
+    else if (studies.length) setSelectedLevel('studies');
+    else if (annotations.length) setSelectedLevel('annotations');
+    else setSelectedLevel('');
+  }, [
+    props.selectedStudies,
+    props.selectedPatients,
+    props.selectedAnnotations
+  ]);
+
+  const validateSeriesSelect = () => {
+    if (selectedLevel && !warningSeen) {
+      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select series!`;
+      window.alert(message);
+      setWarningSeen(true);
+    }
+  };
 
   const dispatchSerieDisplay = selected => {
     const openSeries = Object.values(props.openSeries);
@@ -228,19 +201,25 @@ function Series(props) {
         Cell: ({ row, toggleRowExpanded }) => {
           // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
           // to build the toggle for expanding a row
-          const style = { display: 'flex', width: 'fit-content', paddingLeft: '20px'  };
+          const style = {
+            display: 'flex',
+            width: 'fit-content',
+            paddingLeft: '20px'
+          };
 
           return (
             <div style={style} className="tree-combinedCell">
-              <input
-                type="checkbox"
-                style={{ marginRight: '5px'}}
-                // ref={resolvedRef}
-                // {...rest}
-                // onMouseDown={handleOnMouseDown}
-                // onChange={handleSelect}
-                // checked={checked}
-              />
+              <div onMousEnter={validateSeriesSelect}>
+                <input
+                  type="checkbox"
+                  style={{ marginRight: '5px' }}
+                  disabled={selectedLevel}
+                  onClick={() => {
+                    props.dispatch(clearSelection('serie'));
+                    props.dispatch(selectSerie(row.original));
+                  }}
+                />
+              </div>
               <span
                 {...row.getToggleRowExpandedProps({
                   style: {
@@ -395,7 +374,7 @@ function Series(props) {
         )
       }
     ],
-    []
+    [selectedLevel, warningSeen]
   );
 
   const getDataFromStorage = (projectID, subjectID, studyUID) => {
@@ -409,11 +388,6 @@ function Series(props) {
       : [];
 
     return seriesArray;
-  };
-
-  const selectRow = data => {
-    props.dispatch(clearSelection('serie'));
-    props.dispatch(selectSerie(data));
   };
 
   useEffect(() => {
@@ -449,7 +423,6 @@ function Series(props) {
       <Table
         columns={columns}
         data={data}
-        selectRow={selectRow}
         studyDescription={props.studyDescription}
         expandLevel={props.expandLevel}
         patientIndex={props.patientIndex}
@@ -457,7 +430,6 @@ function Series(props) {
         treeExpand={props.treeExpand}
         studyIndex={props.studyIndex}
         getTreeExpandSingle={props.getTreeExpandSingle}
-        // validateTreeRowSelection={props.validateTreeRowSelection}
       />
     </>
   );
