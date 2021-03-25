@@ -3,6 +3,7 @@ import ReactTable from "react-table";
 import { connect } from "react-redux";
 import { Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
+import ReactTooltip from "react-tooltip";
 import {
   FaPlay,
   FaStop,
@@ -528,7 +529,19 @@ class TrackTab extends React.Component {
                           this.handleGetContainerLog(data.original);
                         }}
                       >
-                        <FaEnvelopeOpenText className="menu-clickable" />
+                        <FaEnvelopeOpenText
+                          className="menu-clickable"
+                          data-tip
+                          data-for="log-icon"
+                        />
+                        <ReactTooltip
+                          id="log-icon"
+                          place="bottom"
+                          type="info"
+                          delayShow={1000}
+                        >
+                          <span>open plugin log</span>
+                        </ReactTooltip>
                       </button>
                     </td>
                     <td>
@@ -539,7 +552,19 @@ class TrackTab extends React.Component {
                           this.handleStartOne(data.original.id);
                         }}
                       >
-                        <FaPlay className="menu-clickable" />
+                        <FaPlay
+                          className="menu-clickable"
+                          data-tip
+                          data-for="play-icon"
+                        />
+                        <ReactTooltip
+                          id="play-icon"
+                          place="bottom"
+                          type="info"
+                          delayShow={1000}
+                        >
+                          <span>Start plugin</span>
+                        </ReactTooltip>
                       </button>
                     </td>
                     <td>
@@ -550,7 +575,19 @@ class TrackTab extends React.Component {
                           this.handleStopOne(data.original.id);
                         }}
                       >
-                        <FaStop className="menu-clickable" />
+                        <FaStop
+                          className="menu-clickable"
+                          data-tip
+                          data-for="stop-icon"
+                        />
+                        <ReactTooltip
+                          id="stop-icon"
+                          place="bottom"
+                          type="info"
+                          delayShow={1000}
+                        >
+                          <span>Stop plugin</span>
+                        </ReactTooltip>
                       </button>
                     </td>
                     <td>
@@ -562,7 +599,19 @@ class TrackTab extends React.Component {
                             this.handleDownloadresult(data.original);
                           }}
                         >
-                          <FaDownload className="menu-clickable" />
+                          <FaDownload
+                            className="menu-clickable"
+                            data-tip
+                            data-for="download-icon"
+                          />
+                          <ReactTooltip
+                            id="download-icon"
+                            place="left"
+                            type="info"
+                            delayShow={1000}
+                          >
+                            <span>download plugin results</span>
+                          </ReactTooltip>
                         </button>
                       </div>
                     </td>
@@ -575,7 +624,19 @@ class TrackTab extends React.Component {
                             this.deleteOneFromQueue(data.original.id)
                           }
                         >
-                          <FaTrash className="menu-clickable" />
+                          <FaTrash
+                            className="menu-clickable"
+                            data-tip
+                            data-for="delete-icon"
+                          />
+                          <ReactTooltip
+                            id="delete-icon"
+                            place="left"
+                            type="info"
+                            delayShow={1000}
+                          >
+                            <span>delete plugin instance</span>
+                          </ReactTooltip>
                         </button>
                       </div>
                     </td>

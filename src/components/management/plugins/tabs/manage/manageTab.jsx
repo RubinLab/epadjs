@@ -119,7 +119,12 @@ class ManageTab extends React.Component {
             </div>
           );
         },
-        style: { whiteSpace: "unset" },
+        style: {
+          whiteSpace: "unset",
+          color: "#5bc0de",
+          cursor: "pointer",
+          fontStyle: "italic",
+        },
       },
       {
         id: "projects",
@@ -132,7 +137,12 @@ class ManageTab extends React.Component {
         Cell: (original) => {
           return this.props.projectDataToCell(original);
         },
-        style: { whiteSpace: "unset" },
+        style: {
+          whiteSpace: "unset",
+          color: "#5bc0de",
+          cursor: "pointer",
+          fontStyle: "italic",
+        },
       },
       {
         id: "description",
