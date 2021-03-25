@@ -24,7 +24,6 @@ import Draggable from "react-draggable";
 import "./../../css/plugin.css";
 import "../../../menuStyle.css";
 
-
 class TrackTab extends React.Component {
   state = {
     ocancel: "",
@@ -194,8 +193,6 @@ class TrackTab extends React.Component {
     }
   };
 
-
-
   handleGetContainerLog = async (dataOriginal) => {
     if (this.state.showContainerLog === true) {
       clearInterval(this.state.containerLoggingIntervalHandle);
@@ -206,7 +203,7 @@ class TrackTab extends React.Component {
     try {
       let containerlog = await getContainerLog(containerid);
       console.log("err stream", containerlog);
-      if (containerlog.data != '404') {
+      if (containerlog.data != "404") {
         this.setState({
           showContainerLog: true,
           containerLogData: containerlog.data,
@@ -230,10 +227,10 @@ class TrackTab extends React.Component {
         alert("Please start plugin first");
       }
     } catch (err) {
-      console.log('eror:', err);
+      console.log("eror:", err);
       alert("no log found for the container");
       return true;
-      // 
+      //
     }
   };
 
@@ -362,9 +359,10 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
-        Header: "container name",
-        width: 70,
-        minResizeWidth: 20,
+        id: "containername",
+        Header: "container",
+        minWidth: 110,
+        minResizeWidth: 50,
         Cell: (data) => {
           const queueId = data.original.id;
           return <div>epadplugin_{queueId}</div>;
@@ -373,9 +371,10 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
+        id: "plugin",
         Header: "plugin",
-        width: 50,
-        minResizeWidth: 20,
+        minWidth: 150,
+        minResizeWidth: 50,
         Cell: (data) => {
           const pluginName = data.original.plugin.name;
           return <div>{pluginName}</div>;
@@ -384,8 +383,9 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
+        id: "aims",
         Header: "aims",
-        width: 70,
+        minWidth: 70,
         minResizeWidth: 20,
         Cell: (data) => {
           const aims = data.original.aim_uid;
@@ -402,8 +402,9 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
+        id: "projects",
         Header: "project",
-        width: 70,
+        minWidth: 70,
         minResizeWidth: 20,
         Cell: (data) => {
           const projectName = data.original.project.name;
@@ -413,16 +414,18 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
-        Header: "params type",
+        id: "paramtype",
+        Header: "param type",
         accessor: "plugin_parametertype",
         sortable: true,
         resizable: true,
-        width: 200,
+        minWidth: 100,
         minResizeWidth: 20,
       },
       {
+        id: "runtimeparams",
         Header: "runtime params",
-        width: 100,
+        minWidth: 120,
         minResizeWidth: 20,
         Cell: (data) => {
           const paramsHtml = data.original.runtime_params;
@@ -443,16 +446,18 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
+        id: "status",
         Header: "status",
         accessor: "status",
         sortable: true,
         resizable: true,
-        width: 100,
+        minWidth: 60,
         minResizeWidth: 20,
       },
       {
+        id: "starttime",
         Header: "starttime",
-        width: 200,
+        minWidth: 200,
         minResizeWidth: 20,
         Cell: (data) => {
           const processStartTime = new Date(data.original.starttime);
@@ -476,8 +481,9 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
+        id: "endtime",
         Header: "endtime",
-        width: 200,
+        minWidth: 200,
         minResizeWidth: 20,
         Cell: (data) => {
           const processEndTime = new Date(data.original.endtime);
@@ -502,7 +508,8 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
-        width: 300,
+        id: "opbuttons",
+        minWidth: 150,
         minResizeWidth: 20,
         Header: "",
         sortable: true,
