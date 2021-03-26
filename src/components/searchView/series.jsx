@@ -1,13 +1,16 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
-import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf } from "react-icons/fa";
-import ReactTooltip from "react-tooltip";
-import { withRouter } from "react-router-dom";
-import ReactTable from "react-table";
-import { toast } from "react-toastify";
-import treeTableHOC from "react-table/lib/hoc/treeTable";
-import Annotations from "./annotations";
-import { getSeries } from "../../services/seriesServices";
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+  useTable,
+  useExpanded,
+} from 'react-table';
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
+import ReactTooltip from 'react-tooltip';
+import PropagateLoader from 'react-spinners/PropagateLoader';
+import { MAX_PORT } from '../../constants';
+import { formatDate } from '../flexView/helperMethods';
+import Annotations from './Annotations';
+import { getSeries } from '../../services/seriesServices';
 import {
   alertViewPortFull,
   getSingleSerie,
@@ -16,542 +19,126 @@ import {
   clearSelection,
   addToGrid,
   getWholeData,
-  updatePatient,
-} from "../annotationsList/action";
-import { MAX_PORT, formatDates } from "../../constants";
-import AlertGridFull from "./alertGridFull";
-import { persistExpandView } from "../../Utils/aid";
-import "react-table/react-table.css";
+  updatePatient
+} from '../annotationsList/action';
 
-// const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
-const TreeTable = treeTableHOC(ReactTable);
-
-function getNodes(data, node = []) {
-  data.forEach(item => {
-    if (item.hasOwnProperty("_subRows") && item._subRows) {
-      node = getNodes(item._subRows, node);
-    } else {
-      node.push(item._original);
-    }
-  });
-  return node;
-}
-
-const progressDisplay = status => {
-  if (status === "DONE") {
-    return <FaBatteryFull className="progress-done" />;
-  } else if (status === "NOT_STARTED") {
-    return <FaBatteryEmpty className="progress-notStarted" />;
-  } else if (status === "IN_PROGRESS") {
-    return <FaBatteryHalf className="progress-inProgress" />;
-  } else {
-    return <div>{status}</div>;
-  }
-};
-
-function selectSeries(projectId, subjectId, studyId, seriesId) {
-  return {
-    type: "SELECT_SERIES",
-    payload: {
-      projectId,
-      subjectId,
-      studyId,
-      seriesId,
+function Table({
+  columns,
+  data,
+  studyDescription,
+  expandLevel,
+  patientIndex,
+  getTreeExpandAll,
+  treeExpand,
+  studyIndex
+}) {
+  const {
+    rows,
+    prepareRow,
+    toggleAllRowsExpanded,
+    state: { expanded }
+  } = useTable(
+    {
+      columns,
+      data
     },
-  };
+    useExpanded // Use the useExpanded plugin hook
+  );
+
+  useEffect(() => {
+    const obj = {
+      patient: patientIndex,
+      study: studyIndex,
+      series: data.length
+    };
+
+    if (expandLevel === 3) {
+      toggleAllRowsExpanded(true);
+      getTreeExpandAll(obj, true, expandLevel);
+    }
+    if (expandLevel === 2) {
+      toggleAllRowsExpanded(false);
+      getTreeExpandAll(obj, false, expandLevel);
+    }
+  }, [expandLevel]);
+
+  return (
+    <>
+      {data.length > 0 && (
+        <>
+          {rows.map((row, i) => {
+            prepareRow(row);
+            const isExpandedFromToolbar =
+              treeExpand[patientIndex] && treeExpand[patientIndex][studyIndex]
+                ? treeExpand[patientIndex][studyIndex][row.index]
+                : false;
+            const rowExpanded =
+              row.isExpanded || isExpandedFromToolbar || expandLevel === 4;
+            const style = { height: '2.5rem', background: '#30343b' };
+            return (
+              <>
+                <tr {...row.getRowProps()} style={style}>
+                  {row.cells.map(cell => {
+                    return (
+                      <td
+                        {...cell.getCellProps({
+                          className: cell.column.className
+                        })}
+                      >
+                        {cell.render('Cell')}
+                      </td>
+                    );
+                  })}
+                </tr>
+                {rowExpanded && (
+                  <Annotations
+                    parentSeries={row.original}
+                    studyDescription={studyDescription}
+                    expandLevel={expandLevel}
+                  />
+                )}
+              </>
+            );
+          })}
+        </>
+      )}
+    </>
+  );
 }
 
-class Series extends Component {
-  constructor(props) {
-    super(props);
-    this.widthUnit = 20;
-    this.state = {
-      series: this.props.series,
-      columns: [],
-      selection: [],
-      selectAll: false,
-      selectType: "checkbox",
-      expanded: {},
-      showGridFullWarning: false,
-      // selectedSerie: {}
-      expansionArr: [],
-    };
-  }
+function Series(props) {
+  const widthUnit = 20;
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [warningSeen, setWarningSeen] = useState(false);
+  const [selectedLevel, setSelectedLevel] = useState(false);
 
-  async componentDidMount() {
-    try {
-      const {
-        projectId,
-        subjectId,
-        studyId,
-        expansionArr,
-        // updateExpandedLevelNums,
-        expandLevel,
-        treeExpand,
-        patientIndex,
-        studyIndex,
-        expandLoading,
-        treeData,
-        closeExpand,
-      } = this.props;
-      // const { numOfPresentStudies, numOfStudiesLoaded } = expandLoading;
-      // const { data: data } = await getSeries(projectId, subjectId, studyId);
-      let data = [];
-      if (
-        treeData[projectId] &&
-        treeData[projectId][subjectId] &&
-        treeData[projectId][subjectId].studies[studyId]
-      )
-        data = Object.values(
-          treeData[projectId][subjectId].studies[studyId].series
-        );
-      if (data.length > 0) {
-        data = data.map(el => el.data);
-      } else {
-        let series = await getSeries(projectId, subjectId, studyId);
-        data = series.data;
-        this.props.getTreeData(projectId, "series", data);
-      }
-      this.setState({ data });
-      this.setState({ columns: this.setColumns() });
-      const seriesOpened = expansionArr.includes(studyId);
-      // const alreadyCounted = numOfPresentStudies === numOfStudiesLoaded;
-      // if (!seriesOpened && expandLevel === 2 && !alreadyCounted) {
-      //   updateExpandedLevelNums("study", data.length, 1);
-      // }
-      if (expandLevel > 2) {
-        this.expandCurrentLevel();
-        const obj = {
-          patient: this.props.patientIndex,
-          study: this.props.studyIndex,
-          series: data.length,
-        };
-        this.props.getTreeExpandAll(obj, true, expandLevel);
-      }
+  useEffect(() => {
+    const { selectedPatients, selectedStudies, selectedAnnotations } = props;
+    const patients = Object.values(selectedPatients);
+    const studies = Object.values(selectedStudies);
+    const annotations = Object.values(selectedAnnotations);
 
-      if (data.length === 0) {
-        toast.info("No series found", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-        closeExpand(studyIndex);
-      }
-      const expanded = {};
-      const ptExpandKeys = Object.keys(treeExpand[patientIndex][studyIndex]);
-      const ptExpandVal = Object.values(treeExpand[patientIndex][studyIndex]);
-      ptExpandKeys.forEach((el, index) => {
-        expanded[el] = ptExpandVal[index];
-      });
-      this.setState({ expanded });
-    } catch (err) {
-      // console.log(`Couldn"t load all series data. Please Try again!`);
-      console.error(err);
-    }
-  }
+    if (patients.length) setSelectedLevel('patients');
+    else if (studies.length) setSelectedLevel('studies');
+    else if (annotations.length) setSelectedLevel('annotations');
+    else setSelectedLevel('');
+  }, [
+    props.selectedStudies,
+    props.selectedPatients,
+    props.selectedAnnotations
+  ]);
 
-  async componentDidUpdate(prevProps) {
-    try {
-      const {
-        update,
-        expansionArr,
-        // updateExpandedLevelNums,
-        projectId,
-        subjectId,
-        studyId,
-        treeExpand,
-        patientIndex,
-        studyIndex,
-        expandLevel,
-        closeAllCounter,
-        selectedSeries,
-      } = this.props;
-      const seriesOpened = expansionArr.includes(studyId);
-      if (closeAllCounter !== prevProps.closeAllCounter) {
-        this.setState({ expanded: {} });
-      }
-      if (update !== prevProps.update && treeExpand[patientIndex][studyIndex]) {
-        const { data: data } = await getSeries(projectId, subjectId, studyId);
-        const expanded = persistExpandView(
-          this.state.expanded,
-          this.state.data,
-          data,
-          "seriesUID"
-        );
-        this.setState({ data, expanded });
-        this.props.getTreeData(this.props.projectId, "series", data);
-      }
-      if (this.props.expandLevel != prevProps.expandLevel) {
-        this.props.expandLevel >= 3
-          ? this.expandCurrentLevel()
-          : this.setState({ expanded: {} });
-
-        const expandedToSeries =
-          prevProps.expandLevel < expandLevel && expandLevel === 2;
-        // if (expandedToSeries && seriesOpened) {
-        //   updateExpandedLevelNums("study", this.state.data.length, 1);
-        // }
-        const expandToAnnotations =
-          prevProps.expandLevel < expandLevel && expandLevel === 3;
-        const shrinkedToSeries =
-          prevProps.expandLevel > expandLevel && expandLevel === 2;
-        const obj = {
-          patient: this.props.patientIndex,
-          study: this.props.studyIndex,
-          series: this.state.data.length,
-        };
-        if (shrinkedToSeries) {
-          this.setState({ expansionArr: [] });
-          this.props.getTreeExpandAll(obj, false, this.props.expandLevel);
-        }
-
-        if (expandToAnnotations)
-          this.props.getTreeExpandAll(obj, true, this.props.expandLevel);
-      }
-
-      const newSelectedSrArr = Object.keys(selectedSeries);
-      const oldSelectedSrArr = Object.keys(prevProps.selectedSeries);
-      if (newSelectedSrArr.length !== oldSelectedSrArr.length) {
-        this.setState({ columns: this.setColumns() });
-      }
-
-      if (this.props.treeData !== prevProps.treeData) {
-        const { projectId, subjectId, studyId } = this.props;
-        let series = await getSeries(projectId, subjectId, studyId);
-        // let studies = await getStudies(projectId, subjectId);
-        const { data } = series;
-        this.setState({ data });
-      }
-
-    } catch (err) {
-      // console.log(`Couldn"t load all series data. Please Try again!`);
-      console.error(err);
-    }
-  }
-
-  expandCurrentLevel = () => {
-    try {
-      const expanded = {};
-      if (this.state.data)
-        for (let i = 0; i < this.state.data.length; i++) {
-          // expanded[i] = this.state.data[i].numberOfAnnotations ? true : false;
-          expanded[i] = this.state.data[i];
-        }
-      this.setState({ expanded });
-    } catch (err) {
-      // console.log(`Couldn"t load all series data. Please Try again!`);
-      console.error(err);
+  const validateSeriesSelect = () => {
+    if (selectedLevel && !warningSeen) {
+      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select series!`;
+      window.alert(message);
+      setWarningSeen(true);
     }
   };
 
-  selectRow = selected => {
-    // const newState = { ...this.state.selectedSerie };
-    // newState[selected.seriesUID]
-    //   ? delete newState[selected.seriesUID]
-    //   : (newState[selected.seriesUID] = selected.seriesDescription);
-    // this.setState({ selectedSerie: newState });
-    this.props.dispatch(clearSelection("serie"));
-    this.props.dispatch(selectSerie(selected, this.props.studyDescription));
-  };
-  setColumns() {
-    const { selectedSeries } = this.props;
-    const columns = [
-      {
-        expander: true,
-        width: 35,
-        Expander: ({ isExpanded, ...rest }) => (
-          <div>
-            {isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
-          </div>
-        ),
-        style: {
-          cursor: "pointer",
-          fontSize: 10,
-          padding: "0",
-          textAlign: "center",
-          userSelect: "none",
-          color: "#fafafa",
-          padding: "7px 5px",
-          verticalAlign: "middle",
-        },
-      },
-      {
-        id: "checkbox",
-        accessor: "",
-        width: this.widthUnit,
-        Cell: ({ original }) => {
-          const { seriesUID, projectID } = original;
-          const selected =
-            selectedSeries[seriesUID] &&
-            selectedSeries[seriesUID].projectID === projectID;
-          return (
-            <input
-              type="checkbox"
-              className="checkbox-cell"
-              checked={selected}
-              onChange={() => this.selectRow(original)}
-            />
-          );
-        },
-      },
-      {
-        Header: (
-          <div>
-            Series Description{" "}
-            <span className="badge badge-secondary"> # of Annotations </span>
-          </div>
-        ),
-        width: this.widthUnit * 11,
-        className: "searchView-row__desc",
-        Cell: row => {
-          let desc = row.original.seriesDescription || "Unnamed Serie";
-          let id = "desc" + row.original.seriesUID;
-          return (
-            <>
-              <div data-tip data-for={id} style={{ whiteSpace: "pre-wrap" }}>
-                {desc}
-              </div>{" "}
-              <ReactTooltip
-                id={id}
-                place="top"
-                type="info"
-                delayShow={500}
-                clickable={true}
-              >
-                <span>{desc}</span>
-              </ReactTooltip>
-            </>
-          );
-        },
-      },
-      {
-        //annotations
-        width: this.widthUnit * 2,
-        Cell: row => (
-          <div className="searchView-table__cell">
-            {row.original.numberOfAnnotations === 0 ? (
-              ""
-            ) : (
-              <span className="badge badge-secondary">
-                {row.original.numberOfAnnotations}
-              </span>
-            )}
-          </div>
-        ),
-      },
-      {
-        //subitem
-        width: this.widthUnit * 3,
-        Cell: row => <div />,
-      },
-      {
-        Header: (
-          <div>
-            <span className="badge badge-secondary"> # of Images </span>
-          </div>
-        ),
-        width: this.widthUnit * 3,
-        Cell: row => (
-          <div className="searchView-table__cell">
-            {row.original.numberOfImages === "" ? (
-              ""
-            ) : (
-              <span className="badge badge-secondary">
-                {row.original.numberOfImages}
-              </span>
-            )}
-          </div>
-        ),
-      },
-      {
-        Header: "Type",
-        width: this.widthUnit * 5,
-        Cell: row => (
-          <div className="searchView-table__cell">{row.original.examType}</div>
-        ),
-      },
-      {
-        width: this.widthUnit * 7,
-        Header: "Study/Created Date",
-        Cell: row => (
-          <div className="searchView-table__cell">
-            {formatDates(row.original.seriesDate)}
-          </div>
-        ),
-      },
-      {
-        width: this.widthUnit * 7,
-        Header: "Uploaded",
-        Cell: row => (
-          <div className="searchView-table__cell">
-            {formatDates(row.original.createdTime)}
-          </div>
-        ),
-      },
-      {
-        Header: "Accession",
-        width: this.widthUnit * 6,
-        Cell: row => (
-          <div className="searchView-table__cell">
-            {row.original.accessionNumber}
-          </div>
-        ),
-      },
-      {
-        Header: "Identifier",
-        width: this.widthUnit * 10,
-        Cell: row => (
-          <>
-            <div
-              className="searchView-table__cell"
-              data-tip
-              data-for={row.original.seriesUID}
-            >
-              {row.original.seriesUID}
-            </div>{" "}
-            <ReactTooltip
-              id={row.original.seriesUID}
-              place="top"
-              type="info"
-              delayShow={500}
-              clickable={true}
-            >
-              <span>{row.original.seriesUID}</span>
-            </ReactTooltip>
-          </>
-        ),
-      },
-    ];
-    return columns;
-  }
-
-  toggleSelection = (key, shift, row) => {
-    /*
-      Implementation of how to manage the selection state is up to the developer.
-      This implementation uses an array stored in the component state.
-      Other implementations could use object keys, a Javascript Set, or Redux... etc.
-    */
-    // start off with the existing state
-    if (this.state.selectType === "radio") {
-      let selection = [];
-      if (selection.indexOf(key) < 0) selection.push(key);
-      this.setState({ selection });
-    } else {
-      let selection = [...this.state.selection];
-      const keyIndex = selection.indexOf(key);
-      // check to see if the key exists
-      if (keyIndex >= 0) {
-        // it does exist so we will remove it using destructing
-        selection = [
-          ...selection.slice(0, keyIndex),
-          ...selection.slice(keyIndex + 1),
-        ];
-      } else {
-        // it does not exist so add it
-        selection.push(key);
-      }
-      // update the state
-      this.setState({ selection });
-    }
-  };
-  toggleAll = () => {
-    /*
-      "toggleAll" is a tricky concept with any filterable table
-      do you just select ALL the records that are in your data?
-      OR
-      do you only select ALL the records that are in the current filtered data?
-
-      The latter makes more sense because "selection" is a visual thing for the user.
-      This is especially true if you are going to implement a set of external functions
-      that act on the selected information (you would not want to DELETE the wrong thing!).
-
-      So, to that end, access to the internals of ReactTable are required to get what is
-      currently visible in the table (either on the current page or any other page).
-
-      The HOC provides a method call "getWrappedInstance" to get a ref to the wrapped
-      ReactTable and then get the internal state and the "sortedData".
-      That can then be iterrated to get all the currently visible records and set
-      the selection state.
-    */
-    const selectAll = this.state.selectAll ? false : true;
-    const selection = [];
-    if (selectAll) {
-      // we need to get at the internals of ReactTable
-      const wrappedInstance = this.selectTable.getWrappedInstance();
-      // the "sortedData" property contains the currently accessible records based on the filter and sort
-      const currentRecords = wrappedInstance.getResolvedState().sortedData;
-      // we need to get all the "real" (original) records out to get at their IDs
-      const nodes = getNodes(currentRecords);
-      // we just push all the IDs onto the selection array
-      nodes.forEach(item => {
-        selection.push(item._id);
-      });
-    }
-    this.setState({ selectAll, selection });
-  };
-  isSelected = key => {
-    /*
-      Instead of passing our external selection state we provide an "isSelected"
-      callback and detect the selection state ourselves. This allows any implementation
-      for selection (either an array, object keys, or even a Javascript Set object).
-    */
-    return this.state.selection.includes(key);
-  };
-  logSelection = () => {
-    console.log("selection:", this.state.selection);
-  };
-  toggleType = () => {
-    this.setState({
-      selectType: this.state.selectType === "radio" ? "checkbox" : "radio",
-      selection: [],
-      selectAll: false,
-    });
-  };
-  toggleTree = () => {
-    if (this.state.pivotBy.length) {
-      this.setState({ pivotBy: [], expanded: {} });
-    } else {
-      this.setState({ pivotBy: [], expanded: {} });
-    }
-  };
-
-  onExpandedChange = (newExpanded, index, event) => {
-    const { data } = this.state;
-    this.setState({ expanded: newExpanded });
-    const expansionArr = [...this.state.expansionArr];
-    expansionArr[index] = expansionArr[index] ? false : data[index].seriesUID;
-    this.setState({ expansionArr });
-    const obj = {
-      patient: this.props.patientIndex,
-      study: this.props.studyIndex,
-      series: { [index]: newExpanded[index] },
-    };
-    this.props.getTreeExpandSingle(obj);
-  };
-
-  handleSelectSeries = row => {
-    if (!this.state.series.find(serie => serie.seriesId === row.seriesUID)) {
-      this.props.dispatch(
-        selectSeries(
-          row.projectID,
-          this.props.subjectId,
-          row.studyUID,
-          row.seriesUID
-        )
-      );
-    }
-    this.props.history.push("/display");
-  };
-
-  handleCloseModal = () => {
-    this.setState({ showGridFullWarning: false });
-  };
-
-  dispatchSerieDisplay = selected => {
-    const openSeries = Object.values(this.props.openSeries);
+  const dispatchSerieDisplay = selected => {
+    const openSeries = Object.values(props.openSeries);
     const { patientID, studyUID } = selected;
     let isSerieOpen = false;
 
@@ -563,7 +150,7 @@ class Series extends Component {
       for (let i = 0; i < openSeries.length; i++) {
         if (openSeries[i].seriesUID === selected.seriesUID) {
           isSerieOpen = true;
-          this.props.dispatch(changeActivePort(i));
+          props.dispatch(changeActivePort(i));
           break;
         }
         // }
@@ -574,22 +161,22 @@ class Series extends Component {
     if (!isSerieOpen) {
       //if the grid is full show warning
       if (isGridFull) {
-        // this.setState({ showGridFullWarning: true });
-        this.props.dispatch(alertViewPortFull());
+        // setState({ showGridFullWarning: true });
+        props.dispatch(alertViewPortFull());
       } else {
-        this.props.dispatch(addToGrid(selected));
-        this.props
+        props.dispatch(addToGrid(selected));
+        props
           .dispatch(getSingleSerie(selected))
           .then(() => {})
-          .catch(err => console.log(err));
+          .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
-        if (!this.props.patients[selected.patientID]) {
-          // this.props.dispatch(getWholeData(selected));
+        if (!props.patients[selected.patientID]) {
+          // props.dispatch(getWholeData(selected));
           getWholeData(selected);
         } else {
-          this.props.dispatch(
+          props.dispatch(
             updatePatient(
-              "serie",
+              'serie',
               true,
               patientID,
               studyUID,
@@ -597,117 +184,258 @@ class Series extends Component {
             )
           );
         }
+        props.history.push('/display');
       }
     }
-    this.props.dispatch(clearSelection());
+    props.dispatch(clearSelection());
   };
 
-  closeExpansionFromSub = index => {
-    const expanded = { ...this.state.expanded };
-    expanded[index] = false;
-    this.setState({ expanded });
-    const obj = {
-      patient: this.props.patientIndex,
-      study: this.props.studyIndex,
-      series: { [index]: false },
-    };
-    this.props.getTreeExpandSingle(obj);
+  const columns = React.useMemo(
+    () => [
+      {
+        id: 'series-expander',
+        width: 35,
+        Cell: ({ row, toggleRowExpanded }) => {
+          const style = {
+            display: 'flex',
+            width: 'fit-content',
+            paddingLeft: '20px'
+          };
+
+          return (
+            <div style={style}>
+              <div onMousEnter={validateSeriesSelect}>
+                <input
+                  type="checkbox"
+                  style={{ marginRight: '5px' }}
+                  disabled={selectedLevel}
+                  onClick={() => {
+                    props.dispatch(clearSelection('serie'));
+                    props.dispatch(selectSerie(row.original));
+                  }}
+                />
+              </div>
+              <span
+                {...row.getToggleRowExpandedProps({
+                  style: {
+                    cursor: 'pointer',
+                    fontSize: 10,
+                    textAlign: 'center',
+                    userSelect: 'none',
+                    color: '#fafafa',
+                    verticalAlign: 'middle'
+                  }
+                })}
+                onClick={() => {
+                  const expandStatus = row.isExpanded ? false : true;
+                  const obj = {
+                    patient: props.patientIndex,
+                    study: props.studyIndex,
+                    series: { [row.index]: expandStatus ? {} : false }
+                  };
+                  toggleRowExpanded(row.id, expandStatus);
+                  props.getTreeExpandSingle(obj);
+                }}
+              >
+                {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
+              </span>
+            </div>
+          );
+        }
+      },
+      {
+        width: widthUnit * 12,
+        id: 'study-desc',
+        Cell: ({ row }) => {
+          let desc = row.original.seriesDescription || 'Unnamed Series';
+          let id = 'desc' + row.original.seriesUID;
+          return (
+            <>
+              <span
+                data-tip
+                data-for={id}
+                className="searchView-row__desc"
+                onDoubleClick={() => dispatchSerieDisplay(row.original)}
+                style={{ paddingLeft: '20px' }}
+              >
+                {desc}
+              </span>
+              <ReactTooltip
+                id={id}
+                place="top"
+                type="info"
+                delayShow={500}
+                clickable={true}
+              >
+                <span>{desc}</span>
+              </ReactTooltip>
+            </>
+          );
+        }
+      },
+      {
+        width: widthUnit * 2,
+        id: 'numberOfAnnotations',
+        className: 'searchView-table__cell',
+        Cell: ({ row }) => (
+          <div className="searchView-table__cell">
+            {row.original.numberOfAnnotations === 0 ? (
+              ''
+            ) : (
+              <span className="badge badge-secondary">
+                {row.original.numberOfAnnotations}
+              </span>
+            )}
+          </div>
+        )
+      },
+      {
+        //subitem
+        width: widthUnit * 3,
+        id: 'series-subitem',
+        className: 'searchView-table__cell',
+        Cell: () => <div />
+      },
+      {
+        width: widthUnit * 3,
+        accessor: 'numberOfImages',
+        className: 'searchView-table__cell'
+      },
+      {
+        width: widthUnit * 5,
+        id: 'series-examtype',
+        className: 'searchView-table__cell',
+        Cell: ({ row }) => (
+          <span className="searchView-table__cell">
+            {row.original.examType}
+          </span>
+        )
+      },
+      {
+        width: widthUnit * 7,
+        id: 'series-seriesDate',
+        className: 'searchView-table__cell',
+        Cell: ({ row }) => (
+          <div className="searchView-table__cell">
+            {formatDate(row.original.seriesDate)}
+          </div>
+        )
+      },
+      {
+        width: widthUnit * 7,
+        id: 'series-createdTime',
+        className: 'searchView-table__cell',
+        Cell: ({ row }) => (
+          <div className="searchView-table__cell">
+            {formatDate(row.original.createdTime)}
+          </div>
+        )
+      },
+      {
+        Header: 'Accession',
+        width: widthUnit * 6,
+        className: 'searchView-table__cell',
+        Cell: ({ row }) => (
+          <div className="searchView-table__cell">
+            {row.original.accessionNumber}
+          </div>
+        )
+      },
+      {
+        width: widthUnit * 10,
+        id: 'seriesUID',
+        className: 'searchView-table__cell',
+        Cell: ({ row }) => (
+          <>
+            <div
+              className="searchView-table__cell"
+              data-tip
+              data-for={row.original.seriesUID}
+            >
+              {row.original.seriesUID}
+            </div>{' '}
+            <ReactTooltip
+              id={row.original.seriesUID}
+              place="top"
+              type="info"
+              delayShow={500}
+              clickable={true}
+            >
+              <span>{row.original.seriesUID}</span>
+            </ReactTooltip>
+          </>
+        )
+      }
+    ],
+    [selectedLevel, warningSeen]
+  );
+
+  const getDataFromStorage = (projectID, subjectID, studyUID) => {
+    const treeData = JSON.parse(localStorage.getItem('treeData'));
+    const project = treeData[projectID];
+    const patient = project && project[subjectID] ? project[subjectID] : null;
+    const study =
+      patient && patient.studies[studyUID] ? patient.studies[studyUID] : null;
+    const seriesArray = study
+      ? Object.values(study.series).map(el => el.data)
+      : [];
+
+    return seriesArray;
   };
 
-  render() {
-    const {
-      toggleSelection,
-      toggleAll,
-      isSelected,
-      logSelection,
-      toggleType,
-      onExpandedChange,
-      toggleTree,
-    } = this;
-    const { data, columns, selectAll, selectType, expanded } = this.state;
-    const extraProps = {
-      selectAll,
-      isSelected,
-      toggleAll,
-      toggleSelection,
-      selectType,
-      onExpandedChange,
-      expanded,
-    };
+  useEffect(() => {
+    const { pid, subjectID, studyUID, getTreeData } = props;
+    const dataFromStorage = getDataFromStorage(pid, subjectID, studyUID);
+    let data = [];
+    if (pid && pid !== 'null' && subjectID) {
+      if (dataFromStorage?.length > 0) {
+        data = dataFromStorage;
+        setData(data);
+      } else {
+        setLoading(true);
+        getSeries(pid, subjectID, studyUID)
+          .then(res => {
+            setLoading(false);
+            getTreeData(pid, 'series', res.data);
+            setData(res.data);
+          })
+          .catch(err => {
+            console.error(err);
+          });
+      }
+    }
+  }, []);
 
-    const TheadComponent = props => null;
-    return (
-      <>
-        <div>
-          {this.state.data ? (
-            <TreeTable
-              NoDataComponent={() => null}
-              data={this.state.data}
-              columns={this.state.columns}
-              pageSize={this.state.data.length}
-              ref={r => (this.selectTable = r)}
-              className="-striped -highlight"
-              freezWhenExpanded={false}
-              showPagination={false}
-              TheadComponent={TheadComponent}
-              {...extraProps}
-              getTdProps={(state, rowInfo, column, instance) => {
-                return {
-                  onDoubleClick: (e, handleOriginal) => {
-                    this.handleSelectSeries(rowInfo.original);
-                    if (handleOriginal) {
-                      handleOriginal();
-                    }
-                    this.dispatchSerieDisplay(rowInfo.original);
-                  },
-                };
-              }}
-              SubComponent={row => {
-                return (
-                  <div style={{ paddingLeft: "20px" }}>
-                    <Annotations
-                      projectId={this.props.projectId}
-                      subjectId={this.props.subjectId}
-                      studyId={row.original.studyUID}
-                      seriesId={row.original.seriesUID}
-                      studyDescription={this.props.studyDescription}
-                      seriesDescription={row.original.seriesDescription}
-                      update={this.props.update}
-                      // updateExpandedLevelNums={
-                      //   this.props.updateExpandedLevelNums
-                      // }
-                      expandLevel={this.props.expandLevel}
-                      progressUpdated={this.props.progressUpdated}
-                      expansionArr={this.state.expansionArr}
-                      expandLevel={this.props.expandLevel}
-                      closeExpand={this.closeExpansionFromSub}
-                      // expandLoading={this.props.expandLoading}
-                      treeExpand={this.props.treeExpand}
-                      patientIndex={this.props.patientIndex}
-                      studyIndex={this.props.studyIndex}
-                      seriesIndex={row.index}
-                    />
-                  </div>
-                );
-              }}
-            />
-          ) : null}
-        </div>
-        {this.state.showGridFullWarning && (
-          <AlertGridFull onOK={this.handleCloseModal} />
-        )}
-      </>
-    );
-  }
+  return (
+    <>
+      {loading && (
+        <tr style={{ width: 'fit-content', margin: 'auto', marginTop: '10%' }}>
+          <PropagateLoader color={'#7A8288'} loading={loading} margin={8} />
+        </tr>
+      )}
+      <Table
+        columns={columns}
+        data={data}
+        studyDescription={props.studyDescription}
+        expandLevel={props.expandLevel}
+        patientIndex={props.patientIndex}
+        getTreeExpandAll={props.getTreeExpandAll}
+        treeExpand={props.treeExpand}
+        studyIndex={props.studyIndex}
+        getTreeExpandSingle={props.getTreeExpandSingle}
+      />
+    </>
+  );
 }
 
 const mapStateToProps = state => {
   return {
-    series: state.searchViewReducer.series,
-    openSeries: state.annotationsListReducer.openSeries,
-    patients: state.annotationsListReducer.patients,
-    activePort: state.annotationsListReducer.activePort,
+    selectedPatients: state.annotationsListReducer.selectedPatients,
+    selectedStudies: state.annotationsListReducer.selectedStudies,
     selectedSeries: state.annotationsListReducer.selectedSeries,
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+    openSeries: state.annotationsListReducer.openSeries,
+    patients: state.annotationsListReducer.patients
   };
 };
 

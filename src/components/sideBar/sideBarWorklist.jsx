@@ -1,5 +1,5 @@
 import React from "react";
-import Table from "react-table";
+import Table from "react-table-v6";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
 import { FaRegEye } from "react-icons/fa";

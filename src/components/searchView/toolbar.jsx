@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   FaEye,
   FaDownload,
@@ -9,24 +9,29 @@ import {
   FaLevelUpAlt,
   FaClipboardList,
   FaEdit,
-  FaProjectDiagram,
-} from "react-icons/fa";
-import { FiMinimize2 } from "react-icons/fi";
-import ReactTooltip from "react-tooltip";
-import { BarLoader } from "react-spinners";
+  FaProjectDiagram
+} from 'react-icons/fa';
+import { FiMinimize2 } from 'react-icons/fi';
+import ReactTooltip from 'react-tooltip';
+import { BarLoader } from 'react-spinners';
 
-const mode = sessionStorage.getItem("mode");
+const mode = sessionStorage.getItem('mode');
 
 const toolBar = props => {
   const { project } = props;
-  const noUpload = project === "all" || project === "nonassigned";
+  const noUpload = project === 'all' || project === 'nonassigned';
   return (
     <div className="searchView-toolbar">
       <div className="searchView-toolbar__group">
-        <div className="searchView-toolbar__icon" onClick={props.onView}>
+        <div
+          className={
+            props.hideEyeIcon ? 'hide-delete' : 'searchView-toolbar__icon'
+          }
+          onClick={props.onView}
+        >
           <div>
             <FaEye
-              style={{ fontSize: "1.2rem" }}
+              style={{ fontSize: '1.2rem' }}
               data-tip
               data-for="view-icon"
             />
@@ -43,7 +48,7 @@ const toolBar = props => {
         <div className="searchView-toolbar__icon" onClick={props.onDownload}>
           <div>
             <FaDownload
-              style={{ fontSize: "1.2rem" }}
+              style={{ fontSize: '1.2rem' }}
               data-tip
               data-for="download-icon"
             />
@@ -58,12 +63,12 @@ const toolBar = props => {
           </ReactTooltip>
         </div>
         <div
-          className={noUpload ? "hide-delete" : "searchView-toolbar__icon"}
+          className={noUpload ? 'hide-delete' : 'searchView-toolbar__icon'}
           onClick={noUpload ? null : props.onUpload}
         >
           <div>
             <FaUpload
-              style={{ fontSize: "1.2rem" }}
+              style={{ fontSize: '1.2rem' }}
               data-tip
               data-for="upload-icon"
             />
@@ -82,12 +87,12 @@ const toolBar = props => {
         <div
           onClick={props.showDelete ? props.onDelete : null}
           className={
-            props.showDelete ? "searchView-toolbar__icon" : "hide-delete"
+            props.showDelete ? 'searchView-toolbar__icon' : 'hide-delete'
           }
         >
           <div>
             <FaTrashAlt
-              style={{ fontSize: "1.2rem" }}
+              style={{ fontSize: '1.2rem' }}
               data-tip
               data-for="delete-icon"
             />
@@ -110,7 +115,7 @@ const toolBar = props => {
       <div className="searchView-toolbar__icon" onClick={props.onExpand}>
         <div>
           <FaLevelDownAlt
-            style={{ fontSize: "1.2rem" }}
+            style={{ fontSize: '1.2rem' }}
             data-tip
             data-for="forward-icon"
           />
@@ -129,7 +134,7 @@ const toolBar = props => {
       <div className="searchView-toolbar__icon" onClick={props.onShrink}>
         <div>
           <FaLevelUpAlt
-            style={{ fontSize: "1.2rem" }}
+            style={{ fontSize: '1.2rem' }}
             data-tip
             data-for="back-icon"
           />
@@ -146,7 +151,7 @@ const toolBar = props => {
       <div className="searchView-toolbar__icon" onClick={props.onCloseAll}>
         <div>
           <FiMinimize2
-            style={{ fontSize: "1.5rem", strokeWidth: "3px" }}
+            style={{ fontSize: '1.5rem', strokeWidth: '3px' }}
             data-tip
             data-for="minimize-icon"
           />
@@ -165,14 +170,14 @@ const toolBar = props => {
       <div
         className={
           props.showAddTo
-            ? "searchView-toolbar__icon worklist-icon"
-            : "hide-delete"
+            ? 'searchView-toolbar__icon worklist-icon'
+            : 'hide-delete'
         }
         onClick={props.showAddTo ? props.onWorklist : null}
       >
         <div>
           <FaClipboardList
-            style={{ fontSize: "1.2rem" }}
+            style={{ fontSize: '1.2rem' }}
             data-tip
             data-for="worklist-icon"
           />
@@ -187,18 +192,18 @@ const toolBar = props => {
         </ReactTooltip>
       </div>
 
-      {mode !== "lite" && (
+      {mode !== 'lite' && (
         <div
           className={
             props.showAddTo
-              ? "searchView-toolbar__icon project-icon"
-              : "hide-delete"
+              ? 'searchView-toolbar__icon project-icon'
+              : 'hide-delete'
           }
           onClick={props.showAddTo ? props.onAddProject : null}
         >
           <div>
             <FaProjectDiagram
-              style={{ fontSize: "1.2rem" }}
+              style={{ fontSize: '1.2rem' }}
               data-tip
               data-for="project-icon"
             />
@@ -225,16 +230,16 @@ const toolBar = props => {
       <ReactTooltip id="ann-icon" place="bottom" type="info" delayShow={1000}>
         <span>Add annotation</span>
       </ReactTooltip> */}
-      {props.project && mode !== "lite" && (
+      {props.project && mode !== 'lite' && (
         <div className="searchView-toolbar__group">
           {props.admin && (
             <div
               className={
-                props.showTagEditor ? "searchView-toolbar__icon" : "hide-delete"
+                props.showTagEditor ? 'searchView-toolbar__icon' : 'hide-delete'
               }
               onClick={props.showTagEditor ? props.onUploadWizard : null}
             >
-              <div style={{ fontSize: "1.2rem" }}>
+              <div style={{ fontSize: '1.2rem' }}>
                 <FaEdit data-tip data-for="editor-icon" />
               </div>
 
@@ -254,7 +259,7 @@ const toolBar = props => {
           >
             <div>
               <FaPlusCircle
-                style={{ fontSize: "1.2rem" }}
+                style={{ fontSize: '1.2rem' }}
                 data-tip
                 data-for="new-icon"
               />

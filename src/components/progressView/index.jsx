@@ -1,5 +1,5 @@
 import React from "react";
-import ReactTable from "react-table";
+import ReactTable from "react-table-v6";
 import _ from "lodash";
 import Badge from "react-bootstrap/Badge";
 import ReactTooltip from "react-tooltip";

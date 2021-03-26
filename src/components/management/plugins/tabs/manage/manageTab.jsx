@@ -1,5 +1,5 @@
 import React, { Fragment } from "react";
-import ReactTable from "react-table";
+import ReactTable from "react-table-v6";
 import {
   FaRegTrashAlt,
   FaCogs,

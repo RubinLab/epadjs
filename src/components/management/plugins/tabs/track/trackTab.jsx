@@ -1,5 +1,5 @@
 import React from "react";
-import ReactTable from "react-table";
+import ReactTable from "react-table-v6";
 import { connect } from "react-redux";
 import { Modal } from "react-bootstrap";
 import { toast } from "react-toastify";

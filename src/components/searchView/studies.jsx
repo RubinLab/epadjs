@@ -1,17 +1,19 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
-import ReactTable from "react-table";
-import { withRouter } from "react-router-dom";
-import { FaBatteryEmpty, FaBatteryFull, FaBatteryHalf } from "react-icons/fa";
-import selectTableHOC from "react-table/lib/hoc/selectTable";
-import treeTableHOC from "react-table/lib/hoc/treeTable";
-import { toast } from "react-toastify";
-import { getStudies } from "../../services/studyServices";
-import { getSeries } from "../../services/seriesServices";
-import SelectSeriesModal from "../annotationsList/selectSerieModal";
-import { MAX_PORT, widthUnit, formatDates } from "../../constants";
-import Series from "./series";
-import ReactTooltip from "react-tooltip";
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+  useTable,
+  useExpanded
+} from 'react-table';
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
+import ReactTooltip from 'react-tooltip';
+import PropagateLoader from 'react-spinners/PropagateLoader';
+import { getStudies } from '../../services/studyServices';
+import Series from './Series';
+import { formatDate } from '../flexView/helperMethods';
+import { getSeries } from '../../services/seriesServices';
+import { clearCarets  } from '../../Utils/aid.js';
+import { MAX_PORT } from '../../constants';
+
 import {
   getSingleSerie,
   selectStudy,
@@ -22,519 +24,126 @@ import {
   addToGrid,
   getWholeData,
   alertViewPortFull,
-  updatePatient,
-  // showAnnotationDock
-} from "../annotationsList/action";
-import { persistExpandView, styleEightDigitDate } from "../../Utils/aid";
+  updatePatient
+} from '../annotationsList/action';
 
-//import "react-table/react-table.css";
+function Table({
+  columns,
+  data,
+  getTreeData,
+  expandLevel,
+  patientIndex,
+  getTreeExpandAll,
+  getTreeExpandSingle,
+  treeExpand
+}) {
+  const {
+    rows,
+    prepareRow,
+    toggleAllRowsExpanded,
+    state: { expanded }
+  } = useTable(
+    {
+      columns,
+      data
+    },
+    useExpanded // Use the useExpanded plugin hook
+  );
 
-function getNodes(data, node = []) {
-  data.forEach(item => {
-    if (item.hasOwnProperty("_subRows") && item._subRows) {
-      node = getNodes(item._subRows, node);
-    } else {
-      node.push(item._original);
+  useEffect(() => {
+    const obj = { patient: patientIndex, study: data.length };
+    if (expandLevel === 2) {
+      toggleAllRowsExpanded(true);
+      getTreeExpandAll(obj, true, expandLevel);
     }
-  });
-  return node;
+    if (expandLevel === 1) {
+      toggleAllRowsExpanded(false);
+      getTreeExpandAll(obj, false, expandLevel);
+    }
+  }, [expandLevel]);
+
+  return (
+    <>
+      {data.length > 0 && (
+        <>
+          {rows.map((row, i) => {
+            prepareRow(row);
+            const isExpandedFromToolbar = treeExpand[patientIndex]
+              ? treeExpand[patientIndex][row.index]
+              : false;
+            const expandRow = row.isExpanded || isExpandedFromToolbar;
+            const style = { height: '2.5rem', background: '#272b30' };
+            return (
+              <>
+                <tr {...row.getRowProps()} key={`study-row ${i}`} style={style}>
+                  {row.cells.map(cell => {
+                    return (
+                      <td
+                        {...cell.getCellProps({
+                          className: cell.column.className
+                        })}
+                      >
+                        {cell.render('Cell')}
+                      </td>
+                    );
+                  })}
+                </tr>
+                {expandRow && (
+                  <Series
+                    pid={row.original.projectID}
+                    subjectID={row.original.patientID}
+                    studyUID={row.original.studyUID}
+                    getTreeData={getTreeData}
+                    studyDescription={row.original.studyDescription}
+                    expandLevel={expandLevel}
+                    patientIndex={row.index}
+                    getTreeExpandAll={getTreeExpandAll}
+                    treeExpand={treeExpand}
+                    studyIndex={row.index}
+                    getTreeExpandSingle={getTreeExpandSingle}
+                  />
+                )}
+              </>
+            );
+          })}
+        </>
+      )}
+    </>
+  );
 }
 
-const progressDisplay = status => {
-  if (status === "STUDY_STATUS_COMPLETED") {
-    return <FaBatteryFull className="progress-done" />;
-  } else if (status === "STUDY_STATUS_NOT_STARTED") {
-    return <FaBatteryEmpty className="progress-notStarted" />;
-  } else if (status === "STUDY_STATUS_IN_PROGRESS") {
-    return <FaBatteryHalf className="progress-inProgress" />;
-  } else {
-    return <div>{status}</div>;
-  }
-};
-// const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
+function Studies(props) {
+  const widthUnit = 20;
 
-const TreeTable = treeTableHOC(ReactTable);
+  const [data, setData] = useState([]);
+  let [loading, setLoading] = useState(false);
+  const [warningSeen, setWarningSeen] = useState(false);
+  const [selectedLevel, setSelectedLevel] = useState(false);
 
-class Studies extends Component {
-  constructor(props) {
-    super(props);
-    this.widthUnit = 20;
-    this.state = {
-      columns: [],
-      selection: [],
-      selectAll: false,
-      selectType: "checkbox",
-      expanded: {},
-      selectedStudy: {},
-      isSerieSelectionOpen: false,
-      childExpanded: {},
-      expansionArr: [],
-    };
-  }
+  useEffect(() => {
+    const { selectedPatients, selectedSeries, selectedAnnotations } = props;
+    const patients = Object.values(selectedPatients);
+    const series = Object.values(selectedSeries);
+    const annotations = Object.values(selectedAnnotations);
 
-  async componentDidMount() {
-    try {
-      const {
-        projectId,
-        subjectId,
-        expansionArr,
-        expandLevel,
-        treeExpand,
-        patientIndex,
-        treeData,
-        closeExpand,
-      } = this.props;
-      let data = [];
-      if (treeData[projectId] && treeData[projectId][subjectId]) data = Object.values(treeData[projectId][subjectId].studies);
-      if (data.length > 0) {
-        data = data.map(el => el.data);
-      } else {
-        let studies = await getStudies(projectId, subjectId);
-        data = studies.data;
-        this.props.getTreeData(projectId, "studies", data);
-      }
-      this.setState({ data });
-      this.setState({ columns: this.setColumns() });
-      const studyOpened = expansionArr.includes(subjectId);
-      // const alreadyCounted = expandLoading.numOfPresentStudies > 0;
-      // if (!studyOpened && expandLevel === 1 && !patientExpandComplete) {
-      //   this.props.updateExpandedLevelNums("subject", data.length, 1);
-      // }
-      if (expandLevel > 1) {
-        this.expandCurrentLevel();
-        const obj = {
-          patient: this.props.patientIndex,
-          study: data.length,
-        };
-        this.props.getTreeExpandAll(obj, true, expandLevel);
-      }
-      if (data.length === 0) {
-        toast.info("No study found", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-        closeExpand(patientIndex);
-      }
-      const expanded = {};
-      if (treeExpand[patientIndex]) {
-        const ptExpandKeys = Object.keys(treeExpand[patientIndex]);
-        const ptExpandVal = Object.values(treeExpand[patientIndex]);
-        ptExpandKeys.forEach((el, index) => {
-          expanded[el] = ptExpandVal[index];
-        });
-        this.setState({ expanded });
-      }
-    } catch (err) {
-      console.error(err);
-      console.log(`couldn't load all study data. Please Try again!`);
-    }
-  }
+    if (patients.length) setSelectedLevel('patients');
+    else if (series.length) setSelectedLevel('series');
+    else if (annotations.length) setSelectedLevel('annotations');
+    else setSelectedLevel('');
+  }, [props.selectedStudies, props.selectedSeries, props.selectedAnnotations]);
 
-  async componentDidUpdate(prevProps) {
-    try {
-      const {
-        patientIndex,
-        update,
-        treeExpand,
-        closeAllCounter,
-        selectedStudies,
-      } = this.props;
-
-      if (closeAllCounter !== prevProps.closeAllCounter) {
-        this.setState({ expanded: {}, expansionArr: [] });
-      }
-
-      if (update !== prevProps.update && treeExpand[patientIndex]) {
-        const { data: data } = await getStudies(
-          this.props.projectId,
-          this.props.subjectId
-        );
-        const expanded = persistExpandView(
-          this.state.expanded,
-          this.state.data,
-          data,
-          "studyUID"
-        );
-        await this.setState({ data, expanded });
-        this.props.getTreeData(this.props.projectId, "studies", data);
-      }
-      const { expansionArr, expandLevel, subjectId } = this.props;
-      const studyOpened = expansionArr.includes(subjectId);
-      if (expandLevel != prevProps.expandLevel) {
-        expandLevel >= 2
-          ? this.expandCurrentLevel()
-          : this.setState({ expanded: {} });
-
-        const expandedToStudies =
-          prevProps.expandLevel < expandLevel && expandLevel === 1;
-        // if (expandedToStudies && studyOpened) {
-        //   this.props.updateExpandedLevelNums(
-        //     "subject",
-        //     this.state.data.length,
-        //     1
-        //   );
-        // }
-        const shrinkedToStudy =
-          prevProps.expandLevel > expandLevel && expandLevel === 1;
-        const expandToSeries =
-          prevProps.expandLevel < expandLevel && expandLevel === 2;
-        const obj = {
-          patient: this.props.patientIndex,
-          study: this.state.data.length,
-        };
-        if (shrinkedToStudy) {
-          this.setState({ expansionArr: [] });
-          this.props.getTreeExpandAll(obj, false, expandLevel);
-        }
-        if (expandToSeries) {
-          this.props.getTreeExpandAll(obj, true, expandLevel);
-        }
-      }
-
-      const expanded = Object.keys(this.props.treeExpand);
-      const oldExpanded = Object.keys(prevProps.treeExpand);
-      const shouldCollapse = expanded.length === 0 && oldExpanded > 0;
-      if (shouldCollapse) this.setState({ expanded: {} });
-
-      const newSelectedStArr = Object.keys(selectedStudies);
-      const oldSelectedStArr = Object.keys(prevProps.selectedStudies);
-      if (newSelectedStArr.length !== oldSelectedStArr.length) {
-        this.setState({ columns: this.setColumns() });
-      }
-
-      if (this.props.treeData !== prevProps.treeData) {
-        const { projectId, subjectId } = this.props;
-        let studies = await getStudies(projectId, subjectId);
-        const { data } = studies;
-        this.setState({ data });
-      }
-    } catch (err) {
-      console.log(`couldn't load all study data. Please Try again!`);
-      console.error(err);
-    }
-  }
-
-  expandCurrentLevel = async () => {
-    try {
-      const expansionArr = [];
-      const expanded = {};
-      if (this.state.data)
-        for (let i = 0; i < this.state.data.length; i++) {
-          expanded[i] = this.state.data[i].numberOfSeries ? true : false;
-        }
-      this.setState({ expanded });
-    } catch (err) {
-      console.log(`couldn't load all study data. Please Try again!`);
-      console.error(err);
+  const validateStudySelect = () => {
+    if (selectedLevel && !warningSeen) {
+      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a study!`;
+      window.alert(message);
+      setWarningSeen(true);
     }
   };
 
-  selectRow = selected => {
-    // const { studyUID, numberOfSeries, patientID, projectID } = selected;
-    // const studyObj = { studyUID, numberOfSeries, patientID, projectID };
-    // const newState = { ...this.state.selectedStudy };
-    // newState[studyUID]
-    //   ? delete newState[studyUID]
-    //   : (newState[studyUID] = studyObj);
-    // this.setState({ selectedStudy: newState });
-    this.props.dispatch(clearSelection("study"));
-    this.props.dispatch(selectStudy(selected));
-  };
-
-  cleanCarets(string) {
-    var i = 0,
-      length = string.length;
-    for (i; i < length; i++) {
-      string = string.replace("^", " ");
-    }
-    return string;
-  }
-
-  setColumns() {
-    const { selectedStudies } = this.props;
-    const columns = [
-      {
-        expander: true,
-        width: 35,
-        Expander: ({ isExpanded, ...rest }) => (
-          <div>
-            {isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
-          </div>
-        ),
-        style: {
-          cursor: "pointer",
-          fontSize: 10,
-          padding: "0",
-          textAlign: "center",
-          userSelect: "none",
-          color: "#fafafa",
-          padding: "7px 5px",
-          verticalAlign: "middle",
-        },
-      },
-      {
-        id: "searchView-checkbox",
-        accessor: "",
-        width: this.widthUnit,
-        Cell: ({ original }) => {
-          const { studyUID, projectID } = original;
-          const selected =
-            selectedStudies[studyUID] &&
-            selectedStudies[studyUID].projectID === projectID;
-          return (
-            <input
-              type="checkbox"
-              className="checkbox-cell"
-              checked={selected}
-              onChange={() => this.selectRow(original)}
-            />
-          );
-        },
-      },
-      {
-        width: this.widthUnit * 12,
-        className: "searchView-row__desc",
-        Cell: row => {
-          let desc = this.cleanCarets(row.original.studyDescription);
-          desc = desc || "Unnamed Study";
-          const id = "desc" + row.original.studyUID;
-          return (
-            <>
-              <div data-tip data-for={id} style={{ whiteSpace: "pre-wrap" }}>
-                {desc}
-              </div>
-              <ReactTooltip
-                id={id}
-                place="right"
-                type="info"
-                delayShow={500}
-                clickable={true}
-              >
-                <span>{desc}</span>
-              </ReactTooltip>
-            </>
-          );
-        },
-      },
-      {
-        width: this.widthUnit * 2,
-        Cell: row => (
-          <div className="searchView-table__cell">
-            {row.original.numberOfAnnotations === 0 ? (
-              ""
-            ) : (
-              <span className="badge badge-secondary">
-                {row.original.numberOfAnnotations}
-              </span>
-            )}
-          </div>
-        ),
-      },
-      {
-        width: this.widthUnit * 3,
-        Cell: row => (
-          <div className="searchView-table__cell">
-            {row.original.numberOfSeries === "" ? (
-              ""
-            ) : (
-              <span className="badge badge-secondary">
-                {row.original.numberOfSeries}{" "}
-              </span>
-            )}
-          </div>
-        ),
-      },
-      {
-        width: this.widthUnit * 3,
-        Cell: row => (
-          <div className="searchView-table__cell">
-            {row.original.numberOfImages === "" ? (
-              ""
-            ) : (
-              <span className="badge badge-secondary">
-                {row.original.numberOfImages}
-              </span>
-            )}
-          </div>
-        ),
-      },
-      {
-        //Header: "Type",
-        width: this.widthUnit * 5,
-        Cell: row => (
-          <div className="searchView-table__cell">
-            {row.original.examTypes.join("/")}
-          </div>
-        ),
-      },
-      {
-        //Header: "Study/Created Date",
-        width: this.widthUnit * 7,
-        Cell: row => (
-          <div className="searchView-table__cell">
-            {styleEightDigitDate(row.original.insertDate)}
-          </div>
-        ),
-      },
-      {
-        //Header: "Uploaded",
-        width: this.widthUnit * 7,
-        Cell: row => (
-          <div className="searchView-table__cell">
-            {styleEightDigitDate(row.original.createdTime)}
-          </div>
-        ),
-      },
-      {
-        //Header: "Accession",
-        width: this.widthUnit * 6,
-        Cell: row => (
-          <>
-            <div
-              className="searchView-table__cell"
-              data-tip
-              data-for={row.original.studyAccessionNumber}
-            >
-              {row.original.studyAccessionNumber}
-            </div>
-            <ReactTooltip
-              id={row.original.studyAccessionNumber}
-              place="right"
-              type="info"
-              delayShow={500}
-              clickable={true}
-            >
-              <span>{row.original.studyAccessionNumber}</span>
-            </ReactTooltip>
-          </>
-        ),
-      },
-      {
-        //Header: "Identifier",
-        width: this.widthUnit * 10,
-        Cell: row => (
-          <>
-            <div data-tip data-for={row.original.studyUID}>
-              {row.original.studyUID}
-            </div>{" "}
-            <ReactTooltip
-              id={row.original.studyUID}
-              place="top"
-              type="info"
-              delayShow={500}
-              clickable={true}
-            >
-              <span>{row.original.studyUID}</span>
-            </ReactTooltip>
-          </>
-        ),
-      },
-    ];
-    return columns;
-  }
-
-  toggleSelection = (key, shift, row) => {
-    /*
-      Implementation of how to manage the selection state is up to the developer.
-      This implementation uses an array stored in the component state.
-      Other implementations could use object keys, a Javascript Set, or Redux... etc.
-    */
-    // start off with the existing state
-    if (this.state.selectType === "radio") {
-      let selection = [];
-      if (selection.indexOf(key) < 0) selection.push(key);
-      this.setState({ selection });
-    } else {
-      let selection = [...this.state.selection];
-      const keyIndex = selection.indexOf(key);
-      // check to see if the key exists
-      if (keyIndex >= 0) {
-        // it does exist so we will remove it using destructing
-        selection = [
-          ...selection.slice(0, keyIndex),
-          ...selection.slice(keyIndex + 1),
-        ];
-      } else {
-        // it does not exist so add it
-        selection.push(key);
-      }
-      // update the state
-      this.setState({ selection });
-    }
-  };
-  toggleAll = () => {
-    /*
-      "toggleAll" is a tricky concept with any filterable table
-      do you just select ALL the records that are in your data?
-      OR
-      do you only select ALL the records that are in the current filtered data?
-
-      The latter makes more sense because "selection" is a visual thing for the user.
-      This is especially true if you are going to implement a set of external functions
-      that act on the selected information (you would not want to DELETE the wrong thing!).
-
-      So, to that end, access to the internals of ReactTable are required to get what is
-      currently visible in the table (either on the current page or any other page).
-
-      The HOC provides a method call "getWrappedInstance" to get a ref to the wrapped
-      ReactTable and then get the internal state and the "sortedData".
-      That can then be iterrated to get all the currently visible records and set
-      the selection state.
-    */
-    const selectAll = this.state.selectAll ? false : true;
-    const selection = [];
-    if (selectAll) {
-      // we need to get at the internals of ReactTable
-      const wrappedInstance = this.selectTable.getWrappedInstance();
-      // the "sortedData" property contains the currently accessible records based on the filter and sort
-      const currentRecords = wrappedInstance.getResolvedState().sortedData;
-      // we need to get all the "real" (original) records out to get at their IDs
-      const nodes = getNodes(currentRecords);
-      // we just push all the IDs onto the selection array
-      nodes.forEach(item => {
-        selection.push(item._id);
-      });
-    }
-    this.setState({ selectAll, selection });
-  };
-  isSelected = key => {
-    /*
-      Instead of passing our external selection state we provide an "isSelected"
-      callback and detect the selection state ourselves. This allows any implementation
-      for selection (either an array, object keys, or even a Javascript Set object).
-    */
-    return this.state.selection.includes(key);
-  };
-  logSelection = () => {
-    console.log("selection:", this.state.selection);
-  };
-  toggleType = () => {
-    this.setState({
-      selectType: this.state.selectType === "radio" ? "checkbox" : "radio",
-      selection: [],
-      selectAll: true,
-    });
-  };
-  // toggleTree = () => {
-  //   if (this.state.pivotBy.length) {
-  //     this.setState({ pivotBy: [], expanded: {} });
-  //   } else {
-  //     this.setState({ pivotBy: [], expanded: {} });
-  //   }
-  // };
-
-  // onExpandedChange = (newExpanded, index, event) => {
-  //   this.setState({ expanded: newExpanded });
-  // };
-
-  excludeOpenSeries = allSeriesArr => {
+  const excludeOpenSeries = allSeriesArr => {
     const result = [];
     //get all series number in an array
-    const idArr = this.props.openSeries.reduce((all, item, index) => {
+    const idArr = props.openSeries.reduce((all, item, index) => {
       all.push(item.seriesUID);
       return all;
     }, []);
@@ -548,52 +157,52 @@ class Studies extends Component {
     return result;
   };
 
-  getSeriesData = async selected => {
-    this.props.dispatch(startLoading());
+  const getSeriesData = async selected => {
+    props.dispatch(startLoading());
     const { projectID, patientID, studyUID } = selected;
     try {
       const { data: series } = await getSeries(projectID, patientID, studyUID);
-      this.props.dispatch(loadCompleted());
+      props.dispatch(loadCompleted());
       return series;
     } catch (err) {
-      this.props.dispatch(annotationsLoadingError(err));
+      props.dispatch(annotationsLoadingError(err));
     }
   };
 
-  displaySeries = async selected => {
-    if (this.props.openSeries.length === MAX_PORT) {
-      this.props.dispatch(alertViewPortFull());
+  const displaySeries = async selected => {
+    if (props.openSeries.length === MAX_PORT) {
+      props.dispatch(alertViewPortFull());
     } else {
       const { patientID, studyUID } = selected;
-      let seriesArr;
+      let seriesArr = [];
       //check if the patient is there (create a patient exist flag)
-      const patientExists = this.props.patients[patientID];
+      const patientExists = props.patients[patientID];
       //if there is patient iterate over the series object of the study (form an array of series)
       if (patientExists) {
         seriesArr = Object.values(
-          this.props.patients[patientID].studies[studyUID].series
+          props.patients[patientID].studies[studyUID].series
         );
         //if there is not a patient get series data of the study and (form an array of series)
       } else {
-        seriesArr = await this.getSeriesData(selected);
+        seriesArr = await getSeriesData(selected);
       }
       //get extraction of the series (extract unopen series)
-      if (seriesArr.length > 0) seriesArr = this.excludeOpenSeries(seriesArr);
+      if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
       //check if there is enough room
-      if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
+      if (seriesArr.length + props.openSeries.length > MAX_PORT) {
         //if there is not bring the modal
-        await this.setState({
+        await setState({
           isSerieSelectionOpen: true,
           selectedStudy: [seriesArr],
-          studyName: selected.studyDescription,
+          studyName: selected.studyDescription
         });
       } else {
         //if there is enough room
         //add serie to the grid
         const promiseArr = [];
         for (let serie of seriesArr) {
-          this.props.dispatch(addToGrid(serie));
-          promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
+          props.dispatch(addToGrid(serie));
+          promiseArr.push(props.dispatch(getSingleSerie(serie)));
         }
         //getsingleSerie
         Promise.all(promiseArr)
@@ -602,139 +211,285 @@ class Studies extends Component {
 
         //if patient doesnot exist get patient
         if (!patientExists) {
-          // this.props.dispatch(getWholeData(null, selected));
+          // props.dispatch(getWholeData(null, selected));
           getWholeData(null, selected);
         } else {
           //check if study exist
-          this.props.dispatch(
-            updatePatient("study", true, patientID, studyUID)
-          );
+          props.dispatch(updatePatient('study', true, patientID, studyUID));
         }
-        this.props.history.push("/display");
+        props.history.push('/display');
       }
-      this.props.dispatch(clearSelection());
+      props.dispatch(clearSelection());
     }
   };
 
-  closeSelectionModal = () => {
-    this.setState(state => ({
-      isSerieSelectionOpen: !state.isSerieSelectionOpen,
-    }));
+  const columns = React.useMemo(
+    () => [
+      {
+        id: 'studies-expander', // Make sure it has an ID
+        width: 35,
+        Cell: ({ row, toggleRowExpanded }) => {
+          const style = {
+            display: 'flex',
+            width: 'fit-content',
+            paddingLeft: '10px'
+          };
+
+          return (
+            <div style={style}>
+              <div onMouseEnter={validateStudySelect}>
+                <input
+                  type="checkbox"
+                  style={{ marginRight: '5px' }}
+                  disabled={selectedLevel}
+                  onClick={() => {
+                    props.dispatch(clearSelection('study'));
+                    props.dispatch(selectStudy(row.original));
+                  }}
+                />
+              </div>
+              <span
+                {...row.getToggleRowExpandedProps({
+                  style: {
+                    cursor: 'pointer',
+                    fontSize: 10,
+                    textAlign: 'center',
+                    userSelect: 'none',
+                    color: '#fafafa',
+                    verticalAlign: 'middle'
+                  }
+                })}
+                onClick={() => {
+                  const expandStatus = row.isExpanded ? false : true;
+                  const obj = {
+                    patient: props.patientIndex,
+                    study: { [row.index]: expandStatus ? {} : false }
+                  };
+                  toggleRowExpanded(row.id, expandStatus);
+                  props.getTreeExpandSingle(obj);
+                }}
+              >
+                {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
+              </span>
+            </div>
+          );
+        }
+      },
+      {
+        width: widthUnit * 12,
+        id: 'study-desc',
+        Cell: ({ row }) => {
+          let desc = clearCarets(row.original.studyDescription);
+          desc = desc || 'Unnamed Study';
+          const id = 'desc' + row.original.studyUID;
+          return (
+            <>
+              <span
+                data-tip
+                data-for={id}
+                className="searchView-row__desc"
+                style={{ paddingLeft: '10px' }}
+                onDoubleClick={() => displaySeries(row.original)}
+              >
+                {desc}
+              </span>
+              <ReactTooltip
+                id={id}
+                place="right"
+                type="info"
+                delayShow={500}
+                clickable={true}
+              >
+                <span>{desc}</span>
+              </ReactTooltip>
+            </>
+          );
+        }
+      },
+      {
+        width: widthUnit * 2,
+        id: 'numberOfAnnotations',
+        Cell: ({ row }) => (
+          <div className="searchView-table__cell">
+            {row.original.numberOfAnnotations === 0 ? (
+              ''
+            ) : (
+              <span className="badge badge-secondary">
+                {row.original.numberOfAnnotations}
+              </span>
+            )}
+          </div>
+        )
+      },
+      {
+        width: widthUnit * 3,
+        id: 'numberOfSeries',
+        className: 'searchView-table__cell',
+        Cell: ({ row }) => (
+          <div className="searchView-table__cell">
+            {row.original.numberOfSeries === 0 ? (
+              ''
+            ) : (
+              <span className="badge badge-secondary">
+                {row.original.numberOfSeries}
+              </span>
+            )}
+          </div>
+        )
+      },
+      {
+        width: widthUnit * 3,
+        accessor: 'numberOfImages' || '',
+        className: 'searchView-table__cell'
+      },
+      {
+        width: widthUnit * 5,
+        id: 'study-examtype',
+        className: 'searchView-table__cell',
+        Cell: ({ row }) => (
+          <span className="searchView-table__cell">
+            {row.original.examTypes.join('/')}
+          </span>
+        )
+      },
+      {
+        width: widthUnit * 7,
+        id: 'study-insert-time',
+        className: 'searchView-table__cell',
+        Cell: ({ row }) => (
+          <span className="searchView-table__cell">
+            {formatDate(row.original.insertDate)}
+          </span>
+        )
+      },
+      {
+        width: widthUnit * 7,
+        id: 'study-created-time',
+        className: 'searchView-table__cell',
+
+        Cell: ({ row }) => (
+          <span className="searchView-table__cell">
+            {formatDate(row.original.createdTime)}
+          </span>
+        )
+      },
+      {
+        width: widthUnit * 6,
+        id: 'studyAccessionNumber',
+        className: 'searchView-table__cell',
+        Cell: ({ row }) => (
+          <>
+            <span
+              className="searchView-table__cell"
+              data-tip
+              data-for={row.original.studyAccessionNumber}
+            >
+              {row.original.studyAccessionNumber || ''}
+            </span>
+            <ReactTooltip
+              id={row.original.studyAccessionNumber}
+              place="right"
+              type="info"
+              delayShow={500}
+              clickable={true}
+            >
+              <span>{row.original.studyAccessionNumber}</span>
+            </ReactTooltip>
+          </>
+        )
+      },
+      {
+        id: 'studyUID',
+        className: 'searchView-table__cell',
+        Cell: ({ row }) => (
+          <>
+            <span
+              data-tip
+              data-for={row.original.studyUID}
+            >
+              {row.original.studyUID}
+            </span>{' '}
+            <ReactTooltip
+              id={row.original.studyUID}
+              place="top"
+              type="info"
+              delayShow={500}
+              clickable={true}
+            >
+              <span>{row.original.studyUID}</span>
+            </ReactTooltip>
+          </>
+        )
+      }
+    ],
+    [selectedLevel, warningSeen]
+  );
+
+  const getDataFromStorage = (projectID, subjectID) => {
+    const treeData = JSON.parse(localStorage.getItem('treeData'));
+    const studiesArray =
+      treeData[projectID] && treeData[projectID][subjectID]
+        ? Object.values(treeData[projectID][subjectID].studies).map(
+            el => el.data
+          )
+        : [];
+
+    return studiesArray;
   };
 
-  onExpandedChange = (newExpanded, index, event) => {
-    const { data } = this.state;
-    this.setState({ expanded: newExpanded });
-    const expansionArr = [...this.state.expansionArr];
-    expansionArr[index] = expansionArr[index] ? false : data[index].studyUID;
-    this.setState({ expansionArr });
-    const obj = {
-      patient: this.props.patientIndex,
-      study: { [index]: newExpanded[index] },
-    };
-    this.props.getTreeExpandSingle(obj);
-  };
+  useEffect(() => {
+    const { pid, subjectID, getTreeData } = props;
+    const dataFromStorage = getDataFromStorage(pid, subjectID);
+    let data = [];
+    if (pid && pid !== 'null' && subjectID) {
+      if (dataFromStorage?.length > 0) {
+        data = dataFromStorage;
+        setData(data);
+      } else {
+        setLoading(true);
+        getStudies(pid, subjectID)
+          .then(res => {
+            setLoading(false);
+            getTreeData(pid, 'studies', res.data);
+            setData(res.data);
+          })
+          .catch(err => {
+            console.error(err);
+          });
+      }
+    }
+  }, []);
 
-  closeExpansionFromSub = index => {
-    const expanded = { ...this.state.expanded };
-    expanded[index] = false;
-    this.setState({ expanded });
-    const obj = {
-      patient: this.props.patientIndex,
-      study: { [index]: false },
-    };
-    this.props.getTreeExpandSingle(obj);
-  };
-
-  render() {
-    const {
-      toggleSelection,
-      toggleAll,
-      isSelected,
-      logSelection,
-      toggleType,
-      onExpandedChange,
-      toggleTree,
-    } = this;
-    const { data, columns, selectAll, selectType } = this.state;
-    const extraProps = {
-      selectAll,
-      isSelected,
-      toggleAll,
-      toggleSelection,
-      selectType,
-      // expanded,
-      onExpandedChange,
-    };
-    const TheadComponent = props => null;
-    return (
-      <div>
-        {this.state.data ? (
-          <TreeTable
-            NoDataComponent={() => null}
-            data={this.state.data}
-            columns={this.state.columns}
-            pageSize={this.state.data.length}
-            ref={r => (this.selectTable = r)}
-            className="-striped -highlight"
-            // freezWhenExpanded={false}
-            showPagination={false}
-            TheadComponent={TheadComponent}
-            {...extraProps}
-            getTdProps={(state, rowInfo, column) => ({
-              onDoubleClick: e => {
-                this.displaySeries(rowInfo.original);
-              },
-            })}
-            expanded={this.state.expanded}
-            SubComponent={row => {
-              return (
-                <div style={{ paddingLeft: "20px" }}>
-                  <Series
-                    projectId={this.props.projectId}
-                    subjectId={this.props.subjectId}
-                    studyId={row.original.studyUID}
-                    studyDescription={row.original.studyDescription}
-                    update={this.props.update}
-                    expandLevel={this.props.expandLevel}
-                    // updateExpandedLevelNums={this.props.updateExpandedLevelNums}
-                    progressUpdated={this.props.progressUpdated}
-                    expansionArr={this.state.expansionArr}
-                    getTreeExpandSingle={this.props.getTreeExpandSingle}
-                    getTreeExpandAll={this.props.getTreeExpandAll}
-                    treeExpand={this.props.treeExpand}
-                    patientIndex={this.props.patientIndex}
-                    studyIndex={row.index}
-                    // expandLoading={this.props.expandLoading}
-                    closeExpand={this.closeExpansionFromSub}
-                    treeData={this.props.treeData}
-                    getTreeData={this.props.getTreeData}
-                    closeAllCounter={this.props.closeAllCounter}
-                  />
-                </div>
-              );
-            }}
-          />
-        ) : null}
-        {this.state.isSerieSelectionOpen && (
-          <SelectSeriesModal
-            seriesPassed={this.state.selectedStudy}
-            onCancel={this.closeSelectionModal}
-            studyName={this.state.studyName}
-          />
-        )}
-      </div>
-    );
-  }
+  return (
+    <>
+      {loading && (
+        <tr style={{ width: 'fit-content', margin: 'auto', marginTop: '10%' }}>
+          <PropagateLoader color={'#7A8288'} loading={loading} margin={8} />
+        </tr>
+      )}
+      <Table
+        columns={columns}
+        data={data}
+        getTreeData={props.getTreeData}
+        expandLevel={props.expandLevel}
+        patientIndex={props.patientIndex}
+        getTreeExpandAll={props.getTreeExpandAll}
+        treeExpand={props.treeExpand}
+        getTreeExpandSingle={props.getTreeExpandSingle}
+      />
+    </>
+  );
 }
 
 const mapStateToProps = state => {
   return {
-    openSeries: state.annotationsListReducer.openSeries,
-    patients: state.annotationsListReducer.patients,
-    loading: state.annotationsListReducer.loading,
+    selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
-    showProjectModal: state.annotationsListReducer.showProjectModal,
+    selectedSeries: state.annotationsListReducer.selectedSeries,
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+    openSeries: state.annotationsListReducer.openSeries,
+    patients: state.annotationsListReducer.patients
   };
 };
+
 export default withRouter(connect(mapStateToProps)(Studies));

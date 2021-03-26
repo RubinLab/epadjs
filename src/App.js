@@ -1,70 +1,70 @@
-import React, { Component } from "react";
-import { Route, Switch, Redirect, withRouter } from "react-router-dom";
-import { connect } from "react-redux";
-import { ToastContainer } from "react-toastify";
-import { EventSourcePolyfill } from "event-source-polyfill";
-import Keycloak from "keycloak-js";
-import _ from "lodash";
-import { getUser, getUserInfo } from "./services/userServices";
-import NavBar from "./components/navbar";
-import Sidebar from "./components/sideBar/sidebar";
-import SearchView from "./components/searchView/searchView";
-import DisplayView from "./components/display/displayView";
-import AnotateView from "./components/anotateView";
-import ProgressView from "./components/progressView";
-import FlexView from "./components/flexView";
-import NotFound from "./components/notFound";
-import LoginForm from "./components/loginForm";
-import Logout from "./components/logout";
-import ProtectedRoute from "./components/common/protectedRoute";
-import Cornerstone from "./components/cornerstone/cornerstone";
-import Management from "./components/management/mainMenu";
-import InfoMenu from "./components/infoMenu";
-import UserMenu from "./components/userProfileMenu.jsx";
-import WarningModal from "./components/common/warningModal";
-import ConfirmationModal from "./components/common/confirmationModal";
-import SelectModalMenu from "./components/common/SelectModalMenu";
+import React, { Component } from 'react';
+import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { ToastContainer } from 'react-toastify';
+import { EventSourcePolyfill } from 'event-source-polyfill';
+import Keycloak from 'keycloak-js';
+import _ from 'lodash';
+import { getUser, getUserInfo } from './services/userServices';
+import NavBar from './components/navbar';
+import Sidebar from './components/sideBar/sidebar';
+import SearchView from './components/searchView/searchView';
+import DisplayView from './components/display/displayView';
+import AnotateView from './components/anotateView';
+import ProgressView from './components/progressView';
+import FlexView from './components/flexView';
+import NotFound from './components/notFound';
+import LoginForm from './components/loginForm';
+import Logout from './components/logout';
+import ProtectedRoute from './components/common/protectedRoute';
+import Cornerstone from './components/cornerstone/cornerstone';
+import Management from './components/management/mainMenu';
+import InfoMenu from './components/infoMenu';
+import UserMenu from './components/userProfileMenu.jsx';
+import WarningModal from './components/common/warningModal';
+import ConfirmationModal from './components/common/confirmationModal';
+import SelectModalMenu from './components/common/SelectModalMenu';
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
-import auth from "./services/authService";
-import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
+import auth from './services/authService';
+import MaxViewAlert from './components/annotationsList/maxViewPortAlert';
 import {
   clearAimId,
   getNotificationsData,
   clearSelection,
   selectProject,
   getTemplates,
-  segUploadCompleted,
-} from "./components/annotationsList/action";
-import Worklist from "./components/sideBar/sideBarWorklist";
-import ErrorBoundary from "./ErrorBoundary";
-import Report from "./components/searchView/Report.jsx";
-import { getSubjects, getSubject } from "./services/subjectServices";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "react-toastify/dist/ReactToastify.css";
-import "./App.css";
-import RightsideBar from "./components/RightsideBar/RightsideBar";
-import MinimizedReport from "./components/searchView/MinimizedReport";
+  segUploadCompleted
+} from './components/annotationsList/action';
+import Worklist from './components/sideBar/sideBarWorklist';
+import ErrorBoundary from './ErrorBoundary';
+import Report from './components/searchView/Report.jsx';
+import { getSubjects, getSubject } from './services/subjectServices';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'react-toastify/dist/ReactToastify.css';
+import './App.css';
+import RightsideBar from './components/RightsideBar/RightsideBar';
+import MinimizedReport from './components/searchView/MinimizedReport';
 
 const messages = {
   noPatient: {
-    title: "No Patient Selected",
-    message: "Select a patient to get a report!",
+    title: 'No Patient Selected',
+    message: 'Select a patient to get a report!'
   },
   multiplePatient: {
-    title: "Multiple Patients Selected",
-    message: "Select only one patient to get the report!",
+    title: 'Multiple Patients Selected',
+    message: 'Select only one patient to get the report!'
   },
   projectWaterfall: {
-    title: "Project Selected",
-    message: "Waterfall report will be created for project ",
-  },
+    title: 'Project Selected',
+    message: 'Waterfall report will be created for project '
+  }
 };
 
 const reportsList = [
-  { name: "ADLA" },
-  { name: "Longitudinal" },
-  { name: "RECIST" },
-  { name: "Waterfall" },
+  { name: 'ADLA' },
+  { name: 'Longitudinal' },
+  { name: 'RECIST' },
+  { name: 'Waterfall' }
 ];
 class App extends Component {
   constructor(props) {
@@ -76,7 +76,7 @@ class App extends Component {
       authenticated: false,
       openInfo: false,
       openUser: false,
-      viewType: "search",
+      viewType: 'search',
       lastEventId: null,
       showLog: false,
       admin: false,
@@ -85,61 +85,62 @@ class App extends Component {
       expandLevel: 0,
       maxLevel: 0,
       refTree: {},
-      treeData: {},
+      // treeData: {},
       pid: null,
       closeAll: 0,
       projectAdded: 0,
       showWarning: false,
       showConfirmation: false,
       showReportsMenu: false,
-      title: "",
-      message: "",
-      reportType: "",
+      title: '',
+      message: '',
+      reportType: '',
       reportsCompArr: [],
       minReportsArr: [],
       hiddenReports: {},
-      metric: null,
+      metric: null
     };
   }
 
   getProjectAdded = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       projectAdded: state.projectAdded + 1,
       refTree: {},
-      treeData: {},
+      // treeData: {},
       expandLevel: 0,
-      treeExpand: {},
+      treeExpand: {}
     }));
+    localStorage.setItem('treeData', JSON.stringify({}));
   };
 
   closeWarning = () => {
     this.setState({
       showConfirmation: false,
       showWarning: false,
-      title: "",
-      message: "",
+      title: '',
+      message: ''
     });
   };
 
   handleReportsClick = () => {
-    this.setState((state) => ({ showReportsMenu: !state.showReportsMenu }));
+    this.setState(state => ({ showReportsMenu: !state.showReportsMenu }));
   };
 
-  countCurrentReports = (arr) => {
+  countCurrentReports = arr => {
     let nullCount = 0;
-    arr.forEach((el) => {
+    arr.forEach(el => {
       if (el === null) nullCount++;
     });
     return nullCount;
   };
 
-  closeReportModal = (index) => {
+  closeReportModal = index => {
     const arr = [...this.state.reportsCompArr];
     arr[index] = null;
     this.setState({
       template: null,
       report: null,
-      reportsCompArr: arr,
+      reportsCompArr: arr
     });
 
     // if there isn't any report open clear selection
@@ -156,13 +157,13 @@ class App extends Component {
 
     this.setState({
       hiddenReports,
-      minReportsArr,
+      minReportsArr
     });
 
     this.closeReportModal(reportIndex);
   };
 
-  handleMaximizeReport = (e) => {
+  handleMaximizeReport = e => {
     let { index, reportindex } = e.target.dataset;
     index = parseInt(index);
     reportindex = parseInt(reportindex);
@@ -176,7 +177,7 @@ class App extends Component {
     this.setState({
       hiddenReports,
       minReportsArr,
-      reportsCompArr,
+      reportsCompArr
     });
   };
 
@@ -193,7 +194,7 @@ class App extends Component {
         header={title}
         onClose={this.handleCloseMinimize}
         onExpand={this.handleMaximizeReport}
-        key={minIndex + "min"}
+        key={minIndex + 'min'}
         count={Object.values(hiddenReports).length}
       />
     );
@@ -202,32 +203,32 @@ class App extends Component {
     this.setState({ minReportsArr, reportsCompArr, hiddenReports });
   };
 
-  handleReportSelect = (e) => {
+  handleReportSelect = e => {
     const { projectMap, selectedPatients } = this.props;
     const patients = Object.values(selectedPatients);
     const reportType = e.target.dataset.opt;
     this.handleReportsClick();
     if (patients.length === 0) {
-      if (reportType === "Waterfall") {
+      if (reportType === 'Waterfall') {
         this.setState({
           showConfirmation: true,
           title: messages.projectWaterfall.title,
           message:
             messages.projectWaterfall.message +
-            projectMap[this.state.pid].projectName,
+            projectMap[this.state.pid].projectName
         });
       } else {
         this.setState({
           showWarning: true,
           title: messages.noPatient.title,
-          message: messages.noPatient.message,
+          message: messages.noPatient.message
         });
       }
-    } else if (patients.length > 1 && reportType !== "Waterfall") {
+    } else if (patients.length > 1 && reportType !== 'Waterfall') {
       this.setState({
         showWarning: true,
         title: messages.multiplePatient.title,
-        message: messages.multiplePatient.message,
+        message: messages.multiplePatient.message
       });
     } else {
       const reportsCompArr = [...this.state.reportsCompArr];
@@ -247,15 +248,15 @@ class App extends Component {
       this.setState({
         template: null,
         reportType,
-        reportsCompArr,
+        reportsCompArr
       });
     }
   };
 
-  getMetric = (metric) => {
+  getMetric = metric => {
     this.setState({ metric });
   };
-  handleWaterFallClickOnBar = async (name) => {
+  handleWaterFallClickOnBar = async name => {
     // find the patient selected
     // if project selected get patient details with call
     const { selectedProject, selectedPatients } = this.props;
@@ -281,7 +282,7 @@ class App extends Component {
       />
     );
     this.setState({
-      reportsCompArr,
+      reportsCompArr
     });
   };
 
@@ -292,7 +293,7 @@ class App extends Component {
     reportsCompArr.push(
       <Report
         onClose={this.closeReportModal}
-        report={"Waterfall"}
+        report={'Waterfall'}
         index={index}
         // patient={patients[0]}
         key={`report${index}`}
@@ -304,9 +305,9 @@ class App extends Component {
 
     this.setState({
       template: null,
-      reportType: "Waterfall",
+      reportType: 'Waterfall',
       showConfirmation: false,
-      reportsCompArr,
+      reportsCompArr
     });
   };
 
@@ -315,9 +316,10 @@ class App extends Component {
       const { patient, study, series } = expandObj;
       let treeExpand = { ...this.state.treeExpand };
       let refPatients, refStudies, subSeries, subStudies;
-      const patientLevel = patient && !study && !series;
-      const studyLevel = study && !series;
-      const seriesLevel = series;
+      const patientLevel = study === undefined && series === undefined;
+      const studyLevel = series === undefined && study !== undefined;
+      const seriesLevel =
+        patient !== undefined && study !== undefined && series !== undefined;
       if (patientLevel) {
         if (expanded) {
           for (let i = 0; i < patient; i += 1) treeExpand[i] = {};
@@ -384,7 +386,7 @@ class App extends Component {
     return new Promise((resolve, reject) => {
       try {
         const treeExpand = { ...this.state.treeExpand };
-        if (level === "patientID") {
+        if (level === 'patientID') {
           treeExpand[ids.index] = false;
         }
         this.setState({ treeExpand });
@@ -395,7 +397,7 @@ class App extends Component {
     });
   };
 
-  getTreeExpandSingle = async (expandObj) => {
+  getTreeExpandSingle = async expandObj => {
     try {
       const { patient, study, series } = expandObj;
       let treeExpand = { ...this.state.treeExpand };
@@ -433,18 +435,18 @@ class App extends Component {
     }
   };
 
-  getExpandLevel = (expandLevel) => {
+  getExpandLevel = expandLevel => {
     this.setState({ expandLevel });
   };
 
   handleShrink = async () => {
     const { expandLevel } = this.state;
     if (expandLevel > 0) {
-      await this.setState((state) => ({ expandLevel: state.expandLevel - 1 }));
+      await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
     }
   };
 
-  closeMenu = (notification) => {
+  closeMenu = notification => {
     // if (event && event.type === "keydown") {
     //   if (event.key === "Escape" || event.keyCode === 27) {
     //     this.setState({ openMng: false });
@@ -454,57 +456,58 @@ class App extends Component {
       openMng: false,
       openInfo: false,
       openUser: false,
-      openMenu: false,
+      openMenu: false
     });
     if (notification) this.updateNotificationSeen();
   };
 
-  switchView = (viewType) => {
+  switchView = viewType => {
     const { pid } = this.state;
     this.setState({ viewType });
-    if (viewType === "search") {
+    if (viewType === 'search') {
       pid
         ? this.props.history.push(`/search/${pid}`)
         : this.props.history.push(`/search`);
-    } else if (viewType === "display") {
+    } else if (viewType === 'display') {
       this.props.history.push(`/display`);
     }
   };
 
   handleMngMenu = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       openInfo: false,
       openMng: !state.openMng,
-      openUser: false,
+      openUser: false
     }));
   };
 
   handleInfoMenu = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       openInfo: !state.openInfo,
       openMng: false,
-      openUser: false,
+      openUser: false
     }));
   };
 
   handleUserProfileMenu = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       openInfo: false,
       openMng: false,
-      openUser: !state.openUser,
+      openUser: !state.openUser
     }));
   };
 
   updateProgress = () => {
-    this.setState((state) => ({ progressUpdated: state.progressUpdated + 1 }));
+    this.setState(state => ({ progressUpdated: state.progressUpdated + 1 }));
   };
 
   async componentDidMount() {
+    localStorage.setItem('treeData', JSON.stringify({}));
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),
-      fetch(`${process.env.PUBLIC_URL}/keycloak.json`),
+      fetch(`${process.env.PUBLIC_URL}/keycloak.json`)
     ])
-      .then(async (results) => {
+      .then(async results => {
         const configData = await results[0].json();
         let { mode, apiUrl, wadoUrl, authMode } = configData;
         // check and use environment variables if any
@@ -512,34 +515,34 @@ class App extends Component {
         apiUrl = process.env.REACT_APP_API_URL || apiUrl;
         wadoUrl = process.env.REACT_APP_WADO_URL || wadoUrl;
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
-        sessionStorage.setItem("mode", mode);
-        sessionStorage.setItem("apiUrl", apiUrl);
-        sessionStorage.setItem("wadoUrl", wadoUrl);
-        sessionStorage.setItem("authMode", authMode);
+        sessionStorage.setItem('mode', mode);
+        sessionStorage.setItem('apiUrl', apiUrl);
+        sessionStorage.setItem('wadoUrl', wadoUrl);
+        sessionStorage.setItem('authMode', authMode);
         this.setState({ mode, apiUrl, wadoUrl, authMode });
         const keycloakData = await results[1].json();
         const auth =
-          process.env.REACT_APP_AUTH_URL || keycloakData["auth-server-url"];
+          process.env.REACT_APP_AUTH_URL || keycloakData['auth-server-url'];
         const keycloakJson = {};
         // check and use environment variables if any
         keycloakJson.realm =
           process.env.REACT_APP_AUTH_REALM || keycloakData.realm;
         keycloakJson.url =
-          process.env.REACT_APP_AUTH_URL || keycloakData["auth-server-url"];
+          process.env.REACT_APP_AUTH_URL || keycloakData['auth-server-url'];
         keycloakJson.clientId =
           process.env.REACT_APP_AUTH_RESOURCE || keycloakData.resource;
-        sessionStorage.setItem("auth", auth);
-        sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
+        sessionStorage.setItem('auth', auth);
+        sessionStorage.setItem('keycloakJson', JSON.stringify(keycloakJson));
         this.completeAutorization(apiUrl);
-        if (mode === "lite") this.setState({ pid: "lite" });
+        if (mode === 'lite') this.setState({ pid: 'lite' });
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(err);
       });
     //get notifications from sessionStorage and setState
-    let notifications = sessionStorage.getItem("notifications");
+    let notifications = sessionStorage.getItem('notifications');
     if (!notifications) {
-      sessionStorage.setItem("notifications", JSON.stringify([]));
+      sessionStorage.setItem('notifications', JSON.stringify([]));
       this.setState({ notifications: [] });
     } else {
       notifications = JSON.parse(notifications);
@@ -547,67 +550,67 @@ class App extends Component {
     }
   }
 
-  componentDidUpdate = (prevProps) => {
-    const uploaded = this.props.notificationAction.startsWith("Upload");
+  componentDidUpdate = prevProps => {
+    const uploaded = this.props.notificationAction.startsWith('Upload');
     if (prevProps.lastEventId !== this.props.lastEventId && uploaded) {
       this.props.dispatch(getTemplates());
     }
   };
 
-  completeAutorization = (apiUrl) => {
+  completeAutorization = apiUrl => {
     let getAuthUser = null;
 
-    if (sessionStorage.getItem("authMode") !== "external") {
+    if (sessionStorage.getItem('authMode') !== 'external') {
       const keycloak = Keycloak(
-        JSON.parse(sessionStorage.getItem("keycloakJson"))
+        JSON.parse(sessionStorage.getItem('keycloakJson'))
       );
       getAuthUser = new Promise((resolve, reject) => {
         keycloak
-          .init({ onLoad: "login-required" })
-          .then((authenticated) => {
+          .init({ onLoad: 'login-required' })
+          .then(authenticated => {
             keycloak
               .loadUserInfo()
-              .then((userInfo) => {
+              .then(userInfo => {
                 resolve({ userInfo, keycloak, authenticated });
               })
-              .catch((err) => reject(err));
+              .catch(err => reject(err));
           })
-          .catch((err) => reject(err));
+          .catch(err => reject(err));
       });
     } else {
       // authMode is external ask backend for user
       getAuthUser = new Promise((resolve, reject) => {
         getUserInfo()
-          .then((userInfoResponse) => {
+          .then(userInfoResponse => {
             resolve({
               userInfo: userInfoResponse.data,
               keycloak: {},
-              authenticated: true,
+              authenticated: true
             });
           })
-          .catch((err) => reject(err));
+          .catch(err => reject(err));
       });
     }
 
     getAuthUser
-      .then(async (result) => {
+      .then(async result => {
         try {
           let user = {
             user: result.userInfo.preferred_username || result.userInfo.email,
-            displayname: result.userInfo.given_name,
+            displayname: result.userInfo.given_name
           };
           await auth.login(user, null, result.keycloak);
           this.setState({
             keycloak: result.keycloak,
             authenticated: result.authenticated,
             id: result.userInfo.sub,
-            user,
+            user
           });
           const {
             email,
             family_name,
             given_name,
-            preferred_username,
+            preferred_username
           } = result.userInfo;
           const username = preferred_username || email;
 
@@ -624,27 +627,27 @@ class App extends Component {
             result.keycloak.token
               ? {
                   headers: {
-                    authorization: `Bearer ${result.keycloak.token}`,
-                  },
+                    authorization: `Bearer ${result.keycloak.token}`
+                  }
                 }
               : {}
           );
           this.eventSource.addEventListener(
-            "message",
+            'message',
             this.getMessageFromEventSrc
           );
         } catch (err) {
-          console.log("Error in user retrieval!", err);
+          console.log('Error in user retrieval!', err);
         }
       })
-      .catch((err2) => {
-        console.log("Authentication failed!", err2);
+      .catch(err2 => {
+        console.log('Authentication failed!', err2);
       });
   };
 
-  getMessageFromEventSrc = (res) => {
+  getMessageFromEventSrc = res => {
     try {
-      if (res.data === "heartbeat") {
+      if (res.data === 'heartbeat') {
         return;
       }
       const parsedRes = JSON.parse(res.data);
@@ -654,7 +657,7 @@ class App extends Component {
         createdtime,
         projectID,
         error,
-        refresh,
+        refresh
       } = parsedRes.notification;
       const action = parsedRes.notification.function;
       const message = params;
@@ -665,7 +668,7 @@ class App extends Component {
           getNotificationsData(projectID, lastEventId, refresh, action)
         );
       let time = new Date(createdtime).toString();
-      const GMTIndex = time.indexOf(" G");
+      const GMTIndex = time.indexOf(' G');
       time = time.substring(0, GMTIndex - 3);
       let notifications = [...this.state.notifications];
       notifications.unshift({
@@ -673,13 +676,14 @@ class App extends Component {
         time,
         seen: false,
         action,
-        error,
+        error
       });
-      const tagEdited = action.startsWith("Tag");
-      const uploaded = action.startsWith("Upload");
+      const tagEdited = action.startsWith('Tag');
+      const uploaded = action.startsWith('Upload');
       if (tagEdited || uploaded) {
         const { pid } = this.state;
-        this.setState({ treeData: {} });
+        // this.setState({ treeData: {} });
+        localStorage.setItem('treeData', JSON.stringify({}));
         this.setState({ pid });
         if (this.props.openSeries.length === 0) {
           this.props.history.push(`/search/${pid}`);
@@ -687,7 +691,7 @@ class App extends Component {
       }
       this.setState({ notifications });
       const stringified = JSON.stringify(notifications);
-      sessionStorage.setItem("notifications", stringified);
+      sessionStorage.setItem('notifications', stringified);
     } catch (err) {
       console.error(err);
     }
@@ -695,39 +699,40 @@ class App extends Component {
 
   componentWillUnmount = () => {
     this.eventSource.removeEventListener(
-      "message",
+      'message',
       this.getMessageFromEventSrc
     );
+    localStorage.setItem('treeData', JSON.stringify({}));
   };
 
-  onLogout = (e) => {
+  onLogout = e => {
     auth.logout();
     // sessionStorage.removeItem("annotations");
-    sessionStorage.setItem("notifications", JSON.stringify([]));
+    sessionStorage.setItem('notifications', JSON.stringify([]));
     this.setState({
       authenticated: false,
       id: null,
       name: null,
-      user: null,
+      user: null
     });
-    if (sessionStorage.getItem("authMode") !== "external")
+    if (sessionStorage.getItem('authMode') !== 'external')
       this.state.keycloak.logout().then(() => {
         this.setState({
-          keycloak: null,
+          keycloak: null
         });
         auth.logout();
       });
-    else console.log("No logout in external authentication mode");
+    else console.log('No logout in external authentication mode');
   };
 
   updateNotificationSeen = () => {
     const notifications = [...this.state.notifications];
-    notifications.forEach((notification) => {
+    notifications.forEach(notification => {
       notification.seen = true;
     });
     this.setState({ notifications });
     const stringified = JSON.stringify(notifications);
-    sessionStorage.setItem("notifications", stringified);
+    sessionStorage.setItem('notifications', stringified);
   };
 
   switchSearhView = () => {
@@ -737,28 +742,27 @@ class App extends Component {
   handleCloseAll = () => {
     // let { closeAll } = this.state;
     // closeAll += 1;
-    this.setState((state) => ({
+    this.setState(state => ({
       expandLevel: 0,
-      closeAll: state.closeAll + 1,
+      closeAll: state.closeAll + 1
     }));
   };
 
   getTreeData = (projectID, level, data) => {
     try {
-      const treeData = { ...this.state.treeData };
+      let treeData = JSON.parse(localStorage.getItem('treeData'));
+      // const treeData = { ...this.state.treeData };
       const patientIDs = [];
-      if (level === "subject") {
+      if (level === 'subject') {
         if (!treeData[projectID]) treeData[projectID] = {};
-        data.forEach((el) => {
+        data.forEach(el => {
           if (!treeData[projectID][el.subjectID]) {
             treeData[projectID][el.subjectID] = { data: el, studies: {} };
           }
           patientIDs.push(el.subjectID);
         });
-        if (this.state.treeData[projectID]) {
-          if (
-            data.length < Object.keys(this.state.treeData[projectID]).length
-          ) {
+        if (treeData[projectID]) {
+          if (data.length < Object.keys(treeData[projectID]).length) {
             for (let patient in treeData[projectID]) {
               if (!patientIDs.includes(patient)) {
                 delete treeData[projectID][patient];
@@ -766,14 +770,14 @@ class App extends Component {
             }
           }
         }
-      } else if (level === "studies") {
+      } else if (level === 'studies') {
         const studyUIDs = [];
         const patientID = data[0].patientID;
-        data.forEach((el) => {
+        data.forEach(el => {
           if (!treeData[projectID][el.patientID].studies[el.studyUID]) {
             treeData[projectID][el.patientID].studies[el.studyUID] = {
               data: el,
-              series: {},
+              series: {}
             };
           }
           studyUIDs.push(el.studyUID);
@@ -787,11 +791,11 @@ class App extends Component {
             }
           }
         }
-      } else if (level === "series") {
+      } else if (level === 'series') {
         const patientID = data[0].patientID;
         const studyUID = data[0].studyUID;
         const seriesUIDs = [];
-        data.forEach((el) => {
+        data.forEach(el => {
           if (
             !treeData[projectID][el.patientID].studies[el.studyUID].series[
               el.seriesUID
@@ -800,7 +804,7 @@ class App extends Component {
             treeData[projectID][el.patientID].studies[el.studyUID].series[
               el.seriesUID
             ] = {
-              data: el,
+              data: el
             };
           }
           seriesUIDs.push(el.seriesUID);
@@ -816,13 +820,14 @@ class App extends Component {
           }
         }
       }
-      this.setState({ treeData });
+      // this.setState({ treeData });
+      localStorage.setItem('treeData', JSON.stringify(treeData));
     } catch (err) {
       console.error(err);
     }
   };
 
-  getPidUpdate = (pid) => {
+  getPidUpdate = pid => {
     this.setState({ pid });
   };
 
@@ -831,7 +836,7 @@ class App extends Component {
   };
 
   sortLevelArr = (arr, attribute) => {
-    return arr.sort(function (a, b) {
+    return arr.sort(function(a, b) {
       if (a.data[attribute] < b.data[attribute]) {
         return -1;
       }
@@ -858,13 +863,15 @@ class App extends Component {
   };
 
   clearAllTreeData = () => {
-    this.setState({ treeData: {} });
+    // this.setState({ treeData: {} });
+    localStorage.setItem('treeData', JSON.stringify({}));
   };
 
   clearTreeData = () => {
     try {
       const { pid, treeExpand } = this.state;
-      const patients = { ...this.state.treeData[pid] };
+      let treeData = JSON.parse(localStorage.getItem('treeData'))[pid];
+      const patients = treeData[pid];
       const patientsArr = Object.values(patients);
       for (let patientIndex in treeExpand) {
         // if the index is kept as false it means that
@@ -872,8 +879,8 @@ class App extends Component {
         const patientID = this.getPatientIDfromSortedArray(
           patientIndex,
           patientsArr,
-          "subjectName",
-          "subjectID"
+          'subjectName',
+          'subjectID'
         );
         if (!treeExpand[patientIndex]) {
           // find subject id and empty studies
@@ -888,19 +895,20 @@ class App extends Component {
           }
         }
       }
-      const treeData = { [pid]: patients };
-      this.setState({ treeData });
+      treeData[pid] = patients;
+      // this.setState({ treeData });
+      localStorage.setItem('treeData', JSON.stringify(treeData));
     } catch (err) {
       console.error(err);
     }
   };
 
   findNonExisting = (arr, uid, level) => {
-    const result = arr.filter((el) => el[level] === uid);
+    const result = arr.filter(el => el[level] === uid);
     return result[0];
   };
 
-  checkIfSegUpload = (params) => {
+  checkIfSegUpload = params => {
     const { isSegUploaded } = this.props;
     const segsUploaded = Object.keys(isSegUploaded);
     for (let i = 0; i < segsUploaded.length; i++) {
@@ -912,74 +920,8 @@ class App extends Component {
 
   updateTreeDataOnSave = async (refs, newLevel) => {
     try {
-      this.setState({ treeData: {} });
-      // const treeData = { ...this.state.treeData };
-      // const { projectID, patientID, studyUID, seriesUID } = refs;
-      // const isPatient = projectID && patientID;
-      // const isStudy = projectID && patientID && studyUID;
-      // const isSeries = projectID && patientID && studyUID && seriesUID;
-      // const patient = treeData[projectID][patientID];
-      // const shouldUpdateStudy =
-      //   patient && Object.values(patient.studies).length > 0;
-      // const shouldUpdateSeries =
-      //   shouldUpdateStudy &&
-      //   Object.values(patient.studies[studyUID].series).length > 0;
-      // if (newLevel) {
-      //   if (newLevel === "study" && isStudy && shouldUpdateStudy) {
-      //     const { data: studies } = await getStudies(
-      //       projectID,
-      //       patientID,
-      //       studyUID
-      //     );
-      //     let study = this.findNonExisting(studies, studyUID, "studyUID");
-      //     study = { data: study, series: {} };
-      //     treeData[projectID][patientID].studies[studyUID] = study;
-      //   }
-      //   if (newLevel === "series" && isSeries && shouldUpdateSeries) {
-      //     const { data: seriesArr } = await getSeries(
-      //       projectID,
-      //       patientID,
-      //       studyUID
-      //     );
-      //     let series = this.findNonExisting(seriesArr, seriesUID, "seriesUID");
-      //     series = { data: series };
-      //     treeData[projectID][patientID].studies[studyUID].series[
-      //       seriesUID
-      //     ] = series;
-      //   }
-      // } else {
-      //   if (isPatient && treeData[projectID][patientID]) {
-      //     const promises = [];
-      //     promises.push(getSubject(projectID, patientID));
-      //     if (isStudy && treeData[projectID][patientID].studies[studyUID])
-      //       promises.push(getStudy(projectID, patientID, studyUID));
-      //     if (
-      //       isSeries &&
-      //       treeData[projectID][patientID].studies[studyUID].series[seriesUID]
-      //     )
-      //       promises.push(
-      //         getSingleSeries(projectID, patientID, studyUID, seriesUID)
-      //       );
-
-      //     const result = await Promise.all(promises);
-      //     treeData[projectID][patientID].data = result[0].data;
-
-      //     if (isStudy && treeData[projectID][patientID].studies[studyUID]) {
-      //       treeData[projectID][patientID].studies[studyUID].data =
-      //         result[1].data;
-      //     }
-
-      //     if (
-      //       isSeries &&
-      //       treeData[projectID][patientID].studies[studyUID].series[seriesUID]
-      //     ) {
-      //       treeData[projectID][patientID].studies[studyUID].series[
-      //         seriesUID
-      //       ].data = result[2].data[0];
-      //     }
-      //   }
-      // }
-      // this.setState({ treeData });
+      // this.setState({ treeData: {} });
+      localStorage.setItem('treeData', JSON.stringify({}));
     } catch (err) {
       console.error(err);
     }
@@ -995,7 +937,7 @@ class App extends Component {
       showWarning,
       showConfirmation,
       title,
-      message,
+      message
     } = this.state;
     let noOfUnseen;
     if (notifications) {
@@ -1063,7 +1005,7 @@ class App extends Component {
         {showConfirmation && (
           <ConfirmationModal
             title={title}
-            button={"Get Report"}
+            button={'Get Report'}
             message={message}
             onSubmit={this.displayWaterfall}
             onCancel={this.closeWarning}
@@ -1071,11 +1013,11 @@ class App extends Component {
         )}
         {this.state.reportsCompArr}
         {this.state.minReportsArr}
-        {!this.state.authenticated && mode !== "lite" && (
+        {!this.state.authenticated && mode !== 'lite' && (
           <Route path="/login" component={LoginForm} />
         )}
-        {this.state.authenticated && mode !== "lite" && (
-          <div style={{ display: "inline", width: "100%", height: "100%" }}>
+        {this.state.authenticated && mode !== 'lite' && (
+          <div style={{ display: 'inline', width: '100%', height: '100%' }}>
             <Sidebar
               type={this.state.viewType}
               progressUpdated={progressUpdated}
@@ -1088,7 +1030,7 @@ class App extends Component {
                 <Route path="/logout" component={Logout} />
                 <ProtectedRoute
                   path="/display"
-                  render={(props) => (
+                  render={props => (
                     <DisplayView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -1101,7 +1043,7 @@ class App extends Component {
                 />
                 <ProtectedRoute
                   path="/search/:pid?"
-                  render={(props) => (
+                  render={props => (
                     <SearchView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -1128,7 +1070,7 @@ class App extends Component {
                 />
                 <ProtectedRoute
                   path="/search/:pid?"
-                  render={(props) => (
+                  render={props => (
                     <SearchView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -1160,9 +1102,7 @@ class App extends Component {
                 />
                 <ProtectedRoute
                   path="/flex/:pid?"
-                  render={(props) => (
-                    <FlexView {...props} pid={this.state.pid} />
-                  )}
+                  render={props => <FlexView {...props} pid={this.state.pid} />}
                 />
                 <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 {/* component={Worklist} /> */}
@@ -1173,7 +1113,7 @@ class App extends Component {
                   from="/"
                   exact
                   to="/search"
-                  render={(props) => (
+                  render={props => (
                     <SearchView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -1205,7 +1145,7 @@ class App extends Component {
             </Sidebar>
           </div>
         )}
-        {this.state.authenticated && mode === "lite" && (
+        {this.state.authenticated && mode === 'lite' && (
           <Sidebar
             type={this.state.viewType}
             progressUpdated={progressUpdated}
@@ -1218,7 +1158,7 @@ class App extends Component {
               <Route path="/logout" component={Logout} />
               <ProtectedRoute
                 path="/display"
-                render={(props) => (
+                render={props => (
                   <DisplayView
                     {...props}
                     updateProgress={this.updateProgress}
@@ -1234,7 +1174,7 @@ class App extends Component {
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
                 path="/"
-                render={(props) => (
+                render={props => (
                   <SearchView
                     {...props}
                     updateProgress={this.updateProgress}
@@ -1250,7 +1190,7 @@ class App extends Component {
                     // updateExpandedLevelNums={this.updateExpandedLevelNums}
                     onShrink={this.handleShrink}
                     handleCloseAll={this.handleCloseAll}
-                    treeData={this.state.treeData}
+                    // treeData={this.state.treeData}
                     getTreeData={this.getTreeData}
                     closeAllCounter={this.state.closeAll}
                     admin={this.state.admin}
@@ -1270,7 +1210,7 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   // console.log(state.managementReducer);
   // console.log(state.annotationsListReducer);
   const {
@@ -1285,7 +1225,7 @@ const mapStateToProps = (state) => {
     projectMap,
     lastEventId,
     notificationAction,
-    isSegUploaded,
+    isSegUploaded
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -1300,7 +1240,7 @@ const mapStateToProps = (state) => {
     lastEventId,
     notificationAction,
     isSegUploaded,
-    selection: state.managementReducer.selection,
+    selection: state.managementReducer.selection
   };
 };
 export default withRouter(connect(mapStateToProps)(App));

@@ -1,328 +1,312 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
-import ReactTable from "react-table";
-import selectTableHOC from "react-table/lib/hoc/selectTable";
-import treeTableHOC from "react-table/lib/hoc/treeTable";
-import ReactTooltip from "react-tooltip";
-import Chance from "chance";
-import "react-table/react-table.css";
-import Studies from "./studies";
-import { getSubjects } from "../../services/subjectServices";
-import { selectPatient, clearSelection } from "../annotationsList/action";
-import { persistExpandView, styleEightDigitDate } from "../../Utils/aid";
-import { formatDate } from "../flexView/helperMethods";
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import {
+  useTable,
+  useExpanded,
+  usePagination
+} from 'react-table';
+import { connect } from 'react-redux';
+import ReactTooltip from 'react-tooltip';
+import PropagateLoader from 'react-spinners/PropagateLoader';
+import Studies from './Studies';
+import { selectPatient, clearSelection } from '../annotationsList/action';
+import { getSubjects } from '../../services/subjectServices';
+import { formatDate } from '../flexView/helperMethods';
+import { clearCarets } from '../../Utils/aid.js';
+import './searchView.css';
 
-const mode = sessionStorage.getItem("mode");
+const defaultPageSize = 200;
 
-// const SelectTreeTable = selectTableHOC(treeTableHOC(ReactTable));
-const TreeTable = treeTableHOC(ReactTable);
-const chance = new Chance();
-function getNodes(data, node = []) {
-  data.forEach(item => {
-    if (item.hasOwnProperty("_subRows") && item._subRows) {
-      node = getNodes(item._subRows, node);
-    } else {
-      node.push(item._original);
+function Table({
+  columns,
+  data,
+  fetchData,
+  pageCount,
+  loading,
+  getTreeData,
+  expandLevel,
+  getTreeExpandAll,
+  getTreeExpandSingle,
+  treeExpand
+}) {
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+    page,
+    canPreviousPage,
+    canNextPage,
+    pageOptions,
+    gotoPage,
+    nextPage,
+    previousPage,
+    setPageSize,
+    toggleAllRowsExpanded,
+    state: { expanded, pageIndex, pageSize }
+  } = useTable(
+    {
+      columns,
+      data,
+      initialState: {
+        pageIndex: 0,
+        pageSize: defaultPageSize
+      },
+      manualPagination: true, 
+      pageCount
+    },
+    useExpanded, 
+    usePagination
+  );
+
+  useEffect(() => {
+    if (expandLevel === 1) {
+      toggleAllRowsExpanded(true);
+      getTreeExpandAll({ patient: data.length }, true, expandLevel);
     }
-  });
-  return node;
+    if (expandLevel === 0) {
+      toggleAllRowsExpanded(false);
+      getTreeExpandAll({ patient: data.length }, false, expandLevel);
+    }
+  }, [expandLevel]);
+
+  React.useEffect(() => {
+    fetchData({ pageIndex, pageSize });
+  }, [fetchData, pageIndex, pageSize]);
+
+  const jumpToHeader = () => {
+    // const header = document.getElementById('subjects-header-id');
+    const header = document.getElementById('epad-logo');
+    const bodyRect = document.body.getBoundingClientRect();
+    var headerRect = header.getBoundingClientRect();
+    const offsetTop = headerRect.top - bodyRect.top;
+    const offsetLeft = headerRect.left - bodyRect.left;
+  };
+
+  return (
+    <>
+      {data.length > 0 && (
+        <>
+          <table
+            {...getTableProps()}
+            style={{ width: '-webkit-fill-available' }}
+          >
+            <thead>
+              {headerGroups.map((headerGroup, k) => (
+                <tr
+                  id="subjects-header-id"
+                  key={`subjects-header-id ${k}`}
+                  {...headerGroup.getHeaderGroupProps()}
+                >
+                  {headerGroup.headers.map((column, z) => (
+                    <th {...column.getHeaderProps()} key={`header-col-${z}`} className="new-rt-header__cell">
+                      {column.render('Header')}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody {...getTableBodyProps()}>
+              {rows.map((row, i) => {
+                prepareRow(row);
+                const expandRow = row.isExpanded || treeExpand[row.index];
+                const style = { height: '2.5rem', background: '#1e2125' };
+                // if (i%2 === 0) style.background = '#32353b';
+                return (
+                  <React.Fragment key={`row-fragment-${i}`}>
+                    <tr
+                      {...row.getRowProps()}
+                      style={style}
+                      key={`subject-row ${i}`}
+                    >
+                      {row.cells.map((cell, z) => {
+                        return (
+                          <td
+                            {...cell.getCellProps({
+                              className: cell.column.className
+                            })}
+                            key={`row-col-${z}`}
+                          >
+                            {cell.render('Cell')}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                    {expandRow && (
+                      <Studies
+                        pid={row.original.projectID}
+                        subjectID={row.original.subjectID}
+                        getTreeData={getTreeData}
+                        expandLevel={expandLevel}
+                        patientIndex={row.index}
+                        getTreeExpandAll={getTreeExpandAll}
+                        treeExpand={treeExpand}
+                        getTreeExpandSingle={getTreeExpandSingle}
+                      />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+              {pageCount > 1 && (
+                <tr>
+                  {loading ? (
+                    // Use our custom loading state to show a loading indicator
+                    <td colSpan="10000">Loading...</td>
+                  ) : (
+                    <td colSpan="10000">
+                      Showing {defaultPageSize * pageIndex}-
+                      {defaultPageSize * (pageIndex + 1)} of ~
+                      {pageCount * pageSize} results
+                    </td>
+                  )}
+                </tr>
+              )}
+            </tbody>
+          </table>
+          {pageCount > 1 && (
+            <div className="pagination">
+              <button
+                onClick={() => {
+                  jumpToHeader();
+                  previousPage();
+                }}
+                disabled={!canPreviousPage}
+              >
+                {'<'}
+              </button>
+              <select
+                value={pageSize}
+                onChange={e => {
+                  setPageSize(Number(e.target.value));
+                }}
+              >
+                {[200].map((pageSize, i) => (
+                  <option key={`${pageSize}-${i}`} value={pageSize}>
+                    {pageSize}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => {
+                  jumpToHeader();
+                  nextPage();
+                }}
+                disabled={!canNextPage}
+              >
+                {'>'}
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </>
+  );
 }
 
-class Subjects extends Component {
-  constructor(props) {
-    super(props);
-    this.widthUnit = 20;
-    this.state = {
-      columns: [],
-      selection: [],
-      selectAll: false,
-      selectType: "checkbox",
-      expanded: {},
-      expandedIDs: {},
-      numOfStudies: 0,
-      data: [],
-      expansionArr: [],
-      selected: {},
-    };
-  }
+function Subjects(props) {
+  const widthUnit = 20;
 
-  async componentDidMount() {
-    try {
-      const pid = mode === "lite" ? "lite" : this.props.pid;
-      let data = [];
-      if (this.props.treeData[pid]) {
-        data = Object.values(this.props.treeData[pid]);
-      }
-      if (data.length > 0) {
-        data = data.map(el => el.data);
-        data.sort(function(a, b) {
-          if (a.subjectName < b.subjectName) {
-            return -1;
-          }
-          if (a.subjectName > b.subjectName) {
-            return 1;
-          }
-          return 0;
-        });
-      } else {
-        data = await this.getData();
-        this.props.getTreeData(pid, "subject", data);
-      }
-      this.setState({ data });
-      this.setState({ columns: this.setColumns() });
-      this.updateExpanded();
-    } catch (err) {
-      console.log(`couldn't load all subjects data. Please Try again!`);
-      console.error(err);
-    }
-  }
+  const [data, setData] = useState([]);
+  const searchKey = useRef(null);
+  let [loading, setLoading] = useState(false);
+  const [pageCount, setPageCount] = useState(0);
+  const [warningSeen, setWarningSeen] = useState(false);
+  const [selectedLevel, setSelectedLevel] = useState(false);
 
-  updateExpanded = () => {
-    const expanded = {};
-    const ptExpandKeys = Object.keys(this.props.treeExpand);
-    const ptExpandVal = Object.values(this.props.treeExpand);
-    ptExpandKeys.forEach((el, index) => {
-      expanded[el] = ptExpandVal[index];
-    });
-    this.setState({ expanded });
-    return expanded;
-  };
+  useEffect(() => {
+    const {
+      selectedStudies,
+      selectedSeries,
+      selectedAnnotations
+    } = props;
+    const studies = Object.values(selectedStudies);
+    const series = Object.values(selectedSeries);
+    const annotations = Object.values(selectedAnnotations);
 
-  async componentDidUpdate(prevProps) {
-    try {
-      const {
-        uploadedPid,
-        lastEventId,
-        pid,
-        expandLevel,
-        closeAllCounter,
-        selectedPatients,
-      } = this.props;
+    if (studies.length) setSelectedLevel('studies');
+    else if (series.length) setSelectedLevel('series');
+    else if (annotations.length) setSelectedLevel('annotations');
+    else setSelectedLevel('');
+  }, [props.selectedStudies, props.selectedSeries, props.selectedAnnotations]);
 
-      let data;
-
-      const newExpanded = Object.keys(this.props.treeExpand);
-      const oldExpanded = Object.keys(prevProps.treeExpand);
-      const shouldCollapse = newExpanded.length === 0 && oldExpanded.length > 0;
-      if (shouldCollapse) this.setState({ expanded: {}, expansionArr: [] });
-
-      if (this.props.update !== prevProps.update) {
-        data = await this.getData();
-        const expanded = shouldCollapse
-          ? {}
-          : persistExpandView(
-              this.state.expanded,
-              this.state.data,
-              data,
-              "subjectID"
-            );
-        this.props.getTreeData(pid, "subject", data);
-        this.setState({ data, expanded });
-        if (shouldCollapse) this.setState({ expansionArr: [] });
-      }
-
-      if (closeAllCounter !== prevProps.closeAllCounter) {
-        this.setState({ expanded: {} });
-      }
-
-      if (this.props.expandLevel != prevProps.expandLevel) {
-        this.props.expandLevel >= 1 && this.state.data.length
-          ? this.expandCurrentLevel()
-          : this.setState({ expanded: {} });
-        const shrinkedToSubject =
-          prevProps.expandLevel > expandLevel && expandLevel === 0;
-        const expandedToStudy =
-          prevProps.expandLevel < expandLevel && expandLevel === 1;
-        let obj = {};
-        if (shrinkedToSubject) {
-          this.setState({ expansionArr: [] });
-          this.props.getTreeExpandAll(
-            { patient: this.state.data.length },
-            false,
-            this.props.expandLevel
-          );
-        }
-
-        if (expandedToStudy) {
-          for (let index = 0; index < this.state.data.length; index += 1)
-            obj[index] = {};
-          this.props.getTreeExpandAll(
-            { patient: this.state.data.length },
-            true,
-            this.props.expandLevel
-          );
-        }
-      }
-      if (this.props.pid !== prevProps.pid) {
-        if (!data) {
-          data = await this.getData();
-          this.props.getTreeData(pid, "subject", data);
-        }
-        // this.setState({ data });
-      }
-
-      if (this.props.treeData !== prevProps.treeData) {
-        data = await this.getData();
-        this.setState({ data });
-      }
-
-      const patients = Object.values(this.props.selectedPatients).length;
-      const studies = Object.values(this.props.selectedStudies).length;
-      const series = Object.values(this.props.selectedSeries).length;
-      const annotations = Object.values(this.props.selectedAnnotations).length;
-
-      const oldPatients = Object.values(prevProps.selectedPatients).length;
-      const oldStudies = Object.values(prevProps.selectedStudies).length;
-      const oldSeries = Object.values(prevProps.selectedSeries).length;
-      const oldAnnotations = Object.values(prevProps.selectedAnnotations)
-        .length;
-
-      const wasPatientSelected = patients === 0 && oldPatients > 0;
-      const switchedToStudies =
-        studies === 1 && oldStudies === 0 && wasPatientSelected;
-      const switchedToSeries =
-        series === 1 && oldSeries === 0 && wasPatientSelected;
-      const switchedToAnnotations =
-        annotations === 1 && oldAnnotations === 0 && wasPatientSelected;
-      if (
-        switchedToStudies ||
-        switchedToSeries ||
-        switchedToAnnotations ||
-        wasPatientSelected
-      ) {
-        this.setState({ columns: this.setColumns() });
-      }
-    } catch (err) {
-      console.log(`couldn't load all subjects data. Please Try again!`);
-      console.error(err);
-    }
-  }
-  expandCurrentLevel = async () => {
-    try {
-      const expansionArr = [];
-      const expanded = {};
-      if (this.state.data)
-        for (let i = 0; i < this.state.data.length; i++) {
-          expanded[i] = this.state.data[i].numberOfStudies ? true : false;
-          // expansionArr[i] = this.state.data[i].subjectID;
-        }
-      this.setState({ expanded });
-    } catch (err) {
-      console.log(`Couldn't load all subjects data. Please Try again!`);
-      console.error(err);
-    }
-  };
-
-  getData = async () => {
-    let data = [];
-    try {
-      const { pid } = this.props;
-      const isPropsPidNull = !pid || pid === "null";
-      if (!isPropsPidNull || mode === "lite") {
-        const result = await getSubjects(pid);
-        data = result.data;
-        for (let subject of data) {
-          subject.children = [];
-        }
-      }
-      return data;
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  incColumns = ["subjectName", "numberOfStudies"];
-  getColumns(data) {
-    const columns = [];
-    const sample = data[0];
-    for (let key in sample) {
-      if (this.incColumns.includes(key)) {
-        columns.push({
-          accessor: key,
-          Header: key,
-          style: { whiteSpace: "normal" },
-        });
-      }
-    }
-    return columns;
-  }
-
-  selectRow = selectedRow => {
-    this.props.dispatch(clearSelection("patient"));
-    let { selected } = this.state;
-    selected[selectedRow.subjectID] = selected[selectedRow.subjectID]
-      ? false
-      : true;
-    this.setState({ selected });
-    this.props.dispatch(selectPatient(selectedRow));
-  };
-  setColumns() {
-    const { selectedPatients } = this.props;
-    const columns = [
+  const columns = React.useMemo(
+    () => [
       {
-        expander: true,
+        id: 'expander',
         width: 35,
-        Expander: ({ isExpanded, ...rest }) => (
-          <div>
-            {isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
-          </div>
-        ),
-        style: {
-          cursor: "pointer",
-          fontSize: 10,
-          padding: "0",
-          textAlign: "center",
-          userSelect: "none",
-          color: "#fafafa",
-          padding: "7px 5px",
-          verticalAlign: "middle",
-        },
-      },
-      {
-        id: "searchView-checkbox",
-        accessor: "",
-        resizable: false,
-        sortable: false,
-        width: this.widthUnit,
-        Cell: row => {
-          let { subjectID, projectID } = row.original;
-          subjectID = subjectID ? subjectID : row.original.patientID;
-          const selected = this.state.selected[subjectID];
+        Cell: ({ row, toggleRowExpanded }) => {
+          const style = { display: 'flex', width: 'fit-content' };
           return (
-            <input
-              type="checkbox"
-              className="checkbox-cell"
-              value={selected}
-              onChange={() =>
-                this.selectRow({ ...row.original, index: row.index })
-              }
-            />
+            <div style={style}>
+              <div onMouseEnter={validateSubjectSelect}>
+                <input
+                  type="checkbox"
+                  style={{ marginRight: '5px' }}
+                  disabled={selectedLevel}
+                  onClick={() => {
+                    props.dispatch(clearSelection('patient'));
+                    props.dispatch(selectPatient(row.original));
+                  }}
+                />
+              </div>
+              <span
+                {...row.getToggleRowExpandedProps({
+                  style: {
+                    cursor: 'pointer',
+                    fontSize: 10,
+                    padding: '0',
+                    textAlign: 'center',
+                    userSelect: 'none',
+                    color: '#fafafa',
+                    verticalAlign: 'middle'
+                  }
+                })}
+                onClick={() => {
+                  const expandStatus = row.isExpanded ? false : true;
+                  const obj = {
+                    patient: { [row.index]: expandStatus ? {} : false }
+                  };
+                  toggleRowExpanded(row.id, expandStatus);
+                  props.getTreeExpandSingle(obj);
+                }}
+              >
+                {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
+              </span>
+            </div>
           );
         },
+        SubCell: () => null
       },
       {
         Header: (
           <div className="search-header__col--left">Description/Name</div>
         ),
-        width: this.widthUnit * 13,
-        id: "searchView-desc",
+        width: widthUnit * 13,
+        id: 'searchView-desc',
         resizable: true,
         sortable: true,
-        accessor: "subjectName",
-        Cell: ({ original }) => {
-          const desc = this.cleanCarets(original.subjectName);
-          const id = "desc-tool" + original.subjectID;
+        accessor: 'subjectName',
+        Cell: ({ row, rows }) => {
+          const desc = clearCarets(row.original.subjectName);
+          const id = 'desc-tool' + row.original.subjectID;
           return (
             <>
-              <div data-tip data-for={id} style={{ whiteSpace: "pre-wrap" }}>
+              <span
+                data-tip
+                data-for={id}
+                style={{
+                  whiteSpace: 'pre-wrap',
+                }}
+              >
                 {desc}
-              </div>
+              </span>
               <ReactTooltip id={id} place="right" type="info" delayShow={500}>
                 <span>{desc}</span>
               </ReactTooltip>
             </>
           );
         },
+        SubCell: cellProps => <>{cellProps.value}</>
       },
       {
         Header: (
@@ -331,21 +315,23 @@ class Subjects extends Component {
             <span> aims </span>
           </div>
         ),
-        width: this.widthUnit * 2,
-        id: "searchView-aims",
+        width: widthUnit * 2,
+        id: 'searchView-aims',
         resizable: false,
         sortable: false,
-        Cell: row => (
-          <div className="searchView-table__cell">
-            {row.original.numberOfAnnotations === 0 ? (
-              ""
-            ) : (
-              <span className="badge badge-secondary">
-                {row.original.numberOfAnnotations}
-              </span>
-            )}
-          </div>
-        ),
+        Cell: ({ row }) => {
+          return (
+            <div className="searchView-table__cell">
+              {row.original.numberOfAnnotations === 0 ? (
+                ''
+              ) : (
+                <span className="badge badge-secondary">
+                  {row.original.numberOfAnnotations}
+                </span>
+              )}
+            </div>
+          );
+        }
       },
       {
         Header: (
@@ -354,21 +340,21 @@ class Subjects extends Component {
             <span> sub </span>
           </div>
         ),
-        width: this.widthUnit * 3,
-        id: "searchView-sub",
+        width: widthUnit * 3,
+        id: 'searchView-sub',
         resizable: false,
         sortable: false,
-        Cell: row => (
+        Cell: ({ row }) => (
           <div className="searchView-table__cell">
             {row.original.numberOfStudies === 0 ? (
-              ""
+              ''
             ) : (
               <span className="badge badge-secondary">
                 {row.original.numberOfStudies}
               </span>
             )}
           </div>
-        ),
+        )
       },
       {
         Header: (
@@ -377,70 +363,69 @@ class Subjects extends Component {
             <span> images </span>
           </div>
         ),
-        width: this.widthUnit * 3,
-        id: "searchView-img",
+        width: widthUnit * 3,
+        id: 'searchView-img',
         resizable: false,
         sortable: false,
-        // minResizeWidth: this.widthUnit * 3,
-        Cell: row => <div />,
+        Cell: row => <div />
       },
       {
         Header: <div className="search-header__col">Type</div>,
-        width: this.widthUnit * 5,
-        id: "searchView-type",
+        width: widthUnit * 5,
+        id: 'searchView-type',
         resizable: false,
         sortable: false,
-        // minResizeWidth: this.widthUnit * 5,
-        Cell: row => (
-          <div style={{ textAlign: "center" }}>
-            {row.original.examTypes.join("/")}
+        Cell: ({ row }) => (
+          <div style={{ textAlign: 'center' }}>
+            {row.original.examTypes.join('/')}
           </div>
-        ),
+        )
       },
       {
         Header: <div className="search-header__col">Creation date</div>,
-        width: this.widthUnit * 7,
-        id: "searchView-crDate",
+        width: widthUnit * 7,
+        id: 'searchView-crDate',
         resizable: false,
         sortable: false,
-        // minResizeWidth: this.widthUnit * 10,
-        Cell: row => <div />,
+        Cell: ({ row }) => <div />
       },
       {
         Header: <div className="search-header__col">Upload date</div>,
-        width: this.widthUnit * 7,
-        id: "searchView-upldDate",
+        width: widthUnit * 7,
+        id: 'searchView-upldDate',
         resizable: false,
         sortable: true,
-        accessor: "insertDate",
-        // minResizeWidth: this.widthUnit * 10,
-        Cell: ({ original }) => (
-          <div style={{ textAlign: "center" }}>
-            {formatDate(original.insertDate)}
+        accessor: 'insertDate',
+        Cell: ({ row }) => (
+          <div style={{ textAlign: 'center' }}>
+            {formatDate(row.original.insertDate)}
           </div>
-        ),
+        )
       },
       {
         Header: <div className="search-header__col">Accession</div>,
-        width: this.widthUnit * 5,
-        id: "searchView-access",
+        width: widthUnit * 5,
+        id: 'searchView-access',
         resizable: false,
-        // minResizeWidth: this.widthUnit * 4,
-        Cell: row => <div />,
+        Cell: row => <div />
       },
       {
         Header: <div className="search-header__col">Identifier</div>,
-        width: this.widthUnit * 10,
-        // minResizeWidth: this.widthUnit * 12,
-        id: "searchView-UID",
+        width: widthUnit * 10,
+        maxWidth: widthUnit * 10,
+        id: 'searchView-UID',
         resizable: false,
         sortable: false,
-        Cell: ({ original }) => {
-          const id = "id-tool" + original.subjectID;
+        Cell: ({ row }) => {
+          const id = 'id-tool' + row.original.subjectID;
           return (
             <>
-              <div className="searchView-table__cell" data-tip data-for={id}>
-                {original.subjectID}
+              <div
+                className="searchView-table__cell"
+                data-tip
+                data-for={id}
+              >
+                {row.original.subjectID}
               </div>
               <ReactTooltip
                 id={id}
@@ -449,233 +434,155 @@ class Subjects extends Component {
                 delayShow={500}
                 clickable={true}
               >
-                <span>{original.subjectID}</span>
+                <span>{row.original.subjectID}</span>
               </ReactTooltip>
             </>
           );
-        },
-      },
-    ];
-    return columns;
-  }
-
-  cleanCarets(string) {
-    var i = 0,
-      length = string.length;
-    for (i; i < length; i++) {
-      string = string.replace("^", " ");
-    }
-    return string;
-  }
-
-  // getData(projects) {
-  //   const data = projects.map(item => {
-  //     // using chancejs to generate guid
-  //     // shortid is probably better but seems to have performance issues
-  //     // on codesandbox.io
-  //     const _id = chance.guid();
-  //     return {
-  //       _id,
-  //       ...item,
-  //     };
-  //   });
-  //   return data;
-  // }
-
-  toggleSelection = (key, shift, row) => {
-    /*
-      Implementation of how to manage the selection state is up to the developer.
-      This implementation uses an array stored in the component state.
-      Other implementations could use object keys, a Javascript Set, or Redux... etc.
-    */
-    // start off with the existing state
-    if (this.state.selectType === "radio") {
-      let selection = [];
-      if (selection.indexOf(key) < 0) selection.push(key);
-      this.setState({ selection });
-    } else {
-      let selection = [...this.state.selection];
-      const keyIndex = selection.indexOf(key);
-      // check to see if the key exists
-      if (keyIndex >= 0) {
-        // it does exist so we will remove it using destructing
-        selection = [
-          ...selection.slice(0, keyIndex),
-          ...selection.slice(keyIndex + 1),
-        ];
-      } else {
-        // it does not exist so add it
-        selection.push(key);
+        }
       }
-      // update the state
-      this.setState({ selection });
+    ],
+    [selectedLevel, warningSeen]
+  );
+
+  const validateSubjectSelect = () => {
+    if (selectedLevel && !warningSeen) {
+      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a subject!`;
+      window.alert(message);
+      setWarningSeen(true);
     }
   };
-  toggleAll = () => {
-    /*
-      "toggleAll" is a tricky concept with any filterable table
-      do you just select ALL the records that are in your data?
-      OR
-      do you only select ALL the records that are in the current filtered data?
 
-      The latter makes more sense because "selection" is a visual thing for the user.
-      This is especially true if you are going to implement a set of external functions
-      that act on the selected information (you would not want to DELETE the wrong thing!).
-
-      So, to that end, access to the internals of ReactTable are required to get what is
-      currently visible in the table (either on the current page or any other page).
-
-      The HOC provides a method call "getWrappedInstance" to get a ref to the wrapped
-      ReactTable and then get the internal state and the "sortedData".
-      That can then be iterrated to get all the currently visible records and set
-      the selection state.
-    */
-    const selectAll = this.state.selectAll ? false : true;
-    const selection = [];
-    if (selectAll) {
-      // we need to get at the internals of ReactTable
-      const wrappedInstance = this.selectTable.getWrappedInstance();
-      // the "sortedData" property contains the currently accessible records based on the filter and sort
-      const currentRecords = wrappedInstance.getResolvedState().sortedData;
-      // we need to get all the "real" (original) records out to get at their IDs
-      const nodes = getNodes(currentRecords);
-      // we just push all the IDs onto the selection array
-      nodes.forEach(item => {
-        selection.push(item._id);
-      });
-    }
-    this.setState({ selectAll, selection });
-  };
-  isSelected = key => {
-    /*
-      Instead of passing our external selection state we provide an "isSelected"
-      callback and detect the selection state ourselves. This allows any implementation
-      for selection (either an array, object keys, or even a Javascript Set object).
-    */
-    return this.state.selection.includes(key);
-  };
-  logSelection = () => {
-    console.log("selection:", this.state.selection);
-  };
-  toggleType = () => {
-    this.setState({
-      selectType: this.state.selectType === "radio" ? "checkbox" : "radio",
-      selection: [],
-      selectAll: false,
-    });
-  };
-  toggleTree = () => {
-    if (this.state.pivotBy.length) {
-      this.setState({ pivotBy: [], expanded: {} });
+  const fetchData = useCallback(({ pageIndex, pageSize }) => {
+    if (searchKey) {
+      filterSubjects(null, pageSize, pageIndex, searchKey);
     } else {
-      this.setState({ pivotBy: [], expanded: {} });
+      const pageData = getDataFromStorage(pageSize, pageIndex);
+      setData(pageData);
+    }
+  }, []);
+
+  const preparePageData = (rawData, pageSize = 200, pageIndex = 0) => {
+    setPageCount(Math.ceil(rawData.length / pageSize));
+    const startIndex = pageSize * pageIndex;
+    const endIndex = pageSize * (pageIndex + 1);
+    const pageData = [];
+    rawData.forEach((el, i) => {
+      if (i >= startIndex && i < endIndex) {
+        el.data ? pageData.push(el.data) : pageData.push(el);
+      }
+    });
+    return pageData;
+  };
+
+  const getDataFromStorage = (pageSize, pageIndex) => {
+    const treeData = JSON.parse(localStorage.getItem('treeData'));
+    const subjectsArray = treeData[props.pid]
+      ? Object.values(treeData[props.pid])
+      : [];
+    if (subjectsArray.length > 0) {
+      if (pageSize && pageIndex >= 0)
+        return preparePageData(subjectsArray, pageSize, pageIndex);
+      else return subjectsArray;
+    } else return [];
+  };
+
+  const filterSubjects = (e, pageSize, pageIndex) => {
+    const searchTerm = searchKey.current.value.trim().toLowerCase();
+    setFilteredData(searchTerm, pageSize, pageIndex);
+  };
+
+  const setFilteredData = (searchTerm, pageSize, pageIndex) => {
+    const filteredData = filterSubjectsInTreeeData(searchTerm);
+    if (filteredData) {
+      const pageData = preparePageData(filteredData, pageSize, pageIndex);
+      setData(pageData);
+      setPageCount(Math.ceil(filteredData.length / defaultPageSize));
+    } else {
+      getDataFromStorage(defaultPageSize, 0);
     }
   };
 
-  onExpandedChange = (newExpanded, index, event) => {
-    const { data } = this.state;
-    this.setState({ expanded: newExpanded });
-    const expansionArr = [...this.state.expansionArr];
-    expansionArr[index] = expansionArr[index] ? false : data[index].subjectID;
-    this.setState({ expansionArr });
-    const obj = { patient: { [index]: newExpanded[index] } };
-    this.props.getTreeExpandSingle(obj);
-  };
-
-  closeExpansionFromSub = index => {
-    const expanded = { ...this.state.expanded };
-    expanded[index] = false;
-    this.setState({ expanded });
-    const obj = { patient: { [index]: false } };
-
-    this.props.getTreeExpandSingle(obj);
-  };
-
-  onSortedChange = () => {
-    const { expanded } = this.state;
-    for (let subject in expanded) {
-      expanded[subject] = false;
+  const filterSubjectsInTreeeData = searchTerm => {
+    if (searchTerm) {
+      const subjectsArr = getDataFromStorage();
+      const result = subjectsArr.reduce((all, item, i) => {
+        const name = clearCarets(item.data.subjectName).toLowerCase();
+        if (name.includes(searchTerm)) all.push(item.data);
+        return all;
+      }, []);
+      return result;
     }
-    this.props.handleCloseAll();
-    this.setState({ expanded });
   };
 
-  render() {
-    const {
-      toggleSelection,
-      toggleAll,
-      isSelected,
-      logSelection,
-      toggleType,
-      onExpandedChange,
-      toggleTree,
-    } = this;
-    const {
-      data,
-      columns,
-      selectAll,
-      selectType,
-      pivotBy,
-      expanded,
-    } = this.state;
-    const extraProps = {
-      selectAll,
-      isSelected,
-      toggleAll,
-      toggleSelection,
-      selectType,
-      pivotBy,
-      expanded,
-      onExpandedChange,
-    };
+  const sortSubjectName = list => {
+    let result = list.sort(function(a, b) {
+      if (a.subjectName < b.subjectName) {
+        return -1;
+      }
+      if (a.subjectName > b.subjectName) {
+        return 1;
+      }
+      return 0;
+    });
+    return result;
+  };
 
-    const TheadComponent = props => null;
-    return (
-      <div>
-        {this.state.data ? (
-          <TreeTable
-            NoDataComponent={() => null}
-            data={data}
-            columns={columns}
-            pageSize={data.length}
-            ref={r => (this.selectTable = r)}
-            className="-striped -highlight"
-            showPagination={false}
-            onSortedChange={() => {
-              this.onSortedChange();
-            }}
-            {...extraProps}
-            SubComponent={row => {
-              return (
-                <div style={{ paddingLeft: 20 }}>
-                  <Studies
-                    projectId={this.props.pid}
-                    subjectId={row.original.displaySubjectID}
-                    update={this.props.update}
-                    expandLevel={this.props.expandLevel}
-                    // updateExpandedLevelNums={this.props.updateExpandedLevelNums}
-                    progressUpdated={this.props.progressUpdated}
-                    expansionArr={this.state.expansionArr}
-                    getTreeExpandSingle={this.props.getTreeExpandSingle}
-                    getTreeExpandAll={this.props.getTreeExpandAll}
-                    treeExpand={this.props.treeExpand}
-                    patientIndex={row.index}
-                    closeExpand={this.closeExpansionFromSub}
-                    // expandLoading={this.props.expandLoading}
-                    // patientExpandComplete={this.props.patientExpandComplete}
-                    treeData={this.props.treeData}
-                    getTreeData={this.props.getTreeData}
-                    closeAllCounter={this.props.closeAllCounter}
-                    pid={this.props.pid}
-                  />
-                </div>
-              );
-            }}
-          />
-        ) : null}
-      </div>
-    );
-  }
+  useEffect(() => {
+    const { pid, getTreeData } = props;
+    // const treeData = JSON.parse(localStorage.getItem('treeData'));
+    const dataFromStorage = getDataFromStorage(defaultPageSize, 0);
+    // check if there is data in treedata
+    // if there is use it if not get it and post data back to app
+    let data = [];
+    if (pid && pid !== 'null') {
+      if (dataFromStorage?.length > 0) {
+        data = sortSubjectName(dataFromStorage);
+        setData(data);
+      } else {
+        setLoading(true);
+        getSubjects(pid)
+          .then(res => {
+            setLoading(false);
+            data = preparePageData(res.data, defaultPageSize, 0);
+            getTreeData(pid, 'subject', res.data);
+            setData(data);
+          })
+          .catch(err => {
+            console.error(err);
+          });
+      }
+    }
+  }, []);
+
+  return (
+    <>
+      <label>
+        Search subject:
+        <input
+          type="text"
+          style={{ margin: '1rem' }}
+          onChange={filterSubjects}
+          ref={searchKey}
+        />
+      </label>
+      {loading && (
+        <div style={{ width: 'fit-content', margin: 'auto', marginTop: '10%' }}>
+          <PropagateLoader color={'#7A8288'} loading={loading} margin={8} />
+        </div>
+      )}
+      <Table
+        columns={columns}
+        data={data}
+        pageCount={pageCount}
+        fetchData={fetchData}
+        getTreeData={props.getTreeData}
+        expandLevel={props.expandLevel}
+        getTreeExpandAll={props.getTreeExpandAll}
+        getTreeExpandSingle={props.getTreeExpandSingle}
+        treeExpand={props.treeExpand}
+      />
+    </>
+  );
 }
 
 const mapStateToProps = state => {
@@ -683,7 +590,8 @@ const mapStateToProps = state => {
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
     selectedSeries: state.annotationsListReducer.selectedSeries,
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
   };
 };
+
 export default connect(mapStateToProps)(Subjects);
