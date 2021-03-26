@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   useTable,
   useExpanded,
@@ -26,7 +26,6 @@ function Table({
   fetchData,
   pageCount,
   loading,
-  filterSubjects,
   getTreeData,
   expandLevel,
   getTreeExpandAll,
@@ -98,14 +97,6 @@ function Table({
     <>
       {data.length > 0 && (
         <>
-          <label>
-            {' '}
-            Search subject:
-            <input
-              type="text"
-              onChange={e => filterSubjects(e, pageSize, pageIndex)}
-            />
-          </label>
           <table
             {...getTableProps()}
             style={{ width: '-webkit-fill-available' }}
@@ -223,9 +214,11 @@ function Subjects(props) {
   const widthUnit = 20;
 
   const [data, setData] = useState([]);
-  const [searchKey, setSearchKey] = useState('');
+  // const [searchKey, setSearchKey] = useState('');
+  const searchKey = useRef(null);
   let [loading, setLoading] = useState(false);
   const [pageCount, setPageCount] = useState(0);
+  const [pageIndex, setPageIndex] = useState(0);
   const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
 
@@ -245,12 +238,6 @@ function Subjects(props) {
     else if (annotations.length) setSelectedLevel('annotations');
     else setSelectedLevel('');
   }, [props.selectedStudies, props.selectedSeries, props.selectedAnnotations]);
-
-  // const selectRow = (e, row) => {
-  //   console.log('clickecd');
-  //   props.dispatch(clearSelection('patient'));
-  //   props.dispatch(selectPatient(row.original));
-  // };
 
   const columns = React.useMemo(
     () => [
@@ -479,14 +466,14 @@ function Subjects(props) {
 
   const fetchData = useCallback(({ pageIndex, pageSize }) => {
     if (searchKey) {
-      filterSubjects(searchKey, pageSize, pageIndex);
+      filterSubjects(null, pageSize, pageIndex, searchKey);
     } else {
       const pageData = getDataFromStorage(pageSize, pageIndex);
       setData(pageData);
     }
   }, []);
 
-  const preparePageData = (rawData, pageSize, pageIndex) => {
+  const preparePageData = (rawData, pageSize = 200, pageIndex = 0) => {
     setPageCount(Math.ceil(rawData.length / pageSize));
     const startIndex = pageSize * pageIndex;
     const endIndex = pageSize * (pageIndex + 1);
@@ -512,26 +499,31 @@ function Subjects(props) {
   };
 
   const filterSubjects = (e, pageSize, pageIndex) => {
-    const searchKey = e.target.value.trim().toLowerCase();
-    setSearchKey(searchKey);
-    setFilteredData(searchKey, pageSize, pageIndex);
+    const searchTerm = searchKey.current.value.trim().toLowerCase();
+    setFilteredData(searchTerm, pageSize, pageIndex);
   };
 
-  const setFilteredData = (searchKey, pageSize, pageIndex) => {
-    const filteredData = filterSubjectsInTreeeData(searchKey);
-    const pageData = preparePageData(filteredData, pageSize, pageIndex);
-    setData(pageData);
-    setPageCount(Math.ceil(pageData.length / defaultPageSize));
+  const setFilteredData = (searchTerm, pageSize, pageIndex) => {
+    const filteredData = filterSubjectsInTreeeData(searchTerm);
+    if (filteredData) {
+      const pageData = preparePageData(filteredData, pageSize, pageIndex);
+      setData(pageData);
+      setPageCount(Math.ceil(filteredData.length / defaultPageSize));
+    } else {
+      getDataFromStorage(defaultPageSize, 0);
+    }
   };
 
   const filterSubjectsInTreeeData = searchKey => {
-    const subjectsArr = getDataFromStorage();
-    const result = subjectsArr.reduce((all, item, i) => {
-      const name = clearCarets(item.data.subjectName).toLowerCase();
-      if (name.includes(searchKey)) all.push(item.data);
-      return all;
-    }, []);
-    return result;
+    if (searchKey) {
+      const subjectsArr = getDataFromStorage();
+      const result = subjectsArr.reduce((all, item, i) => {
+        const name = clearCarets(item.data.subjectName).toLowerCase();
+        if (name.includes(searchKey)) all.push(item.data);
+        return all;
+      }, []);
+      return result;
+    }
   };
 
   const sortSubjectName = list => {
@@ -576,6 +568,15 @@ function Subjects(props) {
 
   return (
     <>
+      <label>
+        Search subject:
+        <input
+          type="text"
+          style={{ margin: '1rem' }}
+          onChange={filterSubjects}
+          ref={searchKey}
+        />
+      </label>
       {loading && (
         <div style={{ width: 'fit-content', margin: 'auto', marginTop: '10%' }}>
           <PropagateLoader color={'#7A8288'} loading={loading} margin={8} />
@@ -586,7 +587,6 @@ function Subjects(props) {
         data={data}
         pageCount={pageCount}
         fetchData={fetchData}
-        filterSubjects={filterSubjects}
         getTreeData={props.getTreeData}
         expandLevel={props.expandLevel}
         getTreeExpandAll={props.getTreeExpandAll}
