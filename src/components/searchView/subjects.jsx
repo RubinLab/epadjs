@@ -2,17 +2,13 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   useTable,
   useExpanded,
-  useRowSelect,
   usePagination
 } from 'react-table';
-import { toast } from 'react-toastify';
 import { connect } from 'react-redux';
-import propTypes from 'react-table-v6/lib/propTypes';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import Studies from './Studies';
 import { selectPatient, clearSelection } from '../annotationsList/action';
-// import "react-table-v6/react-table.css";
 import { getSubjects } from '../../services/subjectServices';
 import { formatDate } from '../flexView/helperMethods';
 import { clearCarets } from '../../Utils/aid.js';
@@ -55,14 +51,11 @@ function Table({
       initialState: {
         pageIndex: 0,
         pageSize: defaultPageSize
-      }, // Pass our hoisted table state
-      manualPagination: true, // Tell the usePagination
-      // hook that we'll handle our own data fetching
-      // This means we'll also have to provide our own
-      // pageCount.
+      },
+      manualPagination: true, 
       pageCount
     },
-    useExpanded, // Use the useExpanded plugin hook
+    useExpanded, 
     usePagination
   );
 
@@ -88,9 +81,6 @@ function Table({
     var headerRect = header.getBoundingClientRect();
     const offsetTop = headerRect.top - bodyRect.top;
     const offsetLeft = headerRect.left - bodyRect.left;
-
-    console.log('top, left -->', offsetTop, offsetLeft);
-    // window.scrollTo(left, top);
   };
 
   return (
@@ -109,7 +99,7 @@ function Table({
                   {...headerGroup.getHeaderGroupProps()}
                 >
                   {headerGroup.headers.map((column, z) => (
-                    <th {...column.getHeaderProps()} key={`header-col-${z}`}>
+                    <th {...column.getHeaderProps()} key={`header-col-${z}`} className="new-rt-header__cell">
                       {column.render('Header')}
                     </th>
                   ))}
@@ -128,11 +118,15 @@ function Table({
                       {...row.getRowProps()}
                       style={style}
                       key={`subject-row ${i}`}
-                      // className={`new-table--row${i%2}`}
                     >
                       {row.cells.map((cell, z) => {
                         return (
-                          <td {...cell.getCellProps()} key={`row-col-${z}`}>
+                          <td
+                            {...cell.getCellProps({
+                              className: cell.column.className
+                            })}
+                            key={`row-col-${z}`}
+                          >
                             {cell.render('Cell')}
                           </td>
                         );
@@ -148,7 +142,6 @@ function Table({
                         getTreeExpandAll={getTreeExpandAll}
                         treeExpand={treeExpand}
                         getTreeExpandSingle={getTreeExpandSingle}
-                        // validateTreeRowSelection={validateTreeRowSelection}
                       />
                     )}
                   </React.Fragment>
@@ -214,17 +207,14 @@ function Subjects(props) {
   const widthUnit = 20;
 
   const [data, setData] = useState([]);
-  // const [searchKey, setSearchKey] = useState('');
   const searchKey = useRef(null);
   let [loading, setLoading] = useState(false);
   const [pageCount, setPageCount] = useState(0);
-  const [pageIndex, setPageIndex] = useState(0);
   const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
 
   useEffect(() => {
     const {
-      selectedPatients,
       selectedStudies,
       selectedSeries,
       selectedAnnotations
@@ -241,17 +231,13 @@ function Subjects(props) {
 
   const columns = React.useMemo(
     () => [
-      // { id: 'space', Cell: () => <span style={{ paddingLeft: '1px' }}></span> },
       {
-        // Build our expander column
-        id: 'expander', // Make sure it has an ID
+        id: 'expander',
         width: 35,
         Cell: ({ row, toggleRowExpanded }) => {
-          // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
-          // to build the toggle for expanding a row
           const style = { display: 'flex', width: 'fit-content' };
           return (
-            <div className="tree-combinedCell" style={style}>
+            <div style={style}>
               <div onMouseEnter={validateSubjectSelect}>
                 <input
                   type="checkbox"
@@ -266,9 +252,6 @@ function Subjects(props) {
               <span
                 {...row.getToggleRowExpandedProps({
                   style: {
-                    // We can even use the row.depth property
-                    // and paddingLeft to indicate the depth
-                    // of the row
                     cursor: 'pointer',
                     fontSize: 10,
                     padding: '0',
@@ -308,7 +291,13 @@ function Subjects(props) {
           const id = 'desc-tool' + row.original.subjectID;
           return (
             <>
-              <span data-tip data-for={id} style={{ whiteSpace: 'pre-wrap' }}>
+              <span
+                data-tip
+                data-for={id}
+                style={{
+                  whiteSpace: 'pre-wrap',
+                }}
+              >
                 {desc}
               </span>
               <ReactTooltip id={id} place="right" type="info" delayShow={500}>
@@ -317,7 +306,7 @@ function Subjects(props) {
             </>
           );
         },
-        SubCell: cellProps => <>{cellProps.value} 🎉</>
+        SubCell: cellProps => <>{cellProps.value}</>
       },
       {
         Header: (
@@ -378,7 +367,6 @@ function Subjects(props) {
         id: 'searchView-img',
         resizable: false,
         sortable: false,
-        // minResizeWidth: widthUnit * 3,
         Cell: row => <div />
       },
       {
@@ -387,7 +375,6 @@ function Subjects(props) {
         id: 'searchView-type',
         resizable: false,
         sortable: false,
-        // minResizeWidth: widthUnit * 5,
         Cell: ({ row }) => (
           <div style={{ textAlign: 'center' }}>
             {row.original.examTypes.join('/')}
@@ -400,7 +387,6 @@ function Subjects(props) {
         id: 'searchView-crDate',
         resizable: false,
         sortable: false,
-        // minResizeWidth: widthUnit * 10,
         Cell: ({ row }) => <div />
       },
       {
@@ -410,7 +396,6 @@ function Subjects(props) {
         resizable: false,
         sortable: true,
         accessor: 'insertDate',
-        // minResizeWidth: widthUnit * 10,
         Cell: ({ row }) => (
           <div style={{ textAlign: 'center' }}>
             {formatDate(row.original.insertDate)}
@@ -422,13 +407,12 @@ function Subjects(props) {
         width: widthUnit * 5,
         id: 'searchView-access',
         resizable: false,
-        // minResizeWidth: widthUnit * 4,
         Cell: row => <div />
       },
       {
         Header: <div className="search-header__col">Identifier</div>,
         width: widthUnit * 10,
-        // minResizeWidth: widthUnit * 12,
+        maxWidth: widthUnit * 10,
         id: 'searchView-UID',
         resizable: false,
         sortable: false,
@@ -436,7 +420,11 @@ function Subjects(props) {
           const id = 'id-tool' + row.original.subjectID;
           return (
             <>
-              <div className="searchView-table__cell" data-tip data-for={id}>
+              <div
+                className="searchView-table__cell"
+                data-tip
+                data-for={id}
+              >
                 {row.original.subjectID}
               </div>
               <ReactTooltip
@@ -514,12 +502,12 @@ function Subjects(props) {
     }
   };
 
-  const filterSubjectsInTreeeData = searchKey => {
-    if (searchKey) {
+  const filterSubjectsInTreeeData = searchTerm => {
+    if (searchTerm) {
       const subjectsArr = getDataFromStorage();
       const result = subjectsArr.reduce((all, item, i) => {
         const name = clearCarets(item.data.subjectName).toLowerCase();
-        if (name.includes(searchKey)) all.push(item.data);
+        if (name.includes(searchTerm)) all.push(item.data);
         return all;
       }, []);
       return result;

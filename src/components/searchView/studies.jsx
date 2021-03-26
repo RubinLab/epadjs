@@ -1,21 +1,18 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   useTable,
-  useExpanded,
-  useRowSelect,
-  usePagination
+  useExpanded
 } from 'react-table';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
-// import "react-table-v6/react-table.css";
 import { getStudies } from '../../services/studyServices';
 import Series from './Series';
 import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
-import { clearCarets, styleEightDigitDate } from '../../Utils/aid.js';
-import { MAX_PORT, widthUnit, formatDates } from '../../constants';
+import { clearCarets  } from '../../Utils/aid.js';
+import { MAX_PORT } from '../../constants';
 
 import {
   getSingleSerie,
@@ -41,9 +38,6 @@ function Table({
   treeExpand
 }) {
   const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
     rows,
     prepareRow,
     toggleAllRowsExpanded,
@@ -79,14 +73,18 @@ function Table({
               : false;
             const expandRow = row.isExpanded || isExpandedFromToolbar;
             const style = { height: '2.5rem', background: '#272b30' };
-            // style.background = i % 2 === 0 ? '#18293a' : '#111c28';
-            // if (i%2 === 0) style.background = '#32353b'
             return (
               <>
                 <tr {...row.getRowProps()} key={`study-row ${i}`} style={style}>
                   {row.cells.map(cell => {
                     return (
-                      <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                      <td
+                        {...cell.getCellProps({
+                          className: cell.column.className
+                        })}
+                      >
+                        {cell.render('Cell')}
+                      </td>
                     );
                   })}
                 </tr>
@@ -227,14 +225,10 @@ function Studies(props) {
 
   const columns = React.useMemo(
     () => [
-      // { id: 'space', Cell: () => <span style={{ paddingLeft: '10px' }}></span> },
       {
-        // Build our expander column
         id: 'studies-expander', // Make sure it has an ID
         width: 35,
         Cell: ({ row, toggleRowExpanded }) => {
-          // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
-          // to build the toggle for expanding a row
           const style = {
             display: 'flex',
             width: 'fit-content',
@@ -242,7 +236,7 @@ function Studies(props) {
           };
 
           return (
-            <div style={style} className="tree-combinedCell">
+            <div style={style}>
               <div onMouseEnter={validateStudySelect}>
                 <input
                   type="checkbox"
@@ -262,8 +256,6 @@ function Studies(props) {
                     textAlign: 'center',
                     userSelect: 'none',
                     color: '#fafafa',
-
-                    // padding: '7px 5px',
                     verticalAlign: 'middle'
                   }
                 })}
@@ -284,13 +276,8 @@ function Studies(props) {
         }
       },
       {
-        // Header: (
-        //   <div className="search-header__col--left">Description/Name</div>
-        // ),
         width: widthUnit * 12,
         id: 'study-desc',
-        // resizable: true,
-        // sortable: true,
         Cell: ({ row }) => {
           let desc = clearCarets(row.original.studyDescription);
           desc = desc || 'Unnamed Study';
@@ -337,6 +324,7 @@ function Studies(props) {
       {
         width: widthUnit * 3,
         id: 'numberOfSeries',
+        className: 'searchView-table__cell',
         Cell: ({ row }) => (
           <div className="searchView-table__cell">
             {row.original.numberOfSeries === 0 ? (
@@ -351,12 +339,13 @@ function Studies(props) {
       },
       {
         width: widthUnit * 3,
-        accessor: 'numberOfImages' || ''
+        accessor: 'numberOfImages' || '',
+        className: 'searchView-table__cell'
       },
       {
-        //Header: "Type",
         width: widthUnit * 5,
         id: 'study-examtype',
+        className: 'searchView-table__cell',
         Cell: ({ row }) => (
           <span className="searchView-table__cell">
             {row.original.examTypes.join('/')}
@@ -364,29 +353,30 @@ function Studies(props) {
         )
       },
       {
-        //Header: "Study/Created Date",
         width: widthUnit * 7,
         id: 'study-insert-time',
+        className: 'searchView-table__cell',
         Cell: ({ row }) => (
           <span className="searchView-table__cell">
-            {styleEightDigitDate(row.original.insertDate)}
+            {formatDate(row.original.insertDate)}
           </span>
         )
       },
       {
-        //Header: "Uploaded",
         width: widthUnit * 7,
         id: 'study-created-time',
+        className: 'searchView-table__cell',
+
         Cell: ({ row }) => (
           <span className="searchView-table__cell">
-            {styleEightDigitDate(row.original.createdTime)}
+            {formatDate(row.original.createdTime)}
           </span>
         )
       },
       {
-        //Header: "Accession",
         width: widthUnit * 6,
         id: 'studyAccessionNumber',
+        className: 'searchView-table__cell',
         Cell: ({ row }) => (
           <>
             <span
@@ -394,7 +384,7 @@ function Studies(props) {
               data-tip
               data-for={row.original.studyAccessionNumber}
             >
-              {row.original.studyAccessionNumber}
+              {row.original.studyAccessionNumber || ''}
             </span>
             <ReactTooltip
               id={row.original.studyAccessionNumber}
@@ -409,12 +399,14 @@ function Studies(props) {
         )
       },
       {
-        //Header: "Identifier",
-        width: widthUnit * 10,
         id: 'studyUID',
+        className: 'searchView-table__cell',
         Cell: ({ row }) => (
           <>
-            <span data-tip data-for={row.original.studyUID}>
+            <span
+              data-tip
+              data-for={row.original.studyUID}
+            >
               {row.original.studyUID}
             </span>{' '}
             <ReactTooltip

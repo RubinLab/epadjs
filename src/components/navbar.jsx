@@ -25,7 +25,7 @@ const NavBar = ({
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
-        <Link className="navbar-brand-right nounderline pr-3 " to="#">
+        <Link className="navbar-brand-right nounderline pr-3 " to="#" id="epad-logo">
           <img src={logo} alt={'logo'} width="25px" />
           {mode === 'lite' && 'eLite'} {mode !== 'lite' && 'ePAD'}
         </Link>

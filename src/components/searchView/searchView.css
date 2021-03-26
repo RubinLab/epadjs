@@ -78,6 +78,14 @@
   font-size: 1rem;
 }
 
+.new-rt-header__cell, .new-rt-body__cell {
+  text-align: center;
+}
+
+#searchView-desc {
+  text-align: left;
+}
+
 .searchView-table__cell {
   text-align: center;
 }
@@ -468,7 +476,7 @@ h5.add-subject__modal--label,
   color: '#fafafa';
   padding: '7px 5px';
   vertical-align: 'middle';
-  white-space: 'pre-wrap'
+  white-space: 'pre-wrap';
 }
 
 .searchView-row__desc:hover {
@@ -476,8 +484,6 @@ h5.add-subject__modal--label,
   cursor: pointer;
   text-decoration: underline;
 }
-
-
 
 #modal-fix {
   position: absolute;

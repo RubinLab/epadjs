@@ -2,16 +2,14 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {
   useTable,
   useExpanded,
-  useRowSelect,
-  usePagination
 } from 'react-table';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
-// import "react-table-v6/react-table.css";
 import { getAnnotations } from '../../services/annotationServices';
-import { MAX_PORT, formatDates } from '../../constants';
+import { MAX_PORT } from '../../constants';
+import { formatDate } from '../flexView/helperMethods';
 import {
   alertViewPortFull,
   getSingleSerie,
@@ -26,9 +24,6 @@ import {
 
 function Table({ columns, data }) {
   const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
     rows,
     prepareRow,
     state: { expanded }
@@ -37,7 +32,7 @@ function Table({ columns, data }) {
       columns,
       data
     },
-    useExpanded // Use the useExpanded plugin hook
+    useExpanded
   );
 
   return (
@@ -47,16 +42,16 @@ function Table({ columns, data }) {
           {rows.map((row, i) => {
             prepareRow(row);
             const style = { height: '2.2rem', background: '#3a3f43 ' };
-            // style.background = i % 2 === 0 ? '#363623' : '#272719';
             return (
               <>
                 <tr
                   {...row.getRowProps()}
-                  // style={{ position: 'relative', left: '60px', zIndex: '1' }}
                 >
                   {row.cells.map(cell => {
                     return (
-                      <td style={style} {...cell.getCellProps()}>
+                      <td style={style} {...cell.getCellProps({
+                        className: cell.column.className
+                      })}>
                         {cell.render('Cell')}
                       </td>
                     );
@@ -123,7 +118,7 @@ function Annotations(props) {
         props
           .dispatch(getSingleSerie(selected, aimID))
           .then(() => {})
-          .catch(err => console.log(err));
+          .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
         if (!props.patients[patientID]) {
           // props.dispatch(getWholeData(null, null, selected));
@@ -164,10 +159,9 @@ function Annotations(props) {
   const columns = React.useMemo(
     () => [
       {
-        // Build our expander column
-        id: 'series-expander', // Make sure it has an ID
+        id: 'series-expander',
         Cell: ({ row }) => (
-          <div style={{ paddingLeft: '30px' }} className="tree-combinedCell">
+          <div style={{ paddingLeft: '30px' }}>
             <div onMouseEnter={validateAnnotationSelect}>
               <input
                 type="checkbox"
@@ -182,9 +176,6 @@ function Annotations(props) {
       {
         width: widthUnit * 10,
         id: 'study-desc',
-        // resizable: true,
-        // sortable: true,
-        // className: 'searchView-row__desc',
         Cell: ({ row }) => {
           const { name, aimID, userName } = row.original;
           let desc = name || 'Unnamed annotation';
@@ -246,7 +237,7 @@ function Annotations(props) {
         Cell: ({ row }) => {
           return (
             <div className="searchView-table__cell">
-              {formatDates(row.original.date)}
+              {formatDate(row.original.date)}
             </div>
           );
         }
@@ -266,6 +257,7 @@ function Annotations(props) {
       {
         Header: 'Identifier',
         width: widthUnit * 10,
+        className: 'searchView-table__cell',
         Cell: ({ row }) => {
           let id = 'aimid-tool' + row.original.aimID;
           return (

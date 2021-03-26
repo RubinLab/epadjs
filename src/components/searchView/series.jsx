@@ -2,15 +2,13 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {
   useTable,
   useExpanded,
-  useRowSelect,
-  usePagination
 } from 'react-table';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
-// import "react-table-v6/react-table.css";
-import { MAX_PORT, formatDates } from '../../constants';
+import { MAX_PORT } from '../../constants';
+import { formatDate } from '../flexView/helperMethods';
 import Annotations from './Annotations';
 import { getSeries } from '../../services/seriesServices';
 import {
@@ -23,7 +21,6 @@ import {
   getWholeData,
   updatePatient
 } from '../annotationsList/action';
-import { clearCarets, styleEightDigitDate } from '../../Utils/aid.js';
 
 function Table({
   columns,
@@ -32,14 +29,10 @@ function Table({
   expandLevel,
   patientIndex,
   getTreeExpandAll,
-  getTreeExpandSingle,
   treeExpand,
   studyIndex
 }) {
   const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
     rows,
     prepareRow,
     toggleAllRowsExpanded,
@@ -82,13 +75,18 @@ function Table({
             const rowExpanded =
               row.isExpanded || isExpandedFromToolbar || expandLevel === 4;
             const style = { height: '2.5rem', background: '#30343b' };
-            // style.background = i % 2 === 0 ? '#3a1a19' : '#281211';
             return (
               <>
                 <tr {...row.getRowProps()} style={style}>
                   {row.cells.map(cell => {
                     return (
-                      <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                      <td
+                        {...cell.getCellProps({
+                          className: cell.column.className
+                        })}
+                      >
+                        {cell.render('Cell')}
+                      </td>
                     );
                   })}
                 </tr>
@@ -195,12 +193,9 @@ function Series(props) {
   const columns = React.useMemo(
     () => [
       {
-        // Build our expander column
-        id: 'series-expander', // Make sure it has an ID
+        id: 'series-expander',
         width: 35,
         Cell: ({ row, toggleRowExpanded }) => {
-          // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
-          // to build the toggle for expanding a row
           const style = {
             display: 'flex',
             width: 'fit-content',
@@ -208,7 +203,7 @@ function Series(props) {
           };
 
           return (
-            <div style={style} className="tree-combinedCell">
+            <div style={style}>
               <div onMousEnter={validateSeriesSelect}>
                 <input
                   type="checkbox"
@@ -228,8 +223,6 @@ function Series(props) {
                     textAlign: 'center',
                     userSelect: 'none',
                     color: '#fafafa',
-                    // paddingLeft: '14px',
-                    // padding: '7px 5px',
                     verticalAlign: 'middle'
                   }
                 })}
@@ -251,13 +244,8 @@ function Series(props) {
         }
       },
       {
-        // Header: (
-        //   <div className="search-header__col--left">Description/Name</div>
-        // ),
         width: widthUnit * 12,
         id: 'study-desc',
-        // resizable: true,
-        // sortable: true,
         Cell: ({ row }) => {
           let desc = row.original.seriesDescription || 'Unnamed Series';
           let id = 'desc' + row.original.seriesUID;
@@ -288,6 +276,7 @@ function Series(props) {
       {
         width: widthUnit * 2,
         id: 'numberOfAnnotations',
+        className: 'searchView-table__cell',
         Cell: ({ row }) => (
           <div className="searchView-table__cell">
             {row.original.numberOfAnnotations === 0 ? (
@@ -304,15 +293,18 @@ function Series(props) {
         //subitem
         width: widthUnit * 3,
         id: 'series-subitem',
+        className: 'searchView-table__cell',
         Cell: () => <div />
       },
       {
         width: widthUnit * 3,
-        accessor: 'numberOfImages'
+        accessor: 'numberOfImages',
+        className: 'searchView-table__cell'
       },
       {
         width: widthUnit * 5,
         id: 'series-examtype',
+        className: 'searchView-table__cell',
         Cell: ({ row }) => (
           <span className="searchView-table__cell">
             {row.original.examType}
@@ -321,27 +313,28 @@ function Series(props) {
       },
       {
         width: widthUnit * 7,
-        // Header: "Study/Created Date",
         id: 'series-seriesDate',
+        className: 'searchView-table__cell',
         Cell: ({ row }) => (
           <div className="searchView-table__cell">
-            {formatDates(row.original.seriesDate)}
+            {formatDate(row.original.seriesDate)}
           </div>
         )
       },
       {
         width: widthUnit * 7,
-        // Header: "Uploaded",
         id: 'series-createdTime',
+        className: 'searchView-table__cell',
         Cell: ({ row }) => (
           <div className="searchView-table__cell">
-            {formatDates(row.original.createdTime)}
+            {formatDate(row.original.createdTime)}
           </div>
         )
       },
       {
         Header: 'Accession',
         width: widthUnit * 6,
+        className: 'searchView-table__cell',
         Cell: ({ row }) => (
           <div className="searchView-table__cell">
             {row.original.accessionNumber}
@@ -349,9 +342,9 @@ function Series(props) {
         )
       },
       {
-        // Header: "Identifier",
         width: widthUnit * 10,
         id: 'seriesUID',
+        className: 'searchView-table__cell',
         Cell: ({ row }) => (
           <>
             <div
