@@ -1204,7 +1204,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     }
 
     // Check to see if mouse in bounding box of textbox
-    if (data.handles.textBox) {
+    if (state.showCalculations && data.handles.textBox) {
       if (pointInsideBoundingBox(data.handles.textBox, coords)) {
         return data.handles.textBox;
       }
