@@ -236,15 +236,17 @@ class ToolMenu extends Component {
   disableAllTools = () => {
     this.setState({ activeToolIdx: 0 });
     this.setCursor("default");
-    Array.from(this.tools).forEach((tool) => {
-      this.setToolStateForAllElements(tool.name, "passive");
-      // const apiTool = cornerstoneTools[`${tool.name}Tool`];
-      // if (apiTool) {
-      //   cornerstoneTools.setToolPassive(tool.name);
-      // } else {
-      //   throw new Error(`Tool not found: ${tool.name}Tool`);
-      // }
-    });
+    this.setToolStateForAllElements(this.state.activeTool, "passive");
+    // Array.from(this.tools).forEach((tool) => {
+    //   if (tool !== "FreehandRoiSculptor")
+    //     this.setToolStateForAllElements(tool.name, "passive");
+    //   // const apiTool = cornerstoneTools[`${tool.name}Tool`];
+    //   // if (apiTool) {
+    //   //   cornerstoneTools.setToolPassive(tool.name);
+    //   // } else {
+    //   //   throw new Error(`Tool not found: ${tool.name}Tool`);
+    //   // }
+    // });
   };
 
   setToolStateForAllElements = (toolName, state, mouseMask = 1) => {

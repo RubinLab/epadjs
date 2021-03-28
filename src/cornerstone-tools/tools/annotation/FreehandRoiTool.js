@@ -574,6 +574,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
   }
 
   handleSelectedCallback(evt, toolData, handle, interactionType = "mouse") {
+    console.log("selected");
     const ancestorEvent = {
       element: evt.detail.element,
       data: toolData,

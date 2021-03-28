@@ -946,7 +946,8 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    * @returns {void}
    */
   // eslint-disable-next-line no-unused-vars
-  _deselectAllTools(evt) {
+  _deselectAllTools(evt, setSculptCursor = false) {
+    console.trace();
     const config = this.configuration;
     const toolData = getToolState(this.element, this.referencedToolName);
 
@@ -957,8 +958,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
         toolData.data[i].active = false;
       }
     }
-
-    // setToolCursor(this.element, this.svgCursor);
+    if (setSculptCursor) setToolCursor(this.element, this.svgCursor);
 
     external.cornerstone.updateImage(this.element);
   }
@@ -1027,6 +1027,11 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    * @returns {Number}              The limited radius.
    */
   _limitCursorRadius(eventData, radius, canvasCoords = false) {
+    // For Freehand ROI intense annotations users let user define max sculpt radius
+    const { sculptMaxRadius = 0 } =
+      JSON.parse(sessionStorage.getItem("userPreferences")) ?? {};
+    if (sculptMaxRadius && radius > sculptMaxRadius) return sculptMaxRadius;
+
     const element = eventData.element;
     const image = eventData.image;
     const config = this.configuration;
