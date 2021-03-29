@@ -196,11 +196,22 @@ class DisplayView extends Component {
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
+    window.addEventListener('keydown', this.handleKeyPressed);
     if (series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
     };
   }
+
+  handleKeyPressed = (event) => {
+    if (event.key === "Escape") {
+      const evnt = new CustomEvent("escPressed", {
+        cancelable: true,
+      });
+      window.dispatchEvent(evnt);
+    }
+  }
+
 
   async componentDidUpdate(prevProps, prevState) {
     const { pid, series, activePort, aimList } = this.props;
@@ -243,6 +254,7 @@ class DisplayView extends Component {
     window.removeEventListener("editAim", this.editAimHandler);
     window.removeEventListener("deleteAim", this.deleteAimHandler);
     window.removeEventListener("resize", this.setSubComponentHeights);
+    window.removeEventListener('keydown', this.handleKeyPressed);
     clearInterval(this.state.tokenRefresh)
   }
 
@@ -766,7 +778,7 @@ class DisplayView extends Component {
   measurementRemoved = (event) => {
     const serie = this.getActiveSerie();
     const { aimId } = event.detail.measurementData;
-    if (this.isLastShapeInAim(aimId)) {
+    if (aimId && this.isLastShapeInAim(aimId)) {
       const shouldDeleteAim = window.confirm("This is the last markup in Aim. Would yo like to delete the Aim file as well?");
       if (shouldDeleteAim) {
         this.deleteAim(aimId, serie);
@@ -1446,9 +1458,11 @@ class DisplayView extends Component {
 
   clearSculptState = () => {
     const { tools } = cornerstoneTools.store.state;
+    const evt = {};
+    const selectSculptCursor = true;
     for (let i = 0; i < tools.length; i++) {
       if (tools[i].name === "FreehandRoiSculptor") {
-        tools[i]._deselectAllTools();
+        tools[i]._deselectAllTools(evt, selectSculptCursor);
         return;
       }
     }
@@ -1563,129 +1577,129 @@ class DisplayView extends Component {
     return !Object.entries(this.props.series).length ? (
       <Redirect to="/search" />
     ) : (
-        <React.Fragment>
-          <RightsideBar
-            showAimEditor={this.state.showAimEditor}
-            selectedAim={this.state.selectedAim}
-            onCancel={this.closeAimEditor}
-            hasSegmentation={this.state.hasSegmentation}
-            activeLabelMapIndex={this.state.activeLabelMapIndex}
-            updateProgress={this.props.updateProgress}
-            updateTreeDataOnSave={this.props.updateTreeDataOnSave}
-            setAimDirty={this.setDirtyFlag}
-          >
-            <ToolMenu />
-            {!this.state.isLoading &&
-              Object.entries(this.props.series).length &&
-              this.state.data.map((data, i) => (
-                <div
-                  className={
-                    "viewportContainer" +
-                    (this.props.activePort == i ? " selected" : "")
-                  }
-                  key={i}
-                  id={"viewportContainer" + i}
-                  style={{
-                    width: this.state.width,
-                    height: this.state.height,
-                    display: "inline-block",
-                  }}
-                  onClick={() => this.setActive(i)}
-                >
-                  <div className={"row"}>
-                    <div className={"column left"}>
-                      <span
-                        className={"dot"}
-                        style={{ background: "#ED594A" }}
-                        onClick={() => this.handleClose(i)}
-                      >
-                        <FaTimes />
-                      </span>
-                      <span
-                        className={"dot"}
-                        style={{ background: "#5AC05A" }}
-                        onClick={() => this.hideShow(i)}
-                      >
-                        <FaExpandArrowsAlt />
-                      </span>
-                    </div>
-                    {/* <div className={"column middle"}>
+      <React.Fragment>
+        <RightsideBar
+          showAimEditor={this.state.showAimEditor}
+          selectedAim={this.state.selectedAim}
+          onCancel={this.closeAimEditor}
+          hasSegmentation={this.state.hasSegmentation}
+          activeLabelMapIndex={this.state.activeLabelMapIndex}
+          updateProgress={this.props.updateProgress}
+          updateTreeDataOnSave={this.props.updateTreeDataOnSave}
+          setAimDirty={this.setDirtyFlag}
+        >
+          <ToolMenu />
+          {!this.state.isLoading &&
+            Object.entries(this.props.series).length &&
+            this.state.data.map((data, i) => (
+              <div
+                className={
+                  "viewportContainer" +
+                  (this.props.activePort == i ? " selected" : "")
+                }
+                key={i}
+                id={"viewportContainer" + i}
+                style={{
+                  width: this.state.width,
+                  height: this.state.height,
+                  display: "inline-block",
+                }}
+                onClick={() => this.setActive(i)}
+              >
+                <div className={"row"}>
+                  <div className={"column left"}>
+                    <span
+                      className={"dot"}
+                      style={{ background: "#ED594A" }}
+                      onClick={() => this.handleClose(i)}
+                    >
+                      <FaTimes />
+                    </span>
+                    <span
+                      className={"dot"}
+                      style={{ background: "#5AC05A" }}
+                      onClick={() => this.hideShow(i)}
+                    >
+                      <FaExpandArrowsAlt />
+                    </span>
+                  </div>
+                  {/* <div className={"column middle"}>
                     <label>{series[i].seriesUID}</label>
                   </div> */}
-                    <div className={"column middle-right"}>
-                      <Form inline className="slice-form">
-                        <Form.Group className="slice-number">
-                          <Form.Label htmlFor="imageNum" className="slice-label">
-                            {"Slice # "}
-                          </Form.Label>
-                          <Form.Control
-                            type="number"
-                            min="1"
-                            value={parseInt(data.stack.currentImageIdIndex) + 1}
-                            className={"slice-field"}
-                            onChange={(event) => this.handleJumpChange(i, event)}
-                            style={{
-                              width: "60px",
-                              height: "10px",
-                              opacity: 1,
-                            }}
-                          />
-                        </Form.Group>
-                      </Form>
-                    </div>
-                    <div className={"column right"}>
-                      <span
-                        className={"dot"}
-                        style={{ background: "#FDD800", float: "right" }}
-                        onClick={() => {
-                          this.setState({ showAimEditor: true });
-                        }}
-                      >
-                        <FaPen />
-                      </span>
-                    </div>
+                  <div className={"column middle-right"}>
+                    <Form inline className="slice-form">
+                      <Form.Group className="slice-number">
+                        <Form.Label htmlFor="imageNum" className="slice-label">
+                          {"Slice # "}
+                        </Form.Label>
+                        <Form.Control
+                          type="number"
+                          min="1"
+                          value={parseInt(data.stack.currentImageIdIndex) + 1}
+                          className={"slice-field"}
+                          onChange={(event) => this.handleJumpChange(i, event)}
+                          style={{
+                            width: "60px",
+                            height: "10px",
+                            opacity: 1,
+                          }}
+                        />
+                      </Form.Group>
+                    </Form>
                   </div>
-                  <CornerstoneViewport
-                    key={i}
-                    imageIds={data.stack.imageIds}
-                    imageIdIndex={parseInt(data.stack.currentImageIdIndex)}
-                    viewportIndex={i}
-                    tools={tools}
-                    eventListeners={[
-                      {
-                        target: "element",
-                        eventName: "cornerstonetoolsmeasurementcompleted",
-                        handler: this.measurementCompleted,
-                      },
-                      {
-                        target: "element",
-                        eventName: "cornerstonetoolsmeasurementmodified",
-                        handler: this.measuremementModified,
-                      },
-                      {
-                        target: "element",
-                        eventName: "cornerstonetoolsmeasurementremoved",
-                        handler: this.measurementRemoved,
-                      },
-                      {
-                        target: "element",
-                        eventName: "cornerstonenewimage",
-                        handler: this.newImage,
-                      },
-                    ]}
-                    setViewportActive={() => this.setActive(i)}
-                    isStackPrefetchEnabled={true}
-                    style={{ height: "calc(100% - 26px)" }}
-                  />
+                  <div className={"column right"}>
+                    <span
+                      className={"dot"}
+                      style={{ background: "#FDD800", float: "right" }}
+                      onClick={() => {
+                        this.setState({ showAimEditor: true });
+                      }}
+                    >
+                      <FaPen />
+                    </span>
+                  </div>
                 </div>
-              ))}
-            {/* <ContextMenu
+                <CornerstoneViewport
+                  key={i}
+                  imageIds={data.stack.imageIds}
+                  imageIdIndex={parseInt(data.stack.currentImageIdIndex)}
+                  viewportIndex={i}
+                  tools={tools}
+                  eventListeners={[
+                    {
+                      target: "element",
+                      eventName: "cornerstonetoolsmeasurementcompleted",
+                      handler: this.measurementCompleted,
+                    },
+                    {
+                      target: "element",
+                      eventName: "cornerstonetoolsmeasurementmodified",
+                      handler: this.measuremementModified,
+                    },
+                    {
+                      target: "element",
+                      eventName: "cornerstonetoolsmeasurementremoved",
+                      handler: this.measurementRemoved,
+                    },
+                    {
+                      target: "element",
+                      eventName: "cornerstonenewimage",
+                      handler: this.newImage,
+                    },
+                  ]}
+                  setViewportActive={() => this.setActive(i)}
+                  isStackPrefetchEnabled={true}
+                  style={{ height: "calc(100% - 26px)" }}
+                />
+              </div>
+            ))}
+          {/* <ContextMenu
             onAnnotate={this.onAnnotate}
             closeViewport={this.closeViewport}
           /> */}
-          </RightsideBar>
-        </React.Fragment>
-      );
+        </RightsideBar>
+      </React.Fragment>
+    );
     // </div>
   }
 }

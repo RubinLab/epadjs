@@ -380,8 +380,8 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
             color = config.invalidColor;
             fillColor = config.invalidColor;
           } else {
-            color = toolColors.getColorIfActive(data);
-            fillColor = toolColors.getFillColor();
+            // color = toolColors.getColorIfActive(data);
+            fillColor = toolColors.getColorIfActive(data);
           }
         } else {
           fillColor = toolColors.getToolColor();
@@ -1204,7 +1204,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     }
 
     // Check to see if mouse in bounding box of textbox
-    if (data.handles.textBox) {
+    if (state.showCalculations && data.handles.textBox) {
       if (pointInsideBoundingBox(data.handles.textBox, coords)) {
         return data.handles.textBox;
       }
