@@ -8,6 +8,7 @@ import { getStudies } from "../../services/projectServices";
 import DropDownMenu from "./dropdownMenu";
 import StudyTable from "./StudyTable";
 import SeriesTable from "./SeriesTable";
+import 'react-table-v6/react-table.css';
 import "./flexView.css";
 
 const TreeTable = treeTableHOC(ReactTable);
