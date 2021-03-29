@@ -196,11 +196,22 @@ class DisplayView extends Component {
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
+    window.addEventListener('keydown', this.handleKeyPressed);
     if (series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
     };
   }
+
+  handleKeyPressed = (event) => {
+    if (event.key === "Escape") {
+      const evnt = new CustomEvent("escPressed", {
+        cancelable: true,
+      });
+      window.dispatchEvent(evnt);
+    }
+  }
+
 
   async componentDidUpdate(prevProps, prevState) {
     const { pid, series, activePort, aimList } = this.props;
@@ -243,6 +254,7 @@ class DisplayView extends Component {
     window.removeEventListener("editAim", this.editAimHandler);
     window.removeEventListener("deleteAim", this.deleteAimHandler);
     window.removeEventListener("resize", this.setSubComponentHeights);
+    window.removeEventListener('keydown', this.handleKeyPressed);
     clearInterval(this.state.tokenRefresh)
   }
 

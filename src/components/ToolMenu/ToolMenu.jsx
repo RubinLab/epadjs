@@ -234,9 +234,15 @@ class ToolMenu extends Component {
 
   //TODO: instead of disabling all tools we can just disable the active tool
   disableAllTools = () => {
+    const { activeTool } = this.state;
+    console.log("active tool", activeTool);
+    if (activeTool === "FreehandRoiTool" || activeTool === "FreehandRoi3DTool") {
+      this.deselectFreehand();
+    }
+    this.setToolStateForAllElements(this.state.activeTool, "passive");
     this.setState({ activeToolIdx: 0 });
     this.setCursor("default");
-    this.setToolStateForAllElements(this.state.activeTool, "passive");
+
     // Array.from(this.tools).forEach((tool) => {
     //   if (tool !== "FreehandRoiSculptor")
     //     this.setToolStateForAllElements(tool.name, "passive");
@@ -309,12 +315,37 @@ class ToolMenu extends Component {
       this.setState({ showBrushSize: true, isHuGated: false, showSmartBrush: true });
     } else if (tool === "FreehandRoi3DTool") {
       this.setState({ showInterpolation: true });
+      this.selectFreehand();
     }
+    else if (tool === "FreehandRoiTool") {
+      this.selectFreehand();
+    }
+
     this.disableAllTools();
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
       this.setToolStateForAllElements(tool, "active");
     });
   };
+
+  selectFreehand = () => {
+    window.addEventListener('escPressed', this.cancelPolygon);
+  }
+
+  deselectFreehand = () => {
+    window.removeEventListener('escPressed', this.cancelPolygon);
+  }
+
+  cancelPolygon = () => {
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    let tools = cornerstoneTools.store.state.tools;
+
+    tools = tools.filter(tool => tool.element === element && tool.mode === 'active');
+    console.log("tools", tools);
+    tools = tools.filter(tool => (tool.name === "FreehandRoi3DTool"));
+    console.log("tools", tools);
+    tools[0].cancelDrawing(element);
+  }
 
   getActiveImage = () => {
     const { activePort } = this.props;
