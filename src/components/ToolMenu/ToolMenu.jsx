@@ -112,6 +112,7 @@ class ToolMenu extends Component {
       showDrawing: false,
       showBrushMenu: false,
       showPresets: false,
+      showMetaData: false,
       playing: false,
       customBrush: {
         min: -1000,
@@ -133,7 +134,7 @@ class ToolMenu extends Component {
       { name: "Invert", icon: <FaAdjust />, tool: "Invert" },
       { name: "Reset", icon: <MdLoop />, tool: "Reset" },
       { name: "Pan", icon: <MdPanTool />, tool: "Pan" },
-      // { name: "SeriesData", icon: <FaListAlt />, tool: "MetaData" },
+      { name: "MetaData", icon: <FaListAlt />, tool: "MetaData" },
       { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate" },
       { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
     ];
@@ -282,7 +283,7 @@ class ToolMenu extends Component {
       this.reset();
       return;
     } else if (tool === "MetaData") {
-      this.toggleMetaData();
+      this.showMetaData();
       return;
       // } else if (index === 14) {
       //   this.setInterpolation(!this.state.interpolate);
@@ -350,9 +351,8 @@ class ToolMenu extends Component {
     cornerstone.reset(element);
   };
 
-  toggleMetaData = () => {
-    this.disableAllTools();
-    // this.state.activeElement.style.display = "block";
+  showMetaData = () => {
+    this.setState({ showMetaData: !this.state.showMetaData });
   };
 
   handleClip = () => {
@@ -404,7 +404,7 @@ class ToolMenu extends Component {
           );
         })}
 
-        <MetaData />
+        {this.state.showMetaData && (<MetaData onClose={this.showMetaData} />)}
         {/*<div
           id="angle"
           tabIndex="7"
