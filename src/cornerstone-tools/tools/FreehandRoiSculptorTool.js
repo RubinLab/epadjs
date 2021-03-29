@@ -96,6 +96,10 @@ export default class FreehandRoiSculptorTool extends BaseTool {
     const eventData = evt.detail;
 
     this._selectFreehandTool(eventData);
+    this._activateFreehandTool(
+      eventData.element,
+      this.configuration.currentTool
+    );
     external.cornerstone.updateImage(eventData.element);
   }
 
@@ -947,7 +951,6 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    */
   // eslint-disable-next-line no-unused-vars
   _deselectAllTools(evt, setSculptCursor = false) {
-    console.trace();
     const config = this.configuration;
     const toolData = getToolState(this.element, this.referencedToolName);
 
