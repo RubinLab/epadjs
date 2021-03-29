@@ -404,7 +404,7 @@ class ToolMenu extends Component {
           );
         })}
 
-        {this.state.showMetaData && (<MetaData />)}
+        {this.state.showMetaData && (<MetaData onClose={this.showMetaData} />)}
         {/*<div
           id="angle"
           tabIndex="7"

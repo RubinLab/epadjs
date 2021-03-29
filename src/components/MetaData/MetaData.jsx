@@ -17,17 +17,16 @@ class MetaData extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      output: []
+      output: [],
+      input: ""
     }
     this.dumpDataSet = this.dumpDataSet.bind(this);
   }
   componentDidMount() {
     const { activePort } = this.props;
     const { element } = cornerstone.getEnabledElements()[activePort];
-    // console.log("cornerstone", cornerstone);
     const image = cornerstone.getImage(element);
     const { elements } = image.data;
-    console.log("image", image);
     const tempOutput = [];
     this.dumpDataSet(image.data, tempOutput);
     this.setState({ output: tempOutput });
@@ -78,11 +77,14 @@ class MetaData extends Component {
   dumpDataSet(dataSet, output) {
     const maxLength = 128;
     const untilTag = "";
-    const showGroupElement = true;
-    const showLength = true;
-    const showVR = true;
+    const showGroupElement = false;
+    const showLength = false;
+    const showVR = false;
     const showFragments = true;
     const showFrames = true;
+    const showP10Header = true;
+    const showPrivateElements = true;
+    const showEmptyValues = false;
 
     // try {
     var keys = [];
@@ -101,15 +103,15 @@ class MetaData extends Component {
       var propertyName = keys[k];
       var element = dataSet.elements[propertyName];
 
-      // if (showP10Header === false && element.tag <= "x0002ffff") {
-      //   continue;
-      // }
-      // if (showPrivateElements === false && dicomParser.isPrivateTag(element.tag)) {
-      //   continue;
-      // }
-      // if (showEmptyValues === false && element.length <= 0) {
-      //   continue;
-      // }
+      if (showP10Header === false && element.tag <= "x0002ffff") {
+        continue;
+      }
+      if (showPrivateElements === false && dicomParser.isPrivateTag(element.tag)) {
+        continue;
+      }
+      if (showEmptyValues === false && element.length <= 0) {
+        continue;
+      }
       var text = "";
       var title = "";
 
@@ -449,22 +451,31 @@ class MetaData extends Component {
     //   throw ex;
     // }
   }
+  onChangeHandler = (e) => {
+    this.setState({
+      input: e.target.value,
+    })
+  }
 
   render() {
-    console.log("list", this.state.output[0]);
-    const { output } = this.state;
+    const { output, input } = this.state;
+    const lowerInput = input.toLowerCase();
+    const list = output.filter(d => input === '' || d.toLowerCase().includes(lowerInput));
 
-    const listHtml = { __html: output.join('') };
+    const listHtml = { __html: list.join('') };
     return (
       <Draggable handle="#handle">
-        <div className="smb-pop-up">
-          <div className="close-smart-brush-menu" onClick={this.props.onClose}>
+        <div className="md-pop-up">
+          <div className="close-meta-data-menu" onClick={this.props.onClose}>
             <a href="#">X</a>
           </div>
           <div id="handle" className="buttonLabel">
             <span>Meta Data of Image</span>
           </div>
           <hr />
+          <div> Filter :
+            <input value={this.state.input} type="text" onChange={this.onChangeHandler} />
+          </div>
           <div>
             {output.length && (<ul dangerouslySetInnerHTML={listHtml} />)}
           </div>
