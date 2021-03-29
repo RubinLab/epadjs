@@ -4,6 +4,7 @@ import MetaData from "../MetaData/MetaData";
 import SmartBrushMenu from "../SmartBrushMenu/SmartBrushMenu";
 import BrushSizeSelector from "./BrushSizeSelector";
 import { WindowLevel } from "../WindowLevel/WindowLevel";
+import ColormapSelector from "./ColormapSelector";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import {
@@ -311,7 +312,7 @@ class ToolMenu extends Component {
     } else if (tool === "FreehandRoi3DTool") {
       this.setState({ showInterpolation: true });
     } else if (tool === "colorLut") {
-      this.applyColorLUT();
+      this.setState({ showColormap: true });
       return;
     } else if (tool === "fuse") {
       this.handleFuse();
@@ -394,17 +395,9 @@ class ToolMenu extends Component {
     this.setState({ showInterpolation: false });
   };
 
-  applyColorLUT = () => {
-    const { element } = cornerstone.getEnabledElements()[
-      this.props.activePort
-    ];
-    const viewport = cornerstone.getViewport(element);
-    const colormap = cornerstone.colors.getColormap("hotIron");
-
-    viewport.colormap = colormap;
-    cornerstone.setViewport(element, viewport);
-    cornerstone.updateImage(element, true);
-  };
+  closeColormap = () => {
+    this.setState({ showColormap: false });
+  }
 
   handleFuse = () => {
     const { fuse } = this.state;
@@ -792,7 +785,15 @@ class ToolMenu extends Component {
         {this.state.activeTool === "FreehandRoi3DTool" &&
           this.state.showInterpolation && (
             <Interpolation onClose={this.showInterpolation} />
-          )}
+          )
+        }
+        {this.state.showColormap && (
+          <ColormapSelector
+            activePort={this.props.activePort}
+            onClose={this.closeColormap}
+          />
+        )}
+
       </div>
     );
   }

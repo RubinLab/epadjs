@@ -1,34 +1,60 @@
 import React, { Component } from "react";
-import cornerstoneTools from "cornerstone-tools";
-import "./ColorMapSelector.css";
+import cornerstone from "cornerstone-core";
+import "./ColormapSelector.css";
 
-class ColorMapSelector extends Component {
+class ColormapSelector extends Component {
     constructor(props) {
         super(props);
-
         this.state = {
-            size: 10,
-        };
+            activeColormap: this.getActiveColormap()
+        }
     }
 
-    const
+    getActiveColormap = () => {
+        const { element } = cornerstone.getEnabledElements()[
+            this.props.activePort
+        ];
+        const viewport = cornerstone.getViewport(element);
+        console.log("active colormap", viewport.colormap);
+        return viewport.colormap;
+    }
+
+    handleChange = (event) => {
+        const newColormap = event.target.value;
+        this.setState({ activeColormap: newColormap });
+        this.applyColormap(newColormap);
+    }
+
+    applyColormap = (newColormap) => {
+        const { element } = cornerstone.getEnabledElements()[
+            this.props.activePort
+        ];
+        const viewport = cornerstone.getViewport(element);
+        viewport.colormap = newColormap;
+        cornerstone.setViewport(element, viewport);
+        cornerstone.updateImage(element, true);
+    };
+
+    createColormapOptions = (colormapsList) => {
+        let items = [];
+        colormapsList.forEach(colormapItem => {
+            items.push(<option value={colormapItem.id}>{colormapItem.name}</option>);
+        })
+        return items;
+    }
+
 
     render() {
+        const { activeColormap } = this.state;
+        const colormapsList = cornerstone.colors.getColormapsList();
         return (
-            <div className="brush-size-selector">
-                <span>Color LUTs</span>
-
-                <InputRange
-                    //   style={inputRange}
-                    //   disabled={this.state.rangeDisabled}
-                    step={1}
-                    minValue={1}
-                    maxValue={50}
-                    value={this.state.size}
-                    onChange={(value) => this.setState({ size: value })}
-                    onChangeComplete={(value) => this.applyBrushSize(value)}
-                />
-                <div className="close-brush" onClick={this.props.onClose}>
+            <div className="color-map-selector">
+                <span>Color Maps</span>
+                <hr />
+                <select value={activeColormap} onChange={this.handleChange}>
+                    {this.createColormapOptions(colormapsList)}
+                </select>
+                <div className="close-color-map" onClick={this.props.onClose}>
                     <a href="#">X</a>
                 </div>
             </div>
@@ -36,4 +62,4 @@ class ColorMapSelector extends Component {
     }
 }
 
-export default ColorMapSelector;
+export default ColormapSelector;
