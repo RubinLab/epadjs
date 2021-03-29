@@ -778,7 +778,7 @@ class DisplayView extends Component {
   measurementRemoved = (event) => {
     const serie = this.getActiveSerie();
     const { aimId } = event.detail.measurementData;
-    if (this.isLastShapeInAim(aimId)) {
+    if (aimId && this.isLastShapeInAim(aimId)) {
       const shouldDeleteAim = window.confirm("This is the last markup in Aim. Would yo like to delete the Aim file as well?");
       if (shouldDeleteAim) {
         this.deleteAim(aimId, serie);
