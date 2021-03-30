@@ -206,6 +206,40 @@ class SearchView extends Component {
     }
   };
 
+  handleSelectionOnExpandChange = searchViewAutoExpand => {
+    const { expandLevel } = this.props;
+    const lengthOfPatients = Object.entries(this.props.selectedPatients).length;
+    const lengthOfStudies = Object.entries(this.props.selectedStudies).length;
+    const lengthOfSeries = Object.entries(this.props.selectedSeries).length;
+    const lengthOfAnns = Object.entries(this.props.selectedAnnotations).length;
+    const selectedLevel = {
+      0: lengthOfPatients,
+      1: lengthOfStudies,
+      2: lengthOfSeries,
+      3: lengthOfAnns
+    };
+
+    if (searchViewAutoExpand === 0) {
+      if (selectedLevel[2] || selectedLevel[3]) {
+        this.props.dispatch(clearSelection());
+      }
+    } else if (searchViewAutoExpand === 1) {
+      if (expandLevel === 3 && selectedLevel[3]) {
+        this.props.dispatch(clearSelection());
+      } else if (expandLevel === 2 && (selectedLevel[3] || selectedLevel[2])) {
+        this.props.dispatch(clearSelection());
+      } else if (
+        expandLevel === 1 &&
+        (selectedLevel[3] || selectedLevel[2] || selectedLevel[1])
+      ) {
+        this.props.dispatch(clearSelection());
+      }
+    } else {
+      if (selectedLevel[0]) return;
+      else this.props.dispatch(clearSelection());
+    }
+  };
+
   handleExpand = async () => {
     if (this.state.expandLevel < 3) {
       // this.setState(state => ({ expandLevel: state.expandLevel + 1 }));
@@ -216,7 +250,18 @@ class SearchView extends Component {
       expanded[i] = true;
     }
     this.setState({ expanded });
+    this.handleSelectionOnExpandChange(0);
   };
+
+  handleShrink = () => {
+    this.props.onShrink();
+    this.handleSelectionOnExpandChange(1);
+  }
+
+  handleCloseAll = () => {
+    this.props.handleCloseAll();
+    this.handleSelectionOnExpandChange(2);
+  }
 
   updateUploadStatus = () => {
     this.setState(state => ({ update: state.update + 1 }));
@@ -946,8 +991,8 @@ class SearchView extends Component {
           onView={this.viewSelection}
           onDelete={this.handleClickDeleteIcon}
           onExpand={this.handleExpand}
-          onShrink={this.props.onShrink}
-          onCloseAll={this.props.handleCloseAll}
+          onShrink={this.handleShrink}
+          onCloseAll={this.handleCloseAll}
           onNew={this.handleNewClick}
           onWorklist={this.handleWorklistClick}
           onUploadWizard={this.handleUploadWizardClick}
@@ -973,7 +1018,7 @@ class SearchView extends Component {
           expandLevel={this.props.expandLevel}
           expanded={this.state.expanded}
           update={this.state.update}
-          handleCloseAll={this.props.handleCloseAll}
+          handleCloseAll={this.handleCloseAll}
           // updateExpandedLevelNums={this.props.updateExpandedLevelNums}
           progressUpdated={this.props.progressUpdated}
           getTreeExpandSingle={this.props.getTreeExpandSingle}
