@@ -10,25 +10,32 @@ class ColormapSelector extends Component {
         }
     }
 
+    componentDidUpdate(prevProps) {
+        const prevActivePort = prevProps.activePort;
+        const { activePort } = this.props;
+        if (prevActivePort !== activePort) {
+            this.setState({ activeColormap: this.getActiveColormap() });
+        }
+    }
+
     getActiveColormap = () => {
         const { element } = cornerstone.getEnabledElements()[
             this.props.activePort
         ];
         const viewport = cornerstone.getViewport(element);
-        console.log("active colormap", viewport.colormap);
         return viewport.colormap;
     }
 
     handleChange = (event) => {
-        const newColormap = event.target.value;
-        this.setState({ activeColormap: newColormap });
-        this.applyColormap(newColormap);
-    }
-
-    applyColormap = (newColormap) => {
         const { element } = cornerstone.getEnabledElements()[
             this.props.activePort
         ];
+        const newColormap = event.target.value;
+        this.setState({ activeColormap: newColormap });
+        this.applyColormap(newColormap, element);
+    }
+
+    applyColormap = (newColormap, element) => {
         const viewport = cornerstone.getViewport(element);
         viewport.colormap = newColormap;
         cornerstone.setViewport(element, viewport);
@@ -42,7 +49,6 @@ class ColormapSelector extends Component {
         })
         return items;
     }
-
 
     render() {
         const { activeColormap } = this.state;

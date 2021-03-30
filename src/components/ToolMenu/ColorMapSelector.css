@@ -6,15 +6,15 @@
     outline-width: 1px;
     background-color: #3a3f44;
     outline-color: black;
-    width: 370px;
+    width: 170px;
     height: 80px;
-    top: 120px;
-    right: 500px;
+    top: 92px;
+    left: 550px;
     z-index: 1000;
 }
 
 .color-map-selector span {
-    font-size: x-small;
+    font-size: small;
 }
 
 .close-color-map {
