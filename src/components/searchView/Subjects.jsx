@@ -89,7 +89,7 @@ function Table({
         <>
           <table
             {...getTableProps()}
-            style={{ width: '-webkit-fill-available' }}
+            style={{ width: '100%' }}
           >
             <thead>
               {headerGroups.map((headerGroup, k) => (
