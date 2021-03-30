@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import {
-  useTable,
-  useExpanded,
-  usePagination
-} from 'react-table';
+import { useTable, useExpanded, usePagination } from 'react-table';
 import { connect } from 'react-redux';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import Studies from './Studies';
-import { selectPatient, clearSelection } from '../annotationsList/action';
+import {
+  selectPatient,
+  clearSelection,
+  selectStudy,
+  selectSerie,
+  selectAnnotation
+} from '../annotationsList/action';
 import { getSubjects } from '../../services/subjectServices';
 import { formatDate } from '../flexView/helperMethods';
 import { clearCarets } from '../../Utils/aid.js';
@@ -52,10 +54,10 @@ function Table({
         pageIndex: 0,
         pageSize: defaultPageSize
       },
-      manualPagination: true, 
+      manualPagination: true,
       pageCount
     },
-    useExpanded, 
+    useExpanded,
     usePagination
   );
 
@@ -87,10 +89,7 @@ function Table({
     <>
       {data.length > 0 && (
         <>
-          <table
-            {...getTableProps()}
-            style={{ width: '100%' }}
-          >
+          <table {...getTableProps()} style={{ width: '100%' }}>
             <thead>
               {headerGroups.map((headerGroup, k) => (
                 <tr
@@ -99,7 +98,11 @@ function Table({
                   {...headerGroup.getHeaderGroupProps()}
                 >
                   {headerGroup.headers.map((column, z) => (
-                    <th {...column.getHeaderProps()} key={`header-col-${z}`} className="new-rt-header__cell">
+                    <th
+                      {...column.getHeaderProps()}
+                      key={`header-col-${z}`}
+                      className="new-rt-header__cell"
+                    >
                       {column.render('Header')}
                     </th>
                   ))}
@@ -212,22 +215,56 @@ function Subjects(props) {
   const [pageCount, setPageCount] = useState(0);
   const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
+  const [selectedCount, setSelectedCount] = useState(false);
 
   useEffect(() => {
-    const {
-      selectedStudies,
-      selectedSeries,
-      selectedAnnotations
-    } = props;
+    const { selectedStudies, selectedSeries, selectedAnnotations } = props;
     const studies = Object.values(selectedStudies);
     const series = Object.values(selectedSeries);
     const annotations = Object.values(selectedAnnotations);
 
-    if (studies.length) setSelectedLevel('studies');
-    else if (series.length) setSelectedLevel('series');
-    else if (annotations.length) setSelectedLevel('annotations');
-    else setSelectedLevel('');
+    if (studies.length) {
+      setSelectedLevel('studies');
+      setSelectedCount(studies.length);
+    } else if (series.length) {
+      setSelectedLevel('series');
+      setSelectedCount(series.length);
+    } else if (annotations.length) {
+      setSelectedLevel('annotations');
+      setSelectedCount(annotations.length);
+    } else setSelectedLevel('');
   }, [props.selectedStudies, props.selectedSeries, props.selectedAnnotations]);
+
+  const deselectChildLevels = patientID => {
+    if (selectedLevel === 'studies') {
+      const studies = Object.values(props.selectedStudies);
+      const studiesToDeselect = studies.reduce((all, item, i) => {
+        if (item.patientID === patientID) {
+          all.push(item);
+        }
+        return all;
+      }, []);
+      studiesToDeselect.forEach(el => props.dispatch(selectStudy(el)));
+    } else if (selectedLevel === 'series') {
+      const series = Object.values(props.selectedSeries);
+      const seriesToDeselect = series.reduce((all, item, i) => {
+        if (item.patientID === patientID) all.push(item);
+        return all;
+      }, []);
+      seriesToDeselect.forEach(el => props.dispatch(selectSerie(el)));
+    } else if (selectedLevel === 'annotations') {
+      const annotations = Object.values(props.selectedAnnotations);
+      const annotationsToDeselect = annotations.reduce((all, item, i) => {
+        if (item.patientID === patientID) all.push(item);
+        return all;
+      }, []);
+      annotationsToDeselect.forEach(el =>
+        props.dispatch(
+          selectAnnotation(el, el.studyDescription, el.seriesDescription)
+        )
+      );
+    }
+  };
 
   const columns = React.useMemo(
     () => [
@@ -268,6 +305,9 @@ function Subjects(props) {
                   };
                   toggleRowExpanded(row.id, expandStatus);
                   props.getTreeExpandSingle(obj);
+                  if (selectedLevel) {
+                    deselectChildLevels(row.original.subjectID);
+                  }
                 }}
               >
                 {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
@@ -295,7 +335,7 @@ function Subjects(props) {
                 data-tip
                 data-for={id}
                 style={{
-                  whiteSpace: 'pre-wrap',
+                  whiteSpace: 'pre-wrap'
                 }}
               >
                 {desc}
@@ -420,11 +460,7 @@ function Subjects(props) {
           const id = 'id-tool' + row.original.subjectID;
           return (
             <>
-              <div
-                className="searchView-table__cell"
-                data-tip
-                data-for={id}
-              >
+              <div className="searchView-table__cell" data-tip data-for={id}>
                 {row.original.subjectID}
               </div>
               <ReactTooltip
@@ -441,7 +477,7 @@ function Subjects(props) {
         }
       }
     ],
-    [selectedLevel, warningSeen]
+    [selectedLevel, selectedCount, warningSeen]
   );
 
   const validateSubjectSelect = () => {
