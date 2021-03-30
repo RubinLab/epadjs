@@ -1,8 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import {
-  useTable,
-  useExpanded,
-} from 'react-table';
+import { useTable, useExpanded } from 'react-table';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
@@ -44,14 +41,16 @@ function Table({ columns, data }) {
             const style = { height: '2.2rem', background: '#3a3f43 ' };
             return (
               <>
-                <tr
-                  {...row.getRowProps()}
-                >
-                  {row.cells.map(cell => {
+                <tr {...row.getRowProps()} key={`anns${i}`}>
+                  {row.cells.map((cell, k) => {
                     return (
-                      <td style={style} {...cell.getCellProps({
-                        className: cell.column.className
-                      })}>
+                      <td
+                        style={style}
+                        {...cell.getCellProps({
+                          className: cell.column.className
+                        })}
+                        key={`anns-d${k}`}
+                      >
                         {cell.render('Cell')}
                       </td>
                     );
@@ -321,7 +320,7 @@ const mapStateToProps = state => {
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
-    selectedSeries: state.annotationsListReducer.selectedSeries,
+    selectedSeries: state.annotationsListReducer.selectedSeries
   };
 };
 
