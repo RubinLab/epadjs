@@ -24,6 +24,8 @@ import {
   FaCut,
   FaCircle,
   FaMousePointer,
+  FaPalette,
+  FaObjectUngroup
 } from "react-icons/fa";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
@@ -138,8 +140,8 @@ class ToolMenu extends Component {
       // { name: "SeriesData", icon: <FaListAlt />, tool: "MetaData" },
       { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate" },
       { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
-      { name: "Color", icon: <FaListAlt />, tool: "colorLut" },
-      { name: "Fusion", icon: <FaListAlt />, tool: "fuse" },
+      { name: "Color", icon: <FaPalette />, tool: "colorLut" },
+      { name: "Fusion", icon: <FaObjectUngroup />, tool: "fuse" },
     ];
 
     this.markupTools = [
@@ -378,9 +380,10 @@ class ToolMenu extends Component {
   };
 
   setCursor = (cursorStyle) => {
-    const { activePort } = this.props;
-    const { element } = cornerstone.getEnabledElements()[activePort];
-    element.style.cursor = cursorStyle;
+    const elements = cornerstone.getEnabledElements();
+    elements.forEach(({ element }) => {
+      element.style.cursor = cursorStyle;
+    })
   };
 
   closeBrushSize = () => {
