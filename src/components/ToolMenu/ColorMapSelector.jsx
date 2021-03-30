@@ -44,8 +44,8 @@ class ColormapSelector extends Component {
 
     createColormapOptions = (colormapsList) => {
         let items = [];
-        colormapsList.forEach(colormapItem => {
-            items.push(<option value={colormapItem.id}>{colormapItem.name}</option>);
+        colormapsList.forEach((colormapItem, i) => {
+            items.push(<option value={colormapItem.id} key={i}>{colormapItem.name}</option>);
         })
         return items;
     }
