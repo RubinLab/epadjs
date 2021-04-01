@@ -832,6 +832,7 @@ class App extends Component {
   };
 
   clearTreeExpand = () => {
+    console.log(" ++++++++++ clear tree expand called +++++++++++");
     this.setState({ treeExpand: {}, expandLevel: 0 });
   };
 
@@ -978,6 +979,7 @@ class App extends Component {
             getProjectAdded={this.getProjectAdded}
             pid={this.state.pid}
             clearAllTreeData={this.clearAllTreeData}
+            clearTreeExpand={this.clearTreeExpand}
           />
         )}
         {this.state.openInfo && (
@@ -1046,6 +1048,7 @@ class App extends Component {
                   render={props => (
                     <SearchView
                       {...props}
+                      clearTreeExpand={this.clearTreeExpand}
                       updateProgress={this.updateProgress}
                       progressUpdated={progressUpdated}
                       expandLevel={this.state.expandLevel}
@@ -1073,6 +1076,7 @@ class App extends Component {
                   render={props => (
                     <SearchView
                       {...props}
+                      clearTreeExpand={this.clearTreeExpand}
                       updateProgress={this.updateProgress}
                       progressUpdated={progressUpdated}
                       expandLevel={this.state.expandLevel}
@@ -1116,6 +1120,7 @@ class App extends Component {
                   render={props => (
                     <SearchView
                       {...props}
+                      clearTreeExpand={this.clearTreeExpand}
                       updateProgress={this.updateProgress}
                       progressUpdated={progressUpdated}
                       expandLevel={this.state.expandLevel}
@@ -1177,6 +1182,7 @@ class App extends Component {
                 render={props => (
                   <SearchView
                     {...props}
+                    clearTreeExpand={this.clearTreeExpand}
                     updateProgress={this.updateProgress}
                     progressUpdated={progressUpdated}
                     expandLevel={this.state.expandLevel}

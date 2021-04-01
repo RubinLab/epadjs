@@ -256,15 +256,15 @@ class SearchView extends Component {
   handleShrink = () => {
     this.props.onShrink();
     this.handleSelectionOnExpandChange(1);
-  }
+  };
 
   handleCloseAll = () => {
     this.props.handleCloseAll();
     this.handleSelectionOnExpandChange(2);
-  }
+  };
 
   updateUploadStatus = () => {
-    this.setState(state => ({ update: state.update + 1 }));
+    // this.setState(state => ({ update: state.update + 1 }));
     this.state.uploading
       ? this.setState({ uploading: false })
       : this.setState({ uploading: true });
@@ -291,6 +291,9 @@ class SearchView extends Component {
       .then(() => {
         //keep the current state
         this.props.dispatch(clearSelection());
+
+        this.setState(state => ({ update: state.update + 1 }));
+        this.props.history.push(`/search/${pid}`);
         for (let serie of this.props.openSeries) {
           let type = serie.aimID ? 'annotation' : 'serie';
           this.props.dispatch(
@@ -371,7 +374,11 @@ class SearchView extends Component {
             noOfNotDeleted: openItems.length
           });
         }
-        this.props.clearTreeData();
+        // this.props.clearTreeData();
+        console.log(" -----> deleted")
+        localStorage.setItem('treeData', JSON.stringify({}));
+        this.props.clearTreeExpand();
+        this.props.history.push(`/search/${this.props.pid}`);
       })
       .catch(err => {
         console.log(err);
@@ -402,7 +409,12 @@ class SearchView extends Component {
         delSys
       );
     }
-    if (showDeleteFromSysAlert) this.props.clearTreeData();
+    if (showDeleteFromSysAlert) {
+      // this.props.clearTreeData();
+      console.log(" -----> deleted")
+      localStorage.setItem('treeData', JSON.stringify({}));
+      props.clearTreeExpand();
+    }
   };
 
   updateStoreOnAnnotationDelete = arr => {
@@ -1046,6 +1058,7 @@ class SearchView extends Component {
             pid={this.props.pid}
             clearTreeData={this.props.clearTreeData}
             onResolve={this.updateStatus}
+            clearTreeExpand={this.props.clearTreeExpand}
           />
         )}
         {showDeleteAlert && (

@@ -18,6 +18,14 @@ import './searchView.css';
 
 const defaultPageSize = 200;
 
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
+
 function Table({
   columns,
   data,
@@ -28,7 +36,8 @@ function Table({
   expandLevel,
   getTreeExpandAll,
   getTreeExpandSingle,
-  treeExpand
+  treeExpand,
+  collapsed
 }) {
   const {
     getTableProps,
@@ -135,7 +144,7 @@ function Table({
                         );
                       })}
                     </tr>
-                    {expandRow && (
+                    {expandRow && !collapsed && (
                       <Studies
                         pid={row.original.projectID}
                         subjectID={row.original.subjectID}
@@ -216,6 +225,7 @@ function Subjects(props) {
   const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
   const [selectedCount, setSelectedCount] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     const { selectedStudies, selectedSeries, selectedAnnotations } = props;
@@ -304,6 +314,7 @@ function Subjects(props) {
                     patient: { [row.index]: expandStatus ? {} : false }
                   };
                   toggleRowExpanded(row.id, expandStatus);
+                  if (expandStatus) setCollapsed(false);
                   props.getTreeExpandSingle(obj);
                   if (selectedLevel) {
                     deselectChildLevels(row.original.subjectID);
@@ -477,7 +488,7 @@ function Subjects(props) {
         }
       }
     ],
-    [selectedLevel, selectedCount, warningSeen]
+    [selectedLevel, selectedCount, warningSeen, props.update]
   );
 
   const validateSubjectSelect = () => {
@@ -563,8 +574,33 @@ function Subjects(props) {
     return result;
   };
 
+  const lastUpdate = useRef(0);
+
+  useEffect(() => {
+    console.log('useeffect props.update', props.update);
+    setCollapsed(true);
+  }, [props.update]);
+
+  // usePrevValues(
+  //   useMemo(() => ({
+  //     count,
+  //     upperCount
+  //   }), [count, upperCount]),
+  //   useCallback(prevValues => {
+  //     console.log("callback invoked");
+  //     if (prevValues.count + 1 === count) {
+  //       console.log("inner done");
+  //     }
+
+  //     if (prevValues.upperCount + 1 === upperCount) {
+  //       console.log("outer done");
+  //     }
+  //   }, [count, upperCount])
+  // );
+
   useEffect(() => {
     const { pid, getTreeData } = props;
+    console.log('props.update', props.update);
     // const treeData = JSON.parse(localStorage.getItem('treeData'));
     const dataFromStorage = getDataFromStorage(defaultPageSize, 0);
     // check if there is data in treedata
@@ -588,7 +624,7 @@ function Subjects(props) {
           });
       }
     }
-  }, []);
+  }, [props.update]);
 
   return (
     <>
@@ -616,6 +652,8 @@ function Subjects(props) {
         getTreeExpandAll={props.getTreeExpandAll}
         getTreeExpandSingle={props.getTreeExpandSingle}
         treeExpand={props.treeExpand}
+        update={props.update}
+        collapsed={collapsed}
       />
     </>
   );
