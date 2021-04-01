@@ -37,7 +37,6 @@ function Table({
   getTreeExpandAll,
   getTreeExpandSingle,
   treeExpand,
-  collapsed
 }) {
   const {
     getTableProps,
@@ -144,7 +143,7 @@ function Table({
                         );
                       })}
                     </tr>
-                    {expandRow && !collapsed && (
+                    {expandRow && (
                       <Studies
                         pid={row.original.projectID}
                         subjectID={row.original.subjectID}
@@ -225,7 +224,6 @@ function Subjects(props) {
   const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
   const [selectedCount, setSelectedCount] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     const { selectedStudies, selectedSeries, selectedAnnotations } = props;
@@ -314,7 +312,6 @@ function Subjects(props) {
                     patient: { [row.index]: expandStatus ? {} : false }
                   };
                   toggleRowExpanded(row.id, expandStatus);
-                  if (expandStatus) setCollapsed(false);
                   props.getTreeExpandSingle(obj);
                   if (selectedLevel) {
                     deselectChildLevels(row.original.subjectID);
@@ -576,27 +573,6 @@ function Subjects(props) {
 
   const lastUpdate = useRef(0);
 
-  useEffect(() => {
-    console.log('useeffect props.update', props.update);
-    setCollapsed(true);
-  }, [props.update]);
-
-  // usePrevValues(
-  //   useMemo(() => ({
-  //     count,
-  //     upperCount
-  //   }), [count, upperCount]),
-  //   useCallback(prevValues => {
-  //     console.log("callback invoked");
-  //     if (prevValues.count + 1 === count) {
-  //       console.log("inner done");
-  //     }
-
-  //     if (prevValues.upperCount + 1 === upperCount) {
-  //       console.log("outer done");
-  //     }
-  //   }, [count, upperCount])
-  // );
 
   useEffect(() => {
     const { pid, getTreeData } = props;
@@ -653,7 +629,6 @@ function Subjects(props) {
         getTreeExpandSingle={props.getTreeExpandSingle}
         treeExpand={props.treeExpand}
         update={props.update}
-        collapsed={collapsed}
       />
     </>
   );
