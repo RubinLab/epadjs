@@ -500,7 +500,7 @@ function Subjects(props) {
   };
 
   const fetchData = useCallback(({ pageIndex, pageSize }) => {
-    if (searchKey) {
+    if (searchKey.current.value) {
       filterSubjects(null, pageSize, pageIndex, searchKey);
     } else {
       const pageData = getDataFromStorage(pageSize, pageIndex);
