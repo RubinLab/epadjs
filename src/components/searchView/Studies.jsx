@@ -1,8 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import {
-  useTable,
-  useExpanded
-} from 'react-table';
+import { useTable, useExpanded } from 'react-table';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
@@ -11,7 +8,7 @@ import { getStudies } from '../../services/studyServices';
 import Series from './Series';
 import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
-import { clearCarets  } from '../../Utils/aid.js';
+import { clearCarets } from '../../Utils/aid.js';
 import { MAX_PORT } from '../../constants';
 
 import {
@@ -24,7 +21,9 @@ import {
   addToGrid,
   getWholeData,
   alertViewPortFull,
-  updatePatient
+  updatePatient,
+  selectSerie,
+  selectAnnotation
 } from '../annotationsList/action';
 
 function Table({
@@ -75,10 +74,11 @@ function Table({
             const style = { height: '2.5rem', background: '#272b30' };
             return (
               <>
-                <tr {...row.getRowProps()} key={`study-row ${i}`} style={style}>
-                  {row.cells.map(cell => {
+                <tr {...row.getRowProps()} key={`study-row${i}`} style={style}>
+                  {row.cells.map((cell, k) => {
                     return (
                       <td
+                        key={`study-d${k}`}
                         {...cell.getCellProps({
                           className: cell.column.className
                         })}
@@ -119,6 +119,7 @@ function Studies(props) {
   let [loading, setLoading] = useState(false);
   const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
+  const [selectedCount, setSelectedCount] = useState(false);
 
   useEffect(() => {
     const { selectedPatients, selectedSeries, selectedAnnotations } = props;
@@ -126,10 +127,18 @@ function Studies(props) {
     const series = Object.values(selectedSeries);
     const annotations = Object.values(selectedAnnotations);
 
-    if (patients.length) setSelectedLevel('patients');
-    else if (series.length) setSelectedLevel('series');
-    else if (annotations.length) setSelectedLevel('annotations');
-    else setSelectedLevel('');
+    if (patients.length) {
+      setSelectedLevel('patients');
+      setSelectedCount(patients.length);
+    } else if (series.length) {
+      setSelectedLevel('series');
+      setSelectedCount(series.length);
+    } else if (annotations.length) {
+      setSelectedLevel('annotations');
+      setSelectedCount(annotations.length);
+    } else {
+      setSelectedLevel('');
+    }
   }, [props.selectedStudies, props.selectedSeries, props.selectedAnnotations]);
 
   const validateStudySelect = () => {
@@ -137,6 +146,30 @@ function Studies(props) {
       const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a study!`;
       window.alert(message);
       setWarningSeen(true);
+    }
+  };
+
+  const deselectChildLevels = (patientID, studyUID) => {
+    if (selectedLevel === 'series') {
+      const series = Object.values(props.selectedSeries);
+      const seriesToDeselect = series.reduce((all, item, i) => {
+        if (item.patientID === patientID && item.studyUID === studyUID)
+          all.push(item);
+        return all;
+      }, []);
+      seriesToDeselect.forEach(el => props.dispatch(selectSerie(el)));
+    } else if (selectedLevel === 'annotations') {
+      const annotations = Object.values(props.selectedAnnotations);
+      const annotationsToDeselect = annotations.reduce((all, item, i) => {
+        if (item.patientID === patientID && item.studyUID === studyUID)
+          all.push(item);
+        return all;
+      }, []);
+      annotationsToDeselect.forEach(el =>
+        props.dispatch(
+          selectAnnotation(el, el.studyDescription, el.seriesDescription)
+        )
+      );
     }
   };
 
@@ -267,6 +300,13 @@ function Studies(props) {
                   };
                   toggleRowExpanded(row.id, expandStatus);
                   props.getTreeExpandSingle(obj);
+                  console.log(row.original);
+                  if (selectedLevel) {
+                    deselectChildLevels(
+                      row.original.patientID,
+                      row.original.studyUID
+                    );
+                  }
                 }}
               >
                 {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
@@ -403,10 +443,7 @@ function Studies(props) {
         className: 'searchView-table__cell',
         Cell: ({ row }) => (
           <>
-            <span
-              data-tip
-              data-for={row.original.studyUID}
-            >
+            <span data-tip data-for={row.original.studyUID}>
               {row.original.studyUID}
             </span>{' '}
             <ReactTooltip
@@ -422,7 +459,7 @@ function Studies(props) {
         )
       }
     ],
-    [selectedLevel, warningSeen]
+    [selectedLevel, warningSeen, selectedCount]
   );
 
   const getDataFromStorage = (projectID, subjectID) => {

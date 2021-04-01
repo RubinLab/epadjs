@@ -936,6 +936,8 @@ class Annotations extends React.Component {
             projectID={this.state.projectID}
             pid={this.props.pid}
             clearTreeData={this.props.clearTreeData}
+            clearTreeExpand={this.props.clearTreeExpand}
+
           />
         )}
         {this.state.downloadClicked && (

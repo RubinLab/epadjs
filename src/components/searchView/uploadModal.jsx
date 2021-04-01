@@ -1,17 +1,17 @@
-import React from "react";
-import { connect } from "react-redux";
-import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
+import React from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import { Modal } from 'react-bootstrap';
 import {
   getProjects,
   uploadFileToProject
-} from "../../services/projectServices";
-import { uploadFileToSubject } from "../../services/subjectServices";
-import { uploadFileToStudy } from "../../services/studyServices";
-import { uploadFileToSeries } from "../../services/seriesServices";
-import { getTemplates } from "../annotationsList/action";
+} from '../../services/projectServices';
+import { uploadFileToSubject } from '../../services/subjectServices';
+import { uploadFileToStudy } from '../../services/studyServices';
+import { uploadFileToSeries } from '../../services/seriesServices';
+import { getTemplates } from '../annotationsList/action';
 
-const mode = sessionStorage.getItem("mode");
+const mode = sessionStorage.getItem('mode');
 
 class UploadModal extends React.Component {
   state = {
@@ -19,7 +19,7 @@ class UploadModal extends React.Component {
     osirix: false,
     projects: [],
     files: [],
-    projectID: ""
+    projectID: ''
   };
 
   onSelect = e => {
@@ -30,28 +30,28 @@ class UploadModal extends React.Component {
   componentDidMount = async () => {
     try {
       const { pid } = this.props;
-      if (mode !== "lite") {
+      if (mode !== 'lite') {
         let { data: projects } = await getProjects();
         for (let i = 0; i < projects.length; i++) {
-          if (projects[i].id === "all") {
+          if (projects[i].id === 'all') {
             projects.splice(i, 1);
             i = i - 1;
             continue;
           }
-          if (projects[i].id === "nonassigned") {
+          if (projects[i].id === 'nonassigned') {
             projects.splice(i, 1);
             i = i - 1;
             continue;
           }
         }
 
-        const nonSelectablePid = pid === "nonassigned" || pid === "all";
+        const nonSelectablePid = pid === 'nonassigned' || pid === 'all';
         const projectID =
           nonSelectablePid && projects.length > 0
             ? projects[0].id
             : !nonSelectablePid
             ? pid
-            : "";
+            : '';
         this.setState({ projects, projectID });
       }
     } catch (err) {
@@ -71,7 +71,8 @@ class UploadModal extends React.Component {
       clearTreeData,
       onResolve,
       onCancel,
-      onSubmit
+      onSubmit,
+      clearTreeExpand
     } = this.props;
     selectedPatients = Object.values(selectedPatients);
     selectedStudies = Object.values(selectedStudies);
@@ -87,7 +88,7 @@ class UploadModal extends React.Component {
     });
     const config = {
       headers: {
-        "content-type": "multipart/form-data"
+        'content-type': 'multipart/form-data'
       }
     };
 
@@ -110,7 +111,11 @@ class UploadModal extends React.Component {
 
     Promise.all(promises)
       .then(() => {
-        if (clearTreeData) clearTreeData();
+        if (clearTreeData) {
+          // clearTreeData();
+          localStorage.setItem('treeData', JSON.stringify({}));
+          clearTreeExpand();
+        }
         this.props.dispatch(getTemplates());
         if (onResolve) onResolve();
       })
@@ -119,7 +124,7 @@ class UploadModal extends React.Component {
         if (onResolve) onResolve();
       });
     onCancel();
-    this.setState({ projectID: "" });
+    this.setState({ projectID: '' });
   };
 
   selectProject = e => {
@@ -209,7 +214,7 @@ class UploadModal extends React.Component {
 
   render = () => {
     let disabled = this.state.files.length === 0;
-    let className = "alert-upload";
+    let className = 'alert-upload';
     className = this.props.className
       ? `${className} ${this.props.className}`
       : className;
@@ -220,8 +225,8 @@ class UploadModal extends React.Component {
           <Modal.Title className="upload__header">Upload</Modal.Title>
         </Modal.Header>
         <Modal.Body className="upload-container">
-          {mode === "lite" && this.renderUploadFileButton()}
-          {mode !== "lite" &&
+          {mode === 'lite' && this.renderUploadFileButton()}
+          {mode !== 'lite' &&
             (projects.length > 0 ? (
               <>
                 {this.renderProjectDropdown()}
@@ -229,7 +234,7 @@ class UploadModal extends React.Component {
                 {this.renderThickModalFields()}
               </>
             ) : (
-              <div style={{ color: "orangered", fontSize: "1.4rem" }}>
+              <div style={{ color: 'orangered', fontSize: '1.4rem' }}>
                 Please create a project before uploading!
               </div>
             ))}
@@ -253,7 +258,9 @@ UploadModal.propTypes = {
   pid: PropTypes.string,
   selectedPatients: PropTypes.object,
   selectedSeries: PropTypes.object,
-  selectedStudies: PropTypes.object
+  selectedStudies: PropTypes.object,
+  clearTreeExpand:PropTypes.func
+
 };
 
 const mapStateToProps = state => {
