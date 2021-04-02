@@ -5,6 +5,7 @@ import SmartBrushMenu from "../SmartBrushMenu/SmartBrushMenu";
 import BrushSizeSelector from "./BrushSizeSelector";
 import { WindowLevel } from "../WindowLevel/WindowLevel";
 import ColormapSelector from "./ColormapSelector";
+import FuseSelector from "./FuseSelector";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import {
@@ -317,7 +318,7 @@ class ToolMenu extends Component {
       this.setState({ showColormap: true });
       return;
     } else if (tool === "fuse") {
-      this.handleFuse();
+      this.setState({ showFuse: true });
       return;
     }
     this.disableAllTools();
@@ -402,86 +403,9 @@ class ToolMenu extends Component {
     this.setState({ showColormap: false });
   }
 
-  handleFuse = () => {
-    const { fuse } = this.state;
-    const petElement = cornerstone.getEnabledElements()[0].element;
-    const ctElement = cornerstone.getEnabledElements()[1].element;
-    const options = {
-      name: 'PET',
-      opacity: 0.7,
-      viewport: {
-        colormap: 'hotIron',
-        // voi: {
-        //   windowWidth: 30,
-        //   windowCenter: 16
-        // }
-      }
-    }
-    if (!fuse) {
-      console.log("adding");
-      window.addEventListener("newImage", this.newImage);
-
-      this.fuse(petElement, ctElement, options);
-      this.setState({ fuse: true });
-      this.addSynchronizer();
-    }
-    else {
-      window.removeEventListener("newImage", this.newImage);
-      this.unfuse(ctElement);
-      this.setState({ fuse: false });
-    }
+  closeFuse = () => {
+    this.setState({ showFuse: false });
   }
-
-
-  newImage = () => {
-    const petElement = cornerstone.getEnabledElements()[0].element;
-    const ctElement = cornerstone.getEnabledElements()[1].element;
-    const options = {
-      name: 'PET',
-      opacity: 0.7,
-      viewport: {
-        colormap: 'hotIron',
-        // voi: {
-        //   windowWidth: 30,
-        //   windowCenter: 16
-        // }
-      }
-    }
-    this.fuse(petElement, ctElement, options);
-  };
-
-  fuse = (petElement, ctElement, options) => {
-    const petImage = cornerstone.getImage(petElement);
-    const ctImage = cornerstone.getImage(ctElement);
-
-    cornerstone.addLayer(ctElement, ctImage);
-    const layerId = cornerstone.addLayer(ctElement, petImage, options);
-    cornerstone.updateImage(ctElement);
-    cornerstone.setActiveLayer(ctElement, layerId);
-
-  };
-
-  unfuse = (ctElement) => {
-    // delete the top two layers (base on there can only be two layers)
-    const layers = cornerstone.getLayers(ctElement);
-    if (layers) {
-      cornerstone.removeLayer(ctElement, layers.pop().layerId);
-      cornerstone.removeLayer(ctElement, layers.pop().layerId);
-      cornerstone.updateImage(ctElement);
-    }
-  };
-
-  addSynchronizer = () => {
-    const synchronizer = new cornerstoneTools.Synchronizer(
-      'cornerstoneimagerendered',
-      cornerstoneTools.stackImagePositionSynchronizer
-    );
-
-    cornerstone.getEnabledElements().forEach(({ element }) => {
-      synchronizer.add(element);
-    });
-    synchronizer.enabled = true;
-  };
 
   render() {
     const { activeTool } = this.state;
@@ -796,7 +720,11 @@ class ToolMenu extends Component {
             onClose={this.closeColormap}
           />
         )}
-
+        {this.state.showFuse && (
+          <FuseSelector
+            onClose={this.closeFuse}
+          />
+        )}
       </div>
     );
   }
