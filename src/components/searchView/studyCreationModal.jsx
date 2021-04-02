@@ -1,29 +1,31 @@
-import React from "react";
-import { Modal } from "react-bootstrap";
-import { toast } from "react-toastify";
-import { saveStudy } from "../../services/studyServices";
+import React from 'react';
+import { Modal } from 'react-bootstrap';
+import { toast } from 'react-toastify';
+import { saveStudy } from '../../services/studyServices';
 
 const messages = {
-  fillRequredFields: "Please fill the required fields!",
+  fillRequredFields: 'Please fill the required fields!'
 };
 class StudyCreationForm extends React.Component {
   state = {
-    description: "",
-    abbreviation: "",
-    error: "",
-    study: "",
+    description: '',
+    abbreviation: '',
+    error: '',
+    study: '',
     subjects: [],
-    subjectID: "",
+    subjectID: ''
   };
 
   componentDidMount = () => {
-    const { selectedPatients } = this.props;
+    const { selectedPatients, project } = this.props;
+    const treeData = JSON.parse(localStorage.getItem('treeData'));
+    const subjects = Object.values(treeData[project]).map(el => el.data);
     if (selectedPatients.length) {
-      this.setState({ subjectID: selectedPatients[0].patientID });
-
+      this.setState({ subjectID: selectedPatients[0].patientID, subjects });
     } else {
-      this.setState({ subjectID: this.props.subjects[0].subjectID });
+      this.setState({ subjectID: subjects[0].subjectID, subjects });
     }
+
   };
   handleSubmit = () => {
     const { description, abbreviation, subjectID } = this.state;
@@ -35,13 +37,13 @@ class StudyCreationForm extends React.Component {
           const obj = {
             projectID: this.props.project,
             patientID: subjectID,
-            studyUID: abbreviation,
+            studyUID: abbreviation
           };
           this.props.onSubmit();
           this.props.onCancel();
           this.props.onResolve();
-          this.props.updateTreeDataOnSave(obj, "study");
-          toast.success("Study successfully saved!");
+          this.props.updateTreeDataOnSave(obj, 'study');
+          toast.success('Study successfully saved!');
         })
         .catch(error => {
           toast.error(error.response.data.message, { autoClose: false });
@@ -64,7 +66,7 @@ class StudyCreationForm extends React.Component {
     if (this.state.error === messages.fillRequredFields) {
       const { description, abbreviation, subjectID } = this.state;
       if (description && abbreviation && subjectID) {
-        this.setState({ error: "" });
+        this.setState({ error: '' });
       }
     }
   };
@@ -72,7 +74,7 @@ class StudyCreationForm extends React.Component {
   clearCarets = string => {
     if (string) {
       for (let i = 0; i < string.length; i++) {
-        string = string.replace("^", " ");
+        string = string.replace('^', ' ');
       }
       return string;
     }
@@ -80,9 +82,9 @@ class StudyCreationForm extends React.Component {
 
   renderPatients = () => {
     const options = [];
-    for (let patient of this.props.subjects) {
+    for (let patient of this.state.subjects) {
       let patientName = this.clearCarets(patient.subjectName);
-      patientName = patientName || "Unnamed Patient";
+      patientName = patientName || 'Unnamed Patient';
       options.push(
         <option value={patient.subjectID} key={patient.subjectID}>
           {patientName}

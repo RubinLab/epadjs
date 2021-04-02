@@ -786,7 +786,6 @@ class SearchView extends Component {
         return (
           <StudyCreationModal
             onCancel={this.handleNewModalCancel}
-            subjects={this.state.subjects}
             project={this.props.match.params.pid}
             onSubmit={this.updateUploadStatus}
             onResolve={this.updateStatus}
@@ -799,7 +798,6 @@ class SearchView extends Component {
           <SeriesCreationModal
             onCancel={this.handleNewModalCancel}
             project={this.props.match.params.pid}
-            subjects={this.state.subjects}
             onSubmit={this.updateUploadStatus}
             onResolve={this.updateStatus}
             updateTreeDataOnSave={this.props.updateTreeDataOnSave}
