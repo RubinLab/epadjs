@@ -34,7 +34,6 @@ import "../menuStyle.css";
 import { getSeries } from "../../../services/seriesServices";
 import SelectSeriesModal from "../../annotationsList/selectSerieModal";
 
-
 const mode = sessionStorage.getItem("mode");
 
 const messages = {
@@ -75,7 +74,7 @@ class Annotations extends React.Component {
     data: [],
     isSerieSelectionOpen: false,
     selectedStudy: [],
-    studyName: ''
+    studyName: ""
   };
 
   downloadProjectAim = () => {
@@ -495,40 +494,40 @@ class Annotations extends React.Component {
       // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
       //check if there is enough space in the grid
       let isGridFull = openSeries.length === MAX_PORT;
-        //check if the serie is already open
-        if (
-          this.checkIfSerieOpen(selected.original, this.props.openSeries).isOpen
-        ) {
-          const { index } = this.checkIfSerieOpen(
-            selected.original,
-            this.props.openSeries
-          );
-          this.props.dispatch(changeActivePort(index));
-          this.props.dispatch(jumpToAim(seriesUID, aimID, index));
+      //check if the serie is already open
+      if (
+        this.checkIfSerieOpen(selected.original, this.props.openSeries).isOpen
+      ) {
+        const { index } = this.checkIfSerieOpen(
+          selected.original,
+          this.props.openSeries
+        );
+        this.props.dispatch(changeActivePort(index));
+        this.props.dispatch(jumpToAim(seriesUID, aimID, index));
+      } else {
+        if (isGridFull) {
+          this.props.dispatch(alertViewPortFull());
         } else {
-          if (isGridFull) {
-            this.props.dispatch(alertViewPortFull());
+          this.props.dispatch(addToGrid(selected.original, aimID));
+          this.props.dispatch(getSingleSerie(selected.original, aimID));
+          //if grid is NOT full check if patient data exists
+          if (!this.props.patients[patientID]) {
+            // this.props.dispatch(getWholeData(null, null, selected.original));
+            getWholeData(null, null, selected.original);
           } else {
-            this.props.dispatch(addToGrid(selected.original, aimID));
-            this.props.dispatch(getSingleSerie(selected.original, aimID));
-            //if grid is NOT full check if patient data exists
-            if (!this.props.patients[patientID]) {
-              // this.props.dispatch(getWholeData(null, null, selected.original));
-              getWholeData(null, null, selected.original);
-            } else {
-              this.props.dispatch(
-                updatePatient(
-                  "annotation",
-                  true,
-                  patientID,
-                  studyUID,
-                  seriesUID,
-                  aimID
-                )
-              );
-            }
+            this.props.dispatch(
+              updatePatient(
+                "annotation",
+                true,
+                patientID,
+                studyUID,
+                seriesUID,
+                aimID
+              )
+            );
           }
         }
+      }
     } catch (err) {
       console.error(err);
     }
@@ -585,14 +584,16 @@ class Annotations extends React.Component {
         resizable: false,
         style: { display: "flex", justifyContent: "center" },
         Cell: data => {
-
           return this.state.isAllAims ? (
             <FaEyeSlash />
           ) : (
             <Link className="open-link" to={"/display"}>
               <div
                 onClick={() => {
-                  if (data.original.seriesUID === "noseries" || !data.original.seriesUID) {
+                  if (
+                    data.original.seriesUID === "noseries" ||
+                    !data.original.seriesUID
+                  ) {
                     this.displaySeries(data.original);
                   } else {
                     this.openAnnotation(data);
@@ -752,8 +753,7 @@ class Annotations extends React.Component {
   fetchData = async atributes => {
     try {
       const { projectID, bookmark, annotations, total } = this.state;
-      const { page, pageSize } = atributes;
-      this.setState({ page, pageSize });
+      const { page, pageSize } = this.state;
       const pageNum = page + 1;
       if (
         total > annotations.length &&
@@ -831,7 +831,7 @@ class Annotations extends React.Component {
         await this.setState({
           isSerieSelectionOpen: true,
           selectedStudy: [seriesArr],
-          studyName: selected.studyDescription,
+          studyName: selected.studyDescription
         });
       } else {
         //if there is enough room
@@ -862,7 +862,7 @@ class Annotations extends React.Component {
 
   closeSelectionModal = () => {
     this.setState(state => ({
-      isSerieSelectionOpen: !state.isSerieSelectionOpen,
+      isSerieSelectionOpen: !state.isSerieSelectionOpen
     }));
   };
 
@@ -913,11 +913,21 @@ class Annotations extends React.Component {
           pageSize={pageSize}
           defaultPageSize={defaultPageSize}
           onFetchData={this.fetchData}
+          onPageChange={page => {
+            this.setState({ page });
+          }}
           showPageJump={false}
           onPageSizeChange={size => {
             if (filteredData && filteredData.length > 0)
-              this.setState({ pages: Math.ceil(filteredData.length / size) });
-            else this.setState({ pages: Math.ceil(this.state.total / size) });
+              this.setState({
+                pages: Math.ceil(filteredData.length / size),
+                pageSize: size
+              });
+            else
+              this.setState({
+                pages: Math.ceil(this.state.total / size),
+                pageSize: size
+              });
           }}
         />
         {this.state.deleteAllClicked && (
