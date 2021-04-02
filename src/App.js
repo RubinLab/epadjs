@@ -145,7 +145,10 @@ class App extends Component {
 
     // if there isn't any report open clear selection
     const nullCount = this.countCurrentReports(arr);
-    if (nullCount === arr.length) this.props.dispatch(clearSelection());
+    if (nullCount === arr.length) {
+      this.props.dispatch(clearSelection());
+      this.props.history.push(`/display`);  
+    }
   };
 
   handleCloseMinimize = (index, reportIndex) => {
@@ -832,7 +835,6 @@ class App extends Component {
   };
 
   clearTreeExpand = () => {
-    console.log(" ++++++++++ clear tree expand called +++++++++++");
     this.setState({ treeExpand: {}, expandLevel: 0 });
   };
 
