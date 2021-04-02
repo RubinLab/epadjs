@@ -3,10 +3,7 @@ import ReactTable from "react-table-v6";
 import _ from "lodash";
 import Badge from "react-bootstrap/Badge";
 import ReactTooltip from "react-tooltip";
-import {
-  GrCalculator,
-  GrManual
-} from "react-icons/gr";
+import { GrCalculator, GrManual } from "react-icons/gr";
 import { getWorklistProgress } from "../../services/worklistServices";
 import "./proView.css";
 
@@ -46,13 +43,13 @@ class ProgressView extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0,
+          selectAll: 0
         });
       }
     } else {
       newSelected[username] = true;
       await this.setState({
-        selectAll: 2,
+        selectAll: 2
       });
     }
     this.setState({ selected: newSelected });
@@ -68,7 +65,7 @@ class ProgressView extends React.Component {
 
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0,
+      selectAll: this.state.selectAll === 0 ? 1 : 0
     });
   }
 
@@ -88,7 +85,7 @@ class ProgressView extends React.Component {
               <span>{row.value}</span>
             </div>
           );
-        },
+        }
       },
       {
         Header: patientHeader,
@@ -100,7 +97,7 @@ class ProgressView extends React.Component {
               <span>{row.value}</span>
             </div>
           );
-        },
+        }
       },
       // {
       //   Header: "Study Description",
@@ -122,7 +119,7 @@ class ProgressView extends React.Component {
               <span>{row.value}</span>
             </div>
           );
-        },
+        }
       },
       {
         Header: "Requirement",
@@ -134,14 +131,15 @@ class ProgressView extends React.Component {
               <span>{row.value}</span>
             </div>
           );
-        },
+        }
       },
       {
-        // Header: "%",
         width: 25,
         resizable: false,
-        Cell: original => {
-          const isAuto = original.row._original.type === "AUTO";
+        accessor: "type",
+        Aggregated: row => <div />,
+        Cell: row => {
+          const isAuto = row.value === "AUTO";
           const variant = isAuto ? "info" : "light";
           const text = isAuto ? <GrCalculator /> : <GrManual />;
           const tooltipText = isAuto
@@ -151,13 +149,13 @@ class ProgressView extends React.Component {
             <div>
               <Badge
                 data-tip
-                data-for={`progressType-badge${original.index}`}
+                data-for={`progressType-badge${row.index}`}
                 variant={variant}
               >
                 {text}
               </Badge>
               <ReactTooltip
-                id={`progressType-badge${original.index}`}
+                id={`progressType-badge${row.index}`}
                 place="left"
                 type="light"
                 delayShow={1000}
@@ -180,8 +178,8 @@ class ProgressView extends React.Component {
               <span>{row.value}</span>
             </div>
           );
-        },
-      },
+        }
+      }
     ];
 
     if (this.state.view === "User") {
