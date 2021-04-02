@@ -147,7 +147,7 @@ class App extends Component {
     const nullCount = this.countCurrentReports(arr);
     if (nullCount === arr.length) {
       this.props.dispatch(clearSelection());
-      this.props.history.push(`/display`);  
+      this.props.history.push(`/display`);
     }
   };
 
@@ -468,6 +468,7 @@ class App extends Component {
     const { pid } = this.state;
     this.setState({ viewType });
     if (viewType === 'search') {
+      this.props.dispatch(clearSelection());
       pid
         ? this.props.history.push(`/search/${pid}`)
         : this.props.history.push(`/search`);
