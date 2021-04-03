@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useTable, useExpanded, usePagination } from 'react-table';
 import { connect } from 'react-redux';
 import ReactTooltip from 'react-tooltip';
+import { toast } from "react-toastify";
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import Studies from './Studies';
 import {
@@ -491,7 +492,14 @@ function Subjects(props) {
   const validateSubjectSelect = () => {
     if (selectedLevel && !warningSeen) {
       const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a subject!`;
-      window.alert(message);
+      toast.info(message, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       setWarningSeen(true);
     }
   };
