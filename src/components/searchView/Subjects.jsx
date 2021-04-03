@@ -36,7 +36,7 @@ function Table({
   expandLevel,
   getTreeExpandAll,
   getTreeExpandSingle,
-  treeExpand,
+  treeExpand
 }) {
   const {
     getTableProps,
@@ -537,13 +537,14 @@ function Subjects(props) {
 
   const setFilteredData = (searchTerm, pageSize, pageIndex) => {
     const filteredData = filterSubjectsInTreeeData(searchTerm);
+    let pageData;
     if (filteredData) {
-      const pageData = preparePageData(filteredData, pageSize, pageIndex);
-      setData(pageData);
+      pageData = preparePageData(filteredData, pageSize, pageIndex);
       setPageCount(Math.ceil(filteredData.length / defaultPageSize));
     } else {
-      getDataFromStorage(defaultPageSize, 0);
+      pageData = getDataFromStorage(defaultPageSize, 0);
     }
+    setData(pageData);
   };
 
   const filterSubjectsInTreeeData = searchTerm => {
@@ -573,10 +574,8 @@ function Subjects(props) {
 
   const lastUpdate = useRef(0);
 
-
   useEffect(() => {
     const { pid, getTreeData } = props;
-    console.log('props.update', props.update);
     // const treeData = JSON.parse(localStorage.getItem('treeData'));
     const dataFromStorage = getDataFromStorage(defaultPageSize, 0);
     // check if there is data in treedata
