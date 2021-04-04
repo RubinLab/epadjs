@@ -104,7 +104,9 @@ class AimEditor extends Component {
     window.addEventListener("checkShapes", this.checkShapes);
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
+    if (prevProps.aimId.aimId !== this.props.aimId.aimId)
+      this.semanticAnswers.loadAimJson(this.props.aimId);
     const { isSegUploaded } = this.props;
     const { uploadingSegId } = this.state;
     if (isSegUploaded[uploadingSegId]) {

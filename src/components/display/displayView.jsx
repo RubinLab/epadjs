@@ -212,7 +212,6 @@ class DisplayView extends Component {
     }
   }
 
-
   async componentDidUpdate(prevProps, prevState) {
     const { pid, series, activePort, aimList } = this.props;
     const {
@@ -307,12 +306,16 @@ class DisplayView extends Component {
   editAimHandler = (event) => {
     const { aimID, seriesUID } = event.detail;
     const { aimList, activePort } = this.props;
+    const { showAimEditor, selectedAim } = this.state;
 
     if (aimList[seriesUID][aimID]) {
       const aimJson = aimList[seriesUID][aimID].json;
       const markupTypes = this.getMarkupTypesForAim(aimID);
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimID;
+
+      setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
+      this.refreshAllViewports();
 
       // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
 
@@ -327,22 +330,24 @@ class DisplayView extends Component {
       //   this.setActiveLabelMapIndex(0, element);
       //   console.log("Aim json has not segmentation so settin to ", aimJson, 0);
       // }
-
       // check if is already editing an aim
-      if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
-        let message = "";
-        if (this.state.selectedAim) {
-          message = this.prepWarningMessage(
-            this.state.selectedAim.name.value,
-            aimJson.name.value
-          );
-        }
+      if (showAimEditor && (selectedAim !== aimJson)) {
+        let message = this.prepWarningMessage(
+          selectedAim.name.value,
+          aimJson.name.value
+        );
+        const shouldContinue = this.closeAimEditor(true, message);
+        if (!shouldContinue)
+          return;
       }
 
       //The following dispatched is a wrongly named method. it's dispatched to set the selected
       //AimId in the store!!!!!
+      this.props.dispatch(jumpToAim(seriesUID, aimID, activePort));
 
-      this.setState({ showAimEditor: true, selectedAim: aimJson });
+      this.setState({ showAimEditor: true, selectedAim: aimJson }, () => {
+        console.log("new state", this.state);
+      });
     }
     // this.setSerieActiveLabelMap(aimID);
     // this.openAimEditor(aimID, seriesUID);
@@ -857,6 +862,7 @@ class DisplayView extends Component {
   };
 
   setDirtyFlag = () => {
+    console.trace();
     if (!this.state.dirty) this.setState({ dirty: true });
   };
 
@@ -1441,8 +1447,13 @@ class DisplayView extends Component {
   };
 
   closeAimEditor = (isCancel, message = "") => {
+    const { dirty } = this.state;
+    if (dirty) {
+      const unsavedData = this.checkUnsavedData(isCancel, message);
+      if (!unsavedData) return;
+    }
     // if aim editor has been cancelled ask to user
-    if (this.state.dirty && !this.checkUnsavedData(isCancel, message)) return;
+    // if (this.state.dirty && !this.checkUnsavedData(isCancel, message)) return;
     this.setState({
       showAimEditor: false,
       selectedAim: undefined,

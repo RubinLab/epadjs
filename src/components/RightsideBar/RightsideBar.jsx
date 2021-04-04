@@ -43,6 +43,7 @@ class Rightsidebar extends Component {
     let aimEditorHeader;
     selectedAim ? aimEditorHeader = "Aim Editor (Edit Mode)" : aimEditorHeader = "Aim Editor (Create Mode)"
     // const { projectID } = openSeries[activePort];
+    console.log("aim is", this.props.selectedAim);
     return (
       <React.Fragment>
         {!this.state.open && (
