@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTable, useExpanded } from 'react-table';
 import { connect } from 'react-redux';
+import { toast } from "react-toastify";
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
@@ -150,8 +151,14 @@ function Annotations(props) {
   const validateAnnotationSelect = () => {
     if (selectedLevel && !warningSeen) {
       const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select an annotation!`;
-      window.alert(message);
-      setWarningSeen(true);
+      toast.info(message, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });      setWarningSeen(true);
     }
   };
 

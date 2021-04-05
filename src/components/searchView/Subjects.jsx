@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useTable, useExpanded, usePagination } from 'react-table';
 import { connect } from 'react-redux';
 import ReactTooltip from 'react-tooltip';
+import { toast } from "react-toastify";
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import Studies from './Studies';
 import {
@@ -36,7 +37,7 @@ function Table({
   expandLevel,
   getTreeExpandAll,
   getTreeExpandSingle,
-  treeExpand,
+  treeExpand
 }) {
   const {
     getTableProps,
@@ -491,7 +492,14 @@ function Subjects(props) {
   const validateSubjectSelect = () => {
     if (selectedLevel && !warningSeen) {
       const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a subject!`;
-      window.alert(message);
+      toast.info(message, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       setWarningSeen(true);
     }
   };
@@ -537,13 +545,14 @@ function Subjects(props) {
 
   const setFilteredData = (searchTerm, pageSize, pageIndex) => {
     const filteredData = filterSubjectsInTreeeData(searchTerm);
+    let pageData;
     if (filteredData) {
-      const pageData = preparePageData(filteredData, pageSize, pageIndex);
-      setData(pageData);
+      pageData = preparePageData(filteredData, pageSize, pageIndex);
       setPageCount(Math.ceil(filteredData.length / defaultPageSize));
     } else {
-      getDataFromStorage(defaultPageSize, 0);
+      pageData = getDataFromStorage(defaultPageSize, 0);
     }
+    setData(pageData);
   };
 
   const filterSubjectsInTreeeData = searchTerm => {
@@ -573,10 +582,8 @@ function Subjects(props) {
 
   const lastUpdate = useRef(0);
 
-
   useEffect(() => {
     const { pid, getTreeData } = props;
-    console.log('props.update', props.update);
     // const treeData = JSON.parse(localStorage.getItem('treeData'));
     const dataFromStorage = getDataFromStorage(defaultPageSize, 0);
     // check if there is data in treedata

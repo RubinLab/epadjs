@@ -375,8 +375,6 @@ class SearchView extends Component {
           });
         }
         // this.props.clearTreeData();
-        console.log(" -----> deleted")
-        localStorage.setItem('treeData', JSON.stringify({}));
         this.props.clearTreeExpand();
         this.props.history.push(`/search/${this.props.pid}`);
       })
@@ -411,7 +409,7 @@ class SearchView extends Component {
     }
     if (showDeleteFromSysAlert) {
       // this.props.clearTreeData();
-      console.log(" -----> deleted")
+      console.log(' -----> deleted');
       localStorage.setItem('treeData', JSON.stringify({}));
       props.clearTreeExpand();
     }
@@ -724,7 +722,10 @@ class SearchView extends Component {
           this.setState({ downloading: false });
           console.log(err);
         });
+      this.props.history.push(`/search`);
       this.props.dispatch(clearSelection());
+      this.props.history.push(`/search/${pid}`);
+
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
     } else {
