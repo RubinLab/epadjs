@@ -314,9 +314,6 @@ class DisplayView extends Component {
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimID;
 
-      setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
-      this.refreshAllViewports();
-
       // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
 
       const element = this.getActiveElement();
@@ -346,7 +343,8 @@ class DisplayView extends Component {
       this.props.dispatch(jumpToAim(seriesUID, aimID, activePort));
 
       this.setState({ showAimEditor: true, selectedAim: aimJson }, () => {
-        console.log("new state", this.state);
+        setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
+        this.refreshAllViewports();
       });
     }
     // this.setSerieActiveLabelMap(aimID);
@@ -592,8 +590,6 @@ class DisplayView extends Component {
   };
 
   openAimEditor = (aimID, seriesUID) => {
-    console.trace();
-
     const { aimList } = this.props;
     if (Object.entries(aimList).length !== 0) {
       const aimJson = aimList[seriesUID][aimID].json;
@@ -862,7 +858,6 @@ class DisplayView extends Component {
   };
 
   setDirtyFlag = () => {
-    console.trace();
     if (!this.state.dirty) this.setState({ dirty: true });
   };
 
@@ -1470,7 +1465,7 @@ class DisplayView extends Component {
   clearSculptState = () => {
     const { tools } = cornerstoneTools.store.state;
     const evt = {};
-    const selectSculptCursor = true;
+    const selectSculptCursor = false;
     for (let i = 0; i < tools.length; i++) {
       if (tools[i].name === "FreehandRoiSculptor") {
         tools[i]._deselectAllTools(evt, selectSculptCursor);
@@ -1701,6 +1696,7 @@ class DisplayView extends Component {
                   setViewportActive={() => this.setActive(i)}
                   isStackPrefetchEnabled={true}
                   style={{ height: "calc(100% - 26px)" }}
+                  activeTool={this.state.activeTool}
                 />
               </div>
             ))}

@@ -606,9 +606,8 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       // Iterating over handles of all toolData instances to find the indices of the selected handle
       for (let toolIndex = 0; toolIndex < toolState.data.length; toolIndex++) {
         const points = toolState.data[toolIndex].handles.points;
-
         for (let p = 0; p < points.length; p++) {
-          if (points[p] === handle) {
+          if (points[p].x === handle.x && points[p].y === handle.y) {
             config.currentHandle = p;
             config.currentTool = toolIndex;
           }
