@@ -236,7 +236,6 @@ class ToolMenu extends Component {
   //TODO: instead of disabling all tools we can just disable the active tool
   disableAllTools = () => {
     const { activeTool } = this.state;
-    console.log("active tool", activeTool);
     if (activeTool === "FreehandRoiTool" || activeTool === "FreehandRoi3DTool") {
       this.deselectFreehand();
     }
@@ -272,7 +271,7 @@ class ToolMenu extends Component {
   //sets the selected tool active for all of the enabled elements
   setToolActive = (toolName, mouseMask = 1) => {
     cornerstoneTools.setToolActive(toolName, {
-      mouseButtonMask: [mouseMask],
+      mouseButtonMask: mouseMask,
     });
   };
 
@@ -342,7 +341,6 @@ class ToolMenu extends Component {
     let tools = cornerstoneTools.store.state.tools;
 
     tools = tools.filter(tool => tool.element === element && tool.mode === 'active');
-    console.log("tools", tools);
     tools = tools.filter(tool => (tool.name === "FreehandRoi3DTool"));
     console.log("tools", tools);
     tools[0].cancelDrawing(element);
