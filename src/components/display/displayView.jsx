@@ -314,21 +314,11 @@ class DisplayView extends Component {
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimID;
 
-      // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
-
-      const element = this.getActiveElement();
-      if (this.hasSegmentation(aimJson)) {
-        this.setState({ hasSegmentation: true });
-        const { labelMaps } = this.state.seriesLabelMaps[activePort];
-        const labelMapIndexOfAim = labelMaps[aimID];
-        this.setActiveLabelMapIndex(labelMapIndexOfAim, element);
-      }
-      // } else {
-      //   this.setActiveLabelMapIndex(0, element);
-      //   console.log("Aim json has not segmentation so settin to ", aimJson, 0);
-      // }
       // check if is already editing an aim
       if (showAimEditor && (selectedAim !== aimJson)) {
+        // temporal fix for aimEiditor form fields not setting dirty flag
+        alert("You should close the Aim Editor before starting to edit this aim.");
+        return;
         let message = this.prepWarningMessage(
           selectedAim.name.value,
           aimJson.name.value
@@ -336,6 +326,15 @@ class DisplayView extends Component {
         const shouldContinue = this.closeAimEditor(true, message);
         if (!shouldContinue)
           return;
+      }
+
+      // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
+      const element = this.getActiveElement();
+      if (this.hasSegmentation(aimJson)) {
+        this.setState({ hasSegmentation: true });
+        const { labelMaps } = this.state.seriesLabelMaps[activePort];
+        const labelMapIndexOfAim = labelMaps[aimID];
+        this.setActiveLabelMapIndex(labelMapIndexOfAim, element);
       }
 
       //The following dispatched is a wrongly named method. it's dispatched to set the selected
@@ -347,8 +346,6 @@ class DisplayView extends Component {
         this.refreshAllViewports();
       });
     }
-    // this.setSerieActiveLabelMap(aimID);
-    // this.openAimEditor(aimID, seriesUID);
   };
 
   toggleAnnotations = event => {
@@ -870,25 +867,12 @@ class DisplayView extends Component {
     } //Eraser might have already delete the aim}
     const { element, data } = ancestorEvent;
 
-    setMarkupsOfAimActive(aimId);//set the selected markups color to yellow
-    this.refreshAllViewports();
-
     if (aimList[seriesUID][aimId]) {
       const aimJson = aimList[seriesUID][aimId].json;
       const markupTypes = this.getMarkupTypesForAim(aimId);
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimId;
 
-      // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
-      if (this.hasSegmentation(aimJson)) {
-        this.setState({ hasSegmentation: true });
-        const { labelMaps } = this.state.seriesLabelMaps[activePort];
-        const labelMapIndexOfAim = labelMaps[aimId];
-        this.setActiveLabelMapIndex(
-          labelMapIndexOfAim,
-          this.getActiveElement()
-        );
-      }
       // check if is already editing an aim
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
         let message = "";
@@ -907,6 +891,20 @@ class DisplayView extends Component {
           return;
         }
       }
+
+      // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
+      if (this.hasSegmentation(aimJson)) {
+        this.setState({ hasSegmentation: true });
+        const { labelMaps } = this.state.seriesLabelMaps[activePort];
+        const labelMapIndexOfAim = labelMaps[aimId];
+        this.setActiveLabelMapIndex(
+          labelMapIndexOfAim,
+          this.getActiveElement()
+        );
+      }
+
+      setMarkupsOfAimActive(aimId);//set the selected markups color to yellow
+      this.refreshAllViewports();
 
       //The following dispatched is a wrongly named method. it's dispatched to set the selected
       //AimId in the store!!!!!
@@ -1443,6 +1441,7 @@ class DisplayView extends Component {
 
   closeAimEditor = (isCancel, message = "") => {
     const { dirty } = this.state;
+    console.log("in close dirty state", dirty);
     if (dirty) {
       const unsavedData = this.checkUnsavedData(isCancel, message);
       if (!unsavedData) return;
