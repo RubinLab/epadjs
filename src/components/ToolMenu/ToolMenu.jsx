@@ -233,6 +233,10 @@ class ToolMenu extends Component {
     ];
   }
 
+  componentWillUnmount() {
+    sessionStorage.removeItem("activeTool");
+  }
+
   //TODO: instead of disabling all tools we can just disable the active tool
   disableAllTools = () => {
     const { activeTool } = this.state;
@@ -325,6 +329,7 @@ class ToolMenu extends Component {
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
       this.setToolStateForAllElements(tool, "active");
     });
+    sessionStorage.setItem("activeTool", tool);
   };
 
   selectFreehand = () => {

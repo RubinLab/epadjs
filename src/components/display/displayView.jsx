@@ -158,26 +158,9 @@ class DisplayView extends Component {
       redirect: this.props.series.length < 1 ? true : false,
       containerHeight: 0,
       tokenRefresh: null,
+      activeTool: undefined
     };
   }
-
-  checkTokenExpire = async () => {
-    if (this.props.keycloak.isTokenExpired(5)) {
-      window.alert("Are you still there?");
-      await this.updateToken(this.props.keycloak, 5);
-    }
-  };
-
-  updateToken = async () => {
-    try {
-      clearInterval(this.state.tokenRefresh);
-      await refreshToken(this.props.keycloak, 5);
-      const tokenRefresh = setInterval(this.checkTokenExpire, 500);
-      this.setState({ tokenRefresh });
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   componentDidMount() {
     const { series, onSwitchView } = this.props;
@@ -201,15 +184,6 @@ class DisplayView extends Component {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
     };
-  }
-
-  handleKeyPressed = (event) => {
-    if (event.key === "Escape") {
-      const evnt = new CustomEvent("escPressed", {
-        cancelable: true,
-      });
-      window.dispatchEvent(evnt);
-    }
   }
 
   async componentDidUpdate(prevProps, prevState) {
@@ -243,6 +217,7 @@ class DisplayView extends Component {
     else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
       this.renderAims();
     }
+    this.handleActiveTool();
   }
 
   componentWillUnmount() {
@@ -257,6 +232,23 @@ class DisplayView extends Component {
     clearInterval(this.state.tokenRefresh)
   }
 
+  handleKeyPressed = (event) => {
+    if (event.key === "Escape") {
+      const evnt = new CustomEvent("escPressed", {
+        cancelable: true,
+      });
+      window.dispatchEvent(evnt);
+    }
+  }
+
+  // Sets the activeTool state getting it from session storage
+  handleActiveTool = () => {
+    const activeTool = sessionStorage.getItem("activeTool");
+    if (activeTool && activeTool !== this.state.activeTool)
+      this.setState({ activeTool });
+    console.log("active tool", activeTool);
+  }
+
   jumpToAims = () => {
     const { series } = this.props;
     const newData = [...this.state.data];
@@ -268,6 +260,24 @@ class DisplayView extends Component {
       }
     });
     this.setState({ data: newData });
+  };
+
+  checkTokenExpire = async () => {
+    if (this.props.keycloak.isTokenExpired(5)) {
+      window.alert("Are you still there?");
+      await this.updateToken(this.props.keycloak, 5);
+    }
+  };
+
+  updateToken = async () => {
+    try {
+      clearInterval(this.state.tokenRefresh);
+      await refreshToken(this.props.keycloak, 5);
+      const tokenRefresh = setInterval(this.checkTokenExpire, 500);
+      this.setState({ tokenRefresh });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   setSubComponentHeights = e => {
@@ -1577,6 +1587,7 @@ class DisplayView extends Component {
   };
 
   render() {
+    console.log("rendering", this.state.activeTool);
     const { series } = this.props;
     // if (this.state.redirect) return <Redirect to="/search" />;
     return !Object.entries(this.props.series).length ? (
