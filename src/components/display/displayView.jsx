@@ -1585,30 +1585,31 @@ class DisplayView extends Component {
   };
 
   render() {
-    const { series } = this.props;
+    const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
+    const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
     // if (this.state.redirect) return <Redirect to="/search" />;
-    return !Object.entries(this.props.series).length ? (
+    return !Object.entries(series).length ? (
       <Redirect to="/search" />
     ) : (
       <React.Fragment>
         <RightsideBar
-          showAimEditor={this.state.showAimEditor}
-          selectedAim={this.state.selectedAim}
+          showAimEditor={showAimEditor}
+          selectedAim={selectedAim}
           onCancel={this.closeAimEditor}
-          hasSegmentation={this.state.hasSegmentation}
-          activeLabelMapIndex={this.state.activeLabelMapIndex}
-          updateProgress={this.props.updateProgress}
-          updateTreeDataOnSave={this.props.updateTreeDataOnSave}
+          hasSegmentation={hasSegmentation}
+          activeLabelMapIndex={activeLabelMapIndex}
+          updateProgress={updateProgress}
+          updateTreeDataOnSave={updateTreeDataOnSave}
           setAimDirty={this.setDirtyFlag}
         >
           <ToolMenu />
           {!this.state.isLoading &&
-            Object.entries(this.props.series).length &&
-            this.state.data.map((data, i) => (
+            Object.entries(series).length &&
+            data.map((data, i) => (
               <div
                 className={
                   "viewportContainer" +
-                  (this.props.activePort == i ? " selected" : "")
+                  (activePort == i ? " selected" : "")
                 }
                 key={i}
                 id={"viewportContainer" + i}
@@ -1703,7 +1704,7 @@ class DisplayView extends Component {
                   setViewportActive={() => this.setActive(i)}
                   isStackPrefetchEnabled={true}
                   style={{ height: "calc(100% - 26px)" }}
-                  activeTool={this.state.activeTool}
+                  activeTool={activeTool}
                 />
               </div>
             ))}
