@@ -556,8 +556,10 @@ class App extends Component {
 
   componentDidUpdate = prevProps => {
     const uploaded = this.props.notificationAction.startsWith('Upload');
-    if (prevProps.lastEventId !== this.props.lastEventId && uploaded) {
+    const deleted = this.props.notificationAction.startsWith('Delete');
+    if (prevProps.lastEventId !== this.props.lastEventId && (uploaded || deleted)) {
       this.props.dispatch(getTemplates());
+      localStorage.setItem('treeData', JSON.stringify({}));
     }
   };
 
