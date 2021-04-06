@@ -158,26 +158,9 @@ class DisplayView extends Component {
       redirect: this.props.series.length < 1 ? true : false,
       containerHeight: 0,
       tokenRefresh: null,
+      activeTool: undefined
     };
   }
-
-  checkTokenExpire = async () => {
-    if (this.props.keycloak.isTokenExpired(5)) {
-      window.alert("Are you still there?");
-      await this.updateToken(this.props.keycloak, 5);
-    }
-  };
-
-  updateToken = async () => {
-    try {
-      clearInterval(this.state.tokenRefresh);
-      await refreshToken(this.props.keycloak, 5);
-      const tokenRefresh = setInterval(this.checkTokenExpire, 500);
-      this.setState({ tokenRefresh });
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   componentDidMount() {
     const { series, onSwitchView } = this.props;
@@ -201,15 +184,6 @@ class DisplayView extends Component {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
     };
-  }
-
-  handleKeyPressed = (event) => {
-    if (event.key === "Escape") {
-      const evnt = new CustomEvent("escPressed", {
-        cancelable: true,
-      });
-      window.dispatchEvent(evnt);
-    }
   }
 
   async componentDidUpdate(prevProps, prevState) {
@@ -243,6 +217,7 @@ class DisplayView extends Component {
     else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
       this.renderAims();
     }
+    this.handleActiveTool();
   }
 
   componentWillUnmount() {
@@ -257,6 +232,22 @@ class DisplayView extends Component {
     clearInterval(this.state.tokenRefresh)
   }
 
+  handleKeyPressed = (event) => {
+    if (event.key === "Escape") {
+      const evnt = new CustomEvent("escPressed", {
+        cancelable: true,
+      });
+      window.dispatchEvent(evnt);
+    }
+  }
+
+  // Sets the activeTool state getting it from session storage
+  handleActiveTool = () => {
+    const activeTool = sessionStorage.getItem("activeTool");
+    if (activeTool && activeTool !== this.state.activeTool)
+      this.setState({ activeTool });
+  }
+
   jumpToAims = () => {
     const { series } = this.props;
     const newData = [...this.state.data];
@@ -268,6 +259,24 @@ class DisplayView extends Component {
       }
     });
     this.setState({ data: newData });
+  };
+
+  checkTokenExpire = async () => {
+    if (this.props.keycloak.isTokenExpired(5)) {
+      window.alert("Are you still there?");
+      await this.updateToken(this.props.keycloak, 5);
+    }
+  };
+
+  updateToken = async () => {
+    try {
+      clearInterval(this.state.tokenRefresh);
+      await refreshToken(this.props.keycloak, 5);
+      const tokenRefresh = setInterval(this.checkTokenExpire, 500);
+      this.setState({ tokenRefresh });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   setSubComponentHeights = e => {
@@ -1441,7 +1450,6 @@ class DisplayView extends Component {
 
   closeAimEditor = (isCancel, message = "") => {
     const { dirty } = this.state;
-    console.log("in close dirty state", dirty);
     if (dirty) {
       const unsavedData = this.checkUnsavedData(isCancel, message);
       if (!unsavedData) return;
@@ -1577,30 +1585,31 @@ class DisplayView extends Component {
   };
 
   render() {
-    const { series } = this.props;
+    const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
+    const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
     // if (this.state.redirect) return <Redirect to="/search" />;
-    return !Object.entries(this.props.series).length ? (
+    return !Object.entries(series).length ? (
       <Redirect to="/search" />
     ) : (
       <React.Fragment>
         <RightsideBar
-          showAimEditor={this.state.showAimEditor}
-          selectedAim={this.state.selectedAim}
+          showAimEditor={showAimEditor}
+          selectedAim={selectedAim}
           onCancel={this.closeAimEditor}
-          hasSegmentation={this.state.hasSegmentation}
-          activeLabelMapIndex={this.state.activeLabelMapIndex}
-          updateProgress={this.props.updateProgress}
-          updateTreeDataOnSave={this.props.updateTreeDataOnSave}
+          hasSegmentation={hasSegmentation}
+          activeLabelMapIndex={activeLabelMapIndex}
+          updateProgress={updateProgress}
+          updateTreeDataOnSave={updateTreeDataOnSave}
           setAimDirty={this.setDirtyFlag}
         >
           <ToolMenu />
           {!this.state.isLoading &&
-            Object.entries(this.props.series).length &&
-            this.state.data.map((data, i) => (
+            Object.entries(series).length &&
+            data.map((data, i) => (
               <div
                 className={
                   "viewportContainer" +
-                  (this.props.activePort == i ? " selected" : "")
+                  (activePort == i ? " selected" : "")
                 }
                 key={i}
                 id={"viewportContainer" + i}
@@ -1695,7 +1704,7 @@ class DisplayView extends Component {
                   setViewportActive={() => this.setActive(i)}
                   isStackPrefetchEnabled={true}
                   style={{ height: "calc(100% - 26px)" }}
-                  activeTool={this.state.activeTool}
+                  activeTool={activeTool}
                 />
               </div>
             ))}
