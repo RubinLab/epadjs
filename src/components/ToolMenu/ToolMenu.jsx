@@ -347,7 +347,6 @@ class ToolMenu extends Component {
 
     tools = tools.filter(tool => tool.element === element && tool.mode === 'active');
     tools = tools.filter(tool => (tool.name === "FreehandRoi3DTool"));
-    console.log("tools", tools);
     tools[0].cancelDrawing(element);
   }
 

@@ -246,7 +246,6 @@ class DisplayView extends Component {
     const activeTool = sessionStorage.getItem("activeTool");
     if (activeTool && activeTool !== this.state.activeTool)
       this.setState({ activeTool });
-    console.log("active tool", activeTool);
   }
 
   jumpToAims = () => {
@@ -1451,7 +1450,6 @@ class DisplayView extends Component {
 
   closeAimEditor = (isCancel, message = "") => {
     const { dirty } = this.state;
-    console.log("in close dirty state", dirty);
     if (dirty) {
       const unsavedData = this.checkUnsavedData(isCancel, message);
       if (!unsavedData) return;
@@ -1587,7 +1585,6 @@ class DisplayView extends Component {
   };
 
   render() {
-    console.log("rendering", this.state.activeTool);
     const { series } = this.props;
     // if (this.state.redirect) return <Redirect to="/search" />;
     return !Object.entries(this.props.series).length ? (
