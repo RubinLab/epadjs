@@ -557,9 +557,13 @@ class App extends Component {
   componentDidUpdate = prevProps => {
     const uploaded = this.props.notificationAction.startsWith('Upload');
     const deleted = this.props.notificationAction.startsWith('Delete');
-    if (prevProps.lastEventId !== this.props.lastEventId && (uploaded || deleted)) {
+    if (
+      prevProps.lastEventId !== this.props.lastEventId &&
+      (uploaded || deleted)
+    ) {
       this.props.dispatch(getTemplates());
       localStorage.setItem('treeData', JSON.stringify({}));
+      this.clearTreeExpand();
     }
   };
 
