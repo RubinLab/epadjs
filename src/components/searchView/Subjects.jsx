@@ -594,17 +594,19 @@ function Subjects(props) {
         data = sortSubjectName(dataFromStorage);
         setData(data);
       } else {
-        setLoading(true);
-        getSubjects(pid)
-          .then(res => {
-            setLoading(false);
-            data = preparePageData(res.data, defaultPageSize, 0);
-            getTreeData(pid, 'subject', res.data);
-            setData(data);
-          })
-          .catch(err => {
-            console.error(err);
-          });
+        if (pid !== null && pid !== 'null') {
+          setLoading(true);
+          getSubjects(pid)
+            .then(res => {
+              setLoading(false);
+              data = preparePageData(res.data, defaultPageSize, 0);
+              getTreeData(pid, 'subject', res.data);
+              setData(data);
+            })
+            .catch(err => {
+              console.error(err);
+            });
+        }
       }
     }
   }, []);
@@ -612,17 +614,19 @@ function Subjects(props) {
   useEffect(() => {
     localStorage.setItem('treeData', JSON.stringify({}));
     const { pid, getTreeData } = props;
-    setLoading(true);
-    getSubjects(pid)
-      .then(res => {
-        setLoading(false);
-        const data = preparePageData(res.data, defaultPageSize, 0);
-        getTreeData(pid, 'subject', res.data);
-        setData(data);
-      })
-      .catch(err => {
-        console.error(err);
-      });
+    if (pid !== null && pid !== 'null') {
+      setLoading(true);
+      getSubjects(pid)
+        .then(res => {
+          setLoading(false);
+          const data = preparePageData(res.data, defaultPageSize, 0);
+          getTreeData(pid, 'subject', res.data);
+          setData(data);
+        })
+        .catch(err => {
+          console.error(err);
+        });
+    }
   }, [props.update]);
 
   return (
