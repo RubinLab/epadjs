@@ -8,8 +8,8 @@ class FuseSelector extends Component {
         super(props);
         this.state = {
             isFused: false,
-            CT: undefined,
-            PT: undefined,
+            CT: undefined, //Ct viewport index
+            PT: undefined, //PET viewport index
             opacity: 0.7,
             colormap: 'hotIron',
         }
@@ -38,21 +38,6 @@ class FuseSelector extends Component {
         //     this.setState({ isFused: true });
     }
 
-    fuseOk = () => {
-        const elements = cornerstone.getEnabledElements();
-        // We only support two viewports for fuse
-        if (elements.length != 2)
-            return false;
-        //
-        elements.forEach(({ element }, i) => {
-            const modality = this.getModality(element);
-            if (modality)
-                this.setState({ [modality]: i });//set the state with port index
-            else return false;
-        })
-        return true;
-    }
-
     getOptions = () => {
         const { opacity, colormap } = this.state
         return {
@@ -69,7 +54,8 @@ class FuseSelector extends Component {
         return false;
     }
 
-    handleFuse = () => {
+    // 
+    setFuseState = () => {
         const { isFused, CT, PT } = this.state;
         const petElement = cornerstone.getEnabledElements()[PT].element;
         const ctElement = cornerstone.getEnabledElements()[CT].element;
@@ -91,6 +77,8 @@ class FuseSelector extends Component {
         }
     }
 
+    // If CT viewport has a new image (because viewport are synced PET will also scroll to 
+    // corresponding image) fuse it with the new image on PET
     newImage = (event) => {
         console.log("event", event.detail.element);
         const newImageElement = event.detail.element;
@@ -99,7 +87,8 @@ class FuseSelector extends Component {
         const ctElement = cornerstone.getEnabledElements()[CT].element;
         if (newImageElement === ctElement) {
             console.log("ctElement before", cornerstone.getEnabledElements()[CT]);
-            cornerstone.getEnabledElements()[CT].layers.length = 0;
+            cornerstone.purgeLayers(ctElement);
+            // cornerstone.getEnabledElements()[CT].layers.length = 0;//Remove current layers
             this.fuse(petElement, ctElement);
         }
         // console.log("o element");
@@ -143,20 +132,28 @@ class FuseSelector extends Component {
     };
 
     csLayerChange = (e) => {
-        const { viewport, options } = this.getActiveLayer();
+        // const { viewport, options } = this.getActiveLayer();
+        // const colormap = viewport.colormap || "";
+        // const opacity = options.opacity == null ? 1 : options.opacity;
+        // let visible;
+        // if (options.visible === undefined || options.visible)
+        //     visible = true;
+        // else visible = false;
+        // this.setState({ colormap, opacity, visible });
+    }
+
+    handleLayerChange = (event) => {
+        const newActiveLayerId = event.target.value;
+        const ctElement = this.getCtElement();
+
+        const { viewport, options } = cornerstone.getLayer(ctElement, newActiveLayerId);
         const colormap = viewport.colormap || "";
         const opacity = options.opacity == null ? 1 : options.opacity;
         let visible;
         if (options.visible === undefined || options.visible)
             visible = true;
         else visible = false;
-        this.setState({ colormap, opacity, visible });
-    }
-
-    handleLayerChange = (event) => {
-        const ctElement = this.getCtElement();
-        const newActiveLayerId = event.target.value;
-        this.setState({ activeLayerId: newActiveLayerId });
+        this.setState({ activeLayerId: newActiveLayerId, colormap, opacity, visible });
         cornerstone.setActiveLayer(ctElement, newActiveLayerId);
     }
 
@@ -240,7 +237,7 @@ class FuseSelector extends Component {
                 </div>
                 )}
                 {!isFused && (<p>Currently to be able to use Fusion functionality only two viewports of PET and CT modalities should be open!</p>)}
-                <button className="closebtn" disabled={!(CT || PT)} onClick={this.handleFuse}>{buttonLabel}</button>
+                <button className="closebtn" disabled={!(CT || PT)} onClick={this.setFuseState}>{buttonLabel}</button>
 
                 <div className="close-fuse-selector" onClick={this.props.onClose}>
                     <a href="#">X</a>
