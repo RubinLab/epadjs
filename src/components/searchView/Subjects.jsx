@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useTable, useExpanded, usePagination } from 'react-table';
 import { connect } from 'react-redux';
 import ReactTooltip from 'react-tooltip';
-import { toast } from "react-toastify";
+import { toast } from 'react-toastify';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import Studies from './Studies';
 import {
@@ -493,12 +493,12 @@ function Subjects(props) {
     if (selectedLevel && !warningSeen) {
       const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a subject!`;
       toast.info(message, {
-        position: "top-right",
+        position: 'top-right',
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
-        draggable: true,
+        draggable: true
       });
       setWarningSeen(true);
     }
@@ -607,6 +607,22 @@ function Subjects(props) {
           });
       }
     }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('treeData', JSON.stringify({}));
+    const { pid, getTreeData } = props;
+    setLoading(true);
+    getSubjects(pid)
+      .then(res => {
+        setLoading(false);
+        const data = preparePageData(res.data, defaultPageSize, 0);
+        getTreeData(pid, 'subject', res.data);
+        setData(data);
+      })
+      .catch(err => {
+        console.error(err);
+      });
   }, [props.update]);
 
   return (

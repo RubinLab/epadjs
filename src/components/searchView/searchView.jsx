@@ -293,7 +293,7 @@ class SearchView extends Component {
         this.props.dispatch(clearSelection());
 
         this.setState(state => ({ update: state.update + 1 }));
-        this.props.history.push(`/search/${pid}`);
+        this.props.history.push(`/search/${this.props.pid}`);
         for (let serie of this.props.openSeries) {
           let type = serie.aimID ? 'annotation' : 'serie';
           this.props.dispatch(
