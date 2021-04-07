@@ -39,7 +39,7 @@ import { FiMessageSquare } from "react-icons/fi";
 import { errorMonitor } from "events";
 import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
 
-import { createTool } from "aimapi";
+import { createTool, linesToPerpendicular } from "aimapi";
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
@@ -935,7 +935,7 @@ class DisplayView extends Component {
   parseAims = (aimList, seriesUid, studyUid, serieIndex) => {
     const seriesSegmentations = [];
     Object.entries(aimList).forEach(([key, values]) => {
-      this.linesToPerpendicular(values); //change the perendicular lines to bidirectional to render by CS
+      values = linesToPerpendicular(values); //change the perendicular lines to bidirectional to render by CS
       values.forEach((value) => {
         const { markupType, aimUid } = value;
         if (markupType === "DicomSegmentationEntity") {
@@ -962,98 +962,7 @@ class DisplayView extends Component {
       this.handleSegmentations(seriesSegmentations);
   };
 
-  linesToPerpendicular = (values) => {
-    // Takes two lines on the same image, checks if they belong to same Aima and if they are perpendicular.
-    // If so, merges two lines on line1, cnahges the markup type from line to perpendicular
-    // And deletes the second line not to be reRendered as line agai
-    const lines = values.filter(this.checkIfLine);
-
-    const groupedLines = Object.values(this.groupBy(lines, "aimUid"));
-    groupedLines.forEach((lines) => {
-      if (lines.length > 1) {
-        for (let i = 0; i < lines.length; i++) {
-          for (let j = i + 1; j < lines.length; j++) {
-            let pair = [lines[i], lines[j]];
-            if (this.checkIfPerpendicular(pair) && this.intersects(pair)) {
-              // there are multiple lines on the same image that belongs to same aim, a potential perpendicular
-              // they are perpendicular, remove them from the values list and render them as perpendicular
-              pair[0].markupType = "Bidirectional";
-              pair[0].calculations = pair[0].calculations.concat(
-                pair[1].calculations
-              );
-              pair[0].coordinates = pair[0].coordinates.concat(
-                pair[1].coordinates
-              );
-
-              const index = values.indexOf(pair[1]);
-              if (index > -1) {
-                values.splice(index, 1);
-              }
-            }
-          }
-        }
-      }
-    });
-  };
-
-  checkIfPerpendicular = (lines) => {
-    const slope1 = this.getSlopeOfLine(
-      lines[0]["coordinates"][0],
-      lines[0]["coordinates"][1]
-    );
-    const slope2 = this.getSlopeOfLine(
-      lines[1]["coordinates"][0],
-      lines[1]["coordinates"][1]
-    );
-
-    if (
-      (slope1 === "infinity" && slope2 === 0) ||
-      (slope1 === 0 && slope2 === "infinity")
-    )
-      return true;
-    else if (Math.round((slope1 * slope2 * 100) / 100) == -1) return true;
-    return false;
-  };
-
-  getSlopeOfLine = (p1, p2) => {
-    if (p2.x.value - p1.x.value === 0) return "infinity";
-    return (p1.y.value - p2.y.value) / (p1.x.value - p2.x.value);
-  };
-
-  checkIfLine = (markup) => {
-    if (markup) {
-      return markup.markupType === "TwoDimensionMultiPoint";
-    }
-  };
-
-  // returns true iff the line from (a,b)->(c,d) intersects with (p,q)->(r,s)
-  intersects = (lines) => {
-    const a = lines[0]["coordinates"][0].x.value;
-    const b = lines[0]["coordinates"][0].y.value;
-    const c = lines[0]["coordinates"][1].x.value;
-    const d = lines[0]["coordinates"][1].y.value;
-    const p = lines[1]["coordinates"][0].x.value;
-    const q = lines[1]["coordinates"][0].y.value;
-    const r = lines[1]["coordinates"][1].x.value;
-    const s = lines[1]["coordinates"][1].y.value;
-    var det, gamma, lambda;
-
-    det = (c - a) * (s - q) - (r - p) * (d - b);
-    if (det === 0) {
-      return false;
-    } else {
-      lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
-      gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
-      return 0 < lambda && lambda < 1 && 0 < gamma && gamma < 1;
-    }
-  };
-
-  groupBy = (xs, key) => {
-    return xs.reduce(function (rv, x) {
-      (rv[x[key]] = rv[x[key]] || []).push(x);
-      return rv;
-    }, {});
-  };
+  
 
   handleSegmentations = seriesSegmentations => {
     let segLabelMaps = {};
