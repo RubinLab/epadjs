@@ -8,11 +8,22 @@ class FuseSelector extends Component {
         super(props);
         this.state = {
             isFused: false,
+            selectedLayer: "PET",
             CT: undefined, //Ct viewport index
             PT: undefined, //PET viewport index
             opacity: 0.7,
             colormap: 'hotIron',
         }
+        this.defaultCtOptions = {
+            opacity: 1.0,
+            viewport: { colormap: "gray" },
+            visibile: true
+        };
+        this.defaultPetOptions = {
+            opacity: 0.7,
+            viewport: { colormap: "hotIron" },
+            visibile: true
+        };
     }
 
     componentDidMount() {
@@ -27,23 +38,6 @@ class FuseSelector extends Component {
                 this.setState({ [modality]: i });//set the state with port index
             else return false;
         })
-        // if (ctElement) {
-        //     const enabledCtElement = cornerstone.getEnabledElement(ctElement);
-        //     // const layers = cornerstone.getLayers(enabledCtElement);
-        //     console.log("element", enabledCtElement);
-        // }
-        // check if the it's already fused
-        // const ctElement = cornerstone.getEnabledElements()[this.state.CT].element;
-        // if (cornerstone.getLayers(ctElement)?.length > 1)
-        //     this.setState({ isFused: true });
-    }
-
-    getOptions = () => {
-        const { opacity, colormap } = this.state
-        return {
-            opacity,
-            viewport: { colormap }
-        };
     }
 
     getModality = (element) => {
@@ -62,7 +56,6 @@ class FuseSelector extends Component {
 
         if (!isFused) {
             window.addEventListener("newImage", this.newImage);
-            ctElement.addEventListener("cornerstoneactivelayerchanged", this.csLayerChange);
 
             this.fuse(petElement, ctElement);
             this.setState({ isFused: true });
@@ -70,7 +63,6 @@ class FuseSelector extends Component {
         }
         else {
             window.removeEventListener("newImage", this.newImage);
-            ctElement.removeEventListener("cornerstoneactivelayerchanged", this.csLayerChange);
 
             this.unfuse(ctElement);
             this.setState({ isFused: false, CT: undefined, PT: undefined });
@@ -80,32 +72,25 @@ class FuseSelector extends Component {
     // If CT viewport has a new image (because viewport are synced PET will also scroll to 
     // corresponding image) fuse it with the new image on PET
     newImage = (event) => {
-        console.log("event", event.detail.element);
         const newImageElement = event.detail.element;
         const { PT, CT } = this.state;
         const petElement = cornerstone.getEnabledElements()[PT].element;
         const ctElement = cornerstone.getEnabledElements()[CT].element;
-        if (newImageElement === ctElement) {
-            console.log("ctElement before", cornerstone.getEnabledElements()[CT]);
-            cornerstone.purgeLayers(ctElement);
-            // cornerstone.getEnabledElements()[CT].layers.length = 0;//Remove current layers
-            this.fuse(petElement, ctElement);
-        }
-        // console.log("o element");
-        // else console.log("olmadi");
-        // this.fuse(petElement, ctElement);
-        // console.log("ctElement", ctElement);
+        if (newImageElement === ctElement) this.fuse(petElement, ctElement);
     };
 
     fuse = (petElement, ctElement) => {
-        console.log("fusing again", this.getOptions());
+        const { ctOptions, petOptions } = this.getOptions();
+        cornerstone.purgeLayers(ctElement);
         const petImage = cornerstone.getImage(petElement);
         const ctImage = cornerstone.getImage(ctElement);
 
-        const ctLayerId = cornerstone.addLayer(ctElement, ctImage);
-        const petLayerId = cornerstone.addLayer(ctElement, petImage, this.getOptions());
+        const ctLayerId = cornerstone.addLayer(ctElement, ctImage, ctOptions);
+        const petLayerId = cornerstone.addLayer(ctElement, petImage, petOptions);
         cornerstone.updateImage(ctElement);
-        cornerstone.setActiveLayer(ctElement, petLayerId);
+        if (this.state.selectedLayer === "PET")
+            cornerstone.setActiveLayer(ctElement, petLayerId);
+        else cornerstone.setActiveLayer(ctElement, ctLayerId);
         this.setState({ ctLayerId, petLayerId });
     };
 
@@ -119,6 +104,29 @@ class FuseSelector extends Component {
         }
     };
 
+    // Return activeLayer's options
+    getOptions = () => {
+        const ctElement = this.getCtElement();
+        const layers = cornerstone.getLayers(ctElement);
+        if (!layers.length) return { ctOptions: this.defaultCtOptions, petOptions: this.defaultPetOptions };
+        else return { ctOptions: this.getLayerOptions(layers[0]), petOptions: this.getLayerOptions(layers[1]) };
+    }
+
+    getLayerOptions = (layer) => {
+        const { viewport, options } = layer;
+        const colormap = viewport.colormap || "gray";
+        const opacity = options.opacity == null ? 1 : options.opacity;
+        let visible;
+        if (options.visible === undefined || options.visible)
+            visible = true;
+        else visible = false;
+        return {
+            opacity,
+            viewport: { colormap },
+            visible
+        };
+    }
+
     addSynchronizer = () => {
         const synchronizer = new cornerstoneTools.Synchronizer(
             'cornerstoneimagerendered',
@@ -131,23 +139,15 @@ class FuseSelector extends Component {
         synchronizer.enabled = true;
     };
 
-    csLayerChange = (e) => {
-        // const { viewport, options } = this.getActiveLayer();
-        // const colormap = viewport.colormap || "";
-        // const opacity = options.opacity == null ? 1 : options.opacity;
-        // let visible;
-        // if (options.visible === undefined || options.visible)
-        //     visible = true;
-        // else visible = false;
-        // this.setState({ colormap, opacity, visible });
-    }
-
     handleLayerChange = (event) => {
+        if (event.target.selectedIndex === 0)
+            this.setState({ selectedLayer: "CT" });
+        else this.setState({ selectedLayer: "PET" });
         const newActiveLayerId = event.target.value;
         const ctElement = this.getCtElement();
 
         const { viewport, options } = cornerstone.getLayer(ctElement, newActiveLayerId);
-        const colormap = viewport.colormap || "";
+        const colormap = viewport.colormap || "gray";
         const opacity = options.opacity == null ? 1 : options.opacity;
         let visible;
         if (options.visible === undefined || options.visible)
@@ -158,10 +158,15 @@ class FuseSelector extends Component {
     }
 
     handleVisibiltyChange = (event) => {
+        const isVisible = event.target.checked;
+        this.setVisibility(isVisible);
+        this.setState({ visible: isVisible });
+    }
+
+    setVisibility = (isVisible) => {
         const activeLayer = this.getActiveLayer();
-        activeLayer.options.visible = event.target.checked;
+        activeLayer.options.visible = isVisible;
         this.updateView();
-        this.setState({ visible: event.target.checked });
     }
 
     handleOpacityChange = (event) => {
