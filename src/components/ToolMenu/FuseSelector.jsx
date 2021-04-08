@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
+import Draggable from "react-draggable";
 import "./FuseSelector.css";
 
 class FuseSelector extends Component {
@@ -224,41 +225,43 @@ class FuseSelector extends Component {
         const colormapsList = cornerstone.colors.getColormapsList();
         const buttonLabel = isFused ? "Unfuse" : "Fuse PET and CT";
         return (
-            <div className="fuse-selector">
-                <span>Fusion Menu</span>
-                <hr />
-                {isFused && (<div className="layers">
-                    <label htmlFor="layers">Active Layer</label>
-                    <select className="opt-select" name={"layers"} value={this.getActiveLayer().layerId} onChange={this.handleLayerChange}>
-                        <option value={ctLayerId}>CT</option>
-                        <option value={petLayerId}>PET</option>
-                    </select>
-                </div>
-                )}
-                {isFused && (<div className="visibility">
-                    <input type="checkbox" name="visible" onChange={this.handleVisibiltyChange} checked={visible} />
-                    <label htmlFor="visible"> Visible</label>
-                </div>)
-                }
+            <Draggable>
+                <div className="fuse-selector">
+                    <span>Fusion Menu</span>
+                    <hr />
+                    {isFused && (<div className="layers">
+                        <label htmlFor="layers">Active Layer</label>
+                        <select className="opt-select" name={"layers"} value={this.getActiveLayer().layerId} onChange={this.handleLayerChange}>
+                            <option value={ctLayerId}>CT</option>
+                            <option value={petLayerId}>PET</option>
+                        </select>
+                    </div>
+                    )}
+                    {isFused && (<div className="visibility">
+                        <input type="checkbox" name="visible" onChange={this.handleVisibiltyChange} checked={visible} />
+                        <label htmlFor="visible"> Visible</label>
+                    </div>)
+                    }
 
-                {isFused && (<div className="opacity">
-                    <label htmlFor="opacity">Opacity</label>
-                    <input type="range" name={"opacity"} min={0} max={1} step={0.1} onChange={this.handleOpacityChange} value={opacity} />
-                </div>)}
-                {isFused && (<div className="colormap">
-                    <label htmlFor="opacity">Colormap</label>
-                    <select value={colormap} onChange={this.handleColormapChange}>
-                        {this.createColormapOptions(colormapsList)}
-                    </select>
-                </div>
-                )}
-                {!isFused && (<p>Currently to be able to use Fusion functionality only two viewports of PET and CT modalities should be open!</p>)}
-                <button className="closebtn" disabled={!(CT || PT)} onClick={this.setFuseState}>{buttonLabel}</button>
+                    {isFused && (<div className="opacity">
+                        <label htmlFor="opacity">Opacity</label>
+                        <input type="range" name={"opacity"} min={0} max={1} step={0.1} onChange={this.handleOpacityChange} value={opacity} />
+                    </div>)}
+                    {isFused && (<div className="colormap">
+                        <label htmlFor="opacity">Colormap</label>
+                        <select value={colormap} onChange={this.handleColormapChange}>
+                            {this.createColormapOptions(colormapsList)}
+                        </select>
+                    </div>
+                    )}
+                    {!isFused && (<p>Currently to be able to use Fusion functionality only two viewports of PET and CT modalities should be open!</p>)}
+                    <button className="closebtn" disabled={!(CT || PT)} onClick={this.setFuseState}>{buttonLabel}</button>
 
-                <div className="close-fuse-selector" onClick={this.props.onClose}>
-                    <a href="#">X</a>
+                    <div className="close-fuse-selector" onClick={this.props.onClose}>
+                        <a href="#">X</a>
+                    </div>
                 </div>
-            </div>
+            </Draggable>
         );
     }
 }
