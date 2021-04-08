@@ -23,7 +23,7 @@ class ColormapSelector extends Component {
             this.props.activePort
         ];
         const viewport = cornerstone.getViewport(element);
-        return viewport.colormap;
+        return viewport.colormap || "gray";
     }
 
     handleChange = (event) => {
