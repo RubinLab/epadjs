@@ -96,22 +96,11 @@ class FuseSelector extends Component {
     };
 
     unfuse = (ctElement) => {
-        // const { CT } = this.state;
-        // const ctEnabledElement = cornerstone.getEnabledElements()[CT];
-        console.log("elements in unfuse before", cornerstone.getEnabledElements()[1]);
-        alert("ok?");
+        //first set the ct layer active to render the correct image after unfuse
+        cornerstone.setActiveLayer(ctElement, this.state.ctLayerId);
         cornerstone.purgeLayers(ctElement);
         this.removeSynchronizer();
-        cornerstone.reset(ctElement);
-        // ctEnabledElement.viewport.colormap = "gray";
-        // delete the top two layers (base on there can only be two layers)
-        // const layers = cornerstone.getLayers(ctElement);
-        // if (layers.length) {
-        //     cornerstone.removeLayer(ctElement, layers.pop().layerId);
-        // cornerstone.removeLayer(ctElement, layers.pop().layerId);
-        // this.updateView();
-        // }
-        console.log("elements in unfuse after", cornerstone.getEnabledElements()[1]);
+        this.props.onClose();
     };
 
     getOptions = () => {
