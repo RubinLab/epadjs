@@ -725,7 +725,6 @@ class SearchView extends Component {
       this.props.history.push(`/search`);
       this.props.dispatch(clearSelection());
       this.props.history.push(`/search/${pid}`);
-
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
     } else {
@@ -972,6 +971,7 @@ class SearchView extends Component {
     const hideEyeIcon =
       lengthOfStudies === 0 && lengthOfSeries === 0 && lengthOfAnns === 0;
 
+    const pid = this.props.match.params.pid || this.props.pid;
     const showAddTo =
       (lengthOfPatients > 0 && this.verifyObject(selectedPatients)) ||
       (lengthOfStudies > 0 && this.verifyObject(selectedStudies));
@@ -979,7 +979,6 @@ class SearchView extends Component {
       showAddTo ||
       (lengthOfAnns > 0 && this.verifyObject(selectedAnnotations)) ||
       (lengthOfSeries > 0 && this.verifyObject(selectedSeries));
-    const pid = this.props.match.params.pid || this.props.pid;
     const {
       isSerieSelectionOpen,
       showUploadFileModal,
