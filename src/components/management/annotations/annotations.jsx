@@ -189,9 +189,9 @@ class Annotations extends React.Component {
     try {
       const {
         data: { rows, total_rows, bookmark }
-      } = projectID
+      } = projectID && projectID !== 'all_aims'
         ? await getSummaryAnnotations(projectID, bookmarkPassed)
-        : await getAllAnnotations();
+        : await getAllAnnotations(bookmarkPassed);
 
       if (bookmarkPassed) {
         const pages = Math.ceil(total_rows / pageSize);
