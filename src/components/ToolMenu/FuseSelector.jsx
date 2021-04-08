@@ -61,7 +61,7 @@ class FuseSelector extends Component {
 
             this.fuse(petElement, ctElement);
             this.setState({ isFused: true });
-            this.addSynchronizer();
+            this.addSynchronizers();
         }
         else {
             window.removeEventListener("newImage", this.newImage);
@@ -100,7 +100,7 @@ class FuseSelector extends Component {
         //first set the ct layer active to render the correct image after unfuse
         cornerstone.setActiveLayer(ctElement, this.state.ctLayerId);
         cornerstone.purgeLayers(ctElement);
-        this.removeSynchronizer();
+        this.removeSynchronizers();
         this.props.onClose();
     };
 
@@ -126,29 +126,33 @@ class FuseSelector extends Component {
         };
     }
 
-    addSynchronizer = () => {
-        const synchronizer = new cornerstoneTools.Synchronizer(
+    addSynchronizers = () => {
+        const stackPositonSynchronizer = new cornerstoneTools.Synchronizer(
             'cornerstoneimagerendered',
             cornerstoneTools.stackImagePositionSynchronizer
         );
+        const panZoomSynchronizer = new cornerstoneTools.Synchronizer(
+            'cornerstonetoolsmousedrag',
+            cornerstoneTools.panZoomSynchronizer
+        );
         cornerstone.getEnabledElements().forEach(({ element }) => {
-            synchronizer.add(element);
+            stackPositonSynchronizer.add(element);
+            panZoomSynchronizer.add(element)
         });
-        synchronizer.enabled = true;
-        this.synchronizers.push(synchronizer);
+        stackPositonSynchronizer.enabled = true;
+        panZoomSynchronizer.enabled = true;
+        this.synchronizers.push(stackPositonSynchronizer);
+        this.synchronizers.push(panZoomSynchronizer);
 
     };
 
-    removeSynchronizer = () => {
-        const synchronizer = new cornerstoneTools.Synchronizer(
-            'cornerstoneimagerendered',
-            cornerstoneTools.stackImagePositionSynchronizer
-        );
-
+    removeSynchronizers = () => {
         cornerstone.getEnabledElements().forEach(({ element }) => {
-            this.synchronizers[0].remove(element);
+            this.synchronizers.forEach(synchronizer => {
+                synchronizer.remove(element);
+                synchronizer.enabled = false;
+            })
         });
-        this.synchronizers[0].enabled = false;
     };
 
     handleLayerChange = (event) => {
