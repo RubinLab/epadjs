@@ -932,6 +932,7 @@ class App extends Component {
     try {
       // this.setState({ treeData: {} });
       localStorage.setItem('treeData', JSON.stringify({}));
+      this.clearTreeExpand();
     } catch (err) {
       console.error(err);
     }
