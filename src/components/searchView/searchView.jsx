@@ -893,50 +893,29 @@ class SearchView extends Component {
   addSelectionToProject = async e => {
     try {
       const { id } = e.target;
-      const { treeData } = this.props;
+      const { pid } = this.props;
       let promises = [];
       let patientIDs = new Set();
       const patients = Object.values(this.props.selectedPatients);
       const studies = Object.values(this.props.selectedStudies);
       if (patients.length > 0) {
         patients.forEach(el => {
-          promises.push(addSubjectToProject(id, el.patientID));
+          promises.push(addSubjectToProject(id, el.patientID, pid));
         });
       }
       if (studies.length > 0) {
         studies.forEach(el => {
-          promises.push(addStudyToProject(id, el.patientID, el.studyUID));
-          if (!treeData[id][el.patientID]) {
-            patientIDs.add(el.patientID);
-          }
+          promises.push(addStudyToProject(id, el.patientID, el.studyUID, pid));
         });
       }
       await Promise.all(promises);
       console.log('Sucessfully copied!');
-      promises = [];
-
-      if (treeData[id])
-        if (patients.length > 0) {
-          const { data } = await getSubjects(id);
-          this.props.getTreeData(id, 'subject', data);
-        }
-
+      localStorage.setItem('treeData', JSON.stringify({}));
       this.setState({ showProjects: false });
-      if (studies.length > 0) {
-        if (patientIDs.size > 0) {
-          const { data } = await getSubjects(id);
-          this.props.getTreeData(id, 'subject', data);
-        }
-        studies.forEach(el => {
-          promises.push(getStudies(id, el.patientID));
-        });
-        let studiesResult = await Promise.all(promises);
-        studiesResult = studiesResult;
-        studiesResult.forEach(el =>
-          this.props.getTreeData(id, 'studies', el.data)
-        );
-      }
       this.props.dispatch(clearSelection());
+      this.props.history.push(`/search/${id}`);
+      this.clearTreeExpand()
+
     } catch (err) {
       console.log(err);
     }
