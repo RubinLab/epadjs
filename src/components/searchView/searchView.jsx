@@ -877,6 +877,9 @@ class SearchView extends Component {
 
   handleSubmitDownload = () => {
     this.setState({ showAnnotationModal: false });
+    this.props.history.push(`/search`);
+    this.props.dispatch(clearSelection());
+    this.props.history.push(`/search/${this.props.pid}`);
   };
 
   handleUploadWizardClick = () => {
