@@ -169,11 +169,11 @@ const toolBar = props => {
       )} */}
       <div
         className={
-          props.showAddTo
+          props.showAddTo && project !== 'all'
             ? 'searchView-toolbar__icon worklist-icon'
             : 'hide-delete'
         }
-        onClick={props.showAddTo ? props.onWorklist : null}
+        onClick={props.showAddTo && project !== 'all'? props.onWorklist : null}
       >
         <div>
           <FaClipboardList

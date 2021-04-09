@@ -78,8 +78,10 @@ export function downloadProjectAnnotation(pid) {
   return http.get(`${apiUrl}/projects/${pid}/aims?format=stream`, { responseType: "blob" });
 }
 
-export function getAllAnnotations() {
-  return http.get(apiUrl + "/aims?format=summary");
+export function getAllAnnotations(bookmark) {
+  let url = apiUrl + "/aims?format=summary";
+  url = bookmark ? `${url}&bookmark=${bookmark}` : url;
+  return http.get(url);
 }
 
 export function getSummaryAnnotations(projectID, bookmark) {

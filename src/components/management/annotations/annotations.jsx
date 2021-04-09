@@ -70,11 +70,14 @@ class Annotations extends React.Component {
     defaultPageSize: 10,
     pageSize: 10,
     page: 0,
+    oldPageSize: 10,
+    oldPage: 0,
     tableLoading: false,
     data: [],
     isSerieSelectionOpen: false,
     selectedStudy: [],
-    studyName: ""
+    studyName: "",
+    change: ""
   };
 
   downloadProjectAim = () => {
@@ -147,27 +150,48 @@ class Annotations extends React.Component {
   };
 
   populateDisplayRows = (list, pageSize, page) => {
-    let data = [];
+    const { oldPageSize, oldPage, change } = this.state;
 
-    const size = pageSize || this.state.pageSize;
-    const p = page >= 0 ? page : this.state.page;
-    const startIndex = size * p;
-    const endIndex = size * (p + 1);
-    if (list) {
-      list.forEach((el, i) => {
-        if (i >= startIndex && i < endIndex) data.push(el);
-      });
+    if (oldPage !== page || oldPageSize !== pageSize) {
+      let data = [];
+      const size = pageSize || this.state.pageSize;
+      const p = page >= 0 ? page : this.state.page;
+      let startIndex;
+      let endIndex;
+      if (change === "page") {
+        startIndex = size * p;
+        endIndex = size * (p + 1);
+      } else if (change === "pageSize") {
+        if (oldPageSize * p < size) {
+          // strt indx should be calculted from old page start index to new number
+          const adjustedPage = p - 1 >= 0 ? p - 1 : 0;
+          startIndex = size * adjustedPage;
+          endIndex = size * (adjustedPage + 1);
+          this.setState({ page: adjustedPage });
+        } else {
+          startIndex = size * p;
+          endIndex = size * (p + 1);
+        }
+      } else {
+        startIndex = size * p;
+        endIndex = size * (p + 1);
+      }
+      if (list) {
+        list.forEach((el, i) => {
+          if (i >= startIndex && i < endIndex) data.push(el);
+        });
+      }
+      return data;
     }
-    return data;
   };
 
   getAnnotationsData = async (projectID, bookmarkPassed, pageSize) => {
     try {
       const {
         data: { rows, total_rows, bookmark }
-      } = projectID
+      } = projectID && projectID !== 'all_aims'
         ? await getSummaryAnnotations(projectID, bookmarkPassed)
-        : await getAllAnnotations();
+        : await getAllAnnotations(bookmarkPassed);
 
       if (bookmarkPassed) {
         const pages = Math.ceil(total_rows / pageSize);
@@ -753,7 +777,7 @@ class Annotations extends React.Component {
   fetchData = async atributes => {
     try {
       const { projectID, bookmark, annotations, total } = this.state;
-      const { page, pageSize } = this.state;
+      const { page, pageSize, oldPage, oldPageSize } = this.state;
       const pageNum = page + 1;
       if (
         total > annotations.length &&
@@ -769,8 +793,10 @@ class Annotations extends React.Component {
         const data = this.populateDisplayRows(rows, pageSize, page);
         this.setState({ data });
       } else {
-        const data = this.populateDisplayRows(annotations, pageSize, page);
-        this.setState({ data });
+        if (page !== oldPage || pageSize !== oldPageSize) {
+          const data = this.populateDisplayRows(annotations, pageSize, page);
+          this.setState({ data });
+        }
       }
     } catch (err) {
       console.error(err);
@@ -899,37 +925,50 @@ class Annotations extends React.Component {
           pid={projectID}
           isAllAims={this.state.isAllAims}
         />
-        <ReactTable
-          NoDataComponent={() => null}
-          className="pro-table"
-          style={{ maxHeight: "40rem" }}
-          manual
-          data={rowsToDisplay}
-          columns={this.defineColumns()}
-          loading={tableLoading}
-          pages={pages}
-          page={page}
-          pageSizeOptions={[10, 20, 50, 100]}
-          pageSize={pageSize}
-          defaultPageSize={defaultPageSize}
-          onFetchData={this.fetchData}
-          onPageChange={page => {
-            this.setState({ page });
-          }}
-          showPageJump={false}
-          onPageSizeChange={size => {
-            if (filteredData && filteredData.length > 0)
-              this.setState({
-                pages: Math.ceil(filteredData.length / size),
-                pageSize: size
-              });
-            else
-              this.setState({
-                pages: Math.ceil(this.state.total / size),
-                pageSize: size
-              });
-          }}
-        />
+        {this.state.data.length > 0 && (
+          <ReactTable
+            NoDataComponent={() => null}
+            className="pro-table"
+            style={{ maxHeight: "40rem" }}
+            manual
+            data={rowsToDisplay}
+            columns={this.defineColumns()}
+            loading={tableLoading}
+            pages={pages}
+            page={page}
+            pageSizeOptions={[10, 20, 50, 100]}
+            pageSize={pageSize}
+            defaultPageSize={defaultPageSize}
+            onFetchData={() => {
+              setTimeout(() => {
+                this.fetchData();
+              }, 10);
+            }}
+            // {this.fetchData}
+            onPageChange={page => {
+              const oldPage = this.state.page;
+              this.setState({ page, oldPage, change: "page" });
+            }}
+            showPageJump={false}
+            onPageSizeChange={size => {
+              const oldPageSize = this.state.pageSize;
+              if (filteredData && filteredData.length > 0)
+                this.setState({
+                  pages: Math.ceil(filteredData.length / size),
+                  pageSize: size,
+                  oldPageSize
+                });
+              else {
+                this.setState({
+                  pages: Math.ceil(this.state.total / size),
+                  pageSize: size,
+                  oldPageSize
+                });
+              }
+              this.setState({ change: "pageSize" });
+            }}
+          />
+        )}
         {this.state.deleteAllClicked && (
           <DeleteAlert
             message={messages.deleteSelected}
@@ -947,7 +986,6 @@ class Annotations extends React.Component {
             pid={this.props.pid}
             clearTreeData={this.props.clearTreeData}
             clearTreeExpand={this.props.clearTreeExpand}
-
           />
         )}
         {this.state.downloadClicked && (
