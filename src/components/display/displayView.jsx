@@ -836,15 +836,10 @@ class DisplayView extends Component {
   };
 
   measuremementModified = (event, action) => {
-    console.log("action", event);
     this.setDirtyFlag();
     // considering fusion, other viewports may need update so refresh all of them
     // TODO: may look at a flag of fusion 
-    const { detail } = event;
-    if (detail === "brush") {
-      console.log("in brush");
-      this.refreshAllViewports();
-    }
+    this.refreshAllViewports();
   };
 
   handleShapes = () => {

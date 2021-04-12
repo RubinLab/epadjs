@@ -17,11 +17,13 @@ class FuseSelector extends Component {
         }
         this.synchronizers = [];
         this.defaultCtOptions = {
+            name: "CT",
             opacity: 1.0,
             viewport: { colormap: "gray" },
             visibile: true
         };
         this.defaultPetOptions = {
+            name: "PET",
             opacity: 0.7,
             viewport: { colormap: "hotIron" },
             visibile: true
@@ -34,15 +36,45 @@ class FuseSelector extends Component {
         if (elements.length != 2)
             return false;
         //
+        let modalities = {};
         elements.forEach(({ element }, i) => {
             const modality = this.getModality(element);
-            if (modality)
-                this.setState({ [modality]: i });//set the state with port index
+            if (modality) {
+                modalities[modality] = i;//set the state with port index
+            }
             else return false;
         })
+        this.setState({ ...modalities }, () => {
+            const ctElement = this.getCtElement();
+            const layers = cornerstone.getLayers(ctElement);
+            let ctLayerId, petLayerId;
+            if (ctElement && layers.length) {
+                if (layers[0].options.name === "CT") {
+                    ctLayerId = layers[0].layerId;
+                    petLayerId = layers[1].layerId;
+                }
+                else {
+                    petLayerId = layers[0].layerId;
+                    ctLayerId = layers[1].layerId;
+                }
+                this.setState({ isFused: true, ctLayerId, petLayerId }, () => {
+                    const { name } = cornerstone.getActiveLayer(ctElement).options;
+                    let evt = {}
+                    if (name === "CT")
+                        evt.target = { selectedIndex: 0, value: ctLayerId };
+                    else
+                        evt.target = { selectedIndex: 1, value: petLayerId };
+                    this.handleLayerChange(evt);
+                });
+            }
+        });
     }
 
     getModality = (element) => {
+        // if image has already layers it should be the CT 
+        // if not handle it returns the active layers modality that causes a problem
+        if (cornerstone.getLayers(element).length)
+            return "CT";
         const image = cornerstone.getImage(element);
         const seriesModule = cornerstone.metaData.get("generalSeriesModule", image.imageId) || {};
         const modality = seriesModule.modality;
@@ -60,6 +92,7 @@ class FuseSelector extends Component {
             window.addEventListener("newImage", this.newImage);
 
             this.fuse(petElement, ctElement);
+            this.teleportAnnotations();
             this.setState({ isFused: true });
             this.addSynchronizers();
         }
@@ -98,8 +131,10 @@ class FuseSelector extends Component {
         let segMod = cornerstoneTools.getModule("segmentation");
         console.log("series", segMod.state.series);
         const petSeg = segMod.state.series[petImage];
-        console.log("petSre", petSeg);
-        segMod.state.series = { ...segMod.state.series, [ctImage]: petSeg };
+        if (petSeg) {
+            console.log("petSre", petSeg);
+            segMod.state.series = { ...segMod.state.series, [ctImage]: petSeg };
+        }
         console.log("cornerstonetool", cornerstoneTools);
         this.updateView();
     }
