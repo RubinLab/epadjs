@@ -203,6 +203,7 @@ class DisplayView extends Component {
     // const element = document.getElementById("petViewport");
     // console.log("element is", cornerstone);
     // cornerstone.enable(element);
+    console.log("cornerstone tools", cornerstoneTools);
   }
 
   async componentDidUpdate(prevProps, prevState) {
@@ -835,7 +836,15 @@ class DisplayView extends Component {
   };
 
   measuremementModified = (event, action) => {
+    console.log("action", event);
     this.setDirtyFlag();
+    // considering fusion, other viewports may need update so refresh all of them
+    // TODO: may look at a flag of fusion 
+    const { detail } = event;
+    if (detail === "brush") {
+      console.log("in brush");
+      this.refreshAllViewports();
+    }
   };
 
   handleShapes = () => {
@@ -916,6 +925,7 @@ class DisplayView extends Component {
 
     if (!hasSegmentation && detail === "brush") {
       this.setState({ hasSegmentation: true });
+      this.refreshAllViewports();
     }
     this.setDirtyFlag();
     this.setState({ showAimEditor: true, selectedAim: undefined });
@@ -1209,6 +1219,9 @@ class DisplayView extends Component {
         arrayBuffer,
         cornerstone.metaData
       );
+
+      console.log("label map buffer is", labelmapBuffer);
+      console.log("segments on Frame is", segmentsOnFrame);
 
       const { setters, getters } = cornerstoneTools.getModule("segmentation");
 

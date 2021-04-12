@@ -79,21 +79,48 @@ class FuseSelector extends Component {
         const petElement = cornerstone.getEnabledElements()[PT].element;
         const ctElement = cornerstone.getEnabledElements()[CT].element;
         if (newImageElement === ctElement) this.fuse(petElement, ctElement);
+        else if (newImageElement === petElement) this.teleportAnnotations();
     };
 
-    fuse = (petElement, ctElement) => {
-        const { ctOptions, petOptions } = this.getOptions();
-        cornerstone.purgeLayers(ctElement);
-        const petImage = cornerstone.getImage(petElement);
-        const ctImage = cornerstone.getImage(ctElement);
+    teleportAnnotations = () => {
+        const petElement = this.getPetElement();
+        const ctElement = this.getCtElement();
 
-        const ctLayerId = cornerstone.addLayer(ctElement, ctImage, ctOptions);
-        const petLayerId = cornerstone.addLayer(ctElement, petImage, petOptions);
-        cornerstone.updateImage(ctElement);
-        if (this.state.selectedLayer === "PET")
-            cornerstone.setActiveLayer(ctElement, petLayerId);
-        else cornerstone.setActiveLayer(ctElement, ctLayerId);
-        this.setState({ ctLayerId, petLayerId });
+        const stackToolState = cornerstoneTools.getToolState(ctElement, "stack");
+        const petStackToolState = cornerstoneTools.getToolState(petElement, "stack");
+
+        const ctImageIds = stackToolState.data[0].imageIds;
+        const petImageIds = petStackToolState.data[0].imageIds;
+
+        const ctImage = ctImageIds[0];
+        const petImage = petImageIds[0];
+
+        let segMod = cornerstoneTools.getModule("segmentation");
+        console.log("series", segMod.state.series);
+        const petSeg = segMod.state.series[petImage];
+        console.log("petSre", petSeg);
+        segMod.state.series = { ...segMod.state.series, [ctImage]: petSeg };
+        console.log("cornerstonetool", cornerstoneTools);
+        this.updateView();
+    }
+
+    fuse = (petElement, ctElement) => {
+        try {
+            const { ctOptions, petOptions } = this.getOptions();
+            cornerstone.purgeLayers(ctElement);
+            const petImage = cornerstone.getImage(petElement);
+            const ctImage = cornerstone.getImage(ctElement);
+
+            const ctLayerId = cornerstone.addLayer(ctElement, ctImage, ctOptions);
+            const petLayerId = cornerstone.addLayer(ctElement, petImage, petOptions);
+            cornerstone.updateImage(ctElement);
+            if (this.state.selectedLayer === "PET")
+                cornerstone.setActiveLayer(ctElement, petLayerId);
+            else cornerstone.setActiveLayer(ctElement, ctLayerId);
+            this.setState({ ctLayerId, petLayerId });
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     unfuse = (ctElement) => {
@@ -206,6 +233,11 @@ class FuseSelector extends Component {
     getCtElement = () => {
         const { CT } = this.state;
         return cornerstone.getEnabledElements()[CT].element;
+    }
+
+    getPetElement = () => {
+        const { PT } = this.state;
+        return cornerstone.getEnabledElements()[PT].element;
     }
 
     handleColormapChange = (event) => {

@@ -449,44 +449,44 @@ class AimEditor extends Component {
   };
 
   createAimSegmentation = async (answers) => {
-    try {
-      const activeLabelMapIndex = this.getActiveLabelMapIndex();
+    // try {
+    const activeLabelMapIndex = this.getActiveLabelMapIndex();
 
-      const {
-        segBlob,
-        segStats,
-        imageIdx,
-        image,
-      } = await this.createSegmentation3D(activeLabelMapIndex);
+    const {
+      segBlob,
+      segStats,
+      imageIdx,
+      image,
+    } = await this.createSegmentation3D(activeLabelMapIndex);
 
-      // praper the seed data and create aim
-      const seedData = getAimImageData(image);
-      this.addSemanticAnswersToSeedData(seedData, answers);
-      this.addUserToSeedData(seedData);
-      const aim = new Aim(
-        seedData,
-        enumAimType.imageAnnotation,
-        this.updatedAimId,
-        this.state.trackingUId
-      );
+    // praper the seed data and create aim
+    const seedData = getAimImageData(image);
+    this.addSemanticAnswersToSeedData(seedData, answers);
+    this.addUserToSeedData(seedData);
+    const aim = new Aim(
+      seedData,
+      enumAimType.imageAnnotation,
+      this.updatedAimId,
+      this.state.trackingUId
+    );
 
-      let dataset = await this.getDatasetFromBlob(segBlob);
-      // set segmentation series description with the aim name
-      dataset.SeriesDescription = answers.name.value;
+    let dataset = await this.getDatasetFromBlob(segBlob);
+    // set segmentation series description with the aim name
+    dataset.SeriesDescription = answers.name.value;
 
-      // if update segmentation Uid should be same as the previous one
+    // if update segmentation Uid should be same as the previous one
 
-      // fill the segmentation related aim parts
-      const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
-      const segId = this.addSegmentationToAim(aim, segEntityData, segStats);
+    // fill the segmentation related aim parts
+    const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
+    const segId = this.addSegmentationToAim(aim, segEntityData, segStats);
 
-      // create the modified blob
-      const segmentationBlob = dcmjs.data.datasetToBlob(dataset);
+    // create the modified blob
+    const segmentationBlob = dcmjs.data.datasetToBlob(dataset);
 
-      return { aim, segmentationBlob, segId };
-    } catch (error) {
-      throw new Error("Error creating segmentation", error);
-    }
+    return { aim, segmentationBlob, segId };
+    // } catch (error) {
+    //   throw new Error("Error creating segmentation", error);
+    // }
   };
 
   createAimMarkups = (aim, markupsToSave) => {
@@ -1005,13 +1005,32 @@ class AimEditor extends Component {
       };
   };
 
+  getElementsActiveLayerImageIds = (element) => {
+    // Check if there are layers
+    const activeLayer = cornerstone.getActiveLayer(element);
+    if (!activeLayer) {
+      const stackToolState = cornerstoneTools.getToolState(element, "stack");
+      return stackToolState.data[0].imageIds;
+    }
+    // If there are multiple layers (fused image) return active layer's corres
+    // corresponding imageIds
+    const activeLayerImageId = activeLayer.image.imageId;
+    const enabledElements = cornerstone.getEnabledElements();
+    for (let i = 0; i < enabledElements.length; i++) {
+      const { element } = enabledElements[i];
+      const stackToolState = cornerstoneTools.getToolState(element, "stack");
+      if (stackToolState.data[0].imageIds.includes(activeLayerImageId))
+        return stackToolState.data[0].imageIds;
+    }
+
+  }
+
   createSegmentation3D = async (labelmapIndex) => {
     // following is to know the image index which has the first segment
     let firstSegImageIndex;
 
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
-    const stackToolState = cornerstoneTools.getToolState(element, "stack");
-    const imageIds = stackToolState.data[0].imageIds;
+    const imageIds = this.getElementsActiveLayerImageIds(element);
     let imagePromises = [];
     for (let i = 0; i < imageIds.length; i++) {
       imagePromises.push(cornerstone.loadImage(imageIds[i]));
