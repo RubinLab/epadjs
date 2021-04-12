@@ -565,6 +565,12 @@ class App extends Component {
       localStorage.setItem('treeData', JSON.stringify({}));
       this.clearTreeExpand();
     }
+    const oldPid = prevProps.location.pathname.split('/').pop();
+    const newPid = this.props.location.pathname.split('/').pop();
+
+    if (oldPid !== newPid) {
+      this.setState({ pid: newPid });
+    }
   };
 
   completeAutorization = apiUrl => {

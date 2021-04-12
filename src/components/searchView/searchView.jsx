@@ -411,7 +411,7 @@ class SearchView extends Component {
       // this.props.clearTreeData();
       console.log(' -----> deleted');
       localStorage.setItem('treeData', JSON.stringify({}));
-      props.clearTreeExpand();
+      this.props.clearTreeExpand();
     }
   };
 
@@ -915,9 +915,9 @@ class SearchView extends Component {
       console.log('Sucessfully copied!');
       localStorage.setItem('treeData', JSON.stringify({}));
       this.setState({ showProjects: false });
+      this.props.clearTreeExpand()
       this.props.dispatch(clearSelection());
       this.props.history.push(`/search/${id}`);
-      this.clearTreeExpand()
 
     } catch (err) {
       console.log(err);
