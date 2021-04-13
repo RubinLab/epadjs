@@ -449,11 +449,28 @@ class TrackTab extends React.Component {
       {
         id: "status",
         Header: "status",
-        accessor: "status",
+        //accessor: "status",
         sortable: true,
         resizable: true,
         minWidth: 60,
         minResizeWidth: 20,
+        Cell: (data) => {
+          if (data.original.status === "error") {
+            return (
+              <div style={{ color: "#ff9999" }}>{data.original.status}</div>
+            );
+          } else if (data.original.status === "running") {
+            return (
+              <div style={{ color: "#00cc99" }}>{data.original.status}</div>
+            );
+          } else if (data.original.status === "waiting") {
+            return (
+              <div style={{ color: "#e6e600" }}>{data.original.status}</div>
+            );
+          } else {
+            return <div>{data.original.status}</div>;
+          }
+        },
       },
       {
         id: "starttime",
@@ -654,6 +671,10 @@ class TrackTab extends React.Component {
     e.preventDefault();
     e.stopPropagation();
   };
+  logClickHandler = (e) => {
+    e.stopPropagation();
+  };
+
   render() {
     return (
       <div>
@@ -743,6 +764,9 @@ class TrackTab extends React.Component {
               </div>
               <div>
                 <textarea
+                  onClick={this.logClickHandler}
+                  onMouseDown={this.logClickHandler}
+                  onMouseMove={this.logClickHandler}
                   className="pluginLogTextArea"
                   value={this.state.containerLogData}
                   rows={15}
