@@ -567,8 +567,9 @@ class App extends Component {
     }
     const oldPid = prevProps.location.pathname.split('/').pop();
     const newPid = this.props.location.pathname.split('/').pop();
+    const route = this.props.location.pathname.split('/')[1];
 
-    if (oldPid !== newPid) {
+    if (oldPid !== newPid && route === 'search') {
       this.setState({ pid: newPid });
     }
   };
