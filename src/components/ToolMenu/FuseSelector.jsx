@@ -44,6 +44,8 @@ class FuseSelector extends Component {
             }
             else return false;
         })
+        const { CT, PT } = modalities;
+        if (CT === undefined || PT === undefined) return;
         this.setState({ ...modalities }, () => {
             const ctElement = this.getCtElement();
             const layers = cornerstone.getLayers(ctElement);
@@ -87,14 +89,16 @@ class FuseSelector extends Component {
         const { isFused, CT, PT } = this.state;
         const petElement = cornerstone.getEnabledElements()[PT].element;
         const ctElement = cornerstone.getEnabledElements()[CT].element;
+        if (!ctElement || !petElement) return;
 
         if (!isFused) {
             window.addEventListener("newImage", this.newImage);
 
-            this.fuse(petElement, ctElement);
-            this.teleportAnnotations();
-            this.setState({ isFused: true });
-            this.addSynchronizers();
+            if (this.fuse(petElement, ctElement)) {
+                this.teleportAnnotations();
+                this.setState({ isFused: true });
+                this.addSynchronizers();
+            }
         }
         else {
             window.removeEventListener("newImage", this.newImage);
@@ -107,15 +111,22 @@ class FuseSelector extends Component {
     // If CT viewport has a new image (because viewport are synced PET will also scroll to 
     // corresponding image) fuse it with the new image on PET
     newImage = (event) => {
-        const newImageElement = event.detail.element;
-        const { PT, CT } = this.state;
-        const petElement = cornerstone.getEnabledElements()[PT].element;
-        const ctElement = cornerstone.getEnabledElements()[CT].element;
-        if (newImageElement === ctElement) this.fuse(petElement, ctElement);
-        else if (newImageElement === petElement) this.teleportAnnotations();
+        try {
+            const newImageElement = event.detail.element;
+            const { PT, CT } = this.state;
+            const petElement = cornerstone.getEnabledElements()[PT]?.element;
+            const ctElement = cornerstone.getEnabledElements()[CT]?.element;
+            if (ctElement && petElement) {
+                if (newImageElement === ctElement) this.fuse(petElement, ctElement);
+                else if (newImageElement === petElement) this.teleportAnnotations();
+            }
+        } catch (error) {
+            this.props.onClose();
+            console.error(error);
+        }
     };
 
-    teleportAnnotations = () => {
+    teleportAnnotations = (unfuse = false) => {
         const petElement = this.getPetElement();
         const ctElement = this.getCtElement();
 
@@ -129,33 +140,31 @@ class FuseSelector extends Component {
         const petImage = petImageIds[0];
 
         let segMod = cornerstoneTools.getModule("segmentation");
-        console.log("series", segMod.state.series);
         const petSeg = segMod.state.series[petImage];
-        if (petSeg) {
-            console.log("petSre", petSeg);
+        if (petSeg && !unfuse) {
             segMod.state.series = { ...segMod.state.series, [ctImage]: petSeg };
         }
-        console.log("cornerstonetool", cornerstoneTools);
+        else {
+            delete segMod.state.series.ctImage; //its unfuse and delete the seg from pet
+        }
         this.updateView();
     }
 
     fuse = (petElement, ctElement) => {
-        try {
-            const { ctOptions, petOptions } = this.getOptions();
-            cornerstone.purgeLayers(ctElement);
-            const petImage = cornerstone.getImage(petElement);
-            const ctImage = cornerstone.getImage(ctElement);
-
-            const ctLayerId = cornerstone.addLayer(ctElement, ctImage, ctOptions);
-            const petLayerId = cornerstone.addLayer(ctElement, petImage, petOptions);
-            cornerstone.updateImage(ctElement);
-            if (this.state.selectedLayer === "PET")
-                cornerstone.setActiveLayer(ctElement, petLayerId);
-            else cornerstone.setActiveLayer(ctElement, ctLayerId);
-            this.setState({ ctLayerId, petLayerId });
-        } catch (error) {
-            console.error(error);
-        }
+        const { ctOptions, petOptions } = this.getOptions();
+        cornerstone.purgeLayers(ctElement);
+        const petImage = cornerstone.getImage(petElement);
+        const ctImage = cornerstone.getImage(ctElement);
+        if (!ctImage || !petImage)
+            return false;
+        const ctLayerId = cornerstone.addLayer(ctElement, ctImage, ctOptions);
+        const petLayerId = cornerstone.addLayer(ctElement, petImage, petOptions);
+        cornerstone.updateImage(ctElement);
+        if (this.state.selectedLayer === "PET")
+            cornerstone.setActiveLayer(ctElement, petLayerId);
+        else cornerstone.setActiveLayer(ctElement, ctLayerId);
+        this.setState({ ctLayerId, petLayerId });
+        return true;
     };
 
     unfuse = (ctElement) => {
@@ -163,6 +172,7 @@ class FuseSelector extends Component {
         cornerstone.setActiveLayer(ctElement, this.state.ctLayerId);
         cornerstone.purgeLayers(ctElement);
         this.removeSynchronizers();
+        this.teleportAnnotations(true);
         this.props.onClose();
     };
 
@@ -262,17 +272,18 @@ class FuseSelector extends Component {
 
     getActiveLayer = () => {
         const ctElement = this.getCtElement();
-        return cornerstone.getActiveLayer(ctElement);
+        if (ctElement)
+            return cornerstone.getActiveLayer(ctElement);
     }
 
     getCtElement = () => {
         const { CT } = this.state;
-        return cornerstone.getEnabledElements()[CT].element;
+        return cornerstone.getEnabledElements()[CT]?.element;
     }
 
     getPetElement = () => {
         const { PT } = this.state;
-        return cornerstone.getEnabledElements()[PT].element;
+        return cornerstone.getEnabledElements()[PT]?.element;
     }
 
     handleColormapChange = (event) => {
@@ -302,7 +313,7 @@ class FuseSelector extends Component {
                     <hr />
                     {isFused && (<div className="layers">
                         <label htmlFor="layers">Active Layer</label>
-                        <select className="opt-select" name={"layers"} value={this.getActiveLayer().layerId} onChange={this.handleLayerChange}>
+                        <select className="opt-select" name={"layers"} value={this.getActiveLayer()?.layerId} onChange={this.handleLayerChange}>
                             <option value={ctLayerId}>CT</option>
                             <option value={petLayerId}>PET</option>
                         </select>

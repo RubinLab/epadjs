@@ -203,7 +203,6 @@ class DisplayView extends Component {
     // const element = document.getElementById("petViewport");
     // console.log("element is", cornerstone);
     // cornerstone.enable(element);
-    console.log("cornerstone tools", cornerstoneTools);
   }
 
   async componentDidUpdate(prevProps, prevState) {
@@ -1214,9 +1213,6 @@ class DisplayView extends Component {
         arrayBuffer,
         cornerstone.metaData
       );
-
-      console.log("label map buffer is", labelmapBuffer);
-      console.log("segments on Frame is", segmentsOnFrame);
 
       const { setters, getters } = cornerstoneTools.getModule("segmentation");
 
