@@ -452,44 +452,44 @@ class AimEditor extends Component {
 
   createAimSegmentation = async (answers) => {
     let aimName = answers.name.value;
-    try {
-      const activeLabelMapIndex = this.getActiveLabelMapIndex();
+    // try {
+    const activeLabelMapIndex = this.getActiveLabelMapIndex();
 
-      const {
-        segBlob,
-        segStats,
-        imageIdx,
-        image,
-      } = await this.createSegmentation3D(activeLabelMapIndex, aimName);
+    const {
+      segBlob,
+      segStats,
+      imageIdx,
+      image,
+    } = await this.createSegmentation3D(activeLabelMapIndex, aimName);
 
-      // praper the seed data and create aim
-      const seedData = getAimImageData(image);
-      this.addSemanticAnswersToSeedData(seedData, answers);
-      this.addUserToSeedData(seedData);
-      const aim = new Aim(
-        seedData,
-        enumAimType.imageAnnotation,
-        this.updatedAimId,
-        this.state.trackingUId
-      );
+    // praper the seed data and create aim
+    const seedData = getAimImageData(image);
+    this.addSemanticAnswersToSeedData(seedData, answers);
+    this.addUserToSeedData(seedData);
+    const aim = new Aim(
+      seedData,
+      enumAimType.imageAnnotation,
+      this.updatedAimId,
+      this.state.trackingUId
+    );
 
-      let dataset = await this.getDatasetFromBlob(segBlob);
-      // set segmentation series description with the aim name
-      dataset.SeriesDescription = answers.name.value;
+    let dataset = await this.getDatasetFromBlob(segBlob);
+    // set segmentation series description with the aim name
+    dataset.SeriesDescription = answers.name.value;
 
-      // if update segmentation Uid should be same as the previous one
+    // if update segmentation Uid should be same as the previous one
 
-      // fill the segmentation related aim parts
-      const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
-      const segId = this.addSegmentationToAim(aim, segEntityData, segStats);
+    // fill the segmentation related aim parts
+    const segEntityData = this.getSegmentationEntityData(dataset, imageIdx);
+    const segId = this.addSegmentationToAim(aim, segEntityData, segStats);
 
-      // create the modified blob
-      const segmentationBlob = dcmjs.data.datasetToBlob(dataset);
+    // create the modified blob
+    const segmentationBlob = dcmjs.data.datasetToBlob(dataset);
 
-      return { aim, segmentationBlob, segId };
-    } catch (error) {
-      throw new Error("Error creating segmentation", error);
-    }
+    return { aim, segmentationBlob, segId };
+    // } catch (error) {
+    //   throw new Error("Error creating segmentation", error);
+    // }
   };
 
   createAimMarkups = (aim, markupsToSave) => {
@@ -1032,33 +1032,28 @@ class AimEditor extends Component {
     const labelmap3D = labelmaps3D[labelmapIndex];
     const labelmaps2D = labelmap3D.labelmaps2D;
 
-    // Leave the seg metadata intact if its an updated
-    // if (!this.state.isUpdate) {
     for (let i = 0; i < labelmaps2D.length; i++) {
       if (!labelmaps2D[i]) {
         continue;
       }
-
       // Following is to store the image index in Aim that has the first segment
       if (!firstSegImageIndex) firstSegImageIndex = i;
 
-      const segmentsOnLabelmap = labelmaps2D[i].segmentsOnLabelmap;
-      segmentsOnLabelmap.forEach((segmentIndex) => {
-        // CSCHECK::Original was as below but it wasn't adding metadata since 3Dbrush is already 
-        // adding metadata
-        // if (segmentIndex !== 0 && !labelmap3D.metadata[segmentIndex]) {
-        if (segmentIndex !== 0) {
-          const mD = this.generateMockMetadata(
-            segmentIndex, aimName
-          );
-          labelmap3D.metadata[segmentIndex] = this.generateMockMetadata(
-            segmentIndex, aimName
-          );
-        }
-      });
+      // Leave the seg metadata intact if its an updated
+      if (!this.state.isUpdate) {
+        const segmentsOnLabelmap = labelmaps2D[i].segmentsOnLabelmap;
+        segmentsOnLabelmap.forEach((segmentIndex) => {
+          // CSCHECK::Original was as below but it wasn't adding metadata since 3Dbrush is already 
+          // adding metadata
+          // if (segmentIndex !== 0 && !labelmap3D.metadata[segmentIndex]) {
+          if (segmentIndex !== 0) {
+            labelmap3D.metadata[segmentIndex] = this.generateMockMetadata(
+              segmentIndex, aimName
+            );
+          }
+        });
+      }
     }
-    // }
-
     // }
     // For now we support single segments
 
