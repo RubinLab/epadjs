@@ -795,7 +795,7 @@ class AimEditor extends Component {
   };
 
   addSegmentationToAim = (aim, segEntityData, segStats) => {
-    const segId = aim.createSegmentationEntity(segEntityData);
+    const segId = aim.createSegmentationEntity(segEntityData).root;
 
     const { volume, min, max, mean, stdDev } = segStats;
 
