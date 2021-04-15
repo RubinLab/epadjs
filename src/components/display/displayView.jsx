@@ -158,26 +158,9 @@ class DisplayView extends Component {
       redirect: this.props.series.length < 1 ? true : false,
       containerHeight: 0,
       tokenRefresh: null,
+      activeTool: undefined
     };
   }
-
-  checkTokenExpire = async () => {
-    if (this.props.keycloak.isTokenExpired(5)) {
-      window.alert("Are you still there?");
-      await this.updateToken(this.props.keycloak, 5);
-    }
-  };
-
-  updateToken = async () => {
-    try {
-      clearInterval(this.state.tokenRefresh);
-      await refreshToken(this.props.keycloak, 5);
-      const tokenRefresh = setInterval(this.checkTokenExpire, 500);
-      this.setState({ tokenRefresh });
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   componentDidMount() {
     const { series, onSwitchView } = this.props;
@@ -196,6 +179,7 @@ class DisplayView extends Component {
     window.addEventListener("jumpToAimImage", this.jumpToAimImage);
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
+    window.addEventListener('keydown', this.handleKeyPressed);
     if (series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
@@ -236,6 +220,7 @@ class DisplayView extends Component {
     else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
       this.renderAims();
     }
+    this.handleActiveTool();
   }
 
   componentWillUnmount() {
@@ -246,7 +231,24 @@ class DisplayView extends Component {
     window.removeEventListener("editAim", this.editAimHandler);
     window.removeEventListener("deleteAim", this.deleteAimHandler);
     window.removeEventListener("resize", this.setSubComponentHeights);
+    window.removeEventListener('keydown', this.handleKeyPressed);
     clearInterval(this.state.tokenRefresh)
+  }
+
+  handleKeyPressed = (event) => {
+    if (event.key === "Escape") {
+      const evnt = new CustomEvent("escPressed", {
+        cancelable: true,
+      });
+      window.dispatchEvent(evnt);
+    }
+  }
+
+  // Sets the activeTool state getting it from session storage
+  handleActiveTool = () => {
+    const activeTool = sessionStorage.getItem("activeTool");
+    if (activeTool && activeTool !== this.state.activeTool)
+      this.setState({ activeTool });
   }
 
   jumpToAims = () => {
@@ -260,6 +262,24 @@ class DisplayView extends Component {
       }
     });
     this.setState({ data: newData });
+  };
+
+  checkTokenExpire = async () => {
+    if (this.props.keycloak.isTokenExpired(5)) {
+      window.alert("Are you still there?");
+      await this.updateToken(this.props.keycloak, 5);
+    }
+  };
+
+  updateToken = async () => {
+    try {
+      clearInterval(this.state.tokenRefresh);
+      await refreshToken(this.props.keycloak, 5);
+      const tokenRefresh = setInterval(this.checkTokenExpire, 500);
+      this.setState({ tokenRefresh });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   setSubComponentHeights = e => {
@@ -298,6 +318,7 @@ class DisplayView extends Component {
   editAimHandler = (event) => {
     const { aimID, seriesUID } = event.detail;
     const { aimList, activePort } = this.props;
+    const { showAimEditor, selectedAim } = this.state;
 
     if (aimList[seriesUID][aimID]) {
       const aimJson = aimList[seriesUID][aimID].json;
@@ -305,8 +326,21 @@ class DisplayView extends Component {
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimID;
 
-      // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
+      // check if is already editing an aim
+      if (showAimEditor && (selectedAim !== aimJson)) {
+        // temporal fix for aimEiditor form fields not setting dirty flag
+        alert("You should close the Aim Editor before starting to edit this aim.");
+        return;
+        let message = this.prepWarningMessage(
+          selectedAim.name.value,
+          aimJson.name.value
+        );
+        const shouldContinue = this.closeAimEditor(true, message);
+        if (!shouldContinue)
+          return;
+      }
 
+      // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
       const element = this.getActiveElement();
       if (this.hasSegmentation(aimJson)) {
         this.setState({ hasSegmentation: true });
@@ -314,29 +348,16 @@ class DisplayView extends Component {
         const labelMapIndexOfAim = labelMaps[aimID];
         this.setActiveLabelMapIndex(labelMapIndexOfAim, element);
       }
-      // } else {
-      //   this.setActiveLabelMapIndex(0, element);
-      //   console.log("Aim json has not segmentation so settin to ", aimJson, 0);
-      // }
-
-      // check if is already editing an aim
-      if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
-        let message = "";
-        if (this.state.selectedAim) {
-          message = this.prepWarningMessage(
-            this.state.selectedAim.name.value,
-            aimJson.name.value
-          );
-        }
-      }
 
       //The following dispatched is a wrongly named method. it's dispatched to set the selected
       //AimId in the store!!!!!
+      this.props.dispatch(jumpToAim(seriesUID, aimID, activePort));
 
-      this.setState({ showAimEditor: true, selectedAim: aimJson });
+      this.setState({ showAimEditor: true, selectedAim: aimJson }, () => {
+        setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
+        this.refreshAllViewports();
+      });
     }
-    // this.setSerieActiveLabelMap(aimID);
-    // this.openAimEditor(aimID, seriesUID);
   };
 
   toggleAnnotations = event => {
@@ -578,8 +599,6 @@ class DisplayView extends Component {
   };
 
   openAimEditor = (aimID, seriesUID) => {
-    console.trace();
-
     const { aimList } = this.props;
     if (Object.entries(aimList).length !== 0) {
       const aimJson = aimList[seriesUID][aimID].json;
@@ -769,7 +788,7 @@ class DisplayView extends Component {
   measurementRemoved = (event) => {
     const serie = this.getActiveSerie();
     const { aimId } = event.detail.measurementData;
-    if (this.isLastShapeInAim(aimId)) {
+    if (aimId && this.isLastShapeInAim(aimId)) {
       const shouldDeleteAim = window.confirm("This is the last markup in Aim. Would yo like to delete the Aim file as well?");
       if (shouldDeleteAim) {
         this.deleteAim(aimId, serie);
@@ -863,25 +882,12 @@ class DisplayView extends Component {
     } //Eraser might have already delete the aim}
     const { element, data } = ancestorEvent;
 
-    setMarkupsOfAimActive(aimId);//set the selected markups color to yellow
-    this.refreshAllViewports();
-
     if (aimList[seriesUID][aimId]) {
       const aimJson = aimList[seriesUID][aimId].json;
       const markupTypes = this.getMarkupTypesForAim(aimId);
       aimJson["markupType"] = [...markupTypes];
       aimJson["aimId"] = aimId;
 
-      // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
-      if (this.hasSegmentation(aimJson)) {
-        this.setState({ hasSegmentation: true });
-        const { labelMaps } = this.state.seriesLabelMaps[activePort];
-        const labelMapIndexOfAim = labelMaps[aimId];
-        this.setActiveLabelMapIndex(
-          labelMapIndexOfAim,
-          this.getActiveElement()
-        );
-      }
       // check if is already editing an aim
       if (this.state.showAimEditor && this.state.selectedAim !== aimJson) {
         let message = "";
@@ -900,6 +906,20 @@ class DisplayView extends Component {
           return;
         }
       }
+
+      // if we are clciking on an markup and it's aim has segmentation, set the activeLabelMapIndex accordingly
+      if (this.hasSegmentation(aimJson)) {
+        this.setState({ hasSegmentation: true });
+        const { labelMaps } = this.state.seriesLabelMaps[activePort];
+        const labelMapIndexOfAim = labelMaps[aimId];
+        this.setActiveLabelMapIndex(
+          labelMapIndexOfAim,
+          this.getActiveElement()
+        );
+      }
+
+      setMarkupsOfAimActive(aimId);//set the selected markups color to yellow
+      this.refreshAllViewports();
 
       //The following dispatched is a wrongly named method. it's dispatched to set the selected
       //AimId in the store!!!!!
@@ -1436,8 +1456,13 @@ class DisplayView extends Component {
   };
 
   closeAimEditor = (isCancel, message = "") => {
+    const { dirty } = this.state;
+    if (dirty) {
+      const unsavedData = this.checkUnsavedData(isCancel, message);
+      if (!unsavedData) return;
+    }
     // if aim editor has been cancelled ask to user
-    if (this.state.dirty && !this.checkUnsavedData(isCancel, message)) return;
+    // if (this.state.dirty && !this.checkUnsavedData(isCancel, message)) return;
     this.setState({
       showAimEditor: false,
       selectedAim: undefined,
@@ -1453,9 +1478,11 @@ class DisplayView extends Component {
 
   clearSculptState = () => {
     const { tools } = cornerstoneTools.store.state;
+    const evt = {};
+    const selectSculptCursor = false;
     for (let i = 0; i < tools.length; i++) {
       if (tools[i].name === "FreehandRoiSculptor") {
-        tools[i]._deselectAllTools();
+        tools[i]._deselectAllTools(evt, selectSculptCursor);
         return;
       }
     }
@@ -1569,30 +1596,31 @@ class DisplayView extends Component {
   };
 
   render() {
-    const { series } = this.props;
+    const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
+    const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
     // if (this.state.redirect) return <Redirect to="/search" />;
-    return !Object.entries(this.props.series).length ? (
+    return !Object.entries(series).length ? (
       <Redirect to="/search" />
     ) : (
       <React.Fragment>
         <RightsideBar
-          showAimEditor={this.state.showAimEditor}
-          selectedAim={this.state.selectedAim}
+          showAimEditor={showAimEditor}
+          selectedAim={selectedAim}
           onCancel={this.closeAimEditor}
-          hasSegmentation={this.state.hasSegmentation}
-          activeLabelMapIndex={this.state.activeLabelMapIndex}
-          updateProgress={this.props.updateProgress}
-          updateTreeDataOnSave={this.props.updateTreeDataOnSave}
+          hasSegmentation={hasSegmentation}
+          activeLabelMapIndex={activeLabelMapIndex}
+          updateProgress={updateProgress}
+          updateTreeDataOnSave={updateTreeDataOnSave}
           setAimDirty={this.setDirtyFlag}
         >
           <ToolMenu />
           {!this.state.isLoading &&
-            Object.entries(this.props.series).length &&
-            this.state.data.map((data, i) => (
+            Object.entries(series).length &&
+            data.map((data, i) => (
               <div
                 className={
                   "viewportContainer" +
-                  (this.props.activePort == i ? " selected" : "")
+                  (activePort == i ? " selected" : "")
                 }
                 key={i}
                 id={"viewportContainer" + i}
@@ -1687,6 +1715,7 @@ class DisplayView extends Component {
                   setViewportActive={() => this.setActive(i)}
                   isStackPrefetchEnabled={true}
                   style={{ height: "calc(100% - 26px)" }}
+                  activeTool={activeTool}
                 />
               </div>
             ))}

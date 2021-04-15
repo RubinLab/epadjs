@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
-import ReactTable from "react-table";
+import ReactTable from "react-table-v6";
 import { toast } from "react-toastify";
 import {
   saveDefaultParameter,
@@ -58,7 +58,7 @@ class ParametersWindow extends React.Component {
     }
   };
 
-  handleFormElementChange = e => {
+  handleFormElementChange = (e) => {
     const plElements = { ...this.state.parameterFormElements };
     if (e.currentTarget.name != "enabled") {
       plElements[e.currentTarget.name] = e.currentTarget.value;
@@ -94,36 +94,53 @@ class ParametersWindow extends React.Component {
     this.setState({ addnew: false });
   };
   saveParameters = async () => {
-    this.setState({ addnew: false });
     console.log(
       "save paramters after filled : ",
       this.state.parameterFormElements
     );
-    const saveParameterResponse = await saveDefaultParameter(
-      this.state.parameterFormElements
-    );
-    if (saveParameterResponse.status === 200) {
-      console.log("parameters saved succesfully");
-      this.props.notifyParameterParent(
-        this.state.parameterFormElements.plugindbid,
-        "addnew"
-      );
-      this.setState({ update: true });
+    console.log("parameter id :", this.state.parameterFormElements.paramid);
+    if (
+      this.state.parameterFormElements.paramid == "" ||
+      this.state.parameterFormElements.format == ""
+    ) {
+      alert("Please select the required fields");
     } else {
-      toast.error("error happened while saving parameter", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-      //  alert("an error occourred while saving parameters");
+      if (
+        (this.state.parameterFormElements.format == "InputFolder" ||
+          this.state.parameterFormElements.format == "OutputFolder") &&
+        this.state.parameterFormElements.default_value == ""
+      ) {
+        alert("Please assign a default value");
+      } else {
+        this.setState({ addnew: false });
+        const saveParameterResponse = await saveDefaultParameter(
+          this.state.parameterFormElements
+        );
+
+        if (saveParameterResponse.status === 200) {
+          console.log("parameters saved succesfully");
+          this.props.notifyParameterParent(
+            this.state.parameterFormElements.plugindbid,
+            "addnew"
+          );
+          this.setState({ update: true });
+        } else {
+          toast.error("error happened while saving parameter", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+          //  alert("an error occourred while saving parameters");
+        }
+      }
     }
     //this.props.onSave();
   };
   dock;
-  deleteOneParameter = async parameterdbid => {
+  deleteOneParameter = async (parameterdbid) => {
     console.log("delete one called", parameterdbid);
     const deleteParameterResponse = await deleteOneDefaultParameter(
       parameterdbid
@@ -149,7 +166,7 @@ class ParametersWindow extends React.Component {
     }
   };
 
-  handleShowEditParameterWindow = rowInfo => {
+  handleShowEditParameterWindow = (rowInfo) => {
     console.log("row click :", rowInfo);
     const tempParameterFormElements = {
       plugindbid: this.state.parameterFormElements.plugindbid,
@@ -274,7 +291,7 @@ class ParametersWindow extends React.Component {
       },
       {
         Header: "",
-        Cell: data => {
+        Cell: (data) => {
           //const rowdata = original.row.checkbox;
           return (
             <div onClick={() => this.deleteOneParameter(data.original.id)}>
@@ -285,7 +302,7 @@ class ParametersWindow extends React.Component {
       },
     ];
   };
-  handleonMouseDown = e => {
+  handleonMouseDown = (e) => {
     e.stopPropagation();
 
     console.log("The link was clicked.");
@@ -424,7 +441,7 @@ class ParametersWindow extends React.Component {
                     </select>
                     <h5 className="parameter_window_modal_label">Name</h5>
                     <input
-                      onMouseDown={e => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
                       className="add-project__modal--input"
                       name="name"
                       type="text"
@@ -445,7 +462,7 @@ class ParametersWindow extends React.Component {
                     </select>
                     <h5 className="parameter_window_modal_label">prefix</h5>
                     <input
-                      onMouseDown={e => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
                       className="add-project__modal--input"
                       name="prefix"
                       type="text"
@@ -457,7 +474,7 @@ class ParametersWindow extends React.Component {
                       input binding
                     </h5>
                     <input
-                      onMouseDown={e => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
                       className="add-project__modal--input"
                       name="inputBinding"
                       type="text"
@@ -469,7 +486,7 @@ class ParametersWindow extends React.Component {
                       Default value
                     </h5>
                     <input
-                      onMouseDown={e => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
                       className="add-project__modal--input"
                       name="default_value"
                       type="text"
@@ -491,7 +508,7 @@ class ParametersWindow extends React.Component {
                       Description
                     </h5>
                     <input
-                      onMouseDown={e => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
                       className="add-project__modal--input"
                       name="description"
                       type="text"

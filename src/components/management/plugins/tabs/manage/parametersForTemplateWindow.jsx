@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
-import ReactTable from "react-table";
+import ReactTable from "react-table-v6";
 import { toast } from "react-toastify";
 import {
   saveTemplateParameter,

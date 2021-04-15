@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import ReactTable from "react-table";
+import ReactTable from "react-table-v6";
 import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
 import { FaRegTrashAlt, FaProjectDiagram } from "react-icons/fa";

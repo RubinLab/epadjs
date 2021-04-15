@@ -104,7 +104,9 @@ class AimEditor extends Component {
     window.addEventListener("checkShapes", this.checkShapes);
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
+    if ((prevProps?.aimId !== undefined) && (prevProps.aimId.aimId !== this.props?.aimId.aimId))
+      this.semanticAnswers.loadAimJson(this.props.aimId);
     const { isSegUploaded } = this.props;
     const { uploadingSegId } = this.state;
     if (isSegUploaded[uploadingSegId]) {
@@ -394,46 +396,46 @@ class AimEditor extends Component {
     const { hasSegmentation } = this.props;
     const markupsToSave = this.getNewMarkups();
     const templateType = this.semanticAnswers.getSelectedTemplateType();
-    // try {
-    if (hasSegmentation) {
-      // if (!this.checkSegmentationFrames()) return;
-      // segmentation and markups
-      this.createAimSegmentation(answers).then(
-        ({ aim, segmentationBlob, segId }) => {
-          // also add the markups to aim if there is any
-          if (Object.entries(markupsToSave).length !== 0)
-            this.createAimMarkups(aim, markupsToSave);
-          this.saveAim(aim, templateType, segmentationBlob, segId);
-        }
-      );
-    } else if (Object.entries(markupsToSave).length !== 0) {
-      // markups without segmentation
-      const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
-      const aim = new Aim(
-        seedData,
-        enumAimType.imageAnnotation,
-        this.updatedAimId,
-        this.state.trackingUId
-      );
-      this.createAimMarkups(aim, markupsToSave);
-      this.saveAim(aim, templateType);
-    } else {
-      //Non markup image annotation
-      const { activePort } = this.props;
-      const { element } = cornerstone.getEnabledElements()[activePort];
-      const image = cornerstone.getImage(element);
-      const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
-      const aim = new Aim(
-        seedData,
-        enumAimType.imageAnnotation,
-        this.updatedAimId,
-        this.state.trackingUId
-      );
-      this.saveAim(aim, templateType);
+    try {
+      if (hasSegmentation) {
+        // if (!this.checkSegmentationFrames()) return;
+        // segmentation and markups
+        this.createAimSegmentation(answers).then(
+          ({ aim, segmentationBlob, segId }) => {
+            // also add the markups to aim if there is any
+            if (Object.entries(markupsToSave).length !== 0)
+              this.createAimMarkups(aim, markupsToSave);
+            this.saveAim(aim, templateType, segmentationBlob, segId);
+          }
+        );
+      } else if (Object.entries(markupsToSave).length !== 0) {
+        // markups without segmentation
+        const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
+        const aim = new Aim(
+          seedData,
+          enumAimType.imageAnnotation,
+          this.updatedAimId,
+          this.state.trackingUId
+        );
+        this.createAimMarkups(aim, markupsToSave);
+        this.saveAim(aim, templateType);
+      } else {
+        //Non markup image annotation
+        const { activePort } = this.props;
+        const { element } = cornerstone.getEnabledElements()[activePort];
+        const image = cornerstone.getImage(element);
+        const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
+        const aim = new Aim(
+          seedData,
+          enumAimType.imageAnnotation,
+          this.updatedAimId,
+          this.state.trackingUId
+        );
+        this.saveAim(aim, templateType);
+      }
+    } catch (error) {
+      throw new Error("Error creating aim", error);
     }
-    // } catch (error) {
-    //   throw new Error("Error creating aim", error);
-    // }
   };
 
   getActiveElement = () => {
@@ -449,6 +451,7 @@ class AimEditor extends Component {
   };
 
   createAimSegmentation = async (answers) => {
+    let aimName = answers.name.value;
     // try {
     const activeLabelMapIndex = this.getActiveLabelMapIndex();
 
@@ -457,7 +460,7 @@ class AimEditor extends Component {
       segStats,
       imageIdx,
       image,
-    } = await this.createSegmentation3D(activeLabelMapIndex);
+    } = await this.createSegmentation3D(activeLabelMapIndex, aimName);
 
     // praper the seed data and create aim
     const seedData = getAimImageData(image);
@@ -792,7 +795,7 @@ class AimEditor extends Component {
   };
 
   addSegmentationToAim = (aim, segEntityData, segStats) => {
-    const segId = aim.createSegmentationEntity(segEntityData);
+    const segId = aim.createSegmentationEntity(segEntityData).root;
 
     const { volume, min, max, mean, stdDev } = segStats;
 
@@ -1025,7 +1028,7 @@ class AimEditor extends Component {
 
   }
 
-  createSegmentation3D = async (labelmapIndex) => {
+  createSegmentation3D = async (labelmapIndex, aimName) => {
     // following is to know the image index which has the first segment
     let firstSegImageIndex;
 
@@ -1040,7 +1043,6 @@ class AimEditor extends Component {
     if (!labelmaps3D) {
       return;
     }
-
     // for (
     //   let labelmapIndex = 0;
     //   labelmapIndex < labelmaps3D.length;
@@ -1053,18 +1055,23 @@ class AimEditor extends Component {
       if (!labelmaps2D[i]) {
         continue;
       }
-
       // Following is to store the image index in Aim that has the first segment
       if (!firstSegImageIndex) firstSegImageIndex = i;
 
-      const segmentsOnLabelmap = labelmaps2D[i].segmentsOnLabelmap;
-      segmentsOnLabelmap.forEach((segmentIndex) => {
-        if (segmentIndex !== 0 && !labelmap3D.metadata[segmentIndex]) {
-          labelmap3D.metadata[segmentIndex] = this.generateMockMetadata(
-            segmentIndex
-          );
-        }
-      });
+      // Leave the seg metadata intact if its an updated
+      if (!this.state.isUpdate) {
+        const segmentsOnLabelmap = labelmaps2D[i].segmentsOnLabelmap;
+        segmentsOnLabelmap.forEach((segmentIndex) => {
+          // CSCHECK::Original was as below but it wasn't adding metadata since 3Dbrush is already 
+          // adding metadata
+          // if (segmentIndex !== 0 && !labelmap3D.metadata[segmentIndex]) {
+          if (segmentIndex !== 0) {
+            labelmap3D.metadata[segmentIndex] = this.generateMockMetadata(
+              segmentIndex, aimName
+            );
+          }
+        });
+      }
     }
     // }
     // For now we support single segments
@@ -1141,7 +1148,7 @@ class AimEditor extends Component {
     return promise;
   };
 
-  generateMockMetadata = (segmentIndex) => {
+  generateMockMetadata = (segmentIndex, aimName) => {
     // TODO -> Use colors from the cornerstoneTools LUT.
     const RecommendedDisplayCIELabValue = dcmjs.data.Colors.rgb2DICOMLAB([
       1,
@@ -1155,7 +1162,8 @@ class AimEditor extends Component {
         CodeMeaning: "Tissue",
       },
       SegmentNumber: segmentIndex.toString(),
-      SegmentLabel: "Tissue " + segmentIndex.toString(),
+      // SegmentLabel: "Tissue " + segmentIndex.toString(),
+      SegmentLabel: aimName || "Tissue " + segmentIndex.toString(),
       SegmentAlgorithmType: "SEMIAUTOMATIC",
       SegmentAlgorithmName: "ePAD",
       RecommendedDisplayCIELabValue,

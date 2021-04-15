@@ -455,6 +455,7 @@ const Report = props => {
           {props.report !== 'Waterfall' && (
             <div style={{ marginLeft: '0.5rem' }}>
               <select
+                onMouseDown={e => e.stopPropagation()}
                 onChange={e => {
                   const userVal = e.target.value;
                   getReportTable(data[userVal]);

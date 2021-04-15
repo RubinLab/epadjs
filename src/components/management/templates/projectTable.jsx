@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "react-bootstrap";
-import Table from "react-table";
+import Table from "react-table-v6";
 import { FaTimes } from "react-icons/fa";
 
 const projectTable = ({
