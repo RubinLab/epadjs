@@ -5,7 +5,7 @@ import isToolActiveForElement from "./../../store/isToolActiveForElement.js";
 import { getModule } from "./../../store/index.js";
 import {
   getDiffBetweenPixelData,
-  triggerLabelmapModifiedEvent
+  triggerLabelmapModifiedEvent,
 } from "../../util/segmentation";
 
 // Const { configuration, getters, setters } = getModule("segmentation");
@@ -126,7 +126,7 @@ class BaseBrushTool extends BaseTool {
       labelmap2D,
       labelmap3D,
       currentImageIdIndex,
-      activeLabelmapIndex
+      activeLabelmapIndex,
     } = getters.labelmap2D(element);
 
     const shouldErase =
@@ -137,7 +137,7 @@ class BaseBrushTool extends BaseTool {
       labelmap3D,
       currentImageIdIndex,
       activeLabelmapIndex,
-      shouldErase
+      shouldErase,
     };
 
     if (configuration.storeHistory) {
@@ -146,7 +146,7 @@ class BaseBrushTool extends BaseTool {
       this.paintEventData.previousPixelData = previousPixelData;
     }
     const evnt = new CustomEvent("markupCreated", {
-      detail: "brush"
+      detail: "brush",
     });
 
     window.dispatchEvent(evnt);
@@ -188,7 +188,7 @@ class BaseBrushTool extends BaseTool {
       const newPixelData = labelmap2D.pixelData;
       const operation = {
         imageIdIndex: currentImageIdIndex,
-        diff: getDiffBetweenPixelData(previousPixelData, newPixelData)
+        diff: getDiffBetweenPixelData(previousPixelData, newPixelData),
       };
 
       setters.pushState(this.element, [operation]);

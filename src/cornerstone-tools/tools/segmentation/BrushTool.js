@@ -61,6 +61,13 @@ export default class BrushTool extends BaseBrushTool {
       shouldErase
     );
 
+    // Dispatch this event to syn fusion Viewports for EPAD
+    const evnt = new CustomEvent("cornerstonetoolsmeasurementmodified", {
+      detail: "brush",
+    });
+
+    element.dispatchEvent(evnt);
+
     external.cornerstone.updateImage(evt.detail.element);
   }
 }

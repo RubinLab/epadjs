@@ -184,6 +184,9 @@ class DisplayView extends Component {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
     };
+    // const element = document.getElementById("petViewport");
+    // console.log("element is", cornerstone);
+    // cornerstone.enable(element);
   }
 
   async componentDidUpdate(prevProps, prevState) {
@@ -852,6 +855,9 @@ class DisplayView extends Component {
 
   measuremementModified = (event, action) => {
     this.setDirtyFlag();
+    // considering fusion, other viewports may need update so refresh all of them
+    // TODO: may look at a flag of fusion 
+    this.refreshAllViewports();
   };
 
   handleShapes = () => {
@@ -933,6 +939,7 @@ class DisplayView extends Component {
 
     if (!hasSegmentation && detail === "brush") {
       this.setState({ hasSegmentation: true });
+      this.refreshAllViewports();
     }
     this.setDirtyFlag();
     this.setState({ showAimEditor: true, selectedAim: undefined });
@@ -1537,9 +1544,13 @@ class DisplayView extends Component {
     tempData[activePort].stack = data[0];
     Object.assign(tempData[activePort].stack, data[0]);
     // set the state to preserve the imageId
-    this.setState({ data: tempData });
-    // dispatch to write the newImageId to store
-    this.props.dispatch(updateImageId(imageId));
+    // this.setState({ data: tempData });
+    // // dispatch to write the newImageId to store
+    // this.props.dispatch(updateImageId(imageId));
+    const yaw = event.detail;
+    window.dispatchEvent(
+      new CustomEvent("newImage", { detail: yaw })
+    );
   };
 
   onAnnotate = () => {

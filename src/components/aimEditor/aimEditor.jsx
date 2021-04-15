@@ -1008,13 +1008,32 @@ class AimEditor extends Component {
       };
   };
 
+  getElementsActiveLayerImageIds = (element) => {
+    // Check if there are layers
+    const activeLayer = cornerstone.getActiveLayer(element);
+    if (!activeLayer) {
+      const stackToolState = cornerstoneTools.getToolState(element, "stack");
+      return stackToolState.data[0].imageIds;
+    }
+    // If there are multiple layers (fused image) return active layer's corres
+    // corresponding imageIds
+    const activeLayerImageId = activeLayer.image.imageId;
+    const enabledElements = cornerstone.getEnabledElements();
+    for (let i = 0; i < enabledElements.length; i++) {
+      const { element } = enabledElements[i];
+      const stackToolState = cornerstoneTools.getToolState(element, "stack");
+      if (stackToolState.data[0].imageIds.includes(activeLayerImageId))
+        return stackToolState.data[0].imageIds;
+    }
+
+  }
+
   createSegmentation3D = async (labelmapIndex, aimName) => {
     // following is to know the image index which has the first segment
     let firstSegImageIndex;
 
     const { element } = cornerstone.getEnabledElements()[this.props.activePort];
-    const stackToolState = cornerstoneTools.getToolState(element, "stack");
-    const imageIds = stackToolState.data[0].imageIds;
+    const imageIds = this.getElementsActiveLayerImageIds(element);
     let imagePromises = [];
     for (let i = 0; i < imageIds.length; i++) {
       imagePromises.push(cornerstone.loadImage(imageIds[i]));
