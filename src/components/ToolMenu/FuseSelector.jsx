@@ -311,6 +311,7 @@ class FuseSelector extends Component {
                 <div className="fuse-selector">
                     <span>Fusion Menu</span>
                     <hr />
+                    {!isFused && (<b>Note:This is a beta functionality and may have bugs!</b>)}
                     {isFused && (<div className="layers">
                         <label htmlFor="layers">Active Layer</label>
                         <select className="opt-select" name={"layers"} value={this.getActiveLayer()?.layerId} onChange={this.handleLayerChange}>
