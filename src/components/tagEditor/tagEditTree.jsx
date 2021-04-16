@@ -1,6 +1,6 @@
 // import React, { Component } from "react";
-// import ReactTable from "react-table";
-// // import treeTableHOC from "react-table/lib/hoc/treeTable";
+// import ReactTable from "react-table-v6";
+// // import treeTableHOC from "react-table-v6/lib/hoc/treeTable";
 // import TagEditStudy from "./tagEditStudy";
 // // const TreeTable = treeTableHOC(ReactTable);
 

@@ -15,7 +15,7 @@ export function styleEightDigitDate(rawDate) {
 }
 
 export function generateUid() {
-  let uid = "2.25." + Math.floor(1 + Math.random() * 9);
+  let uid = '2.25.' + Math.floor(1 + Math.random() * 9);
   for (let index = 0; index < 38; index++) {
     uid = uid + Math.floor(Math.random() * 10);
   }
@@ -55,9 +55,9 @@ export function isEmpty(obj) {
 
 // from http://stackoverflow.com/questions/1349404/generate-a-string-of-5-random-characters-in-javascript
 const makeRandomString = length => {
-  var text = "";
+  var text = '';
   var possible =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
   for (var i = 0; i < length; i++)
     text += possible.charAt(Math.floor(Math.random() * possible.length));
@@ -65,39 +65,39 @@ const makeRandomString = length => {
 };
 
 const pad = (num, size) => {
-  var s = num + "";
-  while (s.length < size) s = "0" + s;
+  var s = num + '';
+  while (s.length < size) s = '0' + s;
   return s;
 };
 
 // https://github.com/cornerstonejs/dicomParser/blob/master/examples/simpleDeIdentify/index.html
 export const makeDeIdentifiedValue = (length, vr) => {
-  if (vr === "LO" || vr === "SH" || vr === "PN") {
+  if (vr === 'LO' || vr === 'SH' || vr === 'PN') {
     if (!length) length = 8;
     return makeRandomString(length);
-  } else if (vr === "DA") {
+  } else if (vr === 'DA') {
     var now = new Date();
     return (
       now.getYear() + 1900 + pad(now.getMonth() + 1, 2) + pad(now.getDate(), 2)
     );
-  } else if (vr === "TM") {
+  } else if (vr === 'TM') {
     var now = new Date();
     return (
       pad(now.getHours(), 2) +
       pad(now.getMinutes(), 2) +
       pad(now.getSeconds(), 2)
     );
-  } else if (vr === "UI") {
+  } else if (vr === 'UI') {
     return newUID();
   }
-  console.log("unknown VR:" + vr);
+  console.log('unknown VR:' + vr);
 };
 
 const newUID = () => {
   //dcmjs
   //uid=DicomMetaDictionary.uid();
   //static uid() method from https://raw.githubusercontent.com/pieper/dcmjs/3fd2dbaa0e487db05cb48b1cc26a480ca5b1146a/src/DicomMetaDictionary.js
-  let uid = "2.25." + Math.floor(1 + Math.random() * 9);
+  let uid = '2.25.' + Math.floor(1 + Math.random() * 9);
   for (let index = 0; index < 38; index++) {
     uid = uid + Math.floor(Math.random() * 10);
   }
@@ -107,7 +107,7 @@ const newUID = () => {
 export const clearCarets = string => {
   if (string) {
     for (let i = 0; i < string.length; i++) {
-      string = string.replace("^", " ");
+      string = string.replace('^', ' ');
     }
     return string;
   }
@@ -156,14 +156,14 @@ const createSeries = (data, requirements) => {
     SeriesInstanceUID,
     SeriesDescription,
     PatientID,
-    StudyInstanceUID,
+    StudyInstanceUID
   } = data;
   const result = {
     SeriesInstanceUID,
     SeriesDescription: clearCarets(SeriesDescription),
     PatientID,
     StudyInstanceUID,
-    imageCount: 1,
+    imageCount: 1
   };
   const missingTags = checkMissingTags(data, requirements);
   if (missingTags.length > 0) {
@@ -179,7 +179,7 @@ const createStudy = (data, requirements) => {
     StudyDescription,
     SeriesInstanceUID,
     SeriesDescription,
-    PatientID,
+    PatientID
   } = data;
   const result = {
     StudyInstanceUID,
@@ -190,9 +190,9 @@ const createStudy = (data, requirements) => {
         SeriesDescription: clearCarets(SeriesDescription),
         PatientID,
         StudyInstanceUID,
-        imageCount: 1,
-      },
-    },
+        imageCount: 1
+      }
+    }
   };
   const series = result.series[SeriesInstanceUID];
   const missingTags = checkMissingTags(data, requirements);
@@ -210,7 +210,7 @@ const createPatient = (data, requirements) => {
     StudyInstanceUID,
     StudyDescription,
     SeriesInstanceUID,
-    SeriesDescription,
+    SeriesDescription
   } = data;
 
   const result = {
@@ -226,11 +226,11 @@ const createPatient = (data, requirements) => {
             SeriesDescription: clearCarets(SeriesDescription),
             PatientID,
             StudyInstanceUID,
-            imageCount: 1,
-          },
-        },
-      },
-    },
+            imageCount: 1
+          }
+        }
+      }
+    }
   };
   const series = result.studies[StudyInstanceUID].series[SeriesInstanceUID];
   const missingTags = checkMissingTags(data, requirements);
@@ -252,7 +252,7 @@ export const extractTableData = (dataset, requirementsObj) => {
         StudyInstanceUID,
         StudyDescription,
         SeriesInstanceUID,
-        SeriesDescription,
+        SeriesDescription
       } = el;
       const missingTags = checkMissingTags(el, requirementsObj);
       result.push({
@@ -263,7 +263,7 @@ export const extractTableData = (dataset, requirementsObj) => {
         SeriesInstanceUID,
         SeriesDescription: clearCarets(SeriesDescription),
         missingTags,
-        data: el,
+        data: el
       });
     });
   }
@@ -293,3 +293,4 @@ export const checkIfSeriesOpen = (array, selectedUID, UIDlevel) => {
   });
   return { isOpen, index };
 };
+

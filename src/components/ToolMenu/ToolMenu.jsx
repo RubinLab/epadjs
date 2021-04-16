@@ -4,6 +4,8 @@ import MetaData from "../MetaData/MetaData";
 import SmartBrushMenu from "../SmartBrushMenu/SmartBrushMenu";
 import BrushSizeSelector from "./BrushSizeSelector";
 import { WindowLevel } from "../WindowLevel/WindowLevel";
+import ColormapSelector from "./ColormapSelector";
+import FuseSelector from "./FuseSelector";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import {
@@ -23,6 +25,8 @@ import {
   FaCut,
   FaCircle,
   FaMousePointer,
+  FaPalette,
+  FaObjectUngroup
 } from "react-icons/fa";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
@@ -112,6 +116,7 @@ class ToolMenu extends Component {
       showDrawing: false,
       showBrushMenu: false,
       showPresets: false,
+      showMetaData: false,
       playing: false,
       customBrush: {
         min: -1000,
@@ -123,6 +128,7 @@ class ToolMenu extends Component {
       showInterpolation: false,
       activeTool: "",
       activeToolIdx: 0,
+      fuse: false
     };
 
     this.imagingTools = [
@@ -133,9 +139,11 @@ class ToolMenu extends Component {
       { name: "Invert", icon: <FaAdjust />, tool: "Invert" },
       { name: "Reset", icon: <MdLoop />, tool: "Reset" },
       { name: "Pan", icon: <MdPanTool />, tool: "Pan" },
-      // { name: "SeriesData", icon: <FaListAlt />, tool: "MetaData" },
+      { name: "MetaData", icon: <FaListAlt />, tool: "MetaData" },
       { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate" },
       { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
+      { name: "Color", icon: <FaPalette />, tool: "colorLut" },
+      { name: "Fusion", icon: <FaObjectUngroup />, tool: "fuse" },
     ];
 
     this.markupTools = [
@@ -232,19 +240,30 @@ class ToolMenu extends Component {
     ];
   }
 
+  componentWillUnmount() {
+    sessionStorage.removeItem("activeTool");
+  }
+
   //TODO: instead of disabling all tools we can just disable the active tool
   disableAllTools = () => {
+    const { activeTool } = this.state;
+    if (activeTool === "FreehandRoiTool" || activeTool === "FreehandRoi3DTool") {
+      this.deselectFreehand();
+    }
+    this.setToolStateForAllElements(this.state.activeTool, "passive");
     this.setState({ activeToolIdx: 0 });
     this.setCursor("default");
-    Array.from(this.tools).forEach((tool) => {
-      this.setToolStateForAllElements(tool.name, "passive");
-      // const apiTool = cornerstoneTools[`${tool.name}Tool`];
-      // if (apiTool) {
-      //   cornerstoneTools.setToolPassive(tool.name);
-      // } else {
-      //   throw new Error(`Tool not found: ${tool.name}Tool`);
-      // }
-    });
+
+    // Array.from(this.tools).forEach((tool) => {
+    //   if (tool !== "FreehandRoiSculptor")
+    //     this.setToolStateForAllElements(tool.name, "passive");
+    //   // const apiTool = cornerstoneTools[`${tool.name}Tool`];
+    //   // if (apiTool) {
+    //   //   cornerstoneTools.setToolPassive(tool.name);
+    //   // } else {
+    //   //   throw new Error(`Tool not found: ${tool.name}Tool`);
+    //   // }
+    // });
   };
 
   setToolStateForAllElements = (toolName, state, mouseMask = 1) => {
@@ -263,7 +282,7 @@ class ToolMenu extends Component {
   //sets the selected tool active for all of the enabled elements
   setToolActive = (toolName, mouseMask = 1) => {
     cornerstoneTools.setToolActive(toolName, {
-      mouseButtonMask: [mouseMask],
+      mouseButtonMask: mouseMask,
     });
   };
 
@@ -282,7 +301,7 @@ class ToolMenu extends Component {
       this.reset();
       return;
     } else if (tool === "MetaData") {
-      this.toggleMetaData();
+      this.showMetaData();
       return;
       // } else if (index === 14) {
       //   this.setInterpolation(!this.state.interpolate);
@@ -307,12 +326,42 @@ class ToolMenu extends Component {
       this.setState({ showBrushSize: true, isHuGated: false, showSmartBrush: true });
     } else if (tool === "FreehandRoi3DTool") {
       this.setState({ showInterpolation: true });
+    } else if (tool === "colorLut") {
+      this.setState({ showColormap: true });
+      return;
+    } else if (tool === "fuse") {
+      this.setState({ showFuse: true });
+      return;
+      this.selectFreehand();
     }
+    else if (tool === "FreehandRoiTool") {
+      this.selectFreehand();
+    }
+
     this.disableAllTools();
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
       this.setToolStateForAllElements(tool, "active");
     });
+    sessionStorage.setItem("activeTool", tool);
   };
+
+  selectFreehand = () => {
+    window.addEventListener('escPressed', this.cancelPolygon);
+  }
+
+  deselectFreehand = () => {
+    window.removeEventListener('escPressed', this.cancelPolygon);
+  }
+
+  cancelPolygon = () => {
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    let tools = cornerstoneTools.store.state.tools;
+
+    tools = tools.filter(tool => tool.element === element && tool.mode === 'active');
+    tools = tools.filter(tool => (tool.name === "FreehandRoi3DTool"));
+    tools[0].cancelDrawing(element);
+  }
 
   getActiveImage = () => {
     const { activePort } = this.props;
@@ -350,9 +399,8 @@ class ToolMenu extends Component {
     cornerstone.reset(element);
   };
 
-  toggleMetaData = () => {
-    this.disableAllTools();
-    // this.state.activeElement.style.display = "block";
+  showMetaData = () => {
+    this.setState({ showMetaData: !this.state.showMetaData });
   };
 
   handleClip = () => {
@@ -368,9 +416,10 @@ class ToolMenu extends Component {
   };
 
   setCursor = (cursorStyle) => {
-    const { activePort } = this.props;
-    const { element } = cornerstone.getEnabledElements()[activePort];
-    element.style.cursor = cursorStyle;
+    const elements = cornerstone.getEnabledElements();
+    elements.forEach(({ element }) => {
+      element.style.cursor = cursorStyle;
+    })
   };
 
   closeBrushSize = () => {
@@ -384,6 +433,14 @@ class ToolMenu extends Component {
   showInterpolation = () => {
     this.setState({ showInterpolation: false });
   };
+
+  closeColormap = () => {
+    this.setState({ showColormap: false });
+  }
+
+  closeFuse = () => {
+    this.setState({ showFuse: false });
+  }
 
   render() {
     const { activeTool } = this.state;
@@ -404,7 +461,7 @@ class ToolMenu extends Component {
           );
         })}
 
-        <MetaData />
+        {this.state.showMetaData && (<MetaData onClose={this.showMetaData} />)}
         {/*<div
           id="angle"
           tabIndex="7"
@@ -690,7 +747,19 @@ class ToolMenu extends Component {
         {this.state.activeTool === "FreehandRoi3DTool" &&
           this.state.showInterpolation && (
             <Interpolation onClose={this.showInterpolation} />
-          )}
+          )
+        }
+        {this.state.showColormap && (
+          <ColormapSelector
+            activePort={this.props.activePort}
+            onClose={this.closeColormap}
+          />
+        )}
+        {this.state.showFuse && (
+          <FuseSelector
+            onClose={this.closeFuse}
+          />
+        )}
       </div>
     );
   }

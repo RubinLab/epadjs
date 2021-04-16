@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ReactTable from "react-table";
+import ReactTable from "react-table-v6";
 import { FaSortDown, FaSortUp } from "react-icons/fa";
 import find from "lodash/find";
 import "./flexView.css";

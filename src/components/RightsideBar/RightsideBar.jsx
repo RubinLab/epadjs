@@ -39,7 +39,9 @@ class Rightsidebar extends Component {
   };
 
   render() {
-    // const { activePort, openSeries } = this.props;
+    const { selectedAim } = this.props;
+    let aimEditorHeader;
+    selectedAim ? aimEditorHeader = "Aim Editor (Edit Mode)" : aimEditorHeader = "Aim Editor (Create Mode)"
     // const { projectID } = openSeries[activePort];
     return (
       <React.Fragment>
@@ -67,7 +69,7 @@ class Rightsidebar extends Component {
           </Collapsible> */}
           {this.props.showAimEditor && (
             <Collapsible
-              trigger={"Aim Editor"}
+              trigger={aimEditorHeader}
               open={true}
               transitionTime={100}
               triggerOpenedClassName={"test"}

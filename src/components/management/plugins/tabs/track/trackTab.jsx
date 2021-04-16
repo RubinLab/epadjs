@@ -1,8 +1,9 @@
 import React from "react";
-import ReactTable from "react-table";
+import ReactTable from "react-table-v6";
 import { connect } from "react-redux";
 import { Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
+import ReactTooltip from "react-tooltip";
 import {
   FaPlay,
   FaStop,
@@ -23,7 +24,6 @@ import {
 import Draggable from "react-draggable";
 import "./../../css/plugin.css";
 import "../../../menuStyle.css";
-
 
 class TrackTab extends React.Component {
   state = {
@@ -194,8 +194,6 @@ class TrackTab extends React.Component {
     }
   };
 
-
-
   handleGetContainerLog = async (dataOriginal) => {
     if (this.state.showContainerLog === true) {
       clearInterval(this.state.containerLoggingIntervalHandle);
@@ -206,7 +204,7 @@ class TrackTab extends React.Component {
     try {
       let containerlog = await getContainerLog(containerid);
       console.log("err stream", containerlog);
-      if (containerlog.data != '404') {
+      if (containerlog.data != "404") {
         this.setState({
           showContainerLog: true,
           containerLogData: containerlog.data,
@@ -230,10 +228,10 @@ class TrackTab extends React.Component {
         alert("Please start plugin first");
       }
     } catch (err) {
-      console.log('eror:', err);
+      console.log("eror:", err);
       alert("no log found for the container");
       return true;
-      // 
+      //
     }
   };
 
@@ -362,9 +360,10 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
-        Header: "container name",
-        width: 70,
-        minResizeWidth: 20,
+        id: "containername",
+        Header: "container",
+        minWidth: 110,
+        minResizeWidth: 50,
         Cell: (data) => {
           const queueId = data.original.id;
           return <div>epadplugin_{queueId}</div>;
@@ -373,9 +372,10 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
+        id: "plugin",
         Header: "plugin",
-        width: 50,
-        minResizeWidth: 20,
+        minWidth: 150,
+        minResizeWidth: 50,
         Cell: (data) => {
           const pluginName = data.original.plugin.name;
           return <div>{pluginName}</div>;
@@ -384,8 +384,9 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
+        id: "aims",
         Header: "aims",
-        width: 70,
+        minWidth: 70,
         minResizeWidth: 20,
         Cell: (data) => {
           const aims = data.original.aim_uid;
@@ -402,8 +403,9 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
+        id: "projects",
         Header: "project",
-        width: 70,
+        minWidth: 70,
         minResizeWidth: 20,
         Cell: (data) => {
           const projectName = data.original.project.name;
@@ -413,16 +415,18 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
-        Header: "params type",
+        id: "paramtype",
+        Header: "param type",
         accessor: "plugin_parametertype",
         sortable: true,
         resizable: true,
-        width: 200,
+        minWidth: 100,
         minResizeWidth: 20,
       },
       {
+        id: "runtimeparams",
         Header: "runtime params",
-        width: 100,
+        minWidth: 120,
         minResizeWidth: 20,
         Cell: (data) => {
           const paramsHtml = data.original.runtime_params;
@@ -443,16 +447,35 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
+        id: "status",
         Header: "status",
-        accessor: "status",
+        //accessor: "status",
         sortable: true,
         resizable: true,
-        width: 100,
+        minWidth: 60,
         minResizeWidth: 20,
+        Cell: (data) => {
+          if (data.original.status === "error") {
+            return (
+              <div style={{ color: "#ff9999" }}>{data.original.status}</div>
+            );
+          } else if (data.original.status === "running") {
+            return (
+              <div style={{ color: "#00cc99" }}>{data.original.status}</div>
+            );
+          } else if (data.original.status === "waiting") {
+            return (
+              <div style={{ color: "#e6e600" }}>{data.original.status}</div>
+            );
+          } else {
+            return <div>{data.original.status}</div>;
+          }
+        },
       },
       {
+        id: "starttime",
         Header: "starttime",
-        width: 200,
+        minWidth: 200,
         minResizeWidth: 20,
         Cell: (data) => {
           const processStartTime = new Date(data.original.starttime);
@@ -476,8 +499,9 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
+        id: "endtime",
         Header: "endtime",
-        width: 200,
+        minWidth: 200,
         minResizeWidth: 20,
         Cell: (data) => {
           const processEndTime = new Date(data.original.endtime);
@@ -502,7 +526,8 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
-        width: 300,
+        id: "opbuttons",
+        minWidth: 150,
         minResizeWidth: 20,
         Header: "",
         sortable: true,
@@ -521,7 +546,19 @@ class TrackTab extends React.Component {
                           this.handleGetContainerLog(data.original);
                         }}
                       >
-                        <FaEnvelopeOpenText className="menu-clickable" />
+                        <FaEnvelopeOpenText
+                          className="menu-clickable"
+                          data-tip
+                          data-for="log-icon"
+                        />
+                        <ReactTooltip
+                          id="log-icon"
+                          place="bottom"
+                          type="info"
+                          delayShow={1000}
+                        >
+                          <span>open plugin log</span>
+                        </ReactTooltip>
                       </button>
                     </td>
                     <td>
@@ -532,7 +569,19 @@ class TrackTab extends React.Component {
                           this.handleStartOne(data.original.id);
                         }}
                       >
-                        <FaPlay className="menu-clickable" />
+                        <FaPlay
+                          className="menu-clickable"
+                          data-tip
+                          data-for="play-icon"
+                        />
+                        <ReactTooltip
+                          id="play-icon"
+                          place="bottom"
+                          type="info"
+                          delayShow={1000}
+                        >
+                          <span>Start plugin</span>
+                        </ReactTooltip>
                       </button>
                     </td>
                     <td>
@@ -543,7 +592,19 @@ class TrackTab extends React.Component {
                           this.handleStopOne(data.original.id);
                         }}
                       >
-                        <FaStop className="menu-clickable" />
+                        <FaStop
+                          className="menu-clickable"
+                          data-tip
+                          data-for="stop-icon"
+                        />
+                        <ReactTooltip
+                          id="stop-icon"
+                          place="bottom"
+                          type="info"
+                          delayShow={1000}
+                        >
+                          <span>Stop plugin</span>
+                        </ReactTooltip>
                       </button>
                     </td>
                     <td>
@@ -555,7 +616,19 @@ class TrackTab extends React.Component {
                             this.handleDownloadresult(data.original);
                           }}
                         >
-                          <FaDownload className="menu-clickable" />
+                          <FaDownload
+                            className="menu-clickable"
+                            data-tip
+                            data-for="download-icon"
+                          />
+                          <ReactTooltip
+                            id="download-icon"
+                            place="left"
+                            type="info"
+                            delayShow={1000}
+                          >
+                            <span>download plugin results</span>
+                          </ReactTooltip>
                         </button>
                       </div>
                     </td>
@@ -568,7 +641,19 @@ class TrackTab extends React.Component {
                             this.deleteOneFromQueue(data.original.id)
                           }
                         >
-                          <FaTrash className="menu-clickable" />
+                          <FaTrash
+                            className="menu-clickable"
+                            data-tip
+                            data-for="delete-icon"
+                          />
+                          <ReactTooltip
+                            id="delete-icon"
+                            place="left"
+                            type="info"
+                            delayShow={1000}
+                          >
+                            <span>delete plugin instance</span>
+                          </ReactTooltip>
                         </button>
                       </div>
                     </td>
@@ -586,6 +671,10 @@ class TrackTab extends React.Component {
     e.preventDefault();
     e.stopPropagation();
   };
+  logClickHandler = (e) => {
+    e.stopPropagation();
+  };
+
   render() {
     return (
       <div>
@@ -675,6 +764,9 @@ class TrackTab extends React.Component {
               </div>
               <div>
                 <textarea
+                  onClick={this.logClickHandler}
+                  onMouseDown={this.logClickHandler}
+                  onMouseMove={this.logClickHandler}
                   className="pluginLogTextArea"
                   value={this.state.containerLogData}
                   rows={15}

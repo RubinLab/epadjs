@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import ReactTable from "react-table";
+import ReactTable from "react-table-v6";
 import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
 import { FaRegEye, FaEyeSlash, FaCommentsDollar } from "react-icons/fa";
@@ -33,7 +33,6 @@ import WarningModal from "../../common/warningModal";
 import "../menuStyle.css";
 import { getSeries } from "../../../services/seriesServices";
 import SelectSeriesModal from "../../annotationsList/selectSerieModal";
-
 
 const mode = sessionStorage.getItem("mode");
 
@@ -71,11 +70,14 @@ class Annotations extends React.Component {
     defaultPageSize: 10,
     pageSize: 10,
     page: 0,
+    oldPageSize: 10,
+    oldPage: 0,
     tableLoading: false,
     data: [],
     isSerieSelectionOpen: false,
     selectedStudy: [],
-    studyName: ''
+    studyName: "",
+    change: ""
   };
 
   downloadProjectAim = () => {
@@ -148,27 +150,48 @@ class Annotations extends React.Component {
   };
 
   populateDisplayRows = (list, pageSize, page) => {
-    let data = [];
+    const { oldPageSize, oldPage, change } = this.state;
 
-    const size = pageSize || this.state.pageSize;
-    const p = page >= 0 ? page : this.state.page;
-    const startIndex = size * p;
-    const endIndex = size * (p + 1);
-    if (list) {
-      list.forEach((el, i) => {
-        if (i >= startIndex && i < endIndex) data.push(el);
-      });
+    if (oldPage !== page || oldPageSize !== pageSize) {
+      let data = [];
+      const size = pageSize || this.state.pageSize;
+      const p = page >= 0 ? page : this.state.page;
+      let startIndex;
+      let endIndex;
+      if (change === "page") {
+        startIndex = size * p;
+        endIndex = size * (p + 1);
+      } else if (change === "pageSize") {
+        if (oldPageSize * p < size) {
+          // strt indx should be calculted from old page start index to new number
+          const adjustedPage = p - 1 >= 0 ? p - 1 : 0;
+          startIndex = size * adjustedPage;
+          endIndex = size * (adjustedPage + 1);
+          this.setState({ page: adjustedPage });
+        } else {
+          startIndex = size * p;
+          endIndex = size * (p + 1);
+        }
+      } else {
+        startIndex = size * p;
+        endIndex = size * (p + 1);
+      }
+      if (list) {
+        list.forEach((el, i) => {
+          if (i >= startIndex && i < endIndex) data.push(el);
+        });
+      }
+      return data;
     }
-    return data;
   };
 
   getAnnotationsData = async (projectID, bookmarkPassed, pageSize) => {
     try {
       const {
         data: { rows, total_rows, bookmark }
-      } = projectID
+      } = projectID && projectID !== 'all_aims'
         ? await getSummaryAnnotations(projectID, bookmarkPassed)
-        : await getAllAnnotations();
+        : await getAllAnnotations(bookmarkPassed);
 
       if (bookmarkPassed) {
         const pages = Math.ceil(total_rows / pageSize);
@@ -495,40 +518,40 @@ class Annotations extends React.Component {
       // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
       //check if there is enough space in the grid
       let isGridFull = openSeries.length === MAX_PORT;
-        //check if the serie is already open
-        if (
-          this.checkIfSerieOpen(selected.original, this.props.openSeries).isOpen
-        ) {
-          const { index } = this.checkIfSerieOpen(
-            selected.original,
-            this.props.openSeries
-          );
-          this.props.dispatch(changeActivePort(index));
-          this.props.dispatch(jumpToAim(seriesUID, aimID, index));
+      //check if the serie is already open
+      if (
+        this.checkIfSerieOpen(selected.original, this.props.openSeries).isOpen
+      ) {
+        const { index } = this.checkIfSerieOpen(
+          selected.original,
+          this.props.openSeries
+        );
+        this.props.dispatch(changeActivePort(index));
+        this.props.dispatch(jumpToAim(seriesUID, aimID, index));
+      } else {
+        if (isGridFull) {
+          this.props.dispatch(alertViewPortFull());
         } else {
-          if (isGridFull) {
-            this.props.dispatch(alertViewPortFull());
+          this.props.dispatch(addToGrid(selected.original, aimID));
+          this.props.dispatch(getSingleSerie(selected.original, aimID));
+          //if grid is NOT full check if patient data exists
+          if (!this.props.patients[patientID]) {
+            // this.props.dispatch(getWholeData(null, null, selected.original));
+            getWholeData(null, null, selected.original);
           } else {
-            this.props.dispatch(addToGrid(selected.original, aimID));
-            this.props.dispatch(getSingleSerie(selected.original, aimID));
-            //if grid is NOT full check if patient data exists
-            if (!this.props.patients[patientID]) {
-              // this.props.dispatch(getWholeData(null, null, selected.original));
-              getWholeData(null, null, selected.original);
-            } else {
-              this.props.dispatch(
-                updatePatient(
-                  "annotation",
-                  true,
-                  patientID,
-                  studyUID,
-                  seriesUID,
-                  aimID
-                )
-              );
-            }
+            this.props.dispatch(
+              updatePatient(
+                "annotation",
+                true,
+                patientID,
+                studyUID,
+                seriesUID,
+                aimID
+              )
+            );
           }
         }
+      }
     } catch (err) {
       console.error(err);
     }
@@ -585,14 +608,16 @@ class Annotations extends React.Component {
         resizable: false,
         style: { display: "flex", justifyContent: "center" },
         Cell: data => {
-
           return this.state.isAllAims ? (
             <FaEyeSlash />
           ) : (
             <Link className="open-link" to={"/display"}>
               <div
                 onClick={() => {
-                  if (data.original.seriesUID === "noseries" || !data.original.seriesUID) {
+                  if (
+                    data.original.seriesUID === "noseries" ||
+                    !data.original.seriesUID
+                  ) {
                     this.displaySeries(data.original);
                   } else {
                     this.openAnnotation(data);
@@ -752,8 +777,7 @@ class Annotations extends React.Component {
   fetchData = async atributes => {
     try {
       const { projectID, bookmark, annotations, total } = this.state;
-      const { page, pageSize } = atributes;
-      this.setState({ page, pageSize });
+      const { page, pageSize, oldPage, oldPageSize } = this.state;
       const pageNum = page + 1;
       if (
         total > annotations.length &&
@@ -769,8 +793,10 @@ class Annotations extends React.Component {
         const data = this.populateDisplayRows(rows, pageSize, page);
         this.setState({ data });
       } else {
-        const data = this.populateDisplayRows(annotations, pageSize, page);
-        this.setState({ data });
+        if (page !== oldPage || pageSize !== oldPageSize) {
+          const data = this.populateDisplayRows(annotations, pageSize, page);
+          this.setState({ data });
+        }
       }
     } catch (err) {
       console.error(err);
@@ -831,7 +857,7 @@ class Annotations extends React.Component {
         await this.setState({
           isSerieSelectionOpen: true,
           selectedStudy: [seriesArr],
-          studyName: selected.studyDescription,
+          studyName: selected.studyDescription
         });
       } else {
         //if there is enough room
@@ -862,7 +888,7 @@ class Annotations extends React.Component {
 
   closeSelectionModal = () => {
     this.setState(state => ({
-      isSerieSelectionOpen: !state.isSerieSelectionOpen,
+      isSerieSelectionOpen: !state.isSerieSelectionOpen
     }));
   };
 
@@ -899,27 +925,50 @@ class Annotations extends React.Component {
           pid={projectID}
           isAllAims={this.state.isAllAims}
         />
-        <ReactTable
-          NoDataComponent={() => null}
-          className="pro-table"
-          style={{ maxHeight: "40rem" }}
-          manual
-          data={rowsToDisplay}
-          columns={this.defineColumns()}
-          loading={tableLoading}
-          pages={pages}
-          page={page}
-          pageSizeOptions={[10, 20, 50, 100]}
-          pageSize={pageSize}
-          defaultPageSize={defaultPageSize}
-          onFetchData={this.fetchData}
-          showPageJump={false}
-          onPageSizeChange={size => {
-            if (filteredData && filteredData.length > 0)
-              this.setState({ pages: Math.ceil(filteredData.length / size) });
-            else this.setState({ pages: Math.ceil(this.state.total / size) });
-          }}
-        />
+        {this.state.data.length > 0 && (
+          <ReactTable
+            NoDataComponent={() => null}
+            className="pro-table"
+            style={{ maxHeight: "40rem" }}
+            manual
+            data={rowsToDisplay}
+            columns={this.defineColumns()}
+            loading={tableLoading}
+            pages={pages}
+            page={page}
+            pageSizeOptions={[10, 20, 50, 100]}
+            pageSize={pageSize}
+            defaultPageSize={defaultPageSize}
+            onFetchData={() => {
+              setTimeout(() => {
+                this.fetchData();
+              }, 10);
+            }}
+            // {this.fetchData}
+            onPageChange={page => {
+              const oldPage = this.state.page;
+              this.setState({ page, oldPage, change: "page" });
+            }}
+            showPageJump={false}
+            onPageSizeChange={size => {
+              const oldPageSize = this.state.pageSize;
+              if (filteredData && filteredData.length > 0)
+                this.setState({
+                  pages: Math.ceil(filteredData.length / size),
+                  pageSize: size,
+                  oldPageSize
+                });
+              else {
+                this.setState({
+                  pages: Math.ceil(this.state.total / size),
+                  pageSize: size,
+                  oldPageSize
+                });
+              }
+              this.setState({ change: "pageSize" });
+            }}
+          />
+        )}
         {this.state.deleteAllClicked && (
           <DeleteAlert
             message={messages.deleteSelected}
@@ -936,6 +985,7 @@ class Annotations extends React.Component {
             projectID={this.state.projectID}
             pid={this.props.pid}
             clearTreeData={this.props.clearTreeData}
+            clearTreeExpand={this.props.clearTreeExpand}
           />
         )}
         {this.state.downloadClicked && (

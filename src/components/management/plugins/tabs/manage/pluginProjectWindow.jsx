@@ -28,6 +28,9 @@ class PluginProjectWindow extends React.Component {
     let rows = [];
 
     this.props.allProjects.forEach((project) => {
+      console.log("projects : ", project.projectid);
+      if (project.projectid == "all" || project.projectid == "nonassigned")
+        return;
       rows.push(
         <tr key={project.id} className="edit-userRole__table--row">
           <td>
