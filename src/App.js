@@ -44,6 +44,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import RightsideBar from './components/RightsideBar/RightsideBar';
 import MinimizedReport from './components/searchView/MinimizedReport';
+import { AuthConsumer } from 'providers/authProvider';
 
 const messages = {
   noPatient: {
@@ -507,6 +508,7 @@ class App extends Component {
 
   async componentDidMount() {
     localStorage.setItem('treeData', JSON.stringify({}));
+    console.log('process.env.PUBLIC_URL', process.env.PUBLIC_URL);
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),
       fetch(`${process.env.PUBLIC_URL}/keycloak.json`)
@@ -567,32 +569,62 @@ class App extends Component {
     }
     const oldPid = prevProps.location.pathname.split('/').pop();
     const newPid = this.props.location.pathname.split('/').pop();
+    const route = this.props.location.pathname.split('/')[1];
 
-    if (oldPid !== newPid) {
+    if (oldPid !== newPid && route === 'search') {
       this.setState({ pid: newPid });
     }
   };
 
-  completeAutorization = apiUrl => {
+  completeAutorization = async apiUrl => {
     let getAuthUser = null;
 
     if (sessionStorage.getItem('authMode') !== 'external') {
-      const keycloak = Keycloak(
-        JSON.parse(sessionStorage.getItem('keycloakJson'))
-      );
-      getAuthUser = new Promise((resolve, reject) => {
-        keycloak
-          .init({ onLoad: 'login-required' })
-          .then(authenticated => {
-            keycloak
-              .loadUserInfo()
-              .then(userInfo => {
-                resolve({ userInfo, keycloak, authenticated });
-              })
-              .catch(err => reject(err));
-          })
-          .catch(err => reject(err));
-      });
+      console.log('this is here!!');
+      this.authService = new auth.AuthService();
+      let user;
+      const isAuthenticated = this.authService.isAuthenticated();
+      // console.log(
+      //   'this.authService.isAuthenticated',
+      //   this.authService.isAuthenticated()
+      // );
+
+      if (!isAuthenticated && sessionStorage.getItem('loggingIn') !== 'processing') {
+        console.log(' ---> in if ---');
+        sessionStorage.setItem('loggingIn', 'processing');
+        await this.authService.signinRedirect();
+        console.log(' ---> in if done---');
+      } else {
+        //   console.log(' ---> in else ---');
+        user = await this.authService.signinRedirectCallback();
+
+        console.log('user from callback', user);
+        sessionStorage.setItem('loggingIn', 'done');
+        this.setState({
+          user
+        });
+      }
+      // user = await this.authService.getUser();
+      // console.log('user got', user);
+      // this.setState({ authService: this.authService });
+      // console.log('this.authService', this.authService);
+
+      // const keycloak = Keycloak(
+      //   JSON.parse(sessionStorage.getItem('keycloakJson'))
+      // );
+      // getAuthUser = new Promise((resolve, reject) => {
+      //   keycloak
+      //     .init({ onLoad: 'login-required' })
+      //     .then(authenticated => {
+      //       keycloak
+      //         .loadUserInfo()
+      //         .then(userInfo => {
+      //           resolve({ userInfo, keycloak, authenticated });
+      //         })
+      //         .catch(err => reject(err));
+      //     })
+      //     .catch(err => reject(err));
+      // });
     } else {
       // authMode is external ask backend for user
       getAuthUser = new Promise((resolve, reject) => {
@@ -608,57 +640,57 @@ class App extends Component {
       });
     }
 
-    getAuthUser
-      .then(async result => {
-        try {
-          let user = {
-            user: result.userInfo.preferred_username || result.userInfo.email,
-            displayname: result.userInfo.given_name
-          };
-          await auth.login(user, null, result.keycloak);
-          this.setState({
-            keycloak: result.keycloak,
-            authenticated: result.authenticated,
-            id: result.userInfo.sub,
-            user
-          });
-          const {
-            email,
-            family_name,
-            given_name,
-            preferred_username
-          } = result.userInfo;
-          const username = preferred_username || email;
+    // getAuthUser
+    //   .then(async result => {
+    //     try {
+    //       let user = {
+    //         user: result.userInfo.preferred_username || result.userInfo.email,
+    //         displayname: result.userInfo.given_name
+    //       };
+    //       await auth.login(user, null, result.keycloak);
+    //       this.setState({
+    //         keycloak: result.keycloak,
+    //         authenticated: result.authenticated,
+    //         id: result.userInfo.sub,
+    //         user
+    //       });
+    //       const {
+    //         email,
+    //         family_name,
+    //         given_name,
+    //         preferred_username
+    //       } = result.userInfo;
+    //       const username = preferred_username || email;
 
-          let userData;
-          try {
-            userData = await getUser(username);
-            userData = userData.data;
-            this.setState({ admin: userData.admin });
-          } catch (err) {
-            console.error(err);
-          }
-          this.eventSource = new EventSourcePolyfill(
-            `${apiUrl}/notifications`,
-            result.keycloak.token
-              ? {
-                  headers: {
-                    authorization: `Bearer ${result.keycloak.token}`
-                  }
-                }
-              : {}
-          );
-          this.eventSource.addEventListener(
-            'message',
-            this.getMessageFromEventSrc
-          );
-        } catch (err) {
-          console.log('Error in user retrieval!', err);
-        }
-      })
-      .catch(err2 => {
-        console.log('Authentication failed!', err2);
-      });
+    //       let userData;
+    //       try {
+    //         userData = await getUser(username);
+    //         userData = userData.data;
+    //         this.setState({ admin: userData.admin });
+    //       } catch (err) {
+    //         console.error(err);
+    //       }
+    //       this.eventSource = new EventSourcePolyfill(
+    //         `${apiUrl}/notifications`,
+    //         result.keycloak.token
+    //           ? {
+    //               headers: {
+    //                 authorization: `Bearer ${result.keycloak.token}`
+    //               }
+    //             }
+    //           : {}
+    //       );
+    //       this.eventSource.addEventListener(
+    //         'message',
+    //         this.getMessageFromEventSrc
+    //       );
+    //     } catch (err) {
+    //       console.log('Error in user retrieval!', err);
+    //     }
+    //   })
+    //   .catch(err2 => {
+    //     console.log('Authentication failed!', err2);
+    //   });
   };
 
   getMessageFromEventSrc = res => {
@@ -965,6 +997,7 @@ class App extends Component {
     }
     return (
       <ErrorBoundary>
+        {/* <AuthConsumer> */}
         <Cornerstone />
         <ToastContainer />
         <NavBar
@@ -1032,7 +1065,12 @@ class App extends Component {
         {this.state.reportsCompArr}
         {this.state.minReportsArr}
         {!this.state.authenticated && mode !== 'lite' && (
-          <Route path="/login" component={LoginForm} />
+          <Route
+            path="/login"
+            render={props => (
+              <LoginForm {...props} authService={this.state.authService} />
+            )}
+          />
         )}
         {this.state.authenticated && mode !== 'lite' && (
           <div style={{ display: 'inline', width: '100%', height: '100%' }}>
@@ -1227,6 +1265,7 @@ class App extends Component {
         {/* {this.props.selection && (
           <ManagementItemModal selection={this.props.selection} />
         )} */}
+        {/* </AuthConsumer> */}
       </ErrorBoundary>
     );
   }
