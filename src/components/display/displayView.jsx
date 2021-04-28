@@ -1546,7 +1546,7 @@ class DisplayView extends Component {
     // set the state to preserve the imageId
     // this.setState({ data: tempData });
     // // dispatch to write the newImageId to store
-    // this.props.dispatch(updateImageId(imageId));
+    this.props.dispatch(updateImageId(imageId));
     const yaw = event.detail;
     window.dispatchEvent(
       new CustomEvent("newImage", { detail: yaw })
