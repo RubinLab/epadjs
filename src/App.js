@@ -657,6 +657,9 @@ class App extends Component {
             } = source;
             const username = preferred_username || email;
 
+            sessionStorage.setItem('username', username);
+            sessionStorage.setItem('displayName', username);
+
             let userData;
             try {
               userData = await getUser(username);

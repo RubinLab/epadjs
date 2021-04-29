@@ -12,6 +12,7 @@ const mode = sessionStorage.getItem('mode');
 // we need the keycloak object to be able to use update token
 
 // let keycloak = null;
+let authService = null;
 
 export function refreshToken(keycloak, minValidity) {
   return new Promise((resolve, reject) => {
@@ -52,11 +53,33 @@ export function getCurrentUser() {
   return sessionStorage.getItem('username');
 }
 
+// export async function getAuthHeader() {
+//   if (this.keycloak) {
+//     try {
+//       await refreshToken(this.keycloak, 5);
+//       const header = `Bearer ${this.keycloak.token}`;
+//       if (header) {
+//         cornerstoneWADOImageLoader.configure({
+//           beforeSend: function(xhr) {
+//             xhr.setRequestHeader('Authorization', header);
+//           }
+//         });
+//         return header;
+//       }
+//     } catch (err) {
+//       this.keycloak.logout();
+//     }
+//   }
+//   return undefined;
+// }
+
 export async function getAuthHeader() {
-  if (this.keycloak) {
-    try {
-      await refreshToken(this.keycloak, 5);
-      const header = `Bearer ${this.keycloak.token}`;
+  authService = new AuthService();
+  try {
+    const user = await authService.getUser();
+    if (user.access_token) {
+      // TODO: refresh token
+      const header = `Bearer ${user.access_token}`;
       if (header) {
         cornerstoneWADOImageLoader.configure({
           beforeSend: function(xhr) {
@@ -65,9 +88,10 @@ export async function getAuthHeader() {
         });
         return header;
       }
-    } catch (err) {
-      this.keycloak.logout();
     }
+    console.log(' ----------->>>>>>>>>>> user in getAuthHeader', user);
+  } catch (err) {
+    authService.logout();
   }
   return undefined;
 }
@@ -171,19 +195,19 @@ export class AuthService {
 
   logout = () => {
     console.log(' +++ logout called in class +++ ');
-    // this.UserManager.signoutRedirect({
-    //   id_token_hint: localStorage.getItem('id_token')
-    // });
-    this.UserManager.signoutRedirect();
+    this.UserManager.signoutRedirect({
+      id_token_hint: localStorage.getItem('id_token')
+    });
+    // this.UserManager.signoutRedirect();
     this.UserManager.clearStaleState();
-    // this.signinRedirect().then().catch()
+    window.location.replace('http://bds-c02xf0r0jhd5.local:3000/*');
   };
 
   signoutRedirectCallback = () => {
     this.UserManager.signoutRedirectCallback().then(() => {
       localStorage.clear();
       // window.location.replace(process.env.REACT_APP_PUBLIC_URL);
-      window.location.replace('/');
+      window.location.replace('http://bds-c02xf0r0jhd5.local:3000/*');
     });
     this.UserManager.clearStaleState();
   };
