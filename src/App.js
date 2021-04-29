@@ -580,51 +580,39 @@ class App extends Component {
     let getAuthUser = null;
 
     if (sessionStorage.getItem('authMode') !== 'external') {
-      console.log('this is here!!');
       this.authService = new auth.AuthService();
-      let user;
-      const isAuthenticated = this.authService.isAuthenticated();
-      // console.log(
-      //   'this.authService.isAuthenticated',
-      //   this.authService.isAuthenticated()
-      // );
+      let userInfo;
+      const authenticated = this.authService.isAuthenticated();
 
-      if (!isAuthenticated && sessionStorage.getItem('loggingIn') !== 'processing') {
-        console.log(' ---> in if ---');
+      if (
+        !authenticated &&
+        sessionStorage.getItem('loggingIn') !== 'processing'
+      ) {
         sessionStorage.setItem('loggingIn', 'processing');
-        await this.authService.signinRedirect();
-        console.log(' ---> in if done---');
+        try {
+          await this.authService.signinRedirect();
+        } catch (err) {
+          console.error('signinRedirect error', err);
+        }
       } else {
-        //   console.log(' ---> in else ---');
-        user = await this.authService.signinRedirectCallback();
-
-        console.log('user from callback', user);
-        sessionStorage.setItem('loggingIn', 'done');
-        this.setState({
-          user
-        });
+        try {
+          userInfo = await this.authService.signinRedirectCallback();
+          console.log(' -----> user from callback', userInfo);
+          sessionStorage.setItem('loggingIn', 'done');
+          // this.setState({
+          //   user
+          // });
+          getAuthUser = new Promise((resolve, reject) => {
+            resolve({
+              userInfo,
+              authService: this.authService,
+              authenticated: this.authService.isAuthenticated()
+            });
+          });
+        } catch (err) {
+          console.error('signinRedirectCallback error', err);
+        }
       }
-      // user = await this.authService.getUser();
-      // console.log('user got', user);
-      // this.setState({ authService: this.authService });
-      // console.log('this.authService', this.authService);
-
-      // const keycloak = Keycloak(
-      //   JSON.parse(sessionStorage.getItem('keycloakJson'))
-      // );
-      // getAuthUser = new Promise((resolve, reject) => {
-      //   keycloak
-      //     .init({ onLoad: 'login-required' })
-      //     .then(authenticated => {
-      //       keycloak
-      //         .loadUserInfo()
-      //         .then(userInfo => {
-      //           resolve({ userInfo, keycloak, authenticated });
-      //         })
-      //         .catch(err => reject(err));
-      //     })
-      //     .catch(err => reject(err));
-      // });
     } else {
       // authMode is external ask backend for user
       getAuthUser = new Promise((resolve, reject) => {
@@ -632,7 +620,7 @@ class App extends Component {
           .then(userInfoResponse => {
             resolve({
               userInfo: userInfoResponse.data,
-              keycloak: {},
+              authService: {},
               authenticated: true
             });
           })
@@ -640,57 +628,66 @@ class App extends Component {
       });
     }
 
-    // getAuthUser
-    //   .then(async result => {
-    //     try {
-    //       let user = {
-    //         user: result.userInfo.preferred_username || result.userInfo.email,
-    //         displayname: result.userInfo.given_name
-    //       };
-    //       await auth.login(user, null, result.keycloak);
-    //       this.setState({
-    //         keycloak: result.keycloak,
-    //         authenticated: result.authenticated,
-    //         id: result.userInfo.sub,
-    //         user
-    //       });
-    //       const {
-    //         email,
-    //         family_name,
-    //         given_name,
-    //         preferred_username
-    //       } = result.userInfo;
-    //       const username = preferred_username || email;
+    if (getAuthUser) {
+      console.log(' ----> in getAuthUser if');
+      getAuthUser
+        .then(async result => {
+          console.log('result', result);
+          try {
+            const source = result.userInfo.profile
+              ? result.userInfo.profile
+              : result.userInfo;
+            let user = {
+              user: source.preferred_username || source.email,
+              displayname: source.given_name
+            };
+            // TODO: implement login with authService
+            // await auth.login(user, null, result.keycloak);
+            this.setState({
+              authService: result.authService,
+              authenticated: result.authenticated,
+              id: source.sub,
+              user
+            });
+            const {
+              email,
+              family_name,
+              given_name,
+              preferred_username
+            } = source;
+            const username = preferred_username || email;
 
-    //       let userData;
-    //       try {
-    //         userData = await getUser(username);
-    //         userData = userData.data;
-    //         this.setState({ admin: userData.admin });
-    //       } catch (err) {
-    //         console.error(err);
-    //       }
-    //       this.eventSource = new EventSourcePolyfill(
-    //         `${apiUrl}/notifications`,
-    //         result.keycloak.token
-    //           ? {
-    //               headers: {
-    //                 authorization: `Bearer ${result.keycloak.token}`
-    //               }
-    //             }
-    //           : {}
-    //       );
-    //       this.eventSource.addEventListener(
-    //         'message',
-    //         this.getMessageFromEventSrc
-    //       );
-    //     } catch (err) {
-    //       console.log('Error in user retrieval!', err);
-    //     }
-    //   })
-    //   .catch(err2 => {
-    //     console.log('Authentication failed!', err2);
-    //   });
+            let userData;
+            try {
+              userData = await getUser(username);
+              userData = userData.data;
+              console.log('--->>>> userData from backend', userData);
+              this.setState({ admin: userData.admin });
+            } catch (err) {
+              console.error(err);
+            }
+            this.eventSource = new EventSourcePolyfill(
+              `${apiUrl}/notifications`,
+              result.keycloak.token
+                ? {
+                    headers: {
+                      authorization: `Bearer ${result.keycloak.token}`
+                    }
+                  }
+                : {}
+            );
+            this.eventSource.addEventListener(
+              'message',
+              this.getMessageFromEventSrc
+            );
+          } catch (err) {
+            console.log('Error in user retrieval!', err);
+          }
+        })
+        .catch(err2 => {
+          console.log('Authentication failed!', err2);
+        });
+    }
   };
 
   getMessageFromEventSrc = res => {
@@ -755,6 +752,7 @@ class App extends Component {
 
   onLogout = e => {
     auth.logout();
+    this.state.authService.logout();
     // sessionStorage.removeItem("annotations");
     sessionStorage.setItem('notifications', JSON.stringify([]));
     this.setState({
@@ -763,14 +761,12 @@ class App extends Component {
       name: null,
       user: null
     });
-    if (sessionStorage.getItem('authMode') !== 'external')
-      this.state.keycloak.logout().then(() => {
-        this.setState({
-          keycloak: null
-        });
-        auth.logout();
+    if (sessionStorage.getItem('authMode') !== 'external') {
+      this.state.authService.logout();
+      this.setState({
+        authService: null
       });
-    else console.log('No logout in external authentication mode');
+    } else console.log('No logout in external authentication mode');
   };
 
   updateNotificationSeen = () => {

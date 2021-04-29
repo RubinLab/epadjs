@@ -10,7 +10,8 @@ import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 const apiUrl = sessionStorage.getItem('apiUrl');
 const mode = sessionStorage.getItem('mode');
 // we need the keycloak object to be able to use update token
-let keycloak = null;
+
+// let keycloak = null;
 
 export function refreshToken(keycloak, minValidity) {
   return new Promise((resolve, reject) => {
@@ -99,7 +100,8 @@ export class AuthService {
 
     this.UserManager.events.addAccessTokenExpired(() => {
       console.log('token expired');
-      this.signinSilent();
+      // TODO if in display show are you still there and signinSilent
+      // this.signinSilent();
     });
   }
 
@@ -116,37 +118,8 @@ export class AuthService {
       console.log('user in redirect', userRes);
       window.alert(userRes);
       return userRes;
-      // window.location.href = 'http://localhost:3000';
-
-      // return await this.UserManager.signinRedirectCallback();
     }
     return user;
-    // this.UserManager.getUser()
-    //   .then(user => {
-    //     console.log(' ---> user rsolved : this.UserManager.getUser', user);
-    //     if (!user) {
-    // this.UserManager.signinSilent()
-    //   .then(res => {
-    //     console.log('res: this.UserManager.signinSilent', res);
-    //   })
-    //   .catch(err1 => {
-    //     console.error('catch for signinSilent', err1);
-    // this.UserManager.signinRedirectCallback()
-    //   .then(user => {
-    //     console.log('user in redirect', user);
-    //     window.alert(user);
-    //     // window.location.href = 'http://localhost:3000';
-    //   })
-    //   .catch(error => {
-    //     console.error('catch for signinRedirectCallback', error);
-    //   });
-    // return await this.UserManager.signinRedirectCallback();
-    // }
-    // return user;
-    // });
-    // }
-    // })
-    // .catch(err => console.error('catch for getUser', err));
   };
 
   parseJwt = token => {
@@ -176,10 +149,7 @@ export class AuthService {
         `oidc.user:http://bds-c02xf0r0jhd5.local:8899/auth:epad-auth`
       )
     );
-    console.log('in here!!! authenticated', !!oidcStorage);
-    // console.log(!!oidcStorage && !!oidcStorage.access_token);
-    // return (!!oidcStorage && !!oidcStorage.access_token);
-    return !!oidcStorage;
+    return !!oidcStorage && !!oidcStorage.access_token;
   };
 
   signinSilent = () => {
@@ -200,10 +170,13 @@ export class AuthService {
   };
 
   logout = () => {
-    this.UserManager.signoutRedirect({
-      id_token_hint: localStorage.getItem('id_token')
-    });
+    console.log(' +++ logout called in class +++ ');
+    // this.UserManager.signoutRedirect({
+    //   id_token_hint: localStorage.getItem('id_token')
+    // });
+    this.UserManager.signoutRedirect();
     this.UserManager.clearStaleState();
+    // this.signinRedirect().then().catch()
   };
 
   signoutRedirectCallback = () => {
