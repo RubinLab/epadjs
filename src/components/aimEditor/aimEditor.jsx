@@ -105,7 +105,7 @@ class AimEditor extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if ((prevProps?.aimId !== undefined) && (prevProps.aimId.aimId !== this.props?.aimId.aimId))
+    if ((this.props.aimId !== undefined) && (prevProps.aimId !== undefined) && (prevProps.aimId.aimId !== this.props?.aimId?.aimId))
       this.semanticAnswers.loadAimJson(this.props.aimId);
     const { isSegUploaded } = this.props;
     const { uploadingSegId } = this.state;
