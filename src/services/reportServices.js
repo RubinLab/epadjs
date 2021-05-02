@@ -8,8 +8,10 @@ export function getWaterfallReport(
   pairs,
   type = 'BASELINE',
   metric = 'RECIST',
+  exportCalcs
 ) {
-  const url = `${apiUrl}/reports/waterfall?type=${type}&metric=${metric}`;
+  let url = `${apiUrl}/reports/waterfall?type=${type}&metric=${metric}`;
+  if (exportCalcs) url += `&exportCalcs=${JSON.stringify(exportCalcs)}`;
   const body = pairs
     ? { pairs }
     :  projectID && subjectUIDs
