@@ -159,10 +159,13 @@ const Report = props => {
           null,
           type,
           metric,
-          [
-            { field: 'recist', header: 'SLD' },
-            { field: 'mean', header: 'Average HU' },
-          ]
+          metric === 'Export (beta)'? 
+            [
+              { field: 'recist', header: 'SLD' },
+              { field: 'mean', header: 'Average HU' },
+            ]
+            :
+            undefined
         );
       } else {
         const projects = Object.keys(filteredPatients);
@@ -175,18 +178,25 @@ const Report = props => {
             null,
             type,
             metric,
-            [
-              { field: 'recist', header: 'SLD' },
-              { field: 'mean', header: 'Average HU' },
-            ]
+            metric === 'Export (beta)'? 
+              [
+                { field: 'recist', header: 'SLD' },
+                { field: 'mean', header: 'Average HU' },
+              ]
+              :
+              undefined
           );
         } else {
           const pairs = constructPairs(filteredPatients);
           result = await getWaterfallReport(null, null, pairs, type, metric,
-            [
-              { field: 'recist', header: 'SLD' },
-              { field: 'mean', header: 'Average HU' },
-            ]);
+            metric === 'Export (beta)'? 
+              [
+                { field: 'recist', header: 'SLD' },
+                { field: 'mean', header: 'Average HU' },
+              ]
+              :
+              undefined
+            );
         }
       }
       setData(result.data);
