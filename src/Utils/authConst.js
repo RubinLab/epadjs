@@ -4,20 +4,22 @@ export const IDENTITY_CONFIG = {
   client_id: 'epad-auth', //
   //   client_id: process.env.REACT_APP_IDENTITY_CLIENT_ID, //(string): Your client application's identifier as registered with the OIDC provider.
   //   redirect_uri: process.env.REACT_APP_REDIRECT_URL, //The URI of your client application to receive a response from the OIDC provider.
-  redirect_uri: 'http://bds-c02xf0r0jhd5.local:3000/*',
+  // redirect_uri: 'http://bds-c02xf0r0jhd5.local:3000/*',
+  redirect_uri: 'http://bds-c02xf0r0jhd5.local:3000',
+
   // responseType: 'code token',
   // response_mode:"query",
   response_type: 'code', //(string, default: 'id_token'): The type of response desired from the OIDC provider.
   //   scope: 'openid example.api', //(string, default: 'openid'): The scope being requested from the OIDC provider.
   scope: 'openid profile',
-  // silent_redirect_uri: 'http://bds-c02xf0r0jhd5.local:3000/*', //(string): The URL for the page containing the code handling the silent renew.
-
-  //   automaticSilentRenew: true //(boolean, default: false): Flag to indicate if there should be an automatic attempt to renew the access token prior to its expiration.
+  silent_redirect_uri: 'http://bds-c02xf0r0jhd5.local:3000/*', //(string): The URL for the page containing the code handling the silent renew.
+  automaticSilentRenew: true, //(boolean, default: false): Flag to indicate if there should be an automatic attempt to renew the access token prior to its expiration.
   /* --- */
   //   login: process.env.REACT_APP_AUTH_URL + '/login',
-  loadUserInfo: true //(boolean, default: true): Flag to control if additional identity data is loaded from the user info endpoint in order to populate the user's profile.
+  loadUserInfo: true, //(boolean, default: true): Flag to control if additional identity data is loaded from the user info endpoint in order to populate the user's profile.
   //   silent_redirect_uri: process.env.REACT_APP_SILENT_REDIRECT_URL, //(string): The URL for the page containing the code handling the silent renew.
-  //   post_logout_redirect_uri: process.env.REACT_APP_LOGOFF_REDIRECT_URL, // (string): The OIDC post-logout redirect URI.
+  // post_logout_redirect_uri: 'http://bds-c02xf0r0jhd5.local:3000/*', // (string): The OIDC post-logout redirect URI.
+  post_logout_redirect_uri: 'http://bds-c02xf0r0jhd5.local:3000', // (string): The OIDC post-logout redirect URI.
   //   audience: 'https://example.com', //is there a way to specific the audience when making the jwt
   //   grantType: 'password',
   //   webAuthResponseType: 'id_token token'

@@ -613,6 +613,31 @@ class App extends Component {
           console.error('signinRedirectCallback error', err);
         }
       }
+
+      // if (!authenticated) {
+      //   try {
+      //     await this.authService.signinRedirect();
+      //   } catch (err) {
+      //     console.error('signinRedirect error', err);
+      //   }
+      // }
+      // try {
+      //   userInfo = await this.authService.signinRedirectCallback();
+      //   console.log(' -----> user from callback', userInfo);
+      //   sessionStorage.setItem('loggingIn', 'done');
+      //   // this.setState({
+      //   //   user
+      //   // });
+      //   getAuthUser = new Promise((resolve, reject) => {
+      //     resolve({
+      //       userInfo,
+      //       authService: this.authService,
+      //       authenticated: this.authService.isAuthenticated()
+      //     });
+      //   });
+      // } catch (err) {
+      //   console.error('signinRedirectCallback error', err);
+      // }
     } else {
       // authMode is external ask backend for user
       getAuthUser = new Promise((resolve, reject) => {

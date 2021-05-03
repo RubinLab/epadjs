@@ -98,7 +98,6 @@ export async function getAuthHeader() {
 
 export class AuthService {
   UserManager;
-
   constructor() {
     this.UserManager = new UserManager({
       // response_mode:"query",
@@ -123,10 +122,9 @@ export class AuthService {
     });
 
     this.UserManager.events.addAccessTokenExpired(() => {
-      console.log('token expired');
-      // TODO if in display show are you still there and signinSilent
-      // this.signinSilent();
+      this.logout();
     });
+
   }
 
   signinRedirectCallback = async () => {
@@ -179,7 +177,6 @@ export class AuthService {
   signinSilent = () => {
     this.UserManager.signinSilent()
       .then(user => {
-        console.log('signed in', user);
       })
       .catch(err => {
         console.log(err);
