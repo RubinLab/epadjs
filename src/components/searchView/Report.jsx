@@ -10,6 +10,7 @@ import WaterfallReact from './WaterfallReact';
 import { MAX_PORT } from '../../constants';
 import { getWaterfallReport, getReport } from '../../services/reportServices';
 import { checkIfSeriesOpen, clearCarets } from '../../Utils/aid';
+import { CSVLink } from "react-csv";
 import {
   changeActivePort,
   clearGrid,
@@ -147,7 +148,7 @@ const Report = props => {
     const metric = e.target.value;
     props.handleMetric(metric);
     const validMetric =
-      metric === 'ADLA' || metric === 'RECIST' || metric === 'intensitystddev';
+      metric === 'ADLA' || metric === 'RECIST' || metric === 'intensitystddev' || metric === 'Export (beta)';
     const type = 'BASELINE';
     let result;
     if (validMetric) {
@@ -157,7 +158,14 @@ const Report = props => {
           null,
           null,
           type,
-          metric
+          metric,
+          metric === 'Export (beta)'? 
+            [
+              { field: 'recist', header: 'SLD' },
+              { field: 'mean', header: 'Average HU' },
+            ]
+            :
+            undefined
         );
       } else {
         const projects = Object.keys(filteredPatients);
@@ -169,11 +177,26 @@ const Report = props => {
             subjectUIDs[0],
             null,
             type,
-            metric
+            metric,
+            metric === 'Export (beta)'? 
+              [
+                { field: 'recist', header: 'SLD' },
+                { field: 'mean', header: 'Average HU' },
+              ]
+              :
+              undefined
           );
         } else {
           const pairs = constructPairs(filteredPatients);
-          result = await getWaterfallReport(null, null, pairs, type, metric);
+          result = await getWaterfallReport(null, null, pairs, type, metric,
+            metric === 'Export (beta)'? 
+              [
+                { field: 'recist', header: 'SLD' },
+                { field: 'mean', header: 'Average HU' },
+              ]
+              :
+              undefined
+            );
         }
       }
       setData(result.data);
@@ -479,6 +502,7 @@ const Report = props => {
                   <option>RECIST</option>
                   <option>ADLA</option>
                   <option>intensitystddev</option>
+                  <option>Export (beta)</option>
                 </select>
               </div>
               {data.series && data.series.length >= 0 && (
@@ -491,6 +515,7 @@ const Report = props => {
                   />
                 </div>
               )}
+              {data.waterfallExport && <CSVLink {...{data: data.waterfallExport, headers:data.waterfallHeaders,filename:'waterfall.csv'}}>Export to CSV</CSVLink>}
             </>
           )}
 
