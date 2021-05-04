@@ -70,6 +70,7 @@ const reportsList = [
 class App extends Component {
   constructor(props) {
     super(props);
+    console.log(' ----> in constructor');
     this.eventSource = null;
     this.state = {
       openMng: false,
@@ -515,16 +516,37 @@ class App extends Component {
     ])
       .then(async results => {
         const configData = await results[0].json();
-        let { mode, apiUrl, wadoUrl, authMode } = configData;
+        let {
+          mode,
+          apiUrl,
+          wadoUrl,
+          authMode,
+          authority,
+          client_id,
+          redirect_uri,
+          response_type,
+          scope
+        } = configData;
         // check and use environment variables if any
         mode = process.env.REACT_APP_MODE || mode;
         apiUrl = process.env.REACT_APP_API_URL || apiUrl;
         wadoUrl = process.env.REACT_APP_WADO_URL || wadoUrl;
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
+        authority = process.env.REACT_APP_AUTHORITY || authority;
+        client_id = process.env.REACT_APP_CLIENT_ID || client_id;
+        redirect_uri = process.env.REACT_APP_REDIRECT_URI || redirect_uri;
+        response_type = process.env.REACT_APP_RESPONSE_TYPE || response_type;
+        scope = process.env.REACT_APP_SCOPE || scope;
         sessionStorage.setItem('mode', mode);
         sessionStorage.setItem('apiUrl', apiUrl);
         sessionStorage.setItem('wadoUrl', wadoUrl);
         sessionStorage.setItem('authMode', authMode);
+        sessionStorage.setItem('authority', authority);
+        sessionStorage.setItem('client_id', client_id);
+        sessionStorage.setItem('redirect_uri', redirect_uri);
+        sessionStorage.setItem('response_type', response_type);
+        sessionStorage.setItem('scope', scope);
+
         this.setState({ mode, apiUrl, wadoUrl, authMode });
         const keycloakData = await results[1].json();
         const auth =

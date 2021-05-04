@@ -1,10 +1,7 @@
 'use strict';
 
-import { IDENTITY_CONFIG, METADATA_OIDC } from '../Utils/authConst';
 import { UserManager, WebStorageStateStore, Log } from 'oidc-client';
-
 const urls = {};
-
 import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 
 const apiUrl = sessionStorage.getItem('apiUrl');
@@ -99,13 +96,22 @@ export async function getAuthHeader() {
 export class AuthService {
   UserManager;
   constructor() {
+    this.authority = sessionStorage.getItem('authority');
+    this.client_id = sessionStorage.getItem('client_id');
+    this.redirect_uri = sessionStorage.getItem('redirect_uri');
+    this.response_type = sessionStorage.getItem('response_type');
+    this.scope = sessionStorage.getItem('scope');
     this.UserManager = new UserManager({
-      // response_mode:"query",
-      ...IDENTITY_CONFIG,
-      userStore: new WebStorageStateStore({ store: window.sessionStorage }),
-      metadata: {
-        ...METADATA_OIDC
-      }
+      authority: this.authority,
+      client_id: this.client_id,
+      redirect_uri: this.redirect_uri,
+      response_type: this.response_type,
+      scope: this.scope,
+      silent_redirect_uri: this.redirect_uri,
+      automaticSilentRenew: true,
+      loadUserInfo: true,
+      post_logout_redirect_uri: this.redirect_uri,
+      userStore: new WebStorageStateStore({ store: window.sessionStorage })
     });
     // Logger
     Log.logger = console;
@@ -124,7 +130,6 @@ export class AuthService {
     this.UserManager.events.addAccessTokenExpired(() => {
       this.logout();
     });
-
   }
 
   signinRedirectCallback = async () => {
@@ -168,7 +173,7 @@ export class AuthService {
     const oidcStorage = JSON.parse(
       sessionStorage.getItem(
         // `oidc.user:${process.env.REACT_APP_AUTH_URL}:${process.env.REACT_APP_IDENTITY_CLIENT_ID}`
-        `oidc.user:http://bds-c02xf0r0jhd5.local:8899/auth:epad-auth`
+        `oidc.user:${this.authority}:epad-auth`
       )
     );
     return !!oidcStorage && !!oidcStorage.access_token;
@@ -176,8 +181,7 @@ export class AuthService {
 
   signinSilent = () => {
     this.UserManager.signinSilent()
-      .then(user => {
-      })
+      .then(user => {})
       .catch(err => {
         console.log(err);
       });
@@ -197,14 +201,14 @@ export class AuthService {
     });
     // this.UserManager.signoutRedirect();
     this.UserManager.clearStaleState();
-    window.location.replace('http://bds-c02xf0r0jhd5.local:3000/*');
+    window.location.replace(this.redirect_uri);
   };
 
   signoutRedirectCallback = () => {
     this.UserManager.signoutRedirectCallback().then(() => {
       localStorage.clear();
       // window.location.replace(process.env.REACT_APP_PUBLIC_URL);
-      window.location.replace('http://bds-c02xf0r0jhd5.local:3000/*');
+      window.location.replace(this.redirect_uri);
     });
     this.UserManager.clearStaleState();
   };
