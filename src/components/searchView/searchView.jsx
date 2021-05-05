@@ -878,7 +878,8 @@ class SearchView extends Component {
     this.setState({ showAnnotationModal: false });
     this.props.history.push(`/search`);
     this.props.dispatch(clearSelection());
-    this.props.history.push(`/search/${this.props.pid}`);
+    var pid = window.location.pathname.split().pop();
+    this.props.history.push(`/search/${pid}`);
   };
 
   handleUploadWizardClick = () => {
