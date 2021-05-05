@@ -45,6 +45,7 @@ class AimEditor extends Component {
     if (this.props.aimId) {
       this.updatedAimId = this.props.aimId.aimId;
       this.state.isUpdate = true;
+      console.log("props", this.props);
     }
   }
 
