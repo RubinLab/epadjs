@@ -409,7 +409,6 @@ class SearchView extends Component {
     }
     if (showDeleteFromSysAlert) {
       // this.props.clearTreeData();
-      console.log(' -----> deleted');
       localStorage.setItem('treeData', JSON.stringify({}));
       this.props.clearTreeExpand();
     }
@@ -876,9 +875,9 @@ class SearchView extends Component {
 
   handleSubmitDownload = () => {
     this.setState({ showAnnotationModal: false });
+    const pid = window.location.pathname.split('/').pop();
     this.props.history.push(`/search`);
     this.props.dispatch(clearSelection());
-    var pid = window.location.pathname.split().pop();
     this.props.history.push(`/search/${pid}`);
   };
 
