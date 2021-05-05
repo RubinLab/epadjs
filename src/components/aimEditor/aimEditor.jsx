@@ -43,8 +43,10 @@ class AimEditor extends Component {
     };
     //if aim is being updated set the aimId and isUpdate flag
     if (this.props.aimId) {
-      this.updatedAimId = this.props.aimId.aimId;
+      const { aimId, trackingUniqueIdentifier } = this.props.aimId;
+      this.updatedAimId = aimId;
       this.state.isUpdate = true;
+      this.state.trackingUId = trackingUniqueIdentifier;
       console.log("props", this.props);
     }
   }
