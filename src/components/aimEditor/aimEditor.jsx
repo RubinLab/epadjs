@@ -47,7 +47,6 @@ class AimEditor extends Component {
       this.updatedAimId = aimId;
       this.state.isUpdate = true;
       this.state.trackingUId = trackingUniqueIdentifier;
-      console.log("props", this.props);
     }
   }
 
