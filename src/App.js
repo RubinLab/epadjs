@@ -71,6 +71,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     console.log(' ----> in constructor');
+
     this.eventSource = null;
     this.state = {
       openMng: false,
@@ -515,6 +516,7 @@ class App extends Component {
       fetch(`${process.env.PUBLIC_URL}/keycloak.json`)
     ])
       .then(async results => {
+        console.log(' in then top 1');
         const configData = await results[0].json();
         let {
           mode,
@@ -547,6 +549,7 @@ class App extends Component {
         sessionStorage.setItem('response_type', response_type);
         sessionStorage.setItem('scope', scope);
 
+        console.log(' in then after set 2');
         this.setState({ mode, apiUrl, wadoUrl, authMode });
         const keycloakData = await results[1].json();
         const auth =
@@ -561,7 +564,9 @@ class App extends Component {
           process.env.REACT_APP_AUTH_RESOURCE || keycloakData.resource;
         sessionStorage.setItem('auth', auth);
         sessionStorage.setItem('keycloakJson', JSON.stringify(keycloakJson));
+        console.log(' in then before completeAutorization 3');
         this.completeAutorization(apiUrl);
+        console.log(' in then after completeAutorization 4');
         if (mode === 'lite') this.setState({ pid: 'lite' });
       })
       .catch(err => {
@@ -601,29 +606,38 @@ class App extends Component {
   completeAutorization = async apiUrl => {
     let getAuthUser = null;
 
+    const authStatus = sessionStorage.getItem('loggingIn');
+    console.log(' in complete auth 1');
     if (sessionStorage.getItem('authMode') !== 'external') {
       this.authService = new auth.AuthService();
       let userInfo;
       const authenticated = this.authService.isAuthenticated();
 
-      if (
-        !authenticated &&
-        sessionStorage.getItem('loggingIn') !== 'processing'
-      ) {
-        sessionStorage.setItem('loggingIn', 'processing');
+      // if (!authenticated && authStatus !== 'processing') {
+      //   // this.setState({ loggingIn: 'processing' });
+      //   sessionStorage.setItem('loggingIn', 'processing');
+      //   console.log(' in setting to processing 2');
+      //   try {
+      //     await this.authService.signinRedirect();
+      //   } catch (err) {
+      //     console.error('signinRedirect error', err);
+      //   }
+      // } else {
+      if (!authenticated) {
         try {
-          await this.authService.signinRedirect();
-        } catch (err) {
-          console.error('signinRedirect error', err);
-        }
-      } else {
-        try {
+          // this.setState({ loggingIn: 'done' });
+          // userInfo = await this.authService.signinRedirectCallback();
+          alert('before  signinRedirect');
+          const res = await this.authService.signinRedirect();
+          alert(' signinRedirect resolved', res);
           userInfo = await this.authService.signinRedirectCallback();
-          console.log(' -----> user from callback', userInfo);
+          alert(' after signinRedirectCallback resolved', userInfo);
           sessionStorage.setItem('loggingIn', 'done');
+          // this.setState({ loggingIn: 'done' });
           // this.setState({
           //   user
           // });
+          console.log(' assigning getAuthUser 4');
           getAuthUser = new Promise((resolve, reject) => {
             resolve({
               userInfo,
@@ -634,31 +648,16 @@ class App extends Component {
         } catch (err) {
           console.error('signinRedirectCallback error', err);
         }
+      } else if (authenticated) {
+        userInfo = await this.authService.getUser();
+        getAuthUser = new Promise((resolve, reject) => {
+          resolve({
+            userInfo,
+            authService: this.authService,
+            authenticated: this.authService.isAuthenticated()
+          });
+        });
       }
-
-      // if (!authenticated) {
-      //   try {
-      //     await this.authService.signinRedirect();
-      //   } catch (err) {
-      //     console.error('signinRedirect error', err);
-      //   }
-      // }
-      // try {
-      //   userInfo = await this.authService.signinRedirectCallback();
-      //   console.log(' -----> user from callback', userInfo);
-      //   sessionStorage.setItem('loggingIn', 'done');
-      //   // this.setState({
-      //   //   user
-      //   // });
-      //   getAuthUser = new Promise((resolve, reject) => {
-      //     resolve({
-      //       userInfo,
-      //       authService: this.authService,
-      //       authenticated: this.authService.isAuthenticated()
-      //     });
-      //   });
-      // } catch (err) {
-      //   console.error('signinRedirectCallback error', err);
       // }
     } else {
       // authMode is external ask backend for user
@@ -674,9 +673,10 @@ class App extends Component {
           .catch(err => reject(err));
       });
     }
+    console.log(' checking getAuthUser 5', getAuthUser);
 
     if (getAuthUser) {
-      console.log(' ----> in getAuthUser if');
+      console.log(' ----> in getAuthUser if 6');
       getAuthUser
         .then(async result => {
           console.log('result', result);

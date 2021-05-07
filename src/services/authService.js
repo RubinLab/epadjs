@@ -156,8 +156,8 @@ export class AuthService {
   };
 
   signinRedirect = async () => {
-    localStorage.setItem('redirectUri', window.location.pathname);
-    await this.UserManager.signinRedirect({});
+    const exp = await this.UserManager.signinRedirect();
+    console.log(exp);
   };
 
   signinRedirectPopUp = () => {
