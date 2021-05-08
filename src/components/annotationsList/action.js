@@ -469,7 +469,7 @@ const getAimListFields = (aims, ann) => {
         inferenceEntityCollection,
         segmentationEntityCollection,
         typeCode,
-        trackingUniqueIdentifier,
+        trackingUniqueIdentifier: trackingUniqueIdentifier.root,
       };
       const user = aim.ImageAnnotationCollection.user.name.value;
       const id = aim.ImageAnnotationCollection.uniqueIdentifier.root;
