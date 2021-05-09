@@ -247,12 +247,14 @@ class ToolMenu extends Component {
   //TODO: instead of disabling all tools we can just disable the active tool
   disableAllTools = () => {
     const { activeTool } = this.state;
-    if (activeTool === "FreehandRoiTool" || activeTool === "FreehandRoi3DTool") {
-      this.deselectFreehand();
+    if (activeTool) {
+      if (activeTool === "FreehandRoiTool" || activeTool === "FreehandRoi3DTool") {
+        this.deselectFreehand();
+      }
+      this.setToolStateForAllElements(this.state.activeTool, "passive");
+      this.setState({ activeToolIdx: 0 });
+      this.setCursor("default");
     }
-    this.setToolStateForAllElements(this.state.activeTool, "passive");
-    this.setState({ activeToolIdx: 0 });
-    this.setCursor("default");
 
     // Array.from(this.tools).forEach((tool) => {
     //   if (tool !== "FreehandRoiSculptor")
@@ -325,6 +327,7 @@ class ToolMenu extends Component {
       // TODO emel: isn't it bug prone. although it is not going to work, we are setting the state
       this.setState({ showBrushSize: true, isHuGated: false, showSmartBrush: true });
     } else if (tool === "FreehandRoi3DTool") {
+      this.selectFreehand();
       this.setState({ showInterpolation: true });
     } else if (tool === "colorLut") {
       this.setState({ showColormap: true });
@@ -334,9 +337,9 @@ class ToolMenu extends Component {
       return;
       this.selectFreehand();
     }
-    else if (tool === "FreehandRoiTool") {
-      this.selectFreehand();
-    }
+    // else if (tool === "FreehandRoiTool") {
+    //   this.selectFreehand();
+    // }
 
     this.disableAllTools();
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
