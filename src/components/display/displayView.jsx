@@ -220,7 +220,6 @@ class DisplayView extends Component {
     else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
       this.renderAims();
     }
-    this.handleActiveTool();
   }
 
   componentWillUnmount() {
@@ -1473,6 +1472,7 @@ class DisplayView extends Component {
     this.clearSculptState();
     this.clearSmartBrushState();
     this.renderAims(true);
+    this.handleActiveTool();
     return 1;
   };
 
