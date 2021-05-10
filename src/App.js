@@ -508,6 +508,7 @@ class App extends Component {
     this.setState(state => ({ progressUpdated: state.progressUpdated + 1 }));
   };
 
+
   async componentDidMount() {
     localStorage.setItem('treeData', JSON.stringify({}));
     console.log('process.env.PUBLIC_URL', process.env.PUBLIC_URL);
@@ -627,11 +628,11 @@ class App extends Component {
         try {
           // this.setState({ loggingIn: 'done' });
           // userInfo = await this.authService.signinRedirectCallback();
-          alert('before  signinRedirect');
+          // alert('before  signinRedirect');
           const res = await this.authService.signinRedirect();
-          alert(' signinRedirect resolved', res);
-          userInfo = await this.authService.signinRedirectCallback();
-          alert(' after signinRedirectCallback resolved', userInfo);
+          // alert(' signinRedirect resolved', res);
+          userInfo = await this.authService.signinCallback();
+          // alert(' after signinRedirectCallback resolved', userInfo);
           sessionStorage.setItem('loggingIn', 'done');
           // this.setState({ loggingIn: 'done' });
           // this.setState({
@@ -1046,20 +1047,22 @@ class App extends Component {
         {/* <AuthConsumer> */}
         <Cornerstone />
         <ToastContainer />
-        <NavBar
-          user={this.state.user}
-          openGearMenu={this.handleMngMenu}
-          openInfoMenu={this.handleInfoMenu}
-          openUser={this.handleUserProfileMenu}
-          onReports={this.handleReportsClick}
-          logout={this.onLogout}
-          onSearchViewClick={this.switchSearhView}
-          onSwitchView={this.switchView}
-          viewType={this.state.viewType}
-          notificationWarning={noOfUnseen}
-          pid={this.state.pid}
-          path={this.props.location.pathname}
-        />
+        {this.state.authenticated && (
+          <NavBar
+            user={this.state.user}
+            openGearMenu={this.handleMngMenu}
+            openInfoMenu={this.handleInfoMenu}
+            openUser={this.handleUserProfileMenu}
+            onReports={this.handleReportsClick}
+            logout={this.onLogout}
+            onSearchViewClick={this.switchSearhView}
+            onSwitchView={this.switchView}
+            viewType={this.state.viewType}
+            notificationWarning={noOfUnseen}
+            pid={this.state.pid}
+            path={this.props.location.pathname}
+          />
+        )}
         {showReportsMenu && (
           <SelectModalMenu
             list={reportsList}
