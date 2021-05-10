@@ -106,6 +106,7 @@ export class AuthService {
       client_id: this.client_id,
       redirect_uri: this.redirect_uri,
       response_type: this.response_type,
+      response_mode: 'fragment',
       scope: this.scope,
       silent_redirect_uri: this.redirect_uri,
       automaticSilentRenew: true,
@@ -113,6 +114,7 @@ export class AuthService {
       post_logout_redirect_uri: this.redirect_uri,
       userStore: new WebStorageStateStore({ store: window.sessionStorage })
     });
+    console.log('values', this.authority, this.client_id, this.redirect_uri, this.response_type, this.scope);
     // Logger
     Log.logger = console;
     Log.level = Log.DEBUG;
