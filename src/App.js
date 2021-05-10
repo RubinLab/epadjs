@@ -627,11 +627,11 @@ class App extends Component {
         try {
           // this.setState({ loggingIn: 'done' });
           // userInfo = await this.authService.signinRedirectCallback();
-          alert('before  signinRedirect');
+          console.log('before  signinRedirect');
           const res = await this.authService.signinRedirect();
-          alert(' signinRedirect resolved', res);
+          console.log(' signinRedirect resolved', res);
           userInfo = await this.authService.signinRedirectCallback();
-          alert(' after signinRedirectCallback resolved', userInfo);
+          console.log(' after signinRedirectCallback resolved', userInfo);
           sessionStorage.setItem('loggingIn', 'done');
           // this.setState({ loggingIn: 'done' });
           // this.setState({

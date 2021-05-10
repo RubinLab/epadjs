@@ -159,7 +159,7 @@ export class AuthService {
 
   signinRedirect = async () => {
     const exp = await this.UserManager.signinRedirect();
-    console.log(exp);
+    console.log('in signin redirect', exp);
   };
 
   signinRedirectPopUp = () => {
