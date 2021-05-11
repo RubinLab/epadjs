@@ -15,7 +15,6 @@ import AnotateView from './components/anotateView';
 import ProgressView from './components/progressView';
 import FlexView from './components/flexView';
 import NotFound from './components/notFound';
-import Loading from './components/Loading';
 import LoginForm from './components/loginForm';
 import Logout from './components/logout';
 import ProtectedRoute from './components/common/protectedRoute';
@@ -1187,7 +1186,6 @@ class App extends Component {
                   {/* component={Worklist} /> */}
                   <Route path="/tools" />
                   <Route path="/edit" />
-                  <Route path="/loading" component={Loading} />
                   <Route path="/not-found" component={NotFound} />
                   <ProtectedRoute
                     from="/"
@@ -1250,7 +1248,6 @@ class App extends Component {
                     />
                   )}
                 />
-                <Route path="/loading" component={Loading} />
                 <Route path="/not-found" component={NotFound} />
                 <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 <ProtectedRoute
