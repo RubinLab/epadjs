@@ -15,6 +15,7 @@ import AnotateView from './components/anotateView';
 import ProgressView from './components/progressView';
 import FlexView from './components/flexView';
 import NotFound from './components/notFound';
+import Loading from './components/Loading';
 import LoginForm from './components/loginForm';
 import Logout from './components/logout';
 import ProtectedRoute from './components/common/protectedRoute';
@@ -72,11 +73,11 @@ class App extends Component {
   constructor(props) {
     super(props);
     console.log(' ----> in constructor');
-    this.authority = 'http://bds-c02xf0r0jhd5.local:8899/auth/realms/ePad';
-    this.clientId = 'epad-auth';
-    this.redirectUri = 'http://bds-c02xf0r0jhd5.local:3000/*';
-    this.responseType = 'code';
-    this.scope = 'openid profile';
+    // this.authority = 'http://bds-c02xf0r0jhd5.local:8899/auth/realms/ePad';
+    // this.clientId = 'epad-auth';
+    // this.redirectUri = 'http://bds-c02xf0r0jhd5.local:3000/*';
+    // this.responseType = 'code';
+    // this.scope = 'openid profile';
 
     this.eventSource = null;
     this.state = {
@@ -108,11 +109,11 @@ class App extends Component {
       minReportsArr: [],
       hiddenReports: {},
       metric: null,
-      authority: '',
-      clientId: '',
-      redirectUri: '',
-      responseType: '',
-      scope: ''
+      // authority: '',
+      // clientId: '',
+      // redirectUri: '',
+      // responseType: '',
+      // scope: ''
     };
   }
 
@@ -560,9 +561,9 @@ class App extends Component {
         sessionStorage.setItem('response_type', response_type);
         sessionStorage.setItem('scope', scope);
 
-        const clientId = client_id;
-        const redirectUri = redirect_uri;
-        const responseType = response_type;
+        // const clientId = client_id;
+        // const redirectUri = redirect_uri;
+        // const responseType = response_type;
 
         console.log(' in then after set 2');
         this.setState({
@@ -570,11 +571,11 @@ class App extends Component {
           apiUrl,
           wadoUrl,
           authMode,
-          authority,
-          clientId,
-          redirectUri,
-          responseType,
-          scope
+          // authority,
+          // clientId,
+          // redirectUri,
+          // responseType,
+          // scope
         });
         const keycloakData = await results[1].json();
         const auth =
@@ -589,9 +590,7 @@ class App extends Component {
           process.env.REACT_APP_AUTH_RESOURCE || keycloakData.resource;
         sessionStorage.setItem('auth', auth);
         sessionStorage.setItem('keycloakJson', JSON.stringify(keycloakJson));
-        console.log(' in then before completeAutorization 3');
-        this.completeAutorization(apiUrl);
-        console.log(' in then after completeAutorization 4');
+        this.completeAutorization();
         if (mode === 'lite') this.setState({ pid: 'lite' });
       })
       .catch(err => {
@@ -628,9 +627,7 @@ class App extends Component {
     }
   };
 
-  completeAutorization = async apiUrl => {
-    let getAuthUser = null;
-    const authStatus = sessionStorage.getItem('loggingIn');
+  completeAutorization = async () => {
     this.authService = new auth.AuthService();
     let userInfo;
     const authenticated = this.authService.isAuthenticated();
@@ -638,29 +635,23 @@ class App extends Component {
     if (!authenticated) {
       try {
         const res = await this.authService.signinRedirect();
-        userInfo = await this.authService.signinCallback();
-        sessionStorage.setItem('loggingIn', 'done');
-        await this.registerUser(
-          userInfo,
-          this.authService,
-          this.authService.isAuthenticated(),
-          apiUrl
-        );
+        userInfo = await this.authService.signinRedirectCallback();
+        if (userInfo) {
+          await this.registerUser(userInfo);
+        }
       } catch (err) {
         console.error('signinRedirectCallback error', err);
       }
     } else if (authenticated) {
       userInfo = await this.authService.getUser();
-      await this.registerUser(
-        userInfo,
-        this.authService,
-        this.authService.isAuthenticated(),
-        apiUrl
-      );
+      if (userInfo) {
+        await this.registerUser(userInfo);
+      }
     }
+    this.setState({ authenticated: this.authService.isAuthenticated() });
   };
 
-  registerUser = async (userInfo, authService, authenticated, apiUrl) => {
+  registerUser = async userInfo => {
     const source = userInfo.profile ? userInfo.profile : userInfo;
     let user = {
       user: source.preferred_username || source.email,
@@ -668,9 +659,8 @@ class App extends Component {
     };
     // TODO: implement login with authService
     // await auth.login(user, null, result.keycloak);
+
     this.setState({
-      authService,
-      authenticated,
       id: source.sub,
       user
     });
@@ -680,26 +670,28 @@ class App extends Component {
     sessionStorage.setItem('username', username);
     sessionStorage.setItem('displayName', username);
 
+    const apiUrl = sessionStorage.getItem('apiUrl')
+
     let userData;
     try {
       userData = await getUser(username);
       userData = userData.data;
-      console.log('--->>>> userData from backend', userData);
       this.setState({ admin: userData.admin });
+      const { access_token } = await this.authService.getUser();
+      this.eventSource = new EventSourcePolyfill(
+        `${apiUrl}/notifications`,
+        access_token
+          ? {
+              headers: {
+                authorization: `Bearer ${access_token}`
+              }
+            }
+          : {}
+      );
+      this.eventSource.addEventListener('message', this.getMessageFromEventSrc);
     } catch (err) {
       console.error(err);
     }
-    // this.eventSource = new EventSourcePolyfill(
-    //   `${apiUrl}/notifications`,
-    //   result.keycloak.token
-    //     ? {
-    //         headers: {
-    //           authorization: `Bearer ${result.keycloak.token}`
-    //         }
-    //       }
-    //     : {}
-    // );
-    // this.eventSource.addEventListener('message', this.getMessageFromEventSrc);
   };
 
   getMessageFromEventSrc = res => {
@@ -764,7 +756,7 @@ class App extends Component {
 
   onLogout = e => {
     auth.logout();
-    this.state.authService.logout();
+    this.authService.logout();
     // sessionStorage.removeItem("annotations");
     sessionStorage.setItem('notifications', JSON.stringify([]));
     this.setState({
@@ -774,7 +766,7 @@ class App extends Component {
       user: null
     });
     if (sessionStorage.getItem('authMode') !== 'external') {
-      this.state.authService.logout();
+      this.authService.logout();
       this.setState({
         authService: null
       });
@@ -1004,103 +996,237 @@ class App extends Component {
       }, 0);
     }
 
-    const {
-      authority,
-      clientId,
-      redirectUri,
-      responseType,
-      scope
-    } = this.state;
+    // const {
+    //   authority,
+    //   clientId,
+    //   redirectUri,
+    //   responseType,
+    //   scope
+    // } = this.state;
 
-    const oidcConfig = {
-      authority,
-      clientId,
-      redirectUri,
-      responseType,
-      scope
-    };
+    // const oidcConfig = {
+    //   authority,
+    //   clientId,
+    //   redirectUri,
+    //   responseType,
+    //   scope
+    // };
 
     return (
-      <ErrorBoundary>
-        {/* <AuthConsumer> */}
-        <Cornerstone />
-        <ToastContainer />
-        {this.state.authenticated && (
-          <NavBar
-            user={this.state.user}
-            openGearMenu={this.handleMngMenu}
-            openInfoMenu={this.handleInfoMenu}
-            openUser={this.handleUserProfileMenu}
-            onReports={this.handleReportsClick}
-            logout={this.onLogout}
-            onSearchViewClick={this.switchSearhView}
-            onSwitchView={this.switchView}
-            viewType={this.state.viewType}
-            notificationWarning={noOfUnseen}
-            pid={this.state.pid}
-            path={this.props.location.pathname}
-          />
-        )}
-        {showReportsMenu && (
-          <SelectModalMenu
-            list={reportsList}
-            onClick={this.handleReportSelect}
-          />
-        )}
-        {this.state.openMng && (
-          <Management
-            closeMenu={this.closeMenu}
-            updateProgress={this.updateProgress}
-            admin={this.state.admin}
-            getProjectAdded={this.getProjectAdded}
-            pid={this.state.pid}
-            clearAllTreeData={this.clearAllTreeData}
-            clearTreeExpand={this.clearTreeExpand}
-          />
-        )}
-        {this.state.openInfo && (
-          <InfoMenu
-            closeMenu={this.closeMenu}
-            user={this.state.user}
-            notifications={notifications}
-            notificationWarning={noOfUnseen}
-          />
-        )}
-        {this.state.openUser && (
-          <UserMenu
-            closeMenu={this.closeMenu}
-            user={this.state.user}
-            admin={this.state.admin}
-          />
-        )}
-        {showWarning && (
-          <WarningModal
-            onOK={this.closeWarning}
-            title={title}
-            message={message}
-          />
-        )}
-        {showConfirmation && (
-          <ConfirmationModal
-            title={title}
-            button={'Get Report'}
-            message={message}
-            onSubmit={this.displayWaterfall}
-            onCancel={this.closeWarning}
-          />
-        )}
-        {this.state.reportsCompArr}
-        {this.state.minReportsArr}
-        {!this.state.authenticated && mode !== 'lite' && (
-          <Route
-            path="/login"
-            render={props => (
-              <LoginForm {...props} authService={this.state.authService} />
-            )}
-          />
-        )}
-        {this.state.authenticated && mode !== 'lite' && (
-          <div style={{ display: 'inline', width: '100%', height: '100%' }}>
+      <AuthProvider>
+        <ErrorBoundary>
+          <Cornerstone />
+          <ToastContainer />
+          {this.state.authenticated && (
+            <NavBar
+              user={this.state.user}
+              openGearMenu={this.handleMngMenu}
+              openInfoMenu={this.handleInfoMenu}
+              openUser={this.handleUserProfileMenu}
+              onReports={this.handleReportsClick}
+              logout={this.onLogout}
+              onSearchViewClick={this.switchSearhView}
+              onSwitchView={this.switchView}
+              viewType={this.state.viewType}
+              notificationWarning={noOfUnseen}
+              pid={this.state.pid}
+              path={this.props.location.pathname}
+            />
+          )}
+          {showReportsMenu && (
+            <SelectModalMenu
+              list={reportsList}
+              onClick={this.handleReportSelect}
+            />
+          )}
+          {this.state.openMng && (
+            <Management
+              closeMenu={this.closeMenu}
+              updateProgress={this.updateProgress}
+              admin={this.state.admin}
+              getProjectAdded={this.getProjectAdded}
+              pid={this.state.pid}
+              clearAllTreeData={this.clearAllTreeData}
+              clearTreeExpand={this.clearTreeExpand}
+            />
+          )}
+          {this.state.openInfo && (
+            <InfoMenu
+              closeMenu={this.closeMenu}
+              user={this.state.user}
+              notifications={notifications}
+              notificationWarning={noOfUnseen}
+            />
+          )}
+          {this.state.openUser && (
+            <UserMenu
+              closeMenu={this.closeMenu}
+              user={this.state.user}
+              admin={this.state.admin}
+            />
+          )}
+          {showWarning && (
+            <WarningModal
+              onOK={this.closeWarning}
+              title={title}
+              message={message}
+            />
+          )}
+          {showConfirmation && (
+            <ConfirmationModal
+              title={title}
+              button={'Get Report'}
+              message={message}
+              onSubmit={this.displayWaterfall}
+              onCancel={this.closeWarning}
+            />
+          )}
+          {this.state.reportsCompArr}
+          {this.state.minReportsArr}
+          {!this.state.authenticated && mode !== 'lite' && (
+            <Route
+              path="/login"
+              render={props => (
+                <LoginForm {...props} authService={this.authService} />
+              )}
+            />
+          )}
+          {this.state.authenticated && mode !== 'lite' && (
+            <div style={{ display: 'inline', width: '100%', height: '100%' }}>
+              <Sidebar
+                type={this.state.viewType}
+                progressUpdated={progressUpdated}
+                getPidUpdate={this.getPidUpdate}
+                pid={this.state.pid}
+                clearTreeExpand={this.clearTreeExpand}
+                projectAdded={this.state.projectAdded}
+              >
+                <Switch className="splitted-mainview">
+                  <Route path="/logout" component={Logout} />
+                  <ProtectedRoute
+                    path="/display"
+                    render={props => (
+                      <DisplayView
+                        {...props}
+                        updateProgress={this.updateProgress}
+                        pid={this.state.pid}
+                        updateTreeDataOnSave={this.updateTreeDataOnSave}
+                        keycloak={this.state.keycloak}
+                        onSwitchView={this.switchView}
+                      />
+                    )}
+                  />
+                  <ProtectedRoute
+                    path="/search/:pid?"
+                    render={props => (
+                      <SearchView
+                        {...props}
+                        clearTreeExpand={this.clearTreeExpand}
+                        updateProgress={this.updateProgress}
+                        progressUpdated={progressUpdated}
+                        expandLevel={this.state.expandLevel}
+                        getTreeExpandSingle={this.getTreeExpandSingle}
+                        getTreeExpandAll={this.getTreeExpandAll}
+                        treeExpand={treeExpand}
+                        getExpandLevel={this.getExpandLevel}
+                        closeBeforeDelete={this.closeBeforeDelete}
+                        // expandLoading={expandLoading}
+                        // updateExpandedLevelNums={this.updateExpandedLevelNums}
+                        onShrink={this.handleShrink}
+                        handleCloseAll={this.handleCloseAll}
+                        treeData={this.state.treeData}
+                        getTreeData={this.getTreeData}
+                        clearTreeData={this.clearTreeData}
+                        updateTreeDataOnSave={this.updateTreeDataOnSave}
+                        closeAllCounter={this.state.closeAll}
+                        pid={this.state.pid}
+                        admin={this.state.admin}
+                      />
+                    )}
+                  />
+                  <ProtectedRoute
+                    path="/search/:pid?"
+                    render={props => (
+                      <SearchView
+                        {...props}
+                        clearTreeExpand={this.clearTreeExpand}
+                        updateProgress={this.updateProgress}
+                        progressUpdated={progressUpdated}
+                        expandLevel={this.state.expandLevel}
+                        getTreeExpandSingle={this.getTreeExpandSingle}
+                        getTreeExpandAll={this.getTreeExpandAll}
+                        treeExpand={treeExpand}
+                        getExpandLevel={this.getExpandLevel}
+                        closeBeforeDelete={this.closeBeforeDelete}
+                        // expandLoading={expandLoading}
+                        // updateExpandedLevelNums={this.updateExpandedLevelNums}
+                        onShrink={this.handleShrink}
+                        handleCloseAll={this.handleCloseAll}
+                        treeData={this.state.treeData}
+                        getTreeData={this.getTreeData}
+                        clearTreeData={this.clearTreeData}
+                        updateTreeDataOnSave={this.updateTreeDataOnSave}
+                        closeAllCounter={this.state.closeAll}
+                        pid={this.state.pid}
+                        admin={this.state.admin}
+                      />
+                    )}
+                  />
+                  <ProtectedRoute path="/anotate" component={AnotateView} />
+                  <ProtectedRoute
+                    path="/progress/:wid?"
+                    component={ProgressView}
+                  />
+                  <ProtectedRoute
+                    path="/flex/:pid?"
+                    render={props => (
+                      <FlexView {...props} pid={this.state.pid} />
+                    )}
+                  />
+                  <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
+                  {/* component={Worklist} /> */}
+                  <Route path="/tools" />
+                  <Route path="/edit" />
+                  <Route path="/loading" component={Loading} />
+                  <Route path="/not-found" component={NotFound} />
+                  <ProtectedRoute
+                    from="/"
+                    exact
+                    to="/search"
+                    render={props => (
+                      <SearchView
+                        {...props}
+                        clearTreeExpand={this.clearTreeExpand}
+                        updateProgress={this.updateProgress}
+                        progressUpdated={progressUpdated}
+                        expandLevel={this.state.expandLevel}
+                        getTreeExpandSingle={this.getTreeExpandSingle}
+                        closeBeforeDelete={this.closeBeforeDelete}
+                        getTreeExpandAll={this.getTreeExpandAll}
+                        treeExpand={treeExpand}
+                        getExpandLevel={this.getExpandLevel}
+                        // expandLoading={expandLoading}
+                        // updateExpandedLevelNums={this.updateExpandedLevelNums}
+                        onShrink={this.handleShrink}
+                        handleCloseAll={this.handleCloseAll}
+                        treeData={this.state.treeData}
+                        getTreeData={this.getTreeData}
+                        clearTreeData={this.clearTreeData}
+                        updateTreeDataOnSave={this.updateTreeDataOnSave}
+                        closeAllCounter={this.state.closeAll}
+                        pid={this.state.pid}
+                        admin={this.state.admin}
+                      />
+                    )}
+                  />
+
+                  <Redirect to="/not-found" />
+                </Switch>
+                {/* {this.props.activePort === 0 ? <AnnotationsList /> : null} */}
+              </Sidebar>
+            </div>
+          )}
+          {this.state.authenticated && mode === 'lite' && (
             <Sidebar
               type={this.state.viewType}
               progressUpdated={progressUpdated}
@@ -1109,7 +1235,7 @@ class App extends Component {
               clearTreeExpand={this.clearTreeExpand}
               projectAdded={this.state.projectAdded}
             >
-              <Switch className="splitted-mainview">
+              <Switch>
                 <Route path="/logout" component={Logout} />
                 <ProtectedRoute
                   path="/display"
@@ -1124,80 +1250,15 @@ class App extends Component {
                     />
                   )}
                 />
-                <ProtectedRoute
-                  path="/search/:pid?"
-                  render={props => (
-                    <SearchView
-                      {...props}
-                      clearTreeExpand={this.clearTreeExpand}
-                      updateProgress={this.updateProgress}
-                      progressUpdated={progressUpdated}
-                      expandLevel={this.state.expandLevel}
-                      getTreeExpandSingle={this.getTreeExpandSingle}
-                      getTreeExpandAll={this.getTreeExpandAll}
-                      treeExpand={treeExpand}
-                      getExpandLevel={this.getExpandLevel}
-                      closeBeforeDelete={this.closeBeforeDelete}
-                      // expandLoading={expandLoading}
-                      // updateExpandedLevelNums={this.updateExpandedLevelNums}
-                      onShrink={this.handleShrink}
-                      handleCloseAll={this.handleCloseAll}
-                      treeData={this.state.treeData}
-                      getTreeData={this.getTreeData}
-                      clearTreeData={this.clearTreeData}
-                      updateTreeDataOnSave={this.updateTreeDataOnSave}
-                      closeAllCounter={this.state.closeAll}
-                      pid={this.state.pid}
-                      admin={this.state.admin}
-                    />
-                  )}
-                />
-                <ProtectedRoute
-                  path="/search/:pid?"
-                  render={props => (
-                    <SearchView
-                      {...props}
-                      clearTreeExpand={this.clearTreeExpand}
-                      updateProgress={this.updateProgress}
-                      progressUpdated={progressUpdated}
-                      expandLevel={this.state.expandLevel}
-                      getTreeExpandSingle={this.getTreeExpandSingle}
-                      getTreeExpandAll={this.getTreeExpandAll}
-                      treeExpand={treeExpand}
-                      getExpandLevel={this.getExpandLevel}
-                      closeBeforeDelete={this.closeBeforeDelete}
-                      // expandLoading={expandLoading}
-                      // updateExpandedLevelNums={this.updateExpandedLevelNums}
-                      onShrink={this.handleShrink}
-                      handleCloseAll={this.handleCloseAll}
-                      treeData={this.state.treeData}
-                      getTreeData={this.getTreeData}
-                      clearTreeData={this.clearTreeData}
-                      updateTreeDataOnSave={this.updateTreeDataOnSave}
-                      closeAllCounter={this.state.closeAll}
-                      pid={this.state.pid}
-                      admin={this.state.admin}
-                    />
-                  )}
-                />
-                <ProtectedRoute path="/anotate" component={AnotateView} />
+                <Route path="/loading" component={Loading} />
+                <Route path="/not-found" component={NotFound} />
+                <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 <ProtectedRoute
                   path="/progress/:wid?"
                   component={ProgressView}
                 />
                 <ProtectedRoute
-                  path="/flex/:pid?"
-                  render={props => <FlexView {...props} pid={this.state.pid} />}
-                />
-                <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
-                {/* component={Worklist} /> */}
-                <Route path="/tools" />
-                <Route path="/edit" />
-                <Route path="/not-found" component={NotFound} />
-                <ProtectedRoute
-                  from="/"
-                  exact
-                  to="/search"
+                  path="/"
                   render={props => (
                     <SearchView
                       {...props}
@@ -1210,90 +1271,28 @@ class App extends Component {
                       getTreeExpandAll={this.getTreeExpandAll}
                       treeExpand={treeExpand}
                       getExpandLevel={this.getExpandLevel}
+                      pid={this.state.pid}
                       // expandLoading={expandLoading}
                       // updateExpandedLevelNums={this.updateExpandedLevelNums}
                       onShrink={this.handleShrink}
                       handleCloseAll={this.handleCloseAll}
-                      treeData={this.state.treeData}
+                      // treeData={this.state.treeData}
                       getTreeData={this.getTreeData}
-                      clearTreeData={this.clearTreeData}
-                      updateTreeDataOnSave={this.updateTreeDataOnSave}
                       closeAllCounter={this.state.closeAll}
-                      pid={this.state.pid}
                       admin={this.state.admin}
                     />
                   )}
                 />
-
                 <Redirect to="/not-found" />
               </Switch>
-              {/* {this.props.activePort === 0 ? <AnnotationsList /> : null} */}
             </Sidebar>
-          </div>
-        )}
-        {this.state.authenticated && mode === 'lite' && (
-          <Sidebar
-            type={this.state.viewType}
-            progressUpdated={progressUpdated}
-            getPidUpdate={this.getPidUpdate}
-            pid={this.state.pid}
-            clearTreeExpand={this.clearTreeExpand}
-            projectAdded={this.state.projectAdded}
-          >
-            <Switch>
-              <Route path="/logout" component={Logout} />
-              <ProtectedRoute
-                path="/display"
-                render={props => (
-                  <DisplayView
-                    {...props}
-                    updateProgress={this.updateProgress}
-                    pid={this.state.pid}
-                    updateTreeDataOnSave={this.updateTreeDataOnSave}
-                    keycloak={this.state.keycloak}
-                    onSwitchView={this.switchView}
-                  />
-                )}
-              />
-              <Route path="/not-found" component={NotFound} />
-              <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
-              <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
-              <ProtectedRoute
-                path="/"
-                render={props => (
-                  <SearchView
-                    {...props}
-                    clearTreeExpand={this.clearTreeExpand}
-                    updateProgress={this.updateProgress}
-                    progressUpdated={progressUpdated}
-                    expandLevel={this.state.expandLevel}
-                    getTreeExpandSingle={this.getTreeExpandSingle}
-                    closeBeforeDelete={this.closeBeforeDelete}
-                    getTreeExpandAll={this.getTreeExpandAll}
-                    treeExpand={treeExpand}
-                    getExpandLevel={this.getExpandLevel}
-                    pid={this.state.pid}
-                    // expandLoading={expandLoading}
-                    // updateExpandedLevelNums={this.updateExpandedLevelNums}
-                    onShrink={this.handleShrink}
-                    handleCloseAll={this.handleCloseAll}
-                    // treeData={this.state.treeData}
-                    getTreeData={this.getTreeData}
-                    closeAllCounter={this.state.closeAll}
-                    admin={this.state.admin}
-                  />
-                )}
-              />
-              <Redirect to="/not-found" />
-            </Switch>
-          </Sidebar>
-        )}
-        {this.props.showGridFullAlert && <MaxViewAlert />}
-        {/* {this.props.selection && (
+          )}
+          {this.props.showGridFullAlert && <MaxViewAlert />}
+          {/* {this.props.selection && (
           <ManagementItemModal selection={this.props.selection} />
         )} */}
-        {/* </AuthConsumer> */}
-      </ErrorBoundary>
+        </ErrorBoundary>
+      </AuthProvider> 
     );
   }
 }

@@ -138,6 +138,10 @@ export class AuthService {
     return user;
   };
 
+  signinCallback = async () => {
+    const user = await this.UserManager.signinCallback()
+  }
+
   getUser = async () => {
     let user = await this.UserManager.getUser();
     if (!user) {
@@ -160,9 +164,9 @@ export class AuthService {
     console.log(exp);
   };
 
-  signinRedirectPopUp = () => {
-    localStorage.setItem('redirectUri', window.location.pathname);
-    this.UserManager.signinPopup({});
+  signinPopup = async () => {
+    const exp = await this.UserManager.signinPopup();
+    console.log(exp);
   };
 
   navigateToScreen = () => {
