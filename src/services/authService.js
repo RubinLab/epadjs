@@ -106,7 +106,6 @@ export class AuthService {
       client_id: this.client_id,
       redirect_uri: this.redirect_uri,
       response_type: this.response_type,
-      response_mode: 'fragment',
       scope: this.scope,
       silent_redirect_uri: this.redirect_uri,
       automaticSilentRenew: true,
