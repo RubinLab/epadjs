@@ -15,7 +15,7 @@ import AnotateView from './components/anotateView';
 import ProgressView from './components/progressView';
 import FlexView from './components/flexView';
 import NotFound from './components/notFound';
-import Loading from './components/Loading';
+// import Loading from './components/Loading';
 import LoginForm from './components/loginForm';
 import Logout from './components/logout';
 import ProtectedRoute from './components/common/protectedRoute';
@@ -109,7 +109,16 @@ class App extends Component {
       minReportsArr: [],
       hiddenReports: {},
       metric: null
-      // authService: new UserManager()
+      // authService: new UserManager({
+      //   clientId: this.clientId,
+      //   redirectUri: this.redirectUri,
+      //   responseType: this.responseType,
+      //   scope: this.scope,
+      //   silentRedirectUri: this.redirectUri,
+      //   automaticSilentRenew: true,
+      //   loadUserInfo: true,
+      //   postLogoutRedirectUri: this.redirectUri,
+      // })
       // authority: '',
       // clientId: '',
       // redirectUri: '',
@@ -779,10 +788,40 @@ class App extends Component {
   };
 
   onLogout = e => {
-    auth.logout();
-    this.authService.logout();
+    // auth.logout();
+    // this.authService.logout();
+
+    const userInfoKey = `oidc.user:${this.authority}:${this.clientId}`;
+    let user = JSON.parse(sessionStorage.getItem(userInfoKey));
+    const { authority, clientId, redirectUri, responseType, scope } = this;
+    console.log(UserManager);
+    const userManager = new UserManager({
+      authority,
+      clientId,
+      redirectUri,
+      responseType,
+      scope,
+      automaticSilentRenew: true,
+      silentRedirectUri: redirectUri,
+      postLogoutRedirectUri: redirectUri,
+      loadUserInfo: true
+    });
+    console.log(userManager);
+    alert(' +++ logout called in App.js +++ ', AuthProvider.UserManager);
+    alert(' ===> user id token', user.id_token);
+    userManager
+      .signoutRedirect({
+        id_token_hint: user.id_token
+      })
+      .then(res => {
+        alert('then', res);
+        // window.location.replace(redirectUri);
+      })
+      .catch(err => console.log(err));
+    userManager.clearStaleState();
+
     // sessionStorage.removeItem("annotations");
-    sessionStorage.setItem('notifications', JSON.stringify([]));
+    // sessionStorage.setItem('notifications', JSON.stringify([]));
     this.setState({
       authenticated: false,
       id: null,
@@ -790,11 +829,15 @@ class App extends Component {
       user: null
     });
     if (sessionStorage.getItem('authMode') !== 'external') {
-      this.authService.logout();
+      // this.authService.logout();
       this.setState({
         authService: null
       });
     } else console.log('No logout in external authentication mode');
+
+    // Window.localStorage.clear();
+    // Window.sessionStorage.clear();
+    // Storage.clear();
   };
 
   updateNotificationSeen = () => {
@@ -1021,11 +1064,11 @@ class App extends Component {
     }
 
     const { authority, clientId, redirectUri, responseType, scope } = this;
-    // console.log(' ----> authority', authority);
+    console.log(' ----> authority', authority);
     // console.log(' ----> clientId', clientId);
     // console.log(' ----> redirectUri', redirectUri);
     // console.log(' ----> responseType', responseType);
-    console.log(' ----> scope', scope);
+    // console.log(' ----> scope', scope);
 
     const oidcConfig = {
       onSignIn: async user => {
@@ -1040,11 +1083,18 @@ class App extends Component {
           console.error(err);
         }
       },
+      onSignOut: async res => {
+        console.log(' ---> logout in config');
+      },
       authority,
       clientId,
       redirectUri,
       responseType,
-      scope
+      scope,
+      automaticSilentRenew: true,
+      silentRedirectUri: redirectUri,
+      postLogoutRedirectUri: redirectUri,
+      loadUserInfo: true
     };
 
     return (
@@ -1222,7 +1272,7 @@ class App extends Component {
                   {/* component={Worklist} /> */}
                   <Route path="/tools" />
                   <Route path="/edit" />
-                  <Route path="/loading" component={Loading} />
+                  {/* <Route path="/loading" component={Loading} /> */}
                   <Route path="/not-found" component={NotFound} />
                   <ProtectedRoute
                     from="/"
