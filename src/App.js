@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
-import { AuthProvider } from 'oidc-react';
+import { AuthProvider, UserManager } from 'oidc-react';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import Keycloak from 'keycloak-js';
 import _ from 'lodash';
@@ -15,6 +15,7 @@ import AnotateView from './components/anotateView';
 import ProgressView from './components/progressView';
 import FlexView from './components/flexView';
 import NotFound from './components/notFound';
+import Loading from './components/Loading';
 import LoginForm from './components/loginForm';
 import Logout from './components/logout';
 import ProtectedRoute from './components/common/protectedRoute';
@@ -72,11 +73,11 @@ class App extends Component {
   constructor(props) {
     super(props);
     console.log(' ----> in constructor');
-    // this.authority = 'http://bds-c02xf0r0jhd5.local:8899/auth/realms/ePad';
-    // this.clientId = 'epad-auth';
-    // this.redirectUri = 'http://bds-c02xf0r0jhd5.local:3000/*';
-    // this.responseType = 'code';
-    // this.scope = 'openid profile';
+    this.authority = process.env.REACT_APP_AUTHORITY;
+    this.clientId = process.env.REACT_APP_CLIENT_ID;
+    this.redirectUri = process.env.REACT_APP_REDIRECT_URI;
+    this.responseType = process.env.REACT_APP_RESPONSE_TYPE;
+    this.scope = process.env.REACT_APP_SCOPE;
 
     this.eventSource = null;
     this.state = {
@@ -107,12 +108,14 @@ class App extends Component {
       reportsCompArr: [],
       minReportsArr: [],
       hiddenReports: {},
-      metric: null,
+      metric: null
+      // authService: new UserManager()
       // authority: '',
       // clientId: '',
       // redirectUri: '',
       // responseType: '',
       // scope: ''
+      // oidcConfig: {}
     };
   }
 
@@ -521,6 +524,26 @@ class App extends Component {
 
   async componentDidMount() {
     localStorage.setItem('treeData', JSON.stringify({}));
+    /*
+    const { authority, clientId, redirectUri, responseType, scope } = this;
+
+    const oidcConfig = {
+      onSignIn: async user => {
+        // alert('You just signed in, congratz! Check out the console!');
+        console.log('You just signed in, congratz! Check out the console!');
+        console.log(user);
+        window.location.hash = '';
+      },
+      authority,
+      clientId,
+      redirectUri,
+      responseType,
+      scope
+    };
+
+    this.setState({ oidcConfig });
+    */
+
     console.log('process.env.PUBLIC_URL', process.env.PUBLIC_URL);
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),
@@ -569,7 +592,7 @@ class App extends Component {
           mode,
           apiUrl,
           wadoUrl,
-          authMode,
+          authMode
           // authority,
           // clientId,
           // redirectUri,
@@ -589,7 +612,7 @@ class App extends Component {
           process.env.REACT_APP_AUTH_RESOURCE || keycloakData.resource;
         sessionStorage.setItem('auth', auth);
         sessionStorage.setItem('keycloakJson', JSON.stringify(keycloakJson));
-        this.completeAutorization();
+        // this.completeAutorization();
         if (mode === 'lite') this.setState({ pid: 'lite' });
       })
       .catch(err => {
@@ -660,8 +683,8 @@ class App extends Component {
     // await auth.login(user, null, result.keycloak);
 
     this.setState({
-      id: source.sub,
-      user
+      user,
+      authenticated: true
     });
     const { email, family_name, given_name, preferred_username } = source;
     const username = preferred_username || email;
@@ -669,14 +692,16 @@ class App extends Component {
     sessionStorage.setItem('username', username);
     sessionStorage.setItem('displayName', username);
 
-    const apiUrl = sessionStorage.getItem('apiUrl')
+    const apiUrl = sessionStorage.getItem('apiUrl');
 
     let userData;
     try {
       userData = await getUser(username);
+      console.log(' ---> username', username);
+      console.log(username);
       userData = userData.data;
       this.setState({ admin: userData.admin });
-      const { access_token } = await this.authService.getUser();
+      const { access_token } = userInfo;
       this.eventSource = new EventSourcePolyfill(
         `${apiUrl}/notifications`,
         access_token
@@ -995,24 +1020,35 @@ class App extends Component {
       }, 0);
     }
 
-    // const {
-    //   authority,
-    //   clientId,
-    //   redirectUri,
-    //   responseType,
-    //   scope
-    // } = this.state;
+    const { authority, clientId, redirectUri, responseType, scope } = this;
+    // console.log(' ----> authority', authority);
+    // console.log(' ----> clientId', clientId);
+    // console.log(' ----> redirectUri', redirectUri);
+    // console.log(' ----> responseType', responseType);
+    console.log(' ----> scope', scope);
 
-    // const oidcConfig = {
-    //   authority,
-    //   clientId,
-    //   redirectUri,
-    //   responseType,
-    //   scope
-    // };
+    const oidcConfig = {
+      onSignIn: async user => {
+        try {
+          // await AuthProvider.signinRedirectCallback();
+          await this.registerUser(user);
+          // this.props.history.push(`/search`);
+          // alert('You just signed in, congratz! Check out the console!');
+          console.log('You just signed in, congratz! Check out the console!');
+          console.log(user);
+        } catch (err) {
+          console.error(err);
+        }
+      },
+      authority,
+      clientId,
+      redirectUri,
+      responseType,
+      scope
+    };
 
     return (
-      <AuthProvider>
+      <AuthProvider {...oidcConfig}>
         <ErrorBoundary>
           <Cornerstone />
           <ToastContainer />
@@ -1186,6 +1222,7 @@ class App extends Component {
                   {/* component={Worklist} /> */}
                   <Route path="/tools" />
                   <Route path="/edit" />
+                  <Route path="/loading" component={Loading} />
                   <Route path="/not-found" component={NotFound} />
                   <ProtectedRoute
                     from="/"
@@ -1248,6 +1285,7 @@ class App extends Component {
                     />
                   )}
                 />
+                <Route path="/loading" component={Loading} />
                 <Route path="/not-found" component={NotFound} />
                 <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 <ProtectedRoute
@@ -1289,7 +1327,7 @@ class App extends Component {
           <ManagementItemModal selection={this.props.selection} />
         )} */}
         </ErrorBoundary>
-      </AuthProvider> 
+      </AuthProvider>
     );
   }
 }

@@ -1,6 +1,6 @@
 'use strict';
 
-import { UserManager, WebStorageStateStore, Log } from 'oidc-client';
+// import { UserManager, WebStorageStateStore, Log } from 'oidc-client';
 const urls = {};
 import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
 
@@ -71,6 +71,34 @@ export function getCurrentUser() {
 // }
 
 export async function getAuthHeader() {
+  try {
+    const clientId = sessionStorage.getItem('client_id');
+    const authority = sessionStorage.getItem('authority');
+    const userInfoKey = `oidc.user:${authority}:${clientId}`;
+    let user = JSON.parse(sessionStorage.getItem(userInfoKey));
+    if (user.access_token) {
+      // TODO: refresh token
+      const header = `Bearer ${user.access_token}`;
+      if (header) {
+        cornerstoneWADOImageLoader.configure({
+          beforeSend: function(xhr) {
+            xhr.setRequestHeader('Authorization', header);
+          }
+        });
+        return header;
+      }
+    }
+    console.log(' ----------->>>>>>>>>>> user in getAuthHeader', user);
+  } catch (err) {
+    // TODO logout
+    console.log(err);
+    // authService.logout();
+  }
+  return undefined;
+}
+
+/*
+export async function getAuthHeader() {
   authService = new AuthService();
   try {
     const user = await authService.getUser();
@@ -92,7 +120,8 @@ export async function getAuthHeader() {
   }
   return undefined;
 }
-
+*/
+/*
 export class AuthService {
   UserManager;
   constructor() {
@@ -218,12 +247,12 @@ export class AuthService {
     this.UserManager.clearStaleState();
   };
 }
-
+*/
 export default {
   login,
   logout,
   getCurrentUser,
   getAuthHeader,
-  refreshToken,
-  AuthService
+  refreshToken
+  // AuthService
 };
