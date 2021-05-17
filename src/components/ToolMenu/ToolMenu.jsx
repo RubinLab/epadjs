@@ -322,13 +322,13 @@ class ToolMenu extends Component {
       this.setState({ showBrushSize: true });
     } else if (tool === "Brush3DHUGated") {
       if (this.checkIfMultiframe()) { alert("Segmentation tools only works with singleframe images"); return; }
-      this.setState({ showBrushSize: true, isHuGated: true, showSmartBrush: true });
+      this.setState({ showBrushSize: true, isHuGated: true, showSmartBrush: true, isSpherical: false });
     } else if (tool === "BrushSphericalHUGated") {
       if (this.checkIfMultiframe()) { alert("Segmentation tools only works with singleframe images"); return; }
-      this.setState({ showBrushSize: true, isHuGated: true, showSmartBrush: true });
+      this.setState({ showBrushSize: true, isHuGated: true, showSmartBrush: true, isSpherical: true });
     } else if (tool === "Brush3DAutoGated") {
       if (this.checkIfMultiframe()) { alert("Segmentation tools only works with singleframe images"); return; }
-      this.setState({ showBrushSize: true, isHuGated: false, showSmartBrush: true });
+      this.setState({ showBrushSize: true, isHuGated: false, showSmartBrush: true, isSpherical: false });
     } else if (tool === "FreehandRoi3DTool") {
       this.selectFreehand();
       this.setState({ showInterpolation: true });
@@ -743,7 +743,7 @@ class ToolMenu extends Component {
           )}
         {(this.state.activeTool === "Brush3DHUGated" || this.state.activeTool === "BrushSphericalHUGated" || this.state.activeTool === "Brush3DAutoGated") &&
           this.state.showSmartBrush && (
-            <SmartBrushMenu activePort={this.props.activePort} onClose={this.closeSmartBrushMenu} isHuGated={this.state.isHuGated} />
+            <SmartBrushMenu activePort={this.props.activePort} onClose={this.closeSmartBrushMenu} isHuGated={this.state.isHuGated} isSphericalBrush={this.state.isSpherical} />
           )}
         {this.state.showPresets && (
           <WindowLevel

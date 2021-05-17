@@ -107,7 +107,7 @@ class SmartBrushMenu extends Component {
 
   render() {
     const maxApplyToImageNum = this.getLastImageIndexOfSeries();
-    const { isHuGated } = this.props;
+    const { isHuGated, isSphericalBrush } = this.props;
     const isCT = this.checkIfCT();
     let minValue = 0, maxValue = 255;
     if (isCT !== undefined && !isCT) {
@@ -125,45 +125,47 @@ class SmartBrushMenu extends Component {
             <span>Brush Menu</span>
           </div>
           <hr />
-          <div>
-            <span>Apply to whole image </span>
-            <input
-              type="checkbox"
-              name="applyToImage"
-              onChange={this.handleApplyToImageChange}
-              disabled={this.state.applyToImageDisabled}
-            />
-          </div>
-          <div>
-            <span>Apply images </span>
-            <input type="number"
-              min="1"
-              max={maxApplyToImageNum - 1}
-              value={this.state.minInterval}
-              className={"slice-field"}
-              onChange={this.handleApplyToMinChange}
-              style={{
-                width: "50px",
-                height: "20px",
-                opacity: 1,
-              }}
-              disabled={this.state.intervalDisabled}
-            />
-            <span> to </span>
-            <input type="number"
-              min="2"
-              max={maxApplyToImageNum}
-              value={this.state.maxInterval}
-              className={"slice-field"}
-              onChange={this.handleApplyToMaxChange}
-              style={{
-                width: "50px",
-                height: "20px",
-                opacity: 1,
-              }}
-              disabled={this.state.intervalDisabled}
-            />
-          </div>
+          {!isSphericalBrush && (
+            <div>
+              <div>
+                <span>Apply to whole image </span>
+                <input
+                  type="checkbox"
+                  name="applyToImage"
+                  onChange={this.handleApplyToImageChange}
+                  disabled={this.state.applyToImageDisabled}
+                />
+              </div>
+              <div>
+                <span>Apply images </span>
+                <input type="number"
+                  min="1"
+                  max={maxApplyToImageNum - 1}
+                  value={this.state.minInterval}
+                  className={"slice-field"}
+                  onChange={this.handleApplyToMinChange}
+                  style={{
+                    width: "50px",
+                    height: "20px",
+                    opacity: 1,
+                  }}
+                  disabled={this.state.intervalDisabled}
+                />
+                <span> to </span>
+                <input type="number"
+                  min="2"
+                  max={maxApplyToImageNum}
+                  value={this.state.maxInterval}
+                  className={"slice-field"}
+                  onChange={this.handleApplyToMaxChange}
+                  style={{
+                    width: "50px",
+                    height: "20px",
+                    opacity: 1,
+                  }}
+                  disabled={this.state.intervalDisabled}
+                />
+              </div> </div>)}
           {isHuGated && isCT && (
             <div className="brush-presets">
               {brushModule.state.gates.map((gate, i) => (
