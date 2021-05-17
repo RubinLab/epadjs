@@ -101,6 +101,7 @@ const tools = [
   { name: "Brush3D" },
   { name: "SphericalBrush" },
   { name: "Brush3DHUGated" },
+  { name: "BrushSphericalHUGated" },
   { name: "Brush3DAutoGated" },
 ];
 
@@ -217,6 +218,11 @@ class ToolMenu extends Component {
         tool: "Brush3DHUGated",
       },
       {
+        name: "Brush Sp Gated",
+        icon: <FaBroom />,
+        tool: "BrushSphericalHUGated",
+      },
+      {
         name: "Brush Auto Gated",
         icon: <FaBroom />,
         tool: "Brush3DAutoGated",
@@ -315,16 +321,13 @@ class ToolMenu extends Component {
       } //Dont" select the HUGated if the modality is not CT
       this.setState({ showBrushSize: true });
     } else if (tool === "Brush3DHUGated") {
-      if (this.checkIfMultiframe()) { alert("Auto Gated tool only works with singleframe images"); }
-      // TODO emel: isn't it bug prone. although it is not going to work, we are setting the state
+      if (this.checkIfMultiframe()) { alert("Segmentation tools only works with singleframe images"); return; }
+      this.setState({ showBrushSize: true, isHuGated: true, showSmartBrush: true });
+    } else if (tool === "BrushSphericalHUGated") {
+      if (this.checkIfMultiframe()) { alert("Segmentation tools only works with singleframe images"); return; }
       this.setState({ showBrushSize: true, isHuGated: true, showSmartBrush: true });
     } else if (tool === "Brush3DAutoGated") {
-      if (this.checkIfMultiframe()) {
-        // if (!this.checkIfCT() || this.checkIfMultiframe()) {
-        alert("Auto Gated tool only works with singleframe images");
-        // return;
-      } //Dont" select the HUGated if the modality is not CT
-      // TODO emel: isn't it bug prone. although it is not going to work, we are setting the state
+      if (this.checkIfMultiframe()) { alert("Segmentation tools only works with singleframe images"); return; }
       this.setState({ showBrushSize: true, isHuGated: false, showSmartBrush: true });
     } else if (tool === "FreehandRoi3DTool") {
       this.selectFreehand();
@@ -733,11 +736,12 @@ class ToolMenu extends Component {
         {(this.state.activeTool === "Brush3D" ||
           this.state.activeTool === "SphericalBrush" ||
           this.state.activeTool === "Brush3DHUGated" ||
+          this.state.activeTool === "BrushSphericalHUGated" ||
           this.state.activeTool === "Brush3DAutoGated") &&
           this.state.showBrushSize && (
             <BrushSizeSelector onClose={this.closeBrushSize} />
           )}
-        {(this.state.activeTool === "Brush3DHUGated" || this.state.activeTool === "Brush3DAutoGated") &&
+        {(this.state.activeTool === "Brush3DHUGated" || this.state.activeTool === "BrushSphericalHUGated" || this.state.activeTool === "Brush3DAutoGated") &&
           this.state.showSmartBrush && (
             <SmartBrushMenu activePort={this.props.activePort} onClose={this.closeSmartBrushMenu} isHuGated={this.state.isHuGated} />
           )}
