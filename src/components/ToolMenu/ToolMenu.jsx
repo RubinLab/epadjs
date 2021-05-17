@@ -26,7 +26,8 @@ import {
   FaCircle,
   FaMousePointer,
   FaPalette,
-  FaObjectUngroup
+  FaObjectUngroup,
+  FaDotCircle
 } from "react-icons/fa";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
@@ -213,22 +214,22 @@ class ToolMenu extends Component {
         tool: "Brush3D",
       },
       {
-        name: "Brush Gated",
+        name: "Gated",
         icon: <FaBroom />,
         tool: "Brush3DHUGated",
       },
       {
-        name: "Brush Sp Gated",
-        icon: <FaBroom />,
+        name: "Spherical Gated",
+        icon: <FaDotCircle />,
         tool: "BrushSphericalHUGated",
       },
       {
-        name: "Brush Auto Gated",
+        name: "Auto Gated",
         icon: <FaBroom />,
         tool: "Brush3DAutoGated",
       },
       {
-        name: "Spherical Brush",
+        name: "Spherical",
         icon: <IoMdEgg />,
         tool: "SphericalBrush",
       },
