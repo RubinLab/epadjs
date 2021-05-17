@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Table from "react-table";
+import Table from "react-table-v6";
 import { FaRegTrashAlt, FaEdit, FaRegEye } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import "../menuStyle.css";

@@ -10,26 +10,30 @@ class SeriesCreationForm extends React.Component {
     abbreviation: "",
     error: "",
     subjects: [],
-    studies: [],
+    studies: []
   };
 
   componentDidMount = async () => {
-    const { selectedPatients, selectedStudies } = this.props;
-    if (selectedPatients.length) {
-      this.setState({ subjectID: selectedPatients[0].patientID });
-      this.getStudies(selectedPatients[0].patientID);
-    } else if (selectedStudies.length) {
+    const { selectedPatients, selectedStudies, project } = this.props;
+    const treeData = JSON.parse(localStorage.getItem("treeData"));
+    const subjects = Object.values(treeData[project]).map(el => el.data);
+
+    if (selectedStudies.length) {
       this.setState({
         subjectID: selectedStudies[0].patientID,
         study: selectedStudies[0].studyUID,
+        subjects
       });
       this.getStudies(
         selectedStudies[0].patientID,
         selectedStudies[0].studyUID
       );
+    } else if (selectedPatients.length) {
+      this.setState({ subjectID: selectedPatients[0].patientID, subjects });
+      this.getStudies(selectedPatients[0].patientID);
     } else {
-      this.setState({ subjectID: this.props.subjects[0].subjectID });
-      this.getStudies(this.props.subjects[0].patientID);
+      this.setState({ subjectID: subjects[0].subjectID, subjects });
+      this.getStudies(subjects[0].subjectID);
     }
   };
 
@@ -50,7 +54,7 @@ class SeriesCreationForm extends React.Component {
             projectID: this.props.project,
             patientID: subjectID,
             studyUID: study,
-            seriesUID: abbreviation,
+            seriesUID: abbreviation
           };
           this.props.onSubmit();
           this.props.onCancel();
@@ -68,7 +72,7 @@ class SeriesCreationForm extends React.Component {
 
   getStudies = async (selectedSubjectID, stuid) => {
     let studies = [];
-    const subjectID = selectedSubjectID || this.props.subjects[0].subjectID;
+    const subjectID = selectedSubjectID || this.state.subjects[0]?.subjectID;
     try {
       const { data: studies } = await getStudies(this.props.project, subjectID);
       // studies = result.data.ResultSet.Result;
@@ -98,7 +102,7 @@ class SeriesCreationForm extends React.Component {
       patient: "",
       abbreviation: "",
       study: "",
-      error: "",
+      error: ""
     });
     this.props.onCancel();
   };
@@ -114,7 +118,7 @@ class SeriesCreationForm extends React.Component {
 
   renderPatients = () => {
     const options = [];
-    for (let patient of this.props.subjects) {
+    for (let patient of this.state.subjects) {
       let patientName = this.clearCarets(patient.subjectName);
       patientName = patientName || "Unnamed Patient";
       options.push(

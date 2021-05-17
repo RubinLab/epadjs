@@ -6,6 +6,7 @@ import {
   FaCaretDown,
   FaCaretUp,
   FaEdit,
+  FaTrashAlt
 } from "react-icons/fa";
 import AimEntityData from "./aimEntityData";
 import CalculationLabel from "./calculationLabel";
@@ -48,8 +49,8 @@ const annotation = (props) => {
           {props.showLabel ? (
             <FaCaretUp className="clickable-icon" />
           ) : (
-            <FaCaretDown className="clickable-icon" />
-          )}
+              <FaCaretDown className="clickable-icon" />
+            )}
         </div>
         <div
           className="annotation-name__container"
@@ -66,6 +67,12 @@ const annotation = (props) => {
         </div>
         <div
           className="annotation-icon"
+          onClick={() => props.onDelete(props.aim)}
+        >
+          <FaTrashAlt className="clickable-icon" />
+        </div>
+        <div
+          className="annotation-icon"
           onClick={props.onClick}
           data-id={props.id}
           id={props.id}
@@ -73,8 +80,8 @@ const annotation = (props) => {
           {props.displayed ? (
             <FaRegEye id={props.id} className="clickable-icon" />
           ) : (
-            <FaRegEyeSlash id={props.id} className="clickable-icon" />
-          )}
+              <FaRegEyeSlash id={props.id} className="clickable-icon" />
+            )}
         </div>
       </div>
       {props.showLabel && (

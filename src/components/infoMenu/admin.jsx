@@ -1,5 +1,5 @@
 import React from "react";
-import Table from "react-table";
+import Table from "react-table-v6";
 import { FaRegTrashAlt } from "react-icons/fa";
 import ToolBar from "../management/common/basicToolBar";
 import http from "../../services/httpService";

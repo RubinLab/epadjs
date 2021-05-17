@@ -1,6 +1,7 @@
 import React from "react";
-import Table from "react-table";
+import Table from "react-table-v6";
 import { connect } from "react-redux";
+import { toast } from "react-toastify";
 import { FaRegEye } from "react-icons/fa";
 import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
@@ -37,7 +38,9 @@ const mode = sessionStorage.getItem("mode");
 const messages = {
   deleteSingle: "Remove study from the worklist? This cannot be undone.",
   deleteSelected:
-    "Delete selected studies from the worklist? This cannot be undone."
+    "Delete selected studies from the worklist? This cannot be undone.",
+  notAuthorizedProjects:
+    "You do not have access to all of the projects of the worklist. Please contact to your admin about projects:"
 };
 
 class WorkList extends React.Component {
@@ -56,25 +59,50 @@ class WorkList extends React.Component {
   };
 
   componentDidMount = async () => {
-    this.getWorkListData();
+    this.getWorkListData(true);
   };
 
   componentDidUpdate = prevProps => {
     if (prevProps.match.params.wid !== this.props.match.params.wid) {
-      this.getWorkListData();
+      this.getWorkListData(true);
     }
   };
 
-  getWorkListData = async () => {
+  filterProjects = worklists => {
+    const filteredWorklists = [];
+    const notAuthorized = [];
+    const { projectMap } = this.props;
+    worklists.forEach((el, i) => {
+      if (!projectMap[el.projectID])
+        notAuthorized.push(el.projectID);
+      else filteredWorklists.push(el);
+    });
+    return { notAuthorized, filteredWorklists };
+  };
+
+  getWorkListData = async (showError) => {
     const { data: worklists } = await getStudiesOfWorklist(
       sessionStorage.getItem("username"),
       this.props.match.params.wid
     );
-    // for (let worklist of worklists) {
-    //   const { data: projectDetails } = await getProject(worklist.projectID);
-    //   worklist.projectName = projectDetails.name;
-    // }
-    this.setState({ worklists });
+    const { notAuthorized, filteredWorklists } = this.filterProjects(worklists);
+    this.setState({ worklists: filteredWorklists });
+    if (showError && Array.isArray(notAuthorized) && notAuthorized.length > 0) {
+      const projectList = notAuthorized.reduce((all, item, i) => {
+        return `${all} ${item}${
+          notAuthorized.length - 1 === i ? "" : ", "
+        }`;
+      }, "");
+      const message = `${messages.notAuthorizedProjects} ${projectList}`
+      toast.error(message, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
   };
 
   handleCancel = () => {
@@ -329,10 +357,16 @@ class WorkList extends React.Component {
         resizable: true,
         show: mode === "thick",
         Cell: original => {
-          let { projectName } = this.props.projectMap[
-            original.row._original.projectID
-          ];
-          return <div>{projectName}</div>;
+          const { projectMap } = this.props;
+          const { projectID } = original.row._original;
+          if (!projectMap[projectID]) {
+            return null;
+          } else {
+            let { projectName } = this.props.projectMap[
+              original.row._original.projectID
+            ];
+            return <div>{projectName}</div>;
+          }
         }
       },
       {
@@ -375,7 +409,7 @@ class WorkList extends React.Component {
                 variant="success"
                 data-tip
                 data-for={`progress-verified-button${original.index}`}
-                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem"}}
+                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
                 onClick={() =>
                   this.handleClickProgresButton(
                     workListID,
@@ -415,7 +449,7 @@ class WorkList extends React.Component {
                 variant="warning"
                 data-tip
                 data-for={`progress-inprogress-button${original.index}`}
-                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem"}}
+                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
                 onClick={() =>
                   this.handleClickProgresButton(
                     workListID,
@@ -455,7 +489,7 @@ class WorkList extends React.Component {
                 variant="danger"
                 data-tip
                 data-for={`progress-notStarted-button${original.index}`}
-                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem"}}
+                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
                 onClick={() =>
                   this.handleClickProgresButton(
                     workListID,
@@ -497,7 +531,7 @@ class WorkList extends React.Component {
                 variant={progressType === "AUTO" ? "secondary" : "info"}
                 data-tip
                 data-for={`progress-auto-button${original.index}`}
-                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem"}}
+                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
                 onClick={() =>
                   this.handleClickProgresButton(
                     workListID,

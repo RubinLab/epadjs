@@ -61,6 +61,7 @@ const projectEditingForm = ({
             className="add-project__modal--select"
             onChange={onType}
             defaultValue={defaultTemplate}
+            onMouseDown={e => e.stopPropagation()}
           >
             {options}
           </select>
@@ -70,6 +71,7 @@ const projectEditingForm = ({
             className="edit-project__modal--select"
             onChange={onType}
             defaultValue={type}
+            onMouseDown={e => e.stopPropagation()}
           >
             <option value="Private">Private</option>
             <option value="Public">Public</option>

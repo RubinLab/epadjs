@@ -68,31 +68,29 @@ export function getAnnotations2() {
 }
 
 export function downloadAnnotations(optionObj, aimIDlist, projectID) {
-  console.log(optionObj, aimIDlist, projectID);
   projectID = projectID || "lite";
-  return http.post(
-    apiUrl +
-      "/projects/" +
-      projectID +
-      "/aims/download?summary=" +
-      optionObj.summary +
-      "&aim=" +
-      optionObj.aim +
-      "&seg=" +
-      optionObj.seg,
-    aimIDlist,
-    { responseType: "blob" }
-  );
+  const { summary, aim, seg } = optionObj;
+  const url = `${apiUrl}/projects/${projectID}/aims/download?summary=${summary}&aim=${aim}&seg=${seg}`;
+  return http.post(url, aimIDlist, { responseType: "blob" });
 }
 
-export function getAllAnnotations() {
-  return http.get(apiUrl + "/aims?format=summary");
+export function downloadProjectAnnotation(pid) {
+  return http.get(`${apiUrl}/projects/${pid}/aims?format=stream`, { responseType: "blob" });
 }
 
-export function getSummaryAnnotations(projectID) {
-  return mode === "lite"
-    ? http.get(apiUrl + "/projects/lite/aims?format=summary")
-    : http.get(apiUrl + "/projects/" + projectID + "/aims?format=summary");
+export function getAllAnnotations(bookmark) {
+  let url = apiUrl + "/aims?format=summary";
+  url = bookmark ? `${url}&bookmark=${bookmark}` : url;
+  return http.get(url);
+}
+
+export function getSummaryAnnotations(projectID, bookmark) {
+  const pid = projectID || "lite";
+  return bookmark
+    ? http.get(
+        `${apiUrl}/projects/${pid}/aims?format=summary&bookmark=${bookmark}`
+      )
+    : http.get(`${apiUrl}/projects/${pid}/aims?format=summary`);
 }
 
 export function deleteAnnotation(aimObj, delSys) {
@@ -109,9 +107,10 @@ export function deleteAnnotation(aimObj, delSys) {
   );
 }
 
-export function deleteAllAnnotations(projectID, aimList) {
+export function deleteAnnotationsList(projectID, aimList) {
   return http.post(
-    apiUrl + "/projects/" + projectID + "/aims/delete?all=true",
+    // apiUrl + "/projects/" + projectID + "/aims/delete?all=true"
+    apiUrl + "/projects/" + projectID + "/aims/delete",
     aimList
   );
 }
@@ -155,8 +154,8 @@ export function uploadSegmentation(segmentation, segName, projectId = "lite") {
   segData.append("file", segmentation, `${segName}.dcm`);
   const config = {
     headers: {
-      "content-type": "multipart/form-data",
-    },
+      "content-type": "multipart/form-data"
+    }
   };
   return http.post(url, segData, config);
 }
