@@ -8,8 +8,8 @@ const lists = {
   organize: ['AND', 'OR', '(', ')'],
   paranthesis: ['(', ')'],
   condition: ['AND', 'OR'],
-  type: ['Modality', 'Diagnosis', 'Anatomic Entity'],
-  criteria: ['Equals', 'Contains']
+  type: ['modality', 'diagnosis', 'anatomic ntity'],
+  criteria: ['equals', 'contains']
 };
 
 const title = {
@@ -39,13 +39,10 @@ const styles = {
 
 const AnnotationSearch = ({ projectMap }) => {
   const [query, setQuery] = useState('');
-  const [validationMap, setValidationMap] = useState({
-    openPar: false,
-    closePAar: false,
-    type: '',
-    criteria: '',
-    term: '',
-    organize: ''
+  const [partialQuery, setPartialQuery] = useState({
+    type: lists.type[0],
+    criteria: lists.criteria[0],
+    term: ''
   });
   const [selectedProject, setSelectedProject] = useState('all');
 
@@ -75,8 +72,10 @@ const AnnotationSearch = ({ projectMap }) => {
     );
   };
 
-  const formPartialQuery = word => {
-    // concatanate with existing query line
+  const addPartialToQuery = () => {
+    const { type, criteria, term } = partialQuery;
+    const newQuery = `${query} ${type} ${criteria} ${term}`
+    setQuery(newQuery);
   };
 
   const insertIntoQuery = selection => {
@@ -86,7 +85,9 @@ const AnnotationSearch = ({ projectMap }) => {
   const renderContentItem = field => {
     return (
       <select
-        onChange={e => formPartialQuery(e.target.value, field)}
+        onChange={e =>
+          setPartialQuery({ ...partialQuery, [field]: e.target.value })
+        }
         onMouseDown={e => e.stopPropagation()}
         className="annotationSearch-cont__item__sub"
       >
@@ -124,7 +125,9 @@ const AnnotationSearch = ({ projectMap }) => {
           className="form-control annotationSearch-cont__item__sub"
           aria-label="Large"
           name="term"
-          onChange={e => formPartialQuery(e.target.value, 'key')}
+          onChange={e =>
+            setPartialQuery({ ...partialQuery, term: e.target.value })
+          }
           style={{
             padding: '0.15rem',
             height: 'fit-content',
@@ -134,9 +137,7 @@ const AnnotationSearch = ({ projectMap }) => {
         <button
           className={`btn btn-secondary`}
           style={styles.buttonStyles}
-          onClick={() => {
-            setQuery(`${query}`);
-          }}
+          onClick={addPartialToQuery}
           type="button"
           style={{
             padding: '0.3rem 0.5rem',
