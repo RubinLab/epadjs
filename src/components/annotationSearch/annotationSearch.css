@@ -27,8 +27,18 @@
 .annotaionSearch-title {
   font-size: 1.2rem;
   color: aliceblue;
+  margin-left: 0.3rem;
+
 }
 
 .annotationSearch-cont__item {
   margin-bottom: 1.5rem;
+  display: flex;
+  width: 100%;
+  align-items: center
+}
+
+.annotationSearch-cont__item__sub {
+  margin: 0rem 0.3rem;
+  padding: 0.34rem 0rem;
 }

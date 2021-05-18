@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import _ from 'lodash';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaPlus } from 'react-icons/fa';
 import './annotationSearch.css';
 
 const lists = {
@@ -21,19 +21,19 @@ const title = {
 };
 
 const explanation = {
-  organize: 'Group and/or organize your query',
+  organize: 'Group and/or organize your query: ',
   type: 'Select a field from annotation',
   criteria: 'Select a criteria',
   term: 'Type the key word that you want to look for above',
-  project: 'You may select a project'
+  project: 'Select project: '
 };
 
 const styles = {
   buttonStyles: {
-    width: '10rem',
+    width: '5rem',
     margin: '0.2rem',
-    padding: '0.2rem',
-    fontSize: '1.1 rem'
+    padding: '0.3rem 0.5rem',
+    fontSize: '1.2 rem'
   }
 };
 
@@ -48,48 +48,121 @@ const AnnotationSearch = ({ projectMap }) => {
     organize: ''
   });
   const [selectedProject, setSelectedProject] = useState('all');
-  console.log('projectMap', projectMap);
-  const renderButton = (el, i) => {
-    return (
-      <button
-        className={`btn btn-secondary`}
-        style={styles.buttonStyles}
-        key={`${el}-${i}`}
-        name={el}
-        onClick={() => {
-          setQuery(`${query} ${el}`);
-        }}
-        type="button"
-      >
-        {el}
-      </button>
-    );
-  };
 
-  const renderContentItem = name => {
+  const renderOrganizeItem = name => {
     return (
       <div className="annotationSearch-cont__item">
-        <div className="annotaionSearch-title">{`${title[name]} ${explanation[name]}`}</div>
-        <div>
+        <div className="annotaionSearch-title">{`${explanation[name]}`}</div>
+        <div style={{ margin: '0rem 1rem' }}>
           {lists[name]?.map((el, i) => {
-            return renderButton(el, i);
+            return (
+              <button
+                className={`btn btn-secondary`}
+                style={styles.buttonStyles}
+                key={`${el}-${i}`}
+                name={el}
+                onClick={() => {
+                  setQuery(`${query} ${el}`);
+                }}
+                type="button"
+              >
+                {el}
+              </button>
+            );
           })}
         </div>
       </div>
     );
   };
 
-  const renderContent = () => {
+  const formPartialQuery = word => {
+    // concatanate with existing query line
+  };
+
+  const insertIntoQuery = selection => {
+    // get the cursor index and add the selection at that index
+  };
+
+  const renderContentItem = field => {
     return (
-      <div className="annotationSearch-wrapper">
+      <select
+        onChange={e => formPartialQuery(e.target.value, field)}
+        onMouseDown={e => e.stopPropagation()}
+        className="annotationSearch-cont__item__sub"
+      >
+        {lists[field]?.map((el, i) => {
+          return (
+            <option key={lists[field][i]} value={lists[field][i]}>
+              {lists[field][i]}
+            </option>
+          );
+        })}
+      </select>
+    );
+  };
+
+  // const renderContent = () => {
+  //   return (
+  //     <div className="annotationSearch-wrapper">
+  //       {renderContentItem('type')}
+  //       {renderContentItem('criteria')}
+  //       {renderContentItem('term')}
+  //       {renderContentItem('organize')}
+  //       {renderSelect('project')}
+  //     </div>
+  //   );
+  // };
+
+  const renderQueryItem = () => {
+    return (
+      <div className="annotationSearch-cont__item">
         {renderContentItem('type')}
         {renderContentItem('criteria')}
-        {renderContentItem('term')}
-        {renderContentItem('organize')}
-        {renderSelect('project')}
+        <input
+          type="text"
+          autoComplete="off"
+          className="form-control annotationSearch-cont__item__sub"
+          aria-label="Large"
+          name="term"
+          onChange={e => formPartialQuery(e.target.value, 'key')}
+          style={{
+            padding: '0.15rem',
+            height: 'fit-content',
+            fontSize: '1.2rem'
+          }}
+        />
+        <button
+          className={`btn btn-secondary`}
+          style={styles.buttonStyles}
+          onClick={() => {
+            setQuery(`${query}`);
+          }}
+          type="button"
+          style={{
+            padding: '0.3rem 0.5rem',
+            height: 'fit-content',
+            fontSize: '1rem',
+            margin: '0rem 0.3rem',
+            width: '5%'
+          }}
+        >
+          <FaPlus />
+        </button>
       </div>
     );
   };
+
+  // const renderContent = () => {
+  //   return (
+  //     <div className="annotationSearch-wrapper">
+  //       {renderContentSelection('type')}
+  //       {renderContentSelection('criteria')}
+  //       {renderContentItem('term')}
+  //       {renderContentItem('organize')}
+  //       {renderSelect('project')}
+  //     </div>
+  //   );
+  // };
 
   const detactConstant = (str, constant) => {
     const baseQuery = str.toUpperCase();
@@ -131,7 +204,7 @@ const AnnotationSearch = ({ projectMap }) => {
   };
 
   const parseQuery = () => {
-    console.log('parseQuery clicked')
+    console.log('parseQuery clicked');
     debugger;
     let baseQuery = query;
     let parsedQuery = '';
@@ -178,26 +251,31 @@ const AnnotationSearch = ({ projectMap }) => {
         if (end) return;
         else baseQuery = baseQuery.substring(index);
       } else if (detactConstant(baseQuery, 'condition').result) {
-        // check 
-        console.log('parsedQuery', parsedQuery)
+        // check
+        console.log('parsedQuery', parsedQuery);
         return;
       }
-      console.log('parsedQuery', parsedQuery)
+      console.log('parsedQuery', parsedQuery);
       return parsedQuery;
     }
   };
 
-  const renderSelect = () => {
+  const renderProjectSelect = () => {
     const projectNames = Object.values(projectMap);
     const projectID = Object.keys(projectMap);
     return (
-      <div className="annotationSearch-cont__item">
-        <div className="annotaionSearch-title">{`${title['project']} ${
-          explanation['project']
-        }`}</div>
+      <div
+        className="annotationSearch-cont__item"
+        style={{ margin: '1rem 0rem' }}
+      >
+        <div
+          className="annotaionSearch-title"
+          style={{ fontsize: '1.2rem' }}
+        >{`${explanation['project']}`}</div>
         <select
           onChange={e => setSelectedProject(e.target.value)}
           onMouseDown={e => e.stopPropagation()}
+          style={{ margin: '0rem 1rem', padding: '0.35rem 0rem' }}
         >
           {projectNames.map((el, i) => {
             return (
@@ -222,7 +300,7 @@ const AnnotationSearch = ({ projectMap }) => {
         style={{
           width: '-webkit-fill-available',
           display: 'flex',
-          margin: '2rem'
+          margin: '1rem 2rem'
         }}
       >
         <div
@@ -250,7 +328,6 @@ const AnnotationSearch = ({ projectMap }) => {
         </div>
         <button
           className={`btn btn-secondary`}
-          style={{ width: '10rem', margin: '1rem' }}
           type="button"
           className="btn btn-secondary annotationSearch-btn"
           onClick={parseQuery}
@@ -268,11 +345,12 @@ const AnnotationSearch = ({ projectMap }) => {
       </div>
       <div
         style={{
-          display: 'flex',
-          margin: '2rem'
+          margin: '1rem 2rem'
         }}
       >
-        {renderContent()}
+        {renderQueryItem()}
+        {renderOrganizeItem('organize')}
+        {renderProjectSelect()}
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import NavBar from './components/navbar';
 import Sidebar from './components/sideBar/sidebar';
 import SearchView from './components/searchView/searchView';
 import DisplayView from './components/display/displayView';
+import AnnotationSearch from './components/annotationSearch'
 import AnotateView from './components/anotateView';
 import ProgressView from './components/progressView';
 import FlexView from './components/flexView';
