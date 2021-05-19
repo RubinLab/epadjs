@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import { FaSearch, FaPlus } from 'react-icons/fa';
+import { searchAnnotations } from './../../services/annotationServices.js';
 import './annotationSearch.css';
 
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
   paranthesis: ['(', ')'],
   condition: ['AND', 'OR'],
-  type: ['modality', 'diagnosis', 'anatomic ntity'],
+  type: ['modality', 'diagnosis', 'anatomic entity'],
   criteria: ['equals', 'contains']
 };
 
@@ -44,6 +45,7 @@ const AnnotationSearch = ({ projectMap }) => {
     criteria: lists.criteria[0],
     term: ''
   });
+  const [typeSelected, setTypeSelected] = useState(false);
   const [selectedProject, setSelectedProject] = useState('all');
 
   const renderOrganizeItem = name => {
@@ -74,7 +76,7 @@ const AnnotationSearch = ({ projectMap }) => {
 
   const addPartialToQuery = () => {
     const { type, criteria, term } = partialQuery;
-    const newQuery = `${query} ${type} ${criteria} ${term}`
+    const newQuery = `${query} ${type} ${criteria} ${term}`;
     setQuery(newQuery);
   };
 
@@ -88,6 +90,7 @@ const AnnotationSearch = ({ projectMap }) => {
         onChange={e =>
           setPartialQuery({ ...partialQuery, [field]: e.target.value })
         }
+        name={field}
         onMouseDown={e => e.stopPropagation()}
         className="annotationSearch-cont__item__sub"
       >
@@ -166,13 +169,13 @@ const AnnotationSearch = ({ projectMap }) => {
   // };
 
   const detactConstant = (str, constant) => {
-    const baseQuery = str.toUpperCase();
+    // const baseQuery = str.toUpperCase();
     let result = '';
     if (lists[constant]) {
       lists[constant].forEach((el, i) => {
-        const upperVersion = el.toUpperCase();
-        if (baseQuery.indexOf(upperVersion) === 0) {
-          result = baseQuery.substring(0, el.length);
+        // const upperVersion = el.toUpperCase();
+        if (str.indexOf(el) === 0) {
+          result = str.substring(0, el.length);
         }
       });
     }
@@ -180,11 +183,11 @@ const AnnotationSearch = ({ projectMap }) => {
   };
 
   const findMinIndex = indexMap => {
-    const words = Object.key(indexMap);
+    const words = Object.keys(indexMap);
     const indeces = Object.values(indexMap);
     const min = { word: words[0], index: indeces[0] };
     indeces.forEach((el, i) => {
-      if (el < min[index] && el > -1) {
+      if (el < min.index && el > -1) {
         min.word = words[i];
         min.index = indeces[i];
       }
@@ -192,7 +195,8 @@ const AnnotationSearch = ({ projectMap }) => {
     return min;
   };
 
-  const detactTerm = baseQuery => {
+  // finds the index of firt predefined term
+  const detactTermEndIndex = baseQuery => {
     const { organize, paranthesis, type, criteria } = lists;
     const indexMap = {};
     const list = _.concat(organize, paranthesis, type, criteria);
@@ -204,13 +208,27 @@ const AnnotationSearch = ({ projectMap }) => {
     return findMinIndex(indexMap);
   };
 
+  const getSearchResult = () => {
+    const query = parseQuery();
+    searchAnnotations({ query })
+      .then(res => {
+        console.log(res);
+      })
+      .catch(err => console.error(err));
+  };
+
   const parseQuery = () => {
     console.log('parseQuery clicked');
-    debugger;
+    // debugger;
     let baseQuery = query;
     let parsedQuery = '';
     let i = 0;
+    let endIndex;
+    let type;
+    let criteria;
     while (baseQuery.length > 0) {
+      type = detactConstant(baseQuery, 'type').result;
+      criteria = detactConstant(baseQuery, 'criteria').result;
       if (baseQuery[i] === ' ') {
         baseQuery = baseQuery.substring(1);
         continue;
@@ -218,47 +236,49 @@ const AnnotationSearch = ({ projectMap }) => {
         // if closing check there is opening and give error if required
         // if there is an opening and all map full empty it
         // fill the flag object accordingly
-        parsedQuery += `\\${baseQuery[i]} `;
+        parsedQuery += `${baseQuery[i]} `;
         baseQuery = baseQuery.substring(1);
         continue;
-      } else if (detactConstant(baseQuery, 'type').result) {
+      } else if (type) {
         // TODO: keep the order of the default query, if out of order give an error
         //
-        const { result } = detactConstant(baseQuery);
-        parsedQuery += `${result} `;
-        baseQuery = baseQuery.substring(result.length);
+        // const { result } = detactConstant(baseQuery, 'type');
+        parsedQuery += `${type}`;
+        baseQuery = baseQuery.substring(type.length);
+        setTypeSelected(true);
         continue;
         // TODO: keep the order of the default query, if out of order give an error
         // make sure there is a type before
-      } else if (detactConstant(baseQuery, 'criteria').result) {
-        const { result } = detactConstant(baseQuery);
-        parsedQuery += `${result} `;
-        baseQuery = baseQuery.substring(result.length);
+      } else if (criteria) {
+        // if (typeSelected) {
+        // const { result } = detactConstant(baseQuery, 'criteria');
+        parsedQuery += `:`;
+        baseQuery = baseQuery.substring(criteria.length);
+        setTypeSelected(false);
+        endIndex = detactTermEndIndex(baseQuery).index;
         continue;
+        // } else {
         // if there is no term show error
         // if word is not criteria show error
         // fill map term flag
-      } else if (
-        detactTerm(baseQuery).index >= 0 ||
-        detactTerm(baseQuery).end
-      ) {
-        const { word, index, end } = detactTerm(baseQuery);
-        if (index < 2) {
+        // }
+      } else if (endIndex >= 0 || endIndex === -1) {
+        if (endIndex < 2 && endIndex !== -1) {
           // error: please enter a search term
           return;
+        } else if (endIndex !== -1) {
+          const searchTerm = baseQuery.substring(0, endIndex);
+          parsedQuery += `${searchTerm.trim()} `;
+          baseQuery = baseQuery.substring(searchTerm.length);
+        } else if (endIndex === -1) {
+          parsedQuery += baseQuery.trim();
+          baseQuery = '';
         }
-        const searchTerm = baseQuery.substring(0, index).trim();
-        parsedQuery += `${searchTerm} `;
-        if (end) return;
-        else baseQuery = baseQuery.substring(index);
-      } else if (detactConstant(baseQuery, 'condition').result) {
-        // check
-        console.log('parsedQuery', parsedQuery);
-        return;
       }
       console.log('parsedQuery', parsedQuery);
-      return parsedQuery;
     }
+    alert(parsedQuery);
+    return parsedQuery;
   };
 
   const renderProjectSelect = () => {
@@ -331,7 +351,7 @@ const AnnotationSearch = ({ projectMap }) => {
           className={`btn btn-secondary`}
           type="button"
           className="btn btn-secondary annotationSearch-btn"
-          onClick={parseQuery}
+          onClick={getSearchResult}
           // disabled={index < count}
           style={{
             padding: '0.3rem 0.5rem',
