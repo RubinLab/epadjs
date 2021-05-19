@@ -22,7 +22,7 @@ export default class BrushSettings extends React.Component {
       strayRemove: brushState.strayRemove,
       activeGate: brushState.activeGate,
       customGateRangeMin: customGateRange[0],
-      customGateRangeMax: customGateRange[1]
+      customGateRangeMax: customGateRange[1],
     };
 
     this.onGateChange = this.onGateChange.bind(this);
@@ -172,7 +172,7 @@ export default class BrushSettings extends React.Component {
 
     return (
       <div className="segmentation-menu-footer">
-        <h3> Smart CT Gate Selection</h3>
+        {/* <h3> Smart CT Gate Selection</h3>
         <select
           className="form-themed form-control"
           onChange={this.onGateChange}
@@ -185,9 +185,9 @@ export default class BrushSettings extends React.Component {
           ))}
         </select>
 
-        {customGates}
+        {customGates} */}
 
-        <h3> Smart/Auto Gate Settings </h3>
+        <h5> Smart/Auto Gate Settings </h5>
         <label htmlFor="holeFill">{holeFillLabel}</label>
         <input
           className="form-themed form-control"

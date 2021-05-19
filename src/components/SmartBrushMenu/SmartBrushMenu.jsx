@@ -4,6 +4,7 @@ import cornerstoneTools from "cornerstone-tools";
 import InputRange from "react-input-range";
 import Draggable from "react-draggable";
 import "./SmartBrushMenu.css";
+import BrushSettings from '../../ohif-segmentation-plugin/components/segmentationMenu/BrushSettings';
 
 const brushModule = cornerstoneTools.store.modules.segmentation;
 const inputRange = { top: "5em" };
@@ -125,6 +126,7 @@ class SmartBrushMenu extends Component {
             <span>Brush Menu</span>
           </div>
           <hr />
+          <BrushSettings />
           {!isSphericalBrush && (
             <div>
               <div>
