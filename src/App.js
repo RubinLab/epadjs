@@ -614,7 +614,7 @@ class App extends Component {
         try {
           let user = {
             user: result.userInfo.preferred_username || result.userInfo.email,
-            displayname: result.userInfo.given_name
+            displayname: result.userInfo.given_name || result.userInfo.givenName
           };
           await auth.login(user, null, result.keycloak);
           this.setState({
