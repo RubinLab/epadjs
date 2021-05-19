@@ -25,14 +25,6 @@ class Register extends React.Component {
     let tmpFormError = "";
     const tempFormElements = { ...this.state.registerFormElements };
     tempFormElements[e.currentTarget.name] = e.currentTarget.value;
-    //console.log("form elements : ", this.state.pluginFormElements);
-    console.log(e.currentTarget.name, ": value : ", e.currentTarget.value);
-    // if (e.currentTarget.name === "enabled") {
-    //   console.log(e.currentTarget.name, ": target : ", e.currentTarget.checked);
-    // }
-
-    console.log("form elements ", tempFormElements);
-    console.log("form error ", tmpFormError);
     this.setState({
       registerFormElements: tempFormElements,
       formError: tmpFormError,
@@ -70,7 +62,7 @@ class Register extends React.Component {
       formError: tmpFormError,
     });
     tmpState.formError = tmpFormError;
-    // let tmpFormElements = { ...this.state.registerFormElements };
+
     if (tmpState.formError === "") {
       try {
         serverReponse = await registerServerForAppKey(
@@ -80,8 +72,7 @@ class Register extends React.Component {
         this.setState({
           showEmailValidationInput: true,
         });
-        //this.props.onOK();
-        console.log(serverReponse);
+        console.log("server response returned: ", serverReponse);
         if (serverReponse.data === "validated") {
           this.setState({
             apikeysent: true,
@@ -98,6 +89,13 @@ class Register extends React.Component {
         }
       } catch (error) {
         console.log("stat returned ", error);
+        this.setState({
+          apikeysent: false,
+          showEmailValidationInput: false,
+          showform: false,
+          formError:
+            "Encountered an issue while sending the email. Please check Notificatios for further detail",
+        });
       }
     }
   };
@@ -108,11 +106,8 @@ class Register extends React.Component {
       backgroundColor: "DodgerBlue",
       padding: "10px",
       fontFamily: "Arial",
-      //width: "400px",
-      //height: "400px",
     };
     return (
-      // <Modal.Dialog dialogClassName="info-about__modal">
       <Modal.Dialog id="modal-fix">
         <Modal.Header>
           <Modal.Title>Register to ePAD</Modal.Title>
@@ -125,7 +120,7 @@ class Register extends React.Component {
                   !this.state.apikeysent &&
                   this.state.showform && (
                     <Fragment>
-                      <tr style={{ border: "1px solid black" }}>
+                      <tr>
                         <td>
                           <h5 className="add-project__modal--label">Name*</h5>
                         </td>
@@ -247,13 +242,11 @@ class Register extends React.Component {
                     {this.state.formError && (
                       <div className="err-message">
                         <table id="2">
-                          `
                           {this.state.formError.split("\n").map((str) => (
                             <tr id="{str}">
                               <td>{str}</td>
                             </tr>
                           ))}
-                          `
                         </table>
                       </div>
                     )}
