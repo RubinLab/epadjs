@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import _ from 'lodash';
 import { FaSearch, FaPlus } from 'react-icons/fa';
 import { searchAnnotations } from './../../services/annotationServices.js';
+import AnnotationTable from './AnnotationTable.jsx';
 import './annotationSearch.css';
 
 const lists = {
@@ -47,6 +48,7 @@ const AnnotationSearch = ({ projectMap }) => {
   });
   const [typeSelected, setTypeSelected] = useState(false);
   const [selectedProject, setSelectedProject] = useState('all');
+  const [data, setData] = useState([]);
 
   const renderOrganizeItem = name => {
     return (
@@ -213,6 +215,7 @@ const AnnotationSearch = ({ projectMap }) => {
     searchAnnotations({ query })
       .then(res => {
         console.log(res);
+        setData(res.data.rows);
       })
       .catch(err => console.error(err));
   };
@@ -372,6 +375,7 @@ const AnnotationSearch = ({ projectMap }) => {
         {renderQueryItem()}
         {renderOrganizeItem('organize')}
         {renderProjectSelect()}
+        {data.length > 0 && <AnnotationTable data={data} />}
       </div>
     </div>
   );
