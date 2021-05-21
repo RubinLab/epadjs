@@ -185,9 +185,9 @@ export default class BrushSettings extends React.Component {
           ))}
         </select>
 
-        {customGates} */}
+        {customGates} 
 
-        <h5> Smart/Auto Gate Settings </h5>
+        <h5> Smart/Auto Gate Settings </h5>*/}
         <label htmlFor="holeFill">{holeFillLabel}</label>
         <input
           className="form-themed form-control"
