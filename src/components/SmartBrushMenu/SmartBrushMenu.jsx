@@ -23,13 +23,18 @@ class SmartBrushMenu extends Component {
   }
 
   componentDidMount() {
+    const activeGate = brushModule.getters.activeGate();
     if (!this.checkIfCT()) {
       const { minPixelValue, maxPixelValue } = this.getMinMaxPixelValues();
       const customBrush = { min: minPixelValue, max: maxPixelValue };
-      this.setState({ customBrush });
+      this.setState({ customBrush, rangeDisabled: false });
       brushModule.setters.activeGate("custom");
       brushModule.setters.customGateRange(minPixelValue, maxPixelValue);
     }
+    if (activeGate === "custom") {
+      this.setState({ rangeDisabled: false });
+    }
+
   }
 
   handleBrushChange = (gateName) => {
@@ -108,7 +113,8 @@ class SmartBrushMenu extends Component {
 
   handleMinRangeChange = (min) => {
     const brushNewValues = { ...this.state.customBrush };
-    const newMin = Math.min(Number(min), (brushNewValues.max - 1))//Dont set the min more than max value
+    const { minValue } = this.getMinMax();
+    const newMin = Math.max(Math.min(Number(min), (brushNewValues.max - 1)), minValue);//Dont set the min more than max value
     brushNewValues.min = newMin;
     this.setState({ customBrush: brushNewValues }, () => {
       const { min, max } = this.state.customBrush;
@@ -118,7 +124,8 @@ class SmartBrushMenu extends Component {
 
   handleMaxRangeChange = (max) => {
     const brushNewValues = { ...this.state.customBrush };
-    const newMax = Math.max(Number(max), (brushNewValues.min + 1))//Dont set the min more than max value
+    const { maxValue } = this.getMinMax();
+    const newMax = Math.min(Math.max(Number(max), (brushNewValues.min + 1)), maxValue);//Dont set the min more than max value
     brushNewValues.max = newMax;
     this.setState({ customBrush: brushNewValues }, () => {
       const { min, max } = this.state.customBrush;
@@ -126,16 +133,26 @@ class SmartBrushMenu extends Component {
     });
   }
 
+  getMinMax = () => {
+    const isCT = this.checkIfCT();
+    if (isCT !== undefined && !isCT) {
+      const { minPixelValue, maxPixelValue } = this.getMinMaxPixelValues();
+      return { minValue: minPixelValue, maxValue: maxPixelValue };
+    }
+    return { minValue: -1000, maxValue: 3000 };
+  }
+
   render() {
     const maxApplyToImageNum = this.getLastImageIndexOfSeries();
     const { isHuGated, isSphericalBrush } = this.props;
     const isCT = this.checkIfCT();
-    let minValue = 0, maxValue = 255;
-    if (isCT !== undefined && !isCT) {
-      const { minPixelValue, maxPixelValue } = this.getMinMaxPixelValues();
-      minValue = minPixelValue; maxValue = maxPixelValue;
-    }
-    else { minValue = -1000; maxValue = 3000 }
+    const { minValue, maxValue } = this.getMinMax();
+    // let minValue = 0, maxValue = 255;
+    // if (isCT !== undefined && !isCT) {
+    //   const { minPixelValue, maxPixelValue } = this.getMinMaxPixelValues();
+    //   minValue = minPixelValue; maxValue = maxPixelValue;
+    // }
+    // else { minValue = -1000; maxValue = 3000 }
     const { customBrush } = this.state;
     return (
       <Draggable handle="#handle">
@@ -219,7 +236,6 @@ class SmartBrushMenu extends Component {
                     "]" +
                     " HU"}
                   {gate.name === "custom" && (
-
                     <div>
                       <input type="number"
                         min={minValue}
@@ -255,20 +271,49 @@ class SmartBrushMenu extends Component {
             </div>
           )}
           {isHuGated && !isCT && (
-            <div className="range-container">
-              <InputRange
-                style={inputRange}
-                step={1}
-                maxValue={maxValue}
-                minValue={minValue}
+            // <div className="range-container">
+            //   <InputRange
+            //     style={inputRange}
+            //     step={1}
+            //     maxValue={maxValue}
+            //     minValue={minValue}
 
-                value={this.state.customBrush}
-                onChange={(value) =>
-                  this.setState({ customBrush: value })
-                }
-                onChangeComplete={(value) =>
-                  this.applyCustomBrushValues(value)
-                }
+            //     value={this.state.customBrush}
+            //     onChange={(value) =>
+            //       this.setState({ customBrush: value })
+            //     }
+            //     onChangeComplete={(value) =>
+            //       this.applyCustomBrushValues(value)
+            //     }
+            //   />
+            // </div>
+            <div>
+              <input type="number"
+                min={minValue}
+                max={customBrush.max - 1}
+                value={this.state.customBrush.min}
+                className={"slice-field"}
+                onChange={(evt) => this.handleMinRangeChange(evt.target.value)}
+                style={{
+                  width: "60px",
+                  height: "20px",
+                  opacity: 1,
+                }}
+                disabled={this.state.rangeDisabled}
+              />
+              <span> to </span>
+              <input type="number"
+                min={customBrush.min + 1}
+                max={maxValue}
+                value={this.state.customBrush.max}
+                className={"slice-field"}
+                onChange={(evt) => this.handleMaxRangeChange(evt.target.value)}
+                style={{
+                  width: "60px",
+                  height: "20px",
+                  opacity: 1,
+                }}
+                disabled={this.state.rangeDisabled}
               />
             </div>
           )}
