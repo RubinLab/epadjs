@@ -1,14 +1,19 @@
-import { store, EVENTS, importInternal } from "cornerstone-tools";
+import { store, EVENTS, getCircle, drawBrushPixels } from "cornerstone-tools";
 import cornerstone from "cornerstone-core";
 
-import Brush3DTool from "./Brush3DTool.js";
+import Brush3DHUGatedTool from "./Brush3DHUGatedTool.js";
 import floodFill from "./n-dimensional-flood-fill.js";
 
-import { getCircle, drawBrushPixels } from "cornerstone-tools";
+import { getToolState } from "cornerstone-tools/stateManagement/toolState.js";
+import generateBrushMetadata from "../util/generateBrushMetadata.js";
+import {
+  getDiffBetweenPixelData,
+  triggerLabelmapModifiedEvent,
+} from "cornerstone-tools/util/segmentation";
 
 const brushModule = store.modules.segmentation;
 
-export default class Brush3DHUGatedTool extends Brush3DTool {
+export default class BrushSphericalHUGatedTool extends Brush3DHUGatedTool {
   constructor(configuration = {}) {
     const defaultConfig = {};
     const initialConfiguration = Object.assign(defaultConfig, configuration);
@@ -35,12 +40,115 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
     return true;
   }
 
-  _getModality(evt) {
+  _startPainting(evt) {
+    const { configuration, getters } = brushModule;
     const eventData = evt.detail;
-    const { image } = eventData;
-    const seriesModule =
-      cornerstone.metaData.get("generalSeriesModule", image.imageId) || {};
-    return seriesModule.modality;
+    const { element, image } = eventData;
+    const radius = configuration.radius;
+    const { rows, columns } = image;
+    const pixelSpacing = Math.max(
+      image.rowPixelSpacing,
+      image.columnPixelSpacing
+    );
+
+    const stackState = getToolState(element, "stack");
+    const stackData = stackState.data[0];
+    const { imageIds } = stackData;
+
+    const { labelmap2D, labelmap3D, currentImageIdIndex, activeLabelmapIndex } =
+      getters.labelmap2D(element);
+
+    const shouldErase =
+      this._isCtrlDown(eventData) || this.configuration.alwaysEraseOnClick;
+
+    const imagePlaneOfCurrentImage = cornerstone.metaData.get(
+      "imagePlaneModule",
+      image.imageId
+    );
+
+    let imagesInRange;
+
+    if (imagePlaneOfCurrentImage) {
+      const ippOfCurrentImage = imagePlaneOfCurrentImage.imagePositionPatient;
+
+      imagesInRange = this._getImagesInRange(
+        currentImageIdIndex,
+        ippOfCurrentImage,
+        imageIds,
+        radius,
+        pixelSpacing
+      );
+    } else {
+      logger.warn(
+        `No imagePlane metadata found for image, defaulting to circle brush application.`
+      );
+
+      imagesInRange = [
+        // The current image.
+        {
+          imageIdIndex: currentImageIdIndex,
+          radiusOnImage: radius,
+        },
+      ];
+    }
+
+    this.paintEventData = {
+      labelmap2D,
+      labelmap3D,
+      currentImageIdIndex,
+      activeLabelmapIndex,
+      shouldErase,
+      imagesInRange,
+    };
+
+    if (configuration.storeHistory) {
+      const previousPixeldataForImagesInRange = [];
+
+      for (let i = 0; i < imagesInRange.length; i++) {
+        const { imageIdIndex } = imagesInRange[i];
+        const labelmap2DForImageIdIndex = getters.labelmap2DByImageIdIndex(
+          labelmap3D,
+          imageIdIndex,
+          rows,
+          columns
+        );
+
+        const previousPixeldata = labelmap2DForImageIdIndex.pixelData.slice();
+
+        previousPixeldataForImagesInRange.push(previousPixeldata);
+      }
+
+      this.paintEventData.previousPixeldataForImagesInRange =
+        previousPixeldataForImagesInRange;
+    }
+
+    const segmentIndex = labelmap3D.activeSegmentIndex;
+    let metadata = labelmap3D.metadata[segmentIndex];
+
+    if (!metadata) {
+      metadata = generateBrushMetadata("Unnamed Segment");
+
+      brushModule.setters.metadata(
+        element,
+        activeLabelmapIndex,
+        segmentIndex,
+        metadata
+      );
+    }
+
+    // Metadata assigned, start drawing.
+    if (eventData.currentPoints) {
+      this._paint(evt);
+    }
+
+    this._drawing = true;
+    this._startListeningForMouseUp(element);
+
+    // Dispatch event to open the Aim Editor
+    let evnt = new CustomEvent("markupCreated", {
+      detail: "brush",
+    });
+    window.dispatchEvent(evnt);
   }
 
   /**
@@ -68,34 +176,40 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       return;
     }
 
-    let radius;
-    if (brushModule.configuration.applyToImage)
-      radius = columns >= rows ? columns * 2 : radius * 2;
-    else radius = brushModule.configuration.radius;
-
-    const pointerArray = this._gateCircle(
-      image,
-      getCircle(radius, rows, columns, x, y)
-    );
-
-    console.log("pointer array", pointerArray);
-    console.log("original circle", getCircle(radius, rows, columns, x, y));
     const {
       labelmap2D,
       labelmap3D,
       currentImageIdIndex,
       activeLabelmapIndex,
       shouldErase,
+      imagesInRange,
     } = this.paintEventData;
 
-    // Draw / Erase the active color.
-    drawBrushPixels(
-      pointerArray,
-      labelmap2D.pixelData,
-      labelmap3D.activeSegmentIndex,
-      columns,
-      shouldErase
-    );
+    for (let i = 0; i < imagesInRange.length; i++) {
+      const { imageIdIndex, radiusOnImage } = imagesInRange[i];
+      const pointerArray = this._gateCircle(
+        cornerstone.imageCache.cachedImages[imageIdIndex].image,
+        getCircle(radiusOnImage, rows, columns, x, y)
+      );
+
+      // Cache the view on this image if its not present.
+      const labelmap2DForImageIdIndex =
+        brushModule.getters.labelmap2DByImageIdIndex(
+          labelmap3D,
+          imageIdIndex,
+          rows,
+          columns
+        );
+
+      // Draw / Erase the active color.
+      drawBrushPixels(
+        pointerArray,
+        labelmap2DForImageIdIndex.pixelData,
+        labelmap3D.activeSegmentIndex,
+        columns,
+        shouldErase
+      );
+    }
 
     cornerstone.triggerEvent(element, EVENTS.LABELMAP_MODIFIED, {
       activeLabelmapIndex,
@@ -133,12 +247,9 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       if (pixelValue >= gateRange[0] && pixelValue <= gateRange[1]) {
         gatedCircleArray.push(circle[i]);
       }
-      console.log("pixel value", pixelValue, gateRange);
     }
 
-    console.log("gated circle", gatedCircleArray);
     return this._cleanGatedCircle(circle, gatedCircleArray);
-    // return gatedCircleArray;
   }
 
   /**
@@ -435,5 +546,164 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
     }
 
     return largestRegionArea;
+  }
+
+  /**
+   * _getImagesInRange - Returns an array of image Ids within range of the
+   * sphere, and the in-plane brush radii of those images.
+   *
+   * @param  {string} currentImageIdIndex The imageId of the image displayed on
+   *                                   the cornerstone enabled element.
+   * @param  {number[]} ippOfCurrentImage   The image position patient of the image.
+   * @param  {string[]} imageIds           An array of images in the stack.
+   * @param  {number} radius             The radius of the sphere.
+   * @param  {number} pixelSpacing       The pixelSpacing.
+   * @returns {Object[]}                   An array of imageIds in range and their
+   *                                   in plane brush radii.
+   */
+  _getImagesInRange(
+    currentImageIdIndex,
+    ippOfCurrentImage,
+    imageIds,
+    radius,
+    pixelSpacing
+  ) {
+    const radiusInMM = radius * pixelSpacing;
+    const imagesInRange = [
+      // The current image.
+      {
+        imageIdIndex: currentImageIdIndex,
+        radiusOnImage: radius,
+      },
+    ];
+
+    // Check images above
+    for (let i = currentImageIdIndex + 1; i < imageIds.length; i++) {
+      const radiusOnImage = this._getRadiusOnImage(
+        imageIds[i],
+        ippOfCurrentImage,
+        radiusInMM,
+        pixelSpacing
+      );
+
+      if (!radiusOnImage) {
+        break;
+      }
+
+      imagesInRange.push({
+        imageIdIndex: i,
+        radiusOnImage,
+      });
+    }
+
+    // Check images below
+    for (let i = currentImageIdIndex - 1; i >= 0; i--) {
+      const radiusOnImage = this._getRadiusOnImage(
+        imageIds[i],
+        ippOfCurrentImage,
+        radiusInMM,
+        pixelSpacing
+      );
+
+      if (!radiusOnImage) {
+        break;
+      }
+
+      imagesInRange.push({
+        imageIdIndex: i,
+        radiusOnImage,
+      });
+    }
+
+    return imagesInRange;
+  }
+
+  /**
+   * _getRadiusOnImage - If the image is in range of the spherical brush, returns
+   *                     the in-plane brush radius on that image.
+   *
+   * @param  {string} imageId           The cornerstone imageId of the image.
+   * @param  {number[]} ippOfCurrentImage The image position patient of the current image.
+   * @param  {number} radiusInMM        The radius of the sphere in millimeters.
+   * @param  {string} pixelSpacing      The pixelspacing.
+   * @returns {number|undefined}        The brush radius on the image, undefined if
+   *                                    the image is out of range of the sphere.
+   */
+  _getRadiusOnImage(imageId, ippOfCurrentImage, radiusInMM, pixelSpacing) {
+    const imagePlane = cornerstone.metaData.get("imagePlaneModule", imageId);
+
+    if (!imagePlane) {
+      logger.warn(
+        `Can't find imagePlane metadata for image, cancelling spherical brushing on: ${imageId},`
+      );
+
+      return;
+    }
+
+    const ipp = imagePlane.imagePositionPatient;
+
+    const distance = Math.sqrt(
+      Math.pow(ipp[0] - ippOfCurrentImage[0], 2) +
+        Math.pow(ipp[1] - ippOfCurrentImage[1], 2) +
+        Math.pow(ipp[2] - ippOfCurrentImage[2], 2)
+    );
+
+    if (distance > radiusInMM) {
+      // Image too far away, break!
+      return;
+    }
+
+    return Math.floor(
+      Math.sqrt(Math.pow(radiusInMM, 2) - Math.pow(distance, 2)) / pixelSpacing
+    );
+  }
+
+  _endPainting(evt) {
+    const { labelmap3D, imagesInRange } = this.paintEventData;
+    const operations = [];
+    const { configuration, setters } = brushModule;
+
+    for (let i = 0; i < imagesInRange.length; i++) {
+      const { imageIdIndex } = imagesInRange[i];
+      const labelmap2D = labelmap3D.labelmaps2D[imageIdIndex];
+
+      // Grab the labels on the slice.
+      const segmentSet = new Set(labelmap2D.pixelData);
+      const iterator = segmentSet.values();
+
+      const segmentsOnLabelmap = [];
+      let done = false;
+
+      while (!done) {
+        const next = iterator.next();
+
+        done = next.done;
+
+        if (!done) {
+          segmentsOnLabelmap.push(next.value);
+        }
+      }
+
+      labelmap2D.segmentsOnLabelmap = segmentsOnLabelmap;
+
+      if (configuration.storeHistory) {
+        const { previousPixeldataForImagesInRange } = this.paintEventData;
+
+        const previousPixeldata = previousPixeldataForImagesInRange[i];
+        const labelmap2D = labelmap3D.labelmaps2D[imageIdIndex];
+        const newPixelData = labelmap2D.pixelData;
+
+        operations.push({
+          imageIdIndex,
+          diff: getDiffBetweenPixelData(previousPixeldata, newPixelData),
+        });
+      }
+    }
+
+    if (configuration.storeHistory) {
+      setters.pushState(this.element, operations);
+    }
+
+    triggerLabelmapModifiedEvent(this.element);
   }
 }
