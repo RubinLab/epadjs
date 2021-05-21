@@ -77,8 +77,9 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       image,
       getCircle(radius, rows, columns, x, y)
     );
-    // console.log("pointer array", pointerArray);
 
+    console.log("pointer array", pointerArray);
+    console.log("original circle", getCircle(radius, rows, columns, x, y));
     const {
       labelmap2D,
       labelmap3D,
@@ -132,9 +133,12 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       if (pixelValue >= gateRange[0] && pixelValue <= gateRange[1]) {
         gatedCircleArray.push(circle[i]);
       }
+      console.log("pixel value", pixelValue, gateRange);
     }
 
+    console.log("gated circle", gatedCircleArray);
     return this._cleanGatedCircle(circle, gatedCircleArray);
+    // return gatedCircleArray;
   }
 
   /**
