@@ -110,14 +110,20 @@ class SmartBrushMenu extends Component {
     const brushNewValues = { ...this.state.customBrush };
     const newMin = Math.min(Number(min), (brushNewValues.max - 1))//Dont set the min more than max value
     brushNewValues.min = newMin;
-    this.setState({ customBrush: brushNewValues });
+    this.setState({ customBrush: brushNewValues }, () => {
+      const { min, max } = this.state.customBrush;
+      brushModule.setters.customGateRange(min, max);
+    });
   }
 
   handleMaxRangeChange = (max) => {
     const brushNewValues = { ...this.state.customBrush };
     const newMax = Math.max(Number(max), (brushNewValues.min + 1))//Dont set the min more than max value
     brushNewValues.max = newMax;
-    this.setState({ customBrush: brushNewValues });
+    this.setState({ customBrush: brushNewValues }, () => {
+      const { min, max } = this.state.customBrush;
+      brushModule.setters.customGateRange(min, max);
+    });
   }
 
   render() {
@@ -213,53 +219,36 @@ class SmartBrushMenu extends Component {
                     "]" +
                     " HU"}
                   {gate.name === "custom" && (
-                    <div className="range-container">
-                      {/* <InputRange
-                        style={inputRange}
-                        disabled={this.state.rangeDisabled}
-                        step={1}
-                        maxValue={3000}
-                        minValue={-1000}
-                        // formatLabel={value => `${value} HU`}
-                        value={this.state.customBrush}
-                        onChange={(value) =>
-                          this.setState({ customBrush: value })
-                        }
-                        onChangeComplete={(value) =>
-                          this.applyCustomBrushValues(value)
-                        }
-                      /> */}
-                      <div>
-                        <input type="number"
-                          min={minValue}
-                          max={customBrush.max - 1}
-                          value={this.state.customBrush.min}
-                          className={"slice-field"}
-                          onChange={(evt) => this.handleMinRangeChange(evt.target.value)}
-                          style={{
-                            width: "60px",
-                            height: "20px",
-                            opacity: 1,
-                          }}
-                          disabled={this.state.rangeDisabled}
-                        />
-                        <span> to </span>
-                        <input type="number"
-                          min={customBrush.min + 1}
-                          max={maxValue}
-                          value={this.state.customBrush.max}
-                          className={"slice-field"}
-                          onChange={(evt) => this.handleMaxRangeChange(evt.target.value)}
-                          style={{
-                            width: "60px",
-                            height: "20px",
-                            opacity: 1,
-                          }}
-                          disabled={this.state.rangeDisabled}
-                        />
-                      </div>
-                    </div>
 
+                    <div>
+                      <input type="number"
+                        min={minValue}
+                        max={customBrush.max - 1}
+                        value={this.state.customBrush.min}
+                        className={"slice-field"}
+                        onChange={(evt) => this.handleMinRangeChange(evt.target.value)}
+                        style={{
+                          width: "60px",
+                          height: "20px",
+                          opacity: 1,
+                        }}
+                        disabled={this.state.rangeDisabled}
+                      />
+                      <span> to </span>
+                      <input type="number"
+                        min={customBrush.min + 1}
+                        max={maxValue}
+                        value={this.state.customBrush.max}
+                        className={"slice-field"}
+                        onChange={(evt) => this.handleMaxRangeChange(evt.target.value)}
+                        style={{
+                          width: "60px",
+                          height: "20px",
+                          opacity: 1,
+                        }}
+                        disabled={this.state.rangeDisabled}
+                      />
+                    </div>
                   )}
                 </div>
               ))}
