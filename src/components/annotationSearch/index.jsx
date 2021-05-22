@@ -5,6 +5,8 @@ import { FaSearch, FaPlus } from 'react-icons/fa';
 import { searchAnnotations } from './../../services/annotationServices.js';
 import AnnotationTable from './AnnotationTable.jsx';
 import './annotationSearch.css';
+import { clearSelection, selectAnnotation } from '../annotationsList/action';
+import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
 
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
@@ -36,10 +38,16 @@ const styles = {
     margin: '0.2rem',
     padding: '0.3rem 0.5rem',
     fontSize: '1.2 rem'
+  },
+  downloadButton: {
+    width: '8rem',
+    margin: '1rem 0.5rem',
+    padding: '0.3rem 0.5rem',
+    fontSize: '1.2 rem'
   }
 };
 
-const AnnotationSearch = ({ projectMap }) => {
+const AnnotationSearch = props => {
   const [query, setQuery] = useState('');
   const [partialQuery, setPartialQuery] = useState({
     type: lists.type[0],
@@ -49,6 +57,8 @@ const AnnotationSearch = ({ projectMap }) => {
   const [typeSelected, setTypeSelected] = useState(false);
   const [selectedProject, setSelectedProject] = useState('all');
   const [data, setData] = useState([]);
+  const [selectedAnnotations, setSelectedAnnotations] = useState({});
+  const [downloadClicked, setDownloadClicked] = useState(false);
 
   const renderOrganizeItem = name => {
     return (
@@ -84,6 +94,10 @@ const AnnotationSearch = ({ projectMap }) => {
 
   const insertIntoQuery = selection => {
     // get the cursor index and add the selection at that index
+  };
+
+  const updateSelectedAims = aimData => {
+    props.dispatch(selectAnnotation(aimData));
   };
 
   const renderContentItem = field => {
@@ -212,6 +226,7 @@ const AnnotationSearch = ({ projectMap }) => {
 
   const getSearchResult = () => {
     const query = parseQuery();
+    setData([]);
     searchAnnotations({ query })
       .then(res => {
         console.log(res);
@@ -280,13 +295,12 @@ const AnnotationSearch = ({ projectMap }) => {
       }
       console.log('parsedQuery', parsedQuery);
     }
-    alert(parsedQuery);
     return parsedQuery;
   };
 
   const renderProjectSelect = () => {
-    const projectNames = Object.values(projectMap);
-    const projectID = Object.keys(projectMap);
+    const projectNames = Object.values(props.projectMap);
+    const projectID = Object.keys(props.projectMap);
     return (
       <div
         className="annotationSearch-cont__item"
@@ -299,7 +313,7 @@ const AnnotationSearch = ({ projectMap }) => {
         <select
           onChange={e => setSelectedProject(e.target.value)}
           onMouseDown={e => e.stopPropagation()}
-          style={{ margin: '0rem 1rem', padding: '0.35rem 0rem' }}
+          style={{ margin: '0rem 1rem', padding: '1.8px' }}
         >
           {projectNames.map((el, i) => {
             return (
@@ -324,7 +338,7 @@ const AnnotationSearch = ({ projectMap }) => {
         style={{
           width: '-webkit-fill-available',
           display: 'flex',
-          margin: '1rem 2rem'
+          margin: '0.5rem 2rem'
         }}
       >
         <div
@@ -369,21 +383,49 @@ const AnnotationSearch = ({ projectMap }) => {
       </div>
       <div
         style={{
-          margin: '1rem 2rem'
+          margin: '0.5rem 2rem'
         }}
       >
         {renderQueryItem()}
         {renderOrganizeItem('organize')}
         {renderProjectSelect()}
-        {data.length > 0 && <AnnotationTable data={data} />}
+        <button
+          className={`btn btn-secondary`}
+          style={styles.downloadButton}
+          name="download"
+          onClick={() => setDownloadClicked(true)}
+          type="button"
+          disabled={Object.keys(props.selectedAnnotations).length === 0}
+        >
+          DOWNLOAD
+        </button>
+
+        {data.length > 0 && (
+          <AnnotationTable
+            data={data}
+            selected={selectedAnnotations}
+            updateSelectedAims={updateSelectedAims}
+          />
+        )}
       </div>
+      {downloadClicked && (
+        <AnnotationDownloadModal
+          onSubmit={() => {
+            setDownloadClicked(false);
+            getSearchResult();
+          }}
+          onCancel={() => setDownloadClicked(false)}
+          updateStatus={() => console.log('update status')}
+        />
+      )}
     </div>
   );
 };
 
 const mapsStateToProps = state => {
   return {
-    projectMap: state.annotationsListReducer.projectMap
+    projectMap: state.annotationsListReducer.projectMap,
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
   };
 };
 
