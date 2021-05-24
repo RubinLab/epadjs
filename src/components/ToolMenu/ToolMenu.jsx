@@ -403,8 +403,29 @@ class ToolMenu extends Component {
   reset = () => {
     const element = cornerstone.getEnabledElements()[this.props.activePort]
       .element;
+    this.resetRenderCanvas(element);
     cornerstone.reset(element);
   };
+
+  resetRenderCanvas = (element) => {
+    const enabledElement = cornerstone.getEnabledElement(element);
+
+    enabledElement.renderingTools.colormapId = undefined;
+    enabledElement.renderingTools.colorLut = undefined;
+
+    const renderCanvas = enabledElement.renderingTools.renderCanvas;
+    const canvasContext = renderCanvas.getContext('2d');
+
+    // NOTE - we need to fill the render canvas with white pixels since we 
+    // control the luminance using the alpha channel to improve rendering performance. 
+    canvasContext.fillStyle = 'white';
+    canvasContext.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
+
+    const renderCanvasData = canvasContext.getImageData(0, 0, renderCanvas.width, renderCanvas.height);
+
+    enabledElement.renderingTools.renderCanvasContext = canvasContext;
+    enabledElement.renderingTools.renderCanvasData = renderCanvasData;
+  }
 
   showMetaData = () => {
     this.setState({ showMetaData: !this.state.showMetaData });
