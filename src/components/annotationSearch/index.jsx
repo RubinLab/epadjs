@@ -7,12 +7,14 @@ import AnnotationTable from './AnnotationTable.jsx';
 import './annotationSearch.css';
 import { clearSelection, selectAnnotation } from '../annotationsList/action';
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
+import { id } from 'date-fns/locale';
+import { arrayMin } from 'highcharts';
 
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
   paranthesis: ['(', ')'],
   condition: ['AND', 'OR'],
-  type: ['modality', 'diagnosis', 'anatomic entity'],
+  type: ['modality', 'diagnosis', 'anatomic_entity'],
   criteria: ['equals', 'contains']
 };
 
@@ -59,6 +61,7 @@ const AnnotationSearch = props => {
   const [data, setData] = useState([]);
   const [selectedAnnotations, setSelectedAnnotations] = useState({});
   const [downloadClicked, setDownloadClicked] = useState(false);
+  const [error, setError] = useState('');
 
   const renderOrganizeItem = name => {
     return (
@@ -227,13 +230,132 @@ const AnnotationSearch = props => {
   const getSearchResult = () => {
     const query = parseQuery();
     setData([]);
-    searchAnnotations({ query })
-      .then(res => {
-        console.log(res);
-        setData(res.data.rows);
-      })
-      .catch(err => console.error(err));
+    if (query) {
+      searchAnnotations({ query })
+        .then(res => {
+          console.log(res);
+          setData(res.data.rows);
+        })
+        .catch(err => console.error(err));
+    }
   };
+
+  const seperateParanthesis = arr => {
+    console.log('arr', arr);
+    const result = [];
+    arr.forEach(el => {
+      if (el.startsWith('(') || el.endsWith(')')) {
+        if (el.length > 1) {
+          const letterArr = el.split('');
+          let closing = '';
+          if (letterArr[0] === '(') result.push(letterArr.shift());
+          if (letterArr[letterArr.length - 1] === ')') {
+            closing = letterArr.pop();
+          }
+          if (letterArr.length > 0) result.push(letterArr.join(''));
+          if (closing) result.push(closing);
+        } else {
+          result.push(el);
+        }
+      } else {
+        result.push(el);
+      }
+    });
+    return result;
+  };
+
+  const isNoOfParanthesisValid = arr => {
+    const open = 0;
+    const close = 0;
+    arr.forEach(el => {
+      if (el === '(') {
+        open += 1;
+      }
+      if (el === ')') {
+        close += 1;
+      }
+    });
+    return close === open;
+  };
+
+  const validateQueryOrder = arr => {
+    let valid = true;
+    // debugger;
+    arr.forEach((el, i) => {
+      const isCriteria = lists.criteria.includes(el);
+      const followsType = lists.type.includes(arr[i - 1]);
+      console.log(' ===> el, isCriteria, followsType');
+      console.log(el, isCriteria, followsType);
+      if (isCriteria && !followsType) {
+        console.log('in if');
+        valid = false;
+      }
+    });
+    return valid;
+  };
+
+  const checkStartEndWithCondition = arr => {
+    // query order is type + criteria + term
+    const firstAndLastThree = arr.slice(0, 3).concat(arr.slice(arr.length - 3));
+    // first and last three word can not be AND/OR
+    return (
+      firstAndLastThree.includes('AND') || firstAndLastThree.includes('OR')
+    );
+  };
+
+  const validateQuery = arr => {
+    if (arr[0] === ')') {
+      setError('Query can not start with a closing paranthesis');
+      return false;
+    }
+
+    if (arr[arr.length - 1] === '(') {
+      setError('Query can not end with an openning paranthesis');
+      return false;
+    }
+
+    if (!isNoOfParanthesisValid) {
+      setError(
+        'Number of the opening and closing paranthesis should be equal!'
+      );
+      return false;
+    }
+
+    if (!validateQueryOrder(arr)) {
+      setError(
+        `Please select one of the following search fields! ${lists.type.join(
+          ', '
+        )}`
+      );
+      return false;
+    }
+    if (checkStartEndWithCondition(arr)) {
+      setError(`AND/OR conditions should be used to connect two queries!`);
+      return false;
+    }
+    return true;
+  };
+
+  const parseQuery = () => {
+    const queryArray = seperateParanthesis(query.split(' '));
+    console.log(queryArray);
+    const isQueryInputValid = validateQuery(queryArray);
+    if (isQueryInputValid) {
+      const parsedQuery = queryArray.reduce((all, item, index) => {
+        if (lists.criteria.includes(item)) {
+          all += ':';
+        } else {
+          all += item;
+        }
+        console.log(all, item);
+        return all;
+      }, '');
+      console.log(parsedQuery);
+      return parsedQuery;
+    }
+  };
+
+  /*
 
   const parseQuery = () => {
     console.log('parseQuery clicked');
@@ -280,7 +402,8 @@ const AnnotationSearch = props => {
         // if word is not criteria show error
         // fill map term flag
         // }
-      } else if (endIndex >= 0 || endIndex === -1) {
+      } else if (endIndex && (endIndex >= 0 || endIndex === -1)) {
+        console.log('endindex -->', endIndex);
         if (endIndex < 2 && endIndex !== -1) {
           // error: please enter a search term
           return;
@@ -293,10 +416,11 @@ const AnnotationSearch = props => {
           baseQuery = '';
         }
       }
-      console.log('parsedQuery', parsedQuery);
     }
+    console.log('parsedQuery', parsedQuery);
     return parsedQuery;
   };
+  */
 
   const renderProjectSelect = () => {
     const projectNames = Object.values(props.projectMap);
@@ -369,6 +493,7 @@ const AnnotationSearch = props => {
           type="button"
           className="btn btn-secondary annotationSearch-btn"
           onClick={getSearchResult}
+          // onClick={parseIt}
           // disabled={index < count}
           style={{
             padding: '0.3rem 0.5rem',
