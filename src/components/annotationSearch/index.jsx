@@ -161,6 +161,7 @@ const AnnotationSearch = props => {
           style={styles.buttonStyles}
           onClick={addPartialToQuery}
           type="button"
+          name="add-button"
           style={{
             padding: '0.3rem 0.5rem',
             height: 'fit-content',
@@ -435,6 +436,7 @@ const AnnotationSearch = props => {
           style={{ fontsize: '1.2rem' }}
         >{`${explanation['project']}`}</div>
         <select
+          name="project-dropdown"
           onChange={e => setSelectedProject(e.target.value)}
           onMouseDown={e => e.stopPropagation()}
           style={{ margin: '0rem 1rem', padding: '1.8px' }}
@@ -478,7 +480,7 @@ const AnnotationSearch = props => {
             autoComplete="off"
             className="form-control annotationSearch-text"
             aria-label="Large"
-            name="term"
+            name="query"
             onChange={e => setQuery(e.target.value)}
             style={{
               padding: '0.15rem',
@@ -491,6 +493,7 @@ const AnnotationSearch = props => {
         <button
           className={`btn btn-secondary`}
           type="button"
+          name="search-button"
           className="btn btn-secondary annotationSearch-btn"
           onClick={getSearchResult}
           // onClick={parseIt}

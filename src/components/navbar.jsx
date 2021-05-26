@@ -99,7 +99,7 @@ const NavBar = ({
                   </NavLink>
                 </li>{' '} */}
                 <li
-                  id="navbarli"
+                  id="navbar-ann"
                   className={
                     path.includes('annotations') ? 'nav-link activeNav' : 'nav-link'
                   }

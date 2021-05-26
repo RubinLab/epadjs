@@ -39,10 +39,10 @@ import Form from "react-bootstrap/Form";
 import ToolMenu from "../ToolMenu/ToolMenu";
 import { getMarkups, setMarkupsOfAimActive } from "../aimEditor/Helpers";
 import { refreshToken } from "../../services/authService";
-import { isThisSecond } from "date-fns/esm";
-import { FiMessageSquare } from "react-icons/fi";
-import { errorMonitor } from "events";
-import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
+// import { isThisSecond } from "date-fns/esm";
+// import { FiMessageSquare } from "react-icons/fi";
+// import { errorMonitor } from "events";
+// import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
 
 const mode = sessionStorage.getItem("mode");
 const wadoUrl = sessionStorage.getItem("wadoUrl");
