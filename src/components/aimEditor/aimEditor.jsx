@@ -43,8 +43,10 @@ class AimEditor extends Component {
     };
     //if aim is being updated set the aimId and isUpdate flag
     if (this.props.aimId) {
-      this.updatedAimId = this.props.aimId.aimId;
+      const { aimId, trackingUniqueIdentifier } = this.props.aimId;
+      this.updatedAimId = aimId;
       this.state.isUpdate = true;
+      this.state.trackingUId = trackingUniqueIdentifier;
     }
   }
 
@@ -105,7 +107,7 @@ class AimEditor extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if ((prevProps?.aimId !== undefined) && (prevProps.aimId.aimId !== this.props?.aimId.aimId))
+    if ((this.props.aimId !== undefined) && (prevProps.aimId !== undefined) && (prevProps.aimId.aimId !== this.props?.aimId?.aimId))
       this.semanticAnswers.loadAimJson(this.props.aimId);
     const { isSegUploaded } = this.props;
     const { uploadingSegId } = this.state;

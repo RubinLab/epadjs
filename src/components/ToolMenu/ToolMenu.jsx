@@ -26,7 +26,8 @@ import {
   FaCircle,
   FaMousePointer,
   FaPalette,
-  FaObjectUngroup
+  FaObjectUngroup,
+  FaDotCircle
 } from "react-icons/fa";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
@@ -101,6 +102,7 @@ const tools = [
   { name: "Brush3D" },
   { name: "SphericalBrush" },
   { name: "Brush3DHUGated" },
+  { name: "BrushSphericalHUGated" },
   { name: "Brush3DAutoGated" },
 ];
 
@@ -212,17 +214,22 @@ class ToolMenu extends Component {
         tool: "Brush3D",
       },
       {
-        name: "Brush Gated",
+        name: "Gated",
         icon: <FaBroom />,
         tool: "Brush3DHUGated",
       },
       {
-        name: "Brush Auto Gated",
+        name: "Spherical Gated",
+        icon: <FaDotCircle />,
+        tool: "BrushSphericalHUGated",
+      },
+      {
+        name: "Auto Gated",
         icon: <FaBroom />,
         tool: "Brush3DAutoGated",
       },
       {
-        name: "Spherical Brush",
+        name: "Spherical",
         icon: <IoMdEgg />,
         tool: "SphericalBrush",
       },
@@ -247,12 +254,14 @@ class ToolMenu extends Component {
   //TODO: instead of disabling all tools we can just disable the active tool
   disableAllTools = () => {
     const { activeTool } = this.state;
-    if (activeTool === "FreehandRoiTool" || activeTool === "FreehandRoi3DTool") {
-      this.deselectFreehand();
+    if (activeTool) {
+      if (activeTool === "FreehandRoiTool" || activeTool === "FreehandRoi3DTool") {
+        this.deselectFreehand();
+      }
+      this.setToolStateForAllElements(this.state.activeTool, "passive");
+      this.setState({ activeToolIdx: 0 });
+      this.setCursor("default");
     }
-    this.setToolStateForAllElements(this.state.activeTool, "passive");
-    this.setState({ activeToolIdx: 0 });
-    this.setCursor("default");
 
     // Array.from(this.tools).forEach((tool) => {
     //   if (tool !== "FreehandRoiSculptor")
@@ -313,18 +322,16 @@ class ToolMenu extends Component {
       } //Dont" select the HUGated if the modality is not CT
       this.setState({ showBrushSize: true });
     } else if (tool === "Brush3DHUGated") {
-      if (this.checkIfMultiframe()) { alert("Auto Gated tool only works with singleframe images"); }
-      // TODO emel: isn't it bug prone. although it is not going to work, we are setting the state
-      this.setState({ showBrushSize: true, isHuGated: true, showSmartBrush: true });
+      if (this.checkIfMultiframe()) { alert("Segmentation tools only works with singleframe images"); return; }
+      this.setState({ showBrushSize: true, isHuGated: true, showSmartBrush: true, isSpherical: false });
+    } else if (tool === "BrushSphericalHUGated") {
+      if (this.checkIfMultiframe()) { alert("Segmentation tools only works with singleframe images"); return; }
+      this.setState({ showBrushSize: true, isHuGated: true, showSmartBrush: true, isSpherical: true });
     } else if (tool === "Brush3DAutoGated") {
-      if (this.checkIfMultiframe()) {
-        // if (!this.checkIfCT() || this.checkIfMultiframe()) {
-        alert("Auto Gated tool only works with singleframe images");
-        // return;
-      } //Dont" select the HUGated if the modality is not CT
-      // TODO emel: isn't it bug prone. although it is not going to work, we are setting the state
-      this.setState({ showBrushSize: true, isHuGated: false, showSmartBrush: true });
+      if (this.checkIfMultiframe()) { alert("Segmentation tools only works with singleframe images"); return; }
+      this.setState({ showBrushSize: true, isHuGated: false, showSmartBrush: true, isSpherical: false });
     } else if (tool === "FreehandRoi3DTool") {
+      this.selectFreehand();
       this.setState({ showInterpolation: true });
     } else if (tool === "colorLut") {
       this.setState({ showColormap: true });
@@ -334,9 +341,9 @@ class ToolMenu extends Component {
       return;
       this.selectFreehand();
     }
-    else if (tool === "FreehandRoiTool") {
-      this.selectFreehand();
-    }
+    // else if (tool === "FreehandRoiTool") {
+    //   this.selectFreehand();
+    // }
 
     this.disableAllTools();
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
@@ -396,8 +403,29 @@ class ToolMenu extends Component {
   reset = () => {
     const element = cornerstone.getEnabledElements()[this.props.activePort]
       .element;
+    this.resetRenderCanvas(element);
     cornerstone.reset(element);
   };
+
+  resetRenderCanvas = (element) => {
+    const enabledElement = cornerstone.getEnabledElement(element);
+
+    enabledElement.renderingTools.colormapId = undefined;
+    enabledElement.renderingTools.colorLut = undefined;
+
+    const renderCanvas = enabledElement.renderingTools.renderCanvas;
+    const canvasContext = renderCanvas.getContext('2d');
+
+    // NOTE - we need to fill the render canvas with white pixels since we 
+    // control the luminance using the alpha channel to improve rendering performance. 
+    canvasContext.fillStyle = 'white';
+    canvasContext.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
+
+    const renderCanvasData = canvasContext.getImageData(0, 0, renderCanvas.width, renderCanvas.height);
+
+    enabledElement.renderingTools.renderCanvasContext = canvasContext;
+    enabledElement.renderingTools.renderCanvasData = renderCanvasData;
+  }
 
   showMetaData = () => {
     this.setState({ showMetaData: !this.state.showMetaData });
@@ -730,13 +758,14 @@ class ToolMenu extends Component {
         {(this.state.activeTool === "Brush3D" ||
           this.state.activeTool === "SphericalBrush" ||
           this.state.activeTool === "Brush3DHUGated" ||
+          this.state.activeTool === "BrushSphericalHUGated" ||
           this.state.activeTool === "Brush3DAutoGated") &&
           this.state.showBrushSize && (
             <BrushSizeSelector onClose={this.closeBrushSize} />
           )}
-        {(this.state.activeTool === "Brush3DHUGated" || this.state.activeTool === "Brush3DAutoGated") &&
+        {(this.state.activeTool === "Brush3DHUGated" || this.state.activeTool === "BrushSphericalHUGated" || this.state.activeTool === "Brush3DAutoGated") &&
           this.state.showSmartBrush && (
-            <SmartBrushMenu activePort={this.props.activePort} onClose={this.closeSmartBrushMenu} isHuGated={this.state.isHuGated} />
+            <SmartBrushMenu activePort={this.props.activePort} onClose={this.closeSmartBrushMenu} isHuGated={this.state.isHuGated} isSphericalBrush={this.state.isSpherical} />
           )}
         {this.state.showPresets && (
           <WindowLevel
