@@ -16,7 +16,14 @@ import {
   segUploadRemove
 } from "../annotationsList/action";
 import RecistTable from "./RecistTable";
-import { Aim, getAimImageData, modalities } from "aimapi";
+import { 
+  Aim, 
+  getAimImageData, 
+  modalities, 
+  addSegmentationToAim,
+  createAimMarkups,
+  storeMarkupsToBeSaved
+} from "aimapi";
 import { prepAimForParseClass, getMarkups } from "./Helpers";
 import * as questionaire from "./parseClass.js";
 import * as dcmjs from "dcmjs";
@@ -402,7 +409,7 @@ class AimEditor extends Component {
         ({ aim, segmentationBlob, segId }) => {
           // also add the markups to aim if there is any
           if (Object.entries(markupsToSave).length !== 0)
-            this.createAimMarkups(aim, markupsToSave);
+            this.createAimMarkups(aim, markupsToSave, getAxisOfBidirectional);
           this.saveAim(aim, templateType, segmentationBlob, segId);
         }
       );
@@ -415,7 +422,7 @@ class AimEditor extends Component {
         this.updatedAimId,
         this.state.trackingUId
       );
-      this.createAimMarkups(aim, markupsToSave);
+      this.createAimMarkups(aim, markupsToSave, getAxisOfBidirectional);
       this.saveAim(aim, templateType);
     } else {
       //Non markup image annotation
@@ -487,36 +494,6 @@ class AimEditor extends Component {
     } catch (error) {
       throw new Error("Error creating segmentation", error);
     }
-  };
-
-  createAimMarkups = (aim, markupsToSave) => {
-    Object.entries(markupsToSave).forEach(([key, values]) => {
-      values.map((value) => {
-        const { type, markup, shapeIndex, imageId, frameNum } = value;
-        switch (type) {
-          case "point":
-            this.addPointToAim(aim, markup, shapeIndex, imageId, frameNum);
-            break;
-          case "line":
-            this.addLineToAim(aim, markup, shapeIndex, imageId, frameNum);
-            break;
-          case "circle":
-            this.addCircleToAim(aim, markup, shapeIndex, imageId, frameNum);
-            break;
-          case "polygon":
-            this.addPolygonToAim(aim, markup, shapeIndex, imageId, frameNum);
-            break;
-          case "bidirectional":
-            this.addBidirectionalToAim(
-              aim,
-              markup,
-              shapeIndex,
-              imageId,
-              frameNum
-            );
-        }
-      });
-    });
   };
 
   // returns the imageIds that has markup
@@ -620,7 +597,7 @@ class AimEditor extends Component {
             polygons3d.map((polygon) => {
               if (!polygon.aimId || polygon.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
-                this.storeMarkupsToBeSaved(
+                storeMarkupsToBeSaved(
                   CSImageId,
                   {
                     type: "polygon",
@@ -640,7 +617,7 @@ class AimEditor extends Component {
             polygons.map((polygon) => {
               if (!polygon.aimId || polygon.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
-                this.storeMarkupsToBeSaved(
+                storeMarkupsToBeSaved(
                   CSImageId,
                   {
                     type: "polygon",
@@ -663,7 +640,7 @@ class AimEditor extends Component {
                 bidirectional.aimId === this.updatedAimId
               ) {
                 //dont save the same markup to different aims
-                this.storeMarkupsToBeSaved(
+                storeMarkupsToBeSaved(
                   CSImageId,
                   {
                     type: "bidirectional",
@@ -683,7 +660,7 @@ class AimEditor extends Component {
             circles.map((circle) => {
               if (!circle.aimId || circle.aimId === this.updatedAimId) {
                 // //dont save the same markup to different aims
-                this.storeMarkupsToBeSaved(
+                storeMarkupsToBeSaved(
                   CSImageId,
                   {
                     type: "circle",
@@ -703,7 +680,7 @@ class AimEditor extends Component {
             lines.map((line) => {
               if (!line.aimId || line.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
-                this.storeMarkupsToBeSaved(
+                storeMarkupsToBeSaved(
                   CSImageId,
                   {
                     type: "line",
@@ -723,7 +700,7 @@ class AimEditor extends Component {
             points.map((point) => {
               if (!point.aimId || point.aimId === this.updatedAimId) {
                 //dont save the same markup to different aims
-                this.storeMarkupsToBeSaved(
+                storeMarkupsToBeSaved(
                   CSImageId,
                   {
                     type: "point",
@@ -786,46 +763,6 @@ class AimEditor extends Component {
     return cornerstone.imageCache.imageCache[imageId].image;
   };
 
-  storeMarkupsToBeSaved = (imageId, markupData, markupsToSave) => {
-    if (!markupsToSave[imageId]) markupsToSave[imageId] = [];
-    markupsToSave[imageId].push(markupData);
-  };
-
-  addSegmentationToAim = (aim, segEntityData, segStats) => {
-    const segId = aim.createSegmentationEntity(segEntityData);
-
-    const { volume, min, max, mean, stdDev } = segStats;
-
-    if (mean) {
-      const meanId = aim.createMeanCalcEntity({ mean, unit: "[hnsf'U]" });
-      aim.createImageAnnotationStatement(2, segId, meanId);
-    }
-
-    if (stdDev) {
-      const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit: "[hnsf'U]" });
-      aim.createImageAnnotationStatement(2, segId, stdDevId);
-    }
-
-    if (min) {
-      const minId = aim.createMinCalcEntity({ min, unit: "[hnsf'U]" });
-      aim.createImageAnnotationStatement(2, segId, minId);
-    }
-
-    if (max) {
-      const maxId = aim.createMaxCalcEntity({ max, unit: "[hnsf'U]" });
-      aim.createImageAnnotationStatement(2, segId, maxId);
-    }
-
-    if (volume) {
-      const volumeId = aim.createVolumeCalcEntity({
-        value: volume,
-        unit: "mm3",
-      });
-      aim.createImageAnnotationStatement(2, segId, volumeId);
-    }
-    return segEntityData.sopInstanceUid;
-  };
-
   parseImageUid = (imageUid) => {
     if (imageUid.includes("frame=")) {
       const obj = {};
@@ -833,136 +770,6 @@ class AimEditor extends Component {
       return obj;
     }
     return { imageId: imageUid, frameNum: 1 }; //default frame number is always 1
-  };
-
-  addPolygonToAim = (aim, polygon, shapeIndex, imageId, frameNum) => {
-    const { points } = polygon.handles;
-    const markupId = aim.addMarkupEntity(
-      "TwoDimensionPolyline",
-      shapeIndex,
-      points,
-      imageId,
-      frameNum
-    );
-
-    // find out the unit about statistics to write to aim
-    let unit, mean, stdDev, min, max;
-    if (polygon.meanStdDev) {
-      ({ mean, stdDev, min, max } = polygon.meanStdDev);
-      unit = "hu";
-    } else if (polygon.meanStdDevSUV) {
-      ({ mean, stdDev, min, max } = polygon.meanStdDev);
-      unit = "suv";
-    }
-
-    const meanId = aim.createMeanCalcEntity({ mean, unit });
-    aim.createImageAnnotationStatement(1, markupId, meanId);
-
-    const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit });
-    aim.createImageAnnotationStatement(1, markupId, stdDevId);
-
-    const minId = aim.createMinCalcEntity({ min, unit });
-    aim.createImageAnnotationStatement(1, markupId, minId);
-
-    const maxId = aim.createMaxCalcEntity({ max, unit });
-    aim.createImageAnnotationStatement(1, markupId, maxId);
-  };
-
-  addPointToAim = (aim, point, shapeIndex, imageId, frameNum) => {
-    const { end } = point.handles;
-    aim.addMarkupEntity(
-      "TwoDimensionPoint",
-      shapeIndex,
-      [end],
-      imageId,
-      frameNum
-    );
-  };
-
-  addLineToAim = (aim, line, shapeIndex, imageId, frameNum) => {
-    const { start, end } = line.handles;
-    const markupId = aim.addMarkupEntity(
-      "TwoDimensionMultiPoint",
-      shapeIndex,
-      [start, end],
-      imageId,
-      frameNum
-    );
-
-    const lengthId = aim.createLengthCalcEntity({
-      value: line.length,
-      unit: line.unit,
-    });
-    aim.createImageAnnotationStatement(1, markupId, lengthId);
-  };
-
-  addCircleToAim = (aim, circle, shapeIndex, imageId, frameNum) => {
-    const { start, end } = circle.handles;
-    const markupId = aim.addMarkupEntity(
-      "TwoDimensionCircle",
-      shapeIndex,
-      [start, end],
-      imageId,
-      frameNum
-    );
-
-    let unit;
-    if (circle.unit === "HU") unit = "hu";
-    else if (circle.unit === "SUV") unit = "suv";
-
-    const { mean, stdDev, min, max } = circle.cachedStats;
-
-    const meanId = aim.createMeanCalcEntity({ mean, unit });
-    aim.createImageAnnotationStatement(1, markupId, meanId);
-
-    const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit });
-    aim.createImageAnnotationStatement(1, markupId, stdDevId);
-
-    const minId = aim.createMinCalcEntity({ min, unit });
-    aim.createImageAnnotationStatement(1, markupId, minId);
-
-    const maxId = aim.createMaxCalcEntity({ max, unit });
-    aim.createImageAnnotationStatement(1, markupId, maxId);
-
-    // aim.add;
-  };
-
-  addBidirectionalToAim = (
-    aim,
-    bidirectional,
-    shapeIndex,
-    imageId,
-    frameNum
-  ) => {
-    const { longAxis, shortAxis } = this.getAxisOfBidirectional(bidirectional);
-
-    // add longAxis
-    const longAxisMarkupId = aim.addMarkupEntity(
-      "TwoDimensionMultiPoint",
-      shapeIndex,
-      [longAxis.start, longAxis.end],
-      imageId,
-      frameNum
-    );
-    const longAxisLengthId = aim.createLongAxisCalcEntity({
-      value: longAxis.length,
-      unit: "mm",
-    });
-    aim.createImageAnnotationStatement(1, longAxisMarkupId, longAxisLengthId);
-
-    // add shortAxis
-    const shortAxisMarkupId = aim.addMarkupEntity(
-      "TwoDimensionMultiPoint",
-      shapeIndex + 1,
-      [shortAxis.start, shortAxis.end],
-      imageId,
-      frameNum
-    );
-    const shortAxisLengthId = aim.createShortAxisCalcEntity({
-      value: shortAxis.length,
-      unit: "mm",
-    });
-    aim.createImageAnnotationStatement(1, shortAxisMarkupId, shortAxisLengthId);
   };
 
   getAxisOfBidirectional = (bidirectional) => {
