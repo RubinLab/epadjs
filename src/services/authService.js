@@ -101,11 +101,12 @@ export class AuthService {
     this.redirect_uri = sessionStorage.getItem('redirect_uri');
     this.response_type = sessionStorage.getItem('response_type');
     this.scope = sessionStorage.getItem('scope');
-    this.UserManager = new UserManager({
+    const usermng = new UserManager({
       authority: this.authority,
       client_id: this.client_id,
       redirect_uri: this.redirect_uri,
       response_type: this.response_type,
+      response_mode: 'query',
       scope: this.scope,
       silent_redirect_uri: this.redirect_uri,
       automaticSilentRenew: true,
@@ -113,11 +114,14 @@ export class AuthService {
       post_logout_redirect_uri: this.redirect_uri,
       userStore: new WebStorageStateStore({ store: window.sessionStorage })
     });
+    this.UserManager = usermng;
+    console.log('userMNG', usermng);
     // Logger
     Log.logger = console;
-    Log.level = Log.DEBUG;
+    Log.level = Log.INFO;
     this.UserManager.events.addUserLoaded(user => {
       console.log('in the event', user);
+      alert('in the event');
       // if (window.location.href.indexOf('signin-oidc') !== -1) {
       //   this.navigateToScreen();
       // }
@@ -132,10 +136,18 @@ export class AuthService {
     });
   }
 
-  signinRedirectCallback = async () => {
-    const user = await this.UserManager.signinRedirectCallback();
-    console.log('callback user', user);
-    return user;
+  signinRedirectCallback = () => {
+    this.UserManager.signinRedirectCallback()
+      .then(user => {
+        console.log('user', user);
+        window.location.href = 'http://localhost:3000';
+      })
+      .catch(err => {
+        console.log(' ----> auth service catch');
+        console.error(err);
+      });
+    // alert('callback user');
+    // return user;
   };
 
   getUser = async () => {
@@ -156,8 +168,7 @@ export class AuthService {
   };
 
   signinRedirect = async () => {
-    const exp = await this.UserManager.signinRedirect();
-    console.log(exp);
+    this.UserManager.signinRedirect();
   };
 
   signinRedirectPopUp = () => {

@@ -1,39 +1,49 @@
-import React from "react";
-import Joi from "joi-browser";
-import Form from "./common/form";
-import auth from "../services/authService";
-import logo from "../images/logo.png";
-import TermsModal from "./termsModal";
-import SweetAlert from "react-bootstrap-sweetalert";
+import React from 'react';
+import Joi from 'joi-browser';
+import Form from './common/form';
+import auth from '../services/authService';
+
+import logo from '../images/logo.png';
+import TermsModal from './termsModal';
+import SweetAlert from 'react-bootstrap-sweetalert';
 
 class LoginForm extends Form {
   constructor(props) {
     super(props);
     this.state = {
-      data: { username: "", password: "", agreement: "false" },
+      data: { username: '', password: '', agreement: 'false' },
       errors: {},
       modalShow: false,
-      passwordShow: false
+      passwordShow: false,
+      authService: null
     };
   }
+
+  componentDidMount = () => {
+    const authService = new auth.AuthService();
+    this.setState({ authService });
+    
+    // sessionStorage.setItem('authService', JSON.stringify(authService));
+    // authService.signinRedirect({});
+  };
 
   schema = {
     username: Joi.string()
       .required()
-      .label("Username"),
+      .label('Username'),
     password: Joi.string()
       .required()
-      .label("Password"),
+      .label('Password'),
     agreement: Joi.boolean()
       .invalid(false)
-      .label("Licence Agreement")
+      .label('Licence Agreement')
   };
 
   doSubmit = async () => {
     try {
       const { data } = this.state;
       await auth.login(data.username, data.password);
-      window.location = "/";
+      window.location = '/';
     } catch (ex) {
       if (ex.response && ex.response.status === 400) {
         const errors = { ...this.state.errors };
@@ -44,11 +54,20 @@ class LoginForm extends Form {
   };
 
   render() {
-    console.log("here props", this.props)
+    console.log('here props', this.props);
     let modalClose = () => this.setState({ modalShow: false });
-    this.props.authService.signinRedirect();
+    // this.props.authService.signinRedirect();
     return (
-      <div>Loading...</div>
+      <div>
+        <button
+          onClick={() => {
+            this.state.authService.signinRedirect({});
+          }}
+        >
+          {' '}
+          sign in
+        </button>
+      </div>
       // <div className="col-4 mx-auto center-block">
       //   <img src={logo} className="mx-auto d-block" alt={"logo"} width="40px" />
       //   <h4 className="text-center">Welcome to ePAD</h4>

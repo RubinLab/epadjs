@@ -15,6 +15,7 @@ import AnotateView from './components/anotateView';
 import ProgressView from './components/progressView';
 import FlexView from './components/flexView';
 import NotFound from './components/notFound';
+import Loading from './components/Loading';
 import LoginForm from './components/loginForm';
 import Logout from './components/logout';
 import ProtectedRoute from './components/common/protectedRoute';
@@ -46,6 +47,7 @@ import './App.css';
 import RightsideBar from './components/RightsideBar/RightsideBar';
 import MinimizedReport from './components/searchView/MinimizedReport';
 import { AuthConsumer } from 'providers/authProvider';
+import { FaJoint } from 'react-icons/fa';
 
 const messages = {
   noPatient: {
@@ -547,7 +549,8 @@ class App extends Component {
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
         authority = process.env.REACT_APP_AUTHORITY || authority;
         client_id = process.env.REACT_APP_CLIENT_ID || client_id;
-        redirect_uri = process.env.REACT_APP_REDIRECT_URI || redirect_uri;
+        // redirect_uri = process.env.REACT_APP_REDIRECT_URI || redirect_uri;
+        redirect_uri = 'http://bds-c02xf0r0jhd5.local:3000/loading';
         response_type = process.env.REACT_APP_RESPONSE_TYPE || response_type;
         scope = process.env.REACT_APP_SCOPE || scope;
         sessionStorage.setItem('mode', mode);
@@ -559,6 +562,7 @@ class App extends Component {
         sessionStorage.setItem('redirect_uri', redirect_uri);
         sessionStorage.setItem('response_type', response_type);
         sessionStorage.setItem('scope', scope);
+        sessionStorage.setItem('redirected', true);
 
         const clientId = client_id;
         const redirectUri = redirect_uri;
@@ -590,7 +594,9 @@ class App extends Component {
         sessionStorage.setItem('auth', auth);
         sessionStorage.setItem('keycloakJson', JSON.stringify(keycloakJson));
         console.log(' in then before completeAutorization 3');
-        this.completeAutorization(apiUrl);
+        // alert(Object.keys(localStorage).join(','));
+
+        // this.completeAutorization(apiUrl);
         console.log(' in then after completeAutorization 4');
         if (mode === 'lite') this.setState({ pid: 'lite' });
       })
@@ -626,10 +632,16 @@ class App extends Component {
     if (oldPid !== newPid && route === 'search') {
       this.setState({ pid: newPid });
     }
+
+    if (this.props.location.pathname !== prevProps.location.pathname) {
+      // alert(`${this.props.location.pathname} - ${prevProps.location.pathname} --`);
+      if (prevProps.location.pathname === '/login') alert('yesso');
+    }
   };
 
   completeAutorization = async apiUrl => {
     let getAuthUser = null;
+    console.log(' ==> completeAuthorization <== ');
     const authStatus = sessionStorage.getItem('loggingIn');
     this.authService = new auth.AuthService();
     let userInfo;
@@ -637,14 +649,14 @@ class App extends Component {
 
     if (!authenticated) {
       try {
-        const res = await this.authService.signinRedirect();
-        userInfo = await this.authService.signinCallback();
+        // const res = await this.authService.signinRedirect();
+        userInfo = await this.authService.signinRedirectCallback();
         sessionStorage.setItem('loggingIn', 'done');
         await this.registerUser(
           userInfo,
           this.authService,
           this.authService.isAuthenticated(),
-          apiUrl
+          this.state.apiUrl
         );
       } catch (err) {
         console.error('signinRedirectCallback error', err);
@@ -764,7 +776,7 @@ class App extends Component {
 
   onLogout = e => {
     auth.logout();
-    this.state.authService.logout();
+    this.authService.logout();
     // sessionStorage.removeItem("annotations");
     sessionStorage.setItem('notifications', JSON.stringify([]));
     this.setState({
@@ -774,7 +786,7 @@ class App extends Component {
       user: null
     });
     if (sessionStorage.getItem('authMode') !== 'external') {
-      this.state.authService.logout();
+      this.authService.logout();
       this.setState({
         authService: null
       });
@@ -1091,15 +1103,15 @@ class App extends Component {
         )}
         {this.state.reportsCompArr}
         {this.state.minReportsArr}
-        {!this.state.authenticated && mode !== 'lite' && (
+        {/* {!this.state.authenticated && (
           <Route
             path="/login"
             render={props => (
-              <LoginForm {...props} authService={this.state.authService} />
+              <LoginForm {...props} authService={this.authService} />
             )}
           />
-        )}
-        {this.state.authenticated && mode !== 'lite' && (
+        )} */}
+        {mode !== 'lite' && (
           <div style={{ display: 'inline', width: '100%', height: '100%' }}>
             <Sidebar
               type={this.state.viewType}
@@ -1111,6 +1123,26 @@ class App extends Component {
             >
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
+                <Route
+                  path="/login"
+                  render={props => (
+                    <LoginForm
+                      {...props}
+                      // authService={this.authService}
+                      completeAutorization={this.completeAutorization}
+                    />
+                  )}
+                />
+                <Route
+                  path="/redirect"
+                  render={props => (
+                    <Redirect
+                      {...props}
+                      // authService={this.authService}
+                      // completeAutorization={this.completeAutorization}
+                    />
+                  )}
+                />
                 <ProtectedRoute
                   path="/display"
                   render={props => (
@@ -1194,6 +1226,12 @@ class App extends Component {
                 <Route path="/tools" />
                 <Route path="/edit" />
                 <Route path="/not-found" component={NotFound} />
+                <Route
+                  path="/loading"
+                  render={props => (
+                    <Loading {...props} registerUser={this.registerUser} />
+                  )}
+                />
                 <ProtectedRoute
                   from="/"
                   exact
@@ -1225,7 +1263,7 @@ class App extends Component {
                   )}
                 />
 
-                <Redirect to="/not-found" />
+                {/* <Redirect to="/login" /> */}
               </Switch>
               {/* {this.props.activePort === 0 ? <AnnotationsList /> : null} */}
             </Sidebar>
@@ -1256,6 +1294,8 @@ class App extends Component {
                 )}
               />
               <Route path="/not-found" component={NotFound} />
+              <Route path="/loading" component={Loading} />
+
               <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
@@ -1284,7 +1324,7 @@ class App extends Component {
                   />
                 )}
               />
-              <Redirect to="/not-found" />
+              {/* <Redirect to="/login" /> */}
             </Switch>
           </Sidebar>
         )}

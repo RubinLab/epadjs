@@ -57,24 +57,24 @@ class Sidebar extends Component {
 
   componentDidMount = async () => {
     try {
-      this.setTabHeight();
-      const projects = await this.getProjectsData();
-      this.setStateProjectData(projects, true);
-      this.getWorklistandProgressData();
-      window.addEventListener("resize", this.setTabHeight);
+      // this.setTabHeight();
+      // const projects = await this.getProjectsData();
+      // this.setStateProjectData(projects, true);
+      // this.getWorklistandProgressData();
+      // window.addEventListener("resize", this.setTabHeight);
     } catch (error) {
       console.error(error);
     }
   };
 
   setTabHeight = () => {
-    const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
-    const closebtn = document.getElementsByClassName("closebtn __leftBar")[0]
-      .clientHeight;
-    const navTabs = document.getElementsByClassName("nav-tabs")[0].clientHeight;
-    const windowInner = window.innerHeight;
-    const height = windowInner - navTabs - closebtn - navbar - 10;
-    this.setState({ height });
+    // const navbar = document.getElementsByClassName("navbar").length > 0 ? document.getElementsByClassName("navbar")[0].clientHeight : 0;
+    // const closebtn = document.getElementsByClassName("closebtn __leftBar")[0]
+    //   .clientHeight;
+    // const navTabs = document.getElementsByClassName("nav-tabs")[0].clientHeight;
+    // const windowInner = window.innerHeight;
+    // const height = windowInner - navTabs - closebtn - navbar - 10;
+    // this.setState({ height });
   };
 
   componentWillUnmount = () => {
@@ -479,7 +479,8 @@ class Sidebar extends Component {
     const { progressView } = this.state;
     return (
       <React.Fragment>
-        <div
+
+        {/* <div
           id="leftSidebar"
           className="sidenav"
           style={{ width: this.state.width }}
@@ -506,10 +507,11 @@ class Sidebar extends Component {
             onClick={this.handleOpen}
           >
             &#9776;
-          </button>
+          </button> */}
           {this.props.children}
           {/* {this.props.activePort !== null ? <AnnotationsList /> : null} */}
-        </div>
+        {/* </div> */}
+        
       </React.Fragment>
     );
   };
