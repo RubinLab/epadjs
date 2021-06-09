@@ -523,6 +523,13 @@ class Plugins extends React.Component {
       this.setState({ errorMessage: "please fill required boxes" });
       return;
     }
+    if (pluginform.processmultipleaims === "1") {
+      pluginform.processmultipleaims = 1;
+    } else if (pluginform.processmultipleaims === "0") {
+      pluginform.processmultipleaims = 0;
+    } else {
+      pluginform.processmultipleaims = null;
+    }
     const responseEditPlugin = await editPlugin({
       pluginform,
     });

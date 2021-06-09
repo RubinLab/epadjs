@@ -459,6 +459,7 @@ const getAimListFields = (aims, ann) => {
         inferenceEntityCollection,
         segmentationEntityCollection,
         typeCode,
+        trackingUniqueIdentifier,
       } = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0];
       const aimFields = {
         name,
@@ -468,6 +469,7 @@ const getAimListFields = (aims, ann) => {
         inferenceEntityCollection,
         segmentationEntityCollection,
         typeCode,
+        trackingUniqueIdentifier: trackingUniqueIdentifier?.root,
       };
       const user = aim.ImageAnnotationCollection.user.name.value;
       const id = aim.ImageAnnotationCollection.uniqueIdentifier.root;
@@ -743,7 +745,7 @@ const getSingleSerieData = (serie, annotation) => {
         );
         aimsData = serieAims.concat(studyAims);
         imageData = {
-          ...getImageIdAnnotations(serieAims)
+          ...getImageIdAnnotations(serieAims),
         };
         aimsData = getAimListFields(aimsData, annotation);
         resolve({ aimsData, imageData });
@@ -833,15 +835,15 @@ export const setSegLabelMapIndex = (aimID, labelMapIndex) => {
   };
 };
 
-export const segUploadStarted = segUid => {
+export const segUploadStarted = (segUid) => {
   return { type: SEG_UPLOAD_STARTED, payload: segUid };
 };
 
-export const segUploadCompleted = segUid => {
+export const segUploadCompleted = (segUid) => {
   return { type: SEG_UPLOAD_COMPLETED, payload: segUid };
 };
 
-export const segUploadRemove = segUid => {
+export const segUploadRemove = (segUid) => {
   return { type: SEG_UPLOAD_REMOVE, payload: segUid };
 };
 

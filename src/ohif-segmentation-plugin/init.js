@@ -4,6 +4,7 @@ import extendBrushModule from "./modules/extendBrushModule.js";
 
 import Brush3DTool from "./tools/Brush3DTool.js";
 import Brush3DHUGatedTool from "./tools/Brush3DHUGatedTool.js";
+import BrushSphericalHUGatedTool from "./tools/BrushSphericalHUGatedTool.js";
 import Brush3DAutoGatedTool from "./tools/Brush3DAutoGatedTool.js";
 import FreehandRoi3DTool from "./tools/FreehandRoi3DTool.js";
 import FreehandRoi3DSculptorTool from "./tools/FreehandRoi3DSculptorTool.js";
@@ -25,6 +26,7 @@ const defaultConfig = {
   showFreehandStats: true,
   brush3dToolName: "Brush3D",
   brush3DHUGatedToolName: "Brush3DHUGated",
+  brushSphericalHUGatedToolName: "BrushSphericalHUGated",
   brush3DAutoGatedTool: "Brush3DAutoGated",
   freehandRoi3DTool: "FreehandRoi3DTool",
   freehandRoi3DSculptorTool: "FreehandRoi3DSculptor",
@@ -98,6 +100,9 @@ export default function init(configuration = {}) {
 
   addTool(Brush3DTool, { name: config.brush3dToolName });
   addTool(Brush3DHUGatedTool, { name: config.brush3DHUGatedToolName });
+  addTool(BrushSphericalHUGatedTool, {
+    name: config.brushSphericalHUGatedToolName,
+  });
   addTool(Brush3DAutoGatedTool, { name: config.brush3DAutoGatedTool });
   addTool(FreehandRoi3DTool, { name: config.freehandRoi3DTool });
   addTool(FreehandRoi3DSculptorTool, {
@@ -111,4 +116,6 @@ export default function init(configuration = {}) {
   TOOL_NAMES.BRUSH_3D_TOOL = config.brush3dToolName;
   TOOL_NAMES.BRUSH_3D_AUTO_GATED_TOOL = config.brush3DAutoGatedTool;
   TOOL_NAMES.BRUSH_3D_HU_GATED_TOOL = config.brush3DHUGatedToolName;
+  TOOL_NAMES.BRUSH_SPHERICAL_HU_GATED_TOOL =
+    config.brushSphericalHUGatedToolName;
 }

@@ -10,7 +10,9 @@ export default function eraseIfSegmentIndex(
   pixelData,
   segmentIndex
 ) {
+  console.log(pixelData[pixelIndex]);
   if (pixelData[pixelIndex] === segmentIndex) {
+    console.log("erasing", pixelIndex, segmentIndex);
     pixelData[pixelIndex] = 0;
   }
 }

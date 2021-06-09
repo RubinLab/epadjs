@@ -77,11 +77,15 @@ class ManageTab extends React.Component {
         minResizeWidth: 100,
         minWidth: 100,
         Cell: (data) => {
-          console.log("checking multi aims eror ", data.original);
-
-          if (data.original.processmultipleaims === "0") {
+          if (
+            typeof data.original.processmultipleaims === "number" &&
+            data.original.processmultipleaims === 0
+          ) {
             return "one";
-          } else if (data.original.processmultipleaims === "1") {
+          } else if (
+            typeof data.original.processmultipleaims === "number" &&
+            data.original.processmultipleaims === 1
+          ) {
             return "multiple";
           } else {
             return "not required";
