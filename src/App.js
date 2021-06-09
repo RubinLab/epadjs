@@ -2,9 +2,7 @@ import React, { Component } from 'react';
 import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
-import { AuthProvider } from 'oidc-react';
 import { EventSourcePolyfill } from 'event-source-polyfill';
-import Keycloak from 'keycloak-js';
 import _ from 'lodash';
 import { getUser, getUserInfo } from './services/userServices';
 import NavBar from './components/navbar';
@@ -81,7 +79,6 @@ class App extends Component {
     this.eventSource = null;
     this.state = {
       openMng: false,
-      keycloak: null,
       authenticated: false,
       openInfo: false,
       openUser: false,
@@ -524,7 +521,6 @@ class App extends Component {
     console.log('process.env.PUBLIC_URL', process.env.PUBLIC_URL);
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),
-      fetch(`${process.env.PUBLIC_URL}/keycloak.json`)
     ])
       .then(async results => {
         console.log(' in then top 1');
@@ -577,23 +573,6 @@ class App extends Component {
           responseType,
           scope
         });
-        const keycloakData = await results[1].json();
-        const auth =
-          process.env.REACT_APP_AUTH_URL || keycloakData['auth-server-url'];
-        const keycloakJson = {};
-        // check and use environment variables if any
-        keycloakJson.realm =
-          process.env.REACT_APP_AUTH_REALM || keycloakData.realm;
-        keycloakJson.url =
-          process.env.REACT_APP_AUTH_URL || keycloakData['auth-server-url'];
-        keycloakJson.clientId =
-          process.env.REACT_APP_AUTH_RESOURCE || keycloakData.resource;
-        sessionStorage.setItem('auth', auth);
-        sessionStorage.setItem('keycloakJson', JSON.stringify(keycloakJson));
-        console.log(' in then before completeAutorization 3');
-        // alert(Object.keys(localStorage).join(','));
-
-        console.log(' in then after completeAutorization 4');
 
         this.completeAutorization(apiUrl);
         if (mode === 'lite') this.setState({ pid: 'lite' });
@@ -1104,7 +1083,6 @@ class App extends Component {
                       updateProgress={this.updateProgress}
                       pid={this.state.pid}
                       updateTreeDataOnSave={this.updateTreeDataOnSave}
-                      keycloak={this.state.keycloak}
                       onSwitchView={this.switchView}
                     />
                   )}
@@ -1214,7 +1192,6 @@ class App extends Component {
             </Sidebar>
           </div>
         )}
-        )}
         {this.state.authenticated && mode === 'lite' && (
           <Sidebar
             type={this.state.viewType}
@@ -1234,7 +1211,6 @@ class App extends Component {
                     updateProgress={this.updateProgress}
                     pid={this.state.pid}
                     updateTreeDataOnSave={this.updateTreeDataOnSave}
-                    keycloak={this.state.keycloak}
                     onSwitchView={this.switchView}
                   />
                 )}
