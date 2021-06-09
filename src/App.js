@@ -15,7 +15,6 @@ import AnotateView from './components/anotateView';
 import ProgressView from './components/progressView';
 import FlexView from './components/flexView';
 import NotFound from './components/notFound';
-import Loading from './components/Loading';
 import LoginForm from './components/loginForm';
 import Logout from './components/logout';
 import ProtectedRoute from './components/common/protectedRoute';
@@ -73,7 +72,6 @@ const reportsList = [
 class App extends Component {
   constructor(props) {
     super(props);
-    console.log(' ----> in constructor');
     this.authority = 'http://bds-c02xf0r0jhd5.local:8899/auth/realms/ePad';
     this.clientId = 'epad-auth';
     this.redirectUri = 'http://bds-c02xf0r0jhd5.local:3000/*';
@@ -549,8 +547,7 @@ class App extends Component {
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
         authority = process.env.REACT_APP_AUTHORITY || authority;
         client_id = process.env.REACT_APP_CLIENT_ID || client_id;
-        // redirect_uri = process.env.REACT_APP_REDIRECT_URI || redirect_uri;
-        redirect_uri = 'http://bds-c02xf0r0jhd5.local:3000/loading';
+        redirect_uri = process.env.REACT_APP_REDIRECT_URI || redirect_uri;
         response_type = process.env.REACT_APP_RESPONSE_TYPE || response_type;
         scope = process.env.REACT_APP_SCOPE || scope;
         sessionStorage.setItem('mode', mode);
@@ -596,8 +593,9 @@ class App extends Component {
         console.log(' in then before completeAutorization 3');
         // alert(Object.keys(localStorage).join(','));
 
-        // this.completeAutorization(apiUrl);
         console.log(' in then after completeAutorization 4');
+
+        this.completeAutorization(apiUrl);
         if (mode === 'lite') this.setState({ pid: 'lite' });
       })
       .catch(err => {
@@ -632,37 +630,13 @@ class App extends Component {
     if (oldPid !== newPid && route === 'search') {
       this.setState({ pid: newPid });
     }
-
-    if (this.props.location.pathname !== prevProps.location.pathname) {
-      // alert(`${this.props.location.pathname} - ${prevProps.location.pathname} --`);
-      if (prevProps.location.pathname === '/login') alert('yesso');
-    }
   };
 
   completeAutorization = async apiUrl => {
-    let getAuthUser = null;
-    console.log(' ==> completeAuthorization <== ');
-    const authStatus = sessionStorage.getItem('loggingIn');
     this.authService = new auth.AuthService();
-    let userInfo;
     const authenticated = this.authService.isAuthenticated();
-
-    if (!authenticated) {
-      try {
-        // const res = await this.authService.signinRedirect();
-        userInfo = await this.authService.signinRedirectCallback();
-        sessionStorage.setItem('loggingIn', 'done');
-        await this.registerUser(
-          userInfo,
-          this.authService,
-          this.authService.isAuthenticated(),
-          this.state.apiUrl
-        );
-      } catch (err) {
-        console.error('signinRedirectCallback error', err);
-      }
-    } else if (authenticated) {
-      userInfo = await this.authService.getUser();
+    if (authenticated) {
+      const userInfo = await this.authService.getUser();
       await this.registerUser(
         userInfo,
         this.authService,
@@ -696,22 +670,10 @@ class App extends Component {
     try {
       userData = await getUser(username);
       userData = userData.data;
-      console.log('--->>>> userData from backend', userData);
       this.setState({ admin: userData.admin });
     } catch (err) {
       console.error(err);
     }
-    // this.eventSource = new EventSourcePolyfill(
-    //   `${apiUrl}/notifications`,
-    //   result.keycloak.token
-    //     ? {
-    //         headers: {
-    //           authorization: `Bearer ${result.keycloak.token}`
-    //         }
-    //       }
-    //     : {}
-    // );
-    // this.eventSource.addEventListener('message', this.getMessageFromEventSrc);
   };
 
   getMessageFromEventSrc = res => {
@@ -1034,25 +996,22 @@ class App extends Component {
 
     return (
       <ErrorBoundary>
-        {/* <AuthConsumer> */}
         <Cornerstone />
         <ToastContainer />
-        {this.state.authenticated && (
-          <NavBar
-            user={this.state.user}
-            openGearMenu={this.handleMngMenu}
-            openInfoMenu={this.handleInfoMenu}
-            openUser={this.handleUserProfileMenu}
-            onReports={this.handleReportsClick}
-            logout={this.onLogout}
-            onSearchViewClick={this.switchSearhView}
-            onSwitchView={this.switchView}
-            viewType={this.state.viewType}
-            notificationWarning={noOfUnseen}
-            pid={this.state.pid}
-            path={this.props.location.pathname}
-          />
-        )}
+        <NavBar
+          user={this.state.user}
+          openGearMenu={this.handleMngMenu}
+          openInfoMenu={this.handleInfoMenu}
+          openUser={this.handleUserProfileMenu}
+          onReports={this.handleReportsClick}
+          logout={this.onLogout}
+          onSearchViewClick={this.switchSearhView}
+          onSwitchView={this.switchView}
+          viewType={this.state.viewType}
+          notificationWarning={noOfUnseen}
+          pid={this.state.pid}
+          path={this.props.location.pathname}
+        />
         {showReportsMenu && (
           <SelectModalMenu
             list={reportsList}
@@ -1103,15 +1062,19 @@ class App extends Component {
         )}
         {this.state.reportsCompArr}
         {this.state.minReportsArr}
-        {/* {!this.state.authenticated && (
+        {!this.state.authenticated && (
           <Route
             path="/login"
             render={props => (
-              <LoginForm {...props} authService={this.authService} />
+              <LoginForm
+                {...props}
+                authService={this.authService}
+                completeAutorization={this.completeAutorization}
+              />
             )}
           />
-        )} */}
-        {mode !== 'lite' && (
+        )}
+        {mode !== 'lite' && this.state.authenticated && (
           <div style={{ display: 'inline', width: '100%', height: '100%' }}>
             <Sidebar
               type={this.state.viewType}
@@ -1123,16 +1086,6 @@ class App extends Component {
             >
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
-                <Route
-                  path="/login"
-                  render={props => (
-                    <LoginForm
-                      {...props}
-                      // authService={this.authService}
-                      completeAutorization={this.completeAutorization}
-                    />
-                  )}
-                />
                 <Route
                   path="/redirect"
                   render={props => (
@@ -1226,12 +1179,6 @@ class App extends Component {
                 <Route path="/tools" />
                 <Route path="/edit" />
                 <Route path="/not-found" component={NotFound} />
-                <Route
-                  path="/loading"
-                  render={props => (
-                    <Loading {...props} registerUser={this.registerUser} />
-                  )}
-                />
                 <ProtectedRoute
                   from="/"
                   exact
@@ -1262,12 +1209,11 @@ class App extends Component {
                     />
                   )}
                 />
-
-                {/* <Redirect to="/login" /> */}
               </Switch>
               {/* {this.props.activePort === 0 ? <AnnotationsList /> : null} */}
             </Sidebar>
           </div>
+        )}
         )}
         {this.state.authenticated && mode === 'lite' && (
           <Sidebar
@@ -1294,8 +1240,6 @@ class App extends Component {
                 )}
               />
               <Route path="/not-found" component={NotFound} />
-              <Route path="/loading" component={Loading} />
-
               <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
@@ -1324,7 +1268,6 @@ class App extends Component {
                   />
                 )}
               />
-              {/* <Redirect to="/login" /> */}
             </Switch>
           </Sidebar>
         )}
@@ -1332,7 +1275,6 @@ class App extends Component {
         {/* {this.props.selection && (
           <ManagementItemModal selection={this.props.selection} />
         )} */}
-        {/* </AuthConsumer> */}
       </ErrorBoundary>
     );
   }

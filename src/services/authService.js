@@ -86,7 +86,6 @@ export async function getAuthHeader() {
         return header;
       }
     }
-    console.log(' ----------->>>>>>>>>>> user in getAuthHeader', user);
   } catch (err) {
     authService.logout();
   }
@@ -115,16 +114,25 @@ export class AuthService {
       userStore: new WebStorageStateStore({ store: window.sessionStorage })
     });
     this.UserManager = usermng;
-    console.log('userMNG', usermng);
     // Logger
     Log.logger = console;
     Log.level = Log.INFO;
     this.UserManager.events.addUserLoaded(user => {
-      console.log('in the event', user);
-      alert('in the event');
-      // if (window.location.href.indexOf('signin-oidc') !== -1) {
-      //   this.navigateToScreen();
-      // }
+
+      const {
+        email,
+        family_name,
+        given_name,
+        preferred_username
+      } = user.profile;
+
+      let userInfo = {
+        user: preferred_username || email,
+        displayname: given_name
+      };
+
+      sessionStorage.setItem('username', userInfo.user);
+      sessionStorage.setItem('displayName', userInfo.user);
     });
 
     this.UserManager.events.addSilentRenewError(e => {
@@ -139,23 +147,19 @@ export class AuthService {
   signinRedirectCallback = () => {
     this.UserManager.signinRedirectCallback()
       .then(user => {
-        console.log('user', user);
         window.location.href = 'http://localhost:3000';
+        // window.location.href = 'http://bds-c02xf0r0jhd5.local:3000';
+
       })
       .catch(err => {
-        console.log(' ----> auth service catch');
         console.error(err);
       });
-    // alert('callback user');
-    // return user;
   };
 
   getUser = async () => {
     let user = await this.UserManager.getUser();
     if (!user) {
       user = await this.UserManager.signinRedirectCallback();
-      console.log('user in redirect', userRes);
-      window.alert(userRes);
       return userRes;
     }
     return user;
@@ -194,7 +198,7 @@ export class AuthService {
     this.UserManager.signinSilent()
       .then(user => {})
       .catch(err => {
-        console.log(err);
+        console.error(err);
       });
   };
   signinSilentCallback = () => {
@@ -206,13 +210,13 @@ export class AuthService {
   };
 
   logout = () => {
-    console.log(' +++ logout called in class +++ ');
+    console.log(' +++ logout +++ ');
     this.UserManager.signoutRedirect({
       id_token_hint: localStorage.getItem('id_token')
     });
     // this.UserManager.signoutRedirect();
     this.UserManager.clearStaleState();
-    window.location.replace(this.redirect_uri);
+    // window.location.replace(this.redirect_uri);
   };
 
   signoutRedirectCallback = () => {

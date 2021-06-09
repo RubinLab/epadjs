@@ -46,24 +46,15 @@
   </body>
   <script src="oidc-client.min.js"></script>
   <script>
-    
     const userMng = new Oidc.UserManager({ response_mode: 'query' });
-
-    // const userMng = JSON.parse(sessionStorage.getItem('userMNG'));
-    // if (userMng) {
-      console.log('indexte', userMng);
-
+    const redirect_uri = sessionStorage.getItem('redirect_uri');
       userMng
         .signinRedirectCallback()
         .then(function(user) {
-          console.log(' in then resolved callbck');
-          window.location.href = 'http://bds-c02xf0r0jhd5.local:3000/index.html';
-          console.log('user', user);
+          window.location.href = redirect_uri;
         })
         .catch(function(e) {
-          console.log(' in then throw cach');
           console.error(e);
         });
-    // }
   </script>
 </html>
