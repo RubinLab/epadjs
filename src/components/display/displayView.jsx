@@ -211,7 +211,6 @@ class DisplayView extends Component {
     else if (Object.keys(aimList).length !== Object.keys(prevAimList).length) {
       this.renderAims();
     }
-    this.handleActiveTool();
   }
 
   componentWillUnmount() {
@@ -827,6 +826,9 @@ class DisplayView extends Component {
 
   measuremementModified = (event, action) => {
     this.setDirtyFlag();
+    // considering fusion, other viewports may need update so refresh all of them
+    // TODO: may look at a flag of fusion 
+    this.refreshAllViewports();
   };
 
   handleShapes = () => {
@@ -908,6 +910,7 @@ class DisplayView extends Component {
 
     if (!hasSegmentation && detail === "brush") {
       this.setState({ hasSegmentation: true });
+      this.refreshAllViewports();
     }
     this.setDirtyFlag();
     this.setState({ showAimEditor: true, selectedAim: undefined });
@@ -1441,6 +1444,7 @@ class DisplayView extends Component {
     this.clearSculptState();
     this.clearSmartBrushState();
     this.renderAims(true);
+    this.handleActiveTool();
     return 1;
   };
 
@@ -1512,9 +1516,13 @@ class DisplayView extends Component {
     tempData[activePort].stack = data[0];
     Object.assign(tempData[activePort].stack, data[0]);
     // set the state to preserve the imageId
-    this.setState({ data: tempData });
-    // dispatch to write the newImageId to store
+    // this.setState({ data: tempData });
+    // // dispatch to write the newImageId to store
     this.props.dispatch(updateImageId(imageId));
+    const yaw = event.detail;
+    window.dispatchEvent(
+      new CustomEvent("newImage", { detail: yaw })
+    );
   };
 
   onAnnotate = () => {
