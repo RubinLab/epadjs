@@ -188,7 +188,7 @@ export class AuthService {
     const oidcStorage = JSON.parse(
       sessionStorage.getItem(
         // `oidc.user:${process.env.REACT_APP_AUTH_URL}:${process.env.REACT_APP_IDENTITY_CLIENT_ID}`
-        `oidc.user:${this.authority}:epad-auth`
+        `oidc.user:${this.authority}:${this.client_id}`
       )
     );
     return !!oidcStorage && !!oidcStorage.access_token;
