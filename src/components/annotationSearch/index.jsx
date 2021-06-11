@@ -233,6 +233,7 @@ const AnnotationSearch = props => {
     setData([]);
     if (selectedProject) query += ` AND project:${selectedProject}`;
     if (query) {
+      setError('');
       searchAnnotations({ query })
         .then(res => {
           console.log(res);
@@ -267,33 +268,68 @@ const AnnotationSearch = props => {
   };
 
   const isNoOfParanthesisValid = arr => {
-    const open = 0;
-    const close = 0;
-    arr.forEach(el => {
-      if (el === '(') {
-        open += 1;
-      }
-      if (el === ')') {
-        close += 1;
-      }
-    });
+    let open = 0;
+    let close = 0;
+    arr
+      .join()
+      .split('')
+      .forEach(el => {
+        if (el === '(') {
+          open += 1;
+        } else if (el === ')') {
+          close += 1;
+        }
+      });
     return close === open;
   };
 
-  const validateQueryOrder = arr => {
-    let valid = true;
-    // debugger;
+  const validateQueryContent = arr => {
+    let criteriaArr = [];
+    let typeArr = [];
     arr.forEach((el, i) => {
-      const isCriteria = lists.criteria.includes(el);
-      const followsType = lists.type.includes(arr[i - 1]);
-      console.log(' ===> el, isCriteria, followsType');
-      console.log(el, isCriteria, followsType);
-      if (isCriteria && !followsType) {
-        console.log('in if');
-        valid = false;
-      }
+      if (lists.criteria.includes(el)) criteriaArr.push(i);
+      else if (lists.type.includes(el)) typeArr.push(i);
     });
-    return valid;
+    return { criteriaArr, typeArr };
+  };
+
+  const validateQueryOrder = arr => {
+    let validOrder = true;
+    const { criteriaArr, typeArr } = validateQueryContent(arr);
+    // there should be equal number of crieria and type
+    const sameLength = criteriaArr.length === typeArr.length;
+
+    // type should follow the criteria
+    criteriaArr.forEach((el, i) => {
+      if (el !== typeArr[i] + 1) validOrder = false;
+    });
+
+    return validOrder && sameLength;
+  };
+
+  const countCondition = arr => {
+    return arr.reduce((all, item) => {
+      if (lists.condition.includes(item)) all += 1;
+      return all;
+    }, 0);
+  };
+
+  const validateConditionExists = arr => {
+    const { criteriaArr, typeArr } = validateQueryContent(arr);
+    const isMultipleSearch = criteriaArr.length > 1 || typeArr.length > 1;
+    if (isMultipleSearch) {
+      let noOfQuery = 1;
+      if (criteriaArr.length === typeArr.length && criteriaArr.length > 1) {
+        noOfQuery = criteriaArr.length;
+      } else if (criteriaArr.length !== typeArr.length) {
+        noOfQuery =
+          criteriaArr.length > typeArr.length
+            ? criteriaArr.length
+            : typeArr.length;
+      }
+      const noOfCondition = countCondition(arr);
+      return noOfQuery === noOfCondition + 1;
+    } else return true;
   };
 
   const checkStartEndWithCondition = arr => {
@@ -316,7 +352,7 @@ const AnnotationSearch = props => {
       return false;
     }
 
-    if (!isNoOfParanthesisValid) {
+    if (!isNoOfParanthesisValid(arr)) {
       setError(
         'Number of the opening and closing paranthesis should be equal!'
       );
@@ -324,13 +360,19 @@ const AnnotationSearch = props => {
     }
 
     if (!validateQueryOrder(arr)) {
+      const fields = lists.type.join(', ');
+      const criterias = lists.criteria.join(', ');
       setError(
-        `Please select one of the following search fields! ${lists.type.join(
-          ', '
-        )}`
+        `Please select a search field:${fields} and a criteria:${criterias}!`
       );
       return false;
     }
+
+    if (!validateConditionExists(arr)) {
+      setError(`Multiple queries must be connected with AND/OR conditions!`);
+      return false;
+    }
+
     if (checkStartEndWithCondition(arr)) {
       setError(`AND/OR conditions should be used to connect two queries!`);
       return false;
@@ -345,7 +387,10 @@ const AnnotationSearch = props => {
       const parsedQuery = queryArray.reduce((all, item, index) => {
         if (lists.criteria.includes(item)) {
           all += ':';
-        } else if (item.toLowerCase() === 'and' || item.toLowerCase() === 'or') {
+        } else if (
+          item.toLowerCase() === 'and' ||
+          item.toLowerCase() === 'or'
+        ) {
           all = `${all} ${item.toUpperCase()} `;
         } else {
           all += `${item}`;
@@ -426,16 +471,11 @@ const AnnotationSearch = props => {
   const renderOptions = () => {
     const projectNames = Object.values(props.projectMap);
     const projectID = Object.keys(props.projectMap);
-    console.log(props.projectMap);
     const defaultOption = (
-      <option
-            key='default'
-            data-project-id={''}
-            value={''}
-          >
-          in all ePad
-          </option>
-    )
+      <option key="default" data-project-id={''} value={''}>
+        in all ePad
+      </option>
+    );
     const options = [defaultOption];
     projectNames.forEach((el, i) => {
       if (projectID[i] !== 'all' && projectID[i] !== 'nonassigned') {
@@ -529,6 +569,19 @@ const AnnotationSearch = props => {
           <FaSearch />
         </button>
       </div>
+      {error && (
+        <div
+          style={{
+            color: 'orangered',
+            padding: '0.3rem 0.5rem',
+            height: 'fit-content',
+            fontSize: '1.2rem',
+            margin: '0.3rem 2rem'
+          }}
+        >
+          {error}
+        </div>
+      )}
       <div
         style={{
           margin: '0.5rem 2rem'
