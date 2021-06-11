@@ -14,7 +14,7 @@ const lists = {
   organize: ['AND', 'OR', '(', ')'],
   paranthesis: ['(', ')'],
   condition: ['AND', 'OR'],
-  type: ['modality', 'diagnosis', 'anatomic_entity'],
+  type: ['modality', 'diagnosis', 'anatomy'],
   criteria: ['equals', 'contains']
 };
 
@@ -57,7 +57,7 @@ const AnnotationSearch = props => {
     term: ''
   });
   const [typeSelected, setTypeSelected] = useState(false);
-  const [selectedProject, setSelectedProject] = useState('all');
+  const [selectedProject, setSelectedProject] = useState('');
   const [data, setData] = useState([]);
   const [selectedAnnotations, setSelectedAnnotations] = useState({});
   const [downloadClicked, setDownloadClicked] = useState(false);
@@ -229,8 +229,9 @@ const AnnotationSearch = props => {
   };
 
   const getSearchResult = () => {
-    const query = parseQuery();
+    let query = parseQuery();
     setData([]);
+    if (selectedProject) query += ` AND project:${selectedProject}`;
     if (query) {
       searchAnnotations({ query })
         .then(res => {
@@ -346,7 +347,7 @@ const AnnotationSearch = props => {
         if (lists.criteria.includes(item)) {
           all += ':';
         } else {
-          all += item;
+          all += `${item}`;
         }
         console.log(all, item);
         return all;
@@ -423,6 +424,36 @@ const AnnotationSearch = props => {
   };
   */
 
+  const renderOptions = () => {
+    const projectNames = Object.values(props.projectMap);
+    const projectID = Object.keys(props.projectMap);
+    console.log(props.projectMap);
+    const defaultOption = (
+      <option
+            key='default'
+            data-project-id={''}
+            value={''}
+          >
+          in all ePad
+          </option>
+    )
+    const options = [defaultOption];
+    projectNames.forEach((el, i) => {
+      if (projectID[i] !== 'all' && projectID[i] !== 'nonassigned') {
+        options.push(
+          <option
+            key={projectID[i]}
+            data-project-id={projectID[i]}
+            value={projectID[i]}
+          >
+            {el.projectName}
+          </option>
+        );
+      }
+    });
+    return options;
+  };
+
   const renderProjectSelect = () => {
     const projectNames = Object.values(props.projectMap);
     const projectID = Object.keys(props.projectMap);
@@ -434,24 +465,14 @@ const AnnotationSearch = props => {
         <div
           className="annotaionSearch-title"
           style={{ fontsize: '1.2rem' }}
-        >{`${explanation['project']}`}</div>
+        >{`${explanation.project}`}</div>
         <select
           name="project-dropdown"
           onChange={e => setSelectedProject(e.target.value)}
           onMouseDown={e => e.stopPropagation()}
           style={{ margin: '0rem 1rem', padding: '1.8px' }}
         >
-          {projectNames.map((el, i) => {
-            return (
-              <option
-                key={projectID[i]}
-                data-project-id={projectID[i]}
-                value={projectID[i]}
-              >
-                {el.projectName}
-              </option>
-            );
-          })}
+          {renderOptions()}
         </select>
       </div>
     );
