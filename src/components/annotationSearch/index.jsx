@@ -340,19 +340,18 @@ const AnnotationSearch = props => {
 
   const parseQuery = () => {
     const queryArray = seperateParanthesis(query.split(' '));
-    console.log(queryArray);
     const isQueryInputValid = validateQuery(queryArray);
     if (isQueryInputValid) {
       const parsedQuery = queryArray.reduce((all, item, index) => {
         if (lists.criteria.includes(item)) {
           all += ':';
+        } else if (item.toLowerCase() === 'and' || item.toLowerCase() === 'or') {
+          all = `${all} ${item.toUpperCase()} `;
         } else {
           all += `${item}`;
         }
-        console.log(all, item);
         return all;
       }, '');
-      console.log(parsedQuery);
       return parsedQuery;
     }
   };
