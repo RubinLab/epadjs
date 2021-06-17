@@ -1,8 +1,10 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import Draggable from "react-draggable";
 import "./FuseSelector.css";
+import { createFusionViewport } from "components/annotationsList/action";
 
 class FuseSelector extends Component {
     constructor(props) {
@@ -157,6 +159,8 @@ class FuseSelector extends Component {
         const ctImage = cornerstone.getImage(ctElement);
         if (!ctImage || !petImage)
             return false;
+        if (!this.state.isFused)
+            this.props.dispatch(createFusionViewport(1));
         const ctLayerId = cornerstone.addLayer(ctElement, ctImage, ctOptions);
         const petLayerId = cornerstone.addLayer(ctElement, petImage, petOptions);
         cornerstone.updateImage(ctElement);
@@ -349,4 +353,10 @@ class FuseSelector extends Component {
     }
 }
 
-export default FuseSelector;
+// function mapDispatchToProps(dispatch) {
+//     return ({
+//         createFusionViewport: () => { dispatch(CREATE_FUSION_VIEWPORT) }
+//     })
+// }
+
+export default connect(null, null)(FuseSelector)

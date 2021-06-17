@@ -42,6 +42,7 @@ import {
   SEG_UPLOAD_COMPLETED,
   SEG_UPLOAD_REMOVE,
   AIM_DELETE,
+  CREATE_FUSION_VIEWPORT,
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -87,12 +88,8 @@ const asyncReducer = (state = initialState, action) => {
         updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
         return { ...state, openSeries: updatedOpenSeries };
       case GET_NOTIFICATIONS:
-        const {
-          uploadedPid,
-          lastEventId,
-          refresh,
-          notificationAction,
-        } = action.payload;
+        const { uploadedPid, lastEventId, refresh, notificationAction } =
+          action.payload;
         return {
           ...state,
           uploadedPid,
@@ -605,6 +602,14 @@ const asyncReducer = (state = initialState, action) => {
           }
         });
         newOpenSeries[serieToUpdateIndex] = updatedSerie;
+        return { ...state, openSeries: [...newOpenSeries] };
+      }
+      case CREATE_FUSION_VIEWPORT: {
+        const ctViewportId = action.payload;
+        const newOpenSeries = [
+          ...state.openSeries,
+          state.openSeries[ctViewportId],
+        ];
         return { ...state, openSeries: [...newOpenSeries] };
       }
       default:

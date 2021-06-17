@@ -52,6 +52,8 @@ export const SEG_UPLOAD_COMPLETED =
   "epadjs/annotationList/SEG_UPLOAD_COMPLETED";
 export const SEG_UPLOAD_REMOVE = "epadjs/annotationList/SEG_UPLOAD_REMOVE";
 export const AIM_DELETE = "epadjs/annotationList/AIM_DELETE";
+export const CREATE_FUSION_VIEWPORT =
+  "epadjs/annotationList/CREATE_FUSION_VIEWPORT";
 
 export const commonLabels = {
   button: { background: "#c0c0c0", color: "black" },

@@ -42,6 +42,7 @@ import {
   SEG_UPLOAD_COMPLETED,
   SEG_UPLOAD_REMOVE,
   AIM_DELETE,
+  CREATE_FUSION_VIEWPORT,
   colors,
   commonLabels,
 } from "./types";
@@ -181,12 +182,8 @@ export const displaySingleAim = (
 };
 
 export const selectPatient = (selectedPatientObj) => {
-  let {
-    projectID,
-    subjectName,
-    numberOfAnnotations,
-    index,
-  } = selectedPatientObj;
+  let { projectID, subjectName, numberOfAnnotations, index } =
+    selectedPatientObj;
   projectID = projectID ? projectID : "lite";
   const patientID = selectedPatientObj.subjectID;
   return {
@@ -502,13 +499,8 @@ const getRequiredFields = (arr, type, selectedID) => {
         obj = { studyUID, studyDescription };
         result[studyUID] = obj;
       } else if (type === "serie") {
-        let {
-          seriesUID,
-          seriesDescription,
-          studyUID,
-          patientID,
-          projectID,
-        } = element;
+        let { seriesUID, seriesDescription, studyUID, patientID, projectID } =
+          element;
         projectID = projectID ? projectID : "lite";
         const isDisplayed = seriesUID === selectedID || selectedID === studyUID;
 
@@ -849,6 +841,10 @@ export const segUploadRemove = (segUid) => {
 
 export const aimDelete = (aimRefs) => {
   return { type: AIM_DELETE, payload: aimRefs };
+};
+
+export const createFusionViewport = (ctViewportId) => {
+  return { type: CREATE_FUSION_VIEWPORT, payload: ctViewportId };
 };
 
 // gets one patient and all the studys->series->annotations under it
