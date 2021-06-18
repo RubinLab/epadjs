@@ -327,13 +327,8 @@ class CornerstoneViewport extends Component {
    */
   getOverlay() {
     const { viewportOverlayComponent: Component, imageIds } = this.props;
-    const {
-      imageIdIndex,
-      scale,
-      windowWidth,
-      windowCenter,
-      isOverlayVisible,
-    } = this.state;
+    const { imageIdIndex, scale, windowWidth, windowCenter, isOverlayVisible } =
+      this.state;
     const imageId = imageIds[imageIdIndex];
     return (
       imageId &&

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import Draggable from "react-draggable";
@@ -91,16 +91,19 @@ class FuseSelector extends Component {
         const { isFused, CT, PT } = this.state;
         const petElement = cornerstone.getEnabledElements()[PT].element;
         const ctElement = cornerstone.getEnabledElements()[CT].element;
+        console.log("pet, ct", petElement, ctElement);
         if (!ctElement || !petElement) return;
 
         if (!isFused) {
-            window.addEventListener("newImage", this.newImage);
+            window.addEventListener("fusionViewportLoaded", this.fuse);
+            this.props.dispatch(createFusionViewport(CT));
 
-            if (this.fuse(petElement, ctElement)) {
-                this.teleportAnnotations();
-                this.setState({ isFused: true });
-                this.addSynchronizers();
-            }
+
+            // if (this.fuse(petElement, ctElement)) {
+            //     this.teleportAnnotations();
+            //     this.setState({ isFused: true });
+            //     this.addSynchronizers();
+            // }
         }
         else {
             window.removeEventListener("newImage", this.newImage);
@@ -152,15 +155,17 @@ class FuseSelector extends Component {
         this.updateView();
     }
 
-    fuse = (petElement, ctElement) => {
-        const { ctOptions, petOptions } = this.getOptions();
-        cornerstone.purgeLayers(ctElement);
+    fuse = () => {
+        const { CT, PT } = this.state;
+        const petElement = cornerstone.getEnabledElements()[PT].element;
+        const ctElement = cornerstone.getEnabledElements()[CT].element;
         const petImage = cornerstone.getImage(petElement);
         const ctImage = cornerstone.getImage(ctElement);
         if (!ctImage || !petImage)
             return false;
-        if (!this.state.isFused)
-            this.props.dispatch(createFusionViewport(1));
+
+        const { ctOptions, petOptions } = this.getOptions();
+        cornerstone.purgeLayers(ctElement);
         const ctLayerId = cornerstone.addLayer(ctElement, ctImage, ctOptions);
         const petLayerId = cornerstone.addLayer(ctElement, petImage, petOptions);
         cornerstone.updateImage(ctElement);
@@ -168,6 +173,9 @@ class FuseSelector extends Component {
             cornerstone.setActiveLayer(ctElement, petLayerId);
         else cornerstone.setActiveLayer(ctElement, ctLayerId);
         this.setState({ ctLayerId, petLayerId });
+        this.teleportAnnotations();
+        this.setState({ isFused: true });
+        this.addSynchronizers();
         return true;
     };
 
@@ -219,7 +227,6 @@ class FuseSelector extends Component {
         panZoomSynchronizer.enabled = true;
         this.synchronizers.push(stackPositonSynchronizer);
         this.synchronizers.push(panZoomSynchronizer);
-
     };
 
     removeSynchronizers = () => {
@@ -282,6 +289,8 @@ class FuseSelector extends Component {
 
     getCtElement = () => {
         const { CT } = this.state;
+        console.log("ct", CT);
+        console.log("cornerstone elemtns", cornerstone.getEnabledElements());
         return cornerstone.getEnabledElements()[CT]?.element;
     }
 
@@ -353,10 +362,5 @@ class FuseSelector extends Component {
     }
 }
 
-// function mapDispatchToProps(dispatch) {
-//     return ({
-//         createFusionViewport: () => { dispatch(CREATE_FUSION_VIEWPORT) }
-//     })
-// }
-
 export default connect(null, null)(FuseSelector)
+

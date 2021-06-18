@@ -514,7 +514,6 @@ class DisplayView extends Component {
   };
 
   async getImages(serie) {
-    console.log("serie", serie);
     const { data: urls } = await getImageIds(serie); //get the Wado image ids for this series
     return urls;
   }
@@ -1596,6 +1595,19 @@ class DisplayView extends Component {
     this.jumpToImage(imageIndex, i);
   };
 
+  checkFusion = () => {
+    const enabledElements = cornerstone.getEnabledElements();
+    if (enabledElements.length != 3)
+      return;
+    const { series } = this.props;
+    if (series[0].seriesUID === series[2].seriesUID || series[1].seriesUID === series[2].seriesUID) {
+      const evnt = new CustomEvent("fusionViewportLoaded", {
+        cancelable: true,
+      });
+      window.dispatchEvent(evnt);
+    }
+  }
+
   render() {
     const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
     const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
@@ -1711,8 +1723,9 @@ class DisplayView extends Component {
                       target: "element",
                       eventName: "cornerstonenewimage",
                       handler: this.newImage,
-                    },
+                    }
                   ]}
+                  onElementEnabled={this.checkFusion}
                   setViewportActive={() => this.setActive(i)}
                   isStackPrefetchEnabled={true}
                   style={{ height: "calc(100% - 26px)" }}
