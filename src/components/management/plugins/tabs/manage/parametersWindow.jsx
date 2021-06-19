@@ -329,9 +329,15 @@ class ParametersWindow extends React.Component {
         dicoms
       </option>
     );
+
     options.push(
       <option key="paramaters" name="parameters" value="parameters">
         parameters
+      </option>
+    );
+    options.push(
+      <option key="dockeroptions" name="dockeroptions" value="dockeroptions">
+        docker options
       </option>
     );
 
@@ -344,26 +350,69 @@ class ParametersWindow extends React.Component {
         select
       </option>
     );
-    options.push(
-      <option key="InputFolder" name="InputFolder" value="InputFolder">
-        InputFolder
-      </option>
-    );
-    options.push(
-      <option key="InputFile" name="InputFile" value="InputFile">
-        InputFile
-      </option>
-    );
-    options.push(
-      <option key="OutputFolder" name="OutputFolder" value="OutputFolder">
-        OutputFolder
-      </option>
-    );
-    options.push(
-      <option key="Parameters" name="Parameters" value="Parameters">
-        parameters
-      </option>
-    );
+    switch (this.state.parameterFormElements.paramid) {
+      case "output":
+        options.push(
+          <option key="OutputFolder" name="OutputFolder" value="OutputFolder">
+            output folder
+          </option>
+        );
+        break;
+      case "aims":
+        options.push(
+          <option key="InputFolder" name="InputFolder" value="InputFolder">
+            input folder
+          </option>
+        );
+        options.push(
+          <option key="InputFile" name="InputFile" value="InputFile">
+            input file
+          </option>
+        );
+        break;
+      case "dicoms":
+        options.push(
+          <option key="InputFolder" name="InputFolder" value="InputFolder">
+            input folder
+          </option>
+        );
+        options.push(
+          <option key="InputFile" name="InputFile" value="InputFile">
+            input file
+          </option>
+        );
+        break;
+      case "parameters":
+        options.push(
+          <option key="Parameters" name="Parameters" value="Parameters">
+            parameters
+          </option>
+        );
+        break;
+      case "dockeroptions":
+        options.push(
+          <option key="sharedram" name="sharedram" value="sharedram">
+            shared ram
+          </option>
+        );
+        options.push(
+          <option key="driver" name="driver" value="driver">
+            driver
+          </option>
+        );
+        options.push(
+          <option key="deviceids" name="deviceids" value="deviceids">
+            device ids
+          </option>
+        );
+        options.push(
+          <option key="capabilities" name="capabilities" value="capabilities">
+            capabilities
+          </option>
+        );
+        break;
+      default:
+    }
 
     return options;
   };
@@ -378,14 +427,14 @@ class ParametersWindow extends React.Component {
       //  <option key="ParamaterValue" name="Parameter" value="Value">
       //  text : Parameter Value -> Directory
       <option key="ParamaterValue" name="Parameter" value="Directory">
-        Directory
+        directory
       </option>
     );
     options.push(
       //
       //  text : Parameter Name/Value -> File
       <option key="Parameters" name="Parameter" value="File">
-        File
+        file
       </option>
     );
 
@@ -428,7 +477,9 @@ class ParametersWindow extends React.Component {
                 <div className="plugin_parameter_window_modal_addnew">
                   <h5>add new parameter</h5>
                   <form className="plugin_parameter_window_modal_form">
-                    <h5 className="plugin_parameter_window_modal_label">id*</h5>
+                    <h5 className="plugin_parameter_window_modal_label">
+                      type*
+                    </h5>
                     <select
                       className="pluginaddqueueselect"
                       id="paramid"
@@ -493,7 +544,7 @@ class ParametersWindow extends React.Component {
                       value={this.state.parameterFormElements.default_value}
                       onChange={this.handleFormElementChange}
                     />
-                    <h5 className="parameter_window_modal_label">Type</h5>
+                    {/* <h5 className="parameter_window_modal_label">Type</h5>
                     <select
                       className="pluginaddqueueselect"
                       id="type"
@@ -503,7 +554,7 @@ class ParametersWindow extends React.Component {
                       value={this.state.parameterFormElements.type}
                     >
                       {this.prepareDropDownHtmlForParameterType()}
-                    </select>
+                    </select> */}
                     <h5 className="parameter_window_modal_label">
                       Description
                     </h5>
