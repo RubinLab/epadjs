@@ -35,8 +35,8 @@ class FuseSelector extends Component {
     componentDidMount() {
         const elements = cornerstone.getEnabledElements();
         // We only support two viewports for fuse
-        if (elements.length != 2)
-            return false;
+        // if (elements.length != 2)
+        //     return false;
         //
         let modalities = {};
         elements.forEach(({ element }, i) => {
@@ -95,8 +95,10 @@ class FuseSelector extends Component {
         if (!ctElement || !petElement) return;
 
         if (!isFused) {
+            sessionStorage.setItem('showFuse', true);
             window.addEventListener("fusionViewportLoaded", this.fuse);
             this.props.dispatch(createFusionViewport(CT));
+            window.addEventListener("newImage", this.newImage);
 
 
             // if (this.fuse(petElement, ctElement)) {
@@ -107,6 +109,8 @@ class FuseSelector extends Component {
         }
         else {
             window.removeEventListener("newImage", this.newImage);
+            sessionStorage.removeItem('showFuse');
+            window.removeEventListener("fusionViewportLoaded", this.fuse);
 
             this.unfuse(ctElement);
             this.setState({ isFused: false, CT: undefined, PT: undefined });
@@ -289,8 +293,6 @@ class FuseSelector extends Component {
 
     getCtElement = () => {
         const { CT } = this.state;
-        console.log("ct", CT);
-        console.log("cornerstone elemtns", cornerstone.getEnabledElements());
         return cornerstone.getEnabledElements()[CT]?.element;
     }
 
@@ -316,6 +318,7 @@ class FuseSelector extends Component {
     }
 
     render() {
+        console.log("this state", this.state);
         const { CT, PT, isFused, ctLayerId, petLayerId, opacity = 0.7, visible = true, colormap = "hotIron" } = this.state;
         const colormapsList = cornerstone.colors.getColormapsList();
         const buttonLabel = isFused ? "Unfuse" : "Fuse PET and CT";

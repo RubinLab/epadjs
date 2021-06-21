@@ -247,6 +247,12 @@ class ToolMenu extends Component {
     ];
   }
 
+  componentDidMount() {
+    const fuse = sessionStorage.getItem('showFuse');
+    if (fuse)
+      this.setState({ fuse: true });
+  }
+
   componentWillUnmount() {
     sessionStorage.removeItem("activeTool");
   }
