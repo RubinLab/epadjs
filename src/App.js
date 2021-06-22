@@ -366,12 +366,8 @@ class App extends Component {
             id: result.userInfo.sub,
             user,
           });
-          const {
-            email,
-            family_name,
-            given_name,
-            preferred_username,
-          } = result.userInfo;
+          const { email, family_name, given_name, preferred_username } =
+            result.userInfo;
           const username = preferred_username || email;
 
           let userData;
@@ -400,7 +396,7 @@ class App extends Component {
           const { search } = this.props.location;
           let args;
           if (search && (args = search.split("?arg=")[1])) {
-            console.log("ARGS:", args);
+            // console.log("ARGS:", args);
             // const result = await decrypt(args);
             const result = await decryptAndAdd(args);
             const { patientID, studyUID, projectID } = result.data;
@@ -447,11 +443,11 @@ class App extends Component {
       let seriesArr;
 
       seriesArr = await this.getSeriesData(selected);
-      console.log("before reduce", seriesArr);
+      // console.log("before reduce", seriesArr);
 
       //get extraction of the series (extract unopen series)
       if (seriesArr.length > 0) seriesArr = this.excludeOpenSeries(seriesArr);
-      console.log("Reduced array", seriesArr);
+      // console.log("Reduced array", seriesArr);
 
       if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
         alert(
@@ -516,13 +512,8 @@ class App extends Component {
       }
       const parsedRes = JSON.parse(res.data);
       const { lastEventId } = res;
-      const {
-        params,
-        createdtime,
-        projectID,
-        error,
-        refresh,
-      } = parsedRes.notification;
+      const { params, createdtime, projectID, error, refresh } =
+        parsedRes.notification;
       const action = parsedRes.notification.function;
       const message = params;
       if (refresh)
@@ -862,13 +853,8 @@ class App extends Component {
   };
 
   render() {
-    const {
-      notifications,
-      mode,
-      progressUpdated,
-      treeExpand,
-      expandLevel,
-    } = this.state;
+    const { notifications, mode, progressUpdated, treeExpand, expandLevel } =
+      this.state;
     let noOfUnseen;
     if (notifications) {
       noOfUnseen = notifications.reduce((all, item) => {
