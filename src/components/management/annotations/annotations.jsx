@@ -1,14 +1,15 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import ReactTable from "react-table";
+import ReactTable from "react-table-v6";
 import { toast } from "react-toastify";
 import ToolBar from "./toolbar";
-import { FaRegEye, FaCommentsDollar } from "react-icons/fa";
+import { FaRegEye, FaEyeSlash, FaCommentsDollar } from "react-icons/fa";
 import {
   getSummaryAnnotations,
-  deleteAnnotation,
+  downloadProjectAnnotation,
   getAllAnnotations,
+  deleteAnnotationsList
 } from "../../../services/annotationServices";
 import { getProjects } from "../../../services/projectServices";
 import matchSorter from "match-sorter";
@@ -24,9 +25,14 @@ import {
   getSingleSerie,
   getWholeData,
   updatePatient,
+  startLoading,
+  loadCompleted,
+  annotationsLoadingError
 } from "../../annotationsList/action";
 import WarningModal from "../../common/warningModal";
-import "../menuStyle.css"
+import "../menuStyle.css";
+import { getSeries } from "../../../services/seriesServices";
+import SelectSeriesModal from "../../annotationsList/selectSerieModal";
 
 const mode = sessionStorage.getItem("mode");
 
@@ -38,8 +44,10 @@ const messages = {
   itemOpen: {
     title: "Series is open in display",
     openSeries:
-      "couldn't be deleted because the series is open. Please close it before deleting",
+      "could not be deleted because the series is open. Please close it before deleting"
   },
+  downloadProject:
+    "Preparing project for download. The link to the files will be sent with a notification after completion!"
 };
 
 class Annotations extends React.Component {
@@ -50,13 +58,54 @@ class Annotations extends React.Component {
     deleteAllClicked: false,
     selectAll: 0,
     selected: {},
-    filteredData: null,
+    filteredData: [],
     uploadClicked: false,
     downloadClicked: false,
     projectID: "",
     allAims: [],
-    seriesAlreadyOpen: false,
-    selectedSeries: {},
+    seriesAlreadyOpen: {},
+    total: 0,
+    bookmark: "",
+    pages: null,
+    defaultPageSize: 10,
+    pageSize: 10,
+    page: 0,
+    oldPageSize: 10,
+    oldPage: 0,
+    tableLoading: false,
+    data: [],
+    isSerieSelectionOpen: false,
+    selectedStudy: [],
+    studyName: "",
+    change: ""
+  };
+
+  downloadProjectAim = () => {
+    const pid = this.state.projectID || this.props.pid;
+    if (pid === "all_aims") return;
+    downloadProjectAnnotation(pid)
+      .then(result => {
+        if (result.data.type === "application/octet-stream") {
+          let blob = new Blob([result.data], { type: "application/zip" });
+          this.triggerBrowserDownload(blob, `Project ${pid}`);
+        } else
+          toast.success(messages.downloadProject, {
+            autoClose: false,
+            position: "bottom-left"
+          });
+      })
+      .catch(err => console.error(err));
+  };
+
+  triggerBrowserDownload = (blob, fileName) => {
+    const url = window.URL.createObjectURL(new Blob([blob]));
+    const link = document.createElement("a");
+    document.body.appendChild(link);
+    link.style = "display: none";
+    link.href = url;
+    link.download = `${fileName}.zip`;
+    link.click();
+    window.URL.revokeObjectURL(url);
   };
 
   componentDidMount = async () => {
@@ -88,36 +137,99 @@ class Annotations extends React.Component {
     }
   };
 
-  componentDidUpdate = async prevProps => {
+  componentDidUpdate = prevProps => {
     try {
       const { projectID, refresh, lastEventId } = this.props;
+      let pid = this.state.projectID || projectID;
       if (refresh && lastEventId !== prevProps.lastEventId) {
-        await this.getAnnotationsData(projectID);
+        this.getAnnotationsData(pid);
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
-  getAnnotationsData = async projectID => {
+  populateDisplayRows = (list, pageSize, page) => {
+    const { oldPageSize, oldPage, change } = this.state;
+
+    if (oldPage !== page || oldPageSize !== pageSize) {
+      let data = [];
+      const size = pageSize || this.state.pageSize;
+      const p = page >= 0 ? page : this.state.page;
+      let startIndex;
+      let endIndex;
+      if (change === "page") {
+        startIndex = size * p;
+        endIndex = size * (p + 1);
+      } else if (change === "pageSize") {
+        if (oldPageSize * p < size) {
+          // strt indx should be calculted from old page start index to new number
+          const adjustedPage = p - 1 >= 0 ? p - 1 : 0;
+          startIndex = size * adjustedPage;
+          endIndex = size * (adjustedPage + 1);
+          this.setState({ page: adjustedPage });
+        } else {
+          startIndex = size * p;
+          endIndex = size * (p + 1);
+        }
+      } else {
+        startIndex = size * p;
+        endIndex = size * (p + 1);
+      }
+      if (list) {
+        list.forEach((el, i) => {
+          if (i >= startIndex && i < endIndex) data.push(el);
+        });
+      }
+      return data;
+    }
+  };
+
+  getAnnotationsData = async (projectID, bookmarkPassed, pageSize) => {
     try {
-      const { data: annotations } = projectID
-        ? await getSummaryAnnotations(projectID)
-        : await getAllAnnotations();
-      this.setState({ annotations });
+      const {
+        data: { rows, total_rows, bookmark }
+      } = projectID && projectID !== 'all_aims'
+        ? await getSummaryAnnotations(projectID, bookmarkPassed)
+        : await getAllAnnotations(bookmarkPassed);
+
+      if (bookmarkPassed) {
+        const pages = Math.ceil(total_rows / pageSize);
+        const combinedRows = this.state.annotations.concat(rows);
+        this.setState({
+          annotations: combinedRows,
+          total: total_rows,
+          bookmark,
+          pages
+        });
+        return combinedRows;
+      } else {
+        const pages = Math.ceil(total_rows / this.state.pageSize);
+        const data = this.populateDisplayRows(rows);
+        this.setState({
+          annotations: rows,
+          total: total_rows,
+          bookmark,
+          pages,
+          data
+        });
+      }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
   handleProjectSelect = e => {
-    this.setState({ projectID: e.target.value });
-    if (mode !== "lite") {
-      e.target.value === "all_aims"
-        ? this.getAnnotationsData()
-        : this.getAnnotationsData(e.target.value);
-      this.setState({ filteredData: null });
+    this.setState({ projectID: e.target.value, page: 0 });
+
+    if (e.target.value === "all_aims") {
+      this.getAnnotationsData();
+      this.setState({ isAllAims: true });
+    } else {
+      this.getAnnotationsData(e.target.value);
+      this.setState({ isAllAims: false });
     }
+    this.setState({ filteredData: [] });
   };
 
   handleFilterInput = e => {
@@ -128,37 +240,37 @@ class Annotations extends React.Component {
   toggleRow = async (id, projectID, seriesUID) => {
     projectID = projectID ? projectID : "lite";
     let newSelected = Object.assign({}, this.state.selected);
-    let newSelectedSeries = Object.assign({}, this.state.selectedSeries);
     if (newSelected[id]) {
       delete newSelected[id];
-      delete newSelectedSeries[id];
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0,
+          selectAll: 0
         });
       }
     } else {
-      newSelected[id] = projectID;
-      newSelectedSeries[id] = seriesUID;
+      newSelected[id] = { projectID, seriesUID };
       await this.setState({
-        selectAll: 2,
+        selectAll: 2
       });
     }
-    this.setState({ selected: newSelected, selectedSeries: newSelectedSeries });
+    this.setState({ selected: newSelected });
   };
 
   toggleSelectAll() {
     let newSelected = {};
+    const { filteredData, annotations } = this.state;
+    const selectedAims = filteredData?.length ? filteredData : annotations;
     if (this.state.selectAll === 0) {
-      this.state.annotations.forEach(annotation => {
-        let projectID = annotation.projectID ? annotation.projectID : "lite";
-        newSelected[annotation.aimID] = projectID;
+      selectedAims.forEach(annotation => {
+        const projectID = annotation.projectID ? annotation.projectID : "lite";
+        const { seriesUID } = annotation;
+        newSelected[annotation.aimID] = { projectID, seriesUID };
       });
     }
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0,
+      selectAll: this.state.selectAll === 0 ? 1 : 0
     });
   }
 
@@ -172,7 +284,7 @@ class Annotations extends React.Component {
       error: "",
       deleteAllClicked: false,
       uploadClicked: false,
-      downloadClicked: false,
+      downloadClicked: false
     });
   };
 
@@ -180,50 +292,54 @@ class Annotations extends React.Component {
     this.setState({ seriesAlreadyOpen: 0 });
   };
 
-  deleteAllSelected = async () => {
-    const notDeleted = [];
+  deleteAllSelected = () => {
+    const notDeleted = {};
     let newSelected = Object.assign({}, this.state.selected);
-    let newSelectedSeries = Object.assign({}, this.state.selectedSeries);
-
-    const { selectedSeries } = this.state;
+    const toBeDeleted = {};
     const promiseArr = [];
     for (let annotation in newSelected) {
-      const obj = {
-        seriesUID: selectedSeries[annotation],
-        projectID: newSelected[annotation],
-      };
-      if (!this.checkIfSerieOpen(obj, this.props.openSeries).isOpen) {
-        const obj = { aimID: annotation, projectID: newSelected[annotation] };
-        promiseArr.push(deleteAnnotation(obj));
+      const { projectID } = newSelected[annotation];
+      if (
+        this.checkIfSerieOpen(newSelected[annotation], this.props.openSeries)
+          .isOpen
+      ) {
+        notDeleted[annotation] = newSelected[annotation];
+        delete newSelected[annotation];
       } else {
-        notDeleted.push(annotation);
+        toBeDeleted[projectID]
+          ? toBeDeleted[projectID].push(annotation)
+          : (toBeDeleted[projectID] = [annotation]);
       }
     }
+    const projects = Object.keys(toBeDeleted);
+    const aims = Object.values(toBeDeleted);
+
+    projects.forEach((pid, i) => {
+      promiseArr.push(deleteAnnotationsList(pid, aims[i]));
+    });
 
     Promise.all(promiseArr)
       .then(() => {
         this.getAnnotationsData(this.state.projectID);
         this.props.updateProgress();
-        if (notDeleted.length === 0) {
-          this.setState({ selectAll: 0, selected: {}, selectedSeries: {} });
-        } else {
-          this.setState({ seriesAlreadyOpen: notDeleted.length });
-          for (let ann in newSelected) {
-            if (!notDeleted.includes(ann)) {
-              delete newSelected[ann];
-              delete newSelectedSeries[ann];
-            }
-          }
-          this.setState({
-            selectAll: 2,
-            selected: newSelected,
-            selectedSeries: newSelectedSeries,
-          });
-        }
+        const keys = Object.keys(notDeleted);
+        this.props.clearAllTreeData();
+        keys.length === 0
+          ? this.setState({ selectAll: 0, selected: {}, filteredData: [] })
+          : this.setState({
+              seriesAlreadyOpen: keys.length,
+              selected: notDeleted,
+              selectAll: 2
+            });
       })
       .catch(error => {
-        toast.error(error.response.data.message, { autoClose: false });
-        this.getAnnotationsData();
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        )
+          toast.error(error.response.data.message, { autoClose: false });
+        this.getAnnotationsData(this.state.projectID);
       });
     this.handleCancel();
   };
@@ -231,7 +347,7 @@ class Annotations extends React.Component {
   handleDeleteAll = () => {
     const selectedArr = Object.values(this.state.selected);
     const notSelected = selectedArr.includes(false) || selectedArr.length === 0;
-    if (notSelected) {
+    if (notSelected || this.state.isAllAims) {
       return;
     } else {
       this.setState({ deleteAllClicked: true });
@@ -245,12 +361,13 @@ class Annotations extends React.Component {
 
   handleClearFilter = () => {
     this.setState({
-      filteredData: null,
+      filteredData: [],
       name: "",
       subject: "",
       template: "",
       createdStart: "",
       createdEnd: "",
+      isAllAims: false
     });
   };
 
@@ -266,7 +383,7 @@ class Annotations extends React.Component {
       patientName,
       template,
       createdStart,
-      createdEnd,
+      createdEnd
     } = this.state;
     if (!(name || patientName || template || createdStart || createdEnd)) {
       return;
@@ -341,7 +458,7 @@ class Annotations extends React.Component {
       dateArr[2] = dateArr[2][0] === "0" ? dateArr[2][1] : dateArr[2];
       return dateArr[1] + "/" + dateArr[2] + "/" + dateArr[0];
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -384,49 +501,59 @@ class Annotations extends React.Component {
     return { isOpen, index };
   };
 
-  openAnnotation = selected => {
-    const { studyUID, seriesUID, aimID } = selected.original;
-    const patientID = selected.original.subjectID;
-    const projectID = selected.original.projectID
-      ? selected.original.projectID
-      : "lite";
-    const { openSeries } = this.props;
-    // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
-    //check if there is enough space in the grid
-    let isGridFull = openSeries.length === MAX_PORT;
-    //check if the serie is already open
-    if (
-      this.checkIfSerieOpen(selected.original, this.props.openSeries).isOpen
-    ) {
-      const { index } = this.checkIfSerieOpen(
-        selected.original,
-        this.props.openSeries
-      );
-      this.props.dispatch(changeActivePort(index));
-      this.props.dispatch(jumpToAim(seriesUID, aimID, index));
-    } else {
-      if (isGridFull) {
-        this.props.dispatch(alertViewPortFull());
+  openAnnotation = async selected => {
+    try {
+      const {
+        studyUID,
+        seriesUID,
+        aimID,
+        patientName,
+        name
+      } = selected.original;
+      const patientID = selected.original.subjectID;
+      const projectID = selected.original.projectID
+        ? selected.original.projectID
+        : "lite";
+      const { openSeries } = this.props;
+      // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
+      //check if there is enough space in the grid
+      let isGridFull = openSeries.length === MAX_PORT;
+      //check if the serie is already open
+      if (
+        this.checkIfSerieOpen(selected.original, this.props.openSeries).isOpen
+      ) {
+        const { index } = this.checkIfSerieOpen(
+          selected.original,
+          this.props.openSeries
+        );
+        this.props.dispatch(changeActivePort(index));
+        this.props.dispatch(jumpToAim(seriesUID, aimID, index));
       } else {
-        this.props.dispatch(addToGrid(selected.original, aimID));
-        this.props.dispatch(getSingleSerie(selected.original, aimID));
-        //if grid is NOT full check if patient data exists
-        if (!this.props.patients[patientID]) {
-          // this.props.dispatch(getWholeData(null, null, selected.original));
-          getWholeData(null, null, selected.original);
+        if (isGridFull) {
+          this.props.dispatch(alertViewPortFull());
         } else {
-          this.props.dispatch(
-            updatePatient(
-              "annotation",
-              true,
-              patientID,
-              studyUID,
-              seriesUID,
-              aimID
-            )
-          );
+          this.props.dispatch(addToGrid(selected.original, aimID));
+          this.props.dispatch(getSingleSerie(selected.original, aimID));
+          //if grid is NOT full check if patient data exists
+          if (!this.props.patients[patientID]) {
+            // this.props.dispatch(getWholeData(null, null, selected.original));
+            getWholeData(null, null, selected.original);
+          } else {
+            this.props.dispatch(
+              updatePatient(
+                "annotation",
+                true,
+                patientID,
+                studyUID,
+                seriesUID,
+                aimID
+              )
+            );
+          }
         }
       }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -467,33 +594,42 @@ class Annotations extends React.Component {
             />
           );
         },
-        resizable: false,
+        resizable: false
       },
       {
         Header: "Name",
         accessor: "name",
         sortable: true,
-        resizable: true,
+        resizable: true
       },
       {
         Header: "Open",
         sortable: false,
         resizable: false,
         style: { display: "flex", justifyContent: "center" },
-        Cell: original => {
-          return (
+        Cell: data => {
+          return this.state.isAllAims ? (
+            <FaEyeSlash />
+          ) : (
             <Link className="open-link" to={"/display"}>
               <div
                 onClick={() => {
-                  this.openAnnotation(original);
-                  this.props.onClose();
+                  if (
+                    data.original.seriesUID === "noseries" ||
+                    !data.original.seriesUID
+                  ) {
+                    this.displaySeries(data.original);
+                  } else {
+                    this.openAnnotation(data);
+                    this.props.onClose();
+                  }
                 }}
               >
                 <FaRegEye className="menu-clickable" />
               </div>
             </Link>
           );
-        },
+        }
       },
       {
         Header: "Subject",
@@ -504,7 +640,7 @@ class Annotations extends React.Component {
           return (
             <div>{this.clearCarets(original.row.checkbox.patientName)}</div>
           );
-        },
+        }
       },
       {
         accessor: "comment",
@@ -519,20 +655,20 @@ class Annotations extends React.Component {
               <div>Slice / Series #</div>
             </div>
           );
-        },
+        }
       },
       {
         Header: "Template",
         accessor: "template",
         resizable: true,
-        sortable: true,
+        sortable: true
       },
       {
         Header: "User",
         accessor: "userName",
         style: { whiteSpace: "normal" },
         resizable: true,
-        sortable: true,
+        sortable: true
       },
       {
         Header: "Study",
@@ -548,7 +684,7 @@ class Annotations extends React.Component {
             "studyDate"
           ).split(" ");
           return <div>{this.formatDate(studyDateArr[0])}</div>;
-        },
+        }
       },
       {
         Header: "Created",
@@ -563,7 +699,7 @@ class Annotations extends React.Component {
             "date"
           ).split(" ");
           return <div>{this.formatDate(studyDateArr[0])}</div>;
-        },
+        }
       },
       {
         Header: () => {
@@ -585,8 +721,8 @@ class Annotations extends React.Component {
             "date"
           ).split(" ");
           return <div>{studyDateArr[1]}</div>;
-        },
-      },
+        }
+      }
     ];
   };
 
@@ -613,7 +749,7 @@ class Annotations extends React.Component {
       }
       return result ? result : str;
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return str;
     }
   };
@@ -630,19 +766,146 @@ class Annotations extends React.Component {
 
   handleSubmitUpload = () => {
     this.handleCancel();
-    this.getAnnotationsData(this.props.pid);
+    this.getAnnotationsData(this.state.projectID);
   };
 
   handleSubmitDownload = () => {
-    this.setState({ selected: {}, selectAll: 0, selectedSeries: {} });
+    this.setState({ selected: {}, selectAll: 0 });
     this.handleCancel();
+  };
+
+  fetchData = async atributes => {
+    try {
+      const { projectID, bookmark, annotations, total } = this.state;
+      const { page, pageSize, oldPage, oldPageSize } = this.state;
+      const pageNum = page + 1;
+      if (
+        total > annotations.length &&
+        pageSize * pageNum > annotations.length
+      ) {
+        this.setState({ tableLoading: true, page, pageSize });
+        const rows = await this.getAnnotationsData(
+          projectID,
+          bookmark,
+          pageSize
+        );
+        this.setState({ tableLoading: false });
+        const data = this.populateDisplayRows(rows, pageSize, page);
+        this.setState({ data });
+      } else {
+        if (page !== oldPage || pageSize !== oldPageSize) {
+          const data = this.populateDisplayRows(annotations, pageSize, page);
+          this.setState({ data });
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  getSeriesData = async selected => {
+    this.props.dispatch(startLoading());
+    const { projectID, patientID, studyUID } = selected;
+    try {
+      const { data: series } = await getSeries(projectID, patientID, studyUID);
+      this.props.dispatch(loadCompleted());
+      return series;
+    } catch (err) {
+      this.props.dispatch(annotationsLoadingError(err));
+    }
+  };
+
+  excludeOpenSeries = allSeriesArr => {
+    const result = [];
+    //get all series number in an array
+    const idArr = this.props.openSeries.reduce((all, item, index) => {
+      all.push(item.seriesUID);
+      return all;
+    }, []);
+    //if array doesnot include that serie number
+    allSeriesArr.forEach(serie => {
+      if (!idArr.includes(serie.seriesUID)) {
+        //push that serie in the result arr
+        result.push(serie);
+      }
+    });
+    return result;
+  };
+
+  displaySeries = async selected => {
+    if (this.props.openSeries.length === MAX_PORT) {
+      this.props.dispatch(alertViewPortFull());
+    } else {
+      const { subjectID: patientID, studyUID } = selected;
+      let seriesArr;
+      //check if the patient is there (create a patient exist flag)
+      const patientExists = this.props.patients[patientID];
+      //if there is patient iterate over the series object of the study (form an array of series)
+      if (patientExists) {
+        seriesArr = Object.values(
+          this.props.patients[patientID].studies[studyUID].series
+        );
+        //if there is not a patient get series data of the study and (form an array of series)
+      } else {
+        seriesArr = await this.getSeriesData(selected);
+      }
+      //get extraction of the series (extract unopen series)
+      if (seriesArr.length > 0) seriesArr = this.excludeOpenSeries(seriesArr);
+      //check if there is enough room
+      if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
+        //if there is not bring the modal
+        await this.setState({
+          isSerieSelectionOpen: true,
+          selectedStudy: [seriesArr],
+          studyName: selected.studyDescription
+        });
+      } else {
+        //if there is enough room
+        //add serie to the grid
+        const promiseArr = [];
+        for (let serie of seriesArr) {
+          this.props.dispatch(addToGrid(serie));
+          promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
+        }
+        //getsingleSerie
+        Promise.all(promiseArr)
+          .then(() => {})
+          .catch(err => console.error(err));
+
+        //if patient doesnot exist get patient
+        if (!patientExists) {
+          // this.props.dispatch(getWholeData(null, selected));
+          getWholeData(null, selected);
+        } else {
+          //check if study exist
+          this.props.dispatch(
+            updatePatient("study", true, patientID, studyUID)
+          );
+        }
+      }
+    }
+  };
+
+  closeSelectionModal = () => {
+    this.setState(state => ({
+      isSerieSelectionOpen: !state.isSerieSelectionOpen
+    }));
   };
 
   render = () => {
     const checkboxSelected = Object.values(this.state.selected).length > 0;
-    const data = this.state.filteredData || this.state.annotations;
-    const pageSize = data.length < 10 ? 10 : data.length >= 40 ? 50 : 20;
-    const { seriesAlreadyOpen, projectID } = this.state;
+    const {
+      seriesAlreadyOpen,
+      projectID,
+      defaultPageSize,
+      pages,
+      tableLoading,
+      filteredData,
+      pageSize,
+      page,
+      data
+    } = this.state;
+    const rowsToDisplay = filteredData.length > 0 ? filteredData : data;
     const text = seriesAlreadyOpen > 1 ? "annotations" : "annotation";
     return (
       <div className="annotations menu-display" id="annotation">
@@ -657,17 +920,55 @@ class Annotations extends React.Component {
           onFilter={this.filterTableData}
           onUpload={this.handleUpload}
           onDownload={this.handleDownload}
+          onProjectDownload={this.downloadProjectAim}
           onKeyDown={this.handleKeyDown}
           pid={projectID}
+          isAllAims={this.state.isAllAims}
         />
-        <ReactTable
-          NoDataComponent={() => null}
-          className="pro-table"
-          data={this.state.filteredData || this.state.annotations}
-          columns={this.defineColumns()}
-          pageSizeOptions={[10, 20, 50]}
-          defaultPageSize={pageSize}
-        />
+        {this.state.data.length > 0 && (
+          <ReactTable
+            NoDataComponent={() => null}
+            className="pro-table"
+            style={{ maxHeight: "40rem" }}
+            manual
+            data={rowsToDisplay}
+            columns={this.defineColumns()}
+            loading={tableLoading}
+            pages={pages}
+            page={page}
+            pageSizeOptions={[10, 20, 50, 100]}
+            pageSize={pageSize}
+            defaultPageSize={defaultPageSize}
+            onFetchData={() => {
+              setTimeout(() => {
+                this.fetchData();
+              }, 10);
+            }}
+            // {this.fetchData}
+            onPageChange={page => {
+              const oldPage = this.state.page;
+              this.setState({ page, oldPage, change: "page" });
+            }}
+            showPageJump={false}
+            onPageSizeChange={size => {
+              const oldPageSize = this.state.pageSize;
+              if (filteredData && filteredData.length > 0)
+                this.setState({
+                  pages: Math.ceil(filteredData.length / size),
+                  pageSize: size,
+                  oldPageSize
+                });
+              else {
+                this.setState({
+                  pages: Math.ceil(this.state.total / size),
+                  pageSize: size,
+                  oldPageSize
+                });
+              }
+              this.setState({ change: "pageSize" });
+            }}
+          />
+        )}
         {this.state.deleteAllClicked && (
           <DeleteAlert
             message={messages.deleteSelected}
@@ -679,11 +980,12 @@ class Annotations extends React.Component {
         {this.state.uploadClicked && (
           <UploadModal
             onCancel={this.handleCancel}
-            onSubmit={this.handleSubmitUpload}
+            onResolve={this.handleSubmitUpload}
             className="mng-upload"
             projectID={this.state.projectID}
             pid={this.props.pid}
             clearTreeData={this.props.clearTreeData}
+            clearTreeExpand={this.props.clearTreeExpand}
           />
         )}
         {this.state.downloadClicked && (
@@ -693,6 +995,7 @@ class Annotations extends React.Component {
             updateStatus={() => console.log("update status")}
             selected={this.state.selected}
             className="mng-download"
+            projectID={this.state.projectID}
           />
         )}
         {seriesAlreadyOpen > 0 && (
@@ -700,6 +1003,13 @@ class Annotations extends React.Component {
             onOK={this.closeWarningModal}
             title={messages.itemOpen.title}
             message={`${seriesAlreadyOpen} ${text} ${messages.itemOpen.openSeries}`}
+          />
+        )}
+        {this.state.isSerieSelectionOpen && (
+          <SelectSeriesModal
+            seriesPassed={this.state.selectedStudy}
+            onCancel={this.closeSelectionModal}
+            studyName={this.state.studyName}
           />
         )}
       </div>
@@ -714,6 +1024,7 @@ const mapsStateToProps = state => {
     uploadedPid: state.annotationsListReducer.uploadedPid,
     lastEventId: state.annotationsListReducer.lastEventId,
     refresh: state.annotationsListReducer.refresh,
+    projectMap: state.annotationsListReducer.projectMap
   };
 };
 

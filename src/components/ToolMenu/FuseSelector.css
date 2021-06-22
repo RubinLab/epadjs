@@ -1,0 +1,60 @@
+.fuse-selector {
+    position: absolute;
+    background-color: #3a3f44;
+    padding: 5px 10px;
+    outline: solid;
+    outline-width: 1px;
+    background-color: #3a3f44;
+    outline-color: black;
+    width: 170px;
+    height: 250px;
+    top: 92px;
+    left: 585px;
+    z-index: 1000;
+}
+
+.fuse-selector span {
+    font-size: small;
+}
+
+.close-fuse-selector {
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    color: white;
+}
+.layers {
+    float: left;
+}
+
+.visibility {
+    float:right;
+    padding-top: 25px;
+}
+
+.opt-select {
+    display: block;
+}
+
+.opacity {
+    clear: both;
+}
+
+.colormap {
+    clear: both;
+    display: block;
+}
+
+label {
+    font-weight: 400;
+}
+
+hr {
+    margin-top: 0em;
+    margin-bottom: 0em;
+}
+
+h5 {
+    font-size: 2em;
+    margin-bottom: 0em;
+}

@@ -84,6 +84,7 @@ class MainMenu extends React.Component {
             onClose={this.handleCloseModal}
             updateProgress={this.props.updateProgress}
             pid={this.props.pid}
+            clearAllTreeData={this.props.clearAllTreeData}
           />
         );
       case "Templates":

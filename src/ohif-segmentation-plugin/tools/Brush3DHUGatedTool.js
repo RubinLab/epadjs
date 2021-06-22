@@ -16,6 +16,7 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
     super(initialConfiguration);
 
     this.initialConfiguration = initialConfiguration;
+    this.modality = "";
   }
 
   /**
@@ -26,11 +27,20 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
    * @param {Object} evt - The event.
    */
   preMouseDownCallback(evt) {
+    this.modality = this._getModality(evt);
     this.activeGateRange = brushModule.getters.activeGateRange();
 
     this._startPainting(evt);
 
     return true;
+  }
+
+  _getModality(evt) {
+    const eventData = evt.detail;
+    const { image } = eventData;
+    const seriesModule =
+      cornerstone.metaData.get("generalSeriesModule", image.imageId) || {};
+    return seriesModule.modality;
   }
 
   /**
@@ -40,17 +50,28 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
    * @param  {Object} evt The data object associated with the event.
    * @returns {void}
    */
-  _paint(evt) {
-    const eventData = evt.detail;
-    const { element, image } = eventData;
-    const { rows, columns } = image;
-    const { x, y } = eventData.currentPoints.image;
+  _paint(evt, imageIndex, _element) {
+    let element, image, rows, columns, x, y;
+    if (imageIndex && _element) {
+      image = cornerstone.imageCache.cachedImages[imageIndex].image;
+      element = _element;
+      x = 1;
+      y = 1;
+    } else {
+      const eventData = evt.detail;
+      ({ element, image } = eventData);
+      ({ x, y } = eventData.currentPoints.image);
+    }
+    ({ rows, columns } = image);
 
     if (x < 0 || x > columns || y < 0 || y > rows) {
       return;
     }
 
-    const radius = brushModule.configuration.radius;
+    let radius;
+    if (brushModule.configuration.applyToImage)
+      radius = columns >= rows ? columns * 2 : radius * 2;
+    else radius = brushModule.configuration.radius;
 
     const pointerArray = this._gateCircle(
       image,
@@ -62,7 +83,7 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       labelmap3D,
       currentImageIdIndex,
       activeLabelmapIndex,
-      shouldErase
+      shouldErase,
     } = this.paintEventData;
 
     // Draw / Erase the active color.
@@ -75,7 +96,7 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
     );
 
     cornerstone.triggerEvent(element, EVENTS.LABELMAP_MODIFIED, {
-      activeLabelmapIndex
+      activeLabelmapIndex,
     });
 
     cornerstone.updateImage(evt.detail.element);
@@ -103,14 +124,16 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
     for (let i = 0; i < circle.length; i++) {
       let pixelValue = imagePixelData[circle[i][0] + circle[i][1] * rows];
 
-      pixelValue = pixelValue * rescaleSlope + rescaleIntercept;
+      if (this.modality === "CT")
+        //get the original pixel value if the modlity is not CT
+        pixelValue = pixelValue * rescaleSlope + rescaleIntercept;
 
       if (pixelValue >= gateRange[0] && pixelValue <= gateRange[1]) {
         gatedCircleArray.push(circle[i]);
       }
     }
-
     return this._cleanGatedCircle(circle, gatedCircleArray);
+    // return gatedCircleArray;
   }
 
   /**
@@ -322,7 +345,7 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       if (data[i][j] === 1) {
         const result = floodFill({
           getter: getter,
-          seed: [i, j]
+          seed: [i, j],
         });
 
         const flooded = result.flooded;
@@ -361,7 +384,7 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       if (data[i][j] === 1) {
         const result = floodFill({
           getter: getter,
-          seed: [i, j]
+          seed: [i, j],
         });
 
         const flooded = result.flooded;
@@ -374,7 +397,7 @@ export default class Brush3DHUGatedTool extends Brush3DTool {
       } else if (data[i][j] === 2) {
         const result = floodFill({
           getter: getter,
-          seed: [i, j]
+          seed: [i, j],
         });
 
         const flooded = result.flooded;

@@ -4,6 +4,8 @@ import MetaData from "../MetaData/MetaData";
 import SmartBrushMenu from "../SmartBrushMenu/SmartBrushMenu";
 import BrushSizeSelector from "./BrushSizeSelector";
 import { WindowLevel } from "../WindowLevel/WindowLevel";
+import ColormapSelector from "./ColormapSelector";
+import FuseSelector from "./FuseSelector";
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
 import {
@@ -22,7 +24,10 @@ import {
   FaHandScissors,
   FaCut,
   FaCircle,
-  FaHandPointer,
+  FaMousePointer,
+  FaPalette,
+  FaObjectUngroup,
+  FaDotCircle
 } from "react-icons/fa";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
@@ -97,7 +102,8 @@ const tools = [
   { name: "Brush3D" },
   { name: "SphericalBrush" },
   { name: "Brush3DHUGated" },
-  // { name: "Brush3DAutoGated" }
+  { name: "BrushSphericalHUGated" },
+  { name: "Brush3DAutoGated" },
 ];
 
 class ToolMenu extends Component {
@@ -112,6 +118,7 @@ class ToolMenu extends Component {
       showDrawing: false,
       showBrushMenu: false,
       showPresets: false,
+      showMetaData: false,
       playing: false,
       customBrush: {
         min: -1000,
@@ -123,19 +130,22 @@ class ToolMenu extends Component {
       showInterpolation: false,
       activeTool: "",
       activeToolIdx: 0,
+      fuse: false
     };
 
     this.imagingTools = [
-      { name: "Select", icon: <FaHandPointer />, tool: "Noop" },
+      { name: "Select", icon: <FaMousePointer />, tool: "Noop" },
       { name: "Levels", icon: <FiSun />, tool: "Wwwc" },
       { name: "Presets", icon: <FiSunset />, tool: "Presets" },
       { name: "Zoom", icon: <FiZoomIn />, tool: "Zoom" },
       { name: "Invert", icon: <FaAdjust />, tool: "Invert" },
       { name: "Reset", icon: <MdLoop />, tool: "Reset" },
       { name: "Pan", icon: <MdPanTool />, tool: "Pan" },
-      // { name: "SeriesData", icon: <FaListAlt />, tool: "MetaData" },
+      { name: "MetaData", icon: <FaListAlt />, tool: "MetaData" },
       { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate" },
       { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
+      { name: "Color", icon: <FaPalette />, tool: "colorLut" },
+      { name: "Fusion", icon: <FaObjectUngroup />, tool: "fuse" },
     ];
 
     this.markupTools = [
@@ -204,12 +214,22 @@ class ToolMenu extends Component {
         tool: "Brush3D",
       },
       {
-        name: "Brush HU Gated",
+        name: "Gated",
         icon: <FaBroom />,
         tool: "Brush3DHUGated",
       },
       {
-        name: "Spherical Brush",
+        name: "Spherical Gated",
+        icon: <FaDotCircle />,
+        tool: "BrushSphericalHUGated",
+      },
+      {
+        name: "Auto Gated",
+        icon: <FaBroom />,
+        tool: "Brush3DAutoGated",
+      },
+      {
+        name: "Spherical",
         icon: <IoMdEgg />,
         tool: "SphericalBrush",
       },
@@ -227,19 +247,32 @@ class ToolMenu extends Component {
     ];
   }
 
+  componentWillUnmount() {
+    sessionStorage.removeItem("activeTool");
+  }
+
   //TODO: instead of disabling all tools we can just disable the active tool
   disableAllTools = () => {
-    console.log("Cornserstone tools", cornerstoneTools);
-    this.setState({ activeToolIdx: 0 });
-    Array.from(this.tools).forEach((tool) => {
-      this.setToolStateForAllElements(tool.name, "passive");
-      // const apiTool = cornerstoneTools[`${tool.name}Tool`];
-      // if (apiTool) {
-      //   cornerstoneTools.setToolPassive(tool.name);
-      // } else {
-      //   throw new Error(`Tool not found: ${tool.name}Tool`);
-      // }
-    });
+    const { activeTool } = this.state;
+    if (activeTool) {
+      if (activeTool === "FreehandRoiTool" || activeTool === "FreehandRoi3DTool") {
+        this.deselectFreehand();
+      }
+      this.setToolStateForAllElements(this.state.activeTool, "passive");
+      this.setState({ activeToolIdx: 0 });
+      this.setCursor("default");
+    }
+
+    // Array.from(this.tools).forEach((tool) => {
+    //   if (tool !== "FreehandRoiSculptor")
+    //     this.setToolStateForAllElements(tool.name, "passive");
+    //   // const apiTool = cornerstoneTools[`${tool.name}Tool`];
+    //   // if (apiTool) {
+    //   //   cornerstoneTools.setToolPassive(tool.name);
+    //   // } else {
+    //   //   throw new Error(`Tool not found: ${tool.name}Tool`);
+    //   // }
+    // });
   };
 
   setToolStateForAllElements = (toolName, state, mouseMask = 1) => {
@@ -258,15 +291,13 @@ class ToolMenu extends Component {
   //sets the selected tool active for all of the enabled elements
   setToolActive = (toolName, mouseMask = 1) => {
     cornerstoneTools.setToolActive(toolName, {
-      mouseButtonMask: [mouseMask],
+      mouseButtonMask: mouseMask,
     });
   };
 
   handleToolClicked = (index, tool) => {
-    console.log("Tool", tool);
     if (tool === "Noop") {
       this.disableAllTools();
-      this.setCursor("default");
       this.setState({ activeTool: "", activeToolIdx: index });
       return;
     } else if (tool === "Presets") {
@@ -279,7 +310,7 @@ class ToolMenu extends Component {
       this.reset();
       return;
     } else if (tool === "MetaData") {
-      this.toggleMetaData();
+      this.showMetaData();
       return;
       // } else if (index === 14) {
       //   this.setInterpolation(!this.state.interpolate);
@@ -291,19 +322,53 @@ class ToolMenu extends Component {
       } //Dont" select the HUGated if the modality is not CT
       this.setState({ showBrushSize: true });
     } else if (tool === "Brush3DHUGated") {
-      if (!this.checkIfCT() || this.checkIfMultiframe()) {
-        alert("HU Gated tool only works with singleframe CT images");
-        return;
-      } //Dont" select the HUGated if the modality is not CT
-      this.setState({ showBrushSize: true, showSmartBrush: true });
+      if (this.checkIfMultiframe()) { alert("Segmentation tools only works with singleframe images"); return; }
+      this.setState({ showBrushSize: true, isHuGated: true, showSmartBrush: true, isSpherical: false });
+    } else if (tool === "BrushSphericalHUGated") {
+      if (this.checkIfMultiframe()) { alert("Segmentation tools only works with singleframe images"); return; }
+      this.setState({ showBrushSize: true, isHuGated: true, showSmartBrush: true, isSpherical: true });
+    } else if (tool === "Brush3DAutoGated") {
+      if (this.checkIfMultiframe()) { alert("Segmentation tools only works with singleframe images"); return; }
+      this.setState({ showBrushSize: true, isHuGated: false, showSmartBrush: true, isSpherical: false });
     } else if (tool === "FreehandRoi3DTool") {
+      this.selectFreehand();
       this.setState({ showInterpolation: true });
+    } else if (tool === "colorLut") {
+      this.setState({ showColormap: true });
+      return;
+    } else if (tool === "fuse") {
+      this.setState({ showFuse: true });
+      return;
+      this.selectFreehand();
     }
+    // else if (tool === "FreehandRoiTool") {
+    //   this.selectFreehand();
+    // }
+
     this.disableAllTools();
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
       this.setToolStateForAllElements(tool, "active");
     });
+    sessionStorage.setItem("activeTool", tool);
   };
+
+  selectFreehand = () => {
+    window.addEventListener('escPressed', this.cancelPolygon);
+  }
+
+  deselectFreehand = () => {
+    window.removeEventListener('escPressed', this.cancelPolygon);
+  }
+
+  cancelPolygon = () => {
+    const { activePort } = this.props;
+    const { element } = cornerstone.getEnabledElements()[activePort];
+    let tools = cornerstoneTools.store.state.tools;
+
+    tools = tools.filter(tool => tool.element === element && tool.mode === 'active');
+    tools = tools.filter(tool => (tool.name === "FreehandRoi3DTool"));
+    tools[0].cancelDrawing(element);
+  }
 
   getActiveImage = () => {
     const { activePort } = this.props;
@@ -311,14 +376,14 @@ class ToolMenu extends Component {
     return cornerstone.getImage(element);
   };
 
-  checkIfCT = () => {
-    const image = this.getActiveImage();
-    const seriesModule =
-      cornerstone.metaData.get("generalSeriesModule", image.imageId) || {};
-    const modality = seriesModule.modality;
-    if (modality === "CT") return true;
-    return false;
-  };
+  // checkIfCT = () => {
+  //   const image = this.getActiveImage();
+  //   const seriesModule =
+  //     cornerstone.metaData.get("generalSeriesModule", image.imageId) || {};
+  //   const modality = seriesModule.modality;
+  //   if (modality === "CT") return true;
+  //   return false;
+  // };
 
   checkIfMultiframe = () => {
     const image = this.getActiveImage();
@@ -338,12 +403,32 @@ class ToolMenu extends Component {
   reset = () => {
     const element = cornerstone.getEnabledElements()[this.props.activePort]
       .element;
+    this.resetRenderCanvas(element);
     cornerstone.reset(element);
   };
 
-  toggleMetaData = () => {
-    this.disableAllTools();
-    // this.state.activeElement.style.display = "block";
+  resetRenderCanvas = (element) => {
+    const enabledElement = cornerstone.getEnabledElement(element);
+
+    enabledElement.renderingTools.colormapId = undefined;
+    enabledElement.renderingTools.colorLut = undefined;
+
+    const renderCanvas = enabledElement.renderingTools.renderCanvas;
+    const canvasContext = renderCanvas.getContext('2d');
+
+    // NOTE - we need to fill the render canvas with white pixels since we 
+    // control the luminance using the alpha channel to improve rendering performance. 
+    canvasContext.fillStyle = 'white';
+    canvasContext.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
+
+    const renderCanvasData = canvasContext.getImageData(0, 0, renderCanvas.width, renderCanvas.height);
+
+    enabledElement.renderingTools.renderCanvasContext = canvasContext;
+    enabledElement.renderingTools.renderCanvasData = renderCanvasData;
+  }
+
+  showMetaData = () => {
+    this.setState({ showMetaData: !this.state.showMetaData });
   };
 
   handleClip = () => {
@@ -359,9 +444,10 @@ class ToolMenu extends Component {
   };
 
   setCursor = (cursorStyle) => {
-    const { activePort } = this.props;
-    const { element } = cornerstone.getEnabledElements()[activePort];
-    element.style.cursor = cursorStyle;
+    const elements = cornerstone.getEnabledElements();
+    elements.forEach(({ element }) => {
+      element.style.cursor = cursorStyle;
+    })
   };
 
   closeBrushSize = () => {
@@ -376,7 +462,18 @@ class ToolMenu extends Component {
     this.setState({ showInterpolation: false });
   };
 
+  closeColormap = () => {
+    this.setState({ showColormap: false });
+  }
+
+  closeFuse = () => {
+    this.setState({ showFuse: false });
+  }
+
   render() {
+    const { activeTool } = this.state;
+    if (activeTool !== undefined && activeTool !== "" && activeTool !== "FreehandRoiSculptor")
+      this.setToolStateForAllElements(activeTool, "active");
     return (
       <div className="toolbar">
         {this.imagingTools.map((imagingTool, i) => {
@@ -392,7 +489,7 @@ class ToolMenu extends Component {
           );
         })}
 
-        <MetaData />
+        {this.state.showMetaData && (<MetaData onClose={this.showMetaData} />)}
         {/*<div
           id="angle"
           tabIndex="7"
@@ -660,13 +757,15 @@ class ToolMenu extends Component {
         {/* </Collapsible> */}
         {(this.state.activeTool === "Brush3D" ||
           this.state.activeTool === "SphericalBrush" ||
-          this.state.activeTool === "Brush3DHUGated") &&
+          this.state.activeTool === "Brush3DHUGated" ||
+          this.state.activeTool === "BrushSphericalHUGated" ||
+          this.state.activeTool === "Brush3DAutoGated") &&
           this.state.showBrushSize && (
             <BrushSizeSelector onClose={this.closeBrushSize} />
           )}
-        {this.state.activeTool === "Brush3DHUGated" &&
+        {(this.state.activeTool === "Brush3DHUGated" || this.state.activeTool === "BrushSphericalHUGated" || this.state.activeTool === "Brush3DAutoGated") &&
           this.state.showSmartBrush && (
-            <SmartBrushMenu onClose={this.closeSmartBrushMenu} />
+            <SmartBrushMenu activePort={this.props.activePort} onClose={this.closeSmartBrushMenu} isHuGated={this.state.isHuGated} isSphericalBrush={this.state.isSpherical} />
           )}
         {this.state.showPresets && (
           <WindowLevel
@@ -677,7 +776,19 @@ class ToolMenu extends Component {
         {this.state.activeTool === "FreehandRoi3DTool" &&
           this.state.showInterpolation && (
             <Interpolation onClose={this.showInterpolation} />
-          )}
+          )
+        }
+        {this.state.showColormap && (
+          <ColormapSelector
+            activePort={this.props.activePort}
+            onClose={this.closeColormap}
+          />
+        )}
+        {this.state.showFuse && (
+          <FuseSelector
+            onClose={this.closeFuse}
+          />
+        )}
       </div>
     );
   }

@@ -1,31 +1,52 @@
 import React from "react";
-import ReactTable from "react-table";
+import ReactTable from "react-table-v6";
 import { connect } from "react-redux";
 import { Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
-import { FaPlay, FaStop, FaDownload, FaEye, FaTrash } from "react-icons/fa";
-
+import ReactTooltip from "react-tooltip";
+import {
+  FaPlay,
+  FaStop,
+  FaDownload,
+  FaEye,
+  FaTrash,
+  FaEnvelopeOpenText,
+  FaWindowClose,
+} from "react-icons/fa";
 import {
   getPluginsQueue,
   runPluginsQueue,
   stopPluginsQueue,
   deleteFromPluginQueue,
   downloadPluginResult,
+  getContainerLog,
 } from "../../../../../services/pluginServices";
+import Draggable from "react-draggable";
 import "./../../css/plugin.css";
+import "../../../menuStyle.css";
+
 class TrackTab extends React.Component {
   state = {
+    ocancel: "",
+    runungLogId: 0,
+    showContainerLog: false,
+    containerLogData: "",
     pluginQueueList: [],
     showParamsNonZero: false,
     tempParamsHtmlnonZero: [],
     selectedQueueIds: {},
     selectAll: 0,
+    containerLoggingIntervalHandle: "",
   };
 
   componentWillMount = async () => {
     const tempPluginQueueList = await getPluginsQueue();
     console.log("track tab queue lists needs to show", tempPluginQueueList);
-    this.setState({ pluginQueueList: tempPluginQueueList.data });
+    // const canc = new Cancellation();
+    this.setState({
+      pluginQueueList: tempPluginQueueList.data,
+      // cancellation: canc,
+    });
   };
 
   componentDidUpdate = async () => {
@@ -173,6 +194,57 @@ class TrackTab extends React.Component {
     }
   };
 
+  handleGetContainerLog = async (dataOriginal) => {
+    if (this.state.showContainerLog === true) {
+      clearInterval(this.state.containerLoggingIntervalHandle);
+    }
+    //  const containerLoggingIntervalHolder = null;
+    const containerid = dataOriginal.id;
+    let _this = this;
+    try {
+      let containerlog = await getContainerLog(containerid);
+      console.log("err stream", containerlog);
+      if (containerlog.data != "404") {
+        this.setState({
+          showContainerLog: true,
+          containerLogData: containerlog.data,
+        });
+
+        const containerLoggingIntervalHolder = setInterval(
+          async function (innerThis) {
+            console.log("continer id = ", containerid);
+            containerlog = await getContainerLog(containerid);
+            innerThis.setState({
+              containerLogData: containerlog.data,
+            });
+          },
+          5000,
+          _this
+        );
+        this.setState({
+          containerLoggingIntervalHandle: containerLoggingIntervalHolder,
+        });
+      } else {
+        alert("Please start plugin first");
+      }
+    } catch (err) {
+      console.log("eror:", err);
+      alert("no log found for the container");
+      return true;
+      //
+    }
+  };
+
+  handlerStopContainerLogging = () => {
+    // this.state.ocancel();
+    this.setState({
+      showContainerLog: false,
+      containerLogData: "",
+      runungLogId: 0,
+    });
+    clearInterval(this.state.containerLoggingIntervalHandle);
+  };
+
   showRuntimeParamsForNonZero = (data) => {
     console.log("datadattdatatda :", data);
     let cnt = 0;
@@ -288,9 +360,10 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
-        Header: "container name",
-        width: 70,
-        minResizeWidth: 20,
+        id: "containername",
+        Header: "container",
+        minWidth: 110,
+        minResizeWidth: 50,
         Cell: (data) => {
           const queueId = data.original.id;
           return <div>epadplugin_{queueId}</div>;
@@ -299,9 +372,10 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
+        id: "plugin",
         Header: "plugin",
-        width: 50,
-        minResizeWidth: 20,
+        minWidth: 150,
+        minResizeWidth: 50,
         Cell: (data) => {
           const pluginName = data.original.plugin.name;
           return <div>{pluginName}</div>;
@@ -310,8 +384,9 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
+        id: "aims",
         Header: "aims",
-        width: 70,
+        minWidth: 70,
         minResizeWidth: 20,
         Cell: (data) => {
           const aims = data.original.aim_uid;
@@ -328,8 +403,9 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
+        id: "projects",
         Header: "project",
-        width: 70,
+        minWidth: 70,
         minResizeWidth: 20,
         Cell: (data) => {
           const projectName = data.original.project.name;
@@ -339,16 +415,18 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
-        Header: "params type",
+        id: "paramtype",
+        Header: "param type",
         accessor: "plugin_parametertype",
         sortable: true,
         resizable: true,
-        width: 200,
+        minWidth: 100,
         minResizeWidth: 20,
       },
       {
+        id: "runtimeparams",
         Header: "runtime params",
-        width: 100,
+        minWidth: 120,
         minResizeWidth: 20,
         Cell: (data) => {
           const paramsHtml = data.original.runtime_params;
@@ -369,20 +447,39 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
+        id: "status",
         Header: "status",
-        accessor: "status",
+        //accessor: "status",
         sortable: true,
         resizable: true,
-        width: 100,
+        minWidth: 60,
         minResizeWidth: 20,
+        Cell: (data) => {
+          if (data.original.status === "error") {
+            return (
+              <div style={{ color: "#ff9999" }}>{data.original.status}</div>
+            );
+          } else if (data.original.status === "running") {
+            return (
+              <div style={{ color: "#00cc99" }}>{data.original.status}</div>
+            );
+          } else if (data.original.status === "waiting") {
+            return (
+              <div style={{ color: "#e6e600" }}>{data.original.status}</div>
+            );
+          } else {
+            return <div>{data.original.status}</div>;
+          }
+        },
       },
       {
+        id: "starttime",
         Header: "starttime",
-        width: 200,
+        minWidth: 200,
         minResizeWidth: 20,
         Cell: (data) => {
           const processStartTime = new Date(data.original.starttime);
-          if (processStartTime.getFullYear() === 1970) {
+          if (processStartTime.getFullYear() <= 1970) {
             return <div>-</div>;
           } else {
             return (
@@ -402,12 +499,13 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
+        id: "endtime",
         Header: "endtime",
-        width: 200,
+        minWidth: 200,
         minResizeWidth: 20,
         Cell: (data) => {
           const processEndTime = new Date(data.original.endtime);
-          if (processEndTime.getFullYear() === 1970) {
+          if (processEndTime.getFullYear() <= 1970) {
             return <div>-</div>;
           } else {
             return (
@@ -428,7 +526,8 @@ class TrackTab extends React.Component {
         resizable: true,
       },
       {
-        width: 300,
+        id: "opbuttons",
+        minWidth: 150,
         minResizeWidth: 20,
         Header: "",
         sortable: true,
@@ -444,10 +543,45 @@ class TrackTab extends React.Component {
                         variant="primary"
                         className="btn btn-sm btn-outline-light"
                         onClick={() => {
+                          this.handleGetContainerLog(data.original);
+                        }}
+                      >
+                        <FaEnvelopeOpenText
+                          className="menu-clickable"
+                          data-tip
+                          data-for="log-icon"
+                        />
+                        <ReactTooltip
+                          id="log-icon"
+                          place="bottom"
+                          type="info"
+                          delayShow={1000}
+                        >
+                          <span>open plugin log</span>
+                        </ReactTooltip>
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        variant="primary"
+                        className="btn btn-sm btn-outline-light"
+                        onClick={() => {
                           this.handleStartOne(data.original.id);
                         }}
                       >
-                        <FaPlay className="menu-clickable" />
+                        <FaPlay
+                          className="menu-clickable"
+                          data-tip
+                          data-for="play-icon"
+                        />
+                        <ReactTooltip
+                          id="play-icon"
+                          place="bottom"
+                          type="info"
+                          delayShow={1000}
+                        >
+                          <span>Start plugin</span>
+                        </ReactTooltip>
                       </button>
                     </td>
                     <td>
@@ -458,7 +592,19 @@ class TrackTab extends React.Component {
                           this.handleStopOne(data.original.id);
                         }}
                       >
-                        <FaStop className="menu-clickable" />
+                        <FaStop
+                          className="menu-clickable"
+                          data-tip
+                          data-for="stop-icon"
+                        />
+                        <ReactTooltip
+                          id="stop-icon"
+                          place="bottom"
+                          type="info"
+                          delayShow={1000}
+                        >
+                          <span>Stop plugin</span>
+                        </ReactTooltip>
                       </button>
                     </td>
                     <td>
@@ -470,17 +616,45 @@ class TrackTab extends React.Component {
                             this.handleDownloadresult(data.original);
                           }}
                         >
-                          <FaDownload className="menu-clickable" />
+                          <FaDownload
+                            className="menu-clickable"
+                            data-tip
+                            data-for="download-icon"
+                          />
+                          <ReactTooltip
+                            id="download-icon"
+                            place="left"
+                            type="info"
+                            delayShow={1000}
+                          >
+                            <span>download plugin results</span>
+                          </ReactTooltip>
                         </button>
                       </div>
                     </td>
                     <td>
-                      <div
-                        onClick={() =>
-                          this.deleteOneFromQueue(data.original.id)
-                        }
-                      >
-                        <FaTrash className="menu-clickable" />
+                      <div>
+                        <button
+                          variant="primary"
+                          className="btn btn-sm btn-outline-light"
+                          onClick={() =>
+                            this.deleteOneFromQueue(data.original.id)
+                          }
+                        >
+                          <FaTrash
+                            className="menu-clickable"
+                            data-tip
+                            data-for="delete-icon"
+                          />
+                          <ReactTooltip
+                            id="delete-icon"
+                            place="left"
+                            type="info"
+                            delayShow={1000}
+                          >
+                            <span>delete plugin instance</span>
+                          </ReactTooltip>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -492,6 +666,15 @@ class TrackTab extends React.Component {
       },
     ];
   };
+
+  pluginWindowClickHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  logClickHandler = (e) => {
+    e.stopPropagation();
+  };
+
   render() {
     return (
       <div>
@@ -556,6 +739,42 @@ class TrackTab extends React.Component {
               </Modal.Dialog>
             </div>
           </div>
+        )}
+
+        {this.state.showContainerLog && (
+          <Draggable
+            onClick={this.pluginWindowClickHandler}
+            onMouseDown={this.pluginWindowClickHandler}
+            onMouseMove={this.pluginWindowClickHandler}
+          >
+            <div
+              className="pluginlogpopup"
+              id="pluginlogpopup"
+              onClick={this.pluginWindowClickHandler}
+              onMouseDown={this.pluginWindowClickHandler}
+              onMouseMove={this.pluginWindowClickHandler}
+            >
+              <div className="pluginCloseButtonHeader">
+                <FaWindowClose
+                  className="pluginCloseButton"
+                  onClick={() => {
+                    this.handlerStopContainerLogging();
+                  }}
+                />
+              </div>
+              <div>
+                <textarea
+                  onClick={this.logClickHandler}
+                  onMouseDown={this.logClickHandler}
+                  onMouseMove={this.logClickHandler}
+                  className="pluginLogTextArea"
+                  value={this.state.containerLogData}
+                  rows={15}
+                  cols={150}
+                ></textarea>
+              </div>
+            </div>
+          </Draggable>
         )}
       </div>
     );

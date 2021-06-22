@@ -1,6 +1,7 @@
 import React from "react";
-import ReactTable from "react-table";
+import ReactTable from "react-table-v6";
 import { FaCheck, FaRegTrashAlt, FaTimes } from "react-icons/fa";
+import { connect } from "react-redux";
 import "../menuStyle.css";
 import {
   getUsers,
@@ -8,7 +9,7 @@ import {
   deleteUserProjectRole,
   updateUser,
   deleteUser,
-  createUser,
+  createUser
 } from "../../../services/userServices";
 import ToolBar from "../common/basicToolBar";
 import UserRoleEditForm from "./userRoleEdit";
@@ -18,7 +19,7 @@ import CreateUser from "./CreateUserForm";
 
 const messages = {
   deleteSingle: "Delete the user? This cannot be undone.",
-  deleteSelected: "Delete selected users? This cannot be undone.",
+  deleteSelected: "Delete selected users? This cannot be undone."
 };
 
 class Users extends React.Component {
@@ -36,7 +37,7 @@ class Users extends React.Component {
     clickedUserIndex: null,
     showPermissionEdit: false,
     errorMessage: "",
-    hasAddClicked: false,
+    hasAddClicked: false
   };
 
   componentDidMount = () => {
@@ -69,7 +70,7 @@ class Users extends React.Component {
           user.projects = [];
         }
       }
-    } 
+    }
     this.setState({ data, hasAdminPermission, usersProjects });
   };
 
@@ -109,13 +110,13 @@ class Users extends React.Component {
       })
       .catch(err => {
         this.setState({ errorMessage: err.response.data.message });
-        console.log(err);
+        console.error(err);
       });
   };
 
   updateAdmin = async (username, admin) => {
     updateUser(username, {
-      admin: !admin,
+      admin: !admin
     })
       .then(() => {
         this.getUserData();
@@ -123,7 +124,7 @@ class Users extends React.Component {
       })
       .catch(err => {
         this.setState({ errorMessage: err.response.data.message });
-        console.log(err);
+        console.error(err);
       });
   };
 
@@ -149,7 +150,7 @@ class Users extends React.Component {
         })
         .catch(err => {
           this.setState({ errorMessage: err.response.data.message });
-          console.log(err);
+          console.error(err);
         });
     } else {
       this.setState({ errorMessage: "Please change role before submit!" });
@@ -172,7 +173,7 @@ class Users extends React.Component {
       })
       .catch(err => {
         this.setState({ errorMessage: err.response.data.message });
-        console.log(err);
+        console.error(err);
       });
   };
 
@@ -190,7 +191,7 @@ class Users extends React.Component {
       })
       .catch(err => {
         this.setState({ errorMessage: err.response.data.message });
-        console.log(err);
+        console.error(err);
       });
   };
 
@@ -200,7 +201,7 @@ class Users extends React.Component {
 
   displayUserPermissionEdit = index => {
     this.setState(state => ({
-      showPermissionEdit: !state.showPermissionEdit,
+      showPermissionEdit: !state.showPermissionEdit
     }));
     const obj = {};
     this.state.data[index].permissions.forEach(el => {
@@ -223,7 +224,7 @@ class Users extends React.Component {
         CreatePAC: "connection",
         CreateAutoPACQuery: "query",
         CreateProject: "project",
-        CreateWorklist: "worklist",
+        CreateWorklist: "worklist"
       };
       arr.forEach(el => {
         if (mode === "lite" && el === "CreateProject") {
@@ -245,13 +246,13 @@ class Users extends React.Component {
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0,
+          selectAll: 0
         });
       }
     } else {
       newSelected[username] = true;
       await this.setState({
-        selectAll: 2,
+        selectAll: 2
       });
     }
     this.setState({ selected: newSelected });
@@ -267,7 +268,7 @@ class Users extends React.Component {
 
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0,
+      selectAll: this.state.selectAll === 0 ? 1 : 0
     });
   }
 
@@ -283,7 +284,7 @@ class Users extends React.Component {
       hasDeleteAllClicked: false,
       hasDeleteSingleClicked: false,
       errorMessage: "",
-      hasAddClicked: false,
+      hasAddClicked: false
     });
   };
 
@@ -333,7 +334,7 @@ class Users extends React.Component {
         })
         .catch(err => {
           this.setState({ errorMessage: err.response.data.message });
-          console.log(err);
+          console.error(err);
         });
     }
   };
@@ -370,7 +371,7 @@ class Users extends React.Component {
           );
         },
         sortable: false,
-        width: 45,
+        width: 45
       },
       {
         Header: "First",
@@ -380,7 +381,7 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 35,
-        className: "mng-user__cell",
+        className: "mng-user__cell"
       },
       {
         Header: "Last",
@@ -390,7 +391,7 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 35,
-        className: "mng-user__cell",
+        className: "mng-user__cell"
       },
       {
         Header: "User Name",
@@ -400,7 +401,7 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 35,
-        className: "mng-user__cell",
+        className: "mng-user__cell"
       },
       {
         Header: "Email",
@@ -410,7 +411,7 @@ class Users extends React.Component {
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
-        className: "mng-user__cell",
+        className: "mng-user__cell"
       },
       {
         Header: "Projects",
@@ -422,15 +423,15 @@ class Users extends React.Component {
         minWidth: 50,
         className: "mng-user__cell",
         Cell: original => {
+          const { projects } = original.row;
+          const { projectMap } = this.props;
           const className =
-            original.row.projects.length > 0
-              ? "wrapped"
-              : "wrapped click-to-add";
-
+            projects.length > 0 ? "wrapped" : "wrapped click-to-add";
           const text =
-            original.row.projects.length > 0
-              ? original.row.projects.join(", ")
-              : "Add user to a project";
+            projects.length > 0 ? projects.reduce((all, item, i) => {
+              const comma = projects.length - 1 > i ? ", " : "";
+              return `${all}${projectMap[item] ? projectMap[item].projectName : item}${comma}`;
+            }, "") : "Add user to a project";
           return (
             <div
               onClick={() => {
@@ -441,7 +442,7 @@ class Users extends React.Component {
               <p className={className}>{text}</p>
             </div>
           );
-        },
+        }
       },
       {
         Header: "Admin",
@@ -462,7 +463,7 @@ class Users extends React.Component {
               {original.row.checkbox.admin ? <FaCheck /> : <FaTimes />}
             </div>
           );
-        },
+        }
       },
 
       {
@@ -488,7 +489,7 @@ class Users extends React.Component {
               <p className={className}>{text}</p>
             </div>
           );
-        },
+        }
       },
       {
         Header: "",
@@ -505,8 +506,8 @@ class Users extends React.Component {
             >
               <FaRegTrashAlt className="menu-clickable" />
             </div>
-          ) : null,
-      },
+          ) : null
+      }
     ];
   };
 
@@ -516,7 +517,7 @@ class Users extends React.Component {
       clickedUserIndex,
       usersProjects,
       showRoleEdit,
-      showPermissionEdit,
+      showPermissionEdit
     } = this.state;
     const checkboxSelected = Object.values(this.state.selected).length > 0;
     return (
@@ -583,4 +584,10 @@ class Users extends React.Component {
   };
 }
 
-export default Users;
+const mapsStateToProps = state => {
+  return {
+    projectMap: state.annotationsListReducer.projectMap
+  };
+};
+
+export default connect(mapsStateToProps)(Users);

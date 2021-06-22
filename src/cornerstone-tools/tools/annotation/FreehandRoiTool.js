@@ -380,8 +380,8 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
             color = config.invalidColor;
             fillColor = config.invalidColor;
           } else {
-            color = toolColors.getColorIfActive(data);
-            fillColor = toolColors.getFillColor();
+            // color = toolColors.getColorIfActive(data);
+            fillColor = toolColors.getColorIfActive(data);
           }
         } else {
           fillColor = toolColors.getToolColor();
@@ -462,19 +462,20 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
           }
 
           const text = textBoxText.call(this, data);
-
-          drawLinkedTextBox(
-            context,
-            element,
-            data.handles.textBox,
-            text,
-            data.handles.points,
-            textBoxAnchorPoints,
-            color,
-            lineWidth,
-            0,
-            true
-          );
+          if (state.showCalculations) {
+            drawLinkedTextBox(
+              context,
+              element,
+              data.handles.textBox,
+              text,
+              data.handles.points,
+              textBoxAnchorPoints,
+              color,
+              lineWidth,
+              0,
+              true
+            );
+          }
         }
       });
     }
@@ -605,9 +606,8 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
       // Iterating over handles of all toolData instances to find the indices of the selected handle
       for (let toolIndex = 0; toolIndex < toolState.data.length; toolIndex++) {
         const points = toolState.data[toolIndex].handles.points;
-
         for (let p = 0; p < points.length; p++) {
-          if (points[p] === handle) {
+          if (points[p].x === handle.x && points[p].y === handle.y) {
             config.currentHandle = p;
             config.currentTool = toolIndex;
           }
@@ -1203,7 +1203,7 @@ export default class FreehandRoiTool extends BaseAnnotationTool {
     }
 
     // Check to see if mouse in bounding box of textbox
-    if (data.handles.textBox) {
+    if (state.showCalculations && data.handles.textBox) {
       if (pointInsideBoundingBox(data.handles.textBox, coords)) {
         return data.handles.textBox;
       }

@@ -5,6 +5,7 @@ import Team from "./team";
 import Admin from "./admin";
 import Modal from "../management/common/customModal";
 import Notifications from "./notifications";
+import Register from "./register";
 import { FaExclamation } from "react-icons/fa";
 const mode = sessionStorage.getItem("mode");
 
@@ -30,16 +31,16 @@ class InfoMenu extends React.Component {
     this.setState({ coordinate });
   };
 
-  handleSelection = async e => {
+  handleSelection = async (e) => {
     const selection = e.target.textContent;
-    this.setState(state => {
+    this.setState((state) => {
       return { isModalOpen: !state.isModalOpen };
     });
     await this.setState({ selection });
   };
 
-  handleCloseModal = e => {
-    this.setState(state => {
+  handleCloseModal = (e) => {
+    this.setState((state) => {
       return { isModalOpen: !state.isModalOpen };
     });
     this.props.closeMenu(true);
@@ -75,6 +76,8 @@ class InfoMenu extends React.Component {
             title="Notifications"
           />
         );
+      case "Register":
+        return <Register title="Register" onOK={this.handleCloseModal} />;
       default:
         return <div />;
     }
@@ -117,6 +120,9 @@ class InfoMenu extends React.Component {
             </div>
             <div className="info-menu__option" onClick={this.handleSelection}>
               Team
+            </div>
+            <div className="info-menu__option" onClick={this.handleSelection}>
+              Register
             </div>
             {this.state.isAdmin && (
               <>

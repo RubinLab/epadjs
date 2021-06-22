@@ -490,7 +490,7 @@ class Plugins extends React.Component {
         documentation: selectedPluginData.original.documentation,
         processmultipleaims: edit_processmultipleaims,
       };
-      console.log("handle edit pluginFormElements :", editpluginFormElements);
+
       this.setState({
         editPluginClicked: true,
         pluginFormElements: editpluginFormElements,
@@ -522,6 +522,13 @@ class Plugins extends React.Component {
     ) {
       this.setState({ errorMessage: "please fill required boxes" });
       return;
+    }
+    if (pluginform.processmultipleaims === "1") {
+      pluginform.processmultipleaims = 1;
+    } else if (pluginform.processmultipleaims === "0") {
+      pluginform.processmultipleaims = 0;
+    } else {
+      pluginform.processmultipleaims = null;
     }
     const responseEditPlugin = await editPlugin({
       pluginform,

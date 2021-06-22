@@ -1,12 +1,12 @@
-import external from './../../externalModules.js';
-import { BaseBrushTool } from '../base';
-import { getModule } from './../../store/index.js';
-import { drawBrushPixels, getCircle } from '../../util/segmentation/index.js';
-import { getLogger } from '../../util/logger.js';
+import external from "./../../externalModules.js";
+import { BaseBrushTool } from "../base";
+import { getModule } from "./../../store/index.js";
+import { drawBrushPixels, getCircle } from "../../util/segmentation/index.js";
+import { getLogger } from "../../util/logger.js";
 
-const logger = getLogger('tools:BrushTool');
+const logger = getLogger("tools:BrushTool");
 
-const segmentationModule = getModule('segmentation');
+const segmentationModule = getModule("segmentation");
 
 /**
  * @public
@@ -18,10 +18,10 @@ const segmentationModule = getModule('segmentation');
 export default class BrushTool extends BaseBrushTool {
   constructor(props = {}) {
     const defaultProps = {
-      name: 'Brush',
-      supportedInteractionTypes: ['Mouse', 'Touch'],
+      name: "Brush",
+      supportedInteractionTypes: ["Mouse", "Touch"],
       configuration: {},
-      mixins: ['renderBrushMixin'],
+      mixins: ["renderBrushMixin"],
     };
 
     super(props, defaultProps);
@@ -60,6 +60,13 @@ export default class BrushTool extends BaseBrushTool {
       columns,
       shouldErase
     );
+
+    // Dispatch this event to syn fusion Viewports for EPAD
+    const evnt = new CustomEvent("cornerstonetoolsmeasurementmodified", {
+      detail: "brush",
+    });
+
+    element.dispatchEvent(evnt);
 
     external.cornerstone.updateImage(evt.detail.element);
   }

@@ -6,7 +6,7 @@ const mode = sessionStorage.getItem("mode");
 // we need the keycloak object to be able to use update token
 let keycloak = null;
 
-function refreshToken(keycloak, minValidity) {
+export function refreshToken(keycloak, minValidity) {
   return new Promise((resolve, reject) => {
     keycloak
       .updateToken(minValidity)
@@ -38,6 +38,7 @@ export function logout() {
   if (mode === "lite") {
     sessionStorage.removeItem("header");
   }
+  sessionStorage.removeItem("lastSavedAim");
 }
 
 export function getCurrentUser() {
@@ -69,4 +70,5 @@ export default {
   logout,
   getCurrentUser,
   getAuthHeader,
+  refreshToken,
 };

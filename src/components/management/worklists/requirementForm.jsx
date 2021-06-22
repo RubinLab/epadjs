@@ -1,5 +1,5 @@
-import React from "react";
-import { getTemplatesUniversal } from "../../../services/templateServices";
+import React from 'react';
+import { getTemplatesUniversal } from '../../../services/templateServices';
 
 class RequirementForm extends React.Component {
   state = {
@@ -7,7 +7,7 @@ class RequirementForm extends React.Component {
     error: null,
     level: null,
     numOfAims: null,
-    template: null,
+    template: null
   };
 
   componentDidMount = async () => {
@@ -27,8 +27,8 @@ class RequirementForm extends React.Component {
   renderOptions = (arr, field) => {
     const firstItem = <option key="first">{`--- Select ${field} ---`}</option>;
     const options = [firstItem];
-    if (field === "Template") {
-      options.push(<option key="any">{"Any"}</option>);
+    if (field === 'Template') {
+      options.push(<option key="any">{'Any'}</option>);
     }
     arr.forEach((el, i) => {
       options.push(<option key={`${el}-${i}`}>{el}</option>);
@@ -38,28 +38,30 @@ class RequirementForm extends React.Component {
 
   render = () => {
     const { error } = this.state;
-    const levels = ["Patient", "Study", "Series", "Image"];
+    const levels = ['Patient', 'Study', 'Series', 'Image'];
     return (
       <>
         <div className="worklist-requirementForm">
           <div>
             <select
+              onMouseDown={e => e.stopPropagation()}
               className="__field"
               name="level"
               onChange={this.props.onNewReqInfo}
             >
-              {this.renderOptions(levels, "Level")}
+              {this.renderOptions(levels, 'Level')}
             </select>
           </div>
           <div>
             <select
+              onMouseDown={e => e.stopPropagation()}
               className="__field"
               name="template"
               onChange={this.props.onNewReqInfo}
             >
               {this.renderOptions(
                 Object.values(this.state.templates),
-                "Template"
+                'Template'
               )}
             </select>
           </div>

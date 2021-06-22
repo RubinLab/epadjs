@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Table from "react-table";
+import Table from "react-table-v6";
 
 const userList = props => {
   const columns = [

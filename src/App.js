@@ -21,7 +21,9 @@ import Cornerstone from "./components/cornerstone/cornerstone";
 import Management from "./components/management/mainMenu";
 import InfoMenu from "./components/infoMenu";
 import UserMenu from "./components/userProfileMenu.jsx";
-import AnnotationList from "./components/annotationsList";
+import WarningModal from "./components/common/warningModal";
+import ConfirmationModal from "./components/common/confirmationModal";
+import SelectModalMenu from "./components/common/SelectModalMenu";
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
@@ -35,9 +37,14 @@ import {
   alertViewPortFull,
   annotationsLoadingError,
   loadCompleted,
+  clearSelection,
+  selectProject,
+  getTemplates,
+  segUploadCompleted,
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
+
 import { getSubjects, getSubject } from "./services/subjectServices";
 import { getStudies, getStudy } from "./services/studyServices";
 import { getSeries, getSingleSeries } from "./services/seriesServices";
@@ -49,6 +56,29 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
+import MinimizedReport from "./components/searchView/MinimizedReport";
+
+const messages = {
+  noPatient: {
+    title: "No Patient Selected",
+    message: "Select a patient to get a report!",
+  },
+  multiplePatient: {
+    title: "Multiple Patients Selected",
+    message: "Select only one patient to get the report!",
+  },
+  projectWaterfall: {
+    title: "Project Selected",
+    message: "Waterfall report will be created for project ",
+  },
+};
+
+const reportsList = [
+  { name: "ADLA" },
+  { name: "Longitudinal" },
+  { name: "RECIST" },
+  { name: "Waterfall" },
+];
 class App extends Component {
   constructor(props) {
     super(props);
@@ -68,11 +98,20 @@ class App extends Component {
       expandLevel: 0,
       maxLevel: 0,
       refTree: {},
-      treeData: {},
+      // treeData: {},
       pid: null,
       closeAll: 0,
       projectAdded: 0,
-      redirect: false,
+      showWarning: false,
+      showConfirmation: false,
+      showReportsMenu: false,
+      title: "",
+      message: "",
+      reportType: "",
+      reportsCompArr: [],
+      minReportsArr: [],
+      hiddenReports: {},
+      metric: null,
     };
   }
 
@@ -80,10 +119,212 @@ class App extends Component {
     this.setState((state) => ({
       projectAdded: state.projectAdded + 1,
       refTree: {},
-      treeData: {},
+      // treeData: {},
       expandLevel: 0,
       treeExpand: {},
     }));
+    localStorage.setItem("treeData", JSON.stringify({}));
+  };
+
+  closeWarning = () => {
+    this.setState({
+      showConfirmation: false,
+      showWarning: false,
+      title: "",
+      message: "",
+    });
+  };
+
+  handleReportsClick = () => {
+    this.setState((state) => ({ showReportsMenu: !state.showReportsMenu }));
+  };
+
+  countCurrentReports = (arr) => {
+    let nullCount = 0;
+    arr.forEach((el) => {
+      if (el === null) nullCount++;
+    });
+    return nullCount;
+  };
+
+  closeReportModal = (index) => {
+    const arr = [...this.state.reportsCompArr];
+    arr[index] = null;
+    this.setState({
+      template: null,
+      report: null,
+      reportsCompArr: arr,
+    });
+
+    // if there isn't any report open clear selection
+    const nullCount = this.countCurrentReports(arr);
+    if (nullCount === arr.length) {
+      this.props.dispatch(clearSelection());
+      this.props.history.push(`/display`);
+    }
+  };
+
+  handleCloseMinimize = (index, reportIndex) => {
+    const hiddenReports = { ...this.state.hiddenReports };
+    const minReportsArr = [...this.state.minReportsArr];
+
+    minReportsArr[index] = null;
+    delete hiddenReports[reportIndex];
+
+    this.setState({
+      hiddenReports,
+      minReportsArr,
+    });
+
+    this.closeReportModal(reportIndex);
+  };
+
+  handleMaximizeReport = (e) => {
+    let { index, reportindex } = e.target.dataset;
+    index = parseInt(index);
+    reportindex = parseInt(reportindex);
+    const hiddenReports = { ...this.state.hiddenReports };
+    const reportsCompArr = [...this.state.reportsCompArr];
+    const minReportsArr = [...this.state.minReportsArr];
+
+    minReportsArr[index] = null;
+    reportsCompArr[reportindex] = hiddenReports[reportindex];
+    delete hiddenReports[reportindex];
+    this.setState({
+      hiddenReports,
+      minReportsArr,
+      reportsCompArr,
+    });
+  };
+
+  handleMinimizeReport = (index, title) => {
+    const hiddenReports = { ...this.state.hiddenReports };
+    hiddenReports[index] = this.state.reportsCompArr[index];
+    const reportsCompArr = [...this.state.reportsCompArr];
+    const minReportsArr = [...this.state.minReportsArr];
+    const minIndex = minReportsArr.length;
+    const component = (
+      <MinimizedReport
+        index={minIndex}
+        reportIndex={index}
+        header={title}
+        onClose={this.handleCloseMinimize}
+        onExpand={this.handleMaximizeReport}
+        key={minIndex + "min"}
+        count={Object.values(hiddenReports).length}
+      />
+    );
+    reportsCompArr[index] = null;
+    minReportsArr.push(component);
+    this.setState({ minReportsArr, reportsCompArr, hiddenReports });
+  };
+
+  handleReportSelect = (e) => {
+    const { projectMap, selectedPatients } = this.props;
+    const patients = Object.values(selectedPatients);
+    const reportType = e.target.dataset.opt;
+    this.handleReportsClick();
+    if (patients.length === 0) {
+      if (reportType === "Waterfall") {
+        this.setState({
+          showConfirmation: true,
+          title: messages.projectWaterfall.title,
+          message:
+            messages.projectWaterfall.message +
+            projectMap[this.state.pid].projectName,
+        });
+      } else {
+        this.setState({
+          showWarning: true,
+          title: messages.noPatient.title,
+          message: messages.noPatient.message,
+        });
+      }
+    } else if (patients.length > 1 && reportType !== "Waterfall") {
+      this.setState({
+        showWarning: true,
+        title: messages.multiplePatient.title,
+        message: messages.multiplePatient.message,
+      });
+    } else {
+      const reportsCompArr = [...this.state.reportsCompArr];
+      const index = reportsCompArr.length;
+      reportsCompArr.push(
+        <Report
+          onClose={this.closeReportModal}
+          report={reportType}
+          index={index}
+          patient={patients[0]}
+          key={`report${index}`}
+          waterfallClickOn={this.handleWaterFallClickOnBar}
+          handleMetric={this.getMetric}
+          onMinimize={this.handleMinimizeReport}
+        />
+      );
+      this.setState({
+        template: null,
+        reportType,
+        reportsCompArr,
+      });
+    }
+  };
+
+  getMetric = (metric) => {
+    this.setState({ metric });
+  };
+  handleWaterFallClickOnBar = async (name) => {
+    // find the patient selected
+    // if project selected get patient details with call
+    const { selectedProject, selectedPatients } = this.props;
+    let patient;
+    if (selectedProject) {
+      ({ data: patient } = await getSubject(selectedProject, name));
+    } else {
+      patient = this.props.selectedPatients[name];
+    }
+
+    const reportsCompArr = [...this.state.reportsCompArr];
+    const index = reportsCompArr.length;
+    reportsCompArr.push(
+      <Report
+        onClose={this.closeReportModal}
+        report={this.state.metric}
+        index={index}
+        patient={patient}
+        key={`report${index}`}
+        waterfallClickOn={this.handleWaterFallClickOnBar}
+        handleMetric={this.getMetric}
+        onMinimize={this.handleMinimizeReport}
+      />
+    );
+    this.setState({
+      reportsCompArr,
+    });
+  };
+
+  displayWaterfall = () => {
+    this.props.dispatch(selectProject(this.state.pid));
+    const reportsCompArr = [...this.state.reportsCompArr];
+    const index = reportsCompArr.length;
+    reportsCompArr.push(
+      <Report
+        onClose={this.closeReportModal}
+        report={"Waterfall"}
+        index={index}
+        // patient={patients[0]}
+        key={`report${index}`}
+        waterfallClickOn={this.handleWaterFallClickOnBar}
+        handleMetric={this.getMetric}
+        onMinimize={this.handleMinimizeReport}
+      />
+    );
+
+    this.setState({
+      template: null,
+      reportType: "Waterfall",
+      showConfirmation: false,
+      reportsCompArr,
+    });
   };
 
   getTreeExpandAll = (expandObj, expanded, expandLevel) => {
@@ -91,9 +332,10 @@ class App extends Component {
       const { patient, study, series } = expandObj;
       let treeExpand = { ...this.state.treeExpand };
       let refPatients, refStudies, subSeries, subStudies;
-      const patientLevel = patient && !study && !series;
-      const studyLevel = study && !series;
-      const seriesLevel = series;
+      const patientLevel = study === undefined && series === undefined;
+      const studyLevel = series === undefined && study !== undefined;
+      const seriesLevel =
+        patient !== undefined && study !== undefined && series !== undefined;
       if (patientLevel) {
         if (expanded) {
           for (let i = 0; i < patient; i += 1) treeExpand[i] = {};
@@ -236,7 +478,16 @@ class App extends Component {
   };
 
   switchView = (viewType) => {
+    const { pid } = this.state;
     this.setState({ viewType });
+    if (viewType === "search") {
+      this.props.dispatch(clearSelection());
+      pid
+        ? this.props.history.push(`/search/${pid}`)
+        : this.props.history.push(`/search`);
+    } else if (viewType === "display") {
+      this.props.history.push(`/display`);
+    }
   };
 
   handleMngMenu = () => {
@@ -268,6 +519,7 @@ class App extends Component {
   };
 
   async componentDidMount() {
+    localStorage.setItem("treeData", JSON.stringify({}));
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),
       fetch(`${process.env.PUBLIC_URL}/keycloak.json`),
@@ -299,7 +551,6 @@ class App extends Component {
         sessionStorage.setItem("auth", auth);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
         this.completeAutorization(apiUrl);
-
         if (mode === "lite") this.setState({ pid: "lite" });
       })
       .catch((err) => {
@@ -315,6 +566,26 @@ class App extends Component {
       this.setState({ notifications });
     }
   }
+
+  componentDidUpdate = (prevProps) => {
+    const uploaded = this.props.notificationAction.startsWith("Upload");
+    const deleted = this.props.notificationAction.startsWith("Delete");
+    if (
+      prevProps.lastEventId !== this.props.lastEventId &&
+      (uploaded || deleted)
+    ) {
+      this.props.dispatch(getTemplates());
+      localStorage.setItem("treeData", JSON.stringify({}));
+      this.clearTreeExpand();
+    }
+    const oldPid = prevProps.location.pathname.split("/").pop();
+    const newPid = this.props.location.pathname.split("/").pop();
+    const route = this.props.location.pathname.split("/")[1];
+
+    if (oldPid !== newPid && route === "search") {
+      this.setState({ pid: newPid });
+    }
+  };
 
   completeAutorization = (apiUrl) => {
     let getAuthUser = null;
@@ -356,7 +627,8 @@ class App extends Component {
         try {
           let user = {
             user: result.userInfo.preferred_username || result.userInfo.email,
-            displayname: result.userInfo.given_name,
+            displayname:
+              result.userInfo.given_name || result.userInfo.givenName,
           };
           await auth.login(user, null, result.keycloak);
 
@@ -516,6 +788,8 @@ class App extends Component {
         parsedRes.notification;
       const action = parsedRes.notification.function;
       const message = params;
+      // check if the notification is for successfull upload segmentation
+      this.checkIfSegUpload(params);
       if (refresh)
         this.props.dispatch(
           getNotificationsData(projectID, lastEventId, refresh, action)
@@ -535,7 +809,8 @@ class App extends Component {
       const uploaded = action.startsWith("Upload");
       if (tagEdited || uploaded) {
         const { pid } = this.state;
-        this.setState({ treeData: {} });
+        // this.setState({ treeData: {} });
+        localStorage.setItem("treeData", JSON.stringify({}));
         this.setState({ pid });
         if (this.props.openSeries.length === 0) {
           this.props.history.push(`/search/${pid}`);
@@ -554,6 +829,7 @@ class App extends Component {
       "message",
       this.getMessageFromEventSrc
     );
+    localStorage.setItem("treeData", JSON.stringify({}));
   };
 
   onLogout = (e) => {
@@ -601,7 +877,8 @@ class App extends Component {
 
   getTreeData = (projectID, level, data) => {
     try {
-      const treeData = { ...this.state.treeData };
+      let treeData = JSON.parse(localStorage.getItem("treeData"));
+      // const treeData = { ...this.state.treeData };
       const patientIDs = [];
       if (level === "subject") {
         if (!treeData[projectID]) treeData[projectID] = {};
@@ -611,10 +888,8 @@ class App extends Component {
           }
           patientIDs.push(el.subjectID);
         });
-        if (this.state.treeData[projectID]) {
-          if (
-            data.length < Object.keys(this.state.treeData[projectID]).length
-          ) {
+        if (treeData[projectID]) {
+          if (data.length < Object.keys(treeData[projectID]).length) {
             for (let patient in treeData[projectID]) {
               if (!patientIDs.includes(patient)) {
                 delete treeData[projectID][patient];
@@ -672,7 +947,8 @@ class App extends Component {
           }
         }
       }
-      this.setState({ treeData });
+      // this.setState({ treeData });
+      localStorage.setItem("treeData", JSON.stringify(treeData));
     } catch (err) {
       console.error(err);
     }
@@ -713,12 +989,17 @@ class App extends Component {
     return index;
   };
 
+  clearAllTreeData = () => {
+    // this.setState({ treeData: {} });
+    localStorage.setItem("treeData", JSON.stringify({}));
+  };
+
   clearTreeData = () => {
     try {
       const { pid, treeExpand } = this.state;
-      const patients = { ...this.state.treeData[pid] };
+      let treeData = JSON.parse(localStorage.getItem("treeData"))[pid];
+      const patients = treeData[pid];
       const patientsArr = Object.values(patients);
-
       for (let patientIndex in treeExpand) {
         // if the index is kept as false it means that
         // level opened and then closed so we need to clear data
@@ -741,8 +1022,9 @@ class App extends Component {
           }
         }
       }
-      const treeData = { [pid]: patients };
-      this.setState({ treeData });
+      treeData[pid] = patients;
+      // this.setState({ treeData });
+      localStorage.setItem("treeData", JSON.stringify(treeData));
     } catch (err) {
       console.error(err);
     }
@@ -753,76 +1035,21 @@ class App extends Component {
     return result[0];
   };
 
+  checkIfSegUpload = (params) => {
+    const { isSegUploaded } = this.props;
+    const segsUploaded = Object.keys(isSegUploaded);
+    for (let i = 0; i < segsUploaded.length; i++) {
+      if (params.includes(segsUploaded[i])) {
+        return this.props.dispatch(segUploadCompleted(segsUploaded[i]));
+      }
+    }
+  };
+
   updateTreeDataOnSave = async (refs, newLevel) => {
     try {
-      this.setState({ treeData: {} });
-      // const treeData = { ...this.state.treeData };
-      // const { projectID, patientID, studyUID, seriesUID } = refs;
-      // const isPatient = projectID && patientID;
-      // const isStudy = projectID && patientID && studyUID;
-      // const isSeries = projectID && patientID && studyUID && seriesUID;
-      // const patient = treeData[projectID][patientID];
-      // const shouldUpdateStudy =
-      //   patient && Object.values(patient.studies).length > 0;
-      // const shouldUpdateSeries =
-      //   shouldUpdateStudy &&
-      //   Object.values(patient.studies[studyUID].series).length > 0;
-      // if (newLevel) {
-      //   if (newLevel === "study" && isStudy && shouldUpdateStudy) {
-      //     const { data: studies } = await getStudies(
-      //       projectID,
-      //       patientID,
-      //       studyUID
-      //     );
-      //     let study = this.findNonExisting(studies, studyUID, "studyUID");
-      //     study = { data: study, series: {} };
-      //     treeData[projectID][patientID].studies[studyUID] = study;
-      //   }
-      //   if (newLevel === "series" && isSeries && shouldUpdateSeries) {
-      //     const { data: seriesArr } = await getSeries(
-      //       projectID,
-      //       patientID,
-      //       studyUID
-      //     );
-      //     let series = this.findNonExisting(seriesArr, seriesUID, "seriesUID");
-      //     series = { data: series };
-      //     treeData[projectID][patientID].studies[studyUID].series[
-      //       seriesUID
-      //     ] = series;
-      //   }
-      // } else {
-      //   if (isPatient && treeData[projectID][patientID]) {
-      //     const promises = [];
-      //     promises.push(getSubject(projectID, patientID));
-      //     if (isStudy && treeData[projectID][patientID].studies[studyUID])
-      //       promises.push(getStudy(projectID, patientID, studyUID));
-      //     if (
-      //       isSeries &&
-      //       treeData[projectID][patientID].studies[studyUID].series[seriesUID]
-      //     )
-      //       promises.push(
-      //         getSingleSeries(projectID, patientID, studyUID, seriesUID)
-      //       );
-
-      //     const result = await Promise.all(promises);
-      //     treeData[projectID][patientID].data = result[0].data;
-
-      //     if (isStudy && treeData[projectID][patientID].studies[studyUID]) {
-      //       treeData[projectID][patientID].studies[studyUID].data =
-      //         result[1].data;
-      //     }
-
-      //     if (
-      //       isSeries &&
-      //       treeData[projectID][patientID].studies[studyUID].series[seriesUID]
-      //     ) {
-      //       treeData[projectID][patientID].studies[studyUID].series[
-      //         seriesUID
-      //       ].data = result[2].data[0];
-      //     }
-      //   }
-      // }
-      // this.setState({ treeData });
+      // this.setState({ treeData: {} });
+      localStorage.setItem("treeData", JSON.stringify({}));
+      this.clearTreeExpand();
     } catch (err) {
       console.error(err);
     }
@@ -853,8 +1080,17 @@ class App extends Component {
   };
 
   render() {
-    const { notifications, mode, progressUpdated, treeExpand, expandLevel } =
-      this.state;
+    const {
+      notifications,
+      mode,
+      progressUpdated,
+      treeExpand,
+      showReportsMenu,
+      showWarning,
+      showConfirmation,
+      title,
+      message,
+    } = this.state;
     let noOfUnseen;
     if (notifications) {
       noOfUnseen = notifications.reduce((all, item) => {
@@ -871,13 +1107,21 @@ class App extends Component {
           openGearMenu={this.handleMngMenu}
           openInfoMenu={this.handleInfoMenu}
           openUser={this.handleUserProfileMenu}
+          onReports={this.handleReportsClick}
           logout={this.onLogout}
           onSearchViewClick={this.switchSearhView}
           onSwitchView={this.switchView}
           viewType={this.state.viewType}
           notificationWarning={noOfUnseen}
           pid={this.state.pid}
+          path={this.props.location.pathname}
         />
+        {showReportsMenu && (
+          <SelectModalMenu
+            list={reportsList}
+            onClick={this.handleReportSelect}
+          />
+        )}
         {this.state.openMng && (
           <Management
             closeMenu={this.closeMenu}
@@ -885,6 +1129,8 @@ class App extends Component {
             admin={this.state.admin}
             getProjectAdded={this.getProjectAdded}
             pid={this.state.pid}
+            clearAllTreeData={this.clearAllTreeData}
+            clearTreeExpand={this.clearTreeExpand}
           />
         )}
         {this.state.openInfo && (
@@ -902,6 +1148,24 @@ class App extends Component {
             admin={this.state.admin}
           />
         )}
+        {showWarning && (
+          <WarningModal
+            onOK={this.closeWarning}
+            title={title}
+            message={message}
+          />
+        )}
+        {showConfirmation && (
+          <ConfirmationModal
+            title={title}
+            button={"Get Report"}
+            message={message}
+            onSubmit={this.displayWaterfall}
+            onCancel={this.closeWarning}
+          />
+        )}
+        {this.state.reportsCompArr}
+        {this.state.minReportsArr}
         {!this.state.authenticated && mode !== "lite" && (
           <Route path="/login" component={LoginForm} />
         )}
@@ -925,6 +1189,8 @@ class App extends Component {
                       updateProgress={this.updateProgress}
                       pid={this.state.pid}
                       updateTreeDataOnSave={this.updateTreeDataOnSave}
+                      keycloak={this.state.keycloak}
+                      onSwitchView={this.switchView}
                     />
                   )}
                 />
@@ -933,6 +1199,7 @@ class App extends Component {
                   render={(props) => (
                     <SearchView
                       {...props}
+                      clearTreeExpand={this.clearTreeExpand}
                       updateProgress={this.updateProgress}
                       progressUpdated={progressUpdated}
                       expandLevel={this.state.expandLevel}
@@ -960,6 +1227,7 @@ class App extends Component {
                   render={(props) => (
                     <SearchView
                       {...props}
+                      clearTreeExpand={this.clearTreeExpand}
                       updateProgress={this.updateProgress}
                       progressUpdated={progressUpdated}
                       expandLevel={this.state.expandLevel}
@@ -1005,6 +1273,7 @@ class App extends Component {
                   render={(props) => (
                     <SearchView
                       {...props}
+                      clearTreeExpand={this.clearTreeExpand}
                       updateProgress={this.updateProgress}
                       progressUpdated={progressUpdated}
                       expandLevel={this.state.expandLevel}
@@ -1045,7 +1314,19 @@ class App extends Component {
           >
             <Switch>
               <Route path="/logout" component={Logout} />
-              <ProtectedRoute path="/display" component={DisplayView} />
+              <ProtectedRoute
+                path="/display"
+                render={(props) => (
+                  <DisplayView
+                    {...props}
+                    updateProgress={this.updateProgress}
+                    pid={this.state.pid}
+                    updateTreeDataOnSave={this.updateTreeDataOnSave}
+                    keycloak={this.state.keycloak}
+                    onSwitchView={this.switchView}
+                  />
+                )}
+              />
               <Route path="/not-found" component={NotFound} />
               <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
@@ -1054,6 +1335,7 @@ class App extends Component {
                 render={(props) => (
                   <SearchView
                     {...props}
+                    clearTreeExpand={this.clearTreeExpand}
                     updateProgress={this.updateProgress}
                     progressUpdated={progressUpdated}
                     expandLevel={this.state.expandLevel}
@@ -1067,7 +1349,7 @@ class App extends Component {
                     // updateExpandedLevelNums={this.updateExpandedLevelNums}
                     onShrink={this.handleShrink}
                     handleCloseAll={this.handleCloseAll}
-                    treeData={this.state.treeData}
+                    // treeData={this.state.treeData}
                     getTreeData={this.getTreeData}
                     closeAllCounter={this.state.closeAll}
                     admin={this.state.admin}
@@ -1097,6 +1379,12 @@ const mapStateToProps = (state) => {
     activePort,
     imageID,
     openSeries,
+    selectedProject,
+    selectedPatients,
+    projectMap,
+    lastEventId,
+    notificationAction,
+    isSegUploaded,
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -1105,6 +1393,12 @@ const mapStateToProps = (state) => {
     activePort,
     imageID,
     openSeries,
+    selectedProject,
+    selectedPatients,
+    projectMap,
+    lastEventId,
+    notificationAction,
+    isSegUploaded,
     selection: state.managementReducer.selection,
   };
 };

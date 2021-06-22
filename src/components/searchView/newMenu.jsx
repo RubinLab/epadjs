@@ -53,13 +53,13 @@ class NewMenu extends React.Component {
           >
             New series
           </div>
-          <div
+          {/* <div
             className="new-popup__option"
             data-opt="annotation"
             onClick={this.props.onSelect}
           >
             New annotation
-          </div>
+          </div> */}
         </div>
       </div>
     );

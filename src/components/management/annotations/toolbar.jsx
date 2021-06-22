@@ -1,17 +1,16 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 import {
   FaDownload,
   FaUpload,
-  FaShareSquare,
-  FaLocationArrow,
   FaRegTrashAlt,
   FaFilter,
-  FaUndo,
-} from "react-icons/fa";
-import ReactTooltip from "react-tooltip";
-import "../menuStyle.css";
-const mode = sessionStorage.getItem("mode");
+  FaUndo
+} from 'react-icons/fa';
+import { HiOutlineFolderDownload } from 'react-icons/hi';
+import ReactTooltip from 'react-tooltip';
+import '../menuStyle.css';
+const mode = sessionStorage.getItem('mode');
 
 const toolBar = props => {
   const {
@@ -23,7 +22,10 @@ const toolBar = props => {
     onClear,
     onFilter,
     onUploadWizard,
-    onKeyDown, pid
+    onProjectDownload,
+    onKeyDown,
+    pid,
+    isAllAims
   } = props;
   const { selected, projects } = props;
 
@@ -41,7 +43,7 @@ const toolBar = props => {
         All Annotations
       </option>
     );
-   options.splice(0, 0, firstOption);
+    options.splice(0, 0, firstOption);
   }
   let name = React.createRef();
   let subject = React.createRef();
@@ -50,11 +52,11 @@ const toolBar = props => {
   let createdEnd = React.createRef();
 
   function clearFilters() {
-    name.current.value = "";
-    subject.current.value = "";
-    template.current.value = "";
-    createdStart.current.value = "";
-    createdEnd.current.value = "";
+    name.current.value = '';
+    subject.current.value = '';
+    template.current.value = '';
+    createdStart.current.value = '';
+    createdEnd.current.value = '';
   }
 
   return (
@@ -91,9 +93,27 @@ const toolBar = props => {
           </ReactTooltip>
         </>
         <>
+          <div onClick={onProjectDownload}>
+            <HiOutlineFolderDownload
+              className={pid === 'all_aims' ? 'hide-delete' : 'tool-icon'}
+              data-tip
+              data-for="downloadProject-icon"
+              style={{ fontSize: '1.7rem' }}
+            />
+          </div>
+          <ReactTooltip
+            id="downloadProject-icon"
+            place="right"
+            type="info"
+            delayShow={1000}
+          >
+            <span className="filter-label">Download all annotations of the project</span>
+          </ReactTooltip>
+        </>
+        <>
           <div onClick={onDelete}>
             <FaRegTrashAlt
-              className="tool-icon"
+              className={isAllAims ? 'hide-delete' : 'tool-icon'}
               onClick={onDelete}
               data-tip
               data-for="trash-icon"
@@ -109,11 +129,11 @@ const toolBar = props => {
           </ReactTooltip>
         </>
 
-        {mode !== "lite" && (
+        {mode !== 'lite' && (
           <select
             className="annotations-projectSelect"
             name="project"
-            value={pid ? pid : ""}
+            value={pid ? pid : ''}
             onMouseDown={e => e.stopPropagation()}
             onChange={onSelect}
           >
@@ -172,7 +192,7 @@ const toolBar = props => {
               ref={createdStart}
               onKeyDown={onKeyDown}
             />
-            <span className="filter-space">{" - "}</span>
+            <span className="filter-space">{' - '}</span>
             <input
               onMouseDown={e => e.stopPropagation()}
               onChange={onType}
@@ -231,5 +251,16 @@ toolBar.propTypes = {
   onAdd: PropTypes.func,
   onDelete: PropTypes.func,
   selected: PropTypes.bool,
+  projects: PropTypes.array,
+  onSelect: PropTypes.func,
+  onClear: PropTypes.func,
+  onType: PropTypes.func,
+  onFilter: PropTypes.func,
+  onUpload: PropTypes.func,
+  onDownload: PropTypes.func,
+  onProjectDownload: PropTypes.func,
+  onKeyDown: PropTypes.func,
+  pid: PropTypes.string,
+  isAllAims: PropTypes.bool
 };
 export default toolBar;

@@ -78,6 +78,14 @@
   font-size: 1rem;
 }
 
+.new-rt-header__cell, .new-rt-body__cell {
+  text-align: center;
+}
+
+#searchView-desc {
+  text-align: left;
+}
+
 .searchView-table__cell {
   text-align: center;
 }
@@ -206,6 +214,7 @@
 }
 
 .new-popup,
+.selectModalMenu,
 .worklist-popup,
 .projects-popup {
   z-index: 15;
@@ -227,7 +236,8 @@
 
 .new-popup__option,
 .worklist__option,
-.project__option {
+.project__option,
+.selectModalMenu__option {
   width: 100%;
   padding: 0.3rem;
   cursor: pointer;
@@ -238,7 +248,8 @@
 
 .new-popup__option:hover,
 .worklist__option:hover,
-.project__option:hover {
+.project__option:hover,
+.selectModalMenu__option:hover {
   color: whitesmoke;
   background: #70142e;
 }
@@ -262,6 +273,13 @@
 .updateReq__mbody.modal-body {
   /* width: 256px; */
   max-width: fit-content;
+  min-width: 100%;
+}
+
+#worklist #modal-fix {
+  overflow: auto;
+  min-width: 30rem;
+  max-width: inherit;
 }
 
 h5.add-subject__modal--label,
@@ -449,6 +467,18 @@ h5.add-subject__modal--label,
   margin-left: 2rem;
 }
 
+.searchView-row__desc {
+  cursor: 'pointer';
+  font-size: 12px;
+  padding: '0';
+  text-align: 'center';
+  user-select: 'none';
+  color: '#fafafa';
+  padding: '7px 5px';
+  vertical-align: 'middle';
+  white-space: 'pre-wrap';
+}
+
 .searchView-row__desc:hover {
   color: #fafafa;
   cursor: pointer;
@@ -495,4 +525,91 @@ h5.add-subject__modal--label,
 
 #modal-fix.modal-minwidth {
   width: 25rem;
+}
+
+#report {
+  overflow: auto;
+  z-index: 25;
+  left: 15%;
+  top: 15%;
+  background-color: rgb(102, 102, 102);
+  border: 2.5px solid #861737;
+  border-radius: 10px;
+}
+
+#closeBtn {
+  font-size: medium;
+  margin-left: 0.3rem;
+}
+
+.waterfall-header {
+  display: flex;
+  justify-content: space-between;
+  min-height: 1.5rem;
+  height: 2.5rem;
+}
+
+.react-draggable {
+  z-index: 100;
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  background: rgb(77, 77, 77);
+  padding: 0.5rem;
+}
+
+.minreport-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: #861737;
+  border-radius: 10px;
+  border: 0.5px solid white;
+}
+
+.report-header__title {
+  font-size: 1.4rem;
+  color: rgb(204, 204, 255);
+}
+
+.minreport-header__title {
+  font-size: 1.2rem;
+  color: white;
+  border-radius: 7px;
+}
+
+.minreport-header__title {
+  margin-right: 1rem;
+}
+.minreport-header {
+  border-radius: 7px;
+}
+
+.report-header__btn,
+.minreport-header__btn {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 0px 4px;
+  margin-left: 6px;
+  border-radius: 5px;
+}
+
+.report-header__btn.--exp,
+.report-header__btn.--exp {
+  font-weight: 400;
+}
+
+.report-header__btn.--close,
+.report-header__btn.--close {
+  padding: 0px 6px;
+}
+
+.worklist-page .rt-table .rt-tbody .rt-tr-group .rt-tr {
+  align-items: center;
+}
+
+.worklist-page {
+  margin-right: 10px;
 }

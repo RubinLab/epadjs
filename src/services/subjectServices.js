@@ -47,10 +47,16 @@ export function getAllSubjects() {
   return http.get(apiUrl + "/subjects");
 }
 
-export function addSubjectToProject(projectID, subjectID) {
-  return http.put(`${apiUrl}/projects/${projectID}/subjects/${subjectID}`);
+export function addSubjectToProject(projectID, subjectID, sourceProject) {
+  return http.put(`${apiUrl}/projects/${projectID}/subjects/${subjectID}?from=${sourceProject}`);
 }
 
 export function getSubject(projectID, subjectID) {
   return http.get(`${apiUrl}/projects/${projectID}/subjects/${subjectID}`);
+}
+
+export function getAimsOfSubject(projectID, subjectID) {
+  return http.get(
+    `${apiUrl}/projects/${projectID}/subjects/${subjectID}/aims?longitudinal_ref=true`
+  );
 }

@@ -9,12 +9,13 @@ import {
   getNewContext,
   draw,
   setShadow,
-  drawLine
+  drawLine,
 } from "./../../../drawing/index.js";
 import drawLinkedTextBox from "./../../../drawing/drawLinkedTextBox.js";
 import getPixelSpacing from "../../../util/getPixelSpacing";
+import { state } from "../../../store/index.js";
 
-export default function(evt) {
+export default function (evt) {
   const eventData = evt.detail;
   const { element, canvasContext, image } = eventData;
   const { handleRadius, drawHandlesOnHover } = this.configuration;
@@ -60,7 +61,7 @@ export default function(evt) {
       }
     }
 
-    draw(context, context => {
+    draw(context, (context) => {
       // Configurable shadow
       setShadow(context, this.configuration);
 
@@ -69,7 +70,7 @@ export default function(evt) {
         end,
         perpendicularStart,
         perpendicularEnd,
-        textBox
+        textBox,
       } = data.handles;
 
       // Draw the measurement line
@@ -81,14 +82,14 @@ export default function(evt) {
       updatePerpendicularLineHandles(eventData, data);
       drawLine(context, element, perpendicularStart, perpendicularEnd, {
         color,
-        strokeWidth
+        strokeWidth,
       });
 
       // Draw the handles
       const handleOptions = {
         color,
         handleRadius,
-        drawHandlesIfActive: drawHandlesOnHover
+        drawHandlesIfActive: drawHandlesOnHover,
       };
 
       // Draw the handles
@@ -98,26 +99,27 @@ export default function(evt) {
       // Move the textbox slightly to the right and upwards
       // So that it sits beside the length tool handle
       const xOffset = 10;
-      const textBoxAnchorPoints = handles => [
+      const textBoxAnchorPoints = (handles) => [
         handles.start,
         handles.end,
         handles.perpendicularStart,
-        handles.perpendicularEnd
+        handles.perpendicularEnd,
       ];
       const textLines = getTextBoxText(data, rowPixelSpacing, colPixelSpacing);
 
-      drawLinkedTextBox(
-        context,
-        element,
-        textBox,
-        textLines,
-        data.handles,
-        textBoxAnchorPoints,
-        color,
-        lineWidth,
-        xOffset,
-        true
-      );
+      if (state.showCalculations)
+        drawLinkedTextBox(
+          context,
+          element,
+          textBox,
+          textLines,
+          data.handles,
+          textBoxAnchorPoints,
+          color,
+          lineWidth,
+          xOffset,
+          true
+        );
     });
   }
 }

@@ -1,5 +1,5 @@
 import React, { Fragment } from "react";
-import ReactTable from "react-table";
+import ReactTable from "react-table-v6";
 import {
   FaRegTrashAlt,
   FaCogs,
@@ -7,7 +7,6 @@ import {
   FaCheck,
   FaPlusCircle,
 } from "react-icons/fa";
-import "../../../menuStyle.css";
 import "./../../css/plugin.css";
 
 class ManageTab extends React.Component {
@@ -17,7 +16,6 @@ class ManageTab extends React.Component {
       {
         id: "checkbox",
         accessor: "",
-        width: 20,
         Cell: ({ original }) => {
           const { id } = original;
           return (
@@ -45,17 +43,18 @@ class ManageTab extends React.Component {
           );
         },
         // sortable: false,
-        resizable: false,
-        minResizeWidth: 20,
-        // maxWidth: 45
+        resizable: true,
+        minResizeWidth: 45,
+        minWidth: 45,
       },
       {
+        id: "name",
         Header: "Name",
         accessor: "name",
         sortable: true,
         resizable: true,
-        minResizeWidth: 200,
-        width: 200,
+        minResizeWidth: 50,
+        minWidth: 150,
         Cell: (data) => {
           const pluginname = data.row.name;
           const pluginid = data.original.id;
@@ -70,24 +69,38 @@ class ManageTab extends React.Component {
         },
       },
       {
+        id: "aimreq",
         Header: "Aim Required",
+        accessor: "",
         sortable: true,
         resizable: true,
-        minResizeWidth: 200,
-        width: 200,
+        minResizeWidth: 100,
+        minWidth: 100,
         Cell: (data) => {
-          if (data.original.processmultipleaims === null) return "not required";
-          else if (data.original.processmultipleaims === 0) return "one";
-          else return "multiple";
+          if (
+            typeof data.original.processmultipleaims === "number" &&
+            data.original.processmultipleaims === 0
+          ) {
+            return "one";
+          } else if (
+            typeof data.original.processmultipleaims === "number" &&
+            data.original.processmultipleaims === 1
+          ) {
+            return "multiple";
+          } else {
+            return "not required";
+          }
         },
         style: { whiteSpace: "unset" },
       },
       {
+        id: "image",
         Header: "Image",
+        accessor: "",
         sortable: true,
         resizable: true,
-        minResizeWidth: 200,
-        width: 200,
+        minResizeWidth: 50,
+        minWidth: 200,
         Cell: (data) => {
           if (data.original.image_repo !== "")
             return data.original.image_repo + ":" + data.original.image_tag;
@@ -96,11 +109,13 @@ class ManageTab extends React.Component {
         style: { whiteSpace: "unset" },
       },
       {
+        id: "parameters",
         Header: "Parameters",
+        accessor: "",
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
-        width: 100,
+        minWidth: 100,
         Cell: (original) => {
           return (
             <div onClick={() => this.props.handleParametersClicked(original)}>
@@ -108,35 +123,49 @@ class ManageTab extends React.Component {
             </div>
           );
         },
-        style: { whiteSpace: "unset" },
+        style: {
+          whiteSpace: "unset",
+          color: "#5bc0de",
+          cursor: "pointer",
+          fontStyle: "italic",
+        },
       },
       {
+        id: "projects",
         Header: "Projects",
         accessor: "projects",
         sortable: true,
         resizable: true,
-        minResizeWidth: 200,
-        width: 200,
+        minResizeWidth: 100,
+        minWidth: 100,
         Cell: (original) => {
           return this.props.projectDataToCell(original);
         },
-        style: { whiteSpace: "unset" },
+        style: {
+          whiteSpace: "unset",
+          color: "#5bc0de",
+          cursor: "pointer",
+          fontStyle: "italic",
+        },
       },
       {
+        id: "description",
         Header: "Description",
         accessor: "description",
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
-        width: 200,
+        minWidth: 100,
         style: { whiteSpace: "unset" },
       },
       {
+        id: "enabled",
         Header: "Enabled",
+        accessor: "",
         sortable: true,
         resizable: true,
         minResizeWidth: 100,
-        width: 100,
+        minWidth: 100,
         Cell: (data) => {
           if (data.original.enabled) {
             return (
@@ -163,7 +192,10 @@ class ManageTab extends React.Component {
         style: { whiteSpace: "unset" },
       },
       {
+        id: "delete",
         Header: "",
+        accessor: "",
+        minWidth: 45,
         Cell: (original) => {
           const rowdata = original.row.checkbox;
           return (

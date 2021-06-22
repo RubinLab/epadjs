@@ -19,6 +19,7 @@ import {
   SELECT_SERIE,
   SELECT_STUDY,
   SELECT_PATIENT,
+  SELECT_PROJECT,
   SELECT_ANNOTATION,
   LOAD_COMPLETED,
   START_LOADING,
@@ -37,6 +38,10 @@ import {
   GET_PROJECT_MAP,
   SET_SEG_LABEL_MAP_INDEX,
   GET_TEMPLATES,
+  SEG_UPLOAD_STARTED,
+  SEG_UPLOAD_COMPLETED,
+  SEG_UPLOAD_REMOVE,
+  AIM_DELETE,
 } from "./types";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
@@ -48,7 +53,7 @@ const initialState = {
   patients: {},
   showGridFullAlert: false,
   showProjectModal: false,
-  selectedProjects: {},
+  selectedProject: null,
   selectedPatients: {},
   selectedStudies: {},
   selectedSeries: {},
@@ -61,6 +66,8 @@ const initialState = {
   templates: {},
   aimSegLabelMaps: {},
   notificationAction: "",
+  reports: [],
+  isSegUploaded: {},
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -76,14 +83,26 @@ const asyncReducer = (state = initialState, action) => {
           }
           return newSerie;
         });
+
         updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
         return { ...state, openSeries: updatedOpenSeries };
       case GET_NOTIFICATIONS:
-        const { uploadedPid, lastEventId, refresh, notificationAction } = action.payload;
-        return { ...state, uploadedPid, lastEventId, refresh, notificationAction };
+        const {
+          uploadedPid,
+          lastEventId,
+          refresh,
+          notificationAction,
+        } = action.payload;
+        return {
+          ...state,
+          uploadedPid,
+          lastEventId,
+          refresh,
+          notificationAction,
+        };
       case UPDATE_PATIENT_AIM_DELETE:
         let patientAimDelete = { ...state.patients };
-         ({ aimRefs } = action);
+        ({ aimRefs } = action);
         delete patientAimDelete[aimRefs.subjectID].studies[aimRefs.studyUID]
           .series[aimRefs.seriesUID].annotations[aimRefs.aimID];
         return { ...state, patient: patientAimDelete };
@@ -106,6 +125,7 @@ const asyncReducer = (state = initialState, action) => {
         for (let serie of aimIDClearedOPenSeries) {
           serie.aimID = null;
         }
+
         return { ...state, openSeries: aimIDClearedOPenSeries };
       case CLEAR_ACTIVE_AIMID:
         aimIDClearedOPenSeries = state.openSeries.map((serie) => {
@@ -116,6 +136,7 @@ const asyncReducer = (state = initialState, action) => {
           return newSerie;
         });
         aimIDClearedOPenSeries[state.activePort].aimID = null;
+
         return { ...state, openSeries: aimIDClearedOPenSeries };
       case UPDATE_IMAGEID:
         const openSeriesToUpdate = state.openSeries.map((serie) => {
@@ -126,6 +147,7 @@ const asyncReducer = (state = initialState, action) => {
           return newSerie;
         });
         openSeriesToUpdate[state.activePort].imageID = action.imageID;
+
         return { ...state, openSeries: openSeriesToUpdate };
       case CLOSE_SERIE:
         let delSeriesUID = state.openSeries[state.activePort].seriesUID;
@@ -156,6 +178,7 @@ const asyncReducer = (state = initialState, action) => {
         } else {
           delActivePort = delGrid.length - 1;
         }
+
         return {
           ...state,
           openSeries: delGrid,
@@ -198,6 +221,7 @@ const asyncReducer = (state = initialState, action) => {
             serie.aimID = null;
           }
         }
+
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
@@ -243,6 +267,7 @@ const asyncReducer = (state = initialState, action) => {
             changedPortSeries[i].aimID = null;
           }
         }
+
         return Object.assign({}, state, {
           activePort: action.portIndex,
           openSeries: changedPortSeries,
@@ -307,6 +332,7 @@ const asyncReducer = (state = initialState, action) => {
             }
           }
         }
+
         return {
           ...state,
           patients: clearedPatients,
@@ -320,23 +346,28 @@ const asyncReducer = (state = initialState, action) => {
           selectionState.selectedSeries = {};
           selectionState.selectedStudies = {};
           selectionState.selectedPatients = {};
+          selectionState.selectedProject = null;
         } else if (action.selectionType === "serie") {
           selectionState.selectedAnnotations = {};
           selectionState.selectedStudies = {};
           selectionState.selectedPatients = {};
+          selectionState.selectedProject = null;
         } else if (action.selectionType === "study") {
           selectionState.selectedAnnotations = {};
           selectionState.selectedSeries = {};
           selectionState.selectedPatients = {};
+          selectionState.selectedProject = null;
         } else if (action.selectionType === "patient") {
           selectionState.selectedAnnotations = {};
           selectionState.selectedSeries = {};
           selectionState.selectedStudies = {};
+          selectionState.selectedProject = null;
         } else {
           selectionState.selectedAnnotations = {};
           selectionState.selectedSeries = {};
           selectionState.selectedStudies = {};
           selectionState.selectedPatients = {};
+          selectionState.selectedProject = null;
         }
         return selectionState;
       case SELECT_PATIENT:
@@ -355,6 +386,8 @@ const asyncReducer = (state = initialState, action) => {
           ? delete newStudies[action.study.studyUID]
           : (newStudies[action.study.studyUID] = action.study);
         return { ...state, selectedStudies: newStudies };
+      case SELECT_PROJECT:
+        return { ...state, selectedProject: action.projectID };
       case LOAD_COMPLETED:
         return { ...state, loading: false };
       case SELECT_SERIE:
@@ -442,6 +475,7 @@ const asyncReducer = (state = initialState, action) => {
         });
         //update Openseries data
         aimOpenSeries[action.payload.index].aimID = action.payload.aimID;
+
         return {
           ...state,
           aimsList: {
@@ -461,6 +495,7 @@ const asyncReducer = (state = initialState, action) => {
         seriesInfo.defaultTemplate =
           state.projectMap[seriesInfo.projectID]?.defaultTemplate;
         let newOpenSeries = state.openSeries.concat(seriesInfo);
+
         return {
           ...state,
           openSeries: newOpenSeries,
@@ -500,6 +535,7 @@ const asyncReducer = (state = initialState, action) => {
           return newSerie;
         });
         updatedGrid[index].aimID = aimID;
+
         // return { ...state, openSeries: updatedGrid, aimsList: {...state.aimsList} };
         return Object.assign({}, state, {
           openSeries: updatedGrid,
@@ -528,11 +564,54 @@ const asyncReducer = (state = initialState, action) => {
       }
       case GET_TEMPLATES:
         return { ...state, templates: action.templates };
+      case SEG_UPLOAD_STARTED: {
+        let segUid = action.payload;
+        return Object.assign({}, state, {
+          isSegUploaded: { ...state.isSegUploaded, [segUid]: false },
+        });
+      }
+      case SEG_UPLOAD_COMPLETED: {
+        let segUid = action.payload;
+        return Object.assign({}, state, {
+          isSegUploaded: { ...state.isSegUploaded, [segUid]: true },
+        });
+      }
+      case SEG_UPLOAD_REMOVE: {
+        let segUid = action.payload;
+        const { [segUid]: value, ...theRest } = state.isSegUploaded;
+        return Object.assign({}, state, {
+          isSegUploaded: { ...theRest },
+        });
+      }
+      case AIM_DELETE: {
+        const { aimRefs } = action.payload;
+        const { seriesUID } = aimRefs;
+        let serieToUpdateIndex;
+        const newOpenSeries = [...state.openSeries];
+        const serieToUpdate = newOpenSeries.find((serie, index) => {
+          if (serie.seriesUID === seriesUID) {
+            serieToUpdateIndex = index;
+            return serie.seriesUID;
+          }
+          return undefined;
+        });
+        const updatedSerie = { ...serieToUpdate };
+        const { imageAnnotations } = updatedSerie;
+        Object.entries(imageAnnotations).forEach(([key, value]) => {
+          let i = value.length;
+          while (i--) {
+            const ann = value[i];
+            if (ann.aimUid === aimRefs.aimID) value.splice(i, 1);
+          }
+        });
+        newOpenSeries[serieToUpdateIndex] = updatedSerie;
+        return { ...state, openSeries: [...newOpenSeries] };
+      }
       default:
         return state;
     }
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return state;
   }
 };
