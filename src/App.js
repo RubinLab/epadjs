@@ -612,6 +612,9 @@ class App extends Component {
         this.authService.isAuthenticated(),
         apiUrl
       );
+    } else {
+      this.authService.signinRedirect({});
+
     }
   };
 
