@@ -11,24 +11,6 @@ const mode = sessionStorage.getItem('mode');
 // let keycloak = null;
 let authService = null;
 
-export function refreshToken(keycloak, minValidity) {
-  return new Promise((resolve, reject) => {
-    keycloak
-      .updateToken(minValidity)
-      .success(function(refreshed) {
-        if (refreshed) {
-          // console.log("Token was successfully refreshed");
-        } else {
-          // console.log("Token is still valid");
-        }
-        resolve();
-      })
-      .error(function() {
-        reject();
-      });
-  });
-}
-
 export async function login(username, password, keycloak) {
   sessionStorage.setItem('username', username.user);
   sessionStorage.setItem('displayName', username.user); //TODO: change with fullname
@@ -50,32 +32,12 @@ export function getCurrentUser() {
   return sessionStorage.getItem('username');
 }
 
-// export async function getAuthHeader() {
-//   if (this.keycloak) {
-//     try {
-//       await refreshToken(this.keycloak, 5);
-//       const header = `Bearer ${this.keycloak.token}`;
-//       if (header) {
-//         cornerstoneWADOImageLoader.configure({
-//           beforeSend: function(xhr) {
-//             xhr.setRequestHeader('Authorization', header);
-//           }
-//         });
-//         return header;
-//       }
-//     } catch (err) {
-//       this.keycloak.logout();
-//     }
-//   }
-//   return undefined;
-// }
 
 export async function getAuthHeader() {
   authService = new AuthService();
   try {
     const user = await authService.getUser();
     if (user.access_token) {
-      // TODO: refresh token
       const header = `Bearer ${user.access_token}`;
       if (header) {
         cornerstoneWADOImageLoader.configure({
@@ -234,6 +196,5 @@ export default {
   logout,
   getCurrentUser,
   getAuthHeader,
-  refreshToken,
   AuthService
 };

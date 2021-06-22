@@ -19,9 +19,6 @@ class LoginForm extends Form {
     const authService = new auth.AuthService();
     this.setState({ authService });
     authService.signinRedirect({});
-
-    // sessionStorage.setItem('authService', JSON.stringify(authService));
-    // authService.signinRedirect({});
   };
 
   schema = {

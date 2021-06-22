@@ -43,7 +43,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import RightsideBar from './components/RightsideBar/RightsideBar';
 import MinimizedReport from './components/searchView/MinimizedReport';
-import { AuthConsumer } from 'providers/authProvider';
 import { FaJoint } from 'react-icons/fa';
 
 const messages = {
@@ -70,12 +69,6 @@ const reportsList = [
 class App extends Component {
   constructor(props) {
     super(props);
-    this.authority = 'http://bds-c02xf0r0jhd5.local:8899/auth/realms/ePad';
-    this.clientId = 'epad-auth';
-    this.redirectUri = 'http://bds-c02xf0r0jhd5.local:3000/*';
-    this.responseType = 'code';
-    this.scope = 'openid profile';
-
     this.eventSource = null;
     this.state = {
       openMng: false,
@@ -518,12 +511,10 @@ class App extends Component {
 
   async componentDidMount() {
     localStorage.setItem('treeData', JSON.stringify({}));
-    console.log('process.env.PUBLIC_URL', process.env.PUBLIC_URL);
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),
     ])
       .then(async results => {
-        console.log(' in then top 1');
         const configData = await results[0].json();
         let {
           mode,
@@ -561,7 +552,6 @@ class App extends Component {
         const redirectUri = redirect_uri;
         const responseType = response_type;
 
-        console.log(' in then after set 2');
         this.setState({
           mode,
           apiUrl,
@@ -631,8 +621,6 @@ class App extends Component {
       user: source.preferred_username || source.email,
       displayname: source.given_name
     };
-    // TODO: implement login with authService
-    // await auth.login(user, null, result.keycloak);
     this.setState({
       authService,
       authenticated,
@@ -727,7 +715,6 @@ class App extends Component {
       user: null
     });
     if (sessionStorage.getItem('authMode') !== 'external') {
-      this.authService.logout();
       this.setState({
         authService: null
       });
@@ -957,22 +944,6 @@ class App extends Component {
       }, 0);
     }
 
-    const {
-      authority,
-      clientId,
-      redirectUri,
-      responseType,
-      scope
-    } = this.state;
-
-    const oidcConfig = {
-      authority,
-      clientId,
-      redirectUri,
-      responseType,
-      scope
-    };
-
     return (
       <ErrorBoundary>
         <Cornerstone />
@@ -1065,16 +1036,6 @@ class App extends Component {
             >
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
-                <Route
-                  path="/redirect"
-                  render={props => (
-                    <Redirect
-                      {...props}
-                      // authService={this.authService}
-                      // completeAutorization={this.completeAutorization}
-                    />
-                  )}
-                />
                 <ProtectedRoute
                   path="/display"
                   render={props => (
