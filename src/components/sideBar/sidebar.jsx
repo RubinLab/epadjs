@@ -7,19 +7,19 @@ import WorklistSelect from "./worklistSelect";
 import { getProjects } from "../../services/projectServices";
 import {
   getTemplatesUniversal,
-  getAllTemplates,
+  getAllTemplates
 } from "../../services/templateServices";
 import Collapsible from "react-collapsible";
 import { FaArrowAltCircleLeft } from "react-icons/fa";
 import {
   getWorklistsOfAssignee,
   getWorklistsOfCreator,
-  getWorklistProgress,
+  getWorklistProgress
 } from "../../services/worklistServices";
 import {
   getProjectMap,
   clearSelection,
-  getTemplates,
+  getTemplates
 } from "../annotationsList/action";
 // import { getPacs } from "../../services/pacsServices";
 import "./w2.css";
@@ -51,7 +51,7 @@ class Sidebar extends Component {
       progressView: [false, false],
       selected: null,
       type: "",
-      height: 200,
+      height: 200
     };
   }
 
@@ -68,7 +68,10 @@ class Sidebar extends Component {
   };
 
   setTabHeight = () => {
-    const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
+    const navbar =
+      document.getElementsByClassName("navbar").length > 0
+        ? document.getElementsByClassName("navbar")[0].clientHeight
+        : 0;
     const closebtn = document.getElementsByClassName("closebtn __leftBar")[0]
       .clientHeight;
     const navTabs = document.getElementsByClassName("nav-tabs")[0].clientHeight;
@@ -104,12 +107,12 @@ class Sidebar extends Component {
 
         projects = projects.concat(all, nonassigned);
 
-        // const pid = projects[0].id;
-        // this.setState({ projects, pid, selected: pid });
-        // if (this.props.openSeries.length === 0) {
-        //   this.props.history.push(`/search/${pid}`);
-        // }
-        // this.props.getPidUpdate(pid);
+        const pid = projects[0].id;
+        this.setState({ projects, pid, selected: pid });
+        if (this.props.openSeries.length === 0) {
+          this.props.history.push(`/search/${pid}`);
+        }
+        this.props.getPidUpdate(pid);
         const prTempMap = await this.getTemplatesProjectMap();
         const projectMap = {};
         for (let project of projects) {
@@ -118,7 +121,7 @@ class Sidebar extends Component {
           projectMap[project.id] = {
             projectName: name,
             defaultTemplate,
-            templates: prTempMap[project.id] || [],
+            templates: prTempMap[project.id] || []
           };
         }
         this.props.dispatch(getProjectMap(projectMap));
@@ -134,7 +137,7 @@ class Sidebar extends Component {
     this.setState({ projects });
     if (this.props.openSeries.length === 0 && setPid) {
       const pid = projects[0].id;
-      this.setState({pid, selected: pid })
+      this.setState({ pid, selected: pid });
       this.props.history.push(`/search/${pid}`);
       this.props.getPidUpdate(pid);
     }
@@ -215,8 +218,11 @@ class Sidebar extends Component {
         this.setState({ pid });
       }
 
-      if (lastEventId !== prevProps.lastEventId && refresh && !notSideBarUpdate) {
-        console.log("still here")
+      if (
+        lastEventId !== prevProps.lastEventId &&
+        refresh &&
+        !notSideBarUpdate
+      ) {
         projects = await this.getProjectsData();
         this.setStateProjectData(projects);
       }
@@ -230,7 +236,7 @@ class Sidebar extends Component {
       width: "0",
       marginLeft: "0",
       buttonDisplay: "block",
-      open: false,
+      open: false
     });
   };
 
@@ -239,7 +245,7 @@ class Sidebar extends Component {
       width: "200px",
       marginLeft: "200px",
       buttonDisplay: "none",
-      open: true,
+      open: true
     });
   };
 
@@ -294,14 +300,14 @@ class Sidebar extends Component {
         <div onClick={this.collapseAll} key="worklist">
           Worklist
         </div>,
-        <div key="progress">Progress</div>,
+        <div key="progress">Progress</div>
       ];
     } else {
       return [
         <div onClick={this.collapseAll} key="worklist">
           Worklist
         </div>,
-        <div key="progress">Progress</div>,
+        <div key="progress">Progress</div>
       ];
     }
   };
@@ -497,7 +503,7 @@ class Sidebar extends Component {
           className={this.state.open ? "mainView" : "mainView-closed"}
           style={{
             marginLeft: this.state.marginLeft,
-            height: "calc(100% - 50px)",
+            height: "calc(100% - 50px)"
           }}
         >
           <button
@@ -521,14 +527,14 @@ const mapStateToProps = state => {
     lastEventId,
     openSeries,
     notificationAction,
-    refresh,
+    refresh
   } = state.annotationsListReducer;
   return {
     activePort,
     lastEventId,
     openSeries,
     notificationAction,
-    refresh,
+    refresh
   };
 };
 export default withRouter(connect(mapStateToProps)(Sidebar));
