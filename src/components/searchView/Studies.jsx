@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTable, useExpanded } from 'react-table';
 import { connect } from 'react-redux';
-import { toast } from "react-toastify";
+import { toast } from 'react-toastify';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
+import SelectSeriesModal from "../annotationsList/selectSerieModal";
 import { getStudies } from '../../services/studyServices';
 import Series from './Series';
 import { formatDate } from '../flexView/helperMethods';
@@ -121,6 +122,9 @@ function Studies(props) {
   const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
   const [selectedCount, setSelectedCount] = useState(false);
+  const [isSerieSelectionOpen, setIsSerieSelectionOpen] = useState(false);
+  const [selectedStudy, setSelectedStudy] = useState([]);
+  const [studyName, setStudyName] = useState('');
 
   useEffect(() => {
     const { selectedPatients, selectedSeries, selectedAnnotations } = props;
@@ -146,13 +150,14 @@ function Studies(props) {
     if (selectedLevel && !warningSeen) {
       const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a study!`;
       toast.info(message, {
-        position: "top-right",
+        position: 'top-right',
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
-        draggable: true,
-      });      setWarningSeen(true);
+        draggable: true
+      });
+      setWarningSeen(true);
     }
   };
 
@@ -231,11 +236,14 @@ function Studies(props) {
       //check if there is enough room
       if (seriesArr.length + props.openSeries.length > MAX_PORT) {
         //if there is not bring the modal
-        await setState({
-          isSerieSelectionOpen: true,
-          selectedStudy: [seriesArr],
-          studyName: selected.studyDescription
-        });
+        // await setState({
+        //   isSerieSelectionOpen: true,
+        //   selectedStudy: [seriesArr],
+        //   studyName: selected.studyDescription
+        // });
+        setIsSerieSelectionOpen(true);
+        setSelectedStudy([seriesArr]);
+        setStudyName(selected.studyDescription);
       } else {
         //if there is enough room
         //add serie to the grid
@@ -521,6 +529,13 @@ function Studies(props) {
         treeExpand={props.treeExpand}
         getTreeExpandSingle={props.getTreeExpandSingle}
       />
+      {isSerieSelectionOpen && (
+        <SelectSeriesModal
+          seriesPassed={selectedStudy}
+          onCancel={() => setIsSerieSelectionOpen(false)}
+          studyName={studyName}
+        />
+      )}
     </>
   );
 }
