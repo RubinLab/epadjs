@@ -59,9 +59,24 @@ const AnnotationSearch = props => {
   const [typeSelected, setTypeSelected] = useState(false);
   const [selectedProject, setSelectedProject] = useState('');
   const [data, setData] = useState([]);
+  const [rows, setRows] = useState(0);
   const [selectedAnnotations, setSelectedAnnotations] = useState({});
   const [downloadClicked, setDownloadClicked] = useState(false);
   const [error, setError] = useState('');
+
+  const insertIntoQueryOnSelection = el => {
+    const field = document.getElementsByClassName(
+      'form-control annotationSearch-text'
+    )[0];
+    const start = field.selectionStart;
+    if (start === query.length) {
+      setQuery(`${query} ${el}`);
+    } else {
+      const firstPart = query.substring(0, start);
+      const secondPart = query.substring(start);
+      setQuery(`${firstPart} ${el} ${secondPart}`);
+    }
+  };
 
   const renderOrganizeItem = name => {
     return (
@@ -76,7 +91,7 @@ const AnnotationSearch = props => {
                 key={`${el}-${i}`}
                 name={el}
                 onClick={() => {
-                  setQuery(`${query} ${el}`);
+                  insertIntoQueryOnSelection(el);
                 }}
                 type="button"
               >
@@ -188,19 +203,19 @@ const AnnotationSearch = props => {
   //   );
   // };
 
-  const detactConstant = (str, constant) => {
-    // const baseQuery = str.toUpperCase();
-    let result = '';
-    if (lists[constant]) {
-      lists[constant].forEach((el, i) => {
-        // const upperVersion = el.toUpperCase();
-        if (str.indexOf(el) === 0) {
-          result = str.substring(0, el.length);
-        }
-      });
-    }
-    return { result };
-  };
+  // const detactConstant = (str, constant) => {
+  //   // const baseQuery = str.toUpperCase();
+  //   let result = '';
+  //   if (lists[constant]) {
+  //     lists[constant].forEach((el, i) => {
+  //       // const upperVersion = el.toUpperCase();
+  //       if (str.indexOf(el) === 0) {
+  //         result = str.substring(0, el.length);
+  //       }
+  //     });
+  //   }
+  //   return { result };
+  // };
 
   const findMinIndex = indexMap => {
     const words = Object.keys(indexMap);
@@ -238,6 +253,7 @@ const AnnotationSearch = props => {
         .then(res => {
           console.log(res);
           setData(res.data.rows);
+          setRows(res.data.total_rows);
         })
         .catch(err => console.error(err));
     }
@@ -363,7 +379,8 @@ const AnnotationSearch = props => {
       const fields = lists.type.join(', ');
       const criterias = lists.criteria.join(', ');
       setError(
-        `Please select a search field:${fields} and a criteria:${criterias}!`
+        `Search field (${fields}) must be followed by a criteria (${criterias})`
+        // `Please select a search field:${fields} and a criteria:${criterias}!`
       );
       return false;
     }
