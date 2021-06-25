@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import { FaSearch, FaPlus } from 'react-icons/fa';
-import { searchAnnotations } from './../../services/annotationServices.js';
+import {
+  searchAnnotations,
+  getAllAnnotations
+} from './../../services/annotationServices.js';
 import AnnotationTable from './AnnotationTable.jsx';
 import './annotationSearch.css';
 import { clearSelection, selectAnnotation } from '../annotationsList/action';
@@ -63,6 +66,7 @@ const AnnotationSearch = props => {
   const [selectedAnnotations, setSelectedAnnotations] = useState({});
   const [downloadClicked, setDownloadClicked] = useState(false);
   const [error, setError] = useState('');
+  const [bookmark, setBookmark] = useState('');
 
   const insertIntoQueryOnSelection = el => {
     const field = document.getElementsByClassName(
@@ -243,7 +247,13 @@ const AnnotationSearch = props => {
     return findMinIndex(indexMap);
   };
 
-  const getSearchResult = () => {
+  const populateSearchResult = res => {
+    setData(data.concat(res.data.rows));
+    setRows(res.data.total_rows);
+    setBookmark(res.data.bookmark);
+  };
+
+  const getSearchResult = page => {
     let query = parseQuery();
     setData([]);
     if (selectedProject) query += ` AND project:${selectedProject}`;
@@ -251,16 +261,23 @@ const AnnotationSearch = props => {
       setError('');
       searchAnnotations({ query })
         .then(res => {
-          console.log(res);
-          setData(res.data.rows);
-          setRows(res.data.total_rows);
+          populateSearchResult(res);
         })
         .catch(err => console.error(err));
     }
   };
 
+  const getNewData = (bm) => {
+    getAllAnnotations(bm)
+      .then(res => {
+        populateSearchResult(res);
+      })
+      .catch(err => console.error(err));
+    // get the new data with bookmark
+    // concatanate the new 200 lines
+  };
+
   const seperateParanthesis = arr => {
-    console.log('arr', arr);
     const result = [];
     arr.forEach(el => {
       if (el.startsWith('(') || el.endsWith(')')) {
@@ -418,72 +435,6 @@ const AnnotationSearch = props => {
     }
   };
 
-  /*
-
-  const parseQuery = () => {
-    console.log('parseQuery clicked');
-    // debugger;
-    let baseQuery = query;
-    let parsedQuery = '';
-    let i = 0;
-    let endIndex;
-    let type;
-    let criteria;
-    while (baseQuery.length > 0) {
-      type = detactConstant(baseQuery, 'type').result;
-      criteria = detactConstant(baseQuery, 'criteria').result;
-      if (baseQuery[i] === ' ') {
-        baseQuery = baseQuery.substring(1);
-        continue;
-      } else if (lists.paranthesis.includes(baseQuery[i])) {
-        // if closing check there is opening and give error if required
-        // if there is an opening and all map full empty it
-        // fill the flag object accordingly
-        parsedQuery += `${baseQuery[i]} `;
-        baseQuery = baseQuery.substring(1);
-        continue;
-      } else if (type) {
-        // TODO: keep the order of the default query, if out of order give an error
-        //
-        // const { result } = detactConstant(baseQuery, 'type');
-        parsedQuery += `${type}`;
-        baseQuery = baseQuery.substring(type.length);
-        setTypeSelected(true);
-        continue;
-        // TODO: keep the order of the default query, if out of order give an error
-        // make sure there is a type before
-      } else if (criteria) {
-        // if (typeSelected) {
-        // const { result } = detactConstant(baseQuery, 'criteria');
-        parsedQuery += `:`;
-        baseQuery = baseQuery.substring(criteria.length);
-        setTypeSelected(false);
-        endIndex = detactTermEndIndex(baseQuery).index;
-        continue;
-        // } else {
-        // if there is no term show error
-        // if word is not criteria show error
-        // fill map term flag
-        // }
-      } else if (endIndex && (endIndex >= 0 || endIndex === -1)) {
-        console.log('endindex -->', endIndex);
-        if (endIndex < 2 && endIndex !== -1) {
-          // error: please enter a search term
-          return;
-        } else if (endIndex !== -1) {
-          const searchTerm = baseQuery.substring(0, endIndex);
-          parsedQuery += `${searchTerm.trim()} `;
-          baseQuery = baseQuery.substring(searchTerm.length);
-        } else if (endIndex === -1) {
-          parsedQuery += baseQuery.trim();
-          baseQuery = '';
-        }
-      }
-    }
-    console.log('parsedQuery', parsedQuery);
-    return parsedQuery;
-  };
-  */
 
   const renderOptions = () => {
     const projectNames = Object.values(props.projectMap);
@@ -623,6 +574,9 @@ const AnnotationSearch = props => {
             data={data}
             selected={selectedAnnotations}
             updateSelectedAims={updateSelectedAims}
+            noOfRows={rows}
+            getNewData={getNewData}
+            bookmark={bookmark}
           />
         )}
       </div>
