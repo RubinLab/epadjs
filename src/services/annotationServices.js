@@ -79,9 +79,13 @@ export function downloadAnnotations(optionObj, aimIDlist, projectID) {
 }
 
 export function downloadProjectAnnotation(pid) {
+<<<<<<< HEAD
   return http.get(`${apiUrl}/projects/${pid}/aims?format=stream`, {
     responseType: "blob"
   });
+=======
+  return http.get(`${apiUrl}/projects/${pid}/aims?format=stream`, { responseType: "blob" });
+>>>>>>> develop
 }
 
 export function getAllAnnotations(bookmark) {

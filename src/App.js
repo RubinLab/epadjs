@@ -10,7 +10,10 @@ import NavBar from './components/navbar';
 import Sidebar from './components/sideBar/sidebar';
 import SearchView from './components/searchView/searchView';
 import DisplayView from './components/display/displayView';
+<<<<<<< HEAD
 import AnnotationSearch from './components/annotationSearch'
+=======
+>>>>>>> develop
 import AnotateView from './components/anotateView';
 import ProgressView from './components/progressView';
 import FlexView from './components/flexView';
@@ -617,7 +620,7 @@ class App extends Component {
         try {
           let user = {
             user: result.userInfo.preferred_username || result.userInfo.email,
-            displayname: result.userInfo.given_name
+            displayname: result.userInfo.given_name || result.userInfo.givenName
           };
           await auth.login(user, null, result.keycloak);
           this.setState({
@@ -1127,12 +1130,15 @@ class App extends Component {
                 <ProtectedRoute
                   path="/flex/:pid?"
                   render={props => <FlexView {...props} pid={this.state.pid} />}
+<<<<<<< HEAD
                 />
                 <ProtectedRoute
                   path="/annotations"
                   render={props => (
                     <AnnotationSearch {...props} pid={this.state.pid} />
                   )}
+=======
+>>>>>>> develop
                 />
                 <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 {/* component={Worklist} /> */}
