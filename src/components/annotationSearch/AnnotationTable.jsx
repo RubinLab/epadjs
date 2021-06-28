@@ -58,34 +58,6 @@ function Table({
     },
     usePagination,
     useRowSelect
-    // hooks => {
-    //   hooks.visibleColumns.push(columns => [
-    //     // Let's make a column for selection
-    //     {
-    //       id: 'selection',
-    //       // The header can use the table's getToggleAllRowsSelectedProps method
-    //       // to render a checkbox
-    //       Header: ({ getToggleAllRowsSelectedProps }) => (
-    //         <div>
-    //           <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
-    //         </div>
-    //       ),
-    //       // The cell can use the individual row's getToggleRowSelectedProps method
-    //       // to the render a checkbox
-    //       Cell: ({ row }) => (
-    //         <div>
-    //           <IndeterminateCheckbox
-    //             {...row.getToggleRowSelectedProps()}
-    //             selected={selected}
-    //             updateSelectedAims={updateSelectedAims}
-    //             aimID={row.original.aimID}
-    //           />
-    //         </div>
-    //       )
-    //     },
-    //     ...columns
-    //   ]);
-    // }
   );
 
   React.useEffect(() => {
@@ -177,21 +149,6 @@ function Table({
           </button>
         </div>
       )}
-      {/* <p>Selected Rows: {Object.keys(selectedRowIds).length}</p>
-      <pre>
-        <code>
-          {JSON.stringify(
-            {
-              selectedRowIds: selectedRowIds,
-              'selectedFlatRows[].original': selectedFlatRows.map(
-                d => d.original
-              )
-            },
-            null,
-            2
-          )}
-        </code>
-      </pre> */}
     </>
   );
 }

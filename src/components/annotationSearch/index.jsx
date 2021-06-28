@@ -149,17 +149,6 @@ const AnnotationSearch = props => {
     );
   };
 
-  // const renderContent = () => {
-  //   return (
-  //     <div className="annotationSearch-wrapper">
-  //       {renderContentItem('type')}
-  //       {renderContentItem('criteria')}
-  //       {renderContentItem('term')}
-  //       {renderContentItem('organize')}
-  //       {renderSelect('project')}
-  //     </div>
-  //   );
-  // };
 
   const renderQueryItem = () => {
     return (
@@ -200,32 +189,6 @@ const AnnotationSearch = props => {
       </div>
     );
   };
-
-  // const renderContent = () => {
-  //   return (
-  //     <div className="annotationSearch-wrapper">
-  //       {renderContentSelection('type')}
-  //       {renderContentSelection('criteria')}
-  //       {renderContentItem('term')}
-  //       {renderContentItem('organize')}
-  //       {renderSelect('project')}
-  //     </div>
-  //   );
-  // };
-
-  // const detactConstant = (str, constant) => {
-  //   // const baseQuery = str.toUpperCase();
-  //   let result = '';
-  //   if (lists[constant]) {
-  //     lists[constant].forEach((el, i) => {
-  //       // const upperVersion = el.toUpperCase();
-  //       if (str.indexOf(el) === 0) {
-  //         result = str.substring(0, el.length);
-  //       }
-  //     });
-  //   }
-  //   return { result };
-  // };
 
   const findMinIndex = indexMap => {
     const words = Object.keys(indexMap);

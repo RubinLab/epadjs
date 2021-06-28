@@ -10,10 +10,7 @@ import NavBar from './components/navbar';
 import Sidebar from './components/sideBar/sidebar';
 import SearchView from './components/searchView/searchView';
 import DisplayView from './components/display/displayView';
-<<<<<<< HEAD
-import AnnotationSearch from './components/annotationSearch'
-=======
->>>>>>> develop
+import AnnotationSearch from './components/annotationSearch';
 import AnotateView from './components/anotateView';
 import ProgressView from './components/progressView';
 import FlexView from './components/flexView';
@@ -478,7 +475,7 @@ class App extends Component {
         : this.props.history.push(`/search`);
     } else if (viewType === 'display') {
       this.props.history.push(`/display`);
-    } else if (viewType === "annotations") {
+    } else if (viewType === 'annotations') {
       this.props.history.push(`/annotations`);
     }
   };
@@ -1130,15 +1127,12 @@ class App extends Component {
                 <ProtectedRoute
                   path="/flex/:pid?"
                   render={props => <FlexView {...props} pid={this.state.pid} />}
-<<<<<<< HEAD
                 />
                 <ProtectedRoute
                   path="/annotations"
                   render={props => (
                     <AnnotationSearch {...props} pid={this.state.pid} />
                   )}
-=======
->>>>>>> develop
                 />
                 <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 {/* component={Worklist} /> */}
@@ -1233,6 +1227,12 @@ class App extends Component {
                     closeAllCounter={this.state.closeAll}
                     admin={this.state.admin}
                   />
+                )}
+              />
+              <ProtectedRoute
+                path="/annotations"
+                render={props => (
+                  <AnnotationSearch {...props} pid={this.state.pid} />
                 )}
               />
               <Redirect to="/not-found" />
