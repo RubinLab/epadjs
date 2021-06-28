@@ -10,8 +10,6 @@ import AnnotationTable from './AnnotationTable.jsx';
 import './annotationSearch.css';
 import { clearSelection, selectAnnotation } from '../annotationsList/action';
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
-import { id } from 'date-fns/locale';
-import { arrayMin } from 'highcharts';
 
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
@@ -34,7 +32,8 @@ const explanation = {
   type: 'Select a field from annotation',
   criteria: 'Select a criteria',
   term: 'Type the key word that you want to look for above',
-  project: 'Select project: '
+  project: 'Select project: ',
+  noResult: 'Can not find any result!'
 };
 
 const styles = {
@@ -49,6 +48,13 @@ const styles = {
     margin: '1rem 0.5rem',
     padding: '0.3rem 0.5rem',
     fontSize: '1.2 rem'
+  },
+  error: {
+    color: 'orangered',
+    padding: '0.3rem 0.5rem',
+    height: 'fit-content',
+    fontSize: '1.2rem',
+    margin: '0.3rem 2rem'
   }
 };
 
@@ -267,7 +273,7 @@ const AnnotationSearch = props => {
     }
   };
 
-  const getNewData = (bm) => {
+  const getNewData = bm => {
     getAllAnnotations(bm)
       .then(res => {
         populateSearchResult(res);
@@ -417,24 +423,34 @@ const AnnotationSearch = props => {
   const parseQuery = () => {
     const queryArray = seperateParanthesis(query.split(' '));
     const isQueryInputValid = validateQuery(queryArray);
+    let criteria = '';
     if (isQueryInputValid) {
       const parsedQuery = queryArray.reduce((all, item, index) => {
         if (lists.criteria.includes(item)) {
           all += ':';
+          criteria = item;
         } else if (
           item.toLowerCase() === 'and' ||
           item.toLowerCase() === 'or'
         ) {
           all = `${all} ${item.toUpperCase()} `;
-        } else {
+        } else if (lists.type.includes(item)) {
           all += `${item}`;
+        } else if (lists.paranthesis.includes(item)) {
+          all += `${item}`;
+        } else {
+          if (criteria === 'equals') {
+            all += `"${item}"`;
+          }
+          if (criteria === 'contains') {
+            all += `${item}`;
+          }
         }
         return all;
       }, '');
       return parsedQuery;
     }
   };
-
 
   const renderOptions = () => {
     const projectNames = Object.values(props.projectMap);
@@ -537,19 +553,7 @@ const AnnotationSearch = props => {
           <FaSearch />
         </button>
       </div>
-      {error && (
-        <div
-          style={{
-            color: 'orangered',
-            padding: '0.3rem 0.5rem',
-            height: 'fit-content',
-            fontSize: '1.2rem',
-            margin: '0.3rem 2rem'
-          }}
-        >
-          {error}
-        </div>
-      )}
+      {error && <div style={styles.error}>{error}</div>}
       <div
         style={{
           margin: '0.5rem 2rem'
@@ -568,7 +572,11 @@ const AnnotationSearch = props => {
         >
           DOWNLOAD
         </button>
-
+        {rows === 0 && (
+          <div style={{ ...styles.error, margin: '0rem' }}>
+            {explanation.noResult}
+          </div>
+        )}
         {data.length > 0 && (
           <AnnotationTable
             data={data}
