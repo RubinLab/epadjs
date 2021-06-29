@@ -152,3 +152,12 @@ const mapStateToProps = state => {
 };
 
 export default connect(mapStateToProps)(AnnnotationDownloadModal);
+
+AnnnotationDownloadModal.propTypes = {
+  selectedAnnotations: PropTypes.object,
+  selected: PropTypes.object,
+  updateStatus: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  onCancel: PropTypes.func,
+  className: PropTypes.string
+};

@@ -1,0 +1,44 @@
+.annotationSearch-line {
+  display: inline-flex;
+  justify-content: space-between;
+  width: 'inherit';
+  padding: 0px 5px;
+}
+
+.annotationSearch-container {
+  display: grid;
+}
+
+.annotationSearch-btn {
+  height: 36px;
+  margin-right: 0.5rem;
+}
+
+.annotationSearch-select {
+  padding: 0.375rem 2rem 0.375rem 0.75rem;
+  margin-right: 0.5rem;
+  height: fit-content;
+}
+
+.annotationSearch-text {
+  margin-right: 0.5rem;
+}
+
+.annotaionSearch-title {
+  font-size: 1.2rem;
+  color: aliceblue;
+  margin-left: 0.3rem;
+
+}
+
+.annotationSearch-cont__item {
+  margin-bottom: 0.5rem;
+  display: flex;
+  width: 100%;
+  align-items: center
+}
+
+.annotationSearch-cont__item__sub {
+  margin: 0rem 0.3rem;
+  padding: 0.34rem 0rem;
+}

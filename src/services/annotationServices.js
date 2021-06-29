@@ -67,6 +67,10 @@ export function getAnnotations2() {
   return http.get(apiUrl + "/projects/lite/aims");
 }
 
+export function searchAnnotations(body) {
+  return http.put(apiUrl + "/search", body);
+}
+
 export function downloadAnnotations(optionObj, aimIDlist, projectID) {
   projectID = projectID || "lite";
   const { summary, aim, seg } = optionObj;

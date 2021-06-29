@@ -294,3 +294,26 @@ export const checkIfSeriesOpen = (array, selectedUID, UIDlevel) => {
   return { isOpen, index };
 };
 
+export const convertDateFormat = (str, attr) => {
+  try {
+    let result = "";
+    const dateArr = [];
+    dateArr.push(str.substring(0, 4));
+    dateArr.push(str.substring(4, 6));
+    dateArr.push(str.substring(6, 8));
+    if (attr === "date") {
+      const timeArr = [];
+      timeArr.push(str.substring(8, 10));
+      timeArr.push(str.substring(10, 12));
+      timeArr.push(str.substring(12));
+      result = dateArr.join("-") + " " + timeArr.join(":");
+    }
+    if (attr === "studyDate") {
+      result = dateArr.join("-") + " 00:00:00";
+    }
+    return result ? result : str;
+  } catch (err) {
+    console.error(err);
+    return str;
+  }
+};
