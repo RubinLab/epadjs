@@ -19,14 +19,6 @@ const lists = {
   criteria: ['equals', 'contains']
 };
 
-const title = {
-  type: 'STEP 1: ',
-  criteria: 'STEP 2: ',
-  term: 'STEP 3: ',
-  organize: 'STEP 4: ',
-  project: 'STEP 5: '
-};
-
 const explanation = {
   organize: 'Group and/or organize your query: ',
   type: 'Select a field from annotation',
@@ -120,10 +112,6 @@ const AnnotationSearch = props => {
     setQuery(newQuery);
   };
 
-  const insertIntoQuery = selection => {
-    // get the cursor index and add the selection at that index
-  };
-
   const updateSelectedAims = aimData => {
     props.dispatch(selectAnnotation(aimData));
   };
@@ -190,31 +178,6 @@ const AnnotationSearch = props => {
     );
   };
 
-  const findMinIndex = indexMap => {
-    const words = Object.keys(indexMap);
-    const indeces = Object.values(indexMap);
-    const min = { word: words[0], index: indeces[0] };
-    indeces.forEach((el, i) => {
-      if (el < min.index && el > -1) {
-        min.word = words[i];
-        min.index = indeces[i];
-      }
-    });
-    return min;
-  };
-
-  // finds the index of firt predefined term
-  const detactTermEndIndex = baseQuery => {
-    const { organize, paranthesis, type, criteria } = lists;
-    const indexMap = {};
-    const list = _.concat(organize, paranthesis, type, criteria);
-    list.forEach(el => {
-      indexMap[el] = baseQuery.indexOf(el);
-    });
-    // cover if query ends there ??????
-
-    return findMinIndex(indexMap);
-  };
 
   const populateSearchResult = res => {
     setData(data.concat(res.data.rows));
