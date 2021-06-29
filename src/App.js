@@ -1,29 +1,30 @@
-import React, { Component } from "react";
-import { Route, Switch, Redirect, withRouter } from "react-router-dom";
-import { connect } from "react-redux";
-import { ToastContainer } from "react-toastify";
-import { EventSourcePolyfill } from "event-source-polyfill";
-import Keycloak from "keycloak-js";
-import _ from "lodash";
-import { getUser, getUserInfo } from "./services/userServices";
-import NavBar from "./components/navbar";
-import Sidebar from "./components/sideBar/sidebar";
-import SearchView from "./components/searchView/searchView";
-import DisplayView from "./components/display/displayView";
-import AnotateView from "./components/anotateView";
-import ProgressView from "./components/progressView";
-import FlexView from "./components/flexView";
-import NotFound from "./components/notFound";
-import LoginForm from "./components/loginForm";
-import Logout from "./components/logout";
-import ProtectedRoute from "./components/common/protectedRoute";
-import Cornerstone from "./components/cornerstone/cornerstone";
-import Management from "./components/management/mainMenu";
-import InfoMenu from "./components/infoMenu";
-import UserMenu from "./components/userProfileMenu.jsx";
-import WarningModal from "./components/common/warningModal";
-import ConfirmationModal from "./components/common/confirmationModal";
-import SelectModalMenu from "./components/common/SelectModalMenu";
+import React, { Component } from 'react';
+import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { ToastContainer } from 'react-toastify';
+import { EventSourcePolyfill } from 'event-source-polyfill';
+import Keycloak from 'keycloak-js';
+import _ from 'lodash';
+import { getUser, getUserInfo } from './services/userServices';
+import NavBar from './components/navbar';
+import Sidebar from './components/sideBar/sidebar';
+import SearchView from './components/searchView/searchView';
+import DisplayView from './components/display/displayView';
+import AnnotationSearch from './components/annotationSearch';
+import AnotateView from './components/anotateView';
+import ProgressView from './components/progressView';
+import FlexView from './components/flexView';
+import NotFound from './components/notFound';
+import LoginForm from './components/loginForm';
+import Logout from './components/logout';
+import ProtectedRoute from './components/common/protectedRoute';
+import Cornerstone from './components/cornerstone/cornerstone';
+import Management from './components/management/mainMenu';
+import InfoMenu from './components/infoMenu';
+import UserMenu from './components/userProfileMenu.jsx';
+import WarningModal from './components/common/warningModal';
+import ConfirmationModal from './components/common/confirmationModal';
+import SelectModalMenu from './components/common/SelectModalMenu';
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
@@ -487,6 +488,8 @@ class App extends Component {
         : this.props.history.push(`/search`);
     } else if (viewType === "display") {
       this.props.history.push(`/display`);
+    } else if (viewType === 'annotations') {
+      this.props.history.push(`/annotations`);
     }
   };
 
@@ -1261,6 +1264,12 @@ class App extends Component {
                     <FlexView {...props} pid={this.state.pid} />
                   )}
                 />
+                <ProtectedRoute
+                  path="/annotations"
+                  render={props => (
+                    <AnnotationSearch {...props} pid={this.state.pid} />
+                  )}
+                />
                 <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 {/* component={Worklist} /> */}
                 <Route path="/tools" />
@@ -1354,6 +1363,12 @@ class App extends Component {
                     closeAllCounter={this.state.closeAll}
                     admin={this.state.admin}
                   />
+                )}
+              />
+              <ProtectedRoute
+                path="/annotations"
+                render={props => (
+                  <AnnotationSearch {...props} pid={this.state.pid} />
                 )}
               />
               <Redirect to="/not-found" />
