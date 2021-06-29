@@ -8,9 +8,9 @@ export function getAnnotations(series, opts = {}) {
     const fullUrl =
       apiUrl +
       "/projects/lite/subjects/" +
-      subjectId +
+      encodeURIComponent(subjectId) +
       "/studies/" +
-      studyId +
+      encodeURIComponent(studyId) +
       "/series/" +
       seriesId;
     if (Object.entries(opts).length === 0 && opts.constructor === Object) {
@@ -22,13 +22,13 @@ export function getAnnotations(series, opts = {}) {
     const fullUrl =
       apiUrl +
       "/projects/" +
-      projectId +
+      encodeURIComponent(projectId) +
       "/subjects/" +
-      subjectId +
+      encodeURIComponent(subjectId) +
       "/studies/" +
-      studyId +
+      encodeURIComponent(studyId) +
       "/series/" +
-      seriesId;
+      encodeURIComponent(seriesId);
     if (Object.entries(opts).length === 0 && opts.constructor === Object)
       return http.get(fullUrl + "/aims?count=0&format=summary");
     else if (opts["json"]) return http.get(fullUrl + "/aims?format=json");
@@ -41,24 +41,24 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
     return http.get(
       apiUrl +
         "/projects/lite/subjects/" +
-        subjectId +
+        encodeURIComponent(subjectId) +
         "/studies/" +
-        studyId +
+        encodeURIComponent(studyId) +
         "/series/" +
-        seriesId +
+        encodeURIComponent(seriesId) +
         "/aims?format=json"
     );
   else
     return http.get(
       apiUrl +
         "/projects/" +
-        projectId +
+        encodeURIComponent(projectId) +
         "/subjects/" +
-        subjectId +
+        encodeURIComponent(subjectId) +
         "/studies/" +
-        studyId +
+        encodeURIComponent(studyId) +
         "/series/" +
-        seriesId +
+        encodeURIComponent(seriesId) +
         "/aims?format=json"
     );
 }
@@ -70,12 +70,12 @@ export function getAnnotations2() {
 export function downloadAnnotations(optionObj, aimIDlist, projectID) {
   projectID = projectID || "lite";
   const { summary, aim, seg } = optionObj;
-  const url = `${apiUrl}/projects/${projectID}/aims/download?summary=${summary}&aim=${aim}&seg=${seg}`;
+  const url = `${apiUrl}/projects/${encodeURIComponent(projectID)}/aims/download?summary=${summary}&aim=${aim}&seg=${seg}`;
   return http.post(url, aimIDlist, { responseType: "blob" });
 }
 
 export function downloadProjectAnnotation(pid) {
-  return http.get(`${apiUrl}/projects/${pid}/aims?format=stream`, { responseType: "blob" });
+  return http.get(`${apiUrl}/projects/${encodeURIComponent(pid)}/aims?format=stream`, { responseType: "blob" });
 }
 
 export function getAllAnnotations(bookmark) {
@@ -88,9 +88,9 @@ export function getSummaryAnnotations(projectID, bookmark) {
   const pid = projectID || "lite";
   return bookmark
     ? http.get(
-        `${apiUrl}/projects/${pid}/aims?format=summary&bookmark=${bookmark}`
+        `${apiUrl}/projects/${encodeURIComponent(pid)}/aims?format=summary&bookmark=${bookmark}`
       )
-    : http.get(`${apiUrl}/projects/${pid}/aims?format=summary`);
+    : http.get(`${apiUrl}/projects/${encodeURIComponent(pid)}/aims?format=summary`);
 }
 
 export function deleteAnnotation(aimObj, delSys) {
@@ -99,9 +99,9 @@ export function deleteAnnotation(aimObj, delSys) {
   return http.delete(
     apiUrl +
       "/projects/" +
-      projectID +
+      encodeURIComponent(projectID) +
       "/aims/" +
-      aimID +
+      encodeURIComponent(aimID) +
       "?deleteDSO=true" +
       query
   );
@@ -110,7 +110,7 @@ export function deleteAnnotation(aimObj, delSys) {
 export function deleteAnnotationsList(projectID, aimList) {
   return http.post(
     // apiUrl + "/projects/" + projectID + "/aims/delete?all=true"
-    apiUrl + "/projects/" + projectID + "/aims/delete",
+    apiUrl + "/projects/" + encodeURIComponent(projectID) + "/aims/delete",
     aimList
   );
 }
@@ -120,7 +120,7 @@ export function uploadAim(aim, projectId, isUpdate = false, updatedAimId) {
   if (mode === "lite") {
     url = apiUrl + "/projects/lite/aims";
   } else {
-    url = apiUrl + "/projects/" + projectId + "/aims";
+    url = apiUrl + "/projects/" + encodeURIComponent(projectId) + "/aims";
   }
   if (isUpdate) return http.put(url + `/${updatedAimId}`, aim);
   else return http.post(url, aim);
@@ -149,7 +149,7 @@ export function uploadAim(aim, projectId, isUpdate = false, updatedAimId) {
 // }
 
 export function uploadSegmentation(segmentation, segName, projectId = "lite") {
-  const url = apiUrl + "/projects/" + projectId + "/files";
+  const url = apiUrl + "/projects/" + encodeURIComponent(projectId) + "/files";
   const segData = new FormData();
   segData.append("file", segmentation, `${segName}.dcm`);
   const config = {

@@ -13,7 +13,7 @@ export function getProjectsWithPkAsId() {
 //cavit
 
 export function deleteProject(projectId) {
-  return http.delete(apiUrl + "/projects/" + projectId);
+  return http.delete(apiUrl + "/projects/" + encodeURIComponent(projectId));
 }
 
 export function saveProject(
@@ -46,7 +46,7 @@ export function updateProject(
   return http.put(
     apiUrl +
       "/projects/" +
-      id +
+      encodeURIComponent(id) +
       "?projectName=" +
       projectName +
       "&description=" +
@@ -60,24 +60,24 @@ export function updateProject(
 
 export function updateTemplate(id, defaultTemplate) {
   return http.put(
-    apiUrl + "/projects/" + id + "?defaultTemplate=" + defaultTemplate
+    apiUrl + "/projects/" + encodeURIComponent(id) + "?defaultTemplate=" + defaultTemplate
   );
 }
 
 export function getProjectUsers(id) {
-  return http.get(apiUrl + "/projects/" + id + "/users");
+  return http.get(apiUrl + "/projects/" + encodeURIComponent(id) + "/users");
 }
 
 export function editUserRole(id, user, role) {
   return role
-    ? http.put(apiUrl + "/projects/" + id + "/users/" + user, { role })
-    : http.delete(apiUrl + "/projects/" + id + "/users/" + user);
+    ? http.put(apiUrl + "/projects/" + encodeURIComponent(id) + "/users/" + user, { role })
+    : http.delete(apiUrl + "/projects/" + encodeURIComponent(id) + "/users/" + user);
 }
 
 export function downloadProjects(projectID) {
   const pid = mode === "lite" ? "lite" : projectID
   return http.get(
-    apiUrl + "/projects/" + pid + "?format=stream&includeAims=true"
+    apiUrl + "/projects/" + encodeURIComponent(pid) + "?format=stream&includeAims=true"
   );
 }
 
@@ -85,15 +85,15 @@ export function uploadFileToProject(formData, config, projectID) {
   if (mode === "lite") {
     return http.post(apiUrl + "/projects/lite/files", formData, config);
   } else {
-    const url = apiUrl + "/projects/" + projectID + "/files";
+    const url = apiUrl + "/projects/" + encodeURIComponent(projectID) + "/files";
     return http.post(url, formData, config);
   }
 }
 
 export function getProject(projectID) {
-  return http.get(apiUrl + "/projects/" + projectID);
+  return http.get(apiUrl + "/projects/" + encodeURIComponent(projectID));
 }
 
 export function getStudies(projectID) {
-  return http.get(apiUrl + "/projects/" + projectID + "/studies");
+  return http.get(apiUrl + "/projects/" + encodeURIComponent(projectID) + "/studies");
 }
