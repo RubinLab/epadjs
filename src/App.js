@@ -674,6 +674,7 @@ class App extends Component {
             // console.log("ARGS:", args);
             // const result = await decrypt(args);
             const result = await decryptAndAdd(args);
+            console.log("result data", result.data);
             const { patientID, studyUID, projectID } = result.data;
             // console.log("Result", result.data, patientID, studyUID);
             const packedData = {
