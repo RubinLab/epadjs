@@ -26,7 +26,7 @@ const explanation = {
   criteria: 'Select a criteria',
   term: 'Type the key word that you want to look for above',
   project: 'Select project: ',
-  noResult: 'Can not find a result for the search!'
+  noResult: 'Can not find any result!'
 };
 
 const styles = {
