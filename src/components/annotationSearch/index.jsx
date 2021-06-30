@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
+import { toast } from "react-toastify";
 import _ from 'lodash';
 import { FaSearch, FaPlus } from 'react-icons/fa';
 import {
@@ -25,7 +26,7 @@ const explanation = {
   criteria: 'Select a criteria',
   term: 'Type the key word that you want to look for above',
   project: 'Select project: ',
-  noResult: 'Can not find any result!'
+  noResult: 'Can not find a result for the search!'
 };
 
 const styles = {
@@ -183,6 +184,9 @@ const AnnotationSearch = props => {
     setData(data.concat(res.data.rows));
     setRows(res.data.total_rows);
     setBookmark(res.data.bookmark);
+    if (res.data.total_rows === 0) {
+      toast.info(explanation.noResult, {position: "top-right"});
+    }
   };
 
   const getSearchResult = page => {
@@ -498,11 +502,6 @@ const AnnotationSearch = props => {
         >
           DOWNLOAD
         </button>
-        {rows === 0 && (
-          <div style={{ ...styles.error, margin: '0rem' }}>
-            {explanation.noResult}
-          </div>
-        )}
         {data.length > 0 && (
           <AnnotationTable
             data={data}
