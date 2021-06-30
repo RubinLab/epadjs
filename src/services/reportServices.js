@@ -24,9 +24,9 @@ export function getReport(projectId, patId, filter) {
   const url =
     apiUrl +
     "/projects/" +
-    projectId +
+    encodeURIComponent(projectId) +
     "/subjects/" +
-    patId +
+    encodeURIComponent(patId) +
     "/aims?" +
     filter;
     return http.get(url);

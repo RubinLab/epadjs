@@ -5,12 +5,12 @@ const mode = sessionStorage.getItem("mode");
 export function getSubjects(projectId) {
   if (mode === "lite") {
     projectId = "lite";
-    return http.get(apiUrl + "/projects/" + projectId + "/subjects");
-  } else return http.get(apiUrl + "/projects/" + projectId + "/subjects");
+    return http.get(apiUrl + "/projects/" + encodeURIComponent(projectId) + "/subjects");
+  } else return http.get(apiUrl + "/projects/" + encodeURIComponent(projectId) + "/subjects");
 }
 
 export function downloadSubjects(projectID, body) {
-  const pid = projectID || "lite";
+  const pid = encodeURIComponent(projectID) || "lite";
   const url =
     apiUrl +
     "/projects/" +
@@ -23,14 +23,14 @@ export function downloadSubjects(projectID, body) {
 export function deleteSubject(subject, delSys) {
   let { patientID, projectID } = subject;
   patientID = patientID ? patientID : subject.subjectID;
-  const url = apiUrl + `/projects/${projectID}/subjects/${patientID}${delSys}`;
+  const url = apiUrl + `/projects/${encodeURIComponent(projectID)}/subjects/${encodeURIComponent(patientID)}${delSys}`;
   return http.delete(url);
 }
 
 export function saveSubject(projectID, subjectAbr, subjectName) {
   const body = { name: subjectName };
   return http.put(
-    apiUrl + "/projects/" + projectID + "/subjects/" + subjectAbr,
+    apiUrl + "/projects/" + encodeURIComponent(projectID) + "/subjects/" + subjectAbr,
     body
   );
 }
@@ -39,7 +39,7 @@ export function uploadFileToSubject(formData, config, subject) {
   let { subjectID, projectID } = subject;
   subjectID = subjectID ? subjectID : subject.patientID;
   projectID = projectID || "lite";
-  const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/files`;
+  const url = `${apiUrl}/projects/${encodeURIComponent(projectID)}/subjects/${encodeURIComponent(subjectID)}/files`;
   return http.post(url, formData, config);
 }
 
@@ -48,15 +48,15 @@ export function getAllSubjects() {
 }
 
 export function addSubjectToProject(projectID, subjectID, sourceProject) {
-  return http.put(`${apiUrl}/projects/${projectID}/subjects/${subjectID}?from=${sourceProject}`);
+  return http.put(`${apiUrl}/projects/${encodeURIComponent(projectID)}/subjects/${encodeURIComponent(subjectID)}?from=${sourceProject}`);
 }
 
 export function getSubject(projectID, subjectID) {
-  return http.get(`${apiUrl}/projects/${projectID}/subjects/${subjectID}`);
+  return http.get(`${apiUrl}/projects/${encodeURIComponent(projectID)}/subjects/${encodeURIComponent(subjectID)}`);
 }
 
 export function getAimsOfSubject(projectID, subjectID) {
   return http.get(
-    `${apiUrl}/projects/${projectID}/subjects/${subjectID}/aims?longitudinal_ref=true`
+    `${apiUrl}/projects/${encodeURIComponent(projectID)}/subjects/${encodeURIComponent(subjectID)}/aims?longitudinal_ref=true`
   );
 }
