@@ -7,7 +7,7 @@ const apiUrl = sessionStorage.getItem("apiUrl");
 // }
 export function getOnePlugin(plugindbid) {
   // "/plugins/" + plugindbid)
-  return http.get(apiUrl + "/plugins/" + plugindbid);
+  return http.get(apiUrl + "/plugins/" + encodeURIComponent(plugindbid));
 }
 export function getPluginsWithProject() {
   return http.get(apiUrl + "/pluginsprojects"); // /pluginswithproject
@@ -24,17 +24,17 @@ export function getTools() {
 
 export function updateProjectsForPlugin(pluginid, projectids) {
   // "/plugins/" + pluginid + "/projects/", projectids
-  return http.put(apiUrl + "/plugins/" + pluginid + "/projects/", projectids);
+  return http.put(apiUrl + "/plugins/" + encodeURIComponent(pluginid) + "/projects/", projectids);
 }
 
 export function updateTemplatesForPlugin(pluginid, templateids) {
   // "/plugins/" + pluginid + "/templates/", templateids
-  return http.put(apiUrl + "/plugins/" + pluginid + "/templates/", templateids);
+  return http.put(apiUrl + "/plugins/" + encodeURIComponent(pluginid) + "/templates/", templateids);
 }
 
 export function updateStatusQueueProcess(queueid, tostatus) {
   return http.put(
-    apiUrl + "/plugins/queue/update/" + queueid + "/status/" + tostatus
+    apiUrl + "/plugins/queue/update/" + encodeURIComponent(queueid) + "/status/" + tostatus
   );
 }
 
@@ -84,19 +84,19 @@ export function deleteTool() {
 export function deleteOneDefaultParameter(parameterdbid) {
   //  "/plugins/parameters/default/" + parameterdbid
   return http.delete(
-    apiUrl + "/pluginparameters/" + parameterdbid + "/default"
+    apiUrl + "/pluginparameters/" + encodeURIComponent(parameterdbid) + "/default"
   );
 }
 export function deleteOneProjectParameter(parameterdbid) {
   // "/plugins/parameters/project/" + parameterdbid
   return http.delete(
-    apiUrl + "/pluginparameters/" + parameterdbid + "/project"
+    apiUrl + "/pluginparameters/" + encodeURIComponent(parameterdbid) + "/project"
   );
 }
 export function deleteOneTemplateParameter(parameterdbid) {
   // "/plugins/parameters/template/" + parameterdbid
   return http.delete(
-    apiUrl + "/pluginparameters/" + parameterdbid + "/template"
+    apiUrl + "/pluginparameters/" + encodeURIComponent(parameterdbid) + "/template"
   );
 }
 export function deleteFromPluginQueue(queuedbids) {
@@ -118,7 +118,7 @@ export function editTemplateParameter(parametersform) {
 }
 
 export function getPluginsForProject(projectid) {
-  return http.get(apiUrl + "/projects/" + projectid + "/plugins"); // "/plugins/project/" + projectid
+  return http.get(apiUrl + "/projects/" + encodeURIComponent(projectid) + "/plugins"); // "/plugins/project/" + projectid
 }
 export function getPluginsQueue() {
   //  "/plugins/queue/"
@@ -126,7 +126,7 @@ export function getPluginsQueue() {
 }
 export function getDefaultParameter(plugindbid) {
   // "/plugins/parameters/default/" + plugindbid
-  return http.get(apiUrl + "/plugins/" + plugindbid + "/defaultparameters");
+  return http.get(apiUrl + "/plugins/" + encodeURIComponent(plugindbid) + "/defaultparameters");
 }
 
 export function getProjectParameter(plugindbid, projectdbid) {
@@ -134,9 +134,9 @@ export function getProjectParameter(plugindbid, projectdbid) {
   return http.get(
     apiUrl +
       "/plugins/" +
-      plugindbid +
+      encodeURIComponent(plugindbid) +
       "/project/" +
-      projectdbid +
+      encodeURIComponent(projectdbid) +
       "/projectparameters"
   );
 }
@@ -145,14 +145,14 @@ export function getTemplateParameter(plugindbid, templatedbid) {
   return http.get(
     apiUrl +
       "/plugins/" +
-      plugindbid +
+      encodeURIComponent(plugindbid) +
       "/template/" +
-      templatedbid +
+      encodeURIComponent(templatedbid) +
       "/templateparameters"
   );
 }
 export function getContainerLog(containerid) {
-  return http.get(apiUrl + "/container/" + containerid, {
+  return http.get(apiUrl + "/container/" + encodeURIComponent(containerid), {
     responseType: "stream",
   });
 }
