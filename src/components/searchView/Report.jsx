@@ -77,7 +77,7 @@ const Report = props => {
       loadFilter = 'shapes=line&metric=standard deviation';
       numofHeaderCols = 2;
       hideCols = [];
-    } else if (report === 'Longitudinal') {
+    } else if (report) {
       filter = 'report=Longitudinal';
       if (report != 'Longitudinal') loadFilter = 'metric=' + report;
       if (template != null) filter += '&templatecode=' + template;
@@ -148,7 +148,7 @@ const Report = props => {
     const metric = e.target.value;
     props.handleMetric(metric);
     const validMetric =
-      metric === 'ADLA' || metric === 'RECIST' || metric === 'intensitystddev' || metric === 'Export (beta)';
+      metric === 'ADLA' || metric === 'RECIST' || metric === 'intensitystddev' || metric === 'volume' || metric === 'Export (beta)';
     const type = 'BASELINE';
     let result;
     if (validMetric) {
@@ -502,6 +502,7 @@ const Report = props => {
                   <option>RECIST</option>
                   <option>ADLA</option>
                   <option>intensitystddev</option>
+                  <option>volume</option>
                   <option>Export (beta)</option>
                 </select>
               </div>
