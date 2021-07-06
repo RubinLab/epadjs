@@ -138,6 +138,7 @@ const NavBar = ({
                 <li className="nav-item pull-right" data-name="mng">
                   <div
                     className="nav-link mng-icon"
+                    id="mng-icon"
                     data-name="mng"
                     onClick={e => {
                       openGearMenu(e);

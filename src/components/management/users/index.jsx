@@ -352,6 +352,7 @@ class Users extends React.Component {
               className="checkbox"
               checked={this.state.selected[original.username]}
               onChange={() => this.toggleRow(original.username)}
+              id={original.username}
             />
           );
         },
@@ -434,6 +435,7 @@ class Users extends React.Component {
             }, "") : "Add user to a project";
           return (
             <div
+              id={`projects-${original.index}`}
               onClick={() => {
                 this.displayUserRoleEdit();
                 this.saveClickedUser(original);
@@ -478,9 +480,11 @@ class Users extends React.Component {
           let text = this.convertArrToStr(original.row.permissions);
           const className = text ? "wrapped" : "wrapped click-to-add";
           text = text ? text : "Give user permission";
+          
           return (
             <div
               className="menu-clickable"
+              id={`permissions-${original.index}`}
               onClick={() => {
                 this.displayUserPermissionEdit(original.index);
                 this.saveClickedUser(original);
