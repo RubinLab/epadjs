@@ -26,7 +26,11 @@ const NavBar = ({
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
-        <Link className="navbar-brand-right nounderline pr-3 " to="#" id="epad-logo">
+        <Link
+          className="navbar-brand-right nounderline pr-3 "
+          to="#"
+          id="epad-logo"
+        >
           <img src={logo} alt={'logo'} width="25px" />
           {mode === 'lite' && 'eLite'} {mode !== 'lite' && 'ePAD'}
         </Link>
@@ -99,17 +103,6 @@ const NavBar = ({
                   </NavLink>
                 </li>{' '} */}
                 <li
-                  id="navbar-ann"
-                  className={
-                    path.includes('annotations') ? 'nav-link activeNav' : 'nav-link'
-                  }
-                  onClick={() => {
-                    onSwitchView('annotations')
-                  }}
-                >
-                  Annotations
-                </li>
-                <li
                   className="nav-item"
                   onClick={() => {
                     onSwitchView('flex');
@@ -124,6 +117,17 @@ const NavBar = ({
                 </li>{' '}
               </React.Fragment>
             )}
+            <li
+              id="navbar-ann"
+              className={
+                path.includes('annotations') ? 'nav-link activeNav' : 'nav-link'
+              }
+              onClick={() => {
+                onSwitchView('annotations');
+              }}
+            >
+              Annotations
+            </li>
           </ul>
           <ul className="navbar-nav ml-auto">
             {!user && (
