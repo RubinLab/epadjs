@@ -51,6 +51,8 @@ const styles = {
   }
 };
 
+const mode = sessionStorage.getItem('mode');
+
 const AnnotationSearch = props => {
   const [query, setQuery] = useState('');
   const [partialQuery, setPartialQuery] = useState({
@@ -491,7 +493,7 @@ const AnnotationSearch = props => {
       >
         {renderQueryItem()}
         {renderOrganizeItem('organize')}
-        {renderProjectSelect()}
+        {mode !== 'lite' && renderProjectSelect()}
         <button
           className={`btn btn-secondary`}
           style={styles.downloadButton}
