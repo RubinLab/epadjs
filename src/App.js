@@ -1204,6 +1204,12 @@ class App extends Component {
               <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
+                path="/annotations"
+                render={props => (
+                  <AnnotationSearch {...props} pid={this.state.pid} />
+                )}
+              />
+              <ProtectedRoute
                 path="/"
                 render={props => (
                   <SearchView
@@ -1227,12 +1233,6 @@ class App extends Component {
                     closeAllCounter={this.state.closeAll}
                     admin={this.state.admin}
                   />
-                )}
-              />
-              <ProtectedRoute
-                path="/annotations"
-                render={props => (
-                  <AnnotationSearch {...props} pid={this.state.pid} />
                 )}
               />
               <Redirect to="/not-found" />
