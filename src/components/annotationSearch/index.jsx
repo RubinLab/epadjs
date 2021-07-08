@@ -492,7 +492,10 @@ const AnnotationSearch = props => {
         }}
       >
         <Collapsible
-        trigger="Advance search"
+        trigger="Advanced search"
+        triggerClassName="advancedSearch__closed"
+        triggerOpenedClassName="advancedSearch__open"
+        contentInnerClassName="advancedSearch-content"
         >
           {renderQueryItem()}
           {renderOrganizeItem('organize')}
