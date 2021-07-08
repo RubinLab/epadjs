@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
-import { toast } from "react-toastify";
+import { toast } from 'react-toastify';
 import _ from 'lodash';
+import Collapsible from 'react-collapsible';
 import { FaSearch, FaPlus } from 'react-icons/fa';
 import {
   searchAnnotations,
@@ -68,6 +69,7 @@ const AnnotationSearch = props => {
   const [downloadClicked, setDownloadClicked] = useState(false);
   const [error, setError] = useState('');
   const [bookmark, setBookmark] = useState('');
+  // const [advanceSearch, setAdvanceSearch] = useState(false);
 
   const insertIntoQueryOnSelection = el => {
     const field = document.getElementsByClassName(
@@ -140,7 +142,6 @@ const AnnotationSearch = props => {
     );
   };
 
-
   const renderQueryItem = () => {
     return (
       <div className="annotationSearch-cont__item">
@@ -181,13 +182,12 @@ const AnnotationSearch = props => {
     );
   };
 
-
   const populateSearchResult = res => {
     setData(data.concat(res.data.rows));
     setRows(res.data.total_rows);
     setBookmark(res.data.bookmark);
     if (res.data.total_rows === 0) {
-      toast.info(explanation.noResult, {position: "top-right"});
+      toast.info(explanation.noResult, { position: 'top-right' });
     }
   };
 
@@ -491,19 +491,25 @@ const AnnotationSearch = props => {
           margin: '0.5rem 2rem'
         }}
       >
-        {renderQueryItem()}
-        {renderOrganizeItem('organize')}
-        {mode !== 'lite' && renderProjectSelect()}
-        <button
-          className={`btn btn-secondary`}
-          style={styles.downloadButton}
-          name="download"
-          onClick={() => setDownloadClicked(true)}
-          type="button"
-          disabled={Object.keys(props.selectedAnnotations).length === 0}
+        <Collapsible
+        trigger="Advance search"
         >
-          DOWNLOAD
-        </button>
+          {renderQueryItem()}
+          {renderOrganizeItem('organize')}
+        </Collapsible>
+        {mode !== 'lite' && renderProjectSelect()}
+        {Object.keys(props.selectedAnnotations).length !== 0 && (
+          <button
+            className={`btn btn-secondary`}
+            style={styles.downloadButton}
+            name="download"
+            onClick={() => setDownloadClicked(true)}
+            type="button"
+            disabled={Object.keys(props.selectedAnnotations).length === 0}
+          >
+            DOWNLOAD
+          </button>
+        )}
         {data.length > 0 && (
           <AnnotationTable
             data={data}

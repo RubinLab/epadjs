@@ -42,3 +42,36 @@
   margin: 0rem 0.3rem;
   padding: 0.34rem 0rem;
 }
+
+/* .Collapsible__trigger {
+  display: block;
+  font-weight: 400;
+  text-decoration: none;
+  color: #3a3f44;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 5px;
+  background: #3a3f44;
+  color: white;
+}
+
+.Collapsible__trigger:after {
+  font-family: "FontAwesome";
+  content: "\f107";
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  display: block;
+}
+
+.Collapsible__trigger.is-open {
+  display: block;
+  font-weight: 400;
+  text-decoration: none;
+  color: #861737;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 5px;
+  background: #861737;
+  color: white;
+} */
