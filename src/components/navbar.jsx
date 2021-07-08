@@ -58,7 +58,7 @@ const NavBar = ({
                 onSwitchView('search');
               }}
             >
-              Search
+              Patient List
             </li>
             <li
               id="navbarli"
@@ -126,7 +126,7 @@ const NavBar = ({
                 onSwitchView('annotations');
               }}
             >
-              Annotations
+              Search
             </li>
           </ul>
           <ul className="navbar-nav ml-auto">
