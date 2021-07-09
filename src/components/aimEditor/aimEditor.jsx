@@ -164,7 +164,7 @@ class AimEditor extends Component {
   //cavit end
   validateForm = (hasError) => {
     if (hasError > 0) {
-      console.error("Answer form has error/s!!!");
+      console.warn("Answer form has error/s!!!");
       this.setState({
         saveButtonIsActive: false,
       });
