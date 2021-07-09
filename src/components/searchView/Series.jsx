@@ -168,7 +168,7 @@ function Series(props) {
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-      });      setWarningSeen(true);
+      }); setWarningSeen(true);
     }
   };
 
@@ -202,7 +202,7 @@ function Series(props) {
         props.dispatch(addToGrid(selected));
         props
           .dispatch(getSingleSerie(selected))
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
         if (!props.patients[selected.patientID]) {
@@ -244,7 +244,7 @@ function Series(props) {
 
           return (
             <div style={style}>
-              <div onMousEnter={validateSeriesSelect}>
+              <div onMouseEnter={validateSeriesSelect}>
                 <input
                   type="checkbox"
                   style={{ marginRight: '5px' }}
