@@ -77,14 +77,26 @@ const AnnotationSearch = props => {
   const [bookmark, setBookmark] = useState('');
   // const [advanceSearch, setAdvanceSearch] = useState(false);
 
+  const populateSearchResult = (res, pagination) => {
+    console.log(res);
+    const result = Array.isArray(res) ? res[0] : res;
+    if (pagination) setData(data.concat(result.data.rows));
+    else setData(result.data.rows);
+    setRows(result.data.total_rows);
+    setBookmark(result.data.bookmark);
+    if (result.data.total_rows === 0) {
+      toast.info(explanation.noResult, { position: 'top-right' });
+    }
+  };
+
   useEffect(() => {
     const promise =
       props.pid === 'all'
-        ? getAllAnnotations(bookmark)
-        : getSummaryAnnotations(props.pid, bookmark);
+        ? getAllAnnotations()
+        : getSummaryAnnotations(props.pid);
     Promise.all([promise])
       .then(res => {
-        setData(res[0].data.rows);
+        populateSearchResult(res);
       })
       .catch(err => console.error(err));
   }, [props.pid]);
@@ -200,15 +212,6 @@ const AnnotationSearch = props => {
     );
   };
 
-  const populateSearchResult = res => {
-    setData(data.concat(res.data.rows));
-    setRows(res.data.total_rows);
-    setBookmark(res.data.bookmark);
-    if (res.data.total_rows === 0) {
-      toast.info(explanation.noResult, { position: 'top-right' });
-    }
-  };
-
   const getSearchResult = page => {
     let query = parseQuery();
     setData([]);
@@ -226,7 +229,7 @@ const AnnotationSearch = props => {
   const getNewData = bm => {
     getAllAnnotations(bm)
       .then(res => {
-        populateSearchResult(res);
+        populateSearchResult(res, true);
       })
       .catch(err => console.error(err));
     // get the new data with bookmark
