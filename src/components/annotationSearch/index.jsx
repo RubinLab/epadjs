@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { toast } from 'react-toastify';
 import _ from 'lodash';
@@ -6,7 +6,8 @@ import Collapsible from 'react-collapsible';
 import { FaSearch, FaPlus } from 'react-icons/fa';
 import {
   searchAnnotations,
-  getAllAnnotations
+  getAllAnnotations,
+  getSummaryAnnotations
 } from './../../services/annotationServices.js';
 import AnnotationTable from './AnnotationTable.jsx';
 import './annotationSearch.css';
@@ -54,6 +55,11 @@ const styles = {
 
 const mode = sessionStorage.getItem('mode');
 
+// if projct is not selected bring lite by default
+// when project is selected check query
+// if there is a query make search in project + query
+// if theree is not a query cring selected projects' aims
+
 const AnnotationSearch = props => {
   const [query, setQuery] = useState('');
   const [partialQuery, setPartialQuery] = useState({
@@ -70,6 +76,18 @@ const AnnotationSearch = props => {
   const [error, setError] = useState('');
   const [bookmark, setBookmark] = useState('');
   // const [advanceSearch, setAdvanceSearch] = useState(false);
+
+  useEffect(() => {
+    const promise =
+      props.pid === 'all'
+        ? getAllAnnotations(bookmark)
+        : getSummaryAnnotations(props.pid, bookmark);
+    Promise.all([promise])
+      .then(res => {
+        setData(res[0].data.rows);
+      })
+      .catch(err => console.error(err));
+  }, [props.pid]);
 
   const insertIntoQueryOnSelection = el => {
     const field = document.getElementsByClassName(
@@ -492,10 +510,10 @@ const AnnotationSearch = props => {
         }}
       >
         <Collapsible
-        trigger="Advanced search"
-        triggerClassName="advancedSearch__closed"
-        triggerOpenedClassName="advancedSearch__open"
-        contentInnerClassName="advancedSearch-content"
+          trigger="Advanced search"
+          triggerClassName="advancedSearch__closed"
+          triggerOpenedClassName="advancedSearch__open"
+          contentInnerClassName="advancedSearch-content"
         >
           {renderQueryItem()}
           {renderOrganizeItem('organize')}
