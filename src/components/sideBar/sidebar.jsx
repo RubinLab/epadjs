@@ -315,7 +315,7 @@ class Sidebar extends Component {
       if (mode === "thick") {
         const projectsList = projects.map(project => {
           const matchProject =
-            selected === project.id || pathname === project.id;
+            selected === project.id || pathname === project.id || this.props.pid === project.id;
           const className = matchProject
             ? "sidebar-row __selected"
             : "sidebar-row";
