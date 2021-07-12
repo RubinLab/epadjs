@@ -18,7 +18,7 @@ const lists = {
   organize: ['AND', 'OR', '(', ')'],
   paranthesis: ['(', ')'],
   condition: ['AND', 'OR'],
-  type: ['modality', 'diagnosis', 'anatomy'],
+  type: ['modality', 'observation', 'anatomy'],
   criteria: ['equals', 'contains']
 };
 
@@ -211,12 +211,12 @@ const AnnotationSearch = props => {
   };
 
   const getSearchResult = page => {
-    let query = parseQuery();
+    let searchQuery = parseQuery();
     setData([]);
-    if (selectedProject) query += ` AND project:${selectedProject}`;
-    if (query) {
+    if (selectedProject) searchQuery += ` AND project:${selectedProject}`;
+    if (searchQuery) {
       setError('');
-      searchAnnotations({ query })
+      searchAnnotations({ searchQuery })
         .then(res => {
           populateSearchResult(res);
         })
@@ -324,11 +324,14 @@ const AnnotationSearch = props => {
 
   const checkStartEndWithCondition = arr => {
     // query order is type + criteria + term
-    const firstAndLastThree = arr.slice(0, 3).concat(arr.slice(arr.length - 3));
+    const uppercaseArr = arr.map(el => el.toUpperCase());
+    const beginning = uppercaseArr.slice(0, 3);
+    const end = uppercaseArr.length > 2 ? uppercaseArr.slice(arr.length - 3) : [...uppercaseArr];
+    const invalidBeginnig =
+      beginning.includes('AND') || beginning.includes('OR');
+    const invalidEnd = end.includes('AND') || end.includes('OR');
     // first and last three word can not be AND/OR
-    return (
-      firstAndLastThree.includes('AND') || firstAndLastThree.includes('OR')
-    );
+    return invalidBeginnig || invalidEnd;
   };
 
   const validateQuery = arr => {
@@ -371,36 +374,58 @@ const AnnotationSearch = props => {
     return true;
   };
 
+  const checkSingleTermQuery = arr => {
+    const includeParanthesis = query.includes('(') || query.includes(')');
+    const includeOperator =
+      query.toUpperCase().includes('AND') || query.toUpperCase().includes('OR');
+    const { criteriaArr, typeArr } = validateQueryContent(arr);
+    const includeCriteria = criteriaArr.length > 0;
+    const includeType = typeArr.length > 0;
+    return !(
+      includeParanthesis ||
+      includeOperator ||
+      includeCriteria ||
+      includeType
+    );
+  };
+
   const parseQuery = () => {
+    // check if query contains any predined words
     const queryArray = seperateParanthesis(query.split(' '));
-    const isQueryInputValid = validateQuery(queryArray);
-    let criteria = '';
-    if (isQueryInputValid) {
-      const parsedQuery = queryArray.reduce((all, item, index) => {
-        if (lists.criteria.includes(item)) {
-          all += ':';
-          criteria = item;
-        } else if (
-          item.toLowerCase() === 'and' ||
-          item.toLowerCase() === 'or'
-        ) {
-          all = `${all} ${item.toUpperCase()} `;
-        } else if (lists.type.includes(item)) {
-          all += `${item}`;
-        } else if (lists.paranthesis.includes(item)) {
-          all += `${item}`;
-        } else {
-          if (criteria === 'equals') {
-            all += `"${item}"`;
-          }
-          if (criteria === 'contains') {
+    let parsedQuery;
+    if (checkSingleTermQuery(queryArray)) {
+      parsedQuery = query;
+    } else {
+      const isQueryInputValid = validateQuery(queryArray);
+      let criteria = '';
+      console.log('isQueryInputValid', isQueryInputValid);
+      if (isQueryInputValid) {
+        parsedQuery = queryArray.reduce((all, item, index) => {
+          if (lists.criteria.includes(item)) {
+            all += ':';
+            criteria = item;
+          } else if (
+            item.toLowerCase() === 'and' ||
+            item.toLowerCase() === 'or'
+          ) {
+            all = `${all} ${item.toUpperCase()} `;
+          } else if (lists.type.includes(item)) {
             all += `${item}`;
+          } else if (lists.paranthesis.includes(item)) {
+            all += `${item}`;
+          } else {
+            if (criteria === 'equals') {
+              all += `"${item}"`;
+            }
+            if (criteria === 'contains') {
+              all += `${item}`;
+            }
           }
-        }
-        return all;
-      }, '');
-      return parsedQuery;
+          return all;
+        }, '');
+      }
     }
+    return parsedQuery;
   };
 
   const renderOptions = () => {
