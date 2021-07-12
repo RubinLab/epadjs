@@ -27,7 +27,7 @@ const explanation = {
   type: 'Select a field from annotation',
   criteria: 'Select a criteria',
   term: 'Type the key word that you want to look for above',
-  project: 'Select project: ',
+  project: 'Search in all ePAD',
   noResult: 'Can not find any result!'
 };
 
@@ -55,11 +55,6 @@ const styles = {
 
 const mode = sessionStorage.getItem('mode');
 
-// if projct is not selected bring lite by default
-// when project is selected check query
-// if there is a query make search in project + query
-// if theree is not a query cring selected projects' aims
-
 const AnnotationSearch = props => {
   const [query, setQuery] = useState('');
   const [partialQuery, setPartialQuery] = useState({
@@ -80,8 +75,11 @@ const AnnotationSearch = props => {
   const populateSearchResult = (res, pagination) => {
     console.log(res);
     const result = Array.isArray(res) ? res[0] : res;
-    if (pagination) setData(data.concat(result.data.rows));
-    else setData(result.data.rows);
+    if (pagination) {
+      setData(data.concat(result.data.rows));
+    } else {
+      setData(result.data.rows);
+    }
     setRows(result.data.total_rows);
     setBookmark(result.data.bookmark);
     if (result.data.total_rows === 0) {
@@ -431,8 +429,6 @@ const AnnotationSearch = props => {
   };
 
   const renderProjectSelect = () => {
-    const projectNames = Object.values(props.projectMap);
-    const projectID = Object.keys(props.projectMap);
     return (
       <div
         className="annotationSearch-cont__item"
@@ -442,14 +438,17 @@ const AnnotationSearch = props => {
           className="annotaionSearch-title"
           style={{ fontsize: '1.2rem' }}
         >{`${explanation.project}`}</div>
-        <select
+        <input
           name="project-dropdown"
-          onChange={e => setSelectedProject(e.target.value)}
+          type="checkbox"
+          checked={selectedProject === ''}
+          onChange={e => {
+            if (e.target.checked === false) setSelectedProject(props.pid);
+            else setSelectedProject('');
+          }}
           onMouseDown={e => e.stopPropagation()}
           style={{ margin: '0rem 1rem', padding: '1.8px' }}
-        >
-          {renderOptions()}
-        </select>
+        />
       </div>
     );
   };
