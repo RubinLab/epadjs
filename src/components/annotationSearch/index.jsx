@@ -3,7 +3,8 @@ import { connect } from 'react-redux';
 import { toast } from 'react-toastify';
 import _ from 'lodash';
 import Collapsible from 'react-collapsible';
-import { FaSearch, FaPlus } from 'react-icons/fa';
+import { FaSearch, FaPlus, FaEraser } from 'react-icons/fa';
+import ReactTooltip from 'react-tooltip';
 import {
   searchAnnotations,
   getAllAnnotations,
@@ -534,7 +535,37 @@ const AnnotationSearch = props => {
         <button
           className={`btn btn-secondary`}
           type="button"
+          name="erase-button"
+          data-tip
+          data-for="erase-icon"
+          className="btn btn-secondary annotationSearch-btn"
+          onClick={() => setQuery('')}
+          // onClick={parseIt}
+          // disabled={index < count}
+          style={{
+            padding: '0.3rem 0.5rem',
+            height: 'fit-content',
+            fontSize: '1rem',
+            marginTop: '0.1rem',
+            width: '5%'
+          }}
+        >
+          <FaEraser />
+        </button>
+        <ReactTooltip
+          id="erase-icon"
+          place="bottom"
+          type="info"
+          delayShow={500}
+        >
+          <span>Clear query</span>
+        </ReactTooltip>
+        <button
+          className={`btn btn-secondary`}
+          type="button"
           name="search-button"
+          data-tip
+          data-for="search-icon"
           className="btn btn-secondary annotationSearch-btn"
           onClick={getSearchResult}
           // onClick={parseIt}
@@ -549,6 +580,14 @@ const AnnotationSearch = props => {
         >
           <FaSearch />
         </button>
+        <ReactTooltip
+          id="search-icon"
+          place="bottom"
+          type="info"
+          delayShow={500}
+        >
+          <span>Search</span>
+        </ReactTooltip>
       </div>
       {error && <div style={styles.error}>{error}</div>}
       <div
