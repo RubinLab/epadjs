@@ -62,7 +62,7 @@ const AnnotationSearch = props => {
     criteria: lists.criteria[0],
     term: ''
   });
-  const [typeSelected, setTypeSelected] = useState(false);
+  // const [typeSelected, setTypeSelected] = useState(false);
   const [selectedProject, setSelectedProject] = useState('');
   const [data, setData] = useState([]);
   const [rows, setRows] = useState(0);
@@ -88,15 +88,23 @@ const AnnotationSearch = props => {
   };
 
   useEffect(() => {
-    const promise =
-      props.pid === 'all'
-        ? getAllAnnotations()
-        : getSummaryAnnotations(props.pid);
-    Promise.all([promise])
-      .then(res => {
-        populateSearchResult(res);
-      })
-      .catch(err => console.error(err));
+    if (props.searchQuery) {
+      searchAnnotations({ searchQuery: props.searchQuery })
+        .then(res => {
+          populateSearchResult(res);
+        })
+        .catch(err => console.error(err));
+    } else {
+      const promise =
+        props.pid === 'all'
+          ? getAllAnnotations()
+          : getSummaryAnnotations(props.pid);
+      Promise.all([promise])
+        .then(res => {
+          populateSearchResult(res);
+        })
+        .catch(err => console.error(err));
+    }
   }, [props.pid]);
 
   const insertIntoQueryOnSelection = el => {
@@ -211,16 +219,21 @@ const AnnotationSearch = props => {
   };
 
   const getSearchResult = page => {
-    let searchQuery = parseQuery();
-    setData([]);
-    if (selectedProject) searchQuery += ` AND project:${selectedProject}`;
-    if (searchQuery) {
-      setError('');
-      searchAnnotations({ searchQuery })
-        .then(res => {
-          populateSearchResult(res);
-        })
-        .catch(err => console.error(err));
+    if (query.length === 0) {
+      // TODO get annoations for selected project (reset table)
+    } else {
+      let searchQuery = parseQuery();
+      setData([]);
+      if (selectedProject) searchQuery += ` AND project:${selectedProject}`;
+      if (searchQuery) {
+        setError('');
+        props.setQuery(searchQuery);
+        searchAnnotations({ searchQuery })
+          .then(res => {
+            populateSearchResult(res);
+          })
+          .catch(err => console.error(err));
+      }
     }
   };
 
@@ -326,7 +339,10 @@ const AnnotationSearch = props => {
     // query order is type + criteria + term
     const uppercaseArr = arr.map(el => el.toUpperCase());
     const beginning = uppercaseArr.slice(0, 3);
-    const end = uppercaseArr.length > 2 ? uppercaseArr.slice(arr.length - 3) : [...uppercaseArr];
+    const end =
+      uppercaseArr.length > 2
+        ? uppercaseArr.slice(arr.length - 3)
+        : [...uppercaseArr];
     const invalidBeginnig =
       beginning.includes('AND') || beginning.includes('OR');
     const invalidEnd = end.includes('AND') || end.includes('OR');

@@ -99,7 +99,8 @@ class App extends Component {
       reportsCompArr: [],
       minReportsArr: [],
       hiddenReports: {},
-      metric: null
+      metric: null,
+      searchQuery: ''
     };
   }
 
@@ -848,6 +849,7 @@ class App extends Component {
   };
 
   getPidUpdate = pid => {
+    this.setState({ searchQuery: '' });
     this.setState({ pid });
   };
 
@@ -1131,7 +1133,12 @@ class App extends Component {
                 <ProtectedRoute
                   path="/annotations"
                   render={props => (
-                    <AnnotationSearch {...props} pid={this.state.pid} />
+                    <AnnotationSearch
+                      {...props}
+                      pid={this.state.pid}
+                      searchQuery={this.state.searchQuery}
+                      setQuery={query => this.setState({ searchQuery: query })}
+                    />
                   )}
                 />
                 <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
@@ -1206,7 +1213,12 @@ class App extends Component {
               <ProtectedRoute
                 path="/annotations"
                 render={props => (
-                  <AnnotationSearch {...props} pid={this.state.pid} />
+                  <AnnotationSearch
+                    {...props}
+                    pid={this.state.pid}
+                    searchQuery={this.state.searchQuery}
+                    setQuery={query => this.setState({ searchQuery: query })}
+                  />
                 )}
               />
               <ProtectedRoute
