@@ -63,7 +63,6 @@ const AnnotationSearch = props => {
     criteria: lists.criteria[0],
     term: ''
   });
-  // const [typeSelected, setTypeSelected] = useState(false);
   const [selectedProject, setSelectedProject] = useState('');
   const [data, setData] = useState([]);
   const [rows, setRows] = useState(0);
@@ -71,10 +70,8 @@ const AnnotationSearch = props => {
   const [downloadClicked, setDownloadClicked] = useState(false);
   const [error, setError] = useState('');
   const [bookmark, setBookmark] = useState('');
-  // const [advanceSearch, setAdvanceSearch] = useState(false);
 
   const populateSearchResult = (res, pagination) => {
-    console.log(res);
     const result = Array.isArray(res) ? res[0] : res;
     if (pagination) {
       setData(data.concat(result.data.rows));
@@ -102,7 +99,7 @@ const AnnotationSearch = props => {
 
   useEffect(() => {
     if (props.searchQuery) {
-      searchAnnotations({ searchQuery: props.searchQuery })
+      searchAnnotations({ query: props.searchQuery })
         .then(res => {
           populateSearchResult(res);
         })
@@ -233,7 +230,7 @@ const AnnotationSearch = props => {
       if (searchQuery) {
         setError('');
         props.setQuery(searchQuery);
-        searchAnnotations({ searchQuery })
+        searchAnnotations({ query: searchQuery })
           .then(res => {
             populateSearchResult(res);
           })
@@ -341,7 +338,7 @@ const AnnotationSearch = props => {
   };
 
   const checkStartEndWithCondition = arr => {
-    // query order is type + criteria + term
+    // first and last three word can not be AND/OR
     const uppercaseArr = arr.map(el => el.toUpperCase());
     const beginning = uppercaseArr.slice(0, 3);
     const end =
@@ -351,7 +348,6 @@ const AnnotationSearch = props => {
     const invalidBeginnig =
       beginning.includes('AND') || beginning.includes('OR');
     const invalidEnd = end.includes('AND') || end.includes('OR');
-    // first and last three word can not be AND/OR
     return invalidBeginnig || invalidEnd;
   };
 
@@ -411,7 +407,7 @@ const AnnotationSearch = props => {
   };
 
   const parseQuery = () => {
-    // check if query contains any predined words
+    // check if query contains any predefined words
     const queryArray = seperateParanthesis(query.split(' '));
     let parsedQuery;
     if (checkSingleTermQuery(queryArray)) {
