@@ -87,6 +87,18 @@ const AnnotationSearch = props => {
     }
   };
 
+  const getAnnotationsOfProjets = () => {
+    const promise =
+      props.pid === 'all'
+        ? getAllAnnotations()
+        : getSummaryAnnotations(props.pid);
+    Promise.all([promise])
+      .then(res => {
+        populateSearchResult(res);
+      })
+      .catch(err => console.error(err));
+  };
+
   useEffect(() => {
     if (props.searchQuery) {
       searchAnnotations({ searchQuery: props.searchQuery })
@@ -95,15 +107,7 @@ const AnnotationSearch = props => {
         })
         .catch(err => console.error(err));
     } else {
-      const promise =
-        props.pid === 'all'
-          ? getAllAnnotations()
-          : getSummaryAnnotations(props.pid);
-      Promise.all([promise])
-        .then(res => {
-          populateSearchResult(res);
-        })
-        .catch(err => console.error(err));
+      getAnnotationsOfProjets();
     }
   }, [props.pid]);
 
@@ -220,7 +224,7 @@ const AnnotationSearch = props => {
 
   const getSearchResult = page => {
     if (query.length === 0) {
-      // TODO get annoations for selected project (reset table)
+      getAnnotationsOfProjets();
     } else {
       let searchQuery = parseQuery();
       setData([]);
