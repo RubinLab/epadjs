@@ -472,12 +472,12 @@ class App extends Component {
     if (viewType === 'search') {
       this.props.dispatch(clearSelection());
       pid
-        ? this.props.history.push(`/search/${pid}`)
-        : this.props.history.push(`/search`);
+        ? this.props.history.push(`/list/${pid}`)
+        : this.props.history.push(`/list`);
     } else if (viewType === 'display') {
       this.props.history.push(`/display`);
     } else if (viewType === 'annotations') {
-      this.props.history.push(`/annotations`);
+      this.props.history.push(`/search`);
     }
   };
 
@@ -573,7 +573,7 @@ class App extends Component {
     const newPid = this.props.location.pathname.split('/').pop();
     const route = this.props.location.pathname.split('/')[1];
 
-    if (oldPid !== newPid && route === 'search') {
+    if (oldPid !== newPid && route === 'list') {
       this.setState({ pid: newPid });
     }
   };
@@ -707,7 +707,7 @@ class App extends Component {
         localStorage.setItem('treeData', JSON.stringify({}));
         this.setState({ pid });
         if (this.props.openSeries.length === 0) {
-          this.props.history.push(`/search/${pid}`);
+          this.props.history.push(`/list/${pid}`);
         }
       }
       this.setState({ notifications });
@@ -1066,7 +1066,7 @@ class App extends Component {
                   )}
                 />
                 <ProtectedRoute
-                  path="/search/:pid?"
+                  path="/list/:pid?"
                   render={props => (
                     <SearchView
                       {...props}
@@ -1094,7 +1094,7 @@ class App extends Component {
                   )}
                 />
                 <ProtectedRoute
-                  path="/search/:pid?"
+                  path="/list/:pid?"
                   render={props => (
                     <SearchView
                       {...props}
@@ -1131,7 +1131,7 @@ class App extends Component {
                   render={props => <FlexView {...props} pid={this.state.pid} />}
                 />
                 <ProtectedRoute
-                  path="/annotations"
+                  path="/search"
                   render={props => (
                     <AnnotationSearch
                       {...props}
@@ -1149,7 +1149,7 @@ class App extends Component {
                 <ProtectedRoute
                   from="/"
                   exact
-                  to="/search"
+                  to="/list"
                   render={props => (
                     <SearchView
                       {...props}
@@ -1211,7 +1211,7 @@ class App extends Component {
               <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
-                path="/annotations"
+                path="/search"
                 render={props => (
                   <AnnotationSearch
                     {...props}

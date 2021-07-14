@@ -51,7 +51,7 @@ const NavBar = ({
             <li
               id="navbarli"
               className={
-                path.includes('search') ? 'nav-link activeNav' : 'nav-link'
+                path.includes('list') ? 'nav-link activeNav' : 'nav-link'
               }
               onClick={() => {
                 onSearchViewClick();
@@ -118,9 +118,9 @@ const NavBar = ({
               </React.Fragment>
             )}
             <li
-              id="navbar-ann"
+              // id="navbar-ann"
               className={
-                path.includes('annotations') ? 'nav-link activeNav' : 'nav-link'
+                path.includes('search') ? 'nav-link activeNav' : 'nav-link'
               }
               onClick={() => {
                 onSwitchView('annotations');

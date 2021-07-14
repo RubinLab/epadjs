@@ -200,7 +200,7 @@ class DisplayView extends Component {
     const prevActiveSerie = prevSeries[prevActivePort];
 
     if (this.props.series.length < 1) {
-      if (pid) this.props.history.push(`/search/${pid}`);
+      if (pid) this.props.history.push(`/list/${pid}`);
       else return;
       return;
     }
@@ -1598,9 +1598,9 @@ class DisplayView extends Component {
   render() {
     const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
     const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
-    // if (this.state.redirect) return <Redirect to="/search" />;
+    // if (this.state.redirect) return <Redirect to="/list" />;
     return !Object.entries(series).length ? (
-      <Redirect to="/search" />
+      <Redirect to="/list" />
     ) : (
       <React.Fragment>
         <RightsideBar
