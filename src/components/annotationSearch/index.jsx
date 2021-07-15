@@ -415,7 +415,6 @@ const AnnotationSearch = props => {
     } else {
       const isQueryInputValid = validateQuery(queryArray);
       let criteria = '';
-      console.log('isQueryInputValid', isQueryInputValid);
       if (isQueryInputValid) {
         parsedQuery = queryArray.reduce((all, item, index) => {
           if (lists.criteria.includes(item)) {
