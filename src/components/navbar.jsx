@@ -118,7 +118,7 @@ const NavBar = ({
               </React.Fragment>
             )}
             <li
-              // id="navbar-ann"
+              id="navbar-ann"
               className={
                 path.includes('search') ? 'nav-link activeNav' : 'nav-link'
               }
