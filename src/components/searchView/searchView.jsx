@@ -166,6 +166,10 @@ class SearchView extends Component {
     }
   };
 
+  componentWillUnmount() {
+    window.removeEventListener("openSeriesModal", this.handleSeriesModal);
+  }
+
   checkForAllAndUnassigned = () => {
     const { pid } = this.props;
     const checkFromUrl = pid === 'all' || pid === 'nonassigned';
