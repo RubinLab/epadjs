@@ -1,6 +1,6 @@
 export const MAX_PORT = 4;
 export const widthUnit = 20;
-export const DISP_MODALITIES = ["CT", "MR", "PT", "MG", "CR"];
+export const DISP_MODALITIES = ["CT", "MR", "PT", "MG", "CR", "US"];
 
 export const formatDates = (timeStamp) => {
   //split it by space

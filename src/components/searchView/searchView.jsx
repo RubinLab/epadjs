@@ -35,7 +35,7 @@ import {
   updateSingleSerie,
   updatePatientOnAimDelete
 } from '../annotationsList/action';
-import { MAX_PORT } from '../../constants';
+import { MAX_PORT, DISP_MODALITIES } from '../../constants';
 import DownloadSelection from './annotationDownloadModal';
 import './searchView.css';
 import UploadModal from './uploadModal';
@@ -132,6 +132,7 @@ class SearchView extends Component {
     window.addEventListener("openSeriesModal", this.handleSeriesModal);
   };
 
+  // App.js triggers this event when more than allowed series are sent from the url to open
   handleSeriesModal = (event) => {
     const list = event.detail;
     const seriesList = [list];
@@ -541,7 +542,7 @@ class SearchView extends Component {
     } else if (selectedSeries.length > 0) {
       //check if enough room to display selection
       for (let serie of selectedSeries) {
-        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen) {
+        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen && DISP_MODALITIES.includes(series.examType)) {
           notOpenSeries.push(serie);
         }
       }
@@ -600,7 +601,7 @@ class SearchView extends Component {
       groupedObj = this.groupUnderStudy(serieList);
       //check if enough room to display selection
       for (let serie of serieList) {
-        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen) {
+        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen && DISP_MODALITIES.includes(series.examType)) {
           notOpenSeries.push(serie);
         }
       }
