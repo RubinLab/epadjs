@@ -51,13 +51,14 @@ import { getStudies, getStudy } from "./services/studyServices";
 import { getSeries, getSingleSeries } from "./services/seriesServices";
 
 import { decrypt, decryptAndAdd } from "./services/decryptUrlService";
-import { MAX_PORT } from "./constants";
+import { MAX_PORT, DISP_MODALITIES } from "./constants";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
 import MinimizedReport from "./components/searchView/MinimizedReport";
+import { isSupported } from "dompurify";
 
 const messages = {
   noPatient: {
@@ -702,8 +703,8 @@ class App extends Component {
   };
 
   displaySeries = async (studyData) => {
-    const seriesArr = await this.getSeriesData(studyData);
-    console.log("series array", seriesArr);
+    const rawSeriesArray = await this.getSeriesData(studyData);
+    const seriesArr = rawSeriesArray.filter(this.isSupportedModality);
 
     if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
       window.dispatchEvent(
@@ -727,12 +728,14 @@ class App extends Component {
     }
   };
 
+  isSupportedModality = (serie) => {
+    return DISP_MODALITIES.includes(serie.examType);
+  };
+
   getSeriesData = async (studyData) => {
-    // this.props.dispatch(startLoading());
     const { projectID, patientID, studyUID } = studyData;
     try {
       const { data: series } = await getSeries(projectID, patientID, studyUID);
-      // this.props.dispatch(loadCompleted());
       return series;
     } catch (err) {
       this.props.dispatch(annotationsLoadingError(err));
