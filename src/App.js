@@ -686,8 +686,8 @@ class App extends Component {
     const { search } = this.props.location;
     let args;
     if (search && (args = search.split("?arg=")[1])) {
-      // const result = await decrypt(args);
-      const result = await decryptAndAdd(args);
+      const result = await decrypt(args);
+      // const result = await decryptAndAdd(args);
       const { patientID, studyUID, projectID } = result.data;
       const packedData = {
         projectID,
@@ -1187,7 +1187,9 @@ class App extends Component {
                     />
                   )}
                 />
-                {/* <ProtectedRoute
+                {/* LOOKS LIKE THIS IS DUPLICATE!!! */}
+                {/* 
+                <ProtectedRoute
                   path="/search/:pid?"
                   render={(props) => (
                     <SearchView
