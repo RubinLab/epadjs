@@ -5,13 +5,13 @@ export function scanDataFolder() {
   if (mode === "lite") projectId = "lite";
   else {
     const pathName = window.location.pathname;
-    if (!pathName.includes("/search")) {
+    if (!pathName.includes("/list")) {
       alert(
         "This function is only available under search view and while a project is selected!"
       );
       return;
     }
-    projectId = pathName.split("/search/")[1];
+    projectId = pathName.split("/list/")[1];
     if (projectId === "all" || projectId === "nonassigned") {
       alert("A project must be selected to put the data under!");
       return;

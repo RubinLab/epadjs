@@ -51,14 +51,14 @@ const NavBar = ({
             <li
               id="navbarli"
               className={
-                path.includes('search') ? 'nav-link activeNav' : 'nav-link'
+                path.includes('list') ? 'nav-link activeNav' : 'nav-link'
               }
               onClick={() => {
                 onSearchViewClick();
                 onSwitchView('search');
               }}
             >
-              Search
+              Patient List
             </li>
             <li
               id="navbarli"
@@ -120,13 +120,13 @@ const NavBar = ({
             <li
               id="navbar-ann"
               className={
-                path.includes('annotations') ? 'nav-link activeNav' : 'nav-link'
+                path.includes('search') ? 'nav-link activeNav' : 'nav-link'
               }
               onClick={() => {
                 onSwitchView('annotations');
               }}
             >
-              Annotations
+              Search
             </li>
           </ul>
           <ul className="navbar-nav ml-auto">
