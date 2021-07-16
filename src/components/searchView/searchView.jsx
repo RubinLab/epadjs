@@ -128,8 +128,15 @@ class SearchView extends Component {
         subjects,
         expandLevel
       });
-    } catch (err) {}
+    } catch (err) { }
+    window.addEventListener("openSeriesModal", this.handleSeriesModal);
   };
+
+  handleSeriesModal = (event) => {
+    const list = event.detail;
+    const seriesList = [list];
+    this.setState({ isSerieSelectionOpen: true, seriesList });
+  }
 
   componentDidUpdate = async prevProps => {
     const { uploadedPid, lastEventId, expandLevel } = this.props;
@@ -171,10 +178,10 @@ class SearchView extends Component {
       patients.length > 0
         ? patients
         : studies.length > 0
-        ? studies
-        : series.length > 0
-        ? series
-        : annotations;
+          ? studies
+          : series.length > 0
+            ? series
+            : annotations;
     selection.forEach((el, i) => {
       if (el.projectID === 'all' || el.projectID === 'nonassigned') {
         checkFromProjectID = true;
@@ -996,11 +1003,17 @@ class SearchView extends Component {
           onAddProject={this.handleProjectClick}
           admin={this.props.admin}
           hideEyeIcon={hideEyeIcon}
-          // expanding={expanding}
+        // expanding={expanding}
         />
         {isSerieSelectionOpen && !this.props.loading && (
           <ProjectModal
             seriesPassed={this.state.seriesList}
+            onCancel={this.closeSelectionModal}
+          />
+        )}
+        {this.props.showSeriesModal && (
+          <ProjectModal
+            seriesPassed={this.props.seriesList}
             onCancel={this.closeSelectionModal}
           />
         )}

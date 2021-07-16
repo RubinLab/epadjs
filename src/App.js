@@ -1,30 +1,30 @@
-import React, { Component } from 'react';
-import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { ToastContainer } from 'react-toastify';
-import { EventSourcePolyfill } from 'event-source-polyfill';
-import Keycloak from 'keycloak-js';
-import _ from 'lodash';
-import { getUser, getUserInfo } from './services/userServices';
-import NavBar from './components/navbar';
-import Sidebar from './components/sideBar/sidebar';
-import SearchView from './components/searchView/searchView';
-import DisplayView from './components/display/displayView';
-import AnnotationSearch from './components/annotationSearch';
-import AnotateView from './components/anotateView';
-import ProgressView from './components/progressView';
-import FlexView from './components/flexView';
-import NotFound from './components/notFound';
-import LoginForm from './components/loginForm';
-import Logout from './components/logout';
-import ProtectedRoute from './components/common/protectedRoute';
-import Cornerstone from './components/cornerstone/cornerstone';
-import Management from './components/management/mainMenu';
-import InfoMenu from './components/infoMenu';
-import UserMenu from './components/userProfileMenu.jsx';
-import WarningModal from './components/common/warningModal';
-import ConfirmationModal from './components/common/confirmationModal';
-import SelectModalMenu from './components/common/SelectModalMenu';
+import React, { Component } from "react";
+import { Route, Switch, Redirect, withRouter } from "react-router-dom";
+import { connect } from "react-redux";
+import { ToastContainer } from "react-toastify";
+import { EventSourcePolyfill } from "event-source-polyfill";
+import Keycloak from "keycloak-js";
+import _ from "lodash";
+import { getUser, getUserInfo } from "./services/userServices";
+import NavBar from "./components/navbar";
+import Sidebar from "./components/sideBar/sidebar";
+import SearchView from "./components/searchView/searchView";
+import DisplayView from "./components/display/displayView";
+import AnnotationSearch from "./components/annotationSearch";
+import AnotateView from "./components/anotateView";
+import ProgressView from "./components/progressView";
+import FlexView from "./components/flexView";
+import NotFound from "./components/notFound";
+import LoginForm from "./components/loginForm";
+import Logout from "./components/logout";
+import ProtectedRoute from "./components/common/protectedRoute";
+import Cornerstone from "./components/cornerstone/cornerstone";
+import Management from "./components/management/mainMenu";
+import InfoMenu from "./components/infoMenu";
+import UserMenu from "./components/userProfileMenu.jsx";
+import WarningModal from "./components/common/warningModal";
+import ConfirmationModal from "./components/common/confirmationModal";
+import SelectModalMenu from "./components/common/SelectModalMenu";
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
@@ -488,7 +488,7 @@ class App extends Component {
         : this.props.history.push(`/search`);
     } else if (viewType === "display") {
       this.props.history.push(`/display`);
-    } else if (viewType === 'annotations') {
+    } else if (viewType === "annotations") {
       this.props.history.push(`/annotations`);
     }
   };
@@ -553,7 +553,9 @@ class App extends Component {
           process.env.REACT_APP_AUTH_RESOURCE || keycloakData.resource;
         sessionStorage.setItem("auth", auth);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
-        this.completeAutorization(apiUrl);
+        this.completeAutorization(apiUrl).then(() => {
+          this.checkArguments();
+        });
         if (mode === "lite") this.setState({ pid: "lite" });
       })
       .catch((err) => {
@@ -590,7 +592,7 @@ class App extends Component {
     }
   };
 
-  completeAutorization = (apiUrl) => {
+  completeAutorization = async (apiUrl) => {
     let getAuthUser = null;
 
     if (sessionStorage.getItem("authMode") !== "external") {
@@ -625,7 +627,7 @@ class App extends Component {
       });
     }
 
-    getAuthUser
+    return getAuthUser
       .then(async (result) => {
         try {
           let user = {
@@ -667,28 +669,6 @@ class App extends Component {
             "message",
             this.getMessageFromEventSrc
           );
-          // TEACHING FILES RELATED //
-          const { search } = this.props.location;
-          let args;
-          if (search && (args = search.split("?arg=")[1])) {
-            // console.log("ARGS:", args);
-            // const result = await decrypt(args);
-            const result = await decryptAndAdd(args);
-            console.log("result data", result.data);
-            const { patientID, studyUID, projectID } = result.data;
-            // console.log("Result", result.data, patientID, studyUID);
-            const packedData = {
-              projectID,
-              patientID,
-              patientName: "patientName",
-              studyUID,
-            };
-            // this.props.dispatch(addToGrid(packData));
-            // this.props.dispatch(getSingleSerie(packData));
-            // getWholeData(packData);
-            // this.props.history.push("/display");
-            this.displaySeries(packedData);
-          }
         } catch (err) {
           console.log("Error in user retrieval!", err);
         }
@@ -698,87 +678,65 @@ class App extends Component {
       });
   };
 
-  getSeriesData = async (selected) => {
-    this.props.dispatch(startLoading());
-    const { projectID, patientID, studyUID } = selected;
+  checkArguments = async () => {
+    //*********************//
+    // TEACHING FILES PART //
+    //*********************//
+    const { search } = this.props.location;
+    let args;
+    if (search && (args = search.split("?arg=")[1])) {
+      const result = await decrypt(args);
+      // const result = await decryptAndAdd(args);
+      const { patientID, studyUID, projectID } = result.data;
+      const packedData = {
+        projectID,
+        patientID,
+        patientName: "patientName",
+        studyUID,
+      };
+      this.displaySeries(packedData);
+      //****************************//
+      // END OF TEACHING FILES PART //
+      //****************************//
+    }
+  };
+
+  displaySeries = async (studyData) => {
+    const seriesArr = await this.getSeriesData(studyData);
+    console.log("series array", seriesArr);
+
+    if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
+      window.dispatchEvent(
+        new CustomEvent("openSeriesModal", {
+          detail: seriesArr,
+        })
+      );
+    } else {
+      //if there is enough room
+      //add serie to the grid
+      const promiseArr = [];
+      for (let serie of seriesArr) {
+        this.props.dispatch(addToGrid(serie));
+        promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
+      }
+      Promise.all(promiseArr)
+        .then(() => {
+          this.props.history.push("/display");
+        })
+        .catch((err) => console.log(err));
+    }
+  };
+
+  getSeriesData = async (studyData) => {
+    // this.props.dispatch(startLoading());
+    const { projectID, patientID, studyUID } = studyData;
     try {
       const { data: series } = await getSeries(projectID, patientID, studyUID);
-      this.props.dispatch(loadCompleted());
+      // this.props.dispatch(loadCompleted());
       return series;
     } catch (err) {
       this.props.dispatch(annotationsLoadingError(err));
     }
-  };
-
-  displaySeries = async (selected) => {
-    console.log("In display series");
-    if (this.props.openSeries.length === MAX_PORT) {
-      this.props.dispatch(alertViewPortFull());
-    } else {
-      const { patientID, studyUID } = selected;
-      let seriesArr;
-
-      seriesArr = await this.getSeriesData(selected);
-      // console.log("before reduce", seriesArr);
-
-      //get extraction of the series (extract unopen series)
-      if (seriesArr.length > 0) seriesArr = this.excludeOpenSeries(seriesArr);
-      // console.log("Reduced array", seriesArr);
-
-      if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
-        alert(
-          "There are more than 6 series!, this situation is not handled at the moment"
-        );
-        //if there is not bring the modal
-        // await this.setState({
-        //   isSerieSelectionOpen: true,
-        //   selectedStudy: [seriesArr],
-        //   studyName: selected.studyDescription,
-        // });
-      } else {
-        //if there is enough room
-        //add serie to the grid
-        const promiseArr = [];
-        for (let serie of seriesArr) {
-          this.props.dispatch(addToGrid(serie));
-          promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
-        }
-        Promise.all(promiseArr)
-          .then(() => {
-            this.props.history.push("/display");
-          })
-          .catch((err) => console.log(err));
-
-        //if patient doesnot exist get patient
-        // if (!patientExists) {
-        //   // this.props.dispatch(getWholeData(null, selected));
-        //   getWholeData(null, selected);
-        // } else {
-        //   //check if study exist
-        //   this.props.dispatch(
-        //     updatePatient("study", true, patientID, studyUID)
-        //   );
-        // }
-      }
-      // this.props.dispatch(clearSelection());
-    }
-  };
-
-  excludeOpenSeries = (allSeriesArr) => {
-    const result = [];
-    //get all series number in an array
-    const idArr = this.props.openSeries.reduce((all, item, index) => {
-      all.push(item.seriesUID);
-      return all;
-    }, []);
-    //if array doesnot include that serie number
-    allSeriesArr.forEach((serie) => {
-      if (!idArr.includes(serie.seriesUID)) {
-        //push that serie in the result arr
-        result.push(serie);
-      }
-    });
-    return result;
   };
 
   getMessageFromEventSrc = (res) => {
@@ -1226,7 +1184,7 @@ class App extends Component {
                     />
                   )}
                 />
-                <ProtectedRoute
+                {/* <ProtectedRoute
                   path="/search/:pid?"
                   render={(props) => (
                     <SearchView
@@ -1253,7 +1211,7 @@ class App extends Component {
                       admin={this.state.admin}
                     />
                   )}
-                />
+                /> */}
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute
                   path="/progress/:wid?"
@@ -1267,7 +1225,7 @@ class App extends Component {
                 />
                 <ProtectedRoute
                   path="/annotations"
-                  render={props => (
+                  render={(props) => (
                     <AnnotationSearch {...props} pid={this.state.pid} />
                   )}
                 />
@@ -1342,7 +1300,7 @@ class App extends Component {
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
                 path="/annotations"
-                render={props => (
+                render={(props) => (
                   <AnnotationSearch {...props} pid={this.state.pid} />
                 )}
               />
@@ -1369,6 +1327,8 @@ class App extends Component {
                     getTreeData={this.getTreeData}
                     closeAllCounter={this.state.closeAll}
                     admin={this.state.admin}
+                    showSeriesModal={this.state.showSeriesModal}
+                    seriesList={this.state.seriesList}
                   />
                 )}
               />
