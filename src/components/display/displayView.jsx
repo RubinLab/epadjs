@@ -200,7 +200,7 @@ class DisplayView extends Component {
     const prevActiveSerie = prevSeries[prevActivePort];
 
     if (this.props.series.length < 1) {
-      if (pid) this.props.history.push(`/search/${pid}`);
+      if (pid) this.props.history.push(`/list/${pid}`);
       else return;
       return;
     }
@@ -510,6 +510,7 @@ class DisplayView extends Component {
           serie
         );
     });
+
     this.refreshAllViewports();
   };
 
@@ -598,22 +599,25 @@ class DisplayView extends Component {
   };
 
   openAimEditor = (aimID, seriesUID) => {
-    const { aimList } = this.props;
-    if (Object.entries(aimList).length !== 0) {
-      const aimJson = aimList[seriesUID][aimID].json;
-      aimJson.aimID = aimID;
-      const markupTypes = this.getMarkupTypesForAim(aimID);
-      aimJson["markupType"] = [...markupTypes];
-      aimJson["aimId"] = aimID;
-      if (this.hasSegmentation(aimJson)) {
-        this.setState({ hasSegmentation: true });
-        // this.setSerieActiveLabelMap(aimID);
+    try {
+      const { aimList } = this.props;
+      if (Object.entries(aimList).length !== 0) {
+        const aimJson = aimList[seriesUID][aimID].json;
+        aimJson.aimID = aimID;
+        const markupTypes = this.getMarkupTypesForAim(aimID);
+        aimJson["markupType"] = [...markupTypes];
+        aimJson["aimId"] = aimID;
+        if (this.hasSegmentation(aimJson)) {
+          this.setState({ hasSegmentation: true });
+          // this.setSerieActiveLabelMap(aimID);
+        }
+        if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
+          this.setState({ showAimEditor: false });
+        this.setState({ showAimEditor: true, selectedAim: aimJson });
+        setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
+        this.refreshAllViewports();
       }
-      if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
-        this.setState({ showAimEditor: false });
-      this.setState({ showAimEditor: true, selectedAim: aimJson });
-      setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
-      this.refreshAllViewports();
+    } catch (error) {
     }
   };
 
@@ -1598,9 +1602,9 @@ class DisplayView extends Component {
   render() {
     const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
     const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
-    // if (this.state.redirect) return <Redirect to="/search" />;
+    // if (this.state.redirect) return <Redirect to="/list" />;
     return !Object.entries(series).length ? (
-      <Redirect to="/search" />
+      <Redirect to="/list" />
     ) : (
       <React.Fragment>
         <RightsideBar

@@ -632,7 +632,7 @@ function Subjects(props) {
   return (
     <>
       <label>
-        Search subject:
+        Find patient:
         <input
           type="text"
           style={{ margin: '1rem' }}

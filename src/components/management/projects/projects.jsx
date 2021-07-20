@@ -389,7 +389,7 @@ class Projects extends React.Component {
         Cell: original => (
           <Link
             className="open-link"
-            to={"/search/" + original.row.checkbox.id}
+            to={"/list/" + original.row.checkbox.id}
           >
             <div onClick={this.props.onClose}>
               <FaRegEye className="menu-clickable" />
@@ -561,7 +561,7 @@ class Projects extends React.Component {
           />
         )}
         {this.state.hasOpenClicked && (
-          <ProtectedRoute from="/" exact to="/search" component={SearchView} />
+          <ProtectedRoute from="/" exact to="/list" component={SearchView} />
         )}
       </div>
     );

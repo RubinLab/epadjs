@@ -112,7 +112,7 @@ class SearchView extends Component {
     try {
       const { pid } = this.props;
       if (mode === 'thick' && !pid) {
-        this.props.history.push(`/search/${pid}`);
+        this.props.history.push(`/list/${pid}`);
       }
       let subjects = Object.values(this.props.treeData);
       if (subjects.length > 0) {
@@ -305,7 +305,7 @@ class SearchView extends Component {
         this.props.dispatch(clearSelection());
 
         this.setState(state => ({ update: state.update + 1 }));
-        this.props.history.push(`/search/${this.props.pid}`);
+        this.props.history.push(`/list/${this.props.pid}`);
         for (let serie of this.props.openSeries) {
           let type = serie.aimID ? 'annotation' : 'serie';
           this.props.dispatch(
@@ -388,7 +388,7 @@ class SearchView extends Component {
         }
         // this.props.clearTreeData();
         this.props.clearTreeExpand();
-        this.props.history.push(`/search/${this.props.pid}`);
+        this.props.history.push(`/list/${this.props.pid}`);
       })
       .catch(err => {
         console.log(err);
@@ -733,9 +733,9 @@ class SearchView extends Component {
           this.setState({ downloading: false });
           console.log(err);
         });
-      this.props.history.push(`/search`);
+      this.props.history.push(`/list`);
       this.props.dispatch(clearSelection());
-      this.props.history.push(`/search/${pid}`);
+      this.props.history.push(`/list/${pid}`);
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
     } else {
@@ -888,9 +888,9 @@ class SearchView extends Component {
   handleSubmitDownload = () => {
     this.setState({ showAnnotationModal: false });
     const pid = window.location.pathname.split('/').pop();
-    this.props.history.push(`/search`);
+    this.props.history.push(`/list`);
     this.props.dispatch(clearSelection());
-    this.props.history.push(`/search/${pid}`);
+    this.props.history.push(`/list/${pid}`);
   };
 
   handleUploadWizardClick = () => {
@@ -929,7 +929,7 @@ class SearchView extends Component {
       this.setState({ showProjects: false });
       this.props.clearTreeExpand()
       this.props.dispatch(clearSelection());
-      this.props.history.push(`/search/${id}`);
+      this.props.history.push(`/list/${id}`);
 
     } catch (err) {
       console.log(err);

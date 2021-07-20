@@ -181,12 +181,8 @@ export const displaySingleAim = (
 };
 
 export const selectPatient = (selectedPatientObj) => {
-  let {
-    projectID,
-    subjectName,
-    numberOfAnnotations,
-    index,
-  } = selectedPatientObj;
+  let { projectID, subjectName, numberOfAnnotations, index } =
+    selectedPatientObj;
   projectID = projectID ? projectID : "lite";
   const patientID = selectedPatientObj.subjectID;
   return {
@@ -440,7 +436,7 @@ const getAimListFields = (aims, ann) => {
         : "study";
 
       let aimName =
-        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].name
+        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]?.name
           .value;
       let ind = aimName.indexOf("~");
       if (ind >= 0) {
@@ -502,13 +498,8 @@ const getRequiredFields = (arr, type, selectedID) => {
         obj = { studyUID, studyDescription };
         result[studyUID] = obj;
       } else if (type === "serie") {
-        let {
-          seriesUID,
-          seriesDescription,
-          studyUID,
-          patientID,
-          projectID,
-        } = element;
+        let { seriesUID, seriesDescription, studyUID, patientID, projectID } =
+          element;
         projectID = projectID ? projectID : "lite";
         const isDisplayed = seriesUID === selectedID || selectedID === studyUID;
 
