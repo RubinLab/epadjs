@@ -9331,7 +9331,8 @@ div.nav-link.user-profile {
   color: white;
 }
 
-#navbarli.nav-link.activeNav {
+#navbarli.nav-link.activeNav,
+#navbar-ann.nav-link.activeNav {
   color: white;
 }
 

@@ -26,7 +26,11 @@ const NavBar = ({
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
-        <Link className="navbar-brand-right nounderline pr-3 " to="#" id="epad-logo">
+        <Link
+          className="navbar-brand-right nounderline pr-3 "
+          to="#"
+          id="epad-logo"
+        >
           <img src={logo} alt={'logo'} width="25px" />
           {mode === 'lite' && 'eLite'} {mode !== 'lite' && 'ePAD'}
         </Link>
@@ -47,14 +51,14 @@ const NavBar = ({
             <li
               id="navbarli"
               className={
-                path.includes('search') ? 'nav-link activeNav' : 'nav-link'
+                path.includes('list') ? 'nav-link activeNav' : 'nav-link'
               }
               onClick={() => {
                 onSearchViewClick();
                 onSwitchView('search');
               }}
             >
-              Search
+              Patient List
             </li>
             <li
               id="navbarli"
@@ -99,17 +103,6 @@ const NavBar = ({
                   </NavLink>
                 </li>{' '} */}
                 <li
-                  id="navbar-ann"
-                  className={
-                    path.includes('annotations') ? 'nav-link activeNav' : 'nav-link'
-                  }
-                  onClick={() => {
-                    onSwitchView('annotations')
-                  }}
-                >
-                  Annotations
-                </li>
-                <li
                   className="nav-item"
                   onClick={() => {
                     onSwitchView('flex');
@@ -124,6 +117,17 @@ const NavBar = ({
                 </li>{' '}
               </React.Fragment>
             )}
+            <li
+              id="navbar-ann"
+              className={
+                path.includes('search') ? 'nav-link activeNav' : 'nav-link'
+              }
+              onClick={() => {
+                onSwitchView('annotations');
+              }}
+            >
+              Search
+            </li>
           </ul>
           <ul className="navbar-nav ml-auto">
             {!user && (

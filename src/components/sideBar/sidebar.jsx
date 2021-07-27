@@ -107,7 +107,7 @@ class Sidebar extends Component {
         // const pid = projects[0].id;
         // this.setState({ projects, pid, selected: pid });
         // if (this.props.openSeries.length === 0) {
-        //   this.props.history.push(`/search/${pid}`);
+        //   this.props.history.push(`/list/${pid}`);
         // }
         // this.props.getPidUpdate(pid);
         const prTempMap = await this.getTemplatesProjectMap();
@@ -135,7 +135,7 @@ class Sidebar extends Component {
     if (this.props.openSeries.length === 0 && setPid) {
       const pid = projects[0].id;
       this.setState({pid, selected: pid })
-      this.props.history.push(`/search/${pid}`);
+      this.props.history.push(`/list/${pid}`);
       this.props.getPidUpdate(pid);
     }
   };
@@ -253,7 +253,7 @@ class Sidebar extends Component {
       this.collapseAll();
     }
     if (type === "project" && this.props.type === "search") {
-      this.props.history.push(`/search/${id}`);
+      this.props.history.push(`/list/${id}`);
       this.setState({ index: 0 });
       this.props.getPidUpdate(id);
       this.props.clearTreeExpand();
@@ -315,7 +315,7 @@ class Sidebar extends Component {
       if (mode === "thick") {
         const projectsList = projects.map(project => {
           const matchProject =
-            selected === project.id || pathname === project.id;
+            selected === project.id || pathname === project.id || this.props.pid === project.id;
           const className = matchProject
             ? "sidebar-row __selected"
             : "sidebar-row";
