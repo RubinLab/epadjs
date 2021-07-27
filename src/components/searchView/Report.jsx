@@ -148,7 +148,7 @@ const Report = props => {
     const metric = e.target.value;
     props.handleMetric(metric);
     const validMetric =
-      metric === 'ADLA' || metric === 'RECIST' || metric === 'intensitystddev' || metric === 'Export (beta)';
+      metric === 'ADLA' || metric === 'RECIST' || metric === 'intensitystddev' || metric === 'ser_original_shape_VoxelVolume' || metric === 'ser_original_shape_Maximum2DDiameterSlice' || metric === 'ser_original_firstorder_Maximum' || metric === 'ser_original_firstorder_Median' || metric === 'adc_original_firstorder_Maximum' || metric === 'adc_original_firstorder_Median' || metric === 've_original_firstorder_Maximum' || metric === 've_original_firstorder_Median'  || metric === 'Export (beta)';
     const type = 'BASELINE';
     let result;
     if (validMetric) {
@@ -502,6 +502,14 @@ const Report = props => {
                   <option>RECIST</option>
                   <option>ADLA</option>
                   <option>intensitystddev</option>
+                  <option>ser_original_shape_VoxelVolume</option>
+                  <option>ser_original_shape_Maximum2DDiameterSlice</option>
+                  <option>ser_original_firstorder_Maximum</option>
+                  <option>ser_original_firstorder_Median</option>
+                  <option>adc_original_firstorder_Maximum</option>
+                  <option>adc_original_firstorder_Median</option>
+                  <option>ve_original_firstorder_Maximum</option>
+                  <option>ve_original_firstorder_Median</option>
                   <option>Export (beta)</option>
                 </select>
               </div>
