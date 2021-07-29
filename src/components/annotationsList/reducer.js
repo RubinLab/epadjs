@@ -228,13 +228,10 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
 
-        // create id, data arrays for new data
         const newDataKeys = Object.keys(action.payload.aimsData);
-        // create id, data arrays for existing state
         const stateKeys = state.aimsList[action.payload.serID]
           ? Object.keys(state.aimsList[action.payload.serID])
           : [];
-        // creta new obkect
 
         const colorAimsList =
           newDataKeys.length >= stateKeys.length
@@ -249,63 +246,6 @@ const asyncReducer = (state = initialState, action) => {
                 colors
               );
 
-        /*
-
-        const usedColors = new Set();
-        // iterate over the old id array
-        stateKeys.forEach((el, i) => {
-          // find the index of the id in the new id array
-          const index = newDataKeys.indexOf(el);
-          if (index >= 0) {
-            // transfer the color from old one to new one and record data to the new object
-            newDataValues[index].color = stateValues[i].color;
-            colorAimsList[el] = newDataValues[index];
-            const color = stateValues[i].color.button.background;
-            // save color code except for "#aaaaaa" or commonlabels color
-            if (color !== '#aaaaaa' || color !== '#c0c0c0') {
-              usedColors.add(color);
-            }
-            // delete the id and the data from new data arrays
-            newDataKeys.splice(index, 1);
-            newDataValues.splice(index, 1);
-          }
-        });
-
-        // go back to the new id's
-        // iterate over it and assaign color
-        // find index from the length of the colors array
-        newDataKeys.forEach((el, i) => {
-          let index = usedColors.size;
-          let color;
-          if (index === colors.length) {
-            index = 0;
-            usedColors.clear();
-          }
-
-          console.log('index', index);
-          console.log('el', el);
-          const { imgAimUID, markupColor } = newDataValues[i];
-
-          console.log('imgAimUID', imgAimUID);
-          console.log('markupColor', markupColor);
-
-          if (imgAimUID) {
-            if (markupColor) {
-              color = {
-                button: { background: '#aaaaaa', color: 'black' },
-                label: { background: markupColor, color: 'white' }
-              };
-            } else {
-              color = colors[index];
-              usedColors.add(color);
-            }
-          } else {
-            color = commonLabels;
-          }
-          newDataValues[i].color = color;
-          colorAimsList[el] = newDataValues[i];
-        });
-*/
         const result = Object.assign({}, state, {
           loading: false,
           error: false,

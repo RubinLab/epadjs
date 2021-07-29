@@ -321,35 +321,30 @@ export const convertDateFormat = (str, attr) => {
 export const persistColorInSaveAim = (oldList, newList, colors) => {
   const newDataKeys = Object.keys(newList);
   const newDataValues = Object.values(newList);
-  // create id, data arrays for existing state
   const stateKeys = Object.keys(oldList);
   const stateValues = Object.values(oldList);
-  // creta new obkect
   const colorAimsList = {};
   const usedColors = new Set();
 
-  // iterate over the old id array
+  // transfer the colors of existing aim
   stateKeys.forEach((el, i) => {
-    // find the index of the id in the new id array
     const index = newDataKeys.indexOf(el);
     if (index >= 0) {
-      // transfer the color from old one to new one and record data to the new object
       newDataValues[index].color = stateValues[i].color;
       colorAimsList[el] = newDataValues[index];
       const color = stateValues[i].color.button.background;
-      // save color code except for "#aaaaaa" or commonlabels color
       if (color !== '#aaaaaa' || color !== '#c0c0c0') {
         if (usedColors.size === colors.length) {
           usedColors.clear();
         }
         usedColors.add(color);
       }
-      // delete the id and the data from new data arrays
       newDataKeys.splice(index, 1);
       newDataValues.splice(index, 1);
     }
   });
 
+  // assign colors to new aim
   newDataKeys.forEach((el, i) => {
     let color;
     let colorIndex = usedColors.size;
