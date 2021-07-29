@@ -109,6 +109,20 @@ const AnnotationSearch = props => {
     }
   }, [props.pid]);
 
+  const handleUserKeyPress = e => {
+    if (e.key === 'Enter') {
+      getSearchResult()
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleUserKeyPress);
+
+    return () => {
+      window.removeEventListener('keydown', handleUserKeyPress);
+    };
+  }, [handleUserKeyPress]);
+
   const insertIntoQueryOnSelection = el => {
     const field = document.getElementsByClassName(
       'form-control annotationSearch-text'
