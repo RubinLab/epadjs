@@ -99,7 +99,12 @@ const AnnotationSearch = props => {
 
   useEffect(() => {
     if (props.searchQuery) {
-      searchAnnotations({ query: props.searchQuery })
+      const searchQueryFinal = Object.keys(props.searchQuery)[0];
+      const searchQueryText = Object.values(props.searchQuery)[0].query;
+      const searchQueryProject = Object.values(props.searchQuery)[0].project;
+      setQuery(searchQueryText);
+      setSelectedProject(searchQueryProject || '');
+      searchAnnotations({ query: searchQueryFinal})
         .then(res => {
           populateSearchResult(res);
         })
@@ -108,6 +113,20 @@ const AnnotationSearch = props => {
       getAnnotationsOfProjets();
     }
   }, [props.pid]);
+
+  const handleUserKeyPress = e => {
+    if (e.key === 'Enter') {
+      getSearchResult();
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleUserKeyPress);
+
+    return () => {
+      window.removeEventListener('keydown', handleUserKeyPress);
+    };
+  }, [handleUserKeyPress]);
 
   const insertIntoQueryOnSelection = el => {
     const field = document.getElementsByClassName(
@@ -229,7 +248,13 @@ const AnnotationSearch = props => {
       if (selectedProject) searchQuery += ` AND project:${selectedProject}`;
       if (searchQuery) {
         setError('');
-        props.setQuery(searchQuery);
+        const queryToSave = {
+          [searchQuery]: {
+            query,
+            project: selectedProject
+          }
+        };
+        props.setQuery(queryToSave);
         searchAnnotations({ query: searchQuery })
           .then(res => {
             populateSearchResult(res);

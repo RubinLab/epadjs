@@ -7,19 +7,19 @@ import WorklistSelect from "./worklistSelect";
 import { getProjects } from "../../services/projectServices";
 import {
   getTemplatesUniversal,
-  getAllTemplates,
+  getAllTemplates
 } from "../../services/templateServices";
 import Collapsible from "react-collapsible";
 import { FaArrowAltCircleLeft } from "react-icons/fa";
 import {
   getWorklistsOfAssignee,
   getWorklistsOfCreator,
-  getWorklistProgress,
+  getWorklistProgress
 } from "../../services/worklistServices";
 import {
   getProjectMap,
   clearSelection,
-  getTemplates,
+  getTemplates
 } from "../annotationsList/action";
 // import { getPacs } from "../../services/pacsServices";
 import "./w2.css";
@@ -51,7 +51,7 @@ class Sidebar extends Component {
       progressView: [false, false],
       selected: null,
       type: "",
-      height: 200,
+      height: 200
     };
   }
 
@@ -118,7 +118,7 @@ class Sidebar extends Component {
           projectMap[project.id] = {
             projectName: name,
             defaultTemplate,
-            templates: prTempMap[project.id] || [],
+            templates: prTempMap[project.id] || []
           };
         }
         this.props.dispatch(getProjectMap(projectMap));
@@ -134,7 +134,7 @@ class Sidebar extends Component {
     this.setState({ projects });
     if (this.props.openSeries.length === 0 && setPid) {
       const pid = projects[0].id;
-      this.setState({pid, selected: pid })
+      this.setState({ pid, selected: pid });
       this.props.history.push(`/list/${pid}`);
       this.props.getPidUpdate(pid);
     }
@@ -197,8 +197,8 @@ class Sidebar extends Component {
       let { pathname } = this.props.location;
       const { pid, lastEventId, refresh, notificationAction } = this.props;
       const tagEdited = notificationAction.startsWith("Tag");
-      const uploaded = notificationAction.startsWith("Upload");
-      const notSideBarUpdate = tagEdited || uploaded;
+      // const uploaded = notificationAction.startsWith("Upload");
+      const notSideBarUpdate = tagEdited;
       let projects;
       if (prevProps.progressUpdated !== this.props.progressUpdated) {
         this.getWorklistandProgressData();
@@ -215,8 +215,11 @@ class Sidebar extends Component {
         this.setState({ pid });
       }
 
-      if (lastEventId !== prevProps.lastEventId && refresh && !notSideBarUpdate) {
-        console.log("still here")
+      if (
+        lastEventId !== prevProps.lastEventId &&
+        refresh &&
+        !notSideBarUpdate
+      ) {
         projects = await this.getProjectsData();
         this.setStateProjectData(projects);
       }
@@ -230,7 +233,7 @@ class Sidebar extends Component {
       width: "0",
       marginLeft: "0",
       buttonDisplay: "block",
-      open: false,
+      open: false
     });
   };
 
@@ -239,7 +242,7 @@ class Sidebar extends Component {
       width: "200px",
       marginLeft: "200px",
       buttonDisplay: "none",
-      open: true,
+      open: true
     });
   };
 
@@ -294,14 +297,14 @@ class Sidebar extends Component {
         <div onClick={this.collapseAll} key="worklist">
           Worklist
         </div>,
-        <div key="progress">Progress</div>,
+        <div key="progress">Progress</div>
       ];
     } else {
       return [
         <div onClick={this.collapseAll} key="worklist">
           Worklist
         </div>,
-        <div key="progress">Progress</div>,
+        <div key="progress">Progress</div>
       ];
     }
   };
@@ -315,7 +318,9 @@ class Sidebar extends Component {
       if (mode === "thick") {
         const projectsList = projects.map(project => {
           const matchProject =
-            selected === project.id || pathname === project.id || this.props.pid === project.id;
+            selected === project.id ||
+            pathname === project.id ||
+            this.props.pid === project.id;
           const className = matchProject
             ? "sidebar-row __selected"
             : "sidebar-row";
@@ -497,7 +502,7 @@ class Sidebar extends Component {
           className={this.state.open ? "mainView" : "mainView-closed"}
           style={{
             marginLeft: this.state.marginLeft,
-            height: "calc(100% - 50px)",
+            height: "calc(100% - 50px)"
           }}
         >
           <button
@@ -521,14 +526,14 @@ const mapStateToProps = state => {
     lastEventId,
     openSeries,
     notificationAction,
-    refresh,
+    refresh
   } = state.annotationsListReducer;
   return {
     activePort,
     lastEventId,
     openSeries,
     notificationAction,
-    refresh,
+    refresh
   };
 };
 export default withRouter(connect(mapStateToProps)(Sidebar));
