@@ -12,7 +12,7 @@ import {
 } from "./action";
 import SelectionItem from "./containers/selectionItem";
 import { FaRegCheckSquare } from "react-icons/fa";
-import { getSeries } from "../../services/seriesServices";
+import { getSeries, setSignificantSeries } from "../../services/seriesServices";
 import { MAX_PORT } from "../../constants";
 import "./annotationsList.css"
 
@@ -87,6 +87,8 @@ class selectSerieModal extends React.Component {
   displaySelection = async () => {
     let studies = Object.values(this.props.seriesPassed);
     let series = [];
+    let significantSeries = [];
+    let significanceOrder = 1;
     studies.forEach(arr => {
       series = series.concat(arr);
     });
@@ -94,17 +96,20 @@ class selectSerieModal extends React.Component {
     //concatanete all arrays to getther
     for (let i = 0; i < this.state.selectedToDisplay.length; i++) {
       if (this.state.selectedToDisplay[i]) {
-        this.props.dispatch(addToGrid(series[i], series[i].aimID));
-        if (this.state.selectionType === "aim") {
-          this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
-        } else {
-          this.props.dispatch(getSingleSerie(series[i]));
-        }
-        if (!this.props.patients[series[i]]) {
-          this.props.dispatch(getWholeData(series[i]));
-        }
+        significantSeries.push({ seriesUID: series[i].seriesUID, significanceOrder })
+        significanceOrder++;
+        // this.props.dispatch(addToGrid(series[i], series[i].aimID));
+        // if (this.state.selectionType === "aim") {
+        //   this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
+        // } else {
+        //   this.props.dispatch(getSingleSerie(series[i]));
+        // }
+        // if (!this.props.patients[series[i]]) {
+        //   this.props.dispatch(getWholeData(series[i]));
+        // }
       }
     }
+    console.log("significanceSeries", significantSeries);
     this.props.history.push("/display");
     this.handleCancel();
   };
@@ -196,7 +201,7 @@ class selectSerieModal extends React.Component {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body className="selectSerie-container" style={{ textAlign: "start" }}>
-          <div>Maximum 6 series can be viewed at a time.</div>
+          <div>Maximum {MAX_PORT} series can be viewed at a time.</div>
           <button
             size="lg"
             className="selectSerie-clearButton"

@@ -705,6 +705,7 @@ class App extends Component {
   displaySeries = async (studyData) => {
     const rawSeriesArray = await this.getSeriesData(studyData);
     const seriesArr = rawSeriesArray.filter(this.isSupportedModality);
+    console.log("seriesArr", seriesArr);
 
     if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
       window.dispatchEvent(
