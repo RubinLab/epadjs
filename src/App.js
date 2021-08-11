@@ -209,7 +209,7 @@ class App extends Component {
   };
 
   handleReportSelect = e => {
-    const { projectMap, selectedPatients } = this.props;
+    const { projectMap, selectedPatients, openSeries, activePort } = this.props;
     const patients = Object.values(selectedPatients);
     const reportType = e.target.dataset.opt;
     this.handleReportsClick();
@@ -223,11 +223,33 @@ class App extends Component {
             projectMap[this.state.pid].projectName
         });
       } else {
-        this.setState({
-          showWarning: true,
-          title: messages.noPatient.title,
-          message: messages.noPatient.message
-        });
+        if (openSeries.length > 0) {
+          const reportsCompArr = [...this.state.reportsCompArr];
+          const index = reportsCompArr.length;
+          reportsCompArr.push(
+            <Report
+              onClose={this.closeReportModal}
+              report={reportType}
+              index={index}
+              patient={openSeries[activePort]}
+              key={`report${index}`}
+              waterfallClickOn={this.handleWaterFallClickOnBar}
+              handleMetric={this.getMetric}
+              onMinimize={this.handleMinimizeReport}
+            />
+          );
+          this.setState({
+            template: null,
+            reportType,
+            reportsCompArr
+          });
+        } else {
+          this.setState({
+            showWarning: true,
+            title: messages.noPatient.title,
+            message: messages.noPatient.message
+          });
+        }
       }
     } else if (patients.length > 1 && reportType !== 'Waterfall') {
       this.setState({

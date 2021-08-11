@@ -426,11 +426,14 @@ const Report = props => {
     openAims(seriesToOpen, projectID, patientID);
     setShowConfirmModal(false);
   };
-
-  const header =
-    props.report !== 'Waterfall'
-      ? `${props.report} - ${clearCarets(props.patient.subjectName)}`
-      : '';
+  
+  let header = '';
+    if (props.report !== 'Waterfall' ) {
+      let patientName = '';
+     if (props.patient.subjectName) patientName = clearCarets(props.patient.subjectName);
+     else if (props.patient.patientName) patientName = clearCarets(props.patient.patientName);
+     header = `${props.report} - ${patientName}`
+    }
 
   return (
     <>
