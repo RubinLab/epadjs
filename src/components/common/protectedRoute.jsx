@@ -12,7 +12,7 @@ const ProtectedRoute = ({ path, component: Component, render, ...rest }) => {
           return <Redirect to="/login" />;
         }
         // } else if (!auth.getCurrentUser() &&mode  == "lite") {
-        //   return <Redirect to="/search" />;
+        //   return <Redirect to="/list" />;
         // }
         return Component ? <Component {...props} /> : render(props);
       }}

@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
+import { toast } from 'react-toastify';
 import _ from 'lodash';
-import { FaSearch, FaPlus } from 'react-icons/fa';
+import Collapsible from 'react-collapsible';
+import { FaSearch, FaPlus, FaEraser } from 'react-icons/fa';
+import ReactTooltip from 'react-tooltip';
 import {
   searchAnnotations,
-  getAllAnnotations
+  getAllAnnotations,
+  getSummaryAnnotations
 } from './../../services/annotationServices.js';
 import AnnotationTable from './AnnotationTable.jsx';
 import './annotationSearch.css';
@@ -15,7 +19,7 @@ const lists = {
   organize: ['AND', 'OR', '(', ')'],
   paranthesis: ['(', ')'],
   condition: ['AND', 'OR'],
-  type: ['modality', 'diagnosis', 'anatomy'],
+  type: ['modality', 'observation', 'anatomy'],
   criteria: ['equals', 'contains']
 };
 
@@ -24,7 +28,7 @@ const explanation = {
   type: 'Select a field from annotation',
   criteria: 'Select a criteria',
   term: 'Type the key word that you want to look for above',
-  project: 'Select project: ',
+  project: 'Search in all ePAD',
   noResult: 'Can not find any result!'
 };
 
@@ -50,6 +54,8 @@ const styles = {
   }
 };
 
+const mode = sessionStorage.getItem('mode');
+
 const AnnotationSearch = props => {
   const [query, setQuery] = useState('');
   const [partialQuery, setPartialQuery] = useState({
@@ -57,7 +63,6 @@ const AnnotationSearch = props => {
     criteria: lists.criteria[0],
     term: ''
   });
-  const [typeSelected, setTypeSelected] = useState(false);
   const [selectedProject, setSelectedProject] = useState('');
   const [data, setData] = useState([]);
   const [rows, setRows] = useState(0);
@@ -65,6 +70,63 @@ const AnnotationSearch = props => {
   const [downloadClicked, setDownloadClicked] = useState(false);
   const [error, setError] = useState('');
   const [bookmark, setBookmark] = useState('');
+
+  const populateSearchResult = (res, pagination) => {
+    const result = Array.isArray(res) ? res[0] : res;
+    if (pagination) {
+      setData(data.concat(result.data.rows));
+    } else {
+      setData(result.data.rows);
+    }
+    setRows(result.data.total_rows);
+    setBookmark(result.data.bookmark);
+    if (result.data.total_rows === 0) {
+      toast.info(explanation.noResult, { position: 'top-right' });
+    }
+  };
+
+  const getAnnotationsOfProjets = () => {
+    const promise =
+      props.pid === 'all'
+        ? getAllAnnotations()
+        : getSummaryAnnotations(props.pid);
+    Promise.all([promise])
+      .then(res => {
+        populateSearchResult(res);
+      })
+      .catch(err => console.error(err));
+  };
+
+  useEffect(() => {
+    if (props.searchQuery) {
+      const searchQueryFinal = Object.keys(props.searchQuery)[0];
+      const searchQueryText = Object.values(props.searchQuery)[0].query;
+      const searchQueryProject = Object.values(props.searchQuery)[0].project;
+      setQuery(searchQueryText);
+      setSelectedProject(searchQueryProject || '');
+      searchAnnotations({ query: searchQueryFinal})
+        .then(res => {
+          populateSearchResult(res);
+        })
+        .catch(err => console.error(err));
+    } else {
+      getAnnotationsOfProjets();
+    }
+  }, [props.pid]);
+
+  const handleUserKeyPress = e => {
+    if (e.key === 'Enter') {
+      getSearchResult();
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleUserKeyPress);
+
+    return () => {
+      window.removeEventListener('keydown', handleUserKeyPress);
+    };
+  }, [handleUserKeyPress]);
 
   const insertIntoQueryOnSelection = el => {
     const field = document.getElementsByClassName(
@@ -137,7 +199,6 @@ const AnnotationSearch = props => {
     );
   };
 
-
   const renderQueryItem = () => {
     return (
       <div className="annotationSearch-cont__item">
@@ -178,31 +239,35 @@ const AnnotationSearch = props => {
     );
   };
 
-
-  const populateSearchResult = res => {
-    setData(data.concat(res.data.rows));
-    setRows(res.data.total_rows);
-    setBookmark(res.data.bookmark);
-  };
-
   const getSearchResult = page => {
-    let query = parseQuery();
-    setData([]);
-    if (selectedProject) query += ` AND project:${selectedProject}`;
-    if (query) {
-      setError('');
-      searchAnnotations({ query })
-        .then(res => {
-          populateSearchResult(res);
-        })
-        .catch(err => console.error(err));
+    if (query.length === 0) {
+      getAnnotationsOfProjets();
+    } else {
+      let searchQuery = parseQuery();
+      setData([]);
+      if (selectedProject) searchQuery += ` AND project:${selectedProject}`;
+      if (searchQuery) {
+        setError('');
+        const queryToSave = {
+          [searchQuery]: {
+            query,
+            project: selectedProject
+          }
+        };
+        props.setQuery(queryToSave);
+        searchAnnotations({ query: searchQuery })
+          .then(res => {
+            populateSearchResult(res);
+          })
+          .catch(err => console.error(err));
+      }
     }
   };
 
   const getNewData = bm => {
     getAllAnnotations(bm)
       .then(res => {
-        populateSearchResult(res);
+        populateSearchResult(res, true);
       })
       .catch(err => console.error(err));
     // get the new data with bookmark
@@ -298,12 +363,17 @@ const AnnotationSearch = props => {
   };
 
   const checkStartEndWithCondition = arr => {
-    // query order is type + criteria + term
-    const firstAndLastThree = arr.slice(0, 3).concat(arr.slice(arr.length - 3));
     // first and last three word can not be AND/OR
-    return (
-      firstAndLastThree.includes('AND') || firstAndLastThree.includes('OR')
-    );
+    const uppercaseArr = arr.map(el => el.toUpperCase());
+    const beginning = uppercaseArr.slice(0, 3);
+    const end =
+      uppercaseArr.length > 2
+        ? uppercaseArr.slice(arr.length - 3)
+        : [...uppercaseArr];
+    const invalidBeginnig =
+      beginning.includes('AND') || beginning.includes('OR');
+    const invalidEnd = end.includes('AND') || end.includes('OR');
+    return invalidBeginnig || invalidEnd;
   };
 
   const validateQuery = arr => {
@@ -346,36 +416,57 @@ const AnnotationSearch = props => {
     return true;
   };
 
+  const checkSingleTermQuery = arr => {
+    const includeParanthesis = query.includes('(') || query.includes(')');
+    const includeOperator =
+      query.toUpperCase().includes('AND') || query.toUpperCase().includes('OR');
+    const { criteriaArr, typeArr } = validateQueryContent(arr);
+    const includeCriteria = criteriaArr.length > 0;
+    const includeType = typeArr.length > 0;
+    return !(
+      includeParanthesis ||
+      includeOperator ||
+      includeCriteria ||
+      includeType
+    );
+  };
+
   const parseQuery = () => {
+    // check if query contains any predefined words
     const queryArray = seperateParanthesis(query.split(' '));
-    const isQueryInputValid = validateQuery(queryArray);
-    let criteria = '';
-    if (isQueryInputValid) {
-      const parsedQuery = queryArray.reduce((all, item, index) => {
-        if (lists.criteria.includes(item)) {
-          all += ':';
-          criteria = item;
-        } else if (
-          item.toLowerCase() === 'and' ||
-          item.toLowerCase() === 'or'
-        ) {
-          all = `${all} ${item.toUpperCase()} `;
-        } else if (lists.type.includes(item)) {
-          all += `${item}`;
-        } else if (lists.paranthesis.includes(item)) {
-          all += `${item}`;
-        } else {
-          if (criteria === 'equals') {
-            all += `"${item}"`;
-          }
-          if (criteria === 'contains') {
+    let parsedQuery;
+    if (checkSingleTermQuery(queryArray)) {
+      parsedQuery = query;
+    } else {
+      const isQueryInputValid = validateQuery(queryArray);
+      let criteria = '';
+      if (isQueryInputValid) {
+        parsedQuery = queryArray.reduce((all, item, index) => {
+          if (lists.criteria.includes(item)) {
+            all += ':';
+            criteria = item;
+          } else if (
+            item.toLowerCase() === 'and' ||
+            item.toLowerCase() === 'or'
+          ) {
+            all = `${all} ${item.toUpperCase()} `;
+          } else if (lists.type.includes(item)) {
             all += `${item}`;
+          } else if (lists.paranthesis.includes(item)) {
+            all += `${item}`;
+          } else {
+            if (criteria === 'equals') {
+              all += `"${item}"`;
+            }
+            if (criteria === 'contains') {
+              all += `${item}`;
+            }
           }
-        }
-        return all;
-      }, '');
-      return parsedQuery;
+          return all;
+        }, '');
+      }
     }
+    return parsedQuery;
   };
 
   const renderOptions = () => {
@@ -404,8 +495,6 @@ const AnnotationSearch = props => {
   };
 
   const renderProjectSelect = () => {
-    const projectNames = Object.values(props.projectMap);
-    const projectID = Object.keys(props.projectMap);
     return (
       <div
         className="annotationSearch-cont__item"
@@ -415,14 +504,17 @@ const AnnotationSearch = props => {
           className="annotaionSearch-title"
           style={{ fontsize: '1.2rem' }}
         >{`${explanation.project}`}</div>
-        <select
+        <input
           name="project-dropdown"
-          onChange={e => setSelectedProject(e.target.value)}
+          type="checkbox"
+          checked={selectedProject === ''}
+          onChange={e => {
+            if (e.target.checked === false) setSelectedProject(props.pid);
+            else setSelectedProject('');
+          }}
           onMouseDown={e => e.stopPropagation()}
           style={{ margin: '0rem 1rem', padding: '1.8px' }}
-        >
-          {renderOptions()}
-        </select>
+        />
       </div>
     );
   };
@@ -463,7 +555,37 @@ const AnnotationSearch = props => {
         <button
           className={`btn btn-secondary`}
           type="button"
+          name="erase-button"
+          data-tip
+          data-for="erase-icon"
+          className="btn btn-secondary annotationSearch-btn"
+          onClick={() => setQuery('')}
+          // onClick={parseIt}
+          // disabled={index < count}
+          style={{
+            padding: '0.3rem 0.5rem',
+            height: 'fit-content',
+            fontSize: '1rem',
+            marginTop: '0.1rem',
+            width: '5%'
+          }}
+        >
+          <FaEraser />
+        </button>
+        <ReactTooltip
+          id="erase-icon"
+          place="bottom"
+          type="info"
+          delayShow={500}
+        >
+          <span>Clear query</span>
+        </ReactTooltip>
+        <button
+          className={`btn btn-secondary`}
+          type="button"
           name="search-button"
+          data-tip
+          data-for="search-icon"
           className="btn btn-secondary annotationSearch-btn"
           onClick={getSearchResult}
           // onClick={parseIt}
@@ -478,6 +600,14 @@ const AnnotationSearch = props => {
         >
           <FaSearch />
         </button>
+        <ReactTooltip
+          id="search-icon"
+          place="bottom"
+          type="info"
+          delayShow={500}
+        >
+          <span>Search</span>
+        </ReactTooltip>
       </div>
       {error && <div style={styles.error}>{error}</div>}
       <div
@@ -485,23 +615,27 @@ const AnnotationSearch = props => {
           margin: '0.5rem 2rem'
         }}
       >
-        {renderQueryItem()}
-        {renderOrganizeItem('organize')}
-        {renderProjectSelect()}
-        <button
-          className={`btn btn-secondary`}
-          style={styles.downloadButton}
-          name="download"
-          onClick={() => setDownloadClicked(true)}
-          type="button"
-          disabled={Object.keys(props.selectedAnnotations).length === 0}
+        <Collapsible
+          trigger="Advanced search"
+          triggerClassName="advancedSearch__closed"
+          triggerOpenedClassName="advancedSearch__open"
+          contentInnerClassName="advancedSearch-content"
         >
-          DOWNLOAD
-        </button>
-        {rows === 0 && (
-          <div style={{ ...styles.error, margin: '0rem' }}>
-            {explanation.noResult}
-          </div>
+          {renderQueryItem()}
+          {renderOrganizeItem('organize')}
+        </Collapsible>
+        {mode !== 'lite' && renderProjectSelect()}
+        {Object.keys(props.selectedAnnotations).length !== 0 && (
+          <button
+            className={`btn btn-secondary`}
+            style={styles.downloadButton}
+            name="download"
+            onClick={() => setDownloadClicked(true)}
+            type="button"
+            disabled={Object.keys(props.selectedAnnotations).length === 0}
+          >
+            DOWNLOAD
+          </button>
         )}
         {data.length > 0 && (
           <AnnotationTable

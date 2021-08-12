@@ -12,12 +12,12 @@ export function getTemplatesFromDb() {
 }
 export async function getTemplatesOfProjects(projectId = "lite") {
   return http.get(
-    apiUrl + "/projects/" + projectId + "/templates?format=summary"
+    apiUrl + "/projects/" + encodeURIComponent(projectId) + "/templates?format=summary"
   );
 }
 
 export async function getTemplates(projectId = "lite") {
-  return http.get(apiUrl + "/projects/" + projectId + "/templates");
+  return http.get(apiUrl + "/projects/" + encodeURIComponent(projectId) + "/templates");
 }
 
 export function downloadTemplates(tempIDlist, selection) {
@@ -27,7 +27,7 @@ export function downloadTemplates(tempIDlist, selection) {
 }
 
 export function deleteTemplate(templateID) {
-  return http.delete(apiUrl + "/templates/" + templateID);
+  return http.delete(apiUrl + "/templates/" + encodeURIComponent(templateID));
 }
 
 export function getTemplatesUniversal() {
@@ -39,9 +39,9 @@ export function getAllTemplates() {
 }
 
 export function deleteProjectsTemplate(templateID, projectID) {
-  return http.delete(`${apiUrl}/projects/${projectID}/templates/${templateID}`);
+  return http.delete(`${apiUrl}/projects/${encodeURIComponent(projectID)}/templates/${encodeURIComponent(templateID)}`);
 }
 
 export function addTemplateToProject(templateID, projectID) {
-  return http.put(`${apiUrl}/projects/${projectID}/templates/${templateID}`);
+  return http.put(`${apiUrl}/projects/${encodeURIComponent(projectID)}/templates/${encodeURIComponent(templateID)}`);
 }

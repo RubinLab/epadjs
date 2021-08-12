@@ -187,7 +187,6 @@ function AnnotationTable(props) {
 
   useEffect(() => {
     preparePageData(props.data, defaultPageSize, currentPageIndex);
-
   }, [props.noOfRows, props.data]);
 
   const getSeriesData = async selected => {
@@ -468,7 +467,43 @@ function AnnotationTable(props) {
           ).split(' ');
           return <div>{studyDateArr[1]}</div>;
         }
-      }
+      },
+      {
+        Header: 'Modality',
+        sortable: true,
+        resizable: true,
+        accessor: 'modality',
+      },
+      {
+        Header: 'Anatomy',
+        sortable: true,
+        resizable: true,
+        accessor: 'anatomy',
+        Cell: ({ row }) => {
+          return (
+            <div>
+              {Array.isArray(row.original.anatomy)
+                ? row.original.anatomy.join(', ')
+                : row.original.anatomy}
+            </div>
+          );
+        }
+      },
+      {
+        Header: 'Observation',
+        sortable: true,
+        resizable: true,
+        accessor: 'observation',
+        Cell: ({ row }) => {
+          return (
+            <div>
+              {Array.isArray(row.original.observation)
+                ? row.original.observation.join(', ')
+                : row.original.observation}
+            </div>
+          );
+        }
+      },
     ],
     []
   );
@@ -480,7 +515,6 @@ function AnnotationTable(props) {
         setCurrentPageIndex(pageIndex);
         if (props.data.length <= pageIndex * defaultPageSize) {
           props.getNewData(props.bookmark);
-
         } else {
           preparePageData(props.data, defaultPageSize, pageIndex);
         }
