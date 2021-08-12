@@ -435,7 +435,7 @@ class Users extends React.Component {
             }, "") : "Add user to a project";
           return (
             <div
-              id={`projects-${original.index}`}
+              id={`projects-${original.row.checkbox.username}`}
               onClick={() => {
                 this.displayUserRoleEdit();
                 this.saveClickedUser(original);
@@ -484,7 +484,7 @@ class Users extends React.Component {
           return (
             <div
               className="menu-clickable"
-              id={`permissions-${original.index}`}
+              id={`permissions-${original.row.checkbox.username}`}
               onClick={() => {
                 this.displayUserPermissionEdit(original.index);
                 this.saveClickedUser(original);
@@ -503,6 +503,7 @@ class Users extends React.Component {
         Cell: original =>
           this.state.hasAdminPermission ? (
             <div
+              id={`delete-${original.row.checkbox.username}`}
               onClick={() => {
                 this.handleSingleDelete();
                 this.saveClickedUser(original);
