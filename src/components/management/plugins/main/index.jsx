@@ -119,7 +119,7 @@ class Plugins extends React.Component {
   };
 
   addProject = (projectArray, tableSelectedData) => {
-    if (this.state.isAdmin === true) {
+    // if (this.state.isAdmin === true) {
       const tempProjectMap = arrayToMap(projectArray);
       this.setState({
         hasAddProjectClicked: true,
@@ -127,16 +127,16 @@ class Plugins extends React.Component {
         tableSelectedData: tableSelectedData,
         selectedProjects: projectArray,
       });
-    } else {
-      toast.info("user has no right to add project. Admin required", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    }
+    // } else {
+    //   toast.info("user has no right to add project. Admin required", {
+    //     position: "top-right",
+    //     autoClose: 5000,
+    //     hideProgressBar: false,
+    //     closeOnClick: true,
+    //     pauseOnHover: true,
+    //     draggable: true,
+    //   });
+    // }
   };
 
   handleAddProjectCancel = () => {
@@ -164,7 +164,8 @@ class Plugins extends React.Component {
     projectsToRemove = oldProjects.filter(
       (prid) => !newProjects.includes(prid)
     );
-
+    console.log("checking adding project for plugin :projectsToAdd",projectsToAdd);
+    console.log("checking adding project for plugin :projectsToRemove",projectsToRemove);
     const projectsArrayAsResponse = await updateProjectsForPlugin(
       selectedPluginId,
       {
@@ -819,7 +820,7 @@ class Plugins extends React.Component {
             onCancel={this.handleCancel}
           />
         )}
-        {this.state.hasAddProjectClicked && this.state.isAdmin && (
+        {this.state.hasAddProjectClicked && (
           <PluginProjectWindow
             onChange={this.handleProjectSelect}
             onCancel={this.handleAddProjectCancel}

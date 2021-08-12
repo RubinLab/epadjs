@@ -251,6 +251,7 @@ class ParametersWindow extends React.Component {
   defineParametersTableColumns = () => {
     return [
       {
+        id: "id",
         Header: "id",
         accessor: "paramid",
         sortable: true,
@@ -259,6 +260,7 @@ class ParametersWindow extends React.Component {
         width: 70,
       },
       {
+        id: "name",
         Header: "Name",
         accessor: "name",
         sortable: true,
@@ -267,38 +269,95 @@ class ParametersWindow extends React.Component {
         width: 70,
       },
       {
-        Header: "Send sendparamtodocker",
+        id : "sendparam",
+        Header: "send param to docker",
         accessor: "sendparamtodocker",
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
         width: 70,
+        Cell: (data) => {
+          console.log("me",data.original);
+          if (data.original.sendparamtodocker === 1){
+            return (
+              "yes"
+            );
+          }else{
+            return (
+              "no"
+            );
+          }
+
+        },
       },
       {
-        Header: "Send Name",
+        id: "sendname",
+        Header: "send name",
         accessor: "sendname",
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
         width: 70,
+        Cell: (data) => {
+          console.log("me",data.original);
+          if (data.original.sendname === 1){
+            return (
+              "yes"
+            );
+          }else{
+            return (
+              "no"
+            );
+          }
+
+        },
       },
       {
+        id: "uploadimages",
         Header: "upload images",
         accessor: "uploadimages",
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
         width: 70,
+        Cell: (data) => {
+          console.log("me",data.original);
+          if (data.original.uploadimages === 1){
+            return (
+              "yes"
+            );
+          }else{
+            return (
+              "no"
+            );
+          }
+
+        },
       },
       {
+        id:"uploadaims",
         Header: "upload aims",
         accessor: "uploadaims",
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
         width: 70,
+        Cell: (data) => {
+          console.log("me",data.original);
+          if (data.original.uploadaims === 1){
+            return (
+              "yes"
+            );
+          }else{
+            return (
+              "no"
+            );
+          }
+
+        },
       },
       {
+        id: "format",
         Header: "format",
         accessor: "format",
         sortable: true,
@@ -307,6 +366,7 @@ class ParametersWindow extends React.Component {
         width: 100,
       },
       {
+        id: "prefix",
         Header: "prefix",
         accessor: "prefix",
         sortable: true,
@@ -315,6 +375,7 @@ class ParametersWindow extends React.Component {
         width: 100,
       },
       {
+        id: "inputbinding",
         Header: "inputbinding",
         accessor: "inputBinding",
         sortable: true,
@@ -323,6 +384,7 @@ class ParametersWindow extends React.Component {
         width: 100,
       },
       {
+        id :"value",
         Header: "value",
         accessor: "default_value",
         sortable: true,
@@ -330,8 +392,8 @@ class ParametersWindow extends React.Component {
         minResizeWidth: 50,
         width: 100,
       },
-
       {
+        id:"type",
         Header: "type",
         accessor: "type",
         sortable: true,
@@ -341,6 +403,7 @@ class ParametersWindow extends React.Component {
       },
 
       {
+        id: "desciption",
         Header: "description",
         accessor: "description",
         sortable: true,
@@ -349,6 +412,7 @@ class ParametersWindow extends React.Component {
         width: 100,
       },
       {
+        id:"deleteone",
         Header: "",
         Cell: (data) => {
           //const rowdata = original.row.checkbox;
