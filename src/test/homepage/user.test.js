@@ -166,7 +166,7 @@ describe('executing test scenario on ePAD', () => {
     expect(project).toMatch(/test project/);
   });
 
-  test('it deletes single patient from row', async () => {
+  test('it deletes single user from row', async () => {
     const usersAfterDelete = await users.singleDelete('epad_user1@gmail.com');
     evaluate(usersAfterDelete)
       .to.be.an('array')

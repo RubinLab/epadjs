@@ -30,20 +30,6 @@ class User extends Basepage {
     await this.driver.wait(until.elementLocated(By.className('--email'), 1000));
   }
 
-  async getUserIndex(username) {
-    // check if the user list is populated
-    if (this.usersList.length === 0 && this.emailsList.length === 0) {
-      await this.listUsers();
-    }
-    // if populated get the index
-    return this.emailsList.indexOf(username);
-  }
-
-  async compareUserList() {
-    const newEmailsList = await this.listUsers();
-    return this.emailsList.length > newEmailsList.length;
-  }
-
   async singleDelete(username) {
     const elementXpath = "//div[@id='delete-" + username + "']";
     const deleteButton = await this.driver.findElements(By.xpath(elementXpath));
