@@ -46,10 +46,12 @@ export function getCurrentUser() {
 }
 
 export async function getAuthHeader() {
+  const API_KEY = sessionStorage.getItem("API_KEY");
   if (this.keycloak) {
     try {
       await refreshToken(this.keycloak, 5);
       const header = `Bearer ${this.keycloak.token}`;
+      console.log("header", header);
       if (header) {
         cornerstoneWADOImageLoader.configure({
           beforeSend: function (xhr) {
@@ -60,6 +62,17 @@ export async function getAuthHeader() {
       }
     } catch (err) {
       this.keycloak.logout();
+    }
+  } else if (API_KEY) {
+    const header = `apikey ${API_KEY}`;
+    console.log("header API_KEY", header);
+    if (header) {
+      cornerstoneWADOImageLoader.configure({
+        beforeSend: function (xhr) {
+          xhr.setRequestHeader("Authorization", header);
+        },
+      });
+      return header;
     }
   }
   return undefined;
