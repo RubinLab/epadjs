@@ -36,7 +36,7 @@ import {
   getTemplates,
   segUploadCompleted,
   getSingleSerie,
-  addToGrid,
+  addToGrid2,
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
@@ -546,8 +546,8 @@ class App extends Component {
           process.env.REACT_APP_AUTH_RESOURCE || keycloakData.resource;
         sessionStorage.setItem("auth", auth);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
-        this.completeAutorization(apiUrl);
         if (mode === "lite") this.setState({ pid: "lite" });
+        this.checkArguments();
       })
       .catch((err) => {
         console.error(err);
@@ -583,12 +583,58 @@ class App extends Component {
     }
   };
 
-  completeAutorization = (apiUrl) => {
-    let getAuthUser = null;
-    this.checkArguments();
-    return;
+  componentWillUnmount = () => {
+    this.eventSource.removeEventListener(
+      "message",
+      this.getMessageFromEventSrc
+    );
+    localStorage.setItem("treeData", JSON.stringify({}));
+  };
 
-    if (sessionStorage.getItem("authMode") !== "external") {
+  checkArguments = async () => {
+    const { search } = this.props.location;
+    let args;
+    if (search && (args = search.split("?arg=")[1])) {
+      const { data } = await decrypt(args);
+      const { API_KEY, seriesArray, user } = data;
+
+      const parsedSeriesArray = JSON.parse(seriesArray);
+      if (API_KEY) {
+        sessionStorage.setItem("authMode", "apiKey");
+        sessionStorage.setItem("API_KEY", API_KEY);
+        sessionStorage.setItem("user", user);
+        sessionStorage.setItem("username", user);
+      }
+      this.completeAutorization();
+      const promiseArr = [];
+      for (let serie of parsedSeriesArray) {
+        serie = { ...serie, projectID: "lite" };
+        this.props.dispatch(addToGrid2(serie));
+        promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
+      }
+      Promise.all(promiseArr)
+        .then(() => {
+          this.props.history.push("/display");
+        })
+        .catch((err) => console.error(err));
+    } else this.completeAutorization();
+  };
+
+  completeAutorization = () => {
+    let getAuthUser = null;
+    const authMode = sessionStorage.getItem("authMode");
+    const apiUrl = sessionStorage.getItem("apiUrl");
+
+    if (authMode === "apiKey") {
+      const username = sessionStorage.getItem("username");
+      getAuthUser = new Promise((resolve) => {
+        resolve({
+          userInfo: { preferred_username: username },
+          keycloak: {},
+          authenticated: true,
+        });
+      }).catch((err) => reject(err));
+    } else if (authMode !== "external") {
       const keycloak = Keycloak(
         JSON.parse(sessionStorage.getItem("keycloakJson"))
       );
@@ -623,22 +669,8 @@ class App extends Component {
     getAuthUser
       .then(async (result) => {
         try {
-          let user = {
-            user: result.userInfo.preferred_username || result.userInfo.email,
-            displayname:
-              result.userInfo.given_name || result.userInfo.givenName,
-          };
-          await auth.login(user, null, result.keycloak);
-          this.setState({
-            keycloak: result.keycloak,
-            authenticated: result.authenticated,
-            id: result.userInfo.sub,
-            user,
-          });
-          const { email, family_name, given_name, preferred_username } =
-            result.userInfo;
-          const username = preferred_username || email;
-
+          const username =
+            result.userInfo.preferred_username || result.userInfo.email;
           let userData;
           try {
             userData = await getUser(username);
@@ -647,26 +679,51 @@ class App extends Component {
           } catch (err) {
             console.error(err);
           }
-          this.eventSource = new EventSourcePolyfill(
-            `${apiUrl}/notifications`,
-            result.keycloak.token
-              ? {
-                  headers: {
-                    authorization: `Bearer ${result.keycloak.token}`,
-                  },
-                }
-              : {}
-          );
+          let user = {
+            user: userData.username,
+            displayname: `${userData.firstname} ${userData.lastname}`,
+          };
+          await auth.login(user, null, result.keycloak);
+          this.setState({
+            keycloak: result.keycloak,
+            authenticated: result.authenticated,
+            id: result.userInfo.sub,
+            user,
+          });
+
+          if (authMode === "apiKey") {
+            const API_KEY = sessionStorage.getItem("API_KEY");
+            this.eventSource = new EventSourcePolyfill(
+              `${apiUrl}/notifications`,
+              {
+                headers: {
+                  authorization: `apikey ${API_KEY}`,
+                },
+              }
+            );
+          } else {
+            this.eventSource = new EventSourcePolyfill(
+              `${apiUrl}/notifications`,
+              result.keycloak.token
+                ? {
+                    headers: {
+                      authorization: `Bearer ${result.keycloak.token}`,
+                    },
+                  }
+                : {}
+            );
+          }
+
           this.eventSource.addEventListener(
             "message",
             this.getMessageFromEventSrc
           );
         } catch (err) {
-          console.log("Error in user retrieval!", err);
+          console.error("Error in user retrieval!", err);
         }
       })
       .catch((err2) => {
-        console.log("Authentication failed!", err2);
+        console.error("Authentication failed!", err2);
       });
   };
 
@@ -717,99 +774,6 @@ class App extends Component {
     }
   };
 
-  checkArguments = async () => {
-    const { search } = this.props.location;
-    let args;
-    if (search && (args = search.split("?arg=")[1])) {
-      const { data } = await decrypt(args);
-      const { API_KEY, seriesArray, user } = data;
-
-      const parsedSeriesArray = JSON.parse(seriesArray);
-      if (API_KEY) {
-        this.setState({ authenticated: true });
-        sessionStorage.setItem("API_KEY", API_KEY);
-        sessionStorage.setItem("user", user);
-        sessionStorage.setItem("username", user);
-      }
-      const promiseArr = [];
-      for (let serie of parsedSeriesArray) {
-        serie = { ...serie, projectID: "lite" };
-        delete serie.aimUID;
-        console.log("serie", serie);
-        this.props.dispatch(addToGrid(serie));
-        promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
-      }
-      Promise.all(promiseArr)
-        .then(() => {
-          this.props.history.push("/display");
-        })
-        .catch((err) => console.log(err));
-    }
-    // const result = await decryptAndAdd(args);
-    //   const { patientID, studyUID, projectID } = result.data;
-    //   const packedData = {
-    //     projectID,
-    //     patientID,
-    //     patientName: "patientName",
-    //     studyUID,
-    //   };
-    //   this.displaySeries(packedData);
-  };
-
-  displaySeries = async (studyData) => {
-    const rawSeriesArray = await this.getSeriesData(studyData);
-    const seriesArr = rawSeriesArray.filter(this.isSupportedModality);
-
-    const MAX_PORT = sessionStorage.getItem("MAX_PORT");
-
-    if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
-      console.log("am I in here");
-      window.dispatchEvent(
-        new CustomEvent("openSeriesModal", {
-          detail: seriesArr,
-        })
-      );
-    } else {
-      //if there is enough room
-      //add serie to the grid
-      const promiseArr = [];
-      for (let serie of seriesArr) {
-        this.props.dispatch(addToGrid(serie));
-        promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
-      }
-      Promise.all(promiseArr)
-        .then(() => {
-          console.log("nerede bu");
-          alert("yaw");
-
-          // this.props.history.push("/display");
-        })
-        .catch((err) => console.log(err));
-    }
-  };
-
-  isSupportedModality = (serie) => {
-    return DISP_MODALITIES.includes(serie.examType);
-  };
-
-  getSeriesData = async (studyData) => {
-    const { projectID, patientID, studyUID } = studyData;
-    try {
-      const { data: series } = await getSeries(projectID, patientID, studyUID);
-      return series;
-    } catch (err) {
-      this.props.dispatch(annotationsLoadingError(err));
-    }
-  };
-
-  componentWillUnmount = () => {
-    this.eventSource.removeEventListener(
-      "message",
-      this.getMessageFromEventSrc
-    );
-    localStorage.setItem("treeData", JSON.stringify({}));
-  };
-
   onLogout = (e) => {
     auth.logout();
     // sessionStorage.removeItem("annotations");
@@ -827,7 +791,7 @@ class App extends Component {
         });
         auth.logout();
       });
-    else console.log("No logout in external authentication mode");
+    else console.error("No logout in external authentication mode");
   };
 
   updateNotificationSeen = () => {

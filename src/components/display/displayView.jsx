@@ -141,7 +141,6 @@ const mapStateToProps = (state) => {
 
 class DisplayView extends Component {
   constructor(props) {
-    console.log("in constructor");
     super(props);
     this.state = {
       width: "100%",
@@ -165,7 +164,6 @@ class DisplayView extends Component {
   }
 
   componentDidMount() {
-    console.log("in display");
     const { series, onSwitchView } = this.props;
     if (series.length < 1) {
       onSwitchView('search');
