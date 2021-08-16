@@ -36,7 +36,7 @@ import {
   getTemplates,
   segUploadCompleted,
   getSingleSerie,
-  addToGrid2,
+  addToGrid,
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
@@ -520,16 +520,18 @@ class App extends Component {
     ])
       .then(async (results) => {
         const configData = await results[0].json();
-        let { mode, apiUrl, wadoUrl, authMode } = configData;
+        let { mode, apiUrl, wadoUrl, authMode, MAX_PORT } = configData;
         // check and use environment variables if any
         mode = process.env.REACT_APP_MODE || mode;
         apiUrl = process.env.REACT_APP_API_URL || apiUrl;
         wadoUrl = process.env.REACT_APP_WADO_URL || wadoUrl;
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
+        MAX_PORT = process.env.REACT_APP_MAX_PORT || MAX_PORT;
         sessionStorage.setItem("mode", mode);
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
         sessionStorage.setItem("authMode", authMode);
+        sessionStorage.setItem("MAX_PORT", MAX_PORT);
         this.setState({ mode, apiUrl, wadoUrl, authMode });
         const keycloakData = await results[1].json();
         const auth =
@@ -734,7 +736,7 @@ class App extends Component {
         serie = { ...serie, projectID: "lite" };
         delete serie.aimUID;
         console.log("serie", serie);
-        this.props.dispatch(addToGrid2(serie));
+        this.props.dispatch(addToGrid(serie));
         promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
       }
       Promise.all(promiseArr)
@@ -757,6 +759,8 @@ class App extends Component {
   displaySeries = async (studyData) => {
     const rawSeriesArray = await this.getSeriesData(studyData);
     const seriesArr = rawSeriesArray.filter(this.isSupportedModality);
+
+    const MAX_PORT = sessionStorage.getItem("MAX_PORT");
 
     if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
       console.log("am I in here");

@@ -35,7 +35,6 @@ import {
   updateSingleSerie,
   updatePatientOnAimDelete
 } from '../annotationsList/action';
-import { MAX_PORT } from '../../constants';
 import DownloadSelection from './annotationDownloadModal';
 import './searchView.css';
 import UploadModal from './uploadModal';
@@ -56,7 +55,9 @@ import WarningModal from '../common/warningModal';
 import AnnotationCreationModal from './annotationCreationModal.jsx';
 import UpLoadWizard from '../tagEditor/uploadWizard';
 import { FaLessThan } from 'react-icons/fa';
+
 const mode = sessionStorage.getItem('mode');
+const MAX_PORT = sessionStorage.getItem("MAX_PORT");
 
 const messages = {
   newUser: {
@@ -128,7 +129,7 @@ class SearchView extends Component {
         subjects,
         expandLevel
       });
-    } catch (err) {}
+    } catch (err) { }
   };
 
   componentDidUpdate = async prevProps => {
@@ -171,10 +172,10 @@ class SearchView extends Component {
       patients.length > 0
         ? patients
         : studies.length > 0
-        ? studies
-        : series.length > 0
-        ? series
-        : annotations;
+          ? studies
+          : series.length > 0
+            ? series
+            : annotations;
     selection.forEach((el, i) => {
       if (el.projectID === 'all' || el.projectID === 'nonassigned') {
         checkFromProjectID = true;
@@ -996,7 +997,7 @@ class SearchView extends Component {
           onAddProject={this.handleProjectClick}
           admin={this.props.admin}
           hideEyeIcon={hideEyeIcon}
-          // expanding={expanding}
+        // expanding={expanding}
         />
         {isSerieSelectionOpen && !this.props.loading && (
           <ProjectModal

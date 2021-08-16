@@ -4,7 +4,6 @@ import { useTable, usePagination, useRowSelect } from 'react-table';
 import { Link } from 'react-router-dom';
 import { FaRegEye } from 'react-icons/fa';
 import { clearCarets, convertDateFormat } from '../../Utils/aid.js';
-import { MAX_PORT } from '../../constants';
 import {
   changeActivePort,
   jumpToAim,
@@ -20,6 +19,7 @@ import {
 import { getSeries } from '../../services/seriesServices';
 
 const defaultPageSize = 200;
+const MAX_PORT = sessionStorage.getItem("MAX_PORT");
 
 function Table({
   columns,
@@ -312,7 +312,7 @@ function AnnotationTable(props) {
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
