@@ -47,6 +47,7 @@ export function getCurrentUser() {
 
 export async function getAuthHeader() {
   const API_KEY = sessionStorage.getItem("API_KEY");
+  console.log("keycloack", this.keycloak, API_KEY);
   if (API_KEY) {
     const header = `apikey ${API_KEY}`;
     if (header) {

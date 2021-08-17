@@ -601,7 +601,7 @@ class App extends Component {
       const parsedSeriesArray = JSON.parse(seriesArray);
       console.log("parsed array", parsedSeriesArray);
       if (API_KEY) {
-        sessionStorage.setItem("authMode", "apiKey");
+        sessionStorage.setItem("authMode2", "apiKey");
         sessionStorage.setItem("API_KEY", API_KEY);
         sessionStorage.setItem("user", user);
         sessionStorage.setItem("username", user);
@@ -624,9 +624,10 @@ class App extends Component {
   completeAutorization = () => {
     let getAuthUser = null;
     const authMode = sessionStorage.getItem("authMode");
+    const authMode2 = sessionStorage.getItem("authMode2");
     const apiUrl = sessionStorage.getItem("apiUrl");
 
-    if (authMode === "apiKey") {
+    if (authMode2 === "apiKey") {
       const username = sessionStorage.getItem("username");
       getAuthUser = new Promise((resolve) => {
         resolve({
@@ -636,6 +637,7 @@ class App extends Component {
         });
       }).catch((err) => reject(err));
     } else if (authMode !== "external") {
+      console.log("authMode not external", authMode);
       const keycloak = Keycloak(
         JSON.parse(sessionStorage.getItem("keycloakJson"))
       );
@@ -684,6 +686,7 @@ class App extends Component {
             user: userData.username,
             displayname: `${userData.firstname} ${userData.lastname}`,
           };
+          console.log("result", result);
           await auth.login(user, null, result.keycloak);
           this.setState({
             keycloak: result.keycloak,
