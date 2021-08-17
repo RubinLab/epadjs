@@ -510,6 +510,7 @@ class Projects extends React.Component {
           data={this.state.data}
           columns={this.defineColumns()}
           defaultPageSize={10}
+          NoDataComponent={() => null}
         />
         {this.state.hasDeleteAllClicked && (
           <DeleteAlert

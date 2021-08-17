@@ -1,8 +1,8 @@
-import React from "react";
-import ReactTable from "react-table-v6";
-import { FaCheck, FaRegTrashAlt, FaTimes } from "react-icons/fa";
-import { connect } from "react-redux";
-import "../menuStyle.css";
+import React from 'react';
+import ReactTable from 'react-table-v6';
+import { FaCheck, FaRegTrashAlt, FaTimes } from 'react-icons/fa';
+import { connect } from 'react-redux';
+import '../menuStyle.css';
 import {
   getUsers,
   updateUserProjectRole,
@@ -10,16 +10,16 @@ import {
   updateUser,
   deleteUser,
   createUser
-} from "../../../services/userServices";
-import ToolBar from "../common/basicToolBar";
-import UserRoleEditForm from "./userRoleEdit";
-import UserPermissionEdit from "./userPermissionEdit";
-import DeleteAlert from "../common/alertDeletionModal";
-import CreateUser from "./CreateUserForm";
+} from '../../../services/userServices';
+import ToolBar from '../common/basicToolBar';
+import UserRoleEditForm from './userRoleEdit';
+import UserPermissionEdit from './userPermissionEdit';
+import DeleteAlert from '../common/alertDeletionModal';
+import CreateUser from './CreateUserForm';
 
 const messages = {
-  deleteSingle: "Delete the user? This cannot be undone.",
-  deleteSelected: "Delete selected users? This cannot be undone."
+  deleteSingle: 'Delete the user? This cannot be undone.',
+  deleteSelected: 'Delete selected users? This cannot be undone.'
 };
 
 class Users extends React.Component {
@@ -33,10 +33,10 @@ class Users extends React.Component {
     roleEdit: {},
     permissionEdit: {},
     showRoleEdit: false,
-    userToEdit: "",
+    userToEdit: '',
     clickedUserIndex: null,
     showPermissionEdit: false,
-    errorMessage: "",
+    errorMessage: '',
     hasAddClicked: false
   };
 
@@ -46,26 +46,26 @@ class Users extends React.Component {
 
   getUserData = async () => {
     const { data } = await getUsers();
-    const mode = sessionStorage.getItem("mode");
+    const mode = sessionStorage.getItem('mode');
     let usersProjects = [];
     let hasAdminPermission = false;
     const filteredProjects = [];
     //check if the signed in user has admin permissions
-    const signInName = sessionStorage.getItem("username");
+    const signInName = sessionStorage.getItem('username');
     for (let user of data) {
       if (user.username === signInName) {
         hasAdminPermission = user.admin;
-        if (mode === "lite") {
-          usersProjects = ["lite"];
+        if (mode === 'lite') {
+          usersProjects = ['lite'];
         } else {
           usersProjects = user.projects;
         }
       }
     }
-    if (mode === "lite") {
+    if (mode === 'lite') {
       for (let user of data) {
-        if (user.projects.includes("lite")) {
-          user.projects = ["lite"];
+        if (user.projects.includes('lite')) {
+          user.projects = ['lite'];
         } else {
           user.projects = [];
         }
@@ -95,12 +95,12 @@ class Users extends React.Component {
     this.setState({ userToEdit: value });
   };
   updateUserPermission = () => {
-    let permissions = "";
+    let permissions = '';
     const keys = Object.keys(this.state.permissionEdit);
     const values = Object.values(this.state.permissionEdit);
     for (let i = 0; i < keys.length; i += 1) {
       if (values[i]) {
-        permissions = permissions ? permissions + "," + keys[i] : "" + keys[i];
+        permissions = permissions ? permissions + ',' + keys[i] : '' + keys[i];
       }
     }
     updateUser(this.state.userToEdit, { permissions: permissions })
@@ -130,11 +130,11 @@ class Users extends React.Component {
 
   updateUserRole = () => {
     const updates = [];
-    const updatedBy = sessionStorage.getItem("username");
+    const updatedBy = sessionStorage.getItem('username');
     const { roleEdit } = this.state;
     if (Object.keys(roleEdit).length > 0) {
       for (let item in roleEdit) {
-        if (roleEdit[item].role === "None") {
+        if (roleEdit[item].role === 'None') {
           updates.push(deleteUserProjectRole(item, this.state.userToEdit));
         } else {
           const body = { ...roleEdit[item], updatedBy };
@@ -153,7 +153,7 @@ class Users extends React.Component {
           console.error(err);
         });
     } else {
-      this.setState({ errorMessage: "Please change role before submit!" });
+      this.setState({ errorMessage: 'Please change role before submit!' });
     }
   };
 
@@ -216,26 +216,26 @@ class Users extends React.Component {
   };
 
   convertArrToStr = arr => {
-    const mode = sessionStorage.getItem("mode");
+    const mode = sessionStorage.getItem('mode');
     if (arr.length > 0) {
       const result = [];
       const displayMap = {
-        CreateUser: "user",
-        CreatePAC: "connection",
-        CreateAutoPACQuery: "query",
-        CreateProject: "project",
-        CreateWorklist: "worklist"
+        CreateUser: 'user',
+        CreatePAC: 'connection',
+        CreateAutoPACQuery: 'query',
+        CreateProject: 'project',
+        CreateWorklist: 'worklist'
       };
       arr.forEach(el => {
-        if (mode === "lite" && el === "CreateProject") {
+        if (mode === 'lite' && el === 'CreateProject') {
           return;
         } else {
           result.push(displayMap[el]);
         }
       });
-      return result.join(", ");
+      return result.join(', ');
     } else {
-      return "";
+      return '';
     }
   };
 
@@ -278,12 +278,12 @@ class Users extends React.Component {
       roleEdit: [],
       permissionEdit: {},
       showRoleEdit: false,
-      userToEdit: "",
+      userToEdit: '',
       clickedUserIndex: null,
       showPermissionEdit: false,
       hasDeleteAllClicked: false,
       hasDeleteSingleClicked: false,
-      errorMessage: "",
+      errorMessage: '',
       hasAddClicked: false
     });
   };
@@ -293,27 +293,27 @@ class Users extends React.Component {
   };
 
   createUser = () => {
-    const mode = sessionStorage.getItem("mode");
+    const mode = sessionStorage.getItem('mode');
     let roleEdit = [];
     let body = {};
     const { userToEdit } = this.state;
     if (userToEdit) {
-      let permissions = "";
+      let permissions = '';
       const keys = Object.keys(this.state.permissionEdit);
       const values = Object.values(this.state.permissionEdit);
       for (let i = 0; i < keys.length; i += 1) {
         if (values[i]) {
           permissions = permissions
-            ? permissions + "," + keys[i]
-            : "" + keys[i];
+            ? permissions + ',' + keys[i]
+            : '' + keys[i];
         }
       }
       body = permissions
         ? { ...body, username: userToEdit, permissions: permissions }
         : { ...body, username: userToEdit };
 
-      if (mode === "lite" && Object.keys(this.state.roleEdit).length === 0)
-        roleEdit = [{ role: "Member", project: "lite" }];
+      if (mode === 'lite' && Object.keys(this.state.roleEdit).length === 0)
+        roleEdit = [{ role: 'Member', project: 'lite' }];
       else {
         const projectIds = Object.keys(this.state.roleEdit);
         const roles = Object.values(this.state.roleEdit);
@@ -340,11 +340,11 @@ class Users extends React.Component {
   };
 
   defineColumns = () => {
-    const mode = sessionStorage.getItem("mode");
+    const mode = sessionStorage.getItem('mode');
     return [
       {
-        id: "checkbox",
-        accessor: "",
+        id: 'checkbox',
+        accessor: '',
         Cell: ({ original }) => {
           return (
             <input
@@ -375,64 +375,68 @@ class Users extends React.Component {
         width: 45
       },
       {
-        Header: "First",
-        accessor: "firstname",
-        className: "usersTable-cell",
+        Header: 'First',
+        accessor: 'firstname',
+        className: 'usersTable-cell',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 35,
-        className: "mng-user__cell"
+        className: 'mng-user__cell'
       },
       {
-        Header: "Last",
-        accessor: "lastname",
-        className: "usersTable-cell",
+        Header: 'Last',
+        accessor: 'lastname',
+        className: 'usersTable-cell',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 35,
-        className: "mng-user__cell"
+        className: 'mng-user__cell'
       },
       {
-        Header: "User Name",
-        accessor: "username",
-        className: "usersTable-cell",
+        Header: 'User Name',
+        accessor: 'username',
+        className: 'usersTable-cell',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 35,
-        className: "mng-user__cell"
+        className: 'mng-user__cell'
       },
       {
-        Header: "Email",
-        accessor: "email",
-        className: "usersTable-cell",
+        Header: 'Email',
+        accessor: 'email',
+        className: 'usersTable-cell',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
-        className: "mng-user__cell"
+        className: 'mng-user__cell'
       },
       {
-        Header: "Projects",
-        className: "usersTable-cell",
-        accessor: "projects",
+        Header: 'Projects',
+        className: 'usersTable-cell',
+        accessor: 'projects',
         sortable: true,
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
-        className: "mng-user__cell",
+        className: 'mng-user__cell',
         Cell: original => {
           const { projects } = original.row;
           const { projectMap } = this.props;
           const className =
-            projects.length > 0 ? "wrapped" : "wrapped click-to-add";
+            projects.length > 0 ? 'wrapped' : 'wrapped click-to-add';
           const text =
-            projects.length > 0 ? projects.reduce((all, item, i) => {
-              const comma = projects.length - 1 > i ? ", " : "";
-              return `${all}${projectMap[item] ? projectMap[item].projectName : item}${comma}`;
-            }, "") : "Add user to a project";
+            projects.length > 0
+              ? projects.reduce((all, item, i) => {
+                  const comma = projects.length - 1 > i ? ', ' : '';
+                  return `${all}${
+                    projectMap[item] ? projectMap[item].projectName : item
+                  }${comma}`;
+                }, '')
+              : 'Add user to a project';
           return (
             <div
               id={`projects-${original.row.checkbox.username}`}
@@ -447,12 +451,12 @@ class Users extends React.Component {
         }
       },
       {
-        Header: "Admin",
-        className: "usersTable-cell",
+        Header: 'Admin',
+        className: 'usersTable-cell',
         resizable: true,
         minResizeWidth: 20,
         minWidth: 20,
-        className: "mng-user__cell",
+        className: 'mng-user__cell',
         Cell: original => {
           const { username, admin } = original.row.checkbox;
           return (
@@ -469,18 +473,18 @@ class Users extends React.Component {
       },
 
       {
-        Header: "Permissions",
-        accessor: "permissions",
-        className: "usersTable-cell",
+        Header: 'Permissions',
+        accessor: 'permissions',
+        className: 'usersTable-cell',
         resizable: true,
         minResizeWidth: 20,
         minWidth: 50,
-        className: "mng-user__cell",
+        className: 'mng-user__cell',
         Cell: original => {
           let text = this.convertArrToStr(original.row.permissions);
-          const className = text ? "wrapped" : "wrapped click-to-add";
-          text = text ? text : "Give user permission";
-          
+          const className = text ? 'wrapped' : 'wrapped click-to-add';
+          text = text ? text : 'Give user permission';
+
           return (
             <div
               className="menu-clickable"
@@ -496,7 +500,7 @@ class Users extends React.Component {
         }
       },
       {
-        Header: "",
+        Header: '',
         width: 45,
         minResizeWidth: 20,
         resizable: true,
@@ -534,6 +538,7 @@ class Users extends React.Component {
             selected={checkboxSelected}
           />
           <ReactTable
+            NoDataComponent={() => null}
             className="pro-table"
             data={data}
             columns={this.defineColumns()}

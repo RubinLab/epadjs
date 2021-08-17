@@ -584,6 +584,7 @@ class ParametersWindow extends React.Component {
             <div className="plugin_parameter_window_modal_body">
               {!this.state.addnew && (
                 <ReactTable
+                  NoDataComponent={() => null}
                   className="pro-table"
                   data={this.state.defaultParameterList.data}
                   columns={this.defineParametersTableColumns()}

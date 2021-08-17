@@ -439,6 +439,7 @@ class Templates extends React.Component {
           onDownload={this.handleDownload}
         />
         <ReactTable
+          NoDataComponent={() => null}
           className="pro-table"
           data={templates}
           columns={this.defineColumns()}
