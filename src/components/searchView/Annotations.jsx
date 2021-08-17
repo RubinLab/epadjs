@@ -6,7 +6,6 @@ import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import { getAnnotations } from '../../services/annotationServices';
-import { MAX_PORT } from '../../constants';
 import { formatDate } from '../flexView/helperMethods';
 import {
   alertViewPortFull,
@@ -19,6 +18,8 @@ import {
   updatePatient,
   jumpToAim
 } from '../annotationsList/action';
+
+const MAX_PORT = sessionStorage.getItem("MAX_PORT");
 
 function Table({ columns, data }) {
   const {
@@ -117,7 +118,7 @@ function Annotations(props) {
         props.dispatch(addToGrid(selected, aimID));
         props
           .dispatch(getSingleSerie(selected, aimID))
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
         if (!props.patients[patientID]) {
@@ -158,7 +159,7 @@ function Annotations(props) {
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-      });      setWarningSeen(true);
+      }); setWarningSeen(true);
     }
   };
 

@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import Draggable from "react-draggable";
 import { FaRegCheckSquare } from "react-icons/fa";
-import { MAX_PORT } from "../../constants";
 import {
   addToGrid,
   getSingleSerie,
@@ -11,6 +10,8 @@ import {
   updatePatient,
   clearSelection,
 } from "../annotationsList/action";
+
+const MAX_PORT = sessionStorage.getItem("MAX_PORT");
 // connect to store
 // is seriesUID in the openSeries checkbox clicked
 const SeriesTable = (props) => {
@@ -43,7 +44,7 @@ const SeriesTable = (props) => {
     props.dispatch(addToGrid(selected));
     props
       .dispatch(getSingleSerie(selected))
-      .then(() => {})
+      .then(() => { })
       .catch((err) => console.log(err));
     if (!props.patients[selected.patientID]) {
       // props.dispatch(getWholeData(selected));

@@ -1,0 +1,37 @@
+const getVPDimensions = (numSeries) => {
+  const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
+  let toolbarHeight =
+    document.getElementsByClassName("toolbar")[0].clientHeight;
+  const windowInner = window.innerHeight;
+  const containerHeight = windowInner - toolbarHeight - navbar - 10;
+
+  let width, height;
+  switch (numSeries) {
+    case 1:
+      width = "100%";
+      height = containerHeight;
+      break;
+    case 2:
+      width = "50%";
+      height = containerHeight;
+      break;
+    case (3, 4):
+      width = "50%";
+      height = containerHeight / 2;
+      break;
+    case (5, 6):
+      width = "33%";
+      height = containerHeight / 2;
+      break;
+    case (7, 8):
+      width = "25%";
+      height = containerHeight / 2;
+      break;
+    default:
+      width = "100%";
+      height = containerHeight;
+  }
+  return { width, height };
+};
+
+export default getVPDimensions;

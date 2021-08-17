@@ -30,6 +30,7 @@ export const GET_PATIENT = "epadjs/annotationList/GET_PATIENT";
 export const DISPLAY_SINGLE_AIM = "epadjs/annotationList/DISPLAY_SINGLE_AIM";
 export const JUMP_TO_AIM = "epadjs/annotationList/JUMP_TO_AIM";
 export const ADD_TO_GRID = "epadjs/annotationList/ADD_TO_GRID";
+export const ADD_TO_GRID2 = "epadjs/annotationList/ADD_TO_GRID2";
 export const LOAD_COMPLETED = "epadjs/annotationList/LOAD_COMPLETED";
 export const START_LOADING = "epadjs/annotationList/START_LOADING";
 export const UPDATE_PATIENT = "epadjs/annotationList/UPDATE_PATIENT";
@@ -52,18 +53,17 @@ export const SEG_UPLOAD_COMPLETED =
   "epadjs/annotationList/SEG_UPLOAD_COMPLETED";
 export const SEG_UPLOAD_REMOVE = "epadjs/annotationList/SEG_UPLOAD_REMOVE";
 export const AIM_DELETE = "epadjs/annotationList/AIM_DELETE";
-
 export const commonLabels = {
   button: { background: "#c0c0c0", color: "black" },
   label: { background: "#858585", color: "white" },
 };
+
 export const colors = [
   {
     button: { background: "#e6194B", color: "black" },
     label: { background: "#8a0d2a", color: "white" },
   },
-  // {
-  //   button: { background: "#ffe119", color: "black" },
+  // { button: { background: "#ffe119", color: "black" },
   //   label: { background: "#786d22", color: "white" }
   // },
   {

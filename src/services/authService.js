@@ -46,7 +46,18 @@ export function getCurrentUser() {
 }
 
 export async function getAuthHeader() {
-  if (this.keycloak) {
+  const API_KEY = sessionStorage.getItem("API_KEY");
+  if (API_KEY) {
+    const header = `apikey ${API_KEY}`;
+    if (header) {
+      cornerstoneWADOImageLoader.configure({
+        beforeSend: function (xhr) {
+          xhr.setRequestHeader("Authorization", header);
+        },
+      });
+      return header;
+    }
+  } else if (this.keycloak) {
     try {
       await refreshToken(this.keycloak, 5);
       const header = `Bearer ${this.keycloak.token}`;

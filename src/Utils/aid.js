@@ -296,24 +296,101 @@ export const checkIfSeriesOpen = (array, selectedUID, UIDlevel) => {
 
 export const convertDateFormat = (str, attr) => {
   try {
-    let result = "";
+    let result = '';
     const dateArr = [];
     dateArr.push(str.substring(0, 4));
     dateArr.push(str.substring(4, 6));
     dateArr.push(str.substring(6, 8));
-    if (attr === "date") {
+    if (attr === 'date') {
       const timeArr = [];
       timeArr.push(str.substring(8, 10));
       timeArr.push(str.substring(10, 12));
       timeArr.push(str.substring(12));
-      result = dateArr.join("-") + " " + timeArr.join(":");
+      result = dateArr.join('-') + ' ' + timeArr.join(':');
     }
-    if (attr === "studyDate") {
-      result = dateArr.join("-") + " 00:00:00";
+    if (attr === 'studyDate') {
+      result = dateArr.join('-') + ' 00:00:00';
     }
     return result ? result : str;
   } catch (err) {
     console.error(err);
     return str;
   }
+};
+
+export const persistColorInSaveAim = (oldList, newList, colors) => {
+  const newDataKeys = Object.keys(newList);
+  const newDataValues = Object.values(newList);
+  const stateKeys = Object.keys(oldList);
+  const stateValues = Object.values(oldList);
+  const colorAimsList = {};
+  const usedColors = new Set();
+
+  // transfer the colors of existing aim
+  stateKeys.forEach((el, i) => {
+    const index = newDataKeys.indexOf(el);
+    if (index >= 0) {
+      newDataValues[index].color = stateValues[i].color;
+      colorAimsList[el] = newDataValues[index];
+      const color = stateValues[i].color.button.background;
+      if (color !== '#aaaaaa' || color !== '#c0c0c0') {
+        if (usedColors.size === colors.length) {
+          usedColors.clear();
+        }
+        usedColors.add(color);
+      }
+      newDataKeys.splice(index, 1);
+      newDataValues.splice(index, 1);
+    }
+  });
+
+  // assign colors to new aim
+  newDataKeys.forEach((el, i) => {
+    let color;
+    let colorIndex = usedColors.size;
+    if (colorIndex === colors.length) {
+      colorIndex = 0;
+      usedColors.clear();
+    } else {
+      colorIndex = usedColors.size;
+    }
+    const { imgAimUID, markupColor } = newDataValues[i];
+    if (imgAimUID) {
+      if (markupColor) {
+        color = {
+          button: { background: '#aaaaaa', color: 'black' },
+          label: { background: markupColor, color: 'white' }
+        };
+      } else {
+        color = colors[colorIndex];
+        usedColors.add(color?.button?.background);
+      }
+    } else {
+      color = commonLabels;
+    }
+
+    newDataValues[i].color = color;
+    colorAimsList[el] = newDataValues[i];
+  });
+  return colorAimsList;
+};
+
+export const persistColorInDeleteAim = (oldList, newList, colorList) => {
+  const colorAimsList = {};
+
+  const newDataKeys = Object.keys(newList);
+  const newDataValues = Object.values(newList);
+
+  const stateKeys = Object.keys(oldList);
+  const stateValues = Object.values(oldList);
+
+  newDataKeys.forEach((el, i) => {
+    const index = stateKeys.indexOf(el);
+    if (index >= 0) {
+      newDataValues[i].color = stateValues[index].color;
+      colorAimsList[el] = newDataValues[i];
+    }
+  });
+
+  return colorAimsList;
 };

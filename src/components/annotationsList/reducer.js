@@ -24,6 +24,7 @@ import {
   LOAD_COMPLETED,
   START_LOADING,
   ADD_TO_GRID,
+  ADD_TO_GRID2,
   DISPLAY_SINGLE_AIM,
   JUMP_TO_AIM,
   UPDATE_PATIENT,
@@ -42,7 +43,13 @@ import {
   SEG_UPLOAD_COMPLETED,
   SEG_UPLOAD_REMOVE,
   AIM_DELETE,
+  colors,
+  commonLabels,
 } from "./types";
+import {
+  persistColorInSaveAim,
+  persistColorInDeleteAim,
+} from "../../Utils/aid";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
   openSeries: [],
@@ -87,12 +94,8 @@ const asyncReducer = (state = initialState, action) => {
         updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
         return { ...state, openSeries: updatedOpenSeries };
       case GET_NOTIFICATIONS:
-        const {
-          uploadedPid,
-          lastEventId,
-          refresh,
-          notificationAction,
-        } = action.payload;
+        const { uploadedPid, lastEventId, refresh, notificationAction } =
+          action.payload;
         return {
           ...state,
           uploadedPid,
@@ -222,12 +225,30 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
 
+        const newDataKeys = Object.keys(action.payload.aimsData);
+        const stateKeys = state.aimsList[action.payload.serID]
+          ? Object.keys(state.aimsList[action.payload.serID])
+          : [];
+
+        const colorAimsList =
+          newDataKeys.length >= stateKeys.length
+            ? persistColorInSaveAim(
+                state.aimsList[action.payload.serID] || {},
+                action.payload.aimsData,
+                colors
+              )
+            : persistColorInDeleteAim(
+                state.aimsList[action.payload.serID] || {},
+                action.payload.aimsData,
+                colors
+              );
+
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
           aimsList: {
             ...state.aimsList,
-            [action.payload.ref.seriesUID]: action.payload.aimsData,
+            [action.payload.ref.seriesUID]: colorAimsList,
           },
           openSeries: imageAddedSeries,
         });
@@ -500,6 +521,17 @@ const asyncReducer = (state = initialState, action) => {
           ...state,
           openSeries: newOpenSeries,
           activePort: newOpenSeries.length - 1,
+        };
+      case ADD_TO_GRID2:
+        const seriesInfo2 = { ...action.reference };
+        seriesInfo2.projectName = "lite";
+        seriesInfo2.defaultTemplate = null;
+        let newOpenSeries2 = state.openSeries.concat(seriesInfo2);
+
+        return {
+          ...state,
+          openSeries: newOpenSeries2,
+          activePort: newOpenSeries2.length - 1,
         };
       case UPDATE_PATIENT:
         let updatedPt = { ...state.patients[action.payload.patient] };

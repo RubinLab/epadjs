@@ -1,7 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
 import { FaMinus, FaPlus, FaEye, FaCheck } from "react-icons/fa";
-import { MAX_PORT } from "../../../constants";
 import Annotations from "./annotations";
 import {
   updateAnnotationDisplay,
@@ -15,6 +14,8 @@ import {
   jumpToAim,
   showAnnotationDock
 } from "../action";
+
+const MAX_PORT = sessionStorage.getItem("MAX_PORT");
 
 //single serie will be passed
 class ListItem extends React.Component {
@@ -80,7 +81,7 @@ class ListItem extends React.Component {
         this.props.dispatch(addToGrid(this.props.serie));
         this.props
           .dispatch(getSingleSerie(this.props.serie))
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.log(err));
         this.props.dispatch(
           updatePatient("serie", true, patientID, studyUID, seriesUID)
@@ -170,7 +171,7 @@ class ListItem extends React.Component {
           //getsingleserie
           this.props
             .dispatch(getSingleSerie(this.props.serie))
-            .then(() => {})
+            .then(() => { })
             .catch(err => console.log(err));
           //update patient?? with serie
           this.props.dispatch(

@@ -24,6 +24,7 @@ import {
   SELECT_PROJECT,
   CLEAR_SELECTION,
   ADD_TO_GRID,
+  ADD_TO_GRID2,
   LOAD_COMPLETED,
   START_LOADING,
   UPDATE_PATIENT,
@@ -311,6 +312,23 @@ export const addToGrid = (serie, annotation) => {
   return { type: ADD_TO_GRID, reference };
 };
 
+export const addToGrid2 = (serie, annotation) => {
+  let { patientID, studyUID, seriesUID, projectID, patientName } = serie;
+  projectID = projectID ? projectID : "lite";
+  if (annotation)
+    patientID = serie.originalSubjectID || serie.subjectID || serie.patientID;
+  let reference = {
+    projectID,
+    patientID,
+    studyUID,
+    seriesUID,
+    patientName,
+    aimID: annotation,
+    // imageIndex: 0
+  };
+  return { type: ADD_TO_GRID2, reference };
+};
+
 export const showAnnotationWindow = () => {
   return { type: SHOW_ANNOTATION_WINDOW };
 };
@@ -478,8 +496,10 @@ const getAimListFields = (aims, ann) => {
         isDisplayed: displayStatus,
         showLabel: true,
         cornerStoneTools: [],
-        color,
+        // color,
         type,
+        imgAimUID,
+        markupColor,
       };
     });
     return result;
