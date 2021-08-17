@@ -1,7 +1,6 @@
-export const MAX_PORT = 6;
 export const widthUnit = 20;
 
-export const formatDates = timeStamp => {
+export const formatDates = (timeStamp) => {
   //split it by space
   timeStamp = timeStamp + "";
   if (!timeStamp.includes(" ")) {

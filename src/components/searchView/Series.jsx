@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
-import { MAX_PORT } from '../../constants';
 import { formatDate } from '../flexView/helperMethods';
 import Annotations from './Annotations';
 import { getSeries } from '../../services/seriesServices';
@@ -20,6 +19,8 @@ import {
   updatePatient,
   selectAnnotation
 } from '../annotationsList/action';
+
+const MAX_PORT = sessionStorage.getItem("MAX_PORT");
 
 function Table({
   columns,

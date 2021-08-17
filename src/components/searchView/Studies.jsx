@@ -11,7 +11,8 @@ import Series from './Series';
 import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
 import { clearCarets } from '../../Utils/aid.js';
-import { MAX_PORT } from '../../constants';
+
+const MAX_PORT = sessionStorage.getItem("MAX_PORT");
 
 import {
   getSingleSerie,
@@ -254,7 +255,7 @@ function Studies(props) {
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
@@ -482,8 +483,8 @@ function Studies(props) {
     const studiesArray =
       treeData[projectID] && treeData[projectID][subjectID]
         ? Object.values(treeData[projectID][subjectID].studies).map(
-            el => el.data
-          )
+          el => el.data
+        )
         : [];
 
     return studiesArray;

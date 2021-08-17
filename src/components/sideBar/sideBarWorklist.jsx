@@ -22,7 +22,6 @@ import {
 import { getSeries } from "../../services/seriesServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
 import SeriesPopup from "./seriesPopup";
-import { MAX_PORT } from "../../constants";
 import {
   addToGrid,
   getSingleSerie,
@@ -34,6 +33,7 @@ import {
 } from "../annotationsList/action";
 
 const mode = sessionStorage.getItem("mode");
+const MAX_PORT = sessionStorage.getItem("MAX_PORT");
 
 const messages = {
   deleteSingle: "Remove study from the worklist? This cannot be undone.",
@@ -89,9 +89,8 @@ class WorkList extends React.Component {
     this.setState({ worklists: filteredWorklists });
     if (showError && Array.isArray(notAuthorized) && notAuthorized.length > 0) {
       const projectList = notAuthorized.reduce((all, item, i) => {
-        return `${all} ${item}${
-          notAuthorized.length - 1 === i ? "" : ", "
-        }`;
+        return `${all} ${item}${notAuthorized.length - 1 === i ? "" : ", "
+          }`;
       }, "");
       const message = `${messages.notAuthorizedProjects} ${projectList}`
       toast.error(message, {

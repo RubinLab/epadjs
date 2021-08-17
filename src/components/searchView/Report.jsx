@@ -7,7 +7,6 @@ import useResizeAware from 'react-resize-aware';
 import { renderTable, wordExport } from './recist';
 import ConfirmationModal from '../common/confirmationModal';
 import WaterfallReact from './WaterfallReact';
-import { MAX_PORT } from '../../constants';
 import { getWaterfallReport, getReport } from '../../services/reportServices';
 import { checkIfSeriesOpen, clearCarets } from '../../Utils/aid';
 import { CSVLink } from "react-csv";
@@ -19,6 +18,8 @@ import {
   getSingleSerie,
   updateImageId
 } from '../annotationsList/action';
+
+const MAX_PORT = sessionStorage.getItem("MAX_PORT");
 
 const messages = {
   title: 'Can not open all series',
@@ -77,7 +78,7 @@ const Report = props => {
       loadFilter = 'shapes=line&metric=standard deviation';
       numofHeaderCols = 2;
       hideCols = [];
-    } else if (report === 'Longitudinal') {
+    } else if (report) {
       filter = 'report=Longitudinal';
       if (report != 'Longitudinal') loadFilter = 'metric=' + report;
       if (template != null) filter += '&templatecode=' + template;
@@ -148,7 +149,7 @@ const Report = props => {
     const metric = e.target.value;
     props.handleMetric(metric);
     const validMetric =
-      metric === 'ADLA' || metric === 'RECIST' || metric === 'intensitystddev' || metric === 'Export (beta)';
+      metric === 'ADLA' || metric === 'RECIST' || metric === 'intensitystddev' || metric === 'ser_original_shape_voxelvolume' || metric === 'ser_original_shape_maximum2ddiameterslice' || metric === 'ser_original_firstorder_maximum' || metric === 'ser_original_firstorder_median' || metric === 'adc_original_firstorder_maximum' || metric === 'adc_original_firstorder_median' || metric === 've_original_firstorder_maximum' || metric === 've_original_firstorder_median'  || metric === 'Export (beta)';
     const type = 'BASELINE';
     let result;
     if (validMetric) {
@@ -159,7 +160,7 @@ const Report = props => {
           null,
           type,
           metric,
-          metric === 'Export (beta)'? 
+          metric === 'Export (beta)' ?
             [
               { field: 'recist', header: 'SLD' },
               { field: 'mean', header: 'Average HU' },
@@ -178,7 +179,7 @@ const Report = props => {
             null,
             type,
             metric,
-            metric === 'Export (beta)'? 
+            metric === 'Export (beta)' ?
               [
                 { field: 'recist', header: 'SLD' },
                 { field: 'mean', header: 'Average HU' },
@@ -189,14 +190,14 @@ const Report = props => {
         } else {
           const pairs = constructPairs(filteredPatients);
           result = await getWaterfallReport(null, null, pairs, type, metric,
-            metric === 'Export (beta)'? 
+            metric === 'Export (beta)' ?
               [
                 { field: 'recist', header: 'SLD' },
                 { field: 'mean', header: 'Average HU' },
               ]
               :
               undefined
-            );
+          );
         }
       }
       setData(result.data);
@@ -256,7 +257,7 @@ const Report = props => {
     wordExport(subjectName, 'recisttbl' + index);
   };
 
-  useEffect(() => {}, [sizes.width, sizes.height]);
+  useEffect(() => { }, [sizes.width, sizes.height]);
 
   const updateImageIDs = async () => {
     const { openSeries } = props;
@@ -502,6 +503,14 @@ const Report = props => {
                   <option>RECIST</option>
                   <option>ADLA</option>
                   <option>intensitystddev</option>
+                  <option>ser_original_shape_voxelvolume</option>
+                  <option>ser_original_shape_maximum2ddiameterslice</option>
+                  <option>ser_original_firstorder_maximum</option>
+                  <option>ser_original_firstorder_median</option>
+                  <option>adc_original_firstorder_maximum</option>
+                  <option>adc_original_firstorder_median</option>
+                  <option>ve_original_firstorder_maximum</option>
+                  <option>ve_original_firstorder_median</option>
                   <option>Export (beta)</option>
                 </select>
               </div>
@@ -515,7 +524,7 @@ const Report = props => {
                   />
                 </div>
               )}
-              {data.waterfallExport && <CSVLink {...{data: data.waterfallExport, headers:data.waterfallHeaders,filename:'waterfall.csv'}}>Export to CSV</CSVLink>}
+              {data.waterfallExport && <CSVLink {...{ data: data.waterfallExport, headers: data.waterfallHeaders, filename: 'waterfall.csv' }}>Export to CSV</CSVLink>}
             </>
           )}
 

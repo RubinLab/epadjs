@@ -13,10 +13,9 @@ import {
 import SelectionItem from "./containers/selectionItem";
 import { FaRegCheckSquare } from "react-icons/fa";
 import { getSeries } from "../../services/seriesServices";
-import { MAX_PORT } from "../../constants";
 import "./annotationsList.css"
 
-
+const MAX_PORT = sessionStorage.getItem("MAX_PORT");
 const message = {
   title: "Not enough ports to open series"
 };

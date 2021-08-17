@@ -16,7 +16,6 @@ import matchSorter from "match-sorter";
 import DeleteAlert from "../common/alertDeletionModal";
 import UploadModal from "../../searchView/uploadModal";
 import DownloadModal from "../../searchView/annotationDownloadModal";
-import { MAX_PORT } from "../../../constants";
 import {
   changeActivePort,
   jumpToAim,
@@ -35,6 +34,7 @@ import { getSeries } from "../../../services/seriesServices";
 import SelectSeriesModal from "../../annotationsList/selectSerieModal";
 
 const mode = sessionStorage.getItem("mode");
+const MAX_PORT = sessionStorage.getItem("MAX_PORT");
 
 const messages = {
   deleteSelected: "Delete selected annotations? This cannot be undone.",
@@ -190,8 +190,8 @@ class Annotations extends React.Component {
       const {
         data: { rows, total_rows, bookmark }
       } = projectID && projectID !== 'all_aims'
-        ? await getSummaryAnnotations(projectID, bookmarkPassed)
-        : await getAllAnnotations(bookmarkPassed);
+          ? await getSummaryAnnotations(projectID, bookmarkPassed)
+          : await getAllAnnotations(bookmarkPassed);
 
       if (bookmarkPassed) {
         const pages = Math.ceil(total_rows / pageSize);
@@ -327,10 +327,10 @@ class Annotations extends React.Component {
         keys.length === 0
           ? this.setState({ selectAll: 0, selected: {}, filteredData: [] })
           : this.setState({
-              seriesAlreadyOpen: keys.length,
-              selected: notDeleted,
-              selectAll: 2
-            });
+            seriesAlreadyOpen: keys.length,
+            selected: notDeleted,
+            selectAll: 2
+          });
       })
       .catch(error => {
         if (
@@ -869,7 +869,7 @@ class Annotations extends React.Component {
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
