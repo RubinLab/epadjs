@@ -403,7 +403,9 @@ class ToolMenu extends Component {
   reset = () => {
     const element = cornerstone.getEnabledElements()[this.props.activePort]
       .element;
-    this.resetRenderCanvas(element);
+    const layers = cornerstone.getLayers(element);
+    if (layers.length)
+      this.resetRenderCanvas(element);
     cornerstone.reset(element);
   };
 

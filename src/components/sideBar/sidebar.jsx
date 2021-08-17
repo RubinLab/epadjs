@@ -107,12 +107,21 @@ class Sidebar extends Component {
 
         projects = projects.concat(all, nonassigned);
 
+/*
         const pid = projects[0].id;
         this.setState({ projects, pid, selected: pid });
         if (this.props.openSeries.length === 0) {
           this.props.history.push(`/search/${pid}`);
         }
         this.props.getPidUpdate(pid);
+*/
+        // const pid = projects[0].id;
+        // this.setState({ projects, pid, selected: pid });
+        // if (this.props.openSeries.length === 0) {
+        //   this.props.history.push(`/list/${pid}`);
+        // }
+        // this.props.getPidUpdate(pid);
+        
         const prTempMap = await this.getTemplatesProjectMap();
         const projectMap = {};
         for (let project of projects) {
@@ -138,7 +147,7 @@ class Sidebar extends Component {
     if (this.props.openSeries.length === 0 && setPid) {
       const pid = projects[0].id;
       this.setState({ pid, selected: pid });
-      this.props.history.push(`/search/${pid}`);
+      this.props.history.push(`/list/${pid}`);
       this.props.getPidUpdate(pid);
     }
   };
@@ -200,8 +209,8 @@ class Sidebar extends Component {
       let { pathname } = this.props.location;
       const { pid, lastEventId, refresh, notificationAction } = this.props;
       const tagEdited = notificationAction.startsWith("Tag");
-      const uploaded = notificationAction.startsWith("Upload");
-      const notSideBarUpdate = tagEdited || uploaded;
+      // const uploaded = notificationAction.startsWith("Upload");
+      const notSideBarUpdate = tagEdited;
       let projects;
       if (prevProps.progressUpdated !== this.props.progressUpdated) {
         this.getWorklistandProgressData();
@@ -259,7 +268,7 @@ class Sidebar extends Component {
       this.collapseAll();
     }
     if (type === "project" && this.props.type === "search") {
-      this.props.history.push(`/search/${id}`);
+      this.props.history.push(`/list/${id}`);
       this.setState({ index: 0 });
       this.props.getPidUpdate(id);
       this.props.clearTreeExpand();
@@ -321,7 +330,9 @@ class Sidebar extends Component {
       if (mode === "thick") {
         const projectsList = projects.map(project => {
           const matchProject =
-            selected === project.id || pathname === project.id;
+            selected === project.id ||
+            pathname === project.id ||
+            this.props.pid === project.id;
           const className = matchProject
             ? "sidebar-row __selected"
             : "sidebar-row";

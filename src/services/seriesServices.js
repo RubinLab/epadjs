@@ -8,20 +8,20 @@ export function getSeries(projectId, subjectId, studyId) {
     return http.get(
       apiUrl +
         "/projects/lite/subjects/" +
-        subjectId +
+        encodeURIComponent(subjectId) +
         "/studies/" +
-        studyId +
+        encodeURIComponent(studyId) +
         "/series?&filterDSO=true"
     );
   else
     return http.get(
       apiUrl +
         "/projects/" +
-        projectId +
+        encodeURIComponent(projectId) +
         "/subjects/" +
-        subjectId +
+        encodeURIComponent(subjectId) +
         "/studies/" +
-        studyId +
+        encodeURIComponent(studyId) +
         "/series?filterDSO=true"
     );
 }
@@ -30,24 +30,24 @@ export function getImageIds(series) {
     return http.get(
       apiUrl +
         "/projects/lite/subjects/" +
-        series.patientID +
+        encodeURIComponent(series.patientID) +
         "/studies/" +
-        series.studyUID +
+        encodeURIComponent(series.studyUID) +
         "/series/" +
-        series.seriesUID +
+        encodeURIComponent(series.seriesUID) +
         "/images"
     );
   } else {
     return http.get(
       apiUrl +
         "/projects/" +
-        series.projectID +
+        encodeURIComponent(series.projectID) +
         "/subjects/" +
-        series.patientID +
+        encodeURIComponent(series.patientID) +
         "/studies/" +
-        series.studyUID +
+        encodeURIComponent(series.studyUID) +
         "/series/" +
-        series.seriesUID +
+        encodeURIComponent(series.seriesUID) +
         "/images"
     );
   }
@@ -59,9 +59,9 @@ export function getWadoImagePath(studyUid, seriesUid, imageId) {
     return (
       wadoUrl +
       "/studies/" +
-      studyUid +
+      encodeURIComponent(studyUid) +
       "/series/" +
-      seriesUid +
+      encodeURIComponent(seriesUid) +
       "/instances/" +
       imageId
     );
@@ -69,9 +69,9 @@ export function getWadoImagePath(studyUid, seriesUid, imageId) {
     return (
       wadoUrl +
       "/?requestType=WADO&studyUID=" +
-      studyUid +
+      encodeURIComponent(studyUid) +
       "&seriesUID=" +
-      seriesUid +
+      encodeURIComponent(seriesUid) +
       "&objectUID=" +
       imageId
     );
@@ -82,9 +82,9 @@ export function getWadoRSImagePath(studyUid, seriesUid, imageId) {
   return (
     wadoUrl +
     "/studies/" +
-    studyUid +
+    encodeURIComponent(studyUid) +
     "/series/" +
-    seriesUid +
+    encodeURIComponent(seriesUid) +
     "/instances/" +
     imageId
   );
@@ -100,7 +100,7 @@ export function downloadSeries(projectID, body) {
   const url =
     apiUrl +
     "/projects/" +
-    projectID +
+    encodeURIComponent(projectID) +
     "/series/download" +
     "?format=stream&includeAims=true";
   return http.post(url, body, { responseType: "blob" });
@@ -119,13 +119,13 @@ export function deleteSeries(series, delSys) {
   const url =
     apiUrl +
     "/projects/" +
-    projectID +
+    encodeURIComponent(projectID) +
     "/subjects/" +
-    patientID +
+    encodeURIComponent(patientID) +
     "/studies/" +
-    studyUID +
+    encodeURIComponent(studyUID) +
     "/series/" +
-    seriesUID +
+    encodeURIComponent(seriesUID) +
     delSys;
   return http.delete(url);
 }
@@ -140,11 +140,11 @@ export function saveSeries(
   const url =
     apiUrl +
     "/projects/" +
-    projectID +
+    encodeURIComponent(projectID) +
     "/subjects/" +
-    subjectID +
+    encodeURIComponent(subjectID) +
     "/studies/" +
-    studyID +
+    encodeURIComponent(studyID) +
     "/series/" +
     abbreviation;
 
@@ -155,7 +155,11 @@ export function uploadFileToSeries(formData, config, series) {
   let { projectID, subjectID, studyUID, seriesUID } = series;
   projectID = projectID || "lite";
   subjectID = subjectID ? subjectID : series.patientID;
-  const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/series/${seriesUID}/files`;
+  const url = `${apiUrl}/projects/${encodeURIComponent(
+    projectID
+  )}/subjects/${encodeURIComponent(subjectID)}/studies/${encodeURIComponent(
+    studyUID
+  )}/series/${encodeURIComponent(seriesUID)}/files`;
   return http.post(url, formData, config);
 }
 
@@ -168,7 +172,13 @@ export function updateTagsOfSeries(
   applyStudy,
   body
 ) {
-  const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/series/${seriesUID}?editTags=true&applyPatient=${applyPatient}&applyStudy=${applyStudy}`;
+  const url = `${apiUrl}/projects/${encodeURIComponent(
+    projectID
+  )}/subjects/${encodeURIComponent(subjectID)}/studies/${encodeURIComponent(
+    studyUID
+  )}/series/${encodeURIComponent(
+    seriesUID
+  )}?editTags=true&applyPatient=${applyPatient}&applyStudy=${applyStudy}`;
   return http.put(url, body);
 }
 
@@ -176,12 +186,12 @@ export function getSingleSeries(projectId, subjectId, studyUID, seriesUID) {
   return http.get(
     apiUrl +
       "/projects/" +
-      projectId +
+      encodeURIComponent(projectId) +
       "/subjects/" +
-      subjectId +
+      encodeURIComponent(subjectId) +
       "/studies/" +
-      studyUID +
+      encodeURIComponent(studyUID) +
       "/series/" +
-      seriesUID
+      encodeURIComponent(seriesUID)
   );
 }

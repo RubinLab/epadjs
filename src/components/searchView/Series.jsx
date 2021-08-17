@@ -203,7 +203,7 @@ function Series(props) {
         props.dispatch(addToGrid(selected));
         props
           .dispatch(getSingleSerie(selected))
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
         if (!props.patients[selected.patientID]) {

@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
+import { FaCogs } from "react-icons/fa";
 import ParametersForProjectWindow from "./parametersForProjectWindow";
 class PluginProjectWindow extends React.Component {
   constructor(props) {
@@ -35,6 +36,7 @@ class PluginProjectWindow extends React.Component {
         <tr key={project.id} className="edit-userRole__table--row">
           <td>
             <input
+              style={{ cursor: "pointer" }}
               type="checkbox"
               value={project.id}
               name={project.name}
@@ -49,6 +51,7 @@ class PluginProjectWindow extends React.Component {
           <td>{project.name}</td>
           <td>
             <div
+              className="text_clickable"
               onClick={() => {
                 this.handleShowParamatersWindow(
                   project.id,
@@ -56,7 +59,7 @@ class PluginProjectWindow extends React.Component {
                 );
               }}
             >
-              &nbsp; params
+              &nbsp; <FaCogs className="menu-clickable" />
             </div>
           </td>
         </tr>
@@ -78,7 +81,7 @@ class PluginProjectWindow extends React.Component {
                 <tr>
                   <th className="user-table__header">add/remove</th>
                   <th className="user-table__header">project</th>
-                  <th className="user-table__header"></th>
+                  <th className="user-table__header">project params</th>
                 </tr>
               </thead>
               <tbody>{this.populateRows()}</tbody>

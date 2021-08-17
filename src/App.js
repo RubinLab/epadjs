@@ -9,6 +9,7 @@ import NavBar from './components/navbar';
 import Sidebar from './components/sideBar/sidebar';
 import SearchView from './components/searchView/searchView';
 import DisplayView from './components/display/displayView';
+import AnnotationSearch from './components/annotationSearch';
 import AnotateView from './components/anotateView';
 import ProgressView from './components/progressView';
 import FlexView from './components/flexView';
@@ -102,7 +103,8 @@ class App extends Component {
       clientId: '',
       redirectUri: '',
       responseType: '',
-      scope: ''
+      scope: '',
+      searchQuery: ''
     };
   }
 
@@ -474,10 +476,12 @@ class App extends Component {
     if (viewType === 'search') {
       this.props.dispatch(clearSelection());
       pid
-        ? this.props.history.push(`/search/${pid}`)
-        : this.props.history.push(`/search`);
+        ? this.props.history.push(`/list/${pid}`)
+        : this.props.history.push(`/list`);
     } else if (viewType === 'display') {
       this.props.history.push(`/display`);
+    } else if (viewType === 'annotations') {
+      this.props.history.push(`/search`);
     }
   };
 
@@ -596,7 +600,7 @@ class App extends Component {
     const newPid = this.props.location.pathname.split('/').pop();
     const route = this.props.location.pathname.split('/')[1];
 
-    if (oldPid !== newPid && route === 'search') {
+    if (oldPid !== newPid && route === 'list') {
       this.setState({ pid: newPid });
     }
   };
@@ -687,7 +691,7 @@ class App extends Component {
         localStorage.setItem('treeData', JSON.stringify({}));
         this.setState({ pid });
         if (this.props.openSeries.length === 0) {
-          this.props.history.push(`/search/${pid}`);
+          this.props.history.push(`/list/${pid}`);
         }
       }
       this.setState({ notifications });
@@ -827,6 +831,7 @@ class App extends Component {
   };
 
   getPidUpdate = pid => {
+    this.setState({ searchQuery: '' });
     this.setState({ pid });
   };
 
@@ -1052,7 +1057,7 @@ class App extends Component {
                   )}
                 />
                 <ProtectedRoute
-                  path="/search/:pid?"
+                  path="/list/:pid?"
                   render={props => (
                     <SearchView
                       {...props}
@@ -1080,7 +1085,7 @@ class App extends Component {
                   )}
                 />
                 <ProtectedRoute
-                  path="/search/:pid?"
+                  path="/list/:pid?"
                   render={props => (
                     <SearchView
                       {...props}
@@ -1116,6 +1121,17 @@ class App extends Component {
                   path="/flex/:pid?"
                   render={props => <FlexView {...props} pid={this.state.pid} />}
                 />
+                <ProtectedRoute
+                  path="/search"
+                  render={props => (
+                    <AnnotationSearch
+                      {...props}
+                      pid={this.state.pid}
+                      searchQuery={this.state.searchQuery}
+                      setQuery={query => this.setState({ searchQuery: query })}
+                    />
+                  )}
+                />
                 <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
                 {/* component={Worklist} /> */}
                 <Route path="/tools" />
@@ -1124,7 +1140,7 @@ class App extends Component {
                 <ProtectedRoute
                   from="/"
                   exact
-                  to="/search"
+                  to="/list"
                   render={props => (
                     <SearchView
                       {...props}
@@ -1182,6 +1198,17 @@ class App extends Component {
               <Route path="/not-found" component={NotFound} />
               <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
+              <ProtectedRoute
+                path="/search"
+                render={props => (
+                  <AnnotationSearch
+                    {...props}
+                    pid={this.state.pid}
+                    searchQuery={this.state.searchQuery}
+                    setQuery={query => this.setState({ searchQuery: query })}
+                  />
+                )}
+              />
               <ProtectedRoute
                 path="/"
                 render={props => (
