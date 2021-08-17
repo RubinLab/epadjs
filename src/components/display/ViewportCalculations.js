@@ -15,15 +15,18 @@ const getVPDimensions = (numSeries) => {
       width = "50%";
       height = containerHeight;
       break;
-    case (3, 4):
+    case 3:
+    case 4:
       width = "50%";
       height = containerHeight / 2;
       break;
-    case (5, 6):
+    case 5:
+    case 6:
       width = "33%";
       height = containerHeight / 2;
       break;
-    case (7, 8):
+    case 7:
+    case 8:
       width = "25%";
       height = containerHeight / 2;
       break;
