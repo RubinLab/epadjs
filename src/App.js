@@ -597,8 +597,9 @@ class App extends Component {
     if (search && (args = search.split("?arg=")[1])) {
       const { data } = await decrypt(args);
       const { API_KEY, seriesArray, user } = data;
-
+      console.log("seriesArray", seriesArray);
       const parsedSeriesArray = JSON.parse(seriesArray);
+      console.log("parsed array", parsedSeriesArray);
       if (API_KEY) {
         sessionStorage.setItem("authMode", "apiKey");
         sessionStorage.setItem("API_KEY", API_KEY);
@@ -693,8 +694,9 @@ class App extends Component {
 
           if (authMode === "apiKey") {
             const API_KEY = sessionStorage.getItem("API_KEY");
+            const user = sessionStorage.getItem("user");
             this.eventSource = new EventSourcePolyfill(
-              `${apiUrl}/notifications`,
+              `${apiUrl}/notifications?user=${user}`,
               {
                 headers: {
                   authorization: `apikey ${API_KEY}`,
