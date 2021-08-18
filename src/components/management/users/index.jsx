@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactTable from 'react-table-v6';
 import { FaCheck, FaRegTrashAlt, FaTimes } from 'react-icons/fa';
+import ReactTooltip from 'react-tooltip';
 import { connect } from 'react-redux';
 import '../menuStyle.css';
 import {
@@ -438,15 +439,27 @@ class Users extends React.Component {
                 }, '')
               : 'Add user to a project';
           return (
-            <div
-              id={`projects-${original.row.checkbox.username}`}
-              onClick={() => {
-                this.displayUserRoleEdit();
-                this.saveClickedUser(original);
-              }}
-            >
-              <p className={className}>{text}</p>
-            </div>
+            <>
+              <div
+                id={`projects-${original.row.checkbox.username}`}
+                data-tip
+                data-for="users-projects"
+                onClick={() => {
+                  this.displayUserRoleEdit();
+                  this.saveClickedUser(original);
+                }}
+              >
+                <p className={className}>{text}</p>
+              </div>
+              <ReactTooltip
+                id="users-projects"
+                place="right"
+                type="info"
+                delayShow={1000}
+              >
+                <span className="filter-label">Edit user's project</span>
+              </ReactTooltip>
+            </>
           );
         }
       },
@@ -460,14 +473,26 @@ class Users extends React.Component {
         Cell: original => {
           const { username, admin } = original.row.checkbox;
           return (
-            <div
-              className="centeredCell"
-              onClick={async () => {
-                this.updateAdmin(username, admin);
-              }}
-            >
-              {original.row.checkbox.admin ? <FaCheck /> : <FaTimes />}
-            </div>
+            <>
+              <div
+                className="centeredCell"
+                data-tip
+                data-for="users-admin"
+                onClick={async () => {
+                  this.updateAdmin(username, admin);
+                }}
+              >
+                {original.row.checkbox.admin ? <FaCheck /> : <FaTimes />}
+              </div>
+              <ReactTooltip
+                id="users-admin"
+                place="right"
+                type="info"
+                delayShow={1000}
+              >
+                <span className="filter-label">Change admin status</span>
+              </ReactTooltip>
+            </>
           );
         }
       },
@@ -486,16 +511,28 @@ class Users extends React.Component {
           text = text ? text : 'Give user permission';
 
           return (
-            <div
-              className="menu-clickable"
-              id={`permissions-${original.row.checkbox.username}`}
-              onClick={() => {
-                this.displayUserPermissionEdit(original.index);
-                this.saveClickedUser(original);
-              }}
-            >
-              <p className={className}>{text}</p>
-            </div>
+            <>
+              <div
+                className="menu-clickable"
+                data-tip
+                data-for="users-permission"
+                id={`permissions-${original.row.checkbox.username}`}
+                onClick={() => {
+                  this.displayUserPermissionEdit(original.index);
+                  this.saveClickedUser(original);
+                }}
+              >
+                <p className={className}>{text}</p>
+              </div>
+              <ReactTooltip
+                id="users-permission"
+                place="left"
+                type="info"
+                delayShow={1000}
+              >
+                <span className="filter-label">Edit user's permissions</span>
+              </ReactTooltip>{' '}
+            </>
           );
         }
       },
@@ -506,15 +543,27 @@ class Users extends React.Component {
         resizable: true,
         Cell: original =>
           this.state.hasAdminPermission ? (
-            <div
-              id={`delete-${original.row.checkbox.username}`}
-              onClick={() => {
-                this.handleSingleDelete();
-                this.saveClickedUser(original);
-              }}
-            >
-              <FaRegTrashAlt className="menu-clickable" />
-            </div>
+            <>
+              <div
+                id={`delete-${original.row.checkbox.username}`}
+                data-tip
+                data-for="users-singleDelete"
+                onClick={() => {
+                  this.handleSingleDelete();
+                  this.saveClickedUser(original);
+                }}
+              >
+                <FaRegTrashAlt className="menu-clickable" />
+              </div>
+              <ReactTooltip
+                id="users-singleDelete"
+                place="left"
+                type="info"
+                delayShow={1000}
+              >
+                <span className="filter-label">Delete user</span>
+              </ReactTooltip>{' '}
+            </>
           ) : null
       }
     ];
