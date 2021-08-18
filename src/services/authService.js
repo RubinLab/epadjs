@@ -24,12 +24,15 @@ export function refreshToken(keycloak, minValidity) {
   });
 }
 
-export async function login(username, password, keycloak) {
-  sessionStorage.setItem("username", username.user);
-  sessionStorage.setItem("displayName", username.user); //TODO: change with fullname
+export async function setLoginKeycloak(keycloak) {
   if (keycloak) {
     this.keycloak = keycloak;
   }
+}
+
+export async function setLoginSession(username) {
+  sessionStorage.setItem("username", username.user);
+  sessionStorage.setItem("displayName", username.user); //TODO: change with fullname
 }
 
 export function logout() {
@@ -78,8 +81,8 @@ export async function getAuthHeader() {
 }
 
 export default {
-  login,
-  logout,
+  setLoginKeycloak,
+  setLoginSession,
   getCurrentUser,
   getAuthHeader,
   refreshToken,

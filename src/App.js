@@ -674,6 +674,9 @@ class App extends Component {
         try {
           const username =
             result.userInfo.preferred_username || result.userInfo.email;
+
+          console.log("result", result);
+          await auth.setLoginKeycloak(result.keycloak);
           let userData;
           try {
             userData = await getUser(username);
@@ -687,7 +690,7 @@ class App extends Component {
             displayname: `${userData.firstname} ${userData.lastname}`,
           };
           console.log("result", result);
-          await auth.login(user, null, result.keycloak);
+          await auth.setLoginSession(user, null);
           this.setState({
             keycloak: result.keycloak,
             authenticated: result.authenticated,
