@@ -511,10 +511,15 @@ const asyncReducer = (state = initialState, action) => {
         };
       case ADD_TO_GRID:
         const seriesInfo = { ...action.reference };
-        seriesInfo.projectName =
-          state.projectMap[seriesInfo.projectID].projectName;
-        seriesInfo.defaultTemplate =
-          state.projectMap[seriesInfo.projectID].defaultTemplate;
+        const { projectMap } = state;
+        if (projectMap[seriesInfo.projectID]) {
+          seriesInfo.projectName = projectMap[seriesInfo.projectID].projectName;
+          seriesInfo.defaultTemplate =
+            projectMap[seriesInfo.projectID].defaultTemplate;
+        } else {
+          seriesInfo.projectName = "lite";
+          seriesInfo.defaultTemplate = null;
+        }
         let newOpenSeries = state.openSeries.concat(seriesInfo);
 
         return {
@@ -522,17 +527,17 @@ const asyncReducer = (state = initialState, action) => {
           openSeries: newOpenSeries,
           activePort: newOpenSeries.length - 1,
         };
-      case ADD_TO_GRID2:
-        const seriesInfo2 = { ...action.reference };
-        seriesInfo2.projectName = "lite";
-        seriesInfo2.defaultTemplate = null;
-        let newOpenSeries2 = state.openSeries.concat(seriesInfo2);
+      // case ADD_TO_GRID2:
+      //   const seriesInfo2 = { ...action.reference };
+      //   seriesInfo2.projectName = "lite";
+      //   seriesInfo2.defaultTemplate = null;
+      //   let newOpenSeries2 = state.openSeries.concat(seriesInfo2);
 
-        return {
-          ...state,
-          openSeries: newOpenSeries2,
-          activePort: newOpenSeries2.length - 1,
-        };
+      //   return {
+      //     ...state,
+      //     openSeries: newOpenSeries2,
+      //     activePort: newOpenSeries2.length - 1,
+      //   };
       case UPDATE_PATIENT:
         let updatedPt = { ...state.patients[action.payload.patient] };
         if (action.payload.type === "study") {

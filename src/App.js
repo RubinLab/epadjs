@@ -36,7 +36,7 @@ import {
   getTemplates,
   segUploadCompleted,
   getSingleSerie,
-  addToGrid2,
+  addToGrid,
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
@@ -601,7 +601,7 @@ class App extends Component {
       const parsedSeriesArray = JSON.parse(seriesArray);
       console.log("parsed array", parsedSeriesArray);
       if (API_KEY) {
-        sessionStorage.setItem("authMode2", "apiKey");
+        sessionStorage.setItem("authMode", "apiKey");
         sessionStorage.setItem("API_KEY", API_KEY);
         sessionStorage.setItem("user", user);
         sessionStorage.setItem("username", user);
@@ -610,7 +610,7 @@ class App extends Component {
       const promiseArr = [];
       for (let serie of parsedSeriesArray) {
         serie = { ...serie, projectID: "lite" };
-        this.props.dispatch(addToGrid2(serie));
+        this.props.dispatch(addToGrid(serie));
         promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
       }
       Promise.all(promiseArr)
@@ -624,10 +624,9 @@ class App extends Component {
   completeAutorization = () => {
     let getAuthUser = null;
     const authMode = sessionStorage.getItem("authMode");
-    const authMode2 = sessionStorage.getItem("authMode2");
     const apiUrl = sessionStorage.getItem("apiUrl");
 
-    if (authMode2 === "apiKey") {
+    if (authMode === "apiKey") {
       const username = sessionStorage.getItem("username");
       getAuthUser = new Promise((resolve) => {
         resolve({

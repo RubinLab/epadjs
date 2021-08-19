@@ -59,6 +59,7 @@ class Sidebar extends Component {
     try {
       this.setTabHeight();
       const projects = await this.getProjectsData();
+      console.log("projects WWWWWWWWWWWW", projects);
       this.setStateProjectData(projects, true);
       this.getWorklistandProgressData();
       window.addEventListener("resize", this.setTabHeight);
@@ -333,7 +334,7 @@ class Sidebar extends Component {
                     this.props.getPidUpdate(project.id);
                     this.setState({ selected: project.id });
                   }}
-                  // style={{ padding: "0.6rem" }}
+                // style={{ padding: "0.6rem" }}
                 >
                   {project.name}
                   <span id="subjectCount" className="badge badge-secondary">
@@ -393,7 +394,7 @@ class Sidebar extends Component {
           onOpen={() => this.handleCollapse(0, true)}
           onClose={() => this.handleCollapse(0, false)}
           transitionTime={100}
-          // open={progressView[0]}
+        // open={progressView[0]}
         >
           <WorklistSelect
             list={this.state.worklistsCreated}
@@ -407,7 +408,7 @@ class Sidebar extends Component {
           onOpen={() => this.handleCollapse(1, true)}
           onClose={() => this.handleCollapse(1, false)}
           transitionTime={100}
-          // open={progressView[1]}
+        // open={progressView[1]}
         >
           <WorklistSelect
             list={this.state.worklistsAssigned}
