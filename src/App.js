@@ -517,9 +517,11 @@ class App extends Component {
     localStorage.setItem('treeData', JSON.stringify({}));
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),
+      fetch(`${process.env.PUBLIC_URL}/keycloak.json`),
     ])
       .then(async results => {
         const configData = await results[0].json();
+        const authData = await results[1].json();
         let {
           mode,
           apiUrl,
@@ -532,15 +534,16 @@ class App extends Component {
           scope
         } = configData;
         // check and use environment variables if any
+        const authServerUrl = authData['auth-server-url'];
         mode = process.env.REACT_APP_MODE || mode;
         apiUrl = process.env.REACT_APP_API_URL || apiUrl;
         wadoUrl = process.env.REACT_APP_WADO_URL || wadoUrl;
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
-        authority = process.env.REACT_APP_AUTHORITY || authority;
-        client_id = process.env.REACT_APP_CLIENT_ID || client_id;
-        redirect_uri = process.env.REACT_APP_REDIRECT_URI || redirect_uri;
-        response_type = process.env.REACT_APP_RESPONSE_TYPE || response_type;
-        scope = process.env.REACT_APP_SCOPE || scope;
+        authority = process.env.REACT_APP_AUTHORITY || authority || `${authServerUrl}/realms/ePad`;
+        client_id = process.env.REACT_APP_CLIENT_ID || client_id || "epad-auth";
+        redirect_uri = process.env.REACT_APP_REDIRECT_URI || redirect_uri || 'http://localhost:3000/index.html';
+        response_type = process.env.REACT_APP_RESPONSE_TYPE || response_type ||  "code";
+        scope = process.env.REACT_APP_SCOPE || scope || "openid profile";
         sessionStorage.setItem('mode', mode);
         sessionStorage.setItem('apiUrl', apiUrl);
         sessionStorage.setItem('wadoUrl', wadoUrl);
