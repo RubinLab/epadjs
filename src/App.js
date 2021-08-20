@@ -704,8 +704,13 @@ class App extends Component {
 
   displaySeries = async (studyData) => {
     const rawSeriesArray = await this.getSeriesData(studyData);
-    const seriesArr = rawSeriesArray.filter(this.isSupportedModality);
-    console.log("seriesArr", seriesArr);
+    let seriesArr = rawSeriesArray.filter(this.isSupportedModality);
+    let significantSeries = seriesArr.filter(
+      ({ significanceOrder }) => significanceOrder && significanceOrder > 0
+    );
+    // If there are significant series use them to display
+    // if not display modality filtered series
+    if (significantSeries.length) seriesArr = significantSeries;
 
     if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
       window.dispatchEvent(

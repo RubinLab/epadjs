@@ -98,18 +98,19 @@ class selectSerieModal extends React.Component {
       if (this.state.selectedToDisplay[i]) {
         significantSeries.push({ seriesUID: series[i].seriesUID, significanceOrder })
         significanceOrder++;
-        // this.props.dispatch(addToGrid(series[i], series[i].aimID));
-        // if (this.state.selectionType === "aim") {
-        //   this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
-        // } else {
-        //   this.props.dispatch(getSingleSerie(series[i]));
-        // }
-        // if (!this.props.patients[series[i]]) {
-        //   this.props.dispatch(getWholeData(series[i]));
-        // }
+        this.props.dispatch(addToGrid(series[i], series[i].aimID));
+        if (this.state.selectionType === "aim") {
+          this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
+        } else {
+          this.props.dispatch(getSingleSerie(series[i]));
+        }
+        if (!this.props.patients[series[i]]) {
+          this.props.dispatch(getWholeData(series[i]));
+        }
       }
     }
-    console.log("significanceSeries", significantSeries);
+    const { projectID, patientID, studyUID } = series[0];
+    setSignificantSeries(projectID, patientID, studyUID, significantSeries);
     this.props.history.push("/display");
     this.handleCancel();
   };
