@@ -38,7 +38,6 @@ import { FaTimes, FaPen, FaExpandArrowsAlt } from "react-icons/fa";
 import Form from "react-bootstrap/Form";
 import ToolMenu from "../ToolMenu/ToolMenu";
 import { getMarkups, setMarkupsOfAimActive } from "../aimEditor/Helpers";
-import { refreshToken } from "../../services/authService";
 import { isThisSecond } from "date-fns/esm";
 import { FiMessageSquare } from "react-icons/fi";
 import { errorMonitor } from "events";
@@ -158,7 +157,6 @@ class DisplayView extends Component {
       seriesLabelMaps: {},
       redirect: this.props.series.length < 1 ? true : false,
       containerHeight: 0,
-      tokenRefresh: null,
       activeTool: undefined
     };
   }
@@ -233,7 +231,6 @@ class DisplayView extends Component {
     window.removeEventListener("deleteAim", this.deleteAimHandler);
     window.removeEventListener("resize", this.setSubComponentHeights);
     window.removeEventListener('keydown', this.handleKeyPressed);
-    clearInterval(this.state.tokenRefresh)
   }
 
   handleKeyPressed = (event) => {
@@ -263,24 +260,6 @@ class DisplayView extends Component {
       }
     });
     this.setState({ data: newData });
-  };
-
-  checkTokenExpire = async () => {
-    if (this.props.keycloak.isTokenExpired(5)) {
-      window.alert("Are you still there?");
-      await this.updateToken(this.props.keycloak, 5);
-    }
-  };
-
-  updateToken = async () => {
-    try {
-      clearInterval(this.state.tokenRefresh);
-      await refreshToken(this.props.keycloak, 5);
-      const tokenRefresh = setInterval(this.checkTokenExpire, 500);
-      this.setState({ tokenRefresh });
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   setSubComponentHeights = e => {

@@ -12,7 +12,7 @@ const alertDeletionModal = ({ message, onCancel, onDelete, error }) => {
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
         {!error && (
-          <button variant="primary" onClick={onDelete}>
+          <button variant="primary" onClick={onDelete} id='modal-delete-button'>
             Delete
           </button>
         )}

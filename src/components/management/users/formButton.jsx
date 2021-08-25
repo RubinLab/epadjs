@@ -1,13 +1,17 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 
 const formButton = ({ text, onClick, disabled }) => {
   return disabled ? (
-    <button className="user-create__button" onClick={onClick} disabled>
+    <button
+      className="user-create__button"
+      onClick={onClick}
+      disabled
+    >
       {text}
     </button>
   ) : (
-    <button className="user-create__button" onClick={onClick}>
+    <button className="user-create__button" onClick={onClick} id={text}>
       {text}
     </button>
   );
