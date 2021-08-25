@@ -42,8 +42,6 @@ import {
   selectProject,
   getTemplates,
   segUploadCompleted,
-  getSingleSerie,
-  addToGrid,
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
