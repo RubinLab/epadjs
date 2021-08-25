@@ -31,6 +31,13 @@ import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import {
   clearAimId,
   getNotificationsData,
+  getSingleSerie,
+  addToGrid,
+  getWholeData,
+  startLoading,
+  alertViewPortFull,
+  annotationsLoadingError,
+  loadCompleted,
   clearSelection,
   selectProject,
   getTemplates,
@@ -1081,6 +1088,30 @@ class App extends Component {
     }
   };
 
+  // TEACHING FILES RELATED //
+  doTeaching = async () => {
+    // TEACHING FILES RELATED //
+    const { search } = this.props.location;
+    let args;
+    if (search && (args = search.split("?arg=")[1])) {
+      console.log("ARGS:", args);
+      // const result = await decrypt(args);
+      const result = await decryptAndAdd(args);
+      const { patientID, studyUID, projectID } = result.data;
+      console.log("Result", result.data, patientID, studyUID);
+      const packData = {
+        projectID,
+        patientID,
+        patientName: "patientName",
+        studyUID,
+      };
+      this.props.dispatch(addToGrid(packData));
+      this.props.dispatch(getSingleSerie(packData));
+      getWholeData(packData);
+      this.props.history.push("/display");
+    }
+  };
+
   render() {
     const {
       notifications,
@@ -1224,6 +1255,8 @@ class App extends Component {
                     />
                   )}
                 />
+                {/* LOOKS LIKE THIS IS DUPLICATE!!! */}
+                {/* 
                 <ProtectedRoute
                   path="/list/:pid?"
                   render={(props) => (
@@ -1251,7 +1284,7 @@ class App extends Component {
                       admin={this.state.admin}
                     />
                   )}
-                />
+                /> */}
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute
                   path="/progress/:wid?"
@@ -1379,6 +1412,8 @@ class App extends Component {
                     getTreeData={this.getTreeData}
                     closeAllCounter={this.state.closeAll}
                     admin={this.state.admin}
+                    showSeriesModal={this.state.showSeriesModal}
+                    seriesList={this.state.seriesList}
                   />
                 )}
               />

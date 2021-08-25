@@ -1,4 +1,16 @@
 export const widthUnit = 20;
+export const DISP_MODALITIES = [
+  "CT",
+  "MR",
+  "PT",
+  "MG",
+  "CR",
+  "US",
+  "DX",
+  "OT",
+  "XA",
+  "OCT",
+];
 
 export const formatDates = (timeStamp) => {
   //split it by space
@@ -17,6 +29,7 @@ export const formatDates = (timeStamp) => {
       let month = dateArr[0].substring(4, 6);
       let day = dateArr[0].substring(6, 8);
       date = `${year}-${month}-${day}`;
+      DISP_MODALITIES;
     }
     return date + " " + hour;
   }

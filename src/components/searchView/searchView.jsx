@@ -35,6 +35,7 @@ import {
   updateSingleSerie,
   updatePatientOnAimDelete
 } from '../annotationsList/action';
+import { DISP_MODALITIES } from '../../constants';
 import DownloadSelection from './annotationDownloadModal';
 import './searchView.css';
 import UploadModal from './uploadModal';
@@ -130,7 +131,15 @@ class SearchView extends Component {
         expandLevel
       });
     } catch (err) { }
+    window.addEventListener("openSeriesModal", this.handleSeriesModal);
   };
+
+  // App.js triggers this event when more than allowed series are sent from the url to open
+  handleSeriesModal = (event) => {
+    const list = event.detail;
+    const seriesList = [list];
+    this.setState({ isSerieSelectionOpen: true, seriesList });
+  }
 
   componentDidUpdate = async prevProps => {
     const { uploadedPid, lastEventId, expandLevel } = this.props;
@@ -158,6 +167,10 @@ class SearchView extends Component {
       this.handleEditingTags();
     }
   };
+
+  componentWillUnmount() {
+    window.removeEventListener("openSeriesModal", this.handleSeriesModal);
+  }
 
   checkForAllAndUnassigned = () => {
     const { pid } = this.props;
@@ -535,7 +548,7 @@ class SearchView extends Component {
     } else if (selectedSeries.length > 0) {
       //check if enough room to display selection
       for (let serie of selectedSeries) {
-        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen) {
+        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen && DISP_MODALITIES.includes(series.examType)) {
           notOpenSeries.push(serie);
         }
       }
@@ -594,7 +607,7 @@ class SearchView extends Component {
       groupedObj = this.groupUnderStudy(serieList);
       //check if enough room to display selection
       for (let serie of serieList) {
-        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen) {
+        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen && DISP_MODALITIES.includes(series.examType)) {
           notOpenSeries.push(serie);
         }
       }
@@ -1002,6 +1015,12 @@ class SearchView extends Component {
         {isSerieSelectionOpen && !this.props.loading && (
           <ProjectModal
             seriesPassed={this.state.seriesList}
+            onCancel={this.closeSelectionModal}
+          />
+        )}
+        {this.props.showSeriesModal && (
+          <ProjectModal
+            seriesPassed={this.props.seriesList}
             onCancel={this.closeSelectionModal}
           />
         )}
