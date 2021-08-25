@@ -547,7 +547,8 @@ class App extends Component {
         sessionStorage.setItem("auth", auth);
         sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
         if (mode === "lite") this.setState({ pid: "lite" });
-        this.checkArguments();
+        const args = this.getArguments();
+        args ? this.handleArgs(args) : this.completeAutorization();
       })
       .catch((err) => {
         console.error(err);
@@ -589,24 +590,44 @@ class App extends Component {
       this.getMessageFromEventSrc
     );
     localStorage.setItem("treeData", JSON.stringify({}));
+    this.clearSessionStorageItems();
   };
 
-  checkArguments = async () => {
+  clearSessionStorageItems = () => {
+    sessionStorage.removeItem("authMode");
+    sessionStorage.removeItem("API_KEY");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("username");
+  };
+
+  getArguments = () => {
     const { search } = this.props.location;
-    let args;
-    if (search && (args = search.split("?arg=")[1])) {
-      const { data } = await decrypt(args);
-      const { API_KEY, seriesArray, user } = data;
-      console.log("seriesArray", seriesArray);
+    let args = undefined;
+    if (search) args = search.split("?arg=")[1];
+    return args;
+  };
+
+  handleArgs = async (args) => {
+    const { data } = await decrypt(args);
+    const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
+
+    const { openSeries } = this.props;
+
+    if (API_KEY && seriesArray && user) {
+      // THIS IS APIKEY
       const parsedSeriesArray = JSON.parse(seriesArray);
-      console.log("parsed array", parsedSeriesArray);
-      if (API_KEY) {
-        sessionStorage.setItem("authMode", "apiKey");
-        sessionStorage.setItem("API_KEY", API_KEY);
-        sessionStorage.setItem("user", user);
-        sessionStorage.setItem("username", user);
-      }
+      sessionStorage.setItem("authMode", "apiKey");
+      sessionStorage.setItem("API_KEY", API_KEY);
+      sessionStorage.setItem("user", user);
+      sessionStorage.setItem("username", user);
+
       this.completeAutorization();
+      if (parsedSeriesArray.length + openSeries.length > MAX_PORT) {
+        alert(
+          `Number of series passed is more than allowable number of port. Max allowed is ${MAX_PORT}. Please try again with num series less than ${MAX_PORT}`
+        );
+        return;
+      }
       const promiseArr = [];
       for (let serie of parsedSeriesArray) {
         serie = { ...serie, projectID: "lite" };
@@ -618,7 +639,65 @@ class App extends Component {
           this.props.history.push("/display");
         })
         .catch((err) => console.error(err));
-    } else this.completeAutorization();
+    } else if (patientID && studyUID && projectID) {
+      // THIS IS TEACHING
+      this.completeAutorization();
+      // await decrypt(args);
+      await decryptAndAdd(args);
+      const packedData = {
+        projectID,
+        patientID,
+        patientName: "patientName",
+        studyUID,
+      };
+      this.displaySeries(packedData);
+    }
+  };
+
+  displaySeries = async (studyData) => {
+    const rawSeriesArray = await this.getSeriesData(studyData);
+    let seriesArr = rawSeriesArray.filter(this.isSupportedModality);
+    let significantSeries = seriesArr.filter(
+      ({ significanceOrder }) => significanceOrder && significanceOrder > 0
+    );
+    // If there are significant series use them to display
+    // if not display modality filtered series
+    if (significantSeries.length) seriesArr = significantSeries;
+
+    if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
+      window.dispatchEvent(
+        new CustomEvent("openSeriesModal", {
+          detail: seriesArr,
+        })
+      );
+    } else {
+      //if there is enough room
+      //add serie to the grid
+      const promiseArr = [];
+      for (let serie of seriesArr) {
+        this.props.dispatch(addToGrid(serie));
+        promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
+      }
+      Promise.all(promiseArr)
+        .then(() => {
+          this.props.history.push("/display");
+        })
+        .catch((err) => console.error(err));
+    }
+  };
+
+  isSupportedModality = (serie) => {
+    return DISP_MODALITIES.includes(serie.examType);
+  };
+
+  getSeriesData = async (studyData) => {
+    const { projectID, patientID, studyUID } = studyData;
+    try {
+      const { data: series } = await getSeries(projectID, patientID, studyUID);
+      return series;
+    } catch (err) {
+      this.props.dispatch(annotationsLoadingError(err));
+    }
   };
 
   completeAutorization = () => {
@@ -636,7 +715,6 @@ class App extends Component {
         });
       }).catch((err) => reject(err));
     } else if (authMode !== "external") {
-      console.log("authMode not external", authMode);
       const keycloak = Keycloak(
         JSON.parse(sessionStorage.getItem("keycloakJson"))
       );
@@ -674,7 +752,6 @@ class App extends Component {
           const username =
             result.userInfo.preferred_username || result.userInfo.email;
 
-          console.log("result", result);
           await auth.setLoginKeycloak(result.keycloak);
           let userData;
           try {
@@ -688,7 +765,6 @@ class App extends Component {
             user: userData.username,
             displayname: `${userData.firstname} ${userData.lastname}`,
           };
-          console.log("result", result);
           await auth.setLoginSession(user, null);
           this.setState({
             keycloak: result.keycloak,
