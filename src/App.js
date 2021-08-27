@@ -100,9 +100,21 @@ class App extends Component {
       minReportsArr: [],
       hiddenReports: {},
       metric: null,
-      searchQuery: ''
+      searchQuery: '',
+      pairs: {}
     };
   }
+
+  getWorklistPatient = (patient, project) => {
+    const pairsSelected = patient.reduce((all, item, index) => {
+      all.push({ subjectID: item, projectID: project[index] });
+      return all;
+    }, []);
+    const pairs = { ...this.state.pairs };
+    const index = this.state.reportsCompArr.length;
+    pairs[index] = pairsSelected;
+    this.setState({ pairs });
+  };
 
   getProjectAdded = () => {
     this.setState(state => ({
@@ -138,31 +150,41 @@ class App extends Component {
 
   closeReportModal = index => {
     const arr = [...this.state.reportsCompArr];
+    const pairs = { ...this.state.pairs };
+    if (this.state.pairs[index]) {
+      pairs[index] = null;
+    }
     arr[index] = null;
     this.setState({
       template: null,
       report: null,
-      reportsCompArr: arr
+      reportsCompArr: arr,
+      pairs
     });
 
     // if there isn't any report open clear selection
     const nullCount = this.countCurrentReports(arr);
     if (nullCount === arr.length) {
       this.props.dispatch(clearSelection());
-      this.props.history.push(`/display`);
+      // this.props.history.push(`/display`);
     }
   };
 
   handleCloseMinimize = (index, reportIndex) => {
     const hiddenReports = { ...this.state.hiddenReports };
     const minReportsArr = [...this.state.minReportsArr];
+    const pairs = { ...this.state.pairs };
 
+    if (pairs[reportIndex]) {
+      pairs[reportIndex] = null;
+    }
+    
     minReportsArr[index] = null;
     delete hiddenReports[reportIndex];
-
     this.setState({
       hiddenReports,
-      minReportsArr
+      minReportsArr,
+      pairs
     });
 
     this.closeReportModal(reportIndex);
@@ -215,13 +237,17 @@ class App extends Component {
     this.handleReportsClick();
     if (patients.length === 0) {
       if (reportType === 'Waterfall') {
-        this.setState({
-          showConfirmation: true,
-          title: messages.projectWaterfall.title,
-          message:
-            messages.projectWaterfall.message +
-            projectMap[this.state.pid].projectName
-        });
+        if (Object.keys(this.state.pairs).length > 0) {
+          this.displayWaterfall();
+        } else {
+          this.setState({
+            showConfirmation: true,
+            title: messages.projectWaterfall.title,
+            message:
+              messages.projectWaterfall.message +
+              projectMap[this.state.pid].projectName
+          });
+        }
       } else {
         if (openSeries.length > 0) {
           const reportsCompArr = [...this.state.reportsCompArr];
@@ -322,6 +348,7 @@ class App extends Component {
         onClose={this.closeReportModal}
         report={'Waterfall'}
         index={index}
+        pairs={this.state.pairs}
         // patient={patients[0]}
         key={`report${index}`}
         waterfallClickOn={this.handleWaterFallClickOnBar}
@@ -1071,7 +1098,7 @@ class App extends Component {
               pid={this.state.pid}
               clearTreeExpand={this.clearTreeExpand}
               projectAdded={this.state.projectAdded}
-            >
+              >
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
                 <ProtectedRoute
@@ -1163,7 +1190,16 @@ class App extends Component {
                     />
                   )}
                 />
-                <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
+                <ProtectedRoute
+                  path="/worklist/:wid?"
+                  render={props => (
+                    <Worklist
+                      {...props}
+                      getWorklistPatient={this.getWorklistPatient}
+                      reports={this.state.reportsCompArr}
+                    />
+                  )}
+                />
                 {/* component={Worklist} /> */}
                 <Route path="/tools" />
                 <Route path="/edit" />
@@ -1213,6 +1249,7 @@ class App extends Component {
             pid={this.state.pid}
             clearTreeExpand={this.clearTreeExpand}
             projectAdded={this.state.projectAdded}
+            getWorklistPatient={this.getWorklistPatient}
           >
             <Switch>
               <Route path="/logout" component={Logout} />
@@ -1230,7 +1267,16 @@ class App extends Component {
                 )}
               />
               <Route path="/not-found" component={NotFound} />
-              <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
+              <ProtectedRoute
+                path="/worklist/:wid?"
+                render={props => (
+                  <Worklist
+                    {...props}
+                    getWorklistPatient={this.getWorklistPatient}
+                    reports={this.state.reportsCompArr}
+                  />
+                )}
+              />
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
                 path="/search"
