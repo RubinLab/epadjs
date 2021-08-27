@@ -649,13 +649,12 @@ class App extends Component {
     const { search } = this.props.location;
     let args = undefined;
     if (search) args = search.split("?arg=")[1];
+    console.log("returned args", args);
     return args;
   };
 
   handleArgs = async (args) => {
-    console.log("in handle args");
     const { data } = await decrypt(args);
-    console.log("data", data);
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
 
     const { openSeries } = this.props;
@@ -704,7 +703,9 @@ class App extends Component {
   };
 
   displaySeries = async (studyData) => {
+    console.log("study data", studyData);
     const rawSeriesArray = await this.getSeriesData(studyData);
+    if (!rawSeriesArray) return;
     let seriesArr = rawSeriesArray.filter(this.isSupportedModality);
     let significantSeries = seriesArr.filter(
       ({ significanceOrder }) => significanceOrder && significanceOrder > 0

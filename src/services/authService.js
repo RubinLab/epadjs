@@ -120,6 +120,7 @@ export class AuthService {
   }
 
   signinRedirectCallback = () => {
+    alert("redirecting");
     this.UserManager.signinRedirectCallback()
       .then((user) => {
         window.location.href = "http://localhost:3000";
