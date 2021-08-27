@@ -20,7 +20,7 @@ import {
   selectAnnotation
 } from '../annotationsList/action';
 
-const MAX_PORT = sessionStorage.getItem("MAX_PORT");
+const maxPort = sessionStorage.getItem("maxPort");
 
 function Table({
   columns,
@@ -180,7 +180,7 @@ function Series(props) {
     let isSerieOpen = false;
 
     //check if there is enough space in the grid
-    let isGridFull = openSeries.length === MAX_PORT;
+    let isGridFull = openSeries.length === maxPort;
     //check if the serie is already open
 
     if (openSeries.length > 0) {

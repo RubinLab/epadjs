@@ -15,7 +15,7 @@ import {
   showAnnotationDock
 } from "../action";
 
-const MAX_PORT = sessionStorage.getItem("MAX_PORT");
+const maxPort = sessionStorage.getItem("maxPort");
 
 //single serie will be passed
 class ListItem extends React.Component {
@@ -69,7 +69,7 @@ class ListItem extends React.Component {
     const openSeries = Object.values(this.props.openSeries);
     let serieCheck = this.checkIfSerieOpen(this.props.serie);
     //check if there is enough space in the grid
-    let isGridFull = openSeries.length === MAX_PORT;
+    let isGridFull = openSeries.length === maxPort;
     //check if the serie is already open
     if (serieCheck.isOpen) {
       this.props.dispatch(changeActivePort(serieCheck.index));
@@ -109,7 +109,7 @@ class ListItem extends React.Component {
         this.props.dispatch(jumpToAim(seriesid, aimid, index));
       } else {
         //else get single serie dispatch action
-        if (this.props.openSeries.length === MAX_PORT) {
+        if (this.props.openSeries.length === maxPort) {
           this.props.dispatch(alertViewPortFull());
         } else {
           // let { patientID, studyUID, seriesUID, projectID } = serie;
@@ -161,7 +161,7 @@ class ListItem extends React.Component {
         //else - if not open
       } else {
         //check if the grid is full
-        if (this.props.openSeries.length === MAX_PORT) {
+        if (this.props.openSeries.length === maxPort) {
           //if full bring modal
           this.props.dispatch(alertViewPortFull());
           //else - not full

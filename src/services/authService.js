@@ -49,7 +49,7 @@ export async function getAuthHeader() {
       });
       return header;
     }
-  } else if (this.keycloak) {
+  } else {
     authService = new AuthService();
     try {
       const user = await authService.getUser();
@@ -204,7 +204,6 @@ export class AuthService {
 }
 
 export default {
-  setLoginKeycloak,
   setLoginSession,
   getCurrentUser,
   getAuthHeader,

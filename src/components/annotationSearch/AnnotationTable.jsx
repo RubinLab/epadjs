@@ -19,7 +19,7 @@ import {
 import { getSeries } from '../../services/seriesServices';
 
 const defaultPageSize = 200;
-const MAX_PORT = sessionStorage.getItem("MAX_PORT");
+const maxPort = sessionStorage.getItem("maxPort");
 
 function Table({
   columns,
@@ -239,7 +239,7 @@ function AnnotationTable(props) {
       const { openSeries } = props;
       // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
       //check if there is enough space in the grid
-      let isGridFull = openSeries.length === MAX_PORT;
+      let isGridFull = openSeries.length === maxPort;
       //check if the serie is already open
       if (checkIfSerieOpen(selected, props.openSeries).isOpen) {
         const { index } = checkIfSerieOpen(selected, props.openSeries);
@@ -275,7 +275,7 @@ function AnnotationTable(props) {
   };
 
   const displaySeries = async selected => {
-    if (props.openSeries.length === MAX_PORT) {
+    if (props.openSeries.length === maxPort) {
       props.dispatch(alertViewPortFull());
     } else {
       const { subjectID: patientID, studyUID } = selected;
@@ -294,7 +294,7 @@ function AnnotationTable(props) {
       //get extraction of the series (extract unopen series)
       if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
       //check if there is enough room
-      if (seriesArr.length + props.openSeries.length > MAX_PORT) {
+      if (seriesArr.length + props.openSeries.length > maxPort) {
         //if there is not bring the modal
         // await this.setState({
         //   isSerieSelectionOpen: true,

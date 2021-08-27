@@ -58,7 +58,7 @@ import UpLoadWizard from '../tagEditor/uploadWizard';
 import { FaLessThan } from 'react-icons/fa';
 
 const mode = sessionStorage.getItem('mode');
-const MAX_PORT = sessionStorage.getItem("MAX_PORT");
+const maxPort = sessionStorage.getItem("maxPort");
 
 const messages = {
   newUser: {
@@ -491,7 +491,7 @@ class SearchView extends Component {
       let total = 0;
       let studiesObj = {};
 
-      if (this.props.openSeries.length === MAX_PORT) {
+      if (this.props.openSeries.length === maxPort) {
         if (selectedStudies.length === 1) {
           let numOfSer = Object.values(this.groupOpenSeriesByStudy());
           if (selectedStudies[0].numberOfSeries === numOfSer[0]) {
@@ -510,7 +510,7 @@ class SearchView extends Component {
           studiesObj[st.studyUID] = await this.getSeriesData(st);
         }
         //check if enough room to display selection
-        if (total + this.props.openSeries.length > MAX_PORT) {
+        if (total + this.props.openSeries.length > maxPort) {
           this.props.dispatch(startLoading());
           this.setState({ seriesList: studiesObj });
           this.props.dispatch(loadCompleted());
@@ -555,7 +555,7 @@ class SearchView extends Component {
       //if all ports are full
       if (
         notOpenSeries.length > 0 &&
-        this.props.openSeries.length === MAX_PORT
+        this.props.openSeries.length === maxPort
       ) {
         this.props.dispatch(alertViewPortFull());
       } else {
@@ -569,7 +569,7 @@ class SearchView extends Component {
           this.props.history.push('/display');
           this.props.dispatch(clearSelection());
         } else {
-          if (selectedSeries.length + this.props.openSeries.length > MAX_PORT) {
+          if (selectedSeries.length + this.props.openSeries.length > maxPort) {
             groupedObj = this.groupUnderStudy(selectedSeries);
             await this.setState({ seriesList: groupedObj });
             this.setState({ isSerieSelectionOpen: true });
@@ -613,7 +613,7 @@ class SearchView extends Component {
       }
       if (
         notOpenSeries.length > 0 &&
-        this.props.openSeries.length === MAX_PORT
+        this.props.openSeries.length === maxPort
       ) {
         this.props.dispatch(alertViewPortFull());
       } else {
@@ -623,7 +623,7 @@ class SearchView extends Component {
           this.props.dispatch(changeActivePort(index));
           this.props.dispatch(jumpToAim(serID, serieList[0].aimID, index));
         } else {
-          if (notOpenSeries.length + this.props.openSeries.length > MAX_PORT) {
+          if (notOpenSeries.length + this.props.openSeries.length > maxPort) {
             await this.setState({ seriesList: groupedObj });
             this.setState({ isSerieSelectionOpen: true });
             //else get data for each serie for display

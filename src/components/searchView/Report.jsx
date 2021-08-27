@@ -19,11 +19,11 @@ import {
   updateImageId
 } from '../annotationsList/action';
 
-const MAX_PORT = sessionStorage.getItem("MAX_PORT");
+const maxPort = sessionStorage.getItem("maxPort");
 
 const messages = {
   title: 'Can not open all series',
-  message: `Maximum ${MAX_PORT} series can be opened. Please close already opened series first.`
+  message: `Maximum ${maxPort} series can be opened. Please close already opened series first.`
 };
 
 const style = {
@@ -385,7 +385,7 @@ const Report = props => {
         } else {
           // if not open check if the grid is full
           // if so give confirmation (clear display view and cancel buttons)
-          if (openSeries.length === MAX_PORT) {
+          if (openSeries.length === maxPort) {
             setShowConfirmModal(true);
           } else {
             //if not open the series
@@ -404,7 +404,7 @@ const Report = props => {
           }
         });
         // check if already open series and array in hand if have more than 6 series
-        if (notOpenSeries.length + openSeries.length > MAX_PORT) {
+        if (notOpenSeries.length + openSeries.length > maxPort) {
           // if so give confirmation (clear display view and cancel buttons)
           setShowConfirmModal(true);
         } else {

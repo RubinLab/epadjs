@@ -15,7 +15,7 @@ import { FaRegCheckSquare } from "react-icons/fa";
 import { getSeries, setSignificantSeries } from "../../services/seriesServices";
 import "./annotationsList.css"
 
-const MAX_PORT = sessionStorage.getItem("MAX_PORT");
+const maxPort = sessionStorage.getItem("maxPort");
 const message = {
   title: "Not enough ports to open series"
 };
@@ -160,7 +160,7 @@ class selectSerieModal extends React.Component {
         let alreadyOpen = openSeriesUIDList.includes(series[i][k].seriesUID);
         let disabled =
           !this.state.selectedToDisplay[count + k] &&
-          this.state.limit >= MAX_PORT;
+          this.state.limit >= maxPort;
         let desc = series[i][k].seriesDescription || "Unnamed Serie";
         // desc = alreadyOpen ? `${desc} - already open` : desc;
         item = alreadyOpen ? (
@@ -201,7 +201,7 @@ class selectSerieModal extends React.Component {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body className="selectSerie-container" style={{ textAlign: "start" }}>
-          <div>Maximum {MAX_PORT} series can be viewed at a time.</div>
+          <div>Maximum {maxPort} series can be viewed at a time.</div>
           <button
             size="lg"
             className="selectSerie-clearButton"
@@ -209,7 +209,7 @@ class selectSerieModal extends React.Component {
           >
             Close all views
           </button>
-          {this.state.limit >= MAX_PORT && (
+          {this.state.limit >= maxPort && (
             <div>You reached Max number of series</div>
           )}
           <div>{list}</div>

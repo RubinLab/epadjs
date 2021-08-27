@@ -19,7 +19,7 @@ import {
   jumpToAim
 } from '../annotationsList/action';
 
-const MAX_PORT = sessionStorage.getItem("MAX_PORT");
+const maxPort = sessionStorage.getItem("maxPort");
 
 function Table({ columns, data }) {
   const {
@@ -105,7 +105,7 @@ function Annotations(props) {
     const { openSeries } = props;
     // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
     //check if there is enough space in the grid
-    let isGridFull = openSeries.length === MAX_PORT;
+    let isGridFull = openSeries.length === maxPort;
     //check if the serie is already open
     if (checkIfSerieOpen(seriesUID).isOpen) {
       const { index } = checkIfSerieOpen(seriesUID);

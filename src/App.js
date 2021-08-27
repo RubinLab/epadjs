@@ -543,7 +543,9 @@ class App extends Component {
           maxPort,
         } = configData;
         // check and use environment variables if any
-        const authServerUrl = authData["auth-server-url"];
+        // check and use environment variables if any
+        const authServerUrl =
+          process.env.REACT_APP_AUTH_URL || authData["auth-server-url"];
         mode = process.env.REACT_APP_MODE || mode;
         apiUrl = process.env.REACT_APP_API_URL || apiUrl;
         wadoUrl = process.env.REACT_APP_WADO_URL || wadoUrl;
@@ -651,10 +653,13 @@ class App extends Component {
   };
 
   handleArgs = async (args) => {
+    console.log("in handle args");
     const { data } = await decrypt(args);
+    console.log("data", data);
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
 
     const { openSeries } = this.props;
+    const apiUrl = sessionStorage.getItem("apiUrl");
 
     if (API_KEY && seriesArray && user) {
       // THIS IS APIKEY
@@ -664,10 +669,10 @@ class App extends Component {
       sessionStorage.setItem("user", user);
       sessionStorage.setItem("username", user);
 
-      this.completeAutorization();
-      if (parsedSeriesArray.length + openSeries.length > MAX_PORT) {
+      this.completeAutorization(apiUrl);
+      if (parsedSeriesArray.length + openSeries.length > maxPort) {
         alert(
-          `Number of series passed is more than allowable number of port. Max allowed is ${MAX_PORT}. Please try again with num series less than ${MAX_PORT}`
+          `Number of series passed is more than allowable number of port. Max allowed is ${maxPort}. Please try again with num series less than ${maxPort}`
         );
         return;
       }
@@ -684,9 +689,10 @@ class App extends Component {
         .catch((err) => console.error(err));
     } else if (patientID && studyUID && projectID) {
       // THIS IS TEACHING
-      this.completeAutorization();
-      // await decrypt(args);
-      await decryptAndAdd(args);
+      console.log("teaching");
+      this.completeAutorization(apiUrl);
+      await decrypt(args);
+      // await decryptAndAdd(args);
       const packedData = {
         projectID,
         patientID,
@@ -707,7 +713,7 @@ class App extends Component {
     // if not display modality filtered series
     if (significantSeries.length) seriesArr = significantSeries;
 
-    if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
+    if (seriesArr.length + this.props.openSeries.length > maxPort) {
       window.dispatchEvent(
         new CustomEvent("openSeriesModal", {
           detail: seriesArr,

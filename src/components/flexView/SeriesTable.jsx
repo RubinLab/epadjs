@@ -11,7 +11,7 @@ import {
   clearSelection,
 } from "../annotationsList/action";
 
-const MAX_PORT = sessionStorage.getItem("MAX_PORT");
+const maxPort = sessionStorage.getItem("maxPort");
 // connect to store
 // is seriesUID in the openSeries checkbox clicked
 const SeriesTable = (props) => {
@@ -26,7 +26,7 @@ const SeriesTable = (props) => {
 
   const onAllChecked = (e) => {
     const { checked } = e.target;
-    if (openSeries.length + series.length - disabledSeries.length > MAX_PORT) {
+    if (openSeries.length + series.length - disabledSeries.length > maxPort) {
       setError(
         `Only six series can be viewed at a time! ${openSeries.length} series are already open!`
       );
