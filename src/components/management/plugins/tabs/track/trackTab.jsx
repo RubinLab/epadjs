@@ -247,46 +247,49 @@ class TrackTab extends React.Component {
 
   showRuntimeParamsForNonZero = (data) => {
     console.log("datadattdatatda :", data);
+    console.log("datadattdatatda :entries", Object.entries(data));
     let cnt = 0;
     const paramshtml = [];
     for (let [key, value] of Object.entries(data)) {
       cnt = cnt + 1;
       console.log("key  :", key);
       console.log("values  :", value);
-      paramshtml.push(
-        <table className="setparamtable">
-          <tbody>
-            <tr key={cnt + "id"}>
-              <td className="tdleft">id </td>
-              <td className="tdleft"> {value.paramid}</td>
-            </tr>
-            <tr key={cnt + "name"}>
-              <td className="tdleft">name </td>
-              <td className="tdleft"> {value.name}</td>
-            </tr>
-            <tr key={cnt + "description"}>
-              <td className="tdleft">description </td>
-              <td className="tdleft"> {value.description}</td>
-            </tr>
-            <tr key={cnt + "format"}>
-              <td className="tdleft">format</td>
-              <td className="tdleft"> {value.format}</td>
-            </tr>
-            <tr key={cnt + "prefix"}>
-              <td className="tdleft">prefix </td>
-              <td className="tdleft"> {value.prefix}</td>
-            </tr>
-            <tr key={cnt + "value"}>
-              <td className="tdleft">value </td>
-              <td className="tdleft"> {value.default_value}</td>
-            </tr>
-            <tr key={cnt + "inputbinding"}>
-              <td className="tdleft">inputBinding </td>
-              <td className="tdleft"> {value.inputBinding}</td>
-            </tr>
-          </tbody>
-        </table>
-      );
+        if (value.paramid === 'parameters'){
+          paramshtml.push(
+            <table className="setparamtable">
+              <tbody>
+                <tr key={cnt + "id"}>
+                  <td className="tdleft">id </td>
+                  <td className="tdleft"> {value.paramid}</td>
+                </tr>
+                <tr key={cnt + "name"}>
+                  <td className="tdleft">name </td>
+                  <td className="tdleft"> {value.name}</td>
+                </tr>
+                <tr key={cnt + "description"}>
+                  <td className="tdleft">description </td>
+                  <td className="tdleft"> {value.description}</td>
+                </tr>
+                <tr key={cnt + "format"}>
+                  <td className="tdleft">format</td>
+                  <td className="tdleft"> {value.format}</td>
+                </tr>
+                <tr key={cnt + "prefix"}>
+                  <td className="tdleft">prefix </td>
+                  <td className="tdleft"> {value.prefix}</td>
+                </tr>
+                <tr key={cnt + "value"}>
+                  <td className="tdleft">value </td>
+                  <td className="tdleft"> {value.default_value}</td>
+                </tr>
+                <tr key={cnt + "inputbinding"}>
+                  <td className="tdleft">inputBinding </td>
+                  <td className="tdleft"> {value.inputBinding}</td>
+                </tr>
+              </tbody>
+            </table>
+          );
+        }
     }
     this.setState({
       tempParamsHtmlnonZero: paramshtml,

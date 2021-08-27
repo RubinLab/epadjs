@@ -1,5 +1,4 @@
-import webdriver from 'selenium-webdriver';
-import { By, Builder } from 'selenium-webdriver';
+import { By, Builder, until } from 'selenium-webdriver';
 const { testUrl } = require('../../../public/config.json');
 const driver = new Builder().forBrowser('chrome').build();
 driver.manage().setTimeouts({ implicit: 10000 });
@@ -14,6 +13,7 @@ class Basepage {
   }
 
   async getTextByCss(css) {
+    let foo = await this.driver.wait(until.elementLocated(By.css(css)), 30000, 'Timed out after 30 seconds', 1000)
     const result = await this.driver.findElement(By.css(css)).getText();
     // expect(result).toContain(text);
     return result;

@@ -29,14 +29,14 @@ const userRoleEdit = ({
         )}
         <div className="edit-userRole__modal--buttons">
           <button
-            className="edit-userRole__modal--button"
+            className="edit-userRole__modal--button submit"
             variant="primary"
             onClick={onSubmit}
           >
             Submit
           </button>
           <button
-            className="edit-userRole__modal--button"
+            className="edit-userRole__modal--button cancel"
             variant="secondary"
             onClick={onCancel}
           >

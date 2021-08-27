@@ -30,6 +30,7 @@ const userPermissionEdit = ({
             className="edit-permission__modal--button"
             variant="primary"
             onClick={onSubmit}
+            id="user-permission-submit"
           >
             Submit
           </button>
