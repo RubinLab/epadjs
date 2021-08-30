@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useTable, useExpanded, usePagination } from 'react-table';
 import { connect } from 'react-redux';
 import ReactTooltip from 'react-tooltip';
-import { toast } from 'react-toastify';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import Studies from './Studies';
 import {
@@ -222,7 +221,6 @@ function Subjects(props) {
   const searchKey = useRef(null);
   let [loading, setLoading] = useState(false);
   const [pageCount, setPageCount] = useState(0);
-  const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
   const [selectedCount, setSelectedCount] = useState(false);
 
@@ -284,7 +282,7 @@ function Subjects(props) {
           const style = { display: 'flex', width: 'fit-content' };
           return (
             <div style={style}>
-              <div onMouseEnter={validateSubjectSelect}>
+              <div>
                 <input
                   type="checkbox"
                   style={{ marginRight: '5px' }}
@@ -486,23 +484,10 @@ function Subjects(props) {
         }
       }
     ],
-    [selectedLevel, selectedCount, warningSeen, props.update]
+    [selectedLevel, selectedCount, props.update]
   );
 
-  const validateSubjectSelect = () => {
-    if (selectedLevel && !warningSeen) {
-      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a subject!`;
-      toast.info(message, {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
-      });
-      setWarningSeen(true);
-    }
-  };
+
 
   const fetchData = useCallback(({ pageIndex, pageSize }) => {
     if (searchKey.current.value) {

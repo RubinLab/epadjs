@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTable, useExpanded } from 'react-table';
 import { connect } from 'react-redux';
-import { toast } from "react-toastify";
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
@@ -71,7 +70,6 @@ function Annotations(props) {
   const [data, setData] = useState([]);
   let [loading, setLoading] = useState(false);
   const username = sessionStorage.getItem('username');
-  const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
 
   useEffect(() => {
@@ -148,27 +146,13 @@ function Annotations(props) {
     props.dispatch(selectAnnotation(data, studyDescription, seriesDescripion));
   };
 
-  const validateAnnotationSelect = () => {
-    if (selectedLevel && !warningSeen) {
-      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select an annotation!`;
-      toast.info(message, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });      setWarningSeen(true);
-    }
-  };
-
   const columns = React.useMemo(
     () => [
       {
         id: 'series-expander',
         Cell: ({ row }) => (
           <div style={{ paddingLeft: '30px' }}>
-            <div onMouseEnter={validateAnnotationSelect}>
+            <div>
               <input
                 type="checkbox"
                 onClick={e => selectRow(e, row.original)}
@@ -285,7 +269,7 @@ function Annotations(props) {
         }
       }
     ],
-    [selectedLevel, warningSeen]
+    [selectedLevel]
   );
 
   useEffect(() => {

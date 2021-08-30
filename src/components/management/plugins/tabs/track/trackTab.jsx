@@ -707,6 +707,7 @@ class TrackTab extends React.Component {
           </div>
 
           <ReactTable
+            NoDataComponent={() => null}
             className="pro-table"
             data={this.state.pluginQueueList}
             columns={this.definePluginsQueueTableColumns()}
