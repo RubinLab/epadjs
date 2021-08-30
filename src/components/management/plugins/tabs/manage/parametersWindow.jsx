@@ -22,6 +22,7 @@ class ParametersWindow extends React.Component {
       parameterFormElements: {
         plugindbid: props.pluginid,
         paramid: "",
+        refreshdicoms:"0",
         name: "",
         sendname: "0",
         sendparamtodocker:"1",
@@ -65,7 +66,7 @@ class ParametersWindow extends React.Component {
     const plElements = { ...this.state.parameterFormElements };
     console.log('before : ',this.state.parameterFormElements) ;
     if (e.currentTarget.name != "sendname"  && e.currentTarget.name != "uploadimages" &&
-    e.currentTarget.name != "uploadaims" && e.currentTarget.name != "sendparamtodocker") {
+    e.currentTarget.name != "uploadaims" && e.currentTarget.name != "sendparamtodocker" && e.currentTarget.name != "refreshdicoms") {
       if (e.currentTarget.name === "paramid"){
         plElements[e.currentTarget.name] = e.currentTarget.value;
         plElements["format"] = "select";
@@ -95,6 +96,7 @@ class ParametersWindow extends React.Component {
     const tempParameterFormElements = {
       plugindbid: this.props.pluginid,
       paramid: "",
+      refreshdicoms:"0",
       name: "",
       sendname: "0",
       sendparamtodocker: "1",
@@ -200,6 +202,7 @@ class ParametersWindow extends React.Component {
       uploadimages:String(rowInfo.original.uploadimages),
       uploadaims:String(rowInfo.original.uploadaims),
       sendparamtodocker : String(rowInfo.original.sendparamtodocker),
+      refreshdicoms: String(rowInfo.original.refreshdicoms),
       format: rowInfo.original.format,
       prefix: rowInfo.original.prefix,
       inputBinding: rowInfo.original.inputBinding,
@@ -267,6 +270,28 @@ class ParametersWindow extends React.Component {
         resizable: true,
         minResizeWidth: 50,
         width: 70,
+      },
+      {
+        id : "refreshdicoms",
+        Header: "refresh dicoms",
+        accessor: "refreshdicoms",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 50,
+        width: 70,
+        Cell: (data) => {
+          console.log("me",data.original);
+          if (data.original.refreshdicoms === 1){
+            return (
+              "yes"
+            );
+          }else{
+            return (
+              "no"
+            );
+          }
+
+        },
       },
       {
         id : "sendparam",
@@ -618,7 +643,27 @@ class ParametersWindow extends React.Component {
                     >
                       {this.prepareDropDownHtmlForParameterIds()}
                     </select>
-
+                    {this.state.parameterFormElements.paramid === "dicoms" && this.state.parameterFormElements.refreshdicoms === "0" &&
+                      <div><h5>refresh patient images</h5><input
+                      //onMouseDown={(e) => e.stopPropagation()}
+                      className="parameter_window_modal_label"
+                      name="refreshdicoms"
+                      type="checkbox"
+                      onChange={this.handleFormElementChange}
+                      id="refreshdicoms"
+                      value={this.state.parameterFormElements.refreshdicoms}
+                    /></div>}
+                      {this.state.parameterFormElements.paramid === "dicoms" && this.state.parameterFormElements.refreshdicoms === "1" &&
+                      <div><h5>refresh patient images</h5><input
+                      //onMouseDown={(e) => e.stopPropagation()}
+                      className="parameter_window_modal_label"
+                      name="refreshdicoms"
+                      type="checkbox"
+                      onChange={this.handleFormElementChange}
+                      id="refreshdicoms"
+                      value={this.state.parameterFormElements.refreshdicoms}
+                      checked
+                    /></div>}
                     {this.state.parameterFormElements.paramid === "parameters" && this.state.parameterFormElements.sendparamtodocker === "0" &&
                       <div><h5>Send parameter to docker</h5><input
                       //onMouseDown={(e) => e.stopPropagation()}
