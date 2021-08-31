@@ -226,6 +226,7 @@ class ManageTab extends React.Component {
         </div>
         <div className="plugin_manage_table">
           <ReactTable
+            NoDataComponent={() => null}
             className="pro-table"
             data={this.props.data}
             columns={this.defineManageTabColumns()}

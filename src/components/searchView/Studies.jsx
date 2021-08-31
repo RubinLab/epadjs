@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTable, useExpanded } from 'react-table';
 import { connect } from 'react-redux';
-import { toast } from 'react-toastify';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
@@ -119,7 +118,6 @@ function Studies(props) {
 
   const [data, setData] = useState([]);
   let [loading, setLoading] = useState(false);
-  const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
   const [selectedCount, setSelectedCount] = useState(false);
   const [isSerieSelectionOpen, setIsSerieSelectionOpen] = useState(false);
@@ -146,20 +144,6 @@ function Studies(props) {
     }
   }, [props.selectedStudies, props.selectedSeries, props.selectedAnnotations]);
 
-  const validateStudySelect = () => {
-    if (selectedLevel && !warningSeen) {
-      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a study!`;
-      toast.info(message, {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
-      });
-      setWarningSeen(true);
-    }
-  };
 
   const deselectChildLevels = (patientID, studyUID) => {
     if (selectedLevel === 'series') {
@@ -285,7 +269,7 @@ function Studies(props) {
 
           return (
             <div style={style}>
-              <div onMouseEnter={validateStudySelect}>
+              <div>
                 <input
                   type="checkbox"
                   style={{ marginRight: '5px' }}
@@ -474,7 +458,7 @@ function Studies(props) {
         )
       }
     ],
-    [selectedLevel, warningSeen, selectedCount]
+    [selectedLevel, selectedCount]
   );
 
   const getDataFromStorage = (projectID, subjectID) => {

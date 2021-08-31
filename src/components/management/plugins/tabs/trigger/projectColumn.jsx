@@ -760,6 +760,7 @@ class ProjectColumn extends React.Component {
               <td className="trHeader" colSpan="4">
                 {this.state.parameterDropDownSelected && (
                   <ReactTable
+                    NoDataComponent={() => null}
                     className="pro-table"
                     data={this.state.annotationList}
                     columns={this.defineAnnotationsTableColumns()}
