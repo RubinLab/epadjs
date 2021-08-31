@@ -68,10 +68,7 @@ class Sidebar extends Component {
   };
 
   setTabHeight = () => {
-    const navbar =
-      document.getElementsByClassName("navbar").length > 0
-        ? document.getElementsByClassName("navbar")[0].clientHeight
-        : 0;
+    const navbar = document.getElementsByClassName("navbar")[0].clientHeight;
     const closebtn = document.getElementsByClassName("closebtn __leftBar")[0]
       .clientHeight;
     const navTabs = document.getElementsByClassName("nav-tabs")[0].clientHeight;
@@ -107,21 +104,12 @@ class Sidebar extends Component {
 
         projects = projects.concat(all, nonassigned);
 
-/*
-        const pid = projects[0].id;
-        this.setState({ projects, pid, selected: pid });
-        if (this.props.openSeries.length === 0) {
-          this.props.history.push(`/search/${pid}`);
-        }
-        this.props.getPidUpdate(pid);
-*/
         // const pid = projects[0].id;
         // this.setState({ projects, pid, selected: pid });
         // if (this.props.openSeries.length === 0) {
         //   this.props.history.push(`/list/${pid}`);
         // }
         // this.props.getPidUpdate(pid);
-        
         const prTempMap = await this.getTemplatesProjectMap();
         const projectMap = {};
         for (let project of projects) {
