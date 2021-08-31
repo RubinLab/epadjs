@@ -2,7 +2,7 @@ import http from "./httpService";
 const apiUrl = sessionStorage.getItem("apiUrl");
 
 export function decrypt(args) {
-  return http.get(apiUrl + "/decrypt?arg=" + args);
+  return http.get(sessionStorage.getItem("apiUrl") + "/decrypt?arg=" + args);
 }
 
 export function decryptAndAdd(args) {

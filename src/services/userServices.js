@@ -15,13 +15,23 @@ export async function createUser(body) {
 
 export async function updateUserProjectRole(projectid, username, body) {
   return http.put(
-    apiUrl + "/projects/" + encodeURIComponent(projectid) + "/users/" + encodeURIComponent(username),
+    apiUrl +
+      "/projects/" +
+      encodeURIComponent(projectid) +
+      "/users/" +
+      encodeURIComponent(username),
     body
   );
 }
 
 export async function deleteUserProjectRole(projectid, username) {
-  return http.delete(apiUrl + "/projects/" + encodeURIComponent(projectid) + "/users/" + encodeURIComponent(username));
+  return http.delete(
+    apiUrl +
+      "/projects/" +
+      encodeURIComponent(projectid) +
+      "/users/" +
+      encodeURIComponent(username)
+  );
 }
 
 export async function updateUser(username, body) {

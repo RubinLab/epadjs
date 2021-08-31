@@ -4,7 +4,6 @@ import { UserManager, WebStorageStateStore, Log } from "oidc-client";
 const urls = {};
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 
-const apiUrl = sessionStorage.getItem("apiUrl");
 const mode = sessionStorage.getItem("mode");
 // we need the keycloak object to be able to use update token
 
@@ -66,7 +65,8 @@ export async function getAuthHeader() {
         }
       }
     } catch (err) {
-      authService.logout();
+      console.error("ozge special istek", err);
+      // authService.logout();
     }
     return undefined;
   }
@@ -74,7 +74,7 @@ export async function getAuthHeader() {
 
 export class AuthService {
   UserManager;
-  constructor() {
+  constructor(args) {
     this.authority = sessionStorage.getItem("authority");
     this.client_id = sessionStorage.getItem("client_id");
     this.redirect_uri = sessionStorage.getItem("redirect_uri");
@@ -83,7 +83,7 @@ export class AuthService {
     const usermng = new UserManager({
       authority: this.authority,
       client_id: this.client_id,
-      redirect_uri: this.redirect_uri,
+      redirect_uri: this.redirect_uri + (args ? `/?arg=${args}` : ""),
       response_type: this.response_type,
       response_mode: "query",
       scope: this.scope,
@@ -118,18 +118,6 @@ export class AuthService {
       this.logout();
     });
   }
-
-  signinRedirectCallback = () => {
-    alert("redirecting");
-    this.UserManager.signinRedirectCallback()
-      .then((user) => {
-        window.location.href = "http://localhost:3000";
-        // window.location.href = 'http://bds-c02xf0r0jhd5.local:3000';
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  };
 
   getUser = async () => {
     let user = await this.UserManager.getUser();
@@ -166,6 +154,8 @@ export class AuthService {
         `oidc.user:${this.authority}:${this.client_id}`
       )
     );
+    const authMode = sessionStorage.getItem("authMode");
+    if (authMode === "apiKey") return true;
     return !!oidcStorage && !!oidcStorage.access_token;
   };
 

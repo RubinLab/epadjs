@@ -542,6 +542,7 @@ class App extends Component {
           scope,
           maxPort,
         } = configData;
+        console.log("config Data", configData);
         // check and use environment variables if any
         // check and use environment variables if any
         const authServerUrl =
@@ -570,6 +571,7 @@ class App extends Component {
         sessionStorage.setItem("authority", authority);
         sessionStorage.setItem("client_id", client_id);
         sessionStorage.setItem("redirect_uri", redirect_uri);
+        // localStorage.setItem("redirect_uri", redirect_uri);
         sessionStorage.setItem("response_type", response_type);
         sessionStorage.setItem("scope", scope);
         sessionStorage.setItem("redirected", true);
@@ -593,7 +595,7 @@ class App extends Component {
 
         if (mode === "lite") this.setState({ pid: "lite" });
         const args = this.getArguments();
-        args ? this.handleArgs(args) : this.completeAutorization(apiUrl);
+        args ? this.handleArgs(args) : this.completeAutorization(args);
       })
       .catch((err) => {
         console.error(err);
@@ -647,8 +649,8 @@ class App extends Component {
 
   getArguments = () => {
     const { search } = this.props.location;
-    let args = undefined;
-    if (search) args = search.split("?arg=")[1];
+    let args = sessionStorage.getItem("args");
+    if (search && !args) args = search.split("?arg=")[1];
     console.log("returned args", args);
     return args;
   };
@@ -658,9 +660,10 @@ class App extends Component {
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
 
     const { openSeries } = this.props;
-    const apiUrl = sessionStorage.getItem("apiUrl");
 
     if (API_KEY && seriesArray && user) {
+      console.log("API KEY", API_KEY, seriesArray, user);
+      console.log("Api Url", sessionStorage.getItem("apiUrl"));
       // THIS IS APIKEY
       const parsedSeriesArray = JSON.parse(seriesArray);
       sessionStorage.setItem("authMode", "apiKey");
@@ -668,7 +671,21 @@ class App extends Component {
       sessionStorage.setItem("user", user);
       sessionStorage.setItem("username", user);
 
-      this.completeAutorization(apiUrl);
+      // this.completeAutorization(args);
+      this.setState({
+        authenticated: true,
+      });
+
+      let userData;
+      try {
+        userData = await getUser(user);
+        userData = userData.data;
+        this.setState({ admin: userData.admin });
+      } catch (err) {
+        console.error(err);
+      }
+
+      const maxPort = sessionStorage.getItem("maxPort");
       if (parsedSeriesArray.length + openSeries.length > maxPort) {
         alert(
           `Number of series passed is more than allowable number of port. Max allowed is ${maxPort}. Please try again with num series less than ${maxPort}`
@@ -689,9 +706,9 @@ class App extends Component {
     } else if (patientID && studyUID && projectID) {
       // THIS IS TEACHING
       console.log("teaching");
-      this.completeAutorization(apiUrl);
-      await decrypt(args);
-      // await decryptAndAdd(args);
+      await this.completeAutorization(args);
+      // await decrypt(args);
+      await decryptAndAdd(args);
       const packedData = {
         projectID,
         patientID,
@@ -703,7 +720,6 @@ class App extends Component {
   };
 
   displaySeries = async (studyData) => {
-    console.log("study data", studyData);
     const rawSeriesArray = await this.getSeriesData(studyData);
     if (!rawSeriesArray) return;
     let seriesArr = rawSeriesArray.filter(this.isSupportedModality);
@@ -712,6 +728,7 @@ class App extends Component {
     );
     // If there are significant series use them to display
     // if not display modality filtered series
+    const maxPort = sessionStorage.getItem("maxPort");
     if (significantSeries.length) seriesArr = significantSeries;
 
     if (seriesArr.length + this.props.openSeries.length > maxPort) {
@@ -859,22 +876,21 @@ class App extends Component {
   //     });
   // };
 
-  completeAutorization = async (apiUrl) => {
-    this.authService = new auth.AuthService();
+  completeAutorization = async (args) => {
+    this.authService = new auth.AuthService(args);
     const authenticated = this.authService.isAuthenticated();
     if (authenticated) {
       const userInfo = await this.authService.getUser();
       await this.registerUser(
         userInfo,
         this.authService,
-        this.authService.isAuthenticated(),
-        apiUrl
+        this.authService.isAuthenticated()
       );
     } else {
       this.authService.signinRedirect({});
     }
   };
-  registerUser = async (userInfo, authService, authenticated, apiUrl) => {
+  registerUser = async (userInfo, authService, authenticated) => {
     const source = userInfo.profile ? userInfo.profile : userInfo;
     let user = {
       user: source.preferred_username || source.email,
@@ -1168,30 +1184,6 @@ class App extends Component {
       this.clearTreeExpand();
     } catch (err) {
       console.error(err);
-    }
-  };
-
-  // TEACHING FILES RELATED //
-  doTeaching = async () => {
-    // TEACHING FILES RELATED //
-    const { search } = this.props.location;
-    let args;
-    if (search && (args = search.split("?arg=")[1])) {
-      console.log("ARGS:", args);
-      // const result = await decrypt(args);
-      const result = await decryptAndAdd(args);
-      const { patientID, studyUID, projectID } = result.data;
-      console.log("Result", result.data, patientID, studyUID);
-      const packData = {
-        projectID,
-        patientID,
-        patientName: "patientName",
-        studyUID,
-      };
-      this.props.dispatch(addToGrid(packData));
-      this.props.dispatch(getSingleSerie(packData));
-      getWholeData(packData);
-      this.props.history.push("/display");
     }
   };
 
@@ -1519,8 +1511,6 @@ class App extends Component {
 }
 
 const mapStateToProps = (state) => {
-  // console.log(state.managementReducer);
-  // console.log(state.annotationsListReducer);
   const {
     showGridFullAlert,
     showProjectModal,

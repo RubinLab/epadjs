@@ -51,10 +51,12 @@
       userMng
         .signinRedirectCallback()
         .then(function(user) {
+          const args = window.location.href.split("?arg=")[1];
+          sessionStorage.setItem("args", args);
           window.location.href = redirect_uri;
         })
         .catch(function(e) {
-          console.error(e);
+          console.error("error html", e);
         });
   </script>
 </html>

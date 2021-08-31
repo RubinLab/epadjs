@@ -2,7 +2,7 @@ import React from "react";
 import { Modal } from "react-bootstrap";
 import http from "../../services/httpService";
 const mode = sessionStorage.getItem("mode");
-const apiUrl = sessionStorage.getItem("apiUrl");
+// const apiUrl = sessionStorage.getItem("apiUrl");
 
 class About extends React.Component {
   state = { data: {} };
@@ -12,7 +12,7 @@ class About extends React.Component {
     }
   };
   getData = () => {
-    const url = apiUrl + "/epads/version/";
+    const url = http.apiUrl() + "/epads/version/";
     http.get(url).then(res => this.setState({ data: res.data }));
   };
 
