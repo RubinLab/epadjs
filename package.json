@@ -7,9 +7,7 @@
     "axios": "^0.21.1",
     "babel-polyfill": "^6.26.0",
     "bootstrap": "^4.5.0",
-    "chai": "^4.3.4",
     "chance": "^1.1.6",
-    "chromedriver": "^92.0.1",
     "cornerstone-core": "^2.3.0",
     "cornerstone-math": "^0.1.8",
     "cornerstone-wado-image-loader": "^3.1.2",
@@ -19,7 +17,6 @@
     "dompurify": "^2.2.6",
     "event-source-polyfill": "^1.0.15",
     "font-awesome": "^4.7.0",
-    "geckodriver": "^2.0.0",
     "hammerjs": "^2.0.8",
     "highcharts": "^9.1.0",
     "highcharts-react-official": "^3.0.0",
@@ -60,8 +57,7 @@
     "react-tooltip": "^3.11.6",
     "redux": "^4.0.5",
     "redux-devtools-extension": "^2.13.8",
-    "redux-thunk": "^2.3.0",
-    "selenium-webdriver": "^4.0.0-beta.3"
+    "redux-thunk": "^2.3.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -78,6 +74,10 @@
   "devDependencies": {
     "css-loader": "^2.1.1",
     "stylus": "^0.54.7",
-    "stylus-loader": "^3.0.2"
+    "stylus-loader": "^3.0.2",
+    "chromedriver": "^92.0.1",
+    "geckodriver": "^2.0.0",
+    "chai": "^4.3.4",
+    "selenium-webdriver": "^4.0.0-beta.3"
   }
 }
