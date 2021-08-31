@@ -19,7 +19,7 @@ const projectCreationForm = ({
   templates.forEach((el, i) => {
     const { templateCodeValue, templateUID } = el.Template[0];
     options.push(
-      <option value={templateCodeValue} key={templateUID}>
+      <option value={templateCodeValue} key={templateUID} id={templateUID}>
         {templateCodeValue}
       </option>
     );
@@ -39,7 +39,7 @@ const projectCreationForm = ({
             name="name"
             type="text"
             onChange={onType}
-            id="form-first-element"
+            id="projectName"
           />
           <h5 className="add-project__modal--label">ID*</h5>
           <input
@@ -48,6 +48,8 @@ const projectCreationForm = ({
             name="id"
             type="text"
             onChange={onType}
+            id="projectID"
+
           />
           <h6 className="form-exp">
             One word only, no special characters, "_" is OK
@@ -58,12 +60,15 @@ const projectCreationForm = ({
             className="add-project__modal--input"
             name="description"
             onChange={onType}
+            id="projectDescription"
+
           />
           <h5 className="add-project__modal--label">Default Template</h5>
           <select
             name="defaulttemplate"
             className="add-project__modal--select"
             onChange={onType}
+            id="projectTemplate"
           >
             {options}
           </select>
@@ -73,16 +78,18 @@ const projectCreationForm = ({
             className="add-project__modal--select"
             onChange={onType}
             defaultValue="Private"
+            id="projectType"
+
           >
-            <option value="Private">Private</option>
-            <option value="Public">Public</option>
+            <option value="Private" id="private">Private</option>
+            <option value="Public" id="public">Public</option>
           </select>
           <h5 className="form-exp required">*Required</h5>
           {error && <div className="err-message">{error}</div>}
         </form>
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
-        <button variant="primary" onClick={onSubmit}>
+        <button variant="primary" onClick={onSubmit} id="submit-button">
           Submit
         </button>
         <button variant="secondary" onClick={onCancel}>

@@ -178,6 +178,12 @@ describe('executing test scenario on ePAD', () => {
     evaluate(usersAfterDelete).to.not.have.members(userList);
   });
 
+  // TODO
+  // create user with permission
+  // crate user with assigned project 
+  // signout and sign in with diffeerent user and verify permissions
+  // signout and sign in with different user and try project access
+
   afterAll(async () => {
     await driver.quit();
   }, 15000);

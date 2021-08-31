@@ -350,6 +350,7 @@ class Projects extends React.Component {
               className="checkbox-cell"
               checked={this.state.selected[original.id]}
               onChange={() => this.toggleRow(original.id, original.name)}
+              id={original.id}
             />
           );
         },
@@ -486,6 +487,7 @@ class Projects extends React.Component {
         Cell: original => (
           <div
             onClick={() => this.handleSingleDelete(original.row.checkbox.id)}
+            id={`delete-${original.row.checkbox.id}`}
           >
             <FaRegTrashAlt className="menu-clickable" />
           </div>

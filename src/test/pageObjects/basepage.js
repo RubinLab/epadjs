@@ -1,7 +1,7 @@
 import { By, Builder, until } from 'selenium-webdriver';
 const { testUrl } = require('../../../public/config.json');
-const driver = new Builder().forBrowser('chrome').build();
-driver.manage().setTimeouts({ implicit: 10000 });
+// const driver = new Builder().forBrowser('chrome').build();
+// driver.manage().setTimeouts({ implicit: 10000 });
 
 class Basepage {
   constructor(driver) {
