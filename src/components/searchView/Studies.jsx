@@ -10,8 +10,6 @@ import Series from './Series';
 import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
 import { clearCarets } from '../../Utils/aid.js';
-import { MAX_PORT } from '../../constants';
-
 import {
   getSingleSerie,
   selectStudy,
@@ -26,6 +24,8 @@ import {
   selectSerie,
   selectAnnotation
 } from '../annotationsList/action';
+
+const maxPort = sessionStorage.getItem("maxPort");
 
 function Table({
   columns,
@@ -199,7 +199,7 @@ function Studies(props) {
   };
 
   const displaySeries = async selected => {
-    if (props.openSeries.length === MAX_PORT) {
+    if (props.openSeries.length === maxPort) {
       props.dispatch(alertViewPortFull());
     } else {
       const { patientID, studyUID } = selected;
@@ -218,7 +218,7 @@ function Studies(props) {
       //get extraction of the series (extract unopen series)
       if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
       //check if there is enough room
-      if (seriesArr.length + props.openSeries.length > MAX_PORT) {
+      if (seriesArr.length + props.openSeries.length > maxPort) {
         //if there is not bring the modal
         // await setState({
         //   isSerieSelectionOpen: true,
@@ -238,7 +238,7 @@ function Studies(props) {
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
@@ -466,8 +466,8 @@ function Studies(props) {
     const studiesArray =
       treeData[projectID] && treeData[projectID][subjectID]
         ? Object.values(treeData[projectID][subjectID].studies).map(
-            el => el.data
-          )
+          el => el.data
+        )
         : [];
 
     return studiesArray;

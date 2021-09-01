@@ -7,7 +7,6 @@ import useResizeAware from 'react-resize-aware';
 import { renderTable, wordExport } from './recist';
 import ConfirmationModal from '../common/confirmationModal';
 import WaterfallReact from './WaterfallReact';
-import { MAX_PORT } from '../../constants';
 import { getWaterfallReport, getReport } from '../../services/reportServices';
 import { checkIfSeriesOpen, clearCarets } from '../../Utils/aid';
 import { CSVLink } from "react-csv";
@@ -20,9 +19,10 @@ import {
   updateImageId
 } from '../annotationsList/action';
 
+const maxPort = sessionStorage.getItem("maxPort");
 const messages = {
   title: 'Can not open all series',
-  message: `Maximum ${MAX_PORT} series can be opened. Please close already opened series first.`
+  message: `Maximum ${maxPort} series can be opened. Please close already opened series first.`
 };
 
 const style = {
@@ -159,7 +159,7 @@ const Report = props => {
           null,
           type,
           metric,
-          metric === 'Export (beta)'? 
+          metric === 'Export (beta)' ?
             [
               { field: 'recist', header: 'SLD' },
               { field: 'mean', header: 'Average HU' },
@@ -178,7 +178,7 @@ const Report = props => {
             null,
             type,
             metric,
-            metric === 'Export (beta)'? 
+            metric === 'Export (beta)' ?
               [
                 { field: 'recist', header: 'SLD' },
                 { field: 'mean', header: 'Average HU' },
@@ -189,14 +189,14 @@ const Report = props => {
         } else {
           const pairs = constructPairs(filteredPatients);
           result = await getWaterfallReport(null, null, pairs, type, metric,
-            metric === 'Export (beta)'? 
+            metric === 'Export (beta)' ?
               [
                 { field: 'recist', header: 'SLD' },
                 { field: 'mean', header: 'Average HU' },
               ]
               :
               undefined
-            );
+          );
         }
       }
       setData(result.data);
@@ -256,7 +256,7 @@ const Report = props => {
     wordExport(subjectName, 'recisttbl' + index);
   };
 
-  useEffect(() => {}, [sizes.width, sizes.height]);
+  useEffect(() => { }, [sizes.width, sizes.height]);
 
   const updateImageIDs = async () => {
     const { openSeries } = props;
@@ -384,7 +384,7 @@ const Report = props => {
         } else {
           // if not open check if the grid is full
           // if so give confirmation (clear display view and cancel buttons)
-          if (openSeries.length === MAX_PORT) {
+          if (openSeries.length === maxPort) {
             setShowConfirmModal(true);
           } else {
             //if not open the series
@@ -403,7 +403,7 @@ const Report = props => {
           }
         });
         // check if already open series and array in hand if have more than 6 series
-        if (notOpenSeries.length + openSeries.length > MAX_PORT) {
+        if (notOpenSeries.length + openSeries.length > maxPort) {
           // if so give confirmation (clear display view and cancel buttons)
           setShowConfirmModal(true);
         } else {
@@ -515,7 +515,7 @@ const Report = props => {
                   />
                 </div>
               )}
-              {data.waterfallExport && <CSVLink {...{data: data.waterfallExport, headers:data.waterfallHeaders,filename:'waterfall.csv'}}>Export to CSV</CSVLink>}
+              {data.waterfallExport && <CSVLink {...{ data: data.waterfallExport, headers: data.waterfallHeaders, filename: 'waterfall.csv' }}>Export to CSV</CSVLink>}
             </>
           )}
 

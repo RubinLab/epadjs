@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import Draggable from "react-draggable";
 import { FaRegCheckSquare } from "react-icons/fa";
-import { MAX_PORT } from "../../constants";
 import {
   addToGrid,
   getSingleSerie,
@@ -11,6 +10,8 @@ import {
   updatePatient,
   clearSelection,
 } from "../annotationsList/action";
+
+const maxPort = sessionStorage.getItem("maxPort");
 // connect to store
 // is seriesUID in the openSeries checkbox clicked
 const SeriesTable = (props) => {
@@ -25,7 +26,7 @@ const SeriesTable = (props) => {
 
   const onAllChecked = (e) => {
     const { checked } = e.target;
-    if (openSeries.length + series.length - disabledSeries.length > MAX_PORT) {
+    if (openSeries.length + series.length - disabledSeries.length > maxPort) {
       setError(
         `Only six series can be viewed at a time! ${openSeries.length} series are already open!`
       );
@@ -43,7 +44,7 @@ const SeriesTable = (props) => {
     props.dispatch(addToGrid(selected));
     props
       .dispatch(getSingleSerie(selected))
-      .then(() => {})
+      .then(() => { })
       .catch((err) => console.log(err));
     if (!props.patients[selected.patientID]) {
       // props.dispatch(getWholeData(selected));

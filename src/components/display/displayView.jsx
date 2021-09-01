@@ -43,9 +43,7 @@ import { isThisSecond } from "date-fns/esm";
 import { FiMessageSquare } from "react-icons/fi";
 import { errorMonitor } from "events";
 import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
-
-const mode = sessionStorage.getItem("mode");
-const wadoUrl = sessionStorage.getItem("wadoUrl");
+import getVPDimensions from "./ViewportCalculations";
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 } },
@@ -180,7 +178,7 @@ class DisplayView extends Component {
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
     window.addEventListener('keydown', this.handleKeyPressed);
-    if (series && series.length > 0) {
+    if (this.props.keycloak && series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
     };
@@ -264,9 +262,10 @@ class DisplayView extends Component {
   };
 
   checkTokenExpire = async () => {
-    if (this.props.keycloak.isTokenExpired(5)) {
+    const { keycloak } = this.props;
+    if (keycloak.isTokenExpired(5)) {
       window.alert("Are you still there?");
-      await this.updateToken(this.props.keycloak, 5);
+      await this.updateToken(keycloak, 5);
     }
   };
 
@@ -538,8 +537,15 @@ class DisplayView extends Component {
     let newImageIds = {};
     let cornerstoneImageIds = [];
     const imageUrls = await this.getImages(serie);
+    const API_KEY = sessionStorage.getItem("API_KEY");
+    const wadoUrl = sessionStorage.getItem("wadoUrl");
+    let baseUrl;
     imageUrls.map((url) => {
-      const baseUrl = wadoUrl + url.lossyImage;
+      if (API_KEY) {
+        const user = sessionStorage.getItem("username");
+        baseUrl = wadoUrl + url.lossyImage + `&user=${user}`;
+      }
+      else baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
           let multiFrameUrl = baseUrl + "&frame=" + i;
@@ -693,21 +699,9 @@ class DisplayView extends Component {
   };
 
   getViewports = (containerHeight) => {
-    let numSeries = this.props.series.length;
-    let numCols = numSeries % 3;
-    containerHeight = containerHeight
-      ? containerHeight
-      : this.state.containerHeight;
-    if (numSeries > 3) {
-      this.setState({ height: containerHeight / 2 });
-      this.setState({ width: "33%" });
-      return;
-    }
-    if (numCols === 1) {
-      this.setState({ width: "100%", height: containerHeight });
-    } else if (numCols === 2)
-      this.setState({ width: "50%", height: containerHeight });
-    else this.setState({ width: "33%", height: containerHeight });
+    const numSeries = this.props.series.length;
+    const { width, height } = getVPDimensions(numSeries);
+    this.setState({ width, height });
   };
 
   createRefs() {

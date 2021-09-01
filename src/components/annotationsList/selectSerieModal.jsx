@@ -12,11 +12,10 @@ import {
 } from "./action";
 import SelectionItem from "./containers/selectionItem";
 import { FaRegCheckSquare } from "react-icons/fa";
-import { getSeries } from "../../services/seriesServices";
-import { MAX_PORT } from "../../constants";
+import { getSeries, setSignificantSeries } from "../../services/seriesServices";
 import "./annotationsList.css"
 
-
+const maxPort = sessionStorage.getItem("maxPort");
 const message = {
   title: "Not enough ports to open series"
 };
@@ -87,6 +86,8 @@ class selectSerieModal extends React.Component {
   displaySelection = async () => {
     let studies = Object.values(this.props.seriesPassed);
     let series = [];
+    let significantSeries = [];
+    let significanceOrder = 1;
     studies.forEach(arr => {
       series = series.concat(arr);
     });
@@ -94,6 +95,8 @@ class selectSerieModal extends React.Component {
     //concatanete all arrays to getther
     for (let i = 0; i < this.state.selectedToDisplay.length; i++) {
       if (this.state.selectedToDisplay[i]) {
+        significantSeries.push({ seriesUID: series[i].seriesUID, significanceOrder })
+        significanceOrder++;
         this.props.dispatch(addToGrid(series[i], series[i].aimID));
         if (this.state.selectionType === "aim") {
           this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
@@ -105,6 +108,8 @@ class selectSerieModal extends React.Component {
         }
       }
     }
+    const { projectID, patientID, studyUID } = series[0];
+    setSignificantSeries(projectID, patientID, studyUID, significantSeries);
     this.props.history.push("/display");
     this.handleCancel();
   };
@@ -155,7 +160,7 @@ class selectSerieModal extends React.Component {
         let alreadyOpen = openSeriesUIDList.includes(series[i][k].seriesUID);
         let disabled =
           !this.state.selectedToDisplay[count + k] &&
-          this.state.limit >= MAX_PORT;
+          this.state.limit >= maxPort;
         let desc = series[i][k].seriesDescription || "Unnamed Serie";
         // desc = alreadyOpen ? `${desc} - already open` : desc;
         item = alreadyOpen ? (
@@ -204,7 +209,7 @@ class selectSerieModal extends React.Component {
           >
             Close all views
           </button>
-          {this.state.limit >= MAX_PORT && (
+          {this.state.limit >= maxPort && (
             <div>You reached Max number of series</div>
           )}
           <div>{list}</div>

@@ -1,19 +1,20 @@
-import http from './httpService';
-const apiUrl = sessionStorage.getItem('apiUrl');
+import http from "./httpService";
 
 export function getWorklistsOfCreator() {
-  return http.get(apiUrl + '/worklists');
+  return http.get(http.apiUrl() + "/worklists");
 }
 
 // TODO update /worklists/:w/users/:u
 export function getWorklistsOfAssignee(userName) {
   return http.get(
-    apiUrl + '/users/' + encodeURIComponent(userName) + '/worklists'
+    http.apiUrl() + "/users/" + encodeURIComponent(userName) + "/worklists"
   );
 }
 
 export function deleteWorklist(worklistId) {
-  return http.delete(apiUrl + '/worklists/' + encodeURIComponent(worklistId));
+  return http.delete(
+    http.apiUrl() + "/worklists/" + encodeURIComponent(worklistId)
+  );
 }
 
 export function saveWorklist(
@@ -24,22 +25,22 @@ export function saveWorklist(
   duedate,
   requirements
 ) {
-  return http.post(apiUrl + '/worklists', {
+  return http.post(http.apiUrl() + "/worklists", {
     worklistId,
     name,
     assignees,
     description,
     duedate,
-    requirements
+    requirements,
   });
 }
 
 export function updateWorklistAssignee(user, id, body) {
   return http.put(
-    apiUrl +
-      '/worklists/' +
+    http.apiUrl() +
+      "/worklists/" +
       encodeURIComponent(id) +
-      '/users/' +
+      "/users/" +
       encodeURIComponent(user),
     body
   );
@@ -47,33 +48,36 @@ export function updateWorklistAssignee(user, id, body) {
 
 export function addWorklistRequirement(worklist, body) {
   return http.post(
-    apiUrl + '/worklists/' + encodeURIComponent(worklist) + '/requirements',
+    http.apiUrl() +
+      "/worklists/" +
+      encodeURIComponent(worklist) +
+      "/requirements",
     body
   );
 }
 
 export function deleteWorklistRequirement(worklist, requirement) {
   return http.delete(
-    apiUrl +
-      '/worklists/' +
+    http.apiUrl() +
+      "/worklists/" +
       encodeURIComponent(worklist) +
-      '/requirements/' +
+      "/requirements/" +
       requirement
   );
 }
 
 export function updateWorklist(id, body) {
-  return http.put(apiUrl + '/worklists/' + encodeURIComponent(id), body);
+  return http.put(http.apiUrl() + "/worklists/" + encodeURIComponent(id), body);
 }
 
 export function getStudiesOfWorklist(user, id) {
   return http.get(
-    apiUrl +
-      '/worklists/' +
+    http.apiUrl() +
+      "/worklists/" +
       encodeURIComponent(id) +
-      '/users/' +
+      "/users/" +
       encodeURIComponent(user) +
-      '/studies'
+      "/studies"
   );
   // "/subjects/?annotationCount=true"
 }
@@ -86,14 +90,14 @@ export function addStudyToWorklist(
   body
 ) {
   return http.put(
-    apiUrl +
-      '/worklists/' +
+    http.apiUrl() +
+      "/worklists/" +
       encodeURIComponent(worklistId) +
-      '/projects/' +
+      "/projects/" +
       encodeURIComponent(projectID) +
-      '/subjects/' +
+      "/subjects/" +
       encodeURIComponent(patientID) +
-      '/studies/' +
+      "/studies/" +
       encodeURIComponent(studyUID),
     body
   );
@@ -101,12 +105,12 @@ export function addStudyToWorklist(
 
 export function addSubjectToWorklist(worklistId, projectID, patientID, body) {
   return http.put(
-    apiUrl +
-      '/worklists/' +
+    http.apiUrl() +
+      "/worklists/" +
       encodeURIComponent(worklistId) +
-      '/projects/' +
+      "/projects/" +
       encodeURIComponent(projectID) +
-      '/subjects/' +
+      "/subjects/" +
       encodeURIComponent(patientID),
     body
   );
@@ -114,14 +118,14 @@ export function addSubjectToWorklist(worklistId, projectID, patientID, body) {
 
 export function deleteStudyFromWorklist(worklist, data) {
   return http.delete(
-    apiUrl + '/worklists/' + encodeURIComponent(worklist) + '/studies',
+    http.apiUrl() + "/worklists/" + encodeURIComponent(worklist) + "/studies",
     { data }
   );
 }
 
 export function getWorklistProgress(worklist) {
   return http.get(
-    apiUrl + '/worklists/' + encodeURIComponent(worklist) + '/progress'
+    http.apiUrl() + "/worklists/" + encodeURIComponent(worklist) + "/progress"
   );
 }
 
@@ -133,14 +137,14 @@ export function updateWorklistProgressManually(
   annotationStatus
 ) {
   return http.put(
-    apiUrl +
-      '/worklists/' +
+    http.apiUrl() +
+      "/worklists/" +
       encodeURIComponent(worklist) +
-      '/projects/' +
+      "/projects/" +
       encodeURIComponent(project) +
-      '/subjects/' +
+      "/subjects/" +
       encodeURIComponent(subject) +
-      '/studies/' +
+      "/studies/" +
       encodeURIComponent(study) +
       `?annotationStatus=` +
       annotationStatus

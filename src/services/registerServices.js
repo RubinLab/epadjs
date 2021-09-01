@@ -1,5 +1,4 @@
 import http from "./httpService";
-const apiUrl = sessionStorage.getItem("apiUrl");
 
 // export function getRegisteredServer(email,hostname) {
 
@@ -7,5 +6,5 @@ const apiUrl = sessionStorage.getItem("apiUrl");
 // }
 
 export function registerServerForAppKey(registerform) {
-  return http.post(apiUrl + "/register", registerform);
+  return http.post(http.apiUrl() + "/register", registerform);
 }

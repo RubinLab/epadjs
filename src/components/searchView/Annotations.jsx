@@ -5,7 +5,6 @@ import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import { getAnnotations } from '../../services/annotationServices';
-import { MAX_PORT } from '../../constants';
 import { formatDate } from '../flexView/helperMethods';
 import {
   alertViewPortFull,
@@ -100,9 +99,10 @@ function Annotations(props) {
     const { projectID, studyUID, seriesUID, aimID } = selected;
     const patientID = selected.subjectID;
     const { openSeries } = props;
+    const maxPort = sessionStorage.getItem("maxPort");
     // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
     //check if there is enough space in the grid
-    let isGridFull = openSeries.length === MAX_PORT;
+    let isGridFull = openSeries.length === maxPort;
     //check if the serie is already open
     if (checkIfSerieOpen(seriesUID).isOpen) {
       const { index } = checkIfSerieOpen(seriesUID);
@@ -115,7 +115,7 @@ function Annotations(props) {
         props.dispatch(addToGrid(selected, aimID));
         props
           .dispatch(getSingleSerie(selected, aimID))
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
         if (!props.patients[patientID]) {

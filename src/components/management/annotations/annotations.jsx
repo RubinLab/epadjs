@@ -17,7 +17,6 @@ import matchSorter from 'match-sorter';
 import DeleteAlert from '../common/alertDeletionModal';
 import UploadModal from '../../searchView/uploadModal';
 import DownloadModal from '../../searchView/annotationDownloadModal';
-import { MAX_PORT } from '../../../constants';
 import {
   changeActivePort,
   jumpToAim,
@@ -36,6 +35,7 @@ import { getSeries } from '../../../services/seriesServices';
 import SelectSeriesModal from '../../annotationsList/selectSerieModal';
 
 const mode = sessionStorage.getItem('mode');
+const maxPort = sessionStorage.getItem("maxPort");
 
 const messages = {
   deleteSelected: 'Delete selected annotations? This cannot be undone.',
@@ -329,10 +329,10 @@ class Annotations extends React.Component {
         keys.length === 0
           ? this.setState({ selectAll: 0, selected: {}, filteredData: [] })
           : this.setState({
-              seriesAlreadyOpen: keys.length,
-              selected: notDeleted,
-              selectAll: 2
-            });
+            seriesAlreadyOpen: keys.length,
+            selected: notDeleted,
+            selectAll: 2
+          });
       })
       .catch(error => {
         if (
@@ -519,7 +519,7 @@ class Annotations extends React.Component {
       const { openSeries } = this.props;
       // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
       //check if there is enough space in the grid
-      let isGridFull = openSeries.length === MAX_PORT;
+      let isGridFull = openSeries.length === maxPort;
       //check if the serie is already open
       if (
         this.checkIfSerieOpen(selected.original, this.props.openSeries).isOpen
@@ -845,7 +845,7 @@ class Annotations extends React.Component {
   };
 
   displaySeries = async selected => {
-    if (this.props.openSeries.length === MAX_PORT) {
+    if (this.props.openSeries.length === maxPort) {
       this.props.dispatch(alertViewPortFull());
     } else {
       const { subjectID: patientID, studyUID } = selected;
@@ -864,7 +864,7 @@ class Annotations extends React.Component {
       //get extraction of the series (extract unopen series)
       if (seriesArr.length > 0) seriesArr = this.excludeOpenSeries(seriesArr);
       //check if there is enough room
-      if (seriesArr.length + this.props.openSeries.length > MAX_PORT) {
+      if (seriesArr.length + this.props.openSeries.length > maxPort) {
         //if there is not bring the modal
         await this.setState({
           isSerieSelectionOpen: true,
@@ -881,7 +881,7 @@ class Annotations extends React.Component {
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
