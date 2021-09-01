@@ -12,7 +12,7 @@ import {
 } from "./action";
 import SelectionItem from "./containers/selectionItem";
 import { FaRegCheckSquare } from "react-icons/fa";
-import { getSeries } from "../../services/seriesServices";
+import { getSeries, setSignificantSeries } from "../../services/seriesServices";
 import "./annotationsList.css"
 
 const maxPort = sessionStorage.getItem("maxPort");
@@ -86,6 +86,8 @@ class selectSerieModal extends React.Component {
   displaySelection = async () => {
     let studies = Object.values(this.props.seriesPassed);
     let series = [];
+    let significantSeries = [];
+    let significanceOrder = 1;
     studies.forEach(arr => {
       series = series.concat(arr);
     });
@@ -93,6 +95,8 @@ class selectSerieModal extends React.Component {
     //concatanete all arrays to getther
     for (let i = 0; i < this.state.selectedToDisplay.length; i++) {
       if (this.state.selectedToDisplay[i]) {
+        significantSeries.push({ seriesUID: series[i].seriesUID, significanceOrder })
+        significanceOrder++;
         this.props.dispatch(addToGrid(series[i], series[i].aimID));
         if (this.state.selectionType === "aim") {
           this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
@@ -104,6 +108,8 @@ class selectSerieModal extends React.Component {
         }
       }
     }
+    const { projectID, patientID, studyUID } = series[0];
+    setSignificantSeries(projectID, patientID, studyUID, significantSeries);
     this.props.history.push("/display");
     this.handleCancel();
   };
