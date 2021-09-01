@@ -28,7 +28,7 @@ const SeriesTable = (props) => {
     const { checked } = e.target;
     if (openSeries.length + series.length - disabledSeries.length > maxPort) {
       setError(
-        `Only six series can be viewed at a time! ${openSeries.length} series are already open!`
+        `Only ${maxPort} series can be viewed at a time! ${openSeries.length} series are already open!`
       );
     } else {
       const newSelectedSeries = { ...selectedSeries };

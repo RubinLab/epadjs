@@ -201,7 +201,7 @@ class selectSerieModal extends React.Component {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body className="selectSerie-container" style={{ textAlign: "start" }}>
-          <div>Maximum 6 series can be viewed at a time.</div>
+          <div>Maximum {maxPort} series can be viewed at a time.</div>
           <button
             size="lg"
             className="selectSerie-clearButton"

@@ -1,3 +1,4 @@
+import {commonLabels} from "../components/annotationsList/types";
 /**
  * For creating DICOM uids
  * Taken from dcmjs MetaDictionary
