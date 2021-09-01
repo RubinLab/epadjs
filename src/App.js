@@ -663,11 +663,13 @@ class App extends Component {
 
   displaySeries = async (studyData) => {
     const rawSeriesArray = await this.getSeriesData(studyData);
+    console.log('rawSeriesArray', rawSeriesArray);
     if (!rawSeriesArray) return;
     let seriesArr = rawSeriesArray.filter(this.isSupportedModality);
     let significantSeries = seriesArr.filter(
       ({ significanceOrder }) => significanceOrder && significanceOrder > 0
     );
+    console.log('series', seriesArr, significantSeries, this.props.openSeries.length);
     // If there are significant series use them to display
     // if not display modality filtered series
     const maxPort = sessionStorage.getItem("maxPort");
@@ -684,6 +686,7 @@ class App extends Component {
       //add serie to the grid
       const promiseArr = [];
       for (let serie of seriesArr) {
+        console.log('serie', serie);
         this.props.dispatch(addToGrid(serie));
         promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
       }
