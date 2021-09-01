@@ -130,8 +130,17 @@ class SearchView extends Component {
         subjects,
         expandLevel
       });
-    } catch (err) { }
+    } catch (err) { 
+      window.addEventListener("openSeriesModal", this.handleSeriesModal); 
+    }
   };
+
+    // App.js triggers this event when more than allowed series are sent from the url to open
+    handleSeriesModal = (event) => {
+      const list = event.detail;
+      const seriesList = [list];
+      this.setState({ isSerieSelectionOpen: true, seriesList });
+    }
 
   componentDidUpdate = async prevProps => {
     const { uploadedPid, lastEventId, expandLevel } = this.props;
@@ -159,6 +168,10 @@ class SearchView extends Component {
       this.handleEditingTags();
     }
   };
+
+  componentWillUnmount() {
+    window.removeEventListener("openSeriesModal", this.handleSeriesModal);
+  }
 
   checkForAllAndUnassigned = () => {
     const { pid } = this.props;
@@ -999,12 +1012,18 @@ class SearchView extends Component {
           hideEyeIcon={hideEyeIcon}
         // expanding={expanding}
         />
-        {isSerieSelectionOpen && !this.props.loading && (
+        {(this.props.showSeriesModal || (isSerieSelectionOpen && !this.props.loading)) && (
           <ProjectModal
             seriesPassed={this.state.seriesList}
             onCancel={this.closeSelectionModal}
           />
         )}
+        {/* {this.props.showSeriesModal && (
+          <ProjectModal
+            seriesPassed={this.props.seriesList}
+            onCancel={this.closeSelectionModal}
+          />
+        )} */}
         <Subjects
           key={this.props.match.params.pid}
           pid={pid}
