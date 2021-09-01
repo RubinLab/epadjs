@@ -674,7 +674,7 @@ class App extends Component {
     // if not display modality filtered series
     const maxPort = sessionStorage.getItem("maxPort");
     if (significantSeries.length) seriesArr = significantSeries;
-
+    console.log('after', seriesArr, maxPort, (seriesArr.length + this.props.openSeries.length > maxPort));
     if (seriesArr.length + this.props.openSeries.length > maxPort) {
       window.dispatchEvent(
         new CustomEvent("openSeriesModal", {
