@@ -7,16 +7,22 @@ axios.defaults.headers.common["Content-Type"] =
   "application/json, multipart/form-data";
 
 axios.interceptors.request.use(
-  async config => {
+  async (config) => {
     // initializeKeyCloak();
+    const apikey = sessionStorage.getItem("API_KEY");
+    const user = sessionStorage.getItem("user");
+    if (apikey && user) {
+      config.params = {};
+      config.params["user"] = user;
+    }
     const header = await auth.getAuthHeader();
     if (header) config.headers.authorization = header;
     return config;
   },
-  error => Promise.reject(error)
+  (error) => Promise.reject(error)
 );
 
-axios.interceptors.response.use(null, error => {
+axios.interceptors.response.use(null, (error) => {
   console.log("ERROR::");
   console.log(error);
   // console.log("ERROR::", error.response.data);
