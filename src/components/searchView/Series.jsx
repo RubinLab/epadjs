@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
-import { MAX_PORT } from '../../constants';
 import { formatDate } from '../flexView/helperMethods';
 import Annotations from './Annotations';
 import { getSeries } from '../../services/seriesServices';
@@ -19,6 +18,8 @@ import {
   updatePatient,
   selectAnnotation
 } from '../annotationsList/action';
+
+const maxPort = sessionStorage.getItem("maxPort");
 
 function Table({
   columns,
@@ -162,7 +163,7 @@ function Series(props) {
     let isSerieOpen = false;
 
     //check if there is enough space in the grid
-    let isGridFull = openSeries.length === MAX_PORT;
+    let isGridFull = openSeries.length === maxPort;
     //check if the serie is already open
 
     if (openSeries.length > 0) {
