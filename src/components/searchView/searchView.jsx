@@ -472,7 +472,6 @@ class SearchView extends Component {
     let selectedSeries = Object.values(this.props.selectedSeries);
     let selectedAnnotations = Object.values(this.props.selectedAnnotations);
     const groupedAnns = this.groupUnderSerie(selectedAnnotations);
-    console.log("VIEWSELCTION", selectedSeries, selectedStudies);
     let groupedObj;
     let notOpenSeries = [];
     //if studies selected
@@ -537,7 +536,6 @@ class SearchView extends Component {
     } else if (selectedSeries.length > 0) {
       //check if enough room to display selection
       for (let serie of selectedSeries) {
-        console.log("serie", serie);
         if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen && DISP_MODALITIES.includes(serie.examType)) {
           notOpenSeries.push(serie);
         }
@@ -916,7 +914,6 @@ class SearchView extends Component {
         });
       }
       await Promise.all(promises);
-      console.log('Sucessfully copied!');
       localStorage.setItem('treeData', JSON.stringify({}));
       this.setState({ showProjects: false });
       this.props.clearTreeExpand()
