@@ -1,12 +1,9 @@
 import http from "./httpService";
-const apiUrl = sessionStorage.getItem("apiUrl");
-const mode = sessionStorage.getItem("mode");
-const wadoUrl = sessionStorage.getItem("wadoUrl");
 
 export function getSeries(projectId, subjectId, studyId) {
-  if (mode === "lite")
+  if (http.mode() === "lite")
     return http.get(
-      apiUrl +
+      http.apiUrl() +
         "/projects/lite/subjects/" +
         encodeURIComponent(subjectId) +
         "/studies/" +
@@ -15,7 +12,7 @@ export function getSeries(projectId, subjectId, studyId) {
     );
   else
     return http.get(
-      apiUrl +
+      http.apiUrl() +
         "/projects/" +
         encodeURIComponent(projectId) +
         "/subjects/" +
@@ -26,9 +23,9 @@ export function getSeries(projectId, subjectId, studyId) {
     );
 }
 export function getImageIds(series) {
-  if (mode === "lite") {
+  if (http.mode() === "lite") {
     return http.get(
-      apiUrl +
+      http.apiUrl() +
         "/projects/lite/subjects/" +
         encodeURIComponent(series.patientID) +
         "/studies/" +
@@ -39,7 +36,7 @@ export function getImageIds(series) {
     );
   } else {
     return http.get(
-      apiUrl +
+      http.apiUrl() +
         "/projects/" +
         encodeURIComponent(series.projectID) +
         "/subjects/" +
@@ -55,6 +52,7 @@ export function getImageIds(series) {
 
 //  seems like this doesn"t belong to here but olny services know details about paths&server side
 export function getWadoImagePath(studyUid, seriesUid, imageId) {
+  const wadoUrl = http.wadoUrl();
   if (wadoUrl.includes("wadors"))
     return (
       wadoUrl +
@@ -80,7 +78,7 @@ export function getWadoImagePath(studyUid, seriesUid, imageId) {
 // replace the uri path with rs for now. we should be able to handle both somehow
 export function getWadoRSImagePath(studyUid, seriesUid, imageId) {
   return (
-    wadoUrl +
+    http.wadoUrl() +
     "/studies/" +
     encodeURIComponent(studyUid) +
     "/series/" +
@@ -91,14 +89,14 @@ export function getWadoRSImagePath(studyUid, seriesUid, imageId) {
 }
 
 export function getImageArrayBuffer(path) {
-  let url = wadoUrl + path;
+  let url = http.wadoUrl() + path;
   url = url.replace("wadouri:", "");
   return http.get(url, { responseType: "arraybuffer" });
 }
 export function downloadSeries(projectID, body) {
   projectID = projectID || "lite";
   const url =
-    apiUrl +
+    http.apiUrl() +
     "/projects/" +
     encodeURIComponent(projectID) +
     "/series/download" +
@@ -117,7 +115,7 @@ export function getSegmentation(series, imageId) {
 export function deleteSeries(series, delSys) {
   const { projectID, patientID, studyUID, seriesUID } = series;
   const url =
-    apiUrl +
+    http.apiUrl() +
     "/projects/" +
     encodeURIComponent(projectID) +
     "/subjects/" +
@@ -138,7 +136,7 @@ export function saveSeries(
   description
 ) {
   const url =
-    apiUrl +
+    http.apiUrl() +
     "/projects/" +
     encodeURIComponent(projectID) +
     "/subjects/" +
@@ -155,7 +153,7 @@ export function uploadFileToSeries(formData, config, series) {
   let { projectID, subjectID, studyUID, seriesUID } = series;
   projectID = projectID || "lite";
   subjectID = subjectID ? subjectID : series.patientID;
-  const url = `${apiUrl}/projects/${encodeURIComponent(
+  const url = `${http.apiUrl()}/projects/${encodeURIComponent(
     projectID
   )}/subjects/${encodeURIComponent(subjectID)}/studies/${encodeURIComponent(
     studyUID
@@ -172,7 +170,7 @@ export function updateTagsOfSeries(
   applyStudy,
   body
 ) {
-  const url = `${apiUrl}/projects/${encodeURIComponent(
+  const url = `${http.apiUrl()}/projects/${encodeURIComponent(
     projectID
   )}/subjects/${encodeURIComponent(subjectID)}/studies/${encodeURIComponent(
     studyUID
@@ -184,7 +182,7 @@ export function updateTagsOfSeries(
 
 export function getSingleSeries(projectId, subjectId, studyUID, seriesUID) {
   return http.get(
-    apiUrl +
+    http.apiUrl() +
       "/projects/" +
       encodeURIComponent(projectId) +
       "/subjects/" +

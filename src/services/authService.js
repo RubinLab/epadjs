@@ -1,7 +1,6 @@
 "use strict";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 
-const mode = sessionStorage.getItem("mode");
 // we need the keycloak object to be able to use update token
 let keycloak = null;
 
@@ -35,6 +34,7 @@ export function setLoginSession(username) {
 }
 
 export function logout() {
+  const mode = sessionStorage.getItem("mode");
   sessionStorage.removeItem("username");
   sessionStorage.removeItem("displayName");
   if (mode === "lite") {

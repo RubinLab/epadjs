@@ -47,9 +47,24 @@ axios.interceptors.response.use(null, (error) => {
   return Promise.reject(error);
 });
 
+function apiUrl() {
+  return sessionStorage.getItem("apiUrl");
+}
+
+function wadoUrl() {
+  return sessionStorage.getItem("wadoUrl");
+}
+
+function mode() {
+  return sessionStorage.getItem("mode");
+}
+
 export default {
   get: axios.get,
   post: axios.post,
   put: axios.put,
   delete: axios.delete,
+  apiUrl,
+  wadoUrl,
+  mode,
 };

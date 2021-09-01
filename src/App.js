@@ -670,7 +670,6 @@ class App extends Component {
         .catch((err) => console.error(err));
     } else if (patientID && studyUID && projectID) {
       // THIS IS TEACHING
-      console.log("TEACCHIIINNNGGGG");
       await this.completeAutorization(args);
       // await decrypt(args);
       await decryptAndAdd(args);
@@ -685,9 +684,7 @@ class App extends Component {
   };
 
   displaySeries = async (studyData) => {
-    console.log("study data", studyData);
     const rawSeriesArray = await this.getSeriesData(studyData);
-    console.log("raw series", rawSeriesArray);
     if (!rawSeriesArray) return;
     let seriesArr = rawSeriesArray.filter(this.isSupportedModality);
     let significantSeries = seriesArr.filter(
@@ -709,7 +706,6 @@ class App extends Component {
       //add serie to the grid
       const promiseArr = [];
       for (let serie of seriesArr) {
-        console.log("Serie", serie);
         this.props.dispatch(addToGrid(serie));
         promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
       }
