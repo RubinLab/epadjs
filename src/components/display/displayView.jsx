@@ -43,9 +43,7 @@ import { isThisSecond } from "date-fns/esm";
 import { FiMessageSquare } from "react-icons/fi";
 import { errorMonitor } from "events";
 import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
-
-const mode = sessionStorage.getItem("mode");
-const wadoUrl = sessionStorage.getItem("wadoUrl");
+import getVPDimensions from "./ViewportCalculations";
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 } },
@@ -540,6 +538,7 @@ class DisplayView extends Component {
     let cornerstoneImageIds = [];
     const imageUrls = await this.getImages(serie);
     const API_KEY = sessionStorage.getItem("API_KEY");
+    const wadoUrl = sessionStorage.getItem("wadoUrl");
     let baseUrl;
     imageUrls.map((url) => {
       if (API_KEY) {
@@ -700,21 +699,9 @@ class DisplayView extends Component {
   };
 
   getViewports = (containerHeight) => {
-    let numSeries = this.props.series.length;
-    let numCols = numSeries % 3;
-    containerHeight = containerHeight
-      ? containerHeight
-      : this.state.containerHeight;
-    if (numSeries > 3) {
-      this.setState({ height: containerHeight / 2 });
-      this.setState({ width: "33%" });
-      return;
-    }
-    if (numCols === 1) {
-      this.setState({ width: "100%", height: containerHeight });
-    } else if (numCols === 2)
-      this.setState({ width: "50%", height: containerHeight });
-    else this.setState({ width: "33%", height: containerHeight });
+    const numSeries = this.props.series.length;
+    const { width, height } = getVPDimensions(numSeries);
+    this.setState({ width, height });
   };
 
   createRefs() {

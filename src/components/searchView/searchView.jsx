@@ -536,7 +536,7 @@ class SearchView extends Component {
     } else if (selectedSeries.length > 0) {
       //check if enough room to display selection
       for (let serie of selectedSeries) {
-        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen && DISP_MODALITIES.includes(series.examType)) {
+        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen && DISP_MODALITIES.includes(serie.examType)) {
           notOpenSeries.push(serie);
         }
       }
@@ -595,7 +595,7 @@ class SearchView extends Component {
       groupedObj = this.groupUnderStudy(serieList);
       //check if enough room to display selection
       for (let serie of serieList) {
-        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen && DISP_MODALITIES.includes(series.examType)) {
+        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen && DISP_MODALITIES.includes(serie.examType)) {
           notOpenSeries.push(serie);
         }
       }

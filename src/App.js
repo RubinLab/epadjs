@@ -619,35 +619,20 @@ class App extends Component {
   handleArgs = async (args) => {
     const { data } = await decrypt(args);
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
-    const apiUrl = sessionStorage.getItem("apiUrl");
-
     const { openSeries } = this.props;
 
-    if (API_KEY && seriesArray && user) {
-      console.log("API KEEEEYYYY");
-      console.log("API KEY", API_KEY, seriesArray, user);
-      console.log("Api Url", sessionStorage.getItem("apiUrl"));
+    if (API_KEY && user) {
       // THIS IS APIKEY
-      const parsedSeriesArray = JSON.parse(seriesArray);
       sessionStorage.setItem("authMode", "apiKey");
       sessionStorage.setItem("API_KEY", API_KEY);
       sessionStorage.setItem("user", user);
       sessionStorage.setItem("username", user);
+    }
 
-      this.completeAutorization();
-      // this.setState({
-      //   authenticated: true,
-      // });
-      console.log("back from auth");
-      // let userData;
-      // try {
-      //   userData = await getUser(user);
-      //   userData = userData.data;
-      //   this.setState({ admin: userData.admin });
-      // } catch (err) {
-      //   console.error(err);
-      // }
+    await this.completeAutorization();
 
+    if (seriesArray) {
+      const parsedSeriesArray = JSON.parse(seriesArray);
       const maxPort = sessionStorage.getItem("maxPort");
       if (parsedSeriesArray.length + openSeries.length > maxPort) {
         alert(
@@ -656,22 +641,17 @@ class App extends Component {
         return;
       }
       const promiseArr = [];
-      console.log("parsed array", parsedSeriesArray);
       for (let serie of parsedSeriesArray) {
         serie = { ...serie, projectID: "lite" };
         this.props.dispatch(addToGrid(serie));
         promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
       }
-      console.log("Promise arrat", promiseArr);
       Promise.all(promiseArr)
         .then(() => {
           this.props.history.push("/display");
         })
         .catch((err) => console.error(err));
     } else if (patientID && studyUID && projectID) {
-      // THIS IS TEACHING
-      await this.completeAutorization(args);
-      // await decrypt(args);
       await decryptAndAdd(args);
       const packedData = {
         projectID,
