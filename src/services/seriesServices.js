@@ -193,3 +193,17 @@ export function getSingleSeries(projectId, subjectId, studyUID, seriesUID) {
       encodeURIComponent(seriesUID)
   );
 }
+
+export function setSignificantSeries(projectId, subjectId, studyUID, body) {
+  const url =
+    apiUrl +
+    "/projects/" +
+    encodeURIComponent(projectId) +
+    "/subjects/" +
+    encodeURIComponent(subjectId) +
+    "/studies/" +
+    encodeURIComponent(studyUID) +
+    "/significantSeries";
+
+  return http.put(url, body);
+}
