@@ -1,7 +1,6 @@
 "use strict";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 
-const apiUrl = sessionStorage.getItem("apiUrl");
 const mode = sessionStorage.getItem("mode");
 // we need the keycloak object to be able to use update token
 let keycloak = null;
@@ -24,12 +23,15 @@ export function refreshToken(keycloak, minValidity) {
   });
 }
 
-export async function login(username, password, keycloak) {
-  sessionStorage.setItem("username", username.user);
-  sessionStorage.setItem("displayName", username.user); //TODO: change with fullname
+export function setLoginKeycloak(keycloak) {
   if (keycloak) {
     this.keycloak = keycloak;
   }
+}
+
+export function setLoginSession(username) {
+  sessionStorage.setItem("username", username.user);
+  sessionStorage.setItem("displayName", username.user); //TODO: change with fullname
 }
 
 export function logout() {
@@ -46,7 +48,18 @@ export function getCurrentUser() {
 }
 
 export async function getAuthHeader() {
-  if (this.keycloak) {
+  const API_KEY = sessionStorage.getItem("API_KEY");
+  if (API_KEY) {
+    const header = `apikey ${API_KEY}`;
+    if (header) {
+      cornerstoneWADOImageLoader.configure({
+        beforeSend: function (xhr) {
+          xhr.setRequestHeader("Authorization", header);
+        },
+      });
+      return header;
+    }
+  } else if (this.keycloak) {
     try {
       await refreshToken(this.keycloak, 5);
       const header = `Bearer ${this.keycloak.token}`;
@@ -66,9 +79,10 @@ export async function getAuthHeader() {
 }
 
 export default {
-  login,
   logout,
   getCurrentUser,
   getAuthHeader,
   refreshToken,
+  setLoginKeycloak,
+  setLoginSession,
 };

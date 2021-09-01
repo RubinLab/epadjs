@@ -32,7 +32,8 @@ class LoginForm extends Form {
   doSubmit = async () => {
     try {
       const { data } = this.state;
-      await auth.login(data.username, data.password);
+      // deprecated login
+      // await auth.login(data.username, data.password);
       window.location = "/";
     } catch (ex) {
       if (ex.response && ex.response.status === 400) {
