@@ -786,7 +786,7 @@ class App extends Component {
 
             if (authMode === "apiKey") {
               const API_KEY = sessionStorage.getItem("API_KEY");
-              const user = sessionStorage.getItem("user");
+              const user = sessionStorage.getItem("username");
               this.eventSource = new EventSourcePolyfill(
                 `${apiUrl}/notifications?user=${user}`,
                 {

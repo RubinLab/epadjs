@@ -10,7 +10,7 @@ axios.interceptors.request.use(
   async (config) => {
     // initializeKeyCloak();
     const apikey = sessionStorage.getItem("API_KEY");
-    const user = sessionStorage.getItem("user");
+    const user = sessionStorage.getItem("username");
     if (apikey && user) {
       config.params = {};
       config.params["user"] = user;

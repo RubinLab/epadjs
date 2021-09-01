@@ -542,7 +542,7 @@ class DisplayView extends Component {
     let baseUrl;
     imageUrls.map((url) => {
       if (API_KEY) {
-        const user = sessionStorage.getItem("user");
+        const user = sessionStorage.getItem("username");
         baseUrl = wadoUrl + url.lossyImage + `&user=${user}`;
       }
       else baseUrl = wadoUrl + url.lossyImage;
