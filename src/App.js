@@ -6,6 +6,7 @@ import { EventSourcePolyfill } from "event-source-polyfill";
 import Keycloak from "keycloak-js";
 import _ from "lodash";
 import { getUser, getUserInfo } from "./services/userServices";
+import { getSeries } from "./services/seriesServices";
 import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
 import SearchView from "./components/searchView/searchView";
@@ -38,6 +39,7 @@ import {
   selectProject,
   getTemplates,
   segUploadCompleted,
+  annotationsLoadingError,
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
@@ -682,7 +684,9 @@ class App extends Component {
   };
 
   displaySeries = async (studyData) => {
+    console.log("study data", studyData);
     const rawSeriesArray = await this.getSeriesData(studyData);
+    console.log("raw series", rawSeriesArray);
     if (!rawSeriesArray) return;
     let seriesArr = rawSeriesArray.filter(this.isSupportedModality);
     let significantSeries = seriesArr.filter(
@@ -704,6 +708,7 @@ class App extends Component {
       //add serie to the grid
       const promiseArr = [];
       for (let serie of seriesArr) {
+        console.log("Serie", serie);
         this.props.dispatch(addToGrid(serie));
         promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
       }
@@ -725,119 +730,121 @@ class App extends Component {
       const { data: series } = await getSeries(projectID, patientID, studyUID);
       return series;
     } catch (err) {
+      console.log(err);
       this.props.dispatch(annotationsLoadingError(err));
     }
   };
 
-  completeAutorization = () => {
-    console.log("I am in");
-    let getAuthUser = null;
-    const authMode = sessionStorage.getItem("authMode");
-    const apiUrl = sessionStorage.getItem("apiUrl");
+  completeAutorization = () =>
+    new Promise((resolve, reject) => {
+      let getAuthUser = null;
+      const authMode = sessionStorage.getItem("authMode");
+      const apiUrl = sessionStorage.getItem("apiUrl");
 
-    if (authMode === "apiKey") {
-      const username = sessionStorage.getItem("username");
-      getAuthUser = new Promise((resolve) => {
-        resolve({
-          userInfo: { preferred_username: username },
-          keycloak: {},
-          authenticated: true,
-        });
-      }).catch((err) => reject(err));
-    } else if (authMode !== "external") {
-      const keycloak = Keycloak(
-        JSON.parse(sessionStorage.getItem("keycloakJson"))
-      );
-      getAuthUser = new Promise((resolve, reject) => {
-        keycloak
-          .init({ onLoad: "login-required" })
-          .then((authenticated) => {
-            keycloak
-              .loadUserInfo()
-              .then((userInfo) => {
-                resolve({ userInfo, keycloak, authenticated });
-              })
-              .catch((err) => reject(err));
-          })
-          .catch((err) => reject(err));
-      });
-    } else {
-      // authMode is external ask backend for user
-      getAuthUser = new Promise((resolve, reject) => {
-        getUserInfo()
-          .then((userInfoResponse) => {
-            resolve({
-              userInfo: userInfoResponse.data,
-              keycloak: {},
-              authenticated: true,
-            });
-          })
-          .catch((err) => reject(err));
-      });
-    }
-    getAuthUser
-      .then(async (result) => {
-        try {
-          const username =
-            result.userInfo.preferred_username || result.userInfo.email;
-
-          await auth.setLoginKeycloak(result.keycloak);
-          let userData;
-          try {
-            userData = await getUser(username);
-            userData = userData.data;
-            this.setState({ admin: userData.admin });
-          } catch (err) {
-            console.error(err);
-          }
-          let user = {
-            user: userData.username,
-            displayname: `${userData.firstname} ${userData.lastname}`,
-          };
-          await auth.setLoginSession(user, null);
-          this.setState({
-            keycloak: result.keycloak,
-            authenticated: result.authenticated,
-            id: result.userInfo.sub,
-            user,
+      if (authMode === "apiKey") {
+        const username = sessionStorage.getItem("username");
+        getAuthUser = new Promise((resolve) => {
+          resolve({
+            userInfo: { preferred_username: username },
+            keycloak: null,
+            authenticated: true,
           });
+        }).catch((err) => reject(err));
+      } else if (authMode !== "external") {
+        const keycloak = Keycloak(
+          JSON.parse(sessionStorage.getItem("keycloakJson"))
+        );
+        getAuthUser = new Promise((resolve, reject) => {
+          keycloak
+            .init({ onLoad: "login-required" })
+            .then((authenticated) => {
+              keycloak
+                .loadUserInfo()
+                .then((userInfo) => {
+                  resolve({ userInfo, keycloak, authenticated });
+                })
+                .catch((err) => reject(err));
+            })
+            .catch((err) => reject(err));
+        });
+      } else {
+        // authMode is external ask backend for user
+        getAuthUser = new Promise((resolve, reject) => {
+          getUserInfo()
+            .then((userInfoResponse) => {
+              resolve({
+                userInfo: userInfoResponse.data,
+                keycloak: null,
+                authenticated: true,
+              });
+            })
+            .catch((err) => reject(err));
+        });
+      }
+      getAuthUser
+        .then(async (result) => {
+          try {
+            const username =
+              result.userInfo.preferred_username || result.userInfo.email;
 
-          if (authMode === "apiKey") {
-            const API_KEY = sessionStorage.getItem("API_KEY");
-            const user = sessionStorage.getItem("user");
-            this.eventSource = new EventSourcePolyfill(
-              `${apiUrl}/notifications?user=${user}`,
-              {
-                headers: {
-                  authorization: `apikey ${API_KEY}`,
-                },
-              }
+            await auth.setLoginKeycloak(result.keycloak);
+            let userData;
+            try {
+              userData = await getUser(username);
+              userData = userData.data;
+              this.setState({ admin: userData.admin });
+            } catch (err) {
+              console.error(err);
+            }
+            let user = {
+              user: userData.username,
+              displayname: `${userData.firstname} ${userData.lastname}`,
+            };
+            await auth.setLoginSession(user, null);
+            this.setState({
+              keycloak: result.keycloak,
+              authenticated: result.authenticated,
+              id: result.userInfo.sub,
+              user,
+            });
+
+            if (authMode === "apiKey") {
+              const API_KEY = sessionStorage.getItem("API_KEY");
+              const user = sessionStorage.getItem("user");
+              this.eventSource = new EventSourcePolyfill(
+                `${apiUrl}/notifications?user=${user}`,
+                {
+                  headers: {
+                    authorization: `apikey ${API_KEY}`,
+                  },
+                }
+              );
+            } else {
+              this.eventSource = new EventSourcePolyfill(
+                `${apiUrl}/notifications`,
+                result.keycloak.token
+                  ? {
+                      headers: {
+                        authorization: `Bearer ${result.keycloak.token}`,
+                      },
+                    }
+                  : {}
+              );
+            }
+
+            this.eventSource.addEventListener(
+              "message",
+              this.getMessageFromEventSrc
             );
-          } else {
-            this.eventSource = new EventSourcePolyfill(
-              `${apiUrl}/notifications`,
-              result.keycloak.token
-                ? {
-                    headers: {
-                      authorization: `Bearer ${result.keycloak.token}`,
-                    },
-                  }
-                : {}
-            );
+            resolve();
+          } catch (err) {
+            reject("Error in user retrieval!", err);
           }
-
-          this.eventSource.addEventListener(
-            "message",
-            this.getMessageFromEventSrc
-          );
-        } catch (err) {
-          console.error("Error in user retrieval!", err);
-        }
-      })
-      .catch((err2) => {
-        console.error("Authentication failed!", err2);
-      });
-  };
+        })
+        .catch((err2) => {
+          reject("Authentication failed!", err2);
+        });
+    });
 
   // completeAutorization = (apiUrl) => {
   //   let getAuthUser = null;

@@ -180,7 +180,7 @@ class DisplayView extends Component {
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
     window.addEventListener('keydown', this.handleKeyPressed);
-    if (series && series.length > 0) {
+    if (this.props.keycloak && series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
     };
@@ -264,9 +264,10 @@ class DisplayView extends Component {
   };
 
   checkTokenExpire = async () => {
-    if (this.props.keycloak.isTokenExpired(5)) {
+    const { keycloak } = this.props;
+    if (keycloak.isTokenExpired(5)) {
       window.alert("Are you still there?");
-      await this.updateToken(this.props.keycloak, 5);
+      await this.updateToken(keycloak, 5);
     }
   };
 
@@ -538,8 +539,14 @@ class DisplayView extends Component {
     let newImageIds = {};
     let cornerstoneImageIds = [];
     const imageUrls = await this.getImages(serie);
+    const API_KEY = sessionStorage.getItem("API_KEY");
+    let baseUrl;
     imageUrls.map((url) => {
-      const baseUrl = wadoUrl + url.lossyImage;
+      if (API_KEY) {
+        const user = sessionStorage.getItem("user");
+        baseUrl = wadoUrl + url.lossyImage + `&user=${user}`;
+      }
+      else baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
           let multiFrameUrl = baseUrl + "&frame=" + i;
