@@ -32,6 +32,8 @@ import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import {
   clearAimId,
   getNotificationsData,
+  getSingleSerie,
+  addToGrid,
   clearSelection,
   selectProject,
   getTemplates,
@@ -41,6 +43,7 @@ import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
 import Report from "./components/searchView/Report.jsx";
 import { getSubjects, getSubject } from "./services/subjectServices";
+import { decrypt, decryptAndAdd } from "./services/decryptUrlService";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -628,19 +631,19 @@ class App extends Component {
       sessionStorage.setItem("user", user);
       sessionStorage.setItem("username", user);
 
-      // this.completeAutorization(args);
-      this.setState({
-        authenticated: true,
-      });
-
-      let userData;
-      try {
-        userData = await getUser(user);
-        userData = userData.data;
-        this.setState({ admin: userData.admin });
-      } catch (err) {
-        console.error(err);
-      }
+      this.completeAutorization();
+      // this.setState({
+      //   authenticated: true,
+      // });
+      console.log("back from auth");
+      // let userData;
+      // try {
+      //   userData = await getUser(user);
+      //   userData = userData.data;
+      //   this.setState({ admin: userData.admin });
+      // } catch (err) {
+      //   console.error(err);
+      // }
 
       const maxPort = sessionStorage.getItem("maxPort");
       if (parsedSeriesArray.length + openSeries.length > maxPort) {
@@ -650,11 +653,14 @@ class App extends Component {
         return;
       }
       const promiseArr = [];
+      console.log("parsed array", parsedSeriesArray);
       for (let serie of parsedSeriesArray) {
+        console.log("IN THE FOR");
         serie = { ...serie, projectID: "lite" };
         this.props.dispatch(addToGrid(serie));
         promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
       }
+      console.log("Promise arrat", promiseArr);
       Promise.all(promiseArr)
         .then(() => {
           this.props.history.push("/display");
@@ -725,6 +731,7 @@ class App extends Component {
   };
 
   completeAutorization = () => {
+    console.log("I am in");
     let getAuthUser = null;
     const authMode = sessionStorage.getItem("authMode");
     const apiUrl = sessionStorage.getItem("apiUrl");
