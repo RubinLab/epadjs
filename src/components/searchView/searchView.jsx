@@ -55,6 +55,7 @@ import WarningModal from '../common/warningModal';
 import AnnotationCreationModal from './annotationCreationModal.jsx';
 import UpLoadWizard from '../tagEditor/uploadWizard';
 import { FaLessThan } from 'react-icons/fa';
+import { DISP_MODALITIES } from "../../constants";
 
 const mode = sessionStorage.getItem('mode');
 const maxPort = sessionStorage.getItem("maxPort");
@@ -535,7 +536,7 @@ class SearchView extends Component {
     } else if (selectedSeries.length > 0) {
       //check if enough room to display selection
       for (let serie of selectedSeries) {
-        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen) {
+        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen && DISP_MODALITIES.includes(series.examType)) {
           notOpenSeries.push(serie);
         }
       }
@@ -594,7 +595,7 @@ class SearchView extends Component {
       groupedObj = this.groupUnderStudy(serieList);
       //check if enough room to display selection
       for (let serie of serieList) {
-        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen) {
+        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen && DISP_MODALITIES.includes(series.examType)) {
           notOpenSeries.push(serie);
         }
       }

@@ -52,6 +52,7 @@ import "./App.css";
 import RightsideBar from "./components/RightsideBar/RightsideBar";
 import MinimizedReport from "./components/searchView/MinimizedReport";
 import { FaJoint } from "react-icons/fa";
+import { DISP_MODALITIES } from "./constants";
 
 const messages = {
   noPatient: {

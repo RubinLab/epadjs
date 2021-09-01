@@ -1,4 +1,16 @@
 export const widthUnit = 20;
+export const DISP_MODALITIES = [
+  "CT",
+  "MR",
+  "PT",
+  "MG",
+  "CR",
+  "US",
+  "DX",
+  "OT",
+  "XA",
+  "OCT",
+];
 
 export const formatDates = (timeStamp) => {
   //split it by space
