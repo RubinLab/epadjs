@@ -99,6 +99,7 @@ function Annotations(props) {
     const { projectID, studyUID, seriesUID, aimID } = selected;
     const patientID = selected.subjectID;
     const { openSeries } = props;
+    const maxPort = sessionStorage.getItem("maxPort");
     // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
     //check if there is enough space in the grid
     let isGridFull = openSeries.length === maxPort;
