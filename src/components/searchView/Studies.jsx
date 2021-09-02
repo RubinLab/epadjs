@@ -9,7 +9,7 @@ import { getStudies } from '../../services/studyServices';
 import Series from './Series';
 import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
-import { clearCarets } from '../../Utils/aid.js';
+import { clearCarets, isSupportedModality } from '../../Utils/aid.js';
 import {
   getSingleSerie,
   selectStudy,
@@ -215,6 +215,8 @@ function Studies(props) {
       } else {
         seriesArr = await getSeriesData(selected);
       }
+      // filter the nondisplayable modalities
+      seriesArr = seriesArr.filter(isSupportedModality);
       //get extraction of the series (extract unopen series)
       if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
       //check if there is enough room

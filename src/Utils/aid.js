@@ -1,3 +1,5 @@
+import { commonLabels } from "../components/annotationsList/types";
+import { DISP_MODALITIES } from "../constants";
 /**
  * For creating DICOM uids
  * Taken from dcmjs MetaDictionary
@@ -15,7 +17,7 @@ export function styleEightDigitDate(rawDate) {
 }
 
 export function generateUid() {
-  let uid = '2.25.' + Math.floor(1 + Math.random() * 9);
+  let uid = "2.25." + Math.floor(1 + Math.random() * 9);
   for (let index = 0; index < 38; index++) {
     uid = uid + Math.floor(Math.random() * 10);
   }
@@ -40,7 +42,7 @@ export function persistExpandView(expanded, data, newData, id) {
 
 export function arrayToMap(arrayObj) {
   const tempmap = new Map();
-  arrayObj.forEach(temp => {
+  arrayObj.forEach((temp) => {
     tempmap.set(temp, temp);
   });
   return tempmap;
@@ -54,10 +56,10 @@ export function isEmpty(obj) {
 }
 
 // from http://stackoverflow.com/questions/1349404/generate-a-string-of-5-random-characters-in-javascript
-const makeRandomString = length => {
-  var text = '';
+const makeRandomString = (length) => {
+  var text = "";
   var possible =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
   for (var i = 0; i < length; i++)
     text += possible.charAt(Math.floor(Math.random() * possible.length));
@@ -65,49 +67,49 @@ const makeRandomString = length => {
 };
 
 const pad = (num, size) => {
-  var s = num + '';
-  while (s.length < size) s = '0' + s;
+  var s = num + "";
+  while (s.length < size) s = "0" + s;
   return s;
 };
 
 // https://github.com/cornerstonejs/dicomParser/blob/master/examples/simpleDeIdentify/index.html
 export const makeDeIdentifiedValue = (length, vr) => {
-  if (vr === 'LO' || vr === 'SH' || vr === 'PN') {
+  if (vr === "LO" || vr === "SH" || vr === "PN") {
     if (!length) length = 8;
     return makeRandomString(length);
-  } else if (vr === 'DA') {
+  } else if (vr === "DA") {
     var now = new Date();
     return (
       now.getYear() + 1900 + pad(now.getMonth() + 1, 2) + pad(now.getDate(), 2)
     );
-  } else if (vr === 'TM') {
+  } else if (vr === "TM") {
     var now = new Date();
     return (
       pad(now.getHours(), 2) +
       pad(now.getMinutes(), 2) +
       pad(now.getSeconds(), 2)
     );
-  } else if (vr === 'UI') {
+  } else if (vr === "UI") {
     return newUID();
   }
-  console.log('unknown VR:' + vr);
+  console.log("unknown VR:" + vr);
 };
 
 const newUID = () => {
   //dcmjs
   //uid=DicomMetaDictionary.uid();
   //static uid() method from https://raw.githubusercontent.com/pieper/dcmjs/3fd2dbaa0e487db05cb48b1cc26a480ca5b1146a/src/DicomMetaDictionary.js
-  let uid = '2.25.' + Math.floor(1 + Math.random() * 9);
+  let uid = "2.25." + Math.floor(1 + Math.random() * 9);
   for (let index = 0; index < 38; index++) {
     uid = uid + Math.floor(Math.random() * 10);
   }
   return uid;
 };
 
-export const clearCarets = string => {
+export const clearCarets = (string) => {
   if (string) {
     for (let i = 0; i < string.length; i++) {
-      string = string.replace('^', ' ');
+      string = string.replace("^", " ");
     }
     return string;
   }
@@ -116,7 +118,7 @@ export const clearCarets = string => {
 export const extractTreeData = (datasets, requirements) => {
   const result = {};
   if (datasets) {
-    datasets.forEach(data => {
+    datasets.forEach((data) => {
       const { PatientID, StudyInstanceUID, SeriesInstanceUID } = data;
       const patient = result[PatientID];
       if (patient) {
@@ -152,18 +154,14 @@ export const extractTreeData = (datasets, requirements) => {
 
 // extractTreeData
 const createSeries = (data, requirements) => {
-  const {
-    SeriesInstanceUID,
-    SeriesDescription,
-    PatientID,
-    StudyInstanceUID
-  } = data;
+  const { SeriesInstanceUID, SeriesDescription, PatientID, StudyInstanceUID } =
+    data;
   const result = {
     SeriesInstanceUID,
     SeriesDescription: clearCarets(SeriesDescription),
     PatientID,
     StudyInstanceUID,
-    imageCount: 1
+    imageCount: 1,
   };
   const missingTags = checkMissingTags(data, requirements);
   if (missingTags.length > 0) {
@@ -179,7 +177,7 @@ const createStudy = (data, requirements) => {
     StudyDescription,
     SeriesInstanceUID,
     SeriesDescription,
-    PatientID
+    PatientID,
   } = data;
   const result = {
     StudyInstanceUID,
@@ -190,9 +188,9 @@ const createStudy = (data, requirements) => {
         SeriesDescription: clearCarets(SeriesDescription),
         PatientID,
         StudyInstanceUID,
-        imageCount: 1
-      }
-    }
+        imageCount: 1,
+      },
+    },
   };
   const series = result.series[SeriesInstanceUID];
   const missingTags = checkMissingTags(data, requirements);
@@ -210,7 +208,7 @@ const createPatient = (data, requirements) => {
     StudyInstanceUID,
     StudyDescription,
     SeriesInstanceUID,
-    SeriesDescription
+    SeriesDescription,
   } = data;
 
   const result = {
@@ -226,11 +224,11 @@ const createPatient = (data, requirements) => {
             SeriesDescription: clearCarets(SeriesDescription),
             PatientID,
             StudyInstanceUID,
-            imageCount: 1
-          }
-        }
-      }
-    }
+            imageCount: 1,
+          },
+        },
+      },
+    },
   };
   const series = result.studies[StudyInstanceUID].series[SeriesInstanceUID];
   const missingTags = checkMissingTags(data, requirements);
@@ -245,14 +243,14 @@ export const extractTableData = (dataset, requirementsObj) => {
   const result = [];
   const isDataArray = Array.isArray(dataset);
   if (isDataArray) {
-    dataset.forEach(el => {
+    dataset.forEach((el) => {
       const {
         PatientID,
         PatientName,
         StudyInstanceUID,
         StudyDescription,
         SeriesInstanceUID,
-        SeriesDescription
+        SeriesDescription,
       } = el;
       const missingTags = checkMissingTags(el, requirementsObj);
       result.push({
@@ -263,7 +261,7 @@ export const extractTableData = (dataset, requirementsObj) => {
         SeriesInstanceUID,
         SeriesDescription: clearCarets(SeriesDescription),
         missingTags,
-        data: el
+        data: el,
       });
     });
   }
@@ -273,7 +271,7 @@ export const extractTableData = (dataset, requirementsObj) => {
 const checkMissingTags = (dataset, requirementsObj) => {
   const missingTags = [];
   const requirements = Object.keys(requirementsObj);
-  requirements.forEach(req => {
+  requirements.forEach((req) => {
     const tag = req.substring(0, req.length - 2);
     if (!dataset[tag]) {
       missingTags.push(tag);
@@ -296,20 +294,20 @@ export const checkIfSeriesOpen = (array, selectedUID, UIDlevel) => {
 
 export const convertDateFormat = (str, attr) => {
   try {
-    let result = '';
+    let result = "";
     const dateArr = [];
     dateArr.push(str.substring(0, 4));
     dateArr.push(str.substring(4, 6));
     dateArr.push(str.substring(6, 8));
-    if (attr === 'date') {
+    if (attr === "date") {
       const timeArr = [];
       timeArr.push(str.substring(8, 10));
       timeArr.push(str.substring(10, 12));
       timeArr.push(str.substring(12));
-      result = dateArr.join('-') + ' ' + timeArr.join(':');
+      result = dateArr.join("-") + " " + timeArr.join(":");
     }
-    if (attr === 'studyDate') {
-      result = dateArr.join('-') + ' 00:00:00';
+    if (attr === "studyDate") {
+      result = dateArr.join("-") + " 00:00:00";
     }
     return result ? result : str;
   } catch (err) {
@@ -333,7 +331,7 @@ export const persistColorInSaveAim = (oldList, newList, colors) => {
       newDataValues[index].color = stateValues[i].color;
       colorAimsList[el] = newDataValues[index];
       const color = stateValues[i].color.button.background;
-      if (color !== '#aaaaaa' || color !== '#c0c0c0') {
+      if (color !== "#aaaaaa" || color !== "#c0c0c0") {
         if (usedColors.size === colors.length) {
           usedColors.clear();
         }
@@ -358,8 +356,8 @@ export const persistColorInSaveAim = (oldList, newList, colors) => {
     if (imgAimUID) {
       if (markupColor) {
         color = {
-          button: { background: '#aaaaaa', color: 'black' },
-          label: { background: markupColor, color: 'white' }
+          button: { background: "#aaaaaa", color: "black" },
+          label: { background: markupColor, color: "white" },
         };
       } else {
         color = colors[colorIndex];
@@ -393,4 +391,8 @@ export const persistColorInDeleteAim = (oldList, newList, colorList) => {
   });
 
   return colorAimsList;
+};
+
+export const isSupportedModality = (serie) => {
+  return DISP_MODALITIES.includes(serie.examType);
 };

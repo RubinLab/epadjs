@@ -139,7 +139,7 @@ export function deleteAnnotationsList(projectID, aimList) {
 export function uploadAim(aim, projectId, isUpdate = false, updatedAimId) {
   const apiUrl = http.apiUrl();
   let url;
-  if (mode === "lite") {
+  if (http.mode() === "lite") {
     url = apiUrl + "/projects/lite/aims";
   } else {
     url = apiUrl + "/projects/" + encodeURIComponent(projectId) + "/aims";

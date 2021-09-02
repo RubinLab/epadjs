@@ -52,7 +52,7 @@ import "./App.css";
 import RightsideBar from "./components/RightsideBar/RightsideBar";
 import MinimizedReport from "./components/searchView/MinimizedReport";
 import { FaJoint } from "react-icons/fa";
-import { DISP_MODALITIES } from "./constants";
+import { isSupportedModality } from "./Utils/aid.js";
 
 const messages = {
   noPatient: {
@@ -533,7 +533,7 @@ class App extends Component {
         apiUrl = process.env.REACT_APP_API_URL || apiUrl;
         wadoUrl = process.env.REACT_APP_WADO_URL || wadoUrl;
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
-        maxPort = process.env.REACT_APP_MAX_PORT || maxPort;
+        maxPort = process.env.REACT_APP_MAX_PORT || maxPort || 6;
         sessionStorage.setItem("mode", mode);
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
@@ -664,7 +664,7 @@ class App extends Component {
   displaySeries = async (studyData) => {
     const rawSeriesArray = await this.getSeriesData(studyData);
     if (!rawSeriesArray) return;
-    let seriesArr = rawSeriesArray.filter(this.isSupportedModality);
+    let seriesArr = rawSeriesArray.filter(isSupportedModality);
     let significantSeries = seriesArr.filter(
       ({ significanceOrder }) => significanceOrder && significanceOrder > 0
     );
@@ -672,7 +672,6 @@ class App extends Component {
     // if not display modality filtered series
     const maxPort = sessionStorage.getItem("maxPort");
     if (significantSeries.length) seriesArr = significantSeries;
-
     if (seriesArr.length + this.props.openSeries.length > maxPort) {
       window.dispatchEvent(
         new CustomEvent("openSeriesModal", {
@@ -693,10 +692,6 @@ class App extends Component {
         })
         .catch((err) => console.error(err));
     }
-  };
-
-  isSupportedModality = (serie) => {
-    return DISP_MODALITIES.includes(serie.examType);
   };
 
   getSeriesData = async (studyData) => {
