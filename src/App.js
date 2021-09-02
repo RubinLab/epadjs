@@ -526,7 +526,6 @@ class App extends Component {
       .then(async (results) => {
         const configData = await results[0].json();
         let { mode, apiUrl, wadoUrl, authMode, maxPort } = configData;
-        console.log("maxPort", maxPort);
         // check and use environment variables if any
         const authServerUrl =
           process.env.REACT_APP_AUTH_URL || authData["auth-server-url"];
