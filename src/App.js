@@ -52,7 +52,7 @@ import "./App.css";
 import RightsideBar from "./components/RightsideBar/RightsideBar";
 import MinimizedReport from "./components/searchView/MinimizedReport";
 import { FaJoint } from "react-icons/fa";
-import { DISP_MODALITIES } from "./constants";
+import { isSupportedModality } from "./Utils/aid.js";
 
 const messages = {
   noPatient: {
@@ -526,6 +526,7 @@ class App extends Component {
       .then(async (results) => {
         const configData = await results[0].json();
         let { mode, apiUrl, wadoUrl, authMode, maxPort } = configData;
+        console.log("maxPort", maxPort);
         // check and use environment variables if any
         const authServerUrl =
           process.env.REACT_APP_AUTH_URL || authData["auth-server-url"];
@@ -664,7 +665,7 @@ class App extends Component {
   displaySeries = async (studyData) => {
     const rawSeriesArray = await this.getSeriesData(studyData);
     if (!rawSeriesArray) return;
-    let seriesArr = rawSeriesArray.filter(this.isSupportedModality);
+    let seriesArr = rawSeriesArray.filter(isSupportedModality);
     let significantSeries = seriesArr.filter(
       ({ significanceOrder }) => significanceOrder && significanceOrder > 0
     );
@@ -692,10 +693,6 @@ class App extends Component {
         })
         .catch((err) => console.error(err));
     }
-  };
-
-  isSupportedModality = (serie) => {
-    return DISP_MODALITIES.includes(serie.examType);
   };
 
   getSeriesData = async (studyData) => {

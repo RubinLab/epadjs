@@ -13,7 +13,8 @@ import {
 import SelectionItem from "./containers/selectionItem";
 import { FaRegCheckSquare } from "react-icons/fa";
 import { getSeries, setSignificantSeries } from "../../services/seriesServices";
-import "./annotationsList.css"
+import "./annotationsList.css";
+import { isSupportedModality } from "../../Utils/aid.js";
 
 const maxPort = sessionStorage.getItem("maxPort");
 const message = {
@@ -91,12 +92,16 @@ class selectSerieModal extends React.Component {
     studies.forEach(arr => {
       series = series.concat(arr);
     });
+    let significanceSet = series.some((serie) => serie.significanceOrder > 0);
+
     // let series = Object.values(this.props.seriesPassed)[0];
     //concatanete all arrays to getther
     for (let i = 0; i < this.state.selectedToDisplay.length; i++) {
       if (this.state.selectedToDisplay[i]) {
-        significantSeries.push({ seriesUID: series[i].seriesUID, significanceOrder })
-        significanceOrder++;
+        if (!significanceSet) {
+          significantSeries.push({ seriesUID: series[i].seriesUID, significanceOrder })
+          significanceOrder++;
+        }
         this.props.dispatch(addToGrid(series[i], series[i].aimID));
         if (this.state.selectionType === "aim") {
           this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
@@ -109,7 +114,8 @@ class selectSerieModal extends React.Component {
       }
     }
     const { projectID, patientID, studyUID } = series[0];
-    setSignificantSeries(projectID, patientID, studyUID, significantSeries);
+    if (!significanceSet)
+      setSignificantSeries(projectID, patientID, studyUID, significantSeries);
     this.props.history.push("/display");
     this.handleCancel();
   };
@@ -141,9 +147,14 @@ class selectSerieModal extends React.Component {
     let keys = Object.keys(this.props.seriesPassed);
     let count = 0;
     let openSeriesUIDList = [];
+
     this.props.openSeries.forEach(port => {
       openSeriesUIDList.push(port.seriesUID);
     });
+    // filter the series according to displayable modalities
+    for (let i = 0; i < series.length; i++) {
+      series[i] = series[i].filter(isSupportedModality);
+    }
     for (let i = 0; i < series.length; i++) {
       let innerList = [];
       let title = this.props.studyName
@@ -163,6 +174,7 @@ class selectSerieModal extends React.Component {
           this.state.limit >= maxPort;
         let desc = series[i][k].seriesDescription || "Unnamed Serie";
         // desc = alreadyOpen ? `${desc} - already open` : desc;
+        let preSelected = series[i][k].significanceOrder ? true : false;
         item = alreadyOpen ? (
           <div key={series[i][k].seriesUID} className="alreadyOpen-disabled">
             <FaRegCheckSquare />
@@ -175,6 +187,7 @@ class selectSerieModal extends React.Component {
             index={count + k}
             disabled={disabled}
             key={series[i][k].seriesUID}
+            preSelected={preSelected}
           />
         );
         innerList.push(item);
