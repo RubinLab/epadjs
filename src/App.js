@@ -533,7 +533,7 @@ class App extends Component {
         apiUrl = process.env.REACT_APP_API_URL || apiUrl;
         wadoUrl = process.env.REACT_APP_WADO_URL || wadoUrl;
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
-        maxPort = process.env.REACT_APP_MAX_PORT || maxPort;
+        maxPort = process.env.REACT_APP_MAX_PORT || maxPort || 6;
         sessionStorage.setItem("mode", mode);
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
