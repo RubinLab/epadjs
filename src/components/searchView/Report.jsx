@@ -77,14 +77,13 @@ const Report = props => {
       loadFilter = 'shapes=line&metric=standard deviation';
       numofHeaderCols = 2;
       hideCols = [];
-    } else if (report === 'Longitudinal') {
+    } else {
       filter = 'report=Longitudinal';
       if (report != 'Longitudinal') loadFilter = 'metric=' + report;
       if (template != null) filter += '&templatecode=' + template;
       numofHeaderCols = 2;
       hideCols = [];
-    } else {
-      selectedProject = props.selectedProject;
+      if (report === 'Waterfall') selectedProject = props.selectedProject;
     }
     return {
       id,
