@@ -9,7 +9,7 @@ import ConfirmationModal from '../common/confirmationModal';
 import WaterfallReact from './WaterfallReact';
 import { getWaterfallReport, getReport } from '../../services/reportServices';
 import { checkIfSeriesOpen, clearCarets } from '../../Utils/aid';
-import { CSVLink } from "react-csv";
+import { CSVLink } from 'react-csv';
 import {
   changeActivePort,
   clearGrid,
@@ -19,7 +19,10 @@ import {
   updateImageId
 } from '../annotationsList/action';
 
-const maxPort = sessionStorage.getItem("maxPort");
+const maxPort = sessionStorage.getItem('maxPort');
+let waterfallOptions = sessionStorage.getItem('waterfallOptions');
+if (waterfallOptions) waterfallOptions = waterfallOptions.split('-');
+const metric = ['RECIST', 'ADLA', 'intensitystddev', 'Export (beta)'];
 const messages = {
   title: 'Can not open all series',
   message: `Maximum ${maxPort} series can be opened. Please close already opened series first.`
@@ -146,8 +149,10 @@ const Report = props => {
     const { selectedProject } = getTableArguments();
     const metric = e.target.value;
     props.handleMetric(metric);
-    const validMetric =
-      metric === 'ADLA' || metric === 'RECIST' || metric === 'intensitystddev' || metric === 'ser_original_shape_voxelvolume' || metric === 'ser_original_shape_maximum2ddiameterslice' || metric === 'ser_original_firstorder_maximum' || metric === 'ser_original_firstorder_median' || metric === 'adc_original_firstorder_maximum' || metric === 'adc_original_firstorder_median' || metric === 've_original_firstorder_maximum' || metric === 've_original_firstorder_median'  || metric === 'Export (beta)';
+    const configOptions = waterfallOptions ? waterfallOptions : [];
+    const metricOptions = [...metric, ...configOptions];
+    const validMetric = metricOptions.includes(metric);
+
     const type = 'BASELINE';
     let result;
     if (validMetric) {
@@ -158,13 +163,12 @@ const Report = props => {
           null,
           type,
           metric,
-          metric === 'Export (beta)' ?
-            [
-              { field: 'recist', header: 'SLD' },
-              { field: 'mean', header: 'Average HU' },
-            ]
-            :
-            undefined
+          metric === 'Export (beta)'
+            ? [
+                { field: 'recist', header: 'SLD' },
+                { field: 'mean', header: 'Average HU' }
+              ]
+            : undefined
         );
       } else {
         const projects = Object.keys(filteredPatients);
@@ -177,24 +181,27 @@ const Report = props => {
             null,
             type,
             metric,
-            metric === 'Export (beta)' ?
-              [
-                { field: 'recist', header: 'SLD' },
-                { field: 'mean', header: 'Average HU' },
-              ]
-              :
-              undefined
+            metric === 'Export (beta)'
+              ? [
+                  { field: 'recist', header: 'SLD' },
+                  { field: 'mean', header: 'Average HU' }
+                ]
+              : undefined
           );
         } else {
           const pairs = constructPairs(filteredPatients);
-          result = await getWaterfallReport(null, null, pairs, type, metric,
-            metric === 'Export (beta)' ?
-              [
-                { field: 'recist', header: 'SLD' },
-                { field: 'mean', header: 'Average HU' },
-              ]
-              :
-              undefined
+          result = await getWaterfallReport(
+            null,
+            null,
+            pairs,
+            type,
+            metric,
+            metric === 'Export (beta)'
+              ? [
+                  { field: 'recist', header: 'SLD' },
+                  { field: 'mean', header: 'Average HU' }
+                ]
+              : undefined
           );
         }
       }
@@ -255,7 +262,7 @@ const Report = props => {
     wordExport(subjectName, 'recisttbl' + index);
   };
 
-  useEffect(() => { }, [sizes.width, sizes.height]);
+  useEffect(() => {}, [sizes.width, sizes.height]);
 
   const updateImageIDs = async () => {
     const { openSeries } = props;
@@ -431,6 +438,18 @@ const Report = props => {
       ? `${props.report} - ${clearCarets(props.patient.subjectName)}`
       : '';
 
+  const renderWaterfallOptions = () => {
+    const configOptions = waterfallOptions ? waterfallOptions : [];
+    const options = [
+      'Choose to filter',
+      ...metric,
+      ...configOptions,
+    ];
+    return options.map((el, i) => {
+      return <option key={`option-${i}`}>{el}</option>;
+    });
+  };
+
   return (
     <>
       <Rnd
@@ -497,19 +516,7 @@ const Report = props => {
             <>
               <div className="waterfall-header">
                 <select id="filter" onChange={selectMetric}>
-                  <option>Choose to filter</option>
-                  <option>RECIST</option>
-                  <option>ADLA</option>
-                  <option>intensitystddev</option>
-                  <option>ser_original_shape_voxelvolume</option>
-                  <option>ser_original_shape_maximum2ddiameterslice</option>
-                  <option>ser_original_firstorder_maximum</option>
-                  <option>ser_original_firstorder_median</option>
-                  <option>adc_original_firstorder_maximum</option>
-                  <option>adc_original_firstorder_median</option>
-                  <option>ve_original_firstorder_maximum</option>
-                  <option>ve_original_firstorder_median</option>
-                  <option>Export (beta)</option>
+                  {renderWaterfallOptions()}
                 </select>
               </div>
               {data.series && data.series.length >= 0 && (
@@ -522,7 +529,17 @@ const Report = props => {
                   />
                 </div>
               )}
-              {data.waterfallExport && <CSVLink {...{ data: data.waterfallExport, headers: data.waterfallHeaders, filename: 'waterfall.csv' }}>Export to CSV</CSVLink>}
+              {data.waterfallExport && (
+                <CSVLink
+                  {...{
+                    data: data.waterfallExport,
+                    headers: data.waterfallHeaders,
+                    filename: 'waterfall.csv'
+                  }}
+                >
+                  Export to CSV
+                </CSVLink>
+              )}
             </>
           )}
 
