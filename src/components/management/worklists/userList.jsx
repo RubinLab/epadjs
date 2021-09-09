@@ -14,6 +14,7 @@ const userList = props => {
           onChange={props.onChange}
           name={original.row.username}
           checked={props.assignees[original.row.username]}
+          id={original.row.username}
         />
       )
     },
