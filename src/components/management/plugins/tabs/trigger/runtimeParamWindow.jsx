@@ -8,6 +8,7 @@ class RunTimeParamWindow extends React.Component {
     paramsValueByParantArryaIndice: new Map(),
   };
   componentDidMount = async () => {
+    console.log("getting runtime params for plugindbid : ",this.props.selectedPluginDbId);
     const tempDefaultParams = await getDefaultParameter(
       this.props.selectedPluginDbId
     );
@@ -31,7 +32,7 @@ class RunTimeParamWindow extends React.Component {
     const tempParamsList = this.state.defaultParams;
     this.state.paramsValueByParantArryaIndice.forEach(function (value, key) {
       console.log(key + " = " + value);
-      tempParamsList[key].default_value = value;
+        [key].default_value = value;
       console.log(
         "this one will be updated in parent parameter list ",
         tempParamsList[key]
@@ -47,37 +48,40 @@ class RunTimeParamWindow extends React.Component {
 
     let cnt = 0;
     for (let i = 0; i < tempDefaultParams.length; i++) {
-      for (let [key, value] of Object.entries(tempDefaultParams[i])) {
-        cnt = cnt + 1;
-        if (key === "name" || key === "format" || key === "default_value") {
-          html.push(
-            <tr className="trRunTimeParams tdleft" key={cnt}>
-              <td className="tdtrRunTimeParamsleft tdleft">{key}</td>
-              <td className="trRunTimeParams tdleft"> {value}</td>
-            </tr>
-          );
-        }
+      if (tempDefaultParams[i].paramid === 'parameters'){
+            for (let [key, value] of Object.entries(tempDefaultParams[i])) {
+              cnt = cnt + 1;
+              if (key === "name" || key === "format" || key === "default_value") {
+                html.push(
+                  <tr className="trRunTimeParams tdleft" key={cnt}>
+                    <td className="tdtrRunTimeParamsleft tdleft">{key}</td>
+                    <td className="trRunTimeParams tdleft"> {value}</td>
+                  </tr>
+                );
+              }
+            }
+            html.push(
+              <tr key={cnt}>
+                <td className="tdleft">new value</td>
+                <td className="tdleft">
+                  <input
+                    className="paramsInput"
+                    id={tempDefaultParams[i].paramid}
+                    name={i}
+                    type="text"
+                    onChange={this.handleInputChange}
+                  />
+                </td>
+              </tr>
+            );
+            cnt = cnt + 1;
+            html.push(
+              <tr key={cnt} className="trseperator">
+                <td className="trseperator" colSpan="2"></td>
+              </tr>
+            );
+
       }
-      html.push(
-        <tr key={cnt}>
-          <td className="tdleft">new value</td>
-          <td className="tdleft">
-            <input
-              className="paramsInput"
-              id={tempDefaultParams[i].paramid}
-              name={i}
-              type="text"
-              onChange={this.handleInputChange}
-            />
-          </td>
-        </tr>
-      );
-      cnt = cnt + 1;
-      html.push(
-        <tr key={cnt} className="trseperator">
-          <td className="trseperator" colSpan="2"></td>
-        </tr>
-      );
     }
 
     return html;

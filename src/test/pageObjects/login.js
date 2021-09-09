@@ -1,31 +1,31 @@
 import Basepage from './basepage';
-import { By, Key, Builder } from 'selenium-webdriver';
-
+import { By, Key, Builder, until } from 'selenium-webdriver';
 
 class LoginPage extends Basepage {
-
-  constructor (driver) {
-    super(driver)
+  constructor(driver) {
+    super(driver);
+    this.driver = driver;
   }
-  
-  async validateLoginPage() {
+
+  launchLoginPage() {
     super.go_to_url();
-    const logInTitle = await super.getTextByCss('#kc-page-title')
-    return logInTitle;
   }
 
   async login() {
-    // super.go_to_url();
+    super.go_to_url();
+    await this.driver.wait(until.elementLocated(By.id('username')));
+    await this.driver.wait(until.elementLocated(By.id('password')));
+    await this.driver.wait(until.elementLocated(By.id('kc-login')));
     await super.enterTextByCss('#username', 'admin');
     await super.enterTextByCss('#password', 'admin');
     await super.clickById('kc-login');
+    await this.driver.wait(until.elementLocated(By.id('epad-logo')));
   }
 
   async verifyLoggedIn() {
-    const epadLogo = await super.getTextByCss('#epad-logo')
+    const epadLogo = await super.getTextByCss('#epad-logo');
     return epadLogo;
   }
-
 }
 
 export default LoginPage;
