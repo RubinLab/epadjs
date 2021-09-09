@@ -152,7 +152,7 @@ class App extends Component {
     const arr = [...this.state.reportsCompArr];
     const pairs = { ...this.state.pairs };
     if (this.state.pairs[index]) {
-      pairs[index] = null;
+      delete pairs[index];
     }
     arr[index] = null;
     this.setState({
@@ -176,7 +176,7 @@ class App extends Component {
     const pairs = { ...this.state.pairs };
 
     if (pairs[reportIndex]) {
-      pairs[reportIndex] = null;
+      delete pairs[reportIndex];
     }
     
     minReportsArr[index] = null;
