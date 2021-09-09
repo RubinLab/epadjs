@@ -33,7 +33,7 @@ import {
   clearSelection,
   selectProject,
   getTemplates,
-  segUploadCompleted,
+  segUploadCompleted
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
@@ -49,23 +49,23 @@ import { FaJoint } from "react-icons/fa";
 const messages = {
   noPatient: {
     title: "No Patient Selected",
-    message: "Select a patient to get a report!",
+    message: "Select a patient to get a report!"
   },
   multiplePatient: {
     title: "Multiple Patients Selected",
-    message: "Select only one patient to get the report!",
+    message: "Select only one patient to get the report!"
   },
   projectWaterfall: {
     title: "Project Selected",
-    message: "Waterfall report will be created for project ",
-  },
+    message: "Waterfall report will be created for project "
+  }
 };
 
 const reportsList = [
   { name: "ADLA" },
   { name: "Longitudinal" },
   { name: "RECIST" },
-  { name: "Waterfall" },
+  { name: "Waterfall" }
 ];
 class App extends Component {
   constructor(props) {
@@ -99,14 +99,14 @@ class App extends Component {
       minReportsArr: [],
       hiddenReports: {},
       metric: null,
-      searchQuery: '',
+      searchQuery: "",
       pairs: {},
       authority: "",
       clientId: "",
       redirectUri: "",
       responseType: "",
       scope: "",
-      searchQuery: "",
+      searchQuery: ""
     };
   }
 
@@ -122,12 +122,12 @@ class App extends Component {
   };
 
   getProjectAdded = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       projectAdded: state.projectAdded + 1,
       refTree: {},
       // treeData: {},
       expandLevel: 0,
-      treeExpand: {},
+      treeExpand: {}
     }));
     localStorage.setItem("treeData", JSON.stringify({}));
   };
@@ -137,23 +137,23 @@ class App extends Component {
       showConfirmation: false,
       showWarning: false,
       title: "",
-      message: "",
+      message: ""
     });
   };
 
   handleReportsClick = () => {
-    this.setState((state) => ({ showReportsMenu: !state.showReportsMenu }));
+    this.setState(state => ({ showReportsMenu: !state.showReportsMenu }));
   };
 
-  countCurrentReports = (arr) => {
+  countCurrentReports = arr => {
     let nullCount = 0;
-    arr.forEach((el) => {
+    arr.forEach(el => {
       if (el === null) nullCount++;
     });
     return nullCount;
   };
 
-  closeReportModal = (index) => {
+  closeReportModal = index => {
     const arr = [...this.state.reportsCompArr];
     const pairs = { ...this.state.pairs };
     if (this.state.pairs[index]) {
@@ -167,7 +167,7 @@ class App extends Component {
       pairs
     });
 
-    // if there isn't any report open clear selection
+    // if there isn"t any report open clear selection
     const nullCount = this.countCurrentReports(arr);
     if (nullCount === arr.length) {
       this.props.dispatch(clearSelection());
@@ -183,7 +183,7 @@ class App extends Component {
     if (pairs[reportIndex]) {
       delete pairs[reportIndex];
     }
-    
+
     minReportsArr[index] = null;
     delete hiddenReports[reportIndex];
     this.setState({
@@ -195,7 +195,7 @@ class App extends Component {
     this.closeReportModal(reportIndex);
   };
 
-  handleMaximizeReport = (e) => {
+  handleMaximizeReport = e => {
     let { index, reportindex } = e.target.dataset;
     index = parseInt(index);
     reportindex = parseInt(reportindex);
@@ -209,7 +209,7 @@ class App extends Component {
     this.setState({
       hiddenReports,
       minReportsArr,
-      reportsCompArr,
+      reportsCompArr
     });
   };
 
@@ -242,7 +242,7 @@ class App extends Component {
     const reportType = e.target.dataset.opt;
     this.handleReportsClick();
     if (patients.length === 0) {
-      if (reportType === 'Waterfall') {
+      if (reportType === "Waterfall") {
         if (Object.keys(this.state.pairs).length > 0) {
           this.displayWaterfall();
         } else {
@@ -281,12 +281,13 @@ class App extends Component {
             title: messages.noPatient.title,
             message: messages.noPatient.message
           });
+        }
       }
     } else if (patients.length > 1 && reportType !== "Waterfall") {
       this.setState({
         showWarning: true,
         title: messages.multiplePatient.title,
-        message: messages.multiplePatient.message,
+        message: messages.multiplePatient.message
       });
     } else {
       const reportsCompArr = [...this.state.reportsCompArr];
@@ -306,15 +307,15 @@ class App extends Component {
       this.setState({
         template: null,
         reportType,
-        reportsCompArr,
+        reportsCompArr
       });
     }
   };
 
-  getMetric = (metric) => {
+  getMetric = metric => {
     this.setState({ metric });
   };
-  handleWaterFallClickOnBar = async (name) => {
+  handleWaterFallClickOnBar = async name => {
     // find the patient selected
     // if project selected get patient details with call
     const { selectedProject, selectedPatients } = this.props;
@@ -340,7 +341,7 @@ class App extends Component {
       />
     );
     this.setState({
-      reportsCompArr,
+      reportsCompArr
     });
   };
 
@@ -366,7 +367,7 @@ class App extends Component {
       template: null,
       reportType: "Waterfall",
       showConfirmation: false,
-      reportsCompArr,
+      reportsCompArr
     });
   };
 
@@ -456,7 +457,7 @@ class App extends Component {
     });
   };
 
-  getTreeExpandSingle = async (expandObj) => {
+  getTreeExpandSingle = async expandObj => {
     try {
       const { patient, study, series } = expandObj;
       let treeExpand = { ...this.state.treeExpand };
@@ -494,18 +495,18 @@ class App extends Component {
     }
   };
 
-  getExpandLevel = (expandLevel) => {
+  getExpandLevel = expandLevel => {
     this.setState({ expandLevel });
   };
 
   handleShrink = async () => {
     const { expandLevel } = this.state;
     if (expandLevel > 0) {
-      await this.setState((state) => ({ expandLevel: state.expandLevel - 1 }));
+      await this.setState(state => ({ expandLevel: state.expandLevel - 1 }));
     }
   };
 
-  closeMenu = (notification) => {
+  closeMenu = notification => {
     // if (event && event.type === "keydown") {
     //   if (event.key === "Escape" || event.keyCode === 27) {
     //     this.setState({ openMng: false });
@@ -515,12 +516,12 @@ class App extends Component {
       openMng: false,
       openInfo: false,
       openUser: false,
-      openMenu: false,
+      openMenu: false
     });
     if (notification) this.updateNotificationSeen();
   };
 
-  switchView = (viewType) => {
+  switchView = viewType => {
     const { pid } = this.state;
     this.setState({ viewType });
     if (viewType === "search") {
@@ -536,40 +537,40 @@ class App extends Component {
   };
 
   handleMngMenu = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       openInfo: false,
       openMng: !state.openMng,
-      openUser: false,
+      openUser: false
     }));
   };
 
   handleInfoMenu = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       openInfo: !state.openInfo,
       openMng: false,
-      openUser: false,
+      openUser: false
     }));
   };
 
   handleUserProfileMenu = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       openInfo: false,
       openMng: false,
-      openUser: !state.openUser,
+      openUser: !state.openUser
     }));
   };
 
   updateProgress = () => {
-    this.setState((state) => ({ progressUpdated: state.progressUpdated + 1 }));
+    this.setState(state => ({ progressUpdated: state.progressUpdated + 1 }));
   };
 
   async componentDidMount() {
     localStorage.setItem("treeData", JSON.stringify({}));
     Promise.all([
       fetch(`${process.env.PUBLIC_URL}/config.json`),
-      fetch(`${process.env.PUBLIC_URL}/keycloak.json`),
+      fetch(`${process.env.PUBLIC_URL}/keycloak.json`)
     ])
-      .then(async (results) => {
+      .then(async results => {
         const configData = await results[0].json();
         const authData = await results[1].json();
         let {
@@ -581,7 +582,7 @@ class App extends Component {
           client_id,
           redirect_uri,
           response_type,
-          scope,
+          scope
         } = configData;
         // check and use environment variables if any
         const authServerUrl =
@@ -626,13 +627,13 @@ class App extends Component {
           clientId,
           redirectUri,
           responseType,
-          scope,
+          scope
         });
 
         this.completeAutorization(apiUrl);
         if (mode === "lite") this.setState({ pid: "lite" });
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(err);
       });
     //get notifications from sessionStorage and setState
@@ -646,7 +647,7 @@ class App extends Component {
     }
   }
 
-  componentDidUpdate = (prevProps) => {
+  componentDidUpdate = prevProps => {
     const uploaded = this.props.notificationAction.startsWith("Upload");
     const deleted = this.props.notificationAction.startsWith("Delete");
     if (
@@ -666,7 +667,7 @@ class App extends Component {
     }
   };
 
-  completeAutorization = async (apiUrl) => {
+  completeAutorization = async apiUrl => {
     this.authService = new auth.AuthService();
     const authenticated = this.authService.isAuthenticated();
     if (authenticated) {
@@ -686,13 +687,13 @@ class App extends Component {
     const source = userInfo.profile ? userInfo.profile : userInfo;
     let user = {
       user: source.preferred_username || source.email,
-      displayname: source.given_name,
+      displayname: source.given_name
     };
     this.setState({
       authService,
       authenticated,
       id: source.sub,
-      user,
+      user
     });
     const { email, family_name, given_name, preferred_username } = source;
     const username = preferred_username || email;
@@ -710,15 +711,20 @@ class App extends Component {
     }
   };
 
-  getMessageFromEventSrc = (res) => {
+  getMessageFromEventSrc = res => {
     try {
       if (res.data === "heartbeat") {
         return;
       }
       const parsedRes = JSON.parse(res.data);
       const { lastEventId } = res;
-      const { params, createdtime, projectID, error, refresh } =
-        parsedRes.notification;
+      const {
+        params,
+        createdtime,
+        projectID,
+        error,
+        refresh
+      } = parsedRes.notification;
       const action = parsedRes.notification.function;
       const message = params;
       // check if the notification is for successfull upload segmentation
@@ -736,7 +742,7 @@ class App extends Component {
         time,
         seen: false,
         action,
-        error,
+        error
       });
       const tagEdited = action.startsWith("Tag");
       const uploaded = action.startsWith("Upload");
@@ -765,7 +771,7 @@ class App extends Component {
     localStorage.setItem("treeData", JSON.stringify({}));
   };
 
-  onLogout = (e) => {
+  onLogout = e => {
     auth.logout();
     this.authService.logout();
     // sessionStorage.removeItem("annotations");
@@ -774,18 +780,18 @@ class App extends Component {
       authenticated: false,
       id: null,
       name: null,
-      user: null,
+      user: null
     });
     if (sessionStorage.getItem("authMode") !== "external") {
       this.setState({
-        authService: null,
+        authService: null
       });
     } else console.log("No logout in external authentication mode");
   };
 
   updateNotificationSeen = () => {
     const notifications = [...this.state.notifications];
-    notifications.forEach((notification) => {
+    notifications.forEach(notification => {
       notification.seen = true;
     });
     this.setState({ notifications });
@@ -800,9 +806,9 @@ class App extends Component {
   handleCloseAll = () => {
     // let { closeAll } = this.state;
     // closeAll += 1;
-    this.setState((state) => ({
+    this.setState(state => ({
       expandLevel: 0,
-      closeAll: state.closeAll + 1,
+      closeAll: state.closeAll + 1
     }));
   };
 
@@ -813,7 +819,7 @@ class App extends Component {
       const patientIDs = [];
       if (level === "subject") {
         if (!treeData[projectID]) treeData[projectID] = {};
-        data.forEach((el) => {
+        data.forEach(el => {
           if (!treeData[projectID][el.subjectID]) {
             treeData[projectID][el.subjectID] = { data: el, studies: {} };
           }
@@ -831,11 +837,11 @@ class App extends Component {
       } else if (level === "studies") {
         const studyUIDs = [];
         const patientID = data[0].patientID;
-        data.forEach((el) => {
+        data.forEach(el => {
           if (!treeData[projectID][el.patientID].studies[el.studyUID]) {
             treeData[projectID][el.patientID].studies[el.studyUID] = {
               data: el,
-              series: {},
+              series: {}
             };
           }
           studyUIDs.push(el.studyUID);
@@ -853,7 +859,7 @@ class App extends Component {
         const patientID = data[0].patientID;
         const studyUID = data[0].studyUID;
         const seriesUIDs = [];
-        data.forEach((el) => {
+        data.forEach(el => {
           if (
             !treeData[projectID][el.patientID].studies[el.studyUID].series[
               el.seriesUID
@@ -862,7 +868,7 @@ class App extends Component {
             treeData[projectID][el.patientID].studies[el.studyUID].series[
               el.seriesUID
             ] = {
-              data: el,
+              data: el
             };
           }
           seriesUIDs.push(el.seriesUID);
@@ -885,7 +891,7 @@ class App extends Component {
     }
   };
 
-  getPidUpdate = (pid) => {
+  getPidUpdate = pid => {
     this.setState({ searchQuery: "" });
     this.setState({ pid });
   };
@@ -895,7 +901,7 @@ class App extends Component {
   };
 
   sortLevelArr = (arr, attribute) => {
-    return arr.sort(function (a, b) {
+    return arr.sort(function(a, b) {
       if (a.data[attribute] < b.data[attribute]) {
         return -1;
       }
@@ -963,11 +969,11 @@ class App extends Component {
   };
 
   findNonExisting = (arr, uid, level) => {
-    const result = arr.filter((el) => el[level] === uid);
+    const result = arr.filter(el => el[level] === uid);
     return result[0];
   };
 
-  checkIfSegUpload = (params) => {
+  checkIfSegUpload = params => {
     const { isSegUploaded } = this.props;
     const segsUploaded = Object.keys(isSegUploaded);
     for (let i = 0; i < segsUploaded.length; i++) {
@@ -997,7 +1003,7 @@ class App extends Component {
       showWarning,
       showConfirmation,
       title,
-      message,
+      message
     } = this.state;
     let noOfUnseen;
     if (notifications) {
@@ -1078,7 +1084,7 @@ class App extends Component {
         {!this.state.authenticated && (
           <Route
             path="/login"
-            render={(props) => (
+            render={props => (
               <LoginForm
                 {...props}
                 authService={this.authService}
@@ -1096,12 +1102,12 @@ class App extends Component {
               pid={this.state.pid}
               clearTreeExpand={this.clearTreeExpand}
               projectAdded={this.state.projectAdded}
-              >
+            >
               <Switch className="splitted-mainview">
                 <Route path="/logout" component={Logout} />
                 <ProtectedRoute
                   path="/display"
-                  render={(props) => (
+                  render={props => (
                     <DisplayView
                       {...props}
                       updateProgress={this.updateProgress}
@@ -1113,7 +1119,7 @@ class App extends Component {
                 />
                 <ProtectedRoute
                   path="/list/:pid?"
-                  render={(props) => (
+                  render={props => (
                     <SearchView
                       {...props}
                       clearTreeExpand={this.clearTreeExpand}
@@ -1141,7 +1147,7 @@ class App extends Component {
                 />
                 <ProtectedRoute
                   path="/list/:pid?"
-                  render={(props) => (
+                  render={props => (
                     <SearchView
                       {...props}
                       clearTreeExpand={this.clearTreeExpand}
@@ -1174,20 +1180,16 @@ class App extends Component {
                 />
                 <ProtectedRoute
                   path="/flex/:pid?"
-                  render={(props) => (
-                    <FlexView {...props} pid={this.state.pid} />
-                  )}
+                  render={props => <FlexView {...props} pid={this.state.pid} />}
                 />
                 <ProtectedRoute
                   path="/search"
-                  render={(props) => (
+                  render={props => (
                     <AnnotationSearch
                       {...props}
                       pid={this.state.pid}
                       searchQuery={this.state.searchQuery}
-                      setQuery={(query) =>
-                        this.setState({ searchQuery: query })
-                      }
+                      setQuery={query => this.setState({ searchQuery: query })}
                     />
                   )}
                 />
@@ -1209,7 +1211,7 @@ class App extends Component {
                   from="/"
                   exact
                   to="/list"
-                  render={(props) => (
+                  render={props => (
                     <SearchView
                       {...props}
                       clearTreeExpand={this.clearTreeExpand}
@@ -1254,7 +1256,7 @@ class App extends Component {
               <Route path="/logout" component={Logout} />
               <ProtectedRoute
                 path="/display"
-                render={(props) => (
+                render={props => (
                   <DisplayView
                     {...props}
                     updateProgress={this.updateProgress}
@@ -1278,18 +1280,18 @@ class App extends Component {
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
                 path="/search"
-                render={(props) => (
+                render={props => (
                   <AnnotationSearch
                     {...props}
                     pid={this.state.pid}
                     searchQuery={this.state.searchQuery}
-                    setQuery={(query) => this.setState({ searchQuery: query })}
+                    setQuery={query => this.setState({ searchQuery: query })}
                   />
                 )}
               />
               <ProtectedRoute
                 path="/"
-                render={(props) => (
+                render={props => (
                   <SearchView
                     {...props}
                     clearTreeExpand={this.clearTreeExpand}
@@ -1325,7 +1327,7 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   // console.log(state.managementReducer);
   // console.log(state.annotationsListReducer);
   const {
@@ -1340,7 +1342,7 @@ const mapStateToProps = (state) => {
     projectMap,
     lastEventId,
     notificationAction,
-    isSegUploaded,
+    isSegUploaded
   } = state.annotationsListReducer;
   return {
     showGridFullAlert,
@@ -1355,7 +1357,7 @@ const mapStateToProps = (state) => {
     lastEventId,
     notificationAction,
     isSegUploaded,
-    selection: state.managementReducer.selection,
+    selection: state.managementReducer.selection
   };
 };
 export default withRouter(connect(mapStateToProps)(App));
