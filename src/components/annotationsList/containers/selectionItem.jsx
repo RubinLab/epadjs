@@ -1,6 +1,6 @@
 import React from "react";
 
-const selectionItem = ({ desc, onSelect, index, disabled, preSelected }) => {
+const selectionItem = ({ desc, onChange, index, disabled, isChecked }) => {
   return (
     <div className="selectionItem">
       <input
@@ -8,8 +8,8 @@ const selectionItem = ({ desc, onSelect, index, disabled, preSelected }) => {
         type="checkbox"
         name="item"
         data-index={index}
-        checked={preSelected}
-        onClick={onSelect}
+        checked={isChecked}
+        onChange={onChange}
         disabled={disabled}
       />
       <span className="selectionItem-text">{desc}</span>
