@@ -3,8 +3,10 @@ import { Route, Switch, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { EventSourcePolyfill } from "event-source-polyfill";
+import Keycloak from "keycloak-js";
 import _ from "lodash";
 import { getUser, getUserInfo } from "./services/userServices";
+import { getSeries } from "./services/seriesServices";
 import NavBar from "./components/navbar";
 import Sidebar from "./components/sideBar/sidebar";
 import SearchView from "./components/searchView/searchView";
@@ -24,27 +26,33 @@ import UserMenu from "./components/userProfileMenu.jsx";
 import WarningModal from "./components/common/warningModal";
 import ConfirmationModal from "./components/common/confirmationModal";
 import SelectModalMenu from "./components/common/SelectModalMenu";
+
 // import AnnotationsDock from "./components/annotationsList/annotationDock/annotationsDock";
 import auth from "./services/authService";
 import MaxViewAlert from "./components/annotationsList/maxViewPortAlert";
 import {
   clearAimId,
   getNotificationsData,
+  getSingleSerie,
+  addToGrid,
   clearSelection,
   selectProject,
   getTemplates,
-  segUploadCompleted
+  segUploadCompleted,
+  annotationsLoadingError,
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
 import Report from "./components/searchView/Report.jsx";
 import { getSubjects, getSubject } from "./services/subjectServices";
+import { decrypt, decryptAndAdd } from "./services/decryptUrlService";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import RightsideBar from "./components/RightsideBar/RightsideBar";
 import MinimizedReport from "./components/searchView/MinimizedReport";
 import { FaJoint } from "react-icons/fa";
+import { isSupportedModality } from "./Utils/aid.js";
 
 const messages = {
   noPatient: {
@@ -73,6 +81,7 @@ class App extends Component {
     this.eventSource = null;
     this.state = {
       openMng: false,
+      keycloak: null,
       authenticated: false,
       openInfo: false,
       openUser: false,
@@ -101,12 +110,6 @@ class App extends Component {
       metric: null,
       searchQuery: "",
       pairs: {},
-      authority: "",
-      clientId: "",
-      redirectUri: "",
-      responseType: "",
-      scope: "",
-      searchQuery: ""
     };
   }
 
@@ -572,18 +575,8 @@ class App extends Component {
     ])
       .then(async results => {
         const configData = await results[0].json();
-        const authData = await results[1].json();
-        let {
-          mode,
-          apiUrl,
-          wadoUrl,
-          authMode,
-          authority,
-          client_id,
-          redirect_uri,
-          response_type,
-          scope
-        } = configData;
+
+        let { mode, apiUrl, wadoUrl, authMode, maxPort } = configData;
         // check and use environment variables if any
         const authServerUrl =
           process.env.REACT_APP_AUTH_URL || authData["auth-server-url"];
@@ -591,47 +584,30 @@ class App extends Component {
         apiUrl = process.env.REACT_APP_API_URL || apiUrl;
         wadoUrl = process.env.REACT_APP_WADO_URL || wadoUrl;
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
-        authority =
-          process.env.REACT_APP_AUTHORITY ||
-          authority ||
-          `${authServerUrl}/realms/ePad`;
-        client_id = process.env.REACT_APP_CLIENT_ID || client_id || "epad-auth";
-        redirect_uri =
-          process.env.REACT_APP_REDIRECT_URI ||
-          redirect_uri ||
-          `${process.env.PUBLIC_URL}/index.html`;
-        response_type =
-          process.env.REACT_APP_RESPONSE_TYPE || response_type || "code";
-        scope = process.env.REACT_APP_SCOPE || scope || "openid profile";
+        maxPort = process.env.REACT_APP_MAX_PORT || maxPort || 6;
         sessionStorage.setItem("mode", mode);
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
         sessionStorage.setItem("authMode", authMode);
-        sessionStorage.setItem("authority", authority);
-        sessionStorage.setItem("client_id", client_id);
-        sessionStorage.setItem("redirect_uri", redirect_uri);
-        sessionStorage.setItem("response_type", response_type);
-        sessionStorage.setItem("scope", scope);
-        sessionStorage.setItem("redirected", true);
+        sessionStorage.setItem("maxPort", maxPort);
 
-        const clientId = client_id;
-        const redirectUri = redirect_uri;
-        const responseType = response_type;
-
-        this.setState({
-          mode,
-          apiUrl,
-          wadoUrl,
-          authMode,
-          authority,
-          clientId,
-          redirectUri,
-          responseType,
-          scope
-        });
-
-        this.completeAutorization(apiUrl);
+        this.setState({ mode, apiUrl, wadoUrl, authMode });
+        const keycloakData = await results[1].json();
+        const auth =
+          process.env.REACT_APP_AUTH_URL || keycloakData["auth-server-url"];
+        const keycloakJson = {};
+        // check and use environment variables if any
+        keycloakJson.realm =
+          process.env.REACT_APP_AUTH_REALM || keycloakData.realm;
+        keycloakJson.url =
+          process.env.REACT_APP_AUTH_URL || keycloakData["auth-server-url"];
+        keycloakJson.clientId =
+          process.env.REACT_APP_AUTH_RESOURCE || keycloakData.resource;
+        sessionStorage.setItem("auth", auth);
+        sessionStorage.setItem("keycloakJson", JSON.stringify(keycloakJson));
         if (mode === "lite") this.setState({ pid: "lite" });
+        const args = this.getArguments();
+        args ? this.handleArgs(args) : this.completeAutorization(apiUrl, args);
       })
       .catch(err => {
         console.error(err);
@@ -667,51 +643,233 @@ class App extends Component {
     }
   };
 
-  completeAutorization = async apiUrl => {
-    this.authService = new auth.AuthService();
-    const authenticated = this.authService.isAuthenticated();
-    if (authenticated) {
-      const userInfo = await this.authService.getUser();
-      await this.registerUser(
-        userInfo,
-        this.authService,
-        this.authService.isAuthenticated(),
-        apiUrl
+
+  componentWillUnmount = () => {
+    this.eventSource.removeEventListener(
+      "message",
+      this.getMessageFromEventSrc
+    );
+    localStorage.setItem("treeData", JSON.stringify({}));
+    this.clearSessionStorageItems();
+  };
+
+  clearSessionStorageItems = () => {
+    sessionStorage.removeItem("authMode");
+    sessionStorage.removeItem("API_KEY");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("username");
+  };
+
+  getArguments = () => {
+    const { search } = this.props.location;
+    let args = sessionStorage.getItem("args");
+    if (search && !args) args = search.split("?arg=")[1];
+    return args;
+  };
+
+  handleArgs = async (args) => {
+    const { data } = await decrypt(args);
+    const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
+    const { openSeries } = this.props;
+
+    if (API_KEY && user) {
+      // THIS IS APIKEY
+      sessionStorage.setItem("authMode", "apiKey");
+      sessionStorage.setItem("API_KEY", API_KEY);
+      sessionStorage.setItem("username", user);
+    }
+
+    await this.completeAutorization();
+
+    if (seriesArray) {
+      const parsedSeriesArray = JSON.parse(seriesArray);
+      const maxPort = sessionStorage.getItem("maxPort");
+      if (parsedSeriesArray.length + openSeries.length > maxPort) {
+        alert(
+          `Number of series passed is more than allowable number of port. Max allowed is ${maxPort}. Please try again with num series less than ${maxPort}`
+        );
+        return;
+      }
+      const promiseArr = [];
+      for (let serie of parsedSeriesArray) {
+        serie = { ...serie, projectID: "lite" };
+        this.props.dispatch(addToGrid(serie));
+        promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
+      }
+      Promise.all(promiseArr)
+        .then(() => {
+          this.props.history.push("/display");
+        })
+        .catch((err) => console.error(err));
+    } else if (patientID && studyUID && projectID) {
+      await decryptAndAdd(args);
+      const packedData = {
+        projectID,
+        patientID,
+        patientName: "patientName",
+        studyUID,
+      };
+      this.displaySeries(packedData);
+    }
+  };
+
+  displaySeries = async (studyData) => {
+    const rawSeriesArray = await this.getSeriesData(studyData);
+    if (!rawSeriesArray) return;
+    let seriesArr = rawSeriesArray.filter(isSupportedModality);
+    let significantSeries = seriesArr.filter(
+      ({ significanceOrder }) => significanceOrder && significanceOrder > 0
+    );
+    // If there are significant series use them to display
+    // if not display modality filtered series
+    const maxPort = sessionStorage.getItem("maxPort");
+    if (significantSeries.length) seriesArr = significantSeries;
+    if (seriesArr.length + this.props.openSeries.length > maxPort) {
+      window.dispatchEvent(
+        new CustomEvent("openSeriesModal", {
+          detail: seriesArr,
+        })
       );
     } else {
-      this.authService.signinRedirect({});
+      //if there is enough room
+      //add serie to the grid
+      const promiseArr = [];
+      for (let serie of seriesArr) {
+        this.props.dispatch(addToGrid(serie));
+        promiseArr.push(this.props.dispatch(getSingleSerie(serie)));
+      }
+      Promise.all(promiseArr)
+        .then(() => {
+          this.props.history.push("/display");
+        })
+        .catch((err) => console.error(err));
     }
   };
 
-  registerUser = async (userInfo, authService, authenticated, apiUrl) => {
-    const source = userInfo.profile ? userInfo.profile : userInfo;
-    let user = {
-      user: source.preferred_username || source.email,
-      displayname: source.given_name
-    };
-    this.setState({
-      authService,
-      authenticated,
-      id: source.sub,
-      user
-    });
-    const { email, family_name, given_name, preferred_username } = source;
-    const username = preferred_username || email;
 
-    sessionStorage.setItem("username", username);
-    sessionStorage.setItem("displayName", username);
-
-    let userData;
+  getSeriesData = async (studyData) => {
+    const { projectID, patientID, studyUID } = studyData;
     try {
-      userData = await getUser(username);
-      userData = userData.data;
-      this.setState({ admin: userData.admin });
+      const { data: series } = await getSeries(projectID, patientID, studyUID);
+      return series;
     } catch (err) {
-      console.error(err);
+      console.log(err);
+      this.props.dispatch(annotationsLoadingError(err));
     }
   };
 
-  getMessageFromEventSrc = res => {
+  completeAutorization = () =>
+    new Promise((resolve, reject) => {
+      let getAuthUser = null;
+      const authMode = sessionStorage.getItem("authMode");
+      const apiUrl = sessionStorage.getItem("apiUrl");
+
+      if (authMode === "apiKey") {
+        const username = sessionStorage.getItem("username");
+        getAuthUser = new Promise((resolve) => {
+          resolve({
+            userInfo: { preferred_username: username },
+            keycloak: null,
+            authenticated: true,
+          });
+        }).catch((err) => reject(err));
+      } else if (authMode !== "external") {
+        const keycloak = Keycloak(
+          JSON.parse(sessionStorage.getItem("keycloakJson"))
+        );
+        getAuthUser = new Promise((resolve, reject) => {
+          keycloak
+            .init({ onLoad: "login-required" })
+            .then((authenticated) => {
+              keycloak
+                .loadUserInfo()
+                .then((userInfo) => {
+                  resolve({ userInfo, keycloak, authenticated });
+                })
+                .catch((err) => reject(err));
+            })
+            .catch((err) => reject(err));
+        });
+      } else {
+        // authMode is external ask backend for user
+        getAuthUser = new Promise((resolve, reject) => {
+          getUserInfo()
+            .then((userInfoResponse) => {
+              resolve({
+                userInfo: userInfoResponse.data,
+                keycloak: null,
+                authenticated: true,
+              });
+            })
+            .catch((err) => reject(err));
+        });
+      }
+      getAuthUser
+        .then(async (result) => {
+          try {
+            const username =
+              result.userInfo.preferred_username || result.userInfo.email;
+
+            await auth.setLoginKeycloak(result.keycloak);
+            let userData;
+            try {
+              userData = await getUser(username);
+              userData = userData.data;
+              this.setState({ admin: userData.admin });
+            } catch (err) {
+              console.error(err);
+            }
+            let user = {
+              user: userData.username,
+              displayname: `${userData.firstname} ${userData.lastname}`,
+            };
+            await auth.setLoginSession(user, null);
+            this.setState({
+              keycloak: result.keycloak,
+              authenticated: result.authenticated,
+              id: result.userInfo.sub,
+              user,
+            });
+
+            if (authMode === "apiKey") {
+              const API_KEY = sessionStorage.getItem("API_KEY");
+              const user = sessionStorage.getItem("username");
+              this.eventSource = new EventSourcePolyfill(
+                `${apiUrl}/notifications?user=${user}`,
+                {
+                  headers: {
+                    authorization: `apikey ${API_KEY}`,
+                  },
+                }
+              );
+            } else {
+              this.eventSource = new EventSourcePolyfill(
+                `${apiUrl}/notifications`,
+                result.keycloak.token
+                  ? {
+                      headers: {
+                        authorization: `Bearer ${result.keycloak.token}`,
+                      },
+                    }
+                  : {}
+              );
+            }
+
+            this.eventSource.addEventListener(
+              "message",
+              this.getMessageFromEventSrc
+            );
+            resolve();
+          } catch (err) {
+            reject("Error in user retrieval!", err);
+          }
+        })
+        .catch((err2) => {
+          reject("Authentication failed!", err2);
+        });
+    });
+
+  getMessageFromEventSrc = (res) => {
     try {
       if (res.data === "heartbeat") {
         return;
@@ -763,17 +921,9 @@ class App extends Component {
     }
   };
 
-  componentWillUnmount = () => {
-    this.eventSource.removeEventListener(
-      "message",
-      this.getMessageFromEventSrc
-    );
-    localStorage.setItem("treeData", JSON.stringify({}));
-  };
 
-  onLogout = e => {
+  onLogout = (e) => {
     auth.logout();
-    this.authService.logout();
     // sessionStorage.removeItem("annotations");
     sessionStorage.setItem("notifications", JSON.stringify([]));
     this.setState({
@@ -782,11 +932,15 @@ class App extends Component {
       name: null,
       user: null
     });
-    if (sessionStorage.getItem("authMode") !== "external") {
-      this.setState({
-        authService: null
+
+    if (sessionStorage.getItem("authMode") !== "external")
+      this.state.keycloak.logout().then(() => {
+        this.setState({
+          keycloak: null,
+        });
+        auth.logout();
       });
-    } else console.log("No logout in external authentication mode");
+    else console.log("No logout in external authentication mode");
   };
 
   updateNotificationSeen = () => {
@@ -1012,7 +1166,6 @@ class App extends Component {
         return all;
       }, 0);
     }
-
     return (
       <ErrorBoundary>
         <Cornerstone />
@@ -1081,19 +1234,11 @@ class App extends Component {
         )}
         {this.state.reportsCompArr}
         {this.state.minReportsArr}
-        {!this.state.authenticated && (
-          <Route
-            path="/login"
-            render={props => (
-              <LoginForm
-                {...props}
-                authService={this.authService}
-                completeAutorization={this.completeAutorization}
-              />
-            )}
-          />
+
+        {!this.state.authenticated && mode !== "lite" && (
+          <Route path="/login" component={LoginForm} />
         )}
-        {mode !== "lite" && this.state.authenticated && (
+        {this.state.authenticated && mode !== "lite" && (
           <div style={{ display: "inline", width: "100%", height: "100%" }}>
             <Sidebar
               type={this.state.viewType}
@@ -1113,6 +1258,7 @@ class App extends Component {
                       updateProgress={this.updateProgress}
                       pid={this.state.pid}
                       updateTreeDataOnSave={this.updateTreeDataOnSave}
+                      keycloak={this.state.keycloak}
                       onSwitchView={this.switchView}
                     />
                   )}
@@ -1237,6 +1383,8 @@ class App extends Component {
                     />
                   )}
                 />
+
+                <Redirect to="/not-found" />
               </Switch>
               {/* {this.props.activePort === 0 ? <AnnotationsList /> : null} */}
             </Sidebar>
@@ -1262,6 +1410,7 @@ class App extends Component {
                     updateProgress={this.updateProgress}
                     pid={this.state.pid}
                     updateTreeDataOnSave={this.updateTreeDataOnSave}
+                    keycloak={this.state.keycloak}
                     onSwitchView={this.switchView}
                   />
                 )}
@@ -1315,6 +1464,7 @@ class App extends Component {
                   />
                 )}
               />
+              <Redirect to="/not-found" />
             </Switch>
           </Sidebar>
         )}

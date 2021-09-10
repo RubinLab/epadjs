@@ -1,12 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTable, useExpanded } from 'react-table';
 import { connect } from 'react-redux';
-import { toast } from "react-toastify";
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import { getAnnotations } from '../../services/annotationServices';
-import { MAX_PORT } from '../../constants';
 import { formatDate } from '../flexView/helperMethods';
 import {
   alertViewPortFull,
@@ -71,7 +69,6 @@ function Annotations(props) {
   const [data, setData] = useState([]);
   let [loading, setLoading] = useState(false);
   const username = sessionStorage.getItem('username');
-  const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
 
   useEffect(() => {
@@ -102,9 +99,10 @@ function Annotations(props) {
     const { projectID, studyUID, seriesUID, aimID } = selected;
     const patientID = selected.subjectID;
     const { openSeries } = props;
+    const maxPort = sessionStorage.getItem("maxPort");
     // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
     //check if there is enough space in the grid
-    let isGridFull = openSeries.length === MAX_PORT;
+    let isGridFull = openSeries.length === maxPort;
     //check if the serie is already open
     if (checkIfSerieOpen(seriesUID).isOpen) {
       const { index } = checkIfSerieOpen(seriesUID);
@@ -117,7 +115,7 @@ function Annotations(props) {
         props.dispatch(addToGrid(selected, aimID));
         props
           .dispatch(getSingleSerie(selected, aimID))
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
         if (!props.patients[patientID]) {
@@ -148,27 +146,13 @@ function Annotations(props) {
     props.dispatch(selectAnnotation(data, studyDescription, seriesDescripion));
   };
 
-  const validateAnnotationSelect = () => {
-    if (selectedLevel && !warningSeen) {
-      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select an annotation!`;
-      toast.info(message, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });      setWarningSeen(true);
-    }
-  };
-
   const columns = React.useMemo(
     () => [
       {
         id: 'series-expander',
         Cell: ({ row }) => (
           <div style={{ paddingLeft: '30px' }}>
-            <div onMouseEnter={validateAnnotationSelect}>
+            <div>
               <input
                 type="checkbox"
                 onClick={e => selectRow(e, row.original)}
@@ -285,7 +269,7 @@ function Annotations(props) {
         }
       }
     ],
-    [selectedLevel, warningSeen]
+    [selectedLevel]
   );
 
   useEffect(() => {

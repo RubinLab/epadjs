@@ -1,11 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTable, useExpanded } from 'react-table';
 import { connect } from 'react-redux';
-import { toast } from 'react-toastify';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
-import { MAX_PORT } from '../../constants';
 import { formatDate } from '../flexView/helperMethods';
 import Annotations from './Annotations';
 import { getSeries } from '../../services/seriesServices';
@@ -20,6 +18,8 @@ import {
   updatePatient,
   selectAnnotation
 } from '../annotationsList/action';
+
+const maxPort = sessionStorage.getItem("maxPort");
 
 function Table({
   columns,
@@ -110,7 +110,6 @@ function Series(props) {
   const widthUnit = 20;
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
   const [selectedCount, setSelectedCount] = useState(false);
 
@@ -158,28 +157,13 @@ function Series(props) {
     }
   };
 
-  const validateSeriesSelect = () => {
-    if (selectedLevel && !warningSeen) {
-      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select series!`;
-      toast.info(message, {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
-      });
-      setWarningSeen(true);
-    }
-  };
-
   const dispatchSerieDisplay = selected => {
     const openSeries = Object.values(props.openSeries);
     const { patientID, studyUID } = selected;
     let isSerieOpen = false;
 
     //check if there is enough space in the grid
-    let isGridFull = openSeries.length === MAX_PORT;
+    let isGridFull = openSeries.length === maxPort;
     //check if the serie is already open
 
     if (openSeries.length > 0) {
@@ -245,7 +229,7 @@ function Series(props) {
 
           return (
             <div style={style}>
-              <div onMouseEnter={validateSeriesSelect}>
+              <div>
                 <input
                   type="checkbox"
                   style={{ marginRight: '5px' }}
@@ -414,7 +398,7 @@ function Series(props) {
         )
       }
     ],
-    [selectedLevel, warningSeen, selectedCount]
+    [selectedLevel, selectedCount]
   );
 
   const getDataFromStorage = (projectID, subjectID, studyUID) => {

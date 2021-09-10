@@ -1,8 +1,8 @@
 import http from "./httpService";
-const apiUrl = sessionStorage.getItem("apiUrl");
-const mode = sessionStorage.getItem("mode");
+
 export function getStudies(projectId, subjectId) {
-  if (mode === "lite")
+  const apiUrl = http.apiUrl();
+  if (http.mode() === "lite")
     return http.get(
       apiUrl +
         "/projects/lite/subjects/" +
@@ -21,9 +21,9 @@ export function getStudies(projectId, subjectId) {
 }
 
 export function downloadStudies(projectID, body) {
-  projectID = projectID || "lite"
+  projectID = projectID || "lite";
   const url =
-    apiUrl +
+    http.apiUrl() +
     "/projects/" +
     encodeURIComponent(projectID) +
     "/studies/download" +
@@ -34,7 +34,7 @@ export function downloadStudies(projectID, body) {
 export function deleteStudy(study, delSys) {
   const { projectID, patientID, studyUID } = study;
   const url =
-    apiUrl +
+    http.apiUrl() +
     "/projects/" +
     encodeURIComponent(projectID) +
     "/subjects/" +
@@ -47,7 +47,7 @@ export function deleteStudy(study, delSys) {
 
 export function getStudyAims(subjectID, studyUID, projectID = "lite") {
   return http.get(
-    apiUrl +
+    http.apiUrl() +
       "/projects/" +
       encodeURIComponent(projectID) +
       "/subjects/" +
@@ -60,7 +60,12 @@ export function getStudyAims(subjectID, studyUID, projectID = "lite") {
 
 export function saveStudy(projectID, subjectID, studyUid, studyDesc) {
   const url =
-    apiUrl + "/projects/" + encodeURIComponent(projectID) + "/subjects/" + encodeURIComponent(subjectID) + "/studies";
+    http.apiUrl() +
+    "/projects/" +
+    encodeURIComponent(projectID) +
+    "/subjects/" +
+    encodeURIComponent(subjectID) +
+    "/studies";
   const body = { studyUid, studyDesc };
   return http.post(url, body);
 }
@@ -69,19 +74,32 @@ export function uploadFileToStudy(formData, config, study) {
   let { projectID, subjectID, studyUID } = study;
   subjectID = subjectID ? subjectID : study.patientID;
   projectID = projectID || "lite";
-  const url = `${apiUrl}/projects/${encodeURIComponent(projectID)}/subjects/${encodeURIComponent(subjectID)}/studies/${encodeURIComponent(studyUID)}/files`;
+  const url = `${http.apiUrl()}/projects/${encodeURIComponent(
+    projectID
+  )}/subjects/${encodeURIComponent(subjectID)}/studies/${encodeURIComponent(
+    studyUID
+  )}/files`;
   return http.post(url, formData, config);
 }
 
-export function addStudyToProject(projectID, subjectID, studyUID, sourceProject) {
+export function addStudyToProject(
+  projectID,
+  subjectID,
+  studyUID,
+  sourceProject
+) {
   return http.put(
-    `${apiUrl}/projects/${encodeURIComponent(projectID)}/subjects/${encodeURIComponent(subjectID)}/studies/${encodeURIComponent(studyUID)}?from=${sourceProject}`
+    `${http.apiUrl()}/projects/${encodeURIComponent(
+      projectID
+    )}/subjects/${encodeURIComponent(subjectID)}/studies/${encodeURIComponent(
+      studyUID
+    )}?from=${sourceProject}`
   );
 }
 
 export function getStudy(projectId, subjectId, studyUID) {
   return http.get(
-    apiUrl +
+    http.apiUrl() +
       "/projects/" +
       encodeURIComponent(projectId) +
       "/subjects/" +

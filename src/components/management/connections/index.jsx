@@ -343,6 +343,7 @@ class Connections extends React.Component {
           columns={this.defineColumns()}
           pageSizeOptions={[10, 20, 50]}
           defaultPageSize={pageSize}
+          NoDataComponent={() => null}
         />
         {(this.state.delAll || this.state.delOne) && (
           <DeleteAlert

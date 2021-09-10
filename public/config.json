@@ -1,9 +1,9 @@
-
 {
   "mode": "thick",
   "apiUrl": "http://localhost:8080",
   "testUrl": "http://localhost:3000",
   "apiUrlV1": "http://localhost:8080/epad",
   "wadoUrl": "wadouri:http://localhost:8080/wado",
-  "clientKey": "Swa9Ci6Hr7n8eb6JqlEZpaujC7ZQq1fM"
+  "clientKey": "Swa9Ci6Hr7n8eb6JqlEZpaujC7ZQq1fM",
+  "maxPort": "4"
 }

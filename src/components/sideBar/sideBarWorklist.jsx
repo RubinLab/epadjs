@@ -23,7 +23,6 @@ import {
 import { getSeries } from "../../services/seriesServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
 import SeriesPopup from "./seriesPopup";
-import { MAX_PORT } from "../../constants";
 import {
   addToGrid,
   getSingleSerie,
@@ -35,6 +34,7 @@ import {
 } from "../annotationsList/action";
 
 const mode = sessionStorage.getItem("mode");
+const maxPort = sessionStorage.getItem("maxPort");
 
 const messages = {
   deleteSingle: "Remove study from the worklist? This cannot be undone.",
@@ -104,6 +104,7 @@ class WorkList extends React.Component {
     if (showError && Array.isArray(notAuthorized) && notAuthorized.length > 0) {
       const projectList = notAuthorized.reduce((all, item, i) => {
         return `${all} ${item}${notAuthorized.length - 1 === i ? "" : ", "}`;
+
       }, "");
       const message = `${messages.notAuthorizedProjects} ${projectList}`;
       toast.error(message, {
@@ -673,7 +674,7 @@ class WorkList extends React.Component {
       //if all ports are full
       if (
         notOpenSeries.length > 0 &&
-        this.props.openSeries.length === MAX_PORT
+        this.props.openSeries.length === maxPort
       ) {
         this.props.dispatch(alertViewPortFull());
       } else {
@@ -684,11 +685,11 @@ class WorkList extends React.Component {
           this.props.history.push("/display");
           this.props.dispatch(clearSelection());
         } else {
-          if (selectedSeries.length + this.props.openSeries.length > MAX_PORT) {
-            // alert user about the num of open series a the moment and told only max_port is allowed
+          if (selectedSeries.length + this.props.openSeries.length > maxPort) {
+            // alert user about the num of open series a the moment and told only maxPort is allowed
             const openPorts = this.props.openSeries.length;
             this.setState({
-              error: `Already ${openPorts} viewers open. You can open ${MAX_PORT} at a time`
+              error: `Already ${openPorts} viewers open. You can open ${maxPort} at a time`
             });
           } else {
             //else get data for each serie for display

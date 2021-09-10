@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTable, useExpanded } from 'react-table';
 import { connect } from 'react-redux';
-import { toast } from 'react-toastify';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
@@ -10,9 +9,7 @@ import { getStudies } from '../../services/studyServices';
 import Series from './Series';
 import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
-import { clearCarets } from '../../Utils/aid.js';
-import { MAX_PORT } from '../../constants';
-
+import { clearCarets, isSupportedModality } from '../../Utils/aid.js';
 import {
   getSingleSerie,
   selectStudy,
@@ -27,6 +24,8 @@ import {
   selectSerie,
   selectAnnotation
 } from '../annotationsList/action';
+
+const maxPort = sessionStorage.getItem("maxPort");
 
 function Table({
   columns,
@@ -119,7 +118,6 @@ function Studies(props) {
 
   const [data, setData] = useState([]);
   let [loading, setLoading] = useState(false);
-  const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
   const [selectedCount, setSelectedCount] = useState(false);
   const [isSerieSelectionOpen, setIsSerieSelectionOpen] = useState(false);
@@ -146,20 +144,6 @@ function Studies(props) {
     }
   }, [props.selectedStudies, props.selectedSeries, props.selectedAnnotations]);
 
-  const validateStudySelect = () => {
-    if (selectedLevel && !warningSeen) {
-      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a study!`;
-      toast.info(message, {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
-      });
-      setWarningSeen(true);
-    }
-  };
 
   const deselectChildLevels = (patientID, studyUID) => {
     if (selectedLevel === 'series') {
@@ -215,7 +199,7 @@ function Studies(props) {
   };
 
   const displaySeries = async selected => {
-    if (props.openSeries.length === MAX_PORT) {
+    if (props.openSeries.length === maxPort) {
       props.dispatch(alertViewPortFull());
     } else {
       const { patientID, studyUID } = selected;
@@ -231,10 +215,12 @@ function Studies(props) {
       } else {
         seriesArr = await getSeriesData(selected);
       }
+      // filter the nondisplayable modalities
+      seriesArr = seriesArr.filter(isSupportedModality);
       //get extraction of the series (extract unopen series)
       if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
       //check if there is enough room
-      if (seriesArr.length + props.openSeries.length > MAX_PORT) {
+      if (seriesArr.length + props.openSeries.length > maxPort) {
         //if there is not bring the modal
         // await setState({
         //   isSerieSelectionOpen: true,
@@ -254,7 +240,7 @@ function Studies(props) {
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
@@ -285,7 +271,7 @@ function Studies(props) {
 
           return (
             <div style={style}>
-              <div onMouseEnter={validateStudySelect}>
+              <div>
                 <input
                   type="checkbox"
                   style={{ marginRight: '5px' }}
@@ -474,7 +460,7 @@ function Studies(props) {
         )
       }
     ],
-    [selectedLevel, warningSeen, selectedCount]
+    [selectedLevel, selectedCount]
   );
 
   const getDataFromStorage = (projectID, subjectID) => {
@@ -482,8 +468,8 @@ function Studies(props) {
     const studiesArray =
       treeData[projectID] && treeData[projectID][subjectID]
         ? Object.values(treeData[projectID][subjectID].studies).map(
-            el => el.data
-          )
+          el => el.data
+        )
         : [];
 
     return studiesArray;

@@ -1,8 +1,10 @@
 import http from "./httpService";
-const apiUrl = sessionStorage.getItem("apiUrl");
-const mode = sessionStorage.getItem("mode");
+// const apiUrl = sessionStorage.getItem("apiUrl");
+// const mode = sessionStorage.getItem("mode");
 
 export function getAnnotations(series, opts = {}) {
+  const apiUrl = http.apiUrl();
+  const mode = http.mode();
   if (mode === "lite") {
     const { projectId, subjectId, studyId, seriesId } = series;
     const fullUrl =
@@ -37,6 +39,8 @@ export function getAnnotations(series, opts = {}) {
 }
 
 export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
+  const apiUrl = http.apiUrl();
+  const mode = http.mode();
   if (mode === "lite")
     return http.get(
       apiUrl +
@@ -64,44 +68,54 @@ export function getAnnotationsJSON(projectId, subjectId, studyId, seriesId) {
 }
 
 export function getAnnotations2() {
-  return http.get(apiUrl + "/projects/lite/aims");
+  return http.get(http.apiUrl() + "/projects/lite/aims");
 }
 
 export function searchAnnotations(body) {
-  return http.put(apiUrl + "/search", body);
+  return http.put(http.apiUrl() + "/search", body);
 }
 
 export function downloadAnnotations(optionObj, aimIDlist, projectID) {
   projectID = projectID || "lite";
   const { summary, aim, seg } = optionObj;
-  const url = `${apiUrl}/projects/${encodeURIComponent(projectID)}/aims/download?summary=${summary}&aim=${aim}&seg=${seg}`;
+  const url = `${http.apiUrl()}/projects/${encodeURIComponent(
+    projectID
+  )}/aims/download?summary=${summary}&aim=${aim}&seg=${seg}`;
   return http.post(url, aimIDlist, { responseType: "blob" });
 }
 
 export function downloadProjectAnnotation(pid) {
-  return http.get(`${apiUrl}/projects/${encodeURIComponent(pid)}/aims?format=stream`, { responseType: "blob" });
+  return http.get(
+    `${http.apiUrl()}/projects/${encodeURIComponent(pid)}/aims?format=stream`,
+    { responseType: "blob" }
+  );
 }
 
 export function getAllAnnotations(bookmark) {
-  let url = apiUrl + "/aims?format=summary";
+  let url = http.apiUrl() + "/aims?format=summary";
   url = bookmark ? `${url}&bookmark=${bookmark}` : url;
   return http.get(url);
 }
 
 export function getSummaryAnnotations(projectID, bookmark) {
+  const apiUrl = http.apiUrl();
   const pid = projectID || "lite";
   return bookmark
     ? http.get(
-        `${apiUrl}/projects/${encodeURIComponent(pid)}/aims?format=summary&bookmark=${bookmark}`
+        `${apiUrl}/projects/${encodeURIComponent(
+          pid
+        )}/aims?format=summary&bookmark=${bookmark}`
       )
-    : http.get(`${apiUrl}/projects/${encodeURIComponent(pid)}/aims?format=summary`);
+    : http.get(
+        `${apiUrl}/projects/${encodeURIComponent(pid)}/aims?format=summary`
+      );
 }
 
 export function deleteAnnotation(aimObj, delSys) {
   const query = delSys ? `&${delSys.substring(1)}` : "";
   const { aimID, projectID } = aimObj;
   return http.delete(
-    apiUrl +
+    http.apiUrl() +
       "/projects/" +
       encodeURIComponent(projectID) +
       "/aims/" +
@@ -114,14 +128,18 @@ export function deleteAnnotation(aimObj, delSys) {
 export function deleteAnnotationsList(projectID, aimList) {
   return http.post(
     // apiUrl + "/projects/" + projectID + "/aims/delete?all=true"
-    apiUrl + "/projects/" + encodeURIComponent(projectID) + "/aims/delete",
+    http.apiUrl() +
+      "/projects/" +
+      encodeURIComponent(projectID) +
+      "/aims/delete",
     aimList
   );
 }
 
 export function uploadAim(aim, projectId, isUpdate = false, updatedAimId) {
+  const apiUrl = http.apiUrl();
   let url;
-  if (mode === "lite") {
+  if (http.mode() === "lite") {
     url = apiUrl + "/projects/lite/aims";
   } else {
     url = apiUrl + "/projects/" + encodeURIComponent(projectId) + "/aims";
@@ -153,13 +171,14 @@ export function uploadAim(aim, projectId, isUpdate = false, updatedAimId) {
 // }
 
 export function uploadSegmentation(segmentation, segName, projectId = "lite") {
-  const url = apiUrl + "/projects/" + encodeURIComponent(projectId) + "/files";
+  const url =
+    http.apiUrl() + "/projects/" + encodeURIComponent(projectId) + "/files";
   const segData = new FormData();
   segData.append("file", segmentation, `${segName}.dcm`);
   const config = {
     headers: {
-      "content-type": "multipart/form-data"
-    }
+      "content-type": "multipart/form-data",
+    },
   };
   return http.post(url, segData, config);
 }
