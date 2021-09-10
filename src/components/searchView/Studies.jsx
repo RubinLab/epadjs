@@ -218,7 +218,7 @@ function Studies(props) {
       // filter the nondisplayable modalities
       seriesArr = seriesArr.filter(isSupportedModality);
       //get extraction of the series (extract unopen series)
-      if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
+      // if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
       //check if there is enough room
       if (seriesArr.length + props.openSeries.length > maxPort) {
         //if there is not bring the modal
@@ -301,7 +301,6 @@ function Studies(props) {
                   };
                   toggleRowExpanded(row.id, expandStatus);
                   props.getTreeExpandSingle(obj);
-                  console.log(row.original);
                   if (selectedLevel) {
                     deselectChildLevels(
                       row.original.patientID,
