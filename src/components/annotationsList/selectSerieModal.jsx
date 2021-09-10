@@ -88,6 +88,7 @@ class selectSerieModal extends React.Component {
     });
     return this.props.openSeries.length + selectCount;
   };
+
   selectToDisplay = async e => {
     let arr = [...this.state.selectedToDisplay];
     arr[e.target.dataset.index] = e.target.checked;
@@ -158,11 +159,21 @@ class selectSerieModal extends React.Component {
     let count = 0;
     for (let i = 0; i < series.length; i++) {
       for (let k = 0; k < series[i].length; k++) {
-        selectedToDisplay[count + k] = series[i][k].significanceOrder ? true : false;
+        if (!this.isSerieOpen(series[i][k].seriesUID))
+          selectedToDisplay[count + k] = series[i][k].significanceOrder ? true : false;
       }
       count += series[i].length;
     }
-    this.setState({ selectedToDisplay });
+    this.setState({ selectedToDisplay }, () => { this.setState({ limit: this.updateLimit() }) });
+  }
+
+  isSerieOpen = (serieUID) => {
+    const { openSeries } = this.props;
+    let openSeriesUIDList = [];
+    openSeries.forEach(port => {
+      openSeriesUIDList.push(port.seriesUID);
+    });
+    return openSeriesUIDList.includes(serieUID);
   }
 
   renderSelection = () => {
@@ -171,12 +182,7 @@ class selectSerieModal extends React.Component {
     let series = Object.values(this.props.seriesPassed);
     let keys = Object.keys(this.props.seriesPassed);
     let count = 0;
-    let openSeriesUIDList = [];
-    let selectedToDisplay = [];
 
-    this.props.openSeries.forEach(port => {
-      openSeriesUIDList.push(port.seriesUID);
-    });
     // filter the series according to displayable modalities
     for (let i = 0; i < series.length; i++) {
       series[i] = series[i].filter(isSupportedModality);
@@ -194,13 +200,12 @@ class selectSerieModal extends React.Component {
       }
       title = !title ? "Unnamed Study" : title;
       for (let k = 0; k < series[i].length; k++) {
-        let alreadyOpen = openSeriesUIDList.includes(series[i][k].seriesUID);
+        let alreadyOpen = this.isSerieOpen(series[i][k].seriesUID);
         let disabled =
           !this.state.selectedToDisplay[count + k] &&
           this.state.limit >= this.maxPort;
         let desc = series[i][k].seriesDescription || "Unnamed Serie";
         // desc = alreadyOpen ? `${desc} - already open` : desc;
-        // selectedToDisplay[count + k] = series[i][k].significanceOrder ? true : false;
         item = alreadyOpen ? (
           <div key={series[i][k].seriesUID} className="alreadyOpen-disabled">
             <FaRegCheckSquare />
