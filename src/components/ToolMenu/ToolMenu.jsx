@@ -141,109 +141,109 @@ class ToolMenu extends Component {
       // { name: "Invert", icon: <FaAdjust />, tool: "Invert" },
       { name: "Reset", icon: <MdLoop />, tool: "Reset" },
       { name: "Pan", icon: <MdPanTool />, tool: "Pan" },
-      // { name: "MetaData", icon: <FaListAlt />, tool: "MetaData" },
-      // { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate" },
-      // { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
-      // { name: "Color", icon: <FaPalette />, tool: "colorLut" },
-      // { name: "Fusion", icon: <FaObjectUngroup />, tool: "fuse" },
+      { name: "MetaData", icon: <FaListAlt />, tool: "MetaData" },
+      { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate" },
+      { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
+      { name: "Color", icon: <FaPalette />, tool: "colorLut" },
+      { name: "Fusion", icon: <FaObjectUngroup />, tool: "fuse" },
     ];
 
     this.markupTools = [
-      // {
-      //   name: "Point",
-      //   icon: <div className="icon-point fontastic-icons" />,
-      //   tool: "Probe",
-      // },
-      // {
-      //   name: "Line",
-      //   icon: <FaRulerHorizontal />,
-      //   tool: "Length",
-      // },
-      // {
-      //   name: "Circle",
-      //   icon: <div className="icon-circle fontastic-icons" />,
-      //   tool: "CircleRoi",
-      // },
-      // {
-      //   name: "Perpendicular",
-      //   icon: <div className="icon-perpendicular fontastic-icons" />,
-      //   tool: "Bidirectional",
-      // },
-      // {
-      //   name: "Poly/Freehand",
-      //   icon: <div className="icon-polygon fontastic-icons" />,
-      //   tool: "FreehandRoi3DTool",
-      //   // child: (
-      //   //   <span>
-      //   //     Interpolation{" "}
-      //   //     <Switch
-      //   //       onChange={this.setInterpolation}
-      //   //       checked={this.state.interpolate}
-      //   //       onColor="#86d3ff"
-      //   //       onHandleColor="#2693e6"
-      //   //       handleDiameter={10}
-      //   //       uncheckedIcon={false}
-      //   //       checkedIcon={false}
-      //   //       boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
-      //   //       activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-      //   //       height={5}
-      //   //       width={20}
-      //   //       className="react-switch"
-      //   //       id="material-switch"
-      //   //     />
-      //   //   </span>
-      //   // ),
-      // },
-      // {
-      //   name: "Sculpt 2D",
-      //   icon: <FaScrewdriver />,
-      //   tool: "FreehandRoiSculptor",
-      // },
-      // {
-      //   name: "Sculpt 3D",
-      //   icon: <FaScrewdriver />,
-      //   tool: "FreehandRoi3DSculptor",
-      // },
+      {
+        name: "Point",
+        icon: <div className="icon-point fontastic-icons" />,
+        tool: "Probe",
+      },
+      {
+        name: "Line",
+        icon: <FaRulerHorizontal />,
+        tool: "Length",
+      },
+      {
+        name: "Circle",
+        icon: <div className="icon-circle fontastic-icons" />,
+        tool: "CircleRoi",
+      },
+      {
+        name: "Perpendicular",
+        icon: <div className="icon-perpendicular fontastic-icons" />,
+        tool: "Bidirectional",
+      },
+      {
+        name: "Poly/Freehand",
+        icon: <div className="icon-polygon fontastic-icons" />,
+        tool: "FreehandRoi3DTool",
+        // child: (
+        //   <span>
+        //     Interpolation{" "}
+        //     <Switch
+        //       onChange={this.setInterpolation}
+        //       checked={this.state.interpolate}
+        //       onColor="#86d3ff"
+        //       onHandleColor="#2693e6"
+        //       handleDiameter={10}
+        //       uncheckedIcon={false}
+        //       checkedIcon={false}
+        //       boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+        //       activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+        //       height={5}
+        //       width={20}
+        //       className="react-switch"
+        //       id="material-switch"
+        //     />
+        //   </span>
+        // ),
+      },
+      {
+        name: "Sculpt 2D",
+        icon: <FaScrewdriver />,
+        tool: "FreehandRoiSculptor",
+      },
+      {
+        name: "Sculpt 3D",
+        icon: <FaScrewdriver />,
+        tool: "FreehandRoi3DSculptor",
+      },
       { name: "Eraser", icon: <FaEraser />, tool: "Eraser" },
     ];
 
     this.segmentationTools = [
-      // {
-      //   name: "Brush",
-      //   icon: <div className="icon-brush" />,
-      //   tool: "Brush3D",
-      // },
-      // {
-      //   name: "Gated",
-      //   icon: <FaBroom />,
-      //   tool: "Brush3DHUGated",
-      // },
-      // {
-      //   name: "Spherical Gated",
-      //   icon: <FaDotCircle />,
-      //   tool: "BrushSphericalHUGated",
-      // },
-      // {
-      //   name: "Auto Gated",
-      //   icon: <FaBroom />,
-      //   tool: "Brush3DAutoGated",
-      // },
-      // {
-      //   name: "Spherical",
-      //   icon: <IoMdEgg />,
-      //   tool: "SphericalBrush",
-      // },
-      // {
-      //   name: "Freehand Scissors",
-      //   icon: <FaHandScissors />,
-      //   tool: "FreehandScissors"
-      // },
-      // { name: "Circle Scissors", icon: <FaCircle />, tool: "CircleScissors" },
-      // {
-      //   name: "Correction Scissors",
-      //   icon: <TiScissorsOutline />,
-      //   tool: "CorrectionScissors"
-      // }
+      {
+        name: "Brush",
+        icon: <div className="icon-brush" />,
+        tool: "Brush3D",
+      },
+      {
+        name: "Gated",
+        icon: <FaBroom />,
+        tool: "Brush3DHUGated",
+      },
+      {
+        name: "Spherical Gated",
+        icon: <FaDotCircle />,
+        tool: "BrushSphericalHUGated",
+      },
+      {
+        name: "Auto Gated",
+        icon: <FaBroom />,
+        tool: "Brush3DAutoGated",
+      },
+      {
+        name: "Spherical",
+        icon: <IoMdEgg />,
+        tool: "SphericalBrush",
+      },
+      {
+        name: "Freehand Scissors",
+        icon: <FaHandScissors />,
+        tool: "FreehandScissors"
+      },
+      { name: "Circle Scissors", icon: <FaCircle />, tool: "CircleScissors" },
+      {
+        name: "Correction Scissors",
+        icon: <TiScissorsOutline />,
+        tool: "CorrectionScissors"
+      }
     ];
   }
 
