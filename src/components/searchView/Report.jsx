@@ -21,7 +21,7 @@ import {
 
 const maxPort = sessionStorage.getItem('maxPort');
 let waterfallOptions = sessionStorage.getItem('waterfallOptions');
-if (waterfallOptions) waterfallOptions = JSON.parse(waterfallOptions);
+if (waterfallOptions) waterfallOptions = waterfallOptions.split('-');
 const metric = ['RECIST', 'ADLA', 'intensitystddev', 'Export (beta)'];
 const messages = {
   title: 'Can not open all series',
