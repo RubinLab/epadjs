@@ -52,7 +52,7 @@ import "./App.css";
 import RightsideBar from "./components/RightsideBar/RightsideBar";
 import MinimizedReport from "./components/searchView/MinimizedReport";
 import { FaJoint } from "react-icons/fa";
-import { DISP_MODALITIES } from "./constants";
+import { isSupportedModality } from "./Utils/aid.js";
 
 const messages = {
   noPatient: {
@@ -533,8 +533,8 @@ class App extends Component {
         apiUrl = process.env.REACT_APP_API_URL || apiUrl;
         wadoUrl = process.env.REACT_APP_WADO_URL || wadoUrl;
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
-        maxPort = process.env.REACT_APP_MAX_PORT || maxPort;
         const waterfallOptions = process.env.REACT_APP_WATERFALL_OPTS;
+        maxPort = process.env.REACT_APP_MAX_PORT || maxPort || 6;
         sessionStorage.setItem("mode", mode);
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
@@ -668,7 +668,7 @@ class App extends Component {
   displaySeries = async studyData => {
     const rawSeriesArray = await this.getSeriesData(studyData);
     if (!rawSeriesArray) return;
-    let seriesArr = rawSeriesArray.filter(this.isSupportedModality);
+    let seriesArr = rawSeriesArray.filter(isSupportedModality);
     let significantSeries = seriesArr.filter(
       ({ significanceOrder }) => significanceOrder && significanceOrder > 0
     );
@@ -698,11 +698,11 @@ class App extends Component {
     }
   };
 
-  isSupportedModality = serie => {
+  isSupportedModality = (serie) => {
     return DISP_MODALITIES.includes(serie.examType);
   };
 
-  getSeriesData = async studyData => {
+  getSeriesData = async (studyData) => {
     const { projectID, patientID, studyUID } = studyData;
     try {
       const { data: series } = await getSeries(projectID, patientID, studyUID);
