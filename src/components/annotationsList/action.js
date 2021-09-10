@@ -502,8 +502,15 @@ const getRequiredFields = (arr, type, selectedID) => {
         obj = { studyUID, studyDescription };
         result[studyUID] = obj;
       } else if (type === "serie") {
-        let { seriesUID, seriesDescription, studyUID, patientID, projectID } =
-          element;
+        let {
+          seriesUID,
+          seriesDescription,
+          studyUID,
+          patientID,
+          projectID,
+          significanceOrder,
+          examType,
+        } = element;
         projectID = projectID ? projectID : "lite";
         const isDisplayed = seriesUID === selectedID || selectedID === studyUID;
 
@@ -514,6 +521,8 @@ const getRequiredFields = (arr, type, selectedID) => {
           patientID,
           projectID,
           isDisplayed,
+          significanceOrder,
+          examType,
         };
         result[seriesUID] = obj;
       } else {
