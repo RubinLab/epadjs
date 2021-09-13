@@ -79,53 +79,57 @@ describe('executing test scenario on ePAD', () => {
     expect(result).toContain('Worklists');
   });
 
-  
-  test('it creates worklist1', async () => {
-    const singleWorklist = {
-      name: 'worklist_test_1',
-      id: 'worklist_test_1',
-      duedate: '01012022',
-      desc: 'worklist_test_1',
-      assignees: ['admin'],
-      requirements: {
-        level: 'Patient',
-        template: 'Any',
-        numOfAims: 1
-      }
-    };
+  // test('it creates worklist1', async () => {
+  //   const singleWorklist = {
+  //     name: 'worklist_test_1',
+  //     id: 'worklist_test_1',
+  //     duedate: '01012022',
+  //     desc: 'worklist_test_1',
+  //     assignees: ['admin'],
+  //     requirements: {
+  //       level: 'Patient',
+  //       template: 'Any',
+  //       numOfAims: 1
+  //     }
+  //   };
 
-    const worklists = await worklist.createSingleWorklist(singleWorklist);
-    const worklistReturned = worklists.filter(
-      el => el.name === singleWorklist.name
-    );
-    assert.equal(worklistReturned[0].name, 'worklist_test_1');
-    assert.include(worklistReturned[0].duedate, '2022-01-01');
-    assert.equal(worklistReturned[0].desc, 'worklist_test_1');
-    assert.include(worklistReturned[0].assignees, 'admin');
-    assert.include(worklistReturned[0].requirements, '1:any:Patient');
-  });
+  //   const worklists = await worklist.createSingleWorklist(singleWorklist);
+  //   const worklistReturned = worklists.filter(
+  //     el => el.name === singleWorklist.name
+  //   );
+  //   assert.equal(worklistReturned[0].name, 'worklist_test_1');
+  //   assert.include(worklistReturned[0].duedate, '2022-01-01');
+  //   assert.equal(worklistReturned[0].desc, 'worklist_test_1');
+  //   assert.include(worklistReturned[0].assignees, 'admin');
+  //   assert.include(worklistReturned[0].requirements, '1:any:Patient');
+  // });
 
-  test('it creates multiple worklists', async () => {
-    const worklists = await worklist.createMultipleWorklist(sampleList);
-    const worklist1 = worklists.filter(el => el.name === sampleList[0].name);
-    const worklist2 = worklists.filter(el => el.name === sampleList[1].name);
-    assert.equal(worklist1[0].name, 'worklist_test_2');
-    assert.include(worklist1[0].duedate, '2022-01-01');
-    assert.equal(worklist1[0].desc, 'worklist_test_2');
-    assert.include(worklist1[0].assignees, 'admin');
-    assert.include(worklist1[0].requirements, '1:any:Patient');
+  // test('it creates multiple worklists', async () => {
+  //   const worklists = await worklist.createMultipleWorklist(sampleList);
+  //   const worklist1 = worklists.filter(el => el.name === sampleList[0].name);
+  //   const worklist2 = worklists.filter(el => el.name === sampleList[1].name);
+  //   assert.equal(worklist1[0].name, 'worklist_test_2');
+  //   assert.include(worklist1[0].duedate, '2022-01-01');
+  //   assert.equal(worklist1[0].desc, 'worklist_test_2');
+  //   assert.include(worklist1[0].assignees, 'admin');
+  //   assert.include(worklist1[0].requirements, '1:any:Patient');
 
-    assert.equal(worklist2[0].name, 'worklist_test_3');
-    assert.include(worklist2[0].duedate, '2023-01-01');
-    assert.equal(worklist2[0].desc, 'worklist_test_3');
-    assert.include(worklist2[0].assignees, 'admin');
-    assert.include(worklist2[0].requirements, '1:any:Patient');
-  });
-
-  
+  //   assert.equal(worklist2[0].name, 'worklist_test_3');
+  //   assert.include(worklist2[0].duedate, '2023-01-01');
+  //   assert.equal(worklist2[0].desc, 'worklist_test_3');
+  //   assert.include(worklist2[0].assignees, 'admin');
+  //   assert.include(worklist2[0].requirements, '1:any:Patient');
+  // });
 
   test('it edits name', async () => {
-    
+    const newValue = 'worklist_test_1_edited_name';
+    const worklists = await worklist.editInput(
+      'worklist_test_1',
+      'name',
+      newValue
+    );
+    const worklistReturned = worklists.filter(el => el.name === newValue);
+    assert.lengthOf(worklistReturned, 1, 'found the updated name');
   });
 
   test('it adds assignees', async () => {});
@@ -142,35 +146,44 @@ describe('executing test scenario on ePAD', () => {
 
   test('it deletes requirement', async () => {});
 
+  test('it edits description', async () => {
+    const newValue = 'worklist_test_1_edited_desc';
+    const worklists = await worklist.editInput(
+      'worklist_test_1',
+      'desc',
+      newValue
+    );
+    const worklistReturned = worklists.filter(el => el.desc === newValue);
+    assert.lengthOf(worklistReturned, 1, 'found the updated description');
+  });
+
   test('it adds description', async () => {});
+
 
   test('it deletes description', async () => {});
 
-  
-  test('it deletes single worklist from row', async () => {
-    const worklistsAfterDelete = await worklist.singleDelete('worklist_test_1');
-    const worklistReturned = worklistsAfterDelete.filter(
-      el => el.name === 'worklist_test_1'
-    );
-    assert.lengthOf(worklistReturned, 0, 'don not have worklist_test_1');
-  });
-  
+  // test('it deletes single worklist from row', async () => {
+  //   const worklistsAfterDelete = await worklist.singleDelete('worklist_test_1');
+  //   const worklistReturned = worklistsAfterDelete.filter(
+  //     el => el.name === 'worklist_test_1'
+  //   );
+  //   assert.lengthOf(worklistReturned, 0, 'don not have worklist_test_1');
+  // });
 
-  test('it deletes multiple worklists', async () => {
-    const worklistsAfterDelete = await worklist.multipleDelete([
-      'worklist_test_2',
-      'worklist_test_3'
-    ]);
-    const worklistReturned = worklistsAfterDelete.filter(
-      el => el.name === 'worklist_test_2' || el.name === 'worklist_test_3'
-    );
-    assert.lengthOf(
-      worklistReturned,
-      0,
-      'don not have worklist_test_2 or worklist_test_3'
-    );
-  });
-
+  // test('it deletes multiple worklists', async () => {
+  //   const worklistsAfterDelete = await worklist.multipleDelete([
+  //     'worklist_test_2',
+  //     'worklist_test_3'
+  //   ]);
+  //   const worklistReturned = worklistsAfterDelete.filter(
+  //     el => el.name === 'worklist_test_2' || el.name === 'worklist_test_3'
+  //   );
+  //   assert.lengthOf(
+  //     worklistReturned,
+  //     0,
+  //     'don not have worklist_test_2 or worklist_test_3'
+  //   );
+  // });
 
   afterAll(async () => {
     await driver.quit();

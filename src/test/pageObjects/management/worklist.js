@@ -1,5 +1,5 @@
 import Basepage from '../basepage';
-import { By, until } from 'selenium-webdriver';
+import { By, until, Key } from 'selenium-webdriver';
 
 class Worklist extends Basepage {
   constructor(driver) {
@@ -71,7 +71,12 @@ class Worklist extends Basepage {
     const inputField = await this.driver.findElements(
       By.className('edit-user__modal--input')
     );
-    await inputField[0].sendKeys(value).sendKeys(Keys.RETURN);
+    await inputField[0].clear();
+    await inputField[0].sendKeys(value)
+    await inputField[0].sendKeys(Key.RETURN);
+    await this.driver.sleep(2000);
+    return await this.listWorklists();
+
   }
 
   async fillRequirementForm(requirements) {
