@@ -23,30 +23,29 @@ class Worklist extends Basepage {
     );
   }
 
-  async singleDelete(username) {
-    const elementXpath = "//div[@id='delete-" + username + "']";
-    const deleteButton = await this.driver.findElements(By.xpath(elementXpath));
-    await deleteButton[0].click();
-
+  async confirmDelete() {
+    //click delete on confirmation modal
     await this.driver.wait(
-      until.elementLocated(By.id('modal-delete-button'), 10000)
+      until.elementLocated(By.id('modal-delete-button'), 1000)
     );
     const modalDeleteButton = await this.driver.findElement(
       By.id('modal-delete-button')
     );
     await modalDeleteButton.click();
-    await this.driver.sleep(3000);
-    await this.worklists();
-    return this.emailsList;
   }
 
-  async multipleDelete(userNameList) {
+  async singleDelete(worklistID) {
+    await this.clickById(`delete-${worklistID}`);
+    await this.confirmDelete();
+    await this.driver.sleep(3000);
+    return await this.listWorklists();
+  }
+
+  async multipleDelete(worklistIDList) {
     let checkboxPromises = [];
     // select checkboxes
-    userNameList.forEach(element => {
-      checkboxPromises.push(
-        this.driver.findElement(By.xpath(`//input[@id="${element}"]`))
-      );
+    worklistIDList.forEach(element => {
+      checkboxPromises.push(this.driver.findElement(By.id(element)));
     });
     const checkboxses = await Promise.all(checkboxPromises);
     const actionPromises = [];
@@ -56,23 +55,23 @@ class Worklist extends Basepage {
 
     await Promise.all(actionPromises);
     // click on delete icon
-    const deleteButton = await this.driver.findElement(By.id('delete-icon'));
-    await deleteButton.click();
-
+    await this.clickById('delete-icon');
     //click delete on confirmation modal
-    await this.driver.wait(
-      until.elementLocated(By.id('modal-delete-button'), 1000)
-    );
-    const modalDeleteButton = await this.driver.findElement(
-      By.id('modal-delete-button')
-    );
-    await modalDeleteButton.click();
+    await this.confirmDelete();
     // wait until the value change
-    await this.driver.sleep(5000);
+    await this.driver.sleep(2000);
     // call listWorklists to update user list
-    await this.listWorklists();
     // return new users list
-    return this.emailsList;
+    return await this.listWorklists();
+  }
+
+  async editInput(id, attr, value) {
+    const elementId = `${attr}-${id}`;
+    await this.clickById(elementId);
+    const inputField = await this.driver.findElements(
+      By.className('edit-user__modal--input')
+    );
+    await inputField[0].sendKeys(value).sendKeys(Keys.RETURN);
   }
 
   async fillRequirementForm(requirements) {

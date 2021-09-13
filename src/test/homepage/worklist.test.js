@@ -79,6 +79,7 @@ describe('executing test scenario on ePAD', () => {
     expect(result).toContain('Worklists');
   });
 
+  
   test('it creates worklist1', async () => {
     const singleWorklist = {
       name: 'worklist_test_1',
@@ -121,7 +122,11 @@ describe('executing test scenario on ePAD', () => {
     assert.include(worklist2[0].requirements, '1:any:Patient');
   });
 
-  test('it edits name', async () => {});
+  
+
+  test('it edits name', async () => {
+    
+  });
 
   test('it adds assignees', async () => {});
 
@@ -141,22 +146,31 @@ describe('executing test scenario on ePAD', () => {
 
   test('it deletes description', async () => {});
 
+  
   test('it deletes single worklist from row', async () => {
-    // const worklistsAfterDelete = await worklist.singleDelete();
-    // evaluate(worklistsAfterDelete)
-    //   .to.be.an('array')
-    //   .that.does.not.include();
+    const worklistsAfterDelete = await worklist.singleDelete('worklist_test_1');
+    const worklistReturned = worklistsAfterDelete.filter(
+      el => el.name === 'worklist_test_1'
+    );
+    assert.lengthOf(worklistReturned, 0, 'don not have worklist_test_1');
   });
+  
 
   test('it deletes multiple worklists', async () => {
-    // const worklistsAfterDelete = await worklist.multipleDelete(
-    //   worklistsToCreate
-    // );
-    // evaluate(worklistsAfterDelete).to.not.have.members(worklistsToCreate);
+    const worklistsAfterDelete = await worklist.multipleDelete([
+      'worklist_test_2',
+      'worklist_test_3'
+    ]);
+    const worklistReturned = worklistsAfterDelete.filter(
+      el => el.name === 'worklist_test_2' || el.name === 'worklist_test_3'
+    );
+    assert.lengthOf(
+      worklistReturned,
+      0,
+      'don not have worklist_test_2 or worklist_test_3'
+    );
   });
 
-  // TODO
-  // create worklists
 
   afterAll(async () => {
     await driver.quit();
