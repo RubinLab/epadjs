@@ -65,18 +65,42 @@ class Worklist extends Basepage {
     return await this.listWorklists();
   }
 
-  async editInput(id, attr, value) {
+  async sendKeysToField(id, attr, value) {
     const elementId = `${attr}-${id}`;
     await this.clickById(elementId);
-    const inputField = await this.driver.findElements(
-      By.className('edit-user__modal--input')
-    );
-    await inputField[0].clear();
-    await inputField[0].sendKeys(value)
-    await inputField[0].sendKeys(Key.RETURN);
+    let inputField;
+    if (attr === 'due') {
+      inputField = await this.driver.findElement(By.name('duedate'));
+    } else {
+      inputField = await this.driver.findElements(
+        By.className('edit-user__modal--input')
+      );
+      inputField = inputField[0];
+    }
+    if (value) {
+      await inputField.clear();
+      await inputField.sendKeys(value);
+      await inputField.sendKeys(Key.RETURN);
+    } else if (!value && attr === 'due') {
+      await inputField.sendKeys(Key.DELETE);
+    } else {
+      await inputField.clear();
+      await inputField.sendKeys(Key.RETURN);
+    }
+    await this.driver.sleep(500);
+  }
+
+  async editInput(id, attr, value) {
+    await this.sendKeysToField(id, attr, value);
+    if (attr === 'due') {
+      let button = await this.driver.findElements(
+        By.className('updateDueDate__modal--button')
+      );
+      button = button[0];
+      await button.click();
+    }
     await this.driver.sleep(2000);
     return await this.listWorklists();
-
   }
 
   async fillRequirementForm(requirements) {
@@ -99,6 +123,16 @@ class Worklist extends Basepage {
       //   );
       await this.driver.sleep(1000);
     }
+  }
+
+  async editAssigne(assignee) {
+    await this.handleAssigneeSelect([assignee]);
+    const button = await this.driver.findElements(
+      By.className('updateAssignee__modal--button')
+    );
+    await button[0].click();
+    await this.driver.sleep(1500);
+    return await this.listWorklists();
   }
 
   async createWorklist(name, id, duedate, desc, assignees, requirements) {

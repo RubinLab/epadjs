@@ -121,46 +121,73 @@ describe('executing test scenario on ePAD', () => {
   //   assert.include(worklist2[0].requirements, '1:any:Patient');
   // });
 
-  test('it edits name', async () => {
-    const newValue = 'worklist_test_1_edited_name';
+  // test('it edits name', async () => {
+  //   const newValue = 'worklist_test_1_edited_name';
+  //   const worklists = await worklist.editInput(
+  //     'worklist_test_1',
+  //     'name',
+  //     newValue
+  //   );
+  //   const worklistReturned = worklists.filter(el => el.name === newValue);
+  //   assert.lengthOf(worklistReturned, 1, 'found the updated name');
+  // });
+
+  // TODO create a new user and add it to a worklist and verify
+  // TODO remove the added user and verify
+  // test('it adds assignees', async () => {});
+
+  // TODO Remove a worklist's only assignee it should delet the worklist completely
+  // test('it removes worklist by removing the only assignee', async () => {});
+
+  // test('it edits due date', async () => {
+  //   const newValue = '01012030';
+  //   const worklists = await worklist.editInput(
+  //     'worklist_test_1',
+  //     'due',
+  //     newValue
+  //   );
+  //   const worklistReturned = worklists.filter(el =>  el.duedate === '2030-01-01');
+  //   assert.lengthOf(worklistReturned, 1, 'found the updated date');
+  // });
+
+  test('it deletes due date', async () => {
+    const newValue = '';
     const worklists = await worklist.editInput(
       'worklist_test_1',
-      'name',
+      'due',
       newValue
     );
-    const worklistReturned = worklists.filter(el => el.name === newValue);
-    assert.lengthOf(worklistReturned, 1, 'found the updated name');
+    const worklistReturned = worklists.filter(
+      el =>
+        el.name === 'worklist_test_1_edited_name' &&
+        el.duedate === 'Add due date'
+    );
+    assert.lengthOf(worklistReturned, 1, 'date is deleted');
   });
-
-  test('it adds assignees', async () => {});
-
-  test('it removes assignees', async () => {});
-
-  test('it fills duedate', async () => {});
-
-  test('it edits duedate', async () => {});
-
-  test('it changes duedate', async () => {});
 
   test('it adds requirement', async () => {});
 
-  test('it deletes requirement', async () => {});
+  test('it deletes one requirement', async () => {});
 
-  test('it edits description', async () => {
-    const newValue = 'worklist_test_1_edited_desc';
-    const worklists = await worklist.editInput(
-      'worklist_test_1',
-      'desc',
-      newValue
-    );
-    const worklistReturned = worklists.filter(el => el.desc === newValue);
-    assert.lengthOf(worklistReturned, 1, 'found the updated description');
-  });
+  test('it deletes all requirements', async () => {});
+
+  // test('it edits description', async () => {
+  //   const newValue = 'worklist_test_1_edited_desc';
+  //   const worklists = await worklist.editInput(
+  //     'worklist_test_1',
+  //     'desc',
+  //     newValue
+  //   );
+  //   const worklistReturned = worklists.filter(el => el.desc === newValue);
+  //   assert.lengthOf(worklistReturned, 1, 'found the updated description');
+  // });
+
+  test('it deletes description', async () => {});
 
   test('it adds description', async () => {});
 
-
-  test('it deletes description', async () => {});
+  // TODO
+  // test('it CAN NOT delete name', async () => {});
 
   // test('it deletes single worklist from row', async () => {
   //   const worklistsAfterDelete = await worklist.singleDelete('worklist_test_1');
