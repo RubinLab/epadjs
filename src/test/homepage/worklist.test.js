@@ -150,20 +150,20 @@ describe('executing test scenario on ePAD', () => {
   //   assert.lengthOf(worklistReturned, 1, 'found the updated date');
   // });
 
-  test('it deletes due date', async () => {
-    const newValue = '';
-    const worklists = await worklist.editInput(
-      'worklist_test_1',
-      'due',
-      newValue
-    );
-    const worklistReturned = worklists.filter(
-      el =>
-        el.name === 'worklist_test_1_edited_name' &&
-        el.duedate === 'Add due date'
-    );
-    assert.lengthOf(worklistReturned, 1, 'date is deleted');
-  });
+  // test('it deletes due date', async () => {
+  //   const newValue = '';
+  //   const worklists = await worklist.editInput(
+  //     'worklist_test_1',
+  //     'due',
+  //     newValue
+  //   );
+  //   const worklistReturned = worklists.filter(
+  //     el =>
+  //       el.name === 'worklist_test_1_edited_name' &&
+  //       el.duedate === 'Add due date'
+  //   );
+  //   assert.lengthOf(worklistReturned, 1, 'date is deleted');
+  // });
 
   test('it adds requirement', async () => {});
 
@@ -182,9 +182,36 @@ describe('executing test scenario on ePAD', () => {
   //   assert.lengthOf(worklistReturned, 1, 'found the updated description');
   // });
 
-  test('it deletes description', async () => {});
+  test('it deletes description', async () => {
+    const newValue = '';
+    const worklists = await worklist.editInput(
+      'worklist_test_1',
+      'desc',
+      newValue
+    );
+    const worklistReturned = worklists.filter(
+      el =>
+        el.name === 'worklist_test_1_edited_name' &&
+        el.desc === 'Add description'
+    );
+    assert.lengthOf(worklistReturned, 1, 'description is deleted');
 
-  test('it adds description', async () => {});
+  });
+
+  // test('it adds description', async () => {
+  //   const newValue = 'desc added';
+  //   const worklists = await worklist.editInput(
+  //     'worklist_test_1',
+  //     'desc',
+  //     newValue
+  //   );
+  //   const worklistReturned = worklists.filter(
+  //     el =>
+  //       el.name === 'worklist_test_1_edited_name' &&
+  //       el.desc === 'desc added'
+  //   );
+  //   assert.lengthOf(worklistReturned, 1, 'description is added');
+  // });
 
   // TODO
   // test('it CAN NOT delete name', async () => {});

@@ -84,13 +84,19 @@ class Worklist extends Basepage {
     } else if (!value && attr === 'due') {
       await inputField.sendKeys(Key.DELETE);
     } else {
-      await inputField.clear();
+      const text = await inputField.getAttribute("value");      
+      console.log('  --->text', text);
+      for (let i = 0; i < text.length; i++) {
+          await inputField.sendKeys(Key.BACK_SPACE);
+      }
+      await this.driver.sleep(2000);
       await inputField.sendKeys(Key.RETURN);
     }
     await this.driver.sleep(500);
   }
 
   async editInput(id, attr, value) {
+    await this.driver.sleep(2000);
     await this.sendKeysToField(id, attr, value);
     if (attr === 'due') {
       let button = await this.driver.findElements(
