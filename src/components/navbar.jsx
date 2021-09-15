@@ -87,7 +87,7 @@ const NavBar = ({
                   <NavLink className="nav-link" to="/progress">
                     Progress
                   </NavLink>
-                </li> */}                
+                </li> */}
                 {/* <li className="nav-item">
                   <NavLink className="nav-link" to="/edit">
                     Edit
@@ -109,14 +109,14 @@ const NavBar = ({
               </React.Fragment>
             )}
             <li
-                  className="nav-item"
-                  id="navbarReports"
-                  onClick={() => {
-                    onReports();
-                  }}
-                >
-                  Reports
-                </li>
+              className="nav-item"
+              id="navbarReports"
+              onClick={() => {
+                onReports();
+              }}
+            >
+              Analysis
+            </li>
             <li
               id="navbar-ann"
               className={
