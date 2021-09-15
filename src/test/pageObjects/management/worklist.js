@@ -84,10 +84,9 @@ class Worklist extends Basepage {
     } else if (!value && attr === 'due') {
       await inputField.sendKeys(Key.DELETE);
     } else {
-      const text = await inputField.getAttribute("value");      
-      console.log('  --->text', text);
+      const text = await inputField.getAttribute('value');
       for (let i = 0; i < text.length; i++) {
-          await inputField.sendKeys(Key.BACK_SPACE);
+        await inputField.sendKeys(Key.BACK_SPACE);
       }
       await this.driver.sleep(2000);
       await inputField.sendKeys(Key.RETURN);
@@ -105,6 +104,47 @@ class Worklist extends Basepage {
       button = button[0];
       await button.click();
     }
+    await this.driver.sleep(2000);
+    return await this.listWorklists();
+  }
+
+  async addRequirement(id, requirements) {
+    await this.driver.sleep(2000);
+    const elementId = `req-${id}`;
+    await this.clickById(elementId);
+    // click on add button
+    await this.driver.wait(
+      until.elementLocated(By.className('updateReq__btn'), 1500)
+    );
+    const buttons = await this.driver.findElements(
+      By.className('updateReq__btn')
+    );
+    await buttons[0].click();
+    // fill requirement form
+    await this.driver.wait(
+      until.elementLocated(By.className('worklist-requirementForm'), 1500)
+    );
+    await this.fillRequirementForm(requirements);
+    const submit = await this.driver.findElements(
+      By.className('updateReq__modal--button')
+    );
+    await submit[0].click();
+    await this.driver.sleep(2000);
+    return await this.listWorklists();
+  }
+
+  async deleteRequirement(id) {
+    const elementId = `req-${id}`;
+    await this.clickById(elementId);
+    await this.driver.wait(
+      until.elementLocated(By.css('button[name="edit"]'), 2000)
+    );
+    const button = await this.driver.findElement(By.css('button[name="edit"]'));
+    await button.click();
+    const deleteIcons = await this.driver.findElement(
+      By.css('div[name="delete-req"]')
+    );
+    await deleteIcons.click();
     await this.driver.sleep(2000);
     return await this.listWorklists();
   }
@@ -143,6 +183,7 @@ class Worklist extends Basepage {
 
   async createWorklist(name, id, duedate, desc, assignees, requirements) {
     await this.openCreateWorklist();
+
     if (name) {
       await super.enterTextByCss('#addWorklist-name', name);
     }
@@ -157,7 +198,6 @@ class Worklist extends Basepage {
     }
     // await this.driver.wait(until.elementIsEnabled(By.id('next-btn'), 1000));
     await this.driver.sleep(1000);
-
     await this.clickById('Next');
     // await this.driver.wait(
     //   until.elementIsVisible(By.id('addWorklist-users'), 1000)
@@ -176,7 +216,7 @@ class Worklist extends Basepage {
     if (requirements) {
       await this.fillRequirementForm(requirements);
     }
-
+    await this.driver.sleep(3000);
     await this.clickById('Submit');
   }
 
@@ -214,16 +254,14 @@ class Worklist extends Basepage {
     );
     const tableInfo = [];
     const worklistsResolved = await Promise.all(worklists);
-    const titles = ['name', 'assignees', 'duedate', 'requirements', 'desc'];
 
     for (let i = 0; i < worklistsResolved.length; i += 1) {
+      let titles = ['name', 'assignees', 'duedate', 'requirements', 'desc'];
       let textArr = await worklistsResolved[i].getText();
       textArr = textArr.split('\n');
+      textArr = textArr.filter(el => el !== 'Click to edit requirements');
       const obj = {};
-      for (let k = 0; k < textArr.length; k++) {
-        if ('Click to edit requirements' === textArr[k]) continue;
-        obj[titles[k]] = textArr[k];
-      }
+      for (let k = 0; k < textArr.length; k++) obj[titles[k]] = textArr[k];
       tableInfo.push(obj);
     }
     this.setWorklistList(tableInfo);
