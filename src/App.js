@@ -39,7 +39,7 @@ import {
   selectProject,
   getTemplates,
   segUploadCompleted,
-  annotationsLoadingError,
+  annotationsLoadingError
 } from "./components/annotationsList/action";
 import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
@@ -240,7 +240,6 @@ class App extends Component {
 
   handleReportSelect = e => {
     const { projectMap, selectedPatients, openSeries, activePort } = this.props;
-
     const patients = Object.values(selectedPatients);
     const reportType = e.target.dataset.opt;
     this.handleReportsClick();
@@ -579,17 +578,21 @@ class App extends Component {
         let { mode, apiUrl, wadoUrl, authMode, maxPort } = configData;
         // check and use environment variables if any
         const authServerUrl =
-          process.env.REACT_APP_AUTH_URL || authData["auth-server-url"];
+          process.env.REACT_APP_AUTH_URL || Keycloak["auth-server-url"];
         mode = process.env.REACT_APP_MODE || mode;
         apiUrl = process.env.REACT_APP_API_URL || apiUrl;
         wadoUrl = process.env.REACT_APP_WADO_URL || wadoUrl;
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
+        const waterfallOptions = process.env.REACT_APP_WATERFALL_OPTS;
         maxPort = process.env.REACT_APP_MAX_PORT || maxPort || 6;
         sessionStorage.setItem("mode", mode);
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
         sessionStorage.setItem("authMode", authMode);
         sessionStorage.setItem("maxPort", maxPort);
+        if (waterfallOptions) {
+          sessionStorage.setItem("waterfallOptions", waterfallOptions);
+        }
 
         this.setState({ mode, apiUrl, wadoUrl, authMode });
         const keycloakData = await results[1].json();
@@ -667,7 +670,7 @@ class App extends Component {
     return args;
   };
 
-  handleArgs = async (args) => {
+  handleArgs = async args => {
     const { data } = await decrypt(args);
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
     const { openSeries } = this.props;
@@ -700,20 +703,20 @@ class App extends Component {
         .then(() => {
           this.props.history.push("/display");
         })
-        .catch((err) => console.error(err));
+        .catch(err => console.error(err));
     } else if (patientID && studyUID && projectID) {
       await decryptAndAdd(args);
       const packedData = {
         projectID,
         patientID,
         patientName: "patientName",
-        studyUID,
+        studyUID
       };
       this.displaySeries(packedData);
     }
   };
 
-  displaySeries = async (studyData) => {
+  displaySeries = async studyData => {
     const rawSeriesArray = await this.getSeriesData(studyData);
     if (!rawSeriesArray) return;
     let seriesArr = rawSeriesArray.filter(isSupportedModality);
@@ -727,7 +730,7 @@ class App extends Component {
     if (seriesArr.length + this.props.openSeries.length > maxPort) {
       window.dispatchEvent(
         new CustomEvent("openSeriesModal", {
-          detail: seriesArr,
+          detail: seriesArr
         })
       );
     } else {
@@ -742,8 +745,12 @@ class App extends Component {
         .then(() => {
           this.props.history.push("/display");
         })
-        .catch((err) => console.error(err));
+        .catch(err => console.error(err));
     }
+  };
+
+  isSupportedModality = (serie) => {
+    return DISP_MODALITIES.includes(serie.examType);
   };
 
 
@@ -766,13 +773,13 @@ class App extends Component {
 
       if (authMode === "apiKey") {
         const username = sessionStorage.getItem("username");
-        getAuthUser = new Promise((resolve) => {
+        getAuthUser = new Promise(resolve => {
           resolve({
             userInfo: { preferred_username: username },
             keycloak: null,
-            authenticated: true,
+            authenticated: true
           });
-        }).catch((err) => reject(err));
+        }).catch(err => reject(err));
       } else if (authMode !== "external") {
         const keycloak = Keycloak(
           JSON.parse(sessionStorage.getItem("keycloakJson"))
@@ -780,32 +787,32 @@ class App extends Component {
         getAuthUser = new Promise((resolve, reject) => {
           keycloak
             .init({ onLoad: "login-required" })
-            .then((authenticated) => {
+            .then(authenticated => {
               keycloak
                 .loadUserInfo()
-                .then((userInfo) => {
+                .then(userInfo => {
                   resolve({ userInfo, keycloak, authenticated });
                 })
-                .catch((err) => reject(err));
+                .catch(err => reject(err));
             })
-            .catch((err) => reject(err));
+            .catch(err => reject(err));
         });
       } else {
         // authMode is external ask backend for user
         getAuthUser = new Promise((resolve, reject) => {
           getUserInfo()
-            .then((userInfoResponse) => {
+            .then(userInfoResponse => {
               resolve({
                 userInfo: userInfoResponse.data,
                 keycloak: null,
-                authenticated: true,
+                authenticated: true
               });
             })
-            .catch((err) => reject(err));
+            .catch(err => reject(err));
         });
       }
       getAuthUser
-        .then(async (result) => {
+        .then(async result => {
           try {
             const username =
               result.userInfo.preferred_username || result.userInfo.email;
@@ -821,14 +828,14 @@ class App extends Component {
             }
             let user = {
               user: userData.username,
-              displayname: `${userData.firstname} ${userData.lastname}`,
+              displayname: `${userData.firstname} ${userData.lastname}`
             };
             await auth.setLoginSession(user, null);
             this.setState({
               keycloak: result.keycloak,
               authenticated: result.authenticated,
               id: result.userInfo.sub,
-              user,
+              user
             });
 
             if (authMode === "apiKey") {
@@ -838,8 +845,8 @@ class App extends Component {
                 `${apiUrl}/notifications?user=${user}`,
                 {
                   headers: {
-                    authorization: `apikey ${API_KEY}`,
-                  },
+                    authorization: `apikey ${API_KEY}`
+                  }
                 }
               );
             } else {
@@ -848,8 +855,8 @@ class App extends Component {
                 result.keycloak.token
                   ? {
                       headers: {
-                        authorization: `Bearer ${result.keycloak.token}`,
-                      },
+                        authorization: `Bearer ${result.keycloak.token}`
+                      }
                     }
                   : {}
               );
@@ -864,12 +871,12 @@ class App extends Component {
             reject("Error in user retrieval!", err);
           }
         })
-        .catch((err2) => {
+        .catch(err2 => {
           reject("Authentication failed!", err2);
         });
     });
 
-  getMessageFromEventSrc = (res) => {
+  getMessageFromEventSrc = res => {
     try {
       if (res.data === "heartbeat") {
         return;
@@ -922,7 +929,7 @@ class App extends Component {
   };
 
 
-  onLogout = (e) => {
+  onLogout = e => {
     auth.logout();
     // sessionStorage.removeItem("annotations");
     sessionStorage.setItem("notifications", JSON.stringify([]));
@@ -936,7 +943,7 @@ class App extends Component {
     if (sessionStorage.getItem("authMode") !== "external")
       this.state.keycloak.logout().then(() => {
         this.setState({
-          keycloak: null,
+          keycloak: null
         });
         auth.logout();
       });

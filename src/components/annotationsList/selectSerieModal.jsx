@@ -16,22 +16,28 @@ import { getSeries, setSignificantSeries } from "../../services/seriesServices";
 import "./annotationsList.css";
 import { isSupportedModality } from "../../Utils/aid.js";
 
-const maxPort = sessionStorage.getItem("maxPort");
 const message = {
   title: "Not enough ports to open series"
 };
+
 class selectSerieModal extends React.Component {
-  _isMounted = false;
-  state = {
-    selectionType: "",
-    selectionArr: [],
-    // seriesList: [],
-    selectedToDisplay: [],
-    limit: 0
-  };
+  // _isMounted = false;
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectionType: "",
+      selectionArr: [],
+      // seriesList: [],
+      selectedToDisplay: [],
+      limit: 0,
+      list: []
+    };
+    this.maxPort = sessionStorage.getItem("maxPort");
+  }
+
   //get the serie list
   componentDidMount = async () => {
-    this._isMounted = true;
+    // this._isMounted = true;
     let selectionType = "";
     let { selectedStudies, selectedSeries, selectedAnnotations } = this.props;
     selectedStudies = Object.values(selectedStudies);
@@ -45,7 +51,9 @@ class selectSerieModal extends React.Component {
       selectionType = "aim";
     }
     this.setState({ selectionType });
+    this.setPreSelecteds();
   };
+
   componentWillUnmount = () => {
     this._isMounted = false;
   };
@@ -60,10 +68,14 @@ class selectSerieModal extends React.Component {
     return series;
   };
 
-  componentDidUpdate = prevProps => {
-    if (this.props.openSeries.length !== prevProps.openSeries.length) {
+  componentDidUpdate = (prevProps) => {
+    const { openSeries, seriesPassed } = this.props;
+    if (openSeries.length !== prevProps.openSeries.length) {
       let limit = this.updateLimit();
       this.setState({ limit });
+    }
+    if (seriesPassed.length !== prevProps.seriesPassed.length) {
+      this.setPreSelecteds();
     }
   };
 
@@ -76,6 +88,7 @@ class selectSerieModal extends React.Component {
     });
     return this.props.openSeries.length + selectCount;
   };
+
   selectToDisplay = async e => {
     let arr = [...this.state.selectedToDisplay];
     arr[e.target.dataset.index] = e.target.checked;
@@ -140,17 +153,36 @@ class selectSerieModal extends React.Component {
     this.props.onCancel();
   };
 
+  setPreSelecteds = () => {
+    let selectedToDisplay = [];
+    let series = Object.values(this.props.seriesPassed);
+    let count = 0;
+    for (let i = 0; i < series.length; i++) {
+      for (let k = 0; k < series[i].length; k++) {
+        if (!this.isSerieOpen(series[i][k].seriesUID))
+          selectedToDisplay[count + k] = series[i][k].significanceOrder ? true : false;
+      }
+      count += series[i].length;
+    }
+    this.setState({ selectedToDisplay }, () => { this.setState({ limit: this.updateLimit() }) });
+  }
+
+  isSerieOpen = (serieUID) => {
+    const { openSeries } = this.props;
+    let openSeriesUIDList = [];
+    openSeries.forEach(port => {
+      openSeriesUIDList.push(port.seriesUID);
+    });
+    return openSeriesUIDList.includes(serieUID);
+  }
+
   renderSelection = () => {
     let selectionList = [];
     let item;
     let series = Object.values(this.props.seriesPassed);
     let keys = Object.keys(this.props.seriesPassed);
     let count = 0;
-    let openSeriesUIDList = [];
 
-    this.props.openSeries.forEach(port => {
-      openSeriesUIDList.push(port.seriesUID);
-    });
     // filter the series according to displayable modalities
     for (let i = 0; i < series.length; i++) {
       series[i] = series[i].filter(isSupportedModality);
@@ -168,13 +200,12 @@ class selectSerieModal extends React.Component {
       }
       title = !title ? "Unnamed Study" : title;
       for (let k = 0; k < series[i].length; k++) {
-        let alreadyOpen = openSeriesUIDList.includes(series[i][k].seriesUID);
+        let alreadyOpen = this.isSerieOpen(series[i][k].seriesUID);
         let disabled =
           !this.state.selectedToDisplay[count + k] &&
-          this.state.limit >= maxPort;
+          this.state.limit >= this.maxPort;
         let desc = series[i][k].seriesDescription || "Unnamed Serie";
         // desc = alreadyOpen ? `${desc} - already open` : desc;
-        let preSelected = series[i][k].significanceOrder ? true : false;
         item = alreadyOpen ? (
           <div key={series[i][k].seriesUID} className="alreadyOpen-disabled">
             <FaRegCheckSquare />
@@ -183,11 +214,11 @@ class selectSerieModal extends React.Component {
         ) : (
           <SelectionItem
             desc={desc}
-            onSelect={this.selectToDisplay}
+            onChange={this.selectToDisplay}
             index={count + k}
             disabled={disabled}
             key={series[i][k].seriesUID}
-            preSelected={preSelected}
+            isChecked={this.state.selectedToDisplay[count + k]}
           />
         );
         innerList.push(item);
@@ -214,7 +245,7 @@ class selectSerieModal extends React.Component {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body className="selectSerie-container" style={{ textAlign: "start" }}>
-          <div>Maximum {maxPort} series can be viewed at a time.</div>
+          <div>Maximum {this.maxPort} series can be viewed at a time.</div>
           <button
             size="lg"
             className="selectSerie-clearButton"
@@ -222,7 +253,7 @@ class selectSerieModal extends React.Component {
           >
             Close all views
           </button>
-          {this.state.limit >= maxPort && (
+          {this.state.limit >= this.maxPort && (
             <div>You reached Max number of series</div>
           )}
           <div>{list}</div>
