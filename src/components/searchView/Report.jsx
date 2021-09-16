@@ -57,7 +57,7 @@ const Report = props => {
   };
 
   const getTableArguments = () => {
-    const { report, index } = props;
+    const { report, index, pairs } = props;
     let projectID;
     let patientID;
     if (report !== 'Waterfall') {
@@ -80,13 +80,14 @@ const Report = props => {
       loadFilter = 'shapes=line&metric=standard deviation';
       numofHeaderCols = 2;
       hideCols = [];
-    } else {
+    } else if (report === 'Longitudinal') {
       filter = 'report=Longitudinal';
       if (report != 'Longitudinal') loadFilter = 'metric=' + report;
       if (template != null) filter += '&templatecode=' + template;
       numofHeaderCols = 2;
       hideCols = [];
-      if (report === 'Waterfall') selectedProject = props.selectedProject;
+    } else {
+      selectedProject = pairs[index] ? null : props.selectedProject;
     }
     return {
       id,
@@ -152,10 +153,19 @@ const Report = props => {
     const configOptions = waterfallOptions ? waterfallOptions : [];
     const metricOptions = [...metric, ...configOptions];
     const validMetric = metricOptions.includes(metric);
-
     const type = 'BASELINE';
+    const arg =
+      metric === 'Export (beta)'
+        ? [
+            { field: 'recist', header: 'SLD' },
+            { field: 'mean', header: 'Average HU' }
+          ]
+        : undefined;
     let result;
+    console.log();
     if (validMetric) {
+      // in the getTable arguments chec the props pairs?
+      // if there is a pairs selected return null as pid
       if (selectedProject) {
         result = await getWaterfallReport(
           selectedProject,
@@ -163,15 +173,11 @@ const Report = props => {
           null,
           type,
           metric,
-          metric === 'Export (beta)'
-            ? [
-                { field: 'recist', header: 'SLD' },
-                { field: 'mean', header: 'Average HU' }
-              ]
-            : undefined
+          arg
         );
       } else {
         const projects = Object.keys(filteredPatients);
+
         if (projects.length === 1) {
           const pid = projects[0];
           const subjectUIDs = Object.values(filteredPatients);
@@ -181,13 +187,25 @@ const Report = props => {
             null,
             type,
             metric,
-            metric === 'Export (beta)'
-              ? [
-                  { field: 'recist', header: 'SLD' },
-                  { field: 'mean', header: 'Average HU' }
-                ]
-              : undefined
+            arg
           );
+          // check if the props.pairs' length is bigger than 0
+        } else if (
+          props.pairs &&
+          props.pairs[props.index] &&
+          props.pairs[props.index].length > 0
+        ) {
+          // pass it as pairs to getWaterfallReport call
+          result = await getWaterfallReport(
+            null,
+            null,
+            props.pairs[props.index],
+            type,
+            metric,
+            arg
+
+          );
+          // when the report closed clear the selection in the worklist if the worklist page is mounted
         } else {
           const pairs = constructPairs(filteredPatients);
           result = await getWaterfallReport(
@@ -196,12 +214,7 @@ const Report = props => {
             pairs,
             type,
             metric,
-            metric === 'Export (beta)'
-              ? [
-                  { field: 'recist', header: 'SLD' },
-                  { field: 'mean', header: 'Average HU' }
-                ]
-              : undefined
+            arg
           );
         }
       }
@@ -433,10 +446,15 @@ const Report = props => {
     setShowConfirmModal(false);
   };
 
-  const header =
-    props.report !== 'Waterfall'
-      ? `${props.report} - ${clearCarets(props.patient.subjectName)}`
-      : '';
+  let header = '';
+  if (props.report !== 'Waterfall') {
+    let patientName = '';
+    if (props.patient.subjectName)
+      patientName = clearCarets(props.patient.subjectName);
+    else if (props.patient.patientName)
+      patientName = clearCarets(props.patient.patientName);
+    header = `${props.report} - ${patientName}`;
+  }
 
   const renderWaterfallOptions = () => {
     const configOptions = waterfallOptions ? waterfallOptions : [];

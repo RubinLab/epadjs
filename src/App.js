@@ -108,9 +108,21 @@ class App extends Component {
       minReportsArr: [],
       hiddenReports: {},
       metric: null,
-      searchQuery: ""
+      searchQuery: "",
+      pairs: {},
     };
   }
+
+  getWorklistPatient = (patient, project) => {
+    const pairsSelected = patient.reduce((all, item, index) => {
+      all.push({ subjectID: item, projectID: project[index] });
+      return all;
+    }, []);
+    const pairs = { ...this.state.pairs };
+    const index = this.state.reportsCompArr.length;
+    pairs[index] = pairsSelected;
+    this.setState({ pairs });
+  };
 
   getProjectAdded = () => {
     this.setState(state => ({
@@ -146,31 +158,41 @@ class App extends Component {
 
   closeReportModal = index => {
     const arr = [...this.state.reportsCompArr];
+    const pairs = { ...this.state.pairs };
+    if (this.state.pairs[index]) {
+      delete pairs[index];
+    }
     arr[index] = null;
     this.setState({
       template: null,
       report: null,
-      reportsCompArr: arr
+      reportsCompArr: arr,
+      pairs
     });
 
     // if there isn"t any report open clear selection
     const nullCount = this.countCurrentReports(arr);
     if (nullCount === arr.length) {
       this.props.dispatch(clearSelection());
-      this.props.history.push(`/display`);
+      // this.props.history.push(`/display`);
     }
   };
 
   handleCloseMinimize = (index, reportIndex) => {
     const hiddenReports = { ...this.state.hiddenReports };
     const minReportsArr = [...this.state.minReportsArr];
+    const pairs = { ...this.state.pairs };
+
+    if (pairs[reportIndex]) {
+      delete pairs[reportIndex];
+    }
 
     minReportsArr[index] = null;
     delete hiddenReports[reportIndex];
-
     this.setState({
       hiddenReports,
-      minReportsArr
+      minReportsArr,
+      pairs
     });
 
     this.closeReportModal(reportIndex);
@@ -217,25 +239,51 @@ class App extends Component {
   };
 
   handleReportSelect = e => {
-    const { projectMap, selectedPatients } = this.props;
+    const { projectMap, selectedPatients, openSeries, activePort } = this.props;
     const patients = Object.values(selectedPatients);
     const reportType = e.target.dataset.opt;
     this.handleReportsClick();
     if (patients.length === 0) {
       if (reportType === "Waterfall") {
-        this.setState({
-          showConfirmation: true,
-          title: messages.projectWaterfall.title,
-          message:
-            messages.projectWaterfall.message +
-            projectMap[this.state.pid].projectName
-        });
+        if (Object.keys(this.state.pairs).length > 0) {
+          this.displayWaterfall();
+        } else {
+          this.setState({
+            showConfirmation: true,
+            title: messages.projectWaterfall.title,
+            message:
+              messages.projectWaterfall.message +
+              projectMap[this.state.pid].projectName
+          });
+        }
       } else {
-        this.setState({
-          showWarning: true,
-          title: messages.noPatient.title,
-          message: messages.noPatient.message
-        });
+        if (openSeries.length > 0) {
+          const reportsCompArr = [...this.state.reportsCompArr];
+          const index = reportsCompArr.length;
+          reportsCompArr.push(
+            <Report
+              onClose={this.closeReportModal}
+              report={reportType}
+              index={index}
+              patient={openSeries[activePort]}
+              key={`report${index}`}
+              waterfallClickOn={this.handleWaterFallClickOnBar}
+              handleMetric={this.getMetric}
+              onMinimize={this.handleMinimizeReport}
+            />
+          );
+          this.setState({
+            template: null,
+            reportType,
+            reportsCompArr
+          });
+        } else {
+          this.setState({
+            showWarning: true,
+            title: messages.noPatient.title,
+            message: messages.noPatient.message
+          });
+        }
       }
     } else if (patients.length > 1 && reportType !== "Waterfall") {
       this.setState({
@@ -308,6 +356,7 @@ class App extends Component {
         onClose={this.closeReportModal}
         report={"Waterfall"}
         index={index}
+        pairs={this.state.pairs}
         // patient={patients[0]}
         key={`report${index}`}
         waterfallClickOn={this.handleWaterFallClickOnBar}
@@ -525,6 +574,7 @@ class App extends Component {
     ])
       .then(async results => {
         const configData = await results[0].json();
+
         let { mode, apiUrl, wadoUrl, authMode, maxPort } = configData;
         // check and use environment variables if any
         const authServerUrl =
@@ -595,6 +645,7 @@ class App extends Component {
       this.setState({ pid: newPid });
     }
   };
+
 
   componentWillUnmount = () => {
     this.eventSource.removeEventListener(
@@ -701,6 +752,7 @@ class App extends Component {
   isSupportedModality = (serie) => {
     return DISP_MODALITIES.includes(serie.examType);
   };
+
 
   getSeriesData = async (studyData) => {
     const { projectID, patientID, studyUID } = studyData;
@@ -876,6 +928,7 @@ class App extends Component {
     }
   };
 
+
   onLogout = e => {
     auth.logout();
     // sessionStorage.removeItem("annotations");
@@ -886,6 +939,7 @@ class App extends Component {
       name: null,
       user: null
     });
+
     if (sessionStorage.getItem("authMode") !== "external")
       this.state.keycloak.logout().then(() => {
         this.setState({
@@ -1187,6 +1241,7 @@ class App extends Component {
         )}
         {this.state.reportsCompArr}
         {this.state.minReportsArr}
+
         {!this.state.authenticated && mode !== "lite" && (
           <Route path="/login" component={LoginForm} />
         )}
@@ -1291,7 +1346,16 @@ class App extends Component {
                     />
                   )}
                 />
-                <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
+                <ProtectedRoute
+                  path="/worklist/:wid?"
+                  render={props => (
+                    <Worklist
+                      {...props}
+                      getWorklistPatient={this.getWorklistPatient}
+                      reports={this.state.reportsCompArr}
+                    />
+                  )}
+                />
                 {/* component={Worklist} /> */}
                 <Route path="/tools" />
                 <Route path="/edit" />
@@ -1341,6 +1405,7 @@ class App extends Component {
             pid={this.state.pid}
             clearTreeExpand={this.clearTreeExpand}
             projectAdded={this.state.projectAdded}
+            getWorklistPatient={this.getWorklistPatient}
           >
             <Switch>
               <Route path="/logout" component={Logout} />
@@ -1358,7 +1423,16 @@ class App extends Component {
                 )}
               />
               <Route path="/not-found" component={NotFound} />
-              <ProtectedRoute path="/worklist/:wid?" component={Worklist} />
+              <ProtectedRoute
+                path="/worklist/:wid?"
+                render={props => (
+                  <Worklist
+                    {...props}
+                    getWorklistPatient={this.getWorklistPatient}
+                    reports={this.state.reportsCompArr}
+                  />
+                )}
+              />
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
                 path="/search"
