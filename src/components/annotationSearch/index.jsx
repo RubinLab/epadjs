@@ -3,7 +3,15 @@ import { connect } from 'react-redux';
 import { toast } from 'react-toastify';
 import _ from 'lodash';
 import Collapsible from 'react-collapsible';
-import { FaSearch, FaPlus, FaEraser } from 'react-icons/fa';
+import { HiOutlineFolderDownload } from 'react-icons/hi';
+import {
+  FaDownload,
+  FaUpload,
+  FaRegTrashAlt,
+  FaSearch,
+  FaPlus,
+  FaEraser
+} from 'react-icons/fa';
 import ReactTooltip from 'react-tooltip';
 import {
   searchAnnotations,
@@ -77,6 +85,7 @@ const AnnotationSearch = props => {
   const [downloadClicked, setDownloadClicked] = useState(false);
   const [error, setError] = useState('');
   const [bookmark, setBookmark] = useState('');
+  const [uploadClicked, setUploadClicked] = useState(false);
 
   const populateSearchResult = (res, pagination) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -507,12 +516,100 @@ const AnnotationSearch = props => {
     return options;
   };
 
+  const onUpload = () => {
+    setUploadClicked(true);
+  };
+
   const renderProjectSelect = () => {
     return (
       <div
         className="annotationSearch-cont__item"
         style={{ margin: '1rem 0rem' }}
       >
+        <>
+          <div onClick={onUpload}>
+            <FaUpload className="tool-icon" data-tip data-for="upload-icon" />
+          </div>
+          <ReactTooltip
+            id="upload-icon"
+            place="right"
+            type="info"
+            delayShow={1000}
+          >
+            <span className="filter-label">Upload files</span>
+          </ReactTooltip>
+        </>
+        <>
+          <div
+          // onClick={onDownload}
+          >
+            <FaDownload
+              className="tool-icon"
+              data-tip
+              data-for="download-icon"
+            />
+          </div>
+          <ReactTooltip
+            id="download-icon"
+            place="right"
+            type="info"
+            delayShow={1000}
+          >
+            <span className="filter-label">Download selections</span>
+          </ReactTooltip>
+        </>
+        <>
+          <div
+          // onClick={onProjectDownload}
+          >
+            <HiOutlineFolderDownload
+              className={props.pid === 'all_aims' ? 'hide-delete' : 'tool-icon'}
+              data-tip
+              data-for="downloadProject-icon"
+              style={{ fontSize: '1.7rem' }}
+            />
+          </div>
+          <ReactTooltip
+            id="downloadProject-icon"
+            place="right"
+            type="info"
+            delayShow={1000}
+          >
+            <span className="filter-label">
+              Download all annotations of the project
+            </span>
+          </ReactTooltip>
+        </>
+        <>
+          <div
+          // onClick={onDelete}
+          >
+            <FaRegTrashAlt
+              className="tool-icon"
+              // className="tool-icon"
+              // onClick={onDelete}
+              style={
+                Object.keys(props.selectedAnnotations).length === 0
+                  ? {
+                      fontSize: '1.1rem',
+                      color: 'rgb(107, 107, 107)',
+                      cursor: 'not-allowed'
+                    }
+                  : null
+              }
+              data-tip
+              data-for="trash-icon"
+            />
+          </div>
+          <ReactTooltip
+            id="trash-icon"
+            place="right"
+            type="info"
+            delayShow={1000}
+          >
+            <span className="filter-label">Delete selections</span>
+          </ReactTooltip>
+        </>
         <div
           className="annotaionSearch-title"
           style={{ fontsize: '1.2rem' }}
@@ -530,6 +627,11 @@ const AnnotationSearch = props => {
         />
       </div>
     );
+  };
+
+  const handleSubmitUpload = () => {
+    setUploadClicked(false);
+    getAnnotationsOfProjets();
   };
 
   return (
@@ -638,7 +740,7 @@ const AnnotationSearch = props => {
           {renderOrganizeItem('organize')}
         </Collapsible>
         {mode !== 'lite' && renderProjectSelect()}
-        {Object.keys(props.selectedAnnotations).length !== 0 && (
+        {/* {Object.keys(props.selectedAnnotations).length !== 0 && (
           <button
             className={`btn btn-secondary`}
             style={styles.downloadButton}
@@ -649,7 +751,7 @@ const AnnotationSearch = props => {
           >
             DOWNLOAD
           </button>
-        )}
+        )} */}
         {data.length > 0 && (
           <AnnotationTable
             data={data}
@@ -669,6 +771,17 @@ const AnnotationSearch = props => {
           }}
           onCancel={() => setDownloadClicked(false)}
           updateStatus={() => console.log('update status')}
+        />
+      )}
+      {uploadClicked && (
+        <UploadModal
+          onCancel={() => setUploadClicked(false)}
+          onResolve={handleSubmitUpload}
+          className="mng-upload"
+          // projectID={this.state.projectID}
+          pid={props.pid}
+          // clearTreeData={this.props.clearTreeData}
+          // clearTreeExpand={this.props.clearTreeExpand}
         />
       )}
     </div>
