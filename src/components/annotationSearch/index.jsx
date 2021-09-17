@@ -19,7 +19,14 @@ const lists = {
   organize: ['AND', 'OR', '(', ')'],
   paranthesis: ['(', ')'],
   condition: ['AND', 'OR'],
-  type: ['modality', 'observation', 'anatomy'],
+  type: [
+    'modality',
+    'observation',
+    'anatomy',
+    'lesion_name',
+    'patient',
+    'template'
+  ],
   criteria: ['equals', 'contains']
 };
 
@@ -104,7 +111,7 @@ const AnnotationSearch = props => {
       const searchQueryProject = Object.values(props.searchQuery)[0].project;
       setQuery(searchQueryText);
       setSelectedProject(searchQueryProject || '');
-      searchAnnotations({ query: searchQueryFinal})
+      searchAnnotations({ query: searchQueryFinal })
         .then(res => {
           populateSearchResult(res);
         })
@@ -451,7 +458,13 @@ const AnnotationSearch = props => {
           ) {
             all = `${all} ${item.toUpperCase()} `;
           } else if (lists.type.includes(item)) {
-            all += `${item}`;
+            if (item === 'patient') {
+              all += 'patient_name';
+            } else if (item === 'template') {
+              all += 'template_code';
+            } else if (item === 'lesion_name') {
+              all += 'name';
+            } else all += `${item}`;
           } else if (lists.paranthesis.includes(item)) {
             all += `${item}`;
           } else {
