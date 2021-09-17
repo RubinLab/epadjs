@@ -22,6 +22,8 @@ import AnnotationTable from './AnnotationTable.jsx';
 import './annotationSearch.css';
 import { clearSelection, selectAnnotation } from '../annotationsList/action';
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
+import UploadModal from  '../searchView/uploadModal'
+
 
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
