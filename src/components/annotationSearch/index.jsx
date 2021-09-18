@@ -16,14 +16,15 @@ import ReactTooltip from 'react-tooltip';
 import {
   searchAnnotations,
   getAllAnnotations,
-  getSummaryAnnotations
+  getSummaryAnnotations,
+  downloadProjectAnnotation
 } from './../../services/annotationServices.js';
 import AnnotationTable from './AnnotationTable.jsx';
 import './annotationSearch.css';
 import { clearSelection, selectAnnotation } from '../annotationsList/action';
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
-import UploadModal from  '../searchView/uploadModal'
-
+import UploadModal from '../searchView/uploadModal';
+import DownloadModal from '../searchView/annotationDownloadModal';
 
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
@@ -46,7 +47,9 @@ const explanation = {
   criteria: 'Select a criteria',
   term: 'Type the key word that you want to look for above',
   project: 'Search in all ePAD',
-  noResult: 'Can not find any result!'
+  noResult: 'Can not find any result!',
+  downloadProject:
+  'Preparing project for download. The link to the files will be sent with a notification after completion!'
 };
 
 const styles = {
@@ -518,8 +521,31 @@ const AnnotationSearch = props => {
     return options;
   };
 
-  const onUpload = () => {
-    setUploadClicked(true);
+  const triggerBrowserDownload = (blob, fileName) => {
+    const url = window.URL.createObjectURL(new Blob([blob]));
+    const link = document.createElement('a');
+    document.body.appendChild(link);
+    link.style = 'display: none';
+    link.href = url;
+    link.download = `${fileName}.zip`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const downloadProjectAim = () => {
+    if (props.pid === 'all' || props.pid === 'nonassigned') return;
+    downloadProjectAnnotation(props.pid)
+      .then(result => {
+        if (result.data.type === 'application/octet-stream') {
+          let blob = new Blob([result.data], { type: 'application/zip' });
+          triggerBrowserDownload(blob, `Project ${props.pid}`);
+        } else
+          toast.success(explanation.downloadProject, {
+            autoClose: false,
+            position: 'bottom-left'
+          });
+      })
+      .catch(err => console.error(err));
   };
 
   const renderProjectSelect = () => {
@@ -529,7 +555,7 @@ const AnnotationSearch = props => {
         style={{ margin: '1rem 0rem' }}
       >
         <>
-          <div onClick={onUpload}>
+          <div onClick={() => setUploadClicked(true)}>
             <FaUpload className="tool-icon" data-tip data-for="upload-icon" />
           </div>
           <ReactTooltip
@@ -542,9 +568,7 @@ const AnnotationSearch = props => {
           </ReactTooltip>
         </>
         <>
-          <div
-          // onClick={onDownload}
-          >
+          <div onClick={() => setDownloadClicked(true)}>
             <FaDownload
               className="tool-icon"
               data-tip
@@ -561,9 +585,7 @@ const AnnotationSearch = props => {
           </ReactTooltip>
         </>
         <>
-          <div
-          // onClick={onProjectDownload}
-          >
+          <div onClick={downloadProjectAim}>
             <HiOutlineFolderDownload
               className={props.pid === 'all_aims' ? 'hide-delete' : 'tool-icon'}
               data-tip
