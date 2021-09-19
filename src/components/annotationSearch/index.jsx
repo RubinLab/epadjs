@@ -39,7 +39,7 @@ const lists = {
     'patient',
     'template'
   ],
-  criteria: ['equals', 'contains']
+  criteria: ['contains'] // 'equals'
 };
 
 const explanation = {
