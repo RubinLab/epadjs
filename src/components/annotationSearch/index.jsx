@@ -17,15 +17,16 @@ import {
   searchAnnotations,
   getAllAnnotations,
   getSummaryAnnotations,
-  downloadProjectAnnotation
+  downloadProjectAnnotation,
+  deleteAnnotationsList
 } from './../../services/annotationServices.js';
 import AnnotationTable from './AnnotationTable.jsx';
 import './annotationSearch.css';
 import { clearSelection, selectAnnotation } from '../annotationsList/action';
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
 import UploadModal from '../searchView/uploadModal';
-import DownloadModal from '../searchView/annotationDownloadModal';
-
+import DeleteAlert from '../management/common/alertDeletionModal';
+// /common/alertDeletionModal
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
   paranthesis: ['(', ')'],
@@ -42,6 +43,7 @@ const lists = {
 };
 
 const explanation = {
+  deleteSelected: 'Delete selected annotations? This cannot be undone.',
   organize: 'Group and/or organize your query: ',
   type: 'Select a field from annotation',
   criteria: 'Select a criteria',
@@ -49,7 +51,7 @@ const explanation = {
   project: 'Search in all ePAD',
   noResult: 'Can not find any result!',
   downloadProject:
-  'Preparing project for download. The link to the files will be sent with a notification after completion!'
+    'Preparing project for download. The link to the files will be sent with a notification after completion!'
 };
 
 const styles = {
@@ -91,6 +93,7 @@ const AnnotationSearch = props => {
   const [error, setError] = useState('');
   const [bookmark, setBookmark] = useState('');
   const [uploadClicked, setUploadClicked] = useState(false);
+  const [deleteSelectedClicked, setDeleteSelectedClicked] = useState(false);
 
   const populateSearchResult = (res, pagination) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -605,9 +608,7 @@ const AnnotationSearch = props => {
           </ReactTooltip>
         </>
         <>
-          <div
-          // onClick={onDelete}
-          >
+          <div onClick={() => setDeleteSelectedClicked(true)}>
             <FaRegTrashAlt
               className="tool-icon"
               // className="tool-icon"
@@ -656,6 +657,64 @@ const AnnotationSearch = props => {
   const handleSubmitUpload = () => {
     setUploadClicked(false);
     getAnnotationsOfProjets();
+  };
+
+  const checkIfSerieOpen = (obj, openSeries) => {
+    let isOpen = false;
+    let index;
+    const { seriesUID, projectID } = obj;
+    openSeries.forEach((serie, i) => {
+      if (serie.seriesUID === seriesUID && projectID === serie.projectID) {
+        isOpen = true;
+        index = i;
+      }
+    });
+    return { isOpen, index };
+  };
+
+  const deleteAllSelected = () => {
+    const notDeleted = {};
+    let newSelected = Object.assign({}, props.selectedAnnotations);
+    const toBeDeleted = {};
+    const promiseArr = [];
+    for (let annotation in newSelected) {
+      const { projectID } = newSelected[annotation];
+      if (
+        checkIfSerieOpen(newSelected[annotation], props.openSeries).isOpen
+      ) {
+        notDeleted[annotation] = newSelected[annotation];
+        delete newSelected[annotation];
+      } else {
+        toBeDeleted[projectID]
+          ? toBeDeleted[projectID].push(annotation)
+          : (toBeDeleted[projectID] = [annotation]);
+      }
+    }
+    const projects = Object.keys(toBeDeleted);
+    const aims = Object.values(toBeDeleted);
+
+    projects.forEach((pid, i) => {
+      promiseArr.push(deleteAnnotationsList(pid, aims[i]));
+    });
+
+    Promise.all(promiseArr)
+      .then(() => {
+        getAnnotationsOfProjets();
+        // this.props.updateProgress();
+        const keys = Object.keys(notDeleted);
+        // this.props.clearAllTreeData();
+      })
+      .catch(error => {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        )
+          toast.error(error.response.data.message, { autoClose: false });
+          getAnnotationsOfProjets();
+        });
+        setDeleteSelectedClicked(false);
+        props.dispatch(clearSelection());
   };
 
   return (
@@ -808,6 +867,14 @@ const AnnotationSearch = props => {
           // clearTreeExpand={this.props.clearTreeExpand}
         />
       )}
+      {deleteSelectedClicked && (
+        <DeleteAlert
+          message={explanation.deleteSelected}
+          onCancel={() => setDeleteSelectedClicked(false)}
+          onDelete={deleteAllSelected}
+          error={explanation.errorMessage}
+        />
+      )}
     </div>
   );
 };
@@ -815,7 +882,8 @@ const AnnotationSearch = props => {
 const mapsStateToProps = state => {
   return {
     projectMap: state.annotationsListReducer.projectMap,
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+    openSeries: state.annotationsListReducer.openSeries,
   };
 };
 
