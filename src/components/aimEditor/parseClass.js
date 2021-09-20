@@ -82,6 +82,7 @@ export var AimEditor = function (
   this.anyClosedShapeTypes = ["Circle", "Polyline", "Polygon"]; // what is polyline ?
   this.templateShapeArray = []; //each array element is a json object {"shape":'Point', "domid" : '2.25.33554445511225454'});
   this.defaultTemplate = null;
+  this.preOpen = null;
   this.aimForAutoFill = "";
   this.isRecistFlag = false;
 
@@ -151,9 +152,13 @@ export var AimEditor = function (
   };
 
   this.loadTemplates = function (templateList) {
-    let defaultTempCodeVal = "";
+    let defaultTempCodeVal = '';
+    let preOpenTempCodeValue = '';
     if (templateList.default) {
       defaultTempCodeVal = templateList.default;
+    }
+    if (templateList.preOpen && templateList.preOpen !== '' ) {
+      preOpenTempCodeValue = templateList.preOpen;
     }
     self.arrayTemplatesJsonObjects = JSON.parse(
       JSON.stringify(templateList.all)
@@ -173,6 +178,11 @@ export var AimEditor = function (
           if (templateList.default !== null) {
             if (defaultTempCodeVal === object.codeValue) {
               self.defaultTemplate = i + 1;
+            }
+          }
+          if (preOpenTempCodeValue !== '') {
+            if (preOpenTempCodeValue === object.codeValue) {
+              self.preOpen = i + 1;
             }
           }
         }
@@ -300,8 +310,10 @@ export var AimEditor = function (
         self.extractTemplate(self.jsonTemplateCopy);
       }
     };
-
-    if (self.defaultTemplate !== null) {
+    if (self.preOpen !== null) {
+      self.templateSelect.selectedIndex = self.preOpen;
+      self.templateSelect.onchange();
+    }else if (self.defaultTemplate !== null) {
       self.templateSelect.selectedIndex = self.defaultTemplate;
       self.templateSelect.onchange();
     }
