@@ -269,7 +269,15 @@ const AnnotationSearch = props => {
     } else {
       let searchQuery = parseQuery();
       setData([]);
-      if (selectedProject) searchQuery += ` AND project:${selectedProject}`;
+      if (selectedProject) {
+        const multiSearch =
+          searchQuery.includes('AND') || searchQuery.includes('OR');
+        const notHaveParanthesis =
+          searchQuery[0] !== '(' || searchQuery[searchQuery.length - 1] !== ')';
+        if (multiSearch && notHaveParanthesis)
+          searchQuery = `(${searchQuery}) AND project:${selectedProject}`;
+        else searchQuery += ` AND project:${selectedProject}`;
+      }
       if (searchQuery) {
         setError('');
         const queryToSave = {
@@ -679,9 +687,7 @@ const AnnotationSearch = props => {
     const promiseArr = [];
     for (let annotation in newSelected) {
       const { projectID } = newSelected[annotation];
-      if (
-        checkIfSerieOpen(newSelected[annotation], props.openSeries).isOpen
-      ) {
+      if (checkIfSerieOpen(newSelected[annotation], props.openSeries).isOpen) {
         notDeleted[annotation] = newSelected[annotation];
         delete newSelected[annotation];
       } else {
@@ -711,10 +717,10 @@ const AnnotationSearch = props => {
           error.response.data.message
         )
           toast.error(error.response.data.message, { autoClose: false });
-          getAnnotationsOfProjets();
-        });
-        setDeleteSelectedClicked(false);
-        props.dispatch(clearSelection());
+        getAnnotationsOfProjets();
+      });
+    setDeleteSelectedClicked(false);
+    props.dispatch(clearSelection());
   };
 
   return (
@@ -883,7 +889,7 @@ const mapsStateToProps = state => {
   return {
     projectMap: state.annotationsListReducer.projectMap,
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
-    openSeries: state.annotationsListReducer.openSeries,
+    openSeries: state.annotationsListReducer.openSeries
   };
 };
 
