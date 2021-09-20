@@ -699,7 +699,12 @@ class DisplayView extends Component {
   };
 
   getViewports = (containerHeight) => {
-    const numSeries = this.props.series.length;
+    const { hiding } = this.state;
+    // if a viewport is maximized (hiding=true) than arrange the display as if there is only one serie
+    let numSeries = 1;
+    if (!hiding) {
+      numSeries = this.props.series.length;
+    }
     const { width, height } = getVPDimensions(numSeries);
     this.setState({ width, height });
   };
