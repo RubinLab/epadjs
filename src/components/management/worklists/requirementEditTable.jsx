@@ -49,6 +49,7 @@ class RequirementEditTable extends React.Component {
         Cell: row => (
           <div
             className="menu-clickable"
+            name="delete-req"
             onClick={() => {
               this.onClickTable(row.original.id, "delete");
             }}
