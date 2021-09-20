@@ -463,6 +463,17 @@ const AnnotationSearch = props => {
     );
   };
 
+  const handleWhitespace = text => {
+    let result = text.trim().replace(/ {2,}/g, ' ');
+    if (result.includes(' ')) {
+      result = result.split(' ').reduce((all, item, i) => {
+        if (item === ' ') all += `\\${item}`;
+        return all;
+      }, '');
+    }
+    return result;
+  };
+
   const parseQuery = () => {
     // check if query contains any predefined words
     const queryArray = seperateParanthesis(query.split(' '));
@@ -493,11 +504,12 @@ const AnnotationSearch = props => {
           } else if (lists.paranthesis.includes(item)) {
             all += `${item}`;
           } else {
+            const text = handleWhitespace(item);
             if (criteria === 'equals') {
-              all += `"${item}"`;
+              all += `"${text}"`;
             }
             if (criteria === 'contains') {
-              all += `${item}`;
+              all += `${text}`;
             }
           }
           return all;
