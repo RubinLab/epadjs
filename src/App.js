@@ -109,7 +109,7 @@ class App extends Component {
       hiddenReports: {},
       metric: null,
       searchQuery: "",
-      pairs: {},
+      pairs: {}
     };
   }
 
@@ -174,7 +174,14 @@ class App extends Component {
     const nullCount = this.countCurrentReports(arr);
     if (nullCount === arr.length) {
       this.props.dispatch(clearSelection());
-      // this.props.history.push(`/display`);
+      if (this.props.openSeries.length === 0 || this.props.location.pathname.includes("display")) {
+        this.props.history.push(`/display`);
+      } else if (this.props.location.pathname.includes("/list/")) {
+        const newPid = this.props.location.pathname.split("/").pop();
+        this.setState({ pid: newPid });
+      } else {
+        this.props.history.push(this.props.location.pathname);
+      }
     }
   };
 
@@ -646,7 +653,6 @@ class App extends Component {
     }
   };
 
-
   componentWillUnmount = () => {
     this.eventSource.removeEventListener(
       "message",
@@ -749,12 +755,11 @@ class App extends Component {
     }
   };
 
-  isSupportedModality = (serie) => {
+  isSupportedModality = serie => {
     return DISP_MODALITIES.includes(serie.examType);
   };
 
-
-  getSeriesData = async (studyData) => {
+  getSeriesData = async studyData => {
     const { projectID, patientID, studyUID } = studyData;
     try {
       const { data: series } = await getSeries(projectID, patientID, studyUID);
@@ -927,7 +932,6 @@ class App extends Component {
       console.error(err);
     }
   };
-
 
   onLogout = e => {
     auth.logout();
