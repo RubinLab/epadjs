@@ -270,6 +270,7 @@ class App extends Component {
           reportsCompArr.push(
             <Report
               onClose={this.closeReportModal}
+              pairs={this.state.pairs}
               report={reportType}
               index={index}
               patient={openSeries[activePort]}
@@ -308,6 +309,7 @@ class App extends Component {
           index={index}
           patient={patients[0]}
           key={`report${index}`}
+          pairs={this.state.pairs}
           waterfallClickOn={this.handleWaterFallClickOnBar}
           handleMetric={this.getMetric}
           onMinimize={this.handleMinimizeReport}
@@ -343,6 +345,7 @@ class App extends Component {
         report={this.state.metric}
         index={index}
         patient={patient}
+        pairs={this.state.pairs}
         key={`report${index}`}
         waterfallClickOn={this.handleWaterFallClickOnBar}
         handleMetric={this.getMetric}
