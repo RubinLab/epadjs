@@ -22,7 +22,7 @@ import {
 const maxPort = sessionStorage.getItem('maxPort');
 let waterfallOptions = sessionStorage.getItem('waterfallOptions');
 if (waterfallOptions) waterfallOptions = waterfallOptions.split('-');
-const metric = ['RECIST', 'ADLA', 'intensitystddev', 'Export (beta)'];
+const metricDefaultOptions = ['RECIST', 'ADLA', 'intensitystddev', 'Export (beta)'];
 const messages = {
   title: 'Can not open all series',
   message: `Maximum ${maxPort} series can be opened. Please close already opened series first.`
@@ -151,7 +151,7 @@ const Report = props => {
     const metric = e.target.value;
     props.handleMetric(metric);
     const configOptions = waterfallOptions ? waterfallOptions : [];
-    const metricOptions = [...metric, ...configOptions];
+    const metricOptions = [...metricDefaultOptions, ...configOptions];
     const validMetric = metricOptions.includes(metric);
     const type = 'BASELINE';
     const arg =
@@ -162,7 +162,6 @@ const Report = props => {
           ]
         : undefined;
     let result;
-    console.log();
     if (validMetric) {
       // in the getTable arguments chec the props pairs?
       // if there is a pairs selected return null as pid
@@ -177,7 +176,6 @@ const Report = props => {
         );
       } else {
         const projects = Object.keys(filteredPatients);
-
         if (projects.length === 1) {
           const pid = projects[0];
           const subjectUIDs = Object.values(filteredPatients);
@@ -203,7 +201,6 @@ const Report = props => {
             type,
             metric,
             arg
-
           );
           // when the report closed clear the selection in the worklist if the worklist page is mounted
         } else {
@@ -458,11 +455,7 @@ const Report = props => {
 
   const renderWaterfallOptions = () => {
     const configOptions = waterfallOptions ? waterfallOptions : [];
-    const options = [
-      'Choose to filter',
-      ...metric,
-      ...configOptions,
-    ];
+    const options = ['Choose to filter', ...metricDefaultOptions, ...configOptions];
     return options.map((el, i) => {
       return <option key={`option-${i}`}>{el}</option>;
     });
