@@ -22,7 +22,7 @@ import {
 } from "../../services/worklistServices";
 import { getSeries } from "../../services/seriesServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
-import SeriesPopup from "./seriesPopup";
+import SelectSeriesModal from "../annotationsList/selectSerieModal";
 import {
   addToGrid,
   getSingleSerie,
@@ -58,7 +58,8 @@ class WorkList extends React.Component {
     selectedSeries: {},
     error: null,
     patients: [],
-    projects: []
+    projects: [],
+    studyName: ""
   };
 
   componentDidMount = async () => {
@@ -66,7 +67,6 @@ class WorkList extends React.Component {
   };
 
   componentDidUpdate = prevProps => {
-
     if (prevProps.match.params.wid !== this.props.match.params.wid) {
       this.getWorkListData(true);
       this.setState({
@@ -104,7 +104,6 @@ class WorkList extends React.Component {
     if (showError && Array.isArray(notAuthorized) && notAuthorized.length > 0) {
       const projectList = notAuthorized.reduce((all, item, i) => {
         return `${all} ${item}${notAuthorized.length - 1 === i ? "" : ", "}`;
-
       }, "");
       const message = `${messages.notAuthorizedProjects} ${projectList}`;
       toast.error(message, {
@@ -204,11 +203,12 @@ class WorkList extends React.Component {
   }
 
   handleOpenClick = async study => {
-    const { projectID, subjectID, studyUID } = study;
+    const { projectID, subjectID, studyUID, studyDescription } = study;
     const { data: series } = await getSeries(projectID, subjectID, studyUID);
     this.setState(state => ({
       showSeries: !state.showSeries,
-      series
+      series,
+      studyName: studyDescription
     }));
   };
 
@@ -744,13 +744,10 @@ class WorkList extends React.Component {
           />
         )}
         {this.state.showSeries && (
-          <SeriesPopup
-            series={this.state.series}
-            open={this.viewSelection}
-            cancel={this.handleCancelOpenSeries}
-            selectSeries={this.selectSeries}
-            error={this.state.error}
-            openSeries={openSeriesUIDs}
+          <SelectSeriesModal
+            seriesPassed={[this.state.series]}
+            onCancel={this.handleCancelOpenSeries}
+            studyName={this.state.studyName}
           />
         )}
       </div>

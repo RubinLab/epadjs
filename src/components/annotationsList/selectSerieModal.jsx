@@ -68,7 +68,7 @@ class selectSerieModal extends React.Component {
     return series;
   };
 
-  componentDidUpdate = (prevProps) => {
+  componentDidUpdate = prevProps => {
     const { openSeries, seriesPassed } = this.props;
     if (openSeries.length !== prevProps.openSeries.length) {
       let limit = this.updateLimit();
@@ -105,14 +105,17 @@ class selectSerieModal extends React.Component {
     studies.forEach(arr => {
       series = series.concat(arr);
     });
-    let significanceSet = series.some((serie) => serie.significanceOrder > 0);
+    let significanceSet = series.some(serie => serie.significanceOrder > 0);
 
     // let series = Object.values(this.props.seriesPassed)[0];
     //concatanete all arrays to getther
     for (let i = 0; i < this.state.selectedToDisplay.length; i++) {
       if (this.state.selectedToDisplay[i]) {
         if (!significanceSet) {
-          significantSeries.push({ seriesUID: series[i].seriesUID, significanceOrder })
+          significantSeries.push({
+            seriesUID: series[i].seriesUID,
+            significanceOrder
+          });
           significanceOrder++;
         }
         this.props.dispatch(addToGrid(series[i], series[i].aimID));
@@ -160,26 +163,33 @@ class selectSerieModal extends React.Component {
     for (let i = 0; i < series.length; i++) {
       for (let k = 0; k < series[i].length; k++) {
         if (!this.isSerieOpen(series[i][k].seriesUID))
-          selectedToDisplay[count + k] = series[i][k].significanceOrder ? true : false;
+          selectedToDisplay[count + k] = series[i][k].significanceOrder
+            ? true
+            : false;
       }
       count += series[i].length;
     }
-    this.setState({ selectedToDisplay }, () => { this.setState({ limit: this.updateLimit() }) });
-  }
+    this.setState({ selectedToDisplay }, () => {
+      this.setState({ limit: this.updateLimit() });
+    });
+  };
 
-  isSerieOpen = (serieUID) => {
+  isSerieOpen = serieUID => {
     const { openSeries } = this.props;
     let openSeriesUIDList = [];
     openSeries.forEach(port => {
       openSeriesUIDList.push(port.seriesUID);
     });
     return openSeriesUIDList.includes(serieUID);
-  }
+  };
 
   renderSelection = () => {
     let selectionList = [];
     let item;
-    let series = Object.values(this.props.seriesPassed);
+    const { seriesPassed } = this.props;
+    let series = Array.isArray(seriesPassed)
+      ? seriesPassed
+      : Object.values(seriesPassed);
     let keys = Object.keys(this.props.seriesPassed);
     let count = 0;
 
@@ -244,7 +254,10 @@ class selectSerieModal extends React.Component {
             {message.title}
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="selectSerie-container" style={{ textAlign: "start" }}>
+        <Modal.Body
+          className="selectSerie-container"
+          style={{ textAlign: "start" }}
+        >
           <div>Maximum {this.maxPort} series can be viewed at a time.</div>
           <button
             size="lg"
