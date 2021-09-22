@@ -77,16 +77,16 @@ class MainMenu extends React.Component {
             updateProgress={this.props.updateProgress}
           />
         );
-      case "Annotations":
-        return (
-          <Annotations
-            selection={this.state.selection}
-            onClose={this.handleCloseModal}
-            updateProgress={this.props.updateProgress}
-            pid={this.props.pid}
-            clearAllTreeData={this.props.clearAllTreeData}
-          />
-        );
+      // case "Annotations":
+      //   return (
+      //     <Annotations
+      //       selection={this.state.selection}
+      //       onClose={this.handleCloseModal}
+      //       updateProgress={this.props.updateProgress}
+      //       pid={this.props.pid}
+      //       clearAllTreeData={this.props.clearAllTreeData}
+      //     />
+      //   );
       case "Templates":
         return (
           <Templates
@@ -124,9 +124,9 @@ class MainMenu extends React.Component {
             <div className="mng-menu__option" onClick={this.handleSelection}>
               Users
             </div>
-            <div className="mng-menu__option" onClick={this.handleSelection}>
+            {/* <div className="mng-menu__option" onClick={this.handleSelection}>
               Annotations
-            </div>
+            </div> */}
             <div
               className="mng-menu__option"
               onClick={this.handleSelection}
