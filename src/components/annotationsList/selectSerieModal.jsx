@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
+import ReactTooltip from "react-tooltip";
 import { Modal } from "react-bootstrap";
 import {
   clearGrid,
@@ -217,10 +218,21 @@ class selectSerieModal extends React.Component {
         let desc = series[i][k].seriesDescription || "Unnamed Serie";
         // desc = alreadyOpen ? `${desc} - already open` : desc;
         item = alreadyOpen ? (
-          <div key={series[i][k].seriesUID} className="alreadyOpen-disabled">
-            <FaRegCheckSquare />
-            <div className="selectionItem-text">{desc}</div>
-          </div>
+          <>
+            <div key={series[i][k].seriesUID} className="alreadyOpen-disabled">
+              <FaRegCheckSquare data-tip data-for={"alreadyOpenSeries"} />
+              <div className="selectionItem-text">{desc}</div>
+            </div>
+            <ReactTooltip
+              id="alreadyOpenSeries"
+              place="right"
+              type="info"
+              delayShow={100}
+              clickable={false}
+            >
+              <span>{"Already Open"}</span>
+            </ReactTooltip>
+          </>
         ) : (
           <SelectionItem
             desc={desc}
