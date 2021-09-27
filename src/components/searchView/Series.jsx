@@ -19,8 +19,6 @@ import {
   selectAnnotation
 } from '../annotationsList/action';
 
-const maxPort = sessionStorage.getItem("maxPort");
-
 function Table({
   columns,
   data,
@@ -161,11 +159,14 @@ function Series(props) {
     const openSeries = Object.values(props.openSeries);
     const { patientID, studyUID } = selected;
     let isSerieOpen = false;
+    const maxPort = sessionStorage.getItem("maxPort");
+    console.log("MAx port, series length", maxPort, openSeries);
 
     //check if there is enough space in the grid
-    let isGridFull = openSeries.length === maxPort;
+    let isGridFull = openSeries.length == maxPort;
     //check if the serie is already open
 
+    console.log("is grid full", isGridFull);
     if (openSeries.length > 0) {
       for (let i = 0; i < openSeries.length; i++) {
         if (openSeries[i].seriesUID === selected.seriesUID) {
