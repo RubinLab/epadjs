@@ -687,6 +687,7 @@ class App extends Component {
       const parsedSeriesArray = JSON.parse(seriesArray);
       console.log("parsed series array", parsedSeriesArray);
       if (!this.hasEnoughViewports(parsedSeriesArray)) {
+        const maxPort = sessionStorage.getItem("maxPort");
         alert(
           `Number of series passed is more than allowable number of port. Max allowed is ${maxPort}. Please select the series you want to display`
         );
