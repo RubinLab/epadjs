@@ -394,5 +394,7 @@ export const persistColorInDeleteAim = (oldList, newList, colorList) => {
 };
 
 export const isSupportedModality = (serie) => {
+  // To be on the safe side do not filter
+  if (!serie.examType) return true;
   return DISP_MODALITIES.includes(serie.examType);
 };

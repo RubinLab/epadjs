@@ -185,6 +185,7 @@ class selectSerieModal extends React.Component {
   };
 
   renderSelection = () => {
+    console.log("props", this.props.seriesPassed);
     let selectionList = [];
     let item;
     const { seriesPassed } = this.props;
@@ -198,6 +199,7 @@ class selectSerieModal extends React.Component {
     for (let i = 0; i < series.length; i++) {
       series[i] = series[i].filter(isSupportedModality);
     }
+    console.log("series after filtering", series);
     for (let i = 0; i < series.length; i++) {
       let innerList = [];
       let title = this.props.studyName
@@ -219,7 +221,7 @@ class selectSerieModal extends React.Component {
         // desc = alreadyOpen ? `${desc} - already open` : desc;
         item = alreadyOpen ? (
           <>
-            <div key={series[i][k].seriesUID} className="alreadyOpen-disabled">
+            <div key={k + "_" + series[i][k].seriesUID} className="alreadyOpen-disabled">
               <FaRegCheckSquare data-tip data-for={"alreadyOpenSeries"} />
               <div className="selectionItem-text">{desc}</div>
             </div>
@@ -239,7 +241,7 @@ class selectSerieModal extends React.Component {
             onChange={this.selectToDisplay}
             index={count + k}
             disabled={disabled}
-            key={series[i][k].seriesUID}
+            key={k + "_" + series[i][k].seriesUID}
             isChecked={this.state.selectedToDisplay[count + k]}
           />
         );
