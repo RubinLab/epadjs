@@ -1011,6 +1011,7 @@ class SearchView extends Component {
           onAddProject={this.handleProjectClick}
           admin={this.props.admin}
           hideEyeIcon={hideEyeIcon}
+          expandLevel={this.props.expandLevel}
         // expanding={expanding}
         />
         {(this.props.showSeriesModal || (isSerieSelectionOpen && !this.props.loading)) && (

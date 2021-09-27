@@ -3,33 +3,55 @@ import { connect } from 'react-redux';
 import { toast } from 'react-toastify';
 import _ from 'lodash';
 import Collapsible from 'react-collapsible';
-import { FaSearch, FaPlus, FaEraser } from 'react-icons/fa';
+import { HiOutlineFolderDownload } from 'react-icons/hi';
+import {
+  FaDownload,
+  FaUpload,
+  FaRegTrashAlt,
+  FaSearch,
+  FaPlus,
+  FaEraser
+} from 'react-icons/fa';
 import ReactTooltip from 'react-tooltip';
 import {
   searchAnnotations,
   getAllAnnotations,
-  getSummaryAnnotations
+  getSummaryAnnotations,
+  downloadProjectAnnotation,
+  deleteAnnotationsList
 } from './../../services/annotationServices.js';
 import AnnotationTable from './AnnotationTable.jsx';
 import './annotationSearch.css';
 import { clearSelection, selectAnnotation } from '../annotationsList/action';
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
-
+import UploadModal from '../searchView/uploadModal';
+import DeleteAlert from '../management/common/alertDeletionModal';
+// /common/alertDeletionModal
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
   paranthesis: ['(', ')'],
   condition: ['AND', 'OR'],
-  type: ['modality', 'observation', 'anatomy'],
-  criteria: ['equals', 'contains']
+  type: [
+    'modality',
+    'observation',
+    'anatomy',
+    'lesion_name',
+    'patient',
+    'template'
+  ],
+  criteria: ['contains'] // 'equals'
 };
 
 const explanation = {
+  deleteSelected: 'Delete selected annotations? This cannot be undone.',
   organize: 'Group and/or organize your query: ',
   type: 'Select a field from annotation',
   criteria: 'Select a criteria',
   term: 'Type the key word that you want to look for above',
   project: 'Search in all ePAD',
-  noResult: 'Can not find any result!'
+  noResult: 'Can not find any result!',
+  downloadProject:
+    'Preparing project for download. The link to the files will be sent with a notification after completion!'
 };
 
 const styles = {
@@ -70,6 +92,8 @@ const AnnotationSearch = props => {
   const [downloadClicked, setDownloadClicked] = useState(false);
   const [error, setError] = useState('');
   const [bookmark, setBookmark] = useState('');
+  const [uploadClicked, setUploadClicked] = useState(false);
+  const [deleteSelectedClicked, setDeleteSelectedClicked] = useState(false);
 
   const populateSearchResult = (res, pagination) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -104,7 +128,7 @@ const AnnotationSearch = props => {
       const searchQueryProject = Object.values(props.searchQuery)[0].project;
       setQuery(searchQueryText);
       setSelectedProject(searchQueryProject || '');
-      searchAnnotations({ query: searchQueryFinal})
+      searchAnnotations({ query: searchQueryFinal })
         .then(res => {
           populateSearchResult(res);
         })
@@ -245,7 +269,15 @@ const AnnotationSearch = props => {
     } else {
       let searchQuery = parseQuery();
       setData([]);
-      if (selectedProject) searchQuery += ` AND project:${selectedProject}`;
+      if (selectedProject) {
+        const multiSearch =
+          searchQuery.includes('AND') || searchQuery.includes('OR');
+        const notHaveParanthesis =
+          searchQuery[0] !== '(' || searchQuery[searchQuery.length - 1] !== ')';
+        if (multiSearch && notHaveParanthesis)
+          searchQuery = `(${searchQuery}) AND project:${selectedProject}`;
+        else searchQuery += ` AND project:${selectedProject}`;
+      }
       if (searchQuery) {
         setError('');
         const queryToSave = {
@@ -431,6 +463,17 @@ const AnnotationSearch = props => {
     );
   };
 
+  const handleWhitespace = text => {
+    let result = text.trim().replace(/ {2,}/g, ' ');
+    if (result.includes(' ')) {
+      result = result.split(' ').reduce((all, item, i) => {
+        if (item === ' ') all += `\\${item}`;
+        return all;
+      }, '');
+    }
+    return result;
+  };
+
   const parseQuery = () => {
     // check if query contains any predefined words
     const queryArray = seperateParanthesis(query.split(' '));
@@ -451,15 +494,22 @@ const AnnotationSearch = props => {
           ) {
             all = `${all} ${item.toUpperCase()} `;
           } else if (lists.type.includes(item)) {
-            all += `${item}`;
+            if (item === 'patient') {
+              all += 'patient_name';
+            } else if (item === 'template') {
+              all += 'template_code';
+            } else if (item === 'lesion_name') {
+              all += 'name';
+            } else all += `${item}`;
           } else if (lists.paranthesis.includes(item)) {
             all += `${item}`;
           } else {
+            const text = handleWhitespace(item);
             if (criteria === 'equals') {
-              all += `"${item}"`;
+              all += `"${text}"`;
             }
             if (criteria === 'contains') {
-              all += `${item}`;
+              all += `${text}`;
             }
           }
           return all;
@@ -494,12 +544,117 @@ const AnnotationSearch = props => {
     return options;
   };
 
+  const triggerBrowserDownload = (blob, fileName) => {
+    const url = window.URL.createObjectURL(new Blob([blob]));
+    const link = document.createElement('a');
+    document.body.appendChild(link);
+    link.style = 'display: none';
+    link.href = url;
+    link.download = `${fileName}.zip`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const downloadProjectAim = () => {
+    if (props.pid === 'all' || props.pid === 'nonassigned') return;
+    downloadProjectAnnotation(props.pid)
+      .then(result => {
+        if (result.data.type === 'application/octet-stream') {
+          let blob = new Blob([result.data], { type: 'application/zip' });
+          triggerBrowserDownload(blob, `Project ${props.pid}`);
+        } else
+          toast.success(explanation.downloadProject, {
+            autoClose: false,
+            position: 'bottom-left'
+          });
+      })
+      .catch(err => console.error(err));
+  };
+
   const renderProjectSelect = () => {
     return (
       <div
         className="annotationSearch-cont__item"
         style={{ margin: '1rem 0rem' }}
       >
+        <>
+          <div onClick={() => setUploadClicked(true)}>
+            <FaUpload className="tool-icon" data-tip data-for="upload-icon" />
+          </div>
+          <ReactTooltip
+            id="upload-icon"
+            place="right"
+            type="info"
+            delayShow={1000}
+          >
+            <span className="filter-label">Upload files</span>
+          </ReactTooltip>
+        </>
+        <>
+          <div onClick={() => setDownloadClicked(true)}>
+            <FaDownload
+              className="tool-icon"
+              data-tip
+              data-for="download-icon"
+            />
+          </div>
+          <ReactTooltip
+            id="download-icon"
+            place="right"
+            type="info"
+            delayShow={1000}
+          >
+            <span className="filter-label">Download selections</span>
+          </ReactTooltip>
+        </>
+        <>
+          <div onClick={downloadProjectAim}>
+            <HiOutlineFolderDownload
+              className={props.pid === 'all_aims' ? 'hide-delete' : 'tool-icon'}
+              data-tip
+              data-for="downloadProject-icon"
+              style={{ fontSize: '1.7rem' }}
+            />
+          </div>
+          <ReactTooltip
+            id="downloadProject-icon"
+            place="right"
+            type="info"
+            delayShow={1000}
+          >
+            <span className="filter-label">
+              Download all annotations of the project
+            </span>
+          </ReactTooltip>
+        </>
+        <>
+          <div onClick={() => setDeleteSelectedClicked(true)}>
+            <FaRegTrashAlt
+              className="tool-icon"
+              // className="tool-icon"
+              // onClick={onDelete}
+              style={
+                Object.keys(props.selectedAnnotations).length === 0
+                  ? {
+                      fontSize: '1.1rem',
+                      color: 'rgb(107, 107, 107)',
+                      cursor: 'not-allowed'
+                    }
+                  : null
+              }
+              data-tip
+              data-for="trash-icon"
+            />
+          </div>
+          <ReactTooltip
+            id="trash-icon"
+            place="right"
+            type="info"
+            delayShow={1000}
+          >
+            <span className="filter-label">Delete selections</span>
+          </ReactTooltip>
+        </>
         <div
           className="annotaionSearch-title"
           style={{ fontsize: '1.2rem' }}
@@ -517,6 +672,67 @@ const AnnotationSearch = props => {
         />
       </div>
     );
+  };
+
+  const handleSubmitUpload = () => {
+    setUploadClicked(false);
+    getAnnotationsOfProjets();
+  };
+
+  const checkIfSerieOpen = (obj, openSeries) => {
+    let isOpen = false;
+    let index;
+    const { seriesUID, projectID } = obj;
+    openSeries.forEach((serie, i) => {
+      if (serie.seriesUID === seriesUID && projectID === serie.projectID) {
+        isOpen = true;
+        index = i;
+      }
+    });
+    return { isOpen, index };
+  };
+
+  const deleteAllSelected = () => {
+    const notDeleted = {};
+    let newSelected = Object.assign({}, props.selectedAnnotations);
+    const toBeDeleted = {};
+    const promiseArr = [];
+    for (let annotation in newSelected) {
+      const { projectID } = newSelected[annotation];
+      if (checkIfSerieOpen(newSelected[annotation], props.openSeries).isOpen) {
+        notDeleted[annotation] = newSelected[annotation];
+        delete newSelected[annotation];
+      } else {
+        toBeDeleted[projectID]
+          ? toBeDeleted[projectID].push(annotation)
+          : (toBeDeleted[projectID] = [annotation]);
+      }
+    }
+    const projects = Object.keys(toBeDeleted);
+    const aims = Object.values(toBeDeleted);
+
+    projects.forEach((pid, i) => {
+      promiseArr.push(deleteAnnotationsList(pid, aims[i]));
+    });
+
+    Promise.all(promiseArr)
+      .then(() => {
+        getAnnotationsOfProjets();
+        // this.props.updateProgress();
+        const keys = Object.keys(notDeleted);
+        // this.props.clearAllTreeData();
+      })
+      .catch(error => {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        )
+          toast.error(error.response.data.message, { autoClose: false });
+        getAnnotationsOfProjets();
+      });
+    setDeleteSelectedClicked(false);
+    props.dispatch(clearSelection());
   };
 
   return (
@@ -625,7 +841,7 @@ const AnnotationSearch = props => {
           {renderOrganizeItem('organize')}
         </Collapsible>
         {mode !== 'lite' && renderProjectSelect()}
-        {Object.keys(props.selectedAnnotations).length !== 0 && (
+        {/* {Object.keys(props.selectedAnnotations).length !== 0 && (
           <button
             className={`btn btn-secondary`}
             style={styles.downloadButton}
@@ -636,7 +852,7 @@ const AnnotationSearch = props => {
           >
             DOWNLOAD
           </button>
-        )}
+        )} */}
         {data.length > 0 && (
           <AnnotationTable
             data={data}
@@ -658,6 +874,25 @@ const AnnotationSearch = props => {
           updateStatus={() => console.log('update status')}
         />
       )}
+      {uploadClicked && (
+        <UploadModal
+          onCancel={() => setUploadClicked(false)}
+          onResolve={handleSubmitUpload}
+          className="mng-upload"
+          // projectID={this.state.projectID}
+          pid={props.pid}
+          // clearTreeData={this.props.clearTreeData}
+          // clearTreeExpand={this.props.clearTreeExpand}
+        />
+      )}
+      {deleteSelectedClicked && (
+        <DeleteAlert
+          message={explanation.deleteSelected}
+          onCancel={() => setDeleteSelectedClicked(false)}
+          onDelete={deleteAllSelected}
+          error={explanation.errorMessage}
+        />
+      )}
     </div>
   );
 };
@@ -665,7 +900,8 @@ const AnnotationSearch = props => {
 const mapsStateToProps = state => {
   return {
     projectMap: state.annotationsListReducer.projectMap,
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+    openSeries: state.annotationsListReducer.openSeries
   };
 };
 

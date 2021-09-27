@@ -174,7 +174,17 @@ class App extends Component {
     const nullCount = this.countCurrentReports(arr);
     if (nullCount === arr.length) {
       this.props.dispatch(clearSelection());
-      // this.props.history.push(`/display`);
+      if (
+        this.props.openSeries.length === 0 ||
+        this.props.location.pathname.includes("display")
+      ) {
+        this.props.history.push(`/display`);
+      } else if (this.props.location.pathname.includes("/list/")) {
+        const newPid = this.props.location.pathname.split("/").pop();
+        this.setState({ pid: newPid });
+      } else {
+        this.props.history.push(this.props.location.pathname);
+      }
     }
   };
 
@@ -263,6 +273,7 @@ class App extends Component {
           reportsCompArr.push(
             <Report
               onClose={this.closeReportModal}
+              pairs={this.state.pairs}
               report={reportType}
               index={index}
               patient={openSeries[activePort]}
@@ -301,6 +312,7 @@ class App extends Component {
           index={index}
           patient={patients[0]}
           key={`report${index}`}
+          pairs={this.state.pairs}
           waterfallClickOn={this.handleWaterFallClickOnBar}
           handleMetric={this.getMetric}
           onMinimize={this.handleMinimizeReport}
@@ -336,6 +348,7 @@ class App extends Component {
         report={this.state.metric}
         index={index}
         patient={patient}
+        pairs={this.state.pairs}
         key={`report${index}`}
         waterfallClickOn={this.handleWaterFallClickOnBar}
         handleMetric={this.getMetric}
