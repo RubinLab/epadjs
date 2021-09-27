@@ -541,6 +541,7 @@ class AimEditor extends Component {
       return true;
     });
 
+    console.log("marked imageIds", markedImageIds);
     return markedImageIds;
   };
 
