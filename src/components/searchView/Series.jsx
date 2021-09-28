@@ -135,10 +135,8 @@ function Series(props) {
 
   const deselectChildLevels = (patientID, studyUID, seriesUID) => {
     if (selectedLevel === 'annotations') {
-      console.log(patientID, studyUID, seriesUID);
       const annotations = Object.values(props.selectedAnnotations);
       const annotationsToDeselect = annotations.reduce((all, item, i) => {
-        console.log('item', item);
         const correctAnnotation =
           item.subjectID === patientID &&
           item.studyUID === studyUID &&
@@ -165,7 +163,6 @@ function Series(props) {
     let isGridFull = openSeries.length == maxPort;
     //check if the serie is already open
 
-    console.log("is grid full", isGridFull);
     if (openSeries.length > 0) {
       for (let i = 0; i < openSeries.length; i++) {
         if (openSeries[i].seriesUID === selected.seriesUID) {
@@ -238,7 +235,6 @@ function Series(props) {
                     props.dispatch(clearSelection('serie'));
                     props.dispatch(selectSerie(row.original));
                     // handleCheckboxSelect(row);
-                    console.log('cheecked');
                   }}
                 />
               </div>
