@@ -654,7 +654,7 @@ class ProjectColumn extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 150,
-        width: 150,
+        width: 200,
       },
       {
         id : "name",
@@ -681,8 +681,8 @@ class ProjectColumn extends React.Component {
         accessor: "studyDate",
         sortable: true,
         resizable: true,
-        minResizeWidth: 150,
-        width: 150,
+        minResizeWidth: 50,
+        width: 100,
       },
       {
         id : "seriesUID",
@@ -691,7 +691,7 @@ class ProjectColumn extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 150,
-        width: 150,
+        width: 200,
       },
       {
         Cell: ({ original }) => {
