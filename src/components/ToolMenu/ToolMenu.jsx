@@ -404,7 +404,6 @@ class ToolMenu extends Component {
     const elem = cornerstone.getEnabledElements()[this.props.activePort];
     const element = elem.element;
     const layers = cornerstone.getLayers(element);
-    console.log("elem", elem.viewport.colormap);
     const { colormap } = elem.viewport;
     if (layers.length || (colormap && colormap !== "gray"))
       this.resetRenderCanvas(element);
