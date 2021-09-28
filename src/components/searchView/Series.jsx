@@ -159,8 +159,7 @@ function Series(props) {
     const openSeries = Object.values(props.openSeries);
     const { patientID, studyUID } = selected;
     let isSerieOpen = false;
-    const maxPort = sessionStorage.getItem("maxPort");
-    console.log("MAx port, series length", maxPort, openSeries);
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
     //check if there is enough space in the grid
     let isGridFull = openSeries.length == maxPort;
