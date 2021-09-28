@@ -1043,6 +1043,8 @@ class SearchView extends Component {
           treeData={this.props.treeData}
           getTreeData={this.props.getTreeData}
           closeAllCounter={this.props.closeAllCounter}
+          collapseSubjects={this.props.collapseSubjects}
+
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection

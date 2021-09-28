@@ -386,6 +386,10 @@ class App extends Component {
     });
   };
 
+  collapseSubjects = () => {
+    this.setState({ treeExpand: {}, expandLevel: 0 })
+  }
+
   getTreeExpandAll = (expandObj, expanded, expandLevel) => {
     try {
       const { patient, study, series } = expandObj;
@@ -1306,6 +1310,7 @@ class App extends Component {
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
                       admin={this.state.admin}
+                      collapseSubjects={this.collapseSubjects}
                     />
                   )}
                 />
@@ -1334,6 +1339,7 @@ class App extends Component {
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
                       admin={this.state.admin}
+                      collapseSubjects={this.collapseSubjects}
                     />
                   )}
                 />
@@ -1402,6 +1408,7 @@ class App extends Component {
                       closeAllCounter={this.state.closeAll}
                       pid={this.state.pid}
                       admin={this.state.admin}
+                      collapseSubjects={this.collapseSubjects}
                     />
                   )}
                 />
@@ -1483,6 +1490,7 @@ class App extends Component {
                     getTreeData={this.getTreeData}
                     closeAllCounter={this.state.closeAll}
                     admin={this.state.admin}
+                    collapseSubjects={this.collapseSubjects}
                   />
                 )}
               />

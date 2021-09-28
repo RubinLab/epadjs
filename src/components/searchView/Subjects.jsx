@@ -524,6 +524,7 @@ function Subjects(props) {
   };
 
   const filterSubjects = (e, pageSize, pageIndex) => {
+    props.collapseSubjects();
     const searchTerm = searchKey.current.value.trim().toLowerCase();
     setFilteredData(searchTerm, pageSize, pageIndex);
   };
