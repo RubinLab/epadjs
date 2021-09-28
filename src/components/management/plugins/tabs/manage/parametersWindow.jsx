@@ -263,6 +263,24 @@ class ParametersWindow extends React.Component {
         width: 70,
       },
       {
+        id: "format",
+        Header: "format",
+        accessor: "format",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 50,
+        width: 100,
+      },
+      {
+        id :"value",
+        Header: "value",
+        accessor: "default_value",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 50,
+        width: 100,
+      },
+      {
         id: "name",
         Header: "Name",
         accessor: "name",
@@ -270,6 +288,15 @@ class ParametersWindow extends React.Component {
         resizable: true,
         minResizeWidth: 50,
         width: 70,
+      },
+      {
+        id: "inputbinding",
+        Header: "inputbinding",
+        accessor: "inputBinding",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 50,
+        width: 100,
       },
       {
         id : "refreshdicoms",
@@ -290,7 +317,6 @@ class ParametersWindow extends React.Component {
               "no"
             );
           }
-
         },
       },
       {
@@ -382,36 +408,9 @@ class ParametersWindow extends React.Component {
         },
       },
       {
-        id: "format",
-        Header: "format",
-        accessor: "format",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 50,
-        width: 100,
-      },
-      {
         id: "prefix",
         Header: "prefix",
         accessor: "prefix",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 50,
-        width: 100,
-      },
-      {
-        id: "inputbinding",
-        Header: "inputbinding",
-        accessor: "inputBinding",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 50,
-        width: 100,
-      },
-      {
-        id :"value",
-        Header: "value",
-        accessor: "default_value",
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
