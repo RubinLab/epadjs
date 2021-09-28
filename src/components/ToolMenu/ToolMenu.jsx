@@ -27,7 +27,8 @@ import {
   FaMousePointer,
   FaPalette,
   FaObjectUngroup,
-  FaDotCircle
+  FaDotCircle,
+  FaTimes
 } from "react-icons/fa";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
@@ -43,9 +44,7 @@ import AnnotationList from "../annotationsList";
 import ResizeAndDrag from "../management/common/resizeAndDrag";
 import CustomModal from "../management/common/resizeAndDrag";
 import {
-  showAnnotationWindow,
-  showAnnotationDock,
-  getWholeData,
+  clearGrid
 } from "../annotationsList/action";
 import Spinner from "../common/circleSpinner";
 import "../../font-icons/styles.css";
@@ -129,11 +128,12 @@ class ToolMenu extends Component {
       rangeDisabled: true,
       showInterpolation: false,
       activeTool: "",
-      activeToolIdx: 0,
+      activeToolIdx: 1,
       fuse: false
     };
 
     this.imagingTools = [
+      { name: "Close All", icon: <FaTimes />, tool: "ClearGrid" },
       { name: "Select", icon: <FaMousePointer />, tool: "Noop" },
       { name: "Levels", icon: <FiSun />, tool: "Wwwc" },
       { name: "Presets", icon: <FiSunset />, tool: "Presets" },
@@ -299,6 +299,9 @@ class ToolMenu extends Component {
     if (tool === "Noop") {
       this.disableAllTools();
       this.setState({ activeTool: "", activeToolIdx: index });
+      return;
+    } else if (tool === "ClearGrid") {
+      this.props.dispatch(clearGrid());
       return;
     } else if (tool === "Presets") {
       this.showPresets();
