@@ -16,6 +16,7 @@ import { FaRegCheckSquare } from "react-icons/fa";
 import { getSeries, setSignificantSeries } from "../../services/seriesServices";
 import "./annotationsList.css";
 import { isSupportedModality } from "../../Utils/aid.js";
+import { extendWith } from "lodash";
 
 const message = {
   title: "Not enough ports to open series"
@@ -158,11 +159,18 @@ class selectSerieModal extends React.Component {
   };
 
   setPreSelecteds = () => {
+    const { seriesPassed, openSeries } = this.props;
     let selectedToDisplay = [];
-    let series = Object.values(this.props.seriesPassed);
+    let series = Object.values(seriesPassed);
     let count = 0;
     for (let i = 0; i < series.length; i++) {
       for (let k = 0; k < series[i].length; k++) {
+        if (openSeries.length + selectedToDisplay.length >= this.maxPort) {
+          this.setState({ selectedToDisplay }, () => {
+            this.setState({ limit: this.updateLimit() });
+          });
+          return;
+        }
         if (!this.isSerieOpen(series[i][k].seriesUID))
           selectedToDisplay[count + k] = series[i][k].significanceOrder
             ? true
@@ -185,7 +193,6 @@ class selectSerieModal extends React.Component {
   };
 
   renderSelection = () => {
-    console.log("props", this.props.seriesPassed);
     let selectionList = [];
     let item;
     const { seriesPassed } = this.props;
@@ -199,7 +206,6 @@ class selectSerieModal extends React.Component {
     for (let i = 0; i < series.length; i++) {
       series[i] = series[i].filter(isSupportedModality);
     }
-    console.log("series after filtering", series);
     for (let i = 0; i < series.length; i++) {
       let innerList = [];
       let title = this.props.studyName
@@ -278,7 +284,7 @@ class selectSerieModal extends React.Component {
             className="selectSerie-clearButton"
             onClick={() => this.props.dispatch(clearGrid())}
           >
-            Close all views
+            Close all series
           </button>
           {this.state.limit >= this.maxPort && (
             <div>You reached Max number of series</div>

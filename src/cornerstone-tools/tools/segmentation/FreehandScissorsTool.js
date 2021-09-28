@@ -3,14 +3,14 @@ import {
   freehandFillOutsideCursor,
   freehandEraseOutsideCursor,
   freehandEraseInsideCursor,
-} from '../cursors';
+} from "../cursors";
 import {
   fillInsideFreehand,
   fillOutsideFreehand,
   eraseOutsideFreehand,
   eraseInsideFreehand,
-} from './strategies';
-import { BaseTool } from '../base';
+} from "./strategies";
+import { BaseTool } from "../base";
 
 /**
  * @public
@@ -23,7 +23,7 @@ export default class FreehandScissorsTool extends BaseTool {
   /** @inheritdoc */
   constructor(props = {}) {
     const defaultProps = {
-      name: 'FreehandScissors',
+      name: "FreehandScissors",
       strategies: {
         FILL_INSIDE: fillInsideFreehand,
         FILL_OUTSIDE: fillOutsideFreehand,
@@ -36,10 +36,10 @@ export default class FreehandScissorsTool extends BaseTool {
         ERASE_OUTSIDE: freehandEraseOutsideCursor,
         ERASE_INSIDE: freehandEraseInsideCursor,
       },
-      defaultStrategy: 'FILL_INSIDE',
-      supportedInteractionTypes: ['Mouse', 'Touch'],
+      defaultStrategy: "ERASE_INSIDE",
+      supportedInteractionTypes: ["Mouse", "Touch"],
       svgCursor: freehandFillInsideCursor,
-      mixins: ['freehandSegmentationMixin'],
+      mixins: ["freehandSegmentationMixin"],
     };
 
     super(props, defaultProps);

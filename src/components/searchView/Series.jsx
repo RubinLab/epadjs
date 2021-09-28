@@ -19,8 +19,6 @@ import {
   selectAnnotation
 } from '../annotationsList/action';
 
-const maxPort = sessionStorage.getItem("maxPort");
-
 function Table({
   columns,
   data,
@@ -137,10 +135,8 @@ function Series(props) {
 
   const deselectChildLevels = (patientID, studyUID, seriesUID) => {
     if (selectedLevel === 'annotations') {
-      console.log(patientID, studyUID, seriesUID);
       const annotations = Object.values(props.selectedAnnotations);
       const annotationsToDeselect = annotations.reduce((all, item, i) => {
-        console.log('item', item);
         const correctAnnotation =
           item.subjectID === patientID &&
           item.studyUID === studyUID &&
@@ -159,8 +155,10 @@ function Series(props) {
 
   const dispatchSerieDisplay = selected => {
     const openSeries = Object.values(props.openSeries);
+    console.log("open series", openSeries);
     const { patientID, studyUID } = selected;
     let isSerieOpen = false;
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
     //check if there is enough space in the grid
     let isGridFull = openSeries.length === maxPort;
@@ -238,7 +236,6 @@ function Series(props) {
                     props.dispatch(clearSelection('serie'));
                     props.dispatch(selectSerie(row.original));
                     // handleCheckboxSelect(row);
-                    console.log('cheecked');
                   }}
                 />
               </div>

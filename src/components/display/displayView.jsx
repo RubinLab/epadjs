@@ -120,10 +120,10 @@ const tools = [
 
   { name: "SphericalBrush", modeOptions: { mouseButtonMask: 1 } },
   { name: "CircleScissors", modeOptions: { mouseButtonMask: 1 } },
-  // { name: "FreehandScissors", modeOptions: { mouseButtonMask: 1 } },
+  { name: "FreehandScissors", modeOptions: { mouseButtonMask: 1 } },
   // { name: "RectangleScissors", modeOptions: { mouseButtonMask: 1 } },
 
-  // { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
+  { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
 ];
 
 const mapStateToProps = (state) => {
@@ -244,6 +244,7 @@ class DisplayView extends Component {
   // Sets the activeTool state getting it from session storage
   handleActiveTool = () => {
     const activeTool = sessionStorage.getItem("activeTool");
+    console.log("active tool is", activeTool);
     if (activeTool && activeTool !== this.state.activeTool)
       this.setState({ activeTool });
   }

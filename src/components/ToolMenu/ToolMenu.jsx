@@ -401,15 +401,17 @@ class ToolMenu extends Component {
   }
 
   reset = () => {
-    const element = cornerstone.getEnabledElements()[this.props.activePort]
-      .element;
+    const elem = cornerstone.getEnabledElements()[this.props.activePort];
+    const element = elem.element;
     const layers = cornerstone.getLayers(element);
-    if (layers.length)
+    const { colormap } = elem.viewport;
+    if (layers.length || (colormap && colormap !== "gray"))
       this.resetRenderCanvas(element);
     cornerstone.reset(element);
   };
 
   resetRenderCanvas = (element) => {
+
     const enabledElement = cornerstone.getEnabledElement(element);
 
     enabledElement.renderingTools.colormapId = undefined;
