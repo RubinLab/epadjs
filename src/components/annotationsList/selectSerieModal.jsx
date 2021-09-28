@@ -185,7 +185,6 @@ class selectSerieModal extends React.Component {
   };
 
   renderSelection = () => {
-    console.log("props", this.props.seriesPassed);
     let selectionList = [];
     let item;
     const { seriesPassed } = this.props;
@@ -199,7 +198,6 @@ class selectSerieModal extends React.Component {
     for (let i = 0; i < series.length; i++) {
       series[i] = series[i].filter(isSupportedModality);
     }
-    console.log("series after filtering", series);
     for (let i = 0; i < series.length; i++) {
       let innerList = [];
       let title = this.props.studyName
