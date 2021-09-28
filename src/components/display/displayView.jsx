@@ -244,6 +244,7 @@ class DisplayView extends Component {
   // Sets the activeTool state getting it from session storage
   handleActiveTool = () => {
     const activeTool = sessionStorage.getItem("activeTool");
+    console.log("active tool is", activeTool);
     if (activeTool && activeTool !== this.state.activeTool)
       this.setState({ activeTool });
   }
