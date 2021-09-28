@@ -648,6 +648,25 @@ class ProjectColumn extends React.Component {
         // maxWidth: 45
       },
       {
+        id : "aimID",
+        Header: "aim id",
+        accessor: "aimID",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 150,
+        width: 250,
+      },
+      {
+        id : "name",
+        Header: "name",
+        accessor: "name",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 150,
+        width: 150,
+      },
+      {
+        id :  "patientName",
         Header: "patient name",
         accessor: "patientName",
         sortable: true,
@@ -657,12 +676,22 @@ class ProjectColumn extends React.Component {
         className: "trHeader",
       },
       {
-        Header: "name",
-        accessor: "name",
+        id : "studyDate",
+        Header: "study date",
+        accessor: "studyDate",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 50,
+        width: 100,
+      },
+      {
+        id : "seriesUID",
+        Header: "series uid",
+        accessor: "seriesUID",
         sortable: true,
         resizable: true,
         minResizeWidth: 150,
-        width: 150,
+        width: 300,
       },
       {
         Cell: ({ original }) => {
