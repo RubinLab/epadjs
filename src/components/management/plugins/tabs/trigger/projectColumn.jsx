@@ -654,7 +654,7 @@ class ProjectColumn extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 150,
-        width: 200,
+        width: 250,
       },
       {
         id : "name",
@@ -691,7 +691,7 @@ class ProjectColumn extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 150,
-        width: 200,
+        width: 300,
       },
       {
         Cell: ({ original }) => {
