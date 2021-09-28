@@ -395,7 +395,7 @@ function Series(props) {
         )
       }
     ],
-    [selectedLevel, selectedCount]
+    [selectedLevel, selectedCount, props.openSeries]
   );
 
   const getDataFromStorage = (projectID, subjectID, studyUID) => {
