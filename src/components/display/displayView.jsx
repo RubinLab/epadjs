@@ -120,10 +120,10 @@ const tools = [
 
   { name: "SphericalBrush", modeOptions: { mouseButtonMask: 1 } },
   { name: "CircleScissors", modeOptions: { mouseButtonMask: 1 } },
-  // { name: "FreehandScissors", modeOptions: { mouseButtonMask: 1 } },
+  { name: "FreehandScissors", modeOptions: { mouseButtonMask: 1 } },
   // { name: "RectangleScissors", modeOptions: { mouseButtonMask: 1 } },
 
-  // { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
+  { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
 ];
 
 const mapStateToProps = (state) => {
