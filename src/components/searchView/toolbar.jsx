@@ -20,6 +20,11 @@ const mode = sessionStorage.getItem('mode');
 const toolBar = props => {
   const { project } = props;
   const noUpload = project === 'all' || project === 'nonassigned';
+  const disabledStyle = {
+    cursor: 'not-allowed',
+    color: '#5c5c5c',
+    margin: '0.5rem'
+  };
   return (
     <div className="searchView-toolbar">
       <div className="searchView-toolbar__group">
@@ -134,7 +139,9 @@ const toolBar = props => {
       <div className="searchView-toolbar__icon" onClick={props.onShrink}>
         <div>
           <FaLevelUpAlt
-            style={{ fontSize: '1.2rem' }}
+            style={
+              props.expandLevel === 0 ? disabledStyle : { fontSize: '1.2rem' }
+            }
             data-tip
             data-for="back-icon"
           />
@@ -151,7 +158,11 @@ const toolBar = props => {
       <div className="searchView-toolbar__icon" onClick={props.onCloseAll}>
         <div>
           <FiMinimize2
-            style={{ fontSize: '1.5rem', strokeWidth: '3px' }}
+            style={
+              props.expandLevel === 0
+                ? disabledStyle
+                : { fontSize: '1.5rem', strokeWidth: '3px' }
+            }
             data-tip
             data-for="minimize-icon"
           />
@@ -173,7 +184,7 @@ const toolBar = props => {
             ? 'searchView-toolbar__icon worklist-icon'
             : 'hide-delete'
         }
-        onClick={props.showAddTo && project !== 'all'? props.onWorklist : null}
+        onClick={props.showAddTo && project !== 'all' ? props.onWorklist : null}
       >
         <div>
           <FaClipboardList

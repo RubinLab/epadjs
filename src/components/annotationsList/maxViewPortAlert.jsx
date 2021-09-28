@@ -3,11 +3,11 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 import { FaExclamationTriangle } from "react-icons/fa";
-import { alertViewPortFull } from "./action";
+import { alertViewPortFull, clearGrid } from "./action";
 
 const message = {
   title: "Reached max number of open series!",
-  explanation: "Please close a view screen before open a new one"
+  explanation: "Please close a viewport before opening a new one."
 };
 const alertMaxViewPort = props => {
   return (
@@ -23,6 +23,12 @@ const alertMaxViewPort = props => {
         </div>
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
+        <button
+          size="lg"
+          onClick={() => { props.dispatch(clearGrid()); props.dispatch(alertViewPortFull()) }}
+        >
+          Close all series
+        </button>
         <button
           variant="secondary"
           onClick={() => props.dispatch(alertViewPortFull())}

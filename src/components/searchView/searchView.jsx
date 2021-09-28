@@ -130,17 +130,18 @@ class SearchView extends Component {
         subjects,
         expandLevel
       });
-    } catch (err) { 
-      window.addEventListener("openSeriesModal", this.handleSeriesModal); 
+    } catch (err) {
+      window.addEventListener("openSeriesModal", this.handleSeriesModal);
     }
   };
 
-    // App.js triggers this event when more than allowed series are sent from the url to open
-    handleSeriesModal = (event) => {
-      const list = event.detail;
-      const seriesList = [list];
-      this.setState({ isSerieSelectionOpen: true, seriesList });
-    }
+  // App.js triggers this event when more than allowed series are sent from the url to open
+  handleSeriesModal = (event) => {
+    const list = event.detail;
+    const seriesList = [list];
+    console.log("series List in handleSeries", seriesList);
+    this.setState({ isSerieSelectionOpen: true, seriesList });
+  }
 
   componentDidUpdate = async prevProps => {
     const { uploadedPid, lastEventId, expandLevel } = this.props;
@@ -1010,6 +1011,7 @@ class SearchView extends Component {
           onAddProject={this.handleProjectClick}
           admin={this.props.admin}
           hideEyeIcon={hideEyeIcon}
+          expandLevel={this.props.expandLevel}
         // expanding={expanding}
         />
         {(this.props.showSeriesModal || (isSerieSelectionOpen && !this.props.loading)) && (

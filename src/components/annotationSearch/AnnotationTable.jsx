@@ -19,7 +19,28 @@ import {
 import { getSeries } from '../../services/seriesServices';
 
 const defaultPageSize = 200;
-const maxPort = sessionStorage.getItem("maxPort");
+const maxPort = sessionStorage.getItem('maxPort');
+
+const IndeterminateCheckbox = React.forwardRef(
+  ({ indeterminate, ...rest }, ref) => {
+    const defaultRef = React.useRef();
+    const resolvedRef = ref || defaultRef;
+
+    React.useEffect(() => {
+      resolvedRef.current.indeterminate = indeterminate;
+    }, [resolvedRef, indeterminate]);
+    return (
+      <>
+        <input
+          type="checkbox"
+          ref={resolvedRef}
+          {...rest}
+          onClick={() => rest.updateSelectedAims(rest.data)}
+        />
+      </>
+    );
+  }
+);
 
 function Table({
   columns,
@@ -57,7 +78,26 @@ function Table({
       pageCount
     },
     usePagination,
-    useRowSelect
+    useRowSelect,
+    hooks => {
+      hooks.visibleColumns.push(columns => [
+        // Let's make a column for selection
+        {
+          id: 'selection',
+          Cell: ({ row }) => (
+            <div>
+              <IndeterminateCheckbox
+                {...row.getToggleRowSelectedProps()}
+                data={row.original}
+                updateSelectedAims={updateSelectedAims}
+                // onChange={() => updateSelectedAims(row.original)}
+              />
+            </div>
+          )
+        },
+        ...columns
+      ]);
+    }
   );
 
   React.useEffect(() => {
@@ -312,7 +352,7 @@ function AnnotationTable(props) {
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => { })
+          .then(() => {})
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
@@ -329,18 +369,18 @@ function AnnotationTable(props) {
 
   const columns = React.useMemo(
     () => [
-      {
-        id: 'study-desc',
-        Cell: ({ row }) => {
-          return (
-            <input
-              type="checkbox"
-              //   checked={selected && aimID ? selected[aimID] : false}
-              onChange={() => props.updateSelectedAims(row.original)}
-            />
-          );
-        }
-      },
+      // {
+      //   id: 'study-desc',
+      //   Cell: ({ row }) => {
+      //     return (
+      //       <input
+      //         type="checkbox"
+      //         //   checked={selected && aimID ? selected[aimID] : false}
+      //         onChange={() => props.updateSelectedAims(row.original)}
+      //       />
+      //     );
+      //   }
+      // },
       {
         Header: 'Open',
         sortable: false,
@@ -472,7 +512,7 @@ function AnnotationTable(props) {
         Header: 'Modality',
         sortable: true,
         resizable: true,
-        accessor: 'modality',
+        accessor: 'modality'
       },
       {
         Header: 'Anatomy',
@@ -503,7 +543,7 @@ function AnnotationTable(props) {
             </div>
           );
         }
-      },
+      }
     ],
     []
   );
@@ -534,6 +574,7 @@ function AnnotationTable(props) {
       pageCount={pageCount}
       noOfRows={props.noOfRows}
       fetchData={fetchData}
+      updateSelectedAims={props.updateSelectedAims}
     />
   );
 }

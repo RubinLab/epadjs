@@ -70,12 +70,12 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "css-loader": "^2.1.1",
-    "stylus": "^0.54.7",
-    "stylus-loader": "^3.0.2",
-    "chromedriver": "^92.0.1",
-    "geckodriver": "^2.0.0",
     "chai": "^4.3.4",
-    "selenium-webdriver": "^4.0.0-beta.3"
+    "chromedriver": "^92.0.1",
+    "css-loader": "^2.1.1",
+    "geckodriver": "^2.0.4",
+    "selenium-webdriver": "^4.0.0-beta.3",
+    "stylus": "^0.54.7",
+    "stylus-loader": "^3.0.2"
   }
 }

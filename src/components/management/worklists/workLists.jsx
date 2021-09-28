@@ -373,6 +373,7 @@ class WorkList extends React.Component {
               className="checkbox-cell"
               checked={this.state.selected[original.workListID]}
               onChange={() => this.toggleRow(original.workListID)}
+              id={original.workListID}
             />
           );
         },
@@ -423,6 +424,7 @@ class WorkList extends React.Component {
                 className="--commentCont menu-clickable wrapped"
                 data-tip
                 data-for="worklist-name"
+                id={`name-${original.row.checkbox.workListID}`}
                 onClick={() =>
                   this.handleUpdateField(
                     original.index,
@@ -470,6 +472,7 @@ class WorkList extends React.Component {
                   });
                 }}
                 className={className}
+                id={`assignees-${original.row.checkbox.workListID}`}
               >
                 {assignees.length > 0 ? assignees.join(', ') : `Add assignees`}
               </div>
@@ -509,6 +512,7 @@ class WorkList extends React.Component {
                   });
                   this.handleUpdateDueDate();
                 }}
+                id={`due-${original.row.checkbox.workListID}`}
               >
                 {duedate || 'Add due date'}
               </div>
@@ -553,6 +557,8 @@ class WorkList extends React.Component {
                     updateRequirement: true
                   });
                 }}
+                id={`req-${original.row.checkbox.workListID}`}
+
               >
                 {displayReq.join(', ') || 'Define requirement'}
               </div>
@@ -583,7 +589,10 @@ class WorkList extends React.Component {
           const { cellDoubleClicked, clickedIndex } = this.state;
           return cellDoubleClicked === 'description' &&
             clickedIndex === original.index ? (
-            <div ref={this.setWrapperRef} className="--commentInput">
+            <div
+              ref={this.setWrapperRef}
+              className="--commentInput"
+            >
               <EditField
                 name="description"
                 onType={this.getUpdate}
@@ -596,6 +605,7 @@ class WorkList extends React.Component {
                 className={`--commentCont ${className}`}
                 data-tip
                 data-for="worklist-description"
+                id={`desc-${original.row.checkbox.workListID}`}
                 onClick={() =>
                   this.handleUpdateField(
                     original.index,
@@ -633,6 +643,7 @@ class WorkList extends React.Component {
                 onClick={() =>
                   this.handleSingleDelete(original.row.checkbox.workListID)
                 }
+                id={`delete-${original.row.checkbox.workListID}`}
               >
                 <FaRegTrashAlt className="menu-clickable" />
               </div>

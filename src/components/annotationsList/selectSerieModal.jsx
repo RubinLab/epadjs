@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
+import ReactTooltip from "react-tooltip";
 import { Modal } from "react-bootstrap";
 import {
   clearGrid,
@@ -15,6 +16,7 @@ import { FaRegCheckSquare } from "react-icons/fa";
 import { getSeries, setSignificantSeries } from "../../services/seriesServices";
 import "./annotationsList.css";
 import { isSupportedModality } from "../../Utils/aid.js";
+import { extendWith } from "lodash";
 
 const message = {
   title: "Not enough ports to open series"
@@ -68,7 +70,7 @@ class selectSerieModal extends React.Component {
     return series;
   };
 
-  componentDidUpdate = (prevProps) => {
+  componentDidUpdate = prevProps => {
     const { openSeries, seriesPassed } = this.props;
     if (openSeries.length !== prevProps.openSeries.length) {
       let limit = this.updateLimit();
@@ -105,14 +107,17 @@ class selectSerieModal extends React.Component {
     studies.forEach(arr => {
       series = series.concat(arr);
     });
-    let significanceSet = series.some((serie) => serie.significanceOrder > 0);
+    let significanceSet = series.some(serie => serie.significanceOrder > 0);
 
     // let series = Object.values(this.props.seriesPassed)[0];
     //concatanete all arrays to getther
     for (let i = 0; i < this.state.selectedToDisplay.length; i++) {
       if (this.state.selectedToDisplay[i]) {
         if (!significanceSet) {
-          significantSeries.push({ seriesUID: series[i].seriesUID, significanceOrder })
+          significantSeries.push({
+            seriesUID: series[i].seriesUID,
+            significanceOrder
+          });
           significanceOrder++;
         }
         this.props.dispatch(addToGrid(series[i], series[i].aimID));
@@ -154,32 +159,46 @@ class selectSerieModal extends React.Component {
   };
 
   setPreSelecteds = () => {
+    const { seriesPassed, openSeries } = this.props;
     let selectedToDisplay = [];
-    let series = Object.values(this.props.seriesPassed);
+    let series = Object.values(seriesPassed);
     let count = 0;
     for (let i = 0; i < series.length; i++) {
       for (let k = 0; k < series[i].length; k++) {
+        if (openSeries.length + selectedToDisplay.length >= this.maxPort) {
+          this.setState({ selectedToDisplay }, () => {
+            this.setState({ limit: this.updateLimit() });
+          });
+          return;
+        }
         if (!this.isSerieOpen(series[i][k].seriesUID))
-          selectedToDisplay[count + k] = series[i][k].significanceOrder ? true : false;
+          selectedToDisplay[count + k] = series[i][k].significanceOrder
+            ? true
+            : false;
       }
       count += series[i].length;
     }
-    this.setState({ selectedToDisplay }, () => { this.setState({ limit: this.updateLimit() }) });
-  }
+    this.setState({ selectedToDisplay }, () => {
+      this.setState({ limit: this.updateLimit() });
+    });
+  };
 
-  isSerieOpen = (serieUID) => {
+  isSerieOpen = serieUID => {
     const { openSeries } = this.props;
     let openSeriesUIDList = [];
     openSeries.forEach(port => {
       openSeriesUIDList.push(port.seriesUID);
     });
     return openSeriesUIDList.includes(serieUID);
-  }
+  };
 
   renderSelection = () => {
     let selectionList = [];
     let item;
-    let series = Object.values(this.props.seriesPassed);
+    const { seriesPassed } = this.props;
+    let series = Array.isArray(seriesPassed)
+      ? seriesPassed
+      : Object.values(seriesPassed);
     let keys = Object.keys(this.props.seriesPassed);
     let count = 0;
 
@@ -207,17 +226,28 @@ class selectSerieModal extends React.Component {
         let desc = series[i][k].seriesDescription || "Unnamed Serie";
         // desc = alreadyOpen ? `${desc} - already open` : desc;
         item = alreadyOpen ? (
-          <div key={series[i][k].seriesUID} className="alreadyOpen-disabled">
-            <FaRegCheckSquare />
-            <div className="selectionItem-text">{desc}</div>
-          </div>
+          <>
+            <div key={k + "_" + series[i][k].seriesUID} className="alreadyOpen-disabled">
+              <FaRegCheckSquare data-tip data-for={"alreadyOpenSeries"} />
+              <div className="selectionItem-text">{desc}</div>
+            </div>
+            <ReactTooltip
+              id="alreadyOpenSeries"
+              place="right"
+              type="info"
+              delayShow={100}
+              clickable={false}
+            >
+              <span>{"Already Open"}</span>
+            </ReactTooltip>
+          </>
         ) : (
           <SelectionItem
             desc={desc}
             onChange={this.selectToDisplay}
             index={count + k}
             disabled={disabled}
-            key={series[i][k].seriesUID}
+            key={k + "_" + series[i][k].seriesUID}
             isChecked={this.state.selectedToDisplay[count + k]}
           />
         );
@@ -244,14 +274,17 @@ class selectSerieModal extends React.Component {
             {message.title}
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="selectSerie-container" style={{ textAlign: "start" }}>
+        <Modal.Body
+          className="selectSerie-container"
+          style={{ textAlign: "start" }}
+        >
           <div>Maximum {this.maxPort} series can be viewed at a time.</div>
           <button
             size="lg"
             className="selectSerie-clearButton"
             onClick={() => this.props.dispatch(clearGrid())}
           >
-            Close all views
+            Close all series
           </button>
           {this.state.limit >= this.maxPort && (
             <div>You reached Max number of series</div>

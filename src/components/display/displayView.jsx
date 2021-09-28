@@ -120,10 +120,10 @@ const tools = [
 
   { name: "SphericalBrush", modeOptions: { mouseButtonMask: 1 } },
   { name: "CircleScissors", modeOptions: { mouseButtonMask: 1 } },
-  // { name: "FreehandScissors", modeOptions: { mouseButtonMask: 1 } },
+  { name: "FreehandScissors", modeOptions: { mouseButtonMask: 1 } },
   // { name: "RectangleScissors", modeOptions: { mouseButtonMask: 1 } },
 
-  // { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
+  { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
 ];
 
 const mapStateToProps = (state) => {
@@ -244,6 +244,7 @@ class DisplayView extends Component {
   // Sets the activeTool state getting it from session storage
   handleActiveTool = () => {
     const activeTool = sessionStorage.getItem("activeTool");
+    console.log("active tool is", activeTool);
     if (activeTool && activeTool !== this.state.activeTool)
       this.setState({ activeTool });
   }
@@ -699,7 +700,12 @@ class DisplayView extends Component {
   };
 
   getViewports = (containerHeight) => {
-    const numSeries = this.props.series.length;
+    const { hiding } = this.state;
+    // if a viewport is maximized (hiding=true) than arrange the display as if there is only one serie
+    let numSeries = 1;
+    if (!hiding) {
+      numSeries = this.props.series.length;
+    }
     const { width, height } = getVPDimensions(numSeries);
     this.setState({ width, height });
   };
