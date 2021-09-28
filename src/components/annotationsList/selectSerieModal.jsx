@@ -284,7 +284,7 @@ class selectSerieModal extends React.Component {
             className="selectSerie-clearButton"
             onClick={() => this.props.dispatch(clearGrid())}
           >
-            Close all views
+            Close all series
           </button>
           {this.state.limit >= this.maxPort && (
             <div>You reached Max number of series</div>
