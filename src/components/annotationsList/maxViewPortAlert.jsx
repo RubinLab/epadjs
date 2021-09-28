@@ -25,7 +25,7 @@ const alertMaxViewPort = props => {
       <Modal.Footer className="modal-footer__buttons">
         <button
           size="lg"
-          onClick={() => props.dispatch(clearGrid())}
+          onClick={() => { props.dispatch(clearGrid()); props.dispatch(alertViewPortFull()) }}
         >
           Close all series
         </button>

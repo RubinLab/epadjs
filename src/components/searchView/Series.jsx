@@ -155,7 +155,6 @@ function Series(props) {
 
   const dispatchSerieDisplay = selected => {
     const openSeries = Object.values(props.openSeries);
-    console.log("open series", openSeries);
     const { patientID, studyUID } = selected;
     let isSerieOpen = false;
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
@@ -395,7 +394,7 @@ function Series(props) {
         )
       }
     ],
-    [selectedLevel, selectedCount]
+    [selectedLevel, selectedCount, props.openSeries]
   );
 
   const getDataFromStorage = (projectID, subjectID, studyUID) => {
