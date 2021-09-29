@@ -58,7 +58,6 @@ import { FaLessThan } from 'react-icons/fa';
 import { DISP_MODALITIES } from "../../constants";
 
 const mode = sessionStorage.getItem('mode');
-const maxPort = sessionStorage.getItem("maxPort");
 
 const messages = {
   newUser: {
@@ -482,6 +481,7 @@ class SearchView extends Component {
   };
 
   viewSelection = async () => {
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
     let selectedStudies = Object.values(this.props.selectedStudies);
     let selectedSeries = Object.values(this.props.selectedSeries);
     let selectedAnnotations = Object.values(this.props.selectedAnnotations);
