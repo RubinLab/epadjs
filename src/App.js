@@ -711,7 +711,7 @@ class App extends Component {
       const parsedSeriesArray = JSON.parse(seriesArray);
       console.log("parsed series array", parsedSeriesArray);
       if (!this.hasEnoughViewports(parsedSeriesArray)) {
-        const maxPort = sessionStorage.getItem("maxPort");
+        const maxPort = parseInt(sessionStorage.getItem("maxPort"));
         alert(
           `Number of series passed is more than allowable number of port. Max allowed is ${maxPort}. Please select the series you want to display`
         );
@@ -766,7 +766,7 @@ class App extends Component {
   };
 
   hasEnoughViewports = (seriesArr) => {
-    const maxPort = sessionStorage.getItem("maxPort");
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
     if (!maxPort) {
       alert("Maximum allowable viewport number is not defined!");
       return false;

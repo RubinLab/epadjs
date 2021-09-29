@@ -35,7 +35,7 @@ import { getSeries } from '../../../services/seriesServices';
 import SelectSeriesModal from '../../annotationsList/selectSerieModal';
 
 const mode = sessionStorage.getItem('mode');
-const maxPort = sessionStorage.getItem("maxPort");
+const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
 const messages = {
   deleteSelected: 'Delete selected annotations? This cannot be undone.',
