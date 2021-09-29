@@ -442,7 +442,7 @@ const AnnotationSearch = props => {
     }
 
     if (checkStartEndWithCondition(arr)) {
-      setError(`AND/OR conditions should be used to connect two queries!`);
+      setError(`AND/OR conditions should be used to connect two queries. Please use advanced search to build a query.`);
       return false;
     }
     return true;
