@@ -538,15 +538,10 @@ class DisplayView extends Component {
     let newImageIds = {};
     let cornerstoneImageIds = [];
     const imageUrls = await this.getImages(serie);
-    const API_KEY = sessionStorage.getItem("API_KEY");
     const wadoUrl = sessionStorage.getItem("wadoUrl");
     let baseUrl;
     imageUrls.map((url) => {
-      if (API_KEY) {
-        const user = sessionStorage.getItem("username");
-        baseUrl = wadoUrl + url.lossyImage + `&user=${user}`;
-      }
-      else baseUrl = wadoUrl + url.lossyImage;
+      baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
           let multiFrameUrl = baseUrl + "&frame=" + i;
