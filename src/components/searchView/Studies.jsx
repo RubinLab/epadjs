@@ -25,8 +25,6 @@ import {
   selectAnnotation
 } from '../annotationsList/action';
 
-const maxPort = sessionStorage.getItem("maxPort");
-
 function Table({
   columns,
   data,
@@ -199,6 +197,7 @@ function Studies(props) {
   };
 
   const displaySeries = async selected => {
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
     if (props.openSeries.length === maxPort) {
       props.dispatch(alertViewPortFull());
     } else {

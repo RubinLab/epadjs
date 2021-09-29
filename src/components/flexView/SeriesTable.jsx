@@ -11,7 +11,7 @@ import {
   clearSelection,
 } from "../annotationsList/action";
 
-const maxPort = sessionStorage.getItem("maxPort");
+const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 // connect to store
 // is seriesUID in the openSeries checkbox clicked
 const SeriesTable = (props) => {

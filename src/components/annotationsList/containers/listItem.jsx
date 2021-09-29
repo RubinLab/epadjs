@@ -15,7 +15,7 @@ import {
   showAnnotationDock
 } from "../action";
 
-const maxPort = sessionStorage.getItem("maxPort");
+const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
 //single serie will be passed
 class ListItem extends React.Component {

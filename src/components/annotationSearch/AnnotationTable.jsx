@@ -19,7 +19,7 @@ import {
 import { getSeries } from '../../services/seriesServices';
 
 const defaultPageSize = 200;
-const maxPort = sessionStorage.getItem('maxPort');
+const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
@@ -90,7 +90,7 @@ function Table({
                 {...row.getToggleRowSelectedProps()}
                 data={row.original}
                 updateSelectedAims={updateSelectedAims}
-                // onChange={() => updateSelectedAims(row.original)}
+              // onChange={() => updateSelectedAims(row.original)}
               />
             </div>
           )
@@ -352,7 +352,7 @@ function AnnotationTable(props) {
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
