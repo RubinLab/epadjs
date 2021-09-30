@@ -143,7 +143,7 @@ function Annotations(props) {
     props.dispatch(clearSelection('annotation'));
     const { seriesDescripion } = props.series;
     const { studyDescription } = props;
-    props.dispatch(selectAnnotation(data, studyDescription, seriesDescripion));
+    props.dispatch(selectAnnotation(data, studyDescription, seriesDescripion, props.parentSeries.examType));
   };
 
   const columns = React.useMemo(
