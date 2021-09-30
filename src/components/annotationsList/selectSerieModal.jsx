@@ -34,7 +34,7 @@ class selectSerieModal extends React.Component {
       limit: 0,
       list: []
     };
-    this.maxPort = sessionStorage.getItem("maxPort");
+    this.maxPort = parseInt(sessionStorage.getItem("maxPort"));
   }
 
   //get the serie list
@@ -126,9 +126,9 @@ class selectSerieModal extends React.Component {
         } else {
           this.props.dispatch(getSingleSerie(series[i]));
         }
-        if (!this.props.patients[series[i]]) {
-          this.props.dispatch(getWholeData(series[i]));
-        }
+        // if (!this.props.patients[series[i]]) {
+        //   this.props.dispatch(getWholeData(series[i]));
+        // }
       }
     }
     const { projectID, patientID, studyUID } = series[0];
