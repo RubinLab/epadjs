@@ -709,6 +709,9 @@ class App extends Component {
 
     if (seriesArray) {
       const parsedSeriesArray = JSON.parse(seriesArray);
+      parsedSeriesArray.forEach(
+        (serie, i) => (parsedSeriesArray[i] = { ...serie, projectID })
+      );
       console.log("parsed series array", parsedSeriesArray);
       if (!this.hasEnoughViewports(parsedSeriesArray)) {
         const maxPort = parseInt(sessionStorage.getItem("maxPort"));
