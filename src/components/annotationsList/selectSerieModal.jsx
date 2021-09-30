@@ -127,13 +127,15 @@ class selectSerieModal extends React.Component {
           this.props.dispatch(getSingleSerie(series[i]));
         }
         if (!this.props.patients[series[i]]) {
-          this.props.dispatch(getWholeData(series[i]));
+          // this.props.dispatch(getWholeData(series[i]));
         }
       }
     }
-    const { projectID, patientID, studyUID } = series[0];
+    const { projectID, patientID, studyUID, subjectID } = series[0];
+    const subID = patientID ? patientID : subjectID;
+
     if (!significanceSet)
-      setSignificantSeries(projectID, patientID, studyUID, significantSeries);
+      setSignificantSeries(projectID, subID, studyUID, significantSeries);
     this.props.history.push("/display");
     this.handleCancel();
   };
