@@ -14,7 +14,7 @@ import {
 } from "../action";
 import { deleteAnnotation } from "../../../services/annotationServices";
 import cornerstone from "cornerstone-core";
-import { state } from 'cornerstone-tools/store/index.js';
+import { state } from "cornerstone-tools/store/index.js";
 
 class AnnotationsList extends React.Component {
   state = {
@@ -74,7 +74,7 @@ class AnnotationsList extends React.Component {
       );
       window.dispatchEvent(
         new CustomEvent("toggleAnnotations", {
-          detail: { aimID, isVisible: !currentDisplayStatus },
+          detail: { aimID, isVisible: !currentDisplayStatus }
         })
       );
     }
@@ -93,7 +93,7 @@ class AnnotationsList extends React.Component {
     }
   };
 
-  handleCalculations = (checked) => {
+  handleCalculations = checked => {
     this.setState({ showCalculations: checked }, () => {
       state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
       this.refreshAllViewports();
@@ -130,7 +130,7 @@ class AnnotationsList extends React.Component {
     window.dispatchEvent(
       new CustomEvent("deleteAim", { detail: { aim, openSerie } })
     );
-  }
+  };
 
   getLabelArray = () => {
     const calculations = {};
@@ -150,14 +150,14 @@ class AnnotationsList extends React.Component {
           if (calculations[aim.aimUid]) {
             calculations[aim.aimUid][aim.markupUid] = {
               calculations: [...aim.calculations],
-              markupType: aim.markupType,
+              markupType: aim.markupType
             };
             // calculations[aim.markupUid].push({ markupType: aim.markupType });
           } else {
             calculations[aim.aimUid] = {};
             calculations[aim.aimUid][aim.markupUid] = {
               calculations: [...aim.calculations],
-              markupType: aim.markupType,
+              markupType: aim.markupType
             };
             // calculations[aim.markupUid].push({ markupType: aim.markupType });
           }
@@ -170,7 +170,9 @@ class AnnotationsList extends React.Component {
   };
 
   render = () => {
-    const { openSeries, activePort, aimsList } = this.props;
+    const { openSeries, aimsList } = this.props;
+    let { activePort } = this.props;
+    activePort = activePort || activePort === 0 ? activePort : 0;
     const { imageID } = openSeries[activePort];
     const maxHeight = window.innerHeight * 0.6;
     const seriesUID = openSeries[activePort].seriesUID;
@@ -196,7 +198,7 @@ class AnnotationsList extends React.Component {
       if (singleFrameAnnotations && multiFrameAnnotations)
         imageAnnotations = [
           ...singleFrameAnnotations,
-          ...multiFrameAnnotations,
+          ...multiFrameAnnotations
         ];
       else if (singleFrameAnnotations)
         imageAnnotations = singleFrameAnnotations;
@@ -312,9 +314,7 @@ class AnnotationsList extends React.Component {
             />
           </div>
           <div style={{ maxHeight, overflow: "scroll" }}>{annList}</div>
-          <AnnotationsLink
-            imageAims={imageAims}
-          />
+          <AnnotationsLink imageAims={imageAims} />
         </div>
       </React.Fragment>
     );
@@ -327,7 +327,7 @@ const mapStateToProps = state => {
     activePort: state.annotationsListReducer.activePort,
     aimsList: state.annotationsListReducer.aimsList,
     imageID: state.annotationsListReducer.imageID,
-    loading: state.annotationsListReducer.loading,
+    loading: state.annotationsListReducer.loading
   };
 };
 export default connect(mapStateToProps)(AnnotationsList);
