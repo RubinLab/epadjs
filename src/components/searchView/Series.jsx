@@ -239,7 +239,9 @@ function Series(props) {
                   disabled={selectedLevel}
                   onClick={() => {
                     props.dispatch(clearSelection('serie'));
-                    props.dispatch(selectSerie(row.original));
+                    props.dispatch(
+                      selectSerie(row.original, props.studyDescription)
+                    );
                     // handleCheckboxSelect(row);
                   }}
                 />
@@ -282,13 +284,19 @@ function Series(props) {
         Cell: ({ row }) => {
           let desc = row.original.seriesDescription || 'Unnamed Series';
           let id = 'desc' + row.original.seriesUID;
+          const { studyDescription } = props;
           return (
             <>
               <span
                 data-tip
                 data-for={id}
                 className="searchView-row__desc"
-                onDoubleClick={() => dispatchSerieDisplay(row.original)}
+                onDoubleClick={() =>
+                  dispatchSerieDisplay({
+                    ...row.original,
+                    studyDescription
+                  })
+                }
                 style={{ paddingLeft: '20px' }}
               >
                 {desc}
@@ -459,7 +467,7 @@ function Series(props) {
       />
       {showSelectSerie && (
         <SelectSerieModal
-          seriesPassed={[[...props.openSeries, serie]]}
+          seriesPassed={[[serie]]}
           onCancel={() => {
             setShowSelectSerie(false);
             setSerie({});
