@@ -55,7 +55,7 @@ import WarningModal from '../common/warningModal';
 import AnnotationCreationModal from './annotationCreationModal.jsx';
 import UpLoadWizard from '../tagEditor/uploadWizard';
 import { FaLessThan } from 'react-icons/fa';
-import { DISP_MODALITIES } from "../../constants";
+import { DISP_MODALITIES } from '../../constants';
 
 const mode = sessionStorage.getItem('mode');
 
@@ -130,17 +130,16 @@ class SearchView extends Component {
         expandLevel
       });
     } catch (err) {
-      window.addEventListener("openSeriesModal", this.handleSeriesModal);
+      window.addEventListener('openSeriesModal', this.handleSeriesModal);
     }
   };
 
   // App.js triggers this event when more than allowed series are sent from the url to open
-  handleSeriesModal = (event) => {
+  handleSeriesModal = event => {
     const list = event.detail;
     const seriesList = [list];
-    console.log("series List in handleSeries", seriesList);
     this.setState({ isSerieSelectionOpen: true, seriesList });
-  }
+  };
 
   componentDidUpdate = async prevProps => {
     const { uploadedPid, lastEventId, expandLevel } = this.props;
@@ -170,7 +169,7 @@ class SearchView extends Component {
   };
 
   componentWillUnmount() {
-    window.removeEventListener("openSeriesModal", this.handleSeriesModal);
+    window.removeEventListener('openSeriesModal', this.handleSeriesModal);
   }
 
   checkForAllAndUnassigned = () => {
@@ -186,10 +185,10 @@ class SearchView extends Component {
       patients.length > 0
         ? patients
         : studies.length > 0
-          ? studies
-          : series.length > 0
-            ? series
-            : annotations;
+        ? studies
+        : series.length > 0
+        ? series
+        : annotations;
     selection.forEach((el, i) => {
       if (el.projectID === 'all' || el.projectID === 'nonassigned') {
         checkFromProjectID = true;
@@ -481,7 +480,7 @@ class SearchView extends Component {
   };
 
   viewSelection = async () => {
-    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+    const maxPort = parseInt(sessionStorage.getItem('maxPort'));
     let selectedStudies = Object.values(this.props.selectedStudies);
     let selectedSeries = Object.values(this.props.selectedSeries);
     let selectedAnnotations = Object.values(this.props.selectedAnnotations);
@@ -492,75 +491,57 @@ class SearchView extends Component {
     if (selectedStudies.length > 0) {
       let total = 0;
       let studiesObj = {};
-
-      if (this.props.openSeries.length === maxPort) {
-        if (selectedStudies.length === 1) {
-          let numOfSer = Object.values(this.groupOpenSeriesByStudy());
-          if (selectedStudies[0].numberOfSeries === numOfSer[0]) {
-            return;
-          } else {
-            this.props.dispatch(alertViewPortFull());
-          }
-        } else {
-          this.props.dispatch(alertViewPortFull());
-        }
+      for (let st of selectedStudies) {
+        total += st.numberOfSeries;
+      }
+      for (let st of selectedStudies) {
+        studiesObj[st.studyUID] = await this.getSeriesData(st);
+      }
+      //check if enough room to display selection
+      if (total + this.props.openSeries.length > maxPort) {
+        this.props.dispatch(startLoading());
+        this.setState({ seriesList: studiesObj });
+        this.props.dispatch(loadCompleted());
+        this.setState({ isSerieSelectionOpen: true });
       } else {
-        for (let st of selectedStudies) {
-          total += st.numberOfSeries;
+        for (let study in studiesObj) {
+          for (let serie of studiesObj[study]) {
+            this.props.dispatch(addToGrid(serie));
+            this.props.dispatch(getSingleSerie(serie));
+          }
         }
-        for (let st of selectedStudies) {
-          studiesObj[st.studyUID] = await this.getSeriesData(st);
-        }
-        //check if enough room to display selection
-        if (total + this.props.openSeries.length > maxPort) {
-          this.props.dispatch(startLoading());
-          this.setState({ seriesList: studiesObj });
-          this.props.dispatch(loadCompleted());
-          this.setState({ isSerieSelectionOpen: true });
-        } else {
-          for (let study in studiesObj) {
-            for (let serie of studiesObj[study]) {
-              this.props.dispatch(addToGrid(serie));
-              this.props.dispatch(getSingleSerie(serie));
+        for (let study in studiesObj) {
+          for (let serie of studiesObj[study]) {
+            if (!this.props.patients[serie.patientID]) {
+              // await this.props.dispatch(getWholeData(serie));
+              getWholeData(serie);
+            } else {
+              this.props.dispatch(
+                updatePatient(
+                  'serie',
+                  true,
+                  serie.patientID,
+                  serie.studyUID,
+                  serie.seriesUID
+                )
+              );
             }
           }
-          for (let study in studiesObj) {
-            for (let serie of studiesObj[study]) {
-              if (!this.props.patients[serie.patientID]) {
-                // await this.props.dispatch(getWholeData(serie));
-                getWholeData(serie);
-              } else {
-                this.props.dispatch(
-                  updatePatient(
-                    'serie',
-                    true,
-                    serie.patientID,
-                    serie.studyUID,
-                    serie.seriesUID
-                  )
-                );
-              }
-            }
-          }
-          this.props.history.push('/display');
-          this.props.dispatch(clearSelection());
         }
+        this.props.history.push('/display');
+        this.props.dispatch(clearSelection());
       }
       //if series selected
     } else if (selectedSeries.length > 0) {
       //check if enough room to display selection
       for (let serie of selectedSeries) {
-        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen && DISP_MODALITIES.includes(serie.examType)) {
+        if (
+          !this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen &&
+          DISP_MODALITIES.includes(serie.examType)
+        ) {
           notOpenSeries.push(serie);
         }
       }
-      //if all ports are full
-      if (
-        notOpenSeries.length > 0 &&
-        this.props.openSeries.length === maxPort
-      ) {
-        this.props.dispatch(alertViewPortFull());
-      } else {
         //if all series already open update active port
         if (notOpenSeries.length === 0) {
           let index = this.checkIfSerieOpen(
@@ -602,23 +583,19 @@ class SearchView extends Component {
             this.props.dispatch(clearSelection());
           }
         }
-      }
       //if annotations selected
     } else if (selectedAnnotations.length > 0) {
       let serieList = Object.values(groupedAnns);
       groupedObj = this.groupUnderStudy(serieList);
       //check if enough room to display selection
       for (let serie of serieList) {
-        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen && DISP_MODALITIES.includes(serie.examType)) {
+        if (
+          !this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen &&
+          DISP_MODALITIES.includes(serie.examType)
+        ) {
           notOpenSeries.push(serie);
         }
       }
-      if (
-        notOpenSeries.length > 0 &&
-        this.props.openSeries.length === maxPort
-      ) {
-        this.props.dispatch(alertViewPortFull());
-      } else {
         if (notOpenSeries.length === 0) {
           const serID = serieList[0].seriesUID;
           let index = this.checkIfSerieOpen(serID, 'seriesUID').index;
@@ -655,7 +632,6 @@ class SearchView extends Component {
             this.props.dispatch(clearSelection());
           }
         }
-      }
     }
   };
 
@@ -930,10 +906,9 @@ class SearchView extends Component {
       await Promise.all(promises);
       localStorage.setItem('treeData', JSON.stringify({}));
       this.setState({ showProjects: false });
-      this.props.clearTreeExpand()
+      this.props.clearTreeExpand();
       this.props.dispatch(clearSelection());
       this.props.history.push(`/list/${id}`);
-
     } catch (err) {
       console.log(err);
     }
@@ -1012,9 +987,10 @@ class SearchView extends Component {
           admin={this.props.admin}
           hideEyeIcon={hideEyeIcon}
           expandLevel={this.props.expandLevel}
-        // expanding={expanding}
+          // expanding={expanding}
         />
-        {(this.props.showSeriesModal || (isSerieSelectionOpen && !this.props.loading)) && (
+        {(this.props.showSeriesModal ||
+          (isSerieSelectionOpen && !this.props.loading)) && (
           <ProjectModal
             seriesPassed={this.state.seriesList}
             onCancel={this.closeSelectionModal}
@@ -1044,7 +1020,6 @@ class SearchView extends Component {
           getTreeData={this.props.getTreeData}
           closeAllCounter={this.props.closeAllCounter}
           collapseSubjects={this.props.collapseSubjects}
-
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection

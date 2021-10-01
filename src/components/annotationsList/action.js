@@ -256,7 +256,8 @@ export const selectSerie = (selectedSerieObj, studyDescription) => {
 export const selectAnnotation = (
   selectedAnnotationObj,
   studyDescription,
-  seriesDescription
+  seriesDescription,
+  examType
 ) => {
   const {
     aimID,
@@ -276,22 +277,17 @@ export const selectAnnotation = (
 
   return {
     type: SELECT_ANNOTATION,
-
     annotation: {
       aimID,
-
       seriesUID,
-
       studyUID,
-
       subjectID,
-
       projectID,
-
       patientName,
       name,
       studyDescription,
       seriesDescription,
+      examType
     },
   };
 };

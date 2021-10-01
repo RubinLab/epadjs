@@ -198,9 +198,6 @@ function Studies(props) {
 
   const displaySeries = async selected => {
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
-    if (props.openSeries.length === maxPort) {
-      props.dispatch(alertViewPortFull());
-    } else {
       const { patientID, studyUID } = selected;
       let seriesArr = [];
       //check if the patient is there (create a patient exist flag)
@@ -253,7 +250,6 @@ function Studies(props) {
         props.history.push('/display');
       }
       props.dispatch(clearSelection());
-    }
   };
 
   const columns = React.useMemo(
