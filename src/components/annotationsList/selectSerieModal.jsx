@@ -134,8 +134,9 @@ class selectSerieModal extends React.Component {
     const { projectID, patientID, studyUID, subjectID } = series[0];
     const subID = patientID ? patientID : subjectID;
 
-    if (!significanceSet)
+    if (!significanceSet) {
       setSignificantSeries(projectID, subID, studyUID, significantSeries);
+    }
     this.props.history.push("/display");
     this.handleCancel();
   };
@@ -156,7 +157,7 @@ class selectSerieModal extends React.Component {
       selectedToDisplay: [],
       limit: 0
     });
-    this.props.dispatch(clearSelection());
+    // this.props.dispatch(clearSelection());
     this.props.onCancel();
   };
 
@@ -229,7 +230,10 @@ class selectSerieModal extends React.Component {
         // desc = alreadyOpen ? `${desc} - already open` : desc;
         item = alreadyOpen ? (
           <>
-            <div key={k + "_" + series[i][k].seriesUID} className="alreadyOpen-disabled">
+            <div
+              key={k + "_" + series[i][k].seriesUID}
+              className="alreadyOpen-disabled"
+            >
               <FaRegCheckSquare data-tip data-for={"alreadyOpenSeries"} />
               <div className="selectionItem-text">{desc}</div>
             </div>
