@@ -694,7 +694,6 @@ class App extends Component {
 
   handleArgs = async (args) => {
     const { data } = await decrypt(args);
-    console.log("data", data);
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
     const { openSeries } = this.props;
 
@@ -709,7 +708,9 @@ class App extends Component {
 
     if (seriesArray) {
       const parsedSeriesArray = JSON.parse(seriesArray);
-      console.log("parsed series array", parsedSeriesArray);
+      parsedSeriesArray.forEach(
+        (serie, i) => (parsedSeriesArray[i] = { ...serie, projectID })
+      );
       if (!this.hasEnoughViewports(parsedSeriesArray)) {
         const maxPort = parseInt(sessionStorage.getItem("maxPort"));
         alert(
@@ -1515,8 +1516,6 @@ class App extends Component {
 }
 
 const mapStateToProps = (state) => {
-  // console.log(state.managementReducer);
-  // console.log(state.annotationsListReducer);
   const {
     showGridFullAlert,
     showProjectModal,
