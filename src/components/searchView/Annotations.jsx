@@ -6,6 +6,7 @@ import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import { getAnnotations } from '../../services/annotationServices';
 import { formatDate } from '../flexView/helperMethods';
+import SelectSerieModal from '../annotationsList/selectSerieModal';
 import {
   alertViewPortFull,
   getSingleSerie,
@@ -70,6 +71,8 @@ function Annotations(props) {
   let [loading, setLoading] = useState(false);
   const username = sessionStorage.getItem('username');
   const [selectedLevel, setSelectedLevel] = useState(false);
+  const [showSelectSerie, setShowSelectSerie] = useState(false);
+  const [selected, setSelected] = useState({});
 
   useEffect(() => {
     const { selectedPatients, selectedStudies, selectedSeries } = props;
@@ -97,9 +100,10 @@ function Annotations(props) {
 
   const displayAnnotations = selected => {
     const { projectID, studyUID, seriesUID, aimID } = selected;
+    setSelected(selected);
     const patientID = selected.subjectID;
     const { openSeries } = props;
-    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+    const maxPort = parseInt(sessionStorage.getItem('maxPort'));
     // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
     //check if there is enough space in the grid
     let isGridFull = openSeries.length === maxPort;
@@ -108,14 +112,17 @@ function Annotations(props) {
       const { index } = checkIfSerieOpen(seriesUID);
       props.dispatch(changeActivePort(index));
       props.dispatch(jumpToAim(seriesUID, aimID, index));
+      props.dispatch(clearSelection());
+      props.history.push('/display');
     } else {
       if (isGridFull) {
-        props.dispatch(alertViewPortFull());
+        console.log(' --> isGridFull', isGridFull);
+        setShowSelectSerie(true);
       } else {
         props.dispatch(addToGrid(selected, aimID));
         props
           .dispatch(getSingleSerie(selected, aimID))
-          .then(() => { })
+          .then(() => {})
           .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
         if (!props.patients[patientID]) {
@@ -133,17 +140,24 @@ function Annotations(props) {
             )
           );
         }
+        props.dispatch(clearSelection());
+        props.history.push('/display');
       }
     }
-    props.dispatch(clearSelection());
-    props.history.push('/display');
   };
 
   const selectRow = (e, data) => {
     props.dispatch(clearSelection('annotation'));
     const { seriesDescripion } = props.series;
     const { studyDescription } = props;
-    props.dispatch(selectAnnotation(data, studyDescription, seriesDescripion, props.parentSeries.examType));
+    props.dispatch(
+      selectAnnotation(
+        data,
+        studyDescription,
+        seriesDescripion,
+        props.parentSeries.examType
+      )
+    );
   };
 
   const columns = React.useMemo(
@@ -296,6 +310,12 @@ function Annotations(props) {
         <tr style={{ width: 'fit-content', margin: 'auto', marginTop: '10%' }}>
           <PropagateLoader color={'#7A8288'} loading={loading} margin={8} />
         </tr>
+      )}
+      {showSelectSerie && (
+        <SelectSerieModal
+          seriesPassed={[[selected]]}
+          onCancel={() => setShowSelectSerie(false)}
+        />
       )}
       <Table columns={columns} data={data} selectRow={selectRow} />
     </>
