@@ -116,7 +116,6 @@ function Annotations(props) {
       props.history.push('/display');
     } else {
       if (isGridFull) {
-        console.log(' --> isGridFull', isGridFull);
         setShowSelectSerie(true);
       } else {
         props.dispatch(addToGrid(selected, aimID));
@@ -148,13 +147,13 @@ function Annotations(props) {
 
   const selectRow = (e, data) => {
     props.dispatch(clearSelection('annotation'));
-    const { seriesDescripion } = props.series;
+    const { seriesDescription } = props.parentSeries;
     const { studyDescription } = props;
     props.dispatch(
       selectAnnotation(
         data,
         studyDescription,
-        seriesDescripion,
+        seriesDescription,
         props.parentSeries.examType
       )
     );
@@ -191,7 +190,13 @@ function Annotations(props) {
                 data-tip
                 data-for={id}
                 className="searchView-row__desc"
-                onDoubleClick={() => displayAnnotations(row.original)}
+                onDoubleClick={() =>
+                  displayAnnotations({
+                    ...row.original,
+                    studyDescription: props.studyDescription,
+                    seriesDescription: props.parentSeries.seriesDescription
+                  })
+                }
                 style={{ paddingLeft: '30px' }}
               >
                 {desc}
