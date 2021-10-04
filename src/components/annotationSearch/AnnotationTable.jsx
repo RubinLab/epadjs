@@ -17,6 +17,7 @@ import {
   annotationsLoadingError
 } from '../annotationsList/action';
 import { getSeries } from '../../services/seriesServices';
+import SelectSerieModal from '../annotationsList/selectSerieModal';
 
 const defaultPageSize = 200;
 const maxPort = parseInt(sessionStorage.getItem('maxPort'));
@@ -90,7 +91,7 @@ function Table({
                 {...row.getToggleRowSelectedProps()}
                 data={row.original}
                 updateSelectedAims={updateSelectedAims}
-              // onChange={() => updateSelectedAims(row.original)}
+                // onChange={() => updateSelectedAims(row.original)}
               />
             </div>
           )
@@ -210,7 +211,8 @@ function AnnotationTable(props) {
   const [prevPageIndex, setPrevPageIndex] = useState(0);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [data, setData] = useState([]);
-
+  const [showSelectSeriesModal, setShowSelectSeriesModal] = useState(false);
+  const [selected, setSelected] = useState({});
   // Render the UI for your table
   const preparePageData = (rawData, pageSize = 200, pageIndex = 0) => {
     let pageData = [];
@@ -231,7 +233,9 @@ function AnnotationTable(props) {
 
   const getSeriesData = async selected => {
     props.dispatch(startLoading());
-    const { projectID, patientID, studyUID } = selected;
+    const { projectID, studyUID } = selected;
+    let { patientID, subjectID } = selected;
+    patientID = patientID ? patientID : subjectID;
     try {
       const { data: series } = await getSeries(projectID, patientID, studyUID);
       props.dispatch(loadCompleted());
@@ -277,6 +281,7 @@ function AnnotationTable(props) {
       const patientID = selected.subjectID;
       const projectID = selected.projectID ? selected.projectID : 'lite';
       const { openSeries } = props;
+      setSelected(selected);
       // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
       //check if there is enough space in the grid
       let isGridFull = openSeries.length === maxPort;
@@ -285,9 +290,10 @@ function AnnotationTable(props) {
         const { index } = checkIfSerieOpen(selected, props.openSeries);
         props.dispatch(changeActivePort(index));
         props.dispatch(jumpToAim(seriesUID, aimID, index));
+        props.switchToDisplay();
       } else {
         if (isGridFull) {
-          props.dispatch(alertViewPortFull());
+          setShowSelectSeriesModal(true);
         } else {
           props.dispatch(addToGrid(selected, aimID));
           props.dispatch(getSingleSerie(selected, aimID));
@@ -307,6 +313,7 @@ function AnnotationTable(props) {
               )
             );
           }
+          props.switchToDisplay();
         }
       }
     } catch (err) {
@@ -315,8 +322,9 @@ function AnnotationTable(props) {
   };
 
   const displaySeries = async selected => {
+    setSelected(selected);
     if (props.openSeries.length === maxPort) {
-      props.dispatch(alertViewPortFull());
+      setShowSelectSeriesModal(true);
     } else {
       const { subjectID: patientID, studyUID } = selected;
       let seriesArr;
@@ -336,11 +344,8 @@ function AnnotationTable(props) {
       //check if there is enough room
       if (seriesArr.length + props.openSeries.length > maxPort) {
         //if there is not bring the modal
-        // await this.setState({
-        //   isSerieSelectionOpen: true,
-        //   selectedStudy: [seriesArr],
-        //   studyName: selected.studyDescription
-        // });
+        setShowSelectSeriesModal(true);
+        setSelected(seriesArr);
         // TODO show toast
       } else {
         //if there is enough room
@@ -352,7 +357,7 @@ function AnnotationTable(props) {
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => { })
+          .then(() => {})
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
@@ -388,27 +393,29 @@ function AnnotationTable(props) {
         style: { display: 'flex', justifyContent: 'center' },
         Cell: ({ row }) => {
           return (
-            <Link className="open-link" to={'/display'}>
-              <div
-                onClick={() => {
-                  if (
-                    row.original.seriesUID === 'noseries' ||
-                    !row.original.seriesUID
-                  ) {
-                    displaySeries(row.original);
-                  } else {
-                    openAnnotation(row.original);
-                  }
-                }}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  width: '1rem'
-                }}
-              >
-                <FaRegEye className="menu-clickable" />
-              </div>
-            </Link>
+            // <Link className="open-link" to={'/display'}>
+            <div
+              onClick={() => {
+                if (
+                  row.original.seriesUID === 'noseries' ||
+                  !row.original.seriesUID
+                ) {
+                  // study aim opening
+                  displaySeries(row.original);
+                } else {
+                  // series opening
+                  openAnnotation(row.original);
+                }
+              }}
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                width: '1rem'
+              }}
+            >
+              <FaRegEye className="menu-clickable" />
+            </div>
+            // </Link>
           );
         }
       },
@@ -566,16 +573,28 @@ function AnnotationTable(props) {
   );
 
   return (
-    <Table
-      columns={columns}
-      data={data}
-      selected={props.selected}
-      updateSelectedAims={props.updateSelectedAims}
-      pageCount={pageCount}
-      noOfRows={props.noOfRows}
-      fetchData={fetchData}
-      updateSelectedAims={props.updateSelectedAims}
-    />
+    <>
+      <Table
+        columns={columns}
+        data={data}
+        selected={props.selected}
+        updateSelectedAims={props.updateSelectedAims}
+        pageCount={pageCount}
+        noOfRows={props.noOfRows}
+        fetchData={fetchData}
+        updateSelectedAims={props.updateSelectedAims}
+      />
+      {showSelectSeriesModal && (
+        <SelectSerieModal
+          seriesPassed={Array.isArray(selected) ? [selected] : [[selected]]}
+          onCancel={() => {
+            setShowSelectSeriesModal(false);
+            setSelected({});
+          }}
+          // studyName={serie.studyDescription}
+        />
+      )}
+    </>
   );
 }
 

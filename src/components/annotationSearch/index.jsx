@@ -861,6 +861,7 @@ const AnnotationSearch = props => {
             noOfRows={rows}
             getNewData={getNewData}
             bookmark={bookmark}
+            switchToDisplay={() => props.history.push("/display")}
           />
         )}
       </div>
