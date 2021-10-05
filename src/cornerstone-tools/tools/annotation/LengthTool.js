@@ -18,6 +18,7 @@ import { getLogger } from "../../util/logger.js";
 import getPixelSpacing from "../../util/getPixelSpacing";
 import throttle from "../../util/throttle";
 import { state } from "../../store/index.js";
+import calculateLineStatistics from "cornerstone-tools/util/line/calculateLineStatistics.js";
 
 const logger = getLogger("tools:annotation:LengthTool");
 
@@ -42,6 +43,8 @@ export default class LengthTool extends BaseAnnotationTool {
   }
 
   createNewMeasurement(eventData) {
+    console.log("event data", eventData);
+    console.trace();
     const goodEventData =
       eventData && eventData.currentPoints && eventData.currentPoints.image;
 
@@ -121,6 +124,8 @@ export default class LengthTool extends BaseAnnotationTool {
 
   updateCachedStats(image, element, data) {
     const { rowPixelSpacing, colPixelSpacing } = getPixelSpacing(image);
+    const { start, end } = data.handles;
+    calculateLineStatistics(image, { start, end });
 
     // Set rowPixelSpacing and columnPixelSpacing to 1 if they are undefined (or zero)
     const dx =
