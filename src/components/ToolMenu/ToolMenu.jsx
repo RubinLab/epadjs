@@ -302,6 +302,7 @@ class ToolMenu extends Component {
       return;
     } else if (tool === "ClearGrid") {
       this.props.dispatch(clearGrid());
+      this.props.onSwitchView("search");
       return;
     } else if (tool === "Presets") {
       this.showPresets();
