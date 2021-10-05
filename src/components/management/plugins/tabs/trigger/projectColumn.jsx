@@ -719,9 +719,10 @@ class ProjectColumn extends React.Component {
               {this.state.projectDropDownSelected && <td>plugins</td>}
               {this.state.pluginDropDownSelected && <td>parameter type</td>}
               {this.state.parameterDropDownSelected && <td></td>}
+              <td style={{width: "100%"}}></td>
             </tr>
             <tr padding="10px">
-              <td padding="10px">
+              <td padding="10px" style={{width: "80px"}}>
                 <select
                   className="pluginaddqueueselect"
                   id="projects"
@@ -735,7 +736,7 @@ class ProjectColumn extends React.Component {
                   {this.prepareDropDownHtmlForProjects()}
                 </select>
               </td>
-              <td>
+              <td style={{width: "80px"}}>
                 {this.state.projectDropDownSelected && (
                   <select
                     className="pluginaddqueueselect"
@@ -751,7 +752,7 @@ class ProjectColumn extends React.Component {
                   </select>
                 )}
               </td>
-              <td>
+              <td style={{width: "250px"}}>
                 {this.state.pluginDropDownSelected && (
                   <select
                     className="pluginaddqueueselect"
@@ -764,7 +765,7 @@ class ProjectColumn extends React.Component {
                   </select>
                 )}
               </td>
-              <td>
+              <td style={{width: "80px"}}>
                 {this.state.selectedParameterTypeId !== "select" && (
                   <div>
                     <button
@@ -777,16 +778,17 @@ class ProjectColumn extends React.Component {
                   </div>
                 )}
               </td>
+              <td style={{width: "60%"}}></td>
             </tr>
             {this.state.parameterDropDownSelected && (
               <tr className="trHeader">
-                <td className="trHeader" colSpan="4">
+                <td className="trHeader" colSpan="5">
                   Annotations
                 </td>
               </tr>
             )}
             <tr>
-              <td className="trHeader" colSpan="4">
+              <td className="trHeader" colSpan="5">
                 {this.state.parameterDropDownSelected && (
                   <ReactTable
                     NoDataComponent={() => null}
