@@ -7,6 +7,7 @@ import PropagateLoader from 'react-spinners/PropagateLoader';
 import { formatDate } from '../flexView/helperMethods';
 import Annotations from './Annotations';
 import { getSeries } from '../../services/seriesServices';
+import SelectSerieModal from '../annotationsList/selectSerieModal';
 import {
   alertViewPortFull,
   getSingleSerie,
@@ -110,6 +111,8 @@ function Series(props) {
   const [loading, setLoading] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
   const [selectedCount, setSelectedCount] = useState(false);
+  const [showSelectSerie, setShowSelectSerie] = useState(false);
+  const [serie, setSerie] = useState({});
 
   useEffect(() => {
     const { selectedPatients, selectedStudies, selectedAnnotations } = props;
@@ -157,7 +160,7 @@ function Series(props) {
     const openSeries = Object.values(props.openSeries);
     const { patientID, studyUID } = selected;
     let isSerieOpen = false;
-    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+    const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 
     //check if there is enough space in the grid
     let isGridFull = openSeries.length === maxPort;
@@ -178,13 +181,14 @@ function Series(props) {
     if (!isSerieOpen) {
       //if the grid is full show warning
       if (isGridFull) {
-        // setState({ showGridFullWarning: true });
-        props.dispatch(alertViewPortFull());
+        setSerie(selected);
+        setShowSelectSerie(true);
+        // props.dispatch(alertViewPortFull());
       } else {
         props.dispatch(addToGrid(selected));
         props
           .dispatch(getSingleSerie(selected))
-          .then(() => { })
+          .then(() => {})
           .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
         if (!props.patients[selected.patientID]) {
@@ -203,6 +207,8 @@ function Series(props) {
         }
         props.history.push('/display');
       }
+    } else {
+      props.history.push('/display');
     }
     props.dispatch(clearSelection());
   };
@@ -233,7 +239,9 @@ function Series(props) {
                   disabled={selectedLevel}
                   onClick={() => {
                     props.dispatch(clearSelection('serie'));
-                    props.dispatch(selectSerie(row.original));
+                    props.dispatch(
+                      selectSerie(row.original, props.studyDescription)
+                    );
                     // handleCheckboxSelect(row);
                   }}
                 />
@@ -276,13 +284,19 @@ function Series(props) {
         Cell: ({ row }) => {
           let desc = row.original.seriesDescription || 'Unnamed Series';
           let id = 'desc' + row.original.seriesUID;
+          const { studyDescription } = props;
           return (
             <>
               <span
                 data-tip
                 data-for={id}
                 className="searchView-row__desc"
-                onDoubleClick={() => dispatchSerieDisplay(row.original)}
+                onDoubleClick={() =>
+                  dispatchSerieDisplay({
+                    ...row.original,
+                    studyDescription
+                  })
+                }
                 style={{ paddingLeft: '20px' }}
               >
                 {desc}
@@ -451,6 +465,16 @@ function Series(props) {
         studyIndex={props.studyIndex}
         getTreeExpandSingle={props.getTreeExpandSingle}
       />
+      {showSelectSerie && (
+        <SelectSerieModal
+          seriesPassed={[[serie]]}
+          onCancel={() => {
+            setShowSelectSerie(false);
+            setSerie({});
+          }}
+          studyName={serie.studyDescription}
+        />
+      )}
     </>
   );
 }

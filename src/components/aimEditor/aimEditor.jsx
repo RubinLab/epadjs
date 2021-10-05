@@ -541,7 +541,6 @@ class AimEditor extends Component {
       return true;
     });
 
-    console.log("marked imageIds", markedImageIds);
     return markedImageIds;
   };
 
@@ -564,6 +563,7 @@ class AimEditor extends Component {
   saveAim = (aim, templateType, segmentationBlob, segId) => {
     const aimJson = aim.getAim();
     let aimSaved = JSON.parse(aimJson);
+    const isStudyAim = templateType === "Study" ? true : false;
 
     // If file upload service will be used instead of aim save service reagrding
     // the aim size purposes then aim blob should be sent with the following code
@@ -591,6 +591,7 @@ class AimEditor extends Component {
       studyUID,
       name,
       comment,
+      isStudyAim
     };
 
     uploadAim(aimSaved, projectID, this.state.isUpdate, this.updatedAimId)
@@ -1191,17 +1192,31 @@ class AimEditor extends Component {
       pauseOnHover: true,
       draggable: true,
     });
+    const { isStudyAim } = aimRefs;
+    if (isStudyAim) {
+      openSeries.forEach(({ seriesUID, studyUID }) => {
+        if (openSeries[
+          activePort
+        ].studyUID === studyUID && openSeries[
+          activePort
+        ].seriesUID !== seriesUID)
+          this.props.dispatch(
+            getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+          );
+      });
+    }
     this.props.dispatch(
       getSingleSerie({ patientID, projectID, seriesUID, studyUID })
     );
-    this.props.dispatch(
-      updateSingleSerie({
-        subjectID: patientID,
-        projectID,
-        seriesUID,
-        studyUID,
-      })
-    );
+    // Delete after tests Sept 2021
+    // this.props.dispatch(
+    //   updateSingleSerie({
+    //     subjectID: patientID,
+    //     projectID,
+    //     seriesUID,
+    //     studyUID,
+    //   })
+    // );
     this.props.dispatch(updatePatientOnAimSave(aimRefs));
     this.props.updateTreeDataOnSave(aimRefs);
     this.props.onCancel(false); //close the aim editor

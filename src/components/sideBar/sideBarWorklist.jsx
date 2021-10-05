@@ -34,7 +34,6 @@ import {
 } from "../annotationsList/action";
 
 const mode = sessionStorage.getItem("mode");
-const maxPort = sessionStorage.getItem("maxPort");
 
 const messages = {
   deleteSingle: "Remove study from the worklist? This cannot be undone.",
@@ -662,6 +661,7 @@ class WorkList extends React.Component {
   };
 
   viewSelection = async () => {
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
     const notOpenSeries = [];
     const selectedSeries = Object.values(this.state.selectedSeries);
     if (selectedSeries.length > 0) {

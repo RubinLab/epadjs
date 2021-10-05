@@ -442,7 +442,7 @@ const AnnotationSearch = props => {
     }
 
     if (checkStartEndWithCondition(arr)) {
-      setError(`AND/OR conditions should be used to connect two queries!`);
+      setError(`AND/OR conditions should be used to connect two queries. Please use advanced search to build a query.`);
       return false;
     }
     return true;
@@ -451,7 +451,7 @@ const AnnotationSearch = props => {
   const checkSingleTermQuery = arr => {
     const includeParanthesis = query.includes('(') || query.includes(')');
     const includeOperator =
-      query.toUpperCase().includes('AND') || query.toUpperCase().includes('OR');
+      query.toUpperCase().split(' ').includes('AND') || query.toUpperCase().split(' ').includes('OR');
     const { criteriaArr, typeArr } = validateQueryContent(arr);
     const includeCriteria = criteriaArr.length > 0;
     const includeType = typeArr.length > 0;
@@ -476,7 +476,7 @@ const AnnotationSearch = props => {
 
   const parseQuery = () => {
     // check if query contains any predefined words
-    const queryArray = seperateParanthesis(query.split(' '));
+    const queryArray = seperateParanthesis(query.trim().split(' '));
     let parsedQuery;
     if (checkSingleTermQuery(queryArray)) {
       parsedQuery = query;
@@ -861,6 +861,7 @@ const AnnotationSearch = props => {
             noOfRows={rows}
             getNewData={getNewData}
             bookmark={bookmark}
+            switchToDisplay={() => props.history.push("/display")}
           />
         )}
       </div>

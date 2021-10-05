@@ -244,7 +244,6 @@ class DisplayView extends Component {
   // Sets the activeTool state getting it from session storage
   handleActiveTool = () => {
     const activeTool = sessionStorage.getItem("activeTool");
-    console.log("active tool is", activeTool);
     if (activeTool && activeTool !== this.state.activeTool)
       this.setState({ activeTool });
   }
@@ -538,15 +537,10 @@ class DisplayView extends Component {
     let newImageIds = {};
     let cornerstoneImageIds = [];
     const imageUrls = await this.getImages(serie);
-    const API_KEY = sessionStorage.getItem("API_KEY");
     const wadoUrl = sessionStorage.getItem("wadoUrl");
     let baseUrl;
     imageUrls.map((url) => {
-      if (API_KEY) {
-        const user = sessionStorage.getItem("username");
-        baseUrl = wadoUrl + url.lossyImage + `&user=${user}`;
-      }
-      else baseUrl = wadoUrl + url.lossyImage;
+      baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
           let multiFrameUrl = baseUrl + "&frame=" + i;
@@ -812,6 +806,9 @@ class DisplayView extends Component {
   deleteAim = (aimId, serie) => {
     const aimJson = this.getAimJson(aimId, serie);
     const { name, comment } = aimJson;
+    let isStudyAim = false;
+    if (this.getAimType(aimId, serie) === "study")
+      isStudyAim = true;
     const { projectID, patientID, studyUID, seriesUID } = serie;
     const aimRefs = {
       aimID: aimId,
@@ -825,18 +822,34 @@ class DisplayView extends Component {
     deleteAnnotation({ aimID: aimId, projectID }).then(() => {
       this.props.dispatch(clearAimId());
       this.props.dispatch(aimDelete({ aimRefs }))
-      this.props.dispatch(
-        updateSingleSerie({
-          subjectID: patientID,
-          projectID,
-          seriesUID,
-          studyUID,
-        })
-      );
+      // Delete the comment down below after tests Sept 2021
+      // this.props.dispatch(
+      //   updateSingleSerie({
+      //     subjectID: patientID,
+      //     projectID,
+      //     seriesUID,
+      //     studyUID,
+      //   })
+      // );
+      if (isStudyAim) {
+        const { series } = this.props;
+        series.forEach(({ seriesUID, studyUID }) => {
+          if (serie.studyUID === studyUID && serie.seriesUID !== seriesUID)
+            this.props.dispatch(
+              getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+            );
+        });
+      }
       this.props.dispatch(
         getSingleSerie({ patientID, projectID, seriesUID, studyUID })
       );
     })
+  }
+
+  getAimType = (aimId, serie) => {
+    const { seriesUID } = serie;
+    const { aimList } = this.props;
+    return aimList[seriesUID][aimId].type;
   }
 
   getAimJson = (aimId, serie) => {
@@ -1509,6 +1522,7 @@ class DisplayView extends Component {
       return;
     }
     this.props.dispatch(closeSerie());
+    this.props.onSwitchView("search");
   };
 
   handleHideAnnotations = () => {
@@ -1617,7 +1631,7 @@ class DisplayView extends Component {
           updateTreeDataOnSave={updateTreeDataOnSave}
           setAimDirty={this.setDirtyFlag}
         >
-          <ToolMenu />
+          <ToolMenu onSwitchView={this.props.onSwitchView}/>
           {!this.state.isLoading &&
             Object.entries(series).length &&
             data.map((data, i) => (

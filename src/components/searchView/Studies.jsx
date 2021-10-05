@@ -25,8 +25,6 @@ import {
   selectAnnotation
 } from '../annotationsList/action';
 
-const maxPort = sessionStorage.getItem("maxPort");
-
 function Table({
   columns,
   data,
@@ -199,9 +197,7 @@ function Studies(props) {
   };
 
   const displaySeries = async selected => {
-    if (props.openSeries.length === maxPort) {
-      props.dispatch(alertViewPortFull());
-    } else {
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
       const { patientID, studyUID } = selected;
       let seriesArr = [];
       //check if the patient is there (create a patient exist flag)
@@ -254,7 +250,6 @@ function Studies(props) {
         props.history.push('/display');
       }
       props.dispatch(clearSelection());
-    }
   };
 
   const columns = React.useMemo(

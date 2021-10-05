@@ -19,7 +19,7 @@ import {
   updateImageId
 } from '../annotationsList/action';
 
-const maxPort = sessionStorage.getItem('maxPort');
+const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 let waterfallOptions = sessionStorage.getItem('waterfallOptions');
 if (waterfallOptions) waterfallOptions = waterfallOptions.split('-');
 const metricDefaultOptions = ['RECIST', 'ADLA', 'intensitystddev', 'Export (beta)'];
@@ -157,9 +157,9 @@ const Report = props => {
     const arg =
       metric === 'Export (beta)'
         ? [
-            { field: 'recist', header: 'SLD' },
-            { field: 'mean', header: 'Average HU' }
-          ]
+          { field: 'recist', header: 'SLD' },
+          { field: 'mean', header: 'Average HU' }
+        ]
         : undefined;
     let result;
     if (validMetric) {
@@ -272,7 +272,7 @@ const Report = props => {
     wordExport(subjectName, 'recisttbl' + index);
   };
 
-  useEffect(() => {}, [sizes.width, sizes.height]);
+  useEffect(() => { }, [sizes.width, sizes.height]);
 
   const updateImageIDs = async () => {
     const { openSeries } = props;
