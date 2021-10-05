@@ -143,7 +143,7 @@ class ToolMenu extends Component {
       { name: "Pan", icon: <MdPanTool />, tool: "Pan" },
       { name: "MetaData", icon: <FaListAlt />, tool: "MetaData" },
       { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate" },
-      { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
+      // { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
       { name: "Color", icon: <FaPalette />, tool: "colorLut" },
       { name: "Fusion", icon: <FaObjectUngroup />, tool: "fuse" },
     ];
