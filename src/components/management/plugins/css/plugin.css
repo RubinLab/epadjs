@@ -426,10 +426,8 @@
 
 /* plugin_runtime_params end */
 .pluginmain {
+  overflow: hidden;
   position: relative;
-  margin-top: 10px;
-  margin-left: 10px;
-  margin-right: 10px;
   width: 100%;
   height: 100%;
 }
