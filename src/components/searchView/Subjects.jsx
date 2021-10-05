@@ -545,7 +545,7 @@ function Subjects(props) {
     if (searchTerm) {
       const subjectsArr = getDataFromStorage();
       const result = subjectsArr.reduce((all, item, i) => {
-        const name = clearCarets(item.data.subjectName).toLowerCase();
+        const name = item.data && item.data.subjectName ? clearCarets(item.data.subjectName).toLowerCase() : "";
         if (name.includes(searchTerm)) all.push(item.data);
         return all;
       }, []);

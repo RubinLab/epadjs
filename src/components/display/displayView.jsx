@@ -1522,6 +1522,7 @@ class DisplayView extends Component {
       return;
     }
     this.props.dispatch(closeSerie());
+    this.props.onSwitchView("search");
   };
 
   handleHideAnnotations = () => {
@@ -1630,7 +1631,7 @@ class DisplayView extends Component {
           updateTreeDataOnSave={updateTreeDataOnSave}
           setAimDirty={this.setDirtyFlag}
         >
-          <ToolMenu />
+          <ToolMenu onSwitchView={this.props.onSwitchView}/>
           {!this.state.isLoading &&
             Object.entries(series).length &&
             data.map((data, i) => (
