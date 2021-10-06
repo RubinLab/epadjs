@@ -1,8 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
 import { FaCogs } from "react-icons/fa";
 import ParametersForProjectWindow from "./parametersForProjectWindow";
+import Popup from "../../common/Popup.jsx";
+
 class PluginProjectWindow extends React.Component {
   constructor(props) {
     super(props);
@@ -59,7 +60,7 @@ class PluginProjectWindow extends React.Component {
                 );
               }}
             >
-              &nbsp; <FaCogs className="menu-clickable" />
+              &nbsp; <FaCogs  />
             </div>
           </td>
         </tr>
@@ -70,7 +71,9 @@ class PluginProjectWindow extends React.Component {
 
   render() {
     return (
+      <div  class="tools menu-display" id="template">
       <div className="plugin_project_container">
+        <Popup>
         <div dialogClassName="plugin_project_modal">
           <div className="plugin_project_modal_header">
             <div className="plugin_project_modal_title">Projects</div>
@@ -107,6 +110,7 @@ class PluginProjectWindow extends React.Component {
             </div>
           </div>
         </div>
+        </Popup>
         {this.state.showparamswindow && (
           <ParametersForProjectWindow
             onCancel={this.handleParameterCancel}
@@ -115,7 +119,9 @@ class PluginProjectWindow extends React.Component {
             projectdbid={this.state.projectid}
           />
         )}
+        
       </div>
+    </div>
     );
   }
 }

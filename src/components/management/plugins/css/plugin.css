@@ -1,3 +1,13 @@
+.columna {
+  display: table-cell;
+  width: 20%;
+}
+
+/* Clear floats after the columns */
+.rowa {
+  display: table-row;
+  height: 60px;
+}
 .pluginnavbar {
   position: relative;
   width: 100%;
@@ -344,6 +354,7 @@
   height: 100%;
   min-height: 300px;
   min-width: 800px;
+  scroll-behavior: unset;
 }
 
 .plugin_trigger_project_column_container {
@@ -355,6 +366,8 @@
 }
 
 .plugin_trigger_project_column_inner_container {
+  position: relative;
+  overflow: none;
   top: 5px;
   width: 100%;
   height: 100%;

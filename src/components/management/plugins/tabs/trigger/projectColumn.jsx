@@ -3,7 +3,7 @@ import ReactTable from "react-table-v6";
 import { getPluginsForProject } from "../../../../../services/pluginServices";
 import { getSummaryAnnotations } from "../../../../../services/annotationServices";
 import { getProjects } from "../../../../../services/projectServices";
-import { FaCogs } from "react-icons/fa";
+import { FaCogs, FaDivide } from "react-icons/fa";
 import RunTimeParamWindow from "./runtimeParamWindow";
 import { addPluginsToQueue } from "../../../../../services/pluginServices";
 import { toast } from "react-toastify";
@@ -654,7 +654,7 @@ class ProjectColumn extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 150,
-        width: 250,
+        width: 270,
       },
       {
         id : "name",
@@ -691,7 +691,7 @@ class ProjectColumn extends React.Component {
         sortable: true,
         resizable: true,
         minResizeWidth: 150,
-        width: 300,
+        width: 360,
       },
       {
         Cell: ({ original }) => {
@@ -699,8 +699,8 @@ class ProjectColumn extends React.Component {
           return (
             this.state.selectedParameterTypeId === "runtime" &&
             this.state.selectedPluginProcessMultipleAims === 0 && (
-              <div onClick={() => this.handleParamsClick(original)}>
-                <FaCogs />
+              <div className="text_clickable" onClick={() => this.handleParamsClick(original)}>
+                <FaCogs className="menu-clickable"/>
               </div>
             )
           );
@@ -712,83 +712,101 @@ class ProjectColumn extends React.Component {
     return (
       <div className="plugin_trigger_project_column_inner_container ">
         <h2></h2>
-        <table className="plugin_trigger_table">
-          <tbody>
-            <tr className="trHeader">
-              <td>projects</td>
-              {this.state.projectDropDownSelected && <td>plugins</td>}
-              {this.state.pluginDropDownSelected && <td>parameter type</td>}
-              {this.state.parameterDropDownSelected && <td></td>}
-              <td style={{width: "100%"}}></td>
-            </tr>
-            <tr padding="10px">
-              <td padding="10px" style={{width: "80px"}}>
-                <select
-                  className="pluginaddqueueselect"
-                  id="projects"
-                  onChange={this.handleChangeProject}
-                  onMouseDown={this.handleonMouseDown}
-                  value={this.state.selectedProjectId}
-                >
-                  <option key="select" value="select">
-                    select
-                  </option>
-                  {this.prepareDropDownHtmlForProjects()}
-                </select>
-              </td>
-              <td style={{width: "80px"}}>
-                {this.state.projectDropDownSelected && (
-                  <select
-                    className="pluginaddqueueselect"
-                    id="plugins"
-                    onChange={this.handleChangePlugin}
-                    onMouseDown={this.handleonMouseDown}
-                    value={this.state.selectedPluginDbId}
-                  >
-                    <option key="-1" value="-1">
-                      select
-                    </option>
-                    {this.prepareDropDownHtmlForPlugins()}
-                  </select>
-                )}
-              </td>
-              <td style={{width: "250px"}}>
-                {this.state.pluginDropDownSelected && (
-                  <select
-                    className="pluginaddqueueselect"
-                    id="parametertype"
-                    onChange={this.handleChangeParameter}
-                    onMouseDown={this.handleonMouseDown}
-                    value={this.state.selectedParameterTypeId}
-                  >
-                    {this.prepareDropDownHtmlForParameterTypes()}
-                  </select>
-                )}
-              </td>
-              <td style={{width: "80px"}}>
-                {this.state.selectedParameterTypeId !== "select" && (
+
+        <div className="rowa">
+            <div className="columna">
                   <div>
-                    <button
-                      variant="primary"
-                      className="btn btn-sm btn-outline-light"
-                      onClick={this.handleAddSelectedAnnotations}
-                    >
-                      add selected
-                    </button>
+                      projects
                   </div>
+                  <div>
+                      <select
+                          className="pluginaddqueueselect"
+                          id="projects"
+                          onChange={this.handleChangeProject}
+                          onMouseDown={this.handleonMouseDown}
+                          value={this.state.selectedProjectId}
+                        >
+                          <option key="select" value="select">
+                            select
+                          </option>
+                          {this.prepareDropDownHtmlForProjects()}
+                        </select>
+                  </div>
+            </div>
+            <div className="columna">
+                {this.state.projectDropDownSelected && 
+                <div >
+                        <div>
+                            plugins
+                        </div>
+                        {this.state.projectDropDownSelected && (
+                        <div>
+                            <select
+                              className="pluginaddqueueselect"
+                              id="plugins"
+                              onChange={this.handleChangePlugin}
+                              onMouseDown={this.handleonMouseDown}
+                              value={this.state.selectedPluginDbId}
+                            >
+                              <option key="-1" value="-1">
+                                select
+                              </option>
+                              {this.prepareDropDownHtmlForPlugins()}
+                            </select>
+                        </div>
+                        )}
+                </div>
+                }
+            </div>
+
+            <div className="columna">
+                    {this.state.pluginDropDownSelected && 
+                    <div>
+                        <div>
+                          parameter type
+                        </div>
+                         {this.state.pluginDropDownSelected && (
+                          <div>
+                            <select
+                              className="pluginaddqueueselect"
+                              id="parametertype"
+                              onChange={this.handleChangeParameter}
+                              onMouseDown={this.handleonMouseDown}
+                              value={this.state.selectedParameterTypeId}
+                            >
+                              {this.prepareDropDownHtmlForParameterTypes()}
+                            </select>
+                          </div>
+                          )}
+                    </div>
+                    }
+            </div>
+              <div className="columna">
+                 {this.state.selectedParameterTypeId !== "select" && (
+                 <div>
+                        <div>&nbsp;
+                        </div>
+                        <div>
+                          <button
+                            variant="primary"
+                            className="btn btn-sm btn-outline-light"
+                            onClick={this.handleAddSelectedAnnotations}
+                          >
+                            add selected
+                          </button>
+                        </div>
+                </div>
                 )}
-              </td>
-              <td style={{width: "60%"}}></td>
-            </tr>
-            {this.state.parameterDropDownSelected && (
-              <tr className="trHeader">
-                <td className="trHeader" colSpan="5">
-                  Annotations
-                </td>
-              </tr>
-            )}
-            <tr>
-              <td className="trHeader" colSpan="5">
+              </div>
+        </div>
+        <div>
+                    {this.state.parameterDropDownSelected && (
+                    <div>
+                          Annotations
+                    </div>
+                    )}
+        </div>
+        <div>
                 {this.state.parameterDropDownSelected && (
                   <ReactTable
                     NoDataComponent={() => null}
@@ -799,10 +817,7 @@ class ProjectColumn extends React.Component {
                     defaultPageSize={10}
                   />
                 )}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+       </div>  
         {this.state.showParamWindow && (
           <RunTimeParamWindow
             className="trHeader"
