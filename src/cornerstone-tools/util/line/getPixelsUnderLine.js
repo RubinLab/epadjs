@@ -24,7 +24,7 @@ export default function (startCoordinates, endCoordinates) {
   let sy = y1 < y2 ? 1 : -1;
   let err = dx - dy;
   // Set first coordinates
-  coordinatesArray.push({ x1, y1 });
+  coordinatesArray.push({ x: x1, y: y1 });
   // Main loop
   while (!(x1 == x2 && y1 == y2)) {
     let e2 = err << 1;
@@ -37,9 +37,8 @@ export default function (startCoordinates, endCoordinates) {
       y1 += sy;
     }
     // Set coordinates
-    coordinatesArray.push({ x1, y1 });
+    coordinatesArray.push({ x: x1, y: y1 });
   }
   // Return the result
-  console.log("coordinates", coordinatesArray);
   return coordinatesArray;
 }

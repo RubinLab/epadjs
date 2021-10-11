@@ -125,7 +125,10 @@ export default class LengthTool extends BaseAnnotationTool {
   updateCachedStats(image, element, data) {
     const { rowPixelSpacing, colPixelSpacing } = getPixelSpacing(image);
     const { start, end } = data.handles;
-    calculateLineStatistics(image, { start, end });
+    console.log(
+      "statistics ARE ",
+      calculateLineStatistics(image, { start, end })
+    );
 
     // Set rowPixelSpacing and columnPixelSpacing to 1 if they are undefined (or zero)
     const dx =
