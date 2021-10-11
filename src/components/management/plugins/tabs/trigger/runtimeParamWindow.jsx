@@ -2,6 +2,7 @@ import React from "react";
 import { Modal } from "react-bootstrap";
 import { getDefaultParameter } from "../../../../../services/pluginServices";
 import "../../css/plugin.css";
+import Popup from "../../common/Popup.jsx";
 class RunTimeParamWindow extends React.Component {
   state = {
     defaultParams: [],
@@ -89,6 +90,7 @@ class RunTimeParamWindow extends React.Component {
   render() {
     return (
       <div className="plugin_runtime_params_window_container" id="template">
+        <Popup>
         <div className="plugin_runtime_params_modal">
           <div className="plugin_runtime_params_header">
             <div className="tableHeaderRunTimeParams">
@@ -120,6 +122,7 @@ class RunTimeParamWindow extends React.Component {
             </div>
           </div>
         </div>
+        </Popup>
       </div>
     );
   }

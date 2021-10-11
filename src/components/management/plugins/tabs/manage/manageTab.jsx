@@ -218,8 +218,8 @@ class ManageTab extends React.Component {
             className="cursorHand"
           />
           <FaRegTrashAlt
-            data-tip="New Plugin"
-            data-for="plus-icon"
+            data-tip="Delete Plugin"
+            data-for="delete-icon"
             onClick={this.props.onDelete}
             className="cursorHand"
           />

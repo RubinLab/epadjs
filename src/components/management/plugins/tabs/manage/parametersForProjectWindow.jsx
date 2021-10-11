@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Modal } from 'react-bootstrap';
+import Popup from "../../common/Popup.jsx";
 import ReactTable from 'react-table-v6';
 import { toast } from 'react-toastify';
 import {
@@ -371,6 +371,7 @@ class ParametersForProjectWindow extends React.Component {
         className="plugin_project_parameter_window_container"
         id="pluginprojectparams"
       >
+         <Popup>
         <div className="plugin_project_parameter_window_modal">
           <div className="plugin_project_parameter_window_header">
             <div className="plugin_project_parameter_window_title">
@@ -550,6 +551,7 @@ class ParametersForProjectWindow extends React.Component {
             </div>
           )}
         </div>
+        </Popup>
       </div>
     );
   }
