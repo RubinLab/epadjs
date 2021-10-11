@@ -549,11 +549,15 @@ class App extends Component {
   switchView = viewType => {
     const { pid } = this.state;
     this.setState({ viewType });
+    const { openSeries } = this.props;
+    const portOpen = openSeries.length > 0;
     if (viewType === "search") {
       this.props.dispatch(clearSelection());
-      pid
-        ? this.props.history.push(`/list/${pid}`)
-        : this.props.history.push(`/list`);
+      if (!portOpen) {
+        pid
+          ? this.props.history.push(`/list/${pid}`)
+          : this.props.history.push(`/list`);
+      }
     } else if (viewType === "display") {
       this.props.history.push(`/display`);
     } else if (viewType === "annotations") {
