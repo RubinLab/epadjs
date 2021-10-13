@@ -33,7 +33,8 @@ function Table({
   patientIndex,
   getTreeExpandAll,
   getTreeExpandSingle,
-  treeExpand
+  treeExpand, 
+  update
 }) {
   const {
     rows,
@@ -100,6 +101,7 @@ function Table({
                     treeExpand={treeExpand}
                     studyIndex={row.index}
                     getTreeExpandSingle={getTreeExpandSingle}
+                    update={update}
                   />
                 )}
               </>
@@ -454,7 +456,7 @@ function Studies(props) {
         )
       }
     ],
-    [selectedLevel, selectedCount]
+    [selectedLevel, selectedCount, props.update]
   );
 
   const getDataFromStorage = (projectID, subjectID) => {
@@ -490,7 +492,7 @@ function Studies(props) {
           });
       }
     }
-  }, []);
+  }, [props.update]);
 
   return (
     <>
@@ -508,6 +510,7 @@ function Studies(props) {
         getTreeExpandAll={props.getTreeExpandAll}
         treeExpand={props.treeExpand}
         getTreeExpandSingle={props.getTreeExpandSingle}
+        update={props.update}
       />
       {isSerieSelectionOpen && (
         <SelectSeriesModal

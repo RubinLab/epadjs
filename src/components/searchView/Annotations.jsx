@@ -288,7 +288,7 @@ function Annotations(props) {
         }
       }
     ],
-    [selectedLevel]
+    [selectedLevel, props.update]
   );
 
   useEffect(() => {
@@ -307,7 +307,7 @@ function Annotations(props) {
       .catch(err => {
         console.error(err);
       });
-  }, []);
+  }, [props.update]);
 
   return (
     <>

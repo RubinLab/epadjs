@@ -36,7 +36,8 @@ function Table({
   expandLevel,
   getTreeExpandAll,
   getTreeExpandSingle,
-  treeExpand
+  treeExpand, 
+  update
 }) {
   const {
     getTableProps,
@@ -153,6 +154,7 @@ function Table({
                         getTreeExpandAll={getTreeExpandAll}
                         treeExpand={treeExpand}
                         getTreeExpandSingle={getTreeExpandSingle}
+                        update={update}
                       />
                     )}
                   </React.Fragment>
