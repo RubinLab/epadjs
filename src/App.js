@@ -1331,35 +1331,6 @@ class App extends Component {
                     />
                   )}
                 />
-                <ProtectedRoute
-                  path="/list/:pid?"
-                  render={props => (
-                    <SearchView
-                      {...props}
-                      clearTreeExpand={this.clearTreeExpand}
-                      updateProgress={this.updateProgress}
-                      progressUpdated={progressUpdated}
-                      expandLevel={this.state.expandLevel}
-                      getTreeExpandSingle={this.getTreeExpandSingle}
-                      getTreeExpandAll={this.getTreeExpandAll}
-                      treeExpand={treeExpand}
-                      getExpandLevel={this.getExpandLevel}
-                      closeBeforeDelete={this.closeBeforeDelete}
-                      // expandLoading={expandLoading}
-                      // updateExpandedLevelNums={this.updateExpandedLevelNums}
-                      onShrink={this.handleShrink}
-                      handleCloseAll={this.handleCloseAll}
-                      treeData={this.state.treeData}
-                      getTreeData={this.getTreeData}
-                      clearTreeData={this.clearTreeData}
-                      updateTreeDataOnSave={this.updateTreeDataOnSave}
-                      closeAllCounter={this.state.closeAll}
-                      pid={this.state.pid}
-                      admin={this.state.admin}
-                      collapseSubjects={this.collapseSubjects}
-                    />
-                  )}
-                />
                 <ProtectedRoute path="/anotate" component={AnotateView} />
                 <ProtectedRoute
                   path="/progress/:wid?"
