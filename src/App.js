@@ -546,14 +546,14 @@ class App extends Component {
     if (notification) this.updateNotificationSeen();
   };
 
-  switchView = viewType => {
+  switchView = (viewType, force) => {
     const { pid } = this.state;
     this.setState({ viewType });
     const { openSeries } = this.props;
     const portOpen = openSeries.length > 0;
     if (viewType === "search") {
       this.props.dispatch(clearSelection());
-      if (!portOpen) {
+      if (!portOpen || force) {
         pid
           ? this.props.history.push(`/list/${pid}`)
           : this.props.history.push(`/list`);
