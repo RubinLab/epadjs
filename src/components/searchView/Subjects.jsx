@@ -225,6 +225,8 @@ function Subjects(props) {
   const [pageCount, setPageCount] = useState(0);
   const [selectedLevel, setSelectedLevel] = useState(false);
   const [selectedCount, setSelectedCount] = useState(false);
+  const [update, setUpdate] = useState(0);
+
 
   useEffect(() => {
     const { selectedStudies, selectedSeries, selectedAnnotations } = props;
@@ -486,7 +488,7 @@ function Subjects(props) {
         }
       }
     ],
-    [selectedLevel, selectedCount, props.update]
+    [selectedLevel, selectedCount, update]
   );
 
 
@@ -600,6 +602,10 @@ function Subjects(props) {
   }, []);
 
   useEffect(() => {
+    setUpdate(update + 1);
+  }, [props.update]);
+
+  useEffect(() => {
     localStorage.setItem('treeData', JSON.stringify({}));
     const { pid, getTreeData } = props;
     if (pid !== null && pid !== 'null') {
@@ -615,7 +621,7 @@ function Subjects(props) {
           console.error(err);
         });
     }
-  }, [props.update]);
+  }, []);
 
   return (
     <>
@@ -643,7 +649,7 @@ function Subjects(props) {
         getTreeExpandAll={props.getTreeExpandAll}
         getTreeExpandSingle={props.getTreeExpandSingle}
         treeExpand={props.treeExpand}
-        update={props.update}
+        update={update}
       />
     </>
   );
