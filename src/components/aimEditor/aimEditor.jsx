@@ -1192,7 +1192,7 @@ class AimEditor extends Component {
       pauseOnHover: true,
       draggable: true,
     });
-    const { isStudyAim } = aimRefs;
+    const isStudyAim = aimRefs ? aimRefs.isStudyAim : false; //If upload has segmentation it can't be study aim
     if (isStudyAim) {
       openSeries.forEach(({ seriesUID, studyUID }) => {
         if (openSeries[
