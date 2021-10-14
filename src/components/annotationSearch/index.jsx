@@ -442,7 +442,9 @@ const AnnotationSearch = props => {
     }
 
     if (checkStartEndWithCondition(arr)) {
-      setError(`AND/OR conditions should be used to connect two queries. Please use advanced search to build a query.`);
+      setError(
+        `AND/OR conditions should be used to connect two queries. Please use advanced search to build a query.`
+      );
       return false;
     }
     return true;
@@ -451,7 +453,14 @@ const AnnotationSearch = props => {
   const checkSingleTermQuery = arr => {
     const includeParanthesis = query.includes('(') || query.includes(')');
     const includeOperator =
-      query.toUpperCase().split(' ').includes('AND') || query.toUpperCase().split(' ').includes('OR');
+      query
+        .toUpperCase()
+        .split(' ')
+        .includes('AND') ||
+      query
+        .toUpperCase()
+        .split(' ')
+        .includes('OR');
     const { criteriaArr, typeArr } = validateQueryContent(arr);
     const includeCriteria = criteriaArr.length > 0;
     const includeType = typeArr.length > 0;
@@ -655,21 +664,26 @@ const AnnotationSearch = props => {
             <span className="filter-label">Delete selections</span>
           </ReactTooltip>
         </>
-        <div
-          className="annotaionSearch-title"
-          style={{ fontsize: '1.2rem' }}
-        >{`${explanation.project}`}</div>
-        <input
-          name="project-dropdown"
-          type="checkbox"
-          checked={selectedProject === ''}
-          onChange={e => {
-            if (e.target.checked === false) setSelectedProject(props.pid);
-            else setSelectedProject('');
-          }}
-          onMouseDown={e => e.stopPropagation()}
-          style={{ margin: '0rem 1rem', padding: '1.8px' }}
-        />
+        {mode !== 'lite' && (
+          <>
+            {' '}
+            <div
+              className="annotaionSearch-title"
+              style={{ fontsize: '1.2rem' }}
+            >{`${explanation.project}`}</div>
+            <input
+              name="project-dropdown"
+              type="checkbox"
+              checked={selectedProject === ''}
+              onChange={e => {
+                if (e.target.checked === false) setSelectedProject(props.pid);
+                else setSelectedProject('');
+              }}
+              onMouseDown={e => e.stopPropagation()}
+              style={{ margin: '0rem 1rem', padding: '1.8px' }}
+            />{' '}
+          </>
+        )}
       </div>
     );
   };
@@ -840,7 +854,7 @@ const AnnotationSearch = props => {
           {renderQueryItem()}
           {renderOrganizeItem('organize')}
         </Collapsible>
-        {mode !== 'lite' && renderProjectSelect()}
+        {renderProjectSelect()}
         {/* {Object.keys(props.selectedAnnotations).length !== 0 && (
           <button
             className={`btn btn-secondary`}
@@ -861,7 +875,7 @@ const AnnotationSearch = props => {
             noOfRows={rows}
             getNewData={getNewData}
             bookmark={bookmark}
-            switchToDisplay={() => props.history.push("/display")}
+            switchToDisplay={() => props.history.push('/display')}
           />
         )}
       </div>
