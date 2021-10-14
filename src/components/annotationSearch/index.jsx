@@ -122,6 +122,7 @@ const AnnotationSearch = props => {
   };
 
   useEffect(() => {
+    setSelectedProject(props.pid);
     if (props.searchQuery) {
       const searchQueryFinal = Object.keys(props.searchQuery)[0];
       const searchQueryText = Object.values(props.searchQuery)[0].query;
@@ -674,9 +675,8 @@ const AnnotationSearch = props => {
             <input
               name="project-dropdown"
               type="checkbox"
-              checked={selectedProject === ''}
               onChange={e => {
-                if (e.target.checked === false) setSelectedProject(props.pid);
+                if (e.target.checked === false) setSelectedProject(selectedProject);
                 else setSelectedProject('');
               }}
               onMouseDown={e => e.stopPropagation()}
