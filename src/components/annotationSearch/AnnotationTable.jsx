@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { connect } from 'react-redux';
-import { useTable, usePagination, useRowSelect } from 'react-table';
+import { useTable, usePagination, useRowSelect, useSortBy } from 'react-table';
 import { Link } from 'react-router-dom';
 import { FaRegEye } from 'react-icons/fa';
 import { clearCarets, convertDateFormat } from '../../Utils/aid.js';
@@ -78,6 +78,7 @@ function Table({
       manualPagination: true,
       pageCount
     },
+    useSortBy,
     usePagination,
     useRowSelect,
     hooks => {
@@ -118,7 +119,7 @@ function Table({
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
-                <th {...column.getHeaderProps()} style={{ padding: '0.5rem' }}>
+                <th {...column.getHeaderProps(column.getSortByToggleProps())} style={{ padding: '0.5rem' }}>
                   {column.render('Header')}
                 </th>
               ))}
@@ -436,7 +437,7 @@ function AnnotationTable(props) {
       },
       {
         accessor: 'comment',
-        sortable: true,
+        sortable: false,
         resizable: true,
         className: 'wrapped',
         style: { whiteSpace: 'normal' },
@@ -464,7 +465,7 @@ function AnnotationTable(props) {
       },
       {
         Header: 'Study',
-        sortable: true,
+        sortable: false,
         width: 75,
         accessor: 'studyDate',
         filterMethod: (filter, rows) =>
@@ -480,7 +481,7 @@ function AnnotationTable(props) {
       },
       {
         Header: 'Created',
-        sortable: true,
+        sortable: false,
         id: 'date',
         filterMethod: (filter, rows) =>
           matchSorter(rows, filter.value, { keys: ['date'] }),
@@ -502,7 +503,7 @@ function AnnotationTable(props) {
             </div>
           );
         },
-        sortable: true,
+        sortable: false,
         id: 'time',
         filterMethod: (filter, rows) =>
           matchSorter(rows, filter.value, { keys: ['time'] }),
