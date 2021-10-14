@@ -37,7 +37,8 @@ const lists = {
     'anatomy',
     'lesion_name',
     'patient',
-    'template'
+    'template',
+    'user'
   ],
   criteria: ['contains'] // 'equals'
 };
@@ -676,7 +677,8 @@ const AnnotationSearch = props => {
               name="project-dropdown"
               type="checkbox"
               onChange={e => {
-                if (e.target.checked === false) setSelectedProject(selectedProject);
+                if (e.target.checked === false)
+                  setSelectedProject(selectedProject);
                 else setSelectedProject('');
               }}
               onMouseDown={e => e.stopPropagation()}
