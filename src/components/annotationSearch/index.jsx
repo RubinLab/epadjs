@@ -122,6 +122,7 @@ const AnnotationSearch = props => {
       .catch(err => console.error(err));
   };
 
+
   useEffect(() => {
     setSelectedProject(props.pid);
     if (props.searchQuery) {
@@ -130,6 +131,7 @@ const AnnotationSearch = props => {
       const searchQueryProject = Object.values(props.searchQuery)[0].project;
       setQuery(searchQueryText);
       setSelectedProject(searchQueryProject || '');
+      search(searchQueryFinal);
       searchAnnotations({ query: searchQueryFinal })
         .then(res => {
           populateSearchResult(res);
@@ -791,7 +793,10 @@ const AnnotationSearch = props => {
           data-tip
           data-for="erase-icon"
           className="btn btn-secondary annotationSearch-btn"
-          onClick={() => setQuery('')}
+          onClick={() => {
+            setQuery('');
+            getAnnotationsOfProjets()
+          }}
           // onClick={parseIt}
           // disabled={index < count}
           style={{
