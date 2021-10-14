@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
-import SelectSeriesModal from "../annotationsList/selectSerieModal";
+import SelectSeriesModal from '../annotationsList/selectSerieModal';
 import { getStudies } from '../../services/studyServices';
 import Series from './Series';
 import { formatDate } from '../flexView/helperMethods';
@@ -33,7 +33,8 @@ function Table({
   patientIndex,
   getTreeExpandAll,
   getTreeExpandSingle,
-  treeExpand
+  treeExpand,
+  update
 }) {
   const {
     rows,
@@ -100,6 +101,7 @@ function Table({
                     treeExpand={treeExpand}
                     studyIndex={row.index}
                     getTreeExpandSingle={getTreeExpandSingle}
+                    update={update}
                   />
                 )}
               </>
@@ -121,6 +123,7 @@ function Studies(props) {
   const [isSerieSelectionOpen, setIsSerieSelectionOpen] = useState(false);
   const [selectedStudy, setSelectedStudy] = useState([]);
   const [studyName, setStudyName] = useState('');
+  const [update, setUpdate] = useState(0);
 
   useEffect(() => {
     const { selectedPatients, selectedSeries, selectedAnnotations } = props;
@@ -141,7 +144,6 @@ function Studies(props) {
       setSelectedLevel('');
     }
   }, [props.selectedStudies, props.selectedSeries, props.selectedAnnotations]);
-
 
   const deselectChildLevels = (patientID, studyUID) => {
     if (selectedLevel === 'series') {
@@ -197,59 +199,59 @@ function Studies(props) {
   };
 
   const displaySeries = async selected => {
-    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
-      const { patientID, studyUID } = selected;
-      let seriesArr = [];
-      //check if the patient is there (create a patient exist flag)
-      const patientExists = props.patients[patientID];
-      //if there is patient iterate over the series object of the study (form an array of series)
-      if (patientExists) {
-        seriesArr = Object.values(
-          props.patients[patientID].studies[studyUID].series
-        );
-        //if there is not a patient get series data of the study and (form an array of series)
-      } else {
-        seriesArr = await getSeriesData(selected);
+    const maxPort = parseInt(sessionStorage.getItem('maxPort'));
+    const { patientID, studyUID } = selected;
+    let seriesArr = [];
+    //check if the patient is there (create a patient exist flag)
+    const patientExists = props.patients[patientID];
+    //if there is patient iterate over the series object of the study (form an array of series)
+    if (patientExists) {
+      seriesArr = Object.values(
+        props.patients[patientID].studies[studyUID].series
+      );
+      //if there is not a patient get series data of the study and (form an array of series)
+    } else {
+      seriesArr = await getSeriesData(selected);
+    }
+    // filter the nondisplayable modalities
+    seriesArr = seriesArr.filter(isSupportedModality);
+    //get extraction of the series (extract unopen series)
+    // if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
+    //check if there is enough room
+    if (seriesArr.length + props.openSeries.length > maxPort) {
+      //if there is not bring the modal
+      // await setState({
+      //   isSerieSelectionOpen: true,
+      //   selectedStudy: [seriesArr],
+      //   studyName: selected.studyDescription
+      // });
+      setIsSerieSelectionOpen(true);
+      setSelectedStudy([seriesArr]);
+      setStudyName(selected.studyDescription);
+    } else {
+      //if there is enough room
+      //add serie to the grid
+      const promiseArr = [];
+      for (let serie of seriesArr) {
+        props.dispatch(addToGrid(serie));
+        promiseArr.push(props.dispatch(getSingleSerie(serie)));
       }
-      // filter the nondisplayable modalities
-      seriesArr = seriesArr.filter(isSupportedModality);
-      //get extraction of the series (extract unopen series)
-      // if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
-      //check if there is enough room
-      if (seriesArr.length + props.openSeries.length > maxPort) {
-        //if there is not bring the modal
-        // await setState({
-        //   isSerieSelectionOpen: true,
-        //   selectedStudy: [seriesArr],
-        //   studyName: selected.studyDescription
-        // });
-        setIsSerieSelectionOpen(true);
-        setSelectedStudy([seriesArr]);
-        setStudyName(selected.studyDescription);
-      } else {
-        //if there is enough room
-        //add serie to the grid
-        const promiseArr = [];
-        for (let serie of seriesArr) {
-          props.dispatch(addToGrid(serie));
-          promiseArr.push(props.dispatch(getSingleSerie(serie)));
-        }
-        //getsingleSerie
-        Promise.all(promiseArr)
-          .then(() => { })
-          .catch(err => console.error(err));
+      //getsingleSerie
+      Promise.all(promiseArr)
+        .then(() => {})
+        .catch(err => console.error(err));
 
-        //if patient doesnot exist get patient
-        if (!patientExists) {
-          // props.dispatch(getWholeData(null, selected));
-          getWholeData(null, selected);
-        } else {
-          //check if study exist
-          props.dispatch(updatePatient('study', true, patientID, studyUID));
-        }
-        props.history.push('/display');
+      //if patient doesnot exist get patient
+      if (!patientExists) {
+        // props.dispatch(getWholeData(null, selected));
+        getWholeData(null, selected);
+      } else {
+        //check if study exist
+        props.dispatch(updatePatient('study', true, patientID, studyUID));
       }
-      props.dispatch(clearSelection());
+      props.history.push('/display');
+    }
+    props.dispatch(clearSelection());
   };
 
   const columns = React.useMemo(
@@ -454,7 +456,7 @@ function Studies(props) {
         )
       }
     ],
-    [selectedLevel, selectedCount]
+    [selectedLevel, selectedCount, update]
   );
 
   const getDataFromStorage = (projectID, subjectID) => {
@@ -462,8 +464,8 @@ function Studies(props) {
     const studiesArray =
       treeData[projectID] && treeData[projectID][subjectID]
         ? Object.values(treeData[projectID][subjectID].studies).map(
-          el => el.data
-        )
+            el => el.data
+          )
         : [];
 
     return studiesArray;
@@ -492,6 +494,10 @@ function Studies(props) {
     }
   }, []);
 
+  useEffect(() => {
+    setUpdate(update + 1);
+  }, [props.update]);
+
   return (
     <>
       {loading && (
@@ -508,6 +514,7 @@ function Studies(props) {
         getTreeExpandAll={props.getTreeExpandAll}
         treeExpand={props.treeExpand}
         getTreeExpandSingle={props.getTreeExpandSingle}
+        update={update}
       />
       {isSerieSelectionOpen && (
         <SelectSeriesModal

@@ -55,7 +55,7 @@ const NavBar = ({
               }
               onClick={() => {
                 onSearchViewClick();
-                onSwitchView('search');
+                onSwitchView('search', true);
               }}
             >
               Patient List

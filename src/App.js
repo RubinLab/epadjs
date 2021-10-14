@@ -546,14 +546,14 @@ class App extends Component {
     if (notification) this.updateNotificationSeen();
   };
 
-  switchView = viewType => {
+  switchView = (viewType, force) => {
     const { pid } = this.state;
     this.setState({ viewType });
     const { openSeries } = this.props;
     const portOpen = openSeries.length > 0;
     if (viewType === "search") {
       this.props.dispatch(clearSelection());
-      if (!portOpen) {
+      if (!portOpen || force) {
         pid
           ? this.props.history.push(`/list/${pid}`)
           : this.props.history.push(`/list`);
@@ -1299,35 +1299,6 @@ class App extends Component {
                       updateTreeDataOnSave={this.updateTreeDataOnSave}
                       keycloak={this.state.keycloak}
                       onSwitchView={this.switchView}
-                    />
-                  )}
-                />
-                <ProtectedRoute
-                  path="/list/:pid?"
-                  render={props => (
-                    <SearchView
-                      {...props}
-                      clearTreeExpand={this.clearTreeExpand}
-                      updateProgress={this.updateProgress}
-                      progressUpdated={progressUpdated}
-                      expandLevel={this.state.expandLevel}
-                      getTreeExpandSingle={this.getTreeExpandSingle}
-                      getTreeExpandAll={this.getTreeExpandAll}
-                      treeExpand={treeExpand}
-                      getExpandLevel={this.getExpandLevel}
-                      closeBeforeDelete={this.closeBeforeDelete}
-                      // expandLoading={expandLoading}
-                      // updateExpandedLevelNums={this.updateExpandedLevelNums}
-                      onShrink={this.handleShrink}
-                      handleCloseAll={this.handleCloseAll}
-                      treeData={this.state.treeData}
-                      getTreeData={this.getTreeData}
-                      clearTreeData={this.clearTreeData}
-                      updateTreeDataOnSave={this.updateTreeDataOnSave}
-                      closeAllCounter={this.state.closeAll}
-                      pid={this.state.pid}
-                      admin={this.state.admin}
-                      collapseSubjects={this.collapseSubjects}
                     />
                   )}
                 />

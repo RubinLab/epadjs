@@ -54,7 +54,6 @@ import Projects from './addToProject';
 import WarningModal from '../common/warningModal';
 import AnnotationCreationModal from './annotationCreationModal.jsx';
 import UpLoadWizard from '../tagEditor/uploadWizard';
-import { FaLessThan } from 'react-icons/fa';
 import { DISP_MODALITIES } from '../../constants';
 
 const mode = sessionStorage.getItem('mode');
@@ -542,47 +541,47 @@ class SearchView extends Component {
           notOpenSeries.push(serie);
         }
       }
-        //if all series already open update active port
-        if (notOpenSeries.length === 0) {
-          let index = this.checkIfSerieOpen(
-            selectedSeries[0].seriesUID,
-            'seriesUID'
-          ).index;
-          this.props.dispatch(changeActivePort(index));
+      //if all series already open update active port
+      if (notOpenSeries.length === 0) {
+        let index = this.checkIfSerieOpen(
+          selectedSeries[0].seriesUID,
+          'seriesUID'
+        ).index;
+        this.props.dispatch(changeActivePort(index));
+        this.props.history.push('/display');
+        this.props.dispatch(clearSelection());
+      } else {
+        if (selectedSeries.length + this.props.openSeries.length > maxPort) {
+          groupedObj = this.groupUnderStudy(selectedSeries);
+          await this.setState({ seriesList: groupedObj });
+          this.setState({ isSerieSelectionOpen: true });
+          // this.props.history.push("/display");
+        } else {
+          //else get data for each serie for display
+          notOpenSeries.forEach(serie => {
+            this.props.dispatch(addToGrid(serie));
+            this.props.dispatch(getSingleSerie(serie));
+          });
+          for (let series of selectedSeries) {
+            if (!this.props.patients[series.patientID]) {
+              // await this.props.dispatch(getWholeData(series));
+              getWholeData(series);
+            } else {
+              this.props.dispatch(
+                updatePatient(
+                  'serie',
+                  true,
+                  series.patientID,
+                  series.studyUID,
+                  series.seriesUID
+                )
+              );
+            }
+          }
           this.props.history.push('/display');
           this.props.dispatch(clearSelection());
-        } else {
-          if (selectedSeries.length + this.props.openSeries.length > maxPort) {
-            groupedObj = this.groupUnderStudy(selectedSeries);
-            await this.setState({ seriesList: groupedObj });
-            this.setState({ isSerieSelectionOpen: true });
-            // this.props.history.push("/display");
-          } else {
-            //else get data for each serie for display
-            notOpenSeries.forEach(serie => {
-              this.props.dispatch(addToGrid(serie));
-              this.props.dispatch(getSingleSerie(serie));
-            });
-            for (let series of selectedSeries) {
-              if (!this.props.patients[series.patientID]) {
-                // await this.props.dispatch(getWholeData(series));
-                getWholeData(series);
-              } else {
-                this.props.dispatch(
-                  updatePatient(
-                    'serie',
-                    true,
-                    series.patientID,
-                    series.studyUID,
-                    series.seriesUID
-                  )
-                );
-              }
-            }
-            this.props.history.push('/display');
-            this.props.dispatch(clearSelection());
-          }
         }
+      }
       //if annotations selected
     } else if (selectedAnnotations.length > 0) {
       let serieList = Object.values(groupedAnns);
@@ -596,42 +595,42 @@ class SearchView extends Component {
           notOpenSeries.push(serie);
         }
       }
-        if (notOpenSeries.length === 0) {
-          const serID = serieList[0].seriesUID;
-          let index = this.checkIfSerieOpen(serID, 'seriesUID').index;
-          this.props.dispatch(changeActivePort(index));
-          this.props.dispatch(jumpToAim(serID, serieList[0].aimID, index));
+      if (notOpenSeries.length === 0) {
+        const serID = serieList[0].seriesUID;
+        let index = this.checkIfSerieOpen(serID, 'seriesUID').index;
+        this.props.dispatch(changeActivePort(index));
+        this.props.dispatch(jumpToAim(serID, serieList[0].aimID, index));
+      } else {
+        if (notOpenSeries.length + this.props.openSeries.length > maxPort) {
+          await this.setState({ seriesList: groupedObj });
+          this.setState({ isSerieSelectionOpen: true });
+          //else get data for each serie for display
         } else {
-          if (notOpenSeries.length + this.props.openSeries.length > maxPort) {
-            await this.setState({ seriesList: groupedObj });
-            this.setState({ isSerieSelectionOpen: true });
-            //else get data for each serie for display
-          } else {
-            serieList.forEach(serie => {
-              this.props.dispatch(addToGrid(serie, serie.aimID));
-              this.props.dispatch(getSingleSerie(serie, serie.aimID));
-            });
-            for (let ann of selectedAnnotations) {
-              if (!this.props.patients[ann.subjectID]) {
-                // await this.props.dispatch(getWholeData(null, null, ann));
-                getWholeData(null, null, ann);
-              } else {
-                this.props.dispatch(
-                  updatePatient(
-                    'annotation',
-                    true,
-                    ann.subjectID,
-                    ann.studyUID,
-                    ann.seriesUID,
-                    ann.aimID
-                  )
-                );
-              }
+          serieList.forEach(serie => {
+            this.props.dispatch(addToGrid(serie, serie.aimID));
+            this.props.dispatch(getSingleSerie(serie, serie.aimID));
+          });
+          for (let ann of selectedAnnotations) {
+            if (!this.props.patients[ann.subjectID]) {
+              // await this.props.dispatch(getWholeData(null, null, ann));
+              getWholeData(null, null, ann);
+            } else {
+              this.props.dispatch(
+                updatePatient(
+                  'annotation',
+                  true,
+                  ann.subjectID,
+                  ann.studyUID,
+                  ann.seriesUID,
+                  ann.aimID
+                )
+              );
             }
-            this.props.history.push('/display');
-            this.props.dispatch(clearSelection());
           }
+          this.props.history.push('/display');
+          this.props.dispatch(clearSelection());
         }
+      }
     }
   };
 
@@ -713,9 +712,8 @@ class SearchView extends Component {
           this.setState({ downloading: false });
           console.log(err);
         });
-      this.props.history.push(`/list`);
+      this.setState(state => ({ update: state.update + 1 }));
       this.props.dispatch(clearSelection());
-      this.props.history.push(`/list/${pid}`);
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
     } else {
@@ -867,10 +865,8 @@ class SearchView extends Component {
 
   handleSubmitDownload = () => {
     this.setState({ showAnnotationModal: false });
-    const pid = window.location.pathname.split('/').pop();
-    this.props.history.push(`/list`);
+    this.setState(state => ({ update: state.update + 1 }));
     this.props.dispatch(clearSelection());
-    this.props.history.push(`/list/${pid}`);
   };
 
   handleUploadWizardClick = () => {
