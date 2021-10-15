@@ -725,17 +725,18 @@ class DisplayView extends Component {
   }
 
   hideShow = (current) => {
+    const { hiding, containerHeight } = this.state;
     if (this.props.activePort !== current) {
       this.setActive(current);
       return;
     }
     // const element = cornerstone.getEnabledElements()[practivePort];
     const elements = document.getElementsByClassName("viewportContainer");
-    if (this.state.hiding === false) {
+    if (hiding === false) {
       for (var i = 0; i < elements.length; i++) {
         if (i != current) elements[i].style.display = "none";
       }
-      this.setState({ height: this.state.containerHeight, width: "100%" });
+      this.setState({ height: containerHeight, width: "100%" });
     } else {
       this.getViewports();
       for (var i = 0; i < elements.length; i++) {
@@ -743,10 +744,10 @@ class DisplayView extends Component {
       }
     }
     this.setState(
-      { hiding: !this.state.hiding },
+      { hiding: !hiding },
       () =>
         window.dispatchEvent(
-          new CustomEvent("resize", { detail: { isMaximize: true } })
+          new CustomEvent("resize", { detail: { isMaximize: !hiding } })
         ) //for cornerstone to fit the image
       // window.dispatchEvent(new Event("resizeViewport"))}
     );
@@ -1522,7 +1523,7 @@ class DisplayView extends Component {
       return;
     }
     this.props.dispatch(closeSerie());
-    this.props.onSwitchView("search");
+    // this.props.onSwitchView("search");
   };
 
   handleHideAnnotations = () => {
@@ -1631,7 +1632,7 @@ class DisplayView extends Component {
           updateTreeDataOnSave={updateTreeDataOnSave}
           setAimDirty={this.setDirtyFlag}
         >
-          <ToolMenu onSwitchView={this.props.onSwitchView}/>
+          <ToolMenu onSwitchView={this.props.onSwitchView} />
           {!this.state.isLoading &&
             Object.entries(series).length &&
             data.map((data, i) => (
