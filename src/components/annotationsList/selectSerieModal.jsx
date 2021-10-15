@@ -164,20 +164,23 @@ class selectSerieModal extends React.Component {
   setPreSelecteds = () => {
     const { seriesPassed, openSeries } = this.props;
     let selectedToDisplay = [];
+    let selectedCount = 0;
     let series = Object.values(seriesPassed);
     let count = 0;
     for (let i = 0; i < series.length; i++) {
       for (let k = 0; k < series[i].length; k++) {
-        if (openSeries.length + selectedToDisplay.length >= this.maxPort) {
+        if (openSeries.length + selectedCount >= this.maxPort) {
           this.setState({ selectedToDisplay }, () => {
             this.setState({ limit: this.updateLimit() });
           });
           return;
         }
-        if (!this.isSerieOpen(series[i][k].seriesUID))
+        if (!this.isSerieOpen(series[i][k].seriesUID)) {
           selectedToDisplay[count + k] = series[i][k].significanceOrder
             ? true
             : false;
+          selectedCount++;
+        }
       }
       count += series[i].length;
     }
@@ -229,7 +232,7 @@ class selectSerieModal extends React.Component {
         let desc = series[i][k].seriesDescription || "Unnamed Serie";
         // desc = alreadyOpen ? `${desc} - already open` : desc;
         item = alreadyOpen ? (
-          <>
+          <div>
             <div
               key={k + "_" + series[i][k].seriesUID}
               className="alreadyOpen-disabled"
@@ -246,7 +249,7 @@ class selectSerieModal extends React.Component {
             >
               <span>{"Already Open"}</span>
             </ReactTooltip>
-          </>
+          </div>
         ) : (
           <SelectionItem
             desc={desc}
