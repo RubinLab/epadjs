@@ -1,3 +1,4 @@
+import external from "./../../externalModules.js";
 import getPixelsUnderLine from "./getPixelsUnderLine.js";
 
 /**
@@ -10,7 +11,9 @@ import getPixelsUnderLine from "./getPixelsUnderLine.js";
  * @param {Object} line - { startCoordinates, endCoordinates }
  * @returns {Object} { count, mean, variance, stdDev, min, max }
  */
-export default function (image, line) {
+export default function (image, line, element) {
+  if (!element) return;
+  console.log("image", image);
   let sum = 0;
   let sumSquared = 0;
   let count = 0;
@@ -18,20 +21,27 @@ export default function (image, line) {
   let max = null;
 
   const { start, end } = line;
-  const { columns } = image;
+  const { rows, columns } = image;
   console.log("columns", columns);
 
   const pixels = getPixelsUnderLine(start, end);
   console.log("pixels under the line", pixels);
 
+  const pixelData = external.cornerstone.getPixels(
+    element,
+    0,
+    0,
+    columns,
+    rows
+  );
+
   // console.log("PIXESL ", pixels);
-  const pixelData = image.getPixelData();
+  // const pixelData = image.getPixelData();
   console.log("pixelData is", pixelData);
 
   for (let i = 0; i < pixels.length; i++) {
     const { x, y } = pixels[i];
     const index = columns * y + x;
-    console.log("index is", index);
 
     if (min === null) {
       min = pixelData[index];
@@ -48,9 +58,7 @@ export default function (image, line) {
 
   if (count === 0) {
     return {
-      count,
       mean: 0.0,
-      variance: 0.0,
       stdDev: 0.0,
       min: 0.0,
       max: 0.0,
@@ -61,9 +69,7 @@ export default function (image, line) {
   const variance = sumSquared / count - mean * mean;
 
   return {
-    count,
     mean,
-    variance,
     stdDev: Math.sqrt(variance),
     min,
     max,
