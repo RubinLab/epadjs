@@ -13,7 +13,6 @@ import getPixelsUnderLine from "./getPixelsUnderLine.js";
  */
 export default function (image, line, element) {
   if (!element) return;
-  console.log("image", image);
   let sum = 0;
   let sumSquared = 0;
   let count = 0;
@@ -22,10 +21,8 @@ export default function (image, line, element) {
 
   const { start, end } = line;
   const { rows, columns } = image;
-  console.log("columns", columns);
 
   const pixels = getPixelsUnderLine(start, end);
-  console.log("pixels under the line", pixels);
 
   const pixelData = external.cornerstone.getPixels(
     element,
@@ -34,10 +31,6 @@ export default function (image, line, element) {
     columns,
     rows
   );
-
-  // console.log("PIXESL ", pixels);
-  // const pixelData = image.getPixelData();
-  console.log("pixelData is", pixelData);
 
   for (let i = 0; i < pixels.length; i++) {
     const { x, y } = pixels[i];
@@ -54,7 +47,6 @@ export default function (image, line, element) {
     max = Math.max(max, pixelData[index]);
     count++;
   }
-  console.log("sum", sum);
 
   if (count === 0) {
     return {

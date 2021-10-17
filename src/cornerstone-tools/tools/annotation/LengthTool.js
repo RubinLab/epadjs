@@ -45,8 +45,6 @@ export default class LengthTool extends BaseAnnotationTool {
   }
 
   createNewMeasurement(eventData) {
-    console.log("event data", eventData);
-    console.trace();
     const goodEventData =
       eventData && eventData.currentPoints && eventData.currentPoints.image;
 
@@ -141,11 +139,6 @@ export default class LengthTool extends BaseAnnotationTool {
     data.max = max;
     data.mean = mean;
     data.stdDev = stdDev;
-
-    console.log(
-      "statistics ARE ",
-      calculateLineStatistics(image, { start, end })
-    );
 
     // Set rowPixelSpacing and columnPixelSpacing to 1 if they are undefined (or zero)
     const dx =
@@ -243,7 +236,6 @@ export default class LengthTool extends BaseAnnotationTool {
         }
 
         const text = textBoxText(data, rowPixelSpacing, colPixelSpacing);
-        console.log("texts are", text);
 
         if (state.showCalculations)
           drawLinkedTextBox(
