@@ -283,10 +283,12 @@ export default class LengthTool extends BaseAnnotationTool {
 
       data.unit = suffix;
 
-      let lengthText = `Length: ${length.toFixed(2)} ${suffix}`;
+      let lengthText = `Length: ${numbersWithCommas(
+        length.toFixed(2)
+      )} ${suffix}`;
 
-      let minText = `Min: ${min}${moSuffix}`;
-      let maxText = `Max: ${max}${moSuffix}`;
+      let minText = `Min: ${numbersWithCommas(min.toFixed(2))}${moSuffix}`;
+      let maxText = `Max: ${numbersWithCommas(max.toFixed(2))}${moSuffix}`;
 
       // Add these text lines to the array to be displayed in the textbox
       textLines.push(lengthText);
