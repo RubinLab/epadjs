@@ -266,6 +266,7 @@ export default class LengthTool extends BaseAnnotationTool {
 
       if (modality === "CT") {
         moSuffix = "HU";
+        data.calcUnit = "HU";
       }
       data.unit = moSuffix;
 
