@@ -12,6 +12,7 @@ import {
   FaPlus,
   FaEraser
 } from 'react-icons/fa';
+import { FcAbout } from 'react-icons/fc';
 import ReactTooltip from 'react-tooltip';
 import {
   searchAnnotations,
@@ -853,6 +854,26 @@ const AnnotationSearch = props => {
             value={query}
           />
         </div>
+        <>
+          <FcAbout
+            data-tip
+            data-for="about-icon"
+            style={{ fontSize: '2rem' }}
+            className="annotationSearch-btn"
+          />
+          <ReactTooltip
+            id="about-icon"
+            place="bottom"
+            type="info"
+            delayShow={200}
+          >
+            <p>
+              <span>For exact match, use double quote: "7 3225"</span>
+            </p>
+            <p>For complex queries, combine terms with AND/OR:</p>
+            <p>RECIST_v2 AND CT</p>
+          </ReactTooltip>
+        </>
         <button
           className={`btn btn-secondary`}
           type="button"
