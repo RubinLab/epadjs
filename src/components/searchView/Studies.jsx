@@ -456,7 +456,7 @@ function Studies(props) {
         )
       }
     ],
-    [selectedLevel, selectedCount, update]
+    [selectedLevel, selectedCount, props.update]
   );
 
   const getDataFromStorage = (projectID, subjectID) => {
@@ -492,11 +492,11 @@ function Studies(props) {
           });
       }
     }
-  }, []);
-
-  useEffect(() => {
-    setUpdate(update + 1);
   }, [props.update]);
+
+  // useEffect(() => {
+  //   setUpdate(update + 1);
+  // }, [props.update]);
 
   return (
     <>
@@ -514,7 +514,7 @@ function Studies(props) {
         getTreeExpandAll={props.getTreeExpandAll}
         treeExpand={props.treeExpand}
         getTreeExpandSingle={props.getTreeExpandSingle}
-        update={update}
+        update={props.update}
       />
       {isSerieSelectionOpen && (
         <SelectSeriesModal

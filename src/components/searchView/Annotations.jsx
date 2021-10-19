@@ -289,12 +289,12 @@ function Annotations(props) {
         }
       }
     ],
-    [selectedLevel, update]
+    [selectedLevel, props.update]
   );
 
-  useEffect(() => {
-    setUpdate(update + 1);
-  }, [props.update]);
+  // useEffect(() => {
+  //   setUpdate(update + 1);
+  // }, [props.update]);
 
   useEffect(() => {
     const { parentSeries } = props;

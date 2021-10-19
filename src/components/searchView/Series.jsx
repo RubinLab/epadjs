@@ -117,9 +117,9 @@ function Series(props) {
   const [serie, setSerie] = useState({});
   const [update, setUpdate] = useState(0);
 
-  useEffect(() => {
-    setUpdate(update + 1);
-  }, [props.update]);
+  // useEffect(() => {
+  //   setUpdate(update + 1);
+  // }, [props.update]);
 
   useEffect(() => {
     const { selectedPatients, selectedStudies, selectedAnnotations } = props;
@@ -415,7 +415,7 @@ function Series(props) {
         )
       }
     ],
-    [selectedLevel, selectedCount, props.openSeries, update]
+    [selectedLevel, selectedCount, props.openSeries, props.update]
   );
 
   const getDataFromStorage = (projectID, subjectID, studyUID) => {
@@ -452,7 +452,7 @@ function Series(props) {
           });
       }
     }
-  }, []);
+  }, [props.update]);
 
   return (
     <>
@@ -471,7 +471,9 @@ function Series(props) {
         treeExpand={props.treeExpand}
         studyIndex={props.studyIndex}
         getTreeExpandSingle={props.getTreeExpandSingle}
-        update={update}
+        update={props.update}
+        // progressUpdated={this.props.progressUpdated}
+
       />
       {showSelectSerie && (
         <SelectSerieModal
