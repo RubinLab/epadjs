@@ -16,6 +16,7 @@ import {
   loadCompleted,
   annotationsLoadingError
 } from '../annotationsList/action';
+import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
 import SelectSerieModal from '../annotationsList/selectSerieModal';
 
@@ -195,17 +196,17 @@ function Table({
   );
 }
 
-const formatDate = dateString => {
-  try {
-    const dateArr = dateString.split('-');
-    dateArr[0] = dateArr[0].substring(2);
-    dateArr[1] = dateArr[1][0] === '0' ? dateArr[1][1] : dateArr[1];
-    dateArr[2] = dateArr[2][0] === '0' ? dateArr[2][1] : dateArr[2];
-    return dateArr[1] + '/' + dateArr[2] + '/' + dateArr[0];
-  } catch (err) {
-    console.error(err);
-  }
-};
+// const formatDate = dateString => {
+//   try {
+//     const dateArr = dateString.split('-');
+//     dateArr[0] = dateArr[0].substring(2);
+//     dateArr[1] = dateArr[1][0] === '0' ? dateArr[1][1] : dateArr[1];
+//     dateArr[2] = dateArr[2][0] === '0' ? dateArr[2][1] : dateArr[2];
+//     return dateArr[1] + '/' + dateArr[2] + '/' + dateArr[0];
+//   } catch (err) {
+//     console.error(err);
+//   }
+// };
 
 function AnnotationTable(props) {
   const [pageCount, setPageCount] = useState(0);
@@ -466,7 +467,6 @@ function AnnotationTable(props) {
       {
         Header: 'Study',
         sortable: true,
-        width: 75,
         accessor: 'studyDate',
         filterMethod: (filter, rows) =>
           matchSorter(rows, filter.value, { keys: ['date'] }),
