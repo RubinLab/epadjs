@@ -132,7 +132,6 @@ const AnnotationSearch = props => {
       const searchQueryProject = Object.values(props.searchQuery)[0].project;
       setQuery(searchQueryText);
       setSelectedProject(searchQueryProject || '');
-      search(searchQueryFinal);
       searchAnnotations({ query: searchQueryFinal })
         .then(res => {
           populateSearchResult(res);
