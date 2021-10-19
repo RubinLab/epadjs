@@ -437,7 +437,7 @@ function AnnotationTable(props) {
       },
       {
         accessor: 'comment',
-        sortable: false,
+        sortable: true,
         resizable: true,
         className: 'wrapped',
         style: { whiteSpace: 'normal' },
@@ -465,7 +465,7 @@ function AnnotationTable(props) {
       },
       {
         Header: 'Study',
-        sortable: false,
+        sortable: true,
         width: 75,
         accessor: 'studyDate',
         filterMethod: (filter, rows) =>
@@ -481,8 +481,9 @@ function AnnotationTable(props) {
       },
       {
         Header: 'Created',
-        sortable: false,
+        sortable: true,
         id: 'date',
+        accessor: 'date',
         filterMethod: (filter, rows) =>
           matchSorter(rows, filter.value, { keys: ['date'] }),
         filterAll: true,
