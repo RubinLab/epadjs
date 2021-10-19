@@ -12,6 +12,7 @@ import {
   FaPlus,
   FaEraser
 } from 'react-icons/fa';
+import { FcAbout } from 'react-icons/fc';
 import ReactTooltip from 'react-tooltip';
 import {
   searchAnnotations,
@@ -26,7 +27,6 @@ import { clearSelection, selectAnnotation } from '../annotationsList/action';
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
 import UploadModal from '../searchView/uploadModal';
 import DeleteAlert from '../management/common/alertDeletionModal';
-// /common/alertDeletionModal
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
   paranthesis: ['(', ')'],
@@ -37,7 +37,8 @@ const lists = {
     'anatomy',
     'lesion_name',
     'patient',
-    'template'
+    'template',
+    'user'
   ],
   criteria: ['contains'] // 'equals'
 };
@@ -94,6 +95,7 @@ const AnnotationSearch = props => {
   const [bookmark, setBookmark] = useState('');
   const [uploadClicked, setUploadClicked] = useState(false);
   const [deleteSelectedClicked, setDeleteSelectedClicked] = useState(false);
+  const [checkboxSelected, setCheckboxSelected] = useState(false);
 
   const populateSearchResult = (res, pagination) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -122,6 +124,8 @@ const AnnotationSearch = props => {
   };
 
   useEffect(() => {
+    setSelectedProject(props.pid);
+    setCheckboxSelected(false);
     if (props.searchQuery) {
       const searchQueryFinal = Object.keys(props.searchQuery)[0];
       const searchQueryText = Object.values(props.searchQuery)[0].query;
@@ -269,6 +273,7 @@ const AnnotationSearch = props => {
     } else {
       let searchQuery = parseQuery();
       setData([]);
+      //
       if (selectedProject) {
         const multiSearch =
           searchQuery.includes('AND') || searchQuery.includes('OR');
@@ -431,7 +436,6 @@ const AnnotationSearch = props => {
       const criterias = lists.criteria.join(', ');
       setError(
         `Search field (${fields}) must be followed by a criteria (${criterias})`
-        // `Please select a search field:${fields} and a criteria:${criterias}!`
       );
       return false;
     }
@@ -442,7 +446,9 @@ const AnnotationSearch = props => {
     }
 
     if (checkStartEndWithCondition(arr)) {
-      setError(`AND/OR conditions should be used to connect two queries. Please use advanced search to build a query.`);
+      setError(
+        `AND/OR conditions should be used to connect two queries. Please use advanced search to build a query.`
+      );
       return false;
     }
     return true;
@@ -450,28 +456,69 @@ const AnnotationSearch = props => {
 
   const checkSingleTermQuery = arr => {
     const includeParanthesis = query.includes('(') || query.includes(')');
-    const includeOperator =
-      query.toUpperCase().split(' ').includes('AND') || query.toUpperCase().split(' ').includes('OR');
     const { criteriaArr, typeArr } = validateQueryContent(arr);
     const includeCriteria = criteriaArr.length > 0;
     const includeType = typeArr.length > 0;
-    return !(
-      includeParanthesis ||
-      includeOperator ||
-      includeCriteria ||
-      includeType
-    );
+    return !(includeParanthesis || includeCriteria || includeType);
   };
 
-  const handleWhitespace = text => {
-    let result = text.trim().replace(/ {2,}/g, ' ');
-    if (result.includes(' ')) {
-      result = result.split(' ').reduce((all, item, i) => {
-        if (item === ' ') all += `\\${item}`;
-        return all;
+  // const handleWhitespace = text => {
+  //   let result = text.trim().replace(/ {2,}/g, ' ');
+  //   if (result.includes(' ')) {
+  //     result = result.split(' ').reduce((all, item, i) => {
+  //       if (item === ' ') all += `\\${item}`;
+  //       return all;
+  //     }, '');
+  //   }
+  //   return result;
+  // };
+
+  // if quoted, handle space and do 2 search combined with OR
+  // if not quoted check if there is white space, if there is a white space check for a single letter if there is a single letter wrap with double quote
+  // if there is a single letter wrap with doublequote
+
+  const replaceWithCaret = text => {
+    return text
+      .trim()
+      .split('')
+      .reduce((all, item) => {
+        return item === ' ' ? all + '^' : all + item;
       }, '');
+  };
+  const handleWhiteSpaceinQuote = text => {
+    const wrappedInQuote = text.startsWith('"') && text.endsWith('"');
+    const hasWhiteSpace = text.includes(' ');
+    let caretAddedQuery = '';
+    let handleSingleChar = text.includes(' ')
+      ? text
+          .split(' ')
+          .map(item => handleSingleLetter(item))
+          .join(' ')
+      : text;
+    if (wrappedInQuote && hasWhiteSpace) {
+      caretAddedQuery = replaceWithCaret(handleSingleChar);
     }
-    return result;
+    return [handleSingleChar, caretAddedQuery];
+  };
+
+  const handleSingleLetter = q => (q.length === 1 ? `"${q}"` : q);
+
+  // if text has double quotes should look for caret version too
+  const addCaretVersion = (parsedQueryArr, all) => {
+    if (parsedQueryArr[1]) {
+      const allArr = all.split(' ');
+      const len = allArr.length;
+      if (allArr[len - 1].length > 0 && allArr[len - 1].includes(':')) {
+        const str = `(${allArr[len - 1]}${parsedQueryArr[0]} OR ${
+          allArr[len - 1]
+        }${parsedQueryArr[1]})`;
+        allArr.splice(len - 1, 1, str);
+        all = allArr.join(' ');
+      }
+    } else {
+      all += parsedQueryArr[0];
+    }
+    return all;
   };
 
   const parseQuery = () => {
@@ -479,11 +526,18 @@ const AnnotationSearch = props => {
     const queryArray = seperateParanthesis(query.trim().split(' '));
     let parsedQuery;
     if (checkSingleTermQuery(queryArray)) {
-      parsedQuery = query;
+      // wrap single letter in double qute
+      // if caret added query combine with or
+      const parsedQueryArr = handleWhiteSpaceinQuote(query);
+      parsedQuery = parsedQueryArr[1]
+        ? `${parsedQueryArr[0]} OR ${parsedQueryArr[1]}`
+        : parsedQueryArr[0];
     } else {
       const isQueryInputValid = validateQuery(queryArray);
       let criteria = '';
       if (isQueryInputValid) {
+        // form a variable to collect
+        let parsedQueryString = '';
         parsedQuery = queryArray.reduce((all, item, index) => {
           if (lists.criteria.includes(item)) {
             all += ':';
@@ -492,8 +546,18 @@ const AnnotationSearch = props => {
             item.toLowerCase() === 'and' ||
             item.toLowerCase() === 'or'
           ) {
+            if (parsedQueryString.length > 0) {
+              const parsedQueryArr = handleWhiteSpaceinQuote(parsedQueryString);
+              all = addCaretVersion(parsedQueryArr, all);
+              parsedQueryString = '';
+            }
             all = `${all} ${item.toUpperCase()} `;
           } else if (lists.type.includes(item)) {
+            if (parsedQueryString.length > 0) {
+              const parsedQueryArr = handleWhiteSpaceinQuote(parsedQueryString);
+              all = addCaretVersion(parsedQueryArr, all);
+              parsedQueryString = '';
+            }
             if (item === 'patient') {
               all += 'patient_name';
             } else if (item === 'template') {
@@ -501,15 +565,26 @@ const AnnotationSearch = props => {
             } else if (item === 'lesion_name') {
               all += 'name';
             } else all += `${item}`;
+            parsedQueryString = '';
           } else if (lists.paranthesis.includes(item)) {
-            all += `${item}`;
-          } else {
-            const text = handleWhitespace(item);
-            if (criteria === 'equals') {
-              all += `"${text}"`;
+            if (item === ')' && parsedQueryString.length > 0) {
+              const parsedQueryArr = handleWhiteSpaceinQuote(parsedQueryString);
+              all = addCaretVersion(parsedQueryArr, all);
+              parsedQueryString = '';
             }
-            if (criteria === 'contains') {
-              all += `${text}`;
+            all += `${item}`;
+            parsedQueryString = '';
+          } else {
+            // check if it is the end of the query
+            // if it is end of the query do the same with above (add to all)
+            parsedQueryString =
+              parsedQueryString.length > 0
+                ? `${parsedQueryString} ${item}`
+                : item;
+            if (index === queryArray.length - 1) {
+              const parsedQueryArr = handleWhiteSpaceinQuote(parsedQueryString);
+              all = addCaretVersion(parsedQueryArr, all);
+              parsedQueryString = '';
             }
           }
           return all;
@@ -655,21 +730,31 @@ const AnnotationSearch = props => {
             <span className="filter-label">Delete selections</span>
           </ReactTooltip>
         </>
-        <div
-          className="annotaionSearch-title"
-          style={{ fontsize: '1.2rem' }}
-        >{`${explanation.project}`}</div>
-        <input
-          name="project-dropdown"
-          type="checkbox"
-          checked={selectedProject === ''}
-          onChange={e => {
-            if (e.target.checked === false) setSelectedProject(props.pid);
-            else setSelectedProject('');
-          }}
-          onMouseDown={e => e.stopPropagation()}
-          style={{ margin: '0rem 1rem', padding: '1.8px' }}
-        />
+        {mode !== 'lite' && (
+          <>
+            {' '}
+            <div
+              className="annotaionSearch-title"
+              style={{ fontsize: '1.2rem' }}
+            >{`${explanation.project}`}</div>
+            <input
+              name="project-dropdown"
+              type="checkbox"
+              checked={checkboxSelected}
+              onChange={e => {
+                if (e.target.checked === false) {
+                  setSelectedProject(selectedProject);
+                  setCheckboxSelected(false);
+                } else {
+                  setSelectedProject('');
+                  setCheckboxSelected(true);
+                }
+              }}
+              onMouseDown={e => e.stopPropagation()}
+              style={{ margin: '0rem 1rem', padding: '1.8px' }}
+            />{' '}
+          </>
+        )}
       </div>
     );
   };
@@ -768,6 +853,26 @@ const AnnotationSearch = props => {
             value={query}
           />
         </div>
+        <>
+          <FcAbout
+            data-tip
+            data-for="about-icon"
+            style={{ fontSize: '2rem' }}
+            className="annotationSearch-btn"
+          />
+          <ReactTooltip
+            id="about-icon"
+            place="bottom"
+            type="info"
+            delayShow={200}
+          >
+            <p>
+              <span>For exact match, use double quote: "7 3225"</span>
+            </p>
+            <p>For complex queries, combine terms with AND/OR:</p>
+            <p>RECIST_v2 AND CT</p>
+          </ReactTooltip>
+        </>
         <button
           className={`btn btn-secondary`}
           type="button"
@@ -775,7 +880,10 @@ const AnnotationSearch = props => {
           data-tip
           data-for="erase-icon"
           className="btn btn-secondary annotationSearch-btn"
-          onClick={() => setQuery('')}
+          onClick={() => {
+            setQuery('');
+            getAnnotationsOfProjets();
+          }}
           // onClick={parseIt}
           // disabled={index < count}
           style={{
@@ -840,7 +948,7 @@ const AnnotationSearch = props => {
           {renderQueryItem()}
           {renderOrganizeItem('organize')}
         </Collapsible>
-        {mode !== 'lite' && renderProjectSelect()}
+        {renderProjectSelect()}
         {/* {Object.keys(props.selectedAnnotations).length !== 0 && (
           <button
             className={`btn btn-secondary`}
@@ -861,7 +969,7 @@ const AnnotationSearch = props => {
             noOfRows={rows}
             getNewData={getNewData}
             bookmark={bookmark}
-            switchToDisplay={() => props.history.push("/display")}
+            switchToDisplay={() => props.history.push('/display')}
           />
         )}
       </div>
