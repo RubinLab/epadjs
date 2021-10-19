@@ -488,7 +488,7 @@ function Subjects(props) {
         }
       }
     ],
-    [selectedLevel, selectedCount, update]
+    [selectedLevel, selectedCount, props.update]
   );
 
 
@@ -601,9 +601,9 @@ function Subjects(props) {
     }
   }, []);
 
-  useEffect(() => {
-    setUpdate(update + 1);
-  }, [props.update]);
+  // useEffect(() => {
+  //   setUpdate(update + 1);
+  // }, [props.update]);
 
   useEffect(() => {
     localStorage.setItem('treeData', JSON.stringify({}));
@@ -621,7 +621,7 @@ function Subjects(props) {
           console.error(err);
         });
     }
-  }, []);
+  }, [props.update]);
 
   return (
     <>
@@ -649,7 +649,7 @@ function Subjects(props) {
         getTreeExpandAll={props.getTreeExpandAll}
         getTreeExpandSingle={props.getTreeExpandSingle}
         treeExpand={props.treeExpand}
-        update={update}
+        update={props.update}
       />
     </>
   );
