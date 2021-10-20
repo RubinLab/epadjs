@@ -120,6 +120,7 @@
   width: 96%;
   text-align: center;
   vertical-align: center;
+  cursor: grab;
   /* margin: auto; */
 }
 
