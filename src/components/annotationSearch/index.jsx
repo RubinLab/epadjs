@@ -494,7 +494,7 @@ const AnnotationSearch = props => {
           .split(' ')
           .map(item => handleSingleLetter(item))
           .join(' ')
-      : text;
+      : handleSingleLetter(text);
     if (wrappedInQuote && hasWhiteSpace) {
       caretAddedQuery = replaceWithCaret(handleSingleChar);
     }
