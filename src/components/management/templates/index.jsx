@@ -1,24 +1,25 @@
-import React from "react";
-import { connect } from "react-redux";
-import ReactTable from "react-table-v6";
-import { toast } from "react-toastify";
-import ToolBar from "./toolbar";
-import { FaRegTrashAlt, FaProjectDiagram } from "react-icons/fa";
+import React from 'react';
+import { connect } from 'react-redux';
+import ReactTable from 'react-table-v6';
+import ReactTooltip from 'react-tooltip';
+import { toast } from 'react-toastify';
+import ToolBar from './toolbar';
+import { FaRegTrashAlt, FaProjectDiagram } from 'react-icons/fa';
 import {
   getTemplatesOfProjects,
   getTemplatesUniversal,
   downloadTemplates,
   deleteTemplate,
   deleteProjectsTemplate,
-  addTemplateToProject,
-} from "../../../services/templateServices";
-import { getProjects } from "../../../services/projectServices";
-import DeleteAlert from "../common/alertDeletionModal";
-import UploadModal from "../../searchView/uploadModal";
-import EditTemplates from "./projectTable";
-import { getTemplates } from "../../annotationsList/action";
+  addTemplateToProject
+} from '../../../services/templateServices';
+import { getProjects } from '../../../services/projectServices';
+import DeleteAlert from '../common/alertDeletionModal';
+import UploadModal from '../../searchView/uploadModal';
+import EditTemplates from './projectTable';
+import { getTemplates } from '../../annotationsList/action';
 
-const mode = sessionStorage.getItem("mode");
+const mode = sessionStorage.getItem('mode');
 
 class Templates extends React.Component {
   state = {
@@ -32,14 +33,14 @@ class Templates extends React.Component {
     selectedOne: {},
     uploadClicked: false,
     hasEditClicked: false,
-    templateName: "",
-    templateUID: "",
+    templateName: '',
+    templateUID: '',
     tempProjects: [],
-    tempProSelect: {},
+    tempProSelect: {}
   };
 
   componentDidMount = async () => {
-    if (mode !== "lite") {
+    if (mode !== 'lite') {
       const { data: projectList } = await getProjects();
       const temp = [];
       for (let project of projectList) {
@@ -53,7 +54,7 @@ class Templates extends React.Component {
     }
   };
 
-  componentDidUpdate = async (prevProps) => {
+  componentDidUpdate = async prevProps => {
     try {
       const { refresh, lastEventId } = this.props;
       if (refresh && lastEventId !== prevProps.lastEventId) {
@@ -64,15 +65,15 @@ class Templates extends React.Component {
     }
   };
 
-  renderMessages = (input) => {
+  renderMessages = input => {
     return {
-      deleteAll: "Delete selected templates? This cannot be undone.",
-      deleteOne: `Delete template ${input}? This cannot be undone.`,
+      deleteAll: 'Delete selected templates? This cannot be undone.',
+      deleteOne: `Delete template ${input}? This cannot be undone.`
     };
   };
   getTemplatesData = async () => {
     try {
-      if (mode === "lite") {
+      if (mode === 'lite') {
         const { data: templates } = await getTemplatesOfProjects();
         this.setState({ templates });
       } else {
@@ -83,20 +84,20 @@ class Templates extends React.Component {
   };
 
   toggleRow = async (id, projectID) => {
-    projectID = projectID ? projectID : "lite";
+    projectID = projectID ? projectID : 'lite';
     let newSelected = Object.assign({}, this.state.selected);
     if (newSelected[id]) {
       delete newSelected[id];
       let values = Object.values(newSelected);
       if (values.length === 0) {
         this.setState({
-          selectAll: 0,
+          selectAll: 0
         });
       }
     } else {
       newSelected[id] = projectID;
       await this.setState({
-        selectAll: 2,
+        selectAll: 2
       });
     }
     this.setState({ selected: newSelected });
@@ -105,35 +106,35 @@ class Templates extends React.Component {
   toggleSelectAll() {
     let newSelected = {};
     if (this.state.selectAll === 0) {
-      this.state.templates.forEach((temp) => {
+      this.state.templates.forEach(temp => {
         let tempID = temp.Template[0].templateUID;
-        let projectID = temp.projectID ? temp.projectID : "lite";
+        let projectID = temp.projectID ? temp.projectID : 'lite';
         newSelected[tempID] = projectID;
       });
     }
     this.setState({
       selected: newSelected,
-      selectAll: this.state.selectAll === 0 ? 1 : 0,
+      selectAll: this.state.selectAll === 0 ? 1 : 0
     });
   }
 
   handleCancel = () => {
     this.setState({
       hasAddClicked: false,
-      name: "",
-      id: "",
-      user: "",
-      description: "",
-      error: "",
+      name: '',
+      id: '',
+      user: '',
+      description: '',
+      error: '',
       delAll: false,
       uploadClicked: false,
       hasEditClicked: false,
       delOne: false,
-      templateName: "",
+      templateName: '',
       selectedOne: {},
-      templateUID: "",
+      templateUID: '',
       tempProjects: [],
-      tempProSelect: {},
+      tempProSelect: {}
     });
   };
 
@@ -149,7 +150,7 @@ class Templates extends React.Component {
         this.setState({ selectAll: 0, selected: {} });
         this.props.dispatch(getTemplates());
       })
-      .catch((error) => {
+      .catch(error => {
         toast.error(error.response.data.message, { autoClose: false });
         this.getTemplatesData();
       });
@@ -165,22 +166,22 @@ class Templates extends React.Component {
     }
   };
 
-  handleFormInput = (e) => {
+  handleFormInput = e => {
     const { name, value } = e.target;
     this.setState({ [name]: value });
   };
 
-  handleEdit = (e) => {
+  handleEdit = e => {
     this.setState({ hasEditClicked: true });
   };
 
-  handleDeleteOne = (templateData) => {
-    const projectID = templateData.projectID ? templateData.projectID : "lite";
+  handleDeleteOne = templateData => {
+    const projectID = templateData.projectID ? templateData.projectID : 'lite';
     const { templateName, templateUID } = templateData.Template[0];
     this.setState({
       delOne: true,
       templateName,
-      selectedOne: { [templateUID]: projectID },
+      selectedOne: { [templateUID]: projectID }
     });
   };
 
@@ -198,11 +199,11 @@ class Templates extends React.Component {
           selectAll,
           selected: newSelected,
           selectedOne: {},
-          delOne: false,
+          delOne: false
         });
         this.props.dispatch(getTemplates());
       })
-      .catch((error) => {
+      .catch(error => {
         toast.error(error.response.data.message, { autoClose: false });
         this.getTemplatesData();
       });
@@ -213,11 +214,11 @@ class Templates extends React.Component {
       hasEditClicked: true,
       templateUID,
       templateName,
-      tempProjects: projects,
+      tempProjects: projects
     });
   };
 
-  handleTemplateProjectSelect = (e) => {
+  handleTemplateProjectSelect = e => {
     const { id, checked } = e.target;
     const tempProSelect = { ...this.state.tempProSelect };
     tempProSelect[id] = checked;
@@ -256,8 +257,8 @@ class Templates extends React.Component {
   defineColumns = () => {
     const columns = [
       {
-        id: "checkbox",
-        accessor: "",
+        id: 'checkbox',
+        accessor: '',
         width: 50,
         Cell: ({ original }) => {
           const { templateUID } = original.Template[0];
@@ -270,13 +271,13 @@ class Templates extends React.Component {
             />
           );
         },
-        Header: (x) => {
+        Header: x => {
           return (
             <input
               type="checkbox"
               className="checkbox-cell"
               checked={this.state.selectAll === 1}
-              ref={(input) => {
+              ref={input => {
                 if (input) {
                   input.indeterminate = this.state.selectAll === 2;
                 }
@@ -286,90 +287,120 @@ class Templates extends React.Component {
           );
         },
         // sortable: false,
-        resizable: false,
+        resizable: false
       },
       {
-        Header: "Container",
-        accessor: "containerName",
+        Header: 'Container',
+        accessor: 'containerName',
         sortable: true,
-        resizable: true,
+        resizable: true
       },
       {
-        Header: "Template Name",
+        Header: 'Template Name',
         sortable: true,
         resizable: true,
-        Cell: (original) => {
+        Cell: original => {
           return <div>{original.row.checkbox.Template[0].templateName}</div>;
           // return <span>type</span>;
-        },
+        }
       },
       {
-        Header: "Template Code",
+        Header: 'Template Code',
         sortable: true,
         resizable: true,
-        Cell: (original) => {
+        Cell: original => {
           return (
             <div>{original.row.checkbox.Template[0].templateCodeValue}</div>
           );
           // return <span>type</span>;
-        },
+        }
       },
 
       {
-        Header: "Type",
+        Header: 'Type',
         sortable: true,
         resizable: true,
-        Cell: (original) => {
+        Cell: original => {
           return <div>{original.row.checkbox.Template[0].type}</div>;
           // return <span>type</span>;
-        },
+        }
       },
       {
-        Header: "",
+        Header: '',
         width: 30,
-        Cell: (original) => {
+        Cell: original => {
           const template = original.row.checkbox;
           return (
-            <div onClick={() => this.handleDeleteOne(template)}>
-              <FaRegTrashAlt className="menu-clickable" />
-            </div>
+            <>
+              <div
+                onClick={() => this.handleDeleteOne(template)}
+                data-tip
+                data-for="template-trash-icon"
+              >
+                <FaRegTrashAlt className="menu-clickable" />
+              </div>
+              <ReactTooltip
+                id="template-trash-icon"
+                place="left"
+                type="info"
+                delayShow={1000}
+              >
+                <span className="filter-label">Delete template</span>
+              </ReactTooltip>
+            </>
           );
-        },
-      },
+        }
+      }
     ];
     const addToproject = {
-      Header: "Projects",
-      Cell: (original) => {
+      Header: 'Projects',
+      Cell: original => {
         const { templateUID, templateName } = original.row.checkbox.Template[0];
         const projects = original.row.checkbox.projects
           ? original.row.checkbox.projects
           : [];
         const { projectMap } = this.props;
         const className =
-          projects.length > 0 ? "wrapped" : "wrapped click-to-add";
+          projects.length > 0 ? 'wrapped' : 'wrapped click-to-add';
         const text =
-          projects.length > 0 ? projects.reduce((all, item, i) => {
-            const comma = projects.length - 1 > i ? ", " : "";
-            return `${all}${projectMap[item] ? projectMap[item].projectName : item}${comma}`;
-        }, "") : "Add template to a project";
+          projects.length > 0
+            ? projects.reduce((all, item, i) => {
+                const comma = projects.length - 1 > i ? ', ' : '';
+                return `${all}${
+                  projectMap[item] ? projectMap[item].projectName : item
+                }${comma}`;
+              }, '')
+            : 'Add template to a project';
         return (
-          <div
-            onClick={() =>
-              this.handleProjectClick(templateUID, templateName, projects)
-            }
-          >
-            <p className={className}>{text}</p>
-          </div>
+          <>
+            <div
+              data-tip
+              data-for="template-project-relation"
+              onClick={() =>
+                this.handleProjectClick(templateUID, templateName, projects)
+              }
+            >
+              <p className={className}>{text}</p>
+            </div>
+            <ReactTooltip
+                id="template-project-relation"
+                place="left"
+                type="info"
+                delayShow={1000}
+              >
+                <span className="filter-label">Assign template to a project</span>
+              </ReactTooltip>
+          </>
         );
-      },
+      }
     };
-    if (mode !== "lite") columns.splice(5, 0, addToproject);
+    if (mode !== 'lite') columns.splice(5, 0, addToproject);
     return columns;
   };
 
   handleClickProjects = () => {
     this.setState({
-      hasEditClicked: true,
+      hasEditClicked: true
     });
   };
   handleUpload = () => {
@@ -383,12 +414,12 @@ class Templates extends React.Component {
       return;
     } else {
       downloadTemplates(selectedArr)
-        .then((result) => {
-          let blob = new Blob([result.data], { type: "application/zip" });
-          this.triggerBrowserDownload(blob, "Templates");
+        .then(result => {
+          let blob = new Blob([result.data], { type: 'application/zip' });
+          this.triggerBrowserDownload(blob, 'Templates');
           // this.props.onSubmit();
         })
-        .catch((err) => {
+        .catch(err => {
           console.log(err);
         });
     }
@@ -396,9 +427,9 @@ class Templates extends React.Component {
 
   triggerBrowserDownload = (blob, fileName) => {
     const url = window.URL.createObjectURL(new Blob([blob]));
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     document.body.appendChild(link);
-    link.style = "display: none";
+    link.style = 'display: none';
     link.href = url;
     link.download = `${fileName}.zip`;
     link.click();
@@ -425,7 +456,7 @@ class Templates extends React.Component {
       errorMessage,
       uploadClicked,
       hasEditClicked,
-      tempProSelect,
+      tempProSelect
     } = this.state;
     const checkboxSelected = Object.values(selected).length > 0;
     const pageSize =
@@ -439,6 +470,7 @@ class Templates extends React.Component {
           onDownload={this.handleDownload}
         />
         <ReactTable
+          NoDataComponent={() => null}
           className="pro-table"
           data={templates}
           columns={this.defineColumns()}
@@ -482,8 +514,13 @@ class Templates extends React.Component {
   };
 }
 
-const mapStateToProps = (state) => {
-  const { uploadedPid, lastEventId, refresh, projectMap } = state.annotationsListReducer;
+const mapStateToProps = state => {
+  const {
+    uploadedPid,
+    lastEventId,
+    refresh,
+    projectMap
+  } = state.annotationsListReducer;
   return { refresh, uploadedPid, lastEventId, projectMap };
 };
 export default connect(mapStateToProps)(Templates);

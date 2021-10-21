@@ -27,11 +27,12 @@ class RequirementForm extends React.Component {
   renderOptions = (arr, field) => {
     const firstItem = <option key="first">{`--- Select ${field} ---`}</option>;
     const options = [firstItem];
+    const templateIDs = Object.keys(this.state.templates);
     if (field === 'Template') {
-      options.push(<option key="any">{'Any'}</option>);
+      options.push(<option key="any" id='Any'>{'Any'}</option>);
     }
     arr.forEach((el, i) => {
-      options.push(<option key={`${el}-${i}`}>{el}</option>);
+      options.push(<option key={`${el}-${i}`} id={field === 'Level' ? el : templateIDs[i]}>{el}</option>);
     });
     return options;
   };

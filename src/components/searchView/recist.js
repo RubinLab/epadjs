@@ -284,8 +284,8 @@ function filterForMeasurementTemplateShape(
   }
   let filteredTable = [];
   jQuery.each(table, function(i, elem) {
-    filteredTable.push(
-      elem.map(function(selem, j) {
+    let isThereLesionData = false;
+    var row = elem.map(function(selem, j) {
         if (typeof selem === 'object') {
           if (
             (template == null ||
@@ -303,15 +303,16 @@ function filterForMeasurementTemplateShape(
                   shapes
                 )))
           )
-            if (selem != null && typeof selem[measurement] != 'undefined')
+            if (selem != null && typeof selem[measurement] != 'undefined') {
+              if (selem[measurement].value) isThereLesionData = true;
               return selem[measurement].value;
-            else return 'NA';
+            } else return 'NA';
           else return null;
         } else {
           return selem;
         }
       })
-    );
+    if (isThereLesionData) filteredTable.push(row);
   });
 
   return filteredTable;

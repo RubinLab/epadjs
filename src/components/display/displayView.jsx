@@ -43,9 +43,7 @@ import { isThisSecond } from "date-fns/esm";
 import { FiMessageSquare } from "react-icons/fi";
 import { errorMonitor } from "events";
 import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
-
-const mode = sessionStorage.getItem("mode");
-const wadoUrl = sessionStorage.getItem("wadoUrl");
+import getVPDimensions from "./ViewportCalculations";
 
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 } },
@@ -122,10 +120,10 @@ const tools = [
 
   { name: "SphericalBrush", modeOptions: { mouseButtonMask: 1 } },
   { name: "CircleScissors", modeOptions: { mouseButtonMask: 1 } },
-  // { name: "FreehandScissors", modeOptions: { mouseButtonMask: 1 } },
+  { name: "FreehandScissors", modeOptions: { mouseButtonMask: 1 } },
   // { name: "RectangleScissors", modeOptions: { mouseButtonMask: 1 } },
 
-  // { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
+  { name: "CorrectionScissors", modeOptions: { mouseButtonMask: 1 } },
 ];
 
 const mapStateToProps = (state) => {
@@ -180,7 +178,7 @@ class DisplayView extends Component {
     window.addEventListener("editAim", this.editAimHandler);
     window.addEventListener("deleteAim", this.deleteAimHandler);
     window.addEventListener('keydown', this.handleKeyPressed);
-    if (series && series.length > 0) {
+    if (this.props.keycloak && series && series.length > 0) {
       const tokenRefresh = setInterval(this.checkTokenExpire, 500);
       this.setState({ tokenRefresh })
     };
@@ -200,7 +198,7 @@ class DisplayView extends Component {
     const prevActiveSerie = prevSeries[prevActivePort];
 
     if (this.props.series.length < 1) {
-      if (pid) this.props.history.push(`/search/${pid}`);
+      if (pid) this.props.history.push(`/list/${pid}`);
       else return;
       return;
     }
@@ -264,9 +262,10 @@ class DisplayView extends Component {
   };
 
   checkTokenExpire = async () => {
-    if (this.props.keycloak.isTokenExpired(5)) {
+    const { keycloak } = this.props;
+    if (keycloak.isTokenExpired(5)) {
       window.alert("Are you still there?");
-      await this.updateToken(this.props.keycloak, 5);
+      await this.updateToken(keycloak, 5);
     }
   };
 
@@ -510,6 +509,7 @@ class DisplayView extends Component {
           serie
         );
     });
+
     this.refreshAllViewports();
   };
 
@@ -537,8 +537,10 @@ class DisplayView extends Component {
     let newImageIds = {};
     let cornerstoneImageIds = [];
     const imageUrls = await this.getImages(serie);
+    const wadoUrl = sessionStorage.getItem("wadoUrl");
+    let baseUrl;
     imageUrls.map((url) => {
-      const baseUrl = wadoUrl + url.lossyImage;
+      baseUrl = wadoUrl + url.lossyImage;
       if (url.multiFrameImage === true) {
         for (var i = 0; i < url.numberOfFrames; i++) {
           let multiFrameUrl = baseUrl + "&frame=" + i;
@@ -598,22 +600,25 @@ class DisplayView extends Component {
   };
 
   openAimEditor = (aimID, seriesUID) => {
-    const { aimList } = this.props;
-    if (Object.entries(aimList).length !== 0) {
-      const aimJson = aimList[seriesUID][aimID].json;
-      aimJson.aimID = aimID;
-      const markupTypes = this.getMarkupTypesForAim(aimID);
-      aimJson["markupType"] = [...markupTypes];
-      aimJson["aimId"] = aimID;
-      if (this.hasSegmentation(aimJson)) {
-        this.setState({ hasSegmentation: true });
-        // this.setSerieActiveLabelMap(aimID);
+    try {
+      const { aimList } = this.props;
+      if (Object.entries(aimList).length !== 0) {
+        const aimJson = aimList[seriesUID][aimID].json;
+        aimJson.aimID = aimID;
+        const markupTypes = this.getMarkupTypesForAim(aimID);
+        aimJson["markupType"] = [...markupTypes];
+        aimJson["aimId"] = aimID;
+        if (this.hasSegmentation(aimJson)) {
+          this.setState({ hasSegmentation: true });
+          // this.setSerieActiveLabelMap(aimID);
+        }
+        if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
+          this.setState({ showAimEditor: false });
+        this.setState({ showAimEditor: true, selectedAim: aimJson });
+        setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
+        this.refreshAllViewports();
       }
-      if (this.state.showAimEditor && this.state.selectedAim !== aimJson)
-        this.setState({ showAimEditor: false });
-      this.setState({ showAimEditor: true, selectedAim: aimJson });
-      setMarkupsOfAimActive(aimID);//set the selected markups color to yellow
-      this.refreshAllViewports();
+    } catch (error) {
     }
   };
 
@@ -689,21 +694,14 @@ class DisplayView extends Component {
   };
 
   getViewports = (containerHeight) => {
-    let numSeries = this.props.series.length;
-    let numCols = numSeries % 3;
-    containerHeight = containerHeight
-      ? containerHeight
-      : this.state.containerHeight;
-    if (numSeries > 3) {
-      this.setState({ height: containerHeight / 2 });
-      this.setState({ width: "33%" });
-      return;
+    const { hiding } = this.state;
+    // if a viewport is maximized (hiding=true) than arrange the display as if there is only one serie
+    let numSeries = 1;
+    if (!hiding) {
+      numSeries = this.props.series.length;
     }
-    if (numCols === 1) {
-      this.setState({ width: "100%", height: containerHeight });
-    } else if (numCols === 2)
-      this.setState({ width: "50%", height: containerHeight });
-    else this.setState({ width: "33%", height: containerHeight });
+    const { width, height } = getVPDimensions(numSeries);
+    this.setState({ width, height });
   };
 
   createRefs() {
@@ -727,17 +725,18 @@ class DisplayView extends Component {
   }
 
   hideShow = (current) => {
+    const { hiding, containerHeight } = this.state;
     if (this.props.activePort !== current) {
       this.setActive(current);
       return;
     }
     // const element = cornerstone.getEnabledElements()[practivePort];
     const elements = document.getElementsByClassName("viewportContainer");
-    if (this.state.hiding === false) {
+    if (hiding === false) {
       for (var i = 0; i < elements.length; i++) {
         if (i != current) elements[i].style.display = "none";
       }
-      this.setState({ height: this.state.containerHeight, width: "100%" });
+      this.setState({ height: containerHeight, width: "100%" });
     } else {
       this.getViewports();
       for (var i = 0; i < elements.length; i++) {
@@ -745,10 +744,10 @@ class DisplayView extends Component {
       }
     }
     this.setState(
-      { hiding: !this.state.hiding },
+      { hiding: !hiding },
       () =>
         window.dispatchEvent(
-          new CustomEvent("resize", { detail: { isMaximize: true } })
+          new CustomEvent("resize", { detail: { isMaximize: !hiding } })
         ) //for cornerstone to fit the image
       // window.dispatchEvent(new Event("resizeViewport"))}
     );
@@ -808,6 +807,9 @@ class DisplayView extends Component {
   deleteAim = (aimId, serie) => {
     const aimJson = this.getAimJson(aimId, serie);
     const { name, comment } = aimJson;
+    let isStudyAim = false;
+    if (this.getAimType(aimId, serie) === "study")
+      isStudyAim = true;
     const { projectID, patientID, studyUID, seriesUID } = serie;
     const aimRefs = {
       aimID: aimId,
@@ -821,18 +823,34 @@ class DisplayView extends Component {
     deleteAnnotation({ aimID: aimId, projectID }).then(() => {
       this.props.dispatch(clearAimId());
       this.props.dispatch(aimDelete({ aimRefs }))
-      this.props.dispatch(
-        updateSingleSerie({
-          subjectID: patientID,
-          projectID,
-          seriesUID,
-          studyUID,
-        })
-      );
+      // Delete the comment down below after tests Sept 2021
+      // this.props.dispatch(
+      //   updateSingleSerie({
+      //     subjectID: patientID,
+      //     projectID,
+      //     seriesUID,
+      //     studyUID,
+      //   })
+      // );
+      if (isStudyAim) {
+        const { series } = this.props;
+        series.forEach(({ seriesUID, studyUID }) => {
+          if (serie.studyUID === studyUID && serie.seriesUID !== seriesUID)
+            this.props.dispatch(
+              getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+            );
+        });
+      }
       this.props.dispatch(
         getSingleSerie({ patientID, projectID, seriesUID, studyUID })
       );
     })
+  }
+
+  getAimType = (aimId, serie) => {
+    const { seriesUID } = serie;
+    const { aimList } = this.props;
+    return aimList[seriesUID][aimId].type;
   }
 
   getAimJson = (aimId, serie) => {
@@ -1505,6 +1523,7 @@ class DisplayView extends Component {
       return;
     }
     this.props.dispatch(closeSerie());
+    // this.props.onSwitchView("search");
   };
 
   handleHideAnnotations = () => {
@@ -1598,9 +1617,9 @@ class DisplayView extends Component {
   render() {
     const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
     const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
-    // if (this.state.redirect) return <Redirect to="/search" />;
+    // if (this.state.redirect) return <Redirect to="/list" />;
     return !Object.entries(series).length ? (
-      <Redirect to="/search" />
+      <Redirect to="/list" />
     ) : (
       <React.Fragment>
         <RightsideBar
@@ -1613,7 +1632,7 @@ class DisplayView extends Component {
           updateTreeDataOnSave={updateTreeDataOnSave}
           setAimDirty={this.setDirtyFlag}
         >
-          <ToolMenu />
+          <ToolMenu onSwitchView={this.props.onSwitchView} />
           {!this.state.isLoading &&
             Object.entries(series).length &&
             data.map((data, i) => (

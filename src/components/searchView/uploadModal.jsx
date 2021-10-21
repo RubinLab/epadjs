@@ -175,6 +175,7 @@ class UploadModal extends React.Component {
       <div className="upload-select__container">
         <span>Projects: </span>
         <select
+          onMouseDown={e => e.stopPropagation()}
           className="upload-select"
           onChange={e => this.selectProject(e)}
           value={projectID}

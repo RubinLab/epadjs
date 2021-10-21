@@ -1,20 +1,18 @@
-import http from './httpService';
-const apiUrl = sessionStorage.getItem('apiUrl');
-const mode = sessionStorage.getItem('mode');
+import http from "./httpService";
 
 export function getWaterfallReport(
   projectID,
   subjectUIDs,
   pairs,
-  type = 'BASELINE',
-  metric = 'RECIST',
+  type = "BASELINE",
+  metric = "RECIST",
   exportCalcs
 ) {
-  let url = `${apiUrl}/reports/waterfall?type=${type}&metric=${metric}`;
+  let url = `${http.apiUrl()}/reports/waterfall?type=${type}&metric=${metric}`;
   if (exportCalcs) url += `&exportCalcs=${JSON.stringify(exportCalcs)}`;
   const body = pairs
     ? { pairs }
-    :  projectID && subjectUIDs
+    : projectID && subjectUIDs
     ? { projectID, subjectUIDs }
     : { projectID };
   return http.post(url, body);
@@ -22,12 +20,12 @@ export function getWaterfallReport(
 
 export function getReport(projectId, patId, filter) {
   const url =
-    apiUrl +
+    http.apiUrl() +
     "/projects/" +
-    projectId +
+    encodeURIComponent(projectId) +
     "/subjects/" +
-    patId +
+    encodeURIComponent(patId) +
     "/aims?" +
     filter;
-    return http.get(url);
+  return http.get(url);
 }

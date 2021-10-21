@@ -1,7 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
+import { FaCogs } from "react-icons/fa";
 import ParametersForProjectWindow from "./parametersForProjectWindow";
+import Popup from "../../common/Popup.jsx";
+
 class PluginProjectWindow extends React.Component {
   constructor(props) {
     super(props);
@@ -35,6 +37,7 @@ class PluginProjectWindow extends React.Component {
         <tr key={project.id} className="edit-userRole__table--row">
           <td>
             <input
+              style={{ cursor: "pointer" }}
               type="checkbox"
               value={project.id}
               name={project.name}
@@ -49,6 +52,7 @@ class PluginProjectWindow extends React.Component {
           <td>{project.name}</td>
           <td>
             <div
+              className="text_clickable"
               onClick={() => {
                 this.handleShowParamatersWindow(
                   project.id,
@@ -56,7 +60,7 @@ class PluginProjectWindow extends React.Component {
                 );
               }}
             >
-              &nbsp; params
+              &nbsp; <FaCogs  />
             </div>
           </td>
         </tr>
@@ -67,7 +71,9 @@ class PluginProjectWindow extends React.Component {
 
   render() {
     return (
+      <div  class="tools menu-display" id="template">
       <div className="plugin_project_container">
+        <Popup>
         <div dialogClassName="plugin_project_modal">
           <div className="plugin_project_modal_header">
             <div className="plugin_project_modal_title">Projects</div>
@@ -78,7 +84,7 @@ class PluginProjectWindow extends React.Component {
                 <tr>
                   <th className="user-table__header">add/remove</th>
                   <th className="user-table__header">project</th>
-                  <th className="user-table__header"></th>
+                  <th className="user-table__header">project params</th>
                 </tr>
               </thead>
               <tbody>{this.populateRows()}</tbody>
@@ -104,6 +110,7 @@ class PluginProjectWindow extends React.Component {
             </div>
           </div>
         </div>
+        </Popup>
         {this.state.showparamswindow && (
           <ParametersForProjectWindow
             onCancel={this.handleParameterCancel}
@@ -112,7 +119,9 @@ class PluginProjectWindow extends React.Component {
             projectdbid={this.state.projectid}
           />
         )}
+        
       </div>
+    </div>
     );
   }
 }

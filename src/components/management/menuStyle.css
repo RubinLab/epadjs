@@ -32,7 +32,7 @@
   display: inline-block;
   height: 100%;
   margin-left: -0.05em;
-  content: '';
+  content: "";
 }
 
 .custom-modal {
@@ -109,6 +109,7 @@
   width: 100%;
   min-height: 32px;
   margin-top: 0.3rem;
+  background: #272b30;
   /* background: rgb(85, 85, 85); */
 }
 
@@ -119,6 +120,7 @@
   width: 96%;
   text-align: center;
   vertical-align: center;
+  cursor: grab;
   /* margin: auto; */
 }
 
@@ -171,6 +173,7 @@
 .tool-icon {
   margin-right: 1rem;
   cursor: pointer;
+  font-size: 1.1rem;
 }
 
 .menu-clickable {
@@ -182,8 +185,7 @@
 .edit-project__modal--form,
 .add-worklist__modal--form,
 .add-host__modal--form
-/* .edit-worklist__modal--form  */
- {
+/* .edit-worklist__modal--form  */ {
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -205,8 +207,7 @@
 .add-worklist__modal--input,
 .edit-connection__modal--input
 .add-host__modal--input
-/* .edit-worklist__modal--input  */
- {
+/* .edit-worklist__modal--input  */ {
   width: 100%;
 }
 
@@ -232,8 +233,7 @@
 .edit-connection__modal--label,
 .add-connection__modal--label
 .add-host__modal--label
-/* .edit-worklist__modal--label  */
- {
+/* .edit-worklist__modal--label  */ {
   margin-top: 1rem;
   color: gray;
   text-align: left;
@@ -421,8 +421,7 @@
 .add-worklist__modal--form textarea
 /* .edit-worklist__modal--form input,
 .edit-worklist__modal--form textarea,
-.edit-worklist__modal--form select  */
- {
+.edit-worklist__modal--form select  */ {
   color: black;
 }
 
@@ -589,14 +588,14 @@
 .projectTable-modal {
   display: flex;
   /* background: #e83e8c; */
-  height: '-webkit-fill-available';
+  height: "-webkit-fill-available";
   max-height: 90%;
 }
 
 .projectTable-modal .modal-content {
   width: auto;
   min-width: 300px;
-  max-width: '-webkit-fill-available';
+  max-width: "-webkit-fill-available";
 }
 
 #proModal-content {

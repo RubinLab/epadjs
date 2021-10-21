@@ -22,7 +22,7 @@
     "joi-browser": "^13.4.0",
     "jquery": "^3.5.1",
     "keycloak-js": "4.0.0-beta.2",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",
     "match-sorter": "^3.1.1",
     "moment": "^2.27.0",
@@ -30,6 +30,7 @@
     "react": "^16.13.1",
     "react-bootstrap": "^1.1.1",
     "react-bootstrap-sweetalert": "^4.4.1",
+    "react-bootstrap-typeahead": "^5.1.4",
     "react-collapsible": "^2.8.0",
     "react-contexify": "^4.1.1",
     "react-csv": "^2.0.3",
@@ -69,7 +70,11 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "chai": "^4.3.4",
+    "chromedriver": "^92.0.1",
     "css-loader": "^2.1.1",
+    "geckodriver": "^2.0.4",
+    "selenium-webdriver": "^4.0.0-beta.3",
     "stylus": "^0.54.7",
     "stylus-loader": "^3.0.2"
   }

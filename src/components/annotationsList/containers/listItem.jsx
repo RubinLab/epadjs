@@ -1,7 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
 import { FaMinus, FaPlus, FaEye, FaCheck } from "react-icons/fa";
-import { MAX_PORT } from "../../../constants";
 import Annotations from "./annotations";
 import {
   updateAnnotationDisplay,
@@ -15,6 +14,8 @@ import {
   jumpToAim,
   showAnnotationDock
 } from "../action";
+
+const maxPort = parseInt(sessionStorage.getItem("maxPort"));
 
 //single serie will be passed
 class ListItem extends React.Component {
@@ -68,7 +69,7 @@ class ListItem extends React.Component {
     const openSeries = Object.values(this.props.openSeries);
     let serieCheck = this.checkIfSerieOpen(this.props.serie);
     //check if there is enough space in the grid
-    let isGridFull = openSeries.length === MAX_PORT;
+    let isGridFull = openSeries.length === maxPort;
     //check if the serie is already open
     if (serieCheck.isOpen) {
       this.props.dispatch(changeActivePort(serieCheck.index));
@@ -80,7 +81,7 @@ class ListItem extends React.Component {
         this.props.dispatch(addToGrid(this.props.serie));
         this.props
           .dispatch(getSingleSerie(this.props.serie))
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.log(err));
         this.props.dispatch(
           updatePatient("serie", true, patientID, studyUID, seriesUID)
@@ -108,7 +109,7 @@ class ListItem extends React.Component {
         this.props.dispatch(jumpToAim(seriesid, aimid, index));
       } else {
         //else get single serie dispatch action
-        if (this.props.openSeries.length === MAX_PORT) {
+        if (this.props.openSeries.length === maxPort) {
           this.props.dispatch(alertViewPortFull());
         } else {
           // let { patientID, studyUID, seriesUID, projectID } = serie;
@@ -160,7 +161,7 @@ class ListItem extends React.Component {
         //else - if not open
       } else {
         //check if the grid is full
-        if (this.props.openSeries.length === MAX_PORT) {
+        if (this.props.openSeries.length === maxPort) {
           //if full bring modal
           this.props.dispatch(alertViewPortFull());
           //else - not full
@@ -170,7 +171,7 @@ class ListItem extends React.Component {
           //getsingleserie
           this.props
             .dispatch(getSingleSerie(this.props.serie))
-            .then(() => {})
+            .then(() => { })
             .catch(err => console.log(err));
           //update patient?? with serie
           this.props.dispatch(

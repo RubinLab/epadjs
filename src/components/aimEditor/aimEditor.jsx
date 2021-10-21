@@ -164,7 +164,7 @@ class AimEditor extends Component {
   //cavit end
   validateForm = (hasError) => {
     if (hasError > 0) {
-      console.error("Answer form has error/s!!!");
+      console.warn("Answer form has error/s!!!");
       this.setState({
         saveButtonIsActive: false,
       });
@@ -563,6 +563,7 @@ class AimEditor extends Component {
   saveAim = (aim, templateType, segmentationBlob, segId) => {
     const aimJson = aim.getAim();
     let aimSaved = JSON.parse(aimJson);
+    const isStudyAim = templateType === "Study" ? true : false;
 
     // If file upload service will be used instead of aim save service reagrding
     // the aim size purposes then aim blob should be sent with the following code
@@ -590,6 +591,7 @@ class AimEditor extends Component {
       studyUID,
       name,
       comment,
+      isStudyAim
     };
 
     uploadAim(aimSaved, projectID, this.state.isUpdate, this.updatedAimId)
@@ -894,11 +896,27 @@ class AimEditor extends Component {
       frameNum
     );
 
-    const lengthId = aim.createLengthCalcEntity({
-      value: line.length,
-      unit: line.unit,
-    });
+    const { unit, calcUnit, length, min, max, mean, stdDev } = line;
+
+    const lengthId = aim.createLengthCalcEntity({ value: length, unit });
     aim.createImageAnnotationStatement(1, markupId, lengthId);
+
+    let _calcUnit; // unit if calculations
+    if (calcUnit === "HU") _calcUnit = "hu";
+    else if (calcUnit === "SUV") _calcUnit = "suv";
+
+    const minId = aim.createMinCalcEntity({ min, unit: _calcUnit });
+    aim.createImageAnnotationStatement(1, markupId, minId);
+
+    const maxId = aim.createMaxCalcEntity({ max, unit: _calcUnit });
+    aim.createImageAnnotationStatement(1, markupId, maxId);
+
+    const meanId = aim.createMeanCalcEntity({ mean, unit: _calcUnit });
+    aim.createImageAnnotationStatement(1, markupId, meanId);
+
+    const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit: _calcUnit });
+    aim.createImageAnnotationStatement(1, markupId, stdDevId);
+
   };
 
   addCircleToAim = (aim, circle, shapeIndex, imageId, frameNum) => {
@@ -1190,17 +1208,31 @@ class AimEditor extends Component {
       pauseOnHover: true,
       draggable: true,
     });
+    const isStudyAim = aimRefs ? aimRefs.isStudyAim : false; //If upload has segmentation it can't be study aim
+    if (isStudyAim) {
+      openSeries.forEach(({ seriesUID, studyUID }) => {
+        if (openSeries[
+          activePort
+        ].studyUID === studyUID && openSeries[
+          activePort
+        ].seriesUID !== seriesUID)
+          this.props.dispatch(
+            getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+          );
+      });
+    }
     this.props.dispatch(
       getSingleSerie({ patientID, projectID, seriesUID, studyUID })
     );
-    this.props.dispatch(
-      updateSingleSerie({
-        subjectID: patientID,
-        projectID,
-        seriesUID,
-        studyUID,
-      })
-    );
+    // Delete after tests Sept 2021
+    // this.props.dispatch(
+    //   updateSingleSerie({
+    //     subjectID: patientID,
+    //     projectID,
+    //     seriesUID,
+    //     studyUID,
+    //   })
+    // );
     this.props.dispatch(updatePatientOnAimSave(aimRefs));
     this.props.updateTreeDataOnSave(aimRefs);
     this.props.onCancel(false); //close the aim editor

@@ -1,17 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTable, useExpanded } from 'react-table';
 import { connect } from 'react-redux';
-import { toast } from "react-toastify";
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
+import SelectSeriesModal from '../annotationsList/selectSerieModal';
 import { getStudies } from '../../services/studyServices';
 import Series from './Series';
 import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
-import { clearCarets } from '../../Utils/aid.js';
-import { MAX_PORT } from '../../constants';
-
+import { clearCarets, isSupportedModality } from '../../Utils/aid.js';
 import {
   getSingleSerie,
   selectStudy,
@@ -35,7 +33,8 @@ function Table({
   patientIndex,
   getTreeExpandAll,
   getTreeExpandSingle,
-  treeExpand
+  treeExpand,
+  update
 }) {
   const {
     rows,
@@ -102,6 +101,7 @@ function Table({
                     treeExpand={treeExpand}
                     studyIndex={row.index}
                     getTreeExpandSingle={getTreeExpandSingle}
+                    update={update}
                   />
                 )}
               </>
@@ -118,9 +118,12 @@ function Studies(props) {
 
   const [data, setData] = useState([]);
   let [loading, setLoading] = useState(false);
-  const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
   const [selectedCount, setSelectedCount] = useState(false);
+  const [isSerieSelectionOpen, setIsSerieSelectionOpen] = useState(false);
+  const [selectedStudy, setSelectedStudy] = useState([]);
+  const [studyName, setStudyName] = useState('');
+  const [update, setUpdate] = useState(0);
 
   useEffect(() => {
     const { selectedPatients, selectedSeries, selectedAnnotations } = props;
@@ -141,20 +144,6 @@ function Studies(props) {
       setSelectedLevel('');
     }
   }, [props.selectedStudies, props.selectedSeries, props.selectedAnnotations]);
-
-  const validateStudySelect = () => {
-    if (selectedLevel && !warningSeen) {
-      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select a study!`;
-      toast.info(message, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });      setWarningSeen(true);
-    }
-  };
 
   const deselectChildLevels = (patientID, studyUID) => {
     if (selectedLevel === 'series') {
@@ -210,57 +199,59 @@ function Studies(props) {
   };
 
   const displaySeries = async selected => {
-    if (props.openSeries.length === MAX_PORT) {
-      props.dispatch(alertViewPortFull());
+    const maxPort = parseInt(sessionStorage.getItem('maxPort'));
+    const { patientID, studyUID } = selected;
+    let seriesArr = [];
+    //check if the patient is there (create a patient exist flag)
+    const patientExists = props.patients[patientID];
+    //if there is patient iterate over the series object of the study (form an array of series)
+    if (patientExists) {
+      seriesArr = Object.values(
+        props.patients[patientID].studies[studyUID].series
+      );
+      //if there is not a patient get series data of the study and (form an array of series)
     } else {
-      const { patientID, studyUID } = selected;
-      let seriesArr = [];
-      //check if the patient is there (create a patient exist flag)
-      const patientExists = props.patients[patientID];
-      //if there is patient iterate over the series object of the study (form an array of series)
-      if (patientExists) {
-        seriesArr = Object.values(
-          props.patients[patientID].studies[studyUID].series
-        );
-        //if there is not a patient get series data of the study and (form an array of series)
-      } else {
-        seriesArr = await getSeriesData(selected);
-      }
-      //get extraction of the series (extract unopen series)
-      if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
-      //check if there is enough room
-      if (seriesArr.length + props.openSeries.length > MAX_PORT) {
-        //if there is not bring the modal
-        await setState({
-          isSerieSelectionOpen: true,
-          selectedStudy: [seriesArr],
-          studyName: selected.studyDescription
-        });
-      } else {
-        //if there is enough room
-        //add serie to the grid
-        const promiseArr = [];
-        for (let serie of seriesArr) {
-          props.dispatch(addToGrid(serie));
-          promiseArr.push(props.dispatch(getSingleSerie(serie)));
-        }
-        //getsingleSerie
-        Promise.all(promiseArr)
-          .then(() => {})
-          .catch(err => console.error(err));
-
-        //if patient doesnot exist get patient
-        if (!patientExists) {
-          // props.dispatch(getWholeData(null, selected));
-          getWholeData(null, selected);
-        } else {
-          //check if study exist
-          props.dispatch(updatePatient('study', true, patientID, studyUID));
-        }
-        props.history.push('/display');
-      }
-      props.dispatch(clearSelection());
+      seriesArr = await getSeriesData(selected);
     }
+    // filter the nondisplayable modalities
+    seriesArr = seriesArr.filter(isSupportedModality);
+    //get extraction of the series (extract unopen series)
+    // if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
+    //check if there is enough room
+    if (seriesArr.length + props.openSeries.length > maxPort) {
+      //if there is not bring the modal
+      // await setState({
+      //   isSerieSelectionOpen: true,
+      //   selectedStudy: [seriesArr],
+      //   studyName: selected.studyDescription
+      // });
+      setIsSerieSelectionOpen(true);
+      setSelectedStudy([seriesArr]);
+      setStudyName(selected.studyDescription);
+    } else {
+      //if there is enough room
+      //add serie to the grid
+      const promiseArr = [];
+      for (let serie of seriesArr) {
+        props.dispatch(addToGrid(serie));
+        promiseArr.push(props.dispatch(getSingleSerie(serie)));
+      }
+      //getsingleSerie
+      Promise.all(promiseArr)
+        .then(() => {})
+        .catch(err => console.error(err));
+
+      //if patient doesnot exist get patient
+      if (!patientExists) {
+        // props.dispatch(getWholeData(null, selected));
+        getWholeData(null, selected);
+      } else {
+        //check if study exist
+        props.dispatch(updatePatient('study', true, patientID, studyUID));
+      }
+      props.history.push('/display');
+    }
+    props.dispatch(clearSelection());
   };
 
   const columns = React.useMemo(
@@ -277,7 +268,7 @@ function Studies(props) {
 
           return (
             <div style={style}>
-              <div onMouseEnter={validateStudySelect}>
+              <div>
                 <input
                   type="checkbox"
                   style={{ marginRight: '5px' }}
@@ -307,7 +298,6 @@ function Studies(props) {
                   };
                   toggleRowExpanded(row.id, expandStatus);
                   props.getTreeExpandSingle(obj);
-                  console.log(row.original);
                   if (selectedLevel) {
                     deselectChildLevels(
                       row.original.patientID,
@@ -466,7 +456,7 @@ function Studies(props) {
         )
       }
     ],
-    [selectedLevel, warningSeen, selectedCount]
+    [selectedLevel, selectedCount, props.update]
   );
 
   const getDataFromStorage = (projectID, subjectID) => {
@@ -502,7 +492,11 @@ function Studies(props) {
           });
       }
     }
-  }, []);
+  }, [props.update]);
+
+  // useEffect(() => {
+  //   setUpdate(update + 1);
+  // }, [props.update]);
 
   return (
     <>
@@ -520,7 +514,15 @@ function Studies(props) {
         getTreeExpandAll={props.getTreeExpandAll}
         treeExpand={props.treeExpand}
         getTreeExpandSingle={props.getTreeExpandSingle}
+        update={props.update}
       />
+      {isSerieSelectionOpen && (
+        <SelectSeriesModal
+          seriesPassed={selectedStudy}
+          onCancel={() => setIsSerieSelectionOpen(false)}
+          studyName={studyName}
+        />
+      )}
     </>
   );
 }

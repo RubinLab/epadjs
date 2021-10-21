@@ -1,14 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTable, useExpanded } from 'react-table';
 import { connect } from 'react-redux';
-import { toast } from "react-toastify";
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
-import { MAX_PORT } from '../../constants';
 import { formatDate } from '../flexView/helperMethods';
 import Annotations from './Annotations';
 import { getSeries } from '../../services/seriesServices';
+import SelectSerieModal from '../annotationsList/selectSerieModal';
 import {
   alertViewPortFull,
   getSingleSerie,
@@ -29,7 +28,8 @@ function Table({
   patientIndex,
   getTreeExpandAll,
   treeExpand,
-  studyIndex
+  studyIndex, 
+  update
 }) {
   const {
     rows,
@@ -95,6 +95,7 @@ function Table({
                     parentSeries={row.original}
                     studyDescription={studyDescription}
                     expandLevel={expandLevel}
+                    update={update}
                   />
                 )}
               </>
@@ -110,9 +111,15 @@ function Series(props) {
   const widthUnit = 20;
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
   const [selectedCount, setSelectedCount] = useState(false);
+  const [showSelectSerie, setShowSelectSerie] = useState(false);
+  const [serie, setSerie] = useState({});
+  const [update, setUpdate] = useState(0);
+
+  // useEffect(() => {
+  //   setUpdate(update + 1);
+  // }, [props.update]);
 
   useEffect(() => {
     const { selectedPatients, selectedStudies, selectedAnnotations } = props;
@@ -138,10 +145,8 @@ function Series(props) {
 
   const deselectChildLevels = (patientID, studyUID, seriesUID) => {
     if (selectedLevel === 'annotations') {
-      console.log(patientID, studyUID, seriesUID);
       const annotations = Object.values(props.selectedAnnotations);
       const annotationsToDeselect = annotations.reduce((all, item, i) => {
-        console.log('item', item);
         const correctAnnotation =
           item.subjectID === patientID &&
           item.studyUID === studyUID &&
@@ -158,27 +163,14 @@ function Series(props) {
     }
   };
 
-  const validateSeriesSelect = () => {
-    if (selectedLevel && !warningSeen) {
-      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select series!`;
-      toast.info(message, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });      setWarningSeen(true);
-    }
-  };
-
   const dispatchSerieDisplay = selected => {
     const openSeries = Object.values(props.openSeries);
     const { patientID, studyUID } = selected;
     let isSerieOpen = false;
+    const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 
     //check if there is enough space in the grid
-    let isGridFull = openSeries.length === MAX_PORT;
+    let isGridFull = openSeries.length === maxPort;
     //check if the serie is already open
 
     if (openSeries.length > 0) {
@@ -196,8 +188,9 @@ function Series(props) {
     if (!isSerieOpen) {
       //if the grid is full show warning
       if (isGridFull) {
-        // setState({ showGridFullWarning: true });
-        props.dispatch(alertViewPortFull());
+        setSerie(selected);
+        setShowSelectSerie(true);
+        // props.dispatch(alertViewPortFull());
       } else {
         props.dispatch(addToGrid(selected));
         props
@@ -221,6 +214,8 @@ function Series(props) {
         }
         props.history.push('/display');
       }
+    } else {
+      props.history.push('/display');
     }
     props.dispatch(clearSelection());
   };
@@ -244,16 +239,17 @@ function Series(props) {
 
           return (
             <div style={style}>
-              <div onMousEnter={validateSeriesSelect}>
+              <div>
                 <input
                   type="checkbox"
                   style={{ marginRight: '5px' }}
                   disabled={selectedLevel}
                   onClick={() => {
                     props.dispatch(clearSelection('serie'));
-                    props.dispatch(selectSerie(row.original));
+                    props.dispatch(
+                      selectSerie(row.original, props.studyDescription)
+                    );
                     // handleCheckboxSelect(row);
-                    console.log('cheecked');
                   }}
                 />
               </div>
@@ -295,13 +291,19 @@ function Series(props) {
         Cell: ({ row }) => {
           let desc = row.original.seriesDescription || 'Unnamed Series';
           let id = 'desc' + row.original.seriesUID;
+          const { studyDescription } = props;
           return (
             <>
               <span
                 data-tip
                 data-for={id}
                 className="searchView-row__desc"
-                onDoubleClick={() => dispatchSerieDisplay(row.original)}
+                onDoubleClick={() =>
+                  dispatchSerieDisplay({
+                    ...row.original,
+                    studyDescription
+                  })
+                }
                 style={{ paddingLeft: '20px' }}
               >
                 {desc}
@@ -413,7 +415,7 @@ function Series(props) {
         )
       }
     ],
-    [selectedLevel, warningSeen, selectedCount]
+    [selectedLevel, selectedCount, props.openSeries, props.update]
   );
 
   const getDataFromStorage = (projectID, subjectID, studyUID) => {
@@ -450,7 +452,7 @@ function Series(props) {
           });
       }
     }
-  }, []);
+  }, [props.update]);
 
   return (
     <>
@@ -469,7 +471,20 @@ function Series(props) {
         treeExpand={props.treeExpand}
         studyIndex={props.studyIndex}
         getTreeExpandSingle={props.getTreeExpandSingle}
+        update={props.update}
+        // progressUpdated={this.props.progressUpdated}
+
       />
+      {showSelectSerie && (
+        <SelectSerieModal
+          seriesPassed={[[serie]]}
+          onCancel={() => {
+            setShowSelectSerie(false);
+            setSerie({});
+          }}
+          studyName={serie.studyDescription}
+        />
+      )}
     </>
   );
 }

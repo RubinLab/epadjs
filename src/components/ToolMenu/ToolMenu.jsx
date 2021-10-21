@@ -27,7 +27,8 @@ import {
   FaMousePointer,
   FaPalette,
   FaObjectUngroup,
-  FaDotCircle
+  FaDotCircle,
+  FaTimes
 } from "react-icons/fa";
 import { FiSun, FiSunset, FiZoomIn, FiRotateCw } from "react-icons/fi";
 import { IoMdEgg } from "react-icons/io";
@@ -43,9 +44,7 @@ import AnnotationList from "../annotationsList";
 import ResizeAndDrag from "../management/common/resizeAndDrag";
 import CustomModal from "../management/common/resizeAndDrag";
 import {
-  showAnnotationWindow,
-  showAnnotationDock,
-  getWholeData,
+  clearGrid
 } from "../annotationsList/action";
 import Spinner from "../common/circleSpinner";
 import "../../font-icons/styles.css";
@@ -129,16 +128,17 @@ class ToolMenu extends Component {
       rangeDisabled: true,
       showInterpolation: false,
       activeTool: "",
-      activeToolIdx: 0,
+      activeToolIdx: 1,
       fuse: false
     };
 
     this.imagingTools = [
+      { name: "Close All", icon: <FaTimes />, tool: "ClearGrid" },
       { name: "Select", icon: <FaMousePointer />, tool: "Noop" },
       { name: "Levels", icon: <FiSun />, tool: "Wwwc" },
       { name: "Presets", icon: <FiSunset />, tool: "Presets" },
       { name: "Zoom", icon: <FiZoomIn />, tool: "Zoom" },
-      { name: "Invert", icon: <FaAdjust />, tool: "Invert" },
+      // { name: "Invert", icon: <FaAdjust />, tool: "Invert" },
       { name: "Reset", icon: <MdLoop />, tool: "Reset" },
       { name: "Pan", icon: <MdPanTool />, tool: "Pan" },
       { name: "MetaData", icon: <FaListAlt />, tool: "MetaData" },
@@ -233,17 +233,17 @@ class ToolMenu extends Component {
         icon: <IoMdEgg />,
         tool: "SphericalBrush",
       },
-      // {
-      //   name: "Freehand Scissors",
-      //   icon: <FaHandScissors />,
-      //   tool: "FreehandScissors"
-      // },
+      {
+        name: "Freehand Scissors",
+        icon: <FaHandScissors />,
+        tool: "FreehandScissors"
+      },
       { name: "Circle Scissors", icon: <FaCircle />, tool: "CircleScissors" },
-      // {
-      //   name: "Correction Scissors",
-      //   icon: <TiScissorsOutline />,
-      //   tool: "CorrectionScissors"
-      // }
+      {
+        name: "Correction Scissors",
+        icon: <TiScissorsOutline />,
+        tool: "CorrectionScissors"
+      }
     ];
   }
 
@@ -299,6 +299,10 @@ class ToolMenu extends Component {
     if (tool === "Noop") {
       this.disableAllTools();
       this.setState({ activeTool: "", activeToolIdx: index });
+      return;
+    } else if (tool === "ClearGrid") {
+      this.props.dispatch(clearGrid());
+      this.props.onSwitchView("search");
       return;
     } else if (tool === "Presets") {
       this.showPresets();
@@ -401,13 +405,17 @@ class ToolMenu extends Component {
   }
 
   reset = () => {
-    const element = cornerstone.getEnabledElements()[this.props.activePort]
-      .element;
-    this.resetRenderCanvas(element);
+    const elem = cornerstone.getEnabledElements()[this.props.activePort];
+    const element = elem.element;
+    const layers = cornerstone.getLayers(element);
+    const { colormap } = elem.viewport;
+    if (layers.length || (colormap && colormap !== "gray"))
+      this.resetRenderCanvas(element);
     cornerstone.reset(element);
   };
 
   resetRenderCanvas = (element) => {
+
     const enabledElement = cornerstone.getEnabledElement(element);
 
     enabledElement.renderingTools.colormapId = undefined;

@@ -16,6 +16,7 @@ const NavBar = ({
   onSwitchView,
   notificationWarning,
   pid,
+  onAnnotations,
   viewType,
   path
 }) => {
@@ -25,7 +26,11 @@ const NavBar = ({
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
-        <Link className="navbar-brand-right nounderline pr-3 " to="#" id="epad-logo">
+        <Link
+          className="navbar-brand-right nounderline pr-3 "
+          to="#"
+          id="epad-logo"
+        >
           <img src={logo} alt={'logo'} width="25px" />
           {mode === 'lite' && 'eLite'} {mode !== 'lite' && 'ePAD'}
         </Link>
@@ -45,17 +50,21 @@ const NavBar = ({
           <ul className="navbar-nav mr-auto">
             <li
               id="navbarli"
-              className={path.includes("search")  ? "nav-link activeNav" : "nav-link"}
+              className={
+                path.includes('list') ? 'nav-link activeNav' : 'nav-link'
+              }
               onClick={() => {
                 onSearchViewClick();
-                onSwitchView('search');
+                onSwitchView('search', true);
               }}
             >
-              Search
+              Patient List
             </li>
             <li
               id="navbarli"
-              className={path.includes("display") ? "nav-link activeNav" : "nav-link"}
+              className={
+                path.includes('display') ? 'nav-link activeNav' : 'nav-link'
+              }
               onClick={() => {
                 onSwitchView('display');
               }}
@@ -78,16 +87,7 @@ const NavBar = ({
                   <NavLink className="nav-link" to="/progress">
                     Progress
                   </NavLink>
-                </li> */}
-                <li
-                  className="nav-item"
-                  id="navbarReports"
-                  onClick={() => {
-                    onReports();
-                  }}
-                >
-                  Reports
-                </li>
+                </li> */}                
                 {/* <li className="nav-item">
                   <NavLink className="nav-link" to="/edit">
                     Edit
@@ -108,6 +108,26 @@ const NavBar = ({
                 </li>{' '}
               </React.Fragment>
             )}
+            <li
+                  className="nav-item"
+                  id="navbarReports"
+                  onClick={() => {
+                    onReports();
+                  }}
+                >
+                  Reports
+                </li>
+            <li
+              id="navbar-ann"
+              className={
+                path.includes('search') ? 'nav-link activeNav' : 'nav-link'
+              }
+              onClick={() => {
+                onSwitchView('annotations');
+              }}
+            >
+              Search
+            </li>
           </ul>
           <ul className="navbar-nav ml-auto">
             {!user && (
@@ -122,6 +142,7 @@ const NavBar = ({
                 <li className="nav-item pull-right" data-name="mng">
                   <div
                     className="nav-link mng-icon"
+                    id="mng-icon"
                     data-name="mng"
                     onClick={e => {
                       openGearMenu(e);
@@ -174,7 +195,7 @@ const NavBar = ({
 
 const mapStateToProps = state => {
   return {
-    loading: state.annotationsListReducer.loading,
+    loading: state.annotationsListReducer.loading
   };
 };
 export default connect(mapStateToProps)(NavBar);

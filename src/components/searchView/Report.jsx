@@ -7,10 +7,9 @@ import useResizeAware from 'react-resize-aware';
 import { renderTable, wordExport } from './recist';
 import ConfirmationModal from '../common/confirmationModal';
 import WaterfallReact from './WaterfallReact';
-import { MAX_PORT } from '../../constants';
 import { getWaterfallReport, getReport } from '../../services/reportServices';
 import { checkIfSeriesOpen, clearCarets } from '../../Utils/aid';
-import { CSVLink } from "react-csv";
+import { CSVLink } from 'react-csv';
 import {
   changeActivePort,
   clearGrid,
@@ -20,9 +19,13 @@ import {
   updateImageId
 } from '../annotationsList/action';
 
+const maxPort = parseInt(sessionStorage.getItem('maxPort'));
+let waterfallOptions = sessionStorage.getItem('waterfallOptions');
+if (waterfallOptions) waterfallOptions = waterfallOptions.split('-');
+const metricDefaultOptions = ['RECIST', 'ADLA', 'intensitystddev', 'Export (beta)'];
 const messages = {
   title: 'Can not open all series',
-  message: `Maximum ${MAX_PORT} series can be opened. Please close already opened series first.`
+  message: `Maximum ${maxPort} series can be opened. Please close already opened series first.`
 };
 
 const style = {
@@ -54,7 +57,7 @@ const Report = props => {
   };
 
   const getTableArguments = () => {
-    const { report, index } = props;
+    const { report, index, pairs } = props;
     let projectID;
     let patientID;
     if (report !== 'Waterfall') {
@@ -84,7 +87,7 @@ const Report = props => {
       numofHeaderCols = 2;
       hideCols = [];
     } else {
-      selectedProject = props.selectedProject;
+      selectedProject = pairs[index] ? null : props.selectedProject;
     }
     return {
       id,
@@ -147,11 +150,21 @@ const Report = props => {
     const { selectedProject } = getTableArguments();
     const metric = e.target.value;
     props.handleMetric(metric);
-    const validMetric =
-      metric === 'ADLA' || metric === 'RECIST' || metric === 'intensitystddev' || metric === 'Export (beta)';
+    const configOptions = waterfallOptions ? waterfallOptions : [];
+    const metricOptions = [...metricDefaultOptions, ...configOptions];
+    const validMetric = metricOptions.includes(metric);
     const type = 'BASELINE';
+    const arg =
+      metric === 'Export (beta)'
+        ? [
+          { field: 'recist', header: 'SLD' },
+          { field: 'mean', header: 'Average HU' }
+        ]
+        : undefined;
     let result;
     if (validMetric) {
+      // in the getTable arguments chec the props pairs?
+      // if there is a pairs selected return null as pid
       if (selectedProject) {
         result = await getWaterfallReport(
           selectedProject,
@@ -159,13 +172,7 @@ const Report = props => {
           null,
           type,
           metric,
-          metric === 'Export (beta)'? 
-            [
-              { field: 'recist', header: 'SLD' },
-              { field: 'mean', header: 'Average HU' },
-            ]
-            :
-            undefined
+          arg
         );
       } else {
         const projects = Object.keys(filteredPatients);
@@ -178,25 +185,34 @@ const Report = props => {
             null,
             type,
             metric,
-            metric === 'Export (beta)'? 
-              [
-                { field: 'recist', header: 'SLD' },
-                { field: 'mean', header: 'Average HU' },
-              ]
-              :
-              undefined
+            arg
           );
+          // check if the props.pairs' length is bigger than 0
+        } else if (
+          props.pairs &&
+          props.pairs[props.index] &&
+          props.pairs[props.index].length > 0
+        ) {
+          // pass it as pairs to getWaterfallReport call
+          result = await getWaterfallReport(
+            null,
+            null,
+            props.pairs[props.index],
+            type,
+            metric,
+            arg
+          );
+          // when the report closed clear the selection in the worklist if the worklist page is mounted
         } else {
           const pairs = constructPairs(filteredPatients);
-          result = await getWaterfallReport(null, null, pairs, type, metric,
-            metric === 'Export (beta)'? 
-              [
-                { field: 'recist', header: 'SLD' },
-                { field: 'mean', header: 'Average HU' },
-              ]
-              :
-              undefined
-            );
+          result = await getWaterfallReport(
+            null,
+            null,
+            pairs,
+            type,
+            metric,
+            arg
+          );
         }
       }
       setData(result.data);
@@ -256,7 +272,7 @@ const Report = props => {
     wordExport(subjectName, 'recisttbl' + index);
   };
 
-  useEffect(() => {}, [sizes.width, sizes.height]);
+  useEffect(() => { }, [sizes.width, sizes.height]);
 
   const updateImageIDs = async () => {
     const { openSeries } = props;
@@ -384,7 +400,7 @@ const Report = props => {
         } else {
           // if not open check if the grid is full
           // if so give confirmation (clear display view and cancel buttons)
-          if (openSeries.length === MAX_PORT) {
+          if (openSeries.length === maxPort) {
             setShowConfirmModal(true);
           } else {
             //if not open the series
@@ -403,7 +419,7 @@ const Report = props => {
           }
         });
         // check if already open series and array in hand if have more than 6 series
-        if (notOpenSeries.length + openSeries.length > MAX_PORT) {
+        if (notOpenSeries.length + openSeries.length > maxPort) {
           // if so give confirmation (clear display view and cancel buttons)
           setShowConfirmModal(true);
         } else {
@@ -427,10 +443,23 @@ const Report = props => {
     setShowConfirmModal(false);
   };
 
-  const header =
-    props.report !== 'Waterfall'
-      ? `${props.report} - ${clearCarets(props.patient.subjectName)}`
-      : '';
+  let header = '';
+  if (props.report !== 'Waterfall') {
+    let patientName = '';
+    if (props.patient.subjectName)
+      patientName = clearCarets(props.patient.subjectName);
+    else if (props.patient.patientName)
+      patientName = clearCarets(props.patient.patientName);
+    header = `${props.report} - ${patientName}`;
+  }
+
+  const renderWaterfallOptions = () => {
+    const configOptions = waterfallOptions ? waterfallOptions : [];
+    const options = ['Choose to filter', ...metricDefaultOptions, ...configOptions];
+    return options.map((el, i) => {
+      return <option key={`option-${i}`}>{el}</option>;
+    });
+  };
 
   return (
     <>
@@ -498,11 +527,7 @@ const Report = props => {
             <>
               <div className="waterfall-header">
                 <select id="filter" onChange={selectMetric}>
-                  <option>Choose to filter</option>
-                  <option>RECIST</option>
-                  <option>ADLA</option>
-                  <option>intensitystddev</option>
-                  <option>Export (beta)</option>
+                  {renderWaterfallOptions()}
                 </select>
               </div>
               {data.series && data.series.length >= 0 && (
@@ -515,7 +540,17 @@ const Report = props => {
                   />
                 </div>
               )}
-              {data.waterfallExport && <CSVLink {...{data: data.waterfallExport, headers:data.waterfallHeaders,filename:'waterfall.csv'}}>Export to CSV</CSVLink>}
+              {data.waterfallExport && (
+                <CSVLink
+                  {...{
+                    data: data.waterfallExport,
+                    headers: data.waterfallHeaders,
+                    filename: 'waterfall.csv'
+                  }}
+                >
+                  Export to CSV
+                </CSVLink>
+              )}
             </>
           )}
 

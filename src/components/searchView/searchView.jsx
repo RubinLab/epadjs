@@ -35,7 +35,6 @@ import {
   updateSingleSerie,
   updatePatientOnAimDelete
 } from '../annotationsList/action';
-import { MAX_PORT } from '../../constants';
 import DownloadSelection from './annotationDownloadModal';
 import './searchView.css';
 import UploadModal from './uploadModal';
@@ -55,7 +54,8 @@ import Projects from './addToProject';
 import WarningModal from '../common/warningModal';
 import AnnotationCreationModal from './annotationCreationModal.jsx';
 import UpLoadWizard from '../tagEditor/uploadWizard';
-import { FaLessThan } from 'react-icons/fa';
+import { DISP_MODALITIES } from '../../constants';
+
 const mode = sessionStorage.getItem('mode');
 
 const messages = {
@@ -112,7 +112,7 @@ class SearchView extends Component {
     try {
       const { pid } = this.props;
       if (mode === 'thick' && !pid) {
-        this.props.history.push(`/search/${pid}`);
+        this.props.history.push(`/list/${pid}`);
       }
       let subjects = Object.values(this.props.treeData);
       if (subjects.length > 0) {
@@ -128,7 +128,16 @@ class SearchView extends Component {
         subjects,
         expandLevel
       });
-    } catch (err) {}
+    } catch (err) {
+      window.addEventListener('openSeriesModal', this.handleSeriesModal);
+    }
+  };
+
+  // App.js triggers this event when more than allowed series are sent from the url to open
+  handleSeriesModal = event => {
+    const list = event.detail;
+    const seriesList = [list];
+    this.setState({ isSerieSelectionOpen: true, seriesList });
   };
 
   componentDidUpdate = async prevProps => {
@@ -157,6 +166,10 @@ class SearchView extends Component {
       this.handleEditingTags();
     }
   };
+
+  componentWillUnmount() {
+    window.removeEventListener('openSeriesModal', this.handleSeriesModal);
+  }
 
   checkForAllAndUnassigned = () => {
     const { pid } = this.props;
@@ -293,7 +306,7 @@ class SearchView extends Component {
         this.props.dispatch(clearSelection());
 
         this.setState(state => ({ update: state.update + 1 }));
-        this.props.history.push(`/search/${this.props.pid}`);
+        this.props.history.push(`/list/${this.props.pid}`);
         for (let serie of this.props.openSeries) {
           let type = serie.aimID ? 'annotation' : 'serie';
           this.props.dispatch(
@@ -376,7 +389,7 @@ class SearchView extends Component {
         }
         // this.props.clearTreeData();
         this.props.clearTreeExpand();
-        this.props.history.push(`/search/${this.props.pid}`);
+        this.props.history.push(`/list/${this.props.pid}`);
       })
       .catch(err => {
         console.log(err);
@@ -466,6 +479,7 @@ class SearchView extends Component {
   };
 
   viewSelection = async () => {
+    const maxPort = parseInt(sessionStorage.getItem('maxPort'));
     let selectedStudies = Object.values(this.props.selectedStudies);
     let selectedSeries = Object.values(this.props.selectedSeries);
     let selectedAnnotations = Object.values(this.props.selectedAnnotations);
@@ -476,115 +490,96 @@ class SearchView extends Component {
     if (selectedStudies.length > 0) {
       let total = 0;
       let studiesObj = {};
-
-      if (this.props.openSeries.length === MAX_PORT) {
-        if (selectedStudies.length === 1) {
-          let numOfSer = Object.values(this.groupOpenSeriesByStudy());
-          if (selectedStudies[0].numberOfSeries === numOfSer[0]) {
-            return;
-          } else {
-            this.props.dispatch(alertViewPortFull());
-          }
-        } else {
-          this.props.dispatch(alertViewPortFull());
-        }
+      for (let st of selectedStudies) {
+        total += st.numberOfSeries;
+      }
+      for (let st of selectedStudies) {
+        studiesObj[st.studyUID] = await this.getSeriesData(st);
+      }
+      //check if enough room to display selection
+      if (total + this.props.openSeries.length > maxPort) {
+        this.props.dispatch(startLoading());
+        this.setState({ seriesList: studiesObj });
+        this.props.dispatch(loadCompleted());
+        this.setState({ isSerieSelectionOpen: true });
       } else {
-        for (let st of selectedStudies) {
-          total += st.numberOfSeries;
+        for (let study in studiesObj) {
+          for (let serie of studiesObj[study]) {
+            this.props.dispatch(addToGrid(serie));
+            this.props.dispatch(getSingleSerie(serie));
+          }
         }
-        for (let st of selectedStudies) {
-          studiesObj[st.studyUID] = await this.getSeriesData(st);
-        }
-        //check if enough room to display selection
-        if (total + this.props.openSeries.length > MAX_PORT) {
-          this.props.dispatch(startLoading());
-          this.setState({ seriesList: studiesObj });
-          this.props.dispatch(loadCompleted());
-          this.setState({ isSerieSelectionOpen: true });
-        } else {
-          for (let study in studiesObj) {
-            for (let serie of studiesObj[study]) {
-              this.props.dispatch(addToGrid(serie));
-              this.props.dispatch(getSingleSerie(serie));
+        for (let study in studiesObj) {
+          for (let serie of studiesObj[study]) {
+            if (!this.props.patients[serie.patientID]) {
+              // await this.props.dispatch(getWholeData(serie));
+              getWholeData(serie);
+            } else {
+              this.props.dispatch(
+                updatePatient(
+                  'serie',
+                  true,
+                  serie.patientID,
+                  serie.studyUID,
+                  serie.seriesUID
+                )
+              );
             }
           }
-          for (let study in studiesObj) {
-            for (let serie of studiesObj[study]) {
-              if (!this.props.patients[serie.patientID]) {
-                // await this.props.dispatch(getWholeData(serie));
-                getWholeData(serie);
-              } else {
-                this.props.dispatch(
-                  updatePatient(
-                    'serie',
-                    true,
-                    serie.patientID,
-                    serie.studyUID,
-                    serie.seriesUID
-                  )
-                );
-              }
-            }
-          }
-          this.props.history.push('/display');
-          this.props.dispatch(clearSelection());
         }
+        this.props.history.push('/display');
+        this.props.dispatch(clearSelection());
       }
       //if series selected
     } else if (selectedSeries.length > 0) {
       //check if enough room to display selection
       for (let serie of selectedSeries) {
-        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen) {
+        if (
+          !this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen &&
+          DISP_MODALITIES.includes(serie.examType)
+        ) {
           notOpenSeries.push(serie);
         }
       }
-      //if all ports are full
-      if (
-        notOpenSeries.length > 0 &&
-        this.props.openSeries.length === MAX_PORT
-      ) {
-        this.props.dispatch(alertViewPortFull());
+      //if all series already open update active port
+      if (notOpenSeries.length === 0) {
+        let index = this.checkIfSerieOpen(
+          selectedSeries[0].seriesUID,
+          'seriesUID'
+        ).index;
+        this.props.dispatch(changeActivePort(index));
+        this.props.history.push('/display');
+        this.props.dispatch(clearSelection());
       } else {
-        //if all series already open update active port
-        if (notOpenSeries.length === 0) {
-          let index = this.checkIfSerieOpen(
-            selectedSeries[0].seriesUID,
-            'seriesUID'
-          ).index;
-          this.props.dispatch(changeActivePort(index));
+        if (selectedSeries.length + this.props.openSeries.length > maxPort) {
+          groupedObj = this.groupUnderStudy(selectedSeries);
+          await this.setState({ seriesList: groupedObj });
+          this.setState({ isSerieSelectionOpen: true });
+          // this.props.history.push("/display");
+        } else {
+          //else get data for each serie for display
+          notOpenSeries.forEach(serie => {
+            this.props.dispatch(addToGrid(serie));
+            this.props.dispatch(getSingleSerie(serie));
+          });
+          for (let series of selectedSeries) {
+            if (!this.props.patients[series.patientID]) {
+              // await this.props.dispatch(getWholeData(series));
+              getWholeData(series);
+            } else {
+              this.props.dispatch(
+                updatePatient(
+                  'serie',
+                  true,
+                  series.patientID,
+                  series.studyUID,
+                  series.seriesUID
+                )
+              );
+            }
+          }
           this.props.history.push('/display');
           this.props.dispatch(clearSelection());
-        } else {
-          if (selectedSeries.length + this.props.openSeries.length > MAX_PORT) {
-            groupedObj = this.groupUnderStudy(selectedSeries);
-            await this.setState({ seriesList: groupedObj });
-            this.setState({ isSerieSelectionOpen: true });
-            // this.props.history.push("/display");
-          } else {
-            //else get data for each serie for display
-            notOpenSeries.forEach(serie => {
-              this.props.dispatch(addToGrid(serie));
-              this.props.dispatch(getSingleSerie(serie));
-            });
-            for (let series of selectedSeries) {
-              if (!this.props.patients[series.patientID]) {
-                // await this.props.dispatch(getWholeData(series));
-                getWholeData(series);
-              } else {
-                this.props.dispatch(
-                  updatePatient(
-                    'serie',
-                    true,
-                    series.patientID,
-                    series.studyUID,
-                    series.seriesUID
-                  )
-                );
-              }
-            }
-            this.props.history.push('/display');
-            this.props.dispatch(clearSelection());
-          }
         }
       }
       //if annotations selected
@@ -593,51 +588,47 @@ class SearchView extends Component {
       groupedObj = this.groupUnderStudy(serieList);
       //check if enough room to display selection
       for (let serie of serieList) {
-        if (!this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen) {
+        if (
+          !this.checkIfSerieOpen(serie.seriesUID, 'seriesUID').isOpen &&
+          DISP_MODALITIES.includes(serie.examType)
+        ) {
           notOpenSeries.push(serie);
         }
       }
-      if (
-        notOpenSeries.length > 0 &&
-        this.props.openSeries.length === MAX_PORT
-      ) {
-        this.props.dispatch(alertViewPortFull());
+      if (notOpenSeries.length === 0) {
+        const serID = serieList[0].seriesUID;
+        let index = this.checkIfSerieOpen(serID, 'seriesUID').index;
+        this.props.dispatch(changeActivePort(index));
+        this.props.dispatch(jumpToAim(serID, serieList[0].aimID, index));
       } else {
-        if (notOpenSeries.length === 0) {
-          const serID = serieList[0].seriesUID;
-          let index = this.checkIfSerieOpen(serID, 'seriesUID').index;
-          this.props.dispatch(changeActivePort(index));
-          this.props.dispatch(jumpToAim(serID, serieList[0].aimID, index));
+        if (notOpenSeries.length + this.props.openSeries.length > maxPort) {
+          await this.setState({ seriesList: groupedObj });
+          this.setState({ isSerieSelectionOpen: true });
+          //else get data for each serie for display
         } else {
-          if (notOpenSeries.length + this.props.openSeries.length > MAX_PORT) {
-            await this.setState({ seriesList: groupedObj });
-            this.setState({ isSerieSelectionOpen: true });
-            //else get data for each serie for display
-          } else {
-            serieList.forEach(serie => {
-              this.props.dispatch(addToGrid(serie, serie.aimID));
-              this.props.dispatch(getSingleSerie(serie, serie.aimID));
-            });
-            for (let ann of selectedAnnotations) {
-              if (!this.props.patients[ann.subjectID]) {
-                // await this.props.dispatch(getWholeData(null, null, ann));
-                getWholeData(null, null, ann);
-              } else {
-                this.props.dispatch(
-                  updatePatient(
-                    'annotation',
-                    true,
-                    ann.subjectID,
-                    ann.studyUID,
-                    ann.seriesUID,
-                    ann.aimID
-                  )
-                );
-              }
+          serieList.forEach(serie => {
+            this.props.dispatch(addToGrid(serie, serie.aimID));
+            this.props.dispatch(getSingleSerie(serie, serie.aimID));
+          });
+          for (let ann of selectedAnnotations) {
+            if (!this.props.patients[ann.subjectID]) {
+              // await this.props.dispatch(getWholeData(null, null, ann));
+              getWholeData(null, null, ann);
+            } else {
+              this.props.dispatch(
+                updatePatient(
+                  'annotation',
+                  true,
+                  ann.subjectID,
+                  ann.studyUID,
+                  ann.seriesUID,
+                  ann.aimID
+                )
+              );
             }
-            this.props.history.push('/display');
-            this.props.dispatch(clearSelection());
           }
+          this.props.history.push('/display');
+          this.props.dispatch(clearSelection());
         }
       }
     }
@@ -721,9 +712,8 @@ class SearchView extends Component {
           this.setState({ downloading: false });
           console.log(err);
         });
-      this.props.history.push(`/search`);
+      this.setState(state => ({ update: state.update + 1 }));
       this.props.dispatch(clearSelection());
-      this.props.history.push(`/search/${pid}`);
     } else if (selectedAnnotations.length > 0) {
       this.setState({ showAnnotationModal: true });
     } else {
@@ -875,10 +865,8 @@ class SearchView extends Component {
 
   handleSubmitDownload = () => {
     this.setState({ showAnnotationModal: false });
-    const pid = window.location.pathname.split('/').pop();
-    this.props.history.push(`/search`);
+    this.setState(state => ({ update: state.update + 1 }));
     this.props.dispatch(clearSelection());
-    this.props.history.push(`/search/${pid}`);
   };
 
   handleUploadWizardClick = () => {
@@ -912,13 +900,11 @@ class SearchView extends Component {
         });
       }
       await Promise.all(promises);
-      console.log('Sucessfully copied!');
       localStorage.setItem('treeData', JSON.stringify({}));
       this.setState({ showProjects: false });
-      this.props.clearTreeExpand()
+      this.props.clearTreeExpand();
       this.props.dispatch(clearSelection());
-      this.props.history.push(`/search/${id}`);
-
+      this.props.history.push(`/list/${id}`);
     } catch (err) {
       console.log(err);
     }
@@ -996,14 +982,22 @@ class SearchView extends Component {
           onAddProject={this.handleProjectClick}
           admin={this.props.admin}
           hideEyeIcon={hideEyeIcon}
+          expandLevel={this.props.expandLevel}
           // expanding={expanding}
         />
-        {isSerieSelectionOpen && !this.props.loading && (
+        {(this.props.showSeriesModal ||
+          (isSerieSelectionOpen && !this.props.loading)) && (
           <ProjectModal
             seriesPassed={this.state.seriesList}
             onCancel={this.closeSelectionModal}
           />
         )}
+        {/* {this.props.showSeriesModal && (
+          <ProjectModal
+            seriesPassed={this.props.seriesList}
+            onCancel={this.closeSelectionModal}
+          />
+        )} */}
         <Subjects
           key={this.props.match.params.pid}
           pid={pid}
@@ -1021,6 +1015,7 @@ class SearchView extends Component {
           treeData={this.props.treeData}
           getTreeData={this.props.getTreeData}
           closeAllCounter={this.props.closeAllCounter}
+          collapseSubjects={this.props.collapseSubjects}
         />
         {this.state.showAnnotationModal && (
           <DownloadSelection

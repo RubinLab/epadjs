@@ -21,6 +21,7 @@ class ResizeAndDrag extends React.Component {
   render() {
     return (
       <Rnd
+        dragHandleClassName="mng-header__title"
         className="rnd-window"
         style={style}
         // size={{ width: this.state.width, height: this.state.height }}

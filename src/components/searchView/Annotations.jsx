@@ -1,13 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTable, useExpanded } from 'react-table';
 import { connect } from 'react-redux';
-import { toast } from "react-toastify";
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import { getAnnotations } from '../../services/annotationServices';
-import { MAX_PORT } from '../../constants';
 import { formatDate } from '../flexView/helperMethods';
+import SelectSerieModal from '../annotationsList/selectSerieModal';
 import {
   alertViewPortFull,
   getSingleSerie,
@@ -71,8 +70,10 @@ function Annotations(props) {
   const [data, setData] = useState([]);
   let [loading, setLoading] = useState(false);
   const username = sessionStorage.getItem('username');
-  const [warningSeen, setWarningSeen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(false);
+  const [showSelectSerie, setShowSelectSerie] = useState(false);
+  const [selected, setSelected] = useState({});
+  const [update, setUpdate] = useState(0);
 
   useEffect(() => {
     const { selectedPatients, selectedStudies, selectedSeries } = props;
@@ -100,19 +101,23 @@ function Annotations(props) {
 
   const displayAnnotations = selected => {
     const { projectID, studyUID, seriesUID, aimID } = selected;
+    setSelected(selected);
     const patientID = selected.subjectID;
     const { openSeries } = props;
+    const maxPort = parseInt(sessionStorage.getItem('maxPort'));
     // const serieObj = { projectID, patientID, studyUID, seriesUID, aimID };
     //check if there is enough space in the grid
-    let isGridFull = openSeries.length === MAX_PORT;
+    let isGridFull = openSeries.length === maxPort;
     //check if the serie is already open
     if (checkIfSerieOpen(seriesUID).isOpen) {
       const { index } = checkIfSerieOpen(seriesUID);
       props.dispatch(changeActivePort(index));
       props.dispatch(jumpToAim(seriesUID, aimID, index));
+      props.dispatch(clearSelection());
+      props.history.push('/display');
     } else {
       if (isGridFull) {
-        props.dispatch(alertViewPortFull());
+        setShowSelectSerie(true);
       } else {
         props.dispatch(addToGrid(selected, aimID));
         props
@@ -135,31 +140,24 @@ function Annotations(props) {
             )
           );
         }
+        props.dispatch(clearSelection());
+        props.history.push('/display');
       }
     }
-    props.dispatch(clearSelection());
-    props.history.push('/display');
   };
 
   const selectRow = (e, data) => {
     props.dispatch(clearSelection('annotation'));
-    const { seriesDescripion } = props.series;
+    const { seriesDescription } = props.parentSeries;
     const { studyDescription } = props;
-    props.dispatch(selectAnnotation(data, studyDescription, seriesDescripion));
-  };
-
-  const validateAnnotationSelect = () => {
-    if (selectedLevel && !warningSeen) {
-      const message = `There are already selected ${selectedLevel}. Please deselect those if you want to select an annotation!`;
-      toast.info(message, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });      setWarningSeen(true);
-    }
+    props.dispatch(
+      selectAnnotation(
+        data,
+        studyDescription,
+        seriesDescription,
+        props.parentSeries.examType
+      )
+    );
   };
 
   const columns = React.useMemo(
@@ -168,7 +166,7 @@ function Annotations(props) {
         id: 'series-expander',
         Cell: ({ row }) => (
           <div style={{ paddingLeft: '30px' }}>
-            <div onMouseEnter={validateAnnotationSelect}>
+            <div>
               <input
                 type="checkbox"
                 onClick={e => selectRow(e, row.original)}
@@ -193,7 +191,13 @@ function Annotations(props) {
                 data-tip
                 data-for={id}
                 className="searchView-row__desc"
-                onDoubleClick={() => displayAnnotations(row.original)}
+                onDoubleClick={() =>
+                  displayAnnotations({
+                    ...row.original,
+                    studyDescription: props.studyDescription,
+                    seriesDescription: props.parentSeries.seriesDescription
+                  })
+                }
                 style={{ paddingLeft: '30px' }}
               >
                 {desc}
@@ -285,8 +289,12 @@ function Annotations(props) {
         }
       }
     ],
-    [selectedLevel, warningSeen]
+    [selectedLevel, props.update]
   );
+
+  // useEffect(() => {
+  //   setUpdate(update + 1);
+  // }, [props.update]);
 
   useEffect(() => {
     const { parentSeries } = props;
@@ -312,6 +320,12 @@ function Annotations(props) {
         <tr style={{ width: 'fit-content', margin: 'auto', marginTop: '10%' }}>
           <PropagateLoader color={'#7A8288'} loading={loading} margin={8} />
         </tr>
+      )}
+      {showSelectSerie && (
+        <SelectSerieModal
+          seriesPassed={[[selected]]}
+          onCancel={() => setShowSelectSerie(false)}
+        />
       )}
       <Table columns={columns} data={data} selectRow={selectRow} />
     </>

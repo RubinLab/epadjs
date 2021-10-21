@@ -14,11 +14,8 @@ export var AimEditor = function (
   lastSavedAim
 ) {
   //this.mapObjCodeValueParent = new Map();
-  //this.mapHtmlObjects = new Map(); not used
-  //this.mapHtmlSelectObjectsKeyValue = new Map(); not used
-  // this.mapAllowedTermCollectionByCodeValue = new Map(); not used
+
   var self = this;
-  //var domelements = [];
   var selectid = 0;
   this.loadingAimFlag = false;
   this.handlerSetAimDirty = setAimDirty;
@@ -85,6 +82,7 @@ export var AimEditor = function (
   this.anyClosedShapeTypes = ["Circle", "Polyline", "Polygon"]; // what is polyline ?
   this.templateShapeArray = []; //each array element is a json object {"shape":'Point', "domid" : '2.25.33554445511225454'});
   this.defaultTemplate = null;
+  this.preOpen = null;
   this.aimForAutoFill = "";
   this.isRecistFlag = false;
 
@@ -139,11 +137,8 @@ export var AimEditor = function (
     }
 
     keyvalue = keyvalue + "+" + String.fromCharCode(e.keyCode);
-    // console.log(keyvalue);
-
     if (self.mapShortCutKeys.get(keyvalue)) {
-      // console.log("in" + keyvalue);
-      // console.log(self.mapShortCutKeys.get(keyvalue));
+
       if (self.mapShortCutKeys.get(keyvalue) !== null) {
         document.getElementById(self.mapShortCutKeys.get(keyvalue)).click();
       }
@@ -157,11 +152,13 @@ export var AimEditor = function (
   };
 
   this.loadTemplates = function (templateList) {
-    let defaultTempCodeVal = "";
+    let defaultTempCodeVal = '';
+    let preOpenTempCodeValue = '';
     if (templateList.default) {
       defaultTempCodeVal = templateList.default;
-      // defaultTempCodeVal =
-      //   defaultTemplateJson.TemplateContainer.Template[0]["codeValue"];
+    }
+    if (templateList.preOpen && templateList.preOpen !== '' ) {
+      preOpenTempCodeValue = templateList.preOpen;
     }
     self.arrayTemplatesJsonObjects = JSON.parse(
       JSON.stringify(templateList.all)
@@ -183,6 +180,11 @@ export var AimEditor = function (
               self.defaultTemplate = i + 1;
             }
           }
+          if (preOpenTempCodeValue !== '') {
+            if (preOpenTempCodeValue === object.codeValue) {
+              self.preOpen = i + 1;
+            }
+          }
         }
       }
     }
@@ -194,17 +196,15 @@ export var AimEditor = function (
   };
 
   this.createViewerWindow = function () {
-    //var x = document.createElement("INPUT");
-    //x.setAttribute("type", "file");
-    //x.addEventListener('change', self.readx, false);
 
     self.renderButtonhandler(true);
     self.mainWindowDiv = document.createElement("div");
 
     // below section needs to be uncommented for testing purpose
-    //self.mainButtonsDiv = document.createElement('div');
-    //this.addButtons(this.mainWindowDiv);
-    //this.mainWindowDiv.appendChild(x);
+    /*  self.mainButtonsDiv = document.createElement('div');
+        this.addButtons(this.mainWindowDiv);
+        this.mainWindowDiv.appendChild(x);
+    */
     // above section needs to be uncommented for testing purpose
     self.templateListDiv = document.createElement("div");
     self.templateListDiv.id = "tlist";
@@ -223,9 +223,7 @@ export var AimEditor = function (
     accordion2Div.className = " ui accordion";
 
     self.mainWindowDiv.appendChild(self.templateListDiv);
-    //self.mainWindowDiv.appendChild(self.shapeDiv);
     self.mainWindowDiv.appendChild(self.accordion1Div);
-    //self.mainWindowDiv.appendChild(accordion2Div);
 
     //below line needs to be uncommented for testing purpose
     //self.mainWindowDiv.appendChild(self.mainButtonsDiv);
@@ -265,11 +263,8 @@ export var AimEditor = function (
         "-" +
         tempTemplateType +
         " Template ";
-      //templateOption.innerHTML = this.arrayTemplatesJsonObjects[i].key;
       self.templateSelect.appendChild(templateOption);
     }
-
-    // var lblTxt = document.createTextNode("Select template:");
 
     self.templateListDiv.appendChild(self.templateSelect);
     self.userWindow.appendChild(self.mainWindowDiv);
@@ -288,12 +283,7 @@ export var AimEditor = function (
       //uncomment below line for testing
       //self.mainButtonsDiv.innerHTML = "";
 
-      //  self.mapCardinalitiesToCheckId = new Map();
       self.mapStatusAllowedTermBlocks = new Map();
-      //self.mapHtmlObjects = new Map(); not used
-      //self.mapHtmlSelectObjectsKeyValue = new Map(); not used
-      //self.mapAllowedTermCollectionByCodeValue = new Map(); not used
-      // self.mapTemplateCodeValueByIndex = new Map();
       self.mapLabelAnnotatorConfidence = new Map();
       self.mapLabelAnnotConfJson = new Map();
       self.mapLabelSubComment = new Map();
@@ -318,30 +308,12 @@ export var AimEditor = function (
         }
 
         self.extractTemplate(self.jsonTemplateCopy);
-
-        // Auto fill aim editor form if previous aim passed to constructor
-
-        // if (
-        //   self.aimForAutoFill !== null &&
-        //   typeof self.aimForAutoFill !== "undefined"
-        // ) {
-        //   if (
-        //     self.aimForAutoFill.typeCode[0].code ===
-        //     self.jsonTemplateCopy.TemplateContainer.Template[0]["codeValue"]
-        //   ) {
-        //     self.loadAimJson(self.aimForAutoFill, null);
-        //   }
-        // }
-        // Auto fill aim editor form if previous aim passed to constructor  end
-
-        //self.renderButtonhandler(true);
       }
-      // else {
-      //   self.renderButtonhandler(true);
-      // }
     };
-
-    if (self.defaultTemplate !== null) {
+    if (self.preOpen !== null) {
+      self.templateSelect.selectedIndex = self.preOpen;
+      self.templateSelect.onchange();
+    }else if (self.defaultTemplate !== null) {
       self.templateSelect.selectedIndex = self.defaultTemplate;
       self.templateSelect.onchange();
     }
@@ -381,7 +353,6 @@ export var AimEditor = function (
     labelAnnotationNameInput.style.fontFamily = self.fontfamily;
     labelAnnotationNameInput.style.fontSize = "14px";
     labelAnnotationNameInput.style.paddingLeft = "2px";
-    //labelAnnotationNameInput.style.fontWeight = "1000";
     labelAnnotationNameInput.style.lineHeight = "14px";
     labelAnnotationNameInput.style.width = "100%";
     // Line below added by Mete to give default names
@@ -409,7 +380,6 @@ export var AimEditor = function (
     label.textContent = "Comment";
     labelDiv.className = "comment";
     labelDiv.style.paddingTop = "10px";
-    //commentDiv.className = "comment";
 
     var textareaDomObject = document.createElement("textarea");
     labelDiv.appendChild(label);
@@ -477,7 +447,6 @@ export var AimEditor = function (
 
         var headerCheckIcon = document.createElement("i");
         headerCheckIcon.className = "red check circle outline icon";
-        //  headerCheckIcon.id = (component.id).replace(/[.*+?^${}()|[\]\\]/g, '');
         headerCheckIcon.id = component.id;
         document.getElementById("accordion1").appendChild(componentDiv);
 
@@ -486,7 +455,6 @@ export var AimEditor = function (
         incontentDiv.id = ComponentDivId;
 
         componentDiv.appendChild(headerDiv);
-        //icon cav
         headerDiv.appendChild(headerCheckIcon);
         headerDiv.appendChild(headerArrowIcon);
         headerDiv.appendChild(componentDivLabel);
@@ -553,8 +521,6 @@ export var AimEditor = function (
     $(".ui.accordion").accordion();
     self.checkShapes(self.runtimeUserShapes);
     self.formCheckHandler(self.checkFormSaveReady());
-
-    //  self.activateDirtyCheck = true;
   };
 
   this.QuestionType = function (
@@ -563,7 +529,18 @@ export var AimEditor = function (
     parentDiv,
     mapTagArray,
     parentTagTypeFromJson
-  ) {};
+  ) {
+      if (Array.isArray(object)) {
+        for (let cnt=0; cnt < object.length; cnt +=1){
+          object.select = 1;
+          let label = document.createElement("label");
+          label.textContent = "Question type : " + object[cnt].codeMeaning;
+          label.style.marginLeft = "20px";
+          parentDiv.appendChild(label);
+        }
+      }
+
+  };
 
   this.Calculation = function (
     parent,
@@ -595,8 +572,7 @@ export var AimEditor = function (
     mapTagArray,
     parentTagTypeFromJson
   ) {
-    //var textareaDomObject = document.createElement("textarea");
-    //parentDiv.appendChild(textareaDomObject);
+
   };
 
   this.ValidTerm = function (
@@ -622,10 +598,8 @@ export var AimEditor = function (
       arrayLength = 1;
     }
 
-    //checkAnnotatorConfidence(parentDiv,object);
     var ValidTerm = [];
     var i = 0;
-    //console.log("array length", arrayLength);
     for (i = 0; i < arrayLength; i++) {
       var subEObject = null;
       if (isArray === 1) {
@@ -633,7 +607,6 @@ export var AimEditor = function (
       } else {
         subEObject = object;
       }
-      //console.log("undefined object", subEObject);
       var ValidTermObj = {
         type: "ValidTerm",
         codeValue: subEObject.codeValue,
@@ -667,7 +640,6 @@ export var AimEditor = function (
       }
       var allowTermText = parent.codeMeaning;
       var selectHolder;
-      //console.log("valid term section : parent", parent); //editing
 
       if (control != "radioBtn") {
         if (validTermButtonClass != "ui") {
@@ -738,18 +710,12 @@ export var AimEditor = function (
     self.geoshapeidCounter++;
     GSDiv.id = "geoshape" + self.geoshapeidCounter;
     GSDiv.className = "mylbl";
-    //GSDiv.style.width = '200px';
-    // GSDiv.style.height = '20px';
-    // GSDiv.style.backgroundColor = 'white';
-    //GSDiv.style.color = 'black';
     GSDiv.innerHTML = "Required shape : " + object.GeometricShape;
     parentDiv.appendChild(GSDiv);
-    // console.log("shape " + JSON.stringify(object.id));
     self.templateShapeArray.push({
       shape: object.GeometricShape,
       domid: object.id,
     });
-    //document.getElementById( object.id).className = "green check circle outline icon";
   };
 
   this.AllowedTerm = function (
@@ -759,7 +725,6 @@ export var AimEditor = function (
     mapTagArray,
     parentTagTypeFromJson
   ) {
-    //console.log("allowed term object", parent);
     var athis = this;
     athis.parent = parent;
 
@@ -783,18 +748,14 @@ export var AimEditor = function (
     titleDiv.className = "title active";
     titleDiv.style.fontFamily = self.fontfamily;
     titleDiv.style.color = self.fontcolor; //editing
-    //uiAccordionDiv.style.fontWeight = self.fontweight; //editing
     titleDiv.style.fontSize = self.fontsize; //editing
     var titleI = document.createElement("i");
     titleI.className = "dropdown icon";
     var contentDiv = document.createElement("div");
-    //iconcav
+
     var iconI = document.createElement("i");
     iconI.id = parent.id;
     iconI.className = "";
-    // console.log("checking cardinalities for : ", lblTxt);
-    // console.log("cardinality -> min : ", parent.minCardinality);
-    // console.log("ae parent : -> obj : ", parent);
 
     if (parseInt(parent.minCardinality) <= 0) {
       try {
@@ -847,14 +808,6 @@ export var AimEditor = function (
     //selectDiv.multiple=true;
     selectDiv.id = "select" + maindiv;
 
-    // domelements[maindiv] = new Array(6);
-    // domelements[maindiv]["id"] = maindiv;
-    // domelements[maindiv]["label"] = parent.label;
-    // domelements[maindiv]["min"] = parent.minCardinality;
-    // domelements[maindiv]["max"] = parent.maxCardinality;
-    // domelements[maindiv]["selectedCnt"] = 0;
-    // domelements[maindiv]["selectVerification"] = false;
-
     let compObj = {
       id: parent.id,
       min: parent.minCardinality,
@@ -902,10 +855,8 @@ export var AimEditor = function (
       else subEObject = object;
       var ar;
       self.ids++;
-      //add global array
-      var NextId = "0";
 
-      //subEObject.cavit = "added by"
+      var NextId = "0";
       if (typeof subEObject.nextId != "undefined") {
         NextId = subEObject.nextId;
       }
@@ -937,10 +888,6 @@ export var AimEditor = function (
         parant: parent,
         allowterm: allowedTermObj,
       };
-      // this.mapAllowedTermCollectionByCodeValue.set(
-      //   allowedTermObj.codeValue,
-      //   unionPrntAlwtermObj
-      // ); not used
 
       if (subEObject.hasOwnProperty("keyShortCut")) {
         self.mapShortCutKeys.set(
@@ -956,9 +903,6 @@ export var AimEditor = function (
       AllowedTerm.push({
         AllowedTerm: allowedTermObj,
       });
-
-      //add global array
-      //mapTagArray.push( subEObject.codeMeaning);
 
       if (control != "radioBtn") {
         if (arrayLength > 4) {
@@ -1033,7 +977,6 @@ export var AimEditor = function (
         }
       }
 
-      // var el = domelements[domelements.length - 1];
       for (var key in subEObject) {
         if (typeof subEObject[key] == "object") {
           if (key == "ValidTerm") {
@@ -1098,7 +1041,6 @@ export var AimEditor = function (
     var _self = this;
     self.checkAnnotatorConfidence(parentDiv, object);
     self.checkIfCommentRequired(object, parentDiv);
-    //add global array
     var arrayLength = -1;
     let isArray = 0;
     if (Array.isArray(object)) {
@@ -1159,7 +1101,6 @@ export var AimEditor = function (
       arrayLength = 1;
     }
 
-    //console.log(JSON.stringify(object));
     var ImagingObservationCharacteristic = [];
     var i = 0;
     for (i = 0; i < arrayLength; i++) {
@@ -1186,7 +1127,6 @@ export var AimEditor = function (
 
       for (var key in subEObject) {
         if (typeof subEObject[key] == "object") {
-          //console.log("____________"+key);
           self[key](
             subEObject,
             subEObject[key],
@@ -1434,7 +1374,6 @@ export var AimEditor = function (
           );
         }
       }
-      // console.log("scale checking object", parent);
     }
     self.checkAnnotatorConfidence(parentDiv, parent);
   };
@@ -1461,7 +1400,6 @@ export var AimEditor = function (
       for (i = 0; i < scaleArraysize; i++) {
         if (object[i].valueLabel == this.value) {
           object[i].select = "1";
-          //self.mapHtmlSelectObjectsKeyValue.set(this.value, quantileSelect.id); not used
         } else {
           object[i].select = "0";
         }
@@ -1479,7 +1417,6 @@ export var AimEditor = function (
       arrayLength = 1;
     }
     var subEObject = null;
-    //self.checkAnnotatorConfidence(parentDiv,object);
     for (var i = 0; i < arrayLength; i++) {
       if (isArray === 1) subEObject = object[i];
       else subEObject = object;
@@ -1503,7 +1440,6 @@ export var AimEditor = function (
     mapTagArray,
     parentTagTypeFromJson
   ) {
-    // console.log("numerical parent :", "Select" + parent.name);
     var arrayLength = -1;
     var quantileDiv = document.createElement("div");
     quantileDiv.className = "mylbl";
@@ -1540,7 +1476,6 @@ export var AimEditor = function (
       arrayLength = 1;
     }
     var subEObject = null;
-    //self.checkAnnotatorConfidence(parentDiv, object);
     for (var i = 0; i < arrayLength; i++) {
       if (isArray === 1) subEObject = object[i];
       else subEObject = object;
@@ -1579,7 +1514,6 @@ export var AimEditor = function (
       arrayLength = 1;
     }
     var subEObject = null;
-    //self.checkAnnotatorConfidence(parentDiv, object);
     for (var i = 0; i < arrayLength; i++) {
       if (isArray === 1) subEObject = object[i];
       else subEObject = object;
@@ -1588,7 +1522,6 @@ export var AimEditor = function (
           self[key](subEObject, subEObject[key], parentDiv, mapTagArray, null);
         }
       }
-      // console.log("each quantile ", subEObject);
       var quantileDiv = document.createElement("div");
       quantileDiv.className = "mylbl";
       var quantileSelect = document.createElement("select");
@@ -1619,21 +1552,9 @@ export var AimEditor = function (
         }
         var i = 0;
         var scaleArraysize = object.length;
-        // console.log("quatile on select : ", object);
         object.selectedBin = this.selectedIndex + 1;
         object.select = 1;
         object.valueLabel = this.options[this.selectedIndex].value;
-        // for (i = 0; i < scaleArraysize; i++) {
-        //   var createFormValue =
-        //     self.mathOperators.get(object[i].operator) +
-        //     " " +
-        //     object[i].valueLabel +
-        //     " " +
-        //     object[i].ucumString;
-
-        //   if (createFormValue == this.value) object[i].select = "1";
-        //   else object[i].select = "0";
-        // }
       });
     }
     self.checkAnnotatorConfidence(parentDiv, parent);
@@ -1656,7 +1577,6 @@ export var AimEditor = function (
       arrayLength = 1;
     }
     var subEObject = null;
-    //self.checkAnnotatorConfidence(parentDiv, object);
     var intervalDiv = document.createElement("div");
     intervalDiv.className = "mylbl";
     var intervalSelect = document.createElement("select");
@@ -1731,7 +1651,6 @@ export var AimEditor = function (
       arrayLength = 1;
     }
     var subEObject = null;
-    //self.checkAnnotatorConfidence(parentDiv, object);
     for (var i = 0; i < arrayLength; i++) {
       if (isArray === 1) subEObject = object[i];
       else subEObject = object;
@@ -1758,7 +1677,6 @@ export var AimEditor = function (
   ) {
     var div = document.createElement("div");
     div.style.marginLeft = "20px";
-    //div.style.fontsize = self.fontsize;
     div.className = className;
     var label = document.createElement("label");
     label.textContent = lbl;
@@ -1825,9 +1743,7 @@ export var AimEditor = function (
             statusCheckAllowTermObject.endid
           );
       }
-      // console.log("allowedTermObj.getPrimitive(): ", allowedTermObj);
       if (allowedTermObj.getPrimitive().noMoreQuestions == "true") {
-        // console.log("nomore question situation : === true");
         self.DisableTillNext(prObject.id, "tillend", self.callDisable);
       }
 
@@ -1837,7 +1753,6 @@ export var AimEditor = function (
     this.getelementHtml = function () {
       return div;
     };
-    //self.mapHtmlObjects.set(allowedTermObj.codeValue, radioInput); not used
   };
   this.createRadioVT = function (
     prObject,
@@ -1878,7 +1793,7 @@ export var AimEditor = function (
       var getAllowTGroup = validTermObj.primitiveObjATSparent;
       var getAllowTGroupSize = getAllowTGroup.AllowedTerm.length;
       var i = 0;
-      //console.log("gettin alowed terms", getAllowTGroup);
+
       for (i = 0; i < getAllowTGroupSize; i++) {
         if (
           getAllowTGroup.AllowedTerm[i].codeValue !==
@@ -1928,13 +1843,10 @@ export var AimEditor = function (
       self.formCheckHandler(self.checkFormSaveReady());
     };
 
-    //document.addEventListener('click', this.check.bind(this) );
-
     this.getelementHtml = function () {
       return div;
     };
 
-    //self.mapHtmlObjects.set(allowedTermObj.codeValue, radioInput); not used
   };
 
   this.createOption = function (
@@ -1946,8 +1858,6 @@ export var AimEditor = function (
     lbl,
     allowedTermObj
   ) {
-    //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
-
     var div = document.createElement("div");
     div.style.marginLeft = "20px";
     div.className = className;
@@ -1966,7 +1876,6 @@ export var AimEditor = function (
     optionInput.name = name;
     optionInput.checked = checked;
     optionInput.value = lbl;
-    //div.appendChild(radioInput);
 
     div.appendChild(optionInput);
     optionInput.appendChild(square);
@@ -1995,7 +1904,6 @@ export var AimEditor = function (
         checkmarkObj.actualSelected++;
       }
 
-      // console.log("mapCardinalitiesToCheckId", self.mapCardinalitiesToCheckId);
       self.mapCardinalitiesToCheckId.set(prObject.id, checkmarkObj);
       if (
         checkmarkObj.actualSelected >= checkmarkObj.min &&
@@ -2009,7 +1917,6 @@ export var AimEditor = function (
       }
       //disable enable component seection
       if (allowedTermObj.nextId != "0" && this.selected == true) {
-        // console.log("next id catched", allowedTermObj.nextId);
         self.DisableTillNext(
           prObject.id,
           allowedTermObj.nextId,
@@ -2033,10 +1940,8 @@ export var AimEditor = function (
 
       if (allowedTermObj.getPrimitive().noMoreQuestions == "true") {
         if (this.checked == true) {
-          // console.log("nomore question situation : === true");
           self.DisableTillNext(prObject.id, "tillend", self.callDisable);
         } else {
-          // console.log("nomore question situation : === true");
           self.EnableTillNext(prObject.id, "tillend");
         }
       }
@@ -2099,15 +2004,11 @@ export var AimEditor = function (
 
       if (validTermObj.getPrimitive().select == "1") {
         prObject.select = "0";
-        //allowedTermObj.getPrimitive().select ='0';
         validTermObj.getPrimitive().select = "0";
-        //allowedTermObj.changeOnSelect('0',self.AfterClick(allowedTermObj));
         checkmarkObj.actualSelected--;
       } else {
         prObject.select = "1";
-        //allowedTermObj.getPrimitive().select ='1';
         validTermObj.getPrimitive().select = "1";
-        //allowedTermObj.changeOnSelect('1',self.AfterClick(allowedTermObj));
         checkmarkObj.actualSelected++;
       }
 
@@ -2139,8 +2040,6 @@ export var AimEditor = function (
     lbl,
     allowedTermObj
   ) {
-    //this.id = id.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
-
     var div = document.createElement("div");
     div.style.marginLeft = "20px";
     div.className = className;
@@ -2158,7 +2057,6 @@ export var AimEditor = function (
     checkbox.id = id;
     div.appendChild(checkbox);
     div.appendChild(label);
-    // document.getElementById(this.par).appendChild(div);
     this.getelementHtml = function () {
       return div;
     };
@@ -2196,20 +2094,8 @@ export var AimEditor = function (
         document.getElementById(prObject.id).className =
           "red check circle outline icon";
       }
-
-      // let allowedTermGroup = prObject.AllowedTerm;
-      // let clickedAllowedTermIndex = -1;
-      // for (let i = 0; i < allowedTermGroup.length; i++) {
-      //   console.log(allowedTermGroup[i].select);
-      //   if (allowedTermGroup[i].codeValue == allowedTermObj.codeValue) {
-      //     clickedAllowedTermIndex = i;
-      //   }
-      //   //Do something
-      // }
-
       //disable enable component seection
       if (allowedTermObj.nextId != "0" && checkbox.checked == true) {
-        // console.log("next id catched", allowedTermObj.nextId);
         self.DisableTillNext(
           prObject.id,
           allowedTermObj.nextId,
@@ -2233,10 +2119,8 @@ export var AimEditor = function (
 
       if (allowedTermObj.getPrimitive().noMoreQuestions == "true") {
         if (this.checked == true) {
-          // console.log("nomore question situation : === true");
           self.DisableTillNext(prObject.id, "tillend", self.callDisable);
         } else {
-          // console.log("nomore question situation : === true");
           self.EnableTillNext(prObject.id, "tillend");
         }
       }
@@ -2277,7 +2161,6 @@ export var AimEditor = function (
     checkbox.id = id;
     div.appendChild(checkbox);
     div.appendChild(label);
-    // document.getElementById(this.par).appendChild(div);
     this.getelementHtml = function () {
       return div;
     };
@@ -2319,15 +2202,7 @@ export var AimEditor = function (
     };
   };
 
-  // this.checkValidationTosave = function () {
-  //   for (var property1 in domelements) {
-  //     if (domelements[property1]["selectVerification"] == true)
-  //       console.log("true");
-  //     else console.log("false");
-  //   }
-  // };
   this.checkAnnotatorConfidence = function (prentDiv, objectToCheckAnnConf) {
-    //  console.log("checking annotator confidence for : ", objectToCheckAnnConf);
     let isMouseButtondown = false;
     if (typeof objectToCheckAnnConf.annotatorConfidence != "undefined") {
       // Assign value to the property here
@@ -2336,7 +2211,6 @@ export var AimEditor = function (
         objectToCheckAnnConf.hasOwnProperty("name")
       ) {
         if (objectToCheckAnnConf.annotatorConfidence == true) {
-          //console.log("after selecting template"+objectToCheckAnnConf.label);
 
           if (objectToCheckAnnConf.hasOwnProperty("label")) {
             var rangeid = objectToCheckAnnConf.label.replace(
@@ -2352,7 +2226,6 @@ export var AimEditor = function (
 
           self.mapLabelAnnotatorConfidence.set(rangeid, "inputRange" + rangeid);
           self.mapLabelAnnotConfJson.set(rangeid, objectToCheckAnnConf);
-          //console.log(rangeid);
           var annotConfDiv = document.createElement("div");
           var annotConfInput = document.createElement("input");
           annotConfInput.setAttribute("id", "range" + rangeid);
@@ -2405,7 +2278,6 @@ export var AimEditor = function (
             "ui input disabled small"
           );
           let confidenceText = document.createTextNode("Confidence level");
-          //loadButton.appendChild(loadButtonText);
           annotConfDiv.appendChild(annotConfInput);
           annotConfDiv.appendChild(annotConfShowValueInputDiv);
           annotConfShowValueInputDiv.appendChild(annotConfShowValueInput);
@@ -2418,7 +2290,6 @@ export var AimEditor = function (
 
   var disabledefined = [];
   this.DisableTillNext = function (actualid, nextid, call) {
-    // console.log("disable next called", nextid);
     let nextControl = 0;
     for (var [key, value] of self.mapCardinalitiesToCheckId) {
       if (key == actualid) {
@@ -2435,8 +2306,6 @@ export var AimEditor = function (
           document.getElementById(key).className =
             "blue check circle outline icon";
           let ely = document.getElementById(key).parentNode;
-          // console.log("disabling", ely.parentnode);
-          //$(ely.parentNode).dropdown({action: 'hide'});
           $(ely.parentNode).hide();
         } else nextControl = 0;
       }
@@ -2461,7 +2330,6 @@ export var AimEditor = function (
           document.getElementById(key).className =
             "green check circle outline icon";
           let ely = document.getElementById(key).parentNode;
-          // console.log("enabling", ely.parentNode);
           $(ely.parentNode).show();
         } else nextControl = 0;
       }
@@ -2470,9 +2338,6 @@ export var AimEditor = function (
   };
   this.callDisable = function () {
     for (var [key, value] of self.mapStatusAllowedTermBlocks) {
-      // console.log(
-      //   "mapStatusAllowedTermBlocks" + key + " = " + JSON.stringify(value)
-      // );
     }
   };
 
@@ -2488,7 +2353,6 @@ export var AimEditor = function (
   this.solveAimCompnent = function (object) {};
 
   this.AfterClick = function (obj) {
-    //alert():
   };
 
   this.printXmlAim = function (data, xmlArray) {
@@ -2509,12 +2373,63 @@ export var AimEditor = function (
   ) {};
 
   this.saveQuestionType = function (
-    parentArray,
     parentObject,
     itself,
     Entitytype,
     jsonInner
-  ) {};
+  ) {
+          var QuestionTypes = itself.value;
+          let i = 0;
+          let arraySizeforAllowedTerms = -1;
+          let arrayCheckForAllowedTerms = false;
+          let instanceAllowedTerms = null;
+
+          if (Array.isArray(QuestionTypes)) {
+            arraySizeforAllowedTerms = QuestionTypes.length;
+            arrayCheckForAllowedTerms = true;
+          } else {
+            arraySizeforAllowedTerms = 1;
+          }
+          let jsonAllowedTerm = {
+            questionTypeCode: [],
+          };
+
+          if (!jsonInner.hasOwnProperty("questiontypes")) jsonInner.questiontypes = [];
+
+          for (i = 0; i < arraySizeforAllowedTerms; i++) {
+            if (arrayCheckForAllowedTerms == true) {
+              instanceAllowedTerms = QuestionTypes[i];
+            } else {
+              instanceAllowedTerms = QuestionTypes;
+            }
+                  let questionObj = {
+                      code: instanceAllowedTerms.codeValue,
+                      codeSystemName: instanceAllowedTerms.codingSchemeDesignator,
+                      codeSystemVersion: 'instanceAllowedTerms.codingSchemeVersion',
+                      "iso:displayName": {
+                        value: instanceAllowedTerms.codeMeaning,
+                        "xmlns:iso": "uri:iso.org:21090",
+                      },
+                    }
+                  jsonAllowedTerm.questionTypeCode.push(questionObj);
+
+            
+          }
+          if (self.emptyJson(jsonAllowedTerm)) {
+            if (parentObject.type === "Component") {
+
+              jsonAllowedTerm['label'] = {
+                "value":  parentObject.value.label
+              }
+              jsonInner.questiontypes.push(jsonAllowedTerm);
+            } else {
+              jsonAllowedTerm['label'] = {
+                "value":  parentObject.value.label
+              }
+              jsonInner.push(jsonAllowedTerm);
+            }
+          }
+  };
 
   this.saveAlgorithmType = function (
     parentArray,
@@ -2569,7 +2484,6 @@ export var AimEditor = function (
     } else {
       arraySize = 1;
     }
-    // console.log("numerical parent object", parentObject);
     let anotconf = 0.0;
     if (typeof parentObject.value.selectac !== "undefined") {
       anotconf = parentObject.value.selectac;
@@ -2609,7 +2523,6 @@ export var AimEditor = function (
         type: "Numerical",
         value: instanceObject,
       };
-      // console.log("numerical instance object", instanceObject);
       if (i == 0) {
         defaultSelectedValueLabel = instanceObject.valueLabel;
         defaultSelectedOperator = instanceObject.operator;
@@ -2746,7 +2659,6 @@ export var AimEditor = function (
     } else {
       arraySize = 1;
     }
-    // console.log("numerical parent object", parentObject);
     let anotconf = 0.0;
     if (typeof parentObject.value.selectac !== "undefined") {
       anotconf = parentObject.value.selectac;
@@ -2783,7 +2695,6 @@ export var AimEditor = function (
         type: "Numerical",
         value: instanceObject,
       };
-      // console.log("numerical instance object", instanceObject);
       if (i == 0) {
         defaultSelectedValueLabel = instanceObject.valueLabel;
         defaultSelectedBins = parseInt(instanceObject.bins);
@@ -2840,7 +2751,6 @@ export var AimEditor = function (
     if (typeof parentObject.value.selectac !== "undefined") {
       anotconf = parentObject.value.selectac;
     }
-    // console.log("anotconf".anotconf);
     let jsonCharacteristicQuantification = {
       "xsi:type": "Numerical",
       operator: "",
@@ -2872,7 +2782,6 @@ export var AimEditor = function (
         type: "Numerical",
         value: instanceObject,
       };
-      // console.log("numerical instance object", instanceObject);
       if (i == 0) {
         defaultSelectedValue = parseFloat(instanceObject.value);
         defaultSelectedValueLabel = instanceObject.valueLabel;
@@ -2902,7 +2811,6 @@ export var AimEditor = function (
   };
 
   this.saveScaleLevel = function (parentObject, itself, Entitytype, jsonInner) {
-    //jsonInner["xsi:type"] = parentObject.value.scaleType;
     jsonInner["type"] = parentObject.value.scaleType;
     let prntObject = null;
 
@@ -3047,7 +2955,6 @@ export var AimEditor = function (
       } else {
         instanceObject = CharacteristicQuantifications;
       }
-      // console.log("%c CharacteristicQuantifications : "+JSON.stringify(instanceObject),'background:  #068b00; color: white; display: block;');
       let prntObject = {
         type: "CharacteristicQuantification",
         value: instanceObject,
@@ -3059,9 +2966,6 @@ export var AimEditor = function (
             type: key,
             value: instanceObject[key],
           };
-
-          //console.log("@@@@@@@@ car quant : "+key);
-
           //parentHolder -> each component creates it's own copy of the array and passes to the next object
           //componentOpject is the parent object for the callee
           //is the callee object
@@ -3076,7 +2980,6 @@ export var AimEditor = function (
       }
     }
 
-    //if (Object.keys(jsoncharacteristicQuantification).length > 0)
     jsonInner.characteristicQuantificationCollection.push(
       tempjson.CharacteristicQuantification
     );
@@ -3088,7 +2991,6 @@ export var AimEditor = function (
     Entitytype,
     jsonInner
   ) {
-    // console.log("%c __ imaging observation header before: " + JSON.stringify(jsonInner),  'background:  #df9800; color: white; display: block;');
     if (!jsonInner.hasOwnProperty("imagingObservationEntityCollection"))
       jsonInner.imagingObservationEntityCollection = [];
     let jsonImagingObservationEntity = {};
@@ -3098,7 +3000,6 @@ export var AimEditor = function (
       Entitytype,
       jsonInner.imagingObservationEntityCollection
     );
-    //console.log("%c __ imaging observation header after: " + JSON.stringify(jsonInner),  'background: #df9800; color: white; display: block;');
   };
 
   this.saveImagingObservationCharacteristic = function (
@@ -3107,7 +3008,6 @@ export var AimEditor = function (
     Entitytype,
     jsonInner
   ) {
-    //console.log("%c saveImagingObservationCharacteristic - jsonInner before " + JSON.stringify(jsonInner) ,  'background: green; color: white; display: block;');
     let prntObject = null;
     let ImagingObservationCharacteristics = itself;
     let arraySize = -1;
@@ -3121,8 +3021,6 @@ export var AimEditor = function (
     }
     let tempjson = {};
     tempjson.imagingObservationCharacteristicCollection = [];
-    //console.log("XXX ___  itself : im ob char : " + JSON.stringify(itself));
-
     var i = 0;
     for (i = 0; i < arraySize; i++) {
       if (arrayCheck === true) {
@@ -3139,16 +3037,13 @@ export var AimEditor = function (
       let commentvalue = "";
       if (instanceObject.hasOwnProperty("commentSelect")) {
         commentvalue = instanceObject.commentSelect;
-        //console.log("commment on save "+JSON.stringify(instanceObject));
       }
       for (var key in instanceObject) {
-        if (key != "QuestionType") {
           if (typeof instanceObject[key] === "object") {
             let subObject = {
               type: key,
               value: instanceObject[key],
             };
-
             self["save" + key](
               prntObject,
               subObject,
@@ -3156,9 +3051,8 @@ export var AimEditor = function (
               tempjson.imagingObservationCharacteristicCollection
             );
           }
-        }
       }
-
+      
       if (commentvalue !== "") {
         let lastImObCharColl =
           tempjson.imagingObservationCharacteristicCollection[
@@ -3167,12 +3061,8 @@ export var AimEditor = function (
         lastImObCharColl["comment"] = { value: commentvalue };
         commentvalue = "";
       }
-      //after for loop
     }
     jsonInner.push(tempjson);
-    // console.log("%c saveImagingObservationCharacteristic - jsonInner after " + JSON.stringify(jsonInner) ,  'background: green; color: white; display: block;');
-
-    //jsonInner.imagingObservationCharacteristicCollection = imagingObservationCharacteristicCollection;
   };
 
   this.emptyJson = function (obj) {
@@ -3186,7 +3076,6 @@ export var AimEditor = function (
     Entitytype,
     jsonInner
   ) {
-    //console.log("%c __ anatomic entity header before: " + JSON.stringify(jsonInner),  'background:  #8b0087; color: white; display: block;');
     if (!jsonInner.hasOwnProperty("imagingPhysicalEntityCollection"))
       jsonInner.imagingPhysicalEntityCollection = [];
     let jsonImagingPhysicalEntity = {};
@@ -3197,7 +3086,6 @@ export var AimEditor = function (
       jsonInner.imagingPhysicalEntityCollection
     );
 
-    //console.log("%c __ anatomic entity header after: " + JSON.stringify(jsonInner),  'background:  #8b0087; color: white; display: block;');
   };
 
   this.saveAnatomicEntityCharacteristic = function (
@@ -3222,8 +3110,6 @@ export var AimEditor = function (
 
     let tempjson = {};
     tempjson.imagingPhysicalEntityCharacteristicCollection = [];
-
-    // console.log("a e char :" + JSON.stringify(jsonInner));
     for (i = 0; i < arraySize; i++) {
       let jsonAllowedTerms = {};
 
@@ -3242,12 +3128,10 @@ export var AimEditor = function (
 
       if (instanceObject.hasOwnProperty("commentSelect")) {
         commentvalue = instanceObject.commentSelect;
-        //console.log("commment on save "+JSON.stringify(instanceObject));
       }
       for (var key in instanceObject) {
         if (typeof instanceObject[key] === "object") {
-          if (key != "QuestionType") {
-            //alert(key);
+
             let subObject = {
               type: key,
               value: instanceObject[key],
@@ -3259,10 +3143,9 @@ export var AimEditor = function (
               Entitytype,
               tempjson.imagingPhysicalEntityCharacteristicCollection
             );
-          }
         }
       }
-
+      
       if (commentvalue !== "") {
         var lastImPhyCharColl =
           tempjson.imagingPhysicalEntityCharacteristicCollection[
@@ -3281,7 +3164,6 @@ export var AimEditor = function (
     Entitytype,
     jsonInner
   ) {
-    // console.log("allowed terms : " + JSON.stringify(itself));
 
     var AllowedTerms = itself.value;
     let i = 0;
@@ -3324,8 +3206,6 @@ export var AimEditor = function (
 
       if (instanceAllowedTerms.hasOwnProperty("select")) {
         if (instanceAllowedTerms.select == "1") {
-          //console.log("%c each at comp itself "+JSON.stringify(instanceAllowedTerms),'background: gray; color: white; display: block;');
-          //alert(parentObject.type);
           let anotconf = "";
           if (typeof parentObject.value.selectac !== "undefined") {
             anotconf = parentObject.value.selectac;
@@ -3351,7 +3231,6 @@ export var AimEditor = function (
               value: parentObject.value.label,
             },
           };
-          // console.log("-------" + parentObject.value.selectac);
 
           for (var key in instanceAllowedTerms) {
             if (typeof instanceAllowedTerms[key] == "object") {
@@ -3373,15 +3252,10 @@ export var AimEditor = function (
               );
             }
           }
-          //console.log("%c allow "+JSON.stringify(jsonAllowedTerm),  'background: blue; color: white; display: block;');
-          //jsonAllowedTerms.push(jsonAllowedTerm);
           if (self.emptyJson(jsonAllowedTerm)) {
             if (parentObject.type === "Component") {
-              //console.log("AT adding to component : " + JSON.stringify(jsonAllowedTerm));
               jsonInner.allowedterms.push(jsonAllowedTerm);
             } else {
-              //	console.log("AT adding to type : "+ parentObject.type);
-              // console.log("AT adding to  ImagingObservationCharacteristicCollection : " + parentObject.type + " : " + JSON.stringify(jsonAllowedTerm));
               jsonInner.push(jsonAllowedTerm);
             }
           }
@@ -3391,7 +3265,6 @@ export var AimEditor = function (
   };
 
   this.saveValidTerm = function (parentObject, itself, Entitytype, jsonInner) {
-    //console.log("%c valid term begin  : " + JSON.stringify(jsonInner),'background: #8b0000; color: white; display: block;');
 
     let prntObject = null;
 
@@ -3415,12 +3288,6 @@ export var AimEditor = function (
     let tempTypecode = jsonInner.typeCode;
     jsonInner.typeCode = [];
     jsonInner.typeCode.push(tempTypecode);
-    // console.log("**********************************************");
-    // console.log("**********************************************");
-    // console.log("**********************************************");
-    // console.log("**********************************************");
-    // console.log("valid term saving section code checkk");
-    // console.log("temptype code :--->", tempTypecode);
 
     for (i = 0; i < arraySize; i++) {
       if (arrayCheck == true) {
@@ -3434,7 +3301,6 @@ export var AimEditor = function (
         value: instanceObject,
       };
       if (i == 0 && arraySize == 1) {
-        // console.log("valid term instance object", instanceObject);
         defaultCodeValue = instanceObject.codeValue;
         defaultCodingSchemeDesignator = instanceObject.codingSchemeDesignator;
         defaultCodingSchemeVersion = instanceObject.codingSchemeVersion;
@@ -3442,7 +3308,6 @@ export var AimEditor = function (
       } else {
         if (instanceObject.hasOwnProperty("select")) {
           if (instanceObject.select == "1") {
-            // console.log("valid term instance object selecetd", instanceObject);
             defaultCodeValue = instanceObject.codeValue;
             defaultCodingSchemeDesignator =
               instanceObject.codingSchemeDesignator;
@@ -3462,18 +3327,15 @@ export var AimEditor = function (
             "xmlns:iso": "uri:iso.org:21090",
           },
         };
-        // console.log("json valid term before push", jsonValidTerm);
         if (Array.isArray(jsonInner.typeCode)) {
           jsonInner.typeCode[0].push(jsonValidTerm);
         } else {
           jsonInner.typeCode.push(jsonValidTerm);
         }
-        //jsonInner.typeCode[0].push(jsonValidTerm); //edited to be compatible with array to fix the error xml->json (json creates array)
         defaultCodeMeaning = "";
       }
     }
 
-    //console.log("%c valid term end  : " + JSON.stringify(jsonInner),'background: #8b0000; color: white; display: block;');
   };
 
   this.traverseComponentsToSave = function (o, jsonComponents) {
@@ -3496,8 +3358,9 @@ export var AimEditor = function (
 
     for (i = 0; i < arraySizeforComponents; i++) {
       jsonInner = {};
-      if (arrayCheckForComponents === true) instanceComponent = Components[i];
-      else instanceComponent = Components;
+      if (arrayCheckForComponents === true) {
+        instanceComponent = Components[i];
+      }else instanceComponent = Components;
 
       let componentObject = {
         type: "Component",
@@ -3525,10 +3388,7 @@ export var AimEditor = function (
 
       keyorder[fix] = keyorder[0];
       keyorder[0] = "AllowedTerm";
-
-      let counter = 0;
-
-      for (counter; counter < keyorder.length; counter++) {
+      for (let counter = 0; counter < keyorder.length; counter++) {
         if (typeof instanceComponent[keyorder[counter]] == "object") {
           let subObject = {
             type: keyorder[counter],
@@ -3541,6 +3401,7 @@ export var AimEditor = function (
           //Entitytype is used if the allowed term is connected directly to the component to define image or physical entity etc..
 
           try {
+
             self["save" + keyorder[counter]](
               componentObject,
               subObject,
@@ -3552,7 +3413,6 @@ export var AimEditor = function (
           }
         }
       }
-      //console.log("%c ____each comp json:" + JSON.stringify(jsonInner),'background: #a75d4d; color: white; display: block;');
       if (Object.keys(jsonInner).length > 0) {
         jsonParent.innerjsons.push(jsonInner);
         jsonInner = {};
@@ -3560,16 +3420,11 @@ export var AimEditor = function (
     }
 
     jsonComponents.innerjsons = jsonParent.innerjsons;
-
-    //console.log("beforechanging afer json jsonComponents:"+JSON.stringify(jsonComponents));
     return jsonComponents;
   };
 
   this.saveAim = function () {
-    // console.log(
-    //   "____________save aim : self.jsonTemplateCopy" +
-    //     JSON.stringify(self.jsonTemplateCopy)
-    // );
+
     var jsonComponents = {};
     var finaljson = {};
     var mainHolder = [];
@@ -3578,7 +3433,6 @@ export var AimEditor = function (
       self.jsonTemplateCopy,
       jsonComponents
     );
-    //console.log("____________whole comps :"+JSON.stringify(jsonComponents));
 
     /* rules : if there are more than 1 allowed terms directly connected to the components one of them goes under characteristic quantification, the rest goes as 
          entity elements.
@@ -3596,13 +3450,17 @@ export var AimEditor = function (
 
     for (index = 0; index < innerJsonCount; index++) {
       var eachInnerJson = jsonComponents.innerjsons[index];
-      //console.log("^^^^^^^ ddddd eachinner json  :"+JSON.stringify(eachInnerJson));
       var keys = Object.keys(eachInnerJson);
-      //console.log("^^^^^^^ kkkk keys  :"+keys );
-      //console.log("^^^^^^^ llllll keys.length  :"+keys.length);
-      if (keys.length >= 2) {
-        //findout next component
-        switch (keys[1]) {
+
+      let modifiedKeysForAT = [...keys];
+      let indexLocation = modifiedKeysForAT.indexOf('questiontypes');
+      if (indexLocation > -1) {
+        modifiedKeysForAT.splice(indexLocation, 1);
+       }
+
+
+      if (modifiedKeysForAT.length >= 2) {
+        switch (modifiedKeysForAT[1]) {
           case "imagingObservationEntityCollection":
             nextComptype = "imagingObservationEntityCollection";
             break;
@@ -3610,14 +3468,12 @@ export var AimEditor = function (
             nextComptype = "imagingPhysicalEntityCollection";
             break;
           default:
-          // code block
         }
 
         let directATlength = eachInnerJson["allowedterms"].length;
 
         if (directATlength > 0) {
           if (directATlength >= 1) {
-            //console.log("ae > 1");
             //add allowed terms to the next component
             if (eachInnerJson[nextComptype].length > 0) {
               var n;
@@ -3659,7 +3515,6 @@ export var AimEditor = function (
               delete eachInnerJson["allowedterms"];
             }
           } else {
-            //console.log("ae ==1");
             eachInnerJson[nextComptype] = eachInnerJson["allowedterms"];
             delete eachInnerJson["allowedterms"];
           }
@@ -3667,13 +3522,79 @@ export var AimEditor = function (
           delete eachInnerJson["allowedterms"];
         }
       }
-      // console.log("################ before adding to final json  eachInnerJson:"+JSON.stringify(eachInnerJson));
-      // console.log("################ before adding to final json  finaljson:"+JSON.stringify(finaljson));
-      // console.log("warning");
+
+      let modifiedKeysForQT = [...keys];
+      let indexLocationQT = modifiedKeysForQT.indexOf('allowedterms');
+      if (indexLocationQT > -1) {
+       modifiedKeysForQT.splice(indexLocationQT, 1);
+       }
+
+
+      if (modifiedKeysForQT.length >= 2) {
+        switch (modifiedKeysForQT[1]) {
+          case "imagingObservationEntityCollection":
+            nextComptype = "imagingObservationEntityCollection";
+            break;
+          case "imagingPhysicalEntityCollection":
+            nextComptype = "imagingPhysicalEntityCollection";
+            break;
+          default:
+        }
+
+        let directQTlength = eachInnerJson["questiontypes"].length;
+
+        if (directQTlength > 0) {
+          if (directQTlength >= 1) {
+
+            if (eachInnerJson[nextComptype].length > 0) {
+              var n;
+              for (n = 0; n < directQTlength; n++) {
+
+                if (n < directQTlength - 1) {
+                  eachInnerJson[nextComptype].push(
+                    eachInnerJson["questiontypes"][n]
+                  );
+                } else {
+                  var innerkeys = Object.keys(eachInnerJson[nextComptype][0]);
+
+                  if (innerkeys.length == 0) {
+                  } else {
+                    if (
+                      innerkeys[0] ==
+                        "ImagingPhysicalEntityCharacteristicCollection" ||
+                      "imagingObservationCharacteristicCollection"
+                    ) {
+                      var tempMergeJsons = {};
+                      tempMergeJsons = eachInnerJson[nextComptype][0];
+                      Object.assign(
+                        tempMergeJsons,
+                        eachInnerJson["questiontypes"][directQTlength - 1]
+                      );
+                    } else {
+                      eachInnerJson[nextComptype].push(
+                        eachInnerJson["questiontypes"][directQTlength - 1]
+                      );
+                    }
+                  }
+                }
+              }
+              delete eachInnerJson["questiontypes"];
+              nextInnerCompCount = 1;
+            } else {
+              eachInnerJson[nextComptype] = eachInnerJson["questiontypes"];
+              delete eachInnerJson["questiontypes"];
+            }
+          } else {
+            eachInnerJson[nextComptype] = eachInnerJson["questiontypes"];
+            delete eachInnerJson["questiontypes"];
+          }
+        } else {
+          delete eachInnerJson["questiontypes"];
+        }
+      }
       var eachImOB = "";
       var eachImPhy = "";
       if (eachInnerJson.hasOwnProperty("imagingObservationEntityCollection")) {
-        //console.log("each inner json has imagingObservationEntityCollection + "+JSON.stringify(eachInnerJson['imagingObservationEntityCollection']));
         if (
           typeof eachInnerJson["imagingObservationEntityCollection"] !==
           "undefined"
@@ -3681,23 +3602,18 @@ export var AimEditor = function (
           eachImOB = eachInnerJson["imagingObservationEntityCollection"];
           if (mapFinalJsonTags.get("imagingObservationEntityCollection")) {
             if (eachImOB != "" && typeof eachImOB != "undefined") {
-              //console.log("%c !!!! each comp json: final has it" + JSON.stringify(eachImOB),'background: #ffbb33; color: white; display: block;');
               var mergeJson = [];
-              //console.log("push "+eachImOB);
               mergeJson = finaljson[
                 "imagingObservationEntityCollection"
               ].concat(eachImOB);
-              //console.log("merge json "+JSON.stringify(mergeJson));
               finaljson["imagingObservationEntityCollection"] = [...mergeJson];
               eachImOB = "";
             }
           } else {
             if (eachImOB != "" && typeof eachImOB != "undefined") {
-              //console.log("%c !!!! each comp json:final empty" + JSON.stringify(eachImOB),'background: #ffbb33; color: white; display: block;');
               finaljson["imagingObservationEntityCollection"] =
                 eachInnerJson["imagingObservationEntityCollection"];
               mapFinalJsonTags.set("imagingObservationEntityCollection", 1);
-              //console.log("################ after  adding to final json  finaljson was empty:"+JSON.stringify(finaljson));
               eachImOB = "";
             }
           }
@@ -3718,7 +3634,6 @@ export var AimEditor = function (
               eachImPhy = "";
             }
           } else {
-            //var temp
             if (eachImPhy != "" && typeof eachImPhy != "undefined") {
               finaljson["imagingPhysicalEntityCollection"] =
                 eachInnerJson["imagingPhysicalEntityCollection"];
@@ -3728,16 +3643,9 @@ export var AimEditor = function (
           }
         }
       }
-      // console.log("after warning eachImPhy"+eachImPhy);
-      // console.log("after warning eachImOB"+eachImOB);
-      // console.log("final json  warning finaljjjj"+JSON.stringify(finaljson));
     }
     self.addUid(finaljson);
     finaljson = self.replaceTagNamingHierarchy(finaljson);
-    // console.log(
-    //   "save aim sending to react from aim editor : " + JSON.stringify(finaljson)
-    // );
-
     return finaljson;
   };
   this.addButtonsDiv = function (divforbuttons) {
@@ -3749,17 +3657,12 @@ export var AimEditor = function (
     saveButton.appendChild(saveButtonText);
     saveButton.onclick = function () {
       var savedAimJson = self.saveAim();
-      //console.log("  Returning json to react after saving :"+(JSON.stringify(savedAimJson)));
     };
     let loadButton = document.createElement("Button");
     let loadButtonText = document.createTextNode("load");
     loadButton.appendChild(loadButtonText);
     loadButton.onclick = function () {
-      /*presaved aims variables
-            recistSavedAim
-            aimjsonBeauLieuBoneTemplate_rev18
-         */
-      // self.loadAimJson(recist_resaved);
+ 
     };
 
     parentDiv.appendChild(saveButton);
@@ -3788,7 +3691,7 @@ export var AimEditor = function (
   };
 
   this.checkAnnotationShapes = function (prmtrShapeArray) {
-    //self.templateShapeArray.push({"shape":object.GeometricShape, "domid" : object.id});
+
     if (typeof prmtrShapeArray === "undefined") {
       return;
     }
@@ -3797,22 +3700,10 @@ export var AimEditor = function (
     let prmtrShapeArrayLength = prmtrShapeArray.length;
     let templateShapeArrayLength = self.templateShapeArray.length;
 
-    // cavit now
-    //  {
-    //   Line: {
-    //     validate: ""
-    //   },
-    //   Circle: {
-    //     validate: ""
-    //   }
-    // }
-    //  self.runtimeUserShapes
     for (let k = 0; k < prmtrShapeArrayLength; k++) {
-      // this.mapShapesSchemaToTemplate.set("TwoDimensionMultiPoint", [{"formshape" : 'Line'}, {"formshape" : 'Perpendicular'}]);
       let jsonShapeObj = self.mapShapesSchemaToTemplate.get(prmtrShapeArray[k]);
       if (Array.isArray(jsonShapeObj)) {
         for (let n = 0; n < jsonShapeObj.length; n++) {
-          //  Object.assign(obj, { jsonShapeObj[n].formshape : "value3"});
           self.runtimeUserShapes[jsonShapeObj[n].formshape] = { validate: "" };
         }
       } else {
@@ -3823,11 +3714,9 @@ export var AimEditor = function (
         for (let t = 0; t < templateShapeArrayLength; t++) {
           if (self.templateShapeArray[t].shape === "AnyShape") {
             anyShapeFlag = true;
-            // console.log("on load aim any Shape is true here ");
           }
           if (self.templateShapeArray[t].shape === "AnyClosedShape") {
             anyClosedShapeFlag = true;
-            // console.log("on load aim any closed Shape is true here ");
           }
           for (let j = 0; j < jsonShapeObj.length; j++) {
             if (
@@ -3856,28 +3745,14 @@ export var AimEditor = function (
           }
         }
       } else {
-        // console.log("-------- not an array ");
-        //let templateShapeArrayLength = self.templateShapeArray.length;
         for (let t = 0; t < templateShapeArrayLength; t++) {
           if (self.templateShapeArray[t].shape === "AnyShape") {
             anyShapeFlag = true;
-            // console.log("on load aim any Shape is true here ");
           }
           if (self.templateShapeArray[t].shape === "AnyClosedShape") {
             anyClosedShapeFlag = true;
-            // console.log("on load aim any closed Shape is true here ");
           }
-          // console.log(
-          //   self.templateShapeArray[t].shape +
-          //     ": shape equal ? " +
-          //     jsonShapeObj.formshape
-          // );
           if (self.templateShapeArray[t].shape === jsonShapeObj.formshape) {
-            // console.log(
-            //   self.templateShapeArray[t].shape +
-            //     ": shape equal ? " +
-            //     jsonShapeObj.formshape
-            // );
             document.getElementById(
               self.templateShapeArray[t].domid
             ).className = "green check circle outline icon";
@@ -3901,7 +3776,6 @@ export var AimEditor = function (
         }
       }
     }
-    //document.getElementById( object.id).className = "green check circle outline icon";
     self.formCheckHandler(self.checkFormSaveReady());
   };
 
@@ -3919,13 +3793,11 @@ export var AimEditor = function (
 
         self.mapLabelSubComment.set(annoCommentDomid, annoCommentDomid);
         self.mapLabelCommentJson.set(annoCommentDomid, object); //changing
-        //console.log("comment true"+object.label);
 
         var req = document.createElement("div");
         var label = document.createElement("label");
         label.textContent = "Comment";
 
-        //console.log("coment for subs"+JSON.stringify(object));
         let textaDomObject = document.createElement("textarea");
         textaDomObject.style.color = "black";
         textaDomObject.style.width = "100%";
@@ -3943,7 +3815,7 @@ export var AimEditor = function (
       }
     }
   };
-  //degistir
+  //change
   this.traverseJsonOnLoad = function (jsonObj) {
     let label = "";
 
@@ -3955,7 +3827,6 @@ export var AimEditor = function (
           let arrayIndex = -1;
           let arraySize = -1;
 
-          // console.log("CharacteristicQuantification", value);
           if (Array.isArray(CharQuantArray)) {
             arrayCheck = true;
             arraySize = CharQuantArray.length;
@@ -3969,11 +3840,6 @@ export var AimEditor = function (
             } else {
               eachCharactQuantfObj = CharQuantArray;
             }
-            // console.log("eachCharactQuantfObj", eachCharactQuantfObj);
-            // console.log(
-            //   "eachCharactQuantfObj",
-            //   eachCharactQuantfObj["xsi:type"]
-            // );
             let chartQuantfType = eachCharactQuantfObj["xsi:type"];
             switch (chartQuantfType) {
               case "Scale":
@@ -3984,7 +3850,6 @@ export var AimEditor = function (
                 ]);
                 break;
               case "NonQuantifiable":
-                // console.log("NonQuantifiable", eachCharactQuantfObj);
                 $(
                   "#Select" + eachCharactQuantfObj.label.value
                 ).dropdown("set selected", [
@@ -3992,7 +3857,6 @@ export var AimEditor = function (
                 ]);
                 break;
               case "Numerical":
-                // console.log("Numerical", eachCharactQuantfObj);
                 $(
                   "#Select" + eachCharactQuantfObj.label.value
                 ).dropdown("set selected", [
@@ -4004,7 +3868,6 @@ export var AimEditor = function (
                 ]);
                 break;
               case "Quantile":
-                // console.log("Quantile", eachCharactQuantfObj);
                 $(
                   "#Select" + eachCharactQuantfObj.label.value
                 ).dropdown("set selected", [
@@ -4013,7 +3876,6 @@ export var AimEditor = function (
 
                 break;
               case "Interval":
-                // console.log("Interval", eachCharactQuantfObj);
                 $(
                   "#Select" + eachCharactQuantfObj.label.value
                 ).dropdown("set selected", [
@@ -4021,10 +3883,7 @@ export var AimEditor = function (
                 ]);
                 break;
               default:
-              // code block
             }
-
-            // console.log("each char quantf object :", eachCharactQuantfObj);
           }
         }
 
@@ -4088,7 +3947,6 @@ export var AimEditor = function (
               } else {
                 if (docElement.checked != true) {
                   docElement.click();
-                  //docElement.checked = true;
                 }
               }
             }
@@ -4106,8 +3964,6 @@ export var AimEditor = function (
             );
 
             if (typeof returnAnnotConfDomId != "undefined") {
-              //console.log("Annotator condifidence section:"+annotatorConflabel);
-              //console.log("Annotator condifidence value:"+jsonObj['annotatorConfidence']['value']);
               let showannoConfDomid = "range" + annotatorConflabel;
               document.getElementById(returnAnnotConfDomId).value =
                 value.value * 100;
@@ -4155,44 +4011,10 @@ export var AimEditor = function (
     }
   };
 
-  /*switched to partial parsing follow with other loadAimJson
 
-      this.loadAimJson = function (aimjson) {
-      //console.log("____________load aim json :"+JSON.stringify(aimjson));
-      var ImageAnnotation = aimjson.imageAnnotations.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
-      var imagingObservationEntityCollection = ImageAnnotation.imagingObservationEntityCollection;
-      var imagingPhysicalEntityCollection = ImageAnnotation.imagingPhysicalEntityCollection
-
-      var comment = aimjson.imageAnnotations.ImageAnnotationCollection.imageAnnotations.ImageAnnotation.comment.value;
-      var annotationName = aimjson.imageAnnotations.ImageAnnotationCollection.imageAnnotations.ImageAnnotation.name.value;
-
-
-
-      var commentArray = comment.split("~~");
-      document.getElementById("comment").value = commentArray[1];
-      self.aimComment = commentArray[1];
-
-      var annotationNameArray = annotationName.split("~");
-      document.getElementById("annotationName").value = annotationNameArray[0];
-      self.aimName = annotationNameArray[0];
-
-      var modality = commentArray[0].split("/");
-      self.aimType = modality[0];
-
-
-      self.traverseJsonOnLoad(imagingPhysicalEntityCollection);
-      self.traverseJsonOnLoad(imagingObservationEntityCollection);
-      //self.printMap(self.mapLabelAnnotatorConfidence);
-      //self.printMap(self.mapLabelAnnotConfJson);
-      //self.printMap(self.mapLabelCommentJson);
-
-   }
-   */
   this.checkShapes = function (shapes) {
-    // console.log("check shapes called");
-    //if (self.loadingAimFlag === false) {
+
     let shapeKeys = Object.keys(shapes);
-    //alert(shapeKeys);
     let shapeKeysLength = 0;
     let runtimeUserShapesAll = Object.keys(self.runtimeUserShapes);
     //alert(runtimeUserShapesAll);
@@ -4220,13 +4042,6 @@ export var AimEditor = function (
     const newShapes = {Circle, Polyline, Line, Perpendicular};
     */
 
-      /*
-     self.templateShapeArray.push({
-      shape: object.GeometricShape,
-      domid: object.id,
-    });
-     */
-
       /* impoertant note if there are multiple geometric shape component exist in a template 
       or relation will be applied 
     */
@@ -4244,37 +4059,9 @@ export var AimEditor = function (
       }
       if (templateShapeLength > 0) {
         let arryDiffernce = "";
-        //const tempateShapeKeys = [];
-
         let geoTemplateConditionDom = null;
         for (let cnt = 0; cnt < templateShapeLength; cnt++) {
-          //tempateShapeKeys.push(self.templateShapeArray[cnt].shape);
-          //**
-          // if (localShapes.hasOwnProperty(self.templateShapeArray[cnt].shape)) {
-          //   console.log("before dom lcoalshapes:", localShapes);
-          //   console.log(
-          //     "before dom templateShapeArray:",
-          //     self.templateShapeArray
-          //   );
-          //   //  localShapes[self.templateShapeArray[cnt].shape].validate = "ok";
-          //   geoTemplateConditionDom = document.getElementById(
-          //     self.templateShapeArray[cnt].domid
-          //   );
-          //   if (geoTemplateConditionDom !== null) {
-          //     document.getElementById(
-          //       self.templateShapeArray[cnt].domid
-          //     ).className = "green check circle outline icon";
-          //   }
-          // } else {
-          //   geoTemplateConditionDom = document.getElementById(
-          //     self.templateShapeArray[cnt].domid
-          //   );
-          //   if (geoTemplateConditionDom !== null) {
-          //     document.getElementById(
-          //       self.templateShapeArray[cnt].domid
-          //     ).className = "red check circle outline icon";
-          //   }
-          // }
+
           arryDiffernce = Object.keys(localShapes).filter(
             (eachShape) => eachShape !== self.templateShapeArray[cnt].shape
           );
@@ -4300,28 +4087,7 @@ export var AimEditor = function (
               if (linePos > -1) arryDiffernce.splice(linePos, 1);
             }
 
-            // console.log("arryDiffernce : ", arryDiffernce);
-            // if (
-            //   localShapes.hasOwnProperty("Line") ||
-            //   localShapes.hasOwnProperty("Perpendicular")
-            // ) {
-            //   perpPos = arryDiffernce.indexOf("Perpendicular");
-            //   linePos = arryDiffernce.indexOf("Line");
-            //   if (perpPos > -1 || linePos > -1) {
-            //     if (geoTemplateConditionDom !== null) {
-            //       document.getElementById(
-            //         self.templateShapeArray[cnt].domid
-            //       ).className = "green check circle outline icon";
-            //     }
-            //     if (perpPos > -1) {
-            //       arryDiffernce.splice(perpPos, 1);
-            //     }
-            //     if (linePos > -1) {
-            //       linePos = arryDiffernce.indexOf("Line");
-            //       arryDiffernce.splice(linePos, 1);
-            //     }
-            //   }
-            // }
+
             if (arryDiffernce.length > 0) {
               if (geoTemplateConditionDom !== null) {
                 document.getElementById(
@@ -4353,7 +4119,6 @@ export var AimEditor = function (
             anyShapeFlag = false;
           }
           if (anyClosedShapeFlag === true) {
-            //  const shapeKeys = Object.keys(localShapes);
             arryDiffernce = Object.keys(localShapes).filter(
               (eachShape) => !self.anyClosedShapeTypes.includes(eachShape)
             );
@@ -4378,7 +4143,6 @@ export var AimEditor = function (
     self.formCheckHandler(self.checkFormSaveReady());
   };
   this.loadAimJson = function (aimjson, isRecist) {
-    //var ImageAnnotation = aimjson.imageAnnotations.ImageAnnotationCollection.imageAnnotations.ImageAnnotation;
 
     //test
     // example test case const test = { circle : {count : 5, validate:""} , line:  {count : 5, validate:""}  };
@@ -4390,9 +4154,6 @@ export var AimEditor = function (
 
     let aimjsonCopy = aimjson;
     self.loadingAimFlag = true;
-    // if (typeof isRecist !== "undefined") {
-    //   self.isRecistFlag = true;
-    // }
 
     self.activateDirtyCheck = false;
     var templateIndex = self.mapTemplateCodeValueByIndex.get(
@@ -4400,9 +4161,9 @@ export var AimEditor = function (
     );
 
     if (typeof templateIndex === "undefined") {
-      //  self.activateDirtyCheck = true;
 
       return 1;
+
     } else {
       self.templateSelect.selectedIndex = templateIndex + 1;
       let evObj = document.createEvent("Events");
@@ -4413,12 +4174,9 @@ export var AimEditor = function (
         aimjsonCopy.imagingObservationEntityCollection;
       var imagingPhysicalEntityCollection =
         aimjsonCopy.imagingPhysicalEntityCollection;
-      //console.log("xxxx_"+JSON.stringify(imagingObservationEntityCollection))
       var comment = aimjsonCopy.comment.value;
       var annotationName = aimjsonCopy.name.value;
       self.aimTypeCode = aimjsonCopy.typeCode;
-      // console.log("comment" + comment);
-      // console.log("comment" + annotationName);
       if (comment.includes("~")) {
         var commentArray = comment.split("~~");
         document.getElementById("comment").value = commentArray[1];
@@ -4448,10 +4206,6 @@ export var AimEditor = function (
       if (typeof isRecist === "undefined" || isRecist === null) {
         self.checkAnnotationShapes(aimjsonCopy.markupType);
       }
-      //self.printMap(self.mapLabelAnnotatorConfidence);
-      //self.printMap(self.mapLabelAnnotConfJson);
-      //self.printMap(self.mapLabelCommentJson);
-      //self.activateDirtyCheck = true;
 
       self.loadingAimFlag = false;
 
@@ -4465,19 +4219,6 @@ export var AimEditor = function (
 
   this.disableRecistSections = function () {
     // disable for recist
-    //alert(document.getElementById("DropLocation").childNodes[0].className);
-    //alert(document.getElementById("annotationName").parentElement.className);
-    // document.getElementById("allowedTermType").click = function(event) {
-    //   // do something special here
-
-    //   // then cancel event bubbling
-    //   event.stopPropagation();
-    // }mousedown Type-S72 S71
-    // document.getElementById("Type-S71").disabled = true;
-    // document.getElementById("Type-S72").disabled = true;
-    // document.getElementById("Type-S73").disabled = true;
-    // document.getElementById("Type-S74").disabled = true;
-    // alert(document.getElementById("allowedTermType").childNodes.length);
     let recistAllChildNodes = document.getElementById("allowedTermType")
       .childNodes;
     for (let cntRdios = 0; cntRdios < recistAllChildNodes.length; cntRdios++) {
@@ -4638,12 +4379,10 @@ export var AimEditor = function (
       aimJson.imagingPhysicalEntityCollection = {
         ImagingPhysicalEntity: tempJson,
       };
-      //console.log("%c %%% _ temp json _ %%%% " + JSON.stringify(tempJson),'background: #453dc2; color: white; display: block;');
     }
     if (aimJson.hasOwnProperty("imagingObservationEntityCollection")) {
       tempJson = aimJson["imagingObservationEntityCollection"];
 
-      //first check if there are chrachteristics under imagingPhysicalEntityCollection
 
       for (let i = 0; i < tempJson.length; i++) {
         if (
@@ -4680,24 +4419,13 @@ export var AimEditor = function (
       aimJson.imagingObservationEntityCollection = {
         ImagingObservationEntity: tempJson,
       };
-      //console.log("%c %%% _ temp json _ %%%% " + JSON.stringify(tempJson),'background: #453dc2; color: white; display: block;');
     }
-    /*
-            imagingObservationEntityCollection - > ImagingObservationEntity
-            imagingPhysicalEntityCollection - > ImagingPhysicalEntity
-            imagingObservationCharacteristicCollection -> ImagingObservationCharacteristic
-            imagingPhysicalCharacteristicCollection -> ImagingPhysicalCharacteristic
-            characteristicQuantificationCollection -> CharacteristicQuantification
-            
-         */
 
     return aimJson;
   };
 
   this.printMap = function (varmap) {
-    //console.log("Printing map------------------------------------------");
     for (var [key, value] of varmap) {
-      //console.log("______"+key + ' = ' + JSON.stringify(value));
     }
   };
 

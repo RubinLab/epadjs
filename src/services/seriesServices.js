@@ -1,53 +1,50 @@
 import http from "./httpService";
-const apiUrl = sessionStorage.getItem("apiUrl");
-const mode = sessionStorage.getItem("mode");
-const wadoUrl = sessionStorage.getItem("wadoUrl");
 
 export function getSeries(projectId, subjectId, studyId) {
-  if (mode === "lite")
+  if (http.mode() === "lite")
     return http.get(
-      apiUrl +
+      http.apiUrl() +
         "/projects/lite/subjects/" +
-        subjectId +
+        encodeURIComponent(subjectId) +
         "/studies/" +
-        studyId +
+        encodeURIComponent(studyId) +
         "/series?&filterDSO=true"
     );
   else
     return http.get(
-      apiUrl +
+      http.apiUrl() +
         "/projects/" +
-        projectId +
+        encodeURIComponent(projectId) +
         "/subjects/" +
-        subjectId +
+        encodeURIComponent(subjectId) +
         "/studies/" +
-        studyId +
+        encodeURIComponent(studyId) +
         "/series?filterDSO=true"
     );
 }
 export function getImageIds(series) {
-  if (mode === "lite") {
+  if (http.mode() === "lite") {
     return http.get(
-      apiUrl +
+      http.apiUrl() +
         "/projects/lite/subjects/" +
-        series.patientID +
+        encodeURIComponent(series.patientID) +
         "/studies/" +
-        series.studyUID +
+        encodeURIComponent(series.studyUID) +
         "/series/" +
-        series.seriesUID +
+        encodeURIComponent(series.seriesUID) +
         "/images"
     );
   } else {
     return http.get(
-      apiUrl +
+      http.apiUrl() +
         "/projects/" +
-        series.projectID +
+        encodeURIComponent(series.projectID) +
         "/subjects/" +
-        series.patientID +
+        encodeURIComponent(series.patientID) +
         "/studies/" +
-        series.studyUID +
+        encodeURIComponent(series.studyUID) +
         "/series/" +
-        series.seriesUID +
+        encodeURIComponent(series.seriesUID) +
         "/images"
     );
   }
@@ -55,13 +52,14 @@ export function getImageIds(series) {
 
 //  seems like this doesn"t belong to here but olny services know details about paths&server side
 export function getWadoImagePath(studyUid, seriesUid, imageId) {
+  const wadoUrl = http.wadoUrl();
   if (wadoUrl.includes("wadors"))
     return (
       wadoUrl +
       "/studies/" +
-      studyUid +
+      encodeURIComponent(studyUid) +
       "/series/" +
-      seriesUid +
+      encodeURIComponent(seriesUid) +
       "/instances/" +
       imageId
     );
@@ -69,9 +67,9 @@ export function getWadoImagePath(studyUid, seriesUid, imageId) {
     return (
       wadoUrl +
       "/?requestType=WADO&studyUID=" +
-      studyUid +
+      encodeURIComponent(studyUid) +
       "&seriesUID=" +
-      seriesUid +
+      encodeURIComponent(seriesUid) +
       "&objectUID=" +
       imageId
     );
@@ -80,27 +78,27 @@ export function getWadoImagePath(studyUid, seriesUid, imageId) {
 // replace the uri path with rs for now. we should be able to handle both somehow
 export function getWadoRSImagePath(studyUid, seriesUid, imageId) {
   return (
-    wadoUrl +
+    http.wadoUrl() +
     "/studies/" +
-    studyUid +
+    encodeURIComponent(studyUid) +
     "/series/" +
-    seriesUid +
+    encodeURIComponent(seriesUid) +
     "/instances/" +
     imageId
   );
 }
 
 export function getImageArrayBuffer(path) {
-  let url = wadoUrl + path;
+  let url = http.wadoUrl() + path;
   url = url.replace("wadouri:", "");
   return http.get(url, { responseType: "arraybuffer" });
 }
 export function downloadSeries(projectID, body) {
   projectID = projectID || "lite";
   const url =
-    apiUrl +
+    http.apiUrl() +
     "/projects/" +
-    projectID +
+    encodeURIComponent(projectID) +
     "/series/download" +
     "?format=stream&includeAims=true";
   return http.post(url, body, { responseType: "blob" });
@@ -117,15 +115,15 @@ export function getSegmentation(series, imageId) {
 export function deleteSeries(series, delSys) {
   const { projectID, patientID, studyUID, seriesUID } = series;
   const url =
-    apiUrl +
+    http.apiUrl() +
     "/projects/" +
-    projectID +
+    encodeURIComponent(projectID) +
     "/subjects/" +
-    patientID +
+    encodeURIComponent(patientID) +
     "/studies/" +
-    studyUID +
+    encodeURIComponent(studyUID) +
     "/series/" +
-    seriesUID +
+    encodeURIComponent(seriesUID) +
     delSys;
   return http.delete(url);
 }
@@ -138,13 +136,13 @@ export function saveSeries(
   description
 ) {
   const url =
-    apiUrl +
+    http.apiUrl() +
     "/projects/" +
-    projectID +
+    encodeURIComponent(projectID) +
     "/subjects/" +
-    subjectID +
+    encodeURIComponent(subjectID) +
     "/studies/" +
-    studyID +
+    encodeURIComponent(studyID) +
     "/series/" +
     abbreviation;
 
@@ -155,7 +153,11 @@ export function uploadFileToSeries(formData, config, series) {
   let { projectID, subjectID, studyUID, seriesUID } = series;
   projectID = projectID || "lite";
   subjectID = subjectID ? subjectID : series.patientID;
-  const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/series/${seriesUID}/files`;
+  const url = `${http.apiUrl()}/projects/${encodeURIComponent(
+    projectID
+  )}/subjects/${encodeURIComponent(subjectID)}/studies/${encodeURIComponent(
+    studyUID
+  )}/series/${encodeURIComponent(seriesUID)}/files`;
   return http.post(url, formData, config);
 }
 
@@ -168,20 +170,40 @@ export function updateTagsOfSeries(
   applyStudy,
   body
 ) {
-  const url = `${apiUrl}/projects/${projectID}/subjects/${subjectID}/studies/${studyUID}/series/${seriesUID}?editTags=true&applyPatient=${applyPatient}&applyStudy=${applyStudy}`;
+  const url = `${http.apiUrl()}/projects/${encodeURIComponent(
+    projectID
+  )}/subjects/${encodeURIComponent(subjectID)}/studies/${encodeURIComponent(
+    studyUID
+  )}/series/${encodeURIComponent(
+    seriesUID
+  )}?editTags=true&applyPatient=${applyPatient}&applyStudy=${applyStudy}`;
   return http.put(url, body);
 }
 
 export function getSingleSeries(projectId, subjectId, studyUID, seriesUID) {
   return http.get(
-    apiUrl +
+    http.apiUrl() +
       "/projects/" +
-      projectId +
+      encodeURIComponent(projectId) +
       "/subjects/" +
-      subjectId +
+      encodeURIComponent(subjectId) +
       "/studies/" +
-      studyUID +
+      encodeURIComponent(studyUID) +
       "/series/" +
-      seriesUID
+      encodeURIComponent(seriesUID)
   );
+}
+
+export function setSignificantSeries(projectId, subjectId, studyUID, body) {
+  const url =
+    http.apiUrl() +
+    "/projects/" +
+    encodeURIComponent(projectId) +
+    "/subjects/" +
+    encodeURIComponent(subjectId) +
+    "/studies/" +
+    encodeURIComponent(studyUID) +
+    "/significantSeries";
+
+  return http.put(url, body);
 }

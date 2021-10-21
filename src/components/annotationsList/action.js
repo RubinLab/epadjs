@@ -181,12 +181,8 @@ export const displaySingleAim = (
 };
 
 export const selectPatient = (selectedPatientObj) => {
-  let {
-    projectID,
-    subjectName,
-    numberOfAnnotations,
-    index,
-  } = selectedPatientObj;
+  let { projectID, subjectName, numberOfAnnotations, index } =
+    selectedPatientObj;
   projectID = projectID ? projectID : "lite";
   const patientID = selectedPatientObj.subjectID;
   return {
@@ -237,6 +233,7 @@ export const selectSerie = (selectedSerieObj, studyDescription) => {
     patientName,
     seriesDescription,
     numberOfAnnotations,
+    examType,
   } = selectedSerieObj;
 
   return {
@@ -251,6 +248,7 @@ export const selectSerie = (selectedSerieObj, studyDescription) => {
       seriesDescription,
       studyDescription,
       numberOfAnnotations,
+      examType,
     },
   };
 };
@@ -258,7 +256,8 @@ export const selectSerie = (selectedSerieObj, studyDescription) => {
 export const selectAnnotation = (
   selectedAnnotationObj,
   studyDescription,
-  seriesDescription
+  seriesDescription,
+  examType
 ) => {
   const {
     aimID,
@@ -278,22 +277,17 @@ export const selectAnnotation = (
 
   return {
     type: SELECT_ANNOTATION,
-
     annotation: {
       aimID,
-
       seriesUID,
-
       studyUID,
-
       subjectID,
-
       projectID,
-
       patientName,
       name,
       studyDescription,
       seriesDescription,
+      examType
     },
   };
 };
@@ -440,7 +434,7 @@ const getAimListFields = (aims, ann) => {
         : "study";
 
       let aimName =
-        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].name
+        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]?.name
           .value;
       let ind = aimName.indexOf("~");
       if (ind >= 0) {
@@ -482,8 +476,10 @@ const getAimListFields = (aims, ann) => {
         isDisplayed: displayStatus,
         showLabel: true,
         cornerStoneTools: [],
-        color,
+        // color,
         type,
+        imgAimUID,
+        markupColor,
       };
     });
     return result;
@@ -508,6 +504,8 @@ const getRequiredFields = (arr, type, selectedID) => {
           studyUID,
           patientID,
           projectID,
+          significanceOrder,
+          examType,
         } = element;
         projectID = projectID ? projectID : "lite";
         const isDisplayed = seriesUID === selectedID || selectedID === studyUID;
@@ -519,6 +517,8 @@ const getRequiredFields = (arr, type, selectedID) => {
           patientID,
           projectID,
           isDisplayed,
+          significanceOrder,
+          examType,
         };
         result[seriesUID] = obj;
       } else {

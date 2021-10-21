@@ -7,16 +7,22 @@ axios.defaults.headers.common["Content-Type"] =
   "application/json, multipart/form-data";
 
 axios.interceptors.request.use(
-  async config => {
+  async (config) => {
     // initializeKeyCloak();
+    const apikey = sessionStorage.getItem("API_KEY");
+    const user = sessionStorage.getItem("username");
+    if (apikey && user) {
+      config.params = {};
+      config.params["user"] = user;
+    }
     const header = await auth.getAuthHeader();
     if (header) config.headers.authorization = header;
     return config;
   },
-  error => Promise.reject(error)
+  (error) => Promise.reject(error)
 );
 
-axios.interceptors.response.use(null, error => {
+axios.interceptors.response.use(null, (error) => {
   console.log("ERROR::");
   console.log(error);
   // console.log("ERROR::", error.response.data);
@@ -41,9 +47,24 @@ axios.interceptors.response.use(null, error => {
   return Promise.reject(error);
 });
 
+function apiUrl() {
+  return sessionStorage.getItem("apiUrl");
+}
+
+function wadoUrl() {
+  return sessionStorage.getItem("wadoUrl");
+}
+
+function mode() {
+  return sessionStorage.getItem("mode");
+}
+
 export default {
   get: axios.get,
   post: axios.post,
   put: axios.put,
   delete: axios.delete,
+  apiUrl,
+  wadoUrl,
+  mode,
 };

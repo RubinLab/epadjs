@@ -42,7 +42,13 @@ import {
   SEG_UPLOAD_COMPLETED,
   SEG_UPLOAD_REMOVE,
   AIM_DELETE,
+  colors,
+  commonLabels,
 } from "./types";
+import {
+  persistColorInSaveAim,
+  persistColorInDeleteAim,
+} from "../../Utils/aid";
 import { MdSatellite } from "react-icons/md";
 const initialState = {
   openSeries: [],
@@ -87,12 +93,8 @@ const asyncReducer = (state = initialState, action) => {
         updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
         return { ...state, openSeries: updatedOpenSeries };
       case GET_NOTIFICATIONS:
-        const {
-          uploadedPid,
-          lastEventId,
-          refresh,
-          notificationAction,
-        } = action.payload;
+        const { uploadedPid, lastEventId, refresh, notificationAction } =
+          action.payload;
         return {
           ...state,
           uploadedPid,
@@ -222,12 +224,30 @@ const asyncReducer = (state = initialState, action) => {
           }
         }
 
+        const newDataKeys = Object.keys(action.payload.aimsData);
+        const stateKeys = state.aimsList[action.payload.serID]
+          ? Object.keys(state.aimsList[action.payload.serID])
+          : [];
+
+        const colorAimsList =
+          newDataKeys.length >= stateKeys.length
+            ? persistColorInSaveAim(
+                state.aimsList[action.payload.serID] || {},
+                action.payload.aimsData,
+                colors
+              )
+            : persistColorInDeleteAim(
+                state.aimsList[action.payload.serID] || {},
+                action.payload.aimsData,
+                colors
+              );
+
         const result = Object.assign({}, state, {
           loading: false,
           error: false,
           aimsList: {
             ...state.aimsList,
-            [action.payload.ref.seriesUID]: action.payload.aimsData,
+            [action.payload.ref.seriesUID]: colorAimsList,
           },
           openSeries: imageAddedSeries,
         });
@@ -490,10 +510,15 @@ const asyncReducer = (state = initialState, action) => {
         };
       case ADD_TO_GRID:
         const seriesInfo = { ...action.reference };
-        seriesInfo.projectName =
-          state.projectMap[seriesInfo.projectID].projectName;
-        seriesInfo.defaultTemplate =
-          state.projectMap[seriesInfo.projectID].defaultTemplate;
+        const { projectMap } = state;
+        if (projectMap[seriesInfo.projectID]) {
+          seriesInfo.projectName = projectMap[seriesInfo.projectID].projectName;
+          seriesInfo.defaultTemplate =
+            projectMap[seriesInfo.projectID].defaultTemplate;
+        } else {
+          seriesInfo.projectName = "lite";
+          seriesInfo.defaultTemplate = null;
+        }
         let newOpenSeries = state.openSeries.concat(seriesInfo);
 
         return {

@@ -8,7 +8,7 @@ import "../menuStyle.css";
 const baseToolBar = ({ onAdd, onDelete, selected }) => {
   return (
     <div className="basic-toolbar">
-      <div onClick={onAdd} className="tool-icon">
+      <div onClick={onAdd} className="tool-icon" id="addNew-icon">
         <FaPlusCircle
           data-tip="New Project"
           data-tip
@@ -22,6 +22,7 @@ const baseToolBar = ({ onAdd, onDelete, selected }) => {
       <div
         onClick={onDelete}
         className={selected ? "tool-icon" : "hide-delete "}
+        id="delete-icon"
       >
         <FaRegTrashAlt
           className="tool-icon"

@@ -22,7 +22,12 @@ class ParametersWindow extends React.Component {
       parameterFormElements: {
         plugindbid: props.pluginid,
         paramid: "",
+        refreshdicoms:"0",
         name: "",
+        sendname: "0",
+        sendparamtodocker:"1",
+        uploadimages:"0",
+        uploadaims:"0",
         format: "",
         prefix: "",
         inputBinding: "",
@@ -57,26 +62,46 @@ class ParametersWindow extends React.Component {
       });
     }
   };
-
   handleFormElementChange = (e) => {
     const plElements = { ...this.state.parameterFormElements };
-    if (e.currentTarget.name != "enabled") {
-      plElements[e.currentTarget.name] = e.currentTarget.value;
+    console.log('before : ',this.state.parameterFormElements) ;
+    if (e.currentTarget.name != "sendname"  && e.currentTarget.name != "uploadimages" &&
+    e.currentTarget.name != "uploadaims" && e.currentTarget.name != "sendparamtodocker" && e.currentTarget.name != "refreshdicoms") {
+      if (e.currentTarget.name === "paramid"){
+        plElements[e.currentTarget.name] = e.currentTarget.value;
+        plElements["format"] = "select";
+      }else{
+        plElements[e.currentTarget.name] = e.currentTarget.value;
+      
+      
+      }
     } else {
-      plElements[e.currentTarget.name] = e.currentTarget.checked;
+      if (e.currentTarget.checked){
+        plElements[e.currentTarget.name] = "1";
+      }else{
+        plElements[e.currentTarget.name] = "0";
+      }
+     
     }
     //console.log("form elements : ", this.state.pluginFormElements);
     console.log(e.currentTarget.name, ": value : ", e.currentTarget.value);
-    if (e.currentTarget.name === "enabled") {
+    if (e.currentTarget.name === "sendname") {
       console.log(e.currentTarget.name, ": target : ", e.currentTarget.checked);
     }
     this.setState({ parameterFormElements: plElements });
+    console.log('after : ',this.state.parameterFormElements) ;
   };
+
   showAddForm = () => {
     const tempParameterFormElements = {
       plugindbid: this.props.pluginid,
       paramid: "",
+      refreshdicoms:"0",
       name: "",
+      sendname: "0",
+      sendparamtodocker: "1",
+      uploadimages:"0",
+      uploadaims:"0",
       format: "",
       prefix: "",
       inputBinding: "",
@@ -173,6 +198,11 @@ class ParametersWindow extends React.Component {
       paramdbid: rowInfo.original.id,
       paramid: rowInfo.original.paramid,
       name: rowInfo.original.name,
+      sendname: String(rowInfo.original.sendname),
+      uploadimages:String(rowInfo.original.uploadimages),
+      uploadaims:String(rowInfo.original.uploadaims),
+      sendparamtodocker : String(rowInfo.original.sendparamtodocker),
+      refreshdicoms: String(rowInfo.original.refreshdicoms),
       format: rowInfo.original.format,
       prefix: rowInfo.original.prefix,
       inputBinding: rowInfo.original.inputBinding,
@@ -224,6 +254,7 @@ class ParametersWindow extends React.Component {
   defineParametersTableColumns = () => {
     return [
       {
+        id: "id",
         Header: "id",
         accessor: "paramid",
         sortable: true,
@@ -232,14 +263,7 @@ class ParametersWindow extends React.Component {
         width: 70,
       },
       {
-        Header: "Name",
-        accessor: "name",
-        sortable: true,
-        resizable: true,
-        minResizeWidth: 50,
-        width: 70,
-      },
-      {
+        id: "format",
         Header: "format",
         accessor: "format",
         sortable: true,
@@ -248,14 +272,25 @@ class ParametersWindow extends React.Component {
         width: 100,
       },
       {
-        Header: "prefix",
-        accessor: "prefix",
+        id :"value",
+        Header: "value",
+        accessor: "default_value",
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
         width: 100,
       },
       {
+        id: "name",
+        Header: "Name",
+        accessor: "name",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 50,
+        width: 70,
+      },
+      {
+        id: "inputbinding",
         Header: "inputbinding",
         accessor: "inputBinding",
         sortable: true,
@@ -264,15 +299,125 @@ class ParametersWindow extends React.Component {
         width: 100,
       },
       {
-        Header: "value",
-        accessor: "default_value",
+        id : "refreshdicoms",
+        Header: "refresh dicoms",
+        accessor: "refreshdicoms",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 50,
+        width: 70,
+        Cell: (data) => {
+          console.log("me",data.original);
+          if (data.original.refreshdicoms === 1){
+            return (
+              "yes"
+            );
+          }else{
+            return (
+              "no"
+            );
+          }
+        },
+      },
+      {
+        id : "sendparam",
+        Header: "send param to docker",
+        accessor: "sendparamtodocker",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 50,
+        width: 70,
+        Cell: (data) => {
+          console.log("me",data.original);
+          if (data.original.sendparamtodocker === 1){
+            return (
+              "yes"
+            );
+          }else{
+            return (
+              "no"
+            );
+          }
+
+        },
+      },
+      {
+        id: "sendname",
+        Header: "send name",
+        accessor: "sendname",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 50,
+        width: 70,
+        Cell: (data) => {
+          console.log("me",data.original);
+          if (data.original.sendname === 1){
+            return (
+              "yes"
+            );
+          }else{
+            return (
+              "no"
+            );
+          }
+
+        },
+      },
+      {
+        id: "uploadimages",
+        Header: "upload images",
+        accessor: "uploadimages",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 50,
+        width: 70,
+        Cell: (data) => {
+          console.log("me",data.original);
+          if (data.original.uploadimages === 1){
+            return (
+              "yes"
+            );
+          }else{
+            return (
+              "no"
+            );
+          }
+
+        },
+      },
+      {
+        id:"uploadaims",
+        Header: "upload aims",
+        accessor: "uploadaims",
+        sortable: true,
+        resizable: true,
+        minResizeWidth: 50,
+        width: 70,
+        Cell: (data) => {
+          console.log("me",data.original);
+          if (data.original.uploadaims === 1){
+            return (
+              "yes"
+            );
+          }else{
+            return (
+              "no"
+            );
+          }
+
+        },
+      },
+      {
+        id: "prefix",
+        Header: "prefix",
+        accessor: "prefix",
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
         width: 100,
       },
-
       {
+        id:"type",
         Header: "type",
         accessor: "type",
         sortable: true,
@@ -282,6 +427,7 @@ class ParametersWindow extends React.Component {
       },
 
       {
+        id: "desciption",
         Header: "description",
         accessor: "description",
         sortable: true,
@@ -290,6 +436,7 @@ class ParametersWindow extends React.Component {
         width: 100,
       },
       {
+        id:"deleteone",
         Header: "",
         Cell: (data) => {
           //const rowdata = original.row.checkbox;
@@ -329,9 +476,15 @@ class ParametersWindow extends React.Component {
         dicoms
       </option>
     );
+
     options.push(
       <option key="paramaters" name="parameters" value="parameters">
         parameters
+      </option>
+    );
+    options.push(
+      <option key="dockeroptions" name="dockeroptions" value="dockeroptions">
+        docker options
       </option>
     );
 
@@ -344,26 +497,74 @@ class ParametersWindow extends React.Component {
         select
       </option>
     );
-    options.push(
-      <option key="InputFolder" name="InputFolder" value="InputFolder">
-        InputFolder
-      </option>
-    );
-    options.push(
-      <option key="InputFile" name="InputFile" value="InputFile">
-        InputFile
-      </option>
-    );
-    options.push(
-      <option key="OutputFolder" name="OutputFolder" value="OutputFolder">
-        OutputFolder
-      </option>
-    );
-    options.push(
-      <option key="Parameters" name="Parameters" value="Parameters">
-        parameters
-      </option>
-    );
+    switch (this.state.parameterFormElements.paramid) {
+      case "output":
+        options.push(
+          <option key="OutputFolder" name="OutputFolder" value="OutputFolder">
+            output folder
+          </option>
+        );
+        options.push(
+          <option key="OutputFile" name="OutputFile" value="OutputFile">
+            output file
+          </option>
+        );
+        break;
+      case "aims":
+        options.push(
+          <option key="InputFolder" name="InputFolder" value="InputFolder">
+            input folder
+          </option>
+        );
+        options.push(
+          <option key="InputFile" name="InputFile" value="InputFile">
+            input file
+          </option>
+        );
+        break;
+      case "dicoms":
+        options.push(
+          <option key="InputFolder" name="InputFolder" value="InputFolder">
+            input folder
+          </option>
+        );
+        options.push(
+          <option key="InputFile" name="InputFile" value="InputFile">
+            input file
+          </option>
+        );
+        break;
+      case "parameters":
+        options.push(
+          <option key="Parameters" name="Parameters" value="Parameters">
+            parameters
+          </option>
+        );
+        break;
+      case "dockeroptions":
+        options.push(
+          <option key="sharedram" name="sharedram" value="sharedram">
+            shared ram
+          </option>
+        );
+        options.push(
+          <option key="driver" name="driver" value="driver">
+            driver
+          </option>
+        );
+        options.push(
+          <option key="deviceids" name="deviceids" value="deviceids">
+            device ids
+          </option>
+        );
+        options.push(
+          <option key="capabilities" name="capabilities" value="capabilities">
+            capabilities
+          </option>
+        );
+        break;
+      default:
+    }
 
     return options;
   };
@@ -378,14 +579,14 @@ class ParametersWindow extends React.Component {
       //  <option key="ParamaterValue" name="Parameter" value="Value">
       //  text : Parameter Value -> Directory
       <option key="ParamaterValue" name="Parameter" value="Directory">
-        Directory
+        directory
       </option>
     );
     options.push(
       //
       //  text : Parameter Name/Value -> File
       <option key="Parameters" name="Parameter" value="File">
-        File
+        file
       </option>
     );
 
@@ -407,6 +608,7 @@ class ParametersWindow extends React.Component {
             <div className="plugin_parameter_window_modal_body">
               {!this.state.addnew && (
                 <ReactTable
+                  NoDataComponent={() => null}
                   className="pro-table"
                   data={this.state.defaultParameterList.data}
                   columns={this.defineParametersTableColumns()}
@@ -428,7 +630,9 @@ class ParametersWindow extends React.Component {
                 <div className="plugin_parameter_window_modal_addnew">
                   <h5>add new parameter</h5>
                   <form className="plugin_parameter_window_modal_form">
-                    <h5 className="plugin_parameter_window_modal_label">id*</h5>
+                    <h5 className="plugin_parameter_window_modal_label">
+                      type*
+                    </h5>
                     <select
                       className="pluginaddqueueselect"
                       id="paramid"
@@ -439,6 +643,50 @@ class ParametersWindow extends React.Component {
                     >
                       {this.prepareDropDownHtmlForParameterIds()}
                     </select>
+                    {this.state.parameterFormElements.paramid === "dicoms" && this.state.parameterFormElements.refreshdicoms === "0" &&
+                      <div><h5>refresh patient images</h5><input
+                      //onMouseDown={(e) => e.stopPropagation()}
+                      className="parameter_window_modal_label"
+                      name="refreshdicoms"
+                      type="checkbox"
+                      onChange={this.handleFormElementChange}
+                      id="refreshdicoms"
+                      value={this.state.parameterFormElements.refreshdicoms}
+                    /></div>}
+                      {this.state.parameterFormElements.paramid === "dicoms" && this.state.parameterFormElements.refreshdicoms === "1" &&
+                      <div><h5>refresh patient images</h5><input
+                      //onMouseDown={(e) => e.stopPropagation()}
+                      className="parameter_window_modal_label"
+                      name="refreshdicoms"
+                      type="checkbox"
+                      onChange={this.handleFormElementChange}
+                      id="refreshdicoms"
+                      value={this.state.parameterFormElements.refreshdicoms}
+                      checked
+                    /></div>}
+                    {this.state.parameterFormElements.paramid === "parameters" && this.state.parameterFormElements.sendparamtodocker === "0" &&
+                      <div><h5>Send parameter to docker</h5><input
+                      //onMouseDown={(e) => e.stopPropagation()}
+                      className="parameter_window_modal_label"
+                      name="sendparamtodocker"
+                      type="checkbox"
+                      onChange={this.handleFormElementChange}
+                      id="sendparamtodocker"
+                      value={this.state.parameterFormElements.sendparamtodocker}
+                    /></div>}
+                      {this.state.parameterFormElements.paramid === "parameters" && this.state.parameterFormElements.sendparamtodocker === "1" &&
+                      <div><h5>Send parameter to docker</h5><input
+                      //onMouseDown={(e) => e.stopPropagation()}
+                      className="parameter_window_modal_label"
+                      name="sendparamtodocker"
+                      type="checkbox"
+                      onChange={this.handleFormElementChange}
+                      id="sendparamtodocker"
+                      value={this.state.parameterFormElements.sendparamtodocker}
+                      checked
+                    /></div>}
+
+
                     <h5 className="parameter_window_modal_label">Name</h5>
                     <input
                       onMouseDown={(e) => e.stopPropagation()}
@@ -449,6 +697,30 @@ class ParametersWindow extends React.Component {
                       id="form-first-element"
                       value={this.state.parameterFormElements.name}
                     />
+
+                    {this.state.parameterFormElements.sendname === "1" && 
+                      <div><h5>Send name as parameter</h5><input
+                      //onMouseDown={(e) => e.stopPropagation()}
+                      className="parameter_window_modal_label"
+                      name="sendname"
+                      type="checkbox"
+                      onChange={this.handleFormElementChange}
+                      id="sendname"
+                      value={this.state.parameterFormElements.sendname}
+                      checked
+                    /></div>}
+                    {this.state.parameterFormElements.sendname === "0" && 
+                      <div><h5>Send name as parameter</h5><input
+                      //onMouseDown={(e) => e.stopPropagation()}
+                      className="parameter_window_modal_label"
+                      name="sendname"
+                      type="checkbox"
+                      onChange={this.handleFormElementChange}
+                      id="sendname"
+                      value={this.state.parameterFormElements.sendname}
+                    /></div>}
+
+
                     <h5 className="parameter_window_modal_label">format*</h5>
                     <select
                       className="pluginaddqueueselect"
@@ -460,6 +732,48 @@ class ParametersWindow extends React.Component {
                     >
                       {this.prepareDropDownHtmlForParameterFormat()}
                     </select>
+                    {this.state.parameterFormElements.format === "OutputFolder" && this.state.parameterFormElements.uploadimages === "0" &&
+                      <div><h5>Upload back images</h5><input
+                      //onMouseDown={(e) => e.stopPropagation()}
+                      className="parameter_window_modal_label"
+                      name="uploadimages"
+                      type="checkbox"
+                      onChange={this.handleFormElementChange}
+                      id="uploadimages"
+                      value={this.state.parameterFormElements.uploadimages}
+                    /></div>}
+                      {this.state.parameterFormElements.format === "OutputFolder" && this.state.parameterFormElements.uploadimages === "1" &&
+                      <div><h5>Upload back images</h5><input
+                      //onMouseDown={(e) => e.stopPropagation()}
+                      className="parameter_window_modal_label"
+                      name="uploadimages"
+                      type="checkbox"
+                      onChange={this.handleFormElementChange}
+                      id="uploadimages"
+                      value={this.state.parameterFormElements.uploadimages}
+                      checked
+                    /></div>}
+                      {this.state.parameterFormElements.format === "OutputFolder" && this.state.parameterFormElements.uploadaims === "1" &&
+                      <div><h5>Upload back aims</h5><input
+                      //onMouseDown={(e) => e.stopPropagation()}
+                      className="parameter_window_modal_label"
+                      name="uploadaims"
+                      type="checkbox"
+                      onChange={this.handleFormElementChange}
+                      id="uploadaims"
+                      value={this.state.parameterFormElements.uploadaims}
+                      checked
+                    /></div>}
+                     {this.state.parameterFormElements.format === "OutputFolder" && this.state.parameterFormElements.uploadaims === "0" &&
+                      <div><h5>Upload back aims</h5><input
+                      //onMouseDown={(e) => e.stopPropagation()}
+                      className="parameter_window_modal_label"
+                      name="uploadaims"
+                      type="checkbox"
+                      onChange={this.handleFormElementChange}
+                      id="uploadaims"
+                      value={this.state.parameterFormElements.uploadaims}
+                    /></div>}
                     <h5 className="parameter_window_modal_label">prefix</h5>
                     <input
                       onMouseDown={(e) => e.stopPropagation()}
@@ -493,7 +807,7 @@ class ParametersWindow extends React.Component {
                       value={this.state.parameterFormElements.default_value}
                       onChange={this.handleFormElementChange}
                     />
-                    <h5 className="parameter_window_modal_label">Type</h5>
+                    {/* <h5 className="parameter_window_modal_label">Type</h5>
                     <select
                       className="pluginaddqueueselect"
                       id="type"
@@ -503,7 +817,7 @@ class ParametersWindow extends React.Component {
                       value={this.state.parameterFormElements.type}
                     >
                       {this.prepareDropDownHtmlForParameterType()}
-                    </select>
+                    </select> */}
                     <h5 className="parameter_window_modal_label">
                       Description
                     </h5>

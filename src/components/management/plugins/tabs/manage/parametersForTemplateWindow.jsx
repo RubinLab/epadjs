@@ -1,19 +1,19 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
-import ReactTable from "react-table-v6";
-import { toast } from "react-toastify";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Modal } from 'react-bootstrap';
+import ReactTable from 'react-table-v6';
+import { toast } from 'react-toastify';
 import {
   saveTemplateParameter,
   getTemplateParameter,
   deleteOneTemplateParameter,
-  editTemplateParameter,
-} from "../../../../../services/pluginServices";
-import { FaRegTrashAlt } from "react-icons/fa";
+  editTemplateParameter
+} from '../../../../../services/pluginServices';
+import { FaRegTrashAlt } from 'react-icons/fa';
 class ParametersForTemplateWindow extends React.Component {
   constructor(props) {
     super(props);
-    console.log("props ", props);
+    console.log('props ', props);
 
     //console.log("modal log templates", props.allTemplates);
   }
@@ -23,19 +23,19 @@ class ParametersForTemplateWindow extends React.Component {
     parameterFormElements: {
       plugindbid: this.props.plugindbid,
       templatedbid: this.props.templatedbid,
-      paramid: "",
-      name: "",
-      format: "",
-      prefix: "",
-      inputBinding: "",
-      default_value: "",
-      creator: "",
-      type: "",
-      description: "",
+      paramid: '',
+      name: '',
+      format: '',
+      prefix: '',
+      inputBinding: '',
+      default_value: '',
+      creator: '',
+      type: '',
+      description: ''
     },
     addnew: false,
     allTemplates: [],
-    editParam: false,
+    editParam: false
   };
 
   componentWillMount = async () => {
@@ -43,21 +43,21 @@ class ParametersForTemplateWindow extends React.Component {
       this.props.plugindbid,
       this.props.templatedbid
     );
-    console.log("parameter lists", tempDefaultParameterList);
+    console.log('parameter lists', tempDefaultParameterList);
     this.setState({ defaultParameterList: tempDefaultParameterList.data });
   };
 
-  handleFormElementChange = (e) => {
+  handleFormElementChange = e => {
     const plElements = { ...this.state.parameterFormElements };
-    if (e.currentTarget.name != "enabled") {
+    if (e.currentTarget.name != 'enabled') {
       plElements[e.currentTarget.name] = e.currentTarget.value;
     } else {
       plElements[e.currentTarget.name] = e.currentTarget.checked;
     }
     //console.log("form elements : ", this.state.pluginFormElements);
-    console.log(e.currentTarget.name, ": value : ", e.currentTarget.value);
-    if (e.currentTarget.name === "enabled") {
-      console.log(e.currentTarget.name, ": target : ", e.currentTarget.checked);
+    console.log(e.currentTarget.name, ': value : ', e.currentTarget.value);
+    if (e.currentTarget.name === 'enabled') {
+      console.log(e.currentTarget.name, ': target : ', e.currentTarget.checked);
     }
     this.setState({ parameterFormElements: plElements });
   };
@@ -65,19 +65,19 @@ class ParametersForTemplateWindow extends React.Component {
     const tempParameterFormElements = {
       plugindbid: this.props.plugindbid,
       templatedbid: this.props.templatedbid,
-      paramid: "",
-      name: "",
-      format: "",
-      prefix: "",
-      inputBinding: "",
-      default_value: "",
-      creator: "",
-      type: "",
-      description: "",
+      paramid: '',
+      name: '',
+      format: '',
+      prefix: '',
+      inputBinding: '',
+      default_value: '',
+      creator: '',
+      type: '',
+      description: ''
     };
     this.setState({
       addnew: true,
-      parameterFormElements: tempParameterFormElements,
+      parameterFormElements: tempParameterFormElements
     });
   };
   closeAddForm = () => {
@@ -86,61 +86,61 @@ class ParametersForTemplateWindow extends React.Component {
   saveParameters = async () => {
     this.setState({ addnew: false });
     console.log(
-      "save template paramters after filled : ",
+      'save template paramters after filled : ',
       this.state.parameterFormElements
     );
     const saveParameterResponse = await saveTemplateParameter(
       this.state.parameterFormElements
     );
     if (saveParameterResponse.status === 200) {
-      console.log("plugin template parameters saved succesfully");
-      console.log("inserted data : ", saveParameterResponse.data);
+      console.log('plugin template parameters saved succesfully');
+      console.log('inserted data : ', saveParameterResponse.data);
       const tempDefaultParameterList = this.state.defaultParameterList;
       tempDefaultParameterList.push(saveParameterResponse.data);
       this.setState({ defaultParameterList: tempDefaultParameterList });
     } else {
-      toast.error("error happened while saving template parameter", {
-        position: "top-right",
+      toast.error('error happened while saving template parameter', {
+        position: 'top-right',
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
-        draggable: true,
+        draggable: true
       });
       //alert("an error occourred while saving template parameters");
     }
     //this.props.onSave();
   };
   dock;
-  deleteOneParameter = async (parameterdbid) => {
-    console.log("delete one called", parameterdbid);
+  deleteOneParameter = async parameterdbid => {
+    console.log('delete one called', parameterdbid);
     const deleteParameterResponse = await deleteOneTemplateParameter(
       parameterdbid
     );
-    console.log("delete one parameter response :", deleteParameterResponse);
+    console.log('delete one parameter response :', deleteParameterResponse);
     if (deleteParameterResponse.status === 200) {
       let tempDefaultParameterList = this.state.defaultParameterList.filter(
-        (parameter) => {
+        parameter => {
           return parameter.id !== parameterdbid;
         }
       );
       this.setState({ defaultParameterList: tempDefaultParameterList });
-      console.log("parameter deleted succesfully");
+      console.log('parameter deleted succesfully');
     } else {
-      toast.error("error happened while deleting template parameter", {
-        position: "top-right",
+      toast.error('error happened while deleting template parameter', {
+        position: 'top-right',
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
-        draggable: true,
+        draggable: true
       });
       // alert("an error occourred while deleting template parameter");
     }
   };
 
-  handleShowEditParameterWindow = (rowInfo) => {
-    console.log("row click :", rowInfo);
+  handleShowEditParameterWindow = rowInfo => {
+    console.log('row click :', rowInfo);
     const tempParameterFormElements = {
       plugindbid: this.props.plugindbid,
       templatedbid: this.props.templatedbid,
@@ -152,26 +152,26 @@ class ParametersForTemplateWindow extends React.Component {
       inputBinding: rowInfo.original.inputBinding,
       default_value: rowInfo.original.default_value,
       type: rowInfo.original.type,
-      description: rowInfo.original.description,
+      description: rowInfo.original.description
     };
     this.setState({
       editParam: true,
       addnew: true,
-      parameterFormElements: tempParameterFormElements,
+      parameterFormElements: tempParameterFormElements
     });
   };
   handleEditParameterSave = async () => {
-    console.log("edit paramter save clicked");
+    console.log('edit paramter save clicked');
     const editParameterResponse = await editTemplateParameter(
       this.state.parameterFormElements
     );
     if (editParameterResponse.status === 200) {
       console.log(
-        "template parameters edited succesfully",
+        'template parameters edited succesfully',
         JSON.stringify(editParameterResponse.data)
       );
       console.log(
-        "default list needs to be like this :",
+        'default list needs to be like this :',
         JSON.stringify(this.state.defaultParameterList[1])
       );
       const editedData = editParameterResponse.data;
@@ -182,18 +182,18 @@ class ParametersForTemplateWindow extends React.Component {
           let obj = {};
           obj = { ...tempDefaultParameterList[i], ...editedData };
           tempDefaultParameterList[i] = { ...obj };
-          console.log("obj", JSON.stringify(obj));
+          console.log('obj', JSON.stringify(obj));
         }
       }
       this.setState({ defaultParameterList: tempDefaultParameterList });
     } else {
-      toast.error("error happened while editing template parameter", {
-        position: "top-right",
+      toast.error('error happened while editing template parameter', {
+        position: 'top-right',
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
-        draggable: true,
+        draggable: true
       });
       //  alert("an error occourred while editing template parameters");
     }
@@ -201,88 +201,88 @@ class ParametersForTemplateWindow extends React.Component {
     this.setState({ editParam: false, addnew: false });
   };
   handleCloseEditForm = () => {
-    console.log("edit paramter close clicked");
+    console.log('edit paramter close clicked');
     this.setState({ editParam: false, addnew: false });
   };
 
   defineParametersTableColumns = () => {
     return [
       {
-        Header: "id",
-        accessor: "paramid",
+        Header: 'id',
+        accessor: 'paramid',
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
-        width: 70,
+        width: 70
       },
       {
-        Header: "Name",
-        accessor: "name",
+        Header: 'Name',
+        accessor: 'name',
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
-        width: 70,
+        width: 70
       },
       {
-        Header: "format",
-        accessor: "format",
+        Header: 'format',
+        accessor: 'format',
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
-        width: 100,
+        width: 100
       },
       {
-        Header: "prefix",
-        accessor: "prefix",
+        Header: 'prefix',
+        accessor: 'prefix',
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
-        width: 100,
+        width: 100
       },
       {
-        Header: "inputbinding",
-        accessor: "inputBinding",
+        Header: 'inputbinding',
+        accessor: 'inputBinding',
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
-        width: 100,
+        width: 100
       },
       {
-        Header: "value",
-        accessor: "default_value",
+        Header: 'value',
+        accessor: 'default_value',
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
-        width: 100,
+        width: 100
       },
 
       {
-        Header: "type",
-        accessor: "type",
+        Header: 'type',
+        accessor: 'type',
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
-        width: 100,
+        width: 100
       },
       {
-        Header: "description",
-        accessor: "description",
+        Header: 'description',
+        accessor: 'description',
         sortable: true,
         resizable: true,
         minResizeWidth: 50,
-        width: 100,
+        width: 100
       },
       {
-        Header: "",
-        Cell: (data) => {
+        Header: '',
+        Cell: data => {
           //const rowdata = original.row.checkbox;
           return (
             <div onClick={() => this.deleteOneParameter(data.original.id)}>
               <FaRegTrashAlt className="menu-clickable" />
             </div>
           );
-        },
-      },
+        }
+      }
     ];
   };
   render() {
@@ -297,17 +297,18 @@ class ParametersForTemplateWindow extends React.Component {
           <Modal.Body className="create-user__modal--body">
             {!this.state.addnew && (
               <ReactTable
+                NoDataComponent={() => null}
                 className="pro-table"
                 data={this.state.defaultParameterList}
                 columns={this.defineParametersTableColumns()}
                 getTdProps={(state, rowInfo, column, instance) => ({
                   onClick: () => {
-                    if (column.Header != "") {
-                      if (typeof rowInfo !== "undefined") {
+                    if (column.Header != '') {
+                      if (typeof rowInfo !== 'undefined') {
                         this.handleShowEditParameterWindow(rowInfo);
                       }
                     }
-                  },
+                  }
                 })}
                 pageSizeOptions={[10, 20, 50]}
                 defaultPageSize={10}
@@ -319,7 +320,7 @@ class ParametersForTemplateWindow extends React.Component {
                 <form className="add-project__modal--form">
                   <h5 className="add-project__modal--label">id*</h5>
                   <input
-                    onMouseDown={(e) => e.stopPropagation()}
+                    onMouseDown={e => e.stopPropagation()}
                     className="add-project__modal--input"
                     name="paramid"
                     type="text"
@@ -329,7 +330,7 @@ class ParametersForTemplateWindow extends React.Component {
                   />
                   <h5 className="add-project__modal--label">Name*</h5>
                   <input
-                    onMouseDown={(e) => e.stopPropagation()}
+                    onMouseDown={e => e.stopPropagation()}
                     className="add-project__modal--input"
                     name="name"
                     type="text"
@@ -339,7 +340,7 @@ class ParametersForTemplateWindow extends React.Component {
                   />
                   <h5 className="add-project__modal--label">format*</h5>
                   <input
-                    onMouseDown={(e) => e.stopPropagation()}
+                    onMouseDown={e => e.stopPropagation()}
                     className="add-project__modal--input"
                     name="format"
                     type="text"
@@ -349,7 +350,7 @@ class ParametersForTemplateWindow extends React.Component {
                   />
                   <h5 className="add-project__modal--label">prefix*</h5>
                   <input
-                    onMouseDown={(e) => e.stopPropagation()}
+                    onMouseDown={e => e.stopPropagation()}
                     className="add-project__modal--input"
                     name="prefix"
                     type="text"
@@ -359,7 +360,7 @@ class ParametersForTemplateWindow extends React.Component {
                   />
                   <h5 className="add-project__modal--label">input binding*</h5>
                   <input
-                    onMouseDown={(e) => e.stopPropagation()}
+                    onMouseDown={e => e.stopPropagation()}
                     className="add-project__modal--input"
                     name="inputBinding"
                     type="text"
@@ -369,7 +370,7 @@ class ParametersForTemplateWindow extends React.Component {
                   />
                   <h5 className="add-project__modal--label">Default value*</h5>
                   <input
-                    onMouseDown={(e) => e.stopPropagation()}
+                    onMouseDown={e => e.stopPropagation()}
                     className="add-project__modal--input"
                     name="default_value"
                     type="text"
@@ -378,7 +379,7 @@ class ParametersForTemplateWindow extends React.Component {
                   />
                   <h5 className="add-project__modal--label">Type*</h5>
                   <input
-                    onMouseDown={(e) => e.stopPropagation()}
+                    onMouseDown={e => e.stopPropagation()}
                     className="add-project__modal--input"
                     name="type"
                     type="text"
@@ -387,7 +388,7 @@ class ParametersForTemplateWindow extends React.Component {
                   />
                   <h5 className="add-project__modal--label">Description*</h5>
                   <input
-                    onMouseDown={(e) => e.stopPropagation()}
+                    onMouseDown={e => e.stopPropagation()}
                     className="add-project__modal--input"
                     name="description"
                     type="text"
@@ -471,5 +472,5 @@ export default ParametersForTemplateWindow;
 PropTypes.NewPluginWindow = {
   //onSelect: PropTypes.func,
   onCancel: PropTypes.func,
-  onSave: PropTypes.func,
+  onSave: PropTypes.func
 };

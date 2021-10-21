@@ -134,7 +134,6 @@ class WorklistCreationForm extends React.Component {
     const allSelected = validLevel && validTemplate && validNumOfAims;
     // return noneSelected || allSelected;
     return allSelected;
-
   };
 
   handleFormInput = e => {
@@ -240,7 +239,7 @@ class WorklistCreationForm extends React.Component {
                 name="name"
                 type="text"
                 onChange={this.handleFormInput}
-                id="form-first-element"
+                id="addWorklist-name"
                 defaultValue={this.state.name}
               />
               <h5 className="add-worklist__modal--label">ID*</h5>
@@ -251,6 +250,7 @@ class WorklistCreationForm extends React.Component {
                 type="text"
                 onChange={this.handleFormInput}
                 defaultValue={this.state.id}
+                id="addWorklist-id"
               />
               <h6 className="form-exp">
                 One word only, no special characters, "_" is OK
@@ -261,6 +261,7 @@ class WorklistCreationForm extends React.Component {
                 name="duedate"
                 onChange={this.handleFormInput}
                 defaultValue={this.state.duedate}
+                id="addWorklist-due"
               />
               <h5 className="add-worklist__modal--label">Description</h5>
               <textarea
@@ -269,13 +270,14 @@ class WorklistCreationForm extends React.Component {
                 name="description"
                 onChange={this.handleFormInput}
                 defaultValue={this.state.description}
+                id="addWorklist-desc"
               />
               <h5 className="form-exp required">*Required</h5>
             </form>
           )}
           {this.state.page === 1 && (
             <>
-              <h5 className="add-worklist__modal--label">
+              <h5 className="add-worklist__modal--label" id="addWorklist-users">
                 Assign worklist to users
               </h5>
               <UserList
@@ -287,7 +289,10 @@ class WorklistCreationForm extends React.Component {
           )}
           {this.state.page === 2 && (
             <>
-              <h5 className="add-worklist__modal--label">
+              <h5
+                className="add-worklist__modal--label"
+                id="addWorklist-requirements"
+              >
                 Add Requirements to monitor progress
               </h5>
               <RequirementForm
@@ -309,6 +314,7 @@ class WorklistCreationForm extends React.Component {
               onClick={button2Func}
               text={button2Text}
               disabled={page === 0 ? disableNext : disableSubmit}
+              id="next-btn"
             />
             <FormButton onClick={button3Func} text={button3Text} />
           </div>

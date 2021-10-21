@@ -14,6 +14,7 @@ import {
   GrCalculator,
   GrManual
 } from "react-icons/gr";
+import { GoGraph, GoCheck } from "react-icons/go";
 import {
   getStudiesOfWorklist,
   deleteStudyFromWorklist,
@@ -21,8 +22,7 @@ import {
 } from "../../services/worklistServices";
 import { getSeries } from "../../services/seriesServices";
 import DeleteAlert from "../management/common/alertDeletionModal";
-import SeriesPopup from "./seriesPopup";
-import { MAX_PORT } from "../../constants";
+import SelectSeriesModal from "../annotationsList/selectSerieModal";
 import {
   addToGrid,
   getSingleSerie,
@@ -55,7 +55,10 @@ class WorkList extends React.Component {
     showSeries: false,
     series: [],
     selectedSeries: {},
-    error: null
+    error: null,
+    patients: [],
+    projects: [],
+    studyName: ""
   };
 
   componentDidMount = async () => {
@@ -65,6 +68,17 @@ class WorkList extends React.Component {
   componentDidUpdate = prevProps => {
     if (prevProps.match.params.wid !== this.props.match.params.wid) {
       this.getWorkListData(true);
+      this.setState({
+        patients: [],
+        projects: []
+      });
+    }
+
+    if (prevProps.reports.length !== this.props.reports.length) {
+      this.setState({
+        patients: [],
+        projects: []
+      });
     }
   };
 
@@ -73,14 +87,13 @@ class WorkList extends React.Component {
     const notAuthorized = [];
     const { projectMap } = this.props;
     worklists.forEach((el, i) => {
-      if (!projectMap[el.projectID])
-        notAuthorized.push(el.projectID);
+      if (!projectMap[el.projectID]) notAuthorized.push(el.projectID);
       else filteredWorklists.push(el);
     });
     return { notAuthorized, filteredWorklists };
   };
 
-  getWorkListData = async (showError) => {
+  getWorkListData = async showError => {
     const { data: worklists } = await getStudiesOfWorklist(
       sessionStorage.getItem("username"),
       this.props.match.params.wid
@@ -89,11 +102,9 @@ class WorkList extends React.Component {
     this.setState({ worklists: filteredWorklists });
     if (showError && Array.isArray(notAuthorized) && notAuthorized.length > 0) {
       const projectList = notAuthorized.reduce((all, item, i) => {
-        return `${all} ${item}${
-          notAuthorized.length - 1 === i ? "" : ", "
-        }`;
+        return `${all} ${item}${notAuthorized.length - 1 === i ? "" : ", "}`;
       }, "");
-      const message = `${messages.notAuthorizedProjects} ${projectList}`
+      const message = `${messages.notAuthorizedProjects} ${projectList}`;
       toast.error(message, {
         position: "top-right",
         autoClose: 5000,
@@ -191,11 +202,12 @@ class WorkList extends React.Component {
   }
 
   handleOpenClick = async study => {
-    const { projectID, subjectID, studyUID } = study;
+    const { projectID, subjectID, studyUID, studyDescription } = study;
     const { data: series } = await getSeries(projectID, subjectID, studyUID);
     this.setState(state => ({
       showSeries: !state.showSeries,
-      series
+      series,
+      studyName: studyDescription
     }));
   };
 
@@ -223,6 +235,20 @@ class WorkList extends React.Component {
     )
       .then(() => this.getWorkListData())
       .catch(err => console.error(err));
+  };
+
+  checkPairExist = (subjectID, projectID) => {
+    const indexOfSubject = this.state.patients.indexOf(subjectID);
+    const indexOfProject = this.state.projects.indexOf(projectID);
+    const matchPair =
+      indexOfSubject === indexOfProject ||
+      this.state.patients[indexOfProject] === subjectID;
+    const pairExists = indexOfSubject > -1 && indexOfProject > -1 && matchPair;
+    return {
+      indexOfSubject,
+      indexOfProject,
+      pairExists
+    };
   };
 
   defineColumns = () => {
@@ -330,6 +356,61 @@ class WorkList extends React.Component {
           );
           studyDesc = studyDesc ? studyDesc : "Unnamed Study";
           return <div>{studyDesc}</div>;
+        }
+      },
+      {
+        id: "graph",
+        Header: "Report",
+        width: 45,
+        sortable: false,
+        resizable: false,
+        Cell: original => {
+          // console.log(original.row._original);
+          const newPatients = [...this.state.patients];
+          const newProjects = [...this.state.projects];
+          const { subjectID, projectID } = original.row._original;
+          const {
+            indexOfSubject,
+            indexOfProject,
+            pairExists
+          } = this.checkPairExist(subjectID, projectID);
+          const variant = pairExists ? "success" : "primary";
+          const icon = variant === "success" ? <GoCheck /> : <GoGraph />;
+          const text = variant === "success" ? "" : "";
+          return (
+            <div>
+              <Button
+                data-tip
+                data-for={`graph-badge${original.index}`}
+                variant={variant}
+                style={{ padding: "0.1rem 0.2rem", fontSize: "1.1rem" }}
+                onClick={() => {
+                  if (variant === "success") {
+                    newPatients.splice(indexOfSubject, 1);
+                    newProjects.splice(indexOfProject, 1);
+                  } else {
+                    newPatients.push(subjectID);
+                    newProjects.push(projectID);
+                  }
+                  this.setState({
+                    patients: newPatients,
+                    projects: newProjects
+                  });
+                  this.props.getWorklistPatient(newPatients, newProjects);
+                }}
+              >
+                {icon}
+              </Button>
+              <ReactTooltip
+                id={`graph-badge${original.index}`}
+                place="right"
+                type="light"
+                delayShow={1000}
+              >
+                <span>{text}</span>
+              </ReactTooltip>
+            </div>
+          );
         }
       },
 
@@ -580,6 +661,7 @@ class WorkList extends React.Component {
   };
 
   viewSelection = async () => {
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
     const notOpenSeries = [];
     const selectedSeries = Object.values(this.state.selectedSeries);
     if (selectedSeries.length > 0) {
@@ -592,7 +674,7 @@ class WorkList extends React.Component {
       //if all ports are full
       if (
         notOpenSeries.length > 0 &&
-        this.props.openSeries.length === MAX_PORT
+        this.props.openSeries.length === maxPort
       ) {
         this.props.dispatch(alertViewPortFull());
       } else {
@@ -603,11 +685,11 @@ class WorkList extends React.Component {
           this.props.history.push("/display");
           this.props.dispatch(clearSelection());
         } else {
-          if (selectedSeries.length + this.props.openSeries.length > MAX_PORT) {
-            // alert user about the num of open series a the moment and told only max_port is allowed
+          if (selectedSeries.length + this.props.openSeries.length > maxPort) {
+            // alert user about the num of open series a the moment and told only maxPort is allowed
             const openPorts = this.props.openSeries.length;
             this.setState({
-              error: `Already ${openPorts} viewers open. You can open ${MAX_PORT} at a time`
+              error: `Already ${openPorts} viewers open. You can open ${maxPort} at a time`
             });
           } else {
             //else get data for each serie for display
@@ -662,13 +744,10 @@ class WorkList extends React.Component {
           />
         )}
         {this.state.showSeries && (
-          <SeriesPopup
-            series={this.state.series}
-            open={this.viewSelection}
-            cancel={this.handleCancelOpenSeries}
-            selectSeries={this.selectSeries}
-            error={this.state.error}
-            openSeries={openSeriesUIDs}
+          <SelectSeriesModal
+            seriesPassed={[this.state.series]}
+            onCancel={this.handleCancelOpenSeries}
+            studyName={this.state.studyName}
           />
         )}
       </div>
