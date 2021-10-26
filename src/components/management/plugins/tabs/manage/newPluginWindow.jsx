@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "react-bootstrap";
+import Popup from "../../common/Popup.jsx";
 import "../../css/plugin.css";
 class NewPluginWindow extends React.Component {
   constructor(props) {
@@ -30,6 +30,7 @@ class NewPluginWindow extends React.Component {
     const { onChange, error, pluginFormElements } = this.props;
     return (
       <div className="create_plugin_container" id="newplugin">
+        <Popup>
         <div className="create_plugin_modal">
           <div className="create_plugin_header">
             <div className="create_plugin_header">New Plugin</div>
@@ -225,6 +226,7 @@ class NewPluginWindow extends React.Component {
             </div>
           </div>
         </div>
+        </Popup>
       </div>
     );
   }

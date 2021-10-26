@@ -1,3 +1,4 @@
+import external from "./../../externalModules.js";
 import BaseAnnotationTool from "../base/BaseAnnotationTool.js";
 // State
 import { getToolState } from "./../../stateManagement/toolState.js";
@@ -18,6 +19,8 @@ import { getLogger } from "../../util/logger.js";
 import getPixelSpacing from "../../util/getPixelSpacing";
 import throttle from "../../util/throttle";
 import { state } from "../../store/index.js";
+import calculateLineStatistics from "cornerstone-tools/util/line/calculateLineStatistics.js";
+import numbersWithCommas from "../../util/numbersWithCommas.js";
 
 const logger = getLogger("tools:annotation:LengthTool");
 
@@ -121,6 +124,21 @@ export default class LengthTool extends BaseAnnotationTool {
 
   updateCachedStats(image, element, data) {
     const { rowPixelSpacing, colPixelSpacing } = getPixelSpacing(image);
+    const { start, end } = data.handles;
+
+    const { min, max, mean, stdDev } = calculateLineStatistics(
+      image,
+      {
+        start,
+        end,
+      },
+      element
+    );
+
+    data.min = min;
+    data.max = max;
+    data.mean = mean;
+    data.stdDev = stdDev;
 
     // Set rowPixelSpacing and columnPixelSpacing to 1 if they are undefined (or zero)
     const dx =
@@ -148,6 +166,11 @@ export default class LengthTool extends BaseAnnotationTool {
     // We have tool data for this element - iterate over each one and draw it
     const context = getNewContext(eventData.canvasContext.canvas);
     const { image, element } = eventData;
+    const seriesModule = external.cornerstone.metaData.get(
+      "generalSeriesModule",
+      image.imageId
+    );
+    const modality = seriesModule ? seriesModule.modality : null;
     const { rowPixelSpacing, colPixelSpacing } = getPixelSpacing(image);
 
     const lineWidth = toolStyle.getToolWidth();
@@ -231,8 +254,21 @@ export default class LengthTool extends BaseAnnotationTool {
     }
 
     function textBoxText(data, rowPixelSpacing, colPixelSpacing) {
+      const { mean, stdDev, min, max, length } = data;
+      // Define an array to store the rows of text for the textbox
+      const textLines = [];
+
       // Set the length text suffix depending on whether or not pixelSpacing is available
       let suffix = "mm";
+
+      // If the modality is CT, add HU to denote Hounsfield Units
+      let moSuffix = "";
+
+      if (modality === "CT") {
+        moSuffix = "HU";
+        data.calcUnit = "HU";
+      }
+      data.unit = moSuffix;
 
       if (!rowPixelSpacing || !colPixelSpacing) {
         suffix = "pixels";
@@ -240,8 +276,57 @@ export default class LengthTool extends BaseAnnotationTool {
 
       data.unit = suffix;
 
-      return `${data.length.toFixed(2)} ${suffix}`;
+      let lengthText = `Length: ${numbersWithCommas(
+        length.toFixed(2)
+      )} ${suffix}`;
+
+      let minText = `Min: ${numbersWithCommas(min.toFixed(2))}${moSuffix}`;
+      let maxText = `Max: ${numbersWithCommas(max.toFixed(2))}${moSuffix}`;
+
+      // Add these text lines to the array to be displayed in the textbox
+      textLines.push(lengthText);
+      textLines.push(minText);
+      textLines.push(maxText);
+
+      // If the mean and standard deviation values are present, display them
+      if (mean && stdDev !== undefined) {
+        // Create a line of text to display the mean and any units that were specified (i.e. HU)
+        let meanText = `Mean: ${numbersWithCommas(
+          mean.toFixed(2)
+        )} ${moSuffix}`;
+        // Create a line of text to display the standard deviation and any units that were specified (i.e. HU)
+        let stdDevText = `StdDev: ${numbersWithCommas(
+          stdDev.toFixed(2)
+        )} ${moSuffix}`;
+
+        // If this image has SUV values to display, concatenate them to the text line
+        // if (meanStdDevSUV && meanStdDevSUV.mean !== undefined) {
+        //   const SUVtext = " SUV: ";
+
+        //   meanText +=
+        //     SUVtext + numbersWithCommas(meanStdDevSUV.mean.toFixed(2));
+        //   stdDevText +=
+        //     SUVtext + numbersWithCommas(meanStdDevSUV.stdDev.toFixed(2));
+        // }
+        textLines.push(meanText);
+        textLines.push(stdDevText);
+      }
+
+      return textLines;
     }
+
+    // function textBoxText(data, rowPixelSpacing, colPixelSpacing) {
+    //   // Set the length text suffix depending on whether or not pixelSpacing is available
+    //   let suffix = "mm";
+
+    //   if (!rowPixelSpacing || !colPixelSpacing) {
+    //     suffix = "pixels";
+    //   }
+
+    //   data.unit = suffix;
+
+    //   return `${data.length.toFixed(2)} ${suffix}`;
+    // }
 
     function textBoxAnchorPoints(handles) {
       const midpoint = {

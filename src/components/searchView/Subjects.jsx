@@ -36,7 +36,8 @@ function Table({
   expandLevel,
   getTreeExpandAll,
   getTreeExpandSingle,
-  treeExpand
+  treeExpand, 
+  update
 }) {
   const {
     getTableProps,
@@ -153,6 +154,7 @@ function Table({
                         getTreeExpandAll={getTreeExpandAll}
                         treeExpand={treeExpand}
                         getTreeExpandSingle={getTreeExpandSingle}
+                        update={update}
                       />
                     )}
                   </React.Fragment>
@@ -223,6 +225,8 @@ function Subjects(props) {
   const [pageCount, setPageCount] = useState(0);
   const [selectedLevel, setSelectedLevel] = useState(false);
   const [selectedCount, setSelectedCount] = useState(false);
+  const [update, setUpdate] = useState(0);
+
 
   useEffect(() => {
     const { selectedStudies, selectedSeries, selectedAnnotations } = props;
@@ -596,6 +600,10 @@ function Subjects(props) {
       }
     }
   }, []);
+
+  // useEffect(() => {
+  //   setUpdate(update + 1);
+  // }, [props.update]);
 
   useEffect(() => {
     localStorage.setItem('treeData', JSON.stringify({}));

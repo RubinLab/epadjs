@@ -73,6 +73,7 @@ function Annotations(props) {
   const [selectedLevel, setSelectedLevel] = useState(false);
   const [showSelectSerie, setShowSelectSerie] = useState(false);
   const [selected, setSelected] = useState({});
+  const [update, setUpdate] = useState(0);
 
   useEffect(() => {
     const { selectedPatients, selectedStudies, selectedSeries } = props;
@@ -288,8 +289,12 @@ function Annotations(props) {
         }
       }
     ],
-    [selectedLevel]
+    [selectedLevel, props.update]
   );
+
+  // useEffect(() => {
+  //   setUpdate(update + 1);
+  // }, [props.update]);
 
   useEffect(() => {
     const { parentSeries } = props;

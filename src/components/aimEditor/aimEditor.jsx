@@ -896,11 +896,27 @@ class AimEditor extends Component {
       frameNum
     );
 
-    const lengthId = aim.createLengthCalcEntity({
-      value: line.length,
-      unit: line.unit,
-    });
+    const { unit, calcUnit, length, min, max, mean, stdDev } = line;
+
+    const lengthId = aim.createLengthCalcEntity({ value: length, unit });
     aim.createImageAnnotationStatement(1, markupId, lengthId);
+
+    let _calcUnit; // unit if calculations
+    if (calcUnit === "HU") _calcUnit = "hu";
+    else if (calcUnit === "SUV") _calcUnit = "suv";
+
+    const minId = aim.createMinCalcEntity({ min, unit: _calcUnit });
+    aim.createImageAnnotationStatement(1, markupId, minId);
+
+    const maxId = aim.createMaxCalcEntity({ max, unit: _calcUnit });
+    aim.createImageAnnotationStatement(1, markupId, maxId);
+
+    const meanId = aim.createMeanCalcEntity({ mean, unit: _calcUnit });
+    aim.createImageAnnotationStatement(1, markupId, meanId);
+
+    const stdDevId = aim.createStdDevCalcEntity({ stdDev, unit: _calcUnit });
+    aim.createImageAnnotationStatement(1, markupId, stdDevId);
+
   };
 
   addCircleToAim = (aim, circle, shapeIndex, imageId, frameNum) => {
@@ -1192,7 +1208,7 @@ class AimEditor extends Component {
       pauseOnHover: true,
       draggable: true,
     });
-    const { isStudyAim } = aimRefs;
+    const isStudyAim = aimRefs ? aimRefs.isStudyAim : false; //If upload has segmentation it can't be study aim
     if (isStudyAim) {
       openSeries.forEach(({ seriesUID, studyUID }) => {
         if (openSeries[
