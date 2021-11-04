@@ -768,8 +768,8 @@ const AnnotationSearch = props => {
               style={{ margin: '0rem 1rem', padding: '1.8px' }}
             />{' '}
             <div style={{ fontSize: "1.2rem",color: "aliceblue"}} onClick={()=>{
-              console.log(JSON.stringify(props.selectedAnnotations));
-              console.log(props.pid);
+              //  console.log(JSON.stringify(props.selectedAnnotations));
+              //  console.log(props.pid);
               getPluginProjects();
             } 
               }>select plugin : </div>
@@ -913,7 +913,6 @@ const AnnotationSearch = props => {
   }
   
   const runPlugin = async () => {
-    if (Object.keys(props.selectedAnnotations).length > 0){
      
       let tempPluginObject = {};
       for (let i = 0 ; i < pluginListArray.length; i ++ ){
@@ -935,7 +934,11 @@ const AnnotationSearch = props => {
           tempQueueObject.processMultipleAims = tempPluginObject.processmultipleaims;
           tempQueueObject.runtimeParams = {};
           tempQueueObject.parameterType ='default';
-          tempQueueObject.aims = { ...props.selectedAnnotations };
+          if (props && props.selectedAnnotations){
+            tempQueueObject.aims = { ...props.selectedAnnotations };
+          }else{
+            tempQueueObject.aims = {};
+          }
          
           const resultAddQueue = await addPluginsToQueue(tempQueueObject);
           console.log('plugin running queue ',JSON.stringify(resultAddQueue));
@@ -949,10 +952,7 @@ const AnnotationSearch = props => {
           setShowRunPluginButton(false);
           updateSelectedAims;
           getSearchResult();
-    }else{
-      console.log('you need to select the annotations');
-      toast.info(explanation.pluginAnnotations, { position: 'top-right' });
-    }
+
     
   }
 // cavit
