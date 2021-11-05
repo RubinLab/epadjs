@@ -913,6 +913,8 @@ const AnnotationSearch = props => {
   }
   
   const runPlugin = async () => {
+
+      console.log(`selected aims to pass to plugin : ${JSON.stringify(props.selectedAnnotations)}`);
      
       let tempPluginObject = {};
       for (let i = 0 ; i < pluginListArray.length; i ++ ){
@@ -922,36 +924,125 @@ const AnnotationSearch = props => {
         }
 
       }
-      const tempQueueObject = {};
-          tempQueueObject.projectDbId = tempPluginObject.project_plugin.project_id;
-          tempQueueObject.projectId = props.selectedProject;
-          tempQueueObject.projectName = '';
+      if (tempPluginObject.processmultipleaims === null){
 
-          tempQueueObject.pluginDbId = tempPluginObject.id;
-          tempQueueObject.pluginId =tempPluginObject.plugin_id;
-          tempQueueObject.pluginName =tempPluginObject.name;
-          tempQueueObject.pluginType = "local";
-          tempQueueObject.processMultipleAims = tempPluginObject.processmultipleaims;
-          tempQueueObject.runtimeParams = {};
-          tempQueueObject.parameterType ='default';
-          if (props && props.selectedAnnotations){
-            tempQueueObject.aims = { ...props.selectedAnnotations };
-          }else{
-            tempQueueObject.aims = {};
+      
+                  const tempQueueObject = {};
+                  tempQueueObject.projectDbId = tempPluginObject.project_plugin.project_id;
+                  tempQueueObject.projectId = props.selectedProject;
+                  tempQueueObject.projectName = '';
+
+                  tempQueueObject.pluginDbId = tempPluginObject.id;
+                  tempQueueObject.pluginId =tempPluginObject.plugin_id;
+                  tempQueueObject.pluginName =tempPluginObject.name;
+                  tempQueueObject.pluginType = "local";
+                  tempQueueObject.processMultipleAims = tempPluginObject.processmultipleaims;
+                  tempQueueObject.runtimeParams = {};
+                  tempQueueObject.parameterType ='default';
+                  tempQueueObject.aims = {};
+                  
+                  
+                  const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+                  let responseRunPluginsQueue = null;
+                  console.log('plugin running queue ',JSON.stringify(resultAddQueue));
+                  if (resultAddQueue && resultAddQueue.data){
+                    if (Array.isArray(resultAddQueue.data)){
+                      responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
+                    }else{
+                      responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data.id);
+                    }
+                  }
+                  
+                 if (responseRunPluginsQueue.status === 202) {
+                    console.log("queue is running case null");
+                 } else {
+                    console.log("error happened while running queue");
+                 }
+          } else if (tempPluginObject.processmultipleaims === 0){
+            Object.keys(props.selectedAnnotations).forEach(async (eachAnnt) => {
+
+              let aimObj = {};
+              aimObj[eachAnnt] = props.selectedAnnotations[eachAnnt];
+             
+              console.log(`eachAnnt : ${JSON.stringify(aimObj)}`);
+            
+            
+           
+
+            
+                  const tempQueueObject = {};
+                  tempQueueObject.projectDbId = tempPluginObject.project_plugin.project_id;
+                  tempQueueObject.projectId = props.selectedProject;
+                  tempQueueObject.projectName = '';
+
+                  tempQueueObject.pluginDbId = tempPluginObject.id;
+                  tempQueueObject.pluginId =tempPluginObject.plugin_id;
+                  tempQueueObject.pluginName =tempPluginObject.name;
+                  tempQueueObject.pluginType = "local";
+                  tempQueueObject.processMultipleAims = tempPluginObject.processmultipleaims;
+                  tempQueueObject.runtimeParams = {};
+                  tempQueueObject.parameterType ='default';
+                  tempQueueObject.aims = aimObj;
+
+                  
+                  const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+                  let responseRunPluginsQueue = null;
+                  console.log('plugin running queue ',JSON.stringify(resultAddQueue));
+                  if (resultAddQueue && resultAddQueue.data){
+                    if (Array.isArray(resultAddQueue.data)){
+                      responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
+                    }else{
+                      responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data.id);
+                    }
+                  }
+                  
+                  if (responseRunPluginsQueue.status === 202) {
+                    console.log("queue is running case 0 - 1 annot req");
+                  } else {
+                    console.log("error happened while running queue");
+                  }
+                })
+          }else {
+
+                  const tempQueueObject = {};
+                  tempQueueObject.projectDbId = tempPluginObject.project_plugin.project_id;
+                  tempQueueObject.projectId = props.selectedProject;
+                  tempQueueObject.projectName = '';
+
+                  tempQueueObject.pluginDbId = tempPluginObject.id;
+                  tempQueueObject.pluginId =tempPluginObject.plugin_id;
+                  tempQueueObject.pluginName =tempPluginObject.name;
+                  tempQueueObject.pluginType = "local";
+                  tempQueueObject.processMultipleAims = tempPluginObject.processmultipleaims;
+                  tempQueueObject.runtimeParams = {};
+                  tempQueueObject.parameterType ='default';
+                  if (props && props.selectedAnnotations){
+                    tempQueueObject.aims = { ...props.selectedAnnotations };
+                  }else{
+                    tempQueueObject.aims = {};
+                  }
+                  
+                  const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+                  let responseRunPluginsQueue = null;
+                  console.log('plugin running queue ',JSON.stringify(resultAddQueue));
+                  if (resultAddQueue && resultAddQueue.data){
+                    if (Array.isArray(resultAddQueue.data)){
+                      responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
+                    }else{
+                      responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data.id);
+                    }
+                  }
+                  
+                 if (responseRunPluginsQueue.status === 202) {
+                    console.log("queue is running case  1 multi  annot required");
+                  } else {
+                    console.log("error happened while running queue");
+                 }
           }
-         
-          const resultAddQueue = await addPluginsToQueue(tempQueueObject);
-          console.log('plugin running queue ',JSON.stringify(resultAddQueue));
-          const responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
-          if (responseRunPluginsQueue.status === 202) {
-            console.log("queue is running");
-          } else {
-            console.log("error happened while running queue");
-          }
-          setSelectedPluginDbId(-1);
-          setShowRunPluginButton(false);
-          updateSelectedAims;
-          getSearchResult();
+            setSelectedPluginDbId(-1);
+            setShowRunPluginButton(false);
+            // updateSelectedAims;
+            // getSearchResult();
 
     
   }
