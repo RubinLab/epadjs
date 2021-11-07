@@ -71,8 +71,9 @@ export function getAnnotations2() {
   return http.get(http.apiUrl() + "/projects/lite/aims");
 }
 
-export function searchAnnotations(body) {
-  return http.put(http.apiUrl() + "/search", body);
+export function searchAnnotations(body, bookmark) {
+  const url = `${http.apiUrl()}/search${bookmark ? `?bookmark=${bookmark}` : ``}`;
+  return http.put(url, body);
 }
 
 export function downloadAnnotations(optionObj, aimIDlist, projectID) {
@@ -177,8 +178,8 @@ export function uploadSegmentation(segmentation, segName, projectId = "lite") {
   segData.append("file", segmentation, `${segName}.dcm`);
   const config = {
     headers: {
-      "content-type": "multipart/form-data",
-    },
+      "content-type": "multipart/form-data"
+    }
   };
   return http.post(url, segData, config);
 }
