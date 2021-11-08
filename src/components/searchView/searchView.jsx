@@ -184,10 +184,10 @@ class SearchView extends Component {
       patients.length > 0
         ? patients
         : studies.length > 0
-        ? studies
-        : series.length > 0
-        ? series
-        : annotations;
+          ? studies
+          : series.length > 0
+            ? series
+            : annotations;
     selection.forEach((el, i) => {
       if (el.projectID === 'all' || el.projectID === 'nonassigned') {
         checkFromProjectID = true;
@@ -496,6 +496,7 @@ class SearchView extends Component {
       for (let st of selectedStudies) {
         studiesObj[st.studyUID] = await this.getSeriesData(st);
       }
+      console.log("total, openSeries length, maxPort", total, this.props.openSeries.length, maxPort);
       //check if enough room to display selection
       if (total + this.props.openSeries.length > maxPort) {
         this.props.dispatch(startLoading());
@@ -983,15 +984,15 @@ class SearchView extends Component {
           admin={this.props.admin}
           hideEyeIcon={hideEyeIcon}
           expandLevel={this.props.expandLevel}
-          // expanding={expanding}
+        // expanding={expanding}
         />
         {(this.props.showSeriesModal ||
           (isSerieSelectionOpen && !this.props.loading)) && (
-          <ProjectModal
-            seriesPassed={this.state.seriesList}
-            onCancel={this.closeSelectionModal}
-          />
-        )}
+            <ProjectModal
+              seriesPassed={this.state.seriesList}
+              onCancel={this.closeSelectionModal}
+            />
+          )}
         {/* {this.props.showSeriesModal && (
           <ProjectModal
             seriesPassed={this.props.seriesList}
