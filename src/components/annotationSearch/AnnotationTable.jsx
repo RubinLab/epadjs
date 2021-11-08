@@ -20,7 +20,7 @@ import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
 import SelectSerieModal from '../annotationsList/selectSerieModal';
 
-const defaultPageSize = 200;
+const defaultPageSize = 10;
 const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 
 const IndeterminateCheckbox = React.forwardRef(
@@ -76,6 +76,7 @@ function Table({
         pageIndex: 0,
         pageSize: defaultPageSize
       },
+      autoResetPage: false,
       manualPagination: true,
       pageCount
     },
@@ -120,7 +121,10 @@ function Table({
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())} style={{ padding: '0.5rem' }}>
+                <th
+                  {...column.getHeaderProps(column.getSortByToggleProps())}
+                  style={{ padding: '0.5rem' }}
+                >
                   {column.render('Header')}
                 </th>
               ))}
@@ -149,7 +153,7 @@ function Table({
               </tr>
             );
           })}
-          {noOfRows / 200 > 1 && (
+          {noOfRows / defaultPageSize > 1 && (
             <tr>
               <td colSpan="10000">
                 Showing {defaultPageSize * pageIndex}-
@@ -176,7 +180,7 @@ function Table({
               setPageSize(Number(e.target.value));
             }}
           >
-            {[200].map((pageSize, i) => (
+            {[defaultPageSize].map((pageSize, i) => (
               <option key={`${pageSize}-${i}`} value={pageSize}>
                 {pageSize}
               </option>
@@ -216,7 +220,11 @@ function AnnotationTable(props) {
   const [showSelectSeriesModal, setShowSelectSeriesModal] = useState(false);
   const [selected, setSelected] = useState({});
   // Render the UI for your table
-  const preparePageData = (rawData, pageSize = 200, pageIndex = 0) => {
+  const preparePageData = (
+    rawData,
+    pageSize = defaultPageSize,
+    pageIndex = 0
+  ) => {
     let pageData = [];
     setPageCount(Math.ceil(props.noOfRows / pageSize));
     const startIndex = pageSize * pageIndex;
