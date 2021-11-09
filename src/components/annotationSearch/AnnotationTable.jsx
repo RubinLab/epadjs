@@ -571,7 +571,7 @@ function AnnotationTable(props) {
         setPrevPageIndex(pageIndex);
         setCurrentPageIndex(pageIndex);
         if (props.data.length <= pageIndex * defaultPageSize) {
-          props.getNewData(props.bookmark);
+          props.getNewData(pageIndex);
         } else {
           preparePageData(props.data, defaultPageSize, pageIndex);
         }

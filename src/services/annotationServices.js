@@ -72,7 +72,9 @@ export function getAnnotations2() {
 }
 
 export function searchAnnotations(body, bookmark) {
-  const url = `${http.apiUrl()}/search${bookmark ? `?bookmark=${bookmark}` : ``}`;
+  const url = `${http.apiUrl()}/search${
+    bookmark ? `?bookmark=${bookmark}` : ``
+  }`;
   return http.put(url, body);
 }
 
@@ -93,8 +95,9 @@ export function downloadProjectAnnotation(pid) {
 }
 
 export function getAllAnnotations(bookmark) {
-  let url = http.apiUrl() + "/aims?format=summary";
-  url = bookmark ? `${url}&bookmark=${bookmark}` : url;
+  const url = `${http.apiUrl()}/aims?format=summary${
+    bookmark ? `&bookmark=${bookmark}` : ``
+  }`;
   return http.get(url);
 }
 
