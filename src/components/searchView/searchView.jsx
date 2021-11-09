@@ -962,6 +962,8 @@ class SearchView extends Component {
       showDeleteFromSysAlert
     } = this.state;
     const itemStr = noOfNotDeleted > 1 ? 'items' : 'item';
+    console.log("Is serie selection open, is loading", isSerieSelectionOpen, this.props.loading);
+    console.log("series list", this.state.seriesList);
     return (
       <>
         <Toolbar

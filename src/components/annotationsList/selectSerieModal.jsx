@@ -39,6 +39,7 @@ class selectSerieModal extends React.Component {
 
   //get the serie list
   componentDidMount = async () => {
+    console.log("seriesModal mounted");
     // this._isMounted = true;
     let selectionType = "";
     let { selectedStudies, selectedSeries, selectedAnnotations } = this.props;
