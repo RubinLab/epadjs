@@ -487,6 +487,7 @@ class SearchView extends Component {
     let groupedObj;
     let notOpenSeries = [];
     //if studies selected
+    console.log("selectedStudies", selectedStudies);
     if (selectedStudies.length > 0) {
       let total = 0;
       let studiesObj = {};
@@ -497,6 +498,7 @@ class SearchView extends Component {
         studiesObj[st.studyUID] = await this.getSeriesData(st);
       }
       console.log("total, openSeries length, maxPort", total, this.props.openSeries.length, maxPort);
+
       //check if enough room to display selection
       if (total + this.props.openSeries.length > maxPort) {
         this.props.dispatch(startLoading());
