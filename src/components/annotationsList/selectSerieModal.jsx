@@ -43,6 +43,7 @@ class selectSerieModal extends React.Component {
     // this._isMounted = true;
     let selectionType = "";
     let { selectedStudies, selectedSeries, selectedAnnotations } = this.props;
+    console.log("this props", this.props);
     selectedStudies = Object.values(selectedStudies);
     selectedSeries = Object.values(selectedSeries);
     selectedAnnotations = Object.values(selectedAnnotations);
@@ -206,6 +207,7 @@ class selectSerieModal extends React.Component {
     let series = Array.isArray(seriesPassed)
       ? seriesPassed
       : Object.values(seriesPassed);
+    console.log("series in render selection", series);
     let keys = Object.keys(this.props.seriesPassed);
     let count = 0;
 
