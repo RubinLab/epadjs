@@ -980,6 +980,7 @@ const AnnotationSearch = props => {
             getNewData={getNewData}
             bookmark={bookmark}
             switchToDisplay={() => props.history.push('/display')}
+            pid={props.pid}
           />
         )}
       </div>

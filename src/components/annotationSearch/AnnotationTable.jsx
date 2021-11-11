@@ -1,6 +1,12 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { connect } from 'react-redux';
-import { useTable, usePagination, useRowSelect, useSortBy } from 'react-table';
+import {
+  useTable,
+  usePagination,
+  useRowSelect,
+  useSortBy,
+  useControlledState
+} from 'react-table';
 import { Link } from 'react-router-dom';
 import { FaRegEye } from 'react-icons/fa';
 import { clearCarets, convertDateFormat } from '../../Utils/aid.js';
@@ -51,7 +57,9 @@ function Table({
   updateSelectedAims,
   pageCount,
   noOfRows,
-  fetchData
+  fetchData,
+  controlledPageIndex, 
+  handlePageIndex
 }) {
   // Use the state and functions returned from useTable to build your UI
   const {
@@ -73,12 +81,20 @@ function Table({
       columns,
       data,
       initialState: {
-        pageIndex: 0,
         pageSize: defaultPageSize
       },
       autoResetPage: false,
       manualPagination: true,
-      pageCount
+      pageCount,
+      useControlledState: state => {
+        return React.useMemo(
+          () => ({
+            ...state,
+            pageIndex: controlledPageIndex
+          }),
+          [state, controlledPageIndex]
+        );
+      }
     },
     useSortBy,
     usePagination,
@@ -107,7 +123,6 @@ function Table({
   React.useEffect(() => {
     fetchData({ pageIndex, pageSize });
   }, [fetchData, pageIndex, pageSize]);
-
   return (
     <>
       <table {...getTableProps()} style={{ width: '100%' }}>
@@ -168,7 +183,8 @@ function Table({
         <div className="pagination">
           <button
             onClick={() => {
-              previousPage();
+              // previousPage();
+              handlePageIndex('prev')
             }}
             disabled={!canPreviousPage}
           >
@@ -188,7 +204,9 @@ function Table({
           </select>
           <button
             onClick={() => {
-              nextPage();
+              // nextPage();
+              handlePageIndex('next')
+
             }}
             disabled={!canNextPage}
           >
@@ -219,6 +237,13 @@ function AnnotationTable(props) {
   const [data, setData] = useState([]);
   const [showSelectSeriesModal, setShowSelectSeriesModal] = useState(false);
   const [selected, setSelected] = useState({});
+
+  const handlePageIndex = act => {
+    let newIndex = act === 'prev' ? currentPageIndex - 1 : currentPageIndex + 1;
+    newIndex = newIndex < 0 ? 0 : newIndex > pageCount ? pageCount : newIndex;
+    setCurrentPageIndex(newIndex)
+  };
+
   // Render the UI for your table
   const preparePageData = (
     rawData,
@@ -236,6 +261,11 @@ function AnnotationTable(props) {
     });
     setData(pageData);
   };
+
+  useEffect(() => {
+    preparePageData(props.data);
+    setCurrentPageIndex(0);
+  }, [props.pid]);
 
   useEffect(() => {
     preparePageData(props.data, defaultPageSize, currentPageIndex);
@@ -593,6 +623,8 @@ function AnnotationTable(props) {
         noOfRows={props.noOfRows}
         fetchData={fetchData}
         updateSelectedAims={props.updateSelectedAims}
+        controlledPageIndex={currentPageIndex}
+        handlePageIndex={handlePageIndex}
       />
       {showSelectSeriesModal && (
         <SelectSerieModal
