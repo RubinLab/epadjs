@@ -42,7 +42,7 @@ export const UPDATE_PATIENT_AIM_DELETE =
   'epadjs/annotationList/UPDATE_PATIENT_AIM_DELETE';
 export const GET_NOTIFICATIONS = 'epadjs/annotationList/GET_NOTIFICATIONS';
 export const CLEAR_ACTIVE_AIMID = 'epadjs/annotationList/CLEAR_ACTIVE_AIMID';
-export const UPDATE_IMAGE_INDEX = 'epadjs/annotationList/UPDATE_IMAGE_INDEX ';
+// export const UPDATE_IMAGE_INDEX = 'epadjs/annotationList/UPDATE_IMAGE_INDEX ';
 export const GET_PROJECT_MAP = 'epadjs/annotationList/GET_PROJECT_MAP';
 export const SET_SEG_LABEL_MAP_INDEX =
   'epadjs/annotationList/SET_SEG_LABEL_MAP_INDEX';

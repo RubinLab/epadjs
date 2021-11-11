@@ -34,7 +34,7 @@ import {
   UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
   CLEAR_ACTIVE_AIMID,
-  UPDATE_IMAGE_INDEX,
+  // UPDATE_IMAGE_INDEX,
   GET_PROJECT_MAP,
   SET_SEG_LABEL_MAP_INDEX,
   GET_TEMPLATES,
@@ -81,17 +81,16 @@ const asyncReducer = (state = initialState, action) => {
     let aimIDClearedOPenSeries = [];
     let aimRefs = {};
     switch (action.type) {
-      case UPDATE_IMAGE_INDEX:
-        const updatedOpenSeries = state.openSeries.map((serie) => {
-          const newSerie = { ...serie };
-          if (serie.imageAnnotations) {
-            newSerie.imageAnnotations = { ...serie.imageAnnotations };
-          }
-          return newSerie;
-        });
-
-        updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
-        return { ...state, openSeries: updatedOpenSeries };
+      // case UPDATE_IMAGE_INDEX:
+      //   const updatedOpenSeries = state.openSeries.map((serie) => {
+      //     const newSerie = { ...serie };
+      //     if (serie.imageAnnotations) {
+      //       newSerie.imageAnnotations = { ...serie.imageAnnotations };
+      //     }
+      //     return newSerie;
+      //   });
+      //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
+      //   return { ...state, openSeries: updatedOpenSeries };
       case GET_NOTIFICATIONS:
         const { uploadedPid, lastEventId, refresh, notificationAction } =
           action.payload;

@@ -56,6 +56,8 @@ import {
 import { getAllTemplates } from "../../services/templateServices";
 import { getImageIdAnnotations } from "aimapi";
 
+// Invoked at leftsidebar 
+// one of the first actions once the user sign in
 export const getProjectMap = (projectMap) => {
   return { type: GET_PROJECT_MAP, projectMap };
 };
@@ -76,6 +78,7 @@ export const getTemplates = () => {
   };
 };
 
+// closes all ports in display view
 export const clearGrid = (item) => {
   return { type: CLEAR_GRID };
 };
@@ -84,15 +87,19 @@ export const clearActivePortAimID = () => {
   return { type: CLEAR_ACTIVE_AIMID };
 };
 
+// clears aimID of the all open series
 export const clearAimId = () => {
   return {
     type: CLEAR_AIMID,
   };
 };
 
-export const updateImageIndex = (imageIndex) => {
-  return { type: UPDATE_IMAGE_INDEX, imageIndex };
-};
+// commented out at Nov 11, 
+// this action is not used anywhere by the time of comment out
+// export const updateImageIndex = (imageIndex) => {
+//   return { type: UPDATE_IMAGE_INDEX, imageIndex };
+// };
+
 export const updateImageId = (imageID) => {
   return {
     type: UPDATE_IMAGEID,
