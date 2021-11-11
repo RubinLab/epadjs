@@ -1,5 +1,4 @@
 import {
-  LOAD_ANNOTATIONS,
   LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
   LOAD_PATIENT,
@@ -199,6 +198,7 @@ export const jumpToAim = (seriesUID, aimID, index) => {
 //   };
 // };
 
+// invoked when patient select checkbox clicked
 export const selectPatient = (selectedPatientObj) => {
   let { projectID, subjectName, numberOfAnnotations, index } =
     selectedPatientObj;
@@ -210,6 +210,7 @@ export const selectPatient = (selectedPatientObj) => {
   };
 };
 
+// invoked when project dropdown used 
 export const selectProject = (projectID) => {
   return {
     type: SELECT_PROJECT,
@@ -217,6 +218,7 @@ export const selectProject = (projectID) => {
   };
 };
 
+// invoked when study select checkbox clicked
 export const selectStudy = (selectedStudyObj) => {
   let {
     studyUID,
@@ -243,6 +245,7 @@ export const selectStudy = (selectedStudyObj) => {
   };
 };
 
+// invoked when series select checkbox clicked
 export const selectSerie = (selectedSerieObj, studyDescription) => {
   const {
     seriesUID,
@@ -272,6 +275,7 @@ export const selectSerie = (selectedSerieObj, studyDescription) => {
   };
 };
 
+// invoked when annotation select checkbox clicked
 export const selectAnnotation = (
   selectedAnnotationObj,
   studyDescription,
@@ -311,6 +315,8 @@ export const selectAnnotation = (
   };
 };
 
+// opens a new port to display series
+// adds series details to the array
 export const addToGrid = (serie, annotation) => {
   let { patientID, studyUID, seriesUID, projectID, patientName } = serie;
   projectID = projectID ? projectID : "lite";
@@ -328,22 +334,11 @@ export const addToGrid = (serie, annotation) => {
   return { type: ADD_TO_GRID, reference };
 };
 
+// toggle annotation details at the right side bar in display view
 export const showAnnotationWindow = () => {
   return { type: SHOW_ANNOTATION_WINDOW };
 };
 
-const loadAnnotations = () => {
-  return {
-    type: LOAD_ANNOTATIONS,
-  };
-};
-
-// export const getPatient = patient => {
-//   return {
-//     type: GET_PATIENT,
-//     patient
-//   };
-// };
 export const openProjectSelectionModal = () => {
   return {
     type: OPEN_PROJECT_MODAL,

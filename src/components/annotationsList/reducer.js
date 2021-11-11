@@ -1,5 +1,4 @@
 import {
-  LOAD_ANNOTATIONS,
   LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
   LOAD_PATIENT,
@@ -187,12 +186,6 @@ const asyncReducer = (state = initialState, action) => {
           // patients: delPatients,
           activePort: delActivePort,
         };
-      case LOAD_ANNOTATIONS:
-        return Object.assign({}, state, {
-          loading: true,
-
-          error: false,
-        });
       case LOAD_ANNOTATIONS_SUCCESS:
         return { ...state, loading: false };
       case VIEWPORT_FULL:

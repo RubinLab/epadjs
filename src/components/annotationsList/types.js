@@ -1,4 +1,3 @@
-export const LOAD_ANNOTATIONS = 'epadjs/annotationList/LOAD_ANNOTATIONS';
 export const LOAD_ANNOTATIONS_SUCCESS =
   'epadjs/annotationList/LOAD_ANNOTATIONS_SUCCESS';
 export const LOAD_ANNOTATIONS_ERROR =
@@ -26,7 +25,6 @@ export const SELECT_STUDY = 'epadjs/annotationList/SELECT_STUDY';
 export const SELECT_ANNOTATION = 'epadjs/annotationList/SELECT_ANNOTATION';
 export const CLEAR_GRID = 'epadjs/annotationList/CLEAR_GRID ';
 export const CLEAR_SELECTION = 'epadjs/annotationList/CLEAR_SELECTION ';
-export const GET_PATIENT = 'epadjs/annotationList/GET_PATIENT';
 // export const DISPLAY_SINGLE_AIM = 'epadjs/annotationList/DISPLAY_SINGLE_AIM';
 export const JUMP_TO_AIM = 'epadjs/annotationList/JUMP_TO_AIM';
 export const ADD_TO_GRID = 'epadjs/annotationList/ADD_TO_GRID';
