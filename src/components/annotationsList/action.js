@@ -100,6 +100,8 @@ export const clearAimId = () => {
 //   return { type: UPDATE_IMAGE_INDEX, imageIndex };
 // };
 
+// imageId is used to display annotation details 
+// at right side bar
 export const updateImageId = (imageID) => {
   return {
     type: UPDATE_IMAGEID,
@@ -113,6 +115,7 @@ export const closeSerie = () => {
   };
 };
 
+// store data so components can update horizantally
 export const getNotificationsData = (
   uploadedPid,
   lastEventId,
@@ -147,16 +150,21 @@ export const updatePatientOnAimDelete = (aimRefs) => {
   return { type: UPDATE_PATIENT_AIM_DELETE, aimRefs };
 };
 
+// clear selected patients/studies/series/annotations from the store
 export const clearSelection = (selectionType) => {
   return { type: CLEAR_SELECTION, selectionType };
 };
 
+// flag for rerendering UI - showing spinners etc.
 export const loadCompleted = () => {
   return { type: LOAD_COMPLETED };
 };
+
+// flag for rerendering UI - showing spinners etc.
 export const startLoading = () => {
   return { type: START_LOADING };
 };
+
 export const loadPatient = () => {
   return { type: LOAD_PATIENT };
 };
@@ -167,25 +175,29 @@ export const loadPatientError = (err) => {
 export const loadPatientSuccess = (patient) => {
   return { type: LOAD_PATIENT_SUCCESS, patient };
 };
+
+//fill aimID to jump on click eyeicon/annotations etc
 export const jumpToAim = (seriesUID, aimID, index) => {
   return {
     type: JUMP_TO_AIM,
     payload: { seriesUID, aimID, index },
   };
 };
-export const displaySingleAim = (
-  patientID,
-  studyUID,
-  seriesUID,
-  aimID,
-  index
-) => {
-  return {
-    type: DISPLAY_SINGLE_AIM,
 
-    payload: { patientID, studyUID, seriesUID, aimID },
-  };
-};
+// commented out at Nov 11, 
+// this action is not used anywhere by the time of comment out
+// export const displaySingleAim = (
+//   patientID,
+//   studyUID,
+//   seriesUID,
+//   aimID,
+//   index
+// ) => {
+//   return {
+//     type: DISPLAY_SINGLE_AIM,
+//     payload: { patientID, studyUID, seriesUID, aimID },
+//   };
+// };
 
 export const selectPatient = (selectedPatientObj) => {
   let { projectID, subjectName, numberOfAnnotations, index } =
