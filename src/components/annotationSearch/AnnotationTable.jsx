@@ -58,7 +58,7 @@ function Table({
   pageCount,
   noOfRows,
   fetchData,
-  controlledPageIndex, 
+  controlledPageIndex,
   handlePageIndex
 }) {
   // Use the state and functions returned from useTable to build your UI
@@ -183,8 +183,7 @@ function Table({
         <div className="pagination">
           <button
             onClick={() => {
-              // previousPage();
-              handlePageIndex('prev')
+              handlePageIndex('prev');
             }}
             disabled={!canPreviousPage}
           >
@@ -204,9 +203,7 @@ function Table({
           </select>
           <button
             onClick={() => {
-              // nextPage();
-              handlePageIndex('next')
-
+              handlePageIndex('next');
             }}
             disabled={!canNextPage}
           >
@@ -232,7 +229,6 @@ function Table({
 
 function AnnotationTable(props) {
   const [pageCount, setPageCount] = useState(0);
-  const [prevPageIndex, setPrevPageIndex] = useState(0);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [data, setData] = useState([]);
   const [showSelectSeriesModal, setShowSelectSeriesModal] = useState(false);
@@ -240,8 +236,9 @@ function AnnotationTable(props) {
 
   const handlePageIndex = act => {
     let newIndex = act === 'prev' ? currentPageIndex - 1 : currentPageIndex + 1;
-    newIndex = newIndex < 0 ? 0 : newIndex > pageCount ? pageCount : newIndex;
-    setCurrentPageIndex(newIndex)
+    newIndex =
+      newIndex < 0 ? 0 : newIndex + 1 > pageCount ? pageCount : newIndex;
+    setCurrentPageIndex(newIndex);
   };
 
   // Render the UI for your table
@@ -597,16 +594,11 @@ function AnnotationTable(props) {
 
   const fetchData = useCallback(
     ({ pageIndex }) => {
-      if (pageIndex !== prevPageIndex) {
-        setPrevPageIndex(pageIndex);
-        setCurrentPageIndex(pageIndex);
-        if (props.data.length <= pageIndex * defaultPageSize) {
-          props.getNewData(pageIndex);
-        } else {
-          preparePageData(props.data, defaultPageSize, pageIndex);
-        }
+      setCurrentPageIndex(pageIndex);
+      if (props.data.length <= pageIndex * defaultPageSize) {
+        props.getNewData(pageIndex);
       } else {
-        setCurrentPageIndex(pageIndex);
+        preparePageData(props.data, defaultPageSize, pageIndex);
       }
     },
     [props.bookmark]
