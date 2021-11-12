@@ -1,5 +1,4 @@
 import {
-  LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
   LOAD_PATIENT,
   LOAD_PATIENT_SUCCESS,
@@ -12,7 +11,6 @@ import {
   CHANGE_ACTIVE_PORT,
   LOAD_SERIE_SUCCESS,
   SHOW_ANNOTATION_WINDOW /*???*/,
-  OPEN_PROJECT_MODAL,
   CLEAR_GRID,
   CLEAR_SELECTION,
   SELECT_SERIE,
@@ -186,14 +184,9 @@ const asyncReducer = (state = initialState, action) => {
           // patients: delPatients,
           activePort: delActivePort,
         };
-      case LOAD_ANNOTATIONS_SUCCESS:
-        return { ...state, loading: false };
       case VIEWPORT_FULL:
         const viewPortStatus = !state.showGridFullAlert;
         return { ...state, showGridFullAlert: viewPortStatus };
-      case OPEN_PROJECT_MODAL:
-        const projectModalStatus = !state.showProjectModal;
-        return { ...state, showProjectModal: projectModalStatus };
       case LOAD_SERIE_SUCCESS:
         let imageAddedSeries = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
@@ -244,7 +237,6 @@ const asyncReducer = (state = initialState, action) => {
           openSeries: imageAddedSeries,
         });
         return result;
-
       case LOAD_ANNOTATIONS_ERROR:
         return Object.assign({}, state, {
           loading: false,

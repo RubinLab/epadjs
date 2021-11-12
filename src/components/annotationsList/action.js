@@ -1,5 +1,4 @@
 import {
-  LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
   LOAD_PATIENT,
   LOAD_PATIENT_SUCCESS,
@@ -12,7 +11,6 @@ import {
   CHANGE_ACTIVE_PORT,
   LOAD_SERIE_SUCCESS,
   SHOW_ANNOTATION_WINDOW,
-  OPEN_PROJECT_MODAL,
   CLEAR_GRID,
   DISPLAY_SINGLE_AIM,
   JUMP_TO_AIM,
@@ -54,6 +52,7 @@ import {
 } from "../../services/annotationServices";
 import { getAllTemplates } from "../../services/templateServices";
 import { getImageIdAnnotations } from "aimapi";
+import { ConsoleWriter } from "istanbul-lib-report";
 
 // Invoked at leftsidebar 
 // one of the first actions once the user sign in
@@ -339,29 +338,23 @@ export const showAnnotationWindow = () => {
   return { type: SHOW_ANNOTATION_WINDOW };
 };
 
-export const openProjectSelectionModal = () => {
-  return {
-    type: OPEN_PROJECT_MODAL,
-  };
-};
-const annotationsLoaded = () => {
-  return {
-    type: LOAD_ANNOTATIONS_SUCCESS,
-  };
-};
-
+// it saves the error message to the store 
+// TODO: check if the stored error message is used somewhere
 export const annotationsLoadingError = (error) => {
   return {
     type: LOAD_ANNOTATIONS_ERROR,
   };
 };
 
+// TODO: we are showing series selection modal by October 2021
+// Check if this flag is still needed
 export const alertViewPortFull = () => {
   return {
     type: VIEWPORT_FULL,
   };
 };
 
+// toggles show hide annotation on image at display view right bar
 export const updateAnnotationDisplay = (
   patient,
   study,
@@ -369,12 +362,14 @@ export const updateAnnotationDisplay = (
   annotation,
   isDisplayed
 ) => {
+  console.log(" triggered!!!!!")
   return {
     type: UPDATE_ANNOTATION_DISPLAY,
     payload: { patient, study, serie, annotation, isDisplayed },
   };
 };
 
+// invoked at display view right bar 
 export const toggleAllAnnotations = (seriesUID, displayStatus) => {
   return {
     type: TOGGLE_ALL_ANNOTATIONS,
@@ -382,6 +377,7 @@ export const toggleAllAnnotations = (seriesUID, displayStatus) => {
   };
 };
 
+// invoked at display view right bar 
 export const toggleAllLabels = (serieID, checked) => {
   return {
     type: TOGGLE_ALL_LABELS,
@@ -389,6 +385,7 @@ export const toggleAllLabels = (serieID, checked) => {
   };
 };
 
+// invoked at display view right bar 
 export const toggleSingleLabel = (serieID, aimID) => {
   return {
     type: TOGGLE_LABEL,
@@ -403,6 +400,7 @@ export const changeActivePort = (portIndex) => {
   };
 };
 
+// helpeer method
 export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann) => {
   return {
     type: LOAD_SERIE_SUCCESS,
@@ -410,6 +408,7 @@ export const singleSerieLoaded = (ref, aimsData, serID, imageData, ann) => {
   };
 };
 
+// helper method internal use in action
 const getAimListFields = (aims, ann) => {
   try {
     if (!Array.isArray(aims)) aims = [aims];
@@ -502,6 +501,7 @@ const getAimListFields = (aims, ann) => {
   }
 };
 
+// helper method internal use in action
 const getRequiredFields = (arr, type, selectedID) => {
   let result = {};
   if (arr) {
@@ -553,6 +553,7 @@ const getRequiredFields = (arr, type, selectedID) => {
   return result;
 };
 
+// TODO: it may be deleted after getWholeData discarded 
 const getStudiesData = async (dataObj, projectID, patientID, selectedID) => {
   try {
     const { data: studies } = await getStudies(projectID, patientID);
@@ -574,6 +575,7 @@ const getStudiesData = async (dataObj, projectID, patientID, selectedID) => {
   }
 };
 
+// TODO: it may be deleted after getWholeData discarded 
 const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
   try {
     const { data: series } = await getSeries(projectID, patientID, studyID);
@@ -593,6 +595,7 @@ const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
   }
 };
 
+// TODO: it may be deleted after getWholeData discarded 
 const getAnnotationData = async (
   projectId,
   subjectId,
@@ -630,10 +633,11 @@ const getAnnotationData = async (
   }
 };
 
+// action to open series
 export const getSingleSerie = (serie, annotation) => {
   return async (dispatch, getState) => {
     try {
-      await dispatch(loadAnnotations());
+      // await dispatch(loadAnnotations());
       let { patientID, studyUID, seriesUID, numberOfAnnotations } = serie;
       let reference = {
         patientID,
@@ -655,6 +659,7 @@ export const getSingleSerie = (serie, annotation) => {
   };
 };
 
+// TODO: check with getWholeData, this may be unnecessary
 export const updateSingleSerie = (serie, annotation) => {
   return async (dispatch, getState) => {
     let { patientID, studyUID, seriesUID, numberOfAnnotations } = serie;
@@ -672,33 +677,7 @@ export const updateSingleSerie = (serie, annotation) => {
   };
 };
 
-const extractSerieAims = (arr, seriesID) => {
-  let serieAims = [];
-  arr.forEach((aim) => {
-    const serieUID =
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-        .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy
-        .imageSeries.instanceUid.root;
-    if (serieUID === seriesID) {
-      serieAims.push(aim);
-    }
-  });
-  return serieAims;
-};
-
-const extractStudyAims = (arr) => {
-  let studyAims = [];
-  arr.forEach((aim) => {
-    const serieUID =
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-        .imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy
-        .imageSeries.instanceUid.root;
-    if (!serieUID) {
-      studyAims.push(aim);
-    }
-  });
-  return studyAims;
-};
+// ----- / ----- //
 
 const extractNonMarkupAims = (arr, seriesID) => {
   let studyAims = [];
@@ -865,35 +844,3 @@ export const aimDelete = (aimRefs) => {
   return { type: AIM_DELETE, payload: aimRefs };
 };
 
-// gets one patient and all the studys->series->annotations under it
-// export const getAnnotationListData = (serie, study, annotation) => {
-//   return async (dispatch, getState) => {
-//     let { projectID, patientID, patientName, studyUID } = serie || study;
-//     projectID = projectID ? projectID : "lite";
-
-//     let selectedID;
-//     let seriesUID;
-//     if (serie) {
-//       selectedID = serie.seriesUID;
-//       seriesUID = serie.seriesUID;
-//     } else if (study) {
-//       selectedID = study.studyUID;
-//     }
-//     let summaryData = await dispatch(getWholeData(serie, study, annotation));
-
-//     let aimsData = await dispatch(
-//       getSingleSerieData({ projectID, patientID, studyUID, seriesUID })
-//     );
-
-//     const reference = {
-//       patientID,
-//       studyUID,
-//       seriesUID,
-//       aimID: annotation
-//     };
-
-//     dispatch(
-//       annotationsLoaded(summaryData, aimsData, seriesUID, patientID, reference)
-//     );
-//   };
-// };
