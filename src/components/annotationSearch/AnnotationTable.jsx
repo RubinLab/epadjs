@@ -34,6 +34,8 @@ const IndeterminateCheckbox = React.forwardRef(
     const defaultRef = React.useRef();
     const resolvedRef = ref || defaultRef;
 
+    console.log(rest.selected);
+
     React.useEffect(() => {
       resolvedRef.current.indeterminate = indeterminate;
     }, [resolvedRef, indeterminate]);
@@ -43,6 +45,7 @@ const IndeterminateCheckbox = React.forwardRef(
           type="checkbox"
           ref={resolvedRef}
           {...rest}
+          checked={rest.selected}
           onClick={() => rest.updateSelectedAims(rest.data)}
         />
       </>
@@ -59,7 +62,8 @@ function Table({
   noOfRows,
   fetchData,
   controlledPageIndex,
-  handlePageIndex
+  handlePageIndex,
+  listOfSelecteds
 }) {
   // Use the state and functions returned from useTable to build your UI
   const {
@@ -98,26 +102,27 @@ function Table({
     },
     useSortBy,
     usePagination,
-    useRowSelect,
-    hooks => {
-      hooks.visibleColumns.push(columns => [
-        // Let's make a column for selection
-        {
-          id: 'selection',
-          Cell: ({ row }) => (
-            <div>
-              <IndeterminateCheckbox
-                {...row.getToggleRowSelectedProps()}
-                data={row.original}
-                updateSelectedAims={updateSelectedAims}
-                // onChange={() => updateSelectedAims(row.original)}
-              />
-            </div>
-          )
-        },
-        ...columns
-      ]);
-    }
+    useRowSelect
+    // hooks => {
+    //   hooks.visibleColumns.push(columns => [
+    //     // Let's make a column for selection
+    //     {
+    //       id: 'selection',
+    //       Cell: ({ row }) => (
+    //         <div>
+    //           <IndeterminateCheckbox
+    //             {...row.getToggleRowSelectedProps()}
+    //             data={row.original}
+    //             updateSelectedAims={updateSelectedAims}
+    //             selected={listOfSelecteds.includes(row.original.aimID)}
+    //             // onChange={() => updateSelectedAims(row.original)}
+    //           />
+    //         </div>
+    //       )
+    //     },
+    //     ...columns
+    //   ]);
+    // }
   );
 
   React.useEffect(() => {
@@ -233,6 +238,7 @@ function AnnotationTable(props) {
   const [data, setData] = useState([]);
   const [showSelectSeriesModal, setShowSelectSeriesModal] = useState(false);
   const [selected, setSelected] = useState({});
+  const [listOfSelecteds, setListOfSelecteds] = useState([]);
 
   const handlePageIndex = act => {
     let newIndex = act === 'prev' ? currentPageIndex - 1 : currentPageIndex + 1;
@@ -258,6 +264,11 @@ function AnnotationTable(props) {
     });
     setData(pageData);
   };
+
+  useEffect(() => {
+    const selectedList = Object.keys(props.selectedAnnotations);
+    setListOfSelecteds(selectedList);
+  }, [props.selectedAnnotations]);
 
   useEffect(() => {
     preparePageData(props.data);
@@ -411,18 +422,19 @@ function AnnotationTable(props) {
 
   const columns = React.useMemo(
     () => [
-      // {
-      //   id: 'study-desc',
-      //   Cell: ({ row }) => {
-      //     return (
-      //       <input
-      //         type="checkbox"
-      //         //   checked={selected && aimID ? selected[aimID] : false}
-      //         onChange={() => props.updateSelectedAims(row.original)}
-      //       />
-      //     );
-      //   }
-      // },
+      {
+        id: 'study-desc',
+        Cell: ({ row }) => {
+          console.log(" --> rerender!");
+          return (
+            <input
+              type="checkbox"
+              checked={props.selectedAnnotations[row.original.aimID] ? true : false}
+              onChange={() => props.updateSelectedAims(row.original)}
+            />
+          );
+        }
+      },
       {
         Header: 'Open',
         sortable: false,
@@ -589,7 +601,7 @@ function AnnotationTable(props) {
         }
       }
     ],
-    []
+    [props.selectedAnnotations]
   );
 
   const fetchData = useCallback(
@@ -610,13 +622,14 @@ function AnnotationTable(props) {
         columns={columns}
         data={data}
         selected={props.selected}
-        updateSelectedAims={props.updateSelectedAims}
+        // updateSelectedAims={props.updateSelectedAims}
         pageCount={pageCount}
         noOfRows={props.noOfRows}
         fetchData={fetchData}
         updateSelectedAims={props.updateSelectedAims}
         controlledPageIndex={currentPageIndex}
         handlePageIndex={handlePageIndex}
+        listOfSelecteds={listOfSelecteds}
       />
       {showSelectSeriesModal && (
         <SelectSerieModal
@@ -639,7 +652,8 @@ const mapsStateToProps = state => {
     uploadedPid: state.annotationsListReducer.uploadedPid,
     lastEventId: state.annotationsListReducer.lastEventId,
     refresh: state.annotationsListReducer.refresh,
-    projectMap: state.annotationsListReducer.projectMap
+    projectMap: state.annotationsListReducer.projectMap,
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
   };
 };
 
