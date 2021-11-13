@@ -12,6 +12,7 @@ export default function Popup({ children }) {
 
   return (
     <Draggable
+      //  handle="plugin_runtime_params_header"
       onClick={pluginWindowClickHandler}
       onMouseDown={pluginWindowClickHandler}
       onMouseMove={pluginWindowClickHandler}
