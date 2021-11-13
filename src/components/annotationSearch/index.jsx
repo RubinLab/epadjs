@@ -107,7 +107,7 @@ const AnnotationSearch = props => {
 
   const populateSearchResult = (res, pagination) => {
     const result = Array.isArray(res) ? res[0] : res;
-    if (pagination) {
+    if (typeof pagination === 'number' || pagination) {
       setData(data.concat(result.data.rows));
     } else {
       setData(result.data.rows);
@@ -119,20 +119,23 @@ const AnnotationSearch = props => {
     }
   };
 
-  const getAnnotationsOfProjets = () => {
+  const getAnnotationsOfProjets = pageIndex => {
+    const bm = pageIndex ? bookmark : '';
     const promise =
       props.pid === 'all'
-        ? getAllAnnotations()
-        : getSummaryAnnotations(props.pid);
+        ? getAllAnnotations(bm)
+        : getSummaryAnnotations(props.pid, bm);
     Promise.all([promise])
       .then(res => {
-        populateSearchResult(res);
+        populateSearchResult(res, pageIndex);
       })
       .catch(err => console.error(err));
   };
 
   useEffect(() => {
     setSelectedProject(props.pid);
+    setQuery('');
+    setBookmark('');
     setCheckboxSelected(false);
 
     if (props.searchQuery) {
@@ -281,7 +284,7 @@ const AnnotationSearch = props => {
     );
   };
 
-  const getSearchResult = page => {
+  const getSearchResult = pageIndex => {
     if (query.length === 0) {
       getAnnotationsOfProjets();
     } else {
@@ -306,23 +309,28 @@ const AnnotationSearch = props => {
           }
         };
         props.setQuery(queryToSave);
-        searchAnnotations({ query: searchQuery })
+        let promise;
+        if (pageIndex) {
+          promise = searchAnnotations({ query: searchQuery }, bookmark);
+        } else {
+          promise = searchAnnotations({ query: searchQuery });
+        }
+
+        promise
           .then(res => {
-            populateSearchResult(res);
+            populateSearchResult(res, pageIndex);
           })
           .catch(err => console.error(err));
       }
     }
   };
 
-  const getNewData = bm => {
-    getAllAnnotations(bm)
-      .then(res => {
-        populateSearchResult(res, true);
-      })
-      .catch(err => console.error(err));
-    // get the new data with bookmark
-    // concatanate the new 200 lines
+  const getNewData = pageIndex => {
+    if (query) {
+      getSearchResult(pageIndex);
+    } else {
+      getAnnotationsOfProjets(pageIndex);
+    }
   };
 
   const seperateParanthesis = arr => {
@@ -763,6 +771,7 @@ const AnnotationSearch = props => {
                   setSelectedProject('');
                   setCheckboxSelected(true);
                 }
+                setBookmark('');
               }}
               onMouseDown={e => e.stopPropagation()}
               style={{ margin: '0rem 1rem', padding: '1.8px' }}
@@ -1109,6 +1118,7 @@ const AnnotationSearch = props => {
           className="btn btn-secondary annotationSearch-btn"
           onClick={() => {
             setQuery('');
+            setCheckboxSelected(false);
             getAnnotationsOfProjets();
           }}
           // onClick={parseIt}
@@ -1197,6 +1207,7 @@ const AnnotationSearch = props => {
             getNewData={getNewData}
             bookmark={bookmark}
             switchToDisplay={() => props.history.push('/display')}
+            pid={props.pid}
           />
         )}
       </div>

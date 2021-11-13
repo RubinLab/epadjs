@@ -1,6 +1,12 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { connect } from 'react-redux';
-import { useTable, usePagination, useRowSelect, useSortBy } from 'react-table';
+import {
+  useTable,
+  usePagination,
+  useRowSelect,
+  useSortBy,
+  useControlledState
+} from 'react-table';
 import { Link } from 'react-router-dom';
 import { FaRegEye } from 'react-icons/fa';
 import { clearCarets, convertDateFormat } from '../../Utils/aid.js';
@@ -28,6 +34,8 @@ const IndeterminateCheckbox = React.forwardRef(
     const defaultRef = React.useRef();
     const resolvedRef = ref || defaultRef;
 
+    console.log(rest.selected);
+
     React.useEffect(() => {
       resolvedRef.current.indeterminate = indeterminate;
     }, [resolvedRef, indeterminate]);
@@ -37,6 +45,7 @@ const IndeterminateCheckbox = React.forwardRef(
           type="checkbox"
           ref={resolvedRef}
           {...rest}
+          checked={rest.selected}
           onClick={() => rest.updateSelectedAims(rest.data)}
         />
       </>
@@ -51,7 +60,10 @@ function Table({
   updateSelectedAims,
   pageCount,
   noOfRows,
-  fetchData
+  fetchData,
+  controlledPageIndex,
+  handlePageIndex,
+  listOfSelecteds
 }) {
   // Use the state and functions returned from useTable to build your UI
   const {
@@ -73,40 +85,49 @@ function Table({
       columns,
       data,
       initialState: {
-        pageIndex: 0,
         pageSize: defaultPageSize
       },
+      autoResetPage: false,
       manualPagination: true,
-      pageCount
+      pageCount,
+      useControlledState: state => {
+        return React.useMemo(
+          () => ({
+            ...state,
+            pageIndex: controlledPageIndex
+          }),
+          [state, controlledPageIndex]
+        );
+      }
     },
     useSortBy,
     usePagination,
-    useRowSelect,
-    hooks => {
-      hooks.visibleColumns.push(columns => [
-        // Let's make a column for selection
-        {
-          id: 'selection',
-          Cell: ({ row }) => (
-            <div>
-              <IndeterminateCheckbox
-                {...row.getToggleRowSelectedProps()}
-                data={row.original}
-                updateSelectedAims={updateSelectedAims}
-                // onChange={() => updateSelectedAims(row.original)}
-              />
-            </div>
-          )
-        },
-        ...columns
-      ]);
-    }
+    useRowSelect
+    // hooks => {
+    //   hooks.visibleColumns.push(columns => [
+    //     // Let's make a column for selection
+    //     {
+    //       id: 'selection',
+    //       Cell: ({ row }) => (
+    //         <div>
+    //           <IndeterminateCheckbox
+    //             {...row.getToggleRowSelectedProps()}
+    //             data={row.original}
+    //             updateSelectedAims={updateSelectedAims}
+    //             selected={listOfSelecteds.includes(row.original.aimID)}
+    //             // onChange={() => updateSelectedAims(row.original)}
+    //           />
+    //         </div>
+    //       )
+    //     },
+    //     ...columns
+    //   ]);
+    // }
   );
 
   React.useEffect(() => {
     fetchData({ pageIndex, pageSize });
   }, [fetchData, pageIndex, pageSize]);
-
   return (
     <>
       <table {...getTableProps()} style={{ width: '100%' }}>
@@ -120,7 +141,10 @@ function Table({
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())} style={{ padding: '0.5rem' }}>
+                <th
+                  {...column.getHeaderProps(column.getSortByToggleProps())}
+                  style={{ padding: '0.5rem' }}
+                >
                   {column.render('Header')}
                 </th>
               ))}
@@ -149,7 +173,7 @@ function Table({
               </tr>
             );
           })}
-          {noOfRows / 200 > 1 && (
+          {noOfRows / defaultPageSize > 1 && (
             <tr>
               <td colSpan="10000">
                 Showing {defaultPageSize * pageIndex}-
@@ -164,7 +188,7 @@ function Table({
         <div className="pagination">
           <button
             onClick={() => {
-              previousPage();
+              handlePageIndex('prev');
             }}
             disabled={!canPreviousPage}
           >
@@ -176,7 +200,7 @@ function Table({
               setPageSize(Number(e.target.value));
             }}
           >
-            {[200].map((pageSize, i) => (
+            {[defaultPageSize].map((pageSize, i) => (
               <option key={`${pageSize}-${i}`} value={pageSize}>
                 {pageSize}
               </option>
@@ -184,7 +208,7 @@ function Table({
           </select>
           <button
             onClick={() => {
-              nextPage();
+              handlePageIndex('next');
             }}
             disabled={!canNextPage}
           >
@@ -210,13 +234,25 @@ function Table({
 
 function AnnotationTable(props) {
   const [pageCount, setPageCount] = useState(0);
-  const [prevPageIndex, setPrevPageIndex] = useState(0);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [data, setData] = useState([]);
   const [showSelectSeriesModal, setShowSelectSeriesModal] = useState(false);
   const [selected, setSelected] = useState({});
+  const [listOfSelecteds, setListOfSelecteds] = useState([]);
+
+  const handlePageIndex = act => {
+    let newIndex = act === 'prev' ? currentPageIndex - 1 : currentPageIndex + 1;
+    newIndex =
+      newIndex < 0 ? 0 : newIndex + 1 > pageCount ? pageCount : newIndex;
+    setCurrentPageIndex(newIndex);
+  };
+
   // Render the UI for your table
-  const preparePageData = (rawData, pageSize = 200, pageIndex = 0) => {
+  const preparePageData = (
+    rawData,
+    pageSize = defaultPageSize,
+    pageIndex = 0
+  ) => {
     let pageData = [];
     setPageCount(Math.ceil(props.noOfRows / pageSize));
     const startIndex = pageSize * pageIndex;
@@ -228,6 +264,16 @@ function AnnotationTable(props) {
     });
     setData(pageData);
   };
+
+  useEffect(() => {
+    const selectedList = Object.keys(props.selectedAnnotations);
+    setListOfSelecteds(selectedList);
+  }, [props.selectedAnnotations]);
+
+  useEffect(() => {
+    preparePageData(props.data);
+    setCurrentPageIndex(0);
+  }, [props.pid]);
 
   useEffect(() => {
     preparePageData(props.data, defaultPageSize, currentPageIndex);
@@ -376,18 +422,19 @@ function AnnotationTable(props) {
 
   const columns = React.useMemo(
     () => [
-      // {
-      //   id: 'study-desc',
-      //   Cell: ({ row }) => {
-      //     return (
-      //       <input
-      //         type="checkbox"
-      //         //   checked={selected && aimID ? selected[aimID] : false}
-      //         onChange={() => props.updateSelectedAims(row.original)}
-      //       />
-      //     );
-      //   }
-      // },
+      {
+        id: 'study-desc',
+        Cell: ({ row }) => {
+          console.log(" --> rerender!");
+          return (
+            <input
+              type="checkbox"
+              checked={props.selectedAnnotations[row.original.aimID] ? true : false}
+              onChange={() => props.updateSelectedAims(row.original)}
+            />
+          );
+        }
+      },
       {
         Header: 'Open',
         sortable: false,
@@ -554,21 +601,16 @@ function AnnotationTable(props) {
         }
       }
     ],
-    []
+    [props.selectedAnnotations]
   );
 
   const fetchData = useCallback(
     ({ pageIndex }) => {
-      if (pageIndex !== prevPageIndex) {
-        setPrevPageIndex(pageIndex);
-        setCurrentPageIndex(pageIndex);
-        if (props.data.length <= pageIndex * defaultPageSize) {
-          props.getNewData(props.bookmark);
-        } else {
-          preparePageData(props.data, defaultPageSize, pageIndex);
-        }
+      setCurrentPageIndex(pageIndex);
+      if (props.data.length <= pageIndex * defaultPageSize) {
+        props.getNewData(pageIndex);
       } else {
-        setCurrentPageIndex(pageIndex);
+        preparePageData(props.data, defaultPageSize, pageIndex);
       }
     },
     [props.bookmark]
@@ -580,11 +622,14 @@ function AnnotationTable(props) {
         columns={columns}
         data={data}
         selected={props.selected}
-        updateSelectedAims={props.updateSelectedAims}
+        // updateSelectedAims={props.updateSelectedAims}
         pageCount={pageCount}
         noOfRows={props.noOfRows}
         fetchData={fetchData}
         updateSelectedAims={props.updateSelectedAims}
+        controlledPageIndex={currentPageIndex}
+        handlePageIndex={handlePageIndex}
+        listOfSelecteds={listOfSelecteds}
       />
       {showSelectSeriesModal && (
         <SelectSerieModal
@@ -607,7 +652,8 @@ const mapsStateToProps = state => {
     uploadedPid: state.annotationsListReducer.uploadedPid,
     lastEventId: state.annotationsListReducer.lastEventId,
     refresh: state.annotationsListReducer.refresh,
-    projectMap: state.annotationsListReducer.projectMap
+    projectMap: state.annotationsListReducer.projectMap,
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
   };
 };
 
