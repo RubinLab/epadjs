@@ -739,7 +739,7 @@ const AnnotationSearch = props => {
           </ReactTooltip>
         </>
         {mode !== 'lite' && (
-          <>
+          <div className="searchView-toolbar__group">
             {' '}
             <div
               className="annotaionSearch-title"
@@ -762,7 +762,7 @@ const AnnotationSearch = props => {
               onMouseDown={e => e.stopPropagation()}
               style={{ margin: '0rem 1rem', padding: '1.8px' }}
             />{' '}
-          </>
+          </div>
         )}
       </div>
     );

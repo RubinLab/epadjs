@@ -425,7 +425,6 @@ function AnnotationTable(props) {
       {
         id: 'study-desc',
         Cell: ({ row }) => {
-          console.log(" --> rerender!");
           return (
             <input
               type="checkbox"
