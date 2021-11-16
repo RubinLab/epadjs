@@ -846,7 +846,10 @@ const AnnotationSearch = props => {
           </>
         </div>
         {mode !== 'lite' && (
-          <div className="searchView-toolbar__group">
+          <div
+            className="searchView-toolbar__group"
+            style={{ padding: '0.2rem' }}
+          >
             {' '}
             <div
               className="annotaionSearch-title"
@@ -872,47 +875,52 @@ const AnnotationSearch = props => {
           </div>
         )}
         <div
-          style={{ fontSize: '1.2rem', color: 'aliceblue' }}
-          onClick={() => {
-            //  console.log(JSON.stringify(props.selectedAnnotations));
-            //  console.log(props.pid);
-            getPluginProjects();
-          }}
+          className="searchView-toolbar__group"
+          style={{ padding: '0.2rem' }}
         >
-          select plugin :{' '}
+          <div
+            style={{ fontSize: '1.2rem', color: 'aliceblue' }}
+            onClick={() => {
+              //  console.log(JSON.stringify(props.selectedAnnotations));
+              //  console.log(props.pid);
+              getPluginProjects();
+            }}
+          >
+            select plugin :{' '}
+          </div>
+          {showPlugins && (
+            <div>
+              <select
+                style={{ fontSize: '1.1rem', marginLeft: '5px', marginRight: '10px' }}
+                className="pluginaddqueueselect"
+                id="plugins"
+                onChange={handleChangePlugin}
+                value={selectedPluginDbId}
+              >
+                <option key="-1" value="-1">
+                  select
+                </option>
+                {prepareDropDownHtmlForPlugins()}
+              </select>
+            </div>
+          )}
+          {showRunPluginButton && (
+            <div>
+              <button
+                style={{
+                  fontSize: '1.2rem',
+                  background: '#861737',
+                  marginLeft: '5px'
+                }}
+                variant="primary"
+                className="btn btn-sm btn-outline-light"
+                onClick={runPlugin}
+              >
+                run
+              </button>
+            </div>
+          )}
         </div>
-        {showPlugins && (
-          <div>
-            <select
-              style={{ fontSize: '1.1rem', marginLeft: '5px' }}
-              className="pluginaddqueueselect"
-              id="plugins"
-              onChange={handleChangePlugin}
-              value={selectedPluginDbId}
-            >
-              <option key="-1" value="-1">
-                select
-              </option>
-              {prepareDropDownHtmlForPlugins()}
-            </select>
-          </div>
-        )}
-        {showRunPluginButton && (
-          <div>
-            <button
-              style={{
-                fontSize: '1.2rem',
-                background: '#861737',
-                marginLeft: '5px'
-              }}
-              variant="primary"
-              className="btn btn-sm btn-outline-light"
-              onClick={runPlugin}
-            >
-              run
-            </button>
-          </div>
-        )}
       </div>
     );
   };
