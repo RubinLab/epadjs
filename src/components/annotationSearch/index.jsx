@@ -304,14 +304,9 @@ const AnnotationSearch = props => {
           }
         };
         props.setQuery(queryToSave);
-        let promise;
-        if (pageIndex) {
-          promise = searchAnnotations({ query: searchQuery }, bookmark);
-        } else {
-          promise = searchAnnotations({ query: searchQuery });
-        }
+        const bm = pageIndex ? bookmark : '';
 
-        promise
+        searchAnnotations({ query: searchQuery }, bm)
           .then(res => {
             populateSearchResult(res, pageIndex, afterDelete);
           })
