@@ -33,6 +33,11 @@ import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
 import UploadModal from '../searchView/uploadModal';
 import DeleteAlert from '../management/common/alertDeletionModal';
 import ellipse from 'cornerstone-tools/util/ellipse/index.js';
+import {
+  getPluginsForProject,
+  addPluginsToQueue,
+  runPluginsQueue
+} from '../../services/pluginServices';
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
   paranthesis: ['(', ')'],
@@ -60,7 +65,8 @@ const explanation = {
   project: 'Search in all ePAD',
   noResult: 'Can not find any result!',
   downloadProject:
-    'Preparing project for download. The link to the files will be sent with a notification after completion!'
+    'Preparing project for download. The link to the files will be sent with a notification after completion!',
+  pluginAnnotations: 'you need to select an annotation'
 };
 
 const styles = {
@@ -104,6 +110,12 @@ const AnnotationSearch = props => {
   const [deleteSelectedClicked, setDeleteSelectedClicked] = useState(false);
   const [checkboxSelected, setCheckboxSelected] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
+  // cavit
+  const [showPlugins, setShowPluginDropdown] = useState(false);
+  const [pluginListArray, setpluginListArray] = useState([]);
+  const [selectedPluginDbId, setSelectedPluginDbId] = useState(-1);
+  const [showRunPluginButton, setShowRunPluginButton] = useState(false);
+  // cavit
 
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -138,6 +150,7 @@ const AnnotationSearch = props => {
     setBookmark('');
     setCheckboxSelected(false);
     props.dispatch(clearSelection());
+
     if (props.searchQuery) {
       const searchQueryFinal = Object.keys(props.searchQuery)[0];
       const searchQueryText = Object.values(props.searchQuery)[0].query;
@@ -152,6 +165,11 @@ const AnnotationSearch = props => {
     } else {
       getAnnotationsOfProjets();
     }
+    // cavit
+    setShowRunPluginButton(false);
+    setSelectedPluginDbId(-1);
+    getPluginProjects();
+    // cavit
   }, [props.pid]);
 
   const handleUserKeyPress = e => {
@@ -853,6 +871,48 @@ const AnnotationSearch = props => {
             />{' '}
           </div>
         )}
+        <div
+          style={{ fontSize: '1.2rem', color: 'aliceblue' }}
+          onClick={() => {
+            //  console.log(JSON.stringify(props.selectedAnnotations));
+            //  console.log(props.pid);
+            getPluginProjects();
+          }}
+        >
+          select plugin :{' '}
+        </div>
+        {showPlugins && (
+          <div>
+            <select
+              style={{ fontSize: '1.1rem', marginLeft: '5px' }}
+              className="pluginaddqueueselect"
+              id="plugins"
+              onChange={handleChangePlugin}
+              value={selectedPluginDbId}
+            >
+              <option key="-1" value="-1">
+                select
+              </option>
+              {prepareDropDownHtmlForPlugins()}
+            </select>
+          </div>
+        )}
+        {showRunPluginButton && (
+          <div>
+            <button
+              style={{
+                fontSize: '1.2rem',
+                background: '#861737',
+                marginLeft: '5px'
+              }}
+              variant="primary"
+              className="btn btn-sm btn-outline-light"
+              onClick={runPlugin}
+            >
+              run
+            </button>
+          </div>
+        )}
       </div>
     );
   };
@@ -914,7 +974,185 @@ const AnnotationSearch = props => {
     setDeleteSelectedClicked(false);
     props.dispatch(clearSelection());
   };
+  // cavit
+  const prepareDropDownHtmlForPlugins = () => {
+    console.log(showPlugins);
+    console.log(pluginListArray);
+    const list = pluginListArray;
+    let options = [];
+    for (let i = 0; i < list.length; i++) {
+      options.push(
+        <option key={list[i].id} value={list[i].id}>
+          {list[i].name}
+        </option>
+      );
+    }
 
+    return options;
+  };
+
+  const getPluginProjects = async () => {
+    const { data: dataplugin } = await getPluginsForProject(props.pid);
+    if (dataplugin) {
+      setpluginListArray(dataplugin.projectplugin);
+    } else {
+      setpluginListArray([]);
+    }
+    setShowPluginDropdown(true);
+  };
+
+  const handleChangePlugin = e => {
+    const tempSelectedPluign = parseInt(e.target.value);
+    console.log(parseInt(e.target.value));
+    setSelectedPluginDbId(parseInt(e.target.value));
+    if (tempSelectedPluign > -1) {
+      setShowRunPluginButton(true);
+    } else {
+      setShowRunPluginButton(false);
+    }
+  };
+
+  const runPlugin = async () => {
+    console.log(
+      `selected aims to pass to plugin : ${JSON.stringify(
+        props.selectedAnnotations
+      )}`
+    );
+
+    let tempPluginObject = {};
+    for (let i = 0; i < pluginListArray.length; i++) {
+      if (pluginListArray[i].id === selectedPluginDbId) {
+        tempPluginObject = { ...pluginListArray[i] };
+        break;
+      }
+    }
+    if (tempPluginObject.processmultipleaims === null) {
+      const tempQueueObject = {};
+      tempQueueObject.projectDbId = tempPluginObject.project_plugin.project_id;
+      tempQueueObject.projectId = props.selectedProject;
+      tempQueueObject.projectName = '';
+
+      tempQueueObject.pluginDbId = tempPluginObject.id;
+      tempQueueObject.pluginId = tempPluginObject.plugin_id;
+      tempQueueObject.pluginName = tempPluginObject.name;
+      tempQueueObject.pluginType = 'local';
+      tempQueueObject.processMultipleAims =
+        tempPluginObject.processmultipleaims;
+      tempQueueObject.runtimeParams = {};
+      tempQueueObject.parameterType = 'default';
+      tempQueueObject.aims = {};
+
+      const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+      let responseRunPluginsQueue = null;
+      console.log('plugin running queue ', JSON.stringify(resultAddQueue));
+      if (resultAddQueue && resultAddQueue.data) {
+        if (Array.isArray(resultAddQueue.data)) {
+          responseRunPluginsQueue = await runPluginsQueue(
+            resultAddQueue.data[0].id
+          );
+        } else {
+          responseRunPluginsQueue = await runPluginsQueue(
+            resultAddQueue.data.id
+          );
+        }
+      }
+
+      if (responseRunPluginsQueue.status === 202) {
+        console.log('queue is running case null');
+      } else {
+        console.log('error happened while running queue');
+      }
+    } else if (tempPluginObject.processmultipleaims === 0) {
+      Object.keys(props.selectedAnnotations).forEach(async eachAnnt => {
+        let aimObj = {};
+        aimObj[eachAnnt] = props.selectedAnnotations[eachAnnt];
+
+        console.log(`eachAnnt : ${JSON.stringify(aimObj)}`);
+
+        const tempQueueObject = {};
+        tempQueueObject.projectDbId =
+          tempPluginObject.project_plugin.project_id;
+        tempQueueObject.projectId = props.selectedProject;
+        tempQueueObject.projectName = '';
+
+        tempQueueObject.pluginDbId = tempPluginObject.id;
+        tempQueueObject.pluginId = tempPluginObject.plugin_id;
+        tempQueueObject.pluginName = tempPluginObject.name;
+        tempQueueObject.pluginType = 'local';
+        tempQueueObject.processMultipleAims =
+          tempPluginObject.processmultipleaims;
+        tempQueueObject.runtimeParams = {};
+        tempQueueObject.parameterType = 'default';
+        tempQueueObject.aims = aimObj;
+
+        const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+        let responseRunPluginsQueue = null;
+        console.log('plugin running queue ', JSON.stringify(resultAddQueue));
+        if (resultAddQueue && resultAddQueue.data) {
+          if (Array.isArray(resultAddQueue.data)) {
+            responseRunPluginsQueue = await runPluginsQueue(
+              resultAddQueue.data[0].id
+            );
+          } else {
+            responseRunPluginsQueue = await runPluginsQueue(
+              resultAddQueue.data.id
+            );
+          }
+        }
+
+        if (responseRunPluginsQueue.status === 202) {
+          console.log('queue is running case 0 - 1 annot req');
+        } else {
+          console.log('error happened while running queue');
+        }
+      });
+    } else {
+      const tempQueueObject = {};
+      tempQueueObject.projectDbId = tempPluginObject.project_plugin.project_id;
+      tempQueueObject.projectId = props.selectedProject;
+      tempQueueObject.projectName = '';
+
+      tempQueueObject.pluginDbId = tempPluginObject.id;
+      tempQueueObject.pluginId = tempPluginObject.plugin_id;
+      tempQueueObject.pluginName = tempPluginObject.name;
+      tempQueueObject.pluginType = 'local';
+      tempQueueObject.processMultipleAims =
+        tempPluginObject.processmultipleaims;
+      tempQueueObject.runtimeParams = {};
+      tempQueueObject.parameterType = 'default';
+      if (props && props.selectedAnnotations) {
+        tempQueueObject.aims = { ...props.selectedAnnotations };
+      } else {
+        tempQueueObject.aims = {};
+      }
+
+      const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+      let responseRunPluginsQueue = null;
+      console.log('plugin running queue ', JSON.stringify(resultAddQueue));
+      if (resultAddQueue && resultAddQueue.data) {
+        if (Array.isArray(resultAddQueue.data)) {
+          responseRunPluginsQueue = await runPluginsQueue(
+            resultAddQueue.data[0].id
+          );
+        } else {
+          responseRunPluginsQueue = await runPluginsQueue(
+            resultAddQueue.data.id
+          );
+        }
+      }
+
+      if (responseRunPluginsQueue.status === 202) {
+        console.log('queue is running case  1 multi  annot required');
+      } else {
+        console.log('error happened while running queue');
+      }
+    }
+    setSelectedPluginDbId(-1);
+    setShowRunPluginButton(false);
+    // updateSelectedAims;
+    // getSearchResult();
+  };
+  // cavit
   return (
     <div>
       <div

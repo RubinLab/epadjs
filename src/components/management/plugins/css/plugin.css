@@ -79,6 +79,9 @@
 }
 .tdleft {
   text-align: left;
+  padding-bottom: 5px;
+  padding-right: 10px;
+  border-bottom: 1pt solid rgb(107, 107, 107);
 }
 .tdright {
   text-align: right;

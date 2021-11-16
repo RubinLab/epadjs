@@ -717,33 +717,39 @@ class TrackTab extends React.Component {
         </div>
 
         {this.state.showParamsNonZero && (
-          <div>
-            <div className="tools menu-display" id="template">
-              <Modal.Dialog className="create-plugin__modal">
-                <Modal.Header>
-                  <Modal.Title>Runtime Parameters</Modal.Title>
-                </Modal.Header>
-                <Modal.Body className="create-user__modal--body">
-                  {this.state.tempParamsHtmlnonZero}
-                </Modal.Body>
+                    <Draggable
+                    onClick={this.pluginWindowClickHandler}
+                    onMouseDown={this.pluginWindowClickHandler}
+                    onMouseMove={this.pluginWindowClickHandler}
+                  >
+                <div style={{position:"absolute", top:"10%",left:"10%", width:"100%"}}>
+                          <div className="tools menu-display" id="trackTabruntimeParamsWindow">
+                            <Modal.Dialog className="create-plugin__modal">
+                              <Modal.Header>
+                                <Modal.Title>Runtime Parameters</Modal.Title>
+                              </Modal.Header>
+                              <Modal.Body className="create-user__modal--body">
+                                {this.state.tempParamsHtmlnonZero}
+                              </Modal.Body>
 
-                <Modal.Footer className="create-user__modal--footer">
-                  <div className="create-user__modal--buttons">
-                    <button
-                      variant="secondary"
-                      className="btn btn-sm btn-outline-light"
-                      onClick={() => {
-                        this.setState({ showParamsNonZero: false });
-                      }}
-                    >
-                      close
-                    </button>
-                  </div>
-                </Modal.Footer>
-              </Modal.Dialog>
-            </div>
-          </div>
-        )}
+                              <Modal.Footer className="create-user__modal--footer">
+                                <div className="create-user__modal--buttons">
+                                  <button
+                                    variant="secondary"
+                                    className="btn btn-sm btn-outline-light"
+                                    onClick={() => {
+                                      this.setState({ showParamsNonZero: false });
+                                    }}
+                                  >
+                                    close
+                                  </button>
+                                </div>
+                              </Modal.Footer>
+                            </Modal.Dialog>
+                          </div>
+                </div>
+            </Draggable>
+          )}
 
         {this.state.showContainerLog && (
           <Draggable
