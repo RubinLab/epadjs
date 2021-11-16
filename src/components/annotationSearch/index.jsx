@@ -54,7 +54,7 @@ const lists = {
   criteria: ['contains'] // 'equals'
 };
 
-const pageSize = 10;
+const pageSize = 200;
 
 const explanation = {
   deleteSelected: 'Delete selected annotations? This cannot be undone.',
