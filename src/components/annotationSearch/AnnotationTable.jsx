@@ -428,7 +428,9 @@ function AnnotationTable(props) {
           return (
             <input
               type="checkbox"
-              checked={props.selectedAnnotations[row.original.aimID] ? true : false}
+              checked={
+                props.selectedAnnotations[row.original.aimID] ? true : false
+              }
               onChange={() => props.updateSelectedAims(row.original)}
             />
           );
@@ -600,12 +602,13 @@ function AnnotationTable(props) {
         }
       }
     ],
-    [props.selectedAnnotations]
+    [props.selectedAnnotations, data]
   );
 
   const fetchData = useCallback(
     ({ pageIndex }) => {
       setCurrentPageIndex(pageIndex);
+      props.setPageIndex(pageIndex);
       if (props.data.length <= pageIndex * defaultPageSize) {
         props.getNewData(pageIndex);
       } else {

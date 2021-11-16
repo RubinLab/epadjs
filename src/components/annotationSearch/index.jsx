@@ -12,6 +12,11 @@ import {
   FaPlus,
   FaEraser
 } from 'react-icons/fa';
+import {
+  RiCheckboxMultipleFill,
+  RiCheckboxMultipleBlankFill,
+  RiCloseCircleFill
+} from 'react-icons/ri';
 import { FcAbout } from 'react-icons/fc';
 import ReactTooltip from 'react-tooltip';
 import {
@@ -27,6 +32,7 @@ import { clearSelection, selectAnnotation } from '../annotationsList/action';
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
 import UploadModal from '../searchView/uploadModal';
 import DeleteAlert from '../management/common/alertDeletionModal';
+import ellipse from 'cornerstone-tools/util/ellipse/index.js';
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
   paranthesis: ['(', ')'],
@@ -42,6 +48,8 @@ const lists = {
   ],
   criteria: ['contains'] // 'equals'
 };
+
+const pageSize = 10;
 
 const explanation = {
   deleteSelected: 'Delete selected annotations? This cannot be undone.',
@@ -89,13 +97,14 @@ const AnnotationSearch = props => {
   const [selectedProject, setSelectedProject] = useState('');
   const [data, setData] = useState([]);
   const [rows, setRows] = useState(0);
-  const [selectedAnnotations, setSelectedAnnotations] = useState({});
+  // const [selectedAnnotations, setSelectedAnnotations] = useState({});
   const [downloadClicked, setDownloadClicked] = useState(false);
   const [error, setError] = useState('');
   const [bookmark, setBookmark] = useState('');
   const [uploadClicked, setUploadClicked] = useState(false);
   const [deleteSelectedClicked, setDeleteSelectedClicked] = useState(false);
   const [checkboxSelected, setCheckboxSelected] = useState(false);
+  const [pageIndex, setPageIndex] = useState(0);
 
   const populateSearchResult = (res, pagination) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -627,6 +636,27 @@ const AnnotationSearch = props => {
     return options;
   };
 
+  const handleMultipleSelect = action => {
+    const pages = Math.ceil(props.rows / pageSize);
+    const indexStart = pageIndex * pageSize;
+    const indexEnd =
+      pageIndex + 1 === pages ? rows : pageSize * (pageIndex + 1);
+    const arrayToSelect = data.slice(indexStart, indexEnd);
+    if (action === 'selectPageAll') {
+      arrayToSelect.forEach(el => {
+        if (!props.selectedAnnotations[el.aimID])
+          props.dispatch(selectAnnotation(el));
+      });
+    } else if (action === 'unselectPageAll') {
+      arrayToSelect.forEach(el => {
+        if (props.selectedAnnotations[el.aimID])
+          props.dispatch(selectAnnotation(el));
+      });
+    } else if (action === 'unselectAll') {
+      props.dispatch(clearSelection());
+    }
+  };
+
   const triggerBrowserDownload = (blob, fileName) => {
     const url = window.URL.createObjectURL(new Blob([blob]));
     const link = document.createElement('a');
@@ -660,84 +690,147 @@ const AnnotationSearch = props => {
         className="annotationSearch-cont__item"
         style={{ margin: '1rem 0rem' }}
       >
-        <>
-          <div onClick={() => setUploadClicked(true)}>
-            <FaUpload className="tool-icon" data-tip data-for="upload-icon" />
-          </div>
-          <ReactTooltip
-            id="upload-icon"
-            place="right"
-            type="info"
-            delayShow={1000}
-          >
-            <span className="filter-label">Upload files</span>
-          </ReactTooltip>
-        </>
-        <>
-          <div onClick={() => setDownloadClicked(true)}>
-            <FaDownload
+        <div
+          className="searchView-toolbar__group"
+          style={{ padding: '0.2rem' }}
+        >
+          <>
+            <RiCheckboxMultipleFill
               className="tool-icon"
               data-tip
-              data-for="download-icon"
+              data-for="selectPageAll-icon"
+              style={{ fontSize: '1.4rem' }}
+              onClick={() => handleMultipleSelect('selectPageAll')}
             />
-          </div>
-          <ReactTooltip
-            id="download-icon"
-            place="right"
-            type="info"
-            delayShow={1000}
-          >
-            <span className="filter-label">Download selections</span>
-          </ReactTooltip>
-        </>
-        <>
-          <div onClick={downloadProjectAim}>
-            <HiOutlineFolderDownload
-              className={props.pid === 'all_aims' ? 'hide-delete' : 'tool-icon'}
-              data-tip
-              data-for="downloadProject-icon"
-              style={{ fontSize: '1.7rem' }}
-            />
-          </div>
-          <ReactTooltip
-            id="downloadProject-icon"
-            place="right"
-            type="info"
-            delayShow={1000}
-          >
-            <span className="filter-label">
-              Download all annotations of the project
-            </span>
-          </ReactTooltip>
-        </>
-        <>
-          <div onClick={() => setDeleteSelectedClicked(true)}>
-            <FaRegTrashAlt
+            <ReactTooltip
+              id="selectPageAll-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Select rows on page</span>
+            </ReactTooltip>
+          </>
+          <>
+            <RiCheckboxMultipleBlankFill
               className="tool-icon"
-              // className="tool-icon"
-              // onClick={onDelete}
-              style={
-                Object.keys(props.selectedAnnotations).length === 0
-                  ? {
-                      fontSize: '1.1rem',
-                      color: 'rgb(107, 107, 107)',
-                      cursor: 'not-allowed'
-                    }
-                  : null
-              }
               data-tip
-              data-for="trash-icon"
+              data-for="unselectPageAll-icon"
+              style={{ fontSize: '1.4rem' }}
+              onClick={() => handleMultipleSelect('unselectPageAll')}
             />
-          </div>
-          <ReactTooltip
-            id="trash-icon"
-            place="right"
-            type="info"
-            delayShow={1000}
-          >
-            <span className="filter-label">Delete selections</span>
-          </ReactTooltip>
-        </>
+            <ReactTooltip
+              id="unselectPageAll-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Unselect rows on page</span>
+            </ReactTooltip>
+          </>
+          <>
+            <RiCloseCircleFill
+              className="tool-icon"
+              data-tip
+              data-for="unSelectAll-icon"
+              style={{ fontSize: '1.4rem' }}
+              onClick={() => handleMultipleSelect('unselectAll')}
+            />
+            <ReactTooltip
+              id="unSelectAll-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Unselect all</span>
+            </ReactTooltip>
+          </>
+        </div>
+        <div
+          className="searchView-toolbar__group"
+          style={{ padding: '0.2rem' }}
+        >
+          <>
+            <div onClick={() => setUploadClicked(true)}>
+              <FaUpload className="tool-icon" data-tip data-for="upload-icon" />
+            </div>
+            <ReactTooltip
+              id="upload-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Upload files</span>
+            </ReactTooltip>
+          </>
+          <>
+            <div onClick={() => setDownloadClicked(true)}>
+              <FaDownload
+                className="tool-icon"
+                data-tip
+                data-for="download-icon"
+              />
+            </div>
+            <ReactTooltip
+              id="download-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Download selections</span>
+            </ReactTooltip>
+          </>
+          <>
+            <div onClick={downloadProjectAim}>
+              <HiOutlineFolderDownload
+                className={
+                  props.pid === 'all_aims' ? 'hide-delete' : 'tool-icon'
+                }
+                data-tip
+                data-for="downloadProject-icon"
+                style={{ fontSize: '1.7rem' }}
+              />
+            </div>
+            <ReactTooltip
+              id="downloadProject-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">
+                Download all annotations of the project
+              </span>
+            </ReactTooltip>
+          </>
+          <>
+            <div onClick={() => setDeleteSelectedClicked(true)}>
+              <FaRegTrashAlt
+                className="tool-icon"
+                // className="tool-icon"
+                // onClick={onDelete}
+                style={
+                  Object.keys(props.selectedAnnotations).length === 0
+                    ? {
+                        fontSize: '1.1rem',
+                        color: 'rgb(107, 107, 107)',
+                        cursor: 'not-allowed'
+                      }
+                    : null
+                }
+                data-tip
+                data-for="trash-icon"
+              />
+            </div>
+            <ReactTooltip
+              id="trash-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Delete selections</span>
+            </ReactTooltip>
+          </>
+        </div>
         {mode !== 'lite' && (
           <div className="searchView-toolbar__group">
             {' '}
@@ -974,13 +1067,14 @@ const AnnotationSearch = props => {
         {data.length > 0 && (
           <AnnotationTable
             data={data}
-            selected={selectedAnnotations}
+            selected={props.selectedAnnotations}
             updateSelectedAims={updateSelectedAims}
             noOfRows={rows}
             getNewData={getNewData}
             bookmark={bookmark}
             switchToDisplay={() => props.history.push('/display')}
             pid={props.pid}
+            setPageIndex={setPageIndex}
           />
         )}
       </div>
