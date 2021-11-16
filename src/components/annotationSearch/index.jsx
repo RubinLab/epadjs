@@ -984,6 +984,8 @@ const AnnotationSearch = props => {
             setCheckboxSelected(false);
             getAnnotationsOfProjets();
             props.dispatch(clearSelection());
+            props.setQuery("");
+
           }}
           // onClick={parseIt}
           // disabled={index < count}
