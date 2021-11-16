@@ -97,7 +97,6 @@ const AnnotationSearch = props => {
   const [selectedProject, setSelectedProject] = useState('');
   const [data, setData] = useState([]);
   const [rows, setRows] = useState(0);
-  // const [selectedAnnotations, setSelectedAnnotations] = useState({});
   const [downloadClicked, setDownloadClicked] = useState(false);
   const [error, setError] = useState('');
   const [bookmark, setBookmark] = useState('');
@@ -106,9 +105,9 @@ const AnnotationSearch = props => {
   const [checkboxSelected, setCheckboxSelected] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
 
-  const populateSearchResult = (res, pagination) => {
+  const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
-    if (typeof pagination === 'number' || pagination) {
+    if ((typeof pagination === 'number' || pagination) && !afterDelete) {
       setData(data.concat(result.data.rows));
     } else {
       setData(result.data.rows);
@@ -279,7 +278,7 @@ const AnnotationSearch = props => {
     );
   };
 
-  const getSearchResult = pageIndex => {
+  const getSearchResult = (pageIndex, afterDelete) => {
     if (query.length === 0) {
       getAnnotationsOfProjets();
     } else {
@@ -313,16 +312,16 @@ const AnnotationSearch = props => {
 
         promise
           .then(res => {
-            populateSearchResult(res, pageIndex);
+            populateSearchResult(res, pageIndex, afterDelete);
           })
           .catch(err => console.error(err));
       }
     }
   };
 
-  const getNewData = pageIndex => {
+  const getNewData = (pageIndex, afterDelete) => {
     if (query) {
-      getSearchResult(pageIndex);
+      getSearchResult(pageIndex, afterDelete);
     } else {
       getAnnotationsOfProjets(pageIndex);
     }
@@ -904,10 +903,7 @@ const AnnotationSearch = props => {
 
     Promise.all(promiseArr)
       .then(() => {
-        getAnnotationsOfProjets();
-        // this.props.updateProgress();
-        const keys = Object.keys(notDeleted);
-        // this.props.clearAllTreeData();
+        getNewData(pageIndex, true);
       })
       .catch(error => {
         if (
@@ -916,7 +912,7 @@ const AnnotationSearch = props => {
           error.response.data.message
         )
           toast.error(error.response.data.message, { autoClose: false });
-        getAnnotationsOfProjets();
+        getNewData(pageIndex, true);
       });
     setDeleteSelectedClicked(false);
     props.dispatch(clearSelection());
