@@ -157,6 +157,7 @@ const AnnotationSearch = props => {
   const handleUserKeyPress = e => {
     if (e.key === 'Enter') {
       getSearchResult();
+      setPageIndex(0);
     }
   };
 
@@ -280,12 +281,12 @@ const AnnotationSearch = props => {
   };
 
   const getSearchResult = (pageIndex, afterDelete) => {
+    setPageIndex(0);
     if (query.length === 0) {
       getAnnotationsOfProjets();
     } else {
       let searchQuery = parseQuery();
-      setData([]);
-      //
+      // setData([]);
       if (selectedProject) {
         const multiSearch =
           searchQuery.includes('AND') || searchQuery.includes('OR');
@@ -296,7 +297,7 @@ const AnnotationSearch = props => {
         else searchQuery += ` AND project:${selectedProject}`;
       }
       if (searchQuery) {
-        setError('');
+        // setError('');
         const queryToSave = {
           [searchQuery]: {
             query,
@@ -979,8 +980,8 @@ const AnnotationSearch = props => {
             setCheckboxSelected(false);
             getAnnotationsOfProjets();
             props.dispatch(clearSelection());
-            props.setQuery("");
-
+            props.setQuery('');
+            setPageIndex(0);
           }}
           // onClick={parseIt}
           // disabled={index < count}
@@ -1070,6 +1071,7 @@ const AnnotationSearch = props => {
             switchToDisplay={() => props.history.push('/display')}
             pid={props.pid}
             setPageIndex={setPageIndex}
+            indexFromParent={pageIndex}
           />
         )}
       </div>

@@ -242,9 +242,8 @@ function AnnotationTable(props) {
 
   const handlePageIndex = act => {
     let newIndex = act === 'prev' ? currentPageIndex - 1 : currentPageIndex + 1;
-    newIndex =
-      newIndex < 0 ? 0 : newIndex + 1 > pageCount ? pageCount : newIndex;
     setCurrentPageIndex(newIndex);
+    props.setPageIndex(newIndex);
   };
 
   // Render the UI for your table
@@ -276,7 +275,10 @@ function AnnotationTable(props) {
   }, [props.pid]);
 
   useEffect(() => {
-    preparePageData(props.data, defaultPageSize, currentPageIndex);
+    if (props.data.length <= defaultPageSize * currentPageIndex ) {
+      preparePageData(props.data, defaultPageSize, 0);
+      setCurrentPageIndex(0);
+    }
   }, [props.noOfRows, props.data]);
 
   const getSeriesData = async selected => {
@@ -607,8 +609,8 @@ function AnnotationTable(props) {
 
   const fetchData = useCallback(
     ({ pageIndex }) => {
-      setCurrentPageIndex(pageIndex);
-      props.setPageIndex(pageIndex);
+      // setCurrentPageIndex(pageIndex);
+      // props.setPageIndex(pageIndex);
       if (props.data.length <= pageIndex * defaultPageSize) {
         props.getNewData(pageIndex);
       } else {
