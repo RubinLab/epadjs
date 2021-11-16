@@ -137,6 +137,7 @@ const AnnotationSearch = props => {
     setQuery('');
     setBookmark('');
     setCheckboxSelected(false);
+    props.dispatch(clearSelection());
     if (props.searchQuery) {
       const searchQueryFinal = Object.keys(props.searchQuery)[0];
       const searchQueryText = Object.values(props.searchQuery)[0].query;
