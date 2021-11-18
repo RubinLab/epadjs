@@ -12,6 +12,11 @@ import {
   FaPlus,
   FaEraser
 } from 'react-icons/fa';
+import {
+  RiCheckboxMultipleFill,
+  RiCheckboxMultipleBlankFill,
+  RiCloseCircleFill
+} from 'react-icons/ri';
 import { FcAbout } from 'react-icons/fc';
 import ReactTooltip from 'react-tooltip';
 import {
@@ -27,6 +32,12 @@ import { clearSelection, selectAnnotation } from '../annotationsList/action';
 import AnnotationDownloadModal from '../searchView/annotationDownloadModal';
 import UploadModal from '../searchView/uploadModal';
 import DeleteAlert from '../management/common/alertDeletionModal';
+import ellipse from 'cornerstone-tools/util/ellipse/index.js';
+import {
+  getPluginsForProject,
+  addPluginsToQueue,
+  runPluginsQueue
+} from '../../services/pluginServices';
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
   paranthesis: ['(', ')'],
@@ -38,10 +49,13 @@ const lists = {
     'lesion_name',
     'patient',
     'template',
-    'user'
+    'user',
+    'comment'
   ],
   criteria: ['contains'] // 'equals'
 };
+
+const pageSize = 200;
 
 const explanation = {
   deleteSelected: 'Delete selected annotations? This cannot be undone.',
@@ -52,7 +66,8 @@ const explanation = {
   project: 'Search in all ePAD',
   noResult: 'Can not find any result!',
   downloadProject:
-    'Preparing project for download. The link to the files will be sent with a notification after completion!'
+    'Preparing project for download. The link to the files will be sent with a notification after completion!',
+  pluginAnnotations: 'you need to select an annotation'
 };
 
 const styles = {
@@ -89,17 +104,23 @@ const AnnotationSearch = props => {
   const [selectedProject, setSelectedProject] = useState('');
   const [data, setData] = useState([]);
   const [rows, setRows] = useState(0);
-  const [selectedAnnotations, setSelectedAnnotations] = useState({});
   const [downloadClicked, setDownloadClicked] = useState(false);
   const [error, setError] = useState('');
   const [bookmark, setBookmark] = useState('');
   const [uploadClicked, setUploadClicked] = useState(false);
   const [deleteSelectedClicked, setDeleteSelectedClicked] = useState(false);
   const [checkboxSelected, setCheckboxSelected] = useState(false);
+  const [pageIndex, setPageIndex] = useState(0);
+  // cavit
+  const [showPlugins, setShowPluginDropdown] = useState(false);
+  const [pluginListArray, setpluginListArray] = useState([]);
+  const [selectedPluginDbId, setSelectedPluginDbId] = useState(-1);
+  const [showRunPluginButton, setShowRunPluginButton] = useState(false);
+  // cavit
 
-  const populateSearchResult = (res, pagination) => {
+  const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
-    if (pagination) {
+    if ((typeof pagination === 'number' || pagination) && !afterDelete) {
       setData(data.concat(result.data.rows));
     } else {
       setData(result.data.rows);
@@ -111,21 +132,26 @@ const AnnotationSearch = props => {
     }
   };
 
-  const getAnnotationsOfProjets = () => {
+  const getAnnotationsOfProjets = pageIndex => {
+    const bm = pageIndex ? bookmark : '';
     const promise =
       props.pid === 'all'
-        ? getAllAnnotations()
-        : getSummaryAnnotations(props.pid);
+        ? getAllAnnotations(bm)
+        : getSummaryAnnotations(props.pid, bm);
     Promise.all([promise])
       .then(res => {
-        populateSearchResult(res);
+        populateSearchResult(res, pageIndex);
       })
       .catch(err => console.error(err));
   };
 
   useEffect(() => {
     setSelectedProject(props.pid);
+    setQuery('');
+    setBookmark('');
     setCheckboxSelected(false);
+    props.dispatch(clearSelection());
+
     if (props.searchQuery) {
       const searchQueryFinal = Object.keys(props.searchQuery)[0];
       const searchQueryText = Object.values(props.searchQuery)[0].query;
@@ -140,11 +166,17 @@ const AnnotationSearch = props => {
     } else {
       getAnnotationsOfProjets();
     }
+    // cavit
+    setShowRunPluginButton(false);
+    setSelectedPluginDbId(-1);
+    getPluginProjects();
+    // cavit
   }, [props.pid]);
 
   const handleUserKeyPress = e => {
     if (e.key === 'Enter') {
       getSearchResult();
+      setPageIndex(0);
     }
   };
 
@@ -267,13 +299,13 @@ const AnnotationSearch = props => {
     );
   };
 
-  const getSearchResult = page => {
+  const getSearchResult = (pageIndex, afterDelete) => {
+    setPageIndex(0);
     if (query.length === 0) {
       getAnnotationsOfProjets();
     } else {
       let searchQuery = parseQuery();
-      setData([]);
-      //
+      // setData([]);
       if (selectedProject) {
         const multiSearch =
           searchQuery.includes('AND') || searchQuery.includes('OR');
@@ -284,7 +316,7 @@ const AnnotationSearch = props => {
         else searchQuery += ` AND project:${selectedProject}`;
       }
       if (searchQuery) {
-        setError('');
+        // setError('');
         const queryToSave = {
           [searchQuery]: {
             query,
@@ -292,23 +324,23 @@ const AnnotationSearch = props => {
           }
         };
         props.setQuery(queryToSave);
-        searchAnnotations({ query: searchQuery })
+        const bm = pageIndex ? bookmark : '';
+
+        searchAnnotations({ query: searchQuery }, bm)
           .then(res => {
-            populateSearchResult(res);
+            populateSearchResult(res, pageIndex, afterDelete);
           })
           .catch(err => console.error(err));
       }
     }
   };
 
-  const getNewData = bm => {
-    getAllAnnotations(bm)
-      .then(res => {
-        populateSearchResult(res, true);
-      })
-      .catch(err => console.error(err));
-    // get the new data with bookmark
-    // concatanate the new 200 lines
+  const getNewData = (pageIndex, afterDelete) => {
+    if (query) {
+      getSearchResult(pageIndex, afterDelete);
+    } else {
+      getAnnotationsOfProjets(pageIndex);
+    }
   };
 
   const seperateParanthesis = arr => {
@@ -619,6 +651,27 @@ const AnnotationSearch = props => {
     return options;
   };
 
+  const handleMultipleSelect = action => {
+    const pages = Math.ceil(props.rows / pageSize);
+    const indexStart = pageIndex * pageSize;
+    const indexEnd =
+      pageIndex + 1 === pages ? rows : pageSize * (pageIndex + 1);
+    const arrayToSelect = data.slice(indexStart, indexEnd);
+    if (action === 'selectPageAll') {
+      arrayToSelect.forEach(el => {
+        if (!props.selectedAnnotations[el.aimID])
+          props.dispatch(selectAnnotation(el));
+      });
+    } else if (action === 'unselectPageAll') {
+      arrayToSelect.forEach(el => {
+        if (props.selectedAnnotations[el.aimID])
+          props.dispatch(selectAnnotation(el));
+      });
+    } else if (action === 'unselectAll') {
+      props.dispatch(clearSelection());
+    }
+  };
+
   const triggerBrowserDownload = (blob, fileName) => {
     const url = window.URL.createObjectURL(new Blob([blob]));
     const link = document.createElement('a');
@@ -652,86 +705,152 @@ const AnnotationSearch = props => {
         className="annotationSearch-cont__item"
         style={{ margin: '1rem 0rem' }}
       >
-        <>
-          <div onClick={() => setUploadClicked(true)}>
-            <FaUpload className="tool-icon" data-tip data-for="upload-icon" />
-          </div>
-          <ReactTooltip
-            id="upload-icon"
-            place="right"
-            type="info"
-            delayShow={1000}
-          >
-            <span className="filter-label">Upload files</span>
-          </ReactTooltip>
-        </>
-        <>
-          <div onClick={() => setDownloadClicked(true)}>
-            <FaDownload
-              className="tool-icon"
-              data-tip
-              data-for="download-icon"
-            />
-          </div>
-          <ReactTooltip
-            id="download-icon"
-            place="right"
-            type="info"
-            delayShow={1000}
-          >
-            <span className="filter-label">Download selections</span>
-          </ReactTooltip>
-        </>
-        <>
-          <div onClick={downloadProjectAim}>
-            <HiOutlineFolderDownload
-              className={props.pid === 'all_aims' ? 'hide-delete' : 'tool-icon'}
-              data-tip
-              data-for="downloadProject-icon"
-              style={{ fontSize: '1.7rem' }}
-            />
-          </div>
-          <ReactTooltip
-            id="downloadProject-icon"
-            place="right"
-            type="info"
-            delayShow={1000}
-          >
-            <span className="filter-label">
-              Download all annotations of the project
-            </span>
-          </ReactTooltip>
-        </>
-        <>
-          <div onClick={() => setDeleteSelectedClicked(true)}>
-            <FaRegTrashAlt
-              className="tool-icon"
-              // className="tool-icon"
-              // onClick={onDelete}
-              style={
-                Object.keys(props.selectedAnnotations).length === 0
-                  ? {
-                      fontSize: '1.1rem',
-                      color: 'rgb(107, 107, 107)',
-                      cursor: 'not-allowed'
-                    }
-                  : null
-              }
-              data-tip
-              data-for="trash-icon"
-            />
-          </div>
-          <ReactTooltip
-            id="trash-icon"
-            place="right"
-            type="info"
-            delayShow={1000}
-          >
-            <span className="filter-label">Delete selections</span>
-          </ReactTooltip>
-        </>
-        {mode !== 'lite' && (
+        <div
+          className="searchView-toolbar__group"
+          style={{ padding: '0.2rem' }}
+        >
           <>
+            <RiCheckboxMultipleFill
+              className="tool-icon"
+              data-tip
+              data-for="selectPageAll-icon"
+              style={{ fontSize: '1.4rem' }}
+              onClick={() => handleMultipleSelect('selectPageAll')}
+            />
+            <ReactTooltip
+              id="selectPageAll-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Select rows on page</span>
+            </ReactTooltip>
+          </>
+          <>
+            <RiCheckboxMultipleBlankFill
+              className="tool-icon"
+              data-tip
+              data-for="unselectPageAll-icon"
+              style={{ fontSize: '1.4rem' }}
+              onClick={() => handleMultipleSelect('unselectPageAll')}
+            />
+            <ReactTooltip
+              id="unselectPageAll-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Unselect rows on page</span>
+            </ReactTooltip>
+          </>
+          <>
+            <RiCloseCircleFill
+              className="tool-icon"
+              data-tip
+              data-for="unSelectAll-icon"
+              style={{ fontSize: '1.4rem' }}
+              onClick={() => handleMultipleSelect('unselectAll')}
+            />
+            <ReactTooltip
+              id="unSelectAll-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Unselect all</span>
+            </ReactTooltip>
+          </>
+        </div>
+        <div
+          className="searchView-toolbar__group"
+          style={{ padding: '0.2rem' }}
+        >
+          <>
+            <div onClick={() => setUploadClicked(true)}>
+              <FaUpload className="tool-icon" data-tip data-for="upload-icon" />
+            </div>
+            <ReactTooltip
+              id="upload-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Upload files</span>
+            </ReactTooltip>
+          </>
+          <>
+            <div onClick={() => setDownloadClicked(true)}>
+              <FaDownload
+                className="tool-icon"
+                data-tip
+                data-for="download-icon"
+              />
+            </div>
+            <ReactTooltip
+              id="download-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Download selections</span>
+            </ReactTooltip>
+          </>
+          <>
+            <div onClick={downloadProjectAim}>
+              <HiOutlineFolderDownload
+                className={
+                  props.pid === 'all_aims' ? 'hide-delete' : 'tool-icon'
+                }
+                data-tip
+                data-for="downloadProject-icon"
+                style={{ fontSize: '1.7rem' }}
+              />
+            </div>
+            <ReactTooltip
+              id="downloadProject-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">
+                Download all annotations of the project
+              </span>
+            </ReactTooltip>
+          </>
+          <>
+            <div onClick={() => setDeleteSelectedClicked(true)}>
+              <FaRegTrashAlt
+                className="tool-icon"
+                // className="tool-icon"
+                // onClick={onDelete}
+                style={
+                  Object.keys(props.selectedAnnotations).length === 0
+                    ? {
+                        fontSize: '1.1rem',
+                        color: 'rgb(107, 107, 107)',
+                        cursor: 'not-allowed'
+                      }
+                    : null
+                }
+                data-tip
+                data-for="trash-icon"
+              />
+            </div>
+            <ReactTooltip
+              id="trash-icon"
+              place="right"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Delete selections</span>
+            </ReactTooltip>
+          </>
+        </div>
+        {mode !== 'lite' && (
+          <div
+            className="searchView-toolbar__group"
+            style={{ padding: '0.2rem' }}
+          >
             {' '}
             <div
               className="annotaionSearch-title"
@@ -749,12 +868,60 @@ const AnnotationSearch = props => {
                   setSelectedProject('');
                   setCheckboxSelected(true);
                 }
+                setBookmark('');
               }}
               onMouseDown={e => e.stopPropagation()}
               style={{ margin: '0rem 1rem', padding: '1.8px' }}
             />{' '}
-          </>
+          </div>
         )}
+        <div
+          className="searchView-toolbar__group"
+          style={{ padding: '0.2rem' }}
+        >
+          <div
+            style={{ fontSize: '1.2rem', color: 'aliceblue' }}
+            onClick={() => {
+              //  console.log(JSON.stringify(props.selectedAnnotations));
+              //  console.log(props.pid);
+              getPluginProjects();
+            }}
+          >
+            select plugin :{' '}
+          </div>
+          {showPlugins && (
+            <div>
+              <select
+                style={{ fontSize: '1.1rem', marginLeft: '5px', marginRight: '10px' }}
+                className="pluginaddqueueselect"
+                id="plugins"
+                onChange={handleChangePlugin}
+                value={selectedPluginDbId}
+              >
+                <option key="-1" value="-1">
+                  select
+                </option>
+                {prepareDropDownHtmlForPlugins()}
+              </select>
+            </div>
+          )}
+          {showRunPluginButton && (
+            <div>
+              <button
+                style={{
+                  fontSize: '1.2rem',
+                  background: '#861737',
+                  marginLeft: '5px'
+                }}
+                variant="primary"
+                className="btn btn-sm btn-outline-light"
+                onClick={runPlugin}
+              >
+                run
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     );
   };
@@ -802,10 +969,7 @@ const AnnotationSearch = props => {
 
     Promise.all(promiseArr)
       .then(() => {
-        getAnnotationsOfProjets();
-        // this.props.updateProgress();
-        const keys = Object.keys(notDeleted);
-        // this.props.clearAllTreeData();
+        getNewData(pageIndex, true);
       })
       .catch(error => {
         if (
@@ -814,12 +978,190 @@ const AnnotationSearch = props => {
           error.response.data.message
         )
           toast.error(error.response.data.message, { autoClose: false });
-        getAnnotationsOfProjets();
+        getNewData(pageIndex, true);
       });
     setDeleteSelectedClicked(false);
     props.dispatch(clearSelection());
   };
+  // cavit
+  const prepareDropDownHtmlForPlugins = () => {
+    console.log(showPlugins);
+    console.log(pluginListArray);
+    const list = pluginListArray;
+    let options = [];
+    for (let i = 0; i < list.length; i++) {
+      options.push(
+        <option key={list[i].id} value={list[i].id}>
+          {list[i].name}
+        </option>
+      );
+    }
 
+    return options;
+  };
+
+  const getPluginProjects = async () => {
+    const { data: dataplugin } = await getPluginsForProject(props.pid);
+    if (dataplugin) {
+      setpluginListArray(dataplugin.projectplugin);
+    } else {
+      setpluginListArray([]);
+    }
+    setShowPluginDropdown(true);
+  };
+
+  const handleChangePlugin = e => {
+    const tempSelectedPluign = parseInt(e.target.value);
+    console.log(parseInt(e.target.value));
+    setSelectedPluginDbId(parseInt(e.target.value));
+    if (tempSelectedPluign > -1) {
+      setShowRunPluginButton(true);
+    } else {
+      setShowRunPluginButton(false);
+    }
+  };
+
+  const runPlugin = async () => {
+    console.log(
+      `selected aims to pass to plugin : ${JSON.stringify(
+        props.selectedAnnotations
+      )}`
+    );
+
+    let tempPluginObject = {};
+    for (let i = 0; i < pluginListArray.length; i++) {
+      if (pluginListArray[i].id === selectedPluginDbId) {
+        tempPluginObject = { ...pluginListArray[i] };
+        break;
+      }
+    }
+    if (tempPluginObject.processmultipleaims === null) {
+      const tempQueueObject = {};
+      tempQueueObject.projectDbId = tempPluginObject.project_plugin.project_id;
+      tempQueueObject.projectId = props.selectedProject;
+      tempQueueObject.projectName = '';
+
+      tempQueueObject.pluginDbId = tempPluginObject.id;
+      tempQueueObject.pluginId = tempPluginObject.plugin_id;
+      tempQueueObject.pluginName = tempPluginObject.name;
+      tempQueueObject.pluginType = 'local';
+      tempQueueObject.processMultipleAims =
+        tempPluginObject.processmultipleaims;
+      tempQueueObject.runtimeParams = {};
+      tempQueueObject.parameterType = 'default';
+      tempQueueObject.aims = {};
+
+      const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+      let responseRunPluginsQueue = null;
+      console.log('plugin running queue ', JSON.stringify(resultAddQueue));
+      if (resultAddQueue && resultAddQueue.data) {
+        if (Array.isArray(resultAddQueue.data)) {
+          responseRunPluginsQueue = await runPluginsQueue(
+            resultAddQueue.data[0].id
+          );
+        } else {
+          responseRunPluginsQueue = await runPluginsQueue(
+            resultAddQueue.data.id
+          );
+        }
+      }
+
+      if (responseRunPluginsQueue.status === 202) {
+        console.log('queue is running case null');
+      } else {
+        console.log('error happened while running queue');
+      }
+    } else if (tempPluginObject.processmultipleaims === 0) {
+      Object.keys(props.selectedAnnotations).forEach(async eachAnnt => {
+        let aimObj = {};
+        aimObj[eachAnnt] = props.selectedAnnotations[eachAnnt];
+
+        console.log(`eachAnnt : ${JSON.stringify(aimObj)}`);
+
+        const tempQueueObject = {};
+        tempQueueObject.projectDbId =
+          tempPluginObject.project_plugin.project_id;
+        tempQueueObject.projectId = props.selectedProject;
+        tempQueueObject.projectName = '';
+
+        tempQueueObject.pluginDbId = tempPluginObject.id;
+        tempQueueObject.pluginId = tempPluginObject.plugin_id;
+        tempQueueObject.pluginName = tempPluginObject.name;
+        tempQueueObject.pluginType = 'local';
+        tempQueueObject.processMultipleAims =
+          tempPluginObject.processmultipleaims;
+        tempQueueObject.runtimeParams = {};
+        tempQueueObject.parameterType = 'default';
+        tempQueueObject.aims = aimObj;
+
+        const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+        let responseRunPluginsQueue = null;
+        console.log('plugin running queue ', JSON.stringify(resultAddQueue));
+        if (resultAddQueue && resultAddQueue.data) {
+          if (Array.isArray(resultAddQueue.data)) {
+            responseRunPluginsQueue = await runPluginsQueue(
+              resultAddQueue.data[0].id
+            );
+          } else {
+            responseRunPluginsQueue = await runPluginsQueue(
+              resultAddQueue.data.id
+            );
+          }
+        }
+
+        if (responseRunPluginsQueue.status === 202) {
+          console.log('queue is running case 0 - 1 annot req');
+        } else {
+          console.log('error happened while running queue');
+        }
+      });
+    } else {
+      const tempQueueObject = {};
+      tempQueueObject.projectDbId = tempPluginObject.project_plugin.project_id;
+      tempQueueObject.projectId = props.selectedProject;
+      tempQueueObject.projectName = '';
+
+      tempQueueObject.pluginDbId = tempPluginObject.id;
+      tempQueueObject.pluginId = tempPluginObject.plugin_id;
+      tempQueueObject.pluginName = tempPluginObject.name;
+      tempQueueObject.pluginType = 'local';
+      tempQueueObject.processMultipleAims =
+        tempPluginObject.processmultipleaims;
+      tempQueueObject.runtimeParams = {};
+      tempQueueObject.parameterType = 'default';
+      if (props && props.selectedAnnotations) {
+        tempQueueObject.aims = { ...props.selectedAnnotations };
+      } else {
+        tempQueueObject.aims = {};
+      }
+
+      const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+      let responseRunPluginsQueue = null;
+      console.log('plugin running queue ', JSON.stringify(resultAddQueue));
+      if (resultAddQueue && resultAddQueue.data) {
+        if (Array.isArray(resultAddQueue.data)) {
+          responseRunPluginsQueue = await runPluginsQueue(
+            resultAddQueue.data[0].id
+          );
+        } else {
+          responseRunPluginsQueue = await runPluginsQueue(
+            resultAddQueue.data.id
+          );
+        }
+      }
+
+      if (responseRunPluginsQueue.status === 202) {
+        console.log('queue is running case  1 multi  annot required');
+      } else {
+        console.log('error happened while running queue');
+      }
+    }
+    setSelectedPluginDbId(-1);
+    setShowRunPluginButton(false);
+    // updateSelectedAims;
+    // getSearchResult();
+  };
+  // cavit
   return (
     <div>
       <div
@@ -882,7 +1224,11 @@ const AnnotationSearch = props => {
           className="btn btn-secondary annotationSearch-btn"
           onClick={() => {
             setQuery('');
+            setCheckboxSelected(false);
             getAnnotationsOfProjets();
+            props.dispatch(clearSelection());
+            props.setQuery('');
+            setPageIndex(0);
           }}
           // onClick={parseIt}
           // disabled={index < count}
@@ -964,12 +1310,15 @@ const AnnotationSearch = props => {
         {data.length > 0 && (
           <AnnotationTable
             data={data}
-            selected={selectedAnnotations}
+            selected={props.selectedAnnotations}
             updateSelectedAims={updateSelectedAims}
             noOfRows={rows}
             getNewData={getNewData}
             bookmark={bookmark}
             switchToDisplay={() => props.history.push('/display')}
+            pid={props.pid}
+            setPageIndex={setPageIndex}
+            indexFromParent={pageIndex}
           />
         )}
       </div>

@@ -39,6 +39,7 @@ import {
   SEG_UPLOAD_COMPLETED,
   SEG_UPLOAD_REMOVE,
   AIM_DELETE,
+  SAVE_PATIENT_FILTER,
   colors,
   commonLabels
 } from "./types";
@@ -53,6 +54,14 @@ import {
 import { getAllTemplates } from "../../services/templateServices";
 import { getImageIdAnnotations } from "aimapi";
 import { ConsoleWriter } from "istanbul-lib-report";
+
+
+export const savePatientFilter = (patientSearch, pageSize, pageIndex) => {
+  return {
+    type: SAVE_PATIENT_FILTER,
+    patientFilter: { patientSearch, pageSize, pageIndex }
+  };
+};
 
 // Invoked at leftsidebar
 // one of the first actions once the user sign in
