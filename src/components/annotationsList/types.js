@@ -1,6 +1,3 @@
-export const LOAD_ANNOTATIONS = 'epadjs/annotationList/LOAD_ANNOTATIONS';
-export const LOAD_ANNOTATIONS_SUCCESS =
-  'epadjs/annotationList/LOAD_ANNOTATIONS_SUCCESS';
 export const LOAD_ANNOTATIONS_ERROR =
   'epadjs/annotationList/LOAD_ANNOTATIONS_ERROR';
 export const LOAD_PATIENT = 'epadjs/annotationList/LOAD_PATIENT';
@@ -8,7 +5,6 @@ export const LOAD_PATIENT_ERROR = 'epadjs/annotationList/LOAD_PATIENT_ERROR';
 export const LOAD_PATIENT_SUCCESS =
   'epadjs/annotationList/LOAD_PATIENT_SUCCESS';
 export const VIEWPORT_FULL = 'epadjs/annotationList/VIEWPORT_FULL';
-export const OPEN_PROJECT_MODAL = 'epadjs/annotationList/OPEN_PROJECT_MODAL';
 export const UPDATE_ANNOTATION_DISPLAY =
   'epadjs/annotationList/UPDATE_ANNOTATION_DISPLAY';
 export const TOGGLE_ALL_ANNOTATIONS =
@@ -26,8 +22,7 @@ export const SELECT_STUDY = 'epadjs/annotationList/SELECT_STUDY';
 export const SELECT_ANNOTATION = 'epadjs/annotationList/SELECT_ANNOTATION';
 export const CLEAR_GRID = 'epadjs/annotationList/CLEAR_GRID ';
 export const CLEAR_SELECTION = 'epadjs/annotationList/CLEAR_SELECTION ';
-export const GET_PATIENT = 'epadjs/annotationList/GET_PATIENT';
-export const DISPLAY_SINGLE_AIM = 'epadjs/annotationList/DISPLAY_SINGLE_AIM';
+// export const DISPLAY_SINGLE_AIM = 'epadjs/annotationList/DISPLAY_SINGLE_AIM';
 export const JUMP_TO_AIM = 'epadjs/annotationList/JUMP_TO_AIM';
 export const ADD_TO_GRID = 'epadjs/annotationList/ADD_TO_GRID';
 export const LOAD_COMPLETED = 'epadjs/annotationList/LOAD_COMPLETED';
@@ -42,7 +37,7 @@ export const UPDATE_PATIENT_AIM_DELETE =
   'epadjs/annotationList/UPDATE_PATIENT_AIM_DELETE';
 export const GET_NOTIFICATIONS = 'epadjs/annotationList/GET_NOTIFICATIONS';
 export const CLEAR_ACTIVE_AIMID = 'epadjs/annotationList/CLEAR_ACTIVE_AIMID';
-export const UPDATE_IMAGE_INDEX = 'epadjs/annotationList/UPDATE_IMAGE_INDEX ';
+// export const UPDATE_IMAGE_INDEX = 'epadjs/annotationList/UPDATE_IMAGE_INDEX ';
 export const GET_PROJECT_MAP = 'epadjs/annotationList/GET_PROJECT_MAP';
 export const SET_SEG_LABEL_MAP_INDEX =
   'epadjs/annotationList/SET_SEG_LABEL_MAP_INDEX';

@@ -1,6 +1,4 @@
 import {
-  LOAD_ANNOTATIONS,
-  LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
   LOAD_PATIENT,
   LOAD_PATIENT_SUCCESS,
@@ -13,7 +11,6 @@ import {
   CHANGE_ACTIVE_PORT,
   LOAD_SERIE_SUCCESS,
   SHOW_ANNOTATION_WINDOW /*???*/,
-  OPEN_PROJECT_MODAL,
   CLEAR_GRID,
   CLEAR_SELECTION,
   SELECT_SERIE,
@@ -34,7 +31,7 @@ import {
   UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
   CLEAR_ACTIVE_AIMID,
-  UPDATE_IMAGE_INDEX,
+  // UPDATE_IMAGE_INDEX,
   GET_PROJECT_MAP,
   SET_SEG_LABEL_MAP_INDEX,
   GET_TEMPLATES,
@@ -83,6 +80,17 @@ const asyncReducer = (state = initialState, action) => {
     let aimIDClearedOPenSeries = [];
     let aimRefs = {};
     switch (action.type) {
+      // case UPDATE_IMAGE_INDEX:
+      //   const updatedOpenSeries = state.openSeries.map((serie) => {
+      //     const newSerie = { ...serie };
+      //     if (serie.imageAnnotations) {
+      //       newSerie.imageAnnotations = { ...serie.imageAnnotations };
+      //     }
+      //     return newSerie;
+      //   });
+      //   updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
+      //   return { ...state, openSeries: updatedOpenSeries };
+
       case SAVE_PATIENT_FILTER:
         return {
           ...state,
@@ -199,20 +207,9 @@ const asyncReducer = (state = initialState, action) => {
           // patients: delPatients,
           activePort: delActivePort
         };
-      case LOAD_ANNOTATIONS:
-        return Object.assign({}, state, {
-          loading: true,
-
-          error: false
-        });
-      case LOAD_ANNOTATIONS_SUCCESS:
-        return { ...state, loading: false };
       case VIEWPORT_FULL:
         const viewPortStatus = !state.showGridFullAlert;
         return { ...state, showGridFullAlert: viewPortStatus };
-      case OPEN_PROJECT_MODAL:
-        const projectModalStatus = !state.showProjectModal;
-        return { ...state, showProjectModal: projectModalStatus };
       case LOAD_SERIE_SUCCESS:
         let imageAddedSeries = state.openSeries.map(serie => {
           const newSerie = { ...serie };
@@ -263,7 +260,6 @@ const asyncReducer = (state = initialState, action) => {
           openSeries: imageAddedSeries
         });
         return result;
-
       case LOAD_ANNOTATIONS_ERROR:
         return Object.assign({}, state, {
           loading: false,
@@ -457,68 +453,68 @@ const asyncReducer = (state = initialState, action) => {
           patientLoading: false,
           patientLoadingError: false
         };
-      case DISPLAY_SINGLE_AIM:
-        let aimPatient = { ...state.patients[action.payload.patientID] };
-        let aimOpenSeries = state.openSeries.map(serie => {
-          const newSerie = { ...serie };
-          if (serie.imageAnnotations) {
-            newSerie.imageAnnotations = { ...serie.imageAnnotations };
-          }
-          return newSerie;
-        });
-        let aimAimsList = { ...state.aimsList[action.payload.seriesUID] };
-        //update patient data
-        for (let stItem in aimPatient.studies) {
-          if (stItem === action.payload.studyUID) {
-            for (let srItem in aimPatient.studies[stItem].series) {
-              if (srItem === action.payload.seriesUID) {
-                for (let annItem in aimPatient.studies[stItem].series[srItem]
-                  .annotations) {
-                  if (annItem === action.payload.aimID) {
-                    aimPatient.studies[stItem].series[srItem].annotations[
-                      annItem
-                    ].isDisplayed = true;
-                  } else {
-                    aimPatient.studies[stItem].series[srItem].annotations[
-                      annItem
-                    ].isDisplayed = false;
-                  }
-                }
-              }
-            }
-          }
-        }
-        //update aimsList data
-        let allAims = Object.keys(
-          aimPatient.studies[action.payload.studyUID].series[
-            action.payload.seriesUID
-          ].annotations
-        );
+      // case DISPLAY_SINGLE_AIM:
+      //   let aimPatient = { ...state.patients[action.payload.patientID] };
+      //   let aimOpenSeries = state.openSeries.map((serie) => {
+      //     const newSerie = { ...serie };
+      //     if (serie.imageAnnotations) {
+      //       newSerie.imageAnnotations = { ...serie.imageAnnotations };
+      //     }
+      //     return newSerie;
+      //   });
+      //   let aimAimsList = { ...state.aimsList[action.payload.seriesUID] };
+      //   //update patient data
+      //   for (let stItem in aimPatient.studies) {
+      //     if (stItem === action.payload.studyUID) {
+      //       for (let srItem in aimPatient.studies[stItem].series) {
+      //         if (srItem === action.payload.seriesUID) {
+      //           for (let annItem in aimPatient.studies[stItem].series[srItem]
+      //             .annotations) {
+      //             if (annItem === action.payload.aimID) {
+      //               aimPatient.studies[stItem].series[srItem].annotations[
+      //                 annItem
+      //               ].isDisplayed = true;
+      //             } else {
+      //               aimPatient.studies[stItem].series[srItem].annotations[
+      //                 annItem
+      //               ].isDisplayed = false;
+      //             }
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }
+      //   //update aimsList data
+      //   let allAims = Object.keys(
+      //     aimPatient.studies[action.payload.studyUID].series[
+      //       action.payload.seriesUID
+      //     ].annotations
+      //   );
 
-        allAims.forEach(ann => {
-          if (ann === action.payload.aimID) {
-            aimAimsList[ann].isDisplayed = true;
-            aimAimsList[ann].showLabel = true;
-          } else {
-            aimAimsList[ann].isDisplayed = false;
-            aimAimsList[ann].showLabel = false;
-          }
-        });
-        //update Openseries data
-        aimOpenSeries[action.payload.index].aimID = action.payload.aimID;
+      //   allAims.forEach((ann) => {
+      //     if (ann === action.payload.aimID) {
+      //       aimAimsList[ann].isDisplayed = true;
+      //       aimAimsList[ann].showLabel = true;
+      //     } else {
+      //       aimAimsList[ann].isDisplayed = false;
+      //       aimAimsList[ann].showLabel = false;
+      //     }
+      //   });
+      //   //update Openseries data
+      //   aimOpenSeries[action.payload.index].aimID = action.payload.aimID;
 
-        return {
-          ...state,
-          aimsList: {
-            ...state.aimsList,
-            [action.payload.seriesUID]: aimAimsList
-          },
-          patients: {
-            ...state.patients,
-            [action.payload.patientID]: aimPatient
-          },
-          openSeries: aimOpenSeries
-        };
+      //   return {
+      //     ...state,
+      //     aimsList: {
+      //       ...state.aimsList,
+      //       [action.payload.seriesUID]: aimAimsList,
+      //     },
+      //     patients: {
+      //       ...state.patients,
+      //       [action.payload.patientID]: aimPatient,
+      //     },
+      //     openSeries: aimOpenSeries,
+      //   };
       case ADD_TO_GRID:
         const seriesInfo = { ...action.reference };
         const { projectMap } = state;
