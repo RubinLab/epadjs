@@ -96,17 +96,6 @@ const asyncReducer = (state = initialState, action) => {
           ...state,
           patientFilter: action.patientFilter
         };
-      case UPDATE_IMAGE_INDEX:
-        const updatedOpenSeries = state.openSeries.map(serie => {
-          const newSerie = { ...serie };
-          if (serie.imageAnnotations) {
-            newSerie.imageAnnotations = { ...serie.imageAnnotations };
-          }
-          return newSerie;
-        });
-
-        updatedOpenSeries[state.activePort].imageIndex = action.imageIndex;
-        return { ...state, openSeries: updatedOpenSeries };
       case GET_NOTIFICATIONS:
         const {
           uploadedPid,

@@ -1441,6 +1441,10 @@ class App extends Component {
               />
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
               <ProtectedRoute
+                path="/flex/:pid?"
+                render={props => <FlexView {...props} pid={this.state.pid} />}
+              />
+              <ProtectedRoute
                 path="/search"
                 render={props => (
                   <AnnotationSearch
