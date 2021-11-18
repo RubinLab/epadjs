@@ -552,6 +552,12 @@ function AnnotationTable(props) {
             </div>
           );
         }
+      },
+      {
+        Header: 'Comment',
+        sortable: true,
+        resizable: true,
+        accessor: 'userComment',
       }
     ],
     []
