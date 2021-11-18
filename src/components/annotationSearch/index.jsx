@@ -49,7 +49,8 @@ const lists = {
     'lesion_name',
     'patient',
     'template',
-    'user'
+    'user',
+    'comment'
   ],
   criteria: ['contains'] // 'equals'
 };
