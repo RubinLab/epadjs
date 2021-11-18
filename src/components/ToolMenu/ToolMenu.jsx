@@ -143,7 +143,7 @@ class ToolMenu extends Component {
       { name: "Pan", icon: <MdPanTool />, tool: "Pan" },
       { name: "MetaData", icon: <FaListAlt />, tool: "MetaData" },
       { name: "Rotate", icon: <FiRotateCw />, tool: "Rotate" },
-      { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
+      // { name: "Region", icon: <FaListAlt />, tool: "WwwcRegion" },
       { name: "Color", icon: <FaPalette />, tool: "colorLut" },
       { name: "Fusion", icon: <FaObjectUngroup />, tool: "fuse" },
     ];
@@ -208,42 +208,42 @@ class ToolMenu extends Component {
     ];
 
     this.segmentationTools = [
-      {
-        name: "Brush",
-        icon: <div className="icon-brush" />,
-        tool: "Brush3D",
-      },
-      {
-        name: "Gated",
-        icon: <FaBroom />,
-        tool: "Brush3DHUGated",
-      },
-      {
-        name: "Spherical Gated",
-        icon: <FaDotCircle />,
-        tool: "BrushSphericalHUGated",
-      },
-      {
-        name: "Auto Gated",
-        icon: <FaBroom />,
-        tool: "Brush3DAutoGated",
-      },
-      {
-        name: "Spherical",
-        icon: <IoMdEgg />,
-        tool: "SphericalBrush",
-      },
-      {
-        name: "Freehand Scissors",
-        icon: <FaHandScissors />,
-        tool: "FreehandScissors"
-      },
-      { name: "Circle Scissors", icon: <FaCircle />, tool: "CircleScissors" },
-      {
-        name: "Correction Scissors",
-        icon: <TiScissorsOutline />,
-        tool: "CorrectionScissors"
-      }
+      // {
+      //   name: "Brush",
+      //   icon: <div className="icon-brush" />,
+      //   tool: "Brush3D",
+      // },
+      // {
+      //   name: "Gated",
+      //   icon: <FaBroom />,
+      //   tool: "Brush3DHUGated",
+      // },
+      // {
+      //   name: "Spherical Gated",
+      //   icon: <FaDotCircle />,
+      //   tool: "BrushSphericalHUGated",
+      // },
+      // {
+      //   name: "Auto Gated",
+      //   icon: <FaBroom />,
+      //   tool: "Brush3DAutoGated",
+      // },
+      // {
+      //   name: "Spherical",
+      //   icon: <IoMdEgg />,
+      //   tool: "SphericalBrush",
+      // },
+      // {
+      //   name: "Freehand Scissors",
+      //   icon: <FaHandScissors />,
+      //   tool: "FreehandScissors"
+      // },
+      // { name: "Circle Scissors", icon: <FaCircle />, tool: "CircleScissors" },
+      // {
+      //   name: "Correction Scissors",
+      //   icon: <TiScissorsOutline />,
+      //   tool: "CorrectionScissors"
+      // }
     ];
   }
 
