@@ -537,21 +537,22 @@ class Annotations extends React.Component {
           this.props.dispatch(addToGrid(selected.original, aimID));
           this.props.dispatch(getSingleSerie(selected.original, aimID));
           //if grid is NOT full check if patient data exists
-          if (!this.props.patients[patientID]) {
-            // this.props.dispatch(getWholeData(null, null, selected.original));
-            getWholeData(null, null, selected.original);
-          } else {
-            this.props.dispatch(
-              updatePatient(
-                'annotation',
-                true,
-                patientID,
-                studyUID,
-                seriesUID,
-                aimID
-              )
-            );
-          }
+          // -----> Delete after v1.0 <-----
+          // if (!this.props.patients[patientID]) {
+          //   // this.props.dispatch(getWholeData(null, null, selected.original));
+          //   getWholeData(null, null, selected.original);
+          // } else {
+          //   this.props.dispatch(
+          //     updatePatient(
+          //       'annotation',
+          //       true,
+          //       patientID,
+          //       studyUID,
+          //       seriesUID,
+          //       aimID
+          //     )
+          //   );
+          // }
         }
       }
     } catch (err) {
@@ -885,15 +886,16 @@ class Annotations extends React.Component {
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
-        if (!patientExists) {
-          // this.props.dispatch(getWholeData(null, selected));
-          getWholeData(null, selected);
-        } else {
-          //check if study exist
-          this.props.dispatch(
-            updatePatient('study', true, patientID, studyUID)
-          );
-        }
+        // -----> Delete after v1.0 <-----
+        // if (!patientExists) {
+        //   // this.props.dispatch(getWholeData(null, selected));
+        //   getWholeData(null, selected);
+        // } else {
+        //   //check if study exist
+        //   this.props.dispatch(
+        //     updatePatient('study', true, patientID, studyUID)
+        //   );
+        // }
       }
     }
   };

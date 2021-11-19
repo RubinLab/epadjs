@@ -292,14 +292,15 @@ class SearchView extends Component {
     }, {});
     // pass it to getwholedata
     const promiseArr = [];
-    for (let patient in patients) {
+    // -----> Delete after v1.0 <-----
+    // for (let patient in patients) {
       // promiseArr.push(
       //   this.props.dispatch(
       //     getWholeData(this.props.openSeries[patients[patient]])
       //   )
       // );
-      promiseArr.push(getWholeData(this.props.openSeries[patients[patient]]));
-    }
+    //   promiseArr.push(getWholeData(this.props.openSeries[patients[patient]]));
+    // }
     Promise.all(promiseArr)
       .then(() => {
         //keep the current state
@@ -509,24 +510,25 @@ class SearchView extends Component {
             this.props.dispatch(getSingleSerie(serie));
           }
         }
-        for (let study in studiesObj) {
-          for (let serie of studiesObj[study]) {
-            if (!this.props.patients[serie.patientID]) {
-              // await this.props.dispatch(getWholeData(serie));
-              getWholeData(serie);
-            } else {
-              this.props.dispatch(
-                updatePatient(
-                  'serie',
-                  true,
-                  serie.patientID,
-                  serie.studyUID,
-                  serie.seriesUID
-                )
-              );
-            }
-          }
-        }
+        // -----> Delete after v1.0 <-----
+        // for (let study in studiesObj) {
+        //   for (let serie of studiesObj[study]) {
+        //     if (!this.props.patients[serie.patientID]) {
+        //       // await this.props.dispatch(getWholeData(serie));
+        //       getWholeData(serie);
+        //     } else {
+        //       this.props.dispatch(
+        //         updatePatient(
+        //           'serie',
+        //           true,
+        //           serie.patientID,
+        //           serie.studyUID,
+        //           serie.seriesUID
+        //         )
+        //       );
+        //     }
+        //   }
+        // }
         this.props.history.push('/display');
         this.props.dispatch(clearSelection());
       }
@@ -562,22 +564,23 @@ class SearchView extends Component {
             this.props.dispatch(addToGrid(serie));
             this.props.dispatch(getSingleSerie(serie));
           });
-          for (let series of selectedSeries) {
-            if (!this.props.patients[series.patientID]) {
-              // await this.props.dispatch(getWholeData(series));
-              getWholeData(series);
-            } else {
-              this.props.dispatch(
-                updatePatient(
-                  'serie',
-                  true,
-                  series.patientID,
-                  series.studyUID,
-                  series.seriesUID
-                )
-              );
-            }
-          }
+          // -----> Delete after v1.0 <-----
+          // for (let series of selectedSeries) {
+          //   if (!this.props.patients[series.patientID]) {
+          //     // await this.props.dispatch(getWholeData(series));
+          //     getWholeData(series);
+          //   } else {
+          //     this.props.dispatch(
+          //       updatePatient(
+          //         'serie',
+          //         true,
+          //         series.patientID,
+          //         series.studyUID,
+          //         series.seriesUID
+          //       )
+          //     );
+          //   }
+          // }
           this.props.history.push('/display');
           this.props.dispatch(clearSelection());
         }
@@ -610,23 +613,24 @@ class SearchView extends Component {
             this.props.dispatch(addToGrid(serie, serie.aimID));
             this.props.dispatch(getSingleSerie(serie, serie.aimID));
           });
-          for (let ann of selectedAnnotations) {
-            if (!this.props.patients[ann.subjectID]) {
-              // await this.props.dispatch(getWholeData(null, null, ann));
-              getWholeData(null, null, ann);
-            } else {
-              this.props.dispatch(
-                updatePatient(
-                  'annotation',
-                  true,
-                  ann.subjectID,
-                  ann.studyUID,
-                  ann.seriesUID,
-                  ann.aimID
-                )
-              );
-            }
-          }
+          // -----> Delete after v1.0 <-----
+          // for (let ann of selectedAnnotations) {
+          //   if (!this.props.patients[ann.subjectID]) {
+          //     // await this.props.dispatch(getWholeData(null, null, ann));
+          //     getWholeData(null, null, ann);
+          //   } else {
+          //     this.props.dispatch(
+          //       updatePatient(
+          //         'annotation',
+          //         true,
+          //         ann.subjectID,
+          //         ann.studyUID,
+          //         ann.seriesUID,
+          //         ann.aimID
+          //       )
+          //     );
+          //   }
+          // }
           this.props.history.push('/display');
           this.props.dispatch(clearSelection());
         }

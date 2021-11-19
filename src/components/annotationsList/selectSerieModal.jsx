@@ -123,6 +123,7 @@ class selectSerieModal extends React.Component {
         } else {
           this.props.dispatch(getSingleSerie(series[i]));
         }
+        // -----> Delete after v1.0 <-----
         // if (!this.props.patients[series[i]]) {
         //   this.props.dispatch(getWholeData(series[i]));
         // }
