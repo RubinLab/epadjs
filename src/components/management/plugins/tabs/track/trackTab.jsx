@@ -12,6 +12,7 @@ import {
   FaTrash,
   FaEnvelopeOpenText,
   FaWindowClose,
+  FaBuffer,
 } from "react-icons/fa";
 import {
   getPluginsQueue,
@@ -20,6 +21,10 @@ import {
   deleteFromPluginQueue,
   downloadPluginResult,
   getContainerLog,
+  getPluginParentsInQueue,
+  insertPluginSubqueue,
+  deletePluginSubqueue,
+  pluginCopyAimsBetweenPlugins,
 } from "../../../../../services/pluginServices";
 import Draggable from "react-draggable";
 import "./../../css/plugin.css";
@@ -37,6 +42,11 @@ class TrackTab extends React.Component {
     selectedQueueIds: {},
     selectAll: 0,
     containerLoggingIntervalHandle: "",
+    showRunningOrderWindow: false,
+    selectedQueueItem : -1,
+    selectedQueueParent : -1,
+    pluginParents: [],
+    copyParentsAims: false,
   };
 
   componentWillMount = async () => {
@@ -192,6 +202,55 @@ class TrackTab extends React.Component {
     } else {
       console.log("error happened while downloadPluginResult");
     }
+  };
+
+  //check error here cavit
+  handlepluginRunningOrder = async (dataOriginal) => {
+    if (typeof dataOriginal !== "undefined"){
+
+        try{
+            console.log('handlepluginRunningOrder',dataOriginal);
+            console.log('whole queue',this.state.pluginQueueList);
+            //  const containerLoggingIntervalHolder = null;
+            const containerid = dataOriginal.id;
+            let _this = this;
+            const pluginParents = await getPluginParentsInQueue(containerid);
+            console.log("parents", JSON.stringify(pluginParents.data));
+            this.setState({
+              selectedQueueParent: -1,
+              showRunningOrderWindow: true,
+              selectedQueueItem: containerid,
+              copyParentsAims: false,
+              pluginParents: [...pluginParents.data],
+              
+            });
+            // try {
+            //   console.log("cnt id : ", containerid);
+            // } catch (err) {
+            //   console.log("eror:", err);
+            //   alert("no log found for the container");
+            //   return true;
+            //   //
+            // }
+          }catch(err){
+            toast.error(err, {
+              position: 'top-right',
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true
+            });
+          }
+    }else{
+      
+      this.setState({
+        copyParentsAims: false,
+        showRunningOrderWindow: false,
+        
+      });
+    }
+
   };
 
   handleGetContainerLog = async (dataOriginal) => {
@@ -541,6 +600,29 @@ class TrackTab extends React.Component {
               <table>
                 <tbody>
                   <tr>
+                  <td>
+                      <button
+                        variant="primary"
+                        className="btn btn-sm btn-outline-light"
+                        onClick={() => {
+                          this.handlepluginRunningOrder(data.original);
+                        }}
+                      >
+                        <FaBuffer
+                          className="menu-clickable"
+                          data-tip
+                          data-for="runningorder-icon"
+                        />
+                        <ReactTooltip
+                          id="runningorder-icon"
+                          place="bottom"
+                          type="info"
+                          delayShow={1000}
+                        >
+                          <span>set running order</span>
+                        </ReactTooltip>
+                      </button>
+                    </td>
                     <td>
                       <button
                         variant="primary"
@@ -671,13 +753,132 @@ class TrackTab extends React.Component {
   };
 
   pluginWindowClickHandler = (e) => {
-    e.preventDefault();
+   //  e.preventDefault();
     e.stopPropagation();
   };
   logClickHandler = (e) => {
     e.stopPropagation();
   };
 
+  prepareDropDownHtmlForPluginQueue = () => {
+    const list = this.state.pluginQueueList;
+    let options = [];
+    for (let i = 0; i < list.length; i++) {
+      options.push(
+        <option key={list[i].id} value={list[i].id}>
+          {'epadplugin_' + list[i].id}
+        </option>
+      );
+    }
+
+    return options;
+  };
+
+  handleChangePluginQueue = (e) => {
+    const targetSelectObjValue = e.target.value;
+    this.setState({
+      selectedQueueParent: targetSelectObjValue,
+    });
+  };
+
+  handleonMouseDown = (e) => {
+    e.stopPropagation();
+
+    console.log("The link was clicked.");
+  };
+
+  removeFromSubQueue = async (id) =>{
+    console.log(id);
+    try{
+      await deletePluginSubqueue(id);
+      const pluginParents = await getPluginParentsInQueue(this.state.selectedQueueItem);
+      this.setState({
+        selectedQueueParent: -1,
+        pluginParents: [...pluginParents.data],
+      });
+    }catch(err){
+      toast.error(err, {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
+  }
+
+  handleAddSelectedPluginToSubqueue = async ()=>{
+    console.log(this.state.selectedQueueItem);
+    console.log(this.state.selectedQueueParent);
+      if (this.state.selectedQueueParent > -1){
+        try{
+          const subQueueObject ={
+            qid: this.state.selectedQueueItem,
+            parent_qid: this.state.selectedQueueParent,
+            status: 0,
+          };
+          await insertPluginSubqueue(subQueueObject);
+          if (this.state.copyParentsAims){
+            await pluginCopyAimsBetweenPlugins(this.state.selectedQueueParent,this.state.selectedQueueItem);
+          }
+          const pluginParents = await getPluginParentsInQueue(this.state.selectedQueueItem);
+          this.setState({
+            selectedQueueParent: -1,
+            copyParentsAims: false,
+            pluginParents: [...pluginParents.data],
+          });
+        }catch(err){
+          toast.error(err, {
+            position: 'top-right',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true
+          });
+        }
+      }else{
+        toast.info('please select a parent plugin instance', {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+      }
+  }
+
+  pluginParentInstances = () => {
+    
+    const list = this.state.pluginParents;
+    const rows = [];
+    console.log("error here check:", list);
+    for (let i = 0; i < list.length; i++) {
+      rows.push(
+        <tr style={{border: "solid 1px", borderColor: "rgba(0, 0, 0, 0.5)"}}>
+        <td style={{width: "50%"}} >
+          {'epadplugin_' + list[i].parent_qid}
+        </td>
+        <td style={{ textAlign: "left"}}>
+              <div className="text_clickable" onClick={() => this.removeFromSubQueue(list[i].id)}>
+                &nbsp;remove
+              </div>
+        </td>
+        </tr>
+      );
+    }
+
+    return rows;
+  }
+
+  handleCopyPluginParentAims = (e) =>{        
+    this.setState({
+      copyParentsAims: !this.state.copyParentsAims,
+    });
+  }
+  
   render() {
     return (
       <div>
@@ -722,9 +923,8 @@ class TrackTab extends React.Component {
                     onMouseDown={this.pluginWindowClickHandler}
                     onMouseMove={this.pluginWindowClickHandler}
                   >
-                <div style={{position:"absolute", top:"10%",left:"10%", width:"100%"}}>
-                          <div className="tools menu-display" id="trackTabruntimeParamsWindow">
-                            <Modal.Dialog className="create-plugin__modal">
+
+                            <Modal.Dialog   style={{position: "absolute", left: "20%",top: "20%", boxShadow: "2rem 2rem 2rem #111" }}>
                               <Modal.Header>
                                 <Modal.Title>Runtime Parameters</Modal.Title>
                               </Modal.Header>
@@ -746,8 +946,7 @@ class TrackTab extends React.Component {
                                 </div>
                               </Modal.Footer>
                             </Modal.Dialog>
-                          </div>
-                </div>
+
             </Draggable>
           )}
 
@@ -763,6 +962,7 @@ class TrackTab extends React.Component {
               onClick={this.pluginWindowClickHandler}
               onMouseDown={this.pluginWindowClickHandler}
               onMouseMove={this.pluginWindowClickHandler}
+              style={{position: "absolute", left: "20%",top: "20%", boxShadow: "2rem 2rem 2rem #111" }}
             >
               <div className="pluginCloseButtonHeader">
                 <FaWindowClose
@@ -784,6 +984,95 @@ class TrackTab extends React.Component {
                 ></textarea>
               </div>
             </div>
+          </Draggable>
+        )}
+
+          {this.state.showRunningOrderWindow && (
+
+          <Draggable
+            onClick={this.pluginWindowClickHandler}
+            onMouseDown={this.pluginWindowClickHandler}
+            onMouseMove={this.pluginWindowClickHandler}
+          >
+              <Modal.Dialog style={{position: "absolute", left: "20%",top: "20%" , boxShadow: "2rem 2rem 2rem #111" }}>
+                      <Modal.Header>
+                        <Modal.Title>Set Parent Plugins</Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body className="create-user__modal--body">
+                            <div
+                            
+                              id="pluginRunningOrderWindow"
+                              onClick={this.pluginWindowClickHandler}
+                              onMouseDown={this.pluginWindowClickHandler}
+                              onMouseMove={this.pluginWindowClickHandler}
+                            >
+                                <div style={{textAlign: "center"}}>
+                                    <table  style={{align: "left",width:"100%"}}>
+                                        <tr style={{align: "left"}}>
+                                              <td style={{textAlign: "left"}}>
+                                                    Plugin Instance to wait :
+                                              </td>
+                                              <td style={{textAlign: "left"}}> 
+                                                  <select
+                                                    className="pluginaddqueueselect"
+                                                    id="pluginQueueList"
+                                                    onChange={this.handleChangePluginQueue}
+                                                    onMouseDown={this.handleonMouseDown}
+                                                    value={this.state.selectedQueueParent}
+                                                  >
+                                                      <option key="select" value="select">
+                                                        select
+                                                      </option>
+                                                      {this.prepareDropDownHtmlForPluginQueue()}
+                                                  </select>
+                                                
+                                                  <button
+                                                      variant="primary"
+                                                      className="btn btn-sm btn-outline-light"
+                                                      onClick={this.handleAddSelectedPluginToSubqueue}
+                                                    >
+                                                      add selected
+                                                  </button>
+                                              </td>
+                                        </tr>
+                                        <tr style={{align: "left"}}>
+                                            <td style={{textAlign: "left"}}>
+                                                  use parent plugin's aims : 
+                                            </td>
+                                            <td style={{textAlign: "left"}}>
+                                                <input
+                                                  id="copyParentAim"
+                                                  type="checkbox"
+                                                  value="copy"
+                                                  checked={this.state.copyParentsAims}
+                                                  onChange={this.handleCopyPluginParentAims}
+                                                />
+                                            </td>
+                                        </tr>
+                                        <tr style={{height: "40px"}}><td colSpan="2" style={{color: "rgb(255, 153, 153)"}}>epadplugin_{this.state.selectedQueueItem} will wait for all plugins listed below before starting</td></tr>
+                                        <tr style={{textAlign: "center", width: "100%"}} >
+                                          <td style={{textAlign: "center"}} colSpan="2">
+                                            <table style={{textAlign: "center",width: "100%"}}>
+                                              {this.pluginParentInstances()}
+                                            </table>
+                                          </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                      </Modal.Body>
+                      <Modal.Footer>
+                                              <button
+                                              variant="secondary"
+                                              className="btn btn-sm btn-outline-light"
+                                              onClick={() => {
+                                                this.setState({ showRunningOrderWindow: false });
+                                              }}
+                                            >
+                                              close
+                                            </button>
+                      </Modal.Footer>
+              </Modal.Dialog>
           </Draggable>
         )}
       </div>
