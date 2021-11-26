@@ -47,6 +47,7 @@ class TrackTab extends React.Component {
     selectedQueueParent : -1,
     pluginParents: [],
     copyParentsAims: false,
+    sequence: false,
   };
 
   componentWillMount = async () => {
@@ -115,8 +116,9 @@ class TrackTab extends React.Component {
   };
   handleRunQueue = async () => {
     const tempPluginQueueList = [...this.state.pluginQueueList];
+    const sequence = this.state.sequence;
     const responseRunPluginsQueue = await runPluginsQueue(
-      Object.keys(this.state.selectedQueueIds)
+      {ids: Object.keys(this.state.selectedQueueIds), sequence}
     );
     if (responseRunPluginsQueue.status === 202) {
       console.log("queue is running");
@@ -128,7 +130,8 @@ class TrackTab extends React.Component {
     console.log("start one ");
     const queuelist = [];
     queuelist.push(dbid);
-    const responseRunPluginsQueue = await runPluginsQueue(queuelist);
+    const sequence = this.state.sequence;
+    const responseRunPluginsQueue = await runPluginsQueue({ids: queuelist, sequence});
     if (responseRunPluginsQueue.status === 202) {
       console.log("queue is running");
     } else {
@@ -878,12 +881,20 @@ class TrackTab extends React.Component {
       copyParentsAims: !this.state.copyParentsAims,
     });
   }
+
+  handleSequence = (e) =>{        
+    this.setState({
+      sequence: !this.state.sequence,
+    });
+  }
   
   render() {
     return (
       <div>
         <div className="tools menu-display" id="template">
           <div className="topButtons">
+            
+
             <button
               variant="primary"
               className="btn btn-sm btn-outline-light cursorHand"
@@ -905,6 +916,15 @@ class TrackTab extends React.Component {
             >
               <FaTrash className="menu-clickable" />
             </button>
+            &nbsp;&nbsp;
+            run in sequence &nbsp;
+            <input style={{verticalAlign:"middle"}}
+              id="sequence"
+              type="checkbox"
+              value=""
+              checked={this.state.sequence}
+              onChange={this.handleSequence}
+            />
           </div>
 
           <ReactTable
