@@ -954,19 +954,19 @@ const AnnotationSearch = props => {
                   const resultAddQueue = await addPluginsToQueue(tempQueueObject);
                   let responseRunPluginsQueue = null;
                   console.log('plugin running queue ',JSON.stringify(resultAddQueue));
-                  if (resultAddQueue && resultAddQueue.data){
-                    if (Array.isArray(resultAddQueue.data)){
-                      responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
-                    }else{
-                      responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data.id);
-                    }
-                  }
+                  // if (resultAddQueue && resultAddQueue.data){
+                  //   if (Array.isArray(resultAddQueue.data)){
+                  //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
+                  //   }else{
+                  //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data.id);
+                  //   }
+                  // }
                   
-                 if (responseRunPluginsQueue.status === 202) {
-                    console.log("queue is running case null");
-                 } else {
-                    console.log("error happened while running queue");
-                 }
+                //  if (responseRunPluginsQueue.status === 202) {
+                //     console.log("queue is running case null");
+                //  } else {
+                //     console.log("error happened while running queue");
+                //  }
           } else if (tempPluginObject.processmultipleaims === 0){
             Object.keys(props.selectedAnnotations).forEach(async (eachAnnt) => {
 
@@ -997,19 +997,19 @@ const AnnotationSearch = props => {
                   const resultAddQueue = await addPluginsToQueue(tempQueueObject);
                   let responseRunPluginsQueue = null;
                   console.log('plugin running queue ',JSON.stringify(resultAddQueue));
-                  if (resultAddQueue && resultAddQueue.data){
-                    if (Array.isArray(resultAddQueue.data)){
-                      responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
-                    }else{
-                      responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data.id);
-                    }
-                  }
+                  // if (resultAddQueue && resultAddQueue.data){
+                  //   if (Array.isArray(resultAddQueue.data)){
+                  //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
+                  //   }else{
+                  //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data.id);
+                  //   }
+                  // }
                   
-                  if (responseRunPluginsQueue.status === 202) {
-                    console.log("queue is running case 0 - 1 annot req");
-                  } else {
-                    console.log("error happened while running queue");
-                  }
+                  // if (responseRunPluginsQueue.status === 202) {
+                  //   console.log("queue is running case 0 - 1 annot req");
+                  // } else {
+                  //   console.log("error happened while running queue");
+                  // }
                 })
           }else {
 
@@ -1034,19 +1034,19 @@ const AnnotationSearch = props => {
                   const resultAddQueue = await addPluginsToQueue(tempQueueObject);
                   let responseRunPluginsQueue = null;
                   console.log('plugin running queue ',JSON.stringify(resultAddQueue));
-                  if (resultAddQueue && resultAddQueue.data){
-                    if (Array.isArray(resultAddQueue.data)){
-                      responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
-                    }else{
-                      responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data.id);
-                    }
-                  }
+                  // if (resultAddQueue && resultAddQueue.data){
+                  //   if (Array.isArray(resultAddQueue.data)){
+                  //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
+                  //   }else{
+                  //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data.id);
+                  //   }
+                  // }
                   
-                 if (responseRunPluginsQueue.status === 202) {
-                    console.log("queue is running case  1 multi  annot required");
-                  } else {
-                    console.log("error happened while running queue");
-                 }
+                //  if (responseRunPluginsQueue.status === 202) {
+                //     console.log("queue is running case  1 multi  annot required");
+                //   } else {
+                //     console.log("error happened while running queue");
+                //  }
           }
             setSelectedPluginDbId(-1);
             setShowRunPluginButton(false);
