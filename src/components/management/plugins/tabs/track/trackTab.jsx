@@ -125,6 +125,7 @@ class TrackTab extends React.Component {
     } else {
       console.log("error happened while running queue");
     }
+    this.setState({selectedQueueIds: []});
   };
   handleStartOne = async (dbid) => {
     console.log("start one ");
@@ -160,6 +161,7 @@ class TrackTab extends React.Component {
   handleStopMultiple = async () => {
     let tempselectedQueueIds = [];
     tempselectedQueueIds = [...Object.keys(this.state.selectedQueueIds)];
+    this.setState({selectedQueueIds: []});
     const tempIntselectedQueueIds = tempselectedQueueIds.map((id) => {
       return parseInt(id);
     });
@@ -650,27 +652,29 @@ class TrackTab extends React.Component {
                       </button>
                     </td>
                     <td>
-                      <button
-                        variant="primary"
-                        className="btn btn-sm btn-outline-light"
-                        onClick={() => {
-                          this.handleStartOne(data.original.id);
-                        }}
-                      >
-                        <FaPlay
-                          className="menu-clickable"
-                          data-tip
-                          data-for="play-icon"
-                        />
-                        <ReactTooltip
-                          id="play-icon"
-                          place="bottom"
-                          type="info"
-                          delayShow={1000}
+                      {!this.state.sequence && (
+                          <button
+                          variant="primary"
+                          className="btn btn-sm btn-outline-light"
+                          onClick={() => {
+                            this.handleStartOne(data.original.id);
+                          }}
                         >
-                          <span>Start plugin</span>
-                        </ReactTooltip>
-                      </button>
+                          <FaPlay
+                            className="menu-clickable"
+                            data-tip
+                            data-for="play-icon"
+                          />
+                          <ReactTooltip
+                            id="play-icon"
+                            place="bottom"
+                            type="info"
+                            delayShow={1000}
+                          >
+                            <span>Start plugin</span>
+                          </ReactTooltip>
+                        </button>
+                      )}
                     </td>
                     <td>
                       <button
