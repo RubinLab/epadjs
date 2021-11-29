@@ -457,7 +457,7 @@ function Studies(props) {
         )
       }
     ],
-    [selectedLevel, selectedCount, props.update]
+    [selectedLevel, selectedCount, props.update, isSerieSelectionOpen]
   );
 
   const getDataFromStorage = (projectID, subjectID) => {
