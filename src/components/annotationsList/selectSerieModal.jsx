@@ -105,6 +105,7 @@ class selectSerieModal extends React.Component {
     let series = [];
     let significantSeries = [];
     let significanceOrder = 1;
+    // TODO: what is the logic here?
     studies.forEach(arr => {
       series = series.concat(arr);
     });
@@ -114,6 +115,7 @@ class selectSerieModal extends React.Component {
     //concatanete all arrays to getther
     for (let i = 0; i < this.state.selectedToDisplay.length; i++) {
       if (this.state.selectedToDisplay[i]) {
+        // If significance order is not set before we 
         if (!significanceSet) {
           significantSeries.push({
             seriesUID: series[i].seriesUID,
@@ -177,6 +179,7 @@ class selectSerieModal extends React.Component {
           return;
         }
         if (!this.isSerieOpen(series[i][k].seriesUID)) {
+          console.log("Selected to display, count, i, k, series", selectedToDisplay, count, i, k, series);
           selectedToDisplay[count + k] = series[i][k].significanceOrder
             ? true
             : false;
@@ -208,6 +211,7 @@ class selectSerieModal extends React.Component {
       : Object.values(seriesPassed);
     let keys = Object.keys(this.props.seriesPassed);
     let count = 0;
+    let significantExplanation = false; //Explanations at the bottom of the modal
 
     // filter the series according to displayable modalities
     for (let i = 0; i < series.length; i++) {
@@ -231,6 +235,10 @@ class selectSerieModal extends React.Component {
           !this.state.selectedToDisplay[count + k] &&
           this.state.limit >= this.maxPort;
         let desc = series[i][k].seriesDescription || "Unnamed Serie";
+        if (series[i][k].significanceOrder) {
+          desc = desc + " (S)";
+          significantExplanation = true;
+        }
         // desc = alreadyOpen ? `${desc} - already open` : desc;
         item = alreadyOpen ? (
           <div>
@@ -267,6 +275,7 @@ class selectSerieModal extends React.Component {
         <div key={keys[i]}>
           <div className="serieSelection-title">{title}</div>
           <div>{innerList}</div>
+          {significantExplanation && (<div><br />(S): Significant series</div>)}
         </div>
       );
       count += series[i].length;
@@ -294,10 +303,10 @@ class selectSerieModal extends React.Component {
             className="selectSerie-clearButton"
             onClick={() => this.props.dispatch(clearGrid())}
           >
-            Close all series
+            X  - Close all series
           </button>
           {this.state.limit >= this.maxPort && (
-            <div>You reached Max number of series</div>
+            <div>Please close some or all open series to open new ones!</div>
           )}
           <div>{list}</div>
         </Modal.Body>
