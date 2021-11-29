@@ -23,12 +23,12 @@ import {
   ADD_TO_GRID,
   LOAD_COMPLETED,
   START_LOADING,
-  UPDATE_PATIENT,
+  // UPDATE_PATIENT,
   CLOSE_SERIE,
   UPDATE_IMAGEID,
   CLEAR_AIMID,
-  UPDATE_PATIENT_AIM_SAVE,
-  UPDATE_PATIENT_AIM_DELETE,
+  // UPDATE_PATIENT_AIM_SAVE,
+  // UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
   CLEAR_ACTIVE_AIMID,
   UPDATE_IMAGE_INDEX,
@@ -135,30 +135,30 @@ export const getNotificationsData = (
   };
 };
 
-// getwholeData
-export const updatePatient = (
-  type,
-  status,
-  patient,
-  study,
-  serie,
-  annotation
-) => {
-  return {
-    type: UPDATE_PATIENT,
-    payload: { type, status, patient, study, serie, annotation }
-  };
-};
+// -----> Delete after v1.0 <----- 
+// export const updatePatient = (
+//   type,
+//   status,
+//   patient,
+//   study,
+//   serie,
+//   annotation
+// ) => {
+//   return {
+//     type: UPDATE_PATIENT,
+//     payload: { type, status, patient, study, serie, annotation }
+//   };
+// };
 
-// getwholeData
-export const updatePatientOnAimSave = aimRefs => {
-  return { type: UPDATE_PATIENT_AIM_SAVE, aimRefs };
-};
+// -----> Delete after v1.0 <-----  
+// export const updatePatientOnAimSave = aimRefs => {
+//   return { type: UPDATE_PATIENT_AIM_SAVE, aimRefs };
+// };
 
-// getwholeData
-export const updatePatientOnAimDelete = aimRefs => {
-  return { type: UPDATE_PATIENT_AIM_DELETE, aimRefs };
-};
+// -----> Delete after v1.0 <-----  
+// export const updatePatientOnAimDelete = aimRefs => {
+//   return { type: UPDATE_PATIENT_AIM_DELETE, aimRefs };
+// };
 
 // clear selected patients/studies/series/annotations from the store
 export const clearSelection = selectionType => {
@@ -677,7 +677,6 @@ export const getSingleSerie = (serie, annotation) => {
   };
 };
 
-// TODO: check with getWholeData, this may be unnecessary
 export const updateSingleSerie = (serie, annotation) => {
   return async (dispatch, getState) => {
     let { patientID, studyUID, seriesUID, numberOfAnnotations } = serie;

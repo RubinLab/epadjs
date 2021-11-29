@@ -33,7 +33,7 @@ import {
   changeActivePort,
   jumpToAim,
   updateSingleSerie,
-  updatePatientOnAimDelete
+  // updatePatientOnAimDelete
 } from '../annotationsList/action';
 import DownloadSelection from './annotationDownloadModal';
 import './searchView.css';
@@ -301,29 +301,29 @@ class SearchView extends Component {
       // );
     //   promiseArr.push(getWholeData(this.props.openSeries[patients[patient]]));
     // }
-    Promise.all(promiseArr)
-      .then(() => {
-        //keep the current state
-        this.props.dispatch(clearSelection());
+    // Promise.all(promiseArr)
+    //   .then(() => {
+    //     //keep the current state
+    //     this.props.dispatch(clearSelection());
 
-        this.setState(state => ({ update: state.update + 1 }));
-        this.props.history.push(`/list/${this.props.pid}`);
-        for (let serie of this.props.openSeries) {
-          let type = serie.aimID ? 'annotation' : 'serie';
-          this.props.dispatch(
-            updatePatient(
-              type,
-              true,
-              serie.patientID,
-              serie.studyUID,
-              serie.seriesUID
-            )
-          );
-        }
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    //     this.setState(state => ({ update: state.update + 1 }));
+    //     this.props.history.push(`/list/${this.props.pid}`);
+    //     for (let serie of this.props.openSeries) {
+    //       let type = serie.aimID ? 'annotation' : 'serie';
+    //       this.props.dispatch(
+    //         updatePatient(
+    //           type,
+    //           true,
+    //           serie.patientID,
+    //           serie.studyUID,
+    //           serie.seriesUID
+    //         )
+    //       );
+    //     }
+    //   })
+    //   .catch(err => {
+    //     console.log(err);
+    //   });
   };
 
   updateSubjectCount = async () => {
@@ -438,7 +438,8 @@ class SearchView extends Component {
     arr.forEach((el, index) => {
       if (openSeriesUIDs.includes(el.seriesUID)) {
         seriesToUpdate[el.seriesUID] = openSeriesUIDs.indexOf(el.seriesUID);
-        patientsToUpdate.push(el);
+        // -----> Delete after v1.0 <-----
+        // patientsToUpdate.push(el);
       }
     });
     Object.values(seriesToUpdate).forEach(el => {
@@ -447,9 +448,10 @@ class SearchView extends Component {
         updateSingleSerie({ ...this.props.openSeries[el], subjectID })
       );
     });
-    patientsToUpdate.forEach(el => {
-      this.props.dispatch(updatePatientOnAimDelete(el));
-    });
+    // -----> Delete after v1.0 <-----
+    // patientsToUpdate.forEach(el => {
+    //   this.props.dispatch(updatePatientOnAimDelete(el));
+    // });
   };
 
   updateError = error => {

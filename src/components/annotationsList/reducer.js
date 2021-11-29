@@ -23,7 +23,7 @@ import {
   ADD_TO_GRID,
   DISPLAY_SINGLE_AIM,
   JUMP_TO_AIM,
-  UPDATE_PATIENT,
+  // UPDATE_PATIENT,
   CLOSE_SERIE,
   UPDATE_IMAGEID,
   CLEAR_AIMID,
@@ -54,7 +54,7 @@ const initialState = {
   activePort: null,
   loading: false,
   error: false,
-  patients: {},
+  // patients: {},
   showGridFullAlert: false,
   showProjectModal: false,
   selectedProject: null,
@@ -110,20 +110,21 @@ const asyncReducer = (state = initialState, action) => {
           refresh,
           notificationAction
         };
-      case UPDATE_PATIENT_AIM_DELETE:
-        let patientAimDelete = { ...state.patients };
-        ({ aimRefs } = action);
-        delete patientAimDelete[aimRefs.subjectID].studies[aimRefs.studyUID]
-          .series[aimRefs.seriesUID].annotations[aimRefs.aimID];
-        return { ...state, patient: patientAimDelete };
-      case UPDATE_PATIENT_AIM_SAVE:
-        let patientAimSave = { ...state.patients };
-        ({ aimRefs } = action);
-        aimRefs = action.aimRefs;
-        patientAimSave[aimRefs.patientID].studies[aimRefs.studyUID].series[
-          aimRefs.seriesUID
-        ].annotations[aimRefs.aimID] = { ...aimRefs };
-        return { ...state, patient: patientAimSave };
+      // -----> Delete after v1.0 <-----    
+      // case UPDATE_PATIENT_AIM_DELETE:
+      //   let patientAimDelete = { ...state.patients };
+      //   ({ aimRefs } = action);
+      //   delete patientAimDelete[aimRefs.subjectID].studies[aimRefs.studyUID]
+      //     .series[aimRefs.seriesUID].annotations[aimRefs.aimID];
+      //   return { ...state, patient: patientAimDelete };
+      // case UPDATE_PATIENT_AIM_SAVE:
+      //   let patientAimSave = { ...state.patients };
+      //   ({ aimRefs } = action);
+      //   aimRefs = action.aimRefs;
+      //   patientAimSave[aimRefs.patientID].studies[aimRefs.studyUID].series[
+      //     aimRefs.seriesUID
+      //   ].annotations[aimRefs.aimID] = { ...aimRefs };
+      //   return { ...state, patient: patientAimSave };
       case CLEAR_AIMID:
         aimIDClearedOPenSeries = state.openSeries.map(serie => {
           const newSerie = { ...serie };
@@ -328,13 +329,13 @@ const asyncReducer = (state = initialState, action) => {
           selectionObj = { ...state.selectedAnnotations };
         }
         //keep the patient if already there
-        for (let item in selectionObj) {
-          if (state.patients[item.patientID]) {
-            clearedPatients[item.patientID] = {
-              ...state.patients[item.patientID]
-            };
-          }
-        }
+        // for (let item in selectionObj) {
+        //   if (state.patients[item.patientID]) {
+        //     clearedPatients[item.patientID] = {
+        //       ...state.patients[item.patientID]
+        //     };
+        //   }
+        // }
         //update the state as not displayed
         for (let patient in clearedPatients) {
           for (let study in clearedPatients[patient]) {
@@ -351,7 +352,7 @@ const asyncReducer = (state = initialState, action) => {
 
         return {
           ...state,
-          patients: clearedPatients,
+          // patients: clearedPatients,
           openSeries: [],
           aimsList: {},
           activePort: 0
@@ -460,29 +461,30 @@ const asyncReducer = (state = initialState, action) => {
           openSeries: newOpenSeries,
           activePort: newOpenSeries.length - 1
         };
-      case UPDATE_PATIENT:
-        let updatedPt = { ...state.patients[action.payload.patient] };
-        if (action.payload.type === 'study') {
-          let selectedSt = updatedPt.studies[action.payload.study];
-          for (let serie in selectedSt.series) {
-            selectedSt.series[serie].isDisplayed = action.payload.status;
-          }
-        } else if (
-          action.payload.type === 'serie' ||
-          action.payload.type === 'annotation'
-        ) {
-          let selectedSr =
-            updatedPt.studies[action.payload.study].series[
-              action.payload.serie
-            ];
-          selectedSr.isDisplayed = action.payload.status;
-          for (let ann in selectedSr.annotations) {
-            selectedSr.annotations[ann].isDisplayed = action.payload.status;
-          }
-        }
-        let updatedPtPatients = { ...state.patients };
-        updatedPtPatients[action.payload.patient] = updatedPt;
-        return { ...state, patients: updatedPtPatients };
+      // -----> Delete after v1.0 <-----   
+      // case UPDATE_PATIENT:
+      //   let updatedPt = { ...state.patients[action.payload.patient] };
+      //   if (action.payload.type === 'study') {
+      //     let selectedSt = updatedPt.studies[action.payload.study];
+      //     for (let serie in selectedSt.series) {
+      //       selectedSt.series[serie].isDisplayed = action.payload.status;
+      //     }
+      //   } else if (
+      //     action.payload.type === 'serie' ||
+      //     action.payload.type === 'annotation'
+      //   ) {
+      //     let selectedSr =
+      //       updatedPt.studies[action.payload.study].series[
+      //         action.payload.serie
+      //       ];
+      //     selectedSr.isDisplayed = action.payload.status;
+      //     for (let ann in selectedSr.annotations) {
+      //       selectedSr.annotations[ann].isDisplayed = action.payload.status;
+      //     }
+      //   }
+      //   let updatedPtPatients = { ...state.patients };
+      //   updatedPtPatients[action.payload.patient] = updatedPt;
+      //   return { ...state, patients: updatedPtPatients };
       case JUMP_TO_AIM:
         let { aimID, index } = action.payload;
         let serUID = action.payload.seriesUID;

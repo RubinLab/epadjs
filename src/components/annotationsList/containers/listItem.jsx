@@ -83,9 +83,10 @@ class ListItem extends React.Component {
           .dispatch(getSingleSerie(this.props.serie))
           .then(() => { })
           .catch(err => console.log(err));
-        this.props.dispatch(
-          updatePatient("serie", true, patientID, studyUID, seriesUID)
-        );
+        // -----> Delete after v1.0 <----- 
+        // this.props.dispatch(
+        //   updatePatient("serie", true, patientID, studyUID, seriesUID)
+        // );
       }
     }
   };
@@ -154,9 +155,10 @@ class ListItem extends React.Component {
         //update the active port
         this.props.dispatch(changeActivePort(index));
         // change the annotations as displayed in patient and aimlist
-        this.props.dispatch(
-          updatePatient("serie", checked, patientID, studyUID, seriesUID)
-        );
+        // -----> Delete after v1.0 <-----
+        // this.props.dispatch(
+        //   updatePatient("serie", checked, patientID, studyUID, seriesUID)
+        // );
         this.props.dispatch(toggleAllAnnotations(seriesUID, checked));
         //else - if not open
       } else {
@@ -174,17 +176,19 @@ class ListItem extends React.Component {
             .then(() => { })
             .catch(err => console.log(err));
           //update patient?? with serie
-          this.props.dispatch(
-            updatePatient("serie", checked, patientID, studyUID, seriesUID)
-          );
+          // -----> Delete after v1.0 <-----
+          // this.props.dispatch(
+          //   updatePatient("serie", checked, patientID, studyUID, seriesUID)
+          // );
         }
       }
       // if checked false
     } else {
       //update patients and aimlist just annotations to be false
-      this.props.dispatch(
-        updatePatient("serie", checked, patientID, studyUID, seriesUID)
-      );
+      // -----> Delete after v1.0 <-----
+      // this.props.dispatch(
+      //   updatePatient("serie", checked, patientID, studyUID, seriesUID)
+      // );
       this.props.dispatch(toggleAllAnnotations(seriesUID, checked));
       if (isOpen) {
         this.props.dispatch(changeActivePort(index));
