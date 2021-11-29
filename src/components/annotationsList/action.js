@@ -23,12 +23,12 @@ import {
   ADD_TO_GRID,
   LOAD_COMPLETED,
   START_LOADING,
-  UPDATE_PATIENT,
+  // UPDATE_PATIENT,
   CLOSE_SERIE,
   UPDATE_IMAGEID,
   CLEAR_AIMID,
-  UPDATE_PATIENT_AIM_SAVE,
-  UPDATE_PATIENT_AIM_DELETE,
+  // UPDATE_PATIENT_AIM_SAVE,
+  // UPDATE_PATIENT_AIM_DELETE,
   GET_NOTIFICATIONS,
   CLEAR_ACTIVE_AIMID,
   UPDATE_IMAGE_INDEX,
@@ -135,27 +135,30 @@ export const getNotificationsData = (
   };
 };
 
-export const updatePatient = (
-  type,
-  status,
-  patient,
-  study,
-  serie,
-  annotation
-) => {
-  return {
-    type: UPDATE_PATIENT,
-    payload: { type, status, patient, study, serie, annotation }
-  };
-};
+// -----> Delete after v1.0 <----- 
+// export const updatePatient = (
+//   type,
+//   status,
+//   patient,
+//   study,
+//   serie,
+//   annotation
+// ) => {
+//   return {
+//     type: UPDATE_PATIENT,
+//     payload: { type, status, patient, study, serie, annotation }
+//   };
+// };
 
-export const updatePatientOnAimSave = aimRefs => {
-  return { type: UPDATE_PATIENT_AIM_SAVE, aimRefs };
-};
+// -----> Delete after v1.0 <-----  
+// export const updatePatientOnAimSave = aimRefs => {
+//   return { type: UPDATE_PATIENT_AIM_SAVE, aimRefs };
+// };
 
-export const updatePatientOnAimDelete = aimRefs => {
-  return { type: UPDATE_PATIENT_AIM_DELETE, aimRefs };
-};
+// -----> Delete after v1.0 <-----  
+// export const updatePatientOnAimDelete = aimRefs => {
+//   return { type: UPDATE_PATIENT_AIM_DELETE, aimRefs };
+// };
 
 // clear selected patients/studies/series/annotations from the store
 export const clearSelection = selectionType => {
@@ -172,16 +175,16 @@ export const startLoading = () => {
   return { type: START_LOADING };
 };
 
-export const loadPatient = () => {
-  return { type: LOAD_PATIENT };
-};
-export const loadPatientError = err => {
-  return { type: LOAD_PATIENT_ERROR, err };
-};
-
-export const loadPatientSuccess = patient => {
-  return { type: LOAD_PATIENT_SUCCESS, patient };
-};
+// -----> Delete after v1.0 <-----
+// export const loadPatient = () => {
+//   return { type: LOAD_PATIENT };
+// };
+// export const loadPatientError = err => {
+//   return { type: LOAD_PATIENT_ERROR, err };
+// };
+// export const loadPatientSuccess = patient => {
+//   return { type: LOAD_PATIENT_SUCCESS, patient };
+// };
 
 //fill aimID to jump on click eyeicon/annotations etc
 export const jumpToAim = (seriesUID, aimID, index) => {
@@ -565,85 +568,88 @@ const getRequiredFields = (arr, type, selectedID) => {
   return result;
 };
 
+// -----> Delete after v1.0 <-----
 // TODO: it may be deleted after getWholeData discarded
-const getStudiesData = async (dataObj, projectID, patientID, selectedID) => {
-  try {
-    const { data: studies } = await getStudies(projectID, patientID);
-    //create an empty object to be "studies" property in the data
-    //iterate over the studies array create key/value pairs
-    dataObj["studies"] = getRequiredFields(studies, "study", selectedID);
-    return new Promise((resolve, reject) => {
-      resolve(dataObj);
-    });
-  } catch (err) {
-    return new Promise((resolve, reject) => {
-      reject(
-        new Error(
-          `Error while getting study data ${err}`,
-          "src/components/annotationList/action.js"
-        )
-      );
-    });
-  }
-};
+// const getStudiesData = async (dataObj, projectID, patientID, selectedID) => {
+//   try {
+//     const { data: studies } = await getStudies(projectID, patientID);
+//     //create an empty object to be "studies" property in the data
+//     //iterate over the studies array create key/value pairs
+//     dataObj["studies"] = getRequiredFields(studies, "study", selectedID);
+//     return new Promise((resolve, reject) => {
+//       resolve(dataObj);
+//     });
+//   } catch (err) {
+//     return new Promise((resolve, reject) => {
+//       reject(
+//         new Error(
+//           `Error while getting study data ${err}`,
+//           "src/components/annotationList/action.js"
+//         )
+//       );
+//     });
+//   }
+// };
 
+// -----> Delete after v1.0 <-----
 // TODO: it may be deleted after getWholeData discarded
-const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
-  try {
-    const { data: series } = await getSeries(projectID, patientID, studyID);
-    const formattedSeries = getRequiredFields(series, "serie", selectedID);
-    return new Promise((resolve, reject) => {
-      resolve(formattedSeries);
-    });
-  } catch (err) {
-    return new Promise((resolve, reject) => {
-      reject(
-        new Error(
-          `Error while getting series data ${err}`,
-          "src/components/annotationList/action.js"
-        )
-      );
-    });
-  }
-};
+// const getSeriesData = async (projectID, patientID, studyID, selectedID) => {
+//   try {
+//     const { data: series } = await getSeries(projectID, patientID, studyID);
+//     const formattedSeries = getRequiredFields(series, "serie", selectedID);
+//     return new Promise((resolve, reject) => {
+//       resolve(formattedSeries);
+//     });
+//   } catch (err) {
+//     return new Promise((resolve, reject) => {
+//       reject(
+//         new Error(
+//           `Error while getting series data ${err}`,
+//           "src/components/annotationList/action.js"
+//         )
+//       );
+//     });
+//   }
+// };
 
+// -----> Delete after v1.0 <-----
 // TODO: it may be deleted after getWholeData discarded
-const getAnnotationData = async (
-  projectId,
-  subjectId,
-  studyId,
-  seriesId,
-  selectedID
-) => {
-  try {
-    const { data: annotations } = await getAnnotations({
-      projectId,
-      subjectId,
-      studyId,
-      seriesId
-    });
-    let formattedAnnotation = [];
-    if (annotations) {
-      formattedAnnotation = getRequiredFields(
-        annotations,
-        "annotation",
-        selectedID
-      );
-    }
-    return new Promise((resolve, reject) => {
-      resolve(formattedAnnotation);
-    });
-  } catch (err) {
-    return new Promise((resolve, reject) => {
-      reject(
-        new Error(
-          `Error while getting annotations data ${err}`,
-          "src/components/annotationList/action.js"
-        )
-      );
-    });
-  }
-};
+// const getAnnotationData = async (
+//   projectId,
+//   subjectId,
+//   studyId,
+//   seriesId,
+//   selectedID
+// ) => {
+//   try {
+//     const { data: annotations } = await getAnnotations({
+//       projectId,
+//       subjectId,
+//       studyId,
+//       seriesId
+//     });
+//     let formattedAnnotation = [];
+//     if (annotations) {
+//       formattedAnnotation = getRequiredFields(
+//         annotations,
+//         "annotation",
+//         selectedID
+//       );
+//     }
+//     return new Promise((resolve, reject) => {
+//       resolve(formattedAnnotation);
+//     });
+//   } catch (err) {
+//     return new Promise((resolve, reject) => {
+//       reject(
+//         new Error(
+//           `Error while getting annotations data ${err}`,
+//           "src/components/annotationList/action.js"
+//         )
+//       );
+//     });
+//   }
+// };
 
 // action to open series
 export const getSingleSerie = (serie, annotation) => {
@@ -671,7 +677,6 @@ export const getSingleSerie = (serie, annotation) => {
   };
 };
 
-// TODO: check with getWholeData, this may be unnecessary
 export const updateSingleSerie = (serie, annotation) => {
   return async (dispatch, getState) => {
     let { patientID, studyUID, seriesUID, numberOfAnnotations } = serie;
@@ -748,80 +753,81 @@ const getSingleSerieData = (serie, annotation) => {
   });
 };
 
+// -----> Delete after v1.0 <-----
 // TODO : will come back
-export function getWholeData(serie, study, annotation) {
-  return async (dispatch, getState) => {
-    try {
-      // console.log("2 serie, study, annotation", serie, study, annotation);
-      dispatch(loadPatient());
-      let { projectID, patientID, patientName, studyUID } =
-        serie || study || annotation;
-      projectID = projectID ? projectID : "lite";
+// export function getWholeData(serie, study, annotation) {
+//   return async (dispatch, getState) => {
+//     try {
+//       // console.log("2 serie, study, annotation", serie, study, annotation);
+//       dispatch(loadPatient());
+//       let { projectID, patientID, patientName, studyUID } =
+//         serie || study || annotation;
+//       projectID = projectID ? projectID : "lite";
 
-      if (annotation) patientID = annotation.subjectID;
-      let selectedID;
-      let seriesUID;
-      if (serie) {
-        selectedID = serie.seriesUID;
-        seriesUID = serie.seriesUID;
-      } else if (study) {
-        selectedID = study.studyUID;
-      } else if (annotation) {
-        selectedID = annotation.seriesUID;
-      }
-      let summaryData = {
-        projectID,
-        patientID,
-        patientName
-      };
-      // make call to get study and populate the studies data
-      try {
-        study
-          ? await getStudiesData(summaryData, projectID, patientID, selectedID)
-          : await getStudiesData(summaryData, projectID, patientID);
-      } catch (error) {
-        dispatch(loadPatientError(error));
-      }
-      // make call to get series and populate studies with series data
-      const studies = Object.values(summaryData["studies"]);
-      for (let st of studies) {
-        let series;
-        try {
-          series = await getSeriesData(
-            projectID,
-            patientID,
-            st.studyUID,
-            selectedID
-          );
-          st.series = series;
-          //make call to get annotations and populate series annotations data
-          const seriesArr = Object.values(st.series);
-          for (let serie of seriesArr) {
-            try {
-              const annotations = await getAnnotationData(
-                projectID,
-                patientID,
-                st.studyUID,
-                serie.seriesUID,
-                selectedID
-              );
-              serie.annotations = annotations;
-            } catch (error) {
-              dispatch(loadPatientError(error));
-              // dispatch(annotationsLoadingError(error));
-            }
-          }
-        } catch (error) {
-          dispatch(loadPatientError(error));
-        }
-      }
-      // return summaryData;
-      dispatch(loadPatientSuccess(summaryData));
-    } catch (err) {
-      console.error(err);
-    }
-  };
-}
+//       if (annotation) patientID = annotation.subjectID;
+//       let selectedID;
+//       let seriesUID;
+//       if (serie) {
+//         selectedID = serie.seriesUID;
+//         seriesUID = serie.seriesUID;
+//       } else if (study) {
+//         selectedID = study.studyUID;
+//       } else if (annotation) {
+//         selectedID = annotation.seriesUID;
+//       }
+//       let summaryData = {
+//         projectID,
+//         patientID,
+//         patientName
+//       };
+//       // make call to get study and populate the studies data
+//       try {
+//         study
+//           ? await getStudiesData(summaryData, projectID, patientID, selectedID)
+//           : await getStudiesData(summaryData, projectID, patientID);
+//       } catch (error) {
+//         dispatch(loadPatientError(error));
+//       }
+//       // make call to get series and populate studies with series data
+//       const studies = Object.values(summaryData["studies"]);
+//       for (let st of studies) {
+//         let series;
+//         try {
+//           series = await getSeriesData(
+//             projectID,
+//             patientID,
+//             st.studyUID,
+//             selectedID
+//           );
+//           st.series = series;
+//           //make call to get annotations and populate series annotations data
+//           const seriesArr = Object.values(st.series);
+//           for (let serie of seriesArr) {
+//             try {
+//               const annotations = await getAnnotationData(
+//                 projectID,
+//                 patientID,
+//                 st.studyUID,
+//                 serie.seriesUID,
+//                 selectedID
+//               );
+//               serie.annotations = annotations;
+//             } catch (error) {
+//               dispatch(loadPatientError(error));
+//               // dispatch(annotationsLoadingError(error));
+//             }
+//           }
+//         } catch (error) {
+//           dispatch(loadPatientError(error));
+//         }
+//       }
+//       // return summaryData;
+//       dispatch(loadPatientSuccess(summaryData));
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   };
+// }
 
 export const setSegLabelMapIndex = (aimID, labelMapIndex) => {
   return {

@@ -697,22 +697,23 @@ class WorkList extends React.Component {
               this.props.dispatch(addToGrid(serie));
               this.props.dispatch(getSingleSerie(serie));
             });
-            for (let series of selectedSeries) {
-              if (!this.props.patients[series.patientID]) {
-                // await this.props.dispatch(getWholeData(series));
-                getWholeData(series);
-              } else {
-                this.props.dispatch(
-                  updatePatient(
-                    "serie",
-                    true,
-                    series.patientID,
-                    series.studyUID,
-                    series.seriesUID
-                  )
-                );
-              }
-            }
+            // -----> Delete after v1.0 <-----
+            // for (let series of selectedSeries) {
+            //   if (!this.props.patients[series.patientID]) {
+            //     // await this.props.dispatch(getWholeData(series));
+            //     getWholeData(series);
+            //   } else {
+            //     this.props.dispatch(
+            //       updatePatient(
+            //         "serie",
+            //         true,
+            //         series.patientID,
+            //         series.studyUID,
+            //         series.seriesUID
+            //       )
+            //     );
+            //   }
+            // }
             this.props.history.push("/display");
             this.props.dispatch(clearSelection());
           }

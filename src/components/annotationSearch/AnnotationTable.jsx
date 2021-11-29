@@ -348,21 +348,22 @@ function AnnotationTable(props) {
           props.dispatch(addToGrid(selected, aimID));
           props.dispatch(getSingleSerie(selected, aimID));
           //if grid is NOT full check if patient data exists
-          if (!props.patients[patientID]) {
-            // this.props.dispatch(getWholeData(null, null, selected.original));
-            getWholeData(null, null, selected);
-          } else {
-            props.dispatch(
-              updatePatient(
-                'annotation',
-                true,
-                patientID,
-                studyUID,
-                seriesUID,
-                aimID
-              )
-            );
-          }
+          // -----> Delete after v1.0 <-----
+          // if (!props.patients[patientID]) {
+          //   // this.props.dispatch(getWholeData(null, null, selected.original));
+          //   getWholeData(null, null, selected);
+          // } else {
+          //   props.dispatch(
+          //     updatePatient(
+          //       'annotation',
+          //       true,
+          //       patientID,
+          //       studyUID,
+          //       seriesUID,
+          //       aimID
+          //     )
+          //   );
+          // }
           props.switchToDisplay();
         }
       }
@@ -411,13 +412,14 @@ function AnnotationTable(props) {
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
-        if (!patientExists) {
-          // this.props.dispatch(getWholeData(null, selected));
-          getWholeData(null, selected);
-        } else {
-          //check if study exist
-          props.dispatch(updatePatient('study', true, patientID, studyUID));
-        }
+        // -----> Delete after v1.0 <-----
+        // if (!patientExists) {
+        //   // this.props.dispatch(getWholeData(null, selected));
+        //   getWholeData(null, selected);
+        // } else {
+        //   //check if study exist
+        //   props.dispatch(updatePatient('study', true, patientID, studyUID));
+        // }
       }
     }
   };
