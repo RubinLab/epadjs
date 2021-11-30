@@ -71,6 +71,16 @@ const NavBar = ({
             >
               Display
             </li>
+            <li
+              className="nav-item"
+              onClick={() => {
+                onSwitchView('flex');
+              }}
+            >
+              <NavLink className="nav-link" to={pid ? `/flex/${pid}` : `/flex`}>
+                Flex
+              </NavLink>
+            </li>{' '}
             {mode !== 'lite' && (
               <React.Fragment>
                 {/* <li className="nav-item">
@@ -93,19 +103,6 @@ const NavBar = ({
                     Edit
                   </NavLink>
                 </li>{' '} */}
-                <li
-                  className="nav-item"
-                  onClick={() => {
-                    onSwitchView('flex');
-                  }}
-                >
-                  <NavLink
-                    className="nav-link"
-                    to={pid ? `/flex/${pid}` : `/flex`}
-                  >
-                    Flex
-                  </NavLink>
-                </li>{' '}
               </React.Fragment>
             )}
             <li

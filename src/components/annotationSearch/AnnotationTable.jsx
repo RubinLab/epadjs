@@ -242,9 +242,8 @@ function AnnotationTable(props) {
 
   const handlePageIndex = act => {
     let newIndex = act === 'prev' ? currentPageIndex - 1 : currentPageIndex + 1;
-    newIndex =
-      newIndex < 0 ? 0 : newIndex + 1 > pageCount ? pageCount : newIndex;
     setCurrentPageIndex(newIndex);
+    props.setPageIndex(newIndex);
   };
 
   // Render the UI for your table
@@ -276,7 +275,10 @@ function AnnotationTable(props) {
   }, [props.pid]);
 
   useEffect(() => {
-    preparePageData(props.data, defaultPageSize, currentPageIndex);
+    if (props.data.length <= defaultPageSize * currentPageIndex ) {
+      preparePageData(props.data, defaultPageSize, 0);
+      setCurrentPageIndex(0);
+    }
   }, [props.noOfRows, props.data]);
 
   const getSeriesData = async selected => {
@@ -346,21 +348,22 @@ function AnnotationTable(props) {
           props.dispatch(addToGrid(selected, aimID));
           props.dispatch(getSingleSerie(selected, aimID));
           //if grid is NOT full check if patient data exists
-          if (!props.patients[patientID]) {
-            // this.props.dispatch(getWholeData(null, null, selected.original));
-            getWholeData(null, null, selected);
-          } else {
-            props.dispatch(
-              updatePatient(
-                'annotation',
-                true,
-                patientID,
-                studyUID,
-                seriesUID,
-                aimID
-              )
-            );
-          }
+          // -----> Delete after v1.0 <-----
+          // if (!props.patients[patientID]) {
+          //   // this.props.dispatch(getWholeData(null, null, selected.original));
+          //   getWholeData(null, null, selected);
+          // } else {
+          //   props.dispatch(
+          //     updatePatient(
+          //       'annotation',
+          //       true,
+          //       patientID,
+          //       studyUID,
+          //       seriesUID,
+          //       aimID
+          //     )
+          //   );
+          // }
           props.switchToDisplay();
         }
       }
@@ -409,13 +412,14 @@ function AnnotationTable(props) {
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
-        if (!patientExists) {
-          // this.props.dispatch(getWholeData(null, selected));
-          getWholeData(null, selected);
-        } else {
-          //check if study exist
-          props.dispatch(updatePatient('study', true, patientID, studyUID));
-        }
+        // -----> Delete after v1.0 <-----
+        // if (!patientExists) {
+        //   // this.props.dispatch(getWholeData(null, selected));
+        //   getWholeData(null, selected);
+        // } else {
+        //   //check if study exist
+        //   props.dispatch(updatePatient('study', true, patientID, studyUID));
+        // }
       }
     }
   };
@@ -425,11 +429,12 @@ function AnnotationTable(props) {
       {
         id: 'study-desc',
         Cell: ({ row }) => {
-          console.log(" --> rerender!");
           return (
             <input
               type="checkbox"
-              checked={props.selectedAnnotations[row.original.aimID] ? true : false}
+              checked={
+                props.selectedAnnotations[row.original.aimID] ? true : false
+              }
               onChange={() => props.updateSelectedAims(row.original)}
             />
           );
@@ -599,14 +604,21 @@ function AnnotationTable(props) {
             </div>
           );
         }
+      },
+      {
+        Header: 'Comment',
+        sortable: true,
+        resizable: true,
+        accessor: 'userComment',
       }
     ],
-    [props.selectedAnnotations]
+    [props.selectedAnnotations, data]
   );
 
   const fetchData = useCallback(
     ({ pageIndex }) => {
-      setCurrentPageIndex(pageIndex);
+      // setCurrentPageIndex(pageIndex);
+      // props.setPageIndex(pageIndex);
       if (props.data.length <= pageIndex * defaultPageSize) {
         props.getNewData(pageIndex);
       } else {

@@ -242,13 +242,14 @@ function Studies(props) {
         .catch(err => console.error(err));
 
       //if patient doesnot exist get patient
-      if (!patientExists) {
-        // props.dispatch(getWholeData(null, selected));
-        getWholeData(null, selected);
-      } else {
-        //check if study exist
-        props.dispatch(updatePatient('study', true, patientID, studyUID));
-      }
+      // -----> Delete after v1.0 <-----
+      // if (!patientExists) {
+      //   // props.dispatch(getWholeData(null, selected));
+      //   getWholeData(null, selected);
+      // } else {
+      //   //check if study exist
+      //   props.dispatch(updatePatient('study', true, patientID, studyUID));
+      // }
       props.history.push('/display');
     }
     props.dispatch(clearSelection());

@@ -60,9 +60,6 @@ class selectSerieModal extends React.Component {
     this._isMounted = false;
   };
 
-  // getPatient = async study => {
-  //   return this.props.dispatch(getPatient(study));
-  // };
 
   getSerieListData = async (projectID, patientID, studyUID) => {
     const { data: series } = await getSeries(projectID, patientID, studyUID);
@@ -126,6 +123,7 @@ class selectSerieModal extends React.Component {
         } else {
           this.props.dispatch(getSingleSerie(series[i]));
         }
+        // -----> Delete after v1.0 <-----
         // if (!this.props.patients[series[i]]) {
         //   this.props.dispatch(getWholeData(series[i]));
         // }
