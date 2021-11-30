@@ -892,7 +892,11 @@ const AnnotationSearch = props => {
           {showPlugins && (
             <div>
               <select
-                style={{ fontSize: '1.1rem', marginLeft: '5px', marginRight: '10px' }}
+                style={{
+                  fontSize: '1.1rem',
+                  marginLeft: '5px',
+                  marginRight: '10px'
+                }}
                 className="pluginaddqueueselect"
                 id="plugins"
                 onChange={handleChangePlugin}
@@ -1257,9 +1261,10 @@ const AnnotationSearch = props => {
           data-tip
           data-for="search-icon"
           className="btn btn-secondary annotationSearch-btn"
-          onClick={getSearchResult}
-          // onClick={parseIt}
-          // disabled={index < count}
+          onClick={() => {
+            getSearchResult();
+            setPageIndex(0);
+          }}
           style={{
             padding: '0.3rem 0.5rem',
             height: 'fit-content',
