@@ -487,7 +487,6 @@ class SearchView extends Component {
     let groupedObj;
     let notOpenSeries = [];
     //if studies selected
-    console.log("selectedStudies", selectedStudies);
     if (selectedStudies.length > 0) {
       let total = 0;
       let studiesObj = {};
@@ -497,7 +496,6 @@ class SearchView extends Component {
       for (let st of selectedStudies) {
         studiesObj[st.studyUID] = await this.getSeriesData(st);
       }
-      console.log("total, openSeries length, maxPort", total, this.props.openSeries.length, maxPort);
 
       //check if enough room to display selection
       if (total + this.props.openSeries.length > maxPort) {
@@ -964,8 +962,6 @@ class SearchView extends Component {
       showDeleteFromSysAlert
     } = this.state;
     const itemStr = noOfNotDeleted > 1 ? 'items' : 'item';
-    console.log("Is serie selection open, is loading", isSerieSelectionOpen, this.props.loading);
-    console.log("series list", this.state.seriesList);
     return (
       <>
         <Toolbar
