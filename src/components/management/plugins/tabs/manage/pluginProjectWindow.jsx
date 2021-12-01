@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { FaCogs } from "react-icons/fa";
 import ParametersForProjectWindow from "./parametersForProjectWindow";
 import Popup from "../../common/Popup.jsx";
+import Draggable from "react-draggable";
 
 class PluginProjectWindow extends React.Component {
   constructor(props) {
@@ -73,7 +74,11 @@ class PluginProjectWindow extends React.Component {
     return (
       <div  class="tools menu-display" id="template">
       <div className="plugin_project_container">
-        <Popup>
+      <Draggable
+                    onClick={this.pluginWindowClickHandler}
+                    onMouseDown={this.pluginWindowClickHandler}
+                    onMouseMove={this.pluginWindowClickHandler}
+                  >
         <div dialogClassName="plugin_project_modal">
           <div className="plugin_project_modal_header">
             <div className="plugin_project_modal_title">Projects</div>
@@ -110,7 +115,7 @@ class PluginProjectWindow extends React.Component {
             </div>
           </div>
         </div>
-        </Popup>
+        </Draggable>
         {this.state.showparamswindow && (
           <ParametersForProjectWindow
             onCancel={this.handleParameterCancel}

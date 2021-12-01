@@ -537,21 +537,22 @@ class Annotations extends React.Component {
           this.props.dispatch(addToGrid(selected.original, aimID));
           this.props.dispatch(getSingleSerie(selected.original, aimID));
           //if grid is NOT full check if patient data exists
-          if (!this.props.patients[patientID]) {
-            // this.props.dispatch(getWholeData(null, null, selected.original));
-            getWholeData(null, null, selected.original);
-          } else {
-            this.props.dispatch(
-              updatePatient(
-                'annotation',
-                true,
-                patientID,
-                studyUID,
-                seriesUID,
-                aimID
-              )
-            );
-          }
+          // -----> Delete after v1.0 <-----
+          // if (!this.props.patients[patientID]) {
+          //   // this.props.dispatch(getWholeData(null, null, selected.original));
+          //   getWholeData(null, null, selected.original);
+          // } else {
+          //   this.props.dispatch(
+          //     updatePatient(
+          //       'annotation',
+          //       true,
+          //       patientID,
+          //       studyUID,
+          //       seriesUID,
+          //       aimID
+          //     )
+          //   );
+          // }
         }
       }
     } catch (err) {
@@ -849,18 +850,17 @@ class Annotations extends React.Component {
       this.props.dispatch(alertViewPortFull());
     } else {
       const { subjectID: patientID, studyUID } = selected;
-      let seriesArr;
+      let seriesArr = await this.getSeriesData(selected);
       //check if the patient is there (create a patient exist flag)
-      const patientExists = this.props.patients[patientID];
-      //if there is patient iterate over the series object of the study (form an array of series)
-      if (patientExists) {
-        seriesArr = Object.values(
-          this.props.patients[patientID].studies[studyUID].series
-        );
-        //if there is not a patient get series data of the study and (form an array of series)
-      } else {
-        seriesArr = await this.getSeriesData(selected);
-      }
+      // const patientExists = this.props.patients[patientID];
+      // //if there is patient iterate over the series object of the study (form an array of series)
+      // if (patientExists) {
+      //   seriesArr = Object.values(
+      //     this.props.patients[patientID].studies[studyUID].series
+      //   );
+      //   //if there is not a patient get series data of the study and (form an array of series)
+      // } else {
+      // }
       //get extraction of the series (extract unopen series)
       if (seriesArr.length > 0) seriesArr = this.excludeOpenSeries(seriesArr);
       //check if there is enough room
@@ -885,15 +885,16 @@ class Annotations extends React.Component {
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
-        if (!patientExists) {
-          // this.props.dispatch(getWholeData(null, selected));
-          getWholeData(null, selected);
-        } else {
-          //check if study exist
-          this.props.dispatch(
-            updatePatient('study', true, patientID, studyUID)
-          );
-        }
+        // -----> Delete after v1.0 <-----
+        // if (!patientExists) {
+        //   // this.props.dispatch(getWholeData(null, selected));
+        //   getWholeData(null, selected);
+        // } else {
+        //   //check if study exist
+        //   this.props.dispatch(
+        //     updatePatient('study', true, patientID, studyUID)
+        //   );
+        // }
       }
     }
   };
