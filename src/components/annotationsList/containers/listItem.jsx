@@ -29,9 +29,7 @@ class ListItem extends React.Component {
   componentDidMount = () => {
     const { patientID, studyUID, seriesUID } = this.props.serie;
     this.setState({
-      isSerieOpen: this.props.patients[patientID].studies[studyUID].series[
-        seriesUID
-      ].isDisplayed,
+      isSerieOpen: this.props.aimslist[seriesUID],
       collapseAnnList: this.checkIfSerieOpen(this.props.serie.seriesUID).isOpen,
       displayAnnotations: this.props.serie.isDisplayed,
       displayLabels: this.props.serie.isLabelDisplayed
@@ -42,8 +40,7 @@ class ListItem extends React.Component {
     if (prevProps.activePort !== this.props.activePort) {
       const { patientID, studyUID, seriesUID } = this.props.serie;
       const collapseAnnList = this.checkIfSerieOpen(seriesUID).isOpen;
-      const currentStatus = this.props.patients[patientID].studies[studyUID]
-        .series[seriesUID].isDisplayed;
+      const currentStatus = this.props.aimslist[seriesUID];
       this.setState({ isSerieOpen: currentStatus, collapseAnnList });
     }
   };
@@ -81,9 +78,9 @@ class ListItem extends React.Component {
         this.props.dispatch(addToGrid(this.props.serie));
         this.props
           .dispatch(getSingleSerie(this.props.serie))
-          .then(() => { })
+          .then(() => {})
           .catch(err => console.log(err));
-        // -----> Delete after v1.0 <----- 
+        // -----> Delete after v1.0 <-----
         // this.props.dispatch(
         //   updatePatient("serie", true, patientID, studyUID, seriesUID)
         // );
@@ -173,7 +170,7 @@ class ListItem extends React.Component {
           //getsingleserie
           this.props
             .dispatch(getSingleSerie(this.props.serie))
-            .then(() => { })
+            .then(() => {})
             .catch(err => console.log(err));
           //update patient?? with serie
           // -----> Delete after v1.0 <-----
@@ -257,7 +254,8 @@ const mapStateToProps = state => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
     activePort: state.annotationsListReducer.activePort,
-    patients: state.annotationsListReducer.patients
+    // patients: state.annotationsListReducer.patients
+    aimslist: state.annotationsListReducer.aimslist
   };
 };
 export default connect(mapStateToProps)(ListItem);

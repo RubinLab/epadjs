@@ -275,7 +275,7 @@ function AnnotationTable(props) {
   }, [props.pid]);
 
   useEffect(() => {
-    if (props.data.length <= defaultPageSize * currentPageIndex ) {
+    if (props.data.length <= defaultPageSize * currentPageIndex) {
       preparePageData(props.data, defaultPageSize, 0);
       setCurrentPageIndex(0);
     }
@@ -378,18 +378,7 @@ function AnnotationTable(props) {
       setShowSelectSeriesModal(true);
     } else {
       const { subjectID: patientID, studyUID } = selected;
-      let seriesArr;
-      //check if the patient is there (create a patient exist flag)
-      const patientExists = props.patients[patientID];
-      //if there is patient iterate over the series object of the study (form an array of series)
-      if (patientExists) {
-        seriesArr = Object.values(
-          props.patients[patientID].studies[studyUID].series
-        );
-        //if there is not a patient get series data of the study and (form an array of series)
-      } else {
-        seriesArr = await getSeriesData(selected);
-      }
+      let seriesArr = await getSeriesData(selected);
       //get extraction of the series (extract unopen series)
       if (seriesArr.length > 0) seriesArr = excludeOpenSeries(seriesArr);
       //check if there is enough room
@@ -609,7 +598,7 @@ function AnnotationTable(props) {
         Header: 'Comment',
         sortable: true,
         resizable: true,
-        accessor: 'userComment',
+        accessor: 'userComment'
       }
     ],
     [props.selectedAnnotations, data]

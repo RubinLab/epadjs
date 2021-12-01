@@ -850,18 +850,17 @@ class Annotations extends React.Component {
       this.props.dispatch(alertViewPortFull());
     } else {
       const { subjectID: patientID, studyUID } = selected;
-      let seriesArr;
+      let seriesArr = await this.getSeriesData(selected);
       //check if the patient is there (create a patient exist flag)
-      const patientExists = this.props.patients[patientID];
-      //if there is patient iterate over the series object of the study (form an array of series)
-      if (patientExists) {
-        seriesArr = Object.values(
-          this.props.patients[patientID].studies[studyUID].series
-        );
-        //if there is not a patient get series data of the study and (form an array of series)
-      } else {
-        seriesArr = await this.getSeriesData(selected);
-      }
+      // const patientExists = this.props.patients[patientID];
+      // //if there is patient iterate over the series object of the study (form an array of series)
+      // if (patientExists) {
+      //   seriesArr = Object.values(
+      //     this.props.patients[patientID].studies[studyUID].series
+      //   );
+      //   //if there is not a patient get series data of the study and (form an array of series)
+      // } else {
+      // }
       //get extraction of the series (extract unopen series)
       if (seriesArr.length > 0) seriesArr = this.excludeOpenSeries(seriesArr);
       //check if there is enough room

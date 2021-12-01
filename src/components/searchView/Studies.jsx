@@ -201,18 +201,18 @@ function Studies(props) {
   const displaySeries = async selected => {
     const maxPort = parseInt(sessionStorage.getItem('maxPort'));
     const { patientID, studyUID } = selected;
-    let seriesArr = [];
+    let seriesArr = await getSeriesData(selected);
     //check if the patient is there (create a patient exist flag)
-    const patientExists = props.patients[patientID];
+    // const patientExists = props.patients[patientID];
     //if there is patient iterate over the series object of the study (form an array of series)
-    if (patientExists) {
-      seriesArr = Object.values(
-        props.patients[patientID].studies[studyUID].series
-      );
-      //if there is not a patient get series data of the study and (form an array of series)
-    } else {
-      seriesArr = await getSeriesData(selected);
-    }
+    // if (patientExists) {
+    //   seriesArr = Object.values(
+    //     props.patients[patientID].studies[studyUID].series
+    //   );
+    //   //if there is not a patient get series data of the study and (form an array of series)
+    // } else {
+    
+    // }
     // filter the nondisplayable modalities
     seriesArr = seriesArr.filter(isSupportedModality);
     //get extraction of the series (extract unopen series)
@@ -457,7 +457,7 @@ function Studies(props) {
         )
       }
     ],
-    [selectedLevel, selectedCount, props.update]
+    [selectedLevel, selectedCount, props.update, isSerieSelectionOpen]
   );
 
   const getDataFromStorage = (projectID, subjectID) => {
