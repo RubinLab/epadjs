@@ -96,6 +96,13 @@ class selectSerieModal extends React.Component {
     });
   };
 
+  findSerieFromSeries = (serieUID, seriesArray) => {
+    for (let i = 0; i < seriesArray.length; i++) {
+      if (serieUID === seriesArray[i].seriesUID)
+        return seriesArray[i];
+    }
+  }
+
   displaySelection = async () => {
     let studies = Object.values(this.props.seriesPassed);
     const { selectedToDisplay } = this.state;
@@ -110,24 +117,40 @@ class selectSerieModal extends React.Component {
 
     // let series = Object.values(this.props.seriesPassed)[0];
     //concatanete all arrays to getther
-    for (let i = 0; i < Object.keys(selectedToDisplay).length; i++) {
-      // if (this.state.selectedToDisplay[i]) {
-      // If significance order is not set before we 
+    for (let key of Object.keys(selectedToDisplay)) {
       if (!significanceSet) {
         significantSeries.push({
-          seriesUID: series[i].seriesUID,
+          seriesUID: key,
           significanceOrder
         });
         significanceOrder++;
       }
-      this.props.dispatch(addToGrid(series[i], series[i].aimID));
+      let serie = this.findSerieFromSeries(key, series);
+      this.props.dispatch(addToGrid(serie, serie.aimID));
       if (this.state.selectionType === "aim") {
-        this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
+        this.props.dispatch(getSingleSerie(serie, serie.aimID));
       } else {
-        this.props.dispatch(getSingleSerie(series[i]));
+        this.props.dispatch(getSingleSerie(serie));
       }
-      // }
     }
+    // for (let i = 0; i < Object.keys(selectedToDisplay).length; i++) {
+    //   // if (this.state.selectedToDisplay[i]) {
+    //   // If significance order is not set before we 
+    //   if (!significanceSet) {
+    //     significantSeries.push({
+    //       seriesUID: series[i].seriesUID,
+    //       significanceOrder
+    //     });
+    //     significanceOrder++;
+    //   }
+    //   this.props.dispatch(addToGrid(series[i], series[i].aimID));
+    //   if (this.state.selectionType === "aim") {
+    //     this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
+    //   } else {
+    //     this.props.dispatch(getSingleSerie(series[i]));
+    //   }
+    //   // }
+    // }
     const { projectID, patientID, studyUID, subjectID } = series[0];
     const subID = patientID ? patientID : subjectID;
 
@@ -160,6 +183,8 @@ class selectSerieModal extends React.Component {
 
   setPreSelecteds = () => {
     const { seriesPassed, openSeries } = this.props;
+    if (openSeries.length === this.maxPort)
+      return;
     let selectedToDisplay = {};
     let selectedCount = 0;
     let series = Object.values(seriesPassed);
@@ -172,10 +197,14 @@ class selectSerieModal extends React.Component {
           });
           return;
         }
-        if (!this.isSerieOpen(series[i][k].seriesUID)) {
-          selectedToDisplay[series[i][k].seriesUID] = series[i][k].significanceOrder
-            ? true
-            : false;
+        // if (!this.isSerieOpen(series[i][k].seriesUID)) {
+        //   selectedToDisplay[series[i][k].seriesUID] = series[i][k].significanceOrder
+        //     ? true
+        //     : false;
+        //   selectedCount++;
+        // }
+        if (series[i][k].significanceOrder && !this.isSerieOpen(series[i][k].seriesUID)) {
+          selectedToDisplay[series[i][k].seriesUID] = true;
           selectedCount++;
         }
       }
@@ -211,8 +240,6 @@ class selectSerieModal extends React.Component {
   renderSelection = () => {
     const { seriesPassed } = this.props;
     const { selectedToDisplay, limit } = this.state;
-    console.log("selected series", selectedToDisplay);
-    console.log("series passed", seriesPassed);
     let selectionList = [];
     let item;
 
@@ -245,7 +272,7 @@ class selectSerieModal extends React.Component {
         item = alreadyOpen ? (
           <div>
             <div
-              key={k + "_" + series[i][k].seriesUID}
+              key={k + "_" + seriesUID}
               className="alreadyOpen-disabled"
             >
               <FaRegCheckSquare data-tip data-for={"alreadyOpenSeries"} />
