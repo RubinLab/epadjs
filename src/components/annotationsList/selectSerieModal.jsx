@@ -85,13 +85,15 @@ class selectSerieModal extends React.Component {
     return openSeries.length + selectCount;
   };
 
-  selectToDisplay = async e => {
-    console.log("eeeee", e);
-    let arr = [...this.state.selectedToDisplay];
-    arr[e.target.dataset.index] = e.target.checked;
-    await this.setState({ selectedToDisplay: arr });
-    let limit = this.updateLimit();
-    this.setState({ limit });
+  selectToDisplay = serieUID => {
+    let newSelections = { ...this.state.selectedToDisplay };
+    if (newSelections[serieUID])
+      delete newSelections[serieUID];
+    else newSelections[serieUID] = true;
+    this.setState({ selectedToDisplay: { ...newSelections } }, () => {
+      let limit = this.updateLimit();
+      this.setState({ limit });
+    });
   };
 
   displaySelection = async () => {
@@ -209,6 +211,8 @@ class selectSerieModal extends React.Component {
   renderSelection = () => {
     const { seriesPassed } = this.props;
     const { selectedToDisplay, limit } = this.state;
+    console.log("selected series", selectedToDisplay);
+    console.log("series passed", seriesPassed);
     let selectionList = [];
     let item;
 
@@ -223,6 +227,7 @@ class selectSerieModal extends React.Component {
     for (let i = 0; i < series.length; i++) {
       series[i] = series[i].filter(isSupportedModality);
     }
+
     for (let i = 0; i < series.length; i++) {
       let innerList = [];
 
@@ -259,7 +264,7 @@ class selectSerieModal extends React.Component {
         ) : (
           <SelectionItem
             desc={desc}
-            onChange={this.selectToDisplay}
+            onChange={() => this.selectToDisplay(seriesUID)}
             index={count + k}
             disabled={disabled}
             key={k + "_" + seriesUID}
@@ -316,7 +321,7 @@ class selectSerieModal extends React.Component {
           >
             X  - Close all series
           </button> */}
-          {this.state.limit >= this.maxPort && !openSeries.length && (
+          {this.state.limit > this.maxPort && !openSeries.length && (
             <div>Please select only {this.maxPort} series to open!</div>
           )}
           <div>{list}</div>
