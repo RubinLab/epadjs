@@ -328,9 +328,9 @@ class selectSerieModal extends React.Component {
           style={{ textAlign: "start" }}
         >
           <div>Maximum {this.maxPort} series can be viewed at a time.</div>
-          {openSeries.length === this.maxPort && (
+          {openSeries.length > 0 && (
             <div>
-              Please close some or all open series to open new ones!
+              You can close open series to open veiwport space for new one.
               <br />
               <button
                 size="lg"
