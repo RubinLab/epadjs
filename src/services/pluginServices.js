@@ -193,6 +193,40 @@ export function getContainerLog(containerid) {
     }
   );
 }
+
+export function getPluginParentsInQueue(selectedQueueId) {
+  return http.get(
+    http.apiUrl() + "/pluginsubqueue/"+ encodeURIComponent(selectedQueueId)
+  ); 
+}
+
+export function insertPluginSubqueue(subQueueObject) {
+  return http.post(
+    http.apiUrl() + "/pluginsubqueue",
+    subQueueObject
+  );
+}
+
+export function deletePluginSubqueue(id) {
+  // "/plugins/parameters/template/" + parameterdbid
+  return http.delete(
+    http.apiUrl() +
+      "/pluginsubqueue/" +
+      encodeURIComponent(id)
+  );
+}
+
+export function pluginCopyAimsBetweenPlugins(fromid,toid) {
+  // "/plugins/parameters/template/" + parameterdbid
+  return http.get(
+    http.apiUrl() +
+      "/pluginsubqueue/" +
+      encodeURIComponent(fromid) +
+      "/" + 
+      encodeURIComponent(toid) 
+  );
+}
+
 //not used remove if everything works correctly
 // export function stopContainerLog(containerobj) {
 //   return http.post(http.apiUrl() + "/container/stop/", containerobj);
