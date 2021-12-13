@@ -198,20 +198,21 @@ function Series(props) {
           .then(() => {})
           .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
-        if (!props.patients[selected.patientID]) {
-          // props.dispatch(getWholeData(selected));
-          getWholeData(selected);
-        } else {
-          props.dispatch(
-            updatePatient(
-              'serie',
-              true,
-              patientID,
-              studyUID,
-              selected.seriesUID
-            )
-          );
-        }
+        // -----> Delete after v1.0 <-----
+        // if (!props.patients[selected.patientID]) {
+        //   props.dispatch(getWholeData(selected));
+        //   // getWholeData(selected);
+        // } else {
+        //   props.dispatch(
+        //     updatePatient(
+        //       'serie',
+        //       true,
+        //       patientID,
+        //       studyUID,
+        //       selected.seriesUID
+        //     )
+        //   );
+        // }
         props.history.push('/display');
       }
     } else {

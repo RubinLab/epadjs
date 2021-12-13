@@ -3,6 +3,7 @@ import { Modal } from "react-bootstrap";
 import { getDefaultParameter } from "../../../../../services/pluginServices";
 import "../../css/plugin.css";
 import Popup from "../../common/Popup.jsx";
+import Draggable from "react-draggable";
 class RunTimeParamWindow extends React.Component {
   state = {
     defaultParams: [],
@@ -33,12 +34,13 @@ class RunTimeParamWindow extends React.Component {
     const tempParamsList = this.state.defaultParams;
     this.state.paramsValueByParantArryaIndice.forEach(function (value, key) {
       console.log(key + " = " + value);
-        [key].default_value = value;
+      tempParamsList[key].default_value = value;
       console.log(
         "this one will be updated in parent parameter list ",
         tempParamsList[key]
       );
     });
+    console.log('save params called',JSON.stringify(tempParamsList));
     this.props.onSave(tempParamsList);
   };
   showParams = () => {
@@ -89,8 +91,12 @@ class RunTimeParamWindow extends React.Component {
   };
   render() {
     return (
-      <div className="plugin_runtime_params_window_container" id="template">
-        <Popup>
+      <div className="plugin_runtime_params_window_container" id="runtimewindow">
+     <Draggable
+                    onClick={this.pluginWindowClickHandler}
+                    onMouseDown={this.pluginWindowClickHandler}
+                    onMouseMove={this.pluginWindowClickHandler}
+                  >
         <div className="plugin_runtime_params_modal">
           <div className="plugin_runtime_params_header">
             <div className="tableHeaderRunTimeParams">
@@ -122,7 +128,7 @@ class RunTimeParamWindow extends React.Component {
             </div>
           </div>
         </div>
-        </Popup>
+        </Draggable>
       </div>
     );
   }

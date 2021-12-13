@@ -9,7 +9,8 @@ import {
   clearSelection,
   selectStudy,
   selectSerie,
-  selectAnnotation
+  selectAnnotation,
+  savePatientFilter
 } from '../annotationsList/action';
 import { getSubjects } from '../../services/subjectServices';
 import { formatDate } from '../flexView/helperMethods';
@@ -36,7 +37,7 @@ function Table({
   expandLevel,
   getTreeExpandAll,
   getTreeExpandSingle,
-  treeExpand, 
+  treeExpand,
   update
 }) {
   const {
@@ -225,8 +226,7 @@ function Subjects(props) {
   const [pageCount, setPageCount] = useState(0);
   const [selectedLevel, setSelectedLevel] = useState(false);
   const [selectedCount, setSelectedCount] = useState(false);
-  const [update, setUpdate] = useState(0);
-
+  const [prevUpdate, setPrevUpdate] = useState(0);
 
   useEffect(() => {
     const { selectedStudies, selectedSeries, selectedAnnotations } = props;
@@ -491,8 +491,6 @@ function Subjects(props) {
     [selectedLevel, selectedCount, props.update]
   );
 
-
-
   const fetchData = useCallback(({ pageIndex, pageSize }) => {
     if (searchKey.current.value) {
       filterSubjects(null, pageSize, pageIndex, searchKey);
@@ -530,6 +528,7 @@ function Subjects(props) {
   const filterSubjects = (e, pageSize, pageIndex) => {
     props.collapseSubjects();
     const searchTerm = searchKey.current.value.trim().toLowerCase();
+    props.dispatch(savePatientFilter(searchTerm, pageSize, pageIndex));
     setFilteredData(searchTerm, pageSize, pageIndex);
   };
 
@@ -549,7 +548,10 @@ function Subjects(props) {
     if (searchTerm) {
       const subjectsArr = getDataFromStorage();
       const result = subjectsArr.reduce((all, item, i) => {
-        const name = item.data && item.data.subjectName ? clearCarets(item.data.subjectName).toLowerCase() : "";
+        const name =
+          item.data && item.data.subjectName
+            ? clearCarets(item.data.subjectName).toLowerCase()
+            : '';
         if (name.includes(searchTerm)) all.push(item.data);
         return all;
       }, []);
@@ -573,13 +575,38 @@ function Subjects(props) {
   const lastUpdate = useRef(0);
 
   useEffect(() => {
+    if (prevUpdate !== props.update) {
+      props.dispatch(savePatientFilter(''));
+      setPrevUpdate(props.update);
+      localStorage.setItem('treeData', JSON.stringify({}));
+      const { pid, getTreeData } = props;
+      if (pid !== null && pid !== 'null') {
+        setLoading(true);
+        getSubjects(pid)
+          .then(res => {
+            setLoading(false);
+            const data = preparePageData(res.data, defaultPageSize, 0);
+            getTreeData(pid, 'subject', res.data);
+            setData(data);
+          })
+          .catch(err => {
+            console.error(err);
+          });
+      }
+    }
+  }, [props.update]);
+
+  useEffect(() => {
     const { pid, getTreeData } = props;
     // const treeData = JSON.parse(localStorage.getItem('treeData'));
     const dataFromStorage = getDataFromStorage(defaultPageSize, 0);
     // check if there is data in treedata
     // if there is use it if not get it and post data back to app
     let data = [];
-    if (pid && pid !== 'null') {
+    const { patientSearch, pageSize, pageIndex } = props.patientFilter;
+    if (patientSearch) {
+      setFilteredData(patientSearch, pageSize, pageIndex);
+    } else if (pid && pid !== 'null') {
       if (dataFromStorage?.length > 0) {
         data = sortSubjectName(dataFromStorage);
         setData(data);
@@ -605,24 +632,6 @@ function Subjects(props) {
   //   setUpdate(update + 1);
   // }, [props.update]);
 
-  useEffect(() => {
-    localStorage.setItem('treeData', JSON.stringify({}));
-    const { pid, getTreeData } = props;
-    if (pid !== null && pid !== 'null') {
-      setLoading(true);
-      getSubjects(pid)
-        .then(res => {
-          setLoading(false);
-          const data = preparePageData(res.data, defaultPageSize, 0);
-          getTreeData(pid, 'subject', res.data);
-          setData(data);
-        })
-        .catch(err => {
-          console.error(err);
-        });
-    }
-  }, [props.update]);
-
   return (
     <>
       <label>
@@ -632,6 +641,7 @@ function Subjects(props) {
           style={{ margin: '1rem' }}
           onChange={filterSubjects}
           ref={searchKey}
+          value={props.patientFilter.patientSearch}
         />
       </label>
       {loading && (
@@ -660,7 +670,8 @@ const mapStateToProps = state => {
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
     selectedSeries: state.annotationsListReducer.selectedSeries,
-    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
+    patientFilter: state.annotationsListReducer.patientFilter
   };
 };
 
