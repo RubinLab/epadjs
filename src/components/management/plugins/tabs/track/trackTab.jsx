@@ -459,10 +459,11 @@ class TrackTab extends React.Component {
           const aims = data.original.aim_uid;
           const aimHtmlArray = [];
           let cnt = 0;
+          console.log('aim ids for plugins: ', JSON.stringify(aims));
           for (let [key, value] of Object.entries(aims)) {
             console.log(`${key}: ${value}`);
             cnt = cnt + 1;
-            aimHtmlArray.push(<div key={cnt}>{value.name}</div>);
+            aimHtmlArray.push(<div key={cnt}>{value.name}--<font color="#00cc99">id:{value.aimID}</font></div>);
           }
           return aimHtmlArray;
         },
