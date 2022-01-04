@@ -154,10 +154,7 @@ const AnnotationSearch = props => {
     props.dispatch(clearSelection());
 
     if (props.searchQuery) {
-      const searchQueryFinal = escapeStringRegexp(
-        Object.keys(props.searchQuery)[0]
-      );
-      console.log(' --->searchQueryFinal', searchQueryFinal);
+      const searchQueryFinal = escapeQuery(Object.keys(props.searchQuery)[0]);
       const searchQueryText = Object.values(props.searchQuery)[0].query;
       const searchQueryProject = Object.values(props.searchQuery)[0].project;
       setQuery(searchQueryText);
@@ -303,6 +300,19 @@ const AnnotationSearch = props => {
     );
   };
 
+  const escapeQuery = query => {
+    let finalQuery = new RegExp(escapeStringRegexp(query));
+    finalQuery = finalQuery.toString().split('');
+    return finalQuery.reduce((all, item, i) => {
+      if ((i === 0 || i === finalQuery.length - 1) && item === '/') {
+        return all;
+      } else {
+        all += item;
+        return all;
+      }
+    }, '');
+  };
+
   const getSearchResult = (pageIndex, afterDelete) => {
     setPageIndex(0);
     if (query.length === 0) {
@@ -329,11 +339,8 @@ const AnnotationSearch = props => {
         };
         props.setQuery(queryToSave);
         const bm = pageIndex ? bookmark : '';
-        const finalQuery = new RegExp(escapeStringRegexp(searchQuery));
-        console.log(' ==> ');
-        console.log(finalQuery.toString());
-        console.log(' ==> ');
-        searchAnnotations({ query: finalQuery.toString() }, bm)
+        let clearedQuery = escapeQuery(searchQuery);
+        searchAnnotations({ query: clearedQuery }, bm)
           .then(res => {
             populateSearchResult(res, pageIndex, afterDelete);
           })
