@@ -132,7 +132,7 @@ const AnnotationSearch = props => {
     }
   };
 
-  const getAnnotationsOfProjets = pageIndex => {
+  const getAnnotationsOfProjets = (pageIndex, afterdelete) => {
     const bm = pageIndex ? bookmark : '';
     const promise =
       props.pid === 'all'
@@ -140,7 +140,7 @@ const AnnotationSearch = props => {
         : getSummaryAnnotations(props.pid, bm);
     Promise.all([promise])
       .then(res => {
-        populateSearchResult(res, pageIndex);
+        populateSearchResult(res, pageIndex, afterdelete);
       })
       .catch(err => console.error(err));
   };
@@ -302,7 +302,7 @@ const AnnotationSearch = props => {
   const getSearchResult = (pageIndex, afterDelete) => {
     setPageIndex(0);
     if (query.length === 0) {
-      getAnnotationsOfProjets();
+      getAnnotationsOfProjets(pageIndex, afterDelete);
     } else {
       let searchQuery = parseQuery();
       // setData([]);
@@ -339,7 +339,7 @@ const AnnotationSearch = props => {
     if (query) {
       getSearchResult(pageIndex, afterDelete);
     } else {
-      getAnnotationsOfProjets(pageIndex);
+      getAnnotationsOfProjets(pageIndex, afterDelete);
     }
   };
 
@@ -989,8 +989,8 @@ const AnnotationSearch = props => {
   };
   // cavit
   const prepareDropDownHtmlForPlugins = () => {
-    console.log(showPlugins);
-    console.log(pluginListArray);
+    // console.log(showPlugins);
+    // console.log(pluginListArray);
     const list = pluginListArray;
     let options = [];
     for (let i = 0; i < list.length; i++) {
@@ -1040,122 +1040,114 @@ const AnnotationSearch = props => {
       }
     }
 
+    if (tempPluginObject.processmultipleaims === null) {
+      const tempQueueObject = {};
+      tempQueueObject.projectDbId = tempPluginObject.project_plugin.project_id;
+      tempQueueObject.projectId = props.selectedProject;
+      tempQueueObject.projectName = '';
 
-      if (tempPluginObject.processmultipleaims === null){
+      tempQueueObject.pluginDbId = tempPluginObject.id;
+      tempQueueObject.pluginId = tempPluginObject.plugin_id;
+      tempQueueObject.pluginName = tempPluginObject.name;
+      tempQueueObject.pluginType = 'local';
+      tempQueueObject.processMultipleAims =
+        tempPluginObject.processmultipleaims;
+      tempQueueObject.runtimeParams = {};
+      tempQueueObject.parameterType = 'default';
+      tempQueueObject.aims = {};
 
-      
-                  const tempQueueObject = {};
-                  tempQueueObject.projectDbId = tempPluginObject.project_plugin.project_id;
-                  tempQueueObject.projectId = props.selectedProject;
-                  tempQueueObject.projectName = '';
+      const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+      let responseRunPluginsQueue = null;
+      console.log('plugin running queue ', JSON.stringify(resultAddQueue));
+      // if (resultAddQueue && resultAddQueue.data){
+      //   if (Array.isArray(resultAddQueue.data)){
+      //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
+      //   }else{
+      //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data.id);
+      //   }
+      // }
 
-                  tempQueueObject.pluginDbId = tempPluginObject.id;
-                  tempQueueObject.pluginId =tempPluginObject.plugin_id;
-                  tempQueueObject.pluginName =tempPluginObject.name;
-                  tempQueueObject.pluginType = "local";
-                  tempQueueObject.processMultipleAims = tempPluginObject.processmultipleaims;
-                  tempQueueObject.runtimeParams = {};
-                  tempQueueObject.parameterType ='default';
-                  tempQueueObject.aims = {};
-                  
-                  
-                  const resultAddQueue = await addPluginsToQueue(tempQueueObject);
-                  let responseRunPluginsQueue = null;
-                  console.log('plugin running queue ',JSON.stringify(resultAddQueue));
-                  // if (resultAddQueue && resultAddQueue.data){
-                  //   if (Array.isArray(resultAddQueue.data)){
-                  //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
-                  //   }else{
-                  //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data.id);
-                  //   }
-                  // }
-                  
-                //  if (responseRunPluginsQueue.status === 202) {
-                //     console.log("queue is running case null");
-                //  } else {
-                //     console.log("error happened while running queue");
-                //  }
-          } else if (tempPluginObject.processmultipleaims === 0){
-            Object.keys(props.selectedAnnotations).forEach(async (eachAnnt) => {
+      //  if (responseRunPluginsQueue.status === 202) {
+      //     console.log("queue is running case null");
+      //  } else {
+      //     console.log("error happened while running queue");
+      //  }
+    } else if (tempPluginObject.processmultipleaims === 0) {
+      Object.keys(props.selectedAnnotations).forEach(async eachAnnt => {
+        let aimObj = {};
+        aimObj[eachAnnt] = props.selectedAnnotations[eachAnnt];
 
-              let aimObj = {};
-              aimObj[eachAnnt] = props.selectedAnnotations[eachAnnt];
-             
-              console.log(`eachAnnt : ${JSON.stringify(aimObj)}`);
-            
-            
-           
+        console.log(`eachAnnt : ${JSON.stringify(aimObj)}`);
 
-            
-                  const tempQueueObject = {};
-                  tempQueueObject.projectDbId = tempPluginObject.project_plugin.project_id;
-                  tempQueueObject.projectId = props.selectedProject;
-                  tempQueueObject.projectName = '';
+        const tempQueueObject = {};
+        tempQueueObject.projectDbId =
+          tempPluginObject.project_plugin.project_id;
+        tempQueueObject.projectId = props.selectedProject;
+        tempQueueObject.projectName = '';
 
-                  tempQueueObject.pluginDbId = tempPluginObject.id;
-                  tempQueueObject.pluginId =tempPluginObject.plugin_id;
-                  tempQueueObject.pluginName =tempPluginObject.name;
-                  tempQueueObject.pluginType = "local";
-                  tempQueueObject.processMultipleAims = tempPluginObject.processmultipleaims;
-                  tempQueueObject.runtimeParams = {};
-                  tempQueueObject.parameterType ='default';
-                  tempQueueObject.aims = aimObj;
+        tempQueueObject.pluginDbId = tempPluginObject.id;
+        tempQueueObject.pluginId = tempPluginObject.plugin_id;
+        tempQueueObject.pluginName = tempPluginObject.name;
+        tempQueueObject.pluginType = 'local';
+        tempQueueObject.processMultipleAims =
+          tempPluginObject.processmultipleaims;
+        tempQueueObject.runtimeParams = {};
+        tempQueueObject.parameterType = 'default';
+        tempQueueObject.aims = aimObj;
 
-                  
-                  const resultAddQueue = await addPluginsToQueue(tempQueueObject);
-                  let responseRunPluginsQueue = null;
-                  console.log('plugin running queue ',JSON.stringify(resultAddQueue));
-                  // if (resultAddQueue && resultAddQueue.data){
-                  //   if (Array.isArray(resultAddQueue.data)){
-                  //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
-                  //   }else{
-                  //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data.id);
-                  //   }
-                  // }
-                  
-                  // if (responseRunPluginsQueue.status === 202) {
-                  //   console.log("queue is running case 0 - 1 annot req");
-                  // } else {
-                  //   console.log("error happened while running queue");
-                  // }
-                })
-          }else {
+        const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+        let responseRunPluginsQueue = null;
+        console.log('plugin running queue ', JSON.stringify(resultAddQueue));
+        // if (resultAddQueue && resultAddQueue.data){
+        //   if (Array.isArray(resultAddQueue.data)){
+        //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
+        //   }else{
+        //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data.id);
+        //   }
+        // }
 
-                  const tempQueueObject = {};
-                  tempQueueObject.projectDbId = tempPluginObject.project_plugin.project_id;
-                  tempQueueObject.projectId = props.selectedProject;
-                  tempQueueObject.projectName = '';
+        // if (responseRunPluginsQueue.status === 202) {
+        //   console.log("queue is running case 0 - 1 annot req");
+        // } else {
+        //   console.log("error happened while running queue");
+        // }
+      });
+    } else {
+      const tempQueueObject = {};
+      tempQueueObject.projectDbId = tempPluginObject.project_plugin.project_id;
+      tempQueueObject.projectId = props.selectedProject;
+      tempQueueObject.projectName = '';
 
-                  tempQueueObject.pluginDbId = tempPluginObject.id;
-                  tempQueueObject.pluginId =tempPluginObject.plugin_id;
-                  tempQueueObject.pluginName =tempPluginObject.name;
-                  tempQueueObject.pluginType = "local";
-                  tempQueueObject.processMultipleAims = tempPluginObject.processmultipleaims;
-                  tempQueueObject.runtimeParams = {};
-                  tempQueueObject.parameterType ='default';
-                  if (props && props.selectedAnnotations){
-                    tempQueueObject.aims = { ...props.selectedAnnotations };
-                  }else{
-                    tempQueueObject.aims = {};
-                  }
-                  
-                  const resultAddQueue = await addPluginsToQueue(tempQueueObject);
-                  let responseRunPluginsQueue = null;
-                  console.log('plugin running queue ',JSON.stringify(resultAddQueue));
-                  // if (resultAddQueue && resultAddQueue.data){
-                  //   if (Array.isArray(resultAddQueue.data)){
-                  //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
-                  //   }else{
-                  //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data.id);
-                  //   }
-                  // }
-                  
-                //  if (responseRunPluginsQueue.status === 202) {
-                //     console.log("queue is running case  1 multi  annot required");
-                //   } else {
-                //     console.log("error happened while running queue");
-                //  }
+      tempQueueObject.pluginDbId = tempPluginObject.id;
+      tempQueueObject.pluginId = tempPluginObject.plugin_id;
+      tempQueueObject.pluginName = tempPluginObject.name;
+      tempQueueObject.pluginType = 'local';
+      tempQueueObject.processMultipleAims =
+        tempPluginObject.processmultipleaims;
+      tempQueueObject.runtimeParams = {};
+      tempQueueObject.parameterType = 'default';
+      if (props && props.selectedAnnotations) {
+        tempQueueObject.aims = { ...props.selectedAnnotations };
+      } else {
+        tempQueueObject.aims = {};
+      }
 
+      const resultAddQueue = await addPluginsToQueue(tempQueueObject);
+      let responseRunPluginsQueue = null;
+      console.log('plugin running queue ', JSON.stringify(resultAddQueue));
+      // if (resultAddQueue && resultAddQueue.data){
+      //   if (Array.isArray(resultAddQueue.data)){
+      //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
+      //   }else{
+      //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data.id);
+      //   }
+      // }
+
+      //  if (responseRunPluginsQueue.status === 202) {
+      //     console.log("queue is running case  1 multi  annot required");
+      //   } else {
+      //     console.log("error happened while running queue");
+      //  }
     }
     setSelectedPluginDbId(-1);
     setShowRunPluginButton(false);

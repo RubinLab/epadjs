@@ -272,7 +272,7 @@ function AnnotationTable(props) {
   useEffect(() => {
     preparePageData(props.data);
     setCurrentPageIndex(0);
-  }, [props.pid]);
+  }, [props.pid, props.data]);
 
   useEffect(() => {
     if (props.data.length <= defaultPageSize * currentPageIndex) {
