@@ -211,7 +211,7 @@ function Studies(props) {
     //   );
     //   //if there is not a patient get series data of the study and (form an array of series)
     // } else {
-    
+
     // }
     // filter the nondisplayable modalities
     seriesArr = seriesArr.filter(isSupportedModality);
@@ -307,7 +307,12 @@ function Studies(props) {
                   }
                 }}
               >
-                {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
+                {row.isExpanded ||
+                props.treeExpand[props.patientIndex][row.index] ? (
+                  <span>&#x25BC;</span>
+                ) : (
+                  <span>&#x25B6;</span>
+                )}
               </span>
             </div>
           );
