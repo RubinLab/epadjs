@@ -28,7 +28,7 @@ function Table({
   patientIndex,
   getTreeExpandAll,
   treeExpand,
-  studyIndex, 
+  studyIndex,
   update
 }) {
   const {
@@ -280,7 +280,14 @@ function Series(props) {
                   }
                 }}
               >
-                {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
+                {row.isExpanded ||
+                props.treeExpand[props.patientIndex][props.studyIndex][
+                  row.index
+                ] ? (
+                  <span>&#x25BC;</span>
+                ) : (
+                  <span>&#x25B6;</span>
+                )}
               </span>
             </div>
           );
@@ -474,7 +481,6 @@ function Series(props) {
         getTreeExpandSingle={props.getTreeExpandSingle}
         update={props.update}
         // progressUpdated={this.props.progressUpdated}
-
       />
       {showSelectSerie && (
         <SelectSerieModal

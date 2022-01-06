@@ -96,7 +96,7 @@ function Table({
                     getTreeData={getTreeData}
                     studyDescription={row.original.studyDescription}
                     expandLevel={expandLevel}
-                    patientIndex={row.index}
+                    patientIndex={patientIndex}
                     getTreeExpandAll={getTreeExpandAll}
                     treeExpand={treeExpand}
                     studyIndex={row.index}
