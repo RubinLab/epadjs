@@ -61,7 +61,7 @@ const projectTable = ({
       </Modal.Body>
       <Modal.Footer className="modal-footer__buttons">
         {!error && (
-          <button variant="primary" onClick={onSubmit}>
+          <button variant="primary" onClick={onSubmit} id="templateProjectRelation">
             Submit
           </button>
         )}

@@ -177,6 +177,7 @@ class UploadModal extends React.Component {
         <select
           onMouseDown={e => e.stopPropagation()}
           className="upload-select"
+          id="upload-select"
           onChange={e => this.selectProject(e)}
           value={projectID}
         >
@@ -194,6 +195,7 @@ class UploadModal extends React.Component {
           type="file"
           className="upload-display"
           multiple={true}
+          id="upload-file"
           // name="tiff"
           onChange={this.onSelectFile}
         />
@@ -241,7 +243,7 @@ class UploadModal extends React.Component {
             ))}
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
-          <button onClick={this.onUpload} disabled={disabled}>
+          <button onClick={this.onUpload} disabled={disabled} id="upload-submit">
             Submit
           </button>
           <button onClick={this.props.onCancel}>Cancel</button>
