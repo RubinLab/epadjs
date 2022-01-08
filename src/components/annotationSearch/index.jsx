@@ -132,7 +132,7 @@ const AnnotationSearch = props => {
     }
   };
 
-  const getAnnotationsOfProjets = pageIndex => {
+  const getAnnotationsOfProjets = (pageIndex, afterdelete) => {
     const bm = pageIndex ? bookmark : '';
     const promise =
       props.pid === 'all'
@@ -140,7 +140,7 @@ const AnnotationSearch = props => {
         : getSummaryAnnotations(props.pid, bm);
     Promise.all([promise])
       .then(res => {
-        populateSearchResult(res, pageIndex);
+        populateSearchResult(res, pageIndex, afterdelete);
       })
       .catch(err => console.error(err));
   };
@@ -322,7 +322,7 @@ const AnnotationSearch = props => {
   const getSearchResult = (pageIndex, afterDelete) => {
     setPageIndex(0);
     if (query.length === 0) {
-      getAnnotationsOfProjets();
+      getAnnotationsOfProjets(pageIndex, afterDelete);
     } else {
       let searchQuery = parseQuery();
       // setData([]);
@@ -359,7 +359,7 @@ const AnnotationSearch = props => {
     if (query) {
       getSearchResult(pageIndex, afterDelete);
     } else {
-      getAnnotationsOfProjets(pageIndex);
+      getAnnotationsOfProjets(pageIndex, afterDelete);
     }
   };
 
@@ -1009,8 +1009,8 @@ const AnnotationSearch = props => {
   };
   // cavit
   const prepareDropDownHtmlForPlugins = () => {
-    console.log(showPlugins);
-    console.log(pluginListArray);
+    // console.log(showPlugins);
+    // console.log(pluginListArray);
     const list = pluginListArray;
     let options = [];
     for (let i = 0; i < list.length; i++) {
