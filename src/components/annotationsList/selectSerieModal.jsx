@@ -41,7 +41,6 @@ class selectSerieModal extends React.Component {
   componentDidMount = async () => {
     let selectionType = "";
     let { selectedStudies, selectedSeries, selectedAnnotations } = this.props;
-    console.log("this props", this.props);
     selectedStudies = Object.values(selectedStudies);
     selectedSeries = Object.values(selectedSeries);
     selectedAnnotations = Object.values(selectedAnnotations);
@@ -54,6 +53,7 @@ class selectSerieModal extends React.Component {
     }
     this.setState({ selectionType });
     this.setPreSelecteds();
+    this.updateLimit();
   };
 
   componentWillUnmount = () => {
@@ -70,8 +70,7 @@ class selectSerieModal extends React.Component {
   componentDidUpdate = prevProps => {
     const { openSeries, seriesPassed } = this.props;
     if (openSeries.length !== prevProps.openSeries.length) {
-      let limit = this.updateLimit();
-      this.setState({ limit });
+      this.updateLimit();
     }
     if (seriesPassed.length !== prevProps.seriesPassed.length) {
       this.setPreSelecteds();
@@ -83,7 +82,8 @@ class selectSerieModal extends React.Component {
     const { openSeries } = this.props;
     const { selectedToDisplay } = this.state;
     selectCount = Object.keys(selectedToDisplay).length;
-    return openSeries.length + selectCount;
+    const limit = openSeries.length + selectCount;
+    this.setState({ limit });
   };
 
   selectToDisplay = serieUID => {
@@ -92,8 +92,7 @@ class selectSerieModal extends React.Component {
       delete newSelections[serieUID];
     else newSelections[serieUID] = true;
     this.setState({ selectedToDisplay: { ...newSelections } }, () => {
-      let limit = this.updateLimit();
-      this.setState({ limit });
+      this.updateLimit();
     });
   };
 
@@ -134,24 +133,24 @@ class selectSerieModal extends React.Component {
         this.props.dispatch(getSingleSerie(serie));
       }
     }
-    // for (let i = 0; i < Object.keys(selectedToDisplay).length; i++) {
-    //   // if (this.state.selectedToDisplay[i]) {
-    //   // If significance order is not set before we 
-    //   if (!significanceSet) {
-    //     significantSeries.push({
-    //       seriesUID: series[i].seriesUID,
-    //       significanceOrder
-    //     });
-    //     significanceOrder++;
-    //   }
-    //   this.props.dispatch(addToGrid(series[i], series[i].aimID));
-    //   if (this.state.selectionType === "aim") {
-    //     this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
-    //   } else {
-    //     this.props.dispatch(getSingleSerie(series[i]));
-    //   }
-    //   // }
-    // }
+    for (let i = 0; i < Object.keys(selectedToDisplay).length; i++) {
+      // if (this.state.selectedToDisplay[i]) {
+      // If significance order is not set before we 
+      if (!significanceSet) {
+        significantSeries.push({
+          seriesUID: series[i].seriesUID,
+          significanceOrder
+        });
+        significanceOrder++;
+      }
+      this.props.dispatch(addToGrid(series[i], series[i].aimID));
+      if (this.state.selectionType === "aim") {
+        this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
+      } else {
+        this.props.dispatch(getSingleSerie(series[i]));
+      }
+      // }
+    }
     const { projectID, patientID, studyUID, subjectID } = series[0];
     const subID = patientID ? patientID : subjectID;
 
@@ -194,7 +193,7 @@ class selectSerieModal extends React.Component {
       for (let k = 0; k < series[i].length; k++) {
         if (openSeries.length + selectedCount >= this.maxPort) {
           this.setState({ selectedToDisplay }, () => {
-            this.setState({ limit: this.updateLimit() });
+            this.updateLimit();
           });
           return;
         }
@@ -212,7 +211,7 @@ class selectSerieModal extends React.Component {
       count += series[i].length;
     }
     this.setState({ selectedToDisplay }, () => {
-      this.setState({ limit: this.updateLimit() });
+      this.updateLimit();
     });
   };
 
