@@ -1,4 +1,6 @@
 import {
+  LOAD_ANNOTATIONS,
+  LOAD_ANNOTATIONS_SUCCESS,
   LOAD_ANNOTATIONS_ERROR,
   // LOAD_PATIENT,
   // LOAD_PATIENT_SUCCESS,
@@ -41,13 +43,13 @@ import {
   AIM_DELETE,
   SAVE_PATIENT_FILTER,
   colors,
-  commonLabels
-} from './types';
+  commonLabels,
+} from "./types";
 import {
   persistColorInSaveAim,
-  persistColorInDeleteAim
-} from '../../Utils/aid';
-import { MdSatellite } from 'react-icons/md';
+  persistColorInDeleteAim,
+} from "../../Utils/aid";
+import { MdSatellite } from "react-icons/md";
 const initialState = {
   openSeries: [],
   aimsList: {},
@@ -69,10 +71,10 @@ const initialState = {
   projectMap: {},
   templates: {},
   aimSegLabelMaps: {},
-  notificationAction: '',
+  notificationAction: "",
   reports: [],
   isSegUploaded: {},
-  patientFilter: {}
+  patientFilter: {},
 };
 
 const asyncReducer = (state = initialState, action) => {
@@ -94,23 +96,19 @@ const asyncReducer = (state = initialState, action) => {
       case SAVE_PATIENT_FILTER:
         return {
           ...state,
-          patientFilter: action.patientFilter
+          patientFilter: action.patientFilter,
         };
       case GET_NOTIFICATIONS:
-        const {
-          uploadedPid,
-          lastEventId,
-          refresh,
-          notificationAction
-        } = action.payload;
+        const { uploadedPid, lastEventId, refresh, notificationAction } =
+          action.payload;
         return {
           ...state,
           uploadedPid,
           lastEventId,
           refresh,
-          notificationAction
+          notificationAction,
         };
-      // -----> Delete after v1.0 <-----    
+      // -----> Delete after v1.0 <-----
       // case UPDATE_PATIENT_AIM_DELETE:
       //   let patientAimDelete = { ...state.patients };
       //   ({ aimRefs } = action);
@@ -126,7 +124,7 @@ const asyncReducer = (state = initialState, action) => {
       //   ].annotations[aimRefs.aimID] = { ...aimRefs };
       //   return { ...state, patient: patientAimSave };
       case CLEAR_AIMID:
-        aimIDClearedOPenSeries = state.openSeries.map(serie => {
+        aimIDClearedOPenSeries = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
@@ -139,7 +137,7 @@ const asyncReducer = (state = initialState, action) => {
 
         return { ...state, openSeries: aimIDClearedOPenSeries };
       case CLEAR_ACTIVE_AIMID:
-        aimIDClearedOPenSeries = state.openSeries.map(serie => {
+        aimIDClearedOPenSeries = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
@@ -150,7 +148,7 @@ const asyncReducer = (state = initialState, action) => {
 
         return { ...state, openSeries: aimIDClearedOPenSeries };
       case UPDATE_IMAGEID:
-        const openSeriesToUpdate = state.openSeries.map(serie => {
+        const openSeriesToUpdate = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
@@ -195,13 +193,21 @@ const asyncReducer = (state = initialState, action) => {
           openSeries: delGrid,
           aimsList: delAims,
           // patients: delPatients,
-          activePort: delActivePort
+          activePort: delActivePort,
         };
+      case LOAD_ANNOTATIONS:
+        return Object.assign({}, state, {
+          loading: true,
+
+          error: false,
+        });
+      case LOAD_ANNOTATIONS_SUCCESS:
+        return { ...state, loading: false };
       case VIEWPORT_FULL:
         const viewPortStatus = !state.showGridFullAlert;
         return { ...state, showGridFullAlert: viewPortStatus };
       case LOAD_SERIE_SUCCESS:
-        let imageAddedSeries = state.openSeries.map(serie => {
+        let imageAddedSeries = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
@@ -245,15 +251,15 @@ const asyncReducer = (state = initialState, action) => {
           error: false,
           aimsList: {
             ...state.aimsList,
-            [action.payload.ref.seriesUID]: colorAimsList
+            [action.payload.ref.seriesUID]: colorAimsList,
           },
-          openSeries: imageAddedSeries
+          openSeries: imageAddedSeries,
         });
         return result;
       case LOAD_ANNOTATIONS_ERROR:
         return Object.assign({}, state, {
           loading: false,
-          error: action.error
+          error: action.error,
         });
       case UPDATE_ANNOTATION_DISPLAY:
         let { patient, study, serie, annotation, isDisplayed } = action.payload;
@@ -264,15 +270,15 @@ const asyncReducer = (state = initialState, action) => {
               ...state.aimsList[serie],
               [annotation]: {
                 ...state.aimsList[serie][annotation],
-                isDisplayed
-              }
-            }
-          }
+                isDisplayed,
+              },
+            },
+          },
         });
 
       case CHANGE_ACTIVE_PORT:
         //get openseries iterate over the
-        const changedPortSeries = state.openSeries.map(serie => {
+        const changedPortSeries = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
@@ -287,7 +293,7 @@ const asyncReducer = (state = initialState, action) => {
 
         return Object.assign({}, state, {
           activePort: action.portIndex,
-          openSeries: changedPortSeries
+          openSeries: changedPortSeries,
         });
 
       case TOGGLE_ALL_ANNOTATIONS:
@@ -298,7 +304,7 @@ const asyncReducer = (state = initialState, action) => {
           toggleAnns[seriesUID][ann].isDisplayed = displayStatus;
         }
         return Object.assign({}, state, {
-          aimsList: toggleAnns
+          aimsList: toggleAnns,
         });
       case TOGGLE_ALL_LABELS:
         const toggledLabelSerie = { ...state.aimsList };
@@ -355,26 +361,26 @@ const asyncReducer = (state = initialState, action) => {
           // patients: clearedPatients,
           openSeries: [],
           aimsList: {},
-          activePort: 0
+          activePort: 0,
         };
       case CLEAR_SELECTION:
         let selectionState = { ...state };
-        if (action.selectionType === 'annotation') {
+        if (action.selectionType === "annotation") {
           selectionState.selectedSeries = {};
           selectionState.selectedStudies = {};
           selectionState.selectedPatients = {};
           selectionState.selectedProject = null;
-        } else if (action.selectionType === 'serie') {
+        } else if (action.selectionType === "serie") {
           selectionState.selectedAnnotations = {};
           selectionState.selectedStudies = {};
           selectionState.selectedPatients = {};
           selectionState.selectedProject = null;
-        } else if (action.selectionType === 'study') {
+        } else if (action.selectionType === "study") {
           selectionState.selectedAnnotations = {};
           selectionState.selectedSeries = {};
           selectionState.selectedPatients = {};
           selectionState.selectedProject = null;
-        } else if (action.selectionType === 'patient') {
+        } else if (action.selectionType === "patient") {
           selectionState.selectedAnnotations = {};
           selectionState.selectedSeries = {};
           selectionState.selectedStudies = {};
@@ -389,7 +395,7 @@ const asyncReducer = (state = initialState, action) => {
         return selectionState;
       case SELECT_PATIENT:
         let patientsNew = {
-          ...state.selectedPatients
+          ...state.selectedPatients,
         };
         patientsNew[action.patient.patientID]
           ? delete patientsNew[action.patient.patientID]
@@ -397,7 +403,7 @@ const asyncReducer = (state = initialState, action) => {
         return { ...state, selectedPatients: patientsNew };
       case SELECT_STUDY:
         let newStudies = {
-          ...state.selectedStudies
+          ...state.selectedStudies,
         };
         newStudies[action.study.studyUID]
           ? delete newStudies[action.study.studyUID]
@@ -409,7 +415,7 @@ const asyncReducer = (state = initialState, action) => {
         return { ...state, loading: false };
       case SELECT_SERIE:
         let newSeries = {
-          ...state.selectedSeries
+          ...state.selectedSeries,
         };
         newSeries[action.serie.seriesUID]
           ? delete newSeries[action.serie.seriesUID]
@@ -418,14 +424,14 @@ const asyncReducer = (state = initialState, action) => {
         return { ...state, selectedSeries: newSeries };
       case SELECT_ANNOTATION:
         let newAnnotations = {
-          ...state.selectedAnnotations
+          ...state.selectedAnnotations,
         };
         newAnnotations[action.annotation.aimID]
           ? delete newAnnotations[action.annotation.aimID]
           : (newAnnotations[action.annotation.aimID] = action.annotation);
 
         return { ...state, selectedAnnotations: newAnnotations };
-      // -----> Delete after v1.0 <-----  
+      // -----> Delete after v1.0 <-----
       // case LOAD_PATIENT:
       //   return { ...state, patientLoading: true };
       // case LOAD_PATIENT_ERROR:
@@ -451,7 +457,7 @@ const asyncReducer = (state = initialState, action) => {
           seriesInfo.defaultTemplate =
             projectMap[seriesInfo.projectID].defaultTemplate;
         } else {
-          seriesInfo.projectName = 'lite';
+          seriesInfo.projectName = "lite";
           seriesInfo.defaultTemplate = null;
         }
         let newOpenSeries = state.openSeries.concat(seriesInfo);
@@ -459,9 +465,9 @@ const asyncReducer = (state = initialState, action) => {
         return {
           ...state,
           openSeries: newOpenSeries,
-          activePort: newOpenSeries.length - 1
+          activePort: newOpenSeries.length - 1,
         };
-      // -----> Delete after v1.0 <-----   
+      // -----> Delete after v1.0 <-----
       // case UPDATE_PATIENT:
       //   let updatedPt = { ...state.patients[action.payload.patient] };
       //   if (action.payload.type === 'study') {
@@ -488,7 +494,7 @@ const asyncReducer = (state = initialState, action) => {
       case JUMP_TO_AIM:
         let { aimID, index } = action.payload;
         let serUID = action.payload.seriesUID;
-        let updatedGrid = state.openSeries.map(serie => {
+        let updatedGrid = state.openSeries.map((serie) => {
           const newSerie = { ...serie };
           if (serie.imageAnnotations) {
             newSerie.imageAnnotations = { ...serie.imageAnnotations };
@@ -506,21 +512,21 @@ const asyncReducer = (state = initialState, action) => {
               ...state.aimsList[serUID],
               [aimID]: {
                 ...state.aimsList[serUID][aimID],
-                isDisplayed: true
-              }
-            }
-          }
+                isDisplayed: true,
+              },
+            },
+          },
         });
       case GET_PROJECT_MAP:
         return {
           ...state,
-          projectMap: action.projectMap
+          projectMap: action.projectMap,
         };
       case SET_SEG_LABEL_MAP_INDEX: {
         const { aimID, labelMapIndex } = action.payload;
         return {
           ...state,
-          aimSegLabelMaps: { ...state.aimSegLabelMaps, [aimID]: labelMapIndex }
+          aimSegLabelMaps: { ...state.aimSegLabelMaps, [aimID]: labelMapIndex },
         };
       }
       case GET_TEMPLATES:
@@ -528,20 +534,20 @@ const asyncReducer = (state = initialState, action) => {
       case SEG_UPLOAD_STARTED: {
         let segUid = action.payload;
         return Object.assign({}, state, {
-          isSegUploaded: { ...state.isSegUploaded, [segUid]: false }
+          isSegUploaded: { ...state.isSegUploaded, [segUid]: false },
         });
       }
       case SEG_UPLOAD_COMPLETED: {
         let segUid = action.payload;
         return Object.assign({}, state, {
-          isSegUploaded: { ...state.isSegUploaded, [segUid]: true }
+          isSegUploaded: { ...state.isSegUploaded, [segUid]: true },
         });
       }
       case SEG_UPLOAD_REMOVE: {
         let segUid = action.payload;
         const { [segUid]: value, ...theRest } = state.isSegUploaded;
         return Object.assign({}, state, {
-          isSegUploaded: { ...theRest }
+          isSegUploaded: { ...theRest },
         });
       }
       case AIM_DELETE: {
