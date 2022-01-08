@@ -41,7 +41,6 @@ class selectSerieModal extends React.Component {
   componentDidMount = async () => {
     let selectionType = "";
     let { selectedStudies, selectedSeries, selectedAnnotations } = this.props;
-    console.log("this props", this.props);
     selectedStudies = Object.values(selectedStudies);
     selectedSeries = Object.values(selectedSeries);
     selectedAnnotations = Object.values(selectedAnnotations);
@@ -55,7 +54,6 @@ class selectSerieModal extends React.Component {
     this.setState({ selectionType });
     this.setPreSelecteds();
     this.updateLimit();
-    console.log("state is", this.state);
   };
 
   componentWillUnmount = () => {
@@ -86,7 +84,6 @@ class selectSerieModal extends React.Component {
     selectCount = Object.keys(selectedToDisplay).length;
     const limit = openSeries.length + selectCount;
     this.setState({ limit });
-    console.log("limit set", limit);
   };
 
   selectToDisplay = serieUID => {
@@ -136,24 +133,24 @@ class selectSerieModal extends React.Component {
         this.props.dispatch(getSingleSerie(serie));
       }
     }
-    // for (let i = 0; i < Object.keys(selectedToDisplay).length; i++) {
-    //   // if (this.state.selectedToDisplay[i]) {
-    //   // If significance order is not set before we 
-    //   if (!significanceSet) {
-    //     significantSeries.push({
-    //       seriesUID: series[i].seriesUID,
-    //       significanceOrder
-    //     });
-    //     significanceOrder++;
-    //   }
-    //   this.props.dispatch(addToGrid(series[i], series[i].aimID));
-    //   if (this.state.selectionType === "aim") {
-    //     this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
-    //   } else {
-    //     this.props.dispatch(getSingleSerie(series[i]));
-    //   }
-    //   // }
-    // }
+    for (let i = 0; i < Object.keys(selectedToDisplay).length; i++) {
+      // if (this.state.selectedToDisplay[i]) {
+      // If significance order is not set before we 
+      if (!significanceSet) {
+        significantSeries.push({
+          seriesUID: series[i].seriesUID,
+          significanceOrder
+        });
+        significanceOrder++;
+      }
+      this.props.dispatch(addToGrid(series[i], series[i].aimID));
+      if (this.state.selectionType === "aim") {
+        this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
+      } else {
+        this.props.dispatch(getSingleSerie(series[i]));
+      }
+      // }
+    }
     const { projectID, patientID, studyUID, subjectID } = series[0];
     const subID = patientID ? patientID : subjectID;
 
@@ -243,7 +240,6 @@ class selectSerieModal extends React.Component {
   renderSelection = () => {
     const { seriesPassed } = this.props;
     const { selectedToDisplay, limit } = this.state;
-    console.log("limit is", limit);
     let selectionList = [];
     let item;
 
