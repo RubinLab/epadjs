@@ -54,6 +54,8 @@ class selectSerieModal extends React.Component {
     }
     this.setState({ selectionType });
     this.setPreSelecteds();
+    this.updateLimit();
+    console.log("state is", this.state);
   };
 
   componentWillUnmount = () => {
@@ -70,8 +72,7 @@ class selectSerieModal extends React.Component {
   componentDidUpdate = prevProps => {
     const { openSeries, seriesPassed } = this.props;
     if (openSeries.length !== prevProps.openSeries.length) {
-      let limit = this.updateLimit();
-      this.setState({ limit });
+      this.updateLimit();
     }
     if (seriesPassed.length !== prevProps.seriesPassed.length) {
       this.setPreSelecteds();
@@ -83,7 +84,9 @@ class selectSerieModal extends React.Component {
     const { openSeries } = this.props;
     const { selectedToDisplay } = this.state;
     selectCount = Object.keys(selectedToDisplay).length;
-    return openSeries.length + selectCount;
+    const limit = openSeries.length + selectCount;
+    this.setState({ limit });
+    console.log("limit set", limit);
   };
 
   selectToDisplay = serieUID => {
@@ -92,8 +95,7 @@ class selectSerieModal extends React.Component {
       delete newSelections[serieUID];
     else newSelections[serieUID] = true;
     this.setState({ selectedToDisplay: { ...newSelections } }, () => {
-      let limit = this.updateLimit();
-      this.setState({ limit });
+      this.updateLimit();
     });
   };
 
@@ -194,7 +196,7 @@ class selectSerieModal extends React.Component {
       for (let k = 0; k < series[i].length; k++) {
         if (openSeries.length + selectedCount >= this.maxPort) {
           this.setState({ selectedToDisplay }, () => {
-            this.setState({ limit: this.updateLimit() });
+            this.updateLimit();
           });
           return;
         }
@@ -212,7 +214,7 @@ class selectSerieModal extends React.Component {
       count += series[i].length;
     }
     this.setState({ selectedToDisplay }, () => {
-      this.setState({ limit: this.updateLimit() });
+      this.updateLimit();
     });
   };
 
@@ -241,6 +243,7 @@ class selectSerieModal extends React.Component {
   renderSelection = () => {
     const { seriesPassed } = this.props;
     const { selectedToDisplay, limit } = this.state;
+    console.log("limit is", limit);
     let selectionList = [];
     let item;
 
