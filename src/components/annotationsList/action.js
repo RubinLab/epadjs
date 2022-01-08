@@ -664,7 +664,7 @@ const getRequiredFields = (arr, type, selectedID) => {
 export const getSingleSerie = (serie, annotation) => {
   return async (dispatch, getState) => {
     try {
-      // await dispatch(loadAnnotations());
+      await dispatch(loadAnnotations());
       let { patientID, studyUID, seriesUID, numberOfAnnotations } = serie;
       let reference = {
         patientID,
