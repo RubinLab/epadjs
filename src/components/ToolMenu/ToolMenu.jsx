@@ -296,6 +296,7 @@ class ToolMenu extends Component {
   };
 
   handleToolClicked = (index, tool) => {
+    sessionStorage.setItem("activeTool", tool);
     if (tool === "Noop") {
       this.disableAllTools();
       this.setState({ activeTool: "", activeToolIdx: index });
@@ -353,7 +354,7 @@ class ToolMenu extends Component {
     this.setState({ activeTool: tool, activeToolIdx: index }, () => {
       this.setToolStateForAllElements(tool, "active");
     });
-    sessionStorage.setItem("activeTool", tool);
+
   };
 
   selectFreehand = () => {
