@@ -321,7 +321,11 @@ function Subjects(props) {
                   }
                 }}
               >
-                {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
+                {row.isExpanded || props.treeExpand[row.index] ? (
+                  <span>&#x25BC;</span>
+                ) : (
+                  <span>&#x25B6;</span>
+                )}
               </span>
             </div>
           );
