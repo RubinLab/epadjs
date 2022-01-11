@@ -7,20 +7,30 @@ class Navbar extends Basepage {
     this.driver = driver;
     this.tabIds = {
       annotations: 'navbar-ann',
-      management: 'mng-icon'
+      management: 'mng-icon',
+      patientList: 'patientList'
     };
     this.management = null;
   }
 
   async selectTabById(tabname) {
     await this.driver.wait(until.elementLocated(By.id(this.tabIds[tabname])));
-    await super.clickById(this.tabIds[tabname]);
-    await this.driver.wait(until.elementLocated(By.className('mng-menu')));
+    await this.clickById(this.tabIds[tabname]);
+  }
+
+  async selectTabByName(tabname) {
+    await this.driver.wait(until.elementLocated(By.name(tabname)));
+    await this.driver.findElement(By.name(tabname)).tab.click();
+    await tab.click();
   }
 
   async formManagementMenu() {
-    await this.driver.wait(until.elementLocated(By.className('mng-menu__option')));
-    const subjects =  await this.driver.findElements(By.className('mng-menu__option'));
+    await this.driver.wait(
+      until.elementLocated(By.className('mng-menu__option'))
+    );
+    const subjects = await this.driver.findElements(
+      By.className('mng-menu__option')
+    );
     const subjectsTitles = {};
     for (let subject of subjects) {
       const text = await subject.getText();
@@ -32,16 +42,14 @@ class Navbar extends Basepage {
 
   async selectMNGSubject(subject) {
     if (this.management) {
-      await this.management[subject].click()
+      await this.management[subject].click();
     } else {
       const subjects = await this.formManagementMenu();
       await subjects[subject].click();
     }
     const title = await this.driver.findElement(By.className('mng-header'));
-    return  title.getText();
+    return title.getText();
   }
-
- 
 }
 
 export default Navbar;
