@@ -50,6 +50,7 @@ const NavBar = ({
           <ul className="navbar-nav mr-auto">
             <li
               id="navbarli"
+              name="patientList"
               className={
                 path.includes('list') ? 'nav-link activeNav' : 'nav-link'
               }

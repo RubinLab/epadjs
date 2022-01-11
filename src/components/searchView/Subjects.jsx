@@ -638,6 +638,7 @@ function Subjects(props) {
         Find patient:
         <input
           type="text"
+          id="patientFilter"
           style={{ margin: '1rem' }}
           onChange={filterSubjects}
           ref={searchKey}
