@@ -42,7 +42,6 @@ class selectSerieModal extends React.Component {
   componentDidMount = async () => {
     let selectionType = "";
     let { selectedStudies, selectedSeries, selectedAnnotations } = this.props;
-    console.log("this props", this.props);
     selectedStudies = Object.values(selectedStudies);
     selectedSeries = Object.values(selectedSeries);
     selectedAnnotations = Object.values(selectedAnnotations);
@@ -90,7 +89,6 @@ class selectSerieModal extends React.Component {
   };
 
   selectToDisplay = serieUID => {
-    console.log("selected");
     let newSelections = { ...this.state.selectedToDisplay };
     if (newSelections[serieUID])
       delete newSelections[serieUID];
