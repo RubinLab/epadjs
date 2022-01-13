@@ -17,6 +17,7 @@ import { getSeries, setSignificantSeries } from "../../services/seriesServices";
 import "./annotationsList.css";
 import { isSupportedModality } from "../../Utils/aid.js";
 import { extendWith } from "lodash";
+import { TiEject } from "react-icons/ti";
 
 const message = {
   title: "Not enough ports to open series"
@@ -41,7 +42,6 @@ class selectSerieModal extends React.Component {
   componentDidMount = async () => {
     let selectionType = "";
     let { selectedStudies, selectedSeries, selectedAnnotations } = this.props;
-    console.log("this props", this.props);
     selectedStudies = Object.values(selectedStudies);
     selectedSeries = Object.values(selectedSeries);
     selectedAnnotations = Object.values(selectedAnnotations);
@@ -54,6 +54,8 @@ class selectSerieModal extends React.Component {
     }
     this.setState({ selectionType });
     this.setPreSelecteds();
+    const limit = this.updateLimit();
+    this.setState({ limit });
   };
 
   componentWillUnmount = () => {
@@ -305,11 +307,12 @@ class selectSerieModal extends React.Component {
         <div key={keys[i]}>
           <div className="serieSelection-title">{this.getTitle(series[i][0])}</div>
           <div>{innerList}</div>
-          {significantExplanation && (<div><br />(S): Significant series</div>)}
         </div>
       );
       count += series[i].length;
     }
+    if (significantExplanation)
+      selectionList.push(<div><br />(S): Significant series</div>);
     return selectionList;
   };
 
