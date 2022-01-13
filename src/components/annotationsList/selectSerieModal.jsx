@@ -17,6 +17,7 @@ import { getSeries, setSignificantSeries } from "../../services/seriesServices";
 import "./annotationsList.css";
 import { isSupportedModality } from "../../Utils/aid.js";
 import { extendWith } from "lodash";
+import { TiEject } from "react-icons/ti";
 
 const message = {
   title: "Not enough ports to open series"
@@ -54,6 +55,8 @@ class selectSerieModal extends React.Component {
     }
     this.setState({ selectionType });
     this.setPreSelecteds();
+    const limit = this.updateLimit();
+    this.setState({ limit });
   };
 
   componentWillUnmount = () => {
@@ -87,6 +90,7 @@ class selectSerieModal extends React.Component {
   };
 
   selectToDisplay = serieUID => {
+    console.log("selected");
     let newSelections = { ...this.state.selectedToDisplay };
     if (newSelections[serieUID])
       delete newSelections[serieUID];
