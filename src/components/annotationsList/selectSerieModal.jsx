@@ -307,11 +307,12 @@ class selectSerieModal extends React.Component {
         <div key={keys[i]}>
           <div className="serieSelection-title">{this.getTitle(series[i][0])}</div>
           <div>{innerList}</div>
-          {significantExplanation && (<div><br />(S): Significant series</div>)}
         </div>
       );
       count += series[i].length;
     }
+    if (significantExplanation)
+      selectionList.push(<div><br />(S): Significant series</div>);
     return selectionList;
   };
 
