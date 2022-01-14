@@ -882,7 +882,12 @@ const AnnotationSearch = props => {
               checked={checkboxSelected}
               onChange={e => {
                 if (e.target.checked === false) {
-                  setSelectedProject(selectedProject);
+                  const project =
+                    props.searchQuery &&
+                    Object.values(props.searchQuery)[0].project
+                      ? Object.values(props.searchQuery)[0].project
+                      : props.pid;
+                  setSelectedProject(project);
                   setCheckboxSelected(false);
                 } else {
                   setSelectedProject('');
