@@ -206,8 +206,6 @@ class WorkList extends React.Component {
     const { data: series } = await getSeries(projectID, subjectID, studyUID);
     const maxPort = parseInt(sessionStorage.getItem("maxPort"));
     const { openSeries } = this.props;
-    console.log(series, openSeries, maxPort);
-    console.log("openn", openSeries.length);
     if (series.length + openSeries.length <= maxPort) {
       this.setState({ selectedSeries: series }, () => this.viewSelection());
     }
@@ -374,7 +372,6 @@ class WorkList extends React.Component {
         sortable: false,
         resizable: false,
         Cell: original => {
-          // console.log(original.row._original);
           const newPatients = [...this.state.patients];
           const newProjects = [...this.state.projects];
           const { subjectID, projectID } = original.row._original;
@@ -695,7 +692,6 @@ class WorkList extends React.Component {
           this.props.dispatch(clearSelection());
         } else {
           if (selectedSeries.length + this.props.openSeries.length > maxPort) {
-            console.log("ELLLL", selectedSeries, this.props);
             // alert user about the num of open series a the moment and told only maxPort is allowed
             const openPorts = this.props.openSeries.length;
             this.setState({
