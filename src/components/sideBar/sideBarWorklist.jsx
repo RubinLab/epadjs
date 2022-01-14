@@ -204,11 +204,20 @@ class WorkList extends React.Component {
   handleOpenClick = async study => {
     const { projectID, subjectID, studyUID, studyDescription } = study;
     const { data: series } = await getSeries(projectID, subjectID, studyUID);
-    this.setState(state => ({
-      showSeries: !state.showSeries,
-      series,
-      studyName: studyDescription
-    }));
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+    const { openSeries } = this.props;
+    console.log(series, openSeries, maxPort);
+    console.log("openn", openSeries.length);
+    if (series.length + openSeries.length <= maxPort) {
+      this.setState({ selectedSeries: series }, () => this.viewSelection());
+    }
+    else {
+      this.setState(state => ({
+        showSeries: !state.showSeries,
+        series,
+        studyName: studyDescription
+      }));
+    }
   };
 
   handleCancelOpenSeries = () => {
@@ -686,6 +695,7 @@ class WorkList extends React.Component {
           this.props.dispatch(clearSelection());
         } else {
           if (selectedSeries.length + this.props.openSeries.length > maxPort) {
+            console.log("ELLLL", selectedSeries, this.props);
             // alert user about the num of open series a the moment and told only maxPort is allowed
             const openPorts = this.props.openSeries.length;
             this.setState({
