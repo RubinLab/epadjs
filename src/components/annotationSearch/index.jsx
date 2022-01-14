@@ -1349,6 +1349,7 @@ const AnnotationSearch = props => {
           }}
           onCancel={() => setDownloadClicked(false)}
           updateStatus={() => console.log('update status')}
+          projectID={selectedProject}
         />
       )}
       {uploadClicked && (
