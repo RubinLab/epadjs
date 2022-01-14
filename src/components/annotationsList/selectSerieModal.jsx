@@ -318,6 +318,7 @@ class selectSerieModal extends React.Component {
 
   render = () => {
     const { openSeries } = this.props;
+    const selections = Object.keys(this.state.selectedToDisplay);
     const list = this.renderSelection();
     return (
       // <Modal.Dialog dialogClassName="alert-selectSerie">
@@ -358,7 +359,7 @@ class selectSerieModal extends React.Component {
           <div>{list}</div>
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
-          <button onClick={this.displaySelection}>Display selection</button>
+          <button onClick={this.displaySelection} disabled={!selections.length}>Display selection</button>
           <button onClick={this.handleCancel}>Cancel</button>
         </Modal.Footer>
       </Modal.Dialog>
