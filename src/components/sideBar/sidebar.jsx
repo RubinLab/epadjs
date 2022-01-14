@@ -324,10 +324,13 @@ class Sidebar extends Component {
           const className = matchProject
             ? "sidebar-row __selected"
             : "sidebar-row";
+          const badgeID = `subjectCount-${project.id}`;
+          const rowID = `pid-${project.id}`;
           return (
             <tr key={project.id} className={className}>
               <td>
                 <p
+                  id={rowID}
                   onClick={() => {
                     this.handleRoute("project", project.id);
                     this.props.getPidUpdate(project.id);
@@ -336,7 +339,10 @@ class Sidebar extends Component {
                   // style={{ padding: "0.6rem" }}
                 >
                   {project.name}
-                  <span id="subjectCount" className="badge badge-secondary">
+                  <span
+                    id={badgeID}
+                    className="badge badge-secondary subjectCount"
+                  >
                     {project.numberOfSubjects}
                   </span>
                 </p>
