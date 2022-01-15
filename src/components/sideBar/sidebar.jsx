@@ -327,10 +327,9 @@ class Sidebar extends Component {
           const badgeID = `subjectCount-${project.id}`;
           const rowID = `pid-${project.id}`;
           return (
-            <tr key={project.id} className={className}>
+            <tr key={project.id} className={className} id={rowID}>
               <td>
                 <p
-                  id={rowID}
                   onClick={() => {
                     this.handleRoute("project", project.id);
                     this.props.getPidUpdate(project.id);

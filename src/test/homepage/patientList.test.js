@@ -14,8 +14,9 @@ describe('executing test scenario on ePAD', () => {
   const login = new LoginPage(driver);
   const navbar = new Navbar(driver);
   const leftSidebar = new LeftSidebar(driver);
-  const projectDetails = {}
-
+  const projectDetails = {
+    id: 'testProject1'
+  };
 
   // before all
   // create a random project
@@ -35,132 +36,70 @@ describe('executing test scenario on ePAD', () => {
     await leftSidebar.selectTab('projects');
   });
 
-  test('it selects the project', async () => {
-
+  test('it selects the project - ', async () => {
+    const urlID = await leftSidebar.selectProject(projectDetails.id);
+    expect(urlID).toBe(projectDetails.id);
   });
 
-  test('it should not have a patient', async () => {
+  test('it should not have a patient', async () => {});
 
-  });
+  test('it uploads a patient', async () => {});
 
-  test('it uploads a patient', async () => {
+  test('it verifies uploaded patient is present', async () => {});
 
-  });
+  test('it verifies patient count badge shows the correct number', async () => {});
 
-  test('it verifies uploaded patient is present', async () => {
+  test('it downloads patient', async () => {});
 
-  });
+  test('it uploads annotations', async () => {});
 
-  test('it verifies patient count badge shows the correct number', async () => {
+  test('it verifies annotation number is shown correctly', async () => {});
 
-  });
+  test('it expands patient from the arrow', async () => {});
 
-  test('it downloads patient', async () => {
+  test('it expands study from the arrow', async () => {});
 
-  });
+  test('it expands series from the arrow', async () => {});
 
-  test('it uploads annotations', async () => {
+  test('it verifies annotations are present', async () => {});
 
-  });
+  test('it verifies the eye icon opens the annotation', async () => {});
 
-  test('it verifies annotation number is shown correctly', async () => {
+  test('it verifies the eye icon opens the series', async () => {});
 
-  });
+  test('it verifies the eye icon opens the study - series selection modal', async () => {});
 
-  test('it expands patient from the arrow', async () => {
+  test('it verifies selected series are opened', async () => {});
 
-  });
+  test('it shows warning when trying to delete an aim of an opened series', async () => {});
 
-  test('it expands study from the arrow', async () => {
+  test('it shows warning when trying to delete an opened series', async () => {});
 
-  });
+  test('it shows warning when trying to delete a study whose one of series is open', async () => {});
 
-  test('it expands series from the arrow', async () => {
+  test('it shows warning when trying to delete a patient whose one of series is open', async () => {});
 
-  });
+  test('it uploads another patient', async () => {});
 
-  test('it verifies annotations are present', async () => {
+  test('it expands by one level and displays studies', async () => {});
 
-  });
+  test('it expands by one level and displays series', async () => {});
 
-  test('it verifies the eye icon opens the annotation', async () => {
+  test('it expands by one level and displays annotations', async () => {});
 
-  });
+  test('it closes all levels after clicking icon', async () => {});
 
-  test('it verifies the eye icon opens the series', async () => {
+  test('it adds the selected subject to another project', async () => {});
 
-  });
+  test("it adds the selected subject's studies to a worklist", async () => {});
 
-  test('it verifies the eye icon opens the study - series selection modal', async () => {
+  test('it deletes an annotation', async () => {});
 
-  });
+  test('it deletes a series', async () => {});
 
-  test('it verifies selected series are opened', async () => {
+  test('it deletes a study', async () => {});
 
-  });
-
-  test('it shows warning when trying to delete an aim of an opened series', async () => {
-
-  });
-
-
-  test('it shows warning when trying to delete an opened series', async () => {
-
-  });
-
-  test('it shows warning when trying to delete a study whose one of series is open', async () => {
-
-  });
-
-  test('it shows warning when trying to delete a patient whose one of series is open', async () => {
-
-  });
-
-  test('it uploads another patient', async () => {
-
-  });
-
-  test('it expands by one level and displays studies', async () => {
-
-  });
-
-  test('it expands by one level and displays series', async () => {
-
-  });
-
-  test('it expands by one level and displays annotations', async () => {
-
-  });
-
-  test('it closes all levels after clicking icon', async () => {
-
-  });
-  
-  test('it adds the selected subject to another project', async () => {
-
-  });
-
-  test("it adds the selected subject's studies to a worklist", async () => {
-
-  });
-
-
-  test('it deletes an annotation', async () => {
-
-  });
-
-  test('it deletes a series', async () => {
-
-  });
-
-  test('it deletes a study', async () => {
-
-  });
-
-  test('it deletes a patient', async () => {
-
-  });
-
+  test('it deletes a patient', async () => {});
 
   // TODO
   // test not opening duplicate series and jumping to display view

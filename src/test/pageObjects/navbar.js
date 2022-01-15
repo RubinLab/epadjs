@@ -20,8 +20,7 @@ class Navbar extends Basepage {
 
   async selectTabByName(tabname) {
     await this.driver.wait(until.elementLocated(By.name(tabname)));
-    await this.driver.findElement(By.name(tabname)).tab.click();
-    await tab.click();
+    await this.driver.findElement(By.name(tabname)).click();
   }
 
   async formManagementMenu() {
