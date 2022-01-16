@@ -6,6 +6,7 @@ const evaluate = chai.expect;
 import LoginPage from '../pageObjects/login.js';
 import Navbar from '../pageObjects/navbar.js';
 import LeftSidebar from '../pageObjects/leftSideBar';
+import PatientList from '../pageObjects/patientList';
 
 jest.setTimeout(30000);
 
@@ -14,6 +15,8 @@ describe('executing test scenario on ePAD', () => {
   const login = new LoginPage(driver);
   const navbar = new Navbar(driver);
   const leftSidebar = new LeftSidebar(driver);
+  const patientList = new PatientList(driver);
+
   const projectDetails = {
     id: 'testProject1'
   };
@@ -41,11 +44,16 @@ describe('executing test scenario on ePAD', () => {
     expect(urlID).toBe(projectDetails.id);
   });
 
-  test('it should not have a patient', async () => {});
+  test('it should not have a patient', async () => {
+    const result = await patientList.getPatientList();
+    expect(result).toBe('NoSuchElementError');
+  });
 
   test('it uploads a patient', async () => {});
 
-  test('it verifies uploaded patient is present', async () => {});
+  test('it verifies uploaded patient is present', async () => {
+    // expect(list).toHaveLength(0);
+  });
 
   test('it verifies patient count badge shows the correct number', async () => {});
 

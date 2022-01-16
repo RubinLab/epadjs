@@ -131,6 +131,7 @@ function Table({
                       {...row.getRowProps()}
                       style={style}
                       key={`subject-row ${i}`}
+                      className="subject-table-row"
                     >
                       {row.cells.map((cell, z) => {
                         return (
