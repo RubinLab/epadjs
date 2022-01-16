@@ -11,7 +11,7 @@ const toolBar = props => {
   return (
     <div className="templates-toolbar mng-toolbar">
       <>
-        <div onClick={onUpload}>
+        <div onClick={onUpload} id="mng-upload">
           <FaUpload className="tool-icon" data-tip data-for="upload-icon" />
         </div>
         <ReactTooltip
@@ -40,6 +40,7 @@ const toolBar = props => {
         <div onClick={onDelete} className="template-toolbar__icon">
           <FaRegTrashAlt
             className="tool-icon"
+            id="delete-icon"
             onClick={onDelete}
             data-tip
             data-for="trash-icon"

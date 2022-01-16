@@ -261,10 +261,11 @@ class Templates extends React.Component {
         accessor: '',
         width: 50,
         Cell: ({ original }) => {
-          const { templateUID } = original.Template[0];
+          const { templateUID, templateCodeValue } = original.Template[0];
           return (
             <input
               type="checkbox"
+              id={templateCodeValue}
               className="checkbox-cell"
               checked={this.state.selected[templateUID]}
               onChange={() => this.toggleRow(templateUID)}
@@ -309,9 +310,8 @@ class Templates extends React.Component {
         sortable: true,
         resizable: true,
         Cell: original => {
-          return (
-            <div>{original.row.checkbox.Template[0].templateCodeValue}</div>
-          );
+          const codeValue = original.row.checkbox.Template[0].templateCodeValue;
+          return <div id={codeValue}>{codeValue}</div>;
           // return <span>type</span>;
         }
       },
@@ -337,7 +337,10 @@ class Templates extends React.Component {
                 data-tip
                 data-for="template-trash-icon"
               >
-                <FaRegTrashAlt className="menu-clickable" />
+                <FaRegTrashAlt
+                  id={`delete-${template.Template[0].templateCodeValue}`}
+                  className="menu-clickable"
+                />
               </div>
               <ReactTooltip
                 id="template-trash-icon"
@@ -355,7 +358,7 @@ class Templates extends React.Component {
     const addToproject = {
       Header: 'Projects',
       Cell: original => {
-        const { templateUID, templateName } = original.row.checkbox.Template[0];
+        const { templateUID, templateName, templateCodeValue } = original.row.checkbox.Template[0];
         const projects = original.row.checkbox.projects
           ? original.row.checkbox.projects
           : [];
@@ -379,17 +382,18 @@ class Templates extends React.Component {
               onClick={() =>
                 this.handleProjectClick(templateUID, templateName, projects)
               }
+              id={`projects-${templateCodeValue}`}
             >
               <p className={className}>{text}</p>
             </div>
             <ReactTooltip
-                id="template-project-relation"
-                place="left"
-                type="info"
-                delayShow={1000}
-              >
-                <span className="filter-label">Assign template to a project</span>
-              </ReactTooltip>
+              id="template-project-relation"
+              place="left"
+              type="info"
+              delayShow={1000}
+            >
+              <span className="filter-label">Assign template to a project</span>
+            </ReactTooltip>
           </>
         );
       }
