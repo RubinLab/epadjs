@@ -10,6 +10,12 @@ import PatientList from '../pageObjects/patientList';
 
 jest.setTimeout(30000);
 
+const patientListData = {
+  pathToPtient: '/Users/ozge/Documents/patients/Patient-7full.zip',
+  pathToRecistAims: '/Users/ozge/Documents/Dev/recist_annotations_json.zip',
+  patientID: '7'
+};
+
 describe('executing test scenario on ePAD', () => {
   let driver = new Builder().forBrowser('chrome').build();
   const login = new LoginPage(driver);
@@ -45,23 +51,30 @@ describe('executing test scenario on ePAD', () => {
   });
 
   test('it should not have a patient', async () => {
-    const result = await patientList.getPatientList();
-    expect(result).toBe('NoSuchElementError');
+    const result = await patientList.getPatientList(' before upload');
+    expect(result).toHaveLength(0);
   });
 
-  test('it uploads a patient', async () => {});
-
-  test('it verifies uploaded patient is present', async () => {
-    // expect(list).toHaveLength(0);
+  test('it uploads a patient', async () => {
+    await patientList.upload(patientListData.pathToPtient);
+    const patients = await patientList.getPatientList(' uploaded');
+    expect(patients).toHaveLength(1);
   });
 
-  test('it verifies patient count badge shows the correct number', async () => {});
+  test('it verifies patient count badge shows the correct number', async () => {
+    const patientBadge = await leftSidebar.getPatientCountFromBadge(
+      projectDetails.id
+    );
+    expect(patientBadge).toBe('1');
+  });
 
   test('it downloads patient', async () => {});
 
-  test('it uploads annotations', async () => {});
-
-  test('it verifies annotation number is shown correctly', async () => {});
+  test('it uploads annotations', async () => {
+    await patientList.upload(patientListData.pathToRecistAims);
+    const aimCount = await patientList.getsubjectAimCount(patientListData.patientID);
+    expect(aimCount).toBe('13');
+  });
 
   test('it expands patient from the arrow', async () => {});
 

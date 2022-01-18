@@ -33,6 +33,12 @@ class LeftSidebar extends Basepage {
     return currentUrl.split('/').pop();
   }
 
+  async getPatientCountFromBadge(projectID) {
+    let badge = await this.driver.findElement(By.id(`subjectCount-${projectID}`))
+    badge = await badge.getText();  
+    return badge;
+  }
+
 }
 
 export default LeftSidebar;
