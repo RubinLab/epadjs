@@ -70,6 +70,7 @@ const toolBar = props => {
         <div
           className={noUpload ? 'hide-delete' : 'searchView-toolbar__icon'}
           onClick={noUpload ? null : props.onUpload}
+          id="patientList-upload"
         >
           <div>
             <FaUpload

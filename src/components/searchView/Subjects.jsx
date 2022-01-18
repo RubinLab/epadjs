@@ -285,10 +285,13 @@ function Subjects(props) {
         width: 35,
         Cell: ({ row, toggleRowExpanded }) => {
           const style = { display: 'flex', width: 'fit-content' };
+          const checkboxID = `check-${row.original.subjectID}`;
+          const arrowID = `arrow-${row.original.subjectID}`;
           return (
             <div style={style}>
               <div>
                 <input
+                  id={checkboxID}
                   type="checkbox"
                   style={{ marginRight: '5px' }}
                   disabled={selectedLevel}
@@ -299,6 +302,7 @@ function Subjects(props) {
                 />
               </div>
               <span
+                id={arrowID}
                 {...row.getToggleRowExpandedProps({
                   style: {
                     cursor: 'pointer',
@@ -372,12 +376,13 @@ function Subjects(props) {
         resizable: false,
         sortable: false,
         Cell: ({ row }) => {
+          const id = `aimCount-${row.original.subjectID}`;
           return (
             <div className="searchView-table__cell">
               {row.original.numberOfAnnotations === 0 ? (
                 ''
               ) : (
-                <span className="badge badge-secondary">
+                <span className="badge badge-secondary" id={id}>
                   {row.original.numberOfAnnotations}
                 </span>
               )}
