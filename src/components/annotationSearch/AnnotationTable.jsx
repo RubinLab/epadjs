@@ -4,7 +4,7 @@ import {
   useTable,
   usePagination,
   useRowSelect,
-  useSortBy,
+  // useSortBy,
   useControlledState
 } from 'react-table';
 import { Link } from 'react-router-dom';
@@ -100,7 +100,7 @@ function Table({
         );
       }
     },
-    useSortBy,
+    // useSortBy,
     usePagination,
     useRowSelect
     // hooks => {
@@ -142,7 +142,7 @@ function Table({
             <tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
                 <th
-                  {...column.getHeaderProps(column.getSortByToggleProps())}
+                  // {...column.getHeaderProps(column.getSortByToggleProps())}
                   style={{ padding: '0.5rem' }}
                 >
                   {column.render('Header')}
@@ -431,7 +431,7 @@ function AnnotationTable(props) {
       },
       {
         Header: 'Open',
-        sortable: false,
+        // sortable: false,
         resizable: false,
         style: { display: 'flex', justifyContent: 'center' },
         Cell: ({ row }) => {
@@ -465,13 +465,13 @@ function AnnotationTable(props) {
       {
         Header: 'Name',
         accessor: 'name',
-        sortable: true,
+        // sortable: true,
         resizable: true
       },
       {
         Header: 'Subject',
         accessor: 'patientName',
-        sortable: true,
+        // sortable: true,
         resizable: true,
         Cell: ({ row }) => {
           return <div>{clearCarets(row.original.patientName)}</div>;
@@ -479,7 +479,7 @@ function AnnotationTable(props) {
       },
       {
         accessor: 'comment',
-        sortable: true,
+        // sortable: true,
         resizable: true,
         className: 'wrapped',
         style: { whiteSpace: 'normal' },
@@ -496,18 +496,18 @@ function AnnotationTable(props) {
         Header: 'Template',
         accessor: 'template',
         resizable: true,
-        sortable: true
+        // sortable: true
       },
       {
         Header: 'User',
         accessor: 'userName',
         style: { whiteSpace: 'normal' },
         resizable: true,
-        sortable: true
+        // sortable: true
       },
       {
         Header: 'Study',
-        sortable: true,
+        // sortable: true,
         accessor: 'studyDate',
         filterMethod: (filter, rows) =>
           matchSorter(rows, filter.value, { keys: ['date'] }),
@@ -522,7 +522,7 @@ function AnnotationTable(props) {
       },
       {
         Header: 'Created',
-        sortable: true,
+        // sortable: true,
         id: 'date',
         accessor: 'date',
         filterMethod: (filter, rows) =>
@@ -545,7 +545,7 @@ function AnnotationTable(props) {
             </div>
           );
         },
-        sortable: false,
+        // sortable: false,
         id: 'time',
         filterMethod: (filter, rows) =>
           matchSorter(rows, filter.value, { keys: ['time'] }),
@@ -560,13 +560,13 @@ function AnnotationTable(props) {
       },
       {
         Header: 'Modality',
-        sortable: true,
+        // sortable: true,
         resizable: true,
         accessor: 'modality'
       },
       {
         Header: 'Anatomy',
-        sortable: true,
+        // sortable: true,
         resizable: true,
         accessor: 'anatomy',
         Cell: ({ row }) => {
@@ -581,7 +581,7 @@ function AnnotationTable(props) {
       },
       {
         Header: 'Observation',
-        sortable: true,
+        // sortable: true,
         resizable: true,
         accessor: 'observation',
         Cell: ({ row }) => {
@@ -596,7 +596,7 @@ function AnnotationTable(props) {
       },
       {
         Header: 'Comment',
-        sortable: true,
+        // sortable: true,
         resizable: true,
         accessor: 'userComment'
       }
