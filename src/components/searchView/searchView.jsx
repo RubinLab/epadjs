@@ -33,7 +33,7 @@ import {
   changeActivePort,
   jumpToAim,
   updateSingleSerie,
-  updatePatientOnAimDelete
+  // updatePatientOnAimDelete
 } from '../annotationsList/action';
 import DownloadSelection from './annotationDownloadModal';
 import './searchView.css';
@@ -184,10 +184,10 @@ class SearchView extends Component {
       patients.length > 0
         ? patients
         : studies.length > 0
-        ? studies
-        : series.length > 0
-        ? series
-        : annotations;
+          ? studies
+          : series.length > 0
+            ? series
+            : annotations;
     selection.forEach((el, i) => {
       if (el.projectID === 'all' || el.projectID === 'nonassigned') {
         checkFromProjectID = true;
@@ -292,37 +292,38 @@ class SearchView extends Component {
     }, {});
     // pass it to getwholedata
     const promiseArr = [];
-    for (let patient in patients) {
+    // -----> Delete after v1.0 <-----
+    // for (let patient in patients) {
       // promiseArr.push(
       //   this.props.dispatch(
       //     getWholeData(this.props.openSeries[patients[patient]])
       //   )
       // );
-      promiseArr.push(getWholeData(this.props.openSeries[patients[patient]]));
-    }
-    Promise.all(promiseArr)
-      .then(() => {
-        //keep the current state
-        this.props.dispatch(clearSelection());
+    //   promiseArr.push(getWholeData(this.props.openSeries[patients[patient]]));
+    // }
+    // Promise.all(promiseArr)
+    //   .then(() => {
+    //     //keep the current state
+    //     this.props.dispatch(clearSelection());
 
-        this.setState(state => ({ update: state.update + 1 }));
-        this.props.history.push(`/list/${this.props.pid}`);
-        for (let serie of this.props.openSeries) {
-          let type = serie.aimID ? 'annotation' : 'serie';
-          this.props.dispatch(
-            updatePatient(
-              type,
-              true,
-              serie.patientID,
-              serie.studyUID,
-              serie.seriesUID
-            )
-          );
-        }
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    //     this.setState(state => ({ update: state.update + 1 }));
+    //     this.props.history.push(`/list/${this.props.pid}`);
+    //     for (let serie of this.props.openSeries) {
+    //       let type = serie.aimID ? 'annotation' : 'serie';
+    //       this.props.dispatch(
+    //         updatePatient(
+    //           type,
+    //           true,
+    //           serie.patientID,
+    //           serie.studyUID,
+    //           serie.seriesUID
+    //         )
+    //       );
+    //     }
+    //   })
+    //   .catch(err => {
+    //     console.log(err);
+    //   });
   };
 
   updateSubjectCount = async () => {
@@ -437,7 +438,8 @@ class SearchView extends Component {
     arr.forEach((el, index) => {
       if (openSeriesUIDs.includes(el.seriesUID)) {
         seriesToUpdate[el.seriesUID] = openSeriesUIDs.indexOf(el.seriesUID);
-        patientsToUpdate.push(el);
+        // -----> Delete after v1.0 <-----
+        // patientsToUpdate.push(el);
       }
     });
     Object.values(seriesToUpdate).forEach(el => {
@@ -446,9 +448,10 @@ class SearchView extends Component {
         updateSingleSerie({ ...this.props.openSeries[el], subjectID })
       );
     });
-    patientsToUpdate.forEach(el => {
-      this.props.dispatch(updatePatientOnAimDelete(el));
-    });
+    // -----> Delete after v1.0 <-----
+    // patientsToUpdate.forEach(el => {
+    //   this.props.dispatch(updatePatientOnAimDelete(el));
+    // });
   };
 
   updateError = error => {
@@ -496,6 +499,7 @@ class SearchView extends Component {
       for (let st of selectedStudies) {
         studiesObj[st.studyUID] = await this.getSeriesData(st);
       }
+
       //check if enough room to display selection
       if (total + this.props.openSeries.length > maxPort) {
         this.props.dispatch(startLoading());
@@ -509,24 +513,25 @@ class SearchView extends Component {
             this.props.dispatch(getSingleSerie(serie));
           }
         }
-        for (let study in studiesObj) {
-          for (let serie of studiesObj[study]) {
-            if (!this.props.patients[serie.patientID]) {
-              // await this.props.dispatch(getWholeData(serie));
-              getWholeData(serie);
-            } else {
-              this.props.dispatch(
-                updatePatient(
-                  'serie',
-                  true,
-                  serie.patientID,
-                  serie.studyUID,
-                  serie.seriesUID
-                )
-              );
-            }
-          }
-        }
+        // -----> Delete after v1.0 <-----
+        // for (let study in studiesObj) {
+        //   for (let serie of studiesObj[study]) {
+        //     if (!this.props.patients[serie.patientID]) {
+        //       // await this.props.dispatch(getWholeData(serie));
+        //       getWholeData(serie);
+        //     } else {
+        //       this.props.dispatch(
+        //         updatePatient(
+        //           'serie',
+        //           true,
+        //           serie.patientID,
+        //           serie.studyUID,
+        //           serie.seriesUID
+        //         )
+        //       );
+        //     }
+        //   }
+        // }
         this.props.history.push('/display');
         this.props.dispatch(clearSelection());
       }
@@ -562,22 +567,23 @@ class SearchView extends Component {
             this.props.dispatch(addToGrid(serie));
             this.props.dispatch(getSingleSerie(serie));
           });
-          for (let series of selectedSeries) {
-            if (!this.props.patients[series.patientID]) {
-              // await this.props.dispatch(getWholeData(series));
-              getWholeData(series);
-            } else {
-              this.props.dispatch(
-                updatePatient(
-                  'serie',
-                  true,
-                  series.patientID,
-                  series.studyUID,
-                  series.seriesUID
-                )
-              );
-            }
-          }
+          // -----> Delete after v1.0 <-----
+          // for (let series of selectedSeries) {
+          //   if (!this.props.patients[series.patientID]) {
+          //     // await this.props.dispatch(getWholeData(series));
+          //     getWholeData(series);
+          //   } else {
+          //     this.props.dispatch(
+          //       updatePatient(
+          //         'serie',
+          //         true,
+          //         series.patientID,
+          //         series.studyUID,
+          //         series.seriesUID
+          //       )
+          //     );
+          //   }
+          // }
           this.props.history.push('/display');
           this.props.dispatch(clearSelection());
         }
@@ -610,23 +616,24 @@ class SearchView extends Component {
             this.props.dispatch(addToGrid(serie, serie.aimID));
             this.props.dispatch(getSingleSerie(serie, serie.aimID));
           });
-          for (let ann of selectedAnnotations) {
-            if (!this.props.patients[ann.subjectID]) {
-              // await this.props.dispatch(getWholeData(null, null, ann));
-              getWholeData(null, null, ann);
-            } else {
-              this.props.dispatch(
-                updatePatient(
-                  'annotation',
-                  true,
-                  ann.subjectID,
-                  ann.studyUID,
-                  ann.seriesUID,
-                  ann.aimID
-                )
-              );
-            }
-          }
+          // -----> Delete after v1.0 <-----
+          // for (let ann of selectedAnnotations) {
+          //   if (!this.props.patients[ann.subjectID]) {
+          //     // await this.props.dispatch(getWholeData(null, null, ann));
+          //     getWholeData(null, null, ann);
+          //   } else {
+          //     this.props.dispatch(
+          //       updatePatient(
+          //         'annotation',
+          //         true,
+          //         ann.subjectID,
+          //         ann.studyUID,
+          //         ann.seriesUID,
+          //         ann.aimID
+          //       )
+          //     );
+          //   }
+          // }
           this.props.history.push('/display');
           this.props.dispatch(clearSelection());
         }
@@ -983,15 +990,15 @@ class SearchView extends Component {
           admin={this.props.admin}
           hideEyeIcon={hideEyeIcon}
           expandLevel={this.props.expandLevel}
-          // expanding={expanding}
+        // expanding={expanding}
         />
         {(this.props.showSeriesModal ||
           (isSerieSelectionOpen && !this.props.loading)) && (
-          <ProjectModal
-            seriesPassed={this.state.seriesList}
-            onCancel={this.closeSelectionModal}
-          />
-        )}
+            <ProjectModal
+              seriesPassed={this.state.seriesList}
+              onCancel={this.closeSelectionModal}
+            />
+          )}
         {/* {this.props.showSeriesModal && (
           <ProjectModal
             seriesPassed={this.props.seriesList}

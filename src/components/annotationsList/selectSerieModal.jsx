@@ -17,6 +17,7 @@ import { getSeries, setSignificantSeries } from "../../services/seriesServices";
 import "./annotationsList.css";
 import { isSupportedModality } from "../../Utils/aid.js";
 import { extendWith } from "lodash";
+import { TiEject } from "react-icons/ti";
 
 const message = {
   title: "Not enough ports to open series"
@@ -30,7 +31,7 @@ class selectSerieModal extends React.Component {
       selectionType: "",
       selectionArr: [],
       // seriesList: [],
-      selectedToDisplay: [],
+      selectedToDisplay: {},
       limit: 0,
       list: []
     };
@@ -39,7 +40,6 @@ class selectSerieModal extends React.Component {
 
   //get the serie list
   componentDidMount = async () => {
-    // this._isMounted = true;
     let selectionType = "";
     let { selectedStudies, selectedSeries, selectedAnnotations } = this.props;
     selectedStudies = Object.values(selectedStudies);
@@ -54,15 +54,14 @@ class selectSerieModal extends React.Component {
     }
     this.setState({ selectionType });
     this.setPreSelecteds();
+    const limit = this.updateLimit();
+    this.setState({ limit });
   };
 
   componentWillUnmount = () => {
     this._isMounted = false;
   };
 
-  // getPatient = async study => {
-  //   return this.props.dispatch(getPatient(study));
-  // };
 
   getSerieListData = async (projectID, patientID, studyUID) => {
     const { data: series } = await getSeries(projectID, patientID, studyUID);
@@ -83,27 +82,37 @@ class selectSerieModal extends React.Component {
 
   updateLimit = () => {
     let selectCount = 0;
-    this.state.selectedToDisplay.forEach(item => {
-      if (item) {
-        selectCount++;
-      }
-    });
-    return this.props.openSeries.length + selectCount;
+    const { openSeries } = this.props;
+    const { selectedToDisplay } = this.state;
+    selectCount = Object.keys(selectedToDisplay).length;
+    return openSeries.length + selectCount;
   };
 
-  selectToDisplay = async e => {
-    let arr = [...this.state.selectedToDisplay];
-    arr[e.target.dataset.index] = e.target.checked;
-    await this.setState({ selectedToDisplay: arr });
-    let limit = this.updateLimit();
-    this.setState({ limit });
+  selectToDisplay = serieUID => {
+    let newSelections = { ...this.state.selectedToDisplay };
+    if (newSelections[serieUID])
+      delete newSelections[serieUID];
+    else newSelections[serieUID] = true;
+    this.setState({ selectedToDisplay: { ...newSelections } }, () => {
+      let limit = this.updateLimit();
+      this.setState({ limit });
+    });
   };
+
+  findSerieFromSeries = (serieUID, seriesArray) => {
+    for (let i = 0; i < seriesArray.length; i++) {
+      if (serieUID === seriesArray[i].seriesUID)
+        return seriesArray[i];
+    }
+  }
 
   displaySelection = async () => {
     let studies = Object.values(this.props.seriesPassed);
+    const { selectedToDisplay } = this.state;
     let series = [];
     let significantSeries = [];
     let significanceOrder = 1;
+    // TODO: what is the logic here?
     studies.forEach(arr => {
       series = series.concat(arr);
     });
@@ -111,26 +120,40 @@ class selectSerieModal extends React.Component {
 
     // let series = Object.values(this.props.seriesPassed)[0];
     //concatanete all arrays to getther
-    for (let i = 0; i < this.state.selectedToDisplay.length; i++) {
-      if (this.state.selectedToDisplay[i]) {
-        if (!significanceSet) {
-          significantSeries.push({
-            seriesUID: series[i].seriesUID,
-            significanceOrder
-          });
-          significanceOrder++;
-        }
-        this.props.dispatch(addToGrid(series[i], series[i].aimID));
-        if (this.state.selectionType === "aim") {
-          this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
-        } else {
-          this.props.dispatch(getSingleSerie(series[i]));
-        }
-        // if (!this.props.patients[series[i]]) {
-        //   this.props.dispatch(getWholeData(series[i]));
-        // }
+    for (let key of Object.keys(selectedToDisplay)) {
+      if (!significanceSet) {
+        significantSeries.push({
+          seriesUID: key,
+          significanceOrder
+        });
+        significanceOrder++;
+      }
+      let serie = this.findSerieFromSeries(key, series);
+      this.props.dispatch(addToGrid(serie, serie.aimID));
+      if (this.state.selectionType === "aim") {
+        this.props.dispatch(getSingleSerie(serie, serie.aimID));
+      } else {
+        this.props.dispatch(getSingleSerie(serie));
       }
     }
+    // for (let i = 0; i < Object.keys(selectedToDisplay).length; i++) {
+    //   // if (this.state.selectedToDisplay[i]) {
+    //   // If significance order is not set before we 
+    //   if (!significanceSet) {
+    //     significantSeries.push({
+    //       seriesUID: series[i].seriesUID,
+    //       significanceOrder
+    //     });
+    //     significanceOrder++;
+    //   }
+    //   this.props.dispatch(addToGrid(series[i], series[i].aimID));
+    //   if (this.state.selectionType === "aim") {
+    //     this.props.dispatch(getSingleSerie(series[i], series[i].aimID));
+    //   } else {
+    //     this.props.dispatch(getSingleSerie(series[i]));
+    //   }
+    //   // }
+    // }
     const { projectID, patientID, studyUID, subjectID } = series[0];
     const subID = patientID ? patientID : subjectID;
 
@@ -163,7 +186,9 @@ class selectSerieModal extends React.Component {
 
   setPreSelecteds = () => {
     const { seriesPassed, openSeries } = this.props;
-    let selectedToDisplay = [];
+    if (openSeries.length === this.maxPort)
+      return;
+    let selectedToDisplay = {};
     let selectedCount = 0;
     let series = Object.values(seriesPassed);
     let count = 0;
@@ -175,10 +200,14 @@ class selectSerieModal extends React.Component {
           });
           return;
         }
-        if (!this.isSerieOpen(series[i][k].seriesUID)) {
-          selectedToDisplay[count + k] = series[i][k].significanceOrder
-            ? true
-            : false;
+        // if (!this.isSerieOpen(series[i][k].seriesUID)) {
+        //   selectedToDisplay[series[i][k].seriesUID] = series[i][k].significanceOrder
+        //     ? true
+        //     : false;
+        //   selectedCount++;
+        // }
+        if (series[i][k].significanceOrder && !this.isSerieOpen(series[i][k].seriesUID)) {
+          selectedToDisplay[series[i][k].seriesUID] = true;
           selectedCount++;
         }
       }
@@ -190,7 +219,7 @@ class selectSerieModal extends React.Component {
   };
 
   isSerieOpen = serieUID => {
-    const { openSeries } = this.props;
+    const { openSeries, studyName } = this.props;
     let openSeriesUIDList = [];
     openSeries.forEach(port => {
       openSeriesUIDList.push(port.seriesUID);
@@ -198,43 +227,55 @@ class selectSerieModal extends React.Component {
     return openSeriesUIDList.includes(serieUID);
   };
 
+  getTitle = (serie) => {
+    const { studyName, selectedStudies } = this.props;
+    let title = studyName ? studyName
+      : serie.bodyPart || serie.studyDescription;
+    if (!title) {
+      if (selectedStudies[serie.studyUID]) {
+        title = selectedStudies[serie.studyUID].studyDescription;
+      }
+    }
+    title = !title ? "Unnamed Study" : title;
+    return title;
+  }
+
   renderSelection = () => {
+    const { seriesPassed } = this.props;
+    const { selectedToDisplay, limit } = this.state;
     let selectionList = [];
     let item;
-    const { seriesPassed } = this.props;
+
     let series = Array.isArray(seriesPassed)
       ? seriesPassed
       : Object.values(seriesPassed);
-    let keys = Object.keys(this.props.seriesPassed);
+    let keys = Object.keys(seriesPassed);
     let count = 0;
+    let significantExplanation = false; //Explanations at the bottom of the modal
 
     // filter the series according to displayable modalities
     for (let i = 0; i < series.length; i++) {
       series[i] = series[i].filter(isSupportedModality);
     }
+
     for (let i = 0; i < series.length; i++) {
       let innerList = [];
-      let title = this.props.studyName
-        ? this.props.studyName
-        : series[i][0].bodyPart || series[i][0].studyDescription;
-      if (!title) {
-        if (this.props.selectedStudies[series[i][0].studyUID]) {
-          title = this.props.selectedStudies[series[i][0].studyUID]
-            .studyDescription;
-        }
-      }
-      title = !title ? "Unnamed Study" : title;
+
       for (let k = 0; k < series[i].length; k++) {
-        let alreadyOpen = this.isSerieOpen(series[i][k].seriesUID);
+        const { seriesUID } = series[i][k];
+        let alreadyOpen = this.isSerieOpen(seriesUID);
         let disabled =
-          !this.state.selectedToDisplay[count + k] &&
-          this.state.limit >= this.maxPort;
+          !selectedToDisplay[seriesUID] &&
+          limit >= this.maxPort;
         let desc = series[i][k].seriesDescription || "Unnamed Serie";
-        // desc = alreadyOpen ? `${desc} - already open` : desc;
+        if (series[i][k].significanceOrder) {
+          desc = desc + " (S)";
+          significantExplanation = true;
+        }
         item = alreadyOpen ? (
           <div>
             <div
-              key={k + "_" + series[i][k].seriesUID}
+              key={k + "_" + seriesUID}
               className="alreadyOpen-disabled"
             >
               <FaRegCheckSquare data-tip data-for={"alreadyOpenSeries"} />
@@ -253,27 +294,31 @@ class selectSerieModal extends React.Component {
         ) : (
           <SelectionItem
             desc={desc}
-            onChange={this.selectToDisplay}
+            onChange={() => this.selectToDisplay(seriesUID)}
             index={count + k}
             disabled={disabled}
-            key={k + "_" + series[i][k].seriesUID}
-            isChecked={this.state.selectedToDisplay[count + k]}
+            key={k + "_" + seriesUID}
+            isChecked={selectedToDisplay[seriesUID]}
           />
         );
         innerList.push(item);
       }
       selectionList.push(
         <div key={keys[i]}>
-          <div className="serieSelection-title">{title}</div>
+          <div className="serieSelection-title">{this.getTitle(series[i][0])}</div>
           <div>{innerList}</div>
         </div>
       );
       count += series[i].length;
     }
+    if (significantExplanation)
+      selectionList.push(<div><br />(S): Significant series</div>);
     return selectionList;
   };
 
   render = () => {
+    const { openSeries } = this.props;
+    const selections = Object.keys(this.state.selectedToDisplay);
     const list = this.renderSelection();
     return (
       // <Modal.Dialog dialogClassName="alert-selectSerie">
@@ -288,20 +333,33 @@ class selectSerieModal extends React.Component {
           style={{ textAlign: "start" }}
         >
           <div>Maximum {this.maxPort} series can be viewed at a time.</div>
-          <button
+          {openSeries.length > 0 && (
+            <div>
+              You can close open series to open veiwport space for new one.
+              <br />
+              <button
+                size="lg"
+                className="selectSerie-clearButton"
+                onClick={() => this.props.dispatch(clearGrid())}
+              >
+                X  - Close all series
+              </button>
+            </div>
+          )}
+          {/* <button
             size="lg"
             className="selectSerie-clearButton"
             onClick={() => this.props.dispatch(clearGrid())}
           >
-            Close all series
-          </button>
-          {this.state.limit >= this.maxPort && (
-            <div>You reached Max number of series</div>
+            X  - Close all series
+          </button> */}
+          {this.state.limit > this.maxPort && !openSeries.length && (
+            <div>Please select only {this.maxPort} series to open!</div>
           )}
           <div>{list}</div>
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
-          <button onClick={this.displaySelection}>Display selection</button>
+          <button onClick={this.displaySelection} disabled={!selections.length}>Display selection</button>
           <button onClick={this.handleCancel}>Cancel</button>
         </Modal.Footer>
       </Modal.Dialog>

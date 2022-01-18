@@ -204,11 +204,18 @@ class WorkList extends React.Component {
   handleOpenClick = async study => {
     const { projectID, subjectID, studyUID, studyDescription } = study;
     const { data: series } = await getSeries(projectID, subjectID, studyUID);
-    this.setState(state => ({
-      showSeries: !state.showSeries,
-      series,
-      studyName: studyDescription
-    }));
+    const maxPort = parseInt(sessionStorage.getItem("maxPort"));
+    const { openSeries } = this.props;
+    if (series.length + openSeries.length <= maxPort) {
+      this.setState({ selectedSeries: series }, () => this.viewSelection());
+    }
+    else {
+      this.setState(state => ({
+        showSeries: !state.showSeries,
+        series,
+        studyName: studyDescription
+      }));
+    }
   };
 
   handleCancelOpenSeries = () => {
@@ -365,7 +372,6 @@ class WorkList extends React.Component {
         sortable: false,
         resizable: false,
         Cell: original => {
-          // console.log(original.row._original);
           const newPatients = [...this.state.patients];
           const newProjects = [...this.state.projects];
           const { subjectID, projectID } = original.row._original;
@@ -697,22 +703,23 @@ class WorkList extends React.Component {
               this.props.dispatch(addToGrid(serie));
               this.props.dispatch(getSingleSerie(serie));
             });
-            for (let series of selectedSeries) {
-              if (!this.props.patients[series.patientID]) {
-                // await this.props.dispatch(getWholeData(series));
-                getWholeData(series);
-              } else {
-                this.props.dispatch(
-                  updatePatient(
-                    "serie",
-                    true,
-                    series.patientID,
-                    series.studyUID,
-                    series.seriesUID
-                  )
-                );
-              }
-            }
+            // -----> Delete after v1.0 <-----
+            // for (let series of selectedSeries) {
+            //   if (!this.props.patients[series.patientID]) {
+            //     // await this.props.dispatch(getWholeData(series));
+            //     getWholeData(series);
+            //   } else {
+            //     this.props.dispatch(
+            //       updatePatient(
+            //         "serie",
+            //         true,
+            //         series.patientID,
+            //         series.studyUID,
+            //         series.seriesUID
+            //       )
+            //     );
+            //   }
+            // }
             this.props.history.push("/display");
             this.props.dispatch(clearSelection());
           }

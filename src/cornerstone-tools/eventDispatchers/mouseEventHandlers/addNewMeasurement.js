@@ -22,7 +22,6 @@ export default function (evt, tool) {
 
   // Associate this data with this imageId so we can render it and manipulate it
   addToolState(element, tool.name, measurementData);
-  console.log("measurement data is", measurementData);
 
   external.cornerstone.updateImage(element);
 

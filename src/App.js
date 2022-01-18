@@ -45,7 +45,10 @@ import Worklist from "./components/sideBar/sideBarWorklist";
 import ErrorBoundary from "./ErrorBoundary";
 import Report from "./components/searchView/Report.jsx";
 import { getSubjects, getSubject } from "./services/subjectServices";
-import { decrypt, decryptAndAdd } from "./services/decryptUrlService";
+import {
+  decryptAndGrantAccess,
+  decryptAndAdd
+} from "./services/decryptUrlService";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -697,7 +700,7 @@ class App extends Component {
   };
 
   handleArgs = async args => {
-    const { data } = await decrypt(args);
+    const { data } = await decryptAndGrantAccess(args);
     const { API_KEY, seriesArray, user, patientID, studyUID, projectID } = data;
     const { openSeries } = this.props;
 
@@ -1440,6 +1443,10 @@ class App extends Component {
                 )}
               />
               <ProtectedRoute path="/progress/:wid?" component={ProgressView} />
+              <ProtectedRoute
+                path="/flex/:pid?"
+                render={props => <FlexView {...props} pid={this.state.pid} />}
+              />
               <ProtectedRoute
                 path="/search"
                 render={props => (

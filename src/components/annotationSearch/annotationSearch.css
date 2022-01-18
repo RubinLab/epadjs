@@ -28,14 +28,14 @@
   font-size: 1.2rem;
   color: aliceblue;
   margin-left: 0.3rem;
-
+  padding: 0rem 0.3rem;
 }
 
 .annotationSearch-cont__item {
   margin-bottom: 0.5rem;
   display: flex;
   width: 100%;
-  align-items: center
+  align-items: center;
 }
 
 .annotationSearch-cont__item__sub {
@@ -56,8 +56,8 @@
 }
 
 .advancedSearch__closed:after {
-  font-family: "FontAwesome";
-  content: "\f107";
+  font-family: 'FontAwesome';
+  content: '\f107';
   position: absolute;
   right: 10px;
   top: 5px;
@@ -77,8 +77,8 @@
 }
 
 .Collapsible__trigger.is-open.advancedSearch__open:after {
-  font-family: "FontAwesome";
-  content: "\f107";
+  font-family: 'FontAwesome';
+  content: '\f107';
   position: absolute;
   right: 10px;
   top: 5px;
@@ -88,3 +88,4 @@
 .advancedSearch-content {
   background: #3a3f44;
 }
+

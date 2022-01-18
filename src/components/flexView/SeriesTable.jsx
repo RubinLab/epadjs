@@ -46,14 +46,15 @@ const SeriesTable = (props) => {
       .dispatch(getSingleSerie(selected))
       .then(() => { })
       .catch((err) => console.log(err));
-    if (!props.patients[selected.patientID]) {
-      // props.dispatch(getWholeData(selected));
-      getWholeData(selected);
-    } else {
-      props.dispatch(
-        updatePatient("serie", true, patientID, studyUID, selected.seriesUID)
-      );
-    }
+    // -----> Delete after v1.0 <-----
+    // if (!props.patients[selected.patientID]) {
+    //   // props.dispatch(getWholeData(selected));
+    //   getWholeData(selected);
+    // } else {
+    //   props.dispatch(
+    //     updatePatient("serie", true, patientID, studyUID, selected.seriesUID)
+    //   );
+    // }
   };
 
   const onOpenSeries = () => {

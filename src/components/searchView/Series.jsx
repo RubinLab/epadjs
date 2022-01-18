@@ -28,7 +28,7 @@ function Table({
   patientIndex,
   getTreeExpandAll,
   treeExpand,
-  studyIndex, 
+  studyIndex,
   update
 }) {
   const {
@@ -198,20 +198,21 @@ function Series(props) {
           .then(() => {})
           .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
-        if (!props.patients[selected.patientID]) {
-          // props.dispatch(getWholeData(selected));
-          getWholeData(selected);
-        } else {
-          props.dispatch(
-            updatePatient(
-              'serie',
-              true,
-              patientID,
-              studyUID,
-              selected.seriesUID
-            )
-          );
-        }
+        // -----> Delete after v1.0 <-----
+        // if (!props.patients[selected.patientID]) {
+        //   props.dispatch(getWholeData(selected));
+        //   // getWholeData(selected);
+        // } else {
+        //   props.dispatch(
+        //     updatePatient(
+        //       'serie',
+        //       true,
+        //       patientID,
+        //       studyUID,
+        //       selected.seriesUID
+        //     )
+        //   );
+        // }
         props.history.push('/display');
       }
     } else {
@@ -279,7 +280,14 @@ function Series(props) {
                   }
                 }}
               >
-                {row.isExpanded ? <span>&#x25BC;</span> : <span>&#x25B6;</span>}
+                {row.isExpanded ||
+                props.treeExpand[props.patientIndex][props.studyIndex][
+                  row.index
+                ] ? (
+                  <span>&#x25BC;</span>
+                ) : (
+                  <span>&#x25B6;</span>
+                )}
               </span>
             </div>
           );
@@ -473,7 +481,6 @@ function Series(props) {
         getTreeExpandSingle={props.getTreeExpandSingle}
         update={props.update}
         // progressUpdated={this.props.progressUpdated}
-
       />
       {showSelectSerie && (
         <SelectSerieModal

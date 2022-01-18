@@ -125,21 +125,22 @@ function Annotations(props) {
           .then(() => {})
           .catch(err => console.error(err));
         //if grid is NOT full check if patient data exists
-        if (!props.patients[patientID]) {
-          // props.dispatch(getWholeData(null, null, selected));
-          getWholeData(null, null, selected);
-        } else {
-          props.dispatch(
-            updatePatient(
-              'annotation',
-              true,
-              patientID,
-              studyUID,
-              seriesUID,
-              aimID
-            )
-          );
-        }
+        // -----> Delete after v1.0 <-----
+        // if (!props.patients[patientID]) {
+        //   // props.dispatch(getWholeData(null, null, selected));
+        //   getWholeData(null, null, selected);
+        // } else {
+        //   props.dispatch(
+        //     updatePatient(
+        //       'annotation',
+        //       true,
+        //       patientID,
+        //       studyUID,
+        //       seriesUID,
+        //       aimID
+        //     )
+        //   );
+        // }
         props.dispatch(clearSelection());
         props.history.push('/display');
       }

@@ -1,7 +1,7 @@
 import http from "./httpService";
 
-export function decrypt(args) {
-  return http.get(http.apiUrl() + "/decrypt?arg=" + args);
+export function decryptAndGrantAccess(args) {
+  return http.get(http.apiUrl() + "/decryptandgrantaccess?arg=" + args);
 }
 
 export function decryptAndAdd(args) {
