@@ -33,7 +33,7 @@ class AnnnotationDownloadModal extends React.Component {
         : downloadAllAnnotations(optionObj, aimList);
     Promise.all([promise])
       .then(result => {
-        let blob = new Blob([result.data], { type: "application/zip" });
+        let blob = new Blob([result[0].data], { type: "application/zip" });
         this.triggerBrowserDownload(blob, "Annotations");
         this.props.updateStatus();
         this.props.onSubmit();
