@@ -111,8 +111,7 @@ const AnnotationSearch = props => {
   const [deleteSelectedClicked, setDeleteSelectedClicked] = useState(false);
   const [checkboxSelected, setCheckboxSelected] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
-  const [sortKey, setSortKey] = useState('');
-  const [sortOrder, setSortOrder] = useState(true);
+  const [sortKeys, setSortKeys] = useState({});
   // cavit
   const [showPlugins, setShowPluginDropdown] = useState(false);
   const [pluginListArray, setpluginListArray] = useState([]);
@@ -151,7 +150,7 @@ const AnnotationSearch = props => {
     setSelectedProject(props.pid);
     setQuery('');
     setBookmark('');
-    setSortOrder(true);
+    setSortKeys({});
     setCheckboxSelected(false);
     props.dispatch(clearSelection());
 
@@ -180,7 +179,7 @@ const AnnotationSearch = props => {
     if (e.key === 'Enter') {
       getSearchResult();
       setPageIndex(0);
-      setSortOrder(true);
+      setSortKeys({});
     }
   };
 
@@ -193,10 +192,29 @@ const AnnotationSearch = props => {
   }, [handleUserKeyPress]);
 
   const sortTable = (col, order) => {
-    // set asc
-    // if there is a query add sorting to query
-    // if there is not a query add sorting to general query
-    // check if asc and add asc/desc parameter
+    const newSortKeys = { ...sortKeys };
+    if (sortKeys[col]) {
+      newSortKeys[col] = 0;
+    } else {
+      newSortKeys[col] = 1;
+    }
+    setSortKeys(newSortKeys);
+  };
+
+  const isTableSorted = () => {
+    const order = Object.values(newSortKeys);
+    return order.length > 0;
+  };
+
+  const addSortingToQuery = query => {
+    const cols = Object.keys(newSortKeys);
+    const order = Object.values(newSortKeys);
+    const sortQuery = cols.reduce((all, item, index) => {
+      const orderAndKey = order[i] > 0 ? cols[i] : `-${cols[i]}`;
+      all.push(orderAndKey);
+      return all;
+    }, []);
+    return { query: escapeSlashesQuery(query), sort: sortedQuery };
   };
 
   const insertIntoQueryOnSelection = el => {
@@ -358,7 +376,11 @@ const AnnotationSearch = props => {
         props.setQuery(queryToSave);
         const bm = pageIndex ? bookmark : '';
 
-        searchAnnotations({ query: escapeSlashesQuery(searchQuery) }, bm)
+        const finalQuery = isTableSorted()
+          ? addSortingToQuery(searchQuery)
+          : { query: escapeSlashesQuery(searchQuery) };
+
+        searchAnnotations(finalQuery, bm)
           .then(res => {
             populateSearchResult(res, pageIndex, afterDelete);
           })
@@ -1251,7 +1273,7 @@ const AnnotationSearch = props => {
             setQuery('');
             setCheckboxSelected(false);
             getAnnotationsOfProjets();
-            setSortOrder(true);
+            setSortKeys({});
             props.dispatch(clearSelection());
             props.setQuery('');
             setPageIndex(0);
