@@ -2,7 +2,10 @@ import React from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
-import { downloadAnnotations } from "../../services/annotationServices";
+import {
+  downloadAnnotations,
+  downloadAllAnnotations
+} from "../../services/annotationServices";
 import { ToastContainer, toast } from "react-toastify";
 import { clearSelection } from "../annotationsList/action";
 const support = false;
@@ -24,9 +27,13 @@ class AnnnotationDownloadModal extends React.Component {
         : this.props.selected;
     const aimList = Object.keys(annsToDownload);
     this.props.updateStatus();
-    downloadAnnotations(optionObj, aimList, projectID || pid)
+    const promise =
+      projectID || pid
+        ? downloadAnnotations(optionObj, aimList, projectID || pid)
+        : downloadAllAnnotations(optionObj, aimList);
+    Promise.all([promise])
       .then(result => {
-        let blob = new Blob([result.data], { type: "application/zip" });
+        let blob = new Blob([result[0].data], { type: "application/zip" });
         this.triggerBrowserDownload(blob, "Annotations");
         this.props.updateStatus();
         this.props.onSubmit();

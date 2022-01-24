@@ -87,6 +87,12 @@ export function downloadAnnotations(optionObj, aimIDlist, projectID) {
   return http.post(url, aimIDlist, { responseType: "blob" });
 }
 
+export function downloadAllAnnotations(optionObj, aimIDlist) {
+  const { summary, aim, seg } = optionObj;
+  const url = `${http.apiUrl()}/aims/download?summary=${summary}&aim=${aim}&seg=${seg}`;
+  return http.post(url, aimIDlist, { responseType: "blob" });
+}
+
 export function downloadProjectAnnotation(pid) {
   return http.get(
     `${http.apiUrl()}/projects/${encodeURIComponent(pid)}/aims?format=stream`,
