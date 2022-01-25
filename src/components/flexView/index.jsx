@@ -162,7 +162,6 @@ class FlexView extends React.Component {
       series,
       showSeriesTable,
     } = this.state;
-    console.log("series", series);
     return (
       <div className="flexView">
         <Button
