@@ -7,6 +7,7 @@ import { getSeries } from "../../services/seriesServices";
 import { getStudies } from "../../services/projectServices";
 import DropDownMenu from "./dropdownMenu";
 import StudyTable from "./StudyTable";
+import SelectSerieModal from "../annotationsList/selectSerieModal";
 import SeriesTable from "./SeriesTable";
 import 'react-table-v6/react-table.css';
 import "./flexView.css";
@@ -115,7 +116,7 @@ class FlexView extends React.Component {
     this.setState({ data: studies });
   };
 
-  componentWillUnmount = () => {};
+  componentWillUnmount = () => { };
 
   defineColumns = () => {
     const { order } = this.state;
@@ -161,6 +162,7 @@ class FlexView extends React.Component {
       series,
       showSeriesTable,
     } = this.state;
+    console.log("series", series);
     return (
       <div className="flexView">
         <Button
@@ -171,7 +173,8 @@ class FlexView extends React.Component {
           Select columns
         </Button>
         {showSeriesTable && (
-          <SeriesTable series={series} onClose={this.closeSeriesTable} />
+          // <SeriesTable series={series} onClose={this.closeSeriesTable} />
+          <SelectSerieModal seriesPassed={[series]} onCancel={this.closeSeriesTable} />
         )}
         {dropdownSelected && (
           <DropDownMenu
