@@ -112,7 +112,6 @@ const AnnotationSearch = props => {
   const [checkboxSelected, setCheckboxSelected] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [sortKeys, setSortKeys] = useState({});
-
   // cavit
   const [showPlugins, setShowPluginDropdown] = useState(false);
   const [pluginListArray, setpluginListArray] = useState([]);
@@ -198,14 +197,24 @@ const AnnotationSearch = props => {
   };
 
   const addSortingToQuery = query => {
+    const defaultSort = 'name<string>';
+    const reverseDefaultSort = '-name<string>';
     const cols = Object.keys(sortKeys);
     const order = Object.values(sortKeys);
     const sortedQuery = cols.reduce((all, item, i) => {
-      const orderAndKey = order[i] > 0 ? cols[i] : `-${cols[i]}`;
+      const orderAndKey =
+        order[i] > 0 ? `${cols[i]}<string>` : `-${cols[i]}<string>`;
       all.push(orderAndKey);
       return all;
     }, []);
-    return { query: escapeSlashesQuery(query), sort: sortedQuery };
+    return {
+      query: escapeSlashesQuery(query),
+      sort:
+        sortedQuery.includes(defaultSort) ||
+        sortedQuery.includes(reverseDefaultSort)
+          ? sortedQuery
+          : [...sortedQuery, defaultSort]
+    };
   };
 
   const insertIntoQueryOnSelection = el => {

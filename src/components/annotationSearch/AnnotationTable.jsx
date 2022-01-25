@@ -413,12 +413,12 @@ function AnnotationTable(props) {
   };
 
   const updateSort = col => {
-    const newSortKeys = { ...props.sortKeys };
+    let newSortKeys = { ...props.sortKeys };
     setPrevSortKeys({ ...props.sortKeys });
-    if (props.sortKeys[col]) {
-      newSortKeys[col] = 0;
+    if (props.sortKeys[col] >= 0) {
+      newSortKeys[col] = newSortKeys[col] === 0 ? 1 : 0;
     } else {
-      newSortKeys[col] = 1;
+      newSortKeys = { [col]: 1 };
     }
     props.setSortKeys(newSortKeys);
   };
@@ -477,7 +477,7 @@ function AnnotationTable(props) {
           return (
             <div className="mng-anns__header-flex">
               {/* <div onClick={() => props.sortTable('lesion_name')}>Name</div> */}
-              <div onClick={() => updateSort('lesion_name')}>Name</div>
+              <div onClick={() => updateSort('name')}>Name</div>
             </div>
           );
         },
