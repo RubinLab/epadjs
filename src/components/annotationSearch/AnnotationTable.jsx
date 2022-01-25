@@ -671,7 +671,7 @@ function AnnotationTable(props) {
       // props.setPageIndex(pageIndex);
       const sortChanged = !_.isEqual(prevSortKeys, props.sortKeys);
       if (props.data.length <= pageIndex * defaultPageSize || sortChanged) {
-        props.getNewData(pageIndex);
+        props.getNewData(pageIndex, sortChanged);
       } else {
         preparePageData(props.data, defaultPageSize, pageIndex);
       }
