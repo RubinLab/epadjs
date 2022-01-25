@@ -7,7 +7,7 @@ import {
   // useSortBy,
   useControlledState
 } from 'react-table';
-import { Link } from 'react-router-dom';
+import _ from 'lodash';
 import { FaRegEye } from 'react-icons/fa';
 import { clearCarets, convertDateFormat } from '../../Utils/aid.js';
 import {
@@ -33,9 +33,6 @@ const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
     const defaultRef = React.useRef();
     const resolvedRef = ref || defaultRef;
-
-    console.log(rest.selected);
-
     React.useEffect(() => {
       resolvedRef.current.indeterminate = indeterminate;
     }, [resolvedRef, indeterminate]);
@@ -63,7 +60,8 @@ function Table({
   fetchData,
   controlledPageIndex,
   handlePageIndex,
-  listOfSelecteds
+  listOfSelecteds,
+  updateSort
 }) {
   // Use the state and functions returned from useTable to build your UI
   const {
@@ -239,6 +237,7 @@ function AnnotationTable(props) {
   const [showSelectSeriesModal, setShowSelectSeriesModal] = useState(false);
   const [selected, setSelected] = useState({});
   const [listOfSelecteds, setListOfSelecteds] = useState([]);
+  const [prevSortKeys, setPrevSortKeys] = useState({});
 
   const handlePageIndex = act => {
     let newIndex = act === 'prev' ? currentPageIndex - 1 : currentPageIndex + 1;
@@ -272,7 +271,7 @@ function AnnotationTable(props) {
   useEffect(() => {
     preparePageData(props.data);
     setCurrentPageIndex(0);
-  }, [props.pid, props.data]);
+  }, [props.pid, props.data, props.sortKeys]);
 
   useEffect(() => {
     if (props.data.length <= defaultPageSize * currentPageIndex) {
@@ -413,6 +412,17 @@ function AnnotationTable(props) {
     }
   };
 
+  const updateSort = col => {
+    const newSortKeys = { ...props.sortKeys };
+    setPrevSortKeys({ ...props.sortKeys });
+    if (props.sortKeys[col]) {
+      newSortKeys[col] = 0;
+    } else {
+      newSortKeys[col] = 1;
+    }
+    props.setSortKeys(newSortKeys);
+  };
+
   const columns = React.useMemo(
     () => [
       {
@@ -463,13 +473,27 @@ function AnnotationTable(props) {
         }
       },
       {
-        Header: 'Name',
+        Header: () => {
+          return (
+            <div className="mng-anns__header-flex">
+              {/* <div onClick={() => props.sortTable('lesion_name')}>Name</div> */}
+              <div onClick={() => updateSort('lesion_name')}>Name</div>
+            </div>
+          );
+        },
         accessor: 'name',
         // sortable: true,
         resizable: true
       },
       {
-        Header: 'Subject',
+        Header: () => {
+          return (
+            <div className="mng-anns__header-flex">
+              <div onClick={() => updateSort('patient')}>Subject</div>
+              {/* <div onClick={() => props.sortTable('patient')}>Subject</div> */}
+            </div>
+          );
+        },
         accessor: 'patientName',
         // sortable: true,
         resizable: true,
@@ -493,16 +517,29 @@ function AnnotationTable(props) {
         }
       },
       {
-        Header: 'Template',
+        Header: () => {
+          return (
+            <div className="mng-anns__header-flex">
+              {/* <div onClick={() => props.sortTable('template')}>Template</div> */}
+              <div onClick={() => updateSort('template')}>Template</div>
+            </div>
+          );
+        },
         accessor: 'template',
-        resizable: true,
+        resizable: true
         // sortable: true
       },
       {
-        Header: 'User',
+        Header: () => {
+          return (
+            <div className="mng-anns__header-flex">
+              <div onClick={() => updateSort('user')}>User</div>
+            </div>
+          );
+        },
         accessor: 'userName',
         style: { whiteSpace: 'normal' },
-        resizable: true,
+        resizable: true
         // sortable: true
       },
       {
@@ -559,13 +596,25 @@ function AnnotationTable(props) {
         }
       },
       {
-        Header: 'Modality',
+        Header: () => {
+          return (
+            <div className="mng-anns__header-flex">
+              <div onClick={() => updateSort('modality')}>Modality</div>
+            </div>
+          );
+        },
         // sortable: true,
         resizable: true,
         accessor: 'modality'
       },
       {
-        Header: 'Anatomy',
+        Header: () => {
+          return (
+            <div className="mng-anns__header-flex">
+              <div onClick={() => updateSort('anatomy')}>Anatomy</div>
+            </div>
+          );
+        },
         // sortable: true,
         resizable: true,
         accessor: 'anatomy',
@@ -580,7 +629,13 @@ function AnnotationTable(props) {
         }
       },
       {
-        Header: 'Observation',
+        Header: () => {
+          return (
+            <div className="mng-anns__header-flex">
+              <div onClick={() => updateSort('observation')}>Observation</div>
+            </div>
+          );
+        },
         // sortable: true,
         resizable: true,
         accessor: 'observation',
@@ -595,26 +650,33 @@ function AnnotationTable(props) {
         }
       },
       {
-        Header: 'Comment',
+        Header: () => {
+          return (
+            <div className="mng-anns__header-flex">
+              <div onClick={() => updateSort('comment')}>Comment</div>
+            </div>
+          );
+        },
         // sortable: true,
         resizable: true,
         accessor: 'userComment'
       }
     ],
-    [props.selectedAnnotations, data]
+    [props.selectedAnnotations, data, props.sortKeys]
   );
 
   const fetchData = useCallback(
     ({ pageIndex }) => {
       // setCurrentPageIndex(pageIndex);
       // props.setPageIndex(pageIndex);
-      if (props.data.length <= pageIndex * defaultPageSize) {
+      const sortChanged = !_.isEqual(prevSortKeys, props.sortKeys);
+      if (props.data.length <= pageIndex * defaultPageSize || sortChanged) {
         props.getNewData(pageIndex);
       } else {
         preparePageData(props.data, defaultPageSize, pageIndex);
       }
     },
-    [props.bookmark]
+    [props.bookmark, props.sortKeys]
   );
 
   return (
@@ -631,6 +693,7 @@ function AnnotationTable(props) {
         controlledPageIndex={currentPageIndex}
         handlePageIndex={handlePageIndex}
         listOfSelecteds={listOfSelecteds}
+        updateSort={updateSort}
       />
       {showSelectSeriesModal && (
         <SelectSerieModal

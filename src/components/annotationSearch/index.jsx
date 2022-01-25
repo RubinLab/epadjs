@@ -112,6 +112,7 @@ const AnnotationSearch = props => {
   const [checkboxSelected, setCheckboxSelected] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [sortKeys, setSortKeys] = useState({});
+
   // cavit
   const [showPlugins, setShowPluginDropdown] = useState(false);
   const [pluginListArray, setpluginListArray] = useState([]);
@@ -191,25 +192,15 @@ const AnnotationSearch = props => {
     };
   }, [handleUserKeyPress]);
 
-  const sortTable = (col, order) => {
-    const newSortKeys = { ...sortKeys };
-    if (sortKeys[col]) {
-      newSortKeys[col] = 0;
-    } else {
-      newSortKeys[col] = 1;
-    }
-    setSortKeys(newSortKeys);
-  };
-
   const isTableSorted = () => {
-    const order = Object.values(newSortKeys);
+    const order = Object.values(sortKeys);
     return order.length > 0;
   };
 
   const addSortingToQuery = query => {
-    const cols = Object.keys(newSortKeys);
-    const order = Object.values(newSortKeys);
-    const sortQuery = cols.reduce((all, item, index) => {
+    const cols = Object.keys(sortKeys);
+    const order = Object.values(sortKeys);
+    const sortedQuery = cols.reduce((all, item, i) => {
       const orderAndKey = order[i] > 0 ? cols[i] : `-${cols[i]}`;
       all.push(orderAndKey);
       return all;
@@ -348,12 +339,22 @@ const AnnotationSearch = props => {
     );
   };
 
-  const getSearchResult = (pageIndex, afterDelete, col, order) => {
+  const getSearchResult = (pageIndex, afterDelete) => {
     setPageIndex(0);
-    if (query.length === 0) {
+    // if there is not a query but sort still make a search with *
+    const isSorted = isTableSorted();
+    if (query.length === 0 && !isSorted) {
       getAnnotationsOfProjets(pageIndex, afterDelete);
     } else {
-      let searchQuery = parseQuery();
+      // const parsedQuery = parseQuery();
+      let searchQuery;
+      if (query.length === 0) {
+        setQuery('*');
+        searchQuery = parseQuery('*');
+      } else {
+        searchQuery = parseQuery();
+      }
+      // let searchQuery = parsedQuery.length > 0 ? parsedQuery : '\*';
       // setData([]);
       if (selectedProject) {
         const multiSearch =
@@ -390,7 +391,7 @@ const AnnotationSearch = props => {
   };
 
   const getNewData = (pageIndex, afterDelete) => {
-    if (query) {
+    if (query || isTableSorted()) {
       getSearchResult(pageIndex, afterDelete);
     } else {
       getAnnotationsOfProjets(pageIndex, afterDelete);
@@ -607,14 +608,15 @@ const AnnotationSearch = props => {
     return all;
   };
 
-  const parseQuery = () => {
+  const parseQuery = q => {
     // check if query contains any predefined words
-    const queryArray = seperateParanthesis(query.trim().split(' '));
+    const queryToParse = q ? q : query;
+    const queryArray = seperateParanthesis(queryToParse.trim().split(' '));
     let parsedQuery;
     if (checkSingleTermQuery(queryArray)) {
       // wrap single letter in double qute
       // if caret added query combine with or
-      const parsedQueryArr = handleWhiteSpaceinQuote(query);
+      const parsedQueryArr = handleWhiteSpaceinQuote(queryToParse);
       parsedQuery = parsedQueryArr[1]
         ? `${parsedQueryArr[0]} OR ${parsedQueryArr[1]}`
         : parsedQueryArr[0];
@@ -1368,6 +1370,8 @@ const AnnotationSearch = props => {
             pid={props.pid}
             setPageIndex={setPageIndex}
             indexFromParent={pageIndex}
+            sortKeys={sortKeys}
+            setSortKeys={setSortKeys}
           />
         )}
       </div>
