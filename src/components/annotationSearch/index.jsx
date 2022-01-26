@@ -401,6 +401,7 @@ const AnnotationSearch = props => {
 
   const getNewData = (pageIndex, afterDelete) => {
     if (query || isTableSorted()) {
+      console.log(" ----> in here")
       getSearchResult(pageIndex, afterDelete);
     } else {
       getAnnotationsOfProjets(pageIndex, afterDelete);

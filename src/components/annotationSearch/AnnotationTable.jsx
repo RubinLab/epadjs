@@ -125,7 +125,10 @@ function Table({
 
   React.useEffect(() => {
     fetchData({ pageIndex, pageSize });
+    console.log(' ---> pageIndex, pageSize');
+    console.log(pageIndex, pageSize);
   }, [fetchData, pageIndex, pageSize]);
+
   return (
     <>
       <table {...getTableProps()} style={{ width: '100%' }}>
@@ -667,6 +670,9 @@ function AnnotationTable(props) {
 
   const fetchData = useCallback(
     ({ pageIndex }) => {
+      // console.log('---> props.bookmark', props.bookmark);
+      // console.log('---> props.sortKeys', props.sortKeys);
+      console.log('---> pageIndex', pageIndex);
       // setCurrentPageIndex(pageIndex);
       // props.setPageIndex(pageIndex);
       const sortChanged = !_.isEqual(prevSortKeys, props.sortKeys);
@@ -676,6 +682,7 @@ function AnnotationTable(props) {
         preparePageData(props.data, defaultPageSize, pageIndex);
       }
     },
+    // [props.sortKeys]
     [props.bookmark, props.sortKeys]
   );
 
