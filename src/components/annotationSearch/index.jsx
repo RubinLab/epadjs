@@ -401,7 +401,6 @@ const AnnotationSearch = props => {
 
   const getNewData = (pageIndex, afterDelete) => {
     if (query || isTableSorted()) {
-      console.log(" ----> in here")
       getSearchResult(pageIndex, afterDelete);
     } else {
       getAnnotationsOfProjets(pageIndex, afterDelete);
@@ -948,8 +947,6 @@ const AnnotationSearch = props => {
           <div
             style={{ fontSize: '1.2rem', color: 'aliceblue' }}
             onClick={() => {
-              //  console.log(JSON.stringify(props.selectedAnnotations));
-              //  console.log(props.pid);
               getPluginProjects();
             }}
           >
@@ -1055,8 +1052,6 @@ const AnnotationSearch = props => {
   };
   // cavit
   const prepareDropDownHtmlForPlugins = () => {
-    // console.log(showPlugins);
-    // console.log(pluginListArray);
     const list = pluginListArray;
     let options = [];
     for (let i = 0; i < list.length; i++) {
