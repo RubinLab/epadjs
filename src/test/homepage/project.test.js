@@ -7,7 +7,7 @@ import LoginPage from '../pageObjects/login.js';
 import Navbar from '../pageObjects/navbar.js';
 import Project from '../pageObjects/management/project';
 
-jest.setTimeout(30000);
+jest.setTimeout(300000);
 
 const projectList = [
   {
@@ -110,4 +110,4 @@ describe('executing test scenario on ePAD', () => {
   afterAll(async () => {
     await driver.quit();
   }, 15000);
-}, 30000);
+}, 300000);

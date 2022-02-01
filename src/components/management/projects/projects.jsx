@@ -553,7 +553,7 @@ class Projects extends React.Component {
           className="pro-table"
           data={this.state.data}
           columns={this.defineColumns()}
-          defaultPageSize={10}
+          defaultPageSize={50}
           NoDataComponent={() => null}
         />
         {this.state.hasDeleteAllClicked && (

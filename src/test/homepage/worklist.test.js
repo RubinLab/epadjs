@@ -182,7 +182,6 @@ describe('executing test scenario on ePAD', () => {
       el => el.name === 'worklist_test_1_edited_name'
     );
     const updatedRequirements = worklistReturned[0]?.requirements.split(',');
-    console.log('updatedRequirements', updatedRequirements);
     assert.lengthOf(updatedRequirements, 2, 'requirement added');
   });
 
