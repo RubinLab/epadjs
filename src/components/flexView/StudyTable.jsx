@@ -8,7 +8,7 @@ import {
   clearCarets,
   formatTime,
   formatDate,
-  reverseCarets,
+  reverseCarets
 } from "./helperMethods";
 
 const StudyTable = ({ data, order, showSeriesTable }) => {
@@ -25,13 +25,12 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
 
   const filterString = (filter, row) => {
     try {
-      const attrWithCarets = ["studyDescription", "patientName"];
+      const attrWithCarets = ["studyDescription-id", "patientName-id"];
       const { id, value } = filter;
       const valueLowercase = row[id].toLowerCase();
       const keyLowercaseControlled = attrWithCarets.includes(id)
         ? reverseCarets(value).toLowerCase()
         : value.toLowerCase();
-
       const keyLowercase = value.toLowerCase();
       return (
         valueLowercase.startsWith(keyLowercaseControlled) ||
@@ -51,8 +50,8 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
     return {
       style: {
         boxShadow,
-        background,
-      },
+        background
+      }
     };
   };
 
@@ -92,16 +91,16 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterArray(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "examTypes-id" ? "#3a3f44" : null,
-        },
+          backgroundColor: sortedCol === "examTypes-id" ? "#3a3f44" : null
+        }
       }),
-      Cell: (row) => {
+      Cell: row => {
         return Array.isArray(row.original.examTypes) ? (
           <div>{row.original.examTypes.join(", ")}</div>
         ) : (
           <div>{row.original.examType}</div>
         );
-      },
+      }
     },
     {
       Header: "Patient Name",
@@ -113,12 +112,12 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterString(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "patientName-id" ? "#3a3f44" : null,
-        },
+          backgroundColor: sortedCol === "patientName-id" ? "#3a3f44" : null
+        }
       }),
-      Cell: (row) => {
+      Cell: row => {
         return <div>{clearCarets(row.original.patientName)}</div>;
-      },
+      }
     },
     {
       Header: "PatientID",
@@ -130,9 +129,9 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterString(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "patientID-id" ? "#3a3f44" : null,
-        },
-      }),
+          backgroundColor: sortedCol === "patientID-id" ? "#3a3f44" : null
+        }
+      })
     },
     {
       Header: "Sex",
@@ -144,9 +143,9 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterString(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "sex-id" ? "#3a3f44" : null,
-        },
-      }),
+          backgroundColor: sortedCol === "sex-id" ? "#3a3f44" : null
+        }
+      })
     },
     {
       Header: "Description",
@@ -158,15 +157,16 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterString(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "studyDescription-id" ? "#3a3f44" : null,
-        },
+          backgroundColor:
+            sortedCol === "studyDescription-id" ? "#3a3f44" : null
+        }
       }),
-      Cell: (row) => {
+      Cell: row => {
         let desc = row.original.studyDescription
           ? row.original.studyDescription
           : "Unnamed Study";
         return <div>{clearCarets(desc)}</div>;
-      },
+      }
     },
     {
       Header: "Insert Date",
@@ -178,12 +178,12 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterDateAndTime(filter, row, "date"),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "insertDate-id" ? "#3a3f44" : null,
-        },
+          backgroundColor: sortedCol === "insertDate-id" ? "#3a3f44" : null
+        }
       }),
-      Cell: (row) => {
+      Cell: row => {
         return <div>{formatDate(row.original.insertDate)}</div>;
-      },
+      }
     },
     {
       Header: "Study Date",
@@ -195,12 +195,12 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterDateAndTime(filter, row, "date"),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "studyDate-id" ? "#3a3f44" : null,
-        },
+          backgroundColor: sortedCol === "studyDate-id" ? "#3a3f44" : null
+        }
       }),
-      Cell: (row) => {
+      Cell: row => {
         return <div>{formatDate(row.original.studyDate)}</div>;
-      },
+      }
     },
     {
       Header: "Study Time",
@@ -212,12 +212,12 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterDateAndTime(filter, row, "time"),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "studyTime-id" ? "#3a3f44" : null,
-        },
+          backgroundColor: sortedCol === "studyTime-id" ? "#3a3f44" : null
+        }
       }),
-      Cell: (row) => {
+      Cell: row => {
         return <div>{formatTime(row.original.studyTime)}</div>;
-      },
+      }
     },
     {
       Header: "Study UID",
@@ -229,9 +229,9 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterString(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "studyUID-id" ? "#3a3f44" : null,
-        },
-      }),
+          backgroundColor: sortedCol === "studyUID-id" ? "#3a3f44" : null
+        }
+      })
     },
     {
       Header: "# of Aims",
@@ -244,9 +244,9 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor:
-            sortedCol === "numberOfAnnotations-id" ? "#3a3f44" : null,
-        },
-      }),
+            sortedCol === "numberOfAnnotations-id" ? "#3a3f44" : null
+        }
+      })
     },
     {
       Header: "# Of Img",
@@ -258,9 +258,9 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => row[filter.id] >= filter.value,
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "numberOfImages-id" ? "#3a3f44" : null,
-        },
-      }),
+          backgroundColor: sortedCol === "numberOfImages-id" ? "#3a3f44" : null
+        }
+      })
     },
     {
       Header: "# Of Series",
@@ -272,9 +272,9 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => row[filter.id] >= filter.value,
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "numberOfSeries-id" ? "#3a3f44" : null,
-        },
-      }),
+          backgroundColor: sortedCol === "numberOfSeries-id" ? "#3a3f44" : null
+        }
+      })
     },
     {
       Header: "Created Time",
@@ -286,12 +286,12 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterDateAndTime(filter, row, "date"),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "createdTime-id" ? "#3a3f44" : null,
-        },
+          backgroundColor: sortedCol === "createdTime-id" ? "#3a3f44" : null
+        }
       }),
-      Cell: (row) => {
+      Cell: row => {
         return <div>{formatTime(row.original.createdTime)}</div>;
-      },
+      }
     },
     {
       Header: "Birth date",
@@ -303,12 +303,12 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterDateAndTime(filter, row, "date"),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "birthdate-id" ? "#3a3f44" : null,
-        },
+          backgroundColor: sortedCol === "birthdate-id" ? "#3a3f44" : null
+        }
       }),
-      Cell: (row) => {
+      Cell: row => {
         return <div>{formatDate(row.original.birthdate)}</div>;
-      },
+      }
     },
     // {
     //   Header: "First Series Date Acquired",
@@ -366,9 +366,9 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       filterMethod: (filter, row) => filterString(filter, row),
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "projectID-id" ? "#3a3f44" : null,
-        },
-      }),
+          backgroundColor: sortedCol === "projectID-id" ? "#3a3f44" : null
+        }
+      })
     },
     {
       Header: "Referring Physician Name",
@@ -381,9 +381,9 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor:
-            sortedCol === "referringPhysicianName-id" ? "#3a3f44" : null,
-        },
-      }),
+            sortedCol === "referringPhysicianName-id" ? "#3a3f44" : null
+        }
+      })
     },
     {
       Header: `Study Accession Number`,
@@ -395,10 +395,10 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       getProps: (state, rowInfo) => ({
         style: {
           backgroundColor:
-            sortedCol === "studyAccessionNumber-id" ? "#3a3f44" : null,
-        },
+            sortedCol === "studyAccessionNumber-id" ? "#3a3f44" : null
+        }
       }),
-      filterMethod: (filter, row) => filterString(filter, row),
+      filterMethod: (filter, row) => filterString(filter, row)
     },
     {
       Header: "Study ID",
@@ -409,11 +409,11 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       show: true,
       getProps: (state, rowInfo) => ({
         style: {
-          backgroundColor: sortedCol === "studyID-id" ? "#3a3f44" : null,
-        },
+          backgroundColor: sortedCol === "studyID-id" ? "#3a3f44" : null
+        }
       }),
-      filterMethod: (filter, row) => filterString(filter, row),
-    },
+      filterMethod: (filter, row) => filterString(filter, row)
+    }
   ];
 
   const onSortedChange = (newSorted, column, shiftKey) => {
@@ -432,15 +432,15 @@ const StudyTable = ({ data, order, showSeriesTable }) => {
       columns={defineColumns()}
       showPagination={false}
       pageSize={data.length}
-      onSortedChange={(newSorted) => {
+      onSortedChange={newSorted => {
         onSortedChange(newSorted);
       }}
       getTheadThProps={getTheadThProps}
       getTdProps={(state, rowInfo, column) => ({
-        onDoubleClick: (e) => {
+        onDoubleClick: e => {
           const { projectID, patientID, studyUID } = rowInfo.original;
           showSeriesTable(projectID, patientID, studyUID);
-        },
+        }
       })}
     />
   );
