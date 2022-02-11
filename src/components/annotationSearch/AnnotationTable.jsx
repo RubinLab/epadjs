@@ -490,7 +490,7 @@ function AnnotationTable(props) {
         Header: () => {
           return (
             <div className="mng-anns__header-flex">
-              <div onClick={() => updateSort('patient')}>Subject</div>
+              <div onClick={() => updateSort('patient_name')}>Subject</div>
               {/* <div onClick={() => props.sortTable('patient')}>Subject</div> */}
             </div>
           );
@@ -522,7 +522,7 @@ function AnnotationTable(props) {
           return (
             <div className="mng-anns__header-flex">
               {/* <div onClick={() => props.sortTable('template')}>Template</div> */}
-              <div onClick={() => updateSort('template')}>Template</div>
+              <div onClick={() => updateSort('template_code')}>Template</div>
             </div>
           );
         },
