@@ -33,7 +33,7 @@ class Project extends Basepage {
 
   async singleDelete(projectID) {
     await super.clickById(`delete-${projectID}`);
-    await this.driver.sleep(1000);
+    await this.driver.sleep(2000);
     await this.confirmDelete();
     await this.driver.sleep(3000);
     await this.listProjects();
@@ -101,9 +101,9 @@ class Project extends Basepage {
     if (description)
       await super.enterTextByCss('#projectDescription', description);
     if (template) await this.selectDropdownOption('#projectTemplate', template);
-    if (type) await this.selectDropdownOption('#projectType', type);
+    if (type) await this.selectDropdownOption('projectType', type);
     await super.clickById('submit-button');
-    await this.driver.sleep(200);
+    await this.driver.sleep(2000);
   }
 
   async createSingleProject(name, id, description, template, type) {
