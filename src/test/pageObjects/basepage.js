@@ -28,6 +28,11 @@ class Basepage {
     await this.driver.findElement(By.id(id)).click();
   }
 
+  async clickByCss(css) {
+    const element = await this.driver.findElement(By.css(css));
+    await element.click();
+  }
+
   sleep(seconds) {
     var e = new Date().getTime() + seconds * 1000;
     while (new Date().getTime() <= e) {}
