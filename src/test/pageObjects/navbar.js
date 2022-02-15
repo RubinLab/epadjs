@@ -19,8 +19,12 @@ class Navbar extends Basepage {
   }
 
   async formManagementMenu() {
-    await this.driver.wait(until.elementLocated(By.className('mng-menu__option')));
-    const subjects =  await this.driver.findElements(By.className('mng-menu__option'));
+    await this.driver.wait(
+      until.elementLocated(By.className('mng-menu__option'))
+    );
+    const subjects = await this.driver.findElements(
+      By.className('mng-menu__option')
+    );
     const subjectsTitles = {};
     for (let subject of subjects) {
       const text = await subject.getText();
@@ -31,17 +35,11 @@ class Navbar extends Basepage {
   }
 
   async selectMNGSubject(subject) {
-    if (this.management) {
-      await this.management[subject].click()
-    } else {
-      const subjects = await this.formManagementMenu();
-      await subjects[subject].click();
-    }
+    const subjects = await this.formManagementMenu();
+    await subjects[subject].click();
     const title = await this.driver.findElement(By.className('mng-header'));
-    return  title.getText();
+    return title.getText();
   }
-
- 
 }
 
 export default Navbar;
