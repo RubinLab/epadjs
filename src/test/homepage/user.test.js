@@ -6,7 +6,7 @@ const evaluate = chai.expect;
 import LoginPage from '../pageObjects/login.js';
 import Navbar from '../pageObjects/navbar.js';
 import User from '../pageObjects/management/user';
-import Project from 'test/pageObjects/management/project.js';
+import Project from '../pageObjects/management/project.js';
 
 const userList = [
   'epad_user2@gmail.com',
