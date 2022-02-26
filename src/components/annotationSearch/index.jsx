@@ -197,8 +197,8 @@ const AnnotationSearch = props => {
   };
 
   const addSortingToQuery = query => {
-    const defaultSort = 'name<string>';
-    const reverseDefaultSort = '-name<string>';
+    const defaultSort = 'name_sort<string>';
+    const reverseDefaultSort = '-name_sort<string>';
     const cols = Object.keys(sortKeys);
     const order = Object.values(sortKeys);
     const sortedQuery = cols.reduce((all, item, i) => {
