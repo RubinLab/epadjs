@@ -18,6 +18,7 @@ import "./annotationsList.css";
 import { isSupportedModality } from "../../Utils/aid.js";
 import { extendWith } from "lodash";
 import { TiEject } from "react-icons/ti";
+import * as questionaire from "../aimEditor/parseClass";
 
 const message = {
   title: "Not enough ports to open series"
@@ -56,7 +57,54 @@ class selectSerieModal extends React.Component {
     this.setPreSelecteds();
     const limit = this.updateLimit();
     this.setState({ limit });
+
+    // teaching file save related
+
+    const element = document.getElementById("questionaire");
+    const newElement = document.getElementById("questionaire2");
+    this.semanticAnswers = new questionaire.AimEditor(
+      element,
+      this.validateForm,
+      this.renderButtons,
+      "",
+      {}
+    );
+    const { projectMap, openSeries, activePort, templates: allTemplates } = this.props;
+    // const { projectID } = openSeries[activePort];
+    let projectID = "lite";
+
+    const { defaultTemplate, templates } = projectMap[projectID];
+    const projectTemplates = Object.keys(allTemplates)
+      .filter((key) => templates.includes(key))
+      .reduce((arr, key) => {
+        arr.push(allTemplates[key]);
+        return arr;
+      }, []);
+
+    this.semanticAnswers.loadTemplates({
+      default: defaultTemplate,
+      all: projectTemplates,
+    });
+    this.semanticAnswers.createViewerWindow();
   };
+
+
+  //cavit --- teaching file related part
+  renderButtons = (buttonsState) => {
+  };
+  validateForm = (hasError) => {
+    if (hasError > 0) {
+      console.warn("Answer form has error/s!!!");
+      // this.setState({
+      //   saveButtonIsActive: false,
+      // });
+    } else {
+      // this.setState({
+      //   saveButtonIsActive: true,
+      // });
+    }
+  };
+  // end teaching file related part
 
   componentWillUnmount = () => {
     this._isMounted = false;
@@ -332,6 +380,8 @@ class selectSerieModal extends React.Component {
           className="selectSerie-container"
           style={{ textAlign: "start" }}
         >
+          <div id="questionaire"> </div>
+          <div id="questionaire2"> </div>
           <div>Maximum {this.maxPort} series can be viewed at a time.</div>
           {openSeries.length > 0 && (
             <div>
@@ -373,7 +423,10 @@ const mapStateToProps = state => {
     selectedSeries: state.annotationsListReducer.selectedSeries,
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
     patients: state.annotationsListReducer.patients,
-    openSeries: state.annotationsListReducer.openSeries
+    openSeries: state.annotationsListReducer.openSeries,
+    projectMap: state.annotationsListReducer.projectMap,
+    activePort: state.annotationsListReducer.activePort,
+    templates: state.annotationsListReducer.templates,
   };
 };
 
