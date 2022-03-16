@@ -11,7 +11,9 @@ export var AimEditor = function (
   varRenderButtonHandler,
   aimName,
   setAimDirty,
-  lastSavedAim
+  lastSavedAim,
+  isTeachingFlag,
+  tachingDivParent
 ) {
   //this.mapObjCodeValueParent = new Map();
 
@@ -96,6 +98,8 @@ export var AimEditor = function (
   function constructor() {
     if (self.arrayTemplates === "undefined") self.arrayTemplates = [];
     document.addEventListener("keydown", self.aimshortCutKeyEvent, false);
+
+
   }
 
   this.getSelectedTemplateType = function () {
@@ -326,7 +330,11 @@ export var AimEditor = function (
 
   this.extractTemplate = function (json) {
     var a = 0;
-
+    // to hide main aim editor components other than teaching components
+    if (isTeachingFlag){
+      self.mainWindowDiv.style.visibility = 'hidden';      // Hide
+      self.mainWindowDiv.style.display = 'none'; 
+    }
     var subObject = null;
     var arrayLength = -1;
     let isArray = 0;
@@ -414,6 +422,8 @@ export var AimEditor = function (
     document.getElementById("accordion1").appendChild(commentDiv);
     //end adding comment textarea for the template
     var a = 0;
+    // hiding the main aim editor to show only seperated components for teaching file
+
     for (var i = 0; i < arrayLength; i++) {
       a++;
       if (isArray === 1)
@@ -448,7 +458,15 @@ export var AimEditor = function (
         var headerCheckIcon = document.createElement("i");
         headerCheckIcon.className = "red check circle outline icon";
         headerCheckIcon.id = component.id;
-        document.getElementById("accordion1").appendChild(componentDiv);
+
+        // below line adds all components to the div passed from caller. Rectifiying for teaching file
+        //  document.getElementById("accordion1").appendChild(componentDiv);
+        if ( (component.label === 'Radiology Specialty' || component.label === 'Anatomy Core') && isTeachingFlag ){
+         
+          tachingDivParent.appendChild(componentDiv);
+        }else{
+          document.getElementById("accordion1").appendChild(componentDiv);
+        }
 
         var incontentDiv = document.createElement("div");
         incontentDiv.className = "content active";

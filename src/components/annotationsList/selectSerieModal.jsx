@@ -62,13 +62,7 @@ class selectSerieModal extends React.Component {
 
     const element = document.getElementById("questionaire");
     const newElement = document.getElementById("questionaire2");
-    this.semanticAnswers = new questionaire.AimEditor(
-      element,
-      this.validateForm,
-      this.renderButtons,
-      "",
-      {}
-    );
+ 
     const { projectMap, openSeries, activePort, templates: allTemplates } = this.props;
     // const { projectID } = openSeries[activePort];
     let projectID = "lite";
@@ -81,6 +75,16 @@ class selectSerieModal extends React.Component {
         return arr;
       }, []);
 
+    this.semanticAnswers = new questionaire.AimEditor(
+      element,
+      this.validateForm,
+      this.renderButtons,
+      "",
+      {},
+      null,
+      true, // is teachinng flag
+      newElement // the new div which holds only teaching components for aim editor
+    );
     this.semanticAnswers.loadTemplates({
       default: defaultTemplate,
       all: projectTemplates,
