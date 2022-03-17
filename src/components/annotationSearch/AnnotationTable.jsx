@@ -397,7 +397,7 @@ function AnnotationTable(props) {
         }
         //getsingleSerie
         Promise.all(promiseArr)
-          .then(() => {})
+          .then(() => { })
           .catch(err => console.error(err));
 
         //if patient doesnot exist get patient
@@ -513,6 +513,8 @@ function AnnotationTable(props) {
           matchSorter(rows, filter.value, { keys: ['date'] }),
         filterAll: true,
         Cell: ({ row }) => {
+          if (!row.original.studyDate)
+            return <div></div>;
           const studyDateArr = convertDateFormat(
             row.original.studyDate,
             'studyDate'
@@ -639,7 +641,7 @@ function AnnotationTable(props) {
             setShowSelectSeriesModal(false);
             setSelected({});
           }}
-          // studyName={serie.studyDescription}
+        // studyName={serie.studyDescription}
         />
       )}
     </>
