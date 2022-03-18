@@ -458,6 +458,7 @@ class Plugins extends React.Component {
       let editimage_tag = "";
       let editimage_id = "";
       let edit_processmultipleaims = "";
+      console.log("double check process multiple aims when edit fporm open : ",selectedPluginData.original.processmultipleaims);
       if (selectedPluginData.original.image_name != null) {
         editimage_name = selectedPluginData.original.image_name;
       }
@@ -489,7 +490,7 @@ class Plugins extends React.Component {
         modality: selectedPluginData.original.modality,
         developer: selectedPluginData.original.developer,
         documentation: selectedPluginData.original.documentation,
-        processmultipleaims: edit_processmultipleaims,
+        processmultipleaims: edit_processmultipleaims.toString(),
       };
 
       this.setState({
@@ -512,7 +513,7 @@ class Plugins extends React.Component {
     this.setState({ editPluginClicked: false, errorMessage: null });
   };
   handleEditPluginSave = async () => {
-    console.log("edit plugin save clicked");
+    console.log("edit plugin save clicked",pluginform);
     //this.setState({ editPluginClicked: false });
     const pluginform = this.state.pluginFormElements;
     if (
