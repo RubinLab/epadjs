@@ -100,7 +100,9 @@ class SearchView extends Component {
       expandLevel: 0,
       showUploadWizard: false,
       showProjects: false,
-      editingTags: false
+      editingTags: false,
+      isTeachingFile: false,
+      encArgs: ""
     };
   }
 
@@ -130,6 +132,7 @@ class SearchView extends Component {
       });
     } catch (err) {
       window.addEventListener('openSeriesModal', this.handleSeriesModal);
+      window.addEventListener('openTeachingFilesModal', this.handleTeachingFilesModal);
     }
   };
 
@@ -139,6 +142,12 @@ class SearchView extends Component {
     const seriesList = [list];
     this.setState({ isSerieSelectionOpen: true, seriesList });
   };
+
+  handleTeachingFilesModal = event => {
+    const { seriesArray, args } = event.detail;
+    const seriesList = [seriesArray];
+    this.setState({ isSerieSelectionOpen: true, seriesList, isTeachingFile: true, encArgs: args });
+  }
 
   componentDidUpdate = async prevProps => {
     const { uploadedPid, lastEventId, expandLevel } = this.props;
@@ -294,11 +303,11 @@ class SearchView extends Component {
     const promiseArr = [];
     // -----> Delete after v1.0 <-----
     // for (let patient in patients) {
-      // promiseArr.push(
-      //   this.props.dispatch(
-      //     getWholeData(this.props.openSeries[patients[patient]])
-      //   )
-      // );
+    // promiseArr.push(
+    //   this.props.dispatch(
+    //     getWholeData(this.props.openSeries[patients[patient]])
+    //   )
+    // );
     //   promiseArr.push(getWholeData(this.props.openSeries[patients[patient]]));
     // }
     // Promise.all(promiseArr)
@@ -997,6 +1006,8 @@ class SearchView extends Component {
             <ProjectModal
               seriesPassed={this.state.seriesList}
               onCancel={this.closeSelectionModal}
+              isTeachingFile={this.state.isTeachingFile}
+              encrUrlArgs={this.state.encArgs}
             />
           )}
         {/* {this.props.showSeriesModal && (
