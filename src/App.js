@@ -756,9 +756,6 @@ class App extends Component {
           })
         );
       }
-      await decryptAndAdd(args);
-
-      this.displaySeries(packedData);
     }
   };
 
