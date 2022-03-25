@@ -126,3 +126,55 @@ export function prepAimForParseClass(aimJson) {
     console.error(error);
   }
 }
+
+export function createStudyAim(answers) {
+  // const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
+  const seedData = this.getAimSeedDataFromStudy(study);
+  const aim = new Aim(
+    seedData,
+    enumAimType.imageAnnotation,
+    undefined
+  );
+  this.saveAim(aim, templateType);
+}
+
+getAimSeedDataFromStudy = (study) => {
+  var obj = {};
+  obj.aim = {};
+  obj.study = {};
+  obj.series = {};
+  obj.equipment = {};
+  obj.person = {};
+  obj.image = [];
+  const { aim, study: _study, series, equipment, person, image } = obj;
+  const { studyUID, studyTime, studyDate, studyAccessionNumber, sex, patientName, patientID, birthdate } = study;
+
+  aim.studyInstanceUid = studyUID || "";
+
+  _study.startTime = studyTime || "";
+  _study.instanceUid = studyUID || "";
+  _study.startDate = studyDate || "";
+  _study.accessionNumber = studyAccessionNumber || "";
+
+  series.instanceUid = "";
+  series.modality = "";
+  series.number = "";
+  series.description = "";
+  series.instanceNumber = "";
+
+  image.push({
+    sopClassUid: "",
+    sopInstanceUid: "",
+  });
+
+  equipment.manufacturerName = "";
+  equipment.manufacturerModelName = "";
+  equipment.softwareVersion = "";
+
+  person.sex = sex || "";
+  person.name = patientName || "";
+  person.patientId = patientID || "";
+  person.birthDate = birthdate || "";
+
+  return obj;
+}
