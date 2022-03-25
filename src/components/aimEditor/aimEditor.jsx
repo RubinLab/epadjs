@@ -17,18 +17,12 @@ import {
 } from "../annotationsList/action";
 import RecistTable from "./RecistTable";
 import { Aim, getAimImageData, modalities } from "aimapi";
-import { prepAimForParseClass, getMarkups } from "./Helpers";
+import { prepAimForParseClass, getMarkups, addSemanticAnswersToSeedData, addUserToSeedData, enumAimType } from "./Helpers";
 import * as questionaire from "./parseClass.js";
 import * as dcmjs from "dcmjs";
 import Switch from "react-switch";
 import { Modal } from "react-bootstrap";
 import "./aimEditor.css";
-
-const enumAimType = {
-  imageAnnotation: 1,
-  seriesAnnotation: 2,
-  studyAnnotation: 3,
-};
 
 class AimEditor extends Component {
   constructor(props) {
@@ -466,8 +460,8 @@ class AimEditor extends Component {
 
     // praper the seed data and create aim
     const seedData = getAimImageData(image);
-    this.addSemanticAnswersToSeedData(seedData, answers);
-    this.addUserToSeedData(seedData);
+    addSemanticAnswersToSeedData(seedData, answers);
+    addUserToSeedData(seedData);
     const aim = new Aim(
       seedData,
       enumAimType.imageAnnotation,
@@ -548,15 +542,15 @@ class AimEditor extends Component {
     const cornerStoneImageId = Object.keys(markupsToSave)[0];
     const image = this.getCornerstoneImagebyId(cornerStoneImageId);
     const seedData = getAimImageData(image);
-    this.addSemanticAnswersToSeedData(seedData, answers);
-    this.addUserToSeedData(seedData);
+    addSemanticAnswersToSeedData(seedData, answers);
+    addUserToSeedData(seedData);
     return seedData;
   };
 
   getAimSeedDataFromCurrentImage = (image, answers) => {
     const seedData = getAimImageData(image);
-    this.addSemanticAnswersToSeedData(seedData, answers);
-    this.addUserToSeedData(seedData);
+    addSemanticAnswersToSeedData(seedData, answers);
+    addUserToSeedData(seedData);
     return seedData;
   };
 
@@ -755,33 +749,6 @@ class AimEditor extends Component {
     const modality = modalities[seedData.series.modality];
     seedData.series.modality = { ...modality };
   };
-
-  addSemanticAnswersToSeedData = (seedData, answers) => {
-    const {
-      name,
-      comment,
-      imagingPhysicalEntityCollection,
-      imagingObservationEntityCollection,
-      inferenceEntity,
-      typeCode,
-    } = answers;
-    seedData.aim.name = name;
-    if (comment) seedData.aim.comment = comment;
-    if (imagingPhysicalEntityCollection)
-      seedData.aim.imagingPhysicalEntityCollection = imagingPhysicalEntityCollection;
-    if (imagingObservationEntityCollection)
-      seedData.aim.imagingObservationEntityCollection = imagingObservationEntityCollection;
-    if (inferenceEntity) seedData.aim.inferenceEntity = inferenceEntity;
-    if (typeCode) seedData.aim.typeCode = typeCode;
-  };
-
-  addUserToSeedData = (seedData) => {
-    let obj = {};
-    obj.loginName = sessionStorage.getItem("username");
-    obj.name = sessionStorage.getItem("displayName");
-    seedData.user = obj;
-  };
-
   // get the image object by index
   getCornerstoneImagebyIdx = (imageIdx) => {
     const { imageCache } = cornerstone.imageCache;
@@ -1233,7 +1200,7 @@ class AimEditor extends Component {
     //     studyUID,
     //   })
     // );
-    
+
     // this.props.dispatch(updatePatientOnAimSave(aimRefs));
     this.props.updateTreeDataOnSave(aimRefs);
     this.props.onCancel(false); //close the aim editor

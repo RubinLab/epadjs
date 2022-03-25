@@ -3,6 +3,12 @@ import cornerstoneTools from "cornerstone-tools";
 
 const activeColor = "#ddd000";
 
+export const enumAimType = {
+  imageAnnotation: 1,
+  seriesAnnotation: 2,
+  studyAnnotation: 3,
+};
+
 export function getMarkups(toolState, aimOfInterest) {
   var markupsToReturn = {};
   Object.keys(toolState).forEach((key) => {
@@ -127,15 +133,17 @@ export function prepAimForParseClass(aimJson) {
   }
 }
 
-export function createStudyAim(answers) {
-  // const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
+export function createStudyAim(study, answers, updatedAimId, trackingUId) {
   const seedData = this.getAimSeedDataFromStudy(study);
+  this.addSemanticAnswersToSeedData(seedData, answers);
+  this.addUserToSeedData(seedData);
   const aim = new Aim(
     seedData,
-    enumAimType.imageAnnotation,
-    undefined
+    enumAimType.studyAnnotation,
+    updatedAimId,
+    trackingUId
   );
-  this.saveAim(aim, templateType);
+  return aim;
 }
 
 getAimSeedDataFromStudy = (study) => {
@@ -178,3 +186,29 @@ getAimSeedDataFromStudy = (study) => {
 
   return obj;
 }
+
+export function addSemanticAnswersToSeedData(seedData, answers) {
+  const {
+    name,
+    comment,
+    imagingPhysicalEntityCollection,
+    imagingObservationEntityCollection,
+    inferenceEntity,
+    typeCode,
+  } = answers;
+  seedData.aim.name = name;
+  if (comment) seedData.aim.comment = comment;
+  if (imagingPhysicalEntityCollection)
+    seedData.aim.imagingPhysicalEntityCollection = imagingPhysicalEntityCollection;
+  if (imagingObservationEntityCollection)
+    seedData.aim.imagingObservationEntityCollection = imagingObservationEntityCollection;
+  if (inferenceEntity) seedData.aim.inferenceEntity = inferenceEntity;
+  if (typeCode) seedData.aim.typeCode = typeCode;
+};
+
+export function addUserToSeedData(seedData) {
+  let obj = {};
+  obj.loginName = sessionStorage.getItem("username");
+  obj.name = sessionStorage.getItem("displayName");
+  seedData.user = obj;
+};
