@@ -19,6 +19,7 @@ import { isSupportedModality } from "../../Utils/aid.js";
 import { extendWith } from "lodash";
 import { TiEject } from "react-icons/ti";
 import * as questionaire from "../aimEditor/parseClass";
+import { decryptAndAdd } from "services/decryptUrlService";
 
 const message = {
   title: "Not enough ports to open series"
@@ -59,42 +60,49 @@ class selectSerieModal extends React.Component {
     this.setState({ limit });
 
     // teaching file save related
+    const { isTeachingFile } = this.props;
+    if (isTeachingFile) {
+      const element = document.getElementById("questionaire");
+      const newElement = document.getElementById("questionaire2");
 
-    const element = document.getElementById("questionaire");
-    const newElement = document.getElementById("questionaire2");
- 
-    const { projectMap, openSeries, activePort, templates: allTemplates } = this.props;
-    // const { projectID } = openSeries[activePort];
-    let projectID = "lite";
+      const { projectMap, openSeries, activePort, templates: allTemplates } = this.props;
+      console.log("props", this.props);
+      // const { projectID } = openSeries[activePort];
+      // let projectID = "lite";
+      // console.log("Leyn", projectMap);
+      // const { defaultTemplate, templates } = projectMap[projectID];
+      // const projectTemplates = Object.keys(allTemplates)
+      //   .filter((key) => templates.includes(key))
+      //   .reduce((arr, key) => {
+      //     arr.push(allTemplates[key]);
+      //     return arr;
+      //   }, []);
 
-    const { defaultTemplate, templates } = projectMap[projectID];
-    const projectTemplates = Object.keys(allTemplates)
-      .filter((key) => templates.includes(key))
-      .reduce((arr, key) => {
-        arr.push(allTemplates[key]);
-        return arr;
-      }, []);
+      this.semanticAnswers = new questionaire.AimEditor(
+        element,
+        this.validateForm,
+        this.renderButtons,
+        "",
+        {},
+        null,
+        true, // is teachinng flag
+        newElement // the new div which holds only teaching components for aim editor
+      );
+      this.semanticAnswers.loadTemplates({
+        default: "99EPAD_15",
+        all: allTemplates,
+      });
+      this.semanticAnswers.createViewerWindow();
 
-    this.semanticAnswers = new questionaire.AimEditor(
-      element,
-      this.validateForm,
-      this.renderButtons,
-      "",
-      {},
-      null,
-      true, // is teachinng flag
-      newElement // the new div which holds only teaching components for aim editor
-    );
-    this.semanticAnswers.loadTemplates({
-      default: defaultTemplate,
-      all: projectTemplates,
-    });
-    this.semanticAnswers.createViewerWindow();
+      //cavit --- teaching file related part
+
+    };// end teaching file related part
+  }
+  componentWillUnmount = () => {
+    this._isMounted = false;
   };
 
-
-  //cavit --- teaching file related part
-  renderButtons = (buttonsState) => {
+  renderButtons = () => {
   };
   validateForm = (hasError) => {
     if (hasError > 0) {
@@ -106,14 +114,8 @@ class selectSerieModal extends React.Component {
       // this.setState({
       //   saveButtonIsActive: true,
       // });
-    }
+    };
   };
-  // end teaching file related part
-
-  componentWillUnmount = () => {
-    this._isMounted = false;
-  };
-
 
   getSerieListData = async (projectID, patientID, studyUID) => {
     const { data: series } = await getSeries(projectID, patientID, studyUID);
@@ -368,8 +370,84 @@ class selectSerieModal extends React.Component {
     return selectionList;
   };
 
+  saveTeachingFile = async () => {
+    const { encArgs } = this.props;
+    if (!encArgs) {
+      // Warn user
+      return;
+    }
+    await decryptAndAdd(encArgs);
+    const answers = this.semanticAnswers.saveAim();
+    console.log("Answers", answers);
+    answers.name = "Teaching File";
+    const aim = createStudyAim(study, answers);
+    const aimJson = aim.getAim();
+    let aimSaved = JSON.parse(aimJson);
+
+    const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
+    const { openSeries, activePort } = this.props;
+    const { patientID, projectID, seriesUID, studyUID } = openSeries[
+      activePort
+    ];
+    const name =
+      aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .name.value;
+    const comment =
+      aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+        .comment.value;
+    const aimRefs = {
+      aimID,
+      patientID,
+      projectID,
+      seriesUID,
+      studyUID,
+      name,
+      comment,
+      isStudyAim
+    };
+
+    uploadAim(aimSaved, projectID, this.state.isUpdate, this.updatedAimId)
+      .then(() => {
+        const { openSeries, activePort } = this.props;
+        const { patientID, projectID, seriesUID, studyUID } = openSeries[
+          activePort
+        ];
+        toast.success("Teaching File succesfully saved.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        openSeries.forEach(({ seriesUID, studyUID }) => {
+          if (openSeries[
+            activePort
+          ].studyUID === studyUID && openSeries[
+            activePort
+          ].seriesUID !== seriesUID)
+            this.props.dispatch(
+              getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+            );
+        });
+        this.props.dispatch(
+          getSingleSerie({ patientID, projectID, seriesUID, studyUID })
+        );
+        this.props.updateTreeDataOnSave(aimRefs);
+      })
+      .catch((error) => {
+        alert(
+          "Teaching file couldn't be saved! More information about the error can be found in the logs."
+        );
+        console.error(error);
+      });
+
+    // const aim = createAim(answers);
+    // saveAim(aim);
+  }
+
   render = () => {
-    const { openSeries } = this.props;
+    const { openSeries, isTeachingFile } = this.props;
     const selections = Object.keys(this.state.selectedToDisplay);
     const list = this.renderSelection();
     return (
@@ -384,8 +462,8 @@ class selectSerieModal extends React.Component {
           className="selectSerie-container"
           style={{ textAlign: "start" }}
         >
-          <div id="questionaire"> </div>
-          <div id="questionaire2"> </div>
+          {isTeachingFile && (<div><div id="questionaire"> </div>
+            <div id="questionaire2"> </div></div>)}
           <div>Maximum {this.maxPort} series can be viewed at a time.</div>
           {openSeries.length > 0 && (
             <div>
@@ -413,6 +491,13 @@ class selectSerieModal extends React.Component {
           <div>{list}</div>
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
+          {isTeachingFile && (
+            <div>
+              <button onClick={this.saveTeachingFile}>Save Teaching File</button>
+              <button onClick={this.saveTeachingFileAndDisplay}>Save Teaching File & Display</button>
+              <button onClick={this.handleCancel}>Discard</button>
+            </div>
+          )}
           <button onClick={this.displaySelection} disabled={!selections.length}>Display selection</button>
           <button onClick={this.handleCancel}>Cancel</button>
         </Modal.Footer>

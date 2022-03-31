@@ -746,7 +746,7 @@ class App extends Component {
         studyUID,
       };
       // If study has teaching file it's already added so no need to add
-      if (hasTeachingFiles(studyUID)) {
+      if (this.hasTeachingFiles(studyUID)) {
         this.displaySeries(packedData);
       } else {
         const seriesArray = await this.getSeriesData(packedData);

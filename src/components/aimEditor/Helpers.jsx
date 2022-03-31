@@ -133,20 +133,9 @@ export function prepAimForParseClass(aimJson) {
   }
 }
 
-export function createStudyAim(study, answers, updatedAimId, trackingUId) {
-  const seedData = this.getAimSeedDataFromStudy(study);
-  this.addSemanticAnswersToSeedData(seedData, answers);
-  this.addUserToSeedData(seedData);
-  const aim = new Aim(
-    seedData,
-    enumAimType.studyAnnotation,
-    updatedAimId,
-    trackingUId
-  );
-  return aim;
-}
 
-getAimSeedDataFromStudy = (study) => {
+
+export function getAimSeedDataFromStudy(study) {
   var obj = {};
   obj.aim = {};
   obj.study = {};
@@ -212,3 +201,16 @@ export function addUserToSeedData(seedData) {
   obj.name = sessionStorage.getItem("displayName");
   seedData.user = obj;
 };
+
+export function createStudyAim(study, answers, updatedAimId, trackingUId) {
+  const seedData = this.getAimSeedDataFromStudy(study);
+  this.addSemanticAnswersToSeedData(seedData, answers);
+  this.addUserToSeedData(seedData);
+  const aim = new Aim(
+    seedData,
+    enumAimType.studyAnnotation,
+    updatedAimId,
+    trackingUId
+  );
+  return aim;
+}
