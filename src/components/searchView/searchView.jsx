@@ -102,7 +102,8 @@ class SearchView extends Component {
       showProjects: false,
       editingTags: false,
       isTeachingFile: false,
-      encArgs: ""
+      encArgs: "",
+      decArgs: "",
     };
   }
 
@@ -144,9 +145,9 @@ class SearchView extends Component {
   };
 
   handleTeachingFilesModal = event => {
-    const { seriesArray, args } = event.detail;
+    const { seriesArray, args, packedData } = event.detail;
     const seriesList = [seriesArray];
-    this.setState({ isSerieSelectionOpen: true, seriesList, isTeachingFile: true, encArgs: args });
+    this.setState({ isSerieSelectionOpen: true, seriesList, isTeachingFile: true, encArgs: args, decrArgs: packedData });
   }
 
   componentDidUpdate = async prevProps => {
@@ -1008,6 +1009,7 @@ class SearchView extends Component {
               onCancel={this.closeSelectionModal}
               isTeachingFile={this.state.isTeachingFile}
               encrUrlArgs={this.state.encArgs}
+              decrArgs={this.state.decrArgs}
             />
           )}
         {/* {this.props.showSeriesModal && (

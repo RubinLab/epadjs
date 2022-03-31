@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
+import { toast } from "react-toastify";
 import ReactTooltip from "react-tooltip";
 import { Modal } from "react-bootstrap";
 import {
@@ -15,16 +16,15 @@ import SelectionItem from "./containers/selectionItem";
 import { FaRegCheckSquare } from "react-icons/fa";
 import { getSeries, setSignificantSeries } from "../../services/seriesServices";
 import { getTemplate } from "../../services/templateServices";
+import { uploadAim } from "services/annotationServices";
 import "./annotationsList.css";
 import { isSupportedModality } from "../../Utils/aid.js";
 import { extendWith } from "lodash";
 import { TiEject } from "react-icons/ti";
 import * as questionaire from "../aimEditor/parseClass";
+import { createStudyAim } from "../aimEditor/Helpers";
 import { decryptAndAdd } from "services/decryptUrlService";
-
-const message = {
-  title: "Not enough ports to open series"
-};
+import { getSingleStudy } from '../../services/studyServices';
 
 const teachingFileTempUid = "2.25.182468981370271895711046628549377576999";
 const teachingFileTempCode = "99EPAD_15";
@@ -352,47 +352,23 @@ class selectSerieModal extends React.Component {
   };
 
   saveTeachingFile = async () => {
-    const { encArgs } = this.props;
-    if (!encArgs) {
+    const { encrUrlArgs, decrArgs } = this.props;
+    const { patientID, projectID, studyUID } = decrArgs;
+    if (!encrUrlArgs) {
       // Warn user
       return;
     }
-    await decryptAndAdd(encArgs);
+    await decryptAndAdd(encrUrlArgs);
     const answers = this.semanticAnswers.saveAim();
-    console.log("Answers", answers);
-    answers.name = "Teaching File";
+    answers.name.value = "Teaching File";
+    const { data: study } = await getSingleStudy(studyUID);
     const aim = createStudyAim(study, answers);
     const aimJson = aim.getAim();
     let aimSaved = JSON.parse(aimJson);
+    const isUpdate = false;
 
-    const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
-    const { openSeries, activePort } = this.props;
-    const { patientID, projectID, seriesUID, studyUID } = openSeries[
-      activePort
-    ];
-    const name =
-      aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-        .name.value;
-    const comment =
-      aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-        .comment.value;
-    const aimRefs = {
-      aimID,
-      patientID,
-      projectID,
-      seriesUID,
-      studyUID,
-      name,
-      comment,
-      isStudyAim
-    };
-
-    uploadAim(aimSaved, projectID, this.state.isUpdate, this.updatedAimId)
+    uploadAim(aimSaved, projectID, isUpdate)
       .then(() => {
-        const { openSeries, activePort } = this.props;
-        const { patientID, projectID, seriesUID, studyUID } = openSeries[
-          activePort
-        ];
         toast.success("Teaching File succesfully saved.", {
           position: "top-right",
           autoClose: 5000,
@@ -401,20 +377,6 @@ class selectSerieModal extends React.Component {
           pauseOnHover: true,
           draggable: true,
         });
-        openSeries.forEach(({ seriesUID, studyUID }) => {
-          if (openSeries[
-            activePort
-          ].studyUID === studyUID && openSeries[
-            activePort
-          ].seriesUID !== seriesUID)
-            this.props.dispatch(
-              getSingleSerie({ patientID, projectID, seriesUID, studyUID })
-            );
-        });
-        this.props.dispatch(
-          getSingleSerie({ patientID, projectID, seriesUID, studyUID })
-        );
-        this.props.updateTreeDataOnSave(aimRefs);
       })
       .catch((error) => {
         alert(
@@ -422,21 +384,18 @@ class selectSerieModal extends React.Component {
         );
         console.error(error);
       });
-
-    // const aim = createAim(answers);
-    // saveAim(aim);
   }
 
   render = () => {
     const { openSeries, isTeachingFile } = this.props;
+    const title = isTeachingFile ? "Create Teaching File" : "Not enough viewports to display series"
     const selections = Object.keys(this.state.selectedToDisplay);
     const list = this.renderSelection();
     return (
-      // <Modal.Dialog dialogClassName="alert-selectSerie">
       <Modal.Dialog id="modal-fix">
         <Modal.Header>
           <Modal.Title className="selectSerie__header">
-            {message.title}
+            {title}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body
@@ -479,8 +438,12 @@ class selectSerieModal extends React.Component {
               <button onClick={this.handleCancel}>Discard</button>
             </div>
           )}
-          <button onClick={this.displaySelection} disabled={!selections.length}>Display selection</button>
-          <button onClick={this.handleCancel}>Cancel</button>
+          {!isTeachingFile && (
+            <div>
+              <button onClick={this.displaySelection} disabled={!selections.length}>Display selection</button>
+              <button onClick={this.handleCancel}>Cancel</button>
+            </div>
+          )}
         </Modal.Footer>
       </Modal.Dialog>
     );

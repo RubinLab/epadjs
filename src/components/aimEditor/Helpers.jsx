@@ -1,5 +1,6 @@
 import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
+import { Aim } from "aimapi";
 
 const activeColor = "#ddd000";
 
@@ -203,9 +204,9 @@ export function addUserToSeedData(seedData) {
 };
 
 export function createStudyAim(study, answers, updatedAimId, trackingUId) {
-  const seedData = this.getAimSeedDataFromStudy(study);
-  this.addSemanticAnswersToSeedData(seedData, answers);
-  this.addUserToSeedData(seedData);
+  const seedData = getAimSeedDataFromStudy(study);
+  addSemanticAnswersToSeedData(seedData, answers);
+  addUserToSeedData(seedData);
   const aim = new Aim(
     seedData,
     enumAimType.studyAnnotation,

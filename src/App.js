@@ -746,13 +746,14 @@ class App extends Component {
         studyUID,
       };
       // If study has teaching file it's already added so no need to add
-      if (this.hasTeachingFiles(studyUID)) {
+      const { data: TF } = await this.hasTeachingFiles(studyUID);
+      if (TF.total_rows) {
         this.displaySeries(packedData);
       } else {
         const seriesArray = await this.getSeriesData(packedData);
         window.dispatchEvent(
           new CustomEvent("openTeachingFilesModal", {
-            detail: { seriesArray, args },
+            detail: { seriesArray, args, packedData },
           })
         );
       }
@@ -760,10 +761,8 @@ class App extends Component {
   };
 
   hasTeachingFiles = (studyUID) => {
-    searchAnnotations({
+    return searchAnnotations({
       query: `(template_code:99EPAD_15 AND study_uid:${studyUID}) AND project:lite`,
-    }).then((res) => {
-      return res.total_rows;
     });
   };
 
