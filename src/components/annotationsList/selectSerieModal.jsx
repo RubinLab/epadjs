@@ -14,6 +14,7 @@ import {
 import SelectionItem from "./containers/selectionItem";
 import { FaRegCheckSquare } from "react-icons/fa";
 import { getSeries, setSignificantSeries } from "../../services/seriesServices";
+import { getTemplate } from "../../services/templateServices";
 import "./annotationsList.css";
 import { isSupportedModality } from "../../Utils/aid.js";
 import { extendWith } from "lodash";
@@ -24,6 +25,9 @@ import { decryptAndAdd } from "services/decryptUrlService";
 const message = {
   title: "Not enough ports to open series"
 };
+
+const teachingFileTempUid = "2.25.182468981370271895711046628549377576999";
+const teachingFileTempCode = "99EPAD_15";
 
 class selectSerieModal extends React.Component {
   // _isMounted = false;
@@ -65,19 +69,6 @@ class selectSerieModal extends React.Component {
       const element = document.getElementById("questionaire");
       const newElement = document.getElementById("questionaire2");
 
-      const { projectMap, openSeries, activePort, templates: allTemplates } = this.props;
-      console.log("props", this.props);
-      // const { projectID } = openSeries[activePort];
-      // let projectID = "lite";
-      // console.log("Leyn", projectMap);
-      // const { defaultTemplate, templates } = projectMap[projectID];
-      // const projectTemplates = Object.keys(allTemplates)
-      //   .filter((key) => templates.includes(key))
-      //   .reduce((arr, key) => {
-      //     arr.push(allTemplates[key]);
-      //     return arr;
-      //   }, []);
-
       this.semanticAnswers = new questionaire.AimEditor(
         element,
         this.validateForm,
@@ -88,13 +79,12 @@ class selectSerieModal extends React.Component {
         true, // is teachinng flag
         newElement // the new div which holds only teaching components for aim editor
       );
+      const { data: templates } = await getTemplate(teachingFileTempUid);
       this.semanticAnswers.loadTemplates({
-        default: "99EPAD_15",
-        all: allTemplates,
+        default: teachingFileTempCode,
+        all: [templates],
       });
       this.semanticAnswers.createViewerWindow();
-
-      //cavit --- teaching file related part
 
     };// end teaching file related part
   }
@@ -102,19 +92,10 @@ class selectSerieModal extends React.Component {
     this._isMounted = false;
   };
 
+  // These two empty functions are necessary for aim editor
   renderButtons = () => {
   };
-  validateForm = (hasError) => {
-    if (hasError > 0) {
-      console.warn("Answer form has error/s!!!");
-      // this.setState({
-      //   saveButtonIsActive: false,
-      // });
-    } else {
-      // this.setState({
-      //   saveButtonIsActive: true,
-      // });
-    };
+  validateForm = () => {
   };
 
   getSerieListData = async (projectID, patientID, studyUID) => {
@@ -513,9 +494,7 @@ const mapStateToProps = state => {
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
     patients: state.annotationsListReducer.patients,
     openSeries: state.annotationsListReducer.openSeries,
-    projectMap: state.annotationsListReducer.projectMap,
     activePort: state.annotationsListReducer.activePort,
-    templates: state.annotationsListReducer.templates,
   };
 };
 
