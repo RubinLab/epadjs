@@ -1,14 +1,7 @@
-import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
-import { Aim } from "aimapi";
+import { Aim, enumAimType } from "aimapi";
 
 const activeColor = "#ddd000";
-
-export const enumAimType = {
-  imageAnnotation: 1,
-  seriesAnnotation: 2,
-  studyAnnotation: 3,
-};
 
 export function getMarkups(toolState, aimOfInterest) {
   var markupsToReturn = {};
@@ -134,76 +127,11 @@ export function prepAimForParseClass(aimJson) {
   }
 }
 
-
-
-export function getAimSeedDataFromStudy(study) {
-  var obj = {};
-  obj.aim = {};
-  obj.study = {};
-  obj.series = {};
-  obj.equipment = {};
-  obj.person = {};
-  obj.image = [];
-  const { aim, study: _study, series, equipment, person, image } = obj;
-  const { studyUID, studyTime, studyDate, studyAccessionNumber, sex, patientName, patientID, birthdate } = study;
-
-  aim.studyInstanceUid = studyUID || "";
-
-  _study.startTime = studyTime || "";
-  _study.instanceUid = studyUID || "";
-  _study.startDate = studyDate || "";
-  _study.accessionNumber = studyAccessionNumber || "";
-
-  series.instanceUid = "";
-  series.modality = "";
-  series.number = "";
-  series.description = "";
-  series.instanceNumber = "";
-
-  image.push({
-    sopClassUid: "",
-    sopInstanceUid: "",
-  });
-
-  equipment.manufacturerName = "";
-  equipment.manufacturerModelName = "";
-  equipment.softwareVersion = "";
-
-  person.sex = sex || "";
-  person.name = patientName || "";
-  person.patientId = patientID || "";
-  person.birthDate = birthdate || "";
-
-  return obj;
-}
-
-export function addSemanticAnswersToSeedData(seedData, answers) {
-  const {
-    name,
-    comment,
-    imagingPhysicalEntityCollection,
-    imagingObservationEntityCollection,
-    inferenceEntity,
-    typeCode,
-  } = answers;
-  seedData.aim.name = name;
-  if (comment) seedData.aim.comment = comment;
-  if (imagingPhysicalEntityCollection)
-    seedData.aim.imagingPhysicalEntityCollection = imagingPhysicalEntityCollection;
-  if (imagingObservationEntityCollection)
-    seedData.aim.imagingObservationEntityCollection = imagingObservationEntityCollection;
-  if (inferenceEntity) seedData.aim.inferenceEntity = inferenceEntity;
-  if (typeCode) seedData.aim.typeCode = typeCode;
+export function getUserForAim() {
+  return { userName: sessionStorage.getItem("username"), displayName: sessionStorage.getItem("displayName") };
 };
 
-export function addUserToSeedData(seedData) {
-  let obj = {};
-  obj.loginName = sessionStorage.getItem("username");
-  obj.name = sessionStorage.getItem("displayName");
-  seedData.user = obj;
-};
-
-export function createStudyAim(study, answers, updatedAimId, trackingUId) {
+export function createStudyAim({ study, answers, updatedAimId, trackingUId }) {
   const seedData = getAimSeedDataFromStudy(study);
   addSemanticAnswersToSeedData(seedData, answers);
   addUserToSeedData(seedData);

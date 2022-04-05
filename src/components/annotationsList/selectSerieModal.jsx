@@ -22,12 +22,11 @@ import { isSupportedModality } from "../../Utils/aid.js";
 import { extendWith } from "lodash";
 import { TiEject } from "react-icons/ti";
 import * as questionaire from "../aimEditor/parseClass";
-import { createStudyAim } from "../aimEditor/Helpers";
+import { getUserForAim } from "../aimEditor/Helpers";
 import { decryptAndAdd } from "services/decryptUrlService";
 import { getSingleStudy } from '../../services/studyServices';
-
-const teachingFileTempUid = "2.25.182468981370271895711046628549377576999";
-const teachingFileTempCode = "99EPAD_15";
+import { Aim, enumAimType } from "aimapi";
+import { teachingFileTempUid, teachingFileTempCode } from '../../constants';
 
 class selectSerieModal extends React.Component {
   // _isMounted = false;
@@ -360,9 +359,16 @@ class selectSerieModal extends React.Component {
     }
     await decryptAndAdd(encrUrlArgs);
     const answers = this.semanticAnswers.saveAim();
+    console.log("ANSWERS", answers);
     answers.name.value = "Teaching File";
     const { data: study } = await getSingleStudy(studyUID);
-    const aim = createStudyAim(study, answers);
+    const aimData = { study, answers, user: getUserForAim() };
+    const aim = new Aim(
+      aimData,
+      enumAimType.studyAnnotation,
+      updatedAimId,
+      trackingUId
+    );
     const aimJson = aim.getAim();
     let aimSaved = JSON.parse(aimJson);
     const isUpdate = false;
@@ -384,6 +390,11 @@ class selectSerieModal extends React.Component {
         );
         console.error(error);
       });
+  }
+
+  saveTeachingFileAndDisplay = async () => {
+    await this.saveTeachingFile();
+    this.displaySelection();
   }
 
   render = () => {

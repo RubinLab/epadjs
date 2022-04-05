@@ -33,3 +33,7 @@ export const formatDates = (timeStamp) => {
     return date + " " + hour;
   }
 };
+
+export const teachingFileTempUid =
+  "2.25.182468981370271895711046628549377576999";
+export const teachingFileTempCode = "99EPAD_15";
