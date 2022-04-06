@@ -393,62 +393,62 @@ class AimEditor extends Component {
     const { hasSegmentation } = this.props;
     const markupsToSave = this.getNewMarkups();
     const templateType = this.semanticAnswers.getSelectedTemplateType();
-    try {
-      if (hasSegmentation) {
-        // if (!this.checkSegmentationFrames()) return;
-        // segmentation and markups
-        this.createAimSegmentation(answers).then(
-          ({ aim, segmentationBlob, segId }) => {
-            // also add the markups to aim if there is any
-            if (Object.entries(markupsToSave).length !== 0)
-              this.createAimMarkups(aim, markupsToSave);
-            this.saveAim(aim, segmentationBlob, segId);
-          }
+    // try {
+    if (hasSegmentation) {
+      // if (!this.checkSegmentationFrames()) return;
+      // segmentation and markups
+      this.createAimSegmentation(answers).then(
+        ({ aim, segmentationBlob, segId }) => {
+          // also add the markups to aim if there is any
+          if (Object.entries(markupsToSave).length !== 0)
+            this.createAimMarkups(aim, markupsToSave);
+          this.saveAim(aim, segmentationBlob, segId);
+        }
+      );
+    } else if (Object.entries(markupsToSave).length !== 0) {
+      // markups without segmentation
+      const image = this.getAimSeedDataFromMarkup(markupsToSave);
+      const aimData = { image, answers, user: getUserForAim() };
+      const aim = new Aim(
+        aimData,
+        enumAimType.imageAnnotation,
+        this.updatedAimId,
+        this.state.trackingUId
+      );
+      this.createAimMarkups(aim, markupsToSave);
+      this.saveAim(aim);
+    } else {
+      //Non markup annotation
+      let aimData, aim;
+      const isStudyAim = templateType === "Study" ? true : false;
+      if (isStudyAim) { //Study annotation
+        const { openSeries, activePort } = this.props;
+        const { data: study } = await getSingleStudy(openSeries[activePort].studyUID);
+        aimData = { study, answers, user: getUserForAim() };
+        aim = new Aim(
+          aimData,
+          enumAimType.studyAnnotation,
+          this.updatedAimId,
+          this.state.trackingUId
         );
-      } else if (Object.entries(markupsToSave).length !== 0) {
-        // markups without segmentation
-        const image = this.getAimSeedDataFromMarkup(markupsToSave);
-        const aimData = { image, answers, user: getUserForAim() };
-        const aim = new Aim(
+      }
+      else { // Image Annotation, TODO:Might be series annotation too
+        const { activePort } = this.props;
+        const { element } = cornerstone.getEnabledElements()[activePort];
+        const image = cornerstone.getImage(element);
+        aimData = { image, answers, user: getUserForAim() };
+        aim = new Aim(
           aimData,
           enumAimType.imageAnnotation,
           this.updatedAimId,
           this.state.trackingUId
         );
-        this.createAimMarkups(aim, markupsToSave);
-        this.saveAim(aim);
-      } else {
-        //Non markup annotation
-        let aimData, aim;
-        const isStudyAim = templateType === "Study" ? true : false;
-        if (isStudyAim) { //Study annotation
-          const { openSeries, activePort } = this.props;
-          const { data: study } = await getSingleStudy(openSeries[activePort].studyUID);
-          aimData = { study, answers, user: getUserForAim() };
-          aim = new Aim(
-            aimData,
-            enumAimType.imageAnnotation,
-            this.updatedAimId,
-            this.state.trackingUId
-          );
-        }
-        else { // Image Annotation, TODO:Might be series annotation too
-          const { activePort } = this.props;
-          const { element } = cornerstone.getEnabledElements()[activePort];
-          const image = cornerstone.getImage(element);
-          aimData = { image, answers, user: getUserForAim() };
-          aim = new Aim(
-            aimData,
-            enumAimType.imageAnnotation,
-            this.updatedAimId,
-            this.state.trackingUId
-          );
-        }
-        this.saveAim(aim);
       }
-    } catch (error) {
-      throw new Error("Error creating aim", error);
+      this.saveAim(aim);
     }
+    // } catch (error) {
+    //   throw new Error("Error creating aim", error);
+    // }
   };
 
   getActiveElement = () => {
@@ -552,9 +552,10 @@ class AimEditor extends Component {
     return markedImageIds;
   };
 
-  getAimImageDataFromMarkup = (markupsToSave, answers) => {
+  getAimSeedDataFromMarkup = (markupsToSave) => {
     const cornerStoneImageId = Object.keys(markupsToSave)[0];
-    return image = this.getCornerstoneImagebyId(cornerStoneImageId);
+    const image = this.getCornerstoneImagebyId(cornerStoneImageId);
+    return image;
     // const seedData = getAimImageData(image);
     // addSemanticAnswersToSeedData(seedData, answers);
     // addUserToSeedData(seedData);
@@ -590,6 +591,7 @@ class AimEditor extends Component {
     const comment =
       aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
         .comment.value;
+    const isStudyAim = aim.getType() === enumAimType.studyAnnotation ? true : false;
     const aimRefs = {
       aimID,
       patientID,
