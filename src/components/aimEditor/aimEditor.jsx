@@ -8,6 +8,7 @@ import {
   uploadAim,
   uploadSegmentation,
 } from "../../services/annotationServices";
+import { getSingleStudy } from "services/studyServices";
 import {
   updateSingleSerie,
   updatePatientOnAimSave,

@@ -353,10 +353,12 @@ class selectSerieModal extends React.Component {
   saveTeachingFile = async () => {
     const { encrUrlArgs, decrArgs } = this.props;
     const { patientID, projectID, studyUID } = decrArgs;
+    let updatedAimId, trackingUId; //should be undefined for creating new aim
     if (!encrUrlArgs) {
       // Warn user
       return;
     }
+
     await decryptAndAdd(encrUrlArgs);
     const answers = this.semanticAnswers.saveAim();
     console.log("ANSWERS", answers);
@@ -373,7 +375,7 @@ class selectSerieModal extends React.Component {
     let aimSaved = JSON.parse(aimJson);
     const isUpdate = false;
 
-    uploadAim(aimSaved, projectID, isUpdate)
+    return uploadAim(aimSaved, projectID, isUpdate)
       .then(() => {
         toast.success("Teaching File succesfully saved.", {
           position: "top-right",
@@ -393,7 +395,7 @@ class selectSerieModal extends React.Component {
   }
 
   saveTeachingFileAndDisplay = async () => {
-    await this.saveTeachingFile();
+    let result = await this.saveTeachingFile();
     this.displaySelection();
   }
 
@@ -444,7 +446,7 @@ class selectSerieModal extends React.Component {
         <Modal.Footer className="modal-footer__buttons">
           {isTeachingFile && (
             <div>
-              <button onClick={this.saveTeachingFile}>Save Teaching File</button>
+              <button onClick={() => { this.saveTeachingFile(); this.handleCancel() }}>Save Teaching File</button>
               <button onClick={this.saveTeachingFileAndDisplay}>Save Teaching File & Display</button>
               <button onClick={this.handleCancel}>Discard</button>
             </div>

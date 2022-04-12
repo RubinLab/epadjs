@@ -131,15 +131,15 @@ export function getUserForAim() {
   return { userName: sessionStorage.getItem("username"), displayName: sessionStorage.getItem("displayName") };
 };
 
-export function createStudyAim({ study, answers, updatedAimId, trackingUId }) {
-  const seedData = getAimSeedDataFromStudy(study);
-  addSemanticAnswersToSeedData(seedData, answers);
-  addUserToSeedData(seedData);
-  const aim = new Aim(
-    seedData,
-    enumAimType.studyAnnotation,
-    updatedAimId,
-    trackingUId
-  );
-  return aim;
-}
+// export function createStudyAim({ study, answers, updatedAimId, trackingUId }) {
+//   const seedData = getAimSeedDataFromStudy(study);
+//   addSemanticAnswersToSeedData(seedData, answers);
+//   addUserToSeedData(seedData);
+//   const aim = new Aim(
+//     seedData,
+//     enumAimType.studyAnnotation,
+//     updatedAimId,
+//     trackingUId
+//   );
+//   return aim;
+// }
