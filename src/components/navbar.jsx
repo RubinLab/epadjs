@@ -20,9 +20,6 @@ const NavBar = ({
   viewType,
   path
 }) => {
-  // handleClick = () => {
-  //   openMenu();
-  // };
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -47,85 +44,111 @@ const NavBar = ({
         </button>
 
         <div className="collapse navbar-collapse pl-0" id="navbarColor01">
-          <ul className="navbar-nav mr-auto">
-            <li
-              id="navbarli"
-              className={
-                path.includes('list') ? 'nav-link activeNav' : 'nav-link'
-              }
-              onClick={() => {
-                onSearchViewClick();
-                onSwitchView('search', true);
-              }}
-            >
-              Patient List
-            </li>
-            <li
-              id="navbarli"
-              className={
-                path.includes('display') ? 'nav-link activeNav' : 'nav-link'
-              }
-              onClick={() => {
-                onSwitchView('display');
-              }}
-            >
-              Display
-            </li>
-            <li
-              className="nav-item"
-              onClick={() => {
-                onSwitchView('flex');
-              }}
-            >
-              <NavLink className="nav-link" to={pid ? `/flex/${pid}` : `/flex`}>
-                Study List
-              </NavLink>
-            </li>{' '}
-            {mode !== 'lite' && (
-              <React.Fragment>
-                {/* <li className="nav-item">
-                  <NavLink className="nav-link" to="/anotate">
-                    Annotate
-                  </NavLink>
-                </li>
-                <li
-                  className="nav-item"
-                  onClick={() => {
-                    onSwitchView("progress");
-                  }}
-                >
-                  <NavLink className="nav-link" to="/progress">
-                    Progress
-                  </NavLink>
-                </li> */}
-                {/* <li className="nav-item">
-                  <NavLink className="nav-link" to="/edit">
-                    Edit
-                  </NavLink>
-                </li>{' '} */}
-              </React.Fragment>
-            )}
-            <li
-              className="nav-item"
-              id="navbarReports"
-              onClick={() => {
-                onReports();
-              }}
-            >
-              Analysis
-            </li>
-            <li
-              id="navbar-ann"
-              className={
-                path.includes('search') ? 'nav-link activeNav' : 'nav-link'
-              }
-              onClick={() => {
-                onSwitchView('annotations');
-              }}
-            >
-              Search
-            </li>
-          </ul>
+          {mode === 'teaching' && (
+            <ul className="navbar-nav mr-auto">
+              <li
+                id="navbar-ann"
+                className={
+                  path.includes('search') ? 'nav-link activeNav' : 'nav-link'
+                }
+                onClick={() => {
+                  onSwitchView('annotations');
+                }}
+              >
+                Search
+              </li>
+              <li
+                id="navbarli"
+                className={
+                  path.includes('list') ? 'nav-link activeNav' : 'nav-link'
+                }
+                onClick={() => {
+                  onSearchViewClick();
+                  onSwitchView('search', true);
+                }}
+              >
+                Patient List
+              </li>
+              <li
+                className="nav-item"
+                onClick={() => {
+                  onSwitchView('flex');
+                }}
+              >
+                <NavLink className="nav-link" to={pid ? `/flex/${pid}` : `/flex`}>
+                  Study List
+                </NavLink>
+              </li>
+              <li
+                id="navbarli"
+                className={
+                  path.includes('display') ? 'nav-link activeNav' : 'nav-link'
+                }
+                onClick={() => {
+                  onSwitchView('display');
+                }}
+              >
+                Display
+              </li>
+            </ul>
+          )} {/* END TEACHING */}
+          {mode !== 'teaching' && (
+            <ul className="navbar-nav mr-auto">
+              <li
+                id="navbarli"
+                className={
+                  path.includes('list') ? 'nav-link activeNav' : 'nav-link'
+                }
+                onClick={() => {
+                  onSearchViewClick();
+                  onSwitchView('search', true);
+                }}
+              >
+                Patient List
+              </li>
+              <li
+                id="navbarli"
+                className={
+                  path.includes('display') ? 'nav-link activeNav' : 'nav-link'
+                }
+                onClick={() => {
+                  onSwitchView('display');
+                }}
+              >
+                Display
+              </li>
+              <li
+                className="nav-item"
+                onClick={() => {
+                  onSwitchView('flex');
+                }}
+              >
+                <NavLink className="nav-link" to={pid ? `/flex/${pid}` : `/flex`}>
+                  Study List
+                </NavLink>
+              </li>
+              <li
+                className="nav-item"
+                id="navbarReports"
+                onClick={() => {
+                  onReports();
+                }}
+              >
+                Analysis
+              </li>
+              <li
+                id="navbar-ann"
+                className={
+                  path.includes('search') ? 'nav-link activeNav' : 'nav-link'
+                }
+                onClick={() => {
+                  onSwitchView('annotations');
+                }}
+              >
+                Search
+              </li>
+            </ul>
+          )}
           <ul className="navbar-nav ml-auto">
             {!user && (
               <li className="nav-item pull-right">
