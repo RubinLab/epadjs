@@ -78,7 +78,7 @@ const NavBar = ({
               }}
             >
               <NavLink className="nav-link" to={pid ? `/flex/${pid}` : `/flex`}>
-                Flex
+                Study List
               </NavLink>
             </li>{' '}
             {mode !== 'lite' && (
