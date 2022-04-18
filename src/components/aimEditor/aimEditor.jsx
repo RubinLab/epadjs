@@ -24,6 +24,8 @@ import Switch from "react-switch";
 import { Modal } from "react-bootstrap";
 import "./aimEditor.css";
 
+const mode = sessionStorage.getItem('mode');
+
 const enumAimType = {
   imageAnnotation: 1,
   seriesAnnotation: 2,
@@ -209,53 +211,56 @@ class AimEditor extends Component {
     const { patientID, projectID } = openSeries[activePort];
     return (
       <div className="editor-form">
-        AutoFill :
-        <Switch
-          onChange={this.setAutoFill}
-          checked={this.state.autoFill}
-          onColor="#86d3ff"
-          onHandleColor="#2693e6"
-          handleDiameter={10}
-          uncheckedIcon={
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "100%",
-                fontSize: 11,
-                color: "#861737",
-                paddingRight: 2,
-              }}
-            >
-              Off
-            </div>
-          }
-          checkedIcon={
-            <svg viewBox="0 0 10 10" height="100%" width="100%">
-              <circle r={3} cx={5} cy={5} />
-            </svg>
-          }
-          boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
-          activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-          // height={15}
-          // width={20}
-          className="react-switch"
-        />
-        <div
-          className="base-line-selection"
-          onClick={() => this.setState({ showRecist: true })}
-        >
-          Select Baseline
-        </div>
-        {this.state.showRecist && (
-          <RecistTable
-            subjectId={patientID}
-            projectId={projectID}
-            semanticAnswers={this.semanticAnswers}
-            onSelect={this.selectBaseline}
-            onClose={() => this.setState({ showRecist: false })}
+        {mode !== 'teaching' && (<div>
+          <label>AutoFill :</label>
+          <Switch
+            onChange={this.setAutoFill}
+            checked={this.state.autoFill}
+            onColor="#86d3ff"
+            onHandleColor="#2693e6"
+            handleDiameter={10}
+            uncheckedIcon={
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100%",
+                  fontSize: 11,
+                  color: "#861737",
+                  paddingRight: 2,
+                }}
+              >
+                Off
+              </div>
+            }
+            checkedIcon={
+              <svg viewBox="0 0 10 10" height="100%" width="100%">
+                <circle r={3} cx={5} cy={5} />
+              </svg>
+            }
+            boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+            activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+            // height={15}
+            // width={20}
+            className="react-switch"
           />
+          <div
+            className="base-line-selection"
+            onClick={() => this.setState({ showRecist: true })}
+          >
+            Select Baseline
+          </div>
+          {this.state.showRecist && (
+            <RecistTable
+              subjectId={patientID}
+              projectId={projectID}
+              semanticAnswers={this.semanticAnswers}
+              onSelect={this.selectBaseline}
+              onClose={() => this.setState({ showRecist: false })}
+            />
+          )}
+        </div>
         )}
         <br />
         <div id="questionaire" />
@@ -1233,7 +1238,7 @@ class AimEditor extends Component {
     //     studyUID,
     //   })
     // );
-    
+
     // this.props.dispatch(updatePatientOnAimSave(aimRefs));
     this.props.updateTreeDataOnSave(aimRefs);
     this.props.onCancel(false); //close the aim editor
