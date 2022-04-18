@@ -54,6 +54,8 @@ import "./ToolMenu.css";
 import ToolMenuItem from "../ToolMenu/ToolMenuItem";
 import Interpolation from "./Interpolation";
 
+const mode = sessionStorage.getItem('mode');
+
 const mapStateToProps = (state) => {
   return {
     openSeries: state.annotationsListReducer.openSeries,
@@ -303,7 +305,10 @@ class ToolMenu extends Component {
       return;
     } else if (tool === "ClearGrid") {
       this.props.dispatch(clearGrid());
-      this.props.onSwitchView("search");
+      if (mode !== 'teaching')
+        this.props.onSwitchView("search");
+      else
+        this.props.onSwitchView("annotations");
       return;
     } else if (tool === "Presets") {
       this.showPresets();
