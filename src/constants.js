@@ -33,3 +33,5 @@ export const formatDates = (timeStamp) => {
     return date + " " + hour;
   }
 };
+
+export const teachingTemplateCode = "99EPAD_15";
