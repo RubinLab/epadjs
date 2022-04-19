@@ -68,7 +68,7 @@ class AimEditor extends Component {
     if (this.state.autoFill && Object.keys(lastSavedAim).length)
       this.semanticAnswers = new questionaire.AimEditor(
         element,
-        this.validateForm,
+        // this.validateForm,
         this.renderButtons,
         this.getDefaultLesionName(),
         setAimDirty,
@@ -77,7 +77,7 @@ class AimEditor extends Component {
     else
       this.semanticAnswers = new questionaire.AimEditor(
         element,
-        this.validateForm,
+        // this.validateForm,
         this.renderButtons,
         this.getDefaultLesionName(),
         setAimDirty
@@ -166,16 +166,16 @@ class AimEditor extends Component {
   };
   //cavit end
   validateForm = (hasError) => {
-    if (hasError > 0) {
-      console.warn("Answer form has error/s!!!");
-      this.setState({
-        saveButtonIsActive: false,
-      });
-    } else {
-      this.setState({
-        saveButtonIsActive: true,
-      });
-    }
+    // if (hasError > 0) {
+    //   console.warn("Answer form has error/s!!!");
+    //   this.setState({
+    //     saveButtonIsActive: false,
+    //   });
+    // } else {
+    //   this.setState({
+    //     saveButtonIsActive: true,
+    //   });
+    // }
   };
 
   getImage = () => {
@@ -312,9 +312,9 @@ class AimEditor extends Component {
     // Check if the template selected and if the selected template type is compatible to have markups
     if (!this.checkAimTemplate() || !this.checkMarkupsForTemplate()) return;
 
-    if (!this.state.saveButtonIsActive) {
+    if (this.semanticAnswers.checkFormSaveReady()) {
       window.alert(
-        "Please fill required answers or use required geometric shape"
+        "Please fill name/title and all required answers or use required geometric shape"
       );
       return;
     }

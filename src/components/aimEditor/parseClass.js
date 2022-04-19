@@ -11,7 +11,7 @@ const mode = sessionStorage.getItem("mode");
 //export next variable for react
 export var AimEditor = function (
   userWindow,
-  varformCheckHandler,
+  // varformCheckHandler,
   varRenderButtonHandler,
   aimName,
   setAimDirty,
@@ -29,7 +29,7 @@ export var AimEditor = function (
   this.fontweight = "1500";
   this.fontfamily = "Lato, Helvetica Neue, Arial, Helvetica, sans-serif;";
   this.renderButtonhandler = varRenderButtonHandler;
-  this.formCheckHandler = varformCheckHandler;
+  // this.formCheckHandler = varformCheckHandler;
   this.userWindow = userWindow;
   this.arrayTemplates = [];
   this.arrayTemplatesJsonObjects = [];
@@ -527,7 +527,7 @@ export var AimEditor = function (
     $('select[class^="ui dropdown"]').dropdown();
     $(".ui.accordion").accordion();
     self.checkShapes(self.runtimeUserShapes);
-    self.formCheckHandler(self.checkFormSaveReady());
+    // self.formCheckHandler(self.checkFormSaveReady());
   };
 
   this.QuestionType = function (
@@ -1751,7 +1751,7 @@ export var AimEditor = function (
         self.DisableTillNext(prObject.id, "tillend", self.callDisable);
       }
 
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     };
 
     this.getelementHtml = function () {
@@ -1844,7 +1844,7 @@ export var AimEditor = function (
           );
       }
 
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     };
 
     this.getelementHtml = function () {
@@ -1949,7 +1949,7 @@ export var AimEditor = function (
         }
       }
 
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     });
 
     this.getelementHtml = function () {
@@ -2026,7 +2026,7 @@ export var AimEditor = function (
         document.getElementById(vtPrObject.id).className =
           "red check circle outline icon";
       }
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     });
 
     this.getelementHtml = function () {
@@ -2127,8 +2127,7 @@ export var AimEditor = function (
           self.EnableTillNext(prObject.id, "tillend");
         }
       }
-
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     };
   };
 
@@ -2201,7 +2200,7 @@ export var AimEditor = function (
         document.getElementById(vtPrObject.id).className =
           "red check circle outline icon";
       }
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     };
   };
 
@@ -3674,6 +3673,12 @@ export var AimEditor = function (
       if (objs[i].className == "red check circle outline icon")
         countRedCircle++;
     }
+    console.log(
+      "form save ready",
+      document.getElementById("annotationName").value
+    );
+    if (document.getElementById("annotationName").value === "")
+      countRedCircle++;
     return countRedCircle;
   };
 
@@ -3762,7 +3767,7 @@ export var AimEditor = function (
         }
       }
     }
-    self.formCheckHandler(self.checkFormSaveReady());
+    // self.formCheckHandler(self.checkFormSaveReady());
   };
 
   this.setAim = function (aimValue) {
@@ -4117,7 +4122,7 @@ export var AimEditor = function (
         }
       }
     }
-    self.formCheckHandler(self.checkFormSaveReady());
+    // self.formCheckHandler(self.checkFormSaveReady());
   };
   this.loadAimJson = function (aimjson, isRecist) {
     //test
