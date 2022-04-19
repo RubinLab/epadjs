@@ -353,16 +353,17 @@ export var AimEditor = function (
 
     if (mode === "teaching" && templateCode === teachingTemplateCode) {
       labelAnnotationName.textContent = "Case Title";
-      labelAnnotationNameInput.placeholder = "Ex:39 year old with knee pain";
-    } else labelAnnotationName.textContent = "Annotation Name";
+      labelAnnotationNameInput.placeholder = "Ex: 39 year old with knee pain";
+    } else {
+      labelAnnotationName.textContent = "Annotation Name";
+      labelAnnotationNameInput.value = this.aimName;
+    }
 
     labelAnnotationNameInput.style.fontFamily = self.fontfamily;
     labelAnnotationNameInput.style.fontSize = "14px";
     labelAnnotationNameInput.style.paddingLeft = "2px";
     labelAnnotationNameInput.style.lineHeight = "14px";
     labelAnnotationNameInput.style.width = "100%";
-    // Line below added by Mete to give default names
-    labelAnnotationNameInput.value = this.aimName;
 
     labelAnnotationNameInput.onkeyup = function () {
       if (self.activateDirtyCheck) {

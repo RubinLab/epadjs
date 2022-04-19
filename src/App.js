@@ -605,7 +605,8 @@ class App extends Component {
       .then(async (results) => {
         const configData = await results[0].json();
 
-        let { mode, apiUrl, wadoUrl, authMode, maxPort } = configData;
+        let { mode, apiUrl, wadoUrl, authMode, maxPort, defaultAimName } =
+          configData;
         // check and use environment variables if any
         const authServerUrl =
           process.env.REACT_APP_AUTH_URL || Keycloak["auth-server-url"];
@@ -615,11 +616,14 @@ class App extends Component {
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
         const waterfallOptions = process.env.REACT_APP_WATERFALL_OPTS;
         maxPort = process.env.REACT_APP_MAX_PORT || maxPort || 6;
+        defaultAimName =
+          process.env.REACT_APP_DEFAULT_AIM_NAME || defaultAimName;
         sessionStorage.setItem("mode", mode);
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
         sessionStorage.setItem("authMode", authMode);
         sessionStorage.setItem("maxPort", maxPort);
+        sessionStorage.setItem("defaultAimName", defaultAimName);
         if (waterfallOptions) {
           sessionStorage.setItem("waterfallOptions", waterfallOptions);
         }

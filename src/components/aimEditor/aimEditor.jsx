@@ -25,6 +25,7 @@ import { Modal } from "react-bootstrap";
 import "./aimEditor.css";
 
 const mode = sessionStorage.getItem('mode');
+const defaultAimName = sessionStorage.getItem('defaultAimName');
 
 const enumAimType = {
   imageAnnotation: 1,
@@ -156,7 +157,7 @@ class AimEditor extends Component {
         totalNumShapes += shapesOnImage.length;
       });
     }
-    return `Lesion${totalNumShapes}`;
+    return `${defaultAimName}${totalNumShapes}`;
   };
 
   //cavit
