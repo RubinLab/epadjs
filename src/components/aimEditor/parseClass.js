@@ -3683,7 +3683,7 @@ export var AimEditor = function (
   };
 
   this.checkAnnotationShapes = function (prmtrShapeArray) {
-    if (typeof prmtrShapeArray === "undefined") {
+    if (!prmtrShapeArray.length || prmtrShapeArray[0]===undefined) {
       return;
     }
     let anyShapeFlag = false;

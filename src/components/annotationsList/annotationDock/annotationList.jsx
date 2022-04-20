@@ -156,7 +156,7 @@ class AnnotationsList extends React.Component {
           } else {
             calculations[aim.aimUid] = {};
             calculations[aim.aimUid][aim.markupUid] = {
-              calculations: [...aim.calculations],
+              calculations: aim.calculations ? [...aim.calculations] : [],
               markupType: aim.markupType
             };
             // calculations[aim.markupUid].push({ markupType: aim.markupType });
