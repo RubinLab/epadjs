@@ -321,7 +321,7 @@ class DisplayView extends Component {
     if (aimList[seriesUID][aimID]) {
       const aimJson = aimList[seriesUID][aimID].json;
       const markupTypes = this.getMarkupTypesForAim(aimID);
-      aimJson["markupType"] = [...markupTypes];
+      aimJson["markupType"] = markupTypes ? [...markupTypes] : undefined;
       aimJson["aimId"] = aimID;
 
       // check if is already editing an aim
@@ -1535,6 +1535,9 @@ class DisplayView extends Component {
     try {
       const imageAnnotations = this.props.series[this.props.activePort]
         .imageAnnotations;
+      if (!imageAnnotations) {
+        return undefined;
+      }
       Object.entries(imageAnnotations).forEach(([key, values]) => {
         values.forEach((value) => {
           if (value.aimUid === aimUid) markupTypes.push(value.markupType);
