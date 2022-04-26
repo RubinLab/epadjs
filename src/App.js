@@ -57,6 +57,7 @@ import RightsideBar from "./components/RightsideBar/RightsideBar";
 import MinimizedReport from "./components/searchView/MinimizedReport";
 import { FaJoint } from "react-icons/fa";
 import { isSupportedModality } from "./Utils/aid.js";
+import { teachingFileTempCode } from './constants';
 
 const messages = {
   noPatient: {
@@ -766,7 +767,7 @@ class App extends Component {
 
   hasTeachingFiles = (studyUID) => {
     return searchAnnotations({
-      query: `(template_code:99EPAD_15 AND study_uid:${studyUID}) AND project:lite`,
+      query: `(template_code:${teachingFileTempCode} AND study_uid:${studyUID}) AND project:lite`,
     });
   };
 
