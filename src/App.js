@@ -1389,7 +1389,6 @@ class App extends Component {
                 <Route path="/tools" />
                 <Route path="/edit" />
                 <Route path="/not-found" component={NotFound} />
-<<<<<<< HEAD
                 {mode !== "teaching" && (
                   <ProtectedRoute
                     from="/"
@@ -1439,39 +1438,6 @@ class App extends Component {
                     )}
                   />
                 )}
-=======
-                <ProtectedRoute
-                  from="/"
-                  exact
-                  to="/list"
-                  render={(props) => (
-                    <SearchView
-                      {...props}
-                      clearTreeExpand={this.clearTreeExpand}
-                      updateProgress={this.updateProgress}
-                      progressUpdated={progressUpdated}
-                      expandLevel={this.state.expandLevel}
-                      getTreeExpandSingle={this.getTreeExpandSingle}
-                      closeBeforeDelete={this.closeBeforeDelete}
-                      getTreeExpandAll={this.getTreeExpandAll}
-                      treeExpand={treeExpand}
-                      getExpandLevel={this.getExpandLevel}
-                      // expandLoading={expandLoading}
-                      // updateExpandedLevelNums={this.updateExpandedLevelNums}
-                      onShrink={this.handleShrink}
-                      handleCloseAll={this.handleCloseAll}
-                      treeData={this.state.treeData}
-                      getTreeData={this.getTreeData}
-                      clearTreeData={this.clearTreeData}
-                      updateTreeDataOnSave={this.updateTreeDataOnSave}
-                      closeAllCounter={this.state.closeAll}
-                      pid={this.state.pid}
-                      admin={this.state.admin}
-                      collapseSubjects={this.collapseSubjects}
-                    />
-                  )}
-                />
->>>>>>> develop
 
                 <Redirect to="/not-found" />
               </Switch>
