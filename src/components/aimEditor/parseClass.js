@@ -1727,7 +1727,7 @@ export var AimEditor = function (
 
       if (checkmarkObj.actualSelected >= checkmarkObj.min)
         document.getElementById(checkmarkObj.id).className =
-          "green check368 circle outline icon";
+          "green check circle outline icon";
       if (allowedTermObj.nextId != "0") {
         self.DisableTillNext(
           prObject.id,
