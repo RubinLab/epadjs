@@ -8,6 +8,7 @@ import {
   uploadAim,
   uploadSegmentation,
 } from "../../services/annotationServices";
+import { getSingleStudy } from "services/studyServices";
 import {
   updateSingleSerie,
   updatePatientOnAimSave,
@@ -16,19 +17,13 @@ import {
   segUploadRemove
 } from "../annotationsList/action";
 import RecistTable from "./RecistTable";
-import { Aim, getAimImageData, modalities } from "aimapi";
-import { prepAimForParseClass, getMarkups } from "./Helpers";
+import { Aim, enumAimType } from "aimapi";
+import { prepAimForParseClass, getMarkups, getUserForAim } from "./Helpers";
 import * as questionaire from "./parseClass.js";
 import * as dcmjs from "dcmjs";
 import Switch from "react-switch";
 import { Modal } from "react-bootstrap";
 import "./aimEditor.css";
-
-const enumAimType = {
-  imageAnnotation: 1,
-  seriesAnnotation: 2,
-  studyAnnotation: 3,
-};
 
 class AimEditor extends Component {
   constructor(props) {
@@ -349,95 +344,112 @@ class AimEditor extends Component {
     return true;
   };
 
-  fixAimType = (aim, templateType) => {
-    if (
-      templateType === "Study" &&
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-        .imageReferenceEntityCollection
-    ) {
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.instanceUid.root =
-        "";
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.modality = {
-        code: "99EPADM0",
-        codeSystemName: "99EPAD",
-        "iso:displayName": {
-          "xmlns:iso": "uri:iso.org:21090",
-          value: "NA",
-        },
-      };
-    }
-    if (
-      (templateType === "Study" || templateType === "Series") &&
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-        .imageReferenceEntityCollection
-    ) {
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.imageCollection.Image[0].sopClassUid.root =
-        "";
-      aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.imageCollection.Image[0].sopInstanceUid.root =
-        "";
-      // remove instance number from comment
-      if (
-        aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
-          .comment
-      ) {
-        const commentParts = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value.split(
-          "/"
-        );
-        if (commentParts.length > 3) {
-          commentParts[2] = " ";
-          aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value = commentParts.join(
-            "/"
-          );
-        }
-      }
-    }
-    return aim;
-  };
+  // Is handled in aimapi 04/05/2022
+  // fixAimType = (aim, templateType) => {
+  //   if (
+  //     templateType === "Study" &&
+  //     aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+  //       .imageReferenceEntityCollection
+  //   ) {
+  //     aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.instanceUid.root =
+  //       "";
+  //     aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.modality = {
+  //       code: "99EPADM0",
+  //       codeSystemName: "99EPAD",
+  //       "iso:displayName": {
+  //         "xmlns:iso": "uri:iso.org:21090",
+  //         value: "NA",
+  //       },
+  //     };
+  //   }
+  //   if (
+  //     (templateType === "Study" || templateType === "Series") &&
+  //     aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+  //       .imageReferenceEntityCollection
+  //   ) {
+  //     aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.imageCollection.Image[0].sopClassUid.root =
+  //       "";
+  //     aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].imageReferenceEntityCollection.ImageReferenceEntity[0].imageStudy.imageSeries.imageCollection.Image[0].sopInstanceUid.root =
+  //       "";
+  //     // remove instance number from comment
+  //     if (
+  //       aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
+  //         .comment
+  //     ) {
+  //       const commentParts = aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value.split(
+  //         "/"
+  //       );
+  //       if (commentParts.length > 3) {
+  //         commentParts[2] = " ";
+  //         aim.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0].comment.value = commentParts.join(
+  //           "/"
+  //         );
+  //       }
+  //     }
+  //   }
+  //   return aim;
+  // };
 
   createAim = async (answers) => {
     const { hasSegmentation } = this.props;
     const markupsToSave = this.getNewMarkups();
     const templateType = this.semanticAnswers.getSelectedTemplateType();
-    try {
-      if (hasSegmentation) {
-        // if (!this.checkSegmentationFrames()) return;
-        // segmentation and markups
-        this.createAimSegmentation(answers).then(
-          ({ aim, segmentationBlob, segId }) => {
-            // also add the markups to aim if there is any
-            if (Object.entries(markupsToSave).length !== 0)
-              this.createAimMarkups(aim, markupsToSave);
-            this.saveAim(aim, templateType, segmentationBlob, segId);
-          }
-        );
-      } else if (Object.entries(markupsToSave).length !== 0) {
-        // markups without segmentation
-        const seedData = this.getAimSeedDataFromMarkup(markupsToSave, answers);
-        const aim = new Aim(
-          seedData,
-          enumAimType.imageAnnotation,
+    // try {
+    if (hasSegmentation) {
+      // if (!this.checkSegmentationFrames()) return;
+      // segmentation and markups
+      this.createAimSegmentation(answers).then(
+        ({ aim, segmentationBlob, segId }) => {
+          // also add the markups to aim if there is any
+          if (Object.entries(markupsToSave).length !== 0)
+            this.createAimMarkups(aim, markupsToSave);
+          this.saveAim(aim, segmentationBlob, segId);
+        }
+      );
+    } else if (Object.entries(markupsToSave).length !== 0) {
+      // markups without segmentation
+      const image = this.getAimSeedDataFromMarkup(markupsToSave);
+      const aimData = { image, answers, user: getUserForAim() };
+      const aim = new Aim(
+        aimData,
+        enumAimType.imageAnnotation,
+        this.updatedAimId,
+        this.state.trackingUId
+      );
+      this.createAimMarkups(aim, markupsToSave);
+      this.saveAim(aim);
+    } else {
+      //Non markup annotation
+      let aimData, aim;
+      const isStudyAim = templateType === "Study" ? true : false;
+      if (isStudyAim) { //Study annotation
+        const { openSeries, activePort } = this.props;
+        const { data: study } = await getSingleStudy(openSeries[activePort].studyUID);
+        aimData = { study, answers, user: getUserForAim() };
+        aim = new Aim(
+          aimData,
+          enumAimType.studyAnnotation,
           this.updatedAimId,
           this.state.trackingUId
         );
-        this.createAimMarkups(aim, markupsToSave);
-        this.saveAim(aim, templateType);
-      } else {
-        //Non markup image annotation
+      }
+      else { // Image Annotation, TODO:Might be series annotation too
         const { activePort } = this.props;
         const { element } = cornerstone.getEnabledElements()[activePort];
         const image = cornerstone.getImage(element);
-        const seedData = this.getAimSeedDataFromCurrentImage(image, answers);
-        const aim = new Aim(
-          seedData,
+        aimData = { image, answers, user: getUserForAim() };
+        aim = new Aim(
+          aimData,
           enumAimType.imageAnnotation,
           this.updatedAimId,
           this.state.trackingUId
         );
-        this.saveAim(aim, templateType);
       }
-    } catch (error) {
-      throw new Error("Error creating aim", error);
+      this.saveAim(aim);
     }
+    // } catch (error) {
+    //   throw new Error("Error creating aim", error);
+    // }
   };
 
   getActiveElement = () => {
@@ -464,12 +476,9 @@ class AimEditor extends Component {
       image,
     } = await this.createSegmentation3D(activeLabelMapIndex, aimName);
 
-    // praper the seed data and create aim
-    const seedData = getAimImageData(image);
-    this.addSemanticAnswersToSeedData(seedData, answers);
-    this.addUserToSeedData(seedData);
+    const aimData = { image, answers, user: getUserForAim() };
     const aim = new Aim(
-      seedData,
+      aimData,
       enumAimType.imageAnnotation,
       this.updatedAimId,
       this.state.trackingUId
@@ -544,26 +553,27 @@ class AimEditor extends Component {
     return markedImageIds;
   };
 
-  getAimSeedDataFromMarkup = (markupsToSave, answers) => {
+  getAimSeedDataFromMarkup = (markupsToSave) => {
     const cornerStoneImageId = Object.keys(markupsToSave)[0];
     const image = this.getCornerstoneImagebyId(cornerStoneImageId);
-    const seedData = getAimImageData(image);
-    this.addSemanticAnswersToSeedData(seedData, answers);
-    this.addUserToSeedData(seedData);
-    return seedData;
+    return image;
+    // const seedData = getAimImageData(image);
+    // addSemanticAnswersToSeedData(seedData, answers);
+    // addUserToSeedData(seedData);
+    // return seedData;
   };
 
-  getAimSeedDataFromCurrentImage = (image, answers) => {
-    const seedData = getAimImageData(image);
-    this.addSemanticAnswersToSeedData(seedData, answers);
-    this.addUserToSeedData(seedData);
-    return seedData;
-  };
+  // Not being called, commented out on 04/05/2022
+  // getAimSeedDataFromCurrentImage = (image, answers) => {
+  //   const seedData = getAimImageData(image);
+  //   addSemanticAnswersToSeedData(seedData, answers);
+  //   addUserToSeedData(seedData);
+  //   return seedData;
+  // };
 
-  saveAim = (aim, templateType, segmentationBlob, segId) => {
+  saveAim = (aim, segmentationBlob, segId) => {
     const aimJson = aim.getAim();
     let aimSaved = JSON.parse(aimJson);
-    const isStudyAim = templateType === "Study" ? true : false;
 
     // If file upload service will be used instead of aim save service reagrding
     // the aim size purposes then aim blob should be sent with the following code
@@ -571,7 +581,6 @@ class AimEditor extends Component {
     // const aimBlob = new Blob([aimJson], {
     //   type: "application/octet-stream",
     // });
-    aimSaved = this.fixAimType(aimSaved, templateType);
     const aimID = aimSaved.ImageAnnotationCollection.uniqueIdentifier.root;
     const { openSeries, activePort } = this.props;
     const { patientID, projectID, seriesUID, studyUID } = openSeries[
@@ -583,6 +592,7 @@ class AimEditor extends Component {
     const comment =
       aimSaved.ImageAnnotationCollection.imageAnnotations.ImageAnnotation[0]
         .comment.value;
+    const isStudyAim = aim.getType() === enumAimType.studyAnnotation ? true : false;
     const aimRefs = {
       aimID,
       patientID,
@@ -750,37 +760,11 @@ class AimEditor extends Component {
     });
     return markupsToSave;
   };
-
-  addModalityObjectToSeedData = (seedData) => {
-    const modality = modalities[seedData.series.modality];
-    seedData.series.modality = { ...modality };
-  };
-
-  addSemanticAnswersToSeedData = (seedData, answers) => {
-    const {
-      name,
-      comment,
-      imagingPhysicalEntityCollection,
-      imagingObservationEntityCollection,
-      inferenceEntity,
-      typeCode,
-    } = answers;
-    seedData.aim.name = name;
-    if (comment) seedData.aim.comment = comment;
-    if (imagingPhysicalEntityCollection)
-      seedData.aim.imagingPhysicalEntityCollection = imagingPhysicalEntityCollection;
-    if (imagingObservationEntityCollection)
-      seedData.aim.imagingObservationEntityCollection = imagingObservationEntityCollection;
-    if (inferenceEntity) seedData.aim.inferenceEntity = inferenceEntity;
-    if (typeCode) seedData.aim.typeCode = typeCode;
-  };
-
-  addUserToSeedData = (seedData) => {
-    let obj = {};
-    obj.loginName = sessionStorage.getItem("username");
-    obj.name = sessionStorage.getItem("displayName");
-    seedData.user = obj;
-  };
+  // Not being called, commented out at 04/05/2022
+  // addModalityObjectToSeedData = (seedData) => {
+  //   const modality = modalities[seedData.series.modality];
+  //   seedData.series.modality = { ...modality };
+  // };
 
   // get the image object by index
   getCornerstoneImagebyIdx = (imageIdx) => {
@@ -1233,7 +1217,7 @@ class AimEditor extends Component {
     //     studyUID,
     //   })
     // );
-    
+
     // this.props.dispatch(updatePatientOnAimSave(aimRefs));
     this.props.updateTreeDataOnSave(aimRefs);
     this.props.onCancel(false); //close the aim editor

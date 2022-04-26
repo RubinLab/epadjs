@@ -108,3 +108,6 @@ export function getStudy(projectId, subjectId, studyUID) {
       encodeURIComponent(studyUID)
   );
 }
+export function getSingleStudy(studyUID) {
+  return http.get(http.apiUrl() + "/studies/" + encodeURIComponent(studyUID));
+}

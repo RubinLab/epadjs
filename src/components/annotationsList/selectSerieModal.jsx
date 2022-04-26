@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
+import { toast } from "react-toastify";
 import ReactTooltip from "react-tooltip";
 import { Modal } from "react-bootstrap";
 import {
@@ -14,14 +15,18 @@ import {
 import SelectionItem from "./containers/selectionItem";
 import { FaRegCheckSquare } from "react-icons/fa";
 import { getSeries, setSignificantSeries } from "../../services/seriesServices";
+import { getTemplate } from "../../services/templateServices";
+import { uploadAim } from "services/annotationServices";
 import "./annotationsList.css";
 import { isSupportedModality } from "../../Utils/aid.js";
 import { extendWith } from "lodash";
 import { TiEject } from "react-icons/ti";
-
-const message = {
-  title: "Not enough ports to open series"
-};
+import * as questionaire from "../aimEditor/parseClass";
+import { getUserForAim } from "../aimEditor/Helpers";
+import { decryptAndAdd } from "services/decryptUrlService";
+import { getSingleStudy } from '../../services/studyServices';
+import { Aim, enumAimType } from "aimapi";
+import { teachingFileTempUid, teachingFileTempCode } from '../../constants';
 
 class selectSerieModal extends React.Component {
   // _isMounted = false;
@@ -56,12 +61,41 @@ class selectSerieModal extends React.Component {
     this.setPreSelecteds();
     const limit = this.updateLimit();
     this.setState({ limit });
-  };
 
+    // teaching file save related
+    const { isTeachingFile } = this.props;
+    if (isTeachingFile) {
+      const element = document.getElementById("questionaire");
+      const newElement = document.getElementById("questionaire2");
+
+      this.semanticAnswers = new questionaire.AimEditor(
+        element,
+        this.validateForm,
+        this.renderButtons,
+        "",
+        {},
+        null,
+        true, // is teachinng flag
+        newElement // the new div which holds only teaching components for aim editor
+      );
+      const { data: templates } = await getTemplate(teachingFileTempUid);
+      this.semanticAnswers.loadTemplates({
+        default: teachingFileTempCode,
+        all: [templates],
+      });
+      this.semanticAnswers.createViewerWindow();
+
+    };// end teaching file related part
+  }
   componentWillUnmount = () => {
     this._isMounted = false;
   };
 
+  // These two empty functions are necessary for aim editor
+  renderButtons = () => {
+  };
+  validateForm = () => {
+  };
 
   getSerieListData = async (projectID, patientID, studyUID) => {
     const { data: series } = await getSeries(projectID, patientID, studyUID);
@@ -316,22 +350,73 @@ class selectSerieModal extends React.Component {
     return selectionList;
   };
 
+  saveTeachingFile = async () => {
+    const { encrUrlArgs, decrArgs } = this.props;
+    const { patientID, projectID, studyUID } = decrArgs;
+    let updatedAimId, trackingUId; //should be undefined for creating new aim
+    if (!encrUrlArgs) {
+      // Warn user
+      return;
+    }
+
+    await decryptAndAdd(encrUrlArgs);
+    const answers = this.semanticAnswers.saveAim();
+    console.log("ANSWERS", answers);
+    answers.name.value = "Teaching File";
+    const { data: study } = await getSingleStudy(studyUID);
+    const aimData = { study, answers, user: getUserForAim() };
+    const aim = new Aim(
+      aimData,
+      enumAimType.studyAnnotation,
+      updatedAimId,
+      trackingUId
+    );
+    const aimJson = aim.getAim();
+    let aimSaved = JSON.parse(aimJson);
+    const isUpdate = false;
+
+    return uploadAim(aimSaved, projectID, isUpdate)
+      .then(() => {
+        toast.success("Teaching File succesfully saved.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      })
+      .catch((error) => {
+        alert(
+          "Teaching file couldn't be saved! More information about the error can be found in the logs."
+        );
+        console.error(error);
+      });
+  }
+
+  saveTeachingFileAndDisplay = async () => {
+    let result = await this.saveTeachingFile();
+    this.displaySelection();
+  }
+
   render = () => {
-    const { openSeries } = this.props;
+    const { openSeries, isTeachingFile } = this.props;
+    const title = isTeachingFile ? "Create Teaching File" : "Not enough viewports to display series"
     const selections = Object.keys(this.state.selectedToDisplay);
     const list = this.renderSelection();
     return (
-      // <Modal.Dialog dialogClassName="alert-selectSerie">
       <Modal.Dialog id="modal-fix">
         <Modal.Header>
           <Modal.Title className="selectSerie__header">
-            {message.title}
+            {title}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body
           className="selectSerie-container"
           style={{ textAlign: "start" }}
         >
+          {isTeachingFile && (<div><div id="questionaire"> </div>
+            <div id="questionaire2"> </div></div>)}
           <div>Maximum {this.maxPort} series can be viewed at a time.</div>
           {openSeries.length > 0 && (
             <div>
@@ -359,8 +444,19 @@ class selectSerieModal extends React.Component {
           <div>{list}</div>
         </Modal.Body>
         <Modal.Footer className="modal-footer__buttons">
-          <button onClick={this.displaySelection} disabled={!selections.length}>Display selection</button>
-          <button onClick={this.handleCancel}>Cancel</button>
+          {isTeachingFile && (
+            <div>
+              <button onClick={() => { this.saveTeachingFile(); this.handleCancel() }}>Save Teaching File</button>
+              <button onClick={this.saveTeachingFileAndDisplay}>Save Teaching File & Display</button>
+              <button onClick={this.handleCancel}>Discard</button>
+            </div>
+          )}
+          {!isTeachingFile && (
+            <div>
+              <button onClick={this.displaySelection} disabled={!selections.length}>Display selection</button>
+              <button onClick={this.handleCancel}>Cancel</button>
+            </div>
+          )}
         </Modal.Footer>
       </Modal.Dialog>
     );
@@ -373,7 +469,8 @@ const mapStateToProps = state => {
     selectedSeries: state.annotationsListReducer.selectedSeries,
     selectedAnnotations: state.annotationsListReducer.selectedAnnotations,
     patients: state.annotationsListReducer.patients,
-    openSeries: state.annotationsListReducer.openSeries
+    openSeries: state.annotationsListReducer.openSeries,
+    activePort: state.annotationsListReducer.activePort,
   };
 };
 

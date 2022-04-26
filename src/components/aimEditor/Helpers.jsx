@@ -1,5 +1,5 @@
-import cornerstone from "cornerstone-core";
 import cornerstoneTools from "cornerstone-tools";
+import { Aim, enumAimType } from "aimapi";
 
 const activeColor = "#ddd000";
 
@@ -126,3 +126,20 @@ export function prepAimForParseClass(aimJson) {
     console.error(error);
   }
 }
+
+export function getUserForAim() {
+  return { userName: sessionStorage.getItem("username"), displayName: sessionStorage.getItem("displayName") };
+};
+
+// export function createStudyAim({ study, answers, updatedAimId, trackingUId }) {
+//   const seedData = getAimSeedDataFromStudy(study);
+//   addSemanticAnswersToSeedData(seedData, answers);
+//   addUserToSeedData(seedData);
+//   const aim = new Aim(
+//     seedData,
+//     enumAimType.studyAnnotation,
+//     updatedAimId,
+//     trackingUId
+//   );
+//   return aim;
+// }
