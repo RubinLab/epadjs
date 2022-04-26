@@ -4,7 +4,7 @@ import $ from "jquery/dist/jquery.js";
 import "./semantic/semantic.css";
 import "./semantic/semantic.js";
 import DOMPurify from "dompurify";
-import { teachingTemplateCode } from "constants.js";
+import { teachingFileTempCode } from "../../constants";
 
 const mode = sessionStorage.getItem("mode");
 
@@ -357,7 +357,7 @@ export var AimEditor = function (
     var labelAnnotationName = document.createElement("label");
     var labelAnnotationNameInput = document.createElement("INPUT");
 
-    if (mode === "teaching" && templateCode === teachingTemplateCode) {
+    if (mode === "teaching" && templateCode === teachingFileTempCode) {
       labelAnnotationName.textContent = "Case Title";
       labelAnnotationNameInput.placeholder = "Ex: 39 year old with knee pain";
     } else {

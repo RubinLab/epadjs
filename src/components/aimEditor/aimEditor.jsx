@@ -28,12 +28,6 @@ import "./aimEditor.css";
 const mode = sessionStorage.getItem('mode');
 const defaultAimName = sessionStorage.getItem('defaultAimName');
 
-const enumAimType = {
-  imageAnnotation: 1,
-  seriesAnnotation: 2,
-  studyAnnotation: 3,
-};
-
 class AimEditor extends Component {
   constructor(props) {
     super(props);
