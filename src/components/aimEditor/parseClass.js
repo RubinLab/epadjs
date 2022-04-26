@@ -414,7 +414,6 @@ export var AimEditor = function (
     document.getElementById("accordion1").appendChild(annotationNameLabelDiv);
     document.getElementById("accordion1").appendChild(annotationNameDiv);
     document.getElementById("accordion1").appendChild(labelDiv);
-    document.getElementById("accordion1").appendChild(labelDiv);
     document.getElementById("accordion1").appendChild(commentDiv);
     //end adding comment textarea for the template
     var a = 0;

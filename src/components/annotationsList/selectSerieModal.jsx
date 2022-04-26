@@ -24,7 +24,7 @@ import { TiEject } from "react-icons/ti";
 import * as questionaire from "../aimEditor/parseClass";
 import { getUserForAim } from "../aimEditor/Helpers";
 import { decryptAndAdd } from "services/decryptUrlService";
-import { getSingleStudy } from '../../services/studyServices';
+import { getSingleStudy, deleteStudy } from '../../services/studyServices';
 import { Aim, enumAimType } from "aimapi";
 import { teachingFileTempUid, teachingFileTempCode } from '../../constants';
 
@@ -352,16 +352,15 @@ class selectSerieModal extends React.Component {
 
   saveTeachingFile = async () => {
     const { encrUrlArgs, decrArgs } = this.props;
-    const { patientID, projectID, studyUID } = decrArgs;
+    const { projectID, patientID, studyUID } = decrArgs;
     let updatedAimId, trackingUId; //should be undefined for creating new aim
     if (!encrUrlArgs) {
-      // Warn user
+      console.error("Error saving teaching file. No encrypted argument present");
       return;
     }
 
     await decryptAndAdd(encrUrlArgs);
     const answers = this.semanticAnswers.saveAim();
-    console.log("ANSWERS", answers);
     answers.name.value = "Teaching File";
     const { data: study } = await getSingleStudy(studyUID);
     const aimData = { study, answers, user: getUserForAim() };
@@ -387,6 +386,7 @@ class selectSerieModal extends React.Component {
         });
       })
       .catch((error) => {
+        deleteStudy({ projectID, patientID, studyUID }, '?all=true');
         alert(
           "Teaching file couldn't be saved! More information about the error can be found in the logs."
         );
