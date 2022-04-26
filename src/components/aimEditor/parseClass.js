@@ -4,10 +4,14 @@ import $ from "jquery/dist/jquery.js";
 import "./semantic/semantic.css";
 import "./semantic/semantic.js";
 import DOMPurify from "dompurify";
+import { teachingTemplateCode } from "constants.js";
+
+const mode = sessionStorage.getItem("mode");
+
 //export next variable for react
 export var AimEditor = function (
   userWindow,
-  varformCheckHandler,
+  // varformCheckHandler,
   varRenderButtonHandler,
   aimName,
   setAimDirty,
@@ -27,7 +31,7 @@ export var AimEditor = function (
   this.fontweight = "1500";
   this.fontfamily = "Lato, Helvetica Neue, Arial, Helvetica, sans-serif;";
   this.renderButtonhandler = varRenderButtonHandler;
-  this.formCheckHandler = varformCheckHandler;
+  // this.formCheckHandler = varformCheckHandler;
   this.userWindow = userWindow;
   this.arrayTemplates = [];
   this.arrayTemplatesJsonObjects = [];
@@ -324,6 +328,7 @@ export var AimEditor = function (
   };
 
   this.extractTemplate = function (json) {
+    const templateCode = json["TemplateContainer"]["Template"][0]["codeValue"];
     var a = 0;
     // to hide main aim editor components other than teaching components
     if (isTeachingFlag) {
@@ -350,16 +355,21 @@ export var AimEditor = function (
     var annotationNameLabelDiv = document.createElement("div");
 
     var labelAnnotationName = document.createElement("label");
-
-    labelAnnotationName.textContent = "Annotation Name";
     var labelAnnotationNameInput = document.createElement("INPUT");
+
+    if (mode === "teaching" && templateCode === teachingTemplateCode) {
+      labelAnnotationName.textContent = "Case Title";
+      labelAnnotationNameInput.placeholder = "Ex: 39 year old with knee pain";
+    } else {
+      labelAnnotationName.textContent = "Annotation Name";
+      labelAnnotationNameInput.value = this.aimName;
+    }
+
     labelAnnotationNameInput.style.fontFamily = self.fontfamily;
     labelAnnotationNameInput.style.fontSize = "14px";
     labelAnnotationNameInput.style.paddingLeft = "2px";
     labelAnnotationNameInput.style.lineHeight = "14px";
     labelAnnotationNameInput.style.width = "100%";
-    // Line below added by Mete to give default names
-    labelAnnotationNameInput.value = this.aimName;
 
     labelAnnotationNameInput.onkeyup = function () {
       if (self.activateDirtyCheck) {
@@ -539,7 +549,7 @@ export var AimEditor = function (
     $('select[class^="ui dropdown"]').dropdown();
     $(".ui.accordion").accordion();
     self.checkShapes(self.runtimeUserShapes);
-    self.formCheckHandler(self.checkFormSaveReady());
+    // self.formCheckHandler(self.checkFormSaveReady());
   };
 
   this.QuestionType = function (
@@ -1763,7 +1773,7 @@ export var AimEditor = function (
         self.DisableTillNext(prObject.id, "tillend", self.callDisable);
       }
 
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     };
 
     this.getelementHtml = function () {
@@ -1856,7 +1866,7 @@ export var AimEditor = function (
           );
       }
 
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     };
 
     this.getelementHtml = function () {
@@ -1961,7 +1971,7 @@ export var AimEditor = function (
         }
       }
 
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     });
 
     this.getelementHtml = function () {
@@ -2038,7 +2048,7 @@ export var AimEditor = function (
         document.getElementById(vtPrObject.id).className =
           "red check circle outline icon";
       }
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     });
 
     this.getelementHtml = function () {
@@ -2139,8 +2149,7 @@ export var AimEditor = function (
           self.EnableTillNext(prObject.id, "tillend");
         }
       }
-
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     };
   };
 
@@ -2213,7 +2222,7 @@ export var AimEditor = function (
         document.getElementById(vtPrObject.id).className =
           "red check circle outline icon";
       }
-      self.formCheckHandler(self.checkFormSaveReady());
+      // self.formCheckHandler(self.checkFormSaveReady());
     };
   };
 
@@ -3686,11 +3695,17 @@ export var AimEditor = function (
       if (objs[i].className == "red check circle outline icon")
         countRedCircle++;
     }
+    console.log(
+      "form save ready",
+      document.getElementById("annotationName").value
+    );
+    if (document.getElementById("annotationName").value === "")
+      countRedCircle++;
     return countRedCircle;
   };
 
   this.checkAnnotationShapes = function (prmtrShapeArray) {
-    if (typeof prmtrShapeArray === "undefined") {
+    if (typeof prmtrShapeArray === undefined) {
       return;
     }
     let anyShapeFlag = false;
@@ -3774,7 +3789,7 @@ export var AimEditor = function (
         }
       }
     }
-    self.formCheckHandler(self.checkFormSaveReady());
+    // self.formCheckHandler(self.checkFormSaveReady());
   };
 
   this.setAim = function (aimValue) {
@@ -4129,7 +4144,7 @@ export var AimEditor = function (
         }
       }
     }
-    self.formCheckHandler(self.checkFormSaveReady());
+    // self.formCheckHandler(self.checkFormSaveReady());
   };
   this.loadAimJson = function (aimjson, isRecist) {
     //test
@@ -4180,9 +4195,16 @@ export var AimEditor = function (
         document.getElementById("annotationName").value =
           annotationNameArray[0];
         self.aimName = annotationNameArray[0];
+        if (self.aimName === "Teaching File") {
+          document.getElementById("annotationName").value = "";
+        }
       } else {
         document.getElementById("annotationName").value = annotationName;
         self.aimName = annotationName;
+        if (self.aimName === "Teaching File") {
+          self.aimName = "";
+          document.getElementById("annotationName").value = "";
+        }
       }
 
       self.traverseJsonOnLoad(imagingPhysicalEntityCollection);

@@ -42,10 +42,10 @@ class Sidebar extends Component {
       worklistsAssigned: [],
       worklistsCreated: [],
       pacs: [],
-      width: mode === "thick" ? "200px" : "0",
-      marginLeft: mode === "thick" ? "200px" : "0",
-      buttonDisplay: mode === "thick" ? "none" : "block",
-      open: mode === "thick",
+      width: mode !== "lite" ? "200px" : "0",
+      marginLeft: mode !== "lite" ? "200px" : "0",
+      buttonDisplay: mode !== "lite" ? "none" : "block",
+      open: mode !== "lite",
       index: 0,
       pid: null,
       progressView: [false, false],
@@ -248,7 +248,7 @@ class Sidebar extends Component {
 
   handleRoute = (type, id) => {
     let index;
-    const isThick = mode === "thick";
+    const isThick = mode !== "lite";
     this.setState({ type });
     this.setState({ selected: null });
     this.props.dispatch(clearSelection());
@@ -279,7 +279,7 @@ class Sidebar extends Component {
     const state = [...this.state.progressView];
     state[index] = open;
     this.setState({ progressView: state });
-    const conditionalIndex = mode === "thick" ? 2 : 1;
+    const conditionalIndex = mode !== "lite" ? 2 : 1;
     if (open) this.setState({ index: conditionalIndex });
   };
 
@@ -289,7 +289,7 @@ class Sidebar extends Component {
   };
 
   renderNav = () => {
-    if (mode === "thick") {
+    if (mode !== "lite") {
       return [
         <div onClick={this.collapseAll} key="project">
           <FiZoomIn />
@@ -315,7 +315,7 @@ class Sidebar extends Component {
       let { pathname } = this.props.location;
       pathname = pathname.split("/").pop();
       // const pid = pathname.pop();
-      if (mode === "thick") {
+      if (mode !== "lite") {
         const projectsList = projects.map(project => {
           const matchProject =
             selected === project.id ||
@@ -333,7 +333,7 @@ class Sidebar extends Component {
                     this.props.getPidUpdate(project.id);
                     this.setState({ selected: project.id });
                   }}
-                  // style={{ padding: "0.6rem" }}
+                // style={{ padding: "0.6rem" }}
                 >
                   {project.name}
                   <span id="subjectCount" className="badge badge-secondary">
@@ -393,7 +393,7 @@ class Sidebar extends Component {
           onOpen={() => this.handleCollapse(0, true)}
           onClose={() => this.handleCollapse(0, false)}
           transitionTime={100}
-          // open={progressView[0]}
+        // open={progressView[0]}
         >
           <WorklistSelect
             list={this.state.worklistsCreated}
@@ -407,7 +407,7 @@ class Sidebar extends Component {
           onOpen={() => this.handleCollapse(1, true)}
           onClose={() => this.handleCollapse(1, false)}
           transitionTime={100}
-          // open={progressView[1]}
+        // open={progressView[1]}
         >
           <WorklistSelect
             list={this.state.worklistsAssigned}
@@ -429,7 +429,7 @@ class Sidebar extends Component {
         activeKey={this.state.activeTab}
         onSelect={index => this.setState({ index })}
       >
-        {mode === "thick" ? (
+        {mode !== "lite" ? (
           <Tab
             eventKey="0"
             title="Projects"

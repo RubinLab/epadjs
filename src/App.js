@@ -57,6 +57,7 @@ import RightsideBar from "./components/RightsideBar/RightsideBar";
 import MinimizedReport from "./components/searchView/MinimizedReport";
 import { FaJoint } from "react-icons/fa";
 import { isSupportedModality } from "./Utils/aid.js";
+import { teachingFileTempCode } from './constants';
 
 const messages = {
   noPatient: {
@@ -606,7 +607,8 @@ class App extends Component {
       .then(async (results) => {
         const configData = await results[0].json();
 
-        let { mode, apiUrl, wadoUrl, authMode, maxPort } = configData;
+        let { mode, apiUrl, wadoUrl, authMode, maxPort, defaultAimName } =
+          configData;
         // check and use environment variables if any
         const authServerUrl =
           process.env.REACT_APP_AUTH_URL || Keycloak["auth-server-url"];
@@ -616,11 +618,14 @@ class App extends Component {
         authMode = process.env.REACT_APP_AUTH_MODE || authMode;
         const waterfallOptions = process.env.REACT_APP_WATERFALL_OPTS;
         maxPort = process.env.REACT_APP_MAX_PORT || maxPort || 6;
+        defaultAimName =
+          process.env.REACT_APP_DEFAULT_AIM_NAME || defaultAimName;
         sessionStorage.setItem("mode", mode);
         sessionStorage.setItem("apiUrl", apiUrl);
         sessionStorage.setItem("wadoUrl", wadoUrl);
         sessionStorage.setItem("authMode", authMode);
         sessionStorage.setItem("maxPort", maxPort);
+        sessionStorage.setItem("defaultAimName", defaultAimName);
         if (waterfallOptions) {
           sessionStorage.setItem("waterfallOptions", waterfallOptions);
         }
@@ -762,7 +767,7 @@ class App extends Component {
 
   hasTeachingFiles = (studyUID) => {
     return searchAnnotations({
-      query: `(template_code:99EPAD_15 AND study_uid:${studyUID}) AND project:lite`,
+      query: `(template_code:${teachingFileTempCode} AND study_uid:${studyUID}) AND project:lite`,
     });
   };
 
@@ -1385,37 +1390,55 @@ class App extends Component {
                 <Route path="/tools" />
                 <Route path="/edit" />
                 <Route path="/not-found" component={NotFound} />
-                <ProtectedRoute
-                  from="/"
-                  exact
-                  to="/list"
-                  render={(props) => (
-                    <SearchView
-                      {...props}
-                      clearTreeExpand={this.clearTreeExpand}
-                      updateProgress={this.updateProgress}
-                      progressUpdated={progressUpdated}
-                      expandLevel={this.state.expandLevel}
-                      getTreeExpandSingle={this.getTreeExpandSingle}
-                      closeBeforeDelete={this.closeBeforeDelete}
-                      getTreeExpandAll={this.getTreeExpandAll}
-                      treeExpand={treeExpand}
-                      getExpandLevel={this.getExpandLevel}
-                      // expandLoading={expandLoading}
-                      // updateExpandedLevelNums={this.updateExpandedLevelNums}
-                      onShrink={this.handleShrink}
-                      handleCloseAll={this.handleCloseAll}
-                      treeData={this.state.treeData}
-                      getTreeData={this.getTreeData}
-                      clearTreeData={this.clearTreeData}
-                      updateTreeDataOnSave={this.updateTreeDataOnSave}
-                      closeAllCounter={this.state.closeAll}
-                      pid={this.state.pid}
-                      admin={this.state.admin}
-                      collapseSubjects={this.collapseSubjects}
-                    />
-                  )}
-                />
+                {mode !== "teaching" && (
+                  <ProtectedRoute
+                    from="/"
+                    exact
+                    to="/list"
+                    render={(props) => (
+                      <SearchView
+                        {...props}
+                        clearTreeExpand={this.clearTreeExpand}
+                        updateProgress={this.updateProgress}
+                        progressUpdated={progressUpdated}
+                        expandLevel={this.state.expandLevel}
+                        getTreeExpandSingle={this.getTreeExpandSingle}
+                        closeBeforeDelete={this.closeBeforeDelete}
+                        getTreeExpandAll={this.getTreeExpandAll}
+                        treeExpand={treeExpand}
+                        getExpandLevel={this.getExpandLevel}
+                        // expandLoading={expandLoading}
+                        // updateExpandedLevelNums={this.updateExpandedLevelNums}
+                        onShrink={this.handleShrink}
+                        handleCloseAll={this.handleCloseAll}
+                        treeData={this.state.treeData}
+                        getTreeData={this.getTreeData}
+                        clearTreeData={this.clearTreeData}
+                        updateTreeDataOnSave={this.updateTreeDataOnSave}
+                        closeAllCounter={this.state.closeAll}
+                        pid={this.state.pid}
+                        admin={this.state.admin}
+                        collapseSubjects={this.collapseSubjects}
+                      />
+                    )}
+                  />
+                )}
+                {mode === "teaching" && (
+                  <ProtectedRoute
+                    from="/"
+                    to="/search"
+                    render={(props) => (
+                      <AnnotationSearch
+                        {...props}
+                        pid={this.state.pid}
+                        searchQuery={this.state.searchQuery}
+                        setQuery={(query) =>
+                          this.setState({ searchQuery: query })
+                        }
+                      />
+                    )}
+                  />
+                )}
 
                 <Redirect to="/not-found" />
               </Switch>

@@ -25,6 +25,15 @@ import Switch from "react-switch";
 import { Modal } from "react-bootstrap";
 import "./aimEditor.css";
 
+const mode = sessionStorage.getItem('mode');
+const defaultAimName = sessionStorage.getItem('defaultAimName');
+
+const enumAimType = {
+  imageAnnotation: 1,
+  seriesAnnotation: 2,
+  studyAnnotation: 3,
+};
+
 class AimEditor extends Component {
   constructor(props) {
     super(props);
@@ -60,7 +69,7 @@ class AimEditor extends Component {
     if (this.state.autoFill && Object.keys(lastSavedAim).length)
       this.semanticAnswers = new questionaire.AimEditor(
         element,
-        this.validateForm,
+        // this.validateForm,
         this.renderButtons,
         this.getDefaultLesionName(),
         setAimDirty,
@@ -69,7 +78,7 @@ class AimEditor extends Component {
     else
       this.semanticAnswers = new questionaire.AimEditor(
         element,
-        this.validateForm,
+        // this.validateForm,
         this.renderButtons,
         this.getDefaultLesionName(),
         setAimDirty
@@ -149,7 +158,7 @@ class AimEditor extends Component {
         totalNumShapes += shapesOnImage.length;
       });
     }
-    return `Lesion${totalNumShapes}`;
+    return `${defaultAimName}${totalNumShapes}`;
   };
 
   //cavit
@@ -158,16 +167,16 @@ class AimEditor extends Component {
   };
   //cavit end
   validateForm = (hasError) => {
-    if (hasError > 0) {
-      console.warn("Answer form has error/s!!!");
-      this.setState({
-        saveButtonIsActive: false,
-      });
-    } else {
-      this.setState({
-        saveButtonIsActive: true,
-      });
-    }
+    // if (hasError > 0) {
+    //   console.warn("Answer form has error/s!!!");
+    //   this.setState({
+    //     saveButtonIsActive: false,
+    //   });
+    // } else {
+    //   this.setState({
+    //     saveButtonIsActive: true,
+    //   });
+    // }
   };
 
   getImage = () => {
@@ -204,53 +213,56 @@ class AimEditor extends Component {
     const { patientID, projectID } = openSeries[activePort];
     return (
       <div className="editor-form">
-        AutoFill :
-        <Switch
-          onChange={this.setAutoFill}
-          checked={this.state.autoFill}
-          onColor="#86d3ff"
-          onHandleColor="#2693e6"
-          handleDiameter={10}
-          uncheckedIcon={
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "100%",
-                fontSize: 11,
-                color: "#861737",
-                paddingRight: 2,
-              }}
-            >
-              Off
-            </div>
-          }
-          checkedIcon={
-            <svg viewBox="0 0 10 10" height="100%" width="100%">
-              <circle r={3} cx={5} cy={5} />
-            </svg>
-          }
-          boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
-          activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-          // height={15}
-          // width={20}
-          className="react-switch"
-        />
-        <div
-          className="base-line-selection"
-          onClick={() => this.setState({ showRecist: true })}
-        >
-          Select Baseline
-        </div>
-        {this.state.showRecist && (
-          <RecistTable
-            subjectId={patientID}
-            projectId={projectID}
-            semanticAnswers={this.semanticAnswers}
-            onSelect={this.selectBaseline}
-            onClose={() => this.setState({ showRecist: false })}
+        {mode !== 'teaching' && (<div>
+          <label>AutoFill :</label>
+          <Switch
+            onChange={this.setAutoFill}
+            checked={this.state.autoFill}
+            onColor="#86d3ff"
+            onHandleColor="#2693e6"
+            handleDiameter={10}
+            uncheckedIcon={
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100%",
+                  fontSize: 11,
+                  color: "#861737",
+                  paddingRight: 2,
+                }}
+              >
+                Off
+              </div>
+            }
+            checkedIcon={
+              <svg viewBox="0 0 10 10" height="100%" width="100%">
+                <circle r={3} cx={5} cy={5} />
+              </svg>
+            }
+            boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+            activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+            // height={15}
+            // width={20}
+            className="react-switch"
           />
+          <div
+            className="base-line-selection"
+            onClick={() => this.setState({ showRecist: true })}
+          >
+            Select Baseline
+          </div>
+          {this.state.showRecist && (
+            <RecistTable
+              subjectId={patientID}
+              projectId={projectID}
+              semanticAnswers={this.semanticAnswers}
+              onSelect={this.selectBaseline}
+              onClose={() => this.setState({ showRecist: false })}
+            />
+          )}
+        </div>
         )}
         <br />
         <div id="questionaire" />
@@ -301,9 +313,9 @@ class AimEditor extends Component {
     // Check if the template selected and if the selected template type is compatible to have markups
     if (!this.checkAimTemplate() || !this.checkMarkupsForTemplate()) return;
 
-    if (!this.state.saveButtonIsActive) {
+    if (this.semanticAnswers.checkFormSaveReady()) {
       window.alert(
-        "Please fill required answers or use required geometric shape"
+        "Please fill name/title and all required answers or use required geometric shape"
       );
       return;
     }

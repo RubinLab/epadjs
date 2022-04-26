@@ -156,7 +156,7 @@ class AnnotationsList extends React.Component {
           } else {
             calculations[aim.aimUid] = {};
             calculations[aim.aimUid][aim.markupUid] = {
-              calculations: [...aim.calculations],
+              calculations: aim.calculations ? [...aim.calculations] : [],
               markupType: aim.markupType
             };
             // calculations[aim.markupUid].push({ markupType: aim.markupType });
@@ -269,47 +269,47 @@ class AnnotationsList extends React.Component {
               checked={this.state.showCalculations}
               onColor="#86d3ff"
               onHandleColor="#1986d9"
-              handleDiameter={22}
+              handleDiameter={15}
               uncheckedIcon={false}
               checkedIcon={false}
               boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
               activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-              height={15}
-              width={36}
+              height={10}
+              width={25}
               className="react-switch"
             />
           </div>
           <div className="label-toggle">
-            <div className="label-toggle__text">Show All Labels</div>
+            <div className="label-toggle__text">Show All Annotation Details</div>
             <Switch
               onChange={this.handleToggleAllLabels}
               checked={this.state.labelDisplayAll}
               onColor="#86d3ff"
               onHandleColor="#1986d9"
-              handleDiameter={22}
+              handleDiameter={15}
               uncheckedIcon={false}
               checkedIcon={false}
               boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
               activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-              height={15}
-              width={36}
+              height={10}
+              width={25}
               className="react-switch"
             />
           </div>
           <div className="label-toggle">
-            <div className="label-toggle__text">Show All Annotations</div>
+            <div className="label-toggle__text">Show All Markups</div>
             <Switch
               onChange={this.handleToggleAllAnnotations}
               checked={this.state.annsDisplayAll}
               onColor="#86d3ff"
               onHandleColor="#1986d9"
-              handleDiameter={22}
+              handleDiameter={15}
               uncheckedIcon={false}
               checkedIcon={false}
               boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
               activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-              height={15}
-              width={36}
+              height={10}
+              width={25}
               className="react-switch"
             />
           </div>

@@ -19,8 +19,8 @@ const annotation = (props) => {
   buttonStyle.border = borderStyle;
   labelStyle.border = borderStyle;
   const singleButtonBorder = {
-    borderBottomLeftRadius: "1em",
-    borderBottomRightRadius: "1em",
+    borderBottomLeftRadius: "0em",
+    borderBottomRightRadius: "0em",
   };
   const singleButtonStyle = Object.assign({}, buttonStyle, singleButtonBorder);
 
@@ -38,20 +38,12 @@ const annotation = (props) => {
     props.id === props.openSeriesAimID
       ? "annotation-label__container --selected"
       : "annotation-label__container";
+  let displayEyeIcon = false;
+  if (props.aim.markupType && props.aim.markupType[0])
+    displayEyeIcon = true;
   return (
     <div className="annotation-container">
       <div className={className} style={finalButtonStyle}>
-        <div
-          className="annotation-icon showLabel"
-          data-id={props.id}
-          onClick={props.onSingleToggle}
-        >
-          {props.showLabel ? (
-            <FaCaretUp className="clickable-icon" />
-          ) : (
-              <FaCaretDown className="clickable-icon" />
-            )}
-        </div>
         <div
           className="annotation-name__container"
           data-id={props.id}
@@ -64,24 +56,40 @@ const annotation = (props) => {
           onClick={() => props.onEdit(props.id, props.serie)}
         >
           <FaEdit className="clickable-icon" />
+          {/* <span class="tooltiptext">Edit annotation</span> */}
         </div>
         <div
           className="annotation-icon"
           onClick={() => props.onDelete(props.aim)}
         >
           <FaTrashAlt className="clickable-icon" />
+          {/* <span class="tooltiptext">Delete annotation</span> */}
         </div>
-        <div
-          className="annotation-icon"
-          onClick={props.onClick}
-          data-id={props.id}
-          id={props.id}
-        >
-          {props.displayed ? (
-            <FaRegEye id={props.id} className="clickable-icon" />
-          ) : (
+        {displayEyeIcon && (
+          <div
+            className="annotation-icon"
+            onClick={props.onClick}
+            data-id={props.id}
+            id={props.id}
+          >
+            {props.displayed ? (
+              <FaRegEye id={props.id} className="clickable-icon" />
+            ) : (
               <FaRegEyeSlash id={props.id} className="clickable-icon" />
             )}
+            {/* <span class="tooltiptext">Hide/show markup</span> */}
+          </div>
+        )}
+        <div
+          className="annotation-icon showLabel"
+          data-id={props.id}
+          onClick={props.onSingleToggle}
+        >
+          {props.showLabel ? (
+            <FaCaretUp className="clickable-icon" />
+          ) : (
+            <FaCaretDown className="clickable-icon" />
+          )}
         </div>
       </div>
       {props.showLabel && (
