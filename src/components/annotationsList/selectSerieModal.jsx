@@ -332,7 +332,7 @@ class selectSerieModal extends React.Component {
             index={count + k}
             disabled={disabled}
             key={k + "_" + seriesUID}
-            isChecked={selectedToDisplay[seriesUID]}
+            isChecked={selectedToDisplay[seriesUID] || false}
           />
         );
         innerList.push(item);
@@ -346,7 +346,7 @@ class selectSerieModal extends React.Component {
       count += series[i].length;
     }
     if (significantExplanation)
-      selectionList.push(<div><br />(S): Significant series</div>);
+      selectionList.push(<div key={"explanation"}><br />(S): Significant series</div>);
     return selectionList;
   };
 
