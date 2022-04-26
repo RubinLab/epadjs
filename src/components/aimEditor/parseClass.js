@@ -4,7 +4,7 @@ import $ from "jquery/dist/jquery.js";
 import "./semantic/semantic.css";
 import "./semantic/semantic.js";
 import DOMPurify from "dompurify";
-import { teachingFileTempCode } from "constants";
+import { teachingFileTempCode } from "../../constants";
 
 const mode = sessionStorage.getItem("mode");
 
