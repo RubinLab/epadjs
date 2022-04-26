@@ -49,6 +49,7 @@ import {
   decryptAndGrantAccess,
   decryptAndAdd,
 } from "./services/decryptUrlService";
+import { searchAnnotations } from "./services/annotationServices.js";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -741,15 +742,32 @@ class App extends Component {
         })
         .catch((err) => console.error(err));
     } else if (patientID && studyUID && projectID) {
-      await decryptAndAdd(args);
+      // This should be teaching files
       const packedData = {
         projectID,
         patientID,
         patientName: "patientName",
         studyUID,
       };
-      this.displaySeries(packedData);
+      // If study has teaching file it's already added so no need to add
+      const { data: TF } = await this.hasTeachingFiles(studyUID);
+      if (TF.total_rows) {
+        this.displaySeries(packedData);
+      } else {
+        const seriesArray = await this.getSeriesData(packedData);
+        window.dispatchEvent(
+          new CustomEvent("openTeachingFilesModal", {
+            detail: { seriesArray, args, packedData },
+          })
+        );
+      }
     }
+  };
+
+  hasTeachingFiles = (studyUID) => {
+    return searchAnnotations({
+      query: `(template_code:99EPAD_15 AND study_uid:${studyUID}) AND project:lite`,
+    });
   };
 
   displaySeries = async (studyData) => {
@@ -1371,6 +1389,7 @@ class App extends Component {
                 <Route path="/tools" />
                 <Route path="/edit" />
                 <Route path="/not-found" component={NotFound} />
+<<<<<<< HEAD
                 {mode !== "teaching" && (
                   <ProtectedRoute
                     from="/"
@@ -1420,6 +1439,39 @@ class App extends Component {
                     )}
                   />
                 )}
+=======
+                <ProtectedRoute
+                  from="/"
+                  exact
+                  to="/list"
+                  render={(props) => (
+                    <SearchView
+                      {...props}
+                      clearTreeExpand={this.clearTreeExpand}
+                      updateProgress={this.updateProgress}
+                      progressUpdated={progressUpdated}
+                      expandLevel={this.state.expandLevel}
+                      getTreeExpandSingle={this.getTreeExpandSingle}
+                      closeBeforeDelete={this.closeBeforeDelete}
+                      getTreeExpandAll={this.getTreeExpandAll}
+                      treeExpand={treeExpand}
+                      getExpandLevel={this.getExpandLevel}
+                      // expandLoading={expandLoading}
+                      // updateExpandedLevelNums={this.updateExpandedLevelNums}
+                      onShrink={this.handleShrink}
+                      handleCloseAll={this.handleCloseAll}
+                      treeData={this.state.treeData}
+                      getTreeData={this.getTreeData}
+                      clearTreeData={this.clearTreeData}
+                      updateTreeDataOnSave={this.updateTreeDataOnSave}
+                      closeAllCounter={this.state.closeAll}
+                      pid={this.state.pid}
+                      admin={this.state.admin}
+                      collapseSubjects={this.collapseSubjects}
+                    />
+                  )}
+                />
+>>>>>>> develop
 
                 <Redirect to="/not-found" />
               </Switch>

@@ -59,3 +59,7 @@ export function addTemplateToProject(templateID, projectID) {
     )}/templates/${encodeURIComponent(templateID)}`
   );
 }
+
+export function getTemplate(templateUID) {
+  return http.get(http.apiUrl() + "/templates/" + templateUID);
+}
