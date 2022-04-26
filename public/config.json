@@ -1,5 +1,5 @@
 {
-  "mode": "teaching",
+  "mode": "lite",
   "apiUrl": "http://localhost:8080",
   "testUrl": "http://localhost:3000",
   "apiUrlV1": "http://localhost:8080/epad",
