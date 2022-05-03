@@ -14,7 +14,7 @@ import {
 } from "../action";
 import { deleteAnnotation } from "../../../services/annotationServices";
 import cornerstone from "cornerstone-core";
-import { state } from "cornerstone-tools/store/index.js";
+import { store } from "cornerstone-tools";
 
 class AnnotationsList extends React.Component {
   state = {
@@ -95,7 +95,7 @@ class AnnotationsList extends React.Component {
 
   handleCalculations = checked => {
     this.setState({ showCalculations: checked }, () => {
-      state.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
+      store.showCalculations = this.state.showCalculations; //set the cornerstone state with componenets state
       this.refreshAllViewports();
     });
   };

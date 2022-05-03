@@ -7,15 +7,14 @@ import {
 } from "cornerstone-core";
 import { point } from "cornerstone-math";
 import {
-  importInternal,
-  FreehandRoiTool,
+  FreehandMouseTool,
   getToolState,
   store,
   toolStyle,
   toolColors,
   EVENTS,
 } from "cornerstone-tools";
-import { state } from "cornerstone-tools/store/index.js";
+import cornerstoneTools, { state } from "cornerstone-tools";
 
 import generateUID from "../util/generateUID.js";
 import interpolate from "../util/freehandInterpolate/interpolate.js";
@@ -26,21 +25,21 @@ const {
   insertOrDelete,
   freehandArea,
   calculateFreehandStatistics,
-} = importInternal("util/freehandUtils");
-const draw = importInternal("drawing/draw");
-const drawJoinedLines = importInternal("drawing/drawJoinedLines");
-const drawHandles = importInternal("drawing/drawHandles");
-const drawLinkedTextBox = importInternal("drawing/drawLinkedTextBox");
-const moveHandleNearImagePoint = importInternal(
+} = cornerstoneTools.import("util/freehandUtils");
+const draw = cornerstoneTools.import("drawing/draw");
+const drawJoinedLines = cornerstoneTools.import("drawing/drawJoinedLines");
+const drawHandles = cornerstoneTools.import("drawing/drawHandles");
+const drawLinkedTextBox = cornerstoneTools.import("drawing/drawLinkedTextBox");
+const moveHandleNearImagePoint = cornerstoneTools.import(
   "manipulators/moveHandleNearImagePoint"
 );
-const getNewContext = importInternal("drawing/getNewContext");
+const getNewContext = cornerstoneTools.import("drawing/getNewContext");
 const modules = store.modules;
-const numbersWithCommas = importInternal("util/numbersWithCommas");
-const pointInsideBoundingBox = importInternal("util/pointInsideBoundingBox");
-const calculateSUV = importInternal("util/calculateSUV");
+const numbersWithCommas = cornerstoneTools.import("util/numbersWithCommas");
+const pointInsideBoundingBox = cornerstoneTools.import("util/pointInsideBoundingBox");
+const calculateSUV = cornerstoneTools.import("util/calculateSUV");
 
-export default class FreehandRoi3DTool extends FreehandRoiTool {
+export default class FreehandRoi3DTool extends FreehandMouseTool {
   constructor(configuration = {}) {
     const defaultConfig = {
       configuration: defaultFreehandConfiguration(),

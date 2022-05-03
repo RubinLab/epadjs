@@ -12,10 +12,10 @@ class Interpolation extends Component {
     };
   }
 
-  componentDidMount(){
-    const {interpolate} = cornerstoneTools.store.modules.freehand3D.state;
-    if(interpolate !== undefined)
-      this.setState({interpolate});
+  componentDidMount() {
+    const { interpolate } = cornerstoneTools.store.modules.freehand3D.state;
+    if (interpolate !== undefined)
+      this.setState({ interpolate });
   }
 
   setInterpolation = (checked) => {

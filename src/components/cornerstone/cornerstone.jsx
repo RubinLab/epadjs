@@ -1,6 +1,6 @@
 import * as cornerstone from "cornerstone-core";
 // import * as cornerstoneTools from "cornerstone-tools/dist/cornerstoneTools";
-import * as cornerstoneTools from "../../cornerstone-tools";
+import * as cornerstoneTools from "cornerstone-tools";
 import * as cornerstoneMath from "cornerstone-math";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import * as dicomParser from "dicom-parser";
@@ -77,7 +77,7 @@ const Cornerstone = ({ dispatch }) => {
   cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
 
   cornerstoneWADOImageLoader.configure({
-    beforeSend: function(xhr) {
+    beforeSend: function (xhr) {
       // Add custom headers here
       auth
         .getAuthHeader()

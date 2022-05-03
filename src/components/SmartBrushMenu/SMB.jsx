@@ -65,20 +65,20 @@ class SMB extends Component {
                   />
                   {gate.name !== "custom" &&
                     " " +
-                      gate.displayName +
-                      " [" +
-                      gate.range.toString() +
-                      "]" +
-                      " HU"}
+                    gate.displayName +
+                    " [" +
+                    gate.range.toString() +
+                    "]" +
+                    " HU"}
                   {gate.name === "custom" &&
                     " " +
-                      gate.displayName +
-                      " [" +
-                      this.state.customBrush.min +
-                      ", " +
-                      this.state.customBrush.max +
-                      "]" +
-                      " HU"}
+                    gate.displayName +
+                    " [" +
+                    this.state.customBrush.min +
+                    ", " +
+                    this.state.customBrush.max +
+                    "]" +
+                    " HU"}
                   {gate.name === "custom" && (
                     <div className="range-container">
                       <InputRange

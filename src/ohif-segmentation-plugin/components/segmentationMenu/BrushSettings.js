@@ -1,7 +1,7 @@
 import React from "react";
 import cornerstoneTools from "cornerstone-tools";
-const brushModule = cornerstoneTools.store.modules.segmentation;
-const brushState = brushModule.state;
+const brush = cornerstoneTools.store.modules.brush;
+const brushState = brush.state;
 
 //import './segmentationMenu.styl';
 

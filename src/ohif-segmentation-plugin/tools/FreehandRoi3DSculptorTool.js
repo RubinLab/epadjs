@@ -1,5 +1,5 @@
 import {
-  FreehandRoiSculptorTool,
+  FreehandSculpterMouseTool,
   toolColors,
   store,
   getToolState,
@@ -10,7 +10,7 @@ import interpolate from "../util/freehandInterpolate/interpolate.js";
 
 const { modules, state } = store;
 
-export default class FreehandRoi3DSculptorTool extends FreehandRoiSculptorTool {
+export default class FreehandRoi3DSculptorTool extends FreehandSculpterMouseTool {
   constructor(configuration = {}) {
     const defaultConfig = {
       configuration: getDefaultFreehandSculpterMouseToolConfiguration(),

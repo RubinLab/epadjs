@@ -15,7 +15,7 @@ import areStringArraysEqual from "./../helpers/areStringArraysEqual.js";
 
 import "./CornerstoneViewport.css";
 
-const scrollToIndex = cornerstoneTools.importInternal("util/scrollToIndex");
+const scrollToIndex = cornerstoneTools.import("util/scrollToIndex");
 const { loadHandlerManager } = cornerstoneTools;
 
 class CornerstoneViewport extends Component {

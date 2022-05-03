@@ -4,12 +4,12 @@ import cornerstone from "cornerstone-core";
 import Brush3DHUGatedTool from "./Brush3DHUGatedTool.js";
 import floodFill from "./n-dimensional-flood-fill.js";
 
-import { getToolState } from "cornerstone-tools/stateManagement/toolState.js";
+import { getToolState } from "cornerstone-tools_deprecated/stateManagement/toolState.js";
 import generateBrushMetadata from "../util/generateBrushMetadata.js";
 import {
   getDiffBetweenPixelData,
   triggerLabelmapModifiedEvent,
-} from "cornerstone-tools/util/segmentation";
+} from "cornerstone-tools_deprecated/util/segmentation";
 
 const brushModule = store.modules.segmentation;
 

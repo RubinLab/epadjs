@@ -1,7 +1,7 @@
 import getActiveBrushToolsForElement from "./util/getActiveBrushToolsForElement.js";
 import getActiveViewportEnabledElement from "./util/getActiveViewportEnabledElement.js";
 import getActiveFreehandToolsForElement from "./util/getActiveFreehandToolsForElement.js";
-import { store } from "../cornerstone-tools";
+import { store } from "cornerstone-tools";
 
 const brushModule = store.modules.brush;
 

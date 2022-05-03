@@ -42,7 +42,7 @@ import { refreshToken } from "../../services/authService";
 import { isThisSecond } from "date-fns/esm";
 import { FiMessageSquare } from "react-icons/fi";
 import { errorMonitor } from "events";
-import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
+import { FreehandRoiSculptorTool } from 'cornerstone-tools';
 import getVPDimensions from "./ViewportCalculations";
 
 const tools = [
@@ -483,7 +483,7 @@ class DisplayView extends Component {
     cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
     cornerstoneTools.store.modules.freehand3D.state.seriesCollection = [];
     // clear the segmentation data as well
-    cornerstoneTools.store.modules.segmentation.state.series = {};
+    cornerstoneTools.store.modules.brush.state.series = {};
   }
 
   renderAims = (notShowAimEditor = false) => {
@@ -1507,7 +1507,8 @@ class DisplayView extends Component {
   }
 
   clearSmartBrushState = () => {
-    const brushModule = cornerstoneTools.store.modules.segmentation;
+    console.log("cornserstoneTools", cornerstoneTools);
+    const brushModule = cornerstoneTools.store.modules.brush;
     delete brushModule.configuration.applyToImage;
     delete brushModule.configuration.maxInterval;
     delete brushModule.configuration.minInterval;
