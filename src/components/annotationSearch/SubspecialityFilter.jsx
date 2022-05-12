@@ -18,17 +18,8 @@ class SubspecialityFilter extends React.Component {
         // this.subspecialities = this.props.templates.teachingFileTempCode.TemplateContainer.Template;
     }
 
-    // componentDidUpdate() {
-    //     const { subspecialities } = this.state;
-    //     if (!subspecialities.length) {
-    //         const { Template } = this.props.templates["99EPAD_15"].TemplateContainer;
-    //         this.setState({ subspecialities: getAllowedTermsOfTemplateComponent(Template, "Radiology Specialty") });
-    //     }
-    //     console.log("did update");
-    // }
-
     handleClick = (event) => {
-        console.log("evetn", event.target.value, event.target.checked);
+        // console.log("evetn", event.target.value, event.target.checked);
     }
 
     handleApply = () => {
@@ -36,7 +27,6 @@ class SubspecialityFilter extends React.Component {
     }
 
     render() {
-        console.log("subspecialities", this.state.subspecialities);
         return (
             <div className="mf-pop-up">
                 <div className="close-mf-menu" onClick={this.props.onClose}>

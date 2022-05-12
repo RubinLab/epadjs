@@ -12,7 +12,9 @@ class TeachingFilters extends React.Component {
             showModalityFilter: false,
             showSpecialityFilter: false,
             showAnatomyFilter: false,
-            showDiagnosisFilter: false
+            showDiagnosisFilter: false,
+            myCases: false,
+            tfOnly: false
         }
     }
 
@@ -36,8 +38,19 @@ class TeachingFilters extends React.Component {
         this.setState({ showDiagnosisFilter: !showDiagnosisFilter })
     }
 
+    handleMyCasesSelection = () => {
+        const { myCases } = this.state;
+        this.setState({ myCases: !myCases })
+    }
+
+    handleTfOnlySelection = () => {
+        const { tfOnly } = this.state;
+        this.setState({ tfOnly: !tfOnly });
+        console.log("clicked");
+    }
+
     render() {
-        const { showModalityFilter, showSpecialityFilter, showAnatomyFilter, showDiagnosisFilter } = this.state;
+        const { showModalityFilter, showSpecialityFilter, showAnatomyFilter, showDiagnosisFilter, myCases, tfOnly } = this.state;
         return (
             <div
                 className="annotationSearch-cont__item"
@@ -75,6 +88,20 @@ class TeachingFilters extends React.Component {
                     Diagnosis
                 </div>
                 {showDiagnosisFilter && (<DiagnosisFilter onClose={() => { this.setState({ showDiagnosisFilter: false }) }} />)}
+                <label
+                    className="searchView-toolbar__group"
+                    style={{ padding: '0.2rem' }}
+                >
+                    <input type="checkbox" key={myCases} checked={myCases} onChange={this.handleMyCasesSelection} />
+                    My cases
+                </label>
+                <label
+                    className="searchView-toolbar__group"
+                    style={{ padding: '0.2rem' }}
+                >
+                    <input type="checkbox" key={tfOnly} checked={tfOnly} onChange={this.handleTfOnlySelection} />
+                    Teaching Files Only
+                </label>
             </div>
         );
     }

@@ -15,13 +15,12 @@ class DiagnosisFilter extends React.Component {
     }
 
     componentDidMount() {
-        console.log("componenet label", componentLabel);
         const { Template } = this.props.templates[teachingFileTempCode].TemplateContainer;
         this.setState({ diagnosisList: getAllowedTermsOfTemplateComponent(Template, componentLabel) });
     }
 
     handleClick = (event) => {
-        console.log("evetn", event.target.value, event.target.checked);
+        // console.log("evetn", event.target.value, event.target.checked);
     }
 
     handleApply = () => {

@@ -18,7 +18,7 @@ class AnatomyFilter extends React.Component {
     }
 
     handleClick = (event) => {
-        console.log("evetn", event.target.value, event.target.checked);
+        // console.log("evetn", event.target.value, event.target.checked);
     }
 
     handleApply = () => {
