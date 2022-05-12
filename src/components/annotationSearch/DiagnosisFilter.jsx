@@ -4,17 +4,20 @@ import "./SubspecialityFilter.css";
 import { getAllowedTermsOfTemplateComponent } from "Utils/aid";
 import { teachingFileTempCode } from '../../constants';
 
-class AnatomyFilter extends React.Component {
+const componentLabel = "Findings and Diagnosis";
+
+class DiagnosisFilter extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            anatomyList: []
+            diagnosisList: []
         }
     }
 
     componentDidMount() {
+        console.log("componenet label", componentLabel);
         const { Template } = this.props.templates[teachingFileTempCode].TemplateContainer;
-        this.setState({ anatomyList: getAllowedTermsOfTemplateComponent(Template, "Anatomy Detail") });
+        this.setState({ diagnosisList: getAllowedTermsOfTemplateComponent(Template, componentLabel) });
     }
 
     handleClick = (event) => {
@@ -32,9 +35,9 @@ class AnatomyFilter extends React.Component {
                     <a href="#">X</a>
                 </div>
                 <div>
-                    {this.state.anatomyList?.map(anatomy => {
+                    {this.state.diagnosisList?.map(diagnosis => {
                         return (
-                            <label key={anatomy}><input type="checkbox" key={anatomy} value={anatomy} onClick={this.handleClick} /> {anatomy}</label>
+                            <label key={diagnosis}><input type="checkbox" key={diagnosis} value={diagnosis} onClick={this.handleClick} /> {diagnosis}</label>
                         )
                     })
                     }
@@ -53,4 +56,4 @@ const mapStateToProps = state => {
     };
 };
 
-export default connect(mapStateToProps)(AnatomyFilter);
+export default connect(mapStateToProps)(DiagnosisFilter);

@@ -404,7 +404,6 @@ export const getAllowedTermsOfTemplateComponent = (template, componentLabel) => 
   let allowedTerms;
   let termMeanings = [];
   for(let i=0; i<components.length; i++){
-    console.log(components[i].label);
     if(components[i].label === componentLabel){
       allowedTerms = components[i].AllowedTerm;
       break;

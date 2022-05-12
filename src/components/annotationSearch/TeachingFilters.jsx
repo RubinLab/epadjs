@@ -1,6 +1,8 @@
 import React from 'react';
 import ModalityFilter from './ModalityFilter';
 import SubspecialityFilter from './SubspecialityFilter';
+import AnatomyFilter from './AnatomyFilter';
+import DiagnosisFilter from './DiagnosisFilter';
 // import "./ModalityFilter.css";
 
 class TeachingFilters extends React.Component {
@@ -8,7 +10,9 @@ class TeachingFilters extends React.Component {
         super(props);
         this.state = {
             showModalityFilter: false,
-            showSpecialityFilter: false
+            showSpecialityFilter: false,
+            showAnatomyFilter: false,
+            showDiagnosisFilter: false
         }
     }
 
@@ -17,13 +21,23 @@ class TeachingFilters extends React.Component {
         this.setState({ showModalityFilter: !showModalityFilter })
     }
 
-    handleSpecialityyFilterDisplay = () => {
+    handleSpecialityFilterDisplay = () => {
         const { showSpecialityFilter } = this.state;
         this.setState({ showSpecialityFilter: !showSpecialityFilter })
     }
 
+    handleAnatomyFilterDisplay = () => {
+        const { showAnatomyFilter } = this.state;
+        this.setState({ showAnatomyFilter: !showAnatomyFilter })
+    }
+
+    handleDiagnosisFilterDisplay = () => {
+        const { showDiagnosisFilter } = this.state;
+        this.setState({ showDiagnosisFilter: !showDiagnosisFilter })
+    }
+
     render() {
-        const { showModalityFilter, showSpecialityFilter } = this.state;
+        const { showModalityFilter, showSpecialityFilter, showAnatomyFilter, showDiagnosisFilter } = this.state;
         return (
             <div
                 className="annotationSearch-cont__item"
@@ -32,7 +46,7 @@ class TeachingFilters extends React.Component {
                 <div
                     className="searchView-toolbar__group"
                     style={{ padding: '0.2rem' }}
-                    onClick={this.handleSpecialityyFilterDisplay}
+                    onClick={this.handleSpecialityFilterDisplay}
                 >
                     Subspeciality
                 </div>
@@ -45,7 +59,22 @@ class TeachingFilters extends React.Component {
                     Modality
                 </div>
                 {showModalityFilter && (<ModalityFilter onClose={() => { this.setState({ showModalityFilter: false }) }} />)}
-
+                <div
+                    className="searchView-toolbar__group"
+                    style={{ padding: '0.2rem' }}
+                    onClick={this.handleAnatomyFilterDisplay}
+                >
+                    Anatomy
+                </div>
+                {showAnatomyFilter && (<AnatomyFilter onClose={() => { this.setState({ showAnatomyFilter: false }) }} />)}
+                <div
+                    className="searchView-toolbar__group"
+                    style={{ padding: '0.2rem' }}
+                    onClick={this.handleDiagnosisFilterDisplay}
+                >
+                    Diagnosis
+                </div>
+                {showDiagnosisFilter && (<DiagnosisFilter onClose={() => { this.setState({ showDiagnosisFilter: false }) }} />)}
             </div>
         );
     }
