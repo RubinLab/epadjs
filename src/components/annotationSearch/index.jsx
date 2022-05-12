@@ -38,6 +38,8 @@ import {
   addPluginsToQueue,
   runPluginsQueue
 } from '../../services/pluginServices';
+import TeachingFilters from './TeachingFilters.jsx';
+
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
   paranthesis: ['(', ')'],
@@ -543,9 +545,9 @@ const AnnotationSearch = props => {
     let caretAddedQuery = '';
     let handleSingleChar = text.includes(' ')
       ? text
-          .split(' ')
-          .map(item => handleSingleLetter(item))
-          .join(' ')
+        .split(' ')
+        .map(item => handleSingleLetter(item))
+        .join(' ')
       : handleSingleLetter(text);
     if (wrappedInQuote && hasWhiteSpace) {
       caretAddedQuery = replaceWithCaret(handleSingleChar);
@@ -561,9 +563,8 @@ const AnnotationSearch = props => {
       const allArr = all.split(' ');
       const len = allArr.length;
       if (allArr[len - 1].length > 0 && allArr[len - 1].includes(':')) {
-        const str = `(${allArr[len - 1]}${parsedQueryArr[0]} OR ${
-          allArr[len - 1]
-        }${parsedQueryArr[1]})`;
+        const str = `(${allArr[len - 1]}${parsedQueryArr[0]} OR ${allArr[len - 1]
+          }${parsedQueryArr[1]})`;
         allArr.splice(len - 1, 1, str);
         all = allArr.join(' ');
       }
@@ -846,10 +847,10 @@ const AnnotationSearch = props => {
                 style={
                   Object.keys(props.selectedAnnotations).length === 0
                     ? {
-                        fontSize: '1.1rem',
-                        color: 'rgb(107, 107, 107)',
-                        cursor: 'not-allowed'
-                      }
+                      fontSize: '1.1rem',
+                      color: 'rgb(107, 107, 107)',
+                      cursor: 'not-allowed'
+                    }
                     : null
                 }
                 data-tip
@@ -884,7 +885,7 @@ const AnnotationSearch = props => {
                 if (e.target.checked === false) {
                   const project =
                     props.searchQuery &&
-                    Object.values(props.searchQuery)[0].project
+                      Object.values(props.searchQuery)[0].project
                       ? Object.values(props.searchQuery)[0].project
                       : props.pid;
                   setSelectedProject(project);
@@ -1239,7 +1240,7 @@ const AnnotationSearch = props => {
           name="erase-button"
           data-tip
           data-for="erase-icon"
-          className="btn btn-secondary annotationSearch-btn"
+          // className="btn btn-secondary annotationSearch-btn"
           onClick={() => {
             setQuery('');
             setCheckboxSelected(false);
@@ -1274,7 +1275,7 @@ const AnnotationSearch = props => {
           name="search-button"
           data-tip
           data-for="search-icon"
-          className="btn btn-secondary annotationSearch-btn"
+          // className="btn btn-secondary annotationSearch-btn"
           onClick={() => {
             getSearchResult();
             setPageIndex(0);
@@ -1304,16 +1305,23 @@ const AnnotationSearch = props => {
           margin: '0.5rem 2rem'
         }}
       >
-        <Collapsible
-          trigger="Advanced search"
-          triggerClassName="advancedSearch__closed"
-          triggerOpenedClassName="advancedSearch__open"
-          contentInnerClassName="advancedSearch-content"
-        >
-          {renderQueryItem()}
-          {renderOrganizeItem('organize')}
-        </Collapsible>
-        {renderProjectSelect()}
+        {mode === "teaching" && (
+          <TeachingFilters />
+        )}
+        {mode !== "teaching" && (
+          <div>
+            <Collapsible
+              trigger="Advanced search"
+              triggerClassName="advancedSearch__closed"
+              triggerOpenedClassName="advancedSearch__open"
+              contentInnerClassName="advancedSearch-content"
+            >
+              {renderQueryItem()}
+              {renderOrganizeItem('organize')}
+            </Collapsible>
+            {renderProjectSelect()}
+          </div>
+        )}
         {/* {Object.keys(props.selectedAnnotations).length !== 0 && (
           <button
             className={`btn btn-secondary`}
@@ -1359,8 +1367,8 @@ const AnnotationSearch = props => {
           className="mng-upload"
           // projectID={this.state.projectID}
           pid={props.pid}
-          // clearTreeData={this.props.clearTreeData}
-          // clearTreeExpand={this.props.clearTreeExpand}
+        // clearTreeData={this.props.clearTreeData}
+        // clearTreeExpand={this.props.clearTreeExpand}
         />
       )}
       {deleteSelectedClicked && (
