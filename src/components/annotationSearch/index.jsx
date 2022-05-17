@@ -124,6 +124,7 @@ const AnnotationSearch = props => {
   const [selectedSubs, setSelectedSubs] = useState([]);
   const [selectedMods, setSelectedMods] = useState([]);
   const [selectedAnatomies, setSelectedAnatomies] = useState([]);
+  const [selectedDiagnosis, setSelectedDiagnosis] = useState([]);
   const [tfOnly, setTfOnly] = useState(true);
   const [myCases, setMyCases] = useState(false);
 
@@ -203,12 +204,16 @@ const AnnotationSearch = props => {
     }
     getFieldSearchResults();
     setPageIndex(0);
-  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies])
+  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis])
 
   const clearAnatomy = (anatomy) => {
-    console.log("Anem", anatomy);
     let index = selectedAnatomies.indexOf(anatomy);
     setSelectedAnatomies(selectedAnatomies.filter((_, i) => i !== index));
+  }
+
+  const clearDiagnosis = (diagnose) => {
+    let index = selectedDiagnosis.indexOf(diagnose);
+    setSelectedDiagnosis(selectedDiagnosis.filter((_, i) => i !== index));
   }
 
   const insertIntoQueryOnSelection = el => {
@@ -390,6 +395,8 @@ const AnnotationSearch = props => {
       fields['modality'] = selectedMods;
     if (selectedAnatomies.length)
       fields['anatomy'] = selectedAnatomies
+    if (selectedDiagnosis.length)
+      fields['diagnosis'] = selectedDiagnosis
     searchAnnotations({ fields: { ...fields, teachingFiles: tfOnly, myCases } }, bm)
       .then(res => {
         populateSearchResult(res, pageIndex, afterDelete);
@@ -1349,6 +1356,8 @@ const AnnotationSearch = props => {
           <div><TeachingFilters
             selectedAnatomies={selectedAnatomies}
             setSelectedAnatomies={setSelectedAnatomies}
+            selectedDiagnosis={selectedDiagnosis}
+            setSelectedDiagnosis={setSelectedDiagnosis}
             selectedSubs={selectedSubs}
             setSelectedSubs={setSelectedSubs}
             selectedMods={selectedMods}
@@ -1360,7 +1369,11 @@ const AnnotationSearch = props => {
           />
             {selectedAnatomies.map(anatomy => {
               return (<div>Anatomy :{anatomy} <button onClick={() => clearAnatomy(anatomy)}>X</button></div>);
-            })}</div>
+            })}
+            {selectedDiagnosis.map(diagnose => {
+              return (<div>Diagnosis :{diagnose} <button onClick={() => clearDiagnosis(diagnose)}>X</button></div>);
+            })}
+          </div>
         )}
         {mode !== "teaching" && (
           <div>
@@ -1403,37 +1416,43 @@ const AnnotationSearch = props => {
           />
         )}
       </div>
-      {downloadClicked && (
-        <AnnotationDownloadModal
-          onSubmit={() => {
-            setDownloadClicked(false);
-            getSearchResult();
-          }}
-          onCancel={() => setDownloadClicked(false)}
-          updateStatus={() => console.log('update status')}
-          projectID={selectedProject}
-        />
-      )}
-      {uploadClicked && (
-        <UploadModal
-          onCancel={() => setUploadClicked(false)}
-          onResolve={handleSubmitUpload}
-          className="mng-upload"
-          // projectID={this.state.projectID}
-          pid={props.pid}
-        // clearTreeData={this.props.clearTreeData}
-        // clearTreeExpand={this.props.clearTreeExpand}
-        />
-      )}
-      {deleteSelectedClicked && (
-        <DeleteAlert
-          message={explanation.deleteSelected}
-          onCancel={() => setDeleteSelectedClicked(false)}
-          onDelete={deleteAllSelected}
-          error={explanation.errorMessage}
-        />
-      )}
-    </div>
+      {
+        downloadClicked && (
+          <AnnotationDownloadModal
+            onSubmit={() => {
+              setDownloadClicked(false);
+              getSearchResult();
+            }}
+            onCancel={() => setDownloadClicked(false)}
+            updateStatus={() => console.log('update status')}
+            projectID={selectedProject}
+          />
+        )
+      }
+      {
+        uploadClicked && (
+          <UploadModal
+            onCancel={() => setUploadClicked(false)}
+            onResolve={handleSubmitUpload}
+            className="mng-upload"
+            // projectID={this.state.projectID}
+            pid={props.pid}
+          // clearTreeData={this.props.clearTreeData}
+          // clearTreeExpand={this.props.clearTreeExpand}
+          />
+        )
+      }
+      {
+        deleteSelectedClicked && (
+          <DeleteAlert
+            message={explanation.deleteSelected}
+            onCancel={() => setDeleteSelectedClicked(false)}
+            onDelete={deleteAllSelected}
+            error={explanation.errorMessage}
+          />
+        )
+      }
+    </div >
   );
 };
 

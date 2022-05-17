@@ -47,7 +47,7 @@ class TeachingFilters extends React.Component {
     // }
 
     render() {
-        const { selectedAnatomies, setSelectedAnatomies, selectedSubs, setSelectedSubs, selectedMods, setSelectedMods, tfOnly, setTfOnly, myCases, setMyCases } = this.props;
+        const { selectedDiagnosis, setSelectedDiagnosis, selectedAnatomies, setSelectedAnatomies, selectedSubs, setSelectedSubs, selectedMods, setSelectedMods, tfOnly, setTfOnly, myCases, setMyCases } = this.props;
         const { showModalityFilter, showSpecialityFilter, showAnatomyFilter, showDiagnosisFilter } = this.state;
         return (
             <div
@@ -85,7 +85,7 @@ class TeachingFilters extends React.Component {
                 >
                     Diagnosis
                 </div>
-                {showDiagnosisFilter && (<DiagnosisFilter onClose={() => { this.setState({ showDiagnosisFilter: false }) }} />)}
+                {showDiagnosisFilter && (<DiagnosisFilter selectedDiagnosis={selectedDiagnosis} setSelectedDiagnosis={setSelectedDiagnosis} onClose={() => { this.setState({ showDiagnosisFilter: false }) }} />)}
                 <label
                     className="searchView-toolbar__group"
                     style={{ padding: '0.2rem' }}
