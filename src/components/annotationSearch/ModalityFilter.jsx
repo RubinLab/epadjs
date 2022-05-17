@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { DISP_MODALITIES as dispModalities } from "../../constants.js";
 import "./ModalityFilter.css";
 
@@ -21,7 +21,6 @@ const ModalityFilter = (props) => {
         setSelectedMods(selecteds);
         props.onClose();
     }
-
 
     return (
         <div className="mf-pop-up">

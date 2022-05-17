@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { connect } from "react-redux";
-import "./SubSpecialityFilter.css";
-import { getAllowedTermsOfTemplateComponent } from "Utils/aid";
-import { teachingFileTempCode } from '../../constants.js';
 import Dropdown from 'react-bootstrap/Dropdown';
 import FormControl from 'react-bootstrap/FormControl';
+import { getAllowedTermsOfTemplateComponent } from "Utils/aid";
+import { teachingFileTempCode } from '../../constants.js';
+import "./SubSpecialityFilter.css";
+
+const componentLabel = "Anatomy Detail";
 
 const AnatomyFilter = (props) => {
 
@@ -12,7 +14,7 @@ const AnatomyFilter = (props) => {
 
     function getAnatomies() {
         const { Template } = props.templates[teachingFileTempCode].TemplateContainer;
-        return getAllowedTermsOfTemplateComponent(Template, "Anatomy Detail");
+        return getAllowedTermsOfTemplateComponent(Template, componentLabel);
     }
 
     const handleSelect = (selection) => {
@@ -87,7 +89,6 @@ const AnatomyFilter = (props) => {
         </Dropdown>
 
     );
-
 }
 
 const mapStateToProps = state => {

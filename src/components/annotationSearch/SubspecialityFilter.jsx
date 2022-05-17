@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { connect } from "react-redux";
-import "./SubSpecialityFilter.css";
 import { getAllowedTermsOfTemplateComponent } from "Utils/aid"
 import { teachingFileTempCode } from '../../constants.js';
+import "./SubSpecialityFilter.css";
+
+const componentLabel = "Radiology Specialty";
 
 const SubSpecialityFilter = props => {
 
@@ -11,7 +13,7 @@ const SubSpecialityFilter = props => {
 
     function getSubSpecialities() {
         const { Template } = props.templates[teachingFileTempCode].TemplateContainer;
-        return getAllowedTermsOfTemplateComponent(Template, "Radiology Specialty");
+        return getAllowedTermsOfTemplateComponent(Template, componentLabel);
     }
 
     const handleChange = (event) => {

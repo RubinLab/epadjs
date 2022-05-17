@@ -36,16 +36,6 @@ class TeachingFilters extends React.Component {
         this.setState({ showDiagnosisFilter: !showDiagnosisFilter })
     }
 
-    // handleMyCasesSelection = () => {
-    //     const { myCases } = this.state;
-    //     this.setState({ myCases: !myCases })
-    // }
-
-    // handleTfOnlySelection = () => {
-    //     const { tfOnly, } = this.props;
-    //     this.setState({ tfOnly: !tfOnly });
-    // }
-
     render() {
         const { selectedDiagnosis, setSelectedDiagnosis, selectedAnatomies, setSelectedAnatomies, selectedSubs, setSelectedSubs, selectedMods, setSelectedMods, tfOnly, setTfOnly, myCases, setMyCases } = this.props;
         const { showModalityFilter, showSpecialityFilter, showAnatomyFilter, showDiagnosisFilter } = this.state;

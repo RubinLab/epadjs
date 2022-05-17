@@ -88,7 +88,6 @@ const DiagnosisFilter = (props) => {
         </Dropdown>
 
     );
-
 }
 
 const mapStateToProps = state => {
