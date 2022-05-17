@@ -122,6 +122,8 @@ const AnnotationSearch = props => {
 
   const [firstRun, setFirstRun] = useState(true);
   const [selectedSubs, setSelectedSubs] = useState([]);
+  const [selectedMods, setSelectedMods] = useState([]);
+  const [selectedAnatomies, setSelectedAnatomies] = useState([]);
   const [tfOnly, setTfOnly] = useState(true);
   const [myCases, setMyCases] = useState(false);
 
@@ -201,7 +203,13 @@ const AnnotationSearch = props => {
     }
     getFieldSearchResults();
     setPageIndex(0);
-  }, [tfOnly, myCases, selectedSubs])
+  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies])
+
+  const clearAnatomy = (anatomy) => {
+    console.log("Anem", anatomy);
+    let index = selectedAnatomies.indexOf(anatomy);
+    setSelectedAnatomies(selectedAnatomies.filter((_, i) => i !== index));
+  }
 
   const insertIntoQueryOnSelection = el => {
     const field = document.getElementsByClassName(
@@ -378,6 +386,10 @@ const AnnotationSearch = props => {
     const fields = {};
     if (selectedSubs.length)
       fields['subSpeciality'] = selectedSubs;
+    if (selectedMods.length)
+      fields['modality'] = selectedMods;
+    if (selectedAnatomies.length)
+      fields['anatomy'] = selectedAnatomies
     searchAnnotations({ fields: { ...fields, teachingFiles: tfOnly, myCases } }, bm)
       .then(res => {
         populateSearchResult(res, pageIndex, afterDelete);
@@ -1334,14 +1346,21 @@ const AnnotationSearch = props => {
         }}
       >
         {mode === "teaching" && (
-          <TeachingFilters
+          <div><TeachingFilters
+            selectedAnatomies={selectedAnatomies}
+            setSelectedAnatomies={setSelectedAnatomies}
             selectedSubs={selectedSubs}
             setSelectedSubs={setSelectedSubs}
+            selectedMods={selectedMods}
+            setSelectedMods={setSelectedMods}
             tfOnly={tfOnly}
             setTfOnly={setTfOnly}
             myCases={myCases}
             setMyCases={setMyCases}
           />
+            {selectedAnatomies.map(anatomy => {
+              return (<div>Anatomy :{anatomy} <button onClick={() => clearAnatomy(anatomy)}>X</button></div>);
+            })}</div>
         )}
         {mode !== "teaching" && (
           <div>

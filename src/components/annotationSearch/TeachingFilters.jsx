@@ -47,7 +47,7 @@ class TeachingFilters extends React.Component {
     // }
 
     render() {
-        const { selectedSubs, setSelectedSubs, tfOnly, setTfOnly, myCases, setMyCases } = this.props;
+        const { selectedAnatomies, setSelectedAnatomies, selectedSubs, setSelectedSubs, selectedMods, setSelectedMods, tfOnly, setTfOnly, myCases, setMyCases } = this.props;
         const { showModalityFilter, showSpecialityFilter, showAnatomyFilter, showDiagnosisFilter } = this.state;
         return (
             <div
@@ -69,7 +69,7 @@ class TeachingFilters extends React.Component {
                 >
                     Modality
                 </div>
-                {showModalityFilter && (<ModalityFilter onClose={() => { this.setState({ showModalityFilter: false }) }} />)}
+                {showModalityFilter && (<ModalityFilter selectedMods={selectedMods} setSelectedMods={setSelectedMods} onClose={() => { this.setState({ showModalityFilter: false }) }} />)}
                 <div
                     className="searchView-toolbar__group"
                     style={{ padding: '0.2rem' }}
@@ -77,7 +77,7 @@ class TeachingFilters extends React.Component {
                 >
                     Anatomy
                 </div>
-                {showAnatomyFilter && (<AnatomyFilter onClose={() => { this.setState({ showAnatomyFilter: false }) }} />)}
+                {showAnatomyFilter && (<AnatomyFilter selectedAnatomies={selectedAnatomies} setSelectedAnatomies={setSelectedAnatomies} onClose={() => { this.setState({ showAnatomyFilter: false }) }} />)}
                 <div
                     className="searchView-toolbar__group"
                     style={{ padding: '0.2rem' }}

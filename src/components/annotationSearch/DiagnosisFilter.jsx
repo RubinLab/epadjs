@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from "react-redux";
-import "./SubspecialityFilter.css";
+import "./SubSpecialityFilter.css";
 import { getAllowedTermsOfTemplateComponent } from "Utils/aid";
 import { teachingFileTempCode } from '../../constants';
 
