@@ -120,6 +120,11 @@ const AnnotationSearch = props => {
   const [showRunPluginButton, setShowRunPluginButton] = useState(false);
   // cavit
 
+  const [firstRun, setFirstRun] = useState(true);
+  const [selectedSubs, setSelectedSubs] = useState([]);
+  const [tfOnly, setTfOnly] = useState(true);
+  const [myCases, setMyCases] = useState(false);
+
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
     if ((typeof pagination === 'number' || pagination) && !afterDelete) {
@@ -184,11 +189,19 @@ const AnnotationSearch = props => {
 
   useEffect(() => {
     window.addEventListener('keydown', handleUserKeyPress);
-
     return () => {
       window.removeEventListener('keydown', handleUserKeyPress);
     };
   }, [handleUserKeyPress]);
+
+  useEffect(() => {
+    if (firstRun) {
+      setFirstRun(false);
+      return;
+    }
+    getFieldSearchResults();
+    setPageIndex(0);
+  }, [tfOnly, myCases, selectedSubs])
 
   const insertIntoQueryOnSelection = el => {
     const field = document.getElementsByClassName(
@@ -322,10 +335,12 @@ const AnnotationSearch = props => {
   };
 
   const getSearchResult = (pageIndex, afterDelete) => {
+    console.log("Query", query);
     setPageIndex(0);
     if (query.length === 0) {
       getAnnotationsOfProjets(pageIndex, afterDelete);
-    } else {
+    }
+    else {
       let searchQuery = parseQuery();
       // setData([]);
       if (selectedProject) {
@@ -337,6 +352,7 @@ const AnnotationSearch = props => {
           searchQuery = `(${searchQuery}) AND project:${selectedProject}`;
         else searchQuery += ` AND project:${selectedProject}`;
       }
+      console.log("Search query", searchQuery);
       if (searchQuery) {
         // setError('');
         const queryToSave = {
@@ -356,6 +372,18 @@ const AnnotationSearch = props => {
       }
     }
   };
+
+  const getFieldSearchResults = (pageIndex, afterDelete) => {
+    const bm = pageIndex ? bookmark : '';
+    const fields = {};
+    if (selectedSubs.length)
+      fields['subSpeciality'] = selectedSubs;
+    searchAnnotations({ fields: { ...fields, teachingFiles: tfOnly, myCases } }, bm)
+      .then(res => {
+        populateSearchResult(res, pageIndex, afterDelete);
+      })
+      .catch(err => console.error(err));
+  }
 
   const getNewData = (pageIndex, afterDelete) => {
     if (query) {
@@ -1306,7 +1334,14 @@ const AnnotationSearch = props => {
         }}
       >
         {mode === "teaching" && (
-          <TeachingFilters />
+          <TeachingFilters
+            selectedSubs={selectedSubs}
+            setSelectedSubs={setSelectedSubs}
+            tfOnly={tfOnly}
+            setTfOnly={setTfOnly}
+            myCases={myCases}
+            setMyCases={setMyCases}
+          />
         )}
         {mode !== "teaching" && (
           <div>

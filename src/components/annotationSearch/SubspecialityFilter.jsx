@@ -1,51 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from "react-redux";
-import "./SubspecialityFilter.css";
+import "./SubSpecialityFilter.css";
 import { getAllowedTermsOfTemplateComponent } from "Utils/aid"
-import teachingFileTempCode from 'constants';
+import { teachingFileTempCode } from '../../constants.js';
 
-class SubspecialityFilter extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            subspecialities: []
+const SubSpecialityFilter = props => {
+
+    const [subSpecialities, setSubSpecialities] = useState(getSubSpecialities());
+    const [selecteds, setSelecteds] = useState(props.selectedSubs);
+
+    function getSubSpecialities() {
+        const { Template } = props.templates[teachingFileTempCode].TemplateContainer;
+        return getAllowedTermsOfTemplateComponent(Template, "Radiology Specialty");
+    }
+
+    const handleChange = (event) => {
+        const { checked, value } = event.target;
+        if (checked)
+            setSelecteds([...selecteds, value]);
+        else {
+            let index = selecteds.indexOf(value);
+            setSelecteds(selecteds.filter((_, i) => i !== index));
         }
     }
 
-    componentDidMount() {
-        const { Template } = this.props.templates["99EPAD_15"].TemplateContainer;
-        this.setState({ subspecialities: getAllowedTermsOfTemplateComponent(Template, "Radiology Specialty") });
-        // this.subspecialities = this.props.templates.teachingFileTempCode.TemplateContainer.Template;
+    const handleApply = () => {
+        const { setSelectedSubs } = props;
+        setSelectedSubs(selecteds);
+        props.onClose();
     }
 
-    handleClick = (event) => {
-        // console.log("evetn", event.target.value, event.target.checked);
-    }
-
-    handleApply = () => {
-        this.props.onClose();
-    }
-
-    render() {
-        return (
-            <div className="mf-pop-up">
-                <div className="close-mf-menu" onClick={this.props.onClose}>
-                    <a href="#">X</a>
-                </div>
-                <div>
-                    {this.state.subspecialities?.map(speciality => {
-                        return (
-                            <label key={speciality}><input type="checkbox" key={speciality} value={speciality} onClick={this.handleClick} /> {speciality}</label>
-                        )
-                    })
-                    }
-                </div>
-                <div>
-                    <button onClick={this.handleApply}>Apply</button>
-                </div>
+    return (
+        <div className="mf-pop-up" >
+            <div className="close-mf-menu" onClick={props.onClose}>
+                <a href="#">X</a>
             </div>
-        );
-    }
+            <div>
+                {subSpecialities?.map((speciality, i) => {
+                    return (
+                        <label key={i}><input type="checkbox" value={speciality} checked={selecteds.includes(speciality)} onChange={handleChange} /> {speciality}</label>
+                    )
+                })
+                }
+            </div>
+            <div>
+                <button onClick={handleApply}>Apply</button>
+            </div>
+        </div >
+    );
 }
 
 const mapStateToProps = state => {
@@ -54,4 +56,4 @@ const mapStateToProps = state => {
     };
 };
 
-export default connect(mapStateToProps)(SubspecialityFilter);
+export default connect(mapStateToProps)(SubSpecialityFilter);

@@ -1,6 +1,6 @@
 import React from 'react';
 import ModalityFilter from './ModalityFilter';
-import SubspecialityFilter from './SubspecialityFilter';
+import SubSpecialityFilter from './SubSpecialityFilter';
 import AnatomyFilter from './AnatomyFilter';
 import DiagnosisFilter from './DiagnosisFilter';
 // import "./ModalityFilter.css";
@@ -13,8 +13,6 @@ class TeachingFilters extends React.Component {
             showSpecialityFilter: false,
             showAnatomyFilter: false,
             showDiagnosisFilter: false,
-            myCases: false,
-            tfOnly: false
         }
     }
 
@@ -38,19 +36,19 @@ class TeachingFilters extends React.Component {
         this.setState({ showDiagnosisFilter: !showDiagnosisFilter })
     }
 
-    handleMyCasesSelection = () => {
-        const { myCases } = this.state;
-        this.setState({ myCases: !myCases })
-    }
+    // handleMyCasesSelection = () => {
+    //     const { myCases } = this.state;
+    //     this.setState({ myCases: !myCases })
+    // }
 
-    handleTfOnlySelection = () => {
-        const { tfOnly } = this.state;
-        this.setState({ tfOnly: !tfOnly });
-        console.log("clicked");
-    }
+    // handleTfOnlySelection = () => {
+    //     const { tfOnly, } = this.props;
+    //     this.setState({ tfOnly: !tfOnly });
+    // }
 
     render() {
-        const { showModalityFilter, showSpecialityFilter, showAnatomyFilter, showDiagnosisFilter, myCases, tfOnly } = this.state;
+        const { selectedSubs, setSelectedSubs, tfOnly, setTfOnly, myCases, setMyCases } = this.props;
+        const { showModalityFilter, showSpecialityFilter, showAnatomyFilter, showDiagnosisFilter } = this.state;
         return (
             <div
                 className="annotationSearch-cont__item"
@@ -63,7 +61,7 @@ class TeachingFilters extends React.Component {
                 >
                     Subspeciality
                 </div>
-                {showSpecialityFilter && (<SubspecialityFilter onClose={() => { this.setState({ showSpecialityFilter: false }) }} />)}
+                {showSpecialityFilter && (<SubSpecialityFilter selectedSubs={selectedSubs} setSelectedSubs={setSelectedSubs} onClose={() => { this.setState({ showSpecialityFilter: false }) }} />)}
                 <div
                     className="searchView-toolbar__group"
                     style={{ padding: '0.2rem' }}
@@ -92,15 +90,15 @@ class TeachingFilters extends React.Component {
                     className="searchView-toolbar__group"
                     style={{ padding: '0.2rem' }}
                 >
-                    <input type="checkbox" key={myCases} checked={myCases} onChange={this.handleMyCasesSelection} />
+                    <input type="checkbox" key={"myCases"} checked={myCases} onChange={e => setMyCases(e.target.checked)} />
                     My cases
                 </label>
                 <label
                     className="searchView-toolbar__group"
                     style={{ padding: '0.2rem' }}
                 >
-                    <input type="checkbox" key={tfOnly} checked={tfOnly} onChange={this.handleTfOnlySelection} />
-                    Teaching Files Only
+                    <input type="checkbox" key={"tfOnly"} checked={!tfOnly} onChange={e => setTfOnly(!e.target.checked)} />
+                    Include Significant Images
                 </label>
             </div>
         );
