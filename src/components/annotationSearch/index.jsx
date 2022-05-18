@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { toast } from 'react-toastify';
 import _ from 'lodash';
@@ -125,7 +125,7 @@ const AnnotationSearch = props => {
   const [selectedMods, setSelectedMods] = useState([]);
   const [selectedAnatomies, setSelectedAnatomies] = useState([]);
   const [selectedDiagnosis, setSelectedDiagnosis] = useState([]);
-  const [tfOnly, setTfOnly] = useState(true);
+  const [tfOnly, setTfOnly] = useState(false);
   const [myCases, setMyCases] = useState(false);
 
   const populateSearchResult = (res, pagination, afterDelete) => {
@@ -156,6 +156,8 @@ const AnnotationSearch = props => {
   };
 
   useEffect(() => {
+    if (mode === "teaching")
+      return;
     setSelectedProject(props.pid);
     setQuery('');
     setBookmark('');
@@ -183,12 +185,18 @@ const AnnotationSearch = props => {
     // cavit
   }, [props.pid]);
 
-  const handleUserKeyPress = e => {
+  const handleUserKeyPress = (e => {
     if (e.key === 'Enter') {
-      getSearchResult();
-      setPageIndex(0);
+      if (mode !== 'teaching') {
+        getSearchResult();
+        setPageIndex(0);
+      }
+      else {
+        getFieldSearchResults();
+        setPageIndex(0);
+      }
     }
-  };
+  });
 
   useEffect(() => {
     window.addEventListener('keydown', handleUserKeyPress);
@@ -198,13 +206,31 @@ const AnnotationSearch = props => {
   }, [handleUserKeyPress]);
 
   useEffect(() => {
+    if (selectedProject !== props.pid)
+      setSelectedProject(props.pid);
     if (firstRun) {
+      if (sessionStorage.searchState) {
+        loadSearchState();
+      }
       setFirstRun(false);
       return;
     }
     getFieldSearchResults();
     setPageIndex(0);
-  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis])
+    return persistSearch;
+  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid])
+
+  const useDebouncedEffect = (effect, deps, delay) => {
+    useEffect(() => {
+      const handler = setTimeout(() => effect(), delay);
+      return () => clearTimeout(handler);
+    }, [...deps || [], delay]);
+  }
+
+  useDebouncedEffect(() => {
+    if (mode === 'teaching')
+      getFieldSearchResults();
+  }, [query], 500);
 
   const clearAnatomy = (anatomy) => {
     let index = selectedAnatomies.indexOf(anatomy);
@@ -214,6 +240,30 @@ const AnnotationSearch = props => {
   const clearDiagnosis = (diagnose) => {
     let index = selectedDiagnosis.indexOf(diagnose);
     setSelectedDiagnosis(selectedDiagnosis.filter((_, i) => i !== index));
+  }
+
+  const persistSearch = () => {
+    const searchState = { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query };
+    sessionStorage.searchState = JSON.stringify(searchState);
+  }
+
+  const loadSearchState = () => {
+    const searchState = JSON.parse(sessionStorage.searchState);
+    const { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query } = searchState;
+    if (tfOnly !== undefined)
+      setTfOnly(tfOnly);
+    if (myCases !== undefined)
+      setMyCases(myCases);
+    if (selectedSubs.length)
+      setSelectedSubs(selectedSubs);
+    if (selectedMods.length)
+      setSelectedMods(selectedMods);
+    if (selectedAnatomies)
+      setSelectedAnatomies(selectedAnatomies);
+    if (selectedDiagnosis)
+      setSelectedDiagnosis(selectedDiagnosis);
+    if (query)
+      setQuery(query);
   }
 
   const insertIntoQueryOnSelection = el => {
@@ -348,7 +398,6 @@ const AnnotationSearch = props => {
   };
 
   const getSearchResult = (pageIndex, afterDelete) => {
-    console.log("Query", query);
     setPageIndex(0);
     if (query.length === 0) {
       getAnnotationsOfProjets(pageIndex, afterDelete);
@@ -365,7 +414,6 @@ const AnnotationSearch = props => {
           searchQuery = `(${searchQuery}) AND project:${selectedProject}`;
         else searchQuery += ` AND project:${selectedProject}`;
       }
-      console.log("Search query", searchQuery);
       if (searchQuery) {
         // setError('');
         const queryToSave = {
@@ -389,6 +437,11 @@ const AnnotationSearch = props => {
   const getFieldSearchResults = (pageIndex, afterDelete) => {
     const bm = pageIndex ? bookmark : '';
     const fields = {};
+    if (props.pid)
+      fields['project'] = props.pid;
+    if (query.length) {
+      fields['query'] = query;
+    }
     if (selectedSubs.length)
       fields['subSpeciality'] = selectedSubs;
     if (selectedMods.length)
@@ -955,8 +1008,6 @@ const AnnotationSearch = props => {
           <div
             style={{ fontSize: '1.2rem', color: 'aliceblue' }}
             onClick={() => {
-              //  console.log(JSON.stringify(props.selectedAnnotations));
-              //  console.log(props.pid);
               getPluginProjects();
             }}
           >
@@ -1062,8 +1113,6 @@ const AnnotationSearch = props => {
   };
   // cavit
   const prepareDropDownHtmlForPlugins = () => {
-    // console.log(showPlugins);
-    // console.log(pluginListArray);
     const list = pluginListArray;
     let options = [];
     for (let i = 0; i < list.length; i++) {
@@ -1089,7 +1138,6 @@ const AnnotationSearch = props => {
 
   const handleChangePlugin = e => {
     const tempSelectedPluign = parseInt(e.target.value);
-    console.log(parseInt(e.target.value));
     setSelectedPluginDbId(parseInt(e.target.value));
     if (tempSelectedPluign > -1) {
       setShowRunPluginButton(true);
@@ -1131,7 +1179,7 @@ const AnnotationSearch = props => {
 
       const resultAddQueue = await addPluginsToQueue(tempQueueObject);
       let responseRunPluginsQueue = null;
-      console.log('plugin running queue ', JSON.stringify(resultAddQueue));
+      // console.log('plugin running queue ', JSON.stringify(resultAddQueue));
       // if (resultAddQueue && resultAddQueue.data){
       //   if (Array.isArray(resultAddQueue.data)){
       //     responseRunPluginsQueue = await runPluginsQueue(resultAddQueue.data[0].id);
@@ -1252,7 +1300,7 @@ const AnnotationSearch = props => {
             className="form-control annotationSearch-text"
             aria-label="Large"
             name="query"
-            onChange={e => setQuery(e.target.value)}
+            onChange={e => { setQuery(e.target.value) }}
             style={{
               padding: '0.15rem',
               height: 'fit-content',
@@ -1261,7 +1309,7 @@ const AnnotationSearch = props => {
             value={query}
           />
         </div>
-        <>
+        {mode !== 'teaching' && (<>
           <FcAbout
             data-tip
             data-for="about-icon"
@@ -1280,7 +1328,7 @@ const AnnotationSearch = props => {
             <p>For complex queries, combine terms with AND/OR:</p>
             <p>RECIST_v2 AND CT</p>
           </ReactTooltip>
-        </>
+        </>)}
         <button
           className={`btn btn-secondary`}
           type="button"
@@ -1324,7 +1372,10 @@ const AnnotationSearch = props => {
           data-for="search-icon"
           // className="btn btn-secondary annotationSearch-btn"
           onClick={() => {
-            getSearchResult();
+            if (mode === 'teaching')
+              getFieldSearchResults();
+            else
+              getSearchResult();
             setPageIndex(0);
           }}
           style={{
