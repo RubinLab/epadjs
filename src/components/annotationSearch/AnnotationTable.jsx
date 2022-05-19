@@ -26,6 +26,8 @@ import { formatDate } from '../flexView/helperMethods';
 import { getSeries } from '../../services/seriesServices';
 import SelectSerieModal from '../annotationsList/selectSerieModal';
 
+const mode = sessionStorage.getItem('mode');
+
 const defaultPageSize = 200;
 const maxPort = parseInt(sessionStorage.getItem('maxPort'));
 
@@ -63,7 +65,8 @@ function Table({
   fetchData,
   controlledPageIndex,
   handlePageIndex,
-  listOfSelecteds
+  listOfSelecteds,
+  handleSort
 }) {
   // Use the state and functions returned from useTable to build your UI
   const {
@@ -142,8 +145,8 @@ function Table({
             <tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
                 <th
-                  {...column.getHeaderProps(column.getSortByToggleProps())}
-                  style={{ padding: '0.5rem' }}
+                  // {...column.getHeaderProps(column.getSortByToggleProps(() => alert("togged")))}
+                  style={{ padding: '0.5rem' }} onClick={() => { handleSort(column); console.log(column) }}
                 >
                   {column.render('Header')}
                 </th>
@@ -413,9 +416,10 @@ function AnnotationTable(props) {
     }
   };
 
-  const columns = React.useMemo(
+  let columns = React.useMemo(
     () => [
       {
+        Header: 'Select',
         id: 'study-desc',
         Cell: ({ row }) => {
           return (
@@ -463,13 +467,7 @@ function AnnotationTable(props) {
         }
       },
       {
-        Header: 'Name',
-        accessor: 'name',
-        sortable: true,
-        resizable: true
-      },
-      {
-        Header: 'Subject',
+        Header: 'Patient Name',
         accessor: 'patientName',
         sortable: true,
         resizable: true,
@@ -478,35 +476,46 @@ function AnnotationTable(props) {
         }
       },
       {
-        accessor: 'comment',
+        Header: mode == 'teaching' ? 'Medical Records Number' : 'Patient Id',
+        accessor: 'subjectID',
         sortable: true,
         resizable: true,
-        className: 'wrapped',
-        style: { whiteSpace: 'normal' },
-        Header: () => {
-          return (
-            <div className="mng-anns__header-flex">
-              <div>Modality / Series /</div>
-              <div>Slice / Series #</div>
-            </div>
-          );
-        }
       },
       {
-        Header: 'Template',
-        accessor: 'template',
+        Header: 'Accession Number',
+        accessor: 'accessionNumber',
+        sortable: true,
         resizable: true,
-        sortable: true
+        isTeaching: true
       },
       {
-        Header: 'User',
-        accessor: 'userName',
-        style: { whiteSpace: 'normal' },
+        Header: mode === 'teaching' ? 'Caset Title / Annotation Name' : 'Annotation Name',
+        accessor: 'name',
+        sortable: true,
+        resizable: true
+      },
+      {
+        Header: 'Age',
+        accessor: 'age',
+        sortable: true,
         resizable: true,
-        sortable: true
+        isTeaching: true,
       },
       {
-        Header: 'Study',
+        Header: 'Sex',
+        accessor: 'sex',
+        sortable: true,
+        resizable: true,
+        isTeaching: true,
+      },
+      {
+        Header: 'Modality',
+        sortable: true,
+        resizable: true,
+        accessor: 'modality',
+      },
+      {
+        Header: 'Study Date',
         sortable: true,
         accessor: 'studyDate',
         filterMethod: (filter, rows) =>
@@ -521,50 +530,6 @@ function AnnotationTable(props) {
           ).split(' ');
           return <div>{formatDate(studyDateArr[0])}</div>;
         }
-      },
-      {
-        Header: 'Created',
-        sortable: true,
-        id: 'date',
-        accessor: 'date',
-        filterMethod: (filter, rows) =>
-          matchSorter(rows, filter.value, { keys: ['date'] }),
-        filterAll: true,
-        Cell: ({ row }) => {
-          const studyDateArr = convertDateFormat(
-            row.original.date,
-            'date'
-          ).split(' ');
-          return <div>{formatDate(studyDateArr[0])}</div>;
-        }
-      },
-      {
-        Header: () => {
-          return (
-            <div className="mng-anns__header-flex">
-              <div>Created</div>
-              <div>Time</div>
-            </div>
-          );
-        },
-        sortable: false,
-        id: 'time',
-        filterMethod: (filter, rows) =>
-          matchSorter(rows, filter.value, { keys: ['time'] }),
-        filterAll: true,
-        Cell: ({ row }) => {
-          const studyDateArr = convertDateFormat(
-            row.original.date,
-            'date'
-          ).split(' ');
-          return <div>{studyDateArr[1]}</div>;
-        }
-      },
-      {
-        Header: 'Modality',
-        sortable: true,
-        resizable: true,
-        accessor: 'modality'
       },
       {
         Header: 'Anatomy',
@@ -597,14 +562,88 @@ function AnnotationTable(props) {
         }
       },
       {
+        Header: 'Created',
+        sortable: true,
+        id: 'date',
+        accessor: 'date',
+        filterMethod: (filter, rows) =>
+          matchSorter(rows, filter.value, { keys: ['date'] }),
+        filterAll: true,
+        Cell: ({ row }) => {
+          const studyDateArr = convertDateFormat(
+            row.original.date,
+            'date'
+          ).split(' ');
+          return <div>{formatDate(studyDateArr[0])}</div>;
+        }
+      },
+      {
+        Header: 'Template',
+        accessor: mode === 'teaching' ? 'templateType' : 'template',
+        resizable: true,
+        sortable: true
+      },
+      // {
+      //   accessor: 'comment',
+      //   sortable: true,
+      //   resizable: true,
+      //   className: 'wrapped',
+      //   style: { whiteSpace: 'normal' },
+      //   Header: () => {
+      //     if (mode !== 'teaching')
+      //       return (
+      //         <div className="mng-anns__header-flex">
+      //           <div>Modality / Series /</div>
+      //           <div>Slice / Series #</div>
+      //         </div>
+      //       );
+      //     else return 'Modality'
+      //   }
+      // },
+      {
+        Header: 'User',
+        accessor: 'fullName',
+        style: { whiteSpace: 'normal' },
+        resizable: true,
+        sortable: true
+      },
+      // {
+      //   Header: () => {
+      //     return (
+      //       <div className="mng-anns__header-flex">
+      //         <div>Created</div>
+      //         <div>Time</div>
+      //       </div>
+      //     );
+      //   },
+      //   sortable: false,
+      //   id: 'time',
+      //   filterMethod: (filter, rows) =>
+      //     matchSorter(rows, filter.value, { keys: ['time'] }),
+      //   filterAll: true,
+      //   Cell: ({ row }) => {
+      //     const studyDateArr = convertDateFormat(
+      //       row.original.date,
+      //       'date'
+      //     ).split(' ');
+      //     return <div>{studyDateArr[1]}</div>;
+      //   }
+      // },
+      {
         Header: 'Comment',
         sortable: true,
         resizable: true,
-        accessor: 'userComment'
+        accessor: 'comment'
       }
     ],
     [props.selectedAnnotations, data]
   );
+
+  const calculateAge = (birthday) => { // birthday is a date
+    var ageDifMs = Date.now() - birthday.getTime();
+    var ageDate = new Date(ageDifMs); // miliseconds from epoch
+    return Math.abs(ageDate.getUTCFullYear() - 1970);
+  }
 
   const fetchData = useCallback(
     ({ pageIndex }) => {
@@ -618,7 +657,12 @@ function AnnotationTable(props) {
     },
     [props.bookmark]
   );
+  if (mode !== 'teaching')
+    columns = columns.filter(column => !column.isTeaching)
 
+  const handleHeaderClick = () => {
+    alert("clicked");
+  }
   return (
     <>
       <Table
@@ -633,6 +677,7 @@ function AnnotationTable(props) {
         controlledPageIndex={currentPageIndex}
         handlePageIndex={handlePageIndex}
         listOfSelecteds={listOfSelecteds}
+        handleSort={props.handleSort}
       />
       {showSelectSeriesModal && (
         <SelectSerieModal

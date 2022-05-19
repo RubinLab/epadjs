@@ -127,6 +127,7 @@ const AnnotationSearch = props => {
   const [selectedDiagnosis, setSelectedDiagnosis] = useState([]);
   const [tfOnly, setTfOnly] = useState(false);
   const [myCases, setMyCases] = useState(false);
+  const [sort, setSort] = useState([]);
 
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -208,7 +209,7 @@ const AnnotationSearch = props => {
   const useDebouncedEffect = (effect, deps, delay) => {
     useEffect(() => {
       const handler = setTimeout(() => effect(), delay);
-      return () => clearTimeout(handler);
+      return () => { persistSearch(); clearTimeout(handler) };
     }, [...deps || [], delay]);
   }
 
@@ -224,10 +225,18 @@ const AnnotationSearch = props => {
     }
     getFieldSearchResults();
     setPageIndex(0);
-    return persistSearch;
-  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query], 500)
+    // return persistSearch;
+  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query, sort], 500)
 
 
+  const handleSort = (column) => {
+    if (!sort.length)
+      setSort([column]);
+    else if (sort.slice === column)
+      setSort(["-" + column])
+    else if (sort.slice === ("-" + column))
+      setSort([]);
+  }
 
   // useDebouncedEffect(() => {
   //   console.log("Dbounce first", firstRun);
@@ -450,7 +459,7 @@ const AnnotationSearch = props => {
       fields['query'] = query;
     }
     if (selectedSubs.length)
-      fields['subSpeciality'] = selectedSubs;
+      fields['subSpecialty'] = selectedSubs;
     if (selectedMods.length)
       fields['modality'] = selectedMods;
     if (selectedAnatomies.length)
@@ -1471,6 +1480,7 @@ const AnnotationSearch = props => {
             pid={props.pid}
             setPageIndex={setPageIndex}
             indexFromParent={pageIndex}
+            handleSort={handleSort}
           />
         )}
       </div>
