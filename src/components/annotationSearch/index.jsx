@@ -205,7 +205,14 @@ const AnnotationSearch = props => {
     };
   }, [handleUserKeyPress]);
 
-  useEffect(() => {
+  const useDebouncedEffect = (effect, deps, delay) => {
+    useEffect(() => {
+      const handler = setTimeout(() => effect(), delay);
+      return () => clearTimeout(handler);
+    }, [...deps || [], delay]);
+  }
+
+  useDebouncedEffect(() => {
     if (selectedProject !== props.pid)
       setSelectedProject(props.pid);
     if (firstRun) {
@@ -218,19 +225,17 @@ const AnnotationSearch = props => {
     getFieldSearchResults();
     setPageIndex(0);
     return persistSearch;
-  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid])
+  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query], 500)
 
-  const useDebouncedEffect = (effect, deps, delay) => {
-    useEffect(() => {
-      const handler = setTimeout(() => effect(), delay);
-      return () => clearTimeout(handler);
-    }, [...deps || [], delay]);
-  }
 
-  useDebouncedEffect(() => {
-    if (mode === 'teaching')
-      getFieldSearchResults();
-  }, [query], 500);
+
+  // useDebouncedEffect(() => {
+  //   console.log("Dbounce first", firstRun);
+  //   if (firstRun)
+  //     return;
+  //   if (mode === 'teaching')
+  //     getFieldSearchResults();
+  // }, [query], 500);
 
   const clearAnatomy = (anatomy) => {
     let index = selectedAnatomies.indexOf(anatomy);
@@ -243,13 +248,13 @@ const AnnotationSearch = props => {
   }
 
   const persistSearch = () => {
-    const searchState = { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query };
+    const searchState = { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject };
     sessionStorage.searchState = JSON.stringify(searchState);
   }
 
   const loadSearchState = () => {
     const searchState = JSON.parse(sessionStorage.searchState);
-    const { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query } = searchState;
+    const { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject } = searchState;
     if (tfOnly !== undefined)
       setTfOnly(tfOnly);
     if (myCases !== undefined)
@@ -264,6 +269,8 @@ const AnnotationSearch = props => {
       setSelectedDiagnosis(selectedDiagnosis);
     if (query)
       setQuery(query);
+    if (selectedProject)
+      setSelectedProject(selectedProject);
   }
 
   const insertIntoQueryOnSelection = el => {
