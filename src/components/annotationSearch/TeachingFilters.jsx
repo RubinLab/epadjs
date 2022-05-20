@@ -1,6 +1,6 @@
 import React from 'react';
 import ModalityFilter from './ModalityFilter';
-import SubSpecialityFilter from './SubSpecialityFilter';
+import SubSpecialtyFilter from './SubSpecialtyFilter';
 import AnatomyFilter from './AnatomyFilter';
 import DiagnosisFilter from './DiagnosisFilter';
 // import "./ModalityFilter.css";
@@ -51,7 +51,7 @@ class TeachingFilters extends React.Component {
                 >
                     Subspeciality
                 </div>
-                {showSpecialityFilter && (<SubSpecialityFilter selectedSubs={selectedSubs} setSelectedSubs={setSelectedSubs} onClose={() => { this.setState({ showSpecialityFilter: false }) }} />)}
+                {showSpecialityFilter && (<SubSpecialtyFilter selectedSubs={selectedSubs} setSelectedSubs={setSelectedSubs} onClose={() => { this.setState({ showSpecialityFilter: false }) }} />)}
                 <div
                     className="searchView-toolbar__group"
                     style={{ padding: '0.2rem' }}

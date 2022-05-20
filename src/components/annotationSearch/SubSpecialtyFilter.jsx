@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { connect } from "react-redux";
 import { getAllowedTermsOfTemplateComponent } from "Utils/aid"
 import { teachingFileTempCode } from '../../constants.js';
-import "./SubSpecialityFilter.css";
+import "./SubSpecialtyFilter.css";
 
 const componentLabel = "Radiology Specialty";
 

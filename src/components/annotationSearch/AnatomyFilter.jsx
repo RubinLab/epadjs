@@ -4,7 +4,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import FormControl from 'react-bootstrap/FormControl';
 import { getAllowedTermsOfTemplateComponent } from "Utils/aid";
 import { teachingFileTempCode } from '../../constants.js';
-import "./SubSpecialityFilter.css";
+import "./SubSpecialtyFilter.css";
 
 const componentLabel = "Anatomy Detail";
 
