@@ -39,6 +39,7 @@ import {
   runPluginsQueue
 } from '../../services/pluginServices';
 import TeachingFilters from './TeachingFilters.jsx';
+import Spinner from 'react-bootstrap/Spinner';
 
 const lists = {
   organize: ['AND', 'OR', '(', ')'],
@@ -128,6 +129,7 @@ const AnnotationSearch = props => {
   const [tfOnly, setTfOnly] = useState(false);
   const [myCases, setMyCases] = useState(false);
   const [sort, setSort] = useState([]);
+  const [showSpinner, setShowSpinner] = useState(false);
 
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -226,7 +228,7 @@ const AnnotationSearch = props => {
     getFieldSearchResults();
     setPageIndex(0);
     // return persistSearch;
-  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query, sort], 500)
+  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query, sort], 200)
 
 
   const handleSort = ({ id: column }) => {
@@ -453,6 +455,7 @@ const AnnotationSearch = props => {
   };
 
   const getFieldSearchResults = (pageIndex, afterDelete) => {
+    setShowSpinner(true);
     const bm = pageIndex ? bookmark : '';
     const fields = {};
     if (props.pid)
@@ -476,8 +479,9 @@ const AnnotationSearch = props => {
     searchAnnotations(body, bm)
       .then(res => {
         populateSearchResult(res, pageIndex, afterDelete);
+        setShowSpinner(false);
       })
-      .catch(err => console.error(err));
+      .catch(err => { console.error(err); setShowSpinner(false); });
   }
 
   const getNewData = (pageIndex, afterDelete) => {
@@ -1475,7 +1479,7 @@ const AnnotationSearch = props => {
             DOWNLOAD
           </button>
         )} */}
-        {data.length > 0 && (
+        {data.length > 0 && !showSpinner && (
           <AnnotationTable
             data={data}
             selected={props.selectedAnnotations}
@@ -1490,6 +1494,7 @@ const AnnotationSearch = props => {
             handleSort={handleSort}
           />
         )}
+        {showSpinner && <div className="spinner"><Spinner animation="border" role="status" /></div>}
       </div>
       {
         downloadClicked && (
