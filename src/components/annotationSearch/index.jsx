@@ -229,12 +229,14 @@ const AnnotationSearch = props => {
   }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query, sort], 500)
 
 
-  const handleSort = (column) => {
-    if (!sort.length)
+  const handleSort = ({ id: column }) => {
+    if (!sort.length || sort[0] !== column)
       setSort([column]);
-    else if (sort.slice === column)
-      setSort(["-" + column])
-    else if (sort.slice === ("-" + column))
+    else if (sort[0] == column) {
+      console.log("-" + column);
+      setSort(["-" + column]);
+    }
+    else if (sort[0] === ("-" + column))
       setSort([]);
   }
 
@@ -465,8 +467,13 @@ const AnnotationSearch = props => {
     if (selectedAnatomies.length)
       fields['anatomy'] = selectedAnatomies
     if (selectedDiagnosis.length)
-      fields['diagnosis'] = selectedDiagnosis
-    searchAnnotations({ fields: { ...fields, teachingFiles: tfOnly, myCases } }, bm)
+      fields['diagnosis'] = selectedDiagnosis;
+    let body = {};
+    if (sort.length) {
+      body = { fields, sort };
+    } else
+      body = { fields };
+    searchAnnotations(body, bm)
       .then(res => {
         populateSearchResult(res, pageIndex, afterDelete);
       })

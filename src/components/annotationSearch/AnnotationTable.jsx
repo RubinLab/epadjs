@@ -476,20 +476,20 @@ function AnnotationTable(props) {
         }
       },
       {
-        Header: mode == 'teaching' ? 'Medical Records Number' : 'Patient Id',
+        Header: mode == 'teaching' ? 'MRN' : 'Patient Id',
         accessor: 'subjectID',
         sortable: true,
         resizable: true,
       },
       {
-        Header: 'Accession Number',
+        Header: 'Acc No',
         accessor: 'accessionNumber',
         sortable: true,
         resizable: true,
         isTeaching: true
       },
       {
-        Header: mode === 'teaching' ? 'Caset Title / Annotation Name' : 'Annotation Name',
+        Header: mode === 'teaching' ? 'Case Title / Annotation Name' : 'Annotation Name',
         accessor: 'name',
         sortable: true,
         resizable: true
