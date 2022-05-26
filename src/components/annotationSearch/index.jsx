@@ -128,6 +128,7 @@ const AnnotationSearch = props => {
   const [selectedDiagnosis, setSelectedDiagnosis] = useState([]);
   const [tfOnly, setTfOnly] = useState(false);
   const [myCases, setMyCases] = useState(false);
+  const [filters, setFilters] = useState({});
   const [sort, setSort] = useState([]);
   const [showSpinner, setShowSpinner] = useState(false);
 
@@ -228,8 +229,7 @@ const AnnotationSearch = props => {
     getFieldSearchResults();
     setPageIndex(0);
     // return persistSearch;
-  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query, sort], 200)
-
+  }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query, sort, filters], 500)
 
   const handleSort = ({ id: column }) => {
     if (!sort.length || sort[0] !== column)
@@ -242,6 +242,15 @@ const AnnotationSearch = props => {
       setSort([]);
   }
 
+  const handleFilter = (column, target) => {
+    const { value } = target;
+    const newFilters = { ...filters };
+    if (value.length)
+      newFilters[column] = value;
+    else if (newFilters.column && !value)
+      delete newFilters.column;
+    setFilters(newFilters);
+  }
   // useDebouncedEffect(() => {
   //   console.log("Dbounce first", firstRun);
   //   if (firstRun)
@@ -271,13 +280,13 @@ const AnnotationSearch = props => {
   }
 
   const persistSearch = () => {
-    const searchState = { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject };
+    const searchState = { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject, filters };
     sessionStorage.searchState = JSON.stringify(searchState);
   }
 
   const loadSearchState = () => {
     const searchState = JSON.parse(sessionStorage.searchState);
-    const { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject } = searchState;
+    const { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject, filters } = searchState;
     if (tfOnly !== undefined)
       setTfOnly(tfOnly);
     if (myCases !== undefined)
@@ -294,6 +303,8 @@ const AnnotationSearch = props => {
       setQuery(query);
     if (selectedProject)
       setSelectedProject(selectedProject);
+    if (filters)
+      setFilters(filters);
   }
 
   const insertIntoQueryOnSelection = el => {
@@ -486,6 +497,8 @@ const AnnotationSearch = props => {
       body = { fields, sort };
     } else
       body = { fields };
+    if (Object.keys(filters).length)
+      body['filters'] = filters;
     searchAnnotations(body, bm)
       .then(res => {
         populateSearchResult(res, pageIndex, afterDelete);
@@ -1517,6 +1530,8 @@ const AnnotationSearch = props => {
             setPageIndex={setPageIndex}
             indexFromParent={pageIndex}
             handleSort={handleSort}
+            handleFilter={handleFilter}
+            filters={filters}
           />
         )}
         {showSpinner && <div className="spinner"><Spinner animation="border" role="status" /></div>}

@@ -66,7 +66,8 @@ function Table({
   controlledPageIndex,
   handlePageIndex,
   listOfSelecteds,
-  handleSort
+  handleSort,
+  handleFilter,
 }) {
   // Use the state and functions returned from useTable to build your UI
   const {
@@ -146,7 +147,8 @@ function Table({
               {headerGroup.headers.map(column => (
                 <th
                   // {...column.getHeaderProps(column.getSortByToggleProps(() => alert("togged")))}
-                  style={{ padding: '0.5rem' }} onClick={() => { handleSort(column); console.log(column) }}
+                  // style={{ padding: '0.5rem' }} onClick={() => { handleSort(column) }}
+                  style={{ padding: '0.5rem' }}
                 >
                   {column.render('Header')}
                 </th>
@@ -187,38 +189,40 @@ function Table({
           )}
         </tbody>
       </table>
-      {pageCount > 1 && (
-        <div className="pagination">
-          <button
-            onClick={() => {
-              handlePageIndex('prev');
-            }}
-            disabled={!canPreviousPage}
-          >
-            {'<'}
-          </button>
-          <select
-            value={pageSize}
-            onChange={e => {
-              setPageSize(Number(e.target.value));
-            }}
-          >
-            {[defaultPageSize].map((pageSize, i) => (
-              <option key={`${pageSize}-${i}`} value={pageSize}>
-                {pageSize}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={() => {
-              handlePageIndex('next');
-            }}
-            disabled={!canNextPage}
-          >
-            {'>'}
-          </button>
-        </div>
-      )}
+      {
+        pageCount > 1 && (
+          <div className="pagination">
+            <button
+              onClick={() => {
+                handlePageIndex('prev');
+              }}
+              disabled={!canPreviousPage}
+            >
+              {'<'}
+            </button>
+            <select
+              value={pageSize}
+              onChange={e => {
+                setPageSize(Number(e.target.value));
+              }}
+            >
+              {[defaultPageSize].map((pageSize, i) => (
+                <option key={`${pageSize}-${i}`} value={pageSize}>
+                  {pageSize}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={() => {
+                handlePageIndex('next');
+              }}
+              disabled={!canNextPage}
+            >
+              {'>'}
+            </button>
+          </div>
+        )
+      }
     </>
   );
 }
@@ -416,6 +420,8 @@ function AnnotationTable(props) {
     }
   };
 
+  const { patientName } = props.filters;
+
   let columns = React.useMemo(
     () => [
       {
@@ -467,7 +473,8 @@ function AnnotationTable(props) {
         }
       },
       {
-        Header: 'Patient Name',
+        // Header: 'Patient Name',
+        Header: ({ column }) => { return <div>Patient Name<input type="text" placeholder="search column" onInput={({ target }) => props.handleFilter(column.id, target)} value={patientName} /></div> },
         accessor: 'patientName',
         sortable: true,
         resizable: true,
@@ -639,12 +646,6 @@ function AnnotationTable(props) {
     [props.selectedAnnotations, data]
   );
 
-  const calculateAge = (birthday) => { // birthday is a date
-    var ageDifMs = Date.now() - birthday.getTime();
-    var ageDate = new Date(ageDifMs); // miliseconds from epoch
-    return Math.abs(ageDate.getUTCFullYear() - 1970);
-  }
-
   const fetchData = useCallback(
     ({ pageIndex }) => {
       // setCurrentPageIndex(pageIndex);
@@ -657,12 +658,10 @@ function AnnotationTable(props) {
     },
     [props.bookmark]
   );
+
   if (mode !== 'teaching')
     columns = columns.filter(column => !column.isTeaching)
 
-  const handleHeaderClick = () => {
-    alert("clicked");
-  }
   return (
     <>
       <Table
@@ -678,6 +677,7 @@ function AnnotationTable(props) {
         handlePageIndex={handlePageIndex}
         listOfSelecteds={listOfSelecteds}
         handleSort={props.handleSort}
+        handleFilter={props.handleFilter}
       />
       {showSelectSeriesModal && (
         <SelectSerieModal
