@@ -250,6 +250,16 @@ const AnnotationSearch = props => {
   //     getFieldSearchResults();
   // }, [query], 500);
 
+  const clearSubspecialty = (sub) => {
+    let index = selectedSubs.indexOf(sub);
+    setSelectedSubs(selectedSubs.filter((_, i) => i !== index));
+  }
+
+  const clearModality = (mod) => {
+    let index = selectedMods.indexOf(mod);
+    setSelectedMods(selectedMods.filter((_, i) => i !== index));
+  }
+
   const clearAnatomy = (anatomy) => {
     let index = selectedAnatomies.indexOf(anatomy);
     setSelectedAnatomies(selectedAnatomies.filter((_, i) => i !== index));
@@ -1303,6 +1313,14 @@ const AnnotationSearch = props => {
     // getSearchResult();
   };
   // cavit
+
+  const clearAll = () => {
+    setSelectedSubs([]);
+    setSelectedMods([]);
+    setSelectedDiagnosis([]);
+    setSelectedAnatomies([]);
+  }
+
   return (
     <div>
       <div
@@ -1445,12 +1463,19 @@ const AnnotationSearch = props => {
             myCases={myCases}
             setMyCases={setMyCases}
           />
+            {selectedSubs.map(sub => {
+              return (<div>Subspecialty : {sub} <button onClick={() => clearSubspecialty(sub)}>X</button></div>);
+            })}
+            {selectedMods.map(mod => {
+              return (<div>Modality : {mod} <button onClick={() => clearModality(mod)}>X</button></div>);
+            })}
             {selectedAnatomies.map(anatomy => {
-              return (<div>Anatomy :{anatomy} <button onClick={() => clearAnatomy(anatomy)}>X</button></div>);
+              return (<div>Anatomy : {anatomy} <button onClick={() => clearAnatomy(anatomy)}>X</button></div>);
             })}
             {selectedDiagnosis.map(diagnose => {
-              return (<div>Diagnosis :{diagnose} <button onClick={() => clearDiagnosis(diagnose)}>X</button></div>);
+              return (<div>Diagnosis : {diagnose} <button onClick={() => clearDiagnosis(diagnose)}>X</button></div>);
             })}
+            {(selectedSubs.length + selectedMods.length + selectedAnatomies.length + selectedDiagnosis) > 1 && (<div>Clear All <button onClick={() => clearAll()}>X</button></div>)}
           </div>
         )}
         {mode !== "teaching" && (
