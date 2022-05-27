@@ -30,6 +30,12 @@ const userList = props => {
       accessor: "username",
       sortable: true,
       resizable: true,
+      show: false
+    },
+    {
+      accessor: "displayname",
+      sortable: true,
+      resizable: true,
       minWidth: 250
     }
   ];
