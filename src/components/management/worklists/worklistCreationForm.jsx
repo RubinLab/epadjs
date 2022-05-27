@@ -8,6 +8,8 @@ import RequirementForm from "./requirementForm";
 import { saveWorklist } from "../../../services/worklistServices";
 import "../menuStyle.css";
 
+const mode = sessionStorage.getItem('mode');
+
 const messages = {
   fillRequiredFields: "Please fill the required fields",
   missingReqField:
@@ -25,7 +27,8 @@ class WorklistCreationForm extends React.Component {
     description: "",
     duedate: "",
     error: "",
-    requirements: {}
+    requirements: {},
+    isSelectedAll: false,
   };
 
   goPrevPage = () => {
@@ -156,12 +159,45 @@ class WorklistCreationForm extends React.Component {
     this.setState({ [name]: value.trim() });
   };
 
+  handleNameChange = (e) => {
+    const name = e.target.value;
+    const idInput = document.getElementById("addWorklist-id");
+    const newId = name.replace(/[^a-z0-9_]/gi, '');
+    idInput.value = name.replace(/[^a-z0-9_]/gi, '');
+    this.setState({ id: newId });
+  }
+
   selectUser = e => {
     const assigneeList = { ...this.state.assigneeList };
     const { name, checked } = e.target;
     checked ? (assigneeList[name] = true) : delete assigneeList[name];
-    this.setState({ assigneeList });
+    this.setState({ assigneeList }, this.checkAllSelected);
   };
+
+  selectAll = () => {
+    const { users } = this.props;
+    const assigneeList = {};
+    if (!this.state.isSelectedAll) {
+      users.forEach(({ username }) => {
+        assigneeList[username] = true;
+      });
+      this.setState({ assigneeList, isSelectedAll: true });
+    } else {
+      users.forEach(({ username }) => {
+        assigneeList[username] = false;
+      })
+      console.log("Assignee list", assigneeList);
+      this.setState({ assigneeList, isSelectedAll: false });
+    }
+  }
+
+  checkAllSelected = () => {
+    const { assigneeList } = this.state;
+    const { users } = this.props;
+    if (Object.keys(assigneeList).length === users.length)
+      this.setState({ isSelectedAll: true });
+    else this.setState({ isSelectedAll: false });
+  }
 
   handleRequirementFormInput = e => {
     const { name, value } = e.target;
@@ -238,7 +274,7 @@ class WorklistCreationForm extends React.Component {
                 className="add-worklist__modal--input"
                 name="name"
                 type="text"
-                onChange={this.handleFormInput}
+                onChange={(e) => { this.handleFormInput(e); this.handleNameChange(e) }}
                 id="addWorklist-name"
                 defaultValue={this.state.name}
               />
@@ -284,6 +320,8 @@ class WorklistCreationForm extends React.Component {
                 users={this.props.users}
                 onChange={this.selectUser}
                 assignees={this.state.assigneeList}
+                selectAll={this.selectAll}
+                isSelectedAll={this.state.isSelectedAll}
               />
             </>
           )}
@@ -316,6 +354,12 @@ class WorklistCreationForm extends React.Component {
               disabled={page === 0 ? disableNext : disableSubmit}
               id="next-btn"
             />
+            {mode === 'teaching' && this.state.page === 1 && (
+              <FormButton
+                onClick={this.handleSaveWorklist}
+                text='Submit'
+                id="next-btn"
+              />)}
             <FormButton onClick={button3Func} text={button3Text} />
           </div>
         </Modal.Footer>
