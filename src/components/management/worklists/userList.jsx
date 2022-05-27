@@ -5,9 +5,16 @@ import Table from "react-table-v6";
 const userList = props => {
   const columns = [
     {
+      Header: (
+        <div><input
+          type="checkbox"
+          onChange={props.selectAll}
+          checked={props.isSelectedAll}
+        /> Select All</div>
+      ),
       sortable: true,
       resizable: true,
-      minWidth: 30,
+      maxWidth: 80,
       Cell: original => (
         <input
           type="checkbox"
@@ -15,6 +22,7 @@ const userList = props => {
           name={original.row.username}
           checked={props.assignees[original.row.username]}
           id={original.row.username}
+          style={{ textAlign: "right" }}
         />
       )
     },
