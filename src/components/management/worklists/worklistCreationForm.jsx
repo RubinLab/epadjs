@@ -316,6 +316,12 @@ class WorklistCreationForm extends React.Component {
               disabled={page === 0 ? disableNext : disableSubmit}
               id="next-btn"
             />
+            {this.state.page === 1 && (
+              <FormButton
+                onClick={this.handleSaveWorklist}
+                text='Submit'
+                id="next-btn"
+              />)}
             <FormButton onClick={button3Func} text={button3Text} />
           </div>
         </Modal.Footer>
