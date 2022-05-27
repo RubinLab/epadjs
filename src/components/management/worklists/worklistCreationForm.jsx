@@ -8,6 +8,8 @@ import RequirementForm from "./requirementForm";
 import { saveWorklist } from "../../../services/worklistServices";
 import "../menuStyle.css";
 
+const mode = sessionStorage.getItem('mode');
+
 const messages = {
   fillRequiredFields: "Please fill the required fields",
   missingReqField:
@@ -156,6 +158,12 @@ class WorklistCreationForm extends React.Component {
     this.setState({ [name]: value.trim() });
   };
 
+  handleNameChange = (e) => {
+    const name = e.target.value;
+    const idInput = document.getElementById("addWorklist-id");
+    idInput.value = name.replace(/[^a-z0-9_]/gi, '');;
+  }
+
   selectUser = e => {
     const assigneeList = { ...this.state.assigneeList };
     const { name, checked } = e.target;
@@ -238,7 +246,7 @@ class WorklistCreationForm extends React.Component {
                 className="add-worklist__modal--input"
                 name="name"
                 type="text"
-                onChange={this.handleFormInput}
+                onChange={(e) => { this.handleFormInput(e); this.handleNameChange(e) }}
                 id="addWorklist-name"
                 defaultValue={this.state.name}
               />
@@ -316,7 +324,7 @@ class WorklistCreationForm extends React.Component {
               disabled={page === 0 ? disableNext : disableSubmit}
               id="next-btn"
             />
-            {this.state.page === 1 && (
+            {mode === 'teaching' && this.state.page === 1 && (
               <FormButton
                 onClick={this.handleSaveWorklist}
                 text='Submit'
