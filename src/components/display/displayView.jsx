@@ -45,6 +45,8 @@ import { errorMonitor } from "events";
 import FreehandRoiSculptorTool from '../../cornerstone-tools/tools/FreehandRoiSculptorTool';
 import getVPDimensions from "./ViewportCalculations";
 
+const mode = sessionStorage.getItem('mode');
+
 const tools = [
   { name: "Wwwc", modeOptions: { mouseButtonMasks: 1 } },
   { name: "Pan", modeOptions: { mouseButtonMasks: 1 } },
@@ -162,9 +164,9 @@ class DisplayView extends Component {
 
   componentDidMount() {
     const { series, onSwitchView } = this.props;
-    if (series.length < 1) {
-      onSwitchView('search');
-    }
+    // if (series.length < 1) {
+    //   onSwitchView('search');
+    // }
     this.getViewports();
     this.getData();
     if (series.length > 0) {
@@ -1621,8 +1623,10 @@ class DisplayView extends Component {
     const { series, activePort, updateProgress, updateTreeDataOnSave } = this.props;
     const { showAimEditor, selectedAim, hasSegmentation, activeLabelMapIndex, data, activeTool } = this.state;
     // if (this.state.redirect) return <Redirect to="/list" />;
+    const redirect = (mode === 'teaching' ? 'search' : 'list');
+    console.log("Redirect", redirect);
     return !Object.entries(series).length ? (
-      <Redirect to="/list" />
+      <Redirect to='/search' />
     ) : (
       <React.Fragment>
         <RightsideBar
