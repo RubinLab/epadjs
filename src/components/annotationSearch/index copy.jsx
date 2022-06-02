@@ -18,7 +18,6 @@ import {
   RiCloseCircleFill
 } from 'react-icons/ri';
 import { FcAbout } from 'react-icons/fc';
-import { BiSearch } from 'react-icons/bi';
 import ReactTooltip from 'react-tooltip';
 import {
   searchAnnotations,
@@ -1336,17 +1335,135 @@ const AnnotationSearch = props => {
   }
 
   return (
-    <div className="container-fluid body-dk">
-      {/* search / filters */}
-      <div className="search_filter">
-        <div className="row">
-          <div className="col-4">
-            <div className="input-group input-group-sm mb-3">
-              <input className="form-control" type="text" placeholder="Enter Search Terms and/or Use Filters at Right" aria-label="default input example" />
-              <span className="input-group-text" id="basic-addon1"><BiSearch /></span>
-            </div>
-          </div>
-          <TeachingFilters selectedAnatomies={selectedAnatomies}
+    <div>
+      <div
+        className="form-group annotationSearch-container"
+        style={{
+          width: '-webkit-fill-available',
+          display: 'flex',
+          margin: '0.5rem 2rem'
+        }}
+      >
+        <div
+          className="input-group input-group-lg"
+          style={{
+            padding: '0.15rem',
+            height: 'fit-content',
+            fontSize: '1.2rem'
+          }}
+        >
+          <input
+            type="text"
+            autoComplete="off"
+            className="form-control annotationSearch-text"
+            aria-label="Large"
+            name="query"
+            onChange={e => { setQuery(e.target.value) }}
+            style={{
+              padding: '0.15rem',
+              height: 'fit-content',
+              fontSize: '1.2rem'
+            }}
+            value={query}
+          />
+        </div>
+        {mode !== 'teaching' && (<>
+          <FcAbout
+            data-tip
+            data-for="about-icon"
+            style={{ fontSize: '2rem' }}
+            className="annotationSearch-btn"
+          />
+          <ReactTooltip
+            id="about-icon"
+            place="bottom"
+            type="info"
+            delayShow={200}
+          >
+            <p>
+              <span>For exact match, use double quote: "7 3225"</span>
+            </p>
+            <p>For complex queries, combine terms with AND/OR:</p>
+            <p>RECIST_v2 AND CT</p>
+          </ReactTooltip>
+        </>)}
+        <button
+          className={`btn btn-secondary`}
+          type="button"
+          name="erase-button"
+          data-tip
+          data-for="erase-icon"
+          // className="btn btn-secondary annotationSearch-btn"
+          onClick={() => {
+            setQuery('');
+            setCheckboxSelected(false);
+            getAnnotationsOfProjets();
+            props.dispatch(clearSelection());
+            props.setQuery('');
+            setPageIndex(0);
+          }}
+          // onClick={parseIt}
+          // disabled={index < count}
+          style={{
+            padding: '0.3rem 0.5rem',
+            height: 'fit-content',
+            fontSize: '1rem',
+            marginTop: '0.1rem',
+            width: '5%'
+          }}
+        >
+          <FaEraser />
+        </button>
+        <ReactTooltip
+          id="erase-icon"
+          place="bottom"
+          type="info"
+          delayShow={500}
+        >
+          <span>Clear query</span>
+        </ReactTooltip>
+        <button
+          className={`btn btn-secondary`}
+          type="button"
+          name="search-button"
+          data-tip
+          data-for="search-icon"
+          // className="btn btn-secondary annotationSearch-btn"
+          onClick={() => {
+            if (mode === 'teaching')
+              getFieldSearchResults();
+            else
+              getSearchResult();
+            setPageIndex(0);
+          }}
+          style={{
+            padding: '0.3rem 0.5rem',
+            height: 'fit-content',
+            fontSize: '1rem',
+            marginTop: '0.1rem',
+            width: '5%'
+          }}
+        >
+          <FaSearch />
+        </button>
+        <ReactTooltip
+          id="search-icon"
+          place="bottom"
+          type="info"
+          delayShow={500}
+        >
+          <span>Search</span>
+        </ReactTooltip>
+      </div>
+      {error && <div style={styles.error}>{error}</div>}
+      <div
+        style={{
+          margin: '0.5rem 2rem'
+        }}
+      >
+        {mode === "teaching" && (
+          <div><TeachingFilters
+            selectedAnatomies={selectedAnatomies}
             setSelectedAnatomies={setSelectedAnatomies}
             selectedDiagnosis={selectedDiagnosis}
             setSelectedDiagnosis={setSelectedDiagnosis}
@@ -1357,10 +1474,105 @@ const AnnotationSearch = props => {
             tfOnly={tfOnly}
             setTfOnly={setTfOnly}
             myCases={myCases}
-            setMyCases={setMyCases} />
-        </div>
-      </div >
-    </div>
+            setMyCases={setMyCases}
+          />
+            {selectedSubs.map(sub => {
+              return (<div>Subspecialty : {sub} <button onClick={() => clearSubspecialty(sub)}>X</button></div>);
+            })}
+            {selectedMods.map(mod => {
+              return (<div>Modality : {mod} <button onClick={() => clearModality(mod)}>X</button></div>);
+            })}
+            {selectedAnatomies.map(anatomy => {
+              return (<div>Anatomy : {anatomy} <button onClick={() => clearAnatomy(anatomy)}>X</button></div>);
+            })}
+            {selectedDiagnosis.map(diagnose => {
+              return (<div>Diagnosis : {diagnose} <button onClick={() => clearDiagnosis(diagnose)}>X</button></div>);
+            })}
+            {(selectedSubs.length + selectedMods.length + selectedAnatomies.length + selectedDiagnosis) > 1 && (<div>Clear All <button onClick={() => clearAll()}>X</button></div>)}
+          </div>
+        )}
+        {mode !== "teaching" && (
+          <div>
+            <Collapsible
+              trigger="Advanced search"
+              triggerClassName="advancedSearch__closed"
+              triggerOpenedClassName="advancedSearch__open"
+              contentInnerClassName="advancedSearch-content"
+            >
+              {renderQueryItem()}
+              {renderOrganizeItem('organize')}
+            </Collapsible>
+            {renderProjectSelect()}
+          </div>
+        )}
+        {/* {Object.keys(props.selectedAnnotations).length !== 0 && (
+          <button
+            className={`btn btn-secondary`}
+            style={styles.downloadButton}
+            name="download"
+            onClick={() => setDownloadClicked(true)}
+            type="button"
+            disabled={Object.keys(props.selectedAnnotations).length === 0}
+          >
+            DOWNLOAD
+          </button>
+        )} */}
+        {data.length > 0 && !showSpinner && (
+          <AnnotationTable
+            data={data}
+            selected={props.selectedAnnotations}
+            updateSelectedAims={updateSelectedAims}
+            noOfRows={rows}
+            getNewData={getNewData}
+            bookmark={bookmark}
+            switchToDisplay={() => props.history.push('/display')}
+            pid={props.pid}
+            setPageIndex={setPageIndex}
+            indexFromParent={pageIndex}
+            handleSort={handleSort}
+            handleFilter={handleFilter}
+            filters={filters}
+          />
+        )}
+        {showSpinner && <div className="spinner"><Spinner animation="border" role="status" /></div>}
+      </div>
+      {
+        downloadClicked && (
+          <AnnotationDownloadModal
+            onSubmit={() => {
+              setDownloadClicked(false);
+              getSearchResult();
+            }}
+            onCancel={() => setDownloadClicked(false)}
+            updateStatus={() => console.log('update status')}
+            projectID={selectedProject}
+          />
+        )
+      }
+      {
+        uploadClicked && (
+          <UploadModal
+            onCancel={() => setUploadClicked(false)}
+            onResolve={handleSubmitUpload}
+            className="mng-upload"
+            // projectID={this.state.projectID}
+            pid={props.pid}
+          // clearTreeData={this.props.clearTreeData}
+          // clearTreeExpand={this.props.clearTreeExpand}
+          />
+        )
+      }
+      {
+        deleteSelectedClicked && (
+          <DeleteAlert
+            message={explanation.deleteSelected}
+            onCancel={() => setDeleteSelectedClicked(false)}
+            onDelete={deleteAllSelected}
+            error={explanation.errorMessage}
+          />
+        )
+      }
+    </div >
   );
 };
 

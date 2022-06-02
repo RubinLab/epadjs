@@ -40,57 +40,43 @@ class TeachingFilters extends React.Component {
         const { selectedDiagnosis, setSelectedDiagnosis, selectedAnatomies, setSelectedAnatomies, selectedSubs, setSelectedSubs, selectedMods, setSelectedMods, tfOnly, setTfOnly, myCases, setMyCases } = this.props;
         const { showModalityFilter, showSpecialityFilter, showAnatomyFilter, showDiagnosisFilter } = this.state;
         return (
-            <div
-                className="annotationSearch-cont__item"
-                style={{ margin: '1rem 0rem' }}
-            >
-                <div
-                    className="searchView-toolbar__group"
-                    style={{ padding: '0.2rem' }}
-                    onClick={this.handleSpecialityFilterDisplay}
-                >
-                    Subspeciality
+            <>
+                <div className="col">
+                    <div className="input-group input-group-sm mb-3">
+                        <SubSpecialtyFilter selectedSubs={selectedSubs} setSelectedSubs={setSelectedSubs} />
+                        <div className="dropdown" style={{ marginRight: '12px' }}>
+                            <button type="button" onClick={this.handleModalityFilterDisplay} className="btn btn-dark btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                                Modality
+                            </button>
+                            {showModalityFilter && (<ModalityFilter selectedMods={selectedMods} setSelectedMods={setSelectedMods} onClose={() => { this.setState({ showModalityFilter: false }) }} />)}
+                        </div>
+                        <div className="dropdown" style={{ marginRight: '12px' }}>
+                            <button type="button" onClick={this.handleAnatomyFilterDisplay} className="btn btn-dark btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                                Anatomy
+                            </button>
+                            {showAnatomyFilter && (<AnatomyFilter selectedAnatomies={selectedAnatomies} setSelectedAnatomies={setSelectedAnatomies} onClose={() => { this.setState({ showAnatomyFilter: false }) }} />)}
+                        </div>
+                        <div className="dropdown" style={{ marginRight: '12px' }}>
+                            <button type="button" onClick={this.handleDiagnosisFilterDisplay} className="btn btn-dark btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                                Diagnosis
+                            </button>
+                            {showDiagnosisFilter && (<DiagnosisFilter selectedDiagnosis={selectedDiagnosis} setSelectedDiagnosis={setSelectedDiagnosis} onClose={() => { this.setState({ showDiagnosisFilter: false }) }} />)}
+                        </div>
+                    </div>
                 </div>
-                {showSpecialityFilter && (<SubSpecialtyFilter selectedSubs={selectedSubs} setSelectedSubs={setSelectedSubs} onClose={() => { this.setState({ showSpecialityFilter: false }) }} />)}
-                <div
-                    className="searchView-toolbar__group"
-                    style={{ padding: '0.2rem' }}
-                    onClick={this.handleModalityFilterDisplay}
-                >
-                    Modality
+                <div className="col-4">
+                    <div className="input-group input-group-sm mb-3" style={{ fontSize: '.9em' }}>
+                        <div className="form-check form-check-inline">
+                            <label className="form-check-label" htmlFor="flexCheckChecked">Include Significant Images</label>
+                            <input className="form-check-input" type="checkbox" id="flexCheckChecked" key={"tfOnly"} checked={!tfOnly} onChange={e => setTfOnly(!e.target.checked)} />
+                        </div>
+                        <div className="form-check form-check-inline">
+                            <label className="form-check-label" htmlFor="flexCheckChecked">Include Only My Cases</label>
+                            <input className="form-check-input" type="checkbox" id="flexCheckChecked" key={"myCases"} checked={myCases} onChange={e => setMyCases(e.target.checked)} />
+                        </div>
+                    </div>
                 </div>
-                {showModalityFilter && (<ModalityFilter selectedMods={selectedMods} setSelectedMods={setSelectedMods} onClose={() => { this.setState({ showModalityFilter: false }) }} />)}
-                <div
-                    className="searchView-toolbar__group"
-                    style={{ padding: '0.2rem' }}
-                    onClick={this.handleAnatomyFilterDisplay}
-                >
-                    Anatomy
-                </div>
-                {showAnatomyFilter && (<AnatomyFilter selectedAnatomies={selectedAnatomies} setSelectedAnatomies={setSelectedAnatomies} onClose={() => { this.setState({ showAnatomyFilter: false }) }} />)}
-                <div
-                    className="searchView-toolbar__group"
-                    style={{ padding: '0.2rem' }}
-                    onClick={this.handleDiagnosisFilterDisplay}
-                >
-                    Diagnosis
-                </div>
-                {showDiagnosisFilter && (<DiagnosisFilter selectedDiagnosis={selectedDiagnosis} setSelectedDiagnosis={setSelectedDiagnosis} onClose={() => { this.setState({ showDiagnosisFilter: false }) }} />)}
-                <label
-                    className="searchView-toolbar__group"
-                    style={{ padding: '0.2rem' }}
-                >
-                    <input type="checkbox" key={"myCases"} checked={myCases} onChange={e => setMyCases(e.target.checked)} />
-                    My cases
-                </label>
-                <label
-                    className="searchView-toolbar__group"
-                    style={{ padding: '0.2rem' }}
-                >
-                    <input type="checkbox" key={"tfOnly"} checked={!tfOnly} onChange={e => setTfOnly(!e.target.checked)} />
-                    Include Significant Images
-                </label>
-            </div>
+            </>
         );
     }
 }
