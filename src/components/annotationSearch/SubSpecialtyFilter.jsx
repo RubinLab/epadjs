@@ -75,7 +75,7 @@ const SubSpecialityFilter = props => {
             <Dropdown.Toggle as={CustomToggle}>
                 Subspecialty
             </Dropdown.Toggle>
-            <Dropdown.Menu className="p-2 dropdown-menu-dark" >
+            <Dropdown.Menu className="p-2 dropdown-menu-dark subspecialty" >
                 {subSpecialities2D?.map((specialities) => {
                     return (
                         <div className="row">

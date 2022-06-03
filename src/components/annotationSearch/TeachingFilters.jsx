@@ -44,12 +44,8 @@ class TeachingFilters extends React.Component {
                 <div className="col">
                     <div className="input-group input-group-sm mb-3">
                         <SubSpecialtyFilter selectedSubs={selectedSubs} setSelectedSubs={setSelectedSubs} />
-                        <div className="dropdown" style={{ marginRight: '12px' }}>
-                            <button type="button" onClick={this.handleModalityFilterDisplay} className="btn btn-dark btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
-                                Modality
-                            </button>
-                            {showModalityFilter && (<ModalityFilter selectedMods={selectedMods} setSelectedMods={setSelectedMods} onClose={() => { this.setState({ showModalityFilter: false }) }} />)}
-                        </div>
+                        <ModalityFilter selectedMods={selectedMods} setSelectedMods={setSelectedMods} />
+
                         <div className="dropdown" style={{ marginRight: '12px' }}>
                             <button type="button" onClick={this.handleAnatomyFilterDisplay} className="btn btn-dark btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                                 Anatomy
