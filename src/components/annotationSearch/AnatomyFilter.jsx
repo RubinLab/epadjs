@@ -4,7 +4,6 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import FormControl from 'react-bootstrap/FormControl';
 import { getAllowedTermsOfTemplateComponent } from "Utils/aid";
 import { teachingFileTempCode } from '../../constants.js';
-import "./SubSpecialtyFilter.css";
 
 const componentLabel = "Anatomy Detail";
 
@@ -26,18 +25,14 @@ const AnatomyFilter = (props) => {
         props.onClose();
     }
 
-    const AnatomyTogle = React.forwardRef(({ children, onClick }, ref) => (
-        <a
-            href=""
-            ref={ref}
+    const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
+        <button type="button" className="btn btn-dark btn-sm dropdown-toggle" ref={ref}
             onClick={(e) => {
                 e.preventDefault();
                 onClick(e);
-            }}
-        >
+            }}>
             {children}
-            &#x25bc;
-        </a>
+        </button>
     ));
 
     const AnatomyMenu = React.forwardRef(
@@ -52,10 +47,12 @@ const AnatomyFilter = (props) => {
                     className={className}
                     aria-labelledby={labeledBy}
                 >
+                    Select from results to filter
                     <FormControl
                         autoFocus
-                        className="mx-3 my-2 w-auto"
-                        placeholder="Type to filter..."
+                        className="form-control"
+                        placeholder="Type to find Anatomy"
+                        aria-label="Anatomy"
                         onChange={(e) => { setValue(e.target.value), setFirstRun(false) }}
                         value={value}
                     />
@@ -74,11 +71,11 @@ const AnatomyFilter = (props) => {
 
     return (
         <Dropdown>
-            <Dropdown.Toggle as={AnatomyTogle} id="dropdown-custom-components">
+            <Dropdown.Toggle as={CustomToggle} className="d-inline mx-2" id="dropdown-custom-components">
                 Anatomy
             </Dropdown.Toggle>
 
-            <Dropdown.Menu as={AnatomyMenu}>
+            <Dropdown.Menu as={AnatomyMenu} className='p-2 dropdown-menu-dark modality'>
                 {anatomies?.map((anatomy, i) => {
                     return (
                         <Dropdown.Item key={i} eventKey={anatomy} onSelect={eventKey => handleSelect(eventKey)}>{anatomy}</Dropdown.Item>
