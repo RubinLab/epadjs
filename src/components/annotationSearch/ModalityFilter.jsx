@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DISP_MODALITIES as dispModalities } from "../../constants.js";
 import Dropdown from 'react-bootstrap/Dropdown';
 
@@ -6,6 +6,16 @@ const ModalityFilter = (props) => {
     const [modalities,] = useState(dispModalities);
     const [selecteds, setSelecteds] = useState(props.selectedMods);
     const [show, setShow] = useState(false);
+
+    useEffect(() => {
+        window.addEventListener('click', clickHandler);
+        return () => { window.removeEventListener('click', clickHandler) }
+    });
+
+    const clickHandler = (e) => {
+        if (!document.getElementById('modalityDrop').contains(e.target) && e.target.id !== 'modalityDrop')
+            setShow(false);
+    }
 
     const handleChange = (event) => {
         const { checked, value } = event.target;
@@ -24,7 +34,7 @@ const ModalityFilter = (props) => {
     }
 
     const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
-        <button type="button" className="btn btn-dark btn-sm dropdown-toggle" ref={ref}
+        <button id='modalityDrop' type="button" className="btn btn-dark btn-sm dropdown-toggle" ref={ref}
             onClick={(e) => {
                 e.preventDefault();
                 handleToggle();
@@ -45,21 +55,18 @@ const ModalityFilter = (props) => {
     const modalities2D = breakIntoArrayOfArrays(modalities);
 
     const handleToggle = () => {
-        if (show)
-            setShow(false)
-        else
-            setShow(true)
+        setShow(!show)
     }
 
     return (
-        <Dropdown className="d-inline mx-2" show={show} >
+        <Dropdown id='modalityDrop' className="d-inline mx-2" show={show}>
             <Dropdown.Toggle as={CustomToggle}>
                 Modality
             </Dropdown.Toggle>
             <Dropdown.Menu className="p-2 dropdown-menu-dark modality">
-                {modalities2D?.map((modalities) => {
+                {modalities2D?.map((modalities, y) => {
                     return (
-                        <div className="row">
+                        <div key={y} className="row">
                             {modalities.map((modality, i) => {
                                 return (
                                     <div key={i} className="mb-3 col-md-4">

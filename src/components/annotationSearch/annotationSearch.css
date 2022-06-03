@@ -251,5 +251,7 @@ td i{text-align: center;}
   width:300px;
 }
 
-
+.filter-input{
+  border-right: 10px;
+}
 

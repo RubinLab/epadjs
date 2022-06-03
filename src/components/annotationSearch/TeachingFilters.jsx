@@ -8,37 +8,10 @@ import DiagnosisFilter from './DiagnosisFilter';
 class TeachingFilters extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            showModalityFilter: false,
-            showSpecialityFilter: false,
-            showAnatomyFilter: false,
-            showDiagnosisFilter: false,
-        }
-    }
-
-    handleModalityFilterDisplay = () => {
-        const { showModalityFilter } = this.state;
-        this.setState({ showModalityFilter: !showModalityFilter })
-    }
-
-    handleSpecialityFilterDisplay = () => {
-        const { showSpecialityFilter } = this.state;
-        this.setState({ showSpecialityFilter: !showSpecialityFilter })
-    }
-
-    handleAnatomyFilterDisplay = () => {
-        const { showAnatomyFilter } = this.state;
-        this.setState({ showAnatomyFilter: !showAnatomyFilter })
-    }
-
-    handleDiagnosisFilterDisplay = () => {
-        const { showDiagnosisFilter } = this.state;
-        this.setState({ showDiagnosisFilter: !showDiagnosisFilter })
     }
 
     render() {
         const { selectedDiagnosis, setSelectedDiagnosis, selectedAnatomies, setSelectedAnatomies, selectedSubs, setSelectedSubs, selectedMods, setSelectedMods, tfOnly, setTfOnly, myCases, setMyCases } = this.props;
-        const { showModalityFilter, showSpecialityFilter, showAnatomyFilter, showDiagnosisFilter } = this.state;
         return (
             <>
                 <div className="col">
@@ -46,12 +19,7 @@ class TeachingFilters extends React.Component {
                         <SubSpecialtyFilter selectedSubs={selectedSubs} setSelectedSubs={setSelectedSubs} />
                         <ModalityFilter selectedMods={selectedMods} setSelectedMods={setSelectedMods} />
                         <AnatomyFilter selectedAnatomies={selectedAnatomies} setSelectedAnatomies={setSelectedAnatomies} />
-                        <div className="dropdown" style={{ marginRight: '12px' }}>
-                            <button type="button" onClick={this.handleDiagnosisFilterDisplay} className="btn btn-dark btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
-                                Diagnosis
-                            </button>
-                            {showDiagnosisFilter && (<DiagnosisFilter selectedDiagnosis={selectedDiagnosis} setSelectedDiagnosis={setSelectedDiagnosis} onClose={() => { this.setState({ showDiagnosisFilter: false }) }} />)}
-                        </div>
+                        <DiagnosisFilter selectedDiagnosis={selectedDiagnosis} setSelectedDiagnosis={setSelectedDiagnosis} />
                     </div>
                 </div>
                 <div className="col-4">

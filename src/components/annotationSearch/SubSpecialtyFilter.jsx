@@ -20,11 +20,14 @@ const SubSpecialityFilter = props => {
     }
 
     useEffect(() => {
-        if (firstRun) {
-            setSubSpecialities(getSubSpecialities());
-            setFirstRun(false);
-        }
+        window.addEventListener('click', clickHandler);
+        return () => { window.removeEventListener('click', clickHandler) }
     });
+
+    const clickHandler = (e) => {
+        if (!document.getElementById('subSpecDrop').contains(e.target) && e.target.id !== 'subSpecDrop')
+            setShow(false);
+    }
 
     const handleChange = (event) => {
         const { checked, value } = event.target;
@@ -43,8 +46,12 @@ const SubSpecialityFilter = props => {
     }
 
     const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
-        <button type="button" className="btn btn-dark btn-sm dropdown-toggle" ref={ref}
+        <button id='subSpecDrop' type="button" className="btn btn-dark btn-sm dropdown-toggle" ref={ref}
             onClick={(e) => {
+                if (firstRun) {
+                    setSubSpecialities(getSubSpecialities);
+                    setFirstRun(false);
+                }
                 e.preventDefault();
                 handleToggle();
             }}>
@@ -71,18 +78,18 @@ const SubSpecialityFilter = props => {
     }
 
     return (
-        <Dropdown className="d-inline mx-2" show={show} >
+        <Dropdown id='subSpecDrop' className="d-inline mx-2" show={show} >
             <Dropdown.Toggle as={CustomToggle}>
                 Subspecialty
             </Dropdown.Toggle>
             <Dropdown.Menu className="p-2 dropdown-menu-dark subspecialty" >
-                {subSpecialities2D?.map((specialities) => {
+                {subSpecialities2D?.map((specialities, y) => {
                     return (
-                        <div className="row">
+                        <div key={y} className="row">
                             {specialities.map((speciality, i) => {
                                 return (
                                     <div key={i} className="mb-3 col-md-6">
-                                        <input className="form-check-input" type="checkbox" value={speciality} id="flexCheckDefault" checked={selecteds.includes(speciality)} onChange={handleChange} />
+                                        <input className="form-check-input filter-input" type="checkbox" value={speciality} id="flexCheckDefault" checked={selecteds.includes(speciality)} onChange={handleChange} />
                                         <label className="form-check-label title-case" htmlFor="flexCheckDefault">
                                             {speciality}
                                         </label>

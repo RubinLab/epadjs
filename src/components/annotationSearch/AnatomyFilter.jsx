@@ -9,7 +9,8 @@ const componentLabel = "Anatomy Detail";
 
 const AnatomyFilter = (props) => {
 
-    const [anatomies,] = useState(getAnatomies());
+    const [anatomies, setAnatomies] = useState([]);
+    const [firstRun, setFirstRun] = useState(true);
 
     function getAnatomies() {
         const { Template } = props.templates[teachingFileTempCode].TemplateContainer;
@@ -21,13 +22,13 @@ const AnatomyFilter = (props) => {
         setSelectedAnatomies([...selectedAnatomies, selection])
     }
 
-    const handleApply = () => {
-        props.onClose();
-    }
-
     const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
         <button type="button" className="btn btn-dark btn-sm dropdown-toggle" ref={ref}
             onClick={(e) => {
+                if (firstRun) {
+                    setAnatomies(getAnatomies());
+                    setFirstRun(false);
+                }
                 e.preventDefault();
                 onClick(e);
             }}>
@@ -70,8 +71,8 @@ const AnatomyFilter = (props) => {
     );
 
     return (
-        <Dropdown>
-            <Dropdown.Toggle as={CustomToggle} className="d-inline mx-2" id="dropdown-custom-components">
+        <Dropdown className="d-inline mx-2">
+            <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
                 Anatomy
             </Dropdown.Toggle>
 

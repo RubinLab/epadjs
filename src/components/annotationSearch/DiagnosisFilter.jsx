@@ -4,12 +4,12 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import FormControl from 'react-bootstrap/FormControl';
 import { getAllowedTermsOfTemplateComponent } from "Utils/aid";
 import { teachingFileTempCode } from '../../constants';
-import "./SubSpecialtyFilter.css";
 
 const componentLabel = "Findings and Diagnosis";
 
 const DiagnosisFilter = (props) => {
-    const [diagnosis,] = useState(getDiagnosis());
+    const [diagnosis, setDiagnosis] = useState([]);
+    const [firstRun, setFirstRun] = useState(true);
 
     function getDiagnosis() {
         const { Template } = props.templates[teachingFileTempCode].TemplateContainer;
@@ -21,22 +21,18 @@ const DiagnosisFilter = (props) => {
         setSelectedDiagnosis([...selectedDiagnosis, selection])
     }
 
-    const handleApply = () => {
-        props.onClose();
-    }
-
-    const DiagnosisTogle = React.forwardRef(({ children, onClick }, ref) => (
-        <a
-            href=""
-            ref={ref}
+    const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
+        <button type="button" className="btn btn-dark btn-sm dropdown-toggle" ref={ref}
             onClick={(e) => {
+                if (firstRun) {
+                    setDiagnosis(getDiagnosis());
+                    setFirstRun(false);
+                }
                 e.preventDefault();
                 onClick(e);
-            }}
-        >
+            }}>
             {children}
-            &#x25bc;
-        </a>
+        </button>
     ));
 
     const DiagnosisMenu = React.forwardRef(
@@ -51,10 +47,12 @@ const DiagnosisFilter = (props) => {
                     className={className}
                     aria-labelledby={labeledBy}
                 >
+                    Select from results to filter
                     <FormControl
                         autoFocus
-                        className="mx-3 my-2 w-auto"
-                        placeholder="Type to filter..."
+                        className="form-control"
+                        placeholder="Type to find Diagnosis"
+                        aria-label="Anatomy"
                         onChange={(e) => { setValue(e.target.value), setFirstRun(false) }}
                         value={value}
                     />
@@ -72,12 +70,12 @@ const DiagnosisFilter = (props) => {
     );
 
     return (
-        <Dropdown>
-            <Dropdown.Toggle as={DiagnosisTogle} id="dropdown-custom-components">
+        <Dropdown className="d-inline mx-2">
+            <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
                 Diagnosis
             </Dropdown.Toggle>
 
-            <Dropdown.Menu as={DiagnosisMenu}>
+            <Dropdown.Menu as={DiagnosisMenu} className='dropdown-menu p-2 dropdown-menu-dark modality'>
                 {diagnosis?.map((diagnose, i) => {
                     return (
                         <Dropdown.Item key={i} eventKey={diagnose} onSelect={eventKey => handleSelect(eventKey)}>{diagnose}</Dropdown.Item>
