@@ -115,7 +115,7 @@ const AnnotationSearch = props => {
   const [error, setError] = useState('');
   const [bookmark, setBookmark] = useState('');
   const [uploadClicked, setUploadClicked] = useState(false);
-  const [deleteSelectedClicked, setDeleteSelectedClicked] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [checkboxSelected, setCheckboxSelected] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   // cavit
@@ -1001,7 +1001,7 @@ const AnnotationSearch = props => {
             </ReactTooltip>
           </>
           <>
-            <div onClick={() => setDeleteSelectedClicked(true)}>
+            <div onClick={() => setShowDeleteModal(true)}>
               <FaRegTrashAlt
                 className="tool-icon"
                 // className="tool-icon"
@@ -1170,7 +1170,7 @@ const AnnotationSearch = props => {
           toast.error(error.response.data.message, { autoClose: false });
         getNewData(pageIndex, true);
       });
-    setDeleteSelectedClicked(false);
+    setShowDeleteModal(false);
     props.dispatch(clearSelection());
   };
   // cavit
@@ -1346,6 +1346,10 @@ const AnnotationSearch = props => {
     setSelectedAnatomies([]);
   }
 
+  useEffect(() => {
+    console.log('Chanfed', showDeleteModal);
+  }, [showDeleteModal]);
+
   return (
     <>
       <div className="container-fluid body-dk">
@@ -1399,7 +1403,7 @@ const AnnotationSearch = props => {
           <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
           {showWorklist && (<Worklists className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)}
           <button type="button" className="btn btn-sm"><BiDownload /><br />Move to Project</button>
-          <button type="button" className="btn btn-sm"><BiTrash /><br />Delete</button>
+          <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
         </div>
       </div>
       <table className="table table-dark table-striped table-hover title-case" >
@@ -1516,12 +1520,19 @@ const AnnotationSearch = props => {
               handleSort={handleSort}
               handleFilter={handleFilter}
               filters={filters}
-              selecteds={selecteds}
-              setSelecteds={setSelecteds}
             />
           )}
         </tbody>
       </table>
+      <DeleteAlert
+        message={explanation.deleteSelected}
+        onCancel={() => setShowDeleteModal(false)}
+        onDelete={deleteAllSelected}
+        error={explanation.errorMessage}
+        show={showDeleteModal}
+      // onHide={() => setDeleteSelectedClicked(false)}
+      />
+
     </>
   );
 };
