@@ -70,7 +70,7 @@ class selectSerieModal extends React.Component {
 
       this.semanticAnswers = new questionaire.AimEditor(
         element,
-        this.validateForm,
+        // this.validateForm,
         this.renderButtons,
         "",
         {},

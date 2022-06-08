@@ -3,7 +3,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { FaCogs, FaInfoCircle, FaBell } from 'react-icons/fa';
 import logo from '../images/logo.png';
 import { connect } from 'react-redux';
-const mode = sessionStorage.getItem('mode');
+
 
 const NavBar = ({
   user,
@@ -20,6 +20,7 @@ const NavBar = ({
   viewType,
   path
 }) => {
+  const mode = sessionStorage.getItem('mode');
   return (
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
