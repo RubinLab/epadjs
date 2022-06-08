@@ -481,7 +481,6 @@ const AnnotationSearch = props => {
   };
 
   const getFieldSearchResults = (pageIndex, afterDelete) => {
-    console.log("In field search", sort);
     setShowSpinner(true);
     const bm = pageIndex ? bookmark : '';
     const fields = {};
@@ -498,6 +497,10 @@ const AnnotationSearch = props => {
       fields['anatomy'] = selectedAnatomies
     if (selectedDiagnosis.length)
       fields['diagnosis'] = selectedDiagnosis;
+    if (tfOnly)
+      fields['teachingFiles'] = tfOnly;
+    if (myCases)
+      fields['myCases'] = myCases;
     let body = {};
     if (sort.length) {
       body = { fields, sort };

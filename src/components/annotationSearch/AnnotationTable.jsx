@@ -162,18 +162,25 @@ function Table({
         return (
           <tr {...row.getRowProps()}>
             {row.cells.map(cell => {
-              return (
-                <td
-                  {...cell.getCellProps()}
-                  style={{
-                    margin: '0',
-                    padding: '0.8rem 0.4rem',
-                    borderBottom: '0.2px solid #6c757d'
-                  }}
-                >
-                  {cell.render('Cell')}
-                </td>
-              );
+              console.log("cell", cell);
+              if (cell.column.id === 'select')
+                return (
+                  <td {...cell.getCellProps()} className='select_row'>
+                    {cell.render('Cell')}
+                  </td>
+                );
+              else
+                return (
+                  <td
+                    {...cell.getCellProps()}
+                  // style={{
+                  //   margin: '0',
+                  //   padding: '0.8rem 0.4rem',
+                  //   borderBottom: '0.2px solid #6c757d'
+                  // }}
+                  >
+                    {cell.render('Cell')}
+                  </td>)
             })}
           </tr>
         );
@@ -428,11 +435,13 @@ function AnnotationTable(props) {
       () => [
         {
           Header: 'Select',
-          id: 'study-desc',
+          id: 'select',
+          class: 'select_row',
           Cell: ({ row }) => {
             return (
               <input
                 type="checkbox"
+                className='form-check-input'
                 checked={
                   props.selectedAnnotations[row.original.aimID] ? true : false
                 }
