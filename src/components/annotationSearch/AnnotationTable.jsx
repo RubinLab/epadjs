@@ -134,7 +134,7 @@ function Table({
   }, [fetchData, pageIndex, pageSize]);
   return (
     <>
-      <table {...getTableProps()} style={{ width: '100%' }}>
+      {mode !== 'teaching' && (<>{/* <table {...getTableProps()} style={{ width: '100%' }}>
         <thead
           style={{
             color: 'aliceblue',
@@ -155,40 +155,40 @@ function Table({
               ))}
             </tr>
           ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row, i) => {
-            prepareRow(row);
-            return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map(cell => {
-                  return (
-                    <td
-                      {...cell.getCellProps()}
-                      style={{
-                        margin: '0',
-                        padding: '0.8rem 0.4rem',
-                        borderBottom: '0.2px solid #6c757d'
-                      }}
-                    >
-                      {cell.render('Cell')}
-                    </td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-          {noOfRows / defaultPageSize > 1 && (
-            <tr>
-              <td colSpan="10000">
-                Showing {defaultPageSize * pageIndex}-
-                {defaultPageSize * (pageIndex + 1)} of ~{pageCount * pageSize}{' '}
-                results
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+        </thead> */}
+        {/* <tbody {...getTableBodyProps()}> */}</>)}
+      {rows.map((row, i) => {
+        prepareRow(row);
+        return (
+          <tr {...row.getRowProps()}>
+            {row.cells.map(cell => {
+              return (
+                <td
+                  {...cell.getCellProps()}
+                  style={{
+                    margin: '0',
+                    padding: '0.8rem 0.4rem',
+                    borderBottom: '0.2px solid #6c757d'
+                  }}
+                >
+                  {cell.render('Cell')}
+                </td>
+              );
+            })}
+          </tr>
+        );
+      })}
+      {noOfRows / defaultPageSize > 1 && (
+        <tr>
+          <td colSpan="10000">
+            Showing {defaultPageSize * pageIndex}-
+            {defaultPageSize * (pageIndex + 1)} of ~{pageCount * pageSize}{' '}
+            results
+          </td>
+        </tr>
+      )}
+      {mode !== 'teaching' && (<>{/* </tbody>
+      </table> */}</>)}
       {
         pageCount > 1 && (
           <div className="pagination">
@@ -422,229 +422,403 @@ function AnnotationTable(props) {
 
   const { patientName } = props.filters;
 
-  let columns = React.useMemo(
-    () => [
-      {
-        Header: 'Select',
-        id: 'study-desc',
-        Cell: ({ row }) => {
-          return (
-            <input
-              type="checkbox"
-              checked={
-                props.selectedAnnotations[row.original.aimID] ? true : false
-              }
-              onChange={() => props.updateSelectedAims(row.original)}
-            />
-          );
-        }
-      },
-      {
-        Header: 'Open',
-        sortable: false,
-        resizable: false,
-        style: { display: 'flex', justifyContent: 'center' },
-        Cell: ({ row }) => {
-          return (
-            // <Link className="open-link" to={'/display'}>
-            <div
-              onClick={() => {
-                if (
-                  row.original.seriesUID === 'noseries' ||
-                  !row.original.seriesUID
-                ) {
-                  // study aim opening
-                  displaySeries(row.original);
-                } else {
-                  // series opening
-                  openAnnotation(row.original);
+  let columns = [];
+  if (mode === 'teaching') {
+    columns = React.useMemo(
+      () => [
+        {
+          Header: 'Select',
+          id: 'study-desc',
+          Cell: ({ row }) => {
+            return (
+              <input
+                type="checkbox"
+                checked={
+                  props.selectedAnnotations[row.original.aimID] ? true : false
                 }
-              }}
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                width: '1rem'
-              }}
-            >
-              <FaRegEye className="menu-clickable" />
-            </div>
-            // </Link>
-          );
+                onChange={() => props.updateSelectedAims(row.original)}
+              />
+            );
+          }
+        },
+        {
+          Header: 'Patient Name',
+          Header: ({ column }) => { return <div>Patient Name<input type="text" placeholder="search column" onInput={({ target }) => props.handleFilter(column.id, target)} value={patientName} /></div> },
+          accessor: 'patientName',
+          sortable: true,
+          resizable: true,
+          Cell: ({ row }) => {
+            return <div onClick={() => {
+              if (
+                row.original.seriesUID === 'noseries' ||
+                !row.original.seriesUID
+              ) {
+                // study aim opening
+                displaySeries(row.original);
+              } else {
+                // series opening
+                openAnnotation(row.original);
+              }
+            }} style={{ textDecoration: 'underline', cursor: 'pointer' }}>{clearCarets(row.original.patientName)}</div >;
+          }
+        },
+        {
+          Header: 'MRN',
+          accessor: 'subjectID',
+          sortable: true,
+          resizable: true,
+        },
+        {
+          Header: 'Acc No',
+          accessor: 'accessionNumber',
+          sortable: true,
+          resizable: true,
+          isTeaching: true
+        },
+        {
+          Header: 'Case Title / Annotation Name',
+          accessor: 'name',
+          sortable: true,
+          resizable: true
+        },
+        {
+          Header: 'Age',
+          accessor: 'age',
+          sortable: true,
+          resizable: true,
+          isTeaching: true,
+        },
+        {
+          Header: 'Sex',
+          accessor: 'sex',
+          sortable: true,
+          resizable: true,
+          isTeaching: true,
+        },
+        {
+          Header: 'Modality',
+          sortable: true,
+          resizable: true,
+          accessor: 'modality',
+        },
+        {
+          Header: 'Study Date',
+          sortable: true,
+          accessor: 'studyDate',
+          filterMethod: (filter, rows) =>
+            matchSorter(rows, filter.value, { keys: ['date'] }),
+          filterAll: true,
+          Cell: ({ row }) => {
+            if (!row.original.studyDate)
+              return <div></div>;
+            const studyDateArr = convertDateFormat(
+              row.original.studyDate,
+              'studyDate'
+            ).split(' ');
+            return <div>{formatDate(studyDateArr[0])}</div>;
+          }
+        },
+        {
+          Header: 'Anatomy',
+          sortable: true,
+          resizable: true,
+          accessor: 'anatomy',
+          Cell: ({ row }) => {
+            return (
+              <div>
+                {Array.isArray(row.original.anatomy)
+                  ? row.original.anatomy.join(', ')
+                  : row.original.anatomy}
+              </div>
+            );
+          }
+        },
+        {
+          Header: 'Observation',
+          sortable: true,
+          resizable: true,
+          accessor: 'observation',
+          style: { 'whiteSpace': 'nowrap' },
+          Cell: ({ row }) => {
+            return (
+              <div>
+                {Array.isArray(row.original.observation)
+                  ? row.original.observation.join(', ')
+                  : row.original.observation}
+              </div>
+            );
+          }
+        },
+        {
+          Header: 'Created',
+          sortable: true,
+          id: 'date',
+          accessor: 'date',
+          filterMethod: (filter, rows) =>
+            matchSorter(rows, filter.value, { keys: ['date'] }),
+          filterAll: true,
+          Cell: ({ row }) => {
+            const studyDateArr = convertDateFormat(
+              row.original.date,
+              'date'
+            ).split(' ');
+            return <div>{formatDate(studyDateArr[0])}</div>;
+          }
+        },
+        {
+          Header: 'Template',
+          accessor: 'templateType',
+          resizable: true,
+          sortable: true
+        },
+        {
+          Header: 'User',
+          accessor: 'fullName',
+          style: { whiteSpace: 'normal' },
+          resizable: true,
+          sortable: true
+        },
+        {
+          Header: 'Comment',
+          sortable: true,
+          resizable: true,
+          accessor: 'userComment'
+        },
+        {
+          Header: 'Project',
+          sortable: true,
+          resizable: true,
+          accessor: 'projectName'
         }
-      },
-      {
-        // Header: 'Patient Name',
-        Header: ({ column }) => { return <div>Patient Name<input type="text" placeholder="search column" onInput={({ target }) => props.handleFilter(column.id, target)} value={patientName} /></div> },
-        accessor: 'patientName',
-        sortable: true,
-        resizable: true,
-        Cell: ({ row }) => {
-          return <div>{clearCarets(row.original.patientName)}</div>;
+      ],
+      [props.selectedAnnotations, data]
+    );
+  }
+  else {
+    columns = React.useMemo(
+      () => [
+        {
+          Header: 'Select',
+          id: 'study-desc',
+          Cell: ({ row }) => {
+            return (
+              <input
+                type="checkbox"
+                checked={
+                  props.selectedAnnotations[row.original.aimID] ? true : false
+                }
+                onChange={() => props.updateSelectedAims(row.original)}
+              />
+            );
+          }
+        },
+        {
+          Header: 'Open',
+          sortable: false,
+          resizable: false,
+          style: { display: 'flex', justifyContent: 'center' },
+          Cell: ({ row }) => {
+            return (
+              // <Link className="open-link" to={'/display'}>
+              <div
+                onClick={() => {
+                  if (
+                    row.original.seriesUID === 'noseries' ||
+                    !row.original.seriesUID
+                  ) {
+                    // study aim opening
+                    displaySeries(row.original);
+                  } else {
+                    // series opening
+                    openAnnotation(row.original);
+                  }
+                }}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  width: '1rem'
+                }}
+              >
+                <FaRegEye className="menu-clickable" />
+              </div>
+              // </Link>
+            );
+          }
+        },
+        {
+          // Header: 'Patient Name',
+          Header: ({ column }) => { return <div>Patient Name<input type="text" placeholder="search column" onInput={({ target }) => props.handleFilter(column.id, target)} value={patientName} /></div> },
+          accessor: 'patientName',
+          sortable: true,
+          resizable: true,
+          Cell: ({ row }) => {
+            return <div>{clearCarets(row.original.patientName)}</div>;
+          }
+        },
+        {
+          Header: mode == 'teaching' ? 'MRN' : 'Patient Id',
+          accessor: 'subjectID',
+          sortable: true,
+          resizable: true,
+        },
+        {
+          Header: 'Acc No',
+          accessor: 'accessionNumber',
+          sortable: true,
+          resizable: true,
+          isTeaching: true
+        },
+        {
+          Header: mode === 'teaching' ? 'Case Title / Annotation Name' : 'Annotation Name',
+          accessor: 'name',
+          sortable: true,
+          resizable: true
+        },
+        {
+          Header: 'Age',
+          accessor: 'age',
+          sortable: true,
+          resizable: true,
+          isTeaching: true,
+        },
+        {
+          Header: 'Sex',
+          accessor: 'sex',
+          sortable: true,
+          resizable: true,
+          isTeaching: true,
+        },
+        {
+          Header: 'Modality',
+          sortable: true,
+          resizable: true,
+          accessor: 'modality',
+        },
+        {
+          Header: 'Study Date',
+          sortable: true,
+          accessor: 'studyDate',
+          filterMethod: (filter, rows) =>
+            matchSorter(rows, filter.value, { keys: ['date'] }),
+          filterAll: true,
+          Cell: ({ row }) => {
+            if (!row.original.studyDate)
+              return <div></div>;
+            const studyDateArr = convertDateFormat(
+              row.original.studyDate,
+              'studyDate'
+            ).split(' ');
+            return <div>{formatDate(studyDateArr[0])}</div>;
+          }
+        },
+        {
+          Header: 'Anatomy',
+          sortable: true,
+          resizable: true,
+          accessor: 'anatomy',
+          Cell: ({ row }) => {
+            return (
+              <div>
+                {Array.isArray(row.original.anatomy)
+                  ? row.original.anatomy.join(', ')
+                  : row.original.anatomy}
+              </div>
+            );
+          }
+        },
+        {
+          Header: 'Observation',
+          sortable: true,
+          resizable: true,
+          accessor: 'observation',
+          Cell: ({ row }) => {
+            return (
+              <div>
+                {Array.isArray(row.original.observation)
+                  ? row.original.observation.join(', ')
+                  : row.original.observation}
+              </div>
+            );
+          }
+        },
+        {
+          Header: 'Created',
+          sortable: true,
+          id: 'date',
+          accessor: 'date',
+          filterMethod: (filter, rows) =>
+            matchSorter(rows, filter.value, { keys: ['date'] }),
+          filterAll: true,
+          Cell: ({ row }) => {
+            const studyDateArr = convertDateFormat(
+              row.original.date,
+              'date'
+            ).split(' ');
+            return <div>{formatDate(studyDateArr[0])}</div>;
+          }
+        },
+        {
+          Header: 'Template',
+          accessor: mode === 'teaching' ? 'templateType' : 'template',
+          resizable: true,
+          sortable: true
+        },
+        // {
+        //   accessor: 'comment',
+        //   sortable: true,
+        //   resizable: true,
+        //   className: 'wrapped',
+        //   style: { whiteSpace: 'normal' },
+        //   Header: () => {
+        //     if (mode !== 'teaching')
+        //       return (
+        //         <div className="mng-anns__header-flex">
+        //           <div>Modality / Series /</div>
+        //           <div>Slice / Series #</div>
+        //         </div>
+        //       );
+        //     else return 'Modality'
+        //   }
+        // },
+        {
+          Header: 'User',
+          accessor: 'fullName',
+          style: { whiteSpace: 'normal' },
+          resizable: true,
+          sortable: true
+        },
+        // {
+        //   Header: () => {
+        //     return (
+        //       <div className="mng-anns__header-flex">
+        //         <div>Created</div>
+        //         <div>Time</div>
+        //       </div>
+        //     );
+        //   },
+        //   sortable: false,
+        //   id: 'time',
+        //   filterMethod: (filter, rows) =>
+        //     matchSorter(rows, filter.value, { keys: ['time'] }),
+        //   filterAll: true,
+        //   Cell: ({ row }) => {
+        //     const studyDateArr = convertDateFormat(
+        //       row.original.date,
+        //       'date'
+        //     ).split(' ');
+        //     return <div>{studyDateArr[1]}</div>;
+        //   }
+        // },
+        {
+          Header: 'Comment',
+          sortable: true,
+          resizable: true,
+          accessor: 'comment'
         }
-      },
-      {
-        Header: mode == 'teaching' ? 'MRN' : 'Patient Id',
-        accessor: 'subjectID',
-        sortable: true,
-        resizable: true,
-      },
-      {
-        Header: 'Acc No',
-        accessor: 'accessionNumber',
-        sortable: true,
-        resizable: true,
-        isTeaching: true
-      },
-      {
-        Header: mode === 'teaching' ? 'Case Title / Annotation Name' : 'Annotation Name',
-        accessor: 'name',
-        sortable: true,
-        resizable: true
-      },
-      {
-        Header: 'Age',
-        accessor: 'age',
-        sortable: true,
-        resizable: true,
-        isTeaching: true,
-      },
-      {
-        Header: 'Sex',
-        accessor: 'sex',
-        sortable: true,
-        resizable: true,
-        isTeaching: true,
-      },
-      {
-        Header: 'Modality',
-        sortable: true,
-        resizable: true,
-        accessor: 'modality',
-      },
-      {
-        Header: 'Study Date',
-        sortable: true,
-        accessor: 'studyDate',
-        filterMethod: (filter, rows) =>
-          matchSorter(rows, filter.value, { keys: ['date'] }),
-        filterAll: true,
-        Cell: ({ row }) => {
-          if (!row.original.studyDate)
-            return <div></div>;
-          const studyDateArr = convertDateFormat(
-            row.original.studyDate,
-            'studyDate'
-          ).split(' ');
-          return <div>{formatDate(studyDateArr[0])}</div>;
-        }
-      },
-      {
-        Header: 'Anatomy',
-        sortable: true,
-        resizable: true,
-        accessor: 'anatomy',
-        Cell: ({ row }) => {
-          return (
-            <div>
-              {Array.isArray(row.original.anatomy)
-                ? row.original.anatomy.join(', ')
-                : row.original.anatomy}
-            </div>
-          );
-        }
-      },
-      {
-        Header: 'Observation',
-        sortable: true,
-        resizable: true,
-        accessor: 'observation',
-        Cell: ({ row }) => {
-          return (
-            <div>
-              {Array.isArray(row.original.observation)
-                ? row.original.observation.join(', ')
-                : row.original.observation}
-            </div>
-          );
-        }
-      },
-      {
-        Header: 'Created',
-        sortable: true,
-        id: 'date',
-        accessor: 'date',
-        filterMethod: (filter, rows) =>
-          matchSorter(rows, filter.value, { keys: ['date'] }),
-        filterAll: true,
-        Cell: ({ row }) => {
-          const studyDateArr = convertDateFormat(
-            row.original.date,
-            'date'
-          ).split(' ');
-          return <div>{formatDate(studyDateArr[0])}</div>;
-        }
-      },
-      {
-        Header: 'Template',
-        accessor: mode === 'teaching' ? 'templateType' : 'template',
-        resizable: true,
-        sortable: true
-      },
-      // {
-      //   accessor: 'comment',
-      //   sortable: true,
-      //   resizable: true,
-      //   className: 'wrapped',
-      //   style: { whiteSpace: 'normal' },
-      //   Header: () => {
-      //     if (mode !== 'teaching')
-      //       return (
-      //         <div className="mng-anns__header-flex">
-      //           <div>Modality / Series /</div>
-      //           <div>Slice / Series #</div>
-      //         </div>
-      //       );
-      //     else return 'Modality'
-      //   }
-      // },
-      {
-        Header: 'User',
-        accessor: 'fullName',
-        style: { whiteSpace: 'normal' },
-        resizable: true,
-        sortable: true
-      },
-      // {
-      //   Header: () => {
-      //     return (
-      //       <div className="mng-anns__header-flex">
-      //         <div>Created</div>
-      //         <div>Time</div>
-      //       </div>
-      //     );
-      //   },
-      //   sortable: false,
-      //   id: 'time',
-      //   filterMethod: (filter, rows) =>
-      //     matchSorter(rows, filter.value, { keys: ['time'] }),
-      //   filterAll: true,
-      //   Cell: ({ row }) => {
-      //     const studyDateArr = convertDateFormat(
-      //       row.original.date,
-      //       'date'
-      //     ).split(' ');
-      //     return <div>{studyDateArr[1]}</div>;
-      //   }
-      // },
-      {
-        Header: 'Comment',
-        sortable: true,
-        resizable: true,
-        accessor: 'comment'
-      }
-    ],
-    [props.selectedAnnotations, data]
-  );
+      ],
+      [props.selectedAnnotations, data]
+    );
+  }
 
   const fetchData = useCallback(
     ({ pageIndex }) => {

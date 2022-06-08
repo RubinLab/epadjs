@@ -36,6 +36,7 @@ const ModalityFilter = (props) => {
     const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
         <button id='modalityDrop' type="button" className="btn btn-dark btn-sm dropdown-toggle" ref={ref}
             onClick={(e) => {
+                setSelecteds(props.selectedMods);
                 e.preventDefault();
                 handleToggle();
             }}>

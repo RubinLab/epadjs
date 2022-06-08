@@ -25,7 +25,7 @@ import {
   getSummaryAnnotations,
   downloadProjectAnnotation,
   deleteAnnotationsList
-} from './../../services/annotationServices.js';
+} from '../../services/annotationServices.js';
 import AnnotationTable from './AnnotationTable.jsx';
 import './annotationSearch.css';
 import { clearSelection, selectAnnotation } from '../annotationsList/action';

@@ -52,6 +52,7 @@ const SubSpecialityFilter = props => {
                     setSubSpecialities(getSubSpecialities);
                     setFirstRun(false);
                 }
+                setSelecteds(props.selectedSubs);
                 e.preventDefault();
                 handleToggle();
             }}>

@@ -4,7 +4,7 @@
   position: fixed;
   z-index: 1;
   left: 0;
-  background-color: #3a3f44;
+  /* background-color: #3a3f44; */
   overflow-x: hidden;
   transition: 0.4s;
   padding-top: 20px;
@@ -310,6 +310,8 @@ body {
   padding: 0.2em 0.8rem;
   cursor: pointer;
   margin: 0.2rem;
+  color: #9c9a9a;
+  font-size: small; 
 }
 
 .sidebar-row.__selected {
