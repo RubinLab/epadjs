@@ -235,10 +235,9 @@ const AnnotationSearch = props => {
   }, [tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, props.pid, query, sort, filters], 500)
 
   const handleSort = (column) => {
-    console.log("sort called");
-    if (!sort.length || sort[0] !== column)
+    if (!sort.length || (sort[0] !== column && sort[0] !== ("-" + column)))
       setSort([column]);
-    else if (sort[0] == column) {
+    else if (sort[0] === column) {
       console.log("-" + column);
       setSort(["-" + column]);
     }
@@ -284,13 +283,13 @@ const AnnotationSearch = props => {
   }
 
   const persistSearch = () => {
-    const searchState = { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject, filters };
+    const searchState = { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject, filters, sort };
     sessionStorage.searchState = JSON.stringify(searchState);
   }
 
   const loadSearchState = () => {
     const searchState = JSON.parse(sessionStorage.searchState);
-    const { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject, filters } = searchState;
+    const { tfOnly, myCases, selectedSubs, selectedMods, selectedAnatomies, selectedDiagnosis, query, selectedProject, filters, sort } = searchState;
     if (tfOnly !== undefined)
       setTfOnly(tfOnly);
     if (myCases !== undefined)
@@ -309,6 +308,8 @@ const AnnotationSearch = props => {
       setSelectedProject(selectedProject);
     if (filters)
       setFilters(filters);
+    if (sort.length)
+      setSort(sort);
   }
 
   const insertIntoQueryOnSelection = el => {
@@ -480,6 +481,7 @@ const AnnotationSearch = props => {
   };
 
   const getFieldSearchResults = (pageIndex, afterDelete) => {
+    console.log("In field search", sort);
     setShowSpinner(true);
     const bm = pageIndex ? bookmark : '';
     const fields = {};
@@ -1346,7 +1348,7 @@ const AnnotationSearch = props => {
           <div className="row">
             <div className="col-4">
               <div className="input-group input-group-sm mb-3">
-                <input className="form-control" type="text" placeholder="Enter Search Terms and/or Use Filters at Right" aria-label="default input example" />
+                <input className="form-control" type="text" placeholder="Enter Search Terms and/or Use Filters at Right" aria-label="default input example" onChange={e => { setQuery(e.target.value) }} value={query} />
                 <span className="input-group-text" id="basic-addon1"><BiSearch /></span>
               </div>
             </div>
