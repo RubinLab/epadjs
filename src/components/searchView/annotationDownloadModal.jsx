@@ -66,11 +66,14 @@ class AnnnotationDownloadModal extends React.Component {
       ? `${className} ${this.props.className}`
       : className;
     let disabled = !summary && !aim && !seg;
+    const { show } = this.props;
     return (
       // <Modal.Dialog dialogClassName={className}>
-      <Modal.Dialog id="modal-fix" className="modal-minwidth">
+      <Modal size="sm"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered show={show}>
         <Modal.Header>
-          <Modal.Title className="annDownload__header">
+          <Modal.Title id="contained-modal-title-vcenter" className="annDownload__header">
             Select Download Format
           </Modal.Title>
         </Modal.Header>
@@ -145,7 +148,7 @@ class AnnnotationDownloadModal extends React.Component {
 
           <button onClick={this.props.onCancel}>Cancel</button>
         </Modal.Footer>
-      </Modal.Dialog>
+      </Modal>
     );
   };
 }

@@ -1091,8 +1091,9 @@ class SearchView extends Component {
         )}
         {showProjects && (
           <Projects
-            onProjectClose={this.handleProjectClick}
+            onClose={this.handleProjectClick}
             onSave={this.addSelectionToProject}
+            className="searchView-toolbar__icon project-icon"
           />
         )}
         {newUser && (

@@ -43,6 +43,7 @@ import {
 } from '../../services/pluginServices';
 import TeachingFilters from './TeachingFilters.jsx';
 import Worklists from '../searchView/addWorklist';
+import Projects from '../searchView/addToProject';
 import Spinner from 'react-bootstrap/Spinner';
 
 const lists = {
@@ -136,7 +137,8 @@ const AnnotationSearch = props => {
   const [sort, setSort] = useState([]);
   const [showSpinner, setShowSpinner] = useState(false);
   const [showWorklist, setShowWorklist] = useState(false);
-  const [selecteds, setSelecteds] = useState([]);
+  const [showProjects, setShowProjects] = useState(false);
+  const [showDownload, setShowDownload] = useState(false);
 
   const populateSearchResult = (res, pagination, afterDelete) => {
     const result = Array.isArray(res) ? res[0] : res;
@@ -1394,10 +1396,11 @@ const AnnotationSearch = props => {
       <div className="icon_row">
         <div className="icon_r">
           <button type="button" className="btn btn-sm"><BsEyeFill /><br />View</button>
-          <button type="button" className="btn btn-sm"><BiDownload /><br />Download</button>
+          <button type="button" className="btn btn-sm" onClick={() => setShowDownload(!showDownload)}><BiDownload /><br />Download</button>
           <button type="button" className="btn btn-sm worklist" onClick={() => { setShowWorklist(!showWorklist) }}><BiDownload /><br />Add to Worklist</button>
           {showWorklist && (<Worklists className='btn btn-sm worklist' onClose={() => { setShowWorklist(false) }} />)}
-          <button type="button" className="btn btn-sm"><BiDownload /><br />Move to Project</button>
+          <button type="button" className="btn btn-sm" onClick={() => { setShowProjects(!showProjects) }}><BiDownload /><br />Move to Project</button>
+          {showProjects && (<Projects className='btn btn-sm worklist' onClose={() => { setShowProjects(false) }} />)}
           <button type="button" className="btn btn-sm" onClick={() => { setShowDeleteModal(true) }}><BiTrash /><br />Delete</button>
         </div>
       </div>
@@ -1525,6 +1528,16 @@ const AnnotationSearch = props => {
         onDelete={deleteAllSelected}
         error={explanation.errorMessage}
         show={showDeleteModal}
+      />
+      <AnnotationDownloadModal
+        onSubmit={() => {
+          setShowDownload(false);
+          getSearchResult();
+        }}
+        onCancel={() => setShowDownload(false)}
+        updateStatus={() => console.log('update status')}
+        projectID={selectedProject}
+        show={showDownload}
       />
 
     </>

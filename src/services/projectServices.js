@@ -120,3 +120,13 @@ export function getStudies(projectID) {
     http.apiUrl() + "/projects/" + encodeURIComponent(projectID) + "/studies"
   );
 }
+
+export function addAimsToProject(projectId, body) {
+  return http.post(
+    http.apiUrl() +
+      "/projects/" +
+      encodeURIComponent(projectId) +
+      "/aims/copy",
+    body
+  );
+}

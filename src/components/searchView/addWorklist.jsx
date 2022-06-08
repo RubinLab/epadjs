@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import { toast } from "react-toastify";
 import {
   getWorklistsOfCreator,
   addStudyToWorklist,
@@ -81,8 +82,28 @@ class WorklistAdd extends React.Component {
 
   addAnnotationsToWorklist = async (annotations, worklist) => {
     const aimIDs = Object.keys(annotations);
-    await addAimsToWorklist(worklist, aimIDs);
-    // this.props.updateProgress();
+    try {
+      await addAimsToWorklist(worklist, aimIDs);
+      toast.success("Annotation(s) succesfully added to worklist.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+      });
+    } catch (e) {
+      toast.fail("Error adding annotation(s) to worklist.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+      });
+      console.error(e);
+    }
+    this.props.onClose();
   }
 
   onSelect = e => {
