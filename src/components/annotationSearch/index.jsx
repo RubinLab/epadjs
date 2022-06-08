@@ -241,7 +241,6 @@ const AnnotationSearch = props => {
     if (!sort.length || (sort[0] !== column && sort[0] !== ("-" + column)))
       setSort([column]);
     else if (sort[0] === column) {
-      console.log("-" + column);
       setSort(["-" + column]);
     }
     else if (sort[0] === ("-" + column))
@@ -1346,10 +1345,6 @@ const AnnotationSearch = props => {
     setSelectedAnatomies([]);
   }
 
-  useEffect(() => {
-    console.log('Chanfed', showDeleteModal);
-  }, [showDeleteModal]);
-
   return (
     <>
       <div className="container-fluid body-dk">
@@ -1530,7 +1525,6 @@ const AnnotationSearch = props => {
         onDelete={deleteAllSelected}
         error={explanation.errorMessage}
         show={showDeleteModal}
-      // onHide={() => setDeleteSelectedClicked(false)}
       />
 
     </>

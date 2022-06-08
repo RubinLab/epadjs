@@ -2,16 +2,14 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "react-bootstrap";
 
-const alertDeletionModal = ({ message, onCancel, onDelete, error }) => {
-  console.log("In", message);
+const alertDeletionModal = ({ message, onCancel, onDelete, error, show }) => {
   return (
-    // <Modal.Dialog dialogClassName="alert-delete__modal">
     <Modal size="lg"
       aria-labelledby="contained-modal-title-vcenter"
-      centered style={{ opacity: 1, width: "200px", display: "block" }} fade={false} animation={false}>>
+      centered show={show} onHide={onCancel}>
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">
-          Modal heading
+          Confirm Annotation Deletion
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
