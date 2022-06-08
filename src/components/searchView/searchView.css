@@ -216,12 +216,12 @@
 .selectModalMenu,
 .worklist-popup,
 .projects-popup {
-  z-index: 15;
-  display: flex;
+  z-index: 1000;
+  /* display: flex;
   flex-direction: column;
   width: fit-content;
   min-width: 10rem;
-  position: absolute;
+  position: absolute; */
   background-color: #3a3f44;
   color: #c3c5c9;
   outline-color: black;
@@ -229,8 +229,19 @@
   border-radius: 5px;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   padding: 0.3rem;
-  max-height: 20rem;
   overflow: auto;
+
+  position: absolute;
+    
+    padding: 5px 10px;
+    outline: solid;
+    outline-width: 1px;
+    
+    outline-color: black;
+    width: 170px;
+    height: 110px;
+    top: 92px;
+    left: 450px;
 }
 
 .new-popup__option,

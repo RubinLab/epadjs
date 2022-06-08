@@ -4,9 +4,11 @@ import {
   getWorklistsOfCreator,
   addStudyToWorklist,
   addSubjectToWorklist,
+  addAimsToWorklist
 } from "../../services/worklistServices";
 
 class WorklistAdd extends React.Component {
+
   state = { worklists: [] };
 
   setWrapperRef = node => {
@@ -21,7 +23,7 @@ class WorklistAdd extends React.Component {
   };
 
 
-  
+
   componentWillUnmount() {
     document.removeEventListener("mousedown", this.handleClickOutside);
     document.removeEventListener('keydown', this.handleClickOutside);
@@ -77,19 +79,29 @@ class WorklistAdd extends React.Component {
       .catch(err => console.log(err));
   };
 
+  addAnnotationsToWorklist = async (annotations, worklist) => {
+    const aimIDs = Object.keys(annotations);
+    await addAimsToWorklist(worklist, aimIDs);
+    // this.props.updateProgress();
+  }
+
   onSelect = e => {
-    if (Object.values(this.props.selectedStudies).length > 0) {
+    const { selectedStudies, selectedPatients, selectedAnnotations } = this.props;
+    if (Object.values(selectedStudies).length > 0) {
       this.addStudyToWorklist(e);
       this.props.onClose();
-    } else if (Object.values(this.props.selectedPatients).length > 0) {
+    } else if (Object.values(selectedPatients).length > 0) {
       this.addSubjectToWorklist(e);
       this.props.onClose();
+    } else if (Object.values(selectedAnnotations).length > 0) {
+      this.addAnnotationsToWorklist(selectedAnnotations, e.target.id);
+      this.props.onClose();
     }
+
   };
+
   render() {
-    const element = document.getElementsByClassName(
-      "searchView-toolbar__icon worklist-icon"
-    );
+    const element = document.getElementsByClassName(this.props.className);
 
     var rect = element[0].getBoundingClientRect();
     const worklists = [];
@@ -124,6 +136,7 @@ const mapStateToProps = state => {
     selectedProjects: state.annotationsListReducer.selectedProjects,
     selectedPatients: state.annotationsListReducer.selectedPatients,
     selectedStudies: state.annotationsListReducer.selectedStudies,
+    selectedAnnotations: state.annotationsListReducer.selectedAnnotations
   };
 };
 export default connect(mapStateToProps)(WorklistAdd);

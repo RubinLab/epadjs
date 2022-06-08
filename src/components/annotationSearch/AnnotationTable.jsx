@@ -36,8 +36,6 @@ const IndeterminateCheckbox = React.forwardRef(
     const defaultRef = React.useRef();
     const resolvedRef = ref || defaultRef;
 
-    console.log(rest.selected);
-
     React.useEffect(() => {
       resolvedRef.current.indeterminate = indeterminate;
     }, [resolvedRef, indeterminate]);
@@ -162,7 +160,6 @@ function Table({
         return (
           <tr {...row.getRowProps()}>
             {row.cells.map(cell => {
-              console.log("cell", cell);
               if (cell.column.id === 'select')
                 return (
                   <td {...cell.getCellProps()} className='select_row'>
